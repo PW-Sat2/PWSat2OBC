@@ -46,10 +46,10 @@ set(CMAKE_EXE_LINKER_FLAGS_RELEASE -static)
 #
 
 #set (CMAKE_C_FLAGS "-mcpu=cortex-r4 --std=gnu99 --specs=nosys.specs -mthumb -march=armv7-r -mtune=cortex-r4 -mfloat-abi=softfp -mfpu=vfpv3-d16 -fPIC -g -O1 -c")
-set (CMAKE_C_FLAGS "-mcpu=cortex-r4 --std=gnu99 --specs=nosys.specs -mthumb -march=armv7-r -mtune=cortex-r4 -mlittle-endian -fno-exceptions -fno-builtin -mfloat-abi=softfp -mfpu=vfpv3-d16 -fPIC -g -O1 -c")
+set (CMAKE_C_FLAGS "-pedantic -O0 -std=gnu99 -mtune=cortex-r4 -fno-exceptions -fno-builtin -fPIC -DEFM32GG280F1024 -MMD -MP -Wall -Wextra -g -mcpu=cortex-m3 -mthumb -march=armv7-m -mlittle-endian -fdata-sections -fomit-frame-pointer -mfix-cortex-m3-ldrd -ffunction-sections -DDEBUG")
 
 #set (CMAKE_CXX_FLAGS "-mcpu=cortex-r4 --std=gnu99 -mthumb -march=armv7-r -mtune=cortex-r4 -mfloat-abi=softfp -mfpu=vfpv3-d16 -fPIC")
-set (CMAKE_CXX_FLAGS "-mcpu=cortex-r4 --std=gnu99 --specs=nosys.specs -mthumb -march=armv7-r -mtune=cortex-r4 -mlittle-endian -fno-exceptions -fno-builtin -mfloat-abi=softfp -mfpu=vfpv3-d16 -fPIC")
+set (CMAKE_CXX_FLAGS "-mcpu=cortex-r4 --std=gnu99 --specs=nosys.specs -mthumb -march=armv7-r -mtune=cortex-r4 -mlittle-endian -fno-exceptions -fno-builtin -mfloat-abi=softfp -fPIC")
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)

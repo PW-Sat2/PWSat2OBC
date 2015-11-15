@@ -4,7 +4,7 @@
 SOURCE_DIR = Source
 INCLUDE_DIR = Include
 OBJECTS_DIR = Object
-BIN_OBJETS = bin
+BIN_DIR = bin
 LST_DIR = lst
 
 DEVICE = EFM32GG280F1024
@@ -53,7 +53,7 @@ FREERTOS_MEMMANG_NR = 1
 #
 # Destination paths
 #
-DEST_BIN_PATH = $(BUILD_PATH)/$(BIN_OBJECTS)
+DEST_BIN_PATH = $(BUILD_PATH)/$(BIN_DIR)
 DEST_OBJECTS_PATH = $(BUILD_PATH)/$(OBJECTS_DIR)
 DEST_LST_DIR = $(BUILD_PATH)/$(LST_DIR)
 
@@ -80,7 +80,7 @@ all: prebuild compile
 include $(ROOT_PATH)/Platforms/Platform-EFM32GG/Makefile
 include $(ROOT_PATH)/FreeRTOS/Makefile
 include $(ROOT_PATH)/Applications/Common/Makefile
-include $(ROOT_PATH)/Applications/PWSat2/Makefile
+include $(ROOT_PATH)/Applications/App/PWSat2/Makefile
 #
 # Include cpplinter (Google Code Style)
 #
