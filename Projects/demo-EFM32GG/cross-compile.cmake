@@ -1,11 +1,7 @@
-set(CMAKE_SYSTEM_NAME Linux)
+include (CMakeForceCompiler)
+set(CMAKE_SYSTEM_NAME Generic)
 
 set(CMAKE_SYSTEM_PROCESSOR arm)
-
-include (CMakeForceCompiler)
-
-#set(CMAKE_SYSROOT /home/devel/rasp-pi-rootfis)
-#set(CMAKE_STAGING_PREFIX /home/devel/stage)
 
 # CMake by default test chosen compiler.
 # We configure compiler so there no need to run this test.
@@ -14,13 +10,7 @@ set(CMAKE_C_COMPILER_FORCED 1)
 set(CMAKE_CXX_COMPILER_FORCED 1)
 
 set(CMAKE_C_COMPILER arm-none-eabi-gcc)
-#set(CMAKE_C_COMPILER arm-linux-gnueabihf-gcc)
-#set(CMAKE_CXX_COMPILER arm-linux-gnueabihf-g++)
 set(CMAKE_CXX_COMPILER arm-none-eabi-g++)
-
-set(BUILD_SHARED_LIBS OFF)
-set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_EXE_LINKER_FLAGS_RELEASE -static)
 
 # FreeRTOS recommend to compile only with gnu99.
 # -spec is required for arm-none-eabi-gcc compiler
@@ -44,12 +34,6 @@ set(CMAKE_EXE_LINKER_FLAGS_RELEASE -static)
 #|(Hard FP) |                                            |          |
 #--------------------------------------------------------------------
 #
-
-#set (CMAKE_C_FLAGS "-mcpu=cortex-r4 --std=gnu99 --specs=nosys.specs -mthumb -march=armv7-r -mtune=cortex-r4 -mfloat-abi=softfp -mfpu=vfpv3-d16 -fPIC -g -O1 -c")
-set (CMAKE_C_FLAGS "-pedantic -O0 -std=gnu99 -mtune=cortex-r4 -fno-exceptions -fno-builtin -fPIC -DEFM32GG280F1024 -MMD -MP -Wall -Wextra -g -mcpu=cortex-m3 -mthumb -march=armv7-m -mlittle-endian -fdata-sections -fomit-frame-pointer -mfix-cortex-m3-ldrd -ffunction-sections -DDEBUG")
-
-#set (CMAKE_CXX_FLAGS "-mcpu=cortex-r4 --std=gnu99 -mthumb -march=armv7-r -mtune=cortex-r4 -mfloat-abi=softfp -mfpu=vfpv3-d16 -fPIC")
-set (CMAKE_CXX_FLAGS "-mcpu=cortex-r4 --std=gnu99 --specs=nosys.specs -mthumb -march=armv7-r -mtune=cortex-r4 -mlittle-endian -fno-exceptions -fno-builtin -mfloat-abi=softfp -fPIC")
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
