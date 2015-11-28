@@ -2,7 +2,7 @@
  * @file efm32gg895f512.h
  * @brief CMSIS Cortex-M Peripheral Access Layer Header File
  *        for EFM32GG895F512
- * @version 4.0.0
+ * @version 4.1.0
  ******************************************************************************
  * @section License
  * <b>(C) Copyright 2015 Silicon Laboratories, Inc. http://www.silabs.com</b>
