@@ -1,2 +1,7 @@
 build-*
 Projects/*/default
+CMakeFiles
+CMakeCache.txt
+cmake_install.cmake
+build
+Makefile
