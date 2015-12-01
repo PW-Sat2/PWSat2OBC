@@ -2,7 +2,7 @@ INCLUDE(CMakeForceCompiler)
 
 set(CMAKE_SYSTEM_NAME Generic)
 
-set(TOOLCHAIN_ROOT D:/Toolchains/ARM/bin/ CACHE STRING "Toolchain root")
+set(TOOLCHAIN_ROOT "" CACHE STRING "Toolchain root")
 
 if(WIN32)
   set(TOOL_EXT .exe)
