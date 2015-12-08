@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.1)
 
 include(./toolchain.cmake)
 
-project(PWSat C ASM)
+project(PWSat C CXX ASM)
 
 set(MEM_MANAGMENT_TYPE 4)
 
@@ -31,7 +31,7 @@ set(CMAKE_EXE_LINKER_FLAGS "-T ${LINKER_SCRIPT} ${CMAKE_EXE_LINKER_FLAGS}")
 message (STATUS "Using C compiler from ${CMAKE_C_COMPILER}")
 message (STATUS "Target platform ${TARGET_PLATFORM}")
 
-foreach(lib )
+foreach(lib googletest)
   message (STATUS "Using lib ${lib}")
   set(BUILD_FILE ${CMAKE_CURRENT_SOURCE_DIR}/libs/${lib}/build.cmake)
 
@@ -44,3 +44,4 @@ foreach(lib )
 endforeach(lib)
 
 include(./src/build.cmake)
+include(./test/build.cmake)
