@@ -129,6 +129,12 @@ GTEST_TEST(MyTest, MyName)
   EXPECT_EQ(2, 4);
 }
 
+GTEST_TEST(MyTest, ThisOneWorks)
+{
+  printf("Running my second test");
+  EXPECT_EQ(2, 2);
+}
+
 void unit_tests(int argc, char ** argv)
 {
   printf("Running unit tests\n");

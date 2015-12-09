@@ -3,6 +3,7 @@ add_definitions(-D__START=main)
 
 set (ARCH cortex-m3)
 set (CHIP EFM32GG)
+set (QEMU_MCU EFM32GG990F1024)
 
 set (CSTANDARD "-specs=rdimon.specs --specs=nano.specs -lc -lnosys -lrdimon")
 set (CWARN "-Wall -Wstrict-prototypes -Wextra")

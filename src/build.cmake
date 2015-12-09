@@ -4,10 +4,7 @@ aux_source_directory(${CMAKE_CURRENT_LIST_DIR} SOURCES)
 
 add_executable(${NAME} ${SOURCES})
 
-foreach(lib platform)
-  target_link_libraries(${NAME} ${lib})
-  add_dependencies(${NAME} ${lib})
-endforeach(lib)
+target_link_libraries(${NAME} platform)
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
 set (HEX_OBJ ${EXEC_OBJ}.hex)

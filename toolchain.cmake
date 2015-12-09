@@ -16,3 +16,5 @@ CMAKE_FORCE_CXX_COMPILER(${TOOLCHAIN_ROOT}arm-none-eabi-g++${TOOL_EXT} GNU)
 set(CMAKE_AR ${TOOLCHAIN_ROOT}arm-none-eabi-ar${TOOL_EXT} CACHE FILEPATH "Archiver")
 set(CMAKE_OBJCOPY ${TOOLCHAIN_ROOT}arm-none-eabi-objcopy${TOOL_EXT} CACHE FILEPATH "Objcopy")
 set(CMAKE_MAKE_PROGRAM ${TOOLCHAIN_ROOT}make${TOOL_EXT})
+
+find_program(QEMU NAMES qemu-system-gnuarmeclipse)
