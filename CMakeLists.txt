@@ -43,5 +43,5 @@ foreach(lib googletest)
   include(${BUILD_FILE})
 endforeach(lib)
 
-include(./src/build.cmake)
-include(./test/build.cmake)
+add_subdirectory(./src)
+add_subdirectory(./test)
