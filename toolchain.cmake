@@ -2,19 +2,13 @@ INCLUDE(CMakeForceCompiler)
 
 set(CMAKE_SYSTEM_NAME Generic)
 
-set(TOOLCHAIN_ROOT "" CACHE STRING "Toolchain root")
+find_program(CC NAMES arm-none-eabi-gcc PATHS $ENV{ARM_TOOLCHAIN})
+find_program(CXX NAMES arm-none-eabi-g++ PATHS $ENV{ARM_TOOLCHAIN})
 
-if(WIN32)
-  set(TOOL_EXT .exe)
-else()
-  set(TOOL_EXT )
-endif()
+find_program(CMAKE_AR NAMES arm-none-eabi-ar PATHS $ENV{ARM_TOOLCHAIN})
+find_program(CMAKE_OBJCOPY NAMES arm-none-eabi-objcopy PATHS $ENV{ARM_TOOLCHAIN})
 
-CMAKE_FORCE_C_COMPILER(${TOOLCHAIN_ROOT}arm-none-eabi-gcc${TOOL_EXT} GNU)
-CMAKE_FORCE_CXX_COMPILER(${TOOLCHAIN_ROOT}arm-none-eabi-g++${TOOL_EXT} GNU)
+CMAKE_FORCE_C_COMPILER(${CC} GNU)
+CMAKE_FORCE_CXX_COMPILER(${CXX} GNU)
 
-set(CMAKE_AR ${TOOLCHAIN_ROOT}arm-none-eabi-ar${TOOL_EXT} CACHE FILEPATH "Archiver")
-set(CMAKE_OBJCOPY ${TOOLCHAIN_ROOT}arm-none-eabi-objcopy${TOOL_EXT} CACHE FILEPATH "Objcopy")
-set(CMAKE_MAKE_PROGRAM ${TOOLCHAIN_ROOT}make${TOOL_EXT})
-
-find_program(QEMU NAMES qemu-system-gnuarmeclipse)
+find_program(QEMU NAMES qemu-system-gnuarmeclipse PATHS $ENV{ARM_TOOLCHAIN} $ENV{QEMU_PATH})
