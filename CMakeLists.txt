@@ -24,14 +24,15 @@ else()
   message(FATAL_ERROR "Target platform ${TARGET_PLATFORM} does not exist")
 endif()
 
-include(${PLATFORM_PATH}/build.cmake)
+include(${PLATFORM_PATH}/settings.cmake)
+add_subdirectory(${PLATFORM_PATH})
 
 set(CMAKE_EXE_LINKER_FLAGS "-T ${LINKER_SCRIPT} ${CMAKE_EXE_LINKER_FLAGS}")
 
 message (STATUS "Using C compiler from ${CMAKE_C_COMPILER}")
 message (STATUS "Target platform ${TARGET_PLATFORM}")
 
-foreach(lib googletest mylib)
+foreach(lib googletest)
   message (STATUS "Using lib ${lib}")
 
   add_subdirectory(./libs/${lib})
