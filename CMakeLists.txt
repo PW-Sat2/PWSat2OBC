@@ -24,7 +24,8 @@ else()
   message(FATAL_ERROR "Target platform ${TARGET_PLATFORM} does not exist")
 endif()
 
-include(${PLATFORM_PATH}/build.cmake)
+include(${PLATFORM_PATH}/settings.cmake)
+add_subdirectory(${PLATFORM_PATH})
 
 set(CMAKE_EXE_LINKER_FLAGS "-T ${LINKER_SCRIPT} ${CMAKE_EXE_LINKER_FLAGS}")
 
@@ -33,15 +34,9 @@ message (STATUS "Target platform ${TARGET_PLATFORM}")
 
 foreach(lib googletest)
   message (STATUS "Using lib ${lib}")
-  set(BUILD_FILE ${CMAKE_CURRENT_SOURCE_DIR}/libs/${lib}/build.cmake)
 
-  if(EXISTS ${BUILD_FILE})
-  else()
-    message(FATAL_ERROR "Build file ${BUILD_FILE} is missing")
-  endif()
-
-  include(${BUILD_FILE})
+  add_subdirectory(./libs/${lib})
 endforeach(lib)
 
-include(./src/build.cmake)
-include(./test/build.cmake)
+add_subdirectory(./src)
+add_subdirectory(./test)

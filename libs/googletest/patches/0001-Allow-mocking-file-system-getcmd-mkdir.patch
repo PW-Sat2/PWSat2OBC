@@ -1,0 +1,59 @@
+From fc6e1aaddb47a32ac1440b980981dd4a2d6be758 Mon Sep 17 00:00:00 2001
+From: Novakov <maciejt.nowak@gmail.com>
+Date: Sat, 12 Dec 2015 16:31:41 +0100
+Subject: [PATCH 1/2] Allow mocking file system (getcmd & mkdir)
+
+---
+ googletest/include/gtest/internal/gtest-port.h | 5 ++++-
+ googletest/src/gtest-filepath.cc               | 8 ++++++--
+ 2 files changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/googletest/include/gtest/internal/gtest-port.h b/googletest/include/gtest/internal/gtest-port.h
+index a8d81ff..7446ae9 100644
+--- a/googletest/include/gtest/internal/gtest-port.h
++++ b/googletest/include/gtest/internal/gtest-port.h
+@@ -413,6 +413,10 @@ struct _RTL_CRITICAL_SECTION;
+ #  include <android/api-level.h>  // NOLINT
+ #endif
+ 
++#ifndef GTEST_MOCK_FS
++# define GTEST_MOCK_FS 0
++#endif
++
+ // Defines this to true iff Google Test can use POSIX regular expressions.
+ #ifndef GTEST_HAS_POSIX_RE
+ # if GTEST_OS_LINUX_ANDROID
+@@ -2552,4 +2556,3 @@ const char* StringFromGTestEnv(const char* flag, const char* default_val);
+ }  // namespace testing
+ 
+ #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
+-
+diff --git a/googletest/src/gtest-filepath.cc b/googletest/src/gtest-filepath.cc
+index 0292dc1..220851e 100644
+--- a/googletest/src/gtest-filepath.cc
++++ b/googletest/src/gtest-filepath.cc
+@@ -97,7 +97,9 @@ static bool IsPathSeparator(char c) {
+ 
+ // Returns the current working directory, or "" if unsuccessful.
+ FilePath FilePath::GetCurrentDir() {
+-#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_RT
++#if GTEST_MOCK_FS == 1
++  return FilePath(kCurrentDirectoryString);
++#elif GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_RT
+   // Windows CE doesn't have a current directory, so we just return
+   // something reasonable.
+   return FilePath(kCurrentDirectoryString);
+@@ -323,7 +325,9 @@ bool FilePath::CreateDirectoriesRecursively() const {
+ // directory for any reason, including if the parent directory does not
+ // exist. Not named "CreateDirectory" because that's a macro on Windows.
+ bool FilePath::CreateFolder() const {
+-#if GTEST_OS_WINDOWS_MOBILE
++#if GTEST_MOCK_FS == 1
++  int result = 0;
++#elif TEST_OS_WINDOWS_MOBILE
+   FilePath removed_sep(this->RemoveTrailingPathSeparator());
+   LPCWSTR unicode = String::AnsiToUtf16(removed_sep.c_str());
+   int result = CreateDirectory(unicode, NULL) ? 0 : -1;
+-- 
+2.6.3.windows.1
+

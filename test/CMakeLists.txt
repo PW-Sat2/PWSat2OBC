@@ -1,11 +1,17 @@
 set(NAME ut)
 
-aux_source_directory(${CMAKE_CURRENT_LIST_DIR} UT_SOURCES)
+set(SOURCES
+  semihosting.cpp
+  test.cpp
+)
 
-add_executable(${NAME} ${UT_SOURCES})
+add_executable(${NAME} ${SOURCES})
 
-target_link_libraries(${NAME} ${GTEST_LIB} platform)
+target_link_libraries(${NAME} platform ${GTEST_LIB})
+
 target_include_directories(${NAME} PRIVATE ${GTEST_INCLUDE})
+
+add_dependencies(${NAME} googletest)
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
 

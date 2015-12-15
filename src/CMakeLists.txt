@@ -1,6 +1,6 @@
 set(NAME pwsat)
 
-aux_source_directory(${CMAKE_CURRENT_LIST_DIR} SOURCES)
+set(SOURCES main.c)
 
 add_executable(${NAME} ${SOURCES})
 

@@ -1,7 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
 #include <gtest/gtest.h>
+#include <stdlib.h>
 
 GTEST_TEST(MyTest, MyName)
 {
