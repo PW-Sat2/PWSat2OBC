@@ -7,8 +7,11 @@ set(SOURCES
 
 add_executable(${NAME} ${SOURCES})
 
-target_link_libraries(${NAME} ${GTEST_LIB} platform)
+target_link_libraries(${NAME} platform ${GTEST_LIB})
+
 target_include_directories(${NAME} PRIVATE ${GTEST_INCLUDE})
+
+add_dependencies(${NAME} googletest)
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
 

@@ -1,0 +1,25 @@
+From 67e3f7d1db8d6f7ae62f9b1596d9457dd654d7da Mon Sep 17 00:00:00 2001
+From: Novakov <maciejt.nowak@gmail.com>
+Date: Sat, 12 Dec 2015 16:32:38 +0100
+Subject: [PATCH 2/2] Fix passing CXX flags
+
+---
+ googletest/cmake/internal_utils.cmake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/googletest/cmake/internal_utils.cmake b/googletest/cmake/internal_utils.cmake
+index 93e6dbb..67ef8d3 100644
+--- a/googletest/cmake/internal_utils.cmake
++++ b/googletest/cmake/internal_utils.cmake
+@@ -145,7 +145,7 @@ function(cxx_library_with_type name type cxx_flags)
+   add_library(${name} ${type} ${ARGN})
+   set_target_properties(${name}
+     PROPERTIES
+-    COMPILE_FLAGS "${cxx_flags}")
++    CMAKE_CXX_FLAGS "${cxx_flags}")
+   if (BUILD_SHARED_LIBS OR type STREQUAL "SHARED")
+     set_target_properties(${name}
+       PROPERTIES
+-- 
+2.6.3.windows.1
+

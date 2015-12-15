@@ -31,16 +31,10 @@ set(CMAKE_EXE_LINKER_FLAGS "-T ${LINKER_SCRIPT} ${CMAKE_EXE_LINKER_FLAGS}")
 message (STATUS "Using C compiler from ${CMAKE_C_COMPILER}")
 message (STATUS "Target platform ${TARGET_PLATFORM}")
 
-foreach(lib googletest)
+foreach(lib googletest mylib)
   message (STATUS "Using lib ${lib}")
-  set(BUILD_FILE ${CMAKE_CURRENT_SOURCE_DIR}/libs/${lib}/build.cmake)
 
-  if(EXISTS ${BUILD_FILE})
-  else()
-    message(FATAL_ERROR "Build file ${BUILD_FILE} is missing")
-  endif()
-
-  include(${BUILD_FILE})
+  add_subdirectory(./libs/${lib})
 endforeach(lib)
 
 add_subdirectory(./src)

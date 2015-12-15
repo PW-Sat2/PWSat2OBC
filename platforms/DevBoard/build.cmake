@@ -18,6 +18,6 @@ set(LINKER_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/Source/efm32gg.ld)
 aux_source_directory(${CMAKE_CURRENT_LIST_DIR}/Source CMSIS_SOURCE)
 list(APPEND CMSIS_SOURCE ${CMAKE_CURRENT_LIST_DIR}/Source/startup_efm32gg.S)
 
-include_directories (${CMAKE_CURRENT_LIST_DIR}/Include)
-
 add_library(platform STATIC ${CMSIS_SOURCE})
+
+target_include_directories (platform PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Include)
