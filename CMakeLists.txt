@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 
 include(./toolchain.cmake)
+include(./utils/functions.cmake)
 
 project(PWSat C CXX ASM)
 
