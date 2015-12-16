@@ -4,7 +4,7 @@ set(SOURCES main.c)
 
 add_executable(${NAME} ${SOURCES})
 
-target_link_libraries(${NAME} platform)
+target_link_libraries(${NAME} platform freeRTOS)
 
 target_generate_hex(${NAME})
 

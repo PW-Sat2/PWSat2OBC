@@ -5,7 +5,7 @@ include(./utils/functions.cmake)
 
 project(PWSat C CXX ASM)
 
-set(MEM_MANAGMENT_TYPE 4)
+set(MEM_MANAGMENT_TYPE 1)
 
 
 set(TARGET_PLATFORM "DevBoard" CACHE STRING "Target platform")
@@ -33,7 +33,7 @@ set(CMAKE_EXE_LINKER_FLAGS "-T ${LINKER_SCRIPT} ${CMAKE_EXE_LINKER_FLAGS}")
 message (STATUS "Using C compiler from ${CMAKE_C_COMPILER}")
 message (STATUS "Target platform ${TARGET_PLATFORM}")
 
-foreach(lib googletest)
+foreach(lib googletest FreeRTOS)
   message (STATUS "Using lib ${lib}")
 
   add_subdirectory(./libs/${lib})
