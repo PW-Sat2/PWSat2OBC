@@ -15,6 +15,7 @@ ExternalProject_Add(googletest
     -DBUILD_GTEST=ON
     -DCMAKE_TOOLCHAIN_FILE=${PROJECT_SOURCE_DIR}/toolchain.cmake
     -DCMAKE_CXX_FLAGS=${OPTIONS}
+  EXCLUDE_FROM_ALL 1
 )
 
 ExternalProject_Get_Property(googletest SOURCE_DIR BINARY_DIR)

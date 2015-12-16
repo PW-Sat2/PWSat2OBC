@@ -7,8 +7,8 @@ project(PWSat C CXX ASM)
 
 set(MEM_MANAGMENT_TYPE 1)
 
-
 set(TARGET_PLATFORM "DevBoard" CACHE STRING "Target platform")
+set(SEMIHOSTING false CACHE BOOL "Enable semihosting")
 
 set(PLATFORM_PATH ${CMAKE_CURRENT_SOURCE_DIR}/platforms/${TARGET_PLATFORM})
 

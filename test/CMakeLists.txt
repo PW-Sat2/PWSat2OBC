@@ -5,7 +5,7 @@ set(SOURCES
   test.cpp
 )
 
-add_executable(${NAME} ${SOURCES})
+add_executable(${NAME} EXCLUDE_FROM_ALL ${SOURCES})
 
 target_link_libraries(${NAME} platform ${GTEST_LIB})
 
