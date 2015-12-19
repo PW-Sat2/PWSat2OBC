@@ -30,8 +30,9 @@ add_subdirectory(${PLATFORM_PATH})
 
 set(CMAKE_EXE_LINKER_FLAGS "-T ${LINKER_SCRIPT} ${CMAKE_EXE_LINKER_FLAGS}")
 
-message (STATUS "Using C compiler from ${CMAKE_C_COMPILER}")
-message (STATUS "Target platform ${TARGET_PLATFORM}")
+message(STATUS "Using C compiler from ${CMAKE_C_COMPILER}")
+message(STATUS "Target platform ${TARGET_PLATFORM}")
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 foreach(lib googletest FreeRTOS)
   message (STATUS "Using lib ${lib}")

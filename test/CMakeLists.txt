@@ -13,6 +13,8 @@ target_include_directories(${NAME} PRIVATE ${GTEST_INCLUDE})
 
 add_dependencies(${NAME} googletest)
 
+target_require_semihosting(${NAME})
+
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
 
 add_custom_target(run_tests
