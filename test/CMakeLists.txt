@@ -7,11 +7,7 @@ set(SOURCES
 
 add_executable(${NAME} EXCLUDE_FROM_ALL ${SOURCES})
 
-target_link_libraries(${NAME} platform ${GTEST_LIB})
-
-target_include_directories(${NAME} PRIVATE ${GTEST_INCLUDE})
-
-add_dependencies(${NAME} googletest)
+target_link_libraries(${NAME} platform gtest)
 
 target_require_semihosting(${NAME})
 
