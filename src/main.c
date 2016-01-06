@@ -10,7 +10,7 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
-#include "semihosting.h"
+#include "swo.h"
 
 #define LED_PORT gpioPortE
 #define LED0 2
@@ -31,9 +31,9 @@ void blinkLed0(void * param)
   while(1)
   {
     GPIO_PinOutToggle(LED_PORT, LED0);
-    iprintf("Idx: %d %s\n", i, s);
+    swoPrintf("Idx: %d %s\n", i, s);
     i++;
-    vTaskDelay(25 / portTICK_PERIOD_MS );
+    vTaskDelay(250 / portTICK_PERIOD_MS );
   }
 }
 
@@ -44,9 +44,9 @@ int main(void) {
 
   CMU_ClockEnable(cmuClock_GPIO, true);
 
-	initialize_semihosting();
+	enableSWO();
 
-	printf("Hello ARM\n");
+	swoPuts("Hello ARM\n");
 
   GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
   GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);

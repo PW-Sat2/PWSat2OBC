@@ -1,12 +1,13 @@
 set(NAME pwsat)
 
-set(SOURCES main.c semihosting.c)
+set(SOURCES 
+    main.c 
+    swo.c
+)
 
 add_executable(${NAME} ${SOURCES})
 
 target_link_libraries(${NAME} platform freeRTOS)
-
-target_support_semihosting(${NAME})
 
 target_generate_hex(${NAME})
 
