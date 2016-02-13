@@ -2,6 +2,7 @@ node {
   echo("Starting build");
 
   dir('source') {
+    deleteDir()
     checkout scm
   }
 
@@ -9,6 +10,7 @@ node {
 
   withEnv(["PATH+TOOLCHAIN=${toolchainPath}"]) {
       dir('build') {
+        deleteDir()
         bat "cmake -G \"MinGW Makefiles\" ../source"
         bat "make pwsat"
         bat "make run_tests"
@@ -16,4 +18,5 @@ node {
   }
 
   step([$class: 'ArtifactArchiver', artifacts: 'build/build/DevBoard/**/*', fingerprint: true])
+  step([$class: 'JUnitResultArchiver', testResults: 'build/build/DevBoard/unit-tests.xml'])
 }
