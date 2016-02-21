@@ -1,0 +1,5 @@
+*.c         text eol=auto
+*.h         text eol=auto
+*.s         text eol=auto
+*.txt       text eol=auto
+*.cmake     text eol=auto
