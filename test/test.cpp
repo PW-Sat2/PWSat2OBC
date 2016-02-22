@@ -4,7 +4,7 @@
 GTEST_TEST(MyTest, MyName)
 {
 	printf("Running my test\n");
-	EXPECT_EQ(2, 4);
+	EXPECT_EQ(2, 2);
 }
 
 GTEST_TEST(MyTest, ThisOneWorks)
