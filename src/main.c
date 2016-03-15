@@ -10,12 +10,9 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
+#include "port_map.h"
 #include "swo.h"
 #include "terminal.h"
-
-#define LED_PORT gpioPortE
-#define LED0 2
-#define LED1 3
 
 void vApplicationStackOverflowHook( xTaskHandle *pxTask,
 		signed char *pcTaskName) {
@@ -34,8 +31,6 @@ void blinkLed0(void * param) {
 		swoPrintf("Idx: %d %s\n", i, s);
 		i++;
 		vTaskDelay(250 / portTICK_PERIOD_MS);
-
-		LEUART_Tx(LEUART0, 'a');
 	}
 }
 
@@ -66,5 +61,6 @@ int main(void) {
 
 	vTaskStartScheduler();
 	GPIO_PinOutToggle(LED_PORT, LED0);
+
 	return 0;
 }
