@@ -3,6 +3,7 @@ set(NAME pwsat)
 set(SOURCES 
     main.c 
     swo.c
+    terminal.c
 )
 
 add_executable(${NAME} ${SOURCES})
