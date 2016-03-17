@@ -1,29 +1,55 @@
 #include <em_gpio.h>
 #include "em_leuart.h"
-#include "port_map.h"
+
+#include "io_map.h"
 #include "leuart.h"
 
-void terminal_handle_command(uint8_t* buffer, uint32_t length)
+void pingHandler()
 {
-	terminal_send_new_line();
+	leuartPuts("pong");
+}
 
-	if(strcmp(buffer, "ping") == 0)
+void ping2Handler()
+{
+	leuartPuts("pong2");
+}
+
+typedef void (*commandHandler)(void);
+
+typedef struct command {
+	uint8_t name[32];
+	commandHandler handler;
+} command;
+
+command commands[] =
+{
+		{ "ping" , &pingHandler },
+		{ "ping2" , &ping2Handler }
+};
+
+void terminalHandleCommand(uint8_t* buffer)
+{
+	terminalSendNewLine();
+
+	for(int i = 0; i < sizeof(commands)/sizeof(command); i++)
 	{
-		terminal_send_new_prefix();
-		leuart_send_string("pong");
-		terminal_send_new_line();
+		if(strcmp(buffer, commands[i].name) == 0)
+		{
+			commands[i].handler();
+			terminalSendNewLine();
+		}
 	}
 
-	terminal_send_new_prefix();
+	terminalSendPrefix();
 }
 
-void terminal_send_new_line()
+void terminalSendNewLine()
 {
-	leuart_send_string("\r\n");
+	leuartPuts("\r\n");
 }
 
-void terminal_send_new_prefix()
+void terminalSendPrefix()
 {
-	leuart_send_string("PW-SAT2->");
+	leuartPuts("PW-SAT2->");
 }
 
