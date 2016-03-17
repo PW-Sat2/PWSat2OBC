@@ -6,13 +6,13 @@
 #include <em_chip.h>
 #include <em_dbg.h>
 
-#include<FreeRTOSConfig.h>
+#include <FreeRTOSConfig.h>
 #include <FreeRTOS.h>
 #include <task.h>
 
+#include "leuart.h"
 #include "port_map.h"
 #include "swo.h"
-#include "terminal.h"
 
 void vApplicationStackOverflowHook( xTaskHandle *pxTask,
 		signed char *pcTaskName) {
@@ -46,7 +46,7 @@ int main(void) {
 	CMU_ClockEnable(cmuClock_LEUART0, true);
 
 	enableSWO();
-	initLeuart();
+	leuart_init();
 
 	swoPuts("Hello ARM\n");
 

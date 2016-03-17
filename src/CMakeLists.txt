@@ -4,6 +4,7 @@ set(SOURCES
     main.c 
     swo.c
     terminal.c
+    leuart.c
 )
 
 add_executable(${NAME} ${SOURCES})
