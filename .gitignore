@@ -7,3 +7,5 @@ build
 Makefile
 
 libs/googletest/gtest
+
+.project
