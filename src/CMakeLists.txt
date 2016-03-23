@@ -5,6 +5,7 @@ set(SOURCES
     swo.c
     terminal.c
     leuart.c
+    commands/ping.c
 )
 
 add_executable(${NAME} ${SOURCES})

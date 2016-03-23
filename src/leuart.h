@@ -8,7 +8,7 @@
 #ifndef SRC_LEUART_H_
 #define SRC_LEUART_H_
 
-void leuartInit(void);
+void leuartInit(xQueueHandle sink);
 void leuartPuts(uint8_t* buffer);
 void leuartPutc(uint8_t c);
 

@@ -1,17 +1,16 @@
 #include <stdio.h>
 #include <em_device.h>
 #include <em_gpio.h>
-#include <em_cmu.h>
 #include <em_system.h>
 #include <em_chip.h>
 #include <em_dbg.h>
+#include <em_cmu.h>
 
 #include <FreeRTOSConfig.h>
 #include <FreeRTOS.h>
 #include <task.h>
 
 #include "io_map.h"
-#include "leuart.h"
 #include "swo.h"
 
 void vApplicationStackOverflowHook( xTaskHandle *pxTask,
@@ -40,13 +39,11 @@ int main(void) {
 	CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
 	CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);
 
-	CMU_ClockEnable(cmuClock_CORELE, true);
-
 	CMU_ClockEnable(cmuClock_GPIO, true);
-	CMU_ClockEnable(cmuClock_LEUART0, true);
 
 	enableSWO();
-	leuartInit();
+
+	terminalInit();
 
 	swoPuts("Hello ARM\n");
 
