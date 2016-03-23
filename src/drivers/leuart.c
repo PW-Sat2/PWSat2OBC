@@ -3,12 +3,14 @@
 #include <task.h>
 
 #include <string.h>
+#include <stdio.h>
+#include <stdarg.h>
 
 #include <em_cmu.h>
 #include <em_gpio.h>
 #include <em_leuart.h>
 
-#include "io_map.h"
+#include "../io_map.h"
 
 QueueHandle_t leuart0sink;
 
@@ -54,6 +56,20 @@ void leuartPuts(char* buffer)
 	{
 		LEUART_Tx(LEUART0, buffer[i]);
 	}
+}
+
+void leuartPrintf(const char * text, ...)
+{
+ char buf[255] = { 0 };
+
+ va_list args;
+ va_start(args, text);
+
+ vsiprintf(buf, text, args);
+
+ leuartPuts(buf);
+
+ va_end(args);
 }
 
 void leuartPutc(uint8_t c)

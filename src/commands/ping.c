@@ -3,14 +3,19 @@
 #include <task.h>
 
 #include <stdint.h>
-#include "../leuart.h"
+#include "../drivers/leuart.h"
 
-void pingHandler()
+void pingHandler(uint16_t argc, char* argv[])
 {
 	leuartPuts("pong");
 }
 
-void ping2Handler()
+void echoHandler(uint16_t argc, char* argv[])
 {
-	leuartPuts("pong2");
+	leuartPuts("echo with args: \r\n");
+
+	for(int i=0; i < argc; i++)
+	{
+		leuartPrintf("%d. %s \r\n", i, argv[i]);
+	}
 }

@@ -6,30 +6,30 @@
 #include <em_leuart.h>
 
 #include "io_map.h"
-#include "leuart.h"
+#include "drivers/leuart.h"
 
-extern void pingHandler();
-extern void ping2Handler();
+extern void pingHandler(uint16_t argc, char* argv[]);
+extern void echoHandler(uint16_t argc, char* argv[]);
 
-typedef void (*commandHandler)(void);
+typedef void (*commandHandler)(uint16_t argc, char* argv[]);
 
 typedef struct command
 {
-	uint8_t name[32];
+	char name[32];
 	commandHandler handler;
 } command;
 
 command commands[] =
 		{
 				{ "ping", &pingHandler },
-				{ "ping2", &ping2Handler }
+				{ "echo", &echoHandler }
 		};
 
 QueueHandle_t terminalQueue;
 
 void handleIncomingChar(void* args)
 {
-	uint8_t input_buffer[32] = { 0 };
+	char input_buffer[32] = { 0 };
 	uint32_t input_buffer_position = 0;
 
 	while (1)
@@ -53,23 +53,39 @@ void handleIncomingChar(void* args)
 	}
 }
 
-void terminalInit()
+void parseCommandLine(char line[], char** commandName, char** arguments, uint16_t* argc)
 {
-	terminalQueue = xQueueCreate(32, sizeof(uint8_t));
-	xTaskCreate(handleIncomingChar, "terminalIn", 1024, NULL, 4, NULL);
+ volatile char* ptr;
+ char* token = strtok_r(line, " ", &ptr);
 
-	leuartInit(terminalQueue);
+ *commandName = token;
+
+ token = strtok_r((char*)NULL, " ", &ptr);
+
+ while (token != NULL )
+ {
+  arguments[*argc] = token;
+  (*argc)++;
+
+  token = strtok_r((char*)NULL, " ", &ptr);
+ }
 }
 
-void terminalHandleCommand(uint8_t* buffer)
+void terminalHandleCommand(char* buffer)
 {
+	char* commandName;
+	uint32_t argc = 0;
+	char* args[8] = {0};
+
 	terminalSendNewLine();
+
+	parseCommandLine(buffer, &commandName, args, &argc);
 
 	for (int i = 0; i < sizeof(commands) / sizeof(command); i++)
 	{
-		if (strcmp(buffer, commands[i].name) == 0)
+		if (strcmp(commandName, commands[i].name) == 0)
 		{
-			commands[i].handler();
+			commands[i].handler(argc, args);
 			terminalSendNewLine();
 		}
 	}
@@ -77,13 +93,20 @@ void terminalHandleCommand(uint8_t* buffer)
 	terminalSendPrefix();
 }
 
-void terminalSendNewLine()
+void terminalSendNewLine(void)
 {
 	leuartPuts("\r\n");
 }
 
-void terminalSendPrefix()
+void terminalSendPrefix(void)
 {
 	leuartPuts("PW-SAT2->");
 }
 
+void terminalInit()
+{
+	terminalQueue = xQueueCreate(32, sizeof(uint8_t));
+	xTaskCreate(handleIncomingChar, "terminalIn", 1024, NULL, 4, NULL);
+
+	leuartInit(terminalQueue);
+}

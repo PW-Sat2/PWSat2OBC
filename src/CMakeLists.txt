@@ -2,9 +2,9 @@ set(NAME pwsat)
 
 set(SOURCES 
     main.c 
-    swo.c
     terminal.c
-    leuart.c
+    drivers/leuart.c
+    drivers/swo.c
     commands/ping.c
 )
 

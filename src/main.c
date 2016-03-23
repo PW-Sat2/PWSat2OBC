@@ -11,7 +11,8 @@
 #include <task.h>
 
 #include "io_map.h"
-#include "swo.h"
+#include "drivers/swo.h"
+#include "terminal.h"
 
 void vApplicationStackOverflowHook( xTaskHandle *pxTask,
 		signed char *pcTaskName) {
@@ -45,7 +46,7 @@ int main(void) {
 
 	terminalInit();
 
-	swoPuts("Hello ARM\n");
+	swoPuts("Hello I'm PW-SAT2 OBC\n");
 
 	GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
 	GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);
