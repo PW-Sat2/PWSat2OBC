@@ -13,28 +13,37 @@
 #include "io_map.h"
 #include "drivers/swo.h"
 #include "terminal.h"
+#include "system.h"
 
-void vApplicationStackOverflowHook( xTaskHandle *pxTask,
-		signed char *pcTaskName) {
+void vApplicationStackOverflowHook( xTaskHandle *pxTask, signed char *pcTaskName)
+{
+	UNREFERENCED_PARAMETER(pxTask);
+	UNREFERENCED_PARAMETER(pcTaskName);
 }
 
-void vApplicationIdleHook(void) {
+void vApplicationIdleHook(void)
+{
 }
 
-void blinkLed0(void * param) {
-	(void) param;
+void blinkLed0(void * param)
+{
+	UNREFERENCED_PARAMETER(param);
+
 	int i = 0;
-	char s[] = "ARM";
+	const char s[] = "ARM";
 
-	while (1) {
+	while (1)
+	{
 		GPIO_PinOutToggle(LED_PORT, LED0);
 		swoPrintf("Idx: %d %s\n", i, s);
 		i++;
+
 		vTaskDelay(250 / portTICK_PERIOD_MS);
 	}
 }
 
-int main(void) {
+int main(void)
+{
 	CHIP_Init();
 
 	CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);

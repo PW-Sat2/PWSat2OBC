@@ -10,7 +10,7 @@
 #include <em_gpio.h>
 #include <em_leuart.h>
 
-#include "../io_map.h"
+#include "io_map.h"
 
 QueueHandle_t leuart0sink;
 
@@ -48,11 +48,11 @@ void leuartInit(xQueueHandle sink)
 	GPIO_PinModeSet(LEUART0_PORT, LEUART0_RX, gpioModeInputPull, 1);
 }
 
-void leuartPuts(char* buffer)
+void leuartPuts(const char* buffer)
 {
-	uint8_t len = strlen(buffer);
+	const size_t len = strlen(buffer);
 
-	for (int i = 0; i < len; i++)
+	for (size_t i = 0; i < len; i++)
 	{
 		LEUART_Tx(LEUART0, buffer[i]);
 	}
@@ -65,7 +65,7 @@ void leuartPrintf(const char * text, ...)
  va_list args;
  va_start(args, text);
 
- vsiprintf(buf, text, args);
+ vsniprintf(buf, sizeof(buf), text, args);
 
  leuartPuts(buf);
 
@@ -79,11 +79,10 @@ void leuartPutc(uint8_t c)
 
 void LEUART0_IRQHandler(void)
 {
-	uint8_t data;
+	uint8_t data = LEUART_RxDataGet(LEUART0);
+
 	BaseType_t woken = pdFALSE;
-
-	data = LEUART_RxDataGet(LEUART0);
-
 	xQueueSendToFrontFromISR(leuart0sink, &data, &woken);
+
 	portEND_SWITCHING_ISR(woken);
 }

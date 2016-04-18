@@ -12,6 +12,8 @@ add_executable(${NAME} ${SOURCES})
 
 target_link_libraries(${NAME} platform freeRTOS)
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
 target_generate_hex(${NAME})
 
 target_jlink_flash(${NAME} "${CMAKE_CURRENT_SOURCE_DIR}/../jlink/flash.jlink")

@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include <FreeRTOS.h>
 #include <queue.h>
 #include <task.h>
@@ -7,19 +9,21 @@
 
 #include "io_map.h"
 #include "drivers/leuart.h"
+#include "system.h"
+#include "terminal.h"
 
-extern void pingHandler(uint16_t argc, char* argv[]);
-extern void echoHandler(uint16_t argc, char* argv[]);
+void pingHandler(uint16_t argc, char* argv[]);
+void echoHandler(uint16_t argc, char* argv[]);
 
 typedef void (*commandHandler)(uint16_t argc, char* argv[]);
 
-typedef struct command
+typedef struct
 {
 	char name[32];
 	commandHandler handler;
 } command;
 
-command commands[] =
+static const command commands[] =
 		{
 				{ "ping", &pingHandler },
 				{ "echo", &echoHandler }
@@ -27,61 +31,47 @@ command commands[] =
 
 QueueHandle_t terminalQueue;
 
-void handleIncomingChar(void* args)
+static void parseCommandLine(char line[], char** commandName, char** arguments, uint16_t* argc)
 {
-	char input_buffer[32] = { 0 };
-	uint32_t input_buffer_position = 0;
+	*argc = 0;
 
-	while (1)
+	char* ptr;
+	char* token = strtok_r(line, " ", &ptr);
+
+	*commandName = token;
+
+	token = strtok_r(NULL, " ", &ptr);
+
+	while (token != NULL )
 	{
-		uint8_t data;
+		arguments[*argc] = token;
+		(*argc)++;
 
-		xQueueReceive(terminalQueue, &data, portMAX_DELAY);
-
-		if (data == 13)
-		{
-			input_buffer[input_buffer_position] = 0;
-			input_buffer_position = 0;
-
-			terminalHandleCommand(input_buffer);
-		}
-		else
-		{
-			leuartPutc(data);
-			input_buffer[input_buffer_position++] = data;
-		}
+		token = strtok_r(NULL, " ", &ptr);
 	}
 }
 
-void parseCommandLine(char line[], char** commandName, char** arguments, uint16_t* argc)
+void terminalSendNewLine(void)
 {
- volatile char* ptr;
- char* token = strtok_r(line, " ", &ptr);
-
- *commandName = token;
-
- token = strtok_r((char*)NULL, " ", &ptr);
-
- while (token != NULL )
- {
-  arguments[*argc] = token;
-  (*argc)++;
-
-  token = strtok_r((char*)NULL, " ", &ptr);
- }
+	leuartPuts("\r\n");
 }
 
-void terminalHandleCommand(char* buffer)
+static void terminalSendPrefix(void)
+{
+	leuartPuts("PW-SAT2->");
+}
+
+static void terminalHandleCommand(char* buffer)
 {
 	char* commandName;
-	uint32_t argc = 0;
-	char* args[8] = {0};
+	uint16_t argc = 0;
+	char* args[8] = { 0 };
 
 	terminalSendNewLine();
 
 	parseCommandLine(buffer, &commandName, args, &argc);
 
-	for (int i = 0; i < sizeof(commands) / sizeof(command); i++)
+	for (size_t i = 0; i < sizeof(commands) / sizeof(command); i++)
 	{
 		if (strcmp(commandName, commands[i].name) == 0)
 		{
@@ -93,17 +83,36 @@ void terminalHandleCommand(char* buffer)
 	terminalSendPrefix();
 }
 
-void terminalSendNewLine(void)
+static void handleIncomingChar(void* args)
 {
-	leuartPuts("\r\n");
+	UNREFERENCED_PARAMETER(args);
+
+	char input_buffer[32] = { 0 };
+	uint32_t input_buffer_position = 0;
+
+	while (1)
+	{
+		uint8_t data = 0;
+
+		xQueueReceive(terminalQueue, &data, portMAX_DELAY);
+
+		if (data == '\n')
+		{
+			input_buffer[input_buffer_position] = 0;
+			input_buffer_position = 0;
+
+			terminalHandleCommand(input_buffer);
+		}
+		else if (input_buffer_position < sizeof(input_buffer) - 1)
+		{
+			leuartPutc(data);
+			input_buffer[input_buffer_position++] = data;
+		}
+	}
 }
 
-void terminalSendPrefix(void)
-{
-	leuartPuts("PW-SAT2->");
-}
 
-void terminalInit()
+void terminalInit(void)
 {
 	terminalQueue = xQueueCreate(32, sizeof(uint8_t));
 	xTaskCreate(handleIncomingChar, "terminalIn", 1024, NULL, 4, NULL);
