@@ -4,6 +4,8 @@ set(SOURCES
     main.c
     terminal.c
     commands/ping.c
+    commands/time.c   
+    openSail.c
 )
 
 add_executable(${NAME} ${SOURCES})

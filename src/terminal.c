@@ -25,7 +25,9 @@ typedef struct
 static const command commands[] =
 		{
 				{ "ping", &pingHandler },
-				{ "echo", &echoHandler }
+				{ "echo", &echoHandler },
+				{ "jumpToTime", &jumpToTimeHandler },
+				{ "currentTime", &currentTimeHandler }
 		};
 
 QueueHandle_t terminalQueue;
@@ -52,12 +54,22 @@ static void parseCommandLine(char line[], char** commandName, char** arguments, 
 
 void terminalSendNewLine(void)
 {
-	leuartPuts("\r\n");
+	leuartPuts("\n");
 }
 
 static void terminalSendPrefix(void)
 {
-	leuartPuts("PW-SAT2->");
+	leuartPuts(">");
+}
+
+void terminalPrintf(const char * text, ...)
+{
+	va_list args;
+	va_start(args, text);
+
+	leuartvPrintf(text, args);
+
+	va_end(args);
 }
 
 static void terminalHandleCommand(char* buffer)
@@ -109,7 +121,6 @@ static void handleIncomingChar(void* args)
 		}
 	}
 }
-
 
 void terminalInit(void)
 {

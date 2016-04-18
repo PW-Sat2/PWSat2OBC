@@ -3,5 +3,6 @@
 
 void terminalInit(void);
 void terminalSendNewLine(void);
+void terminalPrintf(const char * text, ...);
 
 #endif

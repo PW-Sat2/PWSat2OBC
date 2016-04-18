@@ -13,6 +13,7 @@
 #include "io_map.h"
 #include "swo/swo.h"
 #include "terminal.h"
+#include "openSail.h"
 #include "system.h"
 #include "Logger/Logger.h"
 #include "SwoEndpoint/SwoEndpoint.h"
