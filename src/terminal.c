@@ -12,6 +12,7 @@
 #include "system.h"
 #include "terminal.h"
 #include "commands/commands.h"
+#include "drivers/swo.h"
 
 typedef void (*commandHandler)(uint16_t argc, char* argv[]);
 
@@ -113,7 +114,20 @@ static void handleIncomingChar(void* args)
 void terminalInit(void)
 {
 	terminalQueue = xQueueCreate(32, sizeof(uint8_t));
-	xTaskCreate(handleIncomingChar, "terminalIn", 1024, NULL, 4, NULL);
 
-	leuartInit(terminalQueue);
+	if(terminalQueue != NULL)
+	{
+		if(xTaskCreate(handleIncomingChar, "terminalIn", 1024, NULL, 4, NULL) != pdPASS)
+		{
+			leuartInit(terminalQueue);
+		}
+		else
+		{
+			swoPuts("Error. Cannot create terminalIn thread.");
+		}
+	}
+	else
+	{
+		swoPuts("Error. Cannot create terminalQueue.");
+	}
 }
