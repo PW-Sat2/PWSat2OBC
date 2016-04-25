@@ -14,18 +14,18 @@
 
 QueueHandle_t leuart0sink;
 
-LEUART_Init_TypeDef leuart0Init =
-		{
-				.enable = leuartEnable, /* Activate data reception on LEUn_TX pin. */
-				.refFreq = 0, /* Inherit the clock frequenzy from the LEUART clock source */
-				.baudrate = LEUART0_BAUDRATE, /* Baudrate = 9600 bps */
-				.databits = leuartDatabits8, /* Each LEUART frame containes 8 databits */
-				.parity = leuartNoParity, /* No parity bits in use */
-				.stopbits = leuartStopbits2, /* Setting the number of stop bits in a frame to 2 bitperiods */
-		};
-
 void leuartInit(xQueueHandle sink)
 {
+	LEUART_Init_TypeDef leuart0Init =
+			{
+					.enable = leuartEnable, /* Activate data reception on LEUn_TX pin. */
+					.refFreq = 0, /* Inherit the clock frequenzy from the LEUART clock source */
+					.baudrate = LEUART0_BAUDRATE, /* Baudrate = 9600 bps */
+					.databits = leuartDatabits8, /* Each LEUART frame containes 8 databits */
+					.parity = leuartNoParity, /* No parity bits in use */
+					.stopbits = leuartStopbits2, /* Setting the number of stop bits in a frame to 2 bitperiods */
+			};
+
 	leuart0sink = sink;
 
 	CMU_ClockEnable(cmuClock_CORELE, true);
@@ -60,16 +60,16 @@ void leuartPuts(const char* buffer)
 
 void leuartPrintf(const char * text, ...)
 {
- char buf[255] = { 0 };
+	char buf[255] = { 0 };
 
- va_list args;
- va_start(args, text);
+	va_list args;
+	va_start(args, text);
 
- vsniprintf(buf, sizeof(buf), text, args);
+	vsniprintf(buf, sizeof(buf), text, args);
 
- leuartPuts(buf);
+	leuartPuts(buf);
 
- va_end(args);
+	va_end(args);
 }
 
 void leuartPutc(uint8_t c)

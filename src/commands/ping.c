@@ -6,6 +6,7 @@
 
 #include "drivers/leuart.h"
 #include "system.h"
+#include "commands.h"
 
 void pingHandler(uint16_t argc, char* argv[])
 {

@@ -11,9 +11,7 @@
 #include "drivers/leuart.h"
 #include "system.h"
 #include "terminal.h"
-
-void pingHandler(uint16_t argc, char* argv[]);
-void echoHandler(uint16_t argc, char* argv[]);
+#include "commands/commands.h"
 
 typedef void (*commandHandler)(uint16_t argc, char* argv[]);
 
@@ -31,7 +29,7 @@ static const command commands[] =
 
 QueueHandle_t terminalQueue;
 
-static void parseCommandLine(char line[], char** commandName, char** arguments, uint16_t* argc)
+static void parseCommandLine(char line[], char** commandName, char** arguments, uint16_t* argc, uint8_t maxArgsCount)
 {
 	*argc = 0;
 
@@ -42,7 +40,7 @@ static void parseCommandLine(char line[], char** commandName, char** arguments, 
 
 	token = strtok_r(NULL, " ", &ptr);
 
-	while (token != NULL )
+	while (token != NULL && *argc < maxArgsCount)
 	{
 		arguments[*argc] = token;
 		(*argc)++;
@@ -69,9 +67,9 @@ static void terminalHandleCommand(char* buffer)
 
 	terminalSendNewLine();
 
-	parseCommandLine(buffer, &commandName, args, &argc);
+	parseCommandLine(buffer, &commandName, args, &argc, COUNT_OF(args));
 
-	for (size_t i = 0; i < sizeof(commands) / sizeof(command); i++)
+	for (size_t i = 0; i < COUNT_OF(commands); i++)
 	{
 		if (strcmp(commandName, commands[i].name) == 0)
 		{
