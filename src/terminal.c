@@ -78,8 +78,6 @@ static void terminalHandleCommand(char* buffer)
 	uint16_t argc = 0;
 	char* args[8] = { 0 };
 
-	terminalSendNewLine();
-
 	parseCommandLine(buffer, &commandName, args, &argc, COUNT_OF(args));
 
 	for (size_t i = 0; i < COUNT_OF(commands); i++)
@@ -116,7 +114,6 @@ static void handleIncomingChar(void* args)
 		}
 		else if (input_buffer_position < sizeof(input_buffer) - 1)
 		{
-			leuartPutc(data);
 			input_buffer[input_buffer_position++] = data;
 		}
 	}
@@ -128,7 +125,7 @@ void terminalInit(void)
 
 	if(terminalQueue != NULL)
 	{
-		if(xTaskCreate(handleIncomingChar, "terminalIn", 1024, NULL, 4, NULL) != pdPASS)
+		if(xTaskCreate(handleIncomingChar, "terminalIn", 1024, NULL, 4, NULL) == pdPASS)
 		{
 			leuartInit(terminalQueue);
 		}
@@ -141,4 +138,6 @@ void terminalInit(void)
 	{
 		SwoPuts("Error. Cannot create terminalQueue.");
 	}
+
+    terminalSendPrefix();
 }

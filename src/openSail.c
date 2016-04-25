@@ -13,36 +13,35 @@
 
 void openSail()
 {
-	uint8_t input[] = {1,1};
-	i2cWrite(12, input, sizeof(input));
+    uint8_t input[] = { 1, 1 };
+    i2cWrite(12, input, sizeof(input));
 }
 
 void checkOpenSail(void* _)
 {
-	(void) _;
+    (void)_;
 
-	while (1)
-	{
-		uint32_t time = currentTime();
+    while (1)
+    {
+        uint32_t time = currentTime();
+        if (time > SAILOPENTIME)
+        {
+            swoPuts("time to open sail.");
 
-		if (time > SAILOPENTIME)
-		{
-			swoPuts("time to open sail.");
+            openSail();
 
-			openSail();
+            while (1)
+            {
+            }
+        }
 
-			while (1)
-			{
-			}
-		}
-
-		vTaskDelay(pdMS_TO_TICKS(100));
-	}
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
 }
 
 void openSailInit()
 {
-	i2cInit();
+    i2cInit();
 
-	xTaskCreate(checkOpenSail, "openSail", 1024, NULL, 4, NULL);
+    xTaskCreate(checkOpenSail, "openSail", 1024, NULL, 4, NULL);
 }

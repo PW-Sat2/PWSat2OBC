@@ -11,3 +11,5 @@ libs/googletest/gtest
 .project
 
 integration_tests/.idea
+
+*.pyc

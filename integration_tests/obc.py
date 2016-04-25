@@ -3,7 +3,8 @@ import serial
 
 class SerialPortTerminal:
     def __init__(self, comPort):
-        self._serial = serial.Serial(comPort, baudrate=9600, timeout=1)
+        self._serial = serial.Serial(comPort, baudrate=9600, timeout=1, rtscts=False)
+        self._serial.rts = False
 
     def waitForPrompt(self):
         self._serial.write("\n")
@@ -31,6 +32,10 @@ class SerialPortTerminal:
 
         return response.rstrip('\n')
 
+    def reset(self):
+        self._serial.rts = True
+        self._serial.rts = False
+
 
 class OBC:
     def __init__(self, terminal):
@@ -45,4 +50,7 @@ class OBC:
     def current_time(self):
         r = self._terminal.command("currentTime")
         return int(r)
+
+    def reset(self):
+        self._terminal.reset()
 

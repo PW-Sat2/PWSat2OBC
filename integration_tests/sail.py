@@ -1,5 +1,4 @@
 import unittest
-import serial
 import os
 import threading
 
@@ -8,8 +7,8 @@ from i2cMock import I2CMock, I2CDevice
 import i2cMock
 
 
-mock_com = os.environ.get('MOCK_COM') or "com45"
-obc_com = os.environ.get('OBC_COM') or "com46"
+mock_com = os.environ.get('MOCK_COM')
+obc_com = os.environ.get('OBC_COM')
 
 INFINITY_TIME = 999999
 
@@ -43,6 +42,9 @@ class Test_SailTest(unittest.TestCase):
 
         self.thread.start()
 
+    def setUp(self):
+        self.obc.reset()
+
     @classmethod
     def tearDownClass(self):
         self.i2c.close()
@@ -71,3 +73,6 @@ class Test_SailTest(unittest.TestCase):
         threading._sleep(1)
 
         self.assertTrue(self.eps.opened)
+
+if __name__ == '__main__':
+    unittest.main()
