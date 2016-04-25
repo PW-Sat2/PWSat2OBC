@@ -73,6 +73,3 @@ class Test_SailTest(unittest.TestCase):
         threading._sleep(1)
 
         self.assertTrue(self.eps.opened)
-
-if __name__ == '__main__':
-    unittest.main()
