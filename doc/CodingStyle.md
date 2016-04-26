@@ -227,13 +227,13 @@ for module Comm:
 
     #define COMM_PROTOCOL_VERSION 0x12
     
-whereas functions/global variables should be using prefixed with module name in upper camel case:
+whereas functions/global variables should be prefixed with module name in upper camel case:
 
     void CommSendPacket(const struct Buffer* buffer);
 
 #### Formatting
 
-The still not yet complete [clang-format](http://clang.llvm.org/docs/ClangFormat.html) configuration file that will automatically apply most of the formatting rules described above is available [here](https://github.com/PW-Sat2/PWSat2OBC/blob/master/.clang-format).
+The still not yet complete [clang-format](http://clang.llvm.org/docs/ClangFormat.html) configuration file that will automatically apply most of the formatting rules described above is available [here](../.clang-format).
 
 
 #### Tools 
