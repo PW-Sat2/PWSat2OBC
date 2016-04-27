@@ -7,17 +7,16 @@
 #include "io_map.h"
 #include "obc_time.h"
 #include "drivers/swo.h"
-#include "drivers/i2c.h"
+#include "devices/eps.h"
 
 #define SAILOPENTIME 2500
 
-void openSail()
+static void openSail(void)
 {
-    uint8_t input[] = { 1, 1 };
-    i2cWrite(12, input, sizeof(input));
+    EpsOpenSail();
 }
 
-void checkOpenSail(void* _)
+static void checkOpenSail(void* _)
 {
     (void)_;
 
@@ -39,9 +38,7 @@ void checkOpenSail(void* _)
     }
 }
 
-void openSailInit()
+void openSailInit(void)
 {
-    i2cInit();
-
     xTaskCreate(checkOpenSail, "openSail", 1024, NULL, 4, NULL);
 }

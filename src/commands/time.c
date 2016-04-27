@@ -8,10 +8,11 @@
 #include "drivers/swo.h"
 #include "terminal.h"
 #include "obc_time.h"
+#include "system.h"
 
 void jumpToTimeHandler(uint16_t argc, char* argv[])
 {
-	(void)argc;
+  	UNREFERENCED_PARAMETER(argc);
 
 	char * tail;
 
@@ -24,8 +25,8 @@ void jumpToTimeHandler(uint16_t argc, char* argv[])
 
 void currentTimeHandler(uint16_t argc, char* argv[])
 {
-	(void)argc;
-	(void)argv;
+	UNREFERENCED_PARAMETER(argc);
+	UNREFERENCED_PARAMETER(argv);
 
 	terminalPrintf("%d", currentTime());
 }

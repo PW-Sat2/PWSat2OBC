@@ -23,6 +23,7 @@ class Test_SailTest(BaseTest):
 
     def test_happy_path(self):
         self.obc.jump_to_time(INFINITY_TIME)
-        threading._sleep(1)
 
-        self.assertTrue(self.eps.opened)
+        self.eps.wait_for_sail_open()
+
+

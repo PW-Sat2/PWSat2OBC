@@ -2,7 +2,7 @@
 
 static uint32_t time = 0;
 
-uint32_t currentTime()
+uint32_t currentTime(void)
 {
 	return time;
 }

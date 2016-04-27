@@ -5,6 +5,7 @@ set(SOURCES
     terminal.c
     commands/ping.c
     commands/time.c   
+    devices/eps.c
     openSail.c
 )
 

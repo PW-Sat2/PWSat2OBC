@@ -18,6 +18,10 @@
 #include "Logger/Logger.h"
 #include "SwoEndpoint/SwoEndpoint.h"
 
+#include "drivers/i2c.h"
+
+#include "devices/eps.h"
+
 void vApplicationStackOverflowHook( xTaskHandle *pxTask, signed char *pcTaskName)
 {
 	UNREFERENCED_PARAMETER(pxTask);
@@ -68,6 +72,10 @@ int main(void)
 	CMU_ClockEnable(cmuClock_GPIO, true);
 
 	SwoEnable();
+
+	i2cInit();
+
+	EpsInit();
 
 	terminalInit();
 	SwoPuts("Hello I'm PW-SAT2 OBC\n");
