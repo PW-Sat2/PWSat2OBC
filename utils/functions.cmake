@@ -29,3 +29,19 @@ function(target_support_semihosting TARGET)
     target_require_semihosting(${TARGET})
   endif()
 endfunction(target_support_semihosting)
+
+function(target_format_sources TARGET SOURCES)
+    if(CLANG_FORMAT)
+        add_custom_target(${NAME}.format
+            COMMAND ${CLANG_FORMAT} -style=file -i ${SOURCES}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Formatting files: '${SOURCES}'"
+            )
+    else(CLANG_FORMAT)
+        add_custom_target(${NAME}.format
+            COMMAND ""
+            COMMENT "Clang format has not been found. Code formatting is not available. "
+            )
+    endif()
+endfunction(target_format_sources)
+
