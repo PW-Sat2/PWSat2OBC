@@ -18,12 +18,13 @@ BreakBeforeTernaryOperators: false
 ColumnLimit: 120
 
 ContinuationIndentWidth: 4
-Cpp11BracedListStyle: false
+Cpp11BracedListStyle: true
 
 IndentCaseLabels: true
 IndentFunctionDeclarationAfterType: true
 IndentWidth: 4
 
+KeepEmptyLinesAtTheStartOfBlocks: false
 Language: Cpp
 
 MaxEmptyLinesToKeep: 1
