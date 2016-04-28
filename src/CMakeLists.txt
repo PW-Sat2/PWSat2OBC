@@ -18,6 +18,8 @@ target_generate_hex(${NAME})
 
 target_jlink_flash(${NAME} "${CMAKE_CURRENT_SOURCE_DIR}/../jlink/flash.jlink")
 
+target_format_sources(${NAME} "${SOURCES}")
+
 add_custom_target(${NAME}.gdb
   COMMAND ${JLinkGDBServer} -device ${DEVICE}
   DEPENDS ${NAME}
