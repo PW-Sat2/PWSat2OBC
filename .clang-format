@@ -30,6 +30,7 @@ Language: Cpp
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: All
 PointerAlignment: Left
+SortIncludes: true
 SpaceAfterCStyleCast: false
 SpaceBeforeParens: ControlStatements
 SpaceInEmptyParentheses: false
@@ -39,3 +40,24 @@ SpacesInParentheses: false
 Standard: Cpp11
 TabWidth: 4
 UseTab: Never
+
+IncludeCategories:
+  - Regex:           '^(<|")gtest/gtest.h'
+    Priority:        10
+  - Regex:           '^(<|")gtest'
+    Priority:        11
+  - Regex:           '^(<|")gmock/gmock.h'
+    Priority:        12
+  - Regex:           '^(<|")gmock'
+    Priority:        13
+  - Regex:           '^(<|")em_system.h'
+    Priority:        14
+  - Regex:           '^(<|")core_cm3.h'
+    Priority:        15
+  - Regex:           '^(<|")(assert|complex|ctype|errno|inttypes|iso646|limits|locale|math|setjmp|signal|std|string|tgmath|threads|time|uchar|wchar|wctype)'
+    Priority:        1
+  - Regex:           '^<'
+    Priority:        2
+  - Regex:           '^"'
+    Priority:        20
+
