@@ -11,7 +11,7 @@
 #include <task.h>
 
 #include "io_map.h"
-#include "drivers/swo.h"
+#include "swo/swo.h"
 #include "terminal.h"
 #include "system.h"
 

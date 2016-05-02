@@ -4,7 +4,7 @@
 #include <queue.h>
 #include <task.h>
 
-#include "drivers/leuart.h"
+#include "leuart/leuart.h"
 #include "system.h"
 #include "commands.h"
 
