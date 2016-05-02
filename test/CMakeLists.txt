@@ -3,11 +3,12 @@ set(NAME ut)
 set(SOURCES
   semihosting.cpp
   test.cpp
+  Logger/LoggerTest.cpp
 )
 
 add_executable(${NAME} EXCLUDE_FROM_ALL ${SOURCES})
 
-target_link_libraries(${NAME} platform gtest)
+target_link_libraries(${NAME} platform gtest gmock logger)
 
 target_require_semihosting(${NAME})
 
