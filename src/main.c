@@ -14,6 +14,8 @@
 #include "swo/swo.h"
 #include "terminal.h"
 #include "system.h"
+#include "Logger/Logger.h"
+#include "SwoEndpoint/SwoEndpoint.h"
 
 void vApplicationStackOverflowHook( xTaskHandle *pxTask, signed char *pcTaskName)
 {
@@ -54,8 +56,13 @@ int main(void)
 	SwoEnable();
 
 	terminalInit();
-
 	SwoPuts("Hello I'm PW-SAT2 OBC\n");
+	LogInit(LOG_LEVEL_INFO);
+	bool result = LogAddEndpoint(SwoEndpointLogger, NULL, LOG_LEVEL_TRACE);
+	if(!result)
+	{
+		SwoPuts("Unable to attach swo endpoint to logger. ");
+	}
 
 	GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
 	GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);

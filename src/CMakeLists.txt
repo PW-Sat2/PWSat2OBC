@@ -8,7 +8,7 @@ set(SOURCES
 
 add_executable(${NAME} ${SOURCES})
 
-target_link_libraries(${NAME} platform freeRTOS base leuart swo)
+target_link_libraries(${NAME} platform freeRTOS base leuart swo logger SwoEndpoint)
 
 target_generate_hex(${NAME})
 
