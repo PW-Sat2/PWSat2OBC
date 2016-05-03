@@ -13,13 +13,19 @@ extern "C" {
 
 enum LogLevel
 {
-    LOG_LEVEL_ALWAYS = 0,
-    LOG_LEVEL_FATAL = 1,
-    LOG_LEVEL_ERROR = 2,
-    LOG_LEVEL_WARNING = 3,
-    LOG_LEVEL_INFO = 4,
-    LOG_LEVEL_DEBUG = 5,
-    LOG_LEVEL_TRACE = 6
+    // dummy log level used for verification, do not use it, keep it first on the list
+    LOG_LEVEL_MIN = 0,
+
+    LOG_LEVEL_ALWAYS = LOG_LEVEL_MIN,
+    LOG_LEVEL_FATAL,
+    LOG_LEVEL_ERROR,
+    LOG_LEVEL_WARNING,
+    LOG_LEVEL_INFO,
+    LOG_LEVEL_DEBUG,
+    LOG_LEVEL_TRACE,
+
+    // dummy log level used for verification, do not use it, keep it last on the list
+    LOG_LEVEL_MAX = LOG_LEVEL_TRACE
 };
 
 typedef void (*LoggerProcedure)(void* context,

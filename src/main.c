@@ -35,7 +35,7 @@ void blinkLed0(void * param)
 	while (1)
 	{
 		GPIO_PinOutToggle(LED_PORT, LED0);
-		swoPrintf("Idx: %d %s\n", i, s);
+		SwoPrintf("Idx: %d %s\n", i, s);
 		i++;
 
 		vTaskDelay(250 / portTICK_PERIOD_MS);
@@ -51,11 +51,11 @@ int main(void)
 
 	CMU_ClockEnable(cmuClock_GPIO, true);
 
-	enableSWO();
+	SwoEnable();
 
 	terminalInit();
 
-	swoPuts("Hello I'm PW-SAT2 OBC\n");
+	SwoPuts("Hello I'm PW-SAT2 OBC\n");
 
 	GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
 	GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);

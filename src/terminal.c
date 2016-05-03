@@ -123,11 +123,11 @@ void terminalInit(void)
 		}
 		else
 		{
-			swoPuts("Error. Cannot create terminalIn thread.");
+			SwoPuts("Error. Cannot create terminalIn thread.");
 		}
 	}
 	else
 	{
-		swoPuts("Error. Cannot create terminalQueue.");
+		SwoPuts("Error. Cannot create terminalQueue.");
 	}
 }
