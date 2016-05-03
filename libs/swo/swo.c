@@ -42,7 +42,7 @@ void SwoEnable(void)
 	DWT->CTRL = 0x400003FF;
 	ITM->TCR = 0x0001000D;
 	TPI->FFCR = 0x00000100;
-	ITM->TER = 0x1;
+	ITM->TER = 0x7f;
 }
 
 void SwoPutsOnChannel(uint8_t channel, const char * str)
