@@ -1,8 +1,8 @@
 #include "Logger/Logger.h"
 #include <string>
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
 #include "gmock/gmock-matchers.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "system.h"
 
 namespace
@@ -151,5 +151,29 @@ TEST(LoggerTest, TestRemovingEndpoint)
     LogAddEndpoint(LoggerProxyWithFormat, &endpoint, LOG_LEVEL_DEBUG);
     LogAddEndpoint(LoggerProxy, &endpoint, LOG_LEVEL_ERROR);
     LogRemoveEndpoint(LoggerProxy);
+    LOGF(LOG_LEVEL_FATAL, "%s Message %d", "Test", 1);
+}
+
+TEST(LoggerTest, TestRemovingNonExistingEndpoint)
+{
+    LoggerEndpoint endpoint;
+    EXPECT_CALL(endpoint, LogFormat(LOG_LEVEL_FATAL, _, StrEq("Test Message 1"))).Times(2);
+    EXPECT_CALL(endpoint, Log(_, _, _)).Times(0);
+    LogInit(LOG_LEVEL_INFO);
+    LogAddEndpoint(LoggerProxyWithFormat, &endpoint, LOG_LEVEL_INFO);
+    LogAddEndpoint(LoggerProxyWithFormat, &endpoint, LOG_LEVEL_DEBUG);
+    LogRemoveEndpoint(LoggerProxy);
+    LOGF(LOG_LEVEL_FATAL, "%s Message %d", "Test", 1);
+}
+
+TEST(LoggerTest, TestRemovingNullEndpint)
+{
+    LoggerEndpoint endpoint;
+    EXPECT_CALL(endpoint, LogFormat(LOG_LEVEL_FATAL, _, StrEq("Test Message 1"))).Times(2);
+    EXPECT_CALL(endpoint, Log(_, _, _)).Times(0);
+    LogInit(LOG_LEVEL_INFO);
+    LogAddEndpoint(LoggerProxyWithFormat, &endpoint, LOG_LEVEL_INFO);
+    LogAddEndpoint(LoggerProxyWithFormat, &endpoint, LOG_LEVEL_DEBUG);
+    LogRemoveEndpoint(NULL);
     LOGF(LOG_LEVEL_FATAL, "%s Message %d", "Test", 1);
 }

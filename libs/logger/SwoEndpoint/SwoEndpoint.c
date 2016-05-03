@@ -16,4 +16,5 @@ void SwoEndpointLogger(void* context,
     const int channel = messageLevel - LOG_LEVEL_MIN + 1;
     SwoPutsOnChannel(channel, messageHeader);
     SwoVPrintfOnChannel(channel, messageFormat, messageArguments);
+    SwoPutsOnChannel(channel, "\n");
 }
