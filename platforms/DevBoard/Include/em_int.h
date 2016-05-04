@@ -1,10 +1,10 @@
 /***************************************************************************//**
  * @file em_int.h
  * @brief Interrupt enable/disable unit API
- * @version 4.1.0
+ * @version 4.3.0
  *******************************************************************************
  * @section License
- * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
+ * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -30,8 +30,8 @@
  *
  ******************************************************************************/
 
-#ifndef __SILICON_LABS_EM_INT_H__
-#define __SILICON_LABS_EM_INT_H__
+#ifndef EM_INT_H
+#define EM_INT_H
 
 #include "em_device.h"
 
@@ -48,7 +48,7 @@ extern "C" {
 /** @endcond */
 
 /***************************************************************************//**
- * @addtogroup EM_Library
+ * @addtogroup emlib
  * @{
  ******************************************************************************/
 
@@ -65,7 +65,7 @@ extern "C" {
  *   Disable interrupts and increment lock level counter.
  *
  * @return
- *   The resulting interrupt nesting level.
+ *   The resulting interrupt disable nesting level.
  *
  ******************************************************************************/
 __STATIC_INLINE uint32_t INT_Disable(void)
@@ -84,7 +84,7 @@ __STATIC_INLINE uint32_t INT_Disable(void)
  *   Enable interrupts.
  *
  * @return
- *   The resulting interrupt nesting level.
+ *   The resulting interrupt disable nesting level.
  *
  * @details
  *   Decrement interrupt lock level counter and enable interrupts if counter
@@ -112,10 +112,10 @@ __STATIC_INLINE uint32_t INT_Enable(void)
 }
 
 /** @} (end addtogroup INT) */
-/** @} (end addtogroup EM_Library) */
+/** @} (end addtogroup emlib) */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __SILICON_LABS_EM_INT_H__ */
+#endif /* EM_INT_H */

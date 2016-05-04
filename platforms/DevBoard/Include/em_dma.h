@@ -1,10 +1,10 @@
 /***************************************************************************//**
  * @file em_dma.h
  * @brief Direct memory access (DMA) API
- * @version 4.1.0
+ * @version 4.3.0
  *******************************************************************************
  * @section License
- * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
+ * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -30,8 +30,8 @@
  *
  ******************************************************************************/
 
-#ifndef __SILICON_LABS_EM_DMA_H__
-#define __SILICON_LABS_EM_DMA_H__
+#ifndef EM_DMA_H
+#define EM_DMA_H
 
 #include "em_device.h"
 #if defined( DMA_PRESENT )
@@ -44,7 +44,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup EM_Library
+ * @addtogroup emlib
  * @{
  ******************************************************************************/
 
@@ -439,6 +439,7 @@ void DMA_CfgDescrScatterGather(DMA_DESCRIPTOR_TypeDef *descr,
                                DMA_CfgDescrSGAlt_TypeDef *cfg);
 void DMA_ChannelEnable(unsigned int channel, bool enable);
 bool DMA_ChannelEnabled(unsigned int channel);
+void DMA_ChannelRequestEnable(unsigned int channel, bool enable);
 void DMA_Init(DMA_Init_TypeDef *init);
 void DMA_IRQHandler(void);
 void DMA_RefreshPingPong(unsigned int channel,
@@ -450,12 +451,112 @@ void DMA_RefreshPingPong(unsigned int channel,
                          bool last);
 void DMA_Reset(void);
 
+/***************************************************************************//**
+ * @brief
+ *   Clear one or more pending DMA interrupts.
+ *
+ * @param[in] flags
+ *   Pending DMA interrupt sources to clear. Use one or more valid
+ *   interrupt flags for the DMA module (DMA_IFC_nnn).
+ ******************************************************************************/
+__STATIC_INLINE void DMA_IntClear(uint32_t flags)
+{
+  DMA->IFC = flags;
+}
+
+
+/***************************************************************************//**
+ * @brief
+ *   Disable one or more DMA interrupts.
+ *
+ * @param[in] flags
+ *   DMA interrupt sources to disable. Use one or more valid
+ *   interrupt flags for the DMA module (DMA_IEN_nnn).
+ ******************************************************************************/
+__STATIC_INLINE void DMA_IntDisable(uint32_t flags)
+{
+  DMA->IEN &= ~flags;
+}
+
+
+/***************************************************************************//**
+ * @brief
+ *   Enable one or more DMA interrupts.
+ *
+ * @note
+ *   Depending on the use, a pending interrupt may already be set prior to
+ *   enabling the interrupt. Consider using DMA_IntClear() prior to enabling
+ *   if such a pending interrupt should be ignored.
+ *
+ * @param[in] flags
+ *   DMA interrupt sources to enable. Use one or more valid
+ *   interrupt flags for the DMA module (DMA_IEN_nnn).
+ ******************************************************************************/
+__STATIC_INLINE void DMA_IntEnable(uint32_t flags)
+{
+  DMA->IEN |= flags;
+}
+
+
+/***************************************************************************//**
+ * @brief
+ *   Get pending DMA interrupt flags.
+ *
+ * @note
+ *   The event bits are not cleared by the use of this function.
+ *
+ * @return
+ *   DMA interrupt sources pending. Returns one or more valid
+ *   interrupt flags for the DMA module (DMA_IF_nnn).
+ ******************************************************************************/
+__STATIC_INLINE uint32_t DMA_IntGet(void)
+{
+  return DMA->IF;
+}
+
+
+/***************************************************************************//**
+ * @brief
+ *   Get enabled and pending DMA interrupt flags.
+ *   Useful for handling more interrupt sources in the same interrupt handler.
+ *
+ * @note
+ *   Interrupt flags are not cleared by the use of this function.
+ *
+ * @return
+ *   Pending and enabled DMA interrupt sources
+ *   The return value is the bitwise AND of
+ *   - the enabled interrupt sources in DMA_IEN and
+ *   - the pending interrupt flags DMA_IF
+ ******************************************************************************/
+__STATIC_INLINE uint32_t DMA_IntGetEnabled(void)
+{
+  uint32_t ien;
+
+  ien = DMA->IEN;
+  return DMA->IF & ien;
+}
+
+
+/***************************************************************************//**
+ * @brief
+ *   Set one or more pending DMA interrupts
+ *
+ * @param[in] flags
+ *   DMA interrupt sources to set to pending. Use one or more valid
+ *   interrupt flags for the DMA module (DMA_IFS_nnn).
+ ******************************************************************************/
+__STATIC_INLINE void DMA_IntSet(uint32_t flags)
+{
+  DMA->IFS = flags;
+}
+
 /** @} (end addtogroup DMA) */
-/** @} (end addtogroup EM_Library) */
+/** @} (end addtogroup emlib) */
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* defined( DMA_PRESENT ) */
-#endif /* __SILICON_LABS_EM_DMA_H__ */
+#endif /* EM_DMA_H */
