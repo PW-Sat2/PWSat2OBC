@@ -36,11 +36,8 @@ enum LogLevel
  * @param[in] messageFormat Pointer to logged message format string.
  * @param[in] messageArguments Logged message arguments.
  */
-typedef void (*LoggerProcedure)(void* context,
-    enum LogLevel messageLevel,
-    const char* messageHeader,
-    const char* messageFormat,
-    va_list messageArguments);
+typedef void (*LoggerProcedure)(
+    void* context, const char* messageHeader, const char* messageFormat, va_list messageArguments);
 
 /**
  * @brief Macro used for logging non parameterized entries.

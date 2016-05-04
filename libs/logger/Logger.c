@@ -1,9 +1,9 @@
 #include "Logger.h"
+#include "system.h"
 #include <assert.h> // static_assert
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h> //memset
-#include "system.h"
 
 #define MAX_ENDPOINTS 3
 
@@ -119,7 +119,7 @@ void LogMessage(enum LogLevel messageLevel, const char* file, uint32_t line, con
         const LoggerEndpoint* endpoint = &logger.endpoints[cx];
         if (CanLogAtLevel(messageLevel, endpoint->endpointLogLevel))
         {
-            endpoint->endpoint(endpoint->context, messageLevel, buffer, message, arguments);
+            endpoint->endpoint(endpoint->context, buffer, message, arguments);
         }
     }
 
