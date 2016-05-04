@@ -1,10 +1,10 @@
 /***************************************************************************//**
  * @file em_mpu.c
  * @brief Memory Protection Unit (MPU) Peripheral API
- * @version 4.3.0
+ * @version 4.1.0
  *******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -36,7 +36,7 @@
 
 
 /***************************************************************************//**
- * @addtogroup emlib
+ * @addtogroup EM_Library
  * @{
  ******************************************************************************/
 
@@ -120,5 +120,5 @@ void MPU_ConfigureRegion(const MPU_RegionInit_TypeDef *init)
 
 
 /** @} (end addtogroup CMU) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup EM_Library) */
 #endif /* defined(__MPU_PRESENT) && (__MPU_PRESENT == 1) */

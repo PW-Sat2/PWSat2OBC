@@ -1,10 +1,10 @@
 /***************************************************************************//**
  * @file em_assert.c
  * @brief Assert API
- * @version 4.3.0
+ * @version 4.1.0
  *******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -32,7 +32,6 @@
 
 
 #include "em_assert.h"
-#include <stdbool.h>
 
 #if defined(DEBUG_EFM)
 
@@ -52,10 +51,10 @@
  *   Please notice that this function is not used unless DEBUG_EFM is defined
  *   during preprocessing of EFM_ASSERT() usage.
  *
- * @param[in] file
+ * @par file
  *   Name of source file where assertion failed.
  *
- * @param[in] line
+ * @par line
  *   Line number in source file where assertion failed.
  ******************************************************************************/
 void assertEFM(const char *file, int line)
@@ -63,9 +62,8 @@ void assertEFM(const char *file, int line)
   (void)file;  /* Unused parameter */
   (void)line;  /* Unused parameter */
 
-  while (true)
-  {
-  }
+  while (1)
+    ;
 }
 
 #endif /* DEBUG_EFM */

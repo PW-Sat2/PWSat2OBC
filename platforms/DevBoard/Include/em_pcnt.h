@@ -1,10 +1,10 @@
 /***************************************************************************//**
  * @file em_pcnt.h
  * @brief Pulse Counter (PCNT) peripheral API
- * @version 4.3.0
+ * @version 4.1.0
  *******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -30,8 +30,8 @@
  *
  ******************************************************************************/
 
-#ifndef EM_PCNT_H
-#define EM_PCNT_H
+#ifndef __SILICON_LABS_EM_PCNT_H__
+#define __SILICON_LABS_EM_PCNT_H__
 
 #include "em_device.h"
 #if defined(PCNT_COUNT) && (PCNT_COUNT > 0)
@@ -43,7 +43,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
+ * @addtogroup EM_Library
  * @{
  ******************************************************************************/
 
@@ -55,21 +55,17 @@ extern "C" {
 /*******************************************************************************
  *******************************   DEFINES   ***********************************
  ******************************************************************************/
-/** PCNT0 Counter register size. */
+/** PCNT Counter register sizes. */
 #if defined(_EFM32_GECKO_FAMILY)
-#define PCNT0_CNT_SIZE    (8)   /* PCNT0 counter is  8 bits. */
+#define PCNT0_CNT_SIZE    (8)   /** PCNT0 counter is  8 bits. */
 #else
-#define PCNT0_CNT_SIZE   (16)   /* PCNT0 counter is 16 bits. */
+#define PCNT0_CNT_SIZE   (16)   /** PCNT0 counter is 16 bits. */
 #endif
-
 #ifdef PCNT1
-/** PCNT1 Counter register size. */
-#define PCNT1_CNT_SIZE    (8)   /* PCNT1 counter is  8 bits. */
+#define PCNT1_CNT_SIZE    (8)   /** PCNT1 counter is  8 bits. */
 #endif
-
 #ifdef PCNT2
-/** PCNT2 Counter register size. */
-#define PCNT2_CNT_SIZE    (8)   /* PCNT2 counter is  8 bits. */
+#define PCNT2_CNT_SIZE    (8)   /** PCNT2 counter is  8 bits. */
 #endif
 
 
@@ -91,14 +87,14 @@ typedef enum
 
   /** Externally clocked quadrature decoder mode (available in EM0-EM3). */
   pcntModeExtQuad   = _PCNT_CTRL_MODE_EXTCLKQUAD,
-
+  
 #if defined(_PCNT_CTRL_MODE_OVSQUAD1X)
   /** LFACLK oversampling quadrature decoder 1X mode (available in EM0-EM2). */
   pcntModeOvsQuad1  = _PCNT_CTRL_MODE_OVSQUAD1X,
-
+  
   /** LFACLK oversampling quadrature decoder 2X mode (available in EM0-EM2). */
   pcntModeOvsQuad2  = _PCNT_CTRL_MODE_OVSQUAD2X,
-
+  
   /** LFACLK oversampling quadrature decoder 4X mode (available in EM0-EM2). */
   pcntModeOvsQuad4  = _PCNT_CTRL_MODE_OVSQUAD4X,
 #endif
@@ -201,7 +197,7 @@ typedef struct
   /** Counting direction, only applicable for #pcntModeOvsSingle and
    * #pcntModeExtSingle modes. */
   bool                  countDown;
-
+  
   /** Enable filter, only available in #pcntModeOvs* modes. */
   bool                  filter;
 
@@ -264,13 +260,13 @@ typedef struct
 
 #if defined(PCNT_OVSCFG_FILTLEN_DEFAULT)
 /** Filter initialization structure */
-typedef struct
+typedef struct 
 {
   /** Used only in OVSINGLE and OVSQUAD1X-4X modes. To use this, enable the filter through
    *  setting filter to true during PCNT_Init(). Filter length = (filtLen + 5) LFACLK cycles. */
   uint8_t               filtLen;
-
-  /** When set, removes flutter from Quaddecoder inputs S0IN and S1IN.
+  
+  /** When set, removes flutter from Quaddecoder inputs S0IN and S1IN. 
    *  Available only in OVSQUAD1X-4X modes. */
   bool                  flutterrm;
 } PCNT_Filter_TypeDef;
@@ -282,66 +278,66 @@ typedef struct
 {                                                                                               \
   0,                                        /* Default length is 5 LFACLK cycles */             \
   false                                     /* No flutter removal */                            \
-}
+}                                                                                             
 #endif
 
 #if defined(PCNT_CTRL_TCCMODE_DEFAULT)
 
 /** Modes for Triggered Compare and Clear module */
-typedef enum
+typedef enum 
 {
   /** Triggered compare and clear not enabled. */
   tccModeDisabled       = _PCNT_CTRL_TCCMODE_DISABLED,
-
+  
   /** Compare and clear performed on each (optionally prescaled) LFA clock cycle. */
   tccModeLFA            = _PCNT_CTRL_TCCMODE_LFA,
-
+  
   /** Compare and clear performed on PRS edges. Polarity defined by prsPolarity. */
   tccModePRS            = _PCNT_CTRL_TCCMODE_PRS
 } PCNT_TCCMode_TypeDef;
 
 /** Prescaler values for LFA compare and clear events. Only has effect when TCC mode is LFA. */
-typedef enum
+typedef enum 
 {
   /** Compare and clear event each LFA cycle. */
   tccPrescDiv1          = _PCNT_CTRL_TCCPRESC_DIV1,
-
+  
   /** Compare and clear event every other LFA cycle. */
   tccPrescDiv2          = _PCNT_CTRL_TCCPRESC_DIV2,
-
+  
   /** Compare and clear event every 4th LFA cycle. */
   tccPrescDiv4          = _PCNT_CTRL_TCCPRESC_DIV4,
-
+  
   /** Compare and clear event every 8th LFA cycle. */
   tccPrescDiv8          = _PCNT_CTRL_TCCPRESC_DIV8
 } PCNT_TCCPresc_Typedef;
 
 /** Compare modes for TCC module */
-typedef enum
+typedef enum 
 {
   /** Compare match if PCNT_CNT is less than, or equal to PCNT_TOP. */
   tccCompLTOE           = _PCNT_CTRL_TCCCOMP_LTOE,
-
+  
   /** Compare match if PCNT_CNT is greater than or equal to PCNT_TOP. */
   tccCompGTOE           = _PCNT_CTRL_TCCCOMP_GTOE,
-
+  
   /** Compare match if PCNT_CNT is less than, or equal to PCNT_TOP[15:8]], and greater
    *  than, or equal to PCNT_TOP[7:0]. */
   tccCompRange          = _PCNT_CTRL_TCCCOMP_RANGE
 } PCNT_TCCComp_Typedef;
 
 /** TCC initialization structure */
-typedef struct
+typedef struct 
 {
   /** Mode to operate in. */
   PCNT_TCCMode_TypeDef      mode;
-
+  
   /** Prescaler value for LFACLK in LFA mode */
   PCNT_TCCPresc_Typedef     prescaler;
-
+  
   /** Choose the event that will trigger a clear */
   PCNT_TCCComp_Typedef      compare;
-
+  
   /** PRS input to TCC module, either for gating the PCNT clock, triggering the TCC comparison, or both. */
   PCNT_PRSSel_TypeDef       tccPRS;
 
@@ -349,8 +345,8 @@ typedef struct
    *  False = Rising edge for comparison trigger, and PCNT clock gated when the PRS signal is high. @n
    *  True = Falling edge for comparison trigger, and PCNT clock gated when the PRS signal is low. */
   bool                      prsPolarity;
-
-  /** Enable gating PCNT input clock through TCC PRS signal.
+  
+  /** Enable gating PCNT input clock through TCC PRS signal. 
    *  Polarity selection is done through prsPolarity. */
   bool                      prsGateEnable;
 } PCNT_TCC_TypeDef;
@@ -365,7 +361,7 @@ typedef struct
   false                                         /* Do not gate the PCNT counter input */            \
 }
 
-#endif
+#endif 
 /* defined(PCNT_CTRL_TCCMODE_DEFAULT) */
 
 /*******************************************************************************
@@ -545,15 +541,15 @@ __STATIC_INLINE uint32_t PCNT_IntGet(PCNT_TypeDef *pcnt)
  ******************************************************************************/
 __STATIC_INLINE uint32_t PCNT_IntGetEnabled(PCNT_TypeDef *pcnt)
 {
-  uint32_t ien;
+  uint32_t tmp = 0U;
 
 
   /* Store pcnt->IEN in temporary variable in order to define explicit order
    * of volatile accesses. */
-  ien = pcnt->IEN;
+  tmp = pcnt->IEN;
 
   /* Bitwise AND of pending and enabled interrupts */
-  return pcnt->IF & ien;
+  return pcnt->IF & tmp;
 }
 
 /***************************************************************************//**
@@ -609,11 +605,11 @@ __STATIC_INLINE uint32_t PCNT_TopGet(PCNT_TypeDef *pcnt)
 void PCNT_TopSet(PCNT_TypeDef *pcnt, uint32_t val);
 
 /** @} (end addtogroup PCNT) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup EM_Library) */
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* defined(PCNT_COUNT) && (PCNT_COUNT > 0) */
-#endif /* EM_PCNT_H */
+#endif /* __SILICON_LABS_EM_PCNT_H__ */

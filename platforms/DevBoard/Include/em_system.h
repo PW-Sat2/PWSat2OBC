@@ -1,10 +1,10 @@
 /***************************************************************************//**
  * @file em_system.h
  * @brief System API
- * @version 4.3.0
+ * @version 4.1.0
  *******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -30,8 +30,8 @@
  *
  ******************************************************************************/
 
-#ifndef EM_SYSTEM_H
-#define EM_SYSTEM_H
+#ifndef __SILICON_LABS_EM_SYSTEM_H__
+#define __SILICON_LABS_EM_SYSTEM_H__
 
 #include <stdbool.h>
 #include "em_device.h"
@@ -41,7 +41,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
+ * @addtogroup EM_Library
  * @{
  ******************************************************************************/
 
@@ -112,14 +112,14 @@ typedef enum
 #if defined(_DEVINFO_PART_DEVICE_FAMILY_EFR32BG1V)
   systemPartFamilyBlue1V   = _DEVINFO_PART_DEVICE_FAMILY_EFR32BG1V,       /**< EFR32 Blue Gecko Gen1 Value Device Family */
 #endif
-#if defined(_DEVINFO_PART_DEVICE_FAMILY_EFR32ZG1P)
-  systemPartFamilyZappy1P = _DEVINFO_PART_DEVICE_FAMILY_EFR32ZG1P,        /**< EFR32 Zappy Gecko Gen1 Premium Device Family */
+#if defined(_DEVINFO_PART_DEVICE_FAMILY_EFR32SG1P)
+  systemPartFamilySnappy1P = _DEVINFO_PART_DEVICE_FAMILY_EFR32SG1P,       /**< EFR32 Snappy Gecko Gen1 Premium Device Family */
 #endif
-#if defined(_DEVINFO_PART_DEVICE_FAMILY_EFR32ZG1B)
-  systemPartFamilyZappy1B = _DEVINFO_PART_DEVICE_FAMILY_EFR32ZG1B,        /**< EFR32 Zappy Gecko Gen1 Basic Device Family */
+#if defined(_DEVINFO_PART_DEVICE_FAMILY_EFR32SG1B)
+  systemPartFamilySnappy1B = _DEVINFO_PART_DEVICE_FAMILY_EFR32SG1B,       /**< EFR32 Snappy Gecko Gen1 Basic Device Family */
 #endif
-#if defined(_DEVINFO_PART_DEVICE_FAMILY_EFR32ZG1V)
-  systemPartFamilyZappy1V = _DEVINFO_PART_DEVICE_FAMILY_EFR32ZG1V,        /**< EFR32 Zappy Gecko Gen1 Value Device Family */
+#if defined(_DEVINFO_PART_DEVICE_FAMILY_EFR32SG1V)
+  systemPartFamilySnappy1V = _DEVINFO_PART_DEVICE_FAMILY_EFR32SG1V,       /**< EFR32 Snappy Gecko Gen1 Value Device Family */
 #endif
 #if defined(_DEVINFO_PART_DEVICE_FAMILY_EFR32FG1P)
   systemPartFamilyFlex1P   = _DEVINFO_PART_DEVICE_FAMILY_EFR32FG1P,       /**< EFR32 Flex Gecko Gen1 Premium Device Family */
@@ -130,7 +130,7 @@ typedef enum
 #if defined(_DEVINFO_PART_DEVICE_FAMILY_EFR32FG1V)
   systemPartFamilyFlex1V   = _DEVINFO_PART_DEVICE_FAMILY_EFR32FG1V,       /**< EFR32 Flex Gecko Gen1 Value Device Family */
 #endif
-/* Deprecated family #defines */
+/* Legacy family #defines */
 #if defined(_DEVINFO_PART_DEVICE_FAMILY_G)
   systemPartFamilyGecko   = _DEVINFO_PART_DEVICE_FAMILY_G,   /**< Gecko Device Family */
 #endif
@@ -205,15 +205,14 @@ __STATIC_INLINE void SYSTEM_FpuAccessModeSet(SYSTEM_FpuAccess_TypeDef accessMode
 
 /***************************************************************************//**
  * @brief
- *   Get the unique number for this device.
+ *   Get the unique number for this part.
  *
  * @return
- *   Unique number for this device.
+ *   Unique number for this part.
  ******************************************************************************/
 __STATIC_INLINE uint64_t SYSTEM_GetUnique(void)
 {
-  uint32_t tmp = DEVINFO->UNIQUEL;
-  return (uint64_t)((uint64_t)DEVINFO->UNIQUEH << 32) | tmp;
+  return (uint64_t)((uint64_t)DEVINFO->UNIQUEH << 32) | (uint64_t)DEVINFO->UNIQUEL;
 }
 
 /***************************************************************************//**
@@ -319,22 +318,6 @@ __STATIC_INLINE uint32_t SYSTEM_GetFlashPageSize(void)
 }
 
 
-#if defined( _DEVINFO_DEVINFOREV_DEVINFOREV_MASK )
-/***************************************************************************//**
- * @brief
- *   Get DEVINFO revision.
- *
- * @return
- *   Revision of the DEVINFO contents.
- ******************************************************************************/
-__STATIC_INLINE uint8_t SYSTEM_GetDevinfoRev(void)
-{
-  return (DEVINFO->DEVINFOREV & _DEVINFO_DEVINFOREV_DEVINFOREV_MASK)
-          >> _DEVINFO_DEVINFOREV_DEVINFOREV_SHIFT;
-}
-#endif
-
-
 /***************************************************************************//**
  * @brief
  *   Get part number of the MCU.
@@ -384,10 +367,10 @@ __STATIC_INLINE uint8_t SYSTEM_GetCalibrationTemperature(void)
 }
 
 /** @} (end addtogroup SYSTEM) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup EM_Library) */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* EM_SYSTEM_H */
+#endif /* __SILICON_LABS_EM_SYSTEM_H__ */

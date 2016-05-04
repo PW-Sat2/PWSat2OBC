@@ -1,10 +1,10 @@
 /**************************************************************************//**
  * @file efm32gg_lesense_buf.h
  * @brief EFM32GG_LESENSE_BUF register and bit field definitions
- * @version 4.3.0
+ * @version 4.1.0
  ******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Laboratories, Inc. http://www.silabs.com</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -30,17 +30,10 @@
  *
  *****************************************************************************/
 /**************************************************************************//**
-* @addtogroup Parts
-* @{
-******************************************************************************/
-/**************************************************************************//**
  * @brief LESENSE_BUF EFM32GG LESENSE BUF
  *****************************************************************************/
 typedef struct
 {
   __IO uint32_t DATA; /**< Scan results  */
 } LESENSE_BUF_TypeDef;
-
-/** @} End of group Parts */
-
 

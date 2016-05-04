@@ -1,10 +1,10 @@
 /**************************************************************************//**
  * @file efm32gg_dmareq.h
  * @brief EFM32GG_DMAREQ register and bit field definitions
- * @version 4.3.0
+ * @version 4.1.0
  ******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Laboratories, Inc. http://www.silabs.com</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -29,10 +29,6 @@
  * any third party, arising from your use of this Software.
  *
  *****************************************************************************/
-/**************************************************************************//**
-* @addtogroup Parts
-* @{
-******************************************************************************/
 
 /**************************************************************************//**
  * @defgroup EFM32GG_DMAREQ_BitFields
@@ -99,5 +95,5 @@
 #define DMAREQ_EBI_DDEMPTY            ((51 << 16) + 3) /**< DMA channel select for EBI_DDEMPTY */
 
 /** @} End of group EFM32GG_DMAREQ */
-/** @} End of group Parts */
+
 

@@ -1,10 +1,10 @@
 /***************************************************************************//**
  * @file em_msc.h
- * @brief Flash controller (MSC) peripheral API
- * @version 4.3.0
+ * @brief Flash controller module (MSC) peripheral API
+ * @version 4.1.0
  *******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -30,8 +30,8 @@
  *
  ******************************************************************************/
 
-#ifndef EM_MSC_H
-#define EM_MSC_H
+#ifndef __SILICON_LABS_EM_MSC_H__
+#define __SILICON_LABS_EM_MSC_H__
 
 #include "em_device.h"
 #if defined(MSC_COUNT) && (MSC_COUNT > 0)
@@ -39,19 +39,19 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "em_bus.h"
-#include "em_ramfunc.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
+ * @addtogroup EM_Library
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
  * @addtogroup MSC
+ * @brief Flash controller (MSC) peripheral API
  * @{
  ******************************************************************************/
 
@@ -64,27 +64,29 @@ extern "C" {
  *    The timeout used while waiting for the flash to become ready after
  *    a write. This number indicates the number of iterations to perform before
  *    issuing a timeout.
- *
  * @note
  *    This timeout is set very large (in the order of 100x longer than
  *    necessary). This is to avoid any corner cases.
+ *
  */
 #define MSC_PROGRAM_TIMEOUT    10000000ul
 
 /**
  * @brief
- *    By compiling with the define EM_MSC_RUN_FROM_FLASH, the functions
- *    performing erase or write operations will remain in and execute from Flash.
+ *    By compiling with the define EM_MSC_RUN_FROM_FLASH the Flash
+ *    controller (MSC) peripheral will remain in and execute from flash.
  *    This is useful for targets that don't want to allocate RAM space to
- *    hold the flash functions.  Without this define, code for Flash operations
- *    will be copied into RAM at startup.
- *
+ *    hold the flash functions.  Without this define the MSC peripheral
+ *    functions will be copied into and run out of RAM.
  * @note
- *    This define is not present by default. The MSC controller API
+ *    This define is commented out by default so the MSC controller API
  *    will run from RAM by default.
+ *
  */
-#if defined(DOXY_DOC_ONLY)
+#if defined( DOXY_DOC_ONLY )
 #define EM_MSC_RUN_FROM_FLASH
+#else
+//#define EM_MSC_RUN_FROM_FLASH
 #endif
 
 /*******************************************************************************
@@ -116,7 +118,7 @@ typedef enum
 /** Code execution configuration */
 typedef struct
 {
-  bool scbtEn;          /**< Enable Suppressed Conditional Branch Target Prefetch */
+  bool scbtEn;          /**< Enable suppressed Conditional Branch Target Prefetch */
   bool prefetchEn;      /**< Enable MSC prefetching */
   bool ifcDis;          /**< Disable instruction cache */
   bool aiDis;           /**< Disable automatic cache invalidation on write or erase */
@@ -124,7 +126,6 @@ typedef struct
   bool useHprot;        /**< Use ahb_hprot to determine if the instruction is cacheable or not */
 } MSC_ExecConfig_TypeDef;
 
-/** Default MSC ExecConfig initialization */
 #define MSC_EXECCONFIG_DEFAULT  \
 {                               \
   false,                        \
@@ -136,7 +137,7 @@ typedef struct
 }
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
-/* Deprecated type names */
+/* Legacy type names */
 #define mscBusStrategy_Typedef MSC_BusStrategy_Typedef
 #define msc_Return_TypeDef MSC_Status_TypeDef
 /** @endcond */
@@ -323,7 +324,6 @@ __STATIC_INLINE void MSC_StartCacheMeasurement(void)
 __STATIC_INLINE int32_t MSC_GetCacheMeasurement(void)
 {
   int32_t total;
-  int32_t hits;
   /* Stop the counter before computing the hit-rate */
 #if defined( _MSC_CACHECMD_MASK )
   MSC->CACHECMD = MSC_CACHECMD_STOPPC;
@@ -333,20 +333,19 @@ __STATIC_INLINE int32_t MSC_GetCacheMeasurement(void)
 
   /* Check for overflows in performance counters */
   if (MSC->IF & (MSC_IF_CHOF | MSC_IF_CMOF))
-  {
     return -2;
-  }
 
-  hits  = MSC->CACHEHITS;
-  total = MSC->CACHEMISSES + hits;
+  /* Because the hits and misses are volatile, we need to split this up into
+   * two statements to avoid a compiler warning regarding the order of volatile
+   * accesses. */
+  total  = MSC->CACHEHITS;
+  total += MSC->CACHEMISSES;
 
   /* To avoid a division by zero. */
   if (total == 0)
-  {
     return -1;
-  }
 
-  return (hits * 100) / total;
+  return (MSC->CACHEHITS * 100) / total;
 }
 
 
@@ -417,42 +416,49 @@ __STATIC_INLINE void MSC_BusStrategy(mscBusStrategy_Typedef mode)
 #endif
 
 #if defined(EM_MSC_RUN_FROM_FLASH)
-#define MSC_RAMFUNC_DECLARATOR
-#define MSC_RAMFUNC_DEFINITION_BEGIN
-#define MSC_RAMFUNC_DEFINITION_END
-#else
-#define MSC_RAMFUNC_DECLARATOR          RAMFUNC_DECLARATOR
-#define MSC_RAMFUNC_DEFINITION_BEGIN    RAMFUNC_DEFINITION_BEGIN
-#define MSC_RAMFUNC_DEFINITION_END      RAMFUNC_DEFINITION_END
+#define MSC_FUNC_PREFIX
+#define MSC_FUNC_POSTFIX
+#elif defined(__CC_ARM)
+#define MSC_FUNC_PREFIX
+#define MSC_FUNC_POSTFIX
+#elif defined(__ICCARM__)
+#define MSC_FUNC_PREFIX   __ramfunc
+#define MSC_FUNC_POSTFIX
+#elif defined(__GNUC__) && defined(__CROSSWORKS_ARM)
+#define MSC_FUNC_PREFIX
+#define MSC_FUNC_POSTFIX  __attribute__ ((section(".fast")))
+#elif defined(__GNUC__)
+#define MSC_FUNC_PREFIX
+#define MSC_FUNC_POSTFIX  __attribute__ ((section(".ram")))
 #endif
 
-MSC_RAMFUNC_DECLARATOR MSC_Status_TypeDef
+
+MSC_FUNC_PREFIX MSC_Status_TypeDef
   MSC_WriteWord(uint32_t *address,
                 void const *data,
-                uint32_t numBytes);
+                uint32_t numBytes) MSC_FUNC_POSTFIX;
 
 #if !defined( _EFM32_GECKO_FAMILY )
-MSC_RAMFUNC_DECLARATOR MSC_Status_TypeDef
+MSC_FUNC_PREFIX MSC_Status_TypeDef
   MSC_WriteWordFast(uint32_t *address,
                     void const *data,
-                    uint32_t numBytes);
+                    uint32_t numBytes) MSC_FUNC_POSTFIX;
 
 #endif
 
-MSC_RAMFUNC_DECLARATOR MSC_Status_TypeDef
-  MSC_ErasePage(uint32_t *startAddress);
+MSC_FUNC_PREFIX MSC_Status_TypeDef
+  MSC_ErasePage(uint32_t *startAddress) MSC_FUNC_POSTFIX;
 
 #if defined( _MSC_MASSLOCK_MASK )
-MSC_RAMFUNC_DECLARATOR MSC_Status_TypeDef
-  MSC_MassErase(void);
+MSC_FUNC_PREFIX MSC_Status_TypeDef MSC_MassErase(void) MSC_FUNC_POSTFIX;
 #endif
 
 /** @} (end addtogroup MSC) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup EM_Library) */
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* defined(MSC_COUNT) && (MSC_COUNT > 0) */
-#endif /* EM_MSC_H */
+#endif /* __SILICON_LABS_EM_MSC_H__ */

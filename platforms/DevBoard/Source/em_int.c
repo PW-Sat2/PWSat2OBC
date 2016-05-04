@@ -1,10 +1,10 @@
 /**************************************************************************//**
  * @file em_int.c
  * @brief Interrupt enable/disable unit API
- * @version 4.3.0
+ * @version 4.1.0
  ******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -34,23 +34,21 @@
 #include "em_int.h"
 
 /***************************************************************************//**
- * @addtogroup emlib
+ * @addtogroup EM_Library
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
  * @addtogroup INT
- * @brief Safe nesting of interrupt disable/enable API
+ * @brief Safe nesting interrupt disable/enable API
  * @{
  * @details
  *  This module contains functions to safely disable and enable interrupts
- *  at CPU level. INT_Disable() disables interrupts globally and increments a lock
- *  level counter (counting semaphore). INT_Enable() decrements the lock level
- *  counter and enable interrupts if the counter reaches zero.
+ *  at cpu level. INT_Disable() disables interrupts and increments a lock
+ *  level counter. INT_Enable() decrements the lock level counter and enable
+ *  interrupts if the counter was decremented to zero.
  *
- *  These functions would normally be used to secure critical regions, and
- *  to make sure that a critical section that calls into another critical
- *  section does not unintentionally terminate the callee critical section.
+ *  These functions would normally be used to secure critical regions.
  *
  *  These functions should also be used inside interrupt handlers:
  *  @verbatim
@@ -70,4 +68,4 @@
 uint32_t INT_LockCnt = 0;
 
 /** @} (end addtogroup INT) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup EM_Library) */

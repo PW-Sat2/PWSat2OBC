@@ -1,10 +1,10 @@
 /**************************************************************************//**
  * @file efm32gg_timer_cc.h
  * @brief EFM32GG_TIMER_CC register and bit field definitions
- * @version 4.3.0
+ * @version 4.1.0
  ******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Laboratories, Inc. http://www.silabs.com</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -30,10 +30,6 @@
  *
  *****************************************************************************/
 /**************************************************************************//**
-* @addtogroup Parts
-* @{
-******************************************************************************/
-/**************************************************************************//**
  * @brief TIMER_CC EFM32GG TIMER CC
  *****************************************************************************/
 typedef struct
@@ -43,7 +39,4 @@ typedef struct
   __I uint32_t  CCVP; /**< CC Channel Value Peek Register  */
   __IO uint32_t CCVB; /**< CC Channel Buffer Register  */
 } TIMER_CC_TypeDef;
-
-/** @} End of group Parts */
-
 

@@ -1,10 +1,10 @@
 /***************************************************************************//**
  * @file em_lesense.h
  * @brief Low Energy Sensor (LESENSE) peripheral API
- * @version 4.3.0
+ * @version 4.1.0
  *******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -30,8 +30,8 @@
  *
  ******************************************************************************/
 
-#ifndef EM_LESENSE_H
-#define EM_LESENSE_H
+#ifndef __SILICON_LABS_EM_LESENSE_H__
+#define __SILICON_LABS_EM_LESENSE_H__
 
 #include "em_device.h"
 
@@ -45,7 +45,7 @@ extern "C" {
 
 
 /***************************************************************************//**
- * @addtogroup emlib
+ * @addtogroup EM_Library
  * @{
  ******************************************************************************/
 
@@ -1310,7 +1310,7 @@ __STATIC_INLINE uint32_t LESENSE_IntGetEnabled(void)
 
 
 /** @} (end addtogroup LESENSE) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup EM_Library) */
 
 #ifdef __cplusplus
 }
@@ -1318,4 +1318,4 @@ __STATIC_INLINE uint32_t LESENSE_IntGetEnabled(void)
 
 #endif /* defined(LESENSE_COUNT) && (LESENSE_COUNT > 0) */
 
-#endif /* EM_LESENSE_H */
+#endif /* __SILICON_LABS_EM_LESENSE_H__ */

@@ -1,10 +1,10 @@
 /***************************************************************************//**
  * @file em_bitband.h
  * @brief Bitband Peripheral API
- * @version 4.3.0
+ * @version 4.1.0
  *******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -30,8 +30,8 @@
  *
  ******************************************************************************/
 
-#ifndef EM_BITBAND_H
-#define EM_BITBAND_H
+#ifndef __SILICON_LABS_EM_BITBAND_H__
+#define __SILICON_LABS_EM_BITBAND_H__
 
 #include "em_bus.h"
 
@@ -40,15 +40,13 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
+ * @addtogroup EM_Library
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
  * @addtogroup BITBAND
  * @brief BITBAND Peripheral API (deprecated - use em_bus.h)
- * @details
- *  API to perform bitbanded accesses to SRAM and peripheral memory.
  * @{
  ******************************************************************************/
 
@@ -60,9 +58,6 @@ extern "C" {
  *   Bit-banding provides atomic read-modify-write cycle for single bit
  *   modification. Please refer to the reference manual for further details
  *   about bit-banding.
- *
- * @deprecated
- *   Deprecated function. New code should use @ref BUS_RegBitWrite().
  *
  * @note
  *   This function is only atomic on cores which fully support bitbanding.
@@ -86,9 +81,6 @@ extern "C" {
  *   modification. Please refer to the reference manual for further details
  *   about bit-banding.
  *
- * @deprecated
- *   Deprecated function. New code should use @ref BUS_RegBitRead().
- *
  * @param[in] addr   Peripheral address location to read.
  *
  * @param[in] bit    Bit position to read, 0-31.
@@ -106,9 +98,6 @@ extern "C" {
  *   Bit-banding provides atomic read-modify-write cycle for single bit
  *   modification. Please refer to the reference manual for further details
  *   about bit-banding.
- *
- * @deprecated
- *   Deprecated function. New code should use @ref BUS_RamBitWrite().
  *
  * @note
  *   This function is only atomic on cores which fully support bitbanding.
@@ -132,9 +121,6 @@ extern "C" {
  *   modification. Please refer to the reference manual for further details
  *   about bit-banding.
  *
- * @deprecated
- *   Deprecated function. New code should use @ref BUS_RamBitRead().
- *
  * @param[in] addr    SRAM address location to modify bit in.
  *
  * @param[in] bit     Bit position to modify, 0-31.
@@ -144,10 +130,10 @@ extern "C" {
 #define BITBAND_SRAMRead(addr, bit) BUS_RamBitRead(addr, bit)
 
 /** @} (end addtogroup BITBAND) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup EM_Library) */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* EM_BITBAND_H */
+#endif /* __SILICON_LABS_EM_BITBAND_H__ */

@@ -1,10 +1,10 @@
 /***************************************************************************//**
  * @file em_lcd.h
  * @brief Liquid Crystal Display (LCD) peripheral API
- * @version 4.3.0
+ * @version 4.1.0
  *******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -30,8 +30,8 @@
  *
  ******************************************************************************/
 
-#ifndef EM_LCD_H
-#define EM_LCD_H
+#ifndef __SILICON_LABS_EM_LCD_H__
+#define __SILICON_LABS_EM_LCD_H__
 
 #include "em_device.h"
 
@@ -44,7 +44,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
+ * @addtogroup EM_Library
  * @{
  ******************************************************************************/
 
@@ -506,14 +506,14 @@ __STATIC_INLINE uint32_t LCD_IntGet(void)
  ******************************************************************************/
 __STATIC_INLINE uint32_t LCD_IntGetEnabled(void)
 {
-  uint32_t ien;
+  uint32_t tmp = 0U;
 
   /* Store LCD->IEN in temporary variable in order to define explicit order
    * of volatile accesses. */
-  ien = LCD->IEN;
+  tmp = LCD->IEN;
 
   /* Bitwise AND of pending and enabled interrupts */
-  return LCD->IF & ien;
+  return LCD->IF & tmp;
 }
 
 
@@ -601,7 +601,7 @@ __STATIC_INLINE void LCD_DSCEnable(bool enable)
 #endif
 
 /** @} (end addtogroup LCD) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup EM_Library) */
 
 #ifdef __cplusplus
 }
@@ -609,4 +609,4 @@ __STATIC_INLINE void LCD_DSCEnable(bool enable)
 
 #endif /* defined(LCD_COUNT) && (LCD_COUNT > 0) */
 
-#endif /* EM_LCD_H */
+#endif /* __SILICON_LABS_EM_LCD_H__ */

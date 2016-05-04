@@ -1,10 +1,10 @@
 /***************************************************************************//**
  * @file em_i2c.h
  * @brief Inter-intergrated circuit (I2C) peripheral API
- * @version 4.3.0
+ * @version 4.1.0
  *******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -30,8 +30,8 @@
  *
  ******************************************************************************/
 
-#ifndef EM_I2C_H
-#define EM_I2C_H
+#ifndef __SILICON_LABS_EM_I2C_H__
+#define __SILICON_LABS_EM_I2C_H__
 
 #include "em_device.h"
 #if defined(I2C_COUNT) && (I2C_COUNT > 0)
@@ -43,7 +43,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
+ * @addtogroup EM_Library
  * @{
  ******************************************************************************/
 
@@ -286,9 +286,9 @@ typedef struct
 
 uint32_t I2C_BusFreqGet(I2C_TypeDef *i2c);
 void I2C_BusFreqSet(I2C_TypeDef *i2c,
-                    uint32_t freqRef,
-                    uint32_t freqScl,
-                    I2C_ClockHLR_TypeDef i2cMode);
+                    uint32_t refFreq,
+                    uint32_t freq,
+                    I2C_ClockHLR_TypeDef type);
 void I2C_Enable(I2C_TypeDef *i2c, bool enable);
 void I2C_Init(I2C_TypeDef *i2c, const I2C_Init_TypeDef *init);
 
@@ -364,33 +364,7 @@ __STATIC_INLINE void I2C_IntEnable(I2C_TypeDef *i2c, uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE uint32_t I2C_IntGet(I2C_TypeDef *i2c)
 {
-  return i2c->IF;
-}
-
-
-/***************************************************************************//**
- * @brief
- *   Get enabled and pending I2C interrupt flags.
- *   Useful for handling more interrupt sources in the same interrupt handler.
- *
- * @note
- *   Interrupt flags are not cleared by the use of this function.
- *
- * @param[in] i2c
- *   Pointer to I2C peripheral register block.
- *
- * @return
- *   Pending and enabled I2C interrupt sources
- *   The return value is the bitwise AND of
- *   - the enabled interrupt sources in I2Cn_IEN and
- *   - the pending interrupt flags I2Cn_IF
- ******************************************************************************/
-__STATIC_INLINE uint32_t I2C_IntGetEnabled(I2C_TypeDef *i2c)
-{
-  uint32_t ien;
-
-  ien = i2c->IEN;
-  return i2c->IF & ien;
+  return(i2c->IF);
 }
 
 
@@ -431,7 +405,7 @@ void I2C_Reset(I2C_TypeDef *i2c);
  ******************************************************************************/
 __STATIC_INLINE uint8_t I2C_SlaveAddressGet(I2C_TypeDef *i2c)
 {
-  return ((uint8_t)(i2c->SADDR));
+  return((uint8_t)(i2c->SADDR));
 }
 
 
@@ -483,7 +457,7 @@ __STATIC_INLINE void I2C_SlaveAddressSet(I2C_TypeDef *i2c, uint8_t addr)
  ******************************************************************************/
 __STATIC_INLINE uint8_t I2C_SlaveAddressMaskGet(I2C_TypeDef *i2c)
 {
-  return ((uint8_t)(i2c->SADDRMASK));
+  return((uint8_t)(i2c->SADDRMASK));
 }
 
 
@@ -521,11 +495,11 @@ I2C_TransferReturn_TypeDef I2C_TransferInit(I2C_TypeDef *i2c,
                                             I2C_TransferSeq_TypeDef *seq);
 
 /** @} (end addtogroup I2C) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup EM_Library) */
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* defined(I2C_COUNT) && (I2C_COUNT > 0) */
-#endif /* EM_I2C_H */
+#endif /* __SILICON_LABS_EM_I2C_H__ */

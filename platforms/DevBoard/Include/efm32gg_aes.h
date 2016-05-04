@@ -1,10 +1,10 @@
 /**************************************************************************//**
  * @file efm32gg_aes.h
  * @brief EFM32GG_AES register and bit field definitions
- * @version 4.3.0
+ * @version 4.1.0
  ******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Laboratories, Inc. http://www.silabs.com</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -29,10 +29,6 @@
  * any third party, arising from your use of this Software.
  *
  *****************************************************************************/
-/**************************************************************************//**
-* @addtogroup Parts
-* @{
-******************************************************************************/
 /**************************************************************************//**
  * @defgroup EFM32GG_AES
  * @{
@@ -239,5 +235,5 @@ typedef struct
 #define AES_KEYHD_KEYHD_DEFAULT         (_AES_KEYHD_KEYHD_DEFAULT << 0) /**< Shifted mode DEFAULT for AES_KEYHD */
 
 /** @} End of group EFM32GG_AES */
-/** @} End of group Parts */
+
 

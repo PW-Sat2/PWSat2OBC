@@ -1,10 +1,10 @@
 /***************************************************************************//**
  * @file em_lcd.c
  * @brief Liquid Crystal Display (LCD) Peripheral API
- * @version 4.3.0
+ * @version 4.1.0
  *******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -36,18 +36,13 @@
 #include "em_bus.h"
 
 /***************************************************************************//**
- * @addtogroup emlib
+ * @addtogroup EM_Library
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
  * @addtogroup LCD
  * @brief Liquid Crystal Display (LCD) Peripheral API
- * @details
- *  This module contains functions to control the LDC peripheral of Silicon
- *  Labs 32-bit MCUs and SoCs. The LCD driver can drive up to 8x36 segmented
- *  LCD directly. The animation feature makes it possible to have active
- *  animations without CPU intervention.
  * @{
  ******************************************************************************/
 
@@ -763,6 +758,6 @@ void LCD_BiasComSet(int comLine, int biasLevel)
 #endif
 
 /** @} (end addtogroup LCD) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup EM_Library) */
 
 #endif /* defined(LCD_COUNT) && (LCD_COUNT > 0) */

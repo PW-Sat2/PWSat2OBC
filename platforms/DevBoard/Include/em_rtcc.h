@@ -1,10 +1,10 @@
 /***************************************************************************//**
  * @file
  * @brief Real Time Counter (RTCC) peripheral API.
- * @version 4.3.0
+ * @version 4.1.0
  *******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -30,8 +30,8 @@
  *
  ******************************************************************************/
 
-#ifndef EM_RTCC_H
-#define EM_RTCC_H
+#ifndef __SILICON_LABS_EM_RTCC_H__
+#define __SILICON_LABS_EM_RTCC_H__
 
 #include "em_device.h"
 #if defined( RTCC_COUNT ) && ( RTCC_COUNT == 1 )
@@ -44,7 +44,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
+ * @addtogroup EM_Library
  * @{
  ******************************************************************************/
 
@@ -686,11 +686,11 @@ __STATIC_INLINE void RTCC_Unlock( void )
 }
 
 /** @} (end addtogroup RTCC) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup EM_Library) */
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* defined( RTCC_COUNT ) && ( RTC_COUNT == 1 ) */
-#endif /* EM_RTCC_H */
+#endif /* __SILICON_LABS_EM_RTCC_H__ */

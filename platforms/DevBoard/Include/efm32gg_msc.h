@@ -1,10 +1,10 @@
 /**************************************************************************//**
  * @file efm32gg_msc.h
  * @brief EFM32GG_MSC register and bit field definitions
- * @version 4.3.0
+ * @version 4.1.0
  ******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Laboratories, Inc. http://www.silabs.com</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -29,10 +29,6 @@
  * any third party, arising from your use of this Software.
  *
  *****************************************************************************/
-/**************************************************************************//**
-* @addtogroup Parts
-* @{
-******************************************************************************/
 /**************************************************************************//**
  * @defgroup EFM32GG_MSC
  * @{
@@ -463,5 +459,5 @@ typedef struct
 #define MSC_MASSLOCK_LOCKKEY_UNLOCK             (_MSC_MASSLOCK_LOCKKEY_UNLOCK << 0)   /**< Shifted mode UNLOCK for MSC_MASSLOCK */
 
 /** @} End of group EFM32GG_MSC */
-/** @} End of group Parts */
+
 

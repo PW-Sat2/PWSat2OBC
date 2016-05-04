@@ -1,10 +1,10 @@
 /***************************************************************************//**
  * @file em_dac.c
- * @brief Digital to Analog Converter (DAC) Peripheral API
- * @version 4.3.0
+ * @brief Digital to Analog Coversion (DAC) Peripheral API
+ * @version 4.1.0
  *******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -37,18 +37,13 @@
 #include "em_bus.h"
 
 /***************************************************************************//**
- * @addtogroup emlib
+ * @addtogroup EM_Library
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
  * @addtogroup DAC
- * @brief Digital to Analog Converter (DAC) Peripheral API
- * @details
- *  This module contains functions to control the DAC peripheral of Silicon
- *  Labs 32-bit MCUs and SoCs. The DAC converts digital values to analog signals
- *  at up to 500 ksps with 12-bit accuracy. The DAC is designed for low energy
- *  consumption, but can also provide very good performance.
+ * @brief Digital to Analog Coversion (DAC) Peripheral API
  * @{
  ******************************************************************************/
 
@@ -342,5 +337,5 @@ void DAC_Reset(DAC_TypeDef *dac)
 
 
 /** @} (end addtogroup DAC) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup EM_Library) */
 #endif /* defined(DAC_COUNT) && (DAC_COUNT > 0) */

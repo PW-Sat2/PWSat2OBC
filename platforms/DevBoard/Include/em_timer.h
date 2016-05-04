@@ -1,10 +1,10 @@
 /***************************************************************************//**
  * @file em_timer.h
  * @brief Timer/counter (TIMER) peripheral API
- * @version 4.3.0
+ * @version 4.1.0
  *******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -30,8 +30,8 @@
  *
  ******************************************************************************/
 
-#ifndef EM_TIMER_H
-#define EM_TIMER_H
+#ifndef __SILICON_LABS_EM_TIMER_H__
+#define __SILICON_LABS_EM_TIMER_H__
 
 #include "em_device.h"
 #if defined(TIMER_COUNT) && (TIMER_COUNT > 0)
@@ -44,7 +44,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
+ * @addtogroup EM_Library
  * @{
  ******************************************************************************/
 
@@ -109,7 +109,7 @@ typedef enum
   /** Prescaled HFPER clock. */
   timerClkSelHFPerClk = _TIMER_CTRL_CLKSEL_PRESCHFPERCLK,
 
-  /** Compare/Capture Channel 1 Input. */
+  /** Prescaled HFPER clock. */
   timerClkSelCC1      = _TIMER_CTRL_CLKSEL_CC1,
 
   /**
@@ -796,14 +796,14 @@ __STATIC_INLINE uint32_t TIMER_IntGet(TIMER_TypeDef *timer)
  ******************************************************************************/
 __STATIC_INLINE uint32_t TIMER_IntGetEnabled(TIMER_TypeDef *timer)
 {
-  uint32_t ien;
+  uint32_t tmp;
 
   /* Store TIMER->IEN in temporary variable in order to define explicit order
    * of volatile accesses. */
-  ien = timer->IEN;
+  tmp = timer->IEN;
 
   /* Bitwise AND of pending and enabled interrupts */
-  return timer->IF & ien;
+  return timer->IF & tmp;
 }
 
 
@@ -921,11 +921,11 @@ __STATIC_INLINE void TIMER_Unlock(TIMER_TypeDef *timer)
 
 
 /** @} (end addtogroup TIMER) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup EM_Library) */
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* defined(TIMER_COUNT) && (TIMER_COUNT > 0) */
-#endif /* EM_TIMER_H */
+#endif /* __SILICON_LABS_EM_TIMER_H__ */

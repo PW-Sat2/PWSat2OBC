@@ -1,10 +1,10 @@
 /***************************************************************************//**
  * @file em_dac.h
  * @brief Digital to Analog Converter (DAC) peripheral API
- * @version 4.3.0
+ * @version 4.1.0
  *******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -30,8 +30,8 @@
  *
  ******************************************************************************/
 
-#ifndef EM_DAC_H
-#define EM_DAC_H
+#ifndef __SILICON_LABS_EM_DAC_H__
+#define __SILICON_LABS_EM_DAC_H__
 
 #include "em_device.h"
 
@@ -46,7 +46,7 @@ extern "C" {
 
 
 /***************************************************************************//**
- * @addtogroup emlib
+ * @addtogroup EM_Library
  * @{
  ******************************************************************************/
 
@@ -364,38 +364,6 @@ __STATIC_INLINE uint32_t DAC_IntGet(DAC_TypeDef *dac)
 
 /***************************************************************************//**
  * @brief
- *   Get enabled and pending DAC interrupt flags.
- *   Useful for handling more interrupt sources in the same interrupt handler.
- *
- * @param[in] dac
- *   Pointer to DAC peripheral register block.
- *
- * @note
- *   Interrupt flags are not cleared by the use of this function.
- *
- * @return
- *   Pending and enabled DAC interrupt sources.
- *   The return value is the bitwise AND combination of
- *   - the OR combination of enabled interrupt sources in DACx_IEN_nnn
- *     register (DACx_IEN_nnn) and
- *   - the OR combination of valid interrupt flags of the DAC module
- *     (DACx_IF_nnn).
- ******************************************************************************/
-__STATIC_INLINE uint32_t DAC_IntGetEnabled(DAC_TypeDef *dac)
-{
-  uint32_t ien;
-
-  /* Store DAC->IEN in temporary variable in order to define explicit order
-   * of volatile accesses. */
-  ien = dac->IEN;
-
-  /* Bitwise AND of pending and enabled interrupts */
-  return dac->IF & ien;
-}
-
-
-/***************************************************************************//**
- * @brief
  *   Set one or more pending DAC interrupts from SW.
  *
  * @param[in] dac
@@ -414,11 +382,11 @@ uint8_t DAC_PrescaleCalc(uint32_t dacFreq, uint32_t hfperFreq);
 void DAC_Reset(DAC_TypeDef *dac);
 
 /** @} (end addtogroup DAC) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup EM_Library) */
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* defined(DAC_COUNT) && (DAC_COUNT > 0) */
-#endif /* EM_DAC_H */
+#endif /* __SILICON_LABS_EM_DAC_H__ */

@@ -1,10 +1,10 @@
 /***************************************************************************//**
  * @file em_ebi.c
  * @brief External Bus Interface (EBI) Peripheral API
- * @version 4.3.0
+ * @version 4.1.0
  *******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -36,17 +36,13 @@
 #include "em_bus.h"
 
 /***************************************************************************//**
- * @addtogroup emlib
+ * @addtogroup EM_Library
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
  * @addtogroup EBI
  * @brief EBI External Bus Interface (EBI) Peripheral API
- * @details
- *  This module contains functions to control the EBI peripheral of Silicon
- *  Labs 32-bit MCUs and SoCs. The EBI is used for accessing external parallel
- *  devices. The devices appear as part of the internal memory map of the MCU.
  * @{
  ******************************************************************************/
 
@@ -1186,6 +1182,6 @@ void EBI_AltMapEnable(bool enable)
 #endif
 
 /** @} (end addtogroup EBI) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup EM_Library) */
 
 #endif /* defined(EBI_COUNT) && (EBI_COUNT > 0) */

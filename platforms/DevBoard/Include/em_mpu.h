@@ -1,10 +1,10 @@
 /***************************************************************************//**
  * @file em_mpu.h
  * @brief Memory protection unit (MPU) peripheral API
- * @version 4.3.0
+ * @version 4.1.0
  *******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -30,8 +30,8 @@
  *
  ******************************************************************************/
 
-#ifndef EM_MPU_H
-#define EM_MPU_H
+#ifndef __SILICON_LABS_EM_MPU_H__
+#define __SILICON_LABS_EM_MPU_H__
 
 #include "em_device.h"
 
@@ -45,7 +45,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
+ * @addtogroup EM_Library
  * @{
  ******************************************************************************/
 
@@ -230,7 +230,7 @@ __STATIC_INLINE void MPU_Enable(uint32_t flags)
 
 
 /** @} (end addtogroup MPU) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup EM_Library) */
 
 #ifdef __cplusplus
 }
@@ -238,4 +238,4 @@ __STATIC_INLINE void MPU_Enable(uint32_t flags)
 
 #endif /* defined(__MPU_PRESENT) && (__MPU_PRESENT == 1) */
 
-#endif /* EM_MPU_H */
+#endif /* __SILICON_LABS_EM_MPU_H__ */

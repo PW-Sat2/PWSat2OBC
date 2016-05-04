@@ -1,10 +1,10 @@
 /***************************************************************************//**
  * @file em_ldma.h
  * @brief Direct memory access (LDMA) API
- * @version 4.3.0
+ * @version 4.1.0
  *******************************************************************************
  * @section License
- * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -30,8 +30,8 @@
  *
  ******************************************************************************/
 
-#ifndef EM_LDMA_H
-#define EM_LDMA_H
+#ifndef __SILICON_LABS_EM_LDMA_H__
+#define __SILICON_LABS_EM_LDMA_H__
 
 #include "em_device.h"
 
@@ -45,7 +45,7 @@ extern "C" {
 
 
 /***************************************************************************//**
- * @addtogroup emlib
+ * @addtogroup EM_Library
  * @{
  ******************************************************************************/
 
@@ -1210,7 +1210,6 @@ typedef struct
  ******************************************************************************/
 
 void LDMA_DeInit( void );
-void LDMA_EnableChannelRequest( int ch, bool enable);
 void LDMA_Init( LDMA_Init_t *init );
 void LDMA_StartTransfer(  int ch,
                           LDMA_TransferCfg_t *transfer,
@@ -1219,113 +1218,12 @@ void LDMA_StopTransfer( int ch );
 bool LDMA_TransferDone( int ch );
 uint32_t LDMA_TransferRemainingCount( int ch );
 
-
-/***************************************************************************//**
- * @brief
- *   Clear one or more pending LDMA interrupts.
- *
- * @param[in] flags
- *   Pending LDMA interrupt sources to clear. Use one or more valid
- *   interrupt flags for the LDMA module (LDMA_IFC_nnn).
- ******************************************************************************/
-__STATIC_INLINE void LDMA_IntClear(uint32_t flags)
-{
-  LDMA->IFC = flags;
-}
-
-
-/***************************************************************************//**
- * @brief
- *   Disable one or more LDMA interrupts.
- *
- * @param[in] flags
- *   LDMA interrupt sources to disable. Use one or more valid
- *   interrupt flags for the LDMA module (LDMA_IEN_nnn).
- ******************************************************************************/
-__STATIC_INLINE void LDMA_IntDisable(uint32_t flags)
-{
-  LDMA->IEN &= ~flags;
-}
-
-
-/***************************************************************************//**
- * @brief
- *   Enable one or more LDMA interrupts.
- *
- * @note
- *   Depending on the use, a pending interrupt may already be set prior to
- *   enabling the interrupt. Consider using LDMA_IntClear() prior to enabling
- *   if such a pending interrupt should be ignored.
- *
- * @param[in] flags
- *   LDMA interrupt sources to enable. Use one or more valid
- *   interrupt flags for the LDMA module (LDMA_IEN_nnn).
- ******************************************************************************/
-__STATIC_INLINE void LDMA_IntEnable(uint32_t flags)
-{
-  LDMA->IEN |= flags;
-}
-
-
-/***************************************************************************//**
- * @brief
- *   Get pending LDMA interrupt flags.
- *
- * @note
- *   The event bits are not cleared by the use of this function.
- *
- * @return
- *   LDMA interrupt sources pending. Returns one or more valid
- *   interrupt flags for the LDMA module (LDMA_IF_nnn).
- ******************************************************************************/
-__STATIC_INLINE uint32_t LDMA_IntGet(void)
-{
-  return LDMA->IF;
-}
-
-
-/***************************************************************************//**
- * @brief
- *   Get enabled and pending LDMA interrupt flags.
- *   Useful for handling more interrupt sources in the same interrupt handler.
- *
- * @note
- *   Interrupt flags are not cleared by the use of this function.
- *
- * @return
- *   Pending and enabled LDMA interrupt sources
- *   The return value is the bitwise AND of
- *   - the enabled interrupt sources in LDMA_IEN and
- *   - the pending interrupt flags LDMA_IF
- ******************************************************************************/
-__STATIC_INLINE uint32_t LDMA_IntGetEnabled(void)
-{
-  uint32_t ien;
-
-  ien = LDMA->IEN;
-  return LDMA->IF & ien;
-}
-
-
-/***************************************************************************//**
- * @brief
- *   Set one or more pending LDMA interrupts
- *
- * @param[in] flags
- *   LDMA interrupt sources to set to pending. Use one or more valid
- *   interrupt flags for the LDMA module (LDMA_IFS_nnn).
- ******************************************************************************/
-__STATIC_INLINE void LDMA_IntSet(uint32_t flags)
-{
-  LDMA->IFS = flags;
-}
-
 /** @} (end addtogroup LDMA) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup EM_Library) */
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* defined( LDMA_PRESENT ) && ( LDMA_COUNT == 1 ) */
-#endif /* EM_LDMA_H */
+#endif /* __SILICON_LABS_EM_LDMA_H__ */
