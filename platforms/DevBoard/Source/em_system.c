@@ -1,10 +1,10 @@
 /***************************************************************************//**
  * @file em_system.c
  * @brief System Peripheral API
- * @version 4.1.0
+ * @version 4.3.0
  *******************************************************************************
  * @section License
- * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
+ * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -34,13 +34,16 @@
 #include "em_assert.h"
 
 /***************************************************************************//**
- * @addtogroup EM_Library
+ * @addtogroup emlib
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
  * @addtogroup SYSTEM
  * @brief System Peripheral API
+ * @details
+ *  This module contains functions to read device information from Silicon
+ *  Labs 32-bit MCUs and SoCs, as well as control the FPU on compatible devices.
  * @{
  ******************************************************************************/
 
@@ -76,6 +79,7 @@ void SYSTEM_ChipRevisionGet(SYSTEM_ChipRevision_TypeDef *rev)
   tmp |=  ((ROMTABLE->PID3 & _ROMTABLE_PID3_REVMINORLSB_MASK) >> _ROMTABLE_PID3_REVMINORLSB_SHIFT);
   rev->minor = tmp;
 }
+
 
 #if defined(CALIBRATE)
 /***************************************************************************//**
@@ -117,4 +121,4 @@ uint32_t SYSTEM_GetCalibrationValue(volatile uint32_t *regAddress)
 #endif /* defined (CALIBRATE) */
 
 /** @} (end addtogroup SYSTEM) */
-/** @} (end addtogroup EM_Library) */
+/** @} (end addtogroup emlib) */

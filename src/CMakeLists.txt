@@ -6,6 +6,7 @@ set(SOURCES
     drivers/leuart.c
     drivers/swo.c
     commands/ping.c
+    drivers/ADXRS453.c
 )
 
 add_executable(${NAME} ${SOURCES})
