@@ -44,6 +44,17 @@ void blinkLed0(void * param)
 	}
 }
 
+static void InitSwoEndpoint(void)
+{
+    void* swoEndpointHandle = SwoEndpointInit();
+    const bool result = LogAddEndpoint(SwoGetEndpoint(swoEndpointHandle), swoEndpointHandle, LOG_LEVEL_TRACE);
+    if(!result)
+    {
+        SwoPuts("Unable to attach swo endpoint to logger. ");
+    }
+}
+
+
 int main(void)
 {
 	CHIP_Init();
@@ -58,11 +69,7 @@ int main(void)
 	terminalInit();
 	SwoPuts("Hello I'm PW-SAT2 OBC\n");
 	LogInit(LOG_LEVEL_INFO);
-	bool result = LogAddEndpoint(SwoEndpointLogger, NULL, LOG_LEVEL_TRACE);
-	if(!result)
-	{
-		SwoPuts("Unable to attach swo endpoint to logger. ");
-	}
+	InitSwoEndpoint();
 
 	GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
 	GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);
