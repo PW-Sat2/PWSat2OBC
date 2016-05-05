@@ -42,12 +42,12 @@ typedef void (*LoggerProcedure)(
 /**
  * @brief Macro used for logging non parameterized entries.
  */
-#define LOG(level, message) LogMessage(level, __FILE__, __LINE__, message)
+#define LOG(level, message) LogMessage(level, message)
 
 /**
  * @brief Macro used for logging parameterized entries.
  */
-#define LOGF(level, message, ...) LogMessage(level, __FILE__, __LINE__, message, __VA_ARGS__)
+#define LOGF(level, message, ...) LogMessage(level, message, __VA_ARGS__)
 
 /**
  * @brief Reinitializes the logger.
@@ -106,11 +106,9 @@ void LogRemoveEndpoint(LoggerProcedure endpoint);
  * @brief Logs a message.
  *
  * @param[in] messageLevel Requested message logging level.
- * @param[in] file Current source file name.
- * @param[in] line Current line.
  * @param[in] message Logged message.
  */
-void LogMessage(enum LogLevel messageLevel, const char* file, uint32_t line, const char* message, ...);
+void LogMessage(enum LogLevel messageLevel, const char* message, ...);
 
 #ifdef __cplusplus
 }

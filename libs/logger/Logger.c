@@ -26,7 +26,7 @@ typedef struct LoggerTag
 static Logger logger = {0};
 
 static const char* const levelMap[] = {
-    "Always", "Fatal", "Error", "Warning", "Info", "Debug", "Trace",
+    "[Always] ", "[Fatal] ", "[Error] ", "[Warning] ", "[Info] ", "[Debug] ", "[Trace] ",
 };
 
 static_assert(LOG_LEVEL_ALWAYS == 0, "Fix level conversion map for level: Always");
@@ -41,7 +41,7 @@ static const char* LogConvertLevelToString(enum LogLevel level)
 {
     if (level >= COUNT_OF(levelMap))
     {
-        return "Unknown";
+        return "[Unknown] ";
     }
     else
     {
@@ -101,15 +101,14 @@ static inline bool CanLogAtLevel(const enum LogLevel requestedLogLEvel, const en
     return requestedLogLEvel <= currentLogLevel;
 }
 
-void LogMessage(enum LogLevel messageLevel, const char* file, uint32_t line, const char* message, ...)
+void LogMessage(enum LogLevel messageLevel, const char* message, ...)
 {
     if (!CanLogAtLevel(messageLevel, logger.globalLevel))
     {
         return;
     }
 
-    char buffer[64];
-    LogFormat(buffer, COUNT_OF(buffer), "[%s] [%s:%o] ", LogConvertLevelToString(messageLevel), file, line);
+    const char* header = LogConvertLevelToString(messageLevel);
 
     va_list arguments;
     va_start(arguments, message);
@@ -119,7 +118,7 @@ void LogMessage(enum LogLevel messageLevel, const char* file, uint32_t line, con
         const LoggerEndpoint* endpoint = &logger.endpoints[cx];
         if (CanLogAtLevel(messageLevel, endpoint->endpointLogLevel))
         {
-            endpoint->endpoint(endpoint->context, buffer, message, arguments);
+            endpoint->endpoint(endpoint->context, header, message, arguments);
         }
     }
 
