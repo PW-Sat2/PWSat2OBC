@@ -30,8 +30,6 @@ endif()
 include(${PLATFORM_PATH}/settings.cmake)
 add_subdirectory(${PLATFORM_PATH})
 
-set(CMAKE_EXE_LINKER_FLAGS "-T ${LINKER_SCRIPT} ${CMAKE_EXE_LINKER_FLAGS}")
-
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "" FORCE)
 else()

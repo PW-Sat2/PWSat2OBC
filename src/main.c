@@ -41,6 +41,8 @@ void blinkLed0(void * param)
 		i++;
 
 		vTaskDelay(250 / portTICK_PERIOD_MS);
+
+		LOG(LOG_LEVEL_INFO, "Test\n\r");
 	}
 }
 
