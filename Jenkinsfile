@@ -12,6 +12,8 @@ node {
 		  bat "cmake -G \"MinGW Makefiles\" ../source"
 		  bat "make pwsat"
 		  bat "make run_tests"
+		  echo "Memory usage report:"
+		  bat "make pwsat.memory_report"
 		}
 	}
 
