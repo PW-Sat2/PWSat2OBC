@@ -1,0 +1,6 @@
+add_subdirectory(FreeRTOS)
+add_subdirectory(googletest)
+add_subdirectory(leuart)
+add_subdirectory(swo)
+add_subdirectory(base)
+add_subdirectory(logger)

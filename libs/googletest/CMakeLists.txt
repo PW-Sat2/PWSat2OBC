@@ -9,12 +9,14 @@ ExternalProject_Add(gtest_source
   UPDATE_DISCONNECTED 1
   INSTALL_COMMAND ""
   CMAKE_ARGS
-    -DBUILD_GMOCK=OFF
-    -DBUILD_GTEST=ON
+    -DBUILD_GMOCK=ON
+    -DBUILD_GTEST=OFF
     -DCMAKE_TOOLCHAIN_FILE=${PROJECT_SOURCE_DIR}/toolchain.cmake
     -DCMAKE_CXX_FLAGS=${OPTIONS}
     -DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}
     -DCMAKE_BUILD_TYPE:STRING=$<CONFIG>
+  LOG_CONFIGURE ON
+  LOG_BUILD ON
   EXCLUDE_FROM_ALL 1
 )
 
@@ -28,4 +30,5 @@ function(addExternalLib name dependency source_location binary_location include_
     target_include_directories(${name} INTERFACE "${include_directory}")
 endfunction(addExternalLib)
 
-addExternalLib(gtest gtest_source "${source_dir}/googletest" "${binary_dir}/googletest" "${source_dir}/googletest/include")
+addExternalLib(gtest gtest_source "${source_dir}/googletest" "${binary_dir}/googlemock/gtest" "${source_dir}/googletest/include")
+addExternalLib(gmock gtest_source "${source_dir}/googlemock" "${binary_dir}/googlemock" "${source_dir}/googlemock/include")

@@ -1,5 +1,6 @@
 aux_source_directory(${CMAKE_CURRENT_LIST_DIR}/Source CMSIS_SOURCE)
 list(APPEND CMSIS_SOURCE ${CMAKE_CURRENT_LIST_DIR}/Source/startup_efm32gg.S)
+list(APPEND CMSIS_SOURCE ${CMAKE_CURRENT_LIST_DIR}/extension.c)
 
 add_library(platform STATIC ${CMSIS_SOURCE})
 

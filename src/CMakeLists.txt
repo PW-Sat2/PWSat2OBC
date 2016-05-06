@@ -1,18 +1,16 @@
 set(NAME pwsat)
 
-set(SOURCES 
-    main.c 
+set(SOURCES
+    main.c
     terminal.c
-    drivers/leuart.c
-    drivers/swo.c
     commands/ping.c
 )
 
 add_executable(${NAME} ${SOURCES})
 
-target_link_libraries(${NAME} platform freeRTOS)
+set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${PLATFORM_LINKER_SCRIPT}")
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(${NAME} platform freeRTOS base leuart swo logger SwoEndpoint)
 
 target_generate_hex(${NAME})
 

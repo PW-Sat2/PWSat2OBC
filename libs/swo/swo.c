@@ -4,8 +4,12 @@
 #include <em_dbg.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include "swo.h"
 
-void enableSWO(void)
+// Extenseion to the original platform.
+uint32_t ITM_SendCharToChannel (uint32_t ch, uint8_t channel);
+
+void SwoEnable(void)
 {
 		/* Enable GPIO clock. */
 		CMU->HFPERCLKEN0 |= CMU_HFPERCLKEN0_GPIO;
@@ -15,8 +19,6 @@ void enableSWO(void)
 
 		/* Set location 0 */
 		GPIO->ROUTE = (GPIO->ROUTE & ~(_GPIO_ROUTE_SWLOCATION_MASK)) | GPIO_ROUTE_SWLOCATION_LOC0;
-
-
 
 		/* Enable output on pin - GPIO Port F, Pin 2 */
 		GPIO->P[5].MODEL &= ~(_GPIO_P_MODEL_MODE2_MASK);
@@ -40,29 +42,30 @@ void enableSWO(void)
 	DWT->CTRL = 0x400003FF;
 	ITM->TCR = 0x0001000D;
 	TPI->FFCR = 0x00000100;
-	ITM->TER = 0x1;
+	ITM->TER = 0x7f;
 }
 
-void swoPuts(const char * str)
+void SwoPutsOnChannel(uint8_t channel, const char * str)
 {
 	const char* c = str;
 	while (*c != '\0')
 	{
-		ITM_SendChar(*c);
+		ITM_SendCharToChannel(*c, channel);
 		c++;
 	}
 }
 
-void swoPrintf(const char * format, ...)
+void SwoPrintfOnChannel(uint8_t channel, const char * format, ...)
 {
 	va_list args;
 	va_start(args, format);
-
-	char buf[256];
-
-	vsiprintf(buf, format, args);
-
-	swoPuts(buf);
-
+	SwoVPrintfOnChannel(channel, format, args);
 	va_end(args);
+}
+
+void SwoVPrintfOnChannel(uint8_t channel, const char * format, va_list arguments)
+{
+	char buffer[256];
+	vsniprintf(buffer, sizeof(buffer), format, arguments);
+	SwoPutsOnChannel(channel, buffer);
 }

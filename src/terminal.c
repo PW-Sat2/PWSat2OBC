@@ -8,11 +8,11 @@
 #include <em_leuart.h>
 
 #include "io_map.h"
-#include "drivers/leuart.h"
+#include "leuart/leuart.h"
 #include "system.h"
 #include "terminal.h"
 #include "commands/commands.h"
-#include "drivers/swo.h"
+#include "swo/swo.h"
 
 typedef void (*commandHandler)(uint16_t argc, char* argv[]);
 
@@ -123,11 +123,11 @@ void terminalInit(void)
 		}
 		else
 		{
-			swoPuts("Error. Cannot create terminalIn thread.");
+			SwoPuts("Error. Cannot create terminalIn thread.");
 		}
 	}
 	else
 	{
-		swoPuts("Error. Cannot create terminalQueue.");
+		SwoPuts("Error. Cannot create terminalQueue.");
 	}
 }

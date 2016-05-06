@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 
-include(./toolchain.cmake)
-include(./utils/functions.cmake)
+include(toolchain.cmake)
+include(utils/functions.cmake)
 
 project(PWSat C CXX ASM)
 
@@ -16,6 +16,8 @@ set(OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/build/${TARGET_PLATFORM})
 
 file(MAKE_DIRECTORY ${OUTPUT_PATH})
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_PATH}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_PATH}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_PATH}/bin)
@@ -28,8 +30,6 @@ endif()
 include(${PLATFORM_PATH}/settings.cmake)
 add_subdirectory(${PLATFORM_PATH})
 
-set(CMAKE_EXE_LINKER_FLAGS "-T ${LINKER_SCRIPT} ${CMAKE_EXE_LINKER_FLAGS}")
-
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "" FORCE)
 else()
@@ -40,13 +40,6 @@ message(STATUS "Using C compiler from ${CMAKE_C_COMPILER}")
 message(STATUS "Target platform ${TARGET_PLATFORM}")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
-foreach(lib googletest FreeRTOS)
-  message (STATUS "Using lib ${lib}")
-
-  add_subdirectory(./libs/${lib})
-endforeach(lib)
-
-add_subdirectory(./src)
-add_subdirectory(./test)
-
-
+add_subdirectory(src)
+add_subdirectory(libs)
+add_subdirectory(test)

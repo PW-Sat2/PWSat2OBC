@@ -11,9 +11,11 @@
 #include <task.h>
 
 #include "io_map.h"
-#include "drivers/swo.h"
+#include "swo/swo.h"
 #include "terminal.h"
 #include "system.h"
+#include "Logger/Logger.h"
+#include "SwoEndpoint/SwoEndpoint.h"
 
 void vApplicationStackOverflowHook( xTaskHandle *pxTask, signed char *pcTaskName)
 {
@@ -35,12 +37,25 @@ void blinkLed0(void * param)
 	while (1)
 	{
 		GPIO_PinOutToggle(LED_PORT, LED0);
-		swoPrintf("Idx: %d %s\n", i, s);
+		SwoPrintf("Idx: %d %s\n", i, s);
 		i++;
 
 		vTaskDelay(250 / portTICK_PERIOD_MS);
+
+		LOG(LOG_LEVEL_INFO, "Test\n\r");
 	}
 }
+
+static void InitSwoEndpoint(void)
+{
+    void* swoEndpointHandle = SwoEndpointInit();
+    const bool result = LogAddEndpoint(SwoGetEndpoint(swoEndpointHandle), swoEndpointHandle, LOG_LEVEL_TRACE);
+    if(!result)
+    {
+        SwoPuts("Unable to attach swo endpoint to logger. ");
+    }
+}
+
 
 int main(void)
 {
@@ -51,11 +66,12 @@ int main(void)
 
 	CMU_ClockEnable(cmuClock_GPIO, true);
 
-	enableSWO();
+	SwoEnable();
 
 	terminalInit();
-
-	swoPuts("Hello I'm PW-SAT2 OBC\n");
+	SwoPuts("Hello I'm PW-SAT2 OBC\n");
+	LogInit(LOG_LEVEL_INFO);
+	InitSwoEndpoint();
 
 	GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
 	GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);
