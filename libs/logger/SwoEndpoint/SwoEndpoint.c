@@ -48,7 +48,8 @@ static void SwoEndpointLogger(
 static void SwoEndpointLoggerSynchronized(
     void* context, const char* messageHeader, const char* messageFormat, va_list messageArguments)
 {
-    if (xSemaphoreTake(context, 10) != pdTRUE)
+    const TickType_t waitTimeout = 100 / portTICK_PERIOD_MS; // wait at most 100 ms
+    if (xSemaphoreTake(context, waitTimeout) != pdTRUE)
     {
         SwoPuts("Unable to acquire SwoEndpoint semaphore.\n");
         return;

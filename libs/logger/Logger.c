@@ -87,15 +87,6 @@ void LogRemoveEndpoint(LoggerProcedure endpoint)
     }
 }
 
-static int LogFormat(char* buffer, size_t bufferSize, const char* format, ...)
-{
-    va_list arguments;
-    va_start(arguments, format);
-    const int written = vsniprintf(buffer, bufferSize, format, arguments);
-    va_end(arguments);
-    return written;
-}
-
 static inline bool CanLogAtLevel(const enum LogLevel requestedLogLEvel, const enum LogLevel currentLogLevel)
 {
     return requestedLogLEvel <= currentLogLevel;
