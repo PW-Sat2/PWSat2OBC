@@ -22,77 +22,76 @@
 
 #include "devices/eps.h"
 
-void vApplicationStackOverflowHook( xTaskHandle *pxTask, signed char *pcTaskName)
+void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
 {
-	UNREFERENCED_PARAMETER(pxTask);
-	UNREFERENCED_PARAMETER(pcTaskName);
+    UNREFERENCED_PARAMETER(pxTask);
+    UNREFERENCED_PARAMETER(pcTaskName);
 }
 
 void vApplicationIdleHook(void)
 {
 }
 
-void blinkLed0(void * param)
+static void BlinkLed0(void* param)
 {
-	UNREFERENCED_PARAMETER(param);
+    UNREFERENCED_PARAMETER(param);
 
-	int i = 0;
-	const char s[] = "ARM";
+    int i = 0;
+    const char s[] = "ARM";
 
-	while (1)
-	{
-		GPIO_PinOutToggle(LED_PORT, LED0);
-		SwoPrintf("Idx: %d %s\n", i, s);
-		i++;
+    while (1)
+    {
+        GPIO_PinOutToggle(LED_PORT, LED0);
+        SwoPrintf("Idx: %d %s\n", i, s);
+        i++;
 
-		vTaskDelay(250 / portTICK_PERIOD_MS);
+        vTaskDelay(250 / portTICK_PERIOD_MS);
 
-		LOG(LOG_LEVEL_INFO, "Test\n\r");
-	}
+        LOG(LOG_LEVEL_INFO, "Test\n\r");
+    }
 }
 
 static void InitSwoEndpoint(void)
 {
     void* swoEndpointHandle = SwoEndpointInit();
     const bool result = LogAddEndpoint(SwoGetEndpoint(swoEndpointHandle), swoEndpointHandle, LOG_LEVEL_TRACE);
-    if(!result)
+    if (!result)
     {
         SwoPuts("Unable to attach swo endpoint to logger. ");
     }
 }
 
-
 int main(void)
 {
-	CHIP_Init();
+    CHIP_Init();
 
-	CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
-	CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);
+    CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
+    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);
 
-	CMU_ClockEnable(cmuClock_GPIO, true);
+    CMU_ClockEnable(cmuClock_GPIO, true);
 
-	SwoEnable();
+    SwoEnable();
 
-	i2cInit();
+    I2CInit();
 
-	EpsInit();
+    EpsInit();
 
-	terminalInit();
-	SwoPuts("Hello I'm PW-SAT2 OBC\n");
-	LogInit(LOG_LEVEL_INFO);
-	InitSwoEndpoint();
+    TerminalInit();
+    SwoPuts("Hello I'm PW-SAT2 OBC\n");
+    LogInit(LOG_LEVEL_INFO);
+    InitSwoEndpoint();
 
-	GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
-	GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);
-	GPIO_DriveModeSet(LED_PORT, gpioDriveModeLowest);
+    GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
+    GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);
+    GPIO_DriveModeSet(LED_PORT, gpioDriveModeLowest);
 
-	GPIO_PinOutSet(LED_PORT, LED0);
-	GPIO_PinOutSet(LED_PORT, LED1);
+    GPIO_PinOutSet(LED_PORT, LED0);
+    GPIO_PinOutSet(LED_PORT, LED1);
 
-	xTaskCreate(blinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
+    xTaskCreate(BlinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
 
-	vTaskStartScheduler();
-	GPIO_PinOutToggle(LED_PORT, LED0);
+    vTaskStartScheduler();
+    GPIO_PinOutToggle(LED_PORT, LED0);
 
-	return 0;
+    return 0;
 }

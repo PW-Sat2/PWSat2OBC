@@ -4,29 +4,29 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include "drivers/leuart.h"
-#include "drivers/swo.h"
+#include <leuart/leuart.h>
+#include <swo/swo.h>
 #include "terminal.h"
 #include "obc_time.h"
 #include "system.h"
 
-void jumpToTimeHandler(uint16_t argc, char* argv[])
+void JumpToTimeHandler(uint16_t argc, char* argv[])
 {
-  	UNREFERENCED_PARAMETER(argc);
+    UNREFERENCED_PARAMETER(argc);
 
-	char * tail;
+    char* tail;
 
-	uint32_t targetTime = strtol(argv[0], &tail, 10);
+    uint32_t targetTime = strtol(argv[0], &tail, 10);
 
-	swoPrintf("Jumping to time %d\n", targetTime);
+    SwoPrintf("Jumping to time %d\n", targetTime);
 
-	jumpToTime(targetTime);
+    JumpToTime(targetTime);
 }
 
-void currentTimeHandler(uint16_t argc, char* argv[])
+void CurrentTimeHandler(uint16_t argc, char* argv[])
 {
-	UNREFERENCED_PARAMETER(argc);
-	UNREFERENCED_PARAMETER(argv);
+    UNREFERENCED_PARAMETER(argc);
+    UNREFERENCED_PARAMETER(argv);
 
-	terminalPrintf("%d", currentTime());
+    TerminalPrintf("%d", CurrentTime());
 }

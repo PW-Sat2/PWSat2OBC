@@ -4,30 +4,31 @@
 #include <em_cmu.h>
 #include <em_gpio.h>
 
+#include <swo/swo.h>
+
 #include "io_map.h"
 #include "obc_time.h"
-#include "drivers/swo.h"
 #include "devices/eps.h"
 
 #define SAILOPENTIME 2500
 
-static void openSail(void)
+static void OpenSail(void)
 {
     EpsOpenSail();
 }
 
-static void checkOpenSail(void* _)
+static void CheckOpenSail(void* _)
 {
     (void)_;
 
     while (1)
     {
-        uint32_t time = currentTime();
+        uint32_t time = CurrentTime();
         if (time > SAILOPENTIME)
         {
-            swoPuts("time to open sail.");
+            SwoPuts("time to open sail.");
 
-            openSail();
+            OpenSail();
 
             while (1)
             {
@@ -38,7 +39,7 @@ static void checkOpenSail(void* _)
     }
 }
 
-void openSailInit(void)
+void OpenSailInit(void)
 {
-    xTaskCreate(checkOpenSail, "openSail", 1024, NULL, 4, NULL);
+    xTaskCreate(CheckOpenSail, "openSail", 1024, NULL, 4, NULL);
 }

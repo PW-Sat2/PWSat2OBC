@@ -2,12 +2,12 @@
 
 static uint32_t time = 0;
 
-uint32_t currentTime(void)
+uint32_t CurrentTime(void)
 {
-	return time;
+    return time;
 }
 
-void jumpToTime(uint32_t targetTime)
+void JumpToTime(uint32_t targetTime)
 {
-	time = targetTime;
+    time = targetTime;
 }

@@ -1,8 +1,8 @@
 #ifndef SRC_TERMINAL_H_
 #define SRC_TERMINAL_H_
 
-void terminalInit(void);
-void terminalSendNewLine(void);
-void terminalPrintf(const char * text, ...);
+void TerminalInit(void);
+void TerminalSendNewLine(void);
+void TerminalPrintf(const char * text, ...);
 
 #endif

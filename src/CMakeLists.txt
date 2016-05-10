@@ -5,8 +5,10 @@ set(SOURCES
     terminal.c
     commands/ping.c
     commands/time.c   
+    drivers/i2c.c
     devices/eps.c
     openSail.c
+    obc_time.c
 )
 
 add_executable(${NAME} ${SOURCES})

@@ -8,20 +8,20 @@
 #include "system.h"
 #include "commands.h"
 
-void pingHandler(uint16_t argc, char* argv[])
+void PingHandler(uint16_t argc, char* argv[])
 {
-	UNREFERENCED_PARAMETER(argc);
-	UNREFERENCED_PARAMETER(argv);
+    UNREFERENCED_PARAMETER(argc);
+    UNREFERENCED_PARAMETER(argv);
 
-	leuartPuts("pong");
+    leuartPuts("pong");
 }
 
-void echoHandler(uint16_t argc, char* argv[])
+void EchoHandler(uint16_t argc, char* argv[])
 {
-	leuartPuts("echo with args: \r\n");
+    leuartPuts("echo with args: \r\n");
 
-	for(int i=0; i < argc; i++)
-	{
-		leuartPrintf("%d. %s \r\n", i, argv[i]);
-	}
+    for (int i = 0; i < argc; i++)
+    {
+        leuartPrintf("%d. %s \r\n", i, argv[i]);
+    }
 }
