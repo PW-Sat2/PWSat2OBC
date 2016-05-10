@@ -35,18 +35,12 @@ static void BlinkLed0(void* param)
 {
     UNREFERENCED_PARAMETER(param);
 
-    int i = 0;
-    const char s[] = "ARM";
-
     while (1)
     {
         GPIO_PinOutToggle(LED_PORT, LED0);
-        SwoPrintf("Idx: %d %s\n", i, s);
-        i++;
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
 
-        vTaskDelay(250 / portTICK_PERIOD_MS);
-
-        LOG(LOG_LEVEL_INFO, "Test\n\r");
+        LOG(LOG_LEVEL_INFO, "Test");
     }
 }
 
@@ -79,6 +73,8 @@ int main(void)
     SwoPuts("Hello I'm PW-SAT2 OBC\n");
     LogInit(LOG_LEVEL_INFO);
     InitSwoEndpoint();
+
+    OpenSailInit();
 
     GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
     GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);

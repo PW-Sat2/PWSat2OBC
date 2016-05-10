@@ -5,7 +5,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <leuart/leuart.h>
-#include <swo/swo.h>
+#include "swo/swo.h"
+#include "logger/Logger.h"
 #include "terminal.h"
 #include "obc_time.h"
 #include "system.h"
@@ -18,7 +19,7 @@ void JumpToTimeHandler(uint16_t argc, char* argv[])
 
     uint32_t targetTime = strtol(argv[0], &tail, 10);
 
-    SwoPrintf("Jumping to time %d\n", targetTime);
+    LOGF(LOG_LEVEL_INFO, "Jumping to time %d\n", targetTime);
 
     JumpToTime(targetTime);
 }

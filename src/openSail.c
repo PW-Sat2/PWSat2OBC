@@ -5,6 +5,7 @@
 #include <em_gpio.h>
 
 #include <swo/swo.h>
+#include "logger/Logger.h"
 
 #include "io_map.h"
 #include "obc_time.h"
@@ -24,9 +25,10 @@ static void CheckOpenSail(void* _)
     while (1)
     {
         uint32_t time = CurrentTime();
+
         if (time > SAILOPENTIME)
         {
-            SwoPuts("time to open sail.");
+            LOG(LOG_LEVEL_INFO, "time to open sail.");
 
             OpenSail();
 
@@ -41,5 +43,8 @@ static void CheckOpenSail(void* _)
 
 void OpenSailInit(void)
 {
-    xTaskCreate(CheckOpenSail, "openSail", 1024, NULL, 4, NULL);
+    if(xTaskCreate(CheckOpenSail, "openSail", 1024, NULL, 4, NULL) != pdPASS)
+    {
+    	LOG(LOG_LEVEL_ERROR, "Unable to create openSail task");
+    }
 }

@@ -13,6 +13,7 @@
 #include "terminal.h"
 #include "commands/commands.h"
 #include "swo/swo.h"
+#include "logger/Logger.h"
 
 typedef void (*commandHandler)(uint16_t argc, char* argv[]);
 
@@ -120,21 +121,19 @@ void TerminalInit(void)
 {
     terminalQueue = xQueueCreate(32, sizeof(uint8_t));
 
-    if (terminalQueue != NULL)
+    if (terminalQueue == NULL)
     {
-        if (xTaskCreate(HandleIncomingChar, "terminalIn", 1024, NULL, 4, NULL) == pdPASS)
-        {
-            leuartInit(terminalQueue);
-        }
-        else
-        {
-            SwoPuts("Error. Cannot create terminalIn thread.");
-        }
+        LOG(LOG_LEVEL_ERROR, "Error. Cannot create terminalIn thread.");
+        return;
     }
-    else
+
+    if (xTaskCreate(HandleIncomingChar, "terminalIn", 1024, NULL, 4, NULL) != pdPASS)
     {
-        SwoPuts("Error. Cannot create terminalQueue.");
+        LOG(LOG_LEVEL_ERROR, "Error. Cannot create terminalQueue.");
+        return;
     }
+
+    leuartInit(terminalQueue);
 
     TerminalSendPrefix();
 }
