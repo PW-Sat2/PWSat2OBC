@@ -3,7 +3,7 @@
 
 #include "eps.h"
 
-#include "drivers/i2c.h"
+#include "i2c/i2c.h"
 
 #include "system.h"
 
@@ -14,7 +14,6 @@ typedef enum
     EPS_LCL_SAIL_0 = 0,
     EPS_LCL_SAIL_1 = 1,
 } EpsLcl;
-
 
 static void EpsControlLCL(EpsLcl lcl, uint8_t state)
 {

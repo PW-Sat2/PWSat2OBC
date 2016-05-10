@@ -12,13 +12,12 @@
 
 #include "io_map.h"
 #include "swo/swo.h"
+#include "i2c/i2c.h"
 #include "terminal.h"
 #include "openSail.h"
 #include "system.h"
 #include "Logger/Logger.h"
 #include "SwoEndpoint/SwoEndpoint.h"
-
-#include "drivers/i2c.h"
 
 #include "devices/eps.h"
 

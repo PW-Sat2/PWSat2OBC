@@ -10,9 +10,7 @@
 #include <core_cm3.h>
 #include <string.h>
 
-#include <swo/swo.h>
-
-#include "drivers/i2c.h"
+#include "i2c.h"
 
 #include "io_map.h"
 

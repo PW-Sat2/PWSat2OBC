@@ -4,8 +4,7 @@ set(SOURCES
     main.c
     terminal.c
     commands/ping.c
-    commands/time.c   
-    drivers/i2c.c
+    commands/time.c       
     devices/eps.c
     openSail.c
     obc_time.c
@@ -15,7 +14,7 @@ add_executable(${NAME} ${SOURCES})
 
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${PLATFORM_LINKER_SCRIPT}")
 
-target_link_libraries(${NAME} platform freeRTOS base leuart swo logger SwoEndpoint)
+target_link_libraries(${NAME} platform freeRTOS base leuart swo logger SwoEndpoint i2c)
 
 target_generate_hex(${NAME})
 
