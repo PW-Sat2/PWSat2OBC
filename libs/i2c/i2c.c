@@ -32,7 +32,7 @@ void I2C1_IRQHandler(void)
     portEND_SWITCHING_ISR(taskWoken);
 }
 
-static I2C_TransferReturn_TypeDef I2CTransfer(I2C_TransferSeq_TypeDef* seq)
+static I2C_TransferReturn_TypeDef i2cTransfer(I2C_TransferSeq_TypeDef* seq)
 {
     I2C_TransferReturn_TypeDef ret = I2C_TransferInit(I2C, seq);
 
@@ -51,7 +51,7 @@ I2C_TransferReturn_TypeDef I2CWrite(uint8_t address, uint8_t* inData, uint8_t le
     I2C_TransferSeq_TypeDef seq = {
         .addr = address, .flags = I2C_FLAG_WRITE, .buf = {{.len = length, .data = inData}, {.len = 0, .data = NULL}}};
 
-    return I2CTransfer(&seq);
+    return i2cTransfer(&seq);
 }
 
 void I2CInit(void)

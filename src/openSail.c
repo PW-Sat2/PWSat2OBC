@@ -13,12 +13,12 @@
 
 #define SAILOPENTIME 2500
 
-static void OpenSail(void)
+static void openSail(void)
 {
     EpsOpenSail();
 }
 
-static void CheckOpenSail(void* _)
+static void checkOpenSail(void* _)
 {
     (void)_;
 
@@ -30,7 +30,7 @@ static void CheckOpenSail(void* _)
         {
             LOG(LOG_LEVEL_INFO, "time to open sail.");
 
-            OpenSail();
+            openSail();
 
             while (1)
             {
@@ -43,7 +43,7 @@ static void CheckOpenSail(void* _)
 
 void OpenSailInit(void)
 {
-    if(xTaskCreate(CheckOpenSail, "openSail", 1024, NULL, 4, NULL) != pdPASS)
+    if(xTaskCreate(checkOpenSail, "openSail", 1024, NULL, 4, NULL) != pdPASS)
     {
     	LOG(LOG_LEVEL_ERROR, "Unable to create openSail task");
     }

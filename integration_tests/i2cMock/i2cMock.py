@@ -124,18 +124,3 @@ class I2CMock(object):
         data = device.read()
                 
         self.port.write([len(data)] + data) 
-
-        #idx = 0
-
-        #while True:
-        #    c = self.port.read(1)
-        #    if c == NEXT_BYTE:
-        #        if idx >= len(data):
-        #            b = 0
-        #        else:
-        #            b = data[idx]
-
-        #        idx = idx + 1                
-        #        self.port.write([b])
-        #    elif c == READ_FINISHED:
-        #        break        

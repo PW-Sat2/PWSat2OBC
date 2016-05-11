@@ -16,7 +16,7 @@ typedef enum
     EPS_LCL_SAIL_1 = 1,
 } EpsLcl;
 
-static void EpsControlLCL(EpsLcl lcl, uint8_t state)
+static void epsControlLCL(EpsLcl lcl, uint8_t state)
 {
     uint8_t data[] = {1 + lcl, state};
     I2C_TransferReturn_TypeDef result = I2CWrite(EPS_ADDRESS, data, COUNT_OF(data));
@@ -31,14 +31,14 @@ void EpsOpenSail(void)
 {
 	LOG(LOG_LEVEL_INFO, "[EPS] Opening sail");
 
-    EpsControlLCL(EPS_LCL_SAIL_0, true);
+    epsControlLCL(EPS_LCL_SAIL_0, true);
     vTaskDelay(pdMS_TO_TICKS(100));
-    EpsControlLCL(EPS_LCL_SAIL_0, false);
+    epsControlLCL(EPS_LCL_SAIL_0, false);
     vTaskDelay(pdMS_TO_TICKS(100));
 
-    EpsControlLCL(EPS_LCL_SAIL_1, true);
+    epsControlLCL(EPS_LCL_SAIL_1, true);
     vTaskDelay(pdMS_TO_TICKS(100));
-    EpsControlLCL(EPS_LCL_SAIL_1, false);
+    epsControlLCL(EPS_LCL_SAIL_1, false);
     vTaskDelay(pdMS_TO_TICKS(100));
 }
 

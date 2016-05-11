@@ -30,7 +30,7 @@ static const command commands[] = {{"ping", &PingHandler},
 
 static QueueHandle_t terminalQueue;
 
-static void ParseCommandLine(char line[], char** commandName, char** arguments, uint16_t* argc, uint8_t maxArgsCount)
+static void parseCommandLine(char line[], char** commandName, char** arguments, uint16_t* argc, uint8_t maxArgsCount)
 {
     *argc = 0;
 
@@ -55,7 +55,7 @@ void TerminalSendNewLine(void)
     leuartPuts("\n");
 }
 
-static void TerminalSendPrefix(void)
+static void terminalSendPrefix(void)
 {
     leuartPuts(">");
 }
@@ -70,13 +70,13 @@ void TerminalPrintf(const char* text, ...)
     va_end(args);
 }
 
-static void TerminalHandleCommand(char* buffer)
+static void terminalHandleCommand(char* buffer)
 {
     char* commandName;
     uint16_t argc = 0;
     char* args[8] = {0};
 
-    ParseCommandLine(buffer, &commandName, args, &argc, COUNT_OF(args));
+    parseCommandLine(buffer, &commandName, args, &argc, COUNT_OF(args));
 
     for (size_t i = 0; i < COUNT_OF(commands); i++)
     {
@@ -87,10 +87,10 @@ static void TerminalHandleCommand(char* buffer)
         }
     }
 
-    TerminalSendPrefix();
+    terminalSendPrefix();
 }
 
-static void HandleIncomingChar(void* args)
+static void handleIncomingChar(void* args)
 {
     UNREFERENCED_PARAMETER(args);
 
@@ -108,7 +108,7 @@ static void HandleIncomingChar(void* args)
             input_buffer[input_buffer_position] = 0;
             input_buffer_position = 0;
 
-            TerminalHandleCommand(input_buffer);
+            terminalHandleCommand(input_buffer);
         }
         else if (input_buffer_position < sizeof(input_buffer) - 1)
         {
@@ -127,7 +127,7 @@ void TerminalInit(void)
         return;
     }
 
-    if (xTaskCreate(HandleIncomingChar, "terminalIn", 1024, NULL, 4, NULL) != pdPASS)
+    if (xTaskCreate(handleIncomingChar, "terminalIn", 1024, NULL, 4, NULL) != pdPASS)
     {
         LOG(LOG_LEVEL_ERROR, "Error. Cannot create terminalQueue.");
         return;
@@ -135,5 +135,5 @@ void TerminalInit(void)
 
     leuartInit(terminalQueue);
 
-    TerminalSendPrefix();
+    terminalSendPrefix();
 }
