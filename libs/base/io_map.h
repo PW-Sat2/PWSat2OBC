@@ -1,6 +1,8 @@
 #ifndef SRC_IO_MAP_H_
 #define SRC_IO_MAP_H_
 
+#include <em_system.h>
+
 #define LED_PORT gpioPortE
 #define LED0 2
 #define LED1 3

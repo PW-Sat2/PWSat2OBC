@@ -1,26 +1,30 @@
 #include <FreeRTOS.h>
-#include <task.h>
-#include <em_i2c.h>
 #include <em_cmu.h>
 #include <em_gpio.h>
+#include <em_i2c.h>
+#include <task.h>
 
 #include <swo/swo.h>
 #include "logger/Logger.h"
+#include "system.h"
 
+#include "devices/eps.h"
 #include "io_map.h"
 #include "obc_time.h"
-#include "devices/eps.h"
 
 #define SAILOPENTIME 2500
 
 static void openSail(void)
 {
-    EpsOpenSail();
+    if(!EpsOpenSail())
+    {
+    	LOG(LOG_LEVEL_ERROR, "Failed to open sail");
+    }
 }
 
-static void checkOpenSail(void* _)
+static void openSailTask(void* _)
 {
-    (void)_;
+    UNREFERENCED_PARAMETER(_);
 
     while (1)
     {
@@ -31,6 +35,8 @@ static void checkOpenSail(void* _)
             LOG(LOG_LEVEL_INFO, "time to open sail.");
 
             openSail();
+
+            vTaskSuspend(NULL);
 
             while (1)
             {
@@ -43,8 +49,8 @@ static void checkOpenSail(void* _)
 
 void OpenSailInit(void)
 {
-    if(xTaskCreate(checkOpenSail, "openSail", 1024, NULL, 4, NULL) != pdPASS)
+    if (xTaskCreate(openSailTask, "openSail", 1024, NULL, 4, NULL) != pdPASS)
     {
-    	LOG(LOG_LEVEL_ERROR, "Unable to create openSail task");
+        LOG(LOG_LEVEL_ERROR, "Unable to create openSail task");
     }
 }

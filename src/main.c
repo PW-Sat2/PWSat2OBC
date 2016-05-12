@@ -1,23 +1,23 @@
 #include <stdio.h>
+#include <em_chip.h>
+#include <em_cmu.h>
+#include <em_dbg.h>
 #include <em_device.h>
 #include <em_gpio.h>
 #include <em_system.h>
-#include <em_chip.h>
-#include <em_dbg.h>
-#include <em_cmu.h>
 
-#include <FreeRTOSConfig.h>
 #include <FreeRTOS.h>
+#include <FreeRTOSConfig.h>
 #include <task.h>
 
-#include "io_map.h"
-#include "swo/swo.h"
-#include "i2c/i2c.h"
-#include "terminal.h"
-#include "openSail.h"
-#include "system.h"
 #include "Logger/Logger.h"
 #include "SwoEndpoint/SwoEndpoint.h"
+#include "i2c/i2c.h"
+#include "io_map.h"
+#include "openSail.h"
+#include "swo/swo.h"
+#include "system.h"
+#include "terminal.h"
 
 #include "devices/eps.h"
 

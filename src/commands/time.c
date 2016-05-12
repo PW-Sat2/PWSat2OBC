@@ -5,11 +5,11 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <leuart/leuart.h>
-#include "swo/swo.h"
 #include "logger/Logger.h"
-#include "terminal.h"
 #include "obc_time.h"
+#include "swo/swo.h"
 #include "system.h"
+#include "terminal.h"
 
 void JumpToTimeHandler(uint16_t argc, char* argv[])
 {

@@ -4,9 +4,9 @@
 #include <queue.h>
 #include <task.h>
 
+#include "commands.h"
 #include "leuart/leuart.h"
 #include "system.h"
-#include "commands.h"
 
 void PingHandler(uint16_t argc, char* argv[])
 {

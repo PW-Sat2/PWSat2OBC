@@ -4,11 +4,13 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#include <string.h>
 #include <em_cmu.h>
 #include <em_gpio.h>
 #include <em_i2c.h>
 #include <core_cm3.h>
-#include <string.h>
+
+#include "logger/Logger.h"
 
 #include "i2c.h"
 
@@ -27,7 +29,10 @@ void I2C1_IRQHandler(void)
 
     BaseType_t taskWoken = pdFALSE;
 
-    xQueueSendFromISR(i2cResult, &status, &taskWoken);
+    if (xQueueSendFromISR(i2cResult, &status, &taskWoken) != pdFALSE)
+    {
+        LOG(LOG_LEVEL_ERROR, "Error queueing i2c result");
+    }
 
     portEND_SWITCHING_ISR(taskWoken);
 }
@@ -41,7 +46,10 @@ static I2C_TransferReturn_TypeDef i2cTransfer(I2C_TransferSeq_TypeDef* seq)
         return ret;
     }
 
-    xQueueReceive(i2cResult, &ret, portMAX_DELAY);
+    if (xQueueReceive(i2cResult, &ret, portMAX_DELAY) != pdTRUE)
+    {
+        LOG(LOG_LEVEL_ERROR, "Didn't received i2c transfer result");
+    }
 
     return ret;
 }

@@ -7,13 +7,13 @@
 #include <em_gpio.h>
 #include <em_leuart.h>
 
+#include "commands/commands.h"
 #include "io_map.h"
 #include "leuart/leuart.h"
+#include "logger/Logger.h"
+#include "swo/swo.h"
 #include "system.h"
 #include "terminal.h"
-#include "commands/commands.h"
-#include "swo/swo.h"
-#include "logger/Logger.h"
 
 typedef void (*commandHandler)(uint16_t argc, char* argv[]);
 
