@@ -14,6 +14,8 @@ target_link_libraries(${NAME} platform freeRTOS base leuart swo logger SwoEndpoi
 
 target_generate_hex(${NAME})
 
+target_memory_report(${NAME})
+
 target_jlink_flash(${NAME} "${CMAKE_CURRENT_SOURCE_DIR}/../jlink/flash.jlink")
 
 target_format_sources(${NAME} "${SOURCES}")

@@ -45,3 +45,12 @@ function(target_format_sources TARGET SOURCES)
     endif()
 endfunction(target_format_sources)
 
+function(target_memory_report TARGET)
+    get_property(binary TARGET ${TARGET} PROPERTY RUNTIME_OUTPUT_NAME)
+
+    add_custom_target(${TARGET}.memory_report
+        COMMAND ${CMAKE_GCC_SIZE} -A -d $<TARGET_FILE:${TARGET}> > ${OUTPUT_PATH}/${TARGET}.size
+        COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/utils/memory_report.py ${OUTPUT_PATH}/${TARGET}.size
+        DEPENDS ${TARGET}
+        )
+endfunction(target_memory_report)
