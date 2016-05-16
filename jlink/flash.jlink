@@ -3,5 +3,6 @@ speed 4000
 r
 halt
 loadbin pwsat.hex, 0x0
-go
+r
+g
 exit

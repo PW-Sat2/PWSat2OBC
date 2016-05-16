@@ -11,6 +11,7 @@
 #include <em_leuart.h>
 
 #include "io_map.h"
+#include "leuart.h"
 
 QueueHandle_t leuart0sink;
 
@@ -60,19 +61,24 @@ void leuartPuts(const char* buffer)
 
 void leuartPrintf(const char * text, ...)
 {
-	char buf[255] = { 0 };
-
 	va_list args;
 	va_start(args, text);
 
-	vsniprintf(buf, sizeof(buf), text, args);
-
-	leuartPuts(buf);
+	leuartvPrintf(text, args);
 
 	va_end(args);
 }
 
-void leuartPutc(uint8_t c)
+void leuartvPrintf(const char * text, va_list args)
+{
+	char buf[255] = { 0 };
+
+	vsniprintf(buf, sizeof(buf), text, args);
+
+	leuartPuts(buf);
+}
+
+void leuartPutc(const char c)
 {
 	LEUART_Tx(LEUART0, c);
 }

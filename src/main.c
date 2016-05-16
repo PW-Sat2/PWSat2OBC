@@ -1,89 +1,92 @@
 #include <stdio.h>
+#include <em_chip.h>
+#include <em_cmu.h>
+#include <em_dbg.h>
 #include <em_device.h>
 #include <em_gpio.h>
 #include <em_system.h>
-#include <em_chip.h>
-#include <em_dbg.h>
-#include <em_cmu.h>
 
-#include <FreeRTOSConfig.h>
 #include <FreeRTOS.h>
+#include <FreeRTOSConfig.h>
 #include <task.h>
 
-#include "io_map.h"
-#include "swo/swo.h"
-#include "terminal.h"
-#include "system.h"
 #include "Logger/Logger.h"
 #include "SwoEndpoint/SwoEndpoint.h"
+#include "i2c/i2c.h"
+#include "io_map.h"
+#include "openSail.h"
+#include "swo/swo.h"
+#include "system.h"
+#include "terminal.h"
 
-void vApplicationStackOverflowHook( xTaskHandle *pxTask, signed char *pcTaskName)
+#include "devices/eps.h"
+
+void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
 {
-	UNREFERENCED_PARAMETER(pxTask);
-	UNREFERENCED_PARAMETER(pcTaskName);
+    UNREFERENCED_PARAMETER(pxTask);
+    UNREFERENCED_PARAMETER(pcTaskName);
 }
 
 void vApplicationIdleHook(void)
 {
 }
 
-void blinkLed0(void * param)
+static void BlinkLed0(void* param)
 {
-	UNREFERENCED_PARAMETER(param);
+    UNREFERENCED_PARAMETER(param);
 
-	int i = 0;
-	const char s[] = "ARM";
+    while (1)
+    {
+        GPIO_PinOutToggle(LED_PORT, LED0);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
 
-	while (1)
-	{
-		GPIO_PinOutToggle(LED_PORT, LED0);
-		SwoPrintf("Idx: %d %s\n", i, s);
-		i++;
-
-		vTaskDelay(250 / portTICK_PERIOD_MS);
-
-		LOG(LOG_LEVEL_INFO, "Test\n\r");
-	}
+        LOG(LOG_LEVEL_INFO, "Test");
+    }
 }
 
 static void InitSwoEndpoint(void)
 {
     void* swoEndpointHandle = SwoEndpointInit();
     const bool result = LogAddEndpoint(SwoGetEndpoint(swoEndpointHandle), swoEndpointHandle, LOG_LEVEL_TRACE);
-    if(!result)
+    if (!result)
     {
         SwoPuts("Unable to attach swo endpoint to logger. ");
     }
 }
 
-
 int main(void)
 {
-	CHIP_Init();
+    CHIP_Init();
 
-	CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
-	CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);
+    CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
+    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);
 
-	CMU_ClockEnable(cmuClock_GPIO, true);
+    CMU_ClockEnable(cmuClock_GPIO, true);
 
-	SwoEnable();
+    SwoEnable();
 
-	terminalInit();
-	SwoPuts("Hello I'm PW-SAT2 OBC\n");
-	LogInit(LOG_LEVEL_INFO);
-	InitSwoEndpoint();
+    I2CInit();
 
-	GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
-	GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);
-	GPIO_DriveModeSet(LED_PORT, gpioDriveModeLowest);
+    EpsInit();
 
-	GPIO_PinOutSet(LED_PORT, LED0);
-	GPIO_PinOutSet(LED_PORT, LED1);
+    TerminalInit();
+    SwoPuts("Hello I'm PW-SAT2 OBC\n");
+    LogInit(LOG_LEVEL_INFO);
+    InitSwoEndpoint();
 
-	xTaskCreate(blinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
+    OpenSailInit();
 
-	vTaskStartScheduler();
-	GPIO_PinOutToggle(LED_PORT, LED0);
+    GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
+    GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);
+    GPIO_DriveModeSet(LED_PORT, gpioDriveModeLowest);
 
-	return 0;
+    GPIO_PinOutSet(LED_PORT, LED0);
+    GPIO_PinOutSet(LED_PORT, LED1);
+
+    xTaskCreate(BlinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
+
+    vTaskStartScheduler();
+    GPIO_PinOutToggle(LED_PORT, LED0);
+
+    return 0;
 }

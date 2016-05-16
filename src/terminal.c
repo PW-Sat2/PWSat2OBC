@@ -7,127 +7,133 @@
 #include <em_gpio.h>
 #include <em_leuart.h>
 
+#include "commands/commands.h"
 #include "io_map.h"
 #include "leuart/leuart.h"
+#include "logger/Logger.h"
+#include "swo/swo.h"
 #include "system.h"
 #include "terminal.h"
-#include "commands/commands.h"
-#include "swo/swo.h"
 
 typedef void (*commandHandler)(uint16_t argc, char* argv[]);
 
 typedef struct
 {
-	char name[32];
-	commandHandler handler;
+    char name[32];
+    commandHandler handler;
 } command;
 
-static const command commands[] =
-		{
-				{ "ping", &pingHandler },
-				{ "echo", &echoHandler }
-		};
+static const command commands[] = {{"ping", &PingHandler},
+    {"echo", &EchoHandler},
+    {"jumpToTime", &JumpToTimeHandler},
+    {"currentTime", &CurrentTimeHandler}};
 
-QueueHandle_t terminalQueue;
+static QueueHandle_t terminalQueue;
 
 static void parseCommandLine(char line[], char** commandName, char** arguments, uint16_t* argc, uint8_t maxArgsCount)
 {
-	*argc = 0;
+    *argc = 0;
 
-	char* ptr;
-	char* token = strtok_r(line, " ", &ptr);
+    char* ptr;
+    char* token = strtok_r(line, " ", &ptr);
 
-	*commandName = token;
+    *commandName = token;
 
-	token = strtok_r(NULL, " ", &ptr);
+    token = strtok_r(NULL, " ", &ptr);
 
-	while (token != NULL && *argc < maxArgsCount)
-	{
-		arguments[*argc] = token;
-		(*argc)++;
+    while (token != NULL && *argc < maxArgsCount)
+    {
+        arguments[*argc] = token;
+        (*argc)++;
 
-		token = strtok_r(NULL, " ", &ptr);
-	}
+        token = strtok_r(NULL, " ", &ptr);
+    }
 }
 
-void terminalSendNewLine(void)
+void TerminalSendNewLine(void)
 {
-	leuartPuts("\r\n");
+    leuartPuts("\n");
 }
 
 static void terminalSendPrefix(void)
 {
-	leuartPuts("PW-SAT2->");
+    leuartPuts(">");
+}
+
+void TerminalPrintf(const char* text, ...)
+{
+    va_list args;
+    va_start(args, text);
+
+    leuartvPrintf(text, args);
+
+    va_end(args);
 }
 
 static void terminalHandleCommand(char* buffer)
 {
-	char* commandName;
-	uint16_t argc = 0;
-	char* args[8] = { 0 };
+    char* commandName;
+    uint16_t argc = 0;
+    char* args[8] = {0};
 
-	terminalSendNewLine();
+    parseCommandLine(buffer, &commandName, args, &argc, COUNT_OF(args));
 
-	parseCommandLine(buffer, &commandName, args, &argc, COUNT_OF(args));
+    for (size_t i = 0; i < COUNT_OF(commands); i++)
+    {
+        if (strcmp(commandName, commands[i].name) == 0)
+        {
+            commands[i].handler(argc, args);
+            TerminalSendNewLine();
+        }
+    }
 
-	for (size_t i = 0; i < COUNT_OF(commands); i++)
-	{
-		if (strcmp(commandName, commands[i].name) == 0)
-		{
-			commands[i].handler(argc, args);
-			terminalSendNewLine();
-		}
-	}
-
-	terminalSendPrefix();
+    terminalSendPrefix();
 }
 
 static void handleIncomingChar(void* args)
 {
-	UNREFERENCED_PARAMETER(args);
+    UNREFERENCED_PARAMETER(args);
 
-	char input_buffer[32] = { 0 };
-	uint32_t input_buffer_position = 0;
+    char input_buffer[32] = {0};
+    uint32_t input_buffer_position = 0;
 
-	while (1)
-	{
-		uint8_t data = 0;
+    while (1)
+    {
+        uint8_t data = 0;
 
-		xQueueReceive(terminalQueue, &data, portMAX_DELAY);
+        xQueueReceive(terminalQueue, &data, portMAX_DELAY);
 
-		if (data == '\n')
-		{
-			input_buffer[input_buffer_position] = 0;
-			input_buffer_position = 0;
+        if (data == '\n')
+        {
+            input_buffer[input_buffer_position] = 0;
+            input_buffer_position = 0;
 
-			terminalHandleCommand(input_buffer);
-		}
-		else if (input_buffer_position < sizeof(input_buffer) - 1)
-		{
-			leuartPutc(data);
-			input_buffer[input_buffer_position++] = data;
-		}
-	}
+            terminalHandleCommand(input_buffer);
+        }
+        else if (input_buffer_position < sizeof(input_buffer) - 1)
+        {
+            input_buffer[input_buffer_position++] = data;
+        }
+    }
 }
 
-
-void terminalInit(void)
+void TerminalInit(void)
 {
-	terminalQueue = xQueueCreate(32, sizeof(uint8_t));
+    terminalQueue = xQueueCreate(32, sizeof(uint8_t));
 
-	if(terminalQueue != NULL)
-	{
-		if(xTaskCreate(handleIncomingChar, "terminalIn", 1024, NULL, 4, NULL) != pdPASS)
-		{
-			leuartInit(terminalQueue);
-		}
-		else
-		{
-			SwoPuts("Error. Cannot create terminalIn thread.");
-		}
-	}
-	else
-	{
-		SwoPuts("Error. Cannot create terminalQueue.");
-	}
+    if (terminalQueue == NULL)
+    {
+        LOG(LOG_LEVEL_ERROR, "Error. Cannot create terminalIn thread.");
+        return;
+    }
+
+    if (xTaskCreate(handleIncomingChar, "terminalIn", 1024, NULL, 4, NULL) != pdPASS)
+    {
+        LOG(LOG_LEVEL_ERROR, "Error. Cannot create terminalQueue.");
+        return;
+    }
+
+    leuartInit(terminalQueue);
+
+    terminalSendPrefix();
 }
