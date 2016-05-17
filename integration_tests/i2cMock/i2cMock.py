@@ -1,6 +1,9 @@
+from idlelib.idle_test.test_parenmatch import Mock
+
 import serial
 import sys
 import binascii
+import serial.threaded
 
 DEVICE_SELECTED_FOR_WRITE = 'W'
 DEVICE_SELECTED_FOR_READ = 'R'
@@ -60,39 +63,54 @@ class I2CDevice(object):
         
         return handlers
 
+
 class MissingDevice(I2CDevice):
-    def __init__(self):
-        return super(MissingDevice, self).__init__(0xFF)
+    def __init__(self, address):
+        return super(MissingDevice, self).__init__(address)
 
     @command([])
     def catch_all(self, *data):        
-        print 'Missing device.command({})'.format(binascii.hexlify(bytearray(data)))
+        print 'Missing device({}).command({})'.format(self.address, binascii.hexlify(bytearray(data)))
         return [0xCC]
 
-class I2CMock(object):    
+
+class MockProtocol(serial.threaded.Protocol):
+    def __init__(self, mock):
+        super(MockProtocol, self).__init__()
+        self._mock = mock
+
+    def data_received(self, data):
+        self._mock.handle_command(data)
+
+
+class I2CMock(object):
     port = serial.Serial
     devices = {}   
 
     def __init__(self, portName, baudrate=1000000):
         self.port = serial.Serial(port = portName, baudrate = baudrate, rtscts = True)
-        self._missingDevice = MissingDevice()
+        self.active = False
+        self.reader = serial.threaded.ReaderThread(self.port, self._protocol_factory)
+
+    def start(self):
+        self.reader.start()
 
     def add_device(self, device):
         self.devices[device.address] = device
 
-    def run(self):
-        self.active = True
-
-        while self.active:
-            c = self.port.read(1)
-
-            self._handle_command(c)    
-
-    def close(self):
-        self.port.close()
+    def stop(self):
         self.active = False
 
-    def _handle_command(self, cmd):
+    def close(self):
+        self.reader.stop()
+        self.reader.join()
+        self.port.close()
+        self.port = None
+
+    def _protocol_factory(self):
+        return MockProtocol(self)
+
+    def handle_command(self, cmd):
         if cmd == DEVICE_SELECTED_FOR_WRITE:            
             self._device_selected_for_write()
         elif cmd == DEVICE_SELECTED_FOR_READ:
@@ -104,7 +122,7 @@ class I2CMock(object):
         if self.devices.has_key(address):
             return self.devices[address]
         else:
-            return self._missingDevice
+            return MissingDevice(address)
 
     def _device_selected_for_write(self):
         address = ord(self.port.read(1))        

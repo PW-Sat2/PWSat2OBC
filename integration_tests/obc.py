@@ -36,6 +36,9 @@ class SerialPortTerminal:
         self._serial.rts = True
         self._serial.rts = False
 
+    def close(self):
+        self._serial.close()
+
 
 class OBC:
     def __init__(self, terminal):
@@ -51,6 +54,12 @@ class OBC:
         r = self._terminal.command("currentTime")
         return int(r)
 
+    def send_frame(self, data):
+        self._terminal.command("sendFrame %s" % data)
+
     def reset(self):
         self._terminal.reset()
+
+    def close(self):
+        self._terminal.close()
 

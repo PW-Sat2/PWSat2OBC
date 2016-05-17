@@ -26,7 +26,8 @@ typedef struct
 static const command commands[] = {{"ping", &PingHandler},
     {"echo", &EchoHandler},
     {"jumpToTime", &JumpToTimeHandler},
-    {"currentTime", &CurrentTimeHandler}};
+    {"currentTime", &CurrentTimeHandler},
+	{"sendFrame", &SendFrameHandler }};
 
 static QueueHandle_t terminalQueue;
 
@@ -127,7 +128,7 @@ void TerminalInit(void)
         return;
     }
 
-    if (xTaskCreate(handleIncomingChar, "terminalIn", 1024, NULL, 4, NULL) != pdPASS)
+    if (xTaskCreate(handleIncomingChar, "terminalIn", 2048, NULL, 4, NULL) != pdPASS)
     {
         LOG(LOG_LEVEL_ERROR, "Error. Cannot create terminalQueue.");
         return;

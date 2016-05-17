@@ -20,6 +20,7 @@
 #include "terminal.h"
 
 #include "devices/eps.h"
+#include "devices/comm.h"
 
 void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
 {
@@ -68,6 +69,8 @@ int main(void)
     I2CInit();
 
     EpsInit();
+
+    CommInit();
 
     TerminalInit();
     SwoPuts("Hello I'm PW-SAT2 OBC\n");
