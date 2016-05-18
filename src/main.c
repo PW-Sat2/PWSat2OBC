@@ -74,7 +74,7 @@ int main(void)
 
     TerminalInit();
     SwoPuts("Hello I'm PW-SAT2 OBC\n");
-    LogInit(LOG_LEVEL_INFO);
+    LogInit(LOG_LEVEL_MAX);
     InitSwoEndpoint();
 
     OpenSailInit();

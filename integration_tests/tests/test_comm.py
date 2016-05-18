@@ -7,6 +7,7 @@ from tests.base import BaseTest
 mock_com = os.environ.get('MOCK_COM')
 obc_com = os.environ.get('OBC_COM')
 
+
 class Test_Comm(BaseTest):
     def test_should_initialize_transmitter(self):
         self.assertTrue(self.transmitter.wait_for_reset(3))
@@ -40,6 +41,15 @@ class Test_Comm(BaseTest):
         self.obc.receive_frame()
 
         self.assertEqual(self.receiver.queue_size(), 0)
+
+    def test_should_receive_biggest_possible_frame(self):
+        frame = "".join([chr(ord('A') + i % 25) for i in xrange(0, devices.TransmitterDevice.MAX_CONTENT_SIZE)])
+
+        self.receiver.put_frame(frame)
+
+        received_frame = self.obc.receive_frame()
+
+        self.assertEqual(received_frame, frame)
 
     def test_build_receive_frame_response(self):
         data = "a" * 300

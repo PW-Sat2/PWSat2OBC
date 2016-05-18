@@ -103,6 +103,7 @@ class I2CMock(object):
         self.port = None
 
     def _run(self):
+        self.log.debug("Worker thread starting")
         while self.port.is_open:
             try:
                 c = self.port.read(1)
@@ -115,6 +116,8 @@ class I2CMock(object):
                 break
             except Exception as e:
                 self.log.error("Serial read exception %r", e)
+
+        self.log.debug("Finished worker thread")
 
     def handle_command(self, cmd):
         if cmd == DEVICE_SELECTED_FOR_WRITE:

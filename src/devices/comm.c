@@ -74,9 +74,15 @@ void CommReceiveFrame(Frame* frame)
 {
     uint8_t cmd = 0x22;
 
+    LOG(LOG_LEVEL_TRACE, "Receiving frame");
+
     if (I2CWriteRead(RECEIVER_ADDRESS, &cmd, 1, (uint8_t*)frame, sizeof(Frame)) != i2cTransferDone)
     {
         LOG(LOG_LEVEL_ERROR, "Failed to receive frame");
+    }
+    else
+    {
+        LOGF(LOG_LEVEL_DEBUG, "Received frame %d bytes", frame->Size);
     }
 }
 

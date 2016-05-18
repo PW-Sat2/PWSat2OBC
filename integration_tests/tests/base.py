@@ -34,7 +34,5 @@ class BaseTest(unittest.TestCase):
     def tearDown(self):
         self.i2c.close()
 
-        del self.i2c
-
         self.obc.close()
 

@@ -3,12 +3,14 @@
 
 #include <stdint.h>
 
+#define COMM_MAX_FRAME_CONTENTS_SIZE 235
+
 typedef struct
 {
     uint16_t Size;
     uint16_t Doppler;
     uint16_t RSSI;
-    uint8_t Contents[255];
+    uint8_t Contents[COMM_MAX_FRAME_CONTENTS_SIZE];
 } Frame;
 
 void CommInit(void);

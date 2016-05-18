@@ -3,11 +3,17 @@ from Queue import Queue, Empty
 import i2cMock
 from threading import Event
 
+counter = 0
+
+
 class TransmitterDevice(i2cMock.I2CDevice):
+    MAX_CONTENT_SIZE = 235
+    BUFFER_SIZE = 40
+
     def __init__(self):
         super(TransmitterDevice, self).__init__(0x62)
         self._reset = Event()
-        self._buffer = Queue()
+        self._buffer = Queue(TransmitterDevice.BUFFER_SIZE)
     
     @i2cMock.command([0xAA])
     def _reset(self):
@@ -20,7 +26,7 @@ class TransmitterDevice(i2cMock.I2CDevice):
 
         self._buffer.put_nowait(data)
 
-        return [255 - self._buffer.qsize()]
+        return [TransmitterDevice.BUFFER_SIZE - self._buffer.qsize()]
 
     def wait_for_reset(self, timeout=None):
         return self._reset.wait(timeout)
@@ -31,9 +37,12 @@ class TransmitterDevice(i2cMock.I2CDevice):
 
 class ReceiverDevice(i2cMock.I2CDevice):
     def __init__(self):
+        global  counter
+        print "ReceiverDevice.__init__"
         super(ReceiverDevice, self).__init__(0x60)
         self._reset = Event()
         self._buffer = Queue()
+        counter += 1
 
     @i2cMock.command([0xAA])
     def _reset(self):
@@ -47,6 +56,8 @@ class ReceiverDevice(i2cMock.I2CDevice):
 
     @i2cMock.command([0x22])
     def _receive_frame(self):
+        print "Receive frame %d" % counter
+
         if self._buffer.empty():
             return []
 
