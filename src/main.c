@@ -22,6 +22,7 @@
 #include "openSail.h"
 #include "swo/swo.h"
 #include "system.h"
+
 #include "terminal.h"
 
 #include "fs/fs.h"
@@ -30,6 +31,11 @@
 #include "storage/storage.h"
 
 OBC Main;
+
+
+
+
+
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
@@ -120,51 +126,73 @@ static void FrameHandler(CommObject* comm, CommFrame* frame, void* context)
     UNREFERENCED_PARAMETER(frame);
     CommSendFrame(comm, (uint8_t*)"PONG", 4);
 }
+void ADXRS(void * param){
+	UNREFERENCED_PARAMETER(param);
+
+
+
+	long temp=0;  //i know it should be a float but swoPrintf has a problem with %f
+	float rate=0;
+	float angle=0;
+	uint8_t timeDelay=0;
+	ADXRS453_Init();
+
+	while(1){
+		rate=ADXRS453_GetRate();
+
+		temp=ADXRS453_GetTemperature();
+		swoPrintf("temp: %d ' celcius rate: %d '/sec rotation\n", temp, (long)rate);
+		vTaskDelay(10 / portTICK_PERIOD_MS);
+	}
+
+
+}
 
 int main(void)
 {
-    memset(&Main, 0, sizeof(Main));
-    CHIP_Init();
 
-    CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
-    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);
+	 memset(&Main, 0, sizeof(Main));
+	    CHIP_Init();
 
-    CMU_ClockEnable(cmuClock_GPIO, true);
+	    CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
+	    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);
 
-    SwoEnable();
+	    CMU_ClockEnable(cmuClock_GPIO, true);
 
-    LogInit(LOG_LEVEL_DEBUG);
-    InitSwoEndpoint();
+	    SwoEnable();
 
-    OSSetup();
-    I2CInit();
+	    LogInit(LOG_LEVEL_DEBUG);
+	    InitSwoEndpoint();
 
-    EpsInit();
-    CommLowInterface commInterface;
-    commInterface.readProc = I2CWriteRead;
-    commInterface.writeProc = I2CWrite;
-    CommUpperInterface commUpperInterface;
-    commUpperInterface.frameHandler = FrameHandler;
-    commUpperInterface.frameHandlerContext = NULL;
-    CommInitialize(&Main.comm, &commInterface, &commUpperInterface);
+	    OSSetup();
+	    I2CInit();
 
-    TerminalInit();
-    SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
+	    EpsInit();
+	    CommLowInterface commInterface;
+	    commInterface.readProc = I2CWriteRead;
+	    commInterface.writeProc = I2CWrite;
+	    CommUpperInterface commUpperInterface;
+	    commUpperInterface.frameHandler = FrameHandler;
+	    commUpperInterface.frameHandlerContext = NULL;
+	    CommInitialize(&Main.comm, &commInterface, &commUpperInterface);
 
-    OpenSailInit();
+	    TerminalInit();
+	    SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 
-    GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
-    GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);
-    GPIO_DriveModeSet(LED_PORT, gpioDriveModeLowest);
+	    OpenSailInit();
 
-    GPIO_PinOutSet(LED_PORT, LED0);
-    GPIO_PinOutSet(LED_PORT, LED1);
+	    GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
+	    GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);
+	    GPIO_DriveModeSet(LED_PORT, gpioDriveModeLowest);
 
-    System.CreateTask(BlinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
-    System.CreateTask(ObcInitTask, "Init", 512, &Main, tskIDLE_PRIORITY + 16, &Main.initTask);
-    System.RunScheduler();
+	    GPIO_PinOutSet(LED_PORT, LED0);
+	    GPIO_PinOutSet(LED_PORT, LED1);
 
-    GPIO_PinOutToggle(LED_PORT, LED0);
+	    System.CreateTask(BlinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
+	    System.CreateTask(ObcInitTask, "Init", 512, &Main, tskIDLE_PRIORITY + 16, &Main.initTask);
+	    System.RunScheduler();
 
-    return 0;
+	    GPIO_PinOutToggle(LED_PORT, LED0);
+
+	    return 0;
 }

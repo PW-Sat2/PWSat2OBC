@@ -12,6 +12,7 @@ set(SOURCES
     obc_time.c      
     obc.h
     fault_handlers.c
+
 )
 
 add_executable(${NAME} ${SOURCES})
