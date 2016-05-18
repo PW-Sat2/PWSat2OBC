@@ -2,10 +2,10 @@
  * @file efm32gg980f512.h
  * @brief CMSIS Cortex-M Peripheral Access Layer Header File
  *        for EFM32GG980F512
- * @version 4.1.0
+ * @version 4.3.0
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2015 Silicon Laboratories, Inc. http://www.silabs.com</b>
+ * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
  ******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -31,8 +31,8 @@
  *
  *****************************************************************************/
 
-#ifndef __SILICON_LABS_EFM32GG980F512_H__
-#define __SILICON_LABS_EFM32GG980F512_H__
+#ifndef EFM32GG980F512_H
+#define EFM32GG980F512_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -110,6 +110,7 @@ typedef enum IRQn
  * @brief Processor and Core Peripheral Section
  *****************************************************************************/
 #define __MPU_PRESENT             1 /**< Presence of MPU  */
+#define __VTOR_PRESENT            1 /**< Presence of VTOR register in SCB */
 #define __NVIC_PRIO_BITS          3 /**< NVIC interrupt priority bits */
 #define __Vendor_SysTickConfig    0 /**< Is 1 if different SysTick counter is used */
 
@@ -476,4 +477,4 @@ typedef enum IRQn
 #ifdef __cplusplus
 }
 #endif
-#endif /* __SILICON_LABS_EFM32GG980F512_H__ */
+#endif /* EFM32GG980F512_H */
