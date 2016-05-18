@@ -3,6 +3,7 @@
 #include "spidrv.h"
 #include "FreeRTOS.h"
 #include "drivers/swo.h"
+#include "io_map.h"
 SPIDRV_HandleData_t handleData;
 SPIDRV_Handle_t handle = &handleData;
 
@@ -47,23 +48,23 @@ char ADXRS453_Init(void)
     char           status     = 0;
     unsigned short adxrs453Id = 0;
     /* Initialize the SPI communication peripheral  */
-    SPIDRV_Init_t initData = SPIDRV_MASTER_USART1;
-    initData.slaveStartMode = spidrvSlaveStartDelayed;
+    SPIDRV_Init_t initData = ADXRS453_SPI;
       // Initialize a SPI driver instance
     SPIDRV_Init( handle, &initData );
 //RECOMMENDED START-UP SEQUENCE WITH CHK BIT ASSERTION see datasheet
-    RTCDRV_Delay(100);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
     SPIDRV_MTransmit( handle, dataBuffer, 4, TransferComplete );
-    RTCDRV_Delay(50);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
     dataBuffer[3]=0x00;
     SPIDRV_MTransmit( handle, dataBuffer, 4, TransferComplete );
-    RTCDRV_Delay(50);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
     SPIDRV_MTransmit( handle, dataBuffer, 4, TransferComplete );
-    RTCDRV_Delay(50);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
     SPIDRV_MTransmit( handle, dataBuffer, 4, TransferComplete );
-    RTCDRV_Delay(50);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
     SPIDRV_MTransmit( handle, dataBuffer, 4, TransferComplete );
-    RTCDRV_Delay(50);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
+
 
     //CHECK IF ADXRS IS STARTUPED
     adxrs453Id = ADXRS453_GetRegisterValue(ADXRS453_REG_PID);
@@ -119,9 +120,9 @@ unsigned short ADXRS453_GetRegisterValue(unsigned char registerAddress)
     }
 
     SPIDRV_MTransmit( handle, sendBuffer, 4,TransferComplete );
-    RTCDRV_Delay(1);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
     SPIDRV_MReceive( handle, recvBuffer, 4,ReceiveComplete);
-    RTCDRV_Delay(1);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
 
     registerValue = ((unsigned short)recvBuffer[1] << 11) |
                     ((unsigned short)recvBuffer[2] << 3) |
@@ -165,7 +166,7 @@ void ADXRS453_SetRegisterValue(unsigned char registerAddress,
     	sendBuffer[3] |= 1;
     }
     SPIDRV_MTransmit( handle, sendBuffer, 4, TransferComplete );
-    RTCDRV_Delay(1);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
 
 }
 
@@ -198,9 +199,9 @@ unsigned long ADXRS453_GetSensorData(void)
     	sendBuffer[3] |= 1;
     }
     SPIDRV_MTransmit( handle, sendBuffer, 4,TransferComplete );
-    RTCDRV_Delay(1);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
     SPIDRV_MReceive( handle, recvBuffer, 4, ReceiveComplete );
-    RTCDRV_Delay(1);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
     registerValue = ((unsigned long)recvBuffer[0] << 24) |
                     ((unsigned long)recvBuffer[1] << 16) |
                     ((unsigned short)recvBuffer[2] << 8) |
