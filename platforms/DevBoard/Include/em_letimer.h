@@ -1,10 +1,10 @@
 /***************************************************************************//**
  * @file em_letimer.h
  * @brief Low Energy Timer (LETIMER) peripheral API
- * @version 4.1.0
+ * @version 4.3.0
  *******************************************************************************
  * @section License
- * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
+ * <b>Copyright 2016 Silicon Laboratories, Inc. http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -30,8 +30,8 @@
  *
  ******************************************************************************/
 
-#ifndef __SILICON_LABS_EM_LETIMER_H__
-#define __SILICON_LABS_EM_LETIMER_H__
+#ifndef EM_LETIMER_H
+#define EM_LETIMER_H
 
 #include <stdbool.h>
 #include "em_device.h"
@@ -42,7 +42,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup EM_Library
+ * @addtogroup emlib
  * @{
  ******************************************************************************/
 
@@ -253,6 +253,41 @@ __STATIC_INLINE uint32_t LETIMER_IntGet(LETIMER_TypeDef *letimer)
 
 /***************************************************************************//**
  * @brief
+ *   Get enabled and pending LETIMER interrupt flags.
+ *
+ * @details
+ *   Useful for handling more interrupt sources in the same interrupt handler.
+ *
+ * @note
+ *   The event bits are not cleared by the use of this function.
+ *
+ * @param[in] letimer
+ *   Pointer to LETIMER peripheral register block.
+ *
+ * @return
+ *   Pending and enabled LETIMER interrupt sources.
+ *   The return value is the bitwise AND combination of
+ *   - the OR combination of enabled interrupt sources in LETIMER_IEN_nnn
+ *   register (LETIMER_IEN_nnn) and
+ *   - the OR combination of valid interrupt flags of the LETIMER module
+ *   (LETIMER_IF_nnn).
+ ******************************************************************************/
+__STATIC_INLINE uint32_t LETIMER_IntGetEnabled(LETIMER_TypeDef *letimer)
+{
+  uint32_t ien;
+
+
+  /* Store flags in temporary variable in order to define explicit order
+   * of volatile accesses. */
+  ien = letimer->IEN;
+
+  /* Bitwise AND of pending and enabled interrupts */
+  return letimer->IF & ien;
+}
+
+
+/***************************************************************************//**
+ * @brief
  *   Set one or more pending LETIMER interrupts from SW.
  *
  * @param[in] letimer
@@ -267,6 +302,7 @@ __STATIC_INLINE void LETIMER_IntSet(LETIMER_TypeDef *letimer, uint32_t flags)
   letimer->IFS = flags;
 }
 
+
 uint32_t LETIMER_RepeatGet(LETIMER_TypeDef *letimer, unsigned int rep);
 void LETIMER_RepeatSet(LETIMER_TypeDef *letimer,
                        unsigned int rep,
@@ -275,11 +311,11 @@ void LETIMER_Reset(LETIMER_TypeDef *letimer);
 
 
 /** @} (end addtogroup LETIMER) */
-/** @} (end addtogroup EM_Library) */
+/** @} (end addtogroup emlib) */
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* defined(LETIMER_COUNT) && (LETIMER_COUNT > 0) */
-#endif /* __SILICON_LABS_EM_LETIMER_H__ */
+#endif /* EM_LETIMER_H */
