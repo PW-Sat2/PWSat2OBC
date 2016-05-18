@@ -32,6 +32,7 @@ void ReceiveFrameHandler(uint16_t argc, char* argv[])
 
     Frame frame = {.Contents = {0}};
     CommReceiveFrame(&frame);
+    CommRemoveFrame();
 
     TerminalPuts(frame.Contents);
 }

@@ -20,6 +20,8 @@ class TransmitterDevice(i2cMock.I2CDevice):
 
         self._buffer.put_nowait(data)
 
+        return [255 - self._buffer.qsize()]
+
     def wait_for_reset(self, timeout=None):
         return self._reset.wait(timeout)
 
@@ -45,12 +47,19 @@ class ReceiverDevice(i2cMock.I2CDevice):
 
     @i2cMock.command([0x22])
     def _receive_frame(self):
-        try:
-            frame = self._buffer.get_nowait()
-        except Empty:
+        if self._buffer.empty():
             return []
 
+        frame = self._buffer.queue[0]
+
         return ReceiverDevice.build_frame_response(frame, 257, 300)
+
+    @i2cMock.command([0x24])
+    def _remove_frame(self):
+        try:
+            self._buffer.get_nowait()
+        except Empty:
+            pass
 
     @classmethod
     def build_frame_response(cls, content, doppler, rssi):
@@ -68,3 +77,6 @@ class ReceiverDevice(i2cMock.I2CDevice):
 
     def put_frame(self, data):
         self._buffer.put_nowait(data)
+
+    def queue_size(self):
+        return self._buffer.qsize()

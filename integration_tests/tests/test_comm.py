@@ -1,5 +1,4 @@
 import os
-from unittest import TestCase
 
 import devices
 from tests.base import BaseTest
@@ -7,7 +6,6 @@ from tests.base import BaseTest
 
 mock_com = os.environ.get('MOCK_COM')
 obc_com = os.environ.get('OBC_COM')
-
 
 class Test_Comm(BaseTest):
     def test_should_initialize_transmitter(self):
@@ -35,6 +33,13 @@ class Test_Comm(BaseTest):
         frame = self.obc.receive_frame()
 
         self.assertEqual(frame, "ABC")
+
+    def test_should_remove_frame_after_receive(self):
+        self.receiver.put_frame("ABC")
+
+        self.obc.receive_frame()
+
+        self.assertEqual(self.receiver.queue_size(), 0)
 
     def test_build_receive_frame_response(self):
         data = "a" * 300

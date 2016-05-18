@@ -48,7 +48,10 @@ void CommSendFrame(uint8_t* data, uint8_t length)
         cmd[i + 1] = data[i];
     }
 
-    if (I2CWrite(TRANSMITTER_ADDRESS, cmd, length + 1) != i2cTransferDone) // TODO: handle response
+    uint8_t remainingBufferSize;
+
+    if (I2CWriteRead(TRANSMITTER_ADDRESS, cmd, length + 1, &remainingBufferSize, 1) !=
+        i2cTransferDone) // TODO: handle response
     {
         LOG(LOG_LEVEL_ERROR, "Failed to send frame");
     }
@@ -69,10 +72,20 @@ uint8_t CommGetFramesCount(void)
 
 void CommReceiveFrame(Frame* frame)
 {
-	uint8_t cmd = 0x22;
+    uint8_t cmd = 0x22;
 
-	if(I2CWriteRead(RECEIVER_ADDRESS, &cmd, 1, (uint8_t*)frame, sizeof(Frame)) != i2cTransferDone)
-	{
-		LOG(LOG_LEVEL_ERROR, "Failed to receive frame");
-	}
+    if (I2CWriteRead(RECEIVER_ADDRESS, &cmd, 1, (uint8_t*)frame, sizeof(Frame)) != i2cTransferDone)
+    {
+        LOG(LOG_LEVEL_ERROR, "Failed to receive frame");
+    }
+}
+
+void CommRemoveFrame(void)
+{
+    uint8_t cmd = 0x24;
+
+    if (I2CWrite(RECEIVER_ADDRESS, &cmd, 1) != i2cTransferDone)
+    {
+        LOG(LOG_LEVEL_ERROR, "Failed to remove frame from buffer");
+    }
 }

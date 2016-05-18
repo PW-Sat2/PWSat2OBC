@@ -16,9 +16,9 @@
 
 static void openSail(void)
 {
-    if(!EpsOpenSail())
+    if (!EpsOpenSail())
     {
-    	LOG(LOG_LEVEL_ERROR, "Failed to open sail");
+        LOG(LOG_LEVEL_ERROR, "Failed to open sail");
     }
 }
 

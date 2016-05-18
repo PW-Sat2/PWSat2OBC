@@ -15,5 +15,6 @@ void CommInit(void);
 void CommSendFrame(uint8_t* data, uint8_t length);
 uint8_t CommGetFramesCount(void);
 void CommReceiveFrame(Frame* frame);
+void CommRemoveFrame(void);
 
 #endif /* SRC_DEVICES_COMM_H_ */

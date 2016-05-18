@@ -77,7 +77,7 @@ void TerminalPrintf(const char* text, ...)
 
 void TerminalPuts(const char* text)
 {
-	leuartPuts(text);
+    leuartPuts(text);
 }
 
 static void terminalHandleCommand(char* buffer)

@@ -19,8 +19,8 @@
 #include "system.h"
 #include "terminal.h"
 
-#include "devices/eps.h"
 #include "devices/comm.h"
+#include "devices/eps.h"
 
 void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
 {
