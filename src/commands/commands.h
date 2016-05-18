@@ -8,5 +8,7 @@ void EchoHandler(uint16_t argc, char* argv[]);
 void JumpToTimeHandler(uint16_t argc, char* argv[]);
 void CurrentTimeHandler(uint16_t argc, char* argv[]);
 void SendFrameHandler(uint16_t argc, char* argv[]);
+void GetFramesCountHandler(uint16_t argc, char* argv[]);
+void ReceiveFrameHandler(uint16_t argc, char* argv[]);
 
 #endif

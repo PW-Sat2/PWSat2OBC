@@ -4,7 +4,8 @@ set(SOURCES
   semihosting.cpp
   mem.c  
   test.cpp
-  Logger/LoggerTest.cpp   
+  Logger/LoggerTest.cpp
+  Comm/CommTest.cpp   
 )
 
 add_executable(${NAME} EXCLUDE_FROM_ALL ${SOURCES})

@@ -8,6 +8,7 @@
 #include "system.h"
 
 #define TRANSMITTER_ADDRESS 0x62
+#define RECEIVER_ADDRESS 0x60
 
 static void commTask(void* param)
 {
@@ -15,7 +16,12 @@ static void commTask(void* param)
 
     uint8_t cmd = 0xAA;
 
-    if (!I2CWrite(TRANSMITTER_ADDRESS, &cmd, 1))
+    if (I2CWrite(TRANSMITTER_ADDRESS, &cmd, 1) != i2cTransferDone)
+    {
+        LOG(LOG_LEVEL_ERROR, "Transmitter reset failed");
+    }
+
+    if (I2CWrite(RECEIVER_ADDRESS, &cmd, 1) != i2cTransferDone)
     {
         LOG(LOG_LEVEL_ERROR, "Transmitter reset failed");
     }
@@ -42,8 +48,31 @@ void CommSendFrame(uint8_t* data, uint8_t length)
         cmd[i + 1] = data[i];
     }
 
-    if(!I2CWrite(TRANSMITTER_ADDRESS, cmd, length + 1)) // TODO: handle response
+    if (I2CWrite(TRANSMITTER_ADDRESS, cmd, length + 1) != i2cTransferDone) // TODO: handle response
     {
-    	LOG(LOG_LEVEL_ERROR, "Failed to send frame");
+        LOG(LOG_LEVEL_ERROR, "Failed to send frame");
     }
+}
+
+uint8_t CommGetFramesCount(void)
+{
+    uint8_t cmd = 0x21;
+    uint8_t count = 0;
+
+    if (I2CWriteRead(RECEIVER_ADDRESS, &cmd, 1, &count, 1) != i2cTransferDone)
+    {
+        LOG(LOG_LEVEL_ERROR, "Failed to get frame count");
+    }
+
+    return count;
+}
+
+void CommReceiveFrame(Frame* frame)
+{
+	uint8_t cmd = 0x22;
+
+	if(I2CWriteRead(RECEIVER_ADDRESS, &cmd, 1, (uint8_t*)frame, sizeof(Frame)) != i2cTransferDone)
+	{
+		LOG(LOG_LEVEL_ERROR, "Failed to receive frame");
+	}
 }

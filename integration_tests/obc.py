@@ -33,6 +33,7 @@ class SerialPortTerminal:
         return response.rstrip('\n')
 
     def reset(self):
+        self._serial.rts = False
         self._serial.rts = True
         self._serial.rts = False
 
@@ -56,6 +57,14 @@ class OBC:
 
     def send_frame(self, data):
         self._terminal.command("sendFrame %s" % data)
+
+    def get_frame_count(self):
+        r = self._terminal.command("getFramesCount")
+        return int(r)
+
+    def receive_frame(self):
+        r = self._terminal.command("receiveFrame")
+        return r
 
     def reset(self):
         self._terminal.reset()

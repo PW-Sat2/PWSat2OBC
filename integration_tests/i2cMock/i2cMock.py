@@ -1,9 +1,10 @@
-from idlelib.idle_test.test_parenmatch import Mock
+from threading import Thread
 
 import serial
 import sys
 import binascii
 import serial.threaded
+import logging
 
 DEVICE_SELECTED_FOR_WRITE = 'W'
 DEVICE_SELECTED_FOR_READ = 'R'
@@ -12,14 +13,16 @@ WRITE_FINISHED = 'S'
 NEXT_BYTE = 'N'
 READ_FINISHED = 'F'
 
+
 def command(bytes):
     def wrapper(func):
         func.bytes = bytes
         return func
-        
+
     return wrapper
 
-class I2CDevice(object): 
+
+class I2CDevice(object):
     address = None
     handlers = []
     response = None
@@ -27,7 +30,7 @@ class I2CDevice(object):
     def __init__(self, address):
         self.address = address
         self.handlers = self._init_handlers()
-              
+
     def handle(self, data):
         self.response = None
 
@@ -60,7 +63,7 @@ class I2CDevice(object):
                     handlers.append(v)
             except AttributeError:
                 pass
-        
+
         return handlers
 
 
@@ -69,28 +72,21 @@ class MissingDevice(I2CDevice):
         return super(MissingDevice, self).__init__(address)
 
     @command([])
-    def catch_all(self, *data):        
+    def catch_all(self, *data):
         print 'Missing device({}).command({})'.format(self.address, binascii.hexlify(bytearray(data)))
         return [0xCC]
 
 
-class MockProtocol(serial.threaded.Protocol):
-    def __init__(self, mock):
-        super(MockProtocol, self).__init__()
-        self._mock = mock
-
-    def data_received(self, data):
-        self._mock.handle_command(data)
-
-
 class I2CMock(object):
+    log = logging.getLogger("I2CMock")
+
     port = serial.Serial
-    devices = {}   
+    devices = {}
 
     def __init__(self, portName, baudrate=1000000):
-        self.port = serial.Serial(port = portName, baudrate = baudrate, rtscts = True)
+        self.port = serial.Serial(port=portName, baudrate=baudrate, rtscts=True)
         self.active = False
-        self.reader = serial.threaded.ReaderThread(self.port, self._protocol_factory)
+        self.reader = Thread(target=I2CMock._run, args=(self,))
 
     def start(self):
         self.reader.start()
@@ -102,20 +98,31 @@ class I2CMock(object):
         self.active = False
 
     def close(self):
-        self.reader.stop()
-        self.reader.join()
         self.port.close()
+        self.reader.join()
         self.port = None
 
-    def _protocol_factory(self):
-        return MockProtocol(self)
+    def _run(self):
+        while self.port.is_open:
+            try:
+                c = self.port.read(1)
+
+                self.log.debug("Received data: %s", c)
+
+                self.handle_command(c)
+            except serial.SerialException as e:
+                self.log.error("Serial read exception %r. Breaking", e)
+                break
+            except Exception as e:
+                self.log.error("Serial read exception %r", e)
 
     def handle_command(self, cmd):
-        if cmd == DEVICE_SELECTED_FOR_WRITE:            
+        if cmd == DEVICE_SELECTED_FOR_WRITE:
             self._device_selected_for_write()
         elif cmd == DEVICE_SELECTED_FOR_READ:
             self._device_selected_for_read()
         else:
+            self.log.warning("Unknown mock command %s", cmd)
             sys.stdout.write(cmd)
 
     def _device(self, address):
@@ -125,20 +132,29 @@ class I2CMock(object):
             return MissingDevice(address)
 
     def _device_selected_for_write(self):
-        address = ord(self.port.read(1))        
+        address = ord(self.port.read(1))
 
-        numberOfBytes = ord(self.port.read(1))        
-        data = [ ord(self.port.read()) for _ in range(numberOfBytes)]
+        self.log.debug("Device %d selected for write", address)
+
+        numberOfBytes = ord(self.port.read(1))
+
+        self.log.debug("Number of bytes to write: %d", numberOfBytes)
+
+        data = [ord(self.port.read()) for _ in range(numberOfBytes)]
+
+        self.log.debug("Written bytes: %s", data)
 
         device = self._device(address)
 
         device.handle(data)
 
-    def _device_selected_for_read(self):        
-        address = ord(self.port.read(1))    
-        
+    def _device_selected_for_read(self):
+        address = ord(self.port.read(1))
+
+        self.log.debug("Device %d selected for read", address)
+
         device = self._device(address)
-        
+
         data = device.read()
-                
-        self.port.write([len(data)] + data) 
+
+        self.port.write([len(data)] + data)

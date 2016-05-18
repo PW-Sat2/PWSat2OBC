@@ -29,7 +29,7 @@ void I2C1_IRQHandler(void)
 
     BaseType_t taskWoken = pdFALSE;
 
-    if (xQueueSendFromISR(i2cResult, &status, &taskWoken) != pdFALSE)
+    if (xQueueSendFromISR(i2cResult, &status, &taskWoken) != pdTRUE)
     {
         LOG_ISR(LOG_LEVEL_ERROR, "Error queueing i2c result");
     }
@@ -54,10 +54,20 @@ static I2C_TransferReturn_TypeDef i2cTransfer(I2C_TransferSeq_TypeDef* seq)
     return ret;
 }
 
-I2C_TransferReturn_TypeDef I2CWrite(uint8_t address, uint8_t* inData, uint8_t length)
+I2C_TransferReturn_TypeDef I2CWrite(uint8_t address, uint8_t* inData, uint16_t length)
 {
     I2C_TransferSeq_TypeDef seq = {
         .addr = address, .flags = I2C_FLAG_WRITE, .buf = {{.len = length, .data = inData}, {.len = 0, .data = NULL}}};
+
+    return i2cTransfer(&seq);
+}
+
+I2C_TransferReturn_TypeDef I2CWriteRead(
+    uint8_t address, uint8_t* inData, uint16_t inLength, uint8_t* outData, uint16_t outLength)
+{
+    I2C_TransferSeq_TypeDef seq = {.addr = address,
+        .flags = I2C_FLAG_WRITE_READ,
+        .buf = {{.len = inLength, .data = inData}, {.len = outLength, .data = outData}}};
 
     return i2cTransfer(&seq);
 }

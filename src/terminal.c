@@ -23,11 +23,15 @@ typedef struct
     commandHandler handler;
 } command;
 
-static const command commands[] = {{"ping", &PingHandler},
+static const command commands[] = {
+    {"ping", &PingHandler},
     {"echo", &EchoHandler},
     {"jumpToTime", &JumpToTimeHandler},
     {"currentTime", &CurrentTimeHandler},
-	{"sendFrame", &SendFrameHandler }};
+    {"sendFrame", &SendFrameHandler},
+    {"getFramesCount", &GetFramesCountHandler},
+    {"receiveFrame", &ReceiveFrameHandler},
+};
 
 static QueueHandle_t terminalQueue;
 
@@ -69,6 +73,11 @@ void TerminalPrintf(const char* text, ...)
     leuartvPrintf(text, args);
 
     va_end(args);
+}
+
+void TerminalPuts(const char* text)
+{
+	leuartPuts(text);
 }
 
 static void terminalHandleCommand(char* buffer)
@@ -128,7 +137,7 @@ void TerminalInit(void)
         return;
     }
 
-    if (xTaskCreate(handleIncomingChar, "terminalIn", 2048, NULL, 4, NULL) != pdPASS)
+    if (xTaskCreate(handleIncomingChar, "terminalIn", 2500, NULL, 4, NULL) != pdPASS)
     {
         LOG(LOG_LEVEL_ERROR, "Error. Cannot create terminalQueue.");
         return;
