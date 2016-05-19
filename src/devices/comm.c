@@ -3,12 +3,16 @@
 
 #include "comm.h"
 
+#include <stdbool.h>
 #include "Logger/Logger.h"
+
 #include "i2c/i2c.h"
 #include "system.h"
 
 #define TRANSMITTER_ADDRESS 0x62
 #define RECEIVER_ADDRESS 0x60
+
+static bool autoCommHandling = true;
 
 static void commTask(void* param)
 {
@@ -30,13 +34,42 @@ static void commTask(void* param)
 
     while (1)
     {
-        vTaskSuspend(NULL);
+        if (autoCommHandling)
+        {
+            uint8_t framesCount = CommGetFramesCount();
+            if (framesCount > 0)
+            {
+                LOGF(LOG_LEVEL_INFO, "Got %d frames", framesCount);
+
+                for (uint8_t i = 0; i < framesCount; i++)
+                {
+                    Frame frame = {.Contents = {0}};
+
+                    CommReceiveFrame(&frame);
+
+                    LOGF(LOG_LEVEL_INFO, "Received frame %d bytes: %s", frame.Size, frame.Contents);
+
+                    char msg[] = "PONG";
+
+                    CommSendFrame(msg, 4);
+
+                    CommRemoveFrame();
+                }
+            }
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
 void CommInit(void)
 {
     xTaskCreate(commTask, "COMM Task", 512, NULL, 4, NULL);
+}
+
+void CommAutoHandling(bool enable)
+{
+	autoCommHandling = enable;
 }
 
 void CommSendFrame(uint8_t* data, uint8_t length)

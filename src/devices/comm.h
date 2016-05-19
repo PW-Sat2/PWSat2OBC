@@ -2,6 +2,7 @@
 #define SRC_DEVICES_COMM_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #define COMM_MAX_FRAME_CONTENTS_SIZE 235
 
@@ -18,5 +19,6 @@ void CommSendFrame(uint8_t* data, uint8_t length);
 uint8_t CommGetFramesCount(void);
 void CommReceiveFrame(Frame* frame);
 void CommRemoveFrame(void);
+void CommAutoHandling(bool enable);
 
 #endif /* SRC_DEVICES_COMM_H_ */

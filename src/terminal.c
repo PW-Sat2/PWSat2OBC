@@ -23,15 +23,14 @@ typedef struct
     commandHandler handler;
 } command;
 
-static const command commands[] = {
-    {"ping", &PingHandler},
+static const command commands[] = {{"ping", &PingHandler},
     {"echo", &EchoHandler},
     {"jumpToTime", &JumpToTimeHandler},
     {"currentTime", &CurrentTimeHandler},
     {"sendFrame", &SendFrameHandler},
     {"getFramesCount", &GetFramesCountHandler},
     {"receiveFrame", &ReceiveFrameHandler},
-};
+    {"autoCommHandling", &AutoCommHandlingHandler}};
 
 static QueueHandle_t terminalQueue;
 

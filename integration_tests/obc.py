@@ -74,6 +74,12 @@ class OBC:
         r = self._terminal.command("receiveFrame")
         return r
 
+    def comm_auto_handling(self, enable):
+        if enable:
+            self._terminal.command("autoCommHandling T")
+        else:
+            self._terminal.command("autoCommHandling F")
+
     def reset(self):
         self._terminal.reset()
 

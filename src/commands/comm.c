@@ -36,3 +36,10 @@ void ReceiveFrameHandler(uint16_t argc, char* argv[])
 
     TerminalPuts(frame.Contents);
 }
+
+void AutoCommHandlingHandler(uint16_t argc, char* argv[])
+{
+	UNREFERENCED_PARAMETER(argc);
+
+	CommAutoHandling(strcmp(argv[0], "T") == 0);
+}
