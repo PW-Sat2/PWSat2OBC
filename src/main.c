@@ -129,19 +129,13 @@ static void FrameHandler(CommObject* comm, CommFrame* frame, void* context)
 void ADXRS(void * param){
 	UNREFERENCED_PARAMETER(param);
 
-
-
-	long temp=0;  //i know it should be a float but swoPrintf has a problem with %f
+	float temp=0;
 	float rate=0;
-	float angle=0;
-	uint8_t timeDelay=0;
 	ADXRS453_Init();
-
 	while(1){
 		rate=ADXRS453_GetRate();
-
 		temp=ADXRS453_GetTemperature();
-		swoPrintf("temp: %d ' celcius rate: %d '/sec rotation\n", temp, (long)rate);
+		swoPrintf("temp: %d ' celcius rate: %d '/sec rotation\n", (long)temp, (long)rate);
 		vTaskDelay(10 / portTICK_PERIOD_MS);
 	}
 
@@ -150,6 +144,14 @@ void ADXRS(void * param){
 
 int main(void)
 {
+<<<<<<< HEAD
+=======
+	CHIP_Init();
+	CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
+	CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);
+	CMU_ClockEnable(cmuClock_GPIO, true);
+	enableSWO();
+>>>>>>> cleaning
 
 	 memset(&Main, 0, sizeof(Main));
 	    CHIP_Init();
