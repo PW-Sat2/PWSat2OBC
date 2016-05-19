@@ -1,53 +1,47 @@
-import os
-
 import devices
 from tests.base import BaseTest
 
 
-mock_com = os.environ.get('MOCK_COM')
-obc_com = os.environ.get('OBC_COM')
-
-
 class Test_Comm(BaseTest):
     def test_should_initialize_transmitter(self):
-        self.assertTrue(self.transmitter.wait_for_reset(3))
+        self.assertTrue(self.system.transmitter.wait_for_reset(3))
 
     def test_should_send_frame(self):
-        self.obc.send_frame("ABC")
-        msg = self.transmitter.get_message_from_buffer(3)
+        self.system.obc.send_frame("ABC")
+        msg = self.system.transmitter.get_message_from_buffer(3)
 
         self.assertEqual(msg, (65, 66, 67))
 
     def test_should_initialize_receiver(self):
-        self.assertTrue(self.receiver.wait_for_reset(3))
+        self.assertTrue(self.system.receiver.wait_for_reset(3))
 
     def test_should_get_number_of_frames(self):
-        self.receiver.put_frame("ABC")
+        self.system.receiver.put_frame("ABC")
 
-        count = int(self.obc.get_frame_count())
+        count = int(self.system.obc.get_frame_count())
 
         self.assertEqual(count, 1)
 
     def test_should_receive_frame(self):
-        self.receiver.put_frame("ABC")
+        self.system.receiver.put_frame("ABC")
 
-        frame = self.obc.receive_frame()
+        frame = self.system.obc.receive_frame()
 
         self.assertEqual(frame, "ABC")
 
     def test_should_remove_frame_after_receive(self):
-        self.receiver.put_frame("ABC")
+        self.system.receiver.put_frame("ABC")
 
-        self.obc.receive_frame()
+        self.system.obc.receive_frame()
 
-        self.assertEqual(self.receiver.queue_size(), 0)
+        self.assertEqual(self.system.receiver.queue_size(), 0)
 
     def test_should_receive_biggest_possible_frame(self):
         frame = "".join([chr(ord('A') + i % 25) for i in xrange(0, devices.TransmitterDevice.MAX_CONTENT_SIZE)])
 
-        self.receiver.put_frame(frame)
+        self.system.receiver.put_frame(frame)
 
-        received_frame = self.obc.receive_frame()
+        received_frame = self.system.obc.receive_frame()
 
         self.assertEqual(received_frame, frame)
 

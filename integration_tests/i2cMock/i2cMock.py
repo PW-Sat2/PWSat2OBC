@@ -87,6 +87,7 @@ class I2CMock(object):
         self.port = serial.Serial(port=portName, baudrate=baudrate, rtscts=True)
         self.active = False
         self.reader = Thread(target=I2CMock._run, args=(self,))
+        self.reader.daemon = True
 
     def start(self):
         self.reader.start()

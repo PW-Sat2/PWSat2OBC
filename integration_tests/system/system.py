@@ -25,4 +25,8 @@ class System:
         self.i2c.add_device(self.transmitter)
         self.i2c.add_device(self.receiver)
 
+    def close(self):
+        self.i2c.close()
+        self.obc.close()
+
 

@@ -7,6 +7,9 @@ class SerialPortTerminal:
         self._serial.rts = False
 
     def waitForPrompt(self):
+        self._serial.reset_input_buffer()
+        self._serial.flushInput()
+
         self._serial.write("\n")
         self._serial.flush()
         c = self._serial.read(1)
@@ -25,8 +28,13 @@ class SerialPortTerminal:
     def command(self, cmd):
         self.waitForPrompt()
 
-        self._serial.write(cmd)
-        self._serial.write("\n")
+        self._serial.reset_input_buffer()
+        self._serial.reset_output_buffer()
+        self._serial.flushInput()
+        self._serial.flushOutput()
+
+        self._serial.write(cmd + "\n")
+        self._serial.flush()
 
         response = self.readUntilPrompt()
 

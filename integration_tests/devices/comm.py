@@ -3,8 +3,6 @@ from Queue import Queue, Empty
 import i2cMock
 from threading import Event
 
-counter = 0
-
 
 class TransmitterDevice(i2cMock.I2CDevice):
     MAX_CONTENT_SIZE = 235
@@ -37,12 +35,9 @@ class TransmitterDevice(i2cMock.I2CDevice):
 
 class ReceiverDevice(i2cMock.I2CDevice):
     def __init__(self):
-        global  counter
-        print "ReceiverDevice.__init__"
         super(ReceiverDevice, self).__init__(0x60)
         self._reset = Event()
         self._buffer = Queue()
-        counter += 1
 
     @i2cMock.command([0xAA])
     def _reset(self):
@@ -51,13 +46,10 @@ class ReceiverDevice(i2cMock.I2CDevice):
 
     @i2cMock.command([0x21])
     def _get_number_of_frames(self):
-        print "Get number of frames"
         return [self._buffer.qsize()]
 
     @i2cMock.command([0x22])
     def _receive_frame(self):
-        print "Receive frame %d" % counter
-
         if self._buffer.empty():
             return []
 
