@@ -69,7 +69,7 @@ void CommInit(void)
 
 void CommAutoHandling(bool enable)
 {
-	autoCommHandling = enable;
+    autoCommHandling = enable;
 }
 
 void CommSendFrame(uint8_t* data, uint8_t length)

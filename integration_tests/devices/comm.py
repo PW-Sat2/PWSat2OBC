@@ -2,6 +2,7 @@ from Queue import Queue, Empty
 
 import i2cMock
 from threading import Event
+import time
 
 
 class TransmitterDevice(i2cMock.I2CDevice):
@@ -54,7 +55,6 @@ class ReceiverDevice(i2cMock.I2CDevice):
             return []
 
         frame = self._buffer.queue[0]
-
         return ReceiverDevice.build_frame_response(frame, 257, 300)
 
     @i2cMock.command([0x24])

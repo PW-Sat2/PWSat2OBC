@@ -111,7 +111,7 @@ static void handleIncomingChar(void* args)
         uint8_t data = 0;
 
         xQueueReceive(terminalQueue, &data, portMAX_DELAY);
-        LOGF(LOG_LEVEL_TRACE, "Char: %c", data);
+
         if (data == '\n')
         {
             input_buffer[input_buffer_position] = 0;

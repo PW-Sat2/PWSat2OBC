@@ -14,6 +14,7 @@ typedef struct
     uint8_t Contents[COMM_MAX_FRAME_CONTENTS_SIZE];
 } Frame;
 
+
 void CommInit(void);
 void CommSendFrame(uint8_t* data, uint8_t length);
 uint8_t CommGetFramesCount(void);

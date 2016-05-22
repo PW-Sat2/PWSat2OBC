@@ -12,7 +12,8 @@ BYTE_WRITTEN = 'B'
 WRITE_FINISHED = 'S'
 NEXT_BYTE = 'N'
 READ_FINISHED = 'F'
-
+CONTROL_CHAR = 'C'
+CONTROL_CMD_RESTART = 'R'
 
 def command(bytes):
     def wrapper(func):
@@ -41,7 +42,7 @@ class I2CDevice(object):
                 handler = h
                 args = data[len(h.bytes):]
 
-        if handler == None:
+        if handler is None:
             return self._missing_handler(data)
 
         self.response = handler(self, *args)
@@ -83,13 +84,18 @@ class I2CMock(object):
     port = serial.Serial
     devices = {}
 
-    def __init__(self, portName, baudrate=1000000):
-        self.port = serial.Serial(port=portName, baudrate=baudrate, rtscts=True)
+    def __init__(self, port_name, baudrate=250000):
+        self.port = serial.Serial(port=port_name, baudrate=baudrate, rtscts=True, write_timeout=None)
         self.active = False
         self.reader = Thread(target=I2CMock._run, args=(self,))
         self.reader.daemon = True
 
     def start(self):
+        self.port.reset_input_buffer()
+        self.port.reset_output_buffer()
+
+        self.restart()
+
         self.reader.start()
 
     def add_device(self, device):
@@ -103,13 +109,18 @@ class I2CMock(object):
         self.reader.join()
         self.port = None
 
+    def restart(self):
+        self.port.write(CONTROL_CHAR + CONTROL_CMD_RESTART)
+
+        c = self.port.read(1)
+        while c != 'X':
+            c = self.port.read(1)
+
     def _run(self):
         self.log.debug("Worker thread starting")
         while self.port.is_open:
             try:
                 c = self.port.read(1)
-
-                self.log.debug("Received data: %s", c)
 
                 self.handle_command(c)
             except serial.SerialException as e:
@@ -126,7 +137,7 @@ class I2CMock(object):
         elif cmd == DEVICE_SELECTED_FOR_READ:
             self._device_selected_for_read()
         else:
-            self.log.warning("Unknown mock command %s", cmd)
+            self.log.warning("%s", cmd)
             sys.stdout.write(cmd)
 
     def _device(self, address):
@@ -140,17 +151,28 @@ class I2CMock(object):
 
         self.log.debug("Device %d selected for write", address)
 
-        numberOfBytes = ord(self.port.read(1))
+        number_of_bytes = ord(self.port.read(1))
 
-        self.log.debug("Number of bytes to write: %d", numberOfBytes)
+        self.log.debug("Number of bytes to write: %d", number_of_bytes)
 
-        data = [ord(self.port.read()) for _ in range(numberOfBytes)]
+        data = [ord(self.port.read()) for _ in range(number_of_bytes)]
 
         self.log.debug("Written bytes: %s", data)
 
         device = self._device(address)
 
         device.handle(data)
+
+    def _escape(self, data):
+        def escape_char(c):
+            if c == CONTROL_CHAR or c == ord(CONTROL_CHAR):
+                return [CONTROL_CHAR, CONTROL_CHAR]
+            else:
+                return [c]
+
+        escaped = map(escape_char, data)
+
+        return [x for y in escaped for x in y]
 
     def _device_selected_for_read(self):
         address = ord(self.port.read(1))
@@ -161,4 +183,12 @@ class I2CMock(object):
 
         data = device.read()
 
-        self.port.write([len(data)] + data)
+        self.log.debug("Response bytes: %s", data)
+
+        response = [len(data)] + data
+        escaped = self._escape(response)
+
+        self.port.write(escaped)
+        self.port.reset_output_buffer()
+
+        self.log.debug("Bytes written")

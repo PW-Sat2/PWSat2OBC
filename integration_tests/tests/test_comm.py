@@ -42,7 +42,7 @@ class Test_Comm(BaseTest):
     def test_should_remove_frame_after_receive(self):
         self.system.obc.comm_auto_handling(False)
 
-        self.system.receiver.put_frame("ABC")
+        self.system.receiver.put_frame("ABD")
 
         self.system.obc.receive_frame()
 

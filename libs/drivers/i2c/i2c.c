@@ -1,5 +1,6 @@
 #include <FreeRTOS.h>
 #include <queue.h>
+#include <semphr.h>
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -17,6 +18,7 @@
 #include "io_map.h"
 
 static QueueHandle_t i2cResult;
+static SemaphoreHandle_t i2cLock;
 
 void I2C1_IRQHandler(void)
 {
@@ -39,6 +41,8 @@ void I2C1_IRQHandler(void)
 
 static I2C_TransferReturn_TypeDef i2cTransfer(I2C_TransferSeq_TypeDef* seq)
 {
+	xSemaphoreTake(i2cLock, portMAX_DELAY);
+
     I2C_TransferReturn_TypeDef ret = I2C_TransferInit(I2C, seq);
 
     if (ret != i2cTransferInProgress)
@@ -50,6 +54,8 @@ static I2C_TransferReturn_TypeDef i2cTransfer(I2C_TransferSeq_TypeDef* seq)
     {
         LOG(LOG_LEVEL_ERROR, "Didn't received i2c transfer result");
     }
+
+    xSemaphoreGive(i2cLock);
 
     return ret;
 }
@@ -75,6 +81,9 @@ I2C_TransferReturn_TypeDef I2CWriteRead(
 void I2CInit(void)
 {
     i2cResult = xQueueCreate(1, sizeof(I2C_TransferReturn_TypeDef));
+
+    i2cLock = xSemaphoreCreateBinary();
+    xSemaphoreGive(i2cLock);
 
     CMU_ClockEnable(cmuClock_I2C1, true);
 
