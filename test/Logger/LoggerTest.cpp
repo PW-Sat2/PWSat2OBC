@@ -171,3 +171,61 @@ TEST(LoggerTest, TestRemovingNullEndpoint)
     LogRemoveEndpoint(NULL);
     LOGF(LOG_LEVEL_FATAL, "%s Message %d", "Test", 1);
 }
+
+TEST(LoggerTest, TestIsrFlagStandardMacroNoFormat)
+{
+    LoggerEndpoint endpoint;
+    EXPECT_CALL(endpoint, Log(false, _, _)).Times(1);
+    LogInit(LOG_LEVEL_INFO);
+    LogAddEndpoint(LoggerProxy, &endpoint, LOG_LEVEL_INFO);
+    LOG(LOG_LEVEL_FATAL, "Message");
+}
+
+TEST(LoggerTest, TestIsrFlagStandardMacroWithFormat)
+{
+    LoggerEndpoint endpoint;
+    EXPECT_CALL(endpoint, Log(0, _, _)).Times(1);
+    LogInit(LOG_LEVEL_INFO);
+    LogAddEndpoint(LoggerProxy, &endpoint, LOG_LEVEL_INFO);
+    LOGF(LOG_LEVEL_FATAL, "%s Message %d", "My", 1);
+}
+
+TEST(LoggerTest, TestIsrFlagIsrMacroNoFormat)
+{
+    LoggerEndpoint endpoint;
+    EXPECT_CALL(endpoint, Log(true, _, _)).Times(1);
+    LogInit(LOG_LEVEL_INFO);
+    LogAddEndpoint(LoggerProxy, &endpoint, LOG_LEVEL_INFO);
+    LOG_ISR(LOG_LEVEL_FATAL, "Message");
+}
+
+TEST(LoggerTest, TestIsrFlagIsrMacroWithFormat)
+{
+    LoggerEndpoint endpoint;
+    EXPECT_CALL(endpoint, Log(true, _, _)).Times(1);
+    LogInit(LOG_LEVEL_INFO);
+    LogAddEndpoint(LoggerProxy, &endpoint, LOG_LEVEL_INFO);
+    LOGF_ISR(LOG_LEVEL_FATAL, "%s Message %d", "My", 1);
+}
+
+TEST(LoggerTest, TestIsrFlagImmediateMacroNoFormat)
+{
+    LoggerEndpoint endpoint;
+    EXPECT_CALL(endpoint, Log(true, _, _)).Times(1);
+    EXPECT_CALL(endpoint, Log(false, _, _)).Times(1);
+    LogInit(LOG_LEVEL_INFO);
+    LogAddEndpoint(LoggerProxy, &endpoint, LOG_LEVEL_INFO);
+    LOGI(true, LOG_LEVEL_FATAL, "Message");
+    LOGI(false, LOG_LEVEL_FATAL, "Message");
+}
+
+TEST(LoggerTest, TestIsrFlagImmediateMacroWithFormat)
+{
+    LoggerEndpoint endpoint;
+    EXPECT_CALL(endpoint, Log(true, _, _)).Times(1);
+    EXPECT_CALL(endpoint, Log(false, _, _)).Times(1);
+    LogInit(LOG_LEVEL_INFO);
+    LogAddEndpoint(LoggerProxy, &endpoint, LOG_LEVEL_INFO);
+    LOGFI(false, LOG_LEVEL_FATAL, "%s Message %d", "My", 1);
+    LOGFI(true, LOG_LEVEL_FATAL, "%s Message %d", "My", 1);
+}
