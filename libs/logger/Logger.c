@@ -1,9 +1,9 @@
 #include "Logger.h"
-#include "system.h"
 #include <assert.h> // static_assert
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h> //memset
+#include "system.h"
 
 #define MAX_ENDPOINTS 3
 
@@ -80,7 +80,7 @@ void LogRemoveEndpoint(LoggerProcedure endpoint)
         {
             memmove(logger.endpoints + cx,
                 logger.endpoints + cx + 1,
-                sizeof(*logger.endpoints) * logger.endpointCount - (cx + 1));
+                sizeof(*logger.endpoints) * (logger.endpointCount - (cx + 1)));
             --logger.endpointCount;
             break;
         }
