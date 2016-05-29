@@ -10,7 +10,7 @@
 #include <em_i2c.h>
 #include <core_cm3.h>
 
-#include "logger/Logger.h"
+#include "logger/logger.h"
 
 #include "i2c.h"
 
@@ -31,7 +31,7 @@ void I2C1_IRQHandler(void)
 
     if (xQueueSendFromISR(i2cResult, &status, &taskWoken) != pdFALSE)
     {
-        LOG(LOG_LEVEL_ERROR, "Error queueing i2c result");
+        LOG_ISR(LOG_LEVEL_ERROR, "Error queueing i2c result");
     }
 
     portEND_SWITCHING_ISR(taskWoken);

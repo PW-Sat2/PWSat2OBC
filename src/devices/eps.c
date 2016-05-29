@@ -4,7 +4,7 @@
 #include "eps.h"
 
 #include "i2c/i2c.h"
-#include "logger/Logger.h"
+#include "logger/logger.h"
 
 #include "system.h"
 

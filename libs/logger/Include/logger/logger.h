@@ -32,22 +32,69 @@ enum LogLevel
  * @brief Function pointer type that defines entry point for logger's endpoint entry point.
  *
  * @param[in] context Pointer to endpoint's specific context. This value is provided during endpoint registration.
+ * @param[in] withinIsr When set this flag indicates that the logging operation is being done from within ISR.
  * @param[in] messageHeader Pointer to string that contains log entry header.
  * @param[in] messageFormat Pointer to logged message format string.
  * @param[in] messageArguments Logged message arguments.
  */
 typedef void (*LoggerProcedure)(
-    void* context, const char* messageHeader, const char* messageFormat, va_list messageArguments);
+    void* context, bool withinIsr, const char* messageHeader, const char* messageFormat, va_list messageArguments);
 
 /**
  * @brief Macro used for logging non parameterized entries.
+ *
+ * @param[in] level Requested log message level.
+ * @param[in] message Message that should be logged.
+ * @remark Do not use this macro from within interrupt service routines.
  */
-#define LOG(level, message) LogMessage(level, message)
+#define LOG(level, message) LogMessage(false, level, message)
 
 /**
  * @brief Macro used for logging parameterized entries.
+ *
+ * @param[in] level Requested log message level.
+ * @param[in] message Message that should be logged.
+ * @remark Do not use this macro from within interrupt service routines.
  */
-#define LOGF(level, message, ...) LogMessage(level, message, __VA_ARGS__)
+#define LOGF(level, message, ...) LogMessage(false, level, message, __VA_ARGS__)
+
+/**
+ * @brief Macro used for logging non parameterized entries.
+ *
+ * @param[in] level Requested log message level.
+ * @param[in] message Message that should be logged.
+ * @remark This macro is intended for use only from within interrupt service routines.
+ */
+#define LOG_ISR(level, message) LogMessage(true, level, message)
+
+/**
+ * @brief Macro used for logging parameterized entries.
+ *
+ * @param[in] level Requested log message level.
+ * @param[in] message Message that should be logged.
+ * @remark This macro is intended for use only from within interrupt service routines.
+ */
+#define LOGF_ISR(level, message, ...) LogMessage(true, level, message, __VA_ARGS__)
+
+/**
+ * @brief Macro used for logging non parameterized entries.
+ *
+ * @param[in] withinIsr When set to true indicates that message is being logged from within
+ * interrupt service routine, false otherwise.
+ * @param[in] level Requested log message level.
+ * @param[in] message Message that should be logged.
+ */
+#define LOGI(withinIsr, level, message) LogMessage(withinIsr, level, message)
+
+/**
+ * @brief Macro used for logging parameterized entries.
+ *
+ * @param[in] withinIsr When set to true indicates that message is being logged from within
+ * interrupt service routine, false otherwise.
+ * @param[in] level Requested log message level.
+ * @param[in] message Message that should be logged.
+ */
+#define LOGFI(withinIsr, level, message, ...) LogMessage(withinIsr, level, message, __VA_ARGS__)
 
 /**
  * @brief Reinitializes the logger.
@@ -105,10 +152,12 @@ void LogRemoveEndpoint(LoggerProcedure endpoint);
 /**
  * @brief Logs a message.
  *
+ * @param[in] withinIsr When set to true indicates that message is being logged from within
+ * interrupt service routine, false otherwise.
  * @param[in] messageLevel Requested message logging level.
  * @param[in] message Logged message.
  */
-void LogMessage(enum LogLevel messageLevel, const char* message, ...);
+void LogMessage(bool withinIsr, enum LogLevel messageLevel, const char* message, ...);
 
 #ifdef __cplusplus
 }

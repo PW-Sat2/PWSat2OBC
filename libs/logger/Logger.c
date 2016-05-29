@@ -1,9 +1,9 @@
-#include "Logger.h"
-#include "system.h"
+#include "logger.h"
 #include <assert.h> // static_assert
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h> //memset
+#include "system.h"
 
 #define MAX_ENDPOINTS 3
 
@@ -80,7 +80,7 @@ void LogRemoveEndpoint(LoggerProcedure endpoint)
         {
             memmove(logger.endpoints + cx,
                 logger.endpoints + cx + 1,
-                sizeof(*logger.endpoints) * logger.endpointCount - (cx + 1));
+                sizeof(*logger.endpoints) * (logger.endpointCount - (cx + 1)));
             --logger.endpointCount;
             break;
         }
@@ -92,7 +92,7 @@ static inline bool CanLogAtLevel(const enum LogLevel requestedLogLEvel, const en
     return requestedLogLEvel <= currentLogLevel;
 }
 
-void LogMessage(enum LogLevel messageLevel, const char* message, ...)
+void LogMessage(bool withinIsr, enum LogLevel messageLevel, const char* message, ...)
 {
     if (!CanLogAtLevel(messageLevel, logger.globalLevel))
     {
@@ -109,7 +109,7 @@ void LogMessage(enum LogLevel messageLevel, const char* message, ...)
         const LoggerEndpoint* endpoint = &logger.endpoints[cx];
         if (CanLogAtLevel(messageLevel, endpoint->endpointLogLevel))
         {
-            endpoint->endpoint(endpoint->context, header, message, arguments);
+            endpoint->endpoint(endpoint->context, withinIsr, header, message, arguments);
         }
     }
 

@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <leuart/leuart.h>
-#include "logger/Logger.h"
+#include "logger/logger.h"
 #include "obc_time.h"
 #include "swo/swo.h"
 #include "system.h"

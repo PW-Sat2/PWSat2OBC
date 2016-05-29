@@ -5,7 +5,7 @@
 #include <task.h>
 
 #include <swo/swo.h>
-#include "logger/Logger.h"
+#include "logger/logger.h"
 #include "system.h"
 
 #include "devices/eps.h"
