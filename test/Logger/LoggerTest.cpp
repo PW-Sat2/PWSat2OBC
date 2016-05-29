@@ -1,16 +1,16 @@
 #include "Logger/Logger.h"
-#include "gmock/gmock-matchers.h"
-#include "gmock/gmock.h"
-#include "system.h"
-#include "gtest/gtest.h"
 #include <string>
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
+#include "gmock/gmock-matchers.h"
+#include "system.h"
 
 namespace
 {
     struct LoggerEndpoint
     {
-        MOCK_METHOD2(Log, void(const char* header, const char* message));
-        MOCK_METHOD2(LogFormat, void(const char* header, const std::string& message));
+        MOCK_METHOD3(Log, void(bool withinIsr, const char* header, const char* message));
+        MOCK_METHOD3(LogFormat, void(bool withinIsr, const char* header, const std::string& message));
     };
 }
 
@@ -19,15 +19,16 @@ using testing::Ge;
 using testing::_;
 using testing::StrEq;
 
-static void LoggerProxy(void* context, const char* messageHeader, const char* messageFormat, va_list messageArguments)
+static void LoggerProxy(
+    void* context, bool withinIsr, const char* messageHeader, const char* messageFormat, va_list messageArguments)
 {
     UNREFERENCED_PARAMETER(messageArguments);
     const auto endpoint = static_cast<LoggerEndpoint*>(context);
-    endpoint->Log(messageHeader, messageFormat);
+    endpoint->Log(withinIsr, messageHeader, messageFormat);
 }
 
 static void LoggerProxyWithFormat(
-    void* context, const char* messageHeader, const char* messageFormat, va_list messageArguments)
+    void* context, bool withinIsr, const char* messageHeader, const char* messageFormat, va_list messageArguments)
 {
     std::string message;
     auto result = vsnprintf(nullptr, 0, messageFormat, messageArguments) + 1;
@@ -37,7 +38,7 @@ static void LoggerProxyWithFormat(
     result = vsnprintf(&message[0], message.size(), messageFormat, messageArguments);
     message.resize(result);
     const auto endpoint = static_cast<LoggerEndpoint*>(context);
-    endpoint->LogFormat(messageHeader, message);
+    endpoint->LogFormat(withinIsr, messageHeader, message);
 }
 
 TEST(LoggerTest, TestAddSingleEndpoint)
@@ -62,7 +63,7 @@ TEST(LoggerTest, TestAddMultipleEndpointsBeyondLimit)
 TEST(LoggerTest, TestLogEntryWith)
 {
     LoggerEndpoint endpoint;
-    EXPECT_CALL(endpoint, Log(_, StrEq("Test Message")));
+    EXPECT_CALL(endpoint, Log(_, _, StrEq("Test Message")));
     LogInit(LOG_LEVEL_INFO);
     LogAddEndpoint(LoggerProxy, &endpoint, LOG_LEVEL_ERROR);
     LOG(LOG_LEVEL_FATAL, "Test Message");
@@ -71,7 +72,7 @@ TEST(LoggerTest, TestLogEntryWith)
 TEST(LoggerTest, TestLogEntryWithFormat)
 {
     LoggerEndpoint endpoint;
-    EXPECT_CALL(endpoint, LogFormat(_, StrEq("Test Message 1")));
+    EXPECT_CALL(endpoint, LogFormat(_, _, StrEq("Test Message 1")));
     LogInit(LOG_LEVEL_INFO);
     LogAddEndpoint(LoggerProxyWithFormat, &endpoint, LOG_LEVEL_ERROR);
     LOGF(LOG_LEVEL_FATAL, "%s Message %d", "Test", 1);
@@ -80,8 +81,8 @@ TEST(LoggerTest, TestLogEntryWithFormat)
 TEST(LoggerTest, TestMultipleEndpoints)
 {
     LoggerEndpoint endpoint;
-    EXPECT_CALL(endpoint, LogFormat(_, StrEq("Test Message 1")));
-    EXPECT_CALL(endpoint, Log(_, StrEq("%s Message %d")));
+    EXPECT_CALL(endpoint, LogFormat(_, _, StrEq("Test Message 1")));
+    EXPECT_CALL(endpoint, Log(_, _, StrEq("%s Message %d")));
     LogInit(LOG_LEVEL_INFO);
     LogAddEndpoint(LoggerProxyWithFormat, &endpoint, LOG_LEVEL_ERROR);
     LogAddEndpoint(LoggerProxy, &endpoint, LOG_LEVEL_ERROR);
@@ -91,8 +92,8 @@ TEST(LoggerTest, TestMultipleEndpoints)
 TEST(LoggerTest, TestMessageOnDisabledLevel)
 {
     LoggerEndpoint endpoint;
-    EXPECT_CALL(endpoint, LogFormat(_, _)).Times(0);
-    EXPECT_CALL(endpoint, Log(_, _)).Times(0);
+    EXPECT_CALL(endpoint, LogFormat(_, _, _)).Times(0);
+    EXPECT_CALL(endpoint, Log(_, _, _)).Times(0);
     LogInit(LOG_LEVEL_INFO);
     LogAddEndpoint(LoggerProxyWithFormat, &endpoint, LOG_LEVEL_ERROR);
     LogAddEndpoint(LoggerProxy, &endpoint, LOG_LEVEL_ERROR);
@@ -102,8 +103,8 @@ TEST(LoggerTest, TestMessageOnDisabledLevel)
 TEST(LoggerTest, TestMessageOnDisabledLevelByEndpoint)
 {
     LoggerEndpoint endpoint;
-    EXPECT_CALL(endpoint, LogFormat(_, StrEq("Test Message 1")));
-    EXPECT_CALL(endpoint, Log(_, _)).Times(0);
+    EXPECT_CALL(endpoint, LogFormat(_, _, StrEq("Test Message 1")));
+    EXPECT_CALL(endpoint, Log(_, _, _)).Times(0);
     LogInit(LOG_LEVEL_INFO);
     LogAddEndpoint(LoggerProxy, &endpoint, LOG_LEVEL_ERROR);
     LogAddEndpoint(LoggerProxyWithFormat, &endpoint, LOG_LEVEL_INFO);
@@ -113,8 +114,8 @@ TEST(LoggerTest, TestMessageOnDisabledLevelByEndpoint)
 TEST(LoggerTest, TestDuplicatedRegistration)
 {
     LoggerEndpoint endpoint;
-    EXPECT_CALL(endpoint, LogFormat(_, StrEq("Test Message 1"))).Times(2);
-    EXPECT_CALL(endpoint, Log(_, _)).Times(0);
+    EXPECT_CALL(endpoint, LogFormat(_, _, StrEq("Test Message 1"))).Times(2);
+    EXPECT_CALL(endpoint, Log(_, _, _)).Times(0);
     LogInit(LOG_LEVEL_INFO);
     LogAddEndpoint(LoggerProxy, &endpoint, LOG_LEVEL_ERROR);
     LogAddEndpoint(LoggerProxyWithFormat, &endpoint, LOG_LEVEL_INFO);
@@ -125,8 +126,8 @@ TEST(LoggerTest, TestDuplicatedRegistration)
 TEST(LoggerTest, TestDuplicatedRegistrationCheckLevels)
 {
     LoggerEndpoint endpoint;
-    EXPECT_CALL(endpoint, LogFormat(_, StrEq("Test Message 1"))).Times(1);
-    EXPECT_CALL(endpoint, Log(_, _)).Times(0);
+    EXPECT_CALL(endpoint, LogFormat(_, _, StrEq("Test Message 1"))).Times(1);
+    EXPECT_CALL(endpoint, Log(_, _, _)).Times(0);
     LogInit(LOG_LEVEL_TRACE);
     LogAddEndpoint(LoggerProxy, &endpoint, LOG_LEVEL_ERROR);
     LogAddEndpoint(LoggerProxyWithFormat, &endpoint, LOG_LEVEL_INFO);
@@ -137,8 +138,8 @@ TEST(LoggerTest, TestDuplicatedRegistrationCheckLevels)
 TEST(LoggerTest, TestRemovingEndpoint)
 {
     LoggerEndpoint endpoint;
-    EXPECT_CALL(endpoint, LogFormat(_, StrEq("Test Message 1"))).Times(2);
-    EXPECT_CALL(endpoint, Log(_, _)).Times(0);
+    EXPECT_CALL(endpoint, LogFormat(_, _, StrEq("Test Message 1"))).Times(2);
+    EXPECT_CALL(endpoint, Log(_, _, _)).Times(0);
     LogInit(LOG_LEVEL_INFO);
     LogAddEndpoint(LoggerProxyWithFormat, &endpoint, LOG_LEVEL_INFO);
     LogAddEndpoint(LoggerProxyWithFormat, &endpoint, LOG_LEVEL_DEBUG);
@@ -150,8 +151,8 @@ TEST(LoggerTest, TestRemovingEndpoint)
 TEST(LoggerTest, TestRemovingNonExistingEndpoint)
 {
     LoggerEndpoint endpoint;
-    EXPECT_CALL(endpoint, LogFormat(_, StrEq("Test Message 1"))).Times(2);
-    EXPECT_CALL(endpoint, Log(_, _)).Times(0);
+    EXPECT_CALL(endpoint, LogFormat(_, _, StrEq("Test Message 1"))).Times(2);
+    EXPECT_CALL(endpoint, Log(_, _, _)).Times(0);
     LogInit(LOG_LEVEL_INFO);
     LogAddEndpoint(LoggerProxyWithFormat, &endpoint, LOG_LEVEL_INFO);
     LogAddEndpoint(LoggerProxyWithFormat, &endpoint, LOG_LEVEL_DEBUG);
@@ -159,11 +160,11 @@ TEST(LoggerTest, TestRemovingNonExistingEndpoint)
     LOGF(LOG_LEVEL_FATAL, "%s Message %d", "Test", 1);
 }
 
-TEST(LoggerTest, TestRemovingNullEndpint)
+TEST(LoggerTest, TestRemovingNullEndpoint)
 {
     LoggerEndpoint endpoint;
-    EXPECT_CALL(endpoint, LogFormat(_, StrEq("Test Message 1"))).Times(2);
-    EXPECT_CALL(endpoint, Log(_, _)).Times(0);
+    EXPECT_CALL(endpoint, LogFormat(_, _, StrEq("Test Message 1"))).Times(2);
+    EXPECT_CALL(endpoint, Log(_, _, _)).Times(0);
     LogInit(LOG_LEVEL_INFO);
     LogAddEndpoint(LoggerProxyWithFormat, &endpoint, LOG_LEVEL_INFO);
     LogAddEndpoint(LoggerProxyWithFormat, &endpoint, LOG_LEVEL_DEBUG);
