@@ -92,7 +92,7 @@ static inline bool CanLogAtLevel(const enum LogLevel requestedLogLEvel, const en
     return requestedLogLEvel <= currentLogLevel;
 }
 
-void LogMessage(enum LogLevel messageLevel, const char* message, ...)
+void LogMessage(bool withinIsr, enum LogLevel messageLevel, const char* message, ...)
 {
     if (!CanLogAtLevel(messageLevel, logger.globalLevel))
     {
@@ -109,7 +109,7 @@ void LogMessage(enum LogLevel messageLevel, const char* message, ...)
         const LoggerEndpoint* endpoint = &logger.endpoints[cx];
         if (CanLogAtLevel(messageLevel, endpoint->endpointLogLevel))
         {
-            endpoint->endpoint(endpoint->context, header, message, arguments);
+            endpoint->endpoint(endpoint->context, withinIsr, header, message, arguments);
         }
     }
 
