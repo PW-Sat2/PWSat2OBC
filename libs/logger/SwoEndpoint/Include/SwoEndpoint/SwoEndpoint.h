@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Logger/Logger.h"
+#include "logger/logger.h"
 
 /**
  * @brief Initializes swo logger endpoint.

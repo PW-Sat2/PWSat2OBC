@@ -10,7 +10,7 @@
 #include <em_i2c.h>
 #include <core_cm3.h>
 
-#include "logger/Logger.h"
+#include "logger/logger.h"
 
 #include "i2c.h"
 
