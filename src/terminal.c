@@ -10,7 +10,7 @@
 #include "commands/commands.h"
 #include "io_map.h"
 #include "leuart/leuart.h"
-#include "logger/Logger.h"
+#include "logger/logger.h"
 #include "swo/swo.h"
 #include "system.h"
 #include "terminal.h"

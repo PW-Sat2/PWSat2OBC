@@ -1,10 +1,11 @@
 #include "SwoEndpoint.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "swo/swo.h"
 #include "system.h"
-#include <assert.h>
-#include <stdint.h>
 
 void* SwoEndpointInit(void)
 {
@@ -35,9 +36,10 @@ void SwoEndpointClose(void* handle)
 }
 
 static void SwoEndpointLogger(
-    void* context, const char* messageHeader, const char* messageFormat, va_list messageArguments)
+    void* context, bool withinISR, const char* messageHeader, const char* messageFormat, va_list messageArguments)
 {
     UNREFERENCED_PARAMETER(context);
+    UNREFERENCED_PARAMETER(withinISR);
     // Do not use channel 0 for logging. Leave it for other purposes.
     const uint8_t channel = 1;
     SwoPutsOnChannel(channel, messageHeader);
@@ -45,19 +47,43 @@ static void SwoEndpointLogger(
     SwoPutsOnChannel(channel, "\n");
 }
 
-static void SwoEndpointLoggerSynchronized(
-    void* context, const char* messageHeader, const char* messageFormat, va_list messageArguments)
+static bool Lock(void* context, bool withinISR)
 {
-    const TickType_t waitTimeout = 100 / portTICK_PERIOD_MS; // wait at most 100 ms
-    if (xSemaphoreTake(context, waitTimeout) != pdTRUE)
+    if (withinISR)
+    {
+        return (xSemaphoreTakeFromISR(context, NULL) == pdTRUE);
+    }
+    else
+    {
+        const TickType_t waitTimeout = 100 / portTICK_PERIOD_MS; // wait at most 100 ms
+        return (xSemaphoreTake(context, waitTimeout) == pdTRUE);
+    }
+}
+
+static bool Unlock(void* context, bool withinISR)
+{
+    if (withinISR)
+    {
+        return (xSemaphoreGiveFromISR(context, NULL) == pdTRUE);
+    }
+    else
+    {
+        return (xSemaphoreGive(context) == pdTRUE);
+    }
+}
+
+static void SwoEndpointLoggerSynchronized(
+    void* context, bool withinISR, const char* messageHeader, const char* messageFormat, va_list messageArguments)
+{
+    if (!Lock(context, withinISR))
     {
         SwoPuts("Unable to acquire SwoEndpoint semaphore.\n");
         return;
     }
 
-    SwoEndpointLogger(context, messageHeader, messageFormat, messageArguments);
+    SwoEndpointLogger(context, withinISR, messageHeader, messageFormat, messageArguments);
 
-    if (xSemaphoreGive(context) != pdTRUE)
+    if (!Unlock(context, withinISR))
     {
         SwoPuts("Unable to release SwoEndpoint semaphore.\n");
     }

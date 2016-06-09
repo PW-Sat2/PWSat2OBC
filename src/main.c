@@ -10,7 +10,7 @@
 #include <FreeRTOSConfig.h>
 #include <task.h>
 
-#include "Logger/Logger.h"
+#include "logger/logger.h"
 #include "SwoEndpoint/SwoEndpoint.h"
 #include "i2c/i2c.h"
 #include "io_map.h"
