@@ -13,7 +13,7 @@ extern "C" {
  * @brief Reader object definition.
  *
  * This object is supposed to provide mens of reading various entries in a way
- * that is independent of both current memory layout independent and the actual
+ * that is independent of both current memory layout and the actual
  * buffer location in memory.
  */
 typedef struct
@@ -59,7 +59,7 @@ void ReaderInitialize(Reader* reader, const uint8_t* buffer, uint16_t length);
  * @retval true Buffer is valid and there is still some unread data left in it.
  * @retval false An attempt to read beyond the buffer end has been made.
  */
-bool ReaderStatus(const Reader* reader);
+static bool ReaderStatus(const Reader* reader);
 
 /**
  * @brief Returns the number of not yet read bytes from the buffer.
@@ -107,7 +107,7 @@ const uint8_t* ReaderReadArray(Reader* reader, uint16_t length);
  * @brief Resets reader to the initial state.
  * @param[in] reader Pointer to the reader that should be reset.
  */
-void ReaderReset(Reader* reader);
+static void ReaderReset(Reader* reader);
 
 inline bool ReaderStatus(const Reader* reader)
 {

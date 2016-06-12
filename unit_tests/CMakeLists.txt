@@ -7,6 +7,7 @@ set(SOURCES
   logger/LoggerTest.cpp
   Comm/CommTest.cpp
   base/ReaderTest.cpp
+  base/WriterTest.cpp
 )
 
 add_executable(${NAME} EXCLUDE_FROM_ALL ${SOURCES})

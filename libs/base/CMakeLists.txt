@@ -2,6 +2,10 @@ set(NAME base)
 
 set(SOURCES
     reader.c
+    writer.c
+    Include/base/reader.h
+    Include/base/writer.h
+    Include/system.h
 )
 
 add_library(${NAME} STATIC ${SOURCES})

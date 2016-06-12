@@ -4,6 +4,7 @@
 #include "system.h"
 
 using testing::Eq;
+
 TEST(ReaderTest, TestStatusNullBuffer)
 {
     Reader reader;
