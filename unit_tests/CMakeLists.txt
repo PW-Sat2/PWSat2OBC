@@ -2,17 +2,18 @@ set(NAME unit_tests)
 
 set(SOURCES
   semihosting.cpp
-  mem.c  
+  mem.c
   test.cpp
-  Logger/LoggerTest.cpp
-  Comm/CommTest.cpp   
+  logger/LoggerTest.cpp
+  Comm/CommTest.cpp
+  base/ReaderTest.cpp
 )
 
 add_executable(${NAME} EXCLUDE_FROM_ALL ${SOURCES})
 
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_CURRENT_LIST_DIR}/linker.ld")
 
-target_link_libraries(${NAME} platform emlib gtest gmock logger)
+target_link_libraries(${NAME} platform emlib gtest gmock logger base)
 
 target_require_semihosting(${NAME})
 
