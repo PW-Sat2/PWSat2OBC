@@ -19,7 +19,7 @@
 #include "system.h"
 #include "terminal.h"
 
-#include "devices/comm.h"
+#include "comm/comm.h"
 #include "devices/eps.h"
 
 void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
@@ -69,8 +69,10 @@ int main(void)
     I2CInit();
 
     EpsInit();
-
-    CommInit();
+    CommLowInterface commInterface;
+    commInterface.readProc = I2CWriteRead;
+    commInterface.writeProc = I2CWrite;
+    CommInitialize(&commInterface);
 
     TerminalInit();
     SwoPuts("Hello I'm PW-SAT2 OBC\n");
