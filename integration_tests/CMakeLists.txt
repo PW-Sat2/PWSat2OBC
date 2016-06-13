@@ -10,8 +10,8 @@ add_custom_target(${NAME}.deps
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_custom_target(${NAME} 
-    COMMAND ${CMAKE_COMMAND} -E env "MOCK_COM=${MOCK_COM}" "OBC_COM=${OBC_COM}" ${PYTHON_EXECUTABLE} -m nose --with-xunit "--xunit-file=${TEST_RESULTS}"
+add_custom_target(${NAME}
+    COMMAND ${CMAKE_COMMAND} -E env "MOCK_COM=${MOCK_COM}" "OBC_COM=${OBC_COM}" ${PYTHON_EXECUTABLE} -m nose -v --with-xunit "--xunit-file=${TEST_RESULTS}"
     DEPENDS pwsat.flash ${NAME}.deps
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )

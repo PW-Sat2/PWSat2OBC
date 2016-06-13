@@ -1,4 +1,6 @@
 node {
+	stage 'Checkout'
+
 	try {
 		dir('source') {
 		  deleteDir()
@@ -7,14 +9,24 @@ node {
 
 		def toolchainPath = env.ARM_TOOLCHAIN
 
-		withEnv(["PATH+TOOLCHAIN=${toolchainPath}"]) {
+		withEnv(["PATH+TOOLCHAIN=${toolchainPath}", "PATH+SEGGER=${env.SEGGER}"]) {
 			dir('build') {
-			  deleteDir()
-			  bat "cmake -G \"MinGW Makefiles\" ../source"
-			  bat "make pwsat"
-			  bat "make unit_tests.run"
-			  echo "Memory usage report:"
-			  bat "make pwsat.memory_report"
+				deleteDir()
+				stage 'Build'
+				bat "cmake -DMOCK_COM=${env.MOCK_COM} -DOBC_COM=${env.OBC_COM} -G \"MinGW Makefiles\" ../source"
+				bat "make pwsat"
+				step([$class: 'ArtifactArchiver', artifacts: 'build/DevBoard/**/*', fingerprint: true])
+
+				stage 'Unit tests'
+				bat "make unit_tests.run"
+				step([$class: 'JUnitResultArchiver', testResults: 'build/DevBoard/unit-tests.xml'])
+
+				stage 'Reports'
+				echo "Memory usage report:"
+				bat "make pwsat.memory_report"
+				stage concurrency: 1, name: 'Integration Tests'
+				bat "make integration_tests"
+				step([$class: 'JUnitResultArchiver', testResults: 'build/DevBoard/integration-tests.xml'])
 			}
 		}
 
