@@ -15,7 +15,7 @@ add_executable(${NAME} ${SOURCES})
 
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${PLATFORM_LINKER_SCRIPT}")
 
-target_link_libraries(${NAME} platform freeRTOS base comm leuart swo logger SwoEndpoint i2c)
+target_link_libraries(${NAME} platform freeRTOS base os comm leuart swo logger SwoEndpoint i2c)
 
 target_generate_hex(${NAME})
 

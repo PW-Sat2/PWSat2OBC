@@ -10,17 +10,17 @@
 #include <FreeRTOSConfig.h>
 #include <task.h>
 
-#include "logger/logger.h"
 #include "SwoEndpoint/SwoEndpoint.h"
+#include "base/os.h"
+#include "comm/comm.h"
+#include "devices/eps.h"
 #include "i2c/i2c.h"
 #include "io_map.h"
+#include "logger/logger.h"
 #include "openSail.h"
 #include "swo/swo.h"
 #include "system.h"
 #include "terminal.h"
-
-#include "comm/comm.h"
-#include "devices/eps.h"
 
 void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
 {
@@ -57,6 +57,7 @@ static void InitSwoEndpoint(void)
 
 int main(void)
 {
+    CommObject comm;
     CHIP_Init();
 
     CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
@@ -66,18 +67,20 @@ int main(void)
 
     SwoEnable();
 
+    LogInit(LOG_LEVEL_MAX);
+    InitSwoEndpoint();
+
+    OSSetup();
     I2CInit();
 
     EpsInit();
     CommLowInterface commInterface;
     commInterface.readProc = I2CWriteRead;
     commInterface.writeProc = I2CWrite;
-    CommInitialize(&commInterface);
+    CommInitialize(&comm, &commInterface);
 
     TerminalInit();
     SwoPuts("Hello I'm PW-SAT2 OBC\n");
-    LogInit(LOG_LEVEL_MAX);
-    InitSwoEndpoint();
 
     OpenSailInit();
 

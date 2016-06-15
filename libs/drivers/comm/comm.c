@@ -3,13 +3,11 @@
 #include <stdlib.h>
 #include <stdnoreturn.h>
 #include <string.h>
-#include "FreeRTOS.h"
-#include "FreeRTOSConfig.h"
+#include "base/os.h"
 #include "base/reader.h"
 #include "base/writer.h"
 #include "logger/logger.h"
 #include "system.h"
-#include "task.h"
 
 typedef enum { CommReceiver = 0x60, CommTransmitter = 0x61 } CommAddress;
 
@@ -46,60 +44,55 @@ static bool SendCommandWithResponse(
     return object->low.readProc(address, &command, sizeof(command), outBuffer, outBufferSize) == i2cTransferDone;
 }
 
-static bool ResetHardware(CommObject* object)
+void CommInitialize(CommObject* comm, const CommLowInterface* lowerInterface)
 {
-    return SendCommand(object, CommReceiver, CommHardReset);
+    memset(comm, 0, sizeof(CommObject));
+    comm->low = *lowerInterface;
 }
 
-static bool ResetTransmitter(CommObject* object)
+bool CommRestart(CommObject* comm)
 {
-    return SendCommand(object, CommTransmitter, TransmitterSoftReset);
-}
-
-static bool ResetReceiver(CommObject* object)
-{
-    return SendCommand(object, CommReceiver, TransmitterSoftReset);
-}
-
-static bool InitializeHardware(CommObject* object)
-{
-    return ResetHardware(object) && ResetTransmitter(object) && ResetReceiver(object);
-}
-
-CommObject* CommInitialize(const CommLowInterface* lowerInterface)
-{
-    CommObject* com = (CommObject*)malloc(sizeof(CommObject));
-    if (com == NULL)
+    if (comm->commTask == NULL)
     {
-        return NULL;
-    }
-
-    memset(com, 0, sizeof(CommObject));
-    com->low = *lowerInterface;
-    bool status = false;
-
-    do
-    {
-        if (!InitializeHardware(com))
+        const OSResult result = System.CreateTask(CommTask, "COMM Task", 512, comm, 4, &comm->commTask);
+        if (result != OSResultSuccess)
         {
-            break;
+            LOGF(LOG_LEVEL_ERROR, "[comm] Unable to create background task. Status: 0x%08x.", result);
+            return false;
         }
 
-        if (xTaskCreate(CommTask, "COMM Task", 512, com, 4, &com->commTask) != pdPASS)
-        {
-            break;
-        }
-
-        status = true;
-    } while (false);
-
-    if (!status)
-    {
-        free(com);
-        com = NULL;
+        System.SuspendTask(comm->commTask);
     }
 
-    return com;
+    if (!CommReset(comm))
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable reset comm hardware. ");
+        return false;
+    }
+
+    System.ResumeTask(comm->commTask);
+    return true;
+}
+
+bool CommPause(CommObject* comm)
+{
+    System.SuspendTask(comm->commTask);
+    return true;
+}
+
+bool CommReset(CommObject* comm)
+{
+    return SendCommand(comm, CommReceiver, CommHardReset) && CommResetTransmitter(comm) && CommResetReceiver(comm);
+}
+
+bool CommResetTransmitter(CommObject* comm)
+{
+    return SendCommand(comm, CommTransmitter, TransmitterSoftReset);
+}
+
+bool CommResetReceiver(CommObject* comm)
+{
+    return SendCommand(comm, CommReceiver, TransmitterSoftReset);
 }
 
 CommReceiverFrameCount CommGetFrameCount(CommObject* comm)
@@ -332,6 +325,6 @@ static void CommTask(void* param)
             }
         }
 
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        System.SleepTask(10000);
     }
 }

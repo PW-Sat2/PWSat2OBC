@@ -87,7 +87,13 @@ typedef struct
     bool BeaconState;
 } CommTransmitterState;
 
-CommObject* CommInitialize(const CommLowInterface* lowerInterface);
+void CommInitialize(CommObject* comm, const CommLowInterface* lowerInterface);
+
+bool CommPause(CommObject* comm);
+
+bool CommRestart(CommObject* com);
+
+bool CommReset(CommObject* comm);
 
 CommReceiverFrameCount CommGetFrameCount(CommObject* object);
 
@@ -110,6 +116,10 @@ bool CommSetTransmitterStateWhenIdle(CommObject* com, CommTransmitterIdleState r
 bool CommSetTransmitterBitRate(CommObject* com, CommTransmitterBitrate bitrate);
 
 bool CommGetTransmitterState(CommObject* comm, CommTransmitterState* state);
+
+bool CommResetTransmitter(CommObject* comm);
+
+bool CommResetReceiver(CommObject* comm);
 
 #ifdef __cplusplus
 }
