@@ -25,6 +25,8 @@
 #include "terminal.h"
 
 OBC Main;
+#include "storage/storage.h"
+#include "storage/nand.h"
 
 void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
 {
@@ -49,8 +51,16 @@ static void BlinkLed0(void* param)
 
 static void StorageTest(void * param)
 {
+	UNREFERENCED_PARAMETER(param);
+
 	LOG(LOG_LEVEL_INFO, "Storage test");
-	DoThings();
+
+	FlashInterface flash;
+	FlashNANDInterface flashNAND;
+
+	BuildNANDInterface(&flash, &flashNAND);
+
+	DoThings(&flash);
 	vTaskSuspend(NULL);
 }
 
@@ -113,6 +123,8 @@ int main(void)
 
     TerminalInit();
     SwoPuts("Hello I'm PW-SAT2 OBC\n");
+    LogInit(LOG_LEVEL_DEBUG);
+    InitSwoEndpoint();
 
     OpenSailInit();
 
