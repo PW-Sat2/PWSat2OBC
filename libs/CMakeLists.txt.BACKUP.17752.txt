@@ -1,0 +1,22 @@
+add_subdirectory(external)
+add_subdirectory(drivers)
+add_subdirectory(base)
+add_subdirectory(logger)
+<<<<<<< HEAD
+add_subdirectory(storage)
+add_subdirectory(fs)
+add_subdirectory(yaffs_glue)
+add_subdirectory(mission)
+add_subdirectory(time)
+add_subdirectory(state)
+add_subdirectory(adcs)
+add_subdirectory(power)
+add_subdirectory(terminal)
+add_subdirectory(assert)
+add_subdirectory(telecommand_handling)_handling)
+add_subdirectory(free_rtos_wrapper)
+=======
+add_subdirectory(i2c)
+add_subdirectory(uart)
+add_subdirectory(camera)
+>>>>>>> Initial commit for camera ucamII
