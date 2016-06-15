@@ -26,7 +26,9 @@ typedef struct
 static const command commands[] = {{"ping", &PingHandler},
     {"echo", &EchoHandler},
     {"jumpToTime", &JumpToTimeHandler},
-    {"currentTime", &CurrentTimeHandler}};
+    {"currentTime", &CurrentTimeHandler},
+    {"takeRAWPhoto", &TakeRAWPhotoHandler},
+    {"takeJPEGPhoto", &TakeJPEGPhotoHandler}};
 
 static QueueHandle_t terminalQueue;
 
