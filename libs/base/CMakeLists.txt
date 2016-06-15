@@ -6,6 +6,7 @@ set(SOURCES
     Include/base/reader.h
     Include/base/writer.h
     Include/system.h
+    Include/base/os.h
 )
 
 add_library(${NAME} STATIC ${SOURCES})
