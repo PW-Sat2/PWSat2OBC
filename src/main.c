@@ -47,6 +47,13 @@ static void BlinkLed0(void* param)
     }
 }
 
+static void StorageTest(void * param)
+{
+	LOG(LOG_LEVEL_INFO, "Storage test");
+	DoThings();
+	vTaskSuspend(NULL);
+}
+
 static void InitSwoEndpoint(void)
 {
     void* swoEndpointHandle = SwoEndpointInit();
@@ -118,6 +125,7 @@ int main(void)
 
     System.CreateTask(BlinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
     System.CreateTask(ObcInitTask, "Init", 512, &Main, tskIDLE_PRIORITY + 16, &Main.initTask);
+    System.CreateTask(StorageTest, "FS Task", 2048, &Main, tskIDLE_PRIORITY + 1, NULL);
     System.RunScheduler();
 
     GPIO_PinOutToggle(LED_PORT, LED0);

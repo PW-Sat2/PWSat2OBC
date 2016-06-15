@@ -9,4 +9,5 @@ add_subdirectory(drivers/comm)
 
 add_subdirectory(base)
 add_subdirectory(logger)
+add_subdirectory(storage)
 add_subdirectory(os)
