@@ -19,6 +19,7 @@ static const uint8_t ReceiverAddress = 0x60;
 static const uint8_t TransmitterAddress = 0x61;
 
 static const uint8_t ReceiverGetFrameCount = 0x21;
+static const uint8_t ReceiverGetFrame = 0x22;
 static const uint8_t ReceiverRemoveFrame = 0x24;
 static const uint8_t ReceiverReset = 0xAA;
 
@@ -96,17 +97,6 @@ CommTest::CommTest()
 CommTest::~CommTest()
 {
     mockPtr = nullptr;
-}
-
-TEST_F(CommTest, ParseReceivedFrame)
-{
-    uint8_t raw[] = {3, 0, 44, 1, 64, 1, 65, 66, 67, 0};
-    Frame* frame = (Frame*)raw;
-
-    ASSERT_THAT(frame->Size, Eq(3));
-    ASSERT_THAT(frame->Doppler, Eq(300));
-    ASSERT_THAT(frame->RSSI, Eq(320));
-    ASSERT_THAT((char*)frame->Contents, StrEq("ABC"));
 }
 
 TEST_F(CommTest, TestInitializationDoesNotTouchHardware)
@@ -456,4 +446,138 @@ TEST_F(CommTest, TestSendFrameRejectedByHardware)
         }));
     const auto status = CommSendFrame(&comm, buffer, COUNT_OF(buffer));
     ASSERT_THAT(status, Eq(false));
+}
+
+TEST_F(CommTest, TestReceiveFrameFailure)
+{
+    Frame frame;
+    EXPECT_CALL(i2c, I2CRead(ReceiverAddress, ReceiverGetFrame, _, _, Ne(nullptr), Ge(COMM_MAX_FRAME_CONTENTS_SIZE)))
+        .WillOnce(Invoke([&](uint8_t /*address*/,
+            uint8_t /*command*/,
+            uint8_t* /*inData*/,
+            uint16_t /*length*/,
+            uint8_t* /*outData*/,
+            uint16_t /*outLength*/) { return i2cTransferNack; }));
+    const auto status = CommReceiveFrame(&comm, &frame);
+    ASSERT_THAT(status, Eq(false));
+}
+
+TEST_F(CommTest, TestReceiveFrameDopplerFrequencyOutOfRange)
+{
+    Frame frame;
+    EXPECT_CALL(i2c, I2CRead(ReceiverAddress, ReceiverGetFrame, _, _, Ne(nullptr), Ge(COMM_MAX_FRAME_CONTENTS_SIZE)))
+        .WillOnce(Invoke([&](uint8_t /*address*/,
+            uint8_t /*command*/,
+            uint8_t* /*inData*/,
+            uint16_t /*length*/,
+            uint8_t* outData,
+            uint16_t outLength) {
+            memset(outData, 0, outLength);
+            outData[0] = 1;
+            outData[3] = 0xf0;
+            return i2cTransferDone;
+        }));
+    const auto status = CommReceiveFrame(&comm, &frame);
+    ASSERT_THAT(status, Eq(false));
+}
+
+TEST_F(CommTest, TestReceiveFrameRSSIOutOfRange)
+{
+    Frame frame;
+    EXPECT_CALL(i2c, I2CRead(ReceiverAddress, ReceiverGetFrame, _, _, Ne(nullptr), Ge(COMM_MAX_FRAME_CONTENTS_SIZE)))
+        .WillOnce(Invoke([&](uint8_t /*address*/,
+            uint8_t /*command*/,
+            uint8_t* /*inData*/,
+            uint16_t /*length*/,
+            uint8_t* outData,
+            uint16_t outLength) {
+            memset(outData, 0, outLength);
+            outData[0] = 1;
+            outData[5] = 0xf0;
+            return i2cTransferDone;
+        }));
+    const auto status = CommReceiveFrame(&comm, &frame);
+    ASSERT_THAT(status, Eq(false));
+}
+
+TEST_F(CommTest, TestReceiveFrameSizeOutOfRange)
+{
+    Frame frame;
+    EXPECT_CALL(i2c, I2CRead(ReceiverAddress, ReceiverGetFrame, _, _, Ne(nullptr), Ge(COMM_MAX_FRAME_CONTENTS_SIZE)))
+        .WillOnce(Invoke([&](uint8_t /*address*/,
+            uint8_t /*command*/,
+            uint8_t* /*inData*/,
+            uint16_t /*length*/,
+            uint8_t* outData,
+            uint16_t outLength) {
+            memset(outData, 0, outLength);
+            outData[0] = 0xff;
+            return i2cTransferDone;
+        }));
+    const auto status = CommReceiveFrame(&comm, &frame);
+    ASSERT_THAT(status, Eq(false));
+}
+
+TEST_F(CommTest, TestReceiveFrameSizeIsZero)
+{
+    Frame frame;
+    EXPECT_CALL(i2c, I2CRead(ReceiverAddress, ReceiverGetFrame, _, _, Ne(nullptr), Ge(COMM_MAX_FRAME_CONTENTS_SIZE)))
+        .WillOnce(Invoke([&](uint8_t /*address*/,
+            uint8_t /*command*/,
+            uint8_t* /*inData*/,
+            uint16_t /*length*/,
+            uint8_t* outData,
+            uint16_t outLength) {
+            memset(outData, 0, outLength);
+            return i2cTransferDone;
+        }));
+    const auto status = CommReceiveFrame(&comm, &frame);
+    ASSERT_THAT(status, Eq(false));
+}
+
+TEST_F(CommTest, TestReceiveFrameSizeIsOutOfRange)
+{
+    Frame frame;
+    EXPECT_CALL(i2c, I2CRead(ReceiverAddress, ReceiverGetFrame, _, _, Ne(nullptr), Ge(COMM_MAX_FRAME_CONTENTS_SIZE)))
+        .WillOnce(Invoke([&](uint8_t /*address*/,
+            uint8_t /*command*/,
+            uint8_t* /*inData*/,
+            uint16_t /*length*/,
+            uint8_t* outData,
+            uint16_t outLength) {
+            memset(outData, 0, outLength);
+            outData[0] = COMM_MAX_FRAME_CONTENTS_SIZE + 1;
+            return i2cTransferDone;
+        }));
+    const auto status = CommReceiveFrame(&comm, &frame);
+    ASSERT_THAT(status, Eq(false));
+}
+
+TEST_F(CommTest, TestReceiveFrame)
+{
+    Frame frame;
+    const uint8_t expected[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
+    EXPECT_CALL(i2c, I2CRead(ReceiverAddress, ReceiverGetFrame, _, _, Ne(nullptr), Ge(COUNT_OF(expected) + 6)))
+        .WillOnce(Invoke([&](uint8_t /*address*/,
+            uint8_t /*command*/,
+            uint8_t* /*inData*/,
+            uint16_t /*length*/,
+            uint8_t* outData,
+            uint16_t outLength) {
+
+            memset(outData, 0, outLength);
+            outData[0] = COUNT_OF(expected);
+            outData[2] = 0xab;
+            outData[3] = 0x0c;
+            outData[4] = 0xde;
+            outData[5] = 0x0d;
+            memcpy(outData + 6, expected, COUNT_OF(expected));
+            return i2cTransferDone;
+        }));
+    const auto status = CommReceiveFrame(&comm, &frame);
+    ASSERT_THAT(status, Eq(true));
+    ASSERT_THAT(frame.Size, Eq(COUNT_OF(expected)));
+    ASSERT_THAT(frame.Doppler, Eq(0xcab));
+    ASSERT_THAT(frame.RSSI, Eq(0xdde));
+    ASSERT_TRUE(std::equal(expected, expected + COUNT_OF(expected), frame.Contents, frame.Contents + frame.Size));
 }

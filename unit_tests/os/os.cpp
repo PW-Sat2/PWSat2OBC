@@ -28,7 +28,7 @@ static void RunScheduller(void)
 {
     if (OSProxy != nullptr)
     {
-        return OSProxy->RunScheduller();
+        OSProxy->RunScheduller();
     }
 }
 
@@ -36,7 +36,7 @@ static void TaskSleep(const OSTaskTimeSpan time)
 {
     if (OSProxy != nullptr)
     {
-        return OSProxy->Sleep(time);
+        OSProxy->Sleep(time);
     }
 }
 
@@ -44,7 +44,7 @@ static void TaskSuspend(OSTaskHandle task)
 {
     if (OSProxy != nullptr)
     {
-        return OSProxy->SuspendTask(task);
+        OSProxy->SuspendTask(task);
     }
 }
 
@@ -52,7 +52,7 @@ static void TaskResume(OSTaskHandle task)
 {
     if (OSProxy != nullptr)
     {
-        return OSProxy->ResumeTask(task);
+        OSProxy->ResumeTask(task);
     };
 }
 
@@ -78,7 +78,6 @@ OSReset::~OSReset()
     if (!released)
     {
         OSProxy = nullptr;
-        //        OSReset();
     }
 }
 
