@@ -1,6 +1,7 @@
 #include <string>
 #include <algorithm>
 #include <em_i2c.h>
+#include <tuple>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "gmock/gmock-matchers.h"
@@ -18,6 +19,7 @@ using testing::Invoke;
 static const uint8_t ReceiverAddress = 0x60;
 static const uint8_t TransmitterAddress = 0x61;
 
+static const uint8_t ReceverGetTelemetry = 0x1A;
 static const uint8_t ReceiverGetFrameCount = 0x21;
 static const uint8_t ReceiverGetFrame = 0x22;
 static const uint8_t ReceiverRemoveFrame = 0x24;
@@ -28,6 +30,7 @@ static const uint8_t HardwareReset = 0xAB;
 static const uint8_t TransmitterSendFrame = 0x10;
 static const uint8_t TransmitterClearBeacon = 0x1f;
 static const uint8_t TransmitterSetIdleState = 0x24;
+static const uint8_t TransmitterGetTelemetry = 0x25;
 static const uint8_t TransmitterSetBitRate = 0x28;
 static const uint8_t TransmitterGetState = 0x41;
 static const uint8_t TransmitterReset = 0xAA;
@@ -415,7 +418,7 @@ TEST_F(CommTest, TestSendFrame)
     uint8_t buffer[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xb, 0xc};
     EXPECT_CALL(
         i2c, I2CRead(TransmitterAddress, TransmitterSendFrame, Ne(nullptr), COUNT_OF(buffer) + 1, Ne(nullptr), 1))
-        .WillOnce(Invoke([&](uint8_t /*address*/,
+        .WillOnce(Invoke([](uint8_t /*address*/,
             uint8_t /*command*/,
             uint8_t* inData,
             uint16_t length,
@@ -435,7 +438,7 @@ TEST_F(CommTest, TestSendFrameRejectedByHardware)
 {
     uint8_t buffer[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xb, 0xc};
     EXPECT_CALL(i2c, I2CRead(TransmitterAddress, TransmitterSendFrame, _, _, Ne(nullptr), 1))
-        .WillOnce(Invoke([&](uint8_t /*address*/,
+        .WillOnce(Invoke([](uint8_t /*address*/,
             uint8_t /*command*/,
             uint8_t* /*inData*/,
             uint16_t /*length*/,
@@ -452,7 +455,7 @@ TEST_F(CommTest, TestReceiveFrameFailure)
 {
     Frame frame;
     EXPECT_CALL(i2c, I2CRead(ReceiverAddress, ReceiverGetFrame, _, _, Ne(nullptr), Ge(COMM_MAX_FRAME_CONTENTS_SIZE)))
-        .WillOnce(Invoke([&](uint8_t /*address*/,
+        .WillOnce(Invoke([](uint8_t /*address*/,
             uint8_t /*command*/,
             uint8_t* /*inData*/,
             uint16_t /*length*/,
@@ -466,7 +469,7 @@ TEST_F(CommTest, TestReceiveFrameDopplerFrequencyOutOfRange)
 {
     Frame frame;
     EXPECT_CALL(i2c, I2CRead(ReceiverAddress, ReceiverGetFrame, _, _, Ne(nullptr), Ge(COMM_MAX_FRAME_CONTENTS_SIZE)))
-        .WillOnce(Invoke([&](uint8_t /*address*/,
+        .WillOnce(Invoke([](uint8_t /*address*/,
             uint8_t /*command*/,
             uint8_t* /*inData*/,
             uint16_t /*length*/,
@@ -485,7 +488,7 @@ TEST_F(CommTest, TestReceiveFrameRSSIOutOfRange)
 {
     Frame frame;
     EXPECT_CALL(i2c, I2CRead(ReceiverAddress, ReceiverGetFrame, _, _, Ne(nullptr), Ge(COMM_MAX_FRAME_CONTENTS_SIZE)))
-        .WillOnce(Invoke([&](uint8_t /*address*/,
+        .WillOnce(Invoke([](uint8_t /*address*/,
             uint8_t /*command*/,
             uint8_t* /*inData*/,
             uint16_t /*length*/,
@@ -504,7 +507,7 @@ TEST_F(CommTest, TestReceiveFrameSizeOutOfRange)
 {
     Frame frame;
     EXPECT_CALL(i2c, I2CRead(ReceiverAddress, ReceiverGetFrame, _, _, Ne(nullptr), Ge(COMM_MAX_FRAME_CONTENTS_SIZE)))
-        .WillOnce(Invoke([&](uint8_t /*address*/,
+        .WillOnce(Invoke([](uint8_t /*address*/,
             uint8_t /*command*/,
             uint8_t* /*inData*/,
             uint16_t /*length*/,
@@ -522,7 +525,7 @@ TEST_F(CommTest, TestReceiveFrameSizeIsZero)
 {
     Frame frame;
     EXPECT_CALL(i2c, I2CRead(ReceiverAddress, ReceiverGetFrame, _, _, Ne(nullptr), Ge(COMM_MAX_FRAME_CONTENTS_SIZE)))
-        .WillOnce(Invoke([&](uint8_t /*address*/,
+        .WillOnce(Invoke([](uint8_t /*address*/,
             uint8_t /*command*/,
             uint8_t* /*inData*/,
             uint16_t /*length*/,
@@ -539,7 +542,7 @@ TEST_F(CommTest, TestReceiveFrameSizeIsOutOfRange)
 {
     Frame frame;
     EXPECT_CALL(i2c, I2CRead(ReceiverAddress, ReceiverGetFrame, _, _, Ne(nullptr), Ge(COMM_MAX_FRAME_CONTENTS_SIZE)))
-        .WillOnce(Invoke([&](uint8_t /*address*/,
+        .WillOnce(Invoke([](uint8_t /*address*/,
             uint8_t /*command*/,
             uint8_t* /*inData*/,
             uint16_t /*length*/,
@@ -581,3 +584,167 @@ TEST_F(CommTest, TestReceiveFrame)
     ASSERT_THAT(frame.RSSI, Eq(0xdde));
     ASSERT_TRUE(std::equal(expected, expected + COUNT_OF(expected), frame.Contents, frame.Contents + frame.Size));
 }
+
+TEST_F(CommTest, TestReceiverTelemetry)
+{
+    CommReceiverTelemetry telemetry;
+    const uint8_t expected[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e};
+    EXPECT_CALL(
+        i2c, I2CRead(ReceiverAddress, ReceverGetTelemetry, _, _, Ne(nullptr), Ge(sizeof(CommReceiverTelemetry))))
+        .WillOnce(Invoke([&](uint8_t /*address*/,
+            uint8_t /*command*/,
+            uint8_t* /*inData*/,
+            uint16_t /*length*/,
+            uint8_t* outData,
+            uint16_t outLength) {
+            memset(outData, 0, outLength);
+            memcpy(outData, expected, COUNT_OF(expected));
+            return i2cTransferDone;
+        }));
+    const auto status = CommGetReceiverTelemetry(&comm, &telemetry);
+    ASSERT_THAT(status, Eq(true));
+    ASSERT_THAT(telemetry.TransmitterCurrentConsumption, Eq(0x0201));
+    ASSERT_THAT(telemetry.DopplerOffset, Eq(0x0403));
+    ASSERT_THAT(telemetry.ReceiverCurrentConsumption, Eq(0x0605));
+    ASSERT_THAT(telemetry.Vcc, Eq(0x0807));
+    ASSERT_THAT(telemetry.OscilatorTemperature, Eq(0x0a09));
+    ASSERT_THAT(telemetry.AmplifierTemperature, Eq(0x0c0b));
+    ASSERT_THAT(telemetry.SignalStrength, Eq(0x0e0d));
+}
+
+TEST_F(CommTest, TestTransmitterTelemetry)
+{
+    CommTransmitterTelemetry telemetry;
+    const uint8_t expected[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
+    EXPECT_CALL(i2c,
+        I2CRead(TransmitterAddress, TransmitterGetTelemetry, _, _, Ne(nullptr), Ge(sizeof(CommTransmitterTelemetry))))
+        .WillOnce(Invoke([&](uint8_t /*address*/,
+            uint8_t /*command*/,
+            uint8_t* /*inData*/,
+            uint16_t /*length*/,
+            uint8_t* outData,
+            uint16_t outLength) {
+            memset(outData, 0, outLength);
+            memcpy(outData, expected, COUNT_OF(expected));
+            return i2cTransferDone;
+        }));
+    const auto status = CommGetTransmitterTelemetry(&comm, &telemetry);
+    ASSERT_THAT(status, Eq(true));
+    ASSERT_THAT(telemetry.RFReflectedPower, Eq(0x0201));
+    ASSERT_THAT(telemetry.AmplifierTemperature, Eq(0x0403));
+    ASSERT_THAT(telemetry.RFForwardPower, Eq(0x0605));
+    ASSERT_THAT(telemetry.TransmitterCurrentConsumption, Eq(0x0807));
+}
+
+class CommReceiverTelemetryTest : public testing::TestWithParam<std::tuple<int, uint8_t, I2C_TransferReturn_TypeDef>>
+{
+  public:
+    CommReceiverTelemetryTest();
+    ~CommReceiverTelemetryTest();
+
+  protected:
+    CommObject comm;
+    I2CMock i2c;
+};
+
+CommReceiverTelemetryTest::CommReceiverTelemetryTest()
+{
+    CommLowInterface low;
+    low.writeProc = TestI2CWrite;
+    low.readProc = TestI2CRead;
+    CommInitialize(&comm, &low);
+    mockPtr = &i2c;
+}
+
+CommReceiverTelemetryTest::~CommReceiverTelemetryTest()
+{
+    mockPtr = nullptr;
+}
+
+TEST_P(CommReceiverTelemetryTest, TestInvalidTelemetry)
+{
+    CommReceiverTelemetry telemetry;
+    const auto index = std::get<0>(GetParam());
+    const auto value = std::get<1>(GetParam());
+    const auto operationStatus = std::get<2>(GetParam());
+    EXPECT_CALL(
+        i2c, I2CRead(ReceiverAddress, ReceverGetTelemetry, _, _, Ne(nullptr), Ge(sizeof(CommReceiverTelemetry))))
+        .WillOnce(Invoke([&](uint8_t /*address*/,
+            uint8_t /*command*/,
+            uint8_t* /*inData*/,
+            uint16_t /*length*/,
+            uint8_t* outData,
+            uint16_t outLength) {
+            memset(outData, 0, outLength);
+            outData[index] = value;
+            return operationStatus;
+        }));
+    const auto status = CommGetReceiverTelemetry(&comm, &telemetry);
+    ASSERT_THAT(status, Eq(false));
+}
+
+INSTANTIATE_TEST_CASE_P(CommReceiverTelemetryValuesOutOfRange,
+    CommReceiverTelemetryTest,
+    testing::Values(std::make_tuple(0, 0, i2cTransferNack),
+                            std::make_tuple(1, 0xf0, i2cTransferDone),
+                            std::make_tuple(3, 0xf0, i2cTransferDone),
+                            std::make_tuple(5, 0xf0, i2cTransferDone),
+                            std::make_tuple(7, 0xf0, i2cTransferDone),
+                            std::make_tuple(9, 0xf0, i2cTransferDone),
+                            std::make_tuple(11, 0xf0, i2cTransferDone),
+                            std::make_tuple(13, 0xf0, i2cTransferDone)), );
+
+class CommTransmitterTelemetryTest : public testing::TestWithParam<std::tuple<int, uint8_t, I2C_TransferReturn_TypeDef>>
+{
+  public:
+    CommTransmitterTelemetryTest();
+    ~CommTransmitterTelemetryTest();
+
+  protected:
+    CommObject comm;
+    I2CMock i2c;
+};
+
+CommTransmitterTelemetryTest::CommTransmitterTelemetryTest()
+{
+    CommLowInterface low;
+    low.writeProc = TestI2CWrite;
+    low.readProc = TestI2CRead;
+    CommInitialize(&comm, &low);
+    mockPtr = &i2c;
+}
+
+CommTransmitterTelemetryTest::~CommTransmitterTelemetryTest()
+{
+    mockPtr = nullptr;
+}
+
+TEST_P(CommTransmitterTelemetryTest, TestInvalidTelemetry)
+{
+    CommTransmitterTelemetry telemetry;
+    const auto index = std::get<0>(GetParam());
+    const auto value = std::get<1>(GetParam());
+    const auto operationStatus = std::get<2>(GetParam());
+    EXPECT_CALL(i2c,
+        I2CRead(TransmitterAddress, TransmitterGetTelemetry, _, _, Ne(nullptr), Ge(sizeof(CommTransmitterTelemetry))))
+        .WillOnce(Invoke([&](uint8_t /*address*/,
+            uint8_t /*command*/,
+            uint8_t* /*inData*/,
+            uint16_t /*length*/,
+            uint8_t* outData,
+            uint16_t outLength) {
+            memset(outData, 0, outLength);
+            outData[index] = value;
+            return operationStatus;
+        }));
+    const auto status = CommGetTransmitterTelemetry(&comm, &telemetry);
+    ASSERT_THAT(status, Eq(false));
+}
+
+INSTANTIATE_TEST_CASE_P(CommTransmitterTelemetryValuesOutOfRange,
+    CommTransmitterTelemetryTest,
+    testing::Values(std::make_tuple(0, 0, i2cTransferNack),
+                            std::make_tuple(1, 0xf0, i2cTransferDone),
+                            std::make_tuple(3, 0xf0, i2cTransferDone),
+                            std::make_tuple(5, 0xf0, i2cTransferDone),
+                            std::make_tuple(7, 0xf0, i2cTransferDone)), );

@@ -142,6 +142,16 @@ bool CommGetReceiverTelemetry(CommObject* comm, CommReceiverTelemetry* telemetry
     telemetry->OscilatorTemperature = ReaderReadWordLE(&reader);
     telemetry->AmplifierTemperature = ReaderReadWordLE(&reader);
     telemetry->SignalStrength = ReaderReadWordLE(&reader);
+
+    if ((telemetry->TransmitterCurrentConsumption & 0xf000) != 0 || (telemetry->DopplerOffset & 0xf000) != 0 ||
+        (telemetry->ReceiverCurrentConsumption & 0xf000) != 0 || (telemetry->Vcc & 0xf000) != 0 ||
+        (telemetry->OscilatorTemperature & 0xf000) != 0 || (telemetry->AmplifierTemperature & 0xf000) != 0 ||
+        (telemetry->SignalStrength & 0xf000) != 0)
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Received invalid receiver telemetry. ");
+        return false;
+    }
+
     return ReaderStatus(&reader);
 }
 
@@ -161,6 +171,14 @@ bool CommGetTransmitterTelemetry(CommObject* comm, CommTransmitterTelemetry* tel
     telemetry->AmplifierTemperature = ReaderReadWordLE(&reader);
     telemetry->RFForwardPower = ReaderReadWordLE(&reader);
     telemetry->TransmitterCurrentConsumption = ReaderReadWordLE(&reader);
+
+    if ((telemetry->RFReflectedPower & 0xf000) != 0 || (telemetry->AmplifierTemperature & 0xf000) != 0 ||
+        (telemetry->RFForwardPower & 0xf000) != 0 || (telemetry->TransmitterCurrentConsumption & 0xf000) != 0)
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Received invalid transmitter telemetry. ");
+        return false;
+    }
+
     return ReaderStatus(&reader);
 }
 
