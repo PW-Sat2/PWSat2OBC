@@ -28,6 +28,7 @@ static const uint8_t ReceiverReset = 0xAA;
 static const uint8_t HardwareReset = 0xAB;
 
 static const uint8_t TransmitterSendFrame = 0x10;
+static const uint8_t TransmitterSetBeacon = 0x14;
 static const uint8_t TransmitterClearBeacon = 0x1f;
 static const uint8_t TransmitterSetIdleState = 0x24;
 static const uint8_t TransmitterGetTelemetry = 0x25;
@@ -634,6 +635,45 @@ TEST_F(CommTest, TestTransmitterTelemetry)
     ASSERT_THAT(telemetry.AmplifierTemperature, Eq(0x0403));
     ASSERT_THAT(telemetry.RFForwardPower, Eq(0x0605));
     ASSERT_THAT(telemetry.TransmitterCurrentConsumption, Eq(0x0807));
+}
+
+TEST_F(CommTest, TestSetBeaconFailure)
+{
+    CommBeacon beacon;
+    memset(&beacon, 0, sizeof(beacon));
+    beacon.DataSize = 1;
+    EXPECT_CALL(i2c, I2CWrite(TransmitterAddress, TransmitterSetBeacon, Ne(nullptr), _))
+        .WillOnce(Return(i2cTransferNack));
+    const auto status = CommSetBeacon(&comm, &beacon);
+    ASSERT_THAT(status, Eq(false));
+}
+
+TEST_F(CommTest, TestSetBeaconSizeOutOfRange)
+{
+    CommBeacon beacon;
+    memset(&beacon, 0, sizeof(beacon));
+    beacon.DataSize = COMM_MAX_FRAME_CONTENTS_SIZE + 1;
+    EXPECT_CALL(i2c, I2CWrite(TransmitterAddress, TransmitterSetBeacon, Ne(nullptr), _)).Times(0);
+    const auto status = CommSetBeacon(&comm, &beacon);
+    ASSERT_THAT(status, Eq(false));
+}
+
+TEST_F(CommTest, TestSetBeacon)
+{
+    const uint8_t data[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
+    CommBeacon beacon;
+    memset(&beacon, 0, sizeof(beacon));
+    beacon.DataSize = COUNT_OF(data);
+    beacon.Period = 0x0a0b;
+    memcpy(beacon.Data, data, COUNT_OF(data));
+    EXPECT_CALL(i2c, I2CWrite(TransmitterAddress, TransmitterSetBeacon, Ne(nullptr), Eq(COUNT_OF(data) + 3)))
+        .WillOnce(Invoke([](uint8_t /*address*/, uint8_t /*command*/, uint8_t* inData, uint16_t length) {
+            const uint8_t expected[] = {TransmitterSetBeacon, 0x0b, 0x0a, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
+            EXPECT_THAT(std::equal(inData, inData + length, std::begin(expected), std::end(expected)), Eq(true));
+            return i2cTransferDone;
+        }));
+    const auto status = CommSetBeacon(&comm, &beacon);
+    ASSERT_THAT(status, Eq(true));
 }
 
 class CommReceiverTelemetryTest : public testing::TestWithParam<std::tuple<int, uint8_t, I2C_TransferReturn_TypeDef>>

@@ -265,7 +265,7 @@ bool CommSendFrame(CommObject* comm, uint8_t* data, uint8_t length)
 
 bool CommSetBeacon(CommObject* comm, const CommBeacon* beaconData)
 {
-    uint8_t buffer[255];
+    uint8_t buffer[COMM_MAX_FRAME_CONTENTS_SIZE + 2];
     Writer writer;
     WriterInitialize(&writer, buffer, COUNT_OF(buffer));
     WriterWriteByte(&writer, TransmitterSetBeacon);
