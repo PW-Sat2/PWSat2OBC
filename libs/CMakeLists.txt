@@ -1,7 +1,10 @@
-add_subdirectory(FreeRTOS)
-add_subdirectory(googletest)
-add_subdirectory(leuart)
-add_subdirectory(swo)
+add_subdirectory(external/FreeRTOS)
+add_subdirectory(external/googletest)
+add_subdirectory(external/emlib)
+
+add_subdirectory(drivers/leuart)
+add_subdirectory(drivers/swo)
+add_subdirectory(drivers/i2c)
+
 add_subdirectory(base)
 add_subdirectory(logger)
-add_subdirectory(i2c)

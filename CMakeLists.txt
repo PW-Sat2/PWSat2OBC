@@ -42,4 +42,4 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 add_subdirectory(src)
 add_subdirectory(libs)
-add_subdirectory(test)
+add_subdirectory(unit_tests)

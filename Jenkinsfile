@@ -11,7 +11,7 @@ node {
 		  deleteDir()
 		  bat "cmake -G \"MinGW Makefiles\" ../source"
 		  bat "make pwsat"
-		  bat "make run_tests"
+		  bat "make unit_tests.run"
 		  echo "Memory usage report:"
 		  bat "make pwsat.memory_report"
 		}

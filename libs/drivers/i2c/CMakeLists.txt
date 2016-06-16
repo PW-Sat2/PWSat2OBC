@@ -1,14 +1,14 @@
-set(NAME leuart)
+set(NAME i2c)
 
 set(SOURCES
-    leuart.c
+    i2c.c
 )
 
 add_library(${NAME} STATIC ${SOURCES})
 
-target_link_libraries(${NAME} freeRTOS base)
+target_link_libraries(${NAME} freeRTOS platform base emlib logger)
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
-target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/leuart)
+target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/i2c)
 
 target_format_sources(${NAME} "${SOURCES}")
