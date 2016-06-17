@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <em_chip.h>
 #include <em_cmu.h>
 #include <em_dbg.h>
@@ -17,10 +18,13 @@
 #include "i2c/i2c.h"
 #include "io_map.h"
 #include "logger/logger.h"
+#include "obc.h"
 #include "openSail.h"
 #include "swo/swo.h"
 #include "system.h"
 #include "terminal.h"
+
+OBC Main;
 
 void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
 {
@@ -55,9 +59,20 @@ static void InitSwoEndpoint(void)
     }
 }
 
+static void ObcInitTask(void* param)
+{
+    OBC* obc = (OBC*)param;
+    if (!CommRestart(&obc->comm))
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to restart comm. ");
+    }
+
+    System.SuspendTask(obc->initTask);
+}
+
 int main(void)
 {
-    CommObject comm;
+    memset(&Main, 0, sizeof(Main));
     CHIP_Init();
 
     CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
@@ -77,7 +92,7 @@ int main(void)
     CommLowInterface commInterface;
     commInterface.readProc = I2CWriteRead;
     commInterface.writeProc = I2CWrite;
-    CommInitialize(&comm, &commInterface);
+    CommInitialize(&Main.comm, &commInterface);
 
     TerminalInit();
     SwoPuts("Hello I'm PW-SAT2 OBC\n");
@@ -91,9 +106,10 @@ int main(void)
     GPIO_PinOutSet(LED_PORT, LED0);
     GPIO_PinOutSet(LED_PORT, LED1);
 
-    xTaskCreate(BlinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
+    System.CreateTask(BlinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
+    System.CreateTask(ObcInitTask, "Init", 512, &Main, tskIDLE_PRIORITY + 2, &Main.initTask);
+    System.RunScheduler();
 
-    vTaskStartScheduler();
     GPIO_PinOutToggle(LED_PORT, LED0);
 
     return 0;

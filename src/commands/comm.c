@@ -1,51 +1,54 @@
-#include <string.h>
-
-#include "commands.h"
-
 #include "comm/comm.h"
+#include <stdint.h>
+#include <string.h>
+#include "commands.h"
+#include "logger/logger.h"
+#include "obc.h"
 #include "system.h"
 #include "terminal.h"
-
-#include "i2c/i2c.h"
-#include "logger/logger.h"
 
 void SendFrameHandler(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
-    UNREFERENCED_PARAMETER(argv);
-#if 0
     uint8_t len = strlen(argv[0]);
-
-    CommSendFrame(argv[0], len);
-#endif
+    CommSendFrame(&Main.comm, (uint8_t*)argv[0], len);
 }
 
 void GetFramesCountHandler(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
-#if 0
-    uint8_t count = CommGetFramesCount();
-
-    TerminalPrintf("%d\n", count);
-#endif
+    CommReceiverFrameCount count = CommGetFrameCount(&Main.comm);
+    if (count.status)
+    {
+        TerminalPrintf("%d\n", count);
+    }
+    else
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to get frame count. ");
+    }
 }
 
 void ReceiveFrameHandler(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
-#if 0
-    Frame frame = {.Contents = {0}};
-    CommReceiveFrame(&frame);
-    CommRemoveFrame();
 
-    TerminalPuts(frame.Contents);
-#endif
+    Frame frame = {.Contents = {0}};
+    if (CommReceiveFrame(&Main.comm, &frame))
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to get frame from comm. ");
+    }
+    else
+    {
+        CommRemoveFrame(&Main.comm);
+        TerminalPuts((const char*)frame.Contents);
+    }
 }
 
 void AutoCommHandlingHandler(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
+    CommPause(&Main.comm);
 }

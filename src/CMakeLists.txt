@@ -9,6 +9,7 @@ set(SOURCES
     devices/eps.c
     openSail.c
     obc_time.c
+    obc.h
 )
 
 add_executable(${NAME} ${SOURCES})
