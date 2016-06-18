@@ -132,17 +132,17 @@ TEST_F(CommTest, TestHardwareResetFailureOnHardware)
 
 TEST_F(CommTest, TestHardwareResetFailureOnReceiver)
 {
-    EXPECT_CALL(i2c, I2CWrite(ReceiverAddress, HardwareReset, _, 1)).WillOnce(Return(i2cTransferDone));
-    EXPECT_CALL(i2c, I2CWrite(TransmitterAddress, TransmitterReset, _, 1)).WillOnce(Return(i2cTransferDone));
-    EXPECT_CALL(i2c, I2CWrite(ReceiverAddress, ReceiverReset, _, 1)).WillOnce(Return(i2cTransferNack));
+    EXPECT_CALL(i2c, I2CWrite(ReceiverAddress, HardwareReset, Ne(nullptr), 1)).WillOnce(Return(i2cTransferDone));
+    EXPECT_CALL(i2c, I2CWrite(ReceiverAddress, ReceiverReset, Ne(nullptr), 1)).WillOnce(Return(i2cTransferNack));
+    ON_CALL(i2c, I2CWrite(TransmitterAddress, _, _, _)).WillByDefault(Return(i2cTransferDone));
     const auto status = CommReset(&comm);
     ASSERT_THAT(status, Eq(false));
 }
 
 TEST_F(CommTest, TestHardwareResetFailureOnTransmitter)
 {
-    EXPECT_CALL(i2c, I2CWrite(ReceiverAddress, HardwareReset, _, 1)).WillOnce(Return(i2cTransferDone));
     EXPECT_CALL(i2c, I2CWrite(TransmitterAddress, TransmitterReset, _, 1)).WillOnce(Return(i2cTransferNack));
+    EXPECT_CALL(i2c, I2CWrite(ReceiverAddress, _, _, _)).WillRepeatedly(Return(i2cTransferDone));
     const auto status = CommReset(&comm);
     ASSERT_THAT(status, Eq(false));
 }
