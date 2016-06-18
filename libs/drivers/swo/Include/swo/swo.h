@@ -12,17 +12,12 @@ void SwoPrintfOnChannel(uint8_t channel, const char* format, ...);
 
 void SwoVPrintfOnChannel(uint8_t channel, const char* format, va_list arguments);
 
-inline void SwoPuts(const char* str)
+static inline void SwoPuts(const char* str)
 {
     SwoPutsOnChannel(0, str);
 }
 
-inline void SwoPrintf(const char* format, ...)
-{
-    SwoPrintfOnChannel(0, format);
-}
-
-inline void SwoVPrintf(const char* format, va_list arguments)
+static inline void SwoVPrintf(const char* format, va_list arguments)
 {
     SwoVPrintfOnChannel(0, format, arguments);
 }
