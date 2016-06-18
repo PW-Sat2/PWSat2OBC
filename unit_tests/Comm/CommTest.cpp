@@ -5,7 +5,9 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "gmock/gmock-matchers.h"
+#include "OsMock.hpp"
 #include "comm/comm.h"
+#include "os/os.hpp"
 #include "system.h"
 
 using testing::_;
@@ -17,7 +19,7 @@ using testing::Return;
 using testing::Invoke;
 
 static const uint8_t ReceiverAddress = 0x60;
-static const uint8_t TransmitterAddress = 0x61;
+static const uint8_t TransmitterAddress = 0x62;
 
 static const uint8_t ReceverGetTelemetry = 0x1A;
 static const uint8_t ReceiverGetFrameCount = 0x21;
@@ -673,6 +675,15 @@ TEST_F(CommTest, TestSetBeacon)
             return i2cTransferDone;
         }));
     const auto status = CommSetBeacon(&comm, &beacon);
+    ASSERT_THAT(status, Eq(true));
+}
+
+TEST_F(CommTest, TestPauseNonExistingTask)
+{
+    OSMock system;
+    auto guard = InstallProxy(&system);
+    EXPECT_CALL(system, SuspendTask(_)).Times(0);
+    const auto status = CommPause(&comm);
     ASSERT_THAT(status, Eq(true));
 }
 

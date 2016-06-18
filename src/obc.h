@@ -8,6 +8,7 @@ typedef struct
 {
     CommObject comm;
     OSTaskHandle initTask;
+    bool initialized;
 } OBC;
 
 extern OBC Main;

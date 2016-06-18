@@ -23,14 +23,17 @@ typedef struct
     commandHandler handler;
 } command;
 
-static const command commands[] = {{"ping", &PingHandler},
+static const command commands[] = {
+    {"ping", &PingHandler},
     {"echo", &EchoHandler},
     {"jumpToTime", &JumpToTimeHandler},
     {"currentTime", &CurrentTimeHandler},
     {"sendFrame", &SendFrameHandler},
     {"getFramesCount", &GetFramesCountHandler},
     {"receiveFrame", &ReceiveFrameHandler},
-    {"pauseComm", &CommandPauseComm}};
+    {"pauseComm", &CommandPauseComm},
+    {"getState", OBCGetState},
+};
 
 static QueueHandle_t terminalQueue;
 
@@ -111,7 +114,9 @@ static void handleIncomingChar(void* args)
         uint8_t data = 0;
 
         xQueueReceive(terminalQueue, &data, portMAX_DELAY);
-
+#if 0
+        LOGF(LOG_LEVEL_INFO, "Received character: 0x%x, %c", (int)data, data);
+#endif
         if (data == '\n')
         {
             input_buffer[input_buffer_position] = 0;

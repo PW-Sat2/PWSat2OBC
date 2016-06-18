@@ -55,6 +55,12 @@ class OBC:
         self._terminal = terminal
         self._terminal.reset();
 
+    def wait_to_start(self):
+        response = self._terminal.command("getState")
+        while response != "1":
+            response = self._terminal.command("getState")
+        
+
     def ping(self):
         return self._terminal.command("ping")
 

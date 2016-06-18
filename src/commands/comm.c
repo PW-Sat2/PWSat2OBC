@@ -18,10 +18,11 @@ void GetFramesCountHandler(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
+    LOG(LOG_LEVEL_INFO, "Received request to get number of freestanding comm frames. ");
     CommReceiverFrameCount count = CommGetFrameCount(&Main.comm);
     if (count.status)
     {
-        TerminalPrintf("%d\n", count);
+        TerminalPrintf("%d\n", count.frameCount);
     }
     else
     {
@@ -50,5 +51,13 @@ void CommandPauseComm(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
+    LOG(LOG_LEVEL_INFO, "Received request to pause comm...");
     CommPause(&Main.comm);
+}
+
+void OBCGetState(uint16_t argc, char* argv[])
+{
+    UNREFERENCED_PARAMETER(argc);
+    UNREFERENCED_PARAMETER(argv);
+    TerminalPrintf("%d\n", Main.initialized ? 1 : 0);
 }

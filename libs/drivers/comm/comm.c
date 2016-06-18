@@ -9,7 +9,6 @@
 #include "base/writer.h"
 #include "logger/logger.h"
 #include "system.h"
-
 typedef enum { CommReceiver = 0x60, CommTransmitter = 0x62 } CommAddress;
 
 typedef enum {
@@ -92,7 +91,11 @@ bool CommRestart(CommObject* comm)
 
 bool CommPause(CommObject* comm)
 {
-    System.SuspendTask(comm->commTask);
+    if (comm->commTask != NULL)
+    {
+        System.SuspendTask(comm->commTask);
+    }
+
     return true;
 }
 
@@ -118,10 +121,12 @@ CommReceiverFrameCount CommGetFrameCount(CommObject* comm)
     result.status = SendCommandWithResponse(comm, CommReceiver, ReceiverGetFrameCount, &count, sizeof(count));
     if (result.status)
     {
+        LOGF(LOG_LEVEL_INFO, "There are %d frames.", (int)count);
         result.frameCount = count;
     }
     else
     {
+        LOG(LOG_LEVEL_ERROR, "Unable to get frame count");
         result.frameCount = 0;
     }
 
