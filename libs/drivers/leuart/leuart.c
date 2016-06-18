@@ -85,10 +85,8 @@ void leuartPutc(const char c)
 
 void LEUART0_IRQHandler(void)
 {
-	uint8_t data = LEUART_RxDataGet(LEUART0);
-
-	BaseType_t woken = pdFALSE;
-	xQueueSendToFrontFromISR(leuart0sink, &data, &woken);
-
-	portEND_SWITCHING_ISR(woken);
+    uint8_t data = LEUART_RxDataGet(LEUART0);
+    BaseType_t woken = pdFALSE;
+    xQueueSendToBackFromISR(leuart0sink, &data, &woken);
+    portEND_SWITCHING_ISR(woken);
 }
