@@ -44,8 +44,6 @@ static void BlinkLed0(void* param)
     {
         GPIO_PinOutToggle(LED_PORT, LED0);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
-
-        LOG(LOG_LEVEL_INFO, "Test");
     }
 }
 
@@ -107,7 +105,7 @@ int main(void)
     GPIO_PinOutSet(LED_PORT, LED1);
 
     System.CreateTask(BlinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
-    System.CreateTask(ObcInitTask, "Init", 512, &Main, tskIDLE_PRIORITY + 2, &Main.initTask);
+    System.CreateTask(ObcInitTask, "Init", 512, &Main, tskIDLE_PRIORITY + 16, &Main.initTask);
     System.RunScheduler();
 
     GPIO_PinOutToggle(LED_PORT, LED0);

@@ -30,7 +30,7 @@ static const command commands[] = {{"ping", &PingHandler},
     {"sendFrame", &SendFrameHandler},
     {"getFramesCount", &GetFramesCountHandler},
     {"receiveFrame", &ReceiveFrameHandler},
-    {"autoCommHandling", &AutoCommHandlingHandler}};
+    {"pauseComm", &CommandPauseComm}};
 
 static QueueHandle_t terminalQueue;
 

@@ -10,6 +10,6 @@ void CurrentTimeHandler(uint16_t argc, char* argv[]);
 void SendFrameHandler(uint16_t argc, char* argv[]);
 void GetFramesCountHandler(uint16_t argc, char* argv[]);
 void ReceiveFrameHandler(uint16_t argc, char* argv[]);
-void AutoCommHandlingHandler(uint16_t argc, char* argv[]);
+void CommandPauseComm(uint16_t argc, char* argv[]);
 
 #endif

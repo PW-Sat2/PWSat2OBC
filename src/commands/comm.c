@@ -46,7 +46,7 @@ void ReceiveFrameHandler(uint16_t argc, char* argv[])
     }
 }
 
-void AutoCommHandlingHandler(uint16_t argc, char* argv[])
+void CommandPauseComm(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
