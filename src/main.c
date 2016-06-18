@@ -65,7 +65,8 @@ static void ObcInitTask(void* param)
         LOG(LOG_LEVEL_ERROR, "Unable to restart comm. ");
     }
 
-    Main.initialized = true;
+    LOG(LOG_LEVEL_INFO, "Intialized");
+    atomic_store(&Main.initialized, true);
     System.SuspendTask(NULL);
 }
 

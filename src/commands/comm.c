@@ -18,15 +18,11 @@ void GetFramesCountHandler(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
-    LOG(LOG_LEVEL_INFO, "Received request to get number of freestanding comm frames. ");
+    LOG(LOG_LEVEL_INFO, "Received request to get the number of received frames from comm...");
     CommReceiverFrameCount count = CommGetFrameCount(&Main.comm);
     if (count.status)
     {
         TerminalPrintf("%d\n", count.frameCount);
-    }
-    else
-    {
-        LOG(LOG_LEVEL_ERROR, "Unable to get frame count. ");
     }
 }
 
@@ -34,9 +30,9 @@ void ReceiveFrameHandler(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
-
+    LOG(LOG_LEVEL_INFO, "Received request to get the oldes frame from comm...");
     Frame frame = {.Contents = {0}};
-    if (CommReceiveFrame(&Main.comm, &frame))
+    if (!CommReceiveFrame(&Main.comm, &frame))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to get frame from comm. ");
     }
@@ -59,5 +55,5 @@ void OBCGetState(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
-    TerminalPrintf("%d\n", Main.initialized ? 1 : 0);
+    TerminalPrintf("%d\n", atomic_load(&Main.initialized) ? 1 : 0);
 }
