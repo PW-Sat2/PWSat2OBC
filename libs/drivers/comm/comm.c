@@ -36,13 +36,28 @@ static noreturn void CommTask(void* param);
 
 static bool SendCommand(CommObject* object, CommAddress address, uint8_t command)
 {
-    return object->low.writeProc(address, &command, sizeof(command)) == i2cTransferDone;
+    const I2C_TransferReturn_TypeDef result = object->low.writeProc(address, &command, sizeof(command));
+    const bool status = (result == i2cTransferDone);
+    if (!status)
+    {
+        LOGF(LOG_LEVEL_ERROR, "[comm] Unable to send command %d to %d, Reason: %d", command, address, result);
+    }
+
+    return status;
 }
 
 static bool SendCommandWithResponse(
     CommObject* object, CommAddress address, uint8_t command, uint8_t* outBuffer, uint8_t outBufferSize)
 {
-    return object->low.readProc(address, &command, sizeof(command), outBuffer, outBufferSize) == i2cTransferDone;
+    const I2C_TransferReturn_TypeDef result =
+        object->low.readProc(address, &command, sizeof(command), outBuffer, outBufferSize);
+    const bool status = (result == i2cTransferDone);
+    if (!status)
+    {
+        LOGF(LOG_LEVEL_ERROR, "[comm] Unable to send command %d to %d, Reason: %d", command, address, result);
+    }
+
+    return status;
 }
 
 void CommInitialize(CommObject* comm, const CommLowInterface* lowerInterface)
