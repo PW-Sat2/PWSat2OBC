@@ -40,6 +40,7 @@ class SerialPortTerminal:
 
     def reset(self):
         self._serial.reset_input_buffer()
+        self._serial.reset_output_buffer()
         self._serial.flushInput()
         self._serial.flush()
         self._serial.rts = False

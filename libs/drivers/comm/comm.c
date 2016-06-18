@@ -1,5 +1,4 @@
 #include "comm.h"
-#include <inttypes.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdnoreturn.h>
@@ -9,6 +8,7 @@
 #include "base/writer.h"
 #include "logger/logger.h"
 #include "system.h"
+
 typedef enum { CommReceiver = 0x60, CommTransmitter = 0x62 } CommAddress;
 
 typedef enum {
@@ -220,7 +220,7 @@ bool CommReceiveFrame(CommObject* comm, Frame* frame)
 
     if (frame->Size > COMM_MAX_FRAME_CONTENTS_SIZE)
     {
-        LOGF(LOG_LEVEL_ERROR, "[comm] Invalid frame length: " PRIu16 ". ", frame->Size);
+        LOGF(LOG_LEVEL_ERROR, "[comm] Invalid frame length: %d ", (int)frame->Size);
         return false;
     }
 
@@ -236,13 +236,13 @@ bool CommReceiveFrame(CommObject* comm, Frame* frame)
     }
     else
     {
-        LOGF(LOG_LEVEL_DEBUG, "[comm] Received frame " PRIu16 " bytes", frame->Size);
+        LOGF(LOG_LEVEL_DEBUG, "[comm] Received frame %d bytes", (int)frame->Size);
     }
 
     if (frame->Size == 0 || (frame->Doppler & 0xf000) != 0 || (frame->RSSI & 0xf000) != 0)
     {
         LOGF(LOG_LEVEL_ERROR,
-            "[comm] Received invalid frame. Size: " PRIu16 ", Doppler: 0x" PRIx16 ", RSSI: 0x" PRIx16 ". ",
+            "[comm] Received invalid frame. Size: %d, Doppler: 0x%X, RSSI: 0x%X. ",
             frame->Size,
             frame->Doppler,
             frame->RSSI);
@@ -258,7 +258,7 @@ bool CommSendFrame(CommObject* comm, uint8_t* data, uint8_t length)
     if (length > COMM_MAX_FRAME_CONTENTS_SIZE)
     {
         LOGF(LOG_LEVEL_ERROR,
-            "Frame payload is too long. Allowed: %d, Requested: '" PRIu8 "'.",
+            "Frame payload is too long. Allowed: %d, Requested: '%d'.",
             COMM_MAX_FRAME_CONTENTS_SIZE,
             length);
         return false;
@@ -359,7 +359,7 @@ static void CommTask(void* param)
         }
         else if (frameResponse.frameCount > 0)
         {
-            LOGF(LOG_LEVEL_INFO, "[comm] Got " PRIx8 " frames", frameResponse.frameCount);
+            LOGF(LOG_LEVEL_INFO, "[comm] Got %d frames", frameResponse.frameCount);
 
             for (uint8_t i = 0; i < frameResponse.frameCount; i++)
             {
@@ -376,7 +376,7 @@ static void CommTask(void* param)
                         LOG(LOG_LEVEL_ERROR, "[comm] Unable to remove frame from receiver. ");
                     }
 
-                    LOGF(LOG_LEVEL_INFO, "[comm] Received frame " PRIu16 " bytes: %s", frame.Size, frame.Contents);
+                    LOGF(LOG_LEVEL_INFO, "[comm] Received frame %d bytes. ", (int)frame.Size);
                 }
             }
         }
