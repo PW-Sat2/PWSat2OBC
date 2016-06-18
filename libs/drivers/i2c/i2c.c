@@ -47,6 +47,7 @@ static I2C_TransferReturn_TypeDef i2cTransfer(I2C_TransferSeq_TypeDef* seq)
 
     if (ret != i2cTransferInProgress)
     {
+        xSemaphoreGive(i2cLock);
         return ret;
     }
 
