@@ -144,5 +144,5 @@ void TerminalInit(void)
 
     leuartInit(terminalQueue);
 
-    terminalSendPrefix();
+    TerminalPuts("@");
 }

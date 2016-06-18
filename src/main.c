@@ -65,7 +65,7 @@ static void ObcInitTask(void* param)
         LOG(LOG_LEVEL_ERROR, "Unable to restart comm. ");
     }
 
-    System.SuspendTask(obc->initTask);
+    System.SuspendTask(NULL);
 }
 
 int main(void)

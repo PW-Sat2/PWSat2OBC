@@ -1,25 +1,24 @@
 import serial
 
-
 class SerialPortTerminal:
     def __init__(self, comPort):
         self._serial = serial.Serial(comPort, baudrate=9600, timeout=1, rtscts=False)
         self._serial.rts = False
 
-    def waitForPrompt(self):
+    def waitForPrompt(self, terminator='>'):
         self._serial.reset_input_buffer()
         self._serial.flushInput()
 
         self._serial.write("\n")
         self._serial.flush()
         c = self._serial.read(1)
-        while c != '>':
+        while c != terminator:
             c = self._serial.read(1)
-
-    def readUntilPrompt(self):
+        
+    def readUntilPrompt(self, terminator='>'):
         data = ""
         c = self._serial.read(1)
-        while c != '>':
+        while c != terminator:
             data += c
             c = self._serial.read()
 
@@ -37,21 +36,24 @@ class SerialPortTerminal:
         self._serial.flush()
 
         response = self.readUntilPrompt()
-
         return response.rstrip('\n')
 
     def reset(self):
+        self._serial.reset_input_buffer()
+        self._serial.flushInput()
+        self._serial.flush()
         self._serial.rts = False
         self._serial.rts = True
         self._serial.rts = False
+        self.readUntilPrompt('@')
 
     def close(self):
         self._serial.close()
 
-
 class OBC:
     def __init__(self, terminal):
         self._terminal = terminal
+        self._terminal.reset();
 
     def ping(self):
         return self._terminal.command("ping")

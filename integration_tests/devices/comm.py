@@ -10,7 +10,7 @@ class TransmitterDevice(i2cMock.I2CDevice):
     BUFFER_SIZE = 40
 
     def __init__(self):
-        super(TransmitterDevice, self).__init__(0x61)
+        super(TransmitterDevice, self).__init__(0x62)
         self._reset = Event()
         self._hwreset = Event()
         self._buffer = Queue(TransmitterDevice.BUFFER_SIZE)

@@ -10,7 +10,7 @@
 #include "logger/logger.h"
 #include "system.h"
 
-typedef enum { CommReceiver = 0x60, CommTransmitter = 0x61 } CommAddress;
+typedef enum { CommReceiver = 0x60, CommTransmitter = 0x62 } CommAddress;
 
 typedef enum {
     CommHardReset = 0xAB,
