@@ -377,6 +377,10 @@ static void CommTask(void* param)
                     }
 
                     LOGF(LOG_LEVEL_INFO, "[comm] Received frame %d bytes. ", (int)frame.Size);
+
+                    // TODO: add separate frame handler, and move this code there
+                    uint8_t msg[] = "PONG";
+                    CommSendFrame(comm, msg, 4);
                 }
             }
         }
