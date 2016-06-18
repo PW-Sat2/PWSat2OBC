@@ -6,7 +6,7 @@ from system import auto_comm_handling
 class Test_Comm(BaseTest):
     @auto_comm_handling(False)
     def test_should_initialize_transmitter(self):
-        self.assertTrue(self.system.transmitter.wait_for_reset(3))
+        self.assertTrue(self.system.transmitter.wait_for_reset(5))
 
     @auto_comm_handling(False)
     def test_should_send_frame(self):
@@ -16,8 +16,12 @@ class Test_Comm(BaseTest):
         self.assertEqual(msg, (65, 66, 67))
 
     @auto_comm_handling(False)
-    def test_should_initialize_receiver(self):
-        self.assertTrue(self.system.receiver.wait_for_reset(3))
+    def test_should_initialize_hardware(self):
+        self.assertTrue(self.system.receiver.wait_for_hardware_reset(5))
+
+    @auto_comm_handling(False)
+    def test_should_initialize_software(self):
+        self.assertTrue(self.system.receiver.wait_for_reset(5))
 
     @auto_comm_handling(False)
     def test_should_get_number_of_frames(self):

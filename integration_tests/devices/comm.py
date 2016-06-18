@@ -10,14 +10,20 @@ class TransmitterDevice(i2cMock.I2CDevice):
     BUFFER_SIZE = 40
 
     def __init__(self):
-        super(TransmitterDevice, self).__init__(0x62)
+        super(TransmitterDevice, self).__init__(0x61)
         self._reset = Event()
+        self._hwreset = Event()
         self._buffer = Queue(TransmitterDevice.BUFFER_SIZE)
     
     @i2cMock.command([0xAA])
     def _reset(self):
         print "transmitter reset"
         self._reset.set()
+
+    @i2cMock.command([0xAB])
+    def _hwreset(self):
+        print "hardware reset"
+        self._hwreset.set()
 
     @i2cMock.command([0x10])
     def _send_frame(self, *data):
@@ -38,12 +44,18 @@ class ReceiverDevice(i2cMock.I2CDevice):
     def __init__(self):
         super(ReceiverDevice, self).__init__(0x60)
         self._reset = Event()
+        self._hwreset = Event()
         self._buffer = Queue()
 
     @i2cMock.command([0xAA])
     def _reset(self):
         print "receiver reset"
         self._reset.set()
+
+    @i2cMock.command([0xAB])
+    def _hwreset(self):
+        print "hardware reset"
+        self._hwreset.set()
 
     @i2cMock.command([0x21])
     def _get_number_of_frames(self):
@@ -77,6 +89,9 @@ class ReceiverDevice(i2cMock.I2CDevice):
 
     def wait_for_reset(self, timeout=None):
         return self._reset.wait(timeout)
+
+    def wait_for_hardware_reset(self, timeout=None):
+        return self._hwreset.wait(timeout)
 
     def put_frame(self, data):
         self._buffer.put_nowait(data)

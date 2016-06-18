@@ -98,7 +98,7 @@ bool CommPause(CommObject* comm)
 
 bool CommReset(CommObject* comm)
 {
-    return SendCommand(comm, CommReceiver, CommHardReset) && CommResetTransmitter(comm) && CommResetReceiver(comm);
+    return SendCommand(comm, CommReceiver, CommHardReset) && CommResetReceiver(comm) && CommResetTransmitter(comm);
 }
 
 bool CommResetTransmitter(CommObject* comm)
@@ -108,7 +108,7 @@ bool CommResetTransmitter(CommObject* comm)
 
 bool CommResetReceiver(CommObject* comm)
 {
-    return SendCommand(comm, CommReceiver, TransmitterSoftReset);
+    return SendCommand(comm, CommReceiver, ReceiverSoftReset);
 }
 
 CommReceiverFrameCount CommGetFrameCount(CommObject* comm)

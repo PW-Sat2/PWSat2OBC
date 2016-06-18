@@ -75,10 +75,8 @@ class OBC:
         return r
 
     def comm_auto_handling(self, enable):
-        if enable:
-            self._terminal.command("autoCommHandling T")
-        else:
-            self._terminal.command("autoCommHandling F")
+        if not enable:
+            self._terminal.command("pauseComm")
 
     def reset(self):
         self._terminal.reset()
