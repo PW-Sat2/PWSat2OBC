@@ -16,5 +16,7 @@ class BaseTest(unittest.TestCase):
     def setUp(self):
         self.system = System(mock_com, obc_com)
 
+        self.system.obc.current_test(self._testMethodName)
+
     def tearDown(self):
         self.system.close()

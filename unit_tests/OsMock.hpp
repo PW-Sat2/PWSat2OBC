@@ -23,6 +23,10 @@ struct OSMock : IOS
     MOCK_METHOD0(RunScheduller, void());
 
     MOCK_METHOD1(Sleep, void(const OSTaskTimeSpan time));
+
+    MOCK_METHOD0(CreateBinarySemaphore, OSSemaphoreHandle());
+    MOCK_METHOD2(TakeSemaphore, uint8_t(const OSSemaphoreHandle semaphore, const OSTaskTimeSpan time));
+    MOCK_METHOD1(GiveSemaphore, uint8_t(const OSSemaphoreHandle semaphore));
 };
 
 #endif

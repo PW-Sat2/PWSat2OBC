@@ -87,6 +87,10 @@ class OBC:
         if not enable:
             self._terminal.command("pauseComm")
 
+    def current_test(self, test_name):
+        self._terminal.command("currentTest %s" % test_name)
+
+
     def reset(self):
         self._terminal.reset()
 

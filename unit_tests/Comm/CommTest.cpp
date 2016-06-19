@@ -96,6 +96,14 @@ CommTest::CommTest()
     CommLowInterface low;
     low.writeProc = TestI2CWrite;
     low.readProc = TestI2CRead;
+
+    OSMock system;
+
+    auto guard = InstallProxy(&system);
+
+    EXPECT_CALL(system, CreateBinarySemaphore()).Times(2);
+    EXPECT_CALL(system, GiveSemaphore(_)).Times(1);
+
     CommInitialize(&comm, &low);
     mockPtr = &i2c;
 }

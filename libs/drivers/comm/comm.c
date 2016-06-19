@@ -63,6 +63,10 @@ void CommInitialize(CommObject* comm, const CommLowInterface* lowerInterface)
 {
     memset(comm, 0, sizeof(CommObject));
     comm->low = *lowerInterface;
+    comm->taskPauseRequest = System.CreateBinarySemaphore();
+    comm->taskPaused = System.CreateBinarySemaphore();
+
+    System.GiveSemaphore(comm->taskPaused);
 }
 
 bool CommRestart(CommObject* comm)
@@ -93,7 +97,8 @@ bool CommPause(CommObject* comm)
 {
     if (comm->commTask != NULL)
     {
-        System.SuspendTask(comm->commTask);
+        System.GiveSemaphore(comm->taskPauseRequest);
+        System.TakeSemaphore(comm->taskPaused, MAX_DELAY);
     }
 
     return true;
@@ -385,6 +390,15 @@ static void CommTask(void* param)
             }
         }
 
-        System.SleepTask(10000);
+        if (System.TakeSemaphore(comm->taskPauseRequest, 10000))
+        {
+            System.GiveSemaphore(comm->taskPaused);
+
+            System.TakeSemaphore(comm->taskPauseRequest, MAX_DELAY);
+
+            System.SuspendTask(NULL);
+
+            System.GiveSemaphore(comm->taskPaused);
+        }
     }
 }

@@ -45,6 +45,7 @@ class ReceiverDevice(i2cMock.I2CDevice):
         super(ReceiverDevice, self).__init__(0x60)
         self._reset = Event()
         self._hwreset = Event()
+        self._frame_removed = Event()
         self._buffer = Queue()
 
     @i2cMock.command([0xAA])
@@ -73,6 +74,7 @@ class ReceiverDevice(i2cMock.I2CDevice):
     def _remove_frame(self):
         try:
             self._buffer.get_nowait()
+            self._frame_removed.set()
         except Empty:
             pass
 
@@ -92,6 +94,9 @@ class ReceiverDevice(i2cMock.I2CDevice):
 
     def wait_for_hardware_reset(self, timeout=None):
         return self._hwreset.wait(timeout)
+
+    def wait_for_frame_removed(self, timeout=None):
+        return self._frame_removed.wait(timeout)
 
     def put_frame(self, data):
         self._buffer.put_nowait(data)

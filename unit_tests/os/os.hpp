@@ -21,6 +21,12 @@ struct IOS
     virtual void RunScheduller() = 0;
 
     virtual void Sleep(const OSTaskTimeSpan time) = 0;
+
+    virtual OSSemaphoreHandle CreateBinarySemaphore() = 0;
+
+    virtual uint8_t GiveSemaphore(const OSSemaphoreHandle semaphore) = 0;
+
+    virtual uint8_t TakeSemaphore(const OSSemaphoreHandle semaphore, const OSTaskTimeSpan timeout) = 0;
 };
 
 class OSReset

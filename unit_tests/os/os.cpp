@@ -56,6 +56,36 @@ static void TaskResume(OSTaskHandle task)
     };
 }
 
+static OSSemaphoreHandle CreateBinarySemaphore()
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->CreateBinarySemaphore();
+    }
+
+    return 0;
+}
+
+static uint8_t GiveSemaphore(OSSemaphoreHandle semaphore)
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->GiveSemaphore(semaphore);
+    }
+
+    return 0;
+}
+
+static uint8_t TakeSemaphore(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout)
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->TakeSemaphore(semaphore, timeout);
+    }
+
+    return 0;
+}
+
 OSReset::OSReset() : released(false)
 {
 }
@@ -89,5 +119,8 @@ OSReset InstallProxy(IOS* target)
     System.SuspendTask = TaskSuspend;
     System.SleepTask = TaskSleep;
     System.RunScheduler = RunScheduller;
+    System.CreateBinarySemaphore = CreateBinarySemaphore;
+    System.GiveSemaphore = GiveSemaphore;
+    System.TakeSemaphore = TakeSemaphore;
     return OSReset();
 }

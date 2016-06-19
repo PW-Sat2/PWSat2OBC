@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <em_i2c.h>
 
+#include "base/os.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -60,6 +62,8 @@ typedef struct
 {
     CommLowInterface low;
     void* commTask;
+    OSSemaphoreHandle taskPauseRequest;
+    OSSemaphoreHandle taskPaused;
 } CommObject;
 
 typedef struct

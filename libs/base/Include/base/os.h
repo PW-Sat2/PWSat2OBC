@@ -7,6 +7,8 @@ extern "C" {
 
 #include <stdint.h>
 
+#define MAX_DELAY 0xffffffffUL
+
 typedef enum {
     OSResultSuccess = 0,
     OSResultOutOfResources = 1,
@@ -18,6 +20,7 @@ typedef uint16_t OSTaskTimeSpan;
 typedef void (*OSTaskProcedure)(void* param);
 
 typedef void* OSTaskHandle;
+typedef void* OSSemaphoreHandle;
 
 typedef OSResult (*OSTaskCreateProc)(OSTaskProcedure entryPoint,
     const char* taskName,
@@ -32,6 +35,11 @@ typedef void (*OSGenericProc)(void);
 
 typedef void (*OSTaskSleepProc)(const OSTaskTimeSpan time);
 
+typedef OSSemaphoreHandle (*OSCreateSemaphore)(void);
+
+typedef uint8_t (*OSTakeSemaphore)(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout);
+typedef uint8_t (*OSGiveSemaphore)(OSSemaphoreHandle semaphore);
+
 typedef struct
 {
     OSTaskCreateProc CreateTask;
@@ -39,6 +47,10 @@ typedef struct
     OSTaskProcedure SuspendTask;
     OSTaskProcedure ResumeTask;
     OSGenericProc RunScheduler;
+    OSCreateSemaphore CreateBinarySemaphore;
+    OSTakeSemaphore TakeSemaphore;
+    OSGiveSemaphore GiveSemaphore;
+
 } OS;
 
 OSResult OSSetup(void);

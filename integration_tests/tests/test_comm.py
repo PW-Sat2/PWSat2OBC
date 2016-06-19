@@ -44,6 +44,7 @@ class Test_Comm(BaseTest):
         self.system.receiver.put_frame("ABD")
 
         self.system.obc.receive_frame()
+        self.assertTrue(self.system.receiver.wait_for_frame_removed(3))
 
         self.assertEqual(self.system.receiver.queue_size(), 0)
 
@@ -71,7 +72,7 @@ class Test_Comm(BaseTest):
 
     def test_auto_pingpong(self):
         self.system.receiver.put_frame("PING")
-        msg = self.system.transmitter.get_message_from_buffer(3)
+        msg = self.system.transmitter.get_message_from_buffer(20)
 
         msg = ''.join([chr(c) for c in msg])
 
