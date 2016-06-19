@@ -12,6 +12,7 @@ node {
 		withEnv(["PATH+TOOLCHAIN=${toolchainPath}", "PATH+SEGGER=${env.SEGGER}"]) {
 			dir('build') {
 				deleteDir()
+
 				stage 'Build'
 				bat "cmake -DMOCK_COM=${env.MOCK_COM} -DOBC_COM=${env.OBC_COM} -G \"MinGW Makefiles\" ../source"
 				bat "make pwsat"
@@ -24,15 +25,12 @@ node {
 				stage 'Reports'
 				echo "Memory usage report:"
 				bat "make pwsat.memory_report"
+
 				stage concurrency: 1, name: 'Integration Tests'
 				bat "make integration_tests"
 				step([$class: 'JUnitResultArchiver', testResults: 'build/DevBoard/integration-tests.xml'])
 			}
 		}
-
-		step([$class: 'ArtifactArchiver', artifacts: 'build/build/DevBoard/**/*', fingerprint: true])
-		step([$class: 'JUnitResultArchiver', testResults: 'build/build/DevBoard/unit-tests.xml'])
-
 	} catch(err) {
 		currentBuild.result = 'FAILURE'
 	} finally {
