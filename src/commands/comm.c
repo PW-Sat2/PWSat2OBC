@@ -11,6 +11,7 @@ void SendFrameHandler(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     uint8_t len = strlen(argv[0]);
+    LOGF(LOG_LEVEL_INFO, "Received request to send frame of length %d...", len);
     CommSendFrame(&Main.comm, (uint8_t*)argv[0], len);
 }
 
@@ -49,6 +50,7 @@ void CommandPauseComm(uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argv);
     LOG(LOG_LEVEL_INFO, "Received request to pause comm...");
     CommPause(&Main.comm);
+    LOG(LOG_LEVEL_INFO, "Comm paused as requested...");
 }
 
 void OBCGetState(uint16_t argc, char* argv[])

@@ -27,6 +27,14 @@ struct IOS
     virtual uint8_t GiveSemaphore(const OSSemaphoreHandle semaphore) = 0;
 
     virtual uint8_t TakeSemaphore(const OSSemaphoreHandle semaphore, const OSTaskTimeSpan timeout) = 0;
+
+    virtual OSEventGroupHandle CreateEventGroup() = 0;
+
+    virtual OSEventBits EventGroupSetBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange) = 0;
+
+    virtual OSEventBits EventGroupClearBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange) = 0;
+
+    virtual OSEventBits EventGroupWaitForBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, const OSTaskTimeSpan timeout) = 0;
 };
 
 class OSReset

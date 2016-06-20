@@ -101,8 +101,7 @@ CommTest::CommTest()
 
     auto guard = InstallProxy(&system);
 
-    EXPECT_CALL(system, CreateBinarySemaphore()).Times(2);
-    EXPECT_CALL(system, GiveSemaphore(_)).Times(1);
+    EXPECT_CALL(system, CreateEventGroup()).Times(1);
 
     CommInitialize(&comm, &low);
     mockPtr = &i2c;

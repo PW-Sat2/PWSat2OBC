@@ -1,3 +1,5 @@
+import logging
+
 from obc import OBC, SerialPortTerminal
 from devices import *
 from i2cMock import I2CMock
@@ -5,6 +7,8 @@ from i2cMock import I2CMock
 
 class System:
     def __init__(self, mock_com, obc_com):
+        self.log = logging.getLogger("system")
+
         self.obc_com = obc_com
         self.mock_com = mock_com
 

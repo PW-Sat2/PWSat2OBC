@@ -3,6 +3,7 @@
 #include "FreeRTOSConfig.h"
 #include "task.h"
 #include "semphr.h"
+#include "event_groups.h"
 
 static OSResult TaskCreate(OSTaskProcedure entryPoint,
     const char* taskName,
@@ -50,6 +51,26 @@ static uint8_t GiveSemaphore(OSSemaphoreHandle semaphore)
 	return xSemaphoreGive(semaphore);
 }
 
+static OSEventGroupHandle CreateEventGroup(void)
+{
+	return xEventGroupCreate();
+}
+
+static OSEventBits EventGroupSetBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange)
+{
+	return xEventGroupSetBits(eventGroup, bitsToChange);
+}
+
+static OSEventBits EventGroupClearBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange)
+{
+	return xEventGroupClearBits(eventGroup, bitsToChange);
+}
+
+static OSEventBits EventGroupWaitForBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, const OSTaskTimeSpan timeout)
+{
+	return xEventGroupWaitBits(eventGroup, bitsToWaitFor, 0, pdFALSE, timeout);
+}
+
 OS System;
 
 OSResult OSSetup(void)
@@ -62,5 +83,10 @@ OSResult OSSetup(void)
     System.CreateBinarySemaphore = CreateBinarySemaphore;
     System.TakeSemaphore = TakeSemaphore;
     System.GiveSemaphore = GiveSemaphore;
+    System.CreateEventGroup = CreateEventGroup;
+    System.EventGroupSetBits = EventGroupSetBits;
+    System.EventGroupClearBits = EventGroupClearBits;
+    System.EventGroupWaitForBits = EventGroupWaitForBits;
+
     return OSResultSuccess;
 }

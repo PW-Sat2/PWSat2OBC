@@ -115,7 +115,7 @@ static void handleIncomingChar(void* args)
 
         xQueueReceive(terminalQueue, &data, portMAX_DELAY);
 #if 0
-        LOGF(LOG_LEVEL_INFO, "Received character: 0x%x, %c", (int)data, data);
+        LOGF(LOG_LEVEL_INFO, "RC: 0x%x, %c", (int)data, data);
 #endif
         if (data == '\n')
         {
@@ -133,7 +133,7 @@ static void handleIncomingChar(void* args)
 
 void TerminalInit(void)
 {
-    terminalQueue = xQueueCreate(32, sizeof(uint8_t));
+    terminalQueue = xQueueCreate(128, sizeof(uint8_t));
 
     if (terminalQueue == NULL)
     {

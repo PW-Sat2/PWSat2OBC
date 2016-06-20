@@ -62,8 +62,7 @@ typedef struct
 {
     CommLowInterface low;
     void* commTask;
-    OSSemaphoreHandle taskPauseRequest;
-    OSSemaphoreHandle taskPaused;
+    OSEventGroupHandle commTaskFlags;
 } CommObject;
 
 typedef struct

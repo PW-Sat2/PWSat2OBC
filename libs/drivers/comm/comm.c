@@ -31,6 +31,11 @@ typedef enum {
     TransmitterGetState = 0x41
 } TransmitterCommand;
 
+typedef enum {
+	TaskFlagPauseRequest = 1,
+	TaskFlagAck = 2
+} TaskFlag;
+
 static noreturn void CommTask(void* param);
 
 static bool SendCommand(CommObject* object, CommAddress address, uint8_t command)
@@ -63,14 +68,17 @@ void CommInitialize(CommObject* comm, const CommLowInterface* lowerInterface)
 {
     memset(comm, 0, sizeof(CommObject));
     comm->low = *lowerInterface;
-    comm->taskPauseRequest = System.CreateBinarySemaphore();
-    comm->taskPaused = System.CreateBinarySemaphore();
-
-    System.GiveSemaphore(comm->taskPaused);
+    comm->commTaskFlags = System.CreateEventGroup();
 }
 
 bool CommRestart(CommObject* comm)
 {
+    if (!CommReset(comm))
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable reset comm hardware. ");
+        return false;
+    }
+
     if (comm->commTask == NULL)
     {
         const OSResult result = System.CreateTask(CommTask, "COMM Task", 512, comm, 4, &comm->commTask);
@@ -79,17 +87,8 @@ bool CommRestart(CommObject* comm)
             LOGF(LOG_LEVEL_ERROR, "[comm] Unable to create background task. Status: 0x%08x.", result);
             return false;
         }
-
-        System.SuspendTask(comm->commTask);
     }
 
-    if (!CommReset(comm))
-    {
-        LOG(LOG_LEVEL_ERROR, "[comm] Unable reset comm hardware. ");
-        return false;
-    }
-
-    System.ResumeTask(comm->commTask);
     return true;
 }
 
@@ -97,8 +96,8 @@ bool CommPause(CommObject* comm)
 {
     if (comm->commTask != NULL)
     {
-        System.GiveSemaphore(comm->taskPauseRequest);
-        System.TakeSemaphore(comm->taskPaused, MAX_DELAY);
+    	System.EventGroupSetBits(comm->commTaskFlags, TaskFlagPauseRequest);
+    	System.EventGroupWaitForBits(comm->commTaskFlags, TaskFlagAck, MAX_DELAY);
     }
 
     return true;
@@ -390,15 +389,15 @@ static void CommTask(void* param)
             }
         }
 
-        if (System.TakeSemaphore(comm->taskPauseRequest, 10000))
+        if (System.EventGroupWaitForBits(comm->commTaskFlags, TaskFlagPauseRequest, 10000))
         {
-            System.GiveSemaphore(comm->taskPaused);
+        	LOG(LOG_LEVEL_WARNING, "Comm task paused");
 
-            System.TakeSemaphore(comm->taskPauseRequest, MAX_DELAY);
+            System.EventGroupSetBits(comm->commTaskFlags, TaskFlagAck);
 
             System.SuspendTask(NULL);
 
-            System.GiveSemaphore(comm->taskPaused);
+            System.EventGroupClearBits(comm->commTaskFlags, TaskFlagAck | TaskFlagPauseRequest);
         }
     }
 }

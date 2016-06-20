@@ -15,12 +15,14 @@ typedef enum {
     OSResultTimeout = 2,
 } OSResult;
 
-typedef uint16_t OSTaskTimeSpan;
+typedef uint32_t OSTaskTimeSpan;
 
 typedef void (*OSTaskProcedure)(void* param);
 
 typedef void* OSTaskHandle;
 typedef void* OSSemaphoreHandle;
+typedef void* OSEventGroupHandle;
+typedef uint32_t OSEventBits;
 
 typedef OSResult (*OSTaskCreateProc)(OSTaskProcedure entryPoint,
     const char* taskName,
@@ -40,6 +42,10 @@ typedef OSSemaphoreHandle (*OSCreateSemaphore)(void);
 typedef uint8_t (*OSTakeSemaphore)(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout);
 typedef uint8_t (*OSGiveSemaphore)(OSSemaphoreHandle semaphore);
 
+typedef OSEventGroupHandle (*OSCreateEventGroup)(void);
+typedef OSEventBits (*OSEventGroupChangeBits)(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange);
+typedef OSEventBits (*OSEventGroupWaitForBits)(OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, const OSTaskTimeSpan timeout);
+
 typedef struct
 {
     OSTaskCreateProc CreateTask;
@@ -50,7 +56,10 @@ typedef struct
     OSCreateSemaphore CreateBinarySemaphore;
     OSTakeSemaphore TakeSemaphore;
     OSGiveSemaphore GiveSemaphore;
-
+    OSCreateEventGroup CreateEventGroup;
+    OSEventGroupChangeBits EventGroupSetBits;
+    OSEventGroupChangeBits EventGroupClearBits;
+    OSEventGroupWaitForBits EventGroupWaitForBits;
 } OS;
 
 OSResult OSSetup(void);

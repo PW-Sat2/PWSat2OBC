@@ -1,8 +1,8 @@
-#include "logger.h"
 #include <assert.h> // static_assert
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h> //memset
+#include "logger.h"
 #include "system.h"
 
 #define MAX_ENDPOINTS 3
@@ -26,8 +26,7 @@ typedef struct LoggerTag
 static Logger logger = {0};
 
 static const char* const levelMap[] = {
-    "[Always] ", "[Fatal] ", "[Error] ", "[Warning] ", "[Info] ", "[Debug] ", "[Trace] ",
-};
+    "[Always]  ", "[Fatal]   ", "[Error]   ", "[Warning] ", "[Info]    ", "[Debug]   ", "[Trace]   "};
 
 static_assert(LOG_LEVEL_ALWAYS == 0, "Fix level conversion map for level: Always");
 static_assert(LOG_LEVEL_FATAL == 1, "Fix level conversion map for level: Fatal");

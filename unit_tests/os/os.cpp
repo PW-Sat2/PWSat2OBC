@@ -86,6 +86,47 @@ static uint8_t TakeSemaphore(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout
     return 0;
 }
 
+static OSEventGroupHandle CreateEventGroup(void)
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->CreateEventGroup();
+    }
+
+    return 0;
+}
+
+static OSEventBits EventGroupSetBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange)
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->EventGroupSetBits(eventGroup, bitsToChange);
+    }
+
+    return 0;
+}
+
+static OSEventBits EventGroupClearBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange)
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->EventGroupClearBits(eventGroup, bitsToChange);
+    }
+
+    return 0;
+}
+
+static OSEventBits EventGroupWaitForBits(
+    OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, const OSTaskTimeSpan timeout)
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->EventGroupWaitForBits(eventGroup, bitsToWaitFor, timeout);
+    }
+
+    return 0;
+}
+
 OSReset::OSReset() : released(false)
 {
 }
@@ -122,5 +163,9 @@ OSReset InstallProxy(IOS* target)
     System.CreateBinarySemaphore = CreateBinarySemaphore;
     System.GiveSemaphore = GiveSemaphore;
     System.TakeSemaphore = TakeSemaphore;
+    System.CreateEventGroup = CreateEventGroup;
+    System.EventGroupClearBits = EventGroupClearBits;
+    System.EventGroupSetBits = EventGroupSetBits;
+    System.EventGroupWaitForBits = EventGroupWaitForBits;
     return OSReset();
 }

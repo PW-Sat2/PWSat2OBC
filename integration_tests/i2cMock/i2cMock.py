@@ -149,7 +149,7 @@ class I2CMock(object):
     def _device_selected_for_write(self):
         address = ord(self.port.read(1))
 
-        self.log.debug("Device %d selected for write", address)
+        self.log.debug("Device %X selected for write", address)
 
         number_of_bytes = ord(self.port.read(1))
 
@@ -157,7 +157,7 @@ class I2CMock(object):
 
         data = [ord(self.port.read()) for _ in range(number_of_bytes)]
 
-        self.log.debug("Written bytes: %s", data)
+        self.log.debug("Written bytes: %s", map(lambda x: "%X" % x, data))
 
         device = self._device(address)
 
@@ -177,13 +177,13 @@ class I2CMock(object):
     def _device_selected_for_read(self):
         address = ord(self.port.read(1))
 
-        self.log.debug("Device %d selected for read", address)
+        self.log.debug("Device %X selected for read", address)
 
         device = self._device(address)
 
         data = device.read()
 
-        self.log.debug("Response bytes: %s", data)
+        self.log.debug("Response bytes: %s", map(lambda x: "%X" % x, data))
 
         response = [len(data)] + data
         escaped = self._escape(response)
