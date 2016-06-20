@@ -14,7 +14,7 @@ class SerialPortTerminal:
         c = self._serial.read(1)
         while c != terminator:
             c = self._serial.read(1)
-        
+
     def readUntilPrompt(self, terminator='>'):
         data = ""
         c = self._serial.read(1)
@@ -48,6 +48,17 @@ class SerialPortTerminal:
         self._serial.rts = False
         self.readUntilPrompt('@')
 
+    def power_off(self):
+        self._serial.rts = True
+
+    def power_on(self):
+        self._serial.reset_input_buffer()
+        self._serial.reset_output_buffer()
+        self._serial.flushInput()
+        self._serial.flush()
+        self._serial.rts = False
+        self.readUntilPrompt('@')
+
     def close(self):
         self._serial.close()
 
@@ -60,7 +71,7 @@ class OBC:
         response = self._terminal.command("getState")
         while response != "1":
             response = self._terminal.command("getState")
-        
+
 
     def ping(self):
         return self._terminal.command("ping")
@@ -97,3 +108,8 @@ class OBC:
     def close(self):
         self._terminal.close()
 
+    def power_off(self):
+        self._terminal.power_off()
+
+    def power_on(self):
+        self._terminal.power_on()

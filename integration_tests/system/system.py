@@ -12,9 +12,13 @@ class System:
 
         self._setup_devices()
 
+        self.obc = OBC(SerialPortTerminal(obc_com))
+
+        self.obc.power_off()
+
         self.i2c.start()
 
-        self.obc = OBC(SerialPortTerminal(obc_com))
+        self.obc.power_on()
 
     def _setup_devices(self):
         self.eps = EPSDevice()
@@ -28,5 +32,3 @@ class System:
     def close(self):
         self.i2c.close()
         self.obc.close()
-
-
