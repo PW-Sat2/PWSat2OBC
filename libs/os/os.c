@@ -1,9 +1,15 @@
 #include "base/os.h"
 #include "FreeRTOS.h"
 #include "FreeRTOSConfig.h"
-#include "task.h"
-#include "semphr.h"
 #include "event_groups.h"
+#include "semphr.h"
+#include "task.h"
+
+static inline TickType_t ConvertTimeToTicks(const OSTaskTimeSpan span)
+{
+    const uint64_t time = span;
+    return pdMS_TO_TICKS(time);
+}
 
 static OSResult TaskCreate(OSTaskProcedure entryPoint,
     const char* taskName,
@@ -13,7 +19,14 @@ static OSResult TaskCreate(OSTaskProcedure entryPoint,
     OSTaskHandle* taskHandle)
 {
     const BaseType_t result = xTaskCreate(entryPoint, taskName, stackSize, taskParameter, priority, taskHandle);
-    return result == pdPASS ? OSResultSuccess : OSResultOutOfResources;
+    if (result != pdPASS)
+    {
+        return OSResultOutOfResources;
+    }
+    else
+    {
+        return OSResultSuccess;
+    }
 }
 
 static void RunScheduller(void)
@@ -23,7 +36,7 @@ static void RunScheduller(void)
 
 static void TaskSleep(const OSTaskTimeSpan time)
 {
-    vTaskDelay(pdMS_TO_TICKS(time));
+    vTaskDelay(ConvertTimeToTicks(time));
 }
 
 static void TaskSuspend(OSTaskHandle task)
@@ -38,37 +51,61 @@ static void TaskResume(OSTaskHandle task)
 
 static OSSemaphoreHandle CreateBinarySemaphore(void)
 {
-	return xSemaphoreCreateBinary();
+    return xSemaphoreCreateBinary();
 }
 
-static uint8_t TakeSemaphore(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout)
+static OSResult TakeSemaphore(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout)
 {
-	return xSemaphoreTake(semaphore, pdMS_TO_TICKS(timeout));
+    const BaseType_t result = xSemaphoreTake(semaphore, ConvertTimeToTicks(timeout));
+    if (result != pdPASS)
+    {
+        return OSResultTimeout;
+    }
+    else
+    {
+        return OSResultSuccess;
+    }
 }
 
-static uint8_t GiveSemaphore(OSSemaphoreHandle semaphore)
+static OSResult GiveSemaphore(OSSemaphoreHandle semaphore)
 {
-	return xSemaphoreGive(semaphore);
+    const BaseType_t result = xSemaphoreGive(semaphore);
+    if (result != pdPASS)
+    {
+        return OSResultInvalidOperation;
+    }
+    else
+    {
+        return OSResultSuccess;
+    }
 }
 
 static OSEventGroupHandle CreateEventGroup(void)
 {
-	return xEventGroupCreate();
+    return xEventGroupCreate();
 }
 
 static OSEventBits EventGroupSetBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange)
 {
-	return xEventGroupSetBits(eventGroup, bitsToChange);
+    return xEventGroupSetBits(eventGroup, bitsToChange);
 }
 
 static OSEventBits EventGroupClearBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange)
 {
-	return xEventGroupClearBits(eventGroup, bitsToChange);
+    return xEventGroupClearBits(eventGroup, bitsToChange);
 }
 
-static OSEventBits EventGroupWaitForBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, const OSTaskTimeSpan timeout)
+static OSEventBits EventGroupWaitForBits(OSEventGroupHandle eventGroup,
+    const OSEventBits bitsToWaitFor,
+    bool waitAll,
+    bool autoReset,
+    const OSTaskTimeSpan timeout)
 {
-	return xEventGroupWaitBits(eventGroup, bitsToWaitFor, 0, pdFALSE, timeout);
+    return xEventGroupWaitBits(eventGroup,
+        bitsToWaitFor,
+        autoReset ? bitsToWaitFor : 0,
+        waitAll ? pdTRUE : pdFALSE,
+        ConvertTimeToTicks(timeout));
 }
 
 OS System;

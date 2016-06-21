@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #define MAX_DELAY 0xffffffffUL
@@ -13,6 +14,7 @@ typedef enum {
     OSResultSuccess = 0,
     OSResultOutOfResources = 1,
     OSResultTimeout = 2,
+    OSResultInvalidOperation = 3,
 } OSResult;
 
 typedef uint32_t OSTaskTimeSpan;
@@ -39,12 +41,19 @@ typedef void (*OSTaskSleepProc)(const OSTaskTimeSpan time);
 
 typedef OSSemaphoreHandle (*OSCreateSemaphore)(void);
 
-typedef uint8_t (*OSTakeSemaphore)(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout);
-typedef uint8_t (*OSGiveSemaphore)(OSSemaphoreHandle semaphore);
+typedef OSResult (*OSTakeSemaphore)(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout);
+
+typedef OSResult (*OSGiveSemaphore)(OSSemaphoreHandle semaphore);
 
 typedef OSEventGroupHandle (*OSCreateEventGroup)(void);
+
 typedef OSEventBits (*OSEventGroupChangeBits)(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange);
-typedef OSEventBits (*OSEventGroupWaitForBits)(OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, const OSTaskTimeSpan timeout);
+
+typedef OSEventBits (*OSEventGroupWaitForBits)(OSEventGroupHandle eventGroup,
+    const OSEventBits bitsToWaitFor,
+    bool waitAll,
+    bool autoReset,
+    const OSTaskTimeSpan timeout);
 
 typedef struct
 {

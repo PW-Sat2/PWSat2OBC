@@ -9,7 +9,10 @@
 #include "logger/logger.h"
 #include "system.h"
 
-typedef enum { CommReceiver = 0x60, CommTransmitter = 0x62 } CommAddress;
+typedef enum {
+    CommReceiver = 0x60,
+    CommTransmitter = 0x62,
+} CommAddress;
 
 typedef enum {
     CommHardReset = 0xAB,
@@ -32,8 +35,8 @@ typedef enum {
 } TransmitterCommand;
 
 typedef enum {
-	TaskFlagPauseRequest = 1,
-	TaskFlagAck = 2
+    TaskFlagPauseRequest = 1,
+    TaskFlagAck = 2,
 } TaskFlag;
 
 static noreturn void CommTask(void* param);
@@ -96,8 +99,8 @@ bool CommPause(CommObject* comm)
 {
     if (comm->commTask != NULL)
     {
-    	System.EventGroupSetBits(comm->commTaskFlags, TaskFlagPauseRequest);
-    	System.EventGroupWaitForBits(comm->commTaskFlags, TaskFlagAck, MAX_DELAY);
+        System.EventGroupSetBits(comm->commTaskFlags, TaskFlagPauseRequest);
+        System.EventGroupWaitForBits(comm->commTaskFlags, TaskFlagAck, false, true, MAX_DELAY);
     }
 
     return true;
@@ -351,53 +354,59 @@ bool CommGetTransmitterState(CommObject* comm, CommTransmitterState* state)
     return true;
 }
 
+static void CommPollHardware(CommObject* comm)
+{
+    CommReceiverFrameCount frameResponse = CommGetFrameCount(comm);
+    if (!frameResponse.status)
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable to get receiver frame count. ");
+    }
+    else if (frameResponse.frameCount > 0)
+    {
+        LOGF(LOG_LEVEL_INFO, "[comm] Got %d frames", frameResponse.frameCount);
+
+        for (uint8_t i = 0; i < frameResponse.frameCount; i++)
+        {
+            Frame frame;
+            bool status = CommReceiveFrame(comm, &frame);
+            if (!status)
+            {
+                LOG(LOG_LEVEL_ERROR, "[comm] Unable to receive frame. ");
+            }
+            else
+            {
+                if (!CommRemoveFrame(comm))
+                {
+                    LOG(LOG_LEVEL_ERROR, "[comm] Unable to remove frame from receiver. ");
+                }
+
+                LOGF(LOG_LEVEL_INFO, "[comm] Received frame %d bytes. ", (int)frame.Size);
+
+                // TODO: add separate frame handler, and move this code there
+                uint8_t msg[] = "PONG";
+                CommSendFrame(comm, msg, 4);
+            }
+        }
+    }
+}
+
 static void CommTask(void* param)
 {
     CommObject* comm = (CommObject*)param;
+    CommPollHardware(comm);
     for (;;)
     {
-        CommReceiverFrameCount frameResponse = CommGetFrameCount(comm);
-        if (!frameResponse.status)
+        const OSEventBits result =
+            System.EventGroupWaitForBits(comm->commTaskFlags, TaskFlagPauseRequest, false, true, 10000);
+        if (result == TaskFlagPauseRequest)
         {
-            LOG(LOG_LEVEL_ERROR, "[comm] Unable to get receiver frame count. ");
-        }
-        else if (frameResponse.frameCount > 0)
-        {
-            LOGF(LOG_LEVEL_INFO, "[comm] Got %d frames", frameResponse.frameCount);
-
-            for (uint8_t i = 0; i < frameResponse.frameCount; i++)
-            {
-                Frame frame;
-                bool status = CommReceiveFrame(comm, &frame);
-                if (!status)
-                {
-                    LOG(LOG_LEVEL_ERROR, "[comm] Unable to receive frame. ");
-                }
-                else
-                {
-                    if (!CommRemoveFrame(comm))
-                    {
-                        LOG(LOG_LEVEL_ERROR, "[comm] Unable to remove frame from receiver. ");
-                    }
-
-                    LOGF(LOG_LEVEL_INFO, "[comm] Received frame %d bytes. ", (int)frame.Size);
-
-                    // TODO: add separate frame handler, and move this code there
-                    uint8_t msg[] = "PONG";
-                    CommSendFrame(comm, msg, 4);
-                }
-            }
-        }
-
-        if (System.EventGroupWaitForBits(comm->commTaskFlags, TaskFlagPauseRequest, 10000))
-        {
-        	LOG(LOG_LEVEL_WARNING, "Comm task paused");
-
+            LOG(LOG_LEVEL_WARNING, "Comm task paused");
             System.EventGroupSetBits(comm->commTaskFlags, TaskFlagAck);
-
             System.SuspendTask(NULL);
-
-            System.EventGroupClearBits(comm->commTaskFlags, TaskFlagAck | TaskFlagPauseRequest);
+        }
+        else
+        {
+            CommPollHardware(comm);
         }
     }
 }

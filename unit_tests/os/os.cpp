@@ -63,27 +63,27 @@ static OSSemaphoreHandle CreateBinarySemaphore()
         return OSProxy->CreateBinarySemaphore();
     }
 
-    return 0;
+    return nullptr;
 }
 
-static uint8_t GiveSemaphore(OSSemaphoreHandle semaphore)
+static OSResult GiveSemaphore(OSSemaphoreHandle semaphore)
 {
     if (OSProxy != nullptr)
     {
         return OSProxy->GiveSemaphore(semaphore);
     }
 
-    return 0;
+    return OSResultInvalidOperation;
 }
 
-static uint8_t TakeSemaphore(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout)
+static OSResult TakeSemaphore(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout)
 {
     if (OSProxy != nullptr)
     {
         return OSProxy->TakeSemaphore(semaphore, timeout);
     }
 
-    return 0;
+    return OSResultInvalidOperation;
 }
 
 static OSEventGroupHandle CreateEventGroup(void)
@@ -93,7 +93,7 @@ static OSEventGroupHandle CreateEventGroup(void)
         return OSProxy->CreateEventGroup();
     }
 
-    return 0;
+    return nullptr;
 }
 
 static OSEventBits EventGroupSetBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange)
@@ -116,12 +116,15 @@ static OSEventBits EventGroupClearBits(OSEventGroupHandle eventGroup, const OSEv
     return 0;
 }
 
-static OSEventBits EventGroupWaitForBits(
-    OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, const OSTaskTimeSpan timeout)
+static OSEventBits EventGroupWaitForBits(OSEventGroupHandle eventGroup,
+    const OSEventBits bitsToWaitFor,
+    bool waitAll,
+    bool autoReset,
+    const OSTaskTimeSpan timeout)
 {
     if (OSProxy != nullptr)
     {
-        return OSProxy->EventGroupWaitForBits(eventGroup, bitsToWaitFor, timeout);
+        return OSProxy->EventGroupWaitForBits(eventGroup, bitsToWaitFor, waitAll, autoReset, timeout);
     }
 
     return 0;
