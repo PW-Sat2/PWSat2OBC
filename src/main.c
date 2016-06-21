@@ -27,6 +27,7 @@
 OBC Main;
 #include "storage/storage.h"
 #include "storage/nand.h"
+#include "storage/storage.h"
 
 void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
 {
@@ -49,19 +50,19 @@ static void BlinkLed0(void* param)
     }
 }
 
-static void StorageTest(void * param)
+static void StorageTest(void* param)
 {
-	UNREFERENCED_PARAMETER(param);
+    UNREFERENCED_PARAMETER(param);
 
-	LOG(LOG_LEVEL_INFO, "Storage test");
+    LOG(LOG_LEVEL_INFO, "Storage test");
 
-	FlashInterface flash;
-	FlashNANDInterface flashNAND;
+    FlashInterface flash;
+    FlashNANDInterface flashNAND;
 
-	BuildNANDInterface(&flash, &flashNAND);
+    BuildNANDInterface(&flash, &flashNAND);
 
-	DoThings(&flash);
-	vTaskSuspend(NULL);
+    DoThings(&flash);
+    vTaskSuspend(NULL);
 }
 
 static void InitSwoEndpoint(void)
@@ -70,7 +71,7 @@ static void InitSwoEndpoint(void)
     const bool result = LogAddEndpoint(SwoGetEndpoint(swoEndpointHandle), swoEndpointHandle, LOG_LEVEL_TRACE);
     if (!result)
     {
-        SwoPuts("Unable to attach swo endpoint to logger. ");
+        SwoPutsOnChannel(0, "Unable to attach swo endpoint to logger. ");
     }
 }
 
@@ -94,7 +95,7 @@ static void FrameHandler(CommObject* comm, CommFrame* frame, void* context)
     CommSendFrame(comm, (uint8_t*)"PONG", 4);
 }
 
-void FsTask(void *);
+void FsTask(void*);
 
 int main(void)
 {
@@ -124,7 +125,7 @@ int main(void)
     CommInitialize(&Main.comm, &commInterface, &commUpperInterface);
 
     TerminalInit();
-    SwoPuts("Hello I'm PW-SAT2 OBC\n");
+    SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
     LogInit(LOG_LEVEL_DEBUG);
     InitSwoEndpoint();
 
@@ -139,7 +140,7 @@ int main(void)
 
     System.CreateTask(BlinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
     System.CreateTask(ObcInitTask, "Init", 512, &Main, tskIDLE_PRIORITY + 16, &Main.initTask);
-    System.CreateTask(FsTask, "FS Task", 2048, &Main, tskIDLE_PRIORITY + 1, NULL);
+    System.CreateTask(FsTask, "FS Task", 4096, &Main, tskIDLE_PRIORITY + 1, NULL);
     System.RunScheduler();
 
     GPIO_PinOutToggle(LED_PORT, LED0);

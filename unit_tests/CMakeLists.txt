@@ -4,7 +4,10 @@ set(SOURCES
   semihosting.cpp
   mem.c
   test.cpp
-  Logger/LoggerTest.cpp
+  Logger/LoggerTest.cpp   
+  FileSystem/FileSystemTest.cpp
+  FileSystem/YaffsOSGlue.c
+  FileSystem/MemoryDriver.cpp  
   Comm/CommTest.cpp
   base/ReaderTest.cpp
   base/WriterTest.cpp
@@ -13,7 +16,7 @@ set(SOURCES
   OsMock.hpp
 )
 
-add_executable(${NAME} EXCLUDE_FROM_ALL ${SOURCES})
+add_executable(${NAME} ${SOURCES})
 
 if(${ENABLE_COVERAGE})
   set(LD_COVERAGE "-fprofile-arcs")
@@ -25,7 +28,7 @@ endif(${ENABLE_COVERAGE})
 
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_CURRENT_LIST_DIR}/linker.ld ${LD_COVERAGE}")
 
-target_link_libraries(${NAME} platform emlib gtest gmock logger base comm)
+target_link_libraries(${NAME} platform emlib gtest gmock logger comm yaffs)
 
 target_require_semihosting(${NAME})
 
@@ -34,8 +37,8 @@ set_target_properties(${NAME} PROPERTIES LINK_FLAGS "${existing_link_flags} -u _
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
 
-add_custom_target(${NAME}.run
-  COMMAND ${QEMU} -verbose -verbose -board generic -mcu ${QEMU_MCU} -nographic -monitor null -image ${EXEC_OBJ} -semihosting-config "arg=tests,arg=--gtest_output=xml:${OUTPUT_PATH}/unit-tests.xml"
+add_custom_target(unit_tests.run
+  COMMAND ${QEMU} -board generic -mcu ${QEMU_MCU} -nographic -monitor null -image ${EXEC_OBJ} -semihosting-config "arg=tests,arg=--gtest_output=xml:${OUTPUT_PATH}/unit-tests.xml"
 
   DEPENDS ${NAME}
 )
