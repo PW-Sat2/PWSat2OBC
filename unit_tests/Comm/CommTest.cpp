@@ -80,6 +80,22 @@ static I2C_TransferReturn_TypeDef TestI2CRead(
     }
 }
 
+static OSReset SetupComm(CommObject* comm, OSMock& system)
+{
+    CommLowInterface low;
+    low.writeProc = TestI2CWrite;
+    low.readProc = TestI2CRead;
+
+    CommUpperInterface up;
+    up.frameHandler = nullptr;
+    up.frameHandlerContext = nullptr;
+    auto reset = InstallProxy(&system);
+    ON_CALL(system, CreateEventGroup()).WillByDefault(Return(reinterpret_cast<OSEventGroupHandle>(comm)));
+
+    EXPECT_THAT(CommInitialize(comm, &low, &up), Eq(OSResultSuccess));
+    return reset;
+}
+
 class CommTest : public testing::Test
 {
   public:
@@ -88,22 +104,14 @@ class CommTest : public testing::Test
 
   protected:
     CommObject comm;
+    testing::NiceMock<OSMock> system;
     I2CMock i2c;
+    OSReset reset;
 };
 
 CommTest::CommTest()
 {
-    CommLowInterface low;
-    low.writeProc = TestI2CWrite;
-    low.readProc = TestI2CRead;
-
-    OSMock system;
-
-    auto guard = InstallProxy(&system);
-
-    EXPECT_CALL(system, CreateEventGroup()).Times(1);
-
-    CommInitialize(&comm, &low);
+    reset = SetupComm(&comm, system);
     mockPtr = &i2c;
 }
 
@@ -118,9 +126,39 @@ TEST_F(CommTest, TestInitializationDoesNotTouchHardware)
     CommLowInterface low;
     low.writeProc = TestI2CWrite;
     low.readProc = TestI2CRead;
+    CommUpperInterface up;
+    up.frameHandler = nullptr;
+    up.frameHandlerContext = nullptr;
     EXPECT_CALL(i2c, I2CRead(_, _, _, _, _, _)).Times(0);
     EXPECT_CALL(i2c, I2CWrite(_, _, _, _)).Times(0);
-    CommInitialize(&commObject, &low);
+    CommInitialize(&commObject, &low, &up);
+}
+
+TEST_F(CommTest, TestInitializationAllocationFailure)
+{
+    CommObject commObject;
+    CommLowInterface low;
+    low.writeProc = TestI2CWrite;
+    low.readProc = TestI2CRead;
+    CommUpperInterface up;
+    up.frameHandler = nullptr;
+    up.frameHandlerContext = nullptr;
+    EXPECT_CALL(system, CreateEventGroup()).WillOnce(Return(nullptr));
+    const auto status = CommInitialize(&commObject, &low, &up);
+    ASSERT_THAT(status, Ne(OSResultSuccess));
+}
+
+TEST_F(CommTest, TestInitialization)
+{
+    CommObject commObject;
+    CommLowInterface low;
+    low.writeProc = TestI2CWrite;
+    low.readProc = TestI2CRead;
+    CommUpperInterface up;
+    up.frameHandler = nullptr;
+    up.frameHandlerContext = nullptr;
+    const auto status = CommInitialize(&commObject, &low, &up);
+    ASSERT_THAT(status, Eq(OSResultSuccess));
 }
 
 TEST_F(CommTest, TestHardwareReset)
@@ -463,7 +501,7 @@ TEST_F(CommTest, TestSendFrameRejectedByHardware)
 
 TEST_F(CommTest, TestReceiveFrameFailure)
 {
-    Frame frame;
+    CommFrame frame;
     EXPECT_CALL(i2c, I2CRead(ReceiverAddress, ReceiverGetFrame, _, _, Ne(nullptr), Ge(COMM_MAX_FRAME_CONTENTS_SIZE)))
         .WillOnce(Invoke([](uint8_t /*address*/,
             uint8_t /*command*/,
@@ -477,7 +515,7 @@ TEST_F(CommTest, TestReceiveFrameFailure)
 
 TEST_F(CommTest, TestReceiveFrameDopplerFrequencyOutOfRange)
 {
-    Frame frame;
+    CommFrame frame;
     EXPECT_CALL(i2c, I2CRead(ReceiverAddress, ReceiverGetFrame, _, _, Ne(nullptr), Ge(COMM_MAX_FRAME_CONTENTS_SIZE)))
         .WillOnce(Invoke([](uint8_t /*address*/,
             uint8_t /*command*/,
@@ -496,7 +534,7 @@ TEST_F(CommTest, TestReceiveFrameDopplerFrequencyOutOfRange)
 
 TEST_F(CommTest, TestReceiveFrameRSSIOutOfRange)
 {
-    Frame frame;
+    CommFrame frame;
     EXPECT_CALL(i2c, I2CRead(ReceiverAddress, ReceiverGetFrame, _, _, Ne(nullptr), Ge(COMM_MAX_FRAME_CONTENTS_SIZE)))
         .WillOnce(Invoke([](uint8_t /*address*/,
             uint8_t /*command*/,
@@ -515,7 +553,7 @@ TEST_F(CommTest, TestReceiveFrameRSSIOutOfRange)
 
 TEST_F(CommTest, TestReceiveFrameSizeOutOfRange)
 {
-    Frame frame;
+    CommFrame frame;
     EXPECT_CALL(i2c, I2CRead(ReceiverAddress, ReceiverGetFrame, _, _, Ne(nullptr), Ge(COMM_MAX_FRAME_CONTENTS_SIZE)))
         .WillOnce(Invoke([](uint8_t /*address*/,
             uint8_t /*command*/,
@@ -533,7 +571,7 @@ TEST_F(CommTest, TestReceiveFrameSizeOutOfRange)
 
 TEST_F(CommTest, TestReceiveFrameSizeIsZero)
 {
-    Frame frame;
+    CommFrame frame;
     EXPECT_CALL(i2c, I2CRead(ReceiverAddress, ReceiverGetFrame, _, _, Ne(nullptr), Ge(COMM_MAX_FRAME_CONTENTS_SIZE)))
         .WillOnce(Invoke([](uint8_t /*address*/,
             uint8_t /*command*/,
@@ -550,7 +588,7 @@ TEST_F(CommTest, TestReceiveFrameSizeIsZero)
 
 TEST_F(CommTest, TestReceiveFrameSizeIsOutOfRange)
 {
-    Frame frame;
+    CommFrame frame;
     EXPECT_CALL(i2c, I2CRead(ReceiverAddress, ReceiverGetFrame, _, _, Ne(nullptr), Ge(COMM_MAX_FRAME_CONTENTS_SIZE)))
         .WillOnce(Invoke([](uint8_t /*address*/,
             uint8_t /*command*/,
@@ -568,7 +606,7 @@ TEST_F(CommTest, TestReceiveFrameSizeIsOutOfRange)
 
 TEST_F(CommTest, TestReceiveFrame)
 {
-    Frame frame;
+    CommFrame frame;
     const uint8_t expected[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
     EXPECT_CALL(i2c, I2CRead(ReceiverAddress, ReceiverGetFrame, _, _, Ne(nullptr), Ge(COUNT_OF(expected) + 6)))
         .WillOnce(Invoke([&](uint8_t /*address*/,
@@ -703,14 +741,13 @@ class CommReceiverTelemetryTest : public testing::TestWithParam<std::tuple<int, 
   protected:
     CommObject comm;
     I2CMock i2c;
+    testing::NiceMock<OSMock> system;
+    OSReset reset;
 };
 
 CommReceiverTelemetryTest::CommReceiverTelemetryTest()
 {
-    CommLowInterface low;
-    low.writeProc = TestI2CWrite;
-    low.readProc = TestI2CRead;
-    CommInitialize(&comm, &low);
+    reset = SetupComm(&comm, system);
     mockPtr = &i2c;
 }
 
@@ -761,14 +798,13 @@ class CommTransmitterTelemetryTest : public testing::TestWithParam<std::tuple<in
   protected:
     CommObject comm;
     I2CMock i2c;
+    testing::NiceMock<OSMock> system;
+    OSReset reset;
 };
 
 CommTransmitterTelemetryTest::CommTransmitterTelemetryTest()
 {
-    CommLowInterface low;
-    low.writeProc = TestI2CWrite;
-    low.readProc = TestI2CRead;
-    CommInitialize(&comm, &low);
+    reset = SetupComm(&comm, system);
     mockPtr = &i2c;
 }
 

@@ -13,13 +13,15 @@ extern "C" {
 
 #define COMM_MAX_FRAME_CONTENTS_SIZE 235
 
+typedef struct CommObjectTag CommObject;
+
 typedef struct
 {
     uint16_t Size;
     uint16_t Doppler;
     uint16_t RSSI;
     uint8_t Contents[COMM_MAX_FRAME_CONTENTS_SIZE];
-} Frame;
+} CommFrame;
 
 typedef struct
 {
@@ -47,20 +49,29 @@ typedef struct
     uint8_t Data[COMM_MAX_FRAME_CONTENTS_SIZE];
 } CommBeacon;
 
-typedef I2C_TransferReturn_TypeDef (*I2CWriteProcedure)(uint8_t address, uint8_t* inData, uint16_t length);
+typedef I2C_TransferReturn_TypeDef (*CommI2CWriteProcedure)(uint8_t address, uint8_t* inData, uint16_t length);
 
-typedef I2C_TransferReturn_TypeDef (*I2CWriteReadProcedure)(
+typedef I2C_TransferReturn_TypeDef (*CommI2CWriteReadProcedure)(
     uint8_t address, uint8_t* inData, uint16_t inLength, uint8_t* outData, uint16_t outLength);
+
+typedef void (*CommFrameHandler)(CommObject* comm, CommFrame* frame, void* context);
 
 typedef struct
 {
-    I2CWriteProcedure writeProc;
-    I2CWriteReadProcedure readProc;
+    CommI2CWriteProcedure writeProc;
+    CommI2CWriteReadProcedure readProc;
 } CommLowInterface;
 
 typedef struct
 {
+    CommFrameHandler frameHandler;
+    void* frameHandlerContext;
+} CommUpperInterface;
+
+typedef struct CommObjectTag
+{
     CommLowInterface low;
+    CommUpperInterface upper;
     void* commTask;
     OSEventGroupHandle commTaskFlags;
 } CommObject;
@@ -90,7 +101,7 @@ typedef struct
     bool BeaconState;
 } CommTransmitterState;
 
-void CommInitialize(CommObject* comm, const CommLowInterface* lowerInterface);
+OSResult CommInitialize(CommObject* comm, const CommLowInterface* lowerInterface, CommUpperInterface* upperInterface);
 
 bool CommPause(CommObject* comm);
 
@@ -108,7 +119,7 @@ bool CommGetTransmitterTelemetry(CommObject* comm, CommTransmitterTelemetry* tel
 
 bool CommSendFrame(CommObject* comm, uint8_t* data, uint8_t length);
 
-bool CommReceiveFrame(CommObject* comm, Frame* frame);
+bool CommReceiveFrame(CommObject* comm, CommFrame* frame);
 
 bool CommSetBeacon(CommObject* comm, const CommBeacon* beaconData);
 

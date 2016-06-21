@@ -32,7 +32,7 @@ void ReceiveFrameHandler(uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
     LOG(LOG_LEVEL_INFO, "Received request to get the oldes frame from comm...");
-    Frame frame = {.Contents = {0}};
+    CommFrame frame = {.Contents = {0}};
     if (!CommReceiveFrame(&Main.comm, &frame))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to get frame from comm. ");

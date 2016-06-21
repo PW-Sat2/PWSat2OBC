@@ -70,6 +70,13 @@ static void ObcInitTask(void* param)
     System.SuspendTask(NULL);
 }
 
+static void FrameHandler(CommObject* comm, CommFrame* frame, void* context)
+{
+    UNREFERENCED_PARAMETER(context);
+    UNREFERENCED_PARAMETER(frame);
+    CommSendFrame(comm, (uint8_t*)"PONG", 4);
+}
+
 int main(void)
 {
     memset(&Main, 0, sizeof(Main));
@@ -92,7 +99,10 @@ int main(void)
     CommLowInterface commInterface;
     commInterface.readProc = I2CWriteRead;
     commInterface.writeProc = I2CWrite;
-    CommInitialize(&Main.comm, &commInterface);
+    CommUpperInterface commUpperInterface;
+    commUpperInterface.frameHandler = FrameHandler;
+    commUpperInterface.frameHandlerContext = NULL;
+    CommInitialize(&Main.comm, &commInterface, &commUpperInterface);
 
     TerminalInit();
     SwoPuts("Hello I'm PW-SAT2 OBC\n");

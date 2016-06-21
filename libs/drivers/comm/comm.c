@@ -67,11 +67,20 @@ static bool SendCommandWithResponse(
     return status;
 }
 
-void CommInitialize(CommObject* comm, const CommLowInterface* lowerInterface)
+OSResult CommInitialize(CommObject* comm, const CommLowInterface* lowerInterface, CommUpperInterface* upperInterface)
 {
     memset(comm, 0, sizeof(CommObject));
     comm->low = *lowerInterface;
+    comm->upper = *upperInterface;
     comm->commTaskFlags = System.CreateEventGroup();
+    if (comm->commTaskFlags != NULL)
+    {
+        return OSResultSuccess;
+    }
+    else
+    {
+        return OSResultOutOfResources;
+    }
 }
 
 bool CommRestart(CommObject* comm)
@@ -209,7 +218,7 @@ bool CommGetTransmitterTelemetry(CommObject* comm, CommTransmitterTelemetry* tel
     return ReaderStatus(&reader);
 }
 
-bool CommReceiveFrame(CommObject* comm, Frame* frame)
+bool CommReceiveFrame(CommObject* comm, CommFrame* frame)
 {
     uint8_t buffer[COMM_MAX_FRAME_CONTENTS_SIZE + 20];
     bool status = SendCommandWithResponse(comm, CommReceiver, ReceiverGetFrame, buffer, COUNT_OF(buffer));
@@ -367,7 +376,7 @@ static void CommPollHardware(CommObject* comm)
 
         for (uint8_t i = 0; i < frameResponse.frameCount; i++)
         {
-            Frame frame;
+            CommFrame frame;
             bool status = CommReceiveFrame(comm, &frame);
             if (!status)
             {
@@ -381,10 +390,7 @@ static void CommPollHardware(CommObject* comm)
                 }
 
                 LOGF(LOG_LEVEL_INFO, "[comm] Received frame %d bytes. ", (int)frame.Size);
-
-                // TODO: add separate frame handler, and move this code there
-                uint8_t msg[] = "PONG";
-                CommSendFrame(comm, msg, 4);
+                comm->upper.frameHandler(comm, &frame, comm->upper.frameHandlerContext);
             }
         }
     }
