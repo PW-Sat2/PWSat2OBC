@@ -94,6 +94,8 @@ static void FrameHandler(CommObject* comm, CommFrame* frame, void* context)
     CommSendFrame(comm, (uint8_t*)"PONG", 4);
 }
 
+void FsTask(void *);
+
 int main(void)
 {
     memset(&Main, 0, sizeof(Main));
@@ -137,7 +139,7 @@ int main(void)
 
     System.CreateTask(BlinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
     System.CreateTask(ObcInitTask, "Init", 512, &Main, tskIDLE_PRIORITY + 16, &Main.initTask);
-    System.CreateTask(StorageTest, "FS Task", 2048, &Main, tskIDLE_PRIORITY + 1, NULL);
+    System.CreateTask(FsTask, "FS Task", 2048, &Main, tskIDLE_PRIORITY + 1, NULL);
     System.RunScheduler();
 
     GPIO_PinOutToggle(LED_PORT, LED0);

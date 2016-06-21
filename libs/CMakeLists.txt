@@ -1,6 +1,7 @@
 add_subdirectory(external/FreeRTOS)
 add_subdirectory(external/googletest)
 add_subdirectory(external/emlib)
+add_subdirectory(external/yaffs)
 
 add_subdirectory(drivers/leuart)
 add_subdirectory(drivers/swo)

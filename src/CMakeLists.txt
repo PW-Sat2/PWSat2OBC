@@ -9,6 +9,9 @@ set(SOURCES
     devices/eps.c
     openSail.c
     obc_time.c
+    fs.c
+    os_glue.c
+    fs_driver.c
     obc.h
 )
 
@@ -16,7 +19,7 @@ add_executable(${NAME} ${SOURCES})
 
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${PLATFORM_LINKER_SCRIPT} -Wl,-Map=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME}.map")
 
-target_link_libraries(${NAME} platform freeRTOS base os comm leuart swo logger SwoEndpoint i2c storage)
+target_link_libraries(${NAME} platform freeRTOS base os comm leuart swo logger SwoEndpoint i2c storage yaffs)
 
 target_generate_hex(${NAME})
 
