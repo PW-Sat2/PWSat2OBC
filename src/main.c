@@ -49,11 +49,8 @@ void blinkLed0(void * param)
 void ADXRS(void * param){
 	UNREFERENCED_PARAMETER(param);
 
-
-
-	long temp=0;  //i know it should be a float but swoPrintf has a problem with %f
+	float temp=0;
 	float rate=0;
-	float angle=0;
 	ADXRS453_Init_t gyro=GYRO0;
 	ADXRS453_Init_t gyro1=GYRO1;
 	ADXRS453_Init(&gyro);
@@ -76,7 +73,6 @@ int main(void)
 	CHIP_Init();
 	CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
 	CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);
-	CMU_ClockEnable ( cmuClock_TIMER0, true );
 	CMU_ClockEnable(cmuClock_GPIO, true);
 	enableSWO();
 
