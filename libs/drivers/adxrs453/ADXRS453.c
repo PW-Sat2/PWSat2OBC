@@ -4,70 +4,63 @@
 #include "FreeRTOS.h"
 #include "drivers/swo.h"
 #include "io_map.h"
+#include <em_gpio.h>
 SPIDRV_HandleData_t handleData;
 SPIDRV_Handle_t handle = &handleData;
+bool SPIInitialized=false;
 
-
-//callbacks
-void TransferComplete( SPIDRV_Handle_t handle,
-                       Ecode_t transferStatus,
-                       int itemsTransferred )
+void SPISendB(ADXRS453_Init_t *gyro , SPIDRV_Handle_t 	handle,
+		const void * 	buffer,
+		int 	count )
 {
-  if ( transferStatus == ECODE_EMDRV_SPIDRV_OK )
-  {
+	GPIO_PinOutClear((GPIO_Port_TypeDef)gyro->csPortLocation,gyro->csPinLocation);
+    SPIDRV_MTransmitB( handle,buffer,count);
+	GPIO_PinOutSet((GPIO_Port_TypeDef)gyro->csPortLocation,gyro->csPinLocation);
 
-  }
+
 }
-
-void ReceiveComplete( SPIDRV_Handle_t handle,
-                       Ecode_t transferStatus,
-                       int itemsTransferred )
+void SPIRecvB(ADXRS453_Init_t *gyro,SPIDRV_Handle_t 	handle,
+		void * 	buffer,
+		int 	count )
 {
-
-
-  if ( transferStatus == ECODE_EMDRV_SPIDRV_OK )
-  {
-
-  }
+	GPIO_PinOutClear((GPIO_Port_TypeDef)gyro->csPortLocation,gyro->csPinLocation);
+	SPIDRV_MReceiveB(handle,buffer,count);
+	GPIO_PinOutSet((GPIO_Port_TypeDef)gyro->csPortLocation,gyro->csPinLocation);
 }
+void ADXRS453Spi_Init() {
+	/* Initialize the SPI communication peripheral  */
+	if(SPIInitialized==false){
+	 SPIDRV_Init_t initData = ADXRS453_SPI;
+	// Initialize a SPI driver instance
+	 SPIDRV_Init( handle, &initData );
+	 SPIInitialized=true;
+	}
 
-
-
-
-/***************************************************************************//**
- * @brief Initializes the ADXRS453 and SPI and checks if the device is present.
- *
- * @return status - Result of the initialization procedure.
- *                  Example:  0 - if initialization was successful (ID starts
- *                                with 0x52).
- *                           -1 - if initialization was unsuccessful.
-*******************************************************************************/
-char ADXRS453_Init(void)
+}
+char ADXRS453_Init(ADXRS453_Init_t *gyro)
 {
 	unsigned char  dataBuffer[4] = {0x20, 0x00, 0x00, 0x03};
     char           status     = 0;
-    unsigned short adxrs453Id = 0;
-    /* Initialize the SPI communication peripheral  */
-    SPIDRV_Init_t initData = ADXRS453_SPI;
-      // Initialize a SPI driver instance
-    SPIDRV_Init( handle, &initData );
+    unsigned short adxrs453Id;
+
+    ADXRSSpi_Init();
+    GPIO_PinModeSet( (GPIO_Port_TypeDef)gyro->csPortLocation, gyro->csPinLocation ,gpioModePushPull, 1 );
+    GPIO_PinOutSet((GPIO_Port_TypeDef)gyro->csPortLocation,gyro->csPinLocation);
 //RECOMMENDED START-UP SEQUENCE WITH CHK BIT ASSERTION see datasheet
     vTaskDelay(100 / portTICK_PERIOD_MS);
-    SPIDRV_MTransmit( handle, dataBuffer, 4, TransferComplete );
+    SPISendB(gyro, handle, dataBuffer, 4 );
     vTaskDelay(50 / portTICK_PERIOD_MS);
     dataBuffer[3]=0x00;
-    SPIDRV_MTransmit( handle, dataBuffer, 4, TransferComplete );
+    SPISendB(gyro, handle, dataBuffer, 4 );
     vTaskDelay(50 / portTICK_PERIOD_MS);
-    SPIDRV_MTransmit( handle, dataBuffer, 4, TransferComplete );
+    SPISendB(gyro, handle, dataBuffer, 4 );
     vTaskDelay(50 / portTICK_PERIOD_MS);
-    SPIDRV_MTransmit( handle, dataBuffer, 4, TransferComplete );
+    SPISendB(gyro, handle, dataBuffer, 4 );
     vTaskDelay(50 / portTICK_PERIOD_MS);
-    SPIDRV_MTransmit( handle, dataBuffer, 4, TransferComplete );
+    SPISendB(gyro, handle, dataBuffer, 4 );
     vTaskDelay(50 / portTICK_PERIOD_MS);
-
-
     //CHECK IF ADXRS IS STARTUPED
-    adxrs453Id = ADXRS453_GetRegisterValue(ADXRS453_REG_PID);
+    adxrs453Id = ADXRS453_GetRegisterValue(gyro,ADXRS453_REG_PID);
     if((adxrs453Id >> 8) != 0x52)
     {
         status = -1;
@@ -76,25 +69,13 @@ char ADXRS453_Init(void)
     return status;
 }
 
-/***************************************************************************//**
- * @brief Deinitializes the SPI.
- *
- * @param None.
- *
- * @return None.
-*******************************************************************************/
+
 void ADXRS453_DeInit(void){
 	SPIDRV_DeInit( handle);
 }
 
-/***************************************************************************//**
- * @brief Reads the value of a register.
- *
- * @param registerAddress - Address of the register.
- *
- * @return registerValue - Value of the register.
-*******************************************************************************/
-unsigned short ADXRS453_GetRegisterValue(unsigned char registerAddress)
+
+unsigned short ADXRS453_GetRegisterValue(ADXRS453_Init_t *gyro, unsigned char registerAddress)
 {
     unsigned char  sendBuffer[4] = {0, 0, 0, 0};
     unsigned char  recvBuffer[4] = {0, 0, 0, 0};
@@ -119,9 +100,9 @@ unsigned short ADXRS453_GetRegisterValue(unsigned char registerAddress)
     	sendBuffer[3] |= 1;
     }
 
-    SPIDRV_MTransmit( handle, sendBuffer, 4,TransferComplete );
+    SPISendB(gyro, handle, sendBuffer, 4 );
     vTaskDelay(50 / portTICK_PERIOD_MS);
-    SPIDRV_MReceive( handle, recvBuffer, 4,ReceiveComplete);
+    SPIRecvB(gyro, handle, recvBuffer, 4);
     vTaskDelay(50 / portTICK_PERIOD_MS);
 
     registerValue = ((unsigned short)recvBuffer[1] << 11) |
@@ -131,15 +112,7 @@ unsigned short ADXRS453_GetRegisterValue(unsigned char registerAddress)
     return registerValue;
 }
 
-/***************************************************************************//**
- * @brief Writes data into a register.
- *
- * @param registerAddress - Address of the register.
- * @param registerValue - Data value to write.
- *
- * @return None.
-*******************************************************************************/
-void ADXRS453_SetRegisterValue(unsigned char registerAddress,
+void ADXRS453_SetRegisterValue(ADXRS453_Init_t *gyro,unsigned char registerAddress,
                                unsigned short registerValue)
 {
 	unsigned char  sendBuffer[4] = {0, 0, 0, 0};
@@ -165,19 +138,12 @@ void ADXRS453_SetRegisterValue(unsigned char registerAddress,
     {
     	sendBuffer[3] |= 1;
     }
-    SPIDRV_MTransmit( handle, sendBuffer, 4, TransferComplete );
+    SPISendB(gyro, handle, sendBuffer, 4 );
     vTaskDelay(50 / portTICK_PERIOD_MS);
 
 }
 
-/***************************************************************************//**
- * @brief Reads the sensor data.
- *
- * @param None.
- *
- * @return registerValue - The sensor data.
-*******************************************************************************/
-unsigned long ADXRS453_GetSensorData(void)
+unsigned long ADXRS453_GetSensorData(ADXRS453_Init_t *gyro)
 {
 	unsigned char  sendBuffer[4] = {0, 0, 0, 0};
 	unsigned char  recvBuffer[4] = {0, 0, 0, 0};
@@ -198,9 +164,9 @@ unsigned long ADXRS453_GetSensorData(void)
     {
     	sendBuffer[3] |= 1;
     }
-    SPIDRV_MTransmit( handle, sendBuffer, 4,TransferComplete );
+    SPISendB(gyro, handle, sendBuffer, 4 );
     vTaskDelay(50 / portTICK_PERIOD_MS);
-    SPIDRV_MReceive( handle, recvBuffer, 4, ReceiveComplete );
+    SPIRecvB(gyro, handle, recvBuffer, 4 );
     vTaskDelay(50 / portTICK_PERIOD_MS);
     registerValue = ((unsigned long)recvBuffer[0] << 24) |
                     ((unsigned long)recvBuffer[1] << 16) |
@@ -210,19 +176,12 @@ unsigned long ADXRS453_GetSensorData(void)
     return registerValue;
 }
 
-/***************************************************************************//**
- * @brief Reads the rate data and converts it to degrees/second.
- *
- * @param None.
- *
- * @return rate - The rate value in degrees/second.
-*******************************************************************************/
-float ADXRS453_GetRate(void)
+float ADXRS453_GetRate(ADXRS453_Init_t *gyro)
 {
     unsigned short registerValue = 0;
     float          rate          = 0.0;
     
-    registerValue = ADXRS453_GetRegisterValue(ADXRS453_REG_RATE);
+    registerValue = ADXRS453_GetRegisterValue(gyro,ADXRS453_REG_RATE);
    
     /*!< If data received is in positive degree range */
     if(registerValue < 0x8000)
@@ -234,25 +193,17 @@ float ADXRS453_GetRate(void)
     {
         rate = (-1) * ((float)(0xFFFF - registerValue + 1) / 80.0);
     }
-    
     return rate;
 }
 
-/***************************************************************************//**
- * @brief Reads the temperature sensor data and converts it to degrees Celsius.
- *
- * @param None.
- *
- * @return temperature - The temperature value in degrees Celsius.
-*******************************************************************************/
-float ADXRS453_GetTemperature(void)
+float ADXRS453_GetTemperature(ADXRS453_Init_t *gyro)
 {
     unsigned long registerValue = 0;
     float          temperature   = 0;
     
-    registerValue = ADXRS453_GetRegisterValue(ADXRS453_REG_TEM);
+    registerValue = ADXRS453_GetRegisterValue(gyro,ADXRS453_REG_TEM);
     registerValue = (registerValue >> 6) - 0x31F;
     temperature = (float) registerValue / 5;
-    
+
     return temperature;
 }
