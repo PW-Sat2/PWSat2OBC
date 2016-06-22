@@ -72,6 +72,7 @@ char ADXRS453_Init(ADXRS453_Init_t *gyro)
 
 void ADXRS453_DeInit(void){
 	SPIDRV_DeInit( handle);
+	SPIInitialized=false;
 }
 
 
