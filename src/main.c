@@ -101,6 +101,7 @@ static bool FSInit(FileSystem* fs, struct yaffs_dev* rootDevice, YaffsNANDDriver
     return FileSystemInitialize(fs, rootDevice);
 }
 
+
 static void ObcInitTask(void* param)
 {
     OBC* obc = (OBC*)param;
@@ -131,14 +132,14 @@ void ADXRS(void * param){
 
 	float temp=0;
 	float rate=0;
-<<<<<<< HEAD
+
 	ADXRS453_Init();
 	while(1){
 		rate=ADXRS453_GetRate();
 		temp=ADXRS453_GetTemperature();
 		swoPrintf("temp: %d ' celcius rate: %d '/sec rotation\n", (long)temp, (long)rate);
-=======
 	float angle=0;
+
 	ADXRS453_Init_t gyro=GYRO0;
 	ADXRS453_Init_t gyro1=GYRO1;
 	ADXRS453_Init(&gyro);
@@ -150,7 +151,7 @@ void ADXRS(void * param){
 		temp=ADXRS453_GetTemperature(&gyro);
 		swoPrintf("temp: %d ' celcius rate: %d '/sec rotation\n", temp, (long)rate);
 		rate=ADXRS453_GetRate(&gyro1);
->>>>>>> Driver for more than one gyro.
+
 		vTaskDelay(10 / portTICK_PERIOD_MS);
 	}
 
@@ -159,14 +160,7 @@ void ADXRS(void * param){
 
 int main(void)
 {
-<<<<<<< HEAD
-=======
-	CHIP_Init();
-	CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
-	CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);
-	CMU_ClockEnable(cmuClock_GPIO, true);
-	enableSWO();
->>>>>>> cleaning
+
 
 	 memset(&Main, 0, sizeof(Main));
 	    CHIP_Init();
@@ -193,15 +187,11 @@ int main(void)
 	    commUpperInterface.frameHandlerContext = NULL;
 	    CommInitialize(&Main.comm, &commInterface, &commUpperInterface);
 
-<<<<<<< HEAD
 	    TerminalInit();
 	    SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 
 	    OpenSailInit();
-=======
-	terminalInit();
-	swoPuts("Hello I'm PW-SAT2 OBC\n");
->>>>>>> Driver for more than one gyro.
+
 
 	    GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
 	    GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);
