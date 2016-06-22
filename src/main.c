@@ -54,14 +54,17 @@ void ADXRS(void * param){
 	long temp=0;  //i know it should be a float but swoPrintf has a problem with %f
 	float rate=0;
 	float angle=0;
-	uint8_t timeDelay=0;
-	ADXRS453_Init();
+	ADXRS453_Init_t gyro=GYRO0;
+	ADXRS453_Init_t gyro1=GYRO1;
+	ADXRS453_Init(&gyro);
+	ADXRS453_Init(&gyro1);
+
 
 	while(1){
-		rate=ADXRS453_GetRate();
-
-		temp=ADXRS453_GetTemperature();
+		rate=ADXRS453_GetRate(&gyro);
+		temp=ADXRS453_GetTemperature(&gyro);
 		swoPrintf("temp: %d ' celcius rate: %d '/sec rotation\n", temp, (long)rate);
+		rate=ADXRS453_GetRate(&gyro1);
 		vTaskDelay(10 / portTICK_PERIOD_MS);
 	}
 
@@ -78,7 +81,6 @@ int main(void)
 	enableSWO();
 
 	terminalInit();
-
 	swoPuts("Hello I'm PW-SAT2 OBC\n");
 
 

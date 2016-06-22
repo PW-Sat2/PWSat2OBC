@@ -1,6 +1,7 @@
 #ifndef __ADXRS453_H__
 #define __ADXRS453_H__
-
+#include "io_map.h"
+#include "spidrv.h"
 /******************************************************************************/
 /************************** ADXRS453 Definitions ******************************/
 /******************************************************************************/
@@ -26,22 +27,52 @@
 /******************************************************************************/
 
 /*! Initializes the ADXRS453 and checks if the device is present. */
-char ADXRS453_Init(void);
 
+#define ADXRS453_SPI                                              \
+{                                                                         \
+  ADXRS453_SPI_USART_PORT,                       /* USART port                       */    \
+  ADXRS453_SPI_USART_ROUTE_LOCATION,   /* USART pins location number ||  MOSI-PD0, MISO-PD1, CLK-PD2, CS-PD3       */    \
+  1000000,                      /* Bitrate                          */    \
+  8,                            /* Frame length                     */    \
+  0,                            /* Dummy tx value for rx only funcs */    \
+  spidrvMaster,                 /* SPI mode                         */    \
+  spidrvBitOrderMsbFirst,       /* Bit order on bus                 */    \
+  spidrvClockMode0,             /* SPI clock/phase mode             */    \
+  spidrvCsControlApplication,          /* CS controlled by the driver      */    \
+  spidrvSlaveStartDelayed          \
+}
+
+
+typedef struct ADXRS453_Init {
+	uint8_t             csPortLocation;
+	uint8_t             csPinLocation;
+	uint8_t				gyroNumber;
+} ADXRS453_Init_t;
+
+void ADXRS453Spi_Init();
+
+char ADXRS453_Init(ADXRS453_Init_t *gyro);
+
+void SPISendB(ADXRS453_Init_t *gyro,SPIDRV_Handle_t 	handle,
+		const void * 	buffer,
+		int 	count );
+void SPIRecvB(ADXRS453_Init_t *gyro,SPIDRV_Handle_t 	handle,
+		void * 	buffer,
+		int 	count );
 /*! Reads the value of a register. */
-unsigned short ADXRS453_GetRegisterValue(unsigned char registerAddress);
+unsigned short ADXRS453_GetRegisterValue(ADXRS453_Init_t *gyro,unsigned char registerAddress);
 
 /*! Writes data into a register. */
-void ADXRS453_SetRegisterValue(unsigned char registerAddress,
+void ADXRS453_SetRegisterValue(ADXRS453_Init_t *gyro,unsigned char registerAddress,
                                unsigned short registerValue);
 
 /*! Reads the sensor data. */
-unsigned long ADXRS453_GetSensorData(void);
+unsigned long ADXRS453_GetSensorData(ADXRS453_Init_t *gyro);
 
 /*! Reads the rate data and converts it to degrees/second. */
-float ADXRS453_GetRate(void);
+float ADXRS453_GetRate(ADXRS453_Init_t *gyro);
 
 /*! Reads the temperature sensor data and converts it to degrees Celsius. */
-float ADXRS453_GetTemperature(void);
+float ADXRS453_GetTemperature(ADXRS453_Init_t *gyro);
 
 #endif // __ADXRS453_H__
