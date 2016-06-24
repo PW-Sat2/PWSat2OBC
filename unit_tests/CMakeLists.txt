@@ -4,9 +4,12 @@ set(SOURCES
   semihosting.cpp
   mem.c
   test.cpp
+  utils.cpp
   Logger/LoggerTest.cpp   
   FileSystem/FileSystemTest.cpp
   FileSystem/YaffsOSGlue.c
+  FileSystem/MemoryDriver.cpp
+  FileSystem/NANDGeometryTest.cpp 
   FileSystem/MemoryDriver.cpp  
   Comm/CommTest.cpp
   base/ReaderTest.cpp
@@ -28,7 +31,7 @@ endif(${ENABLE_COVERAGE})
 
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_CURRENT_LIST_DIR}/linker.ld ${LD_COVERAGE}")
 
-target_link_libraries(${NAME} platform emlib gtest gmock logger comm yaffs)
+target_link_libraries(${NAME} platform emlib gtest gmock logger yaffs storage comm)
 
 target_require_semihosting(${NAME})
 

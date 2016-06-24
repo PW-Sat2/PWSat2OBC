@@ -266,7 +266,6 @@ static FlashStatus writePage(FlashInterface* flash, uint8_t volatile* address, u
 
 static FlashStatus eraseBlock(FlashInterface* flash, uint32_t address)
 {
-
 }
 
 int check(FlashInterface* flash)

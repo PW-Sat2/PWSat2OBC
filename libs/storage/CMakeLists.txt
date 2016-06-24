@@ -3,6 +3,7 @@ set(NAME storage)
 set(SOURCES
     storage.c
     nand.c
+    nand_calculator.c
 )
 
 add_library(${NAME} STATIC ${SOURCES})
