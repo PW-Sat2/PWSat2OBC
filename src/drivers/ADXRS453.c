@@ -43,7 +43,7 @@ char ADXRS453_Init(ADXRS453_Init_t *gyro)
     char           status     = 0;
     unsigned short adxrs453Id;
 
-    ADXRSSpi_Init();
+    ADXRS453Spi_Init();
     GPIO_PinModeSet( (GPIO_Port_TypeDef)gyro->csPortLocation, gyro->csPinLocation ,gpioModePushPull, 1 );
     GPIO_PinOutSet((GPIO_Port_TypeDef)gyro->csPortLocation,gyro->csPinLocation);
 //RECOMMENDED START-UP SEQUENCE WITH CHK BIT ASSERTION see datasheet
