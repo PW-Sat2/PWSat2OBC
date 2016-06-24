@@ -2,31 +2,33 @@
 #include <queue.h>
 #include <task.h>
 
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
 
-#include "system.h"
-#include "logger/logger.h"
-#include "leuart/leuart.h"
-#include "uart/uart.h"
 #include "camera_utils.h"
+#include "leuart/leuart.h"
+#include "logger/logger.h"
+#include "system.h"
+#include "uart/uart.h"
 
 static QueueHandle_t uartQueue;
 
-#define CAM_ASSERT_LOGF(value, comparator, invalidValue, retValue, ...) \
-    if (value comparator invalidValue) { \
-        LOGF(LOG_LEVEL_ERROR, __VA_ARGS__); \
-        return retValue; \
+#define CAM_ASSERT_LOGF(value, comparator, invalidValue, retValue, ...)                                                \
+    if (value comparator invalidValue)                                                                                 \
+    {                                                                                                                  \
+        LOGF(LOG_LEVEL_ERROR, __VA_ARGS__);                                                                            \
+        return retValue;                                                                                               \
     }
 
-#define CAM_ASSERT_LOG(value, comparator, invalidValue, retValue, message) \
-    if (value comparator invalidValue) { \
-        LOG(LOG_LEVEL_ERROR, message); \
-        return retValue; \
+#define CAM_ASSERT_LOG(value, comparator, invalidValue, retValue, message)                                             \
+    if (value comparator invalidValue)                                                                                 \
+    {                                                                                                                  \
+        LOG(LOG_LEVEL_ERROR, message);                                                                                 \
+        return retValue;                                                                                               \
     }
 
-static int8_t CameraSendCmd(uint8_t * cmd)
+static int8_t CameraSendCmd(uint8_t* cmd)
 {
     int8_t ret = UARTSend(cmd, CameraCmdLength);
     CAM_ASSERT_LOG(ret, ==, -1, -1, "Sending data using uart failed.");
@@ -35,13 +37,15 @@ static int8_t CameraSendCmd(uint8_t * cmd)
     return ret;
 }
 
-static uint16_t CameraGetData(uint8_t * data, uint16_t dataLength, int8_t timeoutMs)
+static uint16_t CameraGetData(uint8_t* data, uint16_t dataLength, int8_t timeoutMs)
 {
     uint8_t byte;
     uint16_t i = 0;
     TickType_t ticks = timeoutMs < 0 ? portMAX_DELAY : timeoutMs / portTICK_PERIOD_MS;
-    for (i = 0; i < dataLength; i++) {
-        if (xQueueReceive(uartQueue, &byte, ticks) == pdFALSE) {
+    for (i = 0; i < dataLength; i++)
+    {
+        if (xQueueReceive(uartQueue, &byte, ticks) == pdFALSE)
+        {
             return i;
         }
         data[i] = byte;
@@ -49,7 +53,7 @@ static uint16_t CameraGetData(uint8_t * data, uint16_t dataLength, int8_t timeou
     return dataLength;
 }
 
-static int8_t CameraGetCmd(uint8_t * cmd, int8_t timeoutMs)
+static int8_t CameraGetCmd(uint8_t* cmd, int8_t timeoutMs)
 {
     uint16_t ret = CameraGetData(cmd, CameraCmdLength, timeoutMs);
     CAM_ASSERT_LOGF(ret, <, CameraCmdLength, -1, "Too less data received  (ret=%u).", ret);
@@ -60,7 +64,7 @@ static int8_t CameraGetCmd(uint8_t * cmd, int8_t timeoutMs)
 
 int8_t CameraGetCmdSync(void)
 {
-    uint8_t cmd[CameraCmdLength] = { 0x00 };
+    uint8_t cmd[CameraCmdLength] = {0x00};
     CAM_ASSERT_LOG(CameraGetCmd(cmd, -1), ==, -1, -1, "Receiving data failed.");
 
     CAM_ASSERT_LOG(CameraParseSyncCmd(cmd), !=, CameraCmd_Sync, -1, "Invalid command received.");
@@ -70,7 +74,7 @@ int8_t CameraGetCmdSync(void)
 
 int8_t CameraGetCmdData(CameraCmdData cmdData)
 {
-    uint8_t cmd[CameraCmdLength] = { 0x00 };
+    uint8_t cmd[CameraCmdLength] = {0x00};
     CAM_ASSERT_LOG(CameraGetCmd(cmd, -1), ==, -1, -1, "Receiving data failed.");
 
     CAM_ASSERT_LOG(CameraParseDataCmd(cmd, cmdData), !=, CameraCmd_Data, -1, "Invalid command received.");
@@ -81,7 +85,7 @@ int8_t CameraGetCmdData(CameraCmdData cmdData)
 static CameraCmd CameraGetCmdAck(int8_t timeoutMs)
 {
     struct CameraCmdAck_ ackData;
-    uint8_t cmd[CameraCmdLength] = { 0x00 };
+    uint8_t cmd[CameraCmdLength] = {0x00};
     CAM_ASSERT_LOG(CameraCmdAckInit(&ackData), ==, -1, CameraCmd_Invalid, "Initialiazing ack data failed.");
 
     CAM_ASSERT_LOG(CameraGetCmd(cmd, timeoutMs), ==, -1, CameraCmd_Invalid, "Receiving data failed.");
@@ -123,14 +127,7 @@ int8_t CameraGetCmdAckSetPackageSize(void)
 
 static int8_t CameraSendCmdAck(CameraCmd cmdAck, uint8_t packageIdLow, uint8_t packageIdHigh)
 {
-    uint8_t cmd[CameraCmdLength] = {
-                                        CameraCmdPrefix,
-                                        CameraCmd_Ack,
-                                        cmdAck,
-                                        0x00,
-                                        packageIdLow,
-                                        packageIdHigh
-                                   };
+    uint8_t cmd[CameraCmdLength] = {CameraCmdPrefix, CameraCmd_Ack, cmdAck, 0x00, packageIdLow, packageIdHigh};
     CameraLogSendCmd(cmd);
     CAM_ASSERT_LOG(CameraSendCmd(cmd), ==, -1, -1, "Sending command failed.");
     return 0;
@@ -152,14 +149,7 @@ int8_t CameraSendCmdAckData(void)
 
 static int8_t CameraSendCmdSync(void)
 {
-    uint8_t cmd[CameraCmdLength] = {
-                                        CameraCmdPrefix,
-                                        CameraCmd_Sync,
-                                        0x00,
-                                        0x00,
-                                        0x00,
-                                        0x00
-                                   };
+    uint8_t cmd[CameraCmdLength] = {CameraCmdPrefix, CameraCmd_Sync, 0x00, 0x00, 0x00, 0x00};
     LOG(LOG_LEVEL_INFO, "Sending Sync command.");
     CameraLogSendCmd(cmd);
     CAM_ASSERT_LOG(CameraSendCmd(cmd), ==, -1, -1, "Sending command failed.");
@@ -168,14 +158,7 @@ static int8_t CameraSendCmdSync(void)
 
 int8_t CameraSendCmdRAWInitial(CameraRAWImageFormat format, CameraRAWResolution rawResolution)
 {
-    uint8_t cmd[CameraCmdLength] = {
-                                        CameraCmdPrefix,
-                                        CameraCmd_Initial,
-                                        0x00,
-                                        format,
-                                        rawResolution,
-                                        0x00
-                                   };
+    uint8_t cmd[CameraCmdLength] = {CameraCmdPrefix, CameraCmd_Initial, 0x00, format, rawResolution, 0x00};
     LOG(LOG_LEVEL_INFO, "Sending Inital command.");
     CameraLogSendCmd(cmd);
     CAM_ASSERT_LOG(CameraSendCmd(cmd), ==, -1, -1, "Sending command failed.");
@@ -184,14 +167,7 @@ int8_t CameraSendCmdRAWInitial(CameraRAWImageFormat format, CameraRAWResolution 
 
 int8_t CameraSendCmdJPEGInitial(CameraJPEGResolution jpegResolution)
 {
-    uint8_t cmd[CameraCmdLength] = {
-                                        CameraCmdPrefix,
-                                        CameraCmd_Initial,
-                                        0x00,
-                                        CameraJPEGFormat,
-                                        0x00,
-                                        jpegResolution
-                                   };
+    uint8_t cmd[CameraCmdLength] = {CameraCmdPrefix, CameraCmd_Initial, 0x00, CameraJPEGFormat, 0x00, jpegResolution};
     LOG(LOG_LEVEL_INFO, "Sending Inital command.");
     CameraLogSendCmd(cmd);
     CAM_ASSERT_LOG(CameraSendCmd(cmd), ==, -1, -1, "Sending command failed.");
@@ -200,14 +176,7 @@ int8_t CameraSendCmdJPEGInitial(CameraJPEGResolution jpegResolution)
 
 int8_t CameraSendCmdGetPicture(CameraPictureType type)
 {
-    uint8_t cmd[CameraCmdLength] = { 
-                                        CameraCmdPrefix,
-                                        CameraCmd_GetPicture,
-                                        type,
-                                        0x00,
-                                        0x00,
-                                        0x00
-                                   };
+    uint8_t cmd[CameraCmdLength] = {CameraCmdPrefix, CameraCmd_GetPicture, type, 0x00, 0x00, 0x00};
     LOG(LOG_LEVEL_INFO, "Sending GetPicture command.");
     CameraLogSendCmd(cmd);
     CAM_ASSERT_LOG(CameraSendCmd(cmd), ==, -1, -1, "Sending command failed.");
@@ -216,14 +185,7 @@ int8_t CameraSendCmdGetPicture(CameraPictureType type)
 
 int8_t CameraSendCmdSnapshot(CameraSnapshotType type)
 {
-    uint8_t cmd[CameraCmdLength] = {
-                                        CameraCmdPrefix,
-                                        CameraCmd_Snapshot,
-                                        type,
-                                        0x00,
-                                        0x00,
-                                        0x00
-                                   };
+    uint8_t cmd[CameraCmdLength] = {CameraCmdPrefix, CameraCmd_Snapshot, type, 0x00, 0x00, 0x00};
     LOG(LOG_LEVEL_INFO, "Sending Snapshot command.");
     CameraLogSendCmd(cmd);
     CAM_ASSERT_LOG(CameraSendCmd(cmd), ==, -1, -1, "Sending command failed.");
@@ -236,13 +198,7 @@ int8_t CameraSendCmdSetPackageSize(uint16_t packageSize)
     CAM_ASSERT_LOG(packageSize, <, 64, -1, "Package size is too small.");
 
     uint8_t cmd[CameraCmdLength] = {
-                                        CameraCmdPrefix,
-                                        CameraCmd_SetPackageSize,
-                                        0x08,
-                                        packageSize & 0xFF,
-                                        (packageSize >> 8) & 0xFF,
-                                        0x00
-                                   };
+        CameraCmdPrefix, CameraCmd_SetPackageSize, 0x08, packageSize & 0xFF, (packageSize >> 8) & 0xFF, 0x00};
     LOG(LOG_LEVEL_INFO, "Sending SetPackageSize command.");
     CameraLogSendCmd(cmd);
     CAM_ASSERT_LOG(CameraSendCmd(cmd), ==, -1, -1, "Sending command failed.");
@@ -257,10 +213,12 @@ int8_t CameraSync(void)
     int8_t i = 60;
     int8_t timeMs = 5;
 
-    while (i > 0) {
+    while (i > 0)
+    {
         CAM_ASSERT_LOG(CameraSendCmdSync(), ==, -1, -1, "Sending Sync command failed.");
         i--;
-        if (CameraGetCmdAckSync(timeMs) == -1) {
+        if (CameraGetCmdAckSync(timeMs) == -1)
+        {
             timeMs++;
             continue;
         }
@@ -276,7 +234,7 @@ int8_t CameraSync(void)
     return -1;
 }
 
-uint16_t CameraReceiveData(uint8_t * data, uint16_t dataLength)
+uint16_t CameraReceiveData(uint8_t* data, uint16_t dataLength)
 {
     uint16_t ret = 0;
     uint16_t toLoad = 0;
@@ -286,15 +244,21 @@ uint16_t CameraReceiveData(uint8_t * data, uint16_t dataLength)
     CAM_ASSERT_LOG(CameraGetCmdData(&cmdData), ==, -1, -1, "Receiving Data command failed.");
     CAM_ASSERT_LOG(cmdData.type, !=, CameraPictureType_RAW, -1, "Received invalid PictureType.");
     CAM_ASSERT_LOG(cmdData.dataLength, <=, 0, -1, "Received invalid picture size.");
-    CAM_ASSERT_LOGF(cmdData.dataLength, >, dataLength, -1, "Data buffer is to small. Passed:%d. Expected size:%d", dataLength, cmdData.dataLength);
+    CAM_ASSERT_LOGF(cmdData.dataLength,
+        >
+        , dataLength, -1, "Data buffer is to small. Passed:%d. Expected size:%d", dataLength, cmdData.dataLength);
 
     LOG(LOG_LEVEL_INFO, "Start receiving data.");
     toLoad = cmdData.dataLength;
-    while (toLoad > 0) {
+    while (toLoad > 0)
+    {
         ret = CameraGetData(&data[cmdData.dataLength - toLoad], toLoad, -1);
-        if (ret > 0) {
+        if (ret > 0)
+        {
             toLoad -= ret;
-        } else {
+        }
+        else
+        {
             LOG(LOG_LEVEL_INFO, "Getting data failed. We keep trying.");
         }
     }
@@ -316,7 +280,7 @@ static int CameraGetJPEGPackage(unsigned char * data, int packageSize)
     return ret;
 }
 */
-int8_t CameraReceiveJPEGData(uint8_t * data, uint16_t dataLength, uint16_t packageSize)
+int8_t CameraReceiveJPEGData(uint8_t* data, uint16_t dataLength, uint16_t packageSize)
 {
     uint16_t ret = 0;
     uint16_t toLoad = 0;
@@ -327,10 +291,13 @@ int8_t CameraReceiveJPEGData(uint8_t * data, uint16_t dataLength, uint16_t packa
 
     toLoad = dataLength;
     uint8_t packageCnt = dataLength / (packageSize - 6) + (dataLength % (packageSize - 6) != 0 ? 1 : 0);
-    for (uint8_t i = 0; i < packageCnt; i++) {
-        while (toLoad > 0) {
+    for (uint8_t i = 0; i < packageCnt; i++)
+    {
+        while (toLoad > 0)
+        {
             ret = CameraGetData(&data[cmdData.dataLength - toLoad], toLoad, -1);
-            if (ret > 0) {
+            if (ret > 0)
+            {
                 toLoad -= ret;
             }
         }
