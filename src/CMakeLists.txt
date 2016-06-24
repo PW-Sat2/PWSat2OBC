@@ -28,3 +28,7 @@ target_memory_report(${NAME})
 target_jlink_flash(${NAME})
 
 target_format_sources(${NAME} "${SOURCES}")
+
+add_custom_target(swo_viewer
+    COMMAND ${JLINKSWO} -device ${DEVICE}
+)
