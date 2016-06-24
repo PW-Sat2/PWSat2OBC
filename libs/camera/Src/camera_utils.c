@@ -1,14 +1,14 @@
+#include "camera_utils.h"
 #include <stddef.h>
 #include "logger/logger.h"
-#include "camera_utils.h"
 
-void CameraLogSendCmd(uint8_t *cmd)
+void CameraLogSendCmd(uint8_t* cmd)
 {
     LOG(LOG_LEVEL_INFO, "Command send:");
     LOGF(LOG_LEVEL_INFO, "%02X%02X%02X%02X%02X%02X", cmd[0], cmd[1], cmd[2], cmd[3], cmd[4], cmd[5]);
 }
 
-void CameraLogGetCmd(uint8_t *cmd)
+void CameraLogGetCmd(uint8_t* cmd)
 {
     LOG(LOG_LEVEL_INFO, "Command received:");
     LOGF(LOG_LEVEL_INFO, "%02X%02X%02X%02X%02X%02X", cmd[0], cmd[1], cmd[2], cmd[3], cmd[4], cmd[5]);
@@ -16,7 +16,8 @@ void CameraLogGetCmd(uint8_t *cmd)
 
 static CameraPictureType CameraGetPictureType(uint8_t type)
 {
-    switch (type) {
+    switch (type)
+    {
         case 0x01:
             return CameraPictureType_Snapshot;
         case 0x02:
@@ -30,7 +31,8 @@ static CameraPictureType CameraGetPictureType(uint8_t type)
 
 static CameraCmd CameraGetCmdType(unsigned char cmd)
 {
-    switch (cmd) {
+    switch (cmd)
+    {
         case 0x01:
             return CameraCmd_Initial;
         case 0x04:
@@ -60,15 +62,16 @@ static CameraCmd CameraGetCmdType(unsigned char cmd)
 
 static uint16_t CameraRAWResolutionGetSquare(CameraRAWResolution resolution)
 {
-    switch (resolution) {
+    switch (resolution)
+    {
         case CameraRAWResolution_80x60:
-            return 80*60;
+            return 80 * 60;
         case CameraRAWResolution_160x120:
-            return 160*120;
+            return 160 * 120;
         case CameraRAWResolution_128x128:
-            return 128*128;
+            return 128 * 128;
         case CameraRAWResolution_128x96:
-            return 128*96;
+            return 128 * 96;
         default:
             return 0;
     }
@@ -76,7 +79,8 @@ static uint16_t CameraRAWResolutionGetSquare(CameraRAWResolution resolution)
 
 static uint8_t CameraRAWImageFormatGetComponent(CameraRAWImageFormat format)
 {
-    switch (format) {
+    switch (format)
+    {
         case CameraRAWImageFormat_GrayScale:
             return 1;
         case CameraRAWImageFormat_RGB565:
@@ -90,20 +94,22 @@ static uint8_t CameraRAWImageFormatGetComponent(CameraRAWImageFormat format)
 
 uint16_t CameraGetRAWDataLength(CameraRAWImageFormat format, CameraRAWResolution resolution)
 {
-    return ((uint16_t) CameraRAWImageFormatGetComponent(format)) * CameraRAWResolutionGetSquare(resolution);
+    return ((uint16_t)CameraRAWImageFormatGetComponent(format)) * CameraRAWResolutionGetSquare(resolution);
 }
 
-CameraCmd CameraParseDataCmd(uint8_t *cmd, CameraCmdData cmdData)
+CameraCmd CameraParseDataCmd(uint8_t* cmd, CameraCmdData cmdData)
 {
-    if (cmd[0] != CameraCmdPrefix || cmd[1] != CameraCmd_Data) {
+    if (cmd[0] != CameraCmdPrefix || cmd[1] != CameraCmd_Data)
+    {
         return CameraCmd_Invalid;
     }
 
-    if (cmdData == NULL) {
+    if (cmdData == NULL)
+    {
         return CameraCmd_Data;
     }
 
-    cmdData->dataLength = (((uint32_t) cmd[3]) | ((uint32_t) cmd[4] << 8) | ((uint32_t) cmd[5] << 16));
+    cmdData->dataLength = (((uint32_t)cmd[3]) | ((uint32_t)cmd[4] << 8) | ((uint32_t)cmd[5] << 16));
     cmdData->type = CameraGetPictureType(cmd[2]);
     LOG(LOG_LEVEL_INFO, "---------------- Data ----------------\n");
     LOGF(LOG_LEVEL_INFO, "---------------- %d ----------------\n", cmd[3]);
@@ -113,25 +119,28 @@ CameraCmd CameraParseDataCmd(uint8_t *cmd, CameraCmdData cmdData)
     return CameraCmd_Data;
 }
 
-CameraCmd CameraParseAckCmd(uint8_t *cmd, CameraCmdAck cmdAck)
+CameraCmd CameraParseAckCmd(uint8_t* cmd, CameraCmdAck cmdAck)
 {
-    if (cmd[0] != CameraCmdPrefix || cmd[1] != CameraCmd_Ack) {
+    if (cmd[0] != CameraCmdPrefix || cmd[1] != CameraCmd_Ack)
+    {
         return CameraCmd_Invalid;
     }
 
-    if (cmdAck == NULL) {
+    if (cmdAck == NULL)
+    {
         return CameraCmd_Ack;
     }
 
     cmdAck->type = CameraGetCmdType(cmd[2]);
     cmdAck->ackCounter = cmd[3];
-    cmdAck->packageId = ((uint16_t) cmd[4] | ((uint16_t) cmd[5] << 8)) >> 1;
+    cmdAck->packageId = ((uint16_t)cmd[4] | ((uint16_t)cmd[5] << 8)) >> 1;
     return CameraCmd_Ack;
 }
 
-CameraCmd CameraParseSyncCmd(uint8_t *cmd)
+CameraCmd CameraParseSyncCmd(uint8_t* cmd)
 {
-    if (cmd[0] != CameraCmdPrefix || cmd[1] != CameraCmd_Sync) {
+    if (cmd[0] != CameraCmdPrefix || cmd[1] != CameraCmd_Sync)
+    {
         return CameraCmd_Invalid;
     }
     return CameraCmd_Sync;
@@ -139,7 +148,8 @@ CameraCmd CameraParseSyncCmd(uint8_t *cmd)
 
 int8_t CameraCmdAckInit(CameraCmdAck cmdAck)
 {
-    if (cmdAck == NULL) {
+    if (cmdAck == NULL)
+    {
         return -1;
     }
     cmdAck->type = CameraCmd_Invalid;
@@ -150,7 +160,8 @@ int8_t CameraCmdAckInit(CameraCmdAck cmdAck)
 
 int8_t CameraCmdDataInit(CameraCmdData cmdData)
 {
-    if (cmdData == NULL) {
+    if (cmdData == NULL)
+    {
         return -1;
     }
     cmdData->type = CameraPictureType_Invalid;
