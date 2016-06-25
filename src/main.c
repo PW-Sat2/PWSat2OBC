@@ -50,21 +50,6 @@ static void BlinkLed0(void* param)
     }
 }
 
-static void StorageTest(void* param)
-{
-    UNREFERENCED_PARAMETER(param);
-
-    LOG(LOG_LEVEL_INFO, "Storage test");
-
-    FlashInterface flash;
-    FlashNANDInterface flashNAND;
-
-    BuildNANDInterface(&flash, &flashNAND);
-
-    DoThings(&flash);
-    vTaskSuspend(NULL);
-}
-
 static void InitSwoEndpoint(void)
 {
     void* swoEndpointHandle = SwoEndpointInit();
@@ -95,7 +80,7 @@ static void FrameHandler(CommObject* comm, CommFrame* frame, void* context)
     CommSendFrame(comm, (uint8_t*)"PONG", 4);
 }
 
-void FsTask(void*);
+extern void FsTask(void*);
 
 int main(void)
 {

@@ -1,19 +1,14 @@
 #include <stdint.h>
-#include "yaffsfs.h"
-#include "yaffs_guts.h"
 #include "logger/logger.h"
+#include "storage/nand.h"
+#include "storage/storage.h"
+#include "system.h"
+#include "yaffs_guts.h"
+#include "yaffsfs.h"
 
-uint8_t memory[10 * 1024];
-
-uint32_t ChunkSize(struct yaffs_dev* dev)
-{
-	return dev->param.total_bytes_per_chunk;
-}
-
-uint32_t ChunkStart(struct yaffs_dev* dev, int chunkNo)
-{
-	return chunkNo * ChunkSize(dev);
-}
+static FlashNANDInterface nand;
+static FlashInterface flash;
+static NANDGeometry geometry;
 
 int ReadChunk(struct yaffs_dev* dev,
     int nand_chunk,
@@ -23,66 +18,100 @@ int ReadChunk(struct yaffs_dev* dev,
     int oob_len,
     enum yaffs_ecc_result* ecc_result)
 {
-	LOGF(LOG_LEVEL_INFO, "ReadChunk %d size: %d oob: %d", nand_chunk, data_len, oob_len);
+    UNREFERENCED_PARAMETER(dev);
+    UNREFERENCED_PARAMETER(oob);
+    UNREFERENCED_PARAMETER(oob_len);
 
-	uint32_t start = ChunkStart(dev, nand_chunk);
+    LOGF(LOG_LEVEL_INFO, "ReadChunk %d size: %d oob: %d", nand_chunk, data_len, oob_len);
 
-	memcpy(data, memory + start, data_len);
+    uint32_t baseAddress = NANDPageBaseAddressFromChunk(&geometry, nand_chunk);
+    FlashStatus status = flash.readPage(&flash, baseAddress, data, data_len);
 
-	*ecc_result = YAFFS_ECC_RESULT_NO_ERROR;
+    *ecc_result = YAFFS_ECC_RESULT_UNKNOWN;
 
-	return YAFFS_OK;
+    return YAFFS_OK;
 }
 
 int WriteChunk(struct yaffs_dev* dev, int nand_chunk, const u8* data, int data_len, const u8* oob, int oob_len)
 {
-	LOGF(LOG_LEVEL_INFO, "WriteChunk %d size: %d oob: %d", nand_chunk, data_len, oob_len);
+    UNREFERENCED_PARAMETER(dev);
+    UNREFERENCED_PARAMETER(oob);
+    UNREFERENCED_PARAMETER(oob_len);
 
-	uint32_t start = ChunkStart(dev, nand_chunk);
-	memcpy(memory + start, data, data_len);
+    LOGF(LOG_LEVEL_INFO, "WriteChunk %d size: %d oob: %d", nand_chunk, data_len, oob_len);
 
-	return YAFFS_OK;
+    uint8_t* baseAddress = (uint8_t*)NANDPageBaseAddressFromChunk(&geometry, nand_chunk);
+
+    FlashStatus status = flash.writePage(&flash, baseAddress, data, data_len);
+
+    if (status != FlashStatusOK)
+    {
+        return YAFFS_FAIL;
+    }
+
+    return YAFFS_OK;
 }
 
 int EraseBlock(struct yaffs_dev* dev, int block_no)
 {
-	LOGF(LOG_LEVEL_INFO, "EraseBlock %d", block_no);
+    UNREFERENCED_PARAMETER(dev);
+    LOGF(LOG_LEVEL_INFO, "EraseBlock %d", block_no);
 
-	return YAFFS_OK;
+    uint32_t baseAddress = NANDBlockBaseAddress(&geometry, block_no);
+
+    FlashStatus status = flash.eraseBlock(&flash, baseAddress);
+
+    if (status != FlashStatusOK)
+    {
+        return YAFFS_FAIL;
+    }
+
+    return YAFFS_OK;
 }
 
 int MarkBadBlock(struct yaffs_dev* dev, int block_no)
 {
-	LOGF(LOG_LEVEL_INFO, "MarkBadBlock %d", block_no);
+    LOGF(LOG_LEVEL_INFO, "MarkBadBlock %d", block_no);
 }
 
 int CheckBadBlock(struct yaffs_dev* dev, int block_no)
 {
-	LOGF(LOG_LEVEL_INFO, "CheckBadBlock %d", block_no);
+    UNREFERENCED_PARAMETER(dev);
 
-	return YAFFS_OK;
+    LOGF(LOG_LEVEL_INFO, "CheckBadBlock %d", block_no);
+
+    uint32_t baseAddress = NANDBlockBaseAddress(&geometry, block_no);
+
+    if (flash.isBadBlock(&flash, baseAddress))
+    {
+        LOGF(LOG_LEVEL_ERROR, "BLokc %d is marked bad", block_no);
+        return YAFFS_FAIL;
+    }
+
+    return YAFFS_OK;
 }
 
 int FlashInitialize(struct yaffs_dev* dev)
 {
-	LOG(LOG_LEVEL_INFO, "Initializing flash");
-	memset(memory, 0xFF, sizeof(memory));
+    UNREFERENCED_PARAMETER(dev);
 
-	return 1;
+    LOG(LOG_LEVEL_INFO, "Initializing flash");
+
+    BuildNANDInterface(&flash, &nand);
+
+    flash.initialize(&flash);
+
+    geometry.baseAddress = flash.baseAddress;
+    geometry.pageSize = 512;
+    geometry.spareAreaPerPage = 0;
+    geometry.pagesPerBlock = 32;
+    geometry.pagesPerChunk = 1;
+
+    NANDCalculateGeometry(&geometry);
+
+    //    flash.eraseBlock(&flash, geometry.baseAddress);
+    //    while (1)
+    //        ;
+
+    return 1;
 }
-
-//int WriteChunkTags(struct yaffs_dev* dev, int nand_chunk, const u8* data, const struct yaffs_ext_tags* tags)
-//{
-//	LOGF(LOG_LEVEL_INFO, "WriteChunkTags %d", nand_chunk);
-//}
-//
-//int ReadChunkTags(struct yaffs_dev* dev, int nand_chunk, u8* data, struct yaffs_ext_tags* tags)
-//{
-//	LOGF(LOG_LEVEL_INFO, "ReadChunkTags %d", nand_chunk);
-//}
-//
-//int QueryBlock(struct yaffs_dev* dev, int block_no, enum yaffs_block_state* state, u32* seq_number)
-//{
-//	LOGF(LOG_LEVEL_INFO, "QueryBlock %d", block_no);
-////	*state =
-//}

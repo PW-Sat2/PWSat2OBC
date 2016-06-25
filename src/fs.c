@@ -31,23 +31,19 @@ void FsTask(void* p)
     flash.drv.drv_read_chunk_fn = ReadChunk;
     flash.drv.drv_write_chunk_fn = WriteChunk;
 
-//    flash.tagger.mark_bad_fn = MarkBadBlock;
-//    flash.tagger.query_block_fn = QueryBlock;
-//    flash.tagger.read_chunk_tags_fn = ReadChunkTags;
-//    flash.tagger.write_chunk_tags_fn = WriteChunkTags;
-
     flash.param.name = "/";
     flash.param.inband_tags = true;
     flash.param.is_yaffs2 = true;
     flash.param.total_bytes_per_chunk = 512;
-    flash.param.chunks_per_block = 3;
-    flash.param.spare_bytes_per_chunk = 16;
-    flash.param.start_block = 0;
+    flash.param.chunks_per_block = 32;
+    flash.param.spare_bytes_per_chunk = 0;
+    flash.param.start_block = 1;
     flash.param.n_reserved_blocks = 3;
+    flash.param.no_tags_ecc = false;
 
     uint32_t blockSize = flash.param.total_bytes_per_chunk * flash.param.chunks_per_block;
 
-    flash.param.end_block = 10 * 1024 / blockSize;
+    flash.param.end_block = 1 * 1024 * 1024 / blockSize - flash.param.start_block - flash.param.n_reserved_blocks;
 
     yaffs_add_device(&flash);
 
@@ -55,28 +51,31 @@ void FsTask(void* p)
 
     LOGF(LOG_LEVEL_INFO, "Mount result: %d", result);
 
-    LOG(LOG_LEVEL_INFO, "Creating file");
-    int file = yaffs_open("/file", O_CREAT | O_RDWR, S_IRUSR);
+    LOG(LOG_LEVEL_INFO, "Incrementing counter");
 
-    char buf[40] = "Hello World";
+    uint32_t counter = 0;
 
-    LOG(LOG_LEVEL_INFO, "Writing to file");
-    yaffs_write(file, buf, COUNT_OF(buf));
+    int file = yaffs_open("/counter", O_RDONLY, S_IRWXU);
 
-    LOG(LOG_LEVEL_INFO, "Closing file");
+    if (file >= 0)
+    {
+        yaffs_read(file, &counter, sizeof(counter));
+        counter++;
+        yaffs_close(file);
+        LOGF(LOG_LEVEL_INFO, "Restart counter: %d", counter);
+    }
+    else
+    {
+        LOG(LOG_LEVEL_INFO, "Creating new restart counter");
+    }
+
+    file = yaffs_open("/counter", O_WRONLY | O_CREAT, S_IRWXU);
+
+    yaffs_write(file, &counter, sizeof(counter));
+
     yaffs_close(file);
 
-    LOG(LOG_LEVEL_INFO, "Reading back");
-
-    file = yaffs_open("/file", O_RDONLY, S_IREAD);
-
-    memset(buf, 0, COUNT_OF(buf));
-
-    yaffs_read(file, buf, COUNT_OF(buf));
-
-    yaffs_close(file);
-
-    LOGF(LOG_LEVEL_INFO, "Read back: %s", buf);
-
+    yaffs_unmount("/");
+    //
     vTaskSuspend(NULL);
 }

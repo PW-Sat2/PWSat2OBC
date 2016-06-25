@@ -18,9 +18,9 @@ int CheckBadBlock(struct yaffs_dev* dev, int block_no);
 
 int FlashInitialize(struct yaffs_dev* dev);
 
-//int WriteChunkTags(struct yaffs_dev* dev, int nand_chunk, const u8* data, const struct yaffs_ext_tags* tags);
-//int ReadChunkTags(struct yaffs_dev* dev, int nand_chunk, u8* data, struct yaffs_ext_tags* tags);
+// int WriteChunkTags(struct yaffs_dev* dev, int nand_chunk, const u8* data, const struct yaffs_ext_tags* tags);
+// int ReadChunkTags(struct yaffs_dev* dev, int nand_chunk, u8* data, struct yaffs_ext_tags* tags);
 //
-//int QueryBlock(struct yaffs_dev* dev, int block_no, enum yaffs_block_state* state, u32* seq_number);
+// int QueryBlock(struct yaffs_dev* dev, int block_no, enum yaffs_block_state* state, u32* seq_number);
 
 #endif /* SRC_FS_DRIVER_H_ */

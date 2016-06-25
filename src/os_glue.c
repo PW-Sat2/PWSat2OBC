@@ -1,85 +1,88 @@
+#include <limits.h>
+#include <stdarg.h>
+#include <stdio.h>
 #include <FreeRTOS.h>
 #include <semphr.h>
 #include <yaffsfs.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <limits.h>
 
 #include "logger/logger.h"
+#include "yaffs_trace.h"
 
 static xSemaphoreHandle yaffsLock;
 int yaffsError = 0;
-int yaffs_trace_mask = INT_MAX;
+unsigned int yaffs_trace_mask = 0xFFFFFFFF;
 
 void yaffsfs_Lock(void)
 {
-	xSemaphoreTake(yaffsLock, portMAX_DELAY);
+    xSemaphoreTake(yaffsLock, portMAX_DELAY);
 }
 
 void yaffsfs_Unlock(void)
 {
-	xSemaphoreGive(yaffsLock);
+    xSemaphoreGive(yaffsLock);
 }
 
 u32 yaffsfs_CurrentTime(void)
 {
-	return 0;
+    return 0;
 }
 
 void yaffsfs_SetError(int err)
 {
-	yaffsError = err;
-	LOGF(LOG_LEVEL_ERROR, "YAFFS error %d", err);
+    yaffsError = err;
+    LOGF(LOG_LEVEL_ERROR, "YAFFS error %d", err);
 }
 
 int yaffsfs_GetLastError(void)
 {
-	return yaffsError;
+    return yaffsError;
 }
 
-void *yaffsfs_malloc(size_t size)
+void* yaffsfs_malloc(size_t size)
 {
-	void* ptr = pvPortMalloc(size);
+    void* ptr = pvPortMalloc(size);
 
-	if(!ptr) {
-		LOGF(LOG_LEVEL_ERROR, "Failed to alocate %d bytes", size);
-	}
+    if (!ptr)
+    {
+        LOGF(LOG_LEVEL_ERROR, "Failed to alocate %d bytes", size);
+    }
 
-	return ptr;
+    return ptr;
 }
-void yaffsfs_free(void *ptr)
+void yaffsfs_free(void* ptr)
 {
-	vPortFree(ptr);
+    vPortFree(ptr);
 }
 
-int yaffsfs_CheckMemRegion(const void *addr, size_t size, int write_request)
+int yaffsfs_CheckMemRegion(const void* addr, size_t size, int write_request)
 {
-	return 1;
+    return 1;
 }
 
 void yaffsfs_OSInitialisation(void)
-{}
-
-void yaffs_bug_fn(const char *file_name, int line_no)
 {
-	LOGF(LOG_LEVEL_ERROR, "YAFFS BUG: %s:%d", file_name, line_no);
+}
+
+void yaffs_bug_fn(const char* file_name, int line_no)
+{
+    LOGF(LOG_LEVEL_ERROR, "YAFFS BUG: %s:%d", file_name, line_no);
 }
 
 void yaffs_log(const char* fmt, ...)
 {
-	va_list args;
-	va_start(args, fmt);
+    va_list args;
+    va_start(args, fmt);
 
-	char buffer[256];
-	vsniprintf(buffer, sizeof(buffer), fmt, args);
+    char buffer[256];
+    vsniprintf(buffer, sizeof(buffer), fmt, args);
 
-	LOG(LOG_LEVEL_INFO, buffer);
+    LOG(LOG_LEVEL_INFO, buffer);
 
-	va_end(args);
+    va_end(args);
 }
 
 void yaffs_glue_init(void)
 {
-	yaffsLock = xSemaphoreCreateBinary();
-	xSemaphoreGive(yaffsLock);
+    yaffsLock = xSemaphoreCreateBinary();
+    xSemaphoreGive(yaffsLock);
 }
