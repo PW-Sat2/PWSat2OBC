@@ -23,17 +23,18 @@ typedef struct
     commandHandler handler;
 } command;
 
-static const command commands[] = {
-    {"ping", &PingHandler},
-    {"echo", &EchoHandler},
-    {"jumpToTime", &JumpToTimeHandler},
-    {"currentTime", &CurrentTimeHandler},
-    {"sendFrame", &SendFrameHandler},
-    {"getFramesCount", &GetFramesCountHandler},
-    {"receiveFrame", &ReceiveFrameHandler},
-    {"pauseComm", &CommandPauseComm},
+static const command commands[] = {{"ping", PingHandler},
+    {"echo", EchoHandler},
+    {"jumpToTime", JumpToTimeHandler},
+    {"currentTime", CurrentTimeHandler},
+    {"sendFrame", SendFrameHandler},
+    {"getFramesCount", GetFramesCountHandler},
+    {"receiveFrame", ReceiveFrameHandler},
+    {"pauseComm", CommandPauseComm},
     {"getState", OBCGetState},
-};
+    {"listFiles", FSListFiles},
+    {"writeFile", FSWriteFile},
+    {"readFile", FSReadFile}};
 
 static QueueHandle_t terminalQueue;
 
@@ -106,7 +107,7 @@ static void handleIncomingChar(void* args)
 {
     UNREFERENCED_PARAMETER(args);
 
-    char input_buffer[32] = {0};
+    char input_buffer[100] = {0};
     uint32_t input_buffer_position = 0;
 
     while (1)

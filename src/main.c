@@ -29,6 +29,8 @@ OBC Main;
 #include "storage/storage.h"
 #include "storage/storage.h"
 
+const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
+
 void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
 {
     UNREFERENCED_PARAMETER(pxTask);

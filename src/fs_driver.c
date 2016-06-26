@@ -22,8 +22,6 @@ int ReadChunk(struct yaffs_dev* dev,
     UNREFERENCED_PARAMETER(oob);
     UNREFERENCED_PARAMETER(oob_len);
 
-    LOGF(LOG_LEVEL_INFO, "ReadChunk %d size: %d oob: %d", nand_chunk, data_len, oob_len);
-
     uint32_t baseAddress = NANDPageBaseAddressFromChunk(&geometry, nand_chunk);
     FlashStatus status = flash.readPage(&flash, baseAddress, data, data_len);
 
@@ -37,8 +35,6 @@ int WriteChunk(struct yaffs_dev* dev, int nand_chunk, const u8* data, int data_l
     UNREFERENCED_PARAMETER(dev);
     UNREFERENCED_PARAMETER(oob);
     UNREFERENCED_PARAMETER(oob_len);
-
-    LOGF(LOG_LEVEL_INFO, "WriteChunk %d size: %d oob: %d", nand_chunk, data_len, oob_len);
 
     uint8_t* baseAddress = (uint8_t*)NANDPageBaseAddressFromChunk(&geometry, nand_chunk);
 
@@ -77,8 +73,6 @@ int MarkBadBlock(struct yaffs_dev* dev, int block_no)
 int CheckBadBlock(struct yaffs_dev* dev, int block_no)
 {
     UNREFERENCED_PARAMETER(dev);
-
-    LOGF(LOG_LEVEL_INFO, "CheckBadBlock %d", block_no);
 
     uint32_t baseAddress = NANDBlockBaseAddress(&geometry, block_no);
 

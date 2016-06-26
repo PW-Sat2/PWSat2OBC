@@ -31,7 +31,10 @@ u32 yaffsfs_CurrentTime(void)
 void yaffsfs_SetError(int err)
 {
     yaffsError = err;
-    LOGF(LOG_LEVEL_ERROR, "YAFFS error %d", err);
+    if (err != 0)
+    {
+        LOGF(LOG_LEVEL_ERROR, "YAFFS error %d", err);
+    }
 }
 
 int yaffsfs_GetLastError(void)
