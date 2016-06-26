@@ -13,13 +13,27 @@ set(SOURCES
     os_glue.c
     fs_driver.c
     obc.h
+    fault_handlers.c
 )
 
 add_executable(${NAME} ${SOURCES})
 
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${PLATFORM_LINKER_SCRIPT} -Wl,-Map=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME}.map")
 
-target_link_libraries(${NAME} platform freeRTOS base os comm leuart swo logger SwoEndpoint i2c storage yaffs)
+target_link_libraries(${NAME} 
+    platform 
+    freeRTOS 
+    base 
+    os 
+    comm 
+    leuart 
+    swo 
+    logger 
+    SwoEndpoint 
+    i2c 
+    storage 
+    yaffs
+)
 
 target_generate_hex(${NAME})
 

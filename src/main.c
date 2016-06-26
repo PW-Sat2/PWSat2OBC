@@ -25,8 +25,8 @@
 #include "terminal.h"
 
 OBC Main;
-#include "storage/storage.h"
 #include "storage/nand.h"
+#include "storage/storage.h"
 #include "storage/storage.h"
 
 void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
@@ -60,8 +60,12 @@ static void InitSwoEndpoint(void)
     }
 }
 
+extern void InitializeYaffs(void);
+
 static void ObcInitTask(void* param)
 {
+    InitializeYaffs();
+
     OBC* obc = (OBC*)param;
     if (!CommRestart(&obc->comm))
     {
@@ -80,8 +84,6 @@ static void FrameHandler(CommObject* comm, CommFrame* frame, void* context)
     CommSendFrame(comm, (uint8_t*)"PONG", 4);
 }
 
-extern void FsTask(void*);
-
 int main(void)
 {
     memset(&Main, 0, sizeof(Main));
@@ -94,7 +96,7 @@ int main(void)
 
     SwoEnable();
 
-    LogInit(LOG_LEVEL_MAX);
+    LogInit(LOG_LEVEL_DEBUG);
     InitSwoEndpoint();
 
     OSSetup();
@@ -111,8 +113,6 @@ int main(void)
 
     TerminalInit();
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
-    LogInit(LOG_LEVEL_DEBUG);
-    InitSwoEndpoint();
 
     OpenSailInit();
 
@@ -125,7 +125,6 @@ int main(void)
 
     System.CreateTask(BlinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
     System.CreateTask(ObcInitTask, "Init", 512, &Main, tskIDLE_PRIORITY + 16, &Main.initTask);
-    System.CreateTask(FsTask, "FS Task", 4096, &Main, tskIDLE_PRIORITY + 1, NULL);
     System.RunScheduler();
 
     GPIO_PinOutToggle(LED_PORT, LED0);

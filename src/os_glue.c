@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <FreeRTOS.h>
 #include <semphr.h>
+#include <yaffs_trace.h>
 #include <yaffsfs.h>
 
 #include "logger/logger.h"
@@ -10,7 +11,7 @@
 
 static xSemaphoreHandle yaffsLock;
 int yaffsError = 0;
-unsigned int yaffs_trace_mask = 0xFFFFFFFF;
+unsigned int yaffs_trace_mask = YAFFS_TRACE_ERASE | YAFFS_TRACE_ERROR | YAFFS_TRACE_BUG | YAFFS_TRACE_BAD_BLOCKS;
 
 void yaffsfs_Lock(void)
 {
