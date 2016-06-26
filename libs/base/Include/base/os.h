@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 /**
@@ -142,6 +143,18 @@ typedef OSEventBits (*OSEventGroupWaitForBits)(OSEventGroupHandle eventGroup,
     const OSTaskTimeSpan timeout);
 
 /**
+ * @brief Type of procedure that allocates block of memory from OS heap
+ * @param[in] size Size of the block to alloc
+ */
+typedef void* (*OSAlloc)(size_t size);
+
+/**
+ * @brief Type of procedure that frees block of memory
+ * @param[in] ptr Pointer to block to free
+ */
+typedef void (*OSFree)(void* ptr);
+
+/**
  * @brief Definition of operating system interface.
  */
 typedef struct
@@ -243,6 +256,8 @@ typedef struct
      * @see OSEventGroupWaitForBits for the details.
      */
     OSEventGroupWaitForBits EventGroupWaitForBits;
+    OSAlloc Alloc;
+    OSFree Free;
 } OS;
 
 /**

@@ -9,10 +9,7 @@ set(SOURCES
     commands/file_system.c 
     devices/eps.c
     openSail.c
-    obc_time.c
-    fs.c
-    os_glue.c
-    fs_driver.c
+    obc_time.c      
     obc.h
     fault_handlers.c
 )
@@ -31,9 +28,8 @@ target_link_libraries(${NAME}
     swo 
     logger 
     SwoEndpoint 
-    i2c 
-    storage 
-    yaffs
+    i2c    
+    fs
 )
 
 target_generate_hex(${NAME})

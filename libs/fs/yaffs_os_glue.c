@@ -1,26 +1,27 @@
 #include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <FreeRTOS.h>
-#include <semphr.h>
+
 #include <yaffs_trace.h>
 #include <yaffsfs.h>
 
+#include "base/os.h"
 #include "logger/logger.h"
+#include "system.h"
 #include "yaffs_trace.h"
 
-static xSemaphoreHandle yaffsLock;
+static OSSemaphoreHandle yaffsLock;
 int yaffsError = 0;
 unsigned int yaffs_trace_mask = YAFFS_TRACE_ERASE | YAFFS_TRACE_ERROR | YAFFS_TRACE_BUG | YAFFS_TRACE_BAD_BLOCKS;
 
 void yaffsfs_Lock(void)
 {
-    xSemaphoreTake(yaffsLock, portMAX_DELAY);
+    System.TakeSemaphore(yaffsLock, MAX_DELAY);
 }
 
 void yaffsfs_Unlock(void)
 {
-    xSemaphoreGive(yaffsLock);
+    System.GiveSemaphore(yaffsLock);
 }
 
 u32 yaffsfs_CurrentTime(void)
@@ -44,7 +45,7 @@ int yaffsfs_GetLastError(void)
 
 void* yaffsfs_malloc(size_t size)
 {
-    void* ptr = pvPortMalloc(size);
+    void* ptr = System.Alloc(size);
 
     if (!ptr)
     {
@@ -55,11 +56,14 @@ void* yaffsfs_malloc(size_t size)
 }
 void yaffsfs_free(void* ptr)
 {
-    vPortFree(ptr);
+    System.Free(ptr);
 }
 
 int yaffsfs_CheckMemRegion(const void* addr, size_t size, int write_request)
 {
+    UNREFERENCED_PARAMETER(addr);
+    UNREFERENCED_PARAMETER(size);
+    UNREFERENCED_PARAMETER(write_request);
     return 1;
 }
 
@@ -85,8 +89,8 @@ void yaffs_log(const char* fmt, ...)
     va_end(args);
 }
 
-void yaffs_glue_init(void)
+void YaffsGlueInit(void)
 {
-    yaffsLock = xSemaphoreCreateBinary();
-    xSemaphoreGive(yaffsLock);
+    yaffsLock = System.CreateBinarySemaphore();
+    System.GiveSemaphore(yaffsLock);
 }

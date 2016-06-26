@@ -1,45 +1,48 @@
 #include <stdint.h>
+#include <string.h>
 #include <fcntl.h>
+#include "obc.h"
 #include "system.h"
 #include "terminal.h"
-#include "yaffsfs.h"
 
 void FSListFiles(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
 
-    yaffs_DIR* dir = yaffs_opendir(argv[0]);
+    FSDirectoryHandle dir = Main.fs.openDirectory(argv[0]);
 
-    struct yaffs_dirent* entry;
-    while ((entry = yaffs_readdir(dir)) != NULL)
+    char* entry;
+    while ((entry = Main.fs.readDirectory(dir)) != NULL)
     {
-        TerminalPuts(entry->d_name);
+        TerminalPuts(entry);
         TerminalSendNewLine();
     }
 
-    yaffs_closedir(dir);
+    Main.fs.closeDirectory(dir);
 }
 
 void FSWriteFile(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
 
-    int file = yaffs_open(argv[0], O_WRONLY | O_CREAT, S_IRWXU);
-    yaffs_write(file, argv[1], strlen(argv[1]));
-    yaffs_close(file);
+    FSFileHandle file = Main.fs.open(argv[0], O_RDWR | O_CREAT | O_TRUNC, S_IRWXU);
+    Main.fs.ftruncate(file, 0);
+    Main.fs.write(file, argv[1], strlen(argv[1]));
+    Main.fs.close(file);
 }
 
 void FSReadFile(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
-    int file = yaffs_open(argv[0], O_RDONLY, S_IRWXU);
+    FSFileHandle file = Main.fs.open(argv[0], O_RDONLY, S_IRWXU);
 
     char buffer[100];
 
     memset(buffer, 0, sizeof(buffer));
 
-    yaffs_read(file, buffer, sizeof(buffer));
-    yaffs_close(file);
+    Main.fs.read(file, buffer, sizeof(buffer));
+
+    Main.fs.close(file);
 
     buffer[99] = 0;
 

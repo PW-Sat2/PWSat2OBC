@@ -24,10 +24,12 @@
 #include "system.h"
 #include "terminal.h"
 
-OBC Main;
+#include "fs/fs.h"
 #include "storage/nand.h"
 #include "storage/storage.h"
 #include "storage/storage.h"
+
+OBC Main;
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
@@ -62,16 +64,18 @@ static void InitSwoEndpoint(void)
     }
 }
 
-extern void InitializeYaffs(void);
-
 static void ObcInitTask(void* param)
 {
-    InitializeYaffs();
-
     OBC* obc = (OBC*)param;
+
+    if (!FileSystemInitialize(&obc->fs))
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to initialize file system");
+    }
+
     if (!CommRestart(&obc->comm))
     {
-        LOG(LOG_LEVEL_ERROR, "Unable to restart comm. ");
+        LOG(LOG_LEVEL_ERROR, "Unable to restart comm");
     }
 
     LOG(LOG_LEVEL_INFO, "Intialized");

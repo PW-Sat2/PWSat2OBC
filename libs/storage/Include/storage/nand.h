@@ -7,16 +7,26 @@
 extern "C" {
 #endif
 
-typedef struct
+typedef struct _FlashNANDInterface
 {
+    uint32_t baseAddress;
     uint8_t volatile* data8;
     uint16_t volatile* data16;
     uint32_t volatile* data32;
     uint8_t volatile* addr;
     uint8_t volatile* cmd;
+    int (*initialize)(struct _FlashNANDInterface* flash);
+    int (*check)(struct _FlashNANDInterface* flash);
+    int (*status)(struct _FlashNANDInterface* flash);
+    FlashStatus (*readPage)(struct _FlashNANDInterface* interface, uint32_t address, uint8_t* buffer, uint16_t len);
+    FlashStatus (*eraseBlock)(struct _FlashNANDInterface* interface, uint32_t address);
+    int (*writeBlock)(struct _FlashNANDInterface* interface, uint32_t address, uint8_t value);
+    FlashStatus (*writePage)(
+        struct _FlashNANDInterface* interface, uint8_t volatile* address, const uint8_t* buffer, uint32_t length);
+    uint8_t (*isBadBlock)(const struct _FlashNANDInterface* flash, uint8_t volatile* address);
 } FlashNANDInterface;
 
-void BuildNANDInterface(FlashInterface* flash, FlashNANDInterface* nand);
+void BuildNANDInterface(FlashNANDInterface* flash);
 
 typedef struct
 {

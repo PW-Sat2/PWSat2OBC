@@ -166,31 +166,27 @@ static void enableEBI(void)
     EBI->NANDCTRL = (EBI_NANDCTRL_BANKSEL_BANK0 | EBI_NANDCTRL_EN);
 }
 
-static int initialize(FlashInterface* flash)
+static int initialize(FlashNANDInterface* flash)
 {
     enableEBI();
 
     flash->baseAddress = EBI_BankAddress(EBI_BANK0);
 
-    FlashNANDInterface* nand = flash->extra;
-
-    nand->data8 = (uint8_t volatile*)flash->baseAddress;
-    nand->data16 = (uint16_t volatile*)flash->baseAddress;
-    nand->data32 = (uint32_t volatile*)flash->baseAddress;
-    nand->addr = (uint8_t volatile*)(flash->baseAddress + (1 << NAND_ALE_BIT));
-    nand->cmd = (uint8_t volatile*)(flash->baseAddress + (1 << NAND_CLE_BIT));
+    flash->data8 = (uint8_t volatile*)flash->baseAddress;
+    flash->data16 = (uint16_t volatile*)flash->baseAddress;
+    flash->data32 = (uint32_t volatile*)flash->baseAddress;
+    flash->addr = (uint8_t volatile*)(flash->baseAddress + (1 << NAND_ALE_BIT));
+    flash->cmd = (uint8_t volatile*)(flash->baseAddress + (1 << NAND_CLE_BIT));
 
     PowerEnable(true);
 
-    Reset(flash->extra);
+    Reset(flash);
 
     return 0;
 }
 
-static FlashStatus readPage(FlashInterface* flash, uint32_t address, uint8_t* buffer, uint16_t len)
+static FlashStatus readPage(FlashNANDInterface* flash, uint32_t address, uint8_t* buffer, uint16_t len)
 {
-    FlashNANDInterface* nand = flash->extra;
-
     uint32_t a = (uint32_t)address;
 
     a &= ~NAND_PAGEADDR_MASK;
@@ -198,42 +194,37 @@ static FlashStatus readPage(FlashInterface* flash, uint32_t address, uint8_t* bu
     ChipEnable(true);
     WaitReady();
 
-    *(nand->cmd) = NAND_RDA_CMD;
-    *(nand->addr) = (uint8_t)a;
-    *(nand->addr) = (uint8_t)(a >> 9);
-    *(nand->addr) = (uint8_t)(a >> 17);
+    *(flash->cmd) = NAND_RDA_CMD;
+    *(flash->addr) = (uint8_t)a;
+    *(flash->addr) = (uint8_t)(a >> 9);
+    *(flash->addr) = (uint8_t)(a >> 17);
 
     WaitReady();
-
-    EBI_StartNandEccGen();
 
     uint32_t* p = (uint32_t*)buffer;
     for (uint16_t i = 0; i < len / 4; i++)
     {
-        *(p + i) = *(nand->data32);
+        *(p + i) = *(flash->data32);
     }
-
-    EBI_StopNandEccGen();
 
     ChipEnable(false);
 
     return FlashStatusOK;
 }
 
-static FlashStatus writePage(FlashInterface* flash, uint8_t volatile* address, const uint8_t* buffer, uint32_t length)
+static FlashStatus writePage(
+    FlashNANDInterface* flash, uint8_t volatile* address, const uint8_t* buffer, uint32_t length)
 {
-    FlashNANDInterface* nand = flash->extra;
-
     address = (uint8_t volatile*)((uint32_t)address & ~NAND_PAGEADDR_MASK);
 
     WriteProtect(false);
     ChipEnable(true);
 
-    *(nand->cmd) = NAND_RDA_CMD;
-    *(nand->cmd) = NAND_PAGEPROG1_CMD;
-    *(nand->addr) = (uint8_t)(uint32_t)address;
-    *(nand->addr) = (uint8_t)((uint32_t)address >> 9);
-    *(nand->addr) = (uint8_t)((uint32_t)address >> 17);
+    *(flash->cmd) = NAND_RDA_CMD;
+    *(flash->cmd) = NAND_PAGEPROG1_CMD;
+    *(flash->addr) = (uint8_t)(uint32_t)address;
+    *(flash->addr) = (uint8_t)((uint32_t)address >> 9);
+    *(flash->addr) = (uint8_t)((uint32_t)address >> 17);
 
     while (EBI->STATUS & EBI_STATUS_AHBACT)
     {
@@ -241,21 +232,17 @@ static FlashStatus writePage(FlashInterface* flash, uint8_t volatile* address, c
 
     WaitReady();
 
-    EBI_StartNandEccGen();
-
     uint32_t* p = (uint32_t*)buffer;
     for (uint16_t i = 0; i < length / 4; i++)
     {
-        *(nand->data32) = *(p + i);
+        *(flash->data32) = *(p + i);
     }
 
     while (EBI->STATUS & EBI_STATUS_AHBACT)
     {
     }
 
-    EBI_StopNandEccGen();
-
-    *(nand->cmd) = NAND_PAGEPROG2_CMD;
+    *(flash->cmd) = NAND_PAGEPROG2_CMD;
 
     WaitReady();
 
@@ -268,22 +255,20 @@ static FlashStatus writePage(FlashInterface* flash, uint8_t volatile* address, c
     return status;
 }
 
-static FlashStatus eraseBlock(FlashInterface* flash, uint32_t address)
+static FlashStatus eraseBlock(FlashNANDInterface* flash, uint32_t address)
 {
     int status;
 
     address &= ~NAND_BLOCKADDR_MASK;
 
-    FlashNANDInterface* nand = (FlashNANDInterface*)flash->extra;
-
     WriteProtect(false);
     ChipEnable(true);
 
-    *(nand->cmd) = NAND_BLOCKERASE1_CMD;
+    *(flash->cmd) = NAND_BLOCKERASE1_CMD;
     /* Coloumn address, bit 8 is not used, implicitely defined by NAND_RDA_CMD. */
-    *(nand->addr) = (uint8_t)(address >> 9);
-    *(nand->addr) = (uint8_t)(address >> 17);
-    *(nand->cmd) = NAND_BLOCKERASE2_CMD;
+    *(flash->addr) = (uint8_t)(address >> 9);
+    *(flash->addr) = (uint8_t)(address >> 17);
+    *(flash->cmd) = NAND_BLOCKERASE2_CMD;
 
     WaitReady();
 
@@ -295,14 +280,12 @@ static FlashStatus eraseBlock(FlashInterface* flash, uint32_t address)
     return status;
 }
 
-int check(FlashInterface* flash)
+int check(FlashNANDInterface* flash)
 {
-    FlashNANDInterface* nand = flash->extra;
-
     ChipEnable(true);
 
-    *(nand->cmd) = NAND_RDSIGN_CMD;
-    uint16_t sig = *(nand->data16);
+    *(flash->cmd) = NAND_RDSIGN_CMD;
+    uint16_t sig = *(flash->data16);
 
     ChipEnable(false);
 
@@ -315,17 +298,14 @@ int check(FlashInterface* flash)
     return FlashStatusOK;
 }
 
-int status(FlashInterface* flash)
+int status(FlashNANDInterface* flash)
 {
-    FlashNANDInterface* nand = flash->extra;
-    *(nand->cmd) = NAND_RDSTATUS_CMD;
-    return *(nand->data8);
+    *(flash->cmd) = NAND_RDSTATUS_CMD;
+    return *(flash->data8);
 }
 
-uint8_t isBadBlock(const struct _FlashInterface* flash, uint8_t volatile* address)
+uint8_t isBadBlock(const FlashNANDInterface* flash, uint8_t volatile* address)
 {
-    FlashNANDInterface* nand = flash->extra;
-
     uint32_t a = (uint32_t)address;
 
     a &= ~NAND_PAGEADDR_MASK;
@@ -333,16 +313,16 @@ uint8_t isBadBlock(const struct _FlashInterface* flash, uint8_t volatile* addres
     ChipEnable(true);
     WaitReady();
 
-    *(nand->cmd) = NAND_RDC_CMD;
-    *(nand->addr) = (uint8_t)a + 6;
-    *(nand->addr) = (uint8_t)(a >> 9);
-    *(nand->addr) = (uint8_t)(a >> 17);
+    *(flash->cmd) = NAND_RDC_CMD;
+    *(flash->addr) = (uint8_t)a + 6;
+    *(flash->addr) = (uint8_t)(a >> 9);
+    *(flash->addr) = (uint8_t)(a >> 17);
 
     WaitReady();
 
     EBI_StartNandEccGen();
 
-    uint8_t badBlockMark = *(nand->data8);
+    uint8_t badBlockMark = *(flash->data8);
 
     EBI_StopNandEccGen();
 
@@ -351,10 +331,8 @@ uint8_t isBadBlock(const struct _FlashInterface* flash, uint8_t volatile* addres
     return badBlockMark != 0xFF;
 }
 
-void BuildNANDInterface(FlashInterface* flash, FlashNANDInterface* nand)
+void BuildNANDInterface(FlashNANDInterface* flash)
 {
-    flash->extra = nand;
-
     flash->initialize = initialize;
     flash->readPage = readPage;
     flash->writePage = writePage;
