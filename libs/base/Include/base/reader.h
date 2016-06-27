@@ -12,7 +12,7 @@ extern "C" {
 /**
  * @brief Reader object definition.
  *
- * This object is supposed to provide mens of reading various entries in a way
+ * This object is supposed to provide means of reading various entries in a way
  * that is independent of both current memory layout and the actual
  * buffer location in memory.
  */
@@ -38,8 +38,8 @@ typedef struct
     /**
      * @brief Current buffer status.
      *
-     * True -> Data is valid.
-     * False -> Buffer overflow detected.
+     *  - True -> Data is valid.
+     *  - False -> Buffer overflow detected.
      */
     bool status;
 } Reader;
