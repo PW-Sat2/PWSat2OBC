@@ -21,12 +21,6 @@ target_generate_hex(${NAME})
 
 target_memory_report(${NAME})
 
-target_jlink_flash(${NAME} "${CMAKE_CURRENT_SOURCE_DIR}/../jlink/flash.jlink")
+target_jlink_flash(${NAME})
 
 target_format_sources(${NAME} "${SOURCES}")
-
-add_custom_target(${NAME}.gdb
-  COMMAND ${JLinkGDBServer} -device ${DEVICE}
-  DEPENDS ${NAME}
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-)

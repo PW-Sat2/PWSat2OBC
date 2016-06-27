@@ -2,7 +2,7 @@ si 1
 speed 4000
 r
 halt
-loadbin pwsat.hex, 0x0
+loadbin "${HEX_FILE}", 0x0
 r
 g
 exit

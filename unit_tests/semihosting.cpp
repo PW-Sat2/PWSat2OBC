@@ -1,7 +1,7 @@
-#include "semihosting.h"
 #include <stdio.h>
 #include <ctype.h>
 #include <signal.h>
+#include "semihosting.h"
 
 #define ARM_RDI_MONITOR
 
