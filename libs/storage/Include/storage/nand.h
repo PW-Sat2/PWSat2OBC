@@ -20,10 +20,14 @@ typedef struct _FlashNANDInterface
     int (*status)(struct _FlashNANDInterface* flash);
     FlashStatus (*readPage)(struct _FlashNANDInterface* interface, uint32_t address, uint8_t* buffer, uint16_t len);
     FlashStatus (*eraseBlock)(struct _FlashNANDInterface* interface, uint32_t address);
-    int (*writeBlock)(struct _FlashNANDInterface* interface, uint32_t address, uint8_t value);
     FlashStatus (*writePage)(
         struct _FlashNANDInterface* interface, uint8_t volatile* address, const uint8_t* buffer, uint32_t length);
+    FlashStatus (*readSpare)(struct _FlashNANDInterface* interface, uint32_t address, uint8_t* buffer, uint16_t length);
+    FlashStatus (*writeSpare)(
+        struct _FlashNANDInterface* interface, uint32_t address, uint8_t* buffer, uint16_t length);
+
     uint8_t (*isBadBlock)(const struct _FlashNANDInterface* flash, uint8_t volatile* address);
+    FlashStatus (*markBadBlock)(const struct _FlashNANDInterface* flash, uint8_t* address);
 } FlashNANDInterface;
 
 void BuildNANDInterface(FlashNANDInterface* flash);
@@ -40,9 +44,29 @@ typedef struct
     uint32_t baseAddress;
 } NANDGeometry;
 
+typedef struct
+{
+    uint32_t baseAddress;
+    uint32_t dataSize;
+    uint8_t* dataBuffer;
+    uint32_t spareSize;
+    uint8_t* spareBuffer;
+} NANDOperationSlice;
+
+typedef struct
+{
+    uint32_t baseAddress;
+    uint32_t dataSize;
+    uint8_t* dataBuffer;
+    uint32_t spareSize;
+    uint8_t* spareBuffer;
+} NANDOperation;
+
 void NANDCalculateGeometry(NANDGeometry* geometry);
 uint32_t NANDPageBaseAddressFromChunk(NANDGeometry* geometry, uint16_t chunkNo);
 uint32_t NANDBlockBaseAddress(NANDGeometry* geometry, uint16_t blockNo);
+uint16_t NANDAffectedPagesCount(NANDGeometry* geometry, NANDOperation* operation);
+NANDOperationSlice NANDGetOperationSlice(NANDGeometry* geometry, NANDOperation* operation, uint16_t pageNo);
 
 #ifdef __cplusplus
 }

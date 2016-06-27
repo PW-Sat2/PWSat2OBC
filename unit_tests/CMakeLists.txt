@@ -31,7 +31,18 @@ endif(${ENABLE_COVERAGE})
 
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_CURRENT_LIST_DIR}/linker.ld ${LD_COVERAGE}")
 
-target_link_libraries(${NAME} platform emlib gtest gmock logger yaffs storage comm)
+target_link_libraries(${NAME}
+    m 
+    platform 
+    emlib 
+    gtest 
+    gmock 
+    logger 
+    yaffs 
+    storage 
+    comm
+    fs    
+)
 
 target_require_semihosting(${NAME})
 

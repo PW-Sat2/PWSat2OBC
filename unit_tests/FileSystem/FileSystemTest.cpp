@@ -2,6 +2,8 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock-matchers.h"
 
+#include "fs/fs.h"
+#include "fs/nand_driver.h"
 #include "system.h"
 #include "yaffs_guts.h"
 #include "yaffsfs.h"
@@ -18,6 +20,7 @@ class FileSystemTest : public Test
 {
   protected:
     yaffs_dev device;
+    YaffsNANDDriver driver;
 
     int32_t FillDevice(int file);
 
@@ -28,10 +31,33 @@ class FileSystemTest : public Test
 
 FileSystemTest::FileSystemTest()
 {
-    memset(&device, 0, sizeof(device));
-    device.param.name = "/";
+    memset(&driver, 0, sizeof(driver));
+    driver.geometry.pageSize = 512;
+    driver.geometry.spareAreaPerPage = 12; // 16 - bad block mark - 3 bytes ECC
+    driver.geometry.pagesPerBlock = 32;
+    driver.geometry.pagesPerChunk = 2;
 
-    InitializeYaffsDev(&device);
+    NANDCalculateGeometry(&driver.geometry);
+
+    InitializeMemoryNAND(&driver.flash);
+
+    memset(&device, 0, sizeof(device));
+
+    SetupYaffsNANDDriver(&device, &driver);
+
+    device.param.name = "/";
+    device.param.inband_tags = false;
+    device.param.is_yaffs2 = true;
+    device.param.total_bytes_per_chunk = driver.geometry.chunkSize;
+    device.param.chunks_per_block = driver.geometry.chunksPerBlock;
+    device.param.spare_bytes_per_chunk = driver.geometry.spareAreaPerPage * driver.geometry.pagesPerChunk;
+    device.param.start_block = 1;
+    device.param.n_reserved_blocks = 3;
+    device.param.no_tags_ecc = true;
+    device.param.always_check_erased = true;
+
+    device.param.end_block =
+        1 * 1024 * 1024 / driver.geometry.blockSize - device.param.start_block - device.param.n_reserved_blocks;
 
     yaffs_add_device(&device);
 }
@@ -51,16 +77,16 @@ int32_t FileSystemTest::FillDevice(int file)
 
     int32_t totalSize = 0;
 
-    for (uint16_t i = 0; i < 1023; i++)
+    for (uint16_t i = 0;; i++)
     {
         int32_t written = yaffs_write(file, buffer, COUNT_OF(buffer));
 
-        totalSize += written;
-
-        if (written < COUNT_OF(buffer))
+        if (written < (int32_t)COUNT_OF(buffer))
         {
             break;
         }
+
+        totalSize += written;
     }
 
     return totalSize;
@@ -94,14 +120,14 @@ TEST_F(FileSystemTest, SanityCheck)
 
     ASSERT_THAT(buffer, StrEq("Hello World"));
 }
-
+#if 1
 TEST_F(FileSystemTest, WritingFileBiggerThatOneChunk)
 {
     yaffs_mount("/");
 
     auto file = yaffs_open("/file", O_CREAT | O_WRONLY, S_IRWXU);
 
-    uint8_t buffer[1024];
+    uint8_t buffer[2048];
     for (uint16_t i = 0; i < COUNT_OF(buffer); i++)
     {
         buffer[i] = i % 256;
@@ -163,15 +189,60 @@ TEST_F(FileSystemTest, BlocksFailingWhileWriting)
 {
     yaffs_mount("/");
 
-    CauseBadBlock(&device, 1);
+    CauseBadBlock(&driver.flash, 1);
 
     auto file = yaffs_open("/file", O_CREAT | O_WRONLY, S_IRWXU);
 
     FillDevice(file);
 
     yaffs_close(file);
-
+    printf("Format\n");
     yaffs_format("/", 1, 1, 0);
 
-    ASSERT_THAT(IsBadBlock(&device, 1), Eq(true));
+    ASSERT_THAT(IsBadBlock(&driver.flash, 1), Eq(true));
 }
+
+TEST_F(FileSystemTest, ShouldCorrectSingleBitError)
+{
+    uint8_t buffer[1024];
+    for (uint16_t i = 0; i < COUNT_OF(buffer); i++)
+    {
+        buffer[i] = i % 256;
+    }
+
+    yaffs_mount("/");
+
+    auto file = yaffs_open("/file", O_CREAT | O_WRONLY, S_IRWXU);
+
+    yaffs_write(file, buffer, sizeof(buffer));
+
+    auto obj = yaffs_get_obj_from_fd(file);
+
+    auto nand_chunk = yaffs_find_chunk_in_file(obj, 1, NULL);
+
+    yaffs_close(file);
+
+    yaffs_unmount("/");
+
+    SwapBit(&driver.flash, nand_chunk * driver.geometry.chunkSize + 100, 1);
+
+    yaffs_flush_whole_cache(&device, 1);
+    printf("remounting\n");
+    yaffs_mount("/");
+    printf("Opening\n");
+    file = yaffs_open("/file", O_RDONLY, S_IRWXU);
+
+    memset(buffer, 0, sizeof(buffer));
+    printf("Reading\n");
+    yaffs_read(file, buffer, sizeof(buffer));
+
+    for (uint16_t i = 0; i < COUNT_OF(buffer); i++)
+    {
+        ASSERT_THAT(buffer[i], Eq(i % 256));
+    }
+
+    yaffs_close(file);
+
+    yaffs_unmount("/");
+}
+#endif

@@ -1,146 +1,195 @@
+#include <stddef.h>
 #include <stdint.h>
 
 #include "MemoryDriver.hpp"
+#include "system.h"
 
-static uint8_t storage[1 * 1024 * 1024];
-static uint8_t spare[64 * 16];
+#define MEMORY_SIZE (1 * 1024 * 1024)
 
 struct DriverContext
 {
-    uint8_t* memory;
-    uint8_t* spare;
+    uint8_t memory[MEMORY_SIZE];
+    uint8_t spare[MEMORY_SIZE / 512 * 16];
     uint8_t faultyBlocks;
-    uint32_t blockSize;
 };
 
 static DriverContext context;
 
-static uint32_t ChunkStart(yaffs_dev* dev, int chunkNo)
+static inline DriverContext* Context(const FlashNANDInterface* interface)
 {
-    return chunkNo * dev->param.total_bytes_per_chunk;
+    return (DriverContext*)(interface->baseAddress - offsetof(DriverContext, memory));
 }
 
-static int ReadChunk(
-    yaffs_dev* dev, int nand_chunk, u8* data, int data_len, u8* oob, int oob_len, yaffs_ecc_result* ecc_result)
+static FlashStatus ReadPage(FlashNANDInterface* interface, uint32_t address, uint8_t* buffer, uint16_t len)
 {
-    uint32_t start = ChunkStart(dev, nand_chunk);
+    auto context = Context(interface);
 
-    uint8_t* memory = ((DriverContext*)dev->driver_context)->memory;
-
-    memcpy(data, memory + start, data_len);
-
-    *ecc_result = YAFFS_ECC_RESULT_NO_ERROR;
-
-    return YAFFS_OK;
-}
-
-static int WriteChunk(yaffs_dev* dev, int nand_chunk, const u8* data, int data_len, const u8* oob, int oob_len)
-{
-    auto context = ((DriverContext*)dev->driver_context);
-
-    uint8_t blockNo = nand_chunk / dev->param.chunks_per_block;
+    uint16_t blockNo = (address - (uint32_t)context->memory) / (512 * 32);
 
     if (context->faultyBlocks & (1 << blockNo))
     {
-        return YAFFS_FAIL;
+        return FlashStatusReadError;
     }
 
-    uint32_t start = ChunkStart(dev, nand_chunk);
+    memcpy(buffer, (void*)address, len);
 
-    memcpy(context->memory + start, data, data_len);
-
-    return YAFFS_OK;
+    return FlashStatusOK;
 }
 
-static int EraseBlock(yaffs_dev* dev, int block_no)
+static FlashStatus ReadSpare(FlashNANDInterface* interface, uint32_t address, uint8_t* buffer, uint16_t length)
 {
-    auto context = ((DriverContext*)dev->driver_context);
+    auto context = Context(interface);
+    uint16_t pageNo = (address - (uint32_t)context->memory) / 512;
 
-    if (context->faultyBlocks & (1 << block_no))
+    uint8_t* spareBase = context->spare + pageNo * 16;
+
+    if (length <= 5)
     {
-        return YAFFS_FAIL;
-    }
-
-    uint32_t blockStart = block_no * context->blockSize;
-
-    memset(context->memory + blockStart, 0xFF, context->blockSize);
-
-    return YAFFS_OK;
-}
-
-static int MarkBadBlock(yaffs_dev* dev, int block_no)
-{
-    spare[block_no * 16 + 6] = 00;
-    return YAFFS_OK;
-}
-
-static int CheckBadBlock(yaffs_dev* dev, int block_no)
-{
-    uint8_t badBlockMark = spare[block_no * 16 + 6];
-
-    if (badBlockMark == 0xFF)
-    {
-        return YAFFS_OK;
+        memcpy(buffer, spareBase, length);
     }
     else
     {
-        return YAFFS_FAIL;
+        memcpy(buffer, spareBase, 5);
+        memcpy(&buffer[5], &spareBase[6], length - 5);
     }
+    //    if (pageNo == 32)
+    {
+        //        printf("Diff=0x%X\n", address - (uint32_t)context->memory);
+        //        printf("RD[%d]=", pageNo);
+        //        for (uint8_t i = 0; i < length; i++)
+        //        {
+        //            printf("%.2X", buffer[i]);
+        //        }
+        //        printf("\n");
+    }
+    return FlashStatusOK;
 }
 
-static int Initialize(yaffs_dev* dev)
+static FlashStatus WritePage(
+    FlashNANDInterface* interface, uint8_t volatile* address, const uint8_t* buffer, uint32_t length)
 {
-    uint32_t size = (dev->param.end_block - dev->param.start_block + 1) * dev->param.chunks_per_block *
-        dev->param.total_bytes_per_chunk;
+    UNREFERENCED_PARAMETER(interface);
 
-    return YAFFS_OK;
+    memcpy((void*)address, buffer, length);
+
+    return FlashStatusOK;
 }
 
-void CauseBadBlock(yaffs_dev* dev, int block)
+static FlashStatus WriteSpare(FlashNANDInterface* interface, uint32_t address, uint8_t* buffer, uint16_t length)
 {
-    ((DriverContext*)dev->driver_context)->faultyBlocks |= 1 << block;
+    auto context = Context(interface);
+    uint16_t pageNo = (address - (uint32_t)context->memory) / 512;
+
+    uint8_t* spareBase = context->spare + pageNo * 16;
+    //    if (pageNo == 32)
+    {
+        //        printf("WR[%d]=", pageNo);
+        //        for (uint8_t i = 0; i < length; i++)
+        //        {
+        //            printf("%.2X", buffer[i]);
+        //        }
+        //        printf("\n");
+    }
+    uint8_t b = spareBase[16];
+
+    if (length <= 5)
+    {
+        memcpy(spareBase, buffer, length);
+        return FlashStatusOK;
+    }
+
+    memcpy(spareBase, buffer, 5);
+    memcpy(&spareBase[6], &buffer[5], length - 5);
+
+    return FlashStatusOK;
 }
 
-bool IsBadBlock(yaffs_dev* dev, int block)
+static FlashStatus EraseBlock(FlashNANDInterface* interface, uint32_t address)
 {
-    return CheckBadBlock(dev, block) == YAFFS_FAIL;
+    auto context = Context(interface);
+
+    uint16_t blockNo = (address - (uint32_t)context->memory) / (512 * 32);
+
+    printf("Erasing block %d\n", blockNo);
+
+    if (context->faultyBlocks & (1 << blockNo))
+    {
+        return FlashStatusWriteError;
+    }
+
+    uint32_t spareAddress = blockNo * 32 * 16;
+
+    memset((void*)address, 0xFF, 32 * 512);
+    memset((void*)spareAddress, 0xFF, 32 * 16);
+
+    return FlashStatusOK;
 }
 
-void InitializeYaffsDev(yaffs_dev* dev)
+static uint8_t CheckBadBlock(const FlashNANDInterface* interface, uint8_t volatile* address)
 {
-    uint16_t pageSize = 512;
-    uint16_t pagesPerBlock = 32;
-    uint16_t spareBytesPerPage = 0;
+    auto context = Context(interface);
 
-    uint32_t desiredSize = 1 * 1024 * 1024; // 1MB
+    uint16_t blockNo = (address - context->memory) / (32 * 512);
 
-    uint32_t blockSize = pagesPerBlock * (spareBytesPerPage + pageSize);
+    uint8_t badBlockMark = context->spare[blockNo * 32 + 5];
 
-    uint32_t totalBlocks = desiredSize / blockSize;
+    return badBlockMark != 0xFF;
+}
 
-    context.spare = spare;
-    context.memory = storage;
+static int Initialize(FlashNANDInterface* interface)
+{
+    UNREFERENCED_PARAMETER(interface);
+
+    return FlashStatusOK;
+}
+
+static FlashStatus MarkBadBlock(const struct _FlashNANDInterface* interface, uint8_t* address)
+{
+    auto context = Context(interface);
+    uint16_t blockNo = (address - context->memory) / (32 * 512);
+    context->spare[blockNo * 32 + 5] = 0xAB;
+
+    return FlashStatusOK;
+}
+
+void CauseBadBlock(FlashNANDInterface* interface, int block)
+{
+    auto context = Context(interface);
+    context->faultyBlocks |= 1 << block;
+}
+
+bool IsBadBlock(FlashNANDInterface* interface, int block)
+{
+    auto context = Context(interface);
+    uint8_t* address = &context->memory[block * 32 * 512];
+    return CheckBadBlock(interface, address);
+}
+
+void SwapBit(FlashNANDInterface* interface, uint32_t byteOffset, uint8_t bitsToSwap)
+{
+    auto context = Context(interface);
+
+    printf("Swaping bit in page %d\n", byteOffset / 512);
+
+    uint8_t b = context->memory[byteOffset];
+    uint8_t c = b ^ bitsToSwap;
+    context->memory[byteOffset] = c;
+}
+
+void InitializeMemoryNAND(FlashNANDInterface* flash)
+{
+    flash->initialize = Initialize;
+    flash->writePage = WritePage;
+    flash->writeSpare = WriteSpare;
+    flash->readPage = ReadPage;
+    flash->readSpare = ReadSpare;
+    flash->eraseBlock = EraseBlock;
+    flash->isBadBlock = CheckBadBlock;
+    flash->markBadBlock = MarkBadBlock;
+    flash->baseAddress = (uint32_t)context.memory;
+
+    memset(context.memory, 0xFF, sizeof(context.memory));
+    memset(context.spare, 0xFF, sizeof(context.spare));
+
     context.faultyBlocks = 0;
-    context.blockSize = blockSize;
-
-    dev->param.is_yaffs2 = true;
-    dev->param.inband_tags = true;
-    dev->param.chunks_per_block = pagesPerBlock;
-    dev->param.spare_bytes_per_chunk = spareBytesPerPage;
-    dev->param.n_reserved_blocks = 3;
-    dev->param.total_bytes_per_chunk = pageSize;
-    dev->driver_context = &context;
-
-    dev->param.start_block = 1;
-    dev->param.end_block = dev->param.start_block + totalBlocks - dev->param.n_reserved_blocks;
-
-    dev->drv.drv_read_chunk_fn = ReadChunk;
-    dev->drv.drv_write_chunk_fn = WriteChunk;
-    dev->drv.drv_erase_fn = EraseBlock;
-    dev->drv.drv_mark_bad_fn = MarkBadBlock;
-    dev->drv.drv_check_bad_fn = CheckBadBlock;
-    dev->drv.drv_initialise_fn = Initialize;
-
-    memset(context.memory, 0xFF, desiredSize);
-    memset(context.spare, 0xFF, 64 * 16);
 }

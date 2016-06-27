@@ -6,7 +6,10 @@
 #include <yaffsfs.h>
 
 int yaffsError = 0;
-unsigned int yaffs_trace_mask = YAFFS_TRACE_BAD_BLOCKS | YAFFS_TRACE_ERROR | YAFFS_TRACE_BUG;
+
+#define YAFFS_TRACE_ALL 0xFFFFFFFF
+
+unsigned int yaffs_trace_mask = 0;
 //    YAFFS_TRACE_BAD_BLOCKS | YAFFS_TRACE_ERASE | YAFFS_TRACE_NANDACCESS | YAFFS_TRACE_ERROR | YAFFS_TRACE_BUG;
 
 void yaffsfs_Lock(void)

@@ -15,37 +15,87 @@ static int ReadChunk(struct yaffs_dev* dev,
     int oob_len,
     enum yaffs_ecc_result* ecc_result)
 {
-    UNREFERENCED_PARAMETER(oob);
-    UNREFERENCED_PARAMETER(oob_len);
-
     YaffsNANDDriver* driver = dev->driver_context;
 
-    uint32_t baseAddress = NANDPageBaseAddressFromChunk(&driver->geometry, nand_chunk);
-    FlashStatus status = driver->flash.readPage(&driver->flash, baseAddress, data, data_len);
+    NANDOperation op;
+    op.baseAddress = NANDPageBaseAddressFromChunk(&driver->geometry, nand_chunk);
+    op.dataBuffer = data;
+    op.dataSize = data_len;
+    op.spareBuffer = oob;
+    op.spareSize = oob_len;
 
-    *ecc_result = YAFFS_ECC_RESULT_UNKNOWN;
+    uint16_t pagesCount = NANDAffectedPagesCount(&driver->geometry, &op);
 
-    if (status != FlashStatusOK)
+    for (uint16_t page = 0; page < pagesCount; page++)
     {
-        return YAFFS_FAIL;
+        NANDOperationSlice slice = NANDGetOperationSlice(&driver->geometry, &op, page);
+
+        if (slice.dataSize > 0)
+        {
+            FlashStatus status =
+                driver->flash.readPage(&driver->flash, slice.baseAddress, slice.dataBuffer, slice.dataSize);
+
+            if (status != FlashStatusOK)
+            {
+                return YAFFS_FAIL;
+            }
+        }
+
+        if (slice.spareSize > 0)
+        {
+            FlashStatus status =
+                driver->flash.readSpare(&driver->flash, slice.baseAddress, slice.spareBuffer, slice.spareSize);
+
+            if (status != FlashStatusOK)
+            {
+                return YAFFS_FAIL;
+            }
+        }
     }
+
+    *ecc_result = YAFFS_ECC_RESULT_NO_ERROR;
+
     return YAFFS_OK;
 }
 
 static int WriteChunk(struct yaffs_dev* dev, int nand_chunk, const u8* data, int data_len, const u8* oob, int oob_len)
 {
-    UNREFERENCED_PARAMETER(oob);
-    UNREFERENCED_PARAMETER(oob_len);
-
     YaffsNANDDriver* driver = dev->driver_context;
 
-    uint8_t* baseAddress = (uint8_t*)NANDPageBaseAddressFromChunk(&driver->geometry, nand_chunk);
+    NANDOperation op;
+    op.baseAddress = NANDPageBaseAddressFromChunk(&driver->geometry, nand_chunk);
+    op.dataBuffer = data;
+    op.dataSize = data_len;
+    op.spareBuffer = oob;
+    op.spareSize = oob_len;
 
-    FlashStatus status = driver->flash.writePage(&driver->flash, baseAddress, data, data_len);
+    uint16_t pagesCount = NANDAffectedPagesCount(&driver->geometry, &op);
 
-    if (status != FlashStatusOK)
+    for (uint16_t page = 0; page < pagesCount; page++)
     {
-        return YAFFS_FAIL;
+        NANDOperationSlice slice = NANDGetOperationSlice(&driver->geometry, &op, page);
+
+        if (slice.dataSize > 0)
+        {
+            FlashStatus status =
+                driver->flash.writePage(&driver->flash, slice.baseAddress, slice.dataBuffer, slice.dataSize);
+
+            if (status != FlashStatusOK)
+            {
+                return YAFFS_FAIL;
+            }
+        }
+
+        if (slice.spareSize > 0)
+        {
+            FlashStatus status =
+                driver->flash.writeSpare(&driver->flash, slice.baseAddress, slice.spareBuffer, slice.spareSize);
+
+            if (status != FlashStatusOK)
+            {
+                return YAFFS_FAIL;
+            }
+        }
     }
 
     return YAFFS_OK;
@@ -75,8 +125,18 @@ static int MarkBadBlock(struct yaffs_dev* dev, int block_no)
     UNREFERENCED_PARAMETER(block_no);
 
     LOGF(LOG_LEVEL_INFO, "MarkBadBlock %d", block_no);
-    while (1)
-        ;
+
+    YaffsNANDDriver* driver = dev->driver_context;
+
+    uint32_t blockAddress = NANDBlockBaseAddress(&driver->geometry, block_no);
+
+    FlashStatus status = driver->flash.markBadBlock(&driver->flash, blockAddress);
+
+    if (status != FlashStatusOK)
+    {
+        return YAFFS_FAIL;
+    }
+
     return YAFFS_OK;
 }
 

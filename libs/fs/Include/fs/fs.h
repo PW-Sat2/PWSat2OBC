@@ -1,6 +1,10 @@
 #ifndef LIBS_FS_INCLUDE_FS_FS_H_
 #define LIBS_FS_INCLUDE_FS_FS_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -20,5 +24,9 @@ typedef struct
 } FileSystem;
 
 bool FileSystemInitialize(FileSystem* fs);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* LIBS_FS_INCLUDE_FS_FS_H_ */
