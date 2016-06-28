@@ -31,7 +31,7 @@ extern "C" {
  *   immediately process them. The received frames will be automatically removed from the hardware buffer,
  *   therefore manual frame erasure is not recommended at it will lead to lost frames.
  *
-*  @{
+ *  @{
  */
 
 /**

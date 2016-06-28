@@ -11,9 +11,25 @@
 extern "C" {
 #endif
 
+/**
+ * @defgroup Logger OBC Logging Library.
+ *
+ * @brief This library provides simple logger that supports logging entries to multiple data sinks at the same time.
+ *
+ * This is synchronous logger that sends the formatted log entries to configured data sinks in sequence therefore
+ * keep in mind that excessive logging will change the timing characteristics of the affected module/routine.
+ *
+ * @remark Due to limited resources the logged entry can only be up to 255 characters long after the parameter
+ * expansion. Log entries that are longer will be truncated to 255 characters.
+ * @{
+*/
+
+/**
+ * @brief Enumerator for all supported log levels.
+ */
 enum LogLevel
 {
-    // dummy log level used for verification, do not use it, keep it first on the list
+    /** @brief Dummy log level used for verification, do not use it, keep it first on the list. */
     LOG_LEVEL_MIN = 0,
 
     LOG_LEVEL_ALWAYS = LOG_LEVEL_MIN,
@@ -24,7 +40,7 @@ enum LogLevel
     LOG_LEVEL_DEBUG,
     LOG_LEVEL_TRACE,
 
-    // dummy log level used for verification, do not use it, keep it last on the list
+    /** @brief Dummy log level used for verification, do not use it, keep it last on the list. */
     LOG_LEVEL_MAX = LOG_LEVEL_TRACE
 };
 
@@ -158,6 +174,8 @@ void LogRemoveEndpoint(LoggerProcedure endpoint);
  * @param[in] message Logged message.
  */
 void LogMessage(bool withinIsr, enum LogLevel messageLevel, const char* message, ...);
+
+/** @}*/
 
 #ifdef __cplusplus
 }
