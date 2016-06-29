@@ -23,10 +23,17 @@ typedef struct
     commandHandler handler;
 } command;
 
-static const command commands[] = {{"ping", &PingHandler},
+static const command commands[] = {
+    {"ping", &PingHandler},
     {"echo", &EchoHandler},
     {"jumpToTime", &JumpToTimeHandler},
-    {"currentTime", &CurrentTimeHandler}};
+    {"currentTime", &CurrentTimeHandler},
+    {"sendFrame", &SendFrameHandler},
+    {"getFramesCount", &GetFramesCountHandler},
+    {"receiveFrame", &ReceiveFrameHandler},
+    {"pauseComm", &CommandPauseComm},
+    {"getState", OBCGetState},
+};
 
 static QueueHandle_t terminalQueue;
 
@@ -70,6 +77,11 @@ void TerminalPrintf(const char* text, ...)
     va_end(args);
 }
 
+void TerminalPuts(const char* text)
+{
+    leuartPuts(text);
+}
+
 static void terminalHandleCommand(char* buffer)
 {
     char* commandName;
@@ -102,7 +114,9 @@ static void handleIncomingChar(void* args)
         uint8_t data = 0;
 
         xQueueReceive(terminalQueue, &data, portMAX_DELAY);
-
+#if 0
+        LOGF(LOG_LEVEL_INFO, "RC: 0x%x, %c", (int)data, data);
+#endif
         if (data == '\n')
         {
             input_buffer[input_buffer_position] = 0;
@@ -119,7 +133,7 @@ static void handleIncomingChar(void* args)
 
 void TerminalInit(void)
 {
-    terminalQueue = xQueueCreate(32, sizeof(uint8_t));
+    terminalQueue = xQueueCreate(128, sizeof(uint8_t));
 
     if (terminalQueue == NULL)
     {
@@ -127,7 +141,7 @@ void TerminalInit(void)
         return;
     }
 
-    if (xTaskCreate(handleIncomingChar, "terminalIn", 1024, NULL, 4, NULL) != pdPASS)
+    if (xTaskCreate(handleIncomingChar, "terminalIn", 2500, NULL, 4, NULL) != pdPASS)
     {
         LOG(LOG_LEVEL_ERROR, "Error. Cannot create terminalQueue.");
         return;
@@ -135,5 +149,5 @@ void TerminalInit(void)
 
     leuartInit(terminalQueue);
 
-    terminalSendPrefix();
+    TerminalPuts("@");
 }

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <em_chip.h>
 #include <em_cmu.h>
 #include <em_dbg.h>
@@ -10,16 +11,20 @@
 #include <FreeRTOSConfig.h>
 #include <task.h>
 
-#include "logger/logger.h"
 #include "SwoEndpoint/SwoEndpoint.h"
+#include "base/os.h"
+#include "comm/comm.h"
+#include "devices/eps.h"
 #include "i2c/i2c.h"
 #include "io_map.h"
+#include "logger/logger.h"
+#include "obc.h"
 #include "openSail.h"
 #include "swo/swo.h"
 #include "system.h"
 #include "terminal.h"
 
-#include "devices/eps.h"
+OBC Main;
 
 void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
 {
@@ -39,8 +44,6 @@ static void BlinkLed0(void* param)
     {
         GPIO_PinOutToggle(LED_PORT, LED0);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
-
-        LOG(LOG_LEVEL_INFO, "Test");
     }
 }
 
@@ -54,8 +57,29 @@ static void InitSwoEndpoint(void)
     }
 }
 
+static void ObcInitTask(void* param)
+{
+    OBC* obc = (OBC*)param;
+    if (!CommRestart(&obc->comm))
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to restart comm. ");
+    }
+
+    LOG(LOG_LEVEL_INFO, "Intialized");
+    atomic_store(&Main.initialized, true);
+    System.SuspendTask(NULL);
+}
+
+static void FrameHandler(CommObject* comm, CommFrame* frame, void* context)
+{
+    UNREFERENCED_PARAMETER(context);
+    UNREFERENCED_PARAMETER(frame);
+    CommSendFrame(comm, (uint8_t*)"PONG", 4);
+}
+
 int main(void)
 {
+    memset(&Main, 0, sizeof(Main));
     CHIP_Init();
 
     CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
@@ -65,14 +89,23 @@ int main(void)
 
     SwoEnable();
 
+    LogInit(LOG_LEVEL_MAX);
+    InitSwoEndpoint();
+
+    OSSetup();
     I2CInit();
 
     EpsInit();
+    CommLowInterface commInterface;
+    commInterface.readProc = I2CWriteRead;
+    commInterface.writeProc = I2CWrite;
+    CommUpperInterface commUpperInterface;
+    commUpperInterface.frameHandler = FrameHandler;
+    commUpperInterface.frameHandlerContext = NULL;
+    CommInitialize(&Main.comm, &commInterface, &commUpperInterface);
 
     TerminalInit();
     SwoPuts("Hello I'm PW-SAT2 OBC\n");
-    LogInit(LOG_LEVEL_INFO);
-    InitSwoEndpoint();
 
     OpenSailInit();
 
@@ -83,9 +116,10 @@ int main(void)
     GPIO_PinOutSet(LED_PORT, LED0);
     GPIO_PinOutSet(LED_PORT, LED1);
 
-    xTaskCreate(BlinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
+    System.CreateTask(BlinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
+    System.CreateTask(ObcInitTask, "Init", 512, &Main, tskIDLE_PRIORITY + 16, &Main.initTask);
+    System.RunScheduler();
 
-    vTaskStartScheduler();
     GPIO_PinOutToggle(LED_PORT, LED0);
 
     return 0;
