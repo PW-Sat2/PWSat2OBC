@@ -5,24 +5,46 @@
 #include "logger.h"
 #include "system.h"
 
+/** @brief Logger endpoint number limit. */
 #define MAX_ENDPOINTS 3
 
 static_assert(MAX_ENDPOINTS < UINT8_MAX, "Fix type of logger's endpoint counter: 'Logger::endpointCount'. ");
 
-typedef struct LoggerEndpointTag
+/**
+ * @brief This type describes single logger endpoint.
+ */
+typedef struct
 {
+    /**
+     * @brief Endpoint execution context.
+     */
     void* context;
+
+    /**
+     * @brief Endpoint entry point.
+     */
     LoggerProcedure endpoint;
+
+    /**
+     * @brief Custom endpoint logging level.
+     */
     enum LogLevel endpointLogLevel;
 } LoggerEndpoint;
 
-typedef struct LoggerTag
+/** @brief This type describes the logger object. */
+typedef struct
 {
+    /** @brief Number of currently available logger endpoints. */
     uint8_t endpointCount;
+
+    /** @brief Global logger loggin level. */
     enum LogLevel globalLevel;
+
+    /** @brief Array for logger endpoints. */
     LoggerEndpoint endpoints[MAX_ENDPOINTS];
 } Logger;
 
+/** @brief Global logger object. */
 static Logger logger = {0};
 
 static const char* const levelMap[] = {

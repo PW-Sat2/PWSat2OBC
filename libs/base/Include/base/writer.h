@@ -69,7 +69,7 @@ static bool WriterStatus(const Writer* writer);
 /**
  * @brief Returns the number of not bytes already written to the buffer.
  * @param[in] writer Pointer to the queried writer object.
- * return Number of not bytes already written to the buffer.
+ * @return Number of bytes already written to the buffer.
  */
 static uint16_t WriterGetDataLength(const Writer* writer);
 
@@ -84,6 +84,7 @@ int32_t WriterRemainingSize(const Writer* writer);
 /**
  * @brief Appends single byte to the buffer and moves the current position to the next byte.
  * @param[in] writer Pointer to the writer object.
+ * @param[in] byte Byte that should be added to writer output.
  * @return Operation status.
  */
 bool WriterWriteByte(Writer* writer, uint8_t byte);
@@ -92,6 +93,7 @@ bool WriterWriteByte(Writer* writer, uint8_t byte);
  * @brief Writes single 16 bit word with little-endian memory orientation to the buffer
  * and advances the current buffer position to the next unused byte.
  * @param[in] writer Pointer to the writer object.
+ * @param[in] word Word that should be added to writer output using little endian byte ordering.
  * @return Operation status.
  */
 bool WriterWriteWordLE(Writer* writer, uint16_t word);
@@ -100,6 +102,7 @@ bool WriterWriteWordLE(Writer* writer, uint16_t word);
  * @brief Writes single 32 bit word with little-endian memory orientation to the buffer
  * and advances the current buffer position to the next unused byte.
  * @param[in] writer Pointer to the queried reader object.
+ * @param[in] dword Doubleword that should be added to writer output using little endian byte ordering.
  * @return Operation status.
  */
 bool WriterWriteDoubleWordLE(Writer* writer, uint32_t dword);
@@ -108,6 +111,8 @@ bool WriterWriteDoubleWordLE(Writer* writer, uint32_t dword);
  * @brief Writes the requested memory block to the buffer.
  *
  * @param[in] writer Pointer to the writer object.
+ * @param[in] buffer Pointer to the memory block whose contents should be appended to writer output.
+ * @param[in] length Size in bytes of the block being added.
  * @return Operation status.
  */
 bool WriterWriteArray(Writer* writer, const uint8_t* buffer, uint16_t length);

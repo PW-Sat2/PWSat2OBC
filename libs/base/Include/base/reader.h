@@ -104,6 +104,7 @@ uint32_t ReaderReadDoubleWordLE(Reader* reader);
  * there are requested number of bytes available in the buffer and advances the current
  * buffer position to the first byte beyond the requested block.
  * @param[in] reader Pointer to the queried reader object.
+ * @param[in] length Size in bytes of the requested data block.
  * @return Pointer to the first byte of the requested memory block.
  */
 const uint8_t* ReaderReadArray(Reader* reader, uint16_t length);

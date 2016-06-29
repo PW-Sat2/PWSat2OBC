@@ -29,6 +29,7 @@ void SwoEndpointClose(void* handle);
 
 /**
  * @brief Returns swo endpoint entry point appropriate for the passed swo endpoint.
+ * @param[in] handle SwoEndpoint context whose entry point should be returned.
  * @return Swo Endpoint entry point.
  */
 LoggerProcedure SwoGetEndpoint(void* handle);
