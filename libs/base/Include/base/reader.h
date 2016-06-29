@@ -10,6 +10,11 @@ extern "C" {
 #endif
 
 /**
+ * @defgroup utilities General Purpose Utilities
+ * @{
+ */
+
+/**
  * @brief Reader object definition.
  *
  * This object is supposed to provide means of reading various entries in a way
@@ -109,17 +114,18 @@ const uint8_t* ReaderReadArray(Reader* reader, uint16_t length);
  */
 static void ReaderReset(Reader* reader);
 
-inline bool ReaderStatus(const Reader* reader)
+static inline bool ReaderStatus(const Reader* reader)
 {
     return reader->status;
 }
 
-inline void ReaderReset(Reader* reader)
+static inline void ReaderReset(Reader* reader)
 {
     reader->position = 0;
     reader->status = reader->buffer != NULL && reader->length > 0;
 }
 
+/** @}*/
 #ifdef __cplusplus
 }
 #endif

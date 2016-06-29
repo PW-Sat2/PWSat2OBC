@@ -10,6 +10,11 @@ extern "C" {
 #endif
 
 /**
+ * @addtogroup utilities General Purpose utilities
+ * @{
+ */
+
+/**
  * @brief Writer object definition.
  *
  * This object is supposed to provide means of writing various entries in a way
@@ -118,17 +123,18 @@ inline bool WriterStatus(const Writer* writer)
     return writer->status;
 }
 
-inline void WriterReset(Writer* writer)
+static inline void WriterReset(Writer* writer)
 {
     writer->position = 0;
     writer->status = writer->buffer != NULL && writer->length > 0;
 }
 
-inline uint16_t WriterGetDataLength(const Writer* writer)
+static inline uint16_t WriterGetDataLength(const Writer* writer)
 {
     return writer->position;
 }
 
+/** @}*/
 #ifdef __cplusplus
 }
 #endif
