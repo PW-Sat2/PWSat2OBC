@@ -19,6 +19,57 @@
 
 
 
+
+/* The fault handler implementation calls a function called
+prvGetRegistersFromStack(). */
+void HardFault_Handler(void)
+{
+    __asm volatile
+    (
+        " tst lr, #4                                                \n"
+        " ite eq                                                    \n"
+        " mrseq r0, msp                                             \n"
+        " mrsne r0, psp                                             \n"
+        " ldr r1, [r0, #24]                                         \n"
+        " ldr r2, handler2_address_const                            \n"
+        " bx r2                                                     \n"
+        " handler2_address_const: .word prvGetRegistersFromStack    \n"
+    );
+}
+
+void prvGetRegistersFromStack( uint32_t *pulFaultStackAddress )
+{
+/* These are volatile to try and prevent the compiler/linker optimising them
+away as the variables never actually get used.  If the debugger won't show the
+values of the variables, make them global my moving their declaration outside
+of this function. */
+volatile uint32_t r0;
+volatile uint32_t r1;
+volatile uint32_t r2;
+volatile uint32_t r3;
+volatile uint32_t r12;
+volatile uint32_t lr; /* Link register. */
+volatile uint32_t pc; /* Program counter. */
+volatile uint32_t psr;/* Program status register. */
+
+    r0 = pulFaultStackAddress[ 0 ];
+    r1 = pulFaultStackAddress[ 1 ];
+    r2 = pulFaultStackAddress[ 2 ];
+    r3 = pulFaultStackAddress[ 3 ];
+
+    r12 = pulFaultStackAddress[ 4 ];
+    lr = pulFaultStackAddress[ 5 ];
+    pc = pulFaultStackAddress[ 6 ];
+    psr = pulFaultStackAddress[ 7 ];
+
+    swoPrintf("HARDFAULT EXCEPTION RISED\n");
+    swoPrintf(" R0 0x%8x \n R1 0x%8x \n R2 0x%8x \n R3 0x%8x \n R12 0x%8x \n lr 0x%8x \n pc 0x%8x \n psr 0x%8x ", r0,r1,r2,r3,r12,lr,pc,psr);
+
+    /* When the following line is hit, the variables contain the register values. */
+    for( ;; );
+}
+
+
 void vApplicationStackOverflowHook( xTaskHandle *pxTask, signed char *pcTaskName)
 {
 	UNREFERENCED_PARAMETER(pxTask);
@@ -59,7 +110,7 @@ void ADXRS(void * param){
 	while(1){
 		rate=ADXRS453_GetRate(&gyro);
 		temp=ADXRS453_GetTemperature(&gyro);
-		swoPrintf("temp: %d ' celcius rate: %d '/sec rotation\n", temp, (long)rate);
+		swoPrintf("temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp, (int)rate);
 		rate=ADXRS453_GetRate(&gyro1);
 		vTaskDelay(10 / portTICK_PERIOD_MS);
 	}

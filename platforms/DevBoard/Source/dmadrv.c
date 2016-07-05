@@ -32,7 +32,7 @@
     || ( EMDRV_DMADRV_DMA_CH_COUNT > DMA_CHAN_COUNT )
 #define EMDRV_DMADRV_DMA_CH_COUNT DMA_CHAN_COUNT
 #endif
-DMA_DESCRIPTOR_TypeDef dmaControlBlock[];
+
 typedef enum
 {
   dmaDirectionMemToPeripheral,

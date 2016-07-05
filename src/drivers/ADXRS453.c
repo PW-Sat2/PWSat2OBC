@@ -13,9 +13,12 @@ void SPISendB(ADXRS453_Init_t *gyro , SPIDRV_Handle_t 	handle,
 		const void * 	buffer,
 		int 	count )
 {
+	vTaskDelay(50 / portTICK_PERIOD_MS);
 	GPIO_PinOutClear((GPIO_Port_TypeDef)gyro->csPortLocation,gyro->csPinLocation);
     SPIDRV_MTransmitB( handle,buffer,count);
 	GPIO_PinOutSet((GPIO_Port_TypeDef)gyro->csPortLocation,gyro->csPinLocation);
+	vTaskDelay(50 / portTICK_PERIOD_MS);
+
 
 
 }
@@ -23,9 +26,12 @@ void SPIRecvB(ADXRS453_Init_t *gyro,SPIDRV_Handle_t 	handle,
 		void * 	buffer,
 		int 	count )
 {
+	vTaskDelay(50 / portTICK_PERIOD_MS);
 	GPIO_PinOutClear((GPIO_Port_TypeDef)gyro->csPortLocation,gyro->csPinLocation);
 	SPIDRV_MReceiveB(handle,buffer,count);
 	GPIO_PinOutSet((GPIO_Port_TypeDef)gyro->csPortLocation,gyro->csPinLocation);
+	vTaskDelay(50 / portTICK_PERIOD_MS);
+
 }
 void ADXRS453Spi_Init() {
 	/* Initialize the SPI communication peripheral  */
@@ -47,18 +53,13 @@ char ADXRS453_Init(ADXRS453_Init_t *gyro)
     GPIO_PinModeSet( (GPIO_Port_TypeDef)gyro->csPortLocation, gyro->csPinLocation ,gpioModePushPull, 1 );
     GPIO_PinOutSet((GPIO_Port_TypeDef)gyro->csPortLocation,gyro->csPinLocation);
 //RECOMMENDED START-UP SEQUENCE WITH CHK BIT ASSERTION see datasheet
-    vTaskDelay(100 / portTICK_PERIOD_MS);
+
     SPISendB(gyro, handle, dataBuffer, 4 );
-    vTaskDelay(50 / portTICK_PERIOD_MS);
     dataBuffer[3]=0x00;
     SPISendB(gyro, handle, dataBuffer, 4 );
-    vTaskDelay(50 / portTICK_PERIOD_MS);
     SPISendB(gyro, handle, dataBuffer, 4 );
-    vTaskDelay(50 / portTICK_PERIOD_MS);
     SPISendB(gyro, handle, dataBuffer, 4 );
-    vTaskDelay(50 / portTICK_PERIOD_MS);
     SPISendB(gyro, handle, dataBuffer, 4 );
-    vTaskDelay(50 / portTICK_PERIOD_MS);
     //CHECK IF ADXRS IS STARTUPED
     adxrs453Id = ADXRS453_GetRegisterValue(gyro,ADXRS453_REG_PID);
     if((adxrs453Id >> 8) != 0x52)
@@ -102,9 +103,7 @@ unsigned short ADXRS453_GetRegisterValue(ADXRS453_Init_t *gyro, unsigned char re
     }
 
     SPISendB(gyro, handle, sendBuffer, 4 );
-    vTaskDelay(50 / portTICK_PERIOD_MS);
     SPIRecvB(gyro, handle, recvBuffer, 4);
-    vTaskDelay(50 / portTICK_PERIOD_MS);
 
     registerValue = ((unsigned short)recvBuffer[1] << 11) |
                     ((unsigned short)recvBuffer[2] << 3) |
@@ -140,7 +139,6 @@ void ADXRS453_SetRegisterValue(ADXRS453_Init_t *gyro,unsigned char registerAddre
     	sendBuffer[3] |= 1;
     }
     SPISendB(gyro, handle, sendBuffer, 4 );
-    vTaskDelay(50 / portTICK_PERIOD_MS);
 
 }
 
@@ -166,9 +164,7 @@ unsigned long ADXRS453_GetSensorData(ADXRS453_Init_t *gyro)
     	sendBuffer[3] |= 1;
     }
     SPISendB(gyro, handle, sendBuffer, 4 );
-    vTaskDelay(50 / portTICK_PERIOD_MS);
     SPIRecvB(gyro, handle, recvBuffer, 4 );
-    vTaskDelay(50 / portTICK_PERIOD_MS);
     registerValue = ((unsigned long)recvBuffer[0] << 24) |
                     ((unsigned long)recvBuffer[1] << 16) |
                     ((unsigned short)recvBuffer[2] << 8) |
