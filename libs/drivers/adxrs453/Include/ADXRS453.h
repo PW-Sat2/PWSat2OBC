@@ -49,7 +49,7 @@ typedef struct ADXRS453_Init {
 	uint8_t				gyroNumber;
 } ADXRS453_Init_t;
 
-void ADXRS453Spi_Init();
+void ADXRS453Spi_Init(void);
 
 char ADXRS453_Init(ADXRS453_Init_t *gyro);
 

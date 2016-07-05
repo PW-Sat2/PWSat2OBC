@@ -26,7 +26,7 @@
  ******************************************************************************/
 
 /// SPIDRV configuration option. Use this define to include the slave part of the SPIDRV API.
-#define EMDRV_SPIDRV_INCLUDE_SLAVE
+//#define EMDRV_SPIDRV_INCLUDE_SLAVE
 
 /** @} (end addtogroup SPIDRV) */
 /** @} (end addtogroup emdrv) */
