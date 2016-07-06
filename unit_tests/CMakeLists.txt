@@ -10,7 +10,8 @@ set(SOURCES
   FileSystem/YaffsOSGlue.c
   FileSystem/MemoryDriver.cpp
   FileSystem/NANDGeometryTest.cpp 
-  FileSystem/MemoryDriver.cpp  
+  FileSystem/MemoryDriver.cpp
+  FileSystem/EccTest.cpp  
   Comm/CommTest.cpp
   base/ReaderTest.cpp
   base/WriterTest.cpp
