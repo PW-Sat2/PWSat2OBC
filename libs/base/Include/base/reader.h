@@ -10,6 +10,11 @@ extern "C" {
 #endif
 
 /**
+ * @defgroup utilities General Purpose Utilities
+ * @{
+ */
+
+/**
  * @brief Reader object definition.
  *
  * This object is supposed to provide means of reading various entries in a way
@@ -99,6 +104,7 @@ uint32_t ReaderReadDoubleWordLE(Reader* reader);
  * there are requested number of bytes available in the buffer and advances the current
  * buffer position to the first byte beyond the requested block.
  * @param[in] reader Pointer to the queried reader object.
+ * @param[in] length Size in bytes of the requested data block.
  * @return Pointer to the first byte of the requested memory block.
  */
 const uint8_t* ReaderReadArray(Reader* reader, uint16_t length);
@@ -109,17 +115,18 @@ const uint8_t* ReaderReadArray(Reader* reader, uint16_t length);
  */
 static void ReaderReset(Reader* reader);
 
-inline bool ReaderStatus(const Reader* reader)
+static inline bool ReaderStatus(const Reader* reader)
 {
     return reader->status;
 }
 
-inline void ReaderReset(Reader* reader)
+static inline void ReaderReset(Reader* reader)
 {
     reader->position = 0;
     reader->status = reader->buffer != NULL && reader->length > 0;
 }
 
+/** @}*/
 #ifdef __cplusplus
 }
 #endif

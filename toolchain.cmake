@@ -17,5 +17,6 @@ find_program(QEMU NAMES qemu-system-gnuarmeclipse PATHS $ENV{ARM_TOOLCHAIN} $ENV
 find_program(JLINK NAMES JLink JLinkExe PATHS $ENV{ARM_TOOLCHAIN} $ENV{JLINK_PATH})
 
 FIND_PACKAGE(PythonInterp 2.7)
+FIND_PACKAGE(Doxygen)
 
 find_program(CLANG_FORMAT NAMES clang-format HINTS $ENV{CLANG_PATH})
