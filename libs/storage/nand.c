@@ -4,6 +4,8 @@
 
 #include "system.h"
 
+#include "base/ecc.h"
+#include "logger/logger.h"
 #include "nand.h"
 
 #define NAND_POWER_PORT gpioPortB
@@ -199,15 +201,52 @@ static FlashStatus readPage(FlashNANDInterface* flash, uint32_t offset, uint8_t*
 
     WaitReady();
 
+    EBI_StartNandEccGen();
+
     uint32_t* p = (uint32_t*)buffer;
     for (uint16_t i = 0; i < length / 4; i++)
     {
         *(p + i) = *(flash->data32);
     }
 
+    uint32_t generatedEcc = EBI_StopNandEccGen();
+
+    *(flash->cmd) = NAND_RDC_CMD;
+    *(flash->addr) = (uint8_t)(uint32_t)offset + 13;
+    *(flash->addr) = (uint8_t)((uint32_t)offset >> 9);
+    *(flash->addr) = (uint8_t)((uint32_t)offset >> 17);
+
+    while (EBI->STATUS & EBI_STATUS_AHBACT)
+    {
+    }
+
+    WaitReady();
+
+    uint32_t readEcc = *(flash->data8) | (*(flash->data8) << 8) | (*(flash->data8) << 16);
+
     ChipEnable(false);
 
-    return FlashStatusOK;
+    if (readEcc == 0x00FFFFFF)
+    {
+        return FlashStatusOK;
+    }
+
+    EccResult correction = EccCorrect(generatedEcc, readEcc, buffer, length);
+
+    LOGF(LOG_LEVEL_INFO, "Read page: %X. Read: %X Gen: %X\n", offset, readEcc, generatedEcc);
+
+    switch (correction)
+    {
+        case EccResultCorrected:
+            return FlashStatusErrorCorrected;
+        case EccResultNotCorrected:
+            return FlashStatusErrorNotCorrected;
+        case EccResultCorrupted:
+            return FlashStatusChecksumCorrupted;
+        case EccResultNoError:
+        default:
+            return FlashStatusOK;
+    }
 }
 
 static FlashStatus writePage(FlashNANDInterface* flash, uint32_t offset, const uint8_t* buffer, uint32_t length)
@@ -229,6 +268,8 @@ static FlashStatus writePage(FlashNANDInterface* flash, uint32_t offset, const u
 
     WaitReady();
 
+    EBI_StartNandEccGen();
+
     uint32_t* p = (uint32_t*)buffer;
     for (uint16_t i = 0; i < length / 4; i++)
     {
@@ -239,12 +280,44 @@ static FlashStatus writePage(FlashNANDInterface* flash, uint32_t offset, const u
     {
     }
 
+    uint32_t ecc = EBI_StopNandEccGen();
+
     *(flash->cmd) = NAND_PAGEPROG2_CMD;
 
     WaitReady();
 
     int flashStatus = flash->status(flash);
     FlashStatus status = (flashStatus & NAND_STATUS_SR0) ? FlashStatusWriteError : FlashStatusOK;
+
+    if (status != FlashStatusOK)
+    {
+        ChipEnable(false);
+        WriteProtect(true);
+        return status;
+    }
+
+    *(flash->cmd) = NAND_RDC_CMD;
+    *(flash->cmd) = NAND_PAGEPROG1_CMD;
+    *(flash->addr) = (uint8_t)(uint32_t)offset + 13;
+    *(flash->addr) = (uint8_t)((uint32_t)offset >> 9);
+    *(flash->addr) = (uint8_t)((uint32_t)offset >> 17);
+
+    while (EBI->STATUS & EBI_STATUS_AHBACT)
+    {
+    }
+
+    WaitReady();
+
+    *(flash->data8) = (uint8_t)(ecc & 0xFF);
+    *(flash->data8) = (uint8_t)((ecc >> 8) & 0xFF);
+    *(flash->data8) = (uint8_t)((ecc >> 16) & 0xFF);
+
+    *(flash->cmd) = NAND_PAGEPROG2_CMD;
+
+    WaitReady();
+
+    flashStatus = flash->status(flash);
+    status = (flashStatus & NAND_STATUS_SR0) ? FlashStatusWriteError : FlashStatusOK;
 
     ChipEnable(false);
     WriteProtect(true);
@@ -301,7 +374,7 @@ int status(FlashNANDInterface* flash)
     return *(flash->data8);
 }
 
-uint8_t isBadBlock(const FlashNANDInterface* flash, uint32_t address)
+uint8_t isBadBlock(FlashNANDInterface* flash, uint32_t address)
 {
     address &= ~NAND_PAGEADDR_MASK;
 
@@ -309,17 +382,13 @@ uint8_t isBadBlock(const FlashNANDInterface* flash, uint32_t address)
     WaitReady();
 
     *(flash->cmd) = NAND_RDC_CMD;
-    *(flash->addr) = (uint8_t)address + 6;
+    *(flash->addr) = (uint8_t)address + 5;
     *(flash->addr) = (uint8_t)(address >> 9);
     *(flash->addr) = (uint8_t)(address >> 17);
 
     WaitReady();
 
-    EBI_StartNandEccGen();
-
     uint8_t badBlockMark = *(flash->data8);
-
-    EBI_StopNandEccGen();
 
     ChipEnable(false);
 
