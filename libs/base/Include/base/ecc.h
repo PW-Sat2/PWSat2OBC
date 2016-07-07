@@ -9,7 +9,7 @@ extern "C" {
 
 typedef enum { EccResultNoError, EccResultCorrected, EccResultNotCorrected, EccResultCorrupted } EccResult;
 
-uint32_t EccCalc(uint8_t* data, uint32_t dataLen);
+uint32_t EccCalc(const uint8_t* data, uint32_t dataLen);
 
 EccResult EccCorrect(uint32_t generated, uint32_t read, uint8_t* data, uint32_t dataLen);
 

@@ -2,6 +2,7 @@
 #include <stdint.h>
 
 #include "MemoryDriver.hpp"
+#include "base/ecc.h"
 #include "system.h"
 
 #define MEMORY_SIZE (1 * 1024 * 1024)
@@ -33,7 +34,33 @@ static FlashStatus ReadPage(FlashNANDInterface* interface, uint32_t address, uin
 
     memcpy(buffer, (void*)address, len);
 
-    return FlashStatusOK;
+    uint16_t pageNo = (address - (uint32_t)context->memory) / 512;
+
+    uint8_t* spareBase = context->spare + pageNo * 16;
+
+    uint32_t readEcc = spareBase[13] | (spareBase[14] << 8) | (spareBase[15] << 16);
+
+    if (readEcc == 0x00FFFFFF)
+    {
+        return FlashStatusOK;
+    }
+
+    uint32_t generatedEcc = EccCalc(buffer, len);
+
+    EccResult correctionResult = EccCorrect(generatedEcc, readEcc, buffer, len);
+
+    switch (correctionResult)
+    {
+        case EccResultCorrected:
+            return FlashStatusErrorCorrected;
+        case EccResultNotCorrected:
+            return FlashStatusErrorNotCorrected;
+        case EccResultCorrupted:
+            return FlashStatusChecksumCorrupted;
+        case EccResultNoError:
+        default:
+            return FlashStatusOK;
+    }
 }
 
 static FlashStatus ReadSpare(FlashNANDInterface* interface, uint32_t address, uint8_t* buffer, uint16_t length)
@@ -52,25 +79,25 @@ static FlashStatus ReadSpare(FlashNANDInterface* interface, uint32_t address, ui
         memcpy(buffer, spareBase, 5);
         memcpy(&buffer[5], &spareBase[6], length - 5);
     }
-    //    if (pageNo == 32)
-    {
-        //        printf("Diff=0x%X\n", address - (uint32_t)context->memory);
-        //        printf("RD[%d]=", pageNo);
-        //        for (uint8_t i = 0; i < length; i++)
-        //        {
-        //            printf("%.2X", buffer[i]);
-        //        }
-        //        printf("\n");
-    }
+
     return FlashStatusOK;
 }
 
 static FlashStatus WritePage(
     FlashNANDInterface* interface, uint8_t volatile* address, const uint8_t* buffer, uint32_t length)
 {
-    UNREFERENCED_PARAMETER(interface);
+    auto context = Context(interface);
+    uint16_t pageNo = (address - context->memory) / 512;
+
+    uint8_t* spareBase = context->spare + pageNo * 16;
 
     memcpy((void*)address, buffer, length);
+
+    uint32_t ecc = EccCalc(buffer, length);
+
+    spareBase[13] = (uint8_t)(ecc & 0xFF);
+    spareBase[14] = (uint8_t)((ecc >> 8) & 0xFF);
+    spareBase[15] = (uint8_t)((ecc >> 16) & 0xFF);
 
     return FlashStatusOK;
 }
@@ -81,16 +108,6 @@ static FlashStatus WriteSpare(FlashNANDInterface* interface, uint32_t address, u
     uint16_t pageNo = (address - (uint32_t)context->memory) / 512;
 
     uint8_t* spareBase = context->spare + pageNo * 16;
-    //    if (pageNo == 32)
-    {
-        //        printf("WR[%d]=", pageNo);
-        //        for (uint8_t i = 0; i < length; i++)
-        //        {
-        //            printf("%.2X", buffer[i]);
-        //        }
-        //        printf("\n");
-    }
-    uint8_t b = spareBase[16];
 
     if (length <= 5)
     {
@@ -109,8 +126,6 @@ static FlashStatus EraseBlock(FlashNANDInterface* interface, uint32_t address)
     auto context = Context(interface);
 
     uint16_t blockNo = (address - (uint32_t)context->memory) / (512 * 32);
-
-    printf("Erasing block %d\n", blockNo);
 
     if (context->faultyBlocks & (1 << blockNo))
     {
@@ -168,8 +183,6 @@ bool IsBadBlock(FlashNANDInterface* interface, int block)
 void SwapBit(FlashNANDInterface* interface, uint32_t byteOffset, uint8_t bitsToSwap)
 {
     auto context = Context(interface);
-
-    printf("Swaping bit in page %d\n", byteOffset / 512);
 
     uint8_t b = context->memory[byteOffset];
     uint8_t c = b ^ bitsToSwap;

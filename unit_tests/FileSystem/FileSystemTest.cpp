@@ -120,7 +120,7 @@ TEST_F(FileSystemTest, SanityCheck)
 
     ASSERT_THAT(buffer, StrEq("Hello World"));
 }
-#if 1
+
 TEST_F(FileSystemTest, WritingFileBiggerThatOneChunk)
 {
     yaffs_mount("/");
@@ -227,13 +227,13 @@ TEST_F(FileSystemTest, ShouldCorrectSingleBitError)
     SwapBit(&driver.flash, nand_chunk * driver.geometry.chunkSize + 100, 1);
 
     yaffs_flush_whole_cache(&device, 1);
-    printf("remounting\n");
+
     yaffs_mount("/");
-    printf("Opening\n");
+
     file = yaffs_open("/file", O_RDONLY, S_IRWXU);
 
     memset(buffer, 0, sizeof(buffer));
-    printf("Reading\n");
+
     yaffs_read(file, buffer, sizeof(buffer));
 
     for (uint16_t i = 0; i < COUNT_OF(buffer); i++)
@@ -245,4 +245,46 @@ TEST_F(FileSystemTest, ShouldCorrectSingleBitError)
 
     yaffs_unmount("/");
 }
-#endif
+
+TEST_F(FileSystemTest, ShouldDetectUncorrectableError)
+{
+    uint8_t buffer[1024];
+    for (uint16_t i = 0; i < COUNT_OF(buffer); i++)
+    {
+        buffer[i] = i % 256;
+    }
+
+    yaffs_mount("/");
+
+    auto file = yaffs_open("/file", O_CREAT | O_WRONLY, S_IRWXU);
+
+    yaffs_write(file, buffer, sizeof(buffer));
+
+    auto obj = yaffs_get_obj_from_fd(file);
+
+    auto nand_chunk = yaffs_find_chunk_in_file(obj, 1, NULL);
+
+    yaffs_close(file);
+
+    yaffs_unmount("/");
+
+    SwapBit(&driver.flash, nand_chunk * driver.geometry.chunkSize + 100, 0b11);
+
+    yaffs_flush_whole_cache(&device, 1);
+
+    yaffs_mount("/");
+
+    file = yaffs_open("/file", O_RDONLY, S_IRWXU);
+
+    memset(buffer, 0, sizeof(buffer));
+
+    uint32_t unfixed = this->device.n_ecc_unfixed;
+
+    auto r = yaffs_read(file, buffer, sizeof(buffer));
+
+    ASSERT_THAT(this->device.n_ecc_unfixed - unfixed, Eq(1));
+
+    yaffs_close(file);
+
+    yaffs_unmount("/");
+}

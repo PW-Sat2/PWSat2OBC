@@ -3,6 +3,14 @@
 
 #include <stdint.h>
 
-typedef enum { FlashStatusOK, FlashStatusInvalidDevice, FlashStatusWriteError, FlashStatusReadError } FlashStatus;
+typedef enum {
+    FlashStatusOK,
+    FlashStatusInvalidDevice,
+    FlashStatusWriteError,
+    FlashStatusReadError,
+    FlashStatusErrorCorrected,
+    FlashStatusErrorNotCorrected,
+    FlashStatusChecksumCorrupted
+} FlashStatus;
 
 #endif /* LIBS_STORAGE_INCLUDE_STORAGE_STORAGE_H_ */

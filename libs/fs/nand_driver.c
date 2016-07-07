@@ -15,7 +15,18 @@ static int ReadChunk(struct yaffs_dev* dev,
     int oob_len,
     enum yaffs_ecc_result* ecc_result)
 {
+    *ecc_result = YAFFS_ECC_RESULT_NO_ERROR;
+
     YaffsNANDDriver* driver = dev->driver_context;
+
+    if (data == NULL)
+    {
+        data_len = 0;
+    }
+    if (oob == NULL)
+    {
+        oob_len = 0;
+    }
 
     NANDOperation op;
     op.baseAddress = NANDPageBaseAddressFromChunk(&driver->geometry, nand_chunk);
@@ -35,9 +46,15 @@ static int ReadChunk(struct yaffs_dev* dev,
             FlashStatus status =
                 driver->flash.readPage(&driver->flash, slice.baseAddress, slice.dataBuffer, slice.dataSize);
 
-            if (status != FlashStatusOK)
+            switch (status)
             {
-                return YAFFS_FAIL;
+                case FlashStatusErrorCorrected:
+                    *ecc_result = YAFFS_ECC_RESULT_FIXED;
+                    break;
+                case FlashStatusErrorNotCorrected:
+                case FlashStatusChecksumCorrupted:
+                    *ecc_result = YAFFS_ECC_RESULT_UNFIXED;
+                    return YAFFS_FAIL;
             }
         }
 
@@ -52,8 +69,6 @@ static int ReadChunk(struct yaffs_dev* dev,
             }
         }
     }
-
-    *ecc_result = YAFFS_ECC_RESULT_NO_ERROR;
 
     return YAFFS_OK;
 }
