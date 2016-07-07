@@ -29,7 +29,7 @@ static int ReadChunk(struct yaffs_dev* dev,
     }
 
     NANDOperation op;
-    op.baseAddress = NANDPageBaseAddressFromChunk(&driver->geometry, nand_chunk);
+    op.offset = NANDPageOffsetFromChunk(&driver->geometry, nand_chunk);
     op.dataBuffer = data;
     op.dataSize = data_len;
     op.spareBuffer = oob;
@@ -43,8 +43,7 @@ static int ReadChunk(struct yaffs_dev* dev,
 
         if (slice.dataSize > 0)
         {
-            FlashStatus status =
-                driver->flash.readPage(&driver->flash, slice.baseAddress, slice.dataBuffer, slice.dataSize);
+            FlashStatus status = driver->flash.readPage(&driver->flash, slice.offset, slice.dataBuffer, slice.dataSize);
 
             switch (status)
             {
@@ -61,7 +60,7 @@ static int ReadChunk(struct yaffs_dev* dev,
         if (slice.spareSize > 0)
         {
             FlashStatus status =
-                driver->flash.readSpare(&driver->flash, slice.baseAddress, slice.spareBuffer, slice.spareSize);
+                driver->flash.readSpare(&driver->flash, slice.offset, slice.spareBuffer, slice.spareSize);
 
             if (status != FlashStatusOK)
             {
@@ -78,7 +77,7 @@ static int WriteChunk(struct yaffs_dev* dev, int nand_chunk, const u8* data, int
     YaffsNANDDriver* driver = dev->driver_context;
 
     NANDOperation op;
-    op.baseAddress = NANDPageBaseAddressFromChunk(&driver->geometry, nand_chunk);
+    op.offset = NANDPageOffsetFromChunk(&driver->geometry, nand_chunk);
     op.dataBuffer = data;
     op.dataSize = data_len;
     op.spareBuffer = oob;
@@ -93,7 +92,7 @@ static int WriteChunk(struct yaffs_dev* dev, int nand_chunk, const u8* data, int
         if (slice.dataSize > 0)
         {
             FlashStatus status =
-                driver->flash.writePage(&driver->flash, slice.baseAddress, slice.dataBuffer, slice.dataSize);
+                driver->flash.writePage(&driver->flash, slice.offset, slice.dataBuffer, slice.dataSize);
 
             if (status != FlashStatusOK)
             {
@@ -104,7 +103,7 @@ static int WriteChunk(struct yaffs_dev* dev, int nand_chunk, const u8* data, int
         if (slice.spareSize > 0)
         {
             FlashStatus status =
-                driver->flash.writeSpare(&driver->flash, slice.baseAddress, slice.spareBuffer, slice.spareSize);
+                driver->flash.writeSpare(&driver->flash, slice.offset, slice.spareBuffer, slice.spareSize);
 
             if (status != FlashStatusOK)
             {
@@ -122,7 +121,7 @@ static int EraseBlock(struct yaffs_dev* dev, int block_no)
 
     YaffsNANDDriver* driver = dev->driver_context;
 
-    uint32_t baseAddress = NANDBlockBaseAddress(&driver->geometry, block_no);
+    uint32_t baseAddress = NANDBlockOffset(&driver->geometry, block_no);
 
     FlashStatus status = driver->flash.eraseBlock(&driver->flash, baseAddress);
 
@@ -143,7 +142,7 @@ static int MarkBadBlock(struct yaffs_dev* dev, int block_no)
 
     YaffsNANDDriver* driver = dev->driver_context;
 
-    uint32_t blockAddress = NANDBlockBaseAddress(&driver->geometry, block_no);
+    uint32_t blockAddress = NANDBlockOffset(&driver->geometry, block_no);
 
     FlashStatus status = driver->flash.markBadBlock(&driver->flash, blockAddress);
 
@@ -159,7 +158,7 @@ static int CheckBadBlock(struct yaffs_dev* dev, int block_no)
 {
     YaffsNANDDriver* driver = dev->driver_context;
 
-    uint32_t baseAddress = NANDBlockBaseAddress(&driver->geometry, block_no);
+    uint32_t baseAddress = NANDBlockOffset(&driver->geometry, block_no);
 
     if (driver->flash.isBadBlock(&driver->flash, baseAddress))
     {
@@ -177,10 +176,6 @@ static int FlashInitialize(struct yaffs_dev* dev)
     YaffsNANDDriver* driver = dev->driver_context;
 
     driver->flash.initialize(&driver->flash);
-
-    driver->geometry.baseAddress = driver->flash.baseAddress;
-
-    NANDCalculateGeometry(&driver->geometry);
 
     return YAFFS_OK;
 }

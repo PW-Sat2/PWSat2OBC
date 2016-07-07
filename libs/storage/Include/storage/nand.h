@@ -9,7 +9,7 @@ extern "C" {
 
 typedef struct _FlashNANDInterface
 {
-    uint32_t baseAddress;
+    void* context;
     uint8_t volatile* data8;
     uint16_t volatile* data16;
     uint32_t volatile* data32;
@@ -18,16 +18,21 @@ typedef struct _FlashNANDInterface
     int (*initialize)(struct _FlashNANDInterface* flash);
     int (*check)(struct _FlashNANDInterface* flash);
     int (*status)(struct _FlashNANDInterface* flash);
-    FlashStatus (*readPage)(struct _FlashNANDInterface* interface, uint32_t address, uint8_t* buffer, uint16_t len);
-    FlashStatus (*eraseBlock)(struct _FlashNANDInterface* interface, uint32_t address);
-    FlashStatus (*writePage)(
-        struct _FlashNANDInterface* interface, uint8_t volatile* address, const uint8_t* buffer, uint32_t length);
-    FlashStatus (*readSpare)(struct _FlashNANDInterface* interface, uint32_t address, uint8_t* buffer, uint16_t length);
-    FlashStatus (*writeSpare)(
-        struct _FlashNANDInterface* interface, uint32_t address, uint8_t* buffer, uint16_t length);
 
-    uint8_t (*isBadBlock)(const struct _FlashNANDInterface* flash, uint8_t volatile* address);
-    FlashStatus (*markBadBlock)(const struct _FlashNANDInterface* flash, uint8_t* address);
+    FlashStatus (*eraseBlock)(struct _FlashNANDInterface* interface, uint32_t offset);
+
+    FlashStatus (*readPage)(struct _FlashNANDInterface* interface, uint32_t offset, uint8_t* buffer, uint16_t length);
+
+    FlashStatus (*readSpare)(struct _FlashNANDInterface* interface, uint32_t offset, uint8_t* buffer, uint16_t length);
+
+    FlashStatus (*writePage)(
+        struct _FlashNANDInterface* interface, uint32_t offset, const uint8_t* buffer, uint32_t length);
+
+    FlashStatus (*writeSpare)(
+        struct _FlashNANDInterface* interface, uint32_t offset, const uint8_t* buffer, uint16_t length);
+
+    uint8_t (*isBadBlock)(struct _FlashNANDInterface* flash, uint32_t offset);
+    FlashStatus (*markBadBlock)(struct _FlashNANDInterface* flash, uint32_t offset);
 } FlashNANDInterface;
 
 void BuildNANDInterface(FlashNANDInterface* flash);
@@ -41,12 +46,12 @@ typedef struct
     uint32_t chunkSize;
     uint32_t blockSize;
     uint32_t chunksPerBlock;
-    uint32_t baseAddress;
+    uint32_t baseOffset;
 } NANDGeometry;
 
 typedef struct
 {
-    uint32_t baseAddress;
+    uint32_t offset;
     uint32_t dataSize;
     uint8_t* dataBuffer;
     uint32_t spareSize;
@@ -55,7 +60,7 @@ typedef struct
 
 typedef struct
 {
-    uint32_t baseAddress;
+    uint32_t offset;
     uint32_t dataSize;
     uint8_t* dataBuffer;
     uint32_t spareSize;
@@ -63,8 +68,8 @@ typedef struct
 } NANDOperation;
 
 void NANDCalculateGeometry(NANDGeometry* geometry);
-uint32_t NANDPageBaseAddressFromChunk(NANDGeometry* geometry, uint16_t chunkNo);
-uint32_t NANDBlockBaseAddress(NANDGeometry* geometry, uint16_t blockNo);
+uint32_t NANDPageOffsetFromChunk(NANDGeometry* geometry, uint16_t chunkNo);
+uint32_t NANDBlockOffset(NANDGeometry* geometry, uint16_t blockNo);
 uint16_t NANDAffectedPagesCount(NANDGeometry* geometry, NANDOperation* operation);
 NANDOperationSlice NANDGetOperationSlice(NANDGeometry* geometry, NANDOperation* operation, uint16_t pageNo);
 

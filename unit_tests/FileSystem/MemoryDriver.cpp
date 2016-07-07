@@ -18,23 +18,22 @@ static DriverContext context;
 
 static inline DriverContext* Context(const FlashNANDInterface* interface)
 {
-    return (DriverContext*)(interface->baseAddress - offsetof(DriverContext, memory));
+    return (DriverContext*)interface->context;
 }
 
-static FlashStatus ReadPage(FlashNANDInterface* interface, uint32_t address, uint8_t* buffer, uint16_t len)
+static FlashStatus ReadPage(FlashNANDInterface* interface, uint32_t offset, uint8_t* buffer, uint16_t len)
 {
     auto context = Context(interface);
 
-    uint16_t blockNo = (address - (uint32_t)context->memory) / (512 * 32);
+    uint16_t blockNo = offset / (512 * 32);
+    uint16_t pageNo = offset / 512;
 
     if (context->faultyBlocks & (1 << blockNo))
     {
         return FlashStatusReadError;
     }
 
-    memcpy(buffer, (void*)address, len);
-
-    uint16_t pageNo = (address - (uint32_t)context->memory) / 512;
+    memcpy(buffer, (void*)(context->memory + offset), len);
 
     uint8_t* spareBase = context->spare + pageNo * 16;
 
@@ -63,10 +62,10 @@ static FlashStatus ReadPage(FlashNANDInterface* interface, uint32_t address, uin
     }
 }
 
-static FlashStatus ReadSpare(FlashNANDInterface* interface, uint32_t address, uint8_t* buffer, uint16_t length)
+static FlashStatus ReadSpare(FlashNANDInterface* interface, uint32_t offset, uint8_t* buffer, uint16_t length)
 {
     auto context = Context(interface);
-    uint16_t pageNo = (address - (uint32_t)context->memory) / 512;
+    uint16_t pageNo = offset / 512;
 
     uint8_t* spareBase = context->spare + pageNo * 16;
 
@@ -83,15 +82,14 @@ static FlashStatus ReadSpare(FlashNANDInterface* interface, uint32_t address, ui
     return FlashStatusOK;
 }
 
-static FlashStatus WritePage(
-    FlashNANDInterface* interface, uint8_t volatile* address, const uint8_t* buffer, uint32_t length)
+static FlashStatus WritePage(FlashNANDInterface* interface, uint32_t offset, const uint8_t* buffer, uint32_t length)
 {
     auto context = Context(interface);
-    uint16_t pageNo = (address - context->memory) / 512;
+    uint16_t pageNo = offset / 512;
 
     uint8_t* spareBase = context->spare + pageNo * 16;
 
-    memcpy((void*)address, buffer, length);
+    memcpy((void*)(context->memory + offset), buffer, length);
 
     uint32_t ecc = EccCalc(buffer, length);
 
@@ -102,10 +100,10 @@ static FlashStatus WritePage(
     return FlashStatusOK;
 }
 
-static FlashStatus WriteSpare(FlashNANDInterface* interface, uint32_t address, uint8_t* buffer, uint16_t length)
+static FlashStatus WriteSpare(FlashNANDInterface* interface, uint32_t offset, const uint8_t* buffer, uint16_t length)
 {
     auto context = Context(interface);
-    uint16_t pageNo = (address - (uint32_t)context->memory) / 512;
+    uint16_t pageNo = offset / 512;
 
     uint8_t* spareBase = context->spare + pageNo * 16;
 
@@ -121,11 +119,11 @@ static FlashStatus WriteSpare(FlashNANDInterface* interface, uint32_t address, u
     return FlashStatusOK;
 }
 
-static FlashStatus EraseBlock(FlashNANDInterface* interface, uint32_t address)
+static FlashStatus EraseBlock(FlashNANDInterface* interface, uint32_t offset)
 {
     auto context = Context(interface);
 
-    uint16_t blockNo = (address - (uint32_t)context->memory) / (512 * 32);
+    uint16_t blockNo = offset / (512 * 32);
 
     if (context->faultyBlocks & (1 << blockNo))
     {
@@ -134,17 +132,17 @@ static FlashStatus EraseBlock(FlashNANDInterface* interface, uint32_t address)
 
     uint32_t spareAddress = blockNo * 32 * 16;
 
-    memset((void*)address, 0xFF, 32 * 512);
+    memset((void*)(context->memory + offset), 0xFF, 32 * 512);
     memset((void*)spareAddress, 0xFF, 32 * 16);
 
     return FlashStatusOK;
 }
 
-static uint8_t CheckBadBlock(const FlashNANDInterface* interface, uint8_t volatile* address)
+static uint8_t CheckBadBlock(FlashNANDInterface* interface, uint32_t offset)
 {
     auto context = Context(interface);
 
-    uint16_t blockNo = (address - context->memory) / (32 * 512);
+    uint16_t blockNo = offset / (32 * 512);
 
     uint8_t badBlockMark = context->spare[blockNo * 32 + 5];
 
@@ -158,10 +156,10 @@ static int Initialize(FlashNANDInterface* interface)
     return FlashStatusOK;
 }
 
-static FlashStatus MarkBadBlock(const struct _FlashNANDInterface* interface, uint8_t* address)
+static FlashStatus MarkBadBlock(struct _FlashNANDInterface* interface, uint32_t offset)
 {
     auto context = Context(interface);
-    uint16_t blockNo = (address - context->memory) / (32 * 512);
+    uint16_t blockNo = offset / (32 * 512);
     context->spare[blockNo * 32 + 5] = 0xAB;
 
     return FlashStatusOK;
@@ -177,7 +175,7 @@ bool IsBadBlock(FlashNANDInterface* interface, int block)
 {
     auto context = Context(interface);
     uint8_t* address = &context->memory[block * 32 * 512];
-    return CheckBadBlock(interface, address);
+    return CheckBadBlock(interface, (uint32_t)address);
 }
 
 void SwapBit(FlashNANDInterface* interface, uint32_t byteOffset, uint8_t bitsToSwap)
@@ -199,7 +197,7 @@ void InitializeMemoryNAND(FlashNANDInterface* flash)
     flash->eraseBlock = EraseBlock;
     flash->isBadBlock = CheckBadBlock;
     flash->markBadBlock = MarkBadBlock;
-    flash->baseAddress = (uint32_t)context.memory;
+    flash->context = &context;
 
     memset(context.memory, 0xFF, sizeof(context.memory));
     memset(context.spare, 0xFF, sizeof(context.spare));

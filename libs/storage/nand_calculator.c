@@ -8,14 +8,14 @@ void NANDCalculateGeometry(NANDGeometry* geometry)
     geometry->chunksPerBlock = geometry->pagesPerBlock / geometry->pagesPerChunk;
 }
 
-uint32_t NANDPageBaseAddressFromChunk(NANDGeometry* geometry, uint16_t chunkNo)
+uint32_t NANDPageOffsetFromChunk(NANDGeometry* geometry, uint16_t chunkNo)
 {
-    return geometry->baseAddress + chunkNo * geometry->chunkSize;
+    return geometry->baseOffset + chunkNo * geometry->chunkSize;
 }
 
-uint32_t NANDBlockBaseAddress(NANDGeometry* geometry, uint16_t blockNo)
+uint32_t NANDBlockOffset(NANDGeometry* geometry, uint16_t blockNo)
 {
-    return geometry->baseAddress + blockNo * geometry->blockSize;
+    return geometry->baseOffset + blockNo * geometry->blockSize;
 }
 
 uint16_t NANDAffectedPagesCount(NANDGeometry* geometry, NANDOperation* operation)
@@ -46,7 +46,7 @@ NANDOperationSlice NANDGetOperationSlice(NANDGeometry* geometry, NANDOperation* 
 {
     NANDOperationSlice slice;
 
-    slice.baseAddress = operation->baseAddress + pageNo * geometry->pageSize;
+    slice.offset = operation->offset + pageNo * geometry->pageSize;
 
     int32_t remaining = operation->dataSize - pageNo * geometry->pageSize;
     if (remaining > 0)
