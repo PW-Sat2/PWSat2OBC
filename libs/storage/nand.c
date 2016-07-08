@@ -5,19 +5,9 @@
 #include "system.h"
 
 #include "base/ecc.h"
+#include "io_map.h"
 #include "logger/logger.h"
 #include "nand.h"
-
-#define NAND_POWER_PORT gpioPortB
-#define NAND_POWER_PIN 15
-#define NAND_READY_PORT gpioPortD
-#define NAND_READY_PIN 15
-#define NAND_CE_PORT gpioPortD
-#define NAND_CE_PIN 14
-#define NAND_WP_PORT gpioPortD
-#define NAND_WP_PIN 13
-#define NAND_ALE_BIT 24
-#define NAND_CLE_BIT 25
 
 #define NAND256W3A_SIGNATURE 0x7520
 
@@ -139,36 +129,36 @@ static void enableEBI(void)
 
     /* Enable GPIO's */
     /* ALE and CLE */
-    GPIO_PinModeSet(gpioPortC, 1, gpioModePushPull, 0);
-    GPIO_PinModeSet(gpioPortC, 2, gpioModePushPull, 0);
+    GPIO_PinModeSet(EBI_ALE_PORT, EBI_ALE_PIN, gpioModePushPull, 0);
+    GPIO_PinModeSet(EBI_CLE_PORT, EBI_CLE_PIN, gpioModePushPull, 0);
 
     /* WP, CE and R/B */
-    GPIO_PinModeSet(gpioPortD, 13, gpioModePushPull, 0); /* active low write-protect */
-    GPIO_PinModeSet(gpioPortD, 14, gpioModePushPull, 1); /* active low chip-enable */
-    GPIO_PinModeSet(gpioPortD, 15, gpioModeInput, 0);    /* ready/busy */
+    GPIO_PinModeSet(NAND_WP_PORT, NAND_WP_PIN, gpioModePushPull, 0);    /* active low write-protect */
+    GPIO_PinModeSet(NAND_CE_PORT, NAND_CE_PIN, gpioModePushPull, 1);    /* active low chip-enable */
+    GPIO_PinModeSet(NAND_READY_PORT, NAND_READY_PIN, gpioModeInput, 0); /* ready/busy */
 
     /* IO pins */
-    GPIO_PinModeSet(gpioPortE, 8, gpioModePushPull, 0);
-    GPIO_PinModeSet(gpioPortE, 9, gpioModePushPull, 0);
-    GPIO_PinModeSet(gpioPortE, 10, gpioModePushPull, 0);
-    GPIO_PinModeSet(gpioPortE, 11, gpioModePushPull, 0);
-    GPIO_PinModeSet(gpioPortE, 12, gpioModePushPull, 0);
-    GPIO_PinModeSet(gpioPortE, 13, gpioModePushPull, 0);
-    GPIO_PinModeSet(gpioPortE, 14, gpioModePushPull, 0);
-    GPIO_PinModeSet(gpioPortE, 15, gpioModePushPull, 0);
+    GPIO_PinModeSet(EBI_DATA_PORT, EBI_DATA_PIN0, gpioModePushPull, 0);
+    GPIO_PinModeSet(EBI_DATA_PORT, EBI_DATA_PIN0 + 1, gpioModePushPull, 0);
+    GPIO_PinModeSet(EBI_DATA_PORT, EBI_DATA_PIN0 + 2, gpioModePushPull, 0);
+    GPIO_PinModeSet(EBI_DATA_PORT, EBI_DATA_PIN0 + 3, gpioModePushPull, 0);
+    GPIO_PinModeSet(EBI_DATA_PORT, EBI_DATA_PIN0 + 4, gpioModePushPull, 0);
+    GPIO_PinModeSet(EBI_DATA_PORT, EBI_DATA_PIN0 + 5, gpioModePushPull, 0);
+    GPIO_PinModeSet(EBI_DATA_PORT, EBI_DATA_PIN0 + 6, gpioModePushPull, 0);
+    GPIO_PinModeSet(EBI_DATA_PORT, EBI_DATA_PIN0 + 7, gpioModePushPull, 0);
 
     /* WE and RE */
-    GPIO_PinModeSet(gpioPortF, 8, gpioModePushPull, 1);
-    GPIO_PinModeSet(gpioPortF, 9, gpioModePushPull, 1);
+    GPIO_PinModeSet(EBI_WE_PORT, EBI_WE_PIN, gpioModePushPull, 1);
+    GPIO_PinModeSet(EBI_RE_PORT, EBI_RE_PIN, gpioModePushPull, 1);
 
     /* NAND Power Enable */
-    GPIO_PinModeSet(gpioPortB, 15, gpioModePushPull, 1);
+    GPIO_PinModeSet(NAND_POWER_PORT, NAND_POWER_PIN, gpioModePushPull, 1);
 
     EBI_Init(&ebiConfig);
     EBI->NANDCTRL = (EBI_NANDCTRL_BANKSEL_BANK0 | EBI_NANDCTRL_EN);
 }
 
-static int initialize(FlashNANDInterface* flash)
+static FlashStatus initialize(FlashNANDInterface* flash)
 {
     enableEBI();
 
@@ -184,7 +174,7 @@ static int initialize(FlashNANDInterface* flash)
 
     Reset(flash);
 
-    return 0;
+    return flash->check(flash);
 }
 
 static FlashStatus readPage(FlashNANDInterface* flash, uint32_t offset, uint8_t* buffer, uint16_t length)
@@ -232,8 +222,6 @@ static FlashStatus readPage(FlashNANDInterface* flash, uint32_t offset, uint8_t*
     }
 
     EccResult correction = EccCorrect(generatedEcc, readEcc, buffer, length);
-
-    LOGF(LOG_LEVEL_INFO, "Read page: %X. Read: %X Gen: %X\n", offset, readEcc, generatedEcc);
 
     switch (correction)
     {
@@ -350,7 +338,7 @@ static FlashStatus eraseBlock(FlashNANDInterface* flash, uint32_t address)
     return status;
 }
 
-int check(FlashNANDInterface* flash)
+static FlashStatus check(FlashNANDInterface* flash)
 {
     ChipEnable(true);
 
@@ -368,13 +356,13 @@ int check(FlashNANDInterface* flash)
     return FlashStatusOK;
 }
 
-int status(FlashNANDInterface* flash)
+static int status(FlashNANDInterface* flash)
 {
     *(flash->cmd) = NAND_RDSTATUS_CMD;
     return *(flash->data8);
 }
 
-uint8_t isBadBlock(FlashNANDInterface* flash, uint32_t address)
+static uint8_t isBadBlock(FlashNANDInterface* flash, uint32_t address)
 {
     address &= ~NAND_PAGEADDR_MASK;
 
@@ -395,6 +383,35 @@ uint8_t isBadBlock(FlashNANDInterface* flash, uint32_t address)
     return badBlockMark != 0xFF;
 }
 
+static FlashStatus markBadBlock(FlashNANDInterface* flash, uint32_t offset)
+{
+    offset &= ~NAND_BLOCKADDR_MASK;
+
+    WriteProtect(false);
+    ChipEnable(true);
+
+    *(flash->cmd) = NAND_RDC_CMD;
+    *(flash->cmd) = NAND_PAGEPROG1_CMD;
+    *(flash->addr) = (uint8_t)offset;
+    /* Address bit 8 is not used, implicitely defined by NAND_RDC_CMD. */
+    *(flash->addr) = (uint8_t)(offset >> 9);
+    *(flash->addr) = (uint8_t)(offset >> 17);
+
+    /* Write bad block marker 0x00 to the 6th byte in the spare area */
+    *(flash->data32) = 0xFFFFFFFF;
+    *(flash->data16) = 0x00FF;
+    *(flash->cmd) = NAND_PAGEPROG2_CMD;
+
+    WaitReady();
+
+    FlashStatus status = (flash->status(flash) & NAND_STATUS_SR0) ? FlashStatusWriteError : FlashStatusOK;
+
+    ChipEnable(false);
+    WriteProtect(true);
+
+    return status;
+}
+
 void BuildNANDInterface(FlashNANDInterface* flash)
 {
     flash->initialize = initialize;
@@ -404,4 +421,5 @@ void BuildNANDInterface(FlashNANDInterface* flash)
     flash->status = status;
     flash->eraseBlock = eraseBlock;
     flash->isBadBlock = isBadBlock;
+    flash->markBadBlock = markBadBlock;
 }

@@ -15,9 +15,9 @@ typedef struct _FlashNANDInterface
     uint32_t volatile* data32;
     uint8_t volatile* addr;
     uint8_t volatile* cmd;
-    int (*initialize)(struct _FlashNANDInterface* flash);
-    int (*check)(struct _FlashNANDInterface* flash);
-    int (*status)(struct _FlashNANDInterface* flash);
+    FlashStatus (*initialize)(struct _FlashNANDInterface* flash);
+    FlashStatus (*check)(struct _FlashNANDInterface* flash);
+    uint32_t (*status)(struct _FlashNANDInterface* flash);
 
     FlashStatus (*eraseBlock)(struct _FlashNANDInterface* interface, uint32_t offset);
 

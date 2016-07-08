@@ -149,7 +149,7 @@ static uint8_t CheckBadBlock(FlashNANDInterface* interface, uint32_t offset)
     return badBlockMark != 0xFF;
 }
 
-static int Initialize(FlashNANDInterface* interface)
+static FlashStatus Initialize(FlashNANDInterface* interface)
 {
     UNREFERENCED_PARAMETER(interface);
 
