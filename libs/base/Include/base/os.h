@@ -256,7 +256,19 @@ typedef struct
      * @see OSEventGroupWaitForBits for the details.
      */
     OSEventGroupWaitForBits EventGroupWaitForBits;
+
+    /**
+     * @brief Pointer to procedure that allocates block of memory from OS heap
+     *
+     * @see OSAlloc
+     */
     OSAlloc Alloc;
+
+    /**
+     * @brief Pointer to procedure that frees block of memory
+     *
+     * @see OSFree
+     */
     OSFree Free;
 } OS;
 

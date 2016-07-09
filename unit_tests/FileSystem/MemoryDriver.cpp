@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <stdbool.h>
 #include "MemoryDriver.hpp"
 #include "base/ecc.h"
 #include "system.h"
@@ -138,7 +139,7 @@ static FlashStatus EraseBlock(FlashNANDInterface* interface, uint32_t offset)
     return FlashStatusOK;
 }
 
-static uint8_t CheckBadBlock(FlashNANDInterface* interface, uint32_t offset)
+static bool CheckBadBlock(FlashNANDInterface* interface, uint32_t offset)
 {
     auto context = Context(interface);
 

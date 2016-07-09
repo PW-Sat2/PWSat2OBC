@@ -13,6 +13,7 @@ typedef struct
 {
     /** @brief Comm driver object. */
     CommObject comm;
+    /** @brief File system object */
     FileSystem fs;
     /** @brief Handle to OBC initialization task. */
     OSTaskHandle initTask;
