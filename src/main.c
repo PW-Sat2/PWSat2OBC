@@ -23,6 +23,7 @@
 #include "swo/swo.h"
 #include "system.h"
 
+
 #include "terminal.h"
 
 #include "fs/fs.h"
@@ -31,6 +32,10 @@
 #include "storage/storage.h"
 
 OBC Main;
+
+#include "drivers/ADXRS453.h"
+#include <spidrv.h>
+
 
 
 
@@ -181,29 +186,45 @@ static void FrameHandler(CommObject* comm, CommFrame* frame, void* context)
 }
 void ADXRS(void * param){
 	UNREFERENCED_PARAMETER(param);
+	SPIDRV_HandleData_t handleData;
+	SPIDRV_Handle_t handle = &handleData;
+	SPIDRV_Init_t initData = ADXRS453_SPI;
+	SPIDRV_Init( handle, &initData );
 
 	float temp=0;
 	float rate=0;
 
-	ADXRS453_Init();
+	GyroInterface_t interface;
+	interface.writeProc=SPISendB;
+	interface.readProc=SPISendRecvB;
+	ADXRS453_Obj_t gyro;
+	gyro.pinLocations = (ADXRS453_PinLocations_t)GYRO0;
+	gyro.interface=interface;
+	ADXRS453_Obj_t gyro1;
+	gyro1.pinLocations = (ADXRS453_PinLocations_t)GYRO1;
+	gyro1.interface=interface;
+	ADXRS453_Obj_t gyro2;
+	gyro2.pinLocations = (ADXRS453_PinLocations_t)GYRO2;
+	gyro2.interface=interface;
+
+	ADXRS453Spi_Init(&gyro);
+	ADXRS453Spi_Init(&gyro1);
+	ADXRS453Spi_Init(&gyro2);
+	ADXRS453_Init(&gyro,handle);
+	ADXRS453_Init(&gyro1,handle);
+	ADXRS453_Init(&gyro2,handle);
+
+
 	while(1){
-		rate=ADXRS453_GetRate();
-		temp=ADXRS453_GetTemperature();
-		swoPrintf("temp: %d ' celcius rate: %d '/sec rotation\n", (long)temp, (long)rate);
-	float angle=0;
-
-	ADXRS453_Init_t gyro=GYRO0;
-	ADXRS453_Init_t gyro1=GYRO1;
-	ADXRS453_Init(&gyro);
-	ADXRS453_Init(&gyro1);
-
-
-	while(1){
-		rate=ADXRS453_GetRate(&gyro);
-		temp=ADXRS453_GetTemperature(&gyro);
-		swoPrintf("temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp, (int)rate);
-		rate=ADXRS453_GetRate(&gyro1);
-
+		SPI_TransferReturn_t rate=ADXRS453_GetRate(&gyro,handle);
+		SPI_TransferReturn_t temp=ADXRS453_GetTemperature(&gyro,handle);
+		swoPrintf("gyro 0 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result, (int)rate.result);
+		rate=ADXRS453_GetRate(&gyro1,handle);
+		temp=ADXRS453_GetTemperature(&gyro1,handle);
+		swoPrintf("gyro 1 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result, (int)rate.result);
+		rate=ADXRS453_GetRate(&gyro2,handle);
+		temp=ADXRS453_GetTemperature(&gyro2,handle);
+		swoPrintf("gyro 2 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result, (int)rate.result);
 		vTaskDelay(10 / portTICK_PERIOD_MS);
 	}
 

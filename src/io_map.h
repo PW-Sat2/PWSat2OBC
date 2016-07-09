@@ -19,15 +19,20 @@
 	{ 			\
 	gpioPortD, /* cs port location*/			\
 	3, /* cs pin location */			\
-	0,  /* gyro number*/				\
 	}
 
 #define GYRO1 	\
 	{ 			\
 	gpioPortD, /* cs port location*/			\
 	6, /* cs pin location */			\
-	1,  /* gyro number*/				\
 	}
+
+#define GYRO2 	\
+	{ 			\
+	gpioPortC, /* cs port location*/			\
+	6, /* cs pin location */			\
+	}
+
 
 
 #endif

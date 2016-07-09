@@ -41,38 +41,85 @@
   spidrvCsControlApplication,          /* CS controlled by the driver      */    \
   spidrvSlaveStartDelayed          \
 }
-
-
-typedef struct ADXRS453_Init {
+typedef struct SPI_TransferPairResultCode
+{
+	Ecode_t resultCodeWrite;
+	Ecode_t resultCodeRead;
+} SPI_TransferPairResultCode_t;
+typedef struct ADXRS453_PinLocations {
 	uint8_t             csPortLocation;
 	uint8_t             csPinLocation;
-	uint8_t				gyroNumber;
-} ADXRS453_Init_t;
+} ADXRS453_PinLocations_t;
+typedef Ecode_t (*GyroSPIWriteProcedure)(ADXRS453_PinLocations_t *locations,SPIDRV_Handle_t 	handle, const void * buffer, uint8_t length);
+typedef SPI_TransferPairResultCode_t (*GyroSPIWriteReadProcedure)(ADXRS453_PinLocations_t *locations,SPIDRV_Handle_t 	handle, const void * buffer, uint8_t length);
 
-void ADXRS453Spi_Init(void);
 
-char ADXRS453_Init(ADXRS453_Init_t *gyro);
+typedef struct
+{
+	GyroSPIWriteProcedure writeProc;
+	GyroSPIWriteReadProcedure readProc;
+} GyroInterface_t;
 
-void SPISendB(ADXRS453_Init_t *gyro,SPIDRV_Handle_t 	handle,
+typedef struct ADXRS453_Obj {
+	ADXRS453_PinLocations_t pinLocations;
+	GyroInterface_t interface;
+} ADXRS453_Obj_t;
+
+
+
+
+typedef struct SPI_TransferReturn
+{
+	SPI_TransferPairResultCode_t resultCodes;
+	uint16_t result;
+} SPI_TransferReturn_t;
+
+
+
+
+
+
+void ADXRS453Spi_Init(ADXRS453_Obj_t *gyro);
+
+int8_t ADXRS453_Init(ADXRS453_Obj_t *gyro,
+		SPIDRV_Handle_t 	handle);
+
+Ecode_t SPISendB(ADXRS453_PinLocations_t *locations,
+		SPIDRV_Handle_t 	handle,
 		const void * 	buffer,
-		int 	count );
-void SPIRecvB(ADXRS453_Init_t *gyro,SPIDRV_Handle_t 	handle,
+		uint8_t 	length );
+
+Ecode_t SPIRecvB(ADXRS453_PinLocations_t *locations,
+		SPIDRV_Handle_t 	handle,
 		void * 	buffer,
-		int 	count );
+		uint8_t 	length );
+SPI_TransferPairResultCode_t SPISendRecvB(ADXRS453_PinLocations_t *locations,
+		SPIDRV_Handle_t 	handle,
+		void * 	buffer,
+		uint8_t 	length );
 /*! Reads the value of a register. */
-unsigned short ADXRS453_GetRegisterValue(ADXRS453_Init_t *gyro,unsigned char registerAddress);
+SPI_TransferReturn_t ADXRS453_GetRegisterValue(ADXRS453_Obj_t *gyro,
+									SPIDRV_Handle_t handle,
+									uint8_t registerAddress);
 
 /*! Writes data into a register. */
-void ADXRS453_SetRegisterValue(ADXRS453_Init_t *gyro,unsigned char registerAddress,
-                               unsigned short registerValue);
+SPI_TransferReturn_t ADXRS453_SetRegisterValue(ADXRS453_Obj_t *gyro,
+								SPIDRV_Handle_t 	handle,
+								uint8_t registerAddress,
+								uint16_t registerValue);
 
 /*! Reads the sensor data. */
-unsigned long ADXRS453_GetSensorData(ADXRS453_Init_t *gyro);
+uint32_t ADXRS453_GetSensorData(ADXRS453_Obj_t *gyro,
+		SPIDRV_Handle_t 	handle);
 
 /*! Reads the rate data and converts it to degrees/second. */
-float ADXRS453_GetRate(ADXRS453_Init_t *gyro);
+SPI_TransferReturn_t ADXRS453_GetRate(ADXRS453_Obj_t *gyro,
+		SPIDRV_Handle_t 	handle);
 
 /*! Reads the temperature sensor data and converts it to degrees Celsius. */
-float ADXRS453_GetTemperature(ADXRS453_Init_t *gyro);
+SPI_TransferReturn_t  ADXRS453_GetTemperature(ADXRS453_Obj_t *gyro,
+		SPIDRV_Handle_t 	handle);
+
+void ADXRS453_DeInit(SPIDRV_Handle_t handle);
 
 #endif // __ADXRS453_H__
