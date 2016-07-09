@@ -32,9 +32,11 @@ static void SetupRootDevice(void)
     rootDevice.param.start_block = 1;
     rootDevice.param.n_reserved_blocks = 3;
     rootDevice.param.no_tags_ecc = true;
-    uint32_t blockSize = rootDevice.param.total_bytes_per_chunk * rootDevice.param.chunks_per_block;
-    rootDevice.param.end_block =
-        1 * 1024 * 1024 / blockSize - rootDevice.param.start_block - rootDevice.param.n_reserved_blocks;
+    rootDevice.param.always_check_erased = true;
+
+    rootDevice.param.end_block = 1 * 1024 * 1024 / rootDeviceDriver.geometry.blockSize - rootDevice.param.start_block -
+        rootDevice.param.n_reserved_blocks;
+
     yaffs_add_device(&rootDevice);
 }
 

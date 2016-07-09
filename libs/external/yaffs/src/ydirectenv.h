@@ -20,16 +20,19 @@
 #ifndef __YDIRECTENV_H__
 #define __YDIRECTENV_H__
 
-#include "stdlib.h"
 #include "stdio.h"
+#include "stdlib.h"
 #include "string.h"
-#include "yaffs_osglue.h"
 #include "yaffs_hweight.h"
+#include "yaffs_osglue.h"
 
-void yaffs_bug_fn(const char *file_name, int line_no);
+void yaffs_bug_fn(const char* file_name, int line_no);
 
-#define BUG() do { yaffs_bug_fn(__FILE__, __LINE__); } while (0)
-
+#define BUG()                                                                                                          \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        yaffs_bug_fn(__FILE__, __LINE__);                                                                              \
+    } while (0)
 
 #define YCHAR char
 #define YUCHAR unsigned char
@@ -39,24 +42,24 @@ void yaffs_bug_fn(const char *file_name, int line_no);
 #define Y_LOFF_T loff_t
 #endif
 
-#define yaffs_strcat(a, b)	strcat(a, b)
-#define yaffs_strcpy(a, b)	strcpy(a, b)
-#define yaffs_strncpy(a, b, c)	strncpy(a, b, c)
-#define yaffs_strnlen(s, m)	strnlen(s, m)
+#define yaffs_strcat(a, b) strcat(a, b)
+#define yaffs_strcpy(a, b) strcpy(a, b)
+#define yaffs_strncpy(a, b, c) strncpy(a, b, c)
+#define yaffs_strnlen(s, m) strnlen(s, m)
 #ifdef CONFIG_YAFFS_CASE_INSENSITIVE
-#define yaffs_strcmp(a, b)	strcasecmp(a, b)
-#define yaffs_strncmp(a, b, c)	strncasecmp(a, b, c)
+#define yaffs_strcmp(a, b) strcasecmp(a, b)
+#define yaffs_strncmp(a, b, c) strncasecmp(a, b, c)
 #else
-#define yaffs_strcmp(a, b)	strcmp(a, b)
-#define yaffs_strncmp(a, b, c)	strncmp(a, b, c)
+#define yaffs_strcmp(a, b) strcmp(a, b)
+#define yaffs_strncmp(a, b, c) strncmp(a, b, c)
 #endif
 
-#define hweight8(x)	yaffs_hweight8(x)
-#define hweight32(x)	yaffs_hweight32(x)
+#define hweight8(x) yaffs_hweight8(x)
+#define hweight32(x) yaffs_hweight32(x)
 
 #define sort(base, n, sz, cmp_fn, swp) qsort(base, n, sz, cmp_fn)
 
-#define YAFFS_PATH_DIVIDERS  "/"
+#define YAFFS_PATH_DIVIDERS "/"
 
 #ifdef NO_inline
 #define inline
@@ -65,35 +68,46 @@ void yaffs_bug_fn(const char *file_name, int line_no);
 #endif
 
 #define kmalloc(x, flags) yaffsfs_malloc(x)
-#define kfree(x)   yaffsfs_free(x)
+#define kfree(x) yaffsfs_free(x)
 #define vmalloc(x) yaffsfs_malloc(x)
 #define vfree(x) yaffsfs_free(x)
 
-#define cond_resched()  do {} while (0)
+#define cond_resched()                                                                                                 \
+    do                                                                                                                 \
+    {                                                                                                                  \
+    } while (0)
 
-void yaffs_log(const char * fmt, ...);
+void yaffs_log(const char* fmt, ...);
 
-#define yaffs_trace(msk, fmt, ...) do { \
-	if (yaffs_trace_mask & (msk)) \
-		yaffs_log("yaffs: " fmt "\n", ##__VA_ARGS__); \
+#define yaffs_tracef(msk, fmt, ...)                                                                                    \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        if (yaffs_trace_mask & (msk))                                                                                  \
+            yaffs_log("yaffs: " fmt "\n", ##__VA_ARGS__);                                                              \
+    \
 } while (0)
 
+#define yaffs_trace(msk, fmt)                                                                                          \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        if (yaffs_trace_mask & (msk))                                                                                  \
+            yaffs_log("yaffs: " fmt "\n");                                                                             \
+    \
+} while (0)
 
-#define YAFFS_LOSTNFOUND_NAME		"lost+found"
-#define YAFFS_LOSTNFOUND_PREFIX		"obj"
+#define YAFFS_LOSTNFOUND_NAME "lost+found"
+#define YAFFS_LOSTNFOUND_PREFIX "obj"
 
 #include "yaffscfg.h"
 
 #define Y_CURRENT_TIME yaffsfs_CurrentTime()
 #define Y_TIME_CONVERT(x) x
 
-#define YAFFS_ROOT_MODE			0666
-#define YAFFS_LOSTNFOUND_MODE		0666
+#define YAFFS_ROOT_MODE 0666
+#define YAFFS_LOSTNFOUND_MODE 0666
 
 #include "yaffs_list.h"
 
 #include "yaffsfs.h"
 
 #endif
-
-

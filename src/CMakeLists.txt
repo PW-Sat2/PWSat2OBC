@@ -41,5 +41,5 @@ target_jlink_flash(${NAME})
 target_format_sources(${NAME} "${SOURCES}")
 
 add_custom_target(swo_viewer
-    COMMAND ${JLINKSWO} -device ${DEVICE}
+    COMMAND ${JLINKSWO} -cpufreq 14000000 -device ${DEVICE} -itmmask 0x3
 )
