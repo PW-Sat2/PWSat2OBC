@@ -42,24 +42,26 @@ node {
 
 		def toolchainPath = env.ARM_TOOLCHAIN
 
-		withEnv(["PATH+TOOLCHAIN=${toolchainPath}", "PATH+SEGGER=${env.SEGGER}"]) {
+		withEnv(["PATH+TOOLCHAIN=${toolchainPath}", "PATH+SEGGER=${env.SEGGER}", "CLICOLOR_FORCE=1"]) {
 			dir('build') {
-				deleteDir()
+				wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+					deleteDir()
 
-				stage 'Build'
-				build()
+					stage 'Build'
+					build()
 
-				stage 'Unit tests'
-				unitTests()
+					stage 'Unit tests'
+					unitTests()
 
-				stage 'Reports'
-				reports()
+					stage 'Reports'
+					reports()
 
-				stage concurrency: 1, name: 'Integration Tests'
-				integrationTests()
+					stage concurrency: 1, name: 'Integration Tests'
+					integrationTests()
 
-				stage name: 'Generate Documentation'
-				generateDoc()
+					stage name: 'Generate Documentation'
+					generateDoc()
+				}
 			}
 		}
 	} catch(err) {
