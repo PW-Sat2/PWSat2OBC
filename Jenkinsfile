@@ -29,7 +29,7 @@ node {
 				stage concurrency: 1, name: 'Integration Tests'
 				bat "make integration_tests"
 				step([$class: 'JUnitResultArchiver', testResults: 'build/DevBoard/integration-tests.xml'])
-				
+
 				stage concurrency: 1, name: 'Generate Documentation'
 				bat "make doc"
 				publishHTML(target:[allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'documentation/html', reportFiles: 'index.html', reportName: 'Source Code Documentation'])
@@ -46,5 +46,22 @@ node {
 
 			slackSend color: color, message: "*Build ${env.JOB_NAME} #${env.BUILD_NUMBER}: ${currentBuild.result}*\n${currentBuild.absoluteUrl}", channel: 'obc-notify'
 		}
+
+		step([
+			$class: 'WarningsPublisher',
+			canResolveRelativePaths: false,
+			canRunOnFailed: true,
+			consoleParsers:
+			[
+				[parserName: 'GNU Make + GNU C Compiler (gcc)']
+			],
+			defaultEncoding: '',
+			excludePattern: 'libs/external/**/*.*',
+			healthy: '',
+			includePattern: '',
+			messagesPattern: '',
+			unHealthy: '',
+			useStableBuildAsReference: true
+		])
 	}
 }
