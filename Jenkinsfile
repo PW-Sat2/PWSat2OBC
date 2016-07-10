@@ -12,6 +12,14 @@ def unitTests() {
 def reports() {
 	echo "Memory usage report:"
 	bat "make pwsat.memory_report"
+	publishHTML(target: [
+		allowMissing: false,
+		alwaysLinkToLastBuild: false,
+		keepAll: false,
+		reportDir: 'build/DevBoard/reports/memory',
+		reportFiles: 'index.html',
+		reportName: 'Memory usage'
+  ])
 }
 
 def integrationTests() {
