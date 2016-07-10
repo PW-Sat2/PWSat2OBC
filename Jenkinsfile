@@ -1,3 +1,36 @@
+def build() {
+	bat "cmake -DMOCK_COM=${env.MOCK_COM} -DOBC_COM=${env.OBC_COM} -G \"MinGW Makefiles\" ../source"
+	bat "make pwsat"
+	step([$class: 'ArtifactArchiver', artifacts: 'build/DevBoard/**/*', fingerprint: true])
+}
+
+def unitTests() {
+	bat "make unit_tests.run"
+	step([$class: 'JUnitResultArchiver', testResults: 'build/DevBoard/unit-tests.xml'])
+}
+
+def reports() {
+	echo "Memory usage report:"
+	bat "make pwsat.memory_report"
+}
+
+def integrationTests() {
+	bat "make integration_tests"
+	step([$class: 'JUnitResultArchiver', testResults: 'build/DevBoard/integration-tests.xml'])
+}
+
+def generateDoc() {
+	bat "make doc"
+	publishHTML(target: [
+		allowMissing: false,
+		alwaysLinkToLastBuild: false,
+		keepAll: false,
+		reportDir: 'documentation/html',
+		reportFiles: 'index.html',
+		reportName: 'Source Code Documentation'
+  ])
+}
+
 node {
 	stage 'Checkout'
 
@@ -14,25 +47,19 @@ node {
 				deleteDir()
 
 				stage 'Build'
-				bat "cmake -DMOCK_COM=${env.MOCK_COM} -DOBC_COM=${env.OBC_COM} -G \"MinGW Makefiles\" ../source"
-				bat "make pwsat"
-				step([$class: 'ArtifactArchiver', artifacts: 'build/DevBoard/**/*', fingerprint: true])
+				build()
 
 				stage 'Unit tests'
-				bat "make unit_tests.run"
-				step([$class: 'JUnitResultArchiver', testResults: 'build/DevBoard/unit-tests.xml'])
+				unitTests()
 
 				stage 'Reports'
-				echo "Memory usage report:"
-				bat "make pwsat.memory_report"
+				reports()
 
 				stage concurrency: 1, name: 'Integration Tests'
-				bat "make integration_tests"
-				step([$class: 'JUnitResultArchiver', testResults: 'build/DevBoard/integration-tests.xml'])
+				integrationTests()
 
-				stage concurrency: 1, name: 'Generate Documentation'
-				bat "make doc"
-				publishHTML(target:[allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'documentation/html', reportFiles: 'index.html', reportName: 'Source Code Documentation'])
+				stage name: 'Generate Documentation'
+				generateDoc()
 			}
 		}
 	} catch(err) {
