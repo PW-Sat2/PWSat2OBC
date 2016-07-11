@@ -36,7 +36,20 @@ def generateDoc() {
 		reportDir: 'documentation/html',
 		reportFiles: 'index.html',
 		reportName: 'Source Code Documentation'
-  ])
+    ])
+}
+
+def coverage() {
+	bat "cmake -DENABLE_COVERAGE=1 ."
+	bat "make unit_tests.coverage"
+	publishHTML(target: [
+		allowMissing: false,
+		alwaysLinkToLastBuild: false,
+		keepAll: false,
+		reportDir: 'build/DevBoard/reports/coverage',
+		reportFiles: 'index.html',
+		reportName: 'Code Coverage'
+    ])
 }
 
 node {
@@ -67,8 +80,11 @@ node {
 					stage concurrency: 1, name: 'Integration Tests'
 					integrationTests()
 
-					stage name: 'Generate Documentation'
+					stage 'Generate Documentation'
 					generateDoc()
+					
+					stage 'Code Coverage'
+					coverage()
 				}
 			}
 		}

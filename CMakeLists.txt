@@ -5,6 +5,8 @@ include(utils/functions.cmake)
 
 project(PWSat C CXX ASM)
 
+set(ENABLE_COVERAGE FALSE CACHE BOOL "Enable code coverage" )
+
 set(MEM_MANAGMENT_TYPE 1)
 
 set(TARGET_PLATFORM "DevBoard" CACHE STRING "Target platform")
@@ -40,6 +42,7 @@ endif()
 message(STATUS "Using C compiler from ${CMAKE_C_COMPILER}")
 message(STATUS "Target platform ${TARGET_PLATFORM}")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "Code coverage: ${ENABLE_COVERAGE}")
 
 add_subdirectory(src)
 add_subdirectory(libs)
