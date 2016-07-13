@@ -1,6 +1,13 @@
 import logging
-
+import os
 import colorlog
+
+
+if os.getenv("CLICOLOR_FORCE") == "1":
+    print "Forcing colors"
+    import colorama
+    colorama.deinit()
+    #colorama.init(convert=False)
 
 
 def setup():

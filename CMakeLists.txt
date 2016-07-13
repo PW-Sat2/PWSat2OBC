@@ -13,6 +13,7 @@ set(SEMIHOSTING false CACHE BOOL "Enable semihosting")
 set(PLATFORM_PATH ${CMAKE_CURRENT_SOURCE_DIR}/platforms/${TARGET_PLATFORM})
 
 set(OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/build/${TARGET_PLATFORM})
+set(REPORTS_PATH ${OUTPUT_PATH}/reports)
 
 file(MAKE_DIRECTORY ${OUTPUT_PATH})
 
@@ -45,3 +46,4 @@ add_subdirectory(libs)
 add_subdirectory(doc)
 add_subdirectory(unit_tests)
 add_subdirectory(integration_tests)
+add_subdirectory(utils)
