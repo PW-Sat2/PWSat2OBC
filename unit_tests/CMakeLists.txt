@@ -15,7 +15,7 @@ set(SOURCES
   Comm/CommTest.cpp
   base/ReaderTest.cpp
   base/WriterTest.cpp
-  RapidTest.cpp
+  MissionPlan/MissionPlanTest.cpp  
   os/os.cpp
   os/os.hpp
   OsMock.hpp
@@ -45,6 +45,8 @@ target_link_libraries(${NAME}
     storage 
     comm
     fs    
+    base
+    mission
     rapidcheck
     rapidcheck.gtest
     rapidcheck.gmock
