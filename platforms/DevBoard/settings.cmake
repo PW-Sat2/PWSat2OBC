@@ -25,6 +25,10 @@ else()
     set (CCOVERAGE )
 endif()
 
+if(ENABLE_LTO)
+    set(LTO_SWITCH "-flto")
+endif()
+
 set (CWARN "-Wall -Wstrict-prototypes -Wextra -Werror")
 set (CXXWARN "-Wall -Wextra -Werror")
 set (CTUNING "-ggdb -pedantic -fomit-frame-pointer -ffunction-sections -fdata-sections")
@@ -33,7 +37,7 @@ set (CMAKE_C_FLAGS "-std=gnu11 ${CWARN} ${CTUNING} ${CMCU} ${CCOVERAGE}")
 set (CMAKE_CXX_FLAGS "-std=gnu++1y -fno-exceptions ${CXXWARN} ${CTUNING} ${CMCU} ${CCOVERAGE}")
 
 set(DEBUG_COMP_OPTIONS "-DDEBUG -Og -g")
-set(RELEASE_COMP_OPTIONS "-DNDEBUG -O2 -flto")
+set(RELEASE_COMP_OPTIONS "-DNDEBUG -O2 ${LTO_SWITCH}")
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -flto")
 
