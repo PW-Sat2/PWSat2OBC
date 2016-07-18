@@ -4,7 +4,7 @@ set(SOURCES
   semihosting.cpp
   mem.c
   test.cpp
-  logger/LoggerTest.cpp
+  Logger/LoggerTest.cpp
   Comm/CommTest.cpp
   base/ReaderTest.cpp
   base/WriterTest.cpp
@@ -43,16 +43,16 @@ add_custom_target(${NAME}.run
 if(${ENABLE_COVERAGE})
     add_custom_target(${NAME}.coverage
         COMMAND ${CMAKE_COMMAND} -E make_directory ${REPORTS_PATH}/coverage
-        COMMAND ${PYTHON_EXECUTABLE} 
+        COMMAND ${PYTHON_EXECUTABLE}
             -c "import gcovr.driver; gcovr.driver.main_()"
             "--gcov-executable=${CMAKE_GCOV}"
-            "--root=${CMAKE_SOURCE_DIR}" 
-            "--object-directory=${CMAKE_BINARY_DIR}" 
-            --html 
-            --html-details 
+            "--root=${CMAKE_SOURCE_DIR}"
+            "--object-directory=${CMAKE_BINARY_DIR}"
+            --html
+            --html-details
             --print-summary
             --sort-percentage
             "--output=${REPORTS_PATH}/coverage/index.html"
-       DEPENDS ${NAME}.run    
+       DEPENDS ${NAME}.run
     )
 endif()
