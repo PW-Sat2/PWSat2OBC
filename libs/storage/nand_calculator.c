@@ -8,26 +8,26 @@ void NANDCalculateGeometry(NANDGeometry* geometry)
     geometry->chunksPerBlock = geometry->pagesPerBlock / geometry->pagesPerChunk;
 }
 
-uint32_t NANDPageOffsetFromChunk(NANDGeometry* geometry, uint16_t chunkNo)
+uint32_t NANDPageOffsetFromChunk(NANDGeometry* const geometry, uint16_t chunkNo)
 {
     return geometry->baseOffset + chunkNo * geometry->chunkSize;
 }
 
-uint32_t NANDBlockOffset(NANDGeometry* geometry, uint16_t blockNo)
+uint32_t NANDBlockOffset(NANDGeometry* const geometry, uint16_t blockNo)
 {
     return geometry->baseOffset + blockNo * geometry->blockSize;
 }
 
-uint16_t NANDAffectedPagesCount(NANDGeometry* geometry, NANDOperation* operation)
+uint16_t NANDAffectedPagesCount(NANDGeometry* const geometry, NANDOperation* operation)
 {
-    uint16_t dataPages = operation->dataSize / geometry->pageSize;
-    if (geometry->pageSize * dataPages < operation->dataSize)
+    uint32_t dataPages = operation->dataSize / geometry->pageSize;
+    if ((uint32_t)(geometry->pageSize * dataPages) < operation->dataSize)
     {
         dataPages++;
     }
 
-    uint16_t sparePages = operation->spareSize / geometry->spareAreaPerPage;
-    if (geometry->spareAreaPerPage * sparePages < operation->spareSize)
+    uint32_t sparePages = operation->spareSize / geometry->spareAreaPerPage;
+    if ((uint32_t)(geometry->spareAreaPerPage * sparePages) < operation->spareSize)
     {
         sparePages++;
     }
@@ -42,17 +42,19 @@ uint16_t NANDAffectedPagesCount(NANDGeometry* geometry, NANDOperation* operation
     }
 }
 
-NANDOperationSlice NANDGetOperationSlice(NANDGeometry* geometry, NANDOperation* operation, uint16_t pageNo)
+NANDOperationSlice NANDGetOperationSlice(NANDGeometry* const geometry, NANDOperation* operation, uint16_t pageNo)
 {
     NANDOperationSlice slice;
 
-    slice.offset = operation->offset + pageNo * geometry->pageSize;
+    const uint32_t pageOffset = pageNo * geometry->pageSize;
 
-    int32_t remaining = operation->dataSize - pageNo * geometry->pageSize;
+    slice.offset = operation->offset + pageOffset;
+
+    int32_t remaining = operation->dataSize - pageOffset;
     if (remaining > 0)
     {
-        slice.dataBuffer = operation->dataBuffer + pageNo * geometry->pageSize;
-        slice.dataSize = operation->dataSize - pageNo * geometry->pageSize;
+        slice.dataBuffer = operation->dataBuffer + pageOffset;
+        slice.dataSize = operation->dataSize - pageOffset;
         if (slice.dataSize > geometry->pageSize)
         {
             slice.dataSize = geometry->pageSize;
@@ -64,12 +66,14 @@ NANDOperationSlice NANDGetOperationSlice(NANDGeometry* geometry, NANDOperation* 
         slice.dataSize = 0;
     }
 
-    remaining = operation->spareSize - pageNo * geometry->spareAreaPerPage;
+    const uint32_t spareOffset = pageNo * geometry->spareAreaPerPage;
+
+    remaining = operation->spareSize - spareOffset;
 
     if (remaining > 0)
     {
-        slice.spareBuffer = operation->spareBuffer + pageNo * geometry->spareAreaPerPage;
-        slice.spareSize = operation->spareSize - pageNo * geometry->spareAreaPerPage;
+        slice.spareBuffer = operation->spareBuffer + spareOffset;
+        slice.spareSize = operation->spareSize - spareOffset;
         if (slice.spareSize > geometry->spareAreaPerPage)
         {
             slice.spareSize = geometry->spareAreaPerPage;

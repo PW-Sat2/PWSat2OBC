@@ -26,7 +26,7 @@
 
 #include "fs/fs.h"
 #include "storage/nand.h"
-#include "storage/storage.h"
+#include "storage/nand_driver.h"
 #include "storage/storage.h"
 
 OBC Main;
@@ -64,11 +64,42 @@ static void InitSwoEndpoint(void)
     }
 }
 
+static bool FSInit(FileSystem* fs, struct yaffs_dev* rootDevice, YaffsNANDDriver* rootDeviceDriver)
+{
+    memset(rootDevice, 0, sizeof(*rootDevice));
+    rootDeviceDriver->geometry.pageSize = 512;
+    rootDeviceDriver->geometry.spareAreaPerPage = 0;
+    rootDeviceDriver->geometry.pagesPerBlock = 32;
+    rootDeviceDriver->geometry.pagesPerChunk = 1;
+
+    NANDCalculateGeometry(&rootDeviceDriver->geometry);
+
+    BuildNANDInterface(&rootDeviceDriver->flash);
+
+    SetupYaffsNANDDriver(rootDevice, rootDeviceDriver);
+
+    rootDevice->param.name = "/";
+    rootDevice->param.inband_tags = true;
+    rootDevice->param.is_yaffs2 = true;
+    rootDevice->param.total_bytes_per_chunk = rootDeviceDriver->geometry.chunkSize;
+    rootDevice->param.chunks_per_block = rootDeviceDriver->geometry.chunksPerBlock;
+    rootDevice->param.spare_bytes_per_chunk = 0;
+    rootDevice->param.start_block = 1;
+    rootDevice->param.n_reserved_blocks = 3;
+    rootDevice->param.no_tags_ecc = true;
+    rootDevice->param.always_check_erased = true;
+
+    rootDevice->param.end_block =
+        1 * 1024 * 1024 / rootDeviceDriver->geometry.blockSize - rootDevice->param.start_block - rootDevice->param.n_reserved_blocks;
+
+    return FileSystemInitialize(fs, rootDevice);
+}
+
 static void ObcInitTask(void* param)
 {
     OBC* obc = (OBC*)param;
 
-    if (!FileSystemInitialize(&obc->fs))
+    if (!FSInit(&obc->fs, &obc->rootDevice, &obc->rootDeviceDriver))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize file system");
     }

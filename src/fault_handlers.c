@@ -51,39 +51,3 @@ __attribute__((naked)) void HardFault_Handler(void)
                    " bx r2                                                     \n"
                    " handler2_address_constHF: .word prvGetRegistersFromStack  \n");
 }
-
-//__attribute__((naked)) void BusFault_Handler(void)
-//{
-//    __asm volatile(" tst lr, #4                                                \n"
-//                   " ite eq                                                    \n"
-//                   " mrseq r0, msp                                             \n"
-//                   " mrsne r0, psp                                             \n"
-//                   " ldr r1, [r0, #24]                                         \n"
-//                   " ldr r2, handler2_address_constBF                          \n"
-//                   " bx r2                                                     \n"
-//                   " handler2_address_constBF: .word prvGetRegistersFromStack  \n");
-//}
-//
-//__attribute__((naked)) void MemManage_Handler(void)
-//{
-//    __asm volatile(" tst lr, #4                                                \n"
-//                   " ite eq                                                    \n"
-//                   " mrseq r0, msp                                             \n"
-//                   " mrsne r0, psp                                             \n"
-//                   " ldr r1, [r0, #24]                                         \n"
-//                   " ldr r2, handler2_address_constMM                          \n"
-//                   " bx r2                                                     \n"
-//                   " handler2_address_constMM: .word prvGetRegistersFromStack  \n");
-//}
-//
-//__attribute__((naked)) void UsageFault_Handler(void)
-//{
-//    __asm volatile(" tst lr, #4                                                \n"
-//                   " ite eq                                                    \n"
-//                   " mrseq r0, msp                                             \n"
-//                   " mrsne r0, psp                                             \n"
-//                   " ldr r1, [r0, #24]                                         \n"
-//                   " ldr r2, handler2_address_constUF                          \n"
-//                   " bx r2                                                     \n"
-//                   " handler2_address_constUF: .word prvGetRegistersFromStack  \n");
-//}

@@ -8,9 +8,13 @@ int yaffsError = 0;
 
 #define YAFFS_TRACE_ALL 0xFFFFFFFF
 
-unsigned int yaffs_trace_mask = 0;
-
-//    YAFFS_TRACE_BAD_BLOCKS | YAFFS_TRACE_ERASE | YAFFS_TRACE_NANDACCESS | YAFFS_TRACE_ERROR | YAFFS_TRACE_BUG;
+unsigned int yaffs_trace_mask =
+#if 1
+    0;
+#else
+    // in case of debugging yaffs
+    YAFFS_TRACE_BAD_BLOCKS | YAFFS_TRACE_ERASE | YAFFS_TRACE_NANDACCESS | YAFFS_TRACE_ERROR | YAFFS_TRACE_BUG;
+#endif
 
 void yaffsfs_Lock(void)
 {

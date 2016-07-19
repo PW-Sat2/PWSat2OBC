@@ -8,10 +8,12 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
+#include <yaffs_guts.h>
+
 /**
  * @defgroup fs File system
  *
- * @brief File system API
+ * @brief File system API. POSIX-compatible
  *
  * Wrappers for YAFFS file system.
  * Partitions:
@@ -34,8 +36,8 @@ typedef struct
     /**
      * @brief Opens file
      * @param[in] path Path to file
-     * @param[in] openFlag Open flags
-     * @param[in] mode Mode
+     * @param[in] openFlag Open flags (O_CREAT, O_RDONLY, O_WRONLY, O_RDWR, O_APPEND)
+     * @param[in] mode Mode (Use S_IRWXU)
      * @return File handle. In case of error: -1
      */
     FSFileHandle (*open)(const char* path, int openFlag, int mode);
@@ -103,10 +105,11 @@ typedef struct
 
 /**
  * @brief Initializes file system interface
- * @param[out] fs File system interface
+ * @param[inout] fs File system interface
+ * @param[in] rootDevice root device driver
  * @return true if initialization was successful
  */
-bool FileSystemInitialize(FileSystem* fs);
+bool FileSystemInitialize(FileSystem* fs, struct yaffs_dev* rootDevice);
 
 /** @} */
 

@@ -1,6 +1,5 @@
 set(NAME yaffs)
 
-#aux_source_directory(src SOURCES)
 set(SOURCES
     src/yaffsfs.c
     src/yaffs_guts.c

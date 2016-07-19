@@ -3,7 +3,7 @@
 #include "gmock/gmock-matchers.h"
 
 #include "fs/fs.h"
-#include "fs/nand_driver.h"
+#include "storage/nand_driver.h"
 #include "system.h"
 #include "yaffs_guts.h"
 #include "yaffsfs.h"
@@ -56,8 +56,7 @@ FileSystemTest::FileSystemTest()
     device.param.no_tags_ecc = true;
     device.param.always_check_erased = true;
 
-    device.param.end_block =
-        1 * 1024 * 1024 / driver.geometry.blockSize - device.param.start_block - device.param.n_reserved_blocks;
+    device.param.end_block = 1 * 1024 * 1024 / driver.geometry.blockSize - device.param.start_block - device.param.n_reserved_blocks;
 
     yaffs_add_device(&device);
 }
@@ -143,9 +142,9 @@ TEST_F(FileSystemTest, WritingFileBiggerThatOneChunk)
 
     file = yaffs_open("/file", O_RDONLY, S_IRWXU);
 
-    memset(buffer, 0, COUNT_OF(buffer));
+    memset(buffer, 0, sizeof(buffer));
 
-    yaffs_read(file, buffer, COUNT_OF(buffer));
+    yaffs_read(file, buffer, sizeof(buffer));
 
     yaffs_close(file);
 
@@ -280,7 +279,7 @@ TEST_F(FileSystemTest, ShouldDetectUncorrectableError)
 
     uint32_t unfixed = this->device.n_ecc_unfixed;
 
-    auto r = yaffs_read(file, buffer, sizeof(buffer));
+    yaffs_read(file, buffer, sizeof(buffer));
 
     ASSERT_THAT(this->device.n_ecc_unfixed - unfixed, Eq(1));
 

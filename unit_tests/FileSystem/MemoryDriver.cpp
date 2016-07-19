@@ -22,7 +22,7 @@ static inline DriverContext* Context(const FlashNANDInterface* interface)
     return (DriverContext*)interface->context;
 }
 
-static FlashStatus ReadPage(FlashNANDInterface* interface, uint32_t offset, uint8_t* buffer, uint16_t len)
+static FlashStatus ReadPage(FlashNANDInterface* interface, uint32_t offset, uint8_t* buffer, uint32_t len)
 {
     auto context = Context(interface);
 
@@ -63,7 +63,7 @@ static FlashStatus ReadPage(FlashNANDInterface* interface, uint32_t offset, uint
     }
 }
 
-static FlashStatus ReadSpare(FlashNANDInterface* interface, uint32_t offset, uint8_t* buffer, uint16_t length)
+static FlashStatus ReadSpare(FlashNANDInterface* interface, uint32_t offset, uint8_t* buffer, uint32_t length)
 {
     auto context = Context(interface);
     uint16_t pageNo = offset / 512;
@@ -83,7 +83,7 @@ static FlashStatus ReadSpare(FlashNANDInterface* interface, uint32_t offset, uin
     return FlashStatusOK;
 }
 
-static FlashStatus WritePage(FlashNANDInterface* interface, uint32_t offset, const uint8_t* buffer, uint32_t length)
+static FlashStatus WritePage(FlashNANDInterface* interface, uint32_t offset, uint8_t* const buffer, uint32_t length)
 {
     auto context = Context(interface);
     uint16_t pageNo = offset / 512;
@@ -101,7 +101,7 @@ static FlashStatus WritePage(FlashNANDInterface* interface, uint32_t offset, con
     return FlashStatusOK;
 }
 
-static FlashStatus WriteSpare(FlashNANDInterface* interface, uint32_t offset, const uint8_t* buffer, uint16_t length)
+static FlashStatus WriteSpare(FlashNANDInterface* interface, uint32_t offset, uint8_t* const buffer, uint32_t length)
 {
     auto context = Context(interface);
     uint16_t pageNo = offset / 512;

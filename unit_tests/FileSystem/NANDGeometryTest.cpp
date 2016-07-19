@@ -72,9 +72,8 @@ TEST(NANDGeometryTest, ShouldCalculateRangesOfMultipageOperation2)
     op.spareSize = 17;
     op.spareBuffer = spareBuffer;
 
-    NANDOperationSlice slice[] = {NANDGetOperationSlice(&geometry, &op, 0),
-        NANDGetOperationSlice(&geometry, &op, 1),
-        NANDGetOperationSlice(&geometry, &op, 2)};
+    NANDOperationSlice slice[] = {
+        NANDGetOperationSlice(&geometry, &op, 0), NANDGetOperationSlice(&geometry, &op, 1), NANDGetOperationSlice(&geometry, &op, 2)};
 
     ASSERT_THAT(Hex(slice[0].offset), Eq(Hex(0x100)));
     ASSERT_THAT(slice[0].dataSize, Eq(512));

@@ -11,6 +11,13 @@ void FSListFiles(uint16_t argc, char* argv[])
 
     FSDirectoryHandle dir = Main.fs.openDirectory(argv[0]);
 
+    if (dir == -1)
+    {
+        TerminalPuts("Error");
+        TerminalSendNewLine();
+        return;
+    }
+
     char* entry;
     while ((entry = Main.fs.readDirectory(dir)) != NULL)
     {
@@ -26,6 +33,14 @@ void FSWriteFile(uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argc);
 
     FSFileHandle file = Main.fs.open(argv[0], O_RDWR | O_CREAT | O_TRUNC, S_IRWXU);
+
+    if (file == -1)
+    {
+        TerminalPuts("Error");
+        TerminalSendNewLine();
+        return;
+    }
+
     Main.fs.ftruncate(file, 0);
     Main.fs.write(file, argv[1], strlen(argv[1]));
     Main.fs.close(file);
@@ -35,6 +50,13 @@ void FSReadFile(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     FSFileHandle file = Main.fs.open(argv[0], O_RDONLY, S_IRWXU);
+
+    if (file == -1)
+    {
+        TerminalPuts("Error");
+        TerminalSendNewLine();
+        return;
+    }
 
     char buffer[100];
 

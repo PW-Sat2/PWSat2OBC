@@ -84,7 +84,7 @@ typedef struct _FlashNANDInterface
      * @param[in] length Length of data to read. Must by multiply of 4
      * @return Operations status
      */
-    FlashStatus (*readPage)(struct _FlashNANDInterface* flash, uint32_t offset, uint8_t* buffer, uint16_t length);
+    FlashStatus (*readPage)(struct _FlashNANDInterface* flash, uint32_t offset, uint8_t* buffer, uint32_t length);
 
     /**
      * @brief Pointer to procedure that reads spare area from single page
@@ -95,7 +95,7 @@ typedef struct _FlashNANDInterface
      * @param[in] length Length of data to read. Must by multiply of 4
      * @return Operations status
      */
-    FlashStatus (*readSpare)(struct _FlashNANDInterface* interface, uint32_t offset, uint8_t* buffer, uint16_t length);
+    FlashStatus (*readSpare)(struct _FlashNANDInterface* interface, uint32_t offset, uint8_t* buffer, uint32_t length);
 
     /**
      * @brief Pointer to procedure that writes single page
@@ -107,7 +107,7 @@ typedef struct _FlashNANDInterface
      * @return Operations status
      */
     FlashStatus (*writePage)(
-        struct _FlashNANDInterface* interface, uint32_t offset, const uint8_t* buffer, uint32_t length);
+        struct _FlashNANDInterface* interface, uint32_t offset, uint8_t* const buffer, uint32_t length);
 
     /**
     * @brief Pointer to procedure that writes spare area of single page
@@ -119,7 +119,7 @@ typedef struct _FlashNANDInterface
     * @return Operations status
     */
     FlashStatus (*writeSpare)(
-        struct _FlashNANDInterface* interface, uint32_t offset, const uint8_t* buffer, uint16_t length);
+        struct _FlashNANDInterface* interface, uint32_t offset, uint8_t* const buffer, uint32_t length);
 
     /**
      * @brief Pointer to procedure that checks if block is marked as bad
@@ -215,7 +215,7 @@ void NANDCalculateGeometry(NANDGeometry* geometry);
  * @param[in] chunkNo Chunk number (indexed from 0)
  * @return Offset to first page in chunk
  */
-uint32_t NANDPageOffsetFromChunk(NANDGeometry* geometry, uint16_t chunkNo);
+uint32_t NANDPageOffsetFromChunk(NANDGeometry* const geometry, uint16_t chunkNo);
 
 /**
  * @brief Calculates offset to start of first page in block
@@ -223,7 +223,7 @@ uint32_t NANDPageOffsetFromChunk(NANDGeometry* geometry, uint16_t chunkNo);
  * @param[in] blockNo Block number (indexed from 0)
  * @return Offset to first page in block
  */
-uint32_t NANDBlockOffset(NANDGeometry* geometry, uint16_t blockNo);
+uint32_t NANDBlockOffset(NANDGeometry* const geometry, uint16_t blockNo);
 
 /**
  * @brief Calculates number of pages affected by single operation
@@ -231,7 +231,7 @@ uint32_t NANDBlockOffset(NANDGeometry* geometry, uint16_t blockNo);
  * @param[in] operation Operation definition
  * @return Number of pages affected by operation
  */
-uint16_t NANDAffectedPagesCount(NANDGeometry* geometry, NANDOperation* operation);
+uint16_t NANDAffectedPagesCount(NANDGeometry* const geometry, NANDOperation* operation);
 
 /**
  * @brief Calculates slice of operation for given page
@@ -240,7 +240,7 @@ uint16_t NANDAffectedPagesCount(NANDGeometry* geometry, NANDOperation* operation
  * @param[in] pageNo Page number
  * @return Operation slice affecting given page
  */
-NANDOperationSlice NANDGetOperationSlice(NANDGeometry* geometry, NANDOperation* operation, uint16_t pageNo);
+NANDOperationSlice NANDGetOperationSlice(NANDGeometry* const geometry, NANDOperation* operation, uint16_t pageNo);
 
 /** @} */
 

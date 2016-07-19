@@ -5,8 +5,8 @@
 extern "C" {
 #endif
 
-#include <storage/nand.h>
 #include <yaffs_guts.h>
+#include "nand.h"
 
 /**
  * @defgroup yaffs-nand YAFFS driver for NAND flash.

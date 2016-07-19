@@ -1,7 +1,6 @@
 set(NAME fs)
 
-add_library(${NAME} STATIC
-    nand_driver.c
+add_library(${NAME} STATIC    
     yaffs_os_glue.c
     fs.c
 )
