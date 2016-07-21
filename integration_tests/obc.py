@@ -111,9 +111,6 @@ class OBC:
         if not enable:
             self._terminal.command("pauseComm")
 
-    def current_test(self, test_name):
-        self._terminal.command("currentTest %s" % test_name)
-
     def reset(self):
         self._terminal.reset()
 
@@ -125,3 +122,13 @@ class OBC:
 
     def power_on(self):
         self._terminal.power_on()
+
+    def list_files(self, path):
+        result = self._terminal.command("listFiles %s" % path)
+        return result.split('\n')
+
+    def write_file(self, path, content):
+        self._terminal.command("writeFile %s %s" % (path, content))
+
+    def read_file(self, path):
+        return self._terminal.command("readFile %s" % path)

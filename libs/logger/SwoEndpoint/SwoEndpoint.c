@@ -16,12 +16,12 @@ void* SwoEndpointInit(void)
         {
             vSemaphoreDelete(handle);
             handle = NULL;
-            SwoPuts("Unable to initialize SwoEndpoint semaphore.\n");
+            SwoPutsOnChannel(0, "Unable to initialize SwoEndpoint semaphore.\n");
         }
     }
     else
     {
-        SwoPuts("Unable to create SwoEndpoint state.\n");
+        SwoPutsOnChannel(0, "Unable to create SwoEndpoint state.\n");
     }
 
     return handle;
@@ -77,7 +77,7 @@ static void SwoEndpointLoggerSynchronized(
 {
     if (!Lock(context, withinISR))
     {
-        SwoPuts("Unable to acquire SwoEndpoint semaphore.\n");
+        SwoPutsOnChannel(0, "Unable to acquire SwoEndpoint semaphore.\n");
         return;
     }
 
@@ -85,7 +85,7 @@ static void SwoEndpointLoggerSynchronized(
 
     if (!Unlock(context, withinISR))
     {
-        SwoPuts("Unable to release SwoEndpoint semaphore.\n");
+        SwoPutsOnChannel(0, "Unable to release SwoEndpoint semaphore.\n");
     }
 }
 

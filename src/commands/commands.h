@@ -12,5 +12,8 @@ void GetFramesCountHandler(uint16_t argc, char* argv[]);
 void ReceiveFrameHandler(uint16_t argc, char* argv[]);
 void CommandPauseComm(uint16_t argc, char* argv[]);
 void OBCGetState(uint16_t argc, char* argv[]);
+void FSListFiles(uint16_t argc, char* argv[]);
+void FSWriteFile(uint16_t argc, char* argv[]);
+void FSReadFile(uint16_t argc, char* argv[]);
 
 #endif

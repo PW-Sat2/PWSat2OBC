@@ -108,6 +108,16 @@ static OSEventBits EventGroupWaitForBits(OSEventGroupHandle eventGroup,
         ConvertTimeToTicks(timeout));
 }
 
+static void* Alloc(size_t size)
+{
+    return pvPortMalloc(size);
+}
+
+static void Free(void* ptr)
+{
+    return vPortFree(ptr);
+}
+
 OS System;
 
 OSResult OSSetup(void)
@@ -124,6 +134,8 @@ OSResult OSSetup(void)
     System.EventGroupSetBits = EventGroupSetBits;
     System.EventGroupClearBits = EventGroupClearBits;
     System.EventGroupWaitForBits = EventGroupWaitForBits;
+    System.Alloc = Alloc;
+    System.Free = Free;
 
     return OSResultSuccess;
 }
