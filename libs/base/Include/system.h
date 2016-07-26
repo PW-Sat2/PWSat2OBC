@@ -18,4 +18,12 @@
 #define __packed __attribute__((aligned(1)))
 #endif
 
+#ifdef __cplusplus
+#define EXTERNC_BEGIN extern "C" {
+#define EXTERNC_END }
+#else
+#define EXTERNC_BEGIN
+#define EXTERNC_END
+#endif
+
 #endif
