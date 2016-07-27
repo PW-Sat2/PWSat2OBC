@@ -18,15 +18,14 @@
 static USART_TypeDef *uart = USART1;
 QueueHandle_t usart1sink;
 
-int8_t UARTSend(uint8_t * str, uint32_t size)
+void UARTSend(uint8_t * str, uint32_t size)
 {
     for (uint32_t i = 0; i < size; i++) {
         USART_Tx(uart, str[i]);
     }
-    return size;
 }
 
-int8_t UARTInit(xQueueHandle sink)
+void UARTInit(xQueueHandle sink)
 {
     /* Initialize USART */
     USART_InitAsync_TypeDef init = {
@@ -70,7 +69,6 @@ int8_t UARTInit(xQueueHandle sink)
 
     /* Finally enable it */
     USART_Enable(uart, usartEnable);
-    return 0;
 }
 
 void USART1_RX_IRQHandler(void)

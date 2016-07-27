@@ -136,11 +136,11 @@ typedef struct CameraCmdAck_ {
     CameraCmd type;
     uint8_t ackCounter;
     uint16_t packageId;
-}*CameraCmdAck;
+}CameraCmdAck;
 
 typedef struct CameraCmdData_ {
     CameraPictureType type;
     uint32_t dataLength;
-}*CameraCmdData;
+}CameraCmdData;
 
 #endif /* _CAMERA_TYPES_H_ */
