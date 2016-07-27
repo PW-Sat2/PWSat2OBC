@@ -2,18 +2,6 @@
 #include <stddef.h>
 #include "logger/logger.h"
 
-void CameraLogSendCmd(uint8_t* cmd)
-{
-    LOG(LOG_LEVEL_INFO, "Command send:");
-    LOGF(LOG_LEVEL_INFO, "%02X%02X%02X%02X%02X%02X", cmd[0], cmd[1], cmd[2], cmd[3], cmd[4], cmd[5]);
-}
-
-void CameraLogGetCmd(uint8_t* cmd)
-{
-    LOG(LOG_LEVEL_INFO, "Command received:");
-    LOGF(LOG_LEVEL_INFO, "%02X%02X%02X%02X%02X%02X", cmd[0], cmd[1], cmd[2], cmd[3], cmd[4], cmd[5]);
-}
-
 static CameraPictureType CameraGetPictureType(uint8_t type)
 {
     switch (type)
@@ -97,7 +85,7 @@ uint16_t CameraGetRAWDataLength(CameraRAWImageFormat format, CameraRAWResolution
     return ((uint16_t)CameraRAWImageFormatGetComponent(format)) * CameraRAWResolutionGetSquare(resolution);
 }
 
-CameraCmd CameraParseDataCmd(uint8_t* cmd, CameraCmdData cmdData)
+CameraCmd CameraParseDataCmd(uint8_t* cmd, CameraCmdData* cmdData)
 {
     if (cmd[0] != CameraCmdPrefix || cmd[1] != CameraCmd_Data)
     {
@@ -119,7 +107,7 @@ CameraCmd CameraParseDataCmd(uint8_t* cmd, CameraCmdData cmdData)
     return CameraCmd_Data;
 }
 
-CameraCmd CameraParseAckCmd(uint8_t* cmd, CameraCmdAck cmdAck)
+CameraCmd CameraParseAckCmd(uint8_t* cmd, CameraCmdAck* cmdAck)
 {
     if (cmd[0] != CameraCmdPrefix || cmd[1] != CameraCmd_Ack)
     {
@@ -146,7 +134,7 @@ CameraCmd CameraParseSyncCmd(uint8_t* cmd)
     return CameraCmd_Sync;
 }
 
-int8_t CameraCmdAckInit(CameraCmdAck cmdAck)
+int8_t CameraCmdAckInit(CameraCmdAck* cmdAck)
 {
     if (cmdAck == NULL)
     {
@@ -158,7 +146,7 @@ int8_t CameraCmdAckInit(CameraCmdAck cmdAck)
     return 0;
 }
 
-int8_t CameraCmdDataInit(CameraCmdData cmdData)
+int8_t CameraCmdDataInit(CameraCmdData* cmdData)
 {
     if (cmdData == NULL)
     {

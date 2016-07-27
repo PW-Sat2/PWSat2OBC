@@ -10,16 +10,13 @@
 #include "camera_internal.h"
 #include "camera_utils.h"
 
-int8_t CameraGetJPEGPicture(CameraJPEGResolution resolution, uint8_t* data)
+int32_t CameraGetJPEGPicture(CameraJPEGResolution resolution, uint8_t* data, uint32_t dataLength)
 {
     UNREFERENCED_PARAMETER(data);
+    UNREFERENCED_PARAMETER(dataLength);
 
-    int8_t ret = CameraInit();
-    if (ret < 0)
-    {
-        LOG(LOG_LEVEL_ERROR, "---------------- Camera Init failed ------------------\n");
-        return -1;
-    }
+    int8_t ret = 0;
+    CameraInit();
 
     ret = CameraSync();
     if (ret == -1)
@@ -84,7 +81,7 @@ int8_t CameraGetJPEGPicture(CameraJPEGResolution resolution, uint8_t* data)
         goto close;
     }
 
-    struct CameraCmdData_ cmdData;
+    CameraCmdData cmdData;
     ret = CameraCmdDataInit(&cmdData);
     if (ret == -1)
     {
@@ -124,15 +121,12 @@ close:
     return ret;
 }
 
-int8_t CameraGetRAWPicture(CameraRAWImageFormat format, CameraRAWResolution resolution, uint8_t* data)
+int32_t CameraGetRAWPicture(
+    CameraRAWImageFormat format, CameraRAWResolution resolution, uint8_t* data, uint32_t dataLength)
 {
-    uint16_t dataLength = 0;
-    int8_t ret = CameraInit();
-    if (ret < 0)
-    {
-        LOG(LOG_LEVEL_ERROR, "---------------- Camera Init failed ------------------\n");
-        return -1;
-    }
+    uint32_t imageLength = 0;
+    int8_t ret = 0;
+    CameraInit();
 
     ret = CameraSync();
     if (ret == -1)
@@ -183,8 +177,8 @@ int8_t CameraGetRAWPicture(CameraRAWImageFormat format, CameraRAWResolution reso
         goto close;
     }
 
-    dataLength = CameraGetRAWDataLength(CameraRAWImageFormat_RGB565, CameraRAWResolution_160x120);
-    if (dataLength == 0)
+    imageLength = CameraGetRAWDataLength(CameraRAWImageFormat_RGB565, CameraRAWResolution_160x120);
+    if (imageLength == 0)
     {
         LOG(LOG_LEVEL_ERROR, "---------------- Get Data Length failed --------------\n");
         goto close;
@@ -204,7 +198,6 @@ int8_t CameraGetRAWPicture(CameraRAWImageFormat format, CameraRAWResolution reso
         LOG(LOG_LEVEL_ERROR, "---------------- Invalid Data Ack --------------------\n");
         goto close;
     }
-    ret = dataLength;
 close:
     return ret;
 }

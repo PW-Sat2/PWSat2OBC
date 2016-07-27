@@ -19,7 +19,7 @@ void TakeRAWPhotoHandler(uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
 
-    CameraGetRAWPicture(CameraRAWImageFormat_GrayScale, CameraRAWResolution_160x120, data);
+    CameraGetRAWPicture(CameraRAWImageFormat_GrayScale, CameraRAWResolution_160x120, data, DATA_LENGTH);
 }
 
 void TakeJPEGPhotoHandler(uint16_t argc, char* argv[])
@@ -27,5 +27,5 @@ void TakeJPEGPhotoHandler(uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
 
-    CameraGetJPEGPicture(CameraJPEGResolution_160x128, data);
+    CameraGetJPEGPicture(CameraJPEGResolution_160x128, data, DATA_LENGTH);
 }

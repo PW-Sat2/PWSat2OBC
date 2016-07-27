@@ -3,9 +3,9 @@
 
 #include "camera_types.h"
 
-int8_t CameraGetJPEGPicture(CameraJPEGResolution resolution, uint8_t * data);
+int32_t CameraGetJPEGPicture(CameraJPEGResolution resolution, uint8_t * data, uint32_t dataLength);
 
-int8_t CameraGetRAWPicture(CameraRAWImageFormat format, CameraRAWResolution resolution,
-                           uint8_t * data);
+int32_t CameraGetRAWPicture(CameraRAWImageFormat format, CameraRAWResolution resolution,
+                            uint8_t * data, uint32_t dataLength);
 
 #endif /* _CAMERA_H_ */

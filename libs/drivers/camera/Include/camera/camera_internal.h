@@ -6,7 +6,7 @@
 
 extern int8_t CameraGetCmdSync(void);
 
-extern int8_t CameraGetCmdData(CameraCmdData cmdData);
+extern int8_t CameraGetCmdData(CameraCmdData *cmdData);
 
 /*
  * Function to receive and verify ACK messages
@@ -23,7 +23,7 @@ extern int8_t CameraSendCmdAckData(void);
 
 extern int8_t CameraSync(void);
 
-extern int8_t CameraReceiveData(uint8_t * data, uint16_t dataLength);
+extern int32_t CameraReceiveData(uint8_t * data, uint32_t dataLength);
 
 extern int8_t CameraSendCmdSnapshot(CameraSnapshotType type);
 
@@ -35,7 +35,7 @@ extern int8_t CameraSendCmdRAWInitial(CameraRAWImageFormat format, CameraRAWReso
 
 extern int8_t CameraSendCmdSetPackageSize(uint16_t packageSize);
 
-extern int8_t CameraInit(void);
+extern void CameraInit(void);
 
 extern int8_t CameraDeinit(void);
 
