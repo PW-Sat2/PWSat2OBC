@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <em_chip.h>
 #include <em_cmu.h>
 #include <em_dbg.h>
@@ -10,16 +11,27 @@
 #include <FreeRTOSConfig.h>
 #include <task.h>
 
-#include "logger/logger.h"
 #include "SwoEndpoint/SwoEndpoint.h"
+#include "base/os.h"
+#include "comm/comm.h"
+#include "devices/eps.h"
 #include "i2c/i2c.h"
 #include "io_map.h"
+#include "logger/logger.h"
+#include "obc.h"
 #include "openSail.h"
 #include "swo/swo.h"
 #include "system.h"
 #include "terminal.h"
 
-#include "devices/eps.h"
+#include "fs/fs.h"
+#include "storage/nand.h"
+#include "storage/nand_driver.h"
+#include "storage/storage.h"
+
+OBC Main;
+
+const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
 void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
 {
@@ -39,8 +51,6 @@ static void BlinkLed0(void* param)
     {
         GPIO_PinOutToggle(LED_PORT, LED0);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
-
-        LOG(LOG_LEVEL_INFO, "Test");
     }
 }
 
@@ -50,12 +60,70 @@ static void InitSwoEndpoint(void)
     const bool result = LogAddEndpoint(SwoGetEndpoint(swoEndpointHandle), swoEndpointHandle, LOG_LEVEL_TRACE);
     if (!result)
     {
-        SwoPuts("Unable to attach swo endpoint to logger. ");
+        SwoPutsOnChannel(0, "Unable to attach swo endpoint to logger. ");
     }
+}
+
+static bool FSInit(FileSystem* fs, struct yaffs_dev* rootDevice, YaffsNANDDriver* rootDeviceDriver)
+{
+    memset(rootDevice, 0, sizeof(*rootDevice));
+    rootDeviceDriver->geometry.pageSize = 512;
+    rootDeviceDriver->geometry.spareAreaPerPage = 0;
+    rootDeviceDriver->geometry.pagesPerBlock = 32;
+    rootDeviceDriver->geometry.pagesPerChunk = 1;
+
+    NANDCalculateGeometry(&rootDeviceDriver->geometry);
+
+    BuildNANDInterface(&rootDeviceDriver->flash);
+
+    SetupYaffsNANDDriver(rootDevice, rootDeviceDriver);
+
+    rootDevice->param.name = "/";
+    rootDevice->param.inband_tags = true;
+    rootDevice->param.is_yaffs2 = true;
+    rootDevice->param.total_bytes_per_chunk = rootDeviceDriver->geometry.chunkSize;
+    rootDevice->param.chunks_per_block = rootDeviceDriver->geometry.chunksPerBlock;
+    rootDevice->param.spare_bytes_per_chunk = 0;
+    rootDevice->param.start_block = 1;
+    rootDevice->param.n_reserved_blocks = 3;
+    rootDevice->param.no_tags_ecc = true;
+    rootDevice->param.always_check_erased = true;
+
+    rootDevice->param.end_block =
+        1 * 1024 * 1024 / rootDeviceDriver->geometry.blockSize - rootDevice->param.start_block - rootDevice->param.n_reserved_blocks;
+
+    return FileSystemInitialize(fs, rootDevice);
+}
+
+static void ObcInitTask(void* param)
+{
+    OBC* obc = (OBC*)param;
+
+    if (!FSInit(&obc->fs, &obc->rootDevice, &obc->rootDeviceDriver))
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to initialize file system");
+    }
+
+    if (!CommRestart(&obc->comm))
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to restart comm");
+    }
+
+    LOG(LOG_LEVEL_INFO, "Intialized");
+    atomic_store(&Main.initialized, true);
+    System.SuspendTask(NULL);
+}
+
+static void FrameHandler(CommObject* comm, CommFrame* frame, void* context)
+{
+    UNREFERENCED_PARAMETER(context);
+    UNREFERENCED_PARAMETER(frame);
+    CommSendFrame(comm, (uint8_t*)"PONG", 4);
 }
 
 int main(void)
 {
+    memset(&Main, 0, sizeof(Main));
     CHIP_Init();
 
     CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
@@ -65,14 +133,23 @@ int main(void)
 
     SwoEnable();
 
+    LogInit(LOG_LEVEL_DEBUG);
+    InitSwoEndpoint();
+
+    OSSetup();
     I2CInit();
 
     EpsInit();
+    CommLowInterface commInterface;
+    commInterface.readProc = I2CWriteRead;
+    commInterface.writeProc = I2CWrite;
+    CommUpperInterface commUpperInterface;
+    commUpperInterface.frameHandler = FrameHandler;
+    commUpperInterface.frameHandlerContext = NULL;
+    CommInitialize(&Main.comm, &commInterface, &commUpperInterface);
 
     TerminalInit();
-    SwoPuts("Hello I'm PW-SAT2 OBC\n");
-    LogInit(LOG_LEVEL_INFO);
-    InitSwoEndpoint();
+    SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 
     OpenSailInit();
 
@@ -83,9 +160,10 @@ int main(void)
     GPIO_PinOutSet(LED_PORT, LED0);
     GPIO_PinOutSet(LED_PORT, LED1);
 
-    xTaskCreate(BlinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
+    System.CreateTask(BlinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
+    System.CreateTask(ObcInitTask, "Init", 512, &Main, tskIDLE_PRIORITY + 16, &Main.initTask);
+    System.RunScheduler();
 
-    vTaskStartScheduler();
     GPIO_PinOutToggle(LED_PORT, LED0);
 
     return 0;

@@ -1,0 +1,4 @@
+add_custom_target(doc
+    COMMAND ${CMAKE_COMMAND} -E env "DOXYGEN_OUTPUT_PATH=${CMAKE_BINARY_DIR}/documentation" ${DOXYGEN_EXECUTABLE}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )

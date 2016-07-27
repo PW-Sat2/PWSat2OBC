@@ -1,28 +1,17 @@
 #include <gtest/gtest.h>
-#include <stdlib.h>
 
-GTEST_TEST(MyTest, MyName)
-{
-	printf("Running my test\n");
-	EXPECT_EQ(2, 2);
-}
-
-GTEST_TEST(MyTest, ThisOneWorks)
-{
-	printf("Running my second test\n");
-	EXPECT_EQ(2, 2);
-}
-
-GTEST_TEST(MyTest, WritingFiles)
-{
-	char buf[] = "Hello ARM";
-	FILE * f = fopen("../arm.txt", "w");
-	fwrite(buf, sizeof(char), sizeof(buf), f);
-	fclose(f);
-}
+#ifdef ENABLE_COVERAGE
+extern "C" void __gcov_flush(void);
+#endif
 
 int run(int argc, char** argv)
 {
-	testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
+    testing::InitGoogleTest(&argc, argv);
+    auto r = RUN_ALL_TESTS();
+
+#ifdef ENABLE_COVERAGE
+    __gcov_flush();
+#endif
+
+    return r;
 }

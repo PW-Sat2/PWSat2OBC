@@ -1,5 +1,6 @@
 #include <FreeRTOS.h>
 #include <queue.h>
+#include <semphr.h>
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -17,6 +18,7 @@
 #include "io_map.h"
 
 static QueueHandle_t i2cResult;
+static SemaphoreHandle_t i2cLock;
 
 void I2C1_IRQHandler(void)
 {
@@ -29,7 +31,7 @@ void I2C1_IRQHandler(void)
 
     BaseType_t taskWoken = pdFALSE;
 
-    if (xQueueSendFromISR(i2cResult, &status, &taskWoken) != pdFALSE)
+    if (xQueueSendFromISR(i2cResult, &status, &taskWoken) != pdTRUE)
     {
         LOG_ISR(LOG_LEVEL_ERROR, "Error queueing i2c result");
     }
@@ -39,10 +41,13 @@ void I2C1_IRQHandler(void)
 
 static I2C_TransferReturn_TypeDef i2cTransfer(I2C_TransferSeq_TypeDef* seq)
 {
+	xSemaphoreTake(i2cLock, portMAX_DELAY);
+
     I2C_TransferReturn_TypeDef ret = I2C_TransferInit(I2C, seq);
 
     if (ret != i2cTransferInProgress)
     {
+        xSemaphoreGive(i2cLock);
         return ret;
     }
 
@@ -51,10 +56,12 @@ static I2C_TransferReturn_TypeDef i2cTransfer(I2C_TransferSeq_TypeDef* seq)
         LOG(LOG_LEVEL_ERROR, "Didn't received i2c transfer result");
     }
 
+    xSemaphoreGive(i2cLock);
+
     return ret;
 }
 
-I2C_TransferReturn_TypeDef I2CWrite(uint8_t address, uint8_t* inData, uint8_t length)
+I2C_TransferReturn_TypeDef I2CWrite(uint8_t address, uint8_t* inData, uint16_t length)
 {
     I2C_TransferSeq_TypeDef seq = {
         .addr = address, .flags = I2C_FLAG_WRITE, .buf = {{.len = length, .data = inData}, {.len = 0, .data = NULL}}};
@@ -62,9 +69,22 @@ I2C_TransferReturn_TypeDef I2CWrite(uint8_t address, uint8_t* inData, uint8_t le
     return i2cTransfer(&seq);
 }
 
+I2C_TransferReturn_TypeDef I2CWriteRead(
+    uint8_t address, uint8_t* inData, uint16_t inLength, uint8_t* outData, uint16_t outLength)
+{
+    I2C_TransferSeq_TypeDef seq = {.addr = address,
+        .flags = I2C_FLAG_WRITE_READ,
+        .buf = {{.len = inLength, .data = inData}, {.len = outLength, .data = outData}}};
+
+    return i2cTransfer(&seq);
+}
+
 void I2CInit(void)
 {
     i2cResult = xQueueCreate(1, sizeof(I2C_TransferReturn_TypeDef));
+
+    i2cLock = xSemaphoreCreateBinary();
+    xSemaphoreGive(i2cLock);
 
     CMU_ClockEnable(cmuClock_I2C1, true);
 

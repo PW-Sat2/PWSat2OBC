@@ -5,6 +5,8 @@ include(utils/functions.cmake)
 
 project(PWSat C CXX ASM)
 
+set(ENABLE_COVERAGE FALSE CACHE BOOL "Enable code coverage" )
+
 set(MEM_MANAGMENT_TYPE 1)
 
 set(TARGET_PLATFORM "DevBoard" CACHE STRING "Target platform")
@@ -13,6 +15,7 @@ set(SEMIHOSTING false CACHE BOOL "Enable semihosting")
 set(PLATFORM_PATH ${CMAKE_CURRENT_SOURCE_DIR}/platforms/${TARGET_PLATFORM})
 
 set(OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/build/${TARGET_PLATFORM})
+set(REPORTS_PATH ${OUTPUT_PATH}/reports)
 
 file(MAKE_DIRECTORY ${OUTPUT_PATH})
 
@@ -39,7 +42,11 @@ endif()
 message(STATUS "Using C compiler from ${CMAKE_C_COMPILER}")
 message(STATUS "Target platform ${TARGET_PLATFORM}")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "Code coverage: ${ENABLE_COVERAGE}")
 
 add_subdirectory(src)
 add_subdirectory(libs)
+add_subdirectory(doc)
 add_subdirectory(unit_tests)
+add_subdirectory(integration_tests)
+add_subdirectory(utils)

@@ -1,6 +1,7 @@
 #ifndef SRC_IO_MAP_H_
 #define SRC_IO_MAP_H_
 
+#include <em_gpio.h>
 #include <em_system.h>
 
 #define LED_PORT gpioPortE
@@ -27,5 +28,29 @@
 #define USART1_RX 1
 #define UART_LOCATION UART_ROUTE_LOCATION_LOC1
 #define USART1_BAUDRATE 9600
+
+// NAND Flash
+#define NAND_POWER_PORT gpioPortB
+#define NAND_POWER_PIN 15
+#define NAND_READY_PORT gpioPortD
+#define NAND_READY_PIN 15
+#define NAND_CE_PORT gpioPortD
+#define NAND_CE_PIN 14
+#define NAND_WP_PORT gpioPortD
+#define NAND_WP_PIN 13
+#define NAND_ALE_BIT 24
+#define NAND_CLE_BIT 25
+
+#define EBI_ALE_PORT gpioPortC
+#define EBI_ALE_PIN 1
+#define EBI_CLE_PORT gpioPortC
+#define EBI_CLE_PIN 2
+#define EBI_WE_PORT gpioPortF
+#define EBI_WE_PIN 8
+#define EBI_RE_PORT gpioPortF
+#define EBI_RE_PIN 9
+
+#define EBI_DATA_PORT gpioPortE
+#define EBI_DATA_PIN0 8
 
 #endif
