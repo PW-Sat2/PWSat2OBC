@@ -21,6 +21,8 @@ set(SOURCES
   adxrs453/adxrs453Test.cpp
   time/time.cpp
   time/timer.cpp
+  mock/FsMock.hpp
+  mock/FsMock.cpp
 )
 
 add_executable(${NAME} ${SOURCES})

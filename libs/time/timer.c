@@ -10,14 +10,16 @@ static void SendTimeNotification(struct TimeProvider* provider);
 
 static void SaveTime(struct TimeProvider* provider);
 
-bool TimeInitialize(struct TimeProvider* provider, TimePassedCallbackType timePassedCallback, void* timePassedCallbackContext)
+bool TimeInitialize(
+    struct TimeProvider* provider, TimePassedCallbackType timePassedCallback, void* timePassedCallbackContext, FileSystem* fileSystem)
 {
-    const struct TimeSnapshot snapshot = GetCurrentPersistentTime();
+    const struct TimeSnapshot snapshot = GetCurrentPersistentTime(fileSystem);
     provider->CurrentTime = snapshot.CurrentTime;
     provider->NotificationTime = 0;
     provider->PersistanceTime = 0;
     provider->OnTimePassed = timePassedCallback;
     provider->TimePassedCallbackContext = timePassedCallbackContext;
+    provider->FileSystemObject = fileSystem;
     return true;
 }
 
@@ -54,10 +56,14 @@ void TimeTickProcedure(struct TimeProvider* provider, TimeSpan delta)
     SaveTime(provider);
 }
 
-struct TimeSnapshot GetCurrentPersistentTime()
+struct TimeSnapshot GetCurrentPersistentTime(FileSystem* fileSystem)
 {
     struct TimeSnapshot snapshot = {0};
-    // TODO
+    if (fileSystem != NULL)
+    {
+        // TODO
+    }
+
     return snapshot;
 }
 
@@ -72,9 +78,15 @@ static void SendTimeNotification(struct TimeProvider* timeProvider)
 
 static void SaveTime(struct TimeProvider* timeProvider)
 {
-    if (timeProvider->PersistanceTime > SavePeriod)
+    if (timeProvider->PersistanceTime <= SavePeriod)
+    {
+        return;
+    }
+
+    if (timeProvider->FileSystemObject != NULL)
     {
         // TODO
-        timeProvider->PersistanceTime = 0;
     }
+
+    timeProvider->PersistanceTime = 0;
 }
