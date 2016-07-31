@@ -5,13 +5,13 @@ set(SOURCES
   mem.c
   test.cpp
   utils.cpp
-  Logger/LoggerTest.cpp   
+  Logger/LoggerTest.cpp
   FileSystem/FileSystemTest.cpp
   FileSystem/YaffsOSGlue.c
   FileSystem/MemoryDriver.cpp
-  FileSystem/NANDGeometryTest.cpp 
+  FileSystem/NANDGeometryTest.cpp
   FileSystem/MemoryDriver.cpp
-  FileSystem/EccTest.cpp  
+  FileSystem/EccTest.cpp
   Comm/CommTest.cpp
   base/ReaderTest.cpp
   base/WriterTest.cpp
@@ -19,6 +19,8 @@ set(SOURCES
   os/os.hpp
   OsMock.hpp
   adxrs453/adxrs453Test.cpp
+  time/time.cpp
+  time/timer.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -34,18 +36,19 @@ endif(${ENABLE_COVERAGE})
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_CURRENT_LIST_DIR}/linker.ld ${LD_COVERAGE}")
 
 target_link_libraries(${NAME}
-    m 
-    platform 
-    emlib 
-    gtest 
-    gmock 
-    logger 
-    yaffs 
-    storage 
+    m
+    platform
+    emlib
+    gtest
+    gmock
+    logger
+    yaffs
+    storage
     comm
     fs    
     emdrv
     adxrs453    
+    time
 )
 
 target_require_semihosting(${NAME})
