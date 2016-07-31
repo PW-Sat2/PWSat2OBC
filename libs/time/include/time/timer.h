@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "TimePoint.h"
+#include "fs/fs.h"
 #include "system.h"
 
 EXTERNC_BEGIN
@@ -32,9 +33,12 @@ struct TimeProvider
     TimeSpan NotificationTime;
 
     TimeSpan PersistanceTime;
+
+    FileSystem* FileSystemObject;
 };
 
-bool TimeInitialize(struct TimeProvider* provider, TimePassedCallbackType timePassedCallback, void* timePassedCallbackContext);
+bool TimeInitialize(
+    struct TimeProvider* provider, TimePassedCallbackType timePassedCallback, void* timePassedCallbackContext, FileSystem* fileSystem);
 
 static TimeSpan TimeGetCurrentTime(struct TimeProvider* timeProvider);
 
@@ -46,7 +50,7 @@ void TimeSetCurrentTime(struct TimeProvider* timeProvider, TimePoint pointInTime
 
 TimeTickCallbackType TimeGetTickProcedure(void);
 
-struct TimeSnapshot GetCurrentPersistentTime(void);
+struct TimeSnapshot GetCurrentPersistentTime(FileSystem* fileSystem);
 
 static inline TimeSpan TimeGetCurrentTime(struct TimeProvider* timeProvider)
 {

@@ -20,6 +20,8 @@ set(SOURCES
   OsMock.hpp
   time/time.cpp
   time/timer.cpp
+  mock/FsMock.hpp
+  mock/FsMock.cpp
 )
 
 add_executable(${NAME} ${SOURCES})

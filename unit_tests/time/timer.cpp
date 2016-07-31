@@ -1,7 +1,8 @@
-#include "time/timer.h"
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "gmock/gmock-matchers.h"
+
+#include "time/timer.h"
 
 using testing::Eq;
 using testing::_;
@@ -33,12 +34,12 @@ class TimerTest : public testing::Test
 
 void TimerTest::Initialize()
 {
-    TimeInitialize(&provider, TimePassedProxy, &timeHandler);
+    TimeInitialize(&provider, TimePassedProxy, &timeHandler, nullptr);
 }
 
 TEST_F(TimerTest, TestDefaultState)
 {
-    const auto result = TimeInitialize(&provider, TimePassedProxy, &timeHandler);
+    const auto result = TimeInitialize(&provider, TimePassedProxy, &timeHandler, nullptr);
     ASSERT_THAT(result, Eq(true));
     ASSERT_THAT(TimeGetCurrentTime(&provider), Eq(0u));
     const auto time = TimeGetCurrentMissionTime(&provider);
