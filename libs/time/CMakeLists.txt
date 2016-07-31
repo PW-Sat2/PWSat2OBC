@@ -2,6 +2,9 @@ set(NAME time)
 
 set(SOURCES
     time.c
+    timer.c
+    include/time/TimePoint.h
+    include/time/timer.h
 )
 
 add_library(${NAME} STATIC ${SOURCES})

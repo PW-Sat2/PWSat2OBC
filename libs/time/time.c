@@ -1,45 +1,28 @@
-#include "time.h"
+#include "TimePoint.h"
 
-static TimeSpan GetCurrentPersistentTime(void);
-
-static void TimeTickProcedure(struct TimeProvider* provider, TimeSpan delta);
-
-bool TimeInitialize(struct TimeProvider* provider, OnTimePassedCallbackType timePassedCallback, void* timePassedCallbackContext)
+TimePoint TimePointBuild(uint16_t day, uint8_t hour, uint8_t minute, uint8_t second, uint16_t milisecond)
 {
-    provider->currentTime = GetCurrentPersistentTime();
-    provider->OnTimePassed = timePassedCallback;
-    provider->TimePassedCallbackContext = timePassedCallbackContext;
-    return true;
+    TimePoint point;
+    point.milisecond = milisecond;
+    point.second = second;
+    point.minute = minute;
+    point.hour = hour;
+    point.day = day;
+    return point;
 }
 
-OnTimeTickCallbackType TimeGetTickProcedure(void)
+TimePoint TimePointNormalize(TimePoint point)
 {
-    return TimeTickProcedure;
+    return TimePointFromTimeSpan(TimePointToTimeSpan(point));
 }
 
-int TimePointCompare(TimePoint left, TimePoint right);
-
-bool TimeAdvanceTime(struct TimeProvider* timeProvider, TimeShift delta)
+bool TimePointEqual(TimePoint left, TimePoint right)
 {
-    if (delta < 0)
-    {
-        return false;
-    }
-    else
-    {
-        timeProvider->currentTime += delta;
-        timeProvider->OnTimePassed(timeProvider->TimePassedCallbackContext, TimePointFromTimeSpan(timeProvider->currentTime));
-        return true;
-    }
+    return left.milisecond == right.milisecond && left.second == right.second && left.minute == right.minute && left.hour == right.hour &&
+        left.day == right.day;
 }
 
-void TimeSetCurrentTime(struct TimeProvider* timeProvider, struct TimePoint pointInTime)
-{
-    timeProvider->currentTime = pointInTime;
-    timeProvider->OnTimePassed(timeProvider->TimePassedCallbackContext, pointInTime);
-}
-
-struct TimePoint TimePointFromTimeSpan(TimeSpan span)
+TimePoint TimePointFromTimeSpan(TimeSpan span)
 {
     TimePoint point = {0};
     point.milisecond = span % 1000;
@@ -65,15 +48,4 @@ TimeSpan TimePointToTimeSpan(TimePoint point)
     result *= 1000;
     result += point.milisecond;
     return result;
-}
-
-void TimeTickProcedure(struct TimeProvider* provider, TimeSpan delta)
-{
-    provider->currentTime += delta;
-    provider->OnTimePassed(provider->TimePassedCallbackContext, TimePointFromTimeSpan(provider->currentTime));
-}
-
-TimeSpan GetCurrentPersistentTime()
-{
-    return 0;
 }
