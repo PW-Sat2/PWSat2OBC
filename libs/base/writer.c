@@ -69,6 +69,27 @@ bool WriterWriteDoubleWordLE(Writer* writer, uint32_t word)
     }
 }
 
+bool WriterWriteQuadWordLE(Writer* writer, uint64_t word)
+{
+    if (!WriterUpdateState(writer, 8))
+    {
+        return false;
+    }
+    else
+    {
+        writer->buffer[writer->position] = word & 0xff;
+        writer->buffer[writer->position + 1] = (word >> 8) & 0xff;
+        writer->buffer[writer->position + 2] = (word >> 16) & 0xff;
+        writer->buffer[writer->position + 3] = (word >> 24) & 0xff;
+        writer->buffer[writer->position + 4] = (word >> 32) & 0xff;
+        writer->buffer[writer->position + 5] = (word >> 40) & 0xff;
+        writer->buffer[writer->position + 6] = (word >> 48) & 0xff;
+        writer->buffer[writer->position + 7] = (word >> 56) & 0xff;
+        writer->position += 8;
+        return true;
+    }
+}
+
 bool WriterWriteArray(Writer* writer, const uint8_t* buffer, uint16_t length)
 {
     if (!WriterUpdateState(writer, length))
