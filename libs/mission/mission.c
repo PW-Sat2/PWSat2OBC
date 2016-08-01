@@ -6,10 +6,11 @@ void SystemStateEmpty(SystemState* state)
 {
     memset(state, 0, sizeof(SystemState));
 
-    state->numValue = 100;
+    state->NumValue = 100;
 }
 
-SystemStateUpdateResult SystemStateUpdate(SystemState* state, SystemStateUpdateDescriptor descriptors[], uint16_t descriptorsCount)
+SystemStateUpdateResult SystemStateUpdate(
+    SystemState* state, const SystemStateUpdateDescriptor descriptors[], const uint16_t descriptorsCount)
 {
     SystemStateUpdateResult result = SystemStateUpdateOK;
 
@@ -31,8 +32,10 @@ SystemStateUpdateResult SystemStateUpdate(SystemState* state, SystemStateUpdateD
     return result;
 }
 
-SystemStateVerifyResult SystemStateVerify(
-    SystemState* state, SystemStateVerifyDescriptor descriptors[], SystemStateVerifyDescriptorResult results[], uint16_t descriptorsCount)
+SystemStateVerifyResult SystemStateVerify(SystemState* const state,
+    const SystemStateVerifyDescriptor descriptors[],
+    SystemStateVerifyDescriptorResult results[],
+    const uint16_t descriptorsCount)
 {
     SystemStateVerifyResult result = SystemStateVerifyOK;
 
@@ -50,7 +53,7 @@ SystemStateVerifyResult SystemStateVerify(
     return result;
 }
 
-void SystemDetermineActions(SystemState* state, SystemActionDescriptor** descriptors, uint16_t descriptorsCount)
+void SystemDetermineActions(SystemState* const state, SystemActionDescriptor** descriptors, uint16_t descriptorsCount)
 {
     for (uint16_t i = 0; i < descriptorsCount; i++)
     {

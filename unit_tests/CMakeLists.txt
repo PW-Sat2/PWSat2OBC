@@ -16,7 +16,7 @@ set(SOURCES
   base/ReaderTest.cpp
   base/WriterTest.cpp
   MissionPlan/MissionPlanTest.cpp  
-  MissionPlan/MissionPlanRealTest.cpp
+  MissionPlan/DeployAntennaActionTest.cpp
   MissionPlan/MissionTestHelpers.cpp
   os/os.cpp
   os/os.hpp

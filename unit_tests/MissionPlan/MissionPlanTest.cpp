@@ -23,29 +23,29 @@ class MissionPlanTest : public testing::Test
 
 TEST_F(MissionPlanTest, EmptyStateShouldHaveEmptyValues)
 {
-    ASSERT_THAT(state.flag, Eq(false));
-    ASSERT_THAT(state.numValue, Eq(100));
-    ASSERT_THAT(state.antennaDeployed, Eq(false));
+    ASSERT_THAT(state.Flag, Eq(false));
+    ASSERT_THAT(state.NumValue, Eq(100));
+    ASSERT_THAT(state.AntennaDeployed, Eq(false));
 }
 
 TEST_F(MissionPlanTest, ShouldUpdateStateAccordingToDescriptors)
 {
     StateUpdater flag("UpdateFlag", [](SystemState* state) {
-        state->flag = true;
+        state->Flag = true;
         return SystemStateUpdateOK;
     });
 
-    StateUpdater numValue("UpdateNumValue", [](SystemState* state) {
-        state->numValue = 200;
+    StateUpdater NumValue("UpdateNumValue", [](SystemState* state) {
+        state->NumValue = 200;
         return SystemStateUpdateOK;
     });
 
-    SystemStateUpdateDescriptor stateDescriptors[] = {flag, numValue};
+    SystemStateUpdateDescriptor stateDescriptors[] = {flag, NumValue};
 
     auto result = SystemStateUpdate(&state, stateDescriptors, COUNT_OF(stateDescriptors));
 
-    ASSERT_THAT(state.flag, Eq(true));
-    ASSERT_THAT(state.numValue, Eq(200));
+    ASSERT_THAT(state.Flag, Eq(true));
+    ASSERT_THAT(state.NumValue, Eq(200));
     ASSERT_THAT(result, Eq(SystemStateUpdateOK));
 }
 
@@ -56,7 +56,7 @@ TEST_F(MissionPlanTest, ShouldContinueUpdatingStateAfterWarning)
         return SystemStateUpdateWarning;
     });
     StateUpdater success("Success", [](SystemState* state) {
-        state->flag = true;
+        state->Flag = true;
         return SystemStateUpdateOK;
     });
 
@@ -64,7 +64,7 @@ TEST_F(MissionPlanTest, ShouldContinueUpdatingStateAfterWarning)
 
     auto result = SystemStateUpdate(&state, stateDescriptors, COUNT_OF(stateDescriptors));
 
-    ASSERT_THAT(state.flag, Eq(true));
+    ASSERT_THAT(state.Flag, Eq(true));
     ASSERT_THAT(result, Eq(SystemStateUpdateWarning));
 }
 
@@ -75,7 +75,7 @@ TEST_F(MissionPlanTest, ShouldAbortUpdatingAfterFailure)
         return SystemStateUpdateFailure;
     });
     StateUpdater success("Success", [](SystemState* state) {
-        state->flag = true;
+        state->Flag = true;
         return SystemStateUpdateOK;
     });
 
@@ -83,14 +83,14 @@ TEST_F(MissionPlanTest, ShouldAbortUpdatingAfterFailure)
 
     auto result = SystemStateUpdate(&state, stateDescriptors, COUNT_OF(stateDescriptors));
 
-    ASSERT_THAT(state.flag, Eq(false));
+    ASSERT_THAT(state.Flag, Eq(false));
     ASSERT_THAT(result, Eq(SystemStateUpdateFailure));
 }
 
 TEST_F(MissionPlanTest, ShouldVerifyStateAgainstConstraints)
 {
-    StateVerifier flagAndNumValue("flag and numValue >= 20", [](SystemState* state, SystemStateVerifyDescriptorResult* result) {
-        if (state->flag && state->numValue >= 20)
+    StateVerifier flagAndNumValue("flag and NumValue >= 20", [](SystemState* state, SystemStateVerifyDescriptorResult* result) {
+        if (state->Flag && state->NumValue >= 20)
         {
             result->Result = SystemStateVerifyOK;
         }
@@ -103,8 +103,8 @@ TEST_F(MissionPlanTest, ShouldVerifyStateAgainstConstraints)
     SystemStateVerifyDescriptor descriptors[] = {flagAndNumValue};
     SystemStateVerifyDescriptorResult results[COUNT_OF(descriptors)];
 
-    state.flag = true;
-    state.numValue = 20;
+    state.Flag = true;
+    state.NumValue = 20;
 
     auto result = SystemStateVerify(&state, descriptors, results, COUNT_OF(descriptors));
 
@@ -114,8 +114,8 @@ TEST_F(MissionPlanTest, ShouldVerifyStateAgainstConstraints)
 
 TEST_F(MissionPlanTest, ShouldReportInvalidState)
 {
-    StateVerifier flagAndNumValue("flag and numValue >= 20", [](SystemState* state, SystemStateVerifyDescriptorResult* result) {
-        if (state->flag && state->numValue >= 20)
+    StateVerifier flagAndNumValue("flag and NumValue >= 20", [](SystemState* state, SystemStateVerifyDescriptorResult* result) {
+        if (state->Flag && state->NumValue >= 20)
         {
             result->Result = SystemStateVerifyOK;
         }
@@ -129,8 +129,8 @@ TEST_F(MissionPlanTest, ShouldReportInvalidState)
     SystemStateVerifyDescriptor descriptors[] = {flagAndNumValue};
     SystemStateVerifyDescriptorResult results[COUNT_OF(descriptors)];
 
-    state.flag = true;
-    state.numValue = 10;
+    state.Flag = true;
+    state.NumValue = 10;
 
     auto result = SystemStateVerify(&state, descriptors, results, COUNT_OF(descriptors));
 
@@ -141,15 +141,15 @@ TEST_F(MissionPlanTest, ShouldReportInvalidState)
 
 TEST_F(MissionPlanTest, ShouldGenerateActionsBasedOnState)
 {
-    state.flag = true;
-    state.numValue = 10;
+    state.Flag = true;
+    state.NumValue = 10;
 
     SystemAction action1 = SystemAction("action1") //
-                               .When([](SystemState* state) { return state->numValue > 5; })
+                               .When([](SystemState* state) { return state->NumValue > 5; })
                                .Do([](SystemState* state) { UNREFERENCED_PARAMETER(state); });
 
     SystemAction action2 = SystemAction("action2") //
-                               .When([](SystemState* state) { return state->numValue > 15; })
+                               .When([](SystemState* state) { return state->NumValue > 15; })
                                .Do([](SystemState* state) { UNREFERENCED_PARAMETER(state); });
 
     SystemActionDescriptor* descriptors[] = {action1, action2};

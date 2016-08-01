@@ -38,7 +38,7 @@ void DeployAntennaActionTest::DetermineActions()
 
 TEST_F(DeployAntennaActionTest, OpenDeployAfterSilencePhaseIfNotAlreadyOpenned)
 {
-    state.time = 30 * 60 + 1; // in seconds
+    state.Time = 30 * 60 + 1; // in seconds
 
     DetermineActions();
 
@@ -47,7 +47,7 @@ TEST_F(DeployAntennaActionTest, OpenDeployAfterSilencePhaseIfNotAlreadyOpenned)
 
 TEST_F(DeployAntennaActionTest, ShouldNotDeployAntennaInSilencePhase)
 {
-    state.time = 20 * 60 + 1; // in seconds
+    state.Time = 20 * 60 + 1; // in seconds
 
     DetermineActions();
 
@@ -56,8 +56,8 @@ TEST_F(DeployAntennaActionTest, ShouldNotDeployAntennaInSilencePhase)
 
 TEST_F(DeployAntennaActionTest, ShouldNotDeployAntennaIfAlreadyOpenned)
 {
-    state.time = 30 * 60 + 1; // in seconds
-    state.antennaDeployed = true;
+    state.Time = 30 * 60 + 1; // in seconds
+    state.AntennaDeployed = true;
 
     DetermineActions();
 
@@ -67,11 +67,12 @@ TEST_F(DeployAntennaActionTest, ShouldNotDeployAntennaIfAlreadyOpenned)
 RC_GTEST_FIXTURE_PROP(DeployAntennaActionTest, CanOpenAntennaOnlyAfterSilentPhaseAndIfNotAlreadyOpenned, (const SystemState& state))
 {
     this->state = state;
+
     DetermineActions();
 
     if (openAntenna.Runnable)
     {
-        RC_ASSERT(state.time > 30 * 60);
-        RC_ASSERT_FALSE(state.antennaDeployed);
+        RC_ASSERT(state.Time > 30 * 60);
+        RC_ASSERT_FALSE(state.AntennaDeployed);
     }
 }

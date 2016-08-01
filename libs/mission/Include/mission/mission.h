@@ -10,10 +10,10 @@ extern "C" {
 
 typedef struct
 {
-    bool flag;
-    int32_t numValue;
-    uint32_t time;
-    bool antennaDeployed;
+    bool Flag;
+    int32_t NumValue;
+    uint32_t Time;
+    bool AntennaDeployed;
 } SystemState;
 
 void SystemStateEmpty(SystemState* state);
@@ -29,7 +29,8 @@ typedef struct
     void* Param;
 } SystemStateUpdateDescriptor;
 
-SystemStateUpdateResult SystemStateUpdate(SystemState* state, SystemStateUpdateDescriptor descriptors[], uint16_t descriptorsCount);
+SystemStateUpdateResult SystemStateUpdate(
+    SystemState* state, const SystemStateUpdateDescriptor descriptors[], const uint16_t descriptorsCount);
 
 typedef enum { SystemStateVerifyOK, SystemStateVerifyFailure } SystemStateVerifyResult;
 
@@ -39,7 +40,7 @@ typedef struct
     uint32_t Reason;
 } SystemStateVerifyDescriptorResult;
 
-typedef void (*SystemStateVerifyProc)(SystemState* state, void* param, SystemStateVerifyDescriptorResult* result);
+typedef void (*SystemStateVerifyProc)(SystemState* const state, void* param, SystemStateVerifyDescriptorResult* result);
 
 typedef struct
 {
@@ -48,11 +49,13 @@ typedef struct
     void* Param;
 } SystemStateVerifyDescriptor;
 
-SystemStateVerifyResult SystemStateVerify(
-    SystemState* state, SystemStateVerifyDescriptor descriptors[], SystemStateVerifyDescriptorResult results[], uint16_t descriptorsCount);
+SystemStateVerifyResult SystemStateVerify(SystemState* const state,
+    const SystemStateVerifyDescriptor descriptors[],
+    SystemStateVerifyDescriptorResult results[],
+    const uint16_t descriptorsCount);
 
-typedef void (*SystemActionProc)(SystemState* state, void* param);
-typedef bool (*SystemActionConditionProc)(SystemState* state, void* param);
+typedef void (*SystemActionProc)(SystemState* const state, void* param);
+typedef bool (*SystemActionConditionProc)(SystemState* const state, void* param);
 
 typedef struct
 {
@@ -63,7 +66,7 @@ typedef struct
     bool Runnable;
 } SystemActionDescriptor;
 
-void SystemDetermineActions(SystemState* state, SystemActionDescriptor** descriptors, uint16_t descriptorsCount);
+void SystemDetermineActions(SystemState* const state, SystemActionDescriptor** descriptors, uint16_t descriptorsCount);
 
 #ifdef __cplusplus
 }

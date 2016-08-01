@@ -123,7 +123,7 @@ namespace rc
         static Gen<SystemState> arbitrary()
         {
             return gen::build<SystemState>(                                //
-                gen::set(&SystemState::time, gen::nonNegative<uint32_t>()) //
+                gen::set(&SystemState::Time, gen::nonNegative<uint32_t>()) //
                 );
         }
     };
