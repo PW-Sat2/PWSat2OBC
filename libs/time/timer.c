@@ -1,4 +1,5 @@
 #include "timer.h"
+#include <stdlib.h>
 #include "base/reader.h"
 #include "base/writer.h"
 #include "logger/logger.h"
@@ -105,7 +106,12 @@ struct TimeSnapshot GetCurrentPersistentTime(FileSystem* fileSystem)
     snapshot[0] = ReadFile(fileSystem, TimeFile0);
     snapshot[1] = ReadFile(fileSystem, TimeFile1);
     snapshot[2] = ReadFile(fileSystem, TimeFile2);
+
+    // every value has one initial copy (its own).
     int counters[3] = {1, 1, 1};
+
+    // now vote to determine the most common value,
+    // by increasing counters that are the same.
     if (TimeSnapshotEqual(snapshot[0], snapshot[1]))
     {
         ++counters[0];
@@ -117,24 +123,43 @@ struct TimeSnapshot GetCurrentPersistentTime(FileSystem* fileSystem)
         ++counters[0];
         ++counters[2];
     }
+    // we can get away with else here since we seek only one maximum value not all of them
+    // we also do not need exact order
     else if (TimeSnapshotEqual(snapshot[1], snapshot[2]))
     {
         ++counters[1];
         ++counters[2];
     }
 
-    int maxIndex = 0;
+    // now that we have voted find the index with the highest count
+    int selectedIndex = 0;
     if (counters[1] > counters[0])
     {
-        maxIndex = 1;
+        selectedIndex = 1;
     }
 
-    if (counters[2] > counters[maxIndex])
+    if (counters[2] > counters[selectedIndex])
     {
-        maxIndex = 2;
+        selectedIndex = 2;
     }
 
-    return snapshot[maxIndex];
+    // all of the values are different so pick the smallest one as being safest....
+    if (counters[selectedIndex] == 1)
+    {
+        // find the index with the oldest time snapshot.
+        selectedIndex = 0;
+        if (TimeSnapshotLessThan(snapshot[1], snapshot[0]))
+        {
+            selectedIndex = 1;
+        }
+
+        if (TimeSnapshotLessThan(snapshot[2], snapshot[selectedIndex]))
+        {
+            selectedIndex = 2;
+        }
+    }
+
+    return snapshot[selectedIndex];
 }
 
 static void SendTimeNotification(struct TimeProvider* timeProvider)
