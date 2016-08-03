@@ -67,6 +67,11 @@ static inline bool TimeSnapshotEqual(struct TimeSnapshot left, struct TimeSnapsh
     return left.CurrentTime == right.CurrentTime;
 }
 
+static inline bool TimeSnapshotLessThan(struct TimeSnapshot left, struct TimeSnapshot right)
+{
+    return left.CurrentTime < right.CurrentTime;
+}
+
 EXTERNC_END
 
 #endif
