@@ -206,10 +206,6 @@ void ADXRS(void * param){
 	ADXRS453_Obj_t gyro2;
 	gyro2.pinLocations = (ADXRS453_PinLocations_t)GYRO2;
 	gyro2.interface=interface;
-
-	ADXRS453Spi_Init(&gyro);
-	ADXRS453Spi_Init(&gyro1);
-	ADXRS453Spi_Init(&gyro2);
 	ADXRS453_Init(&gyro,handle);
 	ADXRS453_Init(&gyro1,handle);
 	ADXRS453_Init(&gyro2,handle);
@@ -218,13 +214,13 @@ void ADXRS(void * param){
 	while(1){
 		SPI_TransferReturn_t rate=ADXRS453_GetRate(&gyro,handle);
 		SPI_TransferReturn_t temp=ADXRS453_GetTemperature(&gyro,handle);
-		swoPrintf("gyro 0 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result, (int)rate.result);
+		swoPrintf("gyro 0 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result.sensorResult, (int)rate.result.sensorResult);
 		rate=ADXRS453_GetRate(&gyro1,handle);
 		temp=ADXRS453_GetTemperature(&gyro1,handle);
-		swoPrintf("gyro 1 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result, (int)rate.result);
+		swoPrintf("gyro 1 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result.sensorResult, (int)rate.result.sensorResult);
 		rate=ADXRS453_GetRate(&gyro2,handle);
 		temp=ADXRS453_GetTemperature(&gyro2,handle);
-		swoPrintf("gyro 2 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result, (int)rate.result);
+		swoPrintf("gyro 2 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result.sensorResult, (int)rate.result.sensorResult);
 		vTaskDelay(10 / portTICK_PERIOD_MS);
 	}
 
@@ -277,7 +273,9 @@ int main(void)
 	    System.CreateTask(ObcInitTask, "Init", 512, &Main, tskIDLE_PRIORITY + 16, &Main.initTask);
 	    System.RunScheduler();
 
+
 	    GPIO_PinOutToggle(LED_PORT, LED0);
+
 
 	    return 0;
 }
