@@ -2,9 +2,12 @@
 #define OBC_H
 
 #include <stdatomic.h>
+
+#include "time/timer.h"
 #include "base/os.h"
 #include "comm/comm.h"
 #include "fs/fs.h"
+#include "openSail.h"
 #include "storage/nand_driver.h"
 #include "yaffs_guts.h"
 
@@ -24,6 +27,10 @@ typedef struct
 
     struct yaffs_dev rootDevice;
     YaffsNANDDriver rootDeviceDriver;
+
+    struct TimeProvider timeProvider;
+
+    OpenSailContext sailContext;
 } OBC;
 
 /** @brief Global OBC object. */
