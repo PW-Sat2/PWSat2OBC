@@ -65,13 +65,14 @@ typedef struct ADXRS453_Obj {
 	GyroInterface_t interface;
 } ADXRS453_Obj_t;
 
-
-
-
 typedef struct SPI_TransferReturn
 {
 	SPI_TransferPairResultCode_t resultCodes;
-	uint16_t result;
+	union
+	{
+		int16_t sensorResult;
+		uint32_t dataResult;
+	}result;
 } SPI_TransferReturn_t;
 
 
@@ -81,7 +82,7 @@ typedef struct SPI_TransferReturn
 
 void ADXRS453Spi_Init(ADXRS453_Obj_t *gyro);
 
-int8_t ADXRS453_Init(ADXRS453_Obj_t *gyro,
+void ADXRS453_Init(ADXRS453_Obj_t *gyro,
 		SPIDRV_Handle_t 	handle);
 
 Ecode_t SPISendB(ADXRS453_PinLocations_t *locations,
@@ -109,7 +110,7 @@ SPI_TransferReturn_t ADXRS453_SetRegisterValue(ADXRS453_Obj_t *gyro,
 								uint16_t registerValue);
 
 /*! Reads the sensor data. */
-uint32_t ADXRS453_GetSensorData(ADXRS453_Obj_t *gyro,
+SPI_TransferReturn_t ADXRS453_GetSensorData(ADXRS453_Obj_t *gyro,
 		SPIDRV_Handle_t 	handle);
 
 /*! Reads the rate data and converts it to degrees/second. */
@@ -120,6 +121,6 @@ SPI_TransferReturn_t ADXRS453_GetRate(ADXRS453_Obj_t *gyro,
 SPI_TransferReturn_t  ADXRS453_GetTemperature(ADXRS453_Obj_t *gyro,
 		SPIDRV_Handle_t 	handle);
 
-void ADXRS453_DeInit(SPIDRV_Handle_t handle);
+
 
 #endif // __ADXRS453_H__

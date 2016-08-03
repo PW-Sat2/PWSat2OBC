@@ -1,11 +1,11 @@
-#include "ADXRS453.h"       // ADXRS453 definitions
+#include "ADXRS453.h"
 #include "spidrv.h"
 #include "FreeRTOS.h"
 #include "drivers/swo.h"
 #include "io_map.h"
 #include <em_gpio.h>
 #include <stdint.h>
-bool SPIInitialized=false;
+
 
 Ecode_t SPISendB(ADXRS453_PinLocations_t *locations , SPIDRV_Handle_t 	handle,
 		const void * 	buffer,
@@ -38,8 +38,8 @@ SPI_TransferPairResultCode_t SPISendRecvB(ADXRS453_PinLocations_t *locations, SP
 		uint8_t 	length )
 {
 	SPI_TransferPairResultCode_t pairResultCode;
-	pairResultCode.resultCodeWrite= SPISendB(locations, handle, buffer, 4 );
-	pairResultCode.resultCodeRead= SPIRecvB(locations, handle, buffer, 4);
+	pairResultCode.resultCodeWrite= SPISendB(locations, handle, buffer, length );
+	pairResultCode.resultCodeRead= SPIRecvB(locations, handle, buffer, length);
 	return pairResultCode;
 }
 
@@ -49,12 +49,10 @@ void ADXRS453Spi_Init(ADXRS453_Obj_t *gyro) {
 	 GPIO_PinOutSet((GPIO_Port_TypeDef)(gyro->pinLocations).csPortLocation,(gyro->pinLocations).csPinLocation);
 }
 
-int8_t ADXRS453_Init(ADXRS453_Obj_t *gyro, SPIDRV_Handle_t handle)
+void ADXRS453_Init(ADXRS453_Obj_t *gyro, SPIDRV_Handle_t handle)
 {
-	SPI_TransferReturn_t transferReturn;
 	uint8_t  dataBuffer[4] = {0x20, 0x00, 0x00, 0x03};
-    int8_t           status     = 0;
-    uint16_t adxrs453Id;
+    ADXRS453Spi_Init(gyro);
 //RECOMMENDED START-UP SEQUENCE WITH CHK BIT ASSERTION see datasheet
     gyro->interface.writeProc(&(gyro->pinLocations), handle, dataBuffer, 4 );
     dataBuffer[3]=0x00;
@@ -62,21 +60,6 @@ int8_t ADXRS453_Init(ADXRS453_Obj_t *gyro, SPIDRV_Handle_t handle)
     gyro->interface.writeProc(&(gyro->pinLocations), handle, dataBuffer, 4 );
     gyro->interface.writeProc(&(gyro->pinLocations), handle, dataBuffer, 4 );
     gyro->interface.writeProc(&(gyro->pinLocations), handle, dataBuffer, 4 );
-    //CHECK IF ADXRS IS STARTUPED
-	transferReturn = ADXRS453_GetRegisterValue(gyro,handle,ADXRS453_REG_PID);
-	adxrs453Id=transferReturn.result;
-    if((adxrs453Id >> 8) != 0x52)
-    {
-        status = -1;
-    }
-    
-    return status;
-}
-
-
-void ADXRS453_DeInit(SPIDRV_Handle_t handle){
-	SPIDRV_DeInit( handle);
-	SPIInitialized=false;
 }
 
 
@@ -113,7 +96,7 @@ SPI_TransferReturn_t ADXRS453_GetRegisterValue(ADXRS453_Obj_t *gyro,
     registerValue = ((uint16_t)sendBuffer[1] << 11) |
                     ((uint16_t)sendBuffer[2] << 3) |
                     (sendBuffer[3] >> 5);
-    transferReturn.result=registerValue;
+    transferReturn.result.dataResult=registerValue;
     return transferReturn;
 }
 
@@ -152,8 +135,9 @@ SPI_TransferReturn_t ADXRS453_SetRegisterValue(ADXRS453_Obj_t *gyro,
 
 }
 
-uint32_t ADXRS453_GetSensorData(ADXRS453_Obj_t *gyro,SPIDRV_Handle_t 	handle)
+SPI_TransferReturn_t ADXRS453_GetSensorData(ADXRS453_Obj_t *gyro,SPIDRV_Handle_t 	handle)
 {
+	SPI_TransferReturn_t transferReturn;
 	uint8_t  sendBuffer[4] = {0, 0, 0, 0};
     uint32_t command       = 0;
     uint8_t bitNo         = 0;
@@ -172,13 +156,13 @@ uint32_t ADXRS453_GetSensorData(ADXRS453_Obj_t *gyro,SPIDRV_Handle_t 	handle)
     {
     	sendBuffer[3] |= 1;
     }
-    SPISendRecvB(&(gyro->pinLocations), handle, sendBuffer, 4 );
+    transferReturn.resultCodes=gyro->interface.readProc(&(gyro->pinLocations), handle, sendBuffer, 4 );
     registerValue = ((uint32_t)sendBuffer[0] << 24) |
                     ((uint32_t)sendBuffer[1] << 16) |
                     ((uint16_t)sendBuffer[2] << 8) |
 					sendBuffer[3];
-    
-    return registerValue;
+    transferReturn.result.dataResult=registerValue;
+    return transferReturn;
 }
 
 SPI_TransferReturn_t ADXRS453_GetRate(ADXRS453_Obj_t *gyro,SPIDRV_Handle_t 	handle)
@@ -188,8 +172,10 @@ SPI_TransferReturn_t ADXRS453_GetRate(ADXRS453_Obj_t *gyro,SPIDRV_Handle_t 	hand
     int16_t          rate          = 0.0;
     
     transferReturn = ADXRS453_GetRegisterValue(gyro, handle, ADXRS453_REG_RATE);
-    registerValue = transferReturn.result;
+    registerValue = transferReturn.result.sensorResult;
    
+    if(transferReturn.resultCodes.resultCodeWrite==0 && transferReturn.resultCodes.resultCodeRead==0)
+    {
     /*!< If data received is in positive degree range */
     if(registerValue < 0x8000)
     {
@@ -198,9 +184,10 @@ SPI_TransferReturn_t ADXRS453_GetRate(ADXRS453_Obj_t *gyro,SPIDRV_Handle_t 	hand
     /*!< If data received is in negative degree range */
     else
     {
-        rate = (-1) * ((int16_t)(0xFFFF - registerValue + 1) / 80.0);
+        rate = (-1) * ((int16_t)(0xFFFF - registerValue + 1) / 80);
     }
-    transferReturn.result= rate;
+    transferReturn.result.sensorResult= rate;
+    }
     return transferReturn;
 }
 
@@ -211,9 +198,12 @@ SPI_TransferReturn_t ADXRS453_GetTemperature(ADXRS453_Obj_t *gyro,SPIDRV_Handle_
     int16_t          temperature   = 0;
     
     transferReturn = ADXRS453_GetRegisterValue(gyro, handle, ADXRS453_REG_TEM);
-    registerValue = transferReturn.result;
-    registerValue = (registerValue >> 6) - 0x31F;
-    temperature = (int16_t) registerValue / 5;
-    transferReturn.result= temperature;
+    if(transferReturn.resultCodes.resultCodeWrite==0 && transferReturn.resultCodes.resultCodeRead==0)
+       {
+    	registerValue = transferReturn.result.dataResult;
+    	registerValue = (registerValue >> 6) - 0x31F;
+    	temperature = (int16_t) registerValue / 5;
+    	transferReturn.result.sensorResult= temperature;
+       }
     return transferReturn;
 }
