@@ -8,8 +8,7 @@ set(SOURCES
     commands/comm.c   
     commands/file_system.c 
     devices/eps.c
-    openSail.c
-    obc_time.c      
+    openSail.c    
     obc.h
     fault_handlers.c
 )
@@ -31,6 +30,7 @@ target_link_libraries(${NAME}
     i2c    
     fs
     adxrs453
+    time
 )
 
 target_generate_hex(${NAME})

@@ -108,6 +108,13 @@ static void ObcInitTask(void* param)
         LOG(LOG_LEVEL_ERROR, "Unable to initialize file system");
     }
 
+    if (!OpenSailInit(&obc->sailContext))
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to initialize sail. ");
+    }
+
+    TimeInitialize(&obc->timeProvider, OpenSailTimeHandler, &obc->sailContext, &obc->fs);
+
     if (!CommRestart(&obc->comm))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to restart comm");
@@ -194,8 +201,6 @@ int main(void)
 
     TerminalInit();
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
-
-    OpenSailInit();
 
     GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
     GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);

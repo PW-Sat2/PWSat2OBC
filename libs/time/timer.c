@@ -17,7 +17,7 @@ static void SendTimeNotification(struct TimeProvider* provider);
 
 static void SaveTime(struct TimeProvider* provider);
 
-bool TimeInitialize(
+void TimeInitialize(
     struct TimeProvider* provider, TimePassedCallbackType timePassedCallback, void* timePassedCallbackContext, FileSystem* fileSystem)
 {
     const struct TimeSnapshot snapshot = GetCurrentPersistentTime(fileSystem);
@@ -27,7 +27,6 @@ bool TimeInitialize(
     provider->OnTimePassed = timePassedCallback;
     provider->TimePassedCallbackContext = timePassedCallbackContext;
     provider->FileSystemObject = fileSystem;
-    return true;
 }
 
 TimeTickCallbackType TimeGetTickProcedure(void)
@@ -96,16 +95,46 @@ static struct TimeSnapshot ReadFile(FileSystem* fs, const char* const filePath)
 
 struct TimeSnapshot GetCurrentPersistentTime(FileSystem* fileSystem)
 {
-    struct TimeSnapshot snapshot = {0};
-    if (fileSystem != NULL)
+    if (fileSystem == NULL)
     {
-        struct TimeSnapshot snapshot0 = ReadFile(fileSystem, TimeFile0);
-        struct TimeSnapshot snapshot1 = ReadFile(fileSystem, TimeFile1);
-        struct TimeSnapshot snapshot2 = ReadFile(fileSystem, TimeFile2);
-        // TODO
+        struct TimeSnapshot snapshot = {0};
+        return snapshot;
     }
 
-    return snapshot;
+    struct TimeSnapshot snapshot[3];
+    snapshot[0] = ReadFile(fileSystem, TimeFile0);
+    snapshot[1] = ReadFile(fileSystem, TimeFile1);
+    snapshot[2] = ReadFile(fileSystem, TimeFile2);
+    int counters[3] = {1, 1, 1};
+    if (TimeSnapshotEqual(snapshot[0], snapshot[1]))
+    {
+        ++counters[0];
+        ++counters[1];
+    }
+
+    if (TimeSnapshotEqual(snapshot[0], snapshot[2]))
+    {
+        ++counters[0];
+        ++counters[2];
+    }
+    else if (TimeSnapshotEqual(snapshot[1], snapshot[2]))
+    {
+        ++counters[1];
+        ++counters[2];
+    }
+
+    int maxIndex = 0;
+    if (counters[1] > counters[0])
+    {
+        maxIndex = 1;
+    }
+
+    if (counters[2] > counters[maxIndex])
+    {
+        maxIndex = 2;
+    }
+
+    return snapshot[maxIndex];
 }
 
 static void SendTimeNotification(struct TimeProvider* timeProvider)

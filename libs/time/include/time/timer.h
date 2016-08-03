@@ -37,7 +37,7 @@ struct TimeProvider
     FileSystem* FileSystemObject;
 };
 
-bool TimeInitialize(
+void TimeInitialize(
     struct TimeProvider* provider, TimePassedCallbackType timePassedCallback, void* timePassedCallbackContext, FileSystem* fileSystem);
 
 static TimeSpan TimeGetCurrentTime(struct TimeProvider* timeProvider);
@@ -59,7 +59,12 @@ static inline TimeSpan TimeGetCurrentTime(struct TimeProvider* timeProvider)
 
 static inline TimePoint TimeGetCurrentMissionTime(struct TimeProvider* timeProvider)
 {
-    return TimePointFromTimeSpan(timeProvider->CurrentTime);
+    return TimePointFromTimeSpan(TimeGetCurrentTime(timeProvider));
+}
+
+static inline bool TimeSnapshotEqual(struct TimeSnapshot left, struct TimeSnapshot right)
+{
+    return left.CurrentTime == right.CurrentTime;
 }
 
 EXTERNC_END

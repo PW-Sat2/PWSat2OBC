@@ -1,18 +1,10 @@
-#include <FreeRTOS.h>
-#include <em_cmu.h>
-#include <em_gpio.h>
-#include <em_i2c.h>
-#include <task.h>
-
-#include <swo/swo.h>
 #include "logger/logger.h"
 #include "system.h"
 
 #include "devices/eps.h"
-#include "io_map.h"
-#include "obc_time.h"
+#include "openSail.h"
 
-#define SAILOPENTIME 2500
+#define SAILOPENTIME 2500000
 
 static void openSail(void)
 {
@@ -22,35 +14,55 @@ static void openSail(void)
     }
 }
 
-static void openSailTask(void* _)
+static void openSailTask(void* parameter)
 {
-    UNREFERENCED_PARAMETER(_);
+    OpenSailContext* context = (OpenSailContext*)parameter;
 
-    while (1)
+    for (;;)
     {
-        uint32_t time = CurrentTime();
-
-        if (time > SAILOPENTIME)
+        const OSResult result = System.TakeSemaphore(context->SemaphoreHandle, MAX_DELAY);
+        if (result == OSResultSuccess)
         {
             LOG(LOG_LEVEL_INFO, "time to open sail.");
 
             openSail();
 
-            vTaskSuspend(NULL);
-
-            while (1)
-            {
-            }
+            System.SuspendTask(NULL);
         }
-
-        vTaskDelay(pdMS_TO_TICKS(100));
+        else if (result != OSResultTimeout)
+        {
+            LOG(LOG_LEVEL_ERROR, "Open Sail semaphore wait failure");
+        }
     }
 }
 
-void OpenSailInit(void)
+bool OpenSailInit(OpenSailContext* context)
 {
-    if (xTaskCreate(openSailTask, "openSail", 1024, NULL, 4, NULL) != pdPASS)
+    context->SemaphoreHandle = System.CreateBinarySemaphore();
+    if (context->SemaphoreHandle == NULL)
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to create openSail semaphore");
+        return false;
+    }
+
+    if (System.CreateTask(openSailTask, "openSail", 1024, context, 4, &context->SailTaskHandle) != OSResultSuccess)
     {
         LOG(LOG_LEVEL_ERROR, "Unable to create openSail task");
+        return false;
+    }
+
+    return true;
+}
+
+void OpenSailTimeHandler(void* context, TimePoint currentTime)
+{
+    const OpenSailContext* sailContext = (OpenSailContext*)context;
+    const TimeSpan span = TimePointToTimeSpan(currentTime);
+    if (span >= SAILOPENTIME)
+    {
+        if (System.GiveSemaphore(sailContext->SemaphoreHandle) != OSResultSuccess)
+        {
+            LOG(LOG_LEVEL_ERROR, "Unable to signal task to open sail. ");
+        }
     }
 }
