@@ -3,8 +3,10 @@ set(NAME mission)
 set(SOURCES
     mission.c    
     antenna.c
+    sail.c
     include/mission/mission.h
     include/mission/antenna.h
+    include/mission/sail.h
 )
 
 add_library(${NAME} STATIC ${SOURCES})

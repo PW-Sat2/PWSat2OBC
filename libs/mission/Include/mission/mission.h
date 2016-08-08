@@ -14,6 +14,7 @@ typedef struct
     int32_t NumValue;
     uint32_t Time;
     bool AntennaDeployed;
+    bool SailOpened;
 } SystemState;
 
 void SystemStateEmpty(SystemState* state);
