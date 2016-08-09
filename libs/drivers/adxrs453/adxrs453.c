@@ -3,6 +3,7 @@
 #include "base/os.h"
 #include "system.h"
 #include "io_map.h"
+#include "logger/logger.h"
 #include <em_gpio.h>
 #include <stdint.h>
 
@@ -164,6 +165,11 @@ SPI_TransferReturn_t ADXRS453_GetRate(ADXRS453_Obj_t *gyro,SPIDRV_Handle_t 	hand
     }
     transferReturn.result.sensorResult= rate;
     }
+    else
+    {
+    	LOGF(LOG_LEVEL_ERROR, "[adxrs] Unable to get rate, write code %d read code %d", transferReturn.resultCodes.resultCodeWrite,
+    			transferReturn.resultCodes.resultCodeRead);
+    }
     return transferReturn;
 }
 
@@ -180,6 +186,11 @@ SPI_TransferReturn_t ADXRS453_GetTemperature(ADXRS453_Obj_t *gyro,SPIDRV_Handle_
     	registerValue = (registerValue >> 6) - 0x31F;
     	temperature = (int16_t) registerValue / 5;
     	transferReturn.result.sensorResult= temperature;
+       }
+    else
+       {
+       	LOGF(LOG_LEVEL_ERROR, "[adxrs] Unable to get temperature, write code %d read code %d", transferReturn.resultCodes.resultCodeWrite,
+       			transferReturn.resultCodes.resultCodeRead);
        }
     return transferReturn;
 }

@@ -152,13 +152,13 @@ void ADXRS(void * param){
 	while(1){
 		SPI_TransferReturn_t rate=ADXRS453_GetRate(&gyro,handle);
 		SPI_TransferReturn_t temp=ADXRS453_GetTemperature(&gyro,handle);
-		SwoPrintf("gyro 0 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result.sensorResult, (int)rate.result.sensorResult);
+		LOGF(LOG_LEVEL_INFO, "gyro 0 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result.sensorResult, (int)rate.result.sensorResult);
 		rate=ADXRS453_GetRate(&gyro1,handle);
 		temp=ADXRS453_GetTemperature(&gyro1,handle);
-		SwoPrintf("gyro 1 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result.sensorResult, (int)rate.result.sensorResult);
+		LOGF(LOG_LEVEL_INFO, "gyro 1 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result.sensorResult, (int)rate.result.sensorResult);
 		rate=ADXRS453_GetRate(&gyro2,handle);
 		temp=ADXRS453_GetTemperature(&gyro2,handle);
-		SwoPrintf("gyro 2 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result.sensorResult, (int)rate.result.sensorResult);
+		LOGF(LOG_LEVEL_INFO, "gyro 2 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result.sensorResult, (int)rate.result.sensorResult);
 		vTaskDelay(10 / portTICK_PERIOD_MS);
 	}
 
