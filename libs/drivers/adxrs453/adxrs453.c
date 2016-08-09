@@ -1,7 +1,7 @@
-#include "ADXRS453.h"
+#include "adxrs453.h"
 #include "spidrv.h"
-#include "FreeRTOS.h"
-#include "drivers/swo.h"
+#include "base/os.h"
+#include "system.h"
 #include "io_map.h"
 #include <em_gpio.h>
 #include <stdint.h>
@@ -49,11 +49,11 @@ Ecode_t SPISendB(ADXRS453_PinLocations_t *locations , SPIDRV_Handle_t 	handle,
 		uint8_t 	length )
 {
 	Ecode_t resultCode;
-	vTaskDelay(50 / portTICK_PERIOD_MS);
+	System.SleepTask(50);
 	GPIO_PinOutClear((GPIO_Port_TypeDef)locations->csPortLocation,locations->csPinLocation);
 	resultCode=SPIDRV_MTransmitB( handle,buffer,length);
 	GPIO_PinOutSet((GPIO_Port_TypeDef)locations->csPortLocation,locations->csPinLocation);
-	vTaskDelay(50 / portTICK_PERIOD_MS);
+	System.SleepTask(50);
 	return resultCode;
 }
 
@@ -62,11 +62,11 @@ Ecode_t SPIRecvB(ADXRS453_PinLocations_t *locations, SPIDRV_Handle_t 	handle,
 		uint8_t 	length )
 {
 	Ecode_t resultCode;
-	vTaskDelay(50 / portTICK_PERIOD_MS);
+	System.SleepTask(50);
 	GPIO_PinOutClear((GPIO_Port_TypeDef)locations->csPortLocation,locations->csPinLocation);
 	resultCode=SPIDRV_MReceiveB(handle,buffer,length);
 	GPIO_PinOutSet((GPIO_Port_TypeDef)locations->csPortLocation,locations->csPinLocation);
-	vTaskDelay(50 / portTICK_PERIOD_MS);
+	System.SleepTask(50);
 	return resultCode;
 }
 

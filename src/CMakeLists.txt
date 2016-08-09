@@ -31,6 +31,7 @@ target_link_libraries(${NAME}
     SwoEndpoint 
     i2c    
     fs
+    adxrs453
 )
 
 target_generate_hex(${NAME})

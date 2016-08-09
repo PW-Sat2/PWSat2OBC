@@ -23,7 +23,7 @@
 #include "swo/swo.h"
 #include "system.h"
 #include "terminal.h"
-#include "adxrs453/ADXRS453.h"
+#include "adxrs453/adxrs453.h"
 #include <spidrv.h>
 
 #include "fs/fs.h"
@@ -153,13 +153,13 @@ void ADXRS(void * param){
 	while(1){
 		SPI_TransferReturn_t rate=ADXRS453_GetRate(&gyro,handle);
 		SPI_TransferReturn_t temp=ADXRS453_GetTemperature(&gyro,handle);
-		swoPrintf("gyro 0 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result.sensorResult, (int)rate.result.sensorResult);
+		SwoPrintf("gyro 0 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result.sensorResult, (int)rate.result.sensorResult);
 		rate=ADXRS453_GetRate(&gyro1,handle);
 		temp=ADXRS453_GetTemperature(&gyro1,handle);
-		swoPrintf("gyro 1 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result.sensorResult, (int)rate.result.sensorResult);
+		SwoPrintf("gyro 1 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result.sensorResult, (int)rate.result.sensorResult);
 		rate=ADXRS453_GetRate(&gyro2,handle);
 		temp=ADXRS453_GetTemperature(&gyro2,handle);
-		swoPrintf("gyro 2 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result.sensorResult, (int)rate.result.sensorResult);
+		SwoPrintf("gyro 2 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result.sensorResult, (int)rate.result.sensorResult);
 		vTaskDelay(10 / portTICK_PERIOD_MS);
 	}
 
