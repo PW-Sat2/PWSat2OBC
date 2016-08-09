@@ -7,6 +7,43 @@
 #include <stdint.h>
 
 
+void GenerateCommand(uint8_t mandatoryAddress , uint8_t registerAddress, uint16_t registerValue, uint8_t * sendBuffer);
+
+void GenerateCommand(uint8_t mandatoryAddress , uint8_t registerAddress, uint16_t registerValue, uint8_t * sendBuffer)
+{
+	uint32_t  command       = 0;
+	uint8_t  bitNo         = 0;
+	uint8_t  sum           = 0;
+	sendBuffer[0] = mandatoryAddress | (registerAddress >> 7);
+	if(mandatoryAddress == ADXRS453_WRITE)
+	{
+		sendBuffer[1] =(registerAddress << 1) |
+                	   (registerValue >> 15);
+		sendBuffer[2] = (registerValue >> 7);
+		sendBuffer[3] = (registerValue << 1);
+	}
+	else
+	{
+		sendBuffer[1] = (registerAddress << 1);
+	}
+
+
+	command = ((uint32_t)sendBuffer[0] << 24) |
+	          ((uint32_t)sendBuffer[1] << 16) |
+	          ((uint16_t)sendBuffer[2] << 8) |
+	          sendBuffer[3];
+	for(bitNo = 31; bitNo > 0; bitNo--)
+	{
+	     sum += ((command >> bitNo) & 0x1);
+	}
+	if(!(sum % 2))
+	{
+	  	sendBuffer[3] |= 1;				// I wasn't able to use __buildin_parity because of undefined reference
+	}  									//, propably arm libc doesn't support it
+
+}
+
+
 Ecode_t SPISendB(ADXRS453_PinLocations_t *locations , SPIDRV_Handle_t 	handle,
 		const void * 	buffer,
 		uint8_t 	length )
@@ -68,31 +105,11 @@ SPI_TransferReturn_t ADXRS453_GetRegisterValue(ADXRS453_Obj_t *gyro,
 									uint8_t registerAddress)
 {
 	SPI_TransferReturn_t transferReturn;
-    uint8_t  sendBuffer[4] = {0, 0, 0, 0};
-
-    uint32_t  command       = 0;
-    uint8_t  bitNo         = 0;
-    uint8_t  sum           = 0;
+	uint8_t sendBuffer[4] = {0, 0, 0, 0};
     uint16_t registerValue = 0;
 
-    sendBuffer[0] = ADXRS453_READ | (registerAddress >> 7);
-    sendBuffer[1] = (registerAddress << 1);
-    command = ((uint32_t)sendBuffer[0] << 24) |
-              ((uint32_t)sendBuffer[1] << 16) |
-              ((uint16_t)sendBuffer[2] << 8) |
-              sendBuffer[3];
-    for(bitNo = 31; bitNo > 0; bitNo--)
-    {
-        sum += ((command >> bitNo) & 0x1);
-    }
-    if(!(sum % 2))
-    {
-    	sendBuffer[3] |= 1;
-    }
-
+    GenerateCommand(ADXRS453_READ,registerAddress,0,sendBuffer);
     transferReturn.resultCodes=gyro->interface.readProc(&(gyro->pinLocations), handle, sendBuffer, 4 );
-
-
     registerValue = ((uint16_t)sendBuffer[1] << 11) |
                     ((uint16_t)sendBuffer[2] << 3) |
                     (sendBuffer[3] >> 5);
@@ -106,29 +123,8 @@ SPI_TransferReturn_t ADXRS453_SetRegisterValue(ADXRS453_Obj_t *gyro,
                                 uint16_t registerValue)
 {
 	SPI_TransferReturn_t transferReturn;
-	uint8_t  sendBuffer[4] = {0, 0, 0, 0};
-    uint32_t command       = 0;
-    uint8_t bitNo         = 0;
-    uint8_t sum           = 0;
-    
-    sendBuffer[0] = ADXRS453_WRITE | (registerAddress >> 7);
-    sendBuffer[1] = (registerAddress << 1) |
-                    (registerValue >> 15);
-    sendBuffer[2] = (registerValue >> 7);
-    sendBuffer[3] = (registerValue << 1);
-    
-    command = ((uint32_t)sendBuffer[0] << 24) |
-              ((uint32_t)sendBuffer[1] << 16) |
-              ((uint16_t)sendBuffer[2] << 8) |
-              sendBuffer[3];
-    for(bitNo = 31; bitNo > 0; bitNo--)
-    {
-        sum += ((command >> bitNo) & 0x1);
-    }
-    if(!(sum % 2))
-    {
-    	sendBuffer[3] |= 1;
-    }
+	uint8_t sendBuffer[4] = {0, 0, 0, 0};
+    GenerateCommand(ADXRS453_WRITE,registerAddress,registerValue,sendBuffer);
     transferReturn.resultCodes.resultCodeRead= gyro->interface.writeProc(&(gyro->pinLocations), handle, sendBuffer, 4 );
     return transferReturn;
 
@@ -138,24 +134,9 @@ SPI_TransferReturn_t ADXRS453_SetRegisterValue(ADXRS453_Obj_t *gyro,
 SPI_TransferReturn_t ADXRS453_GetSensorData(ADXRS453_Obj_t *gyro,SPIDRV_Handle_t 	handle)
 {
 	SPI_TransferReturn_t transferReturn;
-	uint8_t  sendBuffer[4] = {0, 0, 0, 0};
-    uint32_t command       = 0;
-    uint8_t bitNo         = 0;
-    uint8_t sum           = 0;
+	uint8_t sendBuffer[4] = {0, 0, 0, 0};
     uint32_t registerValue = 0;
-    sendBuffer[0] = ADXRS453_SENSOR_DATA;
-    command = ((uint32_t)sendBuffer[0] << 24) |
-              ((uint32_t)sendBuffer[1] << 16) |
-              ((uint16_t)sendBuffer[2] << 8) |
-              sendBuffer[3];
-    for(bitNo = 31; bitNo > 0; bitNo--)
-    {
-        sum += ((command >> bitNo) & 0x1);
-    }
-    if(!(sum % 2))
-    {
-    	sendBuffer[3] |= 1;
-    }
+    GenerateCommand(ADXRS453_SENSOR_DATA,0,0,sendBuffer);
     transferReturn.resultCodes=gyro->interface.readProc(&(gyro->pinLocations), handle, sendBuffer, 4 );
     registerValue = ((uint32_t)sendBuffer[0] << 24) |
                     ((uint32_t)sendBuffer[1] << 16) |
