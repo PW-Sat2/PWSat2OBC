@@ -15,18 +15,13 @@ void GenerateCommand(uint8_t mandatoryAddress , uint8_t registerAddress, uint16_
 	uint8_t  bitNo         = 0;
 	uint8_t  sum           = 0;
 	sendBuffer[0] = mandatoryAddress | (registerAddress >> 7);
+	sendBuffer[1] = (registerAddress << 1);
 	if(mandatoryAddress == ADXRS453_WRITE)
 	{
-		sendBuffer[1] =(registerAddress << 1) |
-                	   (registerValue >> 15);
+		sendBuffer[1] |=  (registerValue >> 15);
 		sendBuffer[2] = (registerValue >> 7);
 		sendBuffer[3] = (registerValue << 1);
 	}
-	else
-	{
-		sendBuffer[1] = (registerAddress << 1);
-	}
-
 
 	command = ((uint32_t)sendBuffer[0] << 24) |
 	          ((uint32_t)sendBuffer[1] << 16) |
