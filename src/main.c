@@ -132,9 +132,6 @@ void ADXRS(void * param){
 	SPIDRV_Handle_t handle = &handleData;
 	SPIDRV_Init_t initData = ADXRS453_SPI;
 	SPIDRV_Init( handle, &initData );
-
-	float temp=0;
-	float rate=0;
 	GyroInterface_t interface;
 	interface.writeProc=SPISendB;
 	interface.readProc=SPISendRecvB;
