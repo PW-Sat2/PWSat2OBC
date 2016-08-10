@@ -1,10 +1,10 @@
 set(NAME mission)
 
 set(SOURCES
-    mission.c    
+    state.c    
     antenna.c
     sail.c
-    include/mission/mission.h
+    include/mission/state.h
     include/mission/antenna.h
     include/mission/sail.h
 )

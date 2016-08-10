@@ -3,7 +3,7 @@
 #include "gmock/gmock-matchers.h"
 #include "MissionTestHelpers.h"
 #include "mission/antenna.h"
-#include "mission/mission.h"
+#include "mission/state.h"
 #include "rapidcheck.h"
 #include "rapidcheck/gtest.h"
 #include "system.h"

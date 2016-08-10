@@ -29,7 +29,11 @@
 #include "storage/nand_driver.h"
 #include "storage/storage.h"
 
+#include "base/ecc.h"
+#include "mission.h"
+
 OBC Main;
+MissionState Mission;
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
@@ -150,6 +154,8 @@ int main(void)
 
     TerminalInit();
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
+
+    InitializeMission(&Mission, &Main);
 
     OpenSailInit();
 

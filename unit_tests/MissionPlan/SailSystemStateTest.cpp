@@ -5,8 +5,8 @@
 
 #include "MissionTestHelpers.h"
 
-#include "mission/mission.h"
 #include "mission/sail.h"
+#include "mission/state.h"
 #include "system.h"
 
 using testing::Test;
@@ -34,7 +34,7 @@ class SailSystemStateTest : public Test
         SystemStateEmpty(&state);
 
         SailInitializeUpdateDescriptor(&updateDescriptor, &sailOpened);
-        SailInitializeActionDescriptor(&openSailAction);
+        SailInitializeActionDescriptor(&openSailAction, &sailOpened);
     }
 };
 

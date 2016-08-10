@@ -1,6 +1,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
-#include "mission.h"
+#include "state.h"
 #include "system.h"
 
 static bool Condition(SystemState* state, void* param)

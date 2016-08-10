@@ -1,5 +1,5 @@
-#ifndef LIBS_MISSION_INCLUDE_MISSION_MISSION_H_
-#define LIBS_MISSION_INCLUDE_MISSION_MISSION_H_
+#ifndef LIBS_MISSION_INCLUDE_MISSION_STATE_H_
+#define LIBS_MISSION_INCLUDE_MISSION_STATE_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -73,4 +73,4 @@ void SystemDetermineActions(SystemState* const state, SystemActionDescriptor** d
 }
 #endif
 
-#endif /* LIBS_MISSION_INCLUDE_MISSION_MISSION_H_ */
+#endif /* LIBS_MISSION_INCLUDE_MISSION_STATE_H_ */

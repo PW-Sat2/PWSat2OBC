@@ -4,7 +4,7 @@
 #include <functional>
 #include "gmock/gmock.h"
 #include "gmock-extensions.h"
-#include "mission/mission.h"
+#include "mission/state.h"
 #include "rapidcheck.h"
 #include "system.h"
 
