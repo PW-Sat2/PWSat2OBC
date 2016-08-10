@@ -14,12 +14,11 @@
 #include "SwoEndpoint/SwoEndpoint.h"
 #include "base/os.h"
 #include "comm/comm.h"
-#include "devices/eps.h"
+#include "eps/eps.h"
 #include "i2c/i2c.h"
 #include "io_map.h"
 #include "logger/logger.h"
 #include "obc.h"
-#include "openSail.h"
 #include "swo/swo.h"
 #include "system.h"
 #include "terminal.h"
@@ -156,8 +155,6 @@ int main(void)
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 
     InitializeMission(&Mission, &Main);
-
-    OpenSailInit();
 
     GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
     GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);

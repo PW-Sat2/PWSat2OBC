@@ -34,6 +34,8 @@ static void OpenSail(SystemState* const state, void* param)
     bool* sailOpened = (bool*)param;
 
     *sailOpened = true;
+
+    EpsOpenSail();
 }
 
 void SailInitializeUpdateDescriptor(SystemStateUpdateDescriptor* descriptor, bool* sailOpened)
