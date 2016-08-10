@@ -114,6 +114,90 @@ TEST_F(adxrs453Test, TestInitializationWithInitialisationProcedure)
 	gyro.interface=interface;
 	EXPECT_CALL(spimock, SPIWrite(_, _, _, _)).Times(5);
 	ADXRS453_Init(&gyro,handle);
+}
+TEST_F(adxrs453Test, TestRunFunctionInterfaceWhenGetSensorValue)
+{
+	SPIDRV_HandleData_t handleData;
+		SPIDRV_Handle_t handle = &handleData;
+	GyroInterface_t interface;
+	interface.writeProc=TestSPIWrite;
+	interface.readProc=TestSPIWriteRead;
+	gyro.interface=interface;
+	EXPECT_CALL(spimock, SPIWriteRead(_, _, _, _)).Times(2);
+	ADXRS453_GetTemperature(&gyro,handle);
+	ADXRS453_GetRate(&gyro,handle);
+}
 
+TEST_F(adxrs453Test, TestWriteBusyErrorSPICommunication)
+{
+	SPIDRV_HandleData_t handleData;
+	SPIDRV_Handle_t handle = &handleData;
+	GyroInterface_t interface;
+	interface.writeProc=TestSPIWrite;
+	interface.readProc=TestSPIWriteRead;
+	gyro.interface=interface;
+	SPI_TransferReturn result;
+	EXPECT_CALL(spimock, SPIWrite(_, _, _, _)).WillOnce(Return(ECODE_EMDRV_SPIDRV_BUSY));
+	ON_CALL(spimock, SPIWrite(_, _, _, _)).WillByDefault(Return(ECODE_EMDRV_SPIDRV_BUSY));
+	result = ADXRS453_SetRegisterValue(&gyro,handle,0,0);
+	EXPECT_EQ(result.resultCodes.resultCodeWrite, ECODE_EMDRV_SPIDRV_BUSY);
+}
+
+TEST_F(adxrs453Test, TestReadBusyErrorSPICommunication)
+{
+	SPIDRV_HandleData_t handleData;
+	SPIDRV_Handle_t handle = &handleData;
+	GyroInterface_t interface;
+	interface.writeProc=TestSPIWrite;
+	interface.readProc=TestSPIWriteRead;
+	gyro.interface=interface;
+	SPI_TransferReturn result;
+	SPI_TransferPairResultCode failresult;
+	failresult.resultCodeWrite=ECODE_EMDRV_SPIDRV_BUSY;
+	failresult.resultCodeRead=ECODE_EMDRV_SPIDRV_BUSY;
+	EXPECT_CALL(spimock, SPIWriteRead(_, _, _, _)).WillOnce(Return(failresult));
+	ON_CALL(spimock, SPIWriteRead(_, _, _, _)).WillByDefault(Return(failresult));
+	result = ADXRS453_GetRegisterValue(&gyro,handle,0);
+	EXPECT_EQ(result.resultCodes.resultCodeWrite, ECODE_EMDRV_SPIDRV_BUSY);
+	EXPECT_EQ(result.resultCodes.resultCodeRead, ECODE_EMDRV_SPIDRV_BUSY);
+}
+
+TEST_F(adxrs453Test, TestReadBusyErrorTempSPICommunication)
+{
+	SPIDRV_HandleData_t handleData;
+	SPIDRV_Handle_t handle = &handleData;
+	GyroInterface_t interface;
+	interface.writeProc=TestSPIWrite;
+	interface.readProc=TestSPIWriteRead;
+	gyro.interface=interface;
+	SPI_TransferReturn result;
+	SPI_TransferPairResultCode failresult;
+	failresult.resultCodeWrite=ECODE_EMDRV_SPIDRV_BUSY;
+	failresult.resultCodeRead=ECODE_EMDRV_SPIDRV_BUSY;
+	EXPECT_CALL(spimock, SPIWriteRead(_, _, _, _)).WillOnce(Return(failresult));
+	ON_CALL(spimock, SPIWriteRead(_, _, _, _)).WillByDefault(Return(failresult));
+	result = ADXRS453_GetTemperature(&gyro,handle);
+	EXPECT_EQ(result.resultCodes.resultCodeWrite, ECODE_EMDRV_SPIDRV_BUSY);
+	EXPECT_EQ(result.resultCodes.resultCodeRead, ECODE_EMDRV_SPIDRV_BUSY);
+
+}
+
+TEST_F(adxrs453Test, TestReadBusyErrorRateSPICommunication)
+{
+	SPIDRV_HandleData_t handleData;
+	SPIDRV_Handle_t handle = &handleData;
+	GyroInterface_t interface;
+	interface.writeProc=TestSPIWrite;
+	interface.readProc=TestSPIWriteRead;
+	gyro.interface=interface;
+	SPI_TransferReturn result;
+	SPI_TransferPairResultCode failresult;
+	failresult.resultCodeWrite=ECODE_EMDRV_SPIDRV_BUSY;
+	failresult.resultCodeRead=ECODE_EMDRV_SPIDRV_BUSY;
+	EXPECT_CALL(spimock, SPIWriteRead(_, _, _, _)).WillOnce(Return(failresult));
+	ON_CALL(spimock, SPIWriteRead(_, _, _, _)).WillByDefault(Return(failresult));
+	result = ADXRS453_GetRate(&gyro,handle);
+	EXPECT_EQ(result.resultCodes.resultCodeWrite, ECODE_EMDRV_SPIDRV_BUSY);
+	EXPECT_EQ(result.resultCodes.resultCodeRead, ECODE_EMDRV_SPIDRV_BUSY);
 }
 

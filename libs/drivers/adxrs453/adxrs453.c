@@ -109,7 +109,7 @@ SPI_TransferReturn_t ADXRS453_SetRegisterValue(ADXRS453_Obj_t *gyro,
 	SPI_TransferReturn_t transferReturn;
 	uint8_t sendBuffer[4] = {0, 0, 0, 0};
     GenerateCommand(ADXRS453_WRITE,registerAddress,registerValue,sendBuffer);
-    transferReturn.resultCodes.resultCodeRead= gyro->interface.writeProc(&(gyro->pinLocations), handle, sendBuffer, 4 );
+    transferReturn.resultCodes.resultCodeWrite= gyro->interface.writeProc(&(gyro->pinLocations), handle, sendBuffer, 4 );
     return transferReturn;
 
 

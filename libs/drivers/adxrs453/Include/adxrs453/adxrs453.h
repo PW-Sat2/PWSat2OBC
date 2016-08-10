@@ -2,6 +2,9 @@
 #define __ADXRS453_H__
 #include "io_map.h"
 #include "spidrv.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 /**
  * @defgroup ADXRS453SPIDRIVER Low Level Adxrs453 gyroscope Module Driver
  *
@@ -299,4 +302,7 @@ void GenerateCommand(uint8_t commandByte , uint8_t registerAddress, uint16_t reg
 
 
 /** @}*/
+#ifdef __cplusplus
+}
+#endif
 #endif // __ADXRS453_H__

@@ -45,8 +45,7 @@ target_link_libraries(${NAME}
     comm
     fs    
     emdrv
-    adxrs453
-    
+    adxrs453    
 )
 
 target_require_semihosting(${NAME})
