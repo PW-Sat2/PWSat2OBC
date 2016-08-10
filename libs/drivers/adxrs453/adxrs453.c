@@ -13,8 +13,6 @@ void GenerateCommand(uint8_t mandatoryAddress , uint8_t registerAddress, uint16_
 void GenerateCommand(uint8_t mandatoryAddress , uint8_t registerAddress, uint16_t registerValue, uint8_t * sendBuffer)
 {
 	uint32_t  command       = 0;
-	uint8_t  bitNo         = 0;
-	uint8_t  sum           = 0;
 	sendBuffer[0] = mandatoryAddress | (registerAddress >> 7);
 	sendBuffer[1] = (registerAddress << 1);
 	if(mandatoryAddress == ADXRS453_WRITE)
@@ -28,14 +26,7 @@ void GenerateCommand(uint8_t mandatoryAddress , uint8_t registerAddress, uint16_
 	          ((uint32_t)sendBuffer[1] << 16) |
 	          ((uint16_t)sendBuffer[2] << 8) |
 	          sendBuffer[3];
-	for(bitNo = 31; bitNo > 0; bitNo--)
-	{
-	     sum += ((command >> bitNo) & 0x1);
-	}
-	if(!(sum % 2))
-	{
-	  	sendBuffer[3] |= 1;				// I wasn't able to use __buildin_parity because of undefined reference
-	}  									//, propably arm libc doesn't support it
+	sendBuffer[3] |=!__builtin_parity(command);
 
 }
 
