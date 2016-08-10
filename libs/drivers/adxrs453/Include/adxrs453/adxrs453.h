@@ -94,7 +94,7 @@ typedef struct SPI_TransferPairResultCode
 } SPI_TransferPairResultCode_t;
 
 /**
- * @brief This type contains error location for chip sellect port and pin .
+ * @brief This type contains location for chip sellect port and pin .
  */
 
 typedef struct ADXRS453_PinLocations {
@@ -111,7 +111,7 @@ typedef struct ADXRS453_PinLocations {
  * @param[in] handle for SPI driver.
  * @param[in] buffer Pointer to buffer that contains the data that should be send to the device.
  * @param[in] length Size of the data stored inside the buffer buffer in bytes.
- * @return sending error code.
+ * @return sending error code see Ecode_t.
  */
 typedef Ecode_t (*GyroSPIWriteProcedure)(ADXRS453_PinLocations_t *locations,SPIDRV_Handle_t handle, const void * buffer, uint8_t length);
 
@@ -124,11 +124,11 @@ typedef Ecode_t (*GyroSPIWriteProcedure)(ADXRS453_PinLocations_t *locations,SPID
  * @param[in] handle for SPI driver.
  * @param[in] buffer Pointer to buffer that contains the data that should be send to the device.
  * @param[in] length Size of the data stored inside the buffer buffer in bytes.
- * @return pair error codes, sending error code and receiving error code.
+ * @return pair error codes, sending error code and receiving error code see SPI_TransferPairResultCode_t.
  */
 typedef SPI_TransferPairResultCode_t (*GyroSPIWriteReadProcedure)(ADXRS453_PinLocations_t *locations,SPIDRV_Handle_t handle, const void * buffer, uint8_t length);
 
-/** ADXRS453 driver gyroscope interface. */
+/**@brief ADXRS453 driver gyroscope interface. */
 typedef struct
 {
 	 /**
@@ -195,7 +195,7 @@ void ADXRS453Spi_Init(ADXRS453_Obj_t *gyro);
 void ADXRS453_Init(ADXRS453_Obj_t *gyro,
 		SPIDRV_Handle_t 	handle);
 /**
- * @brief This procedure is a implementation of interface GyroSPIWriteProcedure.
+ * @brief This procedure is a implementation of interface GyroSPIWriteProcedure see GyroSPIWriteProcedure.
  *
  * This procedure uses emdrv libraries for communication via SPI.
  */
@@ -206,7 +206,7 @@ Ecode_t SPISendB(ADXRS453_PinLocations_t *locations,
 		uint8_t 	length );
 
 /**
- * @brief This procedure is part of implementation of interface GyroSPIWriteReadProcedure.
+ * @brief This procedure is part of implementation of interface GyroSPIWriteReadProcedure see  GyroSPIWriteReadProcedure..
  *
  * This procedure uses emdrv libraries for communication via SPI.
  */
@@ -216,7 +216,7 @@ Ecode_t SPIRecvB(ADXRS453_PinLocations_t *locations,
 		void * 	buffer,
 		uint8_t 	length );
 /**
- * @brief This procedure is a implementation of interface GyroSPIWriteReadProcedure.
+ * @brief This procedure is a implementation of interface GyroSPIWriteReadProcedure see GyroSPIWriteReadProcedure.
  *
  * This procedure uses emdrv libraries for communication via SPI.
  */
@@ -225,14 +225,22 @@ SPI_TransferPairResultCode_t SPISendRecvB(ADXRS453_PinLocations_t *locations,
 		SPIDRV_Handle_t 	handle,
 		void * 	buffer,
 		uint8_t 	length );
-/*! Reads the value of a register. */
+
+/**
+ * @brief Gets register Value for ADXRS453.
+ *
+ * @param[in] gyro Object ADXRS453 Pointer.
+ * @param[in] handle SPI handler.
+ * @param[in] registerAddress register addressr.
+ * @return type of transfer return see SPI_TransferReturn_t
+ */
 
 
 SPI_TransferReturn_t ADXRS453_GetRegisterValue(ADXRS453_Obj_t *gyro,
 									SPIDRV_Handle_t handle,
 									uint8_t registerAddress);
 /**
- * @brief Set register Value for ADXRS453.
+ * @brief Sets register Value for ADXRS453.
  *
  * @param[in] gyro Object ADXRS453 Pointer.
  * @param[in] handle SPI handler.
@@ -277,6 +285,17 @@ SPI_TransferReturn_t ADXRS453_GetRate(ADXRS453_Obj_t *gyro,
  */
 SPI_TransferReturn_t  ADXRS453_GetTemperature(ADXRS453_Obj_t *gyro,
 		SPIDRV_Handle_t 	handle);
+
+/**
+ * @brief generates the command for ADXRS453.
+ *
+ * @param[in] commandByte command byte  .
+ * @param[in] registerAddress register address.
+ * @param[in] registerAddress register value.
+ * @param[out] buffer Pointer to buffer that will contains the command.
+ * @return type of transfer return see SPI_TransferReturn_t
+ */
+void GenerateCommand(uint8_t commandByte , uint8_t registerAddress, uint16_t registerValue, uint8_t * sendBuffer);
 
 
 /** @}*/

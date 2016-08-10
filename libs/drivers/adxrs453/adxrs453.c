@@ -8,14 +8,13 @@
 #include <stdint.h>
 
 
-void GenerateCommand(uint8_t mandatoryAddress , uint8_t registerAddress, uint16_t registerValue, uint8_t * sendBuffer);
 
-void GenerateCommand(uint8_t mandatoryAddress , uint8_t registerAddress, uint16_t registerValue, uint8_t * sendBuffer)
+void GenerateCommand(uint8_t commandByte , uint8_t registerAddress, uint16_t registerValue, uint8_t * sendBuffer)
 {
 	uint32_t  command       = 0;
-	sendBuffer[0] = mandatoryAddress | (registerAddress >> 7);
+	sendBuffer[0] = commandByte | (registerAddress >> 7);
 	sendBuffer[1] = (registerAddress << 1);
-	if(mandatoryAddress == ADXRS453_WRITE)
+	if(commandByte == ADXRS453_WRITE)
 	{
 		sendBuffer[1] |=  (registerValue >> 15);
 		sendBuffer[2] = (registerValue >> 7);
@@ -68,7 +67,6 @@ SPI_TransferPairResultCode_t SPISendRecvB(ADXRS453_PinLocations_t *locations, SP
 }
 
 void ADXRS453Spi_Init(ADXRS453_Obj_t *gyro) {
-	/* Initialize the SPI communication peripheral  */
 	 GPIO_PinModeSet((GPIO_Port_TypeDef)(gyro->pinLocations).csPortLocation, (gyro->pinLocations).csPinLocation ,gpioModePushPull, 1 );
 	 GPIO_PinOutSet((GPIO_Port_TypeDef)(gyro->pinLocations).csPortLocation,(gyro->pinLocations).csPinLocation);
 }
@@ -77,7 +75,6 @@ void ADXRS453_Init(ADXRS453_Obj_t *gyro, SPIDRV_Handle_t handle)
 {
 	uint8_t  dataBuffer[4] = {0x20, 0x00, 0x00, 0x03};
     ADXRS453Spi_Init(gyro);
-//RECOMMENDED START-UP SEQUENCE WITH CHK BIT ASSERTION see datasheet
     gyro->interface.writeProc(&(gyro->pinLocations), handle, dataBuffer, 4 );
     dataBuffer[3]=0x00;
     gyro->interface.writeProc(&(gyro->pinLocations), handle, dataBuffer, 4 );
@@ -144,12 +141,12 @@ SPI_TransferReturn_t ADXRS453_GetRate(ADXRS453_Obj_t *gyro,SPIDRV_Handle_t 	hand
    
     if(transferReturn.resultCodes.resultCodeWrite==0 && transferReturn.resultCodes.resultCodeRead==0)
     {
-    /*!< If data received is in positive degree range */
+
     if(registerValue < 0x8000)
     {
         rate = ((int16_t)registerValue / 80);
     }
-    /*!< If data received is in negative degree range */
+
     else
     {
         rate = (-1) * ((int16_t)(0xFFFF - registerValue + 1) / 80);
