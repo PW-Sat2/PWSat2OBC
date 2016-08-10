@@ -139,7 +139,7 @@ SPI_TransferReturn_t ADXRS453_GetRate(ADXRS453_Obj_t *gyro,SPIDRV_Handle_t 	hand
     transferReturn = ADXRS453_GetRegisterValue(gyro, handle, ADXRS453_REG_RATE);
     registerValue = transferReturn.result.sensorResult;
    
-    if(transferReturn.resultCodes.resultCodeWrite==0 && transferReturn.resultCodes.resultCodeRead==0)
+    if(transferReturn.resultCodes.resultCodeWrite==ECODE_OK && transferReturn.resultCodes.resultCodeRead==ECODE_OK)
     {
 
     if(registerValue < 0x8000)
@@ -168,7 +168,7 @@ SPI_TransferReturn_t ADXRS453_GetTemperature(ADXRS453_Obj_t *gyro,SPIDRV_Handle_
     int16_t          temperature   = 0;
     
     transferReturn = ADXRS453_GetRegisterValue(gyro, handle, ADXRS453_REG_TEM);
-    if(transferReturn.resultCodes.resultCodeWrite==0 && transferReturn.resultCodes.resultCodeRead==0)
+    if(transferReturn.resultCodes.resultCodeWrite==ECODE_OK && transferReturn.resultCodes.resultCodeRead==ECODE_OK)
        {
     	registerValue = transferReturn.result.dataResult;
     	registerValue = (registerValue >> 6) - 0x31F;

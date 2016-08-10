@@ -18,6 +18,7 @@ set(SOURCES
   os/os.cpp
   os/os.hpp
   OsMock.hpp
+  adxrs453/adxrs453Test.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -43,6 +44,9 @@ target_link_libraries(${NAME}
     storage 
     comm
     fs    
+    emdrv
+    adxrs453
+    
 )
 
 target_require_semihosting(${NAME})
