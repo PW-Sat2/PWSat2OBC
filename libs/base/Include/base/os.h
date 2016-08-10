@@ -48,6 +48,9 @@ typedef void* OSEventGroupHandle;
 /** @brief Type definition of event group value. */
 typedef uint32_t OSEventBits;
 
+/** @brief Type definition of queue handle */
+typedef void* OSQueueHandle;
+
 /**
  * @brief Pointer to generic system procedure that operates on task.
  *
@@ -66,12 +69,8 @@ typedef void (*OSTaskProcedure)(OSTaskHandle task);
  * @param[out] taskHandle Pointer to variable that will be filled with the created task handle.
  * @return Operation status.
  */
-typedef OSResult (*OSTaskCreateProc)(OSTaskProcedure entryPoint,
-    const char* taskName,
-    uint16_t stackSize,
-    void* taskParameter,
-    uint32_t priority,
-    OSTaskHandle* taskHandle);
+typedef OSResult (*OSTaskCreateProc)(
+    OSTaskProcedure entryPoint, const char* taskName, uint16_t stackSize, void* taskParameter, uint32_t priority, OSTaskHandle* taskHandle);
 
 /**
  * @brief Pointer to the generic system procedure.
@@ -136,11 +135,8 @@ typedef OSEventBits (*OSEventGroupChangeBits)(OSEventGroupHandle eventGroup, con
  * @return The value of the event group at the time either the event bits being waited for became set,
  * or the block time expired.
  */
-typedef OSEventBits (*OSEventGroupWaitForBits)(OSEventGroupHandle eventGroup,
-    const OSEventBits bitsToWaitFor,
-    bool waitAll,
-    bool autoReset,
-    const OSTaskTimeSpan timeout);
+typedef OSEventBits (*OSEventGroupWaitForBits)(
+    OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, bool waitAll, bool autoReset, const OSTaskTimeSpan timeout);
 
 /**
  * @brief Type of procedure that allocates block of memory from OS heap
@@ -153,6 +149,56 @@ typedef void* (*OSAlloc)(size_t size);
  * @param[in] ptr Pointer to block to free
  */
 typedef void (*OSFree)(void* ptr);
+
+/**
+ * @brief Type of procedure that creates queue
+ * @param[in] maxQueueElements Maximum number of elements in queue
+ * @param[in] elementSize Size of single element
+ * @return Queue handle on success, NULL otherwise
+ */
+typedef OSQueueHandle (*OSCreateQueue)(size_t maxQueueElements, size_t elementSize);
+
+/**
+ * @brief Type of procedure that receives single elment from queue
+ * @param[in] queue Queue handle
+ * @param[out] element Buffer for element
+ * @param[in] timeout Operation timeout in ms.
+ * @return TRUE if element was received, FALSE on timeout
+ */
+typedef bool (*OSQueueReceive)(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout);
+
+/**
+ * @brief Type of procedure that receives single elment from queue in interrupt handler
+ * @param[in] queue Queue handle
+ * @param[out] element Buffer for element
+  * @param[out] taskWoken Set to true if task was woken as a result of receiving element from queue
+ * @return TRUE if element was received, FALSE on timeout
+ */
+typedef bool (*OSQueueReceiveISR)(OSQueueHandle queue, void* element, bool* taskWoken);
+
+/**
+ * @brief Type of procedure that sends element to queue
+ * @param[in] queue Queue handle
+ * @param[in] element Element to send to queue
+ * @param[in] timeout Operation timeout in ms
+ * @return TRUE if element was received, FALSE on timeout
+ */
+typedef bool (*OSQueueSend)(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout);
+
+/**
+ * @brief Type of procedure that sends element to queue in interrupt handler
+ * @param[in] queue Queue handle
+ * @param[in] element Element to send to queue
+  * @param[out] taskWoken Set to true if task was woken as a result of receiving element from queue
+ * @return TRUE if element was received, FALSE on timeout
+ */
+typedef bool (*OSQueueSendISR)(OSQueueHandle queue, void* element, bool* taskWoken);
+
+/**
+ * @brief Type of procedure that causes context switch at the end of interrupt handler
+ * @param[in] taskWoken TRUE if task was woken and context switch should occur
+ */
+typedef void (*OSEndSwitchingISR)(bool taskWoken);
 
 /**
  * @brief Definition of operating system interface.
@@ -270,6 +316,48 @@ typedef struct
      * @see OSFree
      */
     OSFree Free;
+
+    /**
+     * @brief Pointer to procedure that creates queue
+     *
+     * @see OSCreateQueue
+     */
+    OSCreateQueue CreateQueue;
+
+    /**
+     * @brief Pointer to procedure that receives element form queue
+     *
+     * @see OSQueueReceive
+     */
+    OSQueueReceive QueueReceive;
+
+    /**
+     * @brief Pointer to procedure that receives element form queue in interrupt handler
+     *
+     * @see OSQueueReceiveISR
+     */
+    OSQueueReceiveISR QueueReceiveFromISR;
+
+    /**
+     * @brief Pointer to procedure that sends element to queue
+     *
+     * @see OSQueueSend
+     */
+    OSQueueSend QueueSend;
+
+    /**
+     * @brief Pointer to procedure that sends element to queue in interrupt handler
+     *
+     * @see OSQueueSendISR
+     */
+    OSQueueSendISR QueueSendISR;
+
+    /**
+     * @brief Pointer to procedure that should be called at the end of interrupt handler
+     *
+     * @see OSEndSwitchingISR
+     */
+    OSEndSwitchingISR EndSwitchingISR;
 } OS;
 
 /**

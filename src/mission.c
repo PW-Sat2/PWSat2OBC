@@ -73,6 +73,8 @@ static void MissionControlTask(void* param)
 
 void InitializeMission(MissionState* missionState, OBC* obc)
 {
+    UNREFERENCED_PARAMETER(obc);
+
     SailInitializeUpdateDescriptor(&missionState->Sail.Update, &missionState->SailOpened);
     SailInitializeActionDescriptor(&missionState->Sail.OpenSail, &missionState->SailOpened);
 

@@ -7,8 +7,7 @@ set(SOURCES
 add_library(${NAME} STATIC ${SOURCES})
 
 target_link_libraries(${NAME}
-    i2c
-    freeRTOS
+    i2c    
     logger
     base
 )

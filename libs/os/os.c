@@ -2,6 +2,7 @@
 #include "FreeRTOS.h"
 #include "FreeRTOSConfig.h"
 #include "event_groups.h"
+#include "queue.h"
 #include "semphr.h"
 #include "task.h"
 
@@ -11,12 +12,8 @@ static inline TickType_t ConvertTimeToTicks(const OSTaskTimeSpan span)
     return pdMS_TO_TICKS(time);
 }
 
-static OSResult TaskCreate(OSTaskProcedure entryPoint,
-    const char* taskName,
-    uint16_t stackSize,
-    void* taskParameter,
-    uint32_t priority,
-    OSTaskHandle* taskHandle)
+static OSResult TaskCreate(
+    OSTaskProcedure entryPoint, const char* taskName, uint16_t stackSize, void* taskParameter, uint32_t priority, OSTaskHandle* taskHandle)
 {
     const BaseType_t result = xTaskCreate(entryPoint, taskName, stackSize, taskParameter, priority, taskHandle);
     if (result != pdPASS)
@@ -95,17 +92,11 @@ static OSEventBits EventGroupClearBits(OSEventGroupHandle eventGroup, const OSEv
     return xEventGroupClearBits(eventGroup, bitsToChange);
 }
 
-static OSEventBits EventGroupWaitForBits(OSEventGroupHandle eventGroup,
-    const OSEventBits bitsToWaitFor,
-    bool waitAll,
-    bool autoReset,
-    const OSTaskTimeSpan timeout)
+static OSEventBits EventGroupWaitForBits(
+    OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, bool waitAll, bool autoReset, const OSTaskTimeSpan timeout)
 {
-    return xEventGroupWaitBits(eventGroup,
-        bitsToWaitFor,
-        autoReset ? bitsToWaitFor : 0,
-        waitAll ? pdTRUE : pdFALSE,
-        ConvertTimeToTicks(timeout));
+    return xEventGroupWaitBits(
+        eventGroup, bitsToWaitFor, autoReset ? bitsToWaitFor : 0, waitAll ? pdTRUE : pdFALSE, ConvertTimeToTicks(timeout));
 }
 
 static void* Alloc(size_t size)
@@ -115,7 +106,49 @@ static void* Alloc(size_t size)
 
 static void Free(void* ptr)
 {
-    return vPortFree(ptr);
+    vPortFree(ptr);
+}
+
+static OSQueueHandle CreateQueue(size_t maxElementCount, size_t elementSize)
+{
+    return xQueueCreate(maxElementCount, elementSize);
+}
+
+static bool QueueReceive(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout)
+{
+    return xQueueReceive(queue, element, timeout) == pdTRUE;
+}
+
+static bool QueueReceiveISR(OSQueueHandle queue, void* element, bool* taskWoken)
+{
+    BaseType_t tmp;
+
+    bool result = xQueueReceiveFromISR(queue, element, &tmp) == pdTRUE;
+
+    *taskWoken = tmp == pdTRUE;
+
+    return result;
+}
+
+static bool QueueSend(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout)
+{
+    return xQueueSend(queue, element, timeout) == pdTRUE;
+}
+
+static bool QueueSendISR(OSQueueHandle queue, void* element, bool* taskWoken)
+{
+    BaseType_t tmp;
+
+    bool result = xQueueSendFromISR(queue, element, &tmp) == pdTRUE;
+
+    *taskWoken = tmp == pdTRUE;
+
+    return result;
+}
+
+static void EndSwitchingISR(bool taskWoken)
+{
+    portEND_SWITCHING_ISR(taskWoken);
 }
 
 OS System;
@@ -136,6 +169,12 @@ OSResult OSSetup(void)
     System.EventGroupWaitForBits = EventGroupWaitForBits;
     System.Alloc = Alloc;
     System.Free = Free;
+    System.CreateQueue = CreateQueue;
+    System.QueueReceive = QueueReceive;
+    System.QueueReceiveFromISR = QueueReceiveISR;
+    System.QueueSend = QueueSend;
+    System.QueueSendISR = QueueSendISR;
+    System.EndSwitchingISR = EndSwitchingISR;
 
     return OSResultSuccess;
 }
