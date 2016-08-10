@@ -1,13 +1,16 @@
+#include "time/TimePoint.h"
 #include <stdbool.h>
 #include <stdlib.h>
-#include "mission.h"
+#include "state.h"
 #include "system.h"
 
 static bool Condition(SystemState* state, void* param)
 {
     UNREFERENCED_PARAMETER(param);
 
-    if (state->Time < 30 * 60)
+    const TimePoint t = TimePointFromTimeSpan(TimeSpanFromMinutes(30));
+
+    if (TimePointLessThan(state->Time, t))
     {
         return false;
     }

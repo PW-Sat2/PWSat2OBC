@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "mission.h"
+#include "state.h"
 
 void AntennaInitializeActionDescriptor(SystemActionDescriptor* descriptor);
 

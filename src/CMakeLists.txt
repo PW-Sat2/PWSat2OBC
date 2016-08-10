@@ -11,6 +11,7 @@ set(SOURCES
     openSail.c    
     obc.h
     fault_handlers.c
+    mission.c
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -31,6 +32,7 @@ target_link_libraries(${NAME}
     fs
     adxrs453
     time
+    mission
 )
 
 target_generate_hex(${NAME})

@@ -4,7 +4,7 @@
 #include <functional>
 #include "gmock/gmock.h"
 #include "gmock-extensions.h"
-#include "mission/mission.h"
+#include "mission/state.h"
 #include "rapidcheck.h"
 #include "system.h"
 
@@ -118,13 +118,35 @@ class SystemAction
 
 namespace rc
 {
+    template <> struct Arbitrary<TimePoint>
+    {
+        static Gen<TimePoint> arbitrary()
+        {
+            auto day = gen::nonNegative<uint16_t>();
+            auto hour = gen::inRange(0, 23);
+            auto minute = gen::inRange(0, 59);
+            auto second = gen::inRange(0, 59);
+            auto milisecond = gen::inRange(0, 999);
+
+            return gen::apply(
+                [](uint16_t day, uint16_t hour, uint16_t minute, uint16_t second, uint16_t milisecond) {
+                    return TimePointBuild(day, hour, minute, second, milisecond);
+                },
+                day,
+                hour,
+                minute,
+                second,
+                milisecond);
+        }
+    };
+
     template <> struct Arbitrary<SystemState>
     {
         static Gen<SystemState> arbitrary()
         {
-            return gen::build<SystemState>(                                 //
-                gen::set(&SystemState::Time, gen::nonNegative<uint32_t>()), //
-                gen::set(&SystemState::SailOpened, gen::arbitrary<bool>())  //
+            return gen::build<SystemState>(                                //
+                gen::set(&SystemState::Time, gen::arbitrary<TimePoint>()), //
+                gen::set(&SystemState::SailOpened, gen::arbitrary<bool>()) //
                 );
         }
     };

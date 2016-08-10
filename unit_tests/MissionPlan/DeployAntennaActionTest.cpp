@@ -1,9 +1,10 @@
+#include "time/TimeSpan.hpp"
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "gmock/gmock-matchers.h"
 #include "MissionTestHelpers.h"
 #include "mission/antenna.h"
-#include "mission/mission.h"
+#include "mission/state.h"
 #include "rapidcheck.h"
 #include "rapidcheck/gtest.h"
 #include "system.h"
@@ -38,7 +39,7 @@ void DeployAntennaActionTest::DetermineActions()
 
 TEST_F(DeployAntennaActionTest, OpenDeployAfterSilencePhaseIfNotAlreadyOpenned)
 {
-    state.Time = 30 * 60 + 1; // in seconds
+    state.Time = TimePointFromTimeSpan(TimeSpanAdd(TimeSpanFromMinutes(30), TimeSpanFromSeconds(1)));
 
     DetermineActions();
 
@@ -47,7 +48,7 @@ TEST_F(DeployAntennaActionTest, OpenDeployAfterSilencePhaseIfNotAlreadyOpenned)
 
 TEST_F(DeployAntennaActionTest, ShouldNotDeployAntennaInSilencePhase)
 {
-    state.Time = 20 * 60 + 1; // in seconds
+    state.Time = TimePointFromTimeSpan(TimeSpanAdd(TimeSpanFromMinutes(20), TimeSpanFromSeconds(1)));
 
     DetermineActions();
 
@@ -56,7 +57,7 @@ TEST_F(DeployAntennaActionTest, ShouldNotDeployAntennaInSilencePhase)
 
 TEST_F(DeployAntennaActionTest, ShouldNotDeployAntennaIfAlreadyOpenned)
 {
-    state.Time = 30 * 60 + 1; // in seconds
+    state.Time = TimePointFromTimeSpan(TimeSpanAdd(TimeSpanFromMinutes(30), TimeSpanFromSeconds(1)));
     state.AntennaDeployed = true;
 
     DetermineActions();
@@ -72,7 +73,7 @@ RC_GTEST_FIXTURE_PROP(DeployAntennaActionTest, CanOpenAntennaOnlyAfterSilentPhas
 
     if (openAntenna.Runnable)
     {
-        RC_ASSERT(state.Time > 30 * 60);
+        RC_ASSERT(state.Time > TimePointFromTimeSpan(TimeSpanFromMinutes(30)));
         RC_ASSERT_FALSE(state.AntennaDeployed);
     }
 }

@@ -6,11 +6,11 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
-#include "mission.h"
+#include "state.h"
 
 void SailInitializeUpdateDescriptor(SystemStateUpdateDescriptor* descriptor, bool* sailOpened);
 
-void SailInitializeActionDescriptor(SystemActionDescriptor* descriptor);
+void SailInitializeActionDescriptor(SystemActionDescriptor* descriptor, bool* sailOpened);
 
 #ifdef __cplusplus
 }

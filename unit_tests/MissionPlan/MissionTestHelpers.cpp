@@ -1,8 +1,8 @@
 #include <ostream>
-#include "mission/mission.h"
+#include "mission/state.h"
 
 void showValue(const SystemState& state, std::ostream& os)
 {
-    os << "time=" << state.Time << ", "
+    os << "time=" << TimePointToTimeSpan(state.Time).value << ", "
        << "antennaDeployed=" << state.AntennaDeployed;
 }

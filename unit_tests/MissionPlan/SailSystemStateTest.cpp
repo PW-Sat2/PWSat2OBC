@@ -5,8 +5,9 @@
 
 #include "MissionTestHelpers.h"
 
-#include "mission/mission.h"
+#include "time/TimeSpan.hpp"
 #include "mission/sail.h"
+#include "mission/state.h"
 #include "system.h"
 
 using testing::Test;
@@ -34,7 +35,7 @@ class SailSystemStateTest : public Test
         SystemStateEmpty(&state);
 
         SailInitializeUpdateDescriptor(&updateDescriptor, &sailOpened);
-        SailInitializeActionDescriptor(&openSailAction);
+        SailInitializeActionDescriptor(&openSailAction, &sailOpened);
     }
 };
 
@@ -64,7 +65,7 @@ TEST_F(SailSystemStateTest, ShouldUpdateSystemState)
 
 TEST_F(SailSystemStateTest, ShouldOpenSailAfterTimeIfNotOpened)
 {
-    state.Time = 40 * 3600 + 1; // in seconds
+    state.Time = TimePointFromTimeSpan(TimeSpanAdd(TimeSpanFromHours(40), TimeSpanFromSeconds(1)));
     state.SailOpened = false;
 
     DetermineActions();
@@ -81,6 +82,6 @@ RC_GTEST_FIXTURE_PROP(SailSystemStateTest, SailCannotBeOpenedIfNotPossible, (con
     if (openSailAction.Runnable)
     {
         RC_ASSERT(this->state.SailOpened == false);
-        RC_ASSERT(this->state.Time > (uint32_t)(40 * 3600));
+        RC_ASSERT(this->state.Time > TimePointFromTimeSpan(TimeSpanFromHours(40)));
     }
 }

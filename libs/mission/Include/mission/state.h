@@ -1,5 +1,5 @@
-#ifndef LIBS_MISSION_INCLUDE_MISSION_MISSION_H_
-#define LIBS_MISSION_INCLUDE_MISSION_MISSION_H_
+#ifndef LIBS_MISSION_INCLUDE_MISSION_STATE_H_
+#define LIBS_MISSION_INCLUDE_MISSION_STATE_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -8,11 +8,13 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "time/TimePoint.h"
+
 typedef struct
 {
     bool Flag;
     int32_t NumValue;
-    uint32_t Time;
+    TimePoint Time;
     bool AntennaDeployed;
     bool SailOpened;
 } SystemState;
@@ -73,4 +75,4 @@ void SystemDetermineActions(SystemState* const state, SystemActionDescriptor** d
 }
 #endif
 
-#endif /* LIBS_MISSION_INCLUDE_MISSION_MISSION_H_ */
+#endif /* LIBS_MISSION_INCLUDE_MISSION_STATE_H_ */

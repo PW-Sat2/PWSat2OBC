@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
-#include "mission.h"
 #include "sail.h"
+#include "state.h"
 #include "system.h"
 
 static SystemStateUpdateResult UpdateProc(SystemState* state, void* param)
@@ -13,10 +13,11 @@ static SystemStateUpdateResult UpdateProc(SystemState* state, void* param)
 
 static bool CanOpenSail(SystemState* const state, void* param)
 {
-    UNREFERENCED_PARAMETER(state);
     UNREFERENCED_PARAMETER(param);
 
-    if (state->Time <= 40 * 3600)
+    const TimePoint t = TimePointFromTimeSpan(TimeSpanFromHours(40));
+
+    if (TimePointLessThan(state->Time, t))
     {
         return false;
     }
@@ -32,7 +33,9 @@ static bool CanOpenSail(SystemState* const state, void* param)
 static void OpenSail(SystemState* const state, void* param)
 {
     UNREFERENCED_PARAMETER(state);
-    UNREFERENCED_PARAMETER(param);
+    bool* sailOpened = (bool*)param;
+
+    *sailOpened = true;
 }
 
 void SailInitializeUpdateDescriptor(SystemStateUpdateDescriptor* descriptor, bool* sailOpened)
@@ -42,10 +45,10 @@ void SailInitializeUpdateDescriptor(SystemStateUpdateDescriptor* descriptor, boo
     descriptor->Param = sailOpened;
 }
 
-void SailInitializeActionDescriptor(SystemActionDescriptor* descriptor)
+void SailInitializeActionDescriptor(SystemActionDescriptor* descriptor, bool* sailOpened)
 {
-    descriptor->Name = "Open Sail Actioon";
-    descriptor->Param = NULL;
+    descriptor->Name = "Open Sail Action";
+    descriptor->Param = sailOpened;
     descriptor->Condition = CanOpenSail;
     descriptor->ActionProc = OpenSail;
 }
