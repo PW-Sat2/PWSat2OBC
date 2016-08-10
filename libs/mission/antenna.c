@@ -4,7 +4,7 @@
 #include "state.h"
 #include "system.h"
 
-static bool Condition(SystemState* state, void* param)
+static bool Condition(const SystemState* state, void* param)
 {
     UNREFERENCED_PARAMETER(param);
 
@@ -23,7 +23,7 @@ static bool Condition(SystemState* state, void* param)
     return true;
 }
 
-static void Action(SystemState* state, void* param)
+static void Action(const SystemState* state, void* param)
 {
     UNREFERENCED_PARAMETER(state);
     UNREFERENCED_PARAMETER(param);
@@ -35,5 +35,4 @@ void AntennaInitializeActionDescriptor(SystemActionDescriptor* descriptor)
     descriptor->Param = NULL;
     descriptor->Condition = Condition;
     descriptor->ActionProc = Action;
-    descriptor->Runnable = false;
 }

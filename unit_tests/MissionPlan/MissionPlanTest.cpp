@@ -89,7 +89,7 @@ TEST_F(MissionPlanTest, ShouldAbortUpdatingAfterFailure)
 
 TEST_F(MissionPlanTest, ShouldVerifyStateAgainstConstraints)
 {
-    StateVerifier flagAndNumValue("flag and NumValue >= 20", [](SystemState* state, SystemStateVerifyDescriptorResult* result) {
+    StateVerifier flagAndNumValue("flag and NumValue >= 20", [](const SystemState* state, SystemStateVerifyDescriptorResult* result) {
         if (state->Flag && state->NumValue >= 20)
         {
             result->Result = SystemStateVerifyOK;
@@ -114,7 +114,7 @@ TEST_F(MissionPlanTest, ShouldVerifyStateAgainstConstraints)
 
 TEST_F(MissionPlanTest, ShouldReportInvalidState)
 {
-    StateVerifier flagAndNumValue("flag and NumValue >= 20", [](SystemState* state, SystemStateVerifyDescriptorResult* result) {
+    StateVerifier flagAndNumValue("flag and NumValue >= 20", [](const SystemState* state, SystemStateVerifyDescriptorResult* result) {
         if (state->Flag && state->NumValue >= 20)
         {
             result->Result = SystemStateVerifyOK;
@@ -144,18 +144,19 @@ TEST_F(MissionPlanTest, ShouldGenerateActionsBasedOnState)
     state.Flag = true;
     state.NumValue = 10;
 
-    SystemAction action1 = SystemAction("action1") //
-                               .When([](SystemState* state) { return state->NumValue > 5; })
-                               .Do([](SystemState* state) { UNREFERENCED_PARAMETER(state); });
+    SystemAction& action1 = SystemAction("action1") //
+                                .When([](const SystemState* state) { return state->NumValue > 5; })
+                                .Do([](const SystemState* state) { UNREFERENCED_PARAMETER(state); });
 
-    SystemAction action2 = SystemAction("action2") //
-                               .When([](SystemState* state) { return state->NumValue > 15; })
-                               .Do([](SystemState* state) { UNREFERENCED_PARAMETER(state); });
+    SystemAction& action2 = SystemAction("action2") //
+                                .When([](const SystemState* state) { return state->NumValue > 15; })
+                                .Do([](const SystemState* state) { UNREFERENCED_PARAMETER(state); });
 
-    SystemActionDescriptor* descriptors[] = {action1, action2};
+    SystemActionDescriptor actions[] = {action1, action2};
+    SystemActionDescriptor* runnable[COUNT_OF(actions)] = {0};
 
-    SystemDetermineActions(&state, descriptors, COUNT_OF(descriptors));
+    auto runnableCount = SystemDetermineActions(&state, actions, COUNT_OF(actions), runnable);
 
-    ASSERT_THAT(descriptors[0]->Runnable, Eq(true));
-    ASSERT_THAT(descriptors[1]->Runnable, Eq(false));
+    ASSERT_THAT(runnableCount, Eq(1));
+    ASSERT_THAT(runnable[0]->Param, Eq(&action1));
 }

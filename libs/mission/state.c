@@ -32,7 +32,7 @@ SystemStateUpdateResult SystemStateUpdate(
     return result;
 }
 
-SystemStateVerifyResult SystemStateVerify(SystemState* const state,
+SystemStateVerifyResult SystemStateVerify(const SystemState* state,
     const SystemStateVerifyDescriptor descriptors[],
     SystemStateVerifyDescriptorResult results[],
     const uint16_t descriptorsCount)
@@ -53,10 +53,51 @@ SystemStateVerifyResult SystemStateVerify(SystemState* const state,
     return result;
 }
 
-void SystemDetermineActions(SystemState* const state, SystemActionDescriptor** descriptors, uint16_t descriptorsCount)
+uint16_t SystemDetermineActions(
+    const SystemState* state, SystemActionDescriptor descriptors[], uint16_t descriptorsCount, SystemActionDescriptor* runnable[])
 {
+    uint16_t runnableIdx = 0;
+
     for (uint16_t i = 0; i < descriptorsCount; i++)
     {
-        descriptors[i]->Runnable = descriptors[i]->Condition(state, descriptors[i]->Param);
+        if (descriptors[i].Condition(state, descriptors[i].Param))
+        {
+            runnable[runnableIdx] = &descriptors[i];
+            runnableIdx++;
+        }
+        else
+        {
+            //            descriptors[i].LastRun.Executed = false;
+        }
     }
+
+    return runnableIdx;
+}
+
+void SystemDispatchActions(const SystemState* state, SystemActionDescriptor* descriptors[], size_t actionsCount)
+{
+    if (actionsCount == 0)
+    {
+        return;
+    }
+
+    for (size_t i = 0; i < actionsCount; i++)
+    {
+        if (descriptors[i]->LastRun.Executed)
+        {
+            continue;
+        }
+
+        descriptors[i]->LastRun.Executed = true;
+        descriptors[i]->ActionProc(state, descriptors[i]->Param);
+        return;
+    }
+
+    for (size_t i = 0; i < actionsCount; i++)
+    {
+        descriptors[i]->LastRun.Executed = false;
+    }
+
+    descriptors[0]->LastRun.Executed = true;
+    descriptors[0]->ActionProc(state, descriptors[0]->Param);
 }

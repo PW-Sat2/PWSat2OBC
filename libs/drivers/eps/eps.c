@@ -1,5 +1,4 @@
-#include <FreeRTOS.h>
-#include <task.h>
+#include "base/os.h"
 
 #include "eps.h"
 
@@ -36,25 +35,25 @@ bool EpsOpenSail(void)
     {
         return false;
     }
-    vTaskDelay(pdMS_TO_TICKS(100));
+    System.SleepTask(100);
 
     if (!epsControlLCL(EPS_LCL_SAIL_0, false))
     {
         return false;
     }
-    vTaskDelay(pdMS_TO_TICKS(100));
+    System.SleepTask(100);
 
     if (!epsControlLCL(EPS_LCL_SAIL_1, true))
     {
         return false;
     }
-    vTaskDelay(pdMS_TO_TICKS(100));
+    System.SleepTask(100);
 
     if (!epsControlLCL(EPS_LCL_SAIL_1, false))
     {
         return false;
     }
-    vTaskDelay(pdMS_TO_TICKS(100));
+    System.SleepTask(100);
 
     return true;
 }
