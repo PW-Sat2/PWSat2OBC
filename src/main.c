@@ -15,12 +15,11 @@
 #include "SwoEndpoint/SwoEndpoint.h"
 #include "base/os.h"
 #include "comm/comm.h"
-#include "devices/eps.h"
+#include "eps/eps.h"
 #include "i2c/i2c.h"
 #include "io_map.h"
 #include "logger/logger.h"
 #include "obc.h"
-#include "openSail.h"
 #include "swo/swo.h"
 #include "system.h"
 

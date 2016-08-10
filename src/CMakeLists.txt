@@ -6,9 +6,7 @@ set(SOURCES
     commands/ping.c
     commands/time.c   
     commands/comm.c   
-    commands/file_system.c 
-    devices/eps.c
-    openSail.c    
+    commands/file_system.c                
     obc.h
     fault_handlers.c
     mission.c
@@ -33,6 +31,7 @@ target_link_libraries(${NAME}
     adxrs453
     time
     mission
+    eps
 )
 
 target_generate_hex(${NAME})

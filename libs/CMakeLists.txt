@@ -10,6 +10,7 @@ add_subdirectory(drivers/swo)
 add_subdirectory(drivers/i2c)
 add_subdirectory(drivers/comm)
 add_subdirectory(drivers/adxrs453)
+add_subdirectory(drivers/eps)
 
 add_subdirectory(base)
 add_subdirectory(logger)
