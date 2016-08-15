@@ -1,11 +1,15 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "gmock/gmock-matchers.h"
+#include "OsMock.hpp"
+#include "os/os.hpp"
 
 #include "time/timer.h"
 
 using testing::Eq;
+using testing::Ne;
 using testing::_;
+using testing::Return;
 
 bool operator==(const TimePoint& left, const TimePoint& right)
 {
@@ -30,15 +34,23 @@ class TimerTest : public testing::Test
 
     TimeProvider provider;
     TimeNotificationHandler timeHandler;
+    testing::NiceMock<OSMock> os;
+    OSReset guard;
 };
 
 void TimerTest::Initialize()
 {
-    TimeInitialize(&provider, TimePassedProxy, &timeHandler, nullptr);
+    this->guard = InstallProxy(&os);
+    EXPECT_CALL(os, CreateBinarySemaphore()).WillOnce(Return(reinterpret_cast<void*>(1))).WillOnce(Return(reinterpret_cast<void*>(2)));
+    ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResultSuccess));
+    ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResultSuccess));
+    EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, &timeHandler, nullptr));
 }
 
 TEST_F(TimerTest, TestDefaultState)
 {
+    this->guard = InstallProxy(&os);
+    ON_CALL(os, CreateBinarySemaphore()).WillByDefault(Return(reinterpret_cast<void*>(this)));
     const auto result = TimeInitialize(&provider, TimePassedProxy, &timeHandler, nullptr);
     ASSERT_THAT(result, Eq(true));
     ASSERT_THAT(TimeGetCurrentTime(&provider), Eq(0u));
@@ -50,10 +62,25 @@ TEST_F(TimerTest, TestDefaultState)
     ASSERT_THAT(time.day, Eq(0));
 }
 
+TEST_F(TimerTest, TestInitializationFailure)
+{
+    ON_CALL(os, CreateBinarySemaphore()).WillByDefault(Return(nullptr));
+    const auto result = TimeInitialize(&provider, TimePassedProxy, &timeHandler, nullptr);
+    ASSERT_THAT(result, Eq(false));
+}
+
+TEST_F(TimerTest, TestInitializationSecondFailure)
+{
+    this->guard = InstallProxy(&os);
+    EXPECT_CALL(os, CreateBinarySemaphore()).WillOnce(Return(reinterpret_cast<void*>(this))).WillOnce(Return(nullptr));
+    const auto result = TimeInitialize(&provider, TimePassedProxy, &timeHandler, nullptr);
+    ASSERT_THAT(result, Eq(false));
+}
+
 TEST_F(TimerTest, TestAdvanceTimeNoNotification)
 {
-    EXPECT_CALL(timeHandler, OnTimePassed(_)).Times(0);
     Initialize();
+    EXPECT_CALL(timeHandler, OnTimePassed(_)).Times(0);
     TimeAdvanceTime(&provider, 1);
 }
 
@@ -62,6 +89,37 @@ TEST_F(TimerTest, TestAdvanceTimeWithNotification)
     EXPECT_CALL(timeHandler, OnTimePassed(_)).Times(1);
     Initialize();
     TimeAdvanceTime(&provider, 10001);
+}
+
+TEST_F(TimerTest, TestAdvanceTimeWithNotificationCheckNotificationSemaphores)
+{
+    Initialize();
+    EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResultSuccess));
+    EXPECT_CALL(os, GiveSemaphore(provider.timerLock)).Times(1);
+    EXPECT_CALL(os, TakeSemaphore(provider.notificationLock, _)).WillOnce(Return(OSResultSuccess));
+    EXPECT_CALL(os, GiveSemaphore(provider.notificationLock)).Times(1);
+    TimeAdvanceTime(&provider, 10001);
+}
+
+TEST_F(TimerTest, TestAdvanceTimeWithNotificationLockFailure)
+{
+    EXPECT_CALL(timeHandler, OnTimePassed(_)).Times(0);
+    Initialize();
+    EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResultSuccess));
+    EXPECT_CALL(os, GiveSemaphore(provider.timerLock)).Times(1);
+    EXPECT_CALL(os, TakeSemaphore(provider.notificationLock, _)).WillOnce(Return(OSResultInvalidOperation));
+    EXPECT_CALL(os, GiveSemaphore(provider.notificationLock)).Times(0);
+    TimeAdvanceTime(&provider, 10001);
+    ASSERT_THAT(TimeGetCurrentTime(&provider), Eq(10001u));
+}
+
+TEST_F(TimerTest, TestAdvanceTimeWithTimerLockFailure)
+{
+    Initialize();
+    EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResultInvalidOperation));
+    EXPECT_CALL(os, GiveSemaphore(provider.timerLock)).Times(0);
+    TimeAdvanceTime(&provider, 500);
+    ASSERT_THAT(TimeGetCurrentTime(&provider), Eq(0u));
 }
 
 TEST_F(TimerTest, TestCurrentTimeAfterJump)
@@ -90,9 +148,25 @@ TEST_F(TimerTest, TestSetTime)
     point.minute = 3;
     point.hour = 4;
     point.day = 5;
-    TimeSetCurrentTime(&provider, point);
-
+    const auto status = TimeSetCurrentTime(&provider, point);
+    ASSERT_THAT(status, Eq(true));
     ASSERT_THAT(TimeGetCurrentTime(&provider), Eq(446582001u));
+}
+
+TEST_F(TimerTest, TestSetTimeLockError)
+{
+    Initialize();
+    EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResultInvalidOperation));
+    EXPECT_CALL(os, GiveSemaphore(provider.timerLock)).Times(0);
+    TimePoint point;
+    point.milisecond = 1;
+    point.second = 2;
+    point.minute = 3;
+    point.hour = 4;
+    point.day = 5;
+    const auto status = TimeSetCurrentTime(&provider, point);
+    ASSERT_THAT(status, Eq(false));
+    ASSERT_THAT(TimeGetCurrentTime(&provider), Ne(446582001u));
 }
 
 TEST_F(TimerTest, TestSetTimeNotifiesSystemAboutTimeChange)

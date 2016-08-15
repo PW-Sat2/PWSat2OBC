@@ -33,6 +33,10 @@ typedef enum {
     OSResultInvalidOperation = 3,
 } OSResult;
 
+#define OS_RESULT_SUCCEEDED(x) ((x) == OSResultSuccess)
+
+#define OS_RESULT_FAILED(x) ((x) != OSResultSuccess)
+
 /** @brief Type definition for time span in ms. */
 typedef uint32_t OSTaskTimeSpan;
 
@@ -66,12 +70,8 @@ typedef void (*OSTaskProcedure)(OSTaskHandle task);
  * @param[out] taskHandle Pointer to variable that will be filled with the created task handle.
  * @return Operation status.
  */
-typedef OSResult (*OSTaskCreateProc)(OSTaskProcedure entryPoint,
-    const char* taskName,
-    uint16_t stackSize,
-    void* taskParameter,
-    uint32_t priority,
-    OSTaskHandle* taskHandle);
+typedef OSResult (*OSTaskCreateProc)(
+    OSTaskProcedure entryPoint, const char* taskName, uint16_t stackSize, void* taskParameter, uint32_t priority, OSTaskHandle* taskHandle);
 
 /**
  * @brief Pointer to the generic system procedure.
@@ -136,11 +136,8 @@ typedef OSEventBits (*OSEventGroupChangeBits)(OSEventGroupHandle eventGroup, con
  * @return The value of the event group at the time either the event bits being waited for became set,
  * or the block time expired.
  */
-typedef OSEventBits (*OSEventGroupWaitForBits)(OSEventGroupHandle eventGroup,
-    const OSEventBits bitsToWaitFor,
-    bool waitAll,
-    bool autoReset,
-    const OSTaskTimeSpan timeout);
+typedef OSEventBits (*OSEventGroupWaitForBits)(
+    OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, bool waitAll, bool autoReset, const OSTaskTimeSpan timeout);
 
 /**
  * @brief Type of procedure that allocates block of memory from OS heap
