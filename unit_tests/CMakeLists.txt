@@ -20,6 +20,7 @@ set(SOURCES
   OsMock.hpp
   time/time.cpp
   time/timer.cpp
+  time/persistance.cpp
   mock/FsMock.hpp
   mock/FsMock.cpp
 )
