@@ -21,6 +21,7 @@ set(SOURCES
   adxrs453/adxrs453Test.cpp
   time/time.cpp
   time/timer.cpp
+  time/persistance.cpp
   mock/FsMock.hpp
   mock/FsMock.cpp
 )
