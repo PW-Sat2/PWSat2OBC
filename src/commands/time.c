@@ -19,10 +19,10 @@ void JumpToTimeHandler(uint16_t argc, char* argv[])
 
     char* tail;
 
-    TimeSpan targetTime = strtol(argv[0], &tail, 10);
-    targetTime *= 1000;
+    TimeSpan targetTime = strtoul(argv[0], &tail, 10);
 
-    LOGF(LOG_LEVEL_INFO, "Jumping to time %d\n", targetTime);
+    LOGF(LOG_LEVEL_INFO, "Jumping to time %d\n", (int)targetTime);
+    targetTime *= 1000;
 
     TimeSetCurrentTime(&Main.timeProvider, TimePointFromTimeSpan(targetTime));
 }
@@ -31,6 +31,5 @@ void CurrentTimeHandler(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
-
-    TerminalPrintf("%llu", TimeGetCurrentTime(&Main.timeProvider));
+    TerminalPrintf("%d", (int)(TimeGetCurrentTime(&Main.timeProvider) / 1000));
 }

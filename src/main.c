@@ -113,7 +113,10 @@ static void ObcInitTask(void* param)
         LOG(LOG_LEVEL_ERROR, "Unable to initialize sail. ");
     }
 
-    TimeInitialize(&obc->timeProvider, OpenSailTimeHandler, &obc->sailContext, &obc->fs);
+    if (!TimeInitialize(&obc->timeProvider, OpenSailTimeHandler, &obc->sailContext, &obc->fs))
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to initialize persistent timer. ");
+    }
 
     if (!CommRestart(&obc->comm))
     {
