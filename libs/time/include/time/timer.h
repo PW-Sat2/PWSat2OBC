@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "TimePoint.h"
+#include "base/os.h"
 #include "fs/fs.h"
 #include "system.h"
 
@@ -34,33 +35,27 @@ struct TimeProvider
 
     TimeSpan PersistanceTime;
 
+    OSSemaphoreHandle timerLock;
+
+    OSSemaphoreHandle notificationLock;
+
     FileSystem* FileSystemObject;
 };
 
-void TimeInitialize(
+bool TimeInitialize(
     struct TimeProvider* provider, TimePassedCallbackType timePassedCallback, void* timePassedCallbackContext, FileSystem* fileSystem);
 
-static TimeSpan TimeGetCurrentTime(struct TimeProvider* timeProvider);
+TimeSpan TimeGetCurrentTime(struct TimeProvider* timeProvider);
 
-static TimePoint TimeGetCurrentMissionTime(struct TimeProvider* timeProvider);
+TimePoint TimeGetCurrentMissionTime(struct TimeProvider* timeProvider);
 
 void TimeAdvanceTime(struct TimeProvider* timeProvider, TimeSpan delta);
 
-void TimeSetCurrentTime(struct TimeProvider* timeProvider, TimePoint pointInTime);
+bool TimeSetCurrentTime(struct TimeProvider* timeProvider, TimePoint pointInTime);
 
 TimeTickCallbackType TimeGetTickProcedure(void);
 
 struct TimeSnapshot GetCurrentPersistentTime(FileSystem* fileSystem);
-
-static inline TimeSpan TimeGetCurrentTime(struct TimeProvider* timeProvider)
-{
-    return timeProvider->CurrentTime;
-}
-
-static inline TimePoint TimeGetCurrentMissionTime(struct TimeProvider* timeProvider)
-{
-    return TimePointFromTimeSpan(TimeGetCurrentTime(timeProvider));
-}
 
 static inline bool TimeSnapshotEqual(struct TimeSnapshot left, struct TimeSnapshot right)
 {
