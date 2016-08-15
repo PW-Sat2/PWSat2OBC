@@ -43,6 +43,16 @@ bool TimeInitialize(
     provider->FileSystemObject = fileSystem;
     provider->timerLock = System.CreateBinarySemaphore();
     provider->notificationLock = System.CreateBinarySemaphore();
+    if (provider->timerLock != NULL)
+    {
+        System.GiveSemaphore(provider->timerLock);
+    }
+
+    if (provider->notificationLock != NULL)
+    {
+        System.GiveSemaphore(provider->notificationLock);
+    }
+
     const bool result = provider->timerLock != NULL && provider->notificationLock != NULL;
     return result;
 }
