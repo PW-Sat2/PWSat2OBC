@@ -8,16 +8,35 @@ static const char* const TimeFile0 = "TimeState.0";
 static const char* const TimeFile1 = "TimeState.1";
 static const char* const TimeFile2 = "TimeState.2";
 
+/**
+ * @brief Time period between the subsequent mission time notifications.
+ */
 static const TimeSpan NotificationPeriod = 10000; // 10s
 
+/**
+ * @brief Time period between subsequent timer state saves.
+ */
 static const TimeSpan SavePeriod = 15 * 60 * 1000; // 15 min
 
+/**
+ * @brief This structure contains temporary timer state used for passing information between
+ * timer components during single rtc time notification.
+ */
 struct TimerState
 {
+    /**
+     * @brief Current mission time in milliseconds.
+     */
     TimeSpan time;
 
+    /**
+     * @brief Flag indicating whether the timer state should be immediately saved.
+     */
     bool saveTime;
 
+    /**
+     * @brief Flag indicating whether the timer notification should be immediatelly called.
+     */
     bool sendNotification;
 };
 
