@@ -11,6 +11,7 @@
 #include "system.h"
 #include "spidrv.h"
 
+
 using testing::_;
 using testing::Eq;
 using testing::Ne;
@@ -201,3 +202,174 @@ TEST_F(adxrs453Test, TestReadBusyErrorRateSPICommunication)
 	EXPECT_EQ(result.resultCodes.resultCodeRead, ECODE_EMDRV_SPIDRV_BUSY);
 }
 
+TEST_F(adxrs453Test, TestGetTemperatureResponseForNormalValues)
+{
+	SPIDRV_HandleData_t handleData;
+	SPIDRV_Handle_t handle = &handleData;
+	GyroInterface_t interface;
+	interface.writeProc=TestSPIWrite;
+	interface.readProc=TestSPIWriteRead;
+	gyro.interface=interface;
+    EXPECT_CALL(spimock, SPIWriteRead( _, _,  _, _))
+        .WillRepeatedly(Invoke([](ADXRS453_PinLocations_t *,
+        		SPIDRV_Handle_t,
+				const void * buffer,
+				uint8_t length) {
+           *(uint8_t*)(buffer) = 0x4E;
+           *(uint8_t*)(buffer+1) = 0x1C;
+           *(uint8_t*)(buffer+2) = 0xE0;
+           *(uint8_t*)(buffer+3) = 0x01;
+            SPI_TransferPairResultCode okresult;
+            okresult.resultCodeWrite=ECODE_OK;
+            okresult.resultCodeRead=ECODE_OK;
+            return okresult;
+        }));
+    SPI_TransferReturn result = ADXRS453_GetTemperature(&gyro,handle);
+    EXPECT_EQ(result.resultCodes.resultCodeWrite, ECODE_OK);
+    EXPECT_EQ(result.resultCodes.resultCodeRead, ECODE_OK);
+    EXPECT_EQ(result.result.sensorResult, 25);
+
+}
+
+TEST_F(adxrs453Test, TestGetTemperatureResponseForMinimalValues)
+{
+	SPIDRV_HandleData_t handleData;
+	SPIDRV_Handle_t handle = &handleData;
+	GyroInterface_t interface;
+	interface.writeProc=TestSPIWrite;
+	interface.readProc=TestSPIWriteRead;
+	gyro.interface=interface;
+    EXPECT_CALL(spimock, SPIWriteRead( _, _,  _, _))
+        .WillRepeatedly(Invoke([](ADXRS453_PinLocations_t *,
+        		SPIDRV_Handle_t,
+				const void * buffer,
+				uint8_t length) {
+           *(uint8_t*)(buffer) = 0x4E;
+           *(uint8_t*)(buffer+1) = 0x00;
+           *(uint8_t*)(buffer+2) = 0x00;
+           *(uint8_t*)(buffer+3) = 0x00;
+            SPI_TransferPairResultCode okresult;
+            okresult.resultCodeWrite=ECODE_OK;
+            okresult.resultCodeRead=ECODE_OK;
+            return okresult;
+        }));
+    SPI_TransferReturn result = ADXRS453_GetTemperature(&gyro,handle);
+    EXPECT_EQ(result.resultCodes.resultCodeWrite, ECODE_OK);
+    EXPECT_EQ(result.resultCodes.resultCodeRead, ECODE_OK);
+    EXPECT_EQ(result.result.sensorResult, -159);
+
+}
+TEST_F(adxrs453Test, TestGetTemperatureResponseForMaximalValues)
+{
+	SPIDRV_HandleData_t handleData;
+	SPIDRV_Handle_t handle = &handleData;
+	GyroInterface_t interface;
+	interface.writeProc=TestSPIWrite;
+	interface.readProc=TestSPIWriteRead;
+	gyro.interface=interface;
+    EXPECT_CALL(spimock, SPIWriteRead( _, _,  _, _))
+        .WillRepeatedly(Invoke([](ADXRS453_PinLocations_t *,
+        		SPIDRV_Handle_t,
+				const void * buffer,
+				uint8_t length) {
+           *(uint8_t*)(buffer) = 0x4C;
+           *(uint8_t*)(buffer+1) = 0xFF;
+           *(uint8_t*)(buffer+2) = 0xFF;
+           *(uint8_t*)(buffer+3) = 0x00;
+            SPI_TransferPairResultCode okresult;
+            okresult.resultCodeWrite=ECODE_OK;
+            okresult.resultCodeRead=ECODE_OK;
+            return okresult;
+        }));
+    SPI_TransferReturn result = ADXRS453_GetTemperature(&gyro,handle);
+    EXPECT_EQ(result.resultCodes.resultCodeWrite, ECODE_OK);
+    EXPECT_EQ(result.resultCodes.resultCodeRead, ECODE_OK);
+    EXPECT_EQ(result.result.sensorResult, 44);
+
+}
+
+TEST_F(adxrs453Test, TestGetRateResponseForMaximalValues)
+{
+	SPIDRV_HandleData_t handleData;
+	SPIDRV_Handle_t handle = &handleData;
+	GyroInterface_t interface;
+	interface.writeProc=TestSPIWrite;
+	interface.readProc=TestSPIWriteRead;
+	gyro.interface=interface;
+    EXPECT_CALL(spimock, SPIWriteRead( _, _,  _, _))
+        .WillRepeatedly(Invoke([](ADXRS453_PinLocations_t *,
+        		SPIDRV_Handle_t,
+				const void * buffer,
+				uint8_t length) {
+           *(uint8_t*)(buffer) = 0x5E;
+           *(uint8_t*)(buffer+1) = 0x0F;
+           *(uint8_t*)(buffer+2) = 0xFF;
+           *(uint8_t*)(buffer+3) = 0xFF;
+            SPI_TransferPairResultCode okresult;
+            okresult.resultCodeWrite=ECODE_OK;
+            okresult.resultCodeRead=ECODE_OK;
+            return okresult;
+        }));
+    SPI_TransferReturn result = ADXRS453_GetRate(&gyro,handle);
+    EXPECT_EQ(result.resultCodes.resultCodeWrite, ECODE_OK);
+    EXPECT_EQ(result.resultCodes.resultCodeRead, ECODE_OK);
+    EXPECT_EQ(result.result.sensorResult, 409);
+
+}
+
+TEST_F(adxrs453Test, TestGetRateResponseForMinimalValues)
+{
+	SPIDRV_HandleData_t handleData;
+	SPIDRV_Handle_t handle = &handleData;
+	GyroInterface_t interface;
+	interface.writeProc=TestSPIWrite;
+	interface.readProc=TestSPIWriteRead;
+	gyro.interface=interface;
+    EXPECT_CALL(spimock, SPIWriteRead( _, _,  _, _))
+        .WillRepeatedly(Invoke([](ADXRS453_PinLocations_t *,
+        		SPIDRV_Handle_t,
+				const void * buffer,
+				uint8_t length) {
+           *(uint8_t*)(buffer) = 0x5E;
+           *(uint8_t*)(buffer+1) = 0x10;
+           *(uint8_t*)(buffer+2) = 0x10;
+           *(uint8_t*)(buffer+3) = 0x00;
+            SPI_TransferPairResultCode okresult;
+            okresult.resultCodeWrite=ECODE_OK;
+            okresult.resultCodeRead=ECODE_OK;
+            return okresult;
+        }));
+    SPI_TransferReturn result = ADXRS453_GetRate(&gyro,handle);
+    EXPECT_EQ(result.resultCodes.resultCodeWrite, ECODE_OK);
+    EXPECT_EQ(result.resultCodes.resultCodeRead, ECODE_OK);
+    EXPECT_EQ(result.result.sensorResult, -408);
+
+}
+TEST_F(adxrs453Test, TestGetRateResponseForNormalValues)
+{
+	SPIDRV_HandleData_t handleData;
+	SPIDRV_Handle_t handle = &handleData;
+	GyroInterface_t interface;
+	interface.writeProc=TestSPIWrite;
+	interface.readProc=TestSPIWriteRead;
+	gyro.interface=interface;
+    EXPECT_CALL(spimock, SPIWriteRead( _, _,  _, _))
+        .WillRepeatedly(Invoke([](ADXRS453_PinLocations_t *,
+        		SPIDRV_Handle_t,
+				const void * buffer,
+				uint8_t length) {
+           *(uint8_t*)(buffer) = 0x5E;
+           *(uint8_t*)(buffer+1) = 0x01;
+           *(uint8_t*)(buffer+2) = 0x01;
+           *(uint8_t*)(buffer+3) = 0xFF;
+            SPI_TransferPairResultCode okresult;
+            okresult.resultCodeWrite=ECODE_OK;
+            okresult.resultCodeRead=ECODE_OK;
+            return okresult;
+        }));
+    SPI_TransferReturn result = ADXRS453_GetRate(&gyro,handle);
+    EXPECT_EQ(result.resultCodes.resultCodeWrite, ECODE_OK);
+    EXPECT_EQ(result.resultCodes.resultCodeRead, ECODE_OK);
+    EXPECT_EQ(result.result.sensorResult, 25);
+
+}
