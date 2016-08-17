@@ -1,13 +1,12 @@
 #ifndef LIBS_BASE_OS_H
 #define LIBS_BASE_OS_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "system.h"
+
+EXTERNC_BEGIN
 
 /**
  * @defgroup osal OS Abstraction layer
@@ -284,8 +283,6 @@ OSResult OSSetup(void);
 extern OS System;
 
 /** @}*/
-#ifdef __cplusplus
-}
-#endif
+EXTERNC_END
 
 #endif
