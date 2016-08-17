@@ -95,5 +95,6 @@ void I2CInit(void)
 
     I2C_IntEnable(I2C, I2C_IEN_TXC);
 
+    NVIC_SetPriority(I2C1_IRQn, I2C1_INT_PRIORITY);
     NVIC_EnableIRQ(I2C1_IRQn);
 }
