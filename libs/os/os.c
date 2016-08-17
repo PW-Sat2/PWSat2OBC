@@ -11,12 +11,8 @@ static inline TickType_t ConvertTimeToTicks(const OSTaskTimeSpan span)
     return pdMS_TO_TICKS(time);
 }
 
-static OSResult TaskCreate(OSTaskProcedure entryPoint,
-    const char* taskName,
-    uint16_t stackSize,
-    void* taskParameter,
-    uint32_t priority,
-    OSTaskHandle* taskHandle)
+static OSResult TaskCreate(
+    OSTaskProcedure entryPoint, const char* taskName, uint16_t stackSize, void* taskParameter, uint32_t priority, OSTaskHandle* taskHandle)
 {
     const BaseType_t result = xTaskCreate(entryPoint, taskName, stackSize, taskParameter, priority, taskHandle);
     if (result != pdPASS)
@@ -95,17 +91,11 @@ static OSEventBits EventGroupClearBits(OSEventGroupHandle eventGroup, const OSEv
     return xEventGroupClearBits(eventGroup, bitsToChange);
 }
 
-static OSEventBits EventGroupWaitForBits(OSEventGroupHandle eventGroup,
-    const OSEventBits bitsToWaitFor,
-    bool waitAll,
-    bool autoReset,
-    const OSTaskTimeSpan timeout)
+static OSEventBits EventGroupWaitForBits(
+    OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, bool waitAll, bool autoReset, const OSTaskTimeSpan timeout)
 {
-    return xEventGroupWaitBits(eventGroup,
-        bitsToWaitFor,
-        autoReset ? bitsToWaitFor : 0,
-        waitAll ? pdTRUE : pdFALSE,
-        ConvertTimeToTicks(timeout));
+    return xEventGroupWaitBits(
+        eventGroup, bitsToWaitFor, autoReset ? bitsToWaitFor : 0, waitAll ? pdTRUE : pdFALSE, ConvertTimeToTicks(timeout));
 }
 
 static void* Alloc(size_t size)
@@ -115,7 +105,7 @@ static void* Alloc(size_t size)
 
 static void Free(void* ptr)
 {
-    return vPortFree(ptr);
+    // Free is not suported
 }
 
 OS System;

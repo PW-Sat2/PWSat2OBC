@@ -23,15 +23,14 @@
 #include "swo/swo.h"
 #include "system.h"
 
-#include "terminal.h"
-#include "adxrs453/adxrs453.h"
 #include <spidrv.h>
+#include "adxrs453/adxrs453.h"
+#include "terminal.h"
 
 #include "fs/fs.h"
 #include "storage/nand.h"
 #include "storage/nand_driver.h"
 #include "storage/storage.h"
-
 
 OBC Main;
 
@@ -125,48 +124,54 @@ static void FrameHandler(CommObject* comm, CommFrame* frame, void* context)
     CommSendFrame(comm, (uint8_t*)"PONG", 4);
 }
 
+void ADXRS(void* param)
+{
+    UNREFERENCED_PARAMETER(param);
+    SPIDRV_HandleData_t handleData;
+    SPIDRV_Handle_t handle = &handleData;
+    SPIDRV_Init_t initData = ADXRS453_SPI;
+    SPIDRV_Init(handle, &initData);
+    GyroInterface_t interface;
+    interface.writeProc = SPISendB;
+    interface.readProc = SPISendRecvB;
+    ADXRS453_Obj_t gyro;
+    gyro.pinLocations = (ADXRS453_PinLocations_t)GYRO0;
+    gyro.interface = interface;
+    ADXRS453_Obj_t gyro1;
+    gyro1.pinLocations = (ADXRS453_PinLocations_t)GYRO1;
+    gyro1.interface = interface;
+    ADXRS453_Obj_t gyro2;
+    gyro2.pinLocations = (ADXRS453_PinLocations_t)GYRO2;
+    gyro2.interface = interface;
+    ADXRS453_Init(&gyro, handle);
+    ADXRS453_Init(&gyro1, handle);
+    ADXRS453_Init(&gyro2, handle);
 
-void ADXRS(void * param){
-	UNREFERENCED_PARAMETER(param);
-	SPIDRV_HandleData_t handleData;
-	SPIDRV_Handle_t handle = &handleData;
-	SPIDRV_Init_t initData = ADXRS453_SPI;
-	SPIDRV_Init( handle, &initData );
-	GyroInterface_t interface;
-	interface.writeProc=SPISendB;
-	interface.readProc=SPISendRecvB;
-	ADXRS453_Obj_t gyro;
-	gyro.pinLocations = (ADXRS453_PinLocations_t)GYRO0;
-	gyro.interface=interface;
-	ADXRS453_Obj_t gyro1;
-	gyro1.pinLocations = (ADXRS453_PinLocations_t)GYRO1;
-	gyro1.interface=interface;
-	ADXRS453_Obj_t gyro2;
-	gyro2.pinLocations = (ADXRS453_PinLocations_t)GYRO2;
-	gyro2.interface=interface;
-	ADXRS453_Init(&gyro,handle);
-	ADXRS453_Init(&gyro1,handle);
-	ADXRS453_Init(&gyro2,handle);
-
-
-	while(1){
-		SPI_TransferReturn_t rate=ADXRS453_GetRate(&gyro,handle);
-		SPI_TransferReturn_t temp=ADXRS453_GetTemperature(&gyro,handle);
-		LOGF(LOG_LEVEL_INFO, "gyro 0 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result.sensorResult, (int)rate.result.sensorResult);
-		rate=ADXRS453_GetRate(&gyro1,handle);
-		temp=ADXRS453_GetTemperature(&gyro1,handle);
-		LOGF(LOG_LEVEL_INFO, "gyro 1 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result.sensorResult, (int)rate.result.sensorResult);
-		rate=ADXRS453_GetRate(&gyro2,handle);
-		temp=ADXRS453_GetTemperature(&gyro2,handle);
-		LOGF(LOG_LEVEL_INFO, "gyro 2 temp: %d ' celcius rate: %d '/sec rotation\n", (int)temp.result.sensorResult, (int)rate.result.sensorResult);
-		vTaskDelay(10 / portTICK_PERIOD_MS);
-	}
-
-
+    while (1)
+    {
+        SPI_TransferReturn_t rate = ADXRS453_GetRate(&gyro, handle);
+        SPI_TransferReturn_t temp = ADXRS453_GetTemperature(&gyro, handle);
+        LOGF(LOG_LEVEL_INFO,
+            "gyro 0 temp: %d ' celcius rate: %d '/sec rotation\n",
+            (int)temp.result.sensorResult,
+            (int)rate.result.sensorResult);
+        rate = ADXRS453_GetRate(&gyro1, handle);
+        temp = ADXRS453_GetTemperature(&gyro1, handle);
+        LOGF(LOG_LEVEL_INFO,
+            "gyro 1 temp: %d ' celcius rate: %d '/sec rotation\n",
+            (int)temp.result.sensorResult,
+            (int)rate.result.sensorResult);
+        rate = ADXRS453_GetRate(&gyro2, handle);
+        temp = ADXRS453_GetTemperature(&gyro2, handle);
+        LOGF(LOG_LEVEL_INFO,
+            "gyro 2 temp: %d ' celcius rate: %d '/sec rotation\n",
+            (int)temp.result.sensorResult,
+            (int)rate.result.sensorResult);
+        vTaskDelay(10 / portTICK_PERIOD_MS);
+    }
 }
 int main(void)
 {
-
     memset(&Main, 0, sizeof(Main));
     CHIP_Init();
 
@@ -201,18 +206,15 @@ int main(void)
     GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);
     GPIO_DriveModeSet(LED_PORT, gpioDriveModeLowest);
 
-
     GPIO_PinOutSet(LED_PORT, LED0);
     GPIO_PinOutSet(LED_PORT, LED1);
 
-
     System.CreateTask(BlinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
-    System.CreateTask(ADXRS, "ADXRS", 512, NULL, tskIDLE_PRIORITY + 2, NULL);
-    System.CreateTask(ObcInitTask, "Init", 512, &Main, tskIDLE_PRIORITY + 16, &Main.initTask);
+    // System.CreateTask(ADXRS, "ADXRS", 512, NULL, tskIDLE_PRIORITY + 2, NULL);
+    System.CreateTask(ObcInitTask, "Init", 512, &Main, tskIDLE_PRIORITY + 15, &Main.initTask);
     System.RunScheduler();
 
     GPIO_PinOutToggle(LED_PORT, LED0);
-
 
     return 0;
 }

@@ -19,6 +19,7 @@ set(SOURCES
   os/os.hpp
   OsMock.hpp
   adxrs453/adxrs453Test.cpp
+  assert.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
