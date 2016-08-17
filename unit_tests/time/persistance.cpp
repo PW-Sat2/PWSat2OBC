@@ -17,7 +17,7 @@ class TimerPersistanceTest : public testing::Test
   protected:
     TimerPersistanceTest();
     TimeProvider provider;
-    FsMock fs;
+    testing::NiceMock<FsMock> fs;
     testing::NiceMock<OSMock> os;
     OSReset osGuard;
     FsMockReset fsGuard;
@@ -34,6 +34,7 @@ TimerPersistanceTest::TimerPersistanceTest()
     EXPECT_CALL(os, CreateBinarySemaphore()).WillOnce(Return(reinterpret_cast<void*>(1))).WillOnce(Return(reinterpret_cast<void*>(2)));
     ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResultSuccess));
     ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResultSuccess));
+    ON_CALL(fs, GetLastError()).WillByDefault(Return(0));
 }
 
 TEST_F(TimerPersistanceTest, TestReadingStateNoState)

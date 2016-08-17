@@ -1,9 +1,9 @@
 #include "TimePoint.h"
 
-TimePoint TimePointBuild(uint16_t day, uint8_t hour, uint8_t minute, uint8_t second, uint16_t milisecond)
+TimePoint TimePointBuild(uint16_t day, uint8_t hour, uint8_t minute, uint8_t second, uint16_t millisecond)
 {
     TimePoint point;
-    point.milisecond = milisecond;
+    point.milisecond = millisecond;
     point.second = second;
     point.minute = minute;
     point.hour = hour;
@@ -14,12 +14,6 @@ TimePoint TimePointBuild(uint16_t day, uint8_t hour, uint8_t minute, uint8_t sec
 TimePoint TimePointNormalize(TimePoint point)
 {
     return TimePointFromTimeSpan(TimePointToTimeSpan(point));
-}
-
-bool TimePointEqual(TimePoint left, TimePoint right)
-{
-    return left.milisecond == right.milisecond && left.second == right.second && left.minute == right.minute && left.hour == right.hour &&
-        left.day == right.day;
 }
 
 TimePoint TimePointFromTimeSpan(TimeSpan span)

@@ -11,7 +11,7 @@
 #include "system.h"
 
 /**
- * @defgroup time Time abstraction module.
+ * @defgroup time Time abstraction module
  *
  * @brief This module contains timer module that is responsible for measuring absolute mission time in milliseconds.
  * @{
@@ -123,6 +123,7 @@ struct TimeProvider
  * on mission time change.
  * @param[in] timePassedCallbackContext timePassedCallback context pointer. This value is not used by the timer itself.
  * It passes it as the context parameter to the timePassedCallback.
+ * @param[in] fileSystem Pointer to file system object that should be used to read persistent state.
  * @return Operation status. True on success, false otherwise.
  *
  * Besides the time initialization this procedure will automatically restores the timer state from the persistent state
@@ -135,6 +136,7 @@ bool TimeInitialize(
  * @brief This procedure returns current mission time in milliseconds.
  *
  * @param[in] timeProvider Pointer to queried timer object.
+ * @return Current mission time in milliseconds.
  */
 TimeSpan TimeGetCurrentTime(struct TimeProvider* timeProvider);
 
@@ -142,6 +144,7 @@ TimeSpan TimeGetCurrentTime(struct TimeProvider* timeProvider);
  * @brief This procedure returns current mission time in decoded format.
  *
  * @param[in] timeProvider Pointer to queried timer object.
+ * @return Decoded current mission time in milliseconds.
  */
 TimePoint TimeGetCurrentMissionTime(struct TimeProvider* timeProvider);
 
@@ -180,7 +183,7 @@ TimeTickCallbackType TimeGetTickProcedure(void);
  * @brief This procedure is responsible for reading the last timer state that has been
  * preserved in the persistent memory.
  *
- * @param[in] fileSystem Pointer to filesystem object that should be used to read persistent state.
+ * @param[in] fileSystem Pointer to file system object that should be used to read persistent state.
  * @return Either last stable timer state that get read from the persistent memory or
  * value indicating zero (initial time).
  */

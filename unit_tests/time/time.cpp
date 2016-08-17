@@ -41,6 +41,11 @@ TEST(TimeTest, TestTimePointEqualityEqual)
     ASSERT_TRUE(TimePointEqual(TimePointBuild(4501, 80, 200, 150, 12548), TimePointBuild(4501, 80, 200, 150, 12548)));
 }
 
+TEST(TimeTest, TestTimePointEqualityEqualAfterNormalization)
+{
+    ASSERT_TRUE(TimePointEqual(TimePointBuild(4501, 80, 200, 150, 12548), TimePointBuild(4504, 11, 22, 42, 548)));
+}
+
 TEST(TimeTest, TestTimePointEqualityNotEqual)
 {
     ASSERT_FALSE(TimePointEqual(TimePointBuild(4501, 80, 200, 150, 12548), TimePointBuild(4501, 80, 200, 150, 12549)));

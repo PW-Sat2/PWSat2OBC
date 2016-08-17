@@ -33,8 +33,14 @@ typedef enum {
     OSResultInvalidOperation = 3,
 } OSResult;
 
+/**
+ * @brief Macro for verification whether passed OSResult value indicates success.
+ */
 #define OS_RESULT_SUCCEEDED(x) ((x) == OSResultSuccess)
 
+/**
+ * @brief Macro for verification whether passed OSResult value indicates failure.
+ */
 #define OS_RESULT_FAILED(x) ((x) != OSResultSuccess)
 
 /** @brief Type definition for time span in ms. */
