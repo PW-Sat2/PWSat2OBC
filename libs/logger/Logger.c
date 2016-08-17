@@ -5,6 +5,11 @@
 #include "logger.h"
 #include "system.h"
 
+/**
+ * @addgroup Logger
+ * @{
+*/
+
 /** @brief Logger endpoint number limit. */
 #define MAX_ENDPOINTS 3
 
@@ -47,8 +52,7 @@ typedef struct
 /** @brief Global logger object. */
 static Logger logger = {0};
 
-static const char* const levelMap[] = {
-    "[Always]  ", "[Fatal]   ", "[Error]   ", "[Warning] ", "[Info]    ", "[Debug]   ", "[Trace]   "};
+static const char* const levelMap[] = {"[Always]  ", "[Fatal]   ", "[Error]   ", "[Warning] ", "[Info]    ", "[Debug]   ", "[Trace]   "};
 
 static_assert(LOG_LEVEL_ALWAYS == 0, "Fix level conversion map for level: Always");
 static_assert(LOG_LEVEL_FATAL == 1, "Fix level conversion map for level: Fatal");
@@ -99,9 +103,7 @@ void LogRemoveEndpoint(LoggerProcedure endpoint)
     {
         if (logger.endpoints[cx].endpoint == endpoint)
         {
-            memmove(logger.endpoints + cx,
-                logger.endpoints + cx + 1,
-                sizeof(*logger.endpoints) * (logger.endpointCount - (cx + 1)));
+            memmove(logger.endpoints + cx, logger.endpoints + cx + 1, sizeof(*logger.endpoints) * (logger.endpointCount - (cx + 1)));
             --logger.endpointCount;
             break;
         }
@@ -136,3 +138,5 @@ void LogMessage(bool withinIsr, enum LogLevel messageLevel, const char* message,
 
     va_end(arguments);
 }
+
+/** @} */

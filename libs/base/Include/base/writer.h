@@ -4,13 +4,12 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "system.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+EXTERNC_BEGIN
 
 /**
- * @addtogroup utilities General Purpose utilities
+ * @addtogroup utilities
  * @{
  */
 
@@ -149,8 +148,6 @@ static inline uint16_t WriterGetDataLength(const Writer* writer)
 }
 
 /** @}*/
-#ifdef __cplusplus
-}
-#endif
+EXTERNC_END
 
 #endif

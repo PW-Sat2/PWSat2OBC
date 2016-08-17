@@ -4,10 +4,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "system.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+EXTERNC_BEGIN
 
 /**
  * @defgroup utilities General Purpose Utilities
@@ -135,8 +134,6 @@ static inline void ReaderReset(Reader* reader)
 }
 
 /** @}*/
-#ifdef __cplusplus
-}
-#endif
+EXTERNC_END
 
 #endif
