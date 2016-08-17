@@ -16,12 +16,21 @@ class TimerPersistanceTest : public testing::Test
 {
   protected:
     TimerPersistanceTest();
+    TimeSpan GetCurrentTime();
+
     TimeProvider provider;
     testing::NiceMock<FsMock> fs;
     testing::NiceMock<OSMock> os;
     OSReset osGuard;
     FsMockReset fsGuard;
 };
+
+TimeSpan TimerPersistanceTest::GetCurrentTime()
+{
+    TimeSpan span = 0;
+    EXPECT_TRUE(TimeGetCurrentTime(&provider, &span));
+    return span;
+}
 
 static void TimePassedProxy(void* /*context*/, TimePoint /*currentTime*/)
 {
@@ -41,7 +50,7 @@ TEST_F(TimerPersistanceTest, TestReadingStateNoState)
 {
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(-1));
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &MockedFileSystem));
-    ASSERT_THAT(TimeGetCurrentTime(&provider), Eq(0u));
+    ASSERT_THAT(GetCurrentTime(), Eq(0u));
 }
 
 TEST_F(TimerPersistanceTest, TestReadingStateEmptyFiles)
@@ -50,7 +59,7 @@ TEST_F(TimerPersistanceTest, TestReadingStateEmptyFiles)
     EXPECT_CALL(fs, Read(_, _, _)).WillRepeatedly(Return(-1));
     EXPECT_CALL(fs, Close(_)).WillRepeatedly(Return(0));
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &MockedFileSystem));
-    ASSERT_THAT(TimeGetCurrentTime(&provider), Eq(0u));
+    ASSERT_THAT(GetCurrentTime(), Eq(0u));
 }
 
 TEST_F(TimerPersistanceTest, TestReadingFiles)
@@ -71,7 +80,7 @@ TEST_F(TimerPersistanceTest, TestReadingFiles)
             }
         }));
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &MockedFileSystem));
-    ASSERT_THAT(TimeGetCurrentTime(&provider), Eq(0x1111111111111111ull));
+    ASSERT_THAT(GetCurrentTime(), Eq(0x1111111111111111ull));
 }
 
 TEST_F(TimerPersistanceTest, TestReadingSingleNonEmptyFile)
@@ -85,7 +94,7 @@ TEST_F(TimerPersistanceTest, TestReadingSingleNonEmptyFile)
         }))
         .WillRepeatedly(Return(-1));
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &MockedFileSystem));
-    ASSERT_THAT(TimeGetCurrentTime(&provider), Eq(0u));
+    ASSERT_THAT(GetCurrentTime(), Eq(0u));
 }
 
 TEST_F(TimerPersistanceTest, TestReadingTwoNonEmptyFiles)
@@ -99,7 +108,7 @@ TEST_F(TimerPersistanceTest, TestReadingTwoNonEmptyFiles)
             return static_cast<int>(size);
         }));
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &MockedFileSystem));
-    ASSERT_THAT(TimeGetCurrentTime(&provider), Eq(0x1111111111111111ull));
+    ASSERT_THAT(GetCurrentTime(), Eq(0x1111111111111111ull));
 }
 
 TEST_F(TimerPersistanceTest, TestReadingTwoExistingEmptyFiles)
@@ -112,7 +121,7 @@ TEST_F(TimerPersistanceTest, TestReadingTwoExistingEmptyFiles)
             return static_cast<int>(size);
         }));
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &MockedFileSystem));
-    ASSERT_THAT(TimeGetCurrentTime(&provider), Eq(0x1111111111111111ull));
+    ASSERT_THAT(GetCurrentTime(), Eq(0x1111111111111111ull));
 }
 
 TEST_F(TimerPersistanceTest, TestReadingFilesEndiannes)
@@ -134,7 +143,7 @@ TEST_F(TimerPersistanceTest, TestReadingFilesEndiannes)
             }
         }));
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &MockedFileSystem));
-    ASSERT_THAT(TimeGetCurrentTime(&provider), Eq(0x8877665544332211ull));
+    ASSERT_THAT(GetCurrentTime(), Eq(0x8877665544332211ull));
 }
 
 TEST_F(TimerPersistanceTest, TestReadingFilesGetClosed)
@@ -163,7 +172,7 @@ TEST_F(TimerPersistanceTest, TestReadingThreeFilesTwoSame)
             return static_cast<int>(size);
         }));
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &MockedFileSystem));
-    ASSERT_THAT(TimeGetCurrentTime(&provider), Eq(0x8877665544332211ull));
+    ASSERT_THAT(GetCurrentTime(), Eq(0x8877665544332211ull));
 }
 
 TEST_F(TimerPersistanceTest, TestReadingThreeDifferentFiles)
@@ -192,7 +201,7 @@ TEST_F(TimerPersistanceTest, TestReadingThreeDifferentFiles)
         }));
 
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &MockedFileSystem));
-    ASSERT_THAT(TimeGetCurrentTime(&provider), Eq(0x7877665544332211ull));
+    ASSERT_THAT(GetCurrentTime(), Eq(0x7877665544332211ull));
 }
 
 TEST_F(TimerPersistanceTest, TestStateSaveError)
@@ -200,7 +209,7 @@ TEST_F(TimerPersistanceTest, TestStateSaveError)
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(-1));
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &MockedFileSystem));
     TimeAdvanceTime(&provider, 0x44332211ull);
-    ASSERT_THAT(TimeGetCurrentTime(&provider), Eq(0x44332211ull));
+    ASSERT_THAT(GetCurrentTime(), Eq(0x44332211ull));
 }
 
 TEST_F(TimerPersistanceTest, TestStateWriteError)
@@ -211,7 +220,7 @@ TEST_F(TimerPersistanceTest, TestStateWriteError)
     EXPECT_CALL(fs, Write(_, _, _)).WillRepeatedly(Return(-1));
     EXPECT_CALL(fs, Close(_)).Times(3).WillRepeatedly(Return(0));
     TimeAdvanceTime(&provider, 0x44332211ull);
-    ASSERT_THAT(TimeGetCurrentTime(&provider), Eq(0x44332211ull));
+    ASSERT_THAT(GetCurrentTime(), Eq(0x44332211ull));
 }
 
 TEST_F(TimerPersistanceTest, TestStateWrite)
@@ -229,7 +238,7 @@ TEST_F(TimerPersistanceTest, TestStateWrite)
             return static_cast<int>(size);
         }));
     TimeAdvanceTime(&provider, 0x44332211ull);
-    ASSERT_THAT(TimeGetCurrentTime(&provider), Eq(0x44332211ull));
+    ASSERT_THAT(GetCurrentTime(), Eq(0x44332211ull));
 }
 
 TEST_F(TimerPersistanceTest, TestStateWriteClosesFiles)
@@ -242,7 +251,7 @@ TEST_F(TimerPersistanceTest, TestStateWriteClosesFiles)
     EXPECT_CALL(fs, Close(3)).Times(1);
     EXPECT_CALL(fs, Write(_, _, _)).WillRepeatedly(Return(-1));
     TimeAdvanceTime(&provider, 0x44332211ull);
-    ASSERT_THAT(TimeGetCurrentTime(&provider), Eq(0x44332211ull));
+    ASSERT_THAT(GetCurrentTime(), Eq(0x44332211ull));
 }
 
 TEST_F(TimerPersistanceTest, TestStateWriteIsNotDoneOnEveryTimeUpdate)
@@ -257,5 +266,5 @@ TEST_F(TimerPersistanceTest, TestStateWriteIsNotDoneOnEveryTimeUpdate)
     TimeAdvanceTime(&provider, 100000);
     TimeAdvanceTime(&provider, 300000);
     TimeAdvanceTime(&provider, 200000);
-    ASSERT_THAT(TimeGetCurrentTime(&provider), Eq(1000000ull));
+    ASSERT_THAT(GetCurrentTime(), Eq(1000000ull));
 }
