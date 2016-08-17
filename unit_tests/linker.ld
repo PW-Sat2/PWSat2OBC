@@ -179,7 +179,7 @@ SECTIONS
   {
     __HeapBase = .;
     PROVIDE(heap_low = .);
-    . = . + 6M;
+    . = . + 5M;
     __end__ = .;
     end = __end__;
     _end = __end__;
