@@ -9,6 +9,11 @@ static const char* const TimeFile1 = "TimeState.1";
 static const char* const TimeFile2 = "TimeState.2";
 
 /**
+ * @addtogroup time
+ * @{
+ */
+
+/**
  * @brief Time period between the subsequent mission time notifications.
  */
 static const TimeSpan NotificationPeriod = 10000; // 10s
@@ -40,14 +45,61 @@ struct TimerState
     bool sendNotification;
 };
 
+/**
+ * @brief This procedure is responsible for processing rtc time notifications.
+ * @param[in] provider Pointer to timer object that should be notified about passing time.
+ * @param[in] delta The amount of time that has passes since last time notification.
+ */
 static void TimeTickProcedure(struct TimeProvider* provider, TimeSpan delta);
 
+/**
+ * @brief This procedure is responsible for sending passing time notifications to timer clients.
+ *
+ * This procedure does not determine whether notification should be
+ * sent or not, for that it uses the information passed in the state object. The state object
+ * should be prepared by the caller to avoid excessive timer locking in order to obtain stable
+ * timer state.
+ * @param[in] provider Timer object whose notification should be published.
+ * @param[in] state Timer object state snapshot.
+ */
 static void SendTimeNotification(struct TimeProvider* provider, struct TimerState state);
 
+/**
+ * @brief This procedure is responsible for saving specified timer state.
+ *
+ * This method does not determine whether or not state should be saved, for that it
+ * uses information from the state object that should be prepared in advance by the caller
+ * to avoid excessive timer locking in order to obtain stable timer state. The value
+ * that gets saved comes from the state object not the timer itself.
+ *
+ * @param[in] provider Time object whose state should be saved.
+ * @param[in] state The state of the timer object that should be saved.
+ */
 static void SaveTime(struct TimeProvider* provider, struct TimerState state);
 
-static struct TimerState TimeBuildTimerState(struct TimeProvider* TimeProvider);
+/**
+ * @brief This method generates time state snapshot.
+ *
+ * In addition this method also determines whether the time notification should be sent
+ * immediately as well as whether the timer state should also be saved and updates the
+ * timer state accordingly.
+ *
+ * @param[in] timeProvider Timer object whose snapshot should be generated.
+ * @return Captured timer state snapshot.
+ * @see TimerState
+ */
+static struct TimerState TimeBuildTimerState(struct TimeProvider* timeProvider);
 
+/**
+ * @brief This method is responsible for rtc timer notification post processing.
+ *
+ * It is responsible for coordinating the sending passing time notification and
+ * saving the timer state. This method ensures that there is only on timer
+ * notification being executed for the specified timer object at any given time
+ * and similarly that there is at most one task that saves current timer state.
+ * @param[in] timeProvider Timer object whose rtc notification should be processed.
+ * @param[in] state Captured timer state that is valid for processing.
+ */
 static void TimeProcessChange(struct TimeProvider* timeProvider, struct TimerState state);
 
 bool TimeInitialize(
@@ -84,11 +136,6 @@ TimeTickCallbackType TimeGetTickProcedure(void)
 void TimeAdvanceTime(struct TimeProvider* timeProvider, TimeSpan delta)
 {
     TimeTickProcedure(timeProvider, delta);
-}
-
-bool TimePointLessThan(TimePoint left, TimePoint right)
-{
-    return TimePointToTimeSpan(left) < TimePointToTimeSpan(right);
 }
 
 bool TimeSetCurrentTime(struct TimeProvider* timeProvider, TimePoint pointInTime)
@@ -171,6 +218,16 @@ struct TimerState TimeBuildTimerState(struct TimeProvider* timeProvider)
     return result;
 }
 
+/**
+ * @brief This procedure is responsible for reading timer state from single file.
+ *
+ * When selected file does not exist or is empty/corrupted this procedure return
+ * default state with time state set to zero (beginning of time).
+ * @param[in] fs FileSystem interface for accessing files.
+ * @param[in] filePath Path to the file that contains timer state.
+ *
+ * @return Read timer state or default (zero) state in case of errors.
+ */
 static struct TimeSnapshot ReadFile(FileSystem* fs, const char* const filePath)
 {
     struct TimeSnapshot result = {0};
@@ -270,6 +327,15 @@ struct TimeSnapshot GetCurrentPersistentTime(FileSystem* fileSystem)
     return snapshot[selectedIndex];
 }
 
+/**
+ * @brief This method is responsible for writing serialized state to file.
+ *
+ * If the selected file exists it will be overwritten, if it does not exist it will be created.
+ * @param[in] fs FileSystem interface for accessing files.
+ * @param[in] file Path to file that should be saved.
+ * @param[in] buffer Pointer to buffer that contains timer state that should be saved.
+ * @param[in] length Size of data in bytes the buffer.
+ */
 static void SaveToFile(FileSystem* fs, const char* file, const uint8_t* buffer, uint16_t length)
 {
     const FSFileHandle handle = fs->open(file, O_WRONLY | O_CREAT, S_IRWXU);
@@ -316,3 +382,5 @@ static void SaveTime(struct TimeProvider* timeProvider, struct TimerState state)
         SaveToFile(timeProvider->FileSystemObject, TimeFile2, buffer, length);
     }
 }
+
+/** @} */

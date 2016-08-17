@@ -28,8 +28,10 @@ typedef struct
     struct yaffs_dev rootDevice;
     YaffsNANDDriver rootDeviceDriver;
 
+    /** @brief Persistent timer that measures mission time. */
     struct TimeProvider timeProvider;
 
+    /** @brief Object responsible for sail management. */
     OpenSailContext sailContext;
 } OBC;
 
