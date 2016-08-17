@@ -7,7 +7,11 @@ extern "C" {
 
 #include <stdint.h>
 
-/** @defgroup ECC {*/
+/**
+ * @defgroup ECC
+ * @{
+ */
+
 
 /**
  * ECC correction result

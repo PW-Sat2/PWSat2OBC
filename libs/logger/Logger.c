@@ -6,7 +6,7 @@
 #include "system.h"
 
 /**
- * @addgroup Logger
+ * @addtogroup Logger
  * @{
 */
 

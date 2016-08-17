@@ -11,9 +11,9 @@
 #include "system.h"
 
 /**
- * @defgroup time Time abstraction module
+ * @defgroup time Time abstraction
  *
- * @brief This module contains timer module that is responsible for measuring absolute mission time in milliseconds.
+ * @brief This module contains timer object that is responsible for measuring absolute mission time in milliseconds.
  * @{
  */
 
