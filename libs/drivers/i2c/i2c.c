@@ -41,7 +41,7 @@ void I2C1_IRQHandler(void)
 
 static I2C_TransferReturn_TypeDef i2cTransfer(I2C_TransferSeq_TypeDef* seq)
 {
-	xSemaphoreTake(i2cLock, portMAX_DELAY);
+    xSemaphoreTake(i2cLock, portMAX_DELAY);
 
     I2C_TransferReturn_TypeDef ret = I2C_TransferInit(I2C, seq);
 
@@ -69,12 +69,10 @@ I2C_TransferReturn_TypeDef I2CWrite(uint8_t address, uint8_t* inData, uint16_t l
     return i2cTransfer(&seq);
 }
 
-I2C_TransferReturn_TypeDef I2CWriteRead(
-    uint8_t address, uint8_t* inData, uint16_t inLength, uint8_t* outData, uint16_t outLength)
+I2C_TransferReturn_TypeDef I2CWriteRead(uint8_t address, uint8_t* inData, uint16_t inLength, uint8_t* outData, uint16_t outLength)
 {
-    I2C_TransferSeq_TypeDef seq = {.addr = address,
-        .flags = I2C_FLAG_WRITE_READ,
-        .buf = {{.len = inLength, .data = inData}, {.len = outLength, .data = outData}}};
+    I2C_TransferSeq_TypeDef seq = {
+        .addr = address, .flags = I2C_FLAG_WRITE_READ, .buf = {{.len = inLength, .data = inData}, {.len = outLength, .data = outData}}};
 
     return i2cTransfer(&seq);
 }
@@ -100,5 +98,6 @@ void I2CInit(void)
 
     I2C_IntEnable(I2C, I2C_IEN_TXC);
 
+    NVIC_SetPriority(I2C1_IRQn, I2C1_INT_PRIORITY);
     NVIC_EnableIRQ(I2C1_IRQn);
 }
