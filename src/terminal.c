@@ -11,6 +11,7 @@
 #include "io_map.h"
 #include "leuart/leuart.h"
 #include "logger/logger.h"
+#include "obc.h"
 #include "swo/swo.h"
 #include "system.h"
 #include "terminal.h"
@@ -63,12 +64,12 @@ static void parseCommandLine(char line[], char** commandName, char** arguments, 
 
 void TerminalSendNewLine(void)
 {
-    leuartPuts("\n");
+    Main.IO.Puts("\n");
 }
 
 static void terminalSendPrefix(void)
 {
-    leuartPuts(">");
+    Main.IO.Puts(">");
 }
 
 void TerminalPrintf(const char* text, ...)
@@ -76,14 +77,14 @@ void TerminalPrintf(const char* text, ...)
     va_list args;
     va_start(args, text);
 
-    leuartvPrintf(text, args);
+    Main.IO.VPrintf(text, args);
 
     va_end(args);
 }
 
 void TerminalPuts(const char* text)
 {
-    leuartPuts(text);
+    Main.IO.Puts(text);
 }
 
 static void terminalHandleCommand(char* buffer)
@@ -102,40 +103,53 @@ static void terminalHandleCommand(char* buffer)
             TerminalSendNewLine();
         }
     }
-
-    terminalSendPrefix();
 }
 
-static void handleIncomingChar(void* args)
+static void handleIncomingChar(void* arg)
 {
-    UNREFERENCED_PARAMETER(args);
+    UNREFERENCED_PARAMETER(arg);
 
     char input_buffer[100] = {0};
     uint32_t input_buffer_position = 0;
 
+    bool firstRun = true;
+
     while (1)
     {
-        uint8_t data = 0;
+        memset(input_buffer, 0, sizeof(input_buffer));
 
-        xQueueReceive(terminalQueue, &data, portMAX_DELAY);
-#if 0
-        LOGF(LOG_LEVEL_INFO, "RC: 0x%x, %c", (int)data, data);
-#endif
-        if (data == '\n')
+        if (!firstRun)
         {
-            input_buffer[input_buffer_position] = 0;
-            input_buffer_position = 0;
+            terminalSendPrefix();
+        }
 
-            terminalHandleCommand(input_buffer);
-        }
-        else if (input_buffer_position < sizeof(input_buffer) - 1)
-        {
-            input_buffer[input_buffer_position++] = data;
-        }
+        firstRun = false;
+
+        Main.IO.Readline(input_buffer, COUNT_OF(input_buffer));
+
+        LOGF(LOG_LEVEL_INFO, "Received line %s", input_buffer);
+
+        terminalHandleCommand(input_buffer);
+
+        //        xQueueReceive(terminalQueue, &data, portMAX_DELAY);
+        //#if 0
+        //        LOGF(LOG_LEVEL_INFO, "RC: 0x%x, %c", (int)data, data);
+        //#endif
+        //        if (data == '\n')
+        //        {
+        //            input_buffer[input_buffer_position] = 0;
+        //            input_buffer_position = 0;
+        //
+        //            terminalHandleCommand(input_buffer);
+        //        }
+        //        else if (input_buffer_position < sizeof(input_buffer) - 1)
+        //        {
+        //            input_buffer[input_buffer_position++] = data;
+        //        }
     }
 }
 
-void TerminalInit(void)
+void TerminalInit(LineIO* io)
 {
     terminalQueue = xQueueCreate(128, sizeof(uint8_t));
 
@@ -152,6 +166,7 @@ void TerminalInit(void)
     }
 
     leuartInit(terminalQueue);
+    LeuartLineIOInit(io);
 
-    TerminalPuts("@");
+    io->Puts("@");
 }

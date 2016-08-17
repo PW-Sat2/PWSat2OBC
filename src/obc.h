@@ -8,6 +8,7 @@
 #include "base/os.h"
 #include "comm/comm.h"
 #include "fs/fs.h"
+#include "leuart/line_io.h"
 #include "storage/nand_driver.h"
 #include "yaffs_guts.h"
 
@@ -35,6 +36,7 @@ typedef struct
 
     /** @brief Persistent timer that measures mission time. */
     TimeProvider timeProvider;
+    LineIO IO;
 } OBC;
 
 /** @brief Global OBC object. */
