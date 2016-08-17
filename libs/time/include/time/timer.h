@@ -136,23 +136,27 @@ bool TimeInitialize(
  * @brief This procedure returns current mission time in milliseconds.
  *
  * @param[in] timeProvider Pointer to queried timer object.
- * @return Current mission time in milliseconds.
+ * @param[out] currentTime Pointer to time span value that should be
+ * updated with current mission time.
+ * @return True on success, false otherwise.
  */
-TimeSpan TimeGetCurrentTime(struct TimeProvider* timeProvider);
+bool TimeGetCurrentTime(struct TimeProvider* timeProvider, TimeSpan* currentTime);
 
 /**
  * @brief This procedure returns current mission time in decoded format.
  *
  * @param[in] timeProvider Pointer to queried timer object.
- * @return Decoded current mission time in milliseconds.
+ * @param[out] timePoint Pointer to time point value that should be
+ * updated with current decoded mission time.
+ * @return True on success, false otherwise.
  */
-TimePoint TimeGetCurrentMissionTime(struct TimeProvider* timeProvider);
+bool TimeGetCurrentMissionTime(struct TimeProvider* timeProvider, TimePoint* timePoint);
 
 /**
  * @brief This procedure can be used to move timer state forward by specified amount.
  *
  * Be aware that moving time forward far enough far enough may trigger timer notification &
- * timer state save process therefore the procedue may be take some time to complete.
+ * timer state save process therefore the procedure may be take some time to complete.
  * @param[in] timeProvider Pointer to timer object whose state should be updated.
  * @param[in] delta The amount of time that timer state should be moved forward.
  */

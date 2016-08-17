@@ -31,5 +31,7 @@ void CurrentTimeHandler(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
-    TerminalPrintf("%d", (int)(TimeGetCurrentTime(&Main.timeProvider) / 1000));
+    TimeSpan span;
+    TimeGetCurrentTime(&Main.timeProvider, &span);
+    TerminalPrintf("%d", (int)(span / 1000));
 }

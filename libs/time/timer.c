@@ -8,6 +8,14 @@ static const char* const TimeFile0 = "TimeState.0";
 static const char* const TimeFile1 = "TimeState.1";
 static const char* const TimeFile2 = "TimeState.2";
 
+#ifndef TIMER_NOTIFICATION_PERIOD
+#define TIMER_NOTIFICATION_PERIOD 5000
+#endif
+
+#ifndef TIMER_SAVE_PERIOD
+#define TIMER_SAVE_PERIOD (15 * 60 * 1000)
+#endif
+
 /**
  * @addtogroup time
  * @{
@@ -16,12 +24,15 @@ static const char* const TimeFile2 = "TimeState.2";
 /**
  * @brief Time period between the subsequent mission time notifications.
  */
-static const TimeSpan NotificationPeriod = 10000; // 10s
+static const TimeSpan NotificationPeriod = TIMER_NOTIFICATION_PERIOD;
 
 /**
  * @brief Time period between subsequent timer state saves.
  */
-static const TimeSpan SavePeriod = 15 * 60 * 1000; // 15 min
+static const TimeSpan SavePeriod = TIMER_SAVE_PERIOD;
+
+#undef TIMER_NOTIFICATION_PERIOD
+#undef TIMER_SAVE_PERIOD
 
 /**
  * @brief This structure contains temporary timer state used for passing information between
@@ -40,7 +51,7 @@ struct TimerState
     bool saveTime;
 
     /**
-     * @brief Flag indicating whether the timer notification should be immediatelly called.
+     * @brief Flag indicating whether the timer notification should be immediately called.
      */
     bool sendNotification;
 };
@@ -157,14 +168,30 @@ bool TimeSetCurrentTime(struct TimeProvider* timeProvider, TimePoint pointInTime
     return true;
 }
 
-TimeSpan TimeGetCurrentTime(struct TimeProvider* timeProvider)
+bool TimeGetCurrentTime(struct TimeProvider* timeProvider, TimeSpan* currentTime)
 {
-    return timeProvider->CurrentTime;
+    if (OS_RESULT_FAILED(System.TakeSemaphore(timeProvider->timerLock, MAX_DELAY)))
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to acquire timer lock.");
+        return false;
+    }
+
+    *currentTime = timeProvider->CurrentTime;
+
+    System.GiveSemaphore(timeProvider->timerLock);
+    return true;
 }
 
-TimePoint TimeGetCurrentMissionTime(struct TimeProvider* timeProvider)
+bool TimeGetCurrentMissionTime(struct TimeProvider* timeProvider, TimePoint* timePoint)
 {
-    return TimePointFromTimeSpan(TimeGetCurrentTime(timeProvider));
+    TimeSpan span;
+    const bool result = TimeGetCurrentTime(timeProvider, &span);
+    if (result)
+    {
+        *timePoint = TimePointFromTimeSpan(span);
+    }
+
+    return result;
 }
 
 void TimeTickProcedure(struct TimeProvider* timeProvider, TimeSpan delta)
