@@ -29,6 +29,7 @@ set(SOURCES
   time/persistance.cpp
   mock/FsMock.hpp
   mock/FsMock.cpp
+  assert.cpp
 )
 
 add_executable(${NAME} ${SOURCES})

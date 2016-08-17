@@ -11,6 +11,7 @@ set(SOURCES
     obc.h
     fault_handlers.c
     mission.c
+    assert.c
 )
 
 add_executable(${NAME} ${SOURCES})

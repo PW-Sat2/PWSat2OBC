@@ -119,7 +119,7 @@ static void* Alloc(size_t size)
 
 static void Free(void* ptr)
 {
-    vPortFree(ptr);
+    // Free is not suported
 }
 
 static OSQueueHandle CreateQueue(size_t maxElementCount, size_t elementSize)

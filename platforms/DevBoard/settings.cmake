@@ -1,4 +1,4 @@
-add_definitions(-DEFM32GG990F1024)
+add_definitions(-DEFM32GG990F1024 -DDEBUG_EFM_USER)
 
 set (ARCH cortex-m3)
 set (CHIP EFM32GG)

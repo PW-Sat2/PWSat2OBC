@@ -6,7 +6,7 @@ import serial
 class SerialPortTerminal:
     def __init__(self, comPort):
         self.log = logging.getLogger("OBCTerm")
-        self._serial = serial.Serial(comPort, baudrate=9600, timeout=1, rtscts=False)
+        self._serial = serial.Serial(comPort, baudrate=2400, timeout=1, rtscts=False)
         self._serial.rts = False
 
     def waitForPrompt(self, terminator='>'):
