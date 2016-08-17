@@ -32,6 +32,8 @@
 #include "storage/nand_driver.h"
 #include "storage/storage.h"
 
+#include "dmadrv.h"
+
 OBC Main;
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
@@ -179,6 +181,7 @@ int main(void)
     CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);
 
     CMU_ClockEnable(cmuClock_GPIO, true);
+    CMU_ClockEnable(cmuClock_DMA, true);
 
     SwoEnable();
 
@@ -186,6 +189,9 @@ int main(void)
     InitSwoEndpoint();
 
     OSSetup();
+
+    DMADRV_Init();
+
     I2CInit();
 
     EpsInit();
@@ -197,7 +203,7 @@ int main(void)
     commUpperInterface.frameHandlerContext = NULL;
     CommInitialize(&Main.comm, &commInterface, &commUpperInterface);
 
-    TerminalInit();
+    TerminalInit(&Main.IO);
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 
     OpenSailInit();

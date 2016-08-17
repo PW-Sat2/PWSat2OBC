@@ -1,5 +1,6 @@
 #include <FreeRTOS.h>
 #include <queue.h>
+#include <semphr.h>
 #include <task.h>
 
 #include <stdarg.h>
@@ -10,10 +11,15 @@
 #include <em_gpio.h>
 #include <em_leuart.h>
 
+#include "dmadrv.h"
 #include "io_map.h"
 #include "leuart.h"
+#include "line_io.h"
 
 QueueHandle_t leuart0sink;
+
+static SemaphoreHandle_t lineEndReceived;
+static unsigned int dmaChannel;
 
 void leuartInit(xQueueHandle sink)
 {
@@ -34,17 +40,22 @@ void leuartInit(xQueueHandle sink)
     LEUART_Reset(LEUART0);
     LEUART_Init(LEUART0, &leuart0Init);
 
+    LEUART0->SIGFRAME = '\n';
+
     /* Enable LEUART Signal Frame Interrupt */
-    LEUART_IntEnable(LEUART0, LEUART_IEN_RXDATAV);
+    LEUART_IntEnable(LEUART0, LEUART_IEN_SIGF);
 
     /* Enable LEUART0 interrupt vector */
     NVIC_SetPriority(LEUART0_IRQn, LEUART0_INT_PRIORITY);
-    NVIC_EnableIRQ(LEUART0_IRQn);
 
     LEUART0->ROUTE = LEUART_ROUTE_RXPEN | LEUART_ROUTE_TXPEN | LEUART0_LOCATION;
 
     GPIO_PinModeSet(LEUART0_PORT, LEUART0_TX, gpioModePushPull, 1);
     GPIO_PinModeSet(LEUART0_PORT, LEUART0_RX, gpioModeInputPull, 1);
+
+    lineEndReceived = xSemaphoreCreateBinary();
+
+    DMADRV_AllocateChannel(&dmaChannel, NULL);
 }
 
 void leuartPuts(const char* buffer)
@@ -76,15 +87,52 @@ void leuartvPrintf(const char* text, va_list args)
     leuartPuts(buf);
 }
 
-void leuartPutc(const char c)
+size_t leuartReadline(char* buffer, size_t bufferLength)
 {
-    LEUART_Tx(LEUART0, c);
+    DMADRV_PeripheralMemory(dmaChannel,
+        dmadrvPeripheralSignal_LEUART0_RXDATAV,
+        buffer,
+        (void*)&LEUART0->RXDATA,
+        true,
+        bufferLength,
+        dmadrvDataSize1,
+        NULL,
+        NULL);
+
+    NVIC_EnableIRQ(LEUART0_IRQn);
+
+    xSemaphoreTake(lineEndReceived, portMAX_DELAY);
+
+    NVIC_DisableIRQ(LEUART0_IRQn);
+
+    int remaining;
+
+    DMADRV_TransferRemainingCount(dmaChannel, &remaining);
+
+    buffer[bufferLength - remaining - 1] = '\0';
+
+    return bufferLength - remaining;
 }
 
 void LEUART0_IRQHandler(void)
 {
-    uint8_t data = LEUART_RxDataGet(LEUART0);
-    BaseType_t woken = pdFALSE;
-    xQueueSendToBackFromISR(leuart0sink, &data, &woken);
-    portEND_SWITCHING_ISR(woken);
+    uint32_t flags = LEUART_IntGet(LEUART0);
+    LEUART_IntClear(LEUART0, flags);
+
+    if (flags & LEUART_IF_SIGF)
+    {
+        DMADRV_StopTransfer(dmaChannel);
+
+        xSemaphoreGiveFromISR(lineEndReceived, NULL);
+    }
+
+    portEND_SWITCHING_ISR(NULL);
+}
+
+void LeuartLineIOInit(LineIO* io)
+{
+    io->extra = NULL;
+    io->Puts = leuartPuts;
+    io->VPrintf = leuartvPrintf;
+    io->Readline = leuartReadline;
 }
