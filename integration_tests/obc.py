@@ -24,7 +24,7 @@ class SerialPortTerminal:
         c = self._serial.read(1)
         while c != terminator:
             data += c
-            c = self._serial.read()
+            c = self._serial.read(1)
 
         return data
 

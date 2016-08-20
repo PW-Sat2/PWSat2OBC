@@ -15,13 +15,12 @@
 #include "io_map.h"
 #include "leuart.h"
 #include "line_io.h"
-
-QueueHandle_t leuart0sink;
+#include "system.h"
 
 static SemaphoreHandle_t lineEndReceived;
 static unsigned int dmaChannel;
 
-void leuartInit(xQueueHandle sink)
+static void leuartInit(void)
 {
     LEUART_Init_TypeDef leuart0Init = {
         .enable = leuartEnable,       /* Activate data reception on LEUn_TX pin. */
@@ -31,8 +30,6 @@ void leuartInit(xQueueHandle sink)
         .parity = leuartNoParity,     /* No parity bits in use */
         .stopbits = leuartStopbits2,  /* Setting the number of stop bits in a frame to 2 bitperiods */
     };
-
-    leuart0sink = sink;
 
     CMU_ClockEnable(cmuClock_CORELE, true);
     CMU_ClockEnable(cmuClock_LEUART0, true);
@@ -58,8 +55,10 @@ void leuartInit(xQueueHandle sink)
     DMADRV_AllocateChannel(&dmaChannel, NULL);
 }
 
-void leuartPuts(const char* buffer)
+static void leuartPuts(LineIO* io, const char* buffer)
 {
+    UNREFERENCED_PARAMETER(io);
+
     const size_t len = strlen(buffer);
 
     for (size_t i = 0; i < len; i++)
@@ -68,27 +67,19 @@ void leuartPuts(const char* buffer)
     }
 }
 
-void leuartPrintf(const char* text, ...)
-{
-    va_list args;
-    va_start(args, text);
-
-    leuartvPrintf(text, args);
-
-    va_end(args);
-}
-
-void leuartvPrintf(const char* text, va_list args)
+static void leuartvPrintf(LineIO* io, const char* text, va_list args)
 {
     char buf[255] = {0};
 
     vsniprintf(buf, sizeof(buf), text, args);
 
-    leuartPuts(buf);
+    leuartPuts(io, buf);
 }
 
-size_t leuartReadline(char* buffer, size_t bufferLength)
+static size_t leuartReadline(LineIO* io, char* buffer, size_t bufferLength)
 {
+    UNREFERENCED_PARAMETER(io);
+
     DMADRV_PeripheralMemory(dmaChannel,
         dmadrvPeripheralSignal_LEUART0_RXDATAV,
         buffer,
@@ -131,6 +122,8 @@ void LEUART0_IRQHandler(void)
 
 void LeuartLineIOInit(LineIO* io)
 {
+    leuartInit();
+
     io->extra = NULL;
     io->Puts = leuartPuts;
     io->VPrintf = leuartvPrintf;

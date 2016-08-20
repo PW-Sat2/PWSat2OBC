@@ -34,6 +34,8 @@
 
 #include "dmadrv.h"
 
+#include "leuart/leuart.h"
+
 OBC Main;
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
@@ -177,11 +179,11 @@ int main(void)
     memset(&Main, 0, sizeof(Main));
     CHIP_Init();
 
-    CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
-    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);
-
     CMU_ClockEnable(cmuClock_GPIO, true);
     CMU_ClockEnable(cmuClock_DMA, true);
+
+    CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFRCO);
+    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFRCO);
 
     SwoEnable();
 
@@ -191,6 +193,10 @@ int main(void)
     OSSetup();
 
     DMADRV_Init();
+
+    LeuartLineIOInit(&Main.IO);
+
+    TerminalInit();
 
     I2CInit();
 
@@ -203,7 +209,6 @@ int main(void)
     commUpperInterface.frameHandlerContext = NULL;
     CommInitialize(&Main.comm, &commInterface, &commUpperInterface);
 
-    TerminalInit(&Main.IO);
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 
     OpenSailInit();

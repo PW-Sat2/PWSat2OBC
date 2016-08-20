@@ -6,9 +6,4 @@
 
 void LeuartLineIOInit(LineIO* io);
 
-void leuartInit(xQueueHandle sink);
-void leuartPuts(const char* buffer);
-void leuartPrintf(const char* text, ...);
-void leuartvPrintf(const char* text, va_list args);
-
 #endif
