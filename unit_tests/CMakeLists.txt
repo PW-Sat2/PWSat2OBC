@@ -19,6 +19,7 @@ set(SOURCES
   MissionPlan/DeployAntennaActionTest.cpp
   MissionPlan/MissionTestHelpers.cpp
   MissionPlan/SailSystemStateTest.cpp
+  MissionPlan/ActionDispatchTest.cpp
   os/os.cpp
   os/os.hpp
   OsMock.hpp

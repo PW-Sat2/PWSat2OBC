@@ -7,6 +7,7 @@ extern "C" {
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 typedef struct
 {
@@ -41,7 +42,7 @@ typedef struct
     uint32_t Reason;
 } SystemStateVerifyDescriptorResult;
 
-typedef void (*SystemStateVerifyProc)(SystemState* const state, void* param, SystemStateVerifyDescriptorResult* result);
+typedef void (*SystemStateVerifyProc)(const SystemState* state, void* param, SystemStateVerifyDescriptorResult* result);
 
 typedef struct
 {
@@ -50,13 +51,13 @@ typedef struct
     void* Param;
 } SystemStateVerifyDescriptor;
 
-SystemStateVerifyResult SystemStateVerify(SystemState* const state,
+SystemStateVerifyResult SystemStateVerify(const SystemState* state,
     const SystemStateVerifyDescriptor descriptors[],
     SystemStateVerifyDescriptorResult results[],
     const uint16_t descriptorsCount);
 
-typedef void (*SystemActionProc)(SystemState* const state, void* param);
-typedef bool (*SystemActionConditionProc)(SystemState* const state, void* param);
+typedef void (*SystemActionProc)(const SystemState* state, void* param);
+typedef bool (*SystemActionConditionProc)(const SystemState* state, void* param);
 
 typedef struct
 {
@@ -64,10 +65,16 @@ typedef struct
     SystemActionProc ActionProc;
     SystemActionConditionProc Condition;
     void* Param;
-    bool Runnable;
+    struct
+    {
+        bool Executed;
+    } LastRun;
 } SystemActionDescriptor;
 
-void SystemDetermineActions(SystemState* const state, SystemActionDescriptor** descriptors, uint16_t descriptorsCount);
+uint16_t SystemDetermineActions(
+    const SystemState* state, SystemActionDescriptor descriptors[], uint16_t descriptorsCount, SystemActionDescriptor* runnable[]);
+
+void SystemDispatchActions(const SystemState* state, SystemActionDescriptor* descriptors[], size_t actionsCount);
 
 #ifdef __cplusplus
 }

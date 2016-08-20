@@ -11,6 +11,17 @@
 #include "obc_time.h"
 #include "system.h"
 
+typedef struct
+{
+    SystemStateUpdateDescriptor* update;
+    size_t updateCount;
+    SystemStateVerifyDescriptor* verify;
+    SystemStateVerifyDescriptorResult* verifyResult;
+    size_t verifyCount;
+    SystemActionDescriptor** action;
+    size_t actionCount;
+} ModeDescriptor;
+
 static SystemStateUpdateResult UpdateTime(SystemState* state, void* param)
 {
     UNREFERENCED_PARAMETER(param);
@@ -18,6 +29,59 @@ static SystemStateUpdateResult UpdateTime(SystemState* state, void* param)
     state->Time = CurrentTime();
 
     return SystemStateUpdateOK;
+}
+
+static void Loop(SystemState* state, ModeDescriptor* mode)
+{
+    LOG(LOG_LEVEL_INFO, "Mission control loop");
+
+    LOG(LOG_LEVEL_INFO, "Updating system state");
+
+    SystemStateUpdateResult updateResult = SystemStateUpdate(state, mode->update, mode->updateCount);
+
+    LOGF(LOG_LEVEL_INFO, "System state update result %d", updateResult);
+
+    LOG(LOG_LEVEL_TRACE, "Verifing system state");
+
+    SystemStateVerifyResult verifyResult = SystemStateVerify(state, mode->verify, mode->verifyResult, mode->verifyCount);
+
+    LOGF(LOG_LEVEL_INFO, "Verify result %d", verifyResult);
+
+    LOG(LOG_LEVEL_INFO, "Determining actions");
+
+    SystemDetermineActions(state, mode->action, mode->actionCount, NULL);
+
+    LOG(LOG_LEVEL_INFO, "Executing actions");
+
+    for (size_t i = 0; i < mode->actionCount; i++)
+    {
+        // if (mode->action[i]->Runnable)
+        {
+            LOGF(LOG_LEVEL_INFO, "Running action %s", mode->action[i]->Name);
+            mode->action[i]->ActionProc(state, mode->action[i]->Param);
+        }
+    }
+}
+
+static void NormalModeLoop(SystemState* state, MissionState* missionState)
+{
+    SystemStateUpdateDescriptor updateDescriptors[] = {missionState->UpdateTime, missionState->Sail.Update};
+
+    SystemStateVerifyDescriptor verifyDescriptors[0];
+
+    SystemStateVerifyDescriptorResult verifyResults[COUNT_OF(verifyDescriptors)];
+
+    SystemActionDescriptor* actionDescriptors[] = {&missionState->Sail.OpenSail};
+
+    ModeDescriptor descriptor = {.update = updateDescriptors,
+        .updateCount = COUNT_OF(updateDescriptors),
+        .verify = verifyDescriptors,
+        .verifyResult = verifyResults,
+        .verifyCount = COUNT_OF(verifyDescriptors),
+        .action = actionDescriptors,
+        .actionCount = COUNT_OF(actionDescriptors)};
+
+    Loop(state, &descriptor);
 }
 
 static void MissionControlTask(void* param)
@@ -28,44 +92,9 @@ static void MissionControlTask(void* param)
     SystemState state;
     SystemStateEmpty(&state);
 
-    SystemStateUpdateDescriptor updateDescriptors[] = {missionState->UpdateTime, missionState->Sail.Update};
-
-    SystemStateVerifyDescriptor verifyDescriptors[0];
-
-    SystemActionDescriptor* actionDescriptors[] = {&missionState->Sail.OpenSail};
-
     while (1)
     {
-        LOG(LOG_LEVEL_INFO, "Mission control loop");
-
-        LOG(LOG_LEVEL_INFO, "Updating system state");
-
-        SystemStateUpdateResult updateResult = SystemStateUpdate(&state, updateDescriptors, COUNT_OF(updateDescriptors));
-
-        LOGF(LOG_LEVEL_INFO, "System state update result %d", updateResult);
-
-        LOG(LOG_LEVEL_TRACE, "Verifing system state");
-
-        SystemStateVerifyDescriptorResult verifyResults[COUNT_OF(verifyDescriptors)];
-
-        SystemStateVerifyResult verifyResult = SystemStateVerify(&state, verifyDescriptors, verifyResults, COUNT_OF(verifyDescriptors));
-
-        LOGF(LOG_LEVEL_INFO, "Verify result %d", verifyResult);
-
-        LOG(LOG_LEVEL_INFO, "Determining actions");
-
-        SystemDetermineActions(&state, actionDescriptors, COUNT_OF(actionDescriptors));
-
-        LOG(LOG_LEVEL_INFO, "Executing actions");
-
-        for (size_t i = 0; i < COUNT_OF(actionDescriptors); i++)
-        {
-            if (actionDescriptors[i]->Runnable)
-            {
-                LOGF(LOG_LEVEL_INFO, "Running action %s", actionDescriptors[i]->Name);
-                actionDescriptors[i]->ActionProc(&state, actionDescriptors[i]->Param);
-            }
-        }
+        NormalModeLoop(&state, missionState);
 
         System.SleepTask(10000);
     }
