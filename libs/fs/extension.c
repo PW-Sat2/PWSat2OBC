@@ -7,7 +7,7 @@ bool FileSystemSaveToFile(FileSystem* fs, const char* file, const uint8_t* buffe
     if (handle == -1)
     {
         LOGF(LOG_LEVEL_WARNING, "Unable to open file: %s", file);
-        return 0;
+        return false;
     }
 
     const uint32_t result = fs->write(handle, buffer, length);

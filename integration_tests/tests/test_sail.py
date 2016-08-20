@@ -1,4 +1,5 @@
 from base import BaseTest
+from system import wait_for_obc_start
 
 INFINITY_TIME = 999999
 
@@ -10,16 +11,16 @@ class Test_SailTest(BaseTest):
 
         self.assertEqual("pong", l)
 
+    @wait_for_obc_start()
     def test_jump_to_time(self):
-        self.system.obc.wait_to_start();
         self.system.obc.jump_to_time(100)
 
         current_time = self.system.obc.current_time()
 
         self.assertGreaterEqual(current_time, 100)
 
+    @wait_for_obc_start()
     def test_happy_path(self):
-        self.system.obc.wait_to_start();
         self.system.obc.jump_to_time(INFINITY_TIME)
 
         self.assertTrue(self.system.eps.sail0.wait_for_change(1))
