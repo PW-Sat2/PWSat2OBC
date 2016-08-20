@@ -1,0 +1,64 @@
+<html>
+<head>
+    <title>PW-Sat OBC memory report</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+</head>
+<body>
+<div class="container-fluid">
+    <h1>Segments usage</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Segment</th>
+                <th>Total</th>
+                <th>Used</th>
+                <th>Free</th>
+            </tr>
+        </thead>
+        <tbody>
+        {{#segments}}
+            <tr>
+                <td>{{name}}</td>
+                <td>{{kb total}}</td>
+                <td>{{kb used}} ({{percent used total}})</td>
+                <td>{{kb free}} ({{percent free total}})</td>
+            </tr>
+        {{/segments}}
+        </tbody>
+    </table>
+
+    {{#segments}}
+        <h2>Segment details: {{name}}</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Section</th>
+                    <th>Archive</th>
+                    <th>Size</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#sections}}
+                    <tr class="success">
+                        <td><strong>{{header}}</strong></td>
+                        <td></td>
+                        <td>{{kb size}} ({{percent size ../used}} of segment)</td>
+                    </tr>
+                    <tr>
+                        {{#archives}}
+                            {{#if size}}
+                                <tr>
+                                    <td></td>
+                                    <td>{{archive}}</td>
+                                    <td>{{kb size}} ({{percent size ../../size}} of section)</td>
+                                </tr>
+                            {{/if}}
+                        {{/archives}}
+                    </tr>
+                {{/sections}}
+            </tbody>
+        </table>
+    {{/segments}}
+</div>
+</body>
+</html>

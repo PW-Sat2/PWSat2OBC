@@ -239,7 +239,7 @@ The source code formatting with the Clang-Format utility has been integrated int
 
     make logger.format
 
-Alternatively the Clang-Format utility can be invoked manually limited set of files or single file if need be using following command (assuming that clang-format is available somewhere in your PATH):
+Alternatively the Clang-Format utility can be invoked manually on the limited set of files or single file if need be using following command (assuming that clang-format is available somewhere in your PATH):
 
     clang-format --style=file -i <list of files>
 

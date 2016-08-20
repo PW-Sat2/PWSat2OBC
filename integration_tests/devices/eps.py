@@ -1,3 +1,6 @@
+from Queue import Queue, Empty
+import logging
+
 import i2cMock
 from i2cMock import I2CDevice
 import threading
@@ -18,6 +21,7 @@ class LCL:
     def __init__(self):
         self.on_event = threading.Event()
         self.off_event = threading.Event()
+        self.changes = Queue()
 
     def on(self):
         self.is_on = True
@@ -26,11 +30,21 @@ class LCL:
         self.on_event.set()
         self.off_event.clear()
 
+        self.changes.put(True)
+
     def off(self):
         self.is_on = False
 
         self.on_event.clear()
         self.off_event.set()
+
+        self.changes.put(False)
+
+    def wait_for_change(self, timeout=None):
+        try:
+            return self.changes.get(True, timeout)
+        except Empty:
+            raise LCLTimeoutException("x")
 
     def wait_for_on(self, timeout=None):
         if not self.on_event.wait(timeout):
@@ -45,6 +59,8 @@ class EPSDevice(I2CDevice):
     def __init__(self):
         super(EPSDevice, self).__init__(EPS_DEVICE_ADDRESS)
 
+        self.log = logging.getLogger("EPS")
+
         self.sail0 = LCL()
         self.sail1 = LCL()
 
@@ -55,7 +71,7 @@ class EPSDevice(I2CDevice):
         else:
             self.sail0.off()
 
-        print "LCL_SAIL_0: %s" % str(onoff)
+        self.log.debug("LCL_SAIL_0: %s" % str(onoff))
 
     @i2cMock.command([0x02])
     def lcl_sail_1(self, onoff):
@@ -64,7 +80,7 @@ class EPSDevice(I2CDevice):
         else:
             self.sail1.off()
 
-        print "LCL_SAIL_1: %s" % str(onoff)
+        self.log.debug("LCL_SAIL_1: %s" % str(onoff))
 
     def wait_for_sail_open(self):
         self.sail0.wait_for_on(1)

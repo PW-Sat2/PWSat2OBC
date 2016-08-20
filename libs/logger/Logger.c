@@ -1,33 +1,54 @@
-#include "Logger.h"
-#include "system.h"
 #include <assert.h> // static_assert
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h> //memset
+#include "logger.h"
+#include "system.h"
 
+/** @brief Logger endpoint number limit. */
 #define MAX_ENDPOINTS 3
 
 static_assert(MAX_ENDPOINTS < UINT8_MAX, "Fix type of logger's endpoint counter: 'Logger::endpointCount'. ");
 
-typedef struct LoggerEndpointTag
+/**
+ * @brief This type describes single logger endpoint.
+ */
+typedef struct
 {
+    /**
+     * @brief Endpoint execution context.
+     */
     void* context;
+
+    /**
+     * @brief Endpoint entry point.
+     */
     LoggerProcedure endpoint;
+
+    /**
+     * @brief Custom endpoint logging level.
+     */
     enum LogLevel endpointLogLevel;
 } LoggerEndpoint;
 
-typedef struct LoggerTag
+/** @brief This type describes the logger object. */
+typedef struct
 {
+    /** @brief Number of currently available logger endpoints. */
     uint8_t endpointCount;
+
+    /** @brief Global logger loggin level. */
     enum LogLevel globalLevel;
+
+    /** @brief Array for logger endpoints. */
     LoggerEndpoint endpoints[MAX_ENDPOINTS];
 } Logger;
 
+/** @brief Global logger object. */
 static Logger logger = {0};
 
 static const char* const levelMap[] = {
-    "[Always] ", "[Fatal] ", "[Error] ", "[Warning] ", "[Info] ", "[Debug] ", "[Trace] ",
-};
+    "[Always]  ", "[Fatal]   ", "[Error]   ", "[Warning] ", "[Info]    ", "[Debug]   ", "[Trace]   "};
 
 static_assert(LOG_LEVEL_ALWAYS == 0, "Fix level conversion map for level: Always");
 static_assert(LOG_LEVEL_FATAL == 1, "Fix level conversion map for level: Fatal");
@@ -80,7 +101,7 @@ void LogRemoveEndpoint(LoggerProcedure endpoint)
         {
             memmove(logger.endpoints + cx,
                 logger.endpoints + cx + 1,
-                sizeof(*logger.endpoints) * logger.endpointCount - (cx + 1));
+                sizeof(*logger.endpoints) * (logger.endpointCount - (cx + 1)));
             --logger.endpointCount;
             break;
         }
@@ -92,7 +113,7 @@ static inline bool CanLogAtLevel(const enum LogLevel requestedLogLEvel, const en
     return requestedLogLEvel <= currentLogLevel;
 }
 
-void LogMessage(enum LogLevel messageLevel, const char* message, ...)
+void LogMessage(bool withinIsr, enum LogLevel messageLevel, const char* message, ...)
 {
     if (!CanLogAtLevel(messageLevel, logger.globalLevel))
     {
@@ -109,7 +130,7 @@ void LogMessage(enum LogLevel messageLevel, const char* message, ...)
         const LoggerEndpoint* endpoint = &logger.endpoints[cx];
         if (CanLogAtLevel(messageLevel, endpoint->endpointLogLevel))
         {
-            endpoint->endpoint(endpoint->context, header, message, arguments);
+            endpoint->endpoint(endpoint->context, withinIsr, header, message, arguments);
         }
     }
 

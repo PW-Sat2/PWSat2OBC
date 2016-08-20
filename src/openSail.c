@@ -5,7 +5,7 @@
 #include <task.h>
 
 #include <swo/swo.h>
-#include "logger/Logger.h"
+#include "logger/logger.h"
 #include "system.h"
 
 #include "devices/eps.h"
@@ -16,9 +16,9 @@
 
 static void openSail(void)
 {
-    if(!EpsOpenSail())
+    if (!EpsOpenSail())
     {
-    	LOG(LOG_LEVEL_ERROR, "Failed to open sail");
+        LOG(LOG_LEVEL_ERROR, "Failed to open sail");
     }
 }
 
