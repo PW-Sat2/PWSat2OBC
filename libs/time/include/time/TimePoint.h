@@ -37,12 +37,38 @@ typedef struct
  * The point with zero time (beginning of time) is considered to be
  * beginning of the mission itself.
  */
-typedef uint64_t TimeSpan;
+typedef struct
+{
+    uint64_t value;
+} TimeSpan;
 
 /**
  * @brief Type used to represents different between two time spans.
  */
-typedef int64_t TimeShift;
+typedef struct
+{
+    int64_t value;
+} TimeShift;
+
+TimeSpan TimeSpanFromMilliseconds(uint64_t milliseconds);
+
+TimeSpan TimeSpanFromSeconds(uint32_t seconds);
+
+TimeSpan TimeSpanFromMinutes(uint32_t minutes);
+
+TimeSpan TimeSpanFromHours(uint32_t hours);
+
+TimeSpan TimeSpanFromDays(uint32_t days);
+
+TimeSpan TimeSpanAdd(TimeSpan left, TimeSpan right);
+
+TimeShift TimeSpanSub(TimeSpan left, TimeSpan right);
+
+static bool TimeSpanEqual(const TimeSpan left, const TimeSpan right);
+
+static bool TimeSpanNotEqual(const TimeSpan left, const TimeSpan right);
+
+static bool TimeSpanLessThan(const TimeSpan left, const TimeSpan right);
 
 /**
  * @brief This procedure builds Time point object.
@@ -121,12 +147,27 @@ static inline bool TimePointNotEqual(TimePoint left, TimePoint right)
 
 static inline bool TimePointEqual(TimePoint left, TimePoint right)
 {
-    return TimePointToTimeSpan(left) == TimePointToTimeSpan(right);
+    return TimeSpanEqual(TimePointToTimeSpan(left), TimePointToTimeSpan(right));
 }
 
 static inline bool TimePointLessThan(TimePoint left, TimePoint right)
 {
-    return TimePointToTimeSpan(left) < TimePointToTimeSpan(right);
+    return TimeSpanLessThan(TimePointToTimeSpan(left), TimePointToTimeSpan(right));
+}
+
+static inline bool TimeSpanEqual(const TimeSpan left, const TimeSpan right)
+{
+    return left.value == right.value;
+}
+
+static inline bool TimeSpanNotEqual(const TimeSpan left, const TimeSpan right)
+{
+    return left.value != right.value;
+}
+
+static inline bool TimeSpanLessThan(const TimeSpan left, const TimeSpan right)
+{
+    return left.value < right.value;
 }
 
 /** @} */

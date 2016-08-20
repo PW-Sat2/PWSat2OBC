@@ -19,14 +19,14 @@
 
 EXTERNC_BEGIN
 
-struct TimeProvider;
+struct TimeProviderTag;
 
 /**
  * @brief Type definition of the rtc notification routine.
  * @param[in] provider Pointer to timer provider that should update its internal state.
  * @param[in] delta The amount of time that has passed since last timer notification.
  */
-typedef void (*TimeTickCallbackType)(struct TimeProvider* provider, TimeSpan delta);
+typedef void (*TimeTickCallbackType)(struct TimeProviderTag* provider, TimeSpan delta);
 
 /**
  * @brief Type definition of the callback procedure called on time change notification.
@@ -61,7 +61,7 @@ struct TimeSnapshot
  * values in those files or any of those files is not available the majority vote is done to determine the most
  * likely correct value. In case when all of the values are different the smallest one is selected as the correct one.
  */
-struct TimeProvider
+typedef struct TimeProviderTag
 {
     /**
      * @brief Pointer to time notification procedure that gets called on time change.
@@ -113,7 +113,7 @@ struct TimeProvider
      * @brief Pointer to file system object that is used to save/restore timer state.
      */
     FileSystem* FileSystemObject;
-};
+} TimeProvider;
 
 /**
  * @brief Initializes the timer object.
@@ -129,8 +129,11 @@ struct TimeProvider
  * Besides the time initialization this procedure will automatically restores the timer state from the persistent state
  * saved in the files on local flash memory, therefore make sure that file system module is already initialized.
  */
-bool TimeInitialize(
-    struct TimeProvider* provider, TimePassedCallbackType timePassedCallback, void* timePassedCallbackContext, FileSystem* fileSystem);
+bool TimeInitialize(TimeProvider* provider,    //
+    TimePassedCallbackType timePassedCallback, //
+    void* timePassedCallbackContext,           //
+    FileSystem* fileSystem                     //
+    );
 
 /**
  * @brief This procedure returns current mission time in milliseconds.
@@ -140,7 +143,7 @@ bool TimeInitialize(
  * updated with current mission time.
  * @return True on success, false otherwise.
  */
-bool TimeGetCurrentTime(struct TimeProvider* timeProvider, TimeSpan* currentTime);
+bool TimeGetCurrentTime(TimeProvider* timeProvider, TimeSpan* currentTime);
 
 /**
  * @brief This procedure returns current mission time in decoded format.
@@ -150,17 +153,17 @@ bool TimeGetCurrentTime(struct TimeProvider* timeProvider, TimeSpan* currentTime
  * updated with current decoded mission time.
  * @return True on success, false otherwise.
  */
-bool TimeGetCurrentMissionTime(struct TimeProvider* timeProvider, TimePoint* timePoint);
+bool TimeGetCurrentMissionTime(TimeProvider* timeProvider, TimePoint* timePoint);
 
 /**
  * @brief This procedure can be used to move timer state forward by specified amount.
  *
- * Be aware that moving time forward far enough far enough may trigger timer notification &
+ * Be aware that moving time forward far enough may trigger timer notification &
  * timer state save process therefore the procedure may be take some time to complete.
  * @param[in] timeProvider Pointer to timer object whose state should be updated.
  * @param[in] delta The amount of time that timer state should be moved forward.
  */
-void TimeAdvanceTime(struct TimeProvider* timeProvider, TimeSpan delta);
+void TimeAdvanceTime(TimeProvider* timeProvider, TimeSpan delta);
 
 /**
  * @brief This procedure sets the current mission time to any arbitrary point in time.
@@ -171,7 +174,7 @@ void TimeAdvanceTime(struct TimeProvider* timeProvider, TimeSpan delta);
  *
  * @return Operation status. True on success, false otherwise.
  */
-bool TimeSetCurrentTime(struct TimeProvider* timeProvider, TimePoint pointInTime);
+bool TimeSetCurrentTime(TimeProvider* timeProvider, TimePoint pointInTime);
 
 /**
  * @brief Returns timer rtc notification routine.
@@ -205,7 +208,7 @@ struct TimeSnapshot GetCurrentPersistentTime(FileSystem* fileSystem);
  */
 static inline bool TimeSnapshotEqual(struct TimeSnapshot left, struct TimeSnapshot right)
 {
-    return left.CurrentTime == right.CurrentTime;
+    return TimeSpanEqual(left.CurrentTime, right.CurrentTime);
 }
 
 /**
@@ -218,7 +221,7 @@ static inline bool TimeSnapshotEqual(struct TimeSnapshot left, struct TimeSnapsh
  */
 static inline bool TimeSnapshotLessThan(struct TimeSnapshot left, struct TimeSnapshot right)
 {
-    return left.CurrentTime < right.CurrentTime;
+    return TimeSpanLessThan(left.CurrentTime, right.CurrentTime);
 }
 
 /** @}*/

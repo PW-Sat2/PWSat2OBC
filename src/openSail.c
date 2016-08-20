@@ -58,7 +58,7 @@ void OpenSailTimeHandler(void* context, TimePoint currentTime)
 {
     const OpenSailContext* sailContext = (OpenSailContext*)context;
     const TimeSpan span = TimePointToTimeSpan(currentTime);
-    if (span >= SAILOPENTIME)
+    if (TimeSpanLessThan(TimeSpanFromMilliseconds(SAILOPENTIME), span))
     {
         if (System.GiveSemaphore(sailContext->SemaphoreHandle) != OSResultSuccess)
         {

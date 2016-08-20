@@ -3,6 +3,7 @@ set(NAME fs)
 add_library(${NAME} STATIC    
     yaffs_os_glue.c
     fs.c
+    extension.c
 )
 
 target_link_libraries(${NAME} PUBLIC

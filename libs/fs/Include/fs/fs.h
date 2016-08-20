@@ -1,12 +1,11 @@
 #ifndef LIBS_FS_INCLUDE_FS_FS_H_
 #define LIBS_FS_INCLUDE_FS_FS_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdbool.h>
 #include <stdint.h>
+#include "system.h"
+
+EXTERNC_BEGIN
 
 #include <yaffs_guts.h>
 
@@ -111,10 +110,29 @@ typedef struct
  */
 bool FileSystemInitialize(FileSystem* fs, struct yaffs_dev* rootDevice);
 
+/**
+ * @brief This method is responsible for writing serialized state to file.
+ *
+ * If the selected file exists it will be overwritten, if it does not exist it will be created.
+ * @param[in] fs FileSystem interface for accessing files.
+ * @param[in] file Path to file that should be saved.
+ * @param[in] buffer Pointer to buffer that contains timer state that should be saved.
+ * @param[in] length Size of data in bytes the buffer.
+ */
+bool FileSystemSaveToFile(FileSystem* fs, const char* file, const uint8_t* buffer, uint32_t length);
+
+/**
+ * @brief This procedure is responsible for the contents of the specified file.
+ *
+ * @param[in] fs FileSystem interface for accessing files.
+ * @param[in] filePath Path to the file that contains timer state.
+ *
+ * @return Read timer state or default (zero) state in case of errors.
+ */
+bool FileSystemReadFile(FileSystem* fs, const char* const filePath, uint8_t* buffer, uint32_t length);
+
 /** @} */
 
-#ifdef __cplusplus
-}
-#endif
+EXTERNC_END
 
 #endif /* LIBS_FS_INCLUDE_FS_FS_H_ */
