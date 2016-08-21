@@ -1,4 +1,4 @@
-#include "mission/adcs.h"
+#include "adcs/adcs.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include "obc.h"

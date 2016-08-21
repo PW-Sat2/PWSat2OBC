@@ -1,54 +1,77 @@
-#include "adcs.h"
-#include "logger/logger.h"
+#include "adcs/adcs.h"
+#include "adcs_mission.h"
+#include "state/struct.h"
 #include "system.h"
 
-static void HandleCommand(ADCSContext* context, ADCSCommand command)
+static SystemStateUpdateResult ADCSUpdate(SystemState* state, void* param)
 {
-    switch (command)
-    {
-        case ADCSCommandTurnOff:
-            context->CurrentMode = ADCSModeNone;
-            break;
-        case ADCSCommandDetumble:
-            context->CurrentMode = ADCSModeDetumbling;
-            break;
-        case ADCSCommandSunPoint:
-            context->CurrentMode = ADCSModeSunPointing;
-            break;
-    }
+    ADCSContext* adcs = (ADCSContext*)param;
+
+    state->ADCS.CurrentMode = adcs->CurrentMode;
+
+    return SystemStateUpdateOK;
 }
 
-static void ADCSTask(void* arg)
+static bool TurnOffCondition(const SystemState* state, void* param)
 {
-    ADCSContext* context = (ADCSContext*)arg;
-
-    UNREFERENCED_PARAMETER(context);
-
-    while (1)
-    {
-        ADCSCommand command;
-
-        if (System.QueueReceive(context->CommandQueue, &command, 0))
-        {
-            LOGF(LOG_LEVEL_INFO, "[ADCS]Received command %d", command);
-
-            HandleCommand(context, command);
-        }
-
-        LOGF(LOG_LEVEL_INFO, "[ADCS]Running ADCS loop. Mode: %d", context->CurrentMode);
-        System.SleepTask(5000);
-    }
+    UNREFERENCED_PARAMETER(state);
+    UNREFERENCED_PARAMETER(param);
+    return false;
 }
 
-static void ADCSSendCommand(ADCSContext* context, ADCSCommand command)
+static void TurnOff(const SystemState* state, void* param)
 {
-    LOGF(LOG_LEVEL_INFO, "[ADCS]Commanding to %d", command);
-    System.QueueOverwrite(context->CommandQueue, &command);
+    UNREFERENCED_PARAMETER(state);
+    ADCSContext* adcs = (ADCSContext*)param;
+    adcs->Command(adcs, ADCSCommandTurnOff);
 }
 
-void InitializeADCS(ADCSContext* context)
+static bool DetumbleCondition(const SystemState* state, void* param)
 {
-    context->Command = ADCSSendCommand;
-    context->CommandQueue = System.CreateQueue(1, sizeof(ADCSCommand));
-    System.CreateTask(ADCSTask, "ADCSTask", 1024, context, 4, &context->Task);
+    UNREFERENCED_PARAMETER(state);
+    UNREFERENCED_PARAMETER(param);
+    return false;
+}
+
+static void Detumble(const SystemState* state, void* param)
+{
+    UNREFERENCED_PARAMETER(state);
+    ADCSContext* adcs = (ADCSContext*)param;
+    adcs->Command(adcs, ADCSCommandDetumble);
+}
+
+static bool SunPointCondition(const SystemState* state, void* param)
+{
+    UNREFERENCED_PARAMETER(state);
+    UNREFERENCED_PARAMETER(param);
+    return false;
+}
+
+static void SunPoint(const SystemState* state, void* param)
+{
+    UNREFERENCED_PARAMETER(state);
+    ADCSContext* adcs = (ADCSContext*)param;
+    adcs->Command(adcs, ADCSCommandSunPoint);
+}
+
+void ADCSInitializeDescriptors(ADCSContext* adcs, ADCSDescriptors* descriptors)
+{
+    descriptors->Update.Name = "ADCS Update";
+    descriptors->Update.Param = adcs;
+    descriptors->Update.UpdateProc = ADCSUpdate;
+
+    descriptors->TurnOff.Name = "ADCS Turn Off";
+    descriptors->TurnOff.Param = adcs;
+    descriptors->TurnOff.Condition = TurnOffCondition;
+    descriptors->TurnOff.ActionProc = TurnOff;
+
+    descriptors->Detumble.Name = "ADCS Detumble";
+    descriptors->Detumble.Param = adcs;
+    descriptors->Detumble.Condition = DetumbleCondition;
+    descriptors->Detumble.ActionProc = Detumble;
+
+    descriptors->SunPoint.Name = "ADCS SunPoint";
+    descriptors->SunPoint.Param = adcs;
+    descriptors->SunPoint.Condition = SunPointCondition;
+    descriptors->SunPoint.ActionProc = SunPoint;
 }

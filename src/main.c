@@ -32,9 +32,9 @@
 #include "storage/nand_driver.h"
 #include "storage/storage.h"
 
+#include "adcs/adcs.h"
 #include "base/ecc.h"
 #include "mission.h"
-#include "mission/adcs.h"
 
 OBC Main;
 MissionState Mission;

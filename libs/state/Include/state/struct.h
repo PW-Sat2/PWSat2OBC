@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "adcs/adcs.h"
 
 #include "time/TimePoint.h"
 
@@ -17,6 +18,10 @@ typedef struct
     TimePoint Time;
     bool AntennaDeployed;
     bool SailOpened;
+    struct
+    {
+        ADCSMode CurrentMode;
+    } ADCS;
 } SystemState;
 
 #ifdef __cplusplus
