@@ -90,9 +90,8 @@ void SystemDispatchActions(const SystemState* state, SystemActionDescriptor* des
 
         descriptors[i]->LastRun.Executed = true;
         descriptors[i]->ActionProc(state, descriptors[i]->Param);
-        return;
     }
-
+    return;
     for (size_t i = 0; i < actionsCount; i++)
     {
         descriptors[i]->LastRun.Executed = false;

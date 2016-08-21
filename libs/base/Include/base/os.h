@@ -195,6 +195,13 @@ typedef bool (*OSQueueSend)(OSQueueHandle queue, void* element, OSTaskTimeSpan t
 typedef bool (*OSQueueSendISR)(OSQueueHandle queue, void* element, bool* taskWoken);
 
 /**
+ * @brief Overwrites element in queue. Designed for single-element queue
+ * @param[in] queue QueueHandle
+ * @param[in] element Element to send to queue
+ */
+typedef void (*OSQueueOverwrite)(OSQueueHandle queue, const void* element);
+
+/**
  * @brief Type of procedure that causes context switch at the end of interrupt handler
  * @param[in] taskWoken TRUE if task was woken and context switch should occur
  */
@@ -351,6 +358,13 @@ typedef struct
      * @see OSQueueSendISR
      */
     OSQueueSendISR QueueSendISR;
+
+    /**
+     * @brief Pointer to procedure that overwrites element in queue
+     *
+     * @see OSQueueOverwrite
+     */
+    OSQueueOverwrite QueueOverwrite;
 
     /**
      * @brief Pointer to procedure that should be called at the end of interrupt handler

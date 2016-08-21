@@ -5,8 +5,8 @@
 #include <utility>
 #include "gmock/gmock.h"
 #include "gmock-extensions.h"
-#include "mission/state.h"
 #include "rapidcheck.h"
+#include "state/state.h"
 #include "system.h"
 
 using testing::_;

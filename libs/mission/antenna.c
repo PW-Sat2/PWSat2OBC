@@ -1,6 +1,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
-#include "state.h"
+#include "state/state.h"
 #include "system.h"
 
 static bool Condition(const SystemState* state, void* param)

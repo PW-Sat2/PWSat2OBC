@@ -5,6 +5,7 @@
 #include "base/os.h"
 #include "comm/comm.h"
 #include "fs/fs.h"
+#include "mission/adcs.h"
 #include "storage/nand_driver.h"
 #include "yaffs_guts.h"
 
@@ -21,6 +22,8 @@ typedef struct
     OSTaskHandle initTask;
     /** @brief Flag indicating that OBC software has finished initialization process. */
     atomic_bool initialized;
+
+    ADCSContext adcs;
 
     struct yaffs_dev rootDevice;
     YaffsNANDDriver rootDeviceDriver;

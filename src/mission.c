@@ -6,9 +6,9 @@
 #include "logger/logger.h"
 #include "mission.h"
 #include "mission/sail.h"
-#include "mission/state.h"
 #include "obc.h"
 #include "obc_time.h"
+#include "state/state.h"
 #include "system.h"
 
 typedef struct
@@ -18,8 +18,9 @@ typedef struct
     SystemStateVerifyDescriptor* verify;
     SystemStateVerifyDescriptorResult* verifyResult;
     size_t verifyCount;
-    SystemActionDescriptor** action;
+    SystemActionDescriptor* actions;
     size_t actionCount;
+    SystemActionDescriptor** runnableActions;
 } ModeDescriptor;
 
 static SystemStateUpdateResult UpdateTime(SystemState* state, void* param)
@@ -49,18 +50,11 @@ static void Loop(SystemState* state, ModeDescriptor* mode)
 
     LOG(LOG_LEVEL_INFO, "Determining actions");
 
-    SystemDetermineActions(state, mode->action, mode->actionCount, NULL);
+    size_t runnableCount = SystemDetermineActions(state, mode->actions, mode->actionCount, mode->runnableActions);
 
-    LOG(LOG_LEVEL_INFO, "Executing actions");
+    LOGF(LOG_LEVEL_INFO, "Executing %d actions", runnableCount);
 
-    for (size_t i = 0; i < mode->actionCount; i++)
-    {
-        // if (mode->action[i]->Runnable)
-        {
-            LOGF(LOG_LEVEL_INFO, "Running action %s", mode->action[i]->Name);
-            mode->action[i]->ActionProc(state, mode->action[i]->Param);
-        }
-    }
+    SystemDispatchActions(state, mode->runnableActions, runnableCount);
 }
 
 static void NormalModeLoop(SystemState* state, MissionState* missionState)
@@ -71,15 +65,18 @@ static void NormalModeLoop(SystemState* state, MissionState* missionState)
 
     SystemStateVerifyDescriptorResult verifyResults[COUNT_OF(verifyDescriptors)];
 
-    SystemActionDescriptor* actionDescriptors[] = {&missionState->Sail.OpenSail};
+    SystemActionDescriptor actionDescriptors[] = {missionState->Sail.OpenSail};
+
+    SystemActionDescriptor* runnableActions[COUNT_OF(actionDescriptors)];
 
     ModeDescriptor descriptor = {.update = updateDescriptors,
         .updateCount = COUNT_OF(updateDescriptors),
         .verify = verifyDescriptors,
         .verifyResult = verifyResults,
         .verifyCount = COUNT_OF(verifyDescriptors),
-        .action = actionDescriptors,
-        .actionCount = COUNT_OF(actionDescriptors)};
+        .actions = actionDescriptors,
+        .actionCount = COUNT_OF(actionDescriptors),
+        .runnableActions = runnableActions};
 
     Loop(state, &descriptor);
 }

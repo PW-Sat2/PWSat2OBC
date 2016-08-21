@@ -30,6 +30,7 @@
 
 #include "base/ecc.h"
 #include "mission.h"
+#include "mission/adcs.h"
 
 OBC Main;
 MissionState Mission;
@@ -111,6 +112,8 @@ static void ObcInitTask(void* param)
     {
         LOG(LOG_LEVEL_ERROR, "Unable to restart comm");
     }
+
+    InitializeADCS(&obc->adcs);
 
     LOG(LOG_LEVEL_INFO, "Intialized");
     atomic_store(&Main.initialized, true);

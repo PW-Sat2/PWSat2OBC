@@ -4,7 +4,7 @@
 #include "gmock-extensions.h"
 #include "gmock/gmock-matchers.h"
 #include "MissionTestHelpers.h"
-#include "mission/state.h"
+#include "state/state.h"
 #include "system.h"
 
 using testing::Eq;

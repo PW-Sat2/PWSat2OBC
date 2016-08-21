@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
 #include "sail.h"
-#include "state.h"
+#include "state/state.h"
 #include "system.h"
 
 static SystemStateUpdateResult UpdateProc(SystemState* state, void* param)
@@ -11,7 +11,7 @@ static SystemStateUpdateResult UpdateProc(SystemState* state, void* param)
     return SystemStateUpdateOK;
 }
 
-static bool CanOpenSail(SystemState* const state, void* param)
+static bool CanOpenSail(const SystemState* state, void* param)
 {
     UNREFERENCED_PARAMETER(param);
 
@@ -28,7 +28,7 @@ static bool CanOpenSail(SystemState* const state, void* param)
     return true;
 }
 
-static void OpenSail(SystemState* const state, void* param)
+static void OpenSail(const SystemState* state, void* param)
 {
     UNREFERENCED_PARAMETER(state);
     bool* sailOpened = (bool*)param;

@@ -6,7 +6,7 @@
 #include "MissionTestHelpers.h"
 
 #include "mission/sail.h"
-#include "mission/state.h"
+#include "state/state.h"
 #include "system.h"
 
 using testing::Test;
