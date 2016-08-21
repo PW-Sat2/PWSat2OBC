@@ -6,7 +6,8 @@ set(SOURCES
     commands/ping.c
     commands/time.c   
     commands/comm.c   
-    commands/file_system.c                
+    commands/file_system.c       
+    commands/state_command.c                      
     commands/adcs.c      
     obc.h
     fault_handlers.c

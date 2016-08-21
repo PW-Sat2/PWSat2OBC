@@ -12,6 +12,8 @@
 #include "state/state.h"
 #include "system.h"
 
+static TerminalCommand terminalCommand = TerminalCommandNone;
+
 typedef struct
 {
     SystemStateUpdateDescriptor* update;
@@ -55,9 +57,10 @@ static void Loop(SystemState* state, ModeDescriptor* mode)
 static void NormalModeLoop(SystemState* state, MissionState* missionState)
 {
     SystemStateUpdateDescriptor updateDescriptors[] = {
-        missionState->UpdateTime,  //
-        missionState->Sail.Update, //
-        missionState->ADCS.Update  //
+        missionState->TerminalCommandUpdate, //
+        missionState->UpdateTime,            //
+        missionState->Sail.Update,           //
+        missionState->ADCS.Update            //
     };
 
     SystemStateVerifyDescriptor verifyDescriptors[0];
@@ -101,6 +104,21 @@ static void MissionControlTask(void* param)
     }
 }
 
+static SystemStateUpdateResult UpdateCommandTerminal(SystemState* state, void* param)
+{
+    UNREFERENCED_PARAMETER(param);
+
+    state->RequestedCommand = terminalCommand;
+    terminalCommand = TerminalCommandNone;
+
+    return SystemStateUpdateOK;
+}
+
+void SetTerminalCommand(TerminalCommand command)
+{
+    terminalCommand = command;
+}
+
 void InitializeMission(MissionState* missionState, OBC* obc)
 {
     UNREFERENCED_PARAMETER(obc);
@@ -112,6 +130,10 @@ void InitializeMission(MissionState* missionState, OBC* obc)
     missionState->UpdateTime.Name = "Update time";
     missionState->UpdateTime.Param = NULL;
     missionState->UpdateTime.UpdateProc = UpdateTime;
+
+    missionState->TerminalCommandUpdate.Name = "Terminal command";
+    missionState->TerminalCommandUpdate.Param = NULL;
+    missionState->TerminalCommandUpdate.UpdateProc = UpdateCommandTerminal;
 
     System.CreateTask(MissionControlTask, "MissionControl", 2048, missionState, tskIDLE_PRIORITY + 2, NULL);
 }

@@ -36,7 +36,7 @@ static const command commands[] = {
     {"listFiles", FSListFiles},
     {"writeFile", FSWriteFile},
     {"readFile", FSReadFile},
-    {"adcs", CommandADCS} //
+    {"stateCmd", CommandByTerminal} //
 };
 
 static QueueHandle_t terminalQueue;
