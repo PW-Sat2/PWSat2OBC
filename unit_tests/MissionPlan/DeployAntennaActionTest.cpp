@@ -4,9 +4,9 @@
 #include "gmock/gmock-matchers.h"
 #include "MissionTestHelpers.h"
 #include "mission/antenna.h"
-#include "mission/state.h"
 #include "rapidcheck.h"
 #include "rapidcheck/gtest.h"
+#include "state/state.h"
 #include "system.h"
 
 using testing::Test;
@@ -16,13 +16,14 @@ class DeployAntennaActionTest : public Test
 {
   protected:
     SystemActionDescriptor openAntenna;
+    bool runnable;
 
     SystemState state;
 
     void DetermineActions();
 
   public:
-    DeployAntennaActionTest()
+    DeployAntennaActionTest() : runnable(false)
     {
         SystemStateEmpty(&state);
 
@@ -32,9 +33,12 @@ class DeployAntennaActionTest : public Test
 
 void DeployAntennaActionTest::DetermineActions()
 {
-    SystemActionDescriptor* actionDescriptors[] = {&openAntenna};
+    SystemActionDescriptor actionDescriptors[] = {openAntenna};
+    SystemActionDescriptor* runnableDescriptors[1] = {0};
 
-    // SystemDetermineActions(&state, actionDescriptors, COUNT_OF(actionDescriptors));
+    size_t count = SystemDetermineActions(&state, actionDescriptors, COUNT_OF(actionDescriptors), runnableDescriptors);
+
+    runnable = count > 0;
 }
 
 TEST_F(DeployAntennaActionTest, OpenDeployAfterSilencePhaseIfNotAlreadyOpenned)
@@ -43,7 +47,7 @@ TEST_F(DeployAntennaActionTest, OpenDeployAfterSilencePhaseIfNotAlreadyOpenned)
 
     DetermineActions();
 
-    // ASSERT_THAT(openAntenna.Runnable, Eq(true));
+    ASSERT_THAT(runnable, Eq(true));
 }
 
 TEST_F(DeployAntennaActionTest, ShouldNotDeployAntennaInSilencePhase)
@@ -52,7 +56,7 @@ TEST_F(DeployAntennaActionTest, ShouldNotDeployAntennaInSilencePhase)
 
     DetermineActions();
 
-    // ASSERT_THAT(openAntenna.Runnable, Eq(false));
+    ASSERT_THAT(runnable, Eq(false));
 }
 
 TEST_F(DeployAntennaActionTest, ShouldNotDeployAntennaIfAlreadyOpenned)
@@ -62,7 +66,7 @@ TEST_F(DeployAntennaActionTest, ShouldNotDeployAntennaIfAlreadyOpenned)
 
     DetermineActions();
 
-    // ASSERT_THAT(openAntenna.Runnable, Eq(false));
+    ASSERT_THAT(runnable, Eq(false));
 }
 
 RC_GTEST_FIXTURE_PROP(DeployAntennaActionTest, CanOpenAntennaOnlyAfterSilentPhaseAndIfNotAlreadyOpenned, (const SystemState& state))
@@ -71,7 +75,7 @@ RC_GTEST_FIXTURE_PROP(DeployAntennaActionTest, CanOpenAntennaOnlyAfterSilentPhas
 
     DetermineActions();
 
-    // if (openAntenna.Runnable)
+    if (runnable)
     {
         RC_ASSERT(state.Time > TimePointFromTimeSpan(TimeSpanFromMinutes(30)));
         RC_ASSERT_FALSE(state.AntennaDeployed);

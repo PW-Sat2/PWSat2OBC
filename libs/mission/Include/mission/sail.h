@@ -1,12 +1,12 @@
 #ifndef LIBS_MISSION_INCLUDE_MISSION_SAIL_H_
 #define LIBS_MISSION_INCLUDE_MISSION_SAIL_H_
 
+#include <stdbool.h>
+#include "state/state.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <stdbool.h>
-#include "state.h"
 
 void SailInitializeUpdateDescriptor(SystemStateUpdateDescriptor* descriptor, bool* sailOpened);
 

@@ -7,6 +7,7 @@ set(SOURCES
     commands/time.c   
     commands/comm.c   
     commands/file_system.c                
+    commands/adcs.c      
     obc.h
     fault_handlers.c
     mission.c

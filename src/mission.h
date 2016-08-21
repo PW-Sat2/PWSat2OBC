@@ -6,8 +6,8 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
-#include "mission/state.h"
 #include "obc.h"
+#include "state/state.h"
 
 typedef struct
 {

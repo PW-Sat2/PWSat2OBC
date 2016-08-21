@@ -1,12 +1,12 @@
 set(NAME mission)
 
-set(SOURCES
-    state.c    
+set(SOURCES    
     antenna.c
-    sail.c
-    include/mission/state.h
+    sail.c    
+    adcs.c
     include/mission/antenna.h
     include/mission/sail.h
+    include/mission/adcs.h
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -15,6 +15,7 @@ target_link_libraries(${NAME}
     base
     eps
     time
+    state
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

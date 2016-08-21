@@ -1,24 +1,14 @@
 #ifndef LIBS_MISSION_INCLUDE_MISSION_STATE_H_
 #define LIBS_MISSION_INCLUDE_MISSION_STATE_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include "struct.h"
 
-#include "time/TimePoint.h"
-
-typedef struct
-{
-    bool Flag;
-    int32_t NumValue;
-    TimePoint Time;
-    bool AntennaDeployed;
-    bool SailOpened;
-} SystemState;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void SystemStateEmpty(SystemState* state);
 

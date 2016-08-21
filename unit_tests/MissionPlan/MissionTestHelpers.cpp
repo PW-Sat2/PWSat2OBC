@@ -1,5 +1,5 @@
 #include <ostream>
-#include "mission/state.h"
+#include "state/state.h"
 
 void showValue(const SystemState& state, std::ostream& os)
 {

@@ -159,6 +159,11 @@ static bool QueueSendISR(OSQueueHandle queue, void* element, bool* taskWoken)
     return result;
 }
 
+static void QueueOverwrite(OSQueueHandle queue, const void* element)
+{
+    xQueueOverwrite(queue, element);
+}
+
 static void EndSwitchingISR(bool taskWoken)
 {
     portEND_SWITCHING_ISR(taskWoken);
@@ -187,6 +192,7 @@ OSResult OSSetup(void)
     System.QueueReceiveFromISR = QueueReceiveISR;
     System.QueueSend = QueueSend;
     System.QueueSendISR = QueueSendISR;
+    System.QueueOverwrite = QueueOverwrite;
     System.EndSwitchingISR = EndSwitchingISR;
 
     return OSResultSuccess;
