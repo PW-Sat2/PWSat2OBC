@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
+#include "mission/adcs_mission.h"
 #include "obc.h"
 #include "state/state.h"
 
@@ -18,6 +19,8 @@ typedef struct
         SystemStateUpdateDescriptor Update;
         SystemActionDescriptor OpenSail;
     } Sail;
+
+    ADCSDescriptors ADCS;
 
     SystemStateUpdateDescriptor UpdateTime;
 } MissionState;

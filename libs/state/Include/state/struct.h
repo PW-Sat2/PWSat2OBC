@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "adcs/adcs.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,6 +16,10 @@ typedef struct
     uint32_t Time;
     bool AntennaDeployed;
     bool SailOpened;
+    struct
+    {
+        ADCSMode CurrentMode;
+    } ADCS;
 } SystemState;
 
 #ifdef __cplusplus

@@ -2,10 +2,10 @@
 #define OBC_H
 
 #include <stdatomic.h>
+#include "adcs/adcs.h"
 #include "base/os.h"
 #include "comm/comm.h"
 #include "fs/fs.h"
-#include "mission/adcs.h"
 #include "storage/nand_driver.h"
 #include "yaffs_guts.h"
 

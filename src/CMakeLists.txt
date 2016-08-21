@@ -32,6 +32,7 @@ target_link_libraries(${NAME}
     fs
     mission
     eps
+    adcs
 )
 
 target_generate_hex(${NAME})
