@@ -23,9 +23,12 @@ typedef struct
     ADCSDescriptors ADCS;
 
     SystemStateUpdateDescriptor UpdateTime;
+
+    SystemStateUpdateDescriptor TerminalCommandUpdate;
 } MissionState;
 
 void InitializeMission(MissionState* missionState, OBC* obc);
+void SetTerminalCommand(TerminalCommand command);
 
 #ifdef __cplusplus
 }

@@ -18,4 +18,6 @@
 #define __packed __attribute__((aligned(1)))
 #endif
 
+#define HAS_FLAG(value, flag) (((value) & (flag)) == (flag))
+
 #endif

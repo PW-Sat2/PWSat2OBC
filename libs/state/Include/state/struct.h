@@ -9,10 +9,18 @@
 extern "C" {
 #endif
 
+typedef enum {
+    TerminalCommandNone = 0,
+    TerminalCommandADCSTurnOff = 1 << 0,
+    TerminalCommandADCSDetumble = 1 << 1,
+    TerminalCommandADCSSunPoint = 1 << 2
+} TerminalCommand;
+
 typedef struct
 {
     bool Flag;
     int32_t NumValue;
+    TerminalCommand RequestedCommand;
     uint32_t Time;
     bool AntennaDeployed;
     bool SailOpened;

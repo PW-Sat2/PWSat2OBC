@@ -6,7 +6,7 @@ set(SOURCES
     adcs.c
     include/mission/antenna.h
     include/mission/sail.h
-    include/mission/adcs.h    
+    include/mission/adcs_mission.h    
 )
 
 add_library(${NAME} STATIC ${SOURCES})

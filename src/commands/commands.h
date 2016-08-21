@@ -15,6 +15,6 @@ void OBCGetState(uint16_t argc, char* argv[]);
 void FSListFiles(uint16_t argc, char* argv[]);
 void FSWriteFile(uint16_t argc, char* argv[]);
 void FSReadFile(uint16_t argc, char* argv[]);
-void CommandADCS(int argc, char* args[]);
+void CommandByTerminal(int argc, char* args[]);
 
 #endif
