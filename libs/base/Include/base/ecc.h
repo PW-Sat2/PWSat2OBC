@@ -7,7 +7,9 @@ extern "C" {
 
 #include <stdint.h>
 
-/** @defgroup ECC {*/
+/** @defgroup ECC Error Correction Code utilities
+ * @{
+ * */
 
 /**
  * ECC correction result

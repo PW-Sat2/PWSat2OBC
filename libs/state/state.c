@@ -76,27 +76,8 @@ uint16_t SystemDetermineActions(
 
 void SystemDispatchActions(const SystemState* state, SystemActionDescriptor* descriptors[], size_t actionsCount)
 {
-    if (actionsCount == 0)
-    {
-        return;
-    }
-
     for (size_t i = 0; i < actionsCount; i++)
     {
-        if (descriptors[i]->LastRun.Executed)
-        {
-            continue;
-        }
-
-        descriptors[i]->LastRun.Executed = true;
         descriptors[i]->ActionProc(state, descriptors[i]->Param);
     }
-    return;
-    for (size_t i = 0; i < actionsCount; i++)
-    {
-        descriptors[i]->LastRun.Executed = false;
-    }
-
-    descriptors[0]->LastRun.Executed = true;
-    descriptors[0]->ActionProc(state, descriptors[0]->Param);
 }

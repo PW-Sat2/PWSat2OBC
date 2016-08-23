@@ -25,11 +25,13 @@ class SailSystemStateTest : public Test
 
     SystemStateUpdateResult updateResult;
 
+    bool runnable;
+
     void UpdateState();
     void DetermineActions();
 
   public:
-    SailSystemStateTest() : updateResult((SystemStateUpdateResult)-1)
+    SailSystemStateTest() : updateResult((SystemStateUpdateResult)-1), runnable(false)
     {
         SystemStateEmpty(&state);
 
@@ -47,9 +49,10 @@ void SailSystemStateTest::UpdateState()
 
 void SailSystemStateTest::DetermineActions()
 {
-    SystemActionDescriptor* descriptors[] = {&openSailAction};
+    SystemActionDescriptor descriptors[] = {openSailAction};
+    SystemActionDescriptor* runnableDescriptors[COUNT_OF(descriptors)];
 
-    // SystemDetermineActions(&state, descriptors, COUNT_OF(descriptors));
+    runnable = SystemDetermineActions(&state, descriptors, COUNT_OF(descriptors), runnableDescriptors) > 0;
 }
 
 TEST_F(SailSystemStateTest, ShouldUpdateSystemState)
@@ -69,7 +72,7 @@ TEST_F(SailSystemStateTest, ShouldOpenSailAfterTimeIfNotOpened)
 
     DetermineActions();
 
-    // ASSERT_THAT(openSailAction.Runnable, Eq(true));
+    ASSERT_THAT(runnable, Eq(true));
 }
 
 RC_GTEST_FIXTURE_PROP(SailSystemStateTest, SailCannotBeOpenedIfNotPossible, (const SystemState& state))
@@ -78,7 +81,7 @@ RC_GTEST_FIXTURE_PROP(SailSystemStateTest, SailCannotBeOpenedIfNotPossible, (con
 
     DetermineActions();
 
-    // if (openSailAction.Runnable)
+    if (runnable)
     {
         RC_ASSERT(this->state.SailOpened == false);
         RC_ASSERT(this->state.Time > (uint32_t)(40 * 3600));

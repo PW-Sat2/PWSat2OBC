@@ -67,6 +67,24 @@ typedef struct
 } CommFrame;
 
 /**
+ * @brief This type describes single received frame.
+ */
+typedef struct
+{
+    /** @brief Frame contents size in bytes. */
+    uint16_t Size;
+
+    /** @brief Doppler frequency. This field contains the measured Doppler shift on the packet at the reception time. */
+    uint16_t Doppler;
+
+    /** @brief This field contains the measured Received Signal Strength Indicator (RSSI) at the reception time. */
+    uint16_t RSSI;
+
+    /** @brief Frame content. */
+    uint8_t Contents[COMM_MAX_FRAME_CONTENTS_SIZE];
+} CommFrame2;
+
+/**
  * @brief This type contains comm receiver telemetry.
  *
  * The values stored in this structure are provided in their raw form

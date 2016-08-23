@@ -102,7 +102,6 @@ class SystemAction
         actionDescriptor.Condition = SystemAction::Condition;
         actionDescriptor.ActionProc = SystemAction::Action;
         actionDescriptor.Param = this;
-        actionDescriptor.LastRun.Executed = false;
     }
 
     SystemAction() : SystemAction(nullptr)
