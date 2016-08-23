@@ -113,12 +113,7 @@ static void ObcInitTask(void* param)
         LOG(LOG_LEVEL_ERROR, "Unable to initialize file system");
     }
 
-    if (!OpenSailInit(&obc->sailContext))
-    {
-        LOG(LOG_LEVEL_ERROR, "Unable to initialize sail. ");
-    }
-
-    if (!TimeInitialize(&obc->timeProvider, OpenSailTimeHandler, &obc->sailContext, &obc->fs))
+    if (!TimeInitialize(&obc->timeProvider, NULL, NULL, &obc->fs))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize persistent timer. ");
     }

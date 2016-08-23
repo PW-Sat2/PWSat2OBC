@@ -4,6 +4,7 @@ set(SOURCES
     antenna.c
     sail.c        
     adcs.c
+    include/mission/mission.h
     include/mission/antenna.h
     include/mission/sail.h
     include/mission/adcs_mission.h    

@@ -23,10 +23,10 @@ class Test_SailTest(BaseTest):
     def test_happy_path(self):
         self.system.obc.jump_to_time(INFINITY_TIME)
 
-        self.assertTrue(self.system.eps.sail0.wait_for_change(1))
-        self.assertFalse(self.system.eps.sail0.wait_for_change(1))
+        self.assertTrue(self.system.eps.sail0.wait_for_change(10))
+        self.assertFalse(self.system.eps.sail0.wait_for_change(10))
 
-        self.assertTrue(self.system.eps.sail1.wait_for_change(1))
-        self.assertFalse(self.system.eps.sail1.wait_for_change(1))
+        self.assertTrue(self.system.eps.sail1.wait_for_change(10))
+        self.assertFalse(self.system.eps.sail1.wait_for_change(10))
 
 

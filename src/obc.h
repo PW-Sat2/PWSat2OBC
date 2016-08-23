@@ -32,9 +32,6 @@ typedef struct
 
     /** @brief Persistent timer that measures mission time. */
     TimeProvider timeProvider;
-
-    /** @brief Object responsible for sail management. */
-    OpenSailContext sailContext;
 } OBC;
 
 /** @brief Global OBC object. */

@@ -17,7 +17,6 @@ class System:
         self._setup_devices()
 
         self.obc = OBC(SerialPortTerminal(obc_com))
-        print "a"
         self.obc.power_off()
 
         self.i2c.start()
