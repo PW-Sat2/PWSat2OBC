@@ -399,7 +399,7 @@ static void SaveTime(TimeProvider* timeProvider, struct TimerState state)
         totalErrorCount += errorCount;
     } while (++retryCounter < 3 && errorCount > 1);
 
-    if (errorCount > 0)
+    if (totalErrorCount > 0)
     {
         LOGF(LOG_LEVEL_WARNING, "[timer] Timer encountered %d errors over %d state save attempts. ", totalErrorCount, errorCount);
     }
