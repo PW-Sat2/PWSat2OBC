@@ -12,6 +12,7 @@ using testing::Eq;
 using testing::Ne;
 using testing::Return;
 using testing::Invoke;
+using testing::HasSubstr;
 
 class TimerPersistanceTest : public testing::Test
 {
@@ -219,7 +220,7 @@ TEST_F(TimerPersistanceTest, TestStateWriteError)
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &MockedFileSystem));
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(1));
     EXPECT_CALL(fs, Write(_, _, _)).WillRepeatedly(Return(-1));
-    EXPECT_CALL(fs, Close(_)).Times(3).WillRepeatedly(Return(0));
+    EXPECT_CALL(fs, Close(_)).Times(9).WillRepeatedly(Return(0));
     TimeAdvanceTime(&provider, TimeSpanFromMilliseconds(0x44332211ull));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x44332211ull)));
 }
@@ -246,10 +247,12 @@ TEST_F(TimerPersistanceTest, TestStateWriteClosesFiles)
 {
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(-1));
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &MockedFileSystem));
-    EXPECT_CALL(fs, Open(_, _, _)).WillOnce(Return(1)).WillOnce(Return(2)).WillOnce(Return(3));
-    EXPECT_CALL(fs, Close(1)).Times(1);
-    EXPECT_CALL(fs, Close(2)).Times(1);
-    EXPECT_CALL(fs, Close(3)).Times(1);
+    EXPECT_CALL(fs, Open(HasSubstr(".0"), _, _)).Times(3).WillRepeatedly(Return(1));
+    EXPECT_CALL(fs, Open(HasSubstr(".1"), _, _)).Times(3).WillRepeatedly(Return(2));
+    EXPECT_CALL(fs, Open(HasSubstr(".2"), _, _)).Times(3).WillRepeatedly(Return(3));
+    EXPECT_CALL(fs, Close(1)).Times(3);
+    EXPECT_CALL(fs, Close(2)).Times(3);
+    EXPECT_CALL(fs, Close(3)).Times(3);
     EXPECT_CALL(fs, Write(_, _, _)).WillRepeatedly(Return(-1));
     TimeAdvanceTime(&provider, TimeSpanFromMilliseconds(0x44332211ull));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x44332211ull)));
@@ -259,8 +262,8 @@ TEST_F(TimerPersistanceTest, TestStateWriteIsNotDoneOnEveryTimeUpdate)
 {
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(-1));
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &MockedFileSystem));
-    EXPECT_CALL(fs, Open(_, _, _)).Times(3).WillRepeatedly(Return(1));
-    EXPECT_CALL(fs, Close(_)).Times(3);
+    EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(1));
+    EXPECT_CALL(fs, Close(_)).Times(9);
     EXPECT_CALL(fs, Write(_, _, _)).WillRepeatedly(Return(-1));
 
     TimeAdvanceTime(&provider, TimeSpanFromMilliseconds(400000));

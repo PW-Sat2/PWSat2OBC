@@ -358,22 +358,50 @@ static void SendTimeNotification(TimeProvider* timeProvider, struct TimerState s
 
 static void SaveTime(TimeProvider* timeProvider, struct TimerState state)
 {
-    if (state.saveTime && timeProvider->FileSystemObject != NULL)
+    if (                                       //
+        !state.saveTime ||                     //
+        timeProvider->FileSystemObject == NULL //
+        )
     {
-        uint8_t buffer[sizeof(TimeSpan)];
-        Writer writer;
+        return;
+    }
 
-        WriterInitialize(&writer, buffer, sizeof(buffer));
-        WriterWriteQuadWordLE(&writer, state.time.value);
-        if (!WriterStatus(&writer))
+    uint8_t buffer[sizeof(TimeSpan)];
+    Writer writer;
+
+    WriterInitialize(&writer, buffer, sizeof(buffer));
+    WriterWriteQuadWordLE(&writer, state.time.value);
+    if (!WriterStatus(&writer))
+    {
+        return;
+    }
+
+    const uint16_t length = WriterGetDataLength(&writer);
+    int retryCounter = 0;
+    int errorCount = 0;
+    int totalErrorCount = 0;
+    do
+    {
+        errorCount = 0;
+        if (!FileSystemSaveToFile(timeProvider->FileSystemObject, TimeFile0, buffer, length))
         {
-            return;
+            ++errorCount;
+        }
+        if (!FileSystemSaveToFile(timeProvider->FileSystemObject, TimeFile1, buffer, length))
+        {
+            ++errorCount;
+        }
+        if (!FileSystemSaveToFile(timeProvider->FileSystemObject, TimeFile2, buffer, length))
+        {
+            ++errorCount;
         }
 
-        const uint16_t length = WriterGetDataLength(&writer);
-        FileSystemSaveToFile(timeProvider->FileSystemObject, TimeFile0, buffer, length);
-        FileSystemSaveToFile(timeProvider->FileSystemObject, TimeFile1, buffer, length);
-        FileSystemSaveToFile(timeProvider->FileSystemObject, TimeFile2, buffer, length);
+        totalErrorCount += errorCount;
+    } while (++retryCounter < 3 && errorCount > 1);
+
+    if (errorCount > 0)
+    {
+        LOGF(LOG_LEVEL_WARNING, "[timer] Timer encountered %d errors over %d state save attempts. ", totalErrorCount, errorCount);
     }
 }
 
