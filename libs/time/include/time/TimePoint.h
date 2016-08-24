@@ -50,24 +50,79 @@ typedef struct
     int64_t value;
 } TimeShift;
 
+/**
+ * @brief Creates TimeSpan object initialized from time specified in milliseconds.
+ * @param[in] milliseconds TimeSpan value in milliseconds.
+ * @return Prepared time span object.
+ */
 TimeSpan TimeSpanFromMilliseconds(uint64_t milliseconds);
 
+/**
+ * @brief Creates TimeSpan object initialized from time specified in seconds.
+ * @param[in] seconds TimeSpan value in seconds.
+ * @return Prepared time span object.
+ */
 TimeSpan TimeSpanFromSeconds(uint32_t seconds);
 
+/**
+ * @brief Creates TimeSpan object initialized from time specified in minutes.
+ * @param[in] minutes TimeSpan value in minutes.
+ * @return Prepared time span object.
+ */
 TimeSpan TimeSpanFromMinutes(uint32_t minutes);
 
+/**
+ * @brief Creates TimeSpan object initialized from time specified in hours.
+ * @param[in] hours TimeSpan value in hours.
+ * @return Prepared time span object.
+ */
 TimeSpan TimeSpanFromHours(uint32_t hours);
 
+/**
+ * @brief Creates TimeSpan object initialized from time specified in days.
+ * @param[in] days TimeSpan value in days.
+ * @return Prepared time span object.
+ */
 TimeSpan TimeSpanFromDays(uint32_t days);
 
+/**
+ * @brief Adds together two TimeSpan objects.
+ * @param[in] left TimeSpan value to add.
+ * @param[in] right TimeSpan value to add.
+ * @return Addition result.
+ */
 TimeSpan TimeSpanAdd(TimeSpan left, TimeSpan right);
 
+/**
+ * @brief Subtracts two TimeSpan objects.
+ * @param[in] left TimeSpan value to subtract from.
+ * @param[in] right TimeSpan value to be subtracted.
+ * @return Subtraction result.
+ */
 TimeShift TimeSpanSub(TimeSpan left, TimeSpan right);
 
+/**
+ * @brief Compares two TimeSpan objects.
+ * @param[in] left TimeSpan value to compare.
+ * @param[in] right TimeSpan value to compare.
+ * @return Comparison result. True when two TimeSpans are equal, false otherwise.
+ */
 static bool TimeSpanEqual(const TimeSpan left, const TimeSpan right);
 
+/**
+ * @brief Compares two TimeSpan objects.
+ * @param[in] left TimeSpan value to compare.
+ * @param[in] right TimeSpan value to compare.
+ * @return Comparison result. True when two TimeSpans are not equal, false otherwise.
+ */
 static bool TimeSpanNotEqual(const TimeSpan left, const TimeSpan right);
 
+/**
+ * @brief Determines whether left TimeSpan object is strictly smaller than right object.
+ * @param[in] left TimeSpan value to compare.
+ * @param[in] right TimeSpan value to compare.
+ * @return Comparison result. True when left TimeSpan object is strictly smaller than right object, false otherwise.
+ */
 static bool TimeSpanLessThan(const TimeSpan left, const TimeSpan right);
 
 /**
