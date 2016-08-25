@@ -6,6 +6,7 @@
 #include <em_device.h>
 #include <em_gpio.h>
 #include <em_system.h>
+#include <em_emu.h>
 
 #include <FreeRTOS.h>
 #include <FreeRTOSConfig.h>
@@ -45,6 +46,7 @@ void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
 
 void vApplicationIdleHook(void)
 {
+    EMU_EnterEM1();
 }
 
 static void BlinkLed0(void* param)
