@@ -30,6 +30,8 @@ typedef enum {
     OSResultTimeout = 2,
     /** @brief Requested operation is invalid. */
     OSResultInvalidOperation = 3,
+    /** @brief Requested element was not found. */
+    OSResultNotFound = 4,
 } OSResult;
 
 /**

@@ -52,6 +52,7 @@ typedef struct
 /** @brief Global logger object. */
 static Logger logger = {0};
 
+/** @brief Array for converting log level to string. */
 static const char* const levelMap[] = {"[Always]  ", "[Fatal]   ", "[Error]   ", "[Warning] ", "[Info]    ", "[Debug]   ", "[Trace]   "};
 
 static_assert(LOG_LEVEL_ALWAYS == 0, "Fix level conversion map for level: Always");
@@ -62,6 +63,12 @@ static_assert(LOG_LEVEL_INFO == 4, "Fix level conversion map for level: Info");
 static_assert(LOG_LEVEL_DEBUG == 5, "Fix level conversion map for level: Debug");
 static_assert(LOG_LEVEL_TRACE == 6, "Fix level conversion map for level: Trace");
 
+/**
+ * @brief Convert log level to string.
+ * @param[in] level Logging level to convert.
+ * @return String representation of logging level.
+ * @remark Logging level strings are already aligned. If passed log level is not known then the default string will be returned.
+ */
 static const char* LogConvertLevelToString(enum LogLevel level)
 {
     if (level >= COUNT_OF(levelMap))
@@ -110,6 +117,12 @@ void LogRemoveEndpoint(LoggerProcedure endpoint)
     }
 }
 
+/**
+ * @brief This procedure determines if passed logging level is considered to be enabled on configured logging level.
+ * @param[in] requestedLogLEvel Queried log level.
+ * @param[in] currentLogLevel Currently used logging level
+ * @return True Then passed logging level is enabled, false otherwise.
+ */
 static inline bool CanLogAtLevel(const enum LogLevel requestedLogLEvel, const enum LogLevel currentLogLevel)
 {
     return requestedLogLEvel <= currentLogLevel;

@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "base/os.h"
 #include "system.h"
 
 EXTERNC_BEGIN
@@ -27,79 +28,139 @@ typedef void* FSDirectoryHandle;
 /** @brief File handle */
 typedef int FSFileHandle;
 
+// yaffs imposes 2GB file size limit
+/** @brief Type that represents file size. */
+typedef int32_t FSFileSize;
+
+/**
+ * @brief Type that represents file opening status.
+ */
+typedef struct
+{
+    /** Operation status. */
+    OSResult Status;
+    /** Opened file handle. */
+    FSFileHandle FileHandle;
+} FSOpenResult;
+
+/**
+ * @brief Type that represents file read/write operation status.
+ */
+typedef struct
+{
+    /** Operation status. */
+    OSResult Status;
+    /** Number of bytes transferred. */
+    FSFileSize BytesTransferred;
+} FSIOResult;
+
 /**
  * @brief Structure exposing file system API
  */
-typedef struct
+typedef struct FileSystemTag FileSystem;
+
+/**
+ * @brief Enumerator of all possible file opening modes.
+ */
+typedef enum {
+    /** Open file only if it already exist, fail if it does not exist. */
+    FsOpenExisting = 0,
+
+    /** Open file, create a new one if it does not exist. */
+    FsOpenAlways = O_CREAT,
+
+    /** Always create new file, if it exists truncate its content to zero. */
+    FsOpenCreateAlways = O_CREAT | O_EXCL | O_TRUNC,
+
+    /** If set, the file offset shall be set to the end of the file prior to each write. */
+    FsOpenAppend = O_APPEND,
+} FSFileOpenFlags;
+
+/**
+ * @brief Enumerator of all possible file access modes.
+ */
+typedef enum {
+    /** Open for reading only. */
+    FsReadOnly = O_RDONLY,
+    /** Open for writing only. */
+    FsWriteOnly = O_WRONLY,
+    /** Open for reading and writing. */
+    FsReadWrite = O_RDWR,
+} FSFileAccessMode;
+
+/**
+ * @brief Structure exposing file system API
+ */
+typedef struct FileSystemTag
 {
     /**
      * @brief Opens file
      * @param[in] path Path to file
-     * @param[in] openFlag Open flags (O_CREAT, O_RDONLY, O_WRONLY, O_RDWR, O_APPEND)
-     * @param[in] mode Mode (Use S_IRWXU)
-     * @return File handle. In case of error: -1
+     * @param[in] openFlag File opening flags. @see FSFileOpenFlags for details.
+     * @param[in] accessMode Requested file access mode. @see FSFileAccessMode for details.
+     * @return Operation status. @see FSOpenResult for details.
      */
-    FSFileHandle (*open)(const char* path, int openFlag, int mode);
+    FSOpenResult (*open)(FileSystem* fileSystem, const char* path, FSFileOpenFlags openFlag, FSFileAccessMode accessMode);
 
     /**
      * @brief Truncates file to given size
      * @param[in] file File handle
      * @param[in] length Desired length
-     * @return 0 on success, -1 on error
+     * @return Operation status.
      */
-    int (*ftruncate)(FSFileHandle file, int64_t length);
+    OSResult (*ftruncate)(FileSystem* fileSystem, FSFileHandle file, FSFileSize length);
 
     /**
      * @brief Writes data to file
      * @param[in] file File handle
      * @param[in] buffer Data buffer
      * @param[in] size Size of data
-     * @return Number of written bytes on success. -1 on error
+     * @return Operation status. @see FSIOResult for details.
      */
-    int (*write)(FSFileHandle file, const void* buffer, unsigned int size);
+    FSIOResult (*write)(FileSystem* fileSystem, FSFileHandle file, const void* buffer, FSFileSize size);
 
     /**
      * @brief Reads data from file
      * @param[in] file File handle
      * @param[out] buffer Data buffer
      * @param[in] size Size of data
-     * @return Number of read bytes on success. -1 on error
+     * @return Operation status. @see FSIOResult for details.
      */
-    int (*read)(FSFileHandle file, void* buffer, unsigned int size);
+    FSIOResult (*read)(FileSystem* fileSystem, FSFileHandle file, void* buffer, FSFileSize size);
 
     /**
      * @brief Closes file
      * @param[in] file File handle
-     * @return 0 on success, -1 on error
+     * @return Operation status.
      */
-    int (*close)(FSFileHandle file);
+    OSResult (*close)(FileSystem* fileSystem, FSFileHandle file);
 
     /**
      * @brief Opens directory
      * @param[in] dirname Directory path
-     * @return Directory handle on success. -1 on error
+     * @return Directory handle on success. NULL on error.
      */
-    FSDirectoryHandle (*openDirectory)(const char* dirname);
+    FSDirectoryHandle (*openDirectory)(FileSystem* fileSystem, const char* dirname);
 
     /**
      * @brief Reads name of next entry in directory
      * @param[in] directory Directory handle
-     * @return Entry name. NULL if no more entries found
+     * @return Entry name. NULL if no more entries found.
      */
-    char* (*readDirectory)(FSDirectoryHandle directory);
+    char* (*readDirectory)(FileSystem* fileSystem, FSDirectoryHandle directory);
 
     /**
      * @brief Closes directory
      * @param[in] directory Directory handle
-     * @return 0 on success, -1 on error
+     * @return Operation status.
      */
-    int (*closeDirectory)(FSDirectoryHandle directory);
+    OSResult (*closeDirectory)(FileSystem* fileSystem, FSDirectoryHandle directory);
 
     /**
      * @brief Gets last error code
      * @return Error code, @see errno.h
      */
-    int (*getLastError)(void);
+    int (*getLastError)(FileSystem* fileSystem);
 } FileSystem;
 
 /**
@@ -121,7 +182,7 @@ bool FileSystemInitialize(FileSystem* fs, struct yaffs_dev* rootDevice);
  *
  * @return Operation status. True in case of success, false otherwise.
  */
-bool FileSystemSaveToFile(FileSystem* fs, const char* file, const uint8_t* buffer, uint32_t length);
+bool FileSystemSaveToFile(FileSystem* fs, const char* file, const uint8_t* buffer, FSFileSize length);
 
 /**
  * @brief This procedure is responsible for reading the the contents of the specified file.
@@ -136,7 +197,7 @@ bool FileSystemSaveToFile(FileSystem* fs, const char* file, const uint8_t* buffe
  * @retval false Either selected file was not found, file could not be opened or did not contain
  * requested amount of data.
  */
-bool FileSystemReadFile(FileSystem* fs, const char* const filePath, uint8_t* buffer, uint32_t length);
+bool FileSystemReadFile(FileSystem* fs, const char* const filePath, uint8_t* buffer, FSFileSize length);
 
 /** @} */
 

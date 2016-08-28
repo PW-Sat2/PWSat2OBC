@@ -1,96 +1,83 @@
 #include "FsMock.hpp"
 #include <utility>
 
-static FileSystem PrepareFileSystem();
-
-FileSystem MockedFileSystem = PrepareFileSystem();
-
-static FsMock* fsMock = nullptr;
-
-FsMockReset::FsMockReset() : released(false)
+static FSOpenResult FsOpen(FileSystem* fileSystem, const char* path, FSFileOpenFlags openFlag, FSFileAccessMode accessMode)
 {
+    auto fsMock = static_cast<FsMock*>(fileSystem);
+    return fsMock->Open(path, openFlag, accessMode);
 }
 
-FsMockReset::FsMockReset(FsMockReset&& arg) noexcept : released(arg.released)
+static OSResult FsTruncate(FileSystem* fileSystem, FSFileHandle file, FSFileSize length)
 {
-    arg.released = true;
+    auto fsMock = static_cast<FsMock*>(fileSystem);
+    return fsMock->Truncate(file, length);
 }
 
-FsMockReset& FsMockReset::operator=(FsMockReset&& arg) noexcept
+static FSIOResult FsWrite(FileSystem* fileSystem, FSFileHandle file, const void* buffer, FSFileSize size)
 {
-    FsMockReset tmp(std::move(arg));
-    this->released = tmp.released;
-    tmp.released = true;
-    return *this;
+    auto fsMock = static_cast<FsMock*>(fileSystem);
+    return fsMock->Write(file, buffer, size);
 }
 
-FsMockReset::~FsMockReset()
+static FSIOResult FsRead(FileSystem* fileSystem, FSFileHandle file, void* buffer, FSFileSize size)
 {
-    if (!released)
-    {
-        fsMock = nullptr;
-    }
+    auto fsMock = static_cast<FsMock*>(fileSystem);
+    return fsMock->Read(file, buffer, size);
 }
 
-template <typename Pred, typename Result> Result CheckedCall(Pred pred, Result defaultValue)
+static OSResult FsClose(FileSystem* fileSystem, FSFileHandle file)
 {
-    if (fsMock == nullptr)
-    {
-        return defaultValue;
-    }
-    else
-    {
-        return pred();
-    }
+    auto fsMock = static_cast<FsMock*>(fileSystem);
+    return fsMock->Close(file);
 }
 
-static FSFileHandle FsOpen(const char* path, int openFlag, int mode)
+static int FsGetLastError(FileSystem* fileSystem)
 {
-    return CheckedCall([=]() { return fsMock->Open(path, openFlag, mode); }, -1);
+    auto fsMock = static_cast<FsMock*>(fileSystem);
+    return fsMock->GetLastError();
 }
 
-static int FsTruncate(FSFileHandle file, int64_t length)
+FsMock::FsMock()
 {
-    return CheckedCall([=]() { return fsMock->Truncate(file, length); }, -1);
+    open = FsOpen;
+    ftruncate = FsTruncate;
+    write = FsWrite;
+    read = FsRead;
+    openDirectory = nullptr;
+    readDirectory = nullptr;
+    closeDirectory = nullptr;
+    close = FsClose;
+    getLastError = FsGetLastError;
 }
 
-static int FsWrite(FSFileHandle file, const void* buffer, unsigned int size)
+FSOpenResult MakeOpenedFile(int handle)
 {
-    return CheckedCall([=]() { return fsMock->Write(file, buffer, size); }, -1);
+    FSOpenResult result;
+    result.Status = OSResultSuccess;
+    result.FileHandle = handle;
+    return result;
 }
 
-static int FsRead(FSFileHandle file, void* buffer, unsigned int size)
+FSOpenResult MakeOpenedFile(OSResult status)
 {
-    return CheckedCall([=]() { return fsMock->Read(file, buffer, size); }, -1);
+    FSOpenResult result;
+    result.Status = status;
+    result.FileHandle = -1;
+    return result;
 }
 
-static int FsClose(FSFileHandle file)
+FSIOResult MakeFSIOResult(OSResult status)
 {
-    return CheckedCall([=]() { return fsMock->Close(file); }, -1);
+    FSIOResult result;
+    result.Status = status;
+    result.BytesTransferred = 0;
+    return result;
 }
 
-static int FsGetLastError(void)
+FSIOResult MakeFSIOResult(int bytesTransfered)
 {
-    return CheckedCall([=]() { return fsMock->GetLastError(); }, 0);
-}
-
-FsMockReset InstallFileSystemMock(FsMock& mock)
-{
-    fsMock = &mock;
-    return FsMockReset();
-}
-
-FileSystem PrepareFileSystem()
-{
-    FileSystem mock;
-    mock.open = FsOpen;
-    mock.ftruncate = FsTruncate;
-    mock.write = FsWrite;
-    mock.read = FsRead;
-    mock.openDirectory = nullptr;
-    mock.readDirectory = nullptr;
-    mock.closeDirectory = nullptr;
-    mock.close = FsClose;
-    mock.getLastError = FsGetLastError;
-    return mock;
+    FSIOResult result;
+    result.Status = OSResultSuccess;
+    result.BytesTransferred = bytesTransfered;
+    return result;
 }

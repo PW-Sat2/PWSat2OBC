@@ -7,33 +7,23 @@
 #include "gmock/gmock.h"
 #include "fs/fs.h"
 
-struct FsMock
+struct FsMock : FileSystem
 {
-    MOCK_METHOD3(Open, FSFileHandle(const std::string& path, int flags, int mode));
-    MOCK_METHOD2(Truncate, int(FSFileHandle file, int64_t length));
-    MOCK_METHOD3(Write, int(FSFileHandle file, const void* buffer, unsigned int size));
-    MOCK_METHOD3(Read, int(FSFileHandle file, void* buffer, unsigned int size));
-    MOCK_METHOD1(Close, int(FSFileHandle file));
+    FsMock();
+    MOCK_METHOD3(Open, FSOpenResult(const std::string& path, FSFileOpenFlags openFlag, FSFileAccessMode accessMode));
+    MOCK_METHOD2(Truncate, OSResult(FSFileHandle file, FSFileSize length));
+    MOCK_METHOD3(Write, FSIOResult(FSFileHandle file, const void* buffer, FSFileSize size));
+    MOCK_METHOD3(Read, FSIOResult(FSFileHandle file, void* buffer, FSFileSize size));
+    MOCK_METHOD1(Close, OSResult(FSFileHandle file));
     MOCK_METHOD0(GetLastError, int(void));
 };
 
-class FsMockReset
-{
-  public:
-    FsMockReset();
+FSOpenResult MakeOpenedFile(int handle);
 
-    FsMockReset(FsMockReset&& arg) noexcept;
+FSOpenResult MakeOpenedFile(OSResult result);
 
-    ~FsMockReset();
+FSIOResult MakeFSIOResult(int bytesTransfered);
 
-    FsMockReset& operator=(FsMockReset&& arg) noexcept;
-
-  private:
-    bool released;
-};
-
-extern FileSystem MockedFileSystem;
-
-FsMockReset InstallFileSystemMock(FsMock& mock);
+FSIOResult MakeFSIOResult(OSResult result, int bytesTransfered);
 
 #endif
