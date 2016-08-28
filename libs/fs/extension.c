@@ -14,7 +14,7 @@ bool FileSystemSaveToFile(FileSystem* fs, const char* file, const uint8_t* buffe
     const bool status = OS_RESULT_SUCCEEDED(writeResult.Status) && writeResult.BytesTransferred == length;
     if (!status)
     {
-        LOGF(LOG_LEVEL_WARNING, "Unable to update file: %s. Status: 0x%08x", file, fs->getLastError(fs));
+        LOGF(LOG_LEVEL_WARNING, "Unable to update file: %s. Status: 0x%08x", file, writeResult.Status);
     }
 
     fs->close(fs, result.FileHandle);
@@ -30,11 +30,11 @@ bool FileSystemReadFile(FileSystem* fs, const char* const filePath, uint8_t* buf
         return false;
     }
 
-    const FSIOResult writeResult = fs->read(fs, result.FileHandle, buffer, length);
-    const bool status = OS_RESULT_SUCCEEDED(writeResult.Status) && writeResult.BytesTransferred == length;
+    const FSIOResult readResult = fs->read(fs, result.FileHandle, buffer, length);
+    const bool status = OS_RESULT_SUCCEEDED(readResult.Status) && readResult.BytesTransferred == length;
     if (!status)
     {
-        LOGF(LOG_LEVEL_WARNING, "Unable to read file: %s. Status: 0x%08x", filePath, fs->getLastError(fs));
+        LOGF(LOG_LEVEL_WARNING, "Unable to read file: %s. Status: 0x%08x", filePath, readResult.Status);
     }
 
     fs->close(fs, result.FileHandle);

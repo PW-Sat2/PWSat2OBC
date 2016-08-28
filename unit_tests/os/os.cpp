@@ -7,7 +7,7 @@ OS System;
 
 static IOS* OSProxy = nullptr;
 
-static OSResult TaskCreate(OSTaskProcedure entryPoint,
+static OSResult TaskCreate(OSTaskProcedure entryPoint, //
     const char* taskName,
     uint16_t stackSize,
     void* taskParameter,
@@ -20,7 +20,7 @@ static OSResult TaskCreate(OSTaskProcedure entryPoint,
     }
     else
     {
-        return OSResultOutOfResources;
+        return OSResultNotSupported;
     }
 }
 
@@ -116,11 +116,8 @@ static OSEventBits EventGroupClearBits(OSEventGroupHandle eventGroup, const OSEv
     return 0;
 }
 
-static OSEventBits EventGroupWaitForBits(OSEventGroupHandle eventGroup,
-    const OSEventBits bitsToWaitFor,
-    bool waitAll,
-    bool autoReset,
-    const OSTaskTimeSpan timeout)
+static OSEventBits EventGroupWaitForBits(
+    OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, bool waitAll, bool autoReset, const OSTaskTimeSpan timeout)
 {
     if (OSProxy != nullptr)
     {

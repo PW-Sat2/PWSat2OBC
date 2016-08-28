@@ -53,11 +53,9 @@ static bool SendCommand(CommObject* object, CommAddress address, uint8_t command
     return status;
 }
 
-static bool SendCommandWithResponse(
-    CommObject* object, CommAddress address, uint8_t command, uint8_t* outBuffer, uint8_t outBufferSize)
+static bool SendCommandWithResponse(CommObject* object, CommAddress address, uint8_t command, uint8_t* outBuffer, uint8_t outBufferSize)
 {
-    const I2C_TransferReturn_TypeDef result =
-        object->low.readProc(address, &command, sizeof(command), outBuffer, outBufferSize);
+    const I2C_TransferReturn_TypeDef result = object->low.readProc(address, &command, sizeof(command), outBuffer, outBufferSize);
     const bool status = (result == i2cTransferDone);
     if (!status)
     {
@@ -79,7 +77,7 @@ OSResult CommInitialize(CommObject* comm, const CommLowInterface* lowerInterface
     }
     else
     {
-        return OSResultOutOfResources;
+        return OSResultNotEnoughMemory;
     }
 }
 
@@ -194,8 +192,7 @@ bool CommGetReceiverTelemetry(CommObject* comm, CommReceiverTelemetry* telemetry
 bool CommGetTransmitterTelemetry(CommObject* comm, CommTransmitterTelemetry* telemetry)
 {
     uint8_t buffer[sizeof(CommTransmitterTelemetry)];
-    const bool status =
-        SendCommandWithResponse(comm, CommTransmitter, TransmitterGetTelemetry, buffer, COUNT_OF(buffer));
+    const bool status = SendCommandWithResponse(comm, CommTransmitter, TransmitterGetTelemetry, buffer, COUNT_OF(buffer));
     if (!status)
     {
         return status;
@@ -273,10 +270,7 @@ bool CommSendFrame(CommObject* comm, uint8_t* data, uint8_t length)
     uint8_t cmd[255];
     if (length > COMM_MAX_FRAME_CONTENTS_SIZE)
     {
-        LOGF(LOG_LEVEL_ERROR,
-            "Frame payload is too long. Allowed: %d, Requested: '%d'.",
-            COMM_MAX_FRAME_CONTENTS_SIZE,
-            length);
+        LOGF(LOG_LEVEL_ERROR, "Frame payload is too long. Allowed: %d, Requested: '%d'.", COMM_MAX_FRAME_CONTENTS_SIZE, length);
         return false;
     }
 
@@ -284,8 +278,7 @@ bool CommSendFrame(CommObject* comm, uint8_t* data, uint8_t length)
     memcpy(cmd + 1, data, length);
     uint8_t remainingBufferSize;
 
-    const bool status =
-        (comm->low.readProc(CommTransmitter, cmd, length + 1, &remainingBufferSize, 1) == i2cTransferDone);
+    const bool status = (comm->low.readProc(CommTransmitter, cmd, length + 1, &remainingBufferSize, 1) == i2cTransferDone);
     if (!status)
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Failed to send frame");
@@ -340,8 +333,7 @@ bool CommGetTransmitterState(CommObject* comm, CommTransmitterState* state)
 {
     uint8_t command = TransmitterGetState;
     uint8_t response;
-    const bool status = (comm->low.readProc(CommTransmitter, &command, sizeof(command), &response, sizeof(response)) ==
-        i2cTransferDone);
+    const bool status = (comm->low.readProc(CommTransmitter, &command, sizeof(command), &response, sizeof(response)) == i2cTransferDone);
     if (!status)
     {
         return false;
@@ -402,8 +394,7 @@ static void CommTask(void* param)
     CommPollHardware(comm);
     for (;;)
     {
-        const OSEventBits result =
-            System.EventGroupWaitForBits(comm->commTaskFlags, TaskFlagPauseRequest, false, true, 10000);
+        const OSEventBits result = System.EventGroupWaitForBits(comm->commTaskFlags, TaskFlagPauseRequest, false, true, 10000);
         if (result == TaskFlagPauseRequest)
         {
             LOG(LOG_LEVEL_WARNING, "Comm task paused");

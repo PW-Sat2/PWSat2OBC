@@ -5,17 +5,15 @@
 
 extern void YaffsGlueInit(void);
 
-static OSResult YaffsTranslateError(int error)
+static inline OSResult YaffsTranslateError(int error)
 {
-    // TODO determine list of possible errors and integrate them into OSResult enumeration
-    // so they can be directly mapped
-    if (error == -1)
+    if (error != -1)
     {
-        return OSResultInvalidOperation;
+        return OSResultSuccess;
     }
     else
     {
-        return OSResultSuccess;
+        return (OSResult)yaffs_get_error();
     }
 }
 
@@ -96,12 +94,6 @@ static OSResult YaffsCloseDirectory(FileSystem* fileSystem, FSDirectoryHandle di
     return YaffsTranslateError(yaffs_closedir((yaffs_DIR*)directory));
 }
 
-static int YaffsGetLastError(FileSystem* fileSystem)
-{
-    UNREFERENCED_PARAMETER(fileSystem);
-    return yaffs_get_error();
-}
-
 bool FileSystemInitialize(FileSystem* fs, struct yaffs_dev* rootDevice)
 {
     YaffsGlueInit();
@@ -116,7 +108,6 @@ bool FileSystemInitialize(FileSystem* fs, struct yaffs_dev* rootDevice)
     fs->readDirectory = YaffsReadDirectory;
     fs->closeDirectory = YaffsCloseDirectory;
     fs->ftruncate = YaffsTruncate;
-    fs->getLastError = YaffsGetLastError;
 
     int result = yaffs_mount("/");
 

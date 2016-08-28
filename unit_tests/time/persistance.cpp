@@ -43,7 +43,6 @@ TimerPersistanceTest::TimerPersistanceTest()
     EXPECT_CALL(os, CreateBinarySemaphore()).WillOnce(Return(reinterpret_cast<void*>(1))).WillOnce(Return(reinterpret_cast<void*>(2)));
     ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResultSuccess));
     ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResultSuccess));
-    ON_CALL(fs, GetLastError()).WillByDefault(Return(0));
 }
 
 TEST_F(TimerPersistanceTest, TestReadingStateNoState)
@@ -152,7 +151,7 @@ TEST_F(TimerPersistanceTest, TestReadingFilesGetClosed)
         .WillOnce(Return(MakeOpenedFile(1)))
         .WillOnce(Return(MakeOpenedFile(2)))
         .WillOnce(Return(MakeOpenedFile(3)));
-    EXPECT_CALL(fs, Read(_, _, _)).WillRepeatedly(Return(MakeFSIOResult(OSResultOutOfResources)));
+    EXPECT_CALL(fs, Read(_, _, _)).WillRepeatedly(Return(MakeFSIOResult(OSResultNotEnoughMemory)));
     EXPECT_CALL(fs, Close(1)).Times(1);
     EXPECT_CALL(fs, Close(2)).Times(1);
     EXPECT_CALL(fs, Close(3)).Times(1);

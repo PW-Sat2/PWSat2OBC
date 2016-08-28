@@ -161,12 +161,6 @@ typedef struct FileSystemTag
      * @return Operation status.
      */
     OSResult (*closeDirectory)(FileSystem* fileSystem, FSDirectoryHandle directory);
-
-    /**
-     * @brief Gets last error code
-     * @return Error code, @see errno.h
-     */
-    int (*getLastError)(FileSystem* fileSystem);
 } FileSystem;
 
 /**

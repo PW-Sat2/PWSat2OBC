@@ -15,7 +15,6 @@ struct FsMock : FileSystem
     MOCK_METHOD3(Write, FSIOResult(FSFileHandle file, const void* buffer, FSFileSize size));
     MOCK_METHOD3(Read, FSIOResult(FSFileHandle file, void* buffer, FSFileSize size));
     MOCK_METHOD1(Close, OSResult(FSFileHandle file));
-    MOCK_METHOD0(GetLastError, int(void));
 };
 
 FSOpenResult MakeOpenedFile(int handle);

@@ -22,7 +22,7 @@ static OSResult TaskCreate(OSTaskProcedure entryPoint, //
     const BaseType_t result = xTaskCreate(entryPoint, taskName, stackSize, taskParameter, priority, taskHandle);
     if (result != pdPASS)
     {
-        return OSResultOutOfResources;
+        return OSResultNotEnoughMemory;
     }
     else
     {

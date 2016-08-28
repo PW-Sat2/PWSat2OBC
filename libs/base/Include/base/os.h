@@ -1,6 +1,7 @@
 #ifndef LIBS_BASE_OS_H
 #define LIBS_BASE_OS_H
 
+#include <errno.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -18,20 +19,111 @@ EXTERNC_BEGIN
  */
 #define MAX_DELAY 0xffffffffUL
 
+#ifndef ELAST
+// newlib workaround
+#if defined _NEWLIB_VERSION && defined __ELASTERROR
+#define ELAST __ELASTERROR
+#else
+#error "stdlib does not define ELAST errno value."
+#endif
+#endif
 /**
  * @brief Enumerator for all possible operating system error codes.
  */
 typedef enum {
-    /** @brief Success */
+    /** Success */
     OSResultSuccess = 0,
-    /** @brief Not enough resources to complete operation. */
-    OSResultOutOfResources = 1,
-    /** @brief Operation timed out. */
-    OSResultTimeout = 2,
+
     /** @brief Requested operation is invalid. */
-    OSResultInvalidOperation = 3,
-    /** @brief Requested element was not found. */
-    OSResultNotFound = 4,
+    OSResultInvalidOperation = ELAST,
+
+    /** Requested element was not found. */
+    OSResultNotFound = ENOENT,
+    /** Interrupted system call */
+    OSResultInterrupted = EINTR,
+    /** I/O error */
+    OSResultIOError = EIO,
+    /** Arg list too long */
+    OSResultArgListTooLong = E2BIG,
+    /** Bad file number */
+    OSResultInvalidFileHandle = EBADF,
+    /** No children */
+    OSResultNoChildren = ECHILD,
+    /** Not enough space */
+    OSResultNotEnoughMemory = ENOMEM,
+    /** Permission denied */
+    OSResultAccessDenied = EACCES,
+    /** Bad address */
+    OSResultInvalidAddress = EFAULT,
+    /** Device or resource busy */
+    OSResultBusy = EBUSY,
+    /** File exists */
+    OSResultFileExists = EEXIST,
+    /** Cross-device link */
+    OSResultInvalidLink = EXDEV,
+    /** No such device */
+    OSResultDeviceNotFound = ENODEV,
+    /** Not a directory */
+    OSResultNotADirectory = ENOTDIR,
+    /** Is a directory */
+    OSResultIsDirectory = EISDIR,
+    /** Invalid argument */
+    OSResultInvalidArgument = EINVAL,
+    /** Too many open files in system */
+    OSResultTooManyOpenFiles = ENFILE,
+    /** File descriptor value too large */
+    OSResultDescriptorTooLarge = EMFILE,
+    /** File too large */
+    OSResultFileTooLarge = EFBIG,
+    /** No space left on device */
+    OSResultOutOfDiskSpace = ENOSPC,
+    /** Illegal seek */
+    OSResultInvalidSeek = ESPIPE,
+    /** Read-only file system */
+    OSResultReadOnlyFs = EROFS,
+    /** Too many links */
+    OSResultTooManyLinks = EMLINK,
+    /** Result too large */
+    OSResultOutOfRange = ERANGE,
+    /** Deadlock */
+    OSResultDeadlock = EDEADLK,
+    /** No lock */
+    OSResultNoLock = ENOLCK,
+    /** No data (for no delay io) */
+    OSResultWouldBlock = ENODATA,
+    /** Operation timed out. */
+    OSResultTimeout = ETIME,
+    /** Protocol error */
+    OSResultProtocolError = EPROTO,
+    /** Bad message */
+    OSResultInvalidMessage = EBADMSG,
+    /** Inappropriate file type or format */
+    OSResultInvalidFileFormat = EFTYPE,
+    /** Function not implemented */
+    OSResultNotImplemented = ENOSYS,
+    /** Directory not empty */
+    OSResultDirectoryNotEmpty = ENOTEMPTY,
+    /** File or path name too long */
+    OSResultPathTooLong = ENAMETOOLONG,
+    /** Too many symbolic links */
+    OSResultLinkCycle = ELOOP,
+    /** Operation not supported on socket */
+    OSResultNotSupported = EOPNOTSUPP,
+    /** Protocol family not supported  */
+    OSResultProtocolNotSupported = EPFNOSUPPORT,
+    /** No buffer space available */
+    OSResultBufferNotAvailable = ENOBUFS,
+    /** Protocol not available */
+    OSResultProtocolNotAvailable = ENOPROTOOPT,
+    /** Unknown protocol */
+    OSResultUnknownProtocol = EPROTONOSUPPORT,
+    /** Illegal byte sequence */
+    OSResultInvalidByteSequence = EILSEQ,
+    /** Value too large for defined data type */
+    OSResultOverflow = EOVERFLOW,
+    /** Operation canceled */
+    OSResultCancelled = ECANCELED,
+
 } OSResult;
 
 /**

@@ -31,12 +31,6 @@ static OSResult FsClose(FileSystem* fileSystem, FSFileHandle file)
     return fsMock->Close(file);
 }
 
-static int FsGetLastError(FileSystem* fileSystem)
-{
-    auto fsMock = static_cast<FsMock*>(fileSystem);
-    return fsMock->GetLastError();
-}
-
 FsMock::FsMock()
 {
     open = FsOpen;
@@ -47,7 +41,6 @@ FsMock::FsMock()
     readDirectory = nullptr;
     closeDirectory = nullptr;
     close = FsClose;
-    getLastError = FsGetLastError;
 }
 
 FSOpenResult MakeOpenedFile(int handle)
