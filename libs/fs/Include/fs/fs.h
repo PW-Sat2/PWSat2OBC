@@ -13,7 +13,7 @@ EXTERNC_BEGIN
 /**
  * @defgroup fs File system
  *
- * @brief File system API. POSIX-compatible
+ * @brief File system API.
  *
  * Wrappers for YAFFS file system.
  * Partitions:
@@ -40,8 +40,19 @@ typedef struct
     /** Operation status. */
     OSResult Status;
     /** Opened file handle. */
-    FSFileHandle FileHandle;
-} FSOpenResult;
+    FSFileHandle Handle;
+} FSFileOpenResult;
+
+/**
+ * @brief Type that represents directory opening status.
+ */
+typedef struct
+{
+    /** Operation status. */
+    OSResult Status;
+    /** Handle to the opened directory. */
+    FSDirectoryHandle Handle;
+} FSDirectoryOpenResult;
 
 /**
  * @brief Type that represents file read/write operation status.
@@ -86,9 +97,9 @@ typedef enum {
  * @brief Enumerator of all possible file access modes.
  */
 typedef enum {
-    /** Open for reading only. */
+    /** Open only for reading. */
     FsReadOnly = O_RDONLY,
-    /** Open for writing only. */
+    /** Open only for writing. */
     FsWriteOnly = O_WRONLY,
     /** Open for reading and writing. */
     FsReadWrite = O_RDWR,
@@ -101,15 +112,17 @@ typedef struct FileSystemTag
 {
     /**
      * @brief Opens file
+     * @param[in] fileSystem FileSystem interface for accessing files.
      * @param[in] path Path to file
      * @param[in] openFlag File opening flags. @see FSFileOpenFlags for details.
      * @param[in] accessMode Requested file access mode. @see FSFileAccessMode for details.
-     * @return Operation status. @see FSOpenResult for details.
+     * @return Operation status. @see FSFileOpenResult for details.
      */
-    FSOpenResult (*open)(FileSystem* fileSystem, const char* path, FSFileOpenFlags openFlag, FSFileAccessMode accessMode);
+    FSFileOpenResult (*open)(FileSystem* fileSystem, const char* path, FSFileOpenFlags openFlag, FSFileAccessMode accessMode);
 
     /**
      * @brief Truncates file to given size
+     * @param[in] fileSystem FileSystem interface for accessing files.
      * @param[in] file File handle
      * @param[in] length Desired length
      * @return Operation status.
@@ -118,6 +131,7 @@ typedef struct FileSystemTag
 
     /**
      * @brief Writes data to file
+     * @param[in] fileSystem FileSystem interface for accessing files.
      * @param[in] file File handle
      * @param[in] buffer Data buffer
      * @param[in] size Size of data
@@ -127,6 +141,7 @@ typedef struct FileSystemTag
 
     /**
      * @brief Reads data from file
+     * @param[in] fileSystem FileSystem interface for accessing files.
      * @param[in] file File handle
      * @param[out] buffer Data buffer
      * @param[in] size Size of data
@@ -136,6 +151,7 @@ typedef struct FileSystemTag
 
     /**
      * @brief Closes file
+     * @param[in] fileSystem FileSystem interface for accessing files.
      * @param[in] file File handle
      * @return Operation status.
      */
@@ -143,13 +159,15 @@ typedef struct FileSystemTag
 
     /**
      * @brief Opens directory
+     * @param[in] fileSystem FileSystem interface for accessing files.
      * @param[in] dirname Directory path
-     * @return Directory handle on success. NULL on error.
+     * @return Directory handle on success. @see FSDirectoryOpenResult for details.
      */
-    FSDirectoryHandle (*openDirectory)(FileSystem* fileSystem, const char* dirname);
+    FSDirectoryOpenResult (*openDirectory)(FileSystem* fileSystem, const char* dirname);
 
     /**
-     * @brief Reads name of next entry in directory
+     * @brief Reads name of next entry in directory.
+     * @param[in] fileSystem FileSystem interface for accessing files.
      * @param[in] directory Directory handle
      * @return Entry name. NULL if no more entries found.
      */
@@ -157,6 +175,7 @@ typedef struct FileSystemTag
 
     /**
      * @brief Closes directory
+     * @param[in] fileSystem FileSystem interface for accessing files.
      * @param[in] directory Directory handle
      * @return Operation status.
      */

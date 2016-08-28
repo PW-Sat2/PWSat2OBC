@@ -31,22 +31,13 @@ static char* YaffsReadDirectory(FileSystem* fileSystem, FSDirectoryHandle direct
     }
 }
 
-static FSOpenResult YaffsOpen(FileSystem* fileSystem, const char* path, FSFileOpenFlags openFlag, FSFileAccessMode accessMode)
+static FSFileOpenResult YaffsOpen(FileSystem* fileSystem, const char* path, FSFileOpenFlags openFlag, FSFileAccessMode accessMode)
 {
     UNREFERENCED_PARAMETER(fileSystem);
-    FSOpenResult result;
     const int status = yaffs_open(path, openFlag | accessMode, S_IRWXU);
-    if (status == -1)
-    {
-        result.Status = OSResultInvalidOperation;
-        result.FileHandle = 0;
-    }
-    else
-    {
-        result.Status = OSResultSuccess;
-        result.FileHandle = status;
-    }
-
+    FSFileOpenResult result;
+    result.Status = YaffsTranslateError(status);
+    result.Handle = status;
     return result;
 }
 
@@ -82,10 +73,14 @@ static OSResult YaffsClose(FileSystem* fileSystem, FSFileHandle file)
     return YaffsTranslateError(yaffs_close(file));
 }
 
-static FSDirectoryHandle YaffsOpenDirectory(FileSystem* fileSystem, const char* directory)
+static FSDirectoryOpenResult YaffsOpenDirectory(FileSystem* fileSystem, const char* directory)
 {
     UNREFERENCED_PARAMETER(fileSystem);
-    return (FSDirectoryHandle)yaffs_opendir(directory);
+    yaffs_DIR* status = yaffs_opendir(directory);
+    FSDirectoryOpenResult result;
+    result.Status = status != NULL ? OSResultSuccess : ((OSResult)yaffs_get_error());
+    result.Handle = status;
+    return result;
 }
 
 static OSResult YaffsCloseDirectory(FileSystem* fileSystem, FSDirectoryHandle directory)

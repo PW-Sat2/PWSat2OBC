@@ -9,9 +9,9 @@ void FSListFiles(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
 
-    FSDirectoryHandle dir = Main.fs.openDirectory(&Main.fs, argv[0]);
+    const FSDirectoryOpenResult result = Main.fs.openDirectory(&Main.fs, argv[0]);
 
-    if (dir == NULL)
+    if (OS_RESULT_FAILED(result.Status))
     {
         TerminalPuts("Error");
         TerminalSendNewLine();
@@ -19,6 +19,7 @@ void FSListFiles(uint16_t argc, char* argv[])
     }
 
     char* entry;
+    FSDirectoryHandle dir = result.Handle;
     while ((entry = Main.fs.readDirectory(&Main.fs, dir)) != NULL)
     {
         TerminalPuts(entry);
@@ -32,7 +33,7 @@ void FSWriteFile(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
 
-    const FSOpenResult result = Main.fs.open(&Main.fs, argv[0], FsOpenCreateAlways, FsWriteOnly);
+    const FSFileOpenResult result = Main.fs.open(&Main.fs, argv[0], FsOpenCreateAlways, FsWriteOnly);
     if (OS_RESULT_FAILED(result.Status))
     {
         TerminalPuts("Error");
@@ -40,7 +41,7 @@ void FSWriteFile(uint16_t argc, char* argv[])
         return;
     }
 
-    const FSFileHandle file = result.FileHandle;
+    const FSFileHandle file = result.Handle;
     Main.fs.ftruncate(&Main.fs, file, 0);
     Main.fs.write(&Main.fs, file, argv[1], strlen(argv[1]));
     Main.fs.close(&Main.fs, file);
@@ -49,7 +50,7 @@ void FSWriteFile(uint16_t argc, char* argv[])
 void FSReadFile(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
-    const FSOpenResult result = Main.fs.open(&Main.fs, argv[0], FsOpenExisting, FsReadOnly);
+    const FSFileOpenResult result = Main.fs.open(&Main.fs, argv[0], FsOpenExisting, FsReadOnly);
     if (OS_RESULT_FAILED(result.Status))
     {
         TerminalPuts("Error");
@@ -59,7 +60,7 @@ void FSReadFile(uint16_t argc, char* argv[])
 
     char buffer[100];
     memset(buffer, 0, sizeof(buffer));
-    const FSFileHandle file = result.FileHandle;
+    const FSFileHandle file = result.Handle;
     Main.fs.read(&Main.fs, file, buffer, sizeof(buffer));
     Main.fs.close(&Main.fs, file);
 

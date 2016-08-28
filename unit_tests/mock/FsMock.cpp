@@ -1,7 +1,7 @@
 #include "FsMock.hpp"
 #include <utility>
 
-static FSOpenResult FsOpen(FileSystem* fileSystem, const char* path, FSFileOpenFlags openFlag, FSFileAccessMode accessMode)
+static FSFileOpenResult FsOpen(FileSystem* fileSystem, const char* path, FSFileOpenFlags openFlag, FSFileAccessMode accessMode)
 {
     auto fsMock = static_cast<FsMock*>(fileSystem);
     return fsMock->Open(path, openFlag, accessMode);
@@ -43,19 +43,19 @@ FsMock::FsMock()
     close = FsClose;
 }
 
-FSOpenResult MakeOpenedFile(int handle)
+FSFileOpenResult MakeOpenedFile(int handle)
 {
-    FSOpenResult result;
+    FSFileOpenResult result;
     result.Status = OSResultSuccess;
-    result.FileHandle = handle;
+    result.Handle = handle;
     return result;
 }
 
-FSOpenResult MakeOpenedFile(OSResult status)
+FSFileOpenResult MakeOpenedFile(OSResult status)
 {
-    FSOpenResult result;
+    FSFileOpenResult result;
     result.Status = status;
-    result.FileHandle = -1;
+    result.Handle = -1;
     return result;
 }
 
