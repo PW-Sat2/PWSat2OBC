@@ -66,11 +66,17 @@ typedef enum {
     /** Open file only if it already exist, fail if it does not exist. */
     FsOpenExisting = 0,
 
+    /** Opens a file and truncates it so that its size is zero bytes, only if it exists. */
+    FsOpenTruncateExisting = O_TRUNC,
+
     /** Open file, create a new one if it does not exist. */
     FsOpenAlways = O_CREAT,
 
     /** Always create new file, if it exists truncate its content to zero. */
-    FsOpenCreateAlways = O_CREAT | O_EXCL | O_TRUNC,
+    FsOpenCreateAlways = O_CREAT | O_TRUNC,
+
+    /** Creates a new file, only if it does not already exist, fail if it exists. */
+    FsOpenCreateNew = O_CREAT | O_EXCL,
 
     /** If set, the file offset shall be set to the end of the file prior to each write. */
     FsOpenAppend = O_APPEND,
