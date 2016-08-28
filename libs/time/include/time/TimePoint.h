@@ -39,7 +39,7 @@ typedef struct
  */
 typedef struct
 {
-    uint64_t value;
+    uint64_t value; ///< Time span length in milliseconds.
 } TimeSpan;
 
 /**
@@ -47,7 +47,7 @@ typedef struct
  */
 typedef struct
 {
-    int64_t value;
+    int64_t value; ///< Time shift length in milliseconds.
 } TimeShift;
 
 /**

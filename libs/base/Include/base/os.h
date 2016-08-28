@@ -43,13 +43,13 @@ typedef enum {
     OSResultInterrupted = EINTR,
     /** I/O error */
     OSResultIOError = EIO,
-    /** Arg list too long */
+    /** Argument list too long */
     OSResultArgListTooLong = E2BIG,
     /** Bad file number */
     OSResultInvalidFileHandle = EBADF,
     /** No children */
     OSResultNoChildren = ECHILD,
-    /** Not enough space */
+    /** Not enough memory */
     OSResultNotEnoughMemory = ENOMEM,
     /** Permission denied */
     OSResultAccessDenied = EACCES,
@@ -89,7 +89,7 @@ typedef enum {
     OSResultDeadlock = EDEADLK,
     /** No lock */
     OSResultNoLock = ENOLCK,
-    /** No data (for no delay io) */
+    /** A non blocking operation could not be immediately completed */
     OSResultWouldBlock = ENODATA,
     /** Operation timed out. */
     OSResultTimeout = ETIME,
@@ -107,7 +107,7 @@ typedef enum {
     OSResultPathTooLong = ENAMETOOLONG,
     /** Too many symbolic links */
     OSResultLinkCycle = ELOOP,
-    /** Operation not supported on socket */
+    /** Operation not supported */
     OSResultNotSupported = EOPNOTSUPP,
     /** Protocol family not supported  */
     OSResultProtocolNotSupported = EPFNOSUPPORT,
