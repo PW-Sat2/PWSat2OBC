@@ -1,6 +1,7 @@
 set(NAME i2c)
 
 set(SOURCES
+    i2c_old.c   
     i2c.c
 )
 
