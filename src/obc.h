@@ -4,6 +4,7 @@
 #include <stdatomic.h>
 #include "base/os.h"
 #include "comm/comm.h"
+#include "camera/camera_types.h"
 #include "fs/fs.h"
 #include "storage/nand_driver.h"
 #include "yaffs_guts.h"
@@ -13,6 +14,8 @@
  */
 typedef struct
 {
+    /** @brief Camera driver object. */
+    CameraObject camera;
     /** @brief Comm driver object. */
     CommObject comm;
     /** @brief File system object */

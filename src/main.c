@@ -14,6 +14,7 @@
 #include "SwoEndpoint/SwoEndpoint.h"
 #include "base/os.h"
 #include "comm/comm.h"
+#include "camera/camera.h"
 #include "devices/eps.h"
 #include "i2c/i2c.h"
 #include "io_map.h"
@@ -139,6 +140,7 @@ int main(void)
     OSSetup();
     I2CInit();
 
+    CameraInit(&Main.camera);
     EpsInit();
     CommLowInterface commInterface;
     commInterface.readProc = I2CWriteRead;

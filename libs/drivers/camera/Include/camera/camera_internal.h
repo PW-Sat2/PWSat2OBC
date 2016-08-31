@@ -4,39 +4,41 @@
 #include "camera_types.h"
 #include "stddef.h"
 
-extern int8_t CameraGetCmdSync(void);
+#ifdef __cpluplus
+ "C" {
+#endif
 
-extern int8_t CameraGetCmdData(CameraCmdData *cmdData);
+int8_t CameraGetCmdData(CameraObject *self, CameraCmdData *cmdData);
 
 /*
  * Function to receive and verify ACK messages
  */
-extern int8_t CameraGetCmdAckInitial(void);
+int8_t CameraGetCmdAckInitial(CameraObject *self);
 
-extern int8_t CameraGetCmdAckSnapshot(void);
+int8_t CameraGetCmdAckSnapshot(CameraObject *self);
 
-extern int8_t CameraGetCmdAckGetPicture(void);
+int8_t CameraGetCmdAckGetPicture(CameraObject *self);
 
-extern int8_t CameraGetCmdAckSetPackageSize(void);
+int8_t CameraGetCmdAckSetPackageSize(CameraObject *self);
 
-extern int8_t CameraSendCmdAckData(void);
+int8_t CameraSendCmdAckData(void);
 
-extern int8_t CameraSync(void);
+int8_t CameraSync(CameraObject *self);
 
-extern int32_t CameraReceiveData(uint8_t * data, uint32_t dataLength);
+int32_t CameraReceiveData(CameraObject *self, uint8_t * data, uint32_t dataLength);
 
-extern int8_t CameraSendCmdSnapshot(CameraSnapshotType type);
+int8_t CameraSendCmdSnapshot(CameraSnapshotType type);
 
-extern int8_t CameraSendCmdGetPicture(CameraPictureType type);
+int8_t CameraSendCmdGetPicture(CameraPictureType type);
 
-extern int8_t CameraSendCmdJPEGInitial(CameraJPEGResolution jpegResolution);
+int8_t CameraSendCmdJPEGInitial(CameraJPEGResolution jpegResolution);
 
-extern int8_t CameraSendCmdRAWInitial(CameraRAWImageFormat format, CameraRAWResolution rawResolution);
+int8_t CameraSendCmdRAWInitial(CameraRAWImageFormat format, CameraRAWResolution rawResolution);
 
-extern int8_t CameraSendCmdSetPackageSize(uint16_t packageSize);
+int8_t CameraSendCmdSetPackageSize(uint16_t packageSize);
 
-extern void CameraInit(void);
-
-extern int8_t CameraDeinit(void);
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* CAMERA_INTERNAL_H_ */
