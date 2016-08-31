@@ -212,17 +212,13 @@ int main(void)
     TerminalInit();
 
     I2CDriverInit(&Main.I2C.SystemBus);
-    I2CInit(&Main.I2C.SystemBus);
 
     EpsInit(&Main.I2C.SystemBus, &Main.I2C.PayloadBus);
 
-    CommLowInterface commInterface;
-    commInterface.readProc = I2CWriteRead;
-    commInterface.writeProc = I2CWrite;
     CommUpperInterface commUpperInterface;
     commUpperInterface.frameHandler = FrameHandler;
     commUpperInterface.frameHandlerContext = NULL;
-    CommInitialize(&Main.comm, &commInterface, &commUpperInterface);
+    CommInitialize(&Main.comm, &Main.I2C.SystemBus, &commUpperInterface);
 
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 

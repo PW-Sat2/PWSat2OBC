@@ -1,7 +1,6 @@
 set(NAME i2c)
 
-set(SOURCES
-    i2c_old.c   
+set(SOURCES    
     i2c.c
 )
 

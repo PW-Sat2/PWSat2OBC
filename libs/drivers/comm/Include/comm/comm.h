@@ -6,6 +6,7 @@
 #include <em_i2c.h>
 
 #include "base/os.h"
+#include "i2c/i2c.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -139,34 +140,6 @@ typedef struct
 } CommBeacon;
 
 /**
- * @brief Type of pointer to procedure that provides means of sending arbitrary buffer to a device with
- * specified address over the I2C bus.
- *
- * This method should be block the execution until entire requested block has been sent.
- * @param[in] address Requested device address.
- * @param[in] inData Pointer to buffer that contains the data that should be send to the requested device.
- * @param[in] length Size of the data stored inside the inData buffer in bytes.
- * @return Transmission status.
- */
-typedef I2C_TransferReturn_TypeDef (*CommI2CWriteProcedure)(uint8_t address, uint8_t* inData, uint16_t length);
-
-/**
- * @brief Type of pointer to procedure that provides means of sending & reading arbitrary
- * data to & from a device with specified address over the I2C bus.
- *
- * This method should be block the execution until entire requested block has been sent & the
- * requested amount of bytes have been received from the device.
- * @param[in] address Requested device address.
- * @param[in] inData Pointer to buffer that contains the data that should be send to the requested device.
- * @param[in] inLength Size of the data stored inside the inData buffer in bytes.
- * @param[out] outData Pointer to buffer that should be filled with the data received from the device.
- * @param[in] outLength Number of bytes that are expected to be received from the device.
- * @return Transmission status.
- */
-typedef I2C_TransferReturn_TypeDef (*CommI2CWriteReadProcedure)(
-    uint8_t address, uint8_t* inData, uint16_t inLength, uint8_t* outData, uint16_t outLength);
-
-/**
  * @brief Type of pointer to function that is capable of processing frames received via the
  * comm receiver.
  *
@@ -177,24 +150,6 @@ typedef I2C_TransferReturn_TypeDef (*CommI2CWriteReadProcedure)(
  * user and is passed to the frame handler routine in unmodified form.
  */
 typedef void (*CommFrameHandler)(CommObject* comm, CommFrame* frame, void* context);
-
-/** Comm driver lower interface. */
-typedef struct
-{
-    /**
-     * @brief Pointer to function providing means of sending data to comm hardware.
-     *
-     * See the CommI2CWriteProcedure definition for details regarding usage & implementation requirements.
-     */
-    CommI2CWriteProcedure writeProc;
-
-    /**
-     * @brief Pointer to function providing means of reading data from comm hardware.
-     *
-     * See the CommI2CWriteReadProcedure definition for details regarding usage & implementation requirements.
-     */
-    CommI2CWriteReadProcedure readProc;
-} CommLowInterface;
 
 /** Comm driver upper interface. */
 typedef struct
@@ -224,7 +179,7 @@ typedef struct
 typedef struct CommObjectTag
 {
     /** @brief Comm driver lower interface. */
-    CommLowInterface low;
+    I2CBus* low;
 
     /** @brief Comm driver upper interface. */
     CommUpperInterface upper;
@@ -291,7 +246,7 @@ typedef struct
  * @brief This procedure initializes the comm driver object and sets it 'Paused' state.
  *
  * @param[out] comm Pointer to comm object that should be initialized.
- * @param[in] lowerInterface Pointer to the object implementing comm driver lower interface.
+ * @param[in] i2c Pointer to the object implementing I2C interface.
  * @param[in] upperInterface Pointer to the object implementing comm driver upper interface.
  * @return Operation status.
  *
@@ -301,7 +256,7 @@ typedef struct
  * This procedure does not verify whether the passed comm object has already been properly initialized, calling
  * this method twice on the same comm object is undefined behavior.
  */
-OSResult CommInitialize(CommObject* comm, const CommLowInterface* lowerInterface, CommUpperInterface* upperInterface);
+OSResult CommInitialize(CommObject* comm, const I2CBus* i2c, CommUpperInterface* upperInterface);
 
 /**
  * @brief Pauses comm driver.

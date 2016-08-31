@@ -8,9 +8,6 @@
 
 EXTERNC_BEGIN
 
-I2C_TransferReturn_TypeDef I2CWrite(uint8_t address, uint8_t* inData, uint16_t length);
-I2C_TransferReturn_TypeDef I2CWriteRead(uint8_t address, uint8_t* inData, uint16_t inLength, uint8_t* outData, uint16_t outLength);
-
 typedef enum {
     I2CResultOK = 0, /**< Transfer completed successfully. */
 
@@ -19,7 +16,7 @@ typedef enum {
     I2CResultArbLost = -3,    /**< Arbitration lost during transfer. */
     I2CResultUsageFault = -4, /**< Usage fault. */
     I2CResultSwFault = -5,    /**< SW fault. */
-    I2CResultFailure = -6
+    I2CResultFailure = -6     /**< General I2C error */
 } I2CResult;
 
 typedef uint8_t I2CAddress;
@@ -40,8 +37,6 @@ typedef struct _I2CBus
 } I2CBus;
 
 void I2CDriverInit(I2CBus* bus);
-
-void I2CInit(I2CBus* bus);
 
 EXTERNC_END
 

@@ -43,8 +43,8 @@ static noreturn void CommTask(void* param);
 
 static bool SendCommand(CommObject* object, CommAddress address, uint8_t command)
 {
-    const I2C_TransferReturn_TypeDef result = object->low.writeProc(address, &command, sizeof(command));
-    const bool status = (result == i2cTransferDone);
+    const I2CResult result = object->low->Write(object->low, address, &command, sizeof(command));
+    const bool status = (result == I2CResultOK);
     if (!status)
     {
         LOGF(LOG_LEVEL_ERROR, "[comm] Unable to send command %d to %d, Reason: %d", command, address, result);
@@ -55,8 +55,8 @@ static bool SendCommand(CommObject* object, CommAddress address, uint8_t command
 
 static bool SendCommandWithResponse(CommObject* object, CommAddress address, uint8_t command, uint8_t* outBuffer, uint8_t outBufferSize)
 {
-    const I2C_TransferReturn_TypeDef result = object->low.readProc(address, &command, sizeof(command), outBuffer, outBufferSize);
-    const bool status = (result == i2cTransferDone);
+    const I2CResult result = object->low->WriteRead(object->low, address, &command, sizeof(command), outBuffer, outBufferSize);
+    const bool status = (result == I2CResultOK);
     if (!status)
     {
         LOGF(LOG_LEVEL_ERROR, "[comm] Unable to send command %d to %d, Reason: %d", command, address, result);
@@ -65,10 +65,10 @@ static bool SendCommandWithResponse(CommObject* object, CommAddress address, uin
     return status;
 }
 
-OSResult CommInitialize(CommObject* comm, const CommLowInterface* lowerInterface, CommUpperInterface* upperInterface)
+OSResult CommInitialize(CommObject* comm, const I2CBus* i2c, CommUpperInterface* upperInterface)
 {
     memset(comm, 0, sizeof(CommObject));
-    comm->low = *lowerInterface;
+    comm->low = i2c;
     comm->upper = *upperInterface;
     comm->commTaskFlags = System.CreateEventGroup();
     if (comm->commTaskFlags != NULL)
@@ -278,7 +278,7 @@ bool CommSendFrame(CommObject* comm, uint8_t* data, uint8_t length)
     memcpy(cmd + 1, data, length);
     uint8_t remainingBufferSize;
 
-    const bool status = (comm->low.readProc(CommTransmitter, cmd, length + 1, &remainingBufferSize, 1) == i2cTransferDone);
+    const bool status = (comm->low->WriteRead(comm->low, CommTransmitter, cmd, length + 1, &remainingBufferSize, 1) == I2CResultOK);
     if (!status)
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Failed to send frame");
@@ -305,7 +305,7 @@ bool CommSetBeacon(CommObject* comm, const CommBeacon* beaconData)
         return false;
     }
 
-    return comm->low.writeProc(CommTransmitter, buffer, WriterGetDataLength(&writer)) == i2cTransferDone;
+    return comm->low->Write(comm->low, CommTransmitter, buffer, WriterGetDataLength(&writer)) == I2CResultOK;
 }
 
 bool CommClearBeacon(CommObject* comm)
@@ -318,7 +318,7 @@ bool CommSetTransmitterStateWhenIdle(CommObject* comm, CommTransmitterIdleState 
     uint8_t buffer[2];
     buffer[0] = TransmitterSetIdleState;
     buffer[1] = requestedState;
-    return comm->low.writeProc(CommTransmitter, buffer, COUNT_OF(buffer)) == i2cTransferDone;
+    return comm->low->Write(comm->low, CommTransmitter, buffer, COUNT_OF(buffer)) == I2CResultOK;
 }
 
 bool CommSetTransmitterBitRate(CommObject* comm, CommTransmitterBitrate bitrate)
@@ -326,14 +326,15 @@ bool CommSetTransmitterBitRate(CommObject* comm, CommTransmitterBitrate bitrate)
     uint8_t buffer[2];
     buffer[0] = TransmitterSetBitRate;
     buffer[1] = bitrate;
-    return comm->low.writeProc(CommTransmitter, buffer, COUNT_OF(buffer)) == i2cTransferDone;
+    return comm->low->Write(comm->low, CommTransmitter, buffer, COUNT_OF(buffer)) == I2CResultOK;
 }
 
 bool CommGetTransmitterState(CommObject* comm, CommTransmitterState* state)
 {
     uint8_t command = TransmitterGetState;
     uint8_t response;
-    const bool status = (comm->low.readProc(CommTransmitter, &command, sizeof(command), &response, sizeof(response)) == i2cTransferDone);
+    const bool status =
+        (comm->low->WriteRead(comm->low, CommTransmitter, &command, sizeof(command), &response, sizeof(response)) == I2CResultOK);
     if (!status)
     {
         return false;
