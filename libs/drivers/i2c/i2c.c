@@ -1,7 +1,3 @@
-#include <stddef.h>
-#include <stdlib.h>
-
-#include <string.h>
 #include <em_cmu.h>
 #include <em_gpio.h>
 
@@ -11,28 +7,26 @@
 
 #include "i2c.h"
 
-static OSQueueHandle i2cResult;
+static I2CBus* buses[2] = {NULL};
 
 void I2C1_IRQHandler(void)
 {
-    I2C_TransferReturn_TypeDef status = I2C_Transfer(I2C);
+    I2C_TransferReturn_TypeDef status = I2C_Transfer(I2C1);
 
     if (status == i2cTransferInProgress)
     {
         return;
     }
 
-    bool taskWoken = false;
-
-    if (!System.QueueSendISR(i2cResult, &status, &taskWoken))
+    if (!System.QueueSendISR(buses[1]->ResultQueue, &status, NULL))
     {
         LOG_ISR(LOG_LEVEL_ERROR, "Error queueing i2c result");
     }
 
-    System.EndSwitchingISR(taskWoken);
+    System.EndSwitchingISR(NULL);
 }
 
-static void transfer(I2CBus* bus, I2C_TransferSeq_TypeDef* seq)
+static I2CResult ExecuteTransfer(I2CBus* bus, I2C_TransferSeq_TypeDef* seq)
 {
     System.TakeSemaphore(bus->Lock, MAX_DELAY);
 
@@ -41,18 +35,21 @@ static void transfer(I2CBus* bus, I2C_TransferSeq_TypeDef* seq)
     if (ret != i2cTransferInProgress)
     {
         System.GiveSemaphore(bus->Lock);
-        return;
+        return (I2CResult)ret;
     }
 
-    if (!System.QueueReceive(i2cResult, &ret, MAX_DELAY))
+    if (!System.QueueReceive(bus->ResultQueue, &ret, MAX_DELAY))
     {
         LOG(LOG_LEVEL_ERROR, "Didn't received i2c transfer result");
+        return I2CResultFailure;
     }
 
     System.GiveSemaphore(bus->Lock);
+
+    return (I2CResult)ret;
 }
 
-static void Write(I2CBus* bus, I2CAddress address, uint8_t* data, size_t length)
+static I2CResult Write(I2CBus* bus, I2CAddress address, uint8_t* data, size_t length)
 {
     I2C_TransferSeq_TypeDef seq = //
         {
@@ -65,10 +62,10 @@ static void Write(I2CBus* bus, I2CAddress address, uint8_t* data, size_t length)
             }                                  //
         };
 
-    transfer(bus, &seq);
+    return ExecuteTransfer(bus, &seq);
 }
 
-static void WriteRead(I2CBus* bus, I2CAddress address, uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength)
+static I2CResult WriteRead(I2CBus* bus, I2CAddress address, uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength)
 {
     I2C_TransferSeq_TypeDef seq = //
         {
@@ -81,35 +78,42 @@ static void WriteRead(I2CBus* bus, I2CAddress address, uint8_t* inData, size_t i
             }                                       //
         };
 
-    transfer(bus, &seq);
+    return ExecuteTransfer(bus, &seq);
 }
 
-void I2CDriverInit(I2CBus* bus)
+static void SetupMainBusInterface(I2CBus* bus)
 {
     bus->Extra = NULL;
-    bus->HWInterface = I2C;
+    bus->HWInterface = MAIN_BUS_I2C;
     bus->Write = Write;
     bus->WriteRead = WriteRead;
 
-    i2cResult = System.CreateQueue(1, sizeof(I2C_TransferReturn_TypeDef));
+    bus->ResultQueue = System.CreateQueue(1, sizeof(I2C_TransferReturn_TypeDef));
 
     bus->Lock = System.CreateBinarySemaphore();
     System.GiveSemaphore(bus->Lock);
 
+    buses[1] = bus;
+
     CMU_ClockEnable(cmuClock_I2C1, true);
 
-    GPIO_PinModeSet(I2C_PORT, I2C_SDA_PIN, gpioModeWiredAndPullUpFilter, 1);
-    GPIO_PinModeSet(I2C_PORT, I2C_SCL_PIN, gpioModeWiredAndPullUpFilter, 1);
+    GPIO_PinModeSet(MAIN_BUS_I2C_PORT, MAIN_BUS_I2C_SDA_PIN, gpioModeWiredAndPullUpFilter, 1);
+    GPIO_PinModeSet(MAIN_BUS_I2C_PORT, MAIN_BUS_I2C_SCL_PIN, gpioModeWiredAndPullUpFilter, 1);
 
     I2C_Init_TypeDef init = I2C_INIT_DEFAULT;
     init.clhr = i2cClockHLRStandard;
     init.enable = true;
 
-    I2C_Init(I2C, &init);
-    I2C->ROUTE = I2C_ROUTE_SCLPEN | I2C_ROUTE_SDAPEN | I2C_LOCATION;
+    I2C_Init(MAIN_BUS_I2C, &init);
+    MAIN_BUS_I2C->ROUTE = I2C_ROUTE_SCLPEN | I2C_ROUTE_SDAPEN | MAIN_BUS_I2C_LOCATION;
 
-    I2C_IntEnable(I2C, I2C_IEN_TXC);
+    I2C_IntEnable(MAIN_BUS_I2C, I2C_IEN_TXC);
 
     NVIC_SetPriority(I2C1_IRQn, I2C1_INT_PRIORITY);
     NVIC_EnableIRQ(I2C1_IRQn);
+}
+
+void I2CDriverInit(I2CBus* bus)
+{
+    SetupMainBusInterface(bus);
 }

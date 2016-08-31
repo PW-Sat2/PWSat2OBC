@@ -8,9 +8,19 @@
 
 EXTERNC_BEGIN
 
-void I2CInit(void);
 I2C_TransferReturn_TypeDef I2CWrite(uint8_t address, uint8_t* inData, uint16_t length);
 I2C_TransferReturn_TypeDef I2CWriteRead(uint8_t address, uint8_t* inData, uint16_t inLength, uint8_t* outData, uint16_t outLength);
+
+typedef enum {
+    I2CResultOK = 0, /**< Transfer completed successfully. */
+
+    I2CResultNack = -1,       /**< NACK received during transfer. */
+    I2CResultBusErr = -2,     /**< Bus error during transfer (misplaced START/STOP). */
+    I2CResultArbLost = -3,    /**< Arbitration lost during transfer. */
+    I2CResultUsageFault = -4, /**< Usage fault. */
+    I2CResultSwFault = -5,    /**< SW fault. */
+    I2CResultFailure = -6
+} I2CResult;
 
 typedef uint8_t I2CAddress;
 
@@ -20,13 +30,18 @@ typedef struct _I2CBus
 
     void* HWInterface;
 
-    OSSemaphoreHandle Lock;
+    uint16_t DMAChannel;
 
-    void (*Write)(struct _I2CBus* bus, I2CAddress address, uint8_t* inData, size_t length);
-    void (*WriteRead)(struct _I2CBus* bus, I2CAddress address, uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength);
+    OSSemaphoreHandle Lock;
+    OSQueueHandle ResultQueue;
+
+    I2CResult (*Write)(struct _I2CBus* bus, I2CAddress address, uint8_t* inData, size_t length);
+    I2CResult (*WriteRead)(struct _I2CBus* bus, I2CAddress address, uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength);
 } I2CBus;
 
 void I2CDriverInit(I2CBus* bus);
+
+void I2CInit(I2CBus* bus);
 
 EXTERNC_END
 

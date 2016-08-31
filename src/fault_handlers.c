@@ -2,6 +2,7 @@
 #include <em_device.h>
 #include <core_cm3.h>
 #include "system.h"
+#include "swo/swo.h"
 
 void prvGetRegistersFromStack(uint32_t* pulFaultStackAddress)
 {
@@ -40,6 +41,10 @@ void prvGetRegistersFromStack(uint32_t* pulFaultStackAddress)
     UNREFERENCED_PARAMETER(bfar);
 
     /* When the following line is hit, the variables contain the register values. */
+
+    SwoPrintfOnChannel(
+        3, "CFSR: 0x%X\nHFSR: 0x%X\nMMFAR: 0x%X\nBFAR: 0x%X\nLR: 0x%X\nPC: 0x%X\nPSR: 0x%X", cfsr, hfsr, mmfar, bfar, lr, pc, psr);
+
     for (;;)
         ;
 }

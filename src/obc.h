@@ -9,8 +9,21 @@
 #include "comm/comm.h"
 #include "fs/fs.h"
 #include "leuart/line_io.h"
+#include "i2c/i2c.h"
 #include "storage/nand_driver.h"
 #include "yaffs_guts.h"
+
+/**
+ * @brief Object that describes I2C buses
+ */
+typedef struct
+{
+    /** @brief System bus */
+    I2CBus SystemBus;
+
+    /** @brief Payload bus */
+    I2CBus PayloadBus;
+} I2CInterface;
 
 /**
  * @brief Object that describes global OBS state.
@@ -37,6 +50,9 @@ typedef struct
     /** @brief Persistent timer that measures mission time. */
     TimeProvider timeProvider;
     LineIO IO;
+
+    /** @brief I2C interface */
+    I2CInterface I2C;
 } OBC;
 
 /** @brief Global OBC object. */
