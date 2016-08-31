@@ -9,21 +9,19 @@
 #include "antenna/driver.h"
 #include "antenna/miniport.h"
 #include "base/os.h"
+<<<<<<< HEAD
 #include "communication.h"
+=======
+#include "comm/comm.h"
 #include "camera/camera_types.h"
+>>>>>>> Review fixes. CameraObject added.
 #include "fs/fs.h"
-#include "fs/yaffs.h"
+#include "hardware.h"
 #include "leuart/line_io.h"
-#include "n25q/n25q.h"
-#include "n25q/yaffs.h"
-#include "obc/communication.h"
-#include "obc/hardware.h"
-#include "obc/storage.h"
-#include "spi/efm.h"
 #include "storage/nand_driver.h"
 #include "terminal/terminal.h"
 #include "time/timer.h"
-#include "utils.h"
+#include "yaffs_guts.h"
 
 /**
  * @defgroup obc OBC structure
@@ -36,6 +34,7 @@
  */
 struct OBC
 {
+<<<<<<< HEAD
   public:
     /** @brief Constructs @ref OBC object  */
     OBC();
@@ -43,13 +42,14 @@ struct OBC
     /** @brief Initializes every object in OBC structure that needs initialization */
     void Initialize();
 
-    /**
-     * @brief Initialization that takes places after starting RTOS
-     */
-    void PostStartInitialization();
-
+=======
+    /** @brief Camera driver object. */
+    CameraObject camera;
+    /** @brief Comm driver object. */
+    CommObject comm;
+>>>>>>> Review fixes. CameraObject added.
     /** @brief File system object */
-    services::fs::YaffsFileSystem fs;
+    FileSystem fs;
     /** @brief Handle to OBC initialization task. */
     OSTaskHandle initTask;
     /** @brief Flag indicating that OBC software has finished initialization process. */
@@ -58,11 +58,16 @@ struct OBC
     /** @brief ADCS context object */
     ADCSContext adcs;
 
-    /** @brief OBC hardware */
-    obc::OBCHardware Hardware;
+    /** Yaffs root device */
+    struct yaffs_dev rootDevice;
+    /** Driver for yaffs root device */
+    YaffsNANDDriver rootDeviceDriver;
 
     /** @brief Persistent timer that measures mission time. */
-    services::time::TimeProvider timeProvider;
+    TimeProvider timeProvider;
+
+    /** @brief OBC hardware */
+    OBCHardware Hardware;
 
     /** @brief Low level driver for antenna controller. */
     AntennaMiniportDriver antennaMiniport;
@@ -77,10 +82,7 @@ struct OBC
     PowerControl PowerControlInterface;
 
     /** @brief Overall satellite <-> Earth communication */
-    obc::OBCCommunication Communication;
-
-    /** @brief OBC storage */
-    obc::OBCStorage Storage;
+    communication::OBCCommunication Communication;
 
     /** @brief Terminal object. */
     Terminal terminal;

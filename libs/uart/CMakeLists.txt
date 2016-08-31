@@ -6,7 +6,15 @@ set(SOURCES
 
 add_library(${NAME} STATIC ${SOURCES})
 
-target_link_libraries(${NAME} freeRTOS base platform emlib logger)
+target_link_libraries(${NAME} freeRTOS)
+
+target_link_libraries(${NAME} base)
+
+target_link_libraries(${NAME} platform)
+
+target_link_libraries(${NAME} emlib)
+
+target_link_libraries(${NAME} logger)
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/uart)

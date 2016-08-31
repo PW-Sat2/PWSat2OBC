@@ -5,7 +5,15 @@
 #define CameraCmdLength     6
 #define CameraJPEGFormat    0x07
 
-typedef enum CameraCmd_e {
+#include <FreeRTOS.h>
+#include <queue.h>
+
+typedef struct CameraObject_
+{
+    QueueHandle_t uartQueue;
+} CameraObject;
+
+typedef enum {
     CameraCmd_Initial           = 0x01,
     CameraCmd_GetPicture        = 0x04,
     CameraCmd_Snapshot          = 0x05,
