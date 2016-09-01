@@ -7,7 +7,7 @@ extern "C" {
 
 /**
  * @defgroup Mission Mission state
- * @{}
+ *
  */
 
 #ifdef __cplusplus

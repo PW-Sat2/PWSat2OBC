@@ -13,6 +13,17 @@ extern "C" {
 /**
  * @defgroup State Satellite state management
  *
+ * @brief Concept of satellite state management and actions dispatch
+ *
+ * Concept implemented by this library is very similar to game loop and is based on three main phases
+ *
+ *  - \b Update - all update descriptors are executed. After that state contain the most accurate information
+ * about overall satellite state. Examples: Time, power level from EPS, antenna status (opened or not)
+ *  - \b Verify - Checks if state makes any sense. Examples of such invalid state are: negative time, antenna opened before
+ * first 30 minutes passed, etc. It is possible that such state is result of malfunction of some device and needs further
+ * investigation
+ *  - \b Dispatch - List of runnable actions is determined based on their condition. After that they are executed one by one
+ *
  * @{
  */
 

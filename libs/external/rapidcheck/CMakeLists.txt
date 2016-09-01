@@ -3,7 +3,7 @@ include(ExternalProject)
 set(OPTIONS "${CMAKE_CXX_FLAGS} --exceptions -funwind-tables")
 
 ExternalProject_Add(rapidcheck_source
-  GIT_REPOSITORY https://github.com/Novakov/rapidcheck.git
+  GIT_REPOSITORY https://github.com/PW-Sat2/rapidcheck.git
   GIT_TAG newlib
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/rapidcheck
   UPDATE_DISCONNECTED 1

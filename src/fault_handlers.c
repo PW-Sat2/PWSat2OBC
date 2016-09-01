@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <em_device.h>
 #include <core_cm3.h>
+#include "system.h"
 
 void prvGetRegistersFromStack(uint32_t* pulFaultStackAddress)
 {
@@ -8,30 +9,35 @@ void prvGetRegistersFromStack(uint32_t* pulFaultStackAddress)
     away as the variables never actually get used.  If the debugger won't show the
     values of the variables, make them global my moving their declaration outside
     of this function. */
-    volatile uint32_t r0;
-    volatile uint32_t r1;
-    volatile uint32_t r2;
-    volatile uint32_t r3;
-    volatile uint32_t r12;
-    volatile uint32_t lr;  /* Link register. */
-    volatile uint32_t pc;  /* Program counter. */
-    volatile uint32_t psr; /* Program status register. */
 
-    r0 = pulFaultStackAddress[0];
-    r1 = pulFaultStackAddress[1];
-    r2 = pulFaultStackAddress[2];
-    r3 = pulFaultStackAddress[3];
+    volatile uint32_t r0 = pulFaultStackAddress[0];
+    volatile uint32_t r1 = pulFaultStackAddress[1];
+    volatile uint32_t r2 = pulFaultStackAddress[2];
+    volatile uint32_t r3 = pulFaultStackAddress[3];
 
-    r12 = pulFaultStackAddress[4];
-    lr = pulFaultStackAddress[5];
-    pc = pulFaultStackAddress[6];
-    psr = pulFaultStackAddress[7];
+    volatile uint32_t r12 = pulFaultStackAddress[4];
+    volatile uint32_t lr = pulFaultStackAddress[5];  /* Link register. */
+    volatile uint32_t pc = pulFaultStackAddress[6];  /* Program counter. */
+    volatile uint32_t psr = pulFaultStackAddress[7]; /* Program status register. */
 
     //    volatile uint16_t* nvic = *((uint16_t*)0xe000ed04);
     uint32_t cfsr = SCB->CFSR;
     uint32_t hfsr = SCB->HFSR;
     uint32_t mmfar = SCB->MMFAR;
     uint32_t bfar = SCB->BFAR;
+
+    UNREFERENCED_PARAMETER(r0);
+    UNREFERENCED_PARAMETER(r1);
+    UNREFERENCED_PARAMETER(r2);
+    UNREFERENCED_PARAMETER(r3);
+    UNREFERENCED_PARAMETER(r12);
+    UNREFERENCED_PARAMETER(lr);
+    UNREFERENCED_PARAMETER(pc);
+    UNREFERENCED_PARAMETER(psr);
+    UNREFERENCED_PARAMETER(cfsr);
+    UNREFERENCED_PARAMETER(hfsr);
+    UNREFERENCED_PARAMETER(mmfar);
+    UNREFERENCED_PARAMETER(bfar);
 
     /* When the following line is hit, the variables contain the register values. */
     for (;;)

@@ -1,5 +1,6 @@
 #include <stdlib.h>
 
+#include "eps/eps.h"
 #include "sail.h"
 #include "state/state.h"
 #include "system.h"

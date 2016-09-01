@@ -1,7 +1,6 @@
 #include <functional>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include "gmock-extensions.h"
 #include "gmock/gmock-matchers.h"
 #include "MissionTestHelpers.h"
 #include "state/state.h"
@@ -11,14 +10,14 @@ using testing::Eq;
 
 class MissionPlanTest : public testing::Test
 {
-  protected:
-    SystemState state;
-
   public:
     MissionPlanTest()
     {
         SystemStateEmpty(&state);
     }
+
+  protected:
+    SystemState state;
 };
 
 TEST_F(MissionPlanTest, EmptyStateShouldHaveEmptyValues)

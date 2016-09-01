@@ -14,14 +14,6 @@ using testing::Eq;
 
 class DeployAntennaActionTest : public Test
 {
-  protected:
-    SystemActionDescriptor openAntenna;
-    bool runnable;
-
-    SystemState state;
-
-    void DetermineActions();
-
   public:
     DeployAntennaActionTest() : runnable(false)
     {
@@ -29,6 +21,14 @@ class DeployAntennaActionTest : public Test
 
         AntennaInitializeActionDescriptor(&openAntenna);
     }
+
+  protected:
+    SystemActionDescriptor openAntenna;
+    bool runnable;
+
+    SystemState state;
+
+    void DetermineActions();
 };
 
 void DeployAntennaActionTest::DetermineActions()
@@ -77,7 +77,7 @@ RC_GTEST_FIXTURE_PROP(DeployAntennaActionTest, CanOpenAntennaOnlyAfterSilentPhas
 
     if (runnable)
     {
-        RC_ASSERT(state.Time > TimePointFromTimeSpan(TimeSpanFromMinutes(30)));
+        RC_ASSERT(TimePointFromTimeSpan(TimeSpanFromMinutes(30)) < state.Time);
         RC_ASSERT_FALSE(state.AntennaDeployed);
     }
 }

@@ -8,14 +8,14 @@ using testing::Eq;
 
 class ActionDispatchTest : public Test
 {
-  protected:
-    SystemState state;
-
   public:
     ActionDispatchTest()
     {
         SystemStateEmpty(&state);
     }
+
+  protected:
+    SystemState state;
 };
 
 TEST_F(ActionDispatchTest, ShouldExecuteRunnableAction)

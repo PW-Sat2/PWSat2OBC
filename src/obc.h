@@ -25,9 +25,12 @@ typedef struct
     /** @brief Flag indicating that OBC software has finished initialization process. */
     atomic_bool initialized;
 
+    /** @brief ADCS context object */
     ADCSContext adcs;
 
+    /** Yaffs root device */
     struct yaffs_dev rootDevice;
+    /** Driver for yaffs root device */
     YaffsNANDDriver rootDeviceDriver;
 
     /** @brief Persistent timer that measures mission time. */

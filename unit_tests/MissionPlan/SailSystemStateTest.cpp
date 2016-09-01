@@ -16,6 +16,15 @@ using testing::Gt;
 
 class SailSystemStateTest : public Test
 {
+  public:
+    SailSystemStateTest() : updateResult((SystemStateUpdateResult)-1), runnable(false)
+    {
+        SystemStateEmpty(&state);
+
+        SailInitializeUpdateDescriptor(&updateDescriptor, &sailOpened);
+        SailInitializeActionDescriptor(&openSailAction, &sailOpened);
+    }
+
   protected:
     SystemStateUpdateDescriptor updateDescriptor;
     SystemActionDescriptor openSailAction;
@@ -30,15 +39,6 @@ class SailSystemStateTest : public Test
 
     void UpdateState();
     void DetermineActions();
-
-  public:
-    SailSystemStateTest() : updateResult((SystemStateUpdateResult)-1), runnable(false)
-    {
-        SystemStateEmpty(&state);
-
-        SailInitializeUpdateDescriptor(&updateDescriptor, &sailOpened);
-        SailInitializeActionDescriptor(&openSailAction, &sailOpened);
-    }
 };
 
 void SailSystemStateTest::UpdateState()
@@ -85,6 +85,6 @@ RC_GTEST_FIXTURE_PROP(SailSystemStateTest, SailCannotBeOpenedIfNotPossible, (con
     if (runnable)
     {
         RC_ASSERT(this->state.SailOpened == false);
-        RC_ASSERT(this->state.Time > TimePointFromTimeSpan(TimeSpanFromHours(40)));
+        RC_ASSERT(TimePointFromTimeSpan(TimeSpanFromHours(40)) < this->state.Time);
     }
 }

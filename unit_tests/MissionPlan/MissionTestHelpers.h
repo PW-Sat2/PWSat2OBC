@@ -3,26 +3,12 @@
 
 #include <functional>
 #include <utility>
-#include "gmock/gmock.h"
-#include "gmock-extensions.h"
 #include "rapidcheck.h"
 #include "state/state.h"
 #include "system.h"
 
-using testing::_;
-using testing::AtLeast;
-
 class StateUpdater
 {
-  private:
-    const char* name;
-    std::function<SystemStateUpdateResult(SystemState*)> func;
-
-    static SystemStateUpdateResult UpdateByMock(SystemState* state, void* param)
-    {
-        return ((StateUpdater*)param)->func(state);
-    }
-
   public:
     StateUpdater(const char* name, std::function<SystemStateUpdateResult(SystemState*)> f) : name(name), func(f)
     {
@@ -38,19 +24,19 @@ class StateUpdater
 
         return desc;
     }
+
+  private:
+    const char* name;
+    std::function<SystemStateUpdateResult(SystemState*)> func;
+
+    static SystemStateUpdateResult UpdateByMock(SystemState* state, void* param)
+    {
+        return ((StateUpdater*)param)->func(state);
+    }
 };
 
 class StateVerifier
 {
-  private:
-    const char* name;
-    std::function<void(const SystemState*, SystemStateVerifyDescriptorResult*)> func;
-
-    static void VerifyByMock(const SystemState* state, void* param, SystemStateVerifyDescriptorResult* result)
-    {
-        ((StateVerifier*)param)->func(state, result);
-    }
-
   public:
     StateVerifier(const char* name, std::function<void(const SystemState*, SystemStateVerifyDescriptorResult*)> f) : name(name), func(f)
     {
@@ -66,35 +52,19 @@ class StateVerifier
 
         return desc;
     }
+
+  private:
+    const char* name;
+    std::function<void(const SystemState*, SystemStateVerifyDescriptorResult*)> func;
+
+    static void VerifyByMock(const SystemState* state, void* param, SystemStateVerifyDescriptorResult* result)
+    {
+        ((StateVerifier*)param)->func(state, result);
+    }
 };
 
 class SystemAction
 {
-  private:
-    const char* name;
-    bool executed;
-
-    std::function<bool(const SystemState*)> condition;
-    std::function<void(const SystemState*)> action;
-
-    SystemActionDescriptor actionDescriptor;
-
-    static bool Condition(const SystemState* state, void* param)
-    {
-        return ((SystemAction*)param)->condition(state);
-    }
-
-    static void Action(const SystemState* state, void* param)
-    {
-        ((SystemAction*)param)->Execute(state);
-    }
-
-    void Execute(const SystemState* state)
-    {
-        this->executed = true;
-        this->action(state);
-    }
-
   public:
     SystemAction(const char* name) : name(name), executed(false)
     {
@@ -167,6 +137,31 @@ class SystemAction
     void ClearExecuted()
     {
         this->executed = false;
+    }
+
+  private:
+    const char* name;
+    bool executed;
+
+    std::function<bool(const SystemState*)> condition;
+    std::function<void(const SystemState*)> action;
+
+    SystemActionDescriptor actionDescriptor;
+
+    static bool Condition(const SystemState* state, void* param)
+    {
+        return ((SystemAction*)param)->condition(state);
+    }
+
+    static void Action(const SystemState* state, void* param)
+    {
+        ((SystemAction*)param)->Execute(state);
+    }
+
+    void Execute(const SystemState* state)
+    {
+        this->executed = true;
+        this->action(state);
     }
 };
 

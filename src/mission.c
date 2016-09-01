@@ -14,15 +14,26 @@
 
 static TerminalCommand terminalCommand = TerminalCommandNone;
 
+/**
+ * @brief Object describing which descriptors are available in specific mode
+ */
 typedef struct
 {
+    /** @brief Array of update descriptors */
     SystemStateUpdateDescriptor* update;
+    /** @brief Count of update descriptors */
     size_t updateCount;
+    /** @brief Array of verify descriptors */
     SystemStateVerifyDescriptor* verify;
+    /** @brief Array of verify results (with the same length as @see verify) */
     SystemStateVerifyDescriptorResult* verifyResult;
+    /** @brief Count of verify descriptors/results */
     size_t verifyCount;
+    /** @brief Array of action descriptors */
     SystemActionDescriptor* actions;
+    /** @brief Count of action descriptors */
     size_t actionCount;
+    /** @brief Buffer for pointers to action descriptors that can be executed */
     SystemActionDescriptor** runnableActions;
 } ModeDescriptor;
 
@@ -63,10 +74,6 @@ static void NormalModeLoop(SystemState* state, MissionState* missionState)
         missionState->ADCS.Update            //
     };
 
-    SystemStateVerifyDescriptor verifyDescriptors[0];
-
-    SystemStateVerifyDescriptorResult verifyResults[COUNT_OF(verifyDescriptors)];
-
     SystemActionDescriptor actionDescriptors[] = {
         missionState->Sail.OpenSail, //
         missionState->ADCS.TurnOff,  //
@@ -78,9 +85,9 @@ static void NormalModeLoop(SystemState* state, MissionState* missionState)
 
     ModeDescriptor descriptor = {.update = updateDescriptors,
         .updateCount = COUNT_OF(updateDescriptors),
-        .verify = verifyDescriptors,
-        .verifyResult = verifyResults,
-        .verifyCount = COUNT_OF(verifyDescriptors),
+        .verify = NULL,
+        .verifyResult = NULL,
+        .verifyCount = 0,
         .actions = actionDescriptors,
         .actionCount = COUNT_OF(actionDescriptors),
         .runnableActions = runnableActions};

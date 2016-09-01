@@ -5,7 +5,7 @@
 #include "obc.h"
 #include "system.h"
 
-void CommandByTerminal(int argc, char* args[])
+void CommandByTerminal(uint16_t argc, char* args[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(args);
