@@ -1,16 +1,14 @@
 include(ExternalProject)
 
-set(OPTIONS "${CMAKE_CXX_FLAGS} -DGTEST_HAS_POSIX_RE=0 -DGTEST_HAS_STREAM_REDIRECTION=0 -DGTEST_MOCK_FS=1 --exceptions")
+set(OPTIONS "${CMAKE_CXX_FLAGS} --exceptions -funwind-tables")
 
-ExternalProject_Add(gtest_source
-  GIT_REPOSITORY https://github.com/PW-Sat2/googletest.git
+ExternalProject_Add(rapidcheck_source
+  GIT_REPOSITORY https://github.com/PW-Sat2/rapidcheck.git
   GIT_TAG newlib
-  PREFIX ${CMAKE_CURRENT_BINARY_DIR}/gtest
+  PREFIX ${CMAKE_CURRENT_BINARY_DIR}/rapidcheck
   UPDATE_DISCONNECTED 1
   INSTALL_COMMAND ""
-  CMAKE_ARGS
-    -DBUILD_GMOCK=ON
-    -DBUILD_GTEST=OFF
+  CMAKE_ARGS   
     -DCMAKE_TOOLCHAIN_FILE=${PROJECT_SOURCE_DIR}/toolchain.cmake
     -DCMAKE_CXX_FLAGS=${OPTIONS}
     -DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}
@@ -20,8 +18,8 @@ ExternalProject_Add(gtest_source
   EXCLUDE_FROM_ALL 1
 )
 
-ExternalProject_Get_Property(gtest_source source_dir)
-ExternalProject_Get_Property(gtest_source binary_dir)
+ExternalProject_Get_Property(rapidcheck_source source_dir)
+ExternalProject_Get_Property(rapidcheck_source binary_dir)
 
 function(addExternalLib name dependency source_location binary_location include_directory)
     add_library(${name} INTERFACE)
@@ -30,5 +28,10 @@ function(addExternalLib name dependency source_location binary_location include_
     target_include_directories(${name} INTERFACE "${include_directory}")
 endfunction(addExternalLib)
 
-addExternalLib(gtest gtest_source "${source_dir}/googletest" "${binary_dir}/googlemock/gtest" "${source_dir}/googletest/include")
-addExternalLib(gmock gtest_source "${source_dir}/googlemock" "${binary_dir}/googlemock" "${source_dir}/googlemock/include")
+addExternalLib(rapidcheck rapidcheck_source "${source_dir}" "${binary_dir}" "${source_dir}/include")
+
+add_library(rapidcheck.gtest INTERFACE)
+target_include_directories(rapidcheck.gtest INTERFACE "${source_dir}/extras/gtest/include")
+
+add_library(rapidcheck.gmock INTERFACE)
+target_include_directories(rapidcheck.gmock INTERFACE "${source_dir}/extras/gmock/include")

@@ -2,12 +2,12 @@
 #define OBC_H
 
 #include <stdatomic.h>
+#include "adcs/adcs.h"
 
 #include "time/timer.h"
 #include "base/os.h"
 #include "comm/comm.h"
 #include "fs/fs.h"
-#include "openSail.h"
 #include "storage/nand_driver.h"
 #include "yaffs_guts.h"
 
@@ -25,14 +25,16 @@ typedef struct
     /** @brief Flag indicating that OBC software has finished initialization process. */
     atomic_bool initialized;
 
+    /** @brief ADCS context object */
+    ADCSContext adcs;
+
+    /** Yaffs root device */
     struct yaffs_dev rootDevice;
+    /** Driver for yaffs root device */
     YaffsNANDDriver rootDeviceDriver;
 
     /** @brief Persistent timer that measures mission time. */
     TimeProvider timeProvider;
-
-    /** @brief Object responsible for sail management. */
-    OpenSailContext sailContext;
 } OBC;
 
 /** @brief Global OBC object. */

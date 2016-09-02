@@ -26,4 +26,6 @@
 #define EXTERNC_END
 #endif
 
+#define HAS_FLAG(value, flag) (((value) & (flag)) == (flag))
+
 #endif

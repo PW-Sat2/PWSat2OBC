@@ -12,3 +12,5 @@ print "Using Mock Serial port: %s" % mock_com
 print "Using OBC Serial port: %s" % obc_com
 
 system = System(mock_com, obc_com)
+
+print "done"

@@ -15,12 +15,11 @@
 #include "SwoEndpoint/SwoEndpoint.h"
 #include "base/os.h"
 #include "comm/comm.h"
-#include "devices/eps.h"
+#include "eps/eps.h"
 #include "i2c/i2c.h"
 #include "io_map.h"
 #include "logger/logger.h"
 #include "obc.h"
-#include "openSail.h"
 #include "swo/swo.h"
 #include "system.h"
 
@@ -33,7 +32,12 @@
 #include "storage/nand_driver.h"
 #include "storage/storage.h"
 
+#include "adcs/adcs.h"
+#include "base/ecc.h"
+#include "mission.h"
+
 OBC Main;
+MissionState Mission;
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
@@ -109,12 +113,7 @@ static void ObcInitTask(void* param)
         LOG(LOG_LEVEL_ERROR, "Unable to initialize file system");
     }
 
-    if (!OpenSailInit(&obc->sailContext))
-    {
-        LOG(LOG_LEVEL_ERROR, "Unable to initialize sail. ");
-    }
-
-    if (!TimeInitialize(&obc->timeProvider, OpenSailTimeHandler, &obc->sailContext, &obc->fs))
+    if (!TimeInitialize(&obc->timeProvider, NULL, NULL, &obc->fs))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize persistent timer. ");
     }
@@ -123,6 +122,8 @@ static void ObcInitTask(void* param)
     {
         LOG(LOG_LEVEL_ERROR, "Unable to restart comm");
     }
+
+    InitializeADCS(&obc->adcs);
 
     LOG(LOG_LEVEL_INFO, "Intialized");
     atomic_store(&Main.initialized, true);
@@ -211,6 +212,8 @@ int main(void)
 
     TerminalInit();
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
+
+    InitializeMission(&Mission, &Main);
 
     GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
     GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);

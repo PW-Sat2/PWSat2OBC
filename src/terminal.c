@@ -23,7 +23,8 @@ typedef struct
     commandHandler handler;
 } command;
 
-static const command commands[] = {{"ping", PingHandler},
+static const command commands[] = {
+    {"ping", PingHandler},
     {"echo", EchoHandler},
     {"jumpToTime", JumpToTimeHandler},
     {"currentTime", CurrentTimeHandler},
@@ -34,7 +35,9 @@ static const command commands[] = {{"ping", PingHandler},
     {"getState", OBCGetState},
     {"listFiles", FSListFiles},
     {"writeFile", FSWriteFile},
-    {"readFile", FSReadFile}};
+    {"readFile", FSReadFile},
+    {"stateCmd", CommandByTerminal} //
+};
 
 static QueueHandle_t terminalQueue;
 

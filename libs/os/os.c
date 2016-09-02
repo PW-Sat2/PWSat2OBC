@@ -2,6 +2,7 @@
 #include "FreeRTOS.h"
 #include "FreeRTOSConfig.h"
 #include "event_groups.h"
+#include "queue.h"
 #include "semphr.h"
 #include "task.h"
 
@@ -121,6 +122,53 @@ static void Free(void* ptr)
     vPortFree(ptr);
 }
 
+static OSQueueHandle CreateQueue(size_t maxElementCount, size_t elementSize)
+{
+    return xQueueCreate(maxElementCount, elementSize);
+}
+
+static bool QueueReceive(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout)
+{
+    return xQueueReceive(queue, element, timeout) == pdTRUE;
+}
+
+static bool QueueReceiveISR(OSQueueHandle queue, void* element, bool* taskWoken)
+{
+    BaseType_t tmp;
+
+    bool result = xQueueReceiveFromISR(queue, element, &tmp) == pdTRUE;
+
+    *taskWoken = tmp == pdTRUE;
+
+    return result;
+}
+
+static bool QueueSend(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout)
+{
+    return xQueueSend(queue, element, timeout) == pdTRUE;
+}
+
+static bool QueueSendISR(OSQueueHandle queue, void* element, bool* taskWoken)
+{
+    BaseType_t tmp;
+
+    bool result = xQueueSendFromISR(queue, element, &tmp) == pdTRUE;
+
+    *taskWoken = tmp == pdTRUE;
+
+    return result;
+}
+
+static void QueueOverwrite(OSQueueHandle queue, const void* element)
+{
+    xQueueOverwrite(queue, element);
+}
+
+static void EndSwitchingISR(bool taskWoken)
+{
+    portEND_SWITCHING_ISR(taskWoken);
+}
+
 OS System;
 
 OSResult OSSetup(void)
@@ -139,6 +187,13 @@ OSResult OSSetup(void)
     System.EventGroupWaitForBits = EventGroupWaitForBits;
     System.Alloc = Alloc;
     System.Free = Free;
+    System.CreateQueue = CreateQueue;
+    System.QueueReceive = QueueReceive;
+    System.QueueReceiveFromISR = QueueReceiveISR;
+    System.QueueSend = QueueSend;
+    System.QueueSendISR = QueueSendISR;
+    System.QueueOverwrite = QueueOverwrite;
+    System.EndSwitchingISR = EndSwitchingISR;
 
     return OSResultSuccess;
 }

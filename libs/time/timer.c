@@ -350,7 +350,7 @@ struct TimeSnapshot GetCurrentPersistentTime(FileSystem* fileSystem)
 
 static void SendTimeNotification(TimeProvider* timeProvider, struct TimerState state)
 {
-    if (state.sendNotification)
+    if (state.sendNotification && timeProvider->OnTimePassed != NULL)
     {
         timeProvider->OnTimePassed(timeProvider->TimePassedCallbackContext, TimePointFromTimeSpan(state.time));
     }

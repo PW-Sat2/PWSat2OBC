@@ -15,6 +15,11 @@ set(SOURCES
   Comm/CommTest.cpp
   base/ReaderTest.cpp
   base/WriterTest.cpp
+  MissionPlan/MissionPlanTest.cpp  
+  MissionPlan/DeployAntennaActionTest.cpp
+  MissionPlan/MissionTestHelpers.cpp
+  MissionPlan/SailSystemStateTest.cpp
+  MissionPlan/ActionDispatchTest.cpp
   os/os.cpp
   os/os.hpp
   OsMock.hpp
@@ -36,7 +41,8 @@ else()
   set(LD_COVERAGE )
 endif(${ENABLE_COVERAGE})
 
-set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_CURRENT_LIST_DIR}/linker.ld ${LD_COVERAGE}")
+set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_CURRENT_LIST_DIR}/linker.ld -u _printf_float -specs=rdimon.specs ${LD_COVERAGE}")
+
 
 target_link_libraries(${NAME}
     m
@@ -49,15 +55,15 @@ target_link_libraries(${NAME}
     storage
     comm
     fs    
+    base
+    mission
+    rapidcheck
+    rapidcheck.gtest
+    rapidcheck.gmock
     emdrv
     adxrs453    
     time
 )
-
-target_require_semihosting(${NAME})
-
-get_target_property(existing_link_flags ${NAME} LINK_FLAGS)
-set_target_properties(${NAME} PROPERTIES LINK_FLAGS "${existing_link_flags} -u _printf_float")
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
 
