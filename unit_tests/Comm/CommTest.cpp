@@ -75,7 +75,7 @@ static I2CResult TestI2CRead(I2CBus* bus, I2CAddress address, uint8_t* inData, s
     }
 }
 
-static OSReset SetupComm(CommObject* comm, I2CBus* low, OSMock& system)
+static OSReset SetupComm(CommObject* comm, I2CInterface* low, OSMock& system)
 {
     CommUpperInterface up;
     up.frameHandler = nullptr;
@@ -98,13 +98,15 @@ class CommTest : public testing::Test
     testing::NiceMock<OSMock> system;
     I2CMock i2c;
     OSReset reset;
-    I2CBus low;
+    I2CBus systemBus;
+    I2CInterface low;
 };
 
 CommTest::CommTest()
 {
-    low.Write = TestI2CWrite;
-    low.WriteRead = TestI2CRead;
+    systemBus.Write = TestI2CWrite;
+    systemBus.WriteRead = TestI2CRead;
+    low.System = &systemBus;
 
     reset = SetupComm(&comm, &low, system);
     mockPtr = &i2c;
@@ -121,12 +123,15 @@ TEST_F(CommTest, TestInitializationDoesNotTouchHardware)
     I2CBus low;
     low.Write = TestI2CWrite;
     low.WriteRead = TestI2CRead;
+    I2CInterface interface;
+    interface.System = &low;
+    interface.Payload = nullptr;
     CommUpperInterface up;
     up.frameHandler = nullptr;
     up.frameHandlerContext = nullptr;
     EXPECT_CALL(i2c, I2CRead(_, _, _, _, _, _)).Times(0);
     EXPECT_CALL(i2c, I2CWrite(_, _, _, _)).Times(0);
-    CommInitialize(&commObject, &low, &up);
+    CommInitialize(&commObject, &interface, &up);
 }
 
 TEST_F(CommTest, TestInitializationAllocationFailure)
@@ -135,11 +140,14 @@ TEST_F(CommTest, TestInitializationAllocationFailure)
     I2CBus low;
     low.Write = TestI2CWrite;
     low.WriteRead = TestI2CRead;
+    I2CInterface interface;
+    interface.System = &low;
+    interface.Payload = nullptr;
     CommUpperInterface up;
     up.frameHandler = nullptr;
     up.frameHandlerContext = nullptr;
     EXPECT_CALL(system, CreateEventGroup()).WillOnce(Return(nullptr));
-    const auto status = CommInitialize(&commObject, &low, &up);
+    const auto status = CommInitialize(&commObject, &interface, &up);
     ASSERT_THAT(status, Ne(OSResultSuccess));
 }
 
@@ -149,10 +157,13 @@ TEST_F(CommTest, TestInitialization)
     I2CBus low;
     low.Write = TestI2CWrite;
     low.WriteRead = TestI2CRead;
+    I2CInterface interface;
+    interface.System = &low;
+    interface.Payload = nullptr;
     CommUpperInterface up;
     up.frameHandler = nullptr;
     up.frameHandlerContext = nullptr;
-    const auto status = CommInitialize(&commObject, &low, &up);
+    const auto status = CommInitialize(&commObject, &interface, &up);
     ASSERT_THAT(status, Eq(OSResultSuccess));
 }
 
@@ -689,14 +700,18 @@ class CommReceiverTelemetryTest : public testing::TestWithParam<std::tuple<int, 
     testing::NiceMock<OSMock> system;
     OSReset reset;
     I2CBus low;
+    I2CInterface interface;
 };
 
 CommReceiverTelemetryTest::CommReceiverTelemetryTest()
 {
+    interface.System = &low;
+    interface.Payload = nullptr;
+
     low.Write = TestI2CWrite;
     low.WriteRead = TestI2CRead;
 
-    reset = SetupComm(&comm, &low, system);
+    reset = SetupComm(&comm, &interface, system);
     mockPtr = &i2c;
 }
 
@@ -745,14 +760,17 @@ class CommTransmitterTelemetryTest : public testing::TestWithParam<std::tuple<in
     testing::NiceMock<OSMock> system;
     OSReset reset;
     I2CBus low;
+    I2CInterface interface;
 };
 
 CommTransmitterTelemetryTest::CommTransmitterTelemetryTest()
 {
     low.Write = TestI2CWrite;
     low.WriteRead = TestI2CRead;
+    interface.System = &low;
+    interface.Payload = nullptr;
 
-    reset = SetupComm(&comm, &low, system);
+    reset = SetupComm(&comm, &interface, system);
     mockPtr = &i2c;
 }
 

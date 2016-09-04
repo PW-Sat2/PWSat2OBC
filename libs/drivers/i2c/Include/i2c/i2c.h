@@ -36,7 +36,13 @@ typedef struct _I2CBus
     I2CResult (*WriteRead)(struct _I2CBus* bus, I2CAddress address, uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength);
 } I2CBus;
 
-void I2CDriverInit(I2CBus* bus);
+typedef struct
+{
+    I2CBus* System;
+    I2CBus* Payload;
+} I2CInterface;
+
+void I2CDriverInit(I2CBus bus[]);
 
 EXTERNC_END
 

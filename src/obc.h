@@ -14,18 +14,6 @@
 #include "yaffs_guts.h"
 
 /**
- * @brief Object that describes I2C buses
- */
-typedef struct
-{
-    /** @brief System bus */
-    I2CBus SystemBus;
-
-    /** @brief Payload bus */
-    I2CBus PayloadBus;
-} I2CInterface;
-
-/**
  * @brief Object that describes global OBS state.
  */
 typedef struct
@@ -50,6 +38,8 @@ typedef struct
     /** @brief Persistent timer that measures mission time. */
     TimeProvider timeProvider;
     LineIO IO;
+
+    I2CBus I2CBuses[2];
 
     /** @brief I2C interface */
     I2CInterface I2C;

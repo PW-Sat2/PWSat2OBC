@@ -81,10 +81,17 @@ static I2CResult WriteRead(I2CBus* bus, I2CAddress address, uint8_t* inData, siz
     return ExecuteTransfer(bus, &seq);
 }
 
-static void SetupMainBusInterface(I2CBus* bus)
+static void SetupInterface(I2CBus* bus,
+    I2C_TypeDef* hw,
+    uint16_t location,
+    GPIO_Port_TypeDef port,
+    uint16_t sdaPin,
+    uint16_t sclPin,
+    CMU_Clock_TypeDef clock,
+    IRQn_Type irq)
 {
     bus->Extra = NULL;
-    bus->HWInterface = MAIN_BUS_I2C;
+    bus->HWInterface = hw;
     bus->Write = Write;
     bus->WriteRead = WriteRead;
 
@@ -93,27 +100,28 @@ static void SetupMainBusInterface(I2CBus* bus)
     bus->Lock = System.CreateBinarySemaphore();
     System.GiveSemaphore(bus->Lock);
 
-    buses[1] = bus;
+    CMU_ClockEnable(clock, true);
 
-    CMU_ClockEnable(cmuClock_I2C1, true);
-
-    GPIO_PinModeSet(MAIN_BUS_I2C_PORT, MAIN_BUS_I2C_SDA_PIN, gpioModeWiredAndPullUpFilter, 1);
-    GPIO_PinModeSet(MAIN_BUS_I2C_PORT, MAIN_BUS_I2C_SCL_PIN, gpioModeWiredAndPullUpFilter, 1);
+    GPIO_PinModeSet(port, sdaPin, gpioModeWiredAndPullUpFilter, 1);
+    GPIO_PinModeSet(port, sclPin, gpioModeWiredAndPullUpFilter, 1);
 
     I2C_Init_TypeDef init = I2C_INIT_DEFAULT;
     init.clhr = i2cClockHLRStandard;
     init.enable = true;
 
-    I2C_Init(MAIN_BUS_I2C, &init);
-    MAIN_BUS_I2C->ROUTE = I2C_ROUTE_SCLPEN | I2C_ROUTE_SDAPEN | MAIN_BUS_I2C_LOCATION;
+    I2C_Init(hw, &init);
+    hw->ROUTE = I2C_ROUTE_SCLPEN | I2C_ROUTE_SDAPEN | location;
 
-    I2C_IntEnable(MAIN_BUS_I2C, I2C_IEN_TXC);
+    I2C_IntEnable(hw, I2C_IEN_TXC);
 
     NVIC_SetPriority(I2C1_IRQn, I2C1_INT_PRIORITY);
-    NVIC_EnableIRQ(I2C1_IRQn);
+    NVIC_EnableIRQ(irq);
 }
 
-void I2CDriverInit(I2CBus* bus)
+void I2CDriverInit(I2CBus bus[])
 {
-    SetupMainBusInterface(bus);
+    buses[0] = &bus[0];
+    buses[1] = &bus[1];
+
+    SetupInterface(&bus[1], I2C1, I2C1_BUS_LOCATION, I2C1_BUS_PORT, I2C1_BUS_SDA_PIN, I2C1_BUS_SCL_PIN, cmuClock_I2C1, I2C1_IRQn);
 }
