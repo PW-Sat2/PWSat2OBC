@@ -128,7 +128,7 @@ static void handleIncomingChar(void* arg)
     }
 }
 
-void TerminalInit()
+void TerminalInit(void)
 {
     if (xTaskCreate(handleIncomingChar, "terminalIn", 2500, NULL, 4, NULL) != pdPASS)
     {

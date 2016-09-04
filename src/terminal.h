@@ -3,7 +3,7 @@
 
 #include "leuart/line_io.h"
 
-void TerminalInit();
+void TerminalInit(void);
 void TerminalSendNewLine(void);
 void TerminalPrintf(const char* text, ...);
 void TerminalPuts(const char* text);
