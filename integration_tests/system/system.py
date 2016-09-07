@@ -6,13 +6,14 @@ from i2cMock import I2CMock
 
 
 class System:
-    def __init__(self, mock_com, obc_com):
+    def __init__(self, mock_com, obc_com, payload_com):
         self.log = logging.getLogger("system")
 
         self.obc_com = obc_com
         self.mock_com = mock_com
 
         self.i2c = I2CMock(mock_com)
+        self.payload = I2CMock(payload_com)
 
         self._setup_devices()
 
@@ -20,6 +21,7 @@ class System:
         self.obc.power_off()
 
         self.i2c.start()
+        self.payload.start()
 
         self.obc.power_on()
 
@@ -34,4 +36,5 @@ class System:
 
     def close(self):
         self.i2c.close()
+        self.payload.close()
         self.obc.close()

@@ -132,3 +132,6 @@ class OBC:
 
     def read_file(self, path):
         return self._terminal.command("readFile %s" % path)
+
+    def i2c_transfer(self, bus, address, data):
+        return self._terminal.command("i2c %s %d %s" % (bus, address, data))

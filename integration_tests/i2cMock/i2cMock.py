@@ -145,7 +145,7 @@ class I2CMock(object):
             except AttributeError:
                 pass
             except Exception as e:
-                self.log.error("Handle command exception %r", e)
+                self.log.error("Handle command exception %s", traceback.format_exc(e))
 
         self.log.debug("Finished worker thread")
 
