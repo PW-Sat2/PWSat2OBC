@@ -13,32 +13,28 @@
 #include <task.h>
 
 #include "SwoEndpoint/SwoEndpoint.h"
+#include "adcs/adcs.h"
+#include "base/ecc.h"
 #include "base/os.h"
 #include "comm/comm.h"
+#include "dmadrv.h"
 #include "eps/eps.h"
+#include "fs/fs.h"
 #include "i2c/i2c.h"
 #include "io_map.h"
+#include "leuart/leuart.h"
 #include "logger/logger.h"
+#include "mission.h"
 #include "obc.h"
-#include "swo/swo.h"
-#include "system.h"
-
-#include <spidrv.h>
-#include "adxrs453/adxrs453.h"
-#include "terminal.h"
-
-#include "fs/fs.h"
 #include "storage/nand.h"
 #include "storage/nand_driver.h"
 #include "storage/storage.h"
+#include "swo/swo.h"
+#include "system.h"
+#include "terminal.h"
 
-#include "adcs/adcs.h"
-#include "base/ecc.h"
-#include "mission.h"
-
-#include "dmadrv.h"
-
-#include "leuart/leuart.h"
+#include <spidrv.h>
+#include "adxrs453/adxrs453.h"
 
 OBC Main;
 MissionState Mission;
@@ -238,7 +234,7 @@ int main(void)
 
     LeuartLineIOInit(&Main.IO);
 
-    TerminalInit();
+    InitializeTerminal();
 
     SetupI2C();
 
