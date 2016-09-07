@@ -15,13 +15,12 @@
 #include "io_map.h"
 #include "system.h"
 
-static USART_TypeDef *uart = USART1;
 QueueHandle_t usart1sink;
 
 void UARTSend(uint8_t * str, uint32_t size)
 {
     for (uint32_t i = 0; i < size; i++) {
-        USART_Tx(uart, str[i]);
+        USART_Tx(USART1, str[i]);
     }
 }
 
@@ -56,29 +55,27 @@ void UARTInit(xQueueHandle sink)
     GPIO_PinModeSet(USART1_PORT, USART1_RX, gpioModeInput, 0);
 
     /* Configure USART for basic async operation */
-    USART_InitAsync(uart, &init);
+    USART_InitAsync(USART1, &init);
 
     /* Enable pins at default location */
-    uart->ROUTE = UART_LOCATION | UART_ROUTE_RXPEN | UART_ROUTE_TXPEN;
+    USART1->ROUTE = UART_LOCATION | UART_ROUTE_RXPEN | UART_ROUTE_TXPEN;
 
     /* Clear previous RX interrupts */
-    USART_IntClear(uart, _USART_IF_MASK);
+    USART_IntClear(USART1, _USART_IF_MASK);
     NVIC_ClearPendingIRQ(USART1_RX_IRQn);
-    USART_IntEnable(uart, USART_IF_RXDATAV);
+    USART_IntEnable(USART1, USART_IF_RXDATAV);
     NVIC_EnableIRQ(USART1_RX_IRQn);
 
     /* Finally enable it */
-    USART_Enable(uart, usartEnable);
+    USART_Enable(USART1, usartEnable);
 }
 
 void USART1_RX_IRQHandler(void)
 {
     uint8_t data;
     BaseType_t woken = pdFALSE;
-    while (uart->STATUS & USART_STATUS_RXDATAV) {
-        data = (uint8_t) uart->RXDATA;
-        xQueueSendToBackFromISR(usart1sink, &data, &woken);
-    }
 
+    data = USART_Rx(USART1);
+    xQueueSendToBackFromISR(usart1sink, &data, &woken);
     portEND_SWITCHING_ISR(woken);
 }

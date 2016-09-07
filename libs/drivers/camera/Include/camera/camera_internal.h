@@ -1,11 +1,11 @@
 #ifndef CAMERA_INTERNAL_H_
 #define CAMERA_INTERNAL_H_
 
+#include <stddef.h>
 #include "camera_types.h"
-#include "stddef.h"
 
-#ifdef __cpluplus
- "C" {
+#ifdef __cplusplus
+extern  "C" {
 #endif
 
 int8_t CameraGetCmdData(CameraObject *self, CameraCmdData *cmdData);
