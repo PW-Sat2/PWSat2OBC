@@ -1,19 +1,20 @@
 #ifndef _CAMERA_UTILS_H_
 #define _CAMERA_UTILS_H_
 
+#include <stdbool.h>
 #include <stdint.h>
 #include "camera_types.h"
 
 uint16_t CameraGetRAWDataLength(CameraRAWImageFormat format, CameraRAWResolution rawResolution);
 
-CameraCmd CameraParseDataCmd(uint8_t *cmd, CameraCmdData *cmdData);
+CameraCmd CameraParseDataCmd(uint8_t *cmd, uint32_t length, CameraCmdData *cmdData);
 
-CameraCmd CameraParseAckCmd(uint8_t *cmd, CameraCmdAck *cmdAck);
+CameraCmd CameraParseAckCmd(uint8_t *cmd, uint32_t length, CameraCmdAck *cmdAck);
 
-CameraCmd CameraParseSyncCmd(uint8_t *cmd);
+CameraCmd CameraParseSyncCmd(uint8_t *cmd, uint32_t length);
 
-int8_t CameraCmdAckInit(CameraCmdAck *cmdAck);
+bool CameraCmdAckInit(CameraCmdAck *cmdAck);
 
-int8_t CameraCmdDataInit(CameraCmdData *cmdData);
+bool CameraCmdDataInit(CameraCmdData *cmdData);
 
 #endif /* _CAMERA_UTILS_H_ */

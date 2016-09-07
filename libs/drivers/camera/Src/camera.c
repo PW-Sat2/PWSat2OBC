@@ -16,82 +16,59 @@ int32_t CameraGetJPEGPicture(CameraObject *self, CameraJPEGResolution resolution
     UNREFERENCED_PARAMETER(data);
     UNREFERENCED_PARAMETER(dataLength);
 
-    int8_t ret = 0;
+    bool ret = 0;
 
     do {
-        ret = CameraSync(self);
-        if (ret == -1)
+        if (!CameraSync(self))
         {
             LOG(LOG_LEVEL_ERROR, "---------------- Sync failed -------------------------\n");
             break;
         }
 
-        ret = CameraSendCmdJPEGInitial(resolution);
-        if (ret == -1)
-        {
-            LOG(LOG_LEVEL_ERROR, "---------------- Send Cmd JPEG Initial failed --------\n");
-            break;
-        }
+        CameraSendCmdJPEGInitial(resolution);
 
-        ret = CameraGetCmdAckInitial(self);
-        if (ret == -1)
+        if (!CameraGetCmdAckInitial(self))
         {
             LOG(LOG_LEVEL_ERROR, "---------------- Ack Initial failed ------------------\n");
             break;
         }
 
-        ret = CameraSendCmdSetPackageSize(512);
-        if (ret == -1)
+        if (!CameraSendCmdSetPackageSize(512))
         {
             LOG(LOG_LEVEL_ERROR, "---------------- Send Cmd Set Package failed ---------\n");
             break;
         }
 
-        ret = CameraGetCmdAckSetPackageSize(self);
-        if (ret == -1)
+        if (!CameraGetCmdAckSetPackageSize(self))
         {
             LOG(LOG_LEVEL_ERROR, "---------------- ACK Set Package Size failed ---------\n");
             break;
         }
 
-        ret = CameraSendCmdSnapshot(CameraSnapshotType_Compressed);
-        if (ret == -1)
-        {
-            LOG(LOG_LEVEL_ERROR, "---------------- Send Cmd Snapshot failed ------------\n");
-            break;
-        }
+        CameraSendCmdSnapshot(CameraSnapshotType_Compressed);
 
-        ret = CameraGetCmdAckSnapshot(self);
-        if (ret == -1)
+        if (!CameraGetCmdAckSnapshot(self))
         {
             LOG(LOG_LEVEL_ERROR, "---------------- ACK Snapshot failed -----------------\n");
             break;
         }
 
-        ret = CameraSendCmdGetPicture(CameraPictureType_JPEG);
-        if (ret == -1)
-        {
-            LOG(LOG_LEVEL_ERROR, "---------------- Send Cmd Get Picture failed ---------\n");
-            break;
-        }
+        CameraSendCmdGetPicture(CameraPictureType_JPEG);
 
-        ret = CameraGetCmdAckGetPicture(self);
-        if (ret == -1)
+        if (!CameraGetCmdAckGetPicture(self))
         {
             LOG(LOG_LEVEL_ERROR, "---------------- ACK GetPicture failed ---------------\n");
             break;
         }
 
         CameraCmdData cmdData;
-        ret = CameraCmdDataInit(&cmdData);
-        if (ret == -1)
+        if (!CameraCmdDataInit(&cmdData))
         {
             LOG(LOG_LEVEL_ERROR, "---------------- Init Cmd Data struct failed ---------\n");
             break;
         }
 
-        ret = CameraGetCmdData(self, &cmdData);
-        if (ret == -1)
+        if (!CameraGetCmdData(self, &cmdData))
         {
             LOG(LOG_LEVEL_ERROR, "---------------- Get Cmd Data failed -----------------\n");
             break;
@@ -111,12 +88,7 @@ int32_t CameraGetJPEGPicture(CameraObject *self, CameraJPEGResolution resolution
         }
         dataLength = ret;
 
-        ret = CameraSendCmdAckData();
-        if (ret == -1) {
-            LOG(LOG_LEVEL_ERROR, "---------------- Invalid Data Ack --------------------\n");
-            break;
-        }
-        ret = dataLength;
+        CameraSendCmdAckData();
 */
     } while (0);
     return ret;
@@ -127,52 +99,33 @@ int32_t CameraGetRAWPicture(CameraObject *self, CameraRAWImageFormat format,
                             uint32_t dataLength)
 {
     uint32_t imageLength = 0;
-    int8_t ret = 0;
+    bool ret = 0;
     do {
-        ret = CameraSync(self);
-        if (ret == -1)
+        if (!CameraSync(self))
         {
             LOG(LOG_LEVEL_ERROR, "---------------- Sync failed -------------------------\n");
             break;
         }
 
-        ret = CameraSendCmdRAWInitial(format, resolution);
-        if (ret == -1)
-        {
-            LOG(LOG_LEVEL_ERROR, "---------------- Send Cmd RAW Initial failed ---------\n");
-            break;
-        }
+        CameraSendCmdRAWInitial(format, resolution);
 
-        ret = CameraGetCmdAckInitial(self);
-        if (ret == -1)
+        if (!CameraGetCmdAckInitial(self))
         {
             LOG(LOG_LEVEL_ERROR, "---------------- ACK Initial failed ------------------\n");
             break;
         }
 
-        ret = CameraSendCmdSnapshot(CameraSnapshotType_Uncompressed);
-        if (ret == -1)
-        {
-            LOG(LOG_LEVEL_ERROR, "---------------- Send Cmd Snapshot failed ------------\n");
-            break;
-        }
+        CameraSendCmdSnapshot(CameraSnapshotType_Uncompressed);
 
-        ret = CameraGetCmdAckSnapshot(self);
-        if (ret == -1)
+        if (!CameraGetCmdAckSnapshot(self))
         {
             LOG(LOG_LEVEL_ERROR, "---------------- ACK Snapshot failed -----------------\n");
             break;
         }
 
-        ret = CameraSendCmdGetPicture(CameraPictureType_RAW);
-        if (ret == -1)
-        {
-            LOG(LOG_LEVEL_ERROR, "---------------- Send Cmd Get Picture failed ---------\n");
-            break;
-        }
+        CameraSendCmdGetPicture(CameraPictureType_RAW);
 
-        ret = CameraGetCmdAckGetPicture(self);
-        if (ret == -1)
+        if (!CameraGetCmdAckGetPicture(self))
         {
             LOG(LOG_LEVEL_ERROR, "---------------- ACK GetPicture failed----------------\n");
             break;
@@ -193,12 +146,7 @@ int32_t CameraGetRAWPicture(CameraObject *self, CameraRAWImageFormat format,
         }
         dataLength = ret;
 
-        ret = CameraSendCmdAckData();
-        if (ret == -1)
-        {
-            LOG(LOG_LEVEL_ERROR, "---------------- Invalid Data Ack --------------------\n");
-            break;
-        }
+        CameraSendCmdAckData();
     } while (0);
 
     return ret;

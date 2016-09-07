@@ -85,9 +85,9 @@ uint16_t CameraGetRAWDataLength(CameraRAWImageFormat format, CameraRAWResolution
     return ((uint16_t)CameraRAWImageFormatGetComponent(format)) * CameraRAWResolutionGetSquare(resolution);
 }
 
-CameraCmd CameraParseDataCmd(uint8_t* cmd, CameraCmdData* cmdData)
+CameraCmd CameraParseDataCmd(uint8_t* cmd, uint32_t length, CameraCmdData* cmdData)
 {
-    if (cmd[0] != CameraCmdPrefix || cmd[1] != CameraCmd_Data)
+    if (length < 6 || cmd[0] != CameraCmdPrefix || cmd[1] != CameraCmd_Data)
     {
         return CameraCmd_Invalid;
     }
@@ -107,9 +107,9 @@ CameraCmd CameraParseDataCmd(uint8_t* cmd, CameraCmdData* cmdData)
     return CameraCmd_Data;
 }
 
-CameraCmd CameraParseAckCmd(uint8_t* cmd, CameraCmdAck* cmdAck)
+CameraCmd CameraParseAckCmd(uint8_t* cmd, uint32_t length, CameraCmdAck* cmdAck)
 {
-    if (cmd[0] != CameraCmdPrefix || cmd[1] != CameraCmd_Ack)
+    if (length < 6 || cmd[0] != CameraCmdPrefix || cmd[1] != CameraCmd_Ack)
     {
         return CameraCmd_Invalid;
     }
@@ -125,34 +125,34 @@ CameraCmd CameraParseAckCmd(uint8_t* cmd, CameraCmdAck* cmdAck)
     return CameraCmd_Ack;
 }
 
-CameraCmd CameraParseSyncCmd(uint8_t* cmd)
+CameraCmd CameraParseSyncCmd(uint8_t* cmd, uint32_t length)
 {
-    if (cmd[0] != CameraCmdPrefix || cmd[1] != CameraCmd_Sync)
+    if (length < 2 || cmd[0] != CameraCmdPrefix || cmd[1] != CameraCmd_Sync)
     {
         return CameraCmd_Invalid;
     }
     return CameraCmd_Sync;
 }
 
-int8_t CameraCmdAckInit(CameraCmdAck* cmdAck)
+bool CameraCmdAckInit(CameraCmdAck* cmdAck)
 {
     if (cmdAck == NULL)
     {
-        return -1;
+        return false;
     }
     cmdAck->type = CameraCmd_Invalid;
     cmdAck->ackCounter = 0;
     cmdAck->packageId = 0;
-    return 0;
+    return true;
 }
 
-int8_t CameraCmdDataInit(CameraCmdData* cmdData)
+bool CameraCmdDataInit(CameraCmdData* cmdData)
 {
     if (cmdData == NULL)
     {
-        return -1;
+        return false;
     }
     cmdData->type = CameraPictureType_Invalid;
     cmdData->dataLength = 0;
-    return 0;
+    return true;
 }
