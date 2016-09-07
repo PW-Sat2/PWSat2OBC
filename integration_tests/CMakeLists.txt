@@ -23,4 +23,10 @@ add_custom_target(pyconsole
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+if(${USE_SINGLE_BUS})
+    set(PY_USE_SINGLE_BUS "True")
+else()
+    set(PY_USE_SINGLE_BUS "False")
+endif()
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.py.template ${CMAKE_CURRENT_BINARY_DIR}/config.py)

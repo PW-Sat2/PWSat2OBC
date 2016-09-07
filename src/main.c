@@ -213,8 +213,8 @@ int main(void)
 
     I2CDriverInit(Main.I2CBuses);
 
-    Main.I2C.System = &Main.I2CBuses[1];
-    Main.I2C.Payload = &Main.I2CBuses[0];
+    Main.I2C.System = &Main.I2CBuses[I2C_SYSTEM_BUS];
+    Main.I2C.Payload = &Main.I2CBuses[I2C_PAYLOAD_BUS];
 
     EpsInit(&Main.I2C);
 

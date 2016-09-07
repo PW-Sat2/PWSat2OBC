@@ -30,6 +30,14 @@
 
 #define I2C_IRQ_PRIORITY 6
 
+#ifdef I2C_SINGLE_BUS
+#define I2C_SYSTEM_BUS 1
+#define I2C_PAYLOAD_BUS 1
+#else
+#define I2C_SYSTEM_BUS 1
+#define I2C_PAYLOAD_BUS 0
+#endif
+
 // NAND Flash
 #define NAND_POWER_PORT gpioPortB
 #define NAND_POWER_PIN 15

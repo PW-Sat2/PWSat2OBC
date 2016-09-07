@@ -1,5 +1,6 @@
 config = dict(
     MOCK_COM='${MOCK_COM}',
     OBC_COM='${OBC_COM}',
-    PAYLOAD_COM='${PAYLOAD_COM}'
+    PAYLOAD_COM='${PAYLOAD_COM}',
+    SINGLE_BUS=${PY_USE_SINGLE_BUS}
 )
