@@ -1,5 +1,9 @@
 add_definitions(-DEFM32GG990F1024)
 
+if(${CMAKE_BUILD_TYPE} EQUAL "DEBUG")
+    add_definitions(-DENABLE_ASSERT -DDEBUG_EFM_USER)
+endif()
+
 set (ARCH cortex-m3)
 set (CHIP EFM32GG)
 set (DEVICE EFM32GG990F1024)

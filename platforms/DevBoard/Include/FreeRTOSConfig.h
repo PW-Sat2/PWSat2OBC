@@ -81,6 +81,14 @@
  *
  * See http://www.freertos.org/a00110.html.
  *----------------------------------------------------------*/
+#ifdef ENABLE_ASSERT
+extern void assertFailed(const char* source, const char* file, uint16_t line);
+#define configASSERT(x)                                                                                                                    \
+    if (!(x))                                                                                                                              \
+    {                                                                                                                                      \
+        assertFailed("RTOS", __FILE__, __LINE__);                                                                                          \
+    }
+#endif
 
 #define configUSE_PREEMPTION 1
 #define configUSE_IDLE_HOOK 1

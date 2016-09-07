@@ -36,6 +36,10 @@
 #include "base/ecc.h"
 #include "mission.h"
 
+#include "dmadrv.h"
+
+#include "leuart/leuart.h"
+
 OBC Main;
 MissionState Mission;
 
@@ -188,10 +192,11 @@ int main(void)
     memset(&Main, 0, sizeof(Main));
     CHIP_Init();
 
-    CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
-    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);
-
     CMU_ClockEnable(cmuClock_GPIO, true);
+    CMU_ClockEnable(cmuClock_DMA, true);
+
+    CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFRCO);
+    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFRCO);
 
     SwoEnable();
 
@@ -199,6 +204,13 @@ int main(void)
     InitSwoEndpoint();
 
     OSSetup();
+
+    DMADRV_Init();
+
+    LeuartLineIOInit(&Main.IO);
+
+    TerminalInit();
+
     I2CInit();
 
     EpsInit();
@@ -210,7 +222,6 @@ int main(void)
     commUpperInterface.frameHandlerContext = NULL;
     CommInitialize(&Main.comm, &commInterface, &commUpperInterface);
 
-    TerminalInit();
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 
     InitializeMission(&Mission, &Main);
@@ -223,8 +234,8 @@ int main(void)
     GPIO_PinOutSet(LED_PORT, LED1);
 
     System.CreateTask(BlinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
-    System.CreateTask(ADXRS, "ADXRS", 512, NULL, tskIDLE_PRIORITY + 2, NULL);
-    System.CreateTask(ObcInitTask, "Init", 512, &Main, tskIDLE_PRIORITY + 16, &Main.initTask);
+    // System.CreateTask(ADXRS, "ADXRS", 512, NULL, tskIDLE_PRIORITY + 2, NULL);
+    System.CreateTask(ObcInitTask, "Init", 512, &Main, tskIDLE_PRIORITY + 15, &Main.initTask);
     System.RunScheduler();
 
     GPIO_PinOutToggle(LED_PORT, LED0);
