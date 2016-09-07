@@ -12,8 +12,10 @@ class I2CTest(BaseTest):
     def setUp(self):
         BaseTest.setUp(self)
 
-        self.system.i2c.add_device(EchoDevice(0x12))
-        self.system.payload.add_device(EchoDevice(0x12))
+        self.echo = EchoDevice(0x12)
+
+        self.system.i2c.add_device(self.echo)
+        self.system.payload.add_device(self.echo)
 
     def test_transfer_on_both_buses(self):
         response = self.system.obc.i2c_transfer('system', 0x12, 'abc')

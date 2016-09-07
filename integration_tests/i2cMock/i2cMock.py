@@ -100,12 +100,17 @@ class I2CMock(object):
         self.reader.daemon = True
 
     def start(self):
+        if self.active:
+            return
+
         self.port.reset_input_buffer()
         self.port.reset_output_buffer()
 
         self.restart()
 
         self.reader.start()
+
+        self.active = True
 
     def add_device(self, device):
         self.devices[device.address] = device
@@ -114,10 +119,14 @@ class I2CMock(object):
         self.active = False
 
     def close(self):
+        if not self.active:
+            return
+
         self.port.close()
         self.reader.join()
         self.port.close()
         self.port = None
+        self.active = False
 
     def restart(self):
         self.port.write(CONTROL_CHAR + CONTROL_CMD_RESTART)

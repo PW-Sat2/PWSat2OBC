@@ -1,13 +1,16 @@
-import logging
-import os
 import unittest
-import colorlog
 
 from system import System
 
-mock_com = os.environ.get('MOCK_COM')
-obc_com = os.environ.get('OBC_COM')
-payload_com = os.environ.get('PAYLOAD_COM')
+try:
+    from config import config
+except ImportError as e:
+    raise ImportError(
+        "Error loading config: %s. Did you forget to add <build>/integration_tests to PYTHONPATH?" % e.message)
+
+mock_com = config['MOCK_COM']
+obc_com = config['OBC_COM']
+payload_com = config['PAYLOAD_COM']
 
 
 class BaseTest(unittest.TestCase):

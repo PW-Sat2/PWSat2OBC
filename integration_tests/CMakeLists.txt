@@ -12,13 +12,15 @@ add_custom_target(${NAME}.deps
 )
 
 add_custom_target(${NAME}
-    COMMAND ${CMAKE_COMMAND} -E env "MOCK_COM=${MOCK_COM}" "OBC_COM=${OBC_COM}" "PAYLOAD_COM=${PAYLOAD_COM}" ${PYTHON_EXECUTABLE} -m nose -x -s --nologcapture --rednose -v --with-xunit "--xunit-file=${TEST_RESULTS}" 
+    COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}" ${PYTHON_EXECUTABLE} -m nose -x -s --nologcapture --rednose -v --with-xunit "--xunit-file=${TEST_RESULTS}" 
     DEPENDS pwsat.flash ${NAME}.deps
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 add_custom_target(pyconsole
-    COMMAND ${CMAKE_COMMAND} -E env "MOCK_COM=${MOCK_COM}" "OBC_COM=${OBC_COM}" "PAYLOAD_COM=${PAYLOAD_COM}" ipython -i pyconsole.py
+    COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}" ipython -i pyconsole.py
     DEPENDS ${NAME}.deps
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.py.template ${CMAKE_CURRENT_BINARY_DIR}/config.py)

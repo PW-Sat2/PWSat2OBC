@@ -5,6 +5,9 @@ from devices import *
 from i2cMock import I2CMock
 
 
+
+use_only_system_bus = False
+
 class System:
     def __init__(self, mock_com, obc_com, payload_com):
         self.log = logging.getLogger("system")
@@ -13,7 +16,10 @@ class System:
         self.mock_com = mock_com
 
         self.i2c = I2CMock(mock_com)
-        self.payload = I2CMock(payload_com)
+        if use_only_system_bus:
+            self.payload = self.i2c
+        else:
+            self.payload = I2CMock(payload_com)
 
         self._setup_devices()
 
