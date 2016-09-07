@@ -1,11 +1,11 @@
-#ifndef SRC_TERMINAL_H_
-#define SRC_TERMINAL_H_
+#ifndef OBC_TERMINAL_H
+#define OBC_TERMINAL_H
 
-#include "leuart/line_io.h"
+#pragma once
 
-void TerminalInit(void);
-void TerminalSendNewLine(void);
-void TerminalPrintf(const char* text, ...);
-void TerminalPuts(const char* text);
+/**
+@brief Initializes global terminal object.
+*/
+void InitializeTerminal(void);
 
 #endif

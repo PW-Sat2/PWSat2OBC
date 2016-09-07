@@ -35,6 +35,7 @@ target_link_libraries(${NAME}
     mission
     eps
     adcs
+    terminal
 )
 
 target_generate_hex(${NAME})

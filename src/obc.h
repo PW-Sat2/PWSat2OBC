@@ -2,14 +2,15 @@
 #define OBC_H
 
 #include <stdatomic.h>
-#include "adcs/adcs.h"
 
-#include "time/timer.h"
+#include "adcs/adcs.h"
 #include "base/os.h"
 #include "comm/comm.h"
 #include "fs/fs.h"
 #include "leuart/line_io.h"
 #include "storage/nand_driver.h"
+#include "terminal/terminal.h"
+#include "time/timer.h"
 #include "yaffs_guts.h"
 
 /**
@@ -36,7 +37,12 @@ typedef struct
 
     /** @brief Persistent timer that measures mission time. */
     TimeProvider timeProvider;
+
+    /** @brief Standard text based IO. */
     LineIO IO;
+
+    /** @brief Terminal object. */
+    Terminal terminal;
 } OBC;
 
 /** @brief Global OBC object. */

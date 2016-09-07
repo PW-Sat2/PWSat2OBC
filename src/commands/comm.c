@@ -23,7 +23,7 @@ void GetFramesCountHandler(uint16_t argc, char* argv[])
     CommReceiverFrameCount count = CommGetFrameCount(&Main.comm);
     if (count.status)
     {
-        TerminalPrintf("%d\n", count.frameCount);
+        TerminalPrintf(&Main.terminal, "%d\n", count.frameCount);
     }
 }
 
@@ -40,7 +40,7 @@ void ReceiveFrameHandler(uint16_t argc, char* argv[])
     else
     {
         CommRemoveFrame(&Main.comm);
-        TerminalPuts((const char*)frame.Contents);
+        TerminalPuts(&Main.terminal, (const char*)frame.Contents);
     }
 }
 
@@ -57,5 +57,5 @@ void OBCGetState(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
-    TerminalPrintf("%d\n", atomic_load(&Main.initialized) ? 1 : 0);
+    TerminalPrintf(&Main.terminal, "%d\n", atomic_load(&Main.initialized) ? 1 : 0);
 }

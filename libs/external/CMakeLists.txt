@@ -1,0 +1,6 @@
+add_subdirectory(FreeRTOS)
+add_subdirectory(googletest)
+add_subdirectory(emlib)
+add_subdirectory(rapidcheck)
+add_subdirectory(yaffs)
+add_subdirectory(emdrv)
