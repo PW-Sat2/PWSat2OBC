@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <em_chip.h>
+#include <em_cmu.h>
 #include <em_emu.h>
 
 #include <FreeRTOS.h>
@@ -10,6 +11,7 @@
 #include "SwoEndpoint/SwoEndpoint.h"
 #include "base/os.h"
 #include "dmadrv.h"
+#include "io_map.h"
 #include "leuart/leuart.h"
 #include "logger/logger.h"
 #include "swo/swo.h"
@@ -74,6 +76,12 @@ static void InitSwoEndpoint(void)
 int main(void)
 {
     CHIP_Init();
+
+    CMU_ClockEnable(cmuClock_GPIO, true);
+    CMU_ClockEnable(cmuClock_DMA, true);
+
+    CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFRCO);
+    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFRCO);
 
     SwoEnable();
 
