@@ -5,19 +5,31 @@ set(SOURCES
   mem.c
   test.cpp
   utils.cpp
-  Logger/LoggerTest.cpp   
+  Logger/LoggerTest.cpp
   FileSystem/FileSystemTest.cpp
   FileSystem/YaffsOSGlue.c
   FileSystem/MemoryDriver.cpp
-  FileSystem/NANDGeometryTest.cpp 
+  FileSystem/NANDGeometryTest.cpp
   FileSystem/MemoryDriver.cpp
-  FileSystem/EccTest.cpp  
+  FileSystem/EccTest.cpp
   Comm/CommTest.cpp
   base/ReaderTest.cpp
   base/WriterTest.cpp
+  MissionPlan/MissionPlanTest.cpp  
+  MissionPlan/DeployAntennaActionTest.cpp
+  MissionPlan/MissionTestHelpers.cpp
+  MissionPlan/SailSystemStateTest.cpp
+  MissionPlan/ActionDispatchTest.cpp
   os/os.cpp
   os/os.hpp
   OsMock.hpp
+  adxrs453/adxrs453Test.cpp
+  time/time.cpp
+  time/timer.cpp
+  time/persistance.cpp
+  mock/FsMock.hpp
+  mock/FsMock.cpp
+  assert.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -30,25 +42,29 @@ else()
   set(LD_COVERAGE )
 endif(${ENABLE_COVERAGE})
 
-set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_CURRENT_LIST_DIR}/linker.ld ${LD_COVERAGE}")
+set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_CURRENT_LIST_DIR}/linker.ld -u _printf_float -specs=rdimon.specs ${LD_COVERAGE}")
+
 
 target_link_libraries(${NAME}
-    m 
-    platform 
-    emlib 
-    gtest 
-    gmock 
-    logger 
-    yaffs 
-    storage 
+    m
+    platform
+    emlib
+    gtest
+    gmock
+    logger
+    yaffs
+    storage
     comm
     fs    
+    base
+    mission
+    rapidcheck
+    rapidcheck.gtest
+    rapidcheck.gmock
+    emdrv
+    adxrs453    
+    time
 )
-
-target_require_semihosting(${NAME})
-
-get_target_property(existing_link_flags ${NAME} LINK_FLAGS)
-set_target_properties(${NAME} PROPERTIES LINK_FLAGS "${existing_link_flags} -u _printf_float")
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
 

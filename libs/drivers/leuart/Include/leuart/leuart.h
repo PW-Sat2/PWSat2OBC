@@ -2,11 +2,20 @@
 #define SRC_LEUART_H_
 
 #include <stdarg.h>
+#include "line_io.h"
 
-void leuartInit(xQueueHandle sink);
-void leuartPuts(const char* buffer);
-void leuartPrintf(const char * text, ...);
-void leuartvPrintf(const char * text, va_list args);
-void leuartPutc(const char c);
+/**
+ * @defgroup leuart LEUART driver
+ *
+ * @{
+ */
+
+/**
+ * @brief Initializes LEUART driver
+ * @param[out] io Line IO interface
+ */
+void LeuartLineIOInit(LineIO* io);
+
+/** @} */
 
 #endif

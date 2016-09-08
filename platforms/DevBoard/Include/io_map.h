@@ -13,7 +13,8 @@
 #define LEUART0_TX 4
 #define LEUART0_RX 5
 #define LEUART0_LOCATION LEUART_ROUTE_LOCATION_LOC0
-#define LEUART0_BAUDRATE 9600
+#define LEUART0_BAUDRATE 2400
+#define LEUART0_INT_PRIORITY 6
 
 // I2C
 #define I2C I2C1
@@ -21,6 +22,8 @@
 #define I2C_SDA_PIN 4
 #define I2C_SCL_PIN 5
 #define I2C_LOCATION I2C_ROUTE_LOCATION_LOC0
+
+#define I2C1_INT_PRIORITY 6
 
 // USART1
 #define USART1_PORT gpioPortD
@@ -52,5 +55,25 @@
 
 #define EBI_DATA_PORT gpioPortE
 #define EBI_DATA_PIN0 8
+
+#define ADXRS453_SPI_USART_PORT USART1
+#define ADXRS453_SPI_USART_ROUTE_LOCATION _USART_ROUTE_LOCATION_LOC1
+#define GYRO0                                                                                                                              \
+    {                                                                                                                                      \
+        gpioPortD, /* cs port location*/                                                                                                   \
+            3,     /* cs pin location */                                                                                                   \
+    }
+
+#define GYRO1                                                                                                                              \
+    {                                                                                                                                      \
+        gpioPortD, /* cs port location*/                                                                                                   \
+            6,     /* cs pin location */                                                                                                   \
+    }
+
+#define GYRO2                                                                                                                              \
+    {                                                                                                                                      \
+        gpioPortC, /* cs port location*/                                                                                                   \
+            6,     /* cs pin location */                                                                                                   \
+    }
 
 #endif

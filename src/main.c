@@ -4,6 +4,7 @@
 #include <em_cmu.h>
 #include <em_dbg.h>
 #include <em_device.h>
+#include <em_emu.h>
 #include <em_gpio.h>
 #include <em_system.h>
 
@@ -15,14 +16,16 @@
 #include "base/os.h"
 #include "comm/comm.h"
 #include "camera/camera.h"
-#include "devices/eps.h"
+#include "eps/eps.h"
 #include "i2c/i2c.h"
 #include "io_map.h"
 #include "logger/logger.h"
 #include "obc.h"
-#include "openSail.h"
 #include "swo/swo.h"
 #include "system.h"
+
+#include <spidrv.h>
+#include "adxrs453/adxrs453.h"
 #include "terminal.h"
 
 #include "fs/fs.h"
@@ -30,7 +33,16 @@
 #include "storage/nand_driver.h"
 #include "storage/storage.h"
 
+#include "adcs/adcs.h"
+#include "base/ecc.h"
+#include "mission.h"
+
+#include "dmadrv.h"
+
+#include "leuart/leuart.h"
+
 OBC Main;
+MissionState Mission;
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
@@ -42,6 +54,7 @@ void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
 
 void vApplicationIdleHook(void)
 {
+    EMU_EnterEM1();
 }
 
 static void BlinkLed0(void* param)
@@ -105,10 +118,17 @@ static void ObcInitTask(void* param)
         LOG(LOG_LEVEL_ERROR, "Unable to initialize file system");
     }
 
+    if (!TimeInitialize(&obc->timeProvider, NULL, NULL, &obc->fs))
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to initialize persistent timer. ");
+    }
+
     if (!CommRestart(&obc->comm))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to restart comm");
     }
+
+    InitializeADCS(&obc->adcs);
 
     LOG(LOG_LEVEL_INFO, "Intialized");
     atomic_store(&Main.initialized, true);
@@ -122,15 +142,62 @@ static void FrameHandler(CommObject* comm, CommFrame* frame, void* context)
     CommSendFrame(comm, (uint8_t*)"PONG", 4);
 }
 
+void ADXRS(void* param)
+{
+    UNREFERENCED_PARAMETER(param);
+    SPIDRV_HandleData_t handleData;
+    SPIDRV_Handle_t handle = &handleData;
+    SPIDRV_Init_t initData = ADXRS453_SPI;
+    SPIDRV_Init(handle, &initData);
+    GyroInterface_t interface;
+    interface.writeProc = SPISendB;
+    interface.readProc = SPISendRecvB;
+    ADXRS453_Obj_t gyro;
+    gyro.pinLocations = (ADXRS453_PinLocations_t)GYRO0;
+    gyro.interface = interface;
+    ADXRS453_Obj_t gyro1;
+    gyro1.pinLocations = (ADXRS453_PinLocations_t)GYRO1;
+    gyro1.interface = interface;
+    ADXRS453_Obj_t gyro2;
+    gyro2.pinLocations = (ADXRS453_PinLocations_t)GYRO2;
+    gyro2.interface = interface;
+    ADXRS453_Init(&gyro, handle);
+    ADXRS453_Init(&gyro1, handle);
+    ADXRS453_Init(&gyro2, handle);
+
+    while (1)
+    {
+        SPI_TransferReturn_t rate = ADXRS453_GetRate(&gyro, handle);
+        SPI_TransferReturn_t temp = ADXRS453_GetTemperature(&gyro, handle);
+        LOGF(LOG_LEVEL_INFO,
+            "gyro 0 temp: %d ' celcius rate: %d '/sec rotation\n",
+            (int)temp.result.sensorResult,
+            (int)rate.result.sensorResult);
+        rate = ADXRS453_GetRate(&gyro1, handle);
+        temp = ADXRS453_GetTemperature(&gyro1, handle);
+        LOGF(LOG_LEVEL_INFO,
+            "gyro 1 temp: %d ' celcius rate: %d '/sec rotation\n",
+            (int)temp.result.sensorResult,
+            (int)rate.result.sensorResult);
+        rate = ADXRS453_GetRate(&gyro2, handle);
+        temp = ADXRS453_GetTemperature(&gyro2, handle);
+        LOGF(LOG_LEVEL_INFO,
+            "gyro 2 temp: %d ' celcius rate: %d '/sec rotation\n",
+            (int)temp.result.sensorResult,
+            (int)rate.result.sensorResult);
+        vTaskDelay(10 / portTICK_PERIOD_MS);
+    }
+}
 int main(void)
 {
     memset(&Main, 0, sizeof(Main));
     CHIP_Init();
 
-    CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
-    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);
-
     CMU_ClockEnable(cmuClock_GPIO, true);
+    CMU_ClockEnable(cmuClock_DMA, true);
+
+    CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFRCO);
+    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFRCO);
 
     SwoEnable();
 
@@ -138,6 +205,13 @@ int main(void)
     InitSwoEndpoint();
 
     OSSetup();
+
+    DMADRV_Init();
+
+    LeuartLineIOInit(&Main.IO);
+
+    TerminalInit();
+
     I2CInit();
 
     CameraInit(&Main.camera);
@@ -150,10 +224,9 @@ int main(void)
     commUpperInterface.frameHandlerContext = NULL;
     CommInitialize(&Main.comm, &commInterface, &commUpperInterface);
 
-    TerminalInit();
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 
-    OpenSailInit();
+    InitializeMission(&Mission, &Main);
 
     GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
     GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);
@@ -163,7 +236,8 @@ int main(void)
     GPIO_PinOutSet(LED_PORT, LED1);
 
     System.CreateTask(BlinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
-    System.CreateTask(ObcInitTask, "Init", 512, &Main, tskIDLE_PRIORITY + 16, &Main.initTask);
+    // System.CreateTask(ADXRS, "ADXRS", 512, NULL, tskIDLE_PRIORITY + 2, NULL);
+    System.CreateTask(ObcInitTask, "Init", 512, &Main, tskIDLE_PRIORITY + 15, &Main.initTask);
     System.RunScheduler();
 
     GPIO_PinOutToggle(LED_PORT, LED0);

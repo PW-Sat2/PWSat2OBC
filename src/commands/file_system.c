@@ -9,9 +9,9 @@ void FSListFiles(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
 
-    FSDirectoryHandle dir = Main.fs.openDirectory(argv[0]);
+    const FSDirectoryOpenResult result = Main.fs.openDirectory(&Main.fs, argv[0]);
 
-    if (dir == -1)
+    if (OS_RESULT_FAILED(result.Status))
     {
         TerminalPuts("Error");
         TerminalSendNewLine();
@@ -19,39 +19,39 @@ void FSListFiles(uint16_t argc, char* argv[])
     }
 
     char* entry;
-    while ((entry = Main.fs.readDirectory(dir)) != NULL)
+    FSDirectoryHandle dir = result.Handle;
+    while ((entry = Main.fs.readDirectory(&Main.fs, dir)) != NULL)
     {
         TerminalPuts(entry);
         TerminalSendNewLine();
     }
 
-    Main.fs.closeDirectory(dir);
+    Main.fs.closeDirectory(&Main.fs, dir);
 }
 
 void FSWriteFile(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
 
-    FSFileHandle file = Main.fs.open(argv[0], O_RDWR | O_CREAT | O_TRUNC, S_IRWXU);
-
-    if (file == -1)
+    const FSFileOpenResult result = Main.fs.open(&Main.fs, argv[0], FsOpenCreateAlways, FsWriteOnly);
+    if (OS_RESULT_FAILED(result.Status))
     {
         TerminalPuts("Error");
         TerminalSendNewLine();
         return;
     }
 
-    Main.fs.ftruncate(file, 0);
-    Main.fs.write(file, argv[1], strlen(argv[1]));
-    Main.fs.close(file);
+    const FSFileHandle file = result.Handle;
+    Main.fs.ftruncate(&Main.fs, file, 0);
+    Main.fs.write(&Main.fs, file, argv[1], strlen(argv[1]));
+    Main.fs.close(&Main.fs, file);
 }
 
 void FSReadFile(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
-    FSFileHandle file = Main.fs.open(argv[0], O_RDONLY, S_IRWXU);
-
-    if (file == -1)
+    const FSFileOpenResult result = Main.fs.open(&Main.fs, argv[0], FsOpenExisting, FsReadOnly);
+    if (OS_RESULT_FAILED(result.Status))
     {
         TerminalPuts("Error");
         TerminalSendNewLine();
@@ -59,12 +59,10 @@ void FSReadFile(uint16_t argc, char* argv[])
     }
 
     char buffer[100];
-
     memset(buffer, 0, sizeof(buffer));
-
-    Main.fs.read(file, buffer, sizeof(buffer));
-
-    Main.fs.close(file);
+    const FSFileHandle file = result.Handle;
+    Main.fs.read(&Main.fs, file, buffer, sizeof(buffer));
+    Main.fs.close(&Main.fs, file);
 
     buffer[99] = 0;
 

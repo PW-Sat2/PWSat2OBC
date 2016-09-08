@@ -11,6 +11,7 @@
 #include "io_map.h"
 #include "leuart/leuart.h"
 #include "logger/logger.h"
+#include "obc.h"
 #include "swo/swo.h"
 #include "system.h"
 #include "terminal.h"
@@ -23,7 +24,8 @@ typedef struct
     commandHandler handler;
 } command;
 
-static const command commands[] = {{"ping", PingHandler},
+static const command commands[] = {
+    {"ping", PingHandler},
     {"echo", EchoHandler},
     {"jumpToTime", JumpToTimeHandler},
     {"currentTime", CurrentTimeHandler},
@@ -36,9 +38,9 @@ static const command commands[] = {{"ping", PingHandler},
     {"getState", OBCGetState},
     {"listFiles", FSListFiles},
     {"writeFile", FSWriteFile},
-    {"readFile", FSReadFile}};
-
-static QueueHandle_t terminalQueue;
+    {"readFile", FSReadFile},
+    {"stateCmd", CommandByTerminal} //
+};
 
 static void parseCommandLine(char line[], char** commandName, char** arguments, uint16_t* argc, uint8_t maxArgsCount)
 {
@@ -62,12 +64,12 @@ static void parseCommandLine(char line[], char** commandName, char** arguments, 
 
 void TerminalSendNewLine(void)
 {
-    leuartPuts("\n");
+    Main.IO.Puts(&Main.IO, "\n");
 }
 
 static void terminalSendPrefix(void)
 {
-    leuartPuts(">");
+    Main.IO.Puts(&Main.IO, ">");
 }
 
 void TerminalPrintf(const char* text, ...)
@@ -75,14 +77,14 @@ void TerminalPrintf(const char* text, ...)
     va_list args;
     va_start(args, text);
 
-    leuartvPrintf(text, args);
+    Main.IO.VPrintf(&Main.IO, text, args);
 
     va_end(args);
 }
 
 void TerminalPuts(const char* text)
 {
-    leuartPuts(text);
+    Main.IO.Puts(&Main.IO, text);
 }
 
 static void terminalHandleCommand(char* buffer)
@@ -101,56 +103,40 @@ static void terminalHandleCommand(char* buffer)
             TerminalSendNewLine();
         }
     }
-
-    terminalSendPrefix();
 }
 
-static void handleIncomingChar(void* args)
+static void handleIncomingChar(void* arg)
 {
-    UNREFERENCED_PARAMETER(args);
+    UNREFERENCED_PARAMETER(arg);
 
-    char input_buffer[100] = {0};
-    uint32_t input_buffer_position = 0;
+    bool firstRun = true;
 
     while (1)
     {
-        uint8_t data = 0;
+        char input_buffer[100] = {0};
 
-        xQueueReceive(terminalQueue, &data, portMAX_DELAY);
-#if 0
-        LOGF(LOG_LEVEL_INFO, "RC: 0x%x, %c", (int)data, data);
-#endif
-        if (data == '\n')
+        if (!firstRun)
         {
-            input_buffer[input_buffer_position] = 0;
-            input_buffer_position = 0;
+            terminalSendPrefix();
+        }
 
-            terminalHandleCommand(input_buffer);
-        }
-        else if (input_buffer_position < sizeof(input_buffer) - 1)
-        {
-            input_buffer[input_buffer_position++] = data;
-        }
+        firstRun = false;
+
+        Main.IO.Readline(&Main.IO, input_buffer, COUNT_OF(input_buffer));
+
+        LOGF(LOG_LEVEL_INFO, "Received line %s", input_buffer);
+
+        terminalHandleCommand(input_buffer);
     }
 }
 
 void TerminalInit(void)
 {
-    terminalQueue = xQueueCreate(128, sizeof(uint8_t));
-
-    if (terminalQueue == NULL)
-    {
-        LOG(LOG_LEVEL_ERROR, "Error. Cannot create terminalIn thread.");
-        return;
-    }
-
     if (xTaskCreate(handleIncomingChar, "terminalIn", 2500, NULL, 4, NULL) != pdPASS)
     {
         LOG(LOG_LEVEL_ERROR, "Error. Cannot create terminalQueue.");
         return;
     }
 
-    leuartInit(terminalQueue);
-
-    TerminalPuts("@");
+    Main.IO.Puts(&Main.IO, "@");
 }

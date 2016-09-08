@@ -1,7 +1,3 @@
-#include <FreeRTOS.h>
-#include <queue.h>
-#include <semphr.h>
-
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -15,10 +11,11 @@
 
 #include "i2c.h"
 
+#include "base/os.h"
 #include "io_map.h"
 
-static QueueHandle_t i2cResult;
-static SemaphoreHandle_t i2cLock;
+static OSQueueHandle i2cResult;
+static OSSemaphoreHandle i2cLock;
 
 void I2C1_IRQHandler(void)
 {
@@ -29,34 +26,34 @@ void I2C1_IRQHandler(void)
         return;
     }
 
-    BaseType_t taskWoken = pdFALSE;
+    bool taskWoken = false;
 
-    if (xQueueSendFromISR(i2cResult, &status, &taskWoken) != pdTRUE)
+    if (!System.QueueSendISR(i2cResult, &status, &taskWoken))
     {
         LOG_ISR(LOG_LEVEL_ERROR, "Error queueing i2c result");
     }
 
-    portEND_SWITCHING_ISR(taskWoken);
+    System.EndSwitchingISR(taskWoken);
 }
 
 static I2C_TransferReturn_TypeDef i2cTransfer(I2C_TransferSeq_TypeDef* seq)
 {
-	xSemaphoreTake(i2cLock, portMAX_DELAY);
+    System.TakeSemaphore(i2cLock, MAX_DELAY);
 
     I2C_TransferReturn_TypeDef ret = I2C_TransferInit(I2C, seq);
 
     if (ret != i2cTransferInProgress)
     {
-        xSemaphoreGive(i2cLock);
+        System.GiveSemaphore(i2cLock);
         return ret;
     }
 
-    if (xQueueReceive(i2cResult, &ret, portMAX_DELAY) != pdTRUE)
+    if (!System.QueueReceive(i2cResult, &ret, MAX_DELAY))
     {
         LOG(LOG_LEVEL_ERROR, "Didn't received i2c transfer result");
     }
 
-    xSemaphoreGive(i2cLock);
+    System.GiveSemaphore(i2cLock);
 
     return ret;
 }
@@ -69,22 +66,20 @@ I2C_TransferReturn_TypeDef I2CWrite(uint8_t address, uint8_t* inData, uint16_t l
     return i2cTransfer(&seq);
 }
 
-I2C_TransferReturn_TypeDef I2CWriteRead(
-    uint8_t address, uint8_t* inData, uint16_t inLength, uint8_t* outData, uint16_t outLength)
+I2C_TransferReturn_TypeDef I2CWriteRead(uint8_t address, uint8_t* inData, uint16_t inLength, uint8_t* outData, uint16_t outLength)
 {
-    I2C_TransferSeq_TypeDef seq = {.addr = address,
-        .flags = I2C_FLAG_WRITE_READ,
-        .buf = {{.len = inLength, .data = inData}, {.len = outLength, .data = outData}}};
+    I2C_TransferSeq_TypeDef seq = {
+        .addr = address, .flags = I2C_FLAG_WRITE_READ, .buf = {{.len = inLength, .data = inData}, {.len = outLength, .data = outData}}};
 
     return i2cTransfer(&seq);
 }
 
 void I2CInit(void)
 {
-    i2cResult = xQueueCreate(1, sizeof(I2C_TransferReturn_TypeDef));
+    i2cResult = System.CreateQueue(1, sizeof(I2C_TransferReturn_TypeDef));
 
-    i2cLock = xSemaphoreCreateBinary();
-    xSemaphoreGive(i2cLock);
+    i2cLock = System.CreateBinarySemaphore();
+    System.GiveSemaphore(i2cLock);
 
     CMU_ClockEnable(cmuClock_I2C1, true);
 
@@ -100,5 +95,6 @@ void I2CInit(void)
 
     I2C_IntEnable(I2C, I2C_IEN_TXC);
 
+    NVIC_SetPriority(I2C1_IRQn, I2C1_INT_PRIORITY);
     NVIC_EnableIRQ(I2C1_IRQn);
 }

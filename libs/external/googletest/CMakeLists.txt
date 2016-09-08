@@ -1,6 +1,6 @@
 include(ExternalProject)
 
-set(OPTIONS "${CMAKE_CXX_FLAGS} -DGTEST_HAS_POSIX_RE=0 -DGTEST_HAS_STREAM_REDIRECTION=0 -DGTEST_MOCK_FS=1")
+set(OPTIONS "${CMAKE_CXX_FLAGS} -DGTEST_HAS_POSIX_RE=0 -DGTEST_HAS_STREAM_REDIRECTION=0 -DGTEST_MOCK_FS=1 --exceptions")
 
 ExternalProject_Add(gtest_source
   GIT_REPOSITORY https://github.com/PW-Sat2/googletest.git

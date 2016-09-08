@@ -4,13 +4,12 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "system.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+EXTERNC_BEGIN
 
 /**
- * @addtogroup utilities General Purpose utilities
+ * @addtogroup utilities
  * @{
  */
 
@@ -108,6 +107,15 @@ bool WriterWriteWordLE(Writer* writer, uint16_t word);
 bool WriterWriteDoubleWordLE(Writer* writer, uint32_t dword);
 
 /**
+ * @brief Writes single 64 bit word with little-endian memory orientation to the buffer
+ * and advances the current buffer position to the next unused byte.
+ * @param[in] writer Pointer to the queried reader object.
+ * @param[in] dword Quadword that should be added to writer output using little endian byte ordering.
+ * @return Operation status.
+ */
+bool WriterWriteQuadWordLE(Writer* writer, uint64_t dword);
+
+/**
  * @brief Writes the requested memory block to the buffer.
  *
  * @param[in] writer Pointer to the writer object.
@@ -140,8 +148,6 @@ static inline uint16_t WriterGetDataLength(const Writer* writer)
 }
 
 /** @}*/
-#ifdef __cplusplus
-}
-#endif
+EXTERNC_END
 
 #endif

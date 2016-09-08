@@ -4,20 +4,20 @@ set(SOURCES
     main.c
     terminal.c
     commands/ping.c
-    commands/time.c
     commands/camera.c
-    commands/comm.c
-    commands/file_system.c
-    devices/eps.c
-    openSail.c
-    obc_time.c
+    commands/time.c   
+    commands/comm.c   
+    commands/file_system.c       
+    commands/state_command.c                           
     obc.h
     fault_handlers.c
+    mission.c
+    assert.c
 )
 
 add_executable(${NAME} ${SOURCES})
 
-set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${PLATFORM_LINKER_SCRIPT} -Wl,-Map=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME}.map")
+set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${PLATFORM_LINKER_SCRIPT} -Wl,-Map=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME}.map -specs=nano.specs -specs=nosys.specs")
 
 target_link_libraries(${NAME} 
     platform
@@ -32,6 +32,11 @@ target_link_libraries(${NAME}
     SwoEndpoint
     i2c
     fs
+    adxrs453
+    time
+    mission
+    eps
+    adcs
 )
 
 target_generate_hex(${NAME})

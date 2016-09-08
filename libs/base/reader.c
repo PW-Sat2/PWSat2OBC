@@ -65,6 +65,34 @@ uint32_t ReaderReadDoubleWordLE(Reader* reader)
     }
 }
 
+uint64_t ReaderReadQuadWordLE(Reader* reader)
+{
+    if (!ReaderUpdateState(reader, 8))
+    {
+        return 0;
+    }
+    else
+    {
+        uint64_t value = reader->buffer[reader->position + 7];
+        value <<= 8;
+        value += reader->buffer[reader->position + 6];
+        value <<= 8;
+        value += reader->buffer[reader->position + 5];
+        value <<= 8;
+        value += reader->buffer[reader->position + 4];
+        value <<= 8;
+        value += reader->buffer[reader->position + 3];
+        value <<= 8;
+        value += reader->buffer[reader->position + 2];
+        value <<= 8;
+        value += reader->buffer[reader->position + 1];
+        value <<= 8;
+        value += reader->buffer[reader->position];
+        reader->position += 8;
+        return value;
+    }
+}
+
 const uint8_t* ReaderReadArray(Reader* reader, uint16_t length)
 {
     if (!ReaderUpdateState(reader, length))

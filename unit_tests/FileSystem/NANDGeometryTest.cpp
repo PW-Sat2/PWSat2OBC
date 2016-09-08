@@ -121,7 +121,7 @@ INSTANTIATE_TEST_CASE_P(ShouldCalculatePageOffset,
     ShouldCalculatePageOffset,
     Values(std::make_tuple<uint32_t, uint32_t>(0, 0x1000),
                             std::make_tuple<uint32_t, uint32_t>(1, 0x1400),
-                            std::make_tuple<uint32_t, uint32_t>(17, 0x5400)));
+                            std::make_tuple<uint32_t, uint32_t>(17, 0x5400)), );
 
 class ShouldCalculateBlockOffset : public testing::TestWithParam<std::tuple<uint32_t, uint32_t>>
 {
@@ -148,4 +148,4 @@ TEST_P(ShouldCalculateBlockOffset, ShouldCalculateBlockOffset)
 
 INSTANTIATE_TEST_CASE_P(ShouldCalculateBlockOffset,
     ShouldCalculateBlockOffset,
-    Values(std::make_tuple<uint32_t, uint32_t>(0, 0x1000), std::make_tuple<uint32_t, uint32_t>(1, 0x5000)));
+    Values(std::make_tuple<uint32_t, uint32_t>(0, 0x1000), std::make_tuple<uint32_t, uint32_t>(1, 0x5000)), );

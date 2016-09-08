@@ -4,10 +4,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "system.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+EXTERNC_BEGIN
 
 /**
  * @defgroup utilities General Purpose Utilities
@@ -98,6 +97,14 @@ uint16_t ReaderReadWordLE(Reader* reader);
 uint32_t ReaderReadDoubleWordLE(Reader* reader);
 
 /**
+ * @brief Read single 64 bit word with little-endian memory orientation from the buffer
+ * and advance the current buffer position to the next unread byte.
+ * @param[in] reader Pointer to the queried reader object.
+ * @return Read double word.
+ */
+uint64_t ReaderReadQuadWordLE(Reader* reader);
+
+/**
  * @brief Read the requested number of bytes from the buffer.
  *
  * This method does not perform any operation/transformation on the data it only ensures that
@@ -127,8 +134,6 @@ static inline void ReaderReset(Reader* reader)
 }
 
 /** @}*/
-#ifdef __cplusplus
-}
-#endif
+EXTERNC_END
 
 #endif
