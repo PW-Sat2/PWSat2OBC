@@ -13,12 +13,12 @@ except ImportError as e:
 
 class BaseTest(unittest.TestCase):
     def setUp(self):
-        mock_com = config['MOCK_COM']
         obc_com = config['OBC_COM']
-        payload_com = config['PAYLOAD_COM']
+        sys_bus_com = config['SYS_BUS_COM']
+        payload_bus_com = config['PAYLOAD_BUS_COM']
         use_single_bus = config['SINGLE_BUS']
 
-        self.system = System(mock_com, obc_com, payload_com, use_single_bus)
+        self.system = System(obc_com, sys_bus_com, payload_bus_com, use_single_bus)
 
     def tearDown(self):
         self.system.close()

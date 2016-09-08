@@ -1,7 +1,7 @@
 set(NAME integration_tests)
 
-set(MOCK_COM "XXX-MOCK" CACHE STRING "Serial port for system bus mock")
-set(PAYLOAD_COM "XXX-PAYLOAD" CACHE STRING "Serial port for payload bus mock")
+set(SYS_BUS_COM "XXX-MOCK" CACHE STRING "Serial port for system bus mock")
+set(PAYLOAD_BUS_COM "XXX-PAYLOAD" CACHE STRING "Serial port for payload bus mock")
 set(OBC_COM "XXX-OBC" CACHE STRING "Serial port for OBC terminal")
 
 set(TEST_RESULTS ${OUTPUT_PATH}/integration-tests.xml)
