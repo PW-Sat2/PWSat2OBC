@@ -6,7 +6,7 @@
 #include "logger/logger.h"
 
 /**
- * @defgroup SwoEndpoint
+ * @defgroup SwoEndpoint SWO Endpoint for Logger
  * @ingroup Logger
  *
  * @brief Logger data sink that forwards the logged entries to the Serial Wire Output (SWO) channel 1.

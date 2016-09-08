@@ -59,7 +59,7 @@ static I2CResult ExecuteTransfer(I2CBus* bus, I2C_TransferSeq_TypeDef* seq)
     return (I2CResult)ret;
 }
 
-static I2CResult Write(I2CBus* bus, I2CAddress address, uint8_t* data, size_t length)
+static I2CResult Write(I2CBus* bus, const I2CAddress address, uint8_t* data, size_t length)
 {
     I2C_TransferSeq_TypeDef seq = //
         {
@@ -75,7 +75,7 @@ static I2CResult Write(I2CBus* bus, I2CAddress address, uint8_t* data, size_t le
     return ExecuteTransfer(bus, &seq);
 }
 
-static I2CResult WriteRead(I2CBus* bus, I2CAddress address, uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength)
+static I2CResult WriteRead(I2CBus* bus, const I2CAddress address, uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength)
 {
     I2C_TransferSeq_TypeDef seq = //
         {
