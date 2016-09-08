@@ -16,7 +16,7 @@ class System:
         self.sys_bus = I2CMock(sys_bus_com)
 
         if use_single_bus:
-            self.payload_bus = self.i2c
+            self.payload_bus = self.sys_bus
         else:
             self.payload_bus = I2CMock(payload_bus_com)
 
