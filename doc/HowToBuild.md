@@ -1,4 +1,4 @@
-# How to build
+# How to build {#HowToBuild}
 
 ## Tools needed
 Build process requires following tools:
@@ -12,7 +12,7 @@ Build process requires following tools:
 * Clang (for `clang-format`)
 
 ### Ready-made pack for Windows
-For Windows people ready-made pack with all necessary tools is located in FP LAN: \\\morpheus\pub-Transfer\m\mnowak\PWSat-Toolchain.zip. For rest of world: https://www.dropbox.com/s/zrf3c5uy9ujo687/PWSat-Toolchain.zip?dl=0
+For Windows people ready-made pack with all necessary tools is located here: https://www.dropbox.com/s/zrf3c5uy9ujo687/PWSat-Toolchain.zip?dl=0
 After unpacking, add `bin` directory to `PATH`.
 
 ### Unix - Ubuntu 15.10
