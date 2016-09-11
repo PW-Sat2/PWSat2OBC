@@ -129,7 +129,7 @@ static OSQueueHandle CreateQueue(size_t maxElementCount, size_t elementSize)
 
 static bool QueueReceive(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout)
 {
-    return xQueueReceive(queue, element, timeout) == pdTRUE;
+    return xQueueReceive(queue, element, ConvertTimeToTicks(timeout)) == pdTRUE;
 }
 
 static bool QueueReceiveISR(OSQueueHandle queue, void* element, bool* taskWoken)
