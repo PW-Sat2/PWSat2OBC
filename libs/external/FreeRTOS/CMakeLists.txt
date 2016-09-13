@@ -15,4 +15,7 @@ add_library(${NAME} STATIC ${SOURCES} ${MEM_MANG} ${PORT_SOURCES})
 
 target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Include ${PORT_DIR})
 
-target_link_libraries(${NAME} platform assert)
+target_link_libraries(${NAME} 
+	platform 
+	assert
+	)
