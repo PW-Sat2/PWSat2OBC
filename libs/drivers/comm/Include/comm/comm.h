@@ -7,10 +7,9 @@
 
 #include "base/os.h"
 #include "i2c/i2c.h"
+#include "system.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+EXTERNC_BEGIN
 
 /**
  * @defgroup LowerCommDriver Low Level Communication Module Driver
@@ -425,8 +424,6 @@ bool CommResetReceiver(CommObject* comm);
 
 /** @}*/
 
-#ifdef __cplusplus
-}
-#endif
+EXTERNC_END
 
 #endif /* SRC_DEVICES_COMM_H_ */
