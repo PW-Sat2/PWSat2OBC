@@ -2,15 +2,15 @@ set(NAME comm)
 
 set(SOURCES
     comm.c
+    Include/comm/comm.h
 )
 
 add_library(${NAME} STATIC ${SOURCES})
 
-target_link_libraries(${NAME} 
-    base 
-    platform 
-    logger 
-    emlib
+target_link_libraries(${NAME}
+    base
+    platform
+    logger
     i2c
 )
 
