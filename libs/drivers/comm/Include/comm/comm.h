@@ -3,7 +3,6 @@
 
 #include <stdbool.h>
 #include <cstdint>
-#include <em_i2c.h>
 #include <gsl/span>
 
 #include "base/os.h"
