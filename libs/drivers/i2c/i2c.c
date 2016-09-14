@@ -7,9 +7,7 @@
 
 #include "i2c.h"
 
-static I2CBus* buses[2] = {NULL};
-
-static inline void IRQHandler(I2CBus* bus)
+void IRQHandler(I2CBus* bus)
 {
     I2C_TransferReturn_TypeDef status = I2C_Transfer((I2C_TypeDef*)bus->HWInterface);
 
@@ -24,16 +22,6 @@ static inline void IRQHandler(I2CBus* bus)
     }
 
     System.EndSwitchingISR(NULL);
-}
-
-void I2C0_IRQHandler(void)
-{
-    IRQHandler(buses[0]);
-}
-
-void I2C1_IRQHandler(void)
-{
-    IRQHandler(buses[1]);
 }
 
 static I2CResult ExecuteTransfer(I2CBus* bus, I2C_TransferSeq_TypeDef* seq)
@@ -91,7 +79,7 @@ static I2CResult WriteRead(I2CBus* bus, const I2CAddress address, uint8_t* inDat
     return ExecuteTransfer(bus, &seq);
 }
 
-static void SetupInterface(I2CBus* bus,
+void I2CSetupInterface(I2CBus* bus,
     I2C_TypeDef* hw,
     uint16_t location,
     GPIO_Port_TypeDef port,
@@ -126,13 +114,4 @@ static void SetupInterface(I2CBus* bus,
 
     NVIC_SetPriority(irq, I2C_IRQ_PRIORITY);
     NVIC_EnableIRQ(irq);
-}
-
-void I2CDriverInit(I2CBus bus[])
-{
-    buses[0] = &bus[0];
-    buses[1] = &bus[1];
-
-    SetupInterface(&bus[0], I2C0, I2C0_BUS_LOCATION, I2C0_BUS_PORT, I2C0_BUS_SDA_PIN, I2C0_BUS_SCL_PIN, cmuClock_I2C0, I2C0_IRQn);
-    SetupInterface(&bus[1], I2C1, I2C1_BUS_LOCATION, I2C1_BUS_PORT, I2C1_BUS_SDA_PIN, I2C1_BUS_SCL_PIN, cmuClock_I2C1, I2C1_IRQn);
 }

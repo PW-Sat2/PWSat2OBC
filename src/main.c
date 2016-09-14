@@ -56,6 +56,16 @@ void vApplicationIdleHook(void)
     EMU_EnterEM1();
 }
 
+void I2C0_IRQHandler(void)
+{
+    IRQHandler(&Main.I2CBuses[0]);
+}
+
+void I2C1_IRQHandler(void)
+{
+    IRQHandler(&Main.I2CBuses[1]);
+}
+
 static void BlinkLed0(void* param)
 {
     UNREFERENCED_PARAMETER(param);
@@ -187,16 +197,30 @@ void ADXRS(void* param)
         vTaskDelay(10 / portTICK_PERIOD_MS);
     }
 }
-int main(void)
-{
-    memset(&Main, 0, sizeof(Main));
-    CHIP_Init();
 
+void SetupHardware(void)
+{
     CMU_ClockEnable(cmuClock_GPIO, true);
     CMU_ClockEnable(cmuClock_DMA, true);
 
     CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFRCO);
     CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFRCO);
+}
+
+void SetupI2C(void)
+{
+    I2CSetupInterface(
+        &Main.I2CBuses[0], I2C0, I2C0_BUS_LOCATION, I2C0_BUS_PORT, I2C0_BUS_SDA_PIN, I2C0_BUS_SCL_PIN, cmuClock_I2C0, I2C0_IRQn);
+    I2CSetupInterface(
+        &Main.I2CBuses[1], I2C1, I2C1_BUS_LOCATION, I2C1_BUS_PORT, I2C1_BUS_SDA_PIN, I2C1_BUS_SCL_PIN, cmuClock_I2C1, I2C1_IRQn);
+}
+
+int main(void)
+{
+    memset(&Main, 0, sizeof(Main));
+    CHIP_Init();
+
+    SetupHardware();
 
     SwoEnable();
 
@@ -211,7 +235,7 @@ int main(void)
 
     TerminalInit();
 
-    I2CDriverInit(Main.I2CBuses);
+    SetupI2C();
 
     Main.I2C.System = &Main.I2CBuses[I2C_SYSTEM_BUS];
     Main.I2C.Payload = &Main.I2CBuses[I2C_PAYLOAD_BUS];

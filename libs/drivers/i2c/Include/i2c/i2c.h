@@ -2,6 +2,8 @@
 #define SRC_DRIVERS_I2C_H_
 
 #include <stdlib.h>
+#include <em_cmu.h>
+#include <em_gpio.h>
 #include <em_i2c.h>
 #include "base/os.h"
 #include "system.h"
@@ -107,11 +109,16 @@ typedef struct
     I2CBus* Payload;
 } I2CInterface;
 
-/**
- * @brief Initializes all available buses
- * @param[in] bus Two-element array that will hold available buses
- */
-void I2CDriverInit(I2CBus bus[]);
+void I2CSetupInterface(I2CBus* bus,
+    I2C_TypeDef* hw,
+    uint16_t location,
+    GPIO_Port_TypeDef port,
+    uint16_t sdaPin,
+    uint16_t sclPin,
+    CMU_Clock_TypeDef clock,
+    IRQn_Type irq);
+
+void IRQHandler(I2CBus* bus);
 
 void I2CSetUpFallbackBus(I2CBus* bus, I2CInterface* buses);
 
