@@ -113,6 +113,8 @@ typedef struct
  */
 void I2CDriverInit(I2CBus bus[]);
 
+void I2CSetUpFallbackBus(I2CBus* bus, I2CInterface* buses);
+
 /** @} */
 
 EXTERNC_END
