@@ -13,12 +13,12 @@ class System:
         self.sys_bus_com = sys_bus_com
         self.payload_bus_com = payload_bus_com
 
-        self.sys_bus = I2CMock(sys_bus_com)
+        self.sys_bus = I2CMock('SYS', sys_bus_com)
 
         if use_single_bus:
             self.payload_bus = self.sys_bus
         else:
-            self.payload_bus = I2CMock(payload_bus_com)
+            self.payload_bus = I2CMock('PLD', payload_bus_com)
 
         self._setup_devices()
 
@@ -40,7 +40,7 @@ class System:
         self.sys_bus.add_device(self.receiver)
 
     def close(self):
-        self.sys_bus.close()
-        self.payload_bus.close()
+        self.sys_bus.stop()
+        self.payload_bus.stop()
 
         self.obc.close()

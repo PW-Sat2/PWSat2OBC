@@ -26,25 +26,49 @@ void I2CIRQHandler(I2CBus* bus)
 
 static I2CResult ExecuteTransfer(I2CBus* bus, I2C_TransferSeq_TypeDef* seq)
 {
-    System.TakeSemaphore(bus->Lock, MAX_DELAY);
-
-    I2C_TransferReturn_TypeDef ret = I2C_TransferInit((I2C_TypeDef*)bus->HWInterface, seq);
-
-    if (ret != i2cTransferInProgress)
+    if (OS_RESULT_FAILED(System.TakeSemaphore(bus->Lock, MAX_DELAY)))
     {
-        System.GiveSemaphore(bus->Lock);
-        return (I2CResult)ret;
+        LOGF(LOG_LEVEL_ERROR, "[I2C] Taking semaphore failed. Address: %X", seq->addr);
+        return I2CResultFailure;
     }
 
-    if (!System.QueueReceive(bus->ResultQueue, &ret, MAX_DELAY))
+    I2C_TypeDef* hw = (I2C_TypeDef*)bus->HWInterface;
+
+    I2C_TransferReturn_TypeDef rawResult = (I2CResult)I2C_TransferInit(hw, seq);
+
+    if (rawResult != i2cTransferInProgress)
     {
+        System.GiveSemaphore(bus->Lock);
+        return (I2CResult)rawResult;
+    }
+
+    if (!System.QueueReceive(bus->ResultQueue, &rawResult, I2C_TIMEOUT * 1000)) // I2C_TIMEOUT * 1000
+    {
+        I2CResult ret = I2CResultTimeout;
+
         LOG(LOG_LEVEL_ERROR, "Didn't received i2c transfer result");
-        return I2CResultFailure;
+
+        hw->CMD = I2C_CMD_STOP | I2C_CMD_ABORT;
+
+        while (HAS_FLAG(hw->STATUS, I2C_STATUS_PABORT))
+        {
+        }
+
+        if (GPIO_PinInGet((GPIO_Port_TypeDef)bus->IO.Port, bus->IO.SCL) == 0)
+        {
+            LOG(LOG_LEVEL_ERROR, "SCL latched at low level");
+
+            ret = I2CResultClockLatched;
+        }
+
+        System.GiveSemaphore(bus->Lock);
+
+        return ret;
     }
 
     System.GiveSemaphore(bus->Lock);
 
-    return (I2CResult)ret;
+    return (I2CResult)rawResult;
 }
 
 static I2CResult Write(I2CBus* bus, const I2CAddress address, const uint8_t* data, size_t length)
@@ -91,6 +115,10 @@ void I2CSetupInterface(I2CBus* bus,
 {
     bus->Extra = NULL;
     bus->HWInterface = hw;
+    bus->IO.Port = (uint16_t)port;
+    bus->IO.SCL = sclPin;
+    bus->IO.SDA = sdaPin;
+
     bus->Write = Write;
     bus->WriteRead = WriteRead;
 

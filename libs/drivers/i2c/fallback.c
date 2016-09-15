@@ -1,5 +1,7 @@
 #include <stddef.h>
 
+#include "logger/logger.h"
+
 #include "i2c.h"
 
 static I2CResult Write(I2CBus* bus, const I2CAddress address, const uint8_t* data, size_t length)
@@ -12,6 +14,8 @@ static I2CResult Write(I2CBus* bus, const I2CAddress address, const uint8_t* dat
     {
         return systemBusResult;
     }
+
+    LOGF(LOG_LEVEL_WARNING, "Fallbacking to payload bus. System bus error %d. Transfer to %X", systemBusResult, address);
 
     const I2CResult payloadBusResult = buses->Payload->Write(buses->Payload, address, data, length);
 
@@ -29,6 +33,8 @@ static I2CResult WriteRead(
     {
         return systemBusResult;
     }
+
+    LOGF(LOG_LEVEL_WARNING, "Fallbacking to payload bus. System bus error %d. Transfer to %X", systemBusResult, address);
 
     const I2CResult payloadBusResult = buses->Payload->WriteRead(buses->Payload, address, inData, inLength, outData, outLength);
 

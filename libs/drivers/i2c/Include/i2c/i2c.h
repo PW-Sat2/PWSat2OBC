@@ -46,7 +46,12 @@ typedef enum {
     I2CResultSwFault = -5,
 
     /** @brief General I2C error */
-    I2CResultFailure = -6
+    I2CResultTimeout = -6,
+
+    I2CResultClockLatched = -7,
+
+    /** @brief General I2C error */
+    I2CResultFailure = -8
 } I2CResult;
 
 /**
@@ -66,6 +71,13 @@ typedef struct _I2CBus
 
     /** @brief Pointer to hardware registers */
     void* HWInterface;
+
+    struct
+    {
+        uint16_t Port;
+        uint16_t SCL;
+        uint16_t SDA;
+    } IO;
 
     /** @brief Lock used to synchronize access to bus */
     OSSemaphoreHandle Lock;
