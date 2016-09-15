@@ -60,6 +60,16 @@ TEST(ReaderTest, TestReadingWordLE)
     ASSERT_TRUE(ReaderStatus(&reader));
 }
 
+TEST(ReaderTest, TestReadingWordBE)
+{
+    Reader reader;
+    uint8_t array[] = {0x55, 0xaa};
+
+    ReaderInitialize(&reader, array, sizeof(array));
+    ASSERT_THAT(ReaderReadWordBE(&reader), Eq(0x55aa));
+    ASSERT_TRUE(ReaderStatus(&reader));
+}
+
 TEST(ReaderTest, TestReadingWordLEBeyondEnd)
 {
     Reader reader;
@@ -67,6 +77,16 @@ TEST(ReaderTest, TestReadingWordLEBeyondEnd)
 
     ReaderInitialize(&reader, array, sizeof(array));
     ReaderReadWordLE(&reader);
+    ASSERT_FALSE(ReaderStatus(&reader));
+}
+
+TEST(ReaderTest, TestReadingWordBEBeyondEnd)
+{
+    Reader reader;
+    uint8_t array[] = {0x55};
+
+    ReaderInitialize(&reader, array, sizeof(array));
+    ReaderReadWordBE(&reader);
     ASSERT_FALSE(ReaderStatus(&reader));
 }
 
@@ -133,7 +153,7 @@ TEST(ReaderTest, TestReadArrayBeyondEnd)
 TEST(ReaderTest, TestReadingMovesPosition)
 {
     Reader reader;
-    uint8_t array[] = {0x55, 0xaa, 0x77, 0xee, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77};
+    uint8_t array[] = {0x55, 0xaa, 0x77, 0xee, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99};
 
     ReaderInitialize(&reader, array, sizeof(array));
     ASSERT_THAT(ReaderReadByte(&reader), Eq(0x55));
@@ -141,6 +161,7 @@ TEST(ReaderTest, TestReadingMovesPosition)
     ASSERT_THAT(ReaderReadDoubleWordLE(&reader), Eq(0x332211EEU));
     ASSERT_THAT(ReaderReadArray(&reader, 3), Eq(&array[7]));
     ASSERT_THAT(ReaderReadByte(&reader), Eq(0x77));
+    ASSERT_THAT(ReaderReadWordBE(&reader), Eq(0x8899));
     ASSERT_TRUE(ReaderStatus(&reader));
 }
 
@@ -152,6 +173,7 @@ TEST(ReaderTest, TestReadingWithInvalidState)
     ReaderInitialize(&reader, array, sizeof(array));
     ReaderReadByte(&reader);
     ReaderReadWordLE(&reader);
+    ReaderReadWordBE(&reader);
     ReaderReadDoubleWordLE(&reader);
     ReaderReadArray(&reader, 3);
     ReaderReadByte(&reader);
@@ -182,7 +204,7 @@ TEST(ReaderTest, TestRemainigSize)
 TEST(ReaderTest, TestRemainigSizeAtTheEnd)
 {
     Reader reader;
-    uint8_t array[] = {0x55, 0xaa, 0x77, 0xee, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77};
+    uint8_t array[] = {0x55, 0xaa, 0x77, 0xee, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99};
 
     ReaderInitialize(&reader, array, sizeof(array));
     ReaderReadByte(&reader);
@@ -190,5 +212,6 @@ TEST(ReaderTest, TestRemainigSizeAtTheEnd)
     ReaderReadDoubleWordLE(&reader);
     ReaderReadArray(&reader, 3);
     ReaderReadByte(&reader);
+    ReaderReadWordBE(&reader);
     ASSERT_THAT(ReaderRemainingSize(&reader), Eq(0));
 }

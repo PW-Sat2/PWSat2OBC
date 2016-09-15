@@ -26,6 +26,11 @@ TimeSpan TimeSpanFromDays(uint32_t days)
     return TimeSpanFromMilliseconds(days * 24ull * 3600000ull);
 }
 
+uint32_t TimeSpanToSeconds(TimeSpan span)
+{
+    return span.value / 1000;
+}
+
 TimePoint TimePointBuild(uint16_t day, uint8_t hour, uint8_t minute, uint8_t second, uint16_t millisecond)
 {
     TimePoint point;
