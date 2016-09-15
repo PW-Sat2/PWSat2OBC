@@ -109,6 +109,17 @@ typedef struct
     I2CBus* Payload;
 } I2CInterface;
 
+/**
+ * @brief Initializes single hardware I2C interface
+ * @param[out] bus Bus interface
+ * @param[in] hw I2C hardware registers set
+ * @param[in] location Pins location to use
+ * @param[in] port GPIO port to use
+ * @param[in] sdaPin Number of GPIO pin to use for SDA line
+ * @param[in] sclPin Number of GPIO pin to use for SCL line
+ * @param[in] clock Clock used by selected hardware interface
+ * @param[in] irq IRQ number used by selected hardware interface
+ */
 void I2CSetupInterface(I2CBus* bus,
     I2C_TypeDef* hw,
     uint16_t location,
@@ -118,8 +129,17 @@ void I2CSetupInterface(I2CBus* bus,
     CMU_Clock_TypeDef clock,
     IRQn_Type irq);
 
+/**
+ * @brief Interrupt handler for I2C hardware
+ * @param[in] bus Bus associated with given hardware
+ */
 void IRQHandler(I2CBus* bus);
 
+/**
+ * @brief Setups bus wrapper that fallbacks from system to payload bus in case of failure
+ * @param[out] bus Bus wrapper to initialize
+ * @param[in] buses Object representing both buses used in the system
+ */
 void I2CSetUpFallbackBus(I2CBus* bus, I2CInterface* buses);
 
 /** @} */
