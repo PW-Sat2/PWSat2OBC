@@ -89,6 +89,14 @@ uint8_t ReaderReadByte(Reader* reader);
 uint16_t ReaderReadWordLE(Reader* reader);
 
 /**
+ * @brief Read single 16 bit word with big-endian memory orientation from the buffer
+ * and advance the current buffer position to the next unread byte.
+ * @param[in] reader Pointer to the queried reader object.
+ * @return Read word.
+ */
+uint16_t ReaderReadWordBE(Reader* reader);
+
+/**
  * @brief Read single 32 bit word with little-endian memory orientation from the buffer
  * and advance the current buffer position to the next unread byte.
  * @param[in] reader Pointer to the queried reader object.

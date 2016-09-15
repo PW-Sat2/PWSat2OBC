@@ -153,6 +153,14 @@ TimePoint TimePointFromTimeSpan(TimeSpan span);
 TimeSpan TimePointToTimeSpan(TimePoint point);
 
 /**
+ * @brief This procedure converts passed timespan value to time span that is
+ * measured in seconds.
+ * @param[in] span Time span to convert.
+ * @return Time span in seconds.
+ */
+uint32_t TimeSpanToSeconds(TimeSpan span);
+
+/**
  * @brief This procedure normalizes TimePoint object.
  *
  * Normalization here means ensuring that all TimePoint members contain values that fit into
