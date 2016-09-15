@@ -9,6 +9,12 @@ void I2CTestCommandHandler(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
 
+    if (argc != 3)
+    {
+        TerminalPuts("i2c <system|payload> <device> <data>\n");
+        return;
+    }
+
     I2CBus* bus;
 
     if (strcmp(argv[0], "system") == 0)
