@@ -7,7 +7,7 @@
 
 #include "i2c.h"
 
-void IRQHandler(I2CBus* bus)
+void I2CIRQHandler(I2CBus* bus)
 {
     I2C_TransferReturn_TypeDef status = I2C_Transfer((I2C_TypeDef*)bus->HWInterface);
 

@@ -133,7 +133,7 @@ void I2CSetupInterface(I2CBus* bus,
  * @brief Interrupt handler for I2C hardware
  * @param[in] bus Bus associated with given hardware
  */
-void IRQHandler(I2CBus* bus);
+void I2CIRQHandler(I2CBus* bus);
 
 /**
  * @brief Setups bus wrapper that fallbacks from system to payload bus in case of failure

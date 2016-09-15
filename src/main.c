@@ -58,12 +58,12 @@ void vApplicationIdleHook(void)
 
 void I2C0_IRQHandler(void)
 {
-    IRQHandler(&Main.I2CBuses[0]);
+    I2CIRQHandler(&Main.I2CBuses[0]);
 }
 
 void I2C1_IRQHandler(void)
 {
-    IRQHandler(&Main.I2CBuses[1]);
+    I2CIRQHandler(&Main.I2CBuses[1]);
 }
 
 static void BlinkLed0(void* param)
