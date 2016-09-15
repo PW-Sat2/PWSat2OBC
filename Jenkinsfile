@@ -1,5 +1,5 @@
 def build() {
-	bat "cmake -DMOCK_COM=${env.MOCK_COM} -DOBC_COM=${env.OBC_COM} -G \"MinGW Makefiles\" ../source"
+	bat "cmake -DSYS_BUS_COM=${env.MOCK_COM} -DOBC_COM=${env.OBC_COM} -DUSE_SINGLE_BUS=1 -G \"MinGW Makefiles\" ../source"
 	bat "make pwsat"
 	step([$class: 'ArtifactArchiver', artifacts: 'build/DevBoard/**/*', fingerprint: true])
 }
@@ -23,8 +23,10 @@ def reports() {
 }
 
 def integrationTests() {
-	bat "make integration_tests"
-	step([$class: 'JUnitResultArchiver', testResults: 'build/DevBoard/integration-tests.xml'])
+	lock('hardware') {
+		bat "make integration_tests"
+		step([$class: 'JUnitResultArchiver', testResults: 'build/DevBoard/integration-tests.xml'])
+	}
 }
 
 def generateDoc() {

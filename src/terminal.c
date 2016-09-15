@@ -37,7 +37,8 @@ static const command commands[] = {
     {"listFiles", FSListFiles},
     {"writeFile", FSWriteFile},
     {"readFile", FSReadFile},
-    {"stateCmd", CommandByTerminal} //
+    {"stateCmd", CommandByTerminal},
+    {"i2c", I2CTestCommandHandler} //
 };
 
 static void parseCommandLine(char line[], char** commandName, char** arguments, uint16_t* argc, uint8_t maxArgsCount)

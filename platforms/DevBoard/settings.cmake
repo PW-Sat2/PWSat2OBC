@@ -1,8 +1,18 @@
+set(USE_SINGLE_BUS TRUE CACHE BOOL "Use single bus for both System and Payload I2C bus")
+
 add_definitions(-DEFM32GG990F1024)
 
 if(${CMAKE_BUILD_TYPE} EQUAL "DEBUG")
     add_definitions(-DENABLE_ASSERT -DDEBUG_EFM_USER)
 endif()
+
+if(${USE_SINGLE_BUS})
+    add_definitions(-DI2C_SINGLE_BUS)
+    MESSAGE(STATUS "I2C bus mode: SINGLE")
+else()
+    MESSAGE(STATUS "I2C bus mode: DUAL")
+endif()
+
 
 set (ARCH cortex-m3)
 set (CHIP EFM32GG)
