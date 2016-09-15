@@ -213,6 +213,11 @@ void SetupI2C(void)
         &Main.I2CBuses[0], I2C0, I2C0_BUS_LOCATION, I2C0_BUS_PORT, I2C0_BUS_SDA_PIN, I2C0_BUS_SCL_PIN, cmuClock_I2C0, I2C0_IRQn);
     I2CSetupInterface(
         &Main.I2CBuses[1], I2C1, I2C1_BUS_LOCATION, I2C1_BUS_PORT, I2C1_BUS_SDA_PIN, I2C1_BUS_SCL_PIN, cmuClock_I2C1, I2C1_IRQn);
+
+    Main.I2C.System = &Main.I2CBuses[I2C_SYSTEM_BUS];
+    Main.I2C.Payload = &Main.I2CBuses[I2C_PAYLOAD_BUS];
+
+    I2CSetUpFallbackBus(&Main.I2CFallback, &Main.I2C);
 }
 
 int main(void)
@@ -237,15 +242,12 @@ int main(void)
 
     SetupI2C();
 
-    Main.I2C.System = &Main.I2CBuses[I2C_SYSTEM_BUS];
-    Main.I2C.Payload = &Main.I2CBuses[I2C_PAYLOAD_BUS];
-
-    EpsInit(&Main.I2C);
+    EpsInit(&Main.I2CFallback);
 
     CommUpperInterface commUpperInterface;
     commUpperInterface.frameHandler = FrameHandler;
     commUpperInterface.frameHandlerContext = NULL;
-    CommInitialize(&Main.comm, &Main.I2C, &commUpperInterface);
+    CommInitialize(&Main.comm, &Main.I2CFallback, &commUpperInterface);
 
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 

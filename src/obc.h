@@ -46,6 +46,9 @@ typedef struct
 
     /** @brief I2C interface */
     I2CInterface I2C;
+
+    /** @brief I2C Fallback bus */
+    I2CBus I2CFallback;
 } OBC;
 
 /** @brief Global OBC object. */

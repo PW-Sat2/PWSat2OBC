@@ -14,12 +14,12 @@ typedef enum {
     EPS_LCL_SAIL_1 = 1,
 } EpsLcl;
 
-static I2CInterface* i2c;
+static I2CBus* i2c;
 
 static bool epsControlLCL(EpsLcl lcl, uint8_t state)
 {
     uint8_t data[] = {1 + lcl, state};
-    const I2CResult result = i2c->System->Write(i2c->System, EPS_ADDRESS, data, COUNT_OF(data));
+    const I2CResult result = i2c->Write(i2c, EPS_ADDRESS, data, COUNT_OF(data));
 
     if (result != I2CResultOK)
     {
@@ -60,7 +60,7 @@ bool EpsOpenSail(void)
     return true;
 }
 
-void EpsInit(I2CInterface* bus)
+void EpsInit(I2CBus* bus)
 {
     i2c = bus;
 }
