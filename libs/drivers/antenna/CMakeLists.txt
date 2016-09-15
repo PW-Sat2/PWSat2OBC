@@ -2,6 +2,7 @@ set(NAME antenna)
 
 set(SOURCES
     miniport.cpp
+    antenna.cpp
     Include/antenna/antenna.h
     Include/antenna/miniport.h
     Include/antenna/driver.h
@@ -9,11 +10,11 @@ set(SOURCES
 
 add_library(${NAME} STATIC ${SOURCES})
 
-target_link_libraries(${NAME} 
-	base 
-	platform 
+target_link_libraries(${NAME}
+	base
+	platform
 	logger
-	time 
+	time
     i2c
 	)
 

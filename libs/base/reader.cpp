@@ -45,6 +45,22 @@ uint16_t ReaderReadWordLE(Reader* reader)
     }
 }
 
+uint16_t ReaderReadWordBE(Reader* reader)
+{
+    if (!ReaderUpdateState(reader, 2))
+    {
+        return 0;
+    }
+    else
+    {
+        uint16_t value = reader->buffer[reader->position];
+        value <<= 8;
+        value += reader->buffer[reader->position + 1];
+        reader->position += 2;
+        return value;
+    }
+}
+
 uint32_t ReaderReadDoubleWordLE(Reader* reader)
 {
     if (!ReaderUpdateState(reader, 4))
