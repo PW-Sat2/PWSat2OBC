@@ -24,8 +24,6 @@ typedef struct AntennaMiniportDriver
 
     AntennaChannel currentChannel;
 
-    OSResult (*InitializeDeployment)(struct AntennaMiniportDriver* driver);
-
     OSResult (*Reset)(struct AntennaMiniportDriver* driver);
 
     OSResult (*ArmDeploymentSystem)(struct AntennaMiniportDriver* driver);
@@ -38,17 +36,19 @@ typedef struct AntennaMiniportDriver
 
     OSResult (*InitializeAutomaticDeployment)(struct AntennaMiniportDriver* driver);
 
+    OSResult (*CancelAntennaDeployment)(struct AntennaMiniportDriver* driver);
+
     OSResult (*GetDeploymentStatus)(struct AntennaMiniportDriver* driver, AntennaMiniportDeploymentStatus* telemetry);
 
     OSResult (*GetAntennaActivationCount)(struct AntennaMiniportDriver* driver, AntennaId antennaId, uint16_t* count);
 
-    OSResult (*GetAntennaActivationTime)(struct AntennaMiniportDriver* driver, AntennaId antennaId, uint32_t* count);
+    OSResult (*GetAntennaActivationTime)(struct AntennaMiniportDriver* driver, AntennaId antennaId, TimeSpan* count);
 
     OSResult (*GetTemperature)(struct AntennaMiniportDriver* driver, uint16_t* temperature);
 
 } AntennaMiniportDriver;
 
-OSResult AntennaMiniportInitialize(AntennaMiniportDriver* driver, AntennaChannel currentChannel, I2CBus* dedicatedBus);
+void AntennaMiniportInitialize(AntennaMiniportDriver* driver, AntennaChannel currentChannel, I2CBus* dedicatedBus);
 
 EXTERNC_END
 
