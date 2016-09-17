@@ -47,7 +47,7 @@ static I2CResult ExecuteTransfer(I2CBus* bus, I2C_TransferSeq_TypeDef* seq)
     return (I2CResult)ret;
 }
 
-static I2CResult Write(I2CBus* bus, const I2CAddress address, uint8_t* data, size_t length)
+static I2CResult Write(I2CBus* bus, const I2CAddress address, const uint8_t* data, size_t length)
 {
     I2C_TransferSeq_TypeDef seq = //
         {
@@ -55,15 +55,16 @@ static I2CResult Write(I2CBus* bus, const I2CAddress address, uint8_t* data, siz
             .flags = I2C_FLAG_WRITE, //
             .buf =                   //
             {
-                {.len = length, .data = data}, //
-                {.len = 0, .data = NULL}       //
-            }                                  //
+                {.len = length, .data = (uint8_t*)data}, //
+                {.len = 0, .data = NULL}                 //
+            }                                            //
         };
 
     return ExecuteTransfer(bus, &seq);
 }
 
-static I2CResult WriteRead(I2CBus* bus, const I2CAddress address, uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength)
+static I2CResult WriteRead(
+    I2CBus* bus, const I2CAddress address, const uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength)
 {
     I2C_TransferSeq_TypeDef seq = //
         {
@@ -71,9 +72,9 @@ static I2CResult WriteRead(I2CBus* bus, const I2CAddress address, uint8_t* inDat
             .flags = I2C_FLAG_WRITE_READ, //
             .buf =                        //
             {
-                {.len = inLength, .data = inData},  //
-                {.len = outLength, .data = outData} //
-            }                                       //
+                {.len = inLength, .data = (uint8_t*)inData}, //
+                {.len = outLength, .data = outData}          //
+            }                                                //
         };
 
     return ExecuteTransfer(bus, &seq);

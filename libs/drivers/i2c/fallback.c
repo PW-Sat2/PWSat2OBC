@@ -2,7 +2,7 @@
 
 #include "i2c.h"
 
-static I2CResult Write(I2CBus* bus, const I2CAddress address, uint8_t* data, size_t length)
+static I2CResult Write(I2CBus* bus, const I2CAddress address, const uint8_t* data, size_t length)
 {
     I2CInterface* buses = (I2CInterface*)bus->Extra;
 
@@ -18,7 +18,8 @@ static I2CResult Write(I2CBus* bus, const I2CAddress address, uint8_t* data, siz
     return payloadBusResult;
 }
 
-static I2CResult WriteRead(I2CBus* bus, const I2CAddress address, uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength)
+static I2CResult WriteRead(
+    I2CBus* bus, const I2CAddress address, const uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength)
 {
     I2CInterface* buses = (I2CInterface*)bus->Extra;
 

@@ -81,7 +81,7 @@ typedef struct _I2CBus
      * @param[in] length Length of data to be sen
      * @return Transfer result
      */
-    I2CResult (*Write)(struct _I2CBus* bus, const I2CAddress address, uint8_t* inData, size_t length);
+    I2CResult (*Write)(struct _I2CBus* bus, const I2CAddress address, const uint8_t* inData, size_t length);
 
     /**
      *
@@ -95,7 +95,7 @@ typedef struct _I2CBus
      * @return Transfer result
      */
     I2CResult (*WriteRead)(
-        struct _I2CBus* bus, const I2CAddress address, uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength);
+        struct _I2CBus* bus, const I2CAddress address, const uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength);
 } I2CBus;
 
 /**

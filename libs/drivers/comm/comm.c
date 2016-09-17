@@ -65,7 +65,7 @@ static bool SendCommandWithResponse(CommObject* object, CommAddress address, uin
     return status;
 }
 
-OSResult CommInitialize(CommObject* comm, const I2CBus* i2c, CommUpperInterface* upperInterface)
+OSResult CommInitialize(CommObject* comm, I2CBus* i2c, CommUpperInterface* upperInterface)
 {
     memset(comm, 0, sizeof(CommObject));
     comm->low = i2c;

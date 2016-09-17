@@ -256,7 +256,7 @@ typedef struct
  * This procedure does not verify whether the passed comm object has already been properly initialized, calling
  * this method twice on the same comm object is undefined behavior.
  */
-OSResult CommInitialize(CommObject* comm, const I2CBus* i2c, CommUpperInterface* upperInterface);
+OSResult CommInitialize(CommObject* comm, I2CBus* i2c, CommUpperInterface* upperInterface);
 
 /**
  * @brief Pauses comm driver.

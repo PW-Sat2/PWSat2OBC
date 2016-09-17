@@ -11,7 +11,7 @@ void I2CTestCommandHandler(uint16_t argc, char* argv[])
 
     if (argc != 3)
     {
-        TerminalPuts("i2c <system|payload> <device> <data>\n");
+        TerminalPuts(&Main.terminal, "i2c <system|payload> <device> <data>\n");
         return;
     }
 
@@ -27,11 +27,11 @@ void I2CTestCommandHandler(uint16_t argc, char* argv[])
     }
     else
     {
-        TerminalPuts("Unknown bus\n");
+        TerminalPuts(&Main.terminal, "Unknown bus\n");
     }
 
     const uint8_t device = (uint8_t)atoi(argv[1]);
-    const uint8_t* data = (uint8_t*)argv[2];
+    uint8_t* data = (uint8_t*)argv[2];
     const size_t dataLength = strlen(argv[2]);
 
     uint8_t output[20] = {0};
@@ -41,10 +41,10 @@ void I2CTestCommandHandler(uint16_t argc, char* argv[])
 
     if (result == I2CResultOK)
     {
-        TerminalPuts((char*)output);
+        TerminalPuts(&Main.terminal, (char*)output);
     }
     else
     {
-        TerminalPrintf("Error %d\n", result);
+        TerminalPrintf(&Main.terminal, "Error %d\n", result);
     }
 }
