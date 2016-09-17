@@ -48,8 +48,6 @@ typedef struct AntennaMiniportDriver
 
 } AntennaMiniportDriver;
 
-void AntennaMiniportInitialize(AntennaMiniportDriver* driver, AntennaChannel currentChannel, I2CBus* dedicatedBus);
-
 EXTERNC_END
 
 #endif

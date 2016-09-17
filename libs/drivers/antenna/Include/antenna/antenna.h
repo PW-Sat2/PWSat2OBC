@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
+#include "i2c/i2c.h"
 #include "system.h"
 
 EXTERNC_BEGIN
@@ -21,6 +21,18 @@ typedef enum {
 } AntennaChannel;
 
 typedef struct AntennaMiniportDriver AntennaMiniportDriver;
+
+typedef struct AntennaDriver AntennaDriver;
+
+void AntennaDriverInitialize(AntennaDriver* driver,
+    AntennaMiniportDriver* primary,
+    AntennaMiniportDriver* secondary //
+    );
+
+void AntennaMiniportInitialize(AntennaMiniportDriver* driver,
+    AntennaChannel currentChannel,
+    I2CBus* dedicatedBus //
+    );
 
 /** @}*/
 
