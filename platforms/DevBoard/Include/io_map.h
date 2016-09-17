@@ -4,6 +4,9 @@
 #include <em_gpio.h>
 #include <em_system.h>
 
+#define SYS_CLEAR_PORT gpioPortC
+#define SYS_CLEAR_PIN 0
+
 #define LED_PORT gpioPortE
 #define LED0 2
 #define LED1 3
@@ -63,23 +66,27 @@
 #define EBI_DATA_PIN0 8
 
 #define ADXRS453_SPI_USART_PORT USART1
+#define ADXRS433_SPI_USART_GPIO_PORT gpioPortD
+#define ADXRS433_SPI_USART_GPIO_TX 0
+#define ADXRS433_SPI_USART_GPIO_RX 1
+#define ADXRS433_SPI_USART_GPIO_CLK 2
 #define ADXRS453_SPI_USART_ROUTE_LOCATION _USART_ROUTE_LOCATION_LOC1
 #define GYRO0                                                                                                                              \
     {                                                                                                                                      \
-        gpioPortD, /* cs port location*/                                                                                                   \
-            3,     /* cs pin location */                                                                                                   \
+        gpioPortA, /* cs port location*/                                                                                                   \
+            12,    /* cs pin location */                                                                                                   \
     }
 
 #define GYRO1                                                                                                                              \
     {                                                                                                                                      \
-        gpioPortD, /* cs port location*/                                                                                                   \
-            6,     /* cs pin location */                                                                                                   \
+        gpioPortA, /* cs port location*/                                                                                                   \
+            13,    /* cs pin location */                                                                                                   \
     }
 
 #define GYRO2                                                                                                                              \
     {                                                                                                                                      \
-        gpioPortC, /* cs port location*/                                                                                                   \
-            6,     /* cs pin location */                                                                                                   \
+        gpioPortA, /* cs port location*/                                                                                                   \
+            14,    /* cs pin location */                                                                                                   \
     }
 
 #endif

@@ -2,5 +2,6 @@ config = dict(
     SYS_BUS_COM='${SYS_BUS_COM}',
     OBC_COM='${OBC_COM}',
     PAYLOAD_BUS_COM='${PAYLOAD_BUS_COM}',
+    GPIO_COM='${GPIO_COM}',
     SINGLE_BUS=${PY_USE_SINGLE_BUS}
 )

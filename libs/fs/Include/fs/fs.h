@@ -180,6 +180,22 @@ typedef struct FileSystemTag
      * @return Operation status.
      */
     OSResult (*closeDirectory)(FileSystem* fileSystem, FSDirectoryHandle directory);
+
+    /**
+     * @brief Formats partition at given mount point. Partition in unmounted before format and mounted again after
+     * @param[in] fileSystem File system interface
+     * @param[in] mountPoint Partition mount point
+     * @return Operation stastus
+     */
+    OSResult (*format)(FileSystem* fileSystem, const char* mountPoint);
+
+    /**
+     * @brief Creates new directory
+     * @param[in] fileSystem File system interface
+     * @param[in] path Path to directory that should be created
+     * @return Operation status
+     */
+    OSResult (*makeDirectory)(FileSystem* fileSystem, const char* path);
 } FileSystem;
 
 /**

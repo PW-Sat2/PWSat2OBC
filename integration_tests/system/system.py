@@ -6,7 +6,7 @@ from i2cMock import I2CMock
 
 
 class System:
-    def __init__(self, obc_com, sys_bus_com, payload_bus_com, use_single_bus):
+    def __init__(self, obc_com, sys_bus_com, payload_bus_com, use_single_bus, gpio):
         self.log = logging.getLogger("system")
 
         self.obc_com = obc_com
@@ -22,13 +22,13 @@ class System:
 
         self._setup_devices()
 
-        self.obc = OBC(SerialPortTerminal(obc_com))
+        self.obc = OBC(SerialPortTerminal(obc_com, gpio))
         self.obc.power_off()
 
         self.sys_bus.start()
         self.payload_bus.start()
 
-        self.obc.power_on()
+        self.obc.power_on(clean_state=True)
 
     def _setup_devices(self):
         self.eps = EPSDevice()

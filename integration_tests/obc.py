@@ -4,10 +4,13 @@ import serial
 
 
 class SerialPortTerminal:
-    def __init__(self, comPort):
+    def __init__(self, comPort, gpio):
         self.log = logging.getLogger("OBCTerm")
+
+        self._gpio = gpio
+
         self._serial = serial.Serial(comPort, baudrate=2400, timeout=1, rtscts=False)
-        self._serial.rts = False
+        self._gpio.high(self._gpio.RESET)
 
     def waitForPrompt(self, terminator='>'):
         self._serial.reset_input_buffer()
@@ -47,22 +50,27 @@ class SerialPortTerminal:
         self._serial.reset_output_buffer()
         self._serial.flushInput()
         self._serial.flush()
-        self._serial.rts = False
-        self._serial.rts = True
-        self._serial.rts = False
+        self._gpio.high(self._gpio.RESET)
+        self._gpio.low(self._gpio.RESET)
+        self._gpio.high(self._gpio.RESET)
         self.readUntilPrompt('@')
 
     def power_off(self):
         self.log.debug("power off")
-        self._serial.rts = True
+        self._gpio.low(self._gpio.RESET)
 
-    def power_on(self):
+    def power_on(self, clean_state):
         self.log.debug("Powering OBC on")
         self._serial.reset_input_buffer()
         self._serial.reset_output_buffer()
         self._serial.flushInput()
         self._serial.flush()
-        self._serial.rts = False
+        if clean_state:
+            self._gpio.low(self._gpio.CLEAN)
+        else:
+            self._gpio.high(self._gpio.CLEAN)
+
+        self._gpio.high(self._gpio.RESET)
 
         self.log.debug("Waiting for OBC to come up")
 
@@ -120,8 +128,8 @@ class OBC:
     def power_off(self):
         self._terminal.power_off()
 
-    def power_on(self):
-        self._terminal.power_on()
+    def power_on(self, clean_state=False):
+        self._terminal.power_on(clean_state)
 
     def list_files(self, path):
         result = self._terminal.command("listFiles %s" % path)

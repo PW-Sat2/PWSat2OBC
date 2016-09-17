@@ -3,6 +3,7 @@ set(NAME integration_tests)
 set(SYS_BUS_COM "XXX-MOCK" CACHE STRING "Serial port for system bus mock")
 set(PAYLOAD_BUS_COM "XXX-PAYLOAD" CACHE STRING "Serial port for payload bus mock")
 set(OBC_COM "XXX-OBC" CACHE STRING "Serial port for OBC terminal")
+set(GPIO_COM "XXX-GPIO" CACHE STRING "Serial port for GPIO")
 
 set(TEST_RESULTS ${OUTPUT_PATH}/integration-tests.xml)
 
@@ -12,7 +13,7 @@ add_custom_target(${NAME}.deps
 )
 
 add_custom_target(${NAME}
-    COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}" ${PYTHON_EXECUTABLE} -m nose -x -s --nologcapture --rednose -v --with-xunit "--xunit-file=${TEST_RESULTS}" 
+    COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}" ${PYTHON_EXECUTABLE} -m nose -x -s --nologcapture --rednose -v --with-xunit "--xunit-file=${TEST_RESULTS}"
     DEPENDS pwsat.flash ${NAME}.deps
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )

@@ -12,6 +12,7 @@
 
 using testing::StrEq;
 using testing::Eq;
+using testing::Ge;
 using testing::Test;
 
 extern "C" void yaffs_remove_device(struct yaffs_dev* dev);
@@ -284,6 +285,76 @@ TEST_F(FileSystemTest, ShouldDetectUncorrectableError)
     ASSERT_THAT(this->device.n_ecc_unfixed - unfixed, Eq(1));
 
     yaffs_close(file);
+
+    yaffs_unmount("/");
+}
+
+bool DirectoryExists(const char* path)
+{
+    struct yaffs_stat stat;
+    auto status = yaffs_stat(path, &stat);
+
+    return status != -1;
+}
+
+int MakeDirectory(const char* path)
+{
+    char buf[NAME_MAX + 1];
+
+    char* end = stpncpy(buf, path, NAME_MAX);
+
+    if (*(end - 1) != '/')
+    {
+        *end = '/';
+        *(end + 1) = '\0';
+    }
+
+    int16_t status;
+
+    for (char* p = strchr(buf + 1, '/'); p != NULL; p = strchr(p + 1, '/'))
+    {
+        *p = '\0';
+
+        if (!DirectoryExists(buf))
+        {
+            status = yaffs_mkdir(buf, 0777);
+
+            if (status < 0)
+            {
+                return status;
+            }
+        }
+
+        *p = '/';
+    }
+
+    return status;
+}
+
+TEST_F(FileSystemTest, ShouldCreateDirectoryWithParents)
+{
+    const char path[] = "/a/b/c/";
+
+    yaffs_mount("/");
+
+    MakeDirectory(path);
+
+    ASSERT_THAT(DirectoryExists(path), Eq(true));
+
+    yaffs_unmount("/");
+}
+
+TEST_F(FileSystemTest, ShouldCreateDirectoryAndParentExist)
+{
+    const char path[] = "/a/b";
+
+    yaffs_mount("/");
+
+    yaffs_mkdir("/a", 0777);
+
+    MakeDirectory(path);
+
+    ASSERT_THAT(DirectoryExists(path), Eq(true));
 
     yaffs_unmount("/");
 }

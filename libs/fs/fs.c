@@ -1,4 +1,5 @@
 #include "fs.h"
+#include <stdbool.h>
 #include <logger/logger.h>
 #include <yaffs_guts.h>
 #include <yaffsfs.h>
@@ -89,6 +90,59 @@ static OSResult YaffsCloseDirectory(FileSystem* fileSystem, FSDirectoryHandle di
     return YaffsTranslateError(yaffs_closedir((yaffs_DIR*)directory));
 }
 
+static bool YaffsPathExists(const char* path)
+{
+    struct yaffs_stat stat;
+    int16_t status = yaffs_stat(path, &stat);
+
+    return status != -1;
+}
+
+static OSResult YaffsMakeDirectory(FileSystem* fileSystem, const char* path)
+{
+    UNREFERENCED_PARAMETER(fileSystem);
+
+    char buf[NAME_MAX + 1];
+
+    char* end = stpncpy(buf, path, NAME_MAX);
+
+    if (*(end - 1) != '/')
+    {
+        *end = '/';
+        *(end + 1) = '\0';
+    }
+
+    int16_t status = 0;
+
+    for (char* p = strchr(buf + 1, '/'); p != NULL; p = strchr(p + 1, '/'))
+    {
+        *p = '\0';
+
+        if (!YaffsPathExists(buf))
+        {
+            status = yaffs_mkdir(buf, 0777);
+
+            if (status < 0)
+            {
+                return YaffsTranslateError(status);
+            }
+        }
+
+        *p = '/';
+    }
+
+    return YaffsTranslateError(status);
+}
+
+static OSResult YaffsFormat(FileSystem* fileSystem, const char* mountPoint)
+{
+    UNREFERENCED_PARAMETER(fileSystem);
+
+    const int status = yaffs_format(mountPoint, true, true, true);
+
+    return YaffsTranslateError(status);
+}
+
 bool FileSystemInitialize(FileSystem* fs, struct yaffs_dev* rootDevice)
 {
     YaffsGlueInit();
@@ -103,6 +157,8 @@ bool FileSystemInitialize(FileSystem* fs, struct yaffs_dev* rootDevice)
     fs->readDirectory = YaffsReadDirectory;
     fs->closeDirectory = YaffsCloseDirectory;
     fs->ftruncate = YaffsTruncate;
+    fs->format = YaffsFormat;
+    fs->makeDirectory = YaffsMakeDirectory;
 
     int result = yaffs_mount("/");
 
