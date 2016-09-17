@@ -78,10 +78,10 @@ typedef struct _I2CBus
      * @param[in] bus Object associated with bus that should be used
      * @param[in] address Address of device
      * @param[in] inData Data to be sent
-     * @param[in] length Length of data to be sen
+     * @param[in] length Length of data to be sent
      * @return Transfer result
      */
-    I2CResult (*Write)(struct _I2CBus* bus, const I2CAddress address, uint8_t* inData, size_t length);
+    I2CResult (*Write)(struct _I2CBus* bus, const I2CAddress address, const uint8_t* inData, size_t length);
 
     /**
      *
@@ -94,8 +94,13 @@ typedef struct _I2CBus
      * @param[in] outLength Number of bytes to be read from device
      * @return Transfer result
      */
-    I2CResult (*WriteRead)(
-        struct _I2CBus* bus, const I2CAddress address, uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength);
+    I2CResult (*WriteRead)(struct _I2CBus* bus,
+        const I2CAddress address,
+        const uint8_t* inData,
+        size_t inLength,
+        uint8_t* outData,
+        size_t outLength //
+        );
 } I2CBus;
 
 /**

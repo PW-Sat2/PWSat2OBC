@@ -34,8 +34,8 @@ FallbackI2CBusTest::FallbackI2CBusTest()
 
 TEST_F(FallbackI2CBusTest, WriteReadShouldNotFallbackToPayloadBusIfSystemBusWorked)
 {
-    EXPECT_CALL(systemBus, I2CWriteRead(_, _, _, _, _)).WillOnce(Return(I2CResultOK));
-    EXPECT_CALL(payloadBus, I2CWriteRead(_, _, _, _, _)).Times(0);
+    EXPECT_CALL(systemBus, I2CWriteRead(_, _, _, _, _, _)).WillOnce(Return(I2CResultOK));
+    EXPECT_CALL(payloadBus, I2CWriteRead(_, _, _, _, _, _)).Times(0);
 
     uint8_t in[] = {1, 2, 3};
     uint8_t out[3] = {0};
@@ -47,8 +47,8 @@ TEST_F(FallbackI2CBusTest, WriteReadShouldNotFallbackToPayloadBusIfSystemBusWork
 
 TEST_F(FallbackI2CBusTest, WriteReadShouldFallbackToPayloadBusIfSystemBusFailed)
 {
-    EXPECT_CALL(systemBus, I2CWriteRead(_, _, _, _, _)).WillOnce(Return(I2CResultFailure));
-    EXPECT_CALL(payloadBus, I2CWriteRead(_, _, _, _, _)).WillOnce(Return(I2CResultOK));
+    EXPECT_CALL(systemBus, I2CWriteRead(_, _, _, _, _, _)).WillOnce(Return(I2CResultFailure));
+    EXPECT_CALL(payloadBus, I2CWriteRead(_, _, _, _, _, _)).WillOnce(Return(I2CResultOK));
 
     uint8_t in[] = {1, 2, 3};
     uint8_t out[3] = {0};
@@ -60,8 +60,8 @@ TEST_F(FallbackI2CBusTest, WriteReadShouldFallbackToPayloadBusIfSystemBusFailed)
 
 TEST_F(FallbackI2CBusTest, WriteReadShouldFailWhenBothBusesFail)
 {
-    EXPECT_CALL(systemBus, I2CWriteRead(_, _, _, _, _)).WillOnce(Return(I2CResultFailure));
-    EXPECT_CALL(payloadBus, I2CWriteRead(_, _, _, _, _)).WillOnce(Return(I2CResultNack));
+    EXPECT_CALL(systemBus, I2CWriteRead(_, _, _, _, _, _)).WillOnce(Return(I2CResultFailure));
+    EXPECT_CALL(payloadBus, I2CWriteRead(_, _, _, _, _, _)).WillOnce(Return(I2CResultNack));
 
     uint8_t in[] = {1, 2, 3};
     uint8_t out[3] = {0};
@@ -73,8 +73,8 @@ TEST_F(FallbackI2CBusTest, WriteReadShouldFailWhenBothBusesFail)
 
 TEST_F(FallbackI2CBusTest, WriteShouldNotFallbackToPayloadBusIfSystemBusWorked)
 {
-    EXPECT_CALL(systemBus, I2CWrite(_, _, _)).WillOnce(Return(I2CResultOK));
-    EXPECT_CALL(payloadBus, I2CWrite(_, _, _)).Times(0);
+    EXPECT_CALL(systemBus, I2CWrite(_, _, _, _)).WillOnce(Return(I2CResultOK));
+    EXPECT_CALL(payloadBus, I2CWrite(_, _, _, _)).Times(0);
 
     uint8_t in[] = {1, 2, 3};
 
@@ -85,8 +85,8 @@ TEST_F(FallbackI2CBusTest, WriteShouldNotFallbackToPayloadBusIfSystemBusWorked)
 
 TEST_F(FallbackI2CBusTest, WriteShouldFallbackToPayloadBusIfSystemBusFailed)
 {
-    EXPECT_CALL(systemBus, I2CWrite(_, _, _)).WillOnce(Return(I2CResultFailure));
-    EXPECT_CALL(payloadBus, I2CWrite(_, _, _)).WillOnce(Return(I2CResultOK));
+    EXPECT_CALL(systemBus, I2CWrite(_, _, _, _)).WillOnce(Return(I2CResultFailure));
+    EXPECT_CALL(payloadBus, I2CWrite(_, _, _, _)).WillOnce(Return(I2CResultOK));
 
     uint8_t in[] = {1, 2, 3};
 
@@ -97,8 +97,8 @@ TEST_F(FallbackI2CBusTest, WriteShouldFallbackToPayloadBusIfSystemBusFailed)
 
 TEST_F(FallbackI2CBusTest, WriteShouldFailWhenBothBusesFail)
 {
-    EXPECT_CALL(systemBus, I2CWrite(_, _, _)).WillOnce(Return(I2CResultFailure));
-    EXPECT_CALL(payloadBus, I2CWrite(_, _, _)).WillOnce(Return(I2CResultNack));
+    EXPECT_CALL(systemBus, I2CWrite(_, _, _, _)).WillOnce(Return(I2CResultFailure));
+    EXPECT_CALL(payloadBus, I2CWrite(_, _, _, _)).WillOnce(Return(I2CResultNack));
 
     uint8_t in[] = {1, 2, 3};
 
