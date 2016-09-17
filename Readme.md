@@ -16,5 +16,5 @@ The repository is divided into following parts:
 
 ## How to build
 
-The list of the tools needed to build the OBC software and the instructions how to build it can be found [here](https://github.com/PW-Sat2/PWSat2OBC/wiki/How-to-build).
+The list of the tools needed to build the OBC software and the instructions how to build it can be found [here](doc/HowToBuild.md).
 

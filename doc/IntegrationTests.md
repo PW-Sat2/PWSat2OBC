@@ -9,7 +9,7 @@
     * One when using single I2C bus (defualt)
 
 ### Software
-* Toolchain (see [How to build](@ref HowToBuild))
+* Toolchain (see [How to build](HowToBuild.md))
 * Python 2.7 with pip
 
 ## Connections

@@ -1,4 +1,4 @@
-# How to build {#HowToBuild}
+# How to build
 
 ## Tools needed
 Build process requires following tools:
