@@ -20,7 +20,7 @@ set(SOURCES
   MissionPlan/MissionTestHelpers.cpp
   MissionPlan/SailSystemStateTest.cpp
   MissionPlan/ActionDispatchTest.cpp
-  I2C/FallbackI2CBustest.cpp
+  I2C/FallbackI2CBusTest.cpp
   I2C/I2CMock.cpp
   os/os.cpp
   os/os.hpp
