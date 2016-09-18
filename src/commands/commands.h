@@ -16,6 +16,7 @@ void FSListFiles(uint16_t argc, char* argv[]);
 void FSWriteFile(uint16_t argc, char* argv[]);
 void FSReadFile(uint16_t argc, char* argv[]);
 void CommandByTerminal(uint16_t argc, char* args[]);
+void I2CTestCommandHandler(uint16_t argc, char* argv[]);
 
 void TakeRAWPhotoHandler(uint16_t argc, char* argv[]);
 void TakeJPEGPhotoHandler(uint16_t argc, char* argv[]);

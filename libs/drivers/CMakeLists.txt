@@ -1,0 +1,8 @@
+add_subdirectory(leuart)
+add_subdirectory(swo)
+add_subdirectory(i2c)
+add_subdirectory(comm)
+add_subdirectory(adxrs453)
+add_subdirectory(eps)
+add_subdirectory(uart)
+add_subdirectory(camera)

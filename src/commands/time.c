@@ -1,17 +1,16 @@
+#include <stdint.h>
+#include <stdlib.h>
 #include <FreeRTOS.h>
 #include <queue.h>
 #include <task.h>
-
-#include "time/TimePoint.h"
-#include "time/timer.h"
-#include <stdint.h>
-#include <stdlib.h>
-#include <leuart/leuart.h>
+#include "leuart/leuart.h"
 #include "logger/logger.h"
 #include "obc.h"
 #include "swo/swo.h"
 #include "system.h"
 #include "terminal.h"
+#include "time/TimePoint.h"
+#include "time/timer.h"
 
 void JumpToTimeHandler(uint16_t argc, char* argv[])
 {
@@ -34,5 +33,5 @@ void CurrentTimeHandler(uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argv);
     TimeSpan span;
     TimeGetCurrentTime(&Main.timeProvider, &span);
-    TerminalPrintf("%d", (int)(span.value / 1000));
+    TerminalPrintf(&Main.terminal, "%d", (int)(span.value / 1000));
 }

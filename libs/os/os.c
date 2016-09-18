@@ -119,6 +119,7 @@ static void* Alloc(size_t size)
 
 static void Free(void* ptr)
 {
+    UNREFERENCED_PARAMETER(ptr);
     // Free is not suported
 }
 

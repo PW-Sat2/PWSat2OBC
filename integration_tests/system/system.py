@@ -6,20 +6,27 @@ from i2cMock import I2CMock
 
 
 class System:
-    def __init__(self, mock_com, obc_com):
+    def __init__(self, obc_com, sys_bus_com, payload_bus_com, use_single_bus):
         self.log = logging.getLogger("system")
 
         self.obc_com = obc_com
-        self.mock_com = mock_com
+        self.sys_bus_com = sys_bus_com
+        self.payload_bus_com = payload_bus_com
 
-        self.i2c = I2CMock(mock_com)
+        self.sys_bus = I2CMock(sys_bus_com)
+
+        if use_single_bus:
+            self.payload_bus = self.sys_bus
+        else:
+            self.payload_bus = I2CMock(payload_bus_com)
 
         self._setup_devices()
 
         self.obc = OBC(SerialPortTerminal(obc_com))
         self.obc.power_off()
 
-        self.i2c.start()
+        self.sys_bus.start()
+        self.payload_bus.start()
 
         self.obc.power_on()
 
@@ -28,10 +35,12 @@ class System:
         self.transmitter = TransmitterDevice()
         self.receiver = ReceiverDevice()
 
-        self.i2c.add_device(self.eps)
-        self.i2c.add_device(self.transmitter)
-        self.i2c.add_device(self.receiver)
+        self.sys_bus.add_device(self.eps)
+        self.sys_bus.add_device(self.transmitter)
+        self.sys_bus.add_device(self.receiver)
 
     def close(self):
-        self.i2c.close()
+        self.sys_bus.close()
+        self.payload_bus.close()
+
         self.obc.close()

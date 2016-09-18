@@ -13,33 +13,29 @@
 #include <task.h>
 
 #include "SwoEndpoint/SwoEndpoint.h"
+#include "adcs/adcs.h"
+#include "base/ecc.h"
 #include "base/os.h"
 #include "comm/comm.h"
 #include "camera/camera.h"
+#include "dmadrv.h"
 #include "eps/eps.h"
+#include "fs/fs.h"
 #include "i2c/i2c.h"
 #include "io_map.h"
+#include "leuart/leuart.h"
 #include "logger/logger.h"
+#include "mission.h"
 #include "obc.h"
-#include "swo/swo.h"
-#include "system.h"
-
-#include <spidrv.h>
-#include "adxrs453/adxrs453.h"
-#include "terminal.h"
-
-#include "fs/fs.h"
 #include "storage/nand.h"
 #include "storage/nand_driver.h"
 #include "storage/storage.h"
+#include "swo/swo.h"
+#include "system.h"
+#include "terminal.h"
 
-#include "adcs/adcs.h"
-#include "base/ecc.h"
-#include "mission.h"
-
-#include "dmadrv.h"
-
-#include "leuart/leuart.h"
+#include <spidrv.h>
+#include "adxrs453/adxrs453.h"
 
 OBC Main;
 MissionState Mission;
@@ -55,6 +51,16 @@ void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
 void vApplicationIdleHook(void)
 {
     EMU_EnterEM1();
+}
+
+void I2C0_IRQHandler(void)
+{
+    I2CIRQHandler(&Main.I2CBuses[0]);
+}
+
+void I2C1_IRQHandler(void)
+{
+    I2CIRQHandler(&Main.I2CBuses[1]);
 }
 
 static void BlinkLed0(void* param)
@@ -188,16 +194,35 @@ void ADXRS(void* param)
         vTaskDelay(10 / portTICK_PERIOD_MS);
     }
 }
-int main(void)
-{
-    memset(&Main, 0, sizeof(Main));
-    CHIP_Init();
 
+void SetupHardware(void)
+{
     CMU_ClockEnable(cmuClock_GPIO, true);
     CMU_ClockEnable(cmuClock_DMA, true);
 
     CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFRCO);
     CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFRCO);
+}
+
+void SetupI2C(void)
+{
+    I2CSetupInterface(
+        &Main.I2CBuses[0], I2C0, I2C0_BUS_LOCATION, I2C0_BUS_PORT, I2C0_BUS_SDA_PIN, I2C0_BUS_SCL_PIN, cmuClock_I2C0, I2C0_IRQn);
+    I2CSetupInterface(
+        &Main.I2CBuses[1], I2C1, I2C1_BUS_LOCATION, I2C1_BUS_PORT, I2C1_BUS_SDA_PIN, I2C1_BUS_SCL_PIN, cmuClock_I2C1, I2C1_IRQn);
+
+    Main.I2C.System = &Main.I2CBuses[I2C_SYSTEM_BUS];
+    Main.I2C.Payload = &Main.I2CBuses[I2C_PAYLOAD_BUS];
+
+    I2CSetUpFallbackBus(&Main.I2CFallback, &Main.I2C);
+}
+
+int main(void)
+{
+    memset(&Main, 0, sizeof(Main));
+    CHIP_Init();
+
+    SetupHardware();
 
     SwoEnable();
 
@@ -210,19 +235,18 @@ int main(void)
 
     LeuartLineIOInit(&Main.IO);
 
-    TerminalInit();
+    InitializeTerminal();
 
-    I2CInit();
+    SetupI2C();
+
+    EpsInit(&Main.I2CFallback);
 
     CameraInit(&Main.camera);
-    EpsInit();
-    CommLowInterface commInterface;
-    commInterface.readProc = I2CWriteRead;
-    commInterface.writeProc = I2CWrite;
+
     CommUpperInterface commUpperInterface;
     commUpperInterface.frameHandler = FrameHandler;
     commUpperInterface.frameHandlerContext = NULL;
-    CommInitialize(&Main.comm, &commInterface, &commUpperInterface);
+    CommInitialize(&Main.comm, &Main.I2CFallback, &commUpperInterface);
 
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 

@@ -2,6 +2,7 @@
 #define LIBS_DRIVERS_LEUART_INCLUDE_LEUART_LINE_IO_H_
 
 #include <stdarg.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {

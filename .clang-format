@@ -54,7 +54,7 @@ IncludeCategories:
     Priority:        14
   - Regex:           '^(<|")core_cm3.h'
     Priority:        15
-  - Regex:           '^(<|")(assert|complex|ctype|errno|inttypes|iso646|limits|locale|math|setjmp|signal|std|string|tgmath|threads|time|uchar|wchar|wctype)'
+  - Regex:           '^(<|")(assert|complex|ctype|errno|inttypes|iso646|limits|locale|math|setjmp|signal|std.+|string|tgmath|threads|time|uchar|wchar|wctype).h(>|")'
     Priority:        1
   - Regex:           '^<'
     Priority:        2
