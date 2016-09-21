@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include "time/TimePoint.h"
 #include "antenna.h"
 #include "i2c/i2c.h"
 #include "system.h"
+#include "time/TimePoint.h"
 
 EXTERNC_BEGIN
 
@@ -47,6 +47,11 @@ typedef struct AntennaMiniportDriver
     OSResult (*GetTemperature)(struct AntennaMiniportDriver* driver, uint16_t* temperature);
 
 } AntennaMiniportDriver;
+
+void AntennaMiniportInitialize(AntennaMiniportDriver* driver,
+    AntennaChannel currentChannel,
+    I2CBus* dedicatedBus //
+    );
 
 EXTERNC_END
 
