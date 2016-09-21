@@ -35,6 +35,7 @@ set(SOURCES
   mock/FsMock.hpp
   mock/FsMock.cpp
   assert.cpp
+  antenna/miniport.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -71,6 +72,7 @@ target_link_libraries(${NAME}
     adxrs453    
     time
     gsl
+    antenna
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
