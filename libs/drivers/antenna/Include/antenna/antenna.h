@@ -24,18 +24,6 @@ typedef struct AntennaMiniportDriver AntennaMiniportDriver;
 
 typedef struct AntennaDriver AntennaDriver;
 
-void AntennaDriverInitialize(AntennaDriver* driver,
-    AntennaMiniportDriver* primary,
-    AntennaMiniportDriver* secondary //
-    );
-
-void AntennaMiniportInitialize(AntennaMiniportDriver* driver,
-    AntennaChannel currentChannel,
-    I2CBus* dedicatedBus //
-    );
-
-/** @}*/
-
 EXTERNC_END
 
-#endif /* SRC_DEVICES_COMM_H_ */
+#endif /* SRC_DEVICES_ANTENNA_H_ */
