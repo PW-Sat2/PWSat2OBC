@@ -21,18 +21,4 @@ enum AntennaChannel
 struct AntennaMiniportDriver;
 struct AntennaDriver;
 
-typedef struct AntennaDriver AntennaDriver;
-
-void AntennaDriverInitialize(AntennaDriver* driver,
-    AntennaMiniportDriver* primary,
-    AntennaMiniportDriver* secondary //
-    );
-
-void AntennaMiniportInitialize(AntennaMiniportDriver* driver,
-    AntennaChannel currentChannel,
-    I2CBus* dedicatedBus //
-    );
-
-/** @}*/
-
 #endif /* SRC_DEVICES_ANTENNA_H_ */

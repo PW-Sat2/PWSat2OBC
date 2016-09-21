@@ -1,4 +1,5 @@
 #include "antenna.h"
+#include <string.h>
 #include "base/os.h"
 #include "driver.h"
 #include "miniport.h"
@@ -11,6 +12,10 @@
         {                                                                                                                                  \
             (Channel)->status = ANTENNA_PORT_FAILURE;                                                                                      \
         }                                                                                                                                  \
+    }                                                                                                                                      \
+    else                                                                                                                                   \
+    {                                                                                                                                      \
+        result = OSResultIOError;                                                                                                          \
     }
 
 #define APPLY_OPERATION(Channel, Operation, result)                                                                                        \
@@ -21,6 +26,10 @@
         {                                                                                                                                  \
             (Channel)->status = ANTENNA_PORT_FAILURE;                                                                                      \
         }                                                                                                                                  \
+    }                                                                                                                                      \
+    else                                                                                                                                   \
+    {                                                                                                                                      \
+        result = OSResultIOError;                                                                                                          \
     }
 
 static OSResult MergeResult(OSResult primaryChannel, OSResult secondaryChannel)
@@ -135,13 +144,127 @@ static OSResult GetTemperature(struct AntennaDriver* driver, uint16_t* temperatu
     }
 }
 
-static OSResult GetTelemetry(struct AntennaDriver* driver, AntennaTelemetry* /*telemetry*/)
+static void UpdateTelemetryTemperature(struct AntennaDriver* driver, AntennaTelemetry* telemetry)
+{
+    OSResult primary, secondary;
+    uint16_t primaryValue = 0, secondaryValue = 0;
+    APPLY_OPERATION_ARG(&driver->primaryChannel, GetTemperature, primary, &primaryValue);
+    APPLY_OPERATION_ARG(&driver->secondaryChannel, GetTemperature, secondary, &secondaryValue);
+    if (OS_RESULT_SUCCEEDED(primary))
+    {
+        telemetry->Temperature[0] = primaryValue;
+        telemetry->flags |= ANT_TM_TEMPERATURE1;
+    }
+
+    if (OS_RESULT_SUCCEEDED(secondary))
+    {
+        telemetry->Temperature[1] = secondaryValue;
+        telemetry->flags |= ANT_TM_TEMPERATURE2;
+    }
+}
+
+static void UpdateDeploymentStatus(const AntennaMiniportDeploymentStatus* deploymentStatus,
+    AntennaTelemetry* telemetry,
+    uint16_t index,
+    uint16_t deploymentFlag,
+    uint16_t switchFlag //
+    )
+{
+    memcpy(telemetry->DeploymentStatus, deploymentStatus->DeploymentStatus, sizeof(deploymentStatus->DeploymentStatus));
+    memcpy(telemetry->IsDeploymentActive, deploymentStatus->IsDeploymentActive, sizeof(deploymentStatus->IsDeploymentActive));
+    telemetry->IgnoringDeploymentSwitches[index] = deploymentStatus->IgnoringDeploymentSwitches;
+    telemetry->DeploymentSystemArmed[index] = deploymentStatus->DeploymentSystemArmed;
+    telemetry->flags |= ANT_TM_ANTENNA_DEPLOYMENT_STATUS | ANT_TM_ANTENNA_DEPLOYMENT_ACTIVE | deploymentFlag | switchFlag;
+}
+
+static void GetDeploymentStatus(struct AntennaDriver* driver, AntennaTelemetry* telemetry)
 {
     OSResult primary, secondary;
     AntennaMiniportDeploymentStatus primaryTelemetry, secondaryTelemetry;
     APPLY_OPERATION_ARG(&driver->primaryChannel, GetDeploymentStatus, primary, &primaryTelemetry);
     APPLY_OPERATION_ARG(&driver->secondaryChannel, GetDeploymentStatus, secondary, &secondaryTelemetry);
-    return MergeResult(primary, secondary);
+    if (OS_RESULT_SUCCEEDED(primary))
+    {
+        UpdateDeploymentStatus(&primaryTelemetry, telemetry, 0, ANT_TM_DEPLOYMENT_SYSTEM_STATUS1, ANT_TM_SWITCHES_IGNORED1);
+    }
+    else if (OS_RESULT_SUCCEEDED(secondary))
+    {
+        UpdateDeploymentStatus(&secondaryTelemetry, telemetry, 1, ANT_TM_DEPLOYMENT_SYSTEM_STATUS2, ANT_TM_SWITCHES_IGNORED2);
+    }
+}
+
+static void UpdateActivationCount(struct AntennaDriver* driver, AntennaTelemetry* telemetry)
+{
+    const uint16_t flags[] = {
+        ANT_TM_ANTENNA1_ACTIVATION_COUNT,
+        ANT_TM_ANTENNA2_ACTIVATION_COUNT,
+        ANT_TM_ANTENNA3_ACTIVATION_COUNT,
+        ANT_TM_ANTENNA4_ACTIVATION_COUNT,
+    };
+
+    const AntennaId ids[] = {
+        ANTENNA1, ANTENNA2, ANTENNA3, ANTENNA4,
+    };
+
+    for (int i = 0; i < 4; ++i)
+    {
+        OSResult primary, secondary;
+        uint16_t primaryValue = 0, secondaryValue = 0;
+        APPLY_OPERATION_ARG(&driver->primaryChannel, GetAntennaActivationCount, primary, ids[i], &primaryValue);
+        APPLY_OPERATION_ARG(&driver->secondaryChannel, GetAntennaActivationCount, secondary, ids[i], &secondaryValue);
+        if (OS_RESULT_SUCCEEDED(primary))
+        {
+            telemetry->ActivationCount[i] = primaryValue;
+            telemetry->flags |= flags[i];
+        }
+        else if (OS_RESULT_SUCCEEDED(secondary))
+        {
+            telemetry->ActivationCount[1] = secondaryValue;
+            telemetry->flags |= flags[i];
+        }
+    }
+}
+
+static void UpdateActivationTime(struct AntennaDriver* driver, AntennaTelemetry* telemetry)
+{
+    const uint16_t flags[] = {
+        ANT_TM_ANTENNA1_ACTIVATION_TIME,
+        ANT_TM_ANTENNA2_ACTIVATION_TIME,
+        ANT_TM_ANTENNA3_ACTIVATION_TIME,
+        ANT_TM_ANTENNA4_ACTIVATION_TIME, //
+    };
+
+    const AntennaId ids[] = {
+        ANTENNA1, ANTENNA2, ANTENNA3, ANTENNA4,
+    };
+
+    for (int i = 0; i < 4; ++i)
+    {
+        OSResult primary, secondary;
+        TimeSpan primaryValue = {0}, secondaryValue = {0};
+        APPLY_OPERATION_ARG(&driver->primaryChannel, GetAntennaActivationTime, primary, ids[i], &primaryValue);
+        APPLY_OPERATION_ARG(&driver->secondaryChannel, GetAntennaActivationTime, secondary, ids[i], &secondaryValue);
+        if (OS_RESULT_SUCCEEDED(primary))
+        {
+            telemetry->ActivationTime[i] = primaryValue;
+            telemetry->flags |= flags[i];
+        }
+        else if (OS_RESULT_SUCCEEDED(secondary))
+        {
+            telemetry->ActivationTime[1] = secondaryValue;
+            telemetry->flags |= flags[i];
+        }
+    }
+}
+
+static AntennaTelemetry GetTelemetry(struct AntennaDriver* driver)
+{
+    AntennaTelemetry telemetry;
+    GetDeploymentStatus(driver, &telemetry);
+    UpdateTelemetryTemperature(driver, &telemetry);
+    UpdateActivationCount(driver, &telemetry);
+    UpdateActivationTime(driver, &telemetry);
+    return telemetry;
 }
 
 void AntennaDriverInitialize(AntennaDriver* driver,
@@ -149,6 +272,7 @@ void AntennaDriverInitialize(AntennaDriver* driver,
     AntennaMiniportDriver* secondary //
     )
 {
+    memset(driver, 0, sizeof(*driver));
     driver->primaryChannel.port = primary;
     driver->secondaryChannel.port = secondary;
     driver->primaryChannel.status = ANTENNA_PORT_OPERATIONAL;
