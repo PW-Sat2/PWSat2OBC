@@ -45,4 +45,9 @@ struct AntennaMiniportDriver
     OSResult (*GetTemperature)(struct AntennaMiniportDriver* driver, uint16_t* temperature);
 };
 
+void AntennaMiniportInitialize(AntennaMiniportDriver* driver,
+    AntennaChannel currentChannel,
+    I2CBus* dedicatedBus //
+    );
+
 #endif
