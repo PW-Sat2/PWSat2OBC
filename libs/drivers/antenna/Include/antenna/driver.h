@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include "time/TimePoint.h"
 #include "antenna.h"
 #include "system.h"
+#include "time/TimePoint.h"
 
 EXTERNC_BEGIN
 
@@ -15,32 +15,23 @@ typedef enum {
 } AntenaPortStatus;
 
 typedef enum {
-    ANT_TM_ANTENNA1_DEPLOYMENT_STATUS = 1 << 0,
-    ANT_TM_ANTENNA2_DEPLOYMENT_STATUS = 1 << 1,
-    ANT_TM_ANTENNA3_DEPLOYMENT_STATUS = 1 << 2,
-    ANT_TM_ANTENNA4_DEPLOYMENT_STATUS = 1 << 3,
+    ANT_TM_ANTENNA_DEPLOYMENT_STATUS = 1 << 0,
+    ANT_TM_ANTENNA_DEPLOYMENT_ACTIVE = 1 << 1,
+    ANT_TM_ANTENNA1_ACTIVATION_COUNT = 1 << 2,
+    ANT_TM_ANTENNA2_ACTIVATION_COUNT = 1 << 3,
+    ANT_TM_ANTENNA3_ACTIVATION_COUNT = 1 << 4,
+    ANT_TM_ANTENNA4_ACTIVATION_COUNT = 1 << 5,
+    ANT_TM_ANTENNA1_ACTIVATION_TIME = 1 << 6,
+    ANT_TM_ANTENNA2_ACTIVATION_TIME = 1 << 7,
+    ANT_TM_ANTENNA3_ACTIVATION_TIME = 1 << 8,
+    ANT_TM_ANTENNA4_ACTIVATION_TIME = 1 << 9,
 
-    ANT_TM_ANTENNA1_DEPLOYMENT_ACTIVE = 1 << 4,
-    ANT_TM_ANTENNA2_DEPLOYMENT_ACTIVE = 1 << 5,
-    ANT_TM_ANTENNA3_DEPLOYMENT_ACTIVE = 1 << 6,
-    ANT_TM_ANTENNA4_DEPLOYMENT_ACTIVE = 1 << 7,
-
-    ANT_TM_ANTENNA1_ACTIVATION_COUNT = 1 << 8,
-    ANT_TM_ANTENNA2_ACTIVATION_COUNT = 1 << 9,
-    ANT_TM_ANTENNA3_ACTIVATION_COUNT = 1 << 10,
-    ANT_TM_ANTENNA4_ACTIVATION_COUNT = 1 << 11,
-
-    ANT_TM_ANTENNA1_ACTIVATION_TIME = 1 << 12,
-    ANT_TM_ANTENNA2_ACTIVATION_TIME = 1 << 13,
-    ANT_TM_ANTENNA3_ACTIVATION_TIME = 1 << 14,
-    ANT_TM_ANTENNA4_ACTIVATION_TIME = 1 << 15,
-
-    ANT_TM_TEMPERATURE1 = 1 << 16,
-    ANT_TM_TEMPERATURE2 = 1 << 17,
-    ANT_TM_SWITCHES_IGNORED1 = 1 << 18,
-    ANT_TM_SWITCHES_IGNORED2 = 1 << 19,
-    ANT_TM_DEPLOYMENT_SYSTEM_STATUS1 = 1 << 20,
-    ANT_TM_DEPLOYMENT_SYSTEM_STATUS1 = 1 << 21,
+    ANT_TM_TEMPERATURE1 = 1 << 10,
+    ANT_TM_TEMPERATURE2 = 1 << 11,
+    ANT_TM_SWITCHES_IGNORED1 = 1 << 12,
+    ANT_TM_SWITCHES_IGNORED2 = 1 << 13,
+    ANT_TM_DEPLOYMENT_SYSTEM_STATUS1 = 1 << 14,
+    ANT_TM_DEPLOYMENT_SYSTEM_STATUS2 = 1 << 15,
 } TelemetryField;
 
 typedef struct
@@ -48,10 +39,10 @@ typedef struct
     bool DeploymentStatus[4];
     bool IsDeploymentActive[4];
     uint8_t ActivationCount[4];
-    uint32_t ActivationTime[4];
-    uint16_t Temperature;
-    bool IgnoringDeploymentSwitches;
-    bool DeploymentSystemArmed;
+    TimeSpan ActivationTime[4];
+    uint16_t Temperature[2];
+    bool IgnoringDeploymentSwitches[2];
+    bool DeploymentSystemArmed[2];
     uint32_t flags;
 } AntennaTelemetry;
 
@@ -82,9 +73,14 @@ typedef struct AntennaDriver
 
     OSResult (*GetTemperature)(struct AntennaDriver* driver, uint16_t* temperature);
 
-    OSResult (*GetTelemetry)(struct AntennaDriver* driver, AntennaTelemetry* telemetry);
+    AntennaTelemetry (*GetTelemetry)(struct AntennaDriver* driver);
 
 } AntennaDriver;
+
+void AntennaDriverInitialize(AntennaDriver* driver,
+    AntennaMiniportDriver* primary,
+    AntennaMiniportDriver* secondary //
+    );
 
 EXTERNC_END
 
