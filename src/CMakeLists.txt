@@ -30,6 +30,7 @@ target_link_libraries(${NAME}
     SwoEndpoint
     i2c
     fs
+    yaffs_glue
     adxrs453
     time
     mission

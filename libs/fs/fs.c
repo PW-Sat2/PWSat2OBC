@@ -143,12 +143,18 @@ static OSResult YaffsFormat(FileSystem* fileSystem, const char* mountPoint)
     return YaffsTranslateError(status);
 }
 
-bool FileSystemInitialize(FileSystem* fs, struct yaffs_dev* rootDevice)
+static bool YaffsExists(FileSystem* fileSystem, const char* path)
 {
-    YaffsGlueInit();
+    UNREFERENCED_PARAMETER(fileSystem);
 
-    yaffs_add_device(rootDevice);
+    struct yaffs_stat stat;
+    auto status = yaffs_stat(path, &stat);
 
+    return status != -1;
+}
+
+void FileSystemAPI(FileSystem* fs)
+{
     fs->open = YaffsOpen;
     fs->write = YaffsWrite;
     fs->close = YaffsClose;
@@ -159,6 +165,16 @@ bool FileSystemInitialize(FileSystem* fs, struct yaffs_dev* rootDevice)
     fs->ftruncate = YaffsTruncate;
     fs->format = YaffsFormat;
     fs->makeDirectory = YaffsMakeDirectory;
+    fs->exists = YaffsExists;
+}
+
+bool FileSystemInitialize(FileSystem* fs, struct yaffs_dev* rootDevice)
+{
+    YaffsGlueInit();
+
+    yaffs_add_device(rootDevice);
+
+    FileSystemAPI(fs);
 
     int result = yaffs_mount("/");
 
