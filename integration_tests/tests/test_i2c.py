@@ -1,5 +1,5 @@
 from devices import EchoDevice, TimeoutDevice
-from system import auto_comm_handling
+from system import auto_comm_handling, require_two_i2c_buses
 from tests.base import BaseTest
 
 
@@ -56,6 +56,7 @@ class I2CTest(BaseTest):
 
         self.assertEqual(response, 'Error -1')
 
+    @require_two_i2c_buses
     def test_bus_latch_should_trigger_system_power_cycle(self):
         self.system.obc.i2c_transfer('wr', 'system', 0x14, chr(0x2))
 
