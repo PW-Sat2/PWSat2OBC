@@ -9,6 +9,7 @@
 #include "fs/fs.h"
 #include "i2c/i2c.h"
 #include "leuart/line_io.h"
+#include "power/power.h"
 #include "storage/nand_driver.h"
 #include "terminal/terminal.h"
 #include "time/timer.h"
@@ -40,7 +41,11 @@ typedef struct
     TimeProvider timeProvider;
 
     /** @brief Available I2C buses */
-    I2CBus I2CBuses[2];
+    struct
+    {
+        I2CBus Bus;
+        I2CErrorHandlingBus ErrorHandling;
+    } I2CBuses[2];
 
     /** @brief I2C interface */
     I2CInterface I2C;
@@ -53,6 +58,9 @@ typedef struct
 
     /** @brief Terminal object. */
     Terminal terminal;
+
+    /** @brief Power control interface */
+    PowerControl PowerControl;
 } OBC;
 
 /** @brief Global OBC object. */

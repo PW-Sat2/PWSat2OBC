@@ -43,3 +43,26 @@ class I2CTest(BaseTest):
 
         response = self.system.obc.i2c_transfer('wr', 'system', 0x12, 'abc')
         self.assertEqual(response, 'bcd')
+
+    def test_should_detect_nak_on_buses(self):
+        self.system.sys_bus.disable()
+        self.system.payload_bus.disable()
+
+        response = self.system.obc.i2c_transfer('wr', 'system', 0x12, 'abc')
+
+        self.assertEqual(response, 'Error -1')
+
+        response = self.system.obc.i2c_transfer('wr', 'payload', 0x12, 'abc')
+
+        self.assertEqual(response, 'Error -1')
+
+    def test_bus_latch_should_trigger_system_power_cycle(self):
+        self.system.obc.i2c_transfer('wr', 'system', 0x14, chr(0x2))
+
+        self.assertTrue(self.system.eps.power_cycle.wait(0), "Power cycle should be triggered")
+
+        self.system.restart()
+
+        response = self.system.obc.i2c_transfer('wr', 'system', 0x12, 'abc')
+
+        self.assertEqual(response, 'bcd')

@@ -91,6 +91,7 @@ class I2CMock(object):
     CMD_I2C_DISABLE = 0x04
     CMD_I2C_ENABLE = 0x05
     CMD_RESTART = 0x06
+    CMD_UNLATCH = 0x07
     CMD_STOP = 0x08
     CMD_STOPPED = 0x09
 
@@ -144,6 +145,9 @@ class I2CMock(object):
     def stop(self):
         self._command(I2CMock.CMD_I2C_DISABLE)
         self._command(I2CMock.CMD_STOP)
+
+        self._freeze_end.set()
+
         self._reader.join()
         self._port.close()
         self._active = False
@@ -153,10 +157,15 @@ class I2CMock(object):
 
     def unlatch(self):
         if self._port.is_open:
-            self._port.write([7, 0])
+            self._command(I2CMock.CMD_UNLATCH)
+
+    def disable(self):
+        self._command(I2CMock.CMD_I2C_DISABLE)
 
     def _command(self, cmd, data=[]):
-        raw = ['S', cmd, len(data)]
+        raw = ['S', cmd]
+        size = [len(data)]
+        raw.extend(self._escape(size))
         raw.extend(self._escape(data))
 
         self._port.write(raw)

@@ -44,3 +44,13 @@ class System:
         self.payload_bus.stop()
 
         self.obc.close()
+
+    def restart(self):
+        self.sys_bus.unfreeze()
+        self.sys_bus.unlatch()
+
+        self.payload_bus.unfreeze()
+        self.payload_bus.unlatch()
+
+        self.obc.reset()
+        self.obc.wait_to_start()

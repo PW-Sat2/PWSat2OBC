@@ -48,10 +48,14 @@ typedef enum {
     /** @brief General I2C error */
     I2CResultTimeout = -6,
 
+    /** @brief SCL line is latched low at the end of transfer */
     I2CResultClockLatched = -7,
 
     /** @brief General I2C error */
-    I2CResultFailure = -8
+    I2CResultFailure = -8,
+
+    /** @brief SCL line is latched low before transfer */
+    I2CResultClockAlreadyLatched = -9
 } I2CResult;
 
 /**
@@ -158,6 +162,26 @@ void I2CIRQHandler(I2CBus* bus);
  * @param[in] buses Object representing both buses used in the system
  */
 void I2CSetUpFallbackBus(I2CBus* bus, I2CInterface* buses);
+
+/**
+ * @brief Type of procedure used by error handling bus wrapper
+ * @param[in] bus Bus on which transfer failed
+ * @param[in] result Transfer error code
+ * @param[in] address Device that was addressed
+ * @param[in] context Context
+ * @return New result code
+ */
+typedef I2CResult (*BusErrorHandler)(I2CBus* bus, I2CResult result, I2CAddress address, void* context);
+
+typedef struct
+{
+    I2CBus* InnerBus;
+    I2CBus OuterBus;
+    BusErrorHandler ErrorHandler;
+    void* HandlerContext;
+} I2CErrorHandlingBus;
+
+void I2CSetUpErrorHandlingBus(I2CErrorHandlingBus* bus, I2CBus* innerBus, BusErrorHandler handler, void* context);
 
 /** @} */
 

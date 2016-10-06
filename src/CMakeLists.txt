@@ -36,6 +36,8 @@ target_link_libraries(${NAME}
     mission
     eps
     adcs
+    power
+    power_eps
     terminal
     assert
 )

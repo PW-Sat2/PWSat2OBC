@@ -62,14 +62,3 @@ void I2CTestCommandHandler(uint16_t argc, char* argv[])
         TerminalPrintf(&Main.terminal, "Error %d\n", result);
     }
 }
-
-void X(uint16_t argc, char* argv[])
-{
-    UNREFERENCED_PARAMETER(argc);
-    UNREFERENCED_PARAMETER(argv);
-
-    char* d = "abc";
-    char buf[4] = {0};
-    Main.I2C.System->Write(Main.I2C.System, 0x12, (uint8_t*)d, 3);
-    Main.I2C.System->WriteRead(Main.I2C.System, 0x12, (uint8_t*)d, 3, (uint8_t*)buf, 4);
-}

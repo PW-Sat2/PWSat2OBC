@@ -260,7 +260,7 @@ struct TimerState TimeBuildTimerState(TimeProvider* timeProvider)
  */
 static struct TimeSnapshot ReadFile(FileSystem* fs, const char* const filePath)
 {
-    struct TimeSnapshot result = {0};
+    struct TimeSnapshot result = {{0}};
     uint8_t buffer[sizeof(TimeSpan)];
     if (!FileSystemReadFile(fs, filePath, buffer, sizeof(buffer)))
     {
@@ -284,7 +284,7 @@ struct TimeSnapshot GetCurrentPersistentTime(FileSystem* fileSystem)
 {
     if (fileSystem == NULL)
     {
-        struct TimeSnapshot snapshot = {0};
+        struct TimeSnapshot snapshot = {{0}};
         return snapshot;
     }
 

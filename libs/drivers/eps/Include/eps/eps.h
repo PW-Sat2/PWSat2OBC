@@ -7,4 +7,6 @@
 void EpsInit(I2CBus* bus);
 bool EpsOpenSail(void);
 
+bool EpsTriggerSystemPowerCycle(void);
+
 #endif /* SRC_DEVICES_EPS_H_ */

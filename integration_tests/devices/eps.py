@@ -3,9 +3,10 @@ import logging
 
 import i2cMock
 from i2cMock import I2CDevice
-import threading
+from threading import Event
 
 EPS_DEVICE_ADDRESS = 12
+
 
 class LCLTimeoutException(Exception):
     def __init__(self, desired):
@@ -14,13 +15,14 @@ class LCLTimeoutException(Exception):
     def __str__(self):
         return "Timeout waiting for LCL to become %s" % (self.desired,)
 
+
 class LCL:
     is_on = False
     was_on = False
 
     def __init__(self):
-        self.on_event = threading.Event()
-        self.off_event = threading.Event()
+        self.on_event = Event()
+        self.off_event = Event()
         self.changes = Queue()
 
     def on(self):
@@ -63,6 +65,7 @@ class EPSDevice(I2CDevice):
 
         self.sail0 = LCL()
         self.sail1 = LCL()
+        self.power_cycle = Event()
 
     @i2cMock.command([0x01])
     def lcl_sail_0(self, onoff):
@@ -81,6 +84,11 @@ class EPSDevice(I2CDevice):
             self.sail1.off()
 
         self.log.debug("LCL_SAIL_1: %s" % str(onoff))
+
+    @i2cMock.command([0xA0])
+    def trigger_system_power_cycle(self):
+        self.log.info("Triggered system power cycle")
+        self.power_cycle.set()
 
     def wait_for_sail_open(self):
         self.sail0.wait_for_on(1)

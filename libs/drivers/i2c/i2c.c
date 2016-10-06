@@ -7,21 +7,9 @@
 
 #include "i2c.h"
 
-void I2CIRQHandler(I2CBus* bus)
+static bool IsSclLatched(const I2CBus* bus)
 {
-    I2C_TransferReturn_TypeDef status = I2C_Transfer((I2C_TypeDef*)bus->HWInterface);
-
-    if (status == i2cTransferInProgress)
-    {
-        return;
-    }
-
-    if (!System.QueueSendISR(bus->ResultQueue, &status, NULL))
-    {
-        LOG_ISR(LOG_LEVEL_ERROR, "Error queueing i2c result");
-    }
-
-    System.EndSwitchingISR(NULL);
+    return GPIO_PinInGet((GPIO_Port_TypeDef)bus->IO.Port, bus->IO.SCL) == 0;
 }
 
 static I2CResult ExecuteTransfer(I2CBus* bus, I2C_TransferSeq_TypeDef* seq)
@@ -30,6 +18,13 @@ static I2CResult ExecuteTransfer(I2CBus* bus, I2C_TransferSeq_TypeDef* seq)
     {
         LOGF(LOG_LEVEL_ERROR, "[I2C] Taking semaphore failed. Address: %X", seq->addr);
         return I2CResultFailure;
+    }
+
+    if (IsSclLatched(bus))
+    {
+        LOG(LOG_LEVEL_FATAL, "[I2C] SCL already latched");
+        System.GiveSemaphore(bus->Lock);
+        return I2CResultClockAlreadyLatched;
     }
 
     I2C_TypeDef* hw = (I2C_TypeDef*)bus->HWInterface;
@@ -54,7 +49,7 @@ static I2CResult ExecuteTransfer(I2CBus* bus, I2C_TransferSeq_TypeDef* seq)
         {
         }
 
-        if (GPIO_PinInGet((GPIO_Port_TypeDef)bus->IO.Port, bus->IO.SCL) == 0)
+        if (IsSclLatched(bus))
         {
             LOG(LOG_LEVEL_ERROR, "SCL latched at low level");
 
@@ -143,4 +138,21 @@ void I2CSetupInterface(I2CBus* bus,
 
     NVIC_SetPriority(irq, I2C_IRQ_PRIORITY);
     NVIC_EnableIRQ(irq);
+}
+
+void I2CIRQHandler(I2CBus* bus)
+{
+    I2C_TransferReturn_TypeDef status = I2C_Transfer((I2C_TypeDef*)bus->HWInterface);
+
+    if (status == i2cTransferInProgress)
+    {
+        return;
+    }
+
+    if (!System.QueueSendISR(bus->ResultQueue, &status, NULL))
+    {
+        LOG_ISR(LOG_LEVEL_ERROR, "Error queueing i2c result");
+    }
+
+    System.EndSwitchingISR(NULL);
 }
