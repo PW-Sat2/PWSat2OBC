@@ -35,7 +35,7 @@ ErrorHandlingI2CBusTest::ErrorHandlingI2CBusTest()
 
 TEST_F(ErrorHandlingI2CBusTest, WriteReadShouldCallInnerBusAndPassthroughSuccess)
 {
-    EXPECT_CALL(innerBus, I2CWriteRead(_, _, _, _, _)).WillOnce(Return(I2CResultOK));
+    EXPECT_CALL(innerBus, I2CWriteRead(_, _, _, _, _, _)).WillOnce(Return(I2CResultOK));
     EXPECT_CALL(*this, Handler(_, _, _, _)).Times(0);
 
     uint8_t in[] = {1, 2, 3};
@@ -48,7 +48,7 @@ TEST_F(ErrorHandlingI2CBusTest, WriteReadShouldCallInnerBusAndPassthroughSuccess
 
 TEST_F(ErrorHandlingI2CBusTest, WriteReadShouldCallInnerBusAndExecuteHandlerOnError)
 {
-    EXPECT_CALL(innerBus, I2CWriteRead(_, _, _, _, _)).WillOnce(Return(I2CResultBusErr));
+    EXPECT_CALL(innerBus, I2CWriteRead(_, _, _, _, _, _)).WillOnce(Return(I2CResultBusErr));
     EXPECT_CALL(*this, Handler(_, _, _, _)).WillOnce(Return(I2CResultOK));
 
     uint8_t in[] = {1, 2, 3};
@@ -61,7 +61,7 @@ TEST_F(ErrorHandlingI2CBusTest, WriteReadShouldCallInnerBusAndExecuteHandlerOnEr
 
 TEST_F(ErrorHandlingI2CBusTest, WriteShouldCallInnerBusAndPassthroughSuccess)
 {
-    EXPECT_CALL(innerBus, I2CWrite(_, _, _)).WillOnce(Return(I2CResultOK));
+    EXPECT_CALL(innerBus, I2CWrite(_, _, _, _)).WillOnce(Return(I2CResultOK));
     EXPECT_CALL(*this, Handler(_, _, _, _)).Times(0);
 
     uint8_t in[] = {1, 2, 3};
@@ -73,7 +73,7 @@ TEST_F(ErrorHandlingI2CBusTest, WriteShouldCallInnerBusAndPassthroughSuccess)
 
 TEST_F(ErrorHandlingI2CBusTest, WriteShouldCallInnerBusAndExecuteHandlerOnError)
 {
-    EXPECT_CALL(innerBus, I2CWrite(_, _, _)).WillOnce(Return(I2CResultBusErr));
+    EXPECT_CALL(innerBus, I2CWrite(_, _, _, _)).WillOnce(Return(I2CResultBusErr));
     EXPECT_CALL(*this, Handler(_, _, _, _)).WillOnce(Return(I2CResultOK));
 
     uint8_t in[] = {1, 2, 3};

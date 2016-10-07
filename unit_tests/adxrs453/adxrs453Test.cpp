@@ -53,7 +53,7 @@ static Ecode_t TestSPIWrite(ADXRS453_PinLocations_t *locations,
 
 static SPI_TransferPairResultCode_t TestSPIWriteRead(ADXRS453_PinLocations_t *locations,
 		SPIDRV_Handle_t handle,
-		const void * buffer,
+		void * buffer,
 		uint8_t length)
 {
     if (mockPtr != NULL)
