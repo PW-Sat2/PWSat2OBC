@@ -14,3 +14,4 @@ class TestTime(BaseTest):
         current_time = self.system.obc.current_time()
 
         self.assertGreaterEqual(current_time, 100)
+
