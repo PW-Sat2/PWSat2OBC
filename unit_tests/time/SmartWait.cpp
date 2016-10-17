@@ -3,7 +3,6 @@
 
 #include "OsMock.hpp"
 #include "base/os.h"
-//#include "os.hpp"
 #include "time/timer.h"
 
 using testing::Test;

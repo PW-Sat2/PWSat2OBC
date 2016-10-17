@@ -182,7 +182,6 @@ static OSPulseHandle CreatePulseAll(void)
 
 static OSResult WaitForPulse(OSPulseHandle handle, OSTaskTimeSpan timeout)
 {
-    ////        System.EventGroupWaitForBits(timeProvider->TickNotification, 0x80, true, true, MAX_DELAY);
     OSEventBits result = EventGroupWaitForBits((OSEventGroupHandle)handle, 0x80, true, true, timeout);
 
     if (result == 0x80)
@@ -197,7 +196,6 @@ static OSResult WaitForPulse(OSPulseHandle handle, OSTaskTimeSpan timeout)
 
 static void PulseSet(OSPulseHandle handle)
 {
-    // System.EventGroupSetBits(timeProvider->TickNotification, 0x80);
     EventGroupSetBits((OSEventGroupHandle)handle, 0x80);
 }
 
