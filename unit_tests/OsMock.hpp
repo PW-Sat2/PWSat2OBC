@@ -36,12 +36,16 @@ struct OSMock : IOS
 
     MOCK_METHOD2(EventGroupClearBits, OSEventBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange));
 
-    MOCK_METHOD5(EventGroupWaitForBits,
-        OSEventBits(OSEventGroupHandle eventGroup,
-                     const OSEventBits bitsToWaitFor,
-                     bool waitAll,
-                     bool autoReset,
-                     const OSTaskTimeSpan timeout));
+    MOCK_METHOD5(
+        EventGroupWaitForBits,
+        OSEventBits(
+            OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, bool waitAll, bool autoReset, const OSTaskTimeSpan timeout));
+
+    MOCK_METHOD0(CreatePulseAll, OSPulseHandle());
+
+    MOCK_METHOD2(PulseWait, OSResult(OSPulseHandle handle, OSTaskTimeSpan timeout));
+
+    MOCK_METHOD1(PulseSet, void(OSPulseHandle handle));
 };
 
 #endif

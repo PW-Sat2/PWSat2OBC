@@ -154,6 +154,9 @@ typedef uint32_t OSEventBits;
 /** @brief Type definition of queue handle */
 typedef void* OSQueueHandle;
 
+/** @brief Type definition of pulse all handle */
+typedef void* OSPulseHandle;
+
 /**
  * @brief Pointer to generic system procedure that operates on task.
  *
@@ -309,6 +312,25 @@ typedef void (*OSQueueOverwrite)(OSQueueHandle queue, const void* element);
  * @param[in] taskWoken TRUE if task was woken and context switch should occur
  */
 typedef void (*OSEndSwitchingISR)(bool taskWoken);
+
+/**
+ * @brief Type of procedure that create pulse all event group
+ */
+typedef OSPulseHandle (*OSCreatePulseAll)(void);
+
+/**
+ * @brief Type of procedure that waits for pulse
+ * @param[in] handle Pulse handle
+ * @param[in] timeout Operation timeout in ms
+ * @return Wait result
+ */
+typedef OSResult (*OSWaitForPulse)(OSPulseHandle handle, OSTaskTimeSpan timeout);
+
+/**
+ * @brief Type of procedure that sets pulse event
+ * @param[in] handle Pulse handle
+ */
+typedef void (*OSPulseSet)(OSPulseHandle handle);
 
 /**
  * @brief Definition of operating system interface.
@@ -475,6 +497,27 @@ typedef struct
      * @see OSEndSwitchingISR
      */
     OSEndSwitchingISR EndSwitchingISR;
+
+    /**
+     * @brief Pointer to procedure that creates pulse all event
+     *
+     * @see OSCreatePulseAll
+     */
+    OSCreatePulseAll CreatePulseAll;
+
+    /**
+     * @brief Pointer to procedure that waits for pulse
+     *
+     * @see OSWaitForPulse
+     */
+    OSWaitForPulse PulseWait;
+
+    /**
+     * @brief Pointer to procedure that sets pulse event
+     *
+     * @see OSWaitForPulse
+     */
+    OSPulseSet PulseSet;
 } OS;
 
 /**

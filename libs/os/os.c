@@ -175,6 +175,32 @@ static void EndSwitchingISR(bool taskWoken)
     portEND_SWITCHING_ISR(taskWoken);
 }
 
+static OSPulseHandle CreatePulseAll(void)
+{
+    return (OSPulseHandle)CreateEventGroup();
+}
+
+static OSResult WaitForPulse(OSPulseHandle handle, OSTaskTimeSpan timeout)
+{
+    ////        System.EventGroupWaitForBits(timeProvider->TickNotification, 0x80, true, true, MAX_DELAY);
+    OSEventBits result = EventGroupWaitForBits((OSEventGroupHandle)handle, 0x80, true, true, timeout);
+
+    if (result == 0x80)
+    {
+        return OSResultSuccess;
+    }
+    else
+    {
+        return OSResultTimeout;
+    }
+}
+
+static void PulseSet(OSPulseHandle handle)
+{
+    // System.EventGroupSetBits(timeProvider->TickNotification, 0x80);
+    EventGroupSetBits((OSEventGroupHandle)handle, 0x80);
+}
+
 OS System;
 
 OSResult OSSetup(void)
@@ -200,6 +226,9 @@ OSResult OSSetup(void)
     System.QueueSendISR = QueueSendISR;
     System.QueueOverwrite = QueueOverwrite;
     System.EndSwitchingISR = EndSwitchingISR;
+    System.CreatePulseAll = CreatePulseAll;
+    System.PulseSet = PulseSet;
+    System.PulseWait = WaitForPulse;
 
     return OSResultSuccess;
 }
