@@ -138,6 +138,8 @@ bool TimeInitialize(TimeProvider* provider,    //
         System.GiveSemaphore(provider->notificationLock);
     }
 
+    provider->TickNotification = System.CreateEventGroup();
+
     const bool result = provider->timerLock != NULL && provider->notificationLock != NULL;
     return result;
 }
@@ -354,6 +356,11 @@ static void SendTimeNotification(TimeProvider* timeProvider, struct TimerState s
     {
         timeProvider->OnTimePassed(timeProvider->TimePassedCallbackContext, TimePointFromTimeSpan(state.time));
     }
+
+    if (state.sendNotification)
+    {
+        System.EventGroupSetBits(timeProvider->TickNotification, 0x80);
+    }
 }
 
 static void SaveTime(TimeProvider* timeProvider, struct TimerState state)
@@ -403,6 +410,47 @@ static void SaveTime(TimeProvider* timeProvider, struct TimerState state)
     {
         LOGF(LOG_LEVEL_WARNING, "[timer] Timer encountered %d errors over %d state save attempts. ", totalErrorCount, errorCount);
     }
+}
+
+bool TimeLongDelayUntil(TimeProvider* timeProvider, TimePoint time)
+{
+    do
+    {
+        TimePoint missionTime;
+
+        if (!TimeGetCurrentMissionTime(timeProvider, &missionTime))
+        {
+            return false;
+        }
+
+        if (TimePointLessThan(time, missionTime))
+        {
+            return true;
+        }
+
+        if (TimePointEqual(time, missionTime))
+        {
+            return true;
+        }
+
+        System.EventGroupWaitForBits(timeProvider->TickNotification, 0x80, true, true, MAX_DELAY);
+    } while (true);
+
+    return false;
+}
+
+bool TimeLongDelay(TimeProvider* timeProvider, TimeSpan delay)
+{
+    TimePoint missionTime;
+
+    if (!TimeGetCurrentMissionTime(timeProvider, &missionTime))
+    {
+        return false;
+    }
+
+    TimePoint time = TimePointFromTimeSpan(TimeSpanAdd(TimePointToTimeSpan(missionTime), delay));
+
+    return TimeLongDelayUntil(timeProvider, time);
 }
 
 /** @} */

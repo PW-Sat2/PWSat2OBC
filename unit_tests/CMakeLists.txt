@@ -31,6 +31,7 @@ set(SOURCES
   time/time.cpp
   time/timer.cpp
   time/persistance.cpp
+  time/SmartWait.cpp
   mock/FsMock.hpp
   mock/FsMock.cpp
   assert.cpp

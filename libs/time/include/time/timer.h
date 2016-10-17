@@ -109,6 +109,8 @@ typedef struct TimeProviderTag
      */
     OSSemaphoreHandle notificationLock;
 
+    OSEventGroupHandle TickNotification;
+
     /**
      * @brief Pointer to file system object that is used to save/restore timer state.
      */
@@ -223,6 +225,9 @@ static inline bool TimeSnapshotLessThan(struct TimeSnapshot left, struct TimeSna
 {
     return TimeSpanLessThan(left.CurrentTime, right.CurrentTime);
 }
+
+bool TimeLongDelayUntil(TimeProvider* timeProvider, TimePoint time);
+bool TimeLongDelay(TimeProvider* timeProvider, TimeSpan delay);
 
 /** @}*/
 

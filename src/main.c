@@ -76,6 +76,19 @@ static void BlinkLed0(void* param)
     }
 }
 
+static void SmartWaitTask(void* param)
+{
+    UNREFERENCED_PARAMETER(param);
+
+    LOG(LOG_LEVEL_DEBUG, "Wait start");
+
+    while (1)
+    {
+        TimeLongDelay(&Main.timeProvider, TimeSpanFromMinutes(10));
+        LOG(LOG_LEVEL_DEBUG, "After wait");
+    }
+}
+
 static void InitSwoEndpoint(void)
 {
     void* swoEndpointHandle = SwoEndpointInit();
@@ -306,6 +319,7 @@ int main(void)
     System.CreateTask(BlinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
     // System.CreateTask(ADXRS, "ADXRS", 512, NULL, tskIDLE_PRIORITY + 2, NULL);
     System.CreateTask(ObcInitTask, "Init", 512, &Main, tskIDLE_PRIORITY + 15, &Main.initTask);
+    System.CreateTask(SmartWaitTask, "SmartWait", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
     System.RunScheduler();
 
     GPIO_PinOutToggle(LED_PORT, LED0);
