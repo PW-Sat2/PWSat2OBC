@@ -34,11 +34,14 @@ struct IOS
 
     virtual OSEventBits EventGroupClearBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange) = 0;
 
-    virtual OSEventBits EventGroupWaitForBits(OSEventGroupHandle eventGroup,
-        const OSEventBits bitsToWaitFor,
-        bool waitAll,
-        bool autoReset,
-        const OSTaskTimeSpan timeout) = 0;
+    virtual OSEventBits EventGroupWaitForBits(
+        OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, bool waitAll, bool autoReset, const OSTaskTimeSpan timeout) = 0;
+
+    virtual OSPulseHandle CreatePulseAll() = 0;
+
+    virtual OSResult PulseWait(OSPulseHandle handle, OSTaskTimeSpan timeout) = 0;
+
+    virtual void PulseSet(OSPulseHandle handle) = 0;
 };
 
 class OSReset

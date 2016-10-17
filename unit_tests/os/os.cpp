@@ -127,6 +127,34 @@ static OSEventBits EventGroupWaitForBits(
     return 0;
 }
 
+static OSPulseHandle CreatePulseAll(void)
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->CreatePulseAll();
+    }
+
+    return 0;
+}
+
+static OSResult WaitForPulse(OSPulseHandle handle, OSTaskTimeSpan timeout)
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->PulseWait(handle, timeout);
+    }
+
+    return OSResultNotSupported;
+}
+
+static void PulseSet(OSPulseHandle handle)
+{
+    if (OSProxy != nullptr)
+    {
+        OSProxy->PulseSet(handle);
+    }
+}
+
 OSReset::OSReset() : released(false)
 {
 }
@@ -167,5 +195,9 @@ OSReset InstallProxy(IOS* target)
     System.EventGroupClearBits = EventGroupClearBits;
     System.EventGroupSetBits = EventGroupSetBits;
     System.EventGroupWaitForBits = EventGroupWaitForBits;
+    System.CreatePulseAll = CreatePulseAll;
+    System.PulseSet = PulseSet;
+    System.PulseWait = WaitForPulse;
+
     return OSReset();
 }

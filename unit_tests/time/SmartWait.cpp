@@ -40,13 +40,12 @@ TEST_F(SmartWaitTest, ShouldWaitForPulseAndReturnIfDesiredTimeReached)
 {
     timeProvider.CurrentTime = TimePointToTimeSpan(TimePointBuild(0, 0, 0, 0, 0));
 
-    EXPECT_CALL(osMock, EventGroupWaitForBits(_, _, _, _, _))
-        .WillRepeatedly(Invoke([&](
-            OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, bool waitAll, bool autoReset, const OSTaskTimeSpan timeout) {
-            UNUSED(eventGroup, bitsToWaitFor, waitAll, autoReset, timeout);
+    EXPECT_CALL(osMock, PulseWait(_, _))
+        .WillRepeatedly(Invoke([&](OSPulseHandle handle, const OSTaskTimeSpan timeout) {
+            UNUSED(handle, timeout);
 
             timeProvider.CurrentTime = TimeSpanAdd(timeProvider.CurrentTime, TimeSpanFromMinutes(1));
-            return (OSEventBits)0;
+            return OSResultSuccess;
         }));
 
     auto result = TimeLongDelayUntil(&timeProvider, TimePointBuild(0, 0, 10, 0, 0));

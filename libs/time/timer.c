@@ -138,7 +138,7 @@ bool TimeInitialize(TimeProvider* provider,    //
         System.GiveSemaphore(provider->notificationLock);
     }
 
-    provider->TickNotification = System.CreateEventGroup();
+    provider->TickNotification = System.CreatePulseAll();
 
     const bool result = provider->timerLock != NULL && provider->notificationLock != NULL;
     return result;
@@ -359,7 +359,7 @@ static void SendTimeNotification(TimeProvider* timeProvider, struct TimerState s
 
     if (state.sendNotification)
     {
-        System.EventGroupSetBits(timeProvider->TickNotification, 0x80);
+        System.PulseSet(timeProvider->TickNotification);
     }
 }
 
@@ -433,7 +433,7 @@ bool TimeLongDelayUntil(TimeProvider* timeProvider, TimePoint time)
             return true;
         }
 
-        System.EventGroupWaitForBits(timeProvider->TickNotification, 0x80, true, true, MAX_DELAY);
+        System.PulseWait(timeProvider->TickNotification, MAX_DELAY);
     } while (true);
 
     return false;
