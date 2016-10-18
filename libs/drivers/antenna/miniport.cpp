@@ -99,10 +99,10 @@ static OSResult DeployAntenna(AntennaMiniportDriver* driver,
     buffer[0] = (uint8_t)(DEPLOY_ANTENNA + antennaId);
     buffer[1] = (uint8_t)TimeSpanToSeconds(timeout);
     return MapStatus(driver->communicationBus->Write(driver->communicationBus,
-        driver->currentChannel,
-        buffer,
-        2 //
-        ));
+                         driver->currentChannel,
+                         buffer,
+                         2 //
+                         ) == I2CResultOK);
 }
 
 static OSResult DeployAntennaOverride(AntennaMiniportDriver* driver, AntennaId antennaId, TimeSpan timeout)
@@ -111,10 +111,10 @@ static OSResult DeployAntennaOverride(AntennaMiniportDriver* driver, AntennaId a
     buffer[0] = (uint8_t)(DEPLOY_ANTENNA_OVERRIDE + antennaId);
     buffer[1] = (uint8_t)TimeSpanToSeconds(timeout);
     return MapStatus(driver->communicationBus->Write(driver->communicationBus,
-        driver->currentChannel,
-        buffer,
-        2 //
-        ));
+                         driver->currentChannel,
+                         buffer,
+                         2 //
+                         ) == I2CResultOK);
 }
 
 static OSResult InitializeAutomaticDeployment(AntennaMiniportDriver* driver)
@@ -130,6 +130,7 @@ static OSResult CancelAntennaDeployment(AntennaMiniportDriver* driver)
 static OSResult GetDeploymentStatus(AntennaMiniportDriver* driver, AntennaMiniportDeploymentStatus* telemetry)
 {
     uint8_t output[2];
+    memset(telemetry, 0, sizeof(*telemetry));
     if (!SendCommandWithResponse(driver, QUERY_DEPLOYMENT_STATUS, output, sizeof(output)))
     {
         return OSResultIOError;
@@ -138,7 +139,7 @@ static OSResult GetDeploymentStatus(AntennaMiniportDriver* driver, AntennaMinipo
     Reader reader;
     ReaderInitialize(&reader, output, sizeof(output));
     const uint16_t value = ReaderReadWordLE(&reader);
-    if ((value & 0x10) != 0)
+    if ((value & 0x1000) != 0)
     {
         LOGF(LOG_LEVEL_WARNING,
             "[ant] Antenna %d deployment status out of range: %d.",
@@ -168,6 +169,7 @@ static OSResult GetAntennaActivationCount(AntennaMiniportDriver* driver, Antenna
     uint8_t output;
     if (!SendCommandWithResponse(driver, (Command)(QUERY_ANTENNA_ACTIVATION_COUNT + antennaId), &output, sizeof(output)))
     {
+        *count = 0;
         return OSResultIOError;
     }
 
@@ -180,6 +182,7 @@ static OSResult GetAntennaActivationTime(AntennaMiniportDriver* driver, AntennaI
     uint8_t output[2];
     if (!SendCommandWithResponse(driver, (Command)(QUERY_ANTENNA_ACTIVATION_TIME + antennaId), output, sizeof(output)))
     {
+        *span = TimeSpanFromMilliseconds(0);
         return OSResultIOError;
     }
 
@@ -193,6 +196,7 @@ static OSResult GetAntennaActivationTime(AntennaMiniportDriver* driver, AntennaI
 static OSResult GetTemperature(AntennaMiniportDriver* driver, uint16_t* temperature)
 {
     uint8_t output[2];
+    *temperature = 0;
     if (!SendCommandWithResponse(driver, QUERY_TEMPERATURE, output, sizeof(output)))
     {
         return OSResultIOError;
@@ -200,7 +204,7 @@ static OSResult GetTemperature(AntennaMiniportDriver* driver, uint16_t* temperat
 
     Reader reader;
     ReaderInitialize(&reader, output, sizeof(output));
-    const uint16_t value = ReaderReadWordBE(&reader);
+    const uint16_t value = ReaderReadWordLE(&reader);
     if ((value & 0xfc) != 0)
     {
         LOGF(LOG_LEVEL_WARNING,
@@ -212,7 +216,7 @@ static OSResult GetTemperature(AntennaMiniportDriver* driver, uint16_t* temperat
         return OSResultOutOfRange;
     }
 
-    *temperature = value;
+    *temperature = (value >> 6);
     return OSResultSuccess;
 }
 
