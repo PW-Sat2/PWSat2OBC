@@ -8,7 +8,7 @@ Build process requires following tools:
 * SEGGER J-Link (https://www.segger.com/jlink-software.html)
 * QEmu with EFM32GG990 support (our fork, https://github.com/PW-Sat2/qemu/releases/tag/v2.4.1-efm)
 * Doxygen
-* Python2.7
+* Python 2.7
 * Clang (for `clang-format`)
 
 ### Ready-made pack for Windows
