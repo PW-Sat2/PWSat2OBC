@@ -16,7 +16,7 @@ set(SOURCES
   Comm/CommTest.cpp
   base/ReaderTest.cpp
   base/WriterTest.cpp
-  MissionPlan/MissionPlanTest.cpp  
+  MissionPlan/MissionPlanTest.cpp
   MissionPlan/DeployAntennaActionTest.cpp
   MissionPlan/MissionTestHelpers.cpp
   MissionPlan/SailSystemStateTest.cpp
@@ -35,6 +35,9 @@ set(SOURCES
   mock/FsMock.cpp
   assert.cpp
   antenna/miniport.cpp
+  antenna/antenna.cpp
+  antenna/MiniportMock.cpp
+  antenna/MiniportMock.hpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -60,14 +63,14 @@ target_link_libraries(${NAME}
     yaffs
     storage
     comm
-    fs    
+    fs
     base
     mission
     rapidcheck
     rapidcheck.gtest
     rapidcheck.gmock
     emdrv
-    adxrs453    
+    adxrs453
     time
     antenna
 )
