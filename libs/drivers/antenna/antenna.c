@@ -260,6 +260,7 @@ static void UpdateActivationTime(struct AntennaDriver* driver, AntennaTelemetry*
 static AntennaTelemetry GetTelemetry(struct AntennaDriver* driver)
 {
     AntennaTelemetry telemetry;
+    memset(&telemetry, 0, sizeof(telemetry));
     GetDeploymentStatus(driver, &telemetry);
     UpdateTelemetryTemperature(driver, &telemetry);
     UpdateActivationCount(driver, &telemetry);
