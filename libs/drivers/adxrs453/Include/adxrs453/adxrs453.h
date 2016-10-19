@@ -294,8 +294,8 @@ SPI_TransferReturn_t  ADXRS453_GetTemperature(ADXRS453_Obj_t *gyro,
  *
  * @param[in] commandByte command byte  .
  * @param[in] registerAddress register address.
- * @param[in] registerAddress register value.
- * @param[out] buffer Pointer to buffer that will contains the command.
+ * @param[in] registerValue register value.
+ * @param[out] sendBuffer Pointer to buffer that will contains the command.
  * @return type of transfer return see SPI_TransferReturn_t
  */
 void GenerateCommand(uint8_t commandByte , uint8_t registerAddress, uint16_t registerValue, uint8_t * sendBuffer);
