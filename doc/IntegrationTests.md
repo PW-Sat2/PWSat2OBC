@@ -6,7 +6,7 @@
 * Serial Port (for example  FT4232 Mini Module)
 * DeviceMock:
     * Two when using both I2C buses
-    * One when using single I2C bus (defualt)
+    * One when using single I2C bus (default)
 
 ### Software
 * Toolchain (see [How to build](HowToBuild.md))
