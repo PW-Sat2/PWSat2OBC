@@ -180,10 +180,40 @@ typedef struct FileSystemTag
      * @return Operation status.
      */
     OSResult (*closeDirectory)(FileSystem* fileSystem, FSDirectoryHandle directory);
+
+    /**
+     * @brief Formats partition at given mount point. Partition in unmounted before format and mounted again after
+     * @param[in] fileSystem File system interface
+     * @param[in] mountPoint Partition mount point
+     * @return Operation stastus
+     */
+    OSResult (*format)(FileSystem* fileSystem, const char* mountPoint);
+
+    /**
+     * @brief Creates new directory
+     * @param[in] fileSystem File system interface
+     * @param[in] path Path to directory that should be created
+     * @return Operation status
+     */
+    OSResult (*makeDirectory)(FileSystem* fileSystem, const char* path);
+
+    /**
+     * @brief Checks if path exists
+     * @param[in]] fileSystem File system interface
+     * @param[in] path Path to check
+     * @return true if path exists
+     */
+    bool (*exists)(FileSystem* fileSystem, const char* path);
 } FileSystem;
 
 /**
- * @brief Initializes file system interface
+ * @brief Initializes only API pointers.
+ * @param[out] fs File system interface
+ */
+void FileSystemAPI(FileSystem* fs);
+
+/**
+ * @brief Initializes file system interface (including API)
  * @param[inout] fs File system interface
  * @param[in] rootDevice root device driver
  * @return true if initialization was successful

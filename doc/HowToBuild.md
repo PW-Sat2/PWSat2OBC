@@ -41,6 +41,7 @@ Option | Default value | Description
 `TARGET_PLATFORM`  | `DevBoard`           | Platform that should be used as build target. For now only one is supported: `DevBoard`
 `CMAKE_BUILD_TYPE` | `DEBUG`              | Type of build: `DEBUG` or `RELEASE`
 `OBC_COM`          | _None_               | Serial port used to communicate with OBC terminal
+`GPIO_COM`		  | _None_				 | Serial port used for GPIO operations (OBC reset and clean state request)
 `SYS_BUS_COM`      | _None_               | Serial port used to communicate with System Bus mock
 `PAYLOAD_BUS_COM`  | _None_               | Serial port used to communicate with Payload Bus mock
 `USE_SINGLE_BUS`   | 1                    | Set to 1 to enable only one I2C bus. Payload bus will be redirected to System Bus. Set to 0 to use both buses

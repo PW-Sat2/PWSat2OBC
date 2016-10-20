@@ -19,7 +19,8 @@
 * PC <-> Starter Kit:
  * RX from serial port to TX on starter kit (pin PD4)
  * TX from serial port to RX on starter kit (pin PD5)
- * RTS from serial port to RST on starter kit
+ * RTS from GPIO serial port to RST on starter kit
+ * DTR from GPIO serial port to PC0 on starter kit
  * GND from serial port to GND on starter kit
 * Starter Kit <-> DeviceMock (System Bus)
  * GND
@@ -29,8 +30,9 @@
  * I2C bus: SDA (PD6), SCL (PC7)
 
 ## Serial ports
-Three (two for single bus mode) serial ports are used in integration tests:
+Four (three for single bus mode) serial ports are used in integration tests:
  1. Terminal (called `OBC_COM`) used by tests to control behavior of OBC software 
+ 1. GPIO (called `GPIO_COM`) used by tests to reset OBC and request cleaning state at startup
  1. DeviceMock (called `SYS_BUS_COM`) used to simulate all devices that OBC needs to communicate with on System Bus (and Payload Bus in single bus mode)
  1. DeviceMock (called `PAYLOAD_BUS_COM`) used to simulate devices connected to Payload Bus (not used in single bus mode, as everything goes through system bus)
 

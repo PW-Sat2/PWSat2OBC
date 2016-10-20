@@ -1,7 +1,6 @@
 set(NAME fs)
 
-add_library(${NAME} STATIC    
-    yaffs_os_glue.c
+add_library(${NAME} STATIC        
     fs.c
     extension.c
 )

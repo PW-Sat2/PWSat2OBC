@@ -12,6 +12,7 @@
 
 using testing::StrEq;
 using testing::Eq;
+using testing::Ge;
 using testing::Test;
 
 extern "C" void yaffs_remove_device(struct yaffs_dev* dev);
@@ -21,6 +22,7 @@ class FileSystemTest : public Test
   protected:
     yaffs_dev device;
     YaffsNANDDriver driver;
+    FileSystem api;
 
     int32_t FillDevice(int file);
 
@@ -59,6 +61,8 @@ FileSystemTest::FileSystemTest()
     device.param.end_block = 1 * 1024 * 1024 / driver.geometry.blockSize - device.param.start_block - device.param.n_reserved_blocks;
 
     yaffs_add_device(&device);
+
+    FileSystemAPI(&api);
 }
 
 FileSystemTest::~FileSystemTest()
@@ -284,6 +288,42 @@ TEST_F(FileSystemTest, ShouldDetectUncorrectableError)
     ASSERT_THAT(this->device.n_ecc_unfixed - unfixed, Eq(1));
 
     yaffs_close(file);
+
+    yaffs_unmount("/");
+}
+
+bool Exists(const char* path)
+{
+    struct yaffs_stat stat;
+    auto status = yaffs_stat(path, &stat);
+
+    return status != -1;
+}
+
+TEST_F(FileSystemTest, ShouldCreateDirectoryWithParents)
+{
+    const char path[] = "/a/b/c/";
+
+    yaffs_mount("/");
+
+    api.makeDirectory(&api, path);
+
+    ASSERT_THAT(api.exists(&api, path), Eq(true));
+
+    yaffs_unmount("/");
+}
+
+TEST_F(FileSystemTest, ShouldCreateDirectoryAndParentExist)
+{
+    const char path[] = "/a/b";
+
+    yaffs_mount("/");
+
+    yaffs_mkdir("/a", 0777);
+
+    api.makeDirectory(&api, path);
+
+    ASSERT_THAT(api.exists(&api, path), Eq(true));
 
     yaffs_unmount("/");
 }

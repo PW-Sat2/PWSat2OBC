@@ -114,6 +114,26 @@ static bool FSInit(FileSystem* fs, struct yaffs_dev* rootDevice, YaffsNANDDriver
     return FileSystemInitialize(fs, rootDevice);
 }
 
+static void ClearState(OBC* obc)
+{
+    GPIO_PinModeSet(SYS_CLEAR_PORT, SYS_CLEAR_PIN, gpioModeInputPull, 1);
+
+    if (GPIO_PinInGet(SYS_CLEAR_PORT, SYS_CLEAR_PIN) == 0)
+    {
+        LOG(LOG_LEVEL_WARNING, "Clearing state on startup");
+
+        const OSResult status = obc->fs.format(&obc->fs, "/");
+        if (OS_RESULT_SUCCEEDED(status))
+        {
+            LOG(LOG_LEVEL_INFO, "Flash formatted");
+        }
+        else
+        {
+            LOGF(LOG_LEVEL_ERROR, "Error formatting flash %d", status);
+        }
+    }
+}
+
 static void ObcInitTask(void* param)
 {
     OBC* obc = (OBC*)param;
@@ -122,6 +142,8 @@ static void ObcInitTask(void* param)
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize file system");
     }
+
+    ClearState(obc);
 
     if (!TimeInitialize(&obc->timeProvider, NULL, NULL, &obc->fs))
     {

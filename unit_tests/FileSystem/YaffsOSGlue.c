@@ -79,3 +79,7 @@ void yaffs_log(const char* fmt, ...)
 
     va_end(args);
 }
+
+void YaffsGlueInit(void)
+{
+}
