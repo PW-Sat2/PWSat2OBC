@@ -31,3 +31,12 @@ target_compile_definitions(${NAME} PUBLIC
     -DCONFIG_YAFFS_YAFFS2 
     -Dloff_t=int64_t
 )
+
+set_target_properties(${NAME} PROPERTIES COMPILE_FLAGS "\
+    -Wno-type-limits \
+    -Wno-sign-compare \
+    -Wno-implicit-function-declaration \
+    -Wno-unused-but-set-variable \
+    -Wno-unused-parameter \
+    -Wno-unused-function \
+")

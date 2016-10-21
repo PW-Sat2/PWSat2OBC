@@ -1,14 +1,14 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock-matchers.h"
-#include "rapidcheck.h"
+#include "rapidcheck.hpp"
 #include "rapidcheck/gtest.h"
 
 #include "MissionTestHelpers.h"
 
-#include "time/TimeSpan.hpp"
 #include "mission/sail.h"
 #include "state/state.h"
 #include "system.h"
+#include "time/TimeSpan.hpp"
 
 using testing::Test;
 using testing::Eq;

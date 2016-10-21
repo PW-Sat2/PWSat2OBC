@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <yaffs_trace.h>
 #include <yaffsfs.h>
+#include "system.h"
 
 int yaffsError = 0;
 
@@ -58,6 +59,9 @@ void yaffsfs_free(void* ptr)
 
 int yaffsfs_CheckMemRegion(const void* addr, size_t size, int write_request)
 {
+    UNREFERENCED_PARAMETER(addr);
+    UNREFERENCED_PARAMETER(size);
+    UNREFERENCED_PARAMETER(write_request);
     return 1;
 }
 

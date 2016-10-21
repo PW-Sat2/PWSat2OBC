@@ -23,7 +23,7 @@ class MissionPlanTest : public testing::Test
 TEST_F(MissionPlanTest, EmptyStateShouldHaveEmptyValues)
 {
     ASSERT_THAT(state.Flag, Eq(false));
-    ASSERT_THAT(state.NumValue, Eq(100));
+    ASSERT_THAT(state.NumValue, Eq(100L));
     ASSERT_THAT(state.AntennaDeployed, Eq(false));
 }
 
@@ -44,7 +44,7 @@ TEST_F(MissionPlanTest, ShouldUpdateStateAccordingToDescriptors)
     auto result = SystemStateUpdate(&state, stateDescriptors, COUNT_OF(stateDescriptors));
 
     ASSERT_THAT(state.Flag, Eq(true));
-    ASSERT_THAT(state.NumValue, Eq(200));
+    ASSERT_THAT(state.NumValue, Eq(200L));
     ASSERT_THAT(result, Eq(SystemStateUpdateOK));
 }
 
@@ -135,7 +135,7 @@ TEST_F(MissionPlanTest, ShouldReportInvalidState)
 
     ASSERT_THAT(result, Eq(SystemStateVerifyFailure));
     ASSERT_THAT(results[0].Result, Eq(SystemStateVerifyFailure));
-    ASSERT_THAT(results[0].Reason, Eq(5));
+    ASSERT_THAT(results[0].Reason, Eq(5UL));
 }
 
 TEST_F(MissionPlanTest, ShouldGenerateActionsBasedOnState)
@@ -156,6 +156,6 @@ TEST_F(MissionPlanTest, ShouldGenerateActionsBasedOnState)
 
     auto runnableCount = SystemDetermineActions(&state, actions, COUNT_OF(actions), runnable);
 
-    ASSERT_THAT(runnableCount, Eq(1));
+    ASSERT_THAT(runnableCount, Eq(1U));
     ASSERT_THAT(runnable[0]->Param, Eq(&action1));
 }

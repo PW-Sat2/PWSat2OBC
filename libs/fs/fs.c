@@ -148,7 +148,7 @@ static bool YaffsExists(FileSystem* fileSystem, const char* path)
     UNREFERENCED_PARAMETER(fileSystem);
 
     struct yaffs_stat stat;
-    auto status = yaffs_stat(path, &stat);
+    int16_t status = yaffs_stat(path, &stat);
 
     return status != -1;
 }

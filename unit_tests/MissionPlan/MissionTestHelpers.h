@@ -3,7 +3,7 @@
 
 #include <functional>
 #include <utility>
-#include "rapidcheck.h"
+#include "rapidcheck.hpp"
 #include "state/state.h"
 #include "system.h"
 

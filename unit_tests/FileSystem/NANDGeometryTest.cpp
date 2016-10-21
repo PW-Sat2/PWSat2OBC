@@ -20,9 +20,9 @@ TEST(NANDGeometryTest, ShouldCalculateBaseParameters)
 
     NANDCalculateGeometry(&geometry);
 
-    ASSERT_THAT(geometry.chunkSize, Eq(1024));
-    ASSERT_THAT(geometry.blockSize, Eq(16384));
-    ASSERT_THAT(geometry.chunksPerBlock, Eq(16));
+    ASSERT_THAT(geometry.chunkSize, Eq(1024UL));
+    ASSERT_THAT(geometry.blockSize, Eq(16384UL));
+    ASSERT_THAT(geometry.chunksPerBlock, Eq(16UL));
 }
 
 TEST(NANDGeometryTest, ShouldCalculateAffectedPagesCount)
@@ -48,7 +48,7 @@ TEST(NANDGeometryTest, ShouldCalculateAffectedPagesCount)
 
     uint16_t pagesCount = NANDAffectedPagesCount(&geometry, &op);
 
-    ASSERT_THAT(pagesCount, Eq(3));
+    ASSERT_THAT(pagesCount, Eq(3U));
 }
 
 TEST(NANDGeometryTest, ShouldCalculateRangesOfMultipageOperation2)
@@ -76,21 +76,21 @@ TEST(NANDGeometryTest, ShouldCalculateRangesOfMultipageOperation2)
         NANDGetOperationSlice(&geometry, &op, 0), NANDGetOperationSlice(&geometry, &op, 1), NANDGetOperationSlice(&geometry, &op, 2)};
 
     ASSERT_THAT(Hex(slice[0].offset), Eq(Hex(0x100)));
-    ASSERT_THAT(slice[0].dataSize, Eq(512));
+    ASSERT_THAT(slice[0].dataSize, Eq(512UL));
     ASSERT_THAT(slice[0].dataBuffer, Eq(dataBuffer));
-    ASSERT_THAT(slice[0].spareSize, Eq(16));
+    ASSERT_THAT(slice[0].spareSize, Eq(16UL));
     ASSERT_THAT(slice[0].spareBuffer, Eq(spareBuffer));
 
     ASSERT_THAT(Hex(slice[1].offset), Eq(Hex(0x100 + 512)));
-    ASSERT_THAT(slice[1].dataSize, Eq(512));
+    ASSERT_THAT(slice[1].dataSize, Eq(512UL));
     ASSERT_THAT(slice[1].dataBuffer, Eq(dataBuffer + 512));
-    ASSERT_THAT(slice[1].spareSize, Eq(1));
+    ASSERT_THAT(slice[1].spareSize, Eq(1UL));
     ASSERT_THAT(slice[1].spareBuffer, Eq(spareBuffer + 16));
 
     ASSERT_THAT(Hex(slice[2].offset), Eq(Hex(0x100 + 1024)));
-    ASSERT_THAT(slice[2].dataSize, Eq(1));
+    ASSERT_THAT(slice[2].dataSize, Eq(1UL));
     ASSERT_THAT(slice[2].dataBuffer, Eq(dataBuffer + 1024));
-    ASSERT_THAT(slice[2].spareSize, Eq(0));
+    ASSERT_THAT(slice[2].spareSize, Eq(0UL));
     ASSERT_THAT(slice[2].spareBuffer, testing::IsNull());
 }
 
@@ -112,7 +112,7 @@ TEST_P(ShouldCalculatePageOffset, ShouldCalculatePageOffset)
     uint32_t chunkNo = std::get<0>(GetParam());
     uint32_t expectedAddress = std::get<1>(GetParam());
 
-    auto address = NANDPageOffsetFromChunk(&geometry, chunkNo);
+    auto address = NANDPageOffsetFromChunk(&geometry, (uint16_t)chunkNo);
 
     ASSERT_EQ(Hex(address), Hex(expectedAddress));
 }
@@ -143,9 +143,12 @@ TEST_P(ShouldCalculateBlockOffset, ShouldCalculateBlockOffset)
 
     auto offset = NANDBlockOffset(&geometry, blockNo);
 
+    (void)offset;
+    (void)expectedAddress;
+
     ASSERT_EQ(Hex(offset), Hex(expectedAddress));
 }
 
 INSTANTIATE_TEST_CASE_P(ShouldCalculateBlockOffset,
     ShouldCalculateBlockOffset,
-    Values(std::make_tuple<uint32_t, uint32_t>(0, 0x1000), std::make_tuple<uint32_t, uint32_t>(1, 0x5000)), );
+    Values(std::make_tuple<uint32_t, uint32_t>(0x0, 0x1000), std::make_tuple<uint32_t, uint32_t>(0x1, 0x5000)), );
