@@ -7,12 +7,17 @@
 
 #include "i2c.h"
 
+static inline I2CLowLevelBus* LowLevel(I2CBus* bus)
+{
+    return (I2CLowLevelBus*)bus;
+}
+
 /**
  * @brief Checks if SCL line is latched at low level
  * @param[in] bus I2C bus
  * @return true if SCL line is latched
  */
-static bool IsSclLatched(const I2CBus* bus)
+static bool IsSclLatched(const I2CLowLevelBus* bus)
 {
     return GPIO_PinInGet((GPIO_Port_TypeDef)bus->IO.Port, bus->IO.SCL) == 0;
 }
@@ -23,7 +28,7 @@ static bool IsSclLatched(const I2CBus* bus)
  * @param[in] seq Transfer sequence definition
  * @return Transfer result
  */
-static I2CResult ExecuteTransfer(I2CBus* bus, I2C_TransferSeq_TypeDef* seq)
+static I2CResult ExecuteTransfer(I2CLowLevelBus* bus, I2C_TransferSeq_TypeDef* seq)
 {
     if (OS_RESULT_FAILED(System.TakeSemaphore(bus->Lock, MAX_DELAY)))
     {
@@ -98,7 +103,7 @@ static I2CResult Write(I2CBus* bus, const I2CAddress address, const uint8_t* dat
             }                                            //
         };
 
-    return ExecuteTransfer(bus, &seq);
+    return ExecuteTransfer(LowLevel(bus), &seq);
 }
 
 /**
@@ -125,10 +130,10 @@ static I2CResult WriteRead(
             }                                                //
         };
 
-    return ExecuteTransfer(bus, &seq);
+    return ExecuteTransfer(LowLevel(bus), &seq);
 }
 
-void I2CSetupInterface(I2CBus* bus,
+void I2CSetupInterface(I2CLowLevelBus* bus,
     I2C_TypeDef* hw,
     uint16_t location,
     GPIO_Port_TypeDef port,
@@ -137,14 +142,14 @@ void I2CSetupInterface(I2CBus* bus,
     CMU_Clock_TypeDef clock,
     IRQn_Type irq)
 {
-    bus->Extra = NULL;
+    bus->Base.Extra = NULL;
+    bus->Base.Write = Write;
+    bus->Base.WriteRead = WriteRead;
+
     bus->HWInterface = hw;
     bus->IO.Port = (uint16_t)port;
     bus->IO.SCL = sclPin;
     bus->IO.SDA = sdaPin;
-
-    bus->Write = Write;
-    bus->WriteRead = WriteRead;
 
     bus->ResultQueue = System.CreateQueue(1, sizeof(I2C_TransferReturn_TypeDef));
 
@@ -169,7 +174,7 @@ void I2CSetupInterface(I2CBus* bus,
     NVIC_EnableIRQ(irq);
 }
 
-void I2CIRQHandler(I2CBus* bus)
+void I2CIRQHandler(I2CLowLevelBus* bus)
 {
     I2C_TransferReturn_TypeDef status = I2C_Transfer((I2C_TypeDef*)bus->HWInterface);
 

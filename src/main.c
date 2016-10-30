@@ -252,11 +252,11 @@ void SetupI2C(void)
     I2CSetupInterface(
         &Main.I2CBuses[1].Bus, I2C1, I2C1_BUS_LOCATION, I2C1_BUS_PORT, I2C1_BUS_SDA_PIN, I2C1_BUS_SCL_PIN, cmuClock_I2C1, I2C1_IRQn);
 
-    I2CSetUpErrorHandlingBus(&Main.I2CBuses[0].ErrorHandling, &Main.I2CBuses[0].Bus, I2CErrorHandler, &Main.PowerControl);
-    I2CSetUpErrorHandlingBus(&Main.I2CBuses[1].ErrorHandling, &Main.I2CBuses[1].Bus, I2CErrorHandler, &Main.PowerControl);
+    I2CSetUpErrorHandlingBus(&Main.I2CBuses[0].ErrorHandling, (I2CBus*)&Main.I2CBuses[0].Bus, I2CErrorHandler, &Main.PowerControl);
+    I2CSetUpErrorHandlingBus(&Main.I2CBuses[1].ErrorHandling, (I2CBus*)&Main.I2CBuses[1].Bus, I2CErrorHandler, &Main.PowerControl);
 
-    Main.I2C.System = &Main.I2CBuses[I2C_SYSTEM_BUS].ErrorHandling.OuterBus;
-    Main.I2C.Payload = &Main.I2CBuses[I2C_PAYLOAD_BUS].ErrorHandling.OuterBus;
+    Main.I2C.System = (I2CBus*)&Main.I2CBuses[I2C_SYSTEM_BUS].ErrorHandling;
+    Main.I2C.Payload = (I2CBus*)&Main.I2CBuses[I2C_PAYLOAD_BUS].ErrorHandling;
 
     I2CSetUpFallbackBus(&Main.I2CFallback, &Main.I2C);
 }
@@ -283,14 +283,14 @@ int main(void)
 
     SetupI2C();
 
-    EpsInit(&Main.I2CFallback);
+    EpsInit((I2CBus*)&Main.I2CFallback);
 
     EPSPowerControlInitialize(&Main.PowerControl);
 
     CommUpperInterface commUpperInterface;
     commUpperInterface.frameHandler = FrameHandler;
     commUpperInterface.frameHandlerContext = NULL;
-    CommInitialize(&Main.comm, &Main.I2CFallback, &commUpperInterface);
+    CommInitialize(&Main.comm, (I2CBus*)&Main.I2CFallback, &commUpperInterface);
 
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 

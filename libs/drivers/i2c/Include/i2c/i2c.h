@@ -13,12 +13,14 @@ EXTERNC_BEGIN
 /**
  * @defgroup i2c I2C Driver
  *
- * @brief This module provides driver for i2c bus
+ * @brief This module provides driver for I2C bus
  *
  * Capabilities:
  * * Thread-safe bus access
  * * Write and Write-Read transfers
  * * Dual-bus (System and Payload) configuration
+ * * Error-handling
+ * * Automatic fallback
  *
  * @{
  */
@@ -66,34 +68,12 @@ typedef enum {
 typedef uint8_t I2CAddress;
 
 /**
- * @brief Type describing single I2C bus
+ * @brief I2C bus interface
  */
 typedef struct _I2CBus
 {
     /** @brief Arbitrary data needed by driver */
     void* Extra;
-
-    /** @brief Pointer to hardware registers */
-    void* HWInterface;
-
-    /**
-     * @brief GPIO used by this I2C interface
-     */
-    struct
-    {
-        /** @brief Used port */
-        uint16_t Port;
-        /** @brief Number of pin connected to SCL line */
-        uint16_t SCL;
-        /** @brief Number of pin connected to SDA line */
-        uint16_t SDA;
-    } IO;
-
-    /** @brief Lock used to synchronize access to bus */
-    OSSemaphoreHandle Lock;
-
-    /** @brief Single-element queue storing results of transfers */
-    OSQueueHandle ResultQueue;
 
     /**
      * Executes write transfer
@@ -125,6 +105,35 @@ typedef struct _I2CBus
         );
 } I2CBus;
 
+/** @brief Low-level I2C bus driver */
+typedef struct
+{
+    /** @brief Base object */
+    I2CBus Base;
+
+    /** @brief Pointer to hardware registers */
+    void* HWInterface;
+
+    /**
+     * @brief GPIO used by this I2C interface
+     */
+    struct
+    {
+        /** @brief Used port */
+        uint16_t Port;
+        /** @brief Number of pin connected to SCL line */
+        uint16_t SCL;
+        /** @brief Number of pin connected to SDA line */
+        uint16_t SDA;
+    } IO;
+
+    /** @brief Lock used to synchronize access to bus */
+    OSSemaphoreHandle Lock;
+
+    /** @brief Single-element queue storing results of transfers */
+    OSQueueHandle ResultQueue;
+} I2CLowLevelBus;
+
 /**
  * @brief Type with references to used I2C buses
  */
@@ -147,7 +156,7 @@ typedef struct
  * @param[in] clock Clock used by selected hardware interface
  * @param[in] irq IRQ number used by selected hardware interface
  */
-void I2CSetupInterface(I2CBus* bus,
+void I2CSetupInterface(I2CLowLevelBus* bus,
     I2C_TypeDef* hw,
     uint16_t location,
     GPIO_Port_TypeDef port,
@@ -160,14 +169,27 @@ void I2CSetupInterface(I2CBus* bus,
  * @brief Interrupt handler for I2C hardware
  * @param[in] bus Bus associated with given hardware
  */
-void I2CIRQHandler(I2CBus* bus);
+void I2CIRQHandler(I2CLowLevelBus* bus);
+
+/**
+ * @brief I2C Fallbacking bus driver
+ * @implements I2CBus
+ */
+typedef struct
+{
+    /** @brief Base object */
+    I2CBus Base;
+
+    /** @brief Object representing both buses used in the system */
+    I2CInterface* InnerBuses;
+} I2CFallbackBus;
 
 /**
  * @brief Setups bus wrapper that fallbacks from system to payload bus in case of failure
  * @param[out] bus Bus wrapper to initialize
  * @param[in] buses Object representing both buses used in the system
  */
-void I2CSetUpFallbackBus(I2CBus* bus, I2CInterface* buses);
+void I2CSetUpFallbackBus(I2CFallbackBus* bus, I2CInterface* buses);
 
 /**
  * @brief Type of procedure used by error handling bus wrapper
@@ -180,14 +202,15 @@ void I2CSetUpFallbackBus(I2CBus* bus, I2CInterface* buses);
 typedef I2CResult (*BusErrorHandler)(I2CBus* bus, I2CResult result, I2CAddress address, void* context);
 
 /**
- * @brief Defines error handling bus configuration
+ * @brief Error handling bus driver
+ * @implements I2CBus
  */
 typedef struct
 {
+    /** @brief Error handling bus interface */
+    I2CBus Base;
     /** @brief Underlying bus */
     I2CBus* InnerBus;
-    /** @brief Error handling bus interface */
-    I2CBus OuterBus;
     /** @brief Pointer to function called in case of error */
     BusErrorHandler ErrorHandler;
     /** @brief Context passed to error handler function */

@@ -199,7 +199,7 @@ typedef struct FileSystemTag
 
     /**
      * @brief Checks if path exists
-     * @param[in]] fileSystem File system interface
+     * @param[in] fileSystem File system interface
      * @param[in] path Path to check
      * @return true if path exists
      */

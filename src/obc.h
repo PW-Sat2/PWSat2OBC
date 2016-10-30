@@ -43,7 +43,7 @@ typedef struct
     /** @brief Available I2C buses */
     struct
     {
-        I2CBus Bus;
+        I2CLowLevelBus Bus;
         I2CErrorHandlingBus ErrorHandling;
     } I2CBuses[2];
 
@@ -51,7 +51,7 @@ typedef struct
     I2CInterface I2C;
 
     /** @brief I2C Fallback bus */
-    I2CBus I2CFallback;
+    I2CFallbackBus I2CFallback;
 
     /** @brief Standard text based IO. */
     LineIO IO;

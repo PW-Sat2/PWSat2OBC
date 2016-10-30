@@ -41,7 +41,7 @@ TEST_F(ErrorHandlingI2CBusTest, WriteReadShouldCallInnerBusAndPassthroughSuccess
     uint8_t in[] = {1, 2, 3};
     uint8_t out[3] = {0};
 
-    auto r = bus.OuterBus.WriteRead(&bus.OuterBus, 0x20, in, COUNT_OF(in), out, COUNT_OF(out));
+    auto r = bus.Base.WriteRead((I2CBus*)&bus, 0x20, in, COUNT_OF(in), out, COUNT_OF(out));
 
     ASSERT_THAT(r, Eq(I2CResultOK));
 }
@@ -54,7 +54,7 @@ TEST_F(ErrorHandlingI2CBusTest, WriteReadShouldCallInnerBusAndExecuteHandlerOnEr
     uint8_t in[] = {1, 2, 3};
     uint8_t out[3] = {0};
 
-    auto r = bus.OuterBus.WriteRead(&bus.OuterBus, 0x20, in, COUNT_OF(in), out, COUNT_OF(out));
+    auto r = bus.Base.WriteRead((I2CBus*)&bus, 0x20, in, COUNT_OF(in), out, COUNT_OF(out));
 
     ASSERT_THAT(r, Eq(I2CResultOK));
 }
@@ -66,7 +66,7 @@ TEST_F(ErrorHandlingI2CBusTest, WriteShouldCallInnerBusAndPassthroughSuccess)
 
     uint8_t in[] = {1, 2, 3};
 
-    auto r = bus.OuterBus.Write(&bus.OuterBus, 0x20, in, COUNT_OF(in));
+    auto r = bus.Base.Write((I2CBus*)&bus, 0x20, in, COUNT_OF(in));
 
     ASSERT_THAT(r, Eq(I2CResultOK));
 }
@@ -78,7 +78,7 @@ TEST_F(ErrorHandlingI2CBusTest, WriteShouldCallInnerBusAndExecuteHandlerOnError)
 
     uint8_t in[] = {1, 2, 3};
 
-    auto r = bus.OuterBus.Write(&bus.OuterBus, 0x20, in, COUNT_OF(in));
+    auto r = bus.Base.Write((I2CBus*)&bus, 0x20, in, COUNT_OF(in));
 
     ASSERT_THAT(r, Eq(I2CResultOK));
 }
