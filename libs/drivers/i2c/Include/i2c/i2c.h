@@ -76,10 +76,16 @@ typedef struct _I2CBus
     /** @brief Pointer to hardware registers */
     void* HWInterface;
 
+    /**
+     * @brief GPIO used by this I2C interface
+     */
     struct
     {
+        /** @brief Used port */
         uint16_t Port;
+        /** @brief Number of pin connected to SCL line */
         uint16_t SCL;
+        /** @brief Number of pin connected to SDA line */
         uint16_t SDA;
     } IO;
 
@@ -120,7 +126,7 @@ typedef struct _I2CBus
 } I2CBus;
 
 /**
- * @brief Object with references to used I2C buses
+ * @brief Type with references to used I2C buses
  */
 typedef struct
 {
@@ -173,14 +179,28 @@ void I2CSetUpFallbackBus(I2CBus* bus, I2CInterface* buses);
  */
 typedef I2CResult (*BusErrorHandler)(I2CBus* bus, I2CResult result, I2CAddress address, void* context);
 
+/**
+ * @brief Defines error handling bus configuration
+ */
 typedef struct
 {
+    /** @brief Underlying bus */
     I2CBus* InnerBus;
+    /** @brief Error handling bus interface */
     I2CBus OuterBus;
+    /** @brief Pointer to function called in case of error */
     BusErrorHandler ErrorHandler;
+    /** @brief Context passed to error handler function */
     void* HandlerContext;
 } I2CErrorHandlingBus;
 
+/**
+ * @brief Sets up error handling bus
+ * @param[out] bus Error handling bus to initialize
+ * @param[in] innerBus Underlying bus
+ * @param[in] handler Pointer to function called in case of error
+ * @param[in] context Context passed to error handler function
+ */
 void I2CSetUpErrorHandlingBus(I2CErrorHandlingBus* bus, I2CBus* innerBus, BusErrorHandler handler, void* context);
 
 /** @} */

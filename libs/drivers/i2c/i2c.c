@@ -7,11 +7,22 @@
 
 #include "i2c.h"
 
+/**
+ * @brief Checks if SCL line is latched at low level
+ * @param[in] bus I2C bus
+ * @return true if SCL line is latched
+ */
 static bool IsSclLatched(const I2CBus* bus)
 {
     return GPIO_PinInGet((GPIO_Port_TypeDef)bus->IO.Port, bus->IO.SCL) == 0;
 }
 
+/**
+ * @brief Executes single I2C transfer
+ * @param[in] bus I2C bus
+ * @param[in] seq Transfer sequence definition
+ * @return Transfer result
+ */
 static I2CResult ExecuteTransfer(I2CBus* bus, I2C_TransferSeq_TypeDef* seq)
 {
     if (OS_RESULT_FAILED(System.TakeSemaphore(bus->Lock, MAX_DELAY)))
@@ -66,6 +77,14 @@ static I2CResult ExecuteTransfer(I2CBus* bus, I2C_TransferSeq_TypeDef* seq)
     return (I2CResult)rawResult;
 }
 
+/**
+ * @brief Performs write-only request
+ * @param[in] bus I2C bus
+ * @param[in] address Device address
+ * @param[in] data Data to send
+ * @param[in] length Length of data to send
+ * @return Transfer result
+ */
 static I2CResult Write(I2CBus* bus, const I2CAddress address, const uint8_t* data, size_t length)
 {
     I2C_TransferSeq_TypeDef seq = //
@@ -82,6 +101,16 @@ static I2CResult Write(I2CBus* bus, const I2CAddress address, const uint8_t* dat
     return ExecuteTransfer(bus, &seq);
 }
 
+/**
+ * @brief Performs write-read request
+ * @param[in] bus I2C bus
+ * @param[in] address Device address
+ * @param[in] inData Data to send
+ * @param[in] inLength Length of data to send
+ * @param[out] outData Buffer for received data
+ * @param[out] outLength Size of output buffer
+ * @return Transfer result
+ */
 static I2CResult WriteRead(
     I2CBus* bus, const I2CAddress address, const uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength)
 {

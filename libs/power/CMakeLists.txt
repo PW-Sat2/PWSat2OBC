@@ -1,10 +1,6 @@
 set(NAME power)
 
-set(SOURCES
-
-)
-
-add_library(${NAME} INTERFACE ${SOURCES})
+add_library(${NAME} INTERFACE)
 
 target_link_libraries(${NAME} INTERFACE
     base
