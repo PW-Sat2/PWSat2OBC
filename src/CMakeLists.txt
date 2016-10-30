@@ -42,6 +42,7 @@ target_link_libraries(${NAME}
     terminal
     assert
     gsl
+    antenna
 )
 
 target_generate_hex(${NAME})
