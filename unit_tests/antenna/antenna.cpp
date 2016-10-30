@@ -106,7 +106,7 @@ TEST_F(AntennaDriverTest, TestGetTelemetryPositiveTestSecondaryChannel)
     EXPECT_CALL(secondary, GetAntennaActivationCount(_, _)).Times(4).WillRepeatedly(Return(OSResultSuccess));
     EXPECT_CALL(secondary, GetAntennaActivationTime(_, _)).Times(4).WillRepeatedly(Return(OSResultSuccess));
 
-    EXPECT_CALL(primary, GetDeploymentStatus(_)).WillOnce(Return(OSResultIOError));
+    driver.primaryChannel.status = ANTENNA_PORT_FAILURE;
 
     const auto result = driver.GetTelemetry(&driver);
     ASSERT_THAT(result.flags,
@@ -133,7 +133,7 @@ TEST_F(AntennaDriverTest, TestGetTelemetryPositiveTestPrimaryChannel)
     EXPECT_CALL(primary, GetAntennaActivationCount(_, _)).Times(4).WillRepeatedly(Return(OSResultSuccess));
     EXPECT_CALL(primary, GetAntennaActivationTime(_, _)).Times(4).WillRepeatedly(Return(OSResultSuccess));
 
-    EXPECT_CALL(secondary, GetDeploymentStatus(_)).WillOnce(Return(OSResultIOError));
+    driver.secondaryChannel.status = ANTENNA_PORT_FAILURE;
 
     const auto result = driver.GetTelemetry(&driver);
     ASSERT_THAT(result.flags,
@@ -155,9 +155,8 @@ TEST_F(AntennaDriverTest, TestGetTelemetryPositiveTestPrimaryChannel)
 
 TEST_F(AntennaDriverTest, TestGetTelemetryBothChannelsFailure)
 {
-    EXPECT_CALL(primary, GetDeploymentStatus(_)).WillOnce(Return(OSResultIOError));
-    EXPECT_CALL(secondary, GetDeploymentStatus(_)).WillOnce(Return(OSResultIOError));
-
+    driver.primaryChannel.status = ANTENNA_PORT_FAILURE;
+    driver.secondaryChannel.status = ANTENNA_PORT_FAILURE;
     const auto result = driver.GetTelemetry(&driver);
     ASSERT_THAT(result.flags, Eq(0u));
 }
@@ -337,8 +336,8 @@ INSTANTIATE_TEST_CASE_P(AntennaChannelTestSet,
                                 OSResultIOError,
                                 ANTENNA_PORT_OPERATIONAL,
                                 ANTENNA_PORT_OPERATIONAL,
-                                ANTENNA_PORT_FAILURE,
-                                ANTENNA_PORT_FAILURE),
+                                ANTENNA_PORT_OPERATIONAL,
+                                ANTENNA_PORT_OPERATIONAL),
 
                             std::make_tuple(OSResultSuccess,
                                 OSResultIOError,
@@ -346,14 +345,14 @@ INSTANTIATE_TEST_CASE_P(AntennaChannelTestSet,
                                 ANTENNA_PORT_OPERATIONAL,
                                 ANTENNA_PORT_OPERATIONAL,
                                 ANTENNA_PORT_OPERATIONAL,
-                                ANTENNA_PORT_FAILURE),
+                                ANTENNA_PORT_OPERATIONAL),
 
                             std::make_tuple(OSResultIOError,
                                 OSResultSuccess,
                                 OSResultSuccess,
                                 ANTENNA_PORT_OPERATIONAL,
                                 ANTENNA_PORT_OPERATIONAL,
-                                ANTENNA_PORT_FAILURE,
+                                ANTENNA_PORT_OPERATIONAL,
                                 ANTENNA_PORT_OPERATIONAL),
 
                             std::make_tuple(OSResultSuccess,
@@ -386,4 +385,4 @@ INSTANTIATE_TEST_CASE_P(AntennaChannelTestSet,
                                 ANTENNA_PORT_FAILURE,
                                 ANTENNA_PORT_OPERATIONAL,
                                 ANTENNA_PORT_FAILURE,
-                                ANTENNA_PORT_FAILURE)), );
+                                ANTENNA_PORT_OPERATIONAL)), );
