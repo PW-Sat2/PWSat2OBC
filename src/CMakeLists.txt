@@ -40,6 +40,7 @@ target_link_libraries(${NAME}
     power_eps
     terminal
     assert
+    antenna
 )
 
 target_generate_hex(${NAME})

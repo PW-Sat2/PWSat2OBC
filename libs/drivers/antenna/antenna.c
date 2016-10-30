@@ -4,34 +4,53 @@
 #include "driver.h"
 #include "miniport.h"
 
+/**
+ * @brief Macro used to apply specific operation with custom arguments on passed
+ * hardware channel.
+ *
+ * This macro checks that hardware operation status and skips requested action if it is not operational.
+ * @param[in] Channel Hardware channel to which specific operation has to be applied.
+ * @param[in] Operation Operation to be applied.
+ * @param[in] result variable that should be updated with operation status.
+ * @ingroup AntennaDriver
+ */
 #define APPLY_OPERATION_ARG(Channel, Operation, result, ...)                                                                               \
     if ((Channel)->status == ANTENNA_PORT_OPERATIONAL)                                                                                     \
     {                                                                                                                                      \
         result = (Channel)->port->Operation((Channel)->port, __VA_ARGS__);                                                                 \
-        if (OS_RESULT_FAILED(result))                                                                                                      \
-        {                                                                                                                                  \
-            (Channel)->status = ANTENNA_PORT_FAILURE;                                                                                      \
-        }                                                                                                                                  \
     }                                                                                                                                      \
     else                                                                                                                                   \
     {                                                                                                                                      \
         result = OSResultIOError;                                                                                                          \
     }
 
+/**
+ * @brief Macro used to apply specific operation with custom arguments on passed
+ * hardware channel.
+ *
+ * This macro checks that hardware operation status and skips requested action if it is not operational.
+ * @param[in] Channel Hardware channel to which specific operation has to be applied.
+ * @param[in] Operation Operation to be applied.
+ * @param[in] result variable that should be updated with operation status.
+ * @ingroup AntennaDriver
+ */
 #define APPLY_OPERATION(Channel, Operation, result)                                                                                        \
     if ((Channel)->status == ANTENNA_PORT_OPERATIONAL)                                                                                     \
     {                                                                                                                                      \
         result = (Channel)->port->Operation((Channel)->port);                                                                              \
-        if (OS_RESULT_FAILED(result))                                                                                                      \
-        {                                                                                                                                  \
-            (Channel)->status = ANTENNA_PORT_FAILURE;                                                                                      \
-        }                                                                                                                                  \
     }                                                                                                                                      \
     else                                                                                                                                   \
     {                                                                                                                                      \
         result = OSResultIOError;                                                                                                          \
     }
 
+/**
+ * @brief Merges together primary and secondary operation statuses.
+ * @param[in] primaryChannel Operation status for primary channel.
+ * @param[in] secondaryChannel Operation status for primary channel.
+ * @return Merged operation status.
+ * @ingroup AntennaDriver
+ */
 static OSResult MergeResult(OSResult primaryChannel, OSResult secondaryChannel)
 {
     if (OS_RESULT_FAILED(primaryChannel) && OS_RESULT_FAILED(secondaryChannel))
@@ -44,6 +63,14 @@ static OSResult MergeResult(OSResult primaryChannel, OSResult secondaryChannel)
     }
 }
 
+/**
+ * @brief Resets specific hardware channel.
+ *
+ * If the specific channel cannot be reset it will be marked as inoperational
+ * and disabled.
+ * @param[in] channel Hardware channel to be reset.
+ * @ingroup AntennaDriver
+ */
 static void ResetChannel(AntennaChannelInfo* channel)
 {
     if (OS_RESULT_SUCCEEDED(channel->port->Reset(channel->port)))

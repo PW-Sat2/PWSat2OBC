@@ -137,6 +137,13 @@ static void ClearState(OBC* obc)
     }
 }
 
+static void SetupAntennas(void)
+{
+    AntennaMiniportInitialize(&Main.antennaPrimaryMiniport, ANTENNA_PRIMARY_CHANNEL, Main.I2C.System);
+    AntennaMiniportInitialize(&Main.antennaBackupMiniport, ANTENNA_BACKUP_CHANNEL, Main.I2C.System);
+    AntennaDriverInitialize(&Main.antennaDriver, &Main.antennaPrimaryMiniport, &Main.antennaBackupMiniport);
+}
+
 static void ObcInitTask(void* param)
 {
     OBC* obc = (OBC*)param;
@@ -151,6 +158,11 @@ static void ObcInitTask(void* param)
     if (!TimeInitialize(&obc->timeProvider, NULL, NULL, &obc->fs))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize persistent timer. ");
+    }
+
+    if (OS_RESULT_FAILED(Main.antennaDriver.Reset(&Main.antennaDriver)))
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to reset both antenna controllers. ");
     }
 
     if (!CommRestart(&obc->comm))
@@ -286,6 +298,8 @@ int main(void)
     EpsInit((I2CBus*)&Main.I2CFallback);
 
     EPSPowerControlInitialize(&Main.PowerControl);
+
+    SetupAntennas();
 
     CommUpperInterface commUpperInterface;
     commUpperInterface.frameHandler = FrameHandler;
