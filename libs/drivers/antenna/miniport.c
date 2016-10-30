@@ -186,7 +186,7 @@ static OSResult GetAntennaActivationTime(struct AntennaMiniportDriver* driver, A
 
     Reader reader;
     ReaderInitialize(&reader, output, sizeof(output));
-    const uint16_t value = ReaderReadWordLE(&reader);
+    const uint16_t value = ReaderReadWordBE(&reader);
     *span = TimeSpanFromMilliseconds(value * 50);
     return OSResultSuccess;
 }
@@ -202,8 +202,8 @@ static OSResult GetTemperature(struct AntennaMiniportDriver* driver, uint16_t* t
 
     Reader reader;
     ReaderInitialize(&reader, output, sizeof(output));
-    const uint16_t value = ReaderReadWordLE(&reader);
-    if ((value & 0xfc) != 0)
+    const uint16_t value = ReaderReadWordBE(&reader);
+    if ((value & 0xfc00) != 0)
     {
         LOGF(LOG_LEVEL_WARNING,
             "[ant] Antenna %d temperature is out of range: %d.",
@@ -214,7 +214,7 @@ static OSResult GetTemperature(struct AntennaMiniportDriver* driver, uint16_t* t
         return OSResultOutOfRange;
     }
 
-    *temperature = (value >> 6);
+    *temperature = value & 0x3ff;
     return OSResultSuccess;
 }
 
