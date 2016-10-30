@@ -204,7 +204,7 @@ TEST_F(AntennaMiniportTest, TestAntennaTemperature)
     uint16_t response;
     const auto status = miniport.GetTemperature(&miniport, &response);
     ASSERT_THAT(status, Eq(OSResultSuccess));
-    ASSERT_THAT(response, Eq(0x44));
+    ASSERT_THAT(response, Eq(0x11));
 }
 
 TEST_F(AntennaMiniportTest, TestAntennaTemperatureOutOfRange)
@@ -259,7 +259,7 @@ TEST_F(AntennaMiniportTest, TestAntennaActivationTime)
     TimeSpan response;
     const auto status = miniport.GetAntennaActivationTime(&miniport, ANTENNA1, &response);
     ASSERT_THAT(status, Eq(OSResultSuccess));
-    ASSERT_THAT(response, Eq(TimeSpanFromMilliseconds(500)));
+    ASSERT_THAT(response, Eq(TimeSpanFromMilliseconds(128000)));
 }
 
 TEST_F(AntennaMiniportTest, TestAntennaActivationTimeFailure)

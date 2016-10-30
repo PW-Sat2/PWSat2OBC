@@ -37,6 +37,8 @@ class System:
         self.eps = EPSDevice()
         self.transmitter = TransmitterDevice()
         self.receiver = ReceiverDevice()
+        self.primary_antenna = AntennaController(PRIMARY_ANTENNA_CONTROLLER_ADDRESS)
+        self.backup_antenna = AntennaController(BACKUP_ANTENNA_CONTROLLER_ADDRESS)
 
         self.sys_bus.add_device(self.eps)
         self.payload_bus.add_device(self.eps)
