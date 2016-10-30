@@ -3,6 +3,10 @@
 #include "base/reader.h"
 #include "logger/logger.h"
 
+/**
+ * @brief Enumerator of all supported antenna controller commands.
+ * @ingroup AntennaMiniport
+ */
 typedef enum {
     DEPLOY_ANTENNA = 0xa0,
     START_AUTOMATIC_DEPLOYMENT = 0xa5,
@@ -17,11 +21,24 @@ typedef enum {
     QUERY_DEPLOYMENT_STATUS = 0xc3
 } Command;
 
+/**
+ * @brief Maps boolean operation status to OSResult.
+ * @param[in] status Operation status.
+ * @return Mapped operation status.
+ * @ingroup AntennaMiniport
+ */
 static OSResult MapStatus(bool status)
 {
     return status ? OSResultSuccess : OSResultIOError;
 }
 
+/**
+ * @brief Sends requested command via the passed miniport driver.
+ * @param[in] driver Driver object that should be used to send the requested command.
+ * @param[in] command Command to be sent.
+ * @return Operation status. True on success, false otherwise.
+ * @ingroup AntennaMiniport
+ */
 static bool SendCommand(struct AntennaMiniportDriver* driver, Command command)
 {
     uint8_t data = (uint8_t)command;
@@ -45,6 +62,15 @@ static bool SendCommand(struct AntennaMiniportDriver* driver, Command command)
     return status;
 }
 
+/**
+ * @brief Sends requested command via the passed miniport driver and reads hardware response
+ * @param[in] driver Driver object that should be used to send the requested command.
+ * @param[in] command Command to be sent.
+ * @param[out] outBuffer Buffer that should be filled with response from hardware.
+ * @param[in] outBufferSize Size in bytes of the outBuffer buffer.
+ * @return Operation status. True on success, false otherwise.
+ * @ingroup AntennaMiniport
+ */
 static bool SendCommandWithResponse(struct AntennaMiniportDriver* driver,
     Command command,
     uint8_t* outBuffer,

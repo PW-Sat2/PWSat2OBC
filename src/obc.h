@@ -4,6 +4,8 @@
 #include <stdatomic.h>
 
 #include "adcs/adcs.h"
+#include "antenna/driver.h"
+#include "antenna/miniport.h"
 #include "base/os.h"
 #include "comm/comm.h"
 #include "fs/fs.h"
@@ -52,6 +54,15 @@ typedef struct
 
     /** @brief I2C Fallback bus */
     I2CFallbackBus I2CFallback;
+
+    /** @brief Low level driver for primary antenna controller. */
+    AntennaMiniportDriver antennaPrimaryMiniport;
+
+    /** @brief Low level driver for backup antenna controller. */
+    AntennaMiniportDriver antennaBackupMiniport;
+
+    /** @brief High level driver for antenna subsystem. */
+    AntennaDriver antennaDriver;
 
     /** @brief Standard text based IO. */
     LineIO IO;
