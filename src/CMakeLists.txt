@@ -38,6 +38,7 @@ target_link_libraries(${NAME}
     adcs
     terminal
     assert
+    antenna
 )
 
 target_generate_hex(${NAME})
