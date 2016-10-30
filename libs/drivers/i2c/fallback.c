@@ -48,7 +48,6 @@ static I2CResult WriteRead(
 
 void I2CSetUpFallbackBus(I2CFallbackBus* bus, I2CInterface* buses)
 {
-    bus->Base.Extra = NULL;
     bus->Base.Write = Write;
     bus->Base.WriteRead = WriteRead;
     bus->InnerBuses = buses;

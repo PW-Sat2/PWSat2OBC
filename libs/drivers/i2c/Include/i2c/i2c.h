@@ -72,9 +72,6 @@ typedef uint8_t I2CAddress;
  */
 typedef struct _I2CBus
 {
-    /** @brief Arbitrary data needed by driver */
-    void* Extra;
-
     /**
      * Executes write transfer
      * @param[in] bus Object associated with bus that should be used

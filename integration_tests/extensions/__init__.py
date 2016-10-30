@@ -5,8 +5,10 @@ _extensions = []
 
 
 def initialize_extensions():
+    from build_config import config
+
     if 'CAPTURE_LINES' in os.environ and os.environ['CAPTURE_LINES'] == '1':
-        _extensions.append(SaleaeDump())
+        _extensions.append(SaleaeDump(config['CAPTURES_OUTPUT']))
 
 
 def set_up_once():

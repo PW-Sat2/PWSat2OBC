@@ -142,7 +142,6 @@ void I2CSetupInterface(I2CLowLevelBus* bus,
     CMU_Clock_TypeDef clock,
     IRQn_Type irq)
 {
-    bus->Base.Extra = NULL;
     bus->Base.Write = Write;
     bus->Base.WriteRead = WriteRead;
 

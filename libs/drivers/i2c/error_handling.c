@@ -6,7 +6,7 @@
 
 /**
  * @brief Extracts error handling buf configuration from base bus structure
- * @param[in] inner Base bus structure
+ * @param[in] bus Base bus structure
  * @return Error handling bus configuration
  */
 static inline I2CErrorHandlingBus* ErrorHandling(I2CBus* bus)
@@ -61,7 +61,6 @@ static I2CResult WriteRead(
 
 void I2CSetUpErrorHandlingBus(I2CErrorHandlingBus* bus, I2CBus* innerBus, BusErrorHandler handler, void* context)
 {
-    bus->Base.Extra = NULL;
     bus->Base.Write = Write;
     bus->Base.WriteRead = WriteRead;
     bus->InnerBus = innerBus;
