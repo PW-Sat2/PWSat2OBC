@@ -4,6 +4,7 @@
 #include <yaffs_trace.h>
 #include <yaffsfs.h>
 #include "system.h"
+#include "heap.h"
 
 int yaffsError = 0;
 
@@ -43,7 +44,7 @@ int yaffsfs_GetLastError(void)
 
 void* yaffsfs_malloc(size_t size)
 {
-    void* ptr = malloc(size);
+    void* ptr = pvPortMalloc(size);
 
     if (!ptr)
     {
@@ -54,7 +55,7 @@ void* yaffsfs_malloc(size_t size)
 }
 void yaffsfs_free(void* ptr)
 {
-    free(ptr);
+    vPortFree(ptr);
 }
 
 int yaffsfs_CheckMemRegion(const void* addr, size_t size, int write_request)

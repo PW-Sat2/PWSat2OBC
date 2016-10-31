@@ -2,7 +2,8 @@ set(NAME unit_tests)
 
 set(SOURCES
   semihosting.cpp
-  mem.c
+  mem.cpp
+  heap.c
   test.cpp
   utils.cpp
   Logger/LoggerTest.cpp
