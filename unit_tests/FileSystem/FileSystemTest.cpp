@@ -12,6 +12,7 @@
 
 using testing::StrEq;
 using testing::Eq;
+using testing::Ne;
 using testing::Ge;
 using testing::Test;
 
@@ -72,24 +73,25 @@ FileSystemTest::~FileSystemTest()
 
 int32_t FileSystemTest::FillDevice(int file)
 {
-    uint8_t buffer[1024];
-    for (uint16_t i = 0; i < COUNT_OF(buffer); i++)
+    const size_t bufferSize = 10240;
+    auto buffer = new uint8_t[bufferSize];
+    for (uint16_t i = 0; i < bufferSize; i++)
     {
-        buffer[i] = i % 256;
+        buffer[i] = (uint8_t)(i & 0xFF);
     }
 
     int32_t totalSize = 0;
 
     for (uint16_t i = 0;; i++)
     {
-        int32_t written = yaffs_write(file, buffer, COUNT_OF(buffer));
+        int32_t written = yaffs_write(file, buffer, bufferSize);
 
-        if (written < (int32_t)COUNT_OF(buffer))
+        totalSize += written;
+
+        if (written < (int32_t)bufferSize)
         {
             break;
         }
-
-        totalSize += written;
     }
 
     return totalSize;
@@ -133,7 +135,7 @@ TEST_F(FileSystemTest, WritingFileBiggerThatOneChunk)
     uint8_t buffer[2048];
     for (uint16_t i = 0; i < COUNT_OF(buffer); i++)
     {
-        buffer[i] = i % 256;
+        buffer[i] = (uint8_t)(i & 0xFF);
     }
 
     yaffs_write(file, buffer, COUNT_OF(buffer));
@@ -156,7 +158,7 @@ TEST_F(FileSystemTest, WritingFileBiggerThatOneChunk)
 
     for (uint16_t i = 0; i < COUNT_OF(buffer); i++)
     {
-        ASSERT_THAT(buffer[i], Eq(i % 256));
+        ASSERT_THAT(buffer[i], Eq((uint8_t)(i & 0xFF)));
     }
 }
 
@@ -210,7 +212,7 @@ TEST_F(FileSystemTest, ShouldCorrectSingleBitError)
     uint8_t buffer[1024];
     for (uint16_t i = 0; i < COUNT_OF(buffer); i++)
     {
-        buffer[i] = i % 256;
+        buffer[i] = (uint8_t)(i & 0xFF);
     }
 
     yaffs_mount("/");
@@ -241,7 +243,7 @@ TEST_F(FileSystemTest, ShouldCorrectSingleBitError)
 
     for (uint16_t i = 0; i < COUNT_OF(buffer); i++)
     {
-        ASSERT_THAT(buffer[i], Eq(i % 256));
+        ASSERT_THAT(buffer[i], Eq((uint8_t)(i & 0xFF)));
     }
 
     yaffs_close(file);
