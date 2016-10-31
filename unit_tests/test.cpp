@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include "heap.h"
 
 #ifdef ENABLE_COVERAGE
 extern "C" void __gcov_flush(void);
