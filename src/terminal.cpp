@@ -2,15 +2,6 @@
 #include "commands/commands.h"
 #include "obc.h"
 
-typedef void (*commandHandler)(uint16_t argc, char* argv[]);
-
-typedef struct
-{
-    char name[32];
-    commandHandler handler;
-} command;
-
-
 static const TerminalCommandDescription commands[] = {
     {"ping", PingHandler},
     {"echo", EchoHandler},
@@ -25,7 +16,10 @@ static const TerminalCommandDescription commands[] = {
     {"writeFile", FSWriteFile},
     {"readFile", FSReadFile},
     {"stateCmd", CommandByTerminal},
-    {"i2c", I2CTestCommandHandler} //
+    {"i2c", I2CTestCommandHandler},
+    {"antenna", AntennaChangeDeploymentSystemState},
+    {"antenna_deploy", AntennaDeploy},
+    {"antenna_cancel", AntennaCancelDeployment},
 };
 
 void InitializeTerminal(void)
