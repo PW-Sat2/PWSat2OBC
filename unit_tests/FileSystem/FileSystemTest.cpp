@@ -285,19 +285,11 @@ TEST_F(FileSystemTest, ShouldDetectUncorrectableError)
 
     yaffs_read(file, buffer, sizeof(buffer));
 
-    ASSERT_THAT(this->device.n_ecc_unfixed - unfixed, Eq(1));
+    ASSERT_THAT(this->device.n_ecc_unfixed - unfixed, Eq(1UL));
 
     yaffs_close(file);
 
     yaffs_unmount("/");
-}
-
-bool Exists(const char* path)
-{
-    struct yaffs_stat stat;
-    auto status = yaffs_stat(path, &stat);
-
-    return status != -1;
 }
 
 TEST_F(FileSystemTest, ShouldCreateDirectoryWithParents)

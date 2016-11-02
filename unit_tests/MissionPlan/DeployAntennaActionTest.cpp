@@ -1,13 +1,13 @@
-#include "time/TimeSpan.hpp"
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "gmock/gmock-matchers.h"
 #include "MissionTestHelpers.h"
 #include "mission/antenna.h"
-#include "rapidcheck.h"
+#include "rapidcheck.hpp"
 #include "rapidcheck/gtest.h"
 #include "state/state.h"
 #include "system.h"
+#include "time/TimeSpan.hpp"
 
 using testing::Test;
 using testing::Eq;
@@ -78,6 +78,6 @@ RC_GTEST_FIXTURE_PROP(DeployAntennaActionTest, CanOpenAntennaOnlyAfterSilentPhas
     if (runnable)
     {
         RC_ASSERT(TimePointFromTimeSpan(TimeSpanFromMinutes(30)) < state.Time);
-        RC_ASSERT_FALSE(state.AntennaDeployed);
+        RC_ASSERT(!state.AntennaDeployed);
     }
 }
