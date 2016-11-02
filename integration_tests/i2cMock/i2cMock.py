@@ -104,7 +104,7 @@ class I2CMock(object):
         self._port = None
         while self._port is None:
             try:
-                self._port = serial.Serial(port=port_name, baudrate=100000, rtscts=True, write_timeout=None)
+                self._port = serial.Serial(port=port_name, baudrate=100000, rtscts=True)
             except serial.SerialException as e:
                 if not e.args[0].endswith("WindowsError(5, 'Access is denied.')"):
                     raise

@@ -1,3 +1,5 @@
+from time import sleep
+
 from devices import EchoDevice, TimeoutDevice
 from system import auto_comm_handling, require_two_i2c_buses
 from tests.base import BaseTest
@@ -40,6 +42,7 @@ class I2CTest(BaseTest):
 
         self.system.sys_bus.unlatch()
         self.system.sys_bus.unfreeze()
+        sleep(0.1)
 
         response = self.system.obc.i2c_transfer('wr', 'system', 0x12, 'abc')
         self.assertEqual(response, 'bcd')

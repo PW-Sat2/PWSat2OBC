@@ -9,6 +9,8 @@ class System:
     def __init__(self, obc_com, sys_bus_com, payload_bus_com, use_single_bus, gpio):
         self.log = logging.getLogger("system")
 
+        self._use_single_bus = use_single_bus
+
         self.obc_com = obc_com
         self.sys_bus_com = sys_bus_com
         self.payload_bus_com = payload_bus_com
@@ -41,7 +43,8 @@ class System:
 
     def close(self):
         self.sys_bus.stop()
-        self.payload_bus.stop()
+        if not self._use_single_bus:
+            self.payload_bus.stop()
 
         self.obc.close()
 
@@ -49,8 +52,9 @@ class System:
         self.sys_bus.unfreeze()
         self.sys_bus.unlatch()
 
-        self.payload_bus.unfreeze()
-        self.payload_bus.unlatch()
+        if not self._use_single_bus:
+            self.payload_bus.unfreeze()
+            self.payload_bus.unlatch()
 
         self.obc.reset()
         self.obc.wait_to_start()

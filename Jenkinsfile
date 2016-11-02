@@ -1,5 +1,5 @@
 def build() {
-	bat "cmake -DSYS_BUS_COM=${env.MOCK_COM} -DOBC_COM=${env.OBC_COM} -DGPIO_COM=${env.GPIO_COM} -DUSE_SINGLE_BUS=1 -G \"MinGW Makefiles\" ../source"
+	bat "cmake -DSYS_BUS_COM=${env.SYS_BUS_COM} -DPAYLOAD_BUS_COM=${env.PAYLOAD_BUS_COM} -DOBC_COM=${env.OBC_COM} -DGPIO_COM=${env.GPIO_COM} -G \"MinGW Makefiles\" ../source"
 	bat "make pwsat"
 	step([$class: 'ArtifactArchiver', artifacts: 'build/DevBoard/**/*', fingerprint: true])
 }
