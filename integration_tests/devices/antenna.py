@@ -58,24 +58,24 @@ class AntennaController(i2cMock.I2CDevice):
     @i2cMock.command([0xAA])
     def reset(self):
         self.log.debug("Resetting antenna controller: %d", self.address)
-        self.call(self.on_reset)
         self.reset_state()
+        self.call(self.on_reset)
 
     @i2cMock.command([0xAD])
     def arm_deployment_system(self):
         self.log.debug("Arming deployment system controller: %d", self.address)
         if not self.armed:
-            self.call(self.on_arm_state_change, True)
-
-        self.armed = True
+            self.armed = self.call(self.on_arm_state_change, True)
+        else:
+            self.armed = True
 
     @i2cMock.command([0xAC])
     def disarm_deployment_system(self):
         self.log.debug("Disarming deployment system controller: %d", self.address)
         if self.armed:
-            self.call(self.on_arm_state_change, True)
-
-        self.armed = False
+            self.armed = self.call(self.on_arm_state_change, True)
+        else:
+            self.armed = False
 
     def deploy_antenna(self, antanna_id):
         self.log.debug("Beginning of deployment antenna %d on controller: %d", antanna_id + 1, self.address)
