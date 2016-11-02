@@ -29,3 +29,10 @@ class BaseTest(unittest.TestCase):
         self.gpio.close()
 
         #del self.gpio
+
+    def power_on_obc(self):
+        self.system.obc.power_on()
+
+    def power_on_and_wait(self):
+        self.power_on_obc()
+        self.system.obc.wait_to_start()

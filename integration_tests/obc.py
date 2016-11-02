@@ -143,3 +143,19 @@ class OBC:
 
     def i2c_transfer(self, bus, address, data):
         return self._terminal.command("i2c %s %d %s" % (bus, address, data))
+
+    def antenna_arm_deployment(self):
+        return self._terminal.command("antenna arm")
+
+    def antenna_disarm_deployment(self):
+        return self._terminal.command("antenna disarm")
+
+    def antenna_deploy(self, antennaId):
+        return self._terminal.command("antenna_deploy %d" % antennaId)
+
+    def antenna_autodeploy(self):
+        return self._terminal.command("antenna_deploy auto");
+
+    def antenna_cancel_deployment(self):
+        return self._terminal.command("antenna_cancel");
+
