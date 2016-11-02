@@ -7,6 +7,8 @@ from build_config import config
 
 
 class BaseTest(unittest.TestCase):
+    auto_power_on = True
+
     def setUp(self):
         obc_com = config['OBC_COM']
         sys_bus_com = config['SYS_BUS_COM']
@@ -18,7 +20,7 @@ class BaseTest(unittest.TestCase):
 
         extensions.set_up(test_id=self.id())
 
-        self.system = System(obc_com, sys_bus_com, payload_bus_com, use_single_bus, self.gpio)
+        self.system = System(obc_com, sys_bus_com, payload_bus_com, use_single_bus, self.gpio, self.auto_power_on)
 
     def tearDown(self):
         self.system.close()
