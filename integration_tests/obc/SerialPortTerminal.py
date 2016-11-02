@@ -80,3 +80,4 @@ class SerialPortTerminal:
 
     def close(self):
         self._serial.close()
+

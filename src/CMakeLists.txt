@@ -6,6 +6,7 @@ set(SOURCES
     commands/ping.cpp
     commands/time.cpp
     commands/comm.cpp
+    commands/antenna.cpp
     commands/file_system.cpp
     commands/state_command.cpp
     commands/i2c_test_command.cpp

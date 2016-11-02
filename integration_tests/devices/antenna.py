@@ -2,6 +2,7 @@ import logging
 import threading
 import i2cMock
 from i2cMock import I2CDevice
+import inspect
 
 class Antenna():
     deployed = False
@@ -37,7 +38,6 @@ class AntennaController(i2cMock.I2CDevice):
     on_get_temperature = None
     on_get_deployment_status = None
 
-
     def __init__(self, address):
         super(AntennaController, self).__init__(address)
         self.log = logging.getLogger("Antenna")
@@ -49,38 +49,43 @@ class AntennaController(i2cMock.I2CDevice):
         self.deployment_in_progress = False
 
     @staticmethod
-    def call(method, *args):
+    def call(method, default, *args):
         if not method is None:
-            return method(*args)
-        else:
-            return None
+            if inspect.ismethod(method):
+                if len(args) != (method.__code__.co_argcount - 1):
+                    raise Exception("Invalid argument count")
+            else:
+                if len(args) != method.__code__.co_argcount:
+                    raise Exception("Invalid argument count")
+
+            result = method(*args)
+            if not result is None:
+                return result
+
+        return default
 
     @i2cMock.command([0xAA])
     def reset(self):
         self.log.debug("Resetting antenna controller: %d", self.address)
         self.reset_state()
-        self.call(self.on_reset)
+        self.call(self.on_reset, None)
 
     @i2cMock.command([0xAD])
     def arm_deployment_system(self):
         self.log.debug("Arming deployment system controller: %d", self.address)
         if not self.armed:
-            self.armed = self.call(self.on_arm_state_change, True)
-        else:
-            self.armed = True
+            self.armed = self.call(self.on_arm_state_change, True, True)
 
     @i2cMock.command([0xAC])
     def disarm_deployment_system(self):
         self.log.debug("Disarming deployment system controller: %d", self.address)
         if self.armed:
-            self.armed = self.call(self.on_arm_state_change, True)
-        else:
-            self.armed = False
+            self.armed = self.call(self.on_arm_state_change, False, False)
 
     def deploy_antenna(self, antanna_id):
         self.log.debug("Beginning of deployment antenna %d on controller: %d", antanna_id + 1, self.address)
         self.antenna_state[antanna_id].begin_deployment()
-        self.call(self.on_begin_deployment, self, antanna_id)
+        self.call(self.on_begin_deployment, None, self, antanna_id)
 
     @i2cMock.command([0xA1])
     def deploy_antanna_1(self):
@@ -122,7 +127,7 @@ class AntennaController(i2cMock.I2CDevice):
     def deploy_automatically(self):
         self.log.debug("Beginning automatic antenna deployment on controller: %d", self.address)
         self.deployment_in_progress = True
-        self.call(self.on_begin_deployment, self, -1)
+        self.call(self.on_begin_deployment, None, self, -1)
 
     def get_antenna_activation_count(self, antenna_id):
         return [self.antenna_state[antenna_id].activation_count]
@@ -161,7 +166,7 @@ class AntennaController(i2cMock.I2CDevice):
 
     @i2cMock.command([0xC0])
     def get_temperature(self):
-        result = self.call(self.on_get_deployment_status)
+        result = self.call(self.on_get_temperature, None)
         if result is None:
             result = 0
 
@@ -176,7 +181,7 @@ class AntennaController(i2cMock.I2CDevice):
 
     @i2cMock.command([0xC3])
     def get_deployment_status(self):
-        result = self.call(self.on_get_deployment_status)
+        result = self.call(self.on_get_deployment_status, None)
         if not result is None:
             return result
 
