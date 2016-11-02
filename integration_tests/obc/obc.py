@@ -4,16 +4,17 @@ from base64 import b64encode
 from utils import ExtendableFormatter
 from .obc_mixin import OBCMixin
 from .file_system import FileSystemMixin
+from .antenna import AntennaMixin
 from .comm import CommMixin
 from .time import TimeMixin
 from .i2c import I2CMixin
-
 
 class OBC(OBCMixin,
           FileSystemMixin,
           CommMixin,
           TimeMixin,
-          I2CMixin
+          I2CMixin,
+          AntennaMixin
           ):
     def __init__(self, terminal):
         self.log = logging.getLogger("OBC")
