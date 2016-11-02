@@ -58,6 +58,7 @@ function(target_asm_listing TARGET)
     get_property(binary TARGET ${TARGET} PROPERTY RUNTIME_OUTPUT_NAME)
     
     add_custom_target(${TARGET}.asm
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${REPORTS_PATH}
         COMMAND ${CMAKE_OBJDUMP} -dSC $<TARGET_FILE:${TARGET}> > ${REPORTS_PATH}/${TARGET}.lss
         DEPENDS ${TARGET}
     )
