@@ -25,5 +25,12 @@ class BaseTest(unittest.TestCase):
     def tearDown(self):
         self.system.close()
         self.gpio.close()
-
         extensions.tear_down(test_id=self.id())
+
+    def power_on_obc(self):
+        self.system.obc.power_on()
+
+    def power_on_and_wait(self):
+        self.power_on_obc()
+        self.system.obc.wait_to_start()
+
