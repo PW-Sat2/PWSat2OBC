@@ -2,6 +2,15 @@
 #include "commands/commands.h"
 #include "obc.h"
 
+typedef void (*commandHandler)(uint16_t argc, char* argv[]);
+
+typedef struct
+{
+    char name[32];
+    commandHandler handler;
+} command;
+
+
 static const TerminalCommandDescription commands[] = {
     {"ping", PingHandler},
     {"echo", EchoHandler},

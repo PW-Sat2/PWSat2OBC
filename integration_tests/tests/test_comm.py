@@ -51,7 +51,6 @@ class Test_Comm(BaseTest):
     @auto_comm_handling(False)
     def test_should_receive_biggest_possible_frame(self):
         frame = "".join([chr(ord('A') + i % 25) for i in xrange(0, devices.TransmitterDevice.MAX_CONTENT_SIZE)])
-
         self.system.receiver.put_frame(frame)
 
         received_frame = self.system.obc.receive_frame()
@@ -77,5 +76,3 @@ class Test_Comm(BaseTest):
         msg = ''.join([chr(c) for c in msg])
 
         self.assertEqual(msg, "PONG")
-
-

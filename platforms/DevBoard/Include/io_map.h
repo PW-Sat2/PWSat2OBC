@@ -19,6 +19,11 @@
 #define LEUART0_BAUDRATE 2400
 #define LEUART0_INT_PRIORITY 6
 
+// I2C
+#ifndef I2C_TIMEOUT
+#define I2C_TIMEOUT 5 // in seconds
+#endif
+
 // I2C0
 #define I2C0_BUS_PORT gpioPortD
 #define I2C0_BUS_SDA_PIN 6

@@ -35,7 +35,7 @@ static void ADCSTask(void* arg)
             HandleCommand(context, command);
         }
 
-        LOGF(LOG_LEVEL_INFO, "[ADCS]Running ADCS loop. Mode: %d", context->CurrentMode);
+        LOGF(LOG_LEVEL_TRACE, "[ADCS]Running ADCS loop. Mode: %d", context->CurrentMode);
         System.SleepTask(5000);
     }
 }

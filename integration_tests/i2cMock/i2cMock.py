@@ -1,11 +1,13 @@
 import traceback
-from threading import Thread
+from threading import Thread, Event
 
 import serial
 import sys
 import binascii
 import serial.threaded
 import logging
+
+from utils import hex_data
 
 DEVICE_SELECTED_FOR_WRITE = 'W'
 DEVICE_SELECTED_FOR_READ = 'R'
@@ -15,6 +17,7 @@ NEXT_BYTE = 'N'
 READ_FINISHED = 'F'
 CONTROL_CHAR = 'C'
 CONTROL_CMD_RESTART = 'R'
+
 
 def command(bytes):
     def wrapper(func):
@@ -28,6 +31,7 @@ class I2CDevice(object):
     address = None
     handlers = []
     response = None
+    freeze_end = None
 
     def __init__(self, address):
         self.address = address
@@ -46,14 +50,10 @@ class I2CDevice(object):
         if handler is None:
             return self._missing_handler(data)
 
+        return handler(self, *args)
 
-        self.response = handler(self, *args)
-
-    def read(self):
-        if self.response is None:
-            return []
-        else:
-            return self.response
+    def freeze(self):
+        self.freeze_end.wait()
 
     def _missing_handler(self, data):
         print 'Device {:2X}: missing handler for {}'.format(self.address, binascii.hexlify(bytearray(data)))
@@ -72,131 +72,108 @@ class I2CDevice(object):
 
 class MissingDevice(I2CDevice):
     def __init__(self, address):
-        return super(MissingDevice, self).__init__(address)
+        super(MissingDevice, self).__init__(address)
 
     @command([])
     def catch_all(self, *data):
-        print 'Missing device({}).command({})'.format(self.address, binascii.hexlify(bytearray(data)))
+        print 'Missing device({:x}).command({})'.format(self.address, binascii.hexlify(bytearray(data)))
         return [0xCC]
 
 
+class DeviceMockStopped(Exception):
+    pass
+
+
 class I2CMock(object):
-    log = logging.getLogger("I2CMock")
+    CMD_VERSION = 0x01
+    CMD_I2C_WRITE = 0x02
+    CMD_I2C_RESPONSE = 0x03
+    CMD_I2C_DISABLE = 0x04
+    CMD_I2C_ENABLE = 0x05
+    CMD_RESTART = 0x06
+    CMD_UNLATCH = 0x07
+    CMD_STOP = 0x08
+    CMD_STOPPED = 0x09
 
-    port = serial.Serial
-    devices = {}
+    _port = serial.Serial
+    _devices = {}
 
-    def __init__(self, port_name, baudrate=250000):
-        self.port = None
-        while self.port is None:
+    def __init__(self, bus_name, port_name):
+        self._log = logging.getLogger("I2C.%s" % bus_name)
+
+        self._port = None
+        while self._port is None:
             try:
-                self.port = serial.Serial(port=port_name, baudrate=baudrate, rtscts=True, write_timeout=None)
+                self._port = serial.Serial(port=port_name, baudrate=100000, rtscts=True)
             except serial.SerialException as e:
                 if not e.args[0].endswith("WindowsError(5, 'Access is denied.')"):
                     raise
 
-        self.active = False
-        self.reader = Thread(target=I2CMock._run, args=(self,))
-        self.reader.daemon = True
+        self._freeze_end = Event()
+
+        self._active = False
+        self._reader = Thread(target=I2CMock._reader_run, args=(self,))
+        self._reader.daemon = True
+
+        self._command_handlers = {
+            I2CMock.CMD_VERSION: I2CMock._device_command_version,
+            I2CMock.CMD_STOPPED: I2CMock._device_command_stopped,
+            I2CMock.CMD_I2C_WRITE: I2CMock._device_command_write
+        }
+
+        self._started = Event()
 
     def start(self):
-        if self.active:
+        if self._active:
             return
 
-        self.port.reset_input_buffer()
-        self.port.reset_output_buffer()
+        self._log.debug('Starting DeviceMock')
 
-        self.restart()
+        if self._freeze_end.is_set():
+            self._freeze_end.clear()
 
-        self.reader.start()
-
-        self.active = True
+        self._reader.start()
+        self._command(I2CMock.CMD_RESTART)
+        self._log.debug('Waiting for mock to start')
+        self._started.wait()
+        self._command(I2CMock.CMD_I2C_ENABLE)
+        self._active = True
 
     def add_device(self, device):
-        self.devices[device.address] = device
+        self._devices[device.address] = device
 
     def stop(self):
-        self.active = False
+        self._command(I2CMock.CMD_I2C_DISABLE)
+        self._command(I2CMock.CMD_STOP)
 
-    def close(self):
-        if not self.active:
-            return
+        self._freeze_end.set()
 
-        self.port.close()
-        self.reader.join()
-        self.port.close()
-        self.port = None
-        self.active = False
+        self._reader.join()
+        self._port.close()
+        self._active = False
 
-    def restart(self):
-        self.port.write(CONTROL_CHAR + CONTROL_CMD_RESTART)
+    def unfreeze(self):
+        self._freeze_end.set()
 
-        c = self.port.read(1)
-        while c != 'X':
-            c = self.port.read(1)
+    def unlatch(self):
+        if self._port.is_open:
+            self._command(I2CMock.CMD_UNLATCH)
 
-    def _read_port(self, count=1):
-        try:
-            return self.port.read(count)
-        except AttributeError:
-            return None
+    def disable(self):
+        self._command(I2CMock.CMD_I2C_DISABLE)
 
-    def _run(self):
-        self.log.debug("Worker thread starting")
-        while self.port.is_open:
-            try:
-                c = self._read_port(1)
-                if c is not None:
-                    self.handle_command(c)
-            except serial.SerialException as e:
-                self.log.error("Serial read exception %r. Breaking", e)
-                break
-            except AttributeError:
-                pass
-            except Exception as e:
-                self.log.error("Handle command exception %s", traceback.format_exc(e))
+    def _command(self, cmd, data=[]):
+        raw = ['S', cmd]
+        size = [len(data)]
+        raw.extend(self._escape(size))
+        raw.extend(self._escape(data))
 
-        self.log.debug("Finished worker thread")
-
-    def handle_command(self, cmd):
-        if cmd == DEVICE_SELECTED_FOR_WRITE:
-            self._device_selected_for_write()
-        elif cmd == DEVICE_SELECTED_FOR_READ:
-            self._device_selected_for_read()
-        else:
-            self.log.warning("%s", cmd)
-            sys.stdout.write(cmd)
-
-    def _device(self, address):
-        if self.devices.has_key(address):
-            return self.devices[address]
-        else:
-            return MissingDevice(address)
-
-    def _device_selected_for_write(self):
-        address = ord(self._read_port(1))
-
-        self.log.debug("Device %X selected for write", address)
-
-        number_of_bytes = ord(self._read_port(1))
-
-        self.log.debug("Number of bytes to write: %d", number_of_bytes)
-
-        data = [ord(self._read_port()) for _ in range(number_of_bytes)]
-
-        self.log.debug("Written bytes: %s", map(lambda x: "%X" % x, data))
-
-        device = self._device(address)
-
-        try:
-            device.handle(data)
-        except Exception as e:
-            self.log.error("Handle exception: %r", e)
+        self._port.write(raw)
 
     def _escape(self, data):
         def escape_char(c):
-            if c == CONTROL_CHAR or c == ord(CONTROL_CHAR):
-                return [CONTROL_CHAR, CONTROL_CHAR]
+            if c == 'S' or c == ord('S'):
+                return ['S', 'S']
             else:
                 return [c]
 
@@ -204,21 +181,63 @@ class I2CMock(object):
 
         return [x for y in escaped for x in y]
 
-    def _device_selected_for_read(self):
-        address = ord(self._read_port(1))
+    def _reader_run(self):
+        self._log.debug("Worker thread starting")
 
-        self.log.debug("Device %X selected for read", address)
+        self._port.reset_input_buffer()
+        self._port.reset_output_buffer()
+
+        try:
+            while self._port.is_open:
+                (cmd, data) = self._read_command()
+
+                self._log.debug("Received command %X (%s)", cmd, hex_data(data))
+
+                self._command_handlers[cmd](self, *data)
+        except DeviceMockStopped:
+            pass
+        except Exception as e:
+            self._log.error("Handle command exception %s", traceback.format_exc(e))
+
+        self._log.debug("Finished worker thread")
+
+    def _read_command(self):
+        preamble = self._port.read(2)
+        cmd = ord(preamble[0])
+        length = ord(preamble[1])
+
+        data = []
+        if length > 0:
+            data = self._port.read(length)
+
+        return cmd, data
+
+    def _device_command_version(self, version):
+        self._log.info('Device mock version %d', ord(version))
+        self._started.set()
+
+    def _device_command_stopped(self):
+        raise DeviceMockStopped()
+
+    def _device_command_write(self, address, *data):
+        address = ord(address)
+        data = [ord(c) for c in data]
+
+        self._log.info('Device(%X) write(%s)', address, hex_data(data))
 
         device = self._device(address)
+        device.freeze_end = self._freeze_end
 
-        data = device.read()
+        response = device.handle(data) or []
 
-        self.log.debug("Response bytes: %s", map(lambda x: "%X" % x, data))
+        self._log.debug('Generated response')
 
-        response = [len(data)] + data
-        escaped = self._escape(response)
+        self._command(I2CMock.CMD_I2C_RESPONSE, response)
 
-        self.port.write(escaped)
-        self.port.reset_output_buffer()
+        self._log.debug('Response written')
 
-        self.log.debug("Bytes written")
+    def _device(self, address):
+        if self._devices.has_key(address):
+            return self._devices[address]
+        else:
+            return MissingDevice(address)

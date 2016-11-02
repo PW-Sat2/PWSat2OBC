@@ -1,16 +1,16 @@
 import logging
 import os
 import colorlog
+import extensions
 
 
 if os.getenv("CLICOLOR_FORCE") == "1":
     print "Forcing colors"
     import colorama
     colorama.deinit()
-    #colorama.init(convert=False)
 
 
-def setup():
+def _setup_log():
     root_logger = logging.getLogger()
 
     handler = colorlog.StreamHandler()
@@ -30,3 +30,15 @@ def setup():
 
     root_logger.addHandler(handler)
     root_logger.setLevel(logging.DEBUG)
+
+
+def setup():
+    _setup_log()
+
+    extensions.initialize_extensions()
+
+    extensions.set_up_once()
+
+
+def tearDown():
+    extensions.tear_down_once()

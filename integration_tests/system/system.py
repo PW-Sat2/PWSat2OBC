@@ -9,16 +9,18 @@ class System:
     def __init__(self, obc_com, sys_bus_com, payload_bus_com, use_single_bus, gpio):
         self.log = logging.getLogger("system")
 
+        self._use_single_bus = use_single_bus
+
         self.obc_com = obc_com
         self.sys_bus_com = sys_bus_com
         self.payload_bus_com = payload_bus_com
 
-        self.sys_bus = I2CMock(sys_bus_com)
+        self.sys_bus = I2CMock('SYS', sys_bus_com)
 
         if use_single_bus:
             self.payload_bus = self.sys_bus
         else:
-            self.payload_bus = I2CMock(payload_bus_com)
+            self.payload_bus = I2CMock('PLD', payload_bus_com)
 
         self._setup_devices()
 
@@ -40,7 +42,19 @@ class System:
         self.sys_bus.add_device(self.receiver)
 
     def close(self):
-        self.sys_bus.close()
-        self.payload_bus.close()
+        self.sys_bus.stop()
+        if not self._use_single_bus:
+            self.payload_bus.stop()
 
         self.obc.close()
+
+    def restart(self):
+        self.sys_bus.unfreeze()
+        self.sys_bus.unlatch()
+
+        if not self._use_single_bus:
+            self.payload_bus.unfreeze()
+            self.payload_bus.unlatch()
+
+        self.obc.reset()
+        self.obc.wait_to_start()

@@ -48,19 +48,19 @@ static SystemStateUpdateResult UpdateTime(SystemState* state, void* param)
 
 static void Loop(SystemState* state, ModeDescriptor* mode)
 {
-    LOG(LOG_LEVEL_INFO, "Updating system state");
+    LOG(LOG_LEVEL_TRACE, "Updating system state");
 
     SystemStateUpdateResult updateResult = SystemStateUpdate(state, mode->update, mode->updateCount);
 
-    LOGF(LOG_LEVEL_INFO, "System state update result %d", updateResult);
+    LOGF(LOG_LEVEL_TRACE, "System state update result %d", updateResult);
 
     SystemStateVerifyResult verifyResult = SystemStateVerify(state, mode->verify, mode->verifyResult, mode->verifyCount);
 
-    LOGF(LOG_LEVEL_INFO, "Verify result %d", verifyResult);
+    LOGF(LOG_LEVEL_TRACE, "Verify result %d", verifyResult);
 
     size_t runnableCount = SystemDetermineActions(state, mode->actions, mode->actionCount, mode->runnableActions);
 
-    LOGF(LOG_LEVEL_INFO, "Executing %d actions", runnableCount);
+    LOGF(LOG_LEVEL_TRACE, "Executing %d actions", runnableCount);
 
     SystemDispatchActions(state, mode->runnableActions, runnableCount);
 }

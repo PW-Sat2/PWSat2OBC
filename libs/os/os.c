@@ -8,6 +8,11 @@
 
 static inline TickType_t ConvertTimeToTicks(const OSTaskTimeSpan span)
 {
+    if (span == MAX_DELAY)
+    {
+        return portMAX_DELAY;
+    }
+
     const uint64_t time = span;
     return pdMS_TO_TICKS(time);
 }
@@ -146,7 +151,7 @@ static bool QueueReceiveISR(OSQueueHandle queue, void* element, bool* taskWoken)
 
 static bool QueueSend(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout)
 {
-    return xQueueSend(queue, element, timeout) == pdTRUE;
+    return xQueueSend(queue, element, ConvertTimeToTicks(timeout)) == pdTRUE;
 }
 
 static bool QueueSendISR(OSQueueHandle queue, void* element, bool* taskWoken)

@@ -7,46 +7,89 @@
 
 #include "i2c.h"
 
-void I2CIRQHandler(I2CBus* bus)
+static inline I2CLowLevelBus* LowLevel(I2CBus* bus)
 {
-    I2C_TransferReturn_TypeDef status = I2C_Transfer((I2C_TypeDef*)bus->HWInterface);
-
-    if (status == i2cTransferInProgress)
-    {
-        return;
-    }
-
-    if (!System.QueueSendISR(bus->ResultQueue, &status, NULL))
-    {
-        LOG_ISR(LOG_LEVEL_ERROR, "Error queueing i2c result");
-    }
-
-    System.EndSwitchingISR(NULL);
+    return (I2CLowLevelBus*)bus;
 }
 
-static I2CResult ExecuteTransfer(I2CBus* bus, I2C_TransferSeq_TypeDef* seq)
+/**
+ * @brief Checks if SCL line is latched at low level
+ * @param[in] bus I2C bus
+ * @return true if SCL line is latched
+ */
+static bool IsSclLatched(const I2CLowLevelBus* bus)
 {
-    System.TakeSemaphore(bus->Lock, MAX_DELAY);
+    return GPIO_PinInGet((GPIO_Port_TypeDef)bus->IO.Port, bus->IO.SCL) == 0;
+}
 
-    I2C_TransferReturn_TypeDef ret = I2C_TransferInit((I2C_TypeDef*)bus->HWInterface, seq);
-
-    if (ret != i2cTransferInProgress)
+/**
+ * @brief Executes single I2C transfer
+ * @param[in] bus I2C bus
+ * @param[in] seq Transfer sequence definition
+ * @return Transfer result
+ */
+static I2CResult ExecuteTransfer(I2CLowLevelBus* bus, I2C_TransferSeq_TypeDef* seq)
+{
+    if (OS_RESULT_FAILED(System.TakeSemaphore(bus->Lock, MAX_DELAY)))
     {
-        System.GiveSemaphore(bus->Lock);
-        return (I2CResult)ret;
+        LOGF(LOG_LEVEL_ERROR, "[I2C] Taking semaphore failed. Address: %X", seq->addr);
+        return I2CResultFailure;
     }
 
-    if (!System.QueueReceive(bus->ResultQueue, &ret, MAX_DELAY))
+    if (IsSclLatched(bus))
     {
+        LOG(LOG_LEVEL_FATAL, "[I2C] SCL already latched");
+        System.GiveSemaphore(bus->Lock);
+        return I2CResultClockAlreadyLatched;
+    }
+
+    I2C_TypeDef* hw = (I2C_TypeDef*)bus->HWInterface;
+
+    I2C_TransferReturn_TypeDef rawResult = (I2CResult)I2C_TransferInit(hw, seq);
+
+    if (rawResult != i2cTransferInProgress)
+    {
+        System.GiveSemaphore(bus->Lock);
+        return (I2CResult)rawResult;
+    }
+
+    if (!System.QueueReceive(bus->ResultQueue, &rawResult, I2C_TIMEOUT * 1000)) // I2C_TIMEOUT * 1000
+    {
+        I2CResult ret = I2CResultTimeout;
+
         LOG(LOG_LEVEL_ERROR, "Didn't received i2c transfer result");
-        return I2CResultFailure;
+
+        hw->CMD = I2C_CMD_STOP | I2C_CMD_ABORT;
+
+        while (HAS_FLAG(hw->STATUS, I2C_STATUS_PABORT))
+        {
+        }
+
+        if (IsSclLatched(bus))
+        {
+            LOG(LOG_LEVEL_ERROR, "SCL latched at low level");
+
+            ret = I2CResultClockLatched;
+        }
+
+        System.GiveSemaphore(bus->Lock);
+
+        return ret;
     }
 
     System.GiveSemaphore(bus->Lock);
 
-    return (I2CResult)ret;
+    return (I2CResult)rawResult;
 }
 
+/**
+ * @brief Performs write-only request
+ * @param[in] bus I2C bus
+ * @param[in] address Device address
+ * @param[in] data Data to send
+ * @param[in] length Length of data to send
+ * @return Transfer result
+ */
 static I2CResult Write(I2CBus* bus, const I2CAddress address, const uint8_t* data, size_t length)
 {
     I2C_TransferSeq_TypeDef seq = //
@@ -60,9 +103,19 @@ static I2CResult Write(I2CBus* bus, const I2CAddress address, const uint8_t* dat
             }                                            //
         };
 
-    return ExecuteTransfer(bus, &seq);
+    return ExecuteTransfer(LowLevel(bus), &seq);
 }
 
+/**
+ * @brief Performs write-read request
+ * @param[in] bus I2C bus
+ * @param[in] address Device address
+ * @param[in] inData Data to send
+ * @param[in] inLength Length of data to send
+ * @param[out] outData Buffer for received data
+ * @param[out] outLength Size of output buffer
+ * @return Transfer result
+ */
 static I2CResult WriteRead(
     I2CBus* bus, const I2CAddress address, const uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength)
 {
@@ -77,10 +130,10 @@ static I2CResult WriteRead(
             }                                                //
         };
 
-    return ExecuteTransfer(bus, &seq);
+    return ExecuteTransfer(LowLevel(bus), &seq);
 }
 
-void I2CSetupInterface(I2CBus* bus,
+void I2CSetupInterface(I2CLowLevelBus* bus,
     I2C_TypeDef* hw,
     uint16_t location,
     GPIO_Port_TypeDef port,
@@ -89,10 +142,13 @@ void I2CSetupInterface(I2CBus* bus,
     CMU_Clock_TypeDef clock,
     IRQn_Type irq)
 {
-    bus->Extra = NULL;
+    bus->Base.Write = Write;
+    bus->Base.WriteRead = WriteRead;
+
     bus->HWInterface = hw;
-    bus->Write = Write;
-    bus->WriteRead = WriteRead;
+    bus->IO.Port = (uint16_t)port;
+    bus->IO.SCL = sclPin;
+    bus->IO.SDA = sdaPin;
 
     bus->ResultQueue = System.CreateQueue(1, sizeof(I2C_TransferReturn_TypeDef));
 
@@ -115,4 +171,21 @@ void I2CSetupInterface(I2CBus* bus,
 
     NVIC_SetPriority(irq, I2C_IRQ_PRIORITY);
     NVIC_EnableIRQ(irq);
+}
+
+void I2CIRQHandler(I2CLowLevelBus* bus)
+{
+    I2C_TransferReturn_TypeDef status = I2C_Transfer((I2C_TypeDef*)bus->HWInterface);
+
+    if (status == i2cTransferInProgress)
+    {
+        return;
+    }
+
+    if (!System.QueueSendISR(bus->ResultQueue, &status, NULL))
+    {
+        LOG_ISR(LOG_LEVEL_ERROR, "Error queueing i2c result");
+    }
+
+    System.EndSwitchingISR(NULL);
 }

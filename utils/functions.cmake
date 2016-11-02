@@ -53,3 +53,12 @@ function(target_memory_report TARGET)
         DEPENDS ${TARGET} utils.deps
         )
 endfunction(target_memory_report)
+
+function(target_asm_listing TARGET)
+    get_property(binary TARGET ${TARGET} PROPERTY RUNTIME_OUTPUT_NAME)
+    
+    add_custom_target(${TARGET}.asm
+        COMMAND ${CMAKE_OBJDUMP} -dSC $<TARGET_FILE:${TARGET}> > ${REPORTS_PATH}/${TARGET}.lss
+        DEPENDS ${TARGET}
+    )
+endfunction(target_asm_listing)

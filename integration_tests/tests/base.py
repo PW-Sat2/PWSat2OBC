@@ -2,12 +2,8 @@ import unittest
 
 from system import System
 from pins import Pins
-
-try:
-    from config import config
-except ImportError as e:
-    raise ImportError(
-        "Error loading config: %s. Did you forget to add <build>/integration_tests to PYTHONPATH?" % e.message)
+import extensions
+from build_config import config
 
 
 class BaseTest(unittest.TestCase):
@@ -20,10 +16,12 @@ class BaseTest(unittest.TestCase):
 
         self.gpio = Pins(gpio_com)
 
+        extensions.set_up(test_id=self.id())
+
         self.system = System(obc_com, sys_bus_com, payload_bus_com, use_single_bus, self.gpio)
 
     def tearDown(self):
         self.system.close()
         self.gpio.close()
 
-        #del self.gpio
+        extensions.tear_down(test_id=self.id())

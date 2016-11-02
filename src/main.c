@@ -36,6 +36,9 @@
 #include <spidrv.h>
 #include "adxrs453/adxrs453.h"
 
+#include "leuart/leuart.h"
+#include "power_eps/power_eps.h"
+
 OBC Main;
 MissionState Mission;
 
@@ -54,12 +57,12 @@ void vApplicationIdleHook(void)
 
 void I2C0_IRQHandler(void)
 {
-    I2CIRQHandler(&Main.I2CBuses[0]);
+    I2CIRQHandler(&Main.I2CBuses[0].Bus);
 }
 
 void I2C1_IRQHandler(void)
 {
-    I2CIRQHandler(&Main.I2CBuses[1]);
+    I2CIRQHandler(&Main.I2CBuses[1].Bus);
 }
 
 static void BlinkLed0(void* param)
@@ -225,15 +228,35 @@ void SetupHardware(void)
     CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFRCO);
 }
 
+I2CResult I2CErrorHandler(I2CBus* bus, I2CResult result, I2CAddress address, void* context)
+{
+    UNREFERENCED_PARAMETER(bus);
+    UNREFERENCED_PARAMETER(address);
+
+    PowerControl* power = (PowerControl*)context;
+
+    if (result == I2CResultClockLatched)
+    {
+        LOG(LOG_LEVEL_FATAL, "SCL latched. Triggering power cycle");
+        power->TriggerSystemPowerCycle(power);
+        return result;
+    }
+
+    return result;
+}
+
 void SetupI2C(void)
 {
     I2CSetupInterface(
-        &Main.I2CBuses[0], I2C0, I2C0_BUS_LOCATION, I2C0_BUS_PORT, I2C0_BUS_SDA_PIN, I2C0_BUS_SCL_PIN, cmuClock_I2C0, I2C0_IRQn);
+        &Main.I2CBuses[0].Bus, I2C0, I2C0_BUS_LOCATION, I2C0_BUS_PORT, I2C0_BUS_SDA_PIN, I2C0_BUS_SCL_PIN, cmuClock_I2C0, I2C0_IRQn);
     I2CSetupInterface(
-        &Main.I2CBuses[1], I2C1, I2C1_BUS_LOCATION, I2C1_BUS_PORT, I2C1_BUS_SDA_PIN, I2C1_BUS_SCL_PIN, cmuClock_I2C1, I2C1_IRQn);
+        &Main.I2CBuses[1].Bus, I2C1, I2C1_BUS_LOCATION, I2C1_BUS_PORT, I2C1_BUS_SDA_PIN, I2C1_BUS_SCL_PIN, cmuClock_I2C1, I2C1_IRQn);
 
-    Main.I2C.System = &Main.I2CBuses[I2C_SYSTEM_BUS];
-    Main.I2C.Payload = &Main.I2CBuses[I2C_PAYLOAD_BUS];
+    I2CSetUpErrorHandlingBus(&Main.I2CBuses[0].ErrorHandling, (I2CBus*)&Main.I2CBuses[0].Bus, I2CErrorHandler, &Main.PowerControl);
+    I2CSetUpErrorHandlingBus(&Main.I2CBuses[1].ErrorHandling, (I2CBus*)&Main.I2CBuses[1].Bus, I2CErrorHandler, &Main.PowerControl);
+
+    Main.I2C.System = (I2CBus*)&Main.I2CBuses[I2C_SYSTEM_BUS].ErrorHandling;
+    Main.I2C.Payload = (I2CBus*)&Main.I2CBuses[I2C_PAYLOAD_BUS].ErrorHandling;
 
     I2CSetUpFallbackBus(&Main.I2CFallback, &Main.I2C);
 }
@@ -260,12 +283,14 @@ int main(void)
 
     SetupI2C();
 
-    EpsInit(&Main.I2CFallback);
+    EpsInit((I2CBus*)&Main.I2CFallback);
+
+    EPSPowerControlInitialize(&Main.PowerControl);
 
     CommUpperInterface commUpperInterface;
     commUpperInterface.frameHandler = FrameHandler;
     commUpperInterface.frameHandlerContext = NULL;
-    CommInitialize(&Main.comm, &Main.I2CFallback, &commUpperInterface);
+    CommInitialize(&Main.comm, (I2CBus*)&Main.I2CFallback, &commUpperInterface);
 
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 

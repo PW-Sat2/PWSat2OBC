@@ -2,3 +2,4 @@ nose
 pyserial==3.1.1
 rednose
 colorlog
+saleae
