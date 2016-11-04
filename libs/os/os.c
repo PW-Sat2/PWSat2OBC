@@ -6,6 +6,8 @@
 #include "semphr.h"
 #include "task.h"
 
+#define PULSE_ALL_BITS 0x80
+
 static inline TickType_t ConvertTimeToTicks(const OSTaskTimeSpan span)
 {
     if (span == MAX_DELAY)
@@ -182,9 +184,9 @@ static OSPulseHandle CreatePulseAll(void)
 
 static OSResult WaitForPulse(OSPulseHandle handle, OSTaskTimeSpan timeout)
 {
-    OSEventBits result = EventGroupWaitForBits((OSEventGroupHandle)handle, 0x80, true, true, timeout);
+    OSEventBits result = EventGroupWaitForBits((OSEventGroupHandle)handle, PULSE_ALL_BITS, true, true, timeout);
 
-    if (result == 0x80)
+    if (result == PULSE_ALL_BITS)
     {
         return OSResultSuccess;
     }
@@ -196,7 +198,7 @@ static OSResult WaitForPulse(OSPulseHandle handle, OSTaskTimeSpan timeout)
 
 static void PulseSet(OSPulseHandle handle)
 {
-    EventGroupSetBits((OSEventGroupHandle)handle, 0x80);
+    EventGroupSetBits((OSEventGroupHandle)handle, PULSE_ALL_BITS);
 }
 
 OS System;

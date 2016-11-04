@@ -140,7 +140,9 @@ bool TimeInitialize(TimeProvider* provider,    //
 
     provider->TickNotification = System.CreatePulseAll();
 
-    const bool result = provider->timerLock != NULL && provider->notificationLock != NULL;
+    const bool result = provider->timerLock != NULL //
+        && provider->notificationLock != NULL       //
+        && provider->TickNotification != NULL;
     return result;
 }
 
@@ -433,7 +435,10 @@ bool TimeLongDelayUntil(TimeProvider* timeProvider, TimePoint time)
             return true;
         }
 
-        System.PulseWait(timeProvider->TickNotification, MAX_DELAY);
+        if (OS_RESULT_FAILED(System.PulseWait(timeProvider->TickNotification, MAX_DELAY)))
+        {
+            return false;
+        }
     } while (true);
 
     return false;

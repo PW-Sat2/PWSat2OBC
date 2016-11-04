@@ -109,7 +109,10 @@ typedef struct TimeProviderTag
      */
     OSSemaphoreHandle notificationLock;
 
-    OSEventGroupHandle TickNotification;
+    /**
+     * @brief Pulse notifed on each timer tick
+     */
+    OSPulseHandle TickNotification;
 
     /**
      * @brief Pointer to file system object that is used to save/restore timer state.

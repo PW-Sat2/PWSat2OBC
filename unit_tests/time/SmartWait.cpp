@@ -6,10 +6,11 @@
 #include "time/timer.h"
 
 using testing::Test;
-using testing::NiceMock;
+using testing::NaggyMock;
 using testing::Eq;
 using testing::_;
 using testing::Invoke;
+using testing::Return;
 
 class SmartWaitTest : public Test
 {
@@ -18,17 +19,22 @@ class SmartWaitTest : public Test
 
   protected:
     TimeProvider timeProvider;
-    NiceMock<OSMock> osMock;
+    NaggyMock<OSMock> osMock;
     OSReset osGuard;
 };
 
 SmartWaitTest::SmartWaitTest()
 {
     osGuard = InstallProxy(&osMock);
+
+    EXPECT_CALL(osMock, TakeSemaphore(_, _)).WillRepeatedly(Return(OSResultSuccess));
+    EXPECT_CALL(osMock, GiveSemaphore(_)).WillRepeatedly(Return(OSResultSuccess));
 }
 
 TEST_F(SmartWaitTest, ShouldReturnImmediatelyIfAlreadyAfterDesiredTime)
 {
+    EXPECT_CALL(osMock, PulseWait(_, _)).Times(0);
+
     timeProvider.CurrentTime = TimePointToTimeSpan(TimePointBuild(0, 0, 10, 0, 0));
     auto result = TimeLongDelayUntil(&timeProvider, TimePointBuild(0, 0, 10, 0, 0));
 
@@ -40,6 +46,7 @@ TEST_F(SmartWaitTest, ShouldWaitForPulseAndReturnIfDesiredTimeReached)
     timeProvider.CurrentTime = TimePointToTimeSpan(TimePointBuild(0, 0, 0, 0, 0));
 
     EXPECT_CALL(osMock, PulseWait(_, _))
+        .Times(10)
         .WillRepeatedly(Invoke([&](OSPulseHandle handle, const OSTaskTimeSpan timeout) {
             UNUSED(handle, timeout);
 
@@ -50,4 +57,31 @@ TEST_F(SmartWaitTest, ShouldWaitForPulseAndReturnIfDesiredTimeReached)
     auto result = TimeLongDelayUntil(&timeProvider, TimePointBuild(0, 0, 10, 0, 0));
 
     ASSERT_THAT(result, Eq(true));
+}
+
+TEST_F(SmartWaitTest, ShouldWaitForPulseAndReturnIfMissionTimeJumpsOverDesiredTime)
+{
+    timeProvider.CurrentTime = TimePointToTimeSpan(TimePointBuild(0, 0, 0, 0, 0));
+
+    EXPECT_CALL(osMock, PulseWait(_, _))
+        .Times(11)
+        .WillRepeatedly(Invoke([&](OSPulseHandle handle, const OSTaskTimeSpan timeout) {
+            UNUSED(handle, timeout);
+
+            timeProvider.CurrentTime = TimeSpanAdd(timeProvider.CurrentTime, TimeSpanFromMinutes(1));
+            return OSResultSuccess;
+        }));
+
+    auto result = TimeLongDelayUntil(&timeProvider, TimePointBuild(0, 0, 10, 30, 0));
+
+    ASSERT_THAT(result, Eq(true));
+}
+
+TEST_F(SmartWaitTest, ShouldAbortAfterWaitError)
+{
+    EXPECT_CALL(osMock, PulseWait(_, _)).WillOnce(Return(OSResultNotSupported));
+
+    auto result = TimeLongDelay(&timeProvider, TimeSpanFromDays(1));
+
+    ASSERT_THAT(result, Eq(false));
 }

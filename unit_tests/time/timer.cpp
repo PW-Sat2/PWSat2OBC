@@ -44,6 +44,9 @@ void TimerTest::Initialize()
     EXPECT_CALL(os, CreateBinarySemaphore()).WillOnce(Return(reinterpret_cast<void*>(1))).WillOnce(Return(reinterpret_cast<void*>(2)));
     ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResultSuccess));
     ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResultSuccess));
+
+    EXPECT_CALL(os, CreatePulseAll()).WillOnce(Return(reinterpret_cast<void*>(3)));
+
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, &timeHandler, nullptr));
 }
 
@@ -69,6 +72,7 @@ TEST_F(TimerTest, TestDefaultState)
 {
     this->guard = InstallProxy(&os);
     ON_CALL(os, CreateBinarySemaphore()).WillByDefault(Return(reinterpret_cast<void*>(this)));
+    ON_CALL(os, CreatePulseAll()).WillByDefault(Return(reinterpret_cast<void*>(3)));
     const auto result = TimeInitialize(&provider, TimePassedProxy, &timeHandler, nullptr);
     ASSERT_THAT(result, Eq(true));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0ull)));
