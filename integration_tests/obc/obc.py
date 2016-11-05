@@ -2,9 +2,14 @@ import logging
 
 from .CommandFormatter import CommandFormatter
 from .obc_mixin import OBCMixin
+from .file_system import FileSystemMixin
+from .crypto import OBCCrypto
 
 
-class OBC(OBCMixin):
+class OBC(OBCMixin,
+          OBCCrypto,
+          FileSystemMixin
+):
     def __init__(self, terminal):
         self.log = logging.getLogger("OBC")
 
@@ -34,16 +39,6 @@ class OBC(OBCMixin):
 
     def power_on(self, clean_state=False):
         self._terminal.power_on(clean_state)
-
-    def list_files(self, path):
-        result = self._terminal.command("listFiles %s" % path)
-        return result.split('\n')
-
-    def write_file(self, path, content):
-        self._terminal.command("writeFile %s %s" % (path, content))
-
-    def read_file(self, path):
-        return self._terminal.command("readFile %s" % path)
 
     def i2c_transfer(self, mode, bus, address, data):
         return self._terminal.command("i2c %s %s %d %s" % (mode, bus, address, data))
