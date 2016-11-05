@@ -11,6 +11,7 @@ from .i2c import I2CMixin
 class OBC(OBCMixin,
           FileSystemMixin,
           CommMixin,
+          TimeMixin,
           I2CMixin
           ):
     def __init__(self, terminal):
@@ -43,15 +44,5 @@ class OBC(OBCMixin,
     def power_on(self, clean_state=False):
         self._terminal.power_on(clean_state)
 
-    def i2c_transfer(self, mode, bus, address, data):
-        return self._terminal.command("i2c %s %s %d %s" % (mode, bus, address, data))
-
     def ping(self):
-        return self._terminal.command("ping")
-
-    def jump_to_time(self, time):
-        self._terminal.command("jumpToTime %d" % time)
-
-    def current_time(self):
-        r = self._terminal.command("currentTime")
-        return int(r)
+        return self._command("ping")
