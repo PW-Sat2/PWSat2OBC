@@ -31,6 +31,13 @@ def decode_base64():
     return decode_return(p)
 
 
+def decode_lines():
+    def p(s):
+        return s.split('\n')
+
+    return decode_return(p)
+
+
 def command(fmt):
     def wrap(f):
         @wraps(f)
