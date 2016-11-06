@@ -9,8 +9,10 @@ from .i2c import I2CMixin
 
 
 class OBC(OBCMixin,
-          FileSystemMixin
-):
+          FileSystemMixin,
+          CommMixin,
+          I2CMixin
+          ):
     def __init__(self, terminal):
         self.log = logging.getLogger("OBC")
 
@@ -53,18 +55,3 @@ class OBC(OBCMixin,
     def current_time(self):
         r = self._terminal.command("currentTime")
         return int(r)
-
-    def send_frame(self, data):
-        self._terminal.command("sendFrame %s" % data)
-
-    def get_frame_count(self):
-        r = self._terminal.command("getFramesCount")
-        return int(r)
-
-    def receive_frame(self):
-        r = self._terminal.command("receiveFrame")
-        return r
-
-    def comm_auto_handling(self, enable):
-        if not enable:
-            self._terminal.command("pauseComm")
