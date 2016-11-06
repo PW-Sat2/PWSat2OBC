@@ -3,11 +3,12 @@ import logging
 from .CommandFormatter import CommandFormatter
 from .obc_mixin import OBCMixin
 from .file_system import FileSystemMixin
-from .crypto import OBCCrypto
+from .comm import CommMixin
+from .time import TimeMixin
+from .i2c import I2CMixin
 
 
 class OBC(OBCMixin,
-          OBCCrypto,
           FileSystemMixin
 ):
     def __init__(self, terminal):
