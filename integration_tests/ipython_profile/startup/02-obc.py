@@ -23,5 +23,3 @@ def _prepare_environment():
     return System(obc_com, sys_bus_com, payload_bus_com, use_single_bus, gpio)
 
 system = _prepare_environment()
-
-print "Environment prepared"

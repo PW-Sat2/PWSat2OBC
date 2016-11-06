@@ -20,6 +20,8 @@ find_program(JLINK NAMES JLink JLinkExe PATHS $ENV{ARM_TOOLCHAIN} $ENV{JLINK_PAT
 find_program(JLINKSWO NAMES JLinkSWOViewerCL PATHS $ENV{ARM_TOOLCHAIN} $ENV{JLINK_PATH})
 
 FIND_PACKAGE(PythonInterp 2.7)
+find_program(IPYTHON NAMES ipython)
+
 FIND_PACKAGE(Doxygen)
 
 find_program(CLANG_FORMAT NAMES clang-format HINTS $ENV{CLANG_PATH})
