@@ -29,7 +29,7 @@ enum Command
  * @return Mapped operation status.
  * @ingroup AntennaMiniport
  */
-static OSResult MapStatus(bool status)
+static inline OSResult MapStatus(bool status)
 {
     return status ? OSResultSuccess : OSResultIOError;
 }
@@ -41,24 +41,14 @@ static OSResult MapStatus(bool status)
  * @return Operation status. True on success, false otherwise.
  * @ingroup AntennaMiniport
  */
-static bool SendCommand(struct AntennaMiniportDriver* driver, Command command)
+static bool SendCommand(I2CBus* bus, AntennaChannel channel, Command command)
 {
     uint8_t data = (uint8_t)command;
-    const I2CResult result = driver->communicationBus->Write(driver->communicationBus,
-        driver->currentChannel,
-        &data,
-        1 //
-        );
-
+    const I2CResult result = bus->Write(bus, channel, &data, 1);
     const bool status = (result == I2CResultOK);
     if (!status)
     {
-        LOGF(LOG_LEVEL_ERROR,
-            "[ant] Unable to send command %d to %d, Reason: %d",
-            command,
-            driver->currentChannel,
-            result //
-            );
+        LOGF(LOG_LEVEL_ERROR, "[ant] Unable to send command %d to %d, Reason: %d", command, channel, result);
     }
 
     return status;
@@ -73,91 +63,103 @@ static bool SendCommand(struct AntennaMiniportDriver* driver, Command command)
  * @return Operation status. True on success, false otherwise.
  * @ingroup AntennaMiniport
  */
-static bool SendCommandWithResponse(struct AntennaMiniportDriver* driver,
+static bool SendCommandWithResponse(I2CBus* bus,
+    AntennaChannel channel,
     Command command,
     uint8_t* outBuffer,
     uint8_t outBufferSize //
     )
 {
-    const I2CResult result = driver->communicationBus->WriteRead(driver->communicationBus,
-        driver->currentChannel,
-        reinterpret_cast<std::uint8_t*>(&command),
-        sizeof(command),
-        outBuffer,
-        outBufferSize //
-        );
-
+    const I2CResult result =
+        bus->WriteRead(bus, channel, reinterpret_cast<std::uint8_t*>(&command), sizeof(command), outBuffer, outBufferSize);
     const bool status = (result == I2CResultOK);
     if (!status)
     {
-        LOGF(LOG_LEVEL_ERROR,
-            "[ant] Unable to send command %d to %d, Reason: %d",
-            command,
-            driver->currentChannel,
-            result //
-            );
+        LOGF(LOG_LEVEL_ERROR, "[ant] Unable to send command %d to %d, Reason: %d", command, channel, result);
     }
 
     return status;
 }
 
-static OSResult Reset(AntennaMiniportDriver* driver)
-{
-    return MapStatus(SendCommand(driver, RESET));
-}
-
-static OSResult ArmDeploymentSystem(AntennaMiniportDriver* driver)
-{
-    return MapStatus(SendCommand(driver, ARM));
-}
-
-static OSResult DisarmDeploymentSystem(AntennaMiniportDriver* driver)
-{
-    return MapStatus(SendCommand(driver, DISARM));
-}
-
-static OSResult DeployAntenna(AntennaMiniportDriver* driver,
-    AntennaId antennaId,
-    TimeSpan timeout //
+static OSResult Reset(AntennaMiniportDriver* miniport,
+    I2CBus* communicationBus,
+    AntennaChannel channel //
     )
 {
+    UNREFERENCED_PARAMETER(miniport);
+    return MapStatus(SendCommand(communicationBus, channel, RESET));
+}
+
+static OSResult ArmDeploymentSystem(AntennaMiniportDriver* miniport,
+    I2CBus* communicationBus,
+    AntennaChannel channel //
+    )
+{
+    UNREFERENCED_PARAMETER(miniport);
+    return MapStatus(SendCommand(communicationBus, channel, ARM));
+}
+
+static OSResult DisarmDeploymentSystem(AntennaMiniportDriver* miniport,
+    I2CBus* communicationBus,
+    AntennaChannel channel //
+    )
+{
+    UNREFERENCED_PARAMETER(miniport);
+    return MapStatus(SendCommand(communicationBus, channel, DISARM));
+}
+
+static inline uint8_t GetOverrideFlag(bool override)
+{
+    return override ? (DEPLOY_ANTENNA_OVERRIDE - DEPLOY_ANTENNA) : 0;
+}
+
+static OSResult DeployAntenna(struct AntennaMiniportDriver* miniport,
+    I2CBus* communicationBus,
+    AntennaChannel channel,
+    AntennaId antennaId,
+    TimeSpan timeout,
+    bool override //
+    )
+{
+    UNREFERENCED_PARAMETER(miniport);
     uint8_t buffer[2];
-    buffer[0] = (uint8_t)(DEPLOY_ANTENNA + antennaId);
+    buffer[0] = (uint8_t)(DEPLOY_ANTENNA + antennaId + GetOverrideFlag(override));
     buffer[1] = (uint8_t)TimeSpanToSeconds(timeout);
-    return MapStatus(driver->communicationBus->Write(driver->communicationBus,
-                         driver->currentChannel,
+    return MapStatus(communicationBus->Write(communicationBus,
+                         channel,
                          buffer,
-                         2 //
+                         sizeof(buffer) //
                          ) == I2CResultOK);
 }
 
-static OSResult DeployAntennaOverride(AntennaMiniportDriver* driver, AntennaId antennaId, TimeSpan timeout)
+static OSResult InitializeAutomaticDeployment(AntennaMiniportDriver* miniport,
+    I2CBus* communicationBus,
+    AntennaChannel channel //
+    )
 {
-    uint8_t buffer[2];
-    buffer[0] = (uint8_t)(DEPLOY_ANTENNA_OVERRIDE + antennaId);
-    buffer[1] = (uint8_t)TimeSpanToSeconds(timeout);
-    return MapStatus(driver->communicationBus->Write(driver->communicationBus,
-                         driver->currentChannel,
-                         buffer,
-                         2 //
-                         ) == I2CResultOK);
+    UNREFERENCED_PARAMETER(miniport);
+    return MapStatus(SendCommand(communicationBus, channel, START_AUTOMATIC_DEPLOYMENT));
 }
 
-static OSResult InitializeAutomaticDeployment(AntennaMiniportDriver* driver)
+static OSResult CancelAntennaDeployment(AntennaMiniportDriver* miniport,
+    I2CBus* communicationBus,
+    AntennaChannel channel //
+    )
 {
-    return MapStatus(SendCommand(driver, START_AUTOMATIC_DEPLOYMENT));
+    UNREFERENCED_PARAMETER(miniport);
+    return MapStatus(SendCommand(communicationBus, channel, CANCEL_ANTENNA_DEPLOYMENT));
 }
 
-static OSResult CancelAntennaDeployment(AntennaMiniportDriver* driver)
+static OSResult GetDeploymentStatus(AntennaMiniportDriver* miniport,
+    I2CBus* communicationBus,
+    AntennaChannel channel,
+    AntennaDeploymentStatus* telemetry //
+    )
 {
-    return MapStatus(SendCommand(driver, CANCEL_ANTENNA_DEPLOYMENT));
-}
-
-static OSResult GetDeploymentStatus(AntennaMiniportDriver* driver, AntennaMiniportDeploymentStatus* telemetry)
-{
+    UNREFERENCED_PARAMETER(miniport);
     uint8_t output[2];
     memset(telemetry, 0, sizeof(*telemetry));
-    if (!SendCommandWithResponse(driver, QUERY_DEPLOYMENT_STATUS, output, sizeof(output)))
+    if (!SendCommandWithResponse(communicationBus, channel, QUERY_DEPLOYMENT_STATUS, output, sizeof(output)))
     {
         return OSResultIOError;
     }
@@ -169,7 +171,7 @@ static OSResult GetDeploymentStatus(AntennaMiniportDriver* driver, AntennaMinipo
     {
         LOGF(LOG_LEVEL_WARNING,
             "[ant] Antenna %d deployment status out of range: %d.",
-            driver->currentChannel,
+            channel,
             value //
             );
 
@@ -190,10 +192,16 @@ static OSResult GetDeploymentStatus(AntennaMiniportDriver* driver, AntennaMinipo
     return OSResultSuccess;
 }
 
-static OSResult GetAntennaActivationCount(AntennaMiniportDriver* driver, AntennaId antennaId, uint16_t* count)
+static OSResult GetAntennaActivationCount(AntennaMiniportDriver* miniport,
+    I2CBus* communicationBus,
+    AntennaChannel channel,
+    AntennaId antennaId,
+    uint16_t* count //
+    )
 {
+    UNREFERENCED_PARAMETER(miniport);
     uint8_t output;
-    if (!SendCommandWithResponse(driver, (Command)(QUERY_ANTENNA_ACTIVATION_COUNT + antennaId), &output, sizeof(output)))
+    if (!SendCommandWithResponse(communicationBus, channel, (Command)(QUERY_ANTENNA_ACTIVATION_COUNT + antennaId), &output, sizeof(output)))
     {
         *count = 0;
         return OSResultIOError;
@@ -203,10 +211,16 @@ static OSResult GetAntennaActivationCount(AntennaMiniportDriver* driver, Antenna
     return OSResultSuccess;
 }
 
-static OSResult GetAntennaActivationTime(AntennaMiniportDriver* driver, AntennaId antennaId, TimeSpan* span)
+static OSResult GetAntennaActivationTime(AntennaMiniportDriver* miniport,
+    I2CBus* communicationBus,
+    AntennaChannel channel,
+    AntennaId antennaId,
+    TimeSpan* span //
+    )
 {
+    UNREFERENCED_PARAMETER(miniport);
     uint8_t output[2];
-    if (!SendCommandWithResponse(driver, (Command)(QUERY_ANTENNA_ACTIVATION_TIME + antennaId), output, sizeof(output)))
+    if (!SendCommandWithResponse(communicationBus, channel, (Command)(QUERY_ANTENNA_ACTIVATION_TIME + antennaId), output, sizeof(output)))
     {
         *span = TimeSpanFromMilliseconds(0);
         return OSResultIOError;
@@ -219,11 +233,16 @@ static OSResult GetAntennaActivationTime(AntennaMiniportDriver* driver, AntennaI
     return OSResultSuccess;
 }
 
-static OSResult GetTemperature(AntennaMiniportDriver* driver, uint16_t* temperature)
+static OSResult GetTemperature(AntennaMiniportDriver* miniport,
+    I2CBus* communicationBus,
+    AntennaChannel channel,
+    uint16_t* temperature //
+    )
 {
+    UNREFERENCED_PARAMETER(miniport);
     uint8_t output[2];
     *temperature = 0;
-    if (!SendCommandWithResponse(driver, QUERY_TEMPERATURE, output, sizeof(output)))
+    if (!SendCommandWithResponse(communicationBus, channel, QUERY_TEMPERATURE, output, sizeof(output)))
     {
         return OSResultIOError;
     }
@@ -235,7 +254,7 @@ static OSResult GetTemperature(AntennaMiniportDriver* driver, uint16_t* temperat
     {
         LOGF(LOG_LEVEL_WARNING,
             "[ant] Antenna %d temperature is out of range: %d.",
-            driver->currentChannel,
+            channel,
             value //
             );
 
@@ -246,16 +265,13 @@ static OSResult GetTemperature(AntennaMiniportDriver* driver, uint16_t* temperat
     return OSResultSuccess;
 }
 
-void AntennaMiniportInitialize(AntennaMiniportDriver* driver, AntennaChannel currentChannel, I2CBus* dedicatedBus)
+void AntennaMiniportInitialize(AntennaMiniportDriver* driver)
 {
     memset(driver, 0, sizeof(*driver));
-    driver->currentChannel = currentChannel;
-    driver->communicationBus = dedicatedBus;
     driver->Reset = Reset;
     driver->ArmDeploymentSystem = ArmDeploymentSystem;
     driver->DisarmDeploymentSystem = DisarmDeploymentSystem;
     driver->DeployAntenna = DeployAntenna;
-    driver->DeployAntennaOverride = DeployAntennaOverride;
     driver->InitializeAutomaticDeployment = InitializeAutomaticDeployment;
     driver->CancelAntennaDeployment = CancelAntennaDeployment;
     driver->GetDeploymentStatus = GetDeploymentStatus;
