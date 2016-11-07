@@ -157,9 +157,8 @@ static void ClearState(OBC* obc)
 
 static void SetupAntennas(void)
 {
-    AntennaMiniportInitialize(&Main.antennaPrimaryMiniport, ANTENNA_PRIMARY_CHANNEL, Main.I2C.System);
-    AntennaMiniportInitialize(&Main.antennaBackupMiniport, ANTENNA_BACKUP_CHANNEL, Main.I2C.System);
-    AntennaDriverInitialize(&Main.antennaDriver, &Main.antennaPrimaryMiniport, &Main.antennaBackupMiniport);
+    AntennaMiniportInitialize(&Main.antennaMiniport);
+    AntennaDriverInitialize(&Main.antennaDriver, &Main.antennaMiniport, (I2CBus*)&Main.I2CFallback);
 }
 
 static void ObcInitTask(void* param)
@@ -178,7 +177,7 @@ static void ObcInitTask(void* param)
         LOG(LOG_LEVEL_ERROR, "Unable to initialize persistent timer. ");
     }
 
-    if (OS_RESULT_FAILED(Main.antennaDriver.Reset(&Main.antennaDriver)))
+    if (OS_RESULT_FAILED(Main.antennaDriver.HardReset(&Main.antennaDriver)))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to reset both antenna controllers. ");
     }
