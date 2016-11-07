@@ -1,69 +1,102 @@
 #include "MiniportMock.hpp"
 
-static OSResult Reset(struct AntennaMiniportDriver* driver)
+static OSResult Reset(struct AntennaMiniportDriver* driver,
+    I2CBus* communicationBus,
+    AntennaChannel channel //
+    )
 {
     auto mock = static_cast<AntennaMiniportMock*>(driver);
-    return mock->Reset();
+    return mock->Reset(communicationBus, channel);
 }
 
-static OSResult ArmDeploymentSystem(struct AntennaMiniportDriver* driver)
+static OSResult ArmDeploymentSystem(struct AntennaMiniportDriver* driver,
+    I2CBus* communicationBus,
+    AntennaChannel channel //
+    )
 {
     auto mock = static_cast<AntennaMiniportMock*>(driver);
-    return mock->ArmDeploymentSystem();
+    return mock->ArmDeploymentSystem(communicationBus, channel);
 }
 
-static OSResult DisarmDeploymentSystem(struct AntennaMiniportDriver* driver)
+static OSResult DisarmDeploymentSystem(struct AntennaMiniportDriver* driver,
+    I2CBus* communicationBus,
+    AntennaChannel channel //
+    )
 {
     auto mock = static_cast<AntennaMiniportMock*>(driver);
-    return mock->DisarmDeploymentSystem();
+    return mock->DisarmDeploymentSystem(communicationBus, channel);
 }
 
-static OSResult DeployAntenna(struct AntennaMiniportDriver* driver, AntennaId antennaId, TimeSpan timeout)
+static OSResult DeployAntenna(struct AntennaMiniportDriver* driver,
+    I2CBus* communicationBus,
+    AntennaChannel channel,
+    AntennaId antennaId,
+    TimeSpan timeout,
+    bool override //
+    )
 {
     auto mock = static_cast<AntennaMiniportMock*>(driver);
-    return mock->DeployAntenna(antennaId, timeout);
+    return mock->DeployAntenna(communicationBus, channel, antennaId, timeout, override);
 }
 
-static OSResult DeployAntennaOverride(struct AntennaMiniportDriver* driver, AntennaId antennaId, TimeSpan timeout)
+static OSResult InitializeAutomaticDeployment(struct AntennaMiniportDriver* driver,
+    I2CBus* communicationBus,
+    AntennaChannel channel //
+    )
 {
     auto mock = static_cast<AntennaMiniportMock*>(driver);
-    return mock->DeployAntennaOverride(antennaId, timeout);
+    return mock->InitializeAutomaticDeployment(communicationBus, channel);
 }
 
-static OSResult InitializeAutomaticDeployment(struct AntennaMiniportDriver* driver)
+static OSResult CancelAntennaDeployment(struct AntennaMiniportDriver* driver,
+    I2CBus* communicationBus,
+    AntennaChannel channel //
+    )
 {
     auto mock = static_cast<AntennaMiniportMock*>(driver);
-    return mock->InitializeAutomaticDeployment();
+    return mock->CancelAntennaDeployment(communicationBus, channel);
 }
 
-static OSResult CancelAntennaDeployment(struct AntennaMiniportDriver* driver)
+static OSResult GetDeploymentStatus(struct AntennaMiniportDriver* driver,
+    I2CBus* communicationBus,
+    AntennaChannel channel,
+    AntennaDeploymentStatus* telemetry //
+    )
 {
     auto mock = static_cast<AntennaMiniportMock*>(driver);
-    return mock->CancelAntennaDeployment();
+    return mock->GetDeploymentStatus(communicationBus, channel, telemetry);
 }
 
-static OSResult GetDeploymentStatus(struct AntennaMiniportDriver* driver, AntennaMiniportDeploymentStatus* telemetry)
+static OSResult GetAntennaActivationCount(struct AntennaMiniportDriver* driver,
+    I2CBus* communicationBus,
+    AntennaChannel channel,
+    AntennaId antennaId,
+    uint16_t* count //
+    )
 {
     auto mock = static_cast<AntennaMiniportMock*>(driver);
-    return mock->GetDeploymentStatus(telemetry);
+    return mock->GetAntennaActivationCount(communicationBus, channel, antennaId, count);
 }
 
-static OSResult GetAntennaActivationCount(struct AntennaMiniportDriver* driver, AntennaId antennaId, uint16_t* count)
+static OSResult GetAntennaActivationTime(struct AntennaMiniportDriver* driver,
+    I2CBus* communicationBus,
+    AntennaChannel channel,
+    AntennaId antennaId,
+    TimeSpan* count //
+    )
 {
     auto mock = static_cast<AntennaMiniportMock*>(driver);
-    return mock->GetAntennaActivationCount(antennaId, count);
+    return mock->GetAntennaActivationTime(communicationBus, channel, antennaId, count);
 }
 
-static OSResult GetAntennaActivationTime(struct AntennaMiniportDriver* driver, AntennaId antennaId, TimeSpan* count)
+static OSResult GetTemperature(struct AntennaMiniportDriver* driver,
+    I2CBus* communicationBus,
+    AntennaChannel channel,
+    uint16_t* temperature //
+    )
 {
     auto mock = static_cast<AntennaMiniportMock*>(driver);
-    return mock->GetAntennaActivationTime(antennaId, count);
-}
-
-static OSResult GetTemperature(struct AntennaMiniportDriver* driver, uint16_t* temperature)
-{
-    auto mock = static_cast<AntennaMiniportMock*>(driver);
-    return mock->GetTemperature(temperature);
+    return mock->GetTemperature(communicationBus, channel, temperature);
 }
 
 AntennaMiniportMock::AntennaMiniportMock()
@@ -73,7 +106,6 @@ AntennaMiniportMock::AntennaMiniportMock()
     This->ArmDeploymentSystem = ::ArmDeploymentSystem;
     This->DisarmDeploymentSystem = ::DisarmDeploymentSystem;
     This->DeployAntenna = ::DeployAntenna;
-    This->DeployAntennaOverride = ::DeployAntennaOverride;
     This->InitializeAutomaticDeployment = ::InitializeAutomaticDeployment;
     This->CancelAntennaDeployment = ::CancelAntennaDeployment;
     This->GetDeploymentStatus = ::GetDeploymentStatus;

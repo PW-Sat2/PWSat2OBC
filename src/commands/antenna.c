@@ -22,11 +22,11 @@ void AntennaChangeDeploymentSystemState(uint16_t argc, char* argv[])
     OSResult result = -1;
     if (strcmp(argv[0], "arm") == 0)
     {
-        result = Main.antennaDriver.ArmDeploymentSystem(&Main.antennaDriver);
+        result = Main.antennaMiniport.ArmDeploymentSystem(&Main.antennaMiniport, (I2CBus*)&Main.I2CFallback, ANTENNA_PRIMARY_CHANNEL);
     }
     else if (strcmp(argv[0], "disarm") == 0)
     {
-        result = Main.antennaDriver.DisarmDeploymentSystem(&Main.antennaDriver);
+        result = Main.antennaMiniport.DisarmDeploymentSystem(&Main.antennaMiniport, (I2CBus*)&Main.I2CFallback, ANTENNA_PRIMARY_CHANNEL);
     }
 
     LOGF(LOG_LEVEL_INFO, "Finished arm antenna command with %d arguments status: '%d'. ", (int)argc, result);
@@ -42,47 +42,48 @@ void AntennaDeploy(uint16_t argc, char* argv[])
 
     if (strcmp(argv[0], "auto") == 0)
     {
-        const OSResult result = Main.antennaDriver.InitializeAutomaticDeployment(&Main.antennaDriver);
+        const OSResult result = Main.antennaDriver.DeployAntenna(&Main.antennaDriver,
+            ANTENNA_PRIMARY_CHANNEL,
+            AUTO_ID,
+            TimeSpanFromSeconds(10),
+            false //
+            );
         SendResult(result);
         return;
     }
 
-    OSResult (*procedure)(struct AntennaDriver * driver, AntennaId antennaId, TimeSpan timeout);
-    AntennaId antenna = ANTENNA1;
-    if (argc > 1)
-    {
-        if (strcmp(argv[1], "override") == 0)
-        {
-            procedure = Main.antennaDriver.DeployAntennaOverride;
-        }
-        else
-        {
-            procedure = Main.antennaDriver.DeployAntenna;
-        }
-    }
-
+    AntennaId antenna = ANTENNA1_ID;
+    const bool override = (argc > 1) && (strcmp(argv[1], "override") == 0);
     if (strcmp(argv[0], "1") == 0)
     {
-        antenna = ANTENNA1;
+        antenna = ANTENNA1_ID;
     }
     else if (strcmp(argv[0], "2") == 0)
     {
-        antenna = ANTENNA2;
+        antenna = ANTENNA2_ID;
     }
     else if (strcmp(argv[0], "3") == 0)
     {
-        antenna = ANTENNA3;
+        antenna = ANTENNA3_ID;
     }
     else if (strcmp(argv[0], "4") == 0)
     {
-        antenna = ANTENNA4;
+        antenna = ANTENNA4_ID;
     }
 
-    const OSResult result = procedure(&Main.antennaDriver, antenna, TimeSpanFromSeconds(10));
+    const OSResult result = Main.antennaDriver.DeployAntenna(&Main.antennaDriver,
+        ANTENNA_PRIMARY_CHANNEL,
+        antenna,
+        TimeSpanFromSeconds(10),
+        override //
+        );
+
     SendResult(result);
 }
 
 void AntennaCancelDeployment(uint16_t argc, char* argv[])
 {
-    Main.antennaDriver.CancelAntennaDeployment(&Main.antennaDriver);
+    UNREFERENCED_PARAMETER(argc);
+    UNREFERENCED_PARAMETER(argv);
+    Main.antennaDriver.FinishDeployment(&Main.antennaDriver, ANTENNA_PRIMARY_CHANNEL);
 }
