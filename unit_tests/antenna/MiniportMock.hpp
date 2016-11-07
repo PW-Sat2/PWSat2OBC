@@ -10,27 +10,64 @@ struct AntennaMiniportMock : AntennaMiniportDriver
 {
     AntennaMiniportMock();
 
-    MOCK_METHOD0(Reset, OSResult());
+    MOCK_METHOD2(Reset,
+        OSResult(I2CBus* communicationBus,
+                     AntennaChannel channel) //
+        );
 
-    MOCK_METHOD0(ArmDeploymentSystem, OSResult());
+    MOCK_METHOD2(ArmDeploymentSystem,
+        OSResult(I2CBus* communicationBus,
+                     AntennaChannel channel) //
+        );
 
-    MOCK_METHOD0(DisarmDeploymentSystem, OSResult());
+    MOCK_METHOD2(DisarmDeploymentSystem,
+        OSResult(I2CBus* communicationBus,
+                     AntennaChannel channel) //
+        );
 
-    MOCK_METHOD0(InitializeAutomaticDeployment, OSResult());
+    MOCK_METHOD2(InitializeAutomaticDeployment,
+        OSResult(I2CBus* communicationBus,
+                     AntennaChannel channel) //
+        );
 
-    MOCK_METHOD0(CancelAntennaDeployment, OSResult());
+    MOCK_METHOD2(CancelAntennaDeployment,
+        OSResult(I2CBus* communicationBus,
+                     AntennaChannel channel) //
+        );
 
-    MOCK_METHOD2(DeployAntenna, OSResult(AntennaId antennaId, TimeSpan timeout));
+    MOCK_METHOD5(DeployAntenna,
+        OSResult(I2CBus* communicationBus,
+                     AntennaChannel channel,
+                     AntennaId antennaId,
+                     TimeSpan timeout,
+                     bool override) //
+        );
 
-    MOCK_METHOD2(DeployAntennaOverride, OSResult(AntennaId antennaId, TimeSpan timeout));
+    MOCK_METHOD3(GetDeploymentStatus,
+        OSResult(I2CBus* communicationBus,
+                     AntennaChannel channel,
+                     AntennaDeploymentStatus* telemetry) //
+        );
 
-    MOCK_METHOD1(GetDeploymentStatus, OSResult(AntennaMiniportDeploymentStatus* telemetry));
+    MOCK_METHOD4(GetAntennaActivationCount,
+        OSResult(I2CBus* communicationBus,
+                     AntennaChannel channel,
+                     AntennaId antennaId,
+                     uint16_t* count) //
+        );
 
-    MOCK_METHOD2(GetAntennaActivationCount, OSResult(AntennaId antennaId, uint16_t* count));
+    MOCK_METHOD4(GetAntennaActivationTime,
+        OSResult(I2CBus* communicationBus,
+                     AntennaChannel channel,
+                     AntennaId antennaId,
+                     TimeSpan* span) //
+        );
 
-    MOCK_METHOD2(GetAntennaActivationTime, OSResult(AntennaId antennaId, TimeSpan* span));
-
-    MOCK_METHOD1(GetTemperature, OSResult(uint16_t* temperature));
+    MOCK_METHOD3(GetTemperature,
+        OSResult(I2CBus* communicationBus,
+                     AntennaChannel channel,
+                     uint16_t* temperature) //
+        );
 };
 
 #endif

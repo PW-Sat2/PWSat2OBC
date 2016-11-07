@@ -9,6 +9,7 @@ set(SOURCES
     commands/file_system.c
     commands/state_command.c
     commands/i2c_test_command.c
+    commands/antenna.c
     obc.h
     fault_handlers.c
     mission.c
