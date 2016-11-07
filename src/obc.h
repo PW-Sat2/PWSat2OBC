@@ -62,11 +62,8 @@ struct OBC
     /** @brief I2C Fallback bus */
     I2CFallbackBus I2CFallback;
 
-    /** @brief Low level driver for primary antenna controller. */
-    AntennaMiniportDriver antennaPrimaryMiniport;
-
-    /** @brief Low level driver for backup antenna controller. */
-    AntennaMiniportDriver antennaBackupMiniport;
+    /** @brief Low level driver for antenna controller. */
+    AntennaMiniportDriver antennaMiniport;
 
     /** @brief High level driver for antenna subsystem. */
     AntennaDriver antennaDriver;
