@@ -9,81 +9,132 @@ static void SendResult(OSResult result)
     TerminalPrintf(&Main.terminal, "%d", result);
 }
 
-void AntennaChangeDeploymentSystemState(uint16_t argc, char* argv[])
+static bool GetChannel(const char* name, AntennaChannel* channel)
 {
-    LOGF(LOG_LEVEL_INFO, "Received arm antenna command with %d arguments. ", (int)argc);
-
-    if (argc != 1)
+    if (strcmp(name, "primary") == 0)
     {
-        TerminalPuts(&Main.terminal, "antenna [arm|disarm]\n");
-        return;
+        *channel = ANTENNA_PRIMARY_CHANNEL;
+    }
+    else if (strcmp(name, "backup") == 0)
+    {
+        *channel = ANTENNA_BACKUP_CHANNEL;
+    }
+    else
+    {
+        return false;
     }
 
-    OSResult result = OSResultDeviceNotFound;
-    if (strcmp(argv[0], "arm") == 0)
+    return true;
+}
+
+static bool GetAntenna(const char* name, AntennaId* antenna)
+{
+    if (strcmp(name, "auto") == 0)
     {
-        result = Main.antennaMiniport.ArmDeploymentSystem(&Main.antennaMiniport, (I2CBus*)&Main.I2CFallback, ANTENNA_PRIMARY_CHANNEL);
+        *antenna = ANTENNA_AUTO_ID;
     }
-    else if (strcmp(argv[0], "disarm") == 0)
+    else if (strcmp(name, "1") == 0)
     {
-        result = Main.antennaMiniport.DisarmDeploymentSystem(&Main.antennaMiniport, (I2CBus*)&Main.I2CFallback, ANTENNA_PRIMARY_CHANNEL);
+        *antenna = ANTENNA1_ID;
+    }
+    else if (strcmp(name, "2") == 0)
+    {
+        *antenna = ANTENNA2_ID;
+    }
+    else if (strcmp(name, "3") == 0)
+    {
+        *antenna = ANTENNA3_ID;
+    }
+    else if (strcmp(name, "4") == 0)
+    {
+        *antenna = ANTENNA4_ID;
+    }
+    else
+    {
+        return false;
     }
 
-    LOGF(LOG_LEVEL_INFO, "Finished arm antenna command with %d arguments status: '%d'. ", (int)argc, result);
+    return true;
+}
+
+static inline int ToInt(bool value)
+{
+    return value ? 1 : 0;
 }
 
 void AntennaDeploy(uint16_t argc, char* argv[])
 {
-    if (argc < 1)
+    AntennaChannel channel;
+    AntennaId antenna;
+    if (                                  //
+        (argc != 2 && argc != 3) ||       //
+        !GetChannel(argv[1], &channel) || //
+        !GetAntenna(argv[1], &antenna)    //
+        )
     {
-        TerminalPuts(&Main.terminal, "antenna_deploy [auto|1|2|3|4] [override]\n");
+        TerminalPuts(&Main.terminal, "antenna_deploy [primary|backup] [auto|1|2|3|4] [override]\n");
         return;
     }
 
-    if (strcmp(argv[0], "auto") == 0)
-    {
-        const OSResult result = Main.antennaDriver.DeployAntenna(&Main.antennaDriver,
-            ANTENNA_PRIMARY_CHANNEL,
-            AUTO_ID,
-            TimeSpanFromSeconds(10),
-            false //
-            );
-        SendResult(result);
-        return;
-    }
-
-    AntennaId antenna = ANTENNA1_ID;
-    const bool override = (argc > 1) && (strcmp(argv[1], "override") == 0);
-    if (strcmp(argv[0], "1") == 0)
-    {
-        antenna = ANTENNA1_ID;
-    }
-    else if (strcmp(argv[0], "2") == 0)
-    {
-        antenna = ANTENNA2_ID;
-    }
-    else if (strcmp(argv[0], "3") == 0)
-    {
-        antenna = ANTENNA3_ID;
-    }
-    else if (strcmp(argv[0], "4") == 0)
-    {
-        antenna = ANTENNA4_ID;
-    }
-
+    const bool override = (argc > 2) && (strcmp(argv[2], "override") == 0);
     const OSResult result = Main.antennaDriver.DeployAntenna(&Main.antennaDriver,
-        ANTENNA_PRIMARY_CHANNEL,
+        channel,
         antenna,
         TimeSpanFromSeconds(10),
         override //
         );
-
     SendResult(result);
+    return;
 }
 
 void AntennaCancelDeployment(uint16_t argc, char* argv[])
 {
-    UNREFERENCED_PARAMETER(argc);
-    UNREFERENCED_PARAMETER(argv);
-    Main.antennaDriver.FinishDeployment(&Main.antennaDriver, ANTENNA_PRIMARY_CHANNEL);
+    AntennaChannel channel;
+    if (                               //
+        argc < 1 ||                    //
+        !GetChannel(argv[1], &channel) //
+        )
+    {
+        TerminalPuts(&Main.terminal, "antenna_cancel [primary|backup]\n");
+        return;
+    }
+
+    Main.antennaDriver.FinishDeployment(&Main.antennaDriver, channel);
+}
+
+void AntennaGetDeploymentStatus(uint16_t argc, char* argv[])
+{
+    AntennaChannel channel;
+    if (                               //
+        argc < 1 ||                    //
+        !GetChannel(argv[1], &channel) //
+        )
+    {
+        TerminalPuts(&Main.terminal, "antenna_get_status [primary|backup]\n");
+        return;
+    }
+
+    AntennaDeploymentStatus deploymentStatus;
+    const OSResult status = Main.antennaDriver.GetDeploymentStatus(&Main.antennaDriver, channel, &deploymentStatus);
+    if (OS_RESULT_FAILED(status))
+    {
+        SendResult(status);
+    }
+    else
+    {
+        TerminalPrintf(&Main.terminal,
+            "%d %d %d %d %d %d %d %d %d %d\n",
+            status,
+            ToInt(deploymentStatus.DeploymentStatus[0]),        //
+            ToInt(deploymentStatus.DeploymentStatus[1]),        //
+            ToInt(deploymentStatus.DeploymentStatus[2]),        //
+            ToInt(deploymentStatus.DeploymentStatus[3]),        //
+            ToInt(deploymentStatus.IsDeploymentActive[0]),      //
+            ToInt(deploymentStatus.IsDeploymentActive[1]),      //
+            ToInt(deploymentStatus.IsDeploymentActive[2]),      //
+            ToInt(deploymentStatus.IsDeploymentActive[3]),      //
+            ToInt(deploymentStatus.IgnoringDeploymentSwitches), //
+            ToInt(deploymentStatus.DeploymentSystemArmed)       //
+            );
+    }
 }
