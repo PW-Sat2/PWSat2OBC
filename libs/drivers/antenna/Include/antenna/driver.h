@@ -158,17 +158,45 @@ typedef struct
     AntenaPortStatus status;
 } AntennaChannelInfo;
 
+/**
+ * @brief Structure containing status of antenna deployment process query.
+ */
 typedef struct
 {
+    /** Antenna deployment process query status. */
     OSResult status;
+
+    /**
+     * @brief Antenna Deployment process state.
+     *
+     * True when it is in progress, false otherwise.
+     */
     bool delpoymentInProgress;
 } AntennaDeploymentProcessStatus;
 
+/**
+ * @brief This is high level antenna driver responsible for coordinating
+ * communication with the underlying hardware controllers responsible for
+ * antenna deployment.
+ *
+ * This driver keeps minimal state about the controlled hardware and mainly for
+ * informational purposes.
+ *
+ * For the moment it is designed to expose to the user existence of multiple
+ * hardware controllers. It is up to the user to design (and use) any fallback
+ * mechanisms that will try to use subsequent hardware channels in case of
+ * error encountered on primary channle.
+ */
 typedef struct AntennaDriver
 {
+    /**
+     * @brief Pointer to communication bus interface.
+     */
     I2CBus* communicationBus;
 
-    /** Driver instance that manages this specific channel. */
+    /**
+     * @brief Driver instance that coordinates communication with hardware.
+     */
     AntennaMiniportDriver* miniport;
 
     /**
@@ -182,41 +210,71 @@ typedef struct AntennaDriver
     AntennaChannelInfo secondaryChannel;
 
     /**
-     * @brief Pointer to procedure responsible for resetting the underlying hardware.
+     * @brief Pointer to procedure responsible for resetting the underlying hardware controller.
      * @param[in] driver Current driver instance.
+     * @param[in] channel Identifier of channel that should be reset.
      * @return Operation status.
-     * This procedure will report success of at least one channel responds with status success.
      */
     OSResult (*Reset)(struct AntennaDriver* driver, AntennaChannel channel);
 
+    /**
+     * @brief This procedure is responsible for resetting entire hardware managed
+     * by this driver.
+     *
+     * @param[in] driver Current driver instance.
+     * This procedure will report success of at least one channel responds with status success.
+     * @return Operation status.
+     */
     OSResult (*HardReset)(struct AntennaDriver* driver);
 
     /**
-     * @brief Pointer to procedure responsible for deactivating the underlying hardware.
+     * @brief Pointer to procedure responsible for deactivating the underlying hardware channel.
      * @param[in] driver Current driver instance.
+     * @param[in] channel Identifier of channel that should be deactivated.
      * @return Operation status.
-     * This procedure will report success of at least one channel responds with status success.
+     * This procedure will automatically cancel any antenna deployment currently in progress and
+     * disarm deployment system.
      */
     OSResult (*FinishDeployment)(struct AntennaDriver* driver, AntennaChannel channel);
 
     /**
-     * @brief Pointer to procedure responsible for initiation of the manual antenna deployment.
+     * @brief Pointer to procedure responsible for initiation of the either manual or automatic antenna deployment.
      * @param[in] driver Current driver instance.
+     * @param[in] channel Hardware channel that should be used for antenna deployment.
      * @param[in] antennaId Identifier of the antenna that should be deployed.
      * @param[in] timeout Deployment operation timeout.
+     * @param[in] overrideSwitches Flag indicating whether the antenna deployment switches should be
+     * ignored during the process (true), false otherwise.
      * @return Operation status.
-     * This procedure will report success of at least one channel responds with status success.
      */
-    OSResult (*DeployAntenna)(
-        struct AntennaDriver* driver, AntennaChannel channel, AntennaId antennaId, TimeSpan timeout, bool overrideSwitches);
+    OSResult (*DeployAntenna)(struct AntennaDriver* driver,
+        AntennaChannel channel,
+        AntennaId antennaId,
+        TimeSpan timeout,
+        bool overrideSwitches //
+        );
 
-    AntennaDeploymentProcessStatus (*IsDeploymentActive)(struct AntennaDriver* driver, AntennaChannel channe);
+    /**
+     * @brief This procedure checks whether there is currently antenna deployment process in progress.
+     * @param[in] driver Current driver instance.
+     * @param[in] channel Queried hardware channel.
+     * @return Operation status.
+     */
+    AntennaDeploymentProcessStatus (*IsDeploymentActive)(struct AntennaDriver* driver, AntennaChannel channel);
 
+    /**
+     * @brief This procedure returns current global antenna deployment status as seen by the queried hardware channel.
+     * @param[in] driver Current driver instance.
+     * @param[in] channel Queried hardware channel.
+     * @param[out] telemetry On success this value will be filled with current deployment status.
+     * @return Operation status.
+     */
     OSResult (*GetDeploymentStatus)(struct AntennaDriver* driver, AntennaChannel channel, AntennaDeploymentStatus* telemetry);
 
     /**
      * @brief Pointer to the procedure that queries hardware for current temperature.
      * @param[in] driver Current driver instance.
+     * @param[in] channel Queried hardware channel.
      * @param[out] temperature Pointer to variable that on success will be filled with currently
      * measured temperature.
      * @return Operation status.
@@ -242,8 +300,9 @@ typedef struct AntennaDriver
  * This procedure does not initiate any hardware communication, its whole purpose is to
  * initialize driver object with its default state.
  * @param[out] driver Driver object that should be initialized.
- * @param[in] primary Pointer to the low level driver responsible for managing primary hardware controller.
- * @param[in] secondary Pointer to the low level driver responsible for managing backup hardware controller.
+ * @param[in] miniport Pointer to the low level driver responsible for managing hardware controller communication.
+ * @param[in] communicationBus Pointer to the low level driver responsible providing means to exchange
+ * the data with underlying hardware.
  */
 void AntennaDriverInitialize(AntennaDriver* driver,
     AntennaMiniportDriver* miniport,

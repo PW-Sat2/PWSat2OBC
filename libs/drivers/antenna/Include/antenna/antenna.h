@@ -23,7 +23,8 @@ EXTERNC_BEGIN
  * @brief Antenna unique identifiers.
  */
 typedef enum {
-    AUTO_ID = 0x0,
+    /** Pseudo identifier used for deployment indicating hardware automated process. */
+    ANTENNA_AUTO_ID = 0x0,
     ANTENNA1_ID = 0x1,
     ANTENNA2_ID = 0x2,
     ANTENNA3_ID = 0x3,

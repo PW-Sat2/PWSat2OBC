@@ -24,12 +24,19 @@ EXTERNC_BEGIN
 
 /**
  * @brief Low level antenna driver context structure.
+ *
+ * This low level driver is responsible for building/parsing frames exchanges with
+ * hardware. By itself is driver is completely stateless and can be used to manage
+ * multiple hardware channels at the same time (event concurrently). It is the caller
+ * responsibility to keep the driver state in the dedicated structures (if necessary).
  */
 typedef struct AntennaMiniportDriver
 {
     /**
      * @brief Pointer to procedure responsible for resetting the hardware controller.
-     * @param[in] driver Pointer to the current driver instance.
+     * @param[in] miniport Pointer to the current driver instance.
+     * @param[in] communicationBus Bus that should be used to communicate with hardware.
+     * @param[in] channel Current hardware channel.
      * @return Operation status.
      */
     OSResult (*Reset)(struct AntennaMiniportDriver* miniport,
@@ -39,7 +46,9 @@ typedef struct AntennaMiniportDriver
 
     /**
      * @brief Pointer to procedure responsible for activating the antenna deployment module.
-     * @param[in] driver Pointer to the current driver instance.
+     * @param[in] miniport Pointer to the current driver instance.
+     * @param[in] communicationBus Bus that should be used to communicate with hardware.
+     * @param[in] channel Current hardware channel.
      * @return Operation status.
      */
     OSResult (*ArmDeploymentSystem)(struct AntennaMiniportDriver* miniport,
@@ -49,7 +58,9 @@ typedef struct AntennaMiniportDriver
 
     /**
      * @brief Pointer to procedure responsible for deactivating the antenna deployment module.
-     * @param[in] driver Pointer to the current driver instance.
+     * @param[in] miniport Pointer to the current driver instance.
+     * @param[in] communicationBus Bus that should be used to communicate with hardware.
+     * @param[in] channel Current hardware channel.
      * @return Operation status.
      */
     OSResult (*DisarmDeploymentSystem)(struct AntennaMiniportDriver* miniport,
@@ -59,9 +70,13 @@ typedef struct AntennaMiniportDriver
 
     /**
      * @brief Pointer to procedure responsible for initialization of manual deployment of specified antenna.
-     * @param[in] driver Pointer to the current driver instance.
+     * @param[in] miniport Pointer to the current driver instance.
+     * @param[in] communicationBus Bus that should be used to communicate with hardware.
+     * @param[in] channel Current hardware channel.
      * @param[in] antennaId Identifier of antenna that should be deployed.
      * @param[in] timeout Deployment operation timeout.
+     * @param[in] override Flag indicating whether the antenna deployment switches should be
+     * ignored during the process (true), false otherwise.
      * @return Operation status.
      */
     OSResult (*DeployAntenna)(struct AntennaMiniportDriver* miniport,
@@ -69,11 +84,14 @@ typedef struct AntennaMiniportDriver
         AntennaChannel channel,
         AntennaId antennaId,
         TimeSpan timeout,
-        bool override);
+        bool override //
+        );
 
     /**
      * @brief Pointer to procedure responsible for initialization of automatic deployment of all antennas.
-     * @param[in] driver Pointer to the current driver instance.
+     * @param[in] miniport Pointer to the current driver instance.
+     * @param[in] communicationBus Bus that should be used to communicate with hardware.
+     * @param[in] channel Current hardware channel.
      * @return Operation status.
      */
     OSResult (*InitializeAutomaticDeployment)(struct AntennaMiniportDriver* miniport,
@@ -84,6 +102,8 @@ typedef struct AntennaMiniportDriver
     /**
      * @brief Pointer to procedure responsible for cancellation of all antenna deployment.
      * @param[in] driver Pointer to the current driver instance.
+     * @param[in] communicationBus Bus that should be used to communicate with hardware.
+     * @param[in] channel Current hardware channel.
      * @return Operation status.
      */
     OSResult (*CancelAntennaDeployment)(struct AntennaMiniportDriver* miniport,
@@ -93,7 +113,9 @@ typedef struct AntennaMiniportDriver
 
     /**
      * @brief Pointer to procedure responsible for querying the hardware for current antenna deployment status.
-     * @param[in] driver Pointer to the current driver instance.
+     * @param[in] miniport Pointer to the current driver instance.
+     * @param[in] communicationBus Bus that should be used to communicate with hardware.
+     * @param[in] channel Current hardware channel.
      * @param[out] telemetry Pointer to object that on success will be filled with antenna deployment status.
      * @return Operation status.
      */
@@ -109,7 +131,9 @@ typedef struct AntennaMiniportDriver
      *
      * The value returned by this function comes from non persistent counter of antenna deployment requests.
      *
-     * @param[in] driver Pointer to the current driver instance.
+     * @param[in] miniport Pointer to the current driver instance.
+     * @param[in] communicationBus Bus that should be used to communicate with hardware.
+     * @param[in] channel Current hardware channel.
      * @param[in] antennaId Identifier of antenna whose activation count should be obtained.
      * @param[out] count Pointer to value that on success should be updated with antenna deployment count.
      * @return Operation status.
@@ -127,7 +151,9 @@ typedef struct AntennaMiniportDriver
      *
      * The value returned by this function comes from non persistent counter of antenna deployment time.
      *
-     * @param[in] driver Pointer to the current driver instance.
+     * @param[in] miniport Pointer to the current driver instance.
+     * @param[in] communicationBus Bus that should be used to communicate with hardware.
+     * @param[in] channel Current hardware channel.
      * @param[in] antennaId Identifier of antenna whose activation count should be obtained.
      * @param[out] count Pointer to value that on success should be updated with antenna deployment count.
      * @return Operation status.
@@ -142,7 +168,9 @@ typedef struct AntennaMiniportDriver
     /**
      * @brief Pointer to procedure that is responsible for querying the hardware for its current temperature.
      *
-     * @param[in] driver Pointer to the current driver instance.
+     * @param[in] miniport Pointer to the current driver instance.
+     * @param[in] communicationBus Bus that should be used to communicate with hardware.
+     * @param[in] channel Current hardware channel.
      * @param[out] temperature Pointer to value that on success should be updated with current temperature.
      * @return Operation status.
      */
@@ -160,8 +188,6 @@ typedef struct AntennaMiniportDriver
  * with basic default state.
  *
  * @param[out] driver Driver object that should be initialized.
- * @param[in] currentChannel Current hardware channel.
- * @param[in] dedicatedBus Bus that should be used to communicate with hardware.
  */
 void AntennaMiniportInitialize(AntennaMiniportDriver* driver);
 

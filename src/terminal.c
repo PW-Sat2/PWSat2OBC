@@ -10,7 +10,6 @@ typedef struct
     commandHandler handler;
 } command;
 
-
 static const TerminalCommandDescription commands[] = {
     {"ping", PingHandler},
     {"echo", EchoHandler},
@@ -26,9 +25,9 @@ static const TerminalCommandDescription commands[] = {
     {"readFile", FSReadFile},
     {"stateCmd", CommandByTerminal},
     {"i2c", I2CTestCommandHandler},
-    {"antenna", AntennaChangeDeploymentSystemState},
     {"antenna_deploy", AntennaDeploy},
     {"antenna_cancel", AntennaCancelDeployment},
+    {"antenna_get_status", AntennaGetDeploymentStatus},
 };
 
 void InitializeTerminal(void)

@@ -4,6 +4,18 @@
 #include "driver.h"
 #include "miniport.h"
 
+/**
+ * @brief Returns pointer to the structure that contains status of the requested
+ * hardware channel.
+ *
+ * If the hardware channel is not found this procedure will return pointer to
+ * structure describing backup channel.
+ * @param[in] driver Current driver instance.
+ * @param[in] channel Queried hardware channel to be reset.
+ * @return Pointer to the structure that contains status of the requested
+ * hardware channel.
+ * @ingroup AntennaDriver
+ */
 static AntennaChannelInfo* GetChannel(struct AntennaDriver* driver, AntennaChannel channel)
 {
     if (channel == ANTENNA_PRIMARY_CHANNEL)
@@ -16,14 +28,6 @@ static AntennaChannelInfo* GetChannel(struct AntennaDriver* driver, AntennaChann
     }
 }
 
-/**
- * @brief Resets specific hardware channel.
- *
- * If the specific channel cannot be reset it will be marked as inoperational
- * and disabled.
- * @param[in] channel Hardware channel to be reset.
- * @ingroup AntennaDriver
- */
 static OSResult Reset(struct AntennaDriver* driver, AntennaChannel channel)
 {
     AntennaChannelInfo* channelInfo = GetChannel(driver, channel);
@@ -67,7 +71,7 @@ static OSResult DeployAntenna(struct AntennaDriver* driver,
         return status;
     }
 
-    if (antennaId == AUTO_ID)
+    if (antennaId == ANTENNA_AUTO_ID)
     {
         return driver->miniport->InitializeAutomaticDeployment(driver->miniport,
             driver->communicationBus,
