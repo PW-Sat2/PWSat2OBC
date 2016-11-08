@@ -68,7 +68,7 @@ void AntennaDeploy(uint16_t argc, char* argv[])
     AntennaId antenna;
     if (                                  //
         (argc != 2 && argc != 3) ||       //
-        !GetChannel(argv[1], &channel) || //
+        !GetChannel(argv[0], &channel) || //
         !GetAntenna(argv[1], &antenna)    //
         )
     {
