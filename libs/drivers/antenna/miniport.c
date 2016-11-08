@@ -34,7 +34,8 @@ static inline OSResult MapStatus(bool status)
 
 /**
  * @brief Sends requested command via the passed miniport driver.
- * @param[in] driver Driver object that should be used to send the requested command.
+ * @param[in] bus Bus that should be used to communicate with hardware.
+ * @param[in] channel Current hardware channel.
  * @param[in] command Command to be sent.
  * @return Operation status. True on success, false otherwise.
  * @ingroup AntennaMiniport
@@ -54,7 +55,8 @@ static bool SendCommand(I2CBus* bus, AntennaChannel channel, Command command)
 
 /**
  * @brief Sends requested command via the passed miniport driver and reads hardware response
- * @param[in] driver Driver object that should be used to send the requested command.
+ * @param[in] bus Bus that should be used to communicate with hardware.
+ * @param[in] channel Current hardware channel.
  * @param[in] command Command to be sent.
  * @param[out] outBuffer Buffer that should be filled with response from hardware.
  * @param[in] outBufferSize Size in bytes of the outBuffer buffer.
