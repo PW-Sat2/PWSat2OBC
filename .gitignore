@@ -13,3 +13,10 @@ libs/googletest/gtest
 integration_tests/.idea
 
 *.pyc
+
+# IPython profile
+integration_tests/ipython_profile/db
+integration_tests/ipython_profile/log
+integration_tests/ipython_profile/pid
+integration_tests/ipython_profile/security
+integration_tests/ipython_profile/history.sqlite

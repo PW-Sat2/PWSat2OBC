@@ -3,6 +3,7 @@ import logging
 from obc import OBC, SerialPortTerminal
 from devices import *
 from i2cMock import I2CMock
+from pins import Pins
 
 
 class System:
