@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <ostream>
 
+#include "gmock/gmock-generated-matchers.h"
+
 class Hex
 {
   public:
@@ -25,5 +27,10 @@ class Hex
 };
 
 void PrintTo(const Hex& num, ::std::ostream* os);
+
+MATCHER_P(DataEqStr, n, "")
+{
+    return strcmp((const char*)arg, n) == 0;
+}
 
 #endif /* UNIT_TESTS_UTILS_HPP_ */

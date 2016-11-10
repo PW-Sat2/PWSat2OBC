@@ -2,6 +2,8 @@
 #define OBC_H
 
 #include <atomic>
+#include <cstdint>
+#include <gsl/span>
 
 #include "adcs/adcs.h"
 #include "base/os.h"
@@ -16,10 +18,30 @@
 #include "time/timer.h"
 #include "yaffs_guts.h"
 
-class DummyFrameHandler final : public devices::comm::IHandleFrame
+class TelecommandFrameUnpacker final : public IDecryptFrame, public IDecodeTelecommand
 {
   public:
-    virtual void HandleFrame(devices::comm::CommObject& comm, devices::comm::CommFrame& frame) override;
+    virtual std::size_t Decrypt(gsl::span<const std::uint8_t> frame, gsl::span<std::uint8_t> decrypted) override;
+    virtual void Decode(gsl::span<const std::uint8_t> frame, std::uint8_t& commandCode, gsl::span<const std::uint8_t>& parameters) override;
+};
+
+class PingTelecommand final : public IHandleTeleCommand
+{
+  public:
+    PingTelecommand(devices::comm::CommObject& comm);
+
+    virtual void Handle(gsl::span<const std::uint8_t> parameters) override;
+    virtual std::uint8_t CommandCode() const override;
+
+  private:
+    devices::comm::CommObject& _comm;
+};
+
+struct TelecommandsObject
+{
+    TelecommandsObject(devices::comm::CommObject& comm);
+
+    PingTelecommand Ping;
 };
 
 /**
@@ -69,6 +91,12 @@ struct OBC
 
     /** @brief Power control interface */
     PowerControl PowerControlInterface;
+
+    TelecommandFrameUnpacker FrameUnpacker;
+
+    TelecommandsObject Telecommands;
+
+    IHandleTeleCommand* AllTelecommands[1];
 
     /** @brief Incoming frame handler */
     IncomingTelecommandHandler FrameHandler;
