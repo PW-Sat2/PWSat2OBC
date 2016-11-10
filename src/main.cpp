@@ -183,15 +183,6 @@ static void ObcInitTask(void* param)
     System.SuspendTask(NULL);
 }
 
-void DummyFrameHandler::HandleFrame(CommObject& comm, CommFrame& frame)
-{
-    UNREFERENCED_PARAMETER(frame);
-
-    const char* response = "PONG";
-
-    comm.SendFrame(gsl::span<const uint8_t>(reinterpret_cast<const uint8_t*>(response), 4));
-}
-
 void ADXRS(void* param)
 {
     UNREFERENCED_PARAMETER(param);

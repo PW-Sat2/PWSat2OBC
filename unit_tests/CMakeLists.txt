@@ -14,6 +14,7 @@ set(SOURCES
   FileSystem/MemoryDriver.cpp
   FileSystem/EccTest.cpp
   Comm/CommTest.cpp
+  TeleCommandHandling/TeleCommandHandlingTest.cpp
   base/ReaderTest.cpp
   base/WriterTest.cpp
   MissionPlan/MissionPlanTest.cpp  
