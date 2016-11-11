@@ -75,7 +75,8 @@ static OSResult DeployAntenna(struct AntennaDriver* driver,
     {
         return driver->miniport->InitializeAutomaticDeployment(driver->miniport,
             driver->communicationBus,
-            channel //
+            channel,
+            timeout //
             );
     }
     else

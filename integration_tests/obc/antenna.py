@@ -57,3 +57,7 @@ def AntennaMixin(OBCMixin):
     @command("antenna deploy cancel")
     def antenna_cancel_deployment(self):
         pass
+
+    @command("antenna_get_status {0}")
+    def antenna_get_status(self, channel):
+        pass

@@ -133,11 +133,19 @@ static OSResult DeployAntenna(struct AntennaMiniportDriver* miniport,
 
 static OSResult InitializeAutomaticDeployment(struct AntennaMiniportDriver* miniport,
     I2CBus* communicationBus,
-    AntennaChannel channel //
+    AntennaChannel channel,
+    TimeSpan timeout //
     )
 {
     UNREFERENCED_PARAMETER(miniport);
-    return MapStatus(SendCommand(communicationBus, channel, START_AUTOMATIC_DEPLOYMENT));
+    uint8_t buffer[2];
+    buffer[0] = (uint8_t)(START_AUTOMATIC_DEPLOYMENT);
+    buffer[1] = (uint8_t)TimeSpanToSeconds(timeout);
+    return MapStatus(communicationBus->Write(communicationBus,
+                         channel,
+                         buffer,
+                         sizeof(buffer) //
+                         ) == I2CResultOK);
 }
 
 static OSResult CancelAntennaDeployment(struct AntennaMiniportDriver* miniport,
