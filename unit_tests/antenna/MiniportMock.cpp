@@ -41,11 +41,12 @@ static OSResult DeployAntenna(struct AntennaMiniportDriver* driver,
 
 static OSResult InitializeAutomaticDeployment(struct AntennaMiniportDriver* driver,
     I2CBus* /*communicationBus*/,
-    AntennaChannel channel //
+    AntennaChannel channel,
+    TimeSpan timeout //
     )
 {
     auto mock = static_cast<AntennaMiniportMock*>(driver);
-    return mock->InitializeAutomaticDeployment(channel);
+    return mock->InitializeAutomaticDeployment(channel, timeout);
 }
 
 static OSResult CancelAntennaDeployment(struct AntennaMiniportDriver* driver,
