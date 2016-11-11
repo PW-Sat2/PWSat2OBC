@@ -138,7 +138,7 @@ struct I2CInterface final
 {
     I2CInterface(I2CBus* system, I2CBus* payload);
     /** @brief Reference to System I2C bus */
-    I2CBus* System;
+    I2CBus* Bus;
     /** @brief Reference to Payload I2C bus */
     I2CBus* Payload;
 };
