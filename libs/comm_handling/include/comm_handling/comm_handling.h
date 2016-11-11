@@ -6,9 +6,16 @@
 #include "comm/comm.h"
 #include "system.h"
 
+enum class TeleCommandDecryptStatus
+{
+    OK = 0,
+    Failed = 1
+};
+
 struct IDecryptFrame
 {
-    virtual std::size_t Decrypt(gsl::span<const uint8_t> frame, gsl::span<uint8_t> decrypted) = 0;
+    virtual TeleCommandDecryptStatus Decrypt(
+        gsl::span<const uint8_t> frame, gsl::span<uint8_t> decrypted, std::size_t& decryptedDataLength) = 0;
 };
 
 struct IDecodeTelecommand

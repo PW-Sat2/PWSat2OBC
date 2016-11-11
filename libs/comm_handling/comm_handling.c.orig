@@ -1,0 +1,86 @@
+#include <stdalign.h>
+#include <stdint.h>
+#include <em_aes.h>
+
+#include "comm_handling.h"
+#include "logger/logger.h"
+#include "platform.h"
+
+static void DispatchCommandHandler(TeleCommandHandling* self, uint8_t code, const uint8_t* parameters, size_t parametersLength)
+{
+    if (self->Handlers == NULL || self->TeleCommandCount == 0)
+    {
+        return;
+    }
+
+    TeleCommand* command = NULL;
+
+    for (size_t i = 0; i < self->TeleCommandCount; i++)
+    {
+        if (self->Handlers[i].Code != code)
+        {
+            continue;
+        }
+
+        command = &self->Handlers[i];
+    }
+
+    if (command == NULL)
+    {
+        return;
+    }
+
+    command->Handler(parameters, parametersLength, command->HandlerContext);
+}
+
+static void HandleIncomingFrame(CommObject* comm, CommFrame* frame, void* context)
+{
+    UNREFERENCED_PARAMETER(comm);
+
+    TeleCommandHandling* self = (TeleCommandHandling*)context;
+
+    uint8_t decryptedFrame[300] = {0}; // TODO: to constant
+
+    size_t decryptedDetaLength = 0;
+    const TeleCommandDecryptStatus decryptStatus =
+        self->Decrypt(frame->Contents, frame->Size, decryptedFrame, COUNT_OF(decryptedFrame), &decryptedDetaLength, self->DecryptContext);
+
+    if (decryptStatus != TeleCommandDecryptOK)
+    {
+        return;
+    }
+
+    uint8_t commandCode;
+    const uint8_t* commandParameters;
+    size_t commandParametersLength;
+
+    self->DecodeFrame(
+        decryptedFrame, decryptedDetaLength, &commandCode, &commandParameters, &commandParametersLength, self->DecodeFrameContext);
+
+    DispatchCommandHandler(self, commandCode, commandParameters, commandParametersLength);
+}
+
+bool CommHandlerInitialize(TeleCommandHandling* upperInterface,
+    TeleCommandDecrypt decrypt,
+    void* decryptContext,
+    TeleCommandDecodeFrame decodeFrame,
+    void* decodeFrameContext)
+{
+    upperInterface->Base.FrameHandler = HandleIncomingFrame;
+    upperInterface->Base.FrameHandlerContext = upperInterface;
+    upperInterface->Decrypt = decrypt;
+    upperInterface->DecryptContext = decryptContext;
+    upperInterface->DecodeFrame = decodeFrame;
+    upperInterface->DecodeFrameContext = decodeFrameContext;
+    upperInterface->Handlers = NULL;
+    upperInterface->TeleCommandCount = 0;
+
+    return true;
+}
+
+void CommHandlerSetTeleCommands(TeleCommandHandling* handling, TeleCommand* handlers, size_t handlersCount)
+{
+    handling->Handlers = handlers;
+    handling->TeleCommandCount = handlersCount;
+}
+

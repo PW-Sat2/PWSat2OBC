@@ -24,7 +24,14 @@ void IncomingTelecommandHandler::HandleFrame(CommFrame& frame)
 {
     uint8_t decryptedFrame[300] = {0}; // TODO: to constant
 
-    size_t decryptedDetaLength = this->_decryptFrame.Decrypt(span<const uint8_t>(frame.Contents), span<uint8_t>(decryptedFrame));
+    size_t decryptedDetaLength;
+    auto decryptStatus =
+        this->_decryptFrame.Decrypt(span<const uint8_t>(frame.Contents), span<uint8_t>(decryptedFrame), decryptedDetaLength);
+
+    if (decryptStatus != TeleCommandDecryptStatus::OK)
+    {
+        return;
+    }
 
     uint8_t commandCode;
     span<const uint8_t> parameters;
