@@ -23,7 +23,8 @@ struct TeleCommandDepsMock : public IDecryptFrame, public IDecodeTelecommand
 {
     MOCK_METHOD3(Decode, void(gsl::span<const std::uint8_t> frame, std::uint8_t& commandCode, gsl::span<const std::uint8_t>& parameters));
 
-    MOCK_METHOD2(Decrypt, size_t(gsl::span<const uint8_t> frame, gsl::span<uint8_t> decrypted));
+    MOCK_METHOD3(
+        Decrypt, TeleCommandDecryptStatus(gsl::span<const uint8_t> frame, gsl::span<uint8_t> decrypted, size_t& decryptedDataLength));
 };
 
 struct TeleCommandHandlerMock : public IHandleTeleCommand
@@ -51,7 +52,7 @@ TEST_F(TeleCommandHandlingTest, IncomingFrameShouldBeDecryptedAndDecoded)
     CommFrame frame;
     frame.Size = 40;
 
-    EXPECT_CALL(this->deps, Decrypt(_, _)).WillOnce(Return(40));
+    EXPECT_CALL(this->deps, Decrypt(_, _, _)).WillOnce(Return(TeleCommandDecryptStatus::OK));
     EXPECT_CALL(this->deps, Decode(_, _, _));
 
     this->handling.HandleFrame(frame);
@@ -65,11 +66,13 @@ TEST_F(TeleCommandHandlingTest, HandlerShouldBeCalledForKnownTelecommand)
     frame.Size = 50;
     strcpy((char*)frame.Contents, contents);
 
-    EXPECT_CALL(this->deps, Decrypt(_, _))
-        .WillOnce(Invoke([](gsl::span<const uint8_t> frame, gsl::span<uint8_t> decrypted) {
+    EXPECT_CALL(this->deps, Decrypt(_, _, _))
+        .WillOnce(Invoke([](gsl::span<const uint8_t> frame, gsl::span<uint8_t> decrypted, size_t& decryptedDataLength) {
             auto lastCopied = std::copy(frame.cbegin(), frame.cend(), decrypted.begin());
 
-            return lastCopied - decrypted.begin();
+            decryptedDataLength = lastCopied - decrypted.begin();
+
+            return TeleCommandDecryptStatus::OK;
         }));
     EXPECT_CALL(this->deps, Decode(_, _, _))
         .WillOnce(Invoke([](gsl::span<const std::uint8_t> frame, std::uint8_t& commandCode, gsl::span<const std::uint8_t>& parameters) {
@@ -86,4 +89,15 @@ TEST_F(TeleCommandHandlingTest, HandlerShouldBeCalledForKnownTelecommand)
     IncomingTelecommandHandler handler(deps, deps, commands, 1);
 
     handler.HandleFrame(frame);
+}
+
+TEST_F(TeleCommandHandlingTest, WhenDecryptionFailsShouldNotAttemptFrameDecoding)
+{
+    EXPECT_CALL(this->deps, Decrypt(_, _, _)).WillOnce(Return(TeleCommandDecryptStatus::Failed));
+
+    EXPECT_CALL(this->deps, Decode(_, _, _)).Times(0);
+
+    CommFrame frame;
+
+    this->handling.HandleFrame(frame);
 }
