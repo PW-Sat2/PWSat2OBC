@@ -92,7 +92,7 @@ void AntennaCancelDeployment(uint16_t argc, char* argv[])
     AntennaChannel channel;
     if (                               //
         argc < 1 ||                    //
-        !GetChannel(argv[1], &channel) //
+        !GetChannel(argv[0], &channel) //
         )
     {
         TerminalPuts(&Main.terminal, "antenna_cancel [primary|backup]\n");
@@ -107,7 +107,7 @@ void AntennaGetDeploymentStatus(uint16_t argc, char* argv[])
     AntennaChannel channel;
     if (                               //
         argc < 1 ||                    //
-        !GetChannel(argv[1], &channel) //
+        !GetChannel(argv[0], &channel) //
         )
     {
         TerminalPuts(&Main.terminal, "antenna_get_status [primary|backup]\n");
