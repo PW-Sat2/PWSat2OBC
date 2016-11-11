@@ -123,7 +123,7 @@ void AntennaGetDeploymentStatus(uint16_t argc, char* argv[])
     else
     {
         TerminalPrintf(&Main.terminal,
-            "%d %d %d %d %d %d %d %d %d %d\n",
+            "%d %d %d %d %d %d %d %d %d %d %d\n",
             status,
             ToInt(deploymentStatus.DeploymentStatus[0]),        //
             ToInt(deploymentStatus.DeploymentStatus[1]),        //
