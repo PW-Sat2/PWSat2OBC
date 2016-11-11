@@ -16,7 +16,7 @@ struct AntennaMiniportMock : AntennaMiniportDriver
 
     MOCK_METHOD1(DisarmDeploymentSystem, OSResult(AntennaChannel channel));
 
-    MOCK_METHOD1(InitializeAutomaticDeployment, OSResult(AntennaChannel channel));
+    MOCK_METHOD2(InitializeAutomaticDeployment, OSResult(AntennaChannel channel, TimeSpan timeout));
 
     MOCK_METHOD1(CancelAntennaDeployment, OSResult(AntennaChannel channel));
 

@@ -189,7 +189,7 @@ TEST_F(AntennaDriverTest, TestDeployAntennaArmingFailure)
 TEST_F(AntennaDriverTest, TestAutomaticDeploymentSuccess)
 {
     ON_CALL(primary, ArmDeploymentSystem(_)).WillByDefault(Return(OSResultSuccess));
-    EXPECT_CALL(primary, InitializeAutomaticDeployment(ANTENNA_BACKUP_CHANNEL)).WillOnce(Return(OSResultSuccess));
+    EXPECT_CALL(primary, InitializeAutomaticDeployment(ANTENNA_BACKUP_CHANNEL, _)).WillOnce(Return(OSResultSuccess));
     const auto status = driver.DeployAntenna(&driver, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, TimeSpanFromSeconds(20), false);
     ASSERT_THAT(status, Eq(OSResultSuccess));
 }
@@ -197,7 +197,7 @@ TEST_F(AntennaDriverTest, TestAutomaticDeploymentSuccess)
 TEST_F(AntennaDriverTest, TestAutomaticDeploymentFailure)
 {
     ON_CALL(primary, ArmDeploymentSystem(_)).WillByDefault(Return(OSResultSuccess));
-    EXPECT_CALL(primary, InitializeAutomaticDeployment(ANTENNA_BACKUP_CHANNEL)).WillOnce(Return(OSResultDeviceNotFound));
+    EXPECT_CALL(primary, InitializeAutomaticDeployment(ANTENNA_BACKUP_CHANNEL, _)).WillOnce(Return(OSResultDeviceNotFound));
     const auto status = driver.DeployAntenna(&driver, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, TimeSpanFromSeconds(20), false);
     ASSERT_THAT(status, Ne(OSResultSuccess));
 }

@@ -8,6 +8,7 @@ from pins import Pins
 
 class System:
     def __init__(self, obc_com, sys_bus_com, payload_bus_com, use_single_bus, gpio, auto_power_on = True):
+        logging.basicConfig()
         self.log = logging.getLogger("system")
 
         self._use_single_bus = use_single_bus
