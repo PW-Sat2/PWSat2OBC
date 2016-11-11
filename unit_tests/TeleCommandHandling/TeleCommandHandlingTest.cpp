@@ -21,10 +21,11 @@ using namespace devices::comm;
 
 struct TeleCommandDepsMock : public IDecryptFrame, public IDecodeTelecommand
 {
-    MOCK_METHOD3(Decode, void(gsl::span<const std::uint8_t> frame, std::uint8_t& commandCode, gsl::span<const std::uint8_t>& parameters));
-
     MOCK_METHOD3(
         Decrypt, TeleCommandDecryptStatus(gsl::span<const uint8_t> frame, gsl::span<uint8_t> decrypted, size_t& decryptedDataLength));
+
+    MOCK_METHOD3(
+        Decode, TeleCommandDecodeFrameStatus(gsl::span<const uint8_t> frame, uint8_t& commandCode, gsl::span<const uint8_t>& parameters));
 };
 
 struct TeleCommandHandlerMock : public IHandleTeleCommand
@@ -53,7 +54,7 @@ TEST_F(TeleCommandHandlingTest, IncomingFrameShouldBeDecryptedAndDecoded)
     frame.Size = 40;
 
     EXPECT_CALL(this->deps, Decrypt(_, _, _)).WillOnce(Return(TeleCommandDecryptStatus::OK));
-    EXPECT_CALL(this->deps, Decode(_, _, _));
+    EXPECT_CALL(this->deps, Decode(_, _, _)).WillOnce(Return(TeleCommandDecodeFrameStatus::OK));
 
     this->handling.HandleFrame(frame);
 }
@@ -78,6 +79,8 @@ TEST_F(TeleCommandHandlingTest, HandlerShouldBeCalledForKnownTelecommand)
         .WillOnce(Invoke([](gsl::span<const std::uint8_t> frame, std::uint8_t& commandCode, gsl::span<const std::uint8_t>& parameters) {
             commandCode = frame[0];
             parameters = frame.subspan(1, frame.length() - 1);
+
+            return TeleCommandDecodeFrameStatus::OK;
         }));
 
     NiceMock<TeleCommandHandlerMock> someCommand;
@@ -100,4 +103,28 @@ TEST_F(TeleCommandHandlingTest, WhenDecryptionFailsShouldNotAttemptFrameDecoding
     CommFrame frame;
 
     this->handling.HandleFrame(frame);
+}
+
+TEST_F(TeleCommandHandlingTest, WhenDecodingFrameShouldNotAttemptInvokingHandler)
+{
+    EXPECT_CALL(this->deps, Decrypt(_, _, _)).WillOnce(Return(TeleCommandDecryptStatus::OK));
+
+    EXPECT_CALL(this->deps, Decode(_, _, _))
+        .WillOnce(
+            Invoke([](gsl::span<const std::uint8_t> /*frame*/, std::uint8_t& commandCode, gsl::span<const std::uint8_t>& /*parameters*/) {
+                commandCode = 0xAA;
+
+                return (TeleCommandDecodeFrameStatus)TeleCommandDecodeFrameStatus::Failed;
+            }));
+
+    NiceMock<TeleCommandHandlerMock> someCommand;
+    EXPECT_CALL(someCommand, Handle(_)).Times(0);
+
+    IHandleTeleCommand* telecommands[] = {&someCommand};
+
+    IncomingTelecommandHandler handler(this->deps, this->deps, telecommands, 1);
+
+    CommFrame frame;
+
+    handler.HandleFrame(frame);
 }

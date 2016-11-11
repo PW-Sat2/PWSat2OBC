@@ -25,10 +25,18 @@ PingTelecommand::PingTelecommand(devices::comm::CommObject& comm) : _comm(comm)
 {
 }
 
-void TelecommandFrameUnpacker::Decode(gsl::span<const uint8_t> frame, uint8_t& commandCode, gsl::span<const uint8_t>& parameters)
+TeleCommandDecodeFrameStatus TelecommandFrameUnpacker::Decode(
+    gsl::span<const uint8_t> frame, uint8_t& commandCode, gsl::span<const uint8_t>& parameters)
 {
+    if (frame.length() < 1)
+    {
+        return TeleCommandDecodeFrameStatus::Failed;
+    }
+
     commandCode = frame[0];
     parameters = frame.subspan(1, frame.length() - 1);
+
+    return TeleCommandDecodeFrameStatus::OK;
 }
 
 void PingTelecommand::Handle(gsl::span<const uint8_t> parameters)
