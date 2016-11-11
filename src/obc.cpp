@@ -13,11 +13,14 @@ OBC::OBC()
 {
 }
 
-std::size_t TelecommandFrameUnpacker::Decrypt(gsl::span<const uint8_t> frame, gsl::span<uint8_t> decrypted)
+TeleCommandDecryptStatus TelecommandFrameUnpacker::Decrypt(
+    gsl::span<const uint8_t> frame, gsl::span<uint8_t> decrypted, size_t& decryptedDataLength)
 {
     auto lastCopied = std::copy(frame.cbegin(), frame.cend(), decrypted.begin());
 
-    return lastCopied - decrypted.begin();
+    decryptedDataLength = lastCopied - decrypted.begin();
+
+    return TeleCommandDecryptStatus::OK;
 }
 
 PingTelecommand::PingTelecommand(devices::comm::CommObject& comm) : _comm(comm)
