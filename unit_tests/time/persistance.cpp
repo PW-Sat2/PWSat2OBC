@@ -4,8 +4,8 @@
 #include "mock/FsMock.hpp"
 #include "os/os.hpp"
 
-#include "time/timer.h"
 #include "TimeSpan.hpp"
+#include "time/timer.h"
 
 using testing::_;
 using testing::Eq;
@@ -43,6 +43,8 @@ TimerPersistanceTest::TimerPersistanceTest()
     EXPECT_CALL(os, CreateBinarySemaphore()).WillOnce(Return(reinterpret_cast<void*>(1))).WillOnce(Return(reinterpret_cast<void*>(2)));
     ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResultSuccess));
     ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResultSuccess));
+
+    EXPECT_CALL(os, CreatePulseAll()).WillOnce(Return(reinterpret_cast<void*>(3)));
 }
 
 TEST_F(TimerPersistanceTest, TestReadingStateNoState)

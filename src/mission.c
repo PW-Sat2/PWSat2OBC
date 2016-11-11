@@ -2,7 +2,6 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
-#include "time/TimePoint.h"
 #include "base/os.h"
 #include "logger/logger.h"
 #include "mission.h"
@@ -11,6 +10,7 @@
 #include "obc.h"
 #include "state/state.h"
 #include "system.h"
+#include "time/TimePoint.h"
 
 static TerminalCommand terminalCommand = TerminalCommandNone;
 
@@ -107,7 +107,7 @@ static void MissionControlTask(void* param)
     {
         NormalModeLoop(&state, missionState);
 
-        System.SleepTask(10000);
+        TimeLongDelay(&Main.timeProvider, TimeSpanFromSeconds(10));
     }
 }
 

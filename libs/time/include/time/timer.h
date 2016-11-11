@@ -110,6 +110,11 @@ typedef struct TimeProviderTag
     OSSemaphoreHandle notificationLock;
 
     /**
+     * @brief Pulse notifed on each timer tick
+     */
+    OSPulseHandle TickNotification;
+
+    /**
      * @brief Pointer to file system object that is used to save/restore timer state.
      */
     FileSystem* FileSystemObject;
@@ -223,6 +228,22 @@ static inline bool TimeSnapshotLessThan(struct TimeSnapshot left, struct TimeSna
 {
     return TimeSpanLessThan(left.CurrentTime, right.CurrentTime);
 }
+
+/**
+ * @brief Waits until given timepoint. Wait is directed by timer notifications
+ * @param[in] timeProvider Time provider
+ * @param[in] time Wanted time point
+ * @return True if expected time point is reached, false in case of error
+ */
+bool TimeLongDelayUntil(TimeProvider* timeProvider, TimePoint time);
+
+/**
+ * @brief Waits for given time span. Wait is directed by timer notifications
+ * @param[in] timeProvider Time provider
+ * @param[in] delay Time span to wait
+ * @return True if expected time span is elapsed, false in case of error
+ */
+bool TimeLongDelay(TimeProvider* timeProvider, TimeSpan delay);
 
 /** @}*/
 

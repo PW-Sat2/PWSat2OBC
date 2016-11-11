@@ -44,6 +44,9 @@ void TimerTest::Initialize()
     EXPECT_CALL(os, CreateBinarySemaphore()).WillOnce(Return(reinterpret_cast<void*>(1))).WillOnce(Return(reinterpret_cast<void*>(2)));
     ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResultSuccess));
     ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResultSuccess));
+
+    EXPECT_CALL(os, CreatePulseAll()).WillOnce(Return(reinterpret_cast<void*>(3)));
+
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, &timeHandler, nullptr));
 }
 
@@ -58,7 +61,7 @@ TimeSpan TimerTest::GetCurrentTime()
 
 TimePoint TimerTest::GetMissionTime()
 {
-    TimePoint point = {};
+    TimePoint point{0, 0, 0, 0, 0};
     EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResultSuccess));
     EXPECT_CALL(os, GiveSemaphore(provider.timerLock)).Times(1);
     EXPECT_TRUE(TimeGetCurrentMissionTime(&provider, &point));
@@ -69,6 +72,7 @@ TEST_F(TimerTest, TestDefaultState)
 {
     this->guard = InstallProxy(&os);
     ON_CALL(os, CreateBinarySemaphore()).WillByDefault(Return(reinterpret_cast<void*>(this)));
+    ON_CALL(os, CreatePulseAll()).WillByDefault(Return(reinterpret_cast<void*>(3)));
     const auto result = TimeInitialize(&provider, TimePassedProxy, &timeHandler, nullptr);
     ASSERT_THAT(result, Eq(true));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0ull)));
@@ -202,7 +206,7 @@ TEST_F(TimerTest, TestSetTimeNotifiesSystemAboutTimeChange)
 
 TEST_F(TimerTest, TestGetCurrentMissionTime)
 {
-    TimePoint point = {};
+    TimePoint point{0, 0, 0, 0, 0};
     Initialize();
     TimeAdvanceTime(&provider, TimeSpanFromMilliseconds(446582001ull));
     ASSERT_TRUE(TimeGetCurrentMissionTime(&provider, &point));
@@ -215,7 +219,7 @@ TEST_F(TimerTest, TestGetCurrentMissionTime)
 
 TEST_F(TimerTest, TestGetCurrentMissionTimeSynchronization)
 {
-    TimePoint point = {};
+    TimePoint point{0, 0, 0, 0, 0};
     Initialize();
     TimeAdvanceTime(&provider, TimeSpanFromMilliseconds(446582001ull));
     EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResultSuccess));
@@ -225,7 +229,7 @@ TEST_F(TimerTest, TestGetCurrentMissionTimeSynchronization)
 
 TEST_F(TimerTest, TestGetCurrentMissionTimeSynchronizationFailure)
 {
-    TimePoint point = {};
+    TimePoint point{0, 0, 0, 0, 0};
     Initialize();
     TimeAdvanceTime(&provider, TimeSpanFromMilliseconds(446582001ull));
     EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResultInvalidOperation));

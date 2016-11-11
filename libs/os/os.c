@@ -6,6 +6,8 @@
 #include "semphr.h"
 #include "task.h"
 
+#define PULSE_ALL_BITS 0x80
+
 static inline TickType_t ConvertTimeToTicks(const OSTaskTimeSpan span)
 {
     if (span == MAX_DELAY)
@@ -175,6 +177,30 @@ static void EndSwitchingISR(bool taskWoken)
     portEND_SWITCHING_ISR(taskWoken);
 }
 
+static OSPulseHandle CreatePulseAll(void)
+{
+    return (OSPulseHandle)CreateEventGroup();
+}
+
+static OSResult WaitForPulse(OSPulseHandle handle, OSTaskTimeSpan timeout)
+{
+    OSEventBits result = EventGroupWaitForBits((OSEventGroupHandle)handle, PULSE_ALL_BITS, true, true, timeout);
+
+    if (result == PULSE_ALL_BITS)
+    {
+        return OSResultSuccess;
+    }
+    else
+    {
+        return OSResultTimeout;
+    }
+}
+
+static void PulseSet(OSPulseHandle handle)
+{
+    EventGroupSetBits((OSEventGroupHandle)handle, PULSE_ALL_BITS);
+}
+
 OS System;
 
 OSResult OSSetup(void)
@@ -200,6 +226,9 @@ OSResult OSSetup(void)
     System.QueueSendISR = QueueSendISR;
     System.QueueOverwrite = QueueOverwrite;
     System.EndSwitchingISR = EndSwitchingISR;
+    System.CreatePulseAll = CreatePulseAll;
+    System.PulseSet = PulseSet;
+    System.PulseWait = WaitForPulse;
 
     return OSResultSuccess;
 }

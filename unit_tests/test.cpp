@@ -7,6 +7,8 @@ extern "C" void __gcov_flush(void);
 
 int run(int argc, char** argv)
 {
+    ::testing::GTEST_FLAG(throw_on_failure) = true;
+
     testing::InitGoogleTest(&argc, argv);
     auto r = RUN_ALL_TESTS();
 
