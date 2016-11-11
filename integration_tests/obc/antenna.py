@@ -46,18 +46,47 @@ class OverrideSwitches(Enum):
 
         return map[self]
 
-def AntennaMixin(OBCMixin):
+class AntennaStatus:
+    Status = False
+    DeploymentState = [False, False, False, False]
+    DeploymentInProgress = [False, False, False, False]
+    SystemArmed = False
+    IgnoringSwitches = False
+
+    def __init__(self, status):
+        self.Status = status
+
+class AntennaMixin(OBCMixin):
     def __init__(self):
         pass
 
-    @command("antenna deploy {0} {1} {2}")
+    @command("antenna_deploy {0} {1} {2}")
     def antenna_deploy(self, channel, antennaId, override):
          pass
 
-    @command("antenna deploy cancel")
-    def antenna_cancel_deployment(self):
+    @command("antenna_cancel {0}")
+    def antenna_cancel_deployment(self, channel):
         pass
 
+    def parse_deployment_state(result):
+        parts = result.split(" ");
+
+        operationStatus = int(parts[0])
+        if(operationStatus != 0):
+            return AntennaStatus(False)
+
+        parsedResult = AntennaStatus(True)
+        for cx in range(4):
+            parsedResult.DeploymentState[cx] = int(parts[cx + 1])
+
+        for cx in range(4):
+            parsedResult.DeploymentInProgress[cx] = int(parts[cx + 5])
+
+        parsedResult.IgnoringSwitches = int(parts[9])
+        parsedResult.SystemArmed = int(parts[10])
+        return parsedResult
+
+    @decode_return(parse_deployment_state)
     @command("antenna_get_status {0}")
     def antenna_get_status(self, channel):
         pass
