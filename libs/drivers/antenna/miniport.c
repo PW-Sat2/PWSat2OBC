@@ -185,10 +185,10 @@ static OSResult GetDeploymentStatus(struct AntennaMiniportDriver* miniport,
         return OSResultOutOfRange;
     }
 
-    telemetry->DeploymentStatus[0] = (value & 0x8000) != 0;
-    telemetry->DeploymentStatus[1] = (value & 0x0800) != 0;
-    telemetry->DeploymentStatus[2] = (value & 0x0080) != 0;
-    telemetry->DeploymentStatus[3] = (value & 0x0008) != 0;
+    telemetry->DeploymentStatus[0] = (value & 0x8000) == 0;
+    telemetry->DeploymentStatus[1] = (value & 0x0800) == 0;
+    telemetry->DeploymentStatus[2] = (value & 0x0080) == 0;
+    telemetry->DeploymentStatus[3] = (value & 0x0008) == 0;
 
     telemetry->IsDeploymentActive[0] = (value & 0x2000) != 0;
     telemetry->IsDeploymentActive[1] = (value & 0x0200) != 0;
