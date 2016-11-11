@@ -22,7 +22,7 @@ class AntennaDriverTest : public testing::Test
 
 AntennaDriverTest::AntennaDriverTest()
 {
-    AntennaDriverInitialize(&driver, &primary, &i2c);
+    AntennaDriverInitialize(&driver, &primary, &i2c, &i2c);
 }
 
 TEST_F(AntennaDriverTest, TestHardResetBothChannels)

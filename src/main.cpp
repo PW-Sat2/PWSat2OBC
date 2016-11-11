@@ -158,7 +158,7 @@ static void ClearState(OBC* obc)
 static void SetupAntennas(void)
 {
     AntennaMiniportInitialize(&Main.antennaMiniport);
-    AntennaDriverInitialize(&Main.antennaDriver, &Main.antennaMiniport, (I2CBus*)&Main.I2CFallback);
+    AntennaDriverInitialize(&Main.antennaDriver, &Main.antennaMiniport, Main.I2C.Bus, Main.I2C.Payload)
 }
 
 static void ObcInitTask(void* param)
@@ -286,7 +286,7 @@ void SetupI2C(void)
     I2CSetUpErrorHandlingBus(&Main.I2CBuses[0].ErrorHandling, (I2CBus*)&Main.I2CBuses[0].Bus, I2CErrorHandler, &Main.PowerControlInterface);
     I2CSetUpErrorHandlingBus(&Main.I2CBuses[1].ErrorHandling, (I2CBus*)&Main.I2CBuses[1].Bus, I2CErrorHandler, &Main.PowerControlInterface);
 
-    Main.I2C.System = (I2CBus*)&Main.I2CBuses[I2C_SYSTEM_BUS].ErrorHandling;
+    Main.I2C.Bus = (I2CBus*)&Main.I2CBuses[I2C_SYSTEM_BUS].ErrorHandling;
     Main.I2C.Payload = (I2CBus*)&Main.I2CBuses[I2C_PAYLOAD_BUS].ErrorHandling;
 
     I2CSetUpFallbackBus(&Main.I2CFallback, &Main.I2C);

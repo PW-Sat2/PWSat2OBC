@@ -156,6 +156,11 @@ struct AntennaChannelInfo
 {
     /** Status of current hardware channel. */
     AntenaPortStatus status;
+
+    /**
+     * @brief Pointer to communication bus interface.
+     */
+    I2CBus* communicationBus;
 };
 
 /**
@@ -185,15 +190,10 @@ struct AntennaDeploymentProcessStatus
  * For the moment it is designed to expose to the user existence of multiple
  * hardware controllers. It is up to the user to design (and use) any fallback
  * mechanisms that will try to use subsequent hardware channels in case of
- * error encountered on primary channle.
+ * error encountered on primary channel.
  */
 struct AntennaDriver
 {
-    /**
-     * @brief Pointer to communication bus interface.
-     */
-    I2CBus* communicationBus;
-
     /**
      * @brief Driver instance that coordinates communication with hardware.
      */
@@ -305,7 +305,8 @@ struct AntennaDriver
  */
 void AntennaDriverInitialize(AntennaDriver* driver,
     AntennaMiniportDriver* miniport,
-    I2CBus* communicationBus //
+    I2CBus* primaryBus,
+    I2CBus* secondaryBus //
     );
 
 /** @}*/

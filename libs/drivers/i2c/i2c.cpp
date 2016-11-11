@@ -8,7 +8,7 @@
 #include "i2c.h"
 
 I2CInterface::I2CInterface(I2CBus* system, I2CBus* payload)
-    : System(system), //
+    : Bus(system), //
       Payload(payload)
 {
 }

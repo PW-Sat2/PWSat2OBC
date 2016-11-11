@@ -329,15 +329,15 @@ TEST_P(AntennaDeploymentStatusTest, TestDeploymentStatusData)
     const auto systemArmed = std::get<7>(GetParam());
     miniport.GetDeploymentStatus(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, &response);
 
-    ASSERT_THAT(response.DeploymentStatus[0], (deploymentStatuses & 0xff) != 0);
-    ASSERT_THAT(response.DeploymentStatus[1], (deploymentStatuses & 0xff00) != 0);
-    ASSERT_THAT(response.DeploymentStatus[2], (deploymentStatuses & 0xff0000) != 0);
-    ASSERT_THAT(response.DeploymentStatus[3], (deploymentStatuses & 0xff000000) != 0);
+    ASSERT_THAT(response.DeploymentStatus[0], Eq((deploymentStatuses & 0xff) != 0));
+    ASSERT_THAT(response.DeploymentStatus[1], Eq((deploymentStatuses & 0xff00) != 0));
+    ASSERT_THAT(response.DeploymentStatus[2], Eq((deploymentStatuses & 0xff0000) != 0));
+    ASSERT_THAT(response.DeploymentStatus[3], Eq((deploymentStatuses & 0xff000000) != 0));
 
-    ASSERT_THAT(response.IsDeploymentActive[0], (deplomentActive & 0xff) != 0);
-    ASSERT_THAT(response.IsDeploymentActive[1], (deplomentActive & 0xff00) != 0);
-    ASSERT_THAT(response.IsDeploymentActive[2], (deplomentActive & 0xff0000) != 0);
-    ASSERT_THAT(response.IsDeploymentActive[3], (deplomentActive & 0xff000000) != 0);
+    ASSERT_THAT(response.IsDeploymentActive[0], Eq((deplomentActive & 0xff) != 0));
+    ASSERT_THAT(response.IsDeploymentActive[1], Eq((deplomentActive & 0xff00) != 0));
+    ASSERT_THAT(response.IsDeploymentActive[2], Eq((deplomentActive & 0xff0000) != 0));
+    ASSERT_THAT(response.IsDeploymentActive[3], Eq((deplomentActive & 0xff000000) != 0));
 
     ASSERT_THAT(response.IgnoringDeploymentSwitches, Eq(overrideActive));
     ASSERT_THAT(response.DeploymentSystemArmed, Eq(systemArmed));
