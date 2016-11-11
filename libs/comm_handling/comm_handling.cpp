@@ -36,7 +36,12 @@ void IncomingTelecommandHandler::HandleFrame(CommFrame& frame)
     uint8_t commandCode;
     span<const uint8_t> parameters;
 
-    this->_decodeTelecommand.Decode(span<const uint8_t>(decryptedFrame, decryptedDetaLength), commandCode, parameters);
+    auto decodeStatus = this->_decodeTelecommand.Decode(span<const uint8_t>(decryptedFrame, decryptedDetaLength), commandCode, parameters);
+
+    if (decodeStatus != TeleCommandDecodeFrameStatus::OK)
+    {
+        return;
+    }
 
     this->DispatchCommandHandler(commandCode, parameters);
 }
