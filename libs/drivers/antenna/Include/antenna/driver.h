@@ -156,6 +156,11 @@ typedef struct
 {
     /** Status of current hardware channel. */
     AntenaPortStatus status;
+
+    /**
+     * @brief Pointer to communication bus interface.
+     */
+    I2CBus* communicationBus;
 } AntennaChannelInfo;
 
 /**
@@ -189,11 +194,6 @@ typedef struct
  */
 typedef struct AntennaDriver
 {
-    /**
-     * @brief Pointer to communication bus interface.
-     */
-    I2CBus* communicationBus;
-
     /**
      * @brief Driver instance that coordinates communication with hardware.
      */
@@ -306,7 +306,8 @@ typedef struct AntennaDriver
  */
 void AntennaDriverInitialize(AntennaDriver* driver,
     AntennaMiniportDriver* miniport,
-    I2CBus* communicationBus //
+    I2CBus* primaryBus,
+    I2CBus* secondaryBus  //
     );
 
 /** @}*/

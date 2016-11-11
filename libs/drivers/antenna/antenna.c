@@ -30,10 +30,10 @@ static AntennaChannelInfo* GetChannel(struct AntennaDriver* driver, AntennaChann
 
 static OSResult Reset(struct AntennaDriver* driver, AntennaChannel channel)
 {
-    AntennaChannelInfo* channelInfo = GetChannel(driver, channel);
-    const OSResult status = driver->miniport->Reset(driver->miniport, driver->communicationBus, channel);
+    AntennaChannelInfo* hardwareChannel = GetChannel(driver, channel);
+    const OSResult status = driver->miniport->Reset(driver->miniport, hardwareChannel->communicationBus, channel);
     const bool result = OS_RESULT_SUCCEEDED(status);
-    channelInfo->status = result ? ANTENNA_PORT_OPERATIONAL : ANTENNA_PORT_FAILURE;
+    hardwareChannel->status = result ? ANTENNA_PORT_OPERATIONAL : ANTENNA_PORT_FAILURE;
     return status;
 }
 
@@ -62,8 +62,9 @@ static OSResult DeployAntenna(struct AntennaDriver* driver,
     bool overrideSwitches //
     )
 {
+    AntennaChannelInfo* hardwareChannel = GetChannel(driver, channel);
     const OSResult status = driver->miniport->ArmDeploymentSystem(driver->miniport,
-        driver->communicationBus,
+        hardwareChannel->communicationBus,
         channel //
         );
     if (OS_RESULT_FAILED(status))
@@ -74,7 +75,7 @@ static OSResult DeployAntenna(struct AntennaDriver* driver,
     if (antennaId == ANTENNA_AUTO_ID)
     {
         return driver->miniport->InitializeAutomaticDeployment(driver->miniport,
-            driver->communicationBus,
+            hardwareChannel->communicationBus,
             channel,
             timeout //
             );
@@ -82,7 +83,7 @@ static OSResult DeployAntenna(struct AntennaDriver* driver,
     else
     {
         return driver->miniport->DeployAntenna(driver->miniport,
-            driver->communicationBus,
+            hardwareChannel->communicationBus,
             channel,
             antennaId,
             timeout,
@@ -93,8 +94,9 @@ static OSResult DeployAntenna(struct AntennaDriver* driver,
 
 static OSResult FinishDeployment(struct AntennaDriver* driver, AntennaChannel channel)
 {
+    AntennaChannelInfo* hardwareChannel = GetChannel(driver, channel);
     const OSResult result = driver->miniport->CancelAntennaDeployment(driver->miniport,
-        driver->communicationBus,
+        hardwareChannel->communicationBus,
         channel //
         );
     if (OS_RESULT_FAILED(result))
@@ -103,7 +105,7 @@ static OSResult FinishDeployment(struct AntennaDriver* driver, AntennaChannel ch
     }
 
     return driver->miniport->DisarmDeploymentSystem(driver->miniport,
-        driver->communicationBus,
+        hardwareChannel->communicationBus,
         channel //
         );
 }
@@ -111,8 +113,9 @@ static OSResult FinishDeployment(struct AntennaDriver* driver, AntennaChannel ch
 AntennaDeploymentProcessStatus IsDeploymentActive(struct AntennaDriver* driver, AntennaChannel channel)
 {
     AntennaDeploymentStatus response = {0};
+    AntennaChannelInfo* hardwareChannel = GetChannel(driver, channel);
     const OSResult result = driver->miniport->GetDeploymentStatus(driver->miniport,
-        driver->communicationBus,
+        hardwareChannel->communicationBus,
         channel,
         &response //
         );
@@ -130,8 +133,9 @@ static OSResult GetTemperature(struct AntennaDriver* driver,
     uint16_t* temperature //
     )
 {
+    AntennaChannelInfo* hardwareChannel = GetChannel(driver, channel);
     return driver->miniport->GetTemperature(driver->miniport,
-        driver->communicationBus,
+        hardwareChannel->communicationBus,
         channel,
         temperature //
         );
@@ -142,8 +146,9 @@ OSResult GetDeploymentStatus(struct AntennaDriver* driver,
     AntennaDeploymentStatus* telemetry //
     )
 {
+    AntennaChannelInfo* hardwareChannel = GetChannel(driver, channel);
     return driver->miniport->GetDeploymentStatus(driver->miniport,
-        driver->communicationBus,
+        hardwareChannel->communicationBus,
         channel,
         telemetry //
         );
@@ -162,18 +167,20 @@ static void UpdateActivationCount(struct AntennaDriver* driver, AntennaTelemetry
         ANTENNA1_ID, ANTENNA2_ID, ANTENNA3_ID, ANTENNA4_ID,
     };
 
+    AntennaChannelInfo* primaryChannel = GetChannel(driver, ANTENNA_PRIMARY_CHANNEL);
+    AntennaChannelInfo* backupChannel = GetChannel(driver, ANTENNA_BACKUP_CHANNEL);
     for (int i = 0; i < 4; ++i)
     {
         uint16_t primaryValue = 0, secondaryValue = 0;
         const OSResult primary = driver->miniport->GetAntennaActivationCount(driver->miniport,
-            driver->communicationBus,
+            primaryChannel->communicationBus,
             ANTENNA_PRIMARY_CHANNEL,
             ids[i],
             &primaryValue //
             );
 
         const OSResult secondary = driver->miniport->GetAntennaActivationCount(driver->miniport,
-            driver->communicationBus,
+            backupChannel->communicationBus,
             ANTENNA_BACKUP_CHANNEL,
             ids[i],
             &secondaryValue //
@@ -205,18 +212,20 @@ static void UpdateActivationTime(struct AntennaDriver* driver, AntennaTelemetry*
         ANTENNA1_ID, ANTENNA2_ID, ANTENNA3_ID, ANTENNA4_ID,
     };
 
+    AntennaChannelInfo* primaryChannel = GetChannel(driver, ANTENNA_PRIMARY_CHANNEL);
+    AntennaChannelInfo* backupChannel = GetChannel(driver, ANTENNA_BACKUP_CHANNEL);
     for (int i = 0; i < 4; ++i)
     {
         TimeSpan primaryValue = {0}, secondaryValue = {0};
         const OSResult primary = driver->miniport->GetAntennaActivationTime(driver->miniport,
-            driver->communicationBus,
+            primaryChannel->communicationBus,
             ANTENNA_PRIMARY_CHANNEL,
             ids[i],
             &primaryValue //
             );
 
         const OSResult secondary = driver->miniport->GetAntennaActivationTime(driver->miniport,
-            driver->communicationBus,
+            backupChannel->communicationBus,
             ANTENNA_BACKUP_CHANNEL,
             ids[i],
             &secondaryValue //
@@ -237,14 +246,16 @@ static void UpdateActivationTime(struct AntennaDriver* driver, AntennaTelemetry*
 
 static void UpdateTelemetryTemperature(struct AntennaDriver* driver, AntennaTelemetry* telemetry)
 {
+    AntennaChannelInfo* primaryChannel = GetChannel(driver, ANTENNA_PRIMARY_CHANNEL);
+    AntennaChannelInfo* backupChannel = GetChannel(driver, ANTENNA_BACKUP_CHANNEL);
     uint16_t primaryValue = 0, secondaryValue = 0;
     const OSResult primary = driver->miniport->GetTemperature(driver->miniport,
-        driver->communicationBus,
+        primaryChannel->communicationBus,
         ANTENNA_PRIMARY_CHANNEL,
         &primaryValue //
         );
     const OSResult secondary = driver->miniport->GetTemperature(driver->miniport,
-        driver->communicationBus,
+        backupChannel->communicationBus,
         ANTENNA_BACKUP_CHANNEL,
         &secondaryValue //
         );
@@ -273,14 +284,16 @@ static AntennaTelemetry GetTelemetry(struct AntennaDriver* driver)
 
 void AntennaDriverInitialize(AntennaDriver* driver,
     AntennaMiniportDriver* miniport,
-    I2CBus* communicationBus //
+    I2CBus* primaryBus,
+    I2CBus* secondaryBus //
     )
 {
     memset(driver, 0, sizeof(*driver));
     driver->miniport = miniport;
-    driver->communicationBus = communicationBus;
     driver->primaryChannel.status = ANTENNA_PORT_OPERATIONAL;
+    driver->primaryChannel.communicationBus = primaryBus;
     driver->secondaryChannel.status = ANTENNA_PORT_OPERATIONAL;
+    driver->secondaryChannel.communicationBus = secondaryBus;
     driver->Reset = Reset;
     driver->HardReset = HardReset;
     driver->DeployAntenna = DeployAntenna;

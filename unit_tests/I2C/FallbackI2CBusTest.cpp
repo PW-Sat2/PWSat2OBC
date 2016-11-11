@@ -26,7 +26,7 @@ class FallbackI2CBusTest : public Test
 
 FallbackI2CBusTest::FallbackI2CBusTest()
 {
-    buses.System = &systemBus;
+    buses.Bus = &systemBus;
     buses.Payload = &payloadBus;
 
     I2CSetUpFallbackBus(&bus, &buses);

@@ -13,7 +13,7 @@ static I2CResult Write(I2CBus* bus, const I2CAddress address, const uint8_t* dat
 {
     I2CInterface* buses = Fallback(bus)->InnerBuses;
 
-    const I2CResult systemBusResult = buses->System->Write(buses->System, address, data, length);
+    const I2CResult systemBusResult = buses->Bus->Write(buses->Bus, address, data, length);
 
     if (systemBusResult == I2CResultOK)
     {
@@ -32,7 +32,7 @@ static I2CResult WriteRead(
 {
     I2CInterface* buses = Fallback(bus)->InnerBuses;
 
-    const I2CResult systemBusResult = buses->System->WriteRead(buses->System, address, inData, inLength, outData, outLength);
+    const I2CResult systemBusResult = buses->Bus->WriteRead(buses->Bus, address, inData, inLength, outData, outLength);
 
     if (systemBusResult == I2CResultOK)
     {

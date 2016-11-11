@@ -137,7 +137,7 @@ typedef struct
 typedef struct
 {
     /** @brief Reference to System I2C bus */
-    I2CBus* System;
+    I2CBus* Bus;
     /** @brief Reference to Payload I2C bus */
     I2CBus* Payload;
 } I2CInterface;
