@@ -86,6 +86,8 @@ if(${ENABLE_COVERAGE})
             "--gcov-executable=${CMAKE_GCOV}"
             "--root=${CMAKE_SOURCE_DIR}"
             "--object-directory=${CMAKE_BINARY_DIR}"
+            "--exclude=unit_tests.*"
+            "--exclude=libs.external.*"
             --html
             --html-details
             --print-summary
