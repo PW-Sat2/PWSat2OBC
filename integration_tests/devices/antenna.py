@@ -37,6 +37,7 @@ class AntennaController(i2cMock.I2CDevice):
     on_begin_deployment = None
     on_get_temperature = None
     on_get_deployment_status = None
+    on_deployment_cancel = None
 
     def __init__(self, address):
         super(AntennaController, self).__init__(address)
@@ -82,49 +83,49 @@ class AntennaController(i2cMock.I2CDevice):
         if self.armed:
             self.armed = self.call(self.on_arm_state_change, False, False)
 
-    def deploy_antenna(self, antanna_id):
+    def deploy_antenna(self, antanna_id, timeout):
         self.log.debug("Beginning of deployment antenna %d on controller: %d", antanna_id + 1, self.address)
         self.antenna_state[antanna_id].begin_deployment()
         self.call(self.on_begin_deployment, None, self, antanna_id)
 
     @i2cMock.command([0xA1])
-    def deploy_antanna_1(self):
-        self.deploy_antenna(0)
+    def deploy_antanna_1(self, timeout):
+        self.deploy_antenna(1, timeout)
 
     @i2cMock.command([0xA2])
-    def deploy_antanna_2(self):
-        self.deploy_antenna(1)
+    def deploy_antanna_2(self, timeout):
+        self.deploy_antenna(2, timeout)
 
     @i2cMock.command([0xA3])
-    def deploy_antanna_3(self):
-        self.deploy_antenna(2)
+    def deploy_antanna_3(self, timeout):
+        self.deploy_antenna(3, timeout)
 
     @i2cMock.command([0xA4])
-    def deploy_antanna_4(self):
-        self.deploy_antenna(3)
+    def deploy_antanna_4(self, timeout):
+        self.deploy_antenna(4, timeout)
 
-    def deploy_antenna_with_override(self, antanna_id):
+    def deploy_antenna_with_override(self, antanna_id, timeout):
         self.ignore_deployment_switch = True
-        self.deploy_antenna(antanna_id)
+        self.deploy_antenna(antanna_id, timeout)
 
     @i2cMock.command([0xBA])
-    def deploy_antanna_1_with_override(self):
-        self.deploy_antenna_with_override(0)
+    def deploy_antanna_1_with_override(self, timeout):
+        self.deploy_antenna_with_override(1, timeout)
 
     @i2cMock.command([0xBB])
-    def deploy_antanna_2_with_override(self):
-        self.deploy_antenna_with_override(1)
+    def deploy_antanna_2_with_override(self, timeout):
+        self.deploy_antenna_with_override(2, timeout)
 
     @i2cMock.command([0xBC])
-    def deploy_antanna_3_with_override(self):
-        self.deploy_antenna_with_override(2)
+    def deploy_antanna_3_with_override(self, timeout):
+        self.deploy_antenna_with_override(3, timeout)
 
     @i2cMock.command([0xBD])
-    def deploy_antanna_4_with_override(self):
-        self.deploy_antenna_with_override(3)
+    def deploy_antanna_4_with_override(self, timeout):
+        self.deploy_antenna_with_override(4, timeout)
 
     @i2cMock.command([0xA5])
-    def deploy_automatically(self):
+    def deploy_automatically(self, timeout):
         self.log.debug("Beginning automatic antenna deployment on controller: %d", self.address)
         self.deployment_in_progress = True
         self.call(self.on_begin_deployment, None, self, -1)
@@ -204,6 +205,7 @@ class AntennaController(i2cMock.I2CDevice):
         self.deployment_in_progress = False
         for antenna in self.antenna_state:
             antenna.cancel_deployment()
+        self.call(self.on_deployment_cancel, None)
         self.log.debug("Antenna deployment canceled on controller: %d", self.address)
 
     def finish_antenna_deployment(self, antenna_id):

@@ -34,29 +34,6 @@ class Test_Antenna(BaseTest):
         self.system.obc.power_on()
         self.assertTrue(event.wait_for_change(1))
 
-    #def test_arming_deployment_system(self):
-    #    event = TestEvent()
-    #    def handler(newState):
-    #        if newState:
-    #            event.set()
-
-    #    self.system.primary_antenna.on_arm_state_change = handler
-    #    self.power_on_and_wait()
-    #    self.system.obc.antenna_arm_deployment()
-    #    self.assertTrue(event.wait_for_change(1))
-
-    #def test_disarming_deployment_system(self):
-    #    event = TestEvent()
-    #    def handler(newState):
-    #        if not newState:
-    #            event.set()
-
-    #    self.system.primary_antenna.on_arm_state_change = handler
-    #    self.power_on_and_wait()
-    #    self.system.obc.antenna_arm_deployment()
-    #    self.system.obc.antenna_disarm_deployment()
-    #    self.assertTrue(event.wait_for_change(1))
-
     def test_auto_deployment(self):
         event = TestEvent()
         def handler(driver, antenna):
@@ -66,4 +43,34 @@ class Test_Antenna(BaseTest):
         self.system.primary_antenna.on_begin_deployment = handler
         self.power_on_and_wait()
         self.system.obc.antenna_deploy(AntennaChannel.Primary, AntennaId.Auto, OverrideSwitches.Disabled)
+        self.assertTrue(event.wait_for_change(1))
+
+    def test_manual_deployment(self):
+        event = TestEvent()
+        def handler(driver, antenna):
+            if antenna == 2:
+                event.set()
+
+        self.system.primary_antenna.on_begin_deployment = handler
+        self.power_on_and_wait()
+        self.system.obc.antenna_deploy(AntennaChannel.Primary, AntennaId.Antenna2, False)
+        self.assertTrue(event.wait_for_change(1))
+
+    def test_manual_deployment_with_override(self):
+        event = TestEvent()
+        def handler(driver, antenna):
+            if antenna == 2:
+                event.set()
+
+        self.system.backup_antenna.on_begin_deployment = handler
+        self.power_on_and_wait()
+        result = self.system.obc.antenna_deploy(AntennaChannel.Backup, AntennaId.Antenna2, True)
+        self.assertTrue(event.wait_for_change(1))
+        self.assertTrue(self.system.backup_antenna.ignore_deployment_switch)
+
+    def test_deployment_finalization(self):
+        event = TestEvent()
+        self.system.backup_antenna.on_deployment_cancel = event.set
+        self.power_on_and_wait()
+        result = self.system.obc.antenna_cancel_deployment(AntennaChannel.Backup)
         self.assertTrue(event.wait_for_change(1))

@@ -94,15 +94,15 @@ TEST_F(AntennaMiniportTest, TestDisarmingDeploymentFailure)
 
 TEST_F(AntennaMiniportTest, TestAutomaticDeployment)
 {
-    EXPECT_CALL(i2c, I2CWrite(ANTENNA_PRIMARY_CHANNEL, StartDeployment, _, 1)).WillOnce(Return(I2CResultOK));
-    const auto status = miniport.InitializeAutomaticDeployment(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL);
+    EXPECT_CALL(i2c, I2CWrite(ANTENNA_PRIMARY_CHANNEL, StartDeployment, _, 2)).WillOnce(Return(I2CResultOK));
+    const auto status = miniport.InitializeAutomaticDeployment(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, TimeSpanFromSeconds(200));
     ASSERT_THAT(status, Eq(OSResultSuccess));
 }
 
 TEST_F(AntennaMiniportTest, TestAutomaticDeploymentFailure)
 {
-    EXPECT_CALL(i2c, I2CWrite(ANTENNA_PRIMARY_CHANNEL, StartDeployment, _, 1)).WillOnce(Return(I2CResultNack));
-    const auto status = miniport.InitializeAutomaticDeployment(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL);
+    EXPECT_CALL(i2c, I2CWrite(ANTENNA_PRIMARY_CHANNEL, StartDeployment, _, 2)).WillOnce(Return(I2CResultNack));
+    const auto status = miniport.InitializeAutomaticDeployment(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, TimeSpanFromSeconds(200));
     ASSERT_THAT(status, Ne(OSResultSuccess));
 }
 
@@ -208,7 +208,7 @@ TEST_F(AntennaMiniportTest, TestAntennaTemperature)
             outData[1] = 0x11;
             return I2CResultOK;
         }));
-    uint16_t response;
+    uint16_t response = 0;
     const auto status = miniport.GetTemperature(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, &response);
     ASSERT_THAT(status, Eq(OSResultSuccess));
     ASSERT_THAT(response, Eq(0x11));
