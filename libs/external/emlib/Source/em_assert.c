@@ -34,6 +34,8 @@
 #include "em_assert.h"
 #include <stdbool.h>
 
+extern void assertEFM(const char *file, int line);
+
 #if defined(DEBUG_EFM)
 
 /***************************************************************************//**

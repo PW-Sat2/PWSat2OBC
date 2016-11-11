@@ -1,2 +1,3 @@
 pybars
+path.py
 git+https://github.com/PW-Sat2/gcovr.git@pw-sat

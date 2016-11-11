@@ -1,5 +1,5 @@
 def build() {
-	bat "cmake -DSYS_BUS_COM=${env.SYS_BUS_COM} -DPAYLOAD_BUS_COM=${env.PAYLOAD_BUS_COM} -DOBC_COM=${env.OBC_COM} -DGPIO_COM=${env.GPIO_COM} -G \"MinGW Makefiles\" ../source"
+	bat "cmake -DSYS_BUS_COM=${env.SYS_BUS_COM} -DPAYLOAD_BUS_COM=${env.PAYLOAD_BUS_COM} -DOBC_COM=${env.OBC_COM} -DGPIO_COM=${env.GPIO_COM} -DCMAKE_BUILD_TYPE=Release -DUSE_SINGLE_BUS=0 -G \"MinGW Makefiles\" ../source"
 	bat "make pwsat"
 	step([$class: 'ArtifactArchiver', artifacts: 'build/DevBoard/**/*', fingerprint: true])
 }
@@ -42,7 +42,7 @@ def generateDoc() {
 }
 
 def coverage() {
-	bat "cmake -DENABLE_COVERAGE=1 ."
+	bat "cmake -DENABLE_COVERAGE=1 -DCMAKE_BUILD_TYPE=Debug ."
 	bat "make unit_tests.coverage"
 	publishHTML(target: [
 		allowMissing: false,
@@ -84,7 +84,7 @@ node {
 
 					stage 'Generate Documentation'
 					generateDoc()
-					
+
 					stage 'Code Coverage'
 					coverage()
 				}
