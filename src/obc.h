@@ -26,7 +26,8 @@ class TelecommandFrameUnpacker final : public IDecryptFrame, public IDecodeTelec
     virtual TeleCommandDecryptStatus Decrypt(
         gsl::span<const std::uint8_t> frame, gsl::span<std::uint8_t> decrypted, std::size_t& decryptedDataLength) override;
 
-    virtual void Decode(gsl::span<const std::uint8_t> frame, std::uint8_t& commandCode, gsl::span<const std::uint8_t>& parameters) override;
+    virtual TeleCommandDecodeFrameStatus Decode(
+        gsl::span<const std::uint8_t> frame, std::uint8_t& commandCode, gsl::span<const std::uint8_t>& parameters) override;
 };
 
 class PingTelecommand final : public IHandleTeleCommand

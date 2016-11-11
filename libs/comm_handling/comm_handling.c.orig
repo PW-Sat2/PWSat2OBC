@@ -50,12 +50,17 @@ static void HandleIncomingFrame(CommObject* comm, CommFrame* frame, void* contex
         return;
     }
 
-    uint8_t commandCode;
-    const uint8_t* commandParameters;
-    size_t commandParametersLength;
+    uint8_t commandCode = 0;
+    const uint8_t* commandParameters = NULL;
+    size_t commandParametersLength = 0;
 
-    self->DecodeFrame(
+    const TeleCommandDecodeFrameStatus decodeStatus = self->DecodeFrame(
         decryptedFrame, decryptedDetaLength, &commandCode, &commandParameters, &commandParametersLength, self->DecodeFrameContext);
+
+    if (decodeStatus != TeleCommandDecodeFrameOK)
+    {
+        return;
+    }
 
     DispatchCommandHandler(self, commandCode, commandParameters, commandParametersLength);
 }

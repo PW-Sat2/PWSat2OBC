@@ -12,6 +12,12 @@ enum class TeleCommandDecryptStatus
     Failed = 1
 };
 
+enum class TeleCommandDecodeFrameStatus
+{
+    OK,
+    Failed
+};
+
 struct IDecryptFrame
 {
     virtual TeleCommandDecryptStatus Decrypt(
@@ -20,7 +26,8 @@ struct IDecryptFrame
 
 struct IDecodeTelecommand
 {
-    virtual void Decode(gsl::span<const std::uint8_t> frame, std::uint8_t& commandCode, gsl::span<const std::uint8_t>& parameters) = 0;
+    virtual TeleCommandDecodeFrameStatus Decode(
+        gsl::span<const std::uint8_t> frame, std::uint8_t& commandCode, gsl::span<const std::uint8_t>& parameters) = 0;
 };
 
 struct IHandleTeleCommand
