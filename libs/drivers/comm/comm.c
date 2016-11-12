@@ -1,3 +1,8 @@
+/**
+@file Driver for communication module.
+
+@remarks Based on ICD Issue 1.0 2014-12-19
+*/
 #include "comm.h"
 #include <stddef.h>
 #include <stdlib.h>
