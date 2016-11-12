@@ -153,7 +153,7 @@ static void ClearState(OBC* obc)
 static void SetupAntennas(void)
 {
     AntennaMiniportInitialize(&Main.antennaMiniport);
-    AntennaDriverInitialize(&Main.antennaDriver, &Main.antennaMiniport, &Main.I2C.Bus, &Main.I2C.Payload);
+    AntennaDriverInitialize(&Main.antennaDriver, &Main.antennaMiniport, Main.I2C.Bus, Main.I2C.Payload);
 }
 
 static void ObcInitTask(void* param)
