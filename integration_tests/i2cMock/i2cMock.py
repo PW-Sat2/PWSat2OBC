@@ -122,6 +122,7 @@ class I2CMock(object):
         }
 
         self._started = Event()
+        self._reader_started = Event()
 
     def start(self):
         if self._active:
@@ -133,6 +134,8 @@ class I2CMock(object):
             self._freeze_end.clear()
 
         self._reader.start()
+        self._reader_started.wait()
+
         self._command(I2CMock.CMD_RESTART)
         self._log.debug('Waiting for mock to start')
         self._started.wait()
@@ -186,6 +189,8 @@ class I2CMock(object):
 
         self._port.reset_input_buffer()
         self._port.reset_output_buffer()
+
+        self._reader_started.set()
 
         try:
             while self._port.is_open:
