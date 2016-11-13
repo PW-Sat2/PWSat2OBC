@@ -41,7 +41,7 @@ typedef enum {
     SystemStateUpdateOK,
     /** @brief Non-critical error during update */
     SystemStateUpdateWarning,
-    /** @brief Fatal error durring update */
+    /** @brief Fatal error during update */
     SystemStateUpdateFailure
 } SystemStateUpdateResult;
 
@@ -103,7 +103,7 @@ typedef struct
  * @param[in] param Arbitrary parameter
  * @param[out] result Verification result
  */
-typedef void (*SystemStateVerifyProc)(const SystemState* state, void* param, SystemStateVerifyDescriptorResult* result);
+typedef SystemStateVerifyDescriptorResult (*SystemStateVerifyProc)(const SystemState* state, void* param);
 
 /**
  * @brief State verification descriptor

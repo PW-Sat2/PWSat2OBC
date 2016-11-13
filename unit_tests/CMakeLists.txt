@@ -80,6 +80,7 @@ target_link_libraries(${NAME}
     time
     gsl
     antenna
+    mission_antenna
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})

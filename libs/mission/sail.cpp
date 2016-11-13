@@ -16,9 +16,9 @@ static bool CanOpenSail(const SystemState* state, void* param)
 {
     UNREFERENCED_PARAMETER(param);
 
-    const TimePoint t = TimePointFromTimeSpan(TimeSpanFromHours(40));
+    const TimeSpan t = TimeSpanFromHours(40);
 
-    if (TimePointLessThan(state->Time, t))
+    if (TimeSpanLessThan(state->Time, t))
     {
         return false;
     }

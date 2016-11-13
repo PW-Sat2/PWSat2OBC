@@ -5,8 +5,6 @@
 void SystemStateEmpty(SystemState* state)
 {
     memset(state, 0, sizeof(SystemState));
-
-    state->NumValue = 100;
 }
 
 SystemStateUpdateResult SystemStateUpdate(
@@ -41,7 +39,7 @@ SystemStateVerifyResult SystemStateVerify(const SystemState* state,
 
     for (uint16_t i = 0; i < descriptorsCount; i++)
     {
-        descriptors[i].VerifyProc(state, descriptors[i].Param, &results[i]);
+        results[i] = descriptors[i].VerifyProc(state, descriptors[i].Param);
 
         if (results[i].Result == SystemStateVerifyFailure)
         {
