@@ -1,18 +1,12 @@
-#include <stdbool.h>
-#include <FreeRTOS.h>
-#include <task.h>
-
+#include "mission.h"
 #include "base/os.h"
 #include "logger/logger.h"
-#include "mission.h"
 #include "mission/adcs_mission.h"
 #include "mission/sail.h"
 #include "obc.h"
 #include "state/state.h"
 #include "system.h"
 #include "time/TimePoint.h"
-
-static TerminalCommand terminalCommand = TerminalCommandNone;
 
 /**
  * @brief Object describing which descriptors are available in specific mode
@@ -41,7 +35,7 @@ static SystemStateUpdateResult UpdateTime(SystemState* state, void* param)
 {
     UNREFERENCED_PARAMETER(param);
 
-    TimeGetCurrentMissionTime(&Main.timeProvider, &state->Time);
+    TimeGetCurrentTime(&Main.timeProvider, &state->Time);
 
     return SystemStateUpdateOK;
 }
@@ -112,21 +106,6 @@ static void MissionControlTask(void* param)
     }
 }
 
-static SystemStateUpdateResult UpdateCommandTerminal(SystemState* state, void* param)
-{
-    UNREFERENCED_PARAMETER(param);
-
-    state->RequestedCommand = terminalCommand;
-    terminalCommand = TerminalCommandNone;
-
-    return SystemStateUpdateOK;
-}
-
-void SetTerminalCommand(TerminalCommand command)
-{
-    terminalCommand = command;
-}
-
 void InitializeMission(MissionState* missionState, OBC* obc)
 {
     UNREFERENCED_PARAMETER(obc);
@@ -139,9 +118,5 @@ void InitializeMission(MissionState* missionState, OBC* obc)
     missionState->UpdateTime.Param = NULL;
     missionState->UpdateTime.UpdateProc = UpdateTime;
 
-    missionState->TerminalCommandUpdate.Name = "Terminal command";
-    missionState->TerminalCommandUpdate.Param = NULL;
-    missionState->TerminalCommandUpdate.UpdateProc = UpdateCommandTerminal;
-
-    System.CreateTask(MissionControlTask, "MissionControl", 2048, missionState, tskIDLE_PRIORITY + 2, NULL);
+    System.CreateTask(MissionControlTask, "MissionControl", 2048, missionState, 2, NULL);
 }

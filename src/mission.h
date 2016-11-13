@@ -1,14 +1,9 @@
 #ifndef SRC_MISSION_H_
 #define SRC_MISSION_H_
 
-#include <stdbool.h>
 #include "mission/adcs_mission.h"
 #include "obc.h"
 #include "state/state.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /** @brief Object with all state-related descriptors */
 typedef struct
@@ -41,15 +36,5 @@ typedef struct
  * @param[in] obc OBC interface
  */
 void InitializeMission(MissionState* missionState, OBC* obc);
-
-/**
- * @brief Sets terminal command to be taken into consideration in next loop
- * @param[in] command Terminal command
- */
-void SetTerminalCommand(TerminalCommand command);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* SRC_MISSION_H_ */

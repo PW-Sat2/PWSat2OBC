@@ -8,7 +8,6 @@ set(SOURCES
     commands/comm.cpp
     commands/antenna.cpp
     commands/file_system.cpp
-    commands/state_command.cpp
     commands/i2c_test_command.cpp
     obc.h
     obc.cpp
