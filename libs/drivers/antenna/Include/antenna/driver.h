@@ -164,22 +164,6 @@ struct AntennaChannelInfo
 };
 
 /**
- * @brief Structure containing status of antenna deployment process query.
- */
-struct AntennaDeploymentProcessStatus
-{
-    /** Antenna deployment process query status. */
-    OSResult status;
-
-    /**
-     * @brief Antenna Deployment process state.
-     *
-     * True when it is in progress, false otherwise.
-     */
-    bool delpoymentInProgress;
-};
-
-/**
  * @brief This is high level antenna driver responsible for coordinating
  * communication with the underlying hardware controllers responsible for
  * antenna deployment.
@@ -253,14 +237,6 @@ struct AntennaDriver
         TimeSpan timeout,
         bool overrideSwitches //
         );
-
-    /**
-     * @brief This procedure checks whether there is currently antenna deployment process in progress.
-     * @param[in] driver Current driver instance.
-     * @param[in] channel Queried hardware channel.
-     * @return Operation status.
-     */
-    AntennaDeploymentProcessStatus (*IsDeploymentActive)(struct AntennaDriver* driver, AntennaChannel channel);
 
     /**
      * @brief This procedure returns current global antenna deployment status as seen by the queried hardware channel.

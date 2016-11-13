@@ -120,5 +120,5 @@ void SystemAction::Execute(const SystemState* state)
 void showValue(const SystemState& state, std::ostream& os)
 {
     os << "time=" << state.Time.value << ", "
-       << "antennaDeployed=" << state.AntennaDeployed;
+       << "antennaDeployed=" << state.Antenna.Deployed;
 }

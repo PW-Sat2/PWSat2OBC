@@ -31,6 +31,7 @@ DeployAntennaActionTest::DeployAntennaActionTest() : runnable(false)
 {
     SystemStateEmpty(&state);
 
+    InitializeAntennaState(&stateDescriptor, nullptr);
     AntennaInitializeActionDescriptor(&stateDescriptor, &openAntenna);
 }
 
@@ -84,6 +85,6 @@ RC_GTEST_FIXTURE_PROP(DeployAntennaActionTest, CanOpenAntennaOnlyAfterSilentPhas
     if (runnable)
     {
         RC_ASSERT(TimeSpanFromMinutes(30) < state.Time);
-        RC_ASSERT(!state.AntennaDeployed);
+        RC_ASSERT(!state.Antenna.Deployed);
     }
 }

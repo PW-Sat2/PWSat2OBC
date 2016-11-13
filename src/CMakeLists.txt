@@ -47,6 +47,7 @@ target_link_libraries(${NAME}
     telecommand_handling
     gsl
     antenna
+    mission_antenna
 )
 
 target_generate_hex(${NAME})
