@@ -43,6 +43,7 @@ target_link_libraries(${NAME}
     assert
     gsl
     antenna
+    mission_antenna
 )
 
 target_generate_hex(${NAME})

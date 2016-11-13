@@ -23,10 +23,19 @@ typedef struct
 {
     /** @brief Current time */
     TimeSpan Time;
-    /** @brief Flag indicating that antenna has been deployed */
-    bool AntennaDeployed;
+
+    struct
+    {
+        /** @brief Flag indicating that antenna deployment process has been completed*/
+        bool Deployed;
+
+        /** @brief Array of flags containing antenna deloyment state. */
+        bool DeploymentState[4];
+    } Antenna;
+
     /** @brief Flag indicating that sail has been openned */
     bool SailOpened;
+
     /** @brief ADCS-related state */
     struct
     {

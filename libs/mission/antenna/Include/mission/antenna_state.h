@@ -10,11 +10,10 @@ EXTERNC_BEGIN
 
 typedef struct
 {
-    bool antennaDeployed;
     bool overrideState;
+    bool inProgress;
     uint8_t stepNumber;
     uint8_t retryCount;
-    AntennaChannel lastActiveChannel;
     AntennaDriver* driver;
 } AntennaMissionState;
 
@@ -25,6 +24,25 @@ void AntennaInitializeActionDescriptor(AntennaMissionState* stateDescriptor,
 void InitializeAntennaState(AntennaDriver* driver,
     AntennaMissionState* antennaState //
     );
+
+void AntennaInitializeUpdateDescriptor(AntennaMissionState* stateDescriptor,
+    SystemStateUpdateDescriptor* descriptor //
+    );
+
+static void AntennaDeploymentRestart(AntennaMissionState* stateDescriptor);
+
+static void AntennaDeploymentOverride(AntennaMissionState* stateDescriptor);
+
+inline void AntennaDeploymentRestart(AntennaMissionState* stateDescriptor)
+{
+    stateDescriptor->stepNumber = 0;
+    stateDescriptor->retryCount = 0;
+}
+
+inline void AntennaDeploymentOverride(AntennaMissionState* stateDescriptor)
+{
+    stateDescriptor->overrideState = true;
+}
 
 EXTERNC_END
 

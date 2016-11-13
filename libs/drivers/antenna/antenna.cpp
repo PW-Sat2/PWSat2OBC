@@ -110,24 +110,6 @@ static OSResult FinishDeployment(struct AntennaDriver* driver, AntennaChannel ch
         );
 }
 
-static AntennaDeploymentProcessStatus IsDeploymentActive(struct AntennaDriver* driver, AntennaChannel channel)
-{
-    AntennaDeploymentStatus response = {};
-    AntennaChannelInfo* hardwareChannel = GetChannel(driver, channel);
-    const OSResult result = driver->miniport->GetDeploymentStatus(driver->miniport,
-        hardwareChannel->communicationBus,
-        channel,
-        &response //
-        );
-    AntennaDeploymentProcessStatus status;
-    status.status = result;
-    status.delpoymentInProgress = response.IsDeploymentActive[0] | //
-        response.IsDeploymentActive[1] |                           //
-        response.IsDeploymentActive[2] |                           //
-        response.IsDeploymentActive[3];
-    return status;
-}
-
 static OSResult GetTemperature(struct AntennaDriver* driver,
     AntennaChannel channel,
     uint16_t* temperature //
@@ -298,7 +280,6 @@ void AntennaDriverInitialize(AntennaDriver* driver,
     driver->HardReset = HardReset;
     driver->DeployAntenna = DeployAntenna;
     driver->FinishDeployment = FinishDeployment;
-    driver->IsDeploymentActive = IsDeploymentActive;
     driver->GetDeploymentStatus = GetDeploymentStatus;
     driver->GetTemperature = GetTemperature;
     driver->GetTelemetry = GetTelemetry;
