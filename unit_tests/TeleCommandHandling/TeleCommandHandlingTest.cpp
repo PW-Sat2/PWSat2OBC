@@ -6,7 +6,7 @@
 #include "gmock/gmock.h"
 
 #include "comm/comm.h"
-#include "comm_handling/comm_handling.h"
+#include "telecommand_handling/telecommand_handling.h"
 #include "utils.hpp"
 
 using testing::Test;
