@@ -1,7 +1,7 @@
-set(NAME comm_handling)
+set(NAME telecommand_handling)
 
 set(SOURCES
-    comm_handling.cpp
+    telecommand_handling.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

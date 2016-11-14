@@ -2,9 +2,9 @@
 #include <stdint.h>
 #include <em_aes.h>
 
-#include "comm_handling.h"
 #include "logger/logger.h"
 #include "platform.h"
+#include "telecommand_handling.h"
 
 using devices::comm::CommObject;
 using devices::comm::CommFrame;
