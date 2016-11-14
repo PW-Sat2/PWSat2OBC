@@ -62,7 +62,7 @@ target_link_libraries(${NAME}
     yaffs
     storage
     comm
-    comm_handling
+    telecommand_handling
     fs    
     base
     mission
