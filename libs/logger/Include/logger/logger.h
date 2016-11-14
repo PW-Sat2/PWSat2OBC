@@ -173,7 +173,7 @@ void LogRemoveEndpoint(LoggerProcedure endpoint);
  * @param[in] messageLevel Requested message logging level.
  * @param[in] message Logged message.
  */
-void LogMessage(bool withinIsr, enum LogLevel messageLevel, const char* message, ...);
+void LogMessage(bool withinIsr, enum LogLevel messageLevel, const char* message, ...) __attribute__((format(printf, 3, 4)));
 
 /** @}*/
 
