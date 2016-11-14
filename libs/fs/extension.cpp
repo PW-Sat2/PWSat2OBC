@@ -1,5 +1,6 @@
 #include "fs.h"
 #include "logger/logger.h"
+#include "system.h"
 
 bool FileSystemSaveToFile(FileSystem* fs, const char* file, const uint8_t* buffer, FSFileSize length)
 {
@@ -14,7 +15,7 @@ bool FileSystemSaveToFile(FileSystem* fs, const char* file, const uint8_t* buffe
     const bool status = OS_RESULT_SUCCEEDED(writeResult.Status) && writeResult.BytesTransferred == length;
     if (!status)
     {
-        LOGF(LOG_LEVEL_WARNING, "Unable to update file: %s. Status: 0x%08x", file, writeResult.Status);
+        LOGF(LOG_LEVEL_WARNING, "Unable to update file: %s. Status: 0x%08x", file, num(writeResult.Status));
     }
 
     fs->close(fs, result.Handle);
@@ -34,7 +35,7 @@ bool FileSystemReadFile(FileSystem* fs, const char* const filePath, uint8_t* buf
     const bool status = OS_RESULT_SUCCEEDED(readResult.Status) && readResult.BytesTransferred == length;
     if (!status)
     {
-        LOGF(LOG_LEVEL_WARNING, "Unable to read file: %s. Status: 0x%08x", filePath, readResult.Status);
+        LOGF(LOG_LEVEL_WARNING, "Unable to read file: %s. Status: 0x%08x", filePath, num(readResult.Status));
     }
 
     fs->close(fs, result.Handle);

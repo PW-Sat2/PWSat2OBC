@@ -2,6 +2,7 @@
 #define SRC_SYSTEM_H_
 
 #include <stddef.h>
+#include <type_traits>
 
 /**
  * @brief Macro for stating that routine parameter is not used.
@@ -46,5 +47,10 @@
 #define IS_BIT_SET(value, bit) (((value) & (1u << bit)) == (1 << bit))
 
 #define IS_BIT_CLEAR(value, bit) (((value) & (1u << bit)) == 0)
+
+template <typename Enum> typename std::underlying_type_t<Enum> num(Enum v)
+{
+    return static_cast<std::underlying_type_t<Enum>>(v);
+}
 
 #endif

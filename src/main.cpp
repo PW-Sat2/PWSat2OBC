@@ -150,7 +150,7 @@ static void ClearState(OBC* obc)
         }
         else
         {
-            LOGF(LOG_LEVEL_ERROR, "Error formatting flash %d", status);
+            LOGF(LOG_LEVEL_ERROR, "Error formatting flash %d", num(status));
         }
     }
 }

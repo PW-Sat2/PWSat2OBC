@@ -131,7 +131,7 @@ SPI_TransferReturn_t ADXRS453_GetRate(ADXRS453_Obj_t* gyro, SPIDRV_Handle_t hand
     else
     {
         LOGF(LOG_LEVEL_ERROR,
-            "[adxrs] Unable to get rate, write code %d read code %d",
+            "[adxrs] Unable to get rate, write code %ld read code %ld",
             transferReturn.resultCodes.resultCodeWrite,
             transferReturn.resultCodes.resultCodeRead);
     }
@@ -155,7 +155,7 @@ SPI_TransferReturn_t ADXRS453_GetTemperature(ADXRS453_Obj_t* gyro, SPIDRV_Handle
     else
     {
         LOGF(LOG_LEVEL_ERROR,
-            "[adxrs] Unable to get temperature, write code %d read code %d",
+            "[adxrs] Unable to get temperature, write code %ld read code %ld",
             transferReturn.resultCodes.resultCodeWrite,
             transferReturn.resultCodes.resultCodeRead);
     }
