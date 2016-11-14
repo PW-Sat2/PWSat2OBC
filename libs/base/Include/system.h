@@ -1,6 +1,8 @@
 #ifndef SRC_SYSTEM_H_
 #define SRC_SYSTEM_H_
 
+#include <stddef.h>
+
 /**
  * @brief Macro for stating that routine parameter is not used.
  */
@@ -40,5 +42,7 @@
 #endif
 
 #define HAS_FLAG(value, flag) (((value) & (flag)) == (flag))
+
+size_t RoundToMultiply(size_t value, size_t base);
 
 #endif

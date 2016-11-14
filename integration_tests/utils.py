@@ -11,14 +11,14 @@ def hex_data(data):
 def pad_to_multiply(s, base):
     l = base - len(s) % base
     if l < base:
-        padding = '=' * l
+        padding = char * l
     else:
         padding = ''
     return s + padding
 
 
 def b64pad(s):
-    return pad_to_multiply(s, 3)
+    return pad_to_multiply(s, 3, '=')
 
 
 class ExtendableFormatter(Formatter):

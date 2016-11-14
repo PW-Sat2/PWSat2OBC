@@ -4,6 +4,7 @@ set(SOURCES
     reader.cpp
     writer.cpp
     ecc.cpp
+    utils.cpp
     Include/base/reader.h
     Include/base/writer.h
     Include/system.h
