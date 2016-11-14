@@ -67,7 +67,8 @@ target_link_libraries(${NAME}
     yaffs
     storage
     comm
-    fs
+    comm_handling
+    fs    
     base
     mission
     rapidcheck

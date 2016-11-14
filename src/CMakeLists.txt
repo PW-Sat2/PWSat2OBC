@@ -42,6 +42,7 @@ target_link_libraries(${NAME}
     power_eps
     terminal
     assert
+    comm_handling
     gsl
     antenna
 )
