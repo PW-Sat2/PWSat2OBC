@@ -1,6 +1,8 @@
 #ifndef SRC_SYSTEM_H_
 #define SRC_SYSTEM_H_
 
+#include <stddef.h>
+
 /**
  * @brief Macro for stating that routine parameter is not used.
  */

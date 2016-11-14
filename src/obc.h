@@ -8,6 +8,7 @@
 #include "antenna/miniport.h"
 #include "base/os.h"
 #include "comm/comm.h"
+#include "comm_handling/comm_handling.h"
 #include "fs/fs.h"
 #include "i2c/i2c.h"
 #include "leuart/line_io.h"
@@ -75,7 +76,7 @@ struct OBC
     PowerControl PowerControlInterface;
 
     /** @brief Incoming frame handler */
-    DummyFrameHandler FrameHandler;
+    IncomingTelecommandHandler FrameHandler;
 
     /** @brief Comm driver object. */
     devices::comm::CommObject comm;
