@@ -162,32 +162,8 @@ struct IHandleFrame
     virtual void HandleFrame(CommObject* comm, CommFrame* frame, void* context) = 0;
 };
 
-/**
- * @brief This type describe comm driver global state.
- *
- * @remark Do not access directly the fields of this type, instead use the comm driver interface to
- * perform requested action.
- */
-class CommObject final
-{
-  public:
-    CommObject(I2CBus& low, IHandleFrame& upperInterface);
-
-    /** @brief Comm driver lower interface. */
-    I2CBus& low;
-
-    /** @brief Comm driver upper interface. */
-    IHandleFrame& upper;
-
-    /** @brief Handle to comm background task. */
-    void* commTask;
-
-    /** @brief Handle to event group used to communicate with background task. */
-    OSEventGroupHandle commTaskFlags;
-};
-
 /** Type that contains status of the frame count query. */
-typedef struct
+struct CommReceiverFrameCount
 {
     /** @brief Frame count query status. */
     bool status;
@@ -198,7 +174,7 @@ typedef struct
      * The contents of this field is undefined when the status is set to false.
      */
     uint8_t frameCount;
-} CommReceiverFrameCount;
+};
 
 /** Transmitter state enumerator. */
 typedef enum {
@@ -238,185 +214,183 @@ typedef struct
 } CommTransmitterState;
 
 /**
- * @brief This procedure initializes the comm driver object and sets it 'Paused' state.
+ * @brief This type describe comm driver global state.
  *
- * @param[out] comm Pointer to comm object that should be initialized.
- * @param[in] i2c Pointer to the object implementing I2C interface.
- * @param[in] upperInterface Pointer to the object implementing comm driver upper interface.
- * @return Operation status.
- *
- * @remark Both lower & upper interfaces are copied into the comm object itself therefore the caller
- * does not have to worry about ensuring that those objects have to outlast the comm driver object itself.
- *
- * This procedure does not verify whether the passed comm object has already been properly initialized, calling
- * this method twice on the same comm object is undefined behavior.
+ * @remark Do not access directly the fields of this type, instead use the comm driver interface to
+ * perform requested action.
  */
-OSResult CommInitialize(CommObject* comm);
+class CommObject final
+{
+  public:
+    CommObject(I2CBus& low, IHandleFrame& upperInterface);
 
-/**
- * @brief Pauses comm driver.
- *
- * @param[in] comm Pointer to comm object that should be moved to 'Paused' state.
- *
- * This procedure suspends execution of the comm driver background tasks and moves that driver itself to 'Paused'
- * (passive) state. This method will not stop already ongoing communication with the hardware.
- *
- * Calling this method twice without intermediate call to CommRestart causes caller to hang until someone else
- * resumes the driver.
- *
- * @return Operation status, true in case of success, false otherwise.
- */
-bool CommPause(CommObject* comm);
+    /**
+     * @brief This procedure initializes the comm driver object and sets it 'Paused' state.
+     *
+     * @return Operation status.
+     *
+     * This procedure does not verify whether the passed comm object has already been properly initialized, calling
+     * this method twice on the same comm object is undefined behavior.
+     */
+    OSResult Initialize();
 
-/**
- * @brief Restarts the comm driver.
- *
- * @param[in] comm Pointer to comm object that should be restarted (moved to 'Running' state).
- * @return Operation status, true in case of success, false otherwise.
- *
- * During the driver restart process entire hardware is being reseted, and all of the background
- * tasks are being started.
- *
- * Calling this method twice without intermediate call to the CommPause procedure leads to undefined behavior.
- */
-bool CommRestart(CommObject* comm);
+    /**
+     * @brief Pauses comm driver.
+     *
+     * This procedure suspends execution of the comm driver background tasks and moves that driver itself to 'Paused'
+     * (passive) state. This method will not stop already ongoing communication with the hardware.
+     *
+     * Calling this method twice without intermediate call to CommRestart causes caller to hang until someone else
+     * resumes the driver.
+     *
+     * @return Operation status, true in case of success, false otherwise.
+     */
+    bool Pause();
 
-/**
- * @brief Queries comm driver for a number of received and not yet processed frames.
- *
- * @param[in] comm Pointer to queried comm driver object.
- * @return Operation status. See the definition of the CommReceiverFrameCount for details.
- */
-CommReceiverFrameCount CommGetFrameCount(CommObject* comm);
+    /**
+     * @brief Restarts the comm driver.
+     *
+     * @return Operation status, true in case of success, false otherwise.
+     *
+     * During the driver restart process entire hardware is being reseted, and all of the background
+     * tasks are being started.
+     *
+     * Calling this method twice without intermediate call to the CommPause procedure leads to undefined behavior.
+     */
+    bool Restart();
 
-/**
- * @brief Removes the oldest frame from the input frame buffer.
- *
- * @param[in] comm Pointer to the affected comm driver.
- * @return Operation status, true in case of success, false otherwise.
- */
-bool CommRemoveFrame(CommObject* comm);
+    /**
+     * @brief Queries comm driver for a number of received and not yet processed frames.
+     *
+     * @return Operation status. See the definition of the CommReceiverFrameCount for details.
+     */
+    CommReceiverFrameCount GetFrameCount();
 
-/**
- * @brief Queries the comm driver for the receiver telemetry.
- *
- * @param[in] comm Pointer to queried comm driver object.
- * @param[out] telemetry Pointer to object that should be filled with current receiver telemetry.
- * @return Operation status, true in case of success, false otherwise.
- *
- * The contents of the telemetry object is undefined in case of the failure.
- */
-bool CommGetReceiverTelemetry(CommObject* comm, CommReceiverTelemetry* telemetry);
+    /**
+     * @brief Removes the oldest frame from the input frame buffer.
+     *
+     * @return Operation status, true in case of success, false otherwise.
+     */
+    bool RemoveFrame();
 
-/**
- * @brief Queries the comm driver for the transmitter telemetry.
- *
- * @param[in] comm Pointer to queried comm driver object.
- * @param[out] telemetry Pointer to object that should be filled with current transmitter telemetry.
- * @return Operation status, true in case of success, false otherwise.
- *
- * The contents of the telemetry object is undefined in case of the failure.
- */
-bool CommGetTransmitterTelemetry(CommObject* comm, CommTransmitterTelemetry* telemetry);
+    /**
+     * @brief Queries the comm driver for the receiver telemetry.
+     *
+     * @param[out] telemetry Pointer to object that should be filled with current receiver telemetry.
+     * @return Operation status, true in case of success, false otherwise.
+     *
+     * The contents of the telemetry object is undefined in case of the failure.
+     */
+    bool GetReceiverTelemetry(CommReceiverTelemetry* telemetry);
 
-/**
- * @brief Adds the requested frame to the send queue.
- *
- * @param[in] comm Pointer to comm driver object that should send the requested frame.
- * @param[in] data Pointer to buffer that contains the frame contents.
- * @param[in] length Size of the frame contents in bytes. This value cannot be
- * greater then COMM_MAX_FRAME_CONTENTS_SIZE.
- * @return Operation status, true in case of success, false otherwise.
- */
-bool CommSendFrame(CommObject* comm, uint8_t* data, uint8_t length);
+    /**
+     * @brief Queries the comm driver for the transmitter telemetry.
+     *
+     * @param[out] telemetry Pointer to object that should be filled with current transmitter telemetry.
+     * @return Operation status, true in case of success, false otherwise.
+     *
+     * The contents of the telemetry object is undefined in case of the failure.
+     */
+    bool GetTransmitterTelemetry(CommTransmitterTelemetry* telemetry);
 
-/**
- * @brief Requests the contents of the oldest received frame from the queue.
- *
- * @param[in] comm Pointer to queried comm driver object.
- * @param[out] frame Pointer to object that should be filled with the data describing the oldest
- * available received frame.
- * @return Operation status, true in case of success, false otherwise.
- * @ingroup LowerCommDriverLowInterface
- * The contents of the frame object is undefined in case of the failure.
- */
-bool CommReceiveFrame(CommObject* comm, CommFrame* frame);
+    /**
+     * @brief Adds the requested frame to the send queue.
+     *
+     * @param[in] data Pointer to buffer that contains the frame contents.
+     * @param[in] length Size of the frame contents in bytes. This value cannot be
+     * greater then COMM_MAX_FRAME_CONTENTS_SIZE.
+     * @return Operation status, true in case of success, false otherwise.
+     */
+    bool SendFrame(uint8_t* data, uint8_t length);
 
-/**
- * @brief This procedure sets the beacon frame for the passed comm object.
- *
- * @param[in] comm Pointer to affected comm driver object.
- * @param[in] beaconData Pointer to object describing new beacon.
- * See the definition of the CommBeacon for details.
- * @return Operation status, true in case of success, false otherwise.
- */
-bool CommSetBeacon(CommObject* comm, const CommBeacon* beaconData);
+    /**
+     * @brief Requests the contents of the oldest received frame from the queue.
+     *
+     * @param[out] frame Pointer to object that should be filled with the data describing the oldest
+     * available received frame.
+     * @return Operation status, true in case of success, false otherwise.
+     *
+     * The contents of the frame object is undefined in case of the failure.
+     */
+    bool ReceiveFrame(CommFrame* frame);
 
-/**
- * @brief Clears any beacon that is currently set in the transceiver. If a beacon transmission
- * is currently in progress, this transmission will be completed.
- *
- * @param[in] comm Pointer to affected comm driver object.
- * @return Operation status, true in case of success, false otherwise.
- */
-bool CommClearBeacon(CommObject* comm);
+    /**
+     * @brief This procedure sets the beacon frame for the passed comm object.
+     *
+     * @param[in] beaconData Pointer to object describing new beacon.
+     * See the definition of the CommBeacon for details.
+     * @return Operation status, true in case of success, false otherwise.
+     */
+    bool SetBeacon(const CommBeacon* beaconData);
 
-/**
- * @brief Set the transmitter state when there are no more frames to sent.
- *
- * @param[in] comm Pointer to affected comm driver object.
- * @param[in] requestedState New transmitter state when it is idle.
- * @return Operation status, true in case of success, false otherwise.
- */
-bool CommSetTransmitterStateWhenIdle(CommObject* comm, CommTransmitterIdleState requestedState);
+    /**
+     * @brief Clears any beacon that is currently set in the transceiver. If a beacon transmission
+     * is currently in progress, this transmission will be completed.
+     *
+     * @return Operation status, true in case of success, false otherwise.
+     */
+    bool ClearBeacon();
 
-/**
- * @brief Set the transmitter baud rate.
- *
- * @param[in] comm Pointer to affected comm driver object.
- * @param[in] bitrate New transmitter baud rate.
- * @return Operation status, true in case of success, false otherwise.
- */
-bool CommSetTransmitterBitRate(CommObject* comm, CommTransmitterBitrate bitrate);
+    /**
+     * @brief Set the transmitter state when there are no more frames to sent.
+     *
+     * @param[in] requestedState New transmitter state when it is idle.
+     * @return Operation status, true in case of success, false otherwise.
+     */
+    bool SetTransmitterStateWhenIdle(CommTransmitterIdleState requestedState);
 
-/**
- * @brief Queries the comm driver object for current transmitter state.
- *
- * @param[in] comm Pointer to queried comm driver object.
- * @param[out] state Pointer to object that should be filled with the data describing
- * the current transmitter state.
- * @return Operation status, true in case of success, false otherwise.
- *
- * The contents of the state object is undefined in case of the failure.
- */
-bool CommGetTransmitterState(CommObject* comm, CommTransmitterState* state);
+    /**
+     * @brief Set the transmitter baud rate.
+     *
+     * @param[in] bitrate New transmitter baud rate.
+     * @return Operation status, true in case of success, false otherwise.
+     */
+    bool SetTransmitterBitRate(CommTransmitterBitrate bitrate);
 
-/**
- * @brief Resets the hardware associated with the requested comm object.
- *
- * @param[in] comm Pointer to comm whose hardware should should be restarted.
- * @return Operation status, true in case of success, false otherwise.
- * @ingroup LowerCommDriverLowInterface
- */
-bool CommReset(CommObject* comm);
+    /**
+     * @brief Queries the comm driver object for current transmitter state.
+     *
+     * @param[out] state Pointer to object that should be filled with the data describing
+     * the current transmitter state.
+     * @return Operation status, true in case of success, false otherwise.
+     *
+     * The contents of the state object is undefined in case of the failure.
+     */
+    bool GetTransmitterState(CommTransmitterState* state);
 
-/**
- * @brief Resets the transmitter hardware associated with the requested comm object.
- *
- * @param[in] comm Pointer to comm whose transmitter hardware should should be restarted.
- * @return Operation status, true in case of success, false otherwise.
- * @ingroup LowerCommDriverLowInterface
- */
-bool CommResetTransmitter(CommObject* comm);
+    /**
+     * @brief Resets the hardware associated with the requested comm object.
+     *
+     * @return Operation status, true in case of success, false otherwise.
+     */
+    bool Reset();
 
-/**
- * @brief Resets the receiver hardware associated with the requested comm object.
- *
- * @param[in] comm Pointer to comm whose receiver hardware should should be restarted.
- * @return Operation status, true in case of success, false otherwise.
- * @ingroup LowerCommDriverLowInterface
- */
-bool CommResetReceiver(CommObject* comm);
+    /**
+     * @brief Resets the transmitter hardware associated with the requested comm object.
+     *
+     * @return Operation status, true in case of success, false otherwise.
+     */
+    bool ResetTransmitter();
+
+    /**
+     * @brief Resets the receiver hardware associated with the requested comm object.
+     *
+     * @return Operation status, true in case of success, false otherwise.
+     */
+    bool ResetReceiver();
+
+    /** @brief Comm driver lower interface. */
+    I2CBus& low;
+
+    /** @brief Comm driver upper interface. */
+    IHandleFrame& upper;
+
+    /** @brief Handle to comm background task. */
+    void* commTask;
+
+    /** @brief Handle to event group used to communicate with background task. */
+    OSEventGroupHandle commTaskFlags;
+};
 
 /** @}*/
 

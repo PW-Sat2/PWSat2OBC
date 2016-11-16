@@ -166,7 +166,7 @@ static void ObcInitTask(void* param)
         LOG(LOG_LEVEL_ERROR, "Unable to initialize persistent timer. ");
     }
 
-    if (!CommRestart(&obc->comm))
+    if (!obc->comm.Restart())
     {
         LOG(LOG_LEVEL_ERROR, "Unable to restart comm");
     }
@@ -182,7 +182,7 @@ void DummyFrameHandler::HandleFrame(CommObject* comm, CommFrame* frame, void* co
 {
     UNREFERENCED_PARAMETER(context);
     UNREFERENCED_PARAMETER(frame);
-    CommSendFrame(comm, (uint8_t*)"PONG", 4);
+    comm->SendFrame((uint8_t*)"PONG", 4);
 }
 
 void ADXRS(void* param)
@@ -305,7 +305,7 @@ int main(void)
 
     EPSPowerControlInitialize(&Main.PowerControlInterface);
 
-    CommInitialize(&Main.comm);
+    Main.comm.Initialize();
 
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 

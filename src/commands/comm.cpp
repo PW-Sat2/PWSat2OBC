@@ -12,7 +12,7 @@ void SendFrameHandler(uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argc);
     uint8_t len = strlen(argv[0]);
     LOGF(LOG_LEVEL_INFO, "Received request to send frame of length %d...", len);
-    CommSendFrame(&Main.comm, (uint8_t*)argv[0], len);
+    Main.comm.SendFrame((uint8_t*)argv[0], len);
 }
 
 void GetFramesCountHandler(uint16_t argc, char* argv[])
@@ -20,7 +20,7 @@ void GetFramesCountHandler(uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
     LOG(LOG_LEVEL_INFO, "Received request to get the number of received frames from comm...");
-    CommReceiverFrameCount count = CommGetFrameCount(&Main.comm);
+    CommReceiverFrameCount count = Main.comm.GetFrameCount();
     if (count.status)
     {
         TerminalPrintf(&Main.terminal, "%d\n", count.frameCount);
@@ -34,13 +34,13 @@ void ReceiveFrameHandler(uint16_t argc, char* argv[])
     LOG(LOG_LEVEL_INFO, "Received request to get the oldes frame from comm...");
     CommFrame frame;
     memset(frame.Contents, 0, sizeof(frame.Contents));
-    if (!CommReceiveFrame(&Main.comm, &frame))
+    if (!Main.comm.ReceiveFrame(&frame))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to get frame from comm. ");
     }
     else
     {
-        CommRemoveFrame(&Main.comm);
+        Main.comm.RemoveFrame();
         TerminalPuts(&Main.terminal, (const char*)frame.Contents);
     }
 }
@@ -50,7 +50,7 @@ void CommandPauseComm(uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
     LOG(LOG_LEVEL_INFO, "Received request to pause comm...");
-    CommPause(&Main.comm);
+    Main.comm.Pause();
     LOG(LOG_LEVEL_INFO, "Comm paused as requested...");
 }
 
