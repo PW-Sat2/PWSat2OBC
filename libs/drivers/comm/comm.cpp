@@ -20,21 +20,18 @@ CommObject::CommObject(I2CBus& low, IHandleFrame& upperInterface)
 {
 }
 
-typedef enum {
-    CommReceiver = 0x60,
-    CommTransmitter = 0x62,
-} CommAddress;
-
-typedef enum {
+enum ReceiverCommand
+{
     CommHardReset = 0xAB,
     ReceiverSoftReset = 0xAA,
     ReceiverGetFrameCount = 0x21,
     ReceiverGetFrame = 0x22,
     ReceiverRemoveFrame = 0x24,
     ReceiverGetTelemetry = 0x1A,
-} ReceiverCommand;
+};
 
-typedef enum {
+enum TransmitterCommand
+{
     TransmitterSoftReset = 0xAA,
     TransmitterSendFrame = 0x10,
     TransmitterGetTelemetry = 0x25,
@@ -43,18 +40,17 @@ typedef enum {
     TransmitterSetIdleState = 0x24,
     TransmitterSetBitRate = 0x28,
     TransmitterGetState = 0x41
-} TransmitterCommand;
+};
 
-typedef enum {
+enum TaskFlag
+{
     TaskFlagPauseRequest = 1,
     TaskFlagAck = 2,
-} TaskFlag;
+};
 
-[[noreturn]] static void CommTask(void* param);
-
-static bool SendCommand(CommObject* object, CommAddress address, uint8_t command)
+bool CommObject::SendCommand(CommAddress address, uint8_t command)
 {
-    const I2CResult result = object->low.Write(&object->low, address, &command, sizeof(command));
+    const I2CResult result = this->low.Write(&this->low, address, &command, sizeof(command));
     const bool status = (result == I2CResultOK);
     if (!status)
     {
@@ -64,9 +60,9 @@ static bool SendCommand(CommObject* object, CommAddress address, uint8_t command
     return status;
 }
 
-static bool SendCommandWithResponse(CommObject* object, CommAddress address, uint8_t command, uint8_t* outBuffer, uint8_t outBufferSize)
+bool CommObject::SendCommandWithResponse(CommAddress address, uint8_t command, uint8_t* outBuffer, uint8_t outBufferSize)
 {
-    const I2CResult result = object->low.WriteRead(&object->low, address, &command, sizeof(command), outBuffer, outBufferSize);
+    const I2CResult result = this->low.WriteRead(&this->low, address, &command, sizeof(command), outBuffer, outBufferSize);
     const bool status = (result == I2CResultOK);
     if (!status)
     {
@@ -99,7 +95,7 @@ bool CommObject::Restart()
 
     if (this->commTask == NULL)
     {
-        const OSResult result = System.CreateTask(CommTask, "COMM Task", 512, this, 4, &this->commTask);
+        const OSResult result = System.CreateTask(CommObject::CommTask, "COMM Task", 512, this, 4, &this->commTask);
         if (result != OSResultSuccess)
         {
             LOGF(LOG_LEVEL_ERROR, "[comm] Unable to create background task. Status: 0x%08x.", result);
@@ -123,24 +119,24 @@ bool CommObject::Pause()
 
 bool CommObject::Reset()
 {
-    return SendCommand(this, CommReceiver, CommHardReset) && this->ResetReceiver() && this->ResetTransmitter();
+    return this->SendCommand(CommReceiver, CommHardReset) && this->ResetReceiver() && this->ResetTransmitter();
 }
 
 bool CommObject::ResetTransmitter()
 {
-    return SendCommand(this, CommTransmitter, TransmitterSoftReset);
+    return this->SendCommand(CommTransmitter, TransmitterSoftReset);
 }
 
 bool CommObject::ResetReceiver()
 {
-    return SendCommand(this, CommReceiver, ReceiverSoftReset);
+    return this->SendCommand(CommReceiver, ReceiverSoftReset);
 }
 
 CommReceiverFrameCount CommObject::GetFrameCount()
 {
     CommReceiverFrameCount result;
     uint8_t count = 0;
-    result.status = SendCommandWithResponse(this, CommReceiver, ReceiverGetFrameCount, &count, sizeof(count));
+    result.status = this->SendCommandWithResponse(CommReceiver, ReceiverGetFrameCount, &count, sizeof(count));
     if (result.status)
     {
         LOGF(LOG_LEVEL_INFO, "There are %d frames.", (int)count);
@@ -157,7 +153,7 @@ CommReceiverFrameCount CommObject::GetFrameCount()
 
 bool CommObject::RemoveFrame()
 {
-    const bool status = SendCommand(this, CommReceiver, ReceiverRemoveFrame);
+    const bool status = this->SendCommand(CommReceiver, ReceiverRemoveFrame);
     if (!status)
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Failed to remove frame from buffer");
@@ -166,10 +162,10 @@ bool CommObject::RemoveFrame()
     return status;
 }
 
-bool CommObject::GetReceiverTelemetry(CommReceiverTelemetry* telemetry)
+bool CommObject::GetReceiverTelemetry(CommReceiverTelemetry& telemetry)
 {
     uint8_t buffer[sizeof(CommReceiverTelemetry)];
-    const bool status = SendCommandWithResponse(this, CommReceiver, ReceiverGetTelemetry, buffer, COUNT_OF(buffer));
+    const bool status = this->SendCommandWithResponse(CommReceiver, ReceiverGetTelemetry, buffer, COUNT_OF(buffer));
     if (!status)
     {
         return status;
@@ -177,18 +173,21 @@ bool CommObject::GetReceiverTelemetry(CommReceiverTelemetry* telemetry)
 
     Reader reader;
     ReaderInitialize(&reader, buffer, COUNT_OF(buffer));
-    telemetry->TransmitterCurrentConsumption = ReaderReadWordLE(&reader);
-    telemetry->DopplerOffset = ReaderReadWordLE(&reader);
-    telemetry->ReceiverCurrentConsumption = ReaderReadWordLE(&reader);
-    telemetry->Vcc = ReaderReadWordLE(&reader);
-    telemetry->OscilatorTemperature = ReaderReadWordLE(&reader);
-    telemetry->AmplifierTemperature = ReaderReadWordLE(&reader);
-    telemetry->SignalStrength = ReaderReadWordLE(&reader);
+    telemetry.TransmitterCurrentConsumption = ReaderReadWordLE(&reader);
+    telemetry.DopplerOffset = ReaderReadWordLE(&reader);
+    telemetry.ReceiverCurrentConsumption = ReaderReadWordLE(&reader);
+    telemetry.Vcc = ReaderReadWordLE(&reader);
+    telemetry.OscilatorTemperature = ReaderReadWordLE(&reader);
+    telemetry.AmplifierTemperature = ReaderReadWordLE(&reader);
+    telemetry.SignalStrength = ReaderReadWordLE(&reader);
 
-    if ((telemetry->TransmitterCurrentConsumption & 0xf000) != 0 || (telemetry->DopplerOffset & 0xf000) != 0 ||
-        (telemetry->ReceiverCurrentConsumption & 0xf000) != 0 || (telemetry->Vcc & 0xf000) != 0 ||
-        (telemetry->OscilatorTemperature & 0xf000) != 0 || (telemetry->AmplifierTemperature & 0xf000) != 0 ||
-        (telemetry->SignalStrength & 0xf000) != 0)
+    if ((telemetry.TransmitterCurrentConsumption & 0xf000) != 0 || //
+        (telemetry.DopplerOffset & 0xf000) != 0 ||                 //
+        (telemetry.ReceiverCurrentConsumption & 0xf000) != 0 ||    //
+        (telemetry.Vcc & 0xf000) != 0 ||                           //
+        (telemetry.OscilatorTemperature & 0xf000) != 0 ||          //
+        (telemetry.AmplifierTemperature & 0xf000) != 0 ||          //
+        (telemetry.SignalStrength & 0xf000) != 0)
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Received invalid receiver telemetry. ");
         return false;
@@ -197,10 +196,10 @@ bool CommObject::GetReceiverTelemetry(CommReceiverTelemetry* telemetry)
     return ReaderStatus(&reader);
 }
 
-bool CommObject::GetTransmitterTelemetry(CommTransmitterTelemetry* telemetry)
+bool CommObject::GetTransmitterTelemetry(CommTransmitterTelemetry& telemetry)
 {
     uint8_t buffer[sizeof(CommTransmitterTelemetry)];
-    const bool status = SendCommandWithResponse(this, CommTransmitter, TransmitterGetTelemetry, buffer, COUNT_OF(buffer));
+    const bool status = this->SendCommandWithResponse(CommTransmitter, TransmitterGetTelemetry, buffer, COUNT_OF(buffer));
     if (!status)
     {
         return status;
@@ -208,13 +207,15 @@ bool CommObject::GetTransmitterTelemetry(CommTransmitterTelemetry* telemetry)
 
     Reader reader;
     ReaderInitialize(&reader, buffer, COUNT_OF(buffer));
-    telemetry->RFReflectedPower = ReaderReadWordLE(&reader);
-    telemetry->AmplifierTemperature = ReaderReadWordLE(&reader);
-    telemetry->RFForwardPower = ReaderReadWordLE(&reader);
-    telemetry->TransmitterCurrentConsumption = ReaderReadWordLE(&reader);
+    telemetry.RFReflectedPower = ReaderReadWordLE(&reader);
+    telemetry.AmplifierTemperature = ReaderReadWordLE(&reader);
+    telemetry.RFForwardPower = ReaderReadWordLE(&reader);
+    telemetry.TransmitterCurrentConsumption = ReaderReadWordLE(&reader);
 
-    if ((telemetry->RFReflectedPower & 0xf000) != 0 || (telemetry->AmplifierTemperature & 0xf000) != 0 ||
-        (telemetry->RFForwardPower & 0xf000) != 0 || (telemetry->TransmitterCurrentConsumption & 0xf000) != 0)
+    if ((telemetry.RFReflectedPower & 0xf000) != 0 ||     //
+        (telemetry.AmplifierTemperature & 0xf000) != 0 || //
+        (telemetry.RFForwardPower & 0xf000) != 0 ||       //
+        (telemetry.TransmitterCurrentConsumption & 0xf000) != 0)
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Received invalid transmitter telemetry. ");
         return false;
@@ -223,10 +224,10 @@ bool CommObject::GetTransmitterTelemetry(CommTransmitterTelemetry* telemetry)
     return ReaderStatus(&reader);
 }
 
-bool CommObject::ReceiveFrame(CommFrame* frame)
+bool CommObject::ReceiveFrame(CommFrame& frame)
 {
     uint8_t buffer[COMM_MAX_FRAME_CONTENTS_SIZE + 20];
-    bool status = SendCommandWithResponse(this, CommReceiver, ReceiverGetFrame, buffer, COUNT_OF(buffer));
+    bool status = this->SendCommandWithResponse(CommReceiver, ReceiverGetFrame, buffer, COUNT_OF(buffer));
     if (!status)
     {
         return status;
@@ -234,20 +235,20 @@ bool CommObject::ReceiveFrame(CommFrame* frame)
 
     Reader reader;
     ReaderInitialize(&reader, buffer, COUNT_OF(buffer));
-    frame->Size = ReaderReadWordLE(&reader);
-    frame->Doppler = ReaderReadWordLE(&reader);
-    frame->RSSI = ReaderReadWordLE(&reader);
-    const uint8_t* data = ReaderReadArray(&reader, frame->Size);
+    frame.Size = ReaderReadWordLE(&reader);
+    frame.Doppler = ReaderReadWordLE(&reader);
+    frame.RSSI = ReaderReadWordLE(&reader);
+    const uint8_t* data = ReaderReadArray(&reader, frame.Size);
 
-    if (frame->Size > COMM_MAX_FRAME_CONTENTS_SIZE)
+    if (frame.Size > COMM_MAX_FRAME_CONTENTS_SIZE)
     {
-        LOGF(LOG_LEVEL_ERROR, "[comm] Invalid frame length: %d ", (int)frame->Size);
+        LOGF(LOG_LEVEL_ERROR, "[comm] Invalid frame length: %d", (int)frame.Size);
         return false;
     }
 
     if (data != NULL)
     {
-        memcpy(frame->Contents, data, frame->Size);
+        memcpy(frame.Contents, data, frame.Size);
     }
 
     status = ReaderStatus(&reader);
@@ -257,16 +258,13 @@ bool CommObject::ReceiveFrame(CommFrame* frame)
     }
     else
     {
-        LOGF(LOG_LEVEL_DEBUG, "[comm] Received frame %d bytes", (int)frame->Size);
+        LOGF(LOG_LEVEL_DEBUG, "[comm] Received frame %d bytes", (int)frame.Size);
     }
 
-    if (frame->Size == 0 || (frame->Doppler & 0xf000) != 0 || (frame->RSSI & 0xf000) != 0)
+    if (frame.Size == 0 || (frame.Doppler & 0xf000) != 0 || (frame.RSSI & 0xf000) != 0)
     {
-        LOGF(LOG_LEVEL_ERROR,
-            "[comm] Received invalid frame. Size: %d, Doppler: 0x%X, RSSI: 0x%X. ",
-            frame->Size,
-            frame->Doppler,
-            frame->RSSI);
+        LOGF(
+            LOG_LEVEL_ERROR, "[comm] Received invalid frame. Size: %d, Doppler: 0x%X, RSSI: 0x%X. ", frame.Size, frame.Doppler, frame.RSSI);
         return false;
     }
 
@@ -300,14 +298,14 @@ bool CommObject::SendFrame(uint8_t* data, uint8_t length)
     return status && remainingBufferSize != 0xff;
 }
 
-bool CommObject::SetBeacon(const CommBeacon* beaconData)
+bool CommObject::SetBeacon(const CommBeacon& beaconData)
 {
     uint8_t buffer[COMM_MAX_FRAME_CONTENTS_SIZE + 2];
     Writer writer;
     WriterInitialize(&writer, buffer, COUNT_OF(buffer));
     WriterWriteByte(&writer, TransmitterSetBeacon);
-    WriterWriteWordLE(&writer, beaconData->Period);
-    WriterWriteArray(&writer, beaconData->Data, beaconData->DataSize);
+    WriterWriteWordLE(&writer, beaconData.Period);
+    WriterWriteArray(&writer, beaconData.Data, beaconData.DataSize);
     if (!WriterStatus(&writer))
     {
         return false;
@@ -318,7 +316,7 @@ bool CommObject::SetBeacon(const CommBeacon* beaconData)
 
 bool CommObject::ClearBeacon()
 {
-    return SendCommand(this, CommTransmitter, TransmitterClearBeacon);
+    return this->SendCommand(CommTransmitter, TransmitterClearBeacon);
 }
 
 bool CommObject::SetTransmitterStateWhenIdle(CommTransmitterIdleState requestedState)
@@ -337,7 +335,7 @@ bool CommObject::SetTransmitterBitRate(CommTransmitterBitrate bitrate)
     return this->low.Write(&this->low, CommTransmitter, buffer, COUNT_OF(buffer)) == I2CResultOK;
 }
 
-bool CommObject::GetTransmitterState(CommTransmitterState* state)
+bool CommObject::GetTransmitterState(CommTransmitterState& state)
 {
     uint8_t command = TransmitterGetState;
     uint8_t response;
@@ -354,19 +352,19 @@ bool CommObject::GetTransmitterState(CommTransmitterState* state)
         return false;
     }
 
-    state->BeaconState = (response & 2) != 0;
-    state->StateWhenIdle = (CommTransmitterIdleState)(response & 1);
+    state.BeaconState = (response & 2) != 0;
+    state.StateWhenIdle = (CommTransmitterIdleState)(response & 1);
     static const CommTransmitterBitrate conversionArray[] = {
         Comm1200bps, Comm2400bps, Comm4800bps, Comm9600bps,
     };
 
-    state->TransmitterBitRate = conversionArray[(response & 0x0c) >> 2];
+    state.TransmitterBitRate = conversionArray[(response & 0x0c) >> 2];
     return true;
 }
 
-static void CommPollHardware(CommObject* comm)
+void CommObject::PollHardware()
 {
-    CommReceiverFrameCount frameResponse = comm->GetFrameCount();
+    CommReceiverFrameCount frameResponse = this->GetFrameCount();
     if (!frameResponse.status)
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Unable to get receiver frame count. ");
@@ -378,29 +376,29 @@ static void CommPollHardware(CommObject* comm)
         for (uint8_t i = 0; i < frameResponse.frameCount; i++)
         {
             CommFrame frame;
-            bool status = comm->ReceiveFrame(&frame);
+            bool status = this->ReceiveFrame(frame);
             if (!status)
             {
                 LOG(LOG_LEVEL_ERROR, "[comm] Unable to receive frame. ");
             }
             else
             {
-                if (!comm->RemoveFrame())
+                if (!this->RemoveFrame())
                 {
                     LOG(LOG_LEVEL_ERROR, "[comm] Unable to remove frame from receiver. ");
                 }
 
                 LOGF(LOG_LEVEL_INFO, "[comm] Received frame %d bytes. ", (int)frame.Size);
-                comm->upper.HandleFrame(comm, &frame, nullptr);
+                this->upper.HandleFrame(*this, frame);
             }
         }
     }
 }
 
-static void CommTask(void* param)
+void CommObject::CommTask(void* param)
 {
     CommObject* comm = (CommObject*)param;
-    CommPollHardware(comm);
+    comm->PollHardware();
     for (;;)
     {
         const OSEventBits result = System.EventGroupWaitForBits(comm->commTaskFlags, TaskFlagPauseRequest, false, true, 10000);
@@ -412,7 +410,7 @@ static void CommTask(void* param)
         }
         else
         {
-            CommPollHardware(comm);
+            comm->PollHardware();
         }
     }
 }

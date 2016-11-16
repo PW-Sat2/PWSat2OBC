@@ -178,11 +178,11 @@ static void ObcInitTask(void* param)
     System.SuspendTask(NULL);
 }
 
-void DummyFrameHandler::HandleFrame(CommObject* comm, CommFrame* frame, void* context)
+void DummyFrameHandler::HandleFrame(CommObject& comm, CommFrame& frame)
 {
-    UNREFERENCED_PARAMETER(context);
     UNREFERENCED_PARAMETER(frame);
-    comm->SendFrame((uint8_t*)"PONG", 4);
+
+    comm.SendFrame((uint8_t*)"PONG", 4);
 }
 
 void ADXRS(void* param)

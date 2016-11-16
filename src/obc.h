@@ -18,7 +18,7 @@
 class DummyFrameHandler final : public IHandleFrame
 {
   public:
-    virtual void HandleFrame(CommObject* comm, CommFrame* frame, void* context) override;
+    virtual void HandleFrame(CommObject& comm, CommFrame& frame) override;
 };
 
 /**

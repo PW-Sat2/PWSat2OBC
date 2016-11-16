@@ -52,7 +52,7 @@ static OSReset SetupComm(CommObject& comm, OSMock& system)
 
 struct FrameHandlerMock : IHandleFrame
 {
-    MOCK_METHOD3(HandleFrame, void(CommObject*, CommFrame*, void*));
+    MOCK_METHOD2(HandleFrame, void(CommObject&, CommFrame&));
 };
 
 class CommTest : public testing::Test
@@ -302,7 +302,7 @@ TEST_F(CommTest, TestGetTransmitterStateFailure)
 {
     CommTransmitterState state;
     EXPECT_CALL(i2c, I2CWriteRead(TransmitterAddress, TransmitterGetState, Ne(nullptr), 1, _, _)).WillOnce(Return(I2CResultNack));
-    const auto status = comm.GetTransmitterState(&state);
+    const auto status = comm.GetTransmitterState(state);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -319,7 +319,7 @@ TEST_F(CommTest, TestGetTransmitterInvalidResponse)
             *outData = 0xff;
             return I2CResultOK;
         }));
-    const auto status = comm.GetTransmitterState(&state);
+    const auto status = comm.GetTransmitterState(state);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -336,7 +336,7 @@ TEST_F(CommTest, TestGetTransmitterResponse)
             *outData = 0x7f;
             return I2CResultOK;
         }));
-    const auto status = comm.GetTransmitterState(&state);
+    const auto status = comm.GetTransmitterState(state);
     ASSERT_THAT(status, Eq(true));
     ASSERT_THAT(state.BeaconState, Eq(true));
     ASSERT_THAT(state.StateWhenIdle, Eq(CommTransmitterOn));
@@ -356,7 +356,7 @@ TEST_F(CommTest, TestGetBaseLineTransmitterResponse)
             *outData = 0x0;
             return I2CResultOK;
         }));
-    const auto status = comm.GetTransmitterState(&state);
+    const auto status = comm.GetTransmitterState(state);
     ASSERT_THAT(status, Eq(true));
     ASSERT_THAT(state.BeaconState, Eq(false));
     ASSERT_THAT(state.StateWhenIdle, Eq(CommTransmitterOff));
@@ -376,7 +376,7 @@ TEST_F(CommTest, TestGetMixedLineTransmitterResponse)
             *outData = 0x0a;
             return I2CResultOK;
         }));
-    const auto status = comm.GetTransmitterState(&state);
+    const auto status = comm.GetTransmitterState(state);
     ASSERT_THAT(status, Eq(true));
     ASSERT_THAT(state.BeaconState, Eq(true));
     ASSERT_THAT(state.StateWhenIdle, Eq(CommTransmitterOff));
@@ -441,7 +441,7 @@ TEST_F(CommTest, TestReceiveFrameFailure)
             uint16_t /*length*/,
             uint8_t* /*outData*/,
             uint16_t /*outLength*/) { return I2CResultNack; }));
-    const auto status = comm.ReceiveFrame(&frame);
+    const auto status = comm.ReceiveFrame(frame);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -460,7 +460,7 @@ TEST_F(CommTest, TestReceiveFrameDopplerFrequencyOutOfRange)
             outData[3] = 0xf0;
             return I2CResultOK;
         }));
-    const auto status = comm.ReceiveFrame(&frame);
+    const auto status = comm.ReceiveFrame(frame);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -479,7 +479,7 @@ TEST_F(CommTest, TestReceiveFrameRSSIOutOfRange)
             outData[5] = 0xf0;
             return I2CResultOK;
         }));
-    const auto status = comm.ReceiveFrame(&frame);
+    const auto status = comm.ReceiveFrame(frame);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -497,7 +497,7 @@ TEST_F(CommTest, TestReceiveFrameSizeOutOfRange)
             outData[0] = 0xff;
             return I2CResultOK;
         }));
-    const auto status = comm.ReceiveFrame(&frame);
+    const auto status = comm.ReceiveFrame(frame);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -514,7 +514,7 @@ TEST_F(CommTest, TestReceiveFrameSizeIsZero)
             memset(outData, 0, outLength);
             return I2CResultOK;
         }));
-    const auto status = comm.ReceiveFrame(&frame);
+    const auto status = comm.ReceiveFrame(frame);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -532,7 +532,7 @@ TEST_F(CommTest, TestReceiveFrameSizeIsOutOfRange)
             outData[0] = COMM_MAX_FRAME_CONTENTS_SIZE + 1;
             return I2CResultOK;
         }));
-    const auto status = comm.ReceiveFrame(&frame);
+    const auto status = comm.ReceiveFrame(frame);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -557,7 +557,7 @@ TEST_F(CommTest, TestReceiveFrame)
             memcpy(outData + 6, expected, COUNT_OF(expected));
             return I2CResultOK;
         }));
-    const auto status = comm.ReceiveFrame(&frame);
+    const auto status = comm.ReceiveFrame(frame);
     ASSERT_THAT(status, Eq(true));
     ASSERT_THAT(frame.Size, Eq(COUNT_OF(expected)));
     ASSERT_THAT(frame.Doppler, Eq(0xcab));
@@ -580,7 +580,7 @@ TEST_F(CommTest, TestReceiverTelemetry)
             memcpy(outData, expected, COUNT_OF(expected));
             return I2CResultOK;
         }));
-    const auto status = comm.GetReceiverTelemetry(&telemetry);
+    const auto status = comm.GetReceiverTelemetry(telemetry);
     ASSERT_THAT(status, Eq(true));
     ASSERT_THAT(telemetry.TransmitterCurrentConsumption, Eq(0x0201));
     ASSERT_THAT(telemetry.DopplerOffset, Eq(0x0403));
@@ -606,7 +606,7 @@ TEST_F(CommTest, TestTransmitterTelemetry)
             memcpy(outData, expected, COUNT_OF(expected));
             return I2CResultOK;
         }));
-    const auto status = comm.GetTransmitterTelemetry(&telemetry);
+    const auto status = comm.GetTransmitterTelemetry(telemetry);
     ASSERT_THAT(status, Eq(true));
     ASSERT_THAT(telemetry.RFReflectedPower, Eq(0x0201));
     ASSERT_THAT(telemetry.AmplifierTemperature, Eq(0x0403));
@@ -620,7 +620,7 @@ TEST_F(CommTest, TestSetBeaconFailure)
     memset(&beacon, 0, sizeof(beacon));
     beacon.DataSize = 1;
     EXPECT_CALL(i2c, I2CWrite(TransmitterAddress, TransmitterSetBeacon, Ne(nullptr), _)).WillOnce(Return(I2CResultNack));
-    const auto status = comm.SetBeacon(&beacon);
+    const auto status = comm.SetBeacon(beacon);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -630,7 +630,7 @@ TEST_F(CommTest, TestSetBeaconSizeOutOfRange)
     memset(&beacon, 0, sizeof(beacon));
     beacon.DataSize = COMM_MAX_FRAME_CONTENTS_SIZE + 1;
     EXPECT_CALL(i2c, I2CWrite(TransmitterAddress, TransmitterSetBeacon, Ne(nullptr), _)).Times(0);
-    const auto status = comm.SetBeacon(&beacon);
+    const auto status = comm.SetBeacon(beacon);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -648,7 +648,7 @@ TEST_F(CommTest, TestSetBeacon)
             EXPECT_THAT(std::equal(inData, inData + length, std::begin(expected), std::end(expected)), Eq(true));
             return I2CResultOK;
         }));
-    const auto status = comm.SetBeacon(&beacon);
+    const auto status = comm.SetBeacon(beacon);
     ASSERT_THAT(status, Eq(true));
 }
 
@@ -696,7 +696,7 @@ TEST_P(CommReceiverTelemetryTest, TestInvalidTelemetry)
             outData[index] = value;
             return operationStatus;
         }));
-    const auto status = comm.GetReceiverTelemetry(&telemetry);
+    const auto status = comm.GetReceiverTelemetry(telemetry);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -746,7 +746,7 @@ TEST_P(CommTransmitterTelemetryTest, TestInvalidTelemetry)
             outData[index] = value;
             return operationStatus;
         }));
-    const auto status = comm.GetTransmitterTelemetry(&telemetry);
+    const auto status = comm.GetTransmitterTelemetry(telemetry);
     ASSERT_THAT(status, Eq(false));
 }
 

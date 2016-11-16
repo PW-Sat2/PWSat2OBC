@@ -8,10 +8,6 @@
 #include "base/os.h"
 #include "i2c/i2c.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * @defgroup LowerCommDriver Low Level Communication Module Driver
  *
@@ -52,7 +48,7 @@ class CommObject;
 /**
  * @brief This type describes single received frame.
  */
-typedef struct
+struct CommFrame
 {
     /** @brief Frame contents size in bytes. */
     uint16_t Size;
@@ -65,7 +61,7 @@ typedef struct
 
     /** @brief Frame content. */
     uint8_t Contents[COMM_MAX_FRAME_CONTENTS_SIZE];
-} CommFrame;
+};
 
 /**
  * @brief This type contains comm receiver telemetry.
@@ -73,7 +69,7 @@ typedef struct
  * The values stored in this structure are provided in their raw form
  * as they are received directly from the hardware.
  */
-typedef struct
+struct CommReceiverTelemetry
 {
     /** @brief Raw measurement value of the transmitter current consumption. */
     uint16_t TransmitterCurrentConsumption;
@@ -95,7 +91,7 @@ typedef struct
 
     /** @brief Raw measurement value of the instantaneous signal strength of the signal at the receiver. */
     uint16_t SignalStrength;
-} CommReceiverTelemetry;
+};
 
 /**
  * @brief This type contains comm transmitter telemetry.
@@ -103,7 +99,7 @@ typedef struct
  * The values stored in this structure are provided in their raw form
  * as they are received directly from the hardware.
  */
-typedef struct
+struct CommTransmitterTelemetry
 {
     /** @brief Raw measurement value of the instantaneous RF reflected power at the transmitter port. */
     uint16_t RFReflectedPower;
@@ -116,12 +112,12 @@ typedef struct
 
     /** @brief Raw measurement value of the transmitter current consumption. */
     uint16_t TransmitterCurrentConsumption;
-} CommTransmitterTelemetry;
+};
 
 /**
  * @brief This type describes the comm beacon.
  */
-typedef struct
+struct CommBeacon
 {
     /**
      * @brief Repeat interval of the beacon in seconds.
@@ -137,19 +133,7 @@ typedef struct
 
     /** @brief Beacon frame contents. */
     uint8_t Data[COMM_MAX_FRAME_CONTENTS_SIZE];
-} CommBeacon;
-
-/**
- * @brief Type of pointer to function that is capable of processing frames received via the
- * comm receiver.
- *
- * @param[in] comm Pointer to comm object that received the frame.
- * @param[in] frame Pointer to object describing received frame.
- * @param[in] context Pointer to user supplied memory block.
- * The comm driver does not use this parameter. It is provided on comm initialization by the
- * user and is passed to the frame handler routine in unmodified form.
- */
-typedef void (*CommFrameHandler)(CommObject* comm, CommFrame* frame, void* context);
+};
 
 /** Comm driver upper interface. */
 struct IHandleFrame
@@ -159,7 +143,7 @@ struct IHandleFrame
      *
      * See the CommFrameHandler definition for details regarding usage & implementation requirements.
      */
-    virtual void HandleFrame(CommObject* comm, CommFrame* frame, void* context) = 0;
+    virtual void HandleFrame(CommObject& comm, CommFrame& frame) = 0;
 };
 
 /** Type that contains status of the frame count query. */
@@ -177,16 +161,18 @@ struct CommReceiverFrameCount
 };
 
 /** Transmitter state enumerator. */
-typedef enum {
+enum CommTransmitterIdleState
+{
     /** Disabled. */
     CommTransmitterOff = 0,
 
     /** Enabled. */
     CommTransmitterOn = 1,
-} CommTransmitterIdleState;
+};
 
 /** Transmission baud rate enumerator. */
-typedef enum {
+enum CommTransmitterBitrate
+{
     /** 1200 bps */
     Comm1200bps = 1,
 
@@ -198,10 +184,10 @@ typedef enum {
 
     /** 9600 bps */
     Comm9600bps = 8,
-} CommTransmitterBitrate;
+};
 
 /** This type describes configured transmitter state. */
-typedef struct
+struct CommTransmitterState
 {
     /** The transmitter state when there are no frames to send. */
     CommTransmitterIdleState StateWhenIdle;
@@ -211,7 +197,13 @@ typedef struct
 
     /** Flag indicating whether beacon is active. */
     bool BeaconState;
-} CommTransmitterState;
+};
+
+enum CommAddress
+{
+    CommReceiver = 0x60,
+    CommTransmitter = 0x62,
+};
 
 /**
  * @brief This type describe comm driver global state.
@@ -281,7 +273,7 @@ class CommObject final
      *
      * The contents of the telemetry object is undefined in case of the failure.
      */
-    bool GetReceiverTelemetry(CommReceiverTelemetry* telemetry);
+    bool GetReceiverTelemetry(CommReceiverTelemetry& telemetry);
 
     /**
      * @brief Queries the comm driver for the transmitter telemetry.
@@ -291,7 +283,7 @@ class CommObject final
      *
      * The contents of the telemetry object is undefined in case of the failure.
      */
-    bool GetTransmitterTelemetry(CommTransmitterTelemetry* telemetry);
+    bool GetTransmitterTelemetry(CommTransmitterTelemetry& telemetry);
 
     /**
      * @brief Adds the requested frame to the send queue.
@@ -312,7 +304,7 @@ class CommObject final
      *
      * The contents of the frame object is undefined in case of the failure.
      */
-    bool ReceiveFrame(CommFrame* frame);
+    bool ReceiveFrame(CommFrame& frame);
 
     /**
      * @brief This procedure sets the beacon frame for the passed comm object.
@@ -321,7 +313,7 @@ class CommObject final
      * See the definition of the CommBeacon for details.
      * @return Operation status, true in case of success, false otherwise.
      */
-    bool SetBeacon(const CommBeacon* beaconData);
+    bool SetBeacon(const CommBeacon& beaconData);
 
     /**
      * @brief Clears any beacon that is currently set in the transceiver. If a beacon transmission
@@ -356,7 +348,7 @@ class CommObject final
      *
      * The contents of the state object is undefined in case of the failure.
      */
-    bool GetTransmitterState(CommTransmitterState* state);
+    bool GetTransmitterState(CommTransmitterState& state);
 
     /**
      * @brief Resets the hardware associated with the requested comm object.
@@ -390,12 +382,14 @@ class CommObject final
 
     /** @brief Handle to event group used to communicate with background task. */
     OSEventGroupHandle commTaskFlags;
+
+  private:
+    bool SendCommand(CommAddress address, uint8_t command);
+    bool SendCommandWithResponse(CommAddress address, uint8_t command, uint8_t* outBuffer, uint8_t outBufferSize);
+    void PollHardware();
+    [[noreturn]] static void CommTask(void* param);
 };
 
 /** @}*/
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* SRC_DEVICES_COMM_H_ */

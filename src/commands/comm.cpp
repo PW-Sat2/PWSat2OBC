@@ -34,7 +34,7 @@ void ReceiveFrameHandler(uint16_t argc, char* argv[])
     LOG(LOG_LEVEL_INFO, "Received request to get the oldes frame from comm...");
     CommFrame frame;
     memset(frame.Contents, 0, sizeof(frame.Contents));
-    if (!Main.comm.ReceiveFrame(&frame))
+    if (!Main.comm.ReceiveFrame(frame))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to get frame from comm. ");
     }
