@@ -1,7 +1,7 @@
 set(NAME comm)
 
 set(SOURCES
-    comm.c
+    comm.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

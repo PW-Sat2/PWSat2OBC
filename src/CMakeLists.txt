@@ -1,17 +1,17 @@
 set(NAME pwsat)
 
 set(SOURCES
-    main.c
-    terminal.c
-    commands/ping.c
-    commands/time.c
-    commands/comm.c
-    commands/file_system.c
-    commands/state_command.c
-    commands/i2c_test_command.c
+    main.cpp
+    terminal.cpp
+    commands/ping.cpp
+    commands/time.cpp
+    commands/comm.cpp
+    commands/file_system.cpp
+    commands/state_command.cpp
+    commands/i2c_test_command.cpp
     obc.h
-    fault_handlers.c
-    mission.c
+    fault_handlers.cpp
+    mission.cpp
 )
 
 add_executable(${NAME} ${SOURCES})

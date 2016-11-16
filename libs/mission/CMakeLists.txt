@@ -1,9 +1,9 @@
 set(NAME mission)
 
 set(SOURCES    
-    antenna.c
-    sail.c        
-    adcs.c
+    antenna.cpp
+    sail.cpp        
+    adcs.cpp
     Include/mission/mission.h
     Include/mission/antenna.h
     Include/mission/sail.h

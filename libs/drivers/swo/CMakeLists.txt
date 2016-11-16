@@ -1,8 +1,8 @@
 set(NAME swo)
 
 set(SOURCES
-    swo.c
-    extension.c
+    swo.cpp
+    extension.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

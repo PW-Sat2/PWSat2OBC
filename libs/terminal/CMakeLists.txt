@@ -1,7 +1,7 @@
 set(NAME terminal)
 
 set(SOURCES
-    terminal.c
+    terminal.cpp
     include/terminal/terminal.h
 )
 

@@ -1,7 +1,7 @@
 set(NAME state)
 
 set(SOURCES
-    state.c
+    state.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

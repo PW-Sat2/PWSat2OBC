@@ -1,7 +1,7 @@
 set(NAME SwoEndpoint)
 
 set(SOURCES
-    SwoEndpoint.c
+    SwoEndpoint.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

@@ -1,9 +1,9 @@
 set(NAME base)
 
 set(SOURCES
-    reader.c
-    writer.c
-    ecc.c
+    reader.cpp
+    writer.cpp
+    ecc.cpp
     Include/base/reader.h
     Include/base/writer.h
     Include/system.h

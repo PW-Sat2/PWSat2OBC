@@ -1,7 +1,7 @@
 set(NAME assert)
 
 set(SOURCES
-    assert.c
+    assert.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

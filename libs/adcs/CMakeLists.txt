@@ -1,7 +1,7 @@
 set(NAME adcs)
 
 set(SOURCES      
-    adcs.c   
+    adcs.cpp   
     Include/adcs/adcs.h
 )
 

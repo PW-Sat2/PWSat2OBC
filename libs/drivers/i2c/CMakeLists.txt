@@ -1,9 +1,9 @@
 set(NAME i2c)
 
 set(SOURCES    
-    i2c.c
-    fallback.c
-    error_handling.c
+    i2c.cpp
+    fallback.cpp
+    error_handling.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
