@@ -15,13 +15,20 @@
 #include "time/timer.h"
 #include "yaffs_guts.h"
 
+class DummyFrameHandler final : public IHandleFrame
+{
+  public:
+    virtual void HandleFrame(CommObject* comm, CommFrame* frame, void* context) override;
+};
+
 /**
  * @brief Object that describes global OBS state.
  */
-typedef struct
+struct OBC
 {
-    /** @brief Comm driver object. */
-    CommObject comm;
+  public:
+    OBC();
+
     /** @brief File system object */
     FileSystem fs;
     /** @brief Handle to OBC initialization task. */
@@ -61,7 +68,12 @@ typedef struct
 
     /** @brief Power control interface */
     PowerControl PowerControlInterface;
-} OBC;
+
+    DummyFrameHandler FrameHandler;
+
+    /** @brief Comm driver object. */
+    CommObject comm;
+};
 
 /** @brief Global OBC object. */
 extern OBC Main;

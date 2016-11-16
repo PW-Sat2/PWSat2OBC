@@ -178,7 +178,7 @@ static void ObcInitTask(void* param)
     System.SuspendTask(NULL);
 }
 
-static void FrameHandler(CommObject* comm, CommFrame* frame, void* context)
+void DummyFrameHandler::HandleFrame(CommObject* comm, CommFrame* frame, void* context)
 {
     UNREFERENCED_PARAMETER(context);
     UNREFERENCED_PARAMETER(frame);
@@ -274,9 +274,14 @@ void SetupI2C(void)
     I2CSetUpFallbackBus(&Main.I2CFallback, &Main.I2C);
 }
 
+extern "C" void __libc_init_array(void);
+
 int main(void)
 {
     memset(&Main, 0, sizeof(Main));
+
+    __libc_init_array();
+
     CHIP_Init();
 
     SetupHardware();
@@ -300,10 +305,7 @@ int main(void)
 
     EPSPowerControlInitialize(&Main.PowerControlInterface);
 
-    CommUpperInterface commUpperInterface;
-    commUpperInterface.frameHandler = FrameHandler;
-    commUpperInterface.frameHandlerContext = NULL;
-    CommInitialize(&Main.comm, (I2CBus*)&Main.I2CFallback, &commUpperInterface);
+    CommInitialize(&Main.comm);
 
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 

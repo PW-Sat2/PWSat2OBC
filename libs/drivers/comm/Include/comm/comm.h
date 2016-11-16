@@ -47,7 +47,7 @@ extern "C" {
 #define COMM_MAX_FRAME_CONTENTS_SIZE 235u
 
 /** @brief This type describe comm driver global state. */
-typedef struct CommObjectTag CommObject;
+class CommObject;
 
 /**
  * @brief This type describes single received frame.
@@ -152,23 +152,15 @@ typedef struct
 typedef void (*CommFrameHandler)(CommObject* comm, CommFrame* frame, void* context);
 
 /** Comm driver upper interface. */
-typedef struct
+struct IHandleFrame
 {
     /**
      * @brief Pointer to function that should be called whenever new frame is received.
      *
      * See the CommFrameHandler definition for details regarding usage & implementation requirements.
      */
-    CommFrameHandler frameHandler;
-
-    /**
-     * @brief Pointer to the frameHandler execution context.
-     *
-     * Comm driver itself does not explicitly make use of this parameter. It only passes it as
-     * context parameter to the frameHandler procedure.
-     */
-    void* frameHandlerContext;
-} CommUpperInterface;
+    virtual void HandleFrame(CommObject* comm, CommFrame* frame, void* context) = 0;
+};
 
 /**
  * @brief This type describe comm driver global state.
@@ -176,20 +168,23 @@ typedef struct
  * @remark Do not access directly the fields of this type, instead use the comm driver interface to
  * perform requested action.
  */
-typedef struct CommObjectTag
+class CommObject final
 {
+  public:
+    CommObject(I2CBus& low, IHandleFrame& upperInterface);
+
     /** @brief Comm driver lower interface. */
-    I2CBus* low;
+    I2CBus& low;
 
     /** @brief Comm driver upper interface. */
-    CommUpperInterface upper;
+    IHandleFrame& upper;
 
     /** @brief Handle to comm background task. */
     void* commTask;
 
     /** @brief Handle to event group used to communicate with background task. */
     OSEventGroupHandle commTaskFlags;
-} CommObject;
+};
 
 /** Type that contains status of the frame count query. */
 typedef struct
@@ -256,7 +251,7 @@ typedef struct
  * This procedure does not verify whether the passed comm object has already been properly initialized, calling
  * this method twice on the same comm object is undefined behavior.
  */
-OSResult CommInitialize(CommObject* comm, I2CBus* i2c, CommUpperInterface* upperInterface);
+OSResult CommInitialize(CommObject* comm);
 
 /**
  * @brief Pauses comm driver.

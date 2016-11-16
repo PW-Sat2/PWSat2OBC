@@ -40,17 +40,20 @@ static const uint8_t TransmitterSetBitRate = 0x28;
 static const uint8_t TransmitterGetState = 0x41;
 static const uint8_t TransmitterReset = 0xAA;
 
-static OSReset SetupComm(CommObject* comm, I2CBus* low, OSMock& system)
+static OSReset SetupComm(CommObject& comm, OSMock& system)
 {
-    CommUpperInterface up;
-    up.frameHandler = nullptr;
-    up.frameHandlerContext = nullptr;
     auto reset = InstallProxy(&system);
-    ON_CALL(system, CreateEventGroup()).WillByDefault(Return(reinterpret_cast<OSEventGroupHandle>(comm)));
+    ON_CALL(system, CreateEventGroup()).WillByDefault(Return(reinterpret_cast<OSEventGroupHandle>(&comm)));
 
-    EXPECT_THAT(CommInitialize(comm, low, &up), Eq(OSResultSuccess));
+    EXPECT_THAT(CommInitialize(&comm), Eq(OSResultSuccess));
+
     return reset;
 }
+
+struct FrameHandlerMock : IHandleFrame
+{
+    MOCK_METHOD3(HandleFrame, void(CommObject*, CommFrame*, void*));
+};
 
 class CommTest : public testing::Test
 {
@@ -59,46 +62,45 @@ class CommTest : public testing::Test
 
   protected:
     CommObject comm;
+    FrameHandlerMock frameHandler;
     testing::NiceMock<OSMock> system;
     I2CBusMock i2c;
     OSReset reset;
     I2CBus low;
 };
 
-CommTest::CommTest()
+CommTest::CommTest() : comm(i2c, frameHandler)
 {
-    reset = SetupComm(&comm, &i2c, system);
+    reset = SetupComm(comm, system);
 }
 
 TEST_F(CommTest, TestInitializationDoesNotTouchHardware)
 {
-    CommObject commObject;
-    CommUpperInterface up;
-    up.frameHandler = nullptr;
-    up.frameHandlerContext = nullptr;
+    CommObject commObject(i2c, frameHandler);
+
     EXPECT_CALL(i2c, I2CWriteRead(_, _, _, _, _, _)).Times(0);
     EXPECT_CALL(i2c, I2CWrite(_, _, _, _)).Times(0);
-    CommInitialize(&commObject, &i2c, &up);
+
+    CommInitialize(&commObject);
 }
 
 TEST_F(CommTest, TestInitializationAllocationFailure)
 {
-    CommObject commObject;
-    CommUpperInterface up;
-    up.frameHandler = nullptr;
-    up.frameHandlerContext = nullptr;
+    CommObject commObject(i2c, frameHandler);
+
     EXPECT_CALL(system, CreateEventGroup()).WillOnce(Return(nullptr));
-    const auto status = CommInitialize(&commObject, &i2c, &up);
+
+    const auto status = CommInitialize(&commObject);
+
     ASSERT_THAT(status, Ne(OSResultSuccess));
 }
 
 TEST_F(CommTest, TestInitialization)
 {
-    CommObject commObject;
-    CommUpperInterface up;
-    up.frameHandler = nullptr;
-    up.frameHandlerContext = nullptr;
-    const auto status = CommInitialize(&commObject, &i2c, &up);
+    CommObject commObject(i2c, frameHandler);
+
+    const auto status = CommInitialize(&commObject);
+
     ASSERT_THAT(status, Eq(OSResultSuccess));
 }
 
@@ -666,14 +668,15 @@ class CommReceiverTelemetryTest : public testing::TestWithParam<std::tuple<int, 
 
   protected:
     CommObject comm;
+    FrameHandlerMock frameHandler;
     I2CBusMock i2c;
     testing::NiceMock<OSMock> system;
     OSReset reset;
 };
 
-CommReceiverTelemetryTest::CommReceiverTelemetryTest()
+CommReceiverTelemetryTest::CommReceiverTelemetryTest() : comm(i2c, frameHandler)
 {
-    reset = SetupComm(&comm, &i2c, system);
+    reset = SetupComm(comm, system);
 }
 
 TEST_P(CommReceiverTelemetryTest, TestInvalidTelemetry)
@@ -715,14 +718,15 @@ class CommTransmitterTelemetryTest : public testing::TestWithParam<std::tuple<in
 
   protected:
     CommObject comm;
+    FrameHandlerMock frameHandler;
     I2CBusMock i2c;
     testing::NiceMock<OSMock> system;
     OSReset reset;
 };
 
-CommTransmitterTelemetryTest::CommTransmitterTelemetryTest()
+CommTransmitterTelemetryTest::CommTransmitterTelemetryTest() : comm(i2c, frameHandler)
 {
-    reset = SetupComm(&comm, &i2c, system);
+    reset = SetupComm(comm, system);
 }
 
 TEST_P(CommTransmitterTelemetryTest, TestInvalidTelemetry)

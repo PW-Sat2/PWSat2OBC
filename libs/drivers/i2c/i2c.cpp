@@ -7,6 +7,12 @@
 
 #include "i2c.h"
 
+I2CInterface::I2CInterface(I2CBus* system, I2CBus* payload)
+    : System(system), //
+      Payload(payload)
+{
+}
+
 static inline I2CLowLevelBus* LowLevel(I2CBus* bus)
 {
     return (I2CLowLevelBus*)bus;
