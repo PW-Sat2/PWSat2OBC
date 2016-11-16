@@ -119,7 +119,7 @@ static I2CResult WriteRead(
     I2C_TransferSeq_TypeDef seq;
 
     seq.addr = address;
-    seq.flags = I2C_FLAG_WRITE;
+    seq.flags = I2C_FLAG_WRITE_READ;
     seq.buf[0].len = inLength;
     seq.buf[0].data = (uint8_t*)inData;
     seq.buf[1].len = outLength;
