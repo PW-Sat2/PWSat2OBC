@@ -8,7 +8,7 @@ set(SOURCES
   utils.cpp
   Logger/LoggerTest.cpp
   FileSystem/FileSystemTest.cpp
-  FileSystem/YaffsOSGlue.c
+  FileSystem/YaffsOSGlue.cpp
   FileSystem/MemoryDriver.cpp
   FileSystem/NANDGeometryTest.cpp
   FileSystem/MemoryDriver.cpp

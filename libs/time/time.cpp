@@ -44,7 +44,7 @@ TimePoint TimePointNormalize(TimePoint point)
 
 TimePoint TimePointFromTimeSpan(const TimeSpan timeSpan)
 {
-    TimePoint point = {0};
+    TimePoint point = {};
     uint64_t span = timeSpan.value;
     point.milisecond = span % 1000;
     span /= 1000;
@@ -79,6 +79,6 @@ TimeSpan TimeSpanAdd(TimeSpan left, TimeSpan right)
 
 TimeShift TimeSpanSub(TimeSpan left, TimeSpan right)
 {
-    const TimeShift result = {left.value - right.value};
+    const TimeShift result = {static_cast<uint8_t>(left.value - right.value)};
     return result;
 }

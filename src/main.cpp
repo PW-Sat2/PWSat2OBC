@@ -44,13 +44,13 @@ MissionState Mission;
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
-void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
+extern "C" void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
 {
     UNREFERENCED_PARAMETER(pxTask);
     UNREFERENCED_PARAMETER(pcTaskName);
 }
 
-void vApplicationIdleHook(void)
+extern "C" void vApplicationIdleHook(void)
 {
     EMU_EnterEM1();
 }
@@ -174,7 +174,7 @@ static void ObcInitTask(void* param)
     InitializeADCS(&obc->adcs);
 
     LOG(LOG_LEVEL_INFO, "Intialized");
-    atomic_store(&Main.initialized, true);
+    Main.initialized = true;
     System.SuspendTask(NULL);
 }
 
@@ -196,13 +196,13 @@ void ADXRS(void* param)
     interface.writeProc = SPISendB;
     interface.readProc = SPISendRecvB;
     ADXRS453_Obj_t gyro;
-    gyro.pinLocations = (ADXRS453_PinLocations_t)GYRO0;
+    gyro.pinLocations = GYRO0;
     gyro.interface = interface;
     ADXRS453_Obj_t gyro1;
-    gyro1.pinLocations = (ADXRS453_PinLocations_t)GYRO1;
+    gyro1.pinLocations = GYRO1;
     gyro1.interface = interface;
     ADXRS453_Obj_t gyro2;
-    gyro2.pinLocations = (ADXRS453_PinLocations_t)GYRO2;
+    gyro2.pinLocations = GYRO2;
     gyro2.interface = interface;
     ADXRS453_Init(&gyro, handle);
     ADXRS453_Init(&gyro1, handle);
@@ -265,8 +265,8 @@ void SetupI2C(void)
     I2CSetupInterface(
         &Main.I2CBuses[1].Bus, I2C1, I2C1_BUS_LOCATION, I2C1_BUS_PORT, I2C1_BUS_SDA_PIN, I2C1_BUS_SCL_PIN, cmuClock_I2C1, I2C1_IRQn);
 
-    I2CSetUpErrorHandlingBus(&Main.I2CBuses[0].ErrorHandling, (I2CBus*)&Main.I2CBuses[0].Bus, I2CErrorHandler, &Main.PowerControl);
-    I2CSetUpErrorHandlingBus(&Main.I2CBuses[1].ErrorHandling, (I2CBus*)&Main.I2CBuses[1].Bus, I2CErrorHandler, &Main.PowerControl);
+    I2CSetUpErrorHandlingBus(&Main.I2CBuses[0].ErrorHandling, (I2CBus*)&Main.I2CBuses[0].Bus, I2CErrorHandler, &Main.PowerControlInterface);
+    I2CSetUpErrorHandlingBus(&Main.I2CBuses[1].ErrorHandling, (I2CBus*)&Main.I2CBuses[1].Bus, I2CErrorHandler, &Main.PowerControlInterface);
 
     Main.I2C.System = (I2CBus*)&Main.I2CBuses[I2C_SYSTEM_BUS].ErrorHandling;
     Main.I2C.Payload = (I2CBus*)&Main.I2CBuses[I2C_PAYLOAD_BUS].ErrorHandling;
@@ -298,7 +298,7 @@ int main(void)
 
     EpsInit((I2CBus*)&Main.I2CFallback);
 
-    EPSPowerControlInitialize(&Main.PowerControl);
+    EPSPowerControlInitialize(&Main.PowerControlInterface);
 
     CommUpperInterface commUpperInterface;
     commUpperInterface.frameHandler = FrameHandler;

@@ -44,7 +44,7 @@ typedef enum {
     TaskFlagAck = 2,
 } TaskFlag;
 
-static noreturn void CommTask(void* param);
+[[noreturn]] static void CommTask(void* param);
 
 static bool SendCommand(CommObject* object, CommAddress address, uint8_t command)
 {

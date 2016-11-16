@@ -22,14 +22,13 @@ static unsigned int dmaChannel;
 
 static void leuartInit(void)
 {
-    LEUART_Init_TypeDef leuart0Init = {
-        .enable = leuartEnable,       /* Activate data reception on LEUn_TX pin. */
-        .refFreq = 0,                 /* Inherit the clock frequenzy from the LEUART clock source */
-        .baudrate = LEUART0_BAUDRATE, /* Baudrate = 9600 bps */
-        .databits = leuartDatabits8,  /* Each LEUART frame containes 8 databits */
-        .parity = leuartNoParity,     /* No parity bits in use */
-        .stopbits = leuartStopbits2,  /* Setting the number of stop bits in a frame to 2 bitperiods */
-    };
+    LEUART_Init_TypeDef leuart0Init;
+    leuart0Init.enable = leuartEnable;       /* Activate data reception on LEUn_TX pin. */
+    leuart0Init.refFreq = 0;                 /* Inherit the clock frequenzy from the LEUART clock source */
+    leuart0Init.baudrate = LEUART0_BAUDRATE; /* Baudrate = 9600 bps */
+    leuart0Init.databits = leuartDatabits8;  /* Each LEUART frame containes 8 databits */
+    leuart0Init.parity = leuartNoParity;     /* No parity bits in use */
+    leuart0Init.stopbits = leuartStopbits2;  /* Setting the number of stop bits in a frame to 2 bitperiods */
 
     CMU_ClockEnable(cmuClock_CORELE, true);
     CMU_ClockEnable(cmuClock_LEUART0, true);

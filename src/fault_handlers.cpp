@@ -1,10 +1,10 @@
 #include <stdint.h>
 #include <em_device.h>
 #include <core_cm3.h>
-#include "system.h"
 #include "swo/swo.h"
+#include "system.h"
 
-void prvGetRegistersFromStack(uint32_t* pulFaultStackAddress)
+extern "C" void prvGetRegistersFromStack(uint32_t* pulFaultStackAddress)
 {
     /* These are volatile to try and prevent the compiler/linker optimising them
     away as the variables never actually get used.  If the debugger won't show the

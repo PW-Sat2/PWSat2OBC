@@ -2,6 +2,7 @@
 
 #include "eps/eps.h"
 #include "power/power.h"
+#include "power_eps.h"
 #include "system.h"
 
 static void TriggerSystemPowerCycle(PowerControl* powerControl)

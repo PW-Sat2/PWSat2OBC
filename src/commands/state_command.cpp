@@ -12,5 +12,5 @@ void CommandByTerminal(uint16_t argc, char* args[])
 
     int16_t cmd = atoi(args[0]);
 
-    SetTerminalCommand(cmd);
+    SetTerminalCommand((TerminalCommand)cmd);
 }

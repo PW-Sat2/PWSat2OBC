@@ -41,13 +41,13 @@ static void InitializeTerminal(void)
     TerminalSetCommandList(&TerminalObject, commands, COUNT_OF(commands));
 }
 
-void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
+extern "C" void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
 {
     UNREFERENCED_PARAMETER(pxTask);
     UNREFERENCED_PARAMETER(pcTaskName);
 }
 
-void vApplicationIdleHook(void)
+extern "C" void vApplicationIdleHook(void)
 {
     EMU_EnterEM1();
 }

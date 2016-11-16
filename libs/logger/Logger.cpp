@@ -50,7 +50,7 @@ typedef struct
 } Logger;
 
 /** @brief Global logger object. */
-static Logger logger = {0};
+static Logger logger = {};
 
 /** @brief Array for converting log level to string. */
 static const char* const levelMap[] = {"[Always]  ", "[Fatal]   ", "[Error]   ", "[Warning] ", "[Info]    ", "[Debug]   ", "[Trace]   "};

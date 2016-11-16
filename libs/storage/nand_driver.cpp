@@ -11,7 +11,7 @@ static int ReadChunk(struct yaffs_dev* dev, int nand_chunk, u8* data, int data_l
 {
     *ecc_result = YAFFS_ECC_RESULT_NO_ERROR;
 
-    YaffsNANDDriver* driver = dev->driver_context;
+    YaffsNANDDriver* driver = static_cast<YaffsNANDDriver*>(dev->driver_context);
 
     if (data == NULL)
     {
@@ -74,7 +74,7 @@ static int ReadChunk(struct yaffs_dev* dev, int nand_chunk, u8* data, int data_l
 
 static int WriteChunk(struct yaffs_dev* dev, int nand_chunk, const u8* data, int data_len, const u8* oob, int oob_len)
 {
-    YaffsNANDDriver* driver = dev->driver_context;
+    YaffsNANDDriver* driver = static_cast<YaffsNANDDriver*>(dev->driver_context);
 
     if (data == NULL)
     {
@@ -126,7 +126,7 @@ static int EraseBlock(struct yaffs_dev* dev, int block_no)
 {
     LOGF(LOG_LEVEL_INFO, "EraseBlock %d", block_no);
 
-    YaffsNANDDriver* driver = dev->driver_context;
+    YaffsNANDDriver* driver = static_cast<YaffsNANDDriver*>(dev->driver_context);
 
     uint32_t baseAddress = NANDBlockOffset(&driver->geometry, block_no);
 
@@ -144,7 +144,7 @@ static int MarkBadBlock(struct yaffs_dev* dev, int block_no)
 {
     LOGF(LOG_LEVEL_INFO, "MarkBadBlock %d", block_no);
 
-    YaffsNANDDriver* driver = dev->driver_context;
+    YaffsNANDDriver* driver = static_cast<YaffsNANDDriver*>(dev->driver_context);
 
     uint32_t blockAddress = NANDBlockOffset(&driver->geometry, block_no);
 
@@ -160,7 +160,7 @@ static int MarkBadBlock(struct yaffs_dev* dev, int block_no)
 
 static int CheckBadBlock(struct yaffs_dev* dev, int block_no)
 {
-    YaffsNANDDriver* driver = dev->driver_context;
+    YaffsNANDDriver* driver = static_cast<YaffsNANDDriver*>(dev->driver_context);
 
     uint32_t baseAddress = NANDBlockOffset(&driver->geometry, block_no);
 
@@ -177,7 +177,7 @@ static int FlashInitialize(struct yaffs_dev* dev)
 {
     LOG(LOG_LEVEL_INFO, "Initializing flash");
 
-    YaffsNANDDriver* driver = dev->driver_context;
+    YaffsNANDDriver* driver = static_cast<YaffsNANDDriver*>(dev->driver_context);
 
     driver->flash.initialize(&driver->flash);
 

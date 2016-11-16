@@ -45,7 +45,7 @@ static I2CResult ExecuteTransfer(I2CLowLevelBus* bus, I2C_TransferSeq_TypeDef* s
 
     I2C_TypeDef* hw = (I2C_TypeDef*)bus->HWInterface;
 
-    I2C_TransferReturn_TypeDef rawResult = (I2CResult)I2C_TransferInit(hw, seq);
+    I2C_TransferReturn_TypeDef rawResult = I2C_TransferInit(hw, seq);
 
     if (rawResult != i2cTransferInProgress)
     {
@@ -92,16 +92,13 @@ static I2CResult ExecuteTransfer(I2CLowLevelBus* bus, I2C_TransferSeq_TypeDef* s
  */
 static I2CResult Write(I2CBus* bus, const I2CAddress address, const uint8_t* data, size_t length)
 {
-    I2C_TransferSeq_TypeDef seq = //
-        {
-            .addr = address,         //
-            .flags = I2C_FLAG_WRITE, //
-            .buf =                   //
-            {
-                {.len = length, .data = (uint8_t*)data}, //
-                {.len = 0, .data = NULL}                 //
-            }                                            //
-        };
+    I2C_TransferSeq_TypeDef seq;
+    seq.addr = address;
+    seq.flags = I2C_FLAG_WRITE;
+    seq.buf[0].len = length;
+    seq.buf[0].data = (uint8_t*)data;
+    seq.buf[1].len = 0;
+    seq.buf[1].data = nullptr;
 
     return ExecuteTransfer(LowLevel(bus), &seq);
 }
@@ -119,16 +116,14 @@ static I2CResult Write(I2CBus* bus, const I2CAddress address, const uint8_t* dat
 static I2CResult WriteRead(
     I2CBus* bus, const I2CAddress address, const uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength)
 {
-    I2C_TransferSeq_TypeDef seq = //
-        {
-            .addr = address,              //
-            .flags = I2C_FLAG_WRITE_READ, //
-            .buf =                        //
-            {
-                {.len = inLength, .data = (uint8_t*)inData}, //
-                {.len = outLength, .data = outData}          //
-            }                                                //
-        };
+    I2C_TransferSeq_TypeDef seq;
+
+    seq.addr = address;
+    seq.flags = I2C_FLAG_WRITE;
+    seq.buf[0].len = inLength;
+    seq.buf[0].data = (uint8_t*)inData;
+    seq.buf[1].len = outLength;
+    seq.buf[1].data = outData;
 
     return ExecuteTransfer(LowLevel(bus), &seq);
 }

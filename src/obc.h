@@ -1,7 +1,7 @@
 #ifndef OBC_H
 #define OBC_H
 
-#include <stdatomic.h>
+#include <atomic>
 
 #include "adcs/adcs.h"
 #include "base/os.h"
@@ -27,7 +27,7 @@ typedef struct
     /** @brief Handle to OBC initialization task. */
     OSTaskHandle initTask;
     /** @brief Flag indicating that OBC software has finished initialization process. */
-    atomic_bool initialized;
+    std::atomic<bool> initialized;
 
     /** @brief ADCS context object */
     ADCSContext adcs;
@@ -60,7 +60,7 @@ typedef struct
     Terminal terminal;
 
     /** @brief Power control interface */
-    PowerControl PowerControl;
+    PowerControl PowerControlInterface;
 } OBC;
 
 /** @brief Global OBC object. */

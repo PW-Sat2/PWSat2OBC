@@ -26,12 +26,16 @@
 #include "yaffs_hweight.h"
 #include "yaffs_osglue.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void yaffs_bug_fn(const char* file_name, int line_no);
 
-#define BUG()                                                                                                          \
-    do                                                                                                                 \
-    {                                                                                                                  \
-        yaffs_bug_fn(__FILE__, __LINE__);                                                                              \
+#define BUG()                                                                                                                              \
+    do                                                                                                                                     \
+    {                                                                                                                                      \
+        yaffs_bug_fn(__FILE__, __LINE__);                                                                                                  \
     } while (0)
 
 #define YCHAR char
@@ -72,26 +76,26 @@ void yaffs_bug_fn(const char* file_name, int line_no);
 #define vmalloc(x) yaffsfs_malloc(x)
 #define vfree(x) yaffsfs_free(x)
 
-#define cond_resched()                                                                                                 \
-    do                                                                                                                 \
-    {                                                                                                                  \
+#define cond_resched()                                                                                                                     \
+    do                                                                                                                                     \
+    {                                                                                                                                      \
     } while (0)
 
 void yaffs_log(const char* fmt, ...);
 
-#define yaffs_tracef(msk, fmt, ...)                                                                                    \
-    do                                                                                                                 \
-    {                                                                                                                  \
-        if (yaffs_trace_mask & (msk))                                                                                  \
-            yaffs_log("yaffs: " fmt "\n", ##__VA_ARGS__);                                                              \
+#define yaffs_tracef(msk, fmt, ...)                                                                                                        \
+    do                                                                                                                                     \
+    {                                                                                                                                      \
+        if (yaffs_trace_mask & (msk))                                                                                                      \
+            yaffs_log("yaffs: " fmt "\n", ##__VA_ARGS__);                                                                                  \
     \
 } while (0)
 
-#define yaffs_trace(msk, fmt)                                                                                          \
-    do                                                                                                                 \
-    {                                                                                                                  \
-        if (yaffs_trace_mask & (msk))                                                                                  \
-            yaffs_log("yaffs: " fmt "\n");                                                                             \
+#define yaffs_trace(msk, fmt)                                                                                                              \
+    do                                                                                                                                     \
+    {                                                                                                                                      \
+        if (yaffs_trace_mask & (msk))                                                                                                      \
+            yaffs_log("yaffs: " fmt "\n");                                                                                                 \
     \
 } while (0)
 
@@ -109,5 +113,9 @@ void yaffs_log(const char* fmt, ...);
 #include "yaffs_list.h"
 
 #include "yaffsfs.h"
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

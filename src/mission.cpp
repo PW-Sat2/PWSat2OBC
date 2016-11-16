@@ -83,14 +83,15 @@ static void NormalModeLoop(SystemState* state, MissionState* missionState)
 
     SystemActionDescriptor* runnableActions[COUNT_OF(actionDescriptors)];
 
-    ModeDescriptor descriptor = {.update = updateDescriptors,
-        .updateCount = COUNT_OF(updateDescriptors),
-        .verify = NULL,
-        .verifyResult = NULL,
-        .verifyCount = 0,
-        .actions = actionDescriptors,
-        .actionCount = COUNT_OF(actionDescriptors),
-        .runnableActions = runnableActions};
+    ModeDescriptor descriptor;
+    descriptor.update = updateDescriptors;
+    descriptor.updateCount = COUNT_OF(updateDescriptors);
+    descriptor.verify = NULL;
+    descriptor.verifyResult = NULL;
+    descriptor.verifyCount = 0;
+    descriptor.actions = actionDescriptors;
+    descriptor.actionCount = COUNT_OF(actionDescriptors);
+    descriptor.runnableActions = runnableActions;
 
     Loop(state, &descriptor);
 }
