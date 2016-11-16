@@ -1,5 +1,7 @@
+#include <stdio.h>
 #include <gtest/gtest.h>
 #include "heap.h"
+#include "time/timer.h"
 
 #ifdef ENABLE_COVERAGE
 extern "C" void __gcov_flush(void);
