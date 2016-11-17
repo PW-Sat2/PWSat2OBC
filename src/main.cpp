@@ -187,7 +187,7 @@ void DummyFrameHandler::HandleFrame(CommObject& comm, CommFrame& frame)
 
     const char* response = "PONG";
 
-    comm.SendFrame(gsl::span<const uint8_t>((const uint8_t*)response, 4));
+    comm.SendFrame(gsl::span<const uint8_t>(static_cast<const uint8_t*>(response), 4));
 }
 
 void ADXRS(void* param)

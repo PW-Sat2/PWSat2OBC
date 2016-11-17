@@ -15,7 +15,7 @@ void SendFrameHandler(uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argc);
     uint8_t len = strlen(argv[0]);
     LOGF(LOG_LEVEL_INFO, "Received request to send frame of length %d...", len);
-    Main.comm.SendFrame(span<const uint8_t>((const uint8_t*)argv[0], len));
+    Main.comm.SendFrame(span<const uint8_t>(static_cast<const uint8_t*>(argv[0]), len));
 }
 
 void GetFramesCountHandler(uint16_t argc, char* argv[])

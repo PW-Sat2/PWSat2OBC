@@ -18,8 +18,8 @@ using namespace std;
 using gsl::span;
 
 CommObject::CommObject(I2CBus& low, IHandleFrame& upperInterface)
-    : low(low), //
-      upper(upperInterface)
+    : _low(low), //
+      _frameHandler(upperInterface)
 {
 }
 
@@ -53,7 +53,7 @@ enum TaskFlag
 
 bool CommObject::SendCommand(CommAddress address, uint8_t command)
 {
-    const I2CResult result = this->low.Write(&this->low, address, &command, sizeof(command));
+    const I2CResult result = this->_low.Write(&this->_low, address, &command, sizeof(command));
     const bool status = (result == I2CResultOK);
     if (!status)
     {
@@ -65,7 +65,7 @@ bool CommObject::SendCommand(CommAddress address, uint8_t command)
 
 bool CommObject::SendCommandWithResponse(CommAddress address, uint8_t command, span<uint8_t> outBuffer)
 {
-    const I2CResult result = this->low.WriteRead(&this->low, address, &command, sizeof(command), outBuffer.data(), outBuffer.size());
+    const I2CResult result = this->_low.WriteRead(&this->_low, address, &command, sizeof(command), outBuffer.data(), outBuffer.size());
     const bool status = (result == I2CResultOK);
     if (!status)
     {
@@ -77,8 +77,8 @@ bool CommObject::SendCommandWithResponse(CommAddress address, uint8_t command, s
 
 OSResult CommObject::Initialize()
 {
-    this->commTaskFlags = System.CreateEventGroup();
-    if (this->commTaskFlags != NULL)
+    this->_pollingTaskFlags = System.CreateEventGroup();
+    if (this->_pollingTaskFlags != NULL)
     {
         return OSResultSuccess;
     }
@@ -96,9 +96,9 @@ bool CommObject::Restart()
         return false;
     }
 
-    if (this->commTask == NULL)
+    if (this->_pollingTaskHandle == NULL)
     {
-        const OSResult result = System.CreateTask(CommObject::CommTask, "COMM Task", 512, this, 4, &this->commTask);
+        const OSResult result = System.CreateTask(CommObject::CommTask, "COMM Task", 512, this, 4, &this->_pollingTaskHandle);
         if (result != OSResultSuccess)
         {
             LOGF(LOG_LEVEL_ERROR, "[comm] Unable to create background task. Status: 0x%08x.", result);
@@ -111,10 +111,10 @@ bool CommObject::Restart()
 
 bool CommObject::Pause()
 {
-    if (this->commTask != NULL)
+    if (this->_pollingTaskHandle != NULL)
     {
-        System.EventGroupSetBits(this->commTaskFlags, TaskFlagPauseRequest);
-        System.EventGroupWaitForBits(this->commTaskFlags, TaskFlagAck, false, true, MAX_DELAY);
+        System.EventGroupSetBits(this->_pollingTaskFlags, TaskFlagPauseRequest);
+        System.EventGroupWaitForBits(this->_pollingTaskFlags, TaskFlagAck, false, true, MAX_DELAY);
     }
 
     return true;
@@ -288,7 +288,7 @@ bool CommObject::SendFrame(span<const std::uint8_t> frame)
     memcpy(cmd + 1, frame.data(), frame.size());
     uint8_t remainingBufferSize;
 
-    const bool status = (this->low.WriteRead(&this->low, CommTransmitter, cmd, frame.size() + 1, &remainingBufferSize, 1) == I2CResultOK);
+    const bool status = (this->_low.WriteRead(&this->_low, CommTransmitter, cmd, frame.size() + 1, &remainingBufferSize, 1) == I2CResultOK);
     if (!status)
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Failed to send frame");
@@ -315,7 +315,7 @@ bool CommObject::SetBeacon(const CommBeacon& beaconData)
         return false;
     }
 
-    return this->low.Write(&this->low, CommTransmitter, buffer, WriterGetDataLength(&writer)) == I2CResultOK;
+    return this->_low.Write(&this->_low, CommTransmitter, buffer, WriterGetDataLength(&writer)) == I2CResultOK;
 }
 
 bool CommObject::ClearBeacon()
@@ -328,7 +328,7 @@ bool CommObject::SetTransmitterStateWhenIdle(CommTransmitterIdleState requestedS
     uint8_t buffer[2];
     buffer[0] = TransmitterSetIdleState;
     buffer[1] = requestedState;
-    return this->low.Write(&this->low, CommTransmitter, buffer, COUNT_OF(buffer)) == I2CResultOK;
+    return this->_low.Write(&this->_low, CommTransmitter, buffer, COUNT_OF(buffer)) == I2CResultOK;
 }
 
 bool CommObject::SetTransmitterBitRate(CommTransmitterBitrate bitrate)
@@ -336,7 +336,7 @@ bool CommObject::SetTransmitterBitRate(CommTransmitterBitrate bitrate)
     uint8_t buffer[2];
     buffer[0] = TransmitterSetBitRate;
     buffer[1] = bitrate;
-    return this->low.Write(&this->low, CommTransmitter, buffer, COUNT_OF(buffer)) == I2CResultOK;
+    return this->_low.Write(&this->_low, CommTransmitter, buffer, COUNT_OF(buffer)) == I2CResultOK;
 }
 
 bool CommObject::GetTransmitterState(CommTransmitterState& state)
@@ -344,7 +344,7 @@ bool CommObject::GetTransmitterState(CommTransmitterState& state)
     uint8_t command = TransmitterGetState;
     uint8_t response;
     const bool status =
-        (this->low.WriteRead(&this->low, CommTransmitter, &command, sizeof(command), &response, sizeof(response)) == I2CResultOK);
+        (this->_low.WriteRead(&this->_low, CommTransmitter, &command, sizeof(command), &response, sizeof(response)) == I2CResultOK);
     if (!status)
     {
         return false;
@@ -393,7 +393,7 @@ void CommObject::PollHardware()
                 }
 
                 LOGF(LOG_LEVEL_INFO, "[comm] Received frame %d bytes. ", (int)frame.Size);
-                this->upper.HandleFrame(*this, frame);
+                this->_frameHandler.HandleFrame(*this, frame);
             }
         }
     }
@@ -405,11 +405,11 @@ void CommObject::CommTask(void* param)
     comm->PollHardware();
     for (;;)
     {
-        const OSEventBits result = System.EventGroupWaitForBits(comm->commTaskFlags, TaskFlagPauseRequest, false, true, 10000);
+        const OSEventBits result = System.EventGroupWaitForBits(comm->_pollingTaskFlags, TaskFlagPauseRequest, false, true, 10000);
         if (result == TaskFlagPauseRequest)
         {
             LOG(LOG_LEVEL_WARNING, "Comm task paused");
-            System.EventGroupSetBits(comm->commTaskFlags, TaskFlagAck);
+            System.EventGroupSetBits(comm->_pollingTaskFlags, TaskFlagAck);
             System.SuspendTask(NULL);
         }
         else

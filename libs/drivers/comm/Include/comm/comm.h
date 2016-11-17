@@ -374,16 +374,16 @@ class CommObject final
 
   private:
     /** @brief Comm driver lower interface. */
-    I2CBus& low;
+    I2CBus& _low;
 
     /** @brief Comm driver upper interface. */
-    IHandleFrame& upper;
+    IHandleFrame& _frameHandler;
 
     /** @brief Handle to comm background task. */
-    void* commTask;
+    void* _pollingTaskHandle;
 
     /** @brief Handle to event group used to communicate with background task. */
-    OSEventGroupHandle commTaskFlags;
+    OSEventGroupHandle _pollingTaskFlags;
 
     bool SendCommand(CommAddress address, std::uint8_t command);
     bool SendCommandWithResponse(CommAddress address, std::uint8_t command, gsl::span<std::uint8_t> outBuffer);
