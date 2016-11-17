@@ -8,7 +8,6 @@ from pins import Pins
 
 class System:
     def __init__(self, obc_com, sys_bus_com, payload_bus_com, use_single_bus, gpio, auto_power_on = True):
-        logging.basicConfig()
         self.log = logging.getLogger("system")
 
         self._use_single_bus = use_single_bus
@@ -47,7 +46,7 @@ class System:
         self.sys_bus.add_device(self.transmitter)
         self.sys_bus.add_device(self.receiver)
         self.sys_bus.add_device(self.primary_antenna)
-        self.sys_bus.add_device(self.backup_antenna)
+        self.payload_bus.add_device(self.backup_antenna)
 
     def close(self):
         self.sys_bus.stop()

@@ -1,20 +1,8 @@
 import devices
 from tests.base import BaseTest
 from system import auto_comm_handling
-from threading import Event
 from obc import *
-
-class TestEvent():
-    flag = Event()
-
-    def set(self, *args):
-        self.flag.set()
-
-    def reset(self, *args):
-        self.flag.clear();
-
-    def wait_for_change(self, timeout = None):
-        return self.flag.wait(timeout)
+from utils import TestEvent
 
 class Test_Antenna(BaseTest):
     def __init__(self, methodName = 'runTest'):
