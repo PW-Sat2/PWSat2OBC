@@ -1,5 +1,5 @@
 /**
-@file Driver for communication module.
+@file comm.cpp Driver for communication module.
 
 @remarks Based on ICD Issue 1.0 2014-12-19
 */
@@ -144,7 +144,7 @@ CommReceiverFrameCount CommObject::GetFrameCount()
     result.status = this->SendCommandWithResponse(CommReceiver, ReceiverGetFrameCount, span<uint8_t>(&count, 1));
     if (result.status)
     {
-        LOGF(LOG_LEVEL_INFO, "There are %d frames.", (int)count);
+        LOGF(LOG_LEVEL_INFO, "There are %d frames.", static_cast<int>(count));
         result.frameCount = count;
     }
     else
@@ -247,7 +247,7 @@ bool CommObject::ReceiveFrame(CommFrame& frame)
 
     if (frame.Size > COMM_MAX_FRAME_CONTENTS_SIZE)
     {
-        LOGF(LOG_LEVEL_ERROR, "[comm] Invalid frame length: %d", (int)frame.Size);
+        LOGF(LOG_LEVEL_ERROR, "[comm] Invalid frame length: %d", static_cast<int>(frame.Size));
         return false;
     }
 
@@ -263,7 +263,7 @@ bool CommObject::ReceiveFrame(CommFrame& frame)
     }
     else
     {
-        LOGF(LOG_LEVEL_DEBUG, "[comm] Received frame %d bytes", (int)frame.Size);
+        LOGF(LOG_LEVEL_DEBUG, "[comm] Received frame %d bytes", static_cast<int>(frame.Size));
     }
 
     if (frame.Size == 0 || (frame.Doppler & 0xf000) != 0 || (frame.RSSI & 0xf000) != 0)
@@ -359,7 +359,7 @@ bool CommObject::GetTransmitterState(CommTransmitterState& state)
     }
 
     state.BeaconState = (response & 2) != 0;
-    state.StateWhenIdle = (CommTransmitterIdleState)(response & 1);
+    state.StateWhenIdle = static_cast<CommTransmitterIdleState>(response & 1);
     static const CommTransmitterBitrate conversionArray[] = {
         Comm1200bps, Comm2400bps, Comm4800bps, Comm9600bps,
     };

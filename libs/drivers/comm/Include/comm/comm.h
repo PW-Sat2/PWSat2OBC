@@ -140,16 +140,17 @@ namespace devices
             std::uint8_t Data[COMM_MAX_FRAME_CONTENTS_SIZE];
         };
 
-            /** Comm driver upper interface. */
-            struct IHandleFrame
-            {
-                /**
-                 * @brief Pointer to function that should be called whenever new frame is received.
-                 *
-                 * See the CommFrameHandler definition for details regarding usage & implementation requirements.
-                 */
-                virtual void HandleFrame(CommObject& comm, CommFrame& frame) = 0;
-            };
+        /** Comm driver upper interface. */
+        struct IHandleFrame
+        {
+            /**
+             * @brief Method called on each incoming frame.
+             * @param[in] comm Reference to comm driver instance that recieved frame
+             * @param[in] frame Reference to structure describing received frame
+             *
+             */
+            virtual void HandleFrame(CommObject& comm, CommFrame& frame) = 0;
+        };
 
         /** Type that contains status of the frame count query. */
         struct CommReceiverFrameCount
@@ -210,16 +211,21 @@ namespace devices
             CommTransmitter = 0x62,
         };
 
+        /**
+         * @brief This type describe comm driver global state.
+         *
+         * @remark Do not access directly the fields of this type, instead use the comm driver interface to
+         * perform requested action.
+         */
+        class CommObject final
+        {
+          public:
             /**
-             * @brief This type describe comm driver global state.
-             *
-             * @remark Do not access directly the fields of this type, instead use the comm driver interface to
-             * perform requested action.
+             * Constructs new instance of COMM low-level driver
+             * @param[in] low I2C bus used to communicate with device
+             * @param[in] upperInterface Reference to object responsible for interpreting received frames
              */
-            class CommObject final
-            {
-              public:
-                CommObject(I2CBus& low, IHandleFrame& upperInterface);
+            CommObject(I2CBus& low, IHandleFrame& upperInterface);
 
             /**
              * @brief This procedure initializes the comm driver object and sets it 'Paused' state.
@@ -290,15 +296,13 @@ namespace devices
              */
             bool GetTransmitterTelemetry(CommTransmitterTelemetry& telemetry);
 
-                /**
-                 * @brief Adds the requested frame to the send queue.
-                 *
-                 * @param[in] data Pointer to buffer that contains the frame contents.
-                 * @param[in] length Size of the frame contents in bytes. This value cannot be
-                 * greater then COMM_MAX_FRAME_CONTENTS_SIZE.
-                 * @return Operation status, true in case of success, false otherwise.
-                 */
-                bool SendFrame(gsl::span<const std::uint8_t> frame);
+            /**
+             * @brief Adds the requested frame to the send queue.
+             *
+             * @param[in] frame Buffer containing frame contents.
+             * @return Operation status, true in case of success, false otherwise.
+             */
+            bool SendFrame(gsl::span<const std::uint8_t> frame);
 
             /**
              * @brief Requests the contents of the oldest received frame from the queue.
