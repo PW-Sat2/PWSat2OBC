@@ -15,6 +15,7 @@
 #include "system.h"
 
 using namespace std;
+using gsl::span;
 
 CommObject::CommObject(I2CBus& low, IHandleFrame& upperInterface)
     : low(low), //
@@ -62,9 +63,9 @@ bool CommObject::SendCommand(CommAddress address, uint8_t command)
     return status;
 }
 
-bool CommObject::SendCommandWithResponse(CommAddress address, uint8_t command, uint8_t* outBuffer, uint8_t outBufferSize)
+bool CommObject::SendCommandWithResponse(CommAddress address, uint8_t command, span<uint8_t> outBuffer)
 {
-    const I2CResult result = this->low.WriteRead(&this->low, address, &command, sizeof(command), outBuffer, outBufferSize);
+    const I2CResult result = this->low.WriteRead(&this->low, address, &command, sizeof(command), outBuffer.data(), outBuffer.size());
     const bool status = (result == I2CResultOK);
     if (!status)
     {
@@ -138,7 +139,7 @@ CommReceiverFrameCount CommObject::GetFrameCount()
 {
     CommReceiverFrameCount result;
     uint8_t count = 0;
-    result.status = this->SendCommandWithResponse(CommReceiver, ReceiverGetFrameCount, &count, sizeof(count));
+    result.status = this->SendCommandWithResponse(CommReceiver, ReceiverGetFrameCount, span<uint8_t>(&count, 1));
     if (result.status)
     {
         LOGF(LOG_LEVEL_INFO, "There are %d frames.", (int)count);
@@ -167,7 +168,7 @@ bool CommObject::RemoveFrame()
 bool CommObject::GetReceiverTelemetry(CommReceiverTelemetry& telemetry)
 {
     uint8_t buffer[sizeof(CommReceiverTelemetry)];
-    const bool status = this->SendCommandWithResponse(CommReceiver, ReceiverGetTelemetry, buffer, COUNT_OF(buffer));
+    const bool status = this->SendCommandWithResponse(CommReceiver, ReceiverGetTelemetry, span<uint8_t>(buffer));
     if (!status)
     {
         return status;
@@ -201,7 +202,7 @@ bool CommObject::GetReceiverTelemetry(CommReceiverTelemetry& telemetry)
 bool CommObject::GetTransmitterTelemetry(CommTransmitterTelemetry& telemetry)
 {
     uint8_t buffer[sizeof(CommTransmitterTelemetry)];
-    const bool status = this->SendCommandWithResponse(CommTransmitter, TransmitterGetTelemetry, buffer, COUNT_OF(buffer));
+    const bool status = this->SendCommandWithResponse(CommTransmitter, TransmitterGetTelemetry, span<uint8_t>(buffer));
     if (!status)
     {
         return status;
@@ -229,7 +230,7 @@ bool CommObject::GetTransmitterTelemetry(CommTransmitterTelemetry& telemetry)
 bool CommObject::ReceiveFrame(CommFrame& frame)
 {
     uint8_t buffer[COMM_MAX_FRAME_CONTENTS_SIZE + 20];
-    bool status = this->SendCommandWithResponse(CommReceiver, ReceiverGetFrame, buffer, COUNT_OF(buffer));
+    bool status = this->SendCommandWithResponse(CommReceiver, ReceiverGetFrame, span<uint8_t>(buffer));
     if (!status)
     {
         return status;
@@ -273,20 +274,21 @@ bool CommObject::ReceiveFrame(CommFrame& frame)
     return status;
 }
 
-bool CommObject::SendFrame(uint8_t* data, uint8_t length)
+bool CommObject::SendFrame(span<const std::uint8_t> frame)
 {
-    uint8_t cmd[255];
-    if (length > COMM_MAX_FRAME_CONTENTS_SIZE)
+    if (frame.size() > COMM_MAX_FRAME_CONTENTS_SIZE)
     {
-        LOGF(LOG_LEVEL_ERROR, "Frame payload is too long. Allowed: %d, Requested: '%d'.", COMM_MAX_FRAME_CONTENTS_SIZE, length);
+        LOGF(LOG_LEVEL_ERROR, "Frame payload is too long. Allowed: %d, Requested: '%d'.", COMM_MAX_FRAME_CONTENTS_SIZE, frame.size());
         return false;
     }
 
+    uint8_t cmd[255];
+
     cmd[0] = TransmitterSendFrame;
-    memcpy(cmd + 1, data, length);
+    memcpy(cmd + 1, frame.data(), frame.size());
     uint8_t remainingBufferSize;
 
-    const bool status = (this->low.WriteRead(&this->low, CommTransmitter, cmd, length + 1, &remainingBufferSize, 1) == I2CResultOK);
+    const bool status = (this->low.WriteRead(&this->low, CommTransmitter, cmd, frame.size() + 1, &remainingBufferSize, 1) == I2CResultOK);
     if (!status)
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Failed to send frame");

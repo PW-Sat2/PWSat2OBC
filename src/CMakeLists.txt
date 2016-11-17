@@ -41,6 +41,7 @@ target_link_libraries(${NAME}
     power_eps
     terminal
     assert
+    gsl
 )
 
 target_generate_hex(${NAME})

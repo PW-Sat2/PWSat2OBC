@@ -1,11 +1,12 @@
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include <em_chip.h>
 #include <em_cmu.h>
 #include <em_dbg.h>
 #include <em_device.h>
 #include <em_emu.h>
 #include <em_gpio.h>
+#include <gsl/span>
 #include <em_system.h>
 
 #include <FreeRTOS.h>
@@ -38,6 +39,8 @@
 
 #include "leuart/leuart.h"
 #include "power_eps/power_eps.h"
+
+using namespace std;
 
 OBC Main;
 MissionState Mission;
@@ -182,7 +185,9 @@ void DummyFrameHandler::HandleFrame(CommObject& comm, CommFrame& frame)
 {
     UNREFERENCED_PARAMETER(frame);
 
-    comm.SendFrame((uint8_t*)"PONG", 4);
+    const char* response = "PONG";
+
+    comm.SendFrame(gsl::span<const uint8_t>((const uint8_t*)response, 4));
 }
 
 void ADXRS(void* param)

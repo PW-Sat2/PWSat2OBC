@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <cstdint>
 #include <em_i2c.h>
+#include <gsl/span>
 
 #include "base/os.h"
 #include "i2c/i2c.h"
@@ -293,7 +294,7 @@ class CommObject final
      * greater then COMM_MAX_FRAME_CONTENTS_SIZE.
      * @return Operation status, true in case of success, false otherwise.
      */
-    bool SendFrame(std::uint8_t* data, std::uint8_t length);
+    bool SendFrame(gsl::span<const std::uint8_t> frame);
 
     /**
      * @brief Requests the contents of the oldest received frame from the queue.
@@ -385,7 +386,7 @@ class CommObject final
     OSEventGroupHandle commTaskFlags;
 
     bool SendCommand(CommAddress address, std::uint8_t command);
-    bool SendCommandWithResponse(CommAddress address, std::uint8_t command, std::uint8_t* outBuffer, std::uint8_t outBufferSize);
+    bool SendCommandWithResponse(CommAddress address, std::uint8_t command, gsl::span<std::uint8_t> outBuffer);
     void PollHardware();
     [[noreturn]] static void CommTask(void* param);
 };

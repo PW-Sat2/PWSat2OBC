@@ -70,6 +70,7 @@ target_link_libraries(${NAME}
     emdrv
     adxrs453    
     time
+    gsl
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})

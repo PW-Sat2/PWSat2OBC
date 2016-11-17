@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <em_i2c.h>
+#include <gsl/span>
 #include <string>
 #include <tuple>
 #include "gtest/gtest.h"
@@ -19,6 +20,7 @@ using testing::Ge;
 using testing::StrEq;
 using testing::Return;
 using testing::Invoke;
+using gsl::span;
 
 static const uint8_t ReceiverAddress = 0x60;
 static const uint8_t TransmitterAddress = 0x62;
@@ -385,8 +387,8 @@ TEST_F(CommTest, TestGetMixedLineTransmitterResponse)
 
 TEST_F(CommTest, TestSendTooLongFrame)
 {
-    uint8_t buffer[10] = {0};
-    const auto status = comm.SendFrame(buffer, COMM_MAX_FRAME_CONTENTS_SIZE + 1);
+    uint8_t buffer[COMM_MAX_FRAME_CONTENTS_SIZE + 1] = {0};
+    const auto status = comm.SendFrame(span<const uint8_t, COMM_MAX_FRAME_CONTENTS_SIZE + 1>(buffer));
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -395,7 +397,7 @@ TEST_F(CommTest, TestSendFrameFailure)
     uint8_t buffer[10] = {0};
     EXPECT_CALL(i2c, I2CWriteRead(TransmitterAddress, TransmitterSendFrame, Ne(nullptr), COUNT_OF(buffer) + 1, _, _))
         .WillOnce(Return(I2CResultNack));
-    const auto status = comm.SendFrame(buffer, COUNT_OF(buffer));
+    const auto status = comm.SendFrame(span<const uint8_t, 10>(buffer));
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -410,7 +412,7 @@ TEST_F(CommTest, TestSendFrame)
                 *outData = 0;
                 return I2CResultOK;
             }));
-    const auto status = comm.SendFrame(buffer, COUNT_OF(buffer));
+    const auto status = comm.SendFrame(span<const uint8_t>(buffer));
     ASSERT_THAT(status, Eq(true));
 }
 
@@ -427,7 +429,7 @@ TEST_F(CommTest, TestSendFrameRejectedByHardware)
             *outData = 0xff;
             return I2CResultOK;
         }));
-    const auto status = comm.SendFrame(buffer, COUNT_OF(buffer));
+    const auto status = comm.SendFrame(span<const uint8_t>(buffer));
     ASSERT_THAT(status, Eq(false));
 }
 
