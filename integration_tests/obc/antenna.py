@@ -68,25 +68,21 @@ class AntennaMixin(OBCMixin):
     def antenna_cancel_deployment(self, channel):
         pass
 
-    def parse_deployment_state(result):
-        parts = result.split(" ");
+    def _parse_deployment_state(result):
+        parts = map(int, result.split(" "))
 
-        operationStatus = int(parts[0])
+        operationStatus = parts[0]
         if(operationStatus != 0):
             return AntennaStatus(False)
 
         parsedResult = AntennaStatus(True)
-        for cx in range(4):
-            parsedResult.DeploymentState[cx] = int(parts[cx + 1])
-
-        for cx in range(4):
-            parsedResult.DeploymentInProgress[cx] = int(parts[cx + 5])
-
-        parsedResult.IgnoringSwitches = int(parts[9])
-        parsedResult.SystemArmed = int(parts[10])
+        parsedResult.DeploymentState = parts[1:5]
+        parsedResult.DeploymentInProgress = parts[5:9]
+        parsedResult.IgnoringSwitches = parts[9]
+        parsedResult.SystemArmed = parts[10]
         return parsedResult
 
-    @decode_return(parse_deployment_state)
+    @decode_return(_parse_deployment_state)
     @command("antenna_get_status {0}")
     def antenna_get_status(self, channel):
         pass

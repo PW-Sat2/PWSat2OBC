@@ -3,6 +3,7 @@
 #include "obc.h"
 #include "system.h"
 #include "terminal.h"
+#include "utils.h"
 
 static void SendResult(OSResult result)
 {
@@ -55,11 +56,6 @@ static bool GetAntenna(const char* name, AntennaId* antenna)
     }
 
     return true;
-}
-
-static inline int ToInt(bool value)
-{
-    return value ? 1 : 0;
 }
 
 void AntennaDeploy(uint16_t argc, char* argv[])
