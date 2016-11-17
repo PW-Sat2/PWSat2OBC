@@ -41,4 +41,8 @@
 
 #define HAS_FLAG(value, flag) (((value) & (flag)) == (flag))
 
+#define IS_BIT_SET(value, bit) (((value) & (1u << bit)) == (1 << bit))
+
+#define IS_BIT_CLEAR(value, bit) (((value) & (1u << bit)) == 0)
+
 #endif

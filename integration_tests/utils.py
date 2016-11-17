@@ -1,5 +1,6 @@
 from string import Formatter
-
+from threading import Event
+import inspect
 
 def hex_data(data):
     if isinstance(data, basestring):
@@ -32,3 +33,30 @@ class ExtendableFormatter(Formatter):
 
     def register_conversion(self, name, func):
         self._converters[name] = func
+
+def call(method, default, *args):
+    if not method is None:
+        if inspect.ismethod(method):
+            if len(args) != (method.__code__.co_argcount - 1):
+                raise Exception("Invalid argument count")
+        else:
+            if len(args) != method.__code__.co_argcount:
+                raise Exception("Invalid argument count")
+
+        result = method(*args)
+        if not result is None:
+            return result
+
+    return default
+
+class TestEvent():
+    flag = Event()
+
+    def set(self, *args):
+        self.flag.set()
+
+    def reset(self, *args):
+        self.flag.clear();
+
+    def wait_for_change(self, timeout = None):
+        return self.flag.wait(timeout)
