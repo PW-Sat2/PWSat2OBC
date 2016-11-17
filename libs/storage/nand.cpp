@@ -338,7 +338,7 @@ static FlashStatus eraseBlock(FlashNANDInterface* flash, uint32_t address)
     ChipEnable(false);
     WriteProtect(true);
 
-    return (FlashStatus)status;
+    return static_cast<FlashStatus>(status);
 }
 
 static FlashStatus check(FlashNANDInterface* flash)

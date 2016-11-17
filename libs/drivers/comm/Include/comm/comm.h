@@ -146,9 +146,10 @@ namespace drivers
             struct IHandleFrame
             {
                 /**
-                 * @brief Pointer to function that should be called whenever new frame is received.
+                 * @brief Method called on each incoming frame.
+                 * @param[in] comm Reference to comm driver instance that recieved frame
+                 * @param[in] frame Reference to structure describing received frame
                  *
-                 * See the CommFrameHandler definition for details regarding usage & implementation requirements.
                  */
                 virtual void HandleFrame(CommObject& comm, CommFrame& frame) = 0;
             };
@@ -221,6 +222,11 @@ namespace drivers
             class CommObject final
             {
               public:
+                /**
+                 * Constructs new instance of COMM low-level driver
+                 * @param[in] low I2C bus used to communicate with device
+                 * @param[in] upperInterface Reference to object responsible for interpreting received frames
+                 */
                 CommObject(I2CBus& low, IHandleFrame& upperInterface);
 
                 /**
@@ -295,9 +301,7 @@ namespace drivers
                 /**
                  * @brief Adds the requested frame to the send queue.
                  *
-                 * @param[in] data Pointer to buffer that contains the frame contents.
-                 * @param[in] length Size of the frame contents in bytes. This value cannot be
-                 * greater then COMM_MAX_FRAME_CONTENTS_SIZE.
+                 * @param[in] frame Buffer containing frame contents.
                  * @return Operation status, true in case of success, false otherwise.
                  */
                 bool SendFrame(gsl::span<const std::uint8_t> frame);
