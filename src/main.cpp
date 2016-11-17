@@ -41,6 +41,8 @@
 #include "power_eps/power_eps.h"
 
 using namespace std;
+using devices::comm::CommObject;
+using devices::comm::CommFrame;
 
 OBC Main;
 MissionState Mission;
@@ -187,7 +189,7 @@ void DummyFrameHandler::HandleFrame(CommObject& comm, CommFrame& frame)
 
     const char* response = "PONG";
 
-    comm.SendFrame(gsl::span<const uint8_t>(static_cast<const uint8_t*>(response), 4));
+    comm.SendFrame(gsl::span<const uint8_t>(reinterpret_cast<const uint8_t*>(response), 4));
 }
 
 void ADXRS(void* param)

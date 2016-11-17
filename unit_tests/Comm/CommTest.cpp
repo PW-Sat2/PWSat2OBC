@@ -22,6 +22,8 @@ using testing::Return;
 using testing::Invoke;
 using gsl::span;
 
+using namespace devices::comm;
+
 static const uint8_t ReceiverAddress = 0x60;
 static const uint8_t TransmitterAddress = 0x62;
 
