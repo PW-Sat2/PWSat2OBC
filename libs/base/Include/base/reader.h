@@ -45,7 +45,7 @@ typedef struct
      *  - True -> Data is valid.
      *  - False -> Buffer overflow detected.
      */
-    bool status;
+    bool isValid;
 } Reader;
 
 /**
@@ -132,13 +132,13 @@ static void ReaderReset(Reader* reader);
 
 static inline bool ReaderStatus(const Reader* reader)
 {
-    return reader->status;
+    return reader->isValid;
 }
 
 static inline void ReaderReset(Reader* reader)
 {
     reader->position = 0;
-    reader->status = reader->buffer != NULL && reader->length > 0;
+    reader->isValid = reader->buffer != NULL && reader->length > 0;
 }
 
 /** @}*/

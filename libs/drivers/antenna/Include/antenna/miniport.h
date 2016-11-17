@@ -18,7 +18,7 @@ EXTERNC_BEGIN
  * antenna deployment hardware controller using provided I2C bus.
  *
  * The driver itself is responsible mainly for building & parsing frames exchanged with
- * the hardware itself any extensive data interpretation is not done t this level.
+ * the hardware itself any extensive data interpretation is not done at this level.
  * @{
  */
 
@@ -27,7 +27,7 @@ EXTERNC_BEGIN
  *
  * This low level driver is responsible for building/parsing frames exchanges with
  * hardware. By itself is driver is completely stateless and can be used to manage
- * multiple hardware channels at the same time (event concurrently). It is the caller
+ * multiple hardware channels at the same time (even concurrently). It is the caller
  * responsibility to keep the driver state in the dedicated structures (if necessary).
  */
 typedef struct AntennaMiniportDriver

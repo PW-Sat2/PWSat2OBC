@@ -11,7 +11,7 @@
  * If the hardware channel is not found this procedure will return pointer to
  * structure describing backup channel.
  * @param[in] driver Current driver instance.
- * @param[in] channel Queried hardware channel to be reset.
+ * @param[in] channel Queried hardware channel.
  * @return Pointer to the structure that contains status of the requested
  * hardware channel.
  * @ingroup AntennaDriver
@@ -110,7 +110,7 @@ static OSResult FinishDeployment(struct AntennaDriver* driver, AntennaChannel ch
         );
 }
 
-AntennaDeploymentProcessStatus IsDeploymentActive(struct AntennaDriver* driver, AntennaChannel channel)
+static AntennaDeploymentProcessStatus IsDeploymentActive(struct AntennaDriver* driver, AntennaChannel channel)
 {
     AntennaDeploymentStatus response = {0};
     AntennaChannelInfo* hardwareChannel = GetChannel(driver, channel);
@@ -141,7 +141,7 @@ static OSResult GetTemperature(struct AntennaDriver* driver,
         );
 }
 
-OSResult GetDeploymentStatus(struct AntennaDriver* driver,
+static OSResult GetDeploymentStatus(struct AntennaDriver* driver,
     AntennaChannel channel,
     AntennaDeploymentStatus* telemetry //
     )

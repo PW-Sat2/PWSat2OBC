@@ -2,12 +2,12 @@
 
 static bool ReaderUpdateState(Reader* reader, uint8_t requestedSize)
 {
-    if (reader->status)
+    if (reader->isValid)
     {
-        reader->status = (reader->position + requestedSize) <= reader->length;
+        reader->isValid = (reader->position + requestedSize) <= reader->length;
     }
 
-    return reader->status;
+    return reader->isValid;
 }
 
 void ReaderInitialize(Reader* reader, const uint8_t* buffer, uint16_t length)
