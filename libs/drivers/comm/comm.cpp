@@ -4,15 +4,17 @@
 @remarks Based on ICD Issue 1.0 2014-12-19
 */
 #include "comm.h"
-#include <stddef.h>
-#include <stdlib.h>
 #include <stdnoreturn.h>
-#include <string.h>
+#include <cstddef>
+#include <cstdlib>
+#include <cstring>
 #include "base/os.h"
 #include "base/reader.h"
 #include "base/writer.h"
 #include "logger/logger.h"
 #include "system.h"
+
+using namespace std;
 
 CommObject::CommObject(I2CBus& low, IHandleFrame& upperInterface)
     : low(low), //

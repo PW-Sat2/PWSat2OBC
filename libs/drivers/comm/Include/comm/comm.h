@@ -2,7 +2,7 @@
 #define SRC_DEVICES_COMM_H_
 
 #include <stdbool.h>
-#include <stdint.h>
+#include <cstdint>
 #include <em_i2c.h>
 
 #include "base/os.h"
@@ -40,7 +40,7 @@
 /**
  * @brief Maximum allowed single frame content length.
  */
-#define COMM_MAX_FRAME_CONTENTS_SIZE 235u
+constexpr std::uint8_t COMM_MAX_FRAME_CONTENTS_SIZE = 235u;
 
 /** @brief This type describe comm driver global state. */
 class CommObject;
@@ -51,16 +51,16 @@ class CommObject;
 struct CommFrame
 {
     /** @brief Frame contents size in bytes. */
-    uint16_t Size;
+    std::uint16_t Size;
 
     /** @brief Doppler frequency. This field contains the measured Doppler shift on the packet at the reception time. */
-    uint16_t Doppler;
+    std::uint16_t Doppler;
 
     /** @brief This field contains the measured Received Signal Strength Indicator (RSSI) at the reception time. */
-    uint16_t RSSI;
+    std::uint16_t RSSI;
 
     /** @brief Frame content. */
-    uint8_t Contents[COMM_MAX_FRAME_CONTENTS_SIZE];
+    std::uint8_t Contents[COMM_MAX_FRAME_CONTENTS_SIZE];
 };
 
 /**
@@ -72,25 +72,25 @@ struct CommFrame
 struct CommReceiverTelemetry
 {
     /** @brief Raw measurement value of the transmitter current consumption. */
-    uint16_t TransmitterCurrentConsumption;
+    std::uint16_t TransmitterCurrentConsumption;
 
     /** @brief Raw measurement value of the receiver current consumption. */
-    uint16_t ReceiverCurrentConsumption;
+    std::uint16_t ReceiverCurrentConsumption;
 
     /** @brief Raw measurement value of the instantaneous Doppler offset of the signal at the receiver port. */
-    uint16_t DopplerOffset;
+    std::uint16_t DopplerOffset;
 
     /** @brief Raw measurement value of the power bus voltage.*/
-    uint16_t Vcc;
+    std::uint16_t Vcc;
 
     /** @brief Raw measurement value of the local oscillator temperature. */
-    uint16_t OscilatorTemperature;
+    std::uint16_t OscilatorTemperature;
 
     /** @brief Raw measurement value of the power amplifier temperature. */
-    uint16_t AmplifierTemperature;
+    std::uint16_t AmplifierTemperature;
 
     /** @brief Raw measurement value of the instantaneous signal strength of the signal at the receiver. */
-    uint16_t SignalStrength;
+    std::uint16_t SignalStrength;
 };
 
 /**
@@ -102,16 +102,16 @@ struct CommReceiverTelemetry
 struct CommTransmitterTelemetry
 {
     /** @brief Raw measurement value of the instantaneous RF reflected power at the transmitter port. */
-    uint16_t RFReflectedPower;
+    std::uint16_t RFReflectedPower;
 
     /** @brief Raw measurement value of the power amplifier temperature. */
-    uint16_t AmplifierTemperature;
+    std::uint16_t AmplifierTemperature;
 
     /** @brief Raw measurement value of the instantaneous RF forward power at the transmitter port. */
-    uint16_t RFForwardPower;
+    std::uint16_t RFForwardPower;
 
     /** @brief Raw measurement value of the transmitter current consumption. */
-    uint16_t TransmitterCurrentConsumption;
+    std::uint16_t TransmitterCurrentConsumption;
 };
 
 /**
@@ -126,13 +126,13 @@ struct CommBeacon
      * has a minimum value of 0 and a maximum value of 3000. If an interval of more than 3000 seconds
      * is specified, the interval will automatically be set to 3000.
      */
-    uint16_t Period;
+    std::uint16_t Period;
 
     /** @brief Beacon frame contents size in bytes. */
-    uint8_t DataSize;
+    std::uint8_t DataSize;
 
     /** @brief Beacon frame contents. */
-    uint8_t Data[COMM_MAX_FRAME_CONTENTS_SIZE];
+    std::uint8_t Data[COMM_MAX_FRAME_CONTENTS_SIZE];
 };
 
 /** Comm driver upper interface. */
@@ -157,7 +157,7 @@ struct CommReceiverFrameCount
      *
      * The contents of this field is undefined when the status is set to false.
      */
-    uint8_t frameCount;
+    std::uint8_t frameCount;
 };
 
 /** Transmitter state enumerator. */
@@ -268,7 +268,7 @@ class CommObject final
     /**
      * @brief Queries the comm driver for the receiver telemetry.
      *
-     * @param[out] telemetry Pointer to object that should be filled with current receiver telemetry.
+     * @param[out] telemetry Reference to object that should be filled with current receiver telemetry.
      * @return Operation status, true in case of success, false otherwise.
      *
      * The contents of the telemetry object is undefined in case of the failure.
@@ -278,7 +278,7 @@ class CommObject final
     /**
      * @brief Queries the comm driver for the transmitter telemetry.
      *
-     * @param[out] telemetry Pointer to object that should be filled with current transmitter telemetry.
+     * @param[out] telemetry Reference to object that should be filled with current transmitter telemetry.
      * @return Operation status, true in case of success, false otherwise.
      *
      * The contents of the telemetry object is undefined in case of the failure.
@@ -293,12 +293,12 @@ class CommObject final
      * greater then COMM_MAX_FRAME_CONTENTS_SIZE.
      * @return Operation status, true in case of success, false otherwise.
      */
-    bool SendFrame(uint8_t* data, uint8_t length);
+    bool SendFrame(std::uint8_t* data, std::uint8_t length);
 
     /**
      * @brief Requests the contents of the oldest received frame from the queue.
      *
-     * @param[out] frame Pointer to object that should be filled with the data describing the oldest
+     * @param[out] frame Reference to object that should be filled with the data describing the oldest
      * available received frame.
      * @return Operation status, true in case of success, false otherwise.
      *
@@ -309,7 +309,7 @@ class CommObject final
     /**
      * @brief This procedure sets the beacon frame for the passed comm object.
      *
-     * @param[in] beaconData Pointer to object describing new beacon.
+     * @param[in] beaconData Reference to object describing new beacon.
      * See the definition of the CommBeacon for details.
      * @return Operation status, true in case of success, false otherwise.
      */
@@ -342,7 +342,7 @@ class CommObject final
     /**
      * @brief Queries the comm driver object for current transmitter state.
      *
-     * @param[out] state Pointer to object that should be filled with the data describing
+     * @param[out] state Reference to object that should be filled with the data describing
      * the current transmitter state.
      * @return Operation status, true in case of success, false otherwise.
      *
@@ -371,6 +371,7 @@ class CommObject final
      */
     bool ResetReceiver();
 
+  private:
     /** @brief Comm driver lower interface. */
     I2CBus& low;
 
@@ -383,9 +384,8 @@ class CommObject final
     /** @brief Handle to event group used to communicate with background task. */
     OSEventGroupHandle commTaskFlags;
 
-  private:
-    bool SendCommand(CommAddress address, uint8_t command);
-    bool SendCommandWithResponse(CommAddress address, uint8_t command, uint8_t* outBuffer, uint8_t outBufferSize);
+    bool SendCommand(CommAddress address, std::uint8_t command);
+    bool SendCommandWithResponse(CommAddress address, std::uint8_t command, std::uint8_t* outBuffer, std::uint8_t outBufferSize);
     void PollHardware();
     [[noreturn]] static void CommTask(void* param);
 };
