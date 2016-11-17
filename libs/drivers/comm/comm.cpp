@@ -17,6 +17,8 @@
 using namespace std;
 using gsl::span;
 
+using namespace drivers::devices::comm;
+
 CommObject::CommObject(I2CBus& low, IHandleFrame& upperInterface)
     : _low(low), //
       _frameHandler(upperInterface)

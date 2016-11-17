@@ -15,10 +15,10 @@
 #include "time/timer.h"
 #include "yaffs_guts.h"
 
-class DummyFrameHandler final : public IHandleFrame
+class DummyFrameHandler final : public drivers::devices::comm::IHandleFrame
 {
   public:
-    virtual void HandleFrame(CommObject& comm, CommFrame& frame) override;
+    virtual void HandleFrame(drivers::devices::comm::CommObject& comm, drivers::devices::comm::CommFrame& frame) override;
 };
 
 /**
@@ -69,10 +69,11 @@ struct OBC
     /** @brief Power control interface */
     PowerControl PowerControlInterface;
 
+    /** @brief Incoming frame handler */
     DummyFrameHandler FrameHandler;
 
     /** @brief Comm driver object. */
-    CommObject comm;
+    drivers::devices::comm::CommObject comm;
 };
 
 /** @brief Global OBC object. */
