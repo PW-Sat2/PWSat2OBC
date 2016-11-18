@@ -1,14 +1,13 @@
 import devices
 from tests.base import BaseTest
-from system import auto_comm_handling
 from obc import *
 from utils import TestEvent
+from system import auto_power_on
 
 class Test_Antenna(BaseTest):
+    @auto_power_on(False)
     def __init__(self, methodName = 'runTest'):
-        result = super(Test_Antenna, self).__init__(methodName)
-        self.auto_power_on = False
-        return result
+        super(Test_Antenna, self).__init__(methodName)
 
     def test_primary_antenna_is_reset_at_startup(self):
         event = TestEvent();
@@ -74,13 +73,13 @@ class Test_Antenna(BaseTest):
         self.assertTrue(result.SystemArmed)
         self.assertFalse(result.IgnoringSwitches)
 
-        self.assertFalse(result.DeploymentState[0])
-        self.assertTrue(result.DeploymentState[1])
-        self.assertTrue(result.DeploymentState[2])
-        self.assertFalse(result.DeploymentState[3])
+        self.assertFalse(result.DeploymentState[0], "Antenna 1 should not be deployed")
+        self.assertTrue(result.DeploymentState[1], "Antenna 2 should be deployed")
+        self.assertTrue(result.DeploymentState[2], "Antenna 3 should be deployed")
+        self.assertFalse(result.DeploymentState[3], "Antenna 4 should not be deployed")
 
-        self.assertTrue(result.DeploymentInProgress[0])
-        self.assertFalse(result.DeploymentInProgress[1])
-        self.assertFalse(result.DeploymentInProgress[2])
-        self.assertTrue(result.DeploymentInProgress[3])
+        self.assertTrue(result.DeploymentInProgress[0], "Antenna 1 deployment process should be still be running")
+        self.assertFalse(result.DeploymentInProgress[1], "Antenna 2 deployment process should not be still be running")
+        self.assertFalse(result.DeploymentInProgress[2], "Antenna 3 deployment process should not be still be running")
+        self.assertTrue(result.DeploymentInProgress[3], "Antenna 4 deployment process should be still be running")
 
