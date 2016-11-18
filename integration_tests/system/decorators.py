@@ -27,6 +27,16 @@ def wait_for_obc_start():
     return wrap
 
 
+def auto_power_on(auto_power_on):
+    def wrap(f):
+        @wraps(f)
+        def wrapper(self, *args, **kwargs):
+            result = f(self, *args, **kwargs)
+            self.auto_power_on = auto_power_on
+            return result
+        return wrapper
+    return wrap
+
 def require_two_i2c_buses(f):
     if config['SINGLE_BUS']:
         return nottest(f)
