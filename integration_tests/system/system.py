@@ -39,6 +39,7 @@ class System:
         self.receiver = ReceiverDevice()
 
         self.sys_bus.add_device(self.eps)
+        self.payload_bus.add_device(self.eps)
         self.sys_bus.add_device(self.transmitter)
         self.sys_bus.add_device(self.receiver)
 

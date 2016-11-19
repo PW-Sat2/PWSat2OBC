@@ -17,13 +17,12 @@ class LCLTimeoutException(Exception):
 
 
 class LCL:
-    is_on = False
-    was_on = False
-
     def __init__(self):
         self.on_event = Event()
         self.off_event = Event()
         self.changes = Queue()
+        self.is_on = False
+        self.was_on = False
 
     def on(self):
         self.is_on = True
