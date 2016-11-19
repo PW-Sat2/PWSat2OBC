@@ -47,14 +47,12 @@ class OverrideSwitches(Enum):
         return map[self]
 
 class AntennaStatus:
-    Status = False
-    DeploymentState = [False, False, False, False]
-    DeploymentInProgress = [False, False, False, False]
-    SystemArmed = False
-    IgnoringSwitches = False
-
     def __init__(self, status):
         self.Status = status
+        self.DeploymentState = [False, False, False, False]
+        self.DeploymentInProgress = [False, False, False, False]
+        self.SystemArmed = False
+        self.IgnoringSwitches = False
 
 class AntennaMixin(OBCMixin):
     def __init__(self):
