@@ -4,9 +4,10 @@ from i2cMock import I2CDevice
 from utils import *
 
 class Antenna():
-    deployed = False
-    activation_count = 0
-    is_being_deployed = False
+    def __init__(self):
+        self.deployed = False
+        self.activation_count = 0
+        self.is_being_deployed = False
 
     def is_deployed(self):
         return self.deployed
@@ -26,63 +27,62 @@ PRIMARY_ANTENNA_CONTROLLER_ADDRESS = 0x32
 BACKUP_ANTENNA_CONTROLLER_ADDRESS = 0x34
 
 class AntennaController(i2cMock.I2CDevice):
-    armed = False
-    ignore_deployment_switch = False
-    antenna_state = [Antenna(), Antenna(), Antenna(), Antenna()]
-    deployment_in_progress = False
-
-    # callback called when controller is being reset
-    # expected prototype:
-    # None -> None
-    on_reset = None
-
-    # callback called when controller arming state is being changed
-    # expected prototype:
-    # bool requestedState -> bool|None 
-    # parameters: 
-    # requestedState Flag indicating requested system state, True for armed, false otherwise
-    # This callback can return new state that will be set as command result or it can
-    # omit the return value in this case the default behaviour will be applied.
-    on_arm_state_change = None
-
-    # callback called when the antenna deployment is being started
-    # expected prototype:
-    # AntennaController controller, int antennaId -> bool|None
-    # parameters:
-    # controller reference to the controller object that is being affected
-    # antennaId Identifier of the antenna whose deployment process is being deployed. 
-    #   Antenna ids have positive ids, value -1 indicates automatic deployment.
-    # this callback can return bool indicating whether the deployment process state. 
-    # True for the antenna being currently deployed, false in case the deployment process
-    # should not start. Returning None will indicate that default behaviour should be used.
-    on_begin_deployment = None
-
-    # callback called when controller temperature is being requested.
-    # expected prototype:
-    # None -> int|None
-    # parameters:
-    # None
-    # this callback can return an integer that should be used as current temperature 
-    # measurement. Returning None will indicate that default value should be used.
-    on_get_temperature = None
-
-    # callback called when controller's deployment status is being requested.
-    # expected prototype:
-    # None -> []|None
-    # parameters: 
-    # None
-    # this callback can return the array of bytes that should be returned directly as query result.
-    # returning None will indicate that default behaviour should be used.
-    on_get_deployment_status = None
-
-    # callback called when deployment process should be aborted. 
-    # expected prototype:
-    # None -> None
-    on_deployment_cancel = None
-
     def __init__(self, address):
         super(AntennaController, self).__init__(address)
         self.log = logging.getLogger("Antenna" + str(address))
+        self.armed = False
+        self.ignore_deployment_switch = False
+        self.antenna_state = [Antenna(), Antenna(), Antenna(), Antenna()]
+        self.deployment_in_progress = False
+
+        # callback called when controller is being reset
+        # expected prototype:
+        # None -> None
+        self.on_reset = None
+
+        # callback called when controller arming state is being changed
+        # expected prototype:
+        # bool requestedState -> bool|None 
+        # parameters: 
+        # requestedState Flag indicating requested system state, True for armed, false otherwise
+        # This callback can return new state that will be set as command result or it can
+        # omit the return value in this case the default behaviour will be applied.
+        self.on_arm_state_change = None
+
+        # callback called when the antenna deployment is being started
+        # expected prototype:
+        # AntennaController controller, int antennaId -> bool|None
+        # parameters:
+        # controller reference to the controller object that is being affected
+        # antennaId Identifier of the antenna whose deployment process is being deployed. 
+        #   Antenna ids have positive ids, value -1 indicates automatic deployment.
+        # this callback can return bool indicating whether the deployment process state. 
+        # True for the antenna being currently deployed, false in case the deployment process
+        # should not start. Returning None will indicate that default behaviour should be used.
+        self.on_begin_deployment = None
+
+        # callback called when controller temperature is being requested.
+        # expected prototype:
+        # None -> int|None
+        # parameters:
+        # None
+        # this callback can return an integer that should be used as current temperature 
+        # measurement. Returning None will indicate that default value should be used.
+        self.on_get_temperature = None
+
+        # callback called when controller's deployment status is being requested.
+        # expected prototype:
+        # None -> []|None
+        # parameters: 
+        # None
+        # this callback can return the array of bytes that should be returned directly as query result.
+        # returning None will indicate that default behaviour should be used.
+        self.on_get_deployment_status = None
+
+        # callback called when deployment process should be aborted. 
+        # expected prototype:
+        # None -> None
+        self.on_deployment_cancel = None
 
     def reset_state(self):
         self.armed = False

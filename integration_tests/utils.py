@@ -50,7 +50,8 @@ def call(method, default, *args):
     return default
 
 class TestEvent():
-    flag = Event()
+    def __init__(self):
+        self.flag = Event()
 
     def set(self, *args):
         self.flag.set()
