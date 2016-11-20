@@ -11,7 +11,7 @@
 /**
  * @brief Object describing which descriptors are available in specific mode
  */
-typedef struct
+struct ModeDescriptor
 {
     /** @brief Array of update descriptors */
     SystemStateUpdateDescriptor* update;
@@ -29,7 +29,7 @@ typedef struct
     size_t actionCount;
     /** @brief Buffer for pointers to action descriptors that can be executed */
     SystemActionDescriptor** runnableActions;
-} ModeDescriptor;
+};
 
 static SystemStateUpdateResult UpdateTime(SystemState* state, void* param)
 {
@@ -59,32 +59,23 @@ static void Loop(SystemState* state, ModeDescriptor* mode)
     SystemDispatchActions(state, mode->runnableActions, runnableCount);
 }
 
+static SystemStateUpdateDescriptor NormalModeUpdateDescriptors[4];
+
+static SystemActionDescriptor NormalModeActionDescriptors[5];
+
 static void NormalModeLoop(SystemState* state, MissionState* missionState)
 {
-    SystemStateUpdateDescriptor updateDescriptors[] = {
-        missionState->TerminalCommandUpdate, //
-        missionState->UpdateTime,            //
-        missionState->Sail.Update,           //
-        missionState->ADCS.Update            //
-    };
-
-    SystemActionDescriptor actionDescriptors[] = {
-        missionState->Sail.OpenSail, //
-        missionState->ADCS.TurnOff,  //
-        missionState->ADCS.Detumble, //
-        missionState->ADCS.SunPoint, //
-    };
-
-    SystemActionDescriptor* runnableActions[COUNT_OF(actionDescriptors)];
+    UNREFERENCED_PARAMETER(missionState);
+    SystemActionDescriptor* runnableActions[COUNT_OF(NormalModeActionDescriptors)];
 
     ModeDescriptor descriptor;
-    descriptor.update = updateDescriptors;
-    descriptor.updateCount = COUNT_OF(updateDescriptors);
+    descriptor.update = NormalModeUpdateDescriptors;
+    descriptor.updateCount = COUNT_OF(NormalModeUpdateDescriptors);
     descriptor.verify = NULL;
     descriptor.verifyResult = NULL;
     descriptor.verifyCount = 0;
-    descriptor.actions = actionDescriptors;
-    descriptor.actionCount = COUNT_OF(actionDescriptors);
+    descriptor.actions = NormalModeActionDescriptors;
+    descriptor.actionCount = COUNT_OF(NormalModeActionDescriptors);
     descriptor.runnableActions = runnableActions;
 
     Loop(state, &descriptor);
@@ -105,18 +96,27 @@ static void MissionControlTask(void* param)
         TimeLongDelay(&Main.timeProvider, TimeSpanFromSeconds(10));
     }
 }
+static void TimeInitializeUpdateDescriptor(SystemStateUpdateDescriptor* descriptor)
+{
+    descriptor->Name = "Update time";
+    descriptor->Param = NULL;
+    descriptor->UpdateProc = UpdateTime;
+}
 
 void InitializeMission(MissionState* missionState, OBC* obc)
 {
     UNREFERENCED_PARAMETER(obc);
+    AntennaInitializeState(&obc->antennaDriver, &missionState->antennaMission);
 
-    SailInitializeUpdateDescriptor(&missionState->Sail.Update, &missionState->SailOpened);
-    SailInitializeActionDescriptor(&missionState->Sail.OpenSail, &missionState->SailOpened);
-    ADCSInitializeDescriptors(&obc->adcs, &missionState->ADCS);
+    // Update descriptors
+    AntennaInitializeUpdateDescriptor(&missionState->antennaMission, &NormalModeUpdateDescriptors[0]);
+    TimeInitializeUpdateDescriptor(&NormalModeUpdateDescriptors[1]);
+    SailInitializeUpdateDescriptor(&NormalModeUpdateDescriptors[2], &missionState->SailOpened);
 
-    missionState->UpdateTime.Name = "Update time";
-    missionState->UpdateTime.Param = NULL;
-    missionState->UpdateTime.UpdateProc = UpdateTime;
+    // Action Descriptors
+    AntennaInitializeActionDescriptor(&missionState->antennaMission, &NormalModeActionDescriptors[0]);
+    SailInitializeActionDescriptor(&NormalModeActionDescriptors[1], &missionState->SailOpened);
 
+    //    ADCSInitializeDescriptors(&obc->adcs, &missionState->ADCS);
     System.CreateTask(MissionControlTask, "MissionControl", 2048, missionState, 2, NULL);
 }

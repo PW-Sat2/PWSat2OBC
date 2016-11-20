@@ -7,8 +7,16 @@
 #include "system.h"
 #include "time/TimePoint.h"
 
+typedef void DeploymentProcedure(const SystemState* state, //
+    AntennaMissionState* stateDescriptor,
+    AntennaDriver* driver //
+    );
+
+static DeploymentProcedure RegularDeploymentStep, ResetDriverStep;
+
 typedef struct
 {
+    DeploymentProcedure* procedure;
     AntennaChannel channel;
     AntennaId antennaId;
     uint8_t retryCount;
@@ -18,59 +26,77 @@ typedef struct
 } AntennaDeploymentStep;
 
 static const AntennaDeploymentStep deploymentSteps[] = {
-    {ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 3, 3, 3, false},
-    {ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 3, 3, 3, false},
+    {ResetDriverStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 3, 3, 0, false},
+    {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 3, 3, 9, false},
 
-    {ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, 3, 3, 6, false},
-    {ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, 3, 3, 6, false},
-    {ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, 3, 3, 6, false},
-    {ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, 3, 3, 6, false},
+    {ResetDriverStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 3, 3, 0, false},
+    {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 3, 3, 9, false},
 
-    {ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, 3, 3, 6, false},
-    {ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, 3, 3, 6, false},
-    {ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, 3, 3, 6, false},
-    {ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, 3, 3, 6, false},
+    {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, 3, 3, 9, false},
+    {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, 3, 3, 9, false},
+    {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, 3, 3, 9, false},
+    {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, 3, 3, 9, false},
 
-    {ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, 3, 3, 9, false},
-    {ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, 3, 3, 9, false},
-    {ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, 3, 3, 9, false},
-    {ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, 3, 3, 9, false},
+    {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, 3, 3, 9, false},
+    {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, 3, 3, 9, false},
+    {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, 3, 3, 9, false},
+    {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, 3, 3, 9, false},
 
-    {ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, 3, 3, 9, false},
-    {ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, 3, 3, 9, false},
-    {ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, 3, 3, 9, false},
-    {ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, 3, 3, 9, false},
+    {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, 3, 3, 19, false},
+    {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, 3, 3, 19, false},
+    {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, 3, 3, 19, false},
+    {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, 3, 3, 19, false},
 
-    {ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, 3, 3, 19, false},
-    {ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, 3, 3, 19, false},
-    {ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, 3, 3, 19, false},
-    {ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, 3, 3, 19, false},
+    {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, 3, 3, 19, false},
+    {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, 3, 3, 19, false},
+    {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, 3, 3, 19, false},
+    {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, 3, 3, 19, false},
 
-    {ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, 3, 3, 19, false},
-    {ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, 3, 3, 19, false},
-    {ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, 3, 3, 19, false},
-    {ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, 3, 3, 19, false},
+    {ResetDriverStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 3, 3, 0, false},
+    {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, 3, 3, 39, true},
+    {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, 3, 3, 39, true},
+    {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, 3, 3, 39, true},
+    {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, 3, 3, 39, true},
 
-    {ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, 3, 3, 39, true},
-    {ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, 3, 3, 39, true},
-    {ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, 3, 3, 39, true},
-    {ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, 3, 3, 39, true},
+    {ResetDriverStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 3, 3, 0, false},
+    {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, 3, 3, 39, true},
+    {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, 3, 3, 39, true},
+    {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, 3, 3, 39, true},
+    {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, 3, 3, 39, true},
 
-    {ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, 3, 3, 39, true},
-    {ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, 3, 3, 39, true},
-    {ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, 3, 3, 39, true},
-    {ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, 3, 3, 39, true},
+    {ResetDriverStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 3, 3, 0, false},
+    {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, 3, 3, 59, true},
+    {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, 3, 3, 59, true},
+    {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, 3, 3, 59, true},
+    {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, 3, 3, 59, true},
 
-    // should we reset both channels and begin again?
+    {ResetDriverStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 3, 3, 0, false},
+    {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, 3, 3, 59, true},
+    {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, 3, 3, 59, true},
+    {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, 3, 3, 59, true},
+    {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, 3, 3, 59, true},
 };
 
 static const uint8_t DeploymentStepLimit = COUNT_OF(deploymentSteps);
 
+static void NextStep(AntennaMissionState* stateDescriptor)
+{
+    ++stateDescriptor->stepNumber;
+}
+
+static void Retry(AntennaMissionState* stateDescriptor)
+{
+    const AntennaDeploymentStep* step = &deploymentSteps[stateDescriptor->stepNumber];
+    if (++stateDescriptor->retryCount >= step->stepRetry)
+    {
+        NextStep(stateDescriptor);
+    }
+}
+
 static bool AntennaDeploymentCondition(const SystemState* state, void* param)
 {
     AntennaMissionState* stateDescriptor = (AntennaMissionState*)param;
-    const TimeSpan t = TimeSpanFromMinutes(30);
-
+    const TimeSpan t = TimeSpanFromMinutes(40);
     if (TimeSpanLessThan(state->Time, t))
     {
         return false;
@@ -108,7 +134,8 @@ static void StopDeployment(const SystemState* state,
     const AntennaDeploymentStep* step = &deploymentSteps[stateDescriptor->stepNumber - 1];
     for (uint8_t cx = 0; cx < step->retryCount; ++cx)
     {
-        if (OS_RESULT_SUCCEEDED(driver->FinishDeployment(driver, step->channel)))
+        const OSResult status = driver->FinishDeployment(driver, step->channel);
+        if (OS_RESULT_SUCCEEDED(status))
         {
             break;
         }
@@ -133,15 +160,42 @@ static void BeginDeployment(const SystemState* state,
 
         if (OS_RESULT_SUCCEEDED(result))
         {
-            break;
+            NextStep(stateDescriptor);
+            return;
         }
     }
 
-    if (++stateDescriptor->retryCount >= step->stepRetry)
+    Retry(stateDescriptor);
+}
+
+void RegularDeploymentStep(const SystemState* state,
+    AntennaMissionState* stateDescriptor,
+    AntennaDriver* driver //
+    )
+{
+    StopDeployment(state, stateDescriptor, driver);
+    BeginDeployment(state, stateDescriptor, driver);
+}
+
+void ResetDriverStep(const SystemState* state,
+    AntennaMissionState* stateDescriptor,
+    AntennaDriver* driver //
+    )
+{
+    UNREFERENCED_PARAMETER(state);
+    const AntennaDeploymentStep* step = &deploymentSteps[stateDescriptor->stepNumber];
+
+    for (uint8_t cx = 0; cx < step->retryCount; ++cx)
     {
-        ++stateDescriptor->stepNumber;
-        stateDescriptor->retryCount = 0;
+        const OSResult result = driver->Reset(driver, step->channel);
+        if (OS_RESULT_SUCCEEDED(result))
+        {
+            NextStep(stateDescriptor);
+            return;
+        }
     }
+
+    Retry(stateDescriptor);
 }
 
 static void AntennaDeploymentAction(const SystemState* state, void* param)
@@ -149,8 +203,9 @@ static void AntennaDeploymentAction(const SystemState* state, void* param)
     AntennaMissionState* stateDescriptor = (AntennaMissionState*)param;
     AntennaDriver* driver = stateDescriptor->driver;
 
-    StopDeployment(state, stateDescriptor, driver);
-    BeginDeployment(state, stateDescriptor, driver);
+    const AntennaDeploymentStep* step = &deploymentSteps[stateDescriptor->stepNumber];
+    DeploymentProcedure* procedure = step->procedure;
+    procedure(state, stateDescriptor, driver);
 }
 
 /**
@@ -190,10 +245,15 @@ SystemStateUpdateResult AntennaDeploymentUpdate(SystemState* state, void* param)
 
     AntennaDeploymentStatus deploymentStatus;
     AntennaDriver* driver = stateDescriptor->driver;
-    OSResult result = driver->GetDeploymentStatus(driver,
+    const OSResult result = driver->GetDeploymentStatus(driver,
         deploymentSteps[stateDescriptor->stepNumber].channel,
         &deploymentStatus //
         );
+
+    if (OS_RESULT_FAILED(result))
+    {
+        return SystemStateUpdateFailure;
+    }
 
     memcpy(state->Antenna.DeploymentState,
         deploymentStatus.DeploymentStatus,
@@ -203,20 +263,17 @@ SystemStateUpdateResult AntennaDeploymentUpdate(SystemState* state, void* param)
     stateDescriptor->inProgress = IsDeploymentActive(&deploymentStatus);
     state->Antenna.Deployed = (stateDescriptor->stepNumber == DeploymentStepLimit) ||
         (AreAllAntennasDeployed(&deploymentStatus) && !stateDescriptor->overrideState);
-    if (OS_RESULT_FAILED(result))
-    {
-        return SystemStateUpdateFailure;
-    }
 
     return SystemStateUpdateOK;
 }
 
-void InitializeAntennaState(AntennaDriver* driver,
+void AntennaInitializeState(AntennaDriver* driver,
     AntennaMissionState* antennaState //
     )
 {
     antennaState->driver = driver;
     antennaState->overrideState = false;
+    antennaState->inProgress = false;
     antennaState->retryCount = 0;
     antennaState->stepNumber = 0;
 }

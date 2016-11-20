@@ -17,7 +17,7 @@ set(SOURCES
   base/ReaderTest.cpp
   base/WriterTest.cpp
   MissionPlan/MissionPlanTest.cpp
-  MissionPlan/DeployAntennaActionTest.cpp
+  MissionPlan/DeployAntennasTest.cpp
   MissionPlan/MissionTestHelpers.cpp
   MissionPlan/SailSystemStateTest.cpp
   MissionPlan/ActionDispatchTest.cpp
@@ -34,6 +34,8 @@ set(SOURCES
   time/SmartWait.cpp
   mock/FsMock.hpp
   mock/FsMock.cpp
+  mock/AntennaMock.cpp
+  mock/AntennaMock.hpp
   assert.cpp
   antenna/miniport.cpp
   antenna/antenna.cpp

@@ -2,13 +2,14 @@
 #define SRC_MISSION_H_
 
 #include "mission/adcs_mission.h"
+#include "mission/antenna_state.h"
 #include "obc.h"
 #include "state/state.h"
 
 /** @brief Object with all state-related descriptors */
 typedef struct
 {
-    /** @brief (Mock) Flag telling whetever sail should be marked as opened by update descriptor */
+    /** @brief (Mock) Flag telling whether sail should be marked as opened by update descriptor */
     bool SailOpened;
 
     /** @brief Sail-related descriptors */
@@ -26,8 +27,7 @@ typedef struct
     /** @brief Time update descriptor */
     SystemStateUpdateDescriptor UpdateTime;
 
-    /** @brief Terminal command update descriptor */
-    SystemStateUpdateDescriptor TerminalCommandUpdate;
+    AntennaMissionState antennaMission;
 } MissionState;
 
 /**

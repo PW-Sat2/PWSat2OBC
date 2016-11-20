@@ -21,7 +21,7 @@ void AntennaInitializeActionDescriptor(AntennaMissionState* stateDescriptor,
     SystemActionDescriptor* missionDescriptor //
     );
 
-void InitializeAntennaState(AntennaDriver* driver,
+void AntennaInitializeState(AntennaDriver* driver,
     AntennaMissionState* antennaState //
     );
 
