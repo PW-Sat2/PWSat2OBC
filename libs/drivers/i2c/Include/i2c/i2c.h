@@ -134,13 +134,14 @@ typedef struct
 /**
  * @brief Type with references to used I2C buses
  */
-typedef struct
+struct I2CInterface final
 {
+    I2CInterface(I2CBus* system, I2CBus* payload);
     /** @brief Reference to System I2C bus */
     I2CBus* System;
     /** @brief Reference to Payload I2C bus */
     I2CBus* Payload;
-} I2CInterface;
+};
 
 /**
  * @brief Initializes single hardware I2C interface

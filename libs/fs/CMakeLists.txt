@@ -1,8 +1,8 @@
 set(NAME fs)
 
 add_library(${NAME} STATIC        
-    fs.c
-    extension.c
+    fs.cpp
+    extension.cpp
 )
 
 target_link_libraries(${NAME} PUBLIC

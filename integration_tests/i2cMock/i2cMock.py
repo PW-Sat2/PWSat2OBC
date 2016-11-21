@@ -230,7 +230,7 @@ class I2CMock(object):
 
         response = device.handle(data) or []
 
-        self._log.debug('Generated response')
+        self._log.debug('Generated response %r', response)
 
         self._command(I2CMock.CMD_I2C_RESPONSE, response)
 

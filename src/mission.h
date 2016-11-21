@@ -1,14 +1,14 @@
 #ifndef SRC_MISSION_H_
 #define SRC_MISSION_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdbool.h>
 #include "mission/adcs_mission.h"
 #include "obc.h"
 #include "state/state.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /** @brief Object with all state-related descriptors */
 typedef struct

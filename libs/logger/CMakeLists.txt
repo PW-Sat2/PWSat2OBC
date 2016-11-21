@@ -1,7 +1,7 @@
 set(NAME logger)
 
 set(SOURCES
-    Logger.c
+    Logger.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

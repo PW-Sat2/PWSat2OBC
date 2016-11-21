@@ -18,12 +18,14 @@
  * a direct interface.
  */
 
-
 #ifndef __YAFFS_OSGLUE_H__
 #define __YAFFS_OSGLUE_H__
 
-
 #include "yportenv.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void yaffsfs_Lock(void);
 void yaffsfs_Unlock(void);
@@ -32,13 +34,15 @@ u32 yaffsfs_CurrentTime(void);
 
 void yaffsfs_SetError(int err);
 
-void *yaffsfs_malloc(size_t size);
-void yaffsfs_free(void *ptr);
+void* yaffsfs_malloc(size_t size);
+void yaffsfs_free(void* ptr);
 
-int yaffsfs_CheckMemRegion(const void *addr, size_t size, int write_request);
+int yaffsfs_CheckMemRegion(const void* addr, size_t size, int write_request);
 
 void yaffsfs_OSInitialisation(void);
 
-
+#ifdef __cplusplus
+}
 #endif
 
+#endif

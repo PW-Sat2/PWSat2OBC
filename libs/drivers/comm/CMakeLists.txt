@@ -1,7 +1,7 @@
 set(NAME comm)
 
 set(SOURCES
-    comm.c
+    comm.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -12,6 +12,7 @@ target_link_libraries(${NAME}
     logger 
     emlib
     i2c
+    gsl
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

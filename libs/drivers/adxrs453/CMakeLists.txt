@@ -1,7 +1,7 @@
 set(NAME adxrs453)
 
 set(SOURCES
-   adxrs453.c
+   adxrs453.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

@@ -1,7 +1,7 @@
 set(NAME pulse_all)
 
 set(SOURCES
-    main.c
+    main.cpp
 )
 
 add_executable(${NAME} ${SOURCES})

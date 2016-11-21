@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <em_i2c.h>
+#include <gsl/span>
 #include <string>
 #include <tuple>
 #include "gtest/gtest.h"
@@ -19,6 +20,9 @@ using testing::Ge;
 using testing::StrEq;
 using testing::Return;
 using testing::Invoke;
+using gsl::span;
+
+using namespace devices::comm;
 
 static const uint8_t ReceiverAddress = 0x60;
 static const uint8_t TransmitterAddress = 0x62;
@@ -40,17 +44,20 @@ static const uint8_t TransmitterSetBitRate = 0x28;
 static const uint8_t TransmitterGetState = 0x41;
 static const uint8_t TransmitterReset = 0xAA;
 
-static OSReset SetupComm(CommObject* comm, I2CBus* low, OSMock& system)
+static OSReset SetupComm(CommObject& comm, OSMock& system)
 {
-    CommUpperInterface up;
-    up.frameHandler = nullptr;
-    up.frameHandlerContext = nullptr;
     auto reset = InstallProxy(&system);
-    ON_CALL(system, CreateEventGroup()).WillByDefault(Return(reinterpret_cast<OSEventGroupHandle>(comm)));
+    ON_CALL(system, CreateEventGroup()).WillByDefault(Return(reinterpret_cast<OSEventGroupHandle>(&comm)));
 
-    EXPECT_THAT(CommInitialize(comm, low, &up), Eq(OSResultSuccess));
+    EXPECT_THAT(comm.Initialize(), Eq(OSResultSuccess));
+
     return reset;
 }
+
+struct FrameHandlerMock : IHandleFrame
+{
+    MOCK_METHOD2(HandleFrame, void(CommObject&, CommFrame&));
+};
 
 class CommTest : public testing::Test
 {
@@ -59,46 +66,45 @@ class CommTest : public testing::Test
 
   protected:
     CommObject comm;
+    FrameHandlerMock frameHandler;
     testing::NiceMock<OSMock> system;
     I2CBusMock i2c;
     OSReset reset;
     I2CBus low;
 };
 
-CommTest::CommTest()
+CommTest::CommTest() : comm(i2c, frameHandler)
 {
-    reset = SetupComm(&comm, &i2c, system);
+    reset = SetupComm(comm, system);
 }
 
 TEST_F(CommTest, TestInitializationDoesNotTouchHardware)
 {
-    CommObject commObject;
-    CommUpperInterface up;
-    up.frameHandler = nullptr;
-    up.frameHandlerContext = nullptr;
+    CommObject commObject(i2c, frameHandler);
+
     EXPECT_CALL(i2c, I2CWriteRead(_, _, _, _, _, _)).Times(0);
     EXPECT_CALL(i2c, I2CWrite(_, _, _, _)).Times(0);
-    CommInitialize(&commObject, &i2c, &up);
+
+    commObject.Initialize();
 }
 
 TEST_F(CommTest, TestInitializationAllocationFailure)
 {
-    CommObject commObject;
-    CommUpperInterface up;
-    up.frameHandler = nullptr;
-    up.frameHandlerContext = nullptr;
+    CommObject commObject(i2c, frameHandler);
+
     EXPECT_CALL(system, CreateEventGroup()).WillOnce(Return(nullptr));
-    const auto status = CommInitialize(&commObject, &i2c, &up);
+
+    const auto status = commObject.Initialize();
+
     ASSERT_THAT(status, Ne(OSResultSuccess));
 }
 
 TEST_F(CommTest, TestInitialization)
 {
-    CommObject commObject;
-    CommUpperInterface up;
-    up.frameHandler = nullptr;
-    up.frameHandlerContext = nullptr;
-    const auto status = CommInitialize(&commObject, &i2c, &up);
+    CommObject commObject(i2c, frameHandler);
+
+    const auto status = commObject.Initialize();
+
     ASSERT_THAT(status, Eq(OSResultSuccess));
 }
 
@@ -107,14 +113,14 @@ TEST_F(CommTest, TestHardwareReset)
     EXPECT_CALL(i2c, I2CWrite(ReceiverAddress, HardwareReset, Ne(nullptr), 1)).WillOnce(Return(I2CResultOK));
     EXPECT_CALL(i2c, I2CWrite(TransmitterAddress, TransmitterReset, Ne(nullptr), 1)).WillOnce(Return(I2CResultOK));
     EXPECT_CALL(i2c, I2CWrite(ReceiverAddress, ReceiverReset, Ne(nullptr), 1)).WillOnce(Return(I2CResultOK));
-    const auto status = CommReset(&comm);
+    const auto status = comm.Reset();
     ASSERT_THAT(status, Eq(true));
 }
 
 TEST_F(CommTest, TestHardwareResetFailureOnHardware)
 {
     EXPECT_CALL(i2c, I2CWrite(ReceiverAddress, HardwareReset, _, 1)).WillOnce(Return(I2CResultNack));
-    const auto status = CommReset(&comm);
+    const auto status = comm.Reset();
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -123,7 +129,7 @@ TEST_F(CommTest, TestHardwareResetFailureOnReceiver)
     EXPECT_CALL(i2c, I2CWrite(ReceiverAddress, HardwareReset, Ne(nullptr), 1)).WillOnce(Return(I2CResultOK));
     EXPECT_CALL(i2c, I2CWrite(ReceiverAddress, ReceiverReset, Ne(nullptr), 1)).WillOnce(Return(I2CResultNack));
     ON_CALL(i2c, I2CWrite(TransmitterAddress, _, _, _)).WillByDefault(Return(I2CResultOK));
-    const auto status = CommReset(&comm);
+    const auto status = comm.Reset();
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -131,56 +137,56 @@ TEST_F(CommTest, TestHardwareResetFailureOnTransmitter)
 {
     EXPECT_CALL(i2c, I2CWrite(TransmitterAddress, TransmitterReset, _, 1)).WillOnce(Return(I2CResultNack));
     EXPECT_CALL(i2c, I2CWrite(ReceiverAddress, _, _, _)).WillRepeatedly(Return(I2CResultOK));
-    const auto status = CommReset(&comm);
+    const auto status = comm.Reset();
     ASSERT_THAT(status, Eq(false));
 }
 
 TEST_F(CommTest, TestTransmitterReset)
 {
     EXPECT_CALL(i2c, I2CWrite(TransmitterAddress, TransmitterReset, Ne(nullptr), 1)).WillOnce(Return(I2CResultOK));
-    const auto status = CommResetTransmitter(&comm);
+    const auto status = comm.ResetTransmitter();
     ASSERT_THAT(status, Eq(true));
 }
 
 TEST_F(CommTest, TestTransmitterResetFailure)
 {
     EXPECT_CALL(i2c, I2CWrite(TransmitterAddress, TransmitterReset, _, 1)).WillOnce(Return(I2CResultNack));
-    const auto status = CommResetTransmitter(&comm);
+    const auto status = comm.ResetTransmitter();
     ASSERT_THAT(status, Eq(false));
 }
 
 TEST_F(CommTest, TestReceiverReset)
 {
     EXPECT_CALL(i2c, I2CWrite(ReceiverAddress, ReceiverReset, Ne(nullptr), 1)).WillOnce(Return(I2CResultOK));
-    const auto status = CommResetReceiver(&comm);
+    const auto status = comm.ResetReceiver();
     ASSERT_THAT(status, Eq(true));
 }
 
 TEST_F(CommTest, TestReceiverResetFailure)
 {
     EXPECT_CALL(i2c, I2CWrite(ReceiverAddress, ReceiverReset, _, 1)).WillOnce(Return(I2CResultNack));
-    const auto status = CommResetReceiver(&comm);
+    const auto status = comm.ResetReceiver();
     ASSERT_THAT(status, Eq(false));
 }
 
 TEST_F(CommTest, TestFrameRemoval)
 {
     EXPECT_CALL(i2c, I2CWrite(ReceiverAddress, ReceiverRemoveFrame, Ne(nullptr), 1)).WillOnce(Return(I2CResultOK));
-    const auto status = CommRemoveFrame(&comm);
+    const auto status = comm.RemoveFrame();
     ASSERT_THAT(status, Eq(true));
 }
 
 TEST_F(CommTest, TestFrameRemovalFailure)
 {
     EXPECT_CALL(i2c, I2CWrite(ReceiverAddress, ReceiverRemoveFrame, _, 1)).WillOnce(Return(I2CResultNack));
-    const auto status = CommRemoveFrame(&comm);
+    const auto status = comm.RemoveFrame();
     ASSERT_THAT(status, Eq(false));
 }
 
 TEST_F(CommTest, TestGetFrameCountFailure)
 {
     EXPECT_CALL(i2c, I2CWriteRead(ReceiverAddress, ReceiverGetFrameCount, _, _, _, _)).WillOnce(Return(I2CResultNack));
-    const auto result = CommGetFrameCount(&comm);
+    const auto result = comm.GetFrameCount();
     ASSERT_THAT(result.status, Eq(false));
     ASSERT_THAT(result.frameCount, Eq(0));
 }
@@ -198,7 +204,7 @@ TEST_F(CommTest, TestGetFrameCount)
             return I2CResultOK;
         }));
 
-    const auto result = CommGetFrameCount(&comm);
+    const auto result = comm.GetFrameCount();
     ASSERT_THAT(result.status, Eq(true));
     ASSERT_THAT(result.frameCount, Eq(31));
 }
@@ -206,28 +212,28 @@ TEST_F(CommTest, TestGetFrameCount)
 TEST_F(CommTest, TestClearBeaconFailure)
 {
     EXPECT_CALL(i2c, I2CWrite(TransmitterAddress, TransmitterClearBeacon, _, 1)).WillOnce(Return(I2CResultNack));
-    const auto status = CommClearBeacon(&comm);
+    const auto status = comm.ClearBeacon();
     ASSERT_THAT(status, Eq(false));
 }
 
 TEST_F(CommTest, TestClearBeacon)
 {
     EXPECT_CALL(i2c, I2CWrite(TransmitterAddress, TransmitterClearBeacon, Ne(nullptr), 1)).WillOnce(Return(I2CResultOK));
-    const auto status = CommClearBeacon(&comm);
+    const auto status = comm.ClearBeacon();
     ASSERT_THAT(status, Eq(true));
 }
 
 TEST_F(CommTest, TestSetIdleStateFailure)
 {
     EXPECT_CALL(i2c, I2CWrite(TransmitterAddress, TransmitterSetIdleState, _, 2)).WillOnce(Return(I2CResultNack));
-    const auto status = CommSetTransmitterStateWhenIdle(&comm, CommTransmitterOn);
+    const auto status = comm.SetTransmitterStateWhenIdle(CommTransmitterOn);
     ASSERT_THAT(status, Eq(false));
 }
 
 TEST_F(CommTest, TestSetIdleState)
 {
     EXPECT_CALL(i2c, I2CWrite(TransmitterAddress, TransmitterSetIdleState, Ne(nullptr), 2)).WillOnce(Return(I2CResultOK));
-    const auto status = CommSetTransmitterStateWhenIdle(&comm, CommTransmitterOn);
+    const auto status = comm.SetTransmitterStateWhenIdle(CommTransmitterOn);
     ASSERT_THAT(status, Eq(true));
 }
 
@@ -238,7 +244,7 @@ TEST_F(CommTest, TestSetIdleStateCommandOn)
             EXPECT_THAT(inData[1], Eq(1));
             return I2CResultOK;
         }));
-    const auto status = CommSetTransmitterStateWhenIdle(&comm, CommTransmitterOn);
+    const auto status = comm.SetTransmitterStateWhenIdle(CommTransmitterOn);
     ASSERT_THAT(status, Eq(true));
 }
 
@@ -249,21 +255,21 @@ TEST_F(CommTest, TestSetIdleStateCommandOff)
             EXPECT_THAT(inData[1], Eq(0));
             return I2CResultOK;
         }));
-    const auto status = CommSetTransmitterStateWhenIdle(&comm, CommTransmitterOff);
+    const auto status = comm.SetTransmitterStateWhenIdle(CommTransmitterOff);
     ASSERT_THAT(status, Eq(true));
 }
 
 TEST_F(CommTest, TestSetBitRateFailure)
 {
     EXPECT_CALL(i2c, I2CWrite(TransmitterAddress, TransmitterSetBitRate, Ne(nullptr), 2)).WillOnce(Return(I2CResultNack));
-    const auto status = CommSetTransmitterBitRate(&comm, Comm1200bps);
+    const auto status = comm.SetTransmitterBitRate(Comm1200bps);
     ASSERT_THAT(status, Eq(false));
 }
 
 TEST_F(CommTest, TestSetBitRate)
 {
     EXPECT_CALL(i2c, I2CWrite(TransmitterAddress, TransmitterSetBitRate, Ne(nullptr), 2)).WillOnce(Return(I2CResultOK));
-    const auto status = CommSetTransmitterBitRate(&comm, Comm1200bps);
+    const auto status = comm.SetTransmitterBitRate(Comm1200bps);
     ASSERT_THAT(status, Eq(true));
 }
 
@@ -286,13 +292,13 @@ TEST_F(CommTest, TestSetBitRateCommand)
             EXPECT_THAT(inData[1], Eq(8));
             return I2CResultOK;
         }));
-    auto status = CommSetTransmitterBitRate(&comm, Comm1200bps);
+    auto status = comm.SetTransmitterBitRate(Comm1200bps);
     ASSERT_THAT(status, Eq(true));
-    status = CommSetTransmitterBitRate(&comm, Comm2400bps);
+    status = comm.SetTransmitterBitRate(Comm2400bps);
     ASSERT_THAT(status, Eq(true));
-    status = CommSetTransmitterBitRate(&comm, Comm4800bps);
+    status = comm.SetTransmitterBitRate(Comm4800bps);
     ASSERT_THAT(status, Eq(true));
-    status = CommSetTransmitterBitRate(&comm, Comm9600bps);
+    status = comm.SetTransmitterBitRate(Comm9600bps);
     ASSERT_THAT(status, Eq(true));
 }
 
@@ -300,7 +306,7 @@ TEST_F(CommTest, TestGetTransmitterStateFailure)
 {
     CommTransmitterState state;
     EXPECT_CALL(i2c, I2CWriteRead(TransmitterAddress, TransmitterGetState, Ne(nullptr), 1, _, _)).WillOnce(Return(I2CResultNack));
-    const auto status = CommGetTransmitterState(&comm, &state);
+    const auto status = comm.GetTransmitterState(state);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -317,7 +323,7 @@ TEST_F(CommTest, TestGetTransmitterInvalidResponse)
             *outData = 0xff;
             return I2CResultOK;
         }));
-    const auto status = CommGetTransmitterState(&comm, &state);
+    const auto status = comm.GetTransmitterState(state);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -334,7 +340,7 @@ TEST_F(CommTest, TestGetTransmitterResponse)
             *outData = 0x7f;
             return I2CResultOK;
         }));
-    const auto status = CommGetTransmitterState(&comm, &state);
+    const auto status = comm.GetTransmitterState(state);
     ASSERT_THAT(status, Eq(true));
     ASSERT_THAT(state.BeaconState, Eq(true));
     ASSERT_THAT(state.StateWhenIdle, Eq(CommTransmitterOn));
@@ -354,7 +360,7 @@ TEST_F(CommTest, TestGetBaseLineTransmitterResponse)
             *outData = 0x0;
             return I2CResultOK;
         }));
-    const auto status = CommGetTransmitterState(&comm, &state);
+    const auto status = comm.GetTransmitterState(state);
     ASSERT_THAT(status, Eq(true));
     ASSERT_THAT(state.BeaconState, Eq(false));
     ASSERT_THAT(state.StateWhenIdle, Eq(CommTransmitterOff));
@@ -374,7 +380,7 @@ TEST_F(CommTest, TestGetMixedLineTransmitterResponse)
             *outData = 0x0a;
             return I2CResultOK;
         }));
-    const auto status = CommGetTransmitterState(&comm, &state);
+    const auto status = comm.GetTransmitterState(state);
     ASSERT_THAT(status, Eq(true));
     ASSERT_THAT(state.BeaconState, Eq(true));
     ASSERT_THAT(state.StateWhenIdle, Eq(CommTransmitterOff));
@@ -383,8 +389,8 @@ TEST_F(CommTest, TestGetMixedLineTransmitterResponse)
 
 TEST_F(CommTest, TestSendTooLongFrame)
 {
-    uint8_t buffer[10] = {0};
-    const auto status = CommSendFrame(&comm, buffer, COMM_MAX_FRAME_CONTENTS_SIZE + 1);
+    uint8_t buffer[COMM_MAX_FRAME_CONTENTS_SIZE + 1] = {0};
+    const auto status = comm.SendFrame(span<const uint8_t, COMM_MAX_FRAME_CONTENTS_SIZE + 1>(buffer));
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -393,7 +399,7 @@ TEST_F(CommTest, TestSendFrameFailure)
     uint8_t buffer[10] = {0};
     EXPECT_CALL(i2c, I2CWriteRead(TransmitterAddress, TransmitterSendFrame, Ne(nullptr), COUNT_OF(buffer) + 1, _, _))
         .WillOnce(Return(I2CResultNack));
-    const auto status = CommSendFrame(&comm, buffer, COUNT_OF(buffer));
+    const auto status = comm.SendFrame(span<const uint8_t, 10>(buffer));
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -408,7 +414,7 @@ TEST_F(CommTest, TestSendFrame)
                 *outData = 0;
                 return I2CResultOK;
             }));
-    const auto status = CommSendFrame(&comm, buffer, COUNT_OF(buffer));
+    const auto status = comm.SendFrame(span<const uint8_t>(buffer));
     ASSERT_THAT(status, Eq(true));
 }
 
@@ -425,7 +431,7 @@ TEST_F(CommTest, TestSendFrameRejectedByHardware)
             *outData = 0xff;
             return I2CResultOK;
         }));
-    const auto status = CommSendFrame(&comm, buffer, COUNT_OF(buffer));
+    const auto status = comm.SendFrame(span<const uint8_t>(buffer));
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -439,7 +445,7 @@ TEST_F(CommTest, TestReceiveFrameFailure)
             uint16_t /*length*/,
             uint8_t* /*outData*/,
             uint16_t /*outLength*/) { return I2CResultNack; }));
-    const auto status = CommReceiveFrame(&comm, &frame);
+    const auto status = comm.ReceiveFrame(frame);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -458,7 +464,7 @@ TEST_F(CommTest, TestReceiveFrameDopplerFrequencyOutOfRange)
             outData[3] = 0xf0;
             return I2CResultOK;
         }));
-    const auto status = CommReceiveFrame(&comm, &frame);
+    const auto status = comm.ReceiveFrame(frame);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -477,7 +483,7 @@ TEST_F(CommTest, TestReceiveFrameRSSIOutOfRange)
             outData[5] = 0xf0;
             return I2CResultOK;
         }));
-    const auto status = CommReceiveFrame(&comm, &frame);
+    const auto status = comm.ReceiveFrame(frame);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -495,7 +501,7 @@ TEST_F(CommTest, TestReceiveFrameSizeOutOfRange)
             outData[0] = 0xff;
             return I2CResultOK;
         }));
-    const auto status = CommReceiveFrame(&comm, &frame);
+    const auto status = comm.ReceiveFrame(frame);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -512,7 +518,7 @@ TEST_F(CommTest, TestReceiveFrameSizeIsZero)
             memset(outData, 0, outLength);
             return I2CResultOK;
         }));
-    const auto status = CommReceiveFrame(&comm, &frame);
+    const auto status = comm.ReceiveFrame(frame);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -530,7 +536,7 @@ TEST_F(CommTest, TestReceiveFrameSizeIsOutOfRange)
             outData[0] = COMM_MAX_FRAME_CONTENTS_SIZE + 1;
             return I2CResultOK;
         }));
-    const auto status = CommReceiveFrame(&comm, &frame);
+    const auto status = comm.ReceiveFrame(frame);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -555,7 +561,7 @@ TEST_F(CommTest, TestReceiveFrame)
             memcpy(outData + 6, expected, COUNT_OF(expected));
             return I2CResultOK;
         }));
-    const auto status = CommReceiveFrame(&comm, &frame);
+    const auto status = comm.ReceiveFrame(frame);
     ASSERT_THAT(status, Eq(true));
     ASSERT_THAT(frame.Size, Eq(COUNT_OF(expected)));
     ASSERT_THAT(frame.Doppler, Eq(0xcab));
@@ -578,7 +584,7 @@ TEST_F(CommTest, TestReceiverTelemetry)
             memcpy(outData, expected, COUNT_OF(expected));
             return I2CResultOK;
         }));
-    const auto status = CommGetReceiverTelemetry(&comm, &telemetry);
+    const auto status = comm.GetReceiverTelemetry(telemetry);
     ASSERT_THAT(status, Eq(true));
     ASSERT_THAT(telemetry.TransmitterCurrentConsumption, Eq(0x0201));
     ASSERT_THAT(telemetry.DopplerOffset, Eq(0x0403));
@@ -604,7 +610,7 @@ TEST_F(CommTest, TestTransmitterTelemetry)
             memcpy(outData, expected, COUNT_OF(expected));
             return I2CResultOK;
         }));
-    const auto status = CommGetTransmitterTelemetry(&comm, &telemetry);
+    const auto status = comm.GetTransmitterTelemetry(telemetry);
     ASSERT_THAT(status, Eq(true));
     ASSERT_THAT(telemetry.RFReflectedPower, Eq(0x0201));
     ASSERT_THAT(telemetry.AmplifierTemperature, Eq(0x0403));
@@ -618,7 +624,7 @@ TEST_F(CommTest, TestSetBeaconFailure)
     memset(&beacon, 0, sizeof(beacon));
     beacon.DataSize = 1;
     EXPECT_CALL(i2c, I2CWrite(TransmitterAddress, TransmitterSetBeacon, Ne(nullptr), _)).WillOnce(Return(I2CResultNack));
-    const auto status = CommSetBeacon(&comm, &beacon);
+    const auto status = comm.SetBeacon(beacon);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -628,7 +634,7 @@ TEST_F(CommTest, TestSetBeaconSizeOutOfRange)
     memset(&beacon, 0, sizeof(beacon));
     beacon.DataSize = COMM_MAX_FRAME_CONTENTS_SIZE + 1;
     EXPECT_CALL(i2c, I2CWrite(TransmitterAddress, TransmitterSetBeacon, Ne(nullptr), _)).Times(0);
-    const auto status = CommSetBeacon(&comm, &beacon);
+    const auto status = comm.SetBeacon(beacon);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -646,7 +652,7 @@ TEST_F(CommTest, TestSetBeacon)
             EXPECT_THAT(std::equal(inData, inData + length, std::begin(expected), std::end(expected)), Eq(true));
             return I2CResultOK;
         }));
-    const auto status = CommSetBeacon(&comm, &beacon);
+    const auto status = comm.SetBeacon(beacon);
     ASSERT_THAT(status, Eq(true));
 }
 
@@ -655,7 +661,7 @@ TEST_F(CommTest, TestPauseNonExistingTask)
     OSMock system;
     auto guard = InstallProxy(&system);
     EXPECT_CALL(system, SuspendTask(_)).Times(0);
-    const auto status = CommPause(&comm);
+    const auto status = comm.Pause();
     ASSERT_THAT(status, Eq(true));
 }
 
@@ -666,14 +672,15 @@ class CommReceiverTelemetryTest : public testing::TestWithParam<std::tuple<int, 
 
   protected:
     CommObject comm;
+    FrameHandlerMock frameHandler;
     I2CBusMock i2c;
     testing::NiceMock<OSMock> system;
     OSReset reset;
 };
 
-CommReceiverTelemetryTest::CommReceiverTelemetryTest()
+CommReceiverTelemetryTest::CommReceiverTelemetryTest() : comm(i2c, frameHandler)
 {
-    reset = SetupComm(&comm, &i2c, system);
+    reset = SetupComm(comm, system);
 }
 
 TEST_P(CommReceiverTelemetryTest, TestInvalidTelemetry)
@@ -693,7 +700,7 @@ TEST_P(CommReceiverTelemetryTest, TestInvalidTelemetry)
             outData[index] = value;
             return operationStatus;
         }));
-    const auto status = CommGetReceiverTelemetry(&comm, &telemetry);
+    const auto status = comm.GetReceiverTelemetry(telemetry);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -715,14 +722,15 @@ class CommTransmitterTelemetryTest : public testing::TestWithParam<std::tuple<in
 
   protected:
     CommObject comm;
+    FrameHandlerMock frameHandler;
     I2CBusMock i2c;
     testing::NiceMock<OSMock> system;
     OSReset reset;
 };
 
-CommTransmitterTelemetryTest::CommTransmitterTelemetryTest()
+CommTransmitterTelemetryTest::CommTransmitterTelemetryTest() : comm(i2c, frameHandler)
 {
-    reset = SetupComm(&comm, &i2c, system);
+    reset = SetupComm(comm, system);
 }
 
 TEST_P(CommTransmitterTelemetryTest, TestInvalidTelemetry)
@@ -742,7 +750,7 @@ TEST_P(CommTransmitterTelemetryTest, TestInvalidTelemetry)
             outData[index] = value;
             return operationStatus;
         }));
-    const auto status = CommGetTransmitterTelemetry(&comm, &telemetry);
+    const auto status = comm.GetTransmitterTelemetry(telemetry);
     ASSERT_THAT(status, Eq(false));
 }
 

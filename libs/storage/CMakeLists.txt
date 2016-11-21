@@ -1,9 +1,9 @@
 set(NAME storage)
 
 set(SOURCES    
-    nand.c
-    nand_driver.c
-    nand_calculator.c
+    nand.cpp
+    nand_driver.cpp
+    nand_calculator.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

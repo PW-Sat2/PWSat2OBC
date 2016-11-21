@@ -1,7 +1,7 @@
 set(NAME os)
 
 set(SOURCES
-    os.c
+    os.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

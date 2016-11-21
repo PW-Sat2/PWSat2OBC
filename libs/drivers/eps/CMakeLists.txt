@@ -1,7 +1,7 @@
 set(NAME eps)
 
 set(SOURCES
-    eps.c
+    eps.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

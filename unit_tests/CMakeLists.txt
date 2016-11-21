@@ -8,7 +8,7 @@ set(SOURCES
   utils.cpp
   Logger/LoggerTest.cpp
   FileSystem/FileSystemTest.cpp
-  FileSystem/YaffsOSGlue.c
+  FileSystem/YaffsOSGlue.cpp
   FileSystem/MemoryDriver.cpp
   FileSystem/NANDGeometryTest.cpp
   FileSystem/MemoryDriver.cpp
@@ -49,6 +49,7 @@ endif(${ENABLE_COVERAGE})
 
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_CURRENT_LIST_DIR}/linker.ld -u _printf_float -specs=rdimon.specs ${LD_COVERAGE}")
 
+target_compile_options(${NAME} PRIVATE "-fexceptions")
 
 target_link_libraries(${NAME}
     m
@@ -69,6 +70,7 @@ target_link_libraries(${NAME}
     emdrv
     adxrs453    
     time
+    gsl
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})

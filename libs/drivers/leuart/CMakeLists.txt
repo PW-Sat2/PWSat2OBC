@@ -1,7 +1,7 @@
 set(NAME leuart)
 
 set(SOURCES
-    leuart.c
+    leuart.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

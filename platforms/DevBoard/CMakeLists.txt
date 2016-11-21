@@ -1,5 +1,5 @@
 set(SOURCES
-    #extension.c
+    #extension.cpp
 )
 
 add_library(platform INTERFACE ${SOURCES})
