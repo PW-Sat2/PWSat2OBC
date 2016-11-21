@@ -24,6 +24,18 @@ void UARTSend(uint8_t * str, uint32_t size)
     }
 }
 
+
+class IUart {
+
+public :
+
+private:
+
+};
+
+
+
+
 void UARTInit(xQueueHandle sink)
 {
     /* Initialize USART */
