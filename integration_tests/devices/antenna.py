@@ -9,6 +9,9 @@ class Antenna():
         self.activation_count = 0
         self.is_being_deployed = False
 
+    def deployment_in_progress(self):
+        return self.is_being_deployed
+
     def is_deployed(self):
         return self.deployed
 
@@ -229,17 +232,17 @@ class AntennaController(i2cMock.I2CDevice):
         if not result is None:
             return result
 
-        msb = update_value(0, not self.antenna_state[0].is_deployed(), 0x80)
-        msb = update_value(msb, self.antenna_state[0].is_being_deployed(), 0x20)
-        msb = update_value(msb, not self.antenna_state[1].is_deployed(), 0x8)
-        msb = update_value(msb, self.antenna_state[1].is_being_deployed(), 0x2)
-        msb = update_value(msb, self.ignore_deployment_switch, 1)
-        lsb = update_value(0, not self.antenna_state[1].is_deployed(), 0x80)
-        lsb = update_value(lsb, self.antenna_state[2].is_being_deployed(), 0x20)
-        lsb = update_value(lsb, not self.antenna_state[3].is_deployed(), 0x8)
-        lsb = update_value(lsb, self.antenna_state[3].is_being_deployed(), 0x2)
-        lsb = update_value(lsb, self.deployment_in_progress, 0x10)
-        lsb = update_value(lsb, self.armed, 0x1)
+        msb = self.update_value(0, not self.antenna_state[0].is_deployed(), 0x80)
+        msb = self.update_value(msb, self.antenna_state[0].deployment_in_progress(), 0x20)
+        msb = self.update_value(msb, not self.antenna_state[1].is_deployed(), 0x8)
+        msb = self.update_value(msb, self.antenna_state[1].deployment_in_progress(), 0x2)
+        msb = self.update_value(msb, self.ignore_deployment_switch, 1)
+        lsb = self.update_value(0, not self.antenna_state[1].is_deployed(), 0x80)
+        lsb = self.update_value(lsb, self.antenna_state[2].deployment_in_progress(), 0x20)
+        lsb = self.update_value(lsb, not self.antenna_state[3].is_deployed(), 0x8)
+        lsb = self.update_value(lsb, self.antenna_state[3].deployment_in_progress(), 0x2)
+        lsb = self.update_value(lsb, self.deployment_in_progress, 0x10)
+        lsb = self.update_value(lsb, self.armed, 0x1)
         return [msb, lsb]
 
     # antenna icd section 6.2.13
