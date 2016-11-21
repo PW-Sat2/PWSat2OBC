@@ -11,7 +11,6 @@ if os.getenv("CLICOLOR_FORCE") == "1":
 
 
 def _setup_log():
-    logging.basicConfig()
     root_logger = logging.getLogger()
 
     handler = colorlog.StreamHandler()
