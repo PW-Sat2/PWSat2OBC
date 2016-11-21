@@ -45,6 +45,10 @@ class SystemAction
 
     SystemAction();
 
+    SystemAction(const SystemAction& arg) = delete;
+
+    SystemAction& operator=(const SystemAction& arg) = delete;
+
     SystemAction& When(std::function<bool(const SystemState*)> condition);
 
     SystemAction& Do(std::function<void(const SystemState*)> action);

@@ -20,8 +20,10 @@ class ActionDispatchTest : public Test
 
 TEST_F(ActionDispatchTest, ShouldExecuteRunnableAction)
 {
-    SystemAction& action1 = SystemAction("Action1").Always().DoNothing();
-    SystemAction& action2 = SystemAction("Action2").Always().DoNothing();
+    SystemAction action1("Action1");
+    SystemAction action2("Action2");
+    action1.Always().DoNothing();
+    action2.Always().DoNothing();
 
     SystemActionDescriptor actions[] = {action1, action2};
     SystemActionDescriptor* runnable[COUNT_OF(actions)] = {0};
