@@ -244,8 +244,8 @@ void SetupHardware(void)
     CMU_ClockEnable(cmuClock_GPIO, true);
     CMU_ClockEnable(cmuClock_DMA, true);
 
-    CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFRCO);
-    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFRCO);
+    CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
+    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);
 }
 
 I2CResult I2CErrorHandler(I2CBus* bus, I2CResult result, I2CAddress address, void* context)
