@@ -13,6 +13,7 @@ set(SOURCES
     commands/heap.cpp
     obc.h
     obc.cpp
+    communication.cpp
     fault_handlers.cpp
     mission.cpp
 )
