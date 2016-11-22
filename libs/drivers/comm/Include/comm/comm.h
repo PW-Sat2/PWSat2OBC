@@ -204,6 +204,9 @@ namespace devices
             bool BeaconState;
         };
 
+        /**
+         * @brief Enumerator of all communication hardware addresses.
+         */
         enum CommAddress
         {
             CommReceiver = 0x60,
