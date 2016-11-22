@@ -1,5 +1,5 @@
 set(SOURCES
-    platform.c
+    platform.cpp
 )
 
 add_library(platform STATIC ${SOURCES})

@@ -7,11 +7,11 @@ import path
 SEGMENTS = {
     'FLASH': {
         'size': 1 * 1024 * 1024,
-        'sections': ['.text']
+        'sections': ['.text', '.data']
     },
     'RAM': {
         'size': 128 * 1024,
-        'sections': ['.data', '.bss', '.heap']
+        'sections': ['.bss', '.heap']
     }
 }
 
