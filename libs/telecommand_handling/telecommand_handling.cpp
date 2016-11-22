@@ -10,26 +10,29 @@ using devices::comm::CommObject;
 using devices::comm::CommFrame;
 using gsl::span;
 using namespace std;
+using namespace telecommands::handling;
+
+constexpr size_t DecryptionBufferSize = 300;
 
 IncomingTelecommandHandler::IncomingTelecommandHandler(
-    IDecryptFrame& decryptFrame, IDecodeTelecommand& decodeTelecommand, IHandleTeleCommand** telecommands, size_t telecommandsCount)
+    IDecryptFrame& decryptFrame, IDecodeTelecommand& decodeTelecommand, span<IHandleTeleCommand*> telecommands)
     : _decryptFrame(decryptFrame),           //
       _decodeTelecommand(decodeTelecommand), //
-      _telecommands(telecommands),           //
-      _telecommandsCount(telecommandsCount)
+      _telecommands(telecommands)
 {
 }
 
 void IncomingTelecommandHandler::HandleFrame(CommFrame& frame)
 {
-    uint8_t decryptedFrame[300] = {0}; // TODO: to constant
+    uint8_t decryptedFrame[DecryptionBufferSize] = {0};
 
     size_t decryptedDetaLength;
     auto decryptStatus =
         this->_decryptFrame.Decrypt(span<const uint8_t>(frame.Contents), span<uint8_t>(decryptedFrame), decryptedDetaLength);
 
-    if (decryptStatus != TeleCommandDecryptStatus::OK)
+    if (decryptStatus != DecryptStatus::Success)
     {
+        LOGF(LOG_LEVEL_ERROR, "Telecommand decryption failed: %d", num(decryptStatus));
         return;
     }
 
@@ -38,8 +41,9 @@ void IncomingTelecommandHandler::HandleFrame(CommFrame& frame)
 
     auto decodeStatus = this->_decodeTelecommand.Decode(span<const uint8_t>(decryptedFrame, decryptedDetaLength), commandCode, parameters);
 
-    if (decodeStatus != TeleCommandDecodeFrameStatus::OK)
+    if (decodeStatus != DecodeFrameStatus::Success)
     {
+        LOGF(LOG_LEVEL_ERROR, "Telecommand decoding failed: %d", num(decodeStatus));
         return;
     }
 
@@ -48,12 +52,15 @@ void IncomingTelecommandHandler::HandleFrame(CommFrame& frame)
 
 void IncomingTelecommandHandler::DispatchCommandHandler(uint8_t commandCode, span<const uint8_t> parameters)
 {
-    for (size_t i = 0; i < this->_telecommandsCount; i++)
+    for (auto command : this->_telecommands)
     {
-        auto command = this->_telecommands[i];
         if (command->CommandCode() == commandCode)
         {
+            LOGF(LOG_LEVEL_DEBUG, "Dispatching telecommand handler for command %d", commandCode);
+
             command->Handle(parameters);
+
+            return;
         }
     }
 }
