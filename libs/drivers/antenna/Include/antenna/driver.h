@@ -300,8 +300,10 @@ struct AntennaDriver
  * initialize driver object with its default state.
  * @param[out] driver Driver object that should be initialized.
  * @param[in] miniport Pointer to the low level driver responsible for managing hardware controller communication.
- * @param[in] communicationBus Pointer to the low level driver responsible providing means to exchange
- * the data with underlying hardware.
+ * @param[in] primaryBus Pointer to the low level communication driver responsible providing means of exchanging
+ * packets with primary hardware controller.
+ * @param[in] secondaryBus Pointer to the low level communication driver responsible providing means of exchanging
+ * packets with backup hardware controller.
  */
 void AntennaDriverInitialize(AntennaDriver* driver,
     AntennaMiniportDriver* miniport,
