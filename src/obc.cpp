@@ -1,7 +1,8 @@
 #include "obc.h"
+#include "io_map.h"
 
 OBC::OBC()
-    : I2C(&I2CBuses[0].ErrorHandling.Base, &I2CBuses[1].ErrorHandling.Base), //
+    : I2C(&I2CBuses[I2C_SYSTEM_BUS].ErrorHandling.Base, &I2CBuses[I2C_PAYLOAD_BUS].ErrorHandling.Base), //
       comm(*I2C.System, FrameHandler)
 {
 }
