@@ -18,14 +18,13 @@ using testing::Eq;
 using testing::StrEq;
 using namespace std;
 using namespace devices::comm;
+using namespace telecommands::handling;
 
 struct TeleCommandDepsMock : public IDecryptFrame, public IDecodeTelecommand
 {
-    MOCK_METHOD3(
-        Decrypt, TeleCommandDecryptStatus(gsl::span<const uint8_t> frame, gsl::span<uint8_t> decrypted, size_t& decryptedDataLength));
+    MOCK_METHOD3(Decrypt, DecryptStatus(gsl::span<const uint8_t>, gsl::span<uint8_t>, size_t&));
 
-    MOCK_METHOD3(
-        Decode, TeleCommandDecodeFrameStatus(gsl::span<const uint8_t> frame, uint8_t& commandCode, gsl::span<const uint8_t>& parameters));
+    MOCK_METHOD3(Decode, DecodeFrameStatus(gsl::span<const uint8_t>, uint8_t&, gsl::span<const uint8_t>&));
 };
 
 struct TeleCommandHandlerMock : public IHandleTeleCommand
@@ -44,7 +43,7 @@ class TeleCommandHandlingTest : public Test
     NiceMock<TeleCommandDepsMock> deps;
 };
 
-TeleCommandHandlingTest::TeleCommandHandlingTest() : handling(deps, deps, nullptr, 0)
+TeleCommandHandlingTest::TeleCommandHandlingTest() : handling(deps, deps, gsl::span<IHandleTeleCommand*, 0>())
 {
 }
 
@@ -53,8 +52,8 @@ TEST_F(TeleCommandHandlingTest, IncomingFrameShouldBeDecryptedAndDecoded)
     CommFrame frame;
     frame.Size = 40;
 
-    EXPECT_CALL(this->deps, Decrypt(_, _, _)).WillOnce(Return(TeleCommandDecryptStatus::OK));
-    EXPECT_CALL(this->deps, Decode(_, _, _)).WillOnce(Return(TeleCommandDecodeFrameStatus::OK));
+    EXPECT_CALL(this->deps, Decrypt(_, _, _)).WillOnce(Return(DecryptStatus::Success));
+    EXPECT_CALL(this->deps, Decode(_, _, _)).WillOnce(Return(DecodeFrameStatus::Success));
 
     this->handling.HandleFrame(frame);
 }
@@ -73,14 +72,14 @@ TEST_F(TeleCommandHandlingTest, HandlerShouldBeCalledForKnownTelecommand)
 
             decryptedDataLength = lastCopied - decrypted.begin();
 
-            return TeleCommandDecryptStatus::OK;
+            return DecryptStatus::Success;
         }));
     EXPECT_CALL(this->deps, Decode(_, _, _))
         .WillOnce(Invoke([](gsl::span<const std::uint8_t> frame, std::uint8_t& commandCode, gsl::span<const std::uint8_t>& parameters) {
             commandCode = frame[0];
             parameters = frame.subspan(1, frame.length() - 1);
 
-            return TeleCommandDecodeFrameStatus::OK;
+            return DecodeFrameStatus::Success;
         }));
 
     NiceMock<TeleCommandHandlerMock> someCommand;
@@ -89,14 +88,14 @@ TEST_F(TeleCommandHandlingTest, HandlerShouldBeCalledForKnownTelecommand)
 
     IHandleTeleCommand* commands[] = {&someCommand};
 
-    IncomingTelecommandHandler handler(deps, deps, commands, 1);
+    IncomingTelecommandHandler handler(deps, deps, gsl::span<IHandleTeleCommand*>(commands));
 
     handler.HandleFrame(frame);
 }
 
 TEST_F(TeleCommandHandlingTest, WhenDecryptionFailsShouldNotAttemptFrameDecoding)
 {
-    EXPECT_CALL(this->deps, Decrypt(_, _, _)).WillOnce(Return(TeleCommandDecryptStatus::Failed));
+    EXPECT_CALL(this->deps, Decrypt(_, _, _)).WillOnce(Return(DecryptStatus::Failed));
 
     EXPECT_CALL(this->deps, Decode(_, _, _)).Times(0);
 
@@ -107,14 +106,14 @@ TEST_F(TeleCommandHandlingTest, WhenDecryptionFailsShouldNotAttemptFrameDecoding
 
 TEST_F(TeleCommandHandlingTest, WhenDecodingFrameShouldNotAttemptInvokingHandler)
 {
-    EXPECT_CALL(this->deps, Decrypt(_, _, _)).WillOnce(Return(TeleCommandDecryptStatus::OK));
+    EXPECT_CALL(this->deps, Decrypt(_, _, _)).WillOnce(Return(DecryptStatus::Success));
 
     EXPECT_CALL(this->deps, Decode(_, _, _))
         .WillOnce(
             Invoke([](gsl::span<const std::uint8_t> /*frame*/, std::uint8_t& commandCode, gsl::span<const std::uint8_t>& /*parameters*/) {
                 commandCode = 0xAA;
 
-                return (TeleCommandDecodeFrameStatus)TeleCommandDecodeFrameStatus::Failed;
+                return (DecodeFrameStatus)DecodeFrameStatus::Failed;
             }));
 
     NiceMock<TeleCommandHandlerMock> someCommand;
@@ -122,7 +121,7 @@ TEST_F(TeleCommandHandlingTest, WhenDecodingFrameShouldNotAttemptInvokingHandler
 
     IHandleTeleCommand* telecommands[] = {&someCommand};
 
-    IncomingTelecommandHandler handler(this->deps, this->deps, telecommands, 1);
+    IncomingTelecommandHandler handler(this->deps, this->deps, gsl::span<IHandleTeleCommand*>(telecommands));
 
     CommFrame frame;
 
