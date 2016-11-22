@@ -11,6 +11,7 @@ set(SOURCES
     commands/state_command.cpp
     commands/i2c_test_command.cpp
     commands/rtos_status.cpp
+    commands/heap.cpp
     obc.h
     obc.cpp
     fault_handlers.cpp

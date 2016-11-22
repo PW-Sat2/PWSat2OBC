@@ -20,17 +20,17 @@
 #include "time/timer.h"
 #include "yaffs_guts.h"
 
-class TelecommandFrameUnpacker final : public IDecryptFrame, public IDecodeTelecommand
+class TelecommandFrameUnpacker final : public telecommands::handling::IDecryptFrame, public telecommands::handling::IDecodeTelecommand
 {
   public:
-    virtual TeleCommandDecryptStatus Decrypt(
+    virtual telecommands::handling::DecryptStatus Decrypt(
         gsl::span<const std::uint8_t> frame, gsl::span<std::uint8_t> decrypted, std::size_t& decryptedDataLength) override;
 
-    virtual TeleCommandDecodeFrameStatus Decode(
+    virtual telecommands::handling::DecodeFrameStatus Decode(
         gsl::span<const std::uint8_t> frame, std::uint8_t& commandCode, gsl::span<const std::uint8_t>& parameters) override;
 };
 
-class PingTelecommand final : public IHandleTeleCommand
+class PingTelecommand final : public telecommands::handling::IHandleTeleCommand
 {
   public:
     PingTelecommand(devices::comm::CommObject& comm);
@@ -104,10 +104,10 @@ struct OBC
 
     TelecommandsObject Telecommands;
 
-    IHandleTeleCommand* AllTelecommands[1];
+    telecommands::handling::IHandleTeleCommand* AllTelecommands[1];
 
     /** @brief Incoming frame handler */
-    IncomingTelecommandHandler FrameHandler;
+    telecommands::handling::IncomingTelecommandHandler FrameHandler;
 
     /** @brief Comm driver object. */
     devices::comm::CommObject comm;

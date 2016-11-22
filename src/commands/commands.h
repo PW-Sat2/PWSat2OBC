@@ -17,6 +17,7 @@ void FSWriteFile(uint16_t argc, char* argv[]);
 void FSReadFile(uint16_t argc, char* argv[]);
 void CommandByTerminal(uint16_t argc, char* args[]);
 void I2CTestCommandHandler(uint16_t argc, char* argv[]);
+void HeapInfoCommand(uint16_t argc, char* argv[]);
 
 void AntennaDeploy(uint16_t argc, char* argv[]);
 void AntennaCancelDeployment(uint16_t argc, char* argv[]);

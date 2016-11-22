@@ -50,7 +50,7 @@
 
 template <typename Enum> typename std::underlying_type_t<Enum> num(Enum v)
 {
-    return static_cast<std::underlying_type_t<Enum>>(v);
+    return static_cast<typename std::underlying_type_t<Enum>>(v);
 }
 
 #endif
