@@ -139,17 +139,16 @@ namespace devices
             std::uint8_t Data[COMM_MAX_FRAME_CONTENTS_SIZE];
         };
 
-            /** Comm driver upper interface. */
-            struct IHandleFrame
-            {
-                /**
-                 * @brief Method called on each incoming frame.
-                 * @param[in] comm Reference to comm driver instance that recieved frame
-                 * @param[in] frame Reference to structure describing received frame
-                 *
-                 */
-                virtual void HandleFrame(CommFrame& frame) = 0;
-            };
+        /** Comm driver upper interface. */
+        struct IHandleFrame
+        {
+            /**
+             * @brief Method called on each incoming frame.
+             * @param[in] frame Reference to structure describing received frame
+             *
+             */
+            virtual void HandleFrame(CommFrame& frame) = 0;
+        };
 
         /** Type that contains status of the frame count query. */
         struct CommReceiverFrameCount

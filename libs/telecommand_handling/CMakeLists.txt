@@ -2,6 +2,7 @@ set(NAME telecommand_handling)
 
 set(SOURCES
     telecommand_handling.cpp
+    uplink.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

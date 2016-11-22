@@ -182,7 +182,7 @@ static void ObcInitTask(void* param)
         LOG(LOG_LEVEL_ERROR, "Unable to reset both antenna controllers. ");
     }
 
-    if (!obc->comm.Restart())
+    if (!obc->Communication.CommDriver.Restart())
     {
         LOG(LOG_LEVEL_ERROR, "Unable to restart comm");
     }
@@ -310,7 +310,7 @@ int main(void)
 
     EPSPowerControlInitialize(&Main.PowerControlInterface);
 
-    Main.comm.Initialize();
+    Main.Initialize();
 
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 
