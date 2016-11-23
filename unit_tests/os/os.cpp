@@ -161,11 +161,11 @@ bool System::QueueReceive(OSQueueHandle queue, void* element, OSTaskTimeSpan tim
     return false;
 }
 
-bool System::QueueReceiveFromISR(OSQueueHandle queue, void* element, bool* taskWoken)
+bool System::QueueReceiveFromISR(OSQueueHandle queue, void* element)
 {
     if (OSProxy != nullptr)
     {
-        return OSProxy->QueueReceiveFromISR(queue, element, taskWoken);
+        return OSProxy->QueueReceiveFromISR(queue, element);
     }
 
     return false;
@@ -181,11 +181,11 @@ bool System::QueueSend(OSQueueHandle queue, void* element, OSTaskTimeSpan timeou
     return false;
 }
 
-bool System::QueueSendISR(OSQueueHandle queue, void* element, bool* taskWoken)
+bool System::QueueSendISR(OSQueueHandle queue, void* element)
 {
     if (OSProxy != nullptr)
     {
-        return OSProxy->QueueSendISR(queue, element, taskWoken);
+        return OSProxy->QueueSendISR(queue, element);
     }
 
     return false;
@@ -227,11 +227,11 @@ void System::PulseSet(OSPulseHandle handle)
     }
 }
 
-void System::EndSwitchingISR(bool taskWoken)
+void System::EndSwitchingISR()
 {
     if (OSProxy != nullptr)
     {
-        OSProxy->EndSwitchingISR(taskWoken);
+        OSProxy->EndSwitchingISR();
     }
 }
 
