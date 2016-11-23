@@ -4,7 +4,6 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdint.h>
 #include <cstdint>
 #include "system.h"
 
@@ -26,10 +25,12 @@
 #error "stdlib does not define ELAST errno value."
 #endif
 #endif
+
 /**
  * @brief Enumerator for all possible operating system error codes.
  */
-typedef enum {
+enum OSResult
+{
     /** Success */
     OSResultSuccess = 0,
 
@@ -123,7 +124,7 @@ typedef enum {
     /** Operation canceled */
     OSResultCancelled = ECANCELED,
 
-} OSResult;
+};
 
 /**
  * @brief Macro for verification whether passed OSResult value indicates success.
@@ -136,32 +137,32 @@ typedef enum {
 #define OS_RESULT_FAILED(x) ((x) != OSResultSuccess)
 
 /** @brief Type definition for time span in ms. */
-typedef uint32_t OSTaskTimeSpan;
+using OSTaskTimeSpan = std::uint32_t;
 
 /** @brief Type definition of handle to system task. */
-typedef void* OSTaskHandle;
+using OSTaskHandle = void*;
 
 /** @brief Type definition of semaphore handle. */
-typedef void* OSSemaphoreHandle;
+using OSSemaphoreHandle = void*;
 
 /** @brief Type definition of event group handle. */
-typedef void* OSEventGroupHandle;
+using OSEventGroupHandle = void*;
 
 /** @brief Type definition of event group value. */
-typedef uint32_t OSEventBits;
+using OSEventBits = std::uint32_t;
 
 /** @brief Type definition of queue handle */
-typedef void* OSQueueHandle;
+using OSQueueHandle = void*;
 
 /** @brief Type definition of pulse all handle */
-typedef void* OSPulseHandle;
+using OSPulseHandle = void*;
 
 /**
  * @brief Pointer to generic system procedure that operates on task.
  *
  * @param[in] task Task handle.
  */
-typedef void (*OSTaskProcedure)(OSTaskHandle task);
+using OSTaskProcedure = void (*)(OSTaskHandle task);
 
 /**
  * @brief Definition of operating system interface.
@@ -182,9 +183,9 @@ class System
      */
     static OSResult CreateTask(OSTaskProcedure entryPoint,
         const char* taskName,
-        uint16_t stackSize,
+        std::uint16_t stackSize,
         void* taskParameter,
-        uint32_t priority,
+        std::uint32_t priority,
         OSTaskHandle* taskHandle);
 
     /**
