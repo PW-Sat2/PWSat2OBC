@@ -36,7 +36,7 @@ static bool IsSclLatched(const I2CLowLevelBus* bus)
  */
 static I2CResult ExecuteTransfer(I2CLowLevelBus* bus, I2C_TransferSeq_TypeDef* seq)
 {
-    if (OS_RESULT_FAILED(System.TakeSemaphore(bus->Lock, MAX_DELAY)))
+    if (OS_RESULT_FAILED(System::TakeSemaphore(bus->Lock, MAX_DELAY)))
     {
         LOGF(LOG_LEVEL_ERROR, "[I2C] Taking semaphore failed. Address: %X", seq->addr);
         return I2CResultFailure;
@@ -45,7 +45,7 @@ static I2CResult ExecuteTransfer(I2CLowLevelBus* bus, I2C_TransferSeq_TypeDef* s
     if (IsSclLatched(bus))
     {
         LOG(LOG_LEVEL_FATAL, "[I2C] SCL already latched");
-        System.GiveSemaphore(bus->Lock);
+        System::GiveSemaphore(bus->Lock);
         return I2CResultClockAlreadyLatched;
     }
 
@@ -55,11 +55,11 @@ static I2CResult ExecuteTransfer(I2CLowLevelBus* bus, I2C_TransferSeq_TypeDef* s
 
     if (rawResult != i2cTransferInProgress)
     {
-        System.GiveSemaphore(bus->Lock);
+        System::GiveSemaphore(bus->Lock);
         return (I2CResult)rawResult;
     }
 
-    if (!System.QueueReceive(bus->ResultQueue, &rawResult, I2C_TIMEOUT * 1000)) // I2C_TIMEOUT * 1000
+    if (!System::QueueReceive(bus->ResultQueue, &rawResult, I2C_TIMEOUT * 1000)) // I2C_TIMEOUT * 1000
     {
         I2CResult ret = I2CResultTimeout;
 
@@ -78,12 +78,12 @@ static I2CResult ExecuteTransfer(I2CLowLevelBus* bus, I2C_TransferSeq_TypeDef* s
             ret = I2CResultClockLatched;
         }
 
-        System.GiveSemaphore(bus->Lock);
+        System::GiveSemaphore(bus->Lock);
 
         return ret;
     }
 
-    System.GiveSemaphore(bus->Lock);
+    System::GiveSemaphore(bus->Lock);
 
     return (I2CResult)rawResult;
 }
@@ -151,10 +151,10 @@ void I2CSetupInterface(I2CLowLevelBus* bus,
     bus->IO.SCL = sclPin;
     bus->IO.SDA = sdaPin;
 
-    bus->ResultQueue = System.CreateQueue(1, sizeof(I2C_TransferReturn_TypeDef));
+    bus->ResultQueue = System::CreateQueue(1, sizeof(I2C_TransferReturn_TypeDef));
 
-    bus->Lock = System.CreateBinarySemaphore();
-    System.GiveSemaphore(bus->Lock);
+    bus->Lock = System::CreateBinarySemaphore();
+    System::GiveSemaphore(bus->Lock);
 
     CMU_ClockEnable(clock, true);
 
@@ -183,10 +183,10 @@ void I2CIRQHandler(I2CLowLevelBus* bus)
         return;
     }
 
-    if (!System.QueueSendISR(bus->ResultQueue, &status, NULL))
+    if (!System::QueueSendISR(bus->ResultQueue, &status, NULL))
     {
         LOG_ISR(LOG_LEVEL_ERROR, "Error queueing i2c result");
     }
 
-    System.EndSwitchingISR(NULL);
+    System::EndSwitchingISR(NULL);
 }
