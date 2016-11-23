@@ -56,7 +56,7 @@ static OSReset SetupComm(CommObject& comm, OSMock& system)
 
 struct FrameHandlerMock : IHandleFrame
 {
-    MOCK_METHOD1(HandleFrame, void(CommFrame&));
+    MOCK_METHOD2(HandleFrame, void(ITransmitFrame&, CommFrame&));
 };
 
 class CommTest : public testing::Test

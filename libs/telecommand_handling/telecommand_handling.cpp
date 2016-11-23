@@ -7,6 +7,7 @@
 
 using devices::comm::CommObject;
 using devices::comm::CommFrame;
+using devices::comm::ITransmitFrame;
 using gsl::span;
 using namespace std;
 using namespace telecommands::handling;
@@ -21,7 +22,7 @@ IncomingTelecommandHandler::IncomingTelecommandHandler(
 {
 }
 
-void IncomingTelecommandHandler::HandleFrame(CommFrame& frame)
+void IncomingTelecommandHandler::HandleFrame(ITransmitFrame& transmitter, CommFrame& frame)
 {
     uint8_t decryptedFrame[DecryptionBufferSize] = {0};
 
@@ -46,10 +47,10 @@ void IncomingTelecommandHandler::HandleFrame(CommFrame& frame)
         return;
     }
 
-    this->DispatchCommandHandler(commandCode, parameters);
+    this->DispatchCommandHandler(transmitter, commandCode, parameters);
 }
 
-void IncomingTelecommandHandler::DispatchCommandHandler(uint8_t commandCode, span<const uint8_t> parameters)
+void IncomingTelecommandHandler::DispatchCommandHandler(ITransmitFrame& transmitter, uint8_t commandCode, span<const uint8_t> parameters)
 {
     for (auto command : this->_telecommands)
     {
@@ -57,7 +58,7 @@ void IncomingTelecommandHandler::DispatchCommandHandler(uint8_t commandCode, spa
         {
             LOGF(LOG_LEVEL_DEBUG, "Dispatching telecommand handler for command %d", commandCode);
 
-            command->Handle(parameters);
+            command->Handle(transmitter, parameters);
 
             return;
         }
