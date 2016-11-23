@@ -1,11 +1,13 @@
 #include "adxrs453.h"
-#include <stdint.h>
+#include <cstdint>
 #include <em_gpio.h>
 #include "base/os.h"
 #include "io_map.h"
 #include "logger/logger.h"
 #include "spidrv.h"
 #include "system.h"
+
+using namespace std;
 
 void GenerateCommand(uint8_t commandByte, uint8_t registerAddress, uint16_t registerValue, uint8_t* sendBuffer)
 {
