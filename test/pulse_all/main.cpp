@@ -28,7 +28,7 @@ void SetGroup(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
-    System.EventGroupSetBits(GlobalEventGroup, 0x80);
+    System::EventGroupSetBits(GlobalEventGroup, 0x80);
 }
 
 static const TerminalCommandDescription commands[] = {
@@ -58,7 +58,7 @@ static void Observer(void* param)
 
     for (;;)
     {
-        OSEventBits bits = System.EventGroupWaitForBits(groupHandle, 0x80, true, true, MAX_DELAY);
+        OSEventBits bits = System::EventGroupWaitForBits(groupHandle, 0x80, true, true, MAX_DELAY);
         LOGF(LOG_LEVEL_INFO, "Received notification with following bits: %d", bits);
     }
 }
@@ -88,24 +88,22 @@ int main(void)
     LogInit(LOG_LEVEL_DEBUG);
     InitSwoEndpoint();
 
-    OSSetup();
-
     DMADRV_Init();
 
     LeuartLineIOInit(&StdIO);
 
-    GlobalEventGroup = System.CreateEventGroup();
+    GlobalEventGroup = System::CreateEventGroup();
 
     for (int i = 0; i < 5; ++i)
     {
-        System.CreateTask(Observer, "Observer", 512, &GlobalEventGroup, tskIDLE_PRIORITY + 1, NULL);
+        System::CreateTask(Observer, "Observer", 512, &GlobalEventGroup, tskIDLE_PRIORITY + 1, NULL);
     }
 
     InitializeTerminal();
 
     SwoPutsOnChannel(0, "Ready\n");
 
-    System.RunScheduler();
+    System::RunScheduler();
 
     return 0;
 }
