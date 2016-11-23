@@ -1,7 +1,6 @@
 #ifndef SRC_SYSTEM_H_
 #define SRC_SYSTEM_H_
 
-#include <stddef.h>
 #include <type_traits>
 
 /**
@@ -50,7 +49,7 @@
 
 template <typename Enum> typename std::underlying_type_t<Enum> num(Enum v)
 {
-    return static_cast<typename std::underlying_type_t<Enum>>(v);
+    return static_cast<std::underlying_type_t<Enum>>(v);
 }
 
 #endif

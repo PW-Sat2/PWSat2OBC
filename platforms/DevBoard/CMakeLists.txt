@@ -1,9 +1,7 @@
 set(SOURCES
-    platform.cpp
+    
 )
 
-add_library(platform STATIC ${SOURCES})
-
-target_link_libraries(platform PRIVATE base)
+add_library(platform INTERFACE ${SOURCES})
 
 target_include_directories (platform INTERFACE ${CMAKE_CURRENT_LIST_DIR}/Include)
