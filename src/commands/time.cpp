@@ -24,7 +24,7 @@ void JumpToTimeHandler(uint16_t argc, char* argv[])
     LOGF(LOG_LEVEL_INFO, "Jumping to time %d\n", (int)targetTime.value);
     targetTime.value *= 1000;
 
-    TimeSetCurrentTime(&Main.timeProvider, TimePointFromTimeSpan(targetTime));
+    Main.timeProvider.SetCurrentTime(TimePointFromTimeSpan(targetTime));
 }
 
 void CurrentTimeHandler(uint16_t argc, char* argv[])
@@ -32,6 +32,6 @@ void CurrentTimeHandler(uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
     TimeSpan span;
-    TimeGetCurrentTime(&Main.timeProvider, &span);
+    Main.timeProvider.GetCurrentTime(&span);
     TerminalPrintf(&Main.terminal, "%d", (int)(span.value / 1000));
 }

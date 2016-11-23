@@ -13,6 +13,7 @@ using testing::Ne;
 using testing::Return;
 using testing::Invoke;
 using testing::HasSubstr;
+using obc::time::TimeProvider;
 
 class TimerPersistanceTest : public testing::Test
 {
@@ -29,7 +30,7 @@ class TimerPersistanceTest : public testing::Test
 TimeSpan TimerPersistanceTest::GetCurrentTime()
 {
     TimeSpan span{0};
-    EXPECT_TRUE(TimeGetCurrentTime(&provider, &span));
+    EXPECT_TRUE(provider.GetCurrentTime(&span));
     return span;
 }
 
@@ -50,7 +51,7 @@ TimerPersistanceTest::TimerPersistanceTest()
 TEST_F(TimerPersistanceTest, TestReadingStateNoState)
 {
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(OSResultNotFound)));
-    EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
+    EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr, &fs));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0u)));
 }
 
@@ -59,7 +60,7 @@ TEST_F(TimerPersistanceTest, TestReadingStateEmptyFiles)
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(1)));
     EXPECT_CALL(fs, Read(_, _, _)).WillRepeatedly(Return(MakeFSIOResult(OSResultInvalidOperation)));
     EXPECT_CALL(fs, Close(_)).WillRepeatedly(Return(OSResultSuccess));
-    EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
+    EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr, &fs));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0u)));
 }
 
@@ -80,7 +81,7 @@ TEST_F(TimerPersistanceTest, TestReadingFiles)
                 return MakeFSIOResult(size);
             }
         }));
-    EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
+    EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr, &fs));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x1111111111111111ull)));
 }
 
@@ -94,7 +95,7 @@ TEST_F(TimerPersistanceTest, TestReadingSingleNonEmptyFile)
             return MakeFSIOResult(size);
         }))
         .WillRepeatedly(Return(MakeFSIOResult(OSResultInvalidOperation)));
-    EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
+    EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr, &fs));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0u)));
 }
 
@@ -108,7 +109,7 @@ TEST_F(TimerPersistanceTest, TestReadingTwoNonEmptyFiles)
             memset(buffer, 0x11, size);
             return MakeFSIOResult(size);
         }));
-    EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
+    EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr, &fs));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x1111111111111111ull)));
 }
 
@@ -121,7 +122,7 @@ TEST_F(TimerPersistanceTest, TestReadingTwoExistingEmptyFiles)
             memset(buffer, 0x11, size);
             return MakeFSIOResult(size);
         }));
-    EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
+    EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr, &fs));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x1111111111111111ull)));
 }
 
@@ -143,7 +144,7 @@ TEST_F(TimerPersistanceTest, TestReadingFilesEndiannes)
                 return MakeFSIOResult(size);
             }
         }));
-    EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
+    EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr, &fs));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x8877665544332211ull)));
 }
 
@@ -157,7 +158,7 @@ TEST_F(TimerPersistanceTest, TestReadingFilesGetClosed)
     EXPECT_CALL(fs, Close(1)).Times(1);
     EXPECT_CALL(fs, Close(2)).Times(1);
     EXPECT_CALL(fs, Close(3)).Times(1);
-    EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
+    EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr, &fs));
 }
 
 TEST_F(TimerPersistanceTest, TestReadingThreeFilesTwoSame)
@@ -175,7 +176,7 @@ TEST_F(TimerPersistanceTest, TestReadingThreeFilesTwoSame)
             memcpy(buffer, expected, size);
             return MakeFSIOResult(size);
         }));
-    EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
+    EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr, &fs));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x8877665544332211ull)));
 }
 
@@ -207,33 +208,33 @@ TEST_F(TimerPersistanceTest, TestReadingThreeDifferentFiles)
             return MakeFSIOResult(size);
         }));
 
-    EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
+    EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr, &fs));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x7877665544332211ull)));
 }
 
 TEST_F(TimerPersistanceTest, TestStateSaveError)
 {
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(OSResultNotFound)));
-    EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
-    TimeAdvanceTime(&provider, TimeSpanFromMilliseconds(0x44332211ull));
+    EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr, &fs));
+    provider.AdvanceTime(TimeSpanFromMilliseconds(0x44332211ull));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x44332211ull)));
 }
 
 TEST_F(TimerPersistanceTest, TestStateWriteError)
 {
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(OSResultNotFound)));
-    EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
+    EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr, &fs));
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(1)));
     EXPECT_CALL(fs, Write(_, _, _)).WillRepeatedly(Return(MakeFSIOResult(OSResultInvalidOperation)));
     ON_CALL(fs, Close(_)).WillByDefault(Return(OSResultSuccess));
-    TimeAdvanceTime(&provider, TimeSpanFromMilliseconds(0x44332211ull));
+    provider.AdvanceTime(TimeSpanFromMilliseconds(0x44332211ull));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x44332211ull)));
 }
 
 TEST_F(TimerPersistanceTest, TestStateWrite)
 {
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(OSResultNotFound)));
-    EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
+    EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr, &fs));
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(1)));
     ON_CALL(fs, Close(_)).WillByDefault(Return(OSResultSuccess));
     EXPECT_CALL(fs, Write(_, _, _))
@@ -244,14 +245,14 @@ TEST_F(TimerPersistanceTest, TestStateWrite)
                 ::testing::ElementsAreArray(expected));
             return MakeFSIOResult(size);
         }));
-    TimeAdvanceTime(&provider, TimeSpanFromMilliseconds(0x44332211ull));
+    provider.AdvanceTime(TimeSpanFromMilliseconds(0x44332211ull));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x44332211ull)));
 }
 
 TEST_F(TimerPersistanceTest, TestStateWriteClosesFiles)
 {
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(OSResultNotFound)));
-    EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
+    EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr, &fs));
     EXPECT_CALL(fs, Open(HasSubstr(".0"), _, _)).Times(3).WillRepeatedly(Return(MakeOpenedFile(1)));
     EXPECT_CALL(fs, Open(HasSubstr(".1"), _, _)).Times(3).WillRepeatedly(Return(MakeOpenedFile(2)));
     EXPECT_CALL(fs, Open(HasSubstr(".2"), _, _)).Times(3).WillRepeatedly(Return(MakeOpenedFile(3)));
@@ -259,21 +260,21 @@ TEST_F(TimerPersistanceTest, TestStateWriteClosesFiles)
     EXPECT_CALL(fs, Close(2)).Times(3);
     EXPECT_CALL(fs, Close(3)).Times(3);
     EXPECT_CALL(fs, Write(_, _, _)).WillRepeatedly(Return(MakeFSIOResult(OSResultInvalidOperation)));
-    TimeAdvanceTime(&provider, TimeSpanFromMilliseconds(0x44332211ull));
+    provider.AdvanceTime(TimeSpanFromMilliseconds(0x44332211ull));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x44332211ull)));
 }
 
 TEST_F(TimerPersistanceTest, TestStateWriteIsNotDoneOnEveryTimeUpdate)
 {
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(OSResultNotFound)));
-    EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
+    EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr, &fs));
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(1)));
     EXPECT_CALL(fs, Close(_)).Times(9);
     EXPECT_CALL(fs, Write(_, _, _)).WillRepeatedly(Return(MakeFSIOResult(OSResultInvalidOperation)));
 
-    TimeAdvanceTime(&provider, TimeSpanFromMilliseconds(400000));
-    TimeAdvanceTime(&provider, TimeSpanFromMilliseconds(100000));
-    TimeAdvanceTime(&provider, TimeSpanFromMilliseconds(300000));
-    TimeAdvanceTime(&provider, TimeSpanFromMilliseconds(200000));
+    provider.AdvanceTime(TimeSpanFromMilliseconds(400000));
+    provider.AdvanceTime(TimeSpanFromMilliseconds(100000));
+    provider.AdvanceTime(TimeSpanFromMilliseconds(300000));
+    provider.AdvanceTime(TimeSpanFromMilliseconds(200000));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(1000000ull)));
 }

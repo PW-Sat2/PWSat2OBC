@@ -1,198 +1,103 @@
 #include "timer.h"
-#include <stdlib.h>
 #include "base/reader.h"
 #include "base/writer.h"
 #include "logger/logger.h"
 
-static const char* const TimeFile0 = "/TimeState.0";
-static const char* const TimeFile1 = "/TimeState.1";
-static const char* const TimeFile2 = "/TimeState.2";
-
-#ifndef TIMER_NOTIFICATION_PERIOD
-#define TIMER_NOTIFICATION_PERIOD 5000
-#endif
-
-#ifndef TIMER_SAVE_PERIOD
-#define TIMER_SAVE_PERIOD (15 * 60 * 1000)
-#endif
+using namespace obc::time;
 
 /**
  * @addtogroup time
  * @{
  */
 
-/**
- * @brief Time period between the subsequent mission time notifications.
- */
-static const TimeSpan NotificationPeriod = {TIMER_NOTIFICATION_PERIOD};
-
-/**
- * @brief Time period between subsequent timer state saves.
- */
-static const TimeSpan SavePeriod = {TIMER_SAVE_PERIOD};
-
-#undef TIMER_NOTIFICATION_PERIOD
-#undef TIMER_SAVE_PERIOD
-
-/**
- * @brief This structure contains temporary timer state used for passing information between
- * timer components during single rtc time notification.
- */
-struct TimerState
-{
-    /**
-     * @brief Current mission time in milliseconds.
-     */
-    TimeSpan time;
-
-    /**
-     * @brief Flag indicating whether the timer state should be immediately saved.
-     */
-    bool saveTime;
-
-    /**
-     * @brief Flag indicating whether the timer notification should be immediately called.
-     */
-    bool sendNotification;
-};
-
-/**
- * @brief This procedure is responsible for processing rtc time notifications.
- * @param[in] provider Pointer to timer object that should be notified about passing time.
- * @param[in] delta The amount of time that has passes since last time notification.
- */
-static void TimeTickProcedure(TimeProvider* provider, TimeSpan delta);
-
-/**
- * @brief This procedure is responsible for sending passing time notifications to timer clients.
- *
- * This procedure does not determine whether notification should be
- * sent or not, for that it uses the information passed in the state object. The state object
- * should be prepared by the caller to avoid excessive timer locking in order to obtain stable
- * timer state.
- * @param[in] provider Timer object whose notification should be published.
- * @param[in] state Timer object state snapshot.
- */
-static void SendTimeNotification(TimeProvider* provider, struct TimerState state);
-
-/**
- * @brief This procedure is responsible for saving specified timer state.
- *
- * This method does not determine whether or not state should be saved, for that it
- * uses information from the state object that should be prepared in advance by the caller
- * to avoid excessive timer locking in order to obtain stable timer state. The value
- * that gets saved comes from the state object not the timer itself.
- *
- * @param[in] provider Time object whose state should be saved.
- * @param[in] state The state of the timer object that should be saved.
- */
-static void SaveTime(TimeProvider* provider, struct TimerState state);
-
-/**
- * @brief This method generates time state snapshot.
- *
- * In addition this method also determines whether the time notification should be sent
- * immediately as well as whether the timer state should also be saved and updates the
- * timer state accordingly.
- *
- * @param[in] timeProvider Timer object whose snapshot should be generated.
- * @return Captured timer state snapshot.
- * @see TimerState
- */
-static struct TimerState TimeBuildTimerState(TimeProvider* timeProvider);
-
-/**
- * @brief This method is responsible for rtc timer notification post processing.
- *
- * It is responsible for coordinating the sending passing time notification and
- * saving the timer state. This method ensures that there is only on timer
- * notification being executed for the specified timer object at any given time
- * and similarly that there is at most one task that saves current timer state.
- * @param[in] timeProvider Timer object whose rtc notification should be processed.
- * @param[in] state Captured timer state that is valid for processing.
- */
-static void TimeProcessChange(TimeProvider* timeProvider, struct TimerState state);
-
-bool TimeInitialize(TimeProvider* provider,    //
+bool TimeProvider::Initialize(
     TimePassedCallbackType timePassedCallback, //
     void* timePassedCallbackContext,           //
     FileSystem* fileSystem                     //
     )
 {
-    const struct TimeSnapshot snapshot = GetCurrentPersistentTime(fileSystem);
-    provider->CurrentTime = snapshot.CurrentTime;
-    provider->NotificationTime = TimeSpanFromMilliseconds(0ull);
-    provider->PersistanceTime = TimeSpanFromMilliseconds(0ull);
-    provider->OnTimePassed = timePassedCallback;
-    provider->TimePassedCallbackContext = timePassedCallbackContext;
-    provider->FileSystemObject = fileSystem;
-    provider->timerLock = System.CreateBinarySemaphore();
-    provider->notificationLock = System.CreateBinarySemaphore();
-    if (provider->timerLock != NULL)
+    const struct TimeSnapshot snapshot = CurrentPersistentTime(fileSystem);
+    CurrentTime = snapshot.CurrentTime;
+    NotificationTime = TimeSpanFromMilliseconds(0ull);
+    PersistanceTime = TimeSpanFromMilliseconds(0ull);
+    OnTimePassed = timePassedCallback;
+    TimePassedCallbackContext = timePassedCallbackContext;
+    FileSystemObject = fileSystem;
+    timerLock = System.CreateBinarySemaphore();
+    notificationLock = System.CreateBinarySemaphore();
+    if (timerLock != NULL)
     {
-        System.GiveSemaphore(provider->timerLock);
+        System.GiveSemaphore(timerLock);
     }
 
-    if (provider->notificationLock != NULL)
+    if (notificationLock != NULL)
     {
-        System.GiveSemaphore(provider->notificationLock);
+        System.GiveSemaphore(notificationLock);
     }
 
-    provider->TickNotification = System.CreatePulseAll();
+    TickNotification = System.CreatePulseAll();
 
-    const bool result = provider->timerLock != NULL //
-        && provider->notificationLock != NULL       //
-        && provider->TickNotification != NULL;
+    const bool result = timerLock != NULL //
+        && notificationLock != NULL       //
+        && TickNotification != NULL;
     return result;
 }
 
-TimeTickCallbackType TimeGetTickProcedure(void)
+void TimeProvider::AdvanceTime(TimeSpan delta)
 {
-    return TimeTickProcedure;
+    if (OS_RESULT_FAILED(System.TakeSemaphore(timerLock, MAX_DELAY)))
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to acquire timer lock.");
+        return;
+    }
+
+    CurrentTime = TimeSpanAdd(CurrentTime, delta);
+    NotificationTime = TimeSpanAdd(NotificationTime, delta);
+    PersistanceTime = TimeSpanAdd(PersistanceTime, delta);
+
+    struct TimerState state = BuildTimerState();
+
+    System.GiveSemaphore(timerLock);
+    ProcessChange(state);
 }
 
-void TimeAdvanceTime(TimeProvider* timeProvider, TimeSpan delta)
-{
-    TimeTickProcedure(timeProvider, delta);
-}
-
-bool TimeSetCurrentTime(TimeProvider* timeProvider, TimePoint pointInTime)
+bool TimeProvider::SetCurrentTime(TimePoint pointInTime)
 {
     const TimeSpan span = TimePointToTimeSpan(pointInTime);
-    if (OS_RESULT_FAILED(System.TakeSemaphore(timeProvider->timerLock, MAX_DELAY)))
+    if (OS_RESULT_FAILED(System.TakeSemaphore(timerLock, MAX_DELAY)))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to acquire timer lock.");
         return false;
     }
 
-    timeProvider->CurrentTime = span;
-    timeProvider->NotificationTime = TimeSpanAdd(NotificationPeriod, TimeSpanFromMilliseconds(1));
-    timeProvider->PersistanceTime = TimeSpanAdd(SavePeriod, TimeSpanFromMilliseconds(1));
-    struct TimerState state = TimeBuildTimerState(timeProvider);
-    System.GiveSemaphore(timeProvider->timerLock);
+    CurrentTime = span;
+    NotificationTime = TimeSpanAdd(NotificationPeriod, TimeSpanFromMilliseconds(1));
+    PersistanceTime = TimeSpanAdd(SavePeriod, TimeSpanFromMilliseconds(1));
+    struct TimerState state = BuildTimerState();
+    System.GiveSemaphore(timerLock);
 
-    TimeProcessChange(timeProvider, state);
+    ProcessChange(state);
     return true;
 }
 
-bool TimeGetCurrentTime(TimeProvider* timeProvider, TimeSpan* currentTime)
+bool TimeProvider::GetCurrentTime(TimeSpan* currentTime)
 {
-    if (OS_RESULT_FAILED(System.TakeSemaphore(timeProvider->timerLock, MAX_DELAY)))
+    if (OS_RESULT_FAILED(System.TakeSemaphore(timerLock, MAX_DELAY)))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to acquire timer lock.");
         return false;
     }
 
-    *currentTime = timeProvider->CurrentTime;
+    *currentTime = CurrentTime;
 
-    System.GiveSemaphore(timeProvider->timerLock);
+    System.GiveSemaphore(timerLock);
     return true;
 }
 
-bool TimeGetCurrentMissionTime(TimeProvider* timeProvider, TimePoint* timePoint)
+bool TimeProvider::GetCurrentMissionTime(TimePoint* timePoint)
 {
     TimeSpan span;
-    const bool result = TimeGetCurrentTime(timeProvider, &span);
+    const bool result = GetCurrentTime(&span);
     if (result)
     {
         *timePoint = TimePointFromTimeSpan(span);
@@ -201,68 +106,40 @@ bool TimeGetCurrentMissionTime(TimeProvider* timeProvider, TimePoint* timePoint)
     return result;
 }
 
-void TimeTickProcedure(TimeProvider* timeProvider, TimeSpan delta)
+void TimeProvider::ProcessChange(TimerState state)
 {
-    if (OS_RESULT_FAILED(System.TakeSemaphore(timeProvider->timerLock, MAX_DELAY)))
-    {
-        LOG(LOG_LEVEL_ERROR, "Unable to acquire timer lock.");
-        return;
-    }
-
-    timeProvider->CurrentTime = TimeSpanAdd(timeProvider->CurrentTime, delta);
-    timeProvider->NotificationTime = TimeSpanAdd(timeProvider->NotificationTime, delta);
-    timeProvider->PersistanceTime = TimeSpanAdd(timeProvider->PersistanceTime, delta);
-
-    struct TimerState state = TimeBuildTimerState(timeProvider);
-
-    System.GiveSemaphore(timeProvider->timerLock);
-    TimeProcessChange(timeProvider, state);
-}
-
-void TimeProcessChange(TimeProvider* timeProvider, struct TimerState state)
-{
-    if (OS_RESULT_FAILED(System.TakeSemaphore(timeProvider->notificationLock, MAX_DELAY)))
+    if (OS_RESULT_FAILED(System.TakeSemaphore(notificationLock, MAX_DELAY)))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to acquire notification lock.");
         return;
     }
 
-    SendTimeNotification(timeProvider, state);
-    SaveTime(timeProvider, state);
+    SendTimeNotification(state);
+    SaveTime(state);
 
-    System.GiveSemaphore(timeProvider->notificationLock);
+    System.GiveSemaphore(notificationLock);
 }
 
-struct TimerState TimeBuildTimerState(TimeProvider* timeProvider)
+TimerState TimeProvider::BuildTimerState()
 {
     struct TimerState result;
-    result.time = timeProvider->CurrentTime;
-    result.saveTime = TimeSpanLessThan(SavePeriod, timeProvider->PersistanceTime);
-    result.sendNotification = TimeSpanLessThan(NotificationPeriod, timeProvider->NotificationTime);
+    result.time = CurrentTime;
+    result.saveTime = TimeSpanLessThan(SavePeriod, PersistanceTime);
+    result.sendNotification = TimeSpanLessThan(NotificationPeriod, NotificationTime);
     if (result.saveTime)
     {
-        timeProvider->PersistanceTime = TimeSpanFromMilliseconds(0ull);
+        PersistanceTime = TimeSpanFromMilliseconds(0ull);
     }
 
     if (result.sendNotification)
     {
-        timeProvider->NotificationTime = TimeSpanFromMilliseconds(0ull);
+        NotificationTime = TimeSpanFromMilliseconds(0ull);
     }
 
     return result;
 }
 
-/**
- * @brief This procedure is responsible for reading timer state from single file.
- *
- * When selected file does not exist or is empty/corrupted this procedure return
- * default state with time state set to zero (beginning of time).
- * @param[in] fs FileSystem interface for accessing files.
- * @param[in] filePath Path to the file that contains timer state.
- *
- * @return Read timer state or default (zero) state in case of errors.
- */
-static struct TimeSnapshot ReadFile(FileSystem* fs, const char* const filePath)
+struct TimeSnapshot TimeProvider::ReadFile(FileSystem* fs, const char* const filePath)
 {
     struct TimeSnapshot result = {{0}};
     uint8_t buffer[sizeof(TimeSpan)];
@@ -284,7 +161,7 @@ static struct TimeSnapshot ReadFile(FileSystem* fs, const char* const filePath)
     return result;
 }
 
-struct TimeSnapshot GetCurrentPersistentTime(FileSystem* fileSystem)
+struct TimeSnapshot TimeProvider::CurrentPersistentTime(FileSystem* fileSystem)
 {
     if (fileSystem == NULL)
     {
@@ -293,29 +170,29 @@ struct TimeSnapshot GetCurrentPersistentTime(FileSystem* fileSystem)
     }
 
     struct TimeSnapshot snapshot[3];
-    snapshot[0] = ReadFile(fileSystem, TimeFile0);
-    snapshot[1] = ReadFile(fileSystem, TimeFile1);
-    snapshot[2] = ReadFile(fileSystem, TimeFile2);
+    snapshot[0] = ReadFile(fileSystem, File0);
+    snapshot[1] = ReadFile(fileSystem, File1);
+    snapshot[2] = ReadFile(fileSystem, File2);
 
     // every value has one initial copy (its own).
     int votes[3] = {1, 1, 1};
 
     // now vote to determine the most common value,
     // by increasing counters that are the same.
-    if (TimeSnapshotEqual(snapshot[0], snapshot[1]))
+    if (snapshot[0].Equal(snapshot[1]))
     {
         ++votes[0];
         ++votes[1];
     }
 
-    if (TimeSnapshotEqual(snapshot[0], snapshot[2]))
+    if (snapshot[0].Equal(snapshot[2]))
     {
         ++votes[0];
         ++votes[2];
     }
     // we can get away with else here since we seek only one maximum value not all of them
     // we also do not need exact order
-    else if (TimeSnapshotEqual(snapshot[1], snapshot[2]))
+    else if (snapshot[1].Equal(snapshot[2]))
     {
         ++votes[1];
         ++votes[2];
@@ -338,12 +215,12 @@ struct TimeSnapshot GetCurrentPersistentTime(FileSystem* fileSystem)
     {
         // find the index with the oldest time snapshot.
         selectedIndex = 0;
-        if (TimeSnapshotLessThan(snapshot[1], snapshot[0]))
+        if (snapshot[1].LessThan(snapshot[0]))
         {
             selectedIndex = 1;
         }
 
-        if (TimeSnapshotLessThan(snapshot[2], snapshot[selectedIndex]))
+        if (snapshot[2].LessThan(snapshot[selectedIndex]))
         {
             selectedIndex = 2;
         }
@@ -352,24 +229,24 @@ struct TimeSnapshot GetCurrentPersistentTime(FileSystem* fileSystem)
     return snapshot[selectedIndex];
 }
 
-static void SendTimeNotification(TimeProvider* timeProvider, struct TimerState state)
+void TimeProvider::SendTimeNotification(TimerState state)
 {
-    if (state.sendNotification && timeProvider->OnTimePassed != NULL)
+    if (state.sendNotification && OnTimePassed != NULL)
     {
-        timeProvider->OnTimePassed(timeProvider->TimePassedCallbackContext, TimePointFromTimeSpan(state.time));
+        OnTimePassed(TimePassedCallbackContext, TimePointFromTimeSpan(state.time));
     }
 
     if (state.sendNotification)
     {
-        System.PulseSet(timeProvider->TickNotification);
+        System.PulseSet(TickNotification);
     }
 }
 
-static void SaveTime(TimeProvider* timeProvider, struct TimerState state)
+void TimeProvider::SaveTime(TimerState state)
 {
     if (                                       //
         !state.saveTime ||                     //
-        timeProvider->FileSystemObject == NULL //
+        FileSystemObject == NULL //
         )
     {
         return;
@@ -392,15 +269,15 @@ static void SaveTime(TimeProvider* timeProvider, struct TimerState state)
     do
     {
         errorCount = 0;
-        if (!FileSystemSaveToFile(timeProvider->FileSystemObject, TimeFile0, buffer, length))
+        if (!FileSystemSaveToFile(FileSystemObject, File0, buffer, length))
         {
             ++errorCount;
         }
-        if (!FileSystemSaveToFile(timeProvider->FileSystemObject, TimeFile1, buffer, length))
+        if (!FileSystemSaveToFile(FileSystemObject, File1, buffer, length))
         {
             ++errorCount;
         }
-        if (!FileSystemSaveToFile(timeProvider->FileSystemObject, TimeFile2, buffer, length))
+        if (!FileSystemSaveToFile(FileSystemObject, File2, buffer, length))
         {
             ++errorCount;
         }
@@ -414,13 +291,13 @@ static void SaveTime(TimeProvider* timeProvider, struct TimerState state)
     }
 }
 
-bool TimeLongDelayUntil(TimeProvider* timeProvider, TimePoint time)
+bool TimeProvider::LongDelayUntil(TimePoint time)
 {
     do
     {
         TimePoint missionTime;
 
-        if (!TimeGetCurrentMissionTime(timeProvider, &missionTime))
+        if (!GetCurrentMissionTime(&missionTime))
         {
             return false;
         }
@@ -435,7 +312,7 @@ bool TimeLongDelayUntil(TimeProvider* timeProvider, TimePoint time)
             return true;
         }
 
-        if (OS_RESULT_FAILED(System.PulseWait(timeProvider->TickNotification, MAX_DELAY)))
+        if (OS_RESULT_FAILED(System.PulseWait(TickNotification, MAX_DELAY)))
         {
             return false;
         }
@@ -444,18 +321,18 @@ bool TimeLongDelayUntil(TimeProvider* timeProvider, TimePoint time)
     return false;
 }
 
-bool TimeLongDelay(TimeProvider* timeProvider, TimeSpan delay)
+bool TimeProvider::LongDelay(TimeSpan delay)
 {
     TimePoint missionTime;
 
-    if (!TimeGetCurrentMissionTime(timeProvider, &missionTime))
+    if (!GetCurrentMissionTime(&missionTime))
     {
         return false;
     }
 
     TimePoint time = TimePointFromTimeSpan(TimeSpanAdd(TimePointToTimeSpan(missionTime), delay));
 
-    return TimeLongDelayUntil(timeProvider, time);
+    return LongDelayUntil(time);
 }
 
 /** @} */
