@@ -1,5 +1,5 @@
 /**
-@file comm.cpp Driver for communication module.
+@file comm/comm.cpp Driver for communication module.
 
 @remarks Based on ICD Issue 1.0 2014-12-19
 */

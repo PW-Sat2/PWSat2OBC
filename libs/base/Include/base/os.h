@@ -188,6 +188,17 @@ class System
         std::uint32_t priority,
         OSTaskHandle* taskHandle);
 
+    /**
+     * @brief Creates new task
+     *
+     * @param[in] entryPoint Pointer to task procedure.
+     * @param[in] param Pointer to caller supplied object task context.
+     * @param[in] taskName Name of the new task.
+     * @param[in] stackSize Size of the new task's stack in words.
+     * @param[in] priority New task priority.
+     * @param[out] taskHandle Pointer to variable that will be filled with the created task handle.
+     * @return Operation status.
+     */
     template <typename Param>
     static OSResult CreateTask(void (*entryPoint)(Param&),
         Param& param,
@@ -276,19 +287,23 @@ class System
     /**
      * @brief Clears specific bits in the event group.
      *
+     * @param[in] eventGroup Handle to the event group that should be updated.
+     * @param[in] bitsToChange Bits that should be cleared.
+     * @return The value of the event group before the specified bits were cleared.
+     */
+    static OSEventBits EventGroupClearBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange);
+
+    /**
+     * @brief Suspends current task execution until the specific bits in the event group are set.
+     *
      * @param[in] eventGroup The affected event group handle.
      * @param[in] bitsToWaitFor Bits that the caller is interested in.
      * @param[in] waitAll Flat indicating whether this procedure should return when all requested bits are set.
      * @param[in] autoReset Flag indicating whether the signaled bits should be cleared on function return.
      * @param[in] timeout Operation timeout in ms.
-     */
-    static OSEventBits EventGroupClearBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange);
-
-    /**
-     * @brief Suspends current task execution until the
-     * specific bits in the event group are set.
      *
-     * @see OSEventGroupWaitForBits for the details.
+     * @return The value of the event group at the time either the event bits being waited for became set,
+     * or the block time expired.
      */
     static OSEventBits EventGroupWaitForBits(
         OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, bool waitAll, bool autoReset, const OSTaskTimeSpan timeout);

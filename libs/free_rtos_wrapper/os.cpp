@@ -21,9 +21,9 @@ static inline TickType_t ConvertTimeToTicks(const OSTaskTimeSpan span)
 
 OSResult System::CreateTask(OSTaskProcedure entryPoint, //
     const char* taskName,                               //
-    uint16_t stackSize,                                 //
+    std::uint16_t stackSize,                            //
     void* taskParameter,                                //
-    uint32_t priority,                                  //
+    std::uint32_t priority,                             //
     OSTaskHandle* taskHandle                            //
     )
 {
