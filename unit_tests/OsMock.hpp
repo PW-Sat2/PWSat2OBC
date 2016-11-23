@@ -45,9 +45,9 @@ struct OSMock : IOS
     MOCK_METHOD1(Free, void(void* ptr));
     MOCK_METHOD2(CreateQueue, OSQueueHandle(std::size_t maxElementCount, std::size_t elementSize));
     MOCK_METHOD3(QueueReceive, bool(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout));
-    MOCK_METHOD3(QueueReceiveFromISR, bool(OSQueueHandle queue, void* element, bool* taskWoken));
+    MOCK_METHOD2(QueueReceiveFromISR, bool(OSQueueHandle queue, void* element));
     MOCK_METHOD3(QueueSend, bool(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout));
-    MOCK_METHOD3(QueueSendISR, bool(OSQueueHandle queue, void* element, bool* taskWoken));
+    MOCK_METHOD2(QueueSendISR, bool(OSQueueHandle queue, void* element));
     MOCK_METHOD2(QueueOverwrite, void(OSQueueHandle queue, const void* element));
 
     MOCK_METHOD0(CreatePulseAll, OSPulseHandle());
@@ -56,7 +56,7 @@ struct OSMock : IOS
 
     MOCK_METHOD1(PulseSet, void(OSPulseHandle handle));
 
-    MOCK_METHOD1(EndSwitchingISR, void(bool taskWoken));
+    MOCK_METHOD0(EndSwitchingISR, void());
 };
 
 #endif

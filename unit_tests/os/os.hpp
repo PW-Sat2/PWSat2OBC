@@ -43,9 +43,9 @@ struct IOS
     virtual void Free(void* ptr) = 0;
     virtual OSQueueHandle CreateQueue(std::size_t maxElementCount, std::size_t elementSize) = 0;
     virtual bool QueueReceive(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout) = 0;
-    virtual bool QueueReceiveFromISR(OSQueueHandle queue, void* element, bool* taskWoken) = 0;
+    virtual bool QueueReceiveFromISR(OSQueueHandle queue, void* element) = 0;
     virtual bool QueueSend(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout) = 0;
-    virtual bool QueueSendISR(OSQueueHandle queue, void* element, bool* taskWoken) = 0;
+    virtual bool QueueSendISR(OSQueueHandle queue, void* element) = 0;
     virtual void QueueOverwrite(OSQueueHandle queue, const void* element) = 0;
 
     virtual OSPulseHandle CreatePulseAll() = 0;
@@ -54,7 +54,7 @@ struct IOS
 
     virtual void PulseSet(OSPulseHandle handle) = 0;
 
-    virtual void EndSwitchingISR(bool taskWoken) = 0;
+    virtual void EndSwitchingISR() = 0;
 };
 
 class OSReset

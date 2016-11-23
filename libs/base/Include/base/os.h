@@ -323,10 +323,9 @@ class System
      *
      * @param[in] queue Queue handle
      * @param[out] element Buffer for element
-     * @param[out] taskWoken Set to true if task was woken as a result of receiving element from queue
      * @return TRUE if element was received, FALSE on timeout
      */
-    static bool QueueReceiveFromISR(OSQueueHandle queue, void* element, bool* taskWoken);
+    static bool QueueReceiveFromISR(OSQueueHandle queue, void* element);
 
     /**
      * @brief Sends element to queue
@@ -343,10 +342,9 @@ class System
      *
      * @param[in] queue Queue handle
      * @param[in] element Element to send to queue
-     * @param[out] taskWoken Set to true if task was woken as a result of receiving element from queue
      * @return TRUE if element was received, FALSE on timeout
      */
-    static bool QueueSendISR(OSQueueHandle queue, void* element, bool* taskWoken);
+    static bool QueueSendISR(OSQueueHandle queue, void* element);
 
     /**
      * @brief Overwrites element in queue
@@ -359,9 +357,8 @@ class System
     /**
      * @brief Procedure that should be called at the end of interrupt handler
      *
-     * @param[in] taskWoken TRUE if task was woken and context switch should occur
      */
-    static void EndSwitchingISR(bool taskWoken);
+    static void EndSwitchingISR();
 
     /**
      * @brief Creates pulse all event

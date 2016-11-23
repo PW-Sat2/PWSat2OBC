@@ -140,13 +140,9 @@ bool System::QueueReceive(OSQueueHandle queue, void* element, OSTaskTimeSpan tim
     return xQueueReceive(queue, element, ConvertTimeToTicks(timeout)) == pdTRUE;
 }
 
-bool System::QueueReceiveFromISR(OSQueueHandle queue, void* element, bool* taskWoken)
+bool System::QueueReceiveFromISR(OSQueueHandle queue, void* element)
 {
-    BaseType_t tmp;
-
-    bool result = xQueueReceiveFromISR(queue, element, &tmp) == pdTRUE;
-
-    *taskWoken = tmp == pdTRUE;
+    bool result = xQueueReceiveFromISR(queue, element, nullptr) == pdTRUE;
 
     return result;
 }
@@ -156,13 +152,9 @@ bool System::QueueSend(OSQueueHandle queue, void* element, OSTaskTimeSpan timeou
     return xQueueSend(queue, element, ConvertTimeToTicks(timeout)) == pdTRUE;
 }
 
-bool System::QueueSendISR(OSQueueHandle queue, void* element, bool* taskWoken)
+bool System::QueueSendISR(OSQueueHandle queue, void* element)
 {
-    BaseType_t tmp;
-
-    bool result = xQueueSendFromISR(queue, element, &tmp) == pdTRUE;
-
-    *taskWoken = tmp == pdTRUE;
+    bool result = xQueueSendFromISR(queue, element, nullptr) == pdTRUE;
 
     return result;
 }
@@ -172,9 +164,9 @@ void System::QueueOverwrite(OSQueueHandle queue, const void* element)
     xQueueOverwrite(queue, element);
 }
 
-void System::EndSwitchingISR(bool taskWoken)
+void System::EndSwitchingISR()
 {
-    portEND_SWITCHING_ISR(taskWoken);
+    portEND_SWITCHING_ISR(nullptr);
 }
 
 OSPulseHandle System::CreatePulseAll(void)

@@ -183,10 +183,10 @@ void I2CIRQHandler(I2CLowLevelBus* bus)
         return;
     }
 
-    if (!System::QueueSendISR(bus->ResultQueue, &status, NULL))
+    if (!System::QueueSendISR(bus->ResultQueue, &status))
     {
         LOG_ISR(LOG_LEVEL_ERROR, "Error queueing i2c result");
     }
 
-    System::EndSwitchingISR(NULL);
+    System::EndSwitchingISR();
 }
