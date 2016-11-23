@@ -11,6 +11,7 @@ using testing::Eq;
 using testing::_;
 using testing::Invoke;
 using testing::Return;
+using obc::time::TimeProvider;
 
 class SmartWaitTest : public Test
 {
@@ -36,7 +37,7 @@ TEST_F(SmartWaitTest, ShouldReturnImmediatelyIfAlreadyAfterDesiredTime)
     EXPECT_CALL(osMock, PulseWait(_, _)).Times(0);
 
     timeProvider.CurrentTime = TimePointToTimeSpan(TimePointBuild(0, 0, 10, 0, 0));
-    auto result = TimeLongDelayUntil(&timeProvider, TimePointBuild(0, 0, 10, 0, 0));
+    auto result = timeProvider.LongDelayUntil(TimePointBuild(0, 0, 10, 0, 0));
 
     ASSERT_THAT(result, Eq(true));
 }
@@ -54,7 +55,7 @@ TEST_F(SmartWaitTest, ShouldWaitForPulseAndReturnIfDesiredTimeReached)
             return OSResult::Success;
         }));
 
-    auto result = TimeLongDelayUntil(&timeProvider, TimePointBuild(0, 0, 10, 0, 0));
+    auto result = timeProvider.LongDelayUntil(TimePointBuild(0, 0, 10, 0, 0));
 
     ASSERT_THAT(result, Eq(true));
 }
@@ -72,7 +73,7 @@ TEST_F(SmartWaitTest, ShouldWaitForPulseAndReturnIfMissionTimeJumpsOverDesiredTi
             return OSResult::Success;
         }));
 
-    auto result = TimeLongDelayUntil(&timeProvider, TimePointBuild(0, 0, 10, 30, 0));
+    auto result = timeProvider.LongDelayUntil(TimePointBuild(0, 0, 10, 30, 0));
 
     ASSERT_THAT(result, Eq(true));
 }
@@ -81,7 +82,7 @@ TEST_F(SmartWaitTest, ShouldAbortAfterWaitError)
 {
     EXPECT_CALL(osMock, PulseWait(_, _)).WillOnce(Return(OSResult::NotSupported));
 
-    auto result = TimeLongDelay(&timeProvider, TimeSpanFromDays(1));
+    auto result = timeProvider.LongDelay(TimeSpanFromDays(1));
 
     ASSERT_THAT(result, Eq(false));
 }
