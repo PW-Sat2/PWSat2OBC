@@ -395,7 +395,7 @@ void CommObject::PollHardware()
                 }
 
                 LOGF(LOG_LEVEL_INFO, "[comm] Received frame %d bytes. ", (int)frame.Size);
-                this->_frameHandler.HandleFrame(frame);
+                this->_frameHandler.HandleFrame(*this, frame);
             }
         }
     }

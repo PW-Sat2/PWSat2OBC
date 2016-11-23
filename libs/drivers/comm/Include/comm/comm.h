@@ -140,15 +140,30 @@ namespace devices
             std::uint8_t Data[COMM_MAX_FRAME_CONTENTS_SIZE];
         };
 
+        /**
+         * @brief Frame transmitter interface
+         */
+        struct ITransmitFrame
+        {
+            /**
+             * @brief Adds the requested frame to the send queue.
+             *
+             * @param[in] frame Buffer containing frame contents.
+             * @return Operation status, true in case of success, false otherwise.
+             */
+            virtual bool SendFrame(gsl::span<const std::uint8_t> frame) = 0;
+        };
+
         /** Comm driver upper interface. */
         struct IHandleFrame
         {
             /**
              * @brief Method called on each incoming frame.
+             * @param[in] transmitter Reference to object that can be used to send frame back
              * @param[in] frame Reference to structure describing received frame
              *
              */
-            virtual void HandleFrame(CommFrame& frame) = 0;
+            virtual void HandleFrame(ITransmitFrame& transmitter, CommFrame& frame) = 0;
         };
 
         /** Type that contains status of the frame count query. */
@@ -216,7 +231,7 @@ namespace devices
          * @remark Do not access directly the fields of this type, instead use the comm driver interface to
          * perform requested action.
          */
-        class CommObject final
+        class CommObject final : public ITransmitFrame
         {
           public:
             /**

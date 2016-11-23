@@ -13,32 +13,21 @@ namespace communication
     class PingTelecommand final : public telecommands::handling::IHandleTeleCommand
     {
       public:
-        /**
-         * @brief Initializes ping telecommand object
-         * @param[in] comm Low-level comm driver
-         */
-        PingTelecommand(devices::comm::CommObject& comm);
-
-        virtual void Handle(gsl::span<const std::uint8_t> parameters) override;
+        virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
 
         virtual std::uint8_t CommandCode() const override;
-
-      private:
-        /** @brief Low-level comm driver */
-        devices::comm::CommObject& _comm;
     };
 
     /**
      * @brief Object aggregating all supported telecommands
      */
-    class Telecommands
+    class Telecommands final
     {
       public:
         /**
-         * @brief Initializes @ref Telecommands object
-         * @param[in] comm Low-level comm driver
+         * Initializes @ref Telecommands object
          */
-        Telecommands(devices::comm::CommObject& comm);
+        Telecommands();
 
         /**
          * Aggregates all telecommand handlers into single span
@@ -57,7 +46,7 @@ namespace communication
     /**
      * @brief OBC <-> Earth communication
      */
-    struct OBCCommunication
+    struct OBCCommunication final
     {
         /**
          * @brief Initializes @ref OBCCommunication object
