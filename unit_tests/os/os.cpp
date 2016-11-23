@@ -1,13 +1,9 @@
 #include "os.hpp"
 #include <utility>
 
-extern "C" {
-OS System;
-}
-
 static IOS* OSProxy = nullptr;
 
-static OSResult TaskCreate(OSTaskProcedure entryPoint, //
+OSResult System::CreateTask(OSTaskProcedure entryPoint, //
     const char* taskName,
     uint16_t stackSize,
     void* taskParameter,
@@ -24,7 +20,7 @@ static OSResult TaskCreate(OSTaskProcedure entryPoint, //
     }
 }
 
-static void RunScheduller(void)
+void System::RunScheduler(void)
 {
     if (OSProxy != nullptr)
     {
@@ -32,7 +28,7 @@ static void RunScheduller(void)
     }
 }
 
-static void TaskSleep(const OSTaskTimeSpan time)
+void System::SleepTask(const OSTaskTimeSpan time)
 {
     if (OSProxy != nullptr)
     {
@@ -40,7 +36,7 @@ static void TaskSleep(const OSTaskTimeSpan time)
     }
 }
 
-static void TaskSuspend(OSTaskHandle task)
+void System::SuspendTask(OSTaskHandle task)
 {
     if (OSProxy != nullptr)
     {
@@ -48,7 +44,7 @@ static void TaskSuspend(OSTaskHandle task)
     }
 }
 
-static void TaskResume(OSTaskHandle task)
+void System::ResumeTask(OSTaskHandle task)
 {
     if (OSProxy != nullptr)
     {
@@ -56,7 +52,7 @@ static void TaskResume(OSTaskHandle task)
     };
 }
 
-static OSSemaphoreHandle CreateBinarySemaphore()
+OSSemaphoreHandle System::CreateBinarySemaphore()
 {
     if (OSProxy != nullptr)
     {
@@ -66,7 +62,7 @@ static OSSemaphoreHandle CreateBinarySemaphore()
     return nullptr;
 }
 
-static OSResult GiveSemaphore(OSSemaphoreHandle semaphore)
+OSResult System::GiveSemaphore(OSSemaphoreHandle semaphore)
 {
     if (OSProxy != nullptr)
     {
@@ -76,7 +72,7 @@ static OSResult GiveSemaphore(OSSemaphoreHandle semaphore)
     return OSResultInvalidOperation;
 }
 
-static OSResult TakeSemaphore(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout)
+OSResult System::TakeSemaphore(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout)
 {
     if (OSProxy != nullptr)
     {
@@ -86,7 +82,7 @@ static OSResult TakeSemaphore(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeou
     return OSResultInvalidOperation;
 }
 
-static OSEventGroupHandle CreateEventGroup(void)
+OSEventGroupHandle System::CreateEventGroup(void)
 {
     if (OSProxy != nullptr)
     {
@@ -96,7 +92,7 @@ static OSEventGroupHandle CreateEventGroup(void)
     return nullptr;
 }
 
-static OSEventBits EventGroupSetBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange)
+OSEventBits System::EventGroupSetBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange)
 {
     if (OSProxy != nullptr)
     {
@@ -106,7 +102,7 @@ static OSEventBits EventGroupSetBits(OSEventGroupHandle eventGroup, const OSEven
     return 0;
 }
 
-static OSEventBits EventGroupClearBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange)
+OSEventBits System::EventGroupClearBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange)
 {
     if (OSProxy != nullptr)
     {
@@ -116,7 +112,7 @@ static OSEventBits EventGroupClearBits(OSEventGroupHandle eventGroup, const OSEv
     return 0;
 }
 
-static OSEventBits EventGroupWaitForBits(
+OSEventBits System::EventGroupWaitForBits(
     OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, bool waitAll, bool autoReset, const OSTaskTimeSpan timeout)
 {
     if (OSProxy != nullptr)
@@ -127,7 +123,83 @@ static OSEventBits EventGroupWaitForBits(
     return 0;
 }
 
-static OSPulseHandle CreatePulseAll(void)
+void* System::Alloc(size_t size)
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->Alloc(size);
+    }
+
+    return nullptr;
+}
+
+void System::Free(void* ptr)
+{
+    if (OSProxy != nullptr)
+    {
+        OSProxy->Free(ptr);
+    }
+}
+
+OSQueueHandle System::CreateQueue(size_t maxElementCount, size_t elementSize)
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->CreateQueue(maxElementCount, elementSize);
+    }
+
+    return nullptr;
+}
+
+bool System::QueueReceive(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout)
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->QueueReceive(queue, element, timeout);
+    }
+
+    return false;
+}
+
+bool System::QueueReceiveFromISR(OSQueueHandle queue, void* element, bool* taskWoken)
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->QueueReceiveFromISR(queue, element, taskWoken);
+    }
+
+    return false;
+}
+
+bool System::QueueSend(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout)
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->QueueSend(queue, element, timeout);
+    }
+
+    return false;
+}
+
+bool System::QueueSendISR(OSQueueHandle queue, void* element, bool* taskWoken)
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->QueueSendISR(queue, element, taskWoken);
+    }
+
+    return false;
+}
+
+void System::QueueOverwrite(OSQueueHandle queue, const void* element)
+{
+    if (OSProxy != nullptr)
+    {
+        OSProxy->QueueOverwrite(queue, element);
+    }
+}
+
+OSPulseHandle System::CreatePulseAll(void)
 {
     if (OSProxy != nullptr)
     {
@@ -137,7 +209,7 @@ static OSPulseHandle CreatePulseAll(void)
     return 0;
 }
 
-static OSResult WaitForPulse(OSPulseHandle handle, OSTaskTimeSpan timeout)
+OSResult System::PulseWait(OSPulseHandle handle, OSTaskTimeSpan timeout)
 {
     if (OSProxy != nullptr)
     {
@@ -147,11 +219,19 @@ static OSResult WaitForPulse(OSPulseHandle handle, OSTaskTimeSpan timeout)
     return OSResultNotSupported;
 }
 
-static void PulseSet(OSPulseHandle handle)
+void System::PulseSet(OSPulseHandle handle)
 {
     if (OSProxy != nullptr)
     {
         OSProxy->PulseSet(handle);
+    }
+}
+
+void System::EndSwitchingISR(bool taskWoken)
+{
+    if (OSProxy != nullptr)
+    {
+        OSProxy->EndSwitchingISR(taskWoken);
     }
 }
 
@@ -183,21 +263,6 @@ OSReset::~OSReset()
 OSReset InstallProxy(IOS* target)
 {
     OSProxy = target;
-    System.CreateTask = TaskCreate;
-    System.ResumeTask = TaskResume;
-    System.SuspendTask = TaskSuspend;
-    System.SleepTask = TaskSleep;
-    System.RunScheduler = RunScheduller;
-    System.CreateBinarySemaphore = CreateBinarySemaphore;
-    System.GiveSemaphore = GiveSemaphore;
-    System.TakeSemaphore = TakeSemaphore;
-    System.CreateEventGroup = CreateEventGroup;
-    System.EventGroupClearBits = EventGroupClearBits;
-    System.EventGroupSetBits = EventGroupSetBits;
-    System.EventGroupWaitForBits = EventGroupWaitForBits;
-    System.CreatePulseAll = CreatePulseAll;
-    System.PulseSet = PulseSet;
-    System.PulseWait = WaitForPulse;
 
     return OSReset();
 }
