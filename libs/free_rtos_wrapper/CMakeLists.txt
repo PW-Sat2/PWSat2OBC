@@ -1,4 +1,4 @@
-set(NAME os)
+set(NAME free_rtos_wrapper)
 
 set(SOURCES
     os.cpp

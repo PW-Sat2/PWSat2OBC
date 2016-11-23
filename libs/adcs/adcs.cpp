@@ -28,7 +28,7 @@ static void ADCSTask(void* arg)
     {
         ADCSCommand command;
 
-        if (System.QueueReceive(context->CommandQueue, &command, 0))
+        if (System::QueueReceive(context->CommandQueue, &command, 0))
         {
             LOGF(LOG_LEVEL_INFO, "[ADCS]Received command %d", command);
 
@@ -36,19 +36,19 @@ static void ADCSTask(void* arg)
         }
 
         LOGF(LOG_LEVEL_TRACE, "[ADCS]Running ADCS loop. Mode: %d", context->CurrentMode);
-        System.SleepTask(5000);
+        System::SleepTask(5000);
     }
 }
 
 static void ADCSSendCommand(ADCSContext* context, ADCSCommand command)
 {
     LOGF(LOG_LEVEL_INFO, "[ADCS]Commanding to %d", command);
-    System.QueueOverwrite(context->CommandQueue, &command);
+    System::QueueOverwrite(context->CommandQueue, &command);
 }
 
 void InitializeADCS(ADCSContext* context)
 {
     context->Command = ADCSSendCommand;
-    context->CommandQueue = System.CreateQueue(1, sizeof(ADCSCommand));
-    System.CreateTask(ADCSTask, "ADCSTask", 1024, context, 4, &context->Task);
+    context->CommandQueue = System::CreateQueue(1, sizeof(ADCSCommand));
+    System::CreateTask(ADCSTask, "ADCSTask", 1024, context, 4, &context->Task);
 }

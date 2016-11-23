@@ -102,7 +102,7 @@ static void handleIncomingChar(void* arg)
 void TerminalInit(Terminal* terminal, LineIO* stdio)
 {
     terminal->stdio = stdio;
-    if (OS_RESULT_FAILED(System.CreateTask(handleIncomingChar, "terminalIn", 2500, terminal, 4, NULL)))
+    if (OS_RESULT_FAILED(System::CreateTask(handleIncomingChar, "terminalIn", 2500, terminal, 4, NULL)))
     {
         LOG(LOG_LEVEL_ERROR, "Error. Cannot create terminalQueue.");
     }

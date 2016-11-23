@@ -79,7 +79,7 @@ bool CommObject::SendCommandWithResponse(CommAddress address, uint8_t command, s
 
 OSResult CommObject::Initialize()
 {
-    this->_pollingTaskFlags = System.CreateEventGroup();
+    this->_pollingTaskFlags = System::CreateEventGroup();
     if (this->_pollingTaskFlags != NULL)
     {
         return OSResultSuccess;
@@ -100,7 +100,7 @@ bool CommObject::Restart()
 
     if (this->_pollingTaskHandle == NULL)
     {
-        const OSResult result = System.CreateTask(CommObject::CommTask, "COMM Task", 512, this, 4, &this->_pollingTaskHandle);
+        const OSResult result = System::CreateTask(CommObject::CommTask, "COMM Task", 512, this, 4, &this->_pollingTaskHandle);
         if (result != OSResultSuccess)
         {
             LOGF(LOG_LEVEL_ERROR, "[comm] Unable to create background task. Status: 0x%08x.", result);
@@ -115,8 +115,8 @@ bool CommObject::Pause()
 {
     if (this->_pollingTaskHandle != NULL)
     {
-        System.EventGroupSetBits(this->_pollingTaskFlags, TaskFlagPauseRequest);
-        System.EventGroupWaitForBits(this->_pollingTaskFlags, TaskFlagAck, false, true, MAX_DELAY);
+        System::EventGroupSetBits(this->_pollingTaskFlags, TaskFlagPauseRequest);
+        System::EventGroupWaitForBits(this->_pollingTaskFlags, TaskFlagAck, false, true, MAX_DELAY);
     }
 
     return true;
@@ -407,12 +407,12 @@ void CommObject::CommTask(void* param)
     comm->PollHardware();
     for (;;)
     {
-        const OSEventBits result = System.EventGroupWaitForBits(comm->_pollingTaskFlags, TaskFlagPauseRequest, false, true, 10000);
+        const OSEventBits result = System::EventGroupWaitForBits(comm->_pollingTaskFlags, TaskFlagPauseRequest, false, true, 10000);
         if (result == TaskFlagPauseRequest)
         {
             LOG(LOG_LEVEL_WARNING, "Comm task paused");
-            System.EventGroupSetBits(comm->_pollingTaskFlags, TaskFlagAck);
-            System.SuspendTask(NULL);
+            System::EventGroupSetBits(comm->_pollingTaskFlags, TaskFlagAck);
+            System::SuspendTask(NULL);
         }
         else
         {

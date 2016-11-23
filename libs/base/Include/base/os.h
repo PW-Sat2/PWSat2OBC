@@ -5,9 +5,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <cstdint>
 #include "system.h"
-
-EXTERNC_BEGIN
 
 /**
  * @defgroup osal OS Abstraction layer
@@ -165,249 +164,96 @@ typedef void* OSPulseHandle;
 typedef void (*OSTaskProcedure)(OSTaskHandle task);
 
 /**
- * @brief Pointer to procedure that creates new task.
- *
- * @param[in] entryPoint Pointer to task procedure.
- * @param[in] taskName Name of the new task.
- * @param[in] stackSize Size of the new task's stack in words.
- * @param[in] taskParameter Pointer to caller supplied object task context.
- * @param[in] priority New task priority.
- * @param[out] taskHandle Pointer to variable that will be filled with the created task handle.
- * @return Operation status.
- */
-typedef OSResult (*OSTaskCreateProc)(
-    OSTaskProcedure entryPoint, const char* taskName, uint16_t stackSize, void* taskParameter, uint32_t priority, OSTaskHandle* taskHandle);
-
-/**
- * @brief Pointer to the generic system procedure.
- */
-typedef void (*OSGenericProc)(void);
-
-/**
- * @brief Pointer to the procedure that suspends current task execution for specified time period.
- *
- * @param[in] time Time period in ms.
- */
-typedef void (*OSTaskSleepProc)(const OSTaskTimeSpan time);
-
-/**
- * @brief Pointer to procedure that creates semaphore object.
- *
- * @return Semaphore handle on success, NULL otherwise.
- */
-typedef OSSemaphoreHandle (*OSCreateSemaphore)(void);
-
-/**
- * @brief Pointer to procedure that acquires requested semaphore.
- *
- * @param[in] semaphore Handle to the semaphore that should be acquired.
- * @param[in] timeout Operation timeout.
- * @return Operation status.
- */
-typedef OSResult (*OSTakeSemaphore)(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout);
-
-/**
- * @brief Pointer to procedure that releases requested semaphore.
- *
- * @param[in] semaphore Handle to semaphore that should be released.
- * @return Operation status.
- */
-typedef OSResult (*OSGiveSemaphore)(OSSemaphoreHandle semaphore);
-
-/**
- * @brief Pointer to procedure that creates new event group object.
- *
- * @return Event group handle on success, NULL otherwise.
- */
-typedef OSEventGroupHandle (*OSCreateEventGroup)(void);
-
-/**
- * @brief Pointer to procedure that modifies the event group.
- *
- * @param[in] eventGroup Handle to the event group that should be updated.
- * @param[in] bitsToChange Bits that should be set/cleared.
- */
-typedef OSEventBits (*OSEventGroupChangeBits)(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange);
-
-/**
- * @brief Type of the procedure that waits for the specific bits from the event group to be set.
- *
- * @param[in] eventGroup The affected event group handle.
- * @param[in] bitsToWaitFor Bits that the caller is interested in.
- * @param[in] waitAll Flat indicating whether this procedure should return when all requested bits are set.
- * @param[in] autoReset Flag indicating whether the signaled bits should be cleared on function return.
- * @param[in] timeout Operation timeout in ms.
- *
- * @return The value of the event group at the time either the event bits being waited for became set,
- * or the block time expired.
- */
-typedef OSEventBits (*OSEventGroupWaitForBits)(
-    OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, bool waitAll, bool autoReset, const OSTaskTimeSpan timeout);
-
-/**
- * @brief Type of procedure that allocates block of memory from OS heap
- * @param[in] size Size of the block to alloc
- */
-typedef void* (*OSAlloc)(size_t size);
-
-/**
- * @brief Type of procedure that frees block of memory
- * @param[in] ptr Pointer to block to free
- */
-typedef void (*OSFree)(void* ptr);
-
-/**
- * @brief Type of procedure that creates queue
- * @param[in] maxQueueElements Maximum number of elements in queue
- * @param[in] elementSize Size of single element
- * @return Queue handle on success, NULL otherwise
- */
-typedef OSQueueHandle (*OSCreateQueue)(size_t maxQueueElements, size_t elementSize);
-
-/**
- * @brief Type of procedure that receives single elment from queue
- * @param[in] queue Queue handle
- * @param[out] element Buffer for element
- * @param[in] timeout Operation timeout in ms.
- * @return TRUE if element was received, FALSE on timeout
- */
-typedef bool (*OSQueueReceive)(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout);
-
-/**
- * @brief Type of procedure that receives single elment from queue in interrupt handler
- * @param[in] queue Queue handle
- * @param[out] element Buffer for element
-  * @param[out] taskWoken Set to true if task was woken as a result of receiving element from queue
- * @return TRUE if element was received, FALSE on timeout
- */
-typedef bool (*OSQueueReceiveISR)(OSQueueHandle queue, void* element, bool* taskWoken);
-
-/**
- * @brief Type of procedure that sends element to queue
- * @param[in] queue Queue handle
- * @param[in] element Element to send to queue
- * @param[in] timeout Operation timeout in ms
- * @return TRUE if element was received, FALSE on timeout
- */
-typedef bool (*OSQueueSend)(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout);
-
-/**
- * @brief Type of procedure that sends element to queue in interrupt handler
- * @param[in] queue Queue handle
- * @param[in] element Element to send to queue
-  * @param[out] taskWoken Set to true if task was woken as a result of receiving element from queue
- * @return TRUE if element was received, FALSE on timeout
- */
-typedef bool (*OSQueueSendISR)(OSQueueHandle queue, void* element, bool* taskWoken);
-
-/**
- * @brief Overwrites element in queue. Designed for single-element queue
- * @param[in] queue QueueHandle
- * @param[in] element Element to send to queue
- */
-typedef void (*OSQueueOverwrite)(OSQueueHandle queue, const void* element);
-
-/**
- * @brief Type of procedure that causes context switch at the end of interrupt handler
- * @param[in] taskWoken TRUE if task was woken and context switch should occur
- */
-typedef void (*OSEndSwitchingISR)(bool taskWoken);
-
-/**
- * @brief Type of procedure that create pulse all event group
- */
-typedef OSPulseHandle (*OSCreatePulseAll)(void);
-
-/**
- * @brief Type of procedure that waits for pulse
- * @param[in] handle Pulse handle
- * @param[in] timeout Operation timeout in ms
- * @return Wait result
- */
-typedef OSResult (*OSWaitForPulse)(OSPulseHandle handle, OSTaskTimeSpan timeout);
-
-/**
- * @brief Type of procedure that sets pulse event
- * @param[in] handle Pulse handle
- */
-typedef void (*OSPulseSet)(OSPulseHandle handle);
-
-/**
  * @brief Definition of operating system interface.
  */
-typedef struct
+class System
 {
+  public:
     /**
-     * @brief Pointer to function that creates new task.
+     * @brief Creates new task
      *
-     * @see OSTaskCreateProc for the details.
+     * @param[in] entryPoint Pointer to task procedure.
+     * @param[in] taskName Name of the new task.
+     * @param[in] stackSize Size of the new task's stack in words.
+     * @param[in] taskParameter Pointer to caller supplied object task context.
+     * @param[in] priority New task priority.
+     * @param[out] taskHandle Pointer to variable that will be filled with the created task handle.
+     * @return Operation status.
      */
-    OSTaskCreateProc CreateTask;
+    static OSResult CreateTask(OSTaskProcedure entryPoint,
+        const char* taskName,
+        uint16_t stackSize,
+        void* taskParameter,
+        uint32_t priority,
+        OSTaskHandle* taskHandle);
 
     /**
-     * @brief Pointer to function that suspends task execution for specified time period.
-     *
-     * @see OSTaskSleepProc for the details.
+     * @brief Suspends current task execution for specified time period.
+     * @param[in] time Time period in ms.
      */
-    OSTaskSleepProc SleepTask;
+    static void SleepTask(const OSTaskTimeSpan time);
 
     /**
-     * @brief Pointer to function that suspends task execution indefinitely.
+     * @brief Resumes execution of requested task.
      *
-     * @see OSTaskProcedure for the details.
-     * @remark It the task handle is NULL then this function will suspend the calling task.
-     */
-    OSTaskProcedure SuspendTask;
-
-    /**
-     * @brief Pointer to function that resumes execution os requested task.
-     *
-     * @see OSTaskProcedure for the details.
+     * @param[in] task Task handle.
      * @remark This procedure should not be used from within interrupt service routine.
      */
-    OSTaskProcedure ResumeTask;
+    static void ResumeTask(OSTaskHandle task);
 
     /**
-     * @brief Pointer to procedure that runs the system scheduler.
-     */
-    OSGenericProc RunScheduler;
-
-    /**
-     * @brief Pointer to procedure that creates binary semaphore.
+     * @brief Suspend execution of requested task.
      *
-     * @see OSCreateSemaphore for the details.
-     */
-    OSCreateSemaphore CreateBinarySemaphore;
-
-    /**
-     * @brief Pointer to procedure that acquires semaphore.
-     *
-     * @see OSTakeSemaphore for the details.
+     * @param[in] task Task handle.
      * @remark This procedure should not be used from within interrupt service routine.
      */
-    OSTakeSemaphore TakeSemaphore;
+    static void SuspendTask(OSTaskHandle task);
 
     /**
-     * @brief Pointer to procedure that releases semaphore.
+     * @brief Runs the system scheduler.
+     */
+    static void RunScheduler();
+
+    /**
+     * @brief Creates binary semaphore.
      *
-     * @see OSGiveSemaphore for the details.
+     */
+    static OSSemaphoreHandle CreateBinarySemaphore();
+
+    /**
+     * @brief Acquires semaphore.
+     *
+     * @param[in] semaphore Handle to the semaphore that should be acquired.
+     * @param[in] timeout Operation timeout.
+     * @return Operation status.
      * @remark This procedure should not be used from within interrupt service routine.
      */
-    OSGiveSemaphore GiveSemaphore;
+    static OSResult TakeSemaphore(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout);
 
     /**
-     * @brief Pointer to procedure that creates event group object.
+     * @brief Releases semaphore.
      *
-     * @see OSCreateEventGroup for the details.
+     * @param[in] semaphore Handle to semaphore that should be released.
+     * @return Operation status.
+     * @remark This procedure should not be used from within interrupt service routine.
      */
-    OSCreateEventGroup CreateEventGroup;
+    static OSResult GiveSemaphore(OSSemaphoreHandle semaphore);
 
     /**
-     * @brief Pointer to procedure that sets specific bits in the event group.
+     * @brief Creates event group object.
      *
-     * @see OSEventGroupChangeBits for the details.
+     * @return Event group handle on success, NULL otherwise.
+     */
+    static OSEventGroupHandle CreateEventGroup();
+
+    /**
+     * @brief Sets specific bits in the event group.
+     *
+     * @param[in] eventGroup Handle to the event group that should be updated.
+     * @param[in] bitsToChange Bits that should be set.
      * @returns The value of the event group at the time the call to xEventGroupSetBits() returns.
-     * There are two reasons why the returned value might have the bits specified by the uxBitsToSet
+     *
+     * There are two reasons why the returned value might have the bits specified by the bitsToChange
      * parameter cleared:
      *  - If setting a bit results in a task that was waiting for the bit leaving the blocked state
      *  then it is possible the bit will have been cleared automatically.
@@ -416,119 +262,129 @@ typedef struct
      *  the call to EventGroupSetBits() returns.
      * @remark This procedure should not be used from within interrupt service routine.
      */
-    OSEventGroupChangeBits EventGroupSetBits;
+    static OSEventBits EventGroupSetBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange);
 
     /**
-     * @brief Pointer to procedure that clears specific bits in the event group.
+     * @brief Clears specific bits in the event group.
      *
-     * @see OSEventGroupChangeBits for the details.
-     * @return The value of the event group before the specified bits were cleared.
-     * @remark This procedure should not be used from within interrupt service routine.
+     * @param[in] eventGroup The affected event group handle.
+     * @param[in] bitsToWaitFor Bits that the caller is interested in.
+     * @param[in] waitAll Flat indicating whether this procedure should return when all requested bits are set.
+     * @param[in] autoReset Flag indicating whether the signaled bits should be cleared on function return.
+     * @param[in] timeout Operation timeout in ms.
      */
-    OSEventGroupChangeBits EventGroupClearBits;
+    static OSEventBits EventGroupClearBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange);
 
     /**
-     * @brief Pointer to procedure that suspends current task execution until the
+     * @brief Suspends current task execution until the
      * specific bits in the event group are set.
      *
      * @see OSEventGroupWaitForBits for the details.
      */
-    OSEventGroupWaitForBits EventGroupWaitForBits;
+    static OSEventBits EventGroupWaitForBits(
+        OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, bool waitAll, bool autoReset, const OSTaskTimeSpan timeout);
 
     /**
-     * @brief Pointer to procedure that allocates block of memory from OS heap
+     * @brief Allocates block of memory from OS heap
      *
-     * @see OSAlloc
+     * @param[in] size Size of the block to alloc
      */
-    OSAlloc Alloc;
+    static void* Alloc(std::size_t size);
 
     /**
-     * @brief Pointer to procedure that frees block of memory
-     *
+     * @brief Frees block of memory
+     * @param[in] ptr Pointer to block to free
      * @see OSFree
      */
-    OSFree Free;
+    static void Free(void* ptr);
 
     /**
-     * @brief Pointer to procedure that creates queue
+     * @brief Creates queue
      *
-     * @see OSCreateQueue
+     * @param[in] maxQueueElements Maximum number of elements in queue
+     * @param[in] elementSize Size of single element
+     * @return Queue handle on success, NULL otherwise
      */
-    OSCreateQueue CreateQueue;
+    static OSQueueHandle CreateQueue(std::size_t maxQueueElements, std::size_t elementSize);
 
     /**
-     * @brief Pointer to procedure that receives element form queue
+     * @brief Receives element form queue
      *
-     * @see OSQueueReceive
+     * @param[in] queue Queue handle
+     * @param[out] element Buffer for element
+     * @param[in] timeout Operation timeout in ms.
+     * @return TRUE if element was received, FALSE on timeout
      */
-    OSQueueReceive QueueReceive;
+    static bool QueueReceive(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout);
 
     /**
-     * @brief Pointer to procedure that receives element form queue in interrupt handler
+     * @brief Receives element form queue in interrupt handler
      *
-     * @see OSQueueReceiveISR
+     * @param[in] queue Queue handle
+     * @param[out] element Buffer for element
+     * @param[out] taskWoken Set to true if task was woken as a result of receiving element from queue
+     * @return TRUE if element was received, FALSE on timeout
      */
-    OSQueueReceiveISR QueueReceiveFromISR;
+    static bool QueueReceiveFromISR(OSQueueHandle queue, void* element, bool* taskWoken);
 
     /**
-     * @brief Pointer to procedure that sends element to queue
+     * @brief Sends element to queue
      *
-     * @see OSQueueSend
+     * @param[in] queue Queue handle
+     * @param[in] element Element to send to queue
+     * @param[in] timeout Operation timeout in ms
+     * @return TRUE if element was received, FALSE on timeout
      */
-    OSQueueSend QueueSend;
+    static bool QueueSend(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout);
 
     /**
-     * @brief Pointer to procedure that sends element to queue in interrupt handler
+     * @brief Sends element to queue in interrupt handler
      *
-     * @see OSQueueSendISR
+     * @param[in] queue Queue handle
+     * @param[in] element Element to send to queue
+     * @param[out] taskWoken Set to true if task was woken as a result of receiving element from queue
+     * @return TRUE if element was received, FALSE on timeout
      */
-    OSQueueSendISR QueueSendISR;
+    static bool QueueSendISR(OSQueueHandle queue, void* element, bool* taskWoken);
 
     /**
-     * @brief Pointer to procedure that overwrites element in queue
+     * @brief Overwrites element in queue
      *
-     * @see OSQueueOverwrite
+     * @param[in] queue QueueHandle
+     * @param[in] element Element to send to queue
      */
-    OSQueueOverwrite QueueOverwrite;
+    static void QueueOverwrite(OSQueueHandle queue, const void* element);
 
     /**
-     * @brief Pointer to procedure that should be called at the end of interrupt handler
+     * @brief Procedure that should be called at the end of interrupt handler
      *
-     * @see OSEndSwitchingISR
+     * @param[in] taskWoken TRUE if task was woken and context switch should occur
      */
-    OSEndSwitchingISR EndSwitchingISR;
+    static void EndSwitchingISR(bool taskWoken);
 
     /**
-     * @brief Pointer to procedure that creates pulse all event
+     * @brief Creates pulse all event
      *
-     * @see OSCreatePulseAll
      */
-    OSCreatePulseAll CreatePulseAll;
+    static OSPulseHandle CreatePulseAll();
 
     /**
-     * @brief Pointer to procedure that waits for pulse
+     * @brief Waits for pulse
      *
-     * @see OSWaitForPulse
+     * @param[in] handle Pulse handle
+     * @param[in] timeout Operation timeout in ms
+     * @return Wait result
      */
-    OSWaitForPulse PulseWait;
+    static OSResult PulseWait(OSPulseHandle handle, OSTaskTimeSpan timeout);
 
     /**
-     * @brief Pointer to procedure that sets pulse event
+     * @brief Sets pulse event
      *
-     * @see OSWaitForPulse
+     * @param[in] handle Pulse handle
      */
-    OSPulseSet PulseSet;
-} OS;
-
-/**
- * @brief Initializes the system abstraction layer.
- */
-OSResult OSSetup(void);
-
-/** @brief System interface. */
-extern OS System;
+    static void PulseSet(OSPulseHandle handle);
+};
 
 /** @}*/
-EXTERNC_END
 
 #endif

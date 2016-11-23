@@ -191,7 +191,7 @@ static void ObcInitTask(void* param)
 
     LOG(LOG_LEVEL_INFO, "Intialized");
     Main.initialized = true;
-    System.SuspendTask(NULL);
+    System::SuspendTask(NULL);
 }
 
 void DummyFrameHandler::HandleFrame(CommObject& comm, CommFrame& frame)
@@ -306,8 +306,6 @@ int main(void)
     LogInit(LOG_LEVEL_DEBUG);
     InitSwoEndpoint();
 
-    OSSetup();
-
     DMADRV_Init();
 
     LeuartLineIOInit(&Main.IO);
@@ -335,11 +333,11 @@ int main(void)
     GPIO_PinOutSet(LED_PORT, LED0);
     GPIO_PinOutSet(LED_PORT, LED1);
 
-    System.CreateTask(BlinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
-    // System.CreateTask(ADXRS, "ADXRS", 512, NULL, tskIDLE_PRIORITY + 2, NULL);
-    System.CreateTask(ObcInitTask, "Init", 512, &Main, tskIDLE_PRIORITY + 15, &Main.initTask);
-    System.CreateTask(SmartWaitTask, "SmartWait", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
-    System.RunScheduler();
+    System::CreateTask(BlinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
+    // System::CreateTask(ADXRS, "ADXRS", 512, NULL, tskIDLE_PRIORITY + 2, NULL);
+    System::CreateTask(ObcInitTask, "Init", 512, &Main, tskIDLE_PRIORITY + 15, &Main.initTask);
+    System::CreateTask(SmartWaitTask, "SmartWait", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
+    System::RunScheduler();
 
     GPIO_PinOutToggle(LED_PORT, LED0);
 
