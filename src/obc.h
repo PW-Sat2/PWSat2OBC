@@ -47,7 +47,7 @@ struct OBC
     YaffsNANDDriver rootDeviceDriver;
 
     /** @brief Persistent timer that measures mission time. */
-    TimeProvider timeProvider;
+    obc::time::TimeProvider timeProvider;
 
     /** @brief Available I2C buses */
     struct

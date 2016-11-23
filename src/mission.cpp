@@ -41,7 +41,7 @@ static SystemStateUpdateResult UpdateTime(SystemState* state, void* param)
 {
     UNREFERENCED_PARAMETER(param);
 
-    TimeGetCurrentMissionTime(&Main.timeProvider, &state->Time);
+    Main.timeProvider.GetCurrentMissionTime(&state->Time);
 
     return SystemStateUpdateOK;
 }
@@ -108,7 +108,7 @@ static void MissionControlTask(void* param)
     {
         NormalModeLoop(&state, missionState);
 
-        TimeLongDelay(&Main.timeProvider, TimeSpanFromSeconds(10));
+        Main.timeProvider.LongDelay(TimeSpanFromSeconds(10));
     }
 }
 
