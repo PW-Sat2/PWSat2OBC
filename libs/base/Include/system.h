@@ -1,7 +1,6 @@
 #ifndef SRC_SYSTEM_H_
 #define SRC_SYSTEM_H_
 
-#include <stddef.h>
 #include <type_traits>
 
 /**
@@ -44,11 +43,9 @@
 
 #define HAS_FLAG(value, flag) (((value) & (flag)) == (flag))
 
-size_t RoundToMultiply(size_t value, size_t base);
-
 template <typename Enum> typename std::underlying_type_t<Enum> num(Enum v)
 {
-    return static_cast<typename std::underlying_type_t<Enum>>(v);
+    return static_cast<std::underlying_type_t<Enum>>(v);
 }
 
 #endif

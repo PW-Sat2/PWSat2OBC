@@ -3,7 +3,6 @@
 #include <em_aes.h>
 
 #include "logger/logger.h"
-#include "platform.h"
 #include "telecommand_handling.h"
 
 using devices::comm::CommObject;
