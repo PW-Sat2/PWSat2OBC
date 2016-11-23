@@ -29,8 +29,13 @@ struct TeleCommandDepsMock : public IDecryptFrame, public IDecodeTelecommand
 
 struct TeleCommandHandlerMock : public IHandleTeleCommand
 {
-    MOCK_METHOD1(Handle, void(gsl::span<const std::uint8_t> parameters));
+    MOCK_METHOD2(Handle, void(ITransmitFrame&, gsl::span<const std::uint8_t> parameters));
     MOCK_CONST_METHOD0(CommandCode, uint8_t());
+};
+
+struct TransmitFrameMock : public ITransmitFrame
+{
+    MOCK_METHOD1(SendFrame, bool(gsl::span<const uint8_t>));
 };
 
 class TeleCommandHandlingTest : public Test
@@ -41,6 +46,7 @@ class TeleCommandHandlingTest : public Test
   protected:
     IncomingTelecommandHandler handling;
     NiceMock<TeleCommandDepsMock> deps;
+    TransmitFrameMock transmitFrame;
 };
 
 TeleCommandHandlingTest::TeleCommandHandlingTest() : handling(deps, deps, gsl::span<IHandleTeleCommand*, 0>())
@@ -55,7 +61,7 @@ TEST_F(TeleCommandHandlingTest, IncomingFrameShouldBeDecryptedAndDecoded)
     EXPECT_CALL(this->deps, Decrypt(_, _, _)).WillOnce(Return(DecryptStatus::Success));
     EXPECT_CALL(this->deps, Decode(_, _, _)).WillOnce(Return(DecodeFrameStatus::Success));
 
-    this->handling.HandleFrame(frame);
+    this->handling.HandleFrame(this->transmitFrame, frame);
 }
 
 TEST_F(TeleCommandHandlingTest, HandlerShouldBeCalledForKnownTelecommand)
@@ -83,14 +89,14 @@ TEST_F(TeleCommandHandlingTest, HandlerShouldBeCalledForKnownTelecommand)
         }));
 
     NiceMock<TeleCommandHandlerMock> someCommand;
-    EXPECT_CALL(someCommand, Handle(_));
+    EXPECT_CALL(someCommand, Handle(_, _));
     EXPECT_CALL(someCommand, CommandCode()).WillRepeatedly(Return(static_cast<uint8_t>('A')));
 
     IHandleTeleCommand* commands[] = {&someCommand};
 
     IncomingTelecommandHandler handler(deps, deps, gsl::span<IHandleTeleCommand*>(commands));
 
-    handler.HandleFrame(frame);
+    handler.HandleFrame(this->transmitFrame, frame);
 }
 
 TEST_F(TeleCommandHandlingTest, WhenDecryptionFailsShouldNotAttemptFrameDecoding)
@@ -101,7 +107,7 @@ TEST_F(TeleCommandHandlingTest, WhenDecryptionFailsShouldNotAttemptFrameDecoding
 
     CommFrame frame;
 
-    this->handling.HandleFrame(frame);
+    this->handling.HandleFrame(this->transmitFrame, frame);
 }
 
 TEST_F(TeleCommandHandlingTest, WhenDecodingFrameShouldNotAttemptInvokingHandler)
@@ -117,7 +123,7 @@ TEST_F(TeleCommandHandlingTest, WhenDecodingFrameShouldNotAttemptInvokingHandler
             }));
 
     NiceMock<TeleCommandHandlerMock> someCommand;
-    EXPECT_CALL(someCommand, Handle(_)).Times(0);
+    EXPECT_CALL(someCommand, Handle(_, _)).Times(0);
 
     IHandleTeleCommand* telecommands[] = {&someCommand};
 
@@ -125,5 +131,5 @@ TEST_F(TeleCommandHandlingTest, WhenDecodingFrameShouldNotAttemptInvokingHandler
 
     CommFrame frame;
 
-    handler.HandleFrame(frame);
+    handler.HandleFrame(this->transmitFrame, frame);
 }
