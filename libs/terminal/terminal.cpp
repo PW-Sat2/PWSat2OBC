@@ -74,10 +74,8 @@ static void terminalHandleCommand(Terminal* terminal, char* buffer)
     }
 }
 
-static void handleIncomingChar(void* arg)
+static void handleIncomingChar(Terminal& terminal)
 {
-    Terminal* terminal = (Terminal*)arg;
-
     bool firstRun = true;
 
     while (1)
@@ -86,23 +84,24 @@ static void handleIncomingChar(void* arg)
 
         if (!firstRun)
         {
-            terminalSendPrefix(terminal);
+            terminalSendPrefix(&terminal);
         }
 
         firstRun = false;
 
-        terminal->stdio->Readline(terminal->stdio, input_buffer, COUNT_OF(input_buffer));
+        terminal.stdio->Readline(terminal.stdio, input_buffer, COUNT_OF(input_buffer));
 
         LOGF(LOG_LEVEL_INFO, "Received line %s", input_buffer);
 
-        terminalHandleCommand(terminal, input_buffer);
+        terminalHandleCommand(&terminal, input_buffer);
     }
 }
 
 void TerminalInit(Terminal* terminal, LineIO* stdio)
 {
     terminal->stdio = stdio;
-    if (OS_RESULT_FAILED(System::CreateTask(handleIncomingChar, "terminalIn", 2500, terminal, 4, NULL)))
+
+    if (OS_RESULT_FAILED(System::CreateTask(handleIncomingChar, *terminal, "terminalIn", 2500, 4)))
     {
         LOG(LOG_LEVEL_ERROR, "Error. Cannot create terminalQueue.");
     }

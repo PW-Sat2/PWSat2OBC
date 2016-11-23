@@ -188,6 +188,14 @@ class System
         std::uint32_t priority,
         OSTaskHandle* taskHandle);
 
+    template <typename Param>
+    static OSResult CreateTask(void (*entryPoint)(Param&),
+        Param& param,
+        const char* taskName,
+        std::uint16_t stackSize,
+        std::uint32_t priority,
+        OSTaskHandle* taskHandle = nullptr);
+
     /**
      * @brief Suspends current task execution for specified time period.
      * @param[in] time Time period in ms.
@@ -382,6 +390,19 @@ class System
      */
     static void PulseSet(OSPulseHandle handle);
 };
+
+template <typename Param>
+OSResult System::CreateTask(void (*entryPoint)(Param&),
+    Param& param,
+    const char* taskName,
+    std::uint16_t stackSize,
+    std::uint32_t priority,
+    OSTaskHandle* taskHandle)
+{
+    auto entryPointPtr = reinterpret_cast<OSTaskProcedure>(entryPoint);
+
+    return System::CreateTask(entryPointPtr, taskName, stackSize, &param, priority, taskHandle);
+}
 
 /** @}*/
 
