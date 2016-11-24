@@ -26,14 +26,14 @@ typedef struct
 
     struct
     {
-        /** @brief Flag indicating that antenna deployment process has been completed*/
+        /** @brief Flag indicating that antenna deployment process has been completed. */
         bool Deployed;
 
-        /** @brief Array of flags containing antenna deloyment state. */
+        /** @brief Array of flags containing antenna deployment state. */
         bool DeploymentState[4];
     } Antenna;
 
-    /** @brief Flag indicating that sail has been openned */
+    /** @brief Flag indicating that sail has been opened */
     bool SailOpened;
 
     /** @brief ADCS-related state */

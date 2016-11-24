@@ -1,6 +1,8 @@
 #ifndef SRC_SYSTEM_H_
 #define SRC_SYSTEM_H_
 
+#include <cstddef>
+
 /**
  * @brief Macro for stating that routine parameter is not used.
  */
@@ -22,7 +24,15 @@
 /**
  * @brief Macro that calculates the number of elements in an array.
  */
-#define COUNT_OF(x) (sizeof(x) / sizeof(*(x)))
+#define COUNT_OF(x) count_of(x)
+
+/**
+ * @brief Helper function that returns number of elements from an array.
+ */
+template <typename T, std::size_t size> constexpr inline std::size_t count_of(T (&)[size])
+{
+    return size;
+}
 
 /**
  * @brief Tells GCC to support unaligned access

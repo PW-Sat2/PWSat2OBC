@@ -7,8 +7,10 @@
 #include "state/state.h"
 
 /** @brief Object with all state-related descriptors */
-typedef struct
+struct MissionState
 {
+    MissionState(OBC& obc);
+
     /** @brief (Mock) Flag telling whether sail should be marked as opened by update descriptor */
     bool SailOpened;
 
@@ -27,8 +29,8 @@ typedef struct
     /** @brief Time update descriptor */
     SystemStateUpdateDescriptor UpdateTime;
 
-    AntennaMissionState antennaMission;
-} MissionState;
+    mission::antenna::AntennaMissionState antennaMission;
+};
 
 /**
  * @brief Initializes mission-control task

@@ -8,6 +8,10 @@
 #include "system.h"
 #include "time/TimePoint.h"
 
+MissionState::MissionState(OBC& obc) : antennaMission(obc.antennaDriver)
+{
+}
+
 /**
  * @brief Object describing which descriptors are available in specific mode
  */
@@ -59,9 +63,9 @@ static void Loop(SystemState* state, ModeDescriptor* mode)
     SystemDispatchActions(state, mode->runnableActions, runnableCount);
 }
 
-static SystemStateUpdateDescriptor NormalModeUpdateDescriptors[3] = {0};
+static SystemStateUpdateDescriptor NormalModeUpdateDescriptors[3] = {};
 
-static SystemActionDescriptor NormalModeActionDescriptors[2] = {0};
+static SystemActionDescriptor NormalModeActionDescriptors[2] = {};
 
 static void NormalModeLoop(SystemState* state, MissionState* missionState)
 {
@@ -105,8 +109,7 @@ static void TimeInitializeUpdateDescriptor(SystemStateUpdateDescriptor* descript
 
 void InitializeMission(MissionState* missionState, OBC* obc)
 {
-    AntennaInitializeState(&obc->antennaDriver, &missionState->antennaMission);
-
+    UNREFERENCED_PARAMETER(obc);
     // Update descriptors
     AntennaInitializeUpdateDescriptor(&missionState->antennaMission, &NormalModeUpdateDescriptors[0]);
     TimeInitializeUpdateDescriptor(&NormalModeUpdateDescriptors[1]);

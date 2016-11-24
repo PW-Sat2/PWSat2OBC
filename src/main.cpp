@@ -45,7 +45,7 @@ using devices::comm::CommObject;
 using devices::comm::CommFrame;
 
 OBC Main;
-MissionState Mission;
+MissionState Mission(Main);
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 

@@ -44,7 +44,7 @@ enum AntennaChannel
 /**
  * @brief Structure that contains deployment status of all available antennas.
  */
-typedef struct
+struct AntennaDeploymentStatus
 {
     /**
      * @brief This array contains information whether specific antenna has already
@@ -73,7 +73,7 @@ typedef struct
      * @brief Value indicating whether the deployment system is currently active.
      */
     bool DeploymentSystemArmed;
-} AntennaDeploymentStatus;
+};
 
 struct AntennaMiniportDriver;
 struct AntennaDriver;

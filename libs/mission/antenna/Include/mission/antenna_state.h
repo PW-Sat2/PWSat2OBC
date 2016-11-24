@@ -1,49 +1,105 @@
 #ifndef LIBS_MISSION_INCLUDE_MISSION_ANTENNA_H_
 #define LIBS_MISSION_INCLUDE_MISSION_ANTENNA_H_
 
-#include <stdint.h>
+#include <cstdint>
 #include "antenna/antenna.h"
 #include "base/os.h"
 #include "state/state.h"
 
-EXTERNC_BEGIN
-
-typedef struct
+namespace mission
 {
-    bool overrideState;
-    bool inProgress;
-    uint8_t stepNumber;
-    uint8_t retryCount;
-    AntennaDriver* driver;
-} AntennaMissionState;
+    namespace antenna
+    {
+        class AntennaMissionState final
+        {
+          public:
+            AntennaMissionState(AntennaDriver& antennaDriver);
 
-void AntennaInitializeActionDescriptor(AntennaMissionState* stateDescriptor,
-    SystemActionDescriptor* missionDescriptor //
-    );
+            bool IsDeploymentInProgress() const;
 
-void AntennaInitializeState(AntennaDriver* driver,
-    AntennaMissionState* antennaState //
-    );
+            bool IsDeploymentPartFinished() const;
 
-void AntennaInitializeUpdateDescriptor(AntennaMissionState* stateDescriptor,
-    SystemStateUpdateDescriptor* descriptor //
-    );
+            bool IsFinished() const;
 
-static void AntennaDeploymentRestart(AntennaMissionState* stateDescriptor);
+            bool OverrideState() const;
 
-static void AntennaDeploymentOverride(AntennaMissionState* stateDescriptor);
+            std::uint8_t StepNumber() const;
 
-inline void AntennaDeploymentRestart(AntennaMissionState* stateDescriptor)
-{
-    stateDescriptor->stepNumber = 0;
-    stateDescriptor->retryCount = 0;
+            void NextStep();
+
+            void Retry(std::uint8_t limit);
+
+            AntennaDriver& Driver();
+
+            void OverrideDeploymentState();
+
+            void OverrideStep(std::uint8_t stepNumber);
+
+            void Update(const AntennaDeploymentStatus& status);
+
+            void Restart();
+
+            static std::uint8_t StepCount();
+
+            static std::uint8_t DeploymentStepCount();
+
+          private:
+            bool overrideState;
+            bool inProgress;
+            uint8_t stepNumber;
+            uint8_t retryCount;
+            AntennaDriver& driver;
+        };
+
+        inline bool AntennaMissionState::IsDeploymentInProgress() const
+        {
+            return this->inProgress;
+        }
+
+        inline bool AntennaMissionState::OverrideState() const
+        {
+            return this->overrideState;
+        }
+
+        inline std::uint8_t AntennaMissionState::StepNumber() const
+        {
+            return this->stepNumber;
+        }
+
+        inline void AntennaMissionState::NextStep()
+        {
+            ++this->stepNumber;
+        }
+
+        inline AntennaDriver& AntennaMissionState::Driver()
+        {
+            return this->driver;
+        }
+
+        inline void AntennaMissionState::OverrideDeploymentState()
+        {
+            this->overrideState = true;
+        }
+
+        inline void AntennaMissionState::OverrideStep(std::uint8_t stepNumber)
+        {
+            this->stepNumber = stepNumber;
+            this->retryCount = 0;
+        }
+
+        inline void AntennaMissionState::Restart()
+        {
+            OverrideStep(0);
+        }
+
+        void AntennaInitializeActionDescriptor(AntennaMissionState* stateDescriptor,
+            SystemActionDescriptor* missionDescriptor //
+            );
+
+        void AntennaInitializeUpdateDescriptor(AntennaMissionState* stateDescriptor,
+            SystemStateUpdateDescriptor* descriptor //
+            );
+    }
 }
-
-inline void AntennaDeploymentOverride(AntennaMissionState* stateDescriptor)
-{
-    stateDescriptor->overrideState = true;
-}
-
-EXTERNC_END
 
 #endif /* LIBS_MISSION_INCLUDE_MISSION_ANTENNA_H_ */
