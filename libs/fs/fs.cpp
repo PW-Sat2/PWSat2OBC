@@ -10,7 +10,7 @@ static inline OSResult YaffsTranslateError(int error)
 {
     if (error != -1)
     {
-        return OSResultSuccess;
+        return OSResult::Success;
     }
     else
     {
@@ -79,7 +79,7 @@ static FSDirectoryOpenResult YaffsOpenDirectory(FileSystem* fileSystem, const ch
     UNREFERENCED_PARAMETER(fileSystem);
     yaffs_DIR* status = yaffs_opendir(directory);
     FSDirectoryOpenResult result;
-    result.Status = status != NULL ? OSResultSuccess : ((OSResult)yaffs_get_error());
+    result.Status = status != NULL ? OSResult::Success : ((OSResult)yaffs_get_error());
     result.Handle = status;
     return result;
 }

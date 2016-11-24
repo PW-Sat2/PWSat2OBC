@@ -47,11 +47,11 @@ static OSResult HardReset(struct AntennaDriver* driver)
         (driver->secondaryChannel.status == ANTENNA_PORT_FAILURE)  //
         )
     {
-        return OSResultIOError;
+        return OSResult::IOError;
     }
     else
     {
-        return OSResultSuccess;
+        return OSResult::Success;
     }
 }
 

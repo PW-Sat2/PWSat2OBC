@@ -46,7 +46,7 @@ FsMock::FsMock()
 FSFileOpenResult MakeOpenedFile(int handle)
 {
     FSFileOpenResult result;
-    result.Status = OSResultSuccess;
+    result.Status = OSResult::Success;
     result.Handle = handle;
     return result;
 }
@@ -70,7 +70,7 @@ FSIOResult MakeFSIOResult(OSResult status)
 FSIOResult MakeFSIOResult(int bytesTransfered)
 {
     FSIOResult result;
-    result.Status = OSResultSuccess;
+    result.Status = OSResult::Success;
     result.BytesTransferred = bytesTransfered;
     return result;
 }

@@ -30,11 +30,11 @@ OSResult System::CreateTask(OSTaskProcedure entryPoint, //
     const BaseType_t result = xTaskCreate(entryPoint, taskName, stackSize, taskParameter, priority, taskHandle);
     if (result != pdPASS)
     {
-        return OSResultNotEnoughMemory;
+        return OSResult::NotEnoughMemory;
     }
     else
     {
-        return OSResultSuccess;
+        return OSResult::Success;
     }
 }
 
@@ -68,11 +68,11 @@ OSResult System::TakeSemaphore(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeo
     const BaseType_t result = xSemaphoreTake(semaphore, ConvertTimeToTicks(timeout));
     if (result != pdPASS)
     {
-        return OSResultTimeout;
+        return OSResult::Timeout;
     }
     else
     {
-        return OSResultSuccess;
+        return OSResult::Success;
     }
 }
 
@@ -81,11 +81,11 @@ OSResult System::GiveSemaphore(OSSemaphoreHandle semaphore)
     const BaseType_t result = xSemaphoreGive(semaphore);
     if (result != pdPASS)
     {
-        return OSResultInvalidOperation;
+        return OSResult::InvalidOperation;
     }
     else
     {
-        return OSResultSuccess;
+        return OSResult::Success;
     }
 }
 
@@ -180,11 +180,11 @@ OSResult System::PulseWait(OSPulseHandle handle, OSTaskTimeSpan timeout)
 
     if (result == PULSE_ALL_BITS)
     {
-        return OSResultSuccess;
+        return OSResult::Success;
     }
     else
     {
-        return OSResultTimeout;
+        return OSResult::Timeout;
     }
 }
 

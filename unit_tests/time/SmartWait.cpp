@@ -27,8 +27,8 @@ SmartWaitTest::SmartWaitTest()
 {
     osGuard = InstallProxy(&osMock);
 
-    EXPECT_CALL(osMock, TakeSemaphore(_, _)).WillRepeatedly(Return(OSResultSuccess));
-    EXPECT_CALL(osMock, GiveSemaphore(_)).WillRepeatedly(Return(OSResultSuccess));
+    EXPECT_CALL(osMock, TakeSemaphore(_, _)).WillRepeatedly(Return(OSResult::Success));
+    EXPECT_CALL(osMock, GiveSemaphore(_)).WillRepeatedly(Return(OSResult::Success));
 }
 
 TEST_F(SmartWaitTest, ShouldReturnImmediatelyIfAlreadyAfterDesiredTime)
@@ -51,7 +51,7 @@ TEST_F(SmartWaitTest, ShouldWaitForPulseAndReturnIfDesiredTimeReached)
             UNUSED(handle, timeout);
 
             timeProvider.CurrentTime = TimeSpanAdd(timeProvider.CurrentTime, TimeSpanFromMinutes(1));
-            return OSResultSuccess;
+            return OSResult::Success;
         }));
 
     auto result = TimeLongDelayUntil(&timeProvider, TimePointBuild(0, 0, 10, 0, 0));
@@ -69,7 +69,7 @@ TEST_F(SmartWaitTest, ShouldWaitForPulseAndReturnIfMissionTimeJumpsOverDesiredTi
             UNUSED(handle, timeout);
 
             timeProvider.CurrentTime = TimeSpanAdd(timeProvider.CurrentTime, TimeSpanFromMinutes(1));
-            return OSResultSuccess;
+            return OSResult::Success;
         }));
 
     auto result = TimeLongDelayUntil(&timeProvider, TimePointBuild(0, 0, 10, 30, 0));
@@ -79,7 +79,7 @@ TEST_F(SmartWaitTest, ShouldWaitForPulseAndReturnIfMissionTimeJumpsOverDesiredTi
 
 TEST_F(SmartWaitTest, ShouldAbortAfterWaitError)
 {
-    EXPECT_CALL(osMock, PulseWait(_, _)).WillOnce(Return(OSResultNotSupported));
+    EXPECT_CALL(osMock, PulseWait(_, _)).WillOnce(Return(OSResult::NotSupported));
 
     auto result = TimeLongDelay(&timeProvider, TimeSpanFromDays(1));
 

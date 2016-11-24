@@ -16,7 +16,7 @@ OSResult System::CreateTask(OSTaskProcedure entryPoint, //
     }
     else
     {
-        return OSResultNotSupported;
+        return OSResult::NotSupported;
     }
 }
 
@@ -69,7 +69,7 @@ OSResult System::GiveSemaphore(OSSemaphoreHandle semaphore)
         return OSProxy->GiveSemaphore(semaphore);
     }
 
-    return OSResultInvalidOperation;
+    return OSResult::InvalidOperation;
 }
 
 OSResult System::TakeSemaphore(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout)
@@ -79,7 +79,7 @@ OSResult System::TakeSemaphore(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeo
         return OSProxy->TakeSemaphore(semaphore, timeout);
     }
 
-    return OSResultInvalidOperation;
+    return OSResult::InvalidOperation;
 }
 
 OSEventGroupHandle System::CreateEventGroup(void)
@@ -216,7 +216,7 @@ OSResult System::PulseWait(OSPulseHandle handle, OSTaskTimeSpan timeout)
         return OSProxy->PulseWait(handle, timeout);
     }
 
-    return OSResultNotSupported;
+    return OSResult::NotSupported;
 }
 
 void System::PulseSet(OSPulseHandle handle)

@@ -23,6 +23,8 @@ FSFileOpenResult MakeOpenedFile(OSResult result);
 
 FSIOResult MakeFSIOResult(int bytesTransfered);
 
+FSIOResult MakeFSIOResult(OSResult result);
+
 FSIOResult MakeFSIOResult(OSResult result, int bytesTransfered);
 
 #endif

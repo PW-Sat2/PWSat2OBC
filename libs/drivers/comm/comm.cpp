@@ -82,11 +82,11 @@ OSResult CommObject::Initialize()
     this->_pollingTaskFlags = System::CreateEventGroup();
     if (this->_pollingTaskFlags != NULL)
     {
-        return OSResultSuccess;
+        return OSResult::Success;
     }
     else
     {
-        return OSResultNotEnoughMemory;
+        return OSResult::NotEnoughMemory;
     }
 }
 
@@ -101,7 +101,7 @@ bool CommObject::Restart()
     if (this->_pollingTaskHandle == NULL)
     {
         const OSResult result = System::CreateTask(CommObject::CommTask, "COMM Task", 512, this, 4, &this->_pollingTaskHandle);
-        if (result != OSResultSuccess)
+        if (OS_RESULT_FAILED(result))
         {
             LOGF(LOG_LEVEL_ERROR, "[comm] Unable to create background task. Status: 0x%08x.", result);
             return false;

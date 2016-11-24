@@ -29,112 +29,112 @@
 /**
  * @brief Enumerator for all possible operating system error codes.
  */
-enum OSResult
+enum class OSResult
 {
     /** Success */
-    OSResultSuccess = 0,
+    Success = 0,
 
     /** @brief Requested operation is invalid. */
-    OSResultInvalidOperation = ELAST,
+    InvalidOperation = ELAST,
 
     /** Requested element was not found. */
-    OSResultNotFound = ENOENT,
+    NotFound = ENOENT,
     /** Interrupted system call */
-    OSResultInterrupted = EINTR,
+    Interrupted = EINTR,
     /** I/O error */
-    OSResultIOError = EIO,
+    IOError = EIO,
     /** Argument list too long */
-    OSResultArgListTooLong = E2BIG,
+    ArgListTooLong = E2BIG,
     /** Bad file number */
-    OSResultInvalidFileHandle = EBADF,
+    InvalidFileHandle = EBADF,
     /** No children */
-    OSResultNoChildren = ECHILD,
+    NoChildren = ECHILD,
     /** Not enough memory */
-    OSResultNotEnoughMemory = ENOMEM,
+    NotEnoughMemory = ENOMEM,
     /** Permission denied */
-    OSResultAccessDenied = EACCES,
+    AccessDenied = EACCES,
     /** Bad address */
-    OSResultInvalidAddress = EFAULT,
+    InvalidAddress = EFAULT,
     /** Device or resource busy */
-    OSResultBusy = EBUSY,
+    Busy = EBUSY,
     /** File exists */
-    OSResultFileExists = EEXIST,
+    FileExists = EEXIST,
     /** Cross-device link */
-    OSResultInvalidLink = EXDEV,
+    InvalidLink = EXDEV,
     /** No such device */
-    OSResultDeviceNotFound = ENODEV,
+    DeviceNotFound = ENODEV,
     /** Not a directory */
-    OSResultNotADirectory = ENOTDIR,
+    NotADirectory = ENOTDIR,
     /** Is a directory */
-    OSResultIsDirectory = EISDIR,
+    IsDirectory = EISDIR,
     /** Invalid argument */
-    OSResultInvalidArgument = EINVAL,
+    InvalidArgument = EINVAL,
     /** Too many open files in system */
-    OSResultTooManyOpenFiles = ENFILE,
+    TooManyOpenFiles = ENFILE,
     /** File descriptor value too large */
-    OSResultDescriptorTooLarge = EMFILE,
+    DescriptorTooLarge = EMFILE,
     /** File too large */
-    OSResultFileTooLarge = EFBIG,
+    FileTooLarge = EFBIG,
     /** No space left on device */
-    OSResultOutOfDiskSpace = ENOSPC,
+    OutOfDiskSpace = ENOSPC,
     /** Illegal seek */
-    OSResultInvalidSeek = ESPIPE,
+    InvalidSeek = ESPIPE,
     /** Read-only file system */
-    OSResultReadOnlyFs = EROFS,
+    ReadOnlyFs = EROFS,
     /** Too many links */
-    OSResultTooManyLinks = EMLINK,
+    TooManyLinks = EMLINK,
     /** Result too large */
-    OSResultOutOfRange = ERANGE,
+    OutOfRange = ERANGE,
     /** Deadlock */
-    OSResultDeadlock = EDEADLK,
+    Deadlock = EDEADLK,
     /** No lock */
-    OSResultNoLock = ENOLCK,
+    NoLock = ENOLCK,
     /** A non blocking operation could not be immediately completed */
-    OSResultWouldBlock = ENODATA,
+    WouldBlock = ENODATA,
     /** Operation timed out. */
-    OSResultTimeout = ETIME,
+    Timeout = ETIME,
     /** Protocol error */
-    OSResultProtocolError = EPROTO,
+    ProtocolError = EPROTO,
     /** Bad message */
-    OSResultInvalidMessage = EBADMSG,
+    InvalidMessage = EBADMSG,
     /** Inappropriate file type or format */
-    OSResultInvalidFileFormat = EFTYPE,
+    InvalidFileFormat = EFTYPE,
     /** Function not implemented */
-    OSResultNotImplemented = ENOSYS,
+    NotImplemented = ENOSYS,
     /** Directory not empty */
-    OSResultDirectoryNotEmpty = ENOTEMPTY,
+    DirectoryNotEmpty = ENOTEMPTY,
     /** File or path name too long */
-    OSResultPathTooLong = ENAMETOOLONG,
+    PathTooLong = ENAMETOOLONG,
     /** Too many symbolic links */
-    OSResultLinkCycle = ELOOP,
+    LinkCycle = ELOOP,
     /** Operation not supported */
-    OSResultNotSupported = EOPNOTSUPP,
+    NotSupported = EOPNOTSUPP,
     /** Protocol family not supported  */
-    OSResultProtocolNotSupported = EPFNOSUPPORT,
+    ProtocolNotSupported = EPFNOSUPPORT,
     /** No buffer space available */
-    OSResultBufferNotAvailable = ENOBUFS,
+    BufferNotAvailable = ENOBUFS,
     /** Protocol not available */
-    OSResultProtocolNotAvailable = ENOPROTOOPT,
+    ProtocolNotAvailable = ENOPROTOOPT,
     /** Unknown protocol */
-    OSResultUnknownProtocol = EPROTONOSUPPORT,
+    UnknownProtocol = EPROTONOSUPPORT,
     /** Illegal byte sequence */
-    OSResultInvalidByteSequence = EILSEQ,
+    InvalidByteSequence = EILSEQ,
     /** Value too large for defined data type */
-    OSResultOverflow = EOVERFLOW,
+    Overflow = EOVERFLOW,
     /** Operation canceled */
-    OSResultCancelled = ECANCELED,
+    Cancelled = ECANCELED,
 
 };
 
 /**
  * @brief Macro for verification whether passed OSResult value indicates success.
  */
-#define OS_RESULT_SUCCEEDED(x) ((x) == OSResultSuccess)
+#define OS_RESULT_SUCCEEDED(x) ((x) == OSResult::Success)
 
 /**
  * @brief Macro for verification whether passed OSResult value indicates failure.
  */
-#define OS_RESULT_FAILED(x) ((x) != OSResultSuccess)
+#define OS_RESULT_FAILED(x) ((x) != OSResult::Success)
 
 /** @brief Type definition for time span in ms. */
 using OSTaskTimeSpan = std::uint32_t;
