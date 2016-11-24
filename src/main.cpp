@@ -286,9 +286,6 @@ void SetupI2C(void)
     I2CSetUpErrorHandlingBus(&Main.I2CBuses[0].ErrorHandling, (I2CBus*)&Main.I2CBuses[0].Bus, I2CErrorHandler, &Main.PowerControlInterface);
     I2CSetUpErrorHandlingBus(&Main.I2CBuses[1].ErrorHandling, (I2CBus*)&Main.I2CBuses[1].Bus, I2CErrorHandler, &Main.PowerControlInterface);
 
-    Main.I2C.Bus = (I2CBus*)&Main.I2CBuses[I2C_SYSTEM_BUS].ErrorHandling;
-    Main.I2C.Payload = (I2CBus*)&Main.I2CBuses[I2C_PAYLOAD_BUS].ErrorHandling;
-
     I2CSetUpFallbackBus(&Main.I2CFallback, &Main.I2C);
 }
 

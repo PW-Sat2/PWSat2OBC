@@ -10,7 +10,6 @@ set(SOURCES
     commands/file_system.cpp
     commands/state_command.cpp
     commands/i2c_test_command.cpp
-	commands/antenna.cpp
     obc.h
     obc.cpp
     fault_handlers.cpp
