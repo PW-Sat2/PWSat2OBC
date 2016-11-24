@@ -4,7 +4,8 @@
 #include "system.h"
 #include "terminal/terminal.h"
 
-using namespace std;
+using std::size_t;
+using std::uint16_t;
 
 extern "C" size_t xPortGetFreeHeapSize(void);
 

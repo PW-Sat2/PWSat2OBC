@@ -40,7 +40,6 @@
 #include "leuart/leuart.h"
 #include "power_eps/power_eps.h"
 
-using namespace std;
 using devices::comm::CommObject;
 using devices::comm::CommFrame;
 

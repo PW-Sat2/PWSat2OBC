@@ -1,19 +1,24 @@
 #include "communication.h"
 
-using namespace communication;
-using namespace std;
+using std::uint8_t;
+using gsl::span;
+
+using devices::comm::ITransmitFrame;
+using communication::PingTelecommand;
 using telecommands::handling::IHandleTeleCommand;
 
-void PingTelecommand::Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const uint8_t> parameters)
+using namespace communication;
+
+void PingTelecommand::Handle(ITransmitFrame& transmitter, span<const uint8_t> parameters)
 {
     UNREFERENCED_PARAMETER(parameters);
 
     const char* response = "PONG";
 
-    transmitter.SendFrame(gsl::span<const uint8_t>(reinterpret_cast<const uint8_t*>(response), 4));
+    transmitter.SendFrame(span<const uint8_t>(reinterpret_cast<const uint8_t*>(response), 4));
 }
 
-std::uint8_t PingTelecommand::CommandCode() const
+uint8_t PingTelecommand::CommandCode() const
 {
     return static_cast<uint8_t>('P');
 }

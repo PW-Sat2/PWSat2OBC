@@ -1,7 +1,6 @@
 #include "obc.h"
 #include "io_map.h"
 
-using namespace std;
 using telecommands::handling::DecodeFrameStatus;
 using telecommands::handling::DecryptStatus;
 using telecommands::handling::IHandleTeleCommand;
