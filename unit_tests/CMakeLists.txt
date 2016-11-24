@@ -53,6 +53,8 @@ endif(${ENABLE_COVERAGE})
 
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_CURRENT_LIST_DIR}/linker.ld -u _printf_float -specs=rdimon.specs ${LD_COVERAGE}")
 
+target_memory_report(${NAME})
+
 target_compile_options(${NAME} PRIVATE "-fexceptions")
 
 target_link_libraries(${NAME}
@@ -104,3 +106,5 @@ if(${ENABLE_COVERAGE})
        DEPENDS ${NAME}.run
     )
 endif()
+
+
