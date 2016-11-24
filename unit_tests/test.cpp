@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <gtest/gtest.h>
 
 #ifdef ENABLE_COVERAGE
