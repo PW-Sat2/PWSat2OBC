@@ -8,6 +8,9 @@
 
 #define PULSE_ALL_BITS 0x80
 
+static_assert(static_cast<uint8_t>(TaskPriority::Idle) == 0, "Idle priority must be 0");
+static_assert(static_cast<uint8_t>(TaskPriority::Highest) < configMAX_PRIORITIES, "Priorites up to configMAX_PRIORITIES - 1 are allowed");
+
 static inline TickType_t ConvertTimeToTicks(const OSTaskTimeSpan span)
 {
     if (span == MAX_DELAY)
@@ -23,11 +26,11 @@ OSResult System::CreateTask(OSTaskProcedure entryPoint, //
     const char* taskName,                               //
     std::uint16_t stackSize,                            //
     void* taskParameter,                                //
-    std::uint32_t priority,                             //
+    TaskPriority priority,                              //
     OSTaskHandle* taskHandle                            //
     )
 {
-    const BaseType_t result = xTaskCreate(entryPoint, taskName, stackSize, taskParameter, priority, taskHandle);
+    const BaseType_t result = xTaskCreate(entryPoint, taskName, stackSize, taskParameter, static_cast<uint8_t>(priority), taskHandle);
     if (result != pdPASS)
     {
         return OSResult::NotEnoughMemory;

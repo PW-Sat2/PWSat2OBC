@@ -50,5 +50,5 @@ void InitializeADCS(ADCSContext* context)
 {
     context->Command = ADCSSendCommand;
     context->CommandQueue = System::CreateQueue(1, sizeof(ADCSCommand));
-    System::CreateTask(ADCSTask, "ADCSTask", 1024, context, 4, &context->Task);
+    System::CreateTask(ADCSTask, "ADCSTask", 1024, context, TaskPriority::P4, &context->Task);
 }

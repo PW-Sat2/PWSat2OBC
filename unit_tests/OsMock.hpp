@@ -13,7 +13,7 @@ struct OSMock : IOS
                      const char* taskName,
                      uint16_t stackSize,
                      void* taskParameter,
-                     uint32_t priority,
+                     TaskPriority priority,
                      OSTaskHandle* taskHandle));
 
     MOCK_METHOD1(SuspendTask, void(OSTaskHandle task));

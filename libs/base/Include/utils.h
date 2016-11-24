@@ -4,10 +4,31 @@
 #pragma once
 
 #include <stdbool.h>
+#include <cstdint>
 
 static inline int ToInt(bool value)
 {
     return value ? 1 : 0;
 }
+
+constexpr std::size_t operator"" _Bytes(unsigned long long int value)
+{
+    return value;
+}
+
+constexpr std::size_t operator"" _KB(unsigned long long int value)
+{
+    return value * 1024_Bytes;
+}
+
+constexpr std::size_t operator"" _MB(unsigned long long int value)
+{
+    return value * 1024_KB;
+}
+
+struct PureStatic
+{
+    PureStatic() = delete;
+};
 
 #endif

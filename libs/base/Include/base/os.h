@@ -5,7 +5,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <cstdint>
+#include <type_traits>
 #include "system.h"
+#include "utils.h"
 
 /**
  * @defgroup osal OS Abstraction layer
@@ -129,12 +131,18 @@ enum class OSResult
 /**
  * @brief Macro for verification whether passed OSResult value indicates success.
  */
-#define OS_RESULT_SUCCEEDED(x) ((x) == OSResult::Success)
+static inline bool OS_RESULT_SUCCEEDED(OSResult x)
+{
+    return x == OSResult::Success;
+}
 
 /**
  * @brief Macro for verification whether passed OSResult value indicates failure.
  */
-#define OS_RESULT_FAILED(x) ((x) != OSResult::Success)
+static inline bool OS_RESULT_FAILED(OSResult x)
+{
+    return x != OSResult::Success;
+}
 
 /** @brief Type definition for time span in ms. */
 using OSTaskTimeSpan = std::uint32_t;
@@ -164,10 +172,30 @@ using OSPulseHandle = void*;
  */
 using OSTaskProcedure = void (*)(OSTaskHandle task);
 
+enum class TaskPriority
+{
+    Idle = 0,
+    P1,
+    P2,
+    P3,
+    P4,
+    P5,
+    P6,
+    P7,
+    P8,
+    P9,
+    P10,
+    P11,
+    P12,
+    P13,
+    P14,
+    Highest
+};
+
 /**
  * @brief Definition of operating system interface.
  */
-class System
+class System : public PureStatic
 {
   public:
     /**
@@ -185,7 +213,7 @@ class System
         const char* taskName,
         std::uint16_t stackSize,
         void* taskParameter,
-        std::uint32_t priority,
+        TaskPriority priority,
         OSTaskHandle* taskHandle);
 
     /**
@@ -387,10 +415,15 @@ class System
     static void PulseSet(OSPulseHandle handle);
 };
 
-template <typename Param, typename Handler, std::uint16_t StackSize, std::uint16_t Priority> class Task
+template <typename Param, std::size_t StackSize, TaskPriority Priority> class Task
 {
+    static_assert(sizeof(Param) < 16, "WTF are you trying to do?");
+    static_assert(StackSize <= UINT16_MAX, "Stack size must be uint16_t number");
+
   public:
-    Task(const char* name, Param param, Handler handler) : _taskName(name), _param(param), _handler(handler), _handle(nullptr)
+    using HandlerType = void (*)(Param);
+
+    Task(const char* name, Param param, HandlerType handler) : _taskName(name), _param(param), _handler(handler), _handle(nullptr)
     {
     }
 
@@ -408,7 +441,7 @@ template <typename Param, typename Handler, std::uint16_t StackSize, std::uint16
 
     const char* _taskName;
     Param _param;
-    Handler _handler;
+    HandlerType _handler;
     OSTaskHandle _handle;
 };
 

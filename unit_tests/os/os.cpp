@@ -7,7 +7,7 @@ OSResult System::CreateTask(OSTaskProcedure entryPoint, //
     const char* taskName,
     uint16_t stackSize,
     void* taskParameter,
-    uint32_t priority,
+    TaskPriority priority,
     OSTaskHandle* taskHandle)
 {
     if (OSProxy != nullptr)

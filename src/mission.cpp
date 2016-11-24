@@ -143,5 +143,5 @@ void InitializeMission(MissionState* missionState, OBC* obc)
     missionState->TerminalCommandUpdate.Param = NULL;
     missionState->TerminalCommandUpdate.UpdateProc = UpdateCommandTerminal;
 
-    System::CreateTask(MissionControlTask, "MissionControl", 2048, missionState, tskIDLE_PRIORITY + 2, nullptr);
+    System::CreateTask(MissionControlTask, "MissionControl", 2048, missionState, TaskPriority::P2, nullptr);
 }

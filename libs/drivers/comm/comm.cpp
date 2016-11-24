@@ -100,7 +100,8 @@ bool CommObject::Restart()
 
     if (this->_pollingTaskHandle == NULL)
     {
-        const OSResult result = System::CreateTask(CommObject::CommTask, "COMM Task", 512, this, 4, &this->_pollingTaskHandle);
+        const OSResult result =
+            System::CreateTask(CommObject::CommTask, "COMM Task", 512, this, TaskPriority::P4, &this->_pollingTaskHandle);
         if (OS_RESULT_FAILED(result))
         {
             LOGF(LOG_LEVEL_ERROR, "[comm] Unable to create background task. Status: 0x%08x.", result);

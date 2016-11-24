@@ -1,12 +1,13 @@
 #ifndef SRC_TERMINAL_H_
 #define SRC_TERMINAL_H_
 
-#include <stdint.h>
+#include <cstdint>
 #include <gsl/span>
 #include "base/os.h"
 #include "leuart/line_io.h"
+#include "utils.h"
 
-using TerminalCommandHandler = void (*)(uint16_t argc, char* argv[]);
+using TerminalCommandHandler = void (*)(std::uint16_t argc, char* argv[]);
 
 struct TerminalCommandDescription
 {
@@ -31,7 +32,7 @@ class Terminal
     static void Loop(Terminal*);
 
     LineIO& stdio;
-    Task<Terminal*, void (*)(Terminal*), 2500, 4> task;
+    Task<Terminal*, 2_KB, TaskPriority::P4> task;
 
     gsl::span<const TerminalCommandDescription> commandList;
 };

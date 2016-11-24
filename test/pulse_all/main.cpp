@@ -96,7 +96,7 @@ int main(void)
 
     for (int i = 0; i < 5; ++i)
     {
-        System::CreateTask(Observer, "Observer", 512, &GlobalEventGroup, tskIDLE_PRIORITY + 1, NULL);
+        System::CreateTask(Observer, "Observer", 512, &GlobalEventGroup, TaskPriority::P1, NULL);
     }
 
     InitializeTerminal();

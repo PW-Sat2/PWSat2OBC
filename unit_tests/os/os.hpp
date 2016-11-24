@@ -13,7 +13,7 @@ struct IOS
         const char* taskName,
         std::uint16_t stackSize,
         void* taskParameter,
-        std::uint32_t priority,
+        TaskPriority priority,
         OSTaskHandle* taskHandle) = 0;
 
     virtual void SuspendTask(OSTaskHandle task) = 0;
