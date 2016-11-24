@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define configTOTAL_HEAP_SIZE (4 * 1024 * 1024)
+#define configTOTAL_HEAP_SIZE (1 * 1024 * 1024)
 #define portBYTE_ALIGNMENT 8
 #define portBYTE_ALIGNMENT_MASK (0x0007)
 #define mtCOVERAGE_TEST_MARKER()

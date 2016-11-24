@@ -1,8 +1,8 @@
 function(target_generate_hex TARGET)
   set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET})
   set (HEX_OBJ ${EXEC_OBJ}.hex)
-  
-  set_target_properties(${TARGET} PROPERTIES HEX_FILE ${HEX_OBJ}) 
+
+  set_target_properties(${TARGET} PROPERTIES HEX_FILE ${HEX_OBJ})
 
   add_custom_command(OUTPUT ${HEX_OBJ}
       COMMAND ${CMAKE_OBJCOPY} -O ihex ${EXEC_OBJ} ${HEX_OBJ}
@@ -16,7 +16,7 @@ function(target_jlink_flash TARGET)
   set(COMMAND_FILE ${CMAKE_BINARY_DIR}/jlink/${TARGET}.flash.jlink)
 
   get_property(HEX_FILE TARGET ${TARGET} PROPERTY HEX_FILE)
-  
+
   configure_file(${CMAKE_SOURCE_DIR}/jlink/flash.jlink.template ${COMMAND_FILE})
 
   unset(HEX_FILE)
@@ -52,11 +52,12 @@ function(target_memory_report TARGET)
         COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/utils/memory_report.py ${OUTPUT_PATH}/bin/${TARGET}.map ${REPORTS_PATH}/memory
         DEPENDS ${TARGET} utils.deps
         )
+    set_property(TARGET ${NAME} APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME}.map")
 endfunction(target_memory_report)
 
 function(target_asm_listing TARGET)
     get_property(binary TARGET ${TARGET} PROPERTY RUNTIME_OUTPUT_NAME)
-    
+
     add_custom_target(${TARGET}.asm
         COMMAND ${CMAKE_COMMAND} -E make_directory ${REPORTS_PATH}
         COMMAND ${CMAKE_OBJDUMP} -dSC $<TARGET_FILE:${TARGET}> > ${REPORTS_PATH}/${TARGET}.lss
