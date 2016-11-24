@@ -172,24 +172,27 @@ using OSPulseHandle = void*;
  */
 using OSTaskProcedure = void (*)(OSTaskHandle task);
 
+/**
+ * Task priorites
+ */
 enum class TaskPriority
 {
-    Idle = 0,
-    P1,
-    P2,
-    P3,
-    P4,
-    P5,
-    P6,
-    P7,
-    P8,
-    P9,
-    P10,
-    P11,
-    P12,
-    P13,
-    P14,
-    Highest
+    Idle = 0, //!< Idle
+    P1,       //!< P1
+    P2,       //!< P2
+    P3,       //!< P3
+    P4,       //!< P4
+    P5,       //!< P5
+    P6,       //!< P6
+    P7,       //!< P7
+    P8,       //!< P8
+    P9,       //!< P9
+    P10,      //!< P10
+    P11,      //!< P11
+    P12,      //!< P12
+    P13,      //!< P13
+    P14,      //!< P14
+    Highest   //!< Highest
 };
 
 /**
@@ -415,33 +418,57 @@ class System : public PureStatic
     static void PulseSet(OSPulseHandle handle);
 };
 
+/**
+ * RTOS Task wrapper
+ */
 template <typename Param, std::size_t StackSize, TaskPriority Priority> class Task
 {
     static_assert(sizeof(Param) < 16, "WTF are you trying to do?");
     static_assert(StackSize <= UINT16_MAX, "Stack size must be uint16_t number");
 
   public:
+    /**
+     * @brief Type of function that can be used as task handler
+     */
     using HandlerType = void (*)(Param);
 
+    /**
+     * @brief Initializes (but not creates in RTOS) task
+     * @param[in] name Task name
+     * @param[in] param Parameter passed to task
+     * @param[in] handler Function that will be executed in new task
+     */
     Task(const char* name, Param param, HandlerType handler) : _taskName(name), _param(param), _handler(handler), _handle(nullptr)
     {
     }
 
+    /**
+     * Creates RTOS task
+     * @return Operation status
+     */
     OSResult Create()
     {
         return System::CreateTask(EntryPoint, this->_taskName, StackSize, static_cast<void*>(this), Priority, &this->_handle);
     }
 
   private:
+    /**
+     * @brief Wrapper function that dispatches newly started task to specified handler
+     * @param param
+     */
     static void EntryPoint(void* param)
     {
         auto This = static_cast<Task*>(param);
         This->_handler(This->_param);
     }
 
+    /** @brief Task name */
     const char* _taskName;
+    /** @brief Parameter passed to task */
     Param _param;
+    /** @brief Task handler */
     HandlerType _handler;
+    /** @brief Task handle */
     OSTaskHandle _handle;
 };
 

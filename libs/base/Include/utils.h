@@ -26,6 +26,9 @@ constexpr std::size_t operator"" _MB(unsigned long long int value)
     return value * 1024_KB;
 }
 
+/**
+ * Inheriting from this class, will make derived class unconstructable
+ */
 struct PureStatic
 {
     PureStatic() = delete;

@@ -32,7 +32,7 @@ static void parseCommandLine(char line[],
 
 void Terminal::Puts(const char* text)
 {
-    this->stdio.Puts(&this->stdio, text);
+    this->_stdio.Puts(&this->_stdio, text);
 }
 
 void Terminal::NewLine()
@@ -50,14 +50,14 @@ void Terminal::Printf(const char* text, ...)
     va_list args;
     va_start(args, text);
 
-    this->stdio.VPrintf(&this->stdio, text, args);
+    this->_stdio.VPrintf(&this->_stdio, text, args);
 
     va_end(args);
 }
 
 void Terminal::PrintBuffer(gsl::span<const char> buffer)
 {
-    this->stdio.PrintBuffer(buffer);
+    this->_stdio.PrintBuffer(buffer);
 }
 
 void Terminal::HandleCommand(char* buffer)
@@ -68,7 +68,7 @@ void Terminal::HandleCommand(char* buffer)
 
     parseCommandLine(buffer, &commandName, args, &argc, COUNT_OF(args));
 
-    for (auto& command : this->commandList)
+    for (auto& command : this->_commandList)
     {
         if (strcmp(commandName, command.name) == 0)
         {
@@ -96,7 +96,7 @@ void Terminal::Loop(Terminal* terminal)
 
         firstRun = false;
 
-        terminal->stdio.Readline(&terminal->stdio, input_buffer, COUNT_OF(input_buffer));
+        terminal->_stdio.Readline(&terminal->_stdio, input_buffer, COUNT_OF(input_buffer));
 
         LOGF(LOG_LEVEL_INFO, "Received line %s", input_buffer);
 
@@ -105,24 +105,24 @@ void Terminal::Loop(Terminal* terminal)
 }
 
 Terminal::Terminal(LineIO& stdio)
-    : stdio(stdio), //
-      task("Terminal", this, Terminal::Loop)
+    : _stdio(stdio), //
+      _task("Terminal", this, Terminal::Loop)
 {
 }
 
 void Terminal::Initialize()
 {
-    if (OS_RESULT_FAILED(this->task.Create()))
+    if (OS_RESULT_FAILED(this->_task.Create()))
     {
         LOG(LOG_LEVEL_ERROR, "Error. Cannot create terminalQueue.");
     }
     else
     {
-        this->stdio.Puts(&stdio, "@");
+        this->_stdio.Puts(&_stdio, "@");
     }
 }
 
 void Terminal::SetCommandList(gsl::span<const TerminalCommandDescription> commands)
 {
-    this->commandList = commands;
+    this->_commandList = commands;
 }
