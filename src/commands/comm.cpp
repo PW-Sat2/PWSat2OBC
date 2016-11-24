@@ -1,6 +1,6 @@
 #include "comm/comm.h"
-#include <stdint.h>
 #include <string.h>
+#include <cstdint>
 #include <gsl/span>
 #include "commands.h"
 #include "logger/logger.h"
@@ -8,8 +8,11 @@
 #include "system.h"
 #include "terminal.h"
 
+using std::uint16_t;
+using std::uint8_t;
 using gsl::span;
-using namespace devices::comm;
+using devices::comm::CommReceiverFrameCount;
+using devices::comm::CommFrame;
 
 void SendFrameHandler(uint16_t argc, char* argv[])
 {

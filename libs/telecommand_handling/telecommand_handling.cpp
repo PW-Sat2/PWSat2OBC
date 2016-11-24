@@ -5,11 +5,14 @@
 #include "logger/logger.h"
 #include "telecommand_handling.h"
 
+using std::uint8_t;
+using std::size_t;
+using gsl::span;
+
 using devices::comm::CommObject;
 using devices::comm::CommFrame;
 using devices::comm::ITransmitFrame;
-using gsl::span;
-using namespace std;
+
 using namespace telecommands::handling;
 
 constexpr size_t DecryptionBufferSize = 300;

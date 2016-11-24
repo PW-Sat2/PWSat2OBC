@@ -14,7 +14,7 @@
 #include "logger/logger.h"
 #include "system.h"
 
-using namespace std;
+using std::uint8_t;
 using gsl::span;
 
 using namespace devices::comm;

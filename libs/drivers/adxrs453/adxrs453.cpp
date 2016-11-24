@@ -7,7 +7,10 @@
 #include "spidrv.h"
 #include "system.h"
 
-using namespace std;
+using std::uint8_t;
+using std::uint16_t;
+using std::int16_t;
+using std::uint32_t;
 
 void GenerateCommand(uint8_t commandByte, uint8_t registerAddress, uint16_t registerValue, uint8_t* sendBuffer)
 {
