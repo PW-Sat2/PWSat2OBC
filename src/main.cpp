@@ -252,6 +252,8 @@ void SetupHardware(void)
 
 extern "C" void __libc_init_array(void);
 
+extern void N25QInit(void);
+
 int main(void)
 {
     memset(&Main, 0, sizeof(Main));
@@ -284,6 +286,8 @@ int main(void)
     SetupAntennas();
 
     InitializeMission(&Mission, &Main);
+
+    N25QInit();
 
     GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
     GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);

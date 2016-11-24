@@ -24,6 +24,7 @@ set(SOURCES
   MissionPlan/antenna/AntennaMissionStateTest.cpp
   I2C/FallbackI2CBusTest.cpp
   I2C/ErrorHandlingI2CBusTest.cpp
+  N25Q/N25QTest.cpp
   os/os.cpp
   os/os.hpp
   OsMock.hpp
@@ -87,6 +88,7 @@ target_link_libraries(${NAME}
     time
     gsl
     antenna
+    n25q
     mission_antenna
 )
 

@@ -75,7 +75,7 @@ static bool ReadId(void)
 
     if (response[0] != 0x20 || response[1] != 0xBA || response[2] != 0x18)
     {
-        LOGF(LOG_LEVEL_INFO, "Status: 0x%X Manufacturer: 0x%X Type: 0x%X Capacity: 0x%X", st, response[0], response[1], response[2]);
+        LOGF(LOG_LEVEL_INFO, "Status: 0x%lX Manufacturer: 0x%X Type: 0x%X Capacity: 0x%X", st, response[0], response[1], response[2]);
         return false;
     }
 
@@ -134,7 +134,7 @@ static void SPITest(void* a)
         }
     }
 
-    System.SuspendTask(NULL);
+    System::SuspendTask(NULL);
 }
 
 static void Ping(void* v)
@@ -146,7 +146,7 @@ static void Ping(void* v)
         GPIO_PinOutToggle(LED_PORT, LED0);
         GPIO_PinOutToggle(LED_PORT, LED1);
 
-        System.SleepTask(1000);
+        System::SleepTask(1000);
     }
 }
 
@@ -165,8 +165,6 @@ int main(void)
     LogInit(LOG_LEVEL_DEBUG);
     InitSwoEndpoint();
 
-    OSSetup();
-
     SwoPutsOnChannel(0, "Flash test Ready\n");
 
     GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
@@ -176,10 +174,10 @@ int main(void)
     GPIO_PinOutSet(LED_PORT, LED0);
     GPIO_PinOutClear(LED_PORT, LED1);
 
-    System.CreateTask(SPITest, "SPI", 4096, NULL, 1, NULL);
-    System.CreateTask(Ping, "Ping", 1024, NULL, 1, NULL);
+    System::CreateTask(SPITest, "SPI", 4096, NULL, TaskPriority::P1, NULL);
+    System::CreateTask(Ping, "Ping", 1024, NULL, TaskPriority::P1, NULL);
 
-    System.RunScheduler();
+    System::RunScheduler();
 
     return 0;
 }

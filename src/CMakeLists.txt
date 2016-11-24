@@ -51,6 +51,7 @@ target_link_libraries(${NAME}
     assert
     telecommand_handling
     gsl
+    n25q
     antenna
     mission_antenna
 )
