@@ -22,7 +22,7 @@ const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
 OSEventGroupHandle GlobalEventGroup;
 LineIO StdIO;
-Terminal TerminalObject;
+Terminal TerminalObject(StdIO);
 
 void SetGroup(uint16_t argc, char* argv[])
 {
@@ -37,8 +37,8 @@ static const TerminalCommandDescription commands[] = {
 
 static void InitializeTerminal(void)
 {
-    TerminalInit(&TerminalObject, &StdIO);
-    TerminalSetCommandList(&TerminalObject, commands, COUNT_OF(commands));
+    TerminalObject.Initialize();
+    TerminalObject.SetCommandList(gsl::span<const TerminalCommandDescription>(commands));
 }
 
 extern "C" void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)

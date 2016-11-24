@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <gsl/span>
+#include <gsl/span>
 #include "commands.h"
 #include "logger/logger.h"
 #include "obc.h"
@@ -27,7 +28,7 @@ void GetFramesCountHandler(uint16_t argc, char* argv[])
     CommReceiverFrameCount count = Main.comm.GetFrameCount();
     if (count.status)
     {
-        TerminalPrintf(&Main.terminal, "%d\n", count.frameCount);
+        Main.terminal.Printf("%d\n", count.frameCount);
     }
 }
 
@@ -45,7 +46,7 @@ void ReceiveFrameHandler(uint16_t argc, char* argv[])
     else
     {
         Main.comm.RemoveFrame();
-        TerminalPuts(&Main.terminal, (const char*)frame.Contents);
+        Main.terminal.PrintBuffer(gsl::span<const char>(reinterpret_cast<const char*>(frame.Contents), frame.Size));
     }
 }
 
@@ -62,5 +63,5 @@ void OBCGetState(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
-    TerminalPrintf(&Main.terminal, "%d\n", atomic_load(&Main.initialized) ? 1 : 0);
+    Main.terminal.Printf("%d\n", atomic_load(&Main.initialized) ? 1 : 0);
 }

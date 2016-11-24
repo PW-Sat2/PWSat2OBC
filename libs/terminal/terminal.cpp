@@ -30,51 +30,58 @@ static void parseCommandLine(char line[],
     }
 }
 
-void TerminalPuts(Terminal* terminal, const char* text)
+void Terminal::Puts(const char* text)
 {
-    terminal->stdio->Puts(terminal->stdio, text);
+    this->stdio.Puts(&this->stdio, text);
 }
 
-void TerminalSendNewLine(Terminal* terminal)
+void Terminal::NewLine()
 {
-    TerminalPuts(terminal, "\n");
+    this->Puts("\n");
 }
 
-static void terminalSendPrefix(Terminal* terminal)
+void Terminal::SendPrefix()
 {
-    TerminalPuts(terminal, ">");
+    this->Puts(">");
 }
 
-void TerminalPrintf(Terminal* terminal, const char* text, ...)
+void Terminal::Printf(const char* text, ...)
 {
     va_list args;
     va_start(args, text);
 
-    terminal->stdio->VPrintf(terminal->stdio, text, args);
+    this->stdio.VPrintf(&this->stdio, text, args);
 
     va_end(args);
 }
 
-static void terminalHandleCommand(Terminal* terminal, char* buffer)
+void Terminal::PrintBuffer(gsl::span<const char> buffer)
+{
+    this->stdio.PrintBuffer(buffer);
+}
+
+void Terminal::HandleCommand(char* buffer)
 {
     char* commandName;
     uint16_t argc = 0;
     char* args[8] = {0};
 
     parseCommandLine(buffer, &commandName, args, &argc, COUNT_OF(args));
-    const TerminalCommandDescription* commands = terminal->commandList;
-    const uint32_t commandCount = terminal->commandCount;
-    for (size_t i = 0; i < commandCount; i++)
+
+    for (auto& command : this->commandList)
     {
-        if (strcmp(commandName, commands[i].name) == 0)
+        if (strcmp(commandName, command.name) == 0)
         {
-            commands[i].handler(argc, args);
-            TerminalSendNewLine(terminal);
+            command.handler(argc, args);
+
+            this->NewLine();
+
+            return;
         }
     }
 }
 
-static void handleIncomingChar(Terminal& terminal)
+void Terminal::Loop(Terminal* terminal)
 {
     bool firstRun = true;
 
@@ -84,35 +91,38 @@ static void handleIncomingChar(Terminal& terminal)
 
         if (!firstRun)
         {
-            terminalSendPrefix(&terminal);
+            terminal->SendPrefix();
         }
 
         firstRun = false;
 
-        terminal.stdio->Readline(terminal.stdio, input_buffer, COUNT_OF(input_buffer));
+        terminal->stdio.Readline(&terminal->stdio, input_buffer, COUNT_OF(input_buffer));
 
         LOGF(LOG_LEVEL_INFO, "Received line %s", input_buffer);
 
-        terminalHandleCommand(&terminal, input_buffer);
+        terminal->HandleCommand(input_buffer);
     }
 }
 
-void TerminalInit(Terminal* terminal, LineIO* stdio)
+Terminal::Terminal(LineIO& stdio)
+    : stdio(stdio), //
+      task("Terminal", this, Terminal::Loop)
 {
-    terminal->stdio = stdio;
+}
 
-    if (OS_RESULT_FAILED(System::CreateTask(handleIncomingChar, *terminal, "terminalIn", 2500, 4)))
+void Terminal::Initialize()
+{
+    if (OS_RESULT_FAILED(this->task.Create()))
     {
         LOG(LOG_LEVEL_ERROR, "Error. Cannot create terminalQueue.");
     }
     else
     {
-        stdio->Puts(stdio, "@");
+        this->stdio.Puts(&stdio, "@");
     }
 }
 
-void TerminalSetCommandList(Terminal* terminal, const TerminalCommandDescription* commandList, uint32_t commandCount)
+void Terminal::SetCommandList(gsl::span<const TerminalCommandDescription> commands)
 {
-    terminal->commandList = commandList;
-    terminal->commandCount = commandCount;
+    this->commandList = commands;
 }

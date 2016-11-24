@@ -135,7 +135,7 @@ static bool FSInit(FileSystem* fs, struct yaffs_dev* rootDevice, YaffsNANDDriver
     return FileSystemInitialize(fs, rootDevice);
 }
 
-static void ClearState(OBC& obc)
+static void ClearState(OBC* obc)
 {
     GPIO_PinModeSet(SYS_CLEAR_PORT, SYS_CLEAR_PIN, gpioModeInputPull, 1);
 
@@ -143,7 +143,7 @@ static void ClearState(OBC& obc)
     {
         LOG(LOG_LEVEL_WARNING, "Clearing state on startup");
 
-        const OSResult status = obc.fs.format(&obc.fs, "/");
+        const OSResult status = obc->fs.format(&obc->fs, "/");
         if (OS_RESULT_SUCCEEDED(status))
         {
             LOG(LOG_LEVEL_INFO, "Flash formatted");
@@ -161,16 +161,18 @@ static void SetupAntennas(void)
     AntennaDriverInitialize(&Main.antennaDriver, &Main.antennaMiniport, Main.I2C.Bus, Main.I2C.Payload);
 }
 
-static void ObcInitTask(OBC& obc)
+static void ObcInitTask(void* param)
 {
-    if (!FSInit(&obc.fs, &obc.rootDevice, &obc.rootDeviceDriver))
+    auto obc = static_cast<OBC*>(param);
+
+    if (!FSInit(&obc->fs, &obc->rootDevice, &obc->rootDeviceDriver))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize file system");
     }
 
     ClearState(obc);
 
-    if (!TimeInitialize(&obc.timeProvider, NULL, NULL, &obc.fs))
+    if (!TimeInitialize(&obc->timeProvider, NULL, NULL, &obc->fs))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize persistent timer. ");
     }
@@ -180,12 +182,12 @@ static void ObcInitTask(OBC& obc)
         LOG(LOG_LEVEL_ERROR, "Unable to reset both antenna controllers. ");
     }
 
-    if (!obc.comm.Restart())
+    if (!obc->comm.Restart())
     {
         LOG(LOG_LEVEL_ERROR, "Unable to restart comm");
     }
 
-    InitializeADCS(&obc.adcs);
+    InitializeADCS(&obc->adcs);
 
     LOG(LOG_LEVEL_INFO, "Intialized");
     Main.initialized = true;
@@ -334,7 +336,7 @@ int main(void)
 
     System::CreateTask(BlinkLed0, "Blink0", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
     // System::CreateTask(ADXRS, "ADXRS", 512, NULL, tskIDLE_PRIORITY + 2, NULL);
-    System::CreateTask(ObcInitTask, Main, "Init", 512, tskIDLE_PRIORITY + 15, &Main.initTask);
+    System::CreateTask(ObcInitTask, "Init", 512, &Main, tskIDLE_PRIORITY + 15, &Main.initTask);
     System::CreateTask(SmartWaitTask, "SmartWait", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
     System::RunScheduler();
 

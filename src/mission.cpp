@@ -96,15 +96,17 @@ static void NormalModeLoop(SystemState* state, MissionState* missionState)
     Loop(state, &descriptor);
 }
 
-static void MissionControlTask(MissionState& missionState)
+static void MissionControlTask(void* param)
 {
+    auto missionState = static_cast<MissionState*>(param);
+
     LOG(LOG_LEVEL_DEBUG, "Starting mission control task");
     SystemState state;
     SystemStateEmpty(&state);
 
     while (1)
     {
-        NormalModeLoop(&state, &missionState);
+        NormalModeLoop(&state, missionState);
 
         TimeLongDelay(&Main.timeProvider, TimeSpanFromSeconds(10));
     }
@@ -141,5 +143,5 @@ void InitializeMission(MissionState* missionState, OBC* obc)
     missionState->TerminalCommandUpdate.Param = NULL;
     missionState->TerminalCommandUpdate.UpdateProc = UpdateCommandTerminal;
 
-    System::CreateTask(MissionControlTask, *missionState, "MissionControl", 2048, tskIDLE_PRIORITY + 2);
+    System::CreateTask(MissionControlTask, "MissionControl", 2048, missionState, tskIDLE_PRIORITY + 2, nullptr);
 }

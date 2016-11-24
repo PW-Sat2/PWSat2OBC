@@ -1,6 +1,8 @@
-#include "terminal/terminal.h"
+#include <gsl/span>
+
 #include "commands/commands.h"
 #include "obc.h"
+#include "terminal/terminal.h"
 
 static const TerminalCommandDescription commands[] = {
     {"ping", PingHandler},
@@ -24,6 +26,6 @@ static const TerminalCommandDescription commands[] = {
 
 void InitializeTerminal(void)
 {
-    TerminalInit(&Main.terminal, &Main.IO);
-    TerminalSetCommandList(&Main.terminal, commands, COUNT_OF(commands));
+    Main.terminal.Initialize();
+    Main.terminal.SetCommandList(gsl::span<const TerminalCommandDescription>(commands));
 }

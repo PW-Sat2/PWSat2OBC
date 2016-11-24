@@ -189,25 +189,6 @@ class System
         OSTaskHandle* taskHandle);
 
     /**
-     * @brief Creates new task
-     *
-     * @param[in] entryPoint Pointer to task procedure.
-     * @param[in] param Pointer to caller supplied object task context.
-     * @param[in] taskName Name of the new task.
-     * @param[in] stackSize Size of the new task's stack in words.
-     * @param[in] priority New task priority.
-     * @param[out] taskHandle Pointer to variable that will be filled with the created task handle.
-     * @return Operation status.
-     */
-    template <typename Param>
-    static OSResult CreateTask(void (*entryPoint)(Param&),
-        Param& param,
-        const char* taskName,
-        std::uint16_t stackSize,
-        std::uint32_t priority,
-        OSTaskHandle* taskHandle = nullptr);
-
-    /**
      * @brief Suspends current task execution for specified time period.
      * @param[in] time Time period in ms.
      */
@@ -406,18 +387,30 @@ class System
     static void PulseSet(OSPulseHandle handle);
 };
 
-template <typename Param>
-OSResult System::CreateTask(void (*entryPoint)(Param&),
-    Param& param,
-    const char* taskName,
-    std::uint16_t stackSize,
-    std::uint32_t priority,
-    OSTaskHandle* taskHandle)
+template <typename Param, typename Handler, std::uint16_t StackSize, std::uint16_t Priority> class Task
 {
-    auto entryPointPtr = reinterpret_cast<OSTaskProcedure>(entryPoint);
+  public:
+    Task(const char* name, Param param, Handler handler) : _taskName(name), _param(param), _handler(handler), _handle(nullptr)
+    {
+    }
 
-    return System::CreateTask(entryPointPtr, taskName, stackSize, &param, priority, taskHandle);
-}
+    OSResult Create()
+    {
+        return System::CreateTask(EntryPoint, this->_taskName, StackSize, static_cast<void*>(this), Priority, &this->_handle);
+    }
+
+  private:
+    static void EntryPoint(void* param)
+    {
+        auto This = static_cast<Task*>(param);
+        This->_handler(This->_param);
+    }
+
+    const char* _taskName;
+    Param _param;
+    Handler _handler;
+    OSTaskHandle _handle;
+};
 
 /** @}*/
 

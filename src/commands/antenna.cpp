@@ -7,7 +7,7 @@
 
 static void SendResult(OSResult result)
 {
-    TerminalPrintf(&Main.terminal, "%d", result);
+    Main.terminal.Printf("%d", result);
 }
 
 static bool GetChannel(const char* name, AntennaChannel* channel)
@@ -68,7 +68,7 @@ void AntennaDeploy(uint16_t argc, char* argv[])
         !GetAntenna(argv[1], &antenna)    //
         )
     {
-        TerminalPuts(&Main.terminal, "antenna_deploy [primary|backup] [auto|1|2|3|4] [override]\n");
+        Main.terminal.Puts("antenna_deploy [primary|backup] [auto|1|2|3|4] [override]\n");
         return;
     }
 
@@ -91,7 +91,7 @@ void AntennaCancelDeployment(uint16_t argc, char* argv[])
         !GetChannel(argv[0], &channel) //
         )
     {
-        TerminalPuts(&Main.terminal, "antenna_cancel [primary|backup]\n");
+        Main.terminal.Puts("antenna_cancel [primary|backup]\n");
         return;
     }
 
@@ -106,7 +106,7 @@ void AntennaGetDeploymentStatus(uint16_t argc, char* argv[])
         !GetChannel(argv[0], &channel) //
         )
     {
-        TerminalPuts(&Main.terminal, "antenna_get_status [primary|backup]\n");
+        Main.terminal.Puts("antenna_get_status [primary|backup]\n");
         return;
     }
 
@@ -118,8 +118,7 @@ void AntennaGetDeploymentStatus(uint16_t argc, char* argv[])
     }
     else
     {
-        TerminalPrintf(&Main.terminal,
-            "%d %d %d %d %d %d %d %d %d %d %d\n",
+        Main.terminal.Printf("%d %d %d %d %d %d %d %d %d %d %d\n",
             status,
             ToInt(deploymentStatus.DeploymentStatus[0]),        //
             ToInt(deploymentStatus.DeploymentStatus[1]),        //
