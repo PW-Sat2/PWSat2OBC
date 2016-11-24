@@ -20,6 +20,7 @@ set(SOURCES
     communication.cpp
     hardware.cpp
     fault_handlers.cpp
+    n25q/n25q.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
