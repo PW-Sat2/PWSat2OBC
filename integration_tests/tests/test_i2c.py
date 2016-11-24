@@ -63,7 +63,7 @@ class I2CTest(BaseTest):
     def test_bus_latch_should_trigger_system_power_cycle(self):
         self.system.obc.i2c_transfer('wr', 'system', 0x14, chr(0x2))
 
-        self.assertTrue(self.system.eps.power_cycle.wait(0), "Power cycle should be triggered")
+        self.assertTrue(self.system.eps.power_cycle.wait(5), "Power cycle should be triggered")
 
         self.system.restart()
 

@@ -9,7 +9,7 @@ class SerialPortTerminal:
 
         self._gpio = gpio
 
-        self._serial = serial.Serial(comPort, baudrate=9600, timeout=1, rtscts=False)
+        self._serial = serial.Serial(comPort, baudrate=115200, timeout=1, rtscts=False)
         self._gpio.high(self._gpio.RESET)
 
     def waitForPrompt(self, terminator='>'):

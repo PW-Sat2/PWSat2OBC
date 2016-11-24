@@ -1,5 +1,5 @@
 import traceback
-from threading import Thread, Event
+from threading import Thread, Event, Lock
 
 import serial
 import sys
@@ -28,14 +28,11 @@ def command(bytes):
 
 
 class I2CDevice(object):
-    address = None
-    handlers = []
-    response = None
-    freeze_end = None
-
     def __init__(self, address):
         self.address = address
         self.handlers = self._init_handlers()
+        self.response = None
+        self.freeze_end = None
 
     def handle(self, data):
         self.response = None
@@ -56,7 +53,7 @@ class I2CDevice(object):
         self.freeze_end.wait()
 
     def _missing_handler(self, data):
-        print 'Device {:2X}: missing handler for {}'.format(self.address, binascii.hexlify(bytearray(data)))
+        logging.getLogger('Device.{:2X}'.format(self.address)).error('Missing handler for {}'.format(self.address, binascii.hexlify(bytearray(data))))
 
     def _init_handlers(self):
         handlers = []
@@ -73,10 +70,11 @@ class I2CDevice(object):
 class MissingDevice(I2CDevice):
     def __init__(self, address):
         super(MissingDevice, self).__init__(address)
+        self._log = logging.getLogger('MissingDevice.{:2X}'.format(address))
 
     @command([])
     def catch_all(self, *data):
-        print 'Missing device({:x}).command({})'.format(self.address, binascii.hexlify(bytearray(data)))
+        self._log.error('Missing handler for {}'.format(self.address, binascii.hexlify(bytearray(data))))
         return [0xCC]
 
 
@@ -96,7 +94,6 @@ class I2CMock(object):
     CMD_STOPPED = 0x09
 
     _port = serial.Serial
-    _devices = {}
 
     def __init__(self, bus_name, port_name):
         self._log = logging.getLogger("I2C.%s" % bus_name)
@@ -122,6 +119,10 @@ class I2CMock(object):
         }
 
         self._started = Event()
+        self._reader_started = Event()
+        self._port_lock = Lock()
+
+        self._devices = {}
 
     def start(self):
         if self._active:
@@ -133,6 +134,8 @@ class I2CMock(object):
             self._freeze_end.clear()
 
         self._reader.start()
+        self._reader_started.wait()
+
         self._command(I2CMock.CMD_RESTART)
         self._log.debug('Waiting for mock to start')
         self._started.wait()
@@ -143,6 +146,7 @@ class I2CMock(object):
         self._devices[device.address] = device
 
     def stop(self):
+        self._log.debug('Requesting stop')
         self._command(I2CMock.CMD_I2C_DISABLE)
         self._command(I2CMock.CMD_STOP)
 
@@ -151,6 +155,7 @@ class I2CMock(object):
         self._reader.join()
         self._port.close()
         self._active = False
+        self._log.debug('Stopped')
 
     def unfreeze(self):
         self._freeze_end.set()
@@ -168,7 +173,8 @@ class I2CMock(object):
         raw.extend(self._escape(size))
         raw.extend(self._escape(data))
 
-        self._port.write(raw)
+        with self._port_lock:
+            self._port.write(raw)
 
     def _escape(self, data):
         def escape_char(c):
@@ -186,6 +192,8 @@ class I2CMock(object):
 
         self._port.reset_input_buffer()
         self._port.reset_output_buffer()
+
+        self._reader_started.set()
 
         try:
             while self._port.is_open:
