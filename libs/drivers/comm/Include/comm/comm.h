@@ -47,14 +47,15 @@ namespace devices
          */
         constexpr std::uint8_t COMM_MAX_FRAME_CONTENTS_SIZE = 235u;
 
-        /** @brief This type describe comm driver global state. */
-        class CommObject;
-
         /**
          * @brief This type describes single received frame.
          */
         struct CommFrame
         {
+            /**
+             * @brief Returns span of @ref Contents limited to real content size (not maximum frame length)
+             * @return Frame contents span
+             */
             gsl::span<const std::uint8_t> Payload();
 
             /** @brief Frame contents size in bytes. */

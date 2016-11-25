@@ -27,9 +27,9 @@ using namespace telecommands::handling;
 
 struct TeleCommandDepsMock : public IDecryptFrame, public IDecodeTelecommand
 {
-    MOCK_METHOD3(Decrypt, DecryptStatus(span<const uint8_t>, span<uint8_t>, size_t&));
+    MOCK_METHOD2(Decrypt, DecryptFrameResult(span<const uint8_t>, span<uint8_t>));
 
-    MOCK_METHOD3(Decode, DecodeFrameStatus(span<const uint8_t>, uint8_t&, span<const uint8_t>&));
+    MOCK_METHOD1(Decode, DecodeTelecommandResult(span<const uint8_t>));
 };
 
 struct TeleCommandHandlerMock : public IHandleTeleCommand
@@ -63,8 +63,8 @@ TEST_F(TeleCommandHandlingTest, IncomingFrameShouldBeDecryptedAndDecoded)
     CommFrame frame;
     frame.Size = 40;
 
-    EXPECT_CALL(this->deps, Decrypt(_, _, _)).WillOnce(Return(DecryptStatus::Success));
-    EXPECT_CALL(this->deps, Decode(_, _, _)).WillOnce(Return(DecodeFrameStatus::Success));
+    EXPECT_CALL(this->deps, Decrypt(_, _)).WillOnce(Return(DecryptFrameResult::Success(frame.Contents)));
+    EXPECT_CALL(this->deps, Decode(_)).WillOnce(Return(DecodeTelecommandResult::Success(0xA, frame.Contents)));
 
     this->handling.HandleFrame(this->transmitFrame, frame);
 }
@@ -77,21 +77,17 @@ TEST_F(TeleCommandHandlingTest, HandlerShouldBeCalledForKnownTelecommand)
     frame.Size = 50;
     strcpy((char*)frame.Contents.data(), contents);
 
-    EXPECT_CALL(this->deps, Decrypt(_, _, _))
-        .WillOnce(Invoke([](span<const uint8_t> frame, span<uint8_t> decrypted, size_t& decryptedDataLength) {
+    EXPECT_CALL(this->deps, Decrypt(_, _))
+        .WillOnce(Invoke([](span<const uint8_t> frame, span<uint8_t> decrypted) {
             auto lastCopied = std::copy(frame.cbegin(), frame.cend(), decrypted.begin());
 
-            decryptedDataLength = lastCopied - decrypted.begin();
+            auto decryptedDataLength = lastCopied - decrypted.begin();
 
-            return DecryptStatus::Success;
+            return DecryptFrameResult::Success(decrypted.subspan(0, decryptedDataLength));
         }));
-    EXPECT_CALL(this->deps, Decode(_, _, _))
-        .WillOnce(Invoke([](span<const uint8_t> frame, uint8_t& commandCode, span<const uint8_t>& parameters) {
-            commandCode = frame[0];
-            parameters = frame.subspan(1, frame.length() - 1);
-
-            return DecodeFrameStatus::Success;
-        }));
+    EXPECT_CALL(this->deps, Decode(_))
+        .WillOnce(Invoke(
+            [](span<const uint8_t> frame) { return DecodeTelecommandResult::Success(frame[0], frame.subspan(1, frame.length() - 1)); }));
 
     NiceMock<TeleCommandHandlerMock> someCommand;
     EXPECT_CALL(someCommand, Handle(_, _));
@@ -106,9 +102,9 @@ TEST_F(TeleCommandHandlingTest, HandlerShouldBeCalledForKnownTelecommand)
 
 TEST_F(TeleCommandHandlingTest, WhenDecryptionFailsShouldNotAttemptFrameDecoding)
 {
-    EXPECT_CALL(this->deps, Decrypt(_, _, _)).WillOnce(Return(DecryptStatus::Failed));
+    EXPECT_CALL(this->deps, Decrypt(_, _)).WillOnce(Return(DecryptFrameResult::Failure(DecryptFrameFailureReason::GeneralError)));
 
-    EXPECT_CALL(this->deps, Decode(_, _, _)).Times(0);
+    EXPECT_CALL(this->deps, Decode(_)).Times(0);
 
     CommFrame frame;
 
@@ -117,14 +113,11 @@ TEST_F(TeleCommandHandlingTest, WhenDecryptionFailsShouldNotAttemptFrameDecoding
 
 TEST_F(TeleCommandHandlingTest, WhenDecodingFrameShouldNotAttemptInvokingHandler)
 {
-    EXPECT_CALL(this->deps, Decrypt(_, _, _)).WillOnce(Return(DecryptStatus::Success));
+    const uint8_t frameContents[] = {0xA, 0xB};
 
-    EXPECT_CALL(this->deps, Decode(_, _, _))
-        .WillOnce(Invoke([](span<const uint8_t> /*frame*/, uint8_t& commandCode, span<const uint8_t>& /*parameters*/) {
-            commandCode = 0xAA;
+    EXPECT_CALL(this->deps, Decrypt(_, _)).WillOnce(Return(DecryptFrameResult::Success(frameContents)));
 
-            return (DecodeFrameStatus)DecodeFrameStatus::Failed;
-        }));
+    EXPECT_CALL(this->deps, Decode(_)).WillOnce(Return(DecodeTelecommandResult::Failure(DecodeTelecommandFailureReason::GeneralError)));
 
     NiceMock<TeleCommandHandlerMock> someCommand;
     EXPECT_CALL(someCommand, Handle(_, _)).Times(0);

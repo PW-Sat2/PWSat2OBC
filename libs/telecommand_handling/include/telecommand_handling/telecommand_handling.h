@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <gsl/span>
 #include "comm/comm.h"
-#include "system.h"
 
 namespace telecommands
 {
@@ -29,15 +28,52 @@ namespace telecommands
         };
 
         /**
-         * @brief Result of telecommand decoding
+         * @brief Reason of frame decryption failure
          */
-        enum class DecodeFrameStatus
+        enum class DecryptFrameFailureReason
         {
-            /** Frame successfully decoded into telecommand */
-            Success,
+            GeneralError //!< GeneralError
+        };
 
-            /** Decoding frame failed */
-            Failed
+        /**
+         * @brief Result of frame decryption.  It is (sort of) discrinated union: Success | Failure
+         */
+        class DecryptFrameResult
+        {
+          public:
+            /**
+             * @brief Crates success result
+             * @param[in] decrypted Decrypted frame
+             * @return Success result
+             */
+            static const DecryptFrameResult Success(gsl::span<const std::uint8_t> decrypted);
+
+            /**
+             * @brief Creates failure result
+             * @param[in] reason Failure reason
+             * @return Failure result
+             */
+            static const DecryptFrameResult Failure(DecryptFrameFailureReason reason);
+
+            /** @brief Differentiates success from failure */
+            const bool IsSuccess;
+            /** @brief (Success-only) Decrypted frame */
+            const gsl::span<const std::uint8_t> Decrypted;
+            /** @brief (Failure-only) Failure reason */
+            const DecryptFrameFailureReason FailureReason;
+
+          private:
+            /**
+             * @brief Constructor for success case
+             * @param[in] decrypted Decrypted frame
+             */
+            DecryptFrameResult(gsl::span<const std::uint8_t> decrypted);
+
+            /**
+             * @brief Constructor for failure case
+             * @param[in] reason Failure reason
+             */
+            DecryptFrameResult(DecryptFrameFailureReason reason);
         };
 
         /**
@@ -52,8 +88,59 @@ namespace telecommands
              * @param[out] decryptedDataLength Size of decrypted data
              * @return Operation status
              */
-            virtual DecryptStatus Decrypt(
-                gsl::span<const uint8_t> frame, gsl::span<uint8_t> decrypted, std::size_t& decryptedDataLength) = 0;
+            virtual DecryptFrameResult Decrypt(gsl::span<const uint8_t> frame, gsl::span<uint8_t> decrypted) = 0;
+        };
+
+        /**
+         * @brief Reason of telecommand decoding failure
+         */
+        enum class DecodeTelecommandFailureReason
+        {
+            GeneralError //!< General error
+        };
+
+        /**
+         * @brief Result of telecommand decoding. It is (sort of) discrinated union: Success | Failure
+         */
+        class DecodeTelecommandResult
+        {
+          public:
+            /**
+             * @brief Creates success result
+             * @param[in] commandCode Command code
+             * @param[in] parameters Telecommand parameters
+             * @return Success result
+             */
+            static const DecodeTelecommandResult Success(std::uint8_t commandCode, gsl::span<const std::uint8_t> parameters);
+
+            /**
+             * @brief Creates failure result
+             * @param[in] reason Failure result
+             * @return Failure result
+             */
+            static const DecodeTelecommandResult Failure(DecodeTelecommandFailureReason reason);
+
+            /** @brief Differentiates success from failure */
+            const bool IsSuccess;
+            /** @brief (Success-only) Command code */
+            const std::uint8_t CommandCode;
+            /** @brief (Success-only) Telecommand parameters */
+            const gsl::span<const std::uint8_t> Parameters;
+            /** @brief (Failure-only) Failure reason */
+            const DecodeTelecommandFailureReason FailureReason;
+
+          private:
+            /**
+             * @brief Constructor for failure case
+             * @param[in] commandCode Command code
+             * @param[in] parameters Telecommand parameters
+             */
+            DecodeTelecommandResult(std::uint8_t commandCode, gsl::span<const std::uint8_t> parameters);
+            /**
+             * @brief Constructor for failure case
+             * @param[in] reason Failure reason
+             */
+            DecodeTelecommandResult(DecodeTelecommandFailureReason reason);
         };
 
         /**
@@ -68,8 +155,7 @@ namespace telecommands
              * @param[out] parameters Part of \p frame which contains telecommand parameters
              * @return Operation status
              */
-            virtual DecodeFrameStatus Decode(
-                gsl::span<const std::uint8_t> frame, std::uint8_t& commandCode, gsl::span<const std::uint8_t>& parameters) = 0;
+            virtual DecodeTelecommandResult Decode(gsl::span<const std::uint8_t> frame) = 0;
         };
 
         /**
