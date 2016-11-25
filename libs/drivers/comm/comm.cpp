@@ -253,7 +253,7 @@ bool CommObject::ReceiveFrame(CommFrame& frame)
 
     if (data != NULL)
     {
-        memcpy(frame.Contents, data, frame.Size);
+        memcpy(frame.Contents.data(), data, frame.Size);
     }
 
     status = ReaderStatus(&reader);
@@ -419,4 +419,9 @@ void CommObject::CommTask(void* param)
             comm->PollHardware();
         }
     }
+}
+
+span<const uint8_t> CommFrame::Payload()
+{
+    return span<const uint8_t>(this->Contents.begin(), this->Size);
 }

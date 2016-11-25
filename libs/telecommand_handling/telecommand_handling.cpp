@@ -31,7 +31,7 @@ void IncomingTelecommandHandler::HandleFrame(ITransmitFrame& transmitter, CommFr
     array<uint8_t, DecryptionBufferSize> decryptedFrame{0};
 
     size_t decryptedDataLength;
-    auto decryptStatus = this->_decryptFrame.Decrypt((frame.Contents), span<uint8_t>(decryptedFrame), decryptedDataLength);
+    auto decryptStatus = this->_decryptFrame.Decrypt(frame.Payload(), span<uint8_t>(decryptedFrame), decryptedDataLength);
 
     if (decryptStatus != DecryptStatus::Success)
     {

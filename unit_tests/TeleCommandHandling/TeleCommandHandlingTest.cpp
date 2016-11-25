@@ -75,7 +75,7 @@ TEST_F(TeleCommandHandlingTest, HandlerShouldBeCalledForKnownTelecommand)
 
     CommFrame frame;
     frame.Size = 50;
-    strcpy((char*)frame.Contents, contents);
+    strcpy((char*)frame.Contents.data(), contents);
 
     EXPECT_CALL(this->deps, Decrypt(_, _, _))
         .WillOnce(Invoke([](span<const uint8_t> frame, span<uint8_t> decrypted, size_t& decryptedDataLength) {

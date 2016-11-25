@@ -2,6 +2,7 @@
 #define SRC_DEVICES_COMM_H_
 
 #include <stdbool.h>
+#include <array>
 #include <cstdint>
 #include <gsl/span>
 
@@ -54,6 +55,8 @@ namespace devices
          */
         struct CommFrame
         {
+            gsl::span<const std::uint8_t> Payload();
+
             /** @brief Frame contents size in bytes. */
             std::uint16_t Size;
 
@@ -64,7 +67,7 @@ namespace devices
             std::uint16_t RSSI;
 
             /** @brief Frame content. */
-            std::uint8_t Contents[COMM_MAX_FRAME_CONTENTS_SIZE];
+            std::array<uint8_t, COMM_MAX_FRAME_CONTENTS_SIZE> Contents;
         };
 
         /**
