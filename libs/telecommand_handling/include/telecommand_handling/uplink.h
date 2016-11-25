@@ -19,22 +19,18 @@ namespace telecommands
         /**
          * @brief Copies input frame to @p decrypted buffer
          * @param[in] frame Input frame
-         * @param[out] decrypted Buffer for decrypted data
-         * @param[out] decryptedDataLength Decrypted data length
+         * @param[in] decrypted Buffer for decrypted data
          * @return Always success
          */
-        virtual telecommands::handling::DecryptStatus Decrypt(
-            gsl::span<const std::uint8_t> frame, gsl::span<std::uint8_t> decrypted, std::size_t& decryptedDataLength) override;
+        virtual telecommands::handling::DecryptFrameResult Decrypt(
+            gsl::span<const std::uint8_t> frame, gsl::span<std::uint8_t> decrypted) override;
 
         /**
          * @brief Decodes frame into command code (first byte) and parameters (rest of frame)
          * @param[in] frame Incoming frame
-         * @param[out] commandCode Command code (first byte)
-         * @param[out] parameters Parameters buffer
-         * @return Success if frame contains at least one byte
+         * @return Decoding result
          */
-        virtual telecommands::handling::DecodeFrameStatus Decode(
-            gsl::span<const std::uint8_t> frame, std::uint8_t& commandCode, gsl::span<const std::uint8_t>& parameters) override;
+        virtual telecommands::handling::DecodeTelecommandResult Decode(gsl::span<const std::uint8_t> frame) override;
     };
 }
 

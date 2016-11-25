@@ -6,28 +6,25 @@ using std::copy;
 using gsl::span;
 
 using namespace telecommands;
-using telecommands::handling::DecryptStatus;
-using telecommands::handling::DecodeFrameStatus;
-using telecommands::handling::IHandleTeleCommand;
+using telecommands::handling::DecryptFrameResult;
+using telecommands::handling::DecodeTelecommandFailureReason;
+using telecommands::handling::DecodeTelecommandResult;
 
-DecryptStatus UplinkProtocol::Decrypt(span<const uint8_t> frame, span<uint8_t> decrypted, size_t& decryptedDataLength)
+DecryptFrameResult UplinkProtocol::Decrypt(span<const uint8_t> frame, span<uint8_t> decrypted)
 {
-    auto lastCopied = std::copy(frame.cbegin(), frame.cend(), decrypted.begin());
+    auto lastCopied = copy(frame.cbegin(), frame.cend(), decrypted.begin());
 
-    decryptedDataLength = lastCopied - decrypted.begin();
+    auto decryptedDataLength = lastCopied - decrypted.begin();
 
-    return DecryptStatus::Success;
+    return DecryptFrameResult::Success(decrypted.subspan(0, decryptedDataLength));
 }
 
-DecodeFrameStatus UplinkProtocol::Decode(span<const uint8_t> frame, uint8_t& commandCode, span<const uint8_t>& parameters)
+DecodeTelecommandResult UplinkProtocol::Decode(span<const uint8_t> frame)
 {
     if (frame.length() < 1)
     {
-        return DecodeFrameStatus::Failed;
+        return DecodeTelecommandResult::Failure(DecodeTelecommandFailureReason::GeneralError);
     }
 
-    commandCode = frame[0];
-    parameters = frame.subspan(1, frame.length() - 1);
-
-    return DecodeFrameStatus::Success;
+    return DecodeTelecommandResult::Success(frame[0], frame.subspan(1, frame.length() - 1));
 }

@@ -30,28 +30,23 @@ void IncomingTelecommandHandler::HandleFrame(ITransmitFrame& transmitter, CommFr
 {
     array<uint8_t, DecryptionBufferSize> decryptedFrame{0};
 
-    size_t decryptedDataLength;
-    auto decryptStatus = this->_decryptFrame.Decrypt(frame.Payload(), span<uint8_t>(decryptedFrame), decryptedDataLength);
+    auto decryptResult = this->_decryptFrame.Decrypt(frame.Payload(), span<uint8_t>(decryptedFrame));
 
-    if (decryptStatus != DecryptStatus::Success)
+    if (!decryptResult.IsSuccess)
     {
-        LOGF(LOG_LEVEL_ERROR, "Telecommand decryption failed: %d", num(decryptStatus));
+        LOGF(LOG_LEVEL_ERROR, "Telecommand decryption failed: %d", num(decryptResult.FailureReason));
         return;
     }
 
-    uint8_t commandCode;
-    span<const uint8_t> parameters;
+    auto decodeResult = this->_decodeTelecommand.Decode(decryptResult.Decrypted);
 
-    auto decodeStatus =
-        this->_decodeTelecommand.Decode(span<uint8_t>(decryptedFrame.begin(), decryptedDataLength), commandCode, parameters);
-
-    if (decodeStatus != DecodeFrameStatus::Success)
+    if (!decodeResult.IsSuccess)
     {
-        LOGF(LOG_LEVEL_ERROR, "Telecommand decoding failed: %d", num(decodeStatus));
+        LOGF(LOG_LEVEL_ERROR, "Telecommand decoding failed: %d", num(decodeResult.FailureReason));
         return;
     }
 
-    this->DispatchCommandHandler(transmitter, commandCode, parameters);
+    this->DispatchCommandHandler(transmitter, decodeResult.CommandCode, decodeResult.Parameters);
 }
 
 void IncomingTelecommandHandler::DispatchCommandHandler(ITransmitFrame& transmitter, uint8_t commandCode, span<const uint8_t> parameters)
@@ -67,4 +62,43 @@ void IncomingTelecommandHandler::DispatchCommandHandler(ITransmitFrame& transmit
             return;
         }
     }
+}
+
+DecodeTelecommandResult::DecodeTelecommandResult(DecodeTelecommandFailureReason reason)
+    : IsSuccess(false), CommandCode(0), FailureReason(reason)
+{
+}
+
+DecodeTelecommandResult::DecodeTelecommandResult(std::uint8_t commandCode, gsl::span<const std::uint8_t> parameters)
+    : IsSuccess(true), CommandCode(commandCode), Parameters(parameters), FailureReason(DecodeTelecommandFailureReason::GeneralError)
+{
+}
+
+const DecodeTelecommandResult DecodeTelecommandResult::Failure(DecodeTelecommandFailureReason reason)
+{
+    return DecodeTelecommandResult(reason);
+}
+
+const DecodeTelecommandResult DecodeTelecommandResult::Success(uint8_t commandCode, span<const uint8_t> parameters)
+{
+    return DecodeTelecommandResult(commandCode, parameters);
+}
+
+DecryptFrameResult::DecryptFrameResult(span<const uint8_t> decrypted)
+    : IsSuccess(true), Decrypted(decrypted), FailureReason(DecryptFrameFailureReason::GeneralError)
+{
+}
+
+DecryptFrameResult::DecryptFrameResult(DecryptFrameFailureReason reason) : IsSuccess(false), FailureReason(reason)
+{
+}
+
+const DecryptFrameResult DecryptFrameResult::Success(span<const uint8_t> decrypted)
+{
+    return DecryptFrameResult(decrypted);
+}
+
+const DecryptFrameResult DecryptFrameResult::Failure(DecryptFrameFailureReason reason)
+{
+    return DecryptFrameResult(reason);
 }
