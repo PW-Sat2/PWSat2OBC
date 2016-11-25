@@ -1,6 +1,8 @@
 #include "uplink.h"
+#include <algorithm>
 
 using std::uint8_t;
+using std::copy;
 using gsl::span;
 
 using namespace telecommands;

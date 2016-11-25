@@ -1,12 +1,13 @@
 #include <stdalign.h>
 #include <stdint.h>
-#include <em_aes.h>
+#include <array>
 
 #include "logger/logger.h"
 #include "telecommand_handling.h"
 
 using std::uint8_t;
 using std::size_t;
+using std::array;
 using gsl::span;
 
 using devices::comm::CommObject;
@@ -27,11 +28,10 @@ IncomingTelecommandHandler::IncomingTelecommandHandler(
 
 void IncomingTelecommandHandler::HandleFrame(ITransmitFrame& transmitter, CommFrame& frame)
 {
-    uint8_t decryptedFrame[DecryptionBufferSize] = {0};
+    array<uint8_t, DecryptionBufferSize> decryptedFrame{0};
 
-    size_t decryptedDetaLength;
-    auto decryptStatus =
-        this->_decryptFrame.Decrypt(span<const uint8_t>(frame.Contents), span<uint8_t>(decryptedFrame), decryptedDetaLength);
+    size_t decryptedDataLength;
+    auto decryptStatus = this->_decryptFrame.Decrypt((frame.Contents), span<uint8_t>(decryptedFrame), decryptedDataLength);
 
     if (decryptStatus != DecryptStatus::Success)
     {
@@ -42,7 +42,8 @@ void IncomingTelecommandHandler::HandleFrame(ITransmitFrame& transmitter, CommFr
     uint8_t commandCode;
     span<const uint8_t> parameters;
 
-    auto decodeStatus = this->_decodeTelecommand.Decode(span<const uint8_t>(decryptedFrame, decryptedDetaLength), commandCode, parameters);
+    auto decodeStatus =
+        this->_decodeTelecommand.Decode(span<uint8_t>(decryptedFrame.begin(), decryptedDataLength), commandCode, parameters);
 
     if (decodeStatus != DecodeFrameStatus::Success)
     {

@@ -3,7 +3,6 @@
 #include <gsl/span>
 #include "comm/comm.h"
 #include "i2c/i2c.h"
-#include "system.h"
 #include "telecommand_handling/telecommand_handling.h"
 #include "telecommand_handling/uplink.h"
 

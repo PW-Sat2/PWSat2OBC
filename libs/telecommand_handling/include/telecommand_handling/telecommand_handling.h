@@ -94,7 +94,7 @@ namespace telecommands
         /**
          * Incoming frame handler that is capable of decoding them and dispatching telecommands
          */
-        class IncomingTelecommandHandler : public devices::comm::IHandleFrame
+        class IncomingTelecommandHandler final : public devices::comm::IHandleFrame
         {
           public:
             /**
@@ -114,13 +114,6 @@ namespace telecommands
             virtual void HandleFrame(devices::comm::ITransmitFrame& transmitter, devices::comm::CommFrame& frame) override;
 
           private:
-            /** @brief Frame decryption implementation */
-            IDecryptFrame& _decryptFrame;
-            /** @brief Telecommand decoding implementation */
-            IDecodeTelecommand& _decodeTelecommand;
-            /** @brief Array of pointers to telecommands */
-            gsl::span<IHandleTeleCommand*> _telecommands;
-
             /**
              * Dispatches telecommand handler
              * @param[in] transmitter Transmitter used to send response back
@@ -129,6 +122,13 @@ namespace telecommands
              */
             void DispatchCommandHandler(
                 devices::comm::ITransmitFrame& transmitter, std::uint8_t commandCode, gsl::span<const uint8_t> parameters);
+
+            /** @brief Frame decryption implementation */
+            IDecryptFrame& _decryptFrame;
+            /** @brief Telecommand decoding implementation */
+            IDecodeTelecommand& _decodeTelecommand;
+            /** @brief Array of pointers to telecommands */
+            gsl::span<IHandleTeleCommand*> _telecommands;
         };
     }
 }
