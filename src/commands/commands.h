@@ -22,4 +22,6 @@ void AntennaDeploy(uint16_t argc, char* argv[]);
 void AntennaCancelDeployment(uint16_t argc, char* argv[]);
 void AntennaGetDeploymentStatus(uint16_t argc, char* argv[]);
 
+void TaskListCommand(uint16_t argc, char* argv[]);
+
 #endif
