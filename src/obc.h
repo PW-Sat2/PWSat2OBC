@@ -13,6 +13,9 @@
 #include "fs/fs.h"
 #include "hardware.h"
 #include "leuart/line_io.h"
+#include "n25q/n25q.h"
+#include "n25q/yaffs.h"
+#include "spi/efm.h"
 #include "storage/nand_driver.h"
 #include "terminal/terminal.h"
 #include "time/timer.h"
@@ -71,6 +74,11 @@ struct OBC
 
     /** @brief Overall satellite <-> Earth communication */
     communication::OBCCommunication Communication;
+
+    drivers::spi::EFMSPIInterface SPI;
+
+    devices::n25q::N25QDriver N25Qdriver;
+    devices::n25q::N25QYaffsDevice ExternalFlash;
 
     /** @brief Terminal object. */
     Terminal terminal;

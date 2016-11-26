@@ -43,10 +43,24 @@ namespace devices
             Status ReadStatus();
             FlagStatus ReadFlagStatus();
 
+            void ReadMemory(std::size_t address, gsl::span<uint8_t> buffer);
+            void WriteMemory(std::size_t address, gsl::span<const uint8_t> buffer);
+
+            void EraseChip();
+
           private:
-            drivers::spi::ISPIInterface& _spi;
+            void EnableWrite();
+            void DisableWrite();
+            void WaitBusy();
+
+            void WriteAddress(const std::size_t address);
+
+            void WaitForStatus(Status status, bool wantedState);
 
             void Command(const std::uint8_t command, gsl::span<std::uint8_t> response);
+            void Command(const std::uint8_t command);
+
+            drivers::spi::ISPIInterface& _spi;
         };
     }
 }

@@ -13,11 +13,11 @@ target_link_libraries(${NAME}
     platform
     freeRTOS
     base
-    free_rtos_wrapper
     swo
     leuart
     logger
     SwoEndpoint
+    free_rtos_wrapper
 )
 
 target_generate_hex(${NAME})

@@ -2,6 +2,7 @@ set(NAME n25q)
 
 set(SOURCES
     n25q.cpp
+    yaffs.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -10,6 +11,8 @@ target_link_libraries(${NAME}
 	base
 	gsl
 	spi
+	yaffs
+	logger
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

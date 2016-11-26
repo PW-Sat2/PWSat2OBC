@@ -220,6 +220,8 @@ void FileSystemAPI(FileSystem* fs);
  */
 bool FileSystemInitialize(FileSystem* fs, struct yaffs_dev* rootDevice);
 
+bool FileSystemAddDeviceAndMount(FileSystem* fs, yaffs_dev* device);
+
 /**
  * @brief This method is responsible for writing contents of the passed buffer to the selected file.
  *

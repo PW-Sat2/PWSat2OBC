@@ -172,20 +172,26 @@ bool FileSystemInitialize(FileSystem* fs, struct yaffs_dev* rootDevice)
 {
     YaffsGlueInit();
 
-    yaffs_add_device(rootDevice);
-
     FileSystemAPI(fs);
 
-    int result = yaffs_mount("/");
+    return FileSystemAddDeviceAndMount(fs, rootDevice);
+}
+
+bool FileSystemAddDeviceAndMount(FileSystem* fs, yaffs_dev* device)
+{
+    UNREFERENCED_PARAMETER(fs);
+
+    yaffs_add_device(device);
+    int result = yaffs_mount(device->param.name);
 
     if (result == 0)
     {
-        LOG(LOG_LEVEL_DEBUG, "Mounted /");
+        LOGF(LOG_LEVEL_DEBUG, "Mounted %s", device->param.name);
         return true;
     }
     else
     {
-        LOGF(LOG_LEVEL_ERROR, "Failed to mount /: %d", yaffsfs_GetLastError());
+        LOGF(LOG_LEVEL_ERROR, "Failed to mount %s: %d", device->param.name, yaffsfs_GetLastError());
         return false;
     }
 }
