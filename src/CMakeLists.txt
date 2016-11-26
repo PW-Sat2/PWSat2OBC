@@ -11,6 +11,7 @@ set(SOURCES
     commands/antenna.cpp
     commands/file_system.cpp
     commands/i2c_test_command.cpp
+    commands/heap_info.cpp
     commands/rtos_status.cpp
     commands/heap.cpp
     commands/compile_info.cpp

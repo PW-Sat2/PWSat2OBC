@@ -1,23 +1,21 @@
 #include <em_cmu.h>
 #include <em_usart.h>
+#include <gsl/span>
 #include <em_system.h>
 
 #include "base/os.h"
+#include "fs/fs.h"
 #include "io_map.h"
 #include "logger/logger.h"
 #include "n25q/n25q.h"
+#include "n25q/yaffs.h"
 #include "obc.h"
 #include "spi/efm.h"
+#include "yaffs_guts.h"
 
 using namespace devices::n25q;
 using drivers::spi::EFMSPIInterface;
-
-static void CheckId(N25QDriver& n25q)
-{
-    auto id = n25q.ReadId();
-
-    LOGF(LOG_LEVEL_INFO, "Manufacturer = %X Type = %X Capacity = %X", id.Manufacturer, id.MemoryType, id.MemoryCapacity);
-}
+using gsl::span;
 
 static void N25QTask(void* p)
 {
@@ -25,20 +23,7 @@ static void N25QTask(void* p)
 
     LOG(LOG_LEVEL_INFO, "N25Q task");
 
-    GPIO_PinModeSet(gpioPortD, 3, gpioModePushPull, 1); // cs
-
-    EFMSPIInterface spi;
-
-    spi.Initialize();
-
-    N25QDriver n25q(spi);
-
-    while (1)
-    {
-        CheckId(n25q);
-
-        System::SleepTask(1000);
-    }
+    Main.ExternalFlash.Mount();
 
     System::SuspendTask(NULL);
 }

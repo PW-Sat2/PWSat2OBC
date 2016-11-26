@@ -174,8 +174,8 @@ int main(void)
     GPIO_PinOutSet(LED_PORT, LED0);
     GPIO_PinOutClear(LED_PORT, LED1);
 
-    System::CreateTask(SPITest, "SPI", 4096, NULL, TaskPriority::P1, nullptr);
-    System::CreateTask(Ping, "Ping", 1024, NULL, TaskPriority::P1, nullptr);
+    System::CreateTask(SPITest, "SPI", 4_KB, NULL, TaskPriority::P1, NULL);
+    System::CreateTask(Ping, "Ping", 1_KB, NULL, TaskPriority::P1, NULL);
 
     System::RunScheduler();
 

@@ -118,7 +118,7 @@ static bool FSInit(FileSystem* fs, struct yaffs_dev* rootDevice, YaffsNANDDriver
 
     SetupYaffsNANDDriver(rootDevice, rootDeviceDriver);
 
-    rootDevice->param.name = "/";
+    rootDevice->param.name = "/stk";
     rootDevice->param.inband_tags = true;
     rootDevice->param.is_yaffs2 = true;
     rootDevice->param.total_bytes_per_chunk = rootDeviceDriver->geometry.chunkSize;
@@ -143,7 +143,7 @@ static void ClearState(OBC* obc)
     {
         LOG(LOG_LEVEL_WARNING, "Clearing state on startup");
 
-        const OSResult status = obc->fs.format(&obc->fs, "/");
+        const OSResult status = obc->fs.format(&obc->fs, "/stk");
         if (OS_RESULT_SUCCEEDED(status))
         {
             LOG(LOG_LEVEL_INFO, "Flash formatted");
@@ -287,6 +287,8 @@ int main(void)
     SetupAntennas();
 
     Mission.Initialize();
+
+    Main.SPI.Initialize();
 
     N25QInit();
 

@@ -27,9 +27,11 @@ void EFMSPIInterface::Deselect()
 
 void EFMSPIInterface::Initialize()
 {
+    GPIO_PinModeSet(gpioPortD, 3, gpioModePushPull, 1); // cs
+
     SPIDRV_Init_t init;
     init.bitOrder = SPIDRV_BitOrder::spidrvBitOrderMsbFirst;
-    init.bitRate = 1000000;
+    init.bitRate = 8000000;
     init.clockMode = SPIDRV_ClockMode::spidrvClockMode0;
     init.csControl = SPIDRV_CsControl::spidrvCsControlApplication;
     init.dummyTxValue = 0;

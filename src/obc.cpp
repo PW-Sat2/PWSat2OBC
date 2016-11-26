@@ -4,7 +4,10 @@
 OBC::OBC()
     : timeProvider(fs),                      //
       Communication(Hardware.I2C.Buses.Bus), //
-      terminal(this->IO)                     //
+      SPI(),                                                                                            //
+      N25Qdriver(SPI),                                                                                  //
+      ExternalFlash("/ext", SPI),                                                                       //
+      terminal(this->IO)
 {
 }
 

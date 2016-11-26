@@ -20,12 +20,14 @@ void MountList(std::uint16_t argc, char* argv[]);
 void CommandByTerminal(std::uint16_t argc, char* args[]);
 void I2CTestCommandHandler(std::uint16_t argc, char* argv[]);
 void HeapInfoCommand(std::uint16_t argc, char* argv[]);
-void TaskListCommand(uint16_t argc, char* argv[]);
 
 void AntennaDeploy(std::uint16_t argc, char* argv[]);
 void AntennaCancelDeployment(std::uint16_t argc, char* argv[]);
 void AntennaGetDeploymentStatus(std::uint16_t argc, char* argv[]);
 
+void HeapInfo(uint16_t argc, char* argv[]);
+
+void TaskListCommand(uint16_t argc, char* argv[]);
 void CompileInfo(std::uint16_t argc, char* argv[]);
 void SuspendMission(std::uint16_t argc, char* argv[]);
 void ResumeMission(std::uint16_t argc, char* argv[]);
