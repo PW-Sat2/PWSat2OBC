@@ -19,6 +19,7 @@ static const TerminalCommandDescription commands[] = {
     {"antenna_deploy", AntennaDeploy},
     {"antenna_cancel", AntennaCancelDeployment},
     {"antenna_get_status", AntennaGetDeploymentStatus},
+    {"advance_time", AdvanceTimeHandler},
 };
 
 void InitializeTerminal(void)

@@ -1,9 +1,11 @@
 import logging
 import i2cMock
-from i2cMock import I2CDevice
 from utils import *
 
-class Antenna():
+PRIMARY_ANTENNA_CONTROLLER_ADDRESS = 0x32
+BACKUP_ANTENNA_CONTROLLER_ADDRESS = 0x34
+
+class Antenna(object):
     def __init__(self):
         self.deployed = False
         self.activation_count = 0
@@ -25,9 +27,6 @@ class Antenna():
 
     def cancel_deployment(self):
         self.is_being_deployed = False
-
-PRIMARY_ANTENNA_CONTROLLER_ADDRESS = 0x32
-BACKUP_ANTENNA_CONTROLLER_ADDRESS = 0x34
 
 class AntennaController(i2cMock.I2CDevice):
     def __init__(self, address):

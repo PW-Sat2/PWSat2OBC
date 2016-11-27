@@ -95,9 +95,9 @@ static void MissionControlTask(void* param)
 
     while (1)
     {
-        NormalModeLoop(&state, missionState);
-
         TimeLongDelay(&Main.timeProvider, TimeSpanFromSeconds(10));
+
+        NormalModeLoop(&state, missionState);
     }
 }
 static void TimeInitializeUpdateDescriptor(SystemStateUpdateDescriptor* descriptor)
