@@ -109,60 +109,11 @@ namespace obc
         {
             public:
                 /**
-                 * @brief Pointer to time notification procedure that gets called on time change.
-                 * @see TimePassedCallbackType for details.
-                 */
-                TimePassedCallbackType OnTimePassed;
-
-                /**
-                 * @brief Time notification procedure context pointer.
-                 */
-                void* TimePassedCallbackContext;
-
-                /**
-                 * @brief Current mission time in milliseconds.
+                 *  @brief Constructor for timer object.
                  *
-                 * This value is protected by the timerLock semaphore.
+                 *  @param[in] fileSystem Pointer to file system object that should be used to read persistent state.
                  */
-                TimeSpan CurrentTime;
-
-                /**
-                 * @brief Time period since last timer notification.
-                 *
-                 * This value is used to determine whether the time notification should be invoked on next rtc notification.
-                 * This value is protected by the timerLock semaphore.
-                 */
-                TimeSpan NotificationTime;
-
-                /**
-                 * @brief Time period since the last timer state save.
-                 *
-                 * This value is used to determine whether the time state should be saved on next rtc notification.
-                 * This value is protected by the timerLock semaphore.
-                 */
-                TimeSpan PersistanceTime;
-
-                /**
-                 * @brief Semaphore used to protect internal timer state.
-                 *
-                 * This value is used to synchronize access to current mission time.
-                 */
-                OSSemaphoreHandle timerLock;
-
-                /**
-                 * @brief Semaphore used to ensure that only one time notification callback is being executed at any given time.
-                 */
-                OSSemaphoreHandle notificationLock;
-
-                /**
-                 * @brief Pulse notified on each timer tick
-                 */
-                OSPulseHandle TickNotification;
-
-                /**
-                 * @brief Pointer to file system object that is used to save/restore timer state.
-                 */
-                FileSystem* FileSystemObject;
+                TimeProvider(FileSystem& fileSystem);
 
                 /**
                  * @brief Initializes the timer object.
@@ -171,16 +122,14 @@ namespace obc
                  * on mission time change.
                  * @param[in] timePassedCallbackContext timePassedCallback context pointer. This value is not used by the timer itself.
                  * It passes it as the context parameter to the timePassedCallback.
-                 * @param[in] fileSystem Pointer to file system object that should be used to read persistent state.
                  * @return Operation status. True on success, false otherwise.
                  *
                  * Besides the time initialization this procedure will automatically restores the timer state from the persistent state
                  * saved in the files on local flash memory, therefore make sure that file system module is already initialized.
                  */
                 bool Initialize(
-                    TimePassedCallbackType timePassedCallback, //
-                    void* timePassedCallbackContext,           //
-                    FileSystem* fileSystem                     //
+                    TimePassedCallbackType timePassedCallback,  //
+                    void* timePassedCallbackContext             //
                     );
 
                 /**
@@ -316,6 +265,62 @@ namespace obc
                 const char* const File0 = "/TimeState.0";
                 const char* const File1 = "/TimeState.1";
                 const char* const File2 = "/TimeState.2";
+
+                /**
+                 * @brief Pointer to time notification procedure that gets called on time change.
+                 * @see TimePassedCallbackType for details.
+                 */
+                TimePassedCallbackType OnTimePassed;
+
+                /**
+                 * @brief Time notification procedure context pointer.
+                 */
+                void* TimePassedCallbackContext;
+
+                /**
+                 * @brief Current mission time in milliseconds.
+                 *
+                 * This value is protected by the timerLock semaphore.
+                 */
+                TimeSpan CurrentTime;
+
+                /**
+                 * @brief Time period since last timer notification.
+                 *
+                 * This value is used to determine whether the time notification should be invoked on next rtc notification.
+                 * This value is protected by the timerLock semaphore.
+                 */
+                TimeSpan NotificationTime;
+
+                /**
+                 * @brief Time period since the last timer state save.
+                 *
+                 * This value is used to determine whether the time state should be saved on next rtc notification.
+                 * This value is protected by the timerLock semaphore.
+                 */
+                TimeSpan PersistanceTime;
+
+                /**
+                 * @brief Semaphore used to protect internal timer state.
+                 *
+                 * This value is used to synchronize access to current mission time.
+                 */
+                OSSemaphoreHandle timerLock;
+
+                /**
+                 * @brief Semaphore used to ensure that only one time notification callback is being executed at any given time.
+                 */
+                OSSemaphoreHandle notificationLock;
+
+                /**
+                 * @brief Pulse notified on each timer tick
+                 */
+                OSPulseHandle TickNotification;
+
+                /**
+                 * @brief Pointer to file system object that is used to save/restore timer state.
+                 */
+                FileSystem* FileSystemObject;
         } ;
 
         /** @}*/
