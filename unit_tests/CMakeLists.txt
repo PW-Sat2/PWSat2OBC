@@ -18,10 +18,11 @@ set(SOURCES
   base/ReaderTest.cpp
   base/WriterTest.cpp
   MissionPlan/MissionPlanTest.cpp
-  MissionPlan/DeployAntennasTest.cpp
   MissionPlan/MissionTestHelpers.cpp
   MissionPlan/SailSystemStateTest.cpp
   MissionPlan/ActionDispatchTest.cpp
+  MissionPlan/antenna/DeployAntennasTest.cpp
+  MissionPlan/antenna/AntennaMissionStateTest.cpp
   I2C/FallbackI2CBusTest.cpp
   I2C/ErrorHandlingI2CBusTest.cpp
   I2C/I2CMock.cpp

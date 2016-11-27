@@ -10,13 +10,13 @@ class Test_Antenna(BaseTest):
         super(Test_Antenna, self).__init__(methodName)
 
     def test_primary_antenna_is_reset_at_startup(self):
-        event = TestEvent();
+        event = TestEvent()
         self.system.primary_antenna.on_reset = event.set
         self.system.obc.power_on()
         self.assertTrue(event.wait_for_change(1))
 
     def test_backup_antenna_is_reset_at_startup(self):
-        event = TestEvent();
+        event = TestEvent()
         self.system.backup_antenna.on_reset = event.set
         self.system.obc.power_on()
         self.assertTrue(event.wait_for_change(1))

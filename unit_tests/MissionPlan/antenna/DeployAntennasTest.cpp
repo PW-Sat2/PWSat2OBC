@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock-matchers.h"
-#include "MissionTestHelpers.h"
+#include "MissionPlan/MissionTestHelpers.h"
 #include "mission/antenna_state.h"
 #include "mock/AntennaMock.hpp"
 #include "state/state.h"
@@ -129,6 +129,7 @@ TEST_F(DeployAntennasUpdateTest, TestDeploymentStateUpdateFullDeployment)
     ASSERT_THAT(state.Antenna.DeploymentState[2], Eq(true));
     ASSERT_THAT(state.Antenna.DeploymentState[3], Eq(true));
     ASSERT_THAT(stateDescriptor.IsDeploymentPartFinished(), Eq(true));
+    ASSERT_THAT(stateDescriptor.IsFinished(), Eq(false));
 }
 
 TEST_F(DeployAntennasUpdateTest, TestDeploymentStateUpdatePartialDeployment)
@@ -150,6 +151,8 @@ TEST_F(DeployAntennasUpdateTest, TestDeploymentStateUpdatePartialDeployment)
     ASSERT_THAT(state.Antenna.DeploymentState[1], Eq(false));
     ASSERT_THAT(state.Antenna.DeploymentState[2], Eq(true));
     ASSERT_THAT(state.Antenna.DeploymentState[3], Eq(false));
+    ASSERT_THAT(stateDescriptor.IsDeploymentPartFinished(), Eq(false));
+    ASSERT_THAT(stateDescriptor.IsFinished(), Eq(false));
 }
 
 TEST_F(DeployAntennasUpdateTest, TestDeploymentStateUpdateInProgressInactive)
