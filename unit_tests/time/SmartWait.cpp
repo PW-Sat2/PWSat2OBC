@@ -2,6 +2,7 @@
 #include <gmock/gmock.h>
 
 #include "OsMock.hpp"
+#include "mock/FsMock.hpp"
 #include "base/os.h"
 #include "time/timer.h"
 
@@ -21,10 +22,12 @@ class SmartWaitTest : public Test
   protected:
     TimeProvider timeProvider;
     NaggyMock<OSMock> osMock;
+    testing::NiceMock<FsMock> fs;
     OSReset osGuard;
 };
 
 SmartWaitTest::SmartWaitTest()
+    : timeProvider(fs)
 {
     osGuard = InstallProxy(&osMock);
 

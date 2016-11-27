@@ -2,6 +2,7 @@
 #include "gmock/gmock.h"
 #include "gmock/gmock-matchers.h"
 #include "OsMock.hpp"
+#include "mock/FsMock.hpp"
 #include "TimeSpan.hpp"
 #include "os/os.hpp"
 
@@ -27,6 +28,7 @@ void TimePassedProxy(void* context, TimePoint currentTime)
 class TimerTest : public testing::Test
 {
   protected:
+    TimerTest();
     void Initialize();
 
     TimeSpan GetCurrentTime();
@@ -35,9 +37,17 @@ class TimerTest : public testing::Test
 
     TimeProvider provider;
     TimeNotificationHandler timeHandler;
+
+    testing::NiceMock<FsMock> fs;
     testing::NiceMock<OSMock> os;
     OSReset guard;
 };
+
+TimerTest::TimerTest()
+    : provider(fs)
+{
+
+}
 
 void TimerTest::Initialize()
 {
@@ -48,7 +58,7 @@ void TimerTest::Initialize()
 
     EXPECT_CALL(os, CreatePulseAll()).WillOnce(Return(reinterpret_cast<void*>(3)));
 
-    EXPECT_TRUE(provider.Initialize(TimePassedProxy, &timeHandler, nullptr));
+    EXPECT_TRUE(provider.Initialize(TimePassedProxy, &timeHandler));
 }
 
 TimeSpan TimerTest::GetCurrentTime()
@@ -74,7 +84,7 @@ TEST_F(TimerTest, TestDefaultState)
     this->guard = InstallProxy(&os);
     ON_CALL(os, CreateBinarySemaphore()).WillByDefault(Return(reinterpret_cast<void*>(this)));
     ON_CALL(os, CreatePulseAll()).WillByDefault(Return(reinterpret_cast<void*>(3)));
-    const auto result = provider.Initialize(TimePassedProxy, &timeHandler, nullptr);
+    const auto result = provider.Initialize(TimePassedProxy, &timeHandler);
     ASSERT_THAT(result, Eq(true));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0ull)));
     const auto time = GetMissionTime();
@@ -88,7 +98,7 @@ TEST_F(TimerTest, TestDefaultState)
 TEST_F(TimerTest, TestInitializationFailure)
 {
     ON_CALL(os, CreateBinarySemaphore()).WillByDefault(Return(nullptr));
-    const auto result = provider.Initialize(TimePassedProxy, &timeHandler, nullptr);
+    const auto result = provider.Initialize(TimePassedProxy, &timeHandler);
     ASSERT_THAT(result, Eq(false));
 }
 
@@ -96,7 +106,7 @@ TEST_F(TimerTest, TestInitializationSecondFailure)
 {
     this->guard = InstallProxy(&os);
     EXPECT_CALL(os, CreateBinarySemaphore()).WillOnce(Return(reinterpret_cast<void*>(this))).WillOnce(Return(nullptr));
-    const auto result = provider.Initialize(TimePassedProxy, &timeHandler, nullptr);
+    const auto result = provider.Initialize(TimePassedProxy, &timeHandler);
     ASSERT_THAT(result, Eq(false));
 }
 
