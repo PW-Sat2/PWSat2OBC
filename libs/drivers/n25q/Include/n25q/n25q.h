@@ -46,6 +46,8 @@ namespace devices
             void ReadMemory(std::size_t address, gsl::span<uint8_t> buffer);
             void WriteMemory(std::size_t address, gsl::span<const uint8_t> buffer);
 
+            void EraseSector(std::size_t address);
+            void EraseSubSector(std::size_t address);
             void EraseChip();
 
           private:
