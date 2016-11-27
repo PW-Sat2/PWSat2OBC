@@ -173,7 +173,7 @@ static void ObcInitTask(void* param)
 
     ClearState(obc);
 
-    if (!obc->timeProvider.Initialize(NULL, NULL, &obc->fs))
+    if (!obc->timeProvider.Initialize(NULL, NULL))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize persistent timer. ");
     }

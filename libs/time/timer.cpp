@@ -10,19 +10,29 @@ using namespace obc::time;
  * @{
  */
 
-bool TimeProvider::Initialize(
-    TimePassedCallbackType timePassedCallback, //
-    void* timePassedCallbackContext,           //
-    FileSystem* fileSystem                     //
-    )
+TimeProvider::TimeProvider(FileSystem& fileSystem)
 {
-    const struct TimeSnapshot snapshot = CurrentPersistentTime(fileSystem);
-    CurrentTime = snapshot.CurrentTime;
+    TickNotification = nullptr;
+    notificationLock = nullptr;
+    timerLock = nullptr;
+    OnTimePassed = nullptr;
+    TimePassedCallbackContext = nullptr;
+
+    FileSystemObject = &fileSystem;
     NotificationTime = TimeSpanFromMilliseconds(0ull);
     PersistanceTime = TimeSpanFromMilliseconds(0ull);
+}
+
+bool TimeProvider::Initialize(
+        TimePassedCallbackType timePassedCallback,
+        void* timePassedCallbackContext)
+{
     OnTimePassed = timePassedCallback;
     TimePassedCallbackContext = timePassedCallbackContext;
-    FileSystemObject = fileSystem;
+
+    const struct TimeSnapshot snapshot = CurrentPersistentTime(FileSystemObject);
+    CurrentTime = snapshot.CurrentTime;
+
     timerLock = System.CreateBinarySemaphore();
     notificationLock = System.CreateBinarySemaphore();
     if (timerLock != NULL)
