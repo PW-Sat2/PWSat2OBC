@@ -192,6 +192,26 @@ namespace obc
                  */
                 bool LongDelay(TimeSpan delay);
 
+            public:
+                /**
+                 * @brief Semaphore used to protect internal timer state.
+                 *
+                 * This value is used to synchronize access to current mission time.
+                 */
+                OSSemaphoreHandle timerLock;
+
+                /**
+                 * @brief Semaphore used to ensure that only one time notification callback is being executed at any given time.
+                 */
+                OSSemaphoreHandle notificationLock;
+
+                /**
+                 * @brief Current mission time in milliseconds.
+                 *
+                 * This value is protected by the timerLock semaphore.
+                 */
+                TimeSpan CurrentTime;
+
             private:
                 /**
                  * @brief This procedure is responsible for saving specified timer state.
@@ -278,13 +298,6 @@ namespace obc
                 void* TimePassedCallbackContext;
 
                 /**
-                 * @brief Current mission time in milliseconds.
-                 *
-                 * This value is protected by the timerLock semaphore.
-                 */
-                TimeSpan CurrentTime;
-
-                /**
                  * @brief Time period since last timer notification.
                  *
                  * This value is used to determine whether the time notification should be invoked on next rtc notification.
@@ -299,18 +312,6 @@ namespace obc
                  * This value is protected by the timerLock semaphore.
                  */
                 TimeSpan PersistanceTime;
-
-                /**
-                 * @brief Semaphore used to protect internal timer state.
-                 *
-                 * This value is used to synchronize access to current mission time.
-                 */
-                OSSemaphoreHandle timerLock;
-
-                /**
-                 * @brief Semaphore used to ensure that only one time notification callback is being executed at any given time.
-                 */
-                OSSemaphoreHandle notificationLock;
 
                 /**
                  * @brief Pulse notified on each timer tick
