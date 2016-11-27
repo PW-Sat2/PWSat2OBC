@@ -19,6 +19,7 @@
 #include "storage/nand_driver.h"
 #include "terminal/terminal.h"
 #include "time/timer.h"
+#include "utils.h"
 #include "yaffs_guts.h"
 
 /**
@@ -78,7 +79,7 @@ struct OBC
     drivers::spi::EFMSPIInterface SPI;
 
     devices::n25q::N25QDriver N25Qdriver;
-    devices::n25q::N25QYaffsDevice ExternalFlash;
+    devices::n25q::N25QYaffsDevice<devices::n25q::BlockMapping::Sector, 512_Bytes, 16_MB> ExternalFlash;
 
     /** @brief Terminal object. */
     Terminal terminal;

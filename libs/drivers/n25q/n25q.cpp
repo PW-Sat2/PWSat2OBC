@@ -24,6 +24,7 @@ enum N25QCommand
     WriteDisable = 0x05,
     ProgramMemory = 0x02,
     EraseSubsector = 0x20,
+    EraseSector = 0xD8,
     EraseChip = 0xC7
 };
 
@@ -172,6 +173,46 @@ void N25QDriver::WaitForStatus(Status status, bool wantedState)
             return;
 
     } while (true);
+}
+
+void N25QDriver::EraseSector(size_t address)
+{
+    this->EnableWrite();
+
+    {
+        SPISelectSlave select(this->_spi);
+
+        this->Command(N25QCommand::EraseSector);
+        this->WriteAddress(address);
+    }
+
+    {
+        SPISelectSlave select(this->_spi);
+
+        this->WaitBusy();
+    }
+
+    this->DisableWrite();
+}
+
+void N25QDriver::EraseSubSector(size_t address)
+{
+    this->EnableWrite();
+
+    {
+        SPISelectSlave select(this->_spi);
+
+        this->Command(N25QCommand::EraseSubsector);
+        this->WriteAddress(address);
+    }
+
+    {
+        SPISelectSlave select(this->_spi);
+
+        this->WaitBusy();
+    }
+
+    this->DisableWrite();
 }
 
 void N25QDriver::EraseChip()

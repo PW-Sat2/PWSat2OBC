@@ -10,12 +10,22 @@ namespace devices
 {
     namespace n25q
     {
-        class N25QYaffsDevice
+        enum class BlockMapping
+        {
+            SubSector,
+            Sector
+        };
+
+        class N25QYaffsDeviceBase
         {
           public:
-            N25QYaffsDevice(const char* mountPoint, drivers::spi::ISPIInterface& spi);
+            N25QYaffsDeviceBase(const char* mountPoint,
+                BlockMapping blockMapping,
+                std::size_t chunkSize,
+                std::size_t totalSize,
+                drivers::spi::ISPIInterface& spi);
 
-            N25QYaffsDevice(const N25QYaffsDevice&) = delete;
+            N25QYaffsDeviceBase(const N25QYaffsDeviceBase&) = delete;
 
             OSResult Mount();
             void EraseWholeChip();
@@ -44,6 +54,17 @@ namespace devices
 
             yaffs_dev _device;
             N25QDriver _driver;
+            BlockMapping _blockMapping;
+        };
+
+        template <BlockMapping blockMapping, std::size_t ChunkSize, std::size_t TotalSize>
+        class N25QYaffsDevice : public N25QYaffsDeviceBase
+        {
+          public:
+            N25QYaffsDevice(const char* mountPoint, drivers::spi::ISPIInterface& spi)
+                : N25QYaffsDeviceBase(mountPoint, blockMapping, ChunkSize, TotalSize, spi)
+            {
+            }
         };
     }
 }
