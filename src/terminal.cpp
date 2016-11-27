@@ -17,6 +17,7 @@ static const TerminalCommandDescription commands[] = {
     {"listFiles", FSListFiles},
     {"writeFile", FSWriteFile},
     {"readFile", FSReadFile},
+    {"mountList", MountList},
     {"i2c", I2CTestCommandHandler},
     {"antenna_deploy", AntennaDeploy},
     {"antenna_cancel", AntennaCancelDeployment},

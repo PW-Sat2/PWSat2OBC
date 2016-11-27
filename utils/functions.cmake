@@ -67,7 +67,7 @@ endfunction(target_asm_listing)
 
 function(generate_version_file FILENAME)
     execute_process(
-      COMMAND ${GIT_EXECUTABLE} show HEAD --format=%h
+      COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD 
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
       OUTPUT_VARIABLE GIT_COMMIT_HASH
       OUTPUT_STRIP_TRAILING_WHITESPACE
