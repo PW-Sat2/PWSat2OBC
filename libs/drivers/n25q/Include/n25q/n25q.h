@@ -26,6 +26,7 @@ namespace devices
 
         enum FlagStatus
         {
+            Clear = 0,
             ProgramEraseControllerReady = 1 << 7,
             EraseSuspended = 1 << 6,
             EraseError = 1 << 5,
@@ -44,11 +45,11 @@ namespace devices
             FlagStatus ReadFlagStatus();
 
             void ReadMemory(std::size_t address, gsl::span<uint8_t> buffer);
-            void WriteMemory(std::size_t address, gsl::span<const uint8_t> buffer);
+            bool WriteMemory(std::size_t address, gsl::span<const uint8_t> buffer);
 
-            void EraseSector(std::size_t address);
-            void EraseSubSector(std::size_t address);
-            void EraseChip();
+            bool EraseSector(std::size_t address);
+            bool EraseSubSector(std::size_t address);
+            bool EraseChip();
 
           private:
             void EnableWrite();

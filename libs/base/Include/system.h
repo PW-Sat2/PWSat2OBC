@@ -50,7 +50,12 @@ template <typename T, std::size_t size> constexpr inline std::size_t count_of(T 
 #define EXTERNC_END
 #endif
 
-#define HAS_FLAG(value, flag) (((value) & (flag)) == (flag))
+#define HAS_FLAG(value, flag) (has_flag(value, flag))
+
+template <typename Enum> constexpr bool has_flag(Enum value, Enum flag)
+{
+    return (value & flag) == flag;
+}
 
 #define IS_BIT_SET(value, bit) (((value) & (1u << bit)) == (1 << bit))
 

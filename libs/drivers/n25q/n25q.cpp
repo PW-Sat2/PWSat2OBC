@@ -90,8 +90,10 @@ void N25QDriver::ReadMemory(size_t address, span<uint8_t> buffer)
     }
 }
 
-void N25QDriver::WriteMemory(size_t address, span<const uint8_t> buffer)
+bool N25QDriver::WriteMemory(size_t address, span<const uint8_t> buffer)
 {
+    UNREFERENCED_PARAMETER(address);
+
     for (ptrdiff_t offset = 0; offset < buffer.size(); offset += 256)
     {
         auto chunk = buffer.subspan(offset, min(256, buffer.size() - offset));
@@ -111,8 +113,16 @@ void N25QDriver::WriteMemory(size_t address, span<const uint8_t> buffer)
 
             this->WaitBusy();
         }
+
+        auto flags = this->ReadFlagStatus();
+
+        if (has_flag(flags, FlagStatus::ProgramError))
+        {
+            return false;
+        }
     }
-    this->DisableWrite();
+
+    return true;
 }
 
 void N25QDriver::Command(const std::uint8_t command, gsl::span<std::uint8_t> response)
@@ -127,8 +137,6 @@ void N25QDriver::EnableWrite()
 
         this->Command(N25QCommand::WriteEnable);
     }
-
-    this->WaitForStatus(Status::WriteEnabled, true);
 }
 
 void N25QDriver::DisableWrite()
@@ -138,8 +146,6 @@ void N25QDriver::DisableWrite()
 
         this->Command(N25QCommand::WriteDisable);
     }
-
-    this->WaitForStatus(Status::WriteEnabled, false);
 }
 
 void N25QDriver::WaitBusy()
@@ -176,7 +182,7 @@ void N25QDriver::WaitForStatus(Status status, bool wantedState)
     } while (true);
 }
 
-void N25QDriver::EraseSector(size_t address)
+bool N25QDriver::EraseSector(size_t address)
 {
     this->EnableWrite();
 
@@ -193,10 +199,12 @@ void N25QDriver::EraseSector(size_t address)
         this->WaitBusy();
     }
 
-    this->DisableWrite();
+    auto flags = this->ReadFlagStatus();
+
+    return !has_flag(flags, FlagStatus::EraseError);
 }
 
-void N25QDriver::EraseSubSector(size_t address)
+bool N25QDriver::EraseSubSector(size_t address)
 {
     this->EnableWrite();
 
@@ -213,10 +221,12 @@ void N25QDriver::EraseSubSector(size_t address)
         this->WaitBusy();
     }
 
-    this->DisableWrite();
+    auto flags = this->ReadFlagStatus();
+
+    return !has_flag(flags, FlagStatus::EraseError);
 }
 
-void N25QDriver::EraseChip()
+bool N25QDriver::EraseChip()
 {
     this->EnableWrite();
 
@@ -230,8 +240,9 @@ void N25QDriver::EraseChip()
 
         this->WaitBusy();
     }
+    auto flags = this->ReadFlagStatus();
 
-    this->DisableWrite();
+    return !has_flag(flags, FlagStatus::EraseError);
 }
 
 void N25QDriver::Command(const std::uint8_t command)
