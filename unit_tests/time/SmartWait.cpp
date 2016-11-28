@@ -12,7 +12,7 @@ using testing::Eq;
 using testing::_;
 using testing::Invoke;
 using testing::Return;
-using obc::time::TimeProvider;
+using services::time::TimeProvider;
 
 class SmartWaitTest : public Test
 {

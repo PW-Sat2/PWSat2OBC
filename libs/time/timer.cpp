@@ -3,29 +3,51 @@
 #include "base/writer.h"
 #include "logger/logger.h"
 
-using namespace obc::time;
+using namespace services::time;
 
 /**
  * @addtogroup time
  * @{
  */
 
-TimeProvider::TimeProvider(FileSystem& fileSystem)
+inline bool operator==(const TimeSnapshot& left, const TimeSnapshot& right)
 {
-    TickNotification = nullptr;
-    notificationLock = nullptr;
-    timerLock = nullptr;
-    OnTimePassed = nullptr;
-    TimePassedCallbackContext = nullptr;
-
-    FileSystemObject = &fileSystem;
-    NotificationTime = TimeSpanFromMilliseconds(0ull);
-    PersistanceTime = TimeSpanFromMilliseconds(0ull);
+    return TimeSpanEqual(left.CurrentTime, right.CurrentTime);
 }
 
-bool TimeProvider::Initialize(
-        TimePassedCallbackType timePassedCallback,
-        void* timePassedCallbackContext)
+inline bool operator!=(const TimeSnapshot& left, const TimeSnapshot& right)
+{
+    return !(left == right);
+}
+
+inline bool operator<(const TimeSnapshot& left, const TimeSnapshot& right)
+{
+    return TimeSpanLessThan(left.CurrentTime, right.CurrentTime);
+}
+
+inline bool operator>(const TimeSnapshot& left, const TimeSnapshot& right)
+{
+    return right < left;
+}
+
+inline bool operator<=(const TimeSnapshot& left, const TimeSnapshot& right)
+{
+    return !(left > right);
+}
+
+inline bool operator>=(const TimeSnapshot& left, const TimeSnapshot& right)
+{
+    return !(left < right);
+}
+
+TimeProvider::TimeProvider(FileSystem& fileSystem)
+    : timerLock(nullptr), notificationLock(nullptr), OnTimePassed(nullptr), TimePassedCallbackContext(nullptr),
+      NotificationTime(TimeSpanFromMilliseconds(0ull)), PersistanceTime(TimeSpanFromMilliseconds(0ull)), TickNotification(nullptr),
+      FileSystemObject(&fileSystem)
+{
+}
+
+bool TimeProvider::Initialize(TimePassedCallbackType timePassedCallback, void* timePassedCallbackContext)
 {
     OnTimePassed = timePassedCallback;
     TimePassedCallbackContext = timePassedCallbackContext;
@@ -55,7 +77,7 @@ bool TimeProvider::Initialize(
 
 void TimeProvider::AdvanceTime(TimeSpan delta)
 {
-    if (OS_RESULT_FAILED(System.TakeSemaphore(timerLock, MAX_DELAY)))
+    if (OS_RESULT_FAILED(System::TakeSemaphore(timerLock, MAX_DELAY)))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to acquire timer lock.");
         return;
@@ -67,7 +89,7 @@ void TimeProvider::AdvanceTime(TimeSpan delta)
 
     struct TimerState state = BuildTimerState();
 
-    System.GiveSemaphore(timerLock);
+    System::GiveSemaphore(timerLock);
     ProcessChange(state);
 }
 
@@ -90,30 +112,30 @@ bool TimeProvider::SetCurrentTime(TimePoint pointInTime)
     return true;
 }
 
-bool TimeProvider::GetCurrentTime(TimeSpan* currentTime)
+Option<TimeSpan> TimeProvider::GetCurrentTime()
 {
     if (OS_RESULT_FAILED(System::TakeSemaphore(timerLock, MAX_DELAY)))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to acquire timer lock.");
-        return false;
+        return None<TimeSpan>();
     }
 
-    *currentTime = CurrentTime;
+    TimeSpan currentTime = CurrentTime;
 
     System::GiveSemaphore(timerLock);
-    return true;
+    return Some(currentTime);
 }
 
-bool TimeProvider::GetCurrentMissionTime(TimePoint* timePoint)
+Option<TimePoint> TimeProvider::GetCurrentMissionTime()
 {
-    TimeSpan span;
-    const bool result = GetCurrentTime(&span);
-    if (result)
+    const Option<TimeSpan> result = GetCurrentTime();
+    if (result.HasValue)
     {
-        *timePoint = TimePointFromTimeSpan(span);
+        TimePoint convertedTimePoint = TimePointFromTimeSpan(result.Value);
+        return Some(convertedTimePoint);
     }
 
-    return result;
+    return None<TimePoint>();
 }
 
 void TimeProvider::ProcessChange(TimerState state)
@@ -189,20 +211,20 @@ struct TimeSnapshot TimeProvider::CurrentPersistentTime(FileSystem* fileSystem)
 
     // now vote to determine the most common value,
     // by increasing counters that are the same.
-    if (snapshot[0].Equal(snapshot[1]))
+    if (snapshot[0] == snapshot[1])
     {
         ++votes[0];
         ++votes[1];
     }
 
-    if (snapshot[0].Equal(snapshot[2]))
+    if (snapshot[0] == snapshot[2])
     {
         ++votes[0];
         ++votes[2];
     }
     // we can get away with else here since we seek only one maximum value not all of them
     // we also do not need exact order
-    else if (snapshot[1].Equal(snapshot[2]))
+    else if (snapshot[1] == snapshot[2])
     {
         ++votes[1];
         ++votes[2];
@@ -225,12 +247,12 @@ struct TimeSnapshot TimeProvider::CurrentPersistentTime(FileSystem* fileSystem)
     {
         // find the index with the oldest time snapshot.
         selectedIndex = 0;
-        if (snapshot[1].LessThan(snapshot[0]))
+        if (snapshot[1] < snapshot[0])
         {
             selectedIndex = 1;
         }
 
-        if (snapshot[2].LessThan(snapshot[selectedIndex]))
+        if (snapshot[2] < snapshot[selectedIndex])
         {
             selectedIndex = 2;
         }
@@ -254,8 +276,8 @@ void TimeProvider::SendTimeNotification(TimerState state)
 
 void TimeProvider::SaveTime(TimerState state)
 {
-    if (                                       //
-        !state.saveTime ||                     //
+    if (                         //
+        !state.saveTime ||       //
         FileSystemObject == NULL //
         )
     {
@@ -305,19 +327,19 @@ bool TimeProvider::LongDelayUntil(TimePoint time)
 {
     do
     {
-        TimePoint missionTime;
+        Option<TimePoint> missionTime = GetCurrentMissionTime();
 
-        if (!GetCurrentMissionTime(&missionTime))
+        if (!missionTime.HasValue)
         {
             return false;
         }
 
-        if (TimePointLessThan(time, missionTime))
+        if (TimePointLessThan(time, missionTime.Value))
         {
             return true;
         }
 
-        if (TimePointEqual(time, missionTime))
+        if (TimePointEqual(time, missionTime.Value))
         {
             return true;
         }
@@ -333,14 +355,14 @@ bool TimeProvider::LongDelayUntil(TimePoint time)
 
 bool TimeProvider::LongDelay(TimeSpan delay)
 {
-    TimePoint missionTime;
+    Option<TimePoint> missionTime = GetCurrentMissionTime();
 
-    if (!GetCurrentMissionTime(&missionTime))
+    if (!missionTime.HasValue)
     {
         return false;
     }
 
-    TimePoint time = TimePointFromTimeSpan(TimeSpanAdd(TimePointToTimeSpan(missionTime), delay));
+    TimePoint time = TimePointFromTimeSpan(TimeSpanAdd(TimePointToTimeSpan(missionTime.Value), delay));
 
     return LongDelayUntil(time);
 }

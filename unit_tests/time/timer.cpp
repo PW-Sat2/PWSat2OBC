@@ -12,7 +12,7 @@ using testing::Eq;
 using testing::Ne;
 using testing::_;
 using testing::Return;
-using obc::time::TimeProvider;
+using services::time::TimeProvider;
 
 struct TimeNotificationHandler
 {
@@ -63,20 +63,20 @@ void TimerTest::Initialize()
 
 TimeSpan TimerTest::GetCurrentTime()
 {
-    TimeSpan span{0};
     EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResult::Success));
     EXPECT_CALL(os, GiveSemaphore(provider.timerLock)).Times(1);
-    EXPECT_TRUE(provider.GetCurrentTime(&span));
-    return span;
+    Option<TimeSpan> span = provider.GetCurrentTime();
+    EXPECT_TRUE(span.HasValue);
+    return span.Value;
 }
 
 TimePoint TimerTest::GetMissionTime()
 {
-    TimePoint point{0, 0, 0, 0, 0};
     EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResult::Success));
     EXPECT_CALL(os, GiveSemaphore(provider.timerLock)).Times(1);
-    EXPECT_TRUE(provider.GetCurrentMissionTime(&point));
-    return point;
+    Option<TimePoint> point = provider.GetCurrentMissionTime();
+    EXPECT_TRUE(point.HasValue);
+    return point.Value;
 }
 
 TEST_F(TimerTest, TestDefaultState)
@@ -217,55 +217,52 @@ TEST_F(TimerTest, TestSetTimeNotifiesSystemAboutTimeChange)
 
 TEST_F(TimerTest, TestGetCurrentMissionTime)
 {
-    TimePoint point{0, 0, 0, 0, 0};
     Initialize();
     provider.AdvanceTime(TimeSpanFromMilliseconds(446582001ull));
-    ASSERT_TRUE(provider.GetCurrentMissionTime(&point));
-    ASSERT_THAT(point.milisecond, Eq(1));
-    ASSERT_THAT(point.second, Eq(2));
-    ASSERT_THAT(point.minute, Eq(3));
-    ASSERT_THAT(point.hour, Eq(4));
-    ASSERT_THAT(point.day, Eq(5));
+    Option<TimePoint> point = provider.GetCurrentMissionTime();
+    ASSERT_TRUE(point.HasValue);
+    ASSERT_THAT(point.Value.milisecond, Eq(1));
+    ASSERT_THAT(point.Value.second, Eq(2));
+    ASSERT_THAT(point.Value.minute, Eq(3));
+    ASSERT_THAT(point.Value.hour, Eq(4));
+    ASSERT_THAT(point.Value.day, Eq(5));
 }
 
 TEST_F(TimerTest, TestGetCurrentMissionTimeSynchronization)
 {
-    TimePoint point{0, 0, 0, 0, 0};
     Initialize();
     provider.AdvanceTime(TimeSpanFromMilliseconds(446582001ull));
     EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResult::Success));
     EXPECT_CALL(os, GiveSemaphore(provider.timerLock)).Times(1);
-    provider.GetCurrentMissionTime(&point);
+
+    provider.GetCurrentMissionTime();
 }
 
 TEST_F(TimerTest, TestGetCurrentMissionTimeSynchronizationFailure)
 {
-    TimePoint point{0, 0, 0, 0, 0};
     Initialize();
     provider.AdvanceTime(TimeSpanFromMilliseconds(446582001ull));
     EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResult::InvalidOperation));
     EXPECT_CALL(os, GiveSemaphore(provider.timerLock)).Times(0);
-    EXPECT_FALSE(provider.GetCurrentMissionTime(&point));
+    EXPECT_FALSE(provider.GetCurrentMissionTime().HasValue);
 }
 
 TEST_F(TimerTest, TestGetCurrentTimeSynchronization)
 {
-    TimeSpan span{0};
     Initialize();
     provider.AdvanceTime(TimeSpanFromMilliseconds(446582001ull));
     EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResult::Success));
     EXPECT_CALL(os, GiveSemaphore(provider.timerLock)).Times(1);
-    provider.GetCurrentTime(&span);
+    provider.GetCurrentTime();
 }
 
 TEST_F(TimerTest, TestGetCurrentTimeSynchronizationFailure)
 {
-    TimeSpan span{0};
     Initialize();
     provider.AdvanceTime(TimeSpanFromMilliseconds(446582001ull));
     EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResult::InvalidOperation));
     EXPECT_CALL(os, GiveSemaphore(provider.timerLock)).Times(0);
-    EXPECT_FALSE(provider.GetCurrentTime(&span));
+    EXPECT_FALSE(provider.GetCurrentTime().HasValue);
 }
 
 TEST_F(TimerTest, TestTimerCallback)
