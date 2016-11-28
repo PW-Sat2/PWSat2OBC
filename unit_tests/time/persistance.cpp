@@ -13,7 +13,7 @@ using testing::Ne;
 using testing::Return;
 using testing::Invoke;
 using testing::HasSubstr;
-using obc::time::TimeProvider;
+using services::time::TimeProvider;
 
 class TimerPersistanceTest : public testing::Test
 {
@@ -29,9 +29,9 @@ class TimerPersistanceTest : public testing::Test
 
 TimeSpan TimerPersistanceTest::GetCurrentTime()
 {
-    TimeSpan span{0};
-    EXPECT_TRUE(provider.GetCurrentTime(&span));
-    return span;
+    Option<TimeSpan> span = provider.GetCurrentTime();
+    EXPECT_TRUE(span.HasValue);
+    return span.Value;
 }
 
 static void TimePassedProxy(void* /*context*/, TimePoint /*currentTime*/)

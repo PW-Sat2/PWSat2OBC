@@ -44,7 +44,7 @@ static SystemStateUpdateResult UpdateTime(SystemState* state, void* param)
 {
     UNREFERENCED_PARAMETER(param);
 
-    Main.timeProvider.GetCurrentTime(&state->Time);
+    state->Time = Main.timeProvider.GetCurrentTime().Value;
 
     return SystemStateUpdateOK;
 }
