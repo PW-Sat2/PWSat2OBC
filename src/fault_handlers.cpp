@@ -4,7 +4,7 @@
 #include "swo/swo.h"
 #include "system.h"
 
-extern "C" void prvGetRegistersFromStack(uint32_t* pulFaultStackAddress)
+extern "C" __attribute__((used)) void prvGetRegistersFromStack(uint32_t* pulFaultStackAddress)
 {
     /* These are volatile to try and prevent the compiler/linker optimising them
     away as the variables never actually get used.  If the debugger won't show the
