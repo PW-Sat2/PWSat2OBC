@@ -95,7 +95,7 @@ static size_t leuartReadline(LineIO* io, char* buffer, size_t bufferLength)
 
     NVIC_DisableIRQ(LEUART0_IRQn);
 
-    int remaining;
+    int remaining = 0;
 
     DMADRV_TransferRemainingCount(dmaChannel, &remaining);
 

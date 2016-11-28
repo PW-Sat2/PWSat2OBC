@@ -5,7 +5,9 @@ include(utils/functions.cmake)
 
 project(PWSat C CXX ASM)
 
-set(ENABLE_COVERAGE FALSE CACHE BOOL "Enable code coverage" )
+option(ENABLE_LTO "Use link time optimization" OFF)
+
+set(ENABLE_COVERAGE FALSE CACHE BOOL "Enable code coverage")
 
 set(MEM_MANAGMENT_TYPE 1)
 
