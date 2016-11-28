@@ -6,9 +6,21 @@
 #include "obc.h"
 #include "state/state.h"
 
+/**
+ * @defgroup mission Mission module
+ *
+ * This module contains entire mission management related log.
+ * @{
+ */
+
 /** @brief Object with all state-related descriptors */
 struct MissionState
 {
+    /**
+     * @brief .ctor
+     *
+     * @param[in] obc Reference to global obc object that provides dependencies for mission tasks.
+     */
     MissionState(OBC& obc);
 
     /** @brief (Mock) Flag telling whether sail should be marked as opened by update descriptor */
@@ -29,6 +41,7 @@ struct MissionState
     /** @brief Time update descriptor */
     SystemStateUpdateDescriptor UpdateTime;
 
+    /** @brief Antenna deployment process private state. */
     mission::antenna::AntennaMissionState antennaMission;
 };
 
@@ -38,5 +51,7 @@ struct MissionState
  * @param[in] obc OBC interface
  */
 void InitializeMission(MissionState* missionState, OBC* obc);
+
+/** @} */
 
 #endif /* SRC_MISSION_H_ */

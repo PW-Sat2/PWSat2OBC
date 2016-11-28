@@ -33,13 +33,6 @@ class ExtendableFormatter(Formatter):
 
 def call(method, default, *args):
     if method:
-        #if inspect.ismethod(method):
-        #    if len(args) != (method.__code__.co_argcount - 1):
-        #        raise Exception("Invalid argument count")
-        #else:
-        #    if len(args) != method.__code__.co_argcount:
-        #        raise Exception("Invalid argument count")
-
         result = method(*args)
         if not result is None:
             return result

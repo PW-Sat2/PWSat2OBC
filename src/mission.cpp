@@ -8,6 +8,10 @@
 #include "system.h"
 #include "time/TimePoint.h"
 
+/**
+ * @addtogroup mission
+ * @{
+ */
 MissionState::MissionState(OBC& obc) : antennaMission(obc.antennaDriver)
 {
 }
@@ -111,14 +115,16 @@ void InitializeMission(MissionState* missionState, OBC* obc)
 {
     UNREFERENCED_PARAMETER(obc);
     // Update descriptors
-    AntennaInitializeUpdateDescriptor(&missionState->antennaMission, &NormalModeUpdateDescriptors[0]);
+    NormalModeUpdateDescriptors[0] = AntennaInitializeUpdateDescriptor(missionState->antennaMission);
     TimeInitializeUpdateDescriptor(&NormalModeUpdateDescriptors[1]);
     SailInitializeUpdateDescriptor(&NormalModeUpdateDescriptors[2], &missionState->SailOpened);
 
     // Action Descriptors
-    AntennaInitializeActionDescriptor(&missionState->antennaMission, &NormalModeActionDescriptors[0]);
+    NormalModeActionDescriptors[0] = AntennaInitializeActionDescriptor(missionState->antennaMission);
     SailInitializeActionDescriptor(&NormalModeActionDescriptors[1], &missionState->SailOpened);
 
     //    ADCSInitializeDescriptors(&obc->adcs, &missionState->ADCS);
     System::CreateTask(MissionControlTask, "MissionControl", 2048, missionState, TaskPriority::P2, nullptr);
 }
+
+/** @} */
