@@ -42,7 +42,7 @@
 
 using devices::comm::CommObject;
 using devices::comm::CommFrame;
-using obc::time::TimeProvider;
+using services::time::TimeProvider;
 
 OBC Main;
 MissionState Mission(Main);
@@ -172,7 +172,7 @@ static void ObcInitTask(void* param)
 
     ClearState(obc);
 
-    if (!obc->timeProvider.Initialize(NULL, NULL))
+    if (!obc->timeProvider.Initialize(nullptr, nullptr))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize persistent timer. ");
     }

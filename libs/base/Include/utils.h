@@ -54,4 +54,40 @@ struct PureStatic
     PureStatic() = delete;
 };
 
+template <class T>
+class Option
+{
+public:
+    static Option<T> None()
+    {
+        return Option<T>(false, T());;
+    }
+
+    static Option<T> Some(T &result)
+    {
+        return Option<T>(true, result);
+    }
+
+    const bool HasValue;
+    const T Value;
+
+private:
+    Option(bool hasValue, T value)
+        : HasValue(hasValue), Value(value)
+    {
+    }
+};
+
+template<typename T>
+static inline Option<T> None()
+{
+    return Option<T>::None();
+}
+
+template<typename T>
+static inline Option<T> Some(T &value)
+{
+    return Option<T>::Some(value);
+}
+
 #endif
