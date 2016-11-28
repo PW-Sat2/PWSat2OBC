@@ -24,6 +24,9 @@ typedef struct
     /** @brief Current time */
     TimeSpan Time;
 
+    /**
+     * @brief Current antenna deployment state.
+     */
     struct
     {
         /** @brief Flag indicating that antenna deployment process has been completed. */

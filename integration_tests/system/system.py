@@ -4,11 +4,9 @@ from obc import OBC, SerialPortTerminal
 from devices import *
 from i2cMock import I2CMock
 from pins import Pins
-from tests import _setup_log
 
 class System:
     def __init__(self, obc_com, sys_bus_com, payload_bus_com, use_single_bus, gpio, auto_power_on = True):
-        _setup_log()
         self.log = logging.getLogger("system")
 
         self._use_single_bus = use_single_bus

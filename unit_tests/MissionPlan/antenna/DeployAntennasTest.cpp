@@ -29,7 +29,7 @@ DeployAntennasTest::DeployAntennasTest() : stateDescriptor(mock)
 {
     SystemStateEmpty(&state);
 
-    AntennaInitializeActionDescriptor(&stateDescriptor, &openAntenna);
+    openAntenna = AntennaInitializeActionDescriptor(stateDescriptor);
 }
 
 TEST_F(DeployAntennasTest, TestConditionTimeBeforeThreshold)
@@ -90,7 +90,7 @@ DeployAntennasUpdateTest::DeployAntennasUpdateTest() : stateDescriptor(mock)
 {
     SystemStateEmpty(&state);
 
-    AntennaInitializeUpdateDescriptor(&stateDescriptor, &update);
+    update = AntennaInitializeUpdateDescriptor(stateDescriptor);
 }
 
 TEST_F(DeployAntennasUpdateTest, TestNothingToDo)
@@ -239,7 +239,7 @@ DeployAntennasActionTest::DeployAntennasActionTest() : stateDescriptor(mock)
 {
     SystemStateEmpty(&state);
 
-    AntennaInitializeActionDescriptor(&stateDescriptor, &openAntenna);
+    openAntenna = AntennaInitializeActionDescriptor(stateDescriptor);
 }
 
 void DeployAntennasActionTest::Run()

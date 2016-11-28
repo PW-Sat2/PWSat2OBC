@@ -11,25 +11,125 @@ namespace mission
 {
     namespace antenna
     {
+        /**
+         * @addtogroup mission_atenna
+         * @{
+         */
+        /**
+         * @brief Type definition of the specific deployment step handler.
+         *
+         * @param[in] state Reference to global satellite state.
+         * @param[in] stateDescriptor Reference to deployment process state.
+         * @param[in] driver Reference to current antenna driver instance
+         */
         typedef void DeploymentProcedure(const SystemState& state, //
             AntennaMissionState& stateDescriptor,
             AntennaDriver& driver //
             );
 
-        static DeploymentProcedure RegularDeploymentStep, ResetDriverStep, FinishDeploymentStep;
+        /**
+         * @brief This deployment step performs regular deployment operation.
+         *
+         * @param[in] state Reference to global satellite state.
+         * @param[in] stateDescriptor Reference to the deployment process state object.
+         * @param[in] driver Reference to current antenna driver instance.
+         */
+        static void RegularDeploymentStep(const SystemState& state, //
+            AntennaMissionState& stateDescriptor,
+            AntennaDriver& driver //
+            );
 
+        /**
+         * @brief This deployment step resets current hardware channel.
+         *
+         * @param[in] state Reference to global satellite state.
+         * @param[in] stateDescriptor Reference to the deployment process state object.
+         * @param[in] driver Reference to current antenna driver instance.
+         */
+        static void ResetDriverStep(const SystemState& state, //
+            AntennaMissionState& stateDescriptor,
+            AntennaDriver& driver //
+            );
+
+        /**
+         * @brief This deployment step finalizes antenna deployment process.
+         *
+         * @param[in] state Reference to global satellite state.
+         * @param[in] stateDescriptor Reference to the deployment process state object.
+         * @param[in] driver Reference to current antenna driver instance.
+         */
+        static void FinishDeploymentStep(const SystemState& state, //
+            AntennaMissionState& stateDescriptor,
+            AntennaDriver& driver //
+            );
+
+        /**
+         * @brief Deployment step retry limit.
+         *
+         * This value controls how many times each deployment step will be repeated
+         * in case of errors before process can advance further.
+         */
         static constexpr std::uint8_t StepRetryLimit = 3;
+
+        /**
+         * @brief Hardware operation retry limit.
+         *
+         * This value controls how many times each hardware operation will be issued
+         * in case of errors before declaring it as a failure.
+         */
         static constexpr std::uint8_t RetryLimit = 3;
 
+        /**
+         * @brief Class that describes single deployment step.
+         *
+         * The entire process is driven by the array of steps, each described by the object of this type.
+         */
         struct AntennaDeploymentStep final
         {
+            /**
+             * @brief Pointer to the procedure the performs current step.
+             */
             DeploymentProcedure* procedure;
+
+            /**
+             * @brief Hardware channel that should be used to perform this step.
+             */
             AntennaChannel channel;
+
+            /**
+             * @brief Identifier of the antenna that should be used/affected by this step.
+             */
             AntennaId antennaId;
+
+            /**
+             * @brief Antenna deployment process timeout in seconds.
+             */
             uint8_t deploymentTimeout;
+
+            /**
+             * @brief Flag indicating whether hardware deployment switches should be overriden.
+             */
             bool overrideSwitches;
         };
 
+        /**
+         * @brief Array of antenna deployment steps.
+         *
+         * The entire process is composed of steps that are run in sequence from the beginning. Steps themselves are
+         * grouped into series that together form logical variant of the antenna deployment process.
+         *
+         * Following is the list of the deployment stages that are defined in this array:
+         * - Automatic deployment (primary hardware channel)
+         * - Automatic deployment (backup hardware channel)
+         * - Manual deployment (primary hardware channel)
+         * - Manual deployment (backup hardware channel)
+         * - Manual deployment with increased deployment timeout (primary hardware channel)
+         * - Manual deployment with increased deployment timeout (backup hardware channel)
+         * - Manual deployment with overridden deployment switches (primary hardware channel)
+         * - Manual deployment with overridden deployment switches (backup hardware channel)
+         * - Deployment finalization (primary hardware channel)
+         * - Deployment finalization (backup hardware channel)
+         */
         static const AntennaDeploymentStep deploymentSteps[] = {
             {ResetDriverStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 0, false},
             {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 9, false},
@@ -84,8 +184,15 @@ namespace mission
             {FinishDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 0, false},
         };
 
-        static constexpr uint8_t DeploymentStepLimit = COUNT_OF(deploymentSteps);
-        static constexpr uint8_t FinalizationStepIndex = COUNT_OF(deploymentSteps) - 2;
+        /**
+         * @brief Number of steps in the antenna deployment process.
+         */
+        static constexpr uint8_t DeploymentStepLimit = count_of(deploymentSteps);
+
+        /**
+         * @brief Number of the first step in the deployment finalization phase.
+         */
+        static constexpr uint8_t FinalizationStepIndex = count_of(deploymentSteps) - 2;
 
         AntennaMissionState::AntennaMissionState(AntennaDriver& antennaDriver)
             : overrideState(false), //
@@ -136,6 +243,14 @@ namespace mission
             return FinalizationStepIndex;
         }
 
+        /**
+         * @brief Procedure that verifies whether the antenna deployment process should be executed.
+         * @param[in] state Pointer to global satellite state.
+         * @param[in] param Pointer to the deployment condition private context. This pointer should point
+         * at the object of AntennaMissionState type.
+         *
+         * @return True if the deployment action should be performed, false otherwise.
+         */
         static bool AntennaDeploymentCondition(const SystemState* state, void* param)
         {
             AntennaMissionState* stateDescriptor = (AntennaMissionState*)param;
@@ -153,6 +268,15 @@ namespace mission
             return !stateDescriptor->IsFinished();
         }
 
+        /**
+         * @brief This procedure is supposed to stop any deployment process that may currently be active on the
+         * passed hardware channel.
+         *
+         * @param[in] driver Reference to current antenna driver instance.
+         * @param[in] channel Hardware channel that should be used for current operation.
+         * @param[in] retryCount Number of step retry attempts in case of errors.
+         * @return True if operation has been successfully completed, false otherwise.
+         */
         static bool EndDeployment(AntennaDriver& driver, AntennaChannel channel, std::uint8_t retryCount)
         {
             while (retryCount-- > 0)
@@ -167,6 +291,14 @@ namespace mission
             return false;
         }
 
+        /**
+         * @brief This procedure is supposed to stop any deployment process that may currently be active on the
+         * hardware channel used in the previous step.
+         *
+         * @param[in] state Reference to global satellite state.
+         * @param[in] stateDescriptor Reference to the deployment process state object.
+         * @param[in] driver Reference to current antenna driver instance.
+         */
         static void StopDeployment(const SystemState& state,
             AntennaMissionState& stateDescriptor,
             AntennaDriver& driver //
@@ -182,6 +314,13 @@ namespace mission
             EndDeployment(driver, step.channel, RetryLimit);
         }
 
+        /**
+         * @brief This procedure is supposed to start deployment process described by the current step.
+         *
+         * @param[in] state Reference to global satellite state.
+         * @param[in] stateDescriptor Reference to the deployment process state object.
+         * @param[in] driver Reference to current antenna driver instance.
+         */
         static void BeginDeployment(const SystemState& state,
             AntennaMissionState& stateDescriptor,
             AntennaDriver& driver //
@@ -257,6 +396,14 @@ namespace mission
             }
         }
 
+        /**
+         * @brief This procedure is deployment action entry point.
+         *
+         * This procedure runs the antenna deployment process.
+         * @param[in] state Pointer to global satellite state.
+         * @param[in] param Pointer to the deployment condition private context. This pointer should point
+         * at the object of AntennaMissionState type.
+         */
         static void AntennaDeploymentAction(const SystemState* state, void* param)
         {
             AntennaMissionState* stateDescriptor = (AntennaMissionState*)param;
@@ -268,7 +415,7 @@ namespace mission
         /**
          * @brief This procedure checks whether there is currently antenna deployment process in progress.
          * @param[in] deploymentState Current driver deployment state
-         * @return Operation status.
+         * @return True if at least one antenna is being deployed, false otherwise.
          */
         static bool AreAllAntennasDeployed(const AntennaDeploymentStatus& deploymentState)
         {
@@ -278,7 +425,16 @@ namespace mission
                 deploymentState.DeploymentStatus[3];
         }
 
-        SystemStateUpdateResult AntennaDeploymentUpdate(SystemState* state, void* param)
+        /**
+         * @brief This procedure is antenna deployment update descriptor entry point.
+         *
+         * This procedure updates the global satellite state as well as deployemnt process private state.
+         * @param[in] state Pointer to global satellite state.
+         * @param[in] param Pointer to the deployment condition private context. This pointer should point
+         * at the object of AntennaMissionState type.
+         * @return Operation status.
+         */
+        static SystemStateUpdateResult AntennaDeploymentUpdate(SystemState* state, void* param)
         {
             UNREFERENCED_PARAMETER(state);
             AntennaMissionState* stateDescriptor = (AntennaMissionState*)param;
@@ -319,23 +475,25 @@ namespace mission
             return SystemStateUpdateOK;
         }
 
-        void AntennaInitializeActionDescriptor(AntennaMissionState* stateDescriptor,
-            SystemActionDescriptor* descriptor //
-            )
+        SystemActionDescriptor AntennaInitializeActionDescriptor(AntennaMissionState& stateDescriptor)
         {
-            descriptor->Name = "Deploy Antenna Action";
-            descriptor->Param = stateDescriptor;
-            descriptor->Condition = AntennaDeploymentCondition;
-            descriptor->ActionProc = AntennaDeploymentAction;
+            SystemActionDescriptor descriptor;
+            descriptor.Name = "Deploy Antenna Action";
+            descriptor.Param = &stateDescriptor;
+            descriptor.Condition = AntennaDeploymentCondition;
+            descriptor.ActionProc = AntennaDeploymentAction;
+            return descriptor;
         }
 
-        void AntennaInitializeUpdateDescriptor(AntennaMissionState* stateDescriptor,
-            SystemStateUpdateDescriptor* descriptor //
-            )
+        SystemStateUpdateDescriptor AntennaInitializeUpdateDescriptor(AntennaMissionState& stateDescriptor)
         {
-            descriptor->Name = "Deploy Antenna Update";
-            descriptor->Param = stateDescriptor;
-            descriptor->UpdateProc = AntennaDeploymentUpdate;
+            SystemStateUpdateDescriptor descriptor;
+            descriptor.Name = "Deploy Antenna Update";
+            descriptor.Param = &stateDescriptor;
+            descriptor.UpdateProc = AntennaDeploymentUpdate;
+            return descriptor;
         }
+
+        /** @}*/
     }
 }
