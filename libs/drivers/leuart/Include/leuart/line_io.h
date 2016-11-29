@@ -29,7 +29,7 @@ typedef struct _LineIO
     void (*VPrintf)(struct _LineIO* io, const char* text, va_list args);
 
     /**
-     * @brief Procedure that print given buffer char-by-char. Useful for non-terminated strings
+     * @brief Procedure that print given buffer char-by-char. Useful for not null terminated strings
      * @param[in] buffer Buffer to print
      */
     void (*PrintBuffer)(gsl::span<const char> buffer);

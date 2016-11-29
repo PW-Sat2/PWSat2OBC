@@ -6,6 +6,7 @@
 #include <stddef.h>
 #include <cstdint>
 #include <type_traits>
+#include <utility>
 #include "system.h"
 #include "utils.h"
 
@@ -421,10 +422,10 @@ class System : public PureStatic
 /**
  * RTOS Task wrapper
  */
-template <typename Param, std::size_t StackSize, TaskPriority Priority> class Task
+template <typename Param, std::uint16_t StackSize, TaskPriority Priority> class Task
 {
     static_assert(sizeof(Param) < 16, "WTF are you trying to do?");
-    static_assert(StackSize <= UINT16_MAX, "Stack size must be uint16_t number");
+    static_assert(StackSize % 2 == 0, "Stack size must even");
 
   public:
     /**
@@ -438,29 +439,20 @@ template <typename Param, std::size_t StackSize, TaskPriority Priority> class Ta
      * @param[in] param Parameter passed to task
      * @param[in] handler Function that will be executed in new task
      */
-    Task(const char* name, Param param, HandlerType handler) : _taskName(name), _param(param), _handler(handler), _handle(nullptr)
-    {
-    }
+    Task(const char* name, Param param, HandlerType handler);
 
     /**
-     * Creates RTOS task
+     * @brief Creates RTOS task
      * @return Operation status
      */
-    OSResult Create()
-    {
-        return System::CreateTask(EntryPoint, this->_taskName, StackSize, static_cast<void*>(this), Priority, &this->_handle);
-    }
+    OSResult Create();
 
   private:
     /**
      * @brief Wrapper function that dispatches newly started task to specified handler
      * @param param
      */
-    static void EntryPoint(void* param)
-    {
-        auto This = static_cast<Task*>(param);
-        This->_handler(This->_param);
-    }
+    static void EntryPoint(void* param);
 
     /** @brief Task name */
     const char* _taskName;
@@ -471,6 +463,23 @@ template <typename Param, std::size_t StackSize, TaskPriority Priority> class Ta
     /** @brief Task handle */
     OSTaskHandle _handle;
 };
+
+template <typename Param, std::uint16_t StackSize, TaskPriority Priority>
+Task<Param, StackSize, Priority>::Task(const char* name, Param param, HandlerType handler)
+    : _taskName(name), _param(std::move(param)), _handler(std::move(handler)), _handle(nullptr)
+{
+}
+
+template <typename Param, std::uint16_t StackSize, TaskPriority Priority> OSResult Task<Param, StackSize, Priority>::Create()
+{
+    return System::CreateTask(EntryPoint, this->_taskName, StackSize / 2, static_cast<void*>(this), Priority, &this->_handle);
+}
+
+template <typename Param, std::uint16_t StackSize, TaskPriority Priority> void Task<Param, StackSize, Priority>::EntryPoint(void* param)
+{
+    auto This = static_cast<Task*>(param);
+    This->_handler(This->_param);
+}
 
 /** @}*/
 
