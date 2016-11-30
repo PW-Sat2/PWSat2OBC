@@ -1,113 +1,96 @@
-#include <functional>
 #include "gtest/gtest.h"
-#include "gmock/gmock.h"
 #include "gmock/gmock-matchers.h"
-#include "MissionTestHelpers.h"
+#include "mock/ActionDescriptorMock.hpp"
+#include "mock/UpdateDescriptorMock.hpp"
+#include "mock/VerifyDescriprorMock.hpp"
 #include "state/state.h"
-#include "system.h"
+#include "time/TimeSpan.hpp"
 
 using testing::Eq;
+using testing::_;
+using testing::Invoke;
+using testing::Return;
 
-class MissionPlanTest : public testing::Test
+struct MissionPlanTest : public testing::Test
 {
-  public:
-    MissionPlanTest()
-    {
-        SystemStateEmpty(&state);
-    }
+    MissionPlanTest();
 
-  protected:
     SystemState state;
 };
 
-#if 0
-TEST_F(MissionPlanTest, EmptyStateShouldHaveEmptyValues)
+MissionPlanTest::MissionPlanTest()
 {
-    ASSERT_THAT(state.Flag, Eq(false));
-    ASSERT_THAT(state.NumValue, Eq(100L));
-    ASSERT_THAT(state.AntennaDeployed, Eq(false));
+    SystemStateEmpty(&state);
 }
 
+TEST_F(MissionPlanTest, EmptyStateShouldHaveEmptyValues)
+{
+    ASSERT_THAT(state.SailOpened, Eq(false));
+    ASSERT_THAT(state.Time.value, Eq(0ul));
+    ASSERT_THAT(state.Antenna.Deployed, Eq(false));
+}
 
 TEST_F(MissionPlanTest, ShouldUpdateStateAccordingToDescriptors)
 {
-    StateUpdater flag("UpdateFlag", [](SystemState* state) {
-        state->Flag = true;
+    UpdateDescriptorMock update1;
+    UpdateDescriptorMock update2;
+    EXPECT_CALL(update1, Update(_)).WillOnce(Invoke([](SystemState* state) {
+        state->SailOpened = true;
         return SystemStateUpdateOK;
-    });
+    }));
 
-    StateUpdater NumValue("UpdateNumValue", [](SystemState* state) {
-        state->NumValue = 200;
+    EXPECT_CALL(update2, Update(_)).WillOnce(Invoke([](SystemState* state) {
+        state->Time = TimeSpanFromMilliseconds(100);
         return SystemStateUpdateOK;
-    });
+    }));
 
-    SystemStateUpdateDescriptor stateDescriptors[] = {flag, NumValue};
+    SystemStateUpdateDescriptor stateDescriptors[] = {update1.GetDescriptor(), update2.GetDescriptor()};
 
-    auto result = SystemStateUpdate(&state, stateDescriptors, COUNT_OF(stateDescriptors));
+    const auto result = SystemStateUpdate(&state, stateDescriptors, count_of(stateDescriptors));
 
-    ASSERT_THAT(state.Flag, Eq(true));
-    ASSERT_THAT(state.NumValue, Eq(200L));
+    ASSERT_THAT(state.SailOpened, Eq(true));
+    ASSERT_THAT(state.Time, Eq(TimeSpanFromMilliseconds(100)));
     ASSERT_THAT(result, Eq(SystemStateUpdateOK));
 }
 
 TEST_F(MissionPlanTest, ShouldContinueUpdatingStateAfterWarning)
 {
-    StateUpdater warning("Warning", [](SystemState* state) {
-        UNREFERENCED_PARAMETER(state);
-        return SystemStateUpdateWarning;
-    });
-    StateUpdater success("Success", [](SystemState* state) {
-        state->Flag = true;
-        return SystemStateUpdateOK;
-    });
+    UpdateDescriptorMock update1;
+    UpdateDescriptorMock update2;
+    EXPECT_CALL(update1, Update(_)).WillOnce(Return(SystemStateUpdateWarning));
+    EXPECT_CALL(update2, Update(_)).WillOnce(Return(SystemStateUpdateOK));
 
-    SystemStateUpdateDescriptor stateDescriptors[] = {warning, success};
+    SystemStateUpdateDescriptor stateDescriptors[] = {update1.GetDescriptor(), update2.GetDescriptor()};
 
-    auto result = SystemStateUpdate(&state, stateDescriptors, COUNT_OF(stateDescriptors));
+    const auto result = SystemStateUpdate(&state, stateDescriptors, count_of(stateDescriptors));
 
-    ASSERT_THAT(state.Flag, Eq(true));
     ASSERT_THAT(result, Eq(SystemStateUpdateWarning));
 }
 
 TEST_F(MissionPlanTest, ShouldAbortUpdatingAfterFailure)
 {
-    StateUpdater abort("Abort", [](SystemState* state) {
-        UNREFERENCED_PARAMETER(state);
-        return SystemStateUpdateFailure;
-    });
-    StateUpdater success("Success", [](SystemState* state) {
-        state->Flag = true;
-        return SystemStateUpdateOK;
-    });
+    UpdateDescriptorMock update1;
+    UpdateDescriptorMock update2;
+    EXPECT_CALL(update1, Update(_)).WillOnce(Return(SystemStateUpdateFailure));
+    EXPECT_CALL(update2, Update(_)).Times(0);
 
-    SystemStateUpdateDescriptor stateDescriptors[] = {abort, success};
+    SystemStateUpdateDescriptor stateDescriptors[] = {update1.GetDescriptor(), update2.GetDescriptor()};
 
-    auto result = SystemStateUpdate(&state, stateDescriptors, COUNT_OF(stateDescriptors));
+    const auto result = SystemStateUpdate(&state, stateDescriptors, count_of(stateDescriptors));
 
-    ASSERT_THAT(state.Flag, Eq(false));
     ASSERT_THAT(result, Eq(SystemStateUpdateFailure));
 }
 
 TEST_F(MissionPlanTest, ShouldVerifyStateAgainstConstraints)
 {
-    StateVerifier flagAndNumValue("flag and NumValue >= 20", [](const SystemState* state, SystemStateVerifyDescriptorResult* result) {
-        if (state->Flag && state->NumValue >= 20)
-        {
-            result->Result = SystemStateVerifyOK;
-        }
-        else
-        {
-            result->Result = SystemStateVerifyFailure;
-        }
-    });
+    VerifyDescriptorMock verify;
+    EXPECT_CALL(verify, Verify(_)).WillOnce(Return(SystemStateVerifyDescriptorResult{SystemStateVerifyOK, 0}));
 
-    SystemStateVerifyDescriptor descriptors[] = {flagAndNumValue};
-    SystemStateVerifyDescriptorResult results[COUNT_OF(descriptors)];
+    SystemStateVerifyDescriptor descriptors[] = {verify.GetDescriptor()};
 
-    state.Flag = true;
-    state.NumValue = 20;
+    SystemStateVerifyDescriptorResult results[count_of(descriptors)];
 
-    auto result = SystemStateVerify(&state, descriptors, results, COUNT_OF(descriptors));
+    auto result = SystemStateVerify(&state, descriptors, results, count_of(descriptors));
 
     ASSERT_THAT(result, Eq(SystemStateVerifyOK));
     ASSERT_THAT(results[0].Result, Eq(SystemStateVerifyOK));
@@ -115,51 +98,46 @@ TEST_F(MissionPlanTest, ShouldVerifyStateAgainstConstraints)
 
 TEST_F(MissionPlanTest, ShouldReportInvalidState)
 {
-    StateVerifier flagAndNumValue("flag and NumValue >= 20", [](const SystemState* state, SystemStateVerifyDescriptorResult* result) {
-        if (state->Flag && state->NumValue >= 20)
-        {
-            result->Result = SystemStateVerifyOK;
-        }
-        else
-        {
-            result->Reason = 5;
-            result->Result = SystemStateVerifyFailure;
-        }
-    });
+    VerifyDescriptorMock verify;
+    EXPECT_CALL(verify, Verify(_)).WillOnce(Return(SystemStateVerifyDescriptorResult{SystemStateVerifyFailure, 5}));
 
-    SystemStateVerifyDescriptor descriptors[] = {flagAndNumValue};
-    SystemStateVerifyDescriptorResult results[COUNT_OF(descriptors)];
+    SystemStateVerifyDescriptor descriptors[] = {verify.GetDescriptor()};
+    SystemStateVerifyDescriptorResult results[count_of(descriptors)];
 
-    state.Flag = true;
-    state.NumValue = 10;
-
-    auto result = SystemStateVerify(&state, descriptors, results, COUNT_OF(descriptors));
+    auto result = SystemStateVerify(&state, descriptors, results, count_of(descriptors));
 
     ASSERT_THAT(result, Eq(SystemStateVerifyFailure));
     ASSERT_THAT(results[0].Result, Eq(SystemStateVerifyFailure));
-    ASSERT_THAT(results[0].Reason, Eq(5UL));
+    ASSERT_THAT(results[0].Reason, Eq(5u));
 }
 
 TEST_F(MissionPlanTest, ShouldGenerateActionsBasedOnState)
 {
-    state.Flag = true;
-    state.NumValue = 10;
+    ActionDescriptorMock action1;
+    ActionDescriptorMock action2;
 
-    SystemAction& action1 = SystemAction("action1") //
-                                .When([](const SystemState* state) { return state->NumValue > 5; })
-                                .Do([](const SystemState* state) { UNREFERENCED_PARAMETER(state); });
+    EXPECT_CALL(action1, Condition(_)).WillOnce(Return(false));
+    EXPECT_CALL(action2, Condition(_)).WillOnce(Return(true));
 
-    SystemAction& action2 = SystemAction("action2") //
-                                .When([](const SystemState* state) { return state->NumValue > 15; })
-                                .Do([](const SystemState* state) { UNREFERENCED_PARAMETER(state); });
+    SystemActionDescriptor actions[] = {action1.GetDescriptor(), action2.GetDescriptor()};
+    SystemActionDescriptor* runnable[count_of(actions)] = {0};
 
-    SystemActionDescriptor actions[] = {action1, action2};
-    SystemActionDescriptor* runnable[COUNT_OF(actions)] = {0};
-
-    auto runnableCount = SystemDetermineActions(&state, actions, COUNT_OF(actions), runnable);
+    auto runnableCount = SystemDetermineActions(&state, actions, count_of(actions), runnable);
 
     ASSERT_THAT(runnableCount, Eq(1U));
-    ASSERT_THAT(runnable[0]->Param, Eq(&action1));
+    ASSERT_THAT(runnable[0]->Param, Eq(&action2));
 }
 
-#endif
+TEST_F(MissionPlanTest, ShouldExecuteRunnableAction)
+{
+    ActionDescriptorMock action1;
+    ActionDescriptorMock action2;
+
+    EXPECT_CALL(action1, Action(_)).Times(1);
+    EXPECT_CALL(action2, Action(_)).Times(1);
+
+    SystemActionDescriptor actions[] = {action1.GetDescriptor(), action2.GetDescriptor()};
+    SystemActionDescriptor* runable[] = {actions, actions + 1};
+
+    SystemDispatchActions(&state, runable, count_of(runable));
+}

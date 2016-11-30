@@ -142,63 +142,63 @@ namespace mission
             /**
              * @brief Flag indicating whether antenna hardware status should be ignored.
              */
-            bool overrideState;
+            bool _overrideState;
 
             /**
              * @brief Flag indicating whether the antennas are being curretnly deployed.
              */
-            bool inProgress;
+            bool _inProgress;
 
             /**
              * @brief Current step number.
              */
-            uint8_t stepNumber;
+            uint8_t _stepNumber;
 
             /**
              * @brief Current step retry count.
              */
-            uint8_t retryCount;
+            uint8_t _retryCount;
 
             /**
              * @brief Current antenna driver instance.
              */
-            AntennaDriver& driver;
+            AntennaDriver& _driver;
         };
 
         inline bool AntennaMissionState::IsDeploymentInProgress() const
         {
-            return this->inProgress;
+            return this->_inProgress;
         }
 
         inline bool AntennaMissionState::OverrideState() const
         {
-            return this->overrideState;
+            return this->_overrideState;
         }
 
         inline std::uint8_t AntennaMissionState::StepNumber() const
         {
-            return this->stepNumber;
+            return this->_stepNumber;
         }
 
         inline void AntennaMissionState::NextStep()
         {
-            ++this->stepNumber;
+            ++this->_stepNumber;
         }
 
         inline AntennaDriver& AntennaMissionState::Driver()
         {
-            return this->driver;
+            return this->_driver;
         }
 
         inline void AntennaMissionState::OverrideDeploymentState()
         {
-            this->overrideState = true;
+            this->_overrideState = true;
         }
 
         inline void AntennaMissionState::OverrideStep(std::uint8_t stepNumber)
         {
-            this->stepNumber = stepNumber;
-            this->retryCount = 0;
+            this->_stepNumber = stepNumber;
+            this->_retryCount = 0;
         }
 
         inline void AntennaMissionState::Restart()

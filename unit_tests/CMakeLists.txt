@@ -20,7 +20,6 @@ set(SOURCES
   MissionPlan/MissionPlanTest.cpp
   MissionPlan/MissionTestHelpers.cpp
   MissionPlan/SailSystemStateTest.cpp
-  MissionPlan/ActionDispatchTest.cpp
   MissionPlan/antenna/DeployAntennasTest.cpp
   MissionPlan/antenna/AntennaMissionStateTest.cpp
   I2C/FallbackI2CBusTest.cpp
@@ -43,6 +42,12 @@ set(SOURCES
   antenna/antenna.cpp
   antenna/MiniportMock.cpp
   antenna/MiniportMock.hpp
+  mock/ActionDescriptorMock.cpp
+  mock/ActionDescriptorMock.hpp
+  mock/UpdateDescriptorMock.cpp
+  mock/UpdateDescriptorMock.hpp
+  mock/VerifyDescriprorMock.cpp
+  mock/VerifyDescriprorMock.hpp
 )
 
 add_executable(${NAME} ${SOURCES})
