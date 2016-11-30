@@ -4,7 +4,6 @@
 #include "rapidcheck/gtest.h"
 
 #include "MissionTestHelpers.h"
-
 #include "mission/sail.h"
 #include "state/state.h"
 #include "system.h"

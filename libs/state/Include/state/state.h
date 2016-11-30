@@ -1,14 +1,10 @@
 #ifndef LIBS_MISSION_INCLUDE_MISSION_STATE_H_
 #define LIBS_MISSION_INCLUDE_MISSION_STATE_H_
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include "struct.h"
+#pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <cstdint>
+#include "struct.h"
 
 /**
  * @defgroup State Satellite state management
@@ -89,19 +85,29 @@ typedef enum {
 /**
  * @brief Result of state verification
  */
-typedef struct
+struct SystemStateVerifyDescriptorResult
 {
+    /** default ctor. */
+    SystemStateVerifyDescriptorResult();
+
+    /**
+     * @brief ctor
+     * @param[in] result Result of state verification.
+     * @param[in] reason Detailed verification status.
+     */
+    SystemStateVerifyDescriptorResult(SystemStateVerifyResult result, std::uint32_t reason);
+
     /** @brief Result of state verification */
     SystemStateVerifyResult Result;
     /** @brief Detailed reason of verification result */
-    uint32_t Reason;
-} SystemStateVerifyDescriptorResult;
+    std::uint32_t Reason;
+};
 
 /**
  * @brief Procedure that performs state verification
  * @param[in] state State to verify
  * @param[in] param Arbitrary parameter
- * @param[out] result Verification result
+ * @returns Verification result
  */
 typedef SystemStateVerifyDescriptorResult (*SystemStateVerifyProc)(const SystemState* state, void* param);
 
@@ -122,7 +128,7 @@ typedef struct
  * @brief Performs system state verification.
  * @param[in] state State to verify
  * @param[in] descriptors List of descriptors
- * @param[inout] results Verification results. Must be initialized to array of the same length as descriptors.
+ * @param[in,out] results Verification results. Must be initialized to array of the same length as descriptors.
  * @param[in] descriptorsCount Descriptors count
  * @return Overall verification result
  *
@@ -183,9 +189,5 @@ uint16_t SystemDetermineActions(
 void SystemDispatchActions(const SystemState* state, SystemActionDescriptor* descriptors[], size_t actionsCount);
 
 /** @} */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* LIBS_MISSION_INCLUDE_MISSION_STATE_H_ */

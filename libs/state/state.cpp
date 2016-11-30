@@ -1,10 +1,21 @@
 #include "state.h"
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
 void SystemStateEmpty(SystemState* state)
 {
     memset(state, 0, sizeof(SystemState));
+}
+
+SystemStateVerifyDescriptorResult::SystemStateVerifyDescriptorResult() //
+    : SystemStateVerifyDescriptorResult(SystemStateVerifyOK, 0)
+{
+}
+
+SystemStateVerifyDescriptorResult::SystemStateVerifyDescriptorResult(SystemStateVerifyResult result, std::uint32_t reason) //
+    : Result(result),
+      Reason(reason)
+{
 }
 
 SystemStateUpdateResult SystemStateUpdate(

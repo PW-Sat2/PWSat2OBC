@@ -1,4 +1,5 @@
 #include "mission.h"
+#include <array>
 #include "base/os.h"
 #include "logger/logger.h"
 #include "mission/adcs_mission.h"
@@ -74,7 +75,7 @@ static SystemActionDescriptor NormalModeActionDescriptors[2] = {};
 static void NormalModeLoop(SystemState* state, MissionState* missionState)
 {
     UNREFERENCED_PARAMETER(missionState);
-    SystemActionDescriptor* runnableActions[COUNT_OF(NormalModeActionDescriptors)];
+    std::array<SystemActionDescriptor*, count_of(NormalModeActionDescriptors)> runnableActions;
 
     ModeDescriptor descriptor;
     descriptor.update = NormalModeUpdateDescriptors;
@@ -84,7 +85,7 @@ static void NormalModeLoop(SystemState* state, MissionState* missionState)
     descriptor.verifyCount = 0;
     descriptor.actions = NormalModeActionDescriptors;
     descriptor.actionCount = COUNT_OF(NormalModeActionDescriptors);
-    descriptor.runnableActions = runnableActions;
+    descriptor.runnableActions = runnableActions.data();
 
     Loop(state, &descriptor);
 }
