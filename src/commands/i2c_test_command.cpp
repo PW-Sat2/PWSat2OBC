@@ -11,7 +11,7 @@ void I2CTestCommandHandler(uint16_t argc, char* argv[])
 
     if (argc != 4)
     {
-        TerminalPuts(&Main.terminal, "i2c <w|wr> <system|payload> <device> <data>\n");
+        Main.terminal.Puts("i2c <w|wr> <system|payload> <device> <data>\n");
         return;
     }
 
@@ -27,7 +27,7 @@ void I2CTestCommandHandler(uint16_t argc, char* argv[])
     }
     else
     {
-        TerminalPuts(&Main.terminal, "Unknown bus\n");
+        Main.terminal.Puts("Unknown bus\n");
         return;
     }
 
@@ -49,16 +49,16 @@ void I2CTestCommandHandler(uint16_t argc, char* argv[])
     }
     else
     {
-        TerminalPuts(&Main.terminal, "Unknown mode\n");
+        Main.terminal.Puts("Unknown mode\n");
         return;
     }
 
     if (result == I2CResultOK)
     {
-        TerminalPuts(&Main.terminal, (char*)output);
+        Main.terminal.Puts((char*)output);
     }
     else
     {
-        TerminalPrintf(&Main.terminal, "Error %d\n", result);
+        Main.terminal.Printf("Error %d\n", result);
     }
 }

@@ -3,10 +3,7 @@
 
 #include <stdarg.h>
 #include <stddef.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <gsl/span>
 
 /**
  * @brief API for line based interface
@@ -30,6 +27,13 @@ typedef struct _LineIO
      * @param args Format atrguments as @see a_list
      */
     void (*VPrintf)(struct _LineIO* io, const char* text, va_list args);
+
+    /**
+     * @brief Procedure that print given buffer char-by-char. Useful for not null terminated strings
+     * @param[in] buffer Buffer to print
+     */
+    void (*PrintBuffer)(gsl::span<const char> buffer);
+
     /**
      *
      * @param io Procedure that reads single line of text
@@ -39,9 +43,5 @@ typedef struct _LineIO
      */
     size_t (*Readline)(struct _LineIO* io, char* buffer, size_t bufferLength);
 } LineIO;
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* LIBS_DRIVERS_LEUART_INCLUDE_LEUART_LINE_IO_H_ */

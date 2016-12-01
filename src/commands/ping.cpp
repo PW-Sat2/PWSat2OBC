@@ -14,15 +14,15 @@ void PingHandler(uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
 
-    TerminalPuts(&Main.terminal, "pong");
+    Main.terminal.Puts("pong");
 }
 
 void EchoHandler(uint16_t argc, char* argv[])
 {
-    TerminalPuts(&Main.terminal, "echo with args: \r\n");
+    Main.terminal.Puts("echo with args: \r\n");
 
     for (int i = 0; i < argc; i++)
     {
-        TerminalPrintf(&Main.terminal, "%d. %s \r\n", i, argv[i]);
+        Main.terminal.Printf("%d. %s \r\n", i, argv[i]);
     }
 }

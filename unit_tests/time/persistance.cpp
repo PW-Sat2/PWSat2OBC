@@ -41,15 +41,15 @@ TimerPersistanceTest::TimerPersistanceTest()
 {
     this->osGuard = InstallProxy(&os);
     EXPECT_CALL(os, CreateBinarySemaphore()).WillOnce(Return(reinterpret_cast<void*>(1))).WillOnce(Return(reinterpret_cast<void*>(2)));
-    ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResultSuccess));
-    ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResultSuccess));
+    ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
+    ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResult::Success));
 
     EXPECT_CALL(os, CreatePulseAll()).WillOnce(Return(reinterpret_cast<void*>(3)));
 }
 
 TEST_F(TimerPersistanceTest, TestReadingStateNoState)
 {
-    EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(OSResultNotFound)));
+    EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(OSResult::NotFound)));
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0u)));
 }
@@ -57,8 +57,8 @@ TEST_F(TimerPersistanceTest, TestReadingStateNoState)
 TEST_F(TimerPersistanceTest, TestReadingStateEmptyFiles)
 {
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(1)));
-    EXPECT_CALL(fs, Read(_, _, _)).WillRepeatedly(Return(MakeFSIOResult(OSResultInvalidOperation)));
-    EXPECT_CALL(fs, Close(_)).WillRepeatedly(Return(OSResultSuccess));
+    EXPECT_CALL(fs, Read(_, _, _)).WillRepeatedly(Return(MakeFSIOResult(OSResult::InvalidOperation)));
+    EXPECT_CALL(fs, Close(_)).WillRepeatedly(Return(OSResult::Success));
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0u)));
 }
@@ -66,13 +66,13 @@ TEST_F(TimerPersistanceTest, TestReadingStateEmptyFiles)
 TEST_F(TimerPersistanceTest, TestReadingFiles)
 {
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(10)));
-    ON_CALL(fs, Close(_)).WillByDefault(Return(OSResultSuccess));
+    ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
     EXPECT_CALL(fs, Read(_, _, _))
         .WillRepeatedly(Invoke([](FSFileHandle /*file*/, void* buffer, FSFileSize size) {
             EXPECT_THAT(buffer, Ne(nullptr));
             if (buffer == nullptr)
             {
-                return MakeFSIOResult(OSResultInvalidOperation);
+                return MakeFSIOResult(OSResult::InvalidOperation);
             }
             else
             {
@@ -86,14 +86,14 @@ TEST_F(TimerPersistanceTest, TestReadingFiles)
 
 TEST_F(TimerPersistanceTest, TestReadingSingleNonEmptyFile)
 {
-    EXPECT_CALL(fs, Open(_, _, _)).WillOnce(Return(MakeOpenedFile(1))).WillRepeatedly(Return(MakeOpenedFile(OSResultNotFound)));
-    ON_CALL(fs, Close(_)).WillByDefault(Return(OSResultSuccess));
+    EXPECT_CALL(fs, Open(_, _, _)).WillOnce(Return(MakeOpenedFile(1))).WillRepeatedly(Return(MakeOpenedFile(OSResult::NotFound)));
+    ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
     EXPECT_CALL(fs, Read(_, _, _))
         .WillOnce(Invoke([](FSFileHandle /*file*/, void* buffer, FSFileSize size) {
             memset(buffer, 0x11, size);
             return MakeFSIOResult(size);
         }))
-        .WillRepeatedly(Return(MakeFSIOResult(OSResultInvalidOperation)));
+        .WillRepeatedly(Return(MakeFSIOResult(OSResult::InvalidOperation)));
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0u)));
 }
@@ -101,7 +101,7 @@ TEST_F(TimerPersistanceTest, TestReadingSingleNonEmptyFile)
 TEST_F(TimerPersistanceTest, TestReadingTwoNonEmptyFiles)
 {
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(1)));
-    ON_CALL(fs, Close(_)).WillByDefault(Return(OSResultSuccess));
+    ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
     EXPECT_CALL(fs, Read(_, _, _))
         .WillOnce(Return(MakeFSIOResult(0)))
         .WillRepeatedly(Invoke([](FSFileHandle /*file*/, void* buffer, FSFileSize size) {
@@ -114,8 +114,8 @@ TEST_F(TimerPersistanceTest, TestReadingTwoNonEmptyFiles)
 
 TEST_F(TimerPersistanceTest, TestReadingTwoExistingEmptyFiles)
 {
-    EXPECT_CALL(fs, Open(_, _, _)).WillOnce(Return(MakeOpenedFile(OSResultNotFound))).WillRepeatedly(Return(MakeOpenedFile(1)));
-    ON_CALL(fs, Close(_)).WillByDefault(Return(OSResultSuccess));
+    EXPECT_CALL(fs, Open(_, _, _)).WillOnce(Return(MakeOpenedFile(OSResult::NotFound))).WillRepeatedly(Return(MakeOpenedFile(1)));
+    ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
     EXPECT_CALL(fs, Read(_, _, _))
         .WillRepeatedly(Invoke([](FSFileHandle /*file*/, void* buffer, FSFileSize size) {
             memset(buffer, 0x11, size);
@@ -129,13 +129,13 @@ TEST_F(TimerPersistanceTest, TestReadingFilesEndiannes)
 {
     const uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(1)));
-    ON_CALL(fs, Close(_)).WillByDefault(Return(OSResultSuccess));
+    ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
     EXPECT_CALL(fs, Read(_, _, _))
         .WillRepeatedly(Invoke([=](FSFileHandle /*file*/, void* buffer, FSFileSize size) {
             EXPECT_THAT(size, Eq(8));
             if (size != 8)
             {
-                return MakeFSIOResult(OSResultInvalidOperation);
+                return MakeFSIOResult(OSResult::InvalidOperation);
             }
             else
             {
@@ -153,7 +153,7 @@ TEST_F(TimerPersistanceTest, TestReadingFilesGetClosed)
         .WillOnce(Return(MakeOpenedFile(1)))
         .WillOnce(Return(MakeOpenedFile(2)))
         .WillOnce(Return(MakeOpenedFile(3)));
-    EXPECT_CALL(fs, Read(_, _, _)).WillRepeatedly(Return(MakeFSIOResult(OSResultNotEnoughMemory)));
+    EXPECT_CALL(fs, Read(_, _, _)).WillRepeatedly(Return(MakeFSIOResult(OSResult::NotEnoughMemory)));
     EXPECT_CALL(fs, Close(1)).Times(1);
     EXPECT_CALL(fs, Close(2)).Times(1);
     EXPECT_CALL(fs, Close(3)).Times(1);
@@ -165,7 +165,7 @@ TEST_F(TimerPersistanceTest, TestReadingThreeFilesTwoSame)
     const uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
     const uint8_t incorrect[] = {0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99};
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(1)));
-    ON_CALL(fs, Close(_)).WillByDefault(Return(OSResultSuccess));
+    ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
     EXPECT_CALL(fs, Read(_, _, _))
         .WillOnce(Invoke([=](FSFileHandle /*file*/, void* buffer, FSFileSize size) {
             memcpy(buffer, incorrect, size);
@@ -188,7 +188,7 @@ TEST_F(TimerPersistanceTest, TestReadingThreeDifferentFiles)
         .WillOnce(Return(MakeOpenedFile(1)))
         .WillOnce(Return(MakeOpenedFile(2)))
         .WillOnce(Return(MakeOpenedFile(3)));
-    ON_CALL(fs, Close(_)).WillByDefault(Return(OSResultSuccess));
+    ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
     EXPECT_CALL(fs, Read(Eq(1), _, _))
         .WillOnce(Invoke([=](FSFileHandle /*file*/, void* buffer, FSFileSize size) {
             memcpy(buffer, b, size);
@@ -213,7 +213,7 @@ TEST_F(TimerPersistanceTest, TestReadingThreeDifferentFiles)
 
 TEST_F(TimerPersistanceTest, TestStateSaveError)
 {
-    EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(OSResultNotFound)));
+    EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(OSResult::NotFound)));
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
     TimeAdvanceTime(&provider, TimeSpanFromMilliseconds(0x44332211ull));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x44332211ull)));
@@ -221,21 +221,21 @@ TEST_F(TimerPersistanceTest, TestStateSaveError)
 
 TEST_F(TimerPersistanceTest, TestStateWriteError)
 {
-    EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(OSResultNotFound)));
+    EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(OSResult::NotFound)));
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(1)));
-    EXPECT_CALL(fs, Write(_, _, _)).WillRepeatedly(Return(MakeFSIOResult(OSResultInvalidOperation)));
-    ON_CALL(fs, Close(_)).WillByDefault(Return(OSResultSuccess));
+    EXPECT_CALL(fs, Write(_, _, _)).WillRepeatedly(Return(MakeFSIOResult(OSResult::InvalidOperation)));
+    ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
     TimeAdvanceTime(&provider, TimeSpanFromMilliseconds(0x44332211ull));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x44332211ull)));
 }
 
 TEST_F(TimerPersistanceTest, TestStateWrite)
 {
-    EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(OSResultNotFound)));
+    EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(OSResult::NotFound)));
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(1)));
-    ON_CALL(fs, Close(_)).WillByDefault(Return(OSResultSuccess));
+    ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
     EXPECT_CALL(fs, Write(_, _, _))
         .WillRepeatedly(Invoke([](FSFileHandle /*file*/, const void* buffer, FSFileSize size) {
             uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x00, 0x00, 0x00, 0x00};
@@ -250,7 +250,7 @@ TEST_F(TimerPersistanceTest, TestStateWrite)
 
 TEST_F(TimerPersistanceTest, TestStateWriteClosesFiles)
 {
-    EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(OSResultNotFound)));
+    EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(OSResult::NotFound)));
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
     EXPECT_CALL(fs, Open(HasSubstr(".0"), _, _)).Times(3).WillRepeatedly(Return(MakeOpenedFile(1)));
     EXPECT_CALL(fs, Open(HasSubstr(".1"), _, _)).Times(3).WillRepeatedly(Return(MakeOpenedFile(2)));
@@ -258,18 +258,18 @@ TEST_F(TimerPersistanceTest, TestStateWriteClosesFiles)
     EXPECT_CALL(fs, Close(1)).Times(3);
     EXPECT_CALL(fs, Close(2)).Times(3);
     EXPECT_CALL(fs, Close(3)).Times(3);
-    EXPECT_CALL(fs, Write(_, _, _)).WillRepeatedly(Return(MakeFSIOResult(OSResultInvalidOperation)));
+    EXPECT_CALL(fs, Write(_, _, _)).WillRepeatedly(Return(MakeFSIOResult(OSResult::InvalidOperation)));
     TimeAdvanceTime(&provider, TimeSpanFromMilliseconds(0x44332211ull));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x44332211ull)));
 }
 
 TEST_F(TimerPersistanceTest, TestStateWriteIsNotDoneOnEveryTimeUpdate)
 {
-    EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(OSResultNotFound)));
+    EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(OSResult::NotFound)));
     EXPECT_TRUE(TimeInitialize(&provider, TimePassedProxy, nullptr, &fs));
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(1)));
     EXPECT_CALL(fs, Close(_)).Times(9);
-    EXPECT_CALL(fs, Write(_, _, _)).WillRepeatedly(Return(MakeFSIOResult(OSResultInvalidOperation)));
+    EXPECT_CALL(fs, Write(_, _, _)).WillRepeatedly(Return(MakeFSIOResult(OSResult::InvalidOperation)));
 
     TimeAdvanceTime(&provider, TimeSpanFromMilliseconds(400000));
     TimeAdvanceTime(&provider, TimeSpanFromMilliseconds(100000));

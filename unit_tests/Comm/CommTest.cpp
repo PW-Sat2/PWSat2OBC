@@ -49,7 +49,7 @@ static OSReset SetupComm(CommObject& comm, OSMock& system)
     auto reset = InstallProxy(&system);
     ON_CALL(system, CreateEventGroup()).WillByDefault(Return(reinterpret_cast<OSEventGroupHandle>(&comm)));
 
-    EXPECT_THAT(comm.Initialize(), Eq(OSResultSuccess));
+    EXPECT_THAT(comm.Initialize(), Eq(OSResult::Success));
 
     return reset;
 }
@@ -96,7 +96,7 @@ TEST_F(CommTest, TestInitializationAllocationFailure)
 
     const auto status = commObject.Initialize();
 
-    ASSERT_THAT(status, Ne(OSResultSuccess));
+    ASSERT_THAT(status, Ne(OSResult::Success));
 }
 
 TEST_F(CommTest, TestInitialization)
@@ -105,7 +105,7 @@ TEST_F(CommTest, TestInitialization)
 
     const auto status = commObject.Initialize();
 
-    ASSERT_THAT(status, Eq(OSResultSuccess));
+    ASSERT_THAT(status, Eq(OSResult::Success));
 }
 
 TEST_F(CommTest, TestHardwareReset)

@@ -25,7 +25,7 @@ target_link_libraries(${NAME}
     platform
     freeRTOS
     base
-    os
+    free_rtos_wrapper
     comm
     leuart
     swo

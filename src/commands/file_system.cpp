@@ -13,8 +13,8 @@ void FSListFiles(uint16_t argc, char* argv[])
 
     if (OS_RESULT_FAILED(result.Status))
     {
-        TerminalPuts(&Main.terminal, "Error");
-        TerminalSendNewLine(&Main.terminal);
+        Main.terminal.Puts("Error");
+        Main.terminal.NewLine();
         return;
     }
 
@@ -22,8 +22,8 @@ void FSListFiles(uint16_t argc, char* argv[])
     FSDirectoryHandle dir = result.Handle;
     while ((entry = Main.fs.readDirectory(&Main.fs, dir)) != NULL)
     {
-        TerminalPuts(&Main.terminal, entry);
-        TerminalSendNewLine(&Main.terminal);
+        Main.terminal.Puts(entry);
+        Main.terminal.NewLine();
     }
 
     Main.fs.closeDirectory(&Main.fs, dir);
@@ -36,8 +36,8 @@ void FSWriteFile(uint16_t argc, char* argv[])
     const FSFileOpenResult result = Main.fs.open(&Main.fs, argv[0], FsOpenCreateAlways, FsWriteOnly);
     if (OS_RESULT_FAILED(result.Status))
     {
-        TerminalPuts(&Main.terminal, "Error");
-        TerminalSendNewLine(&Main.terminal);
+        Main.terminal.Puts("Error");
+        Main.terminal.NewLine();
         return;
     }
 
@@ -53,8 +53,8 @@ void FSReadFile(uint16_t argc, char* argv[])
     const FSFileOpenResult result = Main.fs.open(&Main.fs, argv[0], FsOpenExisting, FsReadOnly);
     if (OS_RESULT_FAILED(result.Status))
     {
-        TerminalPuts(&Main.terminal, "Error");
-        TerminalSendNewLine(&Main.terminal);
+        Main.terminal.Puts("Error");
+        Main.terminal.NewLine();
         return;
     }
 
@@ -66,6 +66,6 @@ void FSReadFile(uint16_t argc, char* argv[])
 
     buffer[99] = 0;
 
-    TerminalPuts(&Main.terminal, buffer);
-    TerminalSendNewLine(&Main.terminal);
+    Main.terminal.Puts(buffer);
+    Main.terminal.NewLine();
 }

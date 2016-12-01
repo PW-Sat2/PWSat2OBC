@@ -18,12 +18,12 @@ extern "C" {
 
 void yaffsfs_Lock(void)
 {
-    System.TakeSemaphore(yaffsLock, MAX_DELAY);
+    System::TakeSemaphore(yaffsLock, MAX_DELAY);
 }
 
 void yaffsfs_Unlock(void)
 {
-    System.GiveSemaphore(yaffsLock);
+    System::GiveSemaphore(yaffsLock);
 }
 
 u32 yaffsfs_CurrentTime(void)
@@ -47,7 +47,7 @@ int yaffsfs_GetLastError(void)
 
 void* yaffsfs_malloc(size_t size)
 {
-    void* ptr = System.Alloc(size);
+    void* ptr = System::Alloc(size);
 
     if (!ptr)
     {
@@ -58,7 +58,7 @@ void* yaffsfs_malloc(size_t size)
 }
 void yaffsfs_free(void* ptr)
 {
-    System.Free(ptr);
+    System::Free(ptr);
 }
 
 int yaffsfs_CheckMemRegion(const void* addr, size_t size, int write_request)
@@ -94,6 +94,6 @@ void yaffs_log(const char* fmt, ...)
 
 void YaffsGlueInit(void)
 {
-    yaffsLock = System.CreateBinarySemaphore();
-    System.GiveSemaphore(yaffsLock);
+    yaffsLock = System::CreateBinarySemaphore();
+    System::GiveSemaphore(yaffsLock);
 }

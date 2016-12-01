@@ -34,55 +34,55 @@ TEST_F(AntennaDriverTest, TestHardResetBothChannels)
 
 TEST_F(AntennaDriverTest, TestHardResetStatusSuccess)
 {
-    EXPECT_CALL(primary, Reset(ANTENNA_PRIMARY_CHANNEL)).WillOnce(Return(OSResultSuccess));
-    EXPECT_CALL(primary, Reset(ANTENNA_BACKUP_CHANNEL)).WillOnce(Return(OSResultSuccess));
+    EXPECT_CALL(primary, Reset(ANTENNA_PRIMARY_CHANNEL)).WillOnce(Return(OSResult::Success));
+    EXPECT_CALL(primary, Reset(ANTENNA_BACKUP_CHANNEL)).WillOnce(Return(OSResult::Success));
     const auto result = driver.HardReset(&driver);
-    ASSERT_THAT(result, Eq(OSResultSuccess));
+    ASSERT_THAT(result, Eq(OSResult::Success));
     ASSERT_THAT(driver.primaryChannel.status, Eq(ANTENNA_PORT_OPERATIONAL));
     ASSERT_THAT(driver.secondaryChannel.status, Eq(ANTENNA_PORT_OPERATIONAL));
 }
 
 TEST_F(AntennaDriverTest, TestHardResetPrimaryStatusFailure)
 {
-    EXPECT_CALL(primary, Reset(ANTENNA_PRIMARY_CHANNEL)).WillOnce(Return(OSResultDeviceNotFound));
-    EXPECT_CALL(primary, Reset(ANTENNA_BACKUP_CHANNEL)).WillOnce(Return(OSResultSuccess));
+    EXPECT_CALL(primary, Reset(ANTENNA_PRIMARY_CHANNEL)).WillOnce(Return(OSResult::DeviceNotFound));
+    EXPECT_CALL(primary, Reset(ANTENNA_BACKUP_CHANNEL)).WillOnce(Return(OSResult::Success));
     const auto result = driver.HardReset(&driver);
-    ASSERT_THAT(result, Eq(OSResultSuccess));
+    ASSERT_THAT(result, Eq(OSResult::Success));
     ASSERT_THAT(driver.primaryChannel.status, Eq(ANTENNA_PORT_FAILURE));
 }
 
 TEST_F(AntennaDriverTest, TestHardResetSecondaryStatusFailure)
 {
-    EXPECT_CALL(primary, Reset(ANTENNA_PRIMARY_CHANNEL)).WillOnce(Return(OSResultSuccess));
-    EXPECT_CALL(primary, Reset(ANTENNA_BACKUP_CHANNEL)).WillOnce(Return(OSResultDeviceNotFound));
+    EXPECT_CALL(primary, Reset(ANTENNA_PRIMARY_CHANNEL)).WillOnce(Return(OSResult::Success));
+    EXPECT_CALL(primary, Reset(ANTENNA_BACKUP_CHANNEL)).WillOnce(Return(OSResult::DeviceNotFound));
     const auto result = driver.HardReset(&driver);
-    ASSERT_THAT(result, Eq(OSResultSuccess));
+    ASSERT_THAT(result, Eq(OSResult::Success));
     ASSERT_THAT(driver.secondaryChannel.status, Eq(ANTENNA_PORT_FAILURE));
 }
 
 TEST_F(AntennaDriverTest, TestResetStatusSuccess)
 {
     driver.primaryChannel.status = ANTENNA_PORT_FAILURE;
-    EXPECT_CALL(primary, Reset(ANTENNA_PRIMARY_CHANNEL)).WillOnce(Return(OSResultSuccess));
+    EXPECT_CALL(primary, Reset(ANTENNA_PRIMARY_CHANNEL)).WillOnce(Return(OSResult::Success));
     const auto result = driver.Reset(&driver, ANTENNA_PRIMARY_CHANNEL);
-    ASSERT_THAT(result, Eq(OSResultSuccess));
+    ASSERT_THAT(result, Eq(OSResult::Success));
     ASSERT_THAT(driver.primaryChannel.status, Eq(ANTENNA_PORT_OPERATIONAL));
 }
 
 TEST_F(AntennaDriverTest, TestResetStatusFailure)
 {
-    EXPECT_CALL(primary, Reset(ANTENNA_BACKUP_CHANNEL)).WillOnce(Return(OSResultDeviceNotFound));
+    EXPECT_CALL(primary, Reset(ANTENNA_BACKUP_CHANNEL)).WillOnce(Return(OSResult::DeviceNotFound));
     const auto result = driver.Reset(&driver, ANTENNA_BACKUP_CHANNEL);
-    ASSERT_THAT(result, Ne(OSResultSuccess));
+    ASSERT_THAT(result, Ne(OSResult::Success));
     ASSERT_THAT(driver.secondaryChannel.status, Eq(ANTENNA_PORT_FAILURE));
 }
 
 TEST_F(AntennaDriverTest, TestHardResetBothChannelsFailure)
 {
-    EXPECT_CALL(primary, Reset(ANTENNA_PRIMARY_CHANNEL)).WillOnce(Return(OSResultDeviceNotFound));
-    EXPECT_CALL(primary, Reset(ANTENNA_BACKUP_CHANNEL)).WillOnce(Return(OSResultDeviceNotFound));
+    EXPECT_CALL(primary, Reset(ANTENNA_PRIMARY_CHANNEL)).WillOnce(Return(OSResult::DeviceNotFound));
+    EXPECT_CALL(primary, Reset(ANTENNA_BACKUP_CHANNEL)).WillOnce(Return(OSResult::DeviceNotFound));
     const auto result = driver.HardReset(&driver);
-    ASSERT_THAT(result, Ne(OSResultSuccess));
+    ASSERT_THAT(result, Ne(OSResult::Success));
 }
 
 TEST_F(AntennaDriverTest, TestGetTemperature)
@@ -92,32 +92,34 @@ TEST_F(AntennaDriverTest, TestGetTemperature)
             {
                 UNREFERENCED_PARAMETER(channel);
                 *value = 10;
-                return OSResultSuccess;
+                return OSResult::Success;
             }));
 
     uint16_t result;
     const auto status = driver.GetTemperature(&driver, ANTENNA_PRIMARY_CHANNEL, &result);
-    ASSERT_THAT(status, Eq(OSResultSuccess));
+    ASSERT_THAT(status, Eq(OSResult::Success));
     ASSERT_THAT(result, Eq(10));
 }
 
 TEST_F(AntennaDriverTest, TestGetTemperatureFailure)
 {
-    EXPECT_CALL(primary, GetTemperature(ANTENNA_BACKUP_CHANNEL, _)).WillOnce(Return(OSResultIOError));
+    EXPECT_CALL(primary, GetTemperature(ANTENNA_BACKUP_CHANNEL, _)).WillOnce(Return(OSResult::IOError));
     uint16_t result;
     const auto status = driver.GetTemperature(&driver, ANTENNA_BACKUP_CHANNEL, &result);
-    ASSERT_THAT(status, Ne(OSResultSuccess));
+    ASSERT_THAT(status, Ne(OSResult::Success));
 }
 
 TEST_F(AntennaDriverTest, TestGetTelemetryPositiveTestSecondaryChannel)
 {
-    EXPECT_CALL(primary, GetTemperature(ANTENNA_BACKUP_CHANNEL, _)).WillOnce(Return(OSResultSuccess));
-    EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_BACKUP_CHANNEL, _, _)).Times(4).WillRepeatedly(Return(OSResultSuccess));
-    EXPECT_CALL(primary, GetAntennaActivationTime(ANTENNA_BACKUP_CHANNEL, _, _)).Times(4).WillRepeatedly(Return(OSResultSuccess));
+    EXPECT_CALL(primary, GetTemperature(ANTENNA_BACKUP_CHANNEL, _)).WillOnce(Return(OSResult::Success));
+    EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_BACKUP_CHANNEL, _, _)).Times(4).WillRepeatedly(Return(OSResult::Success));
+    EXPECT_CALL(primary, GetAntennaActivationTime(ANTENNA_BACKUP_CHANNEL, _, _)).Times(4).WillRepeatedly(Return(OSResult::Success));
 
-    EXPECT_CALL(primary, GetTemperature(ANTENNA_PRIMARY_CHANNEL, _)).WillOnce(Return(OSResultDeviceNotFound));
-    EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_PRIMARY_CHANNEL, _, _)).Times(4).WillRepeatedly(Return(OSResultDeviceNotFound));
-    EXPECT_CALL(primary, GetAntennaActivationTime(ANTENNA_PRIMARY_CHANNEL, _, _)).Times(4).WillRepeatedly(Return(OSResultDeviceNotFound));
+    EXPECT_CALL(primary, GetTemperature(ANTENNA_PRIMARY_CHANNEL, _)).WillOnce(Return(OSResult::DeviceNotFound));
+    EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_PRIMARY_CHANNEL, _, _))
+        .Times(4)
+        .WillRepeatedly(Return(OSResult::DeviceNotFound));
+    EXPECT_CALL(primary, GetAntennaActivationTime(ANTENNA_PRIMARY_CHANNEL, _, _)).Times(4).WillRepeatedly(Return(OSResult::DeviceNotFound));
 
     const auto result = driver.GetTelemetry(&driver);
     ASSERT_THAT(result.flags,
@@ -135,13 +137,13 @@ TEST_F(AntennaDriverTest, TestGetTelemetryPositiveTestSecondaryChannel)
 
 TEST_F(AntennaDriverTest, TestGetTelemetryPositiveTestPrimaryChannel)
 {
-    EXPECT_CALL(primary, GetTemperature(ANTENNA_PRIMARY_CHANNEL, _)).WillOnce(Return(OSResultSuccess));
-    EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_PRIMARY_CHANNEL, _, _)).Times(4).WillRepeatedly(Return(OSResultSuccess));
-    EXPECT_CALL(primary, GetAntennaActivationTime(ANTENNA_PRIMARY_CHANNEL, _, _)).Times(4).WillRepeatedly(Return(OSResultSuccess));
+    EXPECT_CALL(primary, GetTemperature(ANTENNA_PRIMARY_CHANNEL, _)).WillOnce(Return(OSResult::Success));
+    EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_PRIMARY_CHANNEL, _, _)).Times(4).WillRepeatedly(Return(OSResult::Success));
+    EXPECT_CALL(primary, GetAntennaActivationTime(ANTENNA_PRIMARY_CHANNEL, _, _)).Times(4).WillRepeatedly(Return(OSResult::Success));
 
-    EXPECT_CALL(primary, GetTemperature(ANTENNA_BACKUP_CHANNEL, _)).WillOnce(Return(OSResultDeviceNotFound));
-    EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_BACKUP_CHANNEL, _, _)).Times(4).WillRepeatedly(Return(OSResultDeviceNotFound));
-    EXPECT_CALL(primary, GetAntennaActivationTime(ANTENNA_BACKUP_CHANNEL, _, _)).Times(4).WillRepeatedly(Return(OSResultDeviceNotFound));
+    EXPECT_CALL(primary, GetTemperature(ANTENNA_BACKUP_CHANNEL, _)).WillOnce(Return(OSResult::DeviceNotFound));
+    EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_BACKUP_CHANNEL, _, _)).Times(4).WillRepeatedly(Return(OSResult::DeviceNotFound));
+    EXPECT_CALL(primary, GetAntennaActivationTime(ANTENNA_BACKUP_CHANNEL, _, _)).Times(4).WillRepeatedly(Return(OSResult::DeviceNotFound));
 
     const auto result = driver.GetTelemetry(&driver);
     ASSERT_THAT(result.flags,
@@ -159,9 +161,9 @@ TEST_F(AntennaDriverTest, TestGetTelemetryPositiveTestPrimaryChannel)
 
 TEST_F(AntennaDriverTest, TestGetTelemetryBothChannelsFailure)
 {
-    EXPECT_CALL(primary, GetTemperature(_, _)).WillRepeatedly(Return(OSResultDeviceNotFound));
-    EXPECT_CALL(primary, GetAntennaActivationCount(_, _, _)).WillRepeatedly(Return(OSResultDeviceNotFound));
-    EXPECT_CALL(primary, GetAntennaActivationTime(_, _, _)).WillRepeatedly(Return(OSResultDeviceNotFound));
+    EXPECT_CALL(primary, GetTemperature(_, _)).WillRepeatedly(Return(OSResult::DeviceNotFound));
+    EXPECT_CALL(primary, GetAntennaActivationCount(_, _, _)).WillRepeatedly(Return(OSResult::DeviceNotFound));
+    EXPECT_CALL(primary, GetAntennaActivationTime(_, _, _)).WillRepeatedly(Return(OSResult::DeviceNotFound));
 
     const auto result = driver.GetTelemetry(&driver);
     ASSERT_THAT(result.flags, Eq(0u));
@@ -181,49 +183,49 @@ TEST_F(AntennaDriverTest, TestManualDeployAntennaArmsDeploymentSystem)
 
 TEST_F(AntennaDriverTest, TestDeployAntennaArmingFailure)
 {
-    EXPECT_CALL(primary, ArmDeploymentSystem(ANTENNA_PRIMARY_CHANNEL)).WillOnce(Return(OSResultDeviceNotFound));
+    EXPECT_CALL(primary, ArmDeploymentSystem(ANTENNA_PRIMARY_CHANNEL)).WillOnce(Return(OSResult::DeviceNotFound));
     const auto status = driver.DeployAntenna(&driver, ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, TimeSpanFromSeconds(10), false);
-    ASSERT_THAT(status, Ne(OSResultSuccess));
+    ASSERT_THAT(status, Ne(OSResult::Success));
 }
 
 TEST_F(AntennaDriverTest, TestAutomaticDeploymentSuccess)
 {
-    ON_CALL(primary, ArmDeploymentSystem(_)).WillByDefault(Return(OSResultSuccess));
-    EXPECT_CALL(primary, InitializeAutomaticDeployment(ANTENNA_BACKUP_CHANNEL, _)).WillOnce(Return(OSResultSuccess));
+    ON_CALL(primary, ArmDeploymentSystem(_)).WillByDefault(Return(OSResult::Success));
+    EXPECT_CALL(primary, InitializeAutomaticDeployment(ANTENNA_BACKUP_CHANNEL, _)).WillOnce(Return(OSResult::Success));
     const auto status = driver.DeployAntenna(&driver, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, TimeSpanFromSeconds(20), false);
-    ASSERT_THAT(status, Eq(OSResultSuccess));
+    ASSERT_THAT(status, Eq(OSResult::Success));
 }
 
 TEST_F(AntennaDriverTest, TestAutomaticDeploymentFailure)
 {
-    ON_CALL(primary, ArmDeploymentSystem(_)).WillByDefault(Return(OSResultSuccess));
-    EXPECT_CALL(primary, InitializeAutomaticDeployment(ANTENNA_BACKUP_CHANNEL, _)).WillOnce(Return(OSResultDeviceNotFound));
+    ON_CALL(primary, ArmDeploymentSystem(_)).WillByDefault(Return(OSResult::Success));
+    EXPECT_CALL(primary, InitializeAutomaticDeployment(ANTENNA_BACKUP_CHANNEL, _)).WillOnce(Return(OSResult::DeviceNotFound));
     const auto status = driver.DeployAntenna(&driver, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, TimeSpanFromSeconds(20), false);
-    ASSERT_THAT(status, Ne(OSResultSuccess));
+    ASSERT_THAT(status, Ne(OSResult::Success));
 }
 
 TEST_F(AntennaDriverTest, TestManualDeploymentSuccess)
 {
-    ON_CALL(primary, ArmDeploymentSystem(_)).WillByDefault(Return(OSResultSuccess));
-    EXPECT_CALL(primary, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, _, false)).WillOnce(Return(OSResultSuccess));
+    ON_CALL(primary, ArmDeploymentSystem(_)).WillByDefault(Return(OSResult::Success));
+    EXPECT_CALL(primary, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, _, false)).WillOnce(Return(OSResult::Success));
     const auto status = driver.DeployAntenna(&driver, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, TimeSpanFromSeconds(20), false);
-    ASSERT_THAT(status, Eq(OSResultSuccess));
+    ASSERT_THAT(status, Eq(OSResult::Success));
 }
 
 TEST_F(AntennaDriverTest, TestManualDeploymentFailure)
 {
-    ON_CALL(primary, ArmDeploymentSystem(_)).WillByDefault(Return(OSResultSuccess));
-    EXPECT_CALL(primary, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, _, false)).WillOnce(Return(OSResultDeviceNotFound));
+    ON_CALL(primary, ArmDeploymentSystem(_)).WillByDefault(Return(OSResult::Success));
+    EXPECT_CALL(primary, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, _, false)).WillOnce(Return(OSResult::DeviceNotFound));
     const auto status = driver.DeployAntenna(&driver, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, TimeSpanFromSeconds(20), false);
-    ASSERT_THAT(status, Ne(OSResultSuccess));
+    ASSERT_THAT(status, Ne(OSResult::Success));
 }
 
 TEST_F(AntennaDriverTest, TestManualDeploymentSuccessWithOverride)
 {
-    ON_CALL(primary, ArmDeploymentSystem(_)).WillByDefault(Return(OSResultSuccess));
-    EXPECT_CALL(primary, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, _, true)).WillOnce(Return(OSResultSuccess));
+    ON_CALL(primary, ArmDeploymentSystem(_)).WillByDefault(Return(OSResult::Success));
+    EXPECT_CALL(primary, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, _, true)).WillOnce(Return(OSResult::Success));
     const auto status = driver.DeployAntenna(&driver, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, TimeSpanFromSeconds(20), true);
-    ASSERT_THAT(status, Eq(OSResultSuccess));
+    ASSERT_THAT(status, Eq(OSResult::Success));
 }
 
 TEST_F(AntennaDriverTest, TestFinishDeploymentCancelsDeployment)
@@ -234,26 +236,26 @@ TEST_F(AntennaDriverTest, TestFinishDeploymentCancelsDeployment)
 
 TEST_F(AntennaDriverTest, TestFinishDeploymentDisarmsDeploymentSystem)
 {
-    ON_CALL(primary, CancelAntennaDeployment(_)).WillByDefault(Return(OSResultSuccess));
-    EXPECT_CALL(primary, DisarmDeploymentSystem(ANTENNA_PRIMARY_CHANNEL)).WillOnce(Return(OSResultSuccess));
+    ON_CALL(primary, CancelAntennaDeployment(_)).WillByDefault(Return(OSResult::Success));
+    EXPECT_CALL(primary, DisarmDeploymentSystem(ANTENNA_PRIMARY_CHANNEL)).WillOnce(Return(OSResult::Success));
     const auto result = driver.FinishDeployment(&driver, ANTENNA_PRIMARY_CHANNEL);
-    ASSERT_THAT(result, Eq(OSResultSuccess));
+    ASSERT_THAT(result, Eq(OSResult::Success));
 }
 
 TEST_F(AntennaDriverTest, TestFinishDeploymentCancelFailure)
 {
-    ON_CALL(primary, CancelAntennaDeployment(_)).WillByDefault(Return(OSResultDeviceNotFound));
+    ON_CALL(primary, CancelAntennaDeployment(_)).WillByDefault(Return(OSResult::DeviceNotFound));
     EXPECT_CALL(primary, DisarmDeploymentSystem(ANTENNA_PRIMARY_CHANNEL)).Times(0);
     const auto result = driver.FinishDeployment(&driver, ANTENNA_PRIMARY_CHANNEL);
-    ASSERT_THAT(result, Ne(OSResultSuccess));
+    ASSERT_THAT(result, Ne(OSResult::Success));
 }
 
 TEST_F(AntennaDriverTest, TestFinishDeploymentDisarmingFailure)
 {
-    ON_CALL(primary, CancelAntennaDeployment(_)).WillByDefault(Return(OSResultSuccess));
-    ON_CALL(primary, DisarmDeploymentSystem(_)).WillByDefault(Return(OSResultDeviceNotFound));
+    ON_CALL(primary, CancelAntennaDeployment(_)).WillByDefault(Return(OSResult::Success));
+    ON_CALL(primary, DisarmDeploymentSystem(_)).WillByDefault(Return(OSResult::DeviceNotFound));
     const auto result = driver.FinishDeployment(&driver, ANTENNA_PRIMARY_CHANNEL);
-    ASSERT_THAT(result, Ne(OSResultSuccess));
+    ASSERT_THAT(result, Ne(OSResult::Success));
 }
 
 TEST_F(AntennaDriverTest, TestIsDeploymentActiveNone)
@@ -262,11 +264,11 @@ TEST_F(AntennaDriverTest, TestIsDeploymentActiveNone)
         .WillByDefault(Invoke([](AntennaChannel /*channel*/, AntennaDeploymentStatus* status) //
             {
                 memset(status, 0, sizeof(*status));
-                return OSResultSuccess;
+                return OSResult::Success;
             }));
 
     const auto status = driver.IsDeploymentActive(&driver, ANTENNA_BACKUP_CHANNEL);
-    ASSERT_THAT(status.status, Eq(OSResultSuccess));
+    ASSERT_THAT(status.status, Eq(OSResult::Success));
     ASSERT_THAT(status.delpoymentInProgress, Eq(false));
 }
 
@@ -277,18 +279,18 @@ TEST_F(AntennaDriverTest, TestIsDeploymentActiveSingle)
             {
                 memset(status, 0, sizeof(*status));
                 status->IsDeploymentActive[3] = true;
-                return OSResultSuccess;
+                return OSResult::Success;
             }));
 
     const auto status = driver.IsDeploymentActive(&driver, ANTENNA_BACKUP_CHANNEL);
-    ASSERT_THAT(status.status, Eq(OSResultSuccess));
+    ASSERT_THAT(status.status, Eq(OSResult::Success));
     ASSERT_THAT(status.delpoymentInProgress, Eq(true));
 }
 
 TEST_F(AntennaDriverTest, TestIsDeploymentActiveFailure)
 {
-    ON_CALL(primary, GetDeploymentStatus(_, _)).WillByDefault(Return(OSResultDeviceNotFound));
+    ON_CALL(primary, GetDeploymentStatus(_, _)).WillByDefault(Return(OSResult::DeviceNotFound));
     const auto status = driver.IsDeploymentActive(&driver, ANTENNA_BACKUP_CHANNEL);
-    ASSERT_THAT(status.status, Ne(OSResultSuccess));
+    ASSERT_THAT(status.status, Ne(OSResult::Success));
     ASSERT_THAT(status.delpoymentInProgress, Eq(false));
 }

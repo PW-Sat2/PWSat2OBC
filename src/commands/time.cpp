@@ -33,5 +33,5 @@ void CurrentTimeHandler(uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argv);
     TimeSpan span;
     TimeGetCurrentTime(&Main.timeProvider, &span);
-    TerminalPrintf(&Main.terminal, "%d", (int)(span.value / 1000));
+    Main.terminal.Printf("%d", (int)(span.value / 1000));
 }

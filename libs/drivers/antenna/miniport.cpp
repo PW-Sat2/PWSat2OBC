@@ -24,14 +24,14 @@ enum Command
 };
 
 /**
- * @brief Maps boolean operation status to OSResult.
+ * @brief Maps boolean operation status to OSResult::.
  * @param[in] status Operation status.
  * @return Mapped operation status.
  * @ingroup AntennaMiniport
  */
 static inline OSResult MapStatus(bool status)
 {
-    return status ? OSResultSuccess : OSResultIOError;
+    return status ? OSResult::Success : OSResult::IOError;
 }
 
 /**
@@ -171,7 +171,7 @@ static OSResult GetDeploymentStatus(AntennaMiniportDriver* miniport,
     memset(telemetry, 0, sizeof(*telemetry));
     if (!SendCommandWithResponse(communicationBus, channel, QUERY_DEPLOYMENT_STATUS, output, sizeof(output)))
     {
-        return OSResultIOError;
+        return OSResult::IOError;
     }
 
     Reader reader;
@@ -185,7 +185,7 @@ static OSResult GetDeploymentStatus(AntennaMiniportDriver* miniport,
             value //
             );
 
-        return OSResultOutOfRange;
+        return OSResult::OutOfRange;
     }
 
     telemetry->DeploymentStatus[0] = IS_BIT_CLEAR(value, 15); // (value & 0x8000) == 0;
@@ -199,7 +199,7 @@ static OSResult GetDeploymentStatus(AntennaMiniportDriver* miniport,
     telemetry->IsDeploymentActive[3] = IS_BIT_SET(value, 1);      //(value & 0x0002) != 0;
     telemetry->IgnoringDeploymentSwitches = IS_BIT_SET(value, 8); //(value & 0x0100) != 0;
     telemetry->DeploymentSystemArmed = IS_BIT_SET(value, 0);      //(value & 0x0001) != 0;
-    return OSResultSuccess;
+    return OSResult::Success;
 }
 
 static OSResult GetAntennaActivationCount(AntennaMiniportDriver* miniport,
@@ -214,11 +214,11 @@ static OSResult GetAntennaActivationCount(AntennaMiniportDriver* miniport,
     if (!SendCommandWithResponse(communicationBus, channel, (Command)(QUERY_ANTENNA_ACTIVATION_COUNT + antennaId), &output, sizeof(output)))
     {
         *count = 0;
-        return OSResultIOError;
+        return OSResult::IOError;
     }
 
     *count = output;
-    return OSResultSuccess;
+    return OSResult::Success;
 }
 
 static OSResult GetAntennaActivationTime(AntennaMiniportDriver* miniport,
@@ -233,14 +233,14 @@ static OSResult GetAntennaActivationTime(AntennaMiniportDriver* miniport,
     if (!SendCommandWithResponse(communicationBus, channel, (Command)(QUERY_ANTENNA_ACTIVATION_TIME + antennaId), output, sizeof(output)))
     {
         *span = TimeSpanFromMilliseconds(0);
-        return OSResultIOError;
+        return OSResult::IOError;
     }
 
     Reader reader;
     ReaderInitialize(&reader, output, sizeof(output));
     const uint16_t value = ReaderReadWordBE(&reader);
     *span = TimeSpanFromMilliseconds(value * 50);
-    return OSResultSuccess;
+    return OSResult::Success;
 }
 
 static OSResult GetTemperature(AntennaMiniportDriver* miniport,
@@ -254,7 +254,7 @@ static OSResult GetTemperature(AntennaMiniportDriver* miniport,
     *temperature = 0;
     if (!SendCommandWithResponse(communicationBus, channel, QUERY_TEMPERATURE, output, sizeof(output)))
     {
-        return OSResultIOError;
+        return OSResult::IOError;
     }
 
     Reader reader;
@@ -268,11 +268,11 @@ static OSResult GetTemperature(AntennaMiniportDriver* miniport,
             value //
             );
 
-        return OSResultOutOfRange;
+        return OSResult::OutOfRange;
     }
 
     *temperature = value & 0x3ff;
-    return OSResultSuccess;
+    return OSResult::Success;
 }
 
 void AntennaMiniportInitialize(AntennaMiniportDriver* driver)

@@ -126,19 +126,19 @@ bool TimeInitialize(TimeProvider* provider,    //
     provider->OnTimePassed = timePassedCallback;
     provider->TimePassedCallbackContext = timePassedCallbackContext;
     provider->FileSystemObject = fileSystem;
-    provider->timerLock = System.CreateBinarySemaphore();
-    provider->notificationLock = System.CreateBinarySemaphore();
+    provider->timerLock = System::CreateBinarySemaphore();
+    provider->notificationLock = System::CreateBinarySemaphore();
     if (provider->timerLock != NULL)
     {
-        System.GiveSemaphore(provider->timerLock);
+        System::GiveSemaphore(provider->timerLock);
     }
 
     if (provider->notificationLock != NULL)
     {
-        System.GiveSemaphore(provider->notificationLock);
+        System::GiveSemaphore(provider->notificationLock);
     }
 
-    provider->TickNotification = System.CreatePulseAll();
+    provider->TickNotification = System::CreatePulseAll();
 
     const bool result = provider->timerLock != NULL //
         && provider->notificationLock != NULL       //
@@ -159,7 +159,7 @@ void TimeAdvanceTime(TimeProvider* timeProvider, TimeSpan delta)
 bool TimeSetCurrentTime(TimeProvider* timeProvider, TimePoint pointInTime)
 {
     const TimeSpan span = TimePointToTimeSpan(pointInTime);
-    if (OS_RESULT_FAILED(System.TakeSemaphore(timeProvider->timerLock, MAX_DELAY)))
+    if (OS_RESULT_FAILED(System::TakeSemaphore(timeProvider->timerLock, MAX_DELAY)))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to acquire timer lock.");
         return false;
@@ -169,7 +169,7 @@ bool TimeSetCurrentTime(TimeProvider* timeProvider, TimePoint pointInTime)
     timeProvider->NotificationTime = TimeSpanAdd(NotificationPeriod, TimeSpanFromMilliseconds(1));
     timeProvider->PersistanceTime = TimeSpanAdd(SavePeriod, TimeSpanFromMilliseconds(1));
     struct TimerState state = TimeBuildTimerState(timeProvider);
-    System.GiveSemaphore(timeProvider->timerLock);
+    System::GiveSemaphore(timeProvider->timerLock);
 
     TimeProcessChange(timeProvider, state);
     return true;
@@ -177,7 +177,7 @@ bool TimeSetCurrentTime(TimeProvider* timeProvider, TimePoint pointInTime)
 
 bool TimeGetCurrentTime(TimeProvider* timeProvider, TimeSpan* currentTime)
 {
-    if (OS_RESULT_FAILED(System.TakeSemaphore(timeProvider->timerLock, MAX_DELAY)))
+    if (OS_RESULT_FAILED(System::TakeSemaphore(timeProvider->timerLock, MAX_DELAY)))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to acquire timer lock.");
         return false;
@@ -185,7 +185,7 @@ bool TimeGetCurrentTime(TimeProvider* timeProvider, TimeSpan* currentTime)
 
     *currentTime = timeProvider->CurrentTime;
 
-    System.GiveSemaphore(timeProvider->timerLock);
+    System::GiveSemaphore(timeProvider->timerLock);
     return true;
 }
 
@@ -203,7 +203,7 @@ bool TimeGetCurrentMissionTime(TimeProvider* timeProvider, TimePoint* timePoint)
 
 void TimeTickProcedure(TimeProvider* timeProvider, TimeSpan delta)
 {
-    if (OS_RESULT_FAILED(System.TakeSemaphore(timeProvider->timerLock, MAX_DELAY)))
+    if (OS_RESULT_FAILED(System::TakeSemaphore(timeProvider->timerLock, MAX_DELAY)))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to acquire timer lock.");
         return;
@@ -215,13 +215,13 @@ void TimeTickProcedure(TimeProvider* timeProvider, TimeSpan delta)
 
     struct TimerState state = TimeBuildTimerState(timeProvider);
 
-    System.GiveSemaphore(timeProvider->timerLock);
+    System::GiveSemaphore(timeProvider->timerLock);
     TimeProcessChange(timeProvider, state);
 }
 
 void TimeProcessChange(TimeProvider* timeProvider, struct TimerState state)
 {
-    if (OS_RESULT_FAILED(System.TakeSemaphore(timeProvider->notificationLock, MAX_DELAY)))
+    if (OS_RESULT_FAILED(System::TakeSemaphore(timeProvider->notificationLock, MAX_DELAY)))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to acquire notification lock.");
         return;
@@ -230,7 +230,7 @@ void TimeProcessChange(TimeProvider* timeProvider, struct TimerState state)
     SendTimeNotification(timeProvider, state);
     SaveTime(timeProvider, state);
 
-    System.GiveSemaphore(timeProvider->notificationLock);
+    System::GiveSemaphore(timeProvider->notificationLock);
 }
 
 struct TimerState TimeBuildTimerState(TimeProvider* timeProvider)
@@ -361,7 +361,7 @@ static void SendTimeNotification(TimeProvider* timeProvider, struct TimerState s
 
     if (state.sendNotification)
     {
-        System.PulseSet(timeProvider->TickNotification);
+        System::PulseSet(timeProvider->TickNotification);
     }
 }
 
@@ -435,7 +435,7 @@ bool TimeLongDelayUntil(TimeProvider* timeProvider, TimePoint time)
             return true;
         }
 
-        if (OS_RESULT_FAILED(System.PulseWait(timeProvider->TickNotification, MAX_DELAY)))
+        if (OS_RESULT_FAILED(System::PulseWait(timeProvider->TickNotification, MAX_DELAY)))
         {
             return false;
         }

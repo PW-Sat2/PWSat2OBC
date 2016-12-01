@@ -75,6 +75,14 @@ static void leuartvPrintf(LineIO* io, const char* text, va_list args)
     leuartPuts(io, buf);
 }
 
+static void leuartPrintBuffer(gsl::span<const char> buffer)
+{
+    for (auto c : buffer)
+    {
+        LEUART_Tx(LEUART0, c);
+    }
+}
+
 static size_t leuartReadline(LineIO* io, char* buffer, size_t bufferLength)
 {
     UNREFERENCED_PARAMETER(io);
@@ -127,4 +135,5 @@ void LeuartLineIOInit(LineIO* io)
     io->Puts = leuartPuts;
     io->VPrintf = leuartvPrintf;
     io->Readline = leuartReadline;
+    io->PrintBuffer = leuartPrintBuffer;
 }

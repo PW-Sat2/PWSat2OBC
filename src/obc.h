@@ -71,9 +71,6 @@ struct OBC
     /** @brief Standard text based IO. */
     LineIO IO;
 
-    /** @brief Terminal object. */
-    Terminal terminal;
-
     /** @brief Power control interface */
     PowerControl PowerControlInterface;
 
@@ -82,6 +79,9 @@ struct OBC
 
     /** @brief Comm driver object. */
     devices::comm::CommObject comm;
+
+    /** @brief Terminal object. */
+    Terminal terminal;
 };
 
 /** @brief Global OBC object. */
