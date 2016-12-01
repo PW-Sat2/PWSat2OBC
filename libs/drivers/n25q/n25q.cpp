@@ -27,7 +27,8 @@ enum N25QCommand
     ProgramMemory = 0x02,
     EraseSubsector = 0x20,
     EraseSector = 0xD8,
-    EraseChip = 0xC7
+    EraseChip = 0xC7,
+    ClearFlagRegister = 0x50
 };
 
 N25QDriver::N25QDriver(ISPIInterface& spi) : _spi(spi)
@@ -84,17 +85,15 @@ FlagStatus N25QDriver::ReadFlagStatus()
 
 void N25QDriver::ReadMemory(size_t address, span<uint8_t> buffer)
 {
-    {
-        SPISelectSlave slave(this->_spi);
-        this->Command(N25QCommand::ReadMemory);
-        this->WriteAddress(address);
-        this->_spi.Read(buffer);
-    }
+    SPISelectSlave slave(this->_spi);
+    this->Command(N25QCommand::ReadMemory);
+    this->WriteAddress(address);
+    this->_spi.Read(buffer);
 }
 
 OperationResult N25QDriver::WriteMemory(size_t address, span<const uint8_t> buffer)
 {
-    UNREFERENCED_PARAMETER(address);
+    this->ClearFlags();
 
     for (ptrdiff_t offset = 0; offset < buffer.size(); offset += 256)
     {
@@ -172,6 +171,8 @@ bool N25QDriver::WaitBusy(std::uint32_t timeout)
 
 OperationResult N25QDriver::EraseSector(size_t address)
 {
+    this->ClearFlags();
+
     this->EnableWrite();
 
     {
@@ -202,6 +203,8 @@ OperationResult N25QDriver::EraseSector(size_t address)
 
 OperationResult N25QDriver::EraseSubSector(size_t address)
 {
+    this->ClearFlags();
+
     this->EnableWrite();
 
     {
@@ -232,6 +235,8 @@ OperationResult N25QDriver::EraseSubSector(size_t address)
 
 OperationResult N25QDriver::EraseChip()
 {
+    this->ClearFlags();
+
     this->EnableWrite();
 
     {
@@ -256,6 +261,13 @@ OperationResult N25QDriver::EraseChip()
     }
 
     return OperationResult::Success;
+}
+
+void N25QDriver::ClearFlags()
+{
+    SPISelectSlave select(this->_spi);
+
+    this->Command(N25QCommand::ClearFlagRegister);
 }
 
 void N25QDriver::Command(const std::uint8_t command)

@@ -84,7 +84,8 @@ enum Command
     ProgramMemory = 0x02,
     EraseSubsector = 0x20,
     EraseSector = 0xD8,
-    EraseChip = 0xC7
+    EraseChip = 0xC7,
+    ClearFlagRegister = 0x50
 };
 
 MATCHER_P(SingletonSpan, expected, std::string("Span contains single item " + PrintToString(expected)))
@@ -145,6 +146,15 @@ class N25QDriverTest : public Test
         ExpectCommandAndRespondManyTimes(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress, busyCycles);
 
         ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteDisabled);
+    }
+
+    void ExpectClearFlags()
+    {
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::ClearFlagRegister);
+        }
     }
 
     StrictMock<SPIInterfaceMock> _spi;
@@ -244,6 +254,9 @@ TEST_F(N25QDriverTest, ShouldWriteSinglePage)
 
     {
         InSequence s;
+
+        ExpectClearFlags();
+
         {
             auto selected = this->_spi.ExpectSelected();
 
@@ -282,6 +295,9 @@ TEST_F(N25QDriverTest, ShouldWriteTwoPages)
 
     {
         InSequence s;
+
+        ExpectClearFlags();
+
         {
             auto selected = this->_spi.ExpectSelected();
 
@@ -345,6 +361,9 @@ TEST_F(N25QDriverTest, ShouldDetectProgramErrors)
 
     {
         InSequence s;
+
+        ExpectClearFlags();
+
         {
             auto selected = this->_spi.ExpectSelected();
 
@@ -382,6 +401,8 @@ TEST_F(N25QDriverTest, ShouldEraseSubsector)
     {
         InSequence s;
 
+        ExpectClearFlags();
+
         {
             auto selected = this->_spi.ExpectSelected();
 
@@ -417,6 +438,8 @@ TEST_F(N25QDriverTest, ShouldDetectEraseSubsectorError)
     {
         InSequence s;
 
+        ExpectClearFlags();
+
         {
             auto selected = this->_spi.ExpectSelected();
 
@@ -451,6 +474,8 @@ TEST_F(N25QDriverTest, ShouldDetectEraseSubsectorTimeout)
 
     {
         InSequence s;
+
+        ExpectClearFlags();
 
         {
             auto selected = this->_spi.ExpectSelected();
@@ -493,6 +518,8 @@ TEST_F(N25QDriverTest, ShouldEraseSector)
     {
         InSequence s;
 
+        ExpectClearFlags();
+
         {
             auto selected = this->_spi.ExpectSelected();
 
@@ -528,6 +555,8 @@ TEST_F(N25QDriverTest, ShouldDetectEraseSectorError)
     {
         InSequence s;
 
+        ExpectClearFlags();
+
         {
             auto selected = this->_spi.ExpectSelected();
 
@@ -562,6 +591,8 @@ TEST_F(N25QDriverTest, ShouldDetectEraseSectorTimeout)
 
     {
         InSequence s;
+
+        ExpectClearFlags();
 
         {
             auto selected = this->_spi.ExpectSelected();
@@ -602,6 +633,8 @@ TEST_F(N25QDriverTest, ShouldEraseChip)
     {
         InSequence s;
 
+        ExpectClearFlags();
+
         {
             auto selected = this->_spi.ExpectSelected();
 
@@ -632,6 +665,8 @@ TEST_F(N25QDriverTest, ShouldDetectEraseChipError)
 {
     {
         InSequence s;
+
+        ExpectClearFlags();
 
         {
             auto selected = this->_spi.ExpectSelected();
@@ -664,6 +699,8 @@ TEST_F(N25QDriverTest, EraseChipOperationWillTimeout)
     {
         InSequence s;
 
+        ExpectClearFlags();
+
         {
             auto selected = this->_spi.ExpectSelected();
 
@@ -694,4 +731,11 @@ TEST_F(N25QDriverTest, EraseChipOperationWillTimeout)
     auto result = this->_driver.EraseChip();
 
     ASSERT_THAT(result, Eq(OperationResult::Timeout));
+}
+
+TEST_F(N25QDriverTest, ClearFlagRegister)
+{
+    ExpectClearFlags();
+
+    this->_driver.ClearFlags();
 }
