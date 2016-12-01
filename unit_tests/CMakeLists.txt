@@ -14,6 +14,7 @@ set(SOURCES
   FileSystem/MemoryDriver.cpp
   FileSystem/EccTest.cpp
   Comm/CommTest.cpp
+  TeleCommandHandling/TeleCommandHandlingTest.cpp
   base/ReaderTest.cpp
   base/WriterTest.cpp
   MissionPlan/MissionPlanTest.cpp
@@ -48,7 +49,7 @@ if(${ENABLE_COVERAGE})
   target_link_libraries(${NAME} gcov)
   target_compile_definitions(${NAME} PRIVATE ENABLE_COVERAGE=1)
 else()
-  set(LD_COVERAGE )
+  set(LD_COVERAGE )    
 endif(${ENABLE_COVERAGE})
 
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_CURRENT_LIST_DIR}/linker.ld -u _printf_float -specs=rdimon.specs ${LD_COVERAGE}")
@@ -67,7 +68,8 @@ target_link_libraries(${NAME}
     yaffs
     storage
     comm
-    fs
+    telecommand_handling
+    fs    
     base
     mission
     rapidcheck

@@ -40,7 +40,6 @@
 #include "leuart/leuart.h"
 #include "power_eps/power_eps.h"
 
-using namespace std;
 using devices::comm::CommObject;
 using devices::comm::CommFrame;
 
@@ -150,7 +149,7 @@ static void ClearState(OBC* obc)
         }
         else
         {
-            LOGF(LOG_LEVEL_ERROR, "Error formatting flash %d", status);
+            LOGF(LOG_LEVEL_ERROR, "Error formatting flash %d", num(status));
         }
     }
 }
@@ -182,7 +181,7 @@ static void ObcInitTask(void* param)
         LOG(LOG_LEVEL_ERROR, "Unable to reset both antenna controllers. ");
     }
 
-    if (!obc->comm.Restart())
+    if (!obc->Communication.CommDriver.Restart())
     {
         LOG(LOG_LEVEL_ERROR, "Unable to restart comm");
     }
@@ -193,15 +192,6 @@ static void ObcInitTask(void* param)
     Main.initialized = true;
 
     System::SuspendTask(NULL);
-}
-
-void DummyFrameHandler::HandleFrame(CommObject& comm, CommFrame& frame)
-{
-    UNREFERENCED_PARAMETER(frame);
-
-    const char* response = "PONG";
-
-    comm.SendFrame(gsl::span<const uint8_t>(reinterpret_cast<const uint8_t*>(response), 4));
 }
 
 void ADXRS(void* param)
@@ -319,7 +309,7 @@ int main(void)
 
     EPSPowerControlInitialize(&Main.PowerControlInterface);
 
-    Main.comm.Initialize();
+    Main.Initialize();
 
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 

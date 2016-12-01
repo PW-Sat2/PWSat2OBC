@@ -1,11 +1,16 @@
 #include "adxrs453.h"
-#include <stdint.h>
+#include <cstdint>
 #include <em_gpio.h>
 #include "base/os.h"
 #include "io_map.h"
 #include "logger/logger.h"
 #include "spidrv.h"
 #include "system.h"
+
+using std::uint8_t;
+using std::uint16_t;
+using std::int16_t;
+using std::uint32_t;
 
 void GenerateCommand(uint8_t commandByte, uint8_t registerAddress, uint16_t registerValue, uint8_t* sendBuffer)
 {
@@ -131,7 +136,7 @@ SPI_TransferReturn_t ADXRS453_GetRate(ADXRS453_Obj_t* gyro, SPIDRV_Handle_t hand
     else
     {
         LOGF(LOG_LEVEL_ERROR,
-            "[adxrs] Unable to get rate, write code %d read code %d",
+            "[adxrs] Unable to get rate, write code %ld read code %ld",
             transferReturn.resultCodes.resultCodeWrite,
             transferReturn.resultCodes.resultCodeRead);
     }
@@ -155,7 +160,7 @@ SPI_TransferReturn_t ADXRS453_GetTemperature(ADXRS453_Obj_t* gyro, SPIDRV_Handle
     else
     {
         LOGF(LOG_LEVEL_ERROR,
-            "[adxrs] Unable to get temperature, write code %d read code %d",
+            "[adxrs] Unable to get temperature, write code %ld read code %ld",
             transferReturn.resultCodes.resultCodeWrite,
             transferReturn.resultCodes.resultCodeRead);
     }

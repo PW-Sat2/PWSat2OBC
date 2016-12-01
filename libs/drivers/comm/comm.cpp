@@ -14,7 +14,7 @@
 #include "logger/logger.h"
 #include "system.h"
 
-using namespace std;
+using std::uint8_t;
 using gsl::span;
 
 using namespace devices::comm;
@@ -104,7 +104,7 @@ bool CommObject::Restart()
             System::CreateTask(CommObject::CommTask, "COMM Task", 512, this, TaskPriority::P4, &this->_pollingTaskHandle);
         if (OS_RESULT_FAILED(result))
         {
-            LOGF(LOG_LEVEL_ERROR, "[comm] Unable to create background task. Status: 0x%08x.", result);
+            LOGF(LOG_LEVEL_ERROR, "[comm] Unable to create background task. Status: 0x%08x.", num(result));
             return false;
         }
     }
@@ -254,7 +254,7 @@ bool CommObject::ReceiveFrame(CommFrame& frame)
 
     if (data != NULL)
     {
-        memcpy(frame.Contents, data, frame.Size);
+        memcpy(frame.Contents.data(), data, frame.Size);
     }
 
     status = ReaderStatus(&reader);
@@ -420,4 +420,9 @@ void CommObject::CommTask(void* param)
             comm->PollHardware();
         }
     }
+}
+
+span<const uint8_t> CommFrame::Payload()
+{
+    return span<const uint8_t>(this->Contents.begin(), this->Size);
 }

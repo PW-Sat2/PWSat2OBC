@@ -59,7 +59,7 @@ static void Observer(void* param)
     for (;;)
     {
         OSEventBits bits = System::EventGroupWaitForBits(groupHandle, 0x80, true, true, MAX_DELAY);
-        LOGF(LOG_LEVEL_INFO, "Received notification with following bits: %d", bits);
+        LOGF(LOG_LEVEL_INFO, "Received notification with following bits: %ld", bits);
     }
 }
 

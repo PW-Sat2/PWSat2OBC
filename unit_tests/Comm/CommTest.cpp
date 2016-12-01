@@ -56,7 +56,7 @@ static OSReset SetupComm(CommObject& comm, OSMock& system)
 
 struct FrameHandlerMock : IHandleFrame
 {
-    MOCK_METHOD2(HandleFrame, void(CommObject&, CommFrame&));
+    MOCK_METHOD2(HandleFrame, void(ITransmitFrame&, CommFrame&));
 };
 
 class CommTest : public testing::Test
@@ -566,7 +566,7 @@ TEST_F(CommTest, TestReceiveFrame)
     ASSERT_THAT(frame.Size, Eq(COUNT_OF(expected)));
     ASSERT_THAT(frame.Doppler, Eq(0xcab));
     ASSERT_THAT(frame.RSSI, Eq(0xdde));
-    ASSERT_TRUE(std::equal(expected, expected + COUNT_OF(expected), frame.Contents, frame.Contents + frame.Size));
+    ASSERT_THAT(frame.Payload(), Eq(span<const uint8_t>(expected)));
 }
 
 TEST_F(CommTest, TestReceiverTelemetry)

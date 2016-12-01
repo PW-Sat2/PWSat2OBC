@@ -2,12 +2,14 @@
 #define OBC_H
 
 #include <atomic>
+#include <cstdint>
+#include <gsl/span>
 
 #include "adcs/adcs.h"
 #include "antenna/driver.h"
 #include "antenna/miniport.h"
 #include "base/os.h"
-#include "comm/comm.h"
+#include "communication.h"
 #include "fs/fs.h"
 #include "i2c/i2c.h"
 #include "leuart/line_io.h"
@@ -17,19 +19,17 @@
 #include "time/timer.h"
 #include "yaffs_guts.h"
 
-class DummyFrameHandler final : public devices::comm::IHandleFrame
-{
-  public:
-    virtual void HandleFrame(devices::comm::CommObject& comm, devices::comm::CommFrame& frame) override;
-};
-
 /**
- * @brief Object that describes global OBS state.
+ * @brief Object that describes global OBC state including drivers.
  */
 struct OBC
 {
   public:
+    /** @brief Constructs @ref OBC object  */
     OBC();
+
+    /** @brief Initializes every object in OBC structure that needs initialization */
+    void Initialize();
 
     /** @brief File system object */
     FileSystem fs;
@@ -74,11 +74,8 @@ struct OBC
     /** @brief Power control interface */
     PowerControl PowerControlInterface;
 
-    /** @brief Incoming frame handler */
-    DummyFrameHandler FrameHandler;
-
-    /** @brief Comm driver object. */
-    devices::comm::CommObject comm;
+    /** @brief Overall satellite <-> Earth communication */
+    communication::OBCCommunication Communication;
 
     /** @brief Terminal object. */
     Terminal terminal;

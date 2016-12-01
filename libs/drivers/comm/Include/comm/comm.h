@@ -2,6 +2,7 @@
 #define SRC_DEVICES_COMM_H_
 
 #include <stdbool.h>
+#include <array>
 #include <cstdint>
 #include <gsl/span>
 
@@ -46,14 +47,17 @@ namespace devices
          */
         constexpr std::uint8_t COMM_MAX_FRAME_CONTENTS_SIZE = 235u;
 
-        /** @brief This type describe comm driver global state. */
-        class CommObject;
-
         /**
          * @brief This type describes single received frame.
          */
         struct CommFrame
         {
+            /**
+             * @brief Returns span of @ref Contents limited to real content size (not maximum frame length)
+             * @return Frame contents span
+             */
+            gsl::span<const std::uint8_t> Payload();
+
             /** @brief Frame contents size in bytes. */
             std::uint16_t Size;
 
@@ -64,7 +68,7 @@ namespace devices
             std::uint16_t RSSI;
 
             /** @brief Frame content. */
-            std::uint8_t Contents[COMM_MAX_FRAME_CONTENTS_SIZE];
+            std::array<uint8_t, COMM_MAX_FRAME_CONTENTS_SIZE> Contents;
         };
 
         /**
@@ -139,16 +143,30 @@ namespace devices
             std::uint8_t Data[COMM_MAX_FRAME_CONTENTS_SIZE];
         };
 
+        /**
+         * @brief Frame transmitter interface
+         */
+        struct ITransmitFrame
+        {
+            /**
+             * @brief Adds the requested frame to the send queue.
+             *
+             * @param[in] frame Buffer containing frame contents.
+             * @return Operation status, true in case of success, false otherwise.
+             */
+            virtual bool SendFrame(gsl::span<const std::uint8_t> frame) = 0;
+        };
+
         /** Comm driver upper interface. */
         struct IHandleFrame
         {
             /**
              * @brief Method called on each incoming frame.
-             * @param[in] comm Reference to comm driver instance that recieved frame
+             * @param[in] transmitter Reference to object that can be used to send frame back
              * @param[in] frame Reference to structure describing received frame
              *
              */
-            virtual void HandleFrame(CommObject& comm, CommFrame& frame) = 0;
+            virtual void HandleFrame(ITransmitFrame& transmitter, CommFrame& frame) = 0;
         };
 
         /** Type that contains status of the frame count query. */
@@ -219,7 +237,7 @@ namespace devices
          * @remark Do not access directly the fields of this type, instead use the comm driver interface to
          * perform requested action.
          */
-        class CommObject final
+        class CommObject final : public ITransmitFrame
         {
           public:
             /**

@@ -23,6 +23,7 @@ static const TerminalCommandDescription commands[] = {
     {"antenna_cancel", AntennaCancelDeployment},
     {"antenna_get_status", AntennaGetDeploymentStatus},
     {"tasklist", TaskListCommand},
+    {"heap", HeapInfoCommand},
 };
 
 void InitializeTerminal(void)

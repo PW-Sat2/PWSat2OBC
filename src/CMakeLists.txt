@@ -11,8 +11,10 @@ set(SOURCES
     commands/state_command.cpp
     commands/i2c_test_command.cpp
     commands/rtos_status.cpp
+    commands/heap.cpp
     obc.h
     obc.cpp
+    communication.cpp
     fault_handlers.cpp
     mission.cpp
 )
@@ -43,6 +45,7 @@ target_link_libraries(${NAME}
     power_eps
     terminal
     assert
+    telecommand_handling
     gsl
     antenna
 )
