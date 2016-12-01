@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <limits>
 
 #include <gsl/span>
 #include <gtest/gtest.h>
@@ -8,6 +9,10 @@
 #include "n25q/n25q.h"
 #include "spi/spi.h"
 #include "utils.hpp"
+
+#include "OsMock.hpp"
+#include "base/os.h"
+#include "os/os.hpp"
 
 using std::array;
 using std::copy;
@@ -24,6 +29,8 @@ using testing::ElementsAre;
 using testing::PrintToString;
 using testing::InSequence;
 using testing::WithArg;
+using testing::Return;
+using testing::AtLeast;
 
 using drivers::spi::ISPIInterface;
 using namespace devices::n25q;
@@ -133,21 +140,24 @@ class N25QDriverTest : public Test
 
     void ExpectWaitBusy(uint16_t busyCycles)
     {
-        {
-            auto selected = this->_spi.ExpectSelected();
+        auto selected = this->_spi.ExpectSelected();
 
-            ExpectCommandAndRespondManyTimes(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress, busyCycles);
+        ExpectCommandAndRespondManyTimes(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress, busyCycles);
 
-            ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteDisabled);
-        }
+        ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteDisabled);
     }
 
     StrictMock<SPIInterfaceMock> _spi;
     N25QDriver _driver;
+    NiceMock<OSMock> _os;
+    OSReset _osReset;
 };
 
 N25QDriverTest::N25QDriverTest() : _driver(_spi)
 {
+    this->_osReset = InstallProxy(&this->_os);
+
+    ON_CALL(this->_os, GetTickCount()).WillByDefault(Return(0));
 }
 
 TEST_F(N25QDriverTest, ShouldReadIdCorrectly)
@@ -260,7 +270,7 @@ TEST_F(N25QDriverTest, ShouldWriteSinglePage)
     }
 
     auto result = this->_driver.WriteMemory(address, buffer);
-    ASSERT_THAT(result, Eq(true));
+    ASSERT_THAT(result, Eq(OperationResult::Success));
 }
 
 TEST_F(N25QDriverTest, ShouldWriteTwoPages)
@@ -323,7 +333,7 @@ TEST_F(N25QDriverTest, ShouldWriteTwoPages)
 
     auto result = this->_driver.WriteMemory(address, buffer);
 
-    ASSERT_THAT(result, Eq(true));
+    ASSERT_THAT(result, Eq(OperationResult::Success));
 }
 
 TEST_F(N25QDriverTest, ShouldDetectProgramErrors)
@@ -362,7 +372,7 @@ TEST_F(N25QDriverTest, ShouldDetectProgramErrors)
 
     auto result = this->_driver.WriteMemory(address, buffer);
 
-    ASSERT_THAT(result, Eq(false));
+    ASSERT_THAT(result, Eq(OperationResult::Failure));
 }
 
 TEST_F(N25QDriverTest, ShouldEraseSubsector)
@@ -397,7 +407,7 @@ TEST_F(N25QDriverTest, ShouldEraseSubsector)
 
     auto result = this->_driver.EraseSubSector(address);
 
-    ASSERT_THAT(result, Eq(true));
+    ASSERT_THAT(result, Eq(OperationResult::Success));
 }
 
 TEST_F(N25QDriverTest, ShouldDetectEraseSubsectorError)
@@ -432,7 +442,48 @@ TEST_F(N25QDriverTest, ShouldDetectEraseSubsectorError)
 
     auto result = this->_driver.EraseSubSector(address);
 
-    ASSERT_THAT(result, Eq(false));
+    ASSERT_THAT(result, Eq(OperationResult::Failure));
+}
+
+TEST_F(N25QDriverTest, ShouldDetectEraseSubsectorTimeout)
+{
+    const uint32_t address = 0xCD0000;
+
+    {
+        InSequence s;
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::WriteEnable);
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::EraseSubsector);
+
+            EXPECT_CALL(this->_spi, Write(ElementsAre(0xCD, 0x00, 0x00)));
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            EXPECT_CALL(this->_os, GetTickCount()).WillRepeatedly(Return(0));
+
+            ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
+
+            EXPECT_CALL(this->_os, GetTickCount()).WillRepeatedly(Return(0));
+
+            ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
+
+            EXPECT_CALL(this->_os, GetTickCount()).WillRepeatedly(Return(std::numeric_limits<uint32_t>::max()));
+        }
+    }
+
+    auto result = this->_driver.EraseSubSector(address);
+
+    ASSERT_THAT(result, Eq(OperationResult::Timeout));
 }
 
 TEST_F(N25QDriverTest, ShouldEraseSector)
@@ -467,7 +518,7 @@ TEST_F(N25QDriverTest, ShouldEraseSector)
 
     auto result = this->_driver.EraseSector(address);
 
-    ASSERT_THAT(result, Eq(true));
+    ASSERT_THAT(result, Eq(OperationResult::Success));
 }
 
 TEST_F(N25QDriverTest, ShouldDetectEraseSectorError)
@@ -502,7 +553,48 @@ TEST_F(N25QDriverTest, ShouldDetectEraseSectorError)
 
     auto result = this->_driver.EraseSector(address);
 
-    ASSERT_THAT(result, Eq(false));
+    ASSERT_THAT(result, Eq(OperationResult::Failure));
+}
+
+TEST_F(N25QDriverTest, ShouldDetectEraseSectorTimeout)
+{
+    const uint32_t address = 0xCD0000;
+
+    {
+        InSequence s;
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::WriteEnable);
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::EraseSector);
+
+            EXPECT_CALL(this->_spi, Write(ElementsAre(0xCD, 0x00, 0x00)));
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            EXPECT_CALL(this->_os, GetTickCount()).WillRepeatedly(Return(0));
+
+            ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
+
+            EXPECT_CALL(this->_os, GetTickCount()).WillRepeatedly(Return(0));
+
+            ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
+
+            EXPECT_CALL(this->_os, GetTickCount()).WillRepeatedly(Return(std::numeric_limits<uint32_t>::max()));
+        }
+    }
+
+    auto result = this->_driver.EraseSector(address);
+
+    ASSERT_THAT(result, Eq(OperationResult::Timeout));
 }
 
 TEST_F(N25QDriverTest, ShouldEraseChip)
@@ -533,7 +625,7 @@ TEST_F(N25QDriverTest, ShouldEraseChip)
 
     auto result = this->_driver.EraseChip();
 
-    ASSERT_THAT(result, Eq(true));
+    ASSERT_THAT(result, Eq(OperationResult::Success));
 }
 
 TEST_F(N25QDriverTest, ShouldDetectEraseChipError)
@@ -564,10 +656,42 @@ TEST_F(N25QDriverTest, ShouldDetectEraseChipError)
 
     auto result = this->_driver.EraseChip();
 
-    ASSERT_THAT(result, Eq(false));
+    ASSERT_THAT(result, Eq(OperationResult::Failure));
 }
 
-TEST_F(N25QDriverTest, ShoulWaitBusyTimeout)
+TEST_F(N25QDriverTest, EraseChipOperationWillTimeout)
 {
-    // TODO: write test
+    {
+        InSequence s;
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::WriteEnable);
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::EraseChip);
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            EXPECT_CALL(this->_os, GetTickCount()).WillRepeatedly(Return(0));
+
+            ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
+
+            EXPECT_CALL(this->_os, GetTickCount()).WillRepeatedly(Return(0));
+
+            ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
+
+            EXPECT_CALL(this->_os, GetTickCount()).WillRepeatedly(Return(std::numeric_limits<uint32_t>::max()));
+        }
+    }
+
+    auto result = this->_driver.EraseChip();
+
+    ASSERT_THAT(result, Eq(OperationResult::Timeout));
 }

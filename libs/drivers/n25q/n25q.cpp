@@ -2,7 +2,9 @@
 #include <array>
 #include <cstdint>
 
-#include <base/reader.h>
+#include "base/os.h"
+#include "base/reader.h"
+
 #include "n25q.h"
 
 using std::uint8_t;
@@ -89,7 +91,7 @@ void N25QDriver::ReadMemory(size_t address, span<uint8_t> buffer)
     }
 }
 
-bool N25QDriver::WriteMemory(size_t address, span<const uint8_t> buffer)
+OperationResult N25QDriver::WriteMemory(size_t address, span<const uint8_t> buffer)
 {
     UNREFERENCED_PARAMETER(address);
 
@@ -110,18 +112,18 @@ bool N25QDriver::WriteMemory(size_t address, span<const uint8_t> buffer)
         {
             SPISelectSlave slave(this->_spi);
 
-            this->WaitBusy();
+            this->WaitBusy(ProgramPageTimeout);
         }
 
         auto flags = this->ReadFlagStatus();
 
         if (has_flag(flags, FlagStatus::ProgramError))
         {
-            return false;
+            return OperationResult::Failure;
         }
     }
 
-    return true;
+    return OperationResult::Success;
 }
 
 void N25QDriver::Command(const std::uint8_t command, gsl::span<std::uint8_t> response)
@@ -131,28 +133,29 @@ void N25QDriver::Command(const std::uint8_t command, gsl::span<std::uint8_t> res
 
 void N25QDriver::EnableWrite()
 {
-    {
-        SPISelectSlave slave(this->_spi);
+    SPISelectSlave slave(this->_spi);
 
-        this->Command(N25QCommand::WriteEnable);
-    }
+    this->Command(N25QCommand::WriteEnable);
 }
 
 void N25QDriver::DisableWrite()
 {
-    {
-        SPISelectSlave slave(this->_spi);
+    SPISelectSlave slave(this->_spi);
 
-        this->Command(N25QCommand::WriteDisable);
-    }
+    this->Command(N25QCommand::WriteDisable);
 }
 
-void N25QDriver::WaitBusy()
+bool N25QDriver::WaitBusy(std::uint32_t timeout)
 {
-    // TODO: timeout
+    Timeout timeoutCheck(timeout);
 
     do
     {
+        if (timeoutCheck.Expired())
+        {
+            return false;
+        }
+
         uint8_t status = 0;
 
         this->Command(N25QCommand::ReadStatusRegister, span<uint8_t>(&status, 1));
@@ -162,26 +165,11 @@ void N25QDriver::WaitBusy()
             break;
         }
     } while (true);
+
+    return true;
 }
 
-void N25QDriver::WaitForStatus(Status status, bool wantedState)
-{
-    // TODO: timeout
-    auto expected = wantedState ? status : 0;
-
-    do
-    {
-        auto flag = this->ReadStatus();
-
-        auto masked = flag & status;
-
-        if (masked == expected)
-            return;
-
-    } while (true);
-}
-
-bool N25QDriver::EraseSector(size_t address)
+OperationResult N25QDriver::EraseSector(size_t address)
 {
     this->EnableWrite();
 
@@ -195,15 +183,23 @@ bool N25QDriver::EraseSector(size_t address)
     {
         SPISelectSlave select(this->_spi);
 
-        this->WaitBusy();
+        if (!this->WaitBusy(EraseSectorTimeout))
+        {
+            return OperationResult::Timeout;
+        }
     }
 
     auto flags = this->ReadFlagStatus();
 
-    return !has_flag(flags, FlagStatus::EraseError);
+    if (has_flag(flags, FlagStatus::EraseError))
+    {
+        return OperationResult::Failure;
+    }
+
+    return OperationResult::Success;
 }
 
-bool N25QDriver::EraseSubSector(size_t address)
+OperationResult N25QDriver::EraseSubSector(size_t address)
 {
     this->EnableWrite();
 
@@ -217,15 +213,23 @@ bool N25QDriver::EraseSubSector(size_t address)
     {
         SPISelectSlave select(this->_spi);
 
-        this->WaitBusy();
+        if (!this->WaitBusy(EraseSubSectorTimeout))
+        {
+            return OperationResult::Timeout;
+        }
     }
 
     auto flags = this->ReadFlagStatus();
 
-    return !has_flag(flags, FlagStatus::EraseError);
+    if (has_flag(flags, FlagStatus::EraseError))
+    {
+        return OperationResult::Failure;
+    }
+
+    return OperationResult::Success;
 }
 
-bool N25QDriver::EraseChip()
+OperationResult N25QDriver::EraseChip()
 {
     this->EnableWrite();
 
@@ -237,11 +241,20 @@ bool N25QDriver::EraseChip()
     {
         SPISelectSlave select(this->_spi);
 
-        this->WaitBusy();
+        if (!this->WaitBusy(EraseChipTimeOut))
+        {
+            return OperationResult::Timeout;
+        }
     }
+
     auto flags = this->ReadFlagStatus();
 
-    return !has_flag(flags, FlagStatus::EraseError);
+    if (has_flag(flags, FlagStatus::EraseError))
+    {
+        return OperationResult::Failure;
+    }
+
+    return OperationResult::Success;
 }
 
 void N25QDriver::Command(const std::uint8_t command)

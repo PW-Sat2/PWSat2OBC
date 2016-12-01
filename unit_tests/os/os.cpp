@@ -235,6 +235,16 @@ void System::EndSwitchingISR()
     }
 }
 
+uint32_t System::GetTickCount()
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->GetTickCount();
+    }
+
+    return 0;
+}
+
 OSReset::OSReset() : released(false)
 {
 }

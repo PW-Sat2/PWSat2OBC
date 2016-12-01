@@ -196,3 +196,8 @@ void System::PulseSet(OSPulseHandle handle)
 {
     System::EventGroupSetBits((OSEventGroupHandle)handle, PULSE_ALL_BITS);
 }
+
+uint32_t System::GetTickCount()
+{
+    return xTaskGetTickCount();
+}
