@@ -59,6 +59,8 @@ namespace devices
             OperationResult EraseSubSector(std::size_t address);
             OperationResult EraseChip();
 
+            void ClearFlags();
+
           private:
             void EnableWrite();
             void DisableWrite();
