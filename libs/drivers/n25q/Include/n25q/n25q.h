@@ -35,6 +35,13 @@ namespace devices
             ProgramSuspended = 1 << 2
         };
 
+        enum class OperationResult
+        {
+            Success,
+            Failure,
+            Timeout
+        };
+
         class N25QDriver
         {
           public:
@@ -45,25 +52,29 @@ namespace devices
             FlagStatus ReadFlagStatus();
 
             void ReadMemory(std::size_t address, gsl::span<uint8_t> buffer);
-            bool WriteMemory(std::size_t address, gsl::span<const uint8_t> buffer);
 
-            bool EraseSector(std::size_t address);
-            bool EraseSubSector(std::size_t address);
-            bool EraseChip();
+            OperationResult WriteMemory(std::size_t address, gsl::span<const uint8_t> buffer);
+
+            OperationResult EraseSector(std::size_t address);
+            OperationResult EraseSubSector(std::size_t address);
+            OperationResult EraseChip();
 
           private:
             void EnableWrite();
             void DisableWrite();
-            void WaitBusy();
+            bool WaitBusy(std::uint32_t timeout);
 
             void WriteAddress(const std::size_t address);
-
-            void WaitForStatus(Status status, bool wantedState);
 
             void Command(const std::uint8_t command, gsl::span<std::uint8_t> response);
             void Command(const std::uint8_t command);
 
             drivers::spi::ISPIInterface& _spi;
+
+            constexpr static std::uint32_t ProgramPageTimeout = 10;
+            constexpr static std::uint32_t EraseSubSectorTimeout = 1.2 * (0.8 * 1000);
+            constexpr static std::uint32_t EraseSectorTimeout = 1.2 * (3 * 1000);
+            constexpr static std::uint32_t EraseChipTimeOut = 1.2 * (250 * 1000);
         };
     }
 }

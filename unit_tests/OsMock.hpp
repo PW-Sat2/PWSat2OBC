@@ -56,6 +56,8 @@ struct OSMock : IOS
     MOCK_METHOD1(PulseSet, void(OSPulseHandle handle));
 
     MOCK_METHOD0(EndSwitchingISR, void());
+
+    MOCK_METHOD0(GetTickCount, std::uint32_t());
 };
 
 #endif

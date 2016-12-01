@@ -417,6 +417,12 @@ class System final : public PureStatic
      * @param[in] handle Pulse handle
      */
     static void PulseSet(OSPulseHandle handle);
+
+    /**
+     * @brief Gets tick count since scheduler start
+     * @return Number of ticks
+     */
+    static std::uint32_t GetTickCount();
 };
 
 /**
@@ -615,6 +621,33 @@ template <typename Element, std::size_t Capacity> OSResult Queue<Element, Capaci
     }
     return OSResult::Timeout;
 }
+
+/**
+ * @brief Class that allows checking if specified number of miliseconds elapsed
+ *
+ * This class uses system tick count to measure elapsed time.
+ */
+class Timeout
+{
+  public:
+    /**
+     * @brief Constructs new Timeout object
+     * @param[in] timeout Timeout in miliseconds
+     */
+    Timeout(std::uint32_t timeout);
+
+    /**
+     * @brief Checks is timeout is expired
+     * @return[in] true if timeout specified during construction already expired
+     */
+    bool Expired();
+
+  private:
+    /**
+     * @brief Tick count at which timeout will expire
+     */
+    const std::uint32_t _expireAt;
+};
 
 /** @}*/
 

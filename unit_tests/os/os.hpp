@@ -55,6 +55,8 @@ struct IOS
     virtual void PulseSet(OSPulseHandle handle) = 0;
 
     virtual void EndSwitchingISR() = 0;
+
+    virtual std::uint32_t GetTickCount() = 0;
 };
 
 class OSReset
