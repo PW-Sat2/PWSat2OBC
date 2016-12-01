@@ -23,12 +23,12 @@ void TaskListCommand(uint16_t argc, char* argv[])
 
     uxTaskGetSystemState(tasks.data(), tasksCount, nullptr);
 
-    TerminalPuts(&Main.terminal, "Status\tName      \tStack WM\n");
+    Main.terminal.Puts("Status\tName      \tStack WM\n");
 
     for (auto i = 0; i < tasksCount; i++)
     {
         auto& t = tasks[i];
 
-        TerminalPrintf(&Main.terminal, "%-6c\t%-10s\t%8d\n", TaskStatuses[t.eCurrentState], t.pcTaskName, t.usStackHighWaterMark);
+        Main.terminal.Printf("%-6c\t%-10s\t%8d\n", TaskStatuses[t.eCurrentState], t.pcTaskName, t.usStackHighWaterMark);
     }
 }
