@@ -54,38 +54,62 @@ struct PureStatic
     PureStatic() = delete;
 };
 
-template <class T>
-class Option
+/**
+ * @brief Class that can logically contain either a value of type T or no value.
+ */
+template <class T> class Option
 {
-public:
+  public:
+    /**
+     * @brief Factory method that constructs empty Option instance.
+     * @return Empty Option instance.
+     */
     static Option<T> None()
     {
-        return Option<T>(false, T());;
+        return Option<T>(false, T());
     }
 
-    static Option<T> Some(T &result)
+    /**
+     * @brief Factory method that constructs Option instance that holds given value.
+     * @param[in] value Value to hold in Option instance.
+     * @return Option instance that holds a value.
+     */
+    static Option<T> Some(T& value)
     {
-        return Option<T>(true, result);
+        return Option<T>(true, value);
     }
 
+    /**
+      * @brief A flag indicating if this Option instance holds a value.
+      */
     const bool HasValue;
+
+    /**
+      * @brief Value held by Option instance if HasValue is true.
+      */
     const T Value;
 
-private:
-    Option(bool hasValue, T value)
-        : HasValue(hasValue), Value(value)
+  private:
+    Option(bool hasValue, T value) : HasValue(hasValue), Value(value)
     {
     }
 };
 
-template<typename T>
-static inline Option<T> None()
+/**
+ * @brief Factory method that constructs empty Option instance.
+ * @return Empty Option instance.
+ */
+template <typename T> static inline Option<T> None()
 {
     return Option<T>::None();
 }
 
-template<typename T>
-static inline Option<T> Some(T &value)
+/**
+ * @brief Factory method that constructs Option instance that holds given value.
+ * @param[in] value Value to hold in Option instance.
+ * @return Option instance that holds a value.
+ */
+template <typename T> static inline Option<T> Some(T& value)
 {
     return Option<T>::Some(value);
 }
