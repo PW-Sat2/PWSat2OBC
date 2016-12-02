@@ -116,12 +116,12 @@ void InitializeMission(MissionState* missionState, OBC* obc)
 {
     UNREFERENCED_PARAMETER(obc);
     // Update descriptors
-    NormalModeUpdateDescriptors[0] = AntennaInitializeUpdateDescriptor(missionState->antennaMission);
+    NormalModeUpdateDescriptors[0] = GetAntennaDeploymentUpdateDescriptor(missionState->antennaMission);
     TimeInitializeUpdateDescriptor(&NormalModeUpdateDescriptors[1]);
     SailInitializeUpdateDescriptor(&NormalModeUpdateDescriptors[2], &missionState->SailOpened);
 
     // Action Descriptors
-    NormalModeActionDescriptors[0] = AntennaInitializeActionDescriptor(missionState->antennaMission);
+    NormalModeActionDescriptors[0] = GetAntennaDeploymentActionDescriptor(missionState->antennaMission);
     SailInitializeActionDescriptor(&NormalModeActionDescriptors[1], &missionState->SailOpened);
 
     //    ADCSInitializeDescriptors(&obc->adcs, &missionState->ADCS);

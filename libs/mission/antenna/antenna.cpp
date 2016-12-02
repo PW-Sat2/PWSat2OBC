@@ -130,7 +130,7 @@ namespace mission
         /**
          * @brief Last resort timeout in case everything else fails.
          */
-        constexpr std::uint8_t EmergemcyTimeout = 59;
+        constexpr std::uint8_t EmergencyTimeout = 59;
 
         /**
          * @brief Array of antenna deployment steps.
@@ -190,16 +190,16 @@ namespace mission
             {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, LongTimeout, true},
 
             {ResetDriverStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 0, false},
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, EmergemcyTimeout, true},
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, EmergemcyTimeout, true},
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, EmergemcyTimeout, true},
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, EmergemcyTimeout, true},
+            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, EmergencyTimeout, true},
+            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, EmergencyTimeout, true},
+            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, EmergencyTimeout, true},
+            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, EmergencyTimeout, true},
 
             {ResetDriverStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 0, false},
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, EmergemcyTimeout, true},
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, EmergemcyTimeout, true},
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, EmergemcyTimeout, true},
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, EmergemcyTimeout, true},
+            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, EmergencyTimeout, true},
+            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, EmergencyTimeout, true},
+            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, EmergencyTimeout, true},
+            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, EmergencyTimeout, true},
             {FinishDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 0, false},
             {FinishDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 0, false},
         };
@@ -497,7 +497,7 @@ namespace mission
             return SystemStateUpdateOK;
         }
 
-        SystemActionDescriptor AntennaInitializeActionDescriptor(AntennaMissionState& stateDescriptor)
+        SystemActionDescriptor GetAntennaDeploymentActionDescriptor(AntennaMissionState& stateDescriptor)
         {
             SystemActionDescriptor descriptor;
             descriptor.Name = "Deploy Antenna Action";
@@ -507,7 +507,7 @@ namespace mission
             return descriptor;
         }
 
-        SystemStateUpdateDescriptor AntennaInitializeUpdateDescriptor(AntennaMissionState& stateDescriptor)
+        SystemStateUpdateDescriptor GetAntennaDeploymentUpdateDescriptor(AntennaMissionState& stateDescriptor)
         {
             SystemStateUpdateDescriptor descriptor;
             descriptor.Name = "Deploy Antenna Update";
