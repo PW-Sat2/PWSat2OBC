@@ -212,7 +212,7 @@ namespace mission
          * @param[in] stateDescriptor Reference to the antenna deployment process state object.
          * @returns Action descriptor that runs antenna deployment process.
          */
-        SystemActionDescriptor AntennaInitializeActionDescriptor(AntennaMissionState& stateDescriptor);
+        SystemActionDescriptor GetAntennaDeploymentActionDescriptor(AntennaMissionState& stateDescriptor);
 
         /**
          * @brief Returns antenna deployment update descriptor.
@@ -220,7 +220,7 @@ namespace mission
          * @param[in] stateDescriptor Reference to the antenna deployment process state object.
          * @returns Update descriptor that runs antenna deployment update process.
          */
-        SystemStateUpdateDescriptor AntennaInitializeUpdateDescriptor(AntennaMissionState& stateDescriptor);
+        SystemStateUpdateDescriptor GetAntennaDeploymentUpdateDescriptor(AntennaMissionState& stateDescriptor);
 
         /** @}*/
     }
