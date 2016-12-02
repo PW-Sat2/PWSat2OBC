@@ -1,14 +1,12 @@
 #ifndef LIBS_STATE_INCLUDE_STATE_STRUCT_H_
 #define LIBS_STATE_INCLUDE_STATE_STRUCT_H_
 
-#include <stdbool.h>
-#include <stdint.h>
+#pragma once
+
+#include <cstdint>
 #include "adcs/adcs.h"
 #include "base/os.h"
-
 #include "time/TimePoint.h"
-
-EXTERNC_BEGIN
 
 /**
  * @defgroup StateDef Satellite state definition
@@ -19,7 +17,7 @@ EXTERNC_BEGIN
 /**
  * @brief State of the satellite
  */
-typedef struct
+struct SystemState
 {
     /** @brief Current time */
     TimeSpan Time;
@@ -45,10 +43,8 @@ typedef struct
         /** @brief Current ADCS mode */
         ADCSMode CurrentMode;
     } ADCS;
-} SystemState;
+} ;
 
 /** @} */
-
-EXTERNC_END
 
 #endif /* LIBS_STATE_INCLUDE_STATE_STRUCT_H_ */
