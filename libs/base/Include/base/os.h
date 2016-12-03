@@ -481,6 +481,57 @@ template <typename Param, std::uint16_t StackSize, TaskPriority Priority> void T
     This->_handler(This->_param);
 }
 
+/**
+ * @brief Semaphore lock class.
+ *
+ * When created it takes semaphore and releases it at the end of scope
+ *
+ * Usage:
+ *
+ * @code
+ * {
+ * 	TakeSemaphore lock(this->_sem);
+ *
+ * 	if(!lock())
+ * 	{
+ * 		// take failed
+ * 		return;
+ * 	}
+ *
+ * 	// do something
+ * } // semaphore release at the end of scope
+ * @endcode
+ */
+class TakeSemaphore
+{
+  public:
+    /**
+     * @brief Constructs @ref TakeSemaphore object and tries to acquire semaphore
+     * @param[in] semaphore Semaphore to take
+     * @param[in] timeout Timeout
+     */
+    TakeSemaphore(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout);
+
+    /**
+     * @brief Releases semaphore (if taken) on object destruction
+     */
+    ~TakeSemaphore();
+
+    /**
+     * @brief Checks if semaphore has been taken
+     * @return true if taking semaphore was succesful
+     */
+    bool operator()();
+
+    TakeSemaphore(const TakeSemaphore&) = delete;
+
+  private:
+    /** @brief Semaphore handle */
+    const OSSemaphoreHandle _semaphore;
+    /** @brief Flag indicating if semaphore is acquired */
+    bool _taken;
+};
+
 /** @}*/
 
 #endif
