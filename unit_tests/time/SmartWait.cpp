@@ -2,8 +2,8 @@
 #include <gmock/gmock.h>
 
 #include "OsMock.hpp"
-#include "mock/FsMock.hpp"
 #include "base/os.h"
+#include "mock/FsMock.hpp"
 #include "time/timer.h"
 
 using testing::Test;
@@ -26,8 +26,7 @@ class SmartWaitTest : public Test
     OSReset osGuard;
 };
 
-SmartWaitTest::SmartWaitTest()
-    : timeProvider(fs)
+SmartWaitTest::SmartWaitTest() : timeProvider(fs)
 {
     osGuard = InstallProxy(&osMock);
 
@@ -39,7 +38,7 @@ TEST_F(SmartWaitTest, ShouldReturnImmediatelyIfAlreadyAfterDesiredTime)
 {
     EXPECT_CALL(osMock, PulseWait(_, _)).Times(0);
 
-    timeProvider.CurrentTime = TimePointToTimeSpan(TimePointBuild(0, 0, 10, 0, 0));
+    timeProvider.SetCurrentTime(TimePointBuild(0, 0, 10, 0, 0));
     auto result = timeProvider.LongDelayUntil(TimePointBuild(0, 0, 10, 0, 0));
 
     ASSERT_THAT(result, Eq(true));
@@ -47,16 +46,16 @@ TEST_F(SmartWaitTest, ShouldReturnImmediatelyIfAlreadyAfterDesiredTime)
 
 TEST_F(SmartWaitTest, ShouldWaitForPulseAndReturnIfDesiredTimeReached)
 {
-    timeProvider.CurrentTime = TimePointToTimeSpan(TimePointBuild(0, 0, 0, 0, 0));
+    timeProvider.SetCurrentTime(TimePointBuild(0, 0, 0, 0, 0));
 
-    EXPECT_CALL(osMock, PulseWait(_, _))
-        .Times(10)
-        .WillRepeatedly(Invoke([&](OSPulseHandle handle, const OSTaskTimeSpan timeout) {
-            UNUSED(handle, timeout);
+    EXPECT_CALL(osMock, PulseWait(_, _)).Times(10).WillRepeatedly(Invoke([&](OSPulseHandle handle, const OSTaskTimeSpan timeout) {
+        UNUSED(handle, timeout);
 
-            timeProvider.CurrentTime = TimeSpanAdd(timeProvider.CurrentTime, TimeSpanFromMinutes(1));
-            return OSResult::Success;
-        }));
+        Option<TimeSpan> currentTime = timeProvider.GetCurrentTime();
+
+        timeProvider.SetCurrentTime(TimePointFromTimeSpan(TimeSpanAdd(currentTime.Value, TimeSpanFromMinutes(1))));
+        return OSResult::Success;
+    }));
 
     auto result = timeProvider.LongDelayUntil(TimePointBuild(0, 0, 10, 0, 0));
 
@@ -65,16 +64,16 @@ TEST_F(SmartWaitTest, ShouldWaitForPulseAndReturnIfDesiredTimeReached)
 
 TEST_F(SmartWaitTest, ShouldWaitForPulseAndReturnIfMissionTimeJumpsOverDesiredTime)
 {
-    timeProvider.CurrentTime = TimePointToTimeSpan(TimePointBuild(0, 0, 0, 0, 0));
+    timeProvider.SetCurrentTime(TimePointBuild(0, 0, 0, 0, 0));
 
-    EXPECT_CALL(osMock, PulseWait(_, _))
-        .Times(11)
-        .WillRepeatedly(Invoke([&](OSPulseHandle handle, const OSTaskTimeSpan timeout) {
-            UNUSED(handle, timeout);
+    EXPECT_CALL(osMock, PulseWait(_, _)).Times(11).WillRepeatedly(Invoke([&](OSPulseHandle handle, const OSTaskTimeSpan timeout) {
+        UNUSED(handle, timeout);
 
-            timeProvider.CurrentTime = TimeSpanAdd(timeProvider.CurrentTime, TimeSpanFromMinutes(1));
-            return OSResult::Success;
-        }));
+        Option<TimeSpan> currentTime = timeProvider.GetCurrentTime();
+
+        timeProvider.SetCurrentTime(TimePointFromTimeSpan(TimeSpanAdd(currentTime.Value, TimeSpanFromMinutes(1))));
+        return OSResult::Success;
+    }));
 
     auto result = timeProvider.LongDelayUntil(TimePointBuild(0, 0, 10, 30, 0));
 

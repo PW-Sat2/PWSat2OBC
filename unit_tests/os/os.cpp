@@ -52,11 +52,11 @@ void System::ResumeTask(OSTaskHandle task)
     };
 }
 
-OSSemaphoreHandle System::CreateBinarySemaphore()
+OSSemaphoreHandle System::CreateBinarySemaphore(uint8_t semaphoreId)
 {
     if (OSProxy != nullptr)
     {
-        return OSProxy->CreateBinarySemaphore();
+        return OSProxy->CreateBinarySemaphore(semaphoreId);
     }
 
     return nullptr;

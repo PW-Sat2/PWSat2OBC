@@ -251,7 +251,7 @@ class System final : public PureStatic
      * @brief Creates binary semaphore.
      *
      */
-    static OSSemaphoreHandle CreateBinarySemaphore();
+    static OSSemaphoreHandle CreateBinarySemaphore(uint8_t semaphoreId = 0);
 
     /**
      * @brief Acquires semaphore.
