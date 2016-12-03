@@ -178,6 +178,17 @@ namespace services
 
           public:
             /**
+             * @brief ID used to obtain the timer lock.
+             */
+            static constexpr uint8_t TIMER_LOCK_ID = 1;
+
+            /**
+             * @brief ID used to obtain the notification lock.
+             */
+            static constexpr uint8_t NOTIFICATION_LOCK_ID = 2;
+
+          private:
+            /**
              * @brief Semaphore used to protect internal timer state.
              *
              * This value is used to synchronize access to current mission time.

@@ -58,8 +58,8 @@ bool TimeProvider::Initialize(TimePassedCallbackType timePassedCallback, void* t
 
     const struct TimeSnapshot snapshot = CurrentPersistentTime(FileSystemObject);
     CurrentTime = snapshot.CurrentTime;
-    timerLock = System::CreateBinarySemaphore();
-    notificationLock = System::CreateBinarySemaphore();
+    timerLock = System::CreateBinarySemaphore(TIMER_LOCK_ID);
+    notificationLock = System::CreateBinarySemaphore(NOTIFICATION_LOCK_ID);
 
     if (timerLock != NULL)
     {

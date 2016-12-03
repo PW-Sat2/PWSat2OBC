@@ -38,11 +38,10 @@ static void TimePassedProxy(void* /*context*/, TimePoint /*currentTime*/)
 {
 }
 
-TimerPersistanceTest::TimerPersistanceTest()
-    : provider(fs)
+TimerPersistanceTest::TimerPersistanceTest() : provider(fs)
 {
     this->osGuard = InstallProxy(&os);
-    EXPECT_CALL(os, CreateBinarySemaphore()).WillOnce(Return(reinterpret_cast<void*>(1))).WillOnce(Return(reinterpret_cast<void*>(2)));
+    EXPECT_CALL(os, CreateBinarySemaphore(_)).WillOnce(Return(reinterpret_cast<void*>(1))).WillOnce(Return(reinterpret_cast<void*>(2)));
     ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
     ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResult::Success));
 
@@ -69,19 +68,18 @@ TEST_F(TimerPersistanceTest, TestReadingFiles)
 {
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(10)));
     ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
-    EXPECT_CALL(fs, Read(_, _, _))
-        .WillRepeatedly(Invoke([](FSFileHandle /*file*/, void* buffer, FSFileSize size) {
-            EXPECT_THAT(buffer, Ne(nullptr));
-            if (buffer == nullptr)
-            {
-                return MakeFSIOResult(OSResult::InvalidOperation);
-            }
-            else
-            {
-                memset(buffer, 0x11, size);
-                return MakeFSIOResult(size);
-            }
-        }));
+    EXPECT_CALL(fs, Read(_, _, _)).WillRepeatedly(Invoke([](FSFileHandle /*file*/, void* buffer, FSFileSize size) {
+        EXPECT_THAT(buffer, Ne(nullptr));
+        if (buffer == nullptr)
+        {
+            return MakeFSIOResult(OSResult::InvalidOperation);
+        }
+        else
+        {
+            memset(buffer, 0x11, size);
+            return MakeFSIOResult(size);
+        }
+    }));
     EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x1111111111111111ull)));
 }
@@ -118,11 +116,10 @@ TEST_F(TimerPersistanceTest, TestReadingTwoExistingEmptyFiles)
 {
     EXPECT_CALL(fs, Open(_, _, _)).WillOnce(Return(MakeOpenedFile(OSResult::NotFound))).WillRepeatedly(Return(MakeOpenedFile(1)));
     ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
-    EXPECT_CALL(fs, Read(_, _, _))
-        .WillRepeatedly(Invoke([](FSFileHandle /*file*/, void* buffer, FSFileSize size) {
-            memset(buffer, 0x11, size);
-            return MakeFSIOResult(size);
-        }));
+    EXPECT_CALL(fs, Read(_, _, _)).WillRepeatedly(Invoke([](FSFileHandle /*file*/, void* buffer, FSFileSize size) {
+        memset(buffer, 0x11, size);
+        return MakeFSIOResult(size);
+    }));
     EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x1111111111111111ull)));
 }
@@ -132,19 +129,18 @@ TEST_F(TimerPersistanceTest, TestReadingFilesEndiannes)
     const uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(1)));
     ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
-    EXPECT_CALL(fs, Read(_, _, _))
-        .WillRepeatedly(Invoke([=](FSFileHandle /*file*/, void* buffer, FSFileSize size) {
-            EXPECT_THAT(size, Eq(8));
-            if (size != 8)
-            {
-                return MakeFSIOResult(OSResult::InvalidOperation);
-            }
-            else
-            {
-                memcpy(buffer, expected, size);
-                return MakeFSIOResult(size);
-            }
-        }));
+    EXPECT_CALL(fs, Read(_, _, _)).WillRepeatedly(Invoke([=](FSFileHandle /*file*/, void* buffer, FSFileSize size) {
+        EXPECT_THAT(size, Eq(8));
+        if (size != 8)
+        {
+            return MakeFSIOResult(OSResult::InvalidOperation);
+        }
+        else
+        {
+            memcpy(buffer, expected, size);
+            return MakeFSIOResult(size);
+        }
+    }));
     EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x8877665544332211ull)));
 }
@@ -191,23 +187,20 @@ TEST_F(TimerPersistanceTest, TestReadingThreeDifferentFiles)
         .WillOnce(Return(MakeOpenedFile(2)))
         .WillOnce(Return(MakeOpenedFile(3)));
     ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
-    EXPECT_CALL(fs, Read(Eq(1), _, _))
-        .WillOnce(Invoke([=](FSFileHandle /*file*/, void* buffer, FSFileSize size) {
-            memcpy(buffer, b, size);
-            return MakeFSIOResult(size);
-        }));
+    EXPECT_CALL(fs, Read(Eq(1), _, _)).WillOnce(Invoke([=](FSFileHandle /*file*/, void* buffer, FSFileSize size) {
+        memcpy(buffer, b, size);
+        return MakeFSIOResult(size);
+    }));
 
-    EXPECT_CALL(fs, Read(Eq(2), _, _))
-        .WillOnce(Invoke([=](FSFileHandle /*file*/, void* buffer, FSFileSize size) {
-            memcpy(buffer, a, size);
-            return MakeFSIOResult(size);
-        }));
+    EXPECT_CALL(fs, Read(Eq(2), _, _)).WillOnce(Invoke([=](FSFileHandle /*file*/, void* buffer, FSFileSize size) {
+        memcpy(buffer, a, size);
+        return MakeFSIOResult(size);
+    }));
 
-    EXPECT_CALL(fs, Read(Eq(3), _, _))
-        .WillOnce(Invoke([=](FSFileHandle /*file*/, void* buffer, FSFileSize size) {
-            memcpy(buffer, c, size);
-            return MakeFSIOResult(size);
-        }));
+    EXPECT_CALL(fs, Read(Eq(3), _, _)).WillOnce(Invoke([=](FSFileHandle /*file*/, void* buffer, FSFileSize size) {
+        memcpy(buffer, c, size);
+        return MakeFSIOResult(size);
+    }));
 
     EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x7877665544332211ull)));
@@ -238,14 +231,13 @@ TEST_F(TimerPersistanceTest, TestStateWrite)
     EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr));
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(1)));
     ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
-    EXPECT_CALL(fs, Write(_, _, _))
-        .WillRepeatedly(Invoke([](FSFileHandle /*file*/, const void* buffer, FSFileSize size) {
-            uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x00, 0x00, 0x00, 0x00};
-            EXPECT_THAT(size, Eq(8));
-            EXPECT_THAT(std::vector<uint8_t>(static_cast<const uint8_t*>(buffer), static_cast<const uint8_t*>(buffer) + size),
-                ::testing::ElementsAreArray(expected));
-            return MakeFSIOResult(size);
-        }));
+    EXPECT_CALL(fs, Write(_, _, _)).WillRepeatedly(Invoke([](FSFileHandle /*file*/, const void* buffer, FSFileSize size) {
+        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x00, 0x00, 0x00, 0x00};
+        EXPECT_THAT(size, Eq(8));
+        EXPECT_THAT(std::vector<uint8_t>(static_cast<const uint8_t*>(buffer), static_cast<const uint8_t*>(buffer) + size),
+            ::testing::ElementsAreArray(expected));
+        return MakeFSIOResult(size);
+    }));
     provider.AdvanceTime(TimeSpanFromMilliseconds(0x44332211ull));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x44332211ull)));
 }

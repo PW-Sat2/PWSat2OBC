@@ -2,8 +2,8 @@
 #include "gmock/gmock.h"
 #include "gmock/gmock-matchers.h"
 #include "OsMock.hpp"
-#include "mock/FsMock.hpp"
 #include "TimeSpan.hpp"
+#include "mock/FsMock.hpp"
 #include "os/os.hpp"
 
 #include "time/timer.h"
@@ -18,7 +18,6 @@ struct TimeNotificationHandler
 {
     MOCK_METHOD1(OnTimePassed, void(TimePoint point));
 };
-
 void TimePassedProxy(void* context, TimePoint currentTime)
 {
     const auto handler = static_cast<TimeNotificationHandler*>(context);
@@ -41,18 +40,22 @@ class TimerTest : public testing::Test
     testing::NiceMock<FsMock> fs;
     testing::NiceMock<OSMock> os;
     OSReset guard;
+
+    OSSemaphoreHandle timerLockHandle = reinterpret_cast<void*>(1);
+    OSSemaphoreHandle notificationLockHandle = reinterpret_cast<void*>(2);
 };
 
-TimerTest::TimerTest()
-    : provider(fs)
+TimerTest::TimerTest() : provider(fs)
 {
-
 }
 
 void TimerTest::Initialize()
 {
     this->guard = InstallProxy(&os);
-    EXPECT_CALL(os, CreateBinarySemaphore()).WillOnce(Return(reinterpret_cast<void*>(1))).WillOnce(Return(reinterpret_cast<void*>(2)));
+
+    EXPECT_CALL(os, CreateBinarySemaphore(TimeProvider::TIMER_LOCK_ID)).WillOnce(Return(timerLockHandle));
+    EXPECT_CALL(os, CreateBinarySemaphore(TimeProvider::NOTIFICATION_LOCK_ID)).WillOnce(Return(notificationLockHandle));
+
     ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
     ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResult::Success));
 
@@ -63,8 +66,8 @@ void TimerTest::Initialize()
 
 TimeSpan TimerTest::GetCurrentTime()
 {
-    EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResult::Success));
-    EXPECT_CALL(os, GiveSemaphore(provider.timerLock)).Times(1);
+    EXPECT_CALL(os, TakeSemaphore(timerLockHandle, _)).WillOnce(Return(OSResult::Success));
+    EXPECT_CALL(os, GiveSemaphore(timerLockHandle)).Times(1);
     Option<TimeSpan> span = provider.GetCurrentTime();
     EXPECT_TRUE(span.HasValue);
     return span.Value;
@@ -72,8 +75,8 @@ TimeSpan TimerTest::GetCurrentTime()
 
 TimePoint TimerTest::GetMissionTime()
 {
-    EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResult::Success));
-    EXPECT_CALL(os, GiveSemaphore(provider.timerLock)).Times(1);
+    EXPECT_CALL(os, TakeSemaphore(timerLockHandle, _)).WillOnce(Return(OSResult::Success));
+    EXPECT_CALL(os, GiveSemaphore(timerLockHandle)).Times(1);
     Option<TimePoint> point = provider.GetCurrentMissionTime();
     EXPECT_TRUE(point.HasValue);
     return point.Value;
@@ -82,7 +85,8 @@ TimePoint TimerTest::GetMissionTime()
 TEST_F(TimerTest, TestDefaultState)
 {
     this->guard = InstallProxy(&os);
-    ON_CALL(os, CreateBinarySemaphore()).WillByDefault(Return(reinterpret_cast<void*>(this)));
+    EXPECT_CALL(os, CreateBinarySemaphore(TimeProvider::TIMER_LOCK_ID)).WillOnce(Return(timerLockHandle));
+    EXPECT_CALL(os, CreateBinarySemaphore(TimeProvider::NOTIFICATION_LOCK_ID)).WillOnce(Return(notificationLockHandle));
     ON_CALL(os, CreatePulseAll()).WillByDefault(Return(reinterpret_cast<void*>(3)));
     const auto result = provider.Initialize(TimePassedProxy, &timeHandler);
     ASSERT_THAT(result, Eq(true));
@@ -97,7 +101,7 @@ TEST_F(TimerTest, TestDefaultState)
 
 TEST_F(TimerTest, TestInitializationFailure)
 {
-    ON_CALL(os, CreateBinarySemaphore()).WillByDefault(Return(nullptr));
+    ON_CALL(os, CreateBinarySemaphore(_)).WillByDefault(Return(nullptr));
     const auto result = provider.Initialize(TimePassedProxy, &timeHandler);
     ASSERT_THAT(result, Eq(false));
 }
@@ -105,7 +109,7 @@ TEST_F(TimerTest, TestInitializationFailure)
 TEST_F(TimerTest, TestInitializationSecondFailure)
 {
     this->guard = InstallProxy(&os);
-    EXPECT_CALL(os, CreateBinarySemaphore()).WillOnce(Return(reinterpret_cast<void*>(this))).WillOnce(Return(nullptr));
+    EXPECT_CALL(os, CreateBinarySemaphore(_)).WillOnce(Return(reinterpret_cast<void*>(this))).WillOnce(Return(nullptr));
     const auto result = provider.Initialize(TimePassedProxy, &timeHandler);
     ASSERT_THAT(result, Eq(false));
 }
@@ -127,10 +131,10 @@ TEST_F(TimerTest, TestAdvanceTimeWithNotification)
 TEST_F(TimerTest, TestAdvanceTimeWithNotificationCheckNotificationSemaphores)
 {
     Initialize();
-    EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResult::Success));
-    EXPECT_CALL(os, GiveSemaphore(provider.timerLock)).Times(1);
-    EXPECT_CALL(os, TakeSemaphore(provider.notificationLock, _)).WillOnce(Return(OSResult::Success));
-    EXPECT_CALL(os, GiveSemaphore(provider.notificationLock)).Times(1);
+    EXPECT_CALL(os, TakeSemaphore(timerLockHandle, _)).WillOnce(Return(OSResult::Success));
+    EXPECT_CALL(os, GiveSemaphore(timerLockHandle)).Times(1);
+    EXPECT_CALL(os, TakeSemaphore(notificationLockHandle, _)).WillOnce(Return(OSResult::Success));
+    EXPECT_CALL(os, GiveSemaphore(notificationLockHandle)).Times(1);
     provider.AdvanceTime(TimeSpanFromMilliseconds(10001ull));
 }
 
@@ -138,10 +142,10 @@ TEST_F(TimerTest, TestAdvanceTimeWithNotificationLockFailure)
 {
     EXPECT_CALL(timeHandler, OnTimePassed(_)).Times(0);
     Initialize();
-    EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResult::Success));
-    EXPECT_CALL(os, GiveSemaphore(provider.timerLock)).Times(1);
-    EXPECT_CALL(os, TakeSemaphore(provider.notificationLock, _)).WillOnce(Return(OSResult::InvalidOperation));
-    EXPECT_CALL(os, GiveSemaphore(provider.notificationLock)).Times(0);
+    EXPECT_CALL(os, TakeSemaphore(timerLockHandle, _)).WillOnce(Return(OSResult::Success));
+    EXPECT_CALL(os, GiveSemaphore(timerLockHandle)).Times(1);
+    EXPECT_CALL(os, TakeSemaphore(notificationLockHandle, _)).WillOnce(Return(OSResult::InvalidOperation));
+    EXPECT_CALL(os, GiveSemaphore(notificationLockHandle)).Times(0);
     provider.AdvanceTime(TimeSpanFromMilliseconds(10001ull));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(10001u)));
 }
@@ -149,8 +153,8 @@ TEST_F(TimerTest, TestAdvanceTimeWithNotificationLockFailure)
 TEST_F(TimerTest, TestAdvanceTimeWithTimerLockFailure)
 {
     Initialize();
-    EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResult::InvalidOperation));
-    EXPECT_CALL(os, GiveSemaphore(provider.timerLock)).Times(0);
+    EXPECT_CALL(os, TakeSemaphore(timerLockHandle, _)).WillOnce(Return(OSResult::InvalidOperation));
+    EXPECT_CALL(os, GiveSemaphore(timerLockHandle)).Times(0);
     provider.AdvanceTime(TimeSpanFromMilliseconds(500ull));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0u)));
 }
@@ -189,8 +193,8 @@ TEST_F(TimerTest, TestSetTime)
 TEST_F(TimerTest, TestSetTimeLockError)
 {
     Initialize();
-    EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResult::InvalidOperation));
-    EXPECT_CALL(os, GiveSemaphore(provider.timerLock)).Times(0);
+    EXPECT_CALL(os, TakeSemaphore(timerLockHandle, _)).WillOnce(Return(OSResult::InvalidOperation));
+    EXPECT_CALL(os, GiveSemaphore(timerLockHandle)).Times(0);
     TimePoint point;
     point.milisecond = 1;
     point.second = 2;
@@ -232,8 +236,8 @@ TEST_F(TimerTest, TestGetCurrentMissionTimeSynchronization)
 {
     Initialize();
     provider.AdvanceTime(TimeSpanFromMilliseconds(446582001ull));
-    EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResult::Success));
-    EXPECT_CALL(os, GiveSemaphore(provider.timerLock)).Times(1);
+    EXPECT_CALL(os, TakeSemaphore(timerLockHandle, _)).WillOnce(Return(OSResult::Success));
+    EXPECT_CALL(os, GiveSemaphore(timerLockHandle)).Times(1);
 
     provider.GetCurrentMissionTime();
 }
@@ -242,8 +246,8 @@ TEST_F(TimerTest, TestGetCurrentMissionTimeSynchronizationFailure)
 {
     Initialize();
     provider.AdvanceTime(TimeSpanFromMilliseconds(446582001ull));
-    EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResult::InvalidOperation));
-    EXPECT_CALL(os, GiveSemaphore(provider.timerLock)).Times(0);
+    EXPECT_CALL(os, TakeSemaphore(timerLockHandle, _)).WillOnce(Return(OSResult::InvalidOperation));
+    EXPECT_CALL(os, GiveSemaphore(timerLockHandle)).Times(0);
     EXPECT_FALSE(provider.GetCurrentMissionTime().HasValue);
 }
 
@@ -251,8 +255,8 @@ TEST_F(TimerTest, TestGetCurrentTimeSynchronization)
 {
     Initialize();
     provider.AdvanceTime(TimeSpanFromMilliseconds(446582001ull));
-    EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResult::Success));
-    EXPECT_CALL(os, GiveSemaphore(provider.timerLock)).Times(1);
+    EXPECT_CALL(os, TakeSemaphore(timerLockHandle, _)).WillOnce(Return(OSResult::Success));
+    EXPECT_CALL(os, GiveSemaphore(timerLockHandle)).Times(1);
     provider.GetCurrentTime();
 }
 
@@ -260,8 +264,8 @@ TEST_F(TimerTest, TestGetCurrentTimeSynchronizationFailure)
 {
     Initialize();
     provider.AdvanceTime(TimeSpanFromMilliseconds(446582001ull));
-    EXPECT_CALL(os, TakeSemaphore(provider.timerLock, _)).WillOnce(Return(OSResult::InvalidOperation));
-    EXPECT_CALL(os, GiveSemaphore(provider.timerLock)).Times(0);
+    EXPECT_CALL(os, TakeSemaphore(timerLockHandle, _)).WillOnce(Return(OSResult::InvalidOperation));
+    EXPECT_CALL(os, GiveSemaphore(timerLockHandle)).Times(0);
     EXPECT_FALSE(provider.GetCurrentTime().HasValue);
 }
 

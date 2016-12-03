@@ -24,7 +24,7 @@ struct IOS
 
     virtual void Sleep(const OSTaskTimeSpan time) = 0;
 
-    virtual OSSemaphoreHandle CreateBinarySemaphore() = 0;
+    virtual OSSemaphoreHandle CreateBinarySemaphore(uint8_t semaphoreId = 0) = 0;
 
     virtual OSResult GiveSemaphore(const OSSemaphoreHandle semaphore) = 0;
 
