@@ -10,40 +10,44 @@ using namespace services::time;
  * @{
  */
 
-inline bool operator==(const TimeSnapshot& left, const TimeSnapshot& right)
+bool TimeSnapshot::operator==(const TimeSnapshot& right) const
 {
-    return TimeSpanEqual(left.CurrentTime, right.CurrentTime);
+    return TimeSpanEqual(CurrentTime, right.CurrentTime);
 }
 
-inline bool operator!=(const TimeSnapshot& left, const TimeSnapshot& right)
+bool TimeSnapshot::operator!=(const TimeSnapshot& right) const
 {
-    return !(left == right);
+    return !(*this == right);
 }
 
-inline bool operator<(const TimeSnapshot& left, const TimeSnapshot& right)
+bool TimeSnapshot::operator<(const TimeSnapshot& right) const
 {
-    return TimeSpanLessThan(left.CurrentTime, right.CurrentTime);
+    return TimeSpanLessThan(CurrentTime, right.CurrentTime);
 }
 
-inline bool operator>(const TimeSnapshot& left, const TimeSnapshot& right)
+bool TimeSnapshot::operator>(const TimeSnapshot& right) const
 {
-    return right < left;
+    return right < *this;
 }
 
-inline bool operator<=(const TimeSnapshot& left, const TimeSnapshot& right)
+bool TimeSnapshot::operator<=(const TimeSnapshot& right) const
 {
-    return !(left > right);
+    return !(*this > right);
 }
 
-inline bool operator>=(const TimeSnapshot& left, const TimeSnapshot& right)
+bool TimeSnapshot::operator>=(const TimeSnapshot& right) const
 {
-    return !(left < right);
+    return !(*this < right);
 }
 
 TimeProvider::TimeProvider(FileSystem& fileSystem)
-    : timerLock(nullptr), notificationLock(nullptr), OnTimePassed(nullptr), TimePassedCallbackContext(nullptr),
-      NotificationTime(TimeSpanFromMilliseconds(0ull)), PersistanceTime(TimeSpanFromMilliseconds(0ull)), TickNotification(nullptr),
-      FileSystemObject(&fileSystem)
+    : timerLock(nullptr),                                                                   //
+      notificationLock(nullptr),                                                            //
+      OnTimePassed(nullptr),                                                                //
+      TimePassedCallbackContext(nullptr), NotificationTime(TimeSpanFromMilliseconds(0ull)), //
+      PersistanceTime(TimeSpanFromMilliseconds(0ull)),                                      //
+      TickNotification(nullptr),                                                            //
+      FileSystemObject(&fileSystem)                                                         //
 {
 }
 
