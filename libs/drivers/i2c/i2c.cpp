@@ -7,7 +7,7 @@
 
 #include "i2c.h"
 
-I2CInterface::I2CInterface(I2CBus* system, I2CBus* payload)
+I2CInterface::I2CInterface(I2CBus& system, I2CBus& payload)
     : Bus(system), //
       Payload(payload)
 {
@@ -23,43 +23,37 @@ static inline I2CLowLevelBus* LowLevel(I2CBus* bus)
  * @param[in] bus I2C bus
  * @return true if SCL line is latched
  */
-static bool IsSclLatched(const I2CLowLevelBus* bus)
+bool I2CLowLevelBus::IsSclLatched()
 {
-    return GPIO_PinInGet((GPIO_Port_TypeDef)bus->IO.Port, bus->IO.SCL) == 0;
+    return GPIO_PinInGet((GPIO_Port_TypeDef)this->_io.Port, this->_io.SCL) == 0;
 }
 
-/**
- * @brief Executes single I2C transfer
- * @param[in] bus I2C bus
- * @param[in] seq Transfer sequence definition
- * @return Transfer result
- */
-static I2CResult ExecuteTransfer(I2CLowLevelBus* bus, I2C_TransferSeq_TypeDef* seq)
+I2CResult I2CLowLevelBus::ExecuteTransfer(I2C_TransferSeq_TypeDef* seq)
 {
-    if (OS_RESULT_FAILED(System::TakeSemaphore(bus->Lock, MAX_DELAY)))
+    if (OS_RESULT_FAILED(System::TakeSemaphore(this->_lock, MAX_DELAY)))
     {
         LOGF(LOG_LEVEL_ERROR, "[I2C] Taking semaphore failed. Address: %X", seq->addr);
         return I2CResult::Failure;
     }
 
-    if (IsSclLatched(bus))
+    if (this->IsSclLatched())
     {
         LOG(LOG_LEVEL_FATAL, "[I2C] SCL already latched");
-        System::GiveSemaphore(bus->Lock);
+        System::GiveSemaphore(this->_lock);
         return I2CResult::ClockAlreadyLatched;
     }
 
-    I2C_TypeDef* hw = (I2C_TypeDef*)bus->HWInterface;
+    I2C_TypeDef* hw = (I2C_TypeDef*)this->HWInterface;
 
     I2C_TransferReturn_TypeDef rawResult = I2C_TransferInit(hw, seq);
 
     if (rawResult != i2cTransferInProgress)
     {
-        System::GiveSemaphore(bus->Lock);
+        System::GiveSemaphore(this->_lock);
         return (I2CResult)rawResult;
     }
 
-    if (!System::QueueReceive(bus->ResultQueue, &rawResult, I2C_TIMEOUT * 1000))
+    if (!System::QueueReceive(this->_resultQueue, &rawResult, I2C_TIMEOUT * 1000))
     {
         I2CResult ret = I2CResult::Timeout;
 
@@ -71,19 +65,19 @@ static I2CResult ExecuteTransfer(I2CLowLevelBus* bus, I2C_TransferSeq_TypeDef* s
         {
         }
 
-        if (IsSclLatched(bus))
+        if (this->IsSclLatched())
         {
             LOG(LOG_LEVEL_ERROR, "SCL latched at low level");
 
             ret = I2CResult::ClockLatched;
         }
 
-        System::GiveSemaphore(bus->Lock);
+        System::GiveSemaphore(this->_lock);
 
         return ret;
     }
 
-    System::GiveSemaphore(bus->Lock);
+    System::GiveSemaphore(this->_lock);
 
     return (I2CResult)rawResult;
 }
@@ -98,7 +92,7 @@ I2CResult I2CLowLevelBus::Write(const I2CAddress address, gsl::span<const uint8_
     seq.buf[1].len = 0;
     seq.buf[1].data = nullptr;
 
-    return ExecuteTransfer(this, &seq);
+    return ExecuteTransfer(&seq);
 }
 
 I2CResult I2CLowLevelBus::WriteRead(const I2CAddress address, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData)
@@ -112,7 +106,7 @@ I2CResult I2CLowLevelBus::WriteRead(const I2CAddress address, gsl::span<const ui
     seq.buf[1].len = outData.length();
     seq.buf[1].data = outData.data();
 
-    return ExecuteTransfer(this, &seq);
+    return ExecuteTransfer(&seq);
 }
 
 I2CLowLevelBus::I2CLowLevelBus(I2C_TypeDef* hw, //
@@ -124,49 +118,49 @@ I2CLowLevelBus::I2CLowLevelBus(I2C_TypeDef* hw, //
     IRQn_Type irq)
 {
     this->HWInterface = hw;
-    this->Location = location;
-    this->Clock = clock;
-    this->IRQn = irq;
-    this->IO.Port = (uint16_t)port;
-    this->IO.SCL = sclPin;
-    this->IO.SDA = sdaPin;
+    this->_io.Location = location;
+    this->_io.Clock = clock;
+    this->_io.IRQn = irq;
+    this->_io.Port = (uint16_t)port;
+    this->_io.SCL = sclPin;
+    this->_io.SDA = sdaPin;
 }
 
 void I2CLowLevelBus::Initialize()
 {
-    this->ResultQueue = System::CreateQueue(1, sizeof(I2C_TransferReturn_TypeDef));
+    this->_resultQueue = System::CreateQueue(1, sizeof(I2C_TransferReturn_TypeDef));
 
-    this->Lock = System::CreateBinarySemaphore();
-    System::GiveSemaphore(this->Lock);
+    this->_lock = System::CreateBinarySemaphore();
+    System::GiveSemaphore(this->_lock);
 
-    CMU_ClockEnable((CMU_Clock_TypeDef)this->Clock, true);
+    CMU_ClockEnable(this->_io.Clock, true);
 
-    GPIO_PinModeSet((GPIO_Port_TypeDef)this->IO.Port, this->IO.SDA, gpioModeWiredAndPullUpFilter, 1);
-    GPIO_PinModeSet((GPIO_Port_TypeDef)this->IO.Port, this->IO.SCL, gpioModeWiredAndPullUpFilter, 1);
+    GPIO_PinModeSet((GPIO_Port_TypeDef)this->_io.Port, this->_io.SDA, gpioModeWiredAndPullUpFilter, 1);
+    GPIO_PinModeSet((GPIO_Port_TypeDef)this->_io.Port, this->_io.SCL, gpioModeWiredAndPullUpFilter, 1);
 
     I2C_Init_TypeDef init = I2C_INIT_DEFAULT;
     init.clhr = i2cClockHLRStandard;
     init.enable = true;
 
     I2C_Init((I2C_TypeDef*)this->HWInterface, &init);
-    ((I2C_TypeDef*)this->HWInterface)->ROUTE = I2C_ROUTE_SCLPEN | I2C_ROUTE_SDAPEN | this->Location;
+    ((I2C_TypeDef*)this->HWInterface)->ROUTE = I2C_ROUTE_SCLPEN | I2C_ROUTE_SDAPEN | this->_io.Location;
 
     I2C_IntEnable((I2C_TypeDef*)this->HWInterface, I2C_IEN_TXC);
 
-    NVIC_SetPriority((IRQn_Type)this->IRQn, I2C_IRQ_PRIORITY);
-    NVIC_EnableIRQ((IRQn_Type)this->IRQn);
+    NVIC_SetPriority(this->_io.IRQn, I2C_IRQ_PRIORITY);
+    NVIC_EnableIRQ(this->_io.IRQn);
 }
 
-void I2CIRQHandler(I2CLowLevelBus* bus)
+void I2CLowLevelBus::IRQHandler()
 {
-    auto status = I2C_Transfer((I2C_TypeDef*)bus->HWInterface);
+    auto status = I2C_Transfer((I2C_TypeDef*)this->HWInterface);
 
     if (status == i2cTransferInProgress)
     {
         return;
     }
 
-    if (!System::QueueSendISR(bus->ResultQueue, &status))
+    if (!System::QueueSendISR(this->_resultQueue, &status))
     {
         LOG_ISR(LOG_LEVEL_ERROR, "Error queueing i2c result");
     }

@@ -22,11 +22,11 @@ void I2CTestCommandHandler(uint16_t argc, char* argv[])
 
     if (strcmp(argv[1], "system") == 0)
     {
-        bus = Main.I2C.Bus;
+        bus = &Main.I2C.Bus;
     }
     else if (strcmp(argv[1], "payload") == 0)
     {
-        bus = Main.I2C.Payload;
+        bus = &Main.I2C.Payload;
     }
     else
     {

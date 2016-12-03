@@ -24,7 +24,7 @@ class FallbackI2CBusTest : public Test
     FallbackI2CBusTest();
 };
 
-FallbackI2CBusTest::FallbackI2CBusTest() : buses(&systemBus, &payloadBus), bus(&buses)
+FallbackI2CBusTest::FallbackI2CBusTest() : buses(systemBus, payloadBus), bus(buses)
 {
 }
 

@@ -103,7 +103,7 @@ class I2CLowLevelBus : public I2CBus
 {
   public:
     /**
-     * @brief Initializes single hardware I2C interface
+     * @brief Setups I2C low-level driver object. No RTOS or hardware initialization is done in constructor
      * @param[in] hw I2C hardware registers set
      * @param[in] location Pins location to use
      * @param[in] port GPIO port to use
@@ -124,11 +124,32 @@ class I2CLowLevelBus : public I2CBus
 
     virtual I2CResult WriteRead(const I2CAddress address, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData) override;
 
+    /**
+     * @brief Initializes RTOS and hardware components of I2C low-level driver
+     */
     void Initialize();
 
-    uint32_t Location;
-    uint32_t Clock;
-    uint32_t IRQn;
+    /**
+     * @brief Interrupt handler for I2C hardware
+     * @param[in] bus Bus associated with given hardware
+     */
+    void IRQHandler();
+
+  private:
+    /**
+     * @brief Executes single I2C transfer
+     * @param[in] bus I2C bus
+     * @param[in] seq Transfer sequence definition
+     * @return Transfer result
+     */
+    I2CResult ExecuteTransfer(I2C_TransferSeq_TypeDef* seq);
+
+    /**
+     * @brief Checks if SCL line is latched at low level
+     * @param[in] bus I2C bus
+     * @return true if SCL line is latched
+     */
+    bool IsSclLatched();
 
     /** @brief Pointer to hardware registers */
     void* HWInterface;
@@ -138,19 +159,25 @@ class I2CLowLevelBus : public I2CBus
      */
     struct
     {
+        /** @brief Peripheral clock */
+        CMU_Clock_TypeDef Clock;
+        /** @brief Peripheral interrupt number */
+        IRQn_Type IRQn;
+        /** @brief Peripheral location number */
+        uint16_t Location;
         /** @brief Used port */
         uint16_t Port;
         /** @brief Number of pin connected to SCL line */
         uint16_t SCL;
         /** @brief Number of pin connected to SDA line */
         uint16_t SDA;
-    } IO;
+    } _io;
 
     /** @brief Lock used to synchronize access to bus */
-    OSSemaphoreHandle Lock;
+    OSSemaphoreHandle _lock;
 
     /** @brief Single-element queue storing results of transfers */
-    OSQueueHandle ResultQueue;
+    OSQueueHandle _resultQueue;
 };
 
 /**
@@ -158,38 +185,33 @@ class I2CLowLevelBus : public I2CBus
  */
 struct I2CInterface final
 {
-    I2CInterface(I2CBus* system, I2CBus* payload);
+    I2CInterface(I2CBus& system, I2CBus& payload);
     /** @brief Reference to System I2C bus */
-    I2CBus* Bus;
+    I2CBus& Bus;
     /** @brief Reference to Payload I2C bus */
-    I2CBus* Payload;
+    I2CBus& Payload;
 };
-
-/**
- * @brief Interrupt handler for I2C hardware
- * @param[in] bus Bus associated with given hardware
- */
-void I2CIRQHandler(I2CLowLevelBus* bus);
 
 /**
  * @brief I2C Fallbacking bus driver
  * @implements I2CBus
  */
-class I2CFallbackBus : public I2CBus
+class I2CFallbackBus final : public I2CBus
 {
   public:
     /**
      * @brief Setups bus wrapper that fallbacks from system to payload bus in case of failure
      * @param[in] buses Object representing both buses used in the system
      */
-    I2CFallbackBus(I2CInterface* buses);
+    I2CFallbackBus(I2CInterface& buses);
 
     virtual I2CResult Write(const I2CAddress address, gsl::span<const uint8_t> inData) override;
 
     virtual I2CResult WriteRead(const I2CAddress address, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData) override;
 
+  private:
     /** @brief Object representing both buses used in the system */
-    I2CInterface* InnerBuses;
+    I2CInterface& _innerBuses;
 };
 
 /**
@@ -200,27 +222,28 @@ class I2CFallbackBus : public I2CBus
  * @param[in] context Context
  * @return New result code
  */
-typedef I2CResult (*BusErrorHandler)(I2CBus* bus, I2CResult result, I2CAddress address, void* context);
+using BusErrorHandler = I2CResult (*)(I2CBus& bus, I2CResult result, I2CAddress address, void* context);
 
 /**
  * @brief Error handling bus driver
  * @implements I2CBus
  */
-class I2CErrorHandlingBus : public I2CBus
+class I2CErrorHandlingBus final : public I2CBus
 {
   public:
-    I2CErrorHandlingBus(I2CBus* innerBus, BusErrorHandler handler, void* context);
+    I2CErrorHandlingBus(I2CBus& innerBus, BusErrorHandler handler, void* context);
 
     virtual I2CResult Write(const I2CAddress address, gsl::span<const uint8_t> inData) override;
 
     virtual I2CResult WriteRead(const I2CAddress address, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData) override;
 
+  private:
     /** @brief Underlying bus */
-    I2CBus* InnerBus;
+    I2CBus& _innerBus;
     /** @brief Pointer to function called in case of error */
-    BusErrorHandler ErrorHandler;
+    const BusErrorHandler _errorHandler;
     /** @brief Context passed to error handler function */
-    void* HandlerContext;
+    void* _handlerContext;
 };
 
 /** @} */

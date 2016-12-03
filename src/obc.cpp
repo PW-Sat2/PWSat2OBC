@@ -7,9 +7,9 @@ OBC::OBC()
           {I2C0, I2C0_BUS_LOCATION, I2C0_BUS_PORT, I2C0_BUS_SDA_PIN, I2C0_BUS_SCL_PIN, cmuClock_I2C0, I2C0_IRQn},
           {I2C1, I2C1_BUS_LOCATION, I2C1_BUS_PORT, I2C1_BUS_SDA_PIN, I2C1_BUS_SCL_PIN, cmuClock_I2C1, I2C1_IRQn} //
       },
-      I2C(&I2CBuses[I2C_SYSTEM_BUS].ErrorHandling, &I2CBuses[I2C_PAYLOAD_BUS].ErrorHandling), //
-      I2CFallback(&I2C),                                                                      //
-      Communication(*I2C.Bus),                                                                //
+      I2C(I2CBuses[I2C_SYSTEM_BUS].ErrorHandling, I2CBuses[I2C_PAYLOAD_BUS].ErrorHandling), //
+      I2CFallback(I2C),                                                                     //
+      Communication(I2C.Bus),                                                               //
       terminal(this->IO)
 {
 }
@@ -31,6 +31,6 @@ I2CSingleBus::I2CSingleBus(I2C_TypeDef* hw,
     IRQn_Type irq)
     : //
       Driver(hw, location, port, sdaPin, sclPin, clock, irq),
-      ErrorHandling(&Driver, I2CErrorHandler, &Main.PowerControlInterface)
+      ErrorHandling(Driver, I2CErrorHandler, &Main.PowerControlInterface)
 {
 }

@@ -33,7 +33,7 @@ struct I2CSingleBus
     I2CLowLevelBus Driver;
     I2CErrorHandlingBus ErrorHandling;
 
-    static I2CResult I2CErrorHandler(I2CBus* bus, I2CResult result, I2CAddress address, void* context)
+    static I2CResult I2CErrorHandler(I2CBus& bus, I2CResult result, I2CAddress address, void* context)
     {
         UNREFERENCED_PARAMETER(bus);
         UNREFERENCED_PARAMETER(address);
