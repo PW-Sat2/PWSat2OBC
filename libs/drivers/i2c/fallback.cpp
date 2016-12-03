@@ -8,12 +8,12 @@ I2CResult I2CFallbackBus::Write(const I2CAddress address, const uint8_t* data, s
 
     const I2CResult systemBusResult = buses->Bus->Write(address, data, length);
 
-    if (systemBusResult == I2CResultOK)
+    if (systemBusResult == I2CResult::OK)
     {
         return systemBusResult;
     }
 
-    LOGF(LOG_LEVEL_WARNING, "Fallbacking to payload bus. System bus error %d. Transfer to %X", systemBusResult, address);
+    LOGF(LOG_LEVEL_WARNING, "Fallbacking to payload bus. System bus error %d. Transfer to %X", num(systemBusResult), address);
 
     const I2CResult payloadBusResult = buses->Payload->Write(address, data, length);
 
@@ -26,12 +26,12 @@ I2CResult I2CFallbackBus::WriteRead(const I2CAddress address, const uint8_t* inD
 
     const I2CResult systemBusResult = buses->Bus->WriteRead(address, inData, inLength, outData, outLength);
 
-    if (systemBusResult == I2CResultOK)
+    if (systemBusResult == I2CResult::OK)
     {
         return systemBusResult;
     }
 
-    LOGF(LOG_LEVEL_WARNING, "Fallbacking to payload bus. System bus error %d. Transfer to %X", systemBusResult, address);
+    LOGF(LOG_LEVEL_WARNING, "Fallbacking to payload bus. System bus error %d. Transfer to %X", num(systemBusResult), address);
 
     const I2CResult payloadBusResult = buses->Payload->WriteRead(address, inData, inLength, outData, outLength);
 

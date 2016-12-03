@@ -15,7 +15,7 @@ I2CResult I2CErrorHandlingBus::Write(const I2CAddress address, const uint8_t* da
 {
     const I2CResult result = this->InnerBus->Write(address, data, length);
 
-    if (result == I2CResultOK)
+    if (result == I2CResult::OK)
     {
         return result;
     }
@@ -33,7 +33,7 @@ I2CResult I2CErrorHandlingBus::WriteRead(
 {
     const I2CResult result = this->InnerBus->WriteRead(address, inData, inLength, outData, outLength);
 
-    if (result == I2CResultOK)
+    if (result == I2CResult::OK)
     {
         return result;
     }

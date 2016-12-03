@@ -33,20 +33,20 @@ static inline OSResult MapStatus(I2CResult status)
 {
     switch (status)
     {
-        case I2CResultOK:
+        case I2CResult::OK:
             return OSResult::Success;
-        case I2CResultNack:
-        case I2CResultBusErr:
-        case I2CResultArbLost:
-        case I2CResultUsageFault:
-        case I2CResultSwFault:
-        case I2CResultClockLatched:
-        case I2CResultFailure:
+        case I2CResult::Nack:
+        case I2CResult::BusErr:
+        case I2CResult::ArbLost:
+        case I2CResult::UsageFault:
+        case I2CResult::SwFault:
+        case I2CResult::ClockLatched:
+        case I2CResult::Failure:
             return OSResult::IOError;
-        case I2CResultTimeout:
+        case I2CResult::Timeout:
             return OSResult::Timeout;
         default:
-        case I2CResultClockAlreadyLatched:
+        case I2CResult::ClockAlreadyLatched:
             return OSResult::ProtocolError;
     }
 }
@@ -63,10 +63,10 @@ static OSResult SendCommand(I2CBus* bus, AntennaChannel channel, Command command
 {
     uint8_t data = (uint8_t)command;
     const I2CResult result = bus->Write(channel, &data, 1);
-    const bool status = (result == I2CResultOK);
+    const bool status = (result == I2CResult::OK);
     if (!status)
     {
-        LOGF(LOG_LEVEL_ERROR, "[ant] Unable to send command %d to %d, Reason: %d", command, channel, result);
+        LOGF(LOG_LEVEL_ERROR, "[ant] Unable to send command %d to %d, Reason: %d", command, channel, num(result));
     }
 
     return MapStatus(result);
@@ -90,10 +90,10 @@ static OSResult SendCommandWithResponse(I2CBus* bus,
     )
 {
     const I2CResult result = bus->WriteRead(channel, reinterpret_cast<std::uint8_t*>(&command), sizeof(command), outBuffer, outBufferSize);
-    const bool status = (result == I2CResultOK);
+    const bool status = (result == I2CResult::OK);
     if (!status)
     {
-        LOGF(LOG_LEVEL_ERROR, "[ant] Unable to send command %d to %d, Reason: %d", command, channel, result);
+        LOGF(LOG_LEVEL_ERROR, "[ant] Unable to send command %d to %d, Reason: %d", command, channel, num(result));
     }
 
     return MapStatus(result);
@@ -147,6 +147,7 @@ static OSResult DeployAntenna(struct AntennaMiniportDriver* miniport,
         buffer,
         sizeof(buffer) //
         ));
+;
 }
 
 static OSResult InitializeAutomaticDeployment(AntennaMiniportDriver* miniport,
@@ -163,6 +164,7 @@ static OSResult InitializeAutomaticDeployment(AntennaMiniportDriver* miniport,
         buffer,
         sizeof(buffer) //
         ));
+;
 }
 
 static OSResult CancelAntennaDeployment(AntennaMiniportDriver* miniport,

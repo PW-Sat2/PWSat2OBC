@@ -21,12 +21,12 @@ static bool epsControlLCL(EpsLcl lcl, uint8_t state)
     uint8_t data[] = {static_cast<uint8_t>(1 + lcl), state};
     const I2CResult result = i2c->Write(EPS_ADDRESS, data, COUNT_OF(data));
 
-    if (result != I2CResultOK)
+    if (result != I2CResult::OK)
     {
-        LOGF(LOG_LEVEL_ERROR, "[EPS] ControlLCL %d to state %d failed: %d", lcl, state, result);
+        LOGF(LOG_LEVEL_ERROR, "[EPS] ControlLCL %d to state %d failed: %d", lcl, state, num(result));
     }
 
-    return result == I2CResultOK;
+    return result == I2CResult::OK;
 }
 
 bool EpsOpenSail(void)
@@ -65,12 +65,12 @@ bool EpsTriggerSystemPowerCycle(void)
     uint8_t data[] = {0xA0};
     const I2CResult result = i2c->Write(EPS_ADDRESS, data, COUNT_OF(data));
 
-    if (result != I2CResultOK)
+    if (result != I2CResult::OK)
     {
-        LOGF(LOG_LEVEL_ERROR, "[EPS] EpsTriggerSystemPowerCycle failed: %d", result);
+        LOGF(LOG_LEVEL_ERROR, "[EPS] EpsTriggerSystemPowerCycle failed: %d", num(result));
     }
 
-    return result == I2CResultOK;
+    return result == I2CResult::OK;
 }
 
 void EpsInit(I2CBus* bus)

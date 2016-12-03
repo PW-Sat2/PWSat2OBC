@@ -28,37 +28,37 @@ EXTERNC_BEGIN
 /**
  * @brief Possible results of transfer
  */
-enum I2CResult
+enum class I2CResult
 {
     /** @brief Transfer completed successfully. */
-    I2CResultOK = 0,
+    OK = 0,
 
     /** @brief NACK received during transfer. */
-    I2CResultNack = -1,
+    Nack = -1,
 
     /** @brief Bus error during transfer (misplaced START/STOP). */
-    I2CResultBusErr = -2,
+    BusErr = -2,
 
     /** @brief Arbitration lost during transfer. */
-    I2CResultArbLost = -3,
+    ArbLost = -3,
 
     /** @brief Usage fault. */
-    I2CResultUsageFault = -4,
+    UsageFault = -4,
 
     /** @brief Software fault. */
-    I2CResultSwFault = -5,
+    SwFault = -5,
 
     /** @brief General I2C error */
-    I2CResultTimeout = -6,
+    Timeout = -6,
 
     /** @brief SCL line is latched low at the end of transfer */
-    I2CResultClockLatched = -7,
+    ClockLatched = -7,
 
     /** @brief General I2C error */
-    I2CResultFailure = -8,
+    Failure = -8,
 
     /** @brief SCL line is latched low before transfer */
-    I2CResultClockAlreadyLatched = -9
+    ClockAlreadyLatched = -9
 };
 
 /**

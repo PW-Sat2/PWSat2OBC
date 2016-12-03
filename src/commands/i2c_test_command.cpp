@@ -53,7 +53,7 @@ void I2CTestCommandHandler(uint16_t argc, char* argv[])
         return;
     }
 
-    if (result == I2CResultOK)
+    if (result == I2CResult::OK)
     {
         Main.terminal.Puts((char*)output);
     }

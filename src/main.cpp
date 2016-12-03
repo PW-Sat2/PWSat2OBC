@@ -257,7 +257,7 @@ I2CResult I2CErrorHandler(I2CBus* bus, I2CResult result, I2CAddress address, voi
 
     PowerControl* power = (PowerControl*)context;
 
-    if (result == I2CResultClockLatched)
+    if (result == I2CResult::ClockLatched)
     {
         LOG(LOG_LEVEL_FATAL, "SCL latched. Triggering power cycle");
         power->TriggerSystemPowerCycle(power);

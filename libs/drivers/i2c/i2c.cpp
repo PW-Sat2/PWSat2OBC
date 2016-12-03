@@ -39,14 +39,14 @@ static I2CResult ExecuteTransfer(I2CLowLevelBus* bus, I2C_TransferSeq_TypeDef* s
     if (OS_RESULT_FAILED(System::TakeSemaphore(bus->Lock, MAX_DELAY)))
     {
         LOGF(LOG_LEVEL_ERROR, "[I2C] Taking semaphore failed. Address: %X", seq->addr);
-        return I2CResultFailure;
+        return I2CResult::Failure;
     }
 
     if (IsSclLatched(bus))
     {
         LOG(LOG_LEVEL_FATAL, "[I2C] SCL already latched");
         System::GiveSemaphore(bus->Lock);
-        return I2CResultClockAlreadyLatched;
+        return I2CResult::ClockAlreadyLatched;
     }
 
     I2C_TypeDef* hw = (I2C_TypeDef*)bus->HWInterface;
@@ -61,7 +61,7 @@ static I2CResult ExecuteTransfer(I2CLowLevelBus* bus, I2C_TransferSeq_TypeDef* s
 
     if (!System::QueueReceive(bus->ResultQueue, &rawResult, I2C_TIMEOUT * 1000))
     {
-        I2CResult ret = I2CResultTimeout;
+        I2CResult ret = I2CResult::Timeout;
 
         LOG(LOG_LEVEL_ERROR, "Didn't received i2c transfer result");
 
@@ -75,7 +75,7 @@ static I2CResult ExecuteTransfer(I2CLowLevelBus* bus, I2C_TransferSeq_TypeDef* s
         {
             LOG(LOG_LEVEL_ERROR, "SCL latched at low level");
 
-            ret = I2CResultClockLatched;
+            ret = I2CResult::ClockLatched;
         }
 
         System::GiveSemaphore(bus->Lock);

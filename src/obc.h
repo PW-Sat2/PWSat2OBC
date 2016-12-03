@@ -40,7 +40,7 @@ struct I2CSingleBus
 
         PowerControl* power = (PowerControl*)context;
 
-        if (result == I2CResultClockLatched)
+        if (result == I2CResult::ClockLatched)
         {
             LOG(LOG_LEVEL_FATAL, "SCL latched. Triggering power cycle");
             power->TriggerSystemPowerCycle(power);
