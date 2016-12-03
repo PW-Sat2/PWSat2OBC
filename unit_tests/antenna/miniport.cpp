@@ -1,10 +1,12 @@
 #include "antenna/miniport.h"
 #include <cstdint>
+#include <gsl/span>
 #include <tuple>
 #include "gtest/gtest.h"
 #include "antenna/antenna.h"
 #include "i2c/I2CMock.hpp"
 #include "time/TimeSpan.hpp"
+#include "utils.hpp"
 
 static constexpr std::uint8_t DeployAntenna1 = 0xa1;
 static constexpr std::uint8_t DeployAntenna2 = 0xa2;
@@ -36,7 +38,8 @@ using testing::Eq;
 using testing::Ge;
 using testing::Ne;
 using testing::Invoke;
-using testing::Pointee;
+using testing::ElementsAre;
+using gsl::span;
 
 class AntennaMiniportTest : public testing::Test
 {
@@ -95,14 +98,14 @@ TEST_F(AntennaMiniportTest, TestDisarmingDeploymentFailure)
 
 TEST_F(AntennaMiniportTest, TestAutomaticDeployment)
 {
-    EXPECT_CALL(i2c, Write(ANTENNA_PRIMARY_CHANNEL, Pointee(StartDeployment), 2)).WillOnce(Return(I2CResult::OK));
+    EXPECT_CALL(i2c, Write(ANTENNA_PRIMARY_CHANNEL, BeginsWith(StartDeployment))).WillOnce(Return(I2CResult::OK));
     const auto status = miniport.InitializeAutomaticDeployment(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, TimeSpanFromSeconds(200));
     ASSERT_THAT(status, Eq(OSResult::Success));
 }
 
 TEST_F(AntennaMiniportTest, TestAutomaticDeploymentFailure)
 {
-    EXPECT_CALL(i2c, Write(ANTENNA_PRIMARY_CHANNEL, Pointee(StartDeployment), 2)).WillOnce(Return(I2CResult::Nack));
+    EXPECT_CALL(i2c, Write(ANTENNA_PRIMARY_CHANNEL, BeginsWith(StartDeployment))).WillOnce(Return(I2CResult::Nack));
     const auto status = miniport.InitializeAutomaticDeployment(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, TimeSpanFromSeconds(200));
     ASSERT_THAT(status, Ne(OSResult::Success));
 }
@@ -123,53 +126,37 @@ TEST_F(AntennaMiniportTest, TestCancelAutomaticDeploymentFailure)
 
 TEST_F(AntennaMiniportTest, TestManualAntennaDeployment)
 {
-    EXPECT_CALL(i2c, Write(ANTENNA_PRIMARY_CHANNEL, Pointee(DeployAntenna1), 2))
-        .WillOnce(Invoke([](const I2CAddress /*address*/,
-            const uint8_t* inData,
-            size_t length //
-            ) {
-            EXPECT_THAT(length, Eq(2u));
-            EXPECT_THAT(inData[1], Eq(200u));
-            return I2CResult::OK;
-        }));
+    EXPECT_CALL(i2c, Write(ANTENNA_PRIMARY_CHANNEL, ElementsAre(DeployAntenna1, 200u))).WillOnce(Return(I2CResult::OK));
     const auto status = miniport.DeployAntenna(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, TimeSpanFromSeconds(200), false);
     ASSERT_THAT(status, Eq(OSResult::Success));
 }
 
 TEST_F(AntennaMiniportTest, TestManualAntennaDeploymentFailure)
 {
-    EXPECT_CALL(i2c, Write(ANTENNA_PRIMARY_CHANNEL, Pointee(DeployAntenna2), _)).WillOnce(Return(I2CResult::Nack));
-    const auto status = miniport.DeployAntenna(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, TimeSpanFromMilliseconds(200), false);
+    EXPECT_CALL(i2c, Write(ANTENNA_PRIMARY_CHANNEL, ElementsAre(DeployAntenna2, 200u))).WillOnce(Return(I2CResult::Nack));
+    const auto status = miniport.DeployAntenna(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, TimeSpanFromSeconds(200), false);
     ASSERT_THAT(status, Ne(OSResult::Success));
 }
 
 TEST_F(AntennaMiniportTest, TestManualAntennaDeploymentWithOverride)
 {
-    EXPECT_CALL(i2c, Write(ANTENNA_PRIMARY_CHANNEL, Pointee(DeployAntenna1Override), 2))
-        .WillOnce(Invoke([](const I2CAddress /*address*/,
-            const uint8_t* inData,
-            size_t length //
-            ) {
-            EXPECT_THAT(length, Eq(2u));
-            EXPECT_THAT(inData[1], Eq(200u));
-            return I2CResult::OK;
-        }));
+    EXPECT_CALL(i2c, Write(ANTENNA_PRIMARY_CHANNEL, ElementsAre(DeployAntenna1Override, 200u))).WillOnce(Return(I2CResult::OK));
     const auto status = miniport.DeployAntenna(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, TimeSpanFromSeconds(200), true);
     ASSERT_THAT(status, Eq(OSResult::Success));
 }
 
 TEST_F(AntennaMiniportTest, TestManualAntennaDeploymentWithOverrideFailure)
 {
-    EXPECT_CALL(i2c, Write(ANTENNA_BACKUP_CHANNEL, Pointee(DeployAntenna3Override), _)).WillOnce(Return(I2CResult::Nack));
-    const auto status = miniport.DeployAntenna(&miniport, &i2c, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, TimeSpanFromMilliseconds(200), true);
+    EXPECT_CALL(i2c, Write(ANTENNA_BACKUP_CHANNEL, ElementsAre(DeployAntenna3Override, 200u))).WillOnce(Return(I2CResult::Nack));
+    const auto status = miniport.DeployAntenna(&miniport, &i2c, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, TimeSpanFromSeconds(200), true);
     ASSERT_THAT(status, Ne(OSResult::Success));
 }
 
 TEST_F(AntennaMiniportTest, TestAntennaActivationCount)
 {
-    EXPECT_CALL(i2c, WriteRead(ANTENNA_PRIMARY_CHANNEL, Pointee(QueryActivationCount1), _, Ne(nullptr), Ge(1u)))
-        .WillOnce(Invoke([=](uint8_t /*address*/, const uint8_t* /*inData*/, uint16_t /*length*/, uint8_t* outData, uint16_t outLength) {
-            memset(outData, 0, outLength);
+    EXPECT_CALL(i2c, WriteRead(ANTENNA_PRIMARY_CHANNEL, ElementsAre(QueryActivationCount1), _))
+        .WillOnce(Invoke([=](uint8_t /*address*/, span<const uint8_t> /*inData*/, span<uint8_t> outData) {
+            std::fill(outData.begin(), outData.end(), 0);
             outData[0] = 10;
             return I2CResult::OK;
         }));
@@ -181,7 +168,7 @@ TEST_F(AntennaMiniportTest, TestAntennaActivationCount)
 
 TEST_F(AntennaMiniportTest, TestAntennaActivationCountFailure)
 {
-    EXPECT_CALL(i2c, WriteRead(ANTENNA_BACKUP_CHANNEL, Pointee(QueryActivationCount2), _, _, _)).WillOnce(Return(I2CResult::Nack));
+    EXPECT_CALL(i2c, WriteRead(ANTENNA_BACKUP_CHANNEL, ElementsAre(QueryActivationCount2), _)).WillOnce(Return(I2CResult::Nack));
     uint16_t response;
     const auto status = miniport.GetAntennaActivationCount(&miniport, &i2c, ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, &response);
     ASSERT_THAT(status, Ne(OSResult::Success));
@@ -190,9 +177,9 @@ TEST_F(AntennaMiniportTest, TestAntennaActivationCountFailure)
 
 TEST_F(AntennaMiniportTest, TestAntennaTemperature)
 {
-    EXPECT_CALL(i2c, WriteRead(ANTENNA_PRIMARY_CHANNEL, Pointee(QueryTemperature), _, Ne(nullptr), Ge(2u)))
-        .WillOnce(Invoke([=](uint8_t /*address*/, const uint8_t* /*inData*/, uint16_t /*length*/, uint8_t* outData, uint16_t outLength) {
-            memset(outData, 0, outLength);
+    EXPECT_CALL(i2c, WriteRead(ANTENNA_PRIMARY_CHANNEL, ElementsAre(QueryTemperature), _))
+        .WillOnce(Invoke([=](uint8_t /*address*/, span<const uint8_t> /*inData*/, span<uint8_t> outData) {
+            std::fill(outData.begin(), outData.end(), 0);
             outData[0] = 0;
             outData[1] = 0x11;
             return I2CResult::OK;
@@ -205,9 +192,9 @@ TEST_F(AntennaMiniportTest, TestAntennaTemperature)
 
 TEST_F(AntennaMiniportTest, TestAntennaTemperatureOutOfRange)
 {
-    EXPECT_CALL(i2c, WriteRead(ANTENNA_PRIMARY_CHANNEL, Pointee(QueryTemperature), _, Ne(nullptr), Ge(2u)))
-        .WillOnce(Invoke([=](uint8_t /*address*/, const uint8_t* /*inData*/, uint16_t /*length*/, uint8_t* outData, uint16_t outLength) {
-            memset(outData, 0, outLength);
+    EXPECT_CALL(i2c, WriteRead(ANTENNA_PRIMARY_CHANNEL, ElementsAre(QueryTemperature), _))
+        .WillOnce(Invoke([=](uint8_t /*address*/, span<const uint8_t> /*inData*/, span<uint8_t> outData) {
+            std::fill(outData.begin(), outData.end(), 0);
             outData[0] = 0xfc;
             outData[1] = 0;
             return I2CResult::OK;
@@ -220,7 +207,7 @@ TEST_F(AntennaMiniportTest, TestAntennaTemperatureOutOfRange)
 
 TEST_F(AntennaMiniportTest, TestAntennaTemperatureFailure)
 {
-    EXPECT_CALL(i2c, WriteRead(ANTENNA_PRIMARY_CHANNEL, Pointee(QueryTemperature), _, _, _)).WillOnce(Return(I2CResult::Nack));
+    EXPECT_CALL(i2c, WriteRead(ANTENNA_PRIMARY_CHANNEL, ElementsAre(QueryTemperature), _)).WillOnce(Return(I2CResult::Nack));
     uint16_t response;
     const auto status = miniport.GetTemperature(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, &response);
     ASSERT_THAT(status, Ne(OSResult::Success));
@@ -229,9 +216,9 @@ TEST_F(AntennaMiniportTest, TestAntennaTemperatureFailure)
 
 TEST_F(AntennaMiniportTest, TestAntennaActivationTime)
 {
-    EXPECT_CALL(i2c, WriteRead(ANTENNA_PRIMARY_CHANNEL, Pointee(QueryActivationTime1), _, Ne(nullptr), Ge(1u)))
-        .WillOnce(Invoke([=](uint8_t /*address*/, const uint8_t* /*inData*/, uint16_t /*length*/, uint8_t* outData, uint16_t outLength) {
-            memset(outData, 0, outLength);
+    EXPECT_CALL(i2c, WriteRead(ANTENNA_PRIMARY_CHANNEL, ElementsAre(QueryActivationTime1), _))
+        .WillOnce(Invoke([=](uint8_t /*address*/, span<const uint8_t> /*inData*/, span<uint8_t> outData) {
+            std::fill(outData.begin(), outData.end(), 0);
             outData[0] = 10;
             return I2CResult::OK;
         }));
@@ -243,7 +230,7 @@ TEST_F(AntennaMiniportTest, TestAntennaActivationTime)
 
 TEST_F(AntennaMiniportTest, TestAntennaActivationTimeFailure)
 {
-    EXPECT_CALL(i2c, WriteRead(ANTENNA_PRIMARY_CHANNEL, Pointee(QueryActivationTime2), _, _, _)).WillOnce(Return(I2CResult::Nack));
+    EXPECT_CALL(i2c, WriteRead(ANTENNA_PRIMARY_CHANNEL, ElementsAre(QueryActivationTime2), _)).WillOnce(Return(I2CResult::Nack));
     TimeSpan response;
     const auto status = miniport.GetAntennaActivationTime(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, &response);
     ASSERT_THAT(status, Ne(OSResult::Success));
@@ -273,9 +260,9 @@ void AntennaDeploymentStatusTest::MockI2C()
     const auto response2 = std::get<1>(GetParam());
     const auto i2cResult = std::get<2>(GetParam());
 
-    EXPECT_CALL(i2c, WriteRead(ANTENNA_PRIMARY_CHANNEL, Pointee(QueryDeploymentStatus), _, Ne(nullptr), Ge(2u)))
-        .WillOnce(Invoke([=](uint8_t /*address*/, const uint8_t* /*inData*/, uint16_t /*length*/, uint8_t* outData, uint16_t outLength) {
-            memset(outData, 0, outLength);
+    EXPECT_CALL(i2c, WriteRead(ANTENNA_PRIMARY_CHANNEL, ElementsAre(QueryDeploymentStatus), _))
+        .WillOnce(Invoke([=](uint8_t /*address*/, span<const uint8_t> /*inData*/, span<uint8_t> outData) {
+            std::fill(outData.begin(), outData.end(), 0);
             outData[0] = response1;
             outData[1] = response2;
             return i2cResult;

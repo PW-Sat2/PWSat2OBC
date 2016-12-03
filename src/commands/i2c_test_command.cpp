@@ -1,9 +1,12 @@
 #include <stdint.h>
 #include <string.h>
+#include <gsl/span>
 
 #include "obc.h"
 #include "system.h"
 #include "terminal.h"
+
+using gsl::span;
 
 void I2CTestCommandHandler(uint16_t argc, char* argv[])
 {
@@ -35,17 +38,16 @@ void I2CTestCommandHandler(uint16_t argc, char* argv[])
     uint8_t* data = (uint8_t*)argv[3];
     const size_t dataLength = strlen(argv[3]);
     uint8_t output[100] = {0};
-    size_t outputLength = dataLength;
 
     I2CResult result;
 
     if (strcmp(argv[0], "wr") == 0)
     {
-        result = bus->WriteRead(device, data, dataLength, output, outputLength);
+        result = bus->WriteRead(device, span<const uint8_t>(data, dataLength), output);
     }
     else if (strcmp(argv[0], "w") == 0)
     {
-        result = bus->Write(device, data, dataLength);
+        result = bus->Write(device, span<const uint8_t>(data, dataLength));
     }
     else
     {

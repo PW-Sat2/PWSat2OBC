@@ -1,6 +1,7 @@
 #ifndef UNIT_TESTS_I2C_I2CMOCK_HPP_
 #define UNIT_TESTS_I2C_I2CMOCK_HPP_
 
+#include <gsl/span>
 #include "gmock/gmock.h"
 #include "gmock/gmock-matchers.h"
 #include "i2c/i2c.h"
@@ -8,24 +9,20 @@
 struct I2CBusMock : I2CBus
 {
     I2CBusMock();
-    MOCK_METHOD3(Write,
+    MOCK_METHOD2(Write,
         I2CResult(const I2CAddress address,
-            const uint8_t* inData,
-            size_t length //
+            gsl::span<const uint8_t> inData //
             ));
 
-    MOCK_METHOD5(WriteRead,
+    MOCK_METHOD3(WriteRead,
         I2CResult(const I2CAddress address,
-            const uint8_t* inData,
-            size_t inLength,
-            uint8_t* outData,
-            size_t outLength //
+            gsl::span<const uint8_t> inData,
+            gsl::span<uint8_t> outData //
             ));
 
     decltype(auto) ExpectWriteCommand(const I2CAddress address, uint8_t command)
     {
-        ((void)command);
-        return EXPECT_CALL(*this, Write(address, testing::Pointee(command), 1));
+        return EXPECT_CALL(*this, Write(address, testing::ElementsAre(command)));
     }
 };
 

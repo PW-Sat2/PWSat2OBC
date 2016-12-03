@@ -34,50 +34,50 @@ ErrorHandlingI2CBusTest::ErrorHandlingI2CBusTest() : bus(&innerBus, HandlerProc,
 
 TEST_F(ErrorHandlingI2CBusTest, WriteReadShouldCallInnerBusAndPassthroughSuccess)
 {
-    EXPECT_CALL(innerBus, WriteRead(_, _, _, _, _)).WillOnce(Return(I2CResult::OK));
+    EXPECT_CALL(innerBus, WriteRead(_, _, _)).WillOnce(Return(I2CResult::OK));
     EXPECT_CALL(*this, Handler(_, _, _, _)).Times(0);
 
     uint8_t in[] = {1, 2, 3};
     uint8_t out[3] = {0};
 
-    auto r = bus.WriteRead(0x20, in, COUNT_OF(in), out, COUNT_OF(out));
+    auto r = bus.WriteRead(0x20, in, out);
 
     ASSERT_THAT(r, Eq(I2CResult::OK));
 }
 
 TEST_F(ErrorHandlingI2CBusTest, WriteReadShouldCallInnerBusAndExecuteHandlerOnError)
 {
-    EXPECT_CALL(innerBus, WriteRead(_, _, _, _, _)).WillOnce(Return(I2CResult::BusErr));
+    EXPECT_CALL(innerBus, WriteRead(_, _, _)).WillOnce(Return(I2CResult::BusErr));
     EXPECT_CALL(*this, Handler(_, _, _, _)).WillOnce(Return(I2CResult::OK));
 
     uint8_t in[] = {1, 2, 3};
     uint8_t out[3] = {0};
 
-    auto r = bus.WriteRead(0x20, in, COUNT_OF(in), out, COUNT_OF(out));
+    auto r = bus.WriteRead(0x20, in, out);
 
     ASSERT_THAT(r, Eq(I2CResult::OK));
 }
 
 TEST_F(ErrorHandlingI2CBusTest, WriteShouldCallInnerBusAndPassthroughSuccess)
 {
-    EXPECT_CALL(innerBus, Write(_, _, _)).WillOnce(Return(I2CResult::OK));
+    EXPECT_CALL(innerBus, Write(_, _)).WillOnce(Return(I2CResult::OK));
     EXPECT_CALL(*this, Handler(_, _, _, _)).Times(0);
 
     uint8_t in[] = {1, 2, 3};
 
-    auto r = bus.Write(0x20, in, COUNT_OF(in));
+    auto r = bus.Write(0x20, in);
 
     ASSERT_THAT(r, Eq(I2CResult::OK));
 }
 
 TEST_F(ErrorHandlingI2CBusTest, WriteShouldCallInnerBusAndExecuteHandlerOnError)
 {
-    EXPECT_CALL(innerBus, Write(_, _, _)).WillOnce(Return(I2CResult::BusErr));
+    EXPECT_CALL(innerBus, Write(_, _)).WillOnce(Return(I2CResult::BusErr));
     EXPECT_CALL(*this, Handler(_, _, _, _)).WillOnce(Return(I2CResult::OK));
 
     uint8_t in[] = {1, 2, 3};
 
-    auto r = bus.Write(0x20, in, COUNT_OF(in));
+    auto r = bus.Write(0x20, in);
 
     ASSERT_THAT(r, Eq(I2CResult::OK));
 }

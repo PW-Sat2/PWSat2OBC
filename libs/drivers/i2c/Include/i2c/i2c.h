@@ -1,10 +1,11 @@
 #ifndef SRC_DRIVERS_I2C_H_
 #define SRC_DRIVERS_I2C_H_
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <em_cmu.h>
 #include <em_gpio.h>
 #include <em_i2c.h>
+#include <gsl/span>
 #include "base/os.h"
 #include "system.h"
 
@@ -81,7 +82,7 @@ struct I2CBus
      * @param[in] length Length of data to be sent
      * @return Transfer result
      */
-    virtual I2CResult Write(const I2CAddress address, const uint8_t* inData, size_t length) = 0;
+    virtual I2CResult Write(const I2CAddress address, gsl::span<const uint8_t> inData) = 0;
 
     /**
      *
@@ -94,12 +95,7 @@ struct I2CBus
      * @param[in] outLength Number of bytes to be read from device
      * @return Transfer result
      */
-    virtual I2CResult WriteRead(const I2CAddress address,
-        const uint8_t* inData,
-        size_t inLength,
-        uint8_t* outData,
-        size_t outLength //
-        ) = 0;
+    virtual I2CResult WriteRead(const I2CAddress address, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData) = 0;
 };
 
 /** @brief Low-level I2C bus driver */
@@ -124,14 +120,9 @@ class I2CLowLevelBus : public I2CBus
         CMU_Clock_TypeDef clock,
         IRQn_Type irq);
 
-    virtual I2CResult Write(const I2CAddress address, const uint8_t* inData, size_t length) override;
+    virtual I2CResult Write(const I2CAddress address, gsl::span<const uint8_t> inData) override;
 
-    virtual I2CResult WriteRead(const I2CAddress address,
-        const uint8_t* inData,
-        size_t inLength,
-        uint8_t* outData,
-        size_t outLength //
-        ) override;
+    virtual I2CResult WriteRead(const I2CAddress address, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData) override;
 
     void Initialize();
 
@@ -193,14 +184,9 @@ class I2CFallbackBus : public I2CBus
      */
     I2CFallbackBus(I2CInterface* buses);
 
-    virtual I2CResult Write(const I2CAddress address, const uint8_t* inData, size_t length) override;
+    virtual I2CResult Write(const I2CAddress address, gsl::span<const uint8_t> inData) override;
 
-    virtual I2CResult WriteRead(const I2CAddress address,
-        const uint8_t* inData,
-        size_t inLength,
-        uint8_t* outData,
-        size_t outLength //
-        ) override;
+    virtual I2CResult WriteRead(const I2CAddress address, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData) override;
 
     /** @brief Object representing both buses used in the system */
     I2CInterface* InnerBuses;
@@ -225,14 +211,9 @@ class I2CErrorHandlingBus : public I2CBus
   public:
     I2CErrorHandlingBus(I2CBus* innerBus, BusErrorHandler handler, void* context);
 
-    virtual I2CResult Write(const I2CAddress address, const uint8_t* inData, size_t length) override;
+    virtual I2CResult Write(const I2CAddress address, gsl::span<const uint8_t> inData) override;
 
-    virtual I2CResult WriteRead(const I2CAddress address,
-        const uint8_t* inData,
-        size_t inLength,
-        uint8_t* outData,
-        size_t outLength //
-        ) override;
+    virtual I2CResult WriteRead(const I2CAddress address, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData) override;
 
     /** @brief Underlying bus */
     I2CBus* InnerBus;

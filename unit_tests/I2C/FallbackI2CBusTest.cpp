@@ -30,75 +30,75 @@ FallbackI2CBusTest::FallbackI2CBusTest() : buses(&systemBus, &payloadBus), bus(&
 
 TEST_F(FallbackI2CBusTest, WriteReadShouldNotFallbackToPayloadBusIfSystemBusWorked)
 {
-    EXPECT_CALL(systemBus, WriteRead(_, _, _, _, _)).WillOnce(Return(I2CResult::OK));
-    EXPECT_CALL(payloadBus, WriteRead(_, _, _, _, _)).Times(0);
+    EXPECT_CALL(systemBus, WriteRead(_, _, _)).WillOnce(Return(I2CResult::OK));
+    EXPECT_CALL(payloadBus, WriteRead(_, _, _)).Times(0);
 
     uint8_t in[] = {1, 2, 3};
     uint8_t out[3] = {0};
 
-    auto r = bus.WriteRead(0x20, in, COUNT_OF(in), out, COUNT_OF(out));
+    auto r = bus.WriteRead(0x20, in, out);
 
     ASSERT_THAT(r, Eq(I2CResult::OK));
 }
 
 TEST_F(FallbackI2CBusTest, WriteReadShouldFallbackToPayloadBusIfSystemBusFailed)
 {
-    EXPECT_CALL(systemBus, WriteRead(_, _, _, _, _)).WillOnce(Return(I2CResult::Failure));
-    EXPECT_CALL(payloadBus, WriteRead(_, _, _, _, _)).WillOnce(Return(I2CResult::OK));
+    EXPECT_CALL(systemBus, WriteRead(_, _, _)).WillOnce(Return(I2CResult::Failure));
+    EXPECT_CALL(payloadBus, WriteRead(_, _, _)).WillOnce(Return(I2CResult::OK));
 
     uint8_t in[] = {1, 2, 3};
     uint8_t out[3] = {0};
 
-    auto r = bus.WriteRead(0x20, in, COUNT_OF(in), out, COUNT_OF(out));
+    auto r = bus.WriteRead(0x20, in, out);
 
     ASSERT_THAT(r, Eq(I2CResult::OK));
 }
 
 TEST_F(FallbackI2CBusTest, WriteReadShouldFailWhenBothBusesFail)
 {
-    EXPECT_CALL(systemBus, WriteRead(_, _, _, _, _)).WillOnce(Return(I2CResult::Failure));
-    EXPECT_CALL(payloadBus, WriteRead(_, _, _, _, _)).WillOnce(Return(I2CResult::Nack));
+    EXPECT_CALL(systemBus, WriteRead(_, _, _)).WillOnce(Return(I2CResult::Failure));
+    EXPECT_CALL(payloadBus, WriteRead(_, _, _)).WillOnce(Return(I2CResult::Nack));
 
     uint8_t in[] = {1, 2, 3};
     uint8_t out[3] = {0};
 
-    auto r = bus.WriteRead(0x20, in, COUNT_OF(in), out, COUNT_OF(out));
+    auto r = bus.WriteRead(0x20, in, out);
 
     ASSERT_THAT(r, Eq(I2CResult::Nack));
 }
 
 TEST_F(FallbackI2CBusTest, WriteShouldNotFallbackToPayloadBusIfSystemBusWorked)
 {
-    EXPECT_CALL(systemBus, Write(_, _, _)).WillOnce(Return(I2CResult::OK));
-    EXPECT_CALL(payloadBus, Write(_, _, _)).Times(0);
+    EXPECT_CALL(systemBus, Write(_, _)).WillOnce(Return(I2CResult::OK));
+    EXPECT_CALL(payloadBus, Write(_, _)).Times(0);
 
     uint8_t in[] = {1, 2, 3};
 
-    auto r = bus.Write(0x20, in, COUNT_OF(in));
+    auto r = bus.Write(0x20, in);
 
     ASSERT_THAT(r, Eq(I2CResult::OK));
 }
 
 TEST_F(FallbackI2CBusTest, WriteShouldFallbackToPayloadBusIfSystemBusFailed)
 {
-    EXPECT_CALL(systemBus, Write(_, _, _)).WillOnce(Return(I2CResult::Failure));
-    EXPECT_CALL(payloadBus, Write(_, _, _)).WillOnce(Return(I2CResult::OK));
+    EXPECT_CALL(systemBus, Write(_, _)).WillOnce(Return(I2CResult::Failure));
+    EXPECT_CALL(payloadBus, Write(_, _)).WillOnce(Return(I2CResult::OK));
 
     uint8_t in[] = {1, 2, 3};
 
-    auto r = bus.Write(0x20, in, COUNT_OF(in));
+    auto r = bus.Write(0x20, in);
 
     ASSERT_THAT(r, Eq(I2CResult::OK));
 }
 
 TEST_F(FallbackI2CBusTest, WriteShouldFailWhenBothBusesFail)
 {
-    EXPECT_CALL(systemBus, Write(_, _, _)).WillOnce(Return(I2CResult::Failure));
-    EXPECT_CALL(payloadBus, Write(_, _, _)).WillOnce(Return(I2CResult::Nack));
+    EXPECT_CALL(systemBus, Write(_, _)).WillOnce(Return(I2CResult::Failure));
+    EXPECT_CALL(payloadBus, Write(_, _)).WillOnce(Return(I2CResult::Nack));
 
     uint8_t in[] = {1, 2, 3};
 
-    auto r = bus.Write(0x20, in, COUNT_OF(in));
+    auto r = bus.Write(0x20, in);
 
     ASSERT_THAT(r, Eq(I2CResult::Nack));
 }

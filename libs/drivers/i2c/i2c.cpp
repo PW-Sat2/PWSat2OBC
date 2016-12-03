@@ -88,29 +88,29 @@ static I2CResult ExecuteTransfer(I2CLowLevelBus* bus, I2C_TransferSeq_TypeDef* s
     return (I2CResult)rawResult;
 }
 
-I2CResult I2CLowLevelBus::Write(const I2CAddress address, const uint8_t* data, size_t length)
+I2CResult I2CLowLevelBus::Write(const I2CAddress address, gsl::span<const uint8_t> inData)
 {
     I2C_TransferSeq_TypeDef seq;
     seq.addr = address;
     seq.flags = I2C_FLAG_WRITE;
-    seq.buf[0].len = length;
-    seq.buf[0].data = (uint8_t*)data;
+    seq.buf[0].len = inData.length();
+    seq.buf[0].data = const_cast<uint8_t*>(inData.data());
     seq.buf[1].len = 0;
     seq.buf[1].data = nullptr;
 
     return ExecuteTransfer(this, &seq);
 }
 
-I2CResult I2CLowLevelBus::WriteRead(const I2CAddress address, const uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength)
+I2CResult I2CLowLevelBus::WriteRead(const I2CAddress address, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData)
 {
     I2C_TransferSeq_TypeDef seq;
 
     seq.addr = address;
     seq.flags = I2C_FLAG_WRITE_READ;
-    seq.buf[0].len = inLength;
-    seq.buf[0].data = (uint8_t*)inData;
-    seq.buf[1].len = outLength;
-    seq.buf[1].data = outData;
+    seq.buf[0].len = inData.length();
+    seq.buf[0].data = const_cast<uint8_t*>(inData.data());
+    seq.buf[1].len = outData.length();
+    seq.buf[1].data = outData.data();
 
     return ExecuteTransfer(this, &seq);
 }

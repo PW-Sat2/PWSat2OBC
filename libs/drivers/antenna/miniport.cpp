@@ -1,8 +1,11 @@
 #include "miniport.h"
 #include <string.h>
 #include <cstdint>
+#include <gsl/span>
 #include "base/reader.h"
 #include "logger/logger.h"
+
+using gsl::span;
 
 /**
  * @brief Enumerator of all supported antenna controller commands.
@@ -62,7 +65,7 @@ static inline OSResult MapStatus(I2CResult status)
 static OSResult SendCommand(I2CBus* bus, AntennaChannel channel, Command command)
 {
     uint8_t data = (uint8_t)command;
-    const I2CResult result = bus->Write(channel, &data, 1);
+    const I2CResult result = bus->Write(channel, span<const uint8_t>(&data, 1));
     const bool status = (result == I2CResult::OK);
     if (!status)
     {
@@ -89,7 +92,8 @@ static OSResult SendCommandWithResponse(I2CBus* bus,
     uint8_t outBufferSize //
     )
 {
-    const I2CResult result = bus->WriteRead(channel, reinterpret_cast<std::uint8_t*>(&command), sizeof(command), outBuffer, outBufferSize);
+    const I2CResult result =
+        bus->WriteRead(channel, span<const uint8_t>(reinterpret_cast<uint8_t*>(&command), 1), span<uint8_t>(outBuffer, outBufferSize));
     const bool status = (result == I2CResult::OK);
     if (!status)
     {
@@ -143,11 +147,7 @@ static OSResult DeployAntenna(struct AntennaMiniportDriver* miniport,
     uint8_t buffer[2];
     buffer[0] = (uint8_t)(DEPLOY_ANTENNA + antennaId + GetOverrideFlag(override));
     buffer[1] = (uint8_t)TimeSpanToSeconds(timeout);
-    return MapStatus(communicationBus->Write(channel,
-        buffer,
-        sizeof(buffer) //
-        ));
-;
+    return MapStatus(communicationBus->Write(channel, buffer));
 }
 
 static OSResult InitializeAutomaticDeployment(AntennaMiniportDriver* miniport,
@@ -160,11 +160,7 @@ static OSResult InitializeAutomaticDeployment(AntennaMiniportDriver* miniport,
     uint8_t buffer[2];
     buffer[0] = (uint8_t)(START_AUTOMATIC_DEPLOYMENT);
     buffer[1] = (uint8_t)TimeSpanToSeconds(timeout);
-    return MapStatus(communicationBus->Write(channel,
-        buffer,
-        sizeof(buffer) //
-        ));
-;
+    return MapStatus(communicationBus->Write(channel, buffer));
 }
 
 static OSResult CancelAntennaDeployment(AntennaMiniportDriver* miniport,

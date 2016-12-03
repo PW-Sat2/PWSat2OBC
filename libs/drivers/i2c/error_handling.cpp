@@ -11,9 +11,9 @@ I2CErrorHandlingBus::I2CErrorHandlingBus(I2CBus* innerBus, BusErrorHandler handl
     this->HandlerContext = context;
 }
 
-I2CResult I2CErrorHandlingBus::Write(const I2CAddress address, const uint8_t* data, size_t length)
+I2CResult I2CErrorHandlingBus::Write(const I2CAddress address, gsl::span<const uint8_t> inData)
 {
-    const I2CResult result = this->InnerBus->Write(address, data, length);
+    const I2CResult result = this->InnerBus->Write(address, inData);
 
     if (result == I2CResult::OK)
     {
@@ -28,10 +28,9 @@ I2CResult I2CErrorHandlingBus::Write(const I2CAddress address, const uint8_t* da
     return this->ErrorHandler(this->InnerBus, result, address, this->HandlerContext);
 }
 
-I2CResult I2CErrorHandlingBus::WriteRead(
-    const I2CAddress address, const uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength)
+I2CResult I2CErrorHandlingBus::WriteRead(const I2CAddress address, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData)
 {
-    const I2CResult result = this->InnerBus->WriteRead(address, inData, inLength, outData, outLength);
+    const I2CResult result = this->InnerBus->WriteRead(address, inData, outData);
 
     if (result == I2CResult::OK)
     {
