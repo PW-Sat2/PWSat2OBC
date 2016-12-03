@@ -30,7 +30,9 @@ bool I2CLowLevelBus::IsSclLatched()
 
 I2CResult I2CLowLevelBus::ExecuteTransfer(I2C_TransferSeq_TypeDef* seq)
 {
-    if (OS_RESULT_FAILED(System::TakeSemaphore(this->_lock, MAX_DELAY)))
+    TakeSemaphore lock(this->_lock, MAX_DELAY);
+
+    if (!lock())
     {
         LOGF(LOG_LEVEL_ERROR, "[I2C] Taking semaphore failed. Address: %X", seq->addr);
         return I2CResult::Failure;
@@ -39,7 +41,6 @@ I2CResult I2CLowLevelBus::ExecuteTransfer(I2C_TransferSeq_TypeDef* seq)
     if (this->IsSclLatched())
     {
         LOG(LOG_LEVEL_FATAL, "[I2C] SCL already latched");
-        System::GiveSemaphore(this->_lock);
         return I2CResult::ClockAlreadyLatched;
     }
 
@@ -49,7 +50,6 @@ I2CResult I2CLowLevelBus::ExecuteTransfer(I2C_TransferSeq_TypeDef* seq)
 
     if (rawResult != i2cTransferInProgress)
     {
-        System::GiveSemaphore(this->_lock);
         return (I2CResult)rawResult;
     }
 
@@ -72,12 +72,8 @@ I2CResult I2CLowLevelBus::ExecuteTransfer(I2C_TransferSeq_TypeDef* seq)
             ret = I2CResult::ClockLatched;
         }
 
-        System::GiveSemaphore(this->_lock);
-
         return ret;
     }
-
-    System::GiveSemaphore(this->_lock);
 
     return (I2CResult)rawResult;
 }
