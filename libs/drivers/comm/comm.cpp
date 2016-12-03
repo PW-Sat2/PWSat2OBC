@@ -55,7 +55,7 @@ enum TaskFlag
 
 bool CommObject::SendCommand(CommAddress address, uint8_t command)
 {
-    const I2CResult result = this->_low.Write(&this->_low, address, &command, sizeof(command));
+    const I2CResult result = this->_low.Write(address, &command, sizeof(command));
     const bool status = (result == I2CResultOK);
     if (!status)
     {
@@ -67,7 +67,7 @@ bool CommObject::SendCommand(CommAddress address, uint8_t command)
 
 bool CommObject::SendCommandWithResponse(CommAddress address, uint8_t command, span<uint8_t> outBuffer)
 {
-    const I2CResult result = this->_low.WriteRead(&this->_low, address, &command, sizeof(command), outBuffer.data(), outBuffer.size());
+    const I2CResult result = this->_low.WriteRead(address, &command, sizeof(command), outBuffer.data(), outBuffer.size());
     const bool status = (result == I2CResultOK);
     if (!status)
     {
@@ -291,7 +291,7 @@ bool CommObject::SendFrame(span<const std::uint8_t> frame)
     memcpy(cmd + 1, frame.data(), frame.size());
     uint8_t remainingBufferSize;
 
-    const bool status = (this->_low.WriteRead(&this->_low, CommTransmitter, cmd, frame.size() + 1, &remainingBufferSize, 1) == I2CResultOK);
+    const bool status = (this->_low.WriteRead(CommTransmitter, cmd, frame.size() + 1, &remainingBufferSize, 1) == I2CResultOK);
     if (!status)
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Failed to send frame");
@@ -318,7 +318,7 @@ bool CommObject::SetBeacon(const CommBeacon& beaconData)
         return false;
     }
 
-    return this->_low.Write(&this->_low, CommTransmitter, buffer, WriterGetDataLength(&writer)) == I2CResultOK;
+    return this->_low.Write(CommTransmitter, buffer, WriterGetDataLength(&writer)) == I2CResultOK;
 }
 
 bool CommObject::ClearBeacon()
@@ -331,7 +331,7 @@ bool CommObject::SetTransmitterStateWhenIdle(CommTransmitterIdleState requestedS
     uint8_t buffer[2];
     buffer[0] = TransmitterSetIdleState;
     buffer[1] = requestedState;
-    return this->_low.Write(&this->_low, CommTransmitter, buffer, COUNT_OF(buffer)) == I2CResultOK;
+    return this->_low.Write(CommTransmitter, buffer, COUNT_OF(buffer)) == I2CResultOK;
 }
 
 bool CommObject::SetTransmitterBitRate(CommTransmitterBitrate bitrate)
@@ -339,15 +339,14 @@ bool CommObject::SetTransmitterBitRate(CommTransmitterBitrate bitrate)
     uint8_t buffer[2];
     buffer[0] = TransmitterSetBitRate;
     buffer[1] = bitrate;
-    return this->_low.Write(&this->_low, CommTransmitter, buffer, COUNT_OF(buffer)) == I2CResultOK;
+    return this->_low.Write(CommTransmitter, buffer, COUNT_OF(buffer)) == I2CResultOK;
 }
 
 bool CommObject::GetTransmitterState(CommTransmitterState& state)
 {
     uint8_t command = TransmitterGetState;
     uint8_t response;
-    const bool status =
-        (this->_low.WriteRead(&this->_low, CommTransmitter, &command, sizeof(command), &response, sizeof(response)) == I2CResultOK);
+    const bool status = (this->_low.WriteRead(CommTransmitter, &command, sizeof(command), &response, sizeof(response)) == I2CResultOK);
     if (!status)
     {
         return false;

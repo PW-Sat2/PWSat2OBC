@@ -28,57 +28,56 @@ class ErrorHandlingI2CBusTest : public Test
     ErrorHandlingI2CBusTest();
 };
 
-ErrorHandlingI2CBusTest::ErrorHandlingI2CBusTest()
+ErrorHandlingI2CBusTest::ErrorHandlingI2CBusTest() : bus(&innerBus, HandlerProc, this)
 {
-    I2CSetUpErrorHandlingBus(&bus, &innerBus, HandlerProc, this);
 }
 
 TEST_F(ErrorHandlingI2CBusTest, WriteReadShouldCallInnerBusAndPassthroughSuccess)
 {
-    EXPECT_CALL(innerBus, I2CWriteRead(_, _, _, _, _, _)).WillOnce(Return(I2CResultOK));
+    EXPECT_CALL(innerBus, WriteRead(_, _, _, _, _)).WillOnce(Return(I2CResultOK));
     EXPECT_CALL(*this, Handler(_, _, _, _)).Times(0);
 
     uint8_t in[] = {1, 2, 3};
     uint8_t out[3] = {0};
 
-    auto r = bus.Base.WriteRead((I2CBus*)&bus, 0x20, in, COUNT_OF(in), out, COUNT_OF(out));
+    auto r = bus.WriteRead(0x20, in, COUNT_OF(in), out, COUNT_OF(out));
 
     ASSERT_THAT(r, Eq(I2CResultOK));
 }
 
 TEST_F(ErrorHandlingI2CBusTest, WriteReadShouldCallInnerBusAndExecuteHandlerOnError)
 {
-    EXPECT_CALL(innerBus, I2CWriteRead(_, _, _, _, _, _)).WillOnce(Return(I2CResultBusErr));
+    EXPECT_CALL(innerBus, WriteRead(_, _, _, _, _)).WillOnce(Return(I2CResultBusErr));
     EXPECT_CALL(*this, Handler(_, _, _, _)).WillOnce(Return(I2CResultOK));
 
     uint8_t in[] = {1, 2, 3};
     uint8_t out[3] = {0};
 
-    auto r = bus.Base.WriteRead((I2CBus*)&bus, 0x20, in, COUNT_OF(in), out, COUNT_OF(out));
+    auto r = bus.WriteRead(0x20, in, COUNT_OF(in), out, COUNT_OF(out));
 
     ASSERT_THAT(r, Eq(I2CResultOK));
 }
 
 TEST_F(ErrorHandlingI2CBusTest, WriteShouldCallInnerBusAndPassthroughSuccess)
 {
-    EXPECT_CALL(innerBus, I2CWrite(_, _, _, _)).WillOnce(Return(I2CResultOK));
+    EXPECT_CALL(innerBus, Write(_, _, _)).WillOnce(Return(I2CResultOK));
     EXPECT_CALL(*this, Handler(_, _, _, _)).Times(0);
 
     uint8_t in[] = {1, 2, 3};
 
-    auto r = bus.Base.Write((I2CBus*)&bus, 0x20, in, COUNT_OF(in));
+    auto r = bus.Write(0x20, in, COUNT_OF(in));
 
     ASSERT_THAT(r, Eq(I2CResultOK));
 }
 
 TEST_F(ErrorHandlingI2CBusTest, WriteShouldCallInnerBusAndExecuteHandlerOnError)
 {
-    EXPECT_CALL(innerBus, I2CWrite(_, _, _, _)).WillOnce(Return(I2CResultBusErr));
+    EXPECT_CALL(innerBus, Write(_, _, _)).WillOnce(Return(I2CResultBusErr));
     EXPECT_CALL(*this, Handler(_, _, _, _)).WillOnce(Return(I2CResultOK));
 
     uint8_t in[] = {1, 2, 3};
 
-    auto r = bus.Base.Write((I2CBus*)&bus, 0x20, in, COUNT_OF(in));
+    auto r = bus.Write(0x20, in, COUNT_OF(in));
 
     ASSERT_THAT(r, Eq(I2CResultOK));
 }

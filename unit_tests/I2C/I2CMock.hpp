@@ -8,21 +8,25 @@
 struct I2CBusMock : I2CBus
 {
     I2CBusMock();
-    MOCK_METHOD4(I2CWrite,
+    MOCK_METHOD3(Write,
         I2CResult(const I2CAddress address,
-                     uint8_t command,
-                     const uint8_t* inData,
-                     size_t length //
-                     ));
+            const uint8_t* inData,
+            size_t length //
+            ));
 
-    MOCK_METHOD6(I2CWriteRead,
+    MOCK_METHOD5(WriteRead,
         I2CResult(const I2CAddress address,
-                     uint8_t command,
-                     const uint8_t* inData,
-                     size_t inLength,
-                     uint8_t* outData,
-                     size_t outLength //
-                     ));
+            const uint8_t* inData,
+            size_t inLength,
+            uint8_t* outData,
+            size_t outLength //
+            ));
+
+    decltype(auto) ExpectWriteCommand(const I2CAddress address, uint8_t command)
+    {
+        ((void)command);
+        return EXPECT_CALL(*this, Write(address, testing::Pointee(command), 1));
+    }
 };
 
 #endif /* UNIT_TESTS_I2C_I2CMOCK_HPP_ */

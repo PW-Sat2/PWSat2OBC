@@ -13,11 +13,43 @@
 #include "fs/fs.h"
 #include "i2c/i2c.h"
 #include "leuart/line_io.h"
+#include "logger/logger.h"
 #include "power/power.h"
 #include "storage/nand_driver.h"
 #include "terminal/terminal.h"
 #include "time/timer.h"
 #include "yaffs_guts.h"
+
+struct I2CSingleBus
+{
+    I2CSingleBus(I2C_TypeDef* hw,
+        uint16_t location,
+        GPIO_Port_TypeDef port,
+        uint16_t sdaPin,
+        uint16_t sclPin,
+        CMU_Clock_TypeDef clock,
+        IRQn_Type irq);
+
+    I2CLowLevelBus Driver;
+    I2CErrorHandlingBus ErrorHandling;
+
+    static I2CResult I2CErrorHandler(I2CBus* bus, I2CResult result, I2CAddress address, void* context)
+    {
+        UNREFERENCED_PARAMETER(bus);
+        UNREFERENCED_PARAMETER(address);
+
+        PowerControl* power = (PowerControl*)context;
+
+        if (result == I2CResultClockLatched)
+        {
+            LOG(LOG_LEVEL_FATAL, "SCL latched. Triggering power cycle");
+            power->TriggerSystemPowerCycle(power);
+            return result;
+        }
+
+        return result;
+    }
+};
 
 /**
  * @brief Object that describes global OBC state including drivers.
@@ -50,11 +82,7 @@ struct OBC
     TimeProvider timeProvider;
 
     /** @brief Available I2C buses */
-    struct
-    {
-        I2CLowLevelBus Bus;
-        I2CErrorHandlingBus ErrorHandling;
-    } I2CBuses[2];
+    I2CSingleBus I2CBuses[2];
 
     /** @brief I2C interface */
     I2CInterface I2C;

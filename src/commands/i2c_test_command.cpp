@@ -41,11 +41,11 @@ void I2CTestCommandHandler(uint16_t argc, char* argv[])
 
     if (strcmp(argv[0], "wr") == 0)
     {
-        result = bus->WriteRead(bus, device, data, dataLength, output, outputLength);
+        result = bus->WriteRead(device, data, dataLength, output, outputLength);
     }
     else if (strcmp(argv[0], "w") == 0)
     {
-        result = bus->Write(bus, device, data, dataLength);
+        result = bus->Write(device, data, dataLength);
     }
     else
     {

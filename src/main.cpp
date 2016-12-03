@@ -61,12 +61,12 @@ extern "C" void vApplicationIdleHook(void)
 
 void I2C0_IRQHandler(void)
 {
-    I2CIRQHandler(&Main.I2CBuses[0].Bus);
+    I2CIRQHandler(&Main.I2CBuses[0].Driver);
 }
 
 void I2C1_IRQHandler(void)
 {
-    I2CIRQHandler(&Main.I2CBuses[1].Bus);
+    I2CIRQHandler(&Main.I2CBuses[1].Driver);
 }
 
 static void BlinkLed0(void* param)
@@ -267,18 +267,20 @@ I2CResult I2CErrorHandler(I2CBus* bus, I2CResult result, I2CAddress address, voi
     return result;
 }
 
-void SetupI2C(void)
-{
-    I2CSetupInterface(
-        &Main.I2CBuses[0].Bus, I2C0, I2C0_BUS_LOCATION, I2C0_BUS_PORT, I2C0_BUS_SDA_PIN, I2C0_BUS_SCL_PIN, cmuClock_I2C0, I2C0_IRQn);
-    I2CSetupInterface(
-        &Main.I2CBuses[1].Bus, I2C1, I2C1_BUS_LOCATION, I2C1_BUS_PORT, I2C1_BUS_SDA_PIN, I2C1_BUS_SCL_PIN, cmuClock_I2C1, I2C1_IRQn);
-
-    I2CSetUpErrorHandlingBus(&Main.I2CBuses[0].ErrorHandling, (I2CBus*)&Main.I2CBuses[0].Bus, I2CErrorHandler, &Main.PowerControlInterface);
-    I2CSetUpErrorHandlingBus(&Main.I2CBuses[1].ErrorHandling, (I2CBus*)&Main.I2CBuses[1].Bus, I2CErrorHandler, &Main.PowerControlInterface);
-
-    I2CSetUpFallbackBus(&Main.I2CFallback, &Main.I2C);
-}
+// void SetupI2C(void)
+//{
+//    I2CSetupInterface(
+//        &Main.I2CBuses[0].Bus, I2C0, I2C0_BUS_LOCATION, I2C0_BUS_PORT, I2C0_BUS_SDA_PIN, I2C0_BUS_SCL_PIN, cmuClock_I2C0, I2C0_IRQn);
+//    I2CSetupInterface(
+//        &Main.I2CBuses[1].Bus, I2C1, I2C1_BUS_LOCATION, I2C1_BUS_PORT, I2C1_BUS_SDA_PIN, I2C1_BUS_SCL_PIN, cmuClock_I2C1, I2C1_IRQn);
+//
+//    I2CSetUpErrorHandlingBus(&Main.I2CBuses[0].ErrorHandling, (I2CBus*)&Main.I2CBuses[0].Bus, I2CErrorHandler,
+//    &Main.PowerControlInterface);
+//    I2CSetUpErrorHandlingBus(&Main.I2CBuses[1].ErrorHandling, (I2CBus*)&Main.I2CBuses[1].Bus, I2CErrorHandler,
+//    &Main.PowerControlInterface);
+//
+//    I2CSetUpFallbackBus(&Main.I2CFallback, &Main.I2C);
+//}
 
 extern "C" void __libc_init_array(void);
 
@@ -302,8 +304,6 @@ int main(void)
     LeuartLineIOInit(&Main.IO);
 
     InitializeTerminal();
-
-    SetupI2C();
 
     EpsInit((I2CBus*)&Main.I2CFallback);
 

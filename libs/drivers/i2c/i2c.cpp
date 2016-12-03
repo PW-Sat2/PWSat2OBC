@@ -59,7 +59,7 @@ static I2CResult ExecuteTransfer(I2CLowLevelBus* bus, I2C_TransferSeq_TypeDef* s
         return (I2CResult)rawResult;
     }
 
-    if (!System::QueueReceive(bus->ResultQueue, &rawResult, I2C_TIMEOUT * 1000)) // I2C_TIMEOUT * 1000
+    if (!System::QueueReceive(bus->ResultQueue, &rawResult, I2C_TIMEOUT * 1000))
     {
         I2CResult ret = I2CResultTimeout;
 
@@ -88,15 +88,7 @@ static I2CResult ExecuteTransfer(I2CLowLevelBus* bus, I2C_TransferSeq_TypeDef* s
     return (I2CResult)rawResult;
 }
 
-/**
- * @brief Performs write-only request
- * @param[in] bus I2C bus
- * @param[in] address Device address
- * @param[in] data Data to send
- * @param[in] length Length of data to send
- * @return Transfer result
- */
-static I2CResult Write(I2CBus* bus, const I2CAddress address, const uint8_t* data, size_t length)
+I2CResult I2CLowLevelBus::Write(const I2CAddress address, const uint8_t* data, size_t length)
 {
     I2C_TransferSeq_TypeDef seq;
     seq.addr = address;
@@ -106,21 +98,10 @@ static I2CResult Write(I2CBus* bus, const I2CAddress address, const uint8_t* dat
     seq.buf[1].len = 0;
     seq.buf[1].data = nullptr;
 
-    return ExecuteTransfer(LowLevel(bus), &seq);
+    return ExecuteTransfer(this, &seq);
 }
 
-/**
- * @brief Performs write-read request
- * @param[in] bus I2C bus
- * @param[in] address Device address
- * @param[in] inData Data to send
- * @param[in] inLength Length of data to send
- * @param[out] outData Buffer for received data
- * @param[out] outLength Size of output buffer
- * @return Transfer result
- */
-static I2CResult WriteRead(
-    I2CBus* bus, const I2CAddress address, const uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength)
+I2CResult I2CLowLevelBus::WriteRead(const I2CAddress address, const uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength)
 {
     I2C_TransferSeq_TypeDef seq;
 
@@ -131,11 +112,10 @@ static I2CResult WriteRead(
     seq.buf[1].len = outLength;
     seq.buf[1].data = outData;
 
-    return ExecuteTransfer(LowLevel(bus), &seq);
+    return ExecuteTransfer(this, &seq);
 }
 
-void I2CSetupInterface(I2CLowLevelBus* bus,
-    I2C_TypeDef* hw,
+I2CLowLevelBus::I2CLowLevelBus(I2C_TypeDef* hw, //
     uint16_t location,
     GPIO_Port_TypeDef port,
     uint16_t sdaPin,
@@ -143,40 +123,43 @@ void I2CSetupInterface(I2CLowLevelBus* bus,
     CMU_Clock_TypeDef clock,
     IRQn_Type irq)
 {
-    bus->Base.Write = Write;
-    bus->Base.WriteRead = WriteRead;
+    this->HWInterface = hw;
+    this->Location = location;
+    this->Clock = clock;
+    this->IRQn = irq;
+    this->IO.Port = (uint16_t)port;
+    this->IO.SCL = sclPin;
+    this->IO.SDA = sdaPin;
+}
 
-    bus->HWInterface = hw;
-    bus->IO.Port = (uint16_t)port;
-    bus->IO.SCL = sclPin;
-    bus->IO.SDA = sdaPin;
+void I2CLowLevelBus::Initialize()
+{
+    this->ResultQueue = System::CreateQueue(1, sizeof(I2C_TransferReturn_TypeDef));
 
-    bus->ResultQueue = System::CreateQueue(1, sizeof(I2C_TransferReturn_TypeDef));
+    this->Lock = System::CreateBinarySemaphore();
+    System::GiveSemaphore(this->Lock);
 
-    bus->Lock = System::CreateBinarySemaphore();
-    System::GiveSemaphore(bus->Lock);
+    CMU_ClockEnable((CMU_Clock_TypeDef)this->Clock, true);
 
-    CMU_ClockEnable(clock, true);
-
-    GPIO_PinModeSet(port, sdaPin, gpioModeWiredAndPullUpFilter, 1);
-    GPIO_PinModeSet(port, sclPin, gpioModeWiredAndPullUpFilter, 1);
+    GPIO_PinModeSet((GPIO_Port_TypeDef)this->IO.Port, this->IO.SDA, gpioModeWiredAndPullUpFilter, 1);
+    GPIO_PinModeSet((GPIO_Port_TypeDef)this->IO.Port, this->IO.SCL, gpioModeWiredAndPullUpFilter, 1);
 
     I2C_Init_TypeDef init = I2C_INIT_DEFAULT;
     init.clhr = i2cClockHLRStandard;
     init.enable = true;
 
-    I2C_Init(hw, &init);
-    hw->ROUTE = I2C_ROUTE_SCLPEN | I2C_ROUTE_SDAPEN | location;
+    I2C_Init((I2C_TypeDef*)this->HWInterface, &init);
+    ((I2C_TypeDef*)this->HWInterface)->ROUTE = I2C_ROUTE_SCLPEN | I2C_ROUTE_SDAPEN | this->Location;
 
-    I2C_IntEnable(hw, I2C_IEN_TXC);
+    I2C_IntEnable((I2C_TypeDef*)this->HWInterface, I2C_IEN_TXC);
 
-    NVIC_SetPriority(irq, I2C_IRQ_PRIORITY);
-    NVIC_EnableIRQ(irq);
+    NVIC_SetPriority((IRQn_Type)this->IRQn, I2C_IRQ_PRIORITY);
+    NVIC_EnableIRQ((IRQn_Type)this->IRQn);
 }
 
 void I2CIRQHandler(I2CLowLevelBus* bus)
 {
-    I2C_TransferReturn_TypeDef status = I2C_Transfer((I2C_TypeDef*)bus->HWInterface);
+    auto status = I2C_Transfer((I2C_TypeDef*)bus->HWInterface);
 
     if (status == i2cTransferInProgress)
     {
