@@ -67,6 +67,18 @@ namespace services
              * @brief Current mission time in milliseconds.
              */
             TimeSpan CurrentTime;
+
+            bool operator==(const TimeSnapshot& right) const;
+
+            bool operator!=(const TimeSnapshot& right) const;
+
+            bool operator<(const TimeSnapshot& right) const;
+
+            bool operator>(const TimeSnapshot& right) const;
+
+            bool operator<=(const TimeSnapshot& right) const;
+
+            bool operator>=(const TimeSnapshot& right) const;
         };
 
         /**
@@ -111,18 +123,14 @@ namespace services
             /**
              * @brief This procedure returns current mission time in milliseconds.
              *
-             * @param[out] currentTime Pointer to time span value that should be
-             * updated with current mission time.
-             * @return True on success, false otherwise.
+             * @return Option containing current mission time on success, empty option otherwise.
              */
             Option<TimeSpan> GetCurrentTime();
 
             /**
              * @brief This procedure returns current mission time in decoded format.
              *
-             * @param[out] timePoint Pointer to time point value that should be
-             * updated with current decoded mission time.
-             * @return True on success, false otherwise.
+             * @return Option containing current mission time on success, empty option otherwise.
              */
             Option<TimePoint> GetCurrentMissionTime();
 
