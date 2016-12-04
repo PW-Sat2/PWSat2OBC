@@ -250,38 +250,6 @@ void SetupHardware(void)
     CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_HFCLKLE);
 }
 
-I2CResult I2CErrorHandler(I2CBus* bus, I2CResult result, I2CAddress address, void* context)
-{
-    UNREFERENCED_PARAMETER(bus);
-    UNREFERENCED_PARAMETER(address);
-
-    PowerControl* power = (PowerControl*)context;
-
-    if (result == I2CResult::ClockLatched)
-    {
-        LOG(LOG_LEVEL_FATAL, "SCL latched. Triggering power cycle");
-        power->TriggerSystemPowerCycle(power);
-        return result;
-    }
-
-    return result;
-}
-
-// void SetupI2C(void)
-//{
-//    I2CSetupInterface(
-//        &Main.I2CBuses[0].Bus, I2C0, I2C0_BUS_LOCATION, I2C0_BUS_PORT, I2C0_BUS_SDA_PIN, I2C0_BUS_SCL_PIN, cmuClock_I2C0, I2C0_IRQn);
-//    I2CSetupInterface(
-//        &Main.I2CBuses[1].Bus, I2C1, I2C1_BUS_LOCATION, I2C1_BUS_PORT, I2C1_BUS_SDA_PIN, I2C1_BUS_SCL_PIN, cmuClock_I2C1, I2C1_IRQn);
-//
-//    I2CSetUpErrorHandlingBus(&Main.I2CBuses[0].ErrorHandling, (I2CBus*)&Main.I2CBuses[0].Bus, I2CErrorHandler,
-//    &Main.PowerControlInterface);
-//    I2CSetUpErrorHandlingBus(&Main.I2CBuses[1].ErrorHandling, (I2CBus*)&Main.I2CBuses[1].Bus, I2CErrorHandler,
-//    &Main.PowerControlInterface);
-//
-//    I2CSetUpFallbackBus(&Main.I2CFallback, &Main.I2C);
-//}
-
 extern "C" void __libc_init_array(void);
 
 int main(void)

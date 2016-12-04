@@ -84,7 +84,7 @@ const DecodeTelecommandResult DecodeTelecommandResult::Success(uint8_t commandCo
     return DecodeTelecommandResult(commandCode, parameters);
 }
 
-DecryptFrameResult::DecryptFrameResult(span<const uint8_t> decrypted)
+DecryptFrameResult::DecryptFrameResult(gsl::span<const std::uint8_t> decrypted)
     : IsSuccess(true), Decrypted(decrypted), FailureReason(DecryptFrameFailureReason::GeneralError)
 {
 }

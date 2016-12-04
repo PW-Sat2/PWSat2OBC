@@ -20,8 +20,22 @@
 #include "time/timer.h"
 #include "yaffs_guts.h"
 
-struct I2CSingleBus
+/**
+ * @brief Helper class consisting of I2C low-level driver and error handling wrapper
+ */
+class I2CSingleBus
 {
+  public:
+    /**
+     * @brief Creates drivers for single I2C peripheral
+     * @param[in] hw I2C hardware registers set
+     * @param[in] location Pins location to use
+     * @param[in] port GPIO port to use
+     * @param[in] sdaPin Number of GPIO pin to use for SDA line
+     * @param[in] sclPin Number of GPIO pin to use for SCL line
+     * @param[in] clock Clock used by selected hardware interface
+     * @param[in] irq IRQ number used by selected hardware interface
+     */
     I2CSingleBus(I2C_TypeDef* hw,
         uint16_t location,
         GPIO_Port_TypeDef port,
@@ -30,9 +44,25 @@ struct I2CSingleBus
         CMU_Clock_TypeDef clock,
         IRQn_Type irq);
 
+    /**
+     * @brief Low-level driver
+     */
     I2CLowLevelBus Driver;
+
+    /**
+     * @brief Error handling wrapper
+     */
     I2CErrorHandlingBus ErrorHandling;
 
+  private:
+    /**
+     * @brief Error handling procedure
+     * @param[in] bus Bus on which transfer failed
+     * @param[in] result Transfer error code
+     * @param[in] address Device that was addressed
+     * @param[in] context Context
+     * @return I2C result
+     */
     static I2CResult I2CErrorHandler(I2CBus& bus, I2CResult result, I2CAddress address, void* context)
     {
         UNREFERENCED_PARAMETER(bus);

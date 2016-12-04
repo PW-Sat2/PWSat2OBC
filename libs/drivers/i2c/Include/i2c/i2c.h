@@ -75,24 +75,18 @@ using I2CAddress = uint8_t;
 struct I2CBus
 {
     /**
-     * Executes write transfer
-     * @param[in] bus Object associated with bus that should be used
+     * @brief Executes write transfer
      * @param[in] address Address of device
      * @param[in] inData Data to be sent
-     * @param[in] length Length of data to be sent
      * @return Transfer result
      */
     virtual I2CResult Write(const I2CAddress address, gsl::span<const uint8_t> inData) = 0;
 
     /**
-     *
-     * Executes write-read transfer
-     * @param[in] bus Object associated with bus that should be used
+     * @brief Executes write-read transfer
      * @param[in] address Address of device
      * @param[in] inData Data to be sent
-     * @param[in] length Length of data to be sen
      * @param[out] outData Buffer for data read from device
-     * @param[in] outLength Number of bytes to be read from device
      * @return Transfer result
      */
     virtual I2CResult WriteRead(const I2CAddress address, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData) = 0;
@@ -131,7 +125,6 @@ class I2CLowLevelBus : public I2CBus
 
     /**
      * @brief Interrupt handler for I2C hardware
-     * @param[in] bus Bus associated with given hardware
      */
     void IRQHandler();
 
@@ -185,6 +178,11 @@ class I2CLowLevelBus : public I2CBus
  */
 struct I2CInterface final
 {
+    /**
+     * @brief Constructs @ref I2CInterface object
+     * @param[in] system System bus driver
+     * @param[in] payload Payload bus driver
+     */
     I2CInterface(I2CBus& system, I2CBus& payload);
     /** @brief Reference to System I2C bus */
     I2CBus& Bus;
@@ -231,6 +229,12 @@ using BusErrorHandler = I2CResult (*)(I2CBus& bus, I2CResult result, I2CAddress 
 class I2CErrorHandlingBus final : public I2CBus
 {
   public:
+    /**
+     * @brief Initializes new instance of @ref I2CErrorHandlingBus
+     * @param[in] innerBus Bus that will be wrapped
+     * @param[in] handler Pointer to error handler function
+     * @param[in] context Parameter passed to error handler function
+     */
     I2CErrorHandlingBus(I2CBus& innerBus, BusErrorHandler handler, void* context);
 
     virtual I2CResult Write(const I2CAddress address, gsl::span<const uint8_t> inData) override;
