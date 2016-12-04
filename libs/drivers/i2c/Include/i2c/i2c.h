@@ -170,7 +170,7 @@ class I2CLowLevelBus : public I2CBus
     OSSemaphoreHandle _lock;
 
     /** @brief Single-element queue storing results of transfers */
-    OSQueueHandle _resultQueue;
+    Queue<I2C_TransferReturn_TypeDef, 1> _resultQueue;
 };
 
 /**

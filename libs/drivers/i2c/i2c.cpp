@@ -13,11 +13,6 @@ I2CInterface::I2CInterface(I2CBus& system, I2CBus& payload)
 {
 }
 
-static inline I2CLowLevelBus* LowLevel(I2CBus* bus)
-{
-    return (I2CLowLevelBus*)bus;
-}
-
 /**
  * @brief Checks if SCL line is latched at low level
  * @param[in] bus I2C bus
@@ -53,7 +48,7 @@ I2CResult I2CLowLevelBus::ExecuteTransfer(I2C_TransferSeq_TypeDef* seq)
         return (I2CResult)rawResult;
     }
 
-    if (!System::QueueReceive(this->_resultQueue, &rawResult, I2C_TIMEOUT * 1000))
+    if (OS_RESULT_FAILED(this->_resultQueue.Pop(&rawResult, I2C_TIMEOUT * 1000)))
     {
         I2CResult ret = I2CResult::Timeout;
 
@@ -124,7 +119,7 @@ I2CLowLevelBus::I2CLowLevelBus(I2C_TypeDef* hw, //
 
 void I2CLowLevelBus::Initialize()
 {
-    this->_resultQueue = System::CreateQueue(1, sizeof(I2C_TransferReturn_TypeDef));
+    this->_resultQueue.Create();
 
     this->_lock = System::CreateBinarySemaphore();
     System::GiveSemaphore(this->_lock);
@@ -156,7 +151,7 @@ void I2CLowLevelBus::IRQHandler()
         return;
     }
 
-    if (!System::QueueSendISR(this->_resultQueue, &status))
+    if (OS_RESULT_FAILED(this->_resultQueue.PushISR(&status)))
     {
         LOG_ISR(LOG_LEVEL_ERROR, "Error queueing i2c result");
     }
