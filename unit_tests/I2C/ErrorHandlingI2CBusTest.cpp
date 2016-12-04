@@ -19,12 +19,12 @@ class ErrorHandlingI2CBusTest : public Test
 
     I2CErrorHandlingBus bus;
 
-    static I2CResult HandlerProc(I2CBus& bus, I2CResult result, I2CAddress address, void* context)
+    static I2CResult HandlerProc(II2CBus& bus, I2CResult result, I2CAddress address, void* context)
     {
         return static_cast<ErrorHandlingI2CBusTest*>(context)->Handler(bus, result, address, context);
     }
 
-    MOCK_METHOD4(Handler, I2CResult(I2CBus& bus, I2CResult result, I2CAddress address, void* context));
+    MOCK_METHOD4(Handler, I2CResult(II2CBus& bus, I2CResult result, I2CAddress address, void* context));
 
   public:
     ErrorHandlingI2CBusTest();

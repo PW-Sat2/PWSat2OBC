@@ -11,17 +11,18 @@
 #include "base/os.h"
 #include "base/reader.h"
 #include "base/writer.h"
+#include "i2c/i2c.h"
 #include "logger/logger.h"
 #include "system.h"
 
 using std::uint8_t;
 using gsl::span;
-using drivers::i2c::I2CBus;
+using drivers::i2c::II2CBus;
 using drivers::i2c::I2CResult;
 
 using namespace devices::comm;
 
-CommObject::CommObject(I2CBus& low, IHandleFrame& upperInterface)
+CommObject::CommObject(II2CBus& low, IHandleFrame& upperInterface)
     : _low(low), //
       _frameHandler(upperInterface)
 {

@@ -4,7 +4,7 @@
 #include "driver.h"
 #include "miniport.h"
 
-using drivers::i2c::I2CBus;
+using drivers::i2c::II2CBus;
 using drivers::i2c::I2CResult;
 
 /**
@@ -269,8 +269,8 @@ static AntennaTelemetry GetTelemetry(struct AntennaDriver* driver)
 
 void AntennaDriverInitialize(AntennaDriver* driver,
     AntennaMiniportDriver* miniport,
-    I2CBus* primaryBus,
-    I2CBus* secondaryBus //
+    II2CBus* primaryBus,
+    II2CBus* secondaryBus //
     )
 {
     memset(driver, 0, sizeof(*driver));

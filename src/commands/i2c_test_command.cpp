@@ -7,7 +7,7 @@
 #include "terminal.h"
 
 using gsl::span;
-using drivers::i2c::I2CBus;
+using drivers::i2c::II2CBus;
 using drivers::i2c::I2CResult;
 
 void I2CTestCommandHandler(uint16_t argc, char* argv[])
@@ -20,7 +20,7 @@ void I2CTestCommandHandler(uint16_t argc, char* argv[])
         return;
     }
 
-    I2CBus* bus;
+    II2CBus* bus;
 
     if (strcmp(argv[1], "system") == 0)
     {

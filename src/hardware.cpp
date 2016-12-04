@@ -2,7 +2,7 @@
 
 #include "obc.h"
 
-using drivers::i2c::I2CBus;
+using drivers::i2c::II2CBus;
 using drivers::i2c::I2CResult;
 using drivers::i2c::I2CAddress;
 
@@ -19,7 +19,7 @@ I2CSingleBus::I2CSingleBus(I2C_TypeDef* hw,
 {
 }
 
-I2CResult I2CSingleBus::I2CErrorHandler(I2CBus& bus, I2CResult result, I2CAddress address, void* context)
+I2CResult I2CSingleBus::I2CErrorHandler(II2CBus& bus, I2CResult result, I2CAddress address, void* context)
 {
     UNREFERENCED_PARAMETER(bus);
     UNREFERENCED_PARAMETER(address);

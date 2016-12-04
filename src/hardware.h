@@ -57,7 +57,7 @@ class I2CSingleBus
      * @return I2C result
      */
     static drivers::i2c::I2CResult I2CErrorHandler(
-        drivers::i2c::I2CBus& bus, drivers::i2c::I2CResult result, drivers::i2c::I2CAddress address, void* context);
+        drivers::i2c::II2CBus& bus, drivers::i2c::I2CResult result, drivers::i2c::I2CAddress address, void* context);
 };
 
 /**

@@ -7,6 +7,7 @@
 #include <em_i2c.h>
 #include <gsl/span>
 #include "base/os.h"
+#include "forward.h"
 #include "system.h"
 
 namespace drivers
@@ -76,7 +77,7 @@ namespace drivers
         /**
          * @brief I2C bus interface
          */
-        struct I2CBus
+        struct II2CBus
         {
             /**
              * @brief Executes write transfer
@@ -97,7 +98,7 @@ namespace drivers
         };
 
         /** @brief Low-level I2C bus driver */
-        class I2CLowLevelBus : public I2CBus
+        class I2CLowLevelBus : public II2CBus
         {
           public:
             /**
@@ -187,18 +188,18 @@ namespace drivers
              * @param[in] system System bus driver
              * @param[in] payload Payload bus driver
              */
-            I2CInterface(I2CBus& system, I2CBus& payload);
+            I2CInterface(II2CBus& system, II2CBus& payload);
             /** @brief Reference to System I2C bus */
-            I2CBus& Bus;
+            II2CBus& Bus;
             /** @brief Reference to Payload I2C bus */
-            I2CBus& Payload;
+            II2CBus& Payload;
         };
 
         /**
          * @brief I2C Fallbacking bus driver
          * @implements I2CBus
          */
-        class I2CFallbackBus final : public I2CBus
+        class I2CFallbackBus final : public II2CBus
         {
           public:
             /**
@@ -224,13 +225,13 @@ namespace drivers
          * @param[in] context Context
          * @return New result code
          */
-        using BusErrorHandler = I2CResult (*)(I2CBus& bus, I2CResult result, I2CAddress address, void* context);
+        using BusErrorHandler = I2CResult (*)(II2CBus& bus, I2CResult result, I2CAddress address, void* context);
 
         /**
          * @brief Error handling bus driver
          * @implements I2CBus
          */
-        class I2CErrorHandlingBus final : public I2CBus
+        class I2CErrorHandlingBus final : public II2CBus
         {
           public:
             /**
@@ -239,7 +240,7 @@ namespace drivers
              * @param[in] handler Pointer to error handler function
              * @param[in] context Parameter passed to error handler function
              */
-            I2CErrorHandlingBus(I2CBus& innerBus, BusErrorHandler handler, void* context);
+            I2CErrorHandlingBus(II2CBus& innerBus, BusErrorHandler handler, void* context);
 
             virtual I2CResult Write(const I2CAddress address, gsl::span<const uint8_t> inData) override;
 
@@ -247,7 +248,7 @@ namespace drivers
 
           private:
             /** @brief Underlying bus */
-            I2CBus& _innerBus;
+            II2CBus& _innerBus;
             /** @brief Pointer to function called in case of error */
             const BusErrorHandler _errorHandler;
             /** @brief Context passed to error handler function */

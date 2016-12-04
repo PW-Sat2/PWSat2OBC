@@ -6,7 +6,7 @@
 #include "gmock/gmock-matchers.h"
 #include "i2c/i2c.h"
 
-struct I2CBusMock : drivers::i2c::I2CBus
+struct I2CBusMock : drivers::i2c::II2CBus
 {
     I2CBusMock();
     MOCK_METHOD2(Write,

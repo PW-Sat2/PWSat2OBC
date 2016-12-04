@@ -1,9 +1,9 @@
 #include "MiniportMock.hpp"
 
-using drivers::i2c::I2CBus;
+using drivers::i2c::II2CBus;
 
 static OSResult Reset(struct AntennaMiniportDriver* driver,
-    I2CBus* /*communicationBus*/,
+    II2CBus* /*communicationBus*/,
     AntennaChannel channel //
     )
 {
@@ -12,7 +12,7 @@ static OSResult Reset(struct AntennaMiniportDriver* driver,
 }
 
 static OSResult ArmDeploymentSystem(struct AntennaMiniportDriver* driver,
-    I2CBus* /*communicationBus*/,
+    II2CBus* /*communicationBus*/,
     AntennaChannel channel //
     )
 {
@@ -21,7 +21,7 @@ static OSResult ArmDeploymentSystem(struct AntennaMiniportDriver* driver,
 }
 
 static OSResult DisarmDeploymentSystem(struct AntennaMiniportDriver* driver,
-    I2CBus* /*communicationBus*/,
+    II2CBus* /*communicationBus*/,
     AntennaChannel channel //
     )
 {
@@ -30,7 +30,7 @@ static OSResult DisarmDeploymentSystem(struct AntennaMiniportDriver* driver,
 }
 
 static OSResult DeployAntenna(struct AntennaMiniportDriver* driver,
-    I2CBus* /*communicationBus*/,
+    II2CBus* /*communicationBus*/,
     AntennaChannel channel,
     AntennaId antennaId,
     TimeSpan timeout,
@@ -42,7 +42,7 @@ static OSResult DeployAntenna(struct AntennaMiniportDriver* driver,
 }
 
 static OSResult InitializeAutomaticDeployment(struct AntennaMiniportDriver* driver,
-    I2CBus* /*communicationBus*/,
+    II2CBus* /*communicationBus*/,
     AntennaChannel channel,
     TimeSpan timeout //
     )
@@ -52,7 +52,7 @@ static OSResult InitializeAutomaticDeployment(struct AntennaMiniportDriver* driv
 }
 
 static OSResult CancelAntennaDeployment(struct AntennaMiniportDriver* driver,
-    I2CBus* /*communicationBus*/,
+    II2CBus* /*communicationBus*/,
     AntennaChannel channel //
     )
 {
@@ -61,7 +61,7 @@ static OSResult CancelAntennaDeployment(struct AntennaMiniportDriver* driver,
 }
 
 static OSResult GetDeploymentStatus(struct AntennaMiniportDriver* driver,
-    I2CBus* /*communicationBus*/,
+    II2CBus* /*communicationBus*/,
     AntennaChannel channel,
     AntennaDeploymentStatus* telemetry //
     )
@@ -71,7 +71,7 @@ static OSResult GetDeploymentStatus(struct AntennaMiniportDriver* driver,
 }
 
 static OSResult GetAntennaActivationCount(struct AntennaMiniportDriver* driver,
-    I2CBus* /*communicationBus*/,
+    II2CBus* /*communicationBus*/,
     AntennaChannel channel,
     AntennaId antennaId,
     uint16_t* count //
@@ -82,7 +82,7 @@ static OSResult GetAntennaActivationCount(struct AntennaMiniportDriver* driver,
 }
 
 static OSResult GetAntennaActivationTime(struct AntennaMiniportDriver* driver,
-    I2CBus* /*communicationBus*/,
+    II2CBus* /*communicationBus*/,
     AntennaChannel channel,
     AntennaId antennaId,
     TimeSpan* count //
@@ -93,7 +93,7 @@ static OSResult GetAntennaActivationTime(struct AntennaMiniportDriver* driver,
 }
 
 static OSResult GetTemperature(struct AntennaMiniportDriver* driver,
-    I2CBus* /*communicationBus*/,
+    II2CBus* /*communicationBus*/,
     AntennaChannel channel,
     uint16_t* temperature //
     )

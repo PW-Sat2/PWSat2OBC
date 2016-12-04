@@ -2,7 +2,7 @@
 #define SRC_DEVICES_ANTENNA_H_
 
 #include <cstdint>
-#include "i2c/i2c.h"
+#include "i2c/forward.h"
 
 /**
  * @defgroup antenna Antenna Deployment Driver

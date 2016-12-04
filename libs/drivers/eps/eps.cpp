@@ -7,7 +7,7 @@
 
 #include "system.h"
 
-using drivers::i2c::I2CBus;
+using drivers::i2c::II2CBus;
 using drivers::i2c::I2CResult;
 
 #define EPS_ADDRESS 12
@@ -17,7 +17,7 @@ typedef enum {
     EPS_LCL_SAIL_1 = 1,
 } EpsLcl;
 
-static I2CBus* i2c;
+static II2CBus* i2c;
 
 static bool epsControlLCL(EpsLcl lcl, uint8_t state)
 {
@@ -76,7 +76,7 @@ bool EpsTriggerSystemPowerCycle(void)
     return result == I2CResult::OK;
 }
 
-void EpsInit(I2CBus* bus)
+void EpsInit(II2CBus* bus)
 {
     i2c = bus;
 }

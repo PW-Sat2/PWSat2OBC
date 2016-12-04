@@ -2,7 +2,7 @@
 
 using std::uint8_t;
 using gsl::span;
-using drivers::i2c::I2CBus;
+using drivers::i2c::II2CBus;
 using devices::comm::ITransmitFrame;
 using communication::PingTelecommand;
 using telecommands::handling::IHandleTeleCommand;
@@ -34,7 +34,7 @@ gsl::span<IHandleTeleCommand*> Telecommands::AllTelecommands()
     return gsl::span<IHandleTeleCommand*>(this->_telecommands);
 }
 
-OBCCommunication::OBCCommunication(I2CBus& systemBus)
+OBCCommunication::OBCCommunication(II2CBus& systemBus)
     : UplinkProtocolDecoder(),                                                                                   //
       SupportedTelecommands(),                                                                                   //
       TelecommandHandler(UplinkProtocolDecoder, UplinkProtocolDecoder, SupportedTelecommands.AllTelecommands()), //
