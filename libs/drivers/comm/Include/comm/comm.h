@@ -15,6 +15,7 @@ namespace devices
     {
         /**
          * @defgroup LowerCommDriver Low Level Communication Module Driver
+         * @ingroup device_drivers
          *
          * @brief This module is a low level communication module driver.
          *

@@ -6,6 +6,7 @@
 
 /**
  * @defgroup leuart LEUART driver
+ * @ingroup perhipheral_drivers
  *
  * @{
  */

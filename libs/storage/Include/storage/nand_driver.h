@@ -10,6 +10,7 @@ extern "C" {
 
 /**
  * @defgroup yaffs-nand YAFFS driver for NAND flash.
+ * @ingroup nand-driver
  *
  * @brief This library provides YAFFS driver for NAND flash memory
  *

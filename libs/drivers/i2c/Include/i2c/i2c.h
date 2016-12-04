@@ -16,6 +16,8 @@ namespace drivers
         /**
          * @defgroup i2c I2C Driver
          *
+         * @ingroup perhipheral_drivers
+         *
          * @brief This module provides driver for I2C bus
          *
          * Capabilities:
@@ -34,34 +36,34 @@ namespace drivers
         enum class I2CResult
         {
             /** @brief Transfer completed successfully. */
-            OK = 0,
+            OK = 0, //!< OK
 
             /** @brief NACK received during transfer. */
-            Nack = -1,
+            Nack = -1, //!< Nack
 
             /** @brief Bus error during transfer (misplaced START/STOP). */
-            BusErr = -2,
+            BusErr = -2, //!< BusErr
 
             /** @brief Arbitration lost during transfer. */
-            ArbLost = -3,
+            ArbLost = -3, //!< ArbLost
 
             /** @brief Usage fault. */
-            UsageFault = -4,
+            UsageFault = -4, //!< UsageFault
 
             /** @brief Software fault. */
-            SwFault = -5,
+            SwFault = -5, //!< SwFault
 
             /** @brief General I2C error */
-            Timeout = -6,
+            Timeout = -6, //!< Timeout
 
             /** @brief SCL line is latched low at the end of transfer */
-            ClockLatched = -7,
+            ClockLatched = -7, //!< ClockLatched
 
             /** @brief General I2C error */
-            Failure = -8,
+            Failure = -8, //!< Failure
 
             /** @brief SCL line is latched low before transfer */
-            ClockAlreadyLatched = -9
+            ClockAlreadyLatched = -9 //!< ClockAlreadyLatched
         };
 
         /**

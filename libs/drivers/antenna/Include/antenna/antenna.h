@@ -6,6 +6,7 @@
 
 /**
  * @defgroup antenna Antenna Deployment Driver
+ * @ingroup device_drivers
  *
  * @brief This module contains driver that is responsible for communicating with
  * antenna deployment hardware.
