@@ -4,6 +4,8 @@
 
 #include "i2c.h"
 
+using namespace drivers::i2c;
+
 I2CErrorHandlingBus::I2CErrorHandlingBus(I2CBus& innerBus, BusErrorHandler handler, void* context)
     : _innerBus(innerBus), _errorHandler(handler), _handlerContext(context)
 {

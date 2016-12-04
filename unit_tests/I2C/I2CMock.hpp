@@ -6,21 +6,21 @@
 #include "gmock/gmock-matchers.h"
 #include "i2c/i2c.h"
 
-struct I2CBusMock : I2CBus
+struct I2CBusMock : drivers::i2c::I2CBus
 {
     I2CBusMock();
     MOCK_METHOD2(Write,
-        I2CResult(const I2CAddress address,
+        drivers::i2c::I2CResult(const drivers::i2c::I2CAddress address,
             gsl::span<const uint8_t> inData //
             ));
 
     MOCK_METHOD3(WriteRead,
-        I2CResult(const I2CAddress address,
+        drivers::i2c::I2CResult(const drivers::i2c::I2CAddress address,
             gsl::span<const uint8_t> inData,
             gsl::span<uint8_t> outData //
             ));
 
-    decltype(auto) ExpectWriteCommand(const I2CAddress address, uint8_t command)
+    decltype(auto) ExpectWriteCommand(const drivers::i2c::I2CAddress address, uint8_t command)
     {
         return EXPECT_CALL(*this, Write(address, testing::ElementsAre(command)));
     }

@@ -160,7 +160,7 @@ struct AntennaChannelInfo
     /**
      * @brief Pointer to communication bus interface.
      */
-    I2CBus* communicationBus;
+    drivers::i2c::I2CBus* communicationBus;
 };
 
 /**
@@ -283,8 +283,8 @@ struct AntennaDriver
  */
 void AntennaDriverInitialize(AntennaDriver* driver,
     AntennaMiniportDriver* miniport,
-    I2CBus* primaryBus,
-    I2CBus* secondaryBus //
+    drivers::i2c::I2CBus* primaryBus,
+    drivers::i2c::I2CBus* secondaryBus //
     );
 
 /** @}*/

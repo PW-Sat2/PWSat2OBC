@@ -7,20 +7,17 @@
 
 #include "i2c.h"
 
+using namespace drivers::i2c;
+
 I2CInterface::I2CInterface(I2CBus& system, I2CBus& payload)
     : Bus(system), //
       Payload(payload)
 {
 }
 
-/**
- * @brief Checks if SCL line is latched at low level
- * @param[in] bus I2C bus
- * @return true if SCL line is latched
- */
 bool I2CLowLevelBus::IsSclLatched()
 {
-    return GPIO_PinInGet((GPIO_Port_TypeDef)this->_io.Port, this->_io.SCL) == 0;
+    return GPIO_PinInGet(this->_io.Port, this->_io.SCL) == 0;
 }
 
 I2CResult I2CLowLevelBus::ExecuteTransfer(I2C_TransferSeq_TypeDef* seq)
@@ -39,9 +36,9 @@ I2CResult I2CLowLevelBus::ExecuteTransfer(I2C_TransferSeq_TypeDef* seq)
         return I2CResult::ClockAlreadyLatched;
     }
 
-    I2C_TypeDef* hw = (I2C_TypeDef*)this->HWInterface;
+    auto hw = reinterpret_cast<I2C_TypeDef*>(this->HWInterface);
 
-    I2C_TransferReturn_TypeDef rawResult = I2C_TransferInit(hw, seq);
+    auto rawResult = I2C_TransferInit(hw, seq);
 
     if (rawResult != i2cTransferInProgress)
     {
@@ -112,7 +109,7 @@ I2CLowLevelBus::I2CLowLevelBus(I2C_TypeDef* hw, //
     this->_io.Location = location;
     this->_io.Clock = clock;
     this->_io.IRQn = irq;
-    this->_io.Port = (uint16_t)port;
+    this->_io.Port = port;
     this->_io.SCL = sclPin;
     this->_io.SDA = sdaPin;
 }
@@ -126,17 +123,19 @@ void I2CLowLevelBus::Initialize()
 
     CMU_ClockEnable(this->_io.Clock, true);
 
-    GPIO_PinModeSet((GPIO_Port_TypeDef)this->_io.Port, this->_io.SDA, gpioModeWiredAndPullUpFilter, 1);
-    GPIO_PinModeSet((GPIO_Port_TypeDef)this->_io.Port, this->_io.SCL, gpioModeWiredAndPullUpFilter, 1);
+    GPIO_PinModeSet(this->_io.Port, this->_io.SDA, gpioModeWiredAndPullUpFilter, 1);
+    GPIO_PinModeSet(this->_io.Port, this->_io.SCL, gpioModeWiredAndPullUpFilter, 1);
 
     I2C_Init_TypeDef init = I2C_INIT_DEFAULT;
     init.clhr = i2cClockHLRStandard;
     init.enable = true;
 
-    I2C_Init((I2C_TypeDef*)this->HWInterface, &init);
-    ((I2C_TypeDef*)this->HWInterface)->ROUTE = I2C_ROUTE_SCLPEN | I2C_ROUTE_SDAPEN | this->_io.Location;
+    auto hw = reinterpret_cast<I2C_TypeDef*>(this->HWInterface);
 
-    I2C_IntEnable((I2C_TypeDef*)this->HWInterface, I2C_IEN_TXC);
+    I2C_Init(hw, &init);
+    hw->ROUTE = I2C_ROUTE_SCLPEN | I2C_ROUTE_SDAPEN | this->_io.Location;
+
+    I2C_IntEnable(hw, I2C_IEN_TXC);
 
     NVIC_SetPriority(this->_io.IRQn, I2C_IRQ_PRIORITY);
     NVIC_EnableIRQ(this->_io.IRQn);
@@ -144,7 +143,7 @@ void I2CLowLevelBus::Initialize()
 
 void I2CLowLevelBus::IRQHandler()
 {
-    auto status = I2C_Transfer((I2C_TypeDef*)this->HWInterface);
+    auto status = I2C_Transfer(reinterpret_cast<I2C_TypeDef*>(this->HWInterface));
 
     if (status == i2cTransferInProgress)
     {

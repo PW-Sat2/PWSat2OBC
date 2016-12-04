@@ -10,6 +10,8 @@ using testing::_;
 using testing::Return;
 using testing::Eq;
 
+using namespace drivers::i2c;
+
 class ErrorHandlingI2CBusTest : public Test
 {
   protected:

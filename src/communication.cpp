@@ -2,7 +2,7 @@
 
 using std::uint8_t;
 using gsl::span;
-
+using drivers::i2c::I2CBus;
 using devices::comm::ITransmitFrame;
 using communication::PingTelecommand;
 using telecommands::handling::IHandleTeleCommand;

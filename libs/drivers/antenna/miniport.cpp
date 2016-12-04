@@ -6,6 +6,8 @@
 #include "logger/logger.h"
 
 using gsl::span;
+using drivers::i2c::I2CBus;
+using drivers::i2c::I2CResult;
 
 /**
  * @brief Enumerator of all supported antenna controller commands.

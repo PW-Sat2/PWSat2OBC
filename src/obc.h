@@ -11,75 +11,18 @@
 #include "base/os.h"
 #include "communication.h"
 #include "fs/fs.h"
-#include "i2c/i2c.h"
+#include "hardware.h"
 #include "leuart/line_io.h"
-#include "logger/logger.h"
-#include "power/power.h"
 #include "storage/nand_driver.h"
 #include "terminal/terminal.h"
 #include "time/timer.h"
 #include "yaffs_guts.h"
 
 /**
- * @brief Helper class consisting of I2C low-level driver and error handling wrapper
+ * @defgroup obc OBC structure
+ *
+ * @{
  */
-class I2CSingleBus
-{
-  public:
-    /**
-     * @brief Creates drivers for single I2C peripheral
-     * @param[in] hw I2C hardware registers set
-     * @param[in] location Pins location to use
-     * @param[in] port GPIO port to use
-     * @param[in] sdaPin Number of GPIO pin to use for SDA line
-     * @param[in] sclPin Number of GPIO pin to use for SCL line
-     * @param[in] clock Clock used by selected hardware interface
-     * @param[in] irq IRQ number used by selected hardware interface
-     */
-    I2CSingleBus(I2C_TypeDef* hw,
-        uint16_t location,
-        GPIO_Port_TypeDef port,
-        uint16_t sdaPin,
-        uint16_t sclPin,
-        CMU_Clock_TypeDef clock,
-        IRQn_Type irq);
-
-    /**
-     * @brief Low-level driver
-     */
-    I2CLowLevelBus Driver;
-
-    /**
-     * @brief Error handling wrapper
-     */
-    I2CErrorHandlingBus ErrorHandling;
-
-  private:
-    /**
-     * @brief Error handling procedure
-     * @param[in] bus Bus on which transfer failed
-     * @param[in] result Transfer error code
-     * @param[in] address Device that was addressed
-     * @param[in] context Context
-     * @return I2C result
-     */
-    static I2CResult I2CErrorHandler(I2CBus& bus, I2CResult result, I2CAddress address, void* context)
-    {
-        UNREFERENCED_PARAMETER(bus);
-        UNREFERENCED_PARAMETER(address);
-
-        PowerControl* power = (PowerControl*)context;
-
-        if (result == I2CResult::ClockLatched)
-        {
-            LOG(LOG_LEVEL_FATAL, "SCL latched. Triggering power cycle");
-            power->TriggerSystemPowerCycle(power);
-            return result;
-        }
-
-        return result;
-    }
-};
 
 /**
  * @brief Object that describes global OBC state including drivers.
@@ -111,14 +54,8 @@ struct OBC
     /** @brief Persistent timer that measures mission time. */
     TimeProvider timeProvider;
 
-    /** @brief Available I2C buses */
-    I2CSingleBus I2CBuses[2];
-
-    /** @brief I2C interface */
-    I2CInterface I2C;
-
-    /** @brief I2C Fallback bus */
-    I2CFallbackBus I2CFallback;
+    /** @brief OBC hardware */
+    OBCHardware Hardware;
 
     /** @brief Low level driver for antenna controller. */
     AntennaMiniportDriver antennaMiniport;
@@ -141,5 +78,7 @@ struct OBC
 
 /** @brief Global OBC object. */
 extern OBC Main;
+
+/** @} */
 
 #endif

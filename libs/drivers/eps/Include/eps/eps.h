@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include "i2c/i2c.h"
 
-void EpsInit(I2CBus* bus);
+void EpsInit(drivers::i2c::I2CBus* bus);
 bool EpsOpenSail(void);
 
 bool EpsTriggerSystemPowerCycle(void);

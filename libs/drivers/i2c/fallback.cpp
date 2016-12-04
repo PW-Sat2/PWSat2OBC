@@ -2,6 +2,8 @@
 #include "i2c.h"
 #include "logger/logger.h"
 
+using namespace drivers::i2c;
+
 I2CResult I2CFallbackBus::Write(const I2CAddress address, gsl::span<const uint8_t> inData)
 {
     const I2CResult systemBusResult = this->_innerBuses.Bus.Write(address, inData);

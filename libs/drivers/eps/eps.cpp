@@ -7,6 +7,9 @@
 
 #include "system.h"
 
+using drivers::i2c::I2CBus;
+using drivers::i2c::I2CResult;
+
 #define EPS_ADDRESS 12
 
 typedef enum {

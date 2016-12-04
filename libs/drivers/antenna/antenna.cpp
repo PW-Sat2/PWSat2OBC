@@ -4,6 +4,9 @@
 #include "driver.h"
 #include "miniport.h"
 
+using drivers::i2c::I2CBus;
+using drivers::i2c::I2CResult;
+
 /**
  * @brief Returns pointer to the structure that contains status of the requested
  * hardware channel.

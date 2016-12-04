@@ -61,12 +61,12 @@ extern "C" void vApplicationIdleHook(void)
 
 void I2C0_IRQHandler(void)
 {
-    Main.I2CBuses[0].Driver.IRQHandler();
+    Main.Hardware.I2C.Peripherals[0].Driver.IRQHandler();
 }
 
 void I2C1_IRQHandler(void)
 {
-    Main.I2CBuses[1].Driver.IRQHandler();
+    Main.Hardware.I2C.Peripherals[1].Driver.IRQHandler();
 }
 
 static void BlinkLed0(void* param)
@@ -157,7 +157,7 @@ static void ClearState(OBC* obc)
 static void SetupAntennas(void)
 {
     AntennaMiniportInitialize(&Main.antennaMiniport);
-    AntennaDriverInitialize(&Main.antennaDriver, &Main.antennaMiniport, &Main.I2C.Bus, &Main.I2C.Payload);
+    AntennaDriverInitialize(&Main.antennaDriver, &Main.antennaMiniport, &Main.Hardware.I2C.Buses.Bus, &Main.Hardware.I2C.Buses.Payload);
 }
 
 static void ObcInitTask(void* param)
@@ -273,7 +273,7 @@ int main(void)
 
     InitializeTerminal();
 
-    EpsInit((I2CBus*)&Main.I2CFallback);
+    EpsInit(&Main.Hardware.I2C.Fallback);
 
     EPSPowerControlInitialize(&Main.PowerControlInterface);
 

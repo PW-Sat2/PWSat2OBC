@@ -40,6 +40,7 @@ using testing::Ne;
 using testing::Invoke;
 using testing::ElementsAre;
 using gsl::span;
+using drivers::i2c::I2CResult;
 
 class AntennaMiniportTest : public testing::Test
 {

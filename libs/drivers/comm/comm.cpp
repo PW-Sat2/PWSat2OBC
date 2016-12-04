@@ -16,6 +16,8 @@
 
 using std::uint8_t;
 using gsl::span;
+using drivers::i2c::I2CBus;
+using drivers::i2c::I2CResult;
 
 using namespace devices::comm;
 

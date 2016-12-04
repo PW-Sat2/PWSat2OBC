@@ -1,5 +1,7 @@
 #include "MiniportMock.hpp"
 
+using drivers::i2c::I2CBus;
+
 static OSResult Reset(struct AntennaMiniportDriver* driver,
     I2CBus* /*communicationBus*/,
     AntennaChannel channel //

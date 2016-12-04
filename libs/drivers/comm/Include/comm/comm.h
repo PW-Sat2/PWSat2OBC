@@ -245,7 +245,7 @@ namespace devices
              * @param[in] low I2C bus used to communicate with device
              * @param[in] upperInterface Reference to object responsible for interpreting received frames
              */
-            CommObject(I2CBus& low, IHandleFrame& upperInterface);
+            CommObject(drivers::i2c::I2CBus& low, IHandleFrame& upperInterface);
 
             /**
              * @brief This procedure initializes the comm driver object and sets it 'Paused' state.
@@ -402,7 +402,7 @@ namespace devices
 
           private:
             /** @brief Comm driver lower interface. */
-            I2CBus& _low;
+            drivers::i2c::I2CBus& _low;
 
             /** @brief Comm driver upper interface. */
             IHandleFrame& _frameHandler;

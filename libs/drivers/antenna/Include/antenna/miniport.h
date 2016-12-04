@@ -38,7 +38,7 @@ struct AntennaMiniportDriver
      * @return Operation status.
      */
     OSResult (*Reset)(struct AntennaMiniportDriver* miniport,
-        I2CBus* communicationBus,
+        drivers::i2c::I2CBus* communicationBus,
         AntennaChannel channel //
         );
 
@@ -50,7 +50,7 @@ struct AntennaMiniportDriver
      * @return Operation status.
      */
     OSResult (*ArmDeploymentSystem)(struct AntennaMiniportDriver* miniport,
-        I2CBus* communicationBus,
+        drivers::i2c::I2CBus* communicationBus,
         AntennaChannel channel //
         );
 
@@ -62,7 +62,7 @@ struct AntennaMiniportDriver
      * @return Operation status.
      */
     OSResult (*DisarmDeploymentSystem)(struct AntennaMiniportDriver* miniport,
-        I2CBus* communicationBus,
+        drivers::i2c::I2CBus* communicationBus,
         AntennaChannel channel //
         );
 
@@ -78,7 +78,7 @@ struct AntennaMiniportDriver
      * @return Operation status.
      */
     OSResult (*DeployAntenna)(struct AntennaMiniportDriver* miniport,
-        I2CBus* communicationBus,
+        drivers::i2c::I2CBus* communicationBus,
         AntennaChannel channel,
         AntennaId antennaId,
         TimeSpan timeout,
@@ -94,7 +94,7 @@ struct AntennaMiniportDriver
      * @return Operation status.
      */
     OSResult (*InitializeAutomaticDeployment)(struct AntennaMiniportDriver* miniport,
-        I2CBus* communicationBus,
+        drivers::i2c::I2CBus* communicationBus,
         AntennaChannel channel,
         TimeSpan timeout //
         );
@@ -107,7 +107,7 @@ struct AntennaMiniportDriver
      * @return Operation status.
      */
     OSResult (*CancelAntennaDeployment)(struct AntennaMiniportDriver* miniport,
-        I2CBus* communicationBus,
+        drivers::i2c::I2CBus* communicationBus,
         AntennaChannel channel //
         );
 
@@ -120,7 +120,7 @@ struct AntennaMiniportDriver
      * @return Operation status.
      */
     OSResult (*GetDeploymentStatus)(struct AntennaMiniportDriver* miniport,
-        I2CBus* communicationBus,
+        drivers::i2c::I2CBus* communicationBus,
         AntennaChannel channel,
         AntennaDeploymentStatus* telemetry //
         );
@@ -139,7 +139,7 @@ struct AntennaMiniportDriver
      * @return Operation status.
      */
     OSResult (*GetAntennaActivationCount)(struct AntennaMiniportDriver* miniport,
-        I2CBus* communicationBus,
+        drivers::i2c::I2CBus* communicationBus,
         AntennaChannel channel,
         AntennaId antennaId,
         uint16_t* count //
@@ -159,7 +159,7 @@ struct AntennaMiniportDriver
      * @return Operation status.
      */
     OSResult (*GetAntennaActivationTime)(struct AntennaMiniportDriver* miniport,
-        I2CBus* communicationBus,
+        drivers::i2c::I2CBus* communicationBus,
         AntennaChannel channel,
         AntennaId antennaId,
         TimeSpan* count //
@@ -175,7 +175,7 @@ struct AntennaMiniportDriver
      * @return Operation status.
      */
     OSResult (*GetTemperature)(struct AntennaMiniportDriver* miniport,
-        I2CBus* communicationBus,
+        drivers::i2c::I2CBus* communicationBus,
         AntennaChannel channel,
         uint16_t* temperature //
         );

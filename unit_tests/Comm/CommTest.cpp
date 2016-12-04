@@ -25,7 +25,7 @@ using testing::Pointee;
 using testing::ElementsAre;
 using testing::Matches;
 using gsl::span;
-
+using drivers::i2c::I2CResult;
 using namespace devices::comm;
 
 static const uint8_t ReceiverAddress = 0x60;

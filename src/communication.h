@@ -51,7 +51,7 @@ namespace communication
          * @brief Initializes @ref OBCCommunication object
          * @param[in] i2cBus I2CBus used by low-level comm driver
          */
-        OBCCommunication(I2CBus& i2cBus);
+        OBCCommunication(drivers::i2c::I2CBus& i2cBus);
 
         /**
          * @brief Initializes all communication-related drivers and objects
