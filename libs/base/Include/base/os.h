@@ -532,6 +532,85 @@ class TakeSemaphore
     bool _taken;
 };
 
+/**
+ * @brief RTOS queue wrapper
+ */
+template <typename Element, std::size_t Capacity> class Queue
+{
+  public:
+    /**
+     * @brief Creates underlying RTOS queue object
+     * @return Operation result
+     */
+    OSResult Create();
+
+    /**
+     * @brief Pushes element to queue
+     * @param[in] element Pointer to element that will be placed in queue
+     * @param[in] timeout Timeout in ms
+     * @return Operation result
+     */
+    OSResult Push(Element* element, OSTaskTimeSpan timeout);
+
+    /**
+     * @brief Pushes element to queue from interrupt service routine
+     * @param[in] element Pointer to element that will be placed in queue
+     * @return Operation result
+     */
+    OSResult PushISR(Element* element);
+
+    /**
+     * @brief Pops element from queue
+     * @param[out] element Pointer to place where element from queue will be saved
+     * @param[in] timeout Timeout in ms
+     * @return Operation result
+     */
+    OSResult Pop(Element* element, OSTaskTimeSpan timeout);
+
+  private:
+    /** @brief Queue handle */
+    OSQueueHandle _handle;
+};
+
+template <typename Element, std::size_t Capacity> OSResult Queue<Element, Capacity>::Create()
+{
+    this->_handle = System::CreateQueue(Capacity, sizeof(Element));
+
+    if (this->_handle == nullptr)
+    {
+        return OSResult::NotEnoughMemory;
+    }
+
+    return OSResult::Success;
+}
+
+template <typename Element, std::size_t Capacity> OSResult Queue<Element, Capacity>::Push(Element* element, OSTaskTimeSpan timeout)
+{
+    if (System::QueueSend(this->_handle, element, timeout))
+    {
+        return OSResult::Success;
+    }
+    return OSResult::Timeout;
+}
+
+template <typename Element, std::size_t Capacity> OSResult Queue<Element, Capacity>::PushISR(Element* element)
+{
+    if (System::QueueSendISR(this->_handle, element))
+    {
+        return OSResult::Success;
+    }
+    return OSResult::Overflow;
+}
+
+template <typename Element, std::size_t Capacity> OSResult Queue<Element, Capacity>::Pop(Element* element, OSTaskTimeSpan timeout)
+{
+    if (System::QueueReceive(this->_handle, element, timeout))
+    {
+        return OSResult::Success;
+    }
+    return OSResult::Timeout;
+}
+
 /** @}*/
 
 #endif
