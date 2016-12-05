@@ -18,10 +18,10 @@ set(SOURCES
   base/ReaderTest.cpp
   base/WriterTest.cpp
   MissionPlan/MissionPlanTest.cpp
-  MissionPlan/DeployAntennaActionTest.cpp
   MissionPlan/MissionTestHelpers.cpp
   MissionPlan/SailSystemStateTest.cpp
-  MissionPlan/ActionDispatchTest.cpp
+  MissionPlan/antenna/DeployAntennasTest.cpp
+  MissionPlan/antenna/AntennaMissionStateTest.cpp
   I2C/FallbackI2CBusTest.cpp
   I2C/ErrorHandlingI2CBusTest.cpp
   I2C/I2CMock.cpp
@@ -35,11 +35,19 @@ set(SOURCES
   time/SmartWait.cpp
   mock/FsMock.hpp
   mock/FsMock.cpp
+  mock/AntennaMock.cpp
+  mock/AntennaMock.hpp
   assert.cpp
   antenna/miniport.cpp
   antenna/antenna.cpp
   antenna/MiniportMock.cpp
   antenna/MiniportMock.hpp
+  mock/ActionDescriptorMock.cpp
+  mock/ActionDescriptorMock.hpp
+  mock/UpdateDescriptorMock.cpp
+  mock/UpdateDescriptorMock.hpp
+  mock/VerifyDescriprorMock.cpp
+  mock/VerifyDescriprorMock.hpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -80,6 +88,7 @@ target_link_libraries(${NAME}
     time
     gsl
     antenna
+    mission_antenna
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})

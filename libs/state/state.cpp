@@ -1,12 +1,21 @@
 #include "state.h"
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
 void SystemStateEmpty(SystemState* state)
 {
     memset(state, 0, sizeof(SystemState));
+}
 
-    state->NumValue = 100;
+SystemStateVerifyDescriptorResult::SystemStateVerifyDescriptorResult() //
+    : SystemStateVerifyDescriptorResult(SystemStateVerifyOK, 0)
+{
+}
+
+SystemStateVerifyDescriptorResult::SystemStateVerifyDescriptorResult(SystemStateVerifyResult result, std::uint32_t reason) //
+    : Result(result),
+      Reason(reason)
+{
 }
 
 SystemStateUpdateResult SystemStateUpdate(
@@ -41,7 +50,7 @@ SystemStateVerifyResult SystemStateVerify(const SystemState* state,
 
     for (uint16_t i = 0; i < descriptorsCount; i++)
     {
-        descriptors[i].VerifyProc(state, descriptors[i].Param, &results[i]);
+        results[i] = descriptors[i].VerifyProc(state, descriptors[i].Param);
 
         if (results[i].Result == SystemStateVerifyFailure)
         {

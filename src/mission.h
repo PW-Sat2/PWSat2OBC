@@ -1,19 +1,29 @@
 #ifndef SRC_MISSION_H_
 #define SRC_MISSION_H_
 
-#include <stdbool.h>
 #include "mission/adcs_mission.h"
+#include "mission/antenna_state.h"
 #include "obc.h"
 #include "state/state.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/**
+ * @defgroup mission Mission module
+ *
+ * This module contains entire mission management related log.
+ * @{
+ */
 
 /** @brief Object with all state-related descriptors */
-typedef struct
+struct MissionState
 {
-    /** @brief (Mock) Flag telling whetever sail should be marked as opened by update descriptor */
+    /**
+     * @brief .ctor
+     *
+     * @param[in] obc Reference to global obc object that provides dependencies for mission tasks.
+     */
+    MissionState(OBC& obc);
+
+    /** @brief (Mock) Flag telling whether sail should be marked as opened by update descriptor */
     bool SailOpened;
 
     /** @brief Sail-related descriptors */
@@ -31,9 +41,9 @@ typedef struct
     /** @brief Time update descriptor */
     SystemStateUpdateDescriptor UpdateTime;
 
-    /** @brief Terminal command update descriptor */
-    SystemStateUpdateDescriptor TerminalCommandUpdate;
-} MissionState;
+    /** @brief Antenna deployment process private state. */
+    mission::antenna::AntennaMissionState antennaMission;
+};
 
 /**
  * @brief Initializes mission-control task
@@ -42,14 +52,6 @@ typedef struct
  */
 void InitializeMission(MissionState* missionState, OBC* obc);
 
-/**
- * @brief Sets terminal command to be taken into consideration in next loop
- * @param[in] command Terminal command
- */
-void SetTerminalCommand(TerminalCommand command);
-
-#ifdef __cplusplus
-}
-#endif
+/** @} */
 
 #endif /* SRC_MISSION_H_ */

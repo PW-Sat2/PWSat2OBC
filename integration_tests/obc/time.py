@@ -9,6 +9,10 @@ class TimeMixin(OBCMixin):
     def jump_to_time(self, time):
         pass
 
+    @command("advance_time {0}")
+    def advance_time(self, delta):
+        pass
+
     @decode_return(int)
     @command("currentTime")
     def current_time(self):

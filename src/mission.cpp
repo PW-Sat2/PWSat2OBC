@@ -1,10 +1,7 @@
-#include <stdbool.h>
-#include <FreeRTOS.h>
-#include <task.h>
-
+#include "mission.h"
+#include <array>
 #include "base/os.h"
 #include "logger/logger.h"
-#include "mission.h"
 #include "mission/adcs_mission.h"
 #include "mission/sail.h"
 #include "obc.h"
@@ -12,12 +9,18 @@
 #include "system.h"
 #include "time/TimePoint.h"
 
-static TerminalCommand terminalCommand = TerminalCommandNone;
+/**
+ * @addtogroup mission
+ * @{
+ */
+MissionState::MissionState(OBC& obc) : antennaMission(obc.antennaDriver)
+{
+}
 
 /**
  * @brief Object describing which descriptors are available in specific mode
  */
-typedef struct
+struct ModeDescriptor
 {
     /** @brief Array of update descriptors */
     SystemStateUpdateDescriptor* update;
@@ -35,13 +38,13 @@ typedef struct
     size_t actionCount;
     /** @brief Buffer for pointers to action descriptors that can be executed */
     SystemActionDescriptor** runnableActions;
-} ModeDescriptor;
+};
 
 static SystemStateUpdateResult UpdateTime(SystemState* state, void* param)
 {
     UNREFERENCED_PARAMETER(param);
 
-    TimeGetCurrentMissionTime(&Main.timeProvider, &state->Time);
+    TimeGetCurrentTime(&Main.timeProvider, &state->Time);
 
     return SystemStateUpdateOK;
 }
@@ -65,33 +68,24 @@ static void Loop(SystemState* state, ModeDescriptor* mode)
     SystemDispatchActions(state, mode->runnableActions, runnableCount);
 }
 
+static SystemStateUpdateDescriptor NormalModeUpdateDescriptors[3] = {};
+
+static SystemActionDescriptor NormalModeActionDescriptors[2] = {};
+
 static void NormalModeLoop(SystemState* state, MissionState* missionState)
 {
-    SystemStateUpdateDescriptor updateDescriptors[] = {
-        missionState->TerminalCommandUpdate, //
-        missionState->UpdateTime,            //
-        missionState->Sail.Update,           //
-        missionState->ADCS.Update            //
-    };
-
-    SystemActionDescriptor actionDescriptors[] = {
-        missionState->Sail.OpenSail, //
-        missionState->ADCS.TurnOff,  //
-        missionState->ADCS.Detumble, //
-        missionState->ADCS.SunPoint, //
-    };
-
-    SystemActionDescriptor* runnableActions[COUNT_OF(actionDescriptors)];
+    UNREFERENCED_PARAMETER(missionState);
+    std::array<SystemActionDescriptor*, count_of(NormalModeActionDescriptors)> runnableActions;
 
     ModeDescriptor descriptor;
-    descriptor.update = updateDescriptors;
-    descriptor.updateCount = COUNT_OF(updateDescriptors);
+    descriptor.update = NormalModeUpdateDescriptors;
+    descriptor.updateCount = COUNT_OF(NormalModeUpdateDescriptors);
     descriptor.verify = NULL;
     descriptor.verifyResult = NULL;
     descriptor.verifyCount = 0;
-    descriptor.actions = actionDescriptors;
-    descriptor.actionCount = COUNT_OF(actionDescriptors);
-    descriptor.runnableActions = runnableActions;
+    descriptor.actions = NormalModeActionDescriptors;
+    descriptor.actionCount = COUNT_OF(NormalModeActionDescriptors);
+    descriptor.runnableActions = runnableActions.data();
 
     Loop(state, &descriptor);
 }
@@ -106,42 +100,32 @@ static void MissionControlTask(void* param)
 
     while (1)
     {
-        NormalModeLoop(&state, missionState);
-
         TimeLongDelay(&Main.timeProvider, TimeSpanFromSeconds(10));
+
+        NormalModeLoop(&state, missionState);
     }
 }
-
-static SystemStateUpdateResult UpdateCommandTerminal(SystemState* state, void* param)
+static void TimeInitializeUpdateDescriptor(SystemStateUpdateDescriptor* descriptor)
 {
-    UNREFERENCED_PARAMETER(param);
-
-    state->RequestedCommand = terminalCommand;
-    terminalCommand = TerminalCommandNone;
-
-    return SystemStateUpdateOK;
-}
-
-void SetTerminalCommand(TerminalCommand command)
-{
-    terminalCommand = command;
+    descriptor->Name = "Update time";
+    descriptor->Param = NULL;
+    descriptor->UpdateProc = UpdateTime;
 }
 
 void InitializeMission(MissionState* missionState, OBC* obc)
 {
     UNREFERENCED_PARAMETER(obc);
+    // Update descriptors
+    NormalModeUpdateDescriptors[0] = GetAntennaDeploymentUpdateDescriptor(missionState->antennaMission);
+    TimeInitializeUpdateDescriptor(&NormalModeUpdateDescriptors[1]);
+    SailInitializeUpdateDescriptor(&NormalModeUpdateDescriptors[2], &missionState->SailOpened);
 
-    SailInitializeUpdateDescriptor(&missionState->Sail.Update, &missionState->SailOpened);
-    SailInitializeActionDescriptor(&missionState->Sail.OpenSail, &missionState->SailOpened);
-    ADCSInitializeDescriptors(&obc->adcs, &missionState->ADCS);
+    // Action Descriptors
+    NormalModeActionDescriptors[0] = GetAntennaDeploymentActionDescriptor(missionState->antennaMission);
+    SailInitializeActionDescriptor(&NormalModeActionDescriptors[1], &missionState->SailOpened);
 
-    missionState->UpdateTime.Name = "Update time";
-    missionState->UpdateTime.Param = NULL;
-    missionState->UpdateTime.UpdateProc = UpdateTime;
-
-    missionState->TerminalCommandUpdate.Name = "Terminal command";
-    missionState->TerminalCommandUpdate.Param = NULL;
-    missionState->TerminalCommandUpdate.UpdateProc = UpdateCommandTerminal;
-
+    //    ADCSInitializeDescriptors(&obc->adcs, &missionState->ADCS);
     System::CreateTask(MissionControlTask, "MissionControl", 2048, missionState, TaskPriority::P2, nullptr);
 }
+
+/** @} */

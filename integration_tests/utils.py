@@ -8,7 +8,6 @@ def hex_data(data):
 
     return str(['%X' % b for b in data])
 
-
 def pad_to_multiply(s, base):
     l = base - len(s) % base
     if l < base:
@@ -17,10 +16,8 @@ def pad_to_multiply(s, base):
         padding = ''
     return s + padding
 
-
 def b64pad(s):
     return pad_to_multiply(s, 3, '=')
-
 
 class ExtendableFormatter(Formatter):
     _converters = {}
@@ -35,14 +32,7 @@ class ExtendableFormatter(Formatter):
         self._converters[name] = func
 
 def call(method, default, *args):
-    if not method is None:
-        if inspect.ismethod(method):
-            if len(args) != (method.__code__.co_argcount - 1):
-                raise Exception("Invalid argument count")
-        else:
-            if len(args) != method.__code__.co_argcount:
-                raise Exception("Invalid argument count")
-
+    if method:
         result = method(*args)
         if not result is None:
             return result

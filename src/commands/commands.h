@@ -7,6 +7,7 @@ void PingHandler(uint16_t argc, char* argv[]);
 void EchoHandler(uint16_t argc, char* argv[]);
 void JumpToTimeHandler(uint16_t argc, char* argv[]);
 void CurrentTimeHandler(uint16_t argc, char* argv[]);
+void AdvanceTimeHandler(uint16_t argc, char* argv[]);
 void SendFrameHandler(uint16_t argc, char* argv[]);
 void GetFramesCountHandler(uint16_t argc, char* argv[]);
 void ReceiveFrameHandler(uint16_t argc, char* argv[]);
