@@ -36,6 +36,10 @@
 #include "gpio/gpio.h"
 #include "leuart/leuart.h"
 #include "power_eps/power_eps.h"
+#include "uart/Uart.h"
+
+using devices::comm::CommObject;
+using devices::comm::CommFrame;
 
 using services::time::TimeProvider;
 using namespace std::chrono_literals;
@@ -167,6 +171,34 @@ void SetupHardware(void)
 
 extern "C" void __libc_init_array(void);
 
+
+void UartTask(void* param)
+{
+	UNREFERENCED_PARAMETER(param);
+
+	Uart_Init init;
+	init.uart = USART1;
+	init.baudRate=9600;
+	init.parity=usartNoParity;
+	init.portLocation=USART_ROUTE_LOCATION_LOC1;
+	init.baudrate       = 9600;
+	init.oversampling   = usartOVS16;
+	init.databits       = usartDatabits8;
+	init.parity         = usartNoParity;
+	init.stopbits       = usartStopbits1;
+
+
+
+	Uart::Uart uart(init);
+	uart.Initialize();
+	uart.Write((char *)"ala ma kota");
+
+}
+
+
+
+extern "C" void __libc_init_array(void);
+
 int main(void)
 {
     memset(&Main, 0, sizeof(Main));
@@ -204,6 +236,7 @@ int main(void)
     System::CreateTask(BlinkLed0, "Blink0", 512, NULL, TaskPriority::P1, NULL);
     System::CreateTask(ObcInitTask, "Init", 3_KB, &Main, TaskPriority::Highest, &Main.initTask);
 
+    System::RunScheduler();
     System::RunScheduler();
 
     Main.Hardware.Pins.Led0.Toggle();

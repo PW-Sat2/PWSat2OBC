@@ -1,7 +1,7 @@
 set(NAME uart)
 
 set(SOURCES
-    IUart.cpp
+    Uart.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -15,6 +15,7 @@ target_link_libraries(${NAME} platform)
 target_link_libraries(${NAME} emlib)
 
 target_link_libraries(${NAME} logger)
+target_link_libraries(${NAME} emdrv)
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/uart)

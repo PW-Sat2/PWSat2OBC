@@ -1,6 +1,13 @@
 #ifndef LIBS_DRIVERS_UART_UART_H_
 #define LIBS_DRIVERS_UART_UART_H_
 
+#include "ecode.h"
+#include <stdlib.h>
+#include "dmadrv.h"
+#include "em_usart.h"
+#include "em_cmu.h"
+#include "em_gpio.h"
+
 
 #define ECODE_EMDRV_UARTDRV_OK                (ECODE_OK)
 #define ECODE_EMDRV_UARTDRV_WAITING           (ECODE_EMDRV_UARTDRV_BASE | 0x00000001)
@@ -17,19 +24,52 @@
 #define ECODE_EMDRV_UARTDRV_DMA_ALLOC_ERROR   (ECODE_EMDRV_UARTDRV_BASE | 0x0000000E)
 #define ECODE_EMDRV_UARTDRV_CLOCK_ERROR       (ECODE_EMDRV_UARTDRV_BASE | 0x0000000F)
 
-#define UARTDRV_STATUS_RXEN     (1 << 0)
-#define UARTDRV_STATUS_TXEN     (1 << 1)
-#define UARTDRV_STATUS_RXBLOCK  (1 << 3)
-#define UARTDRV_STATUS_TXTRI    (1 << 4)
-#define UARTDRV_STATUS_TXC      (1 << 5)
-#define UARTDRV_STATUS_TXBL     (1 << 6)
-#define UARTDRV_STATUS_RXDATAV  (1 << 7)
-#define UARTDRV_STATUS_RXFULL   (1 << 8)
-#define UARTDRV_STATUS_TXIDLE   (1 << 13)
 
 
 
-class Uart : IUart{
+//typedef void (*UART_Callback_t)(struct Uart_Init *Init,
+//                                    Ecode_t transferStatus,
+//                                    uint8_t *data,
+//									uint32_t transferCount);
+
+
+
+struct Uart_Init
+{
+USART_TypeDef             *uart;
+uint32_t             baudRate;
+uint8_t              portLocationTx;
+uint8_t              portLocationRx;
+uint8_t              portLocation;
+USART_Stopbits_TypeDef    stopBits;
+USART_Parity_TypeDef      parity;
+USART_OVS_TypeDef         oversampling;
+//UART_Callback_t callbackTx;
+//UART_Callback_t callbackRx;
+};
+
+
+class Uart final{
+
+Uart(Uart_Init &init);
+
+public:
+void Write(uint8_t &data);
+void Read(uint8_t &data);
+void Initialize(void);
+void DeInitialize(void);
+
+private:
+	Uart_Init _init;
+	uint8_t               rxDmaCh;
+	uint8_t               txDmaCh;
+	CMU_Clock_TypeDef          uartClock;
+	DMADRV_PeripheralSignal_t  txDmaSignal;
+	DMADRV_PeripheralSignal_t  rxDmaSignal;
+	GPIO_Port_TypeDef txPort;
+	GPIO_Port_TypeDef rxPort;
+	void InitializeDma(void);
+	void InitializeGpio(void);
 };
 
 
