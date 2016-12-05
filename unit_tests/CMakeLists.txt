@@ -40,6 +40,7 @@ set(SOURCES
   antenna/antenna.cpp
   antenna/MiniportMock.cpp
   antenna/MiniportMock.hpp
+  imtq/imtqTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -80,6 +81,7 @@ target_link_libraries(${NAME}
     time
     gsl
     antenna
+    imtq
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
