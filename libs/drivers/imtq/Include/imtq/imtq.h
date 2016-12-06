@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <array>
 #include <cstdint>
+#include <chrono>
 #include <gsl/span>
 
 #include "base/os.h"
@@ -63,6 +64,7 @@ namespace devices
         	};
 
         	Status(std::uint8_t);
+        	bool IsNew();
         	bool InvalidX();
         	bool InvalidY();
         	bool InvalidZ();
@@ -72,12 +74,33 @@ namespace devices
         	std::uint8_t value;
         };
 
+        class Current
+        {
+          public:
+        	std::uint16_t getIn0dot1miliAmpsStep();
+        	void setIn0dot1miliAmpsStep(std::uint16_t value);
+
+        	float getInAmpere();
+        	void setInAmpere(float value);
+
+        	std::uint16_t getInMiliAmpere();
+        	void setInMiliAmpere(std::uint16_t value);
+
+          private:
+        	// representation: 1 LSB = 1e-4 A
+        	std::uint16_t value;
+        };
+
         class ImtqDriver final
         {
           public:
             ImtqDriver(I2CBus& i2cbus);
 
             bool SendNoOperation();
+            bool SoftwareReset();
+            bool CancelOperation();
+            bool StartMTMMeasurement();
+            bool StartActuationCurrent(std::array<Current, 3> current, std::chrono::milliseconds duration);
 
           private:
             I2CBus& i2cbus;
