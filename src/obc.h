@@ -11,13 +11,18 @@
 #include "base/os.h"
 #include "communication.h"
 #include "fs/fs.h"
-#include "i2c/i2c.h"
+#include "hardware.h"
 #include "leuart/line_io.h"
-#include "power/power.h"
 #include "storage/nand_driver.h"
 #include "terminal/terminal.h"
 #include "time/timer.h"
 #include "yaffs_guts.h"
+
+/**
+ * @defgroup obc OBC structure
+ *
+ * @{
+ */
 
 /**
  * @brief Object that describes global OBC state including drivers.
@@ -49,18 +54,8 @@ struct OBC
     /** @brief Persistent timer that measures mission time. */
     TimeProvider timeProvider;
 
-    /** @brief Available I2C buses */
-    struct
-    {
-        I2CLowLevelBus Bus;
-        I2CErrorHandlingBus ErrorHandling;
-    } I2CBuses[2];
-
-    /** @brief I2C interface */
-    I2CInterface I2C;
-
-    /** @brief I2C Fallback bus */
-    I2CFallbackBus I2CFallback;
+    /** @brief OBC hardware */
+    OBCHardware Hardware;
 
     /** @brief Low level driver for antenna controller. */
     AntennaMiniportDriver antennaMiniport;
@@ -83,5 +78,7 @@ struct OBC
 
 /** @brief Global OBC object. */
 extern OBC Main;
+
+/** @} */
 
 #endif

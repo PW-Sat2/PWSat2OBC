@@ -10,11 +10,11 @@ struct OSMock : IOS
 {
     MOCK_METHOD6(CreateTask,
         OSResult(OSTaskProcedure entryPoint,
-                     const char* taskName,
-                     uint16_t stackSize,
-                     void* taskParameter,
-                     TaskPriority priority,
-                     OSTaskHandle* taskHandle));
+            const char* taskName,
+            uint16_t stackSize,
+            void* taskParameter,
+            TaskPriority priority,
+            OSTaskHandle* taskHandle));
 
     MOCK_METHOD1(SuspendTask, void(OSTaskHandle task));
 
@@ -36,8 +36,7 @@ struct OSMock : IOS
 
     MOCK_METHOD2(EventGroupClearBits, OSEventBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange));
 
-    MOCK_METHOD5(
-        EventGroupWaitForBits,
+    MOCK_METHOD5(EventGroupWaitForBits,
         OSEventBits(
             OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, bool waitAll, bool autoReset, const OSTaskTimeSpan timeout));
 
@@ -46,8 +45,8 @@ struct OSMock : IOS
     MOCK_METHOD2(CreateQueue, OSQueueHandle(std::size_t maxElementCount, std::size_t elementSize));
     MOCK_METHOD3(QueueReceive, bool(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout));
     MOCK_METHOD2(QueueReceiveFromISR, bool(OSQueueHandle queue, void* element));
-    MOCK_METHOD3(QueueSend, bool(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout));
-    MOCK_METHOD2(QueueSendISR, bool(OSQueueHandle queue, void* element));
+    MOCK_METHOD3(QueueSend, bool(OSQueueHandle queue, const void* element, OSTaskTimeSpan timeout));
+    MOCK_METHOD2(QueueSendISR, bool(OSQueueHandle queue, const void* element));
     MOCK_METHOD2(QueueOverwrite, void(OSQueueHandle queue, const void* element));
 
     MOCK_METHOD0(CreatePulseAll, OSPulseHandle());

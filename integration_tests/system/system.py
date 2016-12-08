@@ -5,7 +5,6 @@ from devices import *
 from i2cMock import I2CMock
 from pins import Pins
 
-
 class System:
     def __init__(self, obc_com, sys_bus_com, payload_bus_com, use_single_bus, gpio, auto_power_on = True):
         self.log = logging.getLogger("system")

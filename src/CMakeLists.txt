@@ -8,13 +8,13 @@ set(SOURCES
     commands/comm.cpp
     commands/antenna.cpp
     commands/file_system.cpp
-    commands/state_command.cpp
     commands/i2c_test_command.cpp
     commands/rtos_status.cpp
     commands/heap.cpp
     obc.h
     obc.cpp
     communication.cpp
+    hardware.cpp
     fault_handlers.cpp
     mission.cpp
 )
@@ -48,6 +48,7 @@ target_link_libraries(${NAME}
     telecommand_handling
     gsl
     antenna
+    mission_antenna
 )
 
 target_generate_hex(${NAME})

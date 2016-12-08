@@ -2,68 +2,45 @@
 
 #include "logger/logger.h"
 
-#include "i2c.h"
+#include "wrappers.h"
 
-/**
- * @brief Extracts error handling buf configuration from base bus structure
- * @param[in] bus Base bus structure
- * @return Error handling bus configuration
- */
-static inline I2CErrorHandlingBus* ErrorHandling(I2CBus* bus)
+using namespace drivers::i2c;
+
+I2CErrorHandlingBus::I2CErrorHandlingBus(II2CBus& innerBus, BusErrorHandler handler, void* context)
+    : _innerBus(innerBus), _errorHandler(handler), _handlerContext(context)
 {
-    return (I2CErrorHandlingBus*)bus;
 }
 
-/**
- * @brief Performs write-only request. In case of error, handler specified in configuration is executed.
- * @param[in] bus I2C bus
- * @param[in] address Device address
- * @param[in] data Data to send
- * @param[in] length Length of data to send
- * @return Transfer result
- */
-static I2CResult Write(I2CBus* bus, const I2CAddress address, const uint8_t* data, size_t length)
+I2CResult I2CErrorHandlingBus::Write(const I2CAddress address, gsl::span<const uint8_t> inData)
 {
-    I2CErrorHandlingBus* config = ErrorHandling(bus);
-    const I2CResult result = config->InnerBus->Write(config->InnerBus, address, data, length);
+    const I2CResult result = this->_innerBus.Write(address, inData);
 
-    if (result == I2CResultOK)
+    if (result == I2CResult::OK)
     {
         return result;
     }
 
-    return config->ErrorHandler(config->InnerBus, result, address, config->HandlerContext);
-}
-
-/**
- * @brief Performs write-read request. In case of error, handler specified in configuration is executed.
- * @param[in] bus I2C bus
- * @param[in] address Device address
- * @param[in] inData Data to send
- * @param[in] inLength Length of data to send
- * @param[out] outData Buffer for received data
- * @param[out] outLength Size of output buffer
- * @return Transfer result
- */
-static I2CResult WriteRead(
-    I2CBus* bus, const I2CAddress address, const uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength)
-{
-    I2CErrorHandlingBus* config = ErrorHandling(bus);
-    const I2CResult result = config->InnerBus->WriteRead(config->InnerBus, address, inData, inLength, outData, outLength);
-
-    if (result == I2CResultOK)
+    if (this->_errorHandler == nullptr)
     {
         return result;
     }
 
-    return config->ErrorHandler(config->InnerBus, result, address, config->HandlerContext);
+    return this->_errorHandler(this->_innerBus, result, address, this->_handlerContext);
 }
 
-void I2CSetUpErrorHandlingBus(I2CErrorHandlingBus* bus, I2CBus* innerBus, BusErrorHandler handler, void* context)
+I2CResult I2CErrorHandlingBus::WriteRead(const I2CAddress address, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData)
 {
-    bus->Base.Write = Write;
-    bus->Base.WriteRead = WriteRead;
-    bus->InnerBus = innerBus;
-    bus->ErrorHandler = handler;
-    bus->HandlerContext = context;
+    const I2CResult result = this->_innerBus.WriteRead(address, inData, outData);
+
+    if (result == I2CResult::OK)
+    {
+        return result;
+    }
+
+    if (this->_errorHandler == nullptr)
+    {
+        return result;
+    }
+
+    return this->_errorHandler(this->_innerBus, result, address, this->_handlerContext);
 }

@@ -33,4 +33,9 @@ MATCHER_P(DataEqStr, n, "")
     return strcmp((const char*)arg, n) == 0;
 }
 
+MATCHER_P(BeginsWith, value, std::string("begins with " + value))
+{
+    return arg[0] == value;
+}
+
 #endif /* UNIT_TESTS_UTILS_HPP_ */

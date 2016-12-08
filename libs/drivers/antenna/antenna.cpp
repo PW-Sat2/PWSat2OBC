@@ -4,6 +4,9 @@
 #include "driver.h"
 #include "miniport.h"
 
+using drivers::i2c::II2CBus;
+using drivers::i2c::I2CResult;
+
 /**
  * @brief Returns pointer to the structure that contains status of the requested
  * hardware channel.
@@ -108,24 +111,6 @@ static OSResult FinishDeployment(struct AntennaDriver* driver, AntennaChannel ch
         hardwareChannel->communicationBus,
         channel //
         );
-}
-
-static AntennaDeploymentProcessStatus IsDeploymentActive(struct AntennaDriver* driver, AntennaChannel channel)
-{
-    AntennaDeploymentStatus response = {};
-    AntennaChannelInfo* hardwareChannel = GetChannel(driver, channel);
-    const OSResult result = driver->miniport->GetDeploymentStatus(driver->miniport,
-        hardwareChannel->communicationBus,
-        channel,
-        &response //
-        );
-    AntennaDeploymentProcessStatus status;
-    status.status = result;
-    status.delpoymentInProgress = response.IsDeploymentActive[0] | //
-        response.IsDeploymentActive[1] |                           //
-        response.IsDeploymentActive[2] |                           //
-        response.IsDeploymentActive[3];
-    return status;
 }
 
 static OSResult GetTemperature(struct AntennaDriver* driver,
@@ -284,8 +269,8 @@ static AntennaTelemetry GetTelemetry(struct AntennaDriver* driver)
 
 void AntennaDriverInitialize(AntennaDriver* driver,
     AntennaMiniportDriver* miniport,
-    I2CBus* primaryBus,
-    I2CBus* secondaryBus //
+    II2CBus* primaryBus,
+    II2CBus* secondaryBus //
     )
 {
     memset(driver, 0, sizeof(*driver));
@@ -298,7 +283,6 @@ void AntennaDriverInitialize(AntennaDriver* driver,
     driver->HardReset = HardReset;
     driver->DeployAntenna = DeployAntenna;
     driver->FinishDeployment = FinishDeployment;
-    driver->IsDeploymentActive = IsDeploymentActive;
     driver->GetDeploymentStatus = GetDeploymentStatus;
     driver->GetTemperature = GetTemperature;
     driver->GetTelemetry = GetTelemetry;

@@ -1,5 +1,5 @@
-from .obc_mixin import OBCMixin, command, decode_return
 from enum import Enum, unique
+from .obc_mixin import OBCMixin, command, decode_return
 
 @unique
 class AntennaId(Enum):

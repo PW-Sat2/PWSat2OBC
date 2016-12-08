@@ -11,15 +11,18 @@
 #include "base/os.h"
 #include "base/reader.h"
 #include "base/writer.h"
+#include "i2c/i2c.h"
 #include "logger/logger.h"
 #include "system.h"
 
 using std::uint8_t;
 using gsl::span;
+using drivers::i2c::II2CBus;
+using drivers::i2c::I2CResult;
 
 using namespace devices::comm;
 
-CommObject::CommObject(I2CBus& low, IHandleFrame& upperInterface)
+CommObject::CommObject(II2CBus& low, IHandleFrame& upperInterface)
     : _low(low), //
       _frameHandler(upperInterface)
 {
@@ -55,11 +58,11 @@ enum TaskFlag
 
 bool CommObject::SendCommand(CommAddress address, uint8_t command)
 {
-    const I2CResult result = this->_low.Write(&this->_low, address, &command, sizeof(command));
-    const bool status = (result == I2CResultOK);
+    const I2CResult result = this->_low.Write(address, span<const uint8_t>(&command, 1));
+    const bool status = (result == I2CResult::OK);
     if (!status)
     {
-        LOGF(LOG_LEVEL_ERROR, "[comm] Unable to send command %d to %d, Reason: %d", command, address, result);
+        LOGF(LOG_LEVEL_ERROR, "[comm] Unable to send command %d to %d, Reason: %d", command, address, num(result));
     }
 
     return status;
@@ -67,11 +70,11 @@ bool CommObject::SendCommand(CommAddress address, uint8_t command)
 
 bool CommObject::SendCommandWithResponse(CommAddress address, uint8_t command, span<uint8_t> outBuffer)
 {
-    const I2CResult result = this->_low.WriteRead(&this->_low, address, &command, sizeof(command), outBuffer.data(), outBuffer.size());
-    const bool status = (result == I2CResultOK);
+    const I2CResult result = this->_low.WriteRead(address, span<const uint8_t>(&command, 1), outBuffer);
+    const bool status = (result == I2CResult::OK);
     if (!status)
     {
-        LOGF(LOG_LEVEL_ERROR, "[comm] Unable to send command %d to %d, Reason: %d", command, address, result);
+        LOGF(LOG_LEVEL_ERROR, "[comm] Unable to send command %d to %d, Reason: %d", command, address, num(result));
     }
 
     return status;
@@ -291,7 +294,9 @@ bool CommObject::SendFrame(span<const std::uint8_t> frame)
     memcpy(cmd + 1, frame.data(), frame.size());
     uint8_t remainingBufferSize;
 
-    const bool status = (this->_low.WriteRead(&this->_low, CommTransmitter, cmd, frame.size() + 1, &remainingBufferSize, 1) == I2CResultOK);
+    const bool status =
+        (this->_low.WriteRead(CommTransmitter, span<const uint8_t>(cmd, 1 + frame.size()), span<uint8_t>(&remainingBufferSize, 1)) ==
+            I2CResult::OK);
     if (!status)
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Failed to send frame");
@@ -318,7 +323,7 @@ bool CommObject::SetBeacon(const CommBeacon& beaconData)
         return false;
     }
 
-    return this->_low.Write(&this->_low, CommTransmitter, buffer, WriterGetDataLength(&writer)) == I2CResultOK;
+    return this->_low.Write(CommTransmitter, span<const uint8_t>(buffer, WriterGetDataLength(&writer))) == I2CResult::OK;
 }
 
 bool CommObject::ClearBeacon()
@@ -331,7 +336,7 @@ bool CommObject::SetTransmitterStateWhenIdle(CommTransmitterIdleState requestedS
     uint8_t buffer[2];
     buffer[0] = TransmitterSetIdleState;
     buffer[1] = requestedState;
-    return this->_low.Write(&this->_low, CommTransmitter, buffer, COUNT_OF(buffer)) == I2CResultOK;
+    return this->_low.Write(CommTransmitter, buffer) == I2CResult::OK;
 }
 
 bool CommObject::SetTransmitterBitRate(CommTransmitterBitrate bitrate)
@@ -339,7 +344,7 @@ bool CommObject::SetTransmitterBitRate(CommTransmitterBitrate bitrate)
     uint8_t buffer[2];
     buffer[0] = TransmitterSetBitRate;
     buffer[1] = bitrate;
-    return this->_low.Write(&this->_low, CommTransmitter, buffer, COUNT_OF(buffer)) == I2CResultOK;
+    return this->_low.Write(CommTransmitter, buffer) == I2CResult::OK;
 }
 
 bool CommObject::GetTransmitterState(CommTransmitterState& state)
@@ -347,7 +352,7 @@ bool CommObject::GetTransmitterState(CommTransmitterState& state)
     uint8_t command = TransmitterGetState;
     uint8_t response;
     const bool status =
-        (this->_low.WriteRead(&this->_low, CommTransmitter, &command, sizeof(command), &response, sizeof(response)) == I2CResultOK);
+        (this->_low.WriteRead(CommTransmitter, span<const uint8_t>(&command, 1), span<uint8_t>(&response, 1)) == I2CResult::OK);
     if (!status)
     {
         return false;

@@ -16,7 +16,7 @@ static bool TurnOffCondition(const SystemState* state, void* param)
 {
     UNREFERENCED_PARAMETER(state);
     UNREFERENCED_PARAMETER(param);
-    return HAS_FLAG(state->RequestedCommand, TerminalCommandADCSTurnOff);
+    return false; // HAS_FLAG(state->RequestedCommand, TerminalCommandADCSTurnOff);
 }
 
 static void TurnOff(const SystemState* state, void* param)
@@ -30,7 +30,7 @@ static bool DetumbleCondition(const SystemState* state, void* param)
 {
     UNREFERENCED_PARAMETER(state);
     UNREFERENCED_PARAMETER(param);
-    return HAS_FLAG(state->RequestedCommand, TerminalCommandADCSDetumble);
+    return false; // HAS_FLAG(state->RequestedCommand, TerminalCommandADCSDetumble);
 }
 
 static void Detumble(const SystemState* state, void* param)
@@ -44,7 +44,7 @@ static bool SunPointCondition(const SystemState* state, void* param)
 {
     UNREFERENCED_PARAMETER(state);
     UNREFERENCED_PARAMETER(param);
-    return HAS_FLAG(state->RequestedCommand, TerminalCommandADCSSunPoint);
+    return false; // HAS_FLAG(state->RequestedCommand, TerminalCommandADCSSunPoint);
 }
 
 static void SunPoint(const SystemState* state, void* param)

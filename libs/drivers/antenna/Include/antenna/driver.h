@@ -5,7 +5,7 @@
 
 #include "antenna.h"
 #include "base/os.h"
-#include "i2c/i2c.h"
+#include "i2c/forward.h"
 #include "time/TimePoint.h"
 
 /**
@@ -160,23 +160,7 @@ struct AntennaChannelInfo
     /**
      * @brief Pointer to communication bus interface.
      */
-    I2CBus* communicationBus;
-};
-
-/**
- * @brief Structure containing status of antenna deployment process query.
- */
-struct AntennaDeploymentProcessStatus
-{
-    /** Antenna deployment process query status. */
-    OSResult status;
-
-    /**
-     * @brief Antenna Deployment process state.
-     *
-     * True when it is in progress, false otherwise.
-     */
-    bool delpoymentInProgress;
+    drivers::i2c::II2CBus* communicationBus;
 };
 
 /**
@@ -255,14 +239,6 @@ struct AntennaDriver
         );
 
     /**
-     * @brief This procedure checks whether there is currently antenna deployment process in progress.
-     * @param[in] driver Current driver instance.
-     * @param[in] channel Queried hardware channel.
-     * @return Operation status.
-     */
-    AntennaDeploymentProcessStatus (*IsDeploymentActive)(struct AntennaDriver* driver, AntennaChannel channel);
-
-    /**
      * @brief This procedure returns current global antenna deployment status as seen by the queried hardware channel.
      * @param[in] driver Current driver instance.
      * @param[in] channel Queried hardware channel.
@@ -307,8 +283,8 @@ struct AntennaDriver
  */
 void AntennaDriverInitialize(AntennaDriver* driver,
     AntennaMiniportDriver* miniport,
-    I2CBus* primaryBus,
-    I2CBus* secondaryBus //
+    drivers::i2c::II2CBus* primaryBus,
+    drivers::i2c::II2CBus* secondaryBus //
     );
 
 /** @}*/

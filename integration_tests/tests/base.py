@@ -7,7 +7,9 @@ from build_config import config
 
 
 class BaseTest(unittest.TestCase):
-    auto_power_on = True
+    def __init__(self, *args, **kwargs):
+        super(BaseTest, self).__init__(*args, **kwargs)
+        self.auto_power_on = True
 
     def setUp(self):
         obc_com = config['OBC_COM']

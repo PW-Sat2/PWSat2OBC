@@ -1,52 +1,41 @@
 #include <stddef.h>
-#include "i2c.h"
 #include "logger/logger.h"
+#include "wrappers.h"
 
-static inline I2CFallbackBus* Fallback(I2CBus* bus)
+using namespace drivers::i2c;
+
+I2CResult I2CFallbackBus::Write(const I2CAddress address, gsl::span<const uint8_t> inData)
 {
-    return (I2CFallbackBus*)bus;
-}
+    const I2CResult systemBusResult = this->_innerBuses.Bus.Write(address, inData);
 
-static I2CResult Write(I2CBus* bus, const I2CAddress address, const uint8_t* data, size_t length)
-{
-    I2CInterface* buses = Fallback(bus)->InnerBuses;
-
-    const I2CResult systemBusResult = buses->Bus->Write(buses->Bus, address, data, length);
-
-    if (systemBusResult == I2CResultOK)
+    if (systemBusResult == I2CResult::OK)
     {
         return systemBusResult;
     }
 
-    LOGF(LOG_LEVEL_WARNING, "Fallbacking to payload bus. System bus error %d. Transfer to %X", systemBusResult, address);
+    LOGF(LOG_LEVEL_WARNING, "Fallbacking to payload bus. System bus error %d. Transfer to %X", num(systemBusResult), address);
 
-    const I2CResult payloadBusResult = buses->Payload->Write(buses->Payload, address, data, length);
+    const I2CResult payloadBusResult = this->_innerBuses.Payload.Write(address, inData);
 
     return payloadBusResult;
 }
 
-static I2CResult WriteRead(
-    I2CBus* bus, const I2CAddress address, const uint8_t* inData, size_t inLength, uint8_t* outData, size_t outLength)
+I2CResult I2CFallbackBus::WriteRead(const I2CAddress address, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData)
 {
-    I2CInterface* buses = Fallback(bus)->InnerBuses;
+    const I2CResult systemBusResult = this->_innerBuses.Bus.WriteRead(address, inData, outData);
 
-    const I2CResult systemBusResult = buses->Bus->WriteRead(buses->Bus, address, inData, inLength, outData, outLength);
-
-    if (systemBusResult == I2CResultOK)
+    if (systemBusResult == I2CResult::OK)
     {
         return systemBusResult;
     }
 
-    LOGF(LOG_LEVEL_WARNING, "Fallbacking to payload bus. System bus error %d. Transfer to %X", systemBusResult, address);
+    LOGF(LOG_LEVEL_WARNING, "Fallbacking to payload bus. System bus error %d. Transfer to %X", num(systemBusResult), address);
 
-    const I2CResult payloadBusResult = buses->Payload->WriteRead(buses->Payload, address, inData, inLength, outData, outLength);
+    const I2CResult payloadBusResult = this->_innerBuses.Payload.WriteRead(address, inData, outData);
 
     return payloadBusResult;
 }
 
-void I2CSetUpFallbackBus(I2CFallbackBus* bus, I2CInterface* buses)
+I2CFallbackBus::I2CFallbackBus(I2CInterface& buses) : _innerBuses(buses)
 {
-    bus->Base.Write = Write;
-    bus->Base.WriteRead = WriteRead;
-    bus->InnerBuses = buses;
 }

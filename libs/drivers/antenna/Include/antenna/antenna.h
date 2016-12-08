@@ -2,10 +2,11 @@
 #define SRC_DEVICES_ANTENNA_H_
 
 #include <cstdint>
-#include "i2c/i2c.h"
+#include "i2c/forward.h"
 
 /**
  * @defgroup antenna Antenna Deployment Driver
+ * @ingroup device_drivers
  *
  * @brief This module contains driver that is responsible for communicating with
  * antenna deployment hardware.
@@ -44,7 +45,7 @@ enum AntennaChannel
 /**
  * @brief Structure that contains deployment status of all available antennas.
  */
-typedef struct
+struct AntennaDeploymentStatus
 {
     /**
      * @brief This array contains information whether specific antenna has already
@@ -73,7 +74,7 @@ typedef struct
      * @brief Value indicating whether the deployment system is currently active.
      */
     bool DeploymentSystemArmed;
-} AntennaDeploymentStatus;
+};
 
 struct AntennaMiniportDriver;
 struct AntennaDriver;

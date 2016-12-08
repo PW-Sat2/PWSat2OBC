@@ -85,7 +85,6 @@ namespace telecommands
              * @brief Decrypts incoming frame
              * @param[in] frame Incoming (encrypted) frame
              * @param[out] decrypted Buffer for decrypted data
-             * @param[out] decryptedDataLength Size of decrypted data
              * @return Operation status
              */
             virtual DecryptFrameResult Decrypt(gsl::span<const uint8_t> frame, gsl::span<uint8_t> decrypted) = 0;
@@ -151,8 +150,6 @@ namespace telecommands
             /**
              * @brief Decoded frame into command code and parameters
              * @param[in] frame Incoming frame
-             * @param[out] commandCode Extracted command code
-             * @param[out] parameters Part of \p frame which contains telecommand parameters
              * @return Operation status
              */
             virtual DecodeTelecommandResult Decode(gsl::span<const std::uint8_t> frame) = 0;
