@@ -28,7 +28,12 @@ namespace devices
             N25QYaffsDeviceBase(const N25QYaffsDeviceBase&) = delete;
 
             OSResult Mount();
-            void EraseWholeChip();
+            OSResult EraseWholeChip();
+
+            yaffs_dev* Device()
+            {
+                return &this->_device;
+            }
 
           private:
             static int ReadChunk(struct yaffs_dev* dev, //

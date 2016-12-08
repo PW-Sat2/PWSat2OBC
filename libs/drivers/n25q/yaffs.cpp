@@ -21,7 +21,21 @@ static inline size_t BlockSize(BlockMapping blockMapping)
         case BlockMapping::SubSector:
             return 4_KB;
         default:
-            return 4_KB; // TODO: assert
+            return 4_KB;
+    }
+}
+
+static OSResult MapResult(OperationResult result)
+{
+    switch (result)
+    {
+        case OperationResult::Success:
+            return OSResult::Success;
+        case OperationResult::Timeout:
+            return OSResult::Timeout;
+        case OperationResult::Failure:
+        default:
+            return OSResult::IOError;
     }
 }
 
@@ -64,21 +78,30 @@ OSResult N25QYaffsDeviceBase::Mount()
     auto result = yaffs_mount(this->_device.param.name);
     if (result != -1)
     {
-        LOGF(LOG_LEVEL_INFO, "Device %s mounted successfully", this->_device.param.name);
+        LOGF(LOG_LEVEL_INFO, "[Device %s] Mounted successfully", this->_device.param.name);
         return OSResult::Success;
     }
     else
     {
         auto error = (OSResult)yaffs_get_error();
 
-        LOGF(LOG_LEVEL_ERROR, "Device %s mount failed: %d", this->_device.param.name, num(error));
+        LOGF(LOG_LEVEL_ERROR, "[Device %s] Mount failed: %d", this->_device.param.name, num(error));
         return error;
     }
 }
 
-void N25QYaffsDeviceBase::EraseWholeChip()
+OSResult N25QYaffsDeviceBase::EraseWholeChip()
 {
-    this->_driver.EraseChip();
+    LOGF(LOG_LEVEL_WARNING, "[Device %s] Performing whole chip erase", this->_device.param.name);
+
+    auto result = this->_driver.EraseChip();
+
+    if (result != OperationResult::Success)
+    {
+        LOGF(LOG_LEVEL_ERROR, "[Device %s] Chip erase failed: %d", this->_device.param.name, num(result));
+    }
+
+    return MapResult(result);
 }
 
 int N25QYaffsDeviceBase::ReadChunk(struct yaffs_dev* dev, //
@@ -94,6 +117,7 @@ int N25QYaffsDeviceBase::ReadChunk(struct yaffs_dev* dev, //
     if (oob_len > 0)
     {
         LOGF(LOG_LEVEL_ERROR, "Trying to read OOB %d bytes", oob_len);
+        return YAFFS_FAIL;
     }
 
     auto This = reinterpret_cast<N25QYaffsDeviceBase*>(dev->driver_context);
@@ -121,6 +145,7 @@ int N25QYaffsDeviceBase::WriteChunk(struct yaffs_dev* dev, //
     if (oob_len > 0)
     {
         LOGF(LOG_LEVEL_ERROR, "Trying to write OOB %d bytes", oob_len);
+        return YAFFS_FAIL;
     }
 
     auto This = reinterpret_cast<N25QYaffsDeviceBase*>(dev->driver_context);
@@ -129,7 +154,13 @@ int N25QYaffsDeviceBase::WriteChunk(struct yaffs_dev* dev, //
 
     span<const uint8_t> buffer(data, data_len);
 
-    This->_driver.WriteMemory(baseAddress, buffer);
+    auto result = This->_driver.WriteMemory(baseAddress, buffer);
+
+    if (result != OperationResult::Success)
+    {
+        LOGF(LOG_LEVEL_ERROR, "[Device %s] Write to chunk %d failed", dev->param.name, num(result));
+        return YAFFS_FAIL;
+    }
 
     return YAFFS_OK;
 }
@@ -138,19 +169,27 @@ int N25QYaffsDeviceBase::EraseBlock(struct yaffs_dev* dev, int block_no)
 {
     auto This = reinterpret_cast<N25QYaffsDeviceBase*>(dev->driver_context);
 
-    LOGF(LOG_LEVEL_INFO, "Erasing block %d", block_no);
+    LOGF(LOG_LEVEL_INFO, "[Device %s] Erasing block %d", dev->param.name, block_no);
 
     auto baseAddress = block_no * dev->param.chunks_per_block * dev->param.total_bytes_per_chunk;
+
+    auto result = OperationResult::Failure;
 
     switch (This->_blockMapping)
     {
         case BlockMapping::Sector:
-            This->_driver.EraseSector(baseAddress);
+            result = This->_driver.EraseSector(baseAddress);
             break;
 
         case BlockMapping::SubSector:
-            This->_driver.EraseSubSector(baseAddress);
+            result = This->_driver.EraseSubSector(baseAddress);
             break;
+    }
+
+    if (result != OperationResult::Success)
+    {
+        LOGF(LOG_LEVEL_ERROR, "[Device %s] Erase block failed: %d", dev->param.name, num(result));
+        return YAFFS_FAIL;
     }
 
     return YAFFS_OK;
@@ -159,7 +198,9 @@ int N25QYaffsDeviceBase::EraseBlock(struct yaffs_dev* dev, int block_no)
 int N25QYaffsDeviceBase::MarkBadBlock(struct yaffs_dev* dev, int block_no)
 {
     UNREFERENCED_PARAMETER(dev);
-    LOGF(LOG_LEVEL_INFO, "Marking bad block %d", block_no);
+    LOGF(LOG_LEVEL_WARNING, "[Device %s] Marking bad block %d", dev->param.name, block_no);
+
+    // TODO: bad block management
 
     return YAFFS_OK;
 }
@@ -167,7 +208,8 @@ int N25QYaffsDeviceBase::MarkBadBlock(struct yaffs_dev* dev, int block_no)
 int N25QYaffsDeviceBase::CheckBadBlock(struct yaffs_dev* dev, int block_no)
 {
     UNUSED(dev, block_no);
-    //    LOGF(LOG_LEVEL_INFO, "Checking bad block %d", block_no);
+
+    // TODO: bad block management
 
     return YAFFS_OK;
 }

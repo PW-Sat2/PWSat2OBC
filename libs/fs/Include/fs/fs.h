@@ -204,6 +204,13 @@ typedef struct FileSystemTag
      * @return true if path exists
      */
     bool (*exists)(FileSystem* fileSystem, const char* path);
+
+    /**
+     * @brief Removes all files and directories from specified device
+     * @param[in] fileSystem File system object
+     * @param[in] device Device to clear
+     */
+    void (*ClearDevice)(FileSystem* fileSystem, yaffs_dev* device);
 } FileSystem;
 
 /**
@@ -215,10 +222,8 @@ void FileSystemAPI(FileSystem* fs);
 /**
  * @brief Initializes file system interface (including API)
  * @param[inout] fs File system interface
- * @param[in] rootDevice root device driver
- * @return true if initialization was successful
  */
-bool FileSystemInitialize(FileSystem* fs, struct yaffs_dev* rootDevice);
+void FileSystemInitialize(FileSystem* fs);
 
 bool FileSystemAddDeviceAndMount(FileSystem* fs, yaffs_dev* device);
 
