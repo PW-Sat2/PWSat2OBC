@@ -6,7 +6,6 @@ OBC::OBC()
       Communication(Hardware.I2C.Buses.Bus), //
       SPI(),                                                                                            //
 #ifdef USE_EXTERNAL_FLASH
-      N25Qdriver(SPI),         //
       ExternalFlash("/", SPI), //
 #endif
       terminal(this->IO)

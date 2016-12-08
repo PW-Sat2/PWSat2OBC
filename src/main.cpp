@@ -262,7 +262,7 @@ int main(void)
 
     System::CreateTask(BlinkLed0, "Blink0", 512, NULL, TaskPriority::P1, NULL);
     // System::CreateTask(ADXRS, "ADXRS", 512, NULL, tskIDLE_PRIORITY + 2, NULL);
-    System::CreateTask(ObcInitTask, "Init", 512, &Main, TaskPriority::Highest, &Main.initTask);
+    System::CreateTask(ObcInitTask, "Init", 2_KB, &Main, TaskPriority::Highest, &Main.initTask);
     System::CreateTask(SmartWaitTask, "SmartWait", 512, NULL, TaskPriority::P1, NULL);
     System::RunScheduler();
 

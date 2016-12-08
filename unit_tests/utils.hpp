@@ -35,6 +35,27 @@ MATCHER_P(DataEqStr, n, "")
     return strcmp((const char*)arg, n) == 0;
 }
 
+MATCHER_P(SingletonSpan, expected, std::string("Span contains single item " + testing::PrintToString(expected)))
+{
+    return arg.size() == 1 && arg[0] == expected;
+}
+
+MATCHER_P(SpanOfSize, expected, std::string("Span has size " + testing::PrintToString(expected)))
+{
+    return arg.size() == expected;
+}
+
+template <std::size_t Arg> auto FillBuffer(gsl::span<std::uint8_t> items)
+{
+    return testing::WithArg<Arg>(
+        testing::Invoke([items](gsl::span<std::uint8_t> buffer) { std::copy(items.cbegin(), items.cend(), buffer.begin()); }));
+}
+
+template <std::size_t Arg> auto FillBuffer(std::uint8_t value)
+{
+    return testing::WithArg<Arg>(testing::Invoke([value](gsl::span<std::uint8_t> buffer) { buffer[0] = value; }));
+}
+
 MATCHER_P(BeginsWith, value, std::string("begins with " + value))
 {
     return arg[0] == value;

@@ -112,7 +112,10 @@ OperationResult N25QDriver::WriteMemory(size_t address, span<const uint8_t> buff
         {
             SPISelectSlave slave(this->_spi);
 
-            this->WaitBusy(ProgramPageTimeout);
+            if (!this->WaitBusy(ProgramPageTimeout))
+            {
+                return OperationResult::Timeout;
+            }
         }
 
         auto flags = this->ReadFlagStatus();
@@ -160,7 +163,7 @@ bool N25QDriver::WaitBusy(std::uint32_t timeout)
 
         this->Command(N25QCommand::ReadStatusRegister, span<uint8_t>(&status, 1));
 
-        if ((status & Status::WriteInProgress) == 0)
+        if (!has_flag(static_cast<Status>(status), Status::WriteInProgress))
         {
             break;
         }

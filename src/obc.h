@@ -40,6 +40,7 @@ struct OBC
     /** @brief Initializes every object in OBC structure that needs initialization */
     void Initialize();
 
+    /** @brief Initializes file system */
     bool InitializeFileSystem();
 
     /** @brief File system object */
@@ -73,11 +74,11 @@ struct OBC
     /** @brief Overall satellite <-> Earth communication */
     communication::OBCCommunication Communication;
 
+    /** @brief SPI interface */
     drivers::spi::EFMSPIInterface SPI;
 
 #ifdef USE_EXTERNAL_FLASH
-
-    devices::n25q::N25QDriver N25Qdriver;
+    /** @brief N25Q Yaffs device */
     devices::n25q::N25QYaffsDevice<devices::n25q::BlockMapping::Sector, 512_Bytes, 16_MB> ExternalFlash;
 #else
     /** Yaffs root device */

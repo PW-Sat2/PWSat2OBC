@@ -2,6 +2,7 @@
 #define SRC_SYSTEM_H_
 
 #include <cstddef>
+#include <cstdint>
 #include <type_traits>
 
 /**
@@ -53,6 +54,14 @@ template <typename T, std::size_t size> constexpr inline std::size_t count_of(T 
 #define HAS_FLAG(value, flag) (has_flag(value, flag))
 
 template <typename Enum> constexpr bool has_flag(Enum value, Enum flag)
+{
+    auto valueU = static_cast<std::underlying_type_t<Enum>>(value);
+    auto flagU = static_cast<std::underlying_type_t<Enum>>(flag);
+
+    return (valueU & flagU) == flagU;
+}
+
+template <> constexpr bool has_flag(std::uint32_t value, std::uint32_t flag)
 {
     return (value & flag) == flag;
 }
