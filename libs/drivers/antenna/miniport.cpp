@@ -1,8 +1,14 @@
 #include "miniport.h"
 #include <string.h>
 #include <cstdint>
+#include <gsl/span>
 #include "base/reader.h"
+#include "i2c/i2c.h"
 #include "logger/logger.h"
+
+using gsl::span;
+using drivers::i2c::II2CBus;
+using drivers::i2c::I2CResult;
 
 /**
  * @brief Enumerator of all supported antenna controller commands.
@@ -33,20 +39,20 @@ static inline OSResult MapStatus(I2CResult status)
 {
     switch (status)
     {
-        case I2CResultOK:
+        case I2CResult::OK:
             return OSResult::Success;
-        case I2CResultNack:
-        case I2CResultBusErr:
-        case I2CResultArbLost:
-        case I2CResultUsageFault:
-        case I2CResultSwFault:
-        case I2CResultClockLatched:
-        case I2CResultFailure:
+        case I2CResult::Nack:
+        case I2CResult::BusErr:
+        case I2CResult::ArbLost:
+        case I2CResult::UsageFault:
+        case I2CResult::SwFault:
+        case I2CResult::ClockLatched:
+        case I2CResult::Failure:
             return OSResult::IOError;
-        case I2CResultTimeout:
+        case I2CResult::Timeout:
             return OSResult::Timeout;
         default:
-        case I2CResultClockAlreadyLatched:
+        case I2CResult::ClockAlreadyLatched:
             return OSResult::ProtocolError;
     }
 }
@@ -59,14 +65,14 @@ static inline OSResult MapStatus(I2CResult status)
  * @return Operation status. True on success, false otherwise.
  * @ingroup AntennaMiniport
  */
-static OSResult SendCommand(I2CBus* bus, AntennaChannel channel, Command command)
+static OSResult SendCommand(II2CBus* bus, AntennaChannel channel, Command command)
 {
     uint8_t data = (uint8_t)command;
-    const I2CResult result = bus->Write(bus, channel, &data, 1);
-    const bool status = (result == I2CResultOK);
+    const I2CResult result = bus->Write(channel, span<const uint8_t>(&data, 1));
+    const bool status = (result == I2CResult::OK);
     if (!status)
     {
-        LOGF(LOG_LEVEL_ERROR, "[ant] Unable to send command %d to %d, Reason: %d", command, channel, result);
+        LOGF(LOG_LEVEL_ERROR, "[ant] Unable to send command %d to %d, Reason: %d", command, channel, num(result));
     }
 
     return MapStatus(result);
@@ -82,7 +88,7 @@ static OSResult SendCommand(I2CBus* bus, AntennaChannel channel, Command command
  * @return Operation status. True on success, false otherwise.
  * @ingroup AntennaMiniport
  */
-static OSResult SendCommandWithResponse(I2CBus* bus,
+static OSResult SendCommandWithResponse(II2CBus* bus,
     AntennaChannel channel,
     Command command,
     uint8_t* outBuffer,
@@ -90,18 +96,18 @@ static OSResult SendCommandWithResponse(I2CBus* bus,
     )
 {
     const I2CResult result =
-        bus->WriteRead(bus, channel, reinterpret_cast<std::uint8_t*>(&command), sizeof(command), outBuffer, outBufferSize);
-    const bool status = (result == I2CResultOK);
+        bus->WriteRead(channel, span<const uint8_t>(reinterpret_cast<uint8_t*>(&command), 1), span<uint8_t>(outBuffer, outBufferSize));
+    const bool status = (result == I2CResult::OK);
     if (!status)
     {
-        LOGF(LOG_LEVEL_ERROR, "[ant] Unable to send command %d to %d, Reason: %d", command, channel, result);
+        LOGF(LOG_LEVEL_ERROR, "[ant] Unable to send command %d to %d, Reason: %d", command, channel, num(result));
     }
 
     return MapStatus(result);
 }
 
 static OSResult Reset(AntennaMiniportDriver* miniport,
-    I2CBus* communicationBus,
+    II2CBus* communicationBus,
     AntennaChannel channel //
     )
 {
@@ -110,7 +116,7 @@ static OSResult Reset(AntennaMiniportDriver* miniport,
 }
 
 static OSResult ArmDeploymentSystem(AntennaMiniportDriver* miniport,
-    I2CBus* communicationBus,
+    II2CBus* communicationBus,
     AntennaChannel channel //
     )
 {
@@ -119,7 +125,7 @@ static OSResult ArmDeploymentSystem(AntennaMiniportDriver* miniport,
 }
 
 static OSResult DisarmDeploymentSystem(AntennaMiniportDriver* miniport,
-    I2CBus* communicationBus,
+    II2CBus* communicationBus,
     AntennaChannel channel //
     )
 {
@@ -133,7 +139,7 @@ static inline uint8_t GetOverrideFlag(bool override)
 }
 
 static OSResult DeployAntenna(struct AntennaMiniportDriver* miniport,
-    I2CBus* communicationBus,
+    II2CBus* communicationBus,
     AntennaChannel channel,
     AntennaId antennaId,
     TimeSpan timeout,
@@ -144,15 +150,11 @@ static OSResult DeployAntenna(struct AntennaMiniportDriver* miniport,
     uint8_t buffer[2];
     buffer[0] = (uint8_t)(DEPLOY_ANTENNA + antennaId + GetOverrideFlag(override));
     buffer[1] = (uint8_t)TimeSpanToSeconds(timeout);
-    return MapStatus(communicationBus->Write(communicationBus,
-        channel,
-        buffer,
-        sizeof(buffer) //
-        ));
+    return MapStatus(communicationBus->Write(channel, buffer));
 }
 
 static OSResult InitializeAutomaticDeployment(AntennaMiniportDriver* miniport,
-    I2CBus* communicationBus,
+    II2CBus* communicationBus,
     AntennaChannel channel,
     TimeSpan timeout //
     )
@@ -161,15 +163,11 @@ static OSResult InitializeAutomaticDeployment(AntennaMiniportDriver* miniport,
     uint8_t buffer[2];
     buffer[0] = (uint8_t)(START_AUTOMATIC_DEPLOYMENT);
     buffer[1] = (uint8_t)TimeSpanToSeconds(timeout);
-    return MapStatus(communicationBus->Write(communicationBus,
-        channel,
-        buffer,
-        sizeof(buffer) //
-        ));
+    return MapStatus(communicationBus->Write(channel, buffer));
 }
 
 static OSResult CancelAntennaDeployment(AntennaMiniportDriver* miniport,
-    I2CBus* communicationBus,
+    II2CBus* communicationBus,
     AntennaChannel channel //
     )
 {
@@ -178,7 +176,7 @@ static OSResult CancelAntennaDeployment(AntennaMiniportDriver* miniport,
 }
 
 static OSResult GetDeploymentStatus(AntennaMiniportDriver* miniport,
-    I2CBus* communicationBus,
+    II2CBus* communicationBus,
     AntennaChannel channel,
     AntennaDeploymentStatus* telemetry //
     )
@@ -227,7 +225,7 @@ static OSResult GetDeploymentStatus(AntennaMiniportDriver* miniport,
 }
 
 static OSResult GetAntennaActivationCount(AntennaMiniportDriver* miniport,
-    I2CBus* communicationBus,
+    II2CBus* communicationBus,
     AntennaChannel channel,
     AntennaId antennaId,
     uint16_t* count //
@@ -253,7 +251,7 @@ static OSResult GetAntennaActivationCount(AntennaMiniportDriver* miniport,
 }
 
 static OSResult GetAntennaActivationTime(AntennaMiniportDriver* miniport,
-    I2CBus* communicationBus,
+    II2CBus* communicationBus,
     AntennaChannel channel,
     AntennaId antennaId,
     TimeSpan* span //
@@ -283,7 +281,7 @@ static OSResult GetAntennaActivationTime(AntennaMiniportDriver* miniport,
 }
 
 static OSResult GetTemperature(AntennaMiniportDriver* miniport,
-    I2CBus* communicationBus,
+    II2CBus* communicationBus,
     AntennaChannel channel,
     uint16_t* temperature //
     )

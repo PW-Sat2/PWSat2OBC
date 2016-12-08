@@ -14,6 +14,7 @@ set(SOURCES
     obc.h
     obc.cpp
     communication.cpp
+    hardware.cpp
     fault_handlers.cpp
     mission.cpp
 )

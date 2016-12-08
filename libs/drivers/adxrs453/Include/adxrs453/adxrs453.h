@@ -7,6 +7,7 @@ extern "C" {
 #endif
 /**
  * @defgroup ADXRS453SPIDRIVER Low Level Adxrs453 gyroscope Module Driver
+ * @ingroup device_drivers
  *
  * @brief This module is a low level adxrs453 spi module driver.
  *

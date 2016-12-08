@@ -5,7 +5,7 @@
 
 #include "antenna.h"
 #include "base/os.h"
-#include "i2c/i2c.h"
+#include "i2c/forward.h"
 #include "time/TimePoint.h"
 
 /**
@@ -160,7 +160,7 @@ struct AntennaChannelInfo
     /**
      * @brief Pointer to communication bus interface.
      */
-    I2CBus* communicationBus;
+    drivers::i2c::II2CBus* communicationBus;
 };
 
 /**
@@ -283,8 +283,8 @@ struct AntennaDriver
  */
 void AntennaDriverInitialize(AntennaDriver* driver,
     AntennaMiniportDriver* miniport,
-    I2CBus* primaryBus,
-    I2CBus* secondaryBus //
+    drivers::i2c::II2CBus* primaryBus,
+    drivers::i2c::II2CBus* secondaryBus //
     );
 
 /** @}*/

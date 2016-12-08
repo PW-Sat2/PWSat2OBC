@@ -10,6 +10,7 @@ extern "C" {
 
 /**
  * @defgroup nand-driver NAND Flash driver
+ * @ingroup device_drivers
  *
  * @brief Driver for NAND flash connected to EBI. Dedicated for flash on STK3700
  *
@@ -106,8 +107,7 @@ typedef struct _FlashNANDInterface
      * @param[in] length Length of data to written. Must by multiply of 4
      * @return Operations status
      */
-    FlashStatus (*writePage)(
-        struct _FlashNANDInterface* interface, uint32_t offset, uint8_t* const buffer, uint32_t length);
+    FlashStatus (*writePage)(struct _FlashNANDInterface* interface, uint32_t offset, uint8_t* const buffer, uint32_t length);
 
     /**
     * @brief Pointer to procedure that writes spare area of single page
@@ -118,8 +118,7 @@ typedef struct _FlashNANDInterface
     * @param[in] length Length of data to written. Must by multiply of 4
     * @return Operations status
     */
-    FlashStatus (*writeSpare)(
-        struct _FlashNANDInterface* interface, uint32_t offset, uint8_t* const buffer, uint32_t length);
+    FlashStatus (*writeSpare)(struct _FlashNANDInterface* interface, uint32_t offset, uint8_t* const buffer, uint32_t length);
 
     /**
      * @brief Pointer to procedure that checks if block is marked as bad

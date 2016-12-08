@@ -44,8 +44,8 @@ struct IOS
     virtual OSQueueHandle CreateQueue(std::size_t maxElementCount, std::size_t elementSize) = 0;
     virtual bool QueueReceive(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout) = 0;
     virtual bool QueueReceiveFromISR(OSQueueHandle queue, void* element) = 0;
-    virtual bool QueueSend(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout) = 0;
-    virtual bool QueueSendISR(OSQueueHandle queue, void* element) = 0;
+    virtual bool QueueSend(OSQueueHandle queue, const void* element, OSTaskTimeSpan timeout) = 0;
+    virtual bool QueueSendISR(OSQueueHandle queue, const void* element) = 0;
     virtual void QueueOverwrite(OSQueueHandle queue, const void* element) = 0;
 
     virtual OSPulseHandle CreatePulseAll() = 0;

@@ -7,7 +7,7 @@
 #include <gsl/span>
 
 #include "base/os.h"
-#include "i2c/i2c.h"
+#include "i2c/forward.h"
 
 namespace devices
 {
@@ -15,6 +15,7 @@ namespace devices
     {
         /**
          * @defgroup LowerCommDriver Low Level Communication Module Driver
+         * @ingroup device_drivers
          *
          * @brief This module is a low level communication module driver.
          *
@@ -245,7 +246,7 @@ namespace devices
              * @param[in] low I2C bus used to communicate with device
              * @param[in] upperInterface Reference to object responsible for interpreting received frames
              */
-            CommObject(I2CBus& low, IHandleFrame& upperInterface);
+            CommObject(drivers::i2c::II2CBus& low, IHandleFrame& upperInterface);
 
             /**
              * @brief This procedure initializes the comm driver object and sets it 'Paused' state.
@@ -402,7 +403,7 @@ namespace devices
 
           private:
             /** @brief Comm driver lower interface. */
-            I2CBus& _low;
+            drivers::i2c::II2CBus& _low;
 
             /** @brief Comm driver upper interface. */
             IHandleFrame& _frameHandler;

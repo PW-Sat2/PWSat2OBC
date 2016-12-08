@@ -2,6 +2,7 @@ set(NAME i2c)
 
 set(SOURCES    
     i2c.cpp
+    efm.cpp
     fallback.cpp
     error_handling.cpp
 )
@@ -13,6 +14,7 @@ target_link_libraries(${NAME}
     base 
     emlib 
     logger     
+    gsl
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

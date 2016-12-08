@@ -199,7 +199,7 @@ enum class TaskPriority
 /**
  * @brief Definition of operating system interface.
  */
-class System : public PureStatic
+class System final : public PureStatic
 {
   public:
     /**
@@ -371,7 +371,7 @@ class System : public PureStatic
      * @param[in] timeout Operation timeout in ms
      * @return TRUE if element was received, FALSE on timeout
      */
-    static bool QueueSend(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout);
+    static bool QueueSend(OSQueueHandle queue, const void* element, OSTaskTimeSpan timeout);
 
     /**
      * @brief Sends element to queue in interrupt handler
@@ -380,7 +380,7 @@ class System : public PureStatic
      * @param[in] element Element to send to queue
      * @return TRUE if element was received, FALSE on timeout
      */
-    static bool QueueSendISR(OSQueueHandle queue, void* element);
+    static bool QueueSendISR(OSQueueHandle queue, const void* element);
 
     /**
      * @brief Overwrites element in queue
@@ -422,7 +422,7 @@ class System : public PureStatic
 /**
  * RTOS Task wrapper
  */
-template <typename Param, std::uint16_t StackSize, TaskPriority Priority> class Task
+template <typename Param, std::uint16_t StackSize, TaskPriority Priority> class Task final
 {
     static_assert(sizeof(Param) < 16, "WTF are you trying to do?");
     static_assert(StackSize % 2 == 0, "Stack size must even");
@@ -479,6 +479,141 @@ template <typename Param, std::uint16_t StackSize, TaskPriority Priority> void T
 {
     auto This = static_cast<Task*>(param);
     This->_handler(This->_param);
+}
+
+/**
+ * @brief Semaphore lock class.
+ *
+ * When created it takes semaphore and releases it at the end of scope
+ *
+ * Usage:
+ *
+ * @code
+ * {
+ * 	Lock lock(this->_sem);
+ *
+ * 	if(!lock())
+ * 	{
+ * 		// take failed
+ * 		return;
+ * 	}
+ *
+ * 	// do something
+ * } // semaphore release at the end of scope
+ * @endcode
+ */
+class Lock final
+{
+  public:
+    /**
+     * @brief Constructs @ref Lock object and tries to acquire semaphore
+     * @param[in] semaphore Semaphore to take
+     * @param[in] timeout Timeout
+     */
+    Lock(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout);
+
+    /**
+     * @brief Releases semaphore (if taken) on object destruction
+     */
+    ~Lock();
+
+    /**
+     * @brief Checks if semaphore has been taken
+     * @return true if taking semaphore was succesful
+     */
+    bool operator()();
+
+  private:
+    Lock(const Lock&) = delete;
+    Lock& operator=(const Lock&) = delete;
+    Lock(Lock&&) = delete;
+    Lock& operator=(Lock&&) = delete;
+
+    /** @brief Semaphore handle */
+    const OSSemaphoreHandle _semaphore;
+    /** @brief Flag indicating if semaphore is acquired */
+    bool _taken;
+};
+
+/**
+ * @brief RTOS queue wrapper
+ */
+template <typename Element, std::size_t Capacity> class Queue final
+{
+    static_assert(std::is_pod<Element>::value, "Queue works only for POD/integral types");
+
+  public:
+    /**
+     * @brief Creates underlying RTOS queue object
+     * @return Operation result
+     */
+    OSResult Create();
+
+    /**
+     * @brief Pushes element to queue
+     * @param[in] element Pointer to element that will be placed in queue
+     * @param[in] timeout Timeout in ms
+     * @return Operation result
+     */
+    OSResult Push(const Element& element, OSTaskTimeSpan timeout);
+
+    /**
+     * @brief Pushes element to queue from interrupt service routine
+     * @param[in] element Pointer to element that will be placed in queue
+     * @return Operation result
+     */
+    OSResult PushISR(const Element& element);
+
+    /**
+     * @brief Pops element from queue
+     * @param[out] element Pointer to place where element from queue will be saved
+     * @param[in] timeout Timeout in ms
+     * @return Operation result
+     */
+    OSResult Pop(Element& element, OSTaskTimeSpan timeout);
+
+  private:
+    /** @brief Queue handle */
+    OSQueueHandle _handle;
+};
+
+template <typename Element, std::size_t Capacity> OSResult Queue<Element, Capacity>::Create()
+{
+    this->_handle = System::CreateQueue(Capacity, sizeof(Element));
+
+    if (this->_handle == nullptr)
+    {
+        return OSResult::NotEnoughMemory;
+    }
+
+    return OSResult::Success;
+}
+
+template <typename Element, std::size_t Capacity> OSResult Queue<Element, Capacity>::Push(const Element& element, OSTaskTimeSpan timeout)
+{
+    if (System::QueueSend(this->_handle, &element, timeout))
+    {
+        return OSResult::Success;
+    }
+    return OSResult::Timeout;
+}
+
+template <typename Element, std::size_t Capacity> OSResult Queue<Element, Capacity>::PushISR(const Element& element)
+{
+    if (System::QueueSendISR(this->_handle, &element))
+    {
+        return OSResult::Success;
+    }
+    return OSResult::Overflow;
+}
+
+template <typename Element, std::size_t Capacity> OSResult Queue<Element, Capacity>::Pop(Element& element, OSTaskTimeSpan timeout)
+{
+    if (System::QueueReceive(this->_handle, &element, timeout))
+    {
+        return OSResult::Success;
+    }
+    return OSResult::Timeout;
 }
 
 /** @}*/

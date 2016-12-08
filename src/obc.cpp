@@ -2,13 +2,15 @@
 #include "io_map.h"
 
 OBC::OBC()
-    : I2C(&I2CBuses[I2C_SYSTEM_BUS].ErrorHandling.Base, &I2CBuses[I2C_PAYLOAD_BUS].ErrorHandling.Base), //
-      Communication(*I2C.Bus),                                                                          //
+    :                                        //
+      Communication(Hardware.I2C.Buses.Bus), //
       terminal(this->IO)
 {
 }
 
 void OBC::Initialize()
 {
+    this->Hardware.Initialize();
+
     this->Communication.Initialize();
 }
