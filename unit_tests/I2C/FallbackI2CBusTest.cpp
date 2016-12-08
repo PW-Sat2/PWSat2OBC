@@ -2,7 +2,7 @@
 #include "gmock/gmock.h"
 #include "gmock/gmock-matchers.h"
 #include "I2CMock.hpp"
-#include "i2c/i2c.h"
+#include "i2c/wrappers.h"
 #include "system.h"
 
 using testing::Test;

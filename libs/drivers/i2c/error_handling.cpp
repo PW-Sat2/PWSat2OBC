@@ -2,7 +2,7 @@
 
 #include "logger/logger.h"
 
-#include "i2c.h"
+#include "wrappers.h"
 
 using namespace drivers::i2c;
 

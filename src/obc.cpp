@@ -2,8 +2,7 @@
 #include "io_map.h"
 
 OBC::OBC()
-    : //
-      Hardware(),
+    :                                        //
       Communication(Hardware.I2C.Buses.Bus), //
       terminal(this->IO)
 {

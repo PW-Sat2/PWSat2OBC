@@ -2,6 +2,7 @@ set(NAME i2c)
 
 set(SOURCES    
     i2c.cpp
+    efm.cpp
     fallback.cpp
     error_handling.cpp
 )

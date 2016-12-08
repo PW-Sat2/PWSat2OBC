@@ -150,12 +150,12 @@ bool System::QueueReceiveFromISR(OSQueueHandle queue, void* element)
     return result;
 }
 
-bool System::QueueSend(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout)
+bool System::QueueSend(OSQueueHandle queue, const void* element, OSTaskTimeSpan timeout)
 {
     return xQueueSend(queue, element, ConvertTimeToTicks(timeout)) == pdTRUE;
 }
 
-bool System::QueueSendISR(OSQueueHandle queue, void* element)
+bool System::QueueSendISR(OSQueueHandle queue, const void* element)
 {
     bool result = xQueueSendFromISR(queue, element, nullptr) == pdTRUE;
 

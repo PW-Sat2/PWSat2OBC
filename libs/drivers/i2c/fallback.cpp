@@ -1,6 +1,6 @@
 #include <stddef.h>
-#include "i2c.h"
 #include "logger/logger.h"
+#include "wrappers.h"
 
 using namespace drivers::i2c;
 

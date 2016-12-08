@@ -1,7 +1,9 @@
 #ifndef SRC_HARDWARE_H_
 #define SRC_HARDWARE_H_
 
+#include "i2c/efm.h"
 #include "i2c/i2c.h"
+#include "i2c/wrappers.h"
 #include "io_map.h"
 #include "logger/logger.h"
 #include "power/power.h"

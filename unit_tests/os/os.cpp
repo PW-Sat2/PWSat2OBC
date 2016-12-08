@@ -171,7 +171,7 @@ bool System::QueueReceiveFromISR(OSQueueHandle queue, void* element)
     return false;
 }
 
-bool System::QueueSend(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout)
+bool System::QueueSend(OSQueueHandle queue, const void* element, OSTaskTimeSpan timeout)
 {
     if (OSProxy != nullptr)
     {
@@ -181,7 +181,7 @@ bool System::QueueSend(OSQueueHandle queue, void* element, OSTaskTimeSpan timeou
     return false;
 }
 
-bool System::QueueSendISR(OSQueueHandle queue, void* element)
+bool System::QueueSendISR(OSQueueHandle queue, const void* element)
 {
     if (OSProxy != nullptr)
     {
