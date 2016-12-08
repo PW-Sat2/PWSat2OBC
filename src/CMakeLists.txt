@@ -21,7 +21,6 @@ set(SOURCES
     hardware.cpp
     fault_handlers.cpp
     mission.cpp
-    n25q/n25q.cpp
 )
 
 add_executable(${NAME} ${SOURCES})

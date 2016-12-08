@@ -4,9 +4,9 @@
 #include "base/writer.h"
 #include "logger/logger.h"
 
-static const char* const TimeFile0 = "/stk/TimeState.0";
-static const char* const TimeFile1 = "/stk/TimeState.1";
-static const char* const TimeFile2 = "/stk/TimeState.2";
+static const char* const TimeFile0 = "/TimeState.0";
+static const char* const TimeFile1 = "/TimeState.1";
+static const char* const TimeFile2 = "/TimeState.2";
 
 #ifndef TIMER_NOTIFICATION_PERIOD
 #define TIMER_NOTIFICATION_PERIOD 5000

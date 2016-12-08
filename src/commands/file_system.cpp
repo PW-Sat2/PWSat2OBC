@@ -109,3 +109,15 @@ void MountList(uint16_t argc, char* argv[])
             dirty);
     }
 }
+
+void MakeDirectory(uint16_t argc, char* argv[])
+{
+    if (argc != 1)
+    {
+        Main.terminal.Puts("mkdir <path>\n");
+
+        return;
+    }
+
+    Main.fs.makeDirectory(&Main.fs, argv[0]);
+}

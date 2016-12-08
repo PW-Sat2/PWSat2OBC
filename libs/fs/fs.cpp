@@ -153,6 +153,49 @@ static bool YaffsExists(FileSystem* fileSystem, const char* path)
     return status != -1;
 }
 
+/**
+ * @brief Recursively removes all objects in directory (root itself is left alone)
+ * @param root Root directory
+ */
+static void RemoveDirectoryContents(yaffs_obj* root)
+{
+    auto dir = yaffs_opendir_reldir(root, "");
+
+    yaffs_dirent* entry;
+
+    while ((entry = yaffs_readdir(dir)) != nullptr)
+    {
+        if (entry->d_ino == YAFFS_OBJECTID_LOSTNFOUND)
+        {
+            continue;
+        }
+
+        yaffs_obj* obj = yaffs_find_by_name(root, entry->d_name);
+
+        if (obj->variant_type == YAFFS_OBJECT_TYPE_FILE)
+        {
+            yaffs_unlink_reldir(root, entry->d_name);
+        }
+        else if (obj->variant_type == YAFFS_OBJECT_TYPE_DIRECTORY)
+        {
+            RemoveDirectoryContents(obj);
+
+            yaffs_rmdir_reldir(root, entry->d_name);
+        }
+    }
+
+    yaffs_closedir(dir);
+}
+
+static void YaffsClearDevice(FileSystem* fileSystem, yaffs_dev* device)
+{
+    UNREFERENCED_PARAMETER(fileSystem);
+
+    auto root = yaffs_root(device);
+
+    RemoveDirectoryContents(root);
+}
+
 void FileSystemAPI(FileSystem* fs)
 {
     fs->open = YaffsOpen;
@@ -166,15 +209,14 @@ void FileSystemAPI(FileSystem* fs)
     fs->format = YaffsFormat;
     fs->makeDirectory = YaffsMakeDirectory;
     fs->exists = YaffsExists;
+    fs->ClearDevice = YaffsClearDevice;
 }
 
-bool FileSystemInitialize(FileSystem* fs, struct yaffs_dev* rootDevice)
+void FileSystemInitialize(FileSystem* fs)
 {
     YaffsGlueInit();
 
     FileSystemAPI(fs);
-
-    return FileSystemAddDeviceAndMount(fs, rootDevice);
 }
 
 bool FileSystemAddDeviceAndMount(FileSystem* fs, yaffs_dev* device)

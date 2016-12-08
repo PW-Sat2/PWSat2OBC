@@ -1,5 +1,6 @@
 #include "efm.h"
 #include <em_gpio.h>
+#include <em_usart.h>
 
 using gsl::span;
 
@@ -31,7 +32,7 @@ void EFMSPIInterface::Initialize()
 
     SPIDRV_Init_t init;
     init.bitOrder = SPIDRV_BitOrder::spidrvBitOrderMsbFirst;
-    init.bitRate = 8000000;
+    init.bitRate = 7000000;
     init.clockMode = SPIDRV_ClockMode::spidrvClockMode0;
     init.csControl = SPIDRV_CsControl::spidrvCsControlApplication;
     init.dummyTxValue = 0;

@@ -1,4 +1,5 @@
 set(USE_SINGLE_BUS TRUE CACHE BOOL "Use single bus for both System and Payload I2C bus")
+set(USE_EXTERNAL_FLASH FALSE CACHE BOOL "Use external N25Q flash memory")
 
 add_definitions(-DEFM32GG990F1024)
 
@@ -11,6 +12,13 @@ if(${USE_SINGLE_BUS})
     MESSAGE(STATUS "I2C bus mode: SINGLE")
 else()
     MESSAGE(STATUS "I2C bus mode: DUAL")
+endif()
+
+if(${USE_EXTERNAL_FLASH})
+    add_definitions(-DUSE_EXTERNAL_FLASH)
+    message(STATUS "Flash: External (N25Q)")
+else()
+    message(STATUS "Flash: Internal (STK NAND)")
 endif()
 
 

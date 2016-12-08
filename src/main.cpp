@@ -103,37 +103,6 @@ static void InitSwoEndpoint(void)
     }
 }
 
-static bool FSInit(FileSystem* fs, struct yaffs_dev* rootDevice, YaffsNANDDriver* rootDeviceDriver)
-{
-    memset(rootDevice, 0, sizeof(*rootDevice));
-    rootDeviceDriver->geometry.pageSize = 512;
-    rootDeviceDriver->geometry.spareAreaPerPage = 0;
-    rootDeviceDriver->geometry.pagesPerBlock = 32;
-    rootDeviceDriver->geometry.pagesPerChunk = 1;
-
-    NANDCalculateGeometry(&rootDeviceDriver->geometry);
-
-    BuildNANDInterface(&rootDeviceDriver->flash);
-
-    SetupYaffsNANDDriver(rootDevice, rootDeviceDriver);
-
-    rootDevice->param.name = "/stk";
-    rootDevice->param.inband_tags = true;
-    rootDevice->param.is_yaffs2 = true;
-    rootDevice->param.total_bytes_per_chunk = rootDeviceDriver->geometry.chunkSize;
-    rootDevice->param.chunks_per_block = rootDeviceDriver->geometry.chunksPerBlock;
-    rootDevice->param.spare_bytes_per_chunk = 0;
-    rootDevice->param.start_block = 1;
-    rootDevice->param.n_reserved_blocks = 3;
-    rootDevice->param.no_tags_ecc = true;
-    rootDevice->param.always_check_erased = true;
-
-    rootDevice->param.end_block =
-        1 * 1024 * 1024 / rootDeviceDriver->geometry.blockSize - rootDevice->param.start_block - rootDevice->param.n_reserved_blocks;
-
-    return FileSystemInitialize(fs, rootDevice);
-}
-
 static void ClearState(OBC* obc)
 {
     GPIO_PinModeSet(SYS_CLEAR_PORT, SYS_CLEAR_PIN, gpioModeInputPull, 1);
@@ -142,15 +111,12 @@ static void ClearState(OBC* obc)
     {
         LOG(LOG_LEVEL_WARNING, "Clearing state on startup");
 
-        const OSResult status = obc->fs.format(&obc->fs, "/stk");
-        if (OS_RESULT_SUCCEEDED(status))
-        {
-            LOG(LOG_LEVEL_INFO, "Flash formatted");
-        }
-        else
-        {
-            LOGF(LOG_LEVEL_ERROR, "Error formatting flash %d", num(status));
-        }
+#ifdef USE_EXTERNAL_FLASH
+        obc->fs.ClearDevice(&obc->fs, obc->ExternalFlash.Device());
+#else
+        obc->fs.ClearDevice(&obc->fs, &obc->rootDevice);
+#endif
+        LOG(LOG_LEVEL_INFO, "Flash formatted");
     }
 }
 
@@ -164,7 +130,7 @@ static void ObcInitTask(void* param)
 {
     auto obc = static_cast<OBC*>(param);
 
-    if (!FSInit(&obc->fs, &obc->rootDevice, &obc->rootDeviceDriver))
+    if (!Main.InitializeFileSystem())
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize file system");
     }
@@ -252,8 +218,6 @@ void SetupHardware(void)
 
 extern "C" void __libc_init_array(void);
 
-extern void N25QInit(void);
-
 int main(void)
 {
     memset(&Main, 0, sizeof(Main));
@@ -275,6 +239,8 @@ int main(void)
 
     InitializeTerminal();
 
+    Main.SPI.Initialize();
+
     EpsInit(&Main.Hardware.I2C.Fallback);
 
     EPSPowerControlInitialize(&Main.PowerControlInterface);
@@ -286,10 +252,6 @@ int main(void)
     SetupAntennas();
 
     InitializeMission(&Mission, &Main);
-
-    Main.SPI.Initialize();
-
-    N25QInit();
 
     GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
     GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);

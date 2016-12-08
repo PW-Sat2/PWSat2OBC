@@ -40,6 +40,8 @@ struct OBC
     /** @brief Initializes every object in OBC structure that needs initialization */
     void Initialize();
 
+    bool InitializeFileSystem();
+
     /** @brief File system object */
     FileSystem fs;
     /** @brief Handle to OBC initialization task. */
@@ -49,11 +51,6 @@ struct OBC
 
     /** @brief ADCS context object */
     ADCSContext adcs;
-
-    /** Yaffs root device */
-    struct yaffs_dev rootDevice;
-    /** Driver for yaffs root device */
-    YaffsNANDDriver rootDeviceDriver;
 
     /** @brief Persistent timer that measures mission time. */
     TimeProvider timeProvider;
@@ -78,9 +75,16 @@ struct OBC
 
     drivers::spi::EFMSPIInterface SPI;
 
+#ifdef USE_EXTERNAL_FLASH
+
     devices::n25q::N25QDriver N25Qdriver;
     devices::n25q::N25QYaffsDevice<devices::n25q::BlockMapping::Sector, 512_Bytes, 16_MB> ExternalFlash;
-
+#else
+    /** Yaffs root device */
+    struct yaffs_dev rootDevice;
+    /** Driver for yaffs root device */
+    YaffsNANDDriver rootDeviceDriver;
+#endif
     /** @brief Terminal object. */
     Terminal terminal;
 };
