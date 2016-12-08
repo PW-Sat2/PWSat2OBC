@@ -40,7 +40,7 @@ static OSResult MapResult(OperationResult result)
 }
 
 N25QYaffsDeviceBase::N25QYaffsDeviceBase(
-    const char* mountPoint, BlockMapping blockMapping, size_t chunkSize, size_t totalSize, ISPIInterface& spi)
+    const char* mountPoint, devices::n25q::BlockMapping blockMapping, std::size_t chunkSize, std::size_t totalSize, ISPIInterface& spi)
     : _driver(spi), //
       _blockMapping(blockMapping)
 {

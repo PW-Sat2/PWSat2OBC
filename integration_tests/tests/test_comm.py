@@ -1,6 +1,6 @@
 import devices
 from tests.base import BaseTest
-from system import auto_comm_handling
+from system import auto_comm_handling, wait_for_obc_start
 
 
 class Test_Comm(BaseTest):
@@ -69,6 +69,7 @@ class Test_Comm(BaseTest):
         self.assertEqual(response[4:6], [0x76, 0x01], "RSSI")
         self.assertEqual(response[6:307], [ord('a')] * 300)
 
+    @wait_for_obc_start()
     def test_auto_pingpong(self):
         self.system.receiver.put_frame("PING")
         msg = self.system.transmitter.get_message_from_buffer(20)

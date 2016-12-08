@@ -11,9 +11,22 @@ namespace drivers
 {
     namespace spi
     {
+        /**
+         * @defgroup spi_efm SPI interface for EFM MCU
+         * @ingroup spi
+         *
+         * @{
+         */
+
+        /**
+         * @brief SPI interfaced using SPIDRV
+         */
         class EFMSPIInterface final : public ISPIInterface
         {
           public:
+            /**
+             * Initializes SPI interface and configures peripheral
+             */
             void Initialize();
             virtual void Select() override;
             virtual void Deselect() override;
@@ -22,8 +35,11 @@ namespace drivers
             virtual void WriteRead(gsl::span<const std::uint8_t> input, gsl::span<std::uint8_t> output) override;
 
           private:
+            /** @brief SPIDRV handle data */
             SPIDRV_HandleData _handle;
         };
+
+        /** @} */
     }
 }
 

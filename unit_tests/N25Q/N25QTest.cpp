@@ -11,6 +11,7 @@
 #include "utils.hpp"
 
 #include "OsMock.hpp"
+#include "SPI/SPIMock.h"
 #include "base/os.h"
 #include "os/os.hpp"
 
@@ -35,44 +36,6 @@ using testing::AtLeast;
 using drivers::spi::ISPIInterface;
 using namespace devices::n25q;
 
-struct SPIInterfaceMock;
-
-class SPIExpectSelected
-{
-  public:
-    SPIExpectSelected(SPIInterfaceMock& mock);
-    ~SPIExpectSelected();
-
-  private:
-    SPIInterfaceMock& _mock;
-};
-
-struct SPIInterfaceMock : ISPIInterface
-{
-    MOCK_METHOD0(Select, void());
-    MOCK_METHOD0(Deselect, void());
-    MOCK_METHOD1(Write, void(gsl::span<const std::uint8_t> buffer));
-    MOCK_METHOD1(Read, void(gsl::span<std::uint8_t> buffer));
-    MOCK_METHOD2(WriteRead, void(gsl::span<const std::uint8_t> input, gsl::span<std::uint8_t> output));
-
-    SPIExpectSelected ExpectSelected();
-};
-
-SPIExpectSelected::SPIExpectSelected(SPIInterfaceMock& mock) : _mock(mock)
-{
-    EXPECT_CALL(_mock, Select()).Times(1);
-}
-
-SPIExpectSelected::~SPIExpectSelected()
-{
-    EXPECT_CALL(_mock, Deselect()).Times(1);
-}
-
-SPIExpectSelected SPIInterfaceMock::ExpectSelected()
-{
-    return SPIExpectSelected(*this);
-}
-
 enum Command
 {
     ReadId = 0x9E,
@@ -88,29 +51,23 @@ enum Command
     ClearFlagRegister = 0x50
 };
 
-MATCHER_P(SingletonSpan, expected, std::string("Span contains single item " + PrintToString(expected)))
-{
-    return arg.size() == 1 && arg[0] == expected;
-}
-
-MATCHER_P(SpanOfSize, expected, std::string("Span has size " + PrintToString(expected)))
-{
-    return arg.size() == expected;
-}
-
-template <std::size_t Arg> auto FillBuffer(span<uint8_t> items)
-{
-    return WithArg<Arg>(Invoke([items](span<uint8_t> buffer) { std::copy(items.cbegin(), items.cend(), buffer.begin()); }));
-}
-
-template <std::size_t Arg> auto FillBuffer(uint8_t value)
-{
-    return WithArg<Arg>(Invoke([value](span<uint8_t> buffer) { buffer[0] = value; }));
-}
-
 MATCHER_P(CommandCall, command, std::string("Command " + PrintToString(command)))
 {
     return arg.size() == 1 && arg[0] == command;
+}
+
+static Status operator|(Status lhs, Status rhs)
+{
+    using U = std::underlying_type_t<Status>;
+
+    return static_cast<Status>(static_cast<U>(lhs) | static_cast<U>(rhs));
+}
+
+static FlagStatus operator|(FlagStatus lhs, FlagStatus rhs)
+{
+    using U = std::underlying_type_t<FlagStatus>;
+
+    return static_cast<FlagStatus>(static_cast<U>(lhs) | static_cast<U>(rhs));
 }
 
 class N25QDriverTest : public Test
@@ -134,6 +91,16 @@ class N25QDriverTest : public Test
         return EXPECT_CALL(this->_spi, WriteRead(CommandCall(command), SpanOfSize(1))).WillOnce(FillBuffer<1>(response));
     }
 
+    decltype(auto) ExpectCommandAndRespondOnce(Command command, Status response)
+    {
+        return EXPECT_CALL(this->_spi, WriteRead(CommandCall(command), SpanOfSize(1))).WillOnce(FillBuffer<1>(num(response)));
+    }
+
+    decltype(auto) ExpectCommandAndRespondOnce(Command command, FlagStatus response)
+    {
+        return EXPECT_CALL(this->_spi, WriteRead(CommandCall(command), SpanOfSize(1))).WillOnce(FillBuffer<1>(num(response)));
+    }
+
     decltype(auto) ExpectCommandAndRespondManyTimes(Command command, uint8_t response, uint16_t times)
     {
         return EXPECT_CALL(this->_spi, WriteRead(CommandCall(command), SpanOfSize(1))).Times(times).WillRepeatedly(FillBuffer<1>(response));
@@ -143,7 +110,7 @@ class N25QDriverTest : public Test
     {
         auto selected = this->_spi.ExpectSelected();
 
-        ExpectCommandAndRespondManyTimes(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress, busyCycles);
+        ExpectCommandAndRespondManyTimes(Command::ReadStatusRegister, num(Status::WriteEnabled | Status::WriteInProgress), busyCycles);
 
         ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteDisabled);
     }
