@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 #include <cstdint>
+#include <utility>
 
 /**
  * @brief Converts bool value to 1 or 0
@@ -74,9 +75,9 @@ template <class T> class Option
      * @param[in] value Value to hold in Option instance.
      * @return Option instance that holds a value.
      */
-    static Option<T> Some(T& value)
+    static Option<T> Some(T&& value)
     {
-        return Option<T>(true, value);
+        return Option<T>(true, std::move(value));
     }
 
     /**
@@ -90,7 +91,7 @@ template <class T> class Option
     const T Value;
 
   private:
-    Option(bool hasValue, T value) : HasValue(hasValue), Value(value)
+    Option(bool hasValue, T&& value) : HasValue(hasValue), Value(std::move(value))
     {
     }
 };
@@ -109,9 +110,9 @@ template <typename T> static inline Option<T> None()
  * @param[in] value Value to hold in Option instance.
  * @return Option instance that holds a value.
  */
-template <typename T> static inline Option<T> Some(T& value)
+template <typename T> static inline Option<T> Some(T&& value)
 {
-    return Option<T>::Some(value);
+    return Option<T>::Some(std::move(value));
 }
 
 #endif

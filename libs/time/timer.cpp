@@ -127,7 +127,7 @@ Option<TimeSpan> TimeProvider::GetCurrentTime()
     TimeSpan currentTime = CurrentTime;
 
     System::GiveSemaphore(timerLock);
-    return Some(currentTime);
+    return Some(std::move(currentTime));
 }
 
 Option<TimePoint> TimeProvider::GetCurrentMissionTime()
@@ -135,8 +135,7 @@ Option<TimePoint> TimeProvider::GetCurrentMissionTime()
     const Option<TimeSpan> result = GetCurrentTime();
     if (result.HasValue)
     {
-        TimePoint convertedTimePoint = TimePointFromTimeSpan(result.Value);
-        return Some(convertedTimePoint);
+        return Some(TimePointFromTimeSpan(result.Value));
     }
 
     return None<TimePoint>();
