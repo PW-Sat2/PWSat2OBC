@@ -1,5 +1,5 @@
 /*
-    FreeRTOS V8.2.2 - Copyright (C) 2015 Real Time Engineers Ltd.
+    FreeRTOS V9.0.0 - Copyright (C) 2016 Real Time Engineers Ltd.
     All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
@@ -8,7 +8,7 @@
 
     FreeRTOS is free software; you can redistribute it and/or modify it under
     the terms of the GNU General Public License (version 2) as published by the
-    Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
+    Free Software Foundation >>>> AND MODIFIED BY <<<< the FreeRTOS exception.
 
     ***************************************************************************
     >>!   NOTE: The modification to the GPL is included to allow you to     !<<
@@ -120,6 +120,10 @@ task.h is included from an application file. */
 #include "task.h"
 
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
+
+#if( configSUPPORT_DYNAMIC_ALLOCATION == 0 )
+	#error This file must not be used if configSUPPORT_DYNAMIC_ALLOCATION is 0
+#endif
 
 /* Block sizes must not get too small. */
 #define heapMINIMUM_BLOCK_SIZE	( ( size_t ) ( xHeapStructSize << 1 ) )
@@ -431,7 +435,7 @@ uint8_t *puc;
 void vPortDefineHeapRegions( const HeapRegion_t * const pxHeapRegions )
 {
 BlockLink_t *pxFirstFreeBlockInRegion = NULL, *pxPreviousFreeBlock;
-uint8_t *pucAlignedHeap;
+size_t xAlignedHeap;
 size_t xTotalRegionSize, xTotalHeapSize = 0;
 BaseType_t xDefinedRegions = 0;
 size_t xAddress;
@@ -457,14 +461,14 @@ const HeapRegion_t *pxHeapRegion;
 			xTotalRegionSize -= xAddress - ( size_t ) pxHeapRegion->pucStartAddress;
 		}
 
-		pucAlignedHeap = ( uint8_t * ) xAddress;
+		xAlignedHeap = xAddress;
 
 		/* Set xStart if it has not already been set. */
 		if( xDefinedRegions == 0 )
 		{
 			/* xStart is used to hold a pointer to the first item in the list of
 			free blocks.  The void cast is used to prevent compiler warnings. */
-			xStart.pxNextFreeBlock = ( BlockLink_t * ) pucAlignedHeap;
+			xStart.pxNextFreeBlock = ( BlockLink_t * ) xAlignedHeap;
 			xStart.xBlockSize = ( size_t ) 0;
 		}
 		else
@@ -483,7 +487,7 @@ const HeapRegion_t *pxHeapRegion;
 
 		/* pxEnd is used to mark the end of the list of free blocks and is
 		inserted at the end of the region space. */
-		xAddress = ( ( size_t ) pucAlignedHeap ) + xTotalRegionSize;
+		xAddress = xAlignedHeap + xTotalRegionSize;
 		xAddress -= xHeapStructSize;
 		xAddress &= ~portBYTE_ALIGNMENT_MASK;
 		pxEnd = ( BlockLink_t * ) xAddress;
@@ -493,7 +497,7 @@ const HeapRegion_t *pxHeapRegion;
 		/* To start with there is a single free block in this region that is
 		sized to take up the entire heap region minus the space taken by the
 		free block structure. */
-		pxFirstFreeBlockInRegion = ( BlockLink_t * ) pucAlignedHeap;
+		pxFirstFreeBlockInRegion = ( BlockLink_t * ) xAlignedHeap;
 		pxFirstFreeBlockInRegion->xBlockSize = xAddress - ( size_t ) pxFirstFreeBlockInRegion;
 		pxFirstFreeBlockInRegion->pxNextFreeBlock = pxEnd;
 
