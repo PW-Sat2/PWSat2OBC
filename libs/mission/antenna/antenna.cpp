@@ -2,8 +2,9 @@
 #include <cstring>
 #include "antenna/driver.h"
 #include "antenna_state.h"
+#include "antenna_task.hpp"
 #include "gsl/gsl_util"
-#include "state/state.h"
+#include "mission/base.hpp"
 #include "system.h"
 #include "time/TimePoint.h"
 
@@ -401,12 +402,12 @@ namespace mission
          * @param[in] param Pointer to the deployment condition private context. This pointer should point
          * at the object of AntennaMissionState type.
          */
-        static void AntennaDeploymentAction(const SystemState* state, void* param)
+        static void AntennaDeploymentAction(const SystemState& state, void* param)
         {
             AntennaMissionState* stateDescriptor = (AntennaMissionState*)param;
             const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor->StepNumber()];
             DeploymentProcedure* procedure = step.procedure;
-            procedure(*state, *stateDescriptor, stateDescriptor->Driver());
+            procedure(state, *stateDescriptor, stateDescriptor->Driver());
         }
 
         /**
@@ -430,11 +431,11 @@ namespace mission
          *
          * @return True if the deployment action should be performed, false otherwise.
          */
-        static bool AntennaDeploymentCondition(const SystemState* state, void* param)
+        static bool AntennaDeploymentCondition(const SystemState& state, void* param)
         {
             AntennaMissionState* stateDescriptor = (AntennaMissionState*)param;
             const TimeSpan t = TimeSpanFromMinutes(40);
-            if (TimeSpanLessThan(state->Time, t))
+            if (TimeSpanLessThan(state.Time, t))
             {
                 return false;
             }
@@ -456,13 +457,13 @@ namespace mission
          * at the object of AntennaMissionState type.
          * @return Operation status.
          */
-        static SystemStateUpdateResult AntennaDeploymentUpdate(SystemState* state, void* param)
+        static UpdateResult AntennaDeploymentUpdate(SystemState& state, void* param)
         {
             UNREFERENCED_PARAMETER(state);
             AntennaMissionState* stateDescriptor = (AntennaMissionState*)param;
             if (stateDescriptor->IsFinished())
             {
-                return SystemStateUpdateOK;
+                return UpdateResult::UpdateOK;
             }
 
             AntennaDeploymentStatus deploymentStatus;
@@ -474,12 +475,12 @@ namespace mission
 
             if (OS_RESULT_FAILED(result))
             {
-                return SystemStateUpdateFailure;
+                return UpdateResult::UpdateFailure;
             }
 
             for (int i = 0; i < 4; ++i)
             {
-                state->Antenna.DeploymentState[i] = deploymentStatus.DeploymentStatus[i] || state->Antenna.DeploymentState[i];
+                state.Antenna.DeploymentState[i] = deploymentStatus.DeploymentStatus[i] || state.Antenna.DeploymentState[i];
             }
 
             stateDescriptor->Update(deploymentStatus);
@@ -493,26 +494,30 @@ namespace mission
                 stateDescriptor->OverrideStep(FinalizationStepIndex);
             }
 
-            state->Antenna.Deployed = stateDescriptor->IsFinished();
-            return SystemStateUpdateOK;
+            state.Antenna.Deployed = stateDescriptor->IsFinished();
+            return UpdateResult::UpdateOK;
         }
 
-        SystemActionDescriptor GetAntennaDeploymentActionDescriptor(AntennaMissionState& stateDescriptor)
+        AntennaTask::AntennaTask(AntennaDriver& driver) : state(driver)
         {
-            SystemActionDescriptor descriptor;
-            descriptor.Name = "Deploy Antenna Action";
-            descriptor.Param = &stateDescriptor;
-            descriptor.Condition = AntennaDeploymentCondition;
-            descriptor.ActionProc = AntennaDeploymentAction;
+        }
+
+        ActionDescriptor<SystemState> AntennaTask::BuildAction()
+        {
+            ActionDescriptor<SystemState> descriptor;
+            descriptor.name = "Deploy Antenna Action";
+            descriptor.param = &this->state;
+            descriptor.condition = AntennaDeploymentCondition;
+            descriptor.actionProc = AntennaDeploymentAction;
             return descriptor;
         }
 
-        SystemStateUpdateDescriptor GetAntennaDeploymentUpdateDescriptor(AntennaMissionState& stateDescriptor)
+        UpdateDescriptor<SystemState> AntennaTask::BuildUpdate()
         {
-            SystemStateUpdateDescriptor descriptor;
-            descriptor.Name = "Deploy Antenna Update";
-            descriptor.Param = &stateDescriptor;
-            descriptor.UpdateProc = AntennaDeploymentUpdate;
+            UpdateDescriptor<SystemState> descriptor;
+            descriptor.name = "Deploy Antenna Update";
+            descriptor.param = &this->state;
+            descriptor.updateProc = AntennaDeploymentUpdate;
             return descriptor;
         }
 

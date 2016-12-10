@@ -44,7 +44,7 @@ using devices::comm::CommObject;
 using devices::comm::CommFrame;
 
 OBC Main;
-MissionState Mission(Main);
+mission::ObcMission Mission(Main.timeProvider, Main.antennaDriver, false);
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
@@ -283,7 +283,7 @@ int main(void)
 
     SetupAntennas();
 
-    InitializeMission(&Mission, &Main);
+    Mission.Initialize();
 
     GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
     GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);
