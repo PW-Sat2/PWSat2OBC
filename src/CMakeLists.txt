@@ -19,7 +19,6 @@ set(SOURCES
     communication.cpp
     hardware.cpp
     fault_handlers.cpp
-    mission.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -52,6 +51,8 @@ target_link_libraries(${NAME}
     gsl
     antenna
     mission_antenna
+    mission_sail
+    mission_time
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

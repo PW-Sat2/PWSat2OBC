@@ -1,26 +1,16 @@
 set(NAME mission)
 
 set(SOURCES    
-    sail.cpp        
-    adcs.cpp
-    Include/mission/mission.h
-    Include/mission/sail.h
-    Include/mission/adcs_mission.h
+    Include/mission/base.hpp
 )
 
-add_library(${NAME} STATIC ${SOURCES})
-
-target_link_libraries(${NAME}
-    base
-    eps
-    time
-    state
-    adcs
-)
+add_library(${NAME} INTERFACE)
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
-target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/mission)
+#target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/mission)
 
 target_format_sources(${NAME} "${SOURCES}")
 
 add_subdirectory(antenna)
+add_subdirectory(sail)
+add_subdirectory(time)

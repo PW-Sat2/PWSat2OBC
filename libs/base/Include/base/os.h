@@ -132,7 +132,7 @@ enum class OSResult
 /**
  * @brief Macro for verification whether passed OSResult value indicates success.
  */
-static inline bool OS_RESULT_SUCCEEDED(OSResult x)
+constexpr inline bool OS_RESULT_SUCCEEDED(OSResult x)
 {
     return x == OSResult::Success;
 }
@@ -140,7 +140,7 @@ static inline bool OS_RESULT_SUCCEEDED(OSResult x)
 /**
  * @brief Macro for verification whether passed OSResult value indicates failure.
  */
-static inline bool OS_RESULT_FAILED(OSResult x)
+constexpr inline bool OS_RESULT_FAILED(OSResult x)
 {
     return x != OSResult::Success;
 }
