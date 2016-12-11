@@ -93,17 +93,17 @@ namespace mission
      * @return Number of actions that can be performed
      */
     template <typename State>
-    gsl::span<ActionDescriptor<State>> SystemDetermineActions(const State& state, //
+    gsl::span<ActionDescriptor<State>*> SystemDetermineActions(const State& state, //
         gsl::span<ActionDescriptor<State>> actions,
-        gsl::span<ActionDescriptor<State>> target)
+        gsl::span<ActionDescriptor<State>*> target)
     {
         uint16_t runnableIdx = 0;
 
-        for (const auto& descriptor : actions)
+        for (auto& descriptor : actions)
         {
             if (descriptor.condition(state, descriptor.param))
             {
-                target[runnableIdx++] = descriptor;
+                target[runnableIdx++] = &descriptor;
             }
             else
             {
@@ -121,11 +121,11 @@ namespace mission
      */
     template <typename State>
     void SystemDispatchActions(const State& state, //
-        gsl::span<ActionDescriptor<State>> actions)
+        gsl::span<ActionDescriptor<State>*> actions)
     {
-        for (const auto& descriptor : actions)
+        for (auto descriptor : actions)
         {
-            descriptor.actionProc(state, descriptor.param);
+            descriptor->actionProc(state, descriptor->param);
         }
     }
 }

@@ -41,11 +41,8 @@ set(SOURCES
   antenna/antenna.cpp
   antenna/MiniportMock.cpp
   antenna/MiniportMock.hpp
-  mock/ActionDescriptorMock.cpp
   mock/ActionDescriptorMock.hpp
-  mock/UpdateDescriptorMock.cpp
   mock/UpdateDescriptorMock.hpp
-  mock/VerifyDescriprorMock.cpp
   mock/VerifyDescriprorMock.hpp
 )
 
@@ -88,6 +85,8 @@ target_link_libraries(${NAME}
     gsl
     antenna
     mission_antenna
+    mission_sail
+    mission_time
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
