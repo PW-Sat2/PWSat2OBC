@@ -10,7 +10,7 @@ namespace mission
 {
     namespace antenna
     {
-        struct AntennaTask final : public Update, public Action
+        struct AntennaTask : public Update, public Action
         {
             AntennaTask(AntennaDriver& driver);
             /**

@@ -20,6 +20,8 @@ set(SOURCES
   MissionPlan/MissionPlanTest.cpp
   MissionPlan/MissionTestHelpers.cpp
   MissionPlan/SailSystemStateTest.cpp
+  MissionPlan/TimeTaskTest.cpp
+  MissionPlan/MissionLoopTest.cpp
   MissionPlan/antenna/DeployAntennasTest.cpp
   MissionPlan/antenna/AntennaMissionStateTest.cpp
   I2C/FallbackI2CBusTest.cpp
