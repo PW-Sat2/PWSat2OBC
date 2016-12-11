@@ -69,6 +69,8 @@ namespace mission
 
         typedef std::array<VerifyDescriptor<State>, CountVerify> VerifyList;
 
+        MissionLoop();
+
         template <typename... Args> MissionLoop(Args&&... args);
 
         /**
@@ -90,6 +92,8 @@ namespace mission
         static constexpr std::uint32_t PauseRequestFlag = 0x1;
 
         static constexpr std::uint32_t PauseAckFlag = 0x2;
+
+        void Setup();
 
         template <size_t i, template <typename Type> class Pred, typename Action, typename Collection, typename P, typename... U>
         void Process(Collection& collection, std::true_type);
@@ -113,12 +117,22 @@ namespace mission
         OSEventGroupHandle eventGroup;
     };
 
+    template <typename State, typename... T> MissionLoop<State, T...>::MissionLoop() : taskHandle(nullptr), eventGroup(nullptr)
+    {
+        Setup();
+    }
+
     template <typename State, typename... T>
     template <typename... Args>
     MissionLoop<State, T...>::MissionLoop(Args&&... args) //
         : T(std::forward<Args>(args))...,
           taskHandle(nullptr),
           eventGroup(nullptr)
+    {
+        Setup();
+    }
+
+    template <typename State, typename... T> void MissionLoop<State, T...>::Setup()
     {
         Process<0, IsUpdate, GetUpdateDescriptor, UpdateList, T...>(updates, HasMore<T...>());
         Process<0, IsAction, GetActionDescriptor, ActionList, T...>(actions, HasMore<T...>());
@@ -181,19 +195,19 @@ namespace mission
         std::array<VerifyDescriptorResult, CountVerify> detailedVerifyResult;
         LOG(LOG_LEVEL_TRACE, "Updating system state");
 
-        auto updateResult = SystemStateUpdate(state, gsl::span<UpdateDescriptor<State>>(updates));
+        auto updateResult = SystemStateUpdate(state, gsl::make_span(updates));
 
         LOGF(LOG_LEVEL_TRACE, "System state update result %d", static_cast<int>(updateResult));
 
         auto verifyResult = SystemStateVerify(state,                 //
             gsl::span<const VerifyDescriptor<State>>(verifications), //
-            gsl::span<VerifyDescriptorResult>(detailedVerifyResult));
+            gsl::make_span(detailedVerifyResult));
 
         LOGF(LOG_LEVEL_TRACE, "Verify result %d", static_cast<int>(verifyResult));
 
         auto runableSpan = SystemDetermineActions(state, //
-            gsl::span<ActionDescriptor<State>>(actions), //
-            runnableActions);
+            gsl::make_span(actions),                     //
+            gsl::make_span(runnableActions));
 
         LOGF(LOG_LEVEL_TRACE, "Executing %d actions", static_cast<int>(runableSpan.size()));
 
@@ -216,7 +230,7 @@ namespace mission
             {
                 LOG(LOG_LEVEL_WARNING, "MissionLoop task paused");
                 System::EventGroupSetBits(this->eventGroup, PauseAckFlag);
-                System::SuspendTask(NULL);
+                System::SuspendTask(nullptr);
             }
             else
             {
