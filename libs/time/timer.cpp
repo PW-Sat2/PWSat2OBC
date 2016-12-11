@@ -10,6 +10,16 @@ using namespace services::time;
  * @{
  */
 
+/**
+ * @brief Time period between the subsequent mission time notifications.
+ */
+static constexpr TimeSpan NotificationPeriod = {TIMER_NOTIFICATION_PERIOD};
+
+/**
+ * @brief Time period between subsequent timer state saves.
+ */
+static constexpr TimeSpan SavePeriod = {TIMER_SAVE_PERIOD};
+
 bool TimeSnapshot::operator==(const TimeSnapshot& right) const
 {
     return TimeSpanEqual(CurrentTime, right.CurrentTime);
@@ -127,7 +137,7 @@ Option<TimeSpan> TimeProvider::GetCurrentTime()
     TimeSpan currentTime = CurrentTime;
 
     System::GiveSemaphore(timerLock);
-    return Some(std::move(currentTime));
+    return Some(currentTime);
 }
 
 Option<TimePoint> TimeProvider::GetCurrentMissionTime()

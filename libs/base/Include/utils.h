@@ -5,8 +5,8 @@
 
 #include <stdbool.h>
 #include <cstdint>
+#include <type_traits>
 #include <utility>
-
 /**
  * @brief Converts bool value to 1 or 0
  * @param[in] value Value to convert
@@ -81,6 +81,16 @@ template <class T> class Option
     }
 
     /**
+     * @brief Factory method that constructs Option instance that holds given value.
+     * @param[in] value Value to hold in Option instance.
+     * @return Option instance that holds a value.
+     */
+    static Option<T> Some(T& value)
+    {
+        return Option<T>(true, value);
+    }
+
+    /**
       * @brief A flag indicating if this Option instance holds a value.
       */
     const bool HasValue;
@@ -92,6 +102,10 @@ template <class T> class Option
 
   private:
     Option(bool hasValue, T&& value) : HasValue(hasValue), Value(std::move(value))
+    {
+    }
+
+    Option(bool hasValue, T& value) : HasValue(hasValue), Value(value)
     {
     }
 };
@@ -110,9 +124,9 @@ template <typename T> static inline Option<T> None()
  * @param[in] value Value to hold in Option instance.
  * @return Option instance that holds a value.
  */
-template <typename T> static inline Option<T> Some(T&& value)
+template <typename T> static inline Option<std::remove_reference_t<T>> Some(T&& value)
 {
-    return Option<T>::Some(std::move(value));
+    return Option<std::remove_reference_t<T>>::Some(std::forward<std::remove_reference_t<T>>(value));
 }
 
 #endif

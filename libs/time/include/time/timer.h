@@ -267,16 +267,6 @@ namespace services
             struct TimeSnapshot ReadFile(FileSystem* fs, const char* const filePath);
 
           private:
-            /**
-             * @brief Time period between the subsequent mission time notifications.
-             */
-            const TimeSpan NotificationPeriod = {TIMER_NOTIFICATION_PERIOD};
-
-            /**
-             * @brief Time period between subsequent timer state saves.
-             */
-            const TimeSpan SavePeriod = {TIMER_SAVE_PERIOD};
-
             static constexpr const char* File0 = "/TimeState.0";
             static constexpr const char* File1 = "/TimeState.1";
             static constexpr const char* File2 = "/TimeState.2";
@@ -323,6 +313,4 @@ namespace services
     }
 }
 
-#undef TIMER_NOTIFICATION_PERIOD
-#undef TIMER_SAVE_PERIOD
 #endif
