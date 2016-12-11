@@ -19,6 +19,8 @@ static const TerminalCommandDescription commands[] = {
     {"readFile", FSReadFile},
     {"mountList", MountList},
     {"mkdir", MakeDirectory},
+    {"erase", EraseFlash},
+    {"sync_fs", SyncFS},
     {"i2c", I2CTestCommandHandler},
     {"antenna_deploy", AntennaDeploy},
     {"antenna_cancel", AntennaCancelDeployment},

@@ -20,6 +20,7 @@ set(SOURCES
     obc.cpp
     communication.cpp
     hardware.cpp
+    file_system.cpp
     fault_handlers.cpp
 )
 
@@ -56,6 +57,7 @@ target_link_libraries(${NAME}
     mission_antenna
     mission_sail
     mission_time
+    yaffs
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

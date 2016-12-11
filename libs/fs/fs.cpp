@@ -196,6 +196,22 @@ static void YaffsClearDevice(FileSystem* fileSystem, yaffs_dev* device)
     RemoveDirectoryContents(root);
 }
 
+static void YaffsSync(FileSystem* fileSystem)
+{
+    UNREFERENCED_PARAMETER(fileSystem);
+
+    yaffs_dev_rewind();
+
+    yaffs_dev* dev = nullptr;
+    while ((dev = yaffs_next_dev()) != nullptr)
+    {
+        LOGF(LOG_LEVEL_DEBUG, "Syncing %s", dev->param.name);
+        yaffs_sync_reldev(dev);
+    }
+
+    LOG(LOG_LEVEL_DEBUG, "All devices synced");
+}
+
 void FileSystemAPI(FileSystem* fs)
 {
     fs->open = YaffsOpen;
@@ -210,6 +226,7 @@ void FileSystemAPI(FileSystem* fs)
     fs->makeDirectory = YaffsMakeDirectory;
     fs->exists = YaffsExists;
     fs->ClearDevice = YaffsClearDevice;
+    fs->Sync = YaffsSync;
 }
 
 void FileSystemInitialize(FileSystem* fs)

@@ -10,6 +10,7 @@
 #include "antenna/miniport.h"
 #include "base/os.h"
 #include "communication.h"
+#include "file_system.h"
 #include "fs/fs.h"
 #include "hardware.h"
 #include "leuart/line_io.h"
@@ -20,7 +21,6 @@
 #include "terminal/terminal.h"
 #include "time/timer.h"
 #include "utils.h"
-#include "yaffs_guts.h"
 
 /**
  * @defgroup obc OBC structure
@@ -40,8 +40,10 @@ struct OBC
     /** @brief Initializes every object in OBC structure that needs initialization */
     void Initialize();
 
-    /** @brief Initializes file system */
-    bool InitializeFileSystem();
+    /**
+     * @brief Initialization that takes places after starting RTOS
+     */
+    void PostStartInitialization();
 
     /** @brief File system object */
     FileSystem fs;
@@ -74,18 +76,8 @@ struct OBC
     /** @brief Overall satellite <-> Earth communication */
     communication::OBCCommunication Communication;
 
-    /** @brief SPI interface */
-    drivers::spi::EFMSPIInterface SPI;
+    OBCFileSystem Storage;
 
-#ifdef USE_EXTERNAL_FLASH
-    /** @brief N25Q Yaffs device */
-    devices::n25q::N25QYaffsDevice<devices::n25q::BlockMapping::Sector, 512_Bytes, 16_MB> ExternalFlash;
-#else
-    /** Yaffs root device */
-    struct yaffs_dev rootDevice;
-    /** Driver for yaffs root device */
-    YaffsNANDDriver rootDeviceDriver;
-#endif
     /** @brief Terminal object. */
     Terminal terminal;
 };

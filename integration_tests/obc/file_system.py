@@ -17,3 +17,7 @@ class FileSystemMixin(OBCMixin):
     @command("readFile {0}")
     def read_file(self, path):
         pass
+
+    @command("sync_fs")
+    def sync_fs(self):
+        pass

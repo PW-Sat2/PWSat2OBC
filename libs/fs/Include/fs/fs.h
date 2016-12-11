@@ -211,6 +211,12 @@ typedef struct FileSystemTag
      * @param[in] device Device to clear
      */
     void (*ClearDevice)(FileSystem* fileSystem, yaffs_dev* device);
+
+    /**
+     * @brief Syncs file system (speeds up next mount)
+     * @param fileSystem File system
+     */
+    void (*Sync)(FileSystem* fileSystem);
 } FileSystem;
 
 /**

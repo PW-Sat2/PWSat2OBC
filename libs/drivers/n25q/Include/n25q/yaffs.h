@@ -4,7 +4,9 @@
 #include "base/os.h"
 #include "n25q.h"
 #include "spi/spi.h"
+extern "C" {
 #include "yaffs_guts.h"
+}
 
 namespace devices
 {
@@ -38,25 +40,16 @@ namespace devices
              * @param[in] blockMapping Block mapping
              * @param[in] chunkSize Single chunk size
              * @param[in] totalSize Total memory size
-             * @param[in] spi SPI interface to use
+             * @param[in] driver N25Q driver to use
              */
-            N25QYaffsDeviceBase(const char* mountPoint,
-                BlockMapping blockMapping,
-                std::size_t chunkSize,
-                std::size_t totalSize,
-                drivers::spi::ISPIInterface& spi);
+            N25QYaffsDeviceBase(
+                const char* mountPoint, BlockMapping blockMapping, std::size_t chunkSize, std::size_t totalSize, N25QDriver& driver);
 
             /**
              * @brief Mounts device
              * @return Operation result
              */
             OSResult Mount();
-
-            /**
-             * @brief Triggers whole chip erase
-             * @return Operation result
-             */
-            OSResult EraseWholeChip();
 
             /** @brief Return raw yaffs device */
             inline yaffs_dev* Device();
@@ -130,7 +123,7 @@ namespace devices
             /** @brief Yaffs device */
             yaffs_dev _device;
             /** @brief Low-level N25Q driver */
-            N25QDriver _driver;
+            N25QDriver& _driver;
             /** @brief Block mapping */
             BlockMapping _blockMapping;
         };
@@ -150,10 +143,10 @@ namespace devices
             /**
              * @brief Constructs @ref N25QYaffsDevice
              * @param[in] mountPoint Mount point
-             * @param[in] spi SPI interface to use
+             * @param[in] driver N25Q driver to use
              */
-            N25QYaffsDevice(const char* mountPoint, drivers::spi::ISPIInterface& spi)
-                : N25QYaffsDeviceBase(mountPoint, blockMapping, ChunkSize, TotalSize, spi)
+            N25QYaffsDevice(const char* mountPoint, N25QDriver& driver)
+                : N25QYaffsDeviceBase(mountPoint, blockMapping, ChunkSize, TotalSize, driver)
             {
             }
         };

@@ -7,6 +7,7 @@
 #include "io_map.h"
 #include "logger/logger.h"
 #include "power/power.h"
+#include "spi/efm.h"
 
 /**
  * @defgroup obc_hardware OBC hardware
@@ -93,6 +94,9 @@ struct OBCHardware final
 
     /** @brief I2C */
     OBCHardwareI2C I2C;
+
+    /** @brief SPI interface */
+    drivers::spi::EFMSPIInterface SPI;
 };
 
 /** @} */

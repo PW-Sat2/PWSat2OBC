@@ -113,11 +113,11 @@ static void ClearState(OBC* obc)
         LOG(LOG_LEVEL_WARNING, "Clearing state on startup");
 
 #ifdef USE_EXTERNAL_FLASH
-        obc->fs.ClearDevice(&obc->fs, obc->ExternalFlash.Device());
+        obc->fs.ClearDevice(&obc->fs, obc->Storage.ExternalFlash.Device());
 #else
-        obc->fs.ClearDevice(&obc->fs, &obc->rootDevice);
+        obc->fs.ClearDevice(&obc->fs, &obc->Storage.rootDevice);
 #endif
-        LOG(LOG_LEVEL_INFO, "Flash formatted");
+        LOG(LOG_LEVEL_INFO, "All files removed");
     }
 }
 
@@ -131,10 +131,7 @@ static void ObcInitTask(void* param)
 {
     auto obc = static_cast<OBC*>(param);
 
-    if (!Main.InitializeFileSystem())
-    {
-        LOG(LOG_LEVEL_ERROR, "Unable to initialize file system");
-    }
+    obc->PostStartInitialization();
 
     ClearState(obc);
 
@@ -239,8 +236,6 @@ int main(void)
     LeuartLineIOInit(&Main.IO);
 
     InitializeTerminal();
-
-    Main.SPI.Initialize();
 
     EpsInit(&Main.Hardware.I2C.Fallback);
 
