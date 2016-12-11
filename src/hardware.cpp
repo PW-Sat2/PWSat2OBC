@@ -56,4 +56,5 @@ void OBCHardwareI2C::Initialize()
 void OBCHardware::Initialize()
 {
     this->I2C.Initialize();
+    this->SPI.Initialize();
 }

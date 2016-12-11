@@ -25,23 +25,9 @@ static inline size_t BlockSize(BlockMapping blockMapping)
     }
 }
 
-static OSResult MapResult(OperationResult result)
-{
-    switch (result)
-    {
-        case OperationResult::Success:
-            return OSResult::Success;
-        case OperationResult::Timeout:
-            return OSResult::Timeout;
-        case OperationResult::Failure:
-        default:
-            return OSResult::IOError;
-    }
-}
-
 N25QYaffsDeviceBase::N25QYaffsDeviceBase(
-    const char* mountPoint, devices::n25q::BlockMapping blockMapping, std::size_t chunkSize, std::size_t totalSize, ISPIInterface& spi)
-    : _driver(spi), //
+    const char* mountPoint, devices::n25q::BlockMapping blockMapping, std::size_t chunkSize, std::size_t totalSize, N25QDriver& driver)
+    : _driver(driver), //
       _blockMapping(blockMapping)
 {
     memset(&this->_device, 0, sizeof(this->_device));
@@ -57,6 +43,7 @@ N25QYaffsDeviceBase::N25QYaffsDeviceBase(
     this->_device.param.n_reserved_blocks = 3;
     this->_device.param.no_tags_ecc = true;
     this->_device.param.always_check_erased = true;
+    this->_device.param.disable_bad_block_marking = true;
 
     this->_device.driver_context = this;
     this->_device.drv.drv_read_chunk_fn = N25QYaffsDeviceBase::ReadChunk;
@@ -88,20 +75,6 @@ OSResult N25QYaffsDeviceBase::Mount()
         LOGF(LOG_LEVEL_ERROR, "[Device %s] Mount failed: %d", this->_device.param.name, num(error));
         return error;
     }
-}
-
-OSResult N25QYaffsDeviceBase::EraseWholeChip()
-{
-    LOGF(LOG_LEVEL_WARNING, "[Device %s] Performing whole chip erase", this->_device.param.name);
-
-    auto result = this->_driver.EraseChip();
-
-    if (result != OperationResult::Success)
-    {
-        LOGF(LOG_LEVEL_ERROR, "[Device %s] Chip erase failed: %d", this->_device.param.name, num(result));
-    }
-
-    return MapResult(result);
 }
 
 int N25QYaffsDeviceBase::ReadChunk(struct yaffs_dev* dev, //
@@ -158,7 +131,7 @@ int N25QYaffsDeviceBase::WriteChunk(struct yaffs_dev* dev, //
 
     if (result != OperationResult::Success)
     {
-        LOGF(LOG_LEVEL_ERROR, "[Device %s] Write to chunk %d failed", dev->param.name, num(result));
+        LOGF(LOG_LEVEL_ERROR, "[Device %s] Write to chunk %d failed Error %d", dev->param.name, nand_chunk, num(result));
         return YAFFS_FAIL;
     }
 
@@ -188,7 +161,7 @@ int N25QYaffsDeviceBase::EraseBlock(struct yaffs_dev* dev, int block_no)
 
     if (result != OperationResult::Success)
     {
-        LOGF(LOG_LEVEL_ERROR, "[Device %s] Erase block failed: %d", dev->param.name, num(result));
+        LOGF(LOG_LEVEL_ERROR, "[Device %s] Erase block failed: %d Error %d", dev->param.name, block_no, num(result));
         return YAFFS_FAIL;
     }
 
@@ -200,16 +173,12 @@ int N25QYaffsDeviceBase::MarkBadBlock(struct yaffs_dev* dev, int block_no)
     UNREFERENCED_PARAMETER(dev);
     LOGF(LOG_LEVEL_WARNING, "[Device %s] Marking bad block %d", dev->param.name, block_no);
 
-    // TODO: bad block management
-
     return YAFFS_OK;
 }
 
 int N25QYaffsDeviceBase::CheckBadBlock(struct yaffs_dev* dev, int block_no)
 {
     UNUSED(dev, block_no);
-
-    // TODO: bad block management
 
     return YAFFS_OK;
 }

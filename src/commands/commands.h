@@ -18,6 +18,8 @@ void FSWriteFile(std::uint16_t argc, char* argv[]);
 void FSReadFile(std::uint16_t argc, char* argv[]);
 void MountList(std::uint16_t argc, char* argv[]);
 void MakeDirectory(std::uint16_t argc, char* argv[]);
+void EraseFlash(std::uint16_t argc, char* argv[]);
+void SyncFS(std::uint16_t argc, char* argv[]);
 void CommandByTerminal(std::uint16_t argc, char* args[]);
 void I2CTestCommandHandler(std::uint16_t argc, char* argv[]);
 void HeapInfoCommand(std::uint16_t argc, char* argv[]);

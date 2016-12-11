@@ -185,7 +185,7 @@ namespace devices
              * Datasheet states that this operation should take maximum 5 ms.
              * Rounded to 10ms as it is single FreeRTOS tick
              */
-            constexpr static std::uint32_t ProgramPageTimeout = 10;
+            constexpr static std::uint32_t ProgramPageTimeout = 50;
             /** Erase subsector operation timeout */
             constexpr static std::uint32_t EraseSubSectorTimeout = 1.2 * (0.8 * 1000);
             /** Erase sector operation timeout */

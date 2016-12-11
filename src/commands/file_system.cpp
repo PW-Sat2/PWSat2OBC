@@ -1,10 +1,13 @@
 #include <string.h>
 #include <cstdint>
-#include <fcntl.h>
+#include "base/os.h"
 #include "obc.h"
 #include "system.h"
-#include "terminal.h"
+
+extern "C" {
+#include "yaffs_guts.h"
 #include "yaffsfs.h"
+}
 
 using std::uint16_t;
 using std::int8_t;
@@ -120,4 +123,20 @@ void MakeDirectory(uint16_t argc, char* argv[])
     }
 
     Main.fs.makeDirectory(&Main.fs, argv[0]);
+}
+
+void EraseFlash(uint16_t argc, char* argv[])
+{
+    UNUSED(argc, argv);
+
+    auto result = Main.Storage.ExternalFlashDriver.EraseChip();
+
+    Main.terminal.Printf("Erase result: %d", num(result));
+}
+
+void SyncFS(uint16_t argc, char* argv[])
+{
+    UNUSED(argc, argv);
+
+    Main.fs.Sync(&Main.fs);
 }
