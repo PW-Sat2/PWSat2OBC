@@ -18,4 +18,3 @@ add_subdirectory(efm_support)
 add_subdirectory(obc)
 add_subdirectory(settings)
 add_subdirectory(free_rtos_wrapper)
-

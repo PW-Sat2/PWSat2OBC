@@ -10,10 +10,7 @@
 
 static SemaphoreHandle_t lineEndReceived = xSemaphoreCreateBinary();
 
-Uart::Uart(Uart_Init &init):_init(init)
-{
-
-}
+Uart::Uart(Uart_Init &init):_init(init){}
 
 void Uart::InitializeDma(){
 	this->uartClock   = cmuClock_USART1;

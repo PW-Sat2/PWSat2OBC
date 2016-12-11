@@ -80,7 +80,7 @@ static void BlinkLed0(void* param)
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
-
+/*
 static void SmartWaitTask(void* param)
 {
     UNREFERENCED_PARAMETER(param);
@@ -92,7 +92,7 @@ static void SmartWaitTask(void* param)
         Main.timeProvider.LongDelay(10min);
         LOG(LOG_LEVEL_DEBUG, "After wait");
     }
-}
+}*/
 
 static void InitSwoEndpoint(void)
 {
@@ -169,32 +169,32 @@ void SetupHardware(void)
     CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_HFCLKLE);
 }
 
-extern "C" void __libc_init_array(void);
-
+/*
 
 void UartTask(void* param)
 {
+	uint8_t testByte= 41;
 	UNREFERENCED_PARAMETER(param);
 
 	Uart_Init init;
 	init.uart = USART1;
 	init.baudRate=9600;
 	init.parity=usartNoParity;
-	init.portLocation=USART_ROUTE_LOCATION_LOC1;
-	init.baudrate       = 9600;
+	init.portLocation=1;
+	init.baudRate       = 9600;
 	init.oversampling   = usartOVS16;
-	init.databits       = usartDatabits8;
+	init.dataBits       = usartDatabits8;
 	init.parity         = usartNoParity;
-	init.stopbits       = usartStopbits1;
+	init.stopBits       = usartStopbits1;
 
 
 
-	Uart::Uart uart(init);
+	Uart uart(init);
 	uart.Initialize();
-	uart.Write((char *)"ala ma kota");
+	uart.Write(testByte);
 
 }
-
+*/
 
 
 extern "C" void __libc_init_array(void);
@@ -234,9 +234,16 @@ int main(void)
     Main.Hardware.Pins.Led1.High();
 
     System::CreateTask(BlinkLed0, "Blink0", 512, NULL, TaskPriority::P1, NULL);
+<<<<<<< HEAD
     System::CreateTask(ObcInitTask, "Init", 3_KB, &Main, TaskPriority::Highest, &Main.initTask);
 
     System::RunScheduler();
+=======
+    //System::CreateTask(ADXRS, "ADXRS", 512, NULL, tskIDLE_PRIORITY + 2, NULL);
+    //System::CreateTask(UartTask, "uart", 512, NULL, TaskPriority::P1, NULL);
+    System::CreateTask(ObcInitTask, "Init", 512, &Main, TaskPriority::Highest, &Main.initTask);
+
+>>>>>>> merged
     System::RunScheduler();
 
     Main.Hardware.Pins.Led0.Toggle();

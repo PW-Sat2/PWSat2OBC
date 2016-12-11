@@ -44,6 +44,7 @@ uint8_t              portLocation;
 USART_Stopbits_TypeDef    stopBits;
 USART_Parity_TypeDef      parity;
 USART_OVS_TypeDef         oversampling;
+USART_Databits_TypeDef dataBits;
 //UART_Callback_t callbackTx;
 //UART_Callback_t callbackRx;
 };
@@ -51,18 +52,19 @@ USART_OVS_TypeDef         oversampling;
 
 class Uart final{
 
-Uart(Uart_Init &init);
+
 
 public:
+Uart(Uart_Init &init);
 void Write(uint8_t &data);
 void Read(uint8_t &data);
 void Initialize(void);
 void DeInitialize(void);
 
 private:
-	Uart_Init _init;
-	uint8_t               rxDmaCh;
-	uint8_t               txDmaCh;
+	Uart_Init 				_init;
+	uint8_t               	rxDmaCh;
+	uint8_t              	txDmaCh;
 	CMU_Clock_TypeDef          uartClock;
 	DMADRV_PeripheralSignal_t  txDmaSignal;
 	DMADRV_PeripheralSignal_t  rxDmaSignal;

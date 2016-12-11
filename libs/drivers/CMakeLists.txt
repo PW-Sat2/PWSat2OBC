@@ -5,10 +5,6 @@ add_subdirectory(spi)
 add_subdirectory(comm)
 add_subdirectory(eps)
 add_subdirectory(antenna)
-<<<<<<< HEAD
 add_subdirectory(n25q)
 add_subdirectory(gpio)
-=======
 add_subdirectory(uart)
-
->>>>>>> sample
