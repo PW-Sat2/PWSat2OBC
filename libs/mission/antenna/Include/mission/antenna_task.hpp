@@ -10,9 +10,8 @@ namespace mission
 {
     namespace antenna
     {
-        class AntennaTask : public Update, public Action
+        struct AntennaTask final : public Update, public Action
         {
-          public:
             AntennaTask(AntennaDriver& driver);
             /**
              * @brief Returns antenna deployment action descriptor.
@@ -28,7 +27,9 @@ namespace mission
              */
             UpdateDescriptor<SystemState> BuildUpdate();
 
-          private:
+            /**
+             * @brief State of the antenna mission deployment task.
+             */
             AntennaMissionState state;
         };
     }

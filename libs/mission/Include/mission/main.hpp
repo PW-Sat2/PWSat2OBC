@@ -8,6 +8,7 @@
 #include "base.hpp"
 #include "base/os.h"
 #include "gsl/span"
+#include "logger/logger.h"
 #include "logic.hpp"
 #include "traits.hpp"
 
@@ -51,6 +52,7 @@ namespace mission
     template <typename State, typename... T> struct MissionLoop final : public T...
     {
       public:
+        typedef typename std::remove_reference<State>::type StateType;
         template <typename Type> using IsAction = std::is_base_of<Action, Type>;
         template <typename Type> using IsUpdate = std::is_base_of<Update, Type>;
         template <typename Type> using IsVerify = std::is_base_of<Verify, Type>;
@@ -80,6 +82,10 @@ namespace mission
 
         void RunOnce();
 
+        const StateType& GetState() const noexcept;
+
+        StateType& GetState() noexcept;
+
       private:
         static constexpr std::uint32_t PauseRequestFlag = 0x1;
 
@@ -102,7 +108,7 @@ namespace mission
 
         VerifyList verifications;
 
-        TaskHandle_t taskHandle;
+        OSTaskHandle taskHandle;
 
         OSEventGroupHandle eventGroup;
     };
@@ -171,7 +177,7 @@ namespace mission
 
     template <typename State, typename... T> void MissionLoop<State, T...>::RunOnce()
     {
-        ActionList runnableActions;
+        std::array<ActionDescriptor<State>*, CountAction> runnableActions;
         std::array<VerifyDescriptorResult, CountVerify> detailedVerifyResult;
         LOG(LOG_LEVEL_TRACE, "Updating system state");
 
@@ -187,7 +193,7 @@ namespace mission
 
         auto runableSpan = SystemDetermineActions(state, //
             gsl::span<ActionDescriptor<State>>(actions), //
-            gsl::span<ActionDescriptor<State>>(runnableActions));
+            runnableActions);
 
         LOGF(LOG_LEVEL_TRACE, "Executing %d actions", static_cast<int>(runableSpan.size()));
 
@@ -217,6 +223,18 @@ namespace mission
                 RunOnce();
             }
         }
+    }
+
+    template <typename State, typename... T>
+    inline const typename MissionLoop<State, T...>::StateType& MissionLoop<State, T...>::GetState() const noexcept
+    {
+        return this->state;
+    }
+
+    template <typename State, typename... T>
+    inline typename MissionLoop<State, T...>::StateType& MissionLoop<State, T...>::GetState() noexcept
+    {
+        return this->state;
     }
 }
 
