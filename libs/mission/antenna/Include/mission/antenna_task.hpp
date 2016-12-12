@@ -10,8 +10,16 @@ namespace mission
 {
     namespace antenna
     {
+        /**
+         * @brief Mission part related to antenna deployment.
+         * @ingroup mission_atenna
+         */
         struct AntennaTask : public Update, public Action
         {
+            /**
+             * @brief ctor.
+             * @param[in] driver Reference to antenna driver interface.
+             */
             AntennaTask(AntennaDriver& driver);
             /**
              * @brief Returns antenna deployment action descriptor.
