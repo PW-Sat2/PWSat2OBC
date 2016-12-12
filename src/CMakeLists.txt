@@ -11,6 +11,7 @@ set(SOURCES
     commands/i2c_test_command.cpp
     commands/rtos_status.cpp
     commands/heap.cpp
+    commands/mission.cpp
     obc.h
     obc.cpp
     communication.cpp

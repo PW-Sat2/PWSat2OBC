@@ -25,5 +25,8 @@ void AntennaCancelDeployment(uint16_t argc, char* argv[]);
 void AntennaGetDeploymentStatus(uint16_t argc, char* argv[]);
 
 void TaskListCommand(uint16_t argc, char* argv[]);
+void SuspendMission(uint16_t argc, char* argv[]);
+void ResumeMission(uint16_t argc, char* argv[]);
+void RunMission(uint16_t argc, char* argv[]);
 
 #endif
