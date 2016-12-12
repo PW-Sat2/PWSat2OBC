@@ -24,6 +24,7 @@ static const TerminalCommandDescription commands[] = {
     {"tasklist", TaskListCommand},
     {"heap", HeapInfoCommand},
     {"advance_time", AdvanceTimeHandler},
+    {"compile_info", CompileInfo},
 };
 
 void InitializeTerminal(void)
