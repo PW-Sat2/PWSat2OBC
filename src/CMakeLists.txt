@@ -1,5 +1,7 @@
 set(NAME pwsat)
 
+generate_version_file(${CMAKE_CURRENT_BINARY_DIR}/gen/version.h)
+
 set(SOURCES
     main.cpp
     terminal.cpp
@@ -11,6 +13,7 @@ set(SOURCES
     commands/i2c_test_command.cpp
     commands/rtos_status.cpp
     commands/heap.cpp
+    commands/compile_info.cpp
     obc.h
     obc.cpp
     communication.cpp
@@ -50,6 +53,8 @@ target_link_libraries(${NAME}
     antenna
     mission_antenna
 )
+
+target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)
 
 target_generate_hex(${NAME})
 
