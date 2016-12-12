@@ -27,5 +27,8 @@ void AntennaGetDeploymentStatus(std::uint16_t argc, char* argv[]);
 void TaskListCommand(std::uint16_t argc, char* argv[]);
 
 void CompileInfo(std::uint16_t argc, char* argv[]);
+void SuspendMission(std::uint16_t argc, char* argv[]);
+void ResumeMission(std::uint16_t argc, char* argv[]);
+void RunMission(std::uint16_t argc, char* argv[]);
 
 #endif

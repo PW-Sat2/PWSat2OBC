@@ -14,6 +14,7 @@ set(SOURCES
     commands/rtos_status.cpp
     commands/heap.cpp
     commands/compile_info.cpp
+    commands/mission.cpp
     obc.h
     obc.cpp
     communication.cpp
