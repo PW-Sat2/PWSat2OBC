@@ -10,28 +10,15 @@
 namespace mission
 {
     /**
-     * @defgroup State Satellite state management
-     *
-     * @brief Concept of satellite state management and actions dispatch
-     *
-     * Concept implemented by this library is very similar to game loop and is based on three main phases
-     *
-     *  - \b Update - all update descriptors are executed. After that state contain the most accurate information
-     * about overall satellite state. Examples: Time, power level from EPS, antenna status (opened or not)
-     *  - \b Verify - Checks if state makes any sense. Examples of such invalid state are: negative time, antenna opened before
-     * first 30 minutes passed, etc. It is possible that such state is result of malfunction of some device and needs further
-     * investigation
-     *  - \b Dispatch - List of runnable actions is determined based on their condition. After that they are executed one by one
-     *
+     * @addtogroup mission_loop
      * @{
      */
 
     /**
-     * @brief Invokes all descriptors and updates state
+     * @brief Invokes all the system state update descriptors.
      * @param[in,out] state System state to update
-     * @param[in] descriptors List of update descriptors
-     * @param[in] descriptorsCount Descriptors count
-     * @return Result of state update
+     * @param[in] descriptors List of update descriptors to run.
+     * @return System state update result.
      */
     template <typename State> UpdateResult SystemStateUpdate(State& state, gsl::span<UpdateDescriptor<State>> descriptors)
     {
@@ -55,10 +42,9 @@ namespace mission
 
     /**
      * @brief Performs system state verification.
-     * @param[in] state State to verify
-     * @param[in] descriptors List of descriptors
-     * @param[in,out] results Verification results. Must be initialized to array of the same length as descriptors.
-     * @param[in] descriptorsCount Descriptors count
+     * @param[in] state State to verify.
+     * @param[in] descriptors List of verification descriptors to run.
+     * @param[out] results Verification results. Must be initialized to array of the same length as descriptors.
      * @return Overall verification result
      *
      * @remark Always runs all descriptors.
@@ -85,12 +71,12 @@ namespace mission
     }
 
     /**
-     * @brief Determines which actions can be performed based on state
-     * @param[in] state System state
-     * @param[in] descriptors List of available descriptors
-     * @param[in] descriptorsCount Number of available descriptors
-     * @param[out] runnable Array of runnable actions. Must be initialized to array with the same length as descriptors.
-     * @return Number of actions that can be performed
+     * @brief Determines which actions can be performed based on state.
+     * @param[in] state Current system state.
+     * @param[in] actions List of available action descriptors.
+     * @param[in] target Array of runnable actions. Must be initialized to array with the same length as descriptors.
+     * @return List of the pointers to actions that should be run in current state. This list will be sublist of the
+     * one provided in the target parameter.
      */
     template <typename State>
     gsl::span<ActionDescriptor<State>*> SystemDetermineActions(const State& state, //
@@ -114,10 +100,9 @@ namespace mission
         return target.subspan(0, runnableIdx);
     }
     /**
-     * @brief Executes specified actions
+     * @brief Executes specified actions.
      * @param[in] state System state
-     * @param[in] descriptors List of descriptors to run
-     * @param[in] actionsCount Number of descriptors
+     * @param[in] actions List of action descriptors to run.
      */
     template <typename State>
     void SystemDispatchActions(const State& state, //
