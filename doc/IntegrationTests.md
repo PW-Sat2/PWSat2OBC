@@ -27,7 +27,7 @@
  * I2C bus: SDA (PC4), SCL (PC5)
 * Starter Kit <-> DeviceMock (Payload Bus)
  * GND
- * I2C bus: SDA (PD6), SCL (PC7)
+ * I2C bus: SDA (PD6), SCL (PD7)
 
 ## Serial ports
 Four (three for single bus mode) serial ports are used in integration tests:
