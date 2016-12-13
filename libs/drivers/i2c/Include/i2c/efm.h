@@ -52,7 +52,6 @@ namespace drivers
           private:
             /**
              * @brief Executes single I2C transfer
-             * @param[in] bus I2C bus
              * @param[in] seq Transfer sequence definition
              * @return Transfer result
              */
@@ -60,7 +59,6 @@ namespace drivers
 
             /**
              * @brief Checks if SCL line is latched at low level
-             * @param[in] bus I2C bus
              * @return true if SCL line is latched
              */
             bool IsSclLatched();
