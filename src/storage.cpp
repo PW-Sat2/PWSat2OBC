@@ -1,15 +1,16 @@
-#include "file_system.h"
+#include "storage.h"
+#include "fs/fs.h"
 
-OBCFileSystem::OBCFileSystem(drivers::spi::ISPIInterface& spi)
-    :
+OBCStorage::OBCStorage(drivers::spi::ISPIInterface& spi)
 #ifdef USE_EXTERNAL_FLASH
-      ExternalFlashDriver(spi),
+    : ExternalFlashDriver(spi), //
       ExternalFlash("/", ExternalFlashDriver)
 #endif
 {
+    UNREFERENCED_PARAMETER(spi);
 }
 
-void OBCFileSystem::Initialize()
+void OBCStorage::Initialize()
 {
 #ifdef USE_EXTERNAL_FLASH
     if (OS_RESULT_FAILED(this->ExternalFlash.Mount()))
@@ -43,7 +44,7 @@ void OBCFileSystem::Initialize()
     rootDevice.param.end_block =
         1 * 1024 * 1024 / rootDeviceDriver.geometry.blockSize - rootDevice.param.start_block - rootDevice.param.n_reserved_blocks;
 
-    if (!FileSystemAddDeviceAndMount(&this->fs, &rootDevice))
+    if (!FileSystemAddDeviceAndMount(&rootDevice))
     {
         return;
     }

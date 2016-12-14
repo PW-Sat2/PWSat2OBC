@@ -141,24 +141,12 @@ void N25QDriver::EnableWrite()
     this->Command(N25QCommand::WriteEnable);
 }
 
-void N25QDriver::DisableWrite()
-{
-    SPISelectSlave slave(this->_spi);
-
-    this->Command(N25QCommand::WriteDisable);
-}
-
 bool N25QDriver::WaitBusy(std::uint32_t timeout)
 {
     Timeout timeoutCheck(timeout);
 
     do
     {
-        if (timeoutCheck.Expired())
-        {
-            return false;
-        }
-
         uint8_t status = 0;
 
         this->Command(N25QCommand::ReadStatusRegister, span<uint8_t>(&status, 1));
@@ -166,6 +154,11 @@ bool N25QDriver::WaitBusy(std::uint32_t timeout)
         if (!has_flag(static_cast<Status>(status), Status::WriteInProgress))
         {
             break;
+        }
+
+        if (timeoutCheck.Expired())
+        {
+            return false;
         }
     } while (true);
 

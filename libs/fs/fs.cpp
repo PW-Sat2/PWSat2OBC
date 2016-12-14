@@ -236,10 +236,8 @@ void FileSystemInitialize(FileSystem* fs)
     FileSystemAPI(fs);
 }
 
-bool FileSystemAddDeviceAndMount(FileSystem* fs, yaffs_dev* device)
+bool FileSystemAddDeviceAndMount(yaffs_dev* device)
 {
-    UNREFERENCED_PARAMETER(fs);
-
     yaffs_add_device(device);
     int result = yaffs_mount(device->param.name);
 
