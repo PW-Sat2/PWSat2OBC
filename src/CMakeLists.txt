@@ -20,7 +20,7 @@ set(SOURCES
     obc.cpp
     communication.cpp
     hardware.cpp
-    file_system.cpp
+    storage.cpp
     fault_handlers.cpp
 )
 

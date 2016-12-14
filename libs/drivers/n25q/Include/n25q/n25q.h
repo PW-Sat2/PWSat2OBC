@@ -151,8 +151,6 @@ namespace devices
           private:
             /** @brief Enables write */
             void EnableWrite();
-            /** @brief Disables write */
-            void DisableWrite();
             /**
              * @brief Waits for device to finish current operation
              * @param[in] timeout Timeout

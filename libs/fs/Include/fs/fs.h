@@ -231,7 +231,12 @@ void FileSystemAPI(FileSystem* fs);
  */
 void FileSystemInitialize(FileSystem* fs);
 
-bool FileSystemAddDeviceAndMount(FileSystem* fs, yaffs_dev* device);
+/**
+ * @brief Adds device and mounts it
+ * @param[in] device YAFFS device
+ * @return true on success
+ */
+bool FileSystemAddDeviceAndMount(yaffs_dev* device);
 
 /**
  * @brief This method is responsible for writing contents of the passed buffer to the selected file.

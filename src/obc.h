@@ -10,13 +10,13 @@
 #include "antenna/miniport.h"
 #include "base/os.h"
 #include "communication.h"
-#include "file_system.h"
 #include "fs/fs.h"
 #include "hardware.h"
 #include "leuart/line_io.h"
 #include "n25q/n25q.h"
 #include "n25q/yaffs.h"
 #include "spi/efm.h"
+#include "storage.h"
 #include "storage/nand_driver.h"
 #include "terminal/terminal.h"
 #include "time/timer.h"
@@ -76,7 +76,8 @@ struct OBC
     /** @brief Overall satellite <-> Earth communication */
     communication::OBCCommunication Communication;
 
-    OBCFileSystem Storage;
+    /** @brief OBC storage */
+    OBCStorage Storage;
 
     /** @brief Terminal object. */
     Terminal terminal;
