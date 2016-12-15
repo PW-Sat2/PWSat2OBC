@@ -5,7 +5,6 @@
 #include <gsl/span>
 
 #include "spi.h"
-#include "spidrv.h"
 
 namespace drivers
 {
@@ -35,8 +34,6 @@ namespace drivers
             virtual void WriteRead(gsl::span<const std::uint8_t> input, gsl::span<std::uint8_t> output) override;
 
           private:
-            /** @brief SPIDRV handle data */
-            SPIDRV_HandleData _handle;
         };
 
         /** @} */
