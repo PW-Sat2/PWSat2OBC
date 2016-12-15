@@ -33,8 +33,6 @@
 #include "system.h"
 #include "terminal.h"
 
-#include <spidrv.h>
-
 #include "leuart/leuart.h"
 #include "power_eps/power_eps.h"
 
