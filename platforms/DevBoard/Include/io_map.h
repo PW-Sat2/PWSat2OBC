@@ -70,28 +70,4 @@
 #define EBI_DATA_PORT gpioPortE
 #define EBI_DATA_PIN0 8
 
-#define ADXRS453_SPI_USART_PORT USART1
-#define ADXRS433_SPI_USART_GPIO_PORT gpioPortD
-#define ADXRS433_SPI_USART_GPIO_TX 0
-#define ADXRS433_SPI_USART_GPIO_RX 1
-#define ADXRS433_SPI_USART_GPIO_CLK 2
-#define ADXRS453_SPI_USART_ROUTE_LOCATION _USART_ROUTE_LOCATION_LOC1
-#define GYRO0                                                                                                                              \
-    {                                                                                                                                      \
-        gpioPortA, /* cs port location*/                                                                                                   \
-            12,    /* cs pin location */                                                                                                   \
-    }
-
-#define GYRO1                                                                                                                              \
-    {                                                                                                                                      \
-        gpioPortA, /* cs port location*/                                                                                                   \
-            13,    /* cs pin location */                                                                                                   \
-    }
-
-#define GYRO2                                                                                                                              \
-    {                                                                                                                                      \
-        gpioPortA, /* cs port location*/                                                                                                   \
-            14,    /* cs pin location */                                                                                                   \
-    }
-
 #endif

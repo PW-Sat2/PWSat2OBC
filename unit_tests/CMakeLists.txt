@@ -33,7 +33,6 @@ set(SOURCES
   os/os.cpp
   os/os.hpp
   OsMock.hpp
-  adxrs453/adxrs453Test.cpp
   time/time.cpp
   time/timer.cpp
   time/persistance.cpp
@@ -87,7 +86,6 @@ target_link_libraries(${NAME}
     rapidcheck.gtest
     rapidcheck.gmock
     emdrv
-    adxrs453
     time
     gsl
     antenna
