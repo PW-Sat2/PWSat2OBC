@@ -33,9 +33,9 @@ namespace mission
          * @brief ctor.
          *
          * To support single argument construction.
-         * @param[in] initial Initial sail deployment state.
+         * @param[in] isSailOpened Initial sail deployment state.
          */
-        SailTask(bool initial);
+        SailTask(bool isSailOpened);
 
         /**
          * @brief Prepares action descriptor for this task.

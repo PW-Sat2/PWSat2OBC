@@ -13,11 +13,11 @@ namespace mission
         const bool status = TimeGetCurrentTime(timeProvider, &state.Time);
         if (status)
         {
-            return UpdateResult::UpdateOK;
+            return UpdateResult::Ok;
         }
         else
         {
-            return UpdateResult::UpdateWarning;
+            return UpdateResult::Warning;
         }
     }
 

@@ -34,7 +34,7 @@ struct SailSystemStateTest : public testing::Test
     void DetermineActions();
 };
 
-SailSystemStateTest::SailSystemStateTest() : updateResult(UpdateResult::UpdateOK), runnable(false)
+SailSystemStateTest::SailSystemStateTest() : updateResult(UpdateResult::Ok), runnable(false)
 {
     this->updateDescriptor = this->sailTask.BuildUpdate();
     this->openSailAction = this->sailTask.BuildAction();
@@ -61,7 +61,7 @@ TEST_F(SailSystemStateTest, ShouldUpdateSystemState)
 
     UpdateState();
 
-    ASSERT_THAT(updateResult, Eq(UpdateResult::UpdateOK));
+    ASSERT_THAT(updateResult, Eq(UpdateResult::Ok));
     ASSERT_THAT(state.SailOpened, Eq(true));
 }
 

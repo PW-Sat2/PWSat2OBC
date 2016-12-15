@@ -62,7 +62,7 @@ namespace
     TEST_F(MissionLoopTest, TestLoopBodyUpdateDescriptors)
     {
         auto& update1 = static_cast<UpdateDescriptorMock<State, void>&>(mission);
-        EXPECT_CALL(update1, UpdateProc(_)).WillOnce(Return(UpdateResult::UpdateOK));
+        EXPECT_CALL(update1, UpdateProc(_)).WillOnce(Return(UpdateResult::Ok));
         mission.RunOnce();
     }
 
@@ -71,9 +71,9 @@ namespace
         auto& verify1 = static_cast<VerifyDescriptorMock<State, void>&>(mission);
         auto& verify2 = static_cast<VerifyDescriptorMock<State, int>&>(mission);
         auto& verify3 = static_cast<VerifyDescriptorMock<State, float>&>(mission);
-        EXPECT_CALL(verify1, VerifyProc(_)).WillOnce(Return(VerifyDescriptorResult(VerifyResult::VerifyOK, 0)));
-        EXPECT_CALL(verify2, VerifyProc(_)).WillOnce(Return(VerifyDescriptorResult(VerifyResult::VerifyOK, 0)));
-        EXPECT_CALL(verify3, VerifyProc(_)).WillOnce(Return(VerifyDescriptorResult(VerifyResult::VerifyOK, 0)));
+        EXPECT_CALL(verify1, VerifyProc(_)).WillOnce(Return(VerifyDescriptorResult(VerifyResult::Ok, 0)));
+        EXPECT_CALL(verify2, VerifyProc(_)).WillOnce(Return(VerifyDescriptorResult(VerifyResult::Ok, 0)));
+        EXPECT_CALL(verify3, VerifyProc(_)).WillOnce(Return(VerifyDescriptorResult(VerifyResult::Ok, 0)));
         mission.RunOnce();
     }
 

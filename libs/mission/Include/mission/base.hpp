@@ -79,11 +79,11 @@ namespace mission
     enum class UpdateResult
     {
         /** @brief State updated successfully */
-        UpdateOK,
+        Ok,
         /** @brief Non-critical error during update */
-        UpdateWarning,
+        Warning,
         /** @brief Fatal error during update */
-        UpdateFailure
+        Failure
     };
 
     /**
@@ -126,9 +126,9 @@ namespace mission
     enum class VerifyResult
     {
         /** @brief No error. State is correct */
-        VerifyOK,
+        Ok,
         /** @brief State is invalid. */
-        VerifyFailure
+        Failure
     };
 
     /**
@@ -168,7 +168,7 @@ namespace mission
     };
 
     constexpr VerifyDescriptorResult::VerifyDescriptorResult() //
-        : VerifyDescriptorResult(VerifyResult::VerifyOK, 0)
+        : VerifyDescriptorResult(VerifyResult::Ok, 0)
     {
     }
 

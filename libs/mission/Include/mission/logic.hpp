@@ -22,17 +22,17 @@ namespace mission
      */
     template <typename State> UpdateResult SystemStateUpdate(State& state, gsl::span<UpdateDescriptor<State>> descriptors)
     {
-        UpdateResult result = UpdateResult::UpdateOK;
+        UpdateResult result = UpdateResult::Ok;
         for (const auto& descriptor : descriptors)
         {
             auto descriptorResult = descriptor.updateProc(state, descriptor.param);
-            if (descriptorResult == UpdateResult::UpdateWarning)
+            if (descriptorResult == UpdateResult::Warning)
             {
-                result = UpdateResult::UpdateWarning;
+                result = UpdateResult::Warning;
             }
-            else if (descriptorResult == UpdateResult::UpdateFailure)
+            else if (descriptorResult == UpdateResult::Failure)
             {
-                result = UpdateResult::UpdateFailure;
+                result = UpdateResult::Failure;
                 break;
             }
         }
@@ -54,15 +54,15 @@ namespace mission
         gsl::span<const VerifyDescriptor<State>> descriptors,
         gsl::span<VerifyDescriptorResult> results)
     {
-        VerifyResult result = VerifyResult::VerifyOK;
+        VerifyResult result = VerifyResult::Ok;
         const uint16_t count = 0;
         for (const auto& descriptor : descriptors)
         {
             auto& target = results[count];
             target = descriptor.verifyProc(state, descriptor.param);
-            if (target.Result() == VerifyResult::VerifyFailure)
+            if (target.Result() == VerifyResult::Failure)
             {
-                result = VerifyResult::VerifyFailure;
+                result = VerifyResult::Failure;
                 break;
             }
         }

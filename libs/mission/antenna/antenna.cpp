@@ -463,7 +463,7 @@ namespace mission
             AntennaMissionState* stateDescriptor = (AntennaMissionState*)param;
             if (stateDescriptor->IsFinished())
             {
-                return UpdateResult::UpdateOK;
+                return UpdateResult::Ok;
             }
 
             AntennaDeploymentStatus deploymentStatus;
@@ -475,7 +475,7 @@ namespace mission
 
             if (OS_RESULT_FAILED(result))
             {
-                return UpdateResult::UpdateFailure;
+                return UpdateResult::Failure;
             }
 
             for (int i = 0; i < 4; ++i)
@@ -495,7 +495,7 @@ namespace mission
             }
 
             state.Antenna.Deployed = stateDescriptor->IsFinished();
-            return UpdateResult::UpdateOK;
+            return UpdateResult::Ok;
         }
 
         AntennaTask::AntennaTask(AntennaDriver& driver) : state(driver)

@@ -33,7 +33,7 @@ TEST_F(TimeTaskTest, TestTimeUpdate)
     EXPECT_CALL(mock, TakeSemaphore(_, _)).WillOnce(Return(OSResult::Success));
     provider.CurrentTime = TimeSpanFromSeconds(12345678);
     const auto result = updateDescriptor.updateProc(state, updateDescriptor.param);
-    ASSERT_THAT(result, Eq(UpdateResult::UpdateOK));
+    ASSERT_THAT(result, Eq(UpdateResult::Ok));
     ASSERT_THAT(state.Time, Eq(TimeSpanFromSeconds(12345678)));
 }
 
@@ -43,6 +43,6 @@ TEST_F(TimeTaskTest, TestTimeUpdateFailure)
     EXPECT_CALL(mock, TakeSemaphore(_, _)).WillOnce(Return(OSResult::IOError));
     provider.CurrentTime = TimeSpanFromSeconds(12345678);
     const auto result = updateDescriptor.updateProc(state, updateDescriptor.param);
-    ASSERT_THAT(result, Eq(UpdateResult::UpdateWarning));
+    ASSERT_THAT(result, Eq(UpdateResult::Warning));
     ASSERT_THAT(state.Time, Ne(TimeSpanFromSeconds(12345678)));
 }

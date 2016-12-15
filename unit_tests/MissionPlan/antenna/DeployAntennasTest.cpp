@@ -103,7 +103,7 @@ TEST_F(DeployAntennasUpdateTest, TestNothingToDo)
 {
     stateDescriptor.OverrideStep(AntennaMissionState::StepCount());
     const auto result = update.updateProc(state, update.param);
-    ASSERT_THAT(result, Eq(UpdateResult::UpdateOK));
+    ASSERT_THAT(result, Eq(UpdateResult::Ok));
 }
 
 TEST_F(DeployAntennasUpdateTest, TestDeploymentOverridenFailure)
@@ -112,7 +112,7 @@ TEST_F(DeployAntennasUpdateTest, TestDeploymentOverridenFailure)
     stateDescriptor.OverrideState();
     EXPECT_CALL(mock, GetDeploymentStatus(_, _)).WillOnce(Return(OSResult::IOError));
     const auto result = update.updateProc(state, update.param);
-    ASSERT_THAT(result, Ne(UpdateResult::UpdateOK));
+    ASSERT_THAT(result, Ne(UpdateResult::Ok));
 }
 
 TEST_F(DeployAntennasUpdateTest, TestDeploymentStateUpdateFullDeployment)
@@ -128,7 +128,7 @@ TEST_F(DeployAntennasUpdateTest, TestDeploymentStateUpdateFullDeployment)
                 return OSResult::Success;
             }));
     const auto result = update.updateProc(state, update.param);
-    ASSERT_THAT(result, Eq(UpdateResult::UpdateOK));
+    ASSERT_THAT(result, Eq(UpdateResult::Ok));
     ASSERT_THAT(state.Antenna.Deployed, Eq(false));
     ASSERT_THAT(state.Antenna.DeploymentState[0], Eq(true));
     ASSERT_THAT(state.Antenna.DeploymentState[1], Eq(true));
@@ -151,7 +151,7 @@ TEST_F(DeployAntennasUpdateTest, TestDeploymentStateUpdatePartialDeployment)
                 return OSResult::Success;
             }));
     const auto result = update.updateProc(state, update.param);
-    ASSERT_THAT(result, Eq(UpdateResult::UpdateOK));
+    ASSERT_THAT(result, Eq(UpdateResult::Ok));
     ASSERT_THAT(state.Antenna.Deployed, Eq(false));
     ASSERT_THAT(state.Antenna.DeploymentState[0], Eq(true));
     ASSERT_THAT(state.Antenna.DeploymentState[1], Eq(false));

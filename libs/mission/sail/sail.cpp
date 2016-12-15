@@ -4,7 +4,7 @@
 
 namespace mission
 {
-    SailTask::SailTask(bool initial) : state(initial)
+    SailTask::SailTask(bool isSailOpened) : state(isSailOpened)
     {
     }
 
@@ -31,7 +31,7 @@ namespace mission
     {
         auto This = static_cast<SailTask*>(param);
         state.SailOpened = This->state;
-        return UpdateResult::UpdateOK;
+        return UpdateResult::Ok;
     }
 
     bool SailTask::CanOpenSail(const SystemState& state, void* param)
