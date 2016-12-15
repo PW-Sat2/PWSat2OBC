@@ -2,6 +2,8 @@
 #include <em_gpio.h>
 #include <em_usart.h>
 
+#include "system.h"
+
 using gsl::span;
 
 using namespace drivers::spi;
@@ -13,12 +15,12 @@ void EFMSPIInterface::Select()
 
 void EFMSPIInterface::Write(gsl::span<const std::uint8_t> buffer)
 {
-    SPIDRV_MTransmitB(&this->_handle, buffer.data(), buffer.size());
+    UNREFERENCED_PARAMETER(buffer);
 }
 
 void EFMSPIInterface::Read(gsl::span<std::uint8_t> buffer)
 {
-    SPIDRV_MReceiveB(&this->_handle, buffer.data(), buffer.size());
+    UNREFERENCED_PARAMETER(buffer);
 }
 
 void EFMSPIInterface::Deselect()
@@ -29,19 +31,6 @@ void EFMSPIInterface::Deselect()
 void EFMSPIInterface::Initialize()
 {
     GPIO_PinModeSet(gpioPortD, 3, gpioModePushPull, 1); // cs
-
-    SPIDRV_Init_t init;
-    init.bitOrder = SPIDRV_BitOrder::spidrvBitOrderMsbFirst;
-    init.bitRate = 7000000;
-    init.clockMode = SPIDRV_ClockMode::spidrvClockMode0;
-    init.csControl = SPIDRV_CsControl::spidrvCsControlApplication;
-    init.dummyTxValue = 0;
-    init.frameLength = 8;
-    init.port = USART1;
-    init.portLocation = 1;
-    init.type = SPIDRV_Type::spidrvMaster;
-
-    SPIDRV_Init(&this->_handle, &init);
 }
 
 void EFMSPIInterface::WriteRead(gsl::span<const std::uint8_t> input, gsl::span<std::uint8_t> output)
