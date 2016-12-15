@@ -40,7 +40,6 @@ target_link_libraries(${NAME}
     i2c
     fs
     yaffs_glue
-    adxrs453
     time
     mission
     eps
