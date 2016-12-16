@@ -19,6 +19,8 @@
  */
 struct SystemState
 {
+    SystemState();
+
     /** @brief Current time */
     TimeSpan Time;
 
@@ -43,7 +45,7 @@ struct SystemState
         /** @brief Current ADCS mode */
         ADCSMode CurrentMode;
     } ADCS;
-} ;
+};
 
 /** @} */
 
