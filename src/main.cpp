@@ -17,7 +17,6 @@
 #include "adcs/adcs.h"
 #include "base/ecc.h"
 #include "base/os.h"
-#include "comm/comm.h"
 #include "dmadrv.h"
 #include "eps/eps.h"
 #include "fs/fs.h"
@@ -39,9 +38,6 @@
 
 #include "leuart/leuart.h"
 #include "power_eps/power_eps.h"
-
-using devices::comm::CommObject;
-using devices::comm::CommFrame;
 
 OBC Main;
 mission::ObcMission Mission(Main.timeProvider, Main.antennaDriver, false);

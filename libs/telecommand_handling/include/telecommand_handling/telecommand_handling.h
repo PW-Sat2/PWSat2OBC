@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include <gsl/span>
-#include "comm/comm.h"
+#include "comm/IHandleFrame.hpp"
 
 namespace telecommands
 {
@@ -194,7 +194,7 @@ namespace telecommands
              * @param[in] transmitter Reference to object used to send response back
              * @param[in] frame Incoming frame
              */
-            virtual void HandleFrame(devices::comm::ITransmitFrame& transmitter, devices::comm::CommFrame& frame) override;
+            virtual void HandleFrame(devices::comm::ITransmitFrame& transmitter, devices::comm::Frame& frame) override;
 
           private:
             /**

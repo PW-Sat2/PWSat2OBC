@@ -56,7 +56,7 @@ template <typename T, std::size_t size> constexpr inline std::size_t count_of(T 
 
 #define IS_BIT_CLEAR(value, bit) (((value) & (1u << bit)) == 0)
 
-template <typename Enum> typename std::underlying_type_t<Enum> num(Enum v)
+template <typename Enum> constexpr inline typename std::underlying_type_t<Enum> num(Enum v)
 {
     return static_cast<std::underlying_type_t<Enum>>(v);
 }
