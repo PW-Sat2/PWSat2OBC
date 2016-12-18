@@ -41,7 +41,8 @@ void ReceiveFrameHandler(uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argv);
     LOG(LOG_LEVEL_INFO, "Received request to get the oldes frame from comm...");
     CommFrame frame;
-    if (!Main.Communication.CommDriver.ReceiveFrame(frame))
+    std::uint8_t buffer[devices::comm::ComPrefferedBufferSize];
+    if (!Main.Communication.CommDriver.ReceiveFrame(buffer, frame))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to get frame from comm. ");
     }
@@ -50,9 +51,8 @@ void ReceiveFrameHandler(uint16_t argc, char* argv[])
         Main.Communication.CommDriver.RemoveFrame();
 
         auto payload = frame.Payload();
-        auto payloadStr = reinterpret_cast<const char*>(&payload[0]);
-
-        Main.terminal.PrintBuffer(gsl::span<const char>(payloadStr, frame.Size));
+        auto payloadStr = reinterpret_cast<const char*>(payload.data());
+        Main.terminal.PrintBuffer(gsl::span<const char>(payloadStr, payload.size()));
     }
 }
 
