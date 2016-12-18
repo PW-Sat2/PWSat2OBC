@@ -182,6 +182,20 @@ class CommObject final : public ITransmitFrame
      */
     bool ResetReceiver();
 
+    /**
+     * @brief Resets the internal hardware watchdog.
+     *
+     * @return Operation status, true in case of success, false otherwise.
+     */
+    bool ResetWatchdogReceiver();
+
+    /**
+     * @brief Resets the internal hardware watchdog.
+     *
+     * @return Operation status, true in case of success, false otherwise.
+     */
+    bool ResetWatchdogTransmitter();
+
   private:
     /** @brief Comm driver lower interface. */
     drivers::i2c::II2CBus& _low;

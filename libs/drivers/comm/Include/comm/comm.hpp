@@ -124,7 +124,7 @@ struct ReceiverFrameCount
      *
      * The contents of this field is undefined when the status is set to false.
      */
-    std::uint8_t frameCount;
+    std::uint16_t frameCount;
 };
 
 /** Transmitter state enumerator. */
@@ -168,8 +168,9 @@ struct TransmitterState
 
 enum class ReceiverCommand
 {
-    HardReset = 0xAB,
     SoftReset = 0xAA,
+    HardReset = 0xAB,
+    ResetWatchdog = 0xCC,
     GetFrameCount = 0x21,
     GetFrame = 0x22,
     RemoveFrame = 0x24,
@@ -179,8 +180,10 @@ enum class ReceiverCommand
 enum class TransmitterCommand
 {
     SoftReset = 0xAA,
+    HardReset = 0xAB,
+    ResetWatchdog = 0xCC,
     SendFrame = 0x10,
-    GetTelemetry = 0x25,
+    GetTelemetry = 0x26,
     SetBeacon = 0x14,
     ClearBeacon = 0x1f,
     SetIdleState = 0x24,
