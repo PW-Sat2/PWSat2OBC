@@ -196,9 +196,8 @@ static OSResult GetDeploymentStatus(AntennaMiniportDriver* miniport,
         return result;
     }
 
-    Reader reader;
-    ReaderInitialize(&reader, output, sizeof(output));
-    const uint16_t value = ReaderReadWordLE(&reader);
+    Reader reader(output);
+    const uint16_t value = reader.ReadWordLE();
     if ((value & 0x1000) != 0)
     {
         LOGF(LOG_LEVEL_WARNING,
@@ -273,9 +272,8 @@ static OSResult GetAntennaActivationTime(AntennaMiniportDriver* miniport,
         return OSResult::IOError;
     }
 
-    Reader reader;
-    ReaderInitialize(&reader, output, sizeof(output));
-    const uint16_t value = ReaderReadWordBE(&reader);
+    Reader reader(output);
+    const uint16_t value = reader.ReadWordBE();
     *span = TimeSpanFromMilliseconds(value * 50);
     return OSResult::Success;
 }
@@ -301,9 +299,8 @@ static OSResult GetTemperature(AntennaMiniportDriver* miniport,
         return OSResult::IOError;
     }
 
-    Reader reader;
-    ReaderInitialize(&reader, output, sizeof(output));
-    const uint16_t value = ReaderReadWordBE(&reader);
+    Reader reader(output);
+    const uint16_t value = reader.ReadWordBE();
     if ((value & 0xfc00) != 0)
     {
         LOGF(LOG_LEVEL_WARNING,

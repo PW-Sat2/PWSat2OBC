@@ -180,15 +180,14 @@ bool CommObject::GetReceiverTelemetry(CommReceiverTelemetry& telemetry)
         return status;
     }
 
-    Reader reader;
-    ReaderInitialize(&reader, buffer, COUNT_OF(buffer));
-    telemetry.TransmitterCurrentConsumption = ReaderReadWordLE(&reader);
-    telemetry.DopplerOffset = ReaderReadWordLE(&reader);
-    telemetry.ReceiverCurrentConsumption = ReaderReadWordLE(&reader);
-    telemetry.Vcc = ReaderReadWordLE(&reader);
-    telemetry.OscilatorTemperature = ReaderReadWordLE(&reader);
-    telemetry.AmplifierTemperature = ReaderReadWordLE(&reader);
-    telemetry.SignalStrength = ReaderReadWordLE(&reader);
+    Reader reader(buffer);
+    telemetry.TransmitterCurrentConsumption = reader.ReadWordLE();
+    telemetry.DopplerOffset = reader.ReadWordLE();
+    telemetry.ReceiverCurrentConsumption = reader.ReadWordLE();
+    telemetry.Vcc = reader.ReadWordLE();
+    telemetry.OscilatorTemperature = reader.ReadWordLE();
+    telemetry.AmplifierTemperature = reader.ReadWordLE();
+    telemetry.SignalStrength = reader.ReadWordLE();
 
     if ((telemetry.TransmitterCurrentConsumption & 0xf000) != 0 || //
         (telemetry.DopplerOffset & 0xf000) != 0 ||                 //
@@ -202,7 +201,7 @@ bool CommObject::GetReceiverTelemetry(CommReceiverTelemetry& telemetry)
         return false;
     }
 
-    return ReaderStatus(&reader);
+    return reader.Status();
 }
 
 bool CommObject::GetTransmitterTelemetry(CommTransmitterTelemetry& telemetry)
@@ -214,12 +213,11 @@ bool CommObject::GetTransmitterTelemetry(CommTransmitterTelemetry& telemetry)
         return status;
     }
 
-    Reader reader;
-    ReaderInitialize(&reader, buffer, COUNT_OF(buffer));
-    telemetry.RFReflectedPower = ReaderReadWordLE(&reader);
-    telemetry.AmplifierTemperature = ReaderReadWordLE(&reader);
-    telemetry.RFForwardPower = ReaderReadWordLE(&reader);
-    telemetry.TransmitterCurrentConsumption = ReaderReadWordLE(&reader);
+    Reader reader(buffer);
+    telemetry.RFReflectedPower = reader.ReadWordLE();
+    telemetry.AmplifierTemperature = reader.ReadWordLE();
+    telemetry.RFForwardPower = reader.ReadWordLE();
+    telemetry.TransmitterCurrentConsumption = reader.ReadWordLE();
 
     if ((telemetry.RFReflectedPower & 0xf000) != 0 ||     //
         (telemetry.AmplifierTemperature & 0xf000) != 0 || //
@@ -230,7 +228,7 @@ bool CommObject::GetTransmitterTelemetry(CommTransmitterTelemetry& telemetry)
         return false;
     }
 
-    return ReaderStatus(&reader);
+    return reader.Status();
 }
 
 bool CommObject::ReceiveFrame(CommFrame& frame)
@@ -242,12 +240,11 @@ bool CommObject::ReceiveFrame(CommFrame& frame)
         return status;
     }
 
-    Reader reader;
-    ReaderInitialize(&reader, buffer, COUNT_OF(buffer));
-    frame.Size = ReaderReadWordLE(&reader);
-    frame.Doppler = ReaderReadWordLE(&reader);
-    frame.RSSI = ReaderReadWordLE(&reader);
-    const uint8_t* data = ReaderReadArray(&reader, frame.Size);
+    Reader reader(buffer);
+    frame.Size = reader.ReadWordLE();
+    frame.Doppler = reader.ReadWordLE();
+    frame.RSSI = reader.ReadWordLE();
+    const auto data = reader.ReadArray(frame.Size);
 
     if (frame.Size > COMM_MAX_FRAME_CONTENTS_SIZE)
     {
@@ -255,12 +252,12 @@ bool CommObject::ReceiveFrame(CommFrame& frame)
         return false;
     }
 
-    if (data != NULL)
+    if (!data.empty())
     {
-        memcpy(frame.Contents.data(), data, frame.Size);
+        memcpy(frame.Contents.data(), data.data(), data.size());
     }
 
-    status = ReaderStatus(&reader);
+    status = reader.Status();
     if (!status)
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Failed to receive frame");
@@ -272,8 +269,11 @@ bool CommObject::ReceiveFrame(CommFrame& frame)
 
     if (frame.Size == 0 || (frame.Doppler & 0xf000) != 0 || (frame.RSSI & 0xf000) != 0)
     {
-        LOGF(
-            LOG_LEVEL_ERROR, "[comm] Received invalid frame. Size: %d, Doppler: 0x%X, RSSI: 0x%X. ", frame.Size, frame.Doppler, frame.RSSI);
+        LOGF(LOG_LEVEL_ERROR,                                                       //
+            "[comm] Received invalid frame. Size: %d, Doppler: 0x%X, RSSI: 0x%X. ", //
+            frame.Size,                                                             //
+            frame.Doppler,                                                          //
+            frame.RSSI);
         return false;
     }
 
@@ -289,14 +289,14 @@ bool CommObject::SendFrame(span<const std::uint8_t> frame)
     }
 
     uint8_t cmd[255];
-
     cmd[0] = TransmitterSendFrame;
     memcpy(cmd + 1, frame.data(), frame.size());
     uint8_t remainingBufferSize;
 
-    const bool status =
-        (this->_low.WriteRead(CommTransmitter, span<const uint8_t>(cmd, 1 + frame.size()), span<uint8_t>(&remainingBufferSize, 1)) ==
-            I2CResult::OK);
+    const bool status = (this->_low.WriteRead(CommTransmitter,           //
+                             span<const uint8_t>(cmd, 1 + frame.size()), //
+                             span<uint8_t>(&remainingBufferSize, 1)      //
+                             ) == I2CResult::OK);
     if (!status)
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Failed to send frame");
