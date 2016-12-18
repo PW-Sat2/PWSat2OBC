@@ -1,5 +1,5 @@
 from eps import EPSDevice
-from comm import TransmitterDevice, ReceiverDevice
+from comm import *
 from antenna import *
 from antenna import PRIMARY_ANTENNA_CONTROLLER_ADDRESS
 from antenna import BACKUP_ANTENNA_CONTROLLER_ADDRESS
@@ -9,6 +9,7 @@ __all__ = [
     'EPSDevice',
     'TransmitterDevice',
     'ReceiverDevice',
+    'Comm',
     'EchoDevice',
     'TimeoutDevice',
     'AntennaController',

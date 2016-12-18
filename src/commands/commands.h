@@ -12,6 +12,7 @@ void SendFrameHandler(std::uint16_t argc, char* argv[]);
 void GetFramesCountHandler(std::uint16_t argc, char* argv[]);
 void ReceiveFrameHandler(std::uint16_t argc, char* argv[]);
 void CommandPauseComm(std::uint16_t argc, char* argv[]);
+void CommReset(uint16_t argc, char* argv[]);
 void OBCGetState(std::uint16_t argc, char* argv[]);
 void FSListFiles(std::uint16_t argc, char* argv[]);
 void FSWriteFile(std::uint16_t argc, char* argv[]);
