@@ -1,11 +1,12 @@
 #include <algorithm>
 #include <cstdint>
 #include <gsl/span>
+#include "comm/Frame.hpp"
+#include "comm/ITransmitFrame.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "comm/comm.h"
 #include "telecommand_handling/telecommand_handling.h"
 #include "utils.hpp"
 
@@ -21,7 +22,7 @@ using testing::_;
 using testing::Eq;
 using testing::StrEq;
 
-using devices::comm::CommFrame;
+using devices::comm::Frame;
 using devices::comm::ITransmitFrame;
 using namespace telecommands::handling;
 
@@ -61,7 +62,7 @@ TeleCommandHandlingTest::TeleCommandHandlingTest() : handling(deps, deps, span<I
 TEST_F(TeleCommandHandlingTest, IncomingFrameShouldBeDecryptedAndDecoded)
 {
     std::uint8_t buffer[40] = {};
-    CommFrame frame(0, 0, 0, buffer);
+    Frame frame(0, 0, 0, buffer);
     EXPECT_CALL(this->deps, Decrypt(_, _)).WillOnce(Return(DecryptFrameResult::Success(frame.Payload())));
     EXPECT_CALL(this->deps, Decode(_)).WillOnce(Return(DecodeTelecommandResult::Success(0xA, frame.Payload().subspan(1))));
 
@@ -71,7 +72,7 @@ TEST_F(TeleCommandHandlingTest, IncomingFrameShouldBeDecryptedAndDecoded)
 TEST_F(TeleCommandHandlingTest, HandlerShouldBeCalledForKnownTelecommand)
 {
     std::uint8_t buffer[40] = "ABCD";
-    CommFrame frame(0, 0, 0, buffer);
+    Frame frame(0, 0, 0, buffer);
 
     EXPECT_CALL(this->deps, Decrypt(_, _)).WillOnce(Invoke([](span<const uint8_t> frame, span<uint8_t> decrypted) {
         auto lastCopied = std::copy(frame.cbegin(), frame.cend(), decrypted.begin());
@@ -101,7 +102,7 @@ TEST_F(TeleCommandHandlingTest, WhenDecryptionFailsShouldNotAttemptFrameDecoding
 
     EXPECT_CALL(this->deps, Decode(_)).Times(0);
 
-    CommFrame frame;
+    Frame frame;
 
     this->handling.HandleFrame(this->transmitFrame, frame);
 }
@@ -121,7 +122,7 @@ TEST_F(TeleCommandHandlingTest, WhenDecodingFrameShouldNotAttemptInvokingHandler
 
     IncomingTelecommandHandler handler(this->deps, this->deps, span<IHandleTeleCommand*>(telecommands));
 
-    CommFrame frame;
+    Frame frame;
 
     handler.HandleFrame(this->transmitFrame, frame);
 }

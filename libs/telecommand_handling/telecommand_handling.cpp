@@ -1,17 +1,17 @@
+#include "telecommand_handling.h"
 #include <stdalign.h>
 #include <stdint.h>
 #include <array>
-
+#include "comm/Frame.hpp"
 #include "logger/logger.h"
-#include "telecommand_handling.h"
+#include "system.h"
 
 using std::uint8_t;
 using std::size_t;
 using std::array;
 using gsl::span;
 
-using devices::comm::CommObject;
-using devices::comm::CommFrame;
+using devices::comm::Frame;
 using devices::comm::ITransmitFrame;
 
 using namespace telecommands::handling;
@@ -26,7 +26,7 @@ IncomingTelecommandHandler::IncomingTelecommandHandler(
 {
 }
 
-void IncomingTelecommandHandler::HandleFrame(ITransmitFrame& transmitter, CommFrame& frame)
+void IncomingTelecommandHandler::HandleFrame(ITransmitFrame& transmitter, Frame& frame)
 {
     array<uint8_t, DecryptionBufferSize> decryptedFrame{0};
 

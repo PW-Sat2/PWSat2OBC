@@ -1,7 +1,8 @@
 #ifndef SRC_COMMUNICATION_H_
 #define SRC_COMMUNICATION_H_
+
 #include <gsl/span>
-#include "comm/comm.h"
+#include "comm/CommDriver.hpp"
 #include "i2c/i2c.h"
 #include "telecommand_handling/telecommand_handling.h"
 #include "telecommand_handling/uplink.h"
