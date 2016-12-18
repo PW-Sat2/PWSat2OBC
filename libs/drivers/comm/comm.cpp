@@ -42,6 +42,10 @@ CommObject::CommObject(II2CBus& low, IHandleFrame& upperInterface)
 {
 }
 
+/**
+ * @brief Enumerator of all flags used for communication with comm task
+ * @ingroup LowerCommDriver
+ */
 enum TaskFlag
 {
     TaskFlagPauseRequest = 1,
@@ -227,6 +231,16 @@ bool CommObject::GetTransmitterTelemetry(TransmitterTelemetry& telemetry)
     return reader.Status();
 }
 
+/**
+ * @brief Get the span that is suited to receive the frame with specified length.
+ * @ingroup LowerCommDriver
+ *
+ * @param[in] frameSize Requested frame size.
+ * @param[in] buffer Buffer window that should be shrinked down to exactly match minimum the necessary
+ * space needed to receive the frame with passed size.
+ * @return Buffer window that is at most as long as tne total number of bytes needed to receive the frame from hardware.
+ * This window will be shorter if the input window was not long enough.
+ */
 static gsl::span<std::uint8_t> ReceiveSpan(std::uint16_t frameSize, gsl::span<std::uint8_t> buffer)
 {
     if (buffer.size() <= frameSize + 6)

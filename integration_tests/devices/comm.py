@@ -2,6 +2,7 @@ import logging
 import i2cMock
 import time
 from Queue import Queue, Empty
+from threading import Lock
 from utils import *
 
 class TransmitterDevice(i2cMock.I2CDevice):
@@ -57,6 +58,7 @@ class ReceiverDevice(i2cMock.I2CDevice):
         self.on_frame_remove = None
         self.on_frame_receive = None
         self._buffer = Queue()
+        self._lock = Lock()
 
     @i2cMock.command([0xAA])
     def _reset(self):
@@ -76,17 +78,19 @@ class ReceiverDevice(i2cMock.I2CDevice):
 
     @i2cMock.command([0x21])
     def _get_number_of_frames(self):
-        size = self._buffer.qsize();
-        return [size & 0xff, size / 256]
+        with self._lock:
+            size = self._buffer.qsize();
+            return [size & 0xff, size / 256]
 
     @i2cMock.command([0x22])
     def _receive_frame(self):
         if call(self.on_frame_receive, True, self):
-            if self._buffer.empty():
-                return []
+            with self._lock:
+                if self._buffer.empty():
+                    return []
 
-            frame = self._buffer.queue[0]
-            return ReceiverDevice.build_frame_response(frame, 257, 300)
+                frame = self._buffer.queue[0]
+                return ReceiverDevice.build_frame_response(frame, 257, 300)
         else:
             return []
 
@@ -94,12 +98,14 @@ class ReceiverDevice(i2cMock.I2CDevice):
     def _remove_frame(self):
         try:
             if call(self.on_frame_remove, True, self):
-                self._buffer.get_nowait()
+                with self._lock:
+                    self._buffer.get_nowait()
         except Empty:
             pass
 
     def reset(self):
-        self._buffer = Queue()
+        with self._lock:
+            self._buffer = Queue()
 
     @classmethod
     def build_frame_response(cls, content, doppler, rssi):
@@ -113,10 +119,12 @@ class ReceiverDevice(i2cMock.I2CDevice):
         return length_bytes + doppler_bytes + rssi_bytes + content_bytes
 
     def put_frame(self, data):
-        self._buffer.put_nowait(data)
+        with self._lock:
+            self._buffer.put_nowait(data)
 
     def queue_size(self):
-        return self._buffer.qsize()
+        with self._lock:
+            return self._buffer.qsize()
 
 class Comm(object):
     def __init__(self):
