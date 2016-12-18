@@ -166,6 +166,9 @@ struct TransmitterState
     bool BeaconState;
 };
 
+/**
+ * @brief Enumerator for all supported comm frame receiver commands.
+ */
 enum class ReceiverCommand
 {
     SoftReset = 0xAA,
@@ -177,6 +180,9 @@ enum class ReceiverCommand
     GetTelemetry = 0x1A,
 };
 
+/**
+ * @brief Enumerator for all supported comm frame transmitter commands.
+ */
 enum class TransmitterCommand
 {
     SoftReset = 0xAA,
