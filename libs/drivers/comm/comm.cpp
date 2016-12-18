@@ -1,7 +1,7 @@
 /**
 @file libs/drivers/comm/comm.cpp Driver for communication module.
 
-@remarks Based on ICD Issue 1.0 2014-12-19
+@remarks Based on ICD Issue 1.1 2015-09-16
 */
 #include "comm.hpp"
 #include <stdnoreturn.h>
@@ -120,7 +120,7 @@ bool CommObject::Pause()
 
 bool CommObject::Reset()
 {
-    return this->SendCommand(Address::Receiver, num(ReceiverCommand::HardReset)) && this->ResetReceiver() && this->ResetTransmitter();
+    return this->SendCommand(Address::Receiver, num(ReceiverCommand::HardReset));
 }
 
 bool CommObject::ResetTransmitter()
@@ -136,17 +136,21 @@ bool CommObject::ResetReceiver()
 ReceiverFrameCount CommObject::GetFrameCount()
 {
     ReceiverFrameCount result;
-    uint8_t count = 0;
-    result.status = this->SendCommandWithResponse(Address::Receiver, num(ReceiverCommand::GetFrameCount), span<uint8_t>(&count, 1));
-    if (result.status)
-    {
-        LOGF(LOG_LEVEL_INFO, "There are %d frames.", static_cast<int>(count));
-        result.frameCount = count;
-    }
-    else
+    uint8_t buffer[2];
+    result.status = this->SendCommandWithResponse(Address::Receiver, num(ReceiverCommand::GetFrameCount), buffer);
+    if (!result.status)
     {
         LOG(LOG_LEVEL_ERROR, "Unable to get frame count");
         result.frameCount = 0;
+        return result;
+    }
+
+    Reader reader(buffer);
+    result.frameCount = reader.ReadWordLE();
+    result.status = reader.Status();
+    if (reader.Status())
+    {
+        LOGF(LOG_LEVEL_INFO, "There are %d frames.", static_cast<int>(result.frameCount));
     }
 
     return result;
@@ -373,6 +377,16 @@ bool CommObject::GetTransmitterState(TransmitterState& state)
     return true;
 }
 
+bool CommObject::ResetWatchdogReceiver()
+{
+    return this->SendCommand(Address::Receiver, num(ReceiverCommand::ResetWatchdog));
+}
+
+bool CommObject::ResetWatchdogTransmitter()
+{
+    return this->SendCommand(Address::Transmitter, num(TransmitterCommand::ResetWatchdog));
+}
+
 void CommObject::PollHardware()
 {
     auto frameResponse = this->GetFrameCount();
@@ -414,6 +428,11 @@ void CommObject::PollHardware()
                 }
             }
         }
+    }
+
+    if (!ResetWatchdogReceiver() && !ResetWatchdogTransmitter())
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable to reset comm watchdog. ");
     }
 }
 

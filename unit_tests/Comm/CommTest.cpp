@@ -46,7 +46,7 @@ static constexpr uint8_t TransmitterSendFrame = 0x10;
 static constexpr uint8_t TransmitterSetBeacon = 0x14;
 static constexpr uint8_t TransmitterClearBeacon = 0x1f;
 static constexpr uint8_t TransmitterSetIdleState = 0x24;
-static constexpr uint8_t TransmitterGetTelemetry = 0x25;
+static constexpr uint8_t TransmitterGetTelemetry = 0x26;
 static constexpr uint8_t TransmitterSetBitrate = 0x28;
 static constexpr uint8_t TransmitterGetState = 0x41;
 static constexpr uint8_t TransmitterReset = 0xAA;
@@ -115,8 +115,6 @@ TEST_F(CommTest, TestInitialization)
 TEST_F(CommTest, TestHardwareReset)
 {
     i2c.ExpectWriteCommand(ReceiverAddress, HardwareReset).WillOnce(Return(I2CResult::OK));
-    i2c.ExpectWriteCommand(TransmitterAddress, TransmitterReset).WillOnce(Return(I2CResult::OK));
-    i2c.ExpectWriteCommand(ReceiverAddress, ReceiverReset).WillOnce(Return(I2CResult::OK));
     const auto status = comm.Reset();
     ASSERT_THAT(status, Eq(true));
 }
@@ -124,23 +122,6 @@ TEST_F(CommTest, TestHardwareReset)
 TEST_F(CommTest, TestHardwareResetFailureOnHardware)
 {
     i2c.ExpectWriteCommand(ReceiverAddress, HardwareReset).WillOnce(Return(I2CResult::Nack));
-    const auto status = comm.Reset();
-    ASSERT_THAT(status, Eq(false));
-}
-
-TEST_F(CommTest, TestHardwareResetFailureOnReceiver)
-{
-    i2c.ExpectWriteCommand(ReceiverAddress, HardwareReset).WillOnce(Return(I2CResult::OK));
-    i2c.ExpectWriteCommand(ReceiverAddress, ReceiverReset).WillOnce(Return(I2CResult::Nack));
-    ON_CALL(i2c, Write(TransmitterAddress, _)).WillByDefault(Return(I2CResult::OK));
-    const auto status = comm.Reset();
-    ASSERT_THAT(status, Eq(false));
-}
-
-TEST_F(CommTest, TestHardwareResetFailureOnTransmitter)
-{
-    i2c.ExpectWriteCommand(TransmitterAddress, TransmitterReset).WillOnce(Return(I2CResult::Nack));
-    EXPECT_CALL(i2c, Write(ReceiverAddress, _)).WillRepeatedly(Return(I2CResult::OK));
     const auto status = comm.Reset();
     ASSERT_THAT(status, Eq(false));
 }
@@ -199,13 +180,14 @@ TEST_F(CommTest, TestGetFrameCount)
 {
     EXPECT_CALL(i2c, WriteRead(ReceiverAddress, ElementsAre(ReceiverGetFrameCount), _))
         .WillOnce(Invoke([](uint8_t /*address*/, auto /*inData*/, auto outData) {
-            outData[0] = 31;
+            outData[0] = 1;
+            outData[1] = 1;
             return I2CResult::OK;
         }));
 
     const auto result = comm.GetFrameCount();
     ASSERT_THAT(result.status, Eq(true));
-    ASSERT_THAT(result.frameCount, Eq(31));
+    ASSERT_THAT(result.frameCount, Eq(257));
 }
 
 TEST_F(CommTest, TestClearBeaconFailure)
