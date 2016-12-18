@@ -13,6 +13,7 @@ static const TerminalCommandDescription commands[] = {
     {"getFramesCount", GetFramesCountHandler},
     {"receiveFrame", ReceiveFrameHandler},
     {"pauseComm", CommandPauseComm},
+    {"comm_reset", CommReset},
     {"getState", OBCGetState},
     {"listFiles", FSListFiles},
     {"writeFile", FSWriteFile},

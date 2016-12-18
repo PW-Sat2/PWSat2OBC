@@ -1,6 +1,7 @@
 from SerialPortTerminal import SerialPortTerminal
 from obc import OBC
 from .antenna import *
+from .comm import *
 
 __all__ = [
     'SerialPortTerminal',
@@ -8,4 +9,5 @@ __all__ = [
     'AntennaId',
     'AntennaChannel',
     'OverrideSwitches',
+    'CommModule',
 ]

@@ -35,8 +35,9 @@ class System:
 
     def _setup_devices(self):
         self.eps = EPSDevice()
-        self.transmitter = TransmitterDevice()
-        self.receiver = ReceiverDevice()
+        self.comm = Comm()
+        self.transmitter = self.comm.transmitter
+        self.receiver = self.comm.receiver
         self.primary_antenna = AntennaController(PRIMARY_ANTENNA_CONTROLLER_ADDRESS)
         self.backup_antenna = AntennaController(BACKUP_ANTENNA_CONTROLLER_ADDRESS)
 
