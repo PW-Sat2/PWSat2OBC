@@ -383,9 +383,9 @@ void CommObject::PollHardware()
     else if (frameResponse.frameCount > 0)
     {
         std::uint8_t buffer[PrefferedBufferSize];
-        LOGF(LOG_LEVEL_INFO, "[comm] Got %d frames", frameResponse.frameCount);
+        LOGF(LOG_LEVEL_INFO, "[comm] Got %d frames", static_cast<int>(frameResponse.frameCount));
 
-        for (uint8_t i = 0; i < frameResponse.frameCount; i++)
+        for (decltype(frameResponse.frameCount) i = 0; i < frameResponse.frameCount; i++)
         {
             Frame frame;
             bool status = this->ReceiveFrame(buffer, frame);
@@ -399,9 +399,19 @@ void CommObject::PollHardware()
                 {
                     LOG(LOG_LEVEL_ERROR, "[comm] Unable to remove frame from receiver. ");
                 }
-
-                LOGF(LOG_LEVEL_INFO, "[comm] Received frame %d bytes. ", static_cast<int>(frame.Size()));
-                this->_frameHandler.HandleFrame(*this, frame);
+                else if (frame.Verify())
+                {
+                    LOGF(LOG_LEVEL_INFO, "[comm] Received frame %d bytes. ", static_cast<int>(frame.Size()));
+                    this->_frameHandler.HandleFrame(*this, frame);
+                }
+                else
+                {
+                    LOGF(LOG_LEVEL_ERROR,
+                        "[comm] Received invalid frame. Size: %d, Doppler: 0x%X, RSSI: 0x%X. ",
+                        static_cast<int>(frame.FullSize()),
+                        static_cast<int>(frame.Doppler()),
+                        static_cast<int>(frame.Rssi()));
+                }
             }
         }
     }
