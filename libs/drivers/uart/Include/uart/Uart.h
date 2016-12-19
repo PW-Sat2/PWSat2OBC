@@ -7,35 +7,39 @@
 #include "em_usart.h"
 #include "em_cmu.h"
 #include "em_gpio.h"
+#include "base/os.h"
+#include "logger/logger.h"
+#include <gsl/span>
 
 
-#define ECODE_EMDRV_UARTDRV_OK                (ECODE_OK)
-#define ECODE_EMDRV_UARTDRV_WAITING           (ECODE_EMDRV_UARTDRV_BASE | 0x00000001)
-#define ECODE_EMDRV_UARTDRV_ILLEGAL_HANDLE    (ECODE_EMDRV_UARTDRV_BASE | 0x00000002)
-#define ECODE_EMDRV_UARTDRV_PARAM_ERROR       (ECODE_EMDRV_UARTDRV_BASE | 0x00000003)
-#define ECODE_EMDRV_UARTDRV_BUSY              (ECODE_EMDRV_UARTDRV_BASE | 0x00000004)
-#define ECODE_EMDRV_UARTDRV_ILLEGAL_OPERATION (ECODE_EMDRV_UARTDRV_BASE | 0x00000005)
-#define ECODE_EMDRV_UARTDRV_IDLE              (ECODE_EMDRV_UARTDRV_BASE | 0x00000008)
-#define ECODE_EMDRV_UARTDRV_ABORTED           (ECODE_EMDRV_UARTDRV_BASE | 0x00000009)
-#define ECODE_EMDRV_UARTDRV_QUEUE_FULL        (ECODE_EMDRV_UARTDRV_BASE | 0x0000000A)
-#define ECODE_EMDRV_UARTDRV_QUEUE_EMPTY       (ECODE_EMDRV_UARTDRV_BASE | 0x0000000B)
-#define ECODE_EMDRV_UARTDRV_PARITY_ERROR      (ECODE_EMDRV_UARTDRV_BASE | 0x0000000C)
-#define ECODE_EMDRV_UARTDRV_FRAME_ERROR       (ECODE_EMDRV_UARTDRV_BASE | 0x0000000D)
-#define ECODE_EMDRV_UARTDRV_DMA_ALLOC_ERROR   (ECODE_EMDRV_UARTDRV_BASE | 0x0000000E)
-#define ECODE_EMDRV_UARTDRV_CLOCK_ERROR       (ECODE_EMDRV_UARTDRV_BASE | 0x0000000F)
+namespace drivers
+{
 
-
-
+namespace uart
+    {
 
 //typedef void (*UART_Callback_t)(struct Uart_Init *Init,
 //                                    Ecode_t transferStatus,
 //                                    uint8_t *data,
 //									uint32_t transferCount);
+enum class UartResult{
+	OK = 0,
+	Timeout = -6,
+	Failure = -8
+};
 
 
 
-struct Uart_Init
-{
+struct IUartBus {
+	virtual UartResult Write(gsl::span<const uint8_t>data)=0;
+	virtual UartResult Read(gsl::span<const uint8_t>data)=0;
+};
+
+
+
+
+
+struct Uart_Init{
 USART_TypeDef             *uart;
 uint32_t             baudRate;
 uint8_t              portLocationTx;
@@ -50,30 +54,32 @@ USART_Databits_TypeDef dataBits;
 };
 
 
-class Uart final{
+class Uart final : public IUartBus{
 
 
 
 public:
 Uart(Uart_Init &init);
-void Write(uint8_t &data);
-void Read(uint8_t &data);
+virtual UartResult Write(gsl::span<const uint8_t>data) override;
+virtual UartResult Read(gsl::span<const uint8_t>data) override;
 void Initialize(void);
 void DeInitialize(void);
 
 private:
 	Uart_Init 				_init;
-	uint8_t               	rxDmaCh;
-	uint8_t              	txDmaCh;
 	CMU_Clock_TypeDef          uartClock;
 	DMADRV_PeripheralSignal_t  txDmaSignal;
 	DMADRV_PeripheralSignal_t  rxDmaSignal;
 	GPIO_Port_TypeDef txPort;
 	GPIO_Port_TypeDef rxPort;
+	OSSemaphoreHandle txlock;
+	OSSemaphoreHandle rxlock;
 	void InitializeDma(void);
 	void InitializeGpio(void);
 };
 
 
+    }
+}
 
 #endif /* LIBS_DRIVERS_UART_UART_H_ */

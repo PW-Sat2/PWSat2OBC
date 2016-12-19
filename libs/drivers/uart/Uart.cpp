@@ -7,26 +7,54 @@
 #include "dmadrv.h"
 
 
+using namespace drivers::uart;
 
-static SemaphoreHandle_t lineEndReceived = xSemaphoreCreateBinary();
+
+static unsigned int               	rxDmaCh;
+static unsigned int              	txDmaCh;
+
+static bool TransmitDmaComplete(unsigned int channel,
+		                        unsigned int sequenceNo,
+		                        void *userParam)
+   {
+	(void)channel;
+	(void)sequenceNo;
+	(void)userParam;
+	return true;
+  }
+
+static bool ReceiveDmaComplete(unsigned int channel,
+		                        unsigned int sequenceNo,
+		                        void *userParam)
+   {
+	(void)channel;
+	(void)sequenceNo;
+	(void)userParam;
+	return true;
+  }
+
 
 Uart::Uart(Uart_Init &init):_init(init){}
 
 void Uart::InitializeDma(){
-	this->uartClock   = cmuClock_USART1;
+	this->uartClock   = cmuClock_UART1;
 	this->txDmaSignal = dmadrvPeripheralSignal_USART1_TXBL;
 	this->rxDmaSignal = dmadrvPeripheralSignal_USART1_RXDATAV;
 	DMADRV_Init();
+	DMADRV_AllocateChannel(&rxDmaCh, NULL);
+	DMADRV_AllocateChannel(&txDmaCh, NULL);
+
 }
 
 void Uart::InitializeGpio(){
-	 txPort = (GPIO_Port_TypeDef)AF_USART1_TX_PORT(this->_init.portLocationTx);
-	 rxPort = (GPIO_Port_TypeDef)AF_USART1_RX_PORT(this->_init.portLocationRx);
-	 uint8_t txPin  = AF_USART1_TX_PIN(this->_init.portLocationTx);
-	 uint8_t rxPin  = AF_USART1_RX_PIN(this->_init.portLocationRx);
+	 txPort = (GPIO_Port_TypeDef)AF_USART1_TX_PORT(this->_init.portLocation);
+	 rxPort = (GPIO_Port_TypeDef)AF_USART1_RX_PORT(this->_init.portLocation);
+	 uint8_t txPin  = AF_USART1_TX_PIN(this->_init.portLocation);
+	 uint8_t rxPin  = AF_USART1_RX_PIN(this->_init.portLocation);
 	 GPIO_PinModeSet(this->txPort, txPin, gpioModePushPull, 1);
 	 GPIO_PinModeSet(this->rxPort, rxPin, gpioModeInputPull, 1);
 }
+
 
 void Uart:: Initialize(){
 	 USART_InitAsync_TypeDef usartInit = USART_INITASYNC_DEFAULT;
@@ -37,8 +65,9 @@ void Uart:: Initialize(){
 	 usartInit.databits = (USART_Databits_TypeDef)USART_FRAME_DATABITS_EIGHT;
 	 CMU_ClockEnable(cmuClock_HFPER, true);
 	 CMU_ClockEnable(cmuClock_GPIO, true);
-	 CMU_ClockEnable(uartClock, true);
+	 CMU_ClockEnable(cmuClock_USART1, true);
 	 USART_InitAsync(_init.uart, &usartInit);
+	 USART_IntClear(_init.uart, ~0x0);
 	 Uart::InitializeDma();
 	 Uart::InitializeGpio();
 	 _init.uart->ROUTE = USART_ROUTE_TXPEN
@@ -46,6 +75,7 @@ void Uart:: Initialize(){
 	                         | (_init.portLocation
 	                         << _USART_ROUTE_LOCATION_SHIFT);
 
+	 USART_Enable(_init.uart, usartEnableTx);
 
 }
 void Uart::DeInitialize(){
@@ -58,46 +88,47 @@ void Uart::DeInitialize(){
 	 this->_init.uart->CMD = USART_CMD_RXDIS;
 	 this->_init.uart->CMD = USART_CMD_TXDIS;
 }
-void Uart::Read(uint8_t &data){
 
+UartResult Uart::Read(gsl::span<const uint8_t>data){
+	uint8_t *InData= const_cast<uint8_t*>(data.data());
+	Lock lock(this->rxlock, MAX_DELAY);
 
-	 DMADRV_PeripheralMemory(this->rxDmaCh,
+		if (!lock())
+		    {
+		        //LOGF(LOG_LEVEL_ERROR, "[UART] Taking receive semaphore failed.");
+		        return UartResult::Failure;
+		    }
+
+	 DMADRV_PeripheralMemory(rxDmaCh,
 	        dmadrvPeripheralSignal_USART1_RXDATAV,
-	        (void*)&data,
+	        (void*)InData,
 	        (void*)&USART1->RXDATA,
 	        true,
 	        sizeof(data),
 	        dmadrvDataSize1,
-	        NULL,
+			ReceiveDmaComplete,
 	        NULL);
-
-	    NVIC_EnableIRQ(LEUART0_IRQn);
-
-	    xSemaphoreTake(lineEndReceived, portMAX_DELAY);
-
-	    NVIC_DisableIRQ(LEUART0_IRQn);
-
+	 return UartResult::OK;
 }
 
-void Uart::Write(uint8_t &data){
-	  DMADRV_MemoryPeripheral(this->txDmaCh,
+UartResult Uart::Write(gsl::span<const uint8_t>data){
+	uint8_t *InData= const_cast<uint8_t*>(data.data());
+	Lock lock(this->txlock, MAX_DELAY);
+
+	if (!lock())
+	    {
+	        //LOGF(LOG_LEVEL_ERROR, "[UART] Taking transmit semaphore failed.");
+	        return UartResult::Failure;
+	    }
+
+	DMADRV_MemoryPeripheral(txDmaCh,
 	                          this->txDmaSignal,
 							  (void *)&(this->_init.uart->TXDATA),
-	                          (void*)&data,
+	                          (void*)InData,
 	                          true,
-	                          sizeof(data),
+	                          data.length(),
 	                          dmadrvDataSize1,
-	                          NULL,
+							  TransmitDmaComplete,
 							  NULL);
-
+	 return UartResult::OK;
 }
-
-void USART1_IRQHandler(void)
-{
-    uint32_t flags = USART_IntGet(USART1);
-    USART_IntClear(USART1, flags);
-
-    xSemaphoreGiveFromISR(lineEndReceived, NULL);
-
-}
-

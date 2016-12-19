@@ -43,6 +43,10 @@ using devices::comm::CommFrame;
 
 using services::time::TimeProvider;
 using namespace std::chrono_literals;
+using devices::comm::CommObject;
+using devices::comm::CommFrame;
+using gsl::span;
+using namespace drivers::uart;
 
 OBC Main;
 mission::ObcMission Mission(Main.timeProvider, Main.antennaDriver, false);
@@ -169,18 +173,17 @@ void SetupHardware(void)
     CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_HFCLKLE);
 }
 
-/*
 
 void UartTask(void* param)
 {
-	uint8_t testByte= 41;
+	const char* testByte="lamakota";
 	UNREFERENCED_PARAMETER(param);
 
 	Uart_Init init;
 	init.uart = USART1;
 	init.baudRate=9600;
 	init.parity=usartNoParity;
-	init.portLocation=1;
+	init.portLocation=_USART_ROUTE_LOCATION_LOC1;
 	init.baudRate       = 9600;
 	init.oversampling   = usartOVS16;
 	init.dataBits       = usartDatabits8;
@@ -188,13 +191,15 @@ void UartTask(void* param)
 	init.stopBits       = usartStopbits1;
 
 
-
 	Uart uart(init);
 	uart.Initialize();
-	uart.Write(testByte);
+	while (1) {
+	uart.Write(gsl::span<const uint8_t>(reinterpret_cast<const uint8_t*>(testByte), 8));
+	System::SleepTask(10);
+	}
 
 }
-*/
+
 
 
 extern "C" void __libc_init_array(void);
@@ -234,16 +239,11 @@ int main(void)
     Main.Hardware.Pins.Led1.High();
 
     System::CreateTask(BlinkLed0, "Blink0", 512, NULL, TaskPriority::P1, NULL);
-<<<<<<< HEAD
-    System::CreateTask(ObcInitTask, "Init", 3_KB, &Main, TaskPriority::Highest, &Main.initTask);
 
-    System::RunScheduler();
-=======
     //System::CreateTask(ADXRS, "ADXRS", 512, NULL, tskIDLE_PRIORITY + 2, NULL);
-    //System::CreateTask(UartTask, "uart", 512, NULL, TaskPriority::P1, NULL);
+    System::CreateTask(UartTask, "uart", 512, NULL, TaskPriority::P1, NULL);
     System::CreateTask(ObcInitTask, "Init", 512, &Main, TaskPriority::Highest, &Main.initTask);
 
->>>>>>> merged
     System::RunScheduler();
 
     Main.Hardware.Pins.Led0.Toggle();
