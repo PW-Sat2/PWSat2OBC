@@ -74,6 +74,7 @@ class CommTest : public testing::Test
     testing::NiceMock<OSMock> system;
     I2CBusMock i2c;
     OSReset reset;
+    std::uint8_t dataBuffer[devices::comm::ComPrefferedBufferSize];
 };
 
 CommTest::CommTest() : comm(i2c, frameHandler)
@@ -367,8 +368,8 @@ TEST_F(CommTest, TestGetMixedLineTransmitterResponse)
 
 TEST_F(CommTest, TestSendTooLongFrame)
 {
-    uint8_t buffer[COMM_MAX_FRAME_CONTENTS_SIZE + 1] = {0};
-    const auto status = comm.SendFrame(span<const uint8_t, COMM_MAX_FRAME_CONTENTS_SIZE + 1>(buffer));
+    uint8_t buffer[devices::comm::CommMaxFrameSize + 1] = {0};
+    const auto status = comm.SendFrame(buffer);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -413,73 +414,55 @@ TEST_F(CommTest, TestReceiveFrameFailure)
 {
     CommFrame frame;
     EXPECT_CALL(i2c, WriteRead(ReceiverAddress, ElementsAre(ReceiverGetFrame), _)).WillOnce(Return(I2CResult::Nack));
-    const auto status = comm.ReceiveFrame(frame);
+    const auto status = comm.ReceiveFrame(dataBuffer, frame);
     ASSERT_THAT(status, Eq(false));
 }
 
-TEST_F(CommTest, TestReceiveFrameDopplerFrequencyOutOfRange)
+TEST_F(CommTest, TestReceiveFrameTooShortBuffer)
+{
+    std::uint8_t buffer[1];
+    CommFrame frame;
+    EXPECT_CALL(i2c, WriteRead(ReceiverAddress, ElementsAre(ReceiverGetFrame), _)).Times(0);
+    const auto status = comm.ReceiveFrame(buffer, frame);
+    ASSERT_THAT(status, Eq(false));
+}
+
+TEST_F(CommTest, TestReceiveFramePartialHeader)
+{
+    std::uint8_t buffer[5];
+    CommFrame frame;
+    EXPECT_CALL(i2c, WriteRead(ReceiverAddress, ElementsAre(ReceiverGetFrame), _))
+        .WillRepeatedly(Invoke([&](uint8_t /*address*/, span<const uint8_t> /*inData*/, span<uint8_t> outData) {
+            std::fill(outData.begin(), outData.end(), 0);
+            outData[0] = 32;
+            if (static_cast<size_t>(outData.size()) > 4)
+            {
+                outData[2] = 0xab;
+                outData[3] = 0x0c;
+                outData[4] = 0xde;
+            }
+
+            return I2CResult::OK;
+        }));
+    const auto status = comm.ReceiveFrame(buffer, frame);
+    ASSERT_THAT(status, Eq(true));
+    ASSERT_THAT(frame.FullSize(), Eq(32));
+    ASSERT_THAT(frame.Doppler(), Eq(0xcab));
+    ASSERT_THAT(frame.Rssi(), Eq(0));
+    ASSERT_THAT(frame.Payload().empty(), Eq(true));
+}
+
+TEST_F(CommTest, TestReceiveFrameReceiveFailure)
 {
     CommFrame frame;
     EXPECT_CALL(i2c, WriteRead(ReceiverAddress, ElementsAre(ReceiverGetFrame), _))
         .WillOnce(Invoke([](uint8_t /*address*/, span<const uint8_t> /*inData*/, span<uint8_t> outData) {
             std::fill(outData.begin(), outData.end(), 0);
             outData[0] = 1;
-            outData[3] = 0xf0;
             return I2CResult::OK;
-        }));
-    const auto status = comm.ReceiveFrame(frame);
-    ASSERT_THAT(status, Eq(false));
-}
-
-TEST_F(CommTest, TestReceiveFrameRSSIOutOfRange)
-{
-    CommFrame frame;
-    EXPECT_CALL(i2c, WriteRead(ReceiverAddress, ElementsAre(ReceiverGetFrame), _))
-        .WillOnce(Invoke([](uint8_t /*address*/, span<const uint8_t> /*inData*/, span<uint8_t> outData) {
-            std::fill(outData.begin(), outData.end(), 0);
-            outData[0] = 1;
-            outData[5] = 0xf0;
-            return I2CResult::OK;
-        }));
-    const auto status = comm.ReceiveFrame(frame);
-    ASSERT_THAT(status, Eq(false));
-}
-
-TEST_F(CommTest, TestReceiveFrameSizeOutOfRange)
-{
-    CommFrame frame;
-    EXPECT_CALL(i2c, WriteRead(ReceiverAddress, ElementsAre(ReceiverGetFrame), _))
-        .WillOnce(Invoke([](uint8_t /*address*/, span<const uint8_t> /*inData*/, span<uint8_t> outData) {
-            std::fill(outData.begin(), outData.end(), 0);
-            outData[0] = 0xff;
-            return I2CResult::OK;
-        }));
-    const auto status = comm.ReceiveFrame(frame);
-    ASSERT_THAT(status, Eq(false));
-}
-
-TEST_F(CommTest, TestReceiveFrameSizeIsZero)
-{
-    CommFrame frame;
-    EXPECT_CALL(i2c, WriteRead(ReceiverAddress, ElementsAre(ReceiverGetFrame), _))
-        .WillOnce(Invoke([](uint8_t /*address*/, span<const uint8_t> /*inData*/, span<uint8_t> outData) {
-            std::fill(outData.begin(), outData.end(), 0);
-            return I2CResult::OK;
-        }));
-    const auto status = comm.ReceiveFrame(frame);
-    ASSERT_THAT(status, Eq(false));
-}
-
-TEST_F(CommTest, TestReceiveFrameSizeIsOutOfRange)
-{
-    CommFrame frame;
-    EXPECT_CALL(i2c, WriteRead(ReceiverAddress, ElementsAre(ReceiverGetFrame), _))
-        .WillOnce(Invoke([](uint8_t /*address*/, span<const uint8_t> /*inData*/, span<uint8_t> outData) {
-            std::fill(outData.begin(), outData.end(), 0);
-            outData[0] = COMM_MAX_FRAME_CONTENTS_SIZE + 1;
-            return I2CResult::OK;
-        }));
-    const auto status = comm.ReceiveFrame(frame);
+        }))
+        .WillOnce(Return(I2CResult::Nack));
+    const auto status = comm.ReceiveFrame(dataBuffer, frame);
     ASSERT_THAT(status, Eq(false));
 }
 
@@ -488,23 +471,60 @@ TEST_F(CommTest, TestReceiveFrame)
     CommFrame frame;
     const uint8_t expected[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
     EXPECT_CALL(i2c, WriteRead(ReceiverAddress, ElementsAre(ReceiverGetFrame), _))
-        .WillOnce(Invoke([&](uint8_t /*address*/, span<const uint8_t> /*inData*/, span<uint8_t> outData) {
+        .WillRepeatedly(Invoke([&](uint8_t /*address*/, span<const uint8_t> /*inData*/, span<uint8_t> outData) {
             std::fill(outData.begin(), outData.end(), 0);
             outData[0] = COUNT_OF(expected);
-            outData[2] = 0xab;
-            outData[3] = 0x0c;
-            outData[4] = 0xde;
-            outData[5] = 0x0d;
-            std::copy(std::begin(expected), std::end(expected), outData.begin() + 6);
+            if (static_cast<size_t>(outData.size()) > (5 + count_of(expected)))
+            {
+                outData[2] = 0xab;
+                outData[3] = 0x0c;
+                outData[4] = 0xde;
+                outData[5] = 0x0d;
+                std::copy(std::begin(expected), std::end(expected), outData.begin() + 6);
+            }
 
             return I2CResult::OK;
         }));
-    const auto status = comm.ReceiveFrame(frame);
+    const auto status = comm.ReceiveFrame(dataBuffer, frame);
     ASSERT_THAT(status, Eq(true));
-    ASSERT_THAT(frame.Size, Eq(COUNT_OF(expected)));
-    ASSERT_THAT(frame.Doppler, Eq(0xcab));
-    ASSERT_THAT(frame.RSSI, Eq(0xdde));
-    ASSERT_THAT(frame.Payload(), Eq(span<const uint8_t>(expected)));
+    ASSERT_THAT(frame.Size(), Eq(COUNT_OF(expected)));
+    ASSERT_THAT(frame.Doppler(), Eq(0xcab));
+    ASSERT_THAT(frame.Rssi(), Eq(0xdde));
+    ASSERT_THAT(gsl::span<const std::uint8_t>(frame.Payload()), Eq(span<const uint8_t>(expected)));
+}
+
+TEST_F(CommTest, TestReceiveFramePartialData)
+{
+    std::uint8_t buffer[22];
+    CommFrame frame;
+    const uint8_t expected[] = {0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
+    EXPECT_CALL(i2c, WriteRead(ReceiverAddress, ElementsAre(ReceiverGetFrame), _))
+        .WillRepeatedly(Invoke([&](uint8_t /*address*/, span<const uint8_t> /*inData*/, span<uint8_t> outData) {
+            std::fill(outData.begin(), outData.end(), 0);
+            outData[0] = 32;
+            if (static_cast<size_t>(outData.size()) > 5)
+            {
+                outData[2] = 0xab;
+                outData[3] = 0x0c;
+                outData[4] = 0xde;
+                outData[5] = 0x0d;
+            }
+
+            auto contentSize = std::min<ptrdiff_t>(outData.size() - 6, count_of(expected));
+            if (contentSize > 0)
+            {
+                std::copy(std::begin(expected), std::begin(expected) + contentSize, outData.begin() + 6);
+            }
+
+            return I2CResult::OK;
+        }));
+    const auto status = comm.ReceiveFrame(buffer, frame);
+    ASSERT_THAT(status, Eq(true));
+    ASSERT_THAT(frame.Size(), Eq(16));
+    ASSERT_THAT(frame.FullSize(), Eq(32));
+    ASSERT_THAT(frame.Doppler(), Eq(0xcab));
+    ASSERT_THAT(frame.Rssi(), Eq(0xdde));
+    ASSERT_THAT(gsl::span<const std::uint8_t>(frame.Payload()), Eq(span<const uint8_t>(expected)));
 }
 
 TEST_F(CommTest, TestReceiverTelemetry)
@@ -560,7 +580,7 @@ TEST_F(CommTest, TestSetBeaconSizeOutOfRange)
 {
     CommBeacon beacon;
     memset(&beacon, 0, sizeof(beacon));
-    beacon.DataSize = COMM_MAX_FRAME_CONTENTS_SIZE + 1;
+    beacon.DataSize = devices::comm::CommMaxFrameSize + 1;
     EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon))).Times(0);
     const auto status = comm.SetBeacon(beacon);
     ASSERT_THAT(status, Eq(false));
