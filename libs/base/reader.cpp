@@ -1,130 +1,138 @@
 #include "reader.h"
+#include <utility>
 
-static bool ReaderUpdateState(Reader* reader, uint8_t requestedSize)
+Reader::Reader() : position(0), isValid(false)
 {
-    if (reader->isValid)
+}
+
+Reader::Reader(gsl::span<const uint8_t> view)
+{
+    Initialize(std::move(view));
+}
+
+bool Reader::UpdateState(uint16_t requestedSize)
+{
+    if (this->isValid)
     {
-        reader->isValid = (reader->position + requestedSize) <= reader->length;
+        this->position += requestedSize;
+        this->isValid = this->position <= this->buffer.size();
     }
 
-    return reader->isValid;
+    return this->isValid;
 }
 
-void ReaderInitialize(Reader* reader, const uint8_t* buffer, uint16_t length)
+void Reader::Initialize(gsl::span<const uint8_t> view)
 {
-    reader->buffer = buffer;
-    reader->length = length;
-    ReaderReset(reader);
+    this->buffer = view;
+    Reset();
 }
 
-uint8_t ReaderReadByte(Reader* reader)
+bool Reader::Skip(uint16_t length)
 {
-    if (!ReaderUpdateState(reader, 1))
+    return UpdateState(length);
+}
+
+uint8_t Reader::ReadByte()
+{
+    if (!UpdateState(1))
     {
         return 0;
     }
     else
     {
-        return reader->buffer[reader->position++];
+        return this->buffer[this->position - 1];
     }
 }
 
-uint16_t ReaderReadWordLE(Reader* reader)
+uint16_t Reader::ReadWordLE()
 {
-    if (!ReaderUpdateState(reader, 2))
+    if (!UpdateState(2))
     {
         return 0;
     }
     else
     {
-        uint16_t value = reader->buffer[reader->position + 1];
+        uint16_t value = this->buffer[this->position - 1];
         value <<= 8;
-        value += reader->buffer[reader->position];
-        reader->position += 2;
+        value += this->buffer[this->position - 2];
         return value;
     }
 }
 
-uint16_t ReaderReadWordBE(Reader* reader)
+uint16_t Reader::ReadWordBE()
 {
-    if (!ReaderUpdateState(reader, 2))
+    if (!UpdateState(2))
     {
         return 0;
     }
     else
     {
-        uint16_t value = reader->buffer[reader->position];
+        uint16_t value = this->buffer[this->position - 2];
         value <<= 8;
-        value += reader->buffer[reader->position + 1];
-        reader->position += 2;
+        value += this->buffer[this->position - 1];
         return value;
     }
 }
 
-uint32_t ReaderReadDoubleWordLE(Reader* reader)
+uint32_t Reader::ReadDoubleWordLE()
 {
-    if (!ReaderUpdateState(reader, 4))
+    if (!UpdateState(4))
     {
         return 0;
     }
     else
     {
-        uint32_t value = reader->buffer[reader->position + 3];
+        uint32_t value = this->buffer[this->position - 1];
         value <<= 8;
-        value += reader->buffer[reader->position + 2];
+        value += this->buffer[this->position - 2];
         value <<= 8;
-        value += reader->buffer[reader->position + 1];
+        value += this->buffer[this->position - 3];
         value <<= 8;
-        value += reader->buffer[reader->position];
-        reader->position += 4;
+        value += this->buffer[this->position - 4];
         return value;
     }
 }
 
-uint64_t ReaderReadQuadWordLE(Reader* reader)
+uint64_t Reader::ReadQuadWordLE()
 {
-    if (!ReaderUpdateState(reader, 8))
+    if (!UpdateState(8))
     {
         return 0;
     }
     else
     {
-        uint64_t value = reader->buffer[reader->position + 7];
+        uint64_t value = this->buffer[this->position - 1];
         value <<= 8;
-        value += reader->buffer[reader->position + 6];
+        value += this->buffer[this->position - 2];
         value <<= 8;
-        value += reader->buffer[reader->position + 5];
+        value += this->buffer[this->position - 3];
         value <<= 8;
-        value += reader->buffer[reader->position + 4];
+        value += this->buffer[this->position - 4];
         value <<= 8;
-        value += reader->buffer[reader->position + 3];
+        value += this->buffer[this->position - 5];
         value <<= 8;
-        value += reader->buffer[reader->position + 2];
+        value += this->buffer[this->position - 6];
         value <<= 8;
-        value += reader->buffer[reader->position + 1];
+        value += this->buffer[this->position - 7];
         value <<= 8;
-        value += reader->buffer[reader->position];
-        reader->position += 8;
+        value += this->buffer[this->position - 8];
         return value;
     }
 }
 
-const uint8_t* ReaderReadArray(Reader* reader, uint16_t length)
+gsl::span<const uint8_t> Reader::ReadArray(uint16_t length)
 {
-    if (!ReaderUpdateState(reader, length))
+    if (!UpdateState(length))
     {
-        return NULL;
+        return gsl::span<const std::uint8_t>();
     }
     else
     {
-        const uint8_t* value = reader->buffer + reader->position;
-        reader->position += length;
-        return value;
+        return this->buffer.subspan(this->position - length, length);
     }
 }
 
-int32_t ReaderRemainingSize(const Reader* reader)
+int32_t Reader::RemainingSize()
 {
-    const int32_t size = reader->length;
-    return size - reader->position;
+    return this->buffer.size() - this->position;
 }

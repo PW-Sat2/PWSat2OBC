@@ -22,6 +22,18 @@ using drivers::i2c::I2CResult;
 
 using namespace devices::comm;
 
+CommFrame::CommFrame() : doppler(0), rssi(0)
+{
+}
+
+CommFrame::CommFrame(std::uint16_t dopplerLevel, std::uint16_t rssiLevel, std::uint16_t fullSize, gsl::span<std::uint8_t> data)
+    : doppler(dopplerLevel),   //
+      rssi(rssiLevel),         //
+      fullFrameSize(fullSize), //
+      content(std::move(data))
+{
+}
+
 CommObject::CommObject(II2CBus& low, IHandleFrame& upperInterface)
     : _low(low), //
       _frameHandler(upperInterface)
@@ -180,15 +192,14 @@ bool CommObject::GetReceiverTelemetry(CommReceiverTelemetry& telemetry)
         return status;
     }
 
-    Reader reader;
-    ReaderInitialize(&reader, buffer, COUNT_OF(buffer));
-    telemetry.TransmitterCurrentConsumption = ReaderReadWordLE(&reader);
-    telemetry.DopplerOffset = ReaderReadWordLE(&reader);
-    telemetry.ReceiverCurrentConsumption = ReaderReadWordLE(&reader);
-    telemetry.Vcc = ReaderReadWordLE(&reader);
-    telemetry.OscilatorTemperature = ReaderReadWordLE(&reader);
-    telemetry.AmplifierTemperature = ReaderReadWordLE(&reader);
-    telemetry.SignalStrength = ReaderReadWordLE(&reader);
+    Reader reader(buffer);
+    telemetry.TransmitterCurrentConsumption = reader.ReadWordLE();
+    telemetry.DopplerOffset = reader.ReadWordLE();
+    telemetry.ReceiverCurrentConsumption = reader.ReadWordLE();
+    telemetry.Vcc = reader.ReadWordLE();
+    telemetry.OscilatorTemperature = reader.ReadWordLE();
+    telemetry.AmplifierTemperature = reader.ReadWordLE();
+    telemetry.SignalStrength = reader.ReadWordLE();
 
     if ((telemetry.TransmitterCurrentConsumption & 0xf000) != 0 || //
         (telemetry.DopplerOffset & 0xf000) != 0 ||                 //
@@ -202,7 +213,7 @@ bool CommObject::GetReceiverTelemetry(CommReceiverTelemetry& telemetry)
         return false;
     }
 
-    return ReaderStatus(&reader);
+    return reader.Status();
 }
 
 bool CommObject::GetTransmitterTelemetry(CommTransmitterTelemetry& telemetry)
@@ -214,12 +225,11 @@ bool CommObject::GetTransmitterTelemetry(CommTransmitterTelemetry& telemetry)
         return status;
     }
 
-    Reader reader;
-    ReaderInitialize(&reader, buffer, COUNT_OF(buffer));
-    telemetry.RFReflectedPower = ReaderReadWordLE(&reader);
-    telemetry.AmplifierTemperature = ReaderReadWordLE(&reader);
-    telemetry.RFForwardPower = ReaderReadWordLE(&reader);
-    telemetry.TransmitterCurrentConsumption = ReaderReadWordLE(&reader);
+    Reader reader(buffer);
+    telemetry.RFReflectedPower = reader.ReadWordLE();
+    telemetry.AmplifierTemperature = reader.ReadWordLE();
+    telemetry.RFForwardPower = reader.ReadWordLE();
+    telemetry.TransmitterCurrentConsumption = reader.ReadWordLE();
 
     if ((telemetry.RFReflectedPower & 0xf000) != 0 ||     //
         (telemetry.AmplifierTemperature & 0xf000) != 0 || //
@@ -230,73 +240,87 @@ bool CommObject::GetTransmitterTelemetry(CommTransmitterTelemetry& telemetry)
         return false;
     }
 
-    return ReaderStatus(&reader);
+    return reader.Status();
 }
 
-bool CommObject::ReceiveFrame(CommFrame& frame)
+static gsl::span<std::uint8_t> ReceiveSpan(std::uint16_t frameSize, gsl::span<std::uint8_t> buffer)
 {
-    uint8_t buffer[COMM_MAX_FRAME_CONTENTS_SIZE + 20];
-    bool status = this->SendCommandWithResponse(CommReceiver, ReceiverGetFrame, span<uint8_t>(buffer));
+    if (buffer.size() <= frameSize + 6)
+    {
+        return buffer;
+    }
+    else
+    {
+        return buffer.subspan(0, frameSize + 6);
+    }
+}
+
+bool CommObject::ReceiveFrame(gsl::span<std::uint8_t> buffer, CommFrame& frame)
+{
+    if (buffer.size() < 2)
+    {
+        return false;
+    }
+
+    bool status = this->SendCommandWithResponse(CommReceiver, ReceiverGetFrame, buffer.subspan(0, 2));
     if (!status)
     {
         return status;
     }
 
-    Reader reader;
-    ReaderInitialize(&reader, buffer, COUNT_OF(buffer));
-    frame.Size = ReaderReadWordLE(&reader);
-    frame.Doppler = ReaderReadWordLE(&reader);
-    frame.RSSI = ReaderReadWordLE(&reader);
-    const uint8_t* data = ReaderReadArray(&reader, frame.Size);
-
-    if (frame.Size > COMM_MAX_FRAME_CONTENTS_SIZE)
-    {
-        LOGF(LOG_LEVEL_ERROR, "[comm] Invalid frame length: %d", static_cast<int>(frame.Size));
-        return false;
-    }
-
-    if (data != NULL)
-    {
-        memcpy(frame.Contents.data(), data, frame.Size);
-    }
-
-    status = ReaderStatus(&reader);
+    Reader reader(buffer.subspan(0, 2));
+    auto size = reader.ReadWordLE();
+    buffer = ReceiveSpan(size, buffer);
+    status = this->SendCommandWithResponse(CommReceiver, ReceiverGetFrame, buffer);
     if (!status)
+    {
+        return status;
+    }
+
+    reader.Initialize(buffer);
+    const auto fullSize = reader.ReadWordLE();
+    const auto doppler = reader.ReadWordLE();
+    const auto rssi = reader.ReadWordLE();
+    gsl::span<std::uint8_t> frameContent;
+    if (!reader.Status())
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Failed to receive frame");
     }
     else
     {
-        LOGF(LOG_LEVEL_DEBUG, "[comm] Received frame %d bytes", static_cast<int>(frame.Size));
+        LOGF(LOG_LEVEL_DEBUG, "[comm] Received frame %d bytes", static_cast<int>(fullSize));
+        auto span = reader.ReadArray(reader.RemainingSize());
+        frameContent = gsl::span<std::uint8_t>(const_cast<std::uint8_t*>(span.data()), span.size());
     }
 
-    if (frame.Size == 0 || (frame.Doppler & 0xf000) != 0 || (frame.RSSI & 0xf000) != 0)
-    {
-        LOGF(
-            LOG_LEVEL_ERROR, "[comm] Received invalid frame. Size: %d, Doppler: 0x%X, RSSI: 0x%X. ", frame.Size, frame.Doppler, frame.RSSI);
-        return false;
-    }
+    frame = CommFrame(doppler, rssi, fullSize, std::move(frameContent));
+
+    //    if (fullSize == 0 || (doppler & 0xf000) != 0 || (rssi & 0xf000) != 0)
+    //    {
+    //        LOGF(LOG_LEVEL_ERROR, "[comm] Received invalid frame. Size: %d, Doppler: 0x%X, RSSI: 0x%X. ", fullSize, doppler, rssi);
+    //        return false;
+    //    }
 
     return status;
 }
 
 bool CommObject::SendFrame(span<const std::uint8_t> frame)
 {
-    if (frame.size() > COMM_MAX_FRAME_CONTENTS_SIZE)
+    if (frame.size() > CommMaxFrameSize)
     {
-        LOGF(LOG_LEVEL_ERROR, "Frame payload is too long. Allowed: %d, Requested: '%d'.", COMM_MAX_FRAME_CONTENTS_SIZE, frame.size());
+        LOGF(LOG_LEVEL_ERROR, "Frame payload is too long. Allowed: %d, Requested: '%d'.", CommMaxFrameSize, frame.size());
         return false;
     }
 
-    uint8_t cmd[255];
-
+    uint8_t cmd[ComPrefferedBufferSize];
     cmd[0] = TransmitterSendFrame;
     memcpy(cmd + 1, frame.data(), frame.size());
     uint8_t remainingBufferSize;
 
-    const bool status =
-        (this->_low.WriteRead(CommTransmitter, span<const uint8_t>(cmd, 1 + frame.size()), span<uint8_t>(&remainingBufferSize, 1)) ==
-            I2CResult::OK);
+    const bool status = (this->_low.WriteRead(CommTransmitter,           //
+                             span<const uint8_t>(cmd, 1 + frame.size()), //
+                             span<uint8_t>(&remainingBufferSize, 1)      //
+                             ) == I2CResult::OK);
     if (!status)
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Failed to send frame");
@@ -312,7 +336,7 @@ bool CommObject::SendFrame(span<const std::uint8_t> frame)
 
 bool CommObject::SetBeacon(const CommBeacon& beaconData)
 {
-    uint8_t buffer[COMM_MAX_FRAME_CONTENTS_SIZE + 2];
+    uint8_t buffer[CommMaxFrameSize + 2];
     Writer writer;
     WriterInitialize(&writer, buffer, COUNT_OF(buffer));
     WriterWriteByte(&writer, TransmitterSetBeacon);
@@ -383,12 +407,13 @@ void CommObject::PollHardware()
     }
     else if (frameResponse.frameCount > 0)
     {
+        std::uint8_t buffer[ComPrefferedBufferSize];
         LOGF(LOG_LEVEL_INFO, "[comm] Got %d frames", frameResponse.frameCount);
 
         for (uint8_t i = 0; i < frameResponse.frameCount; i++)
         {
             CommFrame frame;
-            bool status = this->ReceiveFrame(frame);
+            bool status = this->ReceiveFrame(buffer, frame);
             if (!status)
             {
                 LOG(LOG_LEVEL_ERROR, "[comm] Unable to receive frame. ");
@@ -400,7 +425,7 @@ void CommObject::PollHardware()
                     LOG(LOG_LEVEL_ERROR, "[comm] Unable to remove frame from receiver. ");
                 }
 
-                LOGF(LOG_LEVEL_INFO, "[comm] Received frame %d bytes. ", (int)frame.Size);
+                LOGF(LOG_LEVEL_INFO, "[comm] Received frame %d bytes. ", static_cast<int>(frame.Size()));
                 this->_frameHandler.HandleFrame(*this, frame);
             }
         }
@@ -425,9 +450,4 @@ void CommObject::CommTask(void* param)
             comm->PollHardware();
         }
     }
-}
-
-span<const uint8_t> CommFrame::Payload()
-{
-    return span<const uint8_t>(this->Contents.begin(), this->Size);
 }

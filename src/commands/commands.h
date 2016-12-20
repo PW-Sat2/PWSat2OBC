@@ -1,29 +1,34 @@
 #ifndef SRC_COMMANDS_COMMANDS_H_
 #define SRC_COMMANDS_COMMANDS_H_
 
-#include <stdint.h>
+#include <cstdint>
 
-void PingHandler(uint16_t argc, char* argv[]);
-void EchoHandler(uint16_t argc, char* argv[]);
-void JumpToTimeHandler(uint16_t argc, char* argv[]);
-void CurrentTimeHandler(uint16_t argc, char* argv[]);
-void AdvanceTimeHandler(uint16_t argc, char* argv[]);
-void SendFrameHandler(uint16_t argc, char* argv[]);
-void GetFramesCountHandler(uint16_t argc, char* argv[]);
-void ReceiveFrameHandler(uint16_t argc, char* argv[]);
-void CommandPauseComm(uint16_t argc, char* argv[]);
-void OBCGetState(uint16_t argc, char* argv[]);
-void FSListFiles(uint16_t argc, char* argv[]);
-void FSWriteFile(uint16_t argc, char* argv[]);
-void FSReadFile(uint16_t argc, char* argv[]);
-void CommandByTerminal(uint16_t argc, char* args[]);
-void I2CTestCommandHandler(uint16_t argc, char* argv[]);
-void HeapInfoCommand(uint16_t argc, char* argv[]);
+void PingHandler(std::uint16_t argc, char* argv[]);
+void EchoHandler(std::uint16_t argc, char* argv[]);
+void JumpToTimeHandler(std::uint16_t argc, char* argv[]);
+void CurrentTimeHandler(std::uint16_t argc, char* argv[]);
+void AdvanceTimeHandler(std::uint16_t argc, char* argv[]);
+void SendFrameHandler(std::uint16_t argc, char* argv[]);
+void GetFramesCountHandler(std::uint16_t argc, char* argv[]);
+void ReceiveFrameHandler(std::uint16_t argc, char* argv[]);
+void CommandPauseComm(std::uint16_t argc, char* argv[]);
+void OBCGetState(std::uint16_t argc, char* argv[]);
+void FSListFiles(std::uint16_t argc, char* argv[]);
+void FSWriteFile(std::uint16_t argc, char* argv[]);
+void FSReadFile(std::uint16_t argc, char* argv[]);
+void CommandByTerminal(std::uint16_t argc, char* args[]);
+void I2CTestCommandHandler(std::uint16_t argc, char* argv[]);
+void HeapInfoCommand(std::uint16_t argc, char* argv[]);
 
-void AntennaDeploy(uint16_t argc, char* argv[]);
-void AntennaCancelDeployment(uint16_t argc, char* argv[]);
-void AntennaGetDeploymentStatus(uint16_t argc, char* argv[]);
+void AntennaDeploy(std::uint16_t argc, char* argv[]);
+void AntennaCancelDeployment(std::uint16_t argc, char* argv[]);
+void AntennaGetDeploymentStatus(std::uint16_t argc, char* argv[]);
 
-void TaskListCommand(uint16_t argc, char* argv[]);
+void TaskListCommand(std::uint16_t argc, char* argv[]);
+
+void CompileInfo(std::uint16_t argc, char* argv[]);
+void SuspendMission(std::uint16_t argc, char* argv[]);
+void ResumeMission(std::uint16_t argc, char* argv[]);
+void RunMission(std::uint16_t argc, char* argv[]);
 
 #endif

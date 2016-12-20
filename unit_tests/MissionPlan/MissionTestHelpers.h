@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include "rapidcheck.hpp"
-#include "state/state.h"
+#include "state/struct.h"
 
 namespace rc
 {

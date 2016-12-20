@@ -28,7 +28,7 @@ constexpr std::size_t operator"" _Bytes(unsigned long long int value)
 }
 
 /**
- * @biref Converts value in kilobytes to bytes
+ * @brief Converts value in kilobytes to bytes
  * @param[in] value Values in kilobytes
  * @return Value in bytes
  */
@@ -38,7 +38,7 @@ constexpr std::size_t operator"" _KB(unsigned long long int value)
 }
 
 /**
- * @biref Converts value in megabytes to bytes
+ * @brief Converts value in megabytes to bytes
  * @param[in] value Values in megabytes
  * @return Value in bytes
  */
@@ -48,7 +48,7 @@ constexpr std::size_t operator"" _MB(unsigned long long int value)
 }
 
 /**
- * @brief Inheriting from this class, will make derived class unconstructable
+ * @brief Inheriting from this class, will make derived class unconstructible
  */
 struct PureStatic
 {

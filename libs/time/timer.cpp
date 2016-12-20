@@ -194,10 +194,9 @@ struct TimeSnapshot TimeProvider::ReadFile(FileSystem* fs, const char* const fil
         return result;
     }
 
-    Reader reader;
-    ReaderInitialize(&reader, buffer, sizeof(buffer));
-    result.CurrentTime.value = ReaderReadQuadWordLE(&reader);
-    if (!ReaderStatus(&reader))
+    Reader reader(buffer);
+    result.CurrentTime.value = reader.ReadQuadWordLE();
+    if (!reader.Status())
     {
         LOGF(LOG_LEVEL_WARNING, "Not enough data read from file: %s. ", filePath);
         return result;
