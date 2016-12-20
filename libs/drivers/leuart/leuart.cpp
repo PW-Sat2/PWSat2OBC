@@ -100,9 +100,11 @@ static size_t leuartReadline(LineIO* io, char* buffer, size_t bufferLength)
     NVIC_EnableIRQ(LEUART0_IRQn);
 
     xSemaphoreTake(lineEndReceived, portMAX_DELAY);
+    portENTER_CRITICAL();
+    DMADRV_StopTransfer(dmaChannel);
 
     NVIC_DisableIRQ(LEUART0_IRQn);
-
+    portEXIT_CRITICAL();
     int remaining = 0;
 
     DMADRV_TransferRemainingCount(dmaChannel, &remaining);
@@ -119,8 +121,6 @@ void LEUART0_IRQHandler(void)
 
     if (flags & LEUART_IF_SIGF)
     {
-        DMADRV_StopTransfer(dmaChannel);
-
         xSemaphoreGiveFromISR(lineEndReceived, NULL);
     }
 

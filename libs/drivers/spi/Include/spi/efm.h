@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <gsl/span>
 
+#include "base/os.h"
 #include "spi.h"
 
 namespace drivers
@@ -34,6 +35,17 @@ namespace drivers
             virtual void WriteRead(gsl::span<const std::uint8_t> input, gsl::span<std::uint8_t> output) override;
 
           private:
+            static bool OnTransferFinished(unsigned int channel, unsigned int sequenceNo, void* param);
+
+            void PrintDMAInfo();
+
+            unsigned int _txChannel;
+            unsigned int _rxChannel;
+            OSSemaphoreHandle _lock;
+            OSEventGroupHandle _transferGroup;
+            static constexpr OSEventBits TransferRXFinished = 1 << 0;
+            static constexpr OSEventBits TransferTXFinished = 1 << 1;
+            static constexpr OSEventBits TransferFinished = TransferRXFinished | TransferTXFinished;
         };
 
         /** @} */

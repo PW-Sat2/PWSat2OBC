@@ -51,7 +51,7 @@ extern "C" void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* 
 
 extern "C" void vApplicationIdleHook(void)
 {
-    EMU_EnterEM1();
+    //    EMU_EnterEM1();
 }
 
 void I2C0_IRQHandler(void)
@@ -146,6 +146,10 @@ static void ObcInitTask(void* param)
 
     InitializeADCS(&obc->adcs);
 
+    Mission.Initialize();
+
+    System::CreateTask(SmartWaitTask, "SmartWait", 512, NULL, TaskPriority::P1, NULL);
+
     LOG(LOG_LEVEL_INFO, "Intialized");
     Main.initialized = true;
 
@@ -194,8 +198,6 @@ int main(void)
 
     SetupAntennas();
 
-    Mission.Initialize();
-
     GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
     GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);
     GPIO_DriveModeSet(LED_PORT, gpioDriveModeLowest);
@@ -204,8 +206,8 @@ int main(void)
     GPIO_PinOutSet(LED_PORT, LED1);
 
     System::CreateTask(BlinkLed0, "Blink0", 512, NULL, TaskPriority::P1, NULL);
-    System::CreateTask(ObcInitTask, "Init", 2_KB, &Main, TaskPriority::Highest, &Main.initTask);
-    System::CreateTask(SmartWaitTask, "SmartWait", 512, NULL, TaskPriority::P1, NULL);
+    System::CreateTask(ObcInitTask, "Init", 3_KB, &Main, TaskPriority::Highest, &Main.initTask);
+
     System::RunScheduler();
 
     GPIO_PinOutToggle(LED_PORT, LED0);

@@ -1,6 +1,7 @@
 #ifndef LIBS_OBC_STORAGE_N25Q_FLASH_INCLUDE_OBC_STORAGE_N25Q_H_
 #define LIBS_OBC_STORAGE_N25Q_FLASH_INCLUDE_OBC_STORAGE_N25Q_H_
 
+#include "fs/fs.h"
 #include "n25q/n25q.h"
 #include "n25q/yaffs.h"
 
