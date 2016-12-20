@@ -33,6 +33,7 @@ static const TerminalCommandDescription commands[] = {
     {"suspend_mission", SuspendMission},
     {"resume_mission", ResumeMission},
     {"run_mission", RunMission},
+    {"dma", DMAInfo},
 };
 
 void InitializeTerminal(void)

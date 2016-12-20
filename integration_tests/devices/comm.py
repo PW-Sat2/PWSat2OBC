@@ -1,9 +1,8 @@
 import logging
 from Queue import Queue, Empty
+from threading import Event
 
 import i2cMock
-from threading import Event
-import time
 
 
 class TransmitterDevice(i2cMock.I2CDevice):

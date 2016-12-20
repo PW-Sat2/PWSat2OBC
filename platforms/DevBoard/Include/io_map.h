@@ -70,4 +70,11 @@
 #define EBI_DATA_PORT gpioPortE
 #define EBI_DATA_PIN0 8
 
+#define SPI_USART USART1
+#define SPI_LOCATION 1
+#define SPI_PORT gpioPortD
+#define SPI_MOSI 0
+#define SPI_MISO 1
+#define SPI_CLK 2
+
 #endif

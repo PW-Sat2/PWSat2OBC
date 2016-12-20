@@ -197,9 +197,7 @@ TEST_F(N25QDriverTest, ReadRequestShouldBePropertlyFormed)
         InSequence s;
         auto selected = this->_spi.ExpectSelected();
 
-        ExpectCommand(Command::ReadMemory);
-
-        EXPECT_CALL(this->_spi, Write(ElementsAre(0xAB, 0x00, 0x00)));
+        EXPECT_CALL(this->_spi, Write(ElementsAre(Command::ReadMemory, 0xAB, 0x00, 0x00)));
 
         EXPECT_CALL(this->_spi, Read(SpanOfSize(260))).WillOnce(FillBuffer<0>(memory));
     }
@@ -233,9 +231,7 @@ TEST_F(N25QDriverTest, ShouldWriteSinglePage)
         {
             auto selected = this->_spi.ExpectSelected();
 
-            ExpectCommand(Command::ProgramMemory);
-
-            EXPECT_CALL(this->_spi, Write(ElementsAre(0xAB, 0x00, 0x00)));
+            EXPECT_CALL(this->_spi, Write(ElementsAre(Command::ProgramMemory, 0xAB, 0x00, 0x00)));
 
             EXPECT_CALL(this->_spi, Write(ContainerEq(span<const uint8_t>(buffer))));
         }
@@ -274,9 +270,7 @@ TEST_F(N25QDriverTest, ShouldWriteTwoPages)
         {
             auto selected = this->_spi.ExpectSelected();
 
-            ExpectCommand(Command::ProgramMemory);
-
-            EXPECT_CALL(this->_spi, Write(ElementsAre(0xAB, 0x00, 0x00)));
+            EXPECT_CALL(this->_spi, Write(ElementsAre(Command::ProgramMemory, 0xAB, 0x00, 0x00)));
 
             EXPECT_CALL(this->_spi, Write(ContainerEq(span<const uint8_t>(buffer).subspan(0, 256))));
         }
@@ -298,9 +292,7 @@ TEST_F(N25QDriverTest, ShouldWriteTwoPages)
         {
             auto selected = this->_spi.ExpectSelected();
 
-            ExpectCommand(Command::ProgramMemory);
-
-            EXPECT_CALL(this->_spi, Write(ElementsAre(0xAB, 0x01, 0x00)));
+            EXPECT_CALL(this->_spi, Write(ElementsAre(Command::ProgramMemory, 0xAB, 0x01, 0x00)));
 
             EXPECT_CALL(this->_spi, Write(ContainerEq(span<const uint8_t>(buffer).subspan(256, 100))));
         }
@@ -340,9 +332,7 @@ TEST_F(N25QDriverTest, ShouldDetectProgramErrors)
         {
             auto selected = this->_spi.ExpectSelected();
 
-            ExpectCommand(Command::ProgramMemory);
-
-            EXPECT_CALL(this->_spi, Write(ElementsAre(0xAB, 0x00, 0x00)));
+            EXPECT_CALL(this->_spi, Write(ElementsAre(Command::ProgramMemory, 0xAB, 0x00, 0x00)));
 
             EXPECT_CALL(this->_spi, Write(ContainerEq(span<const uint8_t>(buffer).subspan(0, 256))));
         }

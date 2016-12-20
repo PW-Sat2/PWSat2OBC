@@ -4,10 +4,12 @@
 
 #include "base/os.h"
 #include "base/reader.h"
+#include "base/writer.h"
 
 #include "n25q.h"
 
 using std::uint8_t;
+using std::uint32_t;
 using std::array;
 using std::min;
 using std::ptrdiff_t;
@@ -33,6 +35,13 @@ enum N25QCommand
     ResetMemory = 0x99,
     WriteStatusRegister = 0x01
 };
+
+static inline void WriterWriteAddress(Writer* writer, size_t address)
+{
+    WriterWriteByte(writer, static_cast<uint8_t>((address >> 2 * 8) & 0xFF));
+    WriterWriteByte(writer, static_cast<uint8_t>((address >> 1 * 8) & 0xFF));
+    WriterWriteByte(writer, static_cast<uint8_t>((address >> 0 * 8) & 0xFF));
+}
 
 N25QDriver::N25QDriver(ISPIInterface& spi) : _spi(spi)
 {
@@ -85,9 +94,15 @@ FlagStatus N25QDriver::ReadFlagStatus()
 
 void N25QDriver::ReadMemory(size_t address, span<uint8_t> buffer)
 {
+    array<uint8_t, 4> command;
+    Writer writer;
+
+    WriterInitialize(&writer, command.data(), command.size());
+    WriterWriteByte(&writer, N25QCommand::ReadMemory);
+    WriterWriteAddress(&writer, address);
+
     SPISelectSlave slave(this->_spi);
-    this->Command(N25QCommand::ReadMemory);
-    this->WriteAddress(address);
+    this->_spi.Write(command);
     this->_spi.Read(buffer);
 }
 
@@ -102,10 +117,15 @@ OperationResult N25QDriver::WriteMemory(size_t address, span<const uint8_t> buff
         this->EnableWrite();
 
         {
+            array<uint8_t, 4> command;
+            Writer writer;
+            WriterInitialize(&writer, command.data(), command.size());
+            WriterWriteByte(&writer, N25QCommand::ProgramMemory);
+            WriterWriteAddress(&writer, address + offset);
+
             SPISelectSlave slave(this->_spi);
 
-            this->Command(N25QCommand::ProgramMemory);
-            this->WriteAddress(address + offset);
+            this->_spi.Write(command);
             this->_spi.Write(chunk);
         }
 
@@ -304,10 +324,6 @@ void N25QDriver::Reset()
             return;
         }
     }
-
-    auto flag = this->ReadFlagStatus();
-
-    UNREFERENCED_PARAMETER(flag);
 }
 
 void N25QDriver::Command(const std::uint8_t command)
