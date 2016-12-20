@@ -16,6 +16,7 @@ set(SOURCES
     commands/heap.cpp
     commands/compile_info.cpp
     commands/mission.cpp
+    commands/dma.cpp
     obc.h
     obc.cpp
     communication.cpp
