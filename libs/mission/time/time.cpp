@@ -1,6 +1,8 @@
 #include "Include/mission/time.hpp"
 #include "state/struct.h"
 
+using services::time::TimeProvider;
+
 namespace mission
 {
     TimeTask::TimeTask(TimeProvider& timeProvider) : provider(timeProvider)
@@ -10,9 +12,11 @@ namespace mission
     UpdateResult TimeTask::UpdateProc(SystemState& state, void* param)
     {
         auto timeProvider = static_cast<TimeProvider*>(param);
-        const bool status = TimeGetCurrentTime(timeProvider, &state.Time);
-        if (status)
+        Option<TimeSpan> currentTime = timeProvider->GetCurrentTime();
+
+        if (currentTime.HasValue)
         {
+            state.Time = currentTime.Value;
             return UpdateResult::Ok;
         }
         else

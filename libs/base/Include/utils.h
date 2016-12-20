@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <type_traits>
 #include <utility>
+
 /**
  * @brief Converts bool value to 1 or 0
  * @param[in] value Value to convert
@@ -126,7 +127,9 @@ template <typename T> static inline Option<T> None()
  */
 template <typename T> static inline Option<std::remove_reference_t<T>> Some(T&& value)
 {
-    return Option<std::remove_reference_t<T>>::Some(std::forward<std::remove_reference_t<T>>(value));
+    using U = std::remove_reference_t<T>;
+
+    return Option<U>::Some(std::forward<U>(value));
 }
 
 #endif

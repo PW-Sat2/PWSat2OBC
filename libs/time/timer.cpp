@@ -20,36 +20,6 @@ static constexpr TimeSpan NotificationPeriod = {TIMER_NOTIFICATION_PERIOD};
  */
 static constexpr TimeSpan SavePeriod = {TIMER_SAVE_PERIOD};
 
-bool TimeSnapshot::operator==(const TimeSnapshot& right) const
-{
-    return TimeSpanEqual(CurrentTime, right.CurrentTime);
-}
-
-bool TimeSnapshot::operator!=(const TimeSnapshot& right) const
-{
-    return !(*this == right);
-}
-
-bool TimeSnapshot::operator<(const TimeSnapshot& right) const
-{
-    return TimeSpanLessThan(CurrentTime, right.CurrentTime);
-}
-
-bool TimeSnapshot::operator>(const TimeSnapshot& right) const
-{
-    return right < *this;
-}
-
-bool TimeSnapshot::operator<=(const TimeSnapshot& right) const
-{
-    return !(*this > right);
-}
-
-bool TimeSnapshot::operator>=(const TimeSnapshot& right) const
-{
-    return !(*this < right);
-}
-
 TimeProvider::TimeProvider(FileSystem& fileSystem)
     : timerLock(nullptr),                                                                   //
       notificationLock(nullptr),                                                            //

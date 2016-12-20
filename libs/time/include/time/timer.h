@@ -68,17 +68,35 @@ namespace services
              */
             TimeSpan CurrentTime;
 
-            bool operator==(const TimeSnapshot& right) const;
+            bool operator==(const TimeSnapshot& right) const
+            {
+                return TimeSpanEqual(CurrentTime, right.CurrentTime);
+            }
 
-            bool operator!=(const TimeSnapshot& right) const;
+            bool operator!=(const TimeSnapshot& right) const
+            {
+                return !(*this == right);
+            }
 
-            bool operator<(const TimeSnapshot& right) const;
+            bool operator<(const TimeSnapshot& right) const
+            {
+                return TimeSpanLessThan(CurrentTime, right.CurrentTime);
+            }
 
-            bool operator>(const TimeSnapshot& right) const;
+            bool operator>(const TimeSnapshot& right) const
+            {
+                return right < *this;
+            }
 
-            bool operator<=(const TimeSnapshot& right) const;
+            bool operator<=(const TimeSnapshot& right) const
+            {
+                return !(*this > right);
+            }
 
-            bool operator>=(const TimeSnapshot& right) const;
+            bool operator>=(const TimeSnapshot& right) const
+            {
+                return !(*this < right);
+            }
         };
 
         /**

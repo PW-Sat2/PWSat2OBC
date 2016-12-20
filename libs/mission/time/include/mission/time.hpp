@@ -7,6 +7,8 @@
 #include "state/struct.h"
 #include "time/timer.h"
 
+using services::time::TimeProvider;
+
 namespace mission
 {
     /**
