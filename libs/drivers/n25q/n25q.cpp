@@ -28,7 +28,10 @@ enum N25QCommand
     EraseSubsector = 0x20,
     EraseSector = 0xD8,
     EraseChip = 0xC7,
-    ClearFlagRegister = 0x50
+    ClearFlagRegister = 0x50,
+    ResetEnable = 0x66,
+    ResetMemory = 0x99,
+    WriteStatusRegister = 0x01
 };
 
 N25QDriver::N25QDriver(ISPIInterface& spi) : _spi(spi)
@@ -263,6 +266,48 @@ void N25QDriver::ClearFlags()
     SPISelectSlave select(this->_spi);
 
     this->Command(N25QCommand::ClearFlagRegister);
+}
+
+void N25QDriver::Reset()
+{
+    {
+        SPISelectSlave select(this->_spi);
+
+        this->Command(N25QCommand::ResetEnable);
+    }
+
+    {
+        SPISelectSlave select(this->_spi);
+
+        this->Command(N25QCommand::ResetMemory);
+    }
+
+    while (!this->ReadId().IsValid())
+        ;
+
+    this->EnableWrite();
+
+    {
+        SPISelectSlave select(this->_spi);
+
+        this->Command(N25QCommand::WriteStatusRegister);
+
+        auto value = static_cast<uint8_t>(Status::ProtectedAreaFromBottom);
+        this->_spi.Write(gsl::make_span(&value, 1));
+    }
+
+    {
+        SPISelectSlave select(this->_spi);
+
+        if (!this->WaitBusy(100))
+        {
+            return;
+        }
+    }
+
+    auto flag = this->ReadFlagStatus();
+
+    UNREFERENCED_PARAMETER(flag);
 }
 
 void N25QDriver::Command(const std::uint8_t command)

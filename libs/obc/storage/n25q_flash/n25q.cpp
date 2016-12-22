@@ -1,5 +1,5 @@
-#include "fs/fs.h"
 #include "n25q.h"
+#include "fs/fs.h"
 
 using obc::storage::N25QStorage;
 using devices::n25q::OperationResult;
@@ -13,6 +13,8 @@ N25QStorage::N25QStorage(drivers::spi::ISPIInterface& spi, FileSystem& fs)
 
 void N25QStorage::Initialize()
 {
+    this->ExternalFlashDriver.Reset();
+
     if (OS_RESULT_FAILED(this->ExternalFlash.Mount()))
     {
         return;
