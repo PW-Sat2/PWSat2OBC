@@ -36,7 +36,14 @@ namespace devices
             /** @brief Memory type (should be 0xBA) */
             const std::uint8_t MemoryType;
             /** @brief Memory type (should be 0x18) */
-            const std::uint8_t MemoryCapacity;
+            std::uint8_t MemoryCapacity;
+
+            bool IsValid() const
+            {
+                return Manufacturer == 0x20 //
+                    && MemoryType == 0xBA   //
+                    && MemoryCapacity == 0x18;
+            }
         };
 
         /**
@@ -46,6 +53,10 @@ namespace devices
         {
             WriteDisabled = 1 << 7,           //!< WriteDisabled
             ProtectedAreaFromBottom = 1 << 5, //!< ProtectedAreaFromBottom
+            BlockProtect3 = 1 << 6,           //!< BlockProtect3
+            BlockProtect2 = 1 << 4,           //!< BlockProtect2
+            BlockProtect1 = 1 << 3,           //!< BlockProtect1
+            BlockProtect0 = 1 << 2,           //!< BlockProtect0
             WriteEnabled = 1 << 1,            //!< WriteEnabled
             WriteInProgress = 1 << 0          //!< WriteInProgress
         };
@@ -61,7 +72,8 @@ namespace devices
             EraseError = 1 << 5,                  //!< EraseError
             ProgramError = 1 << 4,                //!< ProgramError
             VPPDisable = 1 << 3,                  //!< VPPDisable
-            ProgramSuspended = 1 << 2             //!< ProgramSuspended
+            ProgramSuspended = 1 << 2,            //!< ProgramSuspended
+            ProtectionError = 1 << 1              //!< Protection error
         };
 
         /**
@@ -162,6 +174,8 @@ namespace devices
              * @brief Clears flag status register
              */
             void ClearFlags();
+
+            void Reset();
 
           private:
             /** @brief Enables write */
