@@ -6,6 +6,8 @@
 #include <core_cm3.h>
 
 #include <dmadrv.h>
+#include "efm_support/clock.h"
+#include "efm_support/dma.h"
 #include "io_map.h"
 #include "logger/logger.h"
 #include "system.h"
@@ -22,7 +24,7 @@ static void* TXPort = const_cast<uint32_t*>(&SPI_USART->TXDATA);
 
 void EFMSPIInterface::Initialize()
 {
-    CMU_ClockEnable(cmuClock_USART1, true);
+    CMU_ClockEnable(efm::Clock(SPI_USART), true);
 
     USART_InitSync_TypeDef init = USART_INITSYNC_DEFAULT;
     init.master = true;
@@ -45,14 +47,10 @@ void EFMSPIInterface::Initialize()
     DMADRV_AllocateChannel(&this->_txChannel, nullptr);
 
     this->_transferGroup = System::CreateEventGroup();
-    this->_lock = System::CreateBinarySemaphore();
-    System::GiveSemaphore(this->_lock);
 
     SPI_USART->ROUTE |= USART_ROUTE_CLKPEN | USART_ROUTE_TXPEN | USART_ROUTE_RXPEN | (SPI_LOCATION << _USART_ROUTE_LOCATION_SHIFT);
 
     USART_Enable(SPI_USART, usartEnable);
-
-    //    LOGF(LOG_LEVEL_INFO, "DMA RX %d TX %d", this->_rxChannel, this->_txChannel);
 }
 
 void EFMSPIInterface::Select()
@@ -62,18 +60,15 @@ void EFMSPIInterface::Select()
 
 void EFMSPIInterface::Write(gsl::span<const std::uint8_t> buffer)
 {
-    Lock lock(this->_lock, MAX_DELAY);
-
-    //    LOGF(LOG_LEVEL_INFO, "Write %d", buffer.size());
-
     System::EventGroupClearBits(this->_transferGroup, TransferFinished);
 
-    uint32_t dummyRx = 0;
     SPI_USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
+
     USART_IntClear(SPI_USART, USART_IntGet(SPI_USART));
 
+    uint32_t dummyRx = 0;
     DMADRV_PeripheralMemory(this->_rxChannel,
-        dmadrvPeripheralSignal_USART1_RXDATAV,
+        efm::DMASignal<efm::DMASignalUSART::RXDATAV>(SPI_USART),
         &dummyRx,
         RXPort,
         false,
@@ -83,7 +78,7 @@ void EFMSPIInterface::Write(gsl::span<const std::uint8_t> buffer)
         this);
 
     DMADRV_MemoryPeripheral(this->_txChannel,
-        dmadrvPeripheralSignal_USART1_TXBL,
+        efm::DMASignal<efm::DMASignalUSART::TXBL>(SPI_USART),
         TXPort,
         const_cast<uint8_t*>(buffer.data()),
         true,
@@ -93,25 +88,20 @@ void EFMSPIInterface::Write(gsl::span<const std::uint8_t> buffer)
         this);
 
     System::EventGroupWaitForBits(this->_transferGroup, TransferFinished, true, true, MAX_DELAY);
-
-    //    PrintDMAInfo();
 }
 
 void EFMSPIInterface::Read(gsl::span<std::uint8_t> buffer)
 {
-    Lock lock(this->_lock, MAX_DELAY);
-
-    //    LOGF(LOG_LEVEL_INFO, "Read %d", buffer.size());
-
     System::EventGroupClearBits(this->_transferGroup, TransferFinished);
 
     SPI_USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
+
     USART_IntClear(SPI_USART, USART_IntGet(SPI_USART));
 
-    auto e1 = DMADRV_PeripheralMemory(this->_rxChannel,
-        dmadrvPeripheralSignal_USART1_RXDATAV,
+    DMADRV_PeripheralMemory(this->_rxChannel,
+        efm::DMASignal<efm::DMASignalUSART::RXDATAV>(SPI_USART),
         buffer.data(),
-        RXPort, // const_cast<uint32_t*>(&SPI_USART->RXDATA),
+        RXPort,
         true,
         buffer.size(),
         dmadrvDataSize1,
@@ -119,9 +109,8 @@ void EFMSPIInterface::Read(gsl::span<std::uint8_t> buffer)
         this);
 
     uint32_t dummyTx = 0;
-
-    auto e2 = DMADRV_MemoryPeripheral(this->_txChannel,
-        dmadrvPeripheralSignal_USART1_TXBL,
+    DMADRV_MemoryPeripheral(this->_txChannel,
+        efm::DMASignal<efm::DMASignalUSART::TXBL>(SPI_USART),
         TXPort,
         &dummyTx,
         false,
@@ -130,16 +119,7 @@ void EFMSPIInterface::Read(gsl::span<std::uint8_t> buffer)
         OnTransferFinished,
         this);
 
-    UNUSED(e1, e2);
-
-    //    if (e1 != ECODE_OK || e2 != ECODE_OK)
-    {
-        //        LOGF(LOG_LEVEL_FATAL, "E1=%lX E2=%lX ISER=%lX%lX%lX", e1, e2, NVIC->ISER[2], NVIC->ISER[1], NVIC->ISER[0]);
-    }
-
     System::EventGroupWaitForBits(this->_transferGroup, TransferFinished, true, true, MAX_DELAY);
-
-    //    PrintDMAInfo();
 }
 
 void EFMSPIInterface::Deselect()
@@ -155,10 +135,9 @@ void EFMSPIInterface::WriteRead(gsl::span<const std::uint8_t> input, gsl::span<s
 
 bool EFMSPIInterface::OnTransferFinished(unsigned int channel, unsigned int sequenceNo, void* param)
 {
-    INT_Disable();
     UNUSED(channel, sequenceNo);
+
     auto This = static_cast<EFMSPIInterface*>(param);
-    //    LOGF_ISR(LOG_LEVEL_DEBUG, "DMA complete %s", channel == This->_rxChannel ? "RX" : "TX");
 
     if (channel == This->_rxChannel)
     {
@@ -171,17 +150,5 @@ bool EFMSPIInterface::OnTransferFinished(unsigned int channel, unsigned int sequ
 
     System::EndSwitchingISR();
 
-    INT_Enable();
-
     return true;
-}
-
-void drivers::spi::EFMSPIInterface::PrintDMAInfo()
-{
-    int rxRem = 10, txRem = 10;
-
-    DMADRV_TransferRemainingCount(this->_rxChannel, &rxRem);
-    DMADRV_TransferRemainingCount(this->_txChannel, &txRem);
-
-    LOGF(LOG_LEVEL_INFO, "RX (rem %d) TX (rem %d)", rxRem, txRem);
 }
