@@ -37,12 +37,10 @@ namespace drivers
           private:
             static bool OnTransferFinished(unsigned int channel, unsigned int sequenceNo, void* param);
 
-            void PrintDMAInfo();
-
             unsigned int _txChannel;
             unsigned int _rxChannel;
-            OSSemaphoreHandle _lock;
             OSEventGroupHandle _transferGroup;
+
             static constexpr OSEventBits TransferRXFinished = 1 << 0;
             static constexpr OSEventBits TransferTXFinished = 1 << 1;
             static constexpr OSEventBits TransferFinished = TransferRXFinished | TransferTXFinished;
