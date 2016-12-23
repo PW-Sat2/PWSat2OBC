@@ -48,7 +48,10 @@ enum Command
     EraseSubsector = 0x20,
     EraseSector = 0xD8,
     EraseChip = 0xC7,
-    ClearFlagRegister = 0x50
+    ClearFlagRegister = 0x50,
+    ResetEnable = 0x66,
+    ResetMemory = 0x99,
+    WriteStatusRegister = 0x01
 };
 
 MATCHER_P(CommandCall, command, std::string("Command " + PrintToString(command)))
@@ -695,4 +698,168 @@ TEST_F(N25QDriverTest, ClearFlagRegister)
     ExpectClearFlags();
 
     this->_driver.ClearFlags();
+}
+
+TEST_F(N25QDriverTest, ShouldResetProperly)
+{
+    {
+        InSequence s;
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::ResetEnable);
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::ResetMemory);
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            std::array<uint8_t, 3> id{0xAA, 0xBB, 0xCC};
+
+            ExpectCommandAndRespondOnce(Command::ReadId, id);
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            std::array<uint8_t, 3> id{0x20, 0xBA, 0x18};
+
+            ExpectCommandAndRespondOnce(Command::ReadId, id);
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::WriteEnable);
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::WriteStatusRegister);
+            EXPECT_CALL(this->_spi, Write(ElementsAre(0x20)));
+        }
+
+        ExpectWaitBusy(3);
+    }
+
+    auto result = this->_driver.Reset();
+
+    ASSERT_THAT(result, Eq(OperationResult::Success));
+}
+
+TEST_F(N25QDriverTest, SettingProtectionOnResetCanTimeout)
+{
+    {
+        InSequence s;
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::ResetEnable);
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::ResetMemory);
+        }
+
+        EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0));
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            std::array<uint8_t, 3> id{0xAA, 0xBB, 0xCC};
+
+            ExpectCommandAndRespondOnce(Command::ReadId, id);
+        }
+        EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0));
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            std::array<uint8_t, 3> id{0x20, 0xBA, 0x18};
+
+            ExpectCommandAndRespondOnce(Command::ReadId, id);
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::WriteEnable);
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::WriteStatusRegister);
+            EXPECT_CALL(this->_spi, Write(ElementsAre(0x20)));
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0));
+
+            ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
+
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0));
+
+            ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
+
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(std::numeric_limits<uint32_t>::max()));
+        }
+    }
+
+    auto result = this->_driver.Reset();
+
+    ASSERT_THAT(result, Eq(OperationResult::Timeout));
+}
+
+TEST_F(N25QDriverTest, WaitingOnResetCanTimeout)
+{
+    {
+        InSequence s;
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::ResetEnable);
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::ResetMemory);
+        }
+
+        EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0));
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            std::array<uint8_t, 3> id{0xAA, 0xBB, 0xCC};
+
+            ExpectCommandAndRespondOnce(Command::ReadId, id);
+        }
+        EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0));
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            std::array<uint8_t, 3> id{0xFF, 0xFF, 0xFF};
+
+            ExpectCommandAndRespondOnce(Command::ReadId, id);
+        }
+        EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(std::numeric_limits<uint32_t>::max()));
+    }
+
+    auto result = this->_driver.Reset();
+
+    ASSERT_THAT(result, Eq(OperationResult::Timeout));
 }

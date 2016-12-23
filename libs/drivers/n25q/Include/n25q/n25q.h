@@ -175,7 +175,11 @@ namespace devices
              */
             void ClearFlags();
 
-            void Reset();
+            /**
+             * @brief Resets device to known state (memory content is not affected)
+             * @return Operation status
+             */
+            OperationResult Reset();
 
           private:
             /** @brief Enables write */
@@ -212,13 +216,17 @@ namespace devices
              * Datasheet states that this operation should take maximum 5 ms.
              * Rounded to 10ms as it is single FreeRTOS tick
              */
-            constexpr static OSTaskTimeSpan ProgramPageTimeout = 50;
-            /** Erase subsector operation timeout */
-            constexpr static OSTaskTimeSpan EraseSubSectorTimeout = 1.2 * (0.8 * 1000);
-            /** Erase sector operation timeout */
-            constexpr static OSTaskTimeSpan EraseSectorTimeout = 1.2 * (3 * 1000);
-            /** Erase chip operation timeout */
-            constexpr static OSTaskTimeSpan EraseChipTimeOut = 1.2 * (250 * 1000);
+            constexpr static std::uint32_t ProgramPageTimeout = 50;
+            /** @brief Erase subsector operation timeout */
+            constexpr static std::uint32_t EraseSubSectorTimeout = 1.2 * (0.8 * 1000);
+            /** @brief Erase sector operation timeout */
+            constexpr static std::uint32_t EraseSectorTimeout = 1.2 * (3 * 1000);
+            /** @brief Erase chip operation timeout */
+            constexpr static std::uint32_t EraseChipTimeOut = 1.2 * (250 * 1000);
+            /** @brief Reset timeout */
+            constexpr static std::uint32_t ResetTimeout = 10;
+            /** @brief Write status register timeout */
+            constexpr static std::uint32_t WriteStatusRegisterTimeout = 10;
         };
     }
 }
