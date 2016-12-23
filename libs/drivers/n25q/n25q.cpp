@@ -288,7 +288,7 @@ void N25QDriver::ClearFlags()
     this->Command(N25QCommand::ClearFlagRegister);
 }
 
-void N25QDriver::Reset()
+OperationResult N25QDriver::Reset()
 {
     {
         SPISelectSlave select(this->_spi);
@@ -302,8 +302,18 @@ void N25QDriver::Reset()
         this->Command(N25QCommand::ResetMemory);
     }
 
-    while (!this->ReadId().IsValid())
-        ;
+    Timeout timeoutCheck(ResetTimeout);
+
+    do
+    {
+        auto id = this->ReadId();
+
+        if (id.IsValid())
+            break;
+
+        if (timeoutCheck.Expired())
+            return OperationResult::Timeout;
+    } while (true);
 
     this->EnableWrite();
 
@@ -319,11 +329,13 @@ void N25QDriver::Reset()
     {
         SPISelectSlave select(this->_spi);
 
-        if (!this->WaitBusy(100))
+        if (!this->WaitBusy(WriteStatusRegisterTimeout))
         {
-            return;
+            return OperationResult::Timeout;
         }
     }
+
+    return OperationResult::Success;
 }
 
 void N25QDriver::Command(const std::uint8_t command)
