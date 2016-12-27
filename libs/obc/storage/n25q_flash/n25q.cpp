@@ -1,13 +1,16 @@
 #include "n25q.h"
 #include "fs/fs.h"
+#include "gpio/gpio.h"
 
 using obc::storage::N25QStorage;
 using devices::n25q::OperationResult;
 using services::fs::IYaffsDeviceOperations;
+using drivers::gpio::OutputPin;
 
-N25QStorage::N25QStorage(drivers::spi::ISPIInterface& spi, IYaffsDeviceOperations& deviceOperations)
-    : ExternalFlashDriver(spi),                //
-      ExternalFlash("/", ExternalFlashDriver), //
+N25QStorage::N25QStorage(drivers::spi::EFMSPIInterface& spi, IYaffsDeviceOperations& deviceOperations)
+    : ExternalFlashDriverSPI(spi, OutputPin<gpioPortD, 3>()), //
+      ExternalFlashDriver(ExternalFlashDriverSPI),            //
+      ExternalFlash("/", ExternalFlashDriver),                //
       _deviceOperations(deviceOperations)
 {
 }

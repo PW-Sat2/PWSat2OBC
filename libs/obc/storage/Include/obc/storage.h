@@ -3,7 +3,7 @@
 
 #include "base/os.h"
 #include "fs/yaffs.h"
-#include "spi/spi.h"
+#include "spi/efm.h"
 #include "utils.h"
 
 #ifdef USE_EXTERNAL_FLASH
@@ -35,7 +35,7 @@ namespace obc
          * @param spi SPI interface to use
          * @param deviceOperations YAFFS device operations
          */
-        OBCStorageHandler(drivers::spi::ISPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations);
+        OBCStorageHandler(drivers::spi::EFMSPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations);
 
         /**
          * @brief Performs storage initialization
@@ -60,7 +60,8 @@ namespace obc
     };
 
     template <typename Storage>
-    OBCStorageHandler<Storage>::OBCStorageHandler(drivers::spi::ISPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations)
+    OBCStorageHandler<Storage>::OBCStorageHandler(
+        drivers::spi::EFMSPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations)
         : _storage(spi, deviceOperations)
     {
     }

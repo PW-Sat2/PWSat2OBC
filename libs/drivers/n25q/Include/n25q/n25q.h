@@ -12,6 +12,7 @@ namespace devices
     {
         /**
          * @defgroup n25q N25Q Device driver
+         * @ingroup device_drivers
          *
          * This module contains driver for N25Q NOR serial flash memory
          *
@@ -38,6 +39,7 @@ namespace devices
             /** @brief Memory type (should be 0x18) */
             std::uint8_t MemoryCapacity;
 
+            /** @brief Checks if this id is valid */
             bool IsValid() const
             {
                 return Manufacturer == 0x20 //

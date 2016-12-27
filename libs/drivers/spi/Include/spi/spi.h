@@ -5,14 +5,19 @@
 #include <gsl/span>
 #include "utils.h"
 
+#include "gpio/forward.h"
+
 namespace drivers
 {
     namespace spi
     {
         /**
          * @defgroup spi SPI driver wrapper
+         * @ingroup perhipheral_drivers
          *
          * This module defines C++ friendly SPI interface
+         *
+         * @{
          */
 
         /**
@@ -24,12 +29,16 @@ namespace drivers
             virtual void Select() = 0;
             /** @brief Deselects slave */
             virtual void Deselect() = 0;
-            /** @brief Writes buffer to device */
+            /**
+             * @brief Writes buffer to device
+             * @param[in] buffer Input buffer
+             */
             virtual void Write(gsl::span<const std::uint8_t> buffer) = 0;
-            /** @brief Reads from device */
+            /**
+             * @brief Reads from device
+             * @param[in] buffer Output buffer
+             */
             virtual void Read(gsl::span<std::uint8_t> buffer) = 0;
-            /** @brief Writes that reads from device */
-            virtual void WriteRead(gsl::span<const std::uint8_t> input, gsl::span<std::uint8_t> output) = 0;
         };
 
         /**
@@ -41,7 +50,7 @@ namespace drivers
          * 		SPISelectSlave select(this->_spi); // slave is selected
          *
          * 		// some code interacting with slave
-         * } // at the end of block slave is selected
+         * } // at the end of block slave is deselected
          * @endcode
          */
         class SPISelectSlave final : private NotCopyable, private NotMoveable
@@ -62,6 +71,8 @@ namespace drivers
             /** @brief Used SPI interface */
             ISPIInterface& _spi;
         };
+
+        /** @} */
     }
 }
 

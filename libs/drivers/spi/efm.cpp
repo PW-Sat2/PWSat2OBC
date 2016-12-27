@@ -37,8 +37,6 @@ void EFMSPIInterface::Initialize()
 
     USART_InitSync(SPI_USART, &init);
 
-    GPIO_PinModeSet(gpioPortD, 3, gpioModePushPull, 1); // cs
-
     GPIO_PinModeSet(SPI_PORT, SPI_MOSI, gpioModePushPull, 1);
     GPIO_PinModeSet(SPI_PORT, SPI_MISO, gpioModeInputPull, 0);
     GPIO_PinModeSet(SPI_PORT, SPI_CLK, gpioModePushPull, 1);
@@ -46,16 +44,13 @@ void EFMSPIInterface::Initialize()
     DMADRV_AllocateChannel(&this->_rxChannel, nullptr);
     DMADRV_AllocateChannel(&this->_txChannel, nullptr);
 
-    this->_transferGroup = System::CreateEventGroup();
-
     SPI_USART->ROUTE |= USART_ROUTE_CLKPEN | USART_ROUTE_TXPEN | USART_ROUTE_RXPEN | (SPI_LOCATION << _USART_ROUTE_LOCATION_SHIFT);
 
     USART_Enable(SPI_USART, usartEnable);
-}
 
-void EFMSPIInterface::Select()
-{
-    GPIO_PinOutClear(gpioPortD, 3);
+    this->_transferGroup = System::CreateEventGroup();
+    this->_lock = System::CreateBinarySemaphore();
+    System::GiveSemaphore(this->_lock);
 }
 
 void EFMSPIInterface::Write(gsl::span<const std::uint8_t> buffer)
@@ -122,17 +117,6 @@ void EFMSPIInterface::Read(gsl::span<std::uint8_t> buffer)
     System::EventGroupWaitForBits(this->_transferGroup, TransferFinished, true, true, MAX_DELAY);
 }
 
-void EFMSPIInterface::Deselect()
-{
-    GPIO_PinOutSet(gpioPortD, 3);
-}
-
-void EFMSPIInterface::WriteRead(gsl::span<const std::uint8_t> input, gsl::span<std::uint8_t> output)
-{
-    this->Write(input);
-    this->Read(output);
-}
-
 bool EFMSPIInterface::OnTransferFinished(unsigned int channel, unsigned int sequenceNo, void* param)
 {
     UNUSED(channel, sequenceNo);
@@ -151,4 +135,39 @@ bool EFMSPIInterface::OnTransferFinished(unsigned int channel, unsigned int sequ
     System::EndSwitchingISR();
 
     return true;
+}
+EFMSPISlaveInterface::EFMSPISlaveInterface(EFMSPIInterface& spi, drivers::gpio::Pin pin) : _spi(spi), _pin(pin)
+{
+}
+
+void EFMSPISlaveInterface::Select()
+{
+    this->_spi.Lock();
+    this->_pin.Low();
+}
+
+void EFMSPISlaveInterface::Deselect()
+{
+    this->_pin.High();
+    this->_spi.Unlock();
+}
+
+void EFMSPISlaveInterface::Write(gsl::span<const std::uint8_t> buffer)
+{
+    this->_spi.Write(buffer);
+}
+
+void EFMSPISlaveInterface::Read(gsl::span<std::uint8_t> buffer)
+{
+    this->_spi.Read(buffer);
+}
+
+void drivers::spi::EFMSPIInterface::Lock()
+{
+    System::TakeSemaphore(this->_lock, MAX_DELAY);
+}
+
+void drivers::spi::EFMSPIInterface::Unlock()
+{
+    System::GiveSemaphore(this->_lock);
 }
