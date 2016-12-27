@@ -42,6 +42,7 @@
 
 using devices::comm::CommObject;
 using devices::comm::CommFrame;
+using services::time::TimeProvider;
 
 OBC Main;
 mission::ObcMission Mission(Main.timeProvider, Main.antennaDriver, false);
@@ -88,7 +89,7 @@ static void SmartWaitTask(void* param)
 
     while (1)
     {
-        TimeLongDelay(&Main.timeProvider, TimeSpanFromMinutes(10));
+        Main.timeProvider.LongDelay(TimeSpanFromMinutes(10));
         LOG(LOG_LEVEL_DEBUG, "After wait");
     }
 }
@@ -171,7 +172,7 @@ static void ObcInitTask(void* param)
 
     ClearState(obc);
 
-    if (!TimeInitialize(&obc->timeProvider, NULL, NULL, &obc->fs))
+    if (!obc->timeProvider.Initialize(nullptr, nullptr))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize persistent timer. ");
     }

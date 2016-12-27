@@ -24,7 +24,7 @@ struct OSMock : IOS
 
     MOCK_METHOD1(Sleep, void(const OSTaskTimeSpan time));
 
-    MOCK_METHOD0(CreateBinarySemaphore, OSSemaphoreHandle());
+    MOCK_METHOD1(CreateBinarySemaphore, OSSemaphoreHandle(uint8_t semaphoreId));
 
     MOCK_METHOD2(TakeSemaphore, OSResult(const OSSemaphoreHandle semaphore, const OSTaskTimeSpan time));
 

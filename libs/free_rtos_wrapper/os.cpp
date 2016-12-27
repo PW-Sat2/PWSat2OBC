@@ -61,8 +61,9 @@ void System::ResumeTask(OSTaskHandle task)
     vTaskResume(task);
 }
 
-OSSemaphoreHandle System::CreateBinarySemaphore(void)
+OSSemaphoreHandle System::CreateBinarySemaphore(uint8_t semaphoreId)
 {
+    UNREFERENCED_PARAMETER(semaphoreId);
     return xSemaphoreCreateBinary();
 }
 

@@ -16,7 +16,7 @@ void JumpToTimeHandler(uint16_t argc, char* argv[])
     char* tail;
     const TimeSpan targetTime = TimeSpanFromSeconds(strtoul(argv[0], &tail, 10));
     LOGF(LOG_LEVEL_INFO, "Jumping to time %lu\n", static_cast<std::uint32_t>(targetTime.value / 1000));
-    TimeSetCurrentTime(&Main.timeProvider, TimePointFromTimeSpan(targetTime));
+    Main.timeProvider.SetCurrentTime(TimePointFromTimeSpan(targetTime));
 }
 
 void AdvanceTimeHandler(uint16_t argc, char* argv[])
@@ -30,14 +30,13 @@ void AdvanceTimeHandler(uint16_t argc, char* argv[])
     char* tail;
     const TimeSpan targetTime = TimeSpanFromMilliseconds(strtoul(argv[0], &tail, 10));
     LOGF(LOG_LEVEL_INFO, "Advancing time by '%lu' seconds\n", static_cast<std::uint32_t>(targetTime.value / 1000));
-    TimeAdvanceTime(&Main.timeProvider, targetTime);
+    Main.timeProvider.AdvanceTime(targetTime);
 }
 
 void CurrentTimeHandler(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
-    TimeSpan span;
-    TimeGetCurrentTime(&Main.timeProvider, &span);
+    TimeSpan span = Main.timeProvider.GetCurrentTime().Value;
     Main.terminal.Printf("%lu", static_cast<std::uint32_t>(span.value / 1000));
 }

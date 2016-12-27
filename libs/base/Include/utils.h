@@ -5,6 +5,8 @@
 
 #include <stdbool.h>
 #include <cstdint>
+#include <type_traits>
+#include <utility>
 
 /**
  * @brief Converts bool value to 1 or 0
@@ -53,5 +55,81 @@ struct PureStatic
 {
     PureStatic() = delete;
 };
+
+/**
+ * @brief Class that can logically contain either a value of type T or no value.
+ */
+template <class T> class Option
+{
+  public:
+    /**
+     * @brief Factory method that constructs empty Option instance.
+     * @return Empty Option instance.
+     */
+    static Option<T> None()
+    {
+        return Option<T>(false, T());
+    }
+
+    /**
+     * @brief Factory method that constructs Option instance that holds given value.
+     * @param[in] value Value to hold in Option instance.
+     * @return Option instance that holds a value.
+     */
+    static Option<T> Some(T&& value)
+    {
+        return Option<T>(true, std::move(value));
+    }
+
+    /**
+     * @brief Factory method that constructs Option instance that holds given value.
+     * @param[in] value Value to hold in Option instance.
+     * @return Option instance that holds a value.
+     */
+    static Option<T> Some(T& value)
+    {
+        return Option<T>(true, value);
+    }
+
+    /**
+      * @brief A flag indicating if this Option instance holds a value.
+      */
+    const bool HasValue;
+
+    /**
+      * @brief Value held by Option instance if HasValue is true.
+      */
+    const T Value;
+
+  private:
+    Option(bool hasValue, T&& value) : HasValue(hasValue), Value(std::move(value))
+    {
+    }
+
+    Option(bool hasValue, T& value) : HasValue(hasValue), Value(value)
+    {
+    }
+};
+
+/**
+ * @brief Factory method that constructs empty Option instance.
+ * @return Empty Option instance.
+ */
+template <typename T> static inline Option<T> None()
+{
+    return Option<T>::None();
+}
+
+/**
+ * @brief Factory method that constructs Option instance that holds given value.
+ * @param[in] value Value to hold in Option instance.
+ * @return Option instance that holds a value.
+ */
+template <typename T> static inline Option<std::remove_reference_t<T>> Some(T&& value)
+{
+    using U = std::remove_reference_t<T>;
+
+    return Option<U>::Some(std::forward<U>(value));
+}
 
 #endif
