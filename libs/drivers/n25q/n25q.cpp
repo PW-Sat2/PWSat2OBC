@@ -151,7 +151,8 @@ OperationResult N25QDriver::WriteMemory(size_t address, span<const uint8_t> buff
 
 void N25QDriver::Command(const std::uint8_t command, gsl::span<std::uint8_t> response)
 {
-    this->_spi.WriteRead(span<const uint8_t>(&command, 1), response);
+    this->_spi.Write(span<const uint8_t>(&command, 1));
+    this->_spi.Read(response);
 }
 
 void N25QDriver::EnableWrite()

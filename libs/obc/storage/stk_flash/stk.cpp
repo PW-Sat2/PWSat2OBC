@@ -1,10 +1,9 @@
 #include "stk.h"
 #include "fs/fs.h"
-#include "yaffs.hpp"
 
 using obc::storage::STKStorage;
 
-STKStorage::STKStorage(drivers::spi::ISPIInterface& spi, FileSystem& fs) : _fs(fs)
+STKStorage::STKStorage(drivers::spi::EFMSPIInterface& spi, FileSystem& fs) : _fs(fs)
 {
     UNREFERENCED_PARAMETER(spi);
 }

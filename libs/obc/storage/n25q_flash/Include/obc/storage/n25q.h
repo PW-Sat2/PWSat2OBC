@@ -4,6 +4,7 @@
 #include "fs/fs.h"
 #include "n25q/n25q.h"
 #include "n25q/yaffs.h"
+#include "spi/efm.h"
 
 namespace obc
 {
@@ -27,7 +28,7 @@ namespace obc
              * @param[in] spi SPI interface used by external memories
              * @param[in] fs File system interface
              */
-            N25QStorage(drivers::spi::ISPIInterface& spi, FileSystem& fs);
+            N25QStorage(drivers::spi::EFMSPIInterface& spi, FileSystem& fs);
 
             /** @brief Initializes OBC storage */
             void Initialize();
@@ -40,6 +41,8 @@ namespace obc
 
             /** @brief Performs (lengthy) erase operation */
             OSResult Erase();
+
+            drivers::spi::EFMSPISlaveInterface ExternalFlashDriverSPI;
 
             /** @brief N25Q flash driver */
             devices::n25q::N25QDriver ExternalFlashDriver;
