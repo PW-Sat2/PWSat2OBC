@@ -33,6 +33,7 @@
 #include "system.h"
 #include "terminal.h"
 
+#include "gpio/gpio.h"
 #include "leuart/leuart.h"
 #include "power_eps/power_eps.h"
 
