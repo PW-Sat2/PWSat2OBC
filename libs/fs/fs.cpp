@@ -153,12 +153,21 @@ static bool YaffsExists(FileSystem* fileSystem, const char* path)
     return status != -1;
 }
 
+static constexpr uint8_t RecursionLimit = 5;
+
 /**
  * @brief Recursively removes all objects in directory (root itself is left alone)
  * @param root Root directory
+ * @param depth Recursion depth counter
+ * @return Operation result
  */
-static void RemoveDirectoryContents(yaffs_obj* root)
+static OSResult RemoveDirectoryContents(yaffs_obj* root, int depth = 0)
 {
+    if (depth > RecursionLimit)
+        return OSResult::PathTooLong;
+
+    auto result = OSResult::Success;
+
     auto dir = yaffs_opendir_reldir(root, "");
 
     yaffs_dirent* entry;
@@ -178,22 +187,28 @@ static void RemoveDirectoryContents(yaffs_obj* root)
         }
         else if (obj->variant_type == YAFFS_OBJECT_TYPE_DIRECTORY)
         {
-            RemoveDirectoryContents(obj);
+            if (OS_RESULT_FAILED(RemoveDirectoryContents(obj, depth + 1)))
+            {
+                result = OSResult::PathTooLong;
+                break;
+            }
 
             yaffs_rmdir_reldir(root, entry->d_name);
         }
     }
 
     yaffs_closedir(dir);
+
+    return result;
 }
 
-static void YaffsClearDevice(FileSystem* fileSystem, yaffs_dev* device)
+static OSResult YaffsClearDevice(FileSystem* fileSystem, yaffs_dev* device)
 {
     UNREFERENCED_PARAMETER(fileSystem);
 
     auto root = yaffs_root(device);
 
-    RemoveDirectoryContents(root);
+    return RemoveDirectoryContents(root);
 }
 
 static void YaffsSync(FileSystem* fileSystem)

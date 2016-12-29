@@ -23,6 +23,12 @@ namespace devices
          */
         struct Id
         {
+            /**
+             * @brief Initializes @ref Id instance
+             * @param manufacturer Manufacturer
+             * @param memoryType Memory type
+             * @param memoryCapacity Memory capacity
+             */
             Id(std::uint8_t manufacturer, std::uint8_t memoryType, std::uint8_t memoryCapacity);
 
             /** @brief Manufacturer (should be 0x20) */
