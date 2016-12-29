@@ -25,8 +25,11 @@ static inline size_t BlockSize(BlockMapping blockMapping)
     }
 }
 
-N25QYaffsDeviceBase::N25QYaffsDeviceBase(
-    const char* mountPoint, devices::n25q::BlockMapping blockMapping, std::size_t chunkSize, std::size_t totalSize, N25QDriver& driver)
+N25QYaffsDeviceBase::N25QYaffsDeviceBase(const char* mountPoint,
+    const devices::n25q::BlockMapping blockMapping,
+    const std::size_t chunkSize,
+    const std::size_t totalSize,
+    N25QDriver& driver)
     : _driver(driver), //
       _blockMapping(blockMapping)
 {

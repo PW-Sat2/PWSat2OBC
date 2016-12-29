@@ -57,7 +57,9 @@ struct OSMock : IOS
 
     MOCK_METHOD0(EndSwitchingISR, void());
 
-    MOCK_METHOD0(GetTickCount, std::uint32_t());
+    MOCK_METHOD0(GetUptime, OSTaskTimeSpan());
+
+    MOCK_METHOD0(Yield, void());
 };
 
 #endif

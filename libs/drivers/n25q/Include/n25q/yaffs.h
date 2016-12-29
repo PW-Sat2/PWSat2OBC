@@ -42,8 +42,11 @@ namespace devices
              * @param[in] totalSize Total memory size
              * @param[in] driver N25Q driver to use
              */
-            N25QYaffsDeviceBase(
-                const char* mountPoint, BlockMapping blockMapping, std::size_t chunkSize, std::size_t totalSize, N25QDriver& driver);
+            N25QYaffsDeviceBase(const char* mountPoint,
+                const BlockMapping blockMapping,
+                const std::size_t chunkSize,
+                const std::size_t totalSize,
+                N25QDriver& driver);
 
             /**
              * @brief Mounts device
@@ -125,7 +128,7 @@ namespace devices
             /** @brief Low-level N25Q driver */
             N25QDriver& _driver;
             /** @brief Block mapping */
-            BlockMapping _blockMapping;
+            const BlockMapping _blockMapping;
         };
 
         inline yaffs_dev* N25QYaffsDeviceBase::Device()

@@ -5,8 +5,7 @@
 #include "fs/fs.h"
 #include "storage/nand_driver.h"
 #include "system.h"
-#include "yaffs_guts.h"
-#include "yaffsfs.h"
+#include "yaffs.hpp"
 
 #include "MemoryDriver.hpp"
 

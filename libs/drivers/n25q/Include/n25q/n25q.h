@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <gsl/span>
+#include "base/os.h"
 #include "spi/spi.h"
 
 namespace devices
@@ -22,12 +23,14 @@ namespace devices
          */
         struct Id
         {
+            Id(std::uint8_t manufacturer, std::uint8_t memoryType, std::uint8_t memoryCapacity);
+
             /** @brief Manufacturer (should be 0x20) */
-            std::uint8_t Manufacturer;
+            const std::uint8_t Manufacturer;
             /** @brief Memory type (should be 0xBA) */
-            std::uint8_t MemoryType;
+            const std::uint8_t MemoryType;
             /** @brief Memory type (should be 0x18) */
-            std::uint8_t MemoryCapacity;
+            const std::uint8_t MemoryCapacity;
         };
 
         /**
@@ -118,6 +121,8 @@ namespace devices
              *
              * Write operation spanning more than one page (256 bytes) are splitted into N separate write operations.
              * In case of failure in one of them, subsequent writes are aborted and memory is left partially written
+             *
+             * Operation can take up to 5ms per page
              */
             OperationResult WriteMemory(std::size_t address, gsl::span<const uint8_t> buffer);
 
@@ -125,6 +130,8 @@ namespace devices
              * @brief Erases single subsector (4KB)
              * @param address Subsctor base address
              * @return Operation result
+             *
+             * Operation can take up to 0.8s
              */
             OperationResult EraseSubSector(std::size_t address);
 
@@ -132,6 +139,8 @@ namespace devices
              * @brief Erases single sector (64KB)
              * @param address Sector base address
              * @return Operation result
+             *
+             * Operation can take up to 3s
              */
             OperationResult EraseSector(std::size_t address);
 
@@ -156,7 +165,7 @@ namespace devices
              * @param[in] timeout Timeout
              * @return true of operation finished, false on timeout
              */
-            bool WaitBusy(std::uint32_t timeout);
+            bool WaitBusy(OSTaskTimeSpan timeout);
 
             /**
              * @brief Outputs specified address to device
@@ -183,13 +192,13 @@ namespace devices
              * Datasheet states that this operation should take maximum 5 ms.
              * Rounded to 10ms as it is single FreeRTOS tick
              */
-            constexpr static std::uint32_t ProgramPageTimeout = 50;
+            constexpr static OSTaskTimeSpan ProgramPageTimeout = 50;
             /** Erase subsector operation timeout */
-            constexpr static std::uint32_t EraseSubSectorTimeout = 1.2 * (0.8 * 1000);
+            constexpr static OSTaskTimeSpan EraseSubSectorTimeout = 1.2 * (0.8 * 1000);
             /** Erase sector operation timeout */
-            constexpr static std::uint32_t EraseSectorTimeout = 1.2 * (3 * 1000);
+            constexpr static OSTaskTimeSpan EraseSectorTimeout = 1.2 * (3 * 1000);
             /** Erase chip operation timeout */
-            constexpr static std::uint32_t EraseChipTimeOut = 1.2 * (250 * 1000);
+            constexpr static OSTaskTimeSpan EraseChipTimeOut = 1.2 * (250 * 1000);
         };
     }
 }

@@ -56,7 +56,9 @@ struct IOS
 
     virtual void EndSwitchingISR() = 0;
 
-    virtual std::uint32_t GetTickCount() = 0;
+    virtual OSTaskTimeSpan GetUptime() = 0;
+
+    virtual void Yield() = 0;
 };
 
 class OSReset

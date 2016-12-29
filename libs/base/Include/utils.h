@@ -132,4 +132,18 @@ template <typename T> static inline Option<std::remove_reference_t<T>> Some(T&& 
     return Option<U>::Some(std::forward<U>(value));
 }
 
+struct NotCopyable
+{
+    NotCopyable() = default;
+    NotCopyable(const NotCopyable& arg) = delete;
+    NotCopyable& operator=(const NotCopyable& arg) = delete;
+};
+
+struct NotMoveable
+{
+    NotMoveable() = default;
+    NotMoveable(NotMoveable&& arg) = delete;
+    NotMoveable& operator=(NotMoveable&& arg) = delete;
+};
+
 #endif

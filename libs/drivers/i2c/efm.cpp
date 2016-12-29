@@ -47,7 +47,7 @@ I2CResult I2CLowLevelBus::ExecuteTransfer(I2C_TransferSeq_TypeDef* seq)
 
         hw->CMD = I2C_CMD_STOP | I2C_CMD_ABORT;
 
-        while (HAS_FLAG(hw->STATUS, I2C_STATUS_PABORT))
+        while (has_flag(hw->STATUS, I2C_STATUS_PABORT))
         {
         }
 
