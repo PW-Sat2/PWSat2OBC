@@ -111,7 +111,7 @@ class Test_Comm(BaseTest):
     def test_auto_pingpong(self):
         self.power_on_and_wait()
         self.system.receiver.put_frame("PING")
-        msg = self.system.transmitter.get_message_from_buffer(20)
+        msg = self.system.transmitter.get_message_from_buffer(25)
 
         msg = ''.join([chr(c) for c in msg])
 

@@ -121,6 +121,7 @@ class ReceiverDevice(i2cMock.I2CDevice):
     def put_frame(self, data):
         with self._lock:
             self._buffer.put_nowait(data)
+            self._buffer.qsize()
 
     def queue_size(self):
         with self._lock:
