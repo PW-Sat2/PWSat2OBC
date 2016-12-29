@@ -97,6 +97,7 @@ class Test_Comm(BaseTest):
         self.assertEqual(received_frame, frame)
 
     def test_build_receive_frame_response(self):
+        self.power_on_obc()
         data = "a" * 300
         doppler = 412
         rssi = 374
@@ -109,6 +110,11 @@ class Test_Comm(BaseTest):
         self.assertEqual(response[6:307], [ord('a')] * 300)
 
     def test_auto_pingpong(self):
+        def reset_handler(*args):
+            return False
+        
+        self.system.comm.on_hardware_reset = reset_handler
+        self.system.comm.receiver.on_reset = reset_handler
         self.power_on_and_wait()
         self.system.receiver.put_frame("PING")
         msg = self.system.transmitter.get_message_from_buffer(20)
