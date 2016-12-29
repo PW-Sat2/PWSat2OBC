@@ -112,11 +112,11 @@ static void ClearState(OBC* obc)
     {
         LOG(LOG_LEVEL_WARNING, "Clearing state on startup");
 
-#ifdef USE_EXTERNAL_FLASH
-        obc->fs.ClearDevice(&obc->fs, obc->Storage.ExternalFlash.Device());
-#else
-        obc->fs.ClearDevice(&obc->fs, &obc->Storage.rootDevice);
-#endif
+        if (OS_RESULT_FAILED(obc->Storage.ClearStorage()))
+        {
+            LOG(LOG_LEVEL_ERROR, "Clearing state failed");
+        }
+
         LOG(LOG_LEVEL_INFO, "All files removed");
     }
 }

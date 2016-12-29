@@ -209,8 +209,9 @@ typedef struct FileSystemTag
      * @brief Removes all files and directories from specified device
      * @param[in] fileSystem File system object
      * @param[in] device Device to clear
+     * @return Operation result
      */
-    void (*ClearDevice)(FileSystem* fileSystem, yaffs_dev* device);
+    OSResult (*ClearDevice)(FileSystem* fileSystem, yaffs_dev* device);
 
     /**
      * @brief Syncs file system (speeds up next mount)

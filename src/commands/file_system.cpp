@@ -126,13 +126,9 @@ void EraseFlash(uint16_t argc, char* argv[])
 {
     UNUSED(argc, argv);
 
-#ifdef USE_EXTERNAL_FLASH
-    auto result = Main.Storage.ExternalFlashDriver.EraseChip();
+    auto r = Main.Storage.Erase();
 
-    Main.terminal.Printf("Erase result: %d", num(result));
-#else
-    Main.terminal.Printf("No erase for internal flash");
-#endif
+    Main.terminal.Printf("Erase result: %d", num(r));
 }
 
 void SyncFS(uint16_t argc, char* argv[])
