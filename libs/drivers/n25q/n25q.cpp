@@ -47,13 +47,11 @@ Id N25QDriver::ReadId()
 
     Reader reader(response);
 
-    Id id;
+    auto manufacturer = reader.ReadByte();
+    auto memoryType = reader.ReadByte();
+    auto memoryCapacity = reader.ReadByte();
 
-    id.Manufacturer = reader.ReadByte();
-    id.MemoryType = reader.ReadByte();
-    id.MemoryCapacity = reader.ReadByte();
-
-    return id;
+    return Id(manufacturer, memoryType, memoryCapacity);
 }
 
 Status N25QDriver::ReadStatus()
@@ -140,7 +138,7 @@ void N25QDriver::EnableWrite()
     this->Command(N25QCommand::WriteEnable);
 }
 
-bool N25QDriver::WaitBusy(std::uint32_t timeout)
+bool N25QDriver::WaitBusy(OSTaskTimeSpan timeout)
 {
     Timeout timeoutCheck(timeout);
 
@@ -159,6 +157,8 @@ bool N25QDriver::WaitBusy(std::uint32_t timeout)
         {
             return false;
         }
+
+        System::Yield();
     } while (true);
 
     return true;
@@ -279,4 +279,9 @@ void N25QDriver::WriteAddress(const std::size_t address)
     };
 
     this->_spi.Write(bytes);
+}
+
+Id::Id(std::uint8_t manufacturer, std::uint8_t memoryType, std::uint8_t memoryCapacity)
+    : Manufacturer(manufacturer), MemoryType(memoryType), MemoryCapacity(memoryCapacity)
+{
 }

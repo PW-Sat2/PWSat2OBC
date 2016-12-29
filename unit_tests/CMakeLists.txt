@@ -49,6 +49,7 @@ set(SOURCES
   mock/ActionDescriptorMock.hpp
   mock/UpdateDescriptorMock.hpp
   mock/VerifyDescriprorMock.hpp
+  SPI/SPIMock.cpp
 )
 
 add_executable(${NAME} ${SOURCES})

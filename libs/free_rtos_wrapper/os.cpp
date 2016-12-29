@@ -197,7 +197,12 @@ void System::PulseSet(OSPulseHandle handle)
     System::EventGroupSetBits((OSEventGroupHandle)handle, PULSE_ALL_BITS);
 }
 
-uint32_t System::GetTickCount()
+OSTaskTimeSpan System::GetUptime()
 {
-    return xTaskGetTickCount();
+    return portTICK_PERIOD_MS * xTaskGetTickCount();
+}
+
+void System::Yield()
+{
+    portYIELD();
 }

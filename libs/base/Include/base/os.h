@@ -418,11 +418,14 @@ class System final : public PureStatic
      */
     static void PulseSet(OSPulseHandle handle);
 
+    /** @brief Yields task control */
+    static void Yield();
+
     /**
-     * @brief Gets tick count since scheduler start
-     * @return Number of ticks
+     * @brief Gets number of miliseconds since system start
+     * @return Number of miliseconds since system start
      */
-    static std::uint32_t GetTickCount();
+    static OSTaskTimeSpan GetUptime();
 };
 
 /**
@@ -508,7 +511,7 @@ template <typename Param, std::uint16_t StackSize, TaskPriority Priority> void T
  * } // semaphore release at the end of scope
  * @endcode
  */
-class Lock final
+class Lock final : private NotCopyable, private NotMoveable
 {
   public:
     /**
@@ -530,11 +533,6 @@ class Lock final
     bool operator()();
 
   private:
-    Lock(const Lock&) = delete;
-    Lock& operator=(const Lock&) = delete;
-    Lock(Lock&&) = delete;
-    Lock& operator=(Lock&&) = delete;
-
     /** @brief Semaphore handle */
     const OSSemaphoreHandle _semaphore;
     /** @brief Flag indicating if semaphore is acquired */
@@ -626,15 +624,27 @@ template <typename Element, std::size_t Capacity> OSResult Queue<Element, Capaci
  * @brief Class that allows checking if specified number of miliseconds elapsed
  *
  * This class uses system tick count to measure elapsed time.
+ *
+ * Example usage:
+ * @code
+ * Timeout t(10); // start measuring 10ms timeout
+ *
+ * while(some_condition)
+ * {
+ * 	  // lengthy operation
+ *
+ * 	  if(t.Expired()) return Result::Timeout;
+ * }
+ * @endcode
  */
-class Timeout
+class Timeout final
 {
   public:
     /**
      * @brief Constructs new Timeout object
      * @param[in] timeout Timeout in miliseconds
      */
-    Timeout(std::uint32_t timeout);
+    Timeout(OSTaskTimeSpan timeout);
 
     /**
      * @brief Checks is timeout is expired
@@ -644,9 +654,9 @@ class Timeout
 
   private:
     /**
-     * @brief Tick count at which timeout will expire
+     * @brief System uptime at which timeout will expire
      */
-    const std::uint32_t _expireAt;
+    const OSTaskTimeSpan _expireAt;
 };
 
 /** @}*/

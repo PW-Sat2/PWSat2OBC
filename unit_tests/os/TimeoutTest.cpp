@@ -28,7 +28,7 @@ TimeoutTest::TimeoutTest()
 
 TEST_F(TimeoutTest, ZeroTimeoutWillExpireImmediately)
 {
-    EXPECT_CALL(this->_os, GetTickCount()).WillRepeatedly(Return(0));
+    EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0));
 
     Timeout t(0);
 
@@ -37,13 +37,13 @@ TEST_F(TimeoutTest, ZeroTimeoutWillExpireImmediately)
 
 TEST_F(TimeoutTest, TimeoutWillExpireAfterSpecifiedNumberOfMiliseconds)
 {
-    EXPECT_CALL(this->_os, GetTickCount()).WillRepeatedly(Return(100));
+    EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(100));
 
     Timeout t(10);
 
     ASSERT_THAT(t.Expired(), Eq(false));
 
-    EXPECT_CALL(this->_os, GetTickCount()).WillRepeatedly(Return(110));
+    EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(110));
 
     ASSERT_THAT(t.Expired(), Eq(true));
 }

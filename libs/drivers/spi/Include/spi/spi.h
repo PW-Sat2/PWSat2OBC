@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <gsl/span>
+#include "utils.h"
 
 namespace drivers
 {
@@ -43,7 +44,7 @@ namespace drivers
          * } // at the end of block slave is selected
          * @endcode
          */
-        class SPISelectSlave final
+        class SPISelectSlave final : private NotCopyable, private NotMoveable
         {
           public:
             /**
@@ -58,11 +59,6 @@ namespace drivers
             ~SPISelectSlave();
 
           private:
-            SPISelectSlave(const SPISelectSlave&) = delete;
-            SPISelectSlave& operator=(const SPISelectSlave&) = delete;
-            SPISelectSlave(SPISelectSlave&&) = delete;
-            SPISelectSlave& operator=(SPISelectSlave&&) = delete;
-
             /** @brief Used SPI interface */
             ISPIInterface& _spi;
         };

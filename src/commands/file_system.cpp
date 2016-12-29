@@ -4,10 +4,7 @@
 #include "obc.h"
 #include "system.h"
 
-extern "C" {
-#include "yaffs_guts.h"
-#include "yaffsfs.h"
-}
+#include "yaffs.hpp"
 
 using std::uint16_t;
 using std::int8_t;
