@@ -23,6 +23,7 @@ set(SOURCES
 add_library(${NAME} STATIC ${SOURCES})
 
 target_include_directories(${NAME} PUBLIC src)
+target_include_directories(${NAME} INTERFACE Include)
 
 target_compile_definitions(${NAME} PUBLIC
     -DCONFIG_YAFFS_PROVIDE_DEFS

@@ -134,7 +134,7 @@ N25QDriverTest::N25QDriverTest() : _driver(_spi)
 {
     this->_osReset = InstallProxy(&this->_os);
 
-    ON_CALL(this->_os, GetTickCount()).WillByDefault(Return(0));
+    ON_CALL(this->_os, GetUptime()).WillByDefault(Return(0));
 }
 
 TEST_F(N25QDriverTest, ShouldReadIdCorrectly)
@@ -461,15 +461,15 @@ TEST_F(N25QDriverTest, ShouldDetectEraseSubsectorTimeout)
         {
             auto selected = this->_spi.ExpectSelected();
 
-            EXPECT_CALL(this->_os, GetTickCount()).WillRepeatedly(Return(0));
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0));
 
             ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
 
-            EXPECT_CALL(this->_os, GetTickCount()).WillRepeatedly(Return(0));
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0));
 
             ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
 
-            EXPECT_CALL(this->_os, GetTickCount()).WillRepeatedly(Return(std::numeric_limits<uint32_t>::max()));
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(std::numeric_limits<uint32_t>::max()));
         }
     }
 
@@ -578,15 +578,15 @@ TEST_F(N25QDriverTest, ShouldDetectEraseSectorTimeout)
         {
             auto selected = this->_spi.ExpectSelected();
 
-            EXPECT_CALL(this->_os, GetTickCount()).WillRepeatedly(Return(0));
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0));
 
             ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
 
-            EXPECT_CALL(this->_os, GetTickCount()).WillRepeatedly(Return(0));
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0));
 
             ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
 
-            EXPECT_CALL(this->_os, GetTickCount()).WillRepeatedly(Return(std::numeric_limits<uint32_t>::max()));
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(std::numeric_limits<uint32_t>::max()));
         }
     }
 
@@ -683,15 +683,15 @@ TEST_F(N25QDriverTest, EraseChipOperationWillTimeout)
         {
             auto selected = this->_spi.ExpectSelected();
 
-            EXPECT_CALL(this->_os, GetTickCount()).WillRepeatedly(Return(0));
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0));
 
             ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
 
-            EXPECT_CALL(this->_os, GetTickCount()).WillRepeatedly(Return(0));
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0));
 
             ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
 
-            EXPECT_CALL(this->_os, GetTickCount()).WillRepeatedly(Return(std::numeric_limits<uint32_t>::max()));
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(std::numeric_limits<uint32_t>::max()));
         }
     }
 
