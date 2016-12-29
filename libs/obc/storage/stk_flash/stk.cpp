@@ -1,23 +1,16 @@
-#include "storage.h"
+#include "stk.h"
 #include "fs/fs.h"
+#include "yaffs.hpp"
 
-OBCStorage::OBCStorage(drivers::spi::ISPIInterface& spi)
-#ifdef USE_EXTERNAL_FLASH
-    : ExternalFlashDriver(spi), //
-      ExternalFlash("/", ExternalFlashDriver)
-#endif
+using obc::storage::STKStorage;
+
+STKStorage::STKStorage(drivers::spi::ISPIInterface& spi, FileSystem& fs) : _fs(fs)
 {
     UNREFERENCED_PARAMETER(spi);
 }
 
-void OBCStorage::Initialize()
+void STKStorage::Initialize()
 {
-#ifdef USE_EXTERNAL_FLASH
-    if (OS_RESULT_FAILED(this->ExternalFlash.Mount()))
-    {
-        return;
-    }
-#else
     memset(&rootDevice, 0, sizeof(rootDevice));
     rootDeviceDriver.geometry.pageSize = 512;
     rootDeviceDriver.geometry.spareAreaPerPage = 0;
@@ -48,7 +41,16 @@ void OBCStorage::Initialize()
     {
         return;
     }
-#endif
+}
 
-    //    yaffs_do_background_gc("/", 1);
+OSResult STKStorage::ClearStorage()
+{
+    return this->_fs.ClearDevice(&this->_fs, &this->rootDevice);
+}
+
+OSResult STKStorage::Erase()
+{
+    auto r = yaffs_format(this->rootDevice.param.name, 1, 1, 1);
+
+    return static_cast<OSResult>(r);
 }

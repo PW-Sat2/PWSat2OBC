@@ -15,8 +15,8 @@
 #include "leuart/line_io.h"
 #include "n25q/n25q.h"
 #include "n25q/yaffs.h"
+#include "obc/storage.h"
 #include "spi/efm.h"
-#include "storage.h"
 #include "storage/nand_driver.h"
 #include "terminal/terminal.h"
 #include "time/timer.h"
@@ -77,7 +77,7 @@ struct OBC
     communication::OBCCommunication Communication;
 
     /** @brief OBC storage */
-    OBCStorage Storage;
+    obc::OBCStorage Storage;
 
     /** @brief Terminal object. */
     Terminal terminal;
