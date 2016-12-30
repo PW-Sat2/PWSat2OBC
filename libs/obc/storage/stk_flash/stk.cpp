@@ -3,9 +3,10 @@
 
 using obc::storage::STKStorage;
 
-STKStorage::STKStorage(drivers::spi::EFMSPIInterface& spi, FileSystem& fs) : _fs(fs)
+STKStorage::STKStorage(drivers::spi::EFMSPIInterface& spi, FileSystem& fs, obc::OBCGPIO& pins) : _fs(fs)
 {
     UNREFERENCED_PARAMETER(spi);
+    UNREFERENCED_PARAMETER(pins);
 }
 
 void STKStorage::Initialize()

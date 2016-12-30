@@ -3,6 +3,7 @@
 
 #include "base/os.h"
 #include "fs/fs.h"
+#include "obc/hardware.h"
 #include "spi/efm.h"
 #include "utils.h"
 
@@ -35,7 +36,7 @@ namespace obc
          * @param spi SPI interface to use
          * @param fs File system interface
          */
-        OBCStorageHandler(drivers::spi::EFMSPIInterface& spi, FileSystem& fs);
+        OBCStorageHandler(drivers::spi::EFMSPIInterface& spi, FileSystem& fs, obc::OBCGPIO& pins);
 
         /** @brief Performs storage initialization */
         void Initialize();
@@ -57,7 +58,8 @@ namespace obc
     };
 
     template <typename Storage>
-    OBCStorageHandler<Storage>::OBCStorageHandler(drivers::spi::EFMSPIInterface& spi, FileSystem& fs) : _storage(spi, fs)
+    OBCStorageHandler<Storage>::OBCStorageHandler(drivers::spi::EFMSPIInterface& spi, FileSystem& fs, obc::OBCGPIO& pins)
+        : _storage(spi, fs, pins)
     {
     }
 

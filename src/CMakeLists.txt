@@ -20,7 +20,6 @@ set(SOURCES
     obc.h
     obc.cpp
     communication.cpp
-    hardware.cpp  
     fault_handlers.cpp
 )
 
@@ -58,6 +57,7 @@ target_link_libraries(${NAME}
     mission_time
     yaffs
     obc_storage
+    obc_hardware
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)
