@@ -47,6 +47,7 @@ namespace obc
             /** @brief Performs (lengthy) erase operation */
             OSResult Erase();
 
+            /** @brief SPI driver for N25Q flash slave */
             drivers::spi::EFMSPISlaveInterface ExternalFlashDriverSPI;
 
             /** @brief N25Q flash driver */

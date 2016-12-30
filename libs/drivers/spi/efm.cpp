@@ -19,12 +19,12 @@ using std::uint32_t;
 
 using namespace drivers::spi;
 
-static void* RXPort = const_cast<uint32_t*>(&SPI_USART->RXDATA);
-static void* TXPort = const_cast<uint32_t*>(&SPI_USART->TXDATA);
+static void* RXPort = const_cast<uint32_t*>(&io_map::SPI::Peripheral->RXDATA);
+static void* TXPort = const_cast<uint32_t*>(&io_map::SPI::Peripheral->TXDATA);
 
 void EFMSPIInterface::Initialize()
 {
-    CMU_ClockEnable(efm::Clock(SPI_USART), true);
+    CMU_ClockEnable(efm::Clock(io_map::SPI::Peripheral), true);
 
     USART_InitSync_TypeDef init = USART_INITSYNC_DEFAULT;
     init.master = true;
@@ -35,18 +35,15 @@ void EFMSPIInterface::Initialize()
     init.autoTx = false;
     init.enable = usartDisable;
 
-    USART_InitSync(SPI_USART, &init);
-
-    GPIO_PinModeSet(SPI_PORT, SPI_MOSI, gpioModePushPull, 1);
-    GPIO_PinModeSet(SPI_PORT, SPI_MISO, gpioModeInputPull, 0);
-    GPIO_PinModeSet(SPI_PORT, SPI_CLK, gpioModePushPull, 1);
+    USART_InitSync(io_map::SPI::Peripheral, &init);
 
     DMADRV_AllocateChannel(&this->_rxChannel, nullptr);
     DMADRV_AllocateChannel(&this->_txChannel, nullptr);
 
-    SPI_USART->ROUTE |= USART_ROUTE_CLKPEN | USART_ROUTE_TXPEN | USART_ROUTE_RXPEN | (SPI_LOCATION << _USART_ROUTE_LOCATION_SHIFT);
+    io_map::SPI::Peripheral->ROUTE |=
+        USART_ROUTE_CLKPEN | USART_ROUTE_TXPEN | USART_ROUTE_RXPEN | (io_map::SPI::Location << _USART_ROUTE_LOCATION_SHIFT);
 
-    USART_Enable(SPI_USART, usartEnable);
+    USART_Enable(io_map::SPI::Peripheral, usartEnable);
 
     this->_transferGroup = System::CreateEventGroup();
     this->_lock = System::CreateBinarySemaphore();
@@ -57,13 +54,13 @@ void EFMSPIInterface::Write(gsl::span<const std::uint8_t> buffer)
 {
     System::EventGroupClearBits(this->_transferGroup, TransferFinished);
 
-    SPI_USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
+    io_map::SPI::Peripheral->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
 
-    USART_IntClear(SPI_USART, USART_IntGet(SPI_USART));
+    USART_IntClear(io_map::SPI::Peripheral, USART_IntGet(io_map::SPI::Peripheral));
 
     uint32_t dummyRx = 0;
     DMADRV_PeripheralMemory(this->_rxChannel,
-        efm::DMASignal<efm::DMASignalUSART::RXDATAV>(SPI_USART),
+        efm::DMASignal<efm::DMASignalUSART::RXDATAV>(io_map::SPI::Peripheral),
         &dummyRx,
         RXPort,
         false,
@@ -73,7 +70,7 @@ void EFMSPIInterface::Write(gsl::span<const std::uint8_t> buffer)
         this);
 
     DMADRV_MemoryPeripheral(this->_txChannel,
-        efm::DMASignal<efm::DMASignalUSART::TXBL>(SPI_USART),
+        efm::DMASignal<efm::DMASignalUSART::TXBL>(io_map::SPI::Peripheral),
         TXPort,
         const_cast<uint8_t*>(buffer.data()),
         true,
@@ -89,12 +86,12 @@ void EFMSPIInterface::Read(gsl::span<std::uint8_t> buffer)
 {
     System::EventGroupClearBits(this->_transferGroup, TransferFinished);
 
-    SPI_USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
+    io_map::SPI::Peripheral->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
 
-    USART_IntClear(SPI_USART, USART_IntGet(SPI_USART));
+    USART_IntClear(io_map::SPI::Peripheral, USART_IntGet(io_map::SPI::Peripheral));
 
     DMADRV_PeripheralMemory(this->_rxChannel,
-        efm::DMASignal<efm::DMASignalUSART::RXDATAV>(SPI_USART),
+        efm::DMASignal<efm::DMASignalUSART::RXDATAV>(io_map::SPI::Peripheral),
         buffer.data(),
         RXPort,
         true,
@@ -105,7 +102,7 @@ void EFMSPIInterface::Read(gsl::span<std::uint8_t> buffer)
 
     uint32_t dummyTx = 0;
     DMADRV_MemoryPeripheral(this->_txChannel,
-        efm::DMASignal<efm::DMASignalUSART::TXBL>(SPI_USART),
+        efm::DMASignal<efm::DMASignalUSART::TXBL>(io_map::SPI::Peripheral),
         TXPort,
         &dummyTx,
         false,

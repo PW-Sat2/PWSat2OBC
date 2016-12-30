@@ -71,7 +71,7 @@ static void BlinkLed0(void* param)
 
     while (1)
     {
-        GPIO_PinOutToggle(LED_PORT, LED0);
+        Main.Hardware.Pins.Led0.Toggle();
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
@@ -101,9 +101,7 @@ static void InitSwoEndpoint(void)
 
 static void ClearState(OBC* obc)
 {
-    GPIO_PinModeSet(SYS_CLEAR_PORT, SYS_CLEAR_PIN, gpioModeInputPull, 1);
-
-    if (GPIO_PinInGet(SYS_CLEAR_PORT, SYS_CLEAR_PIN) == 0)
+    if (obc->Hardware.Pins.SysClear.Input() == false)
     {
         LOG(LOG_LEVEL_WARNING, "Clearing state on startup");
 
@@ -187,31 +185,27 @@ int main(void)
 
     LeuartLineIOInit(&Main.IO);
 
-    InitializeTerminal();
-
     EpsInit(&Main.Hardware.I2C.Fallback);
 
     EPSPowerControlInitialize(&Main.PowerControlInterface);
 
     Main.Initialize();
 
+    InitializeTerminal();
+
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 
     SetupAntennas();
 
-    GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
-    GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);
-    GPIO_DriveModeSet(LED_PORT, gpioDriveModeLowest);
-
-    GPIO_PinOutSet(LED_PORT, LED0);
-    GPIO_PinOutSet(LED_PORT, LED1);
+    Main.Hardware.Pins.Led0.High();
+    Main.Hardware.Pins.Led1.High();
 
     System::CreateTask(BlinkLed0, "Blink0", 512, NULL, TaskPriority::P1, NULL);
     System::CreateTask(ObcInitTask, "Init", 3_KB, &Main, TaskPriority::Highest, &Main.initTask);
 
     System::RunScheduler();
 
-    GPIO_PinOutToggle(LED_PORT, LED0);
+    Main.Hardware.Pins.Led0.Toggle();
 
     return 0;
 }

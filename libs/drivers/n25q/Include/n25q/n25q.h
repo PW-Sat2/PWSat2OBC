@@ -40,13 +40,15 @@ namespace devices
             std::uint8_t MemoryCapacity;
 
             /** @brief Checks if this id is valid */
-            bool IsValid() const
-            {
-                return Manufacturer == 0x20 //
-                    && MemoryType == 0xBA   //
-                    && MemoryCapacity == 0x18;
-            }
+            inline bool IsValid() const;
         };
+
+        bool Id::IsValid() const
+        {
+            return Manufacturer == 0x20 //
+                && MemoryType == 0xBA   //
+                && MemoryCapacity == 0x18;
+        }
 
         /**
          * @brief Possible values in status register

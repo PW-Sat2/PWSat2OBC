@@ -60,6 +60,7 @@ namespace obc
         OSResult Erase();
 
       private:
+        /** @brief Underlying storage implementation */
         Storage _storage;
     };
 

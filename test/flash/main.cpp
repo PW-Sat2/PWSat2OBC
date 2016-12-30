@@ -143,8 +143,8 @@ static void Ping(void* v)
 
     while (1)
     {
-        GPIO_PinOutToggle(LED_PORT, LED0);
-        GPIO_PinOutToggle(LED_PORT, LED1);
+        GPIO_PinOutToggle(io_map::Led0::Port, io_map::Led0::PinNumber);
+        GPIO_PinOutToggle(io_map::Led1::Port, io_map::Led1::PinNumber);
 
         System::SleepTask(1000);
     }
@@ -167,12 +167,11 @@ int main(void)
 
     SwoPutsOnChannel(0, "Flash test Ready\n");
 
-    GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
-    GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);
-    GPIO_DriveModeSet(LED_PORT, gpioDriveModeLowest);
+    GPIO_PinModeSet(io_map::Led0::Port, io_map::Led0::PinNumber, gpioModePushPull, 0);
+    GPIO_PinModeSet(io_map::Led1::Port, io_map::Led1::PinNumber, gpioModePushPullDrive, 1);
 
-    GPIO_PinOutSet(LED_PORT, LED0);
-    GPIO_PinOutClear(LED_PORT, LED1);
+    GPIO_PinOutSet(io_map::Led0::Port, io_map::Led0::PinNumber);
+    GPIO_PinOutClear(io_map::Led1::Port, io_map::Led1::PinNumber);
 
     System::CreateTask(SPITest, "SPI", 4_KB, NULL, TaskPriority::P1, NULL);
     System::CreateTask(Ping, "Ping", 1_KB, NULL, TaskPriority::P1, NULL);
