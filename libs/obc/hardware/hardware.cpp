@@ -3,6 +3,9 @@
 using drivers::i2c::II2CBus;
 using drivers::i2c::I2CResult;
 using drivers::i2c::I2CAddress;
+using io_map::I2C;
+using io_map::I2C_0;
+using io_map::I2C_1;
 
 using namespace obc;
 
@@ -40,10 +43,10 @@ I2CResult I2CSingleBus::I2CErrorHandler(II2CBus& bus, I2CResult result, I2CAddre
 OBCHardwareI2C::OBCHardwareI2C(PowerControl* powerControl)
     : //
       Peripherals{
-          {I2C0, I2C0_BUS_LOCATION, I2C0_BUS_PORT, I2C0_BUS_SDA_PIN, I2C0_BUS_SCL_PIN, cmuClock_I2C0, I2C0_IRQn, powerControl},
-          {I2C1, I2C1_BUS_LOCATION, I2C1_BUS_PORT, I2C1_BUS_SDA_PIN, I2C1_BUS_SCL_PIN, cmuClock_I2C1, I2C1_IRQn, powerControl} //
+          {I2C0, I2C_0::Location, I2C_0::SDA::Port, I2C_0::SDA::PinNumber, I2C_0::SCL::PinNumber, cmuClock_I2C0, I2C0_IRQn, powerControl},
+          {I2C1, I2C_1::Location, I2C_1::SDA::Port, I2C_1::SDA::PinNumber, I2C_1::SCL::PinNumber, cmuClock_I2C1, I2C1_IRQn, powerControl} //
       },
-      Buses(Peripherals[I2C_SYSTEM_BUS].ErrorHandling, Peripherals[I2C_PAYLOAD_BUS].ErrorHandling), //
+      Buses(Peripherals[I2C::SystemBus].ErrorHandling, Peripherals[I2C::PayloadBus].ErrorHandling), //
       Fallback(Buses)                                                                               //
 {
 }

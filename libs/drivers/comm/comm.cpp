@@ -22,7 +22,7 @@ using drivers::i2c::I2CResult;
 
 using namespace devices::comm;
 
-CommFrame::CommFrame() : doppler(0), rssi(0)
+CommFrame::CommFrame() : doppler(0), rssi(0), fullFrameSize(0)
 {
 }
 

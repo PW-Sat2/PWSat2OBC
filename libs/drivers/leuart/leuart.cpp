@@ -23,12 +23,12 @@ static unsigned int dmaChannel;
 static void leuartInit(void)
 {
     LEUART_Init_TypeDef leuart0Init;
-    leuart0Init.enable = leuartEnable;       /* Activate data reception on LEUn_TX pin. */
-    leuart0Init.refFreq = 0;                 /* Inherit the clock frequenzy from the LEUART clock source */
-    leuart0Init.baudrate = LEUART0_BAUDRATE; /* Baudrate = 9600 bps */
-    leuart0Init.databits = leuartDatabits8;  /* Each LEUART frame containes 8 databits */
-    leuart0Init.parity = leuartNoParity;     /* No parity bits in use */
-    leuart0Init.stopbits = leuartStopbits2;  /* Setting the number of stop bits in a frame to 2 bitperiods */
+    leuart0Init.enable = leuartEnable;               /* Activate data reception on LEUn_TX pin. */
+    leuart0Init.refFreq = 0;                         /* Inherit the clock frequenzy from the LEUART clock source */
+    leuart0Init.baudrate = io_map::LEUART::Baudrate; /* Baudrate = 9600 bps */
+    leuart0Init.databits = leuartDatabits8;          /* Each LEUART frame containes 8 databits */
+    leuart0Init.parity = leuartNoParity;             /* No parity bits in use */
+    leuart0Init.stopbits = leuartStopbits2;          /* Setting the number of stop bits in a frame to 2 bitperiods */
 
     CMU_ClockEnable(cmuClock_CORELE, true);
     CMU_ClockEnable(cmuClock_LEUART0, true);
@@ -42,12 +42,12 @@ static void leuartInit(void)
     LEUART_IntEnable(LEUART0, LEUART_IEN_SIGF);
 
     /* Enable LEUART0 interrupt vector */
-    NVIC_SetPriority(LEUART0_IRQn, LEUART0_INT_PRIORITY);
+    NVIC_SetPriority(LEUART0_IRQn, io_map::LEUART::InterruptPriority);
 
-    LEUART0->ROUTE = LEUART_ROUTE_RXPEN | LEUART_ROUTE_TXPEN | LEUART0_LOCATION;
+    LEUART0->ROUTE = LEUART_ROUTE_RXPEN | LEUART_ROUTE_TXPEN | io_map::LEUART::Location;
 
-    GPIO_PinModeSet(LEUART0_PORT, LEUART0_TX, gpioModePushPull, 1);
-    GPIO_PinModeSet(LEUART0_PORT, LEUART0_RX, gpioModeInputPull, 1);
+    //    GPIO_PinModeSet(LEUART0_PORT, LEUART0_TX, gpioModePushPull, 1);
+    //    GPIO_PinModeSet(LEUART0_PORT, LEUART0_RX, gpioModeInputPull, 1);
 
     lineEndReceived = xSemaphoreCreateBinary();
 

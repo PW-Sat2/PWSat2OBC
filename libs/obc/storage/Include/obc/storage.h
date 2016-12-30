@@ -35,6 +35,7 @@ namespace obc
          * @brief Initializes @ref OBCStorageHandler instance
          * @param spi SPI interface to use
          * @param fs File system interface
+         * @param pins OBC pins
          */
         OBCStorageHandler(drivers::spi::EFMSPIInterface& spi, FileSystem& fs, obc::OBCGPIO& pins);
 
@@ -54,6 +55,7 @@ namespace obc
         OSResult Erase();
 
       private:
+        /** @brief Underlying storage implementation */
         Storage _storage;
     };
 
