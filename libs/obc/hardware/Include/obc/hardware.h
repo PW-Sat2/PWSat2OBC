@@ -94,11 +94,16 @@ namespace obc
      */
     struct OBCHardware final
     {
+        /**
+         * @brief Initializes @ref OBCHardware instance
+         * @param[in] powerControl Power control interface
+         */
         OBCHardware(PowerControl* powerControl);
 
         /** @brief Initialzies OBC hardware */
         void Initialize();
 
+        /** @brief GPIO Pins */
         OBCGPIO Pins;
 
         /** @brief I2C */

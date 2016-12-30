@@ -10,6 +10,7 @@ target_link_libraries(${NAME}
 	fs
 	spi
 	storage
+	obc_hardware
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

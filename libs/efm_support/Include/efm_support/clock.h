@@ -5,7 +5,7 @@
 
 namespace efm
 {
-    template <typename Peripheral> constexpr CMU_Clock_TypeDef Clock(Peripheral hw)
+    template <typename Peripheral> constexpr CMU_Clock_TypeDef Clock(const Peripheral hw)
     {
         if (hw == USART1)
             return cmuClock_USART1;
