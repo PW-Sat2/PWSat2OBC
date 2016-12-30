@@ -6,10 +6,10 @@ using obc::storage::N25QStorage;
 using devices::n25q::OperationResult;
 using drivers::gpio::OutputPin;
 
-N25QStorage::N25QStorage(drivers::spi::EFMSPIInterface& spi, FileSystem& fs)
-    : ExternalFlashDriverSPI(spi, OutputPin<gpioPortD, 3>()), //
-      ExternalFlashDriver(ExternalFlashDriverSPI),            //
-      ExternalFlash("/", ExternalFlashDriver),                //
+N25QStorage::N25QStorage(drivers::spi::EFMSPIInterface& spi, FileSystem& fs, obc::OBCGPIO& pins)
+    : ExternalFlashDriverSPI(spi, pins.SlaveSelectFlash1), //
+      ExternalFlashDriver(ExternalFlashDriverSPI),         //
+      ExternalFlash("/", ExternalFlashDriver),             //
       _fs(fs)
 {
 }

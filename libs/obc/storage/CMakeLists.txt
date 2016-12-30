@@ -7,6 +7,7 @@ target_link_libraries(${NAME} INTERFACE
     yaffs
     n25q
     storage
+    obc_hardware
 )
 
 if(USE_EXTERNAL_FLASH)

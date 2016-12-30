@@ -13,7 +13,7 @@
  * @param[in] value Value to convert
  * @return 1 for true, 0 for false
  */
-static inline int ToInt(bool value)
+static constexpr inline int ToInt(bool value)
 {
     return value ? 1 : 0;
 }
