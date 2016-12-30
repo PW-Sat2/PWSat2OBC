@@ -204,6 +204,20 @@ typedef struct FileSystemTag
      * @return true if path exists
      */
     bool (*exists)(FileSystem* fileSystem, const char* path);
+
+    /**
+     * @brief Removes all files and directories from specified device
+     * @param[in] fileSystem File system object
+     * @param[in] device Device to clear
+     * @return Operation result
+     */
+    OSResult (*ClearDevice)(FileSystem* fileSystem, yaffs_dev* device);
+
+    /**
+     * @brief Syncs file system (speeds up next mount)
+     * @param fileSystem File system
+     */
+    void (*Sync)(FileSystem* fileSystem);
 } FileSystem;
 
 /**
@@ -215,10 +229,15 @@ void FileSystemAPI(FileSystem* fs);
 /**
  * @brief Initializes file system interface (including API)
  * @param[inout] fs File system interface
- * @param[in] rootDevice root device driver
- * @return true if initialization was successful
  */
-bool FileSystemInitialize(FileSystem* fs, struct yaffs_dev* rootDevice);
+void FileSystemInitialize(FileSystem* fs);
+
+/**
+ * @brief Adds device and mounts it
+ * @param[in] device YAFFS device
+ * @return true on success
+ */
+bool FileSystemAddDeviceAndMount(yaffs_dev* device);
 
 /**
  * @brief This method is responsible for writing contents of the passed buffer to the selected file.

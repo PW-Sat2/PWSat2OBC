@@ -153,6 +153,80 @@ static bool YaffsExists(FileSystem* fileSystem, const char* path)
     return status != -1;
 }
 
+static constexpr uint8_t RecursionLimit = 5;
+
+/**
+ * @brief Recursively removes all objects in directory (root itself is left alone)
+ * @param root Root directory
+ * @param depth Recursion depth counter
+ * @return Operation result
+ */
+static OSResult RemoveDirectoryContents(yaffs_obj* root, int depth = 0)
+{
+    if (depth > RecursionLimit)
+        return OSResult::PathTooLong;
+
+    auto result = OSResult::Success;
+
+    auto dir = yaffs_opendir_reldir(root, "");
+
+    yaffs_dirent* entry;
+
+    while ((entry = yaffs_readdir(dir)) != nullptr)
+    {
+        if (entry->d_ino == YAFFS_OBJECTID_LOSTNFOUND)
+        {
+            continue;
+        }
+
+        yaffs_obj* obj = yaffs_find_by_name(root, entry->d_name);
+
+        if (obj->variant_type == YAFFS_OBJECT_TYPE_FILE)
+        {
+            yaffs_unlink_reldir(root, entry->d_name);
+        }
+        else if (obj->variant_type == YAFFS_OBJECT_TYPE_DIRECTORY)
+        {
+            if (OS_RESULT_FAILED(RemoveDirectoryContents(obj, depth + 1)))
+            {
+                result = OSResult::PathTooLong;
+                break;
+            }
+
+            yaffs_rmdir_reldir(root, entry->d_name);
+        }
+    }
+
+    yaffs_closedir(dir);
+
+    return result;
+}
+
+static OSResult YaffsClearDevice(FileSystem* fileSystem, yaffs_dev* device)
+{
+    UNREFERENCED_PARAMETER(fileSystem);
+
+    auto root = yaffs_root(device);
+
+    return RemoveDirectoryContents(root);
+}
+
+static void YaffsSync(FileSystem* fileSystem)
+{
+    UNREFERENCED_PARAMETER(fileSystem);
+
+    yaffs_dev_rewind();
+
+    yaffs_dev* dev = nullptr;
+    while ((dev = yaffs_next_dev()) != nullptr)
+    {
+        LOGF(LOG_LEVEL_DEBUG, "Syncing %s", dev->param.name);
+        yaffs_sync_reldev(dev);
+    }
+
+    LOG(LOG_LEVEL_DEBUG, "All devices synced");
+}
+
 void FileSystemAPI(FileSystem* fs)
 {
     fs->open = YaffsOpen;
@@ -166,26 +240,30 @@ void FileSystemAPI(FileSystem* fs)
     fs->format = YaffsFormat;
     fs->makeDirectory = YaffsMakeDirectory;
     fs->exists = YaffsExists;
+    fs->ClearDevice = YaffsClearDevice;
+    fs->Sync = YaffsSync;
 }
 
-bool FileSystemInitialize(FileSystem* fs, struct yaffs_dev* rootDevice)
+void FileSystemInitialize(FileSystem* fs)
 {
     YaffsGlueInit();
 
-    yaffs_add_device(rootDevice);
-
     FileSystemAPI(fs);
+}
 
-    int result = yaffs_mount("/");
+bool FileSystemAddDeviceAndMount(yaffs_dev* device)
+{
+    yaffs_add_device(device);
+    int result = yaffs_mount(device->param.name);
 
     if (result == 0)
     {
-        LOG(LOG_LEVEL_DEBUG, "Mounted /");
+        LOGF(LOG_LEVEL_DEBUG, "Mounted %s", device->param.name);
         return true;
     }
     else
     {
-        LOGF(LOG_LEVEL_ERROR, "Failed to mount /: %d", yaffsfs_GetLastError());
+        LOGF(LOG_LEVEL_ERROR, "Failed to mount %s: %d", device->param.name, yaffsfs_GetLastError());
         return false;
     }
 }

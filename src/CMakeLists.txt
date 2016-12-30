@@ -11,6 +11,7 @@ set(SOURCES
     commands/antenna.cpp
     commands/file_system.cpp
     commands/i2c_test_command.cpp
+    commands/heap_info.cpp
     commands/rtos_status.cpp
     commands/heap.cpp
     commands/compile_info.cpp
@@ -18,7 +19,7 @@ set(SOURCES
     obc.h
     obc.cpp
     communication.cpp
-    hardware.cpp
+    hardware.cpp  
     fault_handlers.cpp
 )
 
@@ -50,10 +51,13 @@ target_link_libraries(${NAME}
     assert
     telecommand_handling
     gsl
+    n25q
     antenna
     mission_antenna
     mission_sail
     mission_time
+    yaffs
+    obc_storage
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

@@ -55,6 +55,10 @@ struct IOS
     virtual void PulseSet(OSPulseHandle handle) = 0;
 
     virtual void EndSwitchingISR() = 0;
+
+    virtual OSTaskTimeSpan GetUptime() = 0;
+
+    virtual void Yield() = 0;
 };
 
 class OSReset

@@ -4,7 +4,8 @@
 OBC::OBC()
     : timeProvider(fs),                      //
       Communication(Hardware.I2C.Buses.Bus), //
-      terminal(this->IO)                     //
+      Storage(Hardware.SPI, fs),             //
+      terminal(this->IO)
 {
 }
 
@@ -13,4 +14,11 @@ void OBC::Initialize()
     this->Hardware.Initialize();
 
     this->Communication.Initialize();
+
+    FileSystemInitialize(&this->fs);
+}
+
+void OBC::PostStartInitialization()
+{
+    this->Storage.Initialize();
 }

@@ -25,6 +25,8 @@ class BaseTest(unittest.TestCase):
         self.system = System(obc_com, sys_bus_com, payload_bus_com, use_single_bus, self.gpio, self.auto_power_on)
 
     def tearDown(self):
+        self.system.obc.sync_fs()
+
         self.system.close()
         self.gpio.close()
         extensions.tear_down(test_id=self.id())

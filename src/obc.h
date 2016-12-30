@@ -13,10 +13,14 @@
 #include "fs/fs.h"
 #include "hardware.h"
 #include "leuart/line_io.h"
+#include "n25q/n25q.h"
+#include "n25q/yaffs.h"
+#include "obc/storage.h"
+#include "spi/efm.h"
 #include "storage/nand_driver.h"
 #include "terminal/terminal.h"
 #include "time/timer.h"
-#include "yaffs_guts.h"
+#include "utils.h"
 
 /**
  * @defgroup obc OBC structure
@@ -36,6 +40,11 @@ struct OBC
     /** @brief Initializes every object in OBC structure that needs initialization */
     void Initialize();
 
+    /**
+     * @brief Initialization that takes places after starting RTOS
+     */
+    void PostStartInitialization();
+
     /** @brief File system object */
     FileSystem fs;
     /** @brief Handle to OBC initialization task. */
@@ -45,11 +54,6 @@ struct OBC
 
     /** @brief ADCS context object */
     ADCSContext adcs;
-
-    /** Yaffs root device */
-    struct yaffs_dev rootDevice;
-    /** Driver for yaffs root device */
-    YaffsNANDDriver rootDeviceDriver;
 
     /** @brief Persistent timer that measures mission time. */
     services::time::TimeProvider timeProvider;
@@ -71,6 +75,9 @@ struct OBC
 
     /** @brief Overall satellite <-> Earth communication */
     communication::OBCCommunication Communication;
+
+    /** @brief OBC storage */
+    obc::OBCStorage Storage;
 
     /** @brief Terminal object. */
     Terminal terminal;

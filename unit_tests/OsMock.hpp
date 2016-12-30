@@ -56,6 +56,10 @@ struct OSMock : IOS
     MOCK_METHOD1(PulseSet, void(OSPulseHandle handle));
 
     MOCK_METHOD0(EndSwitchingISR, void());
+
+    MOCK_METHOD0(GetUptime, OSTaskTimeSpan());
+
+    MOCK_METHOD0(Yield, void());
 };
 
 #endif

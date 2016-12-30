@@ -1,6 +1,6 @@
 include(ExternalProject)
 
-set(OPTIONS "${CMAKE_CXX_FLAGS} --exceptions -funwind-tables")
+set(OPTIONS "${CMAKE_CXX_FLAGS} -fexceptions -funwind-tables")
 
 ExternalProject_Add(rapidcheck_source
   GIT_REPOSITORY https://github.com/PW-Sat2/rapidcheck.git

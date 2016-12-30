@@ -235,6 +235,24 @@ void System::EndSwitchingISR()
     }
 }
 
+OSTaskTimeSpan System::GetUptime()
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->GetUptime();
+    }
+
+    return 0;
+}
+
+void System::Yield()
+{
+    if (OSProxy != nullptr)
+    {
+        OSProxy->Yield();
+    }
+}
+
 OSReset::OSReset() : released(false)
 {
 }

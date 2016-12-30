@@ -45,7 +45,9 @@ Option | Default value | Description
 `SYS_BUS_COM`      | _None_               | Serial port used to communicate with System Bus mock
 `PAYLOAD_BUS_COM`  | _None_               | Serial port used to communicate with Payload Bus mock
 `USE_SINGLE_BUS`   | 1                    | Set to 1 to enable only one I2C bus. Payload bus will be redirected to System Bus. Set to 0 to use both buses
+`USE_EXTERNAL_FLASH` | 0				   | Set to 1 to use external N25Q flash memory
 `ENABLE_COVERAGE`  | 0                    | Set to 1 to enable code-coverage for unit tests
+
 
 ## Outputs
 All output are located inside `build\DevBoard` directory. 
