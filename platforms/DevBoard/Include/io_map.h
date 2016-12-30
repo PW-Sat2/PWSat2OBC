@@ -1,8 +1,27 @@
 #ifndef SRC_IO_MAP_H_
 #define SRC_IO_MAP_H_
 
+#include <cstdint>
 #include <em_gpio.h>
 #include <em_system.h>
+
+namespace io_map
+{
+    template <GPIO_Port_TypeDef Port, std::uint16_t PinNumber> struct PinLocation
+    {
+        static constexpr auto UsePort = Port;
+        static constexpr auto UsePinNumber = PinNumber;
+    };
+
+    using SlaveSelectFlash1 = PinLocation<gpioPortD, 3>;
+}
+
+#define SPI_USART USART1
+#define SPI_LOCATION 1
+#define SPI_PORT gpioPortD
+#define SPI_MOSI 0
+#define SPI_MISO 1
+#define SPI_CLK 2
 
 #define SYS_CLEAR_PORT gpioPortC
 #define SYS_CLEAR_PIN 0
@@ -69,12 +88,5 @@
 
 #define EBI_DATA_PORT gpioPortE
 #define EBI_DATA_PIN0 8
-
-#define SPI_USART USART1
-#define SPI_LOCATION 1
-#define SPI_PORT gpioPortD
-#define SPI_MOSI 0
-#define SPI_MISO 1
-#define SPI_CLK 2
 
 #endif

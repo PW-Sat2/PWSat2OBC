@@ -2,9 +2,10 @@
 #include "io_map.h"
 
 OBC::OBC()
-    : timeProvider(fs),                      //
-      Communication(Hardware.I2C.Buses.Bus), //
-      Storage(Hardware.SPI, fs),             //
+    : Hardware(&this->PowerControlInterface),   //
+      timeProvider(fs),                         //
+      Communication(Hardware.I2C.Buses.Bus),    //
+      Storage(Hardware.SPI, fs, Hardware.Pins), //
       terminal(this->IO)
 {
 }

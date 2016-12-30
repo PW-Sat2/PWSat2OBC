@@ -4,6 +4,7 @@
 #include "fs/fs.h"
 #include "fs/yaffs.h"
 #include "spi/spi.h"
+#include "obc/gpio.h"
 #include "spi/efm.h"
 #include "storage/nand.h"
 #include "storage/nand_driver.h"
@@ -29,8 +30,9 @@ namespace obc
              * @brief Constructs @ref STKStorage instance
              * @param[in] spi SPI interface used by external memories
              * @param deviceOperations YAFFS device operations
+             * @param[in] pins GPIO pins (unused)
              */
-            STKStorage(drivers::spi::EFMSPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations);
+            STKStorage(drivers::spi::EFMSPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations, obc::OBCGPIO& pins);
 
             /**
              * @brief Initializes OBC storage

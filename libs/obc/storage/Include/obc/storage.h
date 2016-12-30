@@ -2,7 +2,10 @@
 #define SRC_STORAGE_H_
 
 #include "base/os.h"
+
+#include "fs/fs.h"
 #include "fs/yaffs.h"
+#include "obc/hardware.h"
 #include "spi/efm.h"
 #include "utils.h"
 
@@ -34,8 +37,9 @@ namespace obc
          * @brief Initializes @ref OBCStorageHandler instance
          * @param spi SPI interface to use
          * @param deviceOperations YAFFS device operations
+         * @param pins GPIO pins
          */
-        OBCStorageHandler(drivers::spi::EFMSPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations);
+        OBCStorageHandler(drivers::spi::EFMSPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations, obc::OBCGPIO& pins);
 
         /**
          * @brief Performs storage initialization
@@ -61,8 +65,8 @@ namespace obc
 
     template <typename Storage>
     OBCStorageHandler<Storage>::OBCStorageHandler(
-        drivers::spi::EFMSPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations)
-        : _storage(spi, deviceOperations)
+        drivers::spi::EFMSPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations, obc::OBCGPIO& pins)
+        : _storage(spi, deviceOperations, pins)
     {
     }
 

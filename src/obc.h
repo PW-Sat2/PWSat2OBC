@@ -10,11 +10,12 @@
 #include "antenna/miniport.h"
 #include "base/os.h"
 #include "communication.h"
+#include "fs/fs.h"
 #include "fs/yaffs.h"
-#include "hardware.h"
 #include "leuart/line_io.h"
 #include "n25q/n25q.h"
 #include "n25q/yaffs.h"
+#include "obc/hardware.h"
 #include "obc/storage.h"
 #include "spi/efm.h"
 #include "storage/nand_driver.h"
@@ -55,11 +56,11 @@ struct OBC
     /** @brief ADCS context object */
     ADCSContext adcs;
 
+    /** @brief OBC hardware */
+    obc::OBCHardware Hardware;
+
     /** @brief Persistent timer that measures mission time. */
     services::time::TimeProvider timeProvider;
-
-    /** @brief OBC hardware */
-    OBCHardware Hardware;
 
     /** @brief Low level driver for antenna controller. */
     AntennaMiniportDriver antennaMiniport;

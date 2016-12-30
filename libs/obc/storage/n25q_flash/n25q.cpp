@@ -7,8 +7,8 @@ using devices::n25q::OperationResult;
 using services::fs::IYaffsDeviceOperations;
 using drivers::gpio::OutputPin;
 
-N25QStorage::N25QStorage(drivers::spi::EFMSPIInterface& spi, IYaffsDeviceOperations& deviceOperations)
-    : ExternalFlashDriverSPI(spi, OutputPin<gpioPortD, 3>()), //
+N25QStorage::N25QStorage(drivers::spi::EFMSPIInterface& spi, IYaffsDeviceOperations& deviceOperations, obc::OBCGPIO& pins)
+    : ExternalFlashDriverSPI(spi, pins.SlaveSelectFlash1), //
       ExternalFlashDriver(ExternalFlashDriverSPI),            //
       ExternalFlash("/", ExternalFlashDriver),                //
       _deviceOperations(deviceOperations)

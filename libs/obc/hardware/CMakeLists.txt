@@ -1,17 +1,18 @@
-set(NAME obc_storage_n25q)
+set(NAME obc_hardware)
 
 set(SOURCES
-    n25q.cpp
+    hardware.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
 
 target_link_libraries(${NAME} 
-	fs
-	n25q
+	base
+	gpio
+	i2c
 	spi
-	obc_hardware
+	power
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
-target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/obc/storage)
+target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/obc)

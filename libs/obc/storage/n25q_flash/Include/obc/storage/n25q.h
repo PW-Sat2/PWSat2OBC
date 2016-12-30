@@ -4,6 +4,7 @@
 #include "fs/yaffs.h"
 #include "n25q/n25q.h"
 #include "n25q/yaffs.h"
+#include "obc/gpio.h"
 #include "spi/efm.h"
 
 namespace obc
@@ -27,8 +28,9 @@ namespace obc
              * @brief Constructs @ref N25QStorage instance
              * @param[in] spi SPI interface used by external memories
              * @param deviceOperations YAFFS device operations
+             * @param[in] pins GPIO pins (unused)
              */
-            N25QStorage(drivers::spi::EFMSPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations);
+            N25QStorage(drivers::spi::EFMSPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations, obc::OBCGPIO& pins);
 
             /**
              * @brief Initializes OBC storage
