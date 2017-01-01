@@ -1,10 +1,10 @@
-#include "fs/fs.h"
 #include "n25q.h"
+#include "fs/fs.h"
 
 using obc::storage::N25QStorage;
 using devices::n25q::OperationResult;
 
-N25QStorage::N25QStorage(drivers::spi::ISPIInterface& spi, FileSystem& fs)
+N25QStorage::N25QStorage(drivers::spi::ISPIInterface& spi, YaffsFileSystem& fs)
     : ExternalFlashDriver(spi),                //
       ExternalFlash("/", ExternalFlashDriver), //
       _fs(fs)
@@ -21,7 +21,7 @@ void N25QStorage::Initialize()
 
 OSResult N25QStorage::ClearStorage()
 {
-    return this->_fs.ClearDevice(&this->_fs, this->ExternalFlash.Device());
+    return this->_fs.ClearDevice(this->ExternalFlash.Device());
 }
 
 OSResult N25QStorage::Erase()

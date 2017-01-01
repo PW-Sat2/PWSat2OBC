@@ -1,10 +1,10 @@
 #include "stk.h"
-#include "fs/fs.h"
+#include "fs/yaffs.h"
 #include "yaffs.hpp"
 
 using obc::storage::STKStorage;
 
-STKStorage::STKStorage(drivers::spi::ISPIInterface& spi, FileSystem& fs) : _fs(fs)
+STKStorage::STKStorage(drivers::spi::ISPIInterface& spi, YaffsFileSystem& fs) : _fs(fs)
 {
     UNREFERENCED_PARAMETER(spi);
 }
@@ -37,7 +37,7 @@ void STKStorage::Initialize()
     rootDevice.param.end_block =
         1 * 1024 * 1024 / rootDeviceDriver.geometry.blockSize - rootDevice.param.start_block - rootDevice.param.n_reserved_blocks;
 
-    if (!FileSystemAddDeviceAndMount(&rootDevice))
+    if (!this->_fs.AddDeviceAndMount(&rootDevice))
     {
         return;
     }

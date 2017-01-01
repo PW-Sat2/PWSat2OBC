@@ -26,7 +26,7 @@ namespace obc
              * @param[in] spi SPI interface used by external memories
              * @param[in] fs File system interface
              */
-            N25QStorage(drivers::spi::ISPIInterface& spi, FileSystem& fs);
+            N25QStorage(drivers::spi::ISPIInterface& spi, YaffsFileSystem& fs);
 
             /** @brief Initializes OBC storage */
             void Initialize();
@@ -47,7 +47,7 @@ namespace obc
             devices::n25q::N25QYaffsDevice<devices::n25q::BlockMapping::Sector, 512_Bytes, 16_MB> ExternalFlash;
 
           private:
-            FileSystem& _fs;
+            YaffsFileSystem& _fs;
         };
 
         /** @} */

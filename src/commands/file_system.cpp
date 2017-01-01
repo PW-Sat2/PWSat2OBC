@@ -1,9 +1,9 @@
 #include <string.h>
 #include <cstdint>
+#include <gsl/span>
 #include "base/os.h"
 #include "obc.h"
 #include "system.h"
-
 #include "yaffs.hpp"
 
 using std::uint16_t;
@@ -13,7 +13,7 @@ void FSListFiles(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
 
-    const FSDirectoryOpenResult result = Main.fs.openDirectory(argv[0]);
+    const FSDirectoryOpenResult result = Main.fs.OpenDirectory(argv[0]);
 
     if (OS_RESULT_FAILED(result.Status))
     {
@@ -24,20 +24,20 @@ void FSListFiles(uint16_t argc, char* argv[])
 
     char* entry;
     FSDirectoryHandle dir = result.Handle;
-    while ((entry = Main.fs.readDirectory(dir)) != NULL)
+    while ((entry = Main.fs.ReadDirectory(dir)) != NULL)
     {
         Main.terminal.Puts(entry);
         Main.terminal.NewLine();
     }
 
-    Main.fs.closeDirectory(dir);
+    Main.fs.CloseDirectory(dir);
 }
 
 void FSWriteFile(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
 
-    const FSFileOpenResult result = Main.fs.open(argv[0], FsOpenCreateAlways, FsWriteOnly);
+    const FSFileOpenResult result = Main.fs.Open(argv[0], FSFileOpen::CreateAlways, FSFileAccess::WriteOnly);
     if (OS_RESULT_FAILED(result.Status))
     {
         Main.terminal.Puts("Error");
@@ -46,15 +46,15 @@ void FSWriteFile(uint16_t argc, char* argv[])
     }
 
     const FSFileHandle file = result.Handle;
-    Main.fs.ftruncate(file, 0);
-    Main.fs.write(file, argv[1], strlen(argv[1]));
-    Main.fs.close(file);
+    Main.fs.TruncateFile(file, 0);
+    Main.fs.Write(file, gsl::make_span(reinterpret_cast<uint8_t*>(argv[1]), strlen(argv[1])));
+    Main.fs.Close(file);
 }
 
 void FSReadFile(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
-    const FSFileOpenResult result = Main.fs.open(argv[0], FsOpenExisting, FsReadOnly);
+    const FSFileOpenResult result = Main.fs.Open(argv[0], FSFileOpen::Existing, FSFileAccess::ReadOnly);
     if (OS_RESULT_FAILED(result.Status))
     {
         Main.terminal.Puts("Error");
@@ -62,15 +62,15 @@ void FSReadFile(uint16_t argc, char* argv[])
         return;
     }
 
-    char buffer[100];
-    memset(buffer, 0, sizeof(buffer));
+    std::array<uint8_t, 100> buffer;
+    std::fill(buffer.begin(), buffer.end(), 0);
     const FSFileHandle file = result.Handle;
-    Main.fs.read(file, buffer, sizeof(buffer));
-    Main.fs.close(file);
+    Main.fs.Read(file, buffer);
+    Main.fs.Close(file);
 
     buffer[99] = 0;
 
-    Main.terminal.Puts(buffer);
+    Main.terminal.Puts(reinterpret_cast<char*>(buffer.data()));
     Main.terminal.NewLine();
 }
 
@@ -119,7 +119,7 @@ void MakeDirectory(uint16_t argc, char* argv[])
         return;
     }
 
-    Main.fs.makeDirectory(argv[0]);
+    Main.fs.MakeDirectory(argv[0]);
 }
 
 void EraseFlash(uint16_t argc, char* argv[])

@@ -1,7 +1,7 @@
 #ifndef LIBS_OBC_STORAGE_N25Q_FLASH_INCLUDE_OBC_STORAGE_N25Q_H_
 #define LIBS_OBC_STORAGE_N25Q_FLASH_INCLUDE_OBC_STORAGE_N25Q_H_
 
-#include "fs/fs.h"
+#include "fs/yaffs.h"
 #include "spi/spi.h"
 #include "storage/nand.h"
 #include "storage/nand_driver.h"
@@ -28,7 +28,7 @@ namespace obc
              * @param[in] spi SPI interface used by external memories
              * @param[in] fs File system interface
              */
-            STKStorage(drivers::spi::ISPIInterface& spi, FileSystem& fs);
+            STKStorage(drivers::spi::ISPIInterface& spi, YaffsFileSystem& fs);
 
             /** @brief Initializes OBC storage */
             void Initialize();
@@ -49,7 +49,7 @@ namespace obc
 
           private:
             /** @brief File system interface */
-            FileSystem& _fs;
+            YaffsFileSystem& _fs;
         };
 
         /** @} */

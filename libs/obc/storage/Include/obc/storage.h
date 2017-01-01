@@ -2,7 +2,7 @@
 #define SRC_STORAGE_H_
 
 #include "base/os.h"
-#include "fs/fs.h"
+#include "fs/yaffs.h"
 #include "spi/spi.h"
 #include "utils.h"
 
@@ -35,7 +35,7 @@ namespace obc
          * @param spi SPI interface to use
          * @param fs File system interface
          */
-        OBCStorageHandler(drivers::spi::ISPIInterface& spi, FileSystem& fs);
+        OBCStorageHandler(drivers::spi::ISPIInterface& spi, YaffsFileSystem& fs);
 
         /** @brief Performs storage initialization */
         void Initialize();
@@ -57,7 +57,7 @@ namespace obc
     };
 
     template <typename Storage>
-    OBCStorageHandler<Storage>::OBCStorageHandler(drivers::spi::ISPIInterface& spi, FileSystem& fs) : _storage(spi, fs)
+    OBCStorageHandler<Storage>::OBCStorageHandler(drivers::spi::ISPIInterface& spi, YaffsFileSystem& fs) : _storage(spi, fs)
     {
     }
 

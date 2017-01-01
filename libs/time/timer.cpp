@@ -1,7 +1,9 @@
-#include "timer.h"
+#include <array>
+
 #include "base/reader.h"
 #include "base/writer.h"
 #include "logger/logger.h"
+#include "timer.h"
 
 using namespace services::time;
 
@@ -27,7 +29,7 @@ TimeProvider::TimeProvider(FileSystem& fileSystem)
       TimePassedCallbackContext(nullptr), NotificationTime(TimeSpanFromMilliseconds(0ull)), //
       PersistanceTime(TimeSpanFromMilliseconds(0ull)),                                      //
       TickNotification(nullptr),                                                            //
-      FileSystemObject(&fileSystem)                                                         //
+      FileSystemObject(fileSystem)                                                          //
 {
 }
 
@@ -154,11 +156,11 @@ TimerState TimeProvider::BuildTimerState()
     return result;
 }
 
-struct TimeSnapshot TimeProvider::ReadFile(FileSystem* fs, const char* const filePath)
+struct TimeSnapshot TimeProvider::ReadFile(FileSystem& fs, const char* const filePath)
 {
     struct TimeSnapshot result = {{0}};
-    uint8_t buffer[sizeof(TimeSpan)];
-    if (!FileSystemReadFile(fs, filePath, buffer, sizeof(buffer)))
+    std::array<uint8_t, sizeof(TimeSpan)> buffer;
+    if (!FileSystemReadFile(fs, filePath, buffer))
     {
         LOGF(LOG_LEVEL_WARNING, "Unable to read file: %s.", filePath);
         return result;
@@ -175,14 +177,8 @@ struct TimeSnapshot TimeProvider::ReadFile(FileSystem* fs, const char* const fil
     return result;
 }
 
-struct TimeSnapshot TimeProvider::CurrentPersistentTime(FileSystem* fileSystem)
+struct TimeSnapshot TimeProvider::CurrentPersistentTime(FileSystem& fileSystem)
 {
-    if (fileSystem == NULL)
-    {
-        struct TimeSnapshot snapshot = {{0}};
-        return snapshot;
-    }
-
     struct TimeSnapshot snapshot[3];
     snapshot[0] = ReadFile(fileSystem, File0);
     snapshot[1] = ReadFile(fileSystem, File1);
@@ -258,10 +254,7 @@ void TimeProvider::SendTimeNotification(TimerState state)
 
 void TimeProvider::SaveTime(TimerState state)
 {
-    if (                         //
-        !state.saveTime ||       //
-        FileSystemObject == NULL //
-        )
+    if (!state.saveTime)
     {
         return;
     }
@@ -283,15 +276,15 @@ void TimeProvider::SaveTime(TimerState state)
     do
     {
         errorCount = 0;
-        if (!FileSystemSaveToFile(FileSystemObject, File0, buffer, length))
+        if (!FileSystemSaveToFile(FileSystemObject, File0, gsl::make_span(buffer, length)))
         {
             ++errorCount;
         }
-        if (!FileSystemSaveToFile(FileSystemObject, File1, buffer, length))
+        if (!FileSystemSaveToFile(FileSystemObject, File1, gsl::make_span(buffer, length)))
         {
             ++errorCount;
         }
-        if (!FileSystemSaveToFile(FileSystemObject, File2, buffer, length))
+        if (!FileSystemSaveToFile(FileSystemObject, File2, gsl::make_span(buffer, length)))
         {
             ++errorCount;
         }

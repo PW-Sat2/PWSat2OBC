@@ -299,9 +299,9 @@ TEST_F(FileSystemTest, ShouldCreateDirectoryWithParents)
 
     yaffs_mount("/");
 
-    api.makeDirectory(path);
+    api.MakeDirectory(path);
 
-    ASSERT_THAT(api.exists(path), Eq(true));
+    ASSERT_THAT(api.Exists(path), Eq(true));
 
     yaffs_unmount("/");
 }
@@ -314,9 +314,9 @@ TEST_F(FileSystemTest, ShouldCreateDirectoryAndParentExist)
 
     yaffs_mkdir("/a", 0777);
 
-    api.makeDirectory(path);
+    api.MakeDirectory(path);
 
-    ASSERT_THAT(api.exists(path), Eq(true));
+    ASSERT_THAT(api.Exists(path), Eq(true));
 
     yaffs_unmount("/");
 }
