@@ -3,6 +3,7 @@
 
 using obc::storage::N25QStorage;
 using devices::n25q::OperationResult;
+using services::fs::YaffsFileSystem;
 
 N25QStorage::N25QStorage(drivers::spi::ISPIInterface& spi, YaffsFileSystem& fs)
     : ExternalFlashDriver(spi),                //

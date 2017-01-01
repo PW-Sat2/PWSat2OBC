@@ -8,12 +8,17 @@
 
 using std::uint16_t;
 using std::int8_t;
+using services::fs::File;
+using services::fs::DirectoryOpenResult;
+using services::fs::FileOpen;
+using services::fs::FileAccess;
+using services::fs::DirectoryHandle;
 
 void FSListFiles(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
 
-    const FSDirectoryOpenResult result = Main.fs.OpenDirectory(argv[0]);
+    const DirectoryOpenResult result = Main.fs.OpenDirectory(argv[0]);
 
     if (OS_RESULT_FAILED(result.Status))
     {
@@ -23,7 +28,7 @@ void FSListFiles(uint16_t argc, char* argv[])
     }
 
     char* entry;
-    FSDirectoryHandle dir = result.Handle;
+    DirectoryHandle dir = result.Handle;
     while ((entry = Main.fs.ReadDirectory(dir)) != NULL)
     {
         Main.terminal.Puts(entry);
@@ -37,7 +42,7 @@ void FSWriteFile(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
 
-    auto f = File::Open(Main.fs, argv[0], FSFileOpen::CreateAlways, FSFileAccess::WriteOnly);
+    auto f = File::Open(Main.fs, argv[0], FileOpen::CreateAlways, FileAccess::WriteOnly);
     if (!f)
     {
         Main.terminal.Puts("Error");
@@ -52,7 +57,7 @@ void FSWriteFile(uint16_t argc, char* argv[])
 void FSReadFile(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
-    auto f = File::Open(Main.fs, argv[0], FSFileOpen::Existing, FSFileAccess::ReadOnly);
+    auto f = File::Open(Main.fs, argv[0], FileOpen::Existing, FileAccess::ReadOnly);
     if (!f)
     {
         Main.terminal.Puts("Error");

@@ -16,6 +16,7 @@ using testing::Invoke;
 using testing::HasSubstr;
 using testing::ElementsAreArray;
 using services::time::TimeProvider;
+using services::fs::FileHandle;
 
 class TimerPersistanceTest : public testing::Test
 {
@@ -70,7 +71,7 @@ TEST_F(TimerPersistanceTest, TestReadingFiles)
 {
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(10)));
     ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
-    EXPECT_CALL(fs, Read(_, _)).WillRepeatedly(Invoke([](FSFileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
+    EXPECT_CALL(fs, Read(_, _)).WillRepeatedly(Invoke([](FileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
         std::fill(buffer.begin(), buffer.end(), 0x11);
         return MakeFSIOResult(buffer.size());
     }));
@@ -83,7 +84,7 @@ TEST_F(TimerPersistanceTest, TestReadingSingleNonEmptyFile)
     EXPECT_CALL(fs, Open(_, _, _)).WillOnce(Return(MakeOpenedFile(1))).WillRepeatedly(Return(MakeOpenedFile(OSResult::NotFound)));
     ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
     EXPECT_CALL(fs, Read(_, _))
-        .WillOnce(Invoke([](FSFileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
+        .WillOnce(Invoke([](FileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
             std::fill(buffer.begin(), buffer.end(), 0x11);
             return MakeFSIOResult(buffer.size());
         }))
@@ -98,7 +99,7 @@ TEST_F(TimerPersistanceTest, TestReadingTwoNonEmptyFiles)
     ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
     EXPECT_CALL(fs, Read(_, _))
         .WillOnce(Return(MakeFSIOResult(0)))
-        .WillRepeatedly(Invoke([](FSFileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
+        .WillRepeatedly(Invoke([](FileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
             std::fill(buffer.begin(), buffer.end(), 0x11);
             return MakeFSIOResult(buffer.size());
         }));
@@ -110,7 +111,7 @@ TEST_F(TimerPersistanceTest, TestReadingTwoExistingEmptyFiles)
 {
     EXPECT_CALL(fs, Open(_, _, _)).WillOnce(Return(MakeOpenedFile(OSResult::NotFound))).WillRepeatedly(Return(MakeOpenedFile(1)));
     ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
-    EXPECT_CALL(fs, Read(_, _)).WillRepeatedly(Invoke([](FSFileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
+    EXPECT_CALL(fs, Read(_, _)).WillRepeatedly(Invoke([](FileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
         std::fill(buffer.begin(), buffer.end(), 0x11);
         return MakeFSIOResult(buffer.size());
     }));
@@ -124,7 +125,7 @@ TEST_F(TimerPersistanceTest, TestReadingFilesEndiannes)
 
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(1)));
     ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
-    EXPECT_CALL(fs, Read(_, _)).WillRepeatedly(Invoke([=](FSFileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
+    EXPECT_CALL(fs, Read(_, _)).WillRepeatedly(Invoke([=](FileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
         EXPECT_THAT(buffer, SpanOfSize(8));
         if (buffer.size() != 8)
         {
@@ -160,11 +161,11 @@ TEST_F(TimerPersistanceTest, TestReadingThreeFilesTwoSame)
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(1)));
     ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
     EXPECT_CALL(fs, Read(_, _))
-        .WillOnce(Invoke([=](FSFileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
+        .WillOnce(Invoke([=](FileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
             std::copy(incorrect.begin(), incorrect.end(), buffer.begin());
             return MakeFSIOResult(buffer.size());
         }))
-        .WillRepeatedly(Invoke([=](FSFileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
+        .WillRepeatedly(Invoke([=](FileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
             std::copy(expected.begin(), expected.end(), buffer.begin());
             return MakeFSIOResult(buffer.size());
         }));
@@ -182,17 +183,17 @@ TEST_F(TimerPersistanceTest, TestReadingThreeDifferentFiles)
         .WillOnce(Return(MakeOpenedFile(2)))
         .WillOnce(Return(MakeOpenedFile(3)));
     ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
-    EXPECT_CALL(fs, Read(Eq(1), _)).WillOnce(Invoke([=](FSFileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
+    EXPECT_CALL(fs, Read(Eq(1), _)).WillOnce(Invoke([=](FileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
         std::copy(b.begin(), b.end(), buffer.begin());
         return MakeFSIOResult(buffer.size());
     }));
 
-    EXPECT_CALL(fs, Read(Eq(2), _)).WillOnce(Invoke([=](FSFileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
+    EXPECT_CALL(fs, Read(Eq(2), _)).WillOnce(Invoke([=](FileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
         std::copy(a.begin(), a.end(), buffer.begin());
         return MakeFSIOResult(buffer.size());
     }));
 
-    EXPECT_CALL(fs, Read(Eq(3), _)).WillOnce(Invoke([=](FSFileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
+    EXPECT_CALL(fs, Read(Eq(3), _)).WillOnce(Invoke([=](FileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
         std::copy(c.begin(), c.end(), buffer.begin());
         return MakeFSIOResult(buffer.size());
     }));
@@ -226,7 +227,7 @@ TEST_F(TimerPersistanceTest, TestStateWrite)
     EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr));
     EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(MakeOpenedFile(1)));
     ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
-    EXPECT_CALL(fs, Write(_, _)).WillRepeatedly(Invoke([](FSFileHandle /*file*/, gsl::span<const std::uint8_t> buffer) {
+    EXPECT_CALL(fs, Write(_, _)).WillRepeatedly(Invoke([](FileHandle /*file*/, gsl::span<const std::uint8_t> buffer) {
         uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x00, 0x00, 0x00, 0x00};
         EXPECT_THAT(buffer, ElementsAreArray(expected));
 

@@ -35,7 +35,7 @@ namespace obc
          * @param spi SPI interface to use
          * @param fs File system interface
          */
-        OBCStorageHandler(drivers::spi::ISPIInterface& spi, YaffsFileSystem& fs);
+        OBCStorageHandler(drivers::spi::ISPIInterface& spi, services::fs::YaffsFileSystem& fs);
 
         /** @brief Performs storage initialization */
         void Initialize();
@@ -57,7 +57,7 @@ namespace obc
     };
 
     template <typename Storage>
-    OBCStorageHandler<Storage>::OBCStorageHandler(drivers::spi::ISPIInterface& spi, YaffsFileSystem& fs) : _storage(spi, fs)
+    OBCStorageHandler<Storage>::OBCStorageHandler(drivers::spi::ISPIInterface& spi, services::fs::YaffsFileSystem& fs) : _storage(spi, fs)
     {
     }
 

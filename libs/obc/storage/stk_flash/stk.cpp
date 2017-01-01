@@ -4,7 +4,7 @@
 
 using obc::storage::STKStorage;
 
-STKStorage::STKStorage(drivers::spi::ISPIInterface& spi, YaffsFileSystem& fs) : _fs(fs)
+STKStorage::STKStorage(drivers::spi::ISPIInterface& spi, services::fs::YaffsFileSystem& fs) : _fs(fs)
 {
     UNREFERENCED_PARAMETER(spi);
 }

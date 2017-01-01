@@ -14,6 +14,7 @@ using testing::Eq;
 using testing::Ne;
 using testing::Ge;
 using testing::Test;
+using namespace services::fs;
 
 extern "C" void yaffs_remove_device(struct yaffs_dev* dev);
 
