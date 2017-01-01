@@ -6,9 +6,7 @@
 #include "base/os.h"
 #include "system.h"
 
-EXTERNC_BEGIN
-
-#include <yaffs_guts.h>
+#include "yaffs.hpp"
 
 /**
  * @defgroup fs File system
@@ -23,57 +21,53 @@ EXTERNC_BEGIN
  */
 
 /** @brief Directory handle */
-typedef void* FSDirectoryHandle;
+using FSDirectoryHandle = void*;
 
 /** @brief File handle */
-typedef int FSFileHandle;
+using FSFileHandle = int;
 
 // yaffs imposes 2GB file size limit
 /** @brief Type that represents file size. */
-typedef int32_t FSFileSize;
+using FSFileSize = int32_t;
 
 /**
  * @brief Type that represents file opening status.
  */
-typedef struct
+struct FSFileOpenResult
 {
     /** Operation status. */
     OSResult Status;
     /** Opened file handle. */
     FSFileHandle Handle;
-} FSFileOpenResult;
+};
 
 /**
  * @brief Type that represents directory opening status.
  */
-typedef struct
+struct FSDirectoryOpenResult
 {
     /** Operation status. */
     OSResult Status;
     /** Handle to the opened directory. */
     FSDirectoryHandle Handle;
-} FSDirectoryOpenResult;
+};
 
 /**
  * @brief Type that represents file read/write operation status.
  */
-typedef struct
+struct FSIOResult
 {
     /** Operation status. */
     OSResult Status;
     /** Number of bytes transferred. */
     FSFileSize BytesTransferred;
-} FSIOResult;
-
-/**
- * @brief Structure exposing file system API
- */
-typedef struct FileSystemTag FileSystem;
+};
 
 /**
  * @brief Enumerator of all possible file opening modes.
  */
-typedef enum {
+enum FSFileOpenFlags
+{
     /** Open file only if it already exist, fail if it does not exist. */
     FsOpenExisting = 0,
 
@@ -91,24 +85,25 @@ typedef enum {
 
     /** If set, the file offset shall be set to the end of the file prior to each write. */
     FsOpenAppend = O_APPEND,
-} FSFileOpenFlags;
+};
 
 /**
  * @brief Enumerator of all possible file access modes.
  */
-typedef enum {
+enum FSFileAccessMode
+{
     /** Open only for reading. */
     FsReadOnly = O_RDONLY,
     /** Open only for writing. */
     FsWriteOnly = O_WRONLY,
     /** Open for reading and writing. */
     FsReadWrite = O_RDWR,
-} FSFileAccessMode;
+};
 
 /**
  * @brief Structure exposing file system API
  */
-typedef struct FileSystemTag
+struct FileSystem
 {
     /**
      * @brief Opens file
@@ -118,7 +113,7 @@ typedef struct FileSystemTag
      * @param[in] accessMode Requested file access mode. @see FSFileAccessMode for details.
      * @return Operation status. @see FSFileOpenResult for details.
      */
-    FSFileOpenResult (*open)(FileSystem* fileSystem, const char* path, FSFileOpenFlags openFlag, FSFileAccessMode accessMode);
+    virtual FSFileOpenResult open(const char* path, FSFileOpenFlags openFlag, FSFileAccessMode accessMode) = 0;
 
     /**
      * @brief Truncates file to given size
@@ -127,7 +122,7 @@ typedef struct FileSystemTag
      * @param[in] length Desired length
      * @return Operation status.
      */
-    OSResult (*ftruncate)(FileSystem* fileSystem, FSFileHandle file, FSFileSize length);
+    virtual OSResult ftruncate(FSFileHandle file, FSFileSize length) = 0;
 
     /**
      * @brief Writes data to file
@@ -137,7 +132,7 @@ typedef struct FileSystemTag
      * @param[in] size Size of data
      * @return Operation status. @see FSIOResult for details.
      */
-    FSIOResult (*write)(FileSystem* fileSystem, FSFileHandle file, const void* buffer, FSFileSize size);
+    virtual FSIOResult write(FSFileHandle file, const void* buffer, FSFileSize size) = 0;
 
     /**
      * @brief Reads data from file
@@ -147,7 +142,7 @@ typedef struct FileSystemTag
      * @param[in] size Size of data
      * @return Operation status. @see FSIOResult for details.
      */
-    FSIOResult (*read)(FileSystem* fileSystem, FSFileHandle file, void* buffer, FSFileSize size);
+    virtual FSIOResult read(FSFileHandle file, void* buffer, FSFileSize size) = 0;
 
     /**
      * @brief Closes file
@@ -155,7 +150,7 @@ typedef struct FileSystemTag
      * @param[in] file File handle
      * @return Operation status.
      */
-    OSResult (*close)(FileSystem* fileSystem, FSFileHandle file);
+    virtual OSResult close(FSFileHandle file) = 0;
 
     /**
      * @brief Opens directory
@@ -163,7 +158,7 @@ typedef struct FileSystemTag
      * @param[in] dirname Directory path
      * @return Directory handle on success. @see FSDirectoryOpenResult for details.
      */
-    FSDirectoryOpenResult (*openDirectory)(FileSystem* fileSystem, const char* dirname);
+    virtual FSDirectoryOpenResult openDirectory(const char* dirname) = 0;
 
     /**
      * @brief Reads name of next entry in directory.
@@ -171,7 +166,7 @@ typedef struct FileSystemTag
      * @param[in] directory Directory handle
      * @return Entry name. NULL if no more entries found.
      */
-    char* (*readDirectory)(FileSystem* fileSystem, FSDirectoryHandle directory);
+    virtual char* readDirectory(FSDirectoryHandle directory) = 0;
 
     /**
      * @brief Closes directory
@@ -179,7 +174,7 @@ typedef struct FileSystemTag
      * @param[in] directory Directory handle
      * @return Operation status.
      */
-    OSResult (*closeDirectory)(FileSystem* fileSystem, FSDirectoryHandle directory);
+    virtual OSResult closeDirectory(FSDirectoryHandle directory) = 0;
 
     /**
      * @brief Formats partition at given mount point. Partition in unmounted before format and mounted again after
@@ -187,7 +182,7 @@ typedef struct FileSystemTag
      * @param[in] mountPoint Partition mount point
      * @return Operation stastus
      */
-    OSResult (*format)(FileSystem* fileSystem, const char* mountPoint);
+    virtual OSResult format(const char* mountPoint) = 0;
 
     /**
      * @brief Creates new directory
@@ -195,7 +190,7 @@ typedef struct FileSystemTag
      * @param[in] path Path to directory that should be created
      * @return Operation status
      */
-    OSResult (*makeDirectory)(FileSystem* fileSystem, const char* path);
+    virtual OSResult makeDirectory(const char* path) = 0;
 
     /**
      * @brief Checks if path exists
@@ -203,7 +198,7 @@ typedef struct FileSystemTag
      * @param[in] path Path to check
      * @return true if path exists
      */
-    bool (*exists)(FileSystem* fileSystem, const char* path);
+    virtual bool exists(const char* path) = 0;
 
     /**
      * @brief Removes all files and directories from specified device
@@ -211,26 +206,14 @@ typedef struct FileSystemTag
      * @param[in] device Device to clear
      * @return Operation result
      */
-    OSResult (*ClearDevice)(FileSystem* fileSystem, yaffs_dev* device);
+    virtual OSResult ClearDevice(yaffs_dev* device) = 0;
 
     /**
      * @brief Syncs file system (speeds up next mount)
      * @param fileSystem File system
      */
-    void (*Sync)(FileSystem* fileSystem);
-} FileSystem;
-
-/**
- * @brief Initializes only API pointers.
- * @param[out] fs File system interface
- */
-void FileSystemAPI(FileSystem* fs);
-
-/**
- * @brief Initializes file system interface (including API)
- * @param[inout] fs File system interface
- */
-void FileSystemInitialize(FileSystem* fs);
+    virtual void Sync() = 0;
+};
 
 /**
  * @brief Adds device and mounts it
@@ -268,7 +251,5 @@ bool FileSystemSaveToFile(FileSystem* fs, const char* file, const uint8_t* buffe
 bool FileSystemReadFile(FileSystem* fs, const char* const filePath, uint8_t* buffer, FSFileSize length);
 
 /** @} */
-
-EXTERNC_END
 
 #endif /* LIBS_FS_INCLUDE_FS_FS_H_ */

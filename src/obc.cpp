@@ -13,9 +13,9 @@ void OBC::Initialize()
 {
     this->Hardware.Initialize();
 
-    this->Communication.Initialize();
+    this->fs.Initialize();
 
-    FileSystemInitialize(&this->fs);
+    this->Communication.Initialize();
 }
 
 void OBC::PostStartInitialization()

@@ -1,7 +1,7 @@
 set(NAME fs)
 
 add_library(${NAME} STATIC        
-    fs.cpp
+    yaffs.cpp
     extension.cpp
 )
 

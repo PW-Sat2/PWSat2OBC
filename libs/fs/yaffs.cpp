@@ -1,4 +1,4 @@
-#include "fs.h"
+#include "yaffs.h"
 #include <stdbool.h>
 #include <logger/logger.h>
 #include <yaffs_guts.h>
@@ -18,9 +18,8 @@ static inline OSResult YaffsTranslateError(int error)
     }
 }
 
-static char* YaffsReadDirectory(FileSystem* fileSystem, FSDirectoryHandle directory)
+char* YaffsFileSystem::readDirectory(FSDirectoryHandle directory)
 {
-    UNREFERENCED_PARAMETER(fileSystem);
     struct yaffs_dirent* entry = yaffs_readdir((yaffs_DIR*)directory);
     if (entry == NULL)
     {
@@ -32,9 +31,8 @@ static char* YaffsReadDirectory(FileSystem* fileSystem, FSDirectoryHandle direct
     }
 }
 
-static FSFileOpenResult YaffsOpen(FileSystem* fileSystem, const char* path, FSFileOpenFlags openFlag, FSFileAccessMode accessMode)
+FSFileOpenResult YaffsFileSystem::open(const char* path, FSFileOpenFlags openFlag, FSFileAccessMode accessMode)
 {
-    UNREFERENCED_PARAMETER(fileSystem);
     const int status = yaffs_open(path, openFlag | accessMode, S_IRWXU);
     FSFileOpenResult result;
     result.Status = YaffsTranslateError(status);
@@ -42,15 +40,13 @@ static FSFileOpenResult YaffsOpen(FileSystem* fileSystem, const char* path, FSFi
     return result;
 }
 
-static OSResult YaffsTruncate(FileSystem* fileSystem, FSFileHandle file, FSFileSize length)
+OSResult YaffsFileSystem::ftruncate(FSFileHandle file, FSFileSize length)
 {
-    UNREFERENCED_PARAMETER(fileSystem);
     return YaffsTranslateError(yaffs_ftruncate(file, length));
 }
 
-static FSIOResult YaffsWrite(FileSystem* fileSystem, FSFileHandle file, const void* buffer, FSFileSize size)
+FSIOResult YaffsFileSystem::write(FSFileHandle file, const void* buffer, FSFileSize size)
 {
-    UNREFERENCED_PARAMETER(fileSystem);
     FSIOResult result;
     const int status = yaffs_write(file, buffer, size);
     result.Status = YaffsTranslateError(status);
@@ -58,9 +54,8 @@ static FSIOResult YaffsWrite(FileSystem* fileSystem, FSFileHandle file, const vo
     return result;
 }
 
-static FSIOResult YaffsRead(FileSystem* fileSystem, FSFileHandle file, void* buffer, FSFileSize size)
+FSIOResult YaffsFileSystem::read(FSFileHandle file, void* buffer, FSFileSize size)
 {
-    UNREFERENCED_PARAMETER(fileSystem);
     FSIOResult result;
     const int status = yaffs_read(file, buffer, size);
     result.Status = YaffsTranslateError(status);
@@ -68,15 +63,13 @@ static FSIOResult YaffsRead(FileSystem* fileSystem, FSFileHandle file, void* buf
     return result;
 }
 
-static OSResult YaffsClose(FileSystem* fileSystem, FSFileHandle file)
+OSResult YaffsFileSystem::close(FSFileHandle file)
 {
-    UNREFERENCED_PARAMETER(fileSystem);
     return YaffsTranslateError(yaffs_close(file));
 }
 
-static FSDirectoryOpenResult YaffsOpenDirectory(FileSystem* fileSystem, const char* directory)
+FSDirectoryOpenResult YaffsFileSystem::openDirectory(const char* directory)
 {
-    UNREFERENCED_PARAMETER(fileSystem);
     yaffs_DIR* status = yaffs_opendir(directory);
     FSDirectoryOpenResult result;
     result.Status = status != NULL ? OSResult::Success : ((OSResult)yaffs_get_error());
@@ -84,9 +77,8 @@ static FSDirectoryOpenResult YaffsOpenDirectory(FileSystem* fileSystem, const ch
     return result;
 }
 
-static OSResult YaffsCloseDirectory(FileSystem* fileSystem, FSDirectoryHandle directory)
+OSResult YaffsFileSystem::closeDirectory(FSDirectoryHandle directory)
 {
-    UNREFERENCED_PARAMETER(fileSystem);
     return YaffsTranslateError(yaffs_closedir((yaffs_DIR*)directory));
 }
 
@@ -98,10 +90,8 @@ static bool YaffsPathExists(const char* path)
     return status != -1;
 }
 
-static OSResult YaffsMakeDirectory(FileSystem* fileSystem, const char* path)
+OSResult YaffsFileSystem::makeDirectory(const char* path)
 {
-    UNREFERENCED_PARAMETER(fileSystem);
-
     char buf[NAME_MAX + 1];
 
     char* end = stpncpy(buf, path, NAME_MAX);
@@ -134,19 +124,15 @@ static OSResult YaffsMakeDirectory(FileSystem* fileSystem, const char* path)
     return YaffsTranslateError(status);
 }
 
-static OSResult YaffsFormat(FileSystem* fileSystem, const char* mountPoint)
+OSResult YaffsFileSystem::format(const char* mountPoint)
 {
-    UNREFERENCED_PARAMETER(fileSystem);
-
     const int status = yaffs_format(mountPoint, true, true, true);
 
     return YaffsTranslateError(status);
 }
 
-static bool YaffsExists(FileSystem* fileSystem, const char* path)
+bool YaffsFileSystem::exists(const char* path)
 {
-    UNREFERENCED_PARAMETER(fileSystem);
-
     struct yaffs_stat stat;
     int16_t status = yaffs_stat(path, &stat);
 
@@ -202,19 +188,15 @@ static OSResult RemoveDirectoryContents(yaffs_obj* root, int depth = 0)
     return result;
 }
 
-static OSResult YaffsClearDevice(FileSystem* fileSystem, yaffs_dev* device)
+OSResult YaffsFileSystem::ClearDevice(yaffs_dev* device)
 {
-    UNREFERENCED_PARAMETER(fileSystem);
-
     auto root = yaffs_root(device);
 
     return RemoveDirectoryContents(root);
 }
 
-static void YaffsSync(FileSystem* fileSystem)
+void YaffsFileSystem::Sync()
 {
-    UNREFERENCED_PARAMETER(fileSystem);
-
     yaffs_dev_rewind();
 
     yaffs_dev* dev = nullptr;
@@ -227,28 +209,9 @@ static void YaffsSync(FileSystem* fileSystem)
     LOG(LOG_LEVEL_DEBUG, "All devices synced");
 }
 
-void FileSystemAPI(FileSystem* fs)
-{
-    fs->open = YaffsOpen;
-    fs->write = YaffsWrite;
-    fs->close = YaffsClose;
-    fs->read = YaffsRead;
-    fs->openDirectory = YaffsOpenDirectory;
-    fs->readDirectory = YaffsReadDirectory;
-    fs->closeDirectory = YaffsCloseDirectory;
-    fs->ftruncate = YaffsTruncate;
-    fs->format = YaffsFormat;
-    fs->makeDirectory = YaffsMakeDirectory;
-    fs->exists = YaffsExists;
-    fs->ClearDevice = YaffsClearDevice;
-    fs->Sync = YaffsSync;
-}
-
-void FileSystemInitialize(FileSystem* fs)
+void YaffsFileSystem::Initialize()
 {
     YaffsGlueInit();
-
-    FileSystemAPI(fs);
 }
 
 bool FileSystemAddDeviceAndMount(yaffs_dev* device)

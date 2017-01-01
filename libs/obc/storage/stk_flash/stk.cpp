@@ -45,7 +45,7 @@ void STKStorage::Initialize()
 
 OSResult STKStorage::ClearStorage()
 {
-    return this->_fs.ClearDevice(&this->_fs, &this->rootDevice);
+    return this->_fs.ClearDevice(&this->rootDevice);
 }
 
 OSResult STKStorage::Erase()
