@@ -3,57 +3,63 @@
 
 #include "fs.h"
 
-/**
- * @defgroup fs_yaffs YAFFS implementation of file system interface
- * @ingroup fs
- *
- * @brief YAFFS implementation of file system interface
- *
- * @{
- */
-
-/**
- * @brief Yaffs implementation of file system interface
- */
-class YaffsFileSystem final : public FileSystem
+namespace services
 {
-  public:
-    /**
-     * @brief Initializes file system interface
-     */
-    void Initialize();
+    namespace fs
+    {
+        /**
+         * @defgroup fs_yaffs YAFFS implementation of file system interface
+         * @ingroup fs
+         *
+         * @brief YAFFS implementation of file system interface
+         *
+         * @{
+         */
 
-    virtual FSFileOpenResult Open(const char* path, FSFileOpen openFlag, FSFileAccess accessMode) override;
-    virtual OSResult TruncateFile(FSFileHandle file, FSFileSize length) override;
-    virtual FSIOResult Write(FSFileHandle file, gsl::span<const std::uint8_t> buffer) override;
-    virtual FSIOResult Read(FSFileHandle file, gsl::span<std::uint8_t> buffer) override;
-    virtual OSResult Close(FSFileHandle file) override;
-    virtual FSDirectoryOpenResult OpenDirectory(const char* dirname) override;
-    virtual char* ReadDirectory(FSDirectoryHandle directory) override;
-    virtual OSResult CloseDirectory(FSDirectoryHandle directory) override;
-    virtual OSResult Format(const char* mountPoint) override;
-    virtual OSResult MakeDirectory(const char* path) override;
-    virtual bool Exists(const char* path) override;
+        /**
+         * @brief Yaffs implementation of file system interface
+         */
+        class YaffsFileSystem final : public IFileSystem
+        {
+          public:
+            /**
+             * @brief Initializes file system interface
+             */
+            void Initialize();
 
-    /**
-     * @brief Removes all files and directories from specified device
-     * @param[in] device Device to clear
-     * @return Operation result
-     */
-    OSResult ClearDevice(yaffs_dev* device);
+            virtual FileOpenResult Open(const char* path, FileOpen openFlag, FileAccess accessMode) override;
+            virtual OSResult TruncateFile(FileHandle file, FileSize length) override;
+            virtual IOResult Write(FileHandle file, gsl::span<const std::uint8_t> buffer) override;
+            virtual IOResult Read(FileHandle file, gsl::span<std::uint8_t> buffer) override;
+            virtual OSResult Close(FileHandle file) override;
+            virtual DirectoryOpenResult OpenDirectory(const char* dirname) override;
+            virtual char* ReadDirectory(DirectoryHandle directory) override;
+            virtual OSResult CloseDirectory(DirectoryHandle directory) override;
+            virtual OSResult Format(const char* mountPoint) override;
+            virtual OSResult MakeDirectory(const char* path) override;
+            virtual bool Exists(const char* path) override;
 
-    /**
-     * @brief Syncs file system (speeds up next mount)
-     */
-    void Sync();
+            /**
+             * @brief Removes all files and directories from specified device
+             * @param[in] device Device to clear
+             * @return Operation result
+             */
+            OSResult ClearDevice(yaffs_dev* device);
 
-    /**
-     * @brief Adds device and mounts it
-     * @param[in] device YAFFS device
-     * @return true on success
-     */
-    bool AddDeviceAndMount(yaffs_dev* device);
-};
+            /**
+             * @brief Syncs file system (speeds up next mount)
+             */
+            void Sync();
+
+            /**
+             * @brief Adds device and mounts it
+             * @param[in] device YAFFS device
+             * @return true on success
+             */
+            bool AddDeviceAndMount(yaffs_dev* device);
+        };
+    }
+}
 
 /** @} */
 

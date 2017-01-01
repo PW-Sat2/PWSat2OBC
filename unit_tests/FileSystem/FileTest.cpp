@@ -18,6 +18,8 @@ using testing::StrictMock;
 using testing::Return;
 using testing::Invoke;
 
+using namespace services::fs;
+
 class FileTest : public Test
 {
   protected:
@@ -26,7 +28,7 @@ class FileTest : public Test
 
 TEST_F(FileTest, ShouldOpenAndCloseFileAutomatically)
 {
-    EXPECT_CALL(this->_fs, Open("/file", FSFileOpen::Existing, FSFileAccess::ReadOnly)).WillOnce(Return(MakeOpenedFile(1)));
+    EXPECT_CALL(this->_fs, Open("/file", FileOpen::Existing, FileAccess::ReadOnly)).WillOnce(Return(MakeOpenedFile(1)));
     EXPECT_CALL(this->_fs, Close(1));
 
     auto f = File::OpenRead(this->_fs, "/file");
@@ -36,7 +38,7 @@ TEST_F(FileTest, ShouldOpenAndCloseFileAutomatically)
 
 TEST_F(FileTest, ShouldNotCloseFileIfOpenFailed)
 {
-    EXPECT_CALL(this->_fs, Open("/file", FSFileOpen::Existing, FSFileAccess::ReadOnly))
+    EXPECT_CALL(this->_fs, Open("/file", FileOpen::Existing, FileAccess::ReadOnly))
         .WillOnce(Return(MakeOpenedFile(OSResult::InvalidOperation)));
     EXPECT_CALL(this->_fs, Close(1)).Times(0);
 
@@ -48,10 +50,10 @@ TEST_F(FileTest, ShouldNotCloseFileIfOpenFailed)
 
 TEST_F(FileTest, ShouldOpenFileForWrite)
 {
-    EXPECT_CALL(this->_fs, Open("/file", FSFileOpen::CreateAlways, FSFileAccess::ReadWrite)).WillOnce(Return(MakeOpenedFile(1)));
+    EXPECT_CALL(this->_fs, Open("/file", FileOpen::CreateAlways, FileAccess::ReadWrite)).WillOnce(Return(MakeOpenedFile(1)));
     EXPECT_CALL(this->_fs, Close(1));
 
-    auto f = File::OpenWrite(this->_fs, "/file", FSFileOpen::CreateAlways, FSFileAccess::ReadWrite);
+    auto f = File::OpenWrite(this->_fs, "/file", FileOpen::CreateAlways, FileAccess::ReadWrite);
 
     UNREFERENCED_PARAMETER(f);
 }
@@ -62,7 +64,7 @@ TEST_F(FileTest, ShouldReadFromFile)
 
     EXPECT_CALL(this->_fs, Open("/file", _, _)).WillOnce(Return(MakeOpenedFile(1)));
 
-    EXPECT_CALL(this->_fs, Read(1, SpanOfSize(2))).WillOnce(Invoke([&data](FSFileHandle, span<uint8_t> buffer) {
+    EXPECT_CALL(this->_fs, Read(1, SpanOfSize(2))).WillOnce(Invoke([&data](FileHandle, span<uint8_t> buffer) {
         std::copy(data.begin(), data.end(), buffer.begin());
         return MakeFSIOResult(2);
     }));
@@ -85,7 +87,7 @@ TEST_F(FileTest, ShouldWriteToFile)
 
     EXPECT_CALL(this->_fs, Open("/file", _, _)).WillOnce(Return(MakeOpenedFile(1)));
 
-    EXPECT_CALL(this->_fs, Write(1, SpanOfSize(2))).WillOnce(Invoke([&data](FSFileHandle, span<const uint8_t> buffer) {
+    EXPECT_CALL(this->_fs, Write(1, SpanOfSize(2))).WillOnce(Invoke([&data](FileHandle, span<const uint8_t> buffer) {
         EXPECT_THAT(buffer, ElementsAre(1, 2));
         return MakeFSIOResult(2);
     }));

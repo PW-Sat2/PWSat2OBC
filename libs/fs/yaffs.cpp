@@ -3,6 +3,8 @@
 #include <logger/logger.h>
 #include "yaffs.h"
 
+using namespace services::fs;
+
 extern void YaffsGlueInit(void);
 
 static inline OSResult YaffsTranslateError(int error)
@@ -17,7 +19,7 @@ static inline OSResult YaffsTranslateError(int error)
     }
 }
 
-char* YaffsFileSystem::ReadDirectory(FSDirectoryHandle directory)
+char* YaffsFileSystem::ReadDirectory(DirectoryHandle directory)
 {
     struct yaffs_dirent* entry = yaffs_readdir((yaffs_DIR*)directory);
     if (entry == NULL)
@@ -30,53 +32,53 @@ char* YaffsFileSystem::ReadDirectory(FSDirectoryHandle directory)
     }
 }
 
-FSFileOpenResult YaffsFileSystem::Open(const char* path, FSFileOpen openFlag, FSFileAccess accessMode)
+FileOpenResult YaffsFileSystem::Open(const char* path, FileOpen openFlag, FileAccess accessMode)
 {
     const int status = yaffs_open(path, num(openFlag) | num(accessMode), S_IRWXU);
-    FSFileOpenResult result;
+    FileOpenResult result;
     result.Status = YaffsTranslateError(status);
     result.Handle = status;
     return result;
 }
 
-OSResult YaffsFileSystem::TruncateFile(FSFileHandle file, FSFileSize length)
+OSResult YaffsFileSystem::TruncateFile(FileHandle file, FileSize length)
 {
     return YaffsTranslateError(yaffs_ftruncate(file, length));
 }
 
-FSIOResult YaffsFileSystem::Write(FSFileHandle file, gsl::span<const std::uint8_t> buffer)
+IOResult YaffsFileSystem::Write(FileHandle file, gsl::span<const std::uint8_t> buffer)
 {
-    FSIOResult result;
+    IOResult result;
     const int status = yaffs_write(file, buffer.data(), buffer.size());
     result.Status = YaffsTranslateError(status);
     result.BytesTransferred = status;
     return result;
 }
 
-FSIOResult YaffsFileSystem::Read(FSFileHandle file, gsl::span<std::uint8_t> buffer)
+IOResult YaffsFileSystem::Read(FileHandle file, gsl::span<std::uint8_t> buffer)
 {
-    FSIOResult result;
+    IOResult result;
     const int status = yaffs_read(file, buffer.data(), buffer.size());
     result.Status = YaffsTranslateError(status);
     result.BytesTransferred = status;
     return result;
 }
 
-OSResult YaffsFileSystem::Close(FSFileHandle file)
+OSResult YaffsFileSystem::Close(FileHandle file)
 {
     return YaffsTranslateError(yaffs_close(file));
 }
 
-FSDirectoryOpenResult YaffsFileSystem::OpenDirectory(const char* directory)
+DirectoryOpenResult YaffsFileSystem::OpenDirectory(const char* directory)
 {
     yaffs_DIR* status = yaffs_opendir(directory);
-    FSDirectoryOpenResult result;
+    DirectoryOpenResult result;
     result.Status = status != NULL ? OSResult::Success : ((OSResult)yaffs_get_error());
     result.Handle = status;
     return result;
 }
 
-OSResult YaffsFileSystem::CloseDirectory(FSDirectoryHandle directory)
+OSResult YaffsFileSystem::CloseDirectory(DirectoryHandle directory)
 {
     return YaffsTranslateError(yaffs_closedir((yaffs_DIR*)directory));
 }

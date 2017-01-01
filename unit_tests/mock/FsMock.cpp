@@ -1,33 +1,35 @@
 #include "FsMock.hpp"
 #include <utility>
 
-FSFileOpenResult MakeOpenedFile(int handle)
+using namespace services::fs;
+
+FileOpenResult MakeOpenedFile(int handle)
 {
-    FSFileOpenResult result;
+    FileOpenResult result;
     result.Status = OSResult::Success;
     result.Handle = handle;
     return result;
 }
 
-FSFileOpenResult MakeOpenedFile(OSResult status)
+FileOpenResult MakeOpenedFile(OSResult status)
 {
-    FSFileOpenResult result;
+    FileOpenResult result;
     result.Status = status;
     result.Handle = -1;
     return result;
 }
 
-FSIOResult MakeFSIOResult(OSResult status)
+IOResult MakeFSIOResult(OSResult status)
 {
-    FSIOResult result;
+    IOResult result;
     result.Status = status;
     result.BytesTransferred = 0;
     return result;
 }
 
-FSIOResult MakeFSIOResult(int bytesTransfered)
+IOResult MakeFSIOResult(int bytesTransfered)
 {
-    FSIOResult result;
+    IOResult result;
     result.Status = OSResult::Success;
     result.BytesTransferred = bytesTransfered;
     return result;

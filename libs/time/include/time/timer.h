@@ -120,7 +120,7 @@ namespace services
              *
              *  @param[in] fileSystem Pointer to file system object that should be used to read persistent state.
              */
-            TimeProvider(FileSystem& fileSystem);
+            TimeProvider(services::fs::IFileSystem& fileSystem);
 
             /**
              * @brief Initializes the timer object.
@@ -178,7 +178,7 @@ namespace services
              * @return Either last stable timer state that get read from the persistent memory or
              * value indicating zero (initial time).
              */
-            struct TimeSnapshot CurrentPersistentTime(FileSystem& fileSystem);
+            struct TimeSnapshot CurrentPersistentTime(services::fs::IFileSystem& fileSystem);
 
             /**
              * @brief Waits until given timepoint. Wait is directed by timer notifications
@@ -282,7 +282,7 @@ namespace services
              *
              * @return Read timer state or default (zero) state in case of errors.
              */
-            struct TimeSnapshot ReadFile(FileSystem& fs, const char* const filePath);
+            struct TimeSnapshot ReadFile(services::fs::IFileSystem& fs, const char* const filePath);
 
           private:
             static constexpr const char* File0 = "/TimeState.0";
@@ -324,7 +324,7 @@ namespace services
             /**
              * @brief File system object that is used to save/restore timer state.
              */
-            FileSystem& FileSystemObject;
+            services::fs::IFileSystem& FileSystemObject;
         };
 
         /** @}*/

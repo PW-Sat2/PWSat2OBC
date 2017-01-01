@@ -2,9 +2,11 @@
 #include "logger/logger.h"
 #include "system.h"
 
-bool FileSystemSaveToFile(FileSystem& fs, const char* file, gsl::span<const std::uint8_t> buffer)
+using namespace services::fs;
+
+bool services::fs::SaveToFile(IFileSystem& fs, const char* file, gsl::span<const std::uint8_t> buffer)
 {
-    auto f = File::Open(fs, file, FSFileOpen::CreateAlways, FSFileAccess::WriteOnly);
+    auto f = File::Open(fs, file, FileOpen::CreateAlways, FileAccess::WriteOnly);
 
     if (!f)
     {
@@ -12,7 +14,7 @@ bool FileSystemSaveToFile(FileSystem& fs, const char* file, gsl::span<const std:
         return false;
     }
 
-    const FSIOResult writeResult = f.Write(buffer);
+    const IOResult writeResult = f.Write(buffer);
     const bool status = OS_RESULT_SUCCEEDED(writeResult.Status) && writeResult.BytesTransferred == buffer.size();
     if (!status)
     {
@@ -22,7 +24,7 @@ bool FileSystemSaveToFile(FileSystem& fs, const char* file, gsl::span<const std:
     return status;
 }
 
-bool FileSystemReadFile(FileSystem& fs, const char* const filePath, gsl::span<std::uint8_t> buffer)
+bool services::fs::ReadFromFile(IFileSystem& fs, const char* const filePath, gsl::span<std::uint8_t> buffer)
 {
     auto f = File::OpenRead(fs, filePath);
     if (!f)
@@ -31,7 +33,7 @@ bool FileSystemReadFile(FileSystem& fs, const char* const filePath, gsl::span<st
         return false;
     }
 
-    const FSIOResult readResult = f.Read(buffer);
+    const IOResult readResult = f.Read(buffer);
     const bool status = OS_RESULT_SUCCEEDED(readResult.Status) && readResult.BytesTransferred == buffer.size();
     if (!status)
     {
@@ -41,7 +43,7 @@ bool FileSystemReadFile(FileSystem& fs, const char* const filePath, gsl::span<st
     return status;
 }
 
-File::File(FileSystem& fs, FSFileOpenResult open) : _fs(fs), _handle(open.Handle), _valid(OS_RESULT_SUCCEEDED(open.Status))
+File::File(IFileSystem& fs, FileOpenResult open) : _fs(fs), _handle(open.Handle), _valid(OS_RESULT_SUCCEEDED(open.Status))
 {
 }
 
@@ -71,34 +73,34 @@ File& File::operator=(File&& other)
     return *this;
 }
 
-File File::Open(FileSystem& fs, const char* path, FSFileOpen mode, FSFileAccess access)
+File File::Open(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access)
 {
     auto f = fs.Open(path, mode, access);
 
     return File(fs, f);
 }
 
-File File::OpenRead(FileSystem& fs, const char* path, FSFileOpen mode, FSFileAccess access)
+File File::OpenRead(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access)
 {
     return Open(fs, path, mode, access);
 }
 
-File File::OpenWrite(FileSystem& fs, const char* path, FSFileOpen mode, FSFileAccess access)
+File File::OpenWrite(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access)
 {
     return Open(fs, path, mode, access);
 }
 
-FSIOResult File::Read(gsl::span<uint8_t> buffer)
+IOResult File::Read(gsl::span<uint8_t> buffer)
 {
     return this->_fs.Read(this->_handle, buffer);
 }
 
-FSIOResult File::Write(gsl::span<const uint8_t> buffer)
+IOResult File::Write(gsl::span<const uint8_t> buffer)
 {
     return this->_fs.Write(this->_handle, buffer);
 }
 
-OSResult File::Truncate(FSFileSize size)
+OSResult File::Truncate(FileSize size)
 {
     return this->_fs.TruncateFile(this->_handle, size);
 }

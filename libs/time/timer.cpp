@@ -6,6 +6,9 @@
 #include "timer.h"
 
 using namespace services::time;
+using services::fs::ReadFromFile;
+using services::fs::SaveToFile;
+using services::fs::IFileSystem;
 
 /**
  * @addtogroup time
@@ -22,7 +25,7 @@ static constexpr TimeSpan NotificationPeriod = {TIMER_NOTIFICATION_PERIOD};
  */
 static constexpr TimeSpan SavePeriod = {TIMER_SAVE_PERIOD};
 
-TimeProvider::TimeProvider(FileSystem& fileSystem)
+TimeProvider::TimeProvider(IFileSystem& fileSystem)
     : timerLock(nullptr),                                                                   //
       notificationLock(nullptr),                                                            //
       OnTimePassed(nullptr),                                                                //
@@ -156,11 +159,11 @@ TimerState TimeProvider::BuildTimerState()
     return result;
 }
 
-struct TimeSnapshot TimeProvider::ReadFile(FileSystem& fs, const char* const filePath)
+struct TimeSnapshot TimeProvider::ReadFile(IFileSystem& fs, const char* const filePath)
 {
     struct TimeSnapshot result = {{0}};
     std::array<uint8_t, sizeof(TimeSpan)> buffer;
-    if (!FileSystemReadFile(fs, filePath, buffer))
+    if (!ReadFromFile(fs, filePath, buffer))
     {
         LOGF(LOG_LEVEL_WARNING, "Unable to read file: %s.", filePath);
         return result;
@@ -177,7 +180,7 @@ struct TimeSnapshot TimeProvider::ReadFile(FileSystem& fs, const char* const fil
     return result;
 }
 
-struct TimeSnapshot TimeProvider::CurrentPersistentTime(FileSystem& fileSystem)
+struct TimeSnapshot TimeProvider::CurrentPersistentTime(IFileSystem& fileSystem)
 {
     struct TimeSnapshot snapshot[3];
     snapshot[0] = ReadFile(fileSystem, File0);
@@ -276,15 +279,15 @@ void TimeProvider::SaveTime(TimerState state)
     do
     {
         errorCount = 0;
-        if (!FileSystemSaveToFile(FileSystemObject, File0, gsl::make_span(buffer, length)))
+        if (!SaveToFile(FileSystemObject, File0, gsl::make_span(buffer, length)))
         {
             ++errorCount;
         }
-        if (!FileSystemSaveToFile(FileSystemObject, File1, gsl::make_span(buffer, length)))
+        if (!SaveToFile(FileSystemObject, File1, gsl::make_span(buffer, length)))
         {
             ++errorCount;
         }
-        if (!FileSystemSaveToFile(FileSystemObject, File2, gsl::make_span(buffer, length)))
+        if (!SaveToFile(FileSystemObject, File2, gsl::make_span(buffer, length)))
         {
             ++errorCount;
         }

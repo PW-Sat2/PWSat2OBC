@@ -46,7 +46,7 @@ struct OBC
     void PostStartInitialization();
 
     /** @brief File system object */
-    YaffsFileSystem fs;
+    services::fs::YaffsFileSystem fs;
     /** @brief Handle to OBC initialization task. */
     OSTaskHandle initTask;
     /** @brief Flag indicating that OBC software has finished initialization process. */
