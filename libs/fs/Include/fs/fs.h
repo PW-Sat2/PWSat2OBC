@@ -185,6 +185,104 @@ struct FileSystem
     virtual bool Exists(const char* path) = 0;
 };
 
+        /**
+         * @brief Wrapper over file handle
+         */
+        class File : private NotCopyable
+        {
+          public:
+            /**
+             * @brief Move constructor
+             * @param other Other file (will become invalid)
+             */
+            File(File&& other) noexcept;
+            /**
+             * @brief Move operator
+             * @param other Other file (will become invalid)
+             * @return Reference to this
+             */
+            File& operator=(File&& other) noexcept;
+
+    /** @brief Desctructor */
+    ~File();
+
+    /**
+     * @brief Factory method that opens file
+     * @param fs File system
+     * @param path File path
+     * @param mode Open mode
+     * @param access Access
+     * @return File instance
+     */
+    static File Open(FileSystem& fs, const char* path, FSFileOpen mode, FSFileAccess access);
+
+    /**
+     * @brief Factory method that opens for read
+     * @param fs File system
+     * @param path File path
+     * @param mode Open mode
+     * @param access Access
+     * @return File instance
+     */
+    static File OpenRead(
+        FileSystem& fs, const char* path, FSFileOpen mode = FSFileOpen::Existing, FSFileAccess access = FSFileAccess::ReadOnly);
+
+            /**
+             * @brief Factory method that opens for write
+             * @param fs File system
+             * @param path File path
+             * @param mode Open mode
+             * @param access Access
+             * @return File instance
+             */
+            static File OpenWrite(
+                IFileSystem& fs, const char* path, FileOpen mode = FileOpen::Existing, FileAccess access = FileAccess::WriteOnly);
+
+    /** @brief Implicit cast to bool, true if file opened successfully*/
+    inline operator bool();
+
+    /**
+     * @brief Reads from file
+     * @param buffer Buffer
+     * @return Operation result
+     */
+    FSIOResult Read(gsl::span<uint8_t> buffer);
+
+    /**
+     * @brief Writes to file
+     * @param buffer Buffer
+     * @return Operation result
+     */
+    FSIOResult Write(gsl::span<const uint8_t> buffer);
+
+    /**
+     * @brief Truncates file to desired size
+     * @param size Desired size
+     * @return Operation result
+     */
+    OSResult Truncate(FSFileSize size);
+
+  private:
+    /**
+     * @brief Wraps given file open result
+     * @param fs File system interface
+     * @param open File open result (may be unsuccessful)
+     */
+    File(FileSystem& fs, FSFileOpenResult open);
+
+    /** @brief File system interface */
+    FileSystem& _fs;
+    /** @brief File handle */
+    FSFileHandle _handle;
+    /** @brief Flag indicating whether file is opened successfully */
+    bool _valid;
+};
+
+File::operator bool()
+{
+    return this->_valid;
+}
+
 /**
  * @brief This method is responsible for writing contents of the passed buffer to the selected file.
  *

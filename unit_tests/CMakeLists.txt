@@ -13,6 +13,7 @@ set(SOURCES
   FileSystem/NANDGeometryTest.cpp
   FileSystem/MemoryDriver.cpp
   FileSystem/EccTest.cpp
+  FileSystem/FileTest.cpp
   Comm/CommTest.cpp
   Comm/CommFrameTest.cpp
   TeleCommandHandling/TeleCommandHandlingTest.cpp

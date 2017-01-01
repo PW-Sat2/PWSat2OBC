@@ -13,7 +13,7 @@ static inline OSResult YaffsTranslateError(int error)
     }
     else
     {
-        return (OSResult)yaffs_get_error();
+        return static_cast<OSResult>(yaffs_get_error());
     }
 }
 
