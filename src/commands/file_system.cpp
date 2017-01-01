@@ -37,25 +37,23 @@ void FSWriteFile(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
 
-    const FSFileOpenResult result = Main.fs.Open(argv[0], FSFileOpen::CreateAlways, FSFileAccess::WriteOnly);
-    if (OS_RESULT_FAILED(result.Status))
+    auto f = File::Open(Main.fs, argv[0], FSFileOpen::CreateAlways, FSFileAccess::WriteOnly);
+    if (!f)
     {
         Main.terminal.Puts("Error");
         Main.terminal.NewLine();
         return;
     }
 
-    const FSFileHandle file = result.Handle;
-    Main.fs.TruncateFile(file, 0);
-    Main.fs.Write(file, gsl::make_span(reinterpret_cast<uint8_t*>(argv[1]), strlen(argv[1])));
-    Main.fs.Close(file);
+    f.Truncate(0);
+    f.Write(gsl::make_span(reinterpret_cast<uint8_t*>(argv[1]), strlen(argv[1])));
 }
 
 void FSReadFile(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
-    const FSFileOpenResult result = Main.fs.Open(argv[0], FSFileOpen::Existing, FSFileAccess::ReadOnly);
-    if (OS_RESULT_FAILED(result.Status))
+    auto f = File::Open(Main.fs, argv[0], FSFileOpen::Existing, FSFileAccess::ReadOnly);
+    if (!f)
     {
         Main.terminal.Puts("Error");
         Main.terminal.NewLine();
@@ -64,9 +62,8 @@ void FSReadFile(uint16_t argc, char* argv[])
 
     std::array<uint8_t, 100> buffer;
     std::fill(buffer.begin(), buffer.end(), 0);
-    const FSFileHandle file = result.Handle;
-    Main.fs.Read(file, buffer);
-    Main.fs.Close(file);
+
+    f.Read(buffer);
 
     buffer[99] = 0;
 
