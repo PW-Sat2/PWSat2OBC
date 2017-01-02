@@ -27,6 +27,9 @@ struct TimeTaskTest : public testing::Test
 
 TimeTaskTest::TimeTaskTest() : provider(fileSystemMock), sailTask(provider), updateDescriptor(sailTask.BuildUpdate())
 {
+    ON_CALL(fileSystemMock, Open(_, _, _)).WillByDefault(Return(MakeOpenedFile(1)));
+    ON_CALL(fileSystemMock, Write(_, _)).WillByDefault(Return(MakeFSIOResult(0)));
+    ON_CALL(fileSystemMock, Read(_, _)).WillByDefault(Return(MakeFSIOResult(0)));
 }
 
 TEST_F(TimeTaskTest, TestTimeUpdate)

@@ -35,10 +35,8 @@ char* YaffsFileSystem::ReadDirectory(DirectoryHandle directory)
 FileOpenResult YaffsFileSystem::Open(const char* path, FileOpen openFlag, FileAccess accessMode)
 {
     const int status = yaffs_open(path, num(openFlag) | num(accessMode), S_IRWXU);
-    FileOpenResult result;
-    result.Status = YaffsTranslateError(status);
-    result.Handle = status;
-    return result;
+
+    return FileOpenResult(YaffsTranslateError(status), status);
 }
 
 OSResult YaffsFileSystem::TruncateFile(FileHandle file, FileSize length)
@@ -48,20 +46,16 @@ OSResult YaffsFileSystem::TruncateFile(FileHandle file, FileSize length)
 
 IOResult YaffsFileSystem::Write(FileHandle file, gsl::span<const std::uint8_t> buffer)
 {
-    IOResult result;
     const int status = yaffs_write(file, buffer.data(), buffer.size());
-    result.Status = YaffsTranslateError(status);
-    result.BytesTransferred = status;
-    return result;
+
+    return IOResult(YaffsTranslateError(status), status);
 }
 
 IOResult YaffsFileSystem::Read(FileHandle file, gsl::span<std::uint8_t> buffer)
 {
-    IOResult result;
     const int status = yaffs_read(file, buffer.data(), buffer.size());
-    result.Status = YaffsTranslateError(status);
-    result.BytesTransferred = status;
-    return result;
+
+    return IOResult(YaffsTranslateError(status), status);
 }
 
 OSResult YaffsFileSystem::Close(FileHandle file)
@@ -72,10 +66,8 @@ OSResult YaffsFileSystem::Close(FileHandle file)
 DirectoryOpenResult YaffsFileSystem::OpenDirectory(const char* directory)
 {
     yaffs_DIR* status = yaffs_opendir(directory);
-    DirectoryOpenResult result;
-    result.Status = status != NULL ? OSResult::Success : ((OSResult)yaffs_get_error());
-    result.Handle = status;
-    return result;
+
+    return DirectoryOpenResult(status != NULL ? OSResult::Success : ((OSResult)yaffs_get_error()), status);
 }
 
 OSResult YaffsFileSystem::CloseDirectory(DirectoryHandle directory)
