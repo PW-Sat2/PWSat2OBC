@@ -47,6 +47,9 @@ class TimerTest : public testing::Test
 
 TimerTest::TimerTest() : provider(fs)
 {
+    ON_CALL(fs, Open(_, _, _)).WillByDefault(Return(MakeOpenedFile(1)));
+    ON_CALL(fs, Write(_, _)).WillByDefault(Return(MakeFSIOResult(0)));
+    ON_CALL(fs, Read(_, _)).WillByDefault(Return(MakeFSIOResult(0)));
 }
 
 void TimerTest::Initialize()

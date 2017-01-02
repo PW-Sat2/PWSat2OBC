@@ -3,6 +3,7 @@ set(NAME fs)
 add_library(${NAME} STATIC        
     yaffs.cpp
     extension.cpp
+    fs.cpp
 )
 
 target_link_libraries(${NAME} PUBLIC

@@ -43,7 +43,7 @@ bool services::fs::ReadFromFile(IFileSystem& fs, const char* const filePath, gsl
     return status;
 }
 
-File::File(IFileSystem& fs, FileOpenResult open) : _fs(fs), _handle(open.Handle), _valid(OS_RESULT_SUCCEEDED(open.Status))
+File::File(IFileSystem& fs, FileOpenResult open) : _fs(fs), _handle(open.Handle), _valid(open)
 {
 }
 

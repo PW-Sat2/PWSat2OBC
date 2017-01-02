@@ -35,33 +35,79 @@ namespace services
          */
         struct FileOpenResult
         {
+            /**
+             * @brief Ctor
+             * @param status Operation status
+             * @param handle File handle
+             */
+            FileOpenResult(OSResult status, FileHandle handle);
+
+            /**
+             * @brief Converts to true if operation succeded
+             */
+            inline operator bool() const;
+
             /** Operation status. */
-            OSResult Status;
+            const OSResult Status;
             /** Opened file handle. */
-            FileHandle Handle;
+            const FileHandle Handle;
         };
+
+        FileOpenResult::operator bool() const
+        {
+            return OS_RESULT_SUCCEEDED(this->Status);
+        }
 
         /**
          * @brief Type that represents directory opening status.
          */
         struct DirectoryOpenResult
         {
+            /**
+             * @brief Ctor
+             * @param status Operation status
+             * @param handle Directory handle
+             */
+            DirectoryOpenResult(OSResult status, DirectoryHandle handle);
+
+            /**
+             * @brief Converts to true if operation succeded
+             */
+            inline operator bool() const;
+
             /** Operation status. */
-            OSResult Status;
+            const OSResult Status;
             /** Handle to the opened directory. */
-            DirectoryHandle Handle;
+            const DirectoryHandle Handle;
         };
+
+        DirectoryOpenResult::operator bool() const
+        {
+            return OS_RESULT_SUCCEEDED(this->Status);
+        }
 
         /**
          * @brief Type that represents file read/write operation status.
          */
         struct IOResult
         {
+            IOResult(OSResult status, FileSize bytesTransferred);
+
+            /**
+             * @brief Converts to true if operation succeded
+             */
+            inline operator bool() const;
+
             /** Operation status. */
-            OSResult Status;
+            const OSResult Status;
             /** Number of bytes transferred. */
-            FileSize BytesTransferred;
+            const FileSize BytesTransferred;
         };
+
+        inline IOResult::operator bool() const
+        {
+            return OS_RESULT_SUCCEEDED(this->Status);
+        }
 
         /**
          * @brief Enumerator of all possible file opening modes.
