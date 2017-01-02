@@ -196,7 +196,25 @@ class CommObject final : public ITransmitFrame
      */
     bool ResetWatchdogTransmitter();
 
+    /**
+     * @brief This procedure queries current hardware for state changes.
+     *
+     * This function queries the state of the underlying hardware and processes any not yet received frames.
+     * Additionally it resets hardware watchdog either via transmitter or via receiver.
+     */
+    void PollHardware();
+
   private:
+    bool SendCommand(Address address, std::uint8_t command);
+
+    bool SendCommandWithResponse(Address address, std::uint8_t command, gsl::span<std::uint8_t> outBuffer);
+
+    bool GetFrame(gsl::span<std::uint8_t> buffer, int retryCount, Frame& frame);
+
+    void ProcessSingleFrame();
+
+    [[noreturn]] static void CommTask(void* param);
+
     /** @brief Comm driver lower interface. */
     drivers::i2c::II2CBus& _low;
 
@@ -208,11 +226,6 @@ class CommObject final : public ITransmitFrame
 
     /** @brief Handle to event group used to communicate with background task. */
     OSEventGroupHandle _pollingTaskFlags;
-
-    bool SendCommand(Address address, std::uint8_t command);
-    bool SendCommandWithResponse(Address address, std::uint8_t command, gsl::span<std::uint8_t> outBuffer);
-    void PollHardware();
-    [[noreturn]] static void CommTask(void* param);
 };
 
 COMM_END

@@ -2,7 +2,7 @@
 
 COMM_BEGIN
 
-Frame::Frame() : doppler(0), rssi(0)
+Frame::Frame() : doppler(0), rssi(0), fullFrameSize(0)
 {
 }
 

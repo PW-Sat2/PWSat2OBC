@@ -39,6 +39,7 @@ static constexpr uint8_t ReceiverGetFrameCount = 0x21;
 static constexpr uint8_t ReceiverGetFrame = 0x22;
 static constexpr uint8_t ReceiverRemoveFrame = 0x24;
 static constexpr uint8_t ReceiverReset = 0xAA;
+static constexpr uint8_t ReceiverWatchdogReset = 0xCC;
 
 static constexpr uint8_t HardwareReset = 0xAB;
 
@@ -50,6 +51,7 @@ static constexpr uint8_t TransmitterGetTelemetry = 0x26;
 static constexpr uint8_t TransmitterSetBitrate = 0x28;
 static constexpr uint8_t TransmitterGetState = 0x41;
 static constexpr uint8_t TransmitterReset = 0xAA;
+static constexpr uint8_t TransmitterWatchdogReset = 0xCC;
 
 static OSReset SetupOs(CommObject& comm, OSMock& system)
 {
@@ -75,11 +77,52 @@ struct CommTest : public testing::Test
     I2CBusMock i2c;
     OSReset reset;
     std::uint8_t dataBuffer[devices::comm::PrefferedBufferSize];
+
+    void MockFrameCount(std::uint16_t frameCount);
+
+    void MockFrame(gsl::span<const std::uint8_t> span, std::uint16_t rssi = 0, std::uint16_t doppler = 0);
+
+    void MockRemoveFrame(I2CResult result);
 };
 
 CommTest::CommTest() : comm(i2c, frameHandler)
 {
     reset = SetupOs(comm, system);
+}
+
+void CommTest::MockFrameCount(std::uint16_t frameCount)
+{
+    EXPECT_CALL(i2c, WriteRead(ReceiverAddress, ElementsAre(ReceiverGetFrameCount), _))
+        .WillOnce(Invoke([=](uint8_t /*address*/, auto /*inData*/, auto outData) {
+            outData[0] = frameCount & 0xff;
+            outData[1] = (frameCount >> 8) & 0xff;
+            return I2CResult::OK;
+        }));
+}
+
+void CommTest::MockFrame(gsl::span<const std::uint8_t> data, std::uint16_t rssi, std::uint16_t doppler)
+{
+    EXPECT_CALL(i2c, WriteRead(ReceiverAddress, ElementsAre(ReceiverGetFrame), _))
+        .WillRepeatedly(Invoke([=](uint8_t /*address*/, gsl::span<const uint8_t> /*inData*/, gsl::span<uint8_t> outData) {
+            std::fill(outData.begin(), outData.end(), 0);
+            outData[0] = data.size_bytes() & 0xff;
+            outData[1] = (data.size_bytes() >> 8) & 0xff;
+            if (outData.size() > (5 + data.size_bytes()))
+            {
+                outData[2] = doppler & 0xff;
+                outData[3] = (doppler >> 8) & 0xff;
+                outData[4] = rssi & 0xff;
+                outData[5] = (rssi >> 8) & 0xff;
+                std::copy(std::begin(data), std::end(data), outData.begin() + 6);
+            }
+
+            return I2CResult::OK;
+        }));
+}
+
+void CommTest::MockRemoveFrame(I2CResult result)
+{
+    i2c.ExpectWriteCommand(ReceiverAddress, ReceiverRemoveFrame).WillOnce(Return(result));
 }
 
 TEST_F(CommTest, TestInitializationDoesNotTouchHardware)
@@ -156,14 +199,14 @@ TEST_F(CommTest, TestReceiverResetFailure)
 
 TEST_F(CommTest, TestFrameRemoval)
 {
-    i2c.ExpectWriteCommand(ReceiverAddress, ReceiverRemoveFrame).WillOnce(Return(I2CResult::OK));
+    MockRemoveFrame(I2CResult::OK);
     const auto status = comm.RemoveFrame();
     ASSERT_THAT(status, Eq(true));
 }
 
 TEST_F(CommTest, TestFrameRemovalFailure)
 {
-    i2c.ExpectWriteCommand(ReceiverAddress, ReceiverRemoveFrame).WillOnce(Return(I2CResult::Nack));
+    MockRemoveFrame(I2CResult::Nack);
     const auto status = comm.RemoveFrame();
     ASSERT_THAT(status, Eq(false));
 }
@@ -178,13 +221,7 @@ TEST_F(CommTest, TestGetFrameCountFailure)
 
 TEST_F(CommTest, TestGetFrameCount)
 {
-    EXPECT_CALL(i2c, WriteRead(ReceiverAddress, ElementsAre(ReceiverGetFrameCount), _))
-        .WillOnce(Invoke([](uint8_t /*address*/, auto /*inData*/, auto outData) {
-            outData[0] = 1;
-            outData[1] = 1;
-            return I2CResult::OK;
-        }));
-
+    MockFrameCount(257);
     const auto result = comm.GetFrameCount();
     ASSERT_THAT(result.status, Eq(true));
     ASSERT_THAT(result.frameCount, Eq(257));
@@ -369,8 +406,6 @@ TEST_F(CommTest, TestSendFrame)
     EXPECT_CALL(i2c, WriteRead(TransmitterAddress, BeginsWith(TransmitterSendFrame), _))
         .WillOnce(Invoke([](uint8_t /*address*/, span<const uint8_t> inData, span<uint8_t> outData) {
             const uint8_t expected[] = {TransmitterSendFrame, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xb, 0xc};
-            //            EXPECT_THAT(std::equal(inData.begin(), inData.end(), std::begin(expected), std::end(expected)), Eq(true));
-
             EXPECT_THAT(inData, Eq(span<const uint8_t>(expected)));
 
             outData[0] = 0;
@@ -452,21 +487,7 @@ TEST_F(CommTest, TestReceiveFrame)
 {
     Frame frame;
     const uint8_t expected[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
-    EXPECT_CALL(i2c, WriteRead(ReceiverAddress, ElementsAre(ReceiverGetFrame), _))
-        .WillRepeatedly(Invoke([&](uint8_t /*address*/, span<const uint8_t> /*inData*/, span<uint8_t> outData) {
-            std::fill(outData.begin(), outData.end(), 0);
-            outData[0] = COUNT_OF(expected);
-            if (static_cast<size_t>(outData.size()) > (5 + count_of(expected)))
-            {
-                outData[2] = 0xab;
-                outData[3] = 0x0c;
-                outData[4] = 0xde;
-                outData[5] = 0x0d;
-                std::copy(std::begin(expected), std::end(expected), outData.begin() + 6);
-            }
-
-            return I2CResult::OK;
-        }));
+    MockFrame(expected, 0xdde, 0xcab);
     const auto status = comm.ReceiveFrame(dataBuffer, frame);
     ASSERT_THAT(status, Eq(true));
     ASSERT_THAT(frame.Size(), Eq(COUNT_OF(expected)));
@@ -587,6 +608,128 @@ TEST_F(CommTest, TestPauseNonExistingTask)
     EXPECT_CALL(system, SuspendTask(_)).Times(0);
     const auto status = comm.Pause();
     ASSERT_THAT(status, Eq(true));
+}
+
+TEST_F(CommTest, TestTransmitterWatchdogResetFailure)
+{
+    i2c.ExpectWriteCommand(TransmitterAddress, TransmitterWatchdogReset).WillOnce(Return(I2CResult::Nack));
+    ASSERT_THAT(comm.ResetWatchdogTransmitter(), Eq(false));
+}
+
+TEST_F(CommTest, TestTransmitterWatchdogReset)
+{
+    i2c.ExpectWriteCommand(TransmitterAddress, TransmitterWatchdogReset).WillOnce(Return(I2CResult::OK));
+    ASSERT_THAT(comm.ResetWatchdogTransmitter(), Eq(true));
+}
+
+TEST_F(CommTest, TestReceiverWatchdogResetFailure)
+{
+    i2c.ExpectWriteCommand(ReceiverAddress, ReceiverWatchdogReset).WillOnce(Return(I2CResult::Nack));
+    ASSERT_THAT(comm.ResetWatchdogReceiver(), Eq(false));
+}
+
+TEST_F(CommTest, TestReceiverWatchdogReset)
+{
+    i2c.ExpectWriteCommand(ReceiverAddress, ReceiverWatchdogReset).WillOnce(Return(I2CResult::OK));
+    ASSERT_THAT(comm.ResetWatchdogReceiver(), Eq(true));
+}
+
+TEST_F(CommTest, TestPollHardwareQueriesFrameCountNoFrames)
+{
+    MockFrameCount(0);
+    comm.PollHardware();
+}
+
+TEST_F(CommTest, TestPollHardwareProcessesValidFrames)
+{
+    std::uint8_t buffer[10] = {0};
+    MockFrameCount(1);
+    MockFrame(buffer, 1, 2);
+    EXPECT_CALL(frameHandler, HandleFrame(_, _)).Times(1);
+    comm.PollHardware();
+}
+
+TEST_F(CommTest, TestPollHardwareValidFramesAreRemoved)
+{
+    std::uint8_t buffer[10] = {0};
+    MockFrameCount(1);
+    MockFrame(buffer, 1, 2);
+    MockRemoveFrame(I2CResult::OK);
+    i2c.ExpectWriteCommand(ReceiverAddress, ReceiverWatchdogReset).WillOnce(Return(I2CResult::OK));
+    comm.PollHardware();
+}
+
+TEST_F(CommTest, TestPollHardwareInValidFramesAreRemoved)
+{
+    std::uint8_t buffer[10] = {0};
+    MockFrameCount(1);
+    MockFrame(buffer, 0xffff, 0xffff);
+    MockRemoveFrame(I2CResult::OK);
+    i2c.ExpectWriteCommand(ReceiverAddress, ReceiverWatchdogReset).WillOnce(Return(I2CResult::OK));
+    comm.PollHardware();
+}
+
+TEST_F(CommTest, TestPollHardwareRemoveFrameOnReceiveError)
+{
+    MockFrameCount(1);
+    EXPECT_CALL(i2c, WriteRead(ReceiverAddress, ElementsAre(ReceiverGetFrame), _)).WillRepeatedly(Return(I2CResult::Nack));
+    MockRemoveFrame(I2CResult::OK);
+    i2c.ExpectWriteCommand(ReceiverAddress, ReceiverWatchdogReset).WillOnce(Return(I2CResult::OK));
+    comm.PollHardware();
+}
+
+TEST_F(CommTest, TestPollHardwareDoNotTryToReceiveFrameOnQueryFailure)
+{
+    EXPECT_CALL(i2c, WriteRead(ReceiverAddress, ElementsAre(ReceiverGetFrameCount), _)).WillOnce(Return(I2CResult::Nack));
+
+    comm.PollHardware();
+}
+
+TEST_F(CommTest, TestPollHardwareResetsWatchdogOnReceiver)
+{
+    EXPECT_CALL(i2c, WriteRead(ReceiverAddress, ElementsAre(ReceiverGetFrameCount), _)).WillOnce(Return(I2CResult::Nack));
+    i2c.ExpectWriteCommand(ReceiverAddress, ReceiverWatchdogReset).WillOnce(Return(I2CResult::OK));
+    comm.PollHardware();
+}
+
+TEST_F(CommTest, TestPollHardwareResetsWatchdogOnTransmitter)
+{
+    EXPECT_CALL(i2c, WriteRead(ReceiverAddress, ElementsAre(ReceiverGetFrameCount), _)).WillOnce(Return(I2CResult::Nack));
+    i2c.ExpectWriteCommand(ReceiverAddress, ReceiverWatchdogReset).WillOnce(Return(I2CResult::Nack));
+    i2c.ExpectWriteCommand(TransmitterAddress, TransmitterWatchdogReset).WillOnce(Return(I2CResult::OK));
+    comm.PollHardware();
+}
+
+TEST_F(CommTest, TestRestartResetFailure)
+{
+    i2c.ExpectWriteCommand(ReceiverAddress, HardwareReset).WillOnce(Return(I2CResult::Nack));
+    ASSERT_THAT(comm.Restart(), Eq(false));
+}
+
+TEST_F(CommTest, TestRestartTaskCreationFailure)
+{
+    i2c.ExpectWriteCommand(ReceiverAddress, HardwareReset).WillOnce(Return(I2CResult::OK));
+    EXPECT_CALL(system, CreateTask(_, _, _, _, _, _)).WillOnce(Return(OSResult::IOError));
+    ASSERT_THAT(comm.Restart(), Eq(false));
+}
+
+TEST_F(CommTest, TestRestart)
+{
+    i2c.ExpectWriteCommand(ReceiverAddress, HardwareReset).WillOnce(Return(I2CResult::OK));
+    EXPECT_CALL(system, CreateTask(_, _, _, _, _, _)).WillOnce(Return(OSResult::Success));
+    ASSERT_THAT(comm.Restart(), Eq(true));
+}
+
+TEST_F(CommTest, TestDoubleRestart)
+{
+    i2c.ExpectWriteCommand(ReceiverAddress, HardwareReset).WillOnce(Return(I2CResult::OK));
+    EXPECT_CALL(system, CreateTask(_, _, _, _, _, _)).WillOnce(Invoke([](auto, auto, auto, auto, auto, auto handle) {
+        *handle = reinterpret_cast<void*>(1);
+        return OSResult::Success;
+    }));
+
+    ASSERT_THAT(comm.Restart(), Eq(true));
+    ASSERT_THAT(comm.Restart(), Eq(true));
 }
 
 struct CommReceiverTelemetryTest : public testing::TestWithParam<std::tuple<int, uint8_t, I2CResult>>

@@ -37,8 +37,10 @@ Beacon::Beacon(std::uint16_t beaconPeriod, gsl::span<const std::uint8_t> content
 }
 
 CommObject::CommObject(II2CBus& low, IHandleFrame& upperInterface)
-    : _low(low), //
-      _frameHandler(upperInterface)
+    : _low(low),                     //
+      _frameHandler(upperInterface), //
+      _pollingTaskHandle(nullptr),   //
+      _pollingTaskFlags(nullptr)
 {
 }
 
@@ -91,14 +93,14 @@ OSResult CommObject::Initialize()
 
 bool CommObject::Restart()
 {
-    if (!this->Reset())
+    if (this->_pollingTaskHandle == nullptr)
     {
-        LOG(LOG_LEVEL_ERROR, "[comm] Unable reset comm hardware. ");
-        return false;
-    }
+        if (!this->Reset())
+        {
+            LOG(LOG_LEVEL_ERROR, "[comm] Unable reset comm hardware. ");
+            return false;
+        }
 
-    if (this->_pollingTaskHandle == NULL)
-    {
         const OSResult result =
             System::CreateTask(CommObject::CommTask, "COMM Task", 512, this, TaskPriority::P4, &this->_pollingTaskHandle);
         if (OS_RESULT_FAILED(result))
@@ -410,43 +412,59 @@ void CommObject::PollHardware()
     }
     else if (frameResponse.frameCount > 0)
     {
-        std::uint8_t buffer[PrefferedBufferSize];
         LOGF(LOG_LEVEL_INFO, "[comm] Got %d frames", static_cast<int>(frameResponse.frameCount));
-
         for (decltype(frameResponse.frameCount) i = 0; i < frameResponse.frameCount; i++)
         {
-            Frame frame;
-            bool status = this->ReceiveFrame(buffer, frame);
-            if (!status)
-            {
-                LOG(LOG_LEVEL_ERROR, "[comm] Unable to receive frame. ");
-            }
-            else
-            {
-                if (!this->RemoveFrame())
-                {
-                    LOG(LOG_LEVEL_ERROR, "[comm] Unable to remove frame from receiver. ");
-                }
-                else if (frame.Verify())
-                {
-                    LOGF(LOG_LEVEL_INFO, "[comm] Received frame %d bytes. ", static_cast<int>(frame.Size()));
-                    this->_frameHandler.HandleFrame(*this, frame);
-                }
-                else
-                {
-                    LOGF(LOG_LEVEL_ERROR,
-                        "[comm] Received invalid frame. Size: %d, Doppler: 0x%X, RSSI: 0x%X. ",
-                        static_cast<int>(frame.FullSize()),
-                        static_cast<int>(frame.Doppler()),
-                        static_cast<int>(frame.Rssi()));
-                }
-            }
+            ProcessSingleFrame();
         }
     }
 
     if (!ResetWatchdogReceiver() && !ResetWatchdogTransmitter())
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Unable to reset comm watchdog. ");
+    }
+}
+
+bool CommObject::GetFrame(gsl::span<std::uint8_t> buffer, int retryCount, Frame& frame)
+{
+    for (int i = 0; i < retryCount; ++i)
+    {
+        const bool status = ReceiveFrame(buffer, frame);
+        if (!status)
+        {
+            LOG(LOG_LEVEL_ERROR, "[comm] Unable to receive frame. ");
+        }
+        else if (!frame.Verify())
+        {
+            LOGF(LOG_LEVEL_ERROR,
+                "[comm] Received invalid frame. Size: %d, Doppler: 0x%X, RSSI: 0x%X. ",
+                static_cast<int>(frame.FullSize()),
+                static_cast<int>(frame.Doppler()),
+                static_cast<int>(frame.Rssi()));
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void CommObject::ProcessSingleFrame()
+{
+    Frame frame;
+    std::uint8_t buffer[PrefferedBufferSize];
+    const bool status = GetFrame(buffer, 3, frame);
+    if (status && frame.Verify())
+    {
+        LOGF(LOG_LEVEL_INFO, "[comm] Received frame %d bytes. ", static_cast<int>(frame.Size()));
+        this->_frameHandler.HandleFrame(*this, frame);
+    }
+
+    if (!this->RemoveFrame())
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable to remove frame from receiver. ");
     }
 }
 
