@@ -31,16 +31,16 @@ namespace services
         using FileSize = std::int32_t;
 
         /**
-         * @brief Type that represents file opening status.
+         * @brief General I/O operation result
          */
-        struct FileOpenResult
+        template <typename TResult> struct IOOperationResult
         {
             /**
              * @brief Ctor
              * @param status Operation status
-             * @param handle File handle
+             * @param handle Result
              */
-            FileOpenResult(OSResult status, FileHandle handle);
+            IOOperationResult(OSResult status, TResult result);
 
             /**
              * @brief Converts to true if operation succeded
@@ -49,65 +49,27 @@ namespace services
 
             /** Operation status. */
             const OSResult Status;
-            /** Opened file handle. */
-            const FileHandle Handle;
+            /** Operation result */
+            const TResult Result;
         };
 
-        FileOpenResult::operator bool() const
+        template <typename TResult>
+        IOOperationResult<TResult>::IOOperationResult(OSResult status, TResult result) : Status(status), Result(result)
+        {
+        }
+
+        template <typename TResult> IOOperationResult<TResult>::operator bool() const
         {
             return OS_RESULT_SUCCEEDED(this->Status);
         }
 
-        /**
-         * @brief Type that represents directory opening status.
-         */
-        struct DirectoryOpenResult
-        {
-            /**
-             * @brief Ctor
-             * @param status Operation status
-             * @param handle Directory handle
-             */
-            DirectoryOpenResult(OSResult status, DirectoryHandle handle);
+        /** @brief Type that represents file opening status. */
+        using FileOpenResult = IOOperationResult<FileHandle>;
+        /** @brief Type that represents directory opening status. */
+        using DirectoryOpenResult = IOOperationResult<DirectoryHandle>;
 
-            /**
-             * @brief Converts to true if operation succeded
-             */
-            inline operator bool() const;
-
-            /** Operation status. */
-            const OSResult Status;
-            /** Handle to the opened directory. */
-            const DirectoryHandle Handle;
-        };
-
-        DirectoryOpenResult::operator bool() const
-        {
-            return OS_RESULT_SUCCEEDED(this->Status);
-        }
-
-        /**
-         * @brief Type that represents file read/write operation status.
-         */
-        struct IOResult
-        {
-            IOResult(OSResult status, FileSize bytesTransferred);
-
-            /**
-             * @brief Converts to true if operation succeded
-             */
-            inline operator bool() const;
-
-            /** Operation status. */
-            const OSResult Status;
-            /** Number of bytes transferred. */
-            const FileSize BytesTransferred;
-        };
-
-        inline IOResult::operator bool() const
-        {
-            return OS_RESULT_SUCCEEDED(this->Status);
-        }
+        /** @brief Read/Write operation result */
+        using IOResult = IOOperationResult<gsl::span<const uint8_t>>;
 
         /**
          * @brief Enumerator of all possible file opening modes.
@@ -361,4 +323,5 @@ namespace services
         /** @} */
     }
 }
+
 #endif /* LIBS_FS_INCLUDE_FS_FS_H_ */

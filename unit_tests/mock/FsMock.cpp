@@ -18,7 +18,7 @@ IOResult MakeFSIOResult(OSResult status)
     return IOResult(status, 0);
 }
 
-IOResult MakeFSIOResult(int bytesTransfered)
+IOResult MakeFSIOResult(gsl::span<const uint8_t> result)
 {
-    return IOResult(OSResult::Success, bytesTransfered);
+    return IOResult(OSResult::Success, result);
 }

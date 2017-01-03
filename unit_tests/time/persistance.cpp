@@ -73,7 +73,7 @@ TEST_F(TimerPersistanceTest, TestReadingFiles)
     ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
     EXPECT_CALL(fs, Read(_, _)).WillRepeatedly(Invoke([](FileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
         std::fill(buffer.begin(), buffer.end(), 0x11);
-        return MakeFSIOResult(buffer.size());
+        return MakeFSIOResult(buffer);
     }));
     EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x1111111111111111ull)));
@@ -86,7 +86,7 @@ TEST_F(TimerPersistanceTest, TestReadingSingleNonEmptyFile)
     EXPECT_CALL(fs, Read(_, _))
         .WillOnce(Invoke([](FileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
             std::fill(buffer.begin(), buffer.end(), 0x11);
-            return MakeFSIOResult(buffer.size());
+            return MakeFSIOResult(buffer);
         }))
         .WillRepeatedly(Return(MakeFSIOResult(OSResult::InvalidOperation)));
     EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr));
@@ -101,7 +101,7 @@ TEST_F(TimerPersistanceTest, TestReadingTwoNonEmptyFiles)
         .WillOnce(Return(MakeFSIOResult(0)))
         .WillRepeatedly(Invoke([](FileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
             std::fill(buffer.begin(), buffer.end(), 0x11);
-            return MakeFSIOResult(buffer.size());
+            return MakeFSIOResult(buffer);
         }));
     EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x1111111111111111ull)));
@@ -113,7 +113,7 @@ TEST_F(TimerPersistanceTest, TestReadingTwoExistingEmptyFiles)
     ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
     EXPECT_CALL(fs, Read(_, _)).WillRepeatedly(Invoke([](FileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
         std::fill(buffer.begin(), buffer.end(), 0x11);
-        return MakeFSIOResult(buffer.size());
+        return MakeFSIOResult(buffer);
     }));
     EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x1111111111111111ull)));
@@ -134,7 +134,7 @@ TEST_F(TimerPersistanceTest, TestReadingFilesEndiannes)
         else
         {
             std::copy(expected.begin(), expected.end(), buffer.begin());
-            return MakeFSIOResult(buffer.size());
+            return MakeFSIOResult(buffer);
         }
     }));
     EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr));
@@ -163,11 +163,11 @@ TEST_F(TimerPersistanceTest, TestReadingThreeFilesTwoSame)
     EXPECT_CALL(fs, Read(_, _))
         .WillOnce(Invoke([=](FileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
             std::copy(incorrect.begin(), incorrect.end(), buffer.begin());
-            return MakeFSIOResult(buffer.size());
+            return MakeFSIOResult(buffer);
         }))
         .WillRepeatedly(Invoke([=](FileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
             std::copy(expected.begin(), expected.end(), buffer.begin());
-            return MakeFSIOResult(buffer.size());
+            return MakeFSIOResult(buffer);
         }));
     EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x8877665544332211ull)));
@@ -185,17 +185,17 @@ TEST_F(TimerPersistanceTest, TestReadingThreeDifferentFiles)
     ON_CALL(fs, Close(_)).WillByDefault(Return(OSResult::Success));
     EXPECT_CALL(fs, Read(Eq(1), _)).WillOnce(Invoke([=](FileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
         std::copy(b.begin(), b.end(), buffer.begin());
-        return MakeFSIOResult(buffer.size());
+        return MakeFSIOResult(buffer);
     }));
 
     EXPECT_CALL(fs, Read(Eq(2), _)).WillOnce(Invoke([=](FileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
         std::copy(a.begin(), a.end(), buffer.begin());
-        return MakeFSIOResult(buffer.size());
+        return MakeFSIOResult(buffer);
     }));
 
     EXPECT_CALL(fs, Read(Eq(3), _)).WillOnce(Invoke([=](FileHandle /*file*/, gsl::span<std::uint8_t> buffer) {
         std::copy(c.begin(), c.end(), buffer.begin());
-        return MakeFSIOResult(buffer.size());
+        return MakeFSIOResult(buffer);
     }));
 
     EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr));
@@ -231,7 +231,7 @@ TEST_F(TimerPersistanceTest, TestStateWrite)
         uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x00, 0x00, 0x00, 0x00};
         EXPECT_THAT(buffer, ElementsAreArray(expected));
 
-        return MakeFSIOResult(buffer.size());
+        return MakeFSIOResult(buffer);
     }));
     provider.AdvanceTime(TimeSpanFromMilliseconds(0x44332211ull));
     ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x44332211ull)));

@@ -48,14 +48,24 @@ IOResult YaffsFileSystem::Write(FileHandle file, gsl::span<const std::uint8_t> b
 {
     const int status = yaffs_write(file, buffer.data(), buffer.size());
 
-    return IOResult(YaffsTranslateError(status), status);
+    if (status >= 0)
+    {
+        return IOResult(OSResult::Success, buffer.subspan(0, status));
+    }
+
+    return IOResult(YaffsTranslateError(status), gsl::span<const uint8_t>());
 }
 
 IOResult YaffsFileSystem::Read(FileHandle file, gsl::span<std::uint8_t> buffer)
 {
     const int status = yaffs_read(file, buffer.data(), buffer.size());
 
-    return IOResult(YaffsTranslateError(status), status);
+    if (status >= 0)
+    {
+        return IOResult(OSResult::Success, buffer.subspan(0, status));
+    }
+
+    return IOResult(YaffsTranslateError(status), gsl::span<const uint8_t>());
 }
 
 OSResult YaffsFileSystem::Close(FileHandle file)

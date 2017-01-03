@@ -28,10 +28,8 @@ services::fs::FileOpenResult MakeOpenedFile(int handle);
 
 services::fs::FileOpenResult MakeOpenedFile(OSResult result);
 
-services::fs::IOResult MakeFSIOResult(int bytesTransfered);
+services::fs::IOResult MakeFSIOResult(gsl::span<const uint8_t> result);
 
 services::fs::IOResult MakeFSIOResult(OSResult result);
-
-services::fs::IOResult MakeFSIOResult(OSResult result, int bytesTransfered);
 
 #endif

@@ -28,7 +28,7 @@ void FSListFiles(uint16_t argc, char* argv[])
     }
 
     char* entry;
-    DirectoryHandle dir = result.Handle;
+    DirectoryHandle dir = result.Result;
     while ((entry = Main.fs.ReadDirectory(dir)) != NULL)
     {
         Main.terminal.Puts(entry);

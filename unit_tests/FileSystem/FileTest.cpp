@@ -66,7 +66,7 @@ TEST_F(FileTest, ShouldReadFromFile)
 
     EXPECT_CALL(this->_fs, Read(1, SpanOfSize(2))).WillOnce(Invoke([&data](FileHandle, span<uint8_t> buffer) {
         std::copy(data.begin(), data.end(), buffer.begin());
-        return MakeFSIOResult(2);
+        return MakeFSIOResult(buffer);
     }));
 
     EXPECT_CALL(this->_fs, Close(1));
@@ -77,7 +77,7 @@ TEST_F(FileTest, ShouldReadFromFile)
 
     auto r = f.Read(buffer);
 
-    ASSERT_THAT(r.BytesTransferred, Eq(2));
+    ASSERT_THAT(r.Result.size(), Eq(2));
     ASSERT_THAT(r.Status, Eq(OSResult::Success));
 }
 
@@ -89,7 +89,7 @@ TEST_F(FileTest, ShouldWriteToFile)
 
     EXPECT_CALL(this->_fs, Write(1, SpanOfSize(2))).WillOnce(Invoke([&data](FileHandle, span<const uint8_t> buffer) {
         EXPECT_THAT(buffer, ElementsAre(1, 2));
-        return MakeFSIOResult(2);
+        return MakeFSIOResult(buffer);
     }));
 
     EXPECT_CALL(this->_fs, Close(1));
@@ -98,7 +98,7 @@ TEST_F(FileTest, ShouldWriteToFile)
 
     auto r = f.Write(data);
 
-    ASSERT_THAT(r.BytesTransferred, Eq(2));
+    ASSERT_THAT(r.Result.size(), Eq(2));
     ASSERT_THAT(r.Status, Eq(OSResult::Success));
 }
 

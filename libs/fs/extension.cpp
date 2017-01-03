@@ -15,7 +15,7 @@ bool services::fs::SaveToFile(IFileSystem& fs, const char* file, gsl::span<const
     }
 
     const IOResult writeResult = f.Write(buffer);
-    const bool status = OS_RESULT_SUCCEEDED(writeResult.Status) && writeResult.BytesTransferred == buffer.size();
+    const bool status = OS_RESULT_SUCCEEDED(writeResult.Status) && writeResult.Result.size() == buffer.size();
     if (!status)
     {
         LOGF(LOG_LEVEL_WARNING, "Unable to update file: %s. Status: 0x%08x", file, num(writeResult.Status));
@@ -34,7 +34,7 @@ bool services::fs::ReadFromFile(IFileSystem& fs, const char* const filePath, gsl
     }
 
     const IOResult readResult = f.Read(buffer);
-    const bool status = OS_RESULT_SUCCEEDED(readResult.Status) && readResult.BytesTransferred == buffer.size();
+    const bool status = OS_RESULT_SUCCEEDED(readResult.Status) && readResult.Result.size() == buffer.size();
     if (!status)
     {
         LOGF(LOG_LEVEL_WARNING, "Unable to read file: %s. Status: 0x%08x", filePath, num(readResult.Status));
@@ -43,7 +43,7 @@ bool services::fs::ReadFromFile(IFileSystem& fs, const char* const filePath, gsl
     return status;
 }
 
-File::File(IFileSystem& fs, FileOpenResult open) : _fs(fs), _handle(open.Handle), _valid(open)
+File::File(IFileSystem& fs, FileOpenResult open) : _fs(fs), _handle(open.Result), _valid(open)
 {
 }
 
