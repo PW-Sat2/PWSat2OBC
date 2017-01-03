@@ -2,11 +2,10 @@
 #define LIBS_DRIVERS_N25Q_INCLUDE_N25Q_YAFFS_H_
 
 #include "base/os.h"
+#include "fs/yaffs.h"
 #include "n25q.h"
 #include "spi/spi.h"
-extern "C" {
-#include "yaffs_guts.h"
-}
+#include "yaffs.hpp"
 
 namespace devices
 {
@@ -52,7 +51,7 @@ namespace devices
              * @brief Mounts device
              * @return Operation result
              */
-            OSResult Mount();
+            OSResult Mount(services::fs::YaffsFileSystem& fs);
 
             /** @brief Return raw yaffs device */
             inline yaffs_dev* Device();

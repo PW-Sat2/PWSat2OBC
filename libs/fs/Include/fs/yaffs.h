@@ -54,9 +54,9 @@ namespace services
             /**
              * @brief Adds device and mounts it
              * @param[in] device YAFFS device
-             * @return true on success
+             * @return Operation result
              */
-            bool AddDeviceAndMount(yaffs_dev* device);
+            OSResult AddDeviceAndMount(yaffs_dev* device);
         };
     }
 }

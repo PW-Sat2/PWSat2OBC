@@ -207,7 +207,7 @@ void YaffsFileSystem::Initialize()
     YaffsGlueInit();
 }
 
-bool YaffsFileSystem::AddDeviceAndMount(yaffs_dev* device)
+OSResult YaffsFileSystem::AddDeviceAndMount(yaffs_dev* device)
 {
     yaffs_add_device(device);
     int result = yaffs_mount(device->param.name);
@@ -215,11 +215,12 @@ bool YaffsFileSystem::AddDeviceAndMount(yaffs_dev* device)
     if (result == 0)
     {
         LOGF(LOG_LEVEL_DEBUG, "Mounted %s", device->param.name);
-        return true;
+        return OSResult::Success;
     }
     else
     {
-        LOGF(LOG_LEVEL_ERROR, "Failed to mount %s: %d", device->param.name, yaffsfs_GetLastError());
-        return false;
+        auto error = yaffsfs_GetLastError();
+        LOGF(LOG_LEVEL_ERROR, "Failed to mount %s: %d", device->param.name, error);
+        return static_cast<OSResult>(error);
     }
 }

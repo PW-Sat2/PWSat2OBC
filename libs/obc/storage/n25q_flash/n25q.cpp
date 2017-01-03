@@ -14,7 +14,7 @@ N25QStorage::N25QStorage(drivers::spi::ISPIInterface& spi, YaffsFileSystem& fs)
 
 void N25QStorage::Initialize()
 {
-    if (OS_RESULT_FAILED(this->ExternalFlash.Mount()))
+    if (OS_RESULT_FAILED(this->ExternalFlash.Mount(this->_fs)))
     {
         return;
     }

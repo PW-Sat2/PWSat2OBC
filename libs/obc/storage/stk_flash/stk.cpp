@@ -37,7 +37,7 @@ void STKStorage::Initialize()
     rootDevice.param.end_block =
         1 * 1024 * 1024 / rootDeviceDriver.geometry.blockSize - rootDevice.param.start_block - rootDevice.param.n_reserved_blocks;
 
-    if (!this->_fs.AddDeviceAndMount(&rootDevice))
+    if (OS_RESULT_FAILED(this->_fs.AddDeviceAndMount(&rootDevice)))
     {
         return;
     }
