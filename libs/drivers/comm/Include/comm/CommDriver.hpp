@@ -205,14 +205,57 @@ class CommObject final : public ITransmitFrame
     void PollHardware();
 
   private:
+    /**
+     * @brief Sends passed no argument command to the device with requested address.
+     * @param[in] address Address of the device which should receive the command.
+     * @param[in] command Command code to send.
+     * @return Operation status, true in case of success, false otherwise.
+     */
     bool SendCommand(Address address, std::uint8_t command);
 
+    /**
+     * @brief Sends passed no argument command to the device with requested address.
+     *
+     * This method expected to receive response from the device that should be written to the passed buffer.
+     * This method will try to read at most the number of bytes that is equal to the passed buffer size, any
+     * additional bytes that are send by the device that will not fit into the passed buffer will be discarded.
+     * @param[in] address Address of the device which should receive the command.
+     * @param[in] command Command code to send.
+     * @param[out] outBuffer Buffer for the device response.
+     * @return Operation status, true in case of success, false otherwise.
+     */
     bool SendCommandWithResponse(Address address, std::uint8_t command, gsl::span<std::uint8_t> outBuffer);
 
+    /**
+     * @brief This procedure will try to download the oldest not yet processed frame from the hardware.
+     *
+     * The passed buffer is used as frame content storage area and should be large enough to fit
+     * the entire frame (with its header). IF the buffer is not long enough to contain the entire frame with
+     * its header then the part of the frame that will not fit into the buffer  will be discarded.
+     *
+     * @param[in] buffer Buffer for the frame contents. This method will try to read at most the number of bytes
+     * that is equal to the passed buffer size, any additional bytes that are send by the device
+     * that will not fit into the passed buffer will be discarded.
+     * @param[in] retryCount Number of frame download & processing retrials. Passing value less than 1
+     * will make this function as no operation.
+     * @param[out] frame Frame object that will be filled with the received frame details. This variable is
+     * valid only in case of success and is left untouched in case of failure.
+     * @return Operation status, true in case of success, false otherwise.
+     */
     bool GetFrame(gsl::span<std::uint8_t> buffer, int retryCount, Frame& frame);
 
+    /**
+     * @brief This procedure is responsible for downloading single frame from the hardware
+     * and pushing it through the frame the processing pipeline.
+     *
+     * Once the frame is processed this function will try to remove it from the hardware.
+     */
     void ProcessSingleFrame();
 
+    /**
+     * @brief Internal communication module task entry point.
+     * @param[in] param Task execution context. This should be pointer to the task owner object.
+     */
     [[noreturn]] static void CommTask(void* param);
 
     /** @brief Comm driver lower interface. */
