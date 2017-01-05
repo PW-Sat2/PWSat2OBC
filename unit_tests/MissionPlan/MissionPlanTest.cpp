@@ -28,7 +28,7 @@ MissionPlanTest::MissionPlanTest()
 TEST_F(MissionPlanTest, EmptyStateShouldHaveEmptyValues)
 {
     ASSERT_THAT(state.SailOpened, Eq(false));
-    ASSERT_THAT(state.Time.value, Eq(0ul));
+    ASSERT_THAT(state.Time.count(), Eq(0ul));
     ASSERT_THAT(state.Antenna.Deployed, Eq(false));
 }
 

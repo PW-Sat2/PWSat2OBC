@@ -68,6 +68,10 @@ namespace services
              */
             TimeSpan CurrentTime;
 
+            TimeSnapshot() : CurrentTime(0ull)
+            {
+            }
+
             bool operator==(const TimeSnapshot& right) const
             {
                 return TimeSpanEqual(CurrentTime, right.CurrentTime);

@@ -13,16 +13,17 @@ using namespace services::time;
 /**
  * @brief Time period between the subsequent mission time notifications.
  */
-static constexpr TimeSpan NotificationPeriod = {TIMER_NOTIFICATION_PERIOD};
+static constexpr TimeSpan NotificationPeriod(TIMER_NOTIFICATION_PERIOD);
 
 /**
  * @brief Time period between subsequent timer state saves.
  */
-static constexpr TimeSpan SavePeriod = {TIMER_SAVE_PERIOD};
+static constexpr TimeSpan SavePeriod(TIMER_SAVE_PERIOD);
 
 TimeProvider::TimeProvider(FileSystem& fileSystem)
     : timerLock(nullptr),                                                                   //
       notificationLock(nullptr),                                                            //
+      CurrentTime(0ull),                                                                    //
       OnTimePassed(nullptr),                                                                //
       TimePassedCallbackContext(nullptr), NotificationTime(TimeSpanFromMilliseconds(0ull)), //
       PersistanceTime(TimeSpanFromMilliseconds(0ull)),                                      //
@@ -156,8 +157,9 @@ TimerState TimeProvider::BuildTimerState()
 
 struct TimeSnapshot TimeProvider::ReadFile(FileSystem* fs, const char* const filePath)
 {
-    struct TimeSnapshot result = {{0}};
-    uint8_t buffer[sizeof(TimeSpan)];
+    struct TimeSnapshot result;
+
+    uint8_t buffer[sizeof(uint64_t)];
     if (!FileSystemReadFile(fs, filePath, buffer, sizeof(buffer)))
     {
         LOGF(LOG_LEVEL_WARNING, "Unable to read file: %s.", filePath);
@@ -165,7 +167,8 @@ struct TimeSnapshot TimeProvider::ReadFile(FileSystem* fs, const char* const fil
     }
 
     Reader reader(buffer);
-    result.CurrentTime.value = reader.ReadQuadWordLE();
+
+    result.CurrentTime = TimeSpan(reader.ReadQuadWordLE());
     if (!reader.Status())
     {
         LOGF(LOG_LEVEL_WARNING, "Not enough data read from file: %s. ", filePath);
@@ -179,7 +182,7 @@ struct TimeSnapshot TimeProvider::CurrentPersistentTime(FileSystem* fileSystem)
 {
     if (fileSystem == NULL)
     {
-        struct TimeSnapshot snapshot = {{0}};
+        struct TimeSnapshot snapshot;
         return snapshot;
     }
 
@@ -270,7 +273,7 @@ void TimeProvider::SaveTime(TimerState state)
     Writer writer;
 
     WriterInitialize(&writer, buffer, sizeof(buffer));
-    WriterWriteQuadWordLE(&writer, state.time.value);
+    WriterWriteQuadWordLE(&writer, state.time.count());
     if (!WriterStatus(&writer))
     {
         return;

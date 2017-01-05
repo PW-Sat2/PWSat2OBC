@@ -2,7 +2,7 @@
 
 TimeSpan TimeSpanFromMilliseconds(uint64_t milliseconds)
 {
-    const TimeSpan span = {milliseconds};
+    const TimeSpan span(milliseconds);
     return span;
 }
 
@@ -28,7 +28,7 @@ TimeSpan TimeSpanFromDays(uint32_t days)
 
 uint32_t TimeSpanToSeconds(TimeSpan span)
 {
-    return span.value / 1000;
+    return std::chrono::duration_cast<std::chrono::duration<uint32_t>>(span).count();
 }
 
 TimePoint TimePointBuild(uint16_t day, uint8_t hour, uint8_t minute, uint8_t second, uint16_t millisecond)
@@ -50,7 +50,7 @@ TimePoint TimePointNormalize(TimePoint point)
 TimePoint TimePointFromTimeSpan(const TimeSpan timeSpan)
 {
     TimePoint point = {};
-    uint64_t span = timeSpan.value;
+    uint64_t span = timeSpan.count();
     point.milisecond = span % 1000;
     span /= 1000;
     point.second = span % 60;
@@ -78,12 +78,11 @@ TimeSpan TimePointToTimeSpan(TimePoint point)
 
 TimeSpan TimeSpanAdd(TimeSpan left, TimeSpan right)
 {
-    left.value += right.value;
+    left += right;
     return left;
 }
 
 TimeShift TimeSpanSub(TimeSpan left, TimeSpan right)
 {
-    const TimeShift result = {static_cast<uint8_t>(left.value - right.value)};
-    return result;
+    return left - right;
 }
