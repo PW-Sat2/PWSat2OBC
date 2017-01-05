@@ -201,7 +201,9 @@ static void UpdateActivationTime(struct AntennaDriver* driver, AntennaTelemetry*
     AntennaChannelInfo* backupChannel = GetChannel(driver, ANTENNA_BACKUP_CHANNEL);
     for (int i = 0; i < 4; ++i)
     {
-        TimeSpan primaryValue = {0}, secondaryValue = {0};
+        TimeSpan primaryValue(0);
+        TimeSpan secondaryValue(0);
+
         const OSResult primary = driver->miniport->GetAntennaActivationTime(driver->miniport,
             primaryChannel->communicationBus,
             ANTENNA_PRIMARY_CHANNEL,

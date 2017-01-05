@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <chrono>
 #include "system.h"
 
 EXTERNC_BEGIN
@@ -13,6 +14,24 @@ EXTERNC_BEGIN
  * @addtogroup time
  * @{
  */
+
+// struct MissionClock
+//{
+//    typedef std::chrono::miliseconds          duration;
+//    typedef duration::rep                     rep;
+//    typedef duration::period                  period;
+//    typedef std::chrono::time_point<MissionClock> time_point;
+//    static const bool is_steady =             false;
+//
+//    static time_point now() noexcept
+//    {
+//        using namespace std::chrono;
+//        return time_point
+//          (
+//
+//          );
+//    }
+//};
 
 /**
  * @brief Structure that contains decoded point in time.
@@ -37,18 +56,12 @@ typedef struct
  * The point with zero time (beginning of time) is considered to be
  * beginning of the mission itself.
  */
-typedef struct
-{
-    uint64_t value; ///< Time span length in milliseconds.
-} TimeSpan;
+typedef std::chrono::duration<uint64_t, std::milli> TimeSpan;
 
 /**
  * @brief Type used to represents different between two time spans.
  */
-typedef struct
-{
-    int64_t value; ///< Time shift length in milliseconds.
-} TimeShift;
+typedef std::chrono::duration<uint64_t, std::milli> TimeShift;
 
 /**
  * @brief Creates TimeSpan object initialized from time specified in milliseconds.
@@ -220,17 +233,17 @@ static inline bool TimePointLessThan(TimePoint left, TimePoint right)
 
 static inline bool TimeSpanEqual(const TimeSpan left, const TimeSpan right)
 {
-    return left.value == right.value;
+    return left == right;
 }
 
 static inline bool TimeSpanNotEqual(const TimeSpan left, const TimeSpan right)
 {
-    return left.value != right.value;
+    return left != right;
 }
 
 static inline bool TimeSpanLessThan(const TimeSpan left, const TimeSpan right)
 {
-    return left.value < right.value;
+    return left < right;
 }
 
 /** @} */
