@@ -18,16 +18,17 @@ using services::fs::IFileSystem;
 /**
  * @brief Time period between the subsequent mission time notifications.
  */
-static constexpr TimeSpan NotificationPeriod = {TIMER_NOTIFICATION_PERIOD};
+static constexpr TimeSpan NotificationPeriod(TIMER_NOTIFICATION_PERIOD);
 
 /**
  * @brief Time period between subsequent timer state saves.
  */
-static constexpr TimeSpan SavePeriod = {TIMER_SAVE_PERIOD};
+static constexpr TimeSpan SavePeriod(TIMER_SAVE_PERIOD);
 
 TimeProvider::TimeProvider(IFileSystem& fileSystem)
     : timerLock(nullptr),                                                                   //
       notificationLock(nullptr),                                                            //
+      CurrentTime(0ull),                                                                    //
       OnTimePassed(nullptr),                                                                //
       TimePassedCallbackContext(nullptr), NotificationTime(TimeSpanFromMilliseconds(0ull)), //
       PersistanceTime(TimeSpanFromMilliseconds(0ull)),                                      //
@@ -161,7 +162,7 @@ TimerState TimeProvider::BuildTimerState()
 
 struct TimeSnapshot TimeProvider::ReadFile(IFileSystem& fs, const char* const filePath)
 {
-    struct TimeSnapshot result = {{0}};
+    struct TimeSnapshot result;
     std::array<uint8_t, sizeof(TimeSpan)> buffer;
     if (!ReadFromFile(fs, filePath, buffer))
     {
@@ -170,7 +171,8 @@ struct TimeSnapshot TimeProvider::ReadFile(IFileSystem& fs, const char* const fi
     }
 
     Reader reader(buffer);
-    result.CurrentTime.value = reader.ReadQuadWordLE();
+
+    result.CurrentTime = TimeSpan(reader.ReadQuadWordLE());
     if (!reader.Status())
     {
         LOGF(LOG_LEVEL_WARNING, "Not enough data read from file: %s. ", filePath);
@@ -266,7 +268,7 @@ void TimeProvider::SaveTime(TimerState state)
     Writer writer;
 
     WriterInitialize(&writer, buffer, sizeof(buffer));
-    WriterWriteQuadWordLE(&writer, state.time.value);
+    WriterWriteQuadWordLE(&writer, state.time.count());
     if (!WriterStatus(&writer))
     {
         return;
