@@ -4,12 +4,12 @@
 
 using obc::storage::STKStorage;
 
-STKStorage::STKStorage(drivers::spi::ISPIInterface& spi, services::fs::YaffsFileSystem& fs) : _fs(fs)
+STKStorage::STKStorage(drivers::spi::ISPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations) : _deviceOperations(deviceOperations)
 {
     UNREFERENCED_PARAMETER(spi);
 }
 
-void STKStorage::Initialize()
+OSResult STKStorage::Initialize()
 {
     memset(&rootDevice, 0, sizeof(rootDevice));
     rootDeviceDriver.geometry.pageSize = 512;
@@ -37,15 +37,12 @@ void STKStorage::Initialize()
     rootDevice.param.end_block =
         1 * 1024 * 1024 / rootDeviceDriver.geometry.blockSize - rootDevice.param.start_block - rootDevice.param.n_reserved_blocks;
 
-    if (OS_RESULT_FAILED(this->_fs.AddDeviceAndMount(&rootDevice)))
-    {
-        return;
-    }
+    return this->_deviceOperations.AddDeviceAndMount(&rootDevice);
 }
 
 OSResult STKStorage::ClearStorage()
 {
-    return this->_fs.ClearDevice(&this->rootDevice);
+    return this->_deviceOperations.ClearDevice(&this->rootDevice);
 }
 
 OSResult STKStorage::Erase()

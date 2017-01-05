@@ -38,7 +38,7 @@ namespace services
             /**
              * @brief Ctor
              * @param status Operation status
-             * @param handle Result
+             * @param result Result
              */
             IOOperationResult(OSResult status, TResult result);
 
@@ -225,7 +225,7 @@ namespace services
              * @param access Access
              * @return File instance
              */
-            static File Open(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access);
+            File(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access);
 
             /**
              * @brief Factory method that opens for read
@@ -274,13 +274,6 @@ namespace services
             OSResult Truncate(FileSize size);
 
           private:
-            /**
-             * @brief Wraps given file open result
-             * @param fs File system interface
-             * @param open File open result (may be unsuccessful)
-             */
-            File(IFileSystem& fs, FileOpenResult open);
-
             /** @brief File system interface */
             IFileSystem& _fs;
             /** @brief File handle */

@@ -62,9 +62,9 @@ N25QYaffsDeviceBase::N25QYaffsDeviceBase(const char* mountPoint,
         - this->_device.param.n_reserved_blocks;
 }
 
-OSResult N25QYaffsDeviceBase::Mount(services::fs::YaffsFileSystem& fs)
+OSResult N25QYaffsDeviceBase::Mount(services::fs::IYaffsDeviceOperations& deviceOperations)
 {
-    auto result = fs.AddDeviceAndMount(&this->_device);
+    auto result = deviceOperations.AddDeviceAndMount(&this->_device);
     if (OS_RESULT_SUCCEEDED(result))
     {
         LOGF(LOG_LEVEL_INFO, "[Device %s] Mounted successfully", this->_device.param.name);

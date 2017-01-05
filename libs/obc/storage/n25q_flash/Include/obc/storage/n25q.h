@@ -25,12 +25,15 @@ namespace obc
             /**
              * @brief Constructs @ref N25QStorage instance
              * @param[in] spi SPI interface used by external memories
-             * @param[in] fs File system interface
+             * @param deviceOperations YAFFS device operations
              */
-            N25QStorage(drivers::spi::ISPIInterface& spi, services::fs::YaffsFileSystem& fs);
+            N25QStorage(drivers::spi::ISPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations);
 
-            /** @brief Initializes OBC storage */
-            void Initialize();
+            /**
+             * @brief Initializes OBC storage
+             * @return Operation result
+             */
+            OSResult Initialize();
 
             /**
              * @brief Clears OBC storage
@@ -48,7 +51,7 @@ namespace obc
             devices::n25q::N25QYaffsDevice<devices::n25q::BlockMapping::Sector, 512_Bytes, 16_MB> ExternalFlash;
 
           private:
-            services::fs::YaffsFileSystem& _fs;
+            services::fs::IYaffsDeviceOperations& _deviceOperations;
         };
 
         /** @} */

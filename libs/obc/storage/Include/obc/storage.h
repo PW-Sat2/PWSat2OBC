@@ -33,12 +33,15 @@ namespace obc
         /**
          * @brief Initializes @ref OBCStorageHandler instance
          * @param spi SPI interface to use
-         * @param fs File system interface
+         * @param deviceOperations YAFFS device operations
          */
-        OBCStorageHandler(drivers::spi::ISPIInterface& spi, services::fs::YaffsFileSystem& fs);
+        OBCStorageHandler(drivers::spi::ISPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations);
 
-        /** @brief Performs storage initialization */
-        void Initialize();
+        /**
+         * @brief Performs storage initialization
+         * @return Operation result
+         */
+        OSResult Initialize();
 
         /**
          * @brief Clears OBC storage
@@ -57,13 +60,14 @@ namespace obc
     };
 
     template <typename Storage>
-    OBCStorageHandler<Storage>::OBCStorageHandler(drivers::spi::ISPIInterface& spi, services::fs::YaffsFileSystem& fs) : _storage(spi, fs)
+    OBCStorageHandler<Storage>::OBCStorageHandler(drivers::spi::ISPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations)
+        : _storage(spi, deviceOperations)
     {
     }
 
-    template <typename Storage> inline void obc::OBCStorageHandler<Storage>::Initialize()
+    template <typename Storage> inline OSResult obc::OBCStorageHandler<Storage>::Initialize()
     {
-        this->_storage.Initialize();
+        return this->_storage.Initialize();
     }
 
     template <typename Storage> inline OSResult obc::OBCStorageHandler<Storage>::ClearStorage()

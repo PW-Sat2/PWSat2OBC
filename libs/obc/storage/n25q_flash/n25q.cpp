@@ -3,26 +3,23 @@
 
 using obc::storage::N25QStorage;
 using devices::n25q::OperationResult;
-using services::fs::YaffsFileSystem;
+using services::fs::IYaffsDeviceOperations;
 
-N25QStorage::N25QStorage(drivers::spi::ISPIInterface& spi, YaffsFileSystem& fs)
+N25QStorage::N25QStorage(drivers::spi::ISPIInterface& spi, IYaffsDeviceOperations& deviceOperations)
     : ExternalFlashDriver(spi),                //
       ExternalFlash("/", ExternalFlashDriver), //
-      _fs(fs)
+      _deviceOperations(deviceOperations)
 {
 }
 
-void N25QStorage::Initialize()
+OSResult N25QStorage::Initialize()
 {
-    if (OS_RESULT_FAILED(this->ExternalFlash.Mount(this->_fs)))
-    {
-        return;
-    }
+    return this->ExternalFlash.Mount(this->_deviceOperations);
 }
 
 OSResult N25QStorage::ClearStorage()
 {
-    return this->_fs.ClearDevice(this->ExternalFlash.Device());
+    return this->_deviceOperations.ClearDevice(this->ExternalFlash.Device());
 }
 
 OSResult N25QStorage::Erase()

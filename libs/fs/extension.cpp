@@ -1,3 +1,4 @@
+
 #include "fs.h"
 #include "logger/logger.h"
 #include "system.h"
@@ -6,7 +7,7 @@ using namespace services::fs;
 
 bool services::fs::SaveToFile(IFileSystem& fs, const char* file, gsl::span<const std::uint8_t> buffer)
 {
-    auto f = File::Open(fs, file, FileOpen::CreateAlways, FileAccess::WriteOnly);
+    File f(fs, file, FileOpen::CreateAlways, FileAccess::WriteOnly);
 
     if (!f)
     {
@@ -26,7 +27,7 @@ bool services::fs::SaveToFile(IFileSystem& fs, const char* file, gsl::span<const
 
 bool services::fs::ReadFromFile(IFileSystem& fs, const char* const filePath, gsl::span<std::uint8_t> buffer)
 {
-    auto f = File::OpenRead(fs, filePath);
+    File f(fs, filePath, FileOpen::Existing, FileAccess::ReadOnly);
     if (!f)
     {
         LOGF(LOG_LEVEL_WARNING, "Unable to open file: %s", filePath);
@@ -43,10 +44,6 @@ bool services::fs::ReadFromFile(IFileSystem& fs, const char* const filePath, gsl
     return status;
 }
 
-File::File(IFileSystem& fs, FileOpenResult open) : _fs(fs), _handle(open.Result), _valid(open)
-{
-}
-
 File::~File()
 {
     if (this->_valid)
@@ -55,41 +52,11 @@ File::~File()
     }
 }
 
-File::File(File&& other) noexcept : _fs(other._fs), _handle(other._handle), _valid(other._valid)
-{
-    other._handle = this->_handle;
-    other._valid = this->_valid;
-    other._fs = this->_fs;
-}
-
-File& File::operator=(File&& other) noexcept
-{
-    this->_handle = other._handle;
-    this->_valid = other._valid;
-    this->_fs = other._fs;
-
-    other._handle = this->_handle;
-    other._valid = this->_valid;
-    other._fs = this->_fs;
-
-    return *this;
-}
-
-File File::Open(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access)
+File::File(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access) : _fs(fs)
 {
     auto f = fs.Open(path, mode, access);
-
-    return File(fs, f);
-}
-
-File File::OpenRead(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access)
-{
-    return Open(fs, path, mode, access);
-}
-
-File File::OpenWrite(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access)
-{
-    return Open(fs, path, mode, access);
+    this->_handle = f.Result;
+    this->_valid = f;
 }
 
 IOResult File::Read(gsl::span<uint8_t> buffer)

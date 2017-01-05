@@ -26,12 +26,15 @@ namespace obc
             /**
              * @brief Constructs @ref STKStorage instance
              * @param[in] spi SPI interface used by external memories
-             * @param[in] fs File system interface
+             * @param deviceOperations YAFFS device operations
              */
-            STKStorage(drivers::spi::ISPIInterface& spi, services::fs::YaffsFileSystem& fs);
+            STKStorage(drivers::spi::ISPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations);
 
-            /** @brief Initializes OBC storage */
-            void Initialize();
+            /**
+             * @brief Initializes OBC storage
+             * @return Operation result
+             */
+            OSResult Initialize();
 
             /**
              * @brief Clears OBC storage
@@ -49,7 +52,7 @@ namespace obc
 
           private:
             /** @brief File system interface */
-            services::fs::YaffsFileSystem& _fs;
+            services::fs::IYaffsDeviceOperations& _deviceOperations;
         };
 
         /** @} */

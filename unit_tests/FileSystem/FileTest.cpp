@@ -31,29 +31,18 @@ TEST_F(FileTest, ShouldOpenAndCloseFileAutomatically)
     EXPECT_CALL(this->_fs, Open("/file", FileOpen::Existing, FileAccess::ReadOnly)).WillOnce(Return(MakeOpenedFile(1)));
     EXPECT_CALL(this->_fs, Close(1));
 
-    auto f = File::OpenRead(this->_fs, "/file");
+    File f(this->_fs, "/file", FileOpen::Existing, FileAccess::ReadOnly);
 
     ASSERT_THAT(static_cast<bool>(f), Eq(true));
 }
 
 TEST_F(FileTest, ShouldNotCloseFileIfOpenFailed)
 {
-    EXPECT_CALL(this->_fs, Open("/file", FileOpen::Existing, FileAccess::ReadOnly))
-        .WillOnce(Return(MakeOpenedFile(OSResult::InvalidOperation)));
+    EXPECT_CALL(this->_fs, Open("/file", _, _)).WillOnce(Return(MakeOpenedFile(OSResult::InvalidOperation)));
     EXPECT_CALL(this->_fs, Close(1)).Times(0);
 
-    auto f = File::OpenRead(this->_fs, "/file");
+    File f(this->_fs, "/file", FileOpen::Existing, FileAccess::ReadOnly);
     ASSERT_THAT(static_cast<bool>(f), Eq(false));
-
-    UNREFERENCED_PARAMETER(f);
-}
-
-TEST_F(FileTest, ShouldOpenFileForWrite)
-{
-    EXPECT_CALL(this->_fs, Open("/file", FileOpen::CreateAlways, FileAccess::ReadWrite)).WillOnce(Return(MakeOpenedFile(1)));
-    EXPECT_CALL(this->_fs, Close(1));
-
-    auto f = File::OpenWrite(this->_fs, "/file", FileOpen::CreateAlways, FileAccess::ReadWrite);
 
     UNREFERENCED_PARAMETER(f);
 }
@@ -71,7 +60,7 @@ TEST_F(FileTest, ShouldReadFromFile)
 
     EXPECT_CALL(this->_fs, Close(1));
 
-    auto f = File::OpenRead(this->_fs, "/file");
+    File f(this->_fs, "/file", FileOpen::Existing, FileAccess::ReadOnly);
 
     std::array<uint8_t, 2> buffer;
 
@@ -94,7 +83,7 @@ TEST_F(FileTest, ShouldWriteToFile)
 
     EXPECT_CALL(this->_fs, Close(1));
 
-    auto f = File::OpenWrite(this->_fs, "/file");
+    File f(this->_fs, "/file", FileOpen::CreateNew, FileAccess::WriteOnly);
 
     auto r = f.Write(data);
 
@@ -110,7 +99,7 @@ TEST_F(FileTest, ShouldTruncateFile)
 
     EXPECT_CALL(this->_fs, Close(1));
 
-    auto f = File::OpenWrite(this->_fs, "/file");
+    File f(this->_fs, "/file", FileOpen::CreateNew, FileAccess::WriteOnly);
 
     auto r = f.Truncate(10);
 

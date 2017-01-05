@@ -42,7 +42,7 @@ void FSWriteFile(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
 
-    auto f = File::Open(Main.fs, argv[0], FileOpen::CreateAlways, FileAccess::WriteOnly);
+    File f(Main.fs, argv[0], FileOpen::CreateAlways, FileAccess::WriteOnly);
     if (!f)
     {
         Main.terminal.Puts("Error");
@@ -57,7 +57,7 @@ void FSWriteFile(uint16_t argc, char* argv[])
 void FSReadFile(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
-    auto f = File::Open(Main.fs, argv[0], FileOpen::Existing, FileAccess::ReadOnly);
+    File f(Main.fs, argv[0], FileOpen::Existing, FileAccess::ReadOnly);
     if (!f)
     {
         Main.terminal.Puts("Error");

@@ -17,9 +17,29 @@ namespace services
          */
 
         /**
+         * @brief API for mounting YAFFS device
+         */
+        struct IYaffsDeviceOperations
+        {
+            /**
+             * @brief Adds device and mounts it
+             * @param[in] device YAFFS device
+             * @return Operation result
+             */
+            virtual OSResult AddDeviceAndMount(yaffs_dev* device) = 0;
+
+            /**
+             * @brief Removes all files and directories from specified device
+             * @param[in] device Device to clear
+             * @return Operation result
+             */
+            virtual OSResult ClearDevice(yaffs_dev* device) = 0;
+        };
+
+        /**
          * @brief Yaffs implementation of file system interface
          */
-        class YaffsFileSystem final : public IFileSystem
+        class YaffsFileSystem final : public IFileSystem, public IYaffsDeviceOperations
         {
           public:
             /**
@@ -39,24 +59,14 @@ namespace services
             virtual OSResult MakeDirectory(const char* path) override;
             virtual bool Exists(const char* path) override;
 
-            /**
-             * @brief Removes all files and directories from specified device
-             * @param[in] device Device to clear
-             * @return Operation result
-             */
-            OSResult ClearDevice(yaffs_dev* device);
+            virtual OSResult ClearDevice(yaffs_dev* device) override;
 
             /**
              * @brief Syncs file system (speeds up next mount)
              */
             void Sync();
 
-            /**
-             * @brief Adds device and mounts it
-             * @param[in] device YAFFS device
-             * @return Operation result
-             */
-            OSResult AddDeviceAndMount(yaffs_dev* device);
+            virtual OSResult AddDeviceAndMount(yaffs_dev* device) override;
         };
     }
 }

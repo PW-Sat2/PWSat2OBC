@@ -49,9 +49,10 @@ namespace devices
 
             /**
              * @brief Mounts device
+             * @param deviceOperations YAFFS device operations
              * @return Operation result
              */
-            OSResult Mount(services::fs::YaffsFileSystem& fs);
+            OSResult Mount(services::fs::IYaffsDeviceOperations& deviceOperations);
 
             /** @brief Return raw yaffs device */
             inline yaffs_dev* Device();

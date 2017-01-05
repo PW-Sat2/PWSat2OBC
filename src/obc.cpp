@@ -20,5 +20,10 @@ void OBC::Initialize()
 
 void OBC::PostStartInitialization()
 {
-    this->Storage.Initialize();
+    auto r = this->Storage.Initialize();
+
+    if (OS_RESULT_FAILED(r))
+    {
+        LOGF(LOG_LEVEL_FATAL, "Storage initialization failed %d", num(r));
+    }
 }
