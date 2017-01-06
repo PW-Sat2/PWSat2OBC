@@ -1,13 +1,17 @@
 /**
 @file libs/drivers/comm/comm.cpp Driver for communication module.
 
-@remarks Based on ICD Issue 1.0 2014-12-19
+@remarks Based on ICD Issue 1.1 2015-09-16
 */
-#include "comm.h"
+#include "comm.hpp"
 #include <stdnoreturn.h>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+#include "Beacon.hpp"
+#include "CommDriver.hpp"
+#include "Frame.hpp"
+#include "IHandleFrame.hpp"
 #include "base/os.h"
 #include "base/reader.h"
 #include "base/writer.h"
@@ -20,73 +24,55 @@ using gsl::span;
 using drivers::i2c::II2CBus;
 using drivers::i2c::I2CResult;
 
-using namespace devices::comm;
+using namespace COMM;
 
-CommFrame::CommFrame() : doppler(0), rssi(0)
+Beacon::Beacon() : period(0)
 {
 }
 
-CommFrame::CommFrame(std::uint16_t dopplerLevel, std::uint16_t rssiLevel, std::uint16_t fullSize, gsl::span<std::uint8_t> data)
-    : doppler(dopplerLevel),   //
-      rssi(rssiLevel),         //
-      fullFrameSize(fullSize), //
-      content(std::move(data))
+Beacon::Beacon(std::uint16_t beaconPeriod, gsl::span<const std::uint8_t> contents)
+    : period(beaconPeriod), //
+      payload(std::move(contents))
 {
 }
 
 CommObject::CommObject(II2CBus& low, IHandleFrame& upperInterface)
-    : _low(low), //
-      _frameHandler(upperInterface)
+    : _low(low),                     //
+      _frameHandler(upperInterface), //
+      _pollingTaskHandle(nullptr),   //
+      _pollingTaskFlags(nullptr)
 {
 }
 
-enum ReceiverCommand
-{
-    CommHardReset = 0xAB,
-    ReceiverSoftReset = 0xAA,
-    ReceiverGetFrameCount = 0x21,
-    ReceiverGetFrame = 0x22,
-    ReceiverRemoveFrame = 0x24,
-    ReceiverGetTelemetry = 0x1A,
-};
-
-enum TransmitterCommand
-{
-    TransmitterSoftReset = 0xAA,
-    TransmitterSendFrame = 0x10,
-    TransmitterGetTelemetry = 0x25,
-    TransmitterSetBeacon = 0x14,
-    TransmitterClearBeacon = 0x1f,
-    TransmitterSetIdleState = 0x24,
-    TransmitterSetBitRate = 0x28,
-    TransmitterGetState = 0x41
-};
-
+/**
+ * @brief Enumerator of all flags used for communication with comm task
+ * @ingroup LowerCommDriver
+ */
 enum TaskFlag
 {
     TaskFlagPauseRequest = 1,
     TaskFlagAck = 2,
 };
 
-bool CommObject::SendCommand(CommAddress address, uint8_t command)
+bool CommObject::SendCommand(Address address, uint8_t command)
 {
-    const I2CResult result = this->_low.Write(address, span<const uint8_t>(&command, 1));
+    const I2CResult result = this->_low.Write(num(address), span<const uint8_t>(&command, 1));
     const bool status = (result == I2CResult::OK);
     if (!status)
     {
-        LOGF(LOG_LEVEL_ERROR, "[comm] Unable to send command %d to %d, Reason: %d", command, address, num(result));
+        LOGF(LOG_LEVEL_ERROR, "[comm] Unable to send command %d to %d, Reason: %d", command, num(address), num(result));
     }
 
     return status;
 }
 
-bool CommObject::SendCommandWithResponse(CommAddress address, uint8_t command, span<uint8_t> outBuffer)
+bool CommObject::SendCommandWithResponse(Address address, uint8_t command, span<uint8_t> outBuffer)
 {
-    const I2CResult result = this->_low.WriteRead(address, span<const uint8_t>(&command, 1), outBuffer);
+    const I2CResult result = this->_low.WriteRead(num(address), span<const uint8_t>(&command, 1), outBuffer);
     const bool status = (result == I2CResult::OK);
     if (!status)
     {
-        LOGF(LOG_LEVEL_ERROR, "[comm] Unable to send command %d to %d, Reason: %d", command, address, num(result));
+        LOGF(LOG_LEVEL_ERROR, "[comm] Unable to send command %d to %d, Reason: %d", command, num(address), num(result));
     }
 
     return status;
@@ -107,14 +93,14 @@ OSResult CommObject::Initialize()
 
 bool CommObject::Restart()
 {
-    if (!this->Reset())
+    if (this->_pollingTaskHandle == nullptr)
     {
-        LOG(LOG_LEVEL_ERROR, "[comm] Unable reset comm hardware. ");
-        return false;
-    }
+        if (!this->Reset())
+        {
+            LOG(LOG_LEVEL_ERROR, "[comm] Unable reset comm hardware. ");
+            return false;
+        }
 
-    if (this->_pollingTaskHandle == NULL)
-    {
         const OSResult result =
             System::CreateTask(CommObject::CommTask, "COMM Task", 512, this, TaskPriority::P4, &this->_pollingTaskHandle);
         if (OS_RESULT_FAILED(result))
@@ -140,33 +126,37 @@ bool CommObject::Pause()
 
 bool CommObject::Reset()
 {
-    return this->SendCommand(CommReceiver, CommHardReset) && this->ResetReceiver() && this->ResetTransmitter();
+    return this->SendCommand(Address::Receiver, num(ReceiverCommand::HardReset));
 }
 
 bool CommObject::ResetTransmitter()
 {
-    return this->SendCommand(CommTransmitter, TransmitterSoftReset);
+    return this->SendCommand(Address::Transmitter, num(TransmitterCommand::SoftReset));
 }
 
 bool CommObject::ResetReceiver()
 {
-    return this->SendCommand(CommReceiver, ReceiverSoftReset);
+    return this->SendCommand(Address::Receiver, num(ReceiverCommand::SoftReset));
 }
 
-CommReceiverFrameCount CommObject::GetFrameCount()
+ReceiverFrameCount CommObject::GetFrameCount()
 {
-    CommReceiverFrameCount result;
-    uint8_t count = 0;
-    result.status = this->SendCommandWithResponse(CommReceiver, ReceiverGetFrameCount, span<uint8_t>(&count, 1));
-    if (result.status)
-    {
-        LOGF(LOG_LEVEL_INFO, "There are %d frames.", static_cast<int>(count));
-        result.frameCount = count;
-    }
-    else
+    ReceiverFrameCount result;
+    uint8_t buffer[2];
+    result.status = this->SendCommandWithResponse(Address::Receiver, num(ReceiverCommand::GetFrameCount), buffer);
+    if (!result.status)
     {
         LOG(LOG_LEVEL_ERROR, "Unable to get frame count");
         result.frameCount = 0;
+        return result;
+    }
+
+    Reader reader(buffer);
+    result.frameCount = reader.ReadWordLE();
+    result.status = reader.Status();
+    if (reader.Status())
+    {
+        LOGF(LOG_LEVEL_INFO, "There are %d frames.", static_cast<int>(result.frameCount));
     }
 
     return result;
@@ -174,7 +164,7 @@ CommReceiverFrameCount CommObject::GetFrameCount()
 
 bool CommObject::RemoveFrame()
 {
-    const bool status = this->SendCommand(CommReceiver, ReceiverRemoveFrame);
+    const bool status = this->SendCommand(Address::Receiver, num(ReceiverCommand::RemoveFrame));
     if (!status)
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Failed to remove frame from buffer");
@@ -183,10 +173,10 @@ bool CommObject::RemoveFrame()
     return status;
 }
 
-bool CommObject::GetReceiverTelemetry(CommReceiverTelemetry& telemetry)
+bool CommObject::GetReceiverTelemetry(ReceiverTelemetry& telemetry)
 {
-    uint8_t buffer[sizeof(CommReceiverTelemetry)];
-    const bool status = this->SendCommandWithResponse(CommReceiver, ReceiverGetTelemetry, span<uint8_t>(buffer));
+    uint8_t buffer[sizeof(ReceiverTelemetry)];
+    const bool status = this->SendCommandWithResponse(Address::Receiver, num(ReceiverCommand::GetTelemetry), span<uint8_t>(buffer));
     if (!status)
     {
         return status;
@@ -216,10 +206,10 @@ bool CommObject::GetReceiverTelemetry(CommReceiverTelemetry& telemetry)
     return reader.Status();
 }
 
-bool CommObject::GetTransmitterTelemetry(CommTransmitterTelemetry& telemetry)
+bool CommObject::GetTransmitterTelemetry(TransmitterTelemetry& telemetry)
 {
-    uint8_t buffer[sizeof(CommTransmitterTelemetry)];
-    const bool status = this->SendCommandWithResponse(CommTransmitter, TransmitterGetTelemetry, span<uint8_t>(buffer));
+    uint8_t buffer[sizeof(TransmitterTelemetry)];
+    const bool status = this->SendCommandWithResponse(Address::Transmitter, num(TransmitterCommand::GetTelemetry), span<uint8_t>(buffer));
     if (!status)
     {
         return status;
@@ -243,6 +233,16 @@ bool CommObject::GetTransmitterTelemetry(CommTransmitterTelemetry& telemetry)
     return reader.Status();
 }
 
+/**
+ * @brief Get the span that is suited to receive the frame with specified length.
+ * @ingroup LowerCommDriver
+ *
+ * @param[in] frameSize Requested frame size.
+ * @param[in] buffer Buffer window that should be shrinked down to exactly match minimum the necessary
+ * space needed to receive the frame with passed size.
+ * @return Buffer window that is at most as long as tne total number of bytes needed to receive the frame from hardware.
+ * This window will be shorter if the input window was not long enough.
+ */
 static gsl::span<std::uint8_t> ReceiveSpan(std::uint16_t frameSize, gsl::span<std::uint8_t> buffer)
 {
     if (buffer.size() <= frameSize + 6)
@@ -255,14 +255,14 @@ static gsl::span<std::uint8_t> ReceiveSpan(std::uint16_t frameSize, gsl::span<st
     }
 }
 
-bool CommObject::ReceiveFrame(gsl::span<std::uint8_t> buffer, CommFrame& frame)
+bool CommObject::ReceiveFrame(gsl::span<std::uint8_t> buffer, Frame& frame)
 {
     if (buffer.size() < 2)
     {
         return false;
     }
 
-    bool status = this->SendCommandWithResponse(CommReceiver, ReceiverGetFrame, buffer.subspan(0, 2));
+    bool status = this->SendCommandWithResponse(Address::Receiver, num(ReceiverCommand::GetFrame), buffer.subspan(0, 2));
     if (!status)
     {
         return status;
@@ -271,7 +271,7 @@ bool CommObject::ReceiveFrame(gsl::span<std::uint8_t> buffer, CommFrame& frame)
     Reader reader(buffer.subspan(0, 2));
     auto size = reader.ReadWordLE();
     buffer = ReceiveSpan(size, buffer);
-    status = this->SendCommandWithResponse(CommReceiver, ReceiverGetFrame, buffer);
+    status = this->SendCommandWithResponse(Address::Receiver, num(ReceiverCommand::GetFrame), buffer);
     if (!status)
     {
         return status;
@@ -293,31 +293,24 @@ bool CommObject::ReceiveFrame(gsl::span<std::uint8_t> buffer, CommFrame& frame)
         frameContent = gsl::span<std::uint8_t>(const_cast<std::uint8_t*>(span.data()), span.size());
     }
 
-    frame = CommFrame(doppler, rssi, fullSize, std::move(frameContent));
-
-    //    if (fullSize == 0 || (doppler & 0xf000) != 0 || (rssi & 0xf000) != 0)
-    //    {
-    //        LOGF(LOG_LEVEL_ERROR, "[comm] Received invalid frame. Size: %d, Doppler: 0x%X, RSSI: 0x%X. ", fullSize, doppler, rssi);
-    //        return false;
-    //    }
-
+    frame = Frame(doppler, rssi, fullSize, std::move(frameContent));
     return status;
 }
 
 bool CommObject::SendFrame(span<const std::uint8_t> frame)
 {
-    if (frame.size() > CommMaxFrameSize)
+    if (frame.size() > MaxFrameSize)
     {
-        LOGF(LOG_LEVEL_ERROR, "Frame payload is too long. Allowed: %d, Requested: '%d'.", CommMaxFrameSize, frame.size());
+        LOGF(LOG_LEVEL_ERROR, "Frame payload is too long. Allowed: %d, Requested: '%d'.", MaxFrameSize, frame.size());
         return false;
     }
 
-    uint8_t cmd[ComPrefferedBufferSize];
-    cmd[0] = TransmitterSendFrame;
+    uint8_t cmd[PrefferedBufferSize];
+    cmd[0] = num(TransmitterCommand::SendFrame);
     memcpy(cmd + 1, frame.data(), frame.size());
     uint8_t remainingBufferSize;
 
-    const bool status = (this->_low.WriteRead(CommTransmitter,           //
+    const bool status = (this->_low.WriteRead(num(Address::Transmitter), //
                              span<const uint8_t>(cmd, 1 + frame.size()), //
                              span<uint8_t>(&remainingBufferSize, 1)      //
                              ) == I2CResult::OK);
@@ -334,49 +327,51 @@ bool CommObject::SendFrame(span<const std::uint8_t> frame)
     return status && remainingBufferSize != 0xff;
 }
 
-bool CommObject::SetBeacon(const CommBeacon& beaconData)
+bool CommObject::SetBeacon(const Beacon& beaconData)
 {
-    uint8_t buffer[CommMaxFrameSize + 2];
+    uint8_t buffer[MaxFrameSize + 2];
     Writer writer;
     WriterInitialize(&writer, buffer, COUNT_OF(buffer));
-    WriterWriteByte(&writer, TransmitterSetBeacon);
-    WriterWriteWordLE(&writer, beaconData.Period);
-    WriterWriteArray(&writer, beaconData.Data, beaconData.DataSize);
+    WriterWriteByte(&writer, num(TransmitterCommand::SetBeacon));
+    WriterWriteWordLE(&writer, beaconData.Period());
+    WriterWriteArray(&writer, beaconData.Contents().data(), beaconData.Contents().size());
     if (!WriterStatus(&writer))
     {
         return false;
     }
 
-    return this->_low.Write(CommTransmitter, span<const uint8_t>(buffer, WriterGetDataLength(&writer))) == I2CResult::OK;
+    return this->_low.Write(num(Address::Transmitter), span<const uint8_t>(buffer, WriterGetDataLength(&writer))) == I2CResult::OK;
 }
 
 bool CommObject::ClearBeacon()
 {
-    return this->SendCommand(CommTransmitter, TransmitterClearBeacon);
+    return this->SendCommand(Address::Transmitter, num(TransmitterCommand::ClearBeacon));
 }
 
-bool CommObject::SetTransmitterStateWhenIdle(CommTransmitterIdleState requestedState)
+bool CommObject::SetTransmitterStateWhenIdle(IdleState requestedState)
 {
     uint8_t buffer[2];
-    buffer[0] = TransmitterSetIdleState;
-    buffer[1] = requestedState;
-    return this->_low.Write(CommTransmitter, buffer) == I2CResult::OK;
+    buffer[0] = num(TransmitterCommand::SetIdleState);
+    buffer[1] = num(requestedState);
+    return this->_low.Write(num(Address::Transmitter), buffer) == I2CResult::OK;
 }
 
-bool CommObject::SetTransmitterBitRate(CommTransmitterBitrate bitrate)
+bool CommObject::SetTransmitterBitRate(Bitrate bitrate)
 {
     uint8_t buffer[2];
-    buffer[0] = TransmitterSetBitRate;
-    buffer[1] = bitrate;
-    return this->_low.Write(CommTransmitter, buffer) == I2CResult::OK;
+    buffer[0] = num(TransmitterCommand::SetBitRate);
+    buffer[1] = num(bitrate);
+    return this->_low.Write(num(Address::Transmitter), buffer) == I2CResult::OK;
 }
 
-bool CommObject::GetTransmitterState(CommTransmitterState& state)
+bool CommObject::GetTransmitterState(TransmitterState& state)
 {
-    uint8_t command = TransmitterGetState;
+    uint8_t command = num(TransmitterCommand::GetState);
     uint8_t response;
-    const bool status =
-        (this->_low.WriteRead(CommTransmitter, span<const uint8_t>(&command, 1), span<uint8_t>(&response, 1)) == I2CResult::OK);
+    const bool status = this->_low.WriteRead(num(Address::Transmitter), //
+                            span<const uint8_t>(&command, 1),           //
+                            span<uint8_t>(&response, 1)                 //
+                            ) == I2CResult::OK;
     if (!status)
     {
         return false;
@@ -389,46 +384,87 @@ bool CommObject::GetTransmitterState(CommTransmitterState& state)
     }
 
     state.BeaconState = (response & 2) != 0;
-    state.StateWhenIdle = static_cast<CommTransmitterIdleState>(response & 1);
-    static const CommTransmitterBitrate conversionArray[] = {
-        Comm1200bps, Comm2400bps, Comm4800bps, Comm9600bps,
+    state.StateWhenIdle = static_cast<IdleState>(response & 1);
+    static const Bitrate conversionArray[] = {
+        Bitrate::Comm1200bps, Bitrate::Comm2400bps, Bitrate::Comm4800bps, Bitrate::Comm9600bps,
     };
 
     state.TransmitterBitRate = conversionArray[(response & 0x0c) >> 2];
     return true;
 }
 
+bool CommObject::ResetWatchdogReceiver()
+{
+    return this->SendCommand(Address::Receiver, num(ReceiverCommand::ResetWatchdog));
+}
+
+bool CommObject::ResetWatchdogTransmitter()
+{
+    return this->SendCommand(Address::Transmitter, num(TransmitterCommand::ResetWatchdog));
+}
+
 void CommObject::PollHardware()
 {
-    CommReceiverFrameCount frameResponse = this->GetFrameCount();
+    auto frameResponse = this->GetFrameCount();
     if (!frameResponse.status)
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Unable to get receiver frame count. ");
     }
     else if (frameResponse.frameCount > 0)
     {
-        std::uint8_t buffer[ComPrefferedBufferSize];
-        LOGF(LOG_LEVEL_INFO, "[comm] Got %d frames", frameResponse.frameCount);
-
-        for (uint8_t i = 0; i < frameResponse.frameCount; i++)
+        LOGF(LOG_LEVEL_INFO, "[comm] Got %d frames", static_cast<int>(frameResponse.frameCount));
+        for (decltype(frameResponse.frameCount) i = 0; i < frameResponse.frameCount; i++)
         {
-            CommFrame frame;
-            bool status = this->ReceiveFrame(buffer, frame);
-            if (!status)
-            {
-                LOG(LOG_LEVEL_ERROR, "[comm] Unable to receive frame. ");
-            }
-            else
-            {
-                if (!this->RemoveFrame())
-                {
-                    LOG(LOG_LEVEL_ERROR, "[comm] Unable to remove frame from receiver. ");
-                }
-
-                LOGF(LOG_LEVEL_INFO, "[comm] Received frame %d bytes. ", static_cast<int>(frame.Size()));
-                this->_frameHandler.HandleFrame(*this, frame);
-            }
+            ProcessSingleFrame();
         }
+    }
+
+    if (!ResetWatchdogReceiver() && !ResetWatchdogTransmitter())
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable to reset comm watchdog. ");
+    }
+}
+
+bool CommObject::GetFrame(gsl::span<std::uint8_t> buffer, int retryCount, Frame& frame)
+{
+    for (int i = 0; i < retryCount; ++i)
+    {
+        const bool status = ReceiveFrame(buffer, frame);
+        if (!status)
+        {
+            LOG(LOG_LEVEL_ERROR, "[comm] Unable to receive frame. ");
+        }
+        else if (!frame.Verify())
+        {
+            LOGF(LOG_LEVEL_ERROR,
+                "[comm] Received invalid frame. Size: %d, Doppler: 0x%X, RSSI: 0x%X. ",
+                static_cast<int>(frame.FullSize()),
+                static_cast<int>(frame.Doppler()),
+                static_cast<int>(frame.Rssi()));
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void CommObject::ProcessSingleFrame()
+{
+    Frame frame;
+    std::uint8_t buffer[PrefferedBufferSize];
+    const bool status = GetFrame(buffer, 3, frame);
+    if (status && frame.Verify())
+    {
+        LOGF(LOG_LEVEL_INFO, "[comm] Received frame %d bytes. ", static_cast<int>(frame.Size()));
+        this->_frameHandler.HandleFrame(*this, frame);
+    }
+
+    if (!this->RemoveFrame())
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable to remove frame from receiver. ");
     }
 }
 
