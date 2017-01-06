@@ -314,6 +314,8 @@ OperationResult N25QDriver::Reset()
 
         if (timeoutCheck.Expired())
             return OperationResult::Timeout;
+
+        System::Yield();
     } while (true);
 
     this->EnableWrite();

@@ -92,7 +92,7 @@ namespace drivers
              * @param[in] spi SPI peripheral to use
              * @param[in] pin Pin used as slave select
              */
-            EFMSPISlaveInterface(EFMSPIInterface& spi, drivers::gpio::Pin pin);
+            EFMSPISlaveInterface(EFMSPIInterface& spi, const drivers::gpio::Pin& pin);
 
             virtual void Select() override;
             virtual void Deselect() override;
@@ -103,7 +103,7 @@ namespace drivers
             /** @brief SPI peripheral to use */
             EFMSPIInterface& _spi;
             /** @brief Pin used as slave select */
-            drivers::gpio::Pin _pin;
+            const drivers::gpio::Pin& _pin;
         };
 
         /** @} */

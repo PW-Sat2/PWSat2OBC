@@ -37,7 +37,6 @@ class OBC(OBCMixin,
     def wait_to_start(self):
         response = self._terminal.command("getState")
         while response != "1":
-            # time.sleep(5)
             response = self._terminal.command("getState")
 
     def reset(self):

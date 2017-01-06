@@ -6,33 +6,12 @@
 #include <em_gpio.h>
 #include <em_usart.h>
 #include <em_system.h>
+#include "base/io_map.h"
 
 /** @cond FALSE */
 
 namespace io_map
 {
-    struct PinTag
-    {
-    };
-
-    struct I2CPinsTag
-    {
-    };
-
-    struct SPIPinsTag
-    {
-    };
-
-    struct LEUARTPinsTag
-    {
-    };
-
-    template <GPIO_Port_TypeDef TPort, std::uint16_t TPinNumber> struct PinLocation : public PinTag
-    {
-        static constexpr auto Port = TPort;
-        static constexpr auto PinNumber = TPinNumber;
-    };
-
     using SlaveSelectFlash1 = PinLocation<gpioPortD, 3>;
 
     using Led0 = PinLocation<gpioPortE, 2>;

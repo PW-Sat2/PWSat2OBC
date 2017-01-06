@@ -44,7 +44,7 @@ namespace drivers
              */
             inline bool Input() const;
 
-          protected:
+          private:
             /** @brief Port */
             const GPIO_Port_TypeDef _port;
             /** @brief Pin */
@@ -79,6 +79,11 @@ namespace drivers
         template <typename Location, bool DefaultState = true> class OutputPin final : public Pin
         {
           public:
+            /** @brief Port */
+            static constexpr auto Port = Location::Port;
+            /** @brief Pin number */
+            static constexpr auto PinNumber = Location::PinNumber;
+
             /**
              * @brief Default ctor
              */
@@ -90,14 +95,13 @@ namespace drivers
             void Initialize() const;
         };
 
-        template <typename Location, bool DefaultState>
-        OutputPin<Location, DefaultState>::OutputPin() : Pin(Location::Port, Location::PinNumber)
+        template <typename Location, bool DefaultState> OutputPin<Location, DefaultState>::OutputPin() : Pin(Port, PinNumber)
         {
         }
 
         template <typename Location, bool DefaultState> void OutputPin<Location, DefaultState>::Initialize() const
         {
-            GPIO_PinModeSet(this->_port, this->_pin, gpioModePushPull, ToInt(DefaultState));
+            GPIO_PinModeSet(Port, PinNumber, gpioModePushPull, ToInt(DefaultState));
         }
 
         /**
@@ -108,6 +112,11 @@ namespace drivers
         template <typename Location, bool DefaultState = true> class InputPin final : public Pin
         {
           public:
+            /** @brief Port */
+            static constexpr auto Port = Location::Port;
+            /** @brief Pin number */
+            static constexpr auto PinNumber = Location::PinNumber;
+
             /**
              * @brief Default ctor
              */
@@ -119,14 +128,13 @@ namespace drivers
             void Initialize() const;
         };
 
-        template <typename Location, bool DefaultState>
-        InputPin<Location, DefaultState>::InputPin() : Pin(Location::Port, Location::PinNumber)
+        template <typename Location, bool DefaultState> InputPin<Location, DefaultState>::InputPin() : Pin(Port, PinNumber)
         {
         }
 
         template <typename Location, bool DefaultState> void InputPin<Location, DefaultState>::Initialize() const
         {
-            GPIO_PinModeSet(this->_port, this->_pin, gpioModeInputPull, ToInt(DefaultState));
+            GPIO_PinModeSet(Port, PinNumber, gpioModeInputPull, ToInt(DefaultState));
         }
 
         /** @} */

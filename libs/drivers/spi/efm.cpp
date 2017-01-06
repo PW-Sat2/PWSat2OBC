@@ -133,7 +133,7 @@ bool EFMSPIInterface::OnTransferFinished(unsigned int channel, unsigned int sequ
 
     return true;
 }
-EFMSPISlaveInterface::EFMSPISlaveInterface(EFMSPIInterface& spi, drivers::gpio::Pin pin) : _spi(spi), _pin(pin)
+EFMSPISlaveInterface::EFMSPISlaveInterface(EFMSPIInterface& spi, const drivers::gpio::Pin& pin) : _spi(spi), _pin(pin)
 {
 }
 
