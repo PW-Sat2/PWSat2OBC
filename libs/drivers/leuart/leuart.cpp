@@ -46,9 +46,6 @@ static void leuartInit(void)
 
     LEUART0->ROUTE = LEUART_ROUTE_RXPEN | LEUART_ROUTE_TXPEN | io_map::LEUART::Location;
 
-    //    GPIO_PinModeSet(LEUART0_PORT, LEUART0_TX, gpioModePushPull, 1);
-    //    GPIO_PinModeSet(LEUART0_PORT, LEUART0_RX, gpioModeInputPull, 1);
-
     lineEndReceived = xSemaphoreCreateBinary();
 
     DMADRV_AllocateChannel(&dmaChannel, NULL);
