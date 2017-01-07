@@ -112,6 +112,12 @@ class Reader final
      */
     void Reset();
 
+    /**
+     * @brief Returns span of remaining part of buffer. Internal pointer is not moved
+     * @return Span for remaining part of buffer
+     */
+    gsl::span<const uint8_t> Remaining();
+
   private:
     bool UpdateState(uint16_t requestedSize);
 
