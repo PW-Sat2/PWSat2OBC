@@ -1,9 +1,10 @@
 #include "gtest/gtest.h"
-#include "gmock/gmock-matchers.h"
+#include "gmock/gmock.h"
 #include "base/reader.h"
 #include "system.h"
 
 using testing::Eq;
+using testing::ElementsAre;
 
 TEST(ReaderTest, TestDefaultCtor)
 {
@@ -256,4 +257,27 @@ TEST(ReaderTest, TestRemainigSizeAtTheEnd)
     reader.ReadByte();
     reader.ReadWordBE();
     ASSERT_THAT(reader.RemainingSize(), Eq(0));
+}
+
+TEST(ReaderTest, TestReadingToEnd)
+{
+    std::array<uint8_t, 5> a{1, 2, 3, 4, 5};
+
+    Reader reader(a);
+
+    reader.ReadByte();
+
+    ASSERT_THAT(reader.ReadToEnd(), ElementsAre(2, 3, 4, 5));
+}
+
+TEST(ReaderTest, TestReadingToEndWhenNothingLeftIsCorrect)
+{
+    std::array<uint8_t, 1> a{1};
+
+    Reader reader(a);
+
+    reader.ReadByte();
+
+    ASSERT_THAT(reader.ReadToEnd().size(), Eq(0));
+    ASSERT_THAT(reader.Status(), Eq(true));
 }

@@ -117,7 +117,14 @@ class ReceiverDevice(i2cMock.I2CDevice):
         length_bytes = [length & 0xFF, (length >> 8) & 0xFF]
         doppler_bytes = [doppler & 0xFF, (doppler >> 8) & 0xFF]
         rssi_bytes = [rssi & 0xFF, (rssi >> 8) & 0xFF]
-        content_bytes = [ord(c) for c in content]
+
+        def numberize(v):
+            if type(v) is int:
+                return v
+
+            return ord(v)
+
+        content_bytes = [numberize(c) for c in content]
 
         return length_bytes + doppler_bytes + rssi_bytes + content_bytes
 
