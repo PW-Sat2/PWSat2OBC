@@ -22,7 +22,9 @@ namespace telecommands
          */
         enum class DecodeTelecommandFailureReason
         {
-            GeneralError //!< General error
+            MalformedFrame,      //!< Malformed frame
+            InvalidSecurityCode, //!< Invalid security code
+            GeneralError         //!< General error
         };
 
         /**

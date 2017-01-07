@@ -15,7 +15,8 @@ set(SOURCES
   FileSystem/EccTest.cpp
   Comm/CommTest.cpp
   Comm/CommFrameTest.cpp
-  TeleCommandHandling/TeleCommandHandlingTest.cpp
+  Comm/TeleCommandHandlingTest.cpp
+  Comm/UplinkFrameDecoderTest.cpp
   base/ReaderTest.cpp
   base/WriterTest.cpp
   MissionPlan/MissionPlanTest.cpp
@@ -65,6 +66,8 @@ endif(${ENABLE_COVERAGE})
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_CURRENT_LIST_DIR}/linker.ld -u _printf_float -specs=rdimon.specs ${LD_COVERAGE}")
 
 target_memory_report(${NAME})
+
+target_asm_listing(${NAME})
 
 target_compile_options(${NAME} PRIVATE "-fexceptions")
 

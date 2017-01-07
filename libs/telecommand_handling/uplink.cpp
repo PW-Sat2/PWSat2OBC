@@ -1,5 +1,7 @@
-#include "uplink.h"
 #include <algorithm>
+#include "base/reader.h"
+
+#include "uplink.h"
 
 using std::uint8_t;
 using std::copy;
@@ -9,12 +11,28 @@ using namespace telecommands;
 using telecommands::handling::DecodeTelecommandFailureReason;
 using telecommands::handling::DecodeTelecommandResult;
 
+UplinkProtocol::UplinkProtocol(std::uint32_t securityCode) : _securityCode(securityCode)
+{
+}
+
 DecodeTelecommandResult UplinkProtocol::Decode(span<const uint8_t> frame)
 {
-    if (frame.length() < 1)
+    if (frame.size() < 5)
     {
-        return DecodeTelecommandResult::Failure(DecodeTelecommandFailureReason::GeneralError);
+        return DecodeTelecommandResult::Failure(DecodeTelecommandFailureReason::MalformedFrame);
     }
 
-    return DecodeTelecommandResult::Success(frame[0], frame.subspan(1, frame.length() - 1));
+    Reader r(frame);
+
+    auto code = r.ReadDoubleWordLE();
+
+    if (code != this->_securityCode)
+    {
+        return DecodeTelecommandResult::Failure(DecodeTelecommandFailureReason::InvalidSecurityCode);
+    }
+
+    auto command = r.ReadByte();
+    auto parameters = r.Remaining();
+
+    return DecodeTelecommandResult::Success(command, parameters);
 }

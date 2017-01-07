@@ -116,7 +116,10 @@ class Test_Comm(BaseTest):
         self.system.comm.on_hardware_reset = reset_handler
         self.system.comm.receiver.on_reset = reset_handler
         self.power_on_and_wait()
-        self.system.receiver.put_frame("PING")
+
+        frame = [0xAA, 0xBB, 0xCC, 0xDD, ord('P')]
+
+        self.system.receiver.put_frame(frame)
         msg = self.system.transmitter.get_message_from_buffer(20)
 
         msg = ''.join([chr(c) for c in msg])

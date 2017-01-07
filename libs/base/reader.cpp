@@ -136,3 +136,8 @@ int32_t Reader::RemainingSize()
 {
     return this->buffer.size() - this->position;
 }
+
+gsl::span<const uint8_t> Reader::Remaining()
+{
+    return this->buffer.subspan(this->position);
+}
