@@ -4,10 +4,10 @@ using std::uint8_t;
 using gsl::span;
 using drivers::i2c::II2CBus;
 using devices::comm::ITransmitFrame;
-using communication::PingTelecommand;
+using obc::PingTelecommand;
 using telecommands::handling::IHandleTeleCommand;
 
-using namespace communication;
+using namespace obc;
 
 void PingTelecommand::Handle(ITransmitFrame& transmitter, span<const uint8_t> parameters)
 {
