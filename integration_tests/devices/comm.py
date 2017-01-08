@@ -1,12 +1,14 @@
 import logging
+import struct
+
 import i2cMock
 import time
 from Queue import Queue, Empty
 from threading import Lock
 from utils import *
+from build_config import config
 
 class TransmitterDevice(i2cMock.I2CDevice):
-    MAX_CONTENT_SIZE = 235
     BUFFER_SIZE = 40
 
     def __init__(self):
@@ -112,7 +114,7 @@ class ReceiverDevice(i2cMock.I2CDevice):
 
     @classmethod
     def build_frame_response(cls, content, doppler, rssi):
-        length = len(content)
+        length = len(content) + 4
 
         length_bytes = [length & 0xFF, (length >> 8) & 0xFF]
         doppler_bytes = [doppler & 0xFF, (doppler >> 8) & 0xFF]
@@ -126,7 +128,9 @@ class ReceiverDevice(i2cMock.I2CDevice):
 
         content_bytes = [numberize(c) for c in content]
 
-        return length_bytes + doppler_bytes + rssi_bytes + content_bytes
+        code_bytes = [numberize(c) for c in struct.pack('>L', config['COMM_SECURITY_CODE'])]
+
+        return length_bytes + doppler_bytes + rssi_bytes + code_bytes + content_bytes
 
     def put_frame(self, data):
         with self._lock:
@@ -137,6 +141,8 @@ class ReceiverDevice(i2cMock.I2CDevice):
             return self._buffer.qsize()
 
 class Comm(object):
+    MAX_UPLINK_CONTENT_SIZE = 200 - 4
+
     def __init__(self):
         self.transmitter = TransmitterDevice()
         self.receiver = ReceiverDevice()

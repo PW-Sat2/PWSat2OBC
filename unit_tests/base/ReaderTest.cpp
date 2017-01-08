@@ -143,6 +143,16 @@ TEST(ReaderTest, TestReadingDWordLE)
     ASSERT_TRUE(reader.Status());
 }
 
+TEST(ReaderTest, TestReadingDWordBE)
+{
+    Reader reader;
+    uint8_t array[] = {0x55, 0xaa, 0x77, 0xee};
+
+    reader.Initialize(array);
+    ASSERT_THAT(reader.ReadDoubleWordBE(), Eq(0x55AA77EEU));
+    ASSERT_TRUE(reader.Status());
+}
+
 TEST(ReaderTest, TestReadingQuadWordLE)
 {
     Reader reader;

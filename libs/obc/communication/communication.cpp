@@ -1,4 +1,5 @@
 #include "communication.h"
+#include "settings.h"
 
 using std::uint8_t;
 using gsl::span;
@@ -35,7 +36,7 @@ gsl::span<IHandleTeleCommand*> Telecommands::AllTelecommands()
 }
 
 OBCCommunication::OBCCommunication(II2CBus& systemBus)
-    : UplinkProtocolDecoder(0xDDCCBBAA),                                                  //
+    : UplinkProtocolDecoder(settings::CommSecurityCode),                                  //
       SupportedTelecommands(),                                                            //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.AllTelecommands()), //
       CommDriver(systemBus, TelecommandHandler)

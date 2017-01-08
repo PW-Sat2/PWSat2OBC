@@ -10,6 +10,7 @@ target_link_libraries(${NAME}
 	base
 	comm
 	telecommand_handling
+	settings
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

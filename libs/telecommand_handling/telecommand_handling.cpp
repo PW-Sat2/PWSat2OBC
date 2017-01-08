@@ -16,8 +16,6 @@ using devices::comm::ITransmitFrame;
 
 using namespace telecommands::handling;
 
-constexpr size_t DecryptionBufferSize = 300;
-
 IncomingTelecommandHandler::IncomingTelecommandHandler(IDecodeTelecommand& decodeTelecommand, span<IHandleTeleCommand*> telecommands)
     : _decodeTelecommand(decodeTelecommand), //
       _telecommands(telecommands)

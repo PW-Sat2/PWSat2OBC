@@ -16,6 +16,10 @@ namespace telecommands
     class UplinkProtocol final : public telecommands::handling::IDecodeTelecommand
     {
       public:
+        /**
+         * @brief Initializes @ref UplinkProtocol instance
+         * @param[in] securityCode Security code
+         */
         UplinkProtocol(std::uint32_t securityCode);
 
         /**
@@ -26,6 +30,7 @@ namespace telecommands
         virtual telecommands::handling::DecodeTelecommandResult Decode(gsl::span<const std::uint8_t> frame) override;
 
       private:
+        /** @brief Security code */
         std::uint32_t _securityCode;
     };
 }
