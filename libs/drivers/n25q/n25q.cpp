@@ -31,6 +31,11 @@ enum N25QCommand
     ClearFlagRegister = 0x50
 };
 
+constexpr OSTaskTimeSpan N25QDriver::ProgramPageTimeout;
+constexpr OSTaskTimeSpan N25QDriver::EraseSubSectorTimeout;
+constexpr OSTaskTimeSpan N25QDriver::EraseSectorTimeout;
+constexpr OSTaskTimeSpan N25QDriver::EraseChipTimeOut;
+
 N25QDriver::N25QDriver(ISPIInterface& spi) : _spi(spi)
 {
 }

@@ -19,7 +19,7 @@ bool Lock::operator()()
     return this->_taken;
 }
 
-Timeout::Timeout(std::uint32_t timeout) : _expireAt(System::GetUptime() + timeout)
+Timeout::Timeout(OSTaskTimeSpan timeout) : _expireAt(System::GetUptime() + timeout)
 {
 }
 

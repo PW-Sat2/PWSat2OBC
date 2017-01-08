@@ -242,7 +242,7 @@ OSTaskTimeSpan System::GetUptime()
         return OSProxy->GetUptime();
     }
 
-    return 0;
+    return OSTaskTimeSpan(0);
 }
 
 void System::Yield()

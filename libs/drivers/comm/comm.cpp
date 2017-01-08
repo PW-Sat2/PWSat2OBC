@@ -118,7 +118,7 @@ bool CommObject::Pause()
     if (this->_pollingTaskHandle != NULL)
     {
         System::EventGroupSetBits(this->_pollingTaskFlags, TaskFlagPauseRequest);
-        System::EventGroupWaitForBits(this->_pollingTaskFlags, TaskFlagAck, false, true, MAX_DELAY);
+        System::EventGroupWaitForBits(this->_pollingTaskFlags, TaskFlagAck, false, true, OSTaskTimeSpan(MAX_DELAY));
     }
 
     return true;
@@ -474,7 +474,7 @@ void CommObject::CommTask(void* param)
     comm->PollHardware();
     for (;;)
     {
-        const OSEventBits result = System::EventGroupWaitForBits(comm->_pollingTaskFlags, TaskFlagPauseRequest, false, true, 10000);
+        const OSEventBits result =System::EventGroupWaitForBits(comm->_pollingTaskFlags, TaskFlagPauseRequest, false, true, OSTaskTimeSpan(10000));
         if (result == TaskFlagPauseRequest)
         {
             LOG(LOG_LEVEL_WARNING, "Comm task paused");

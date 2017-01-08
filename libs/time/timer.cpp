@@ -67,7 +67,7 @@ bool TimeProvider::Initialize(TimePassedCallbackType timePassedCallback, void* t
 
 void TimeProvider::AdvanceTime(TimeSpan delta)
 {
-    if (OS_RESULT_FAILED(System::TakeSemaphore(timerLock, MAX_DELAY)))
+    if (OS_RESULT_FAILED(System::TakeSemaphore(timerLock, OSTaskTimeSpan(MAX_DELAY))))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to acquire timer lock.");
         return;
@@ -86,7 +86,7 @@ void TimeProvider::AdvanceTime(TimeSpan delta)
 bool TimeProvider::SetCurrentTime(TimePoint pointInTime)
 {
     const TimeSpan span = TimePointToTimeSpan(pointInTime);
-    if (OS_RESULT_FAILED(System::TakeSemaphore(timerLock, MAX_DELAY)))
+    if (OS_RESULT_FAILED(System::TakeSemaphore(timerLock, OSTaskTimeSpan(MAX_DELAY))))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to acquire timer lock.");
         return false;
@@ -104,7 +104,7 @@ bool TimeProvider::SetCurrentTime(TimePoint pointInTime)
 
 Option<TimeSpan> TimeProvider::GetCurrentTime()
 {
-    if (OS_RESULT_FAILED(System::TakeSemaphore(timerLock, MAX_DELAY)))
+    if (OS_RESULT_FAILED(System::TakeSemaphore(timerLock, OSTaskTimeSpan(MAX_DELAY))))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to acquire timer lock.");
         return None<TimeSpan>();
@@ -129,7 +129,7 @@ Option<TimePoint> TimeProvider::GetCurrentMissionTime()
 
 void TimeProvider::ProcessChange(TimerState state)
 {
-    if (OS_RESULT_FAILED(System::TakeSemaphore(notificationLock, MAX_DELAY)))
+    if (OS_RESULT_FAILED(System::TakeSemaphore(notificationLock, OSTaskTimeSpan(MAX_DELAY))))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to acquire notification lock.");
         return;
@@ -324,7 +324,7 @@ bool TimeProvider::LongDelayUntil(TimePoint time)
             return true;
         }
 
-        if (OS_RESULT_FAILED(System::PulseWait(TickNotification, MAX_DELAY)))
+        if (OS_RESULT_FAILED(System::PulseWait(TickNotification, OSTaskTimeSpan(MAX_DELAY))))
         {
             return false;
         }

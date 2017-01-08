@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <chrono>
 #include <cstdint>
 #include <type_traits>
 #include <utility>
@@ -146,7 +147,7 @@ constexpr inline bool OS_RESULT_FAILED(OSResult x)
 }
 
 /** @brief Type definition for time span in ms. */
-using OSTaskTimeSpan = std::uint32_t;
+using OSTaskTimeSpan = std::chrono::duration<uint64_t, std::milli>;
 
 /** @brief Type definition of handle to system task. */
 using OSTaskHandle = void*;
