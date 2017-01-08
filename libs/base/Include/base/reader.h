@@ -90,6 +90,13 @@ class Reader final
     uint32_t ReadDoubleWordLE();
 
     /**
+     * @brief Read single 32 bit word with big-endian memory orientation from the buffer
+     * and advance the current buffer position to the next unread byte.
+     * @return Read double word.
+     */
+    uint32_t ReadDoubleWordBE();
+
+    /**
      * @brief Read single 64 bit word with little-endian memory orientation from the buffer
      * and advance the current buffer position to the next unread byte.
      * @return Read double word.

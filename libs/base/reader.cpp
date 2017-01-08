@@ -93,6 +93,25 @@ uint32_t Reader::ReadDoubleWordLE()
     }
 }
 
+uint32_t Reader::ReadDoubleWordBE()
+{
+    if (!UpdateState(4))
+    {
+        return 0;
+    }
+    else
+    {
+        uint32_t value = this->buffer[this->position - 4];
+        value <<= 8;
+        value += this->buffer[this->position - 3];
+        value <<= 8;
+        value += this->buffer[this->position - 2];
+        value <<= 8;
+        value += this->buffer[this->position - 1];
+        return value;
+    }
+}
+
 uint64_t Reader::ReadQuadWordLE()
 {
     if (!UpdateState(8))

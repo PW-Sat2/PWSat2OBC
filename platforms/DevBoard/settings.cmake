@@ -1,5 +1,6 @@
 set(USE_SINGLE_BUS TRUE CACHE BOOL "Use single bus for both System and Payload I2C bus")
 set(USE_EXTERNAL_FLASH FALSE CACHE BOOL "Use external N25Q flash memory")
+set(COMM_SECURITY_CODE "0xBBCCDDEE" CACHE STRING "32-bit COMM security code written in hex with leading 0x")
 
 add_definitions(-DEFM32GG990F1024)
 
