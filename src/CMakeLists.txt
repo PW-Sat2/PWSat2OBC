@@ -18,7 +18,6 @@ set(SOURCES
     commands/mission.cpp
     obc.h
     obc.cpp
-    communication.cpp
     hardware.cpp  
     fault_handlers.cpp
 )
@@ -49,7 +48,6 @@ target_link_libraries(${NAME}
     power_eps
     terminal
     assert
-    telecommand_handling
     gsl
     n25q
     antenna
@@ -58,6 +56,7 @@ target_link_libraries(${NAME}
     mission_time
     yaffs
     obc_storage
+    obc_communication
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)
