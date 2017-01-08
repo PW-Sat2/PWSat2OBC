@@ -1,6 +1,8 @@
 #ifndef LIBS_BASE_INCLUDE_BASE_IO_MAP_H_
 #define LIBS_BASE_INCLUDE_BASE_IO_MAP_H_
 
+#include <cstdint>
+
 namespace io_map
 {
     /**

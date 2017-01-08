@@ -7,12 +7,20 @@
 
 namespace efm
 {
+    /**
+     * @brief Possible DMA signals for USART peripheral
+     */
     enum class DMASignalUSART
     {
-        RXDATAV,
-        TXBL
+        RXDATAV, //!< RXDATAV
+        TXBL     //!< TXBL
     };
 
+    /**
+     * @brief Returns specific DMA signal for given USART peripheral
+     * @param peripheral Peripheral base address
+     * @return DMA signal
+     */
     template <DMASignalUSART Signal> constexpr DMADRV_PeripheralSignal_t DMASignal(const USART_TypeDef* peripheral) = delete;
 
     template <> constexpr DMADRV_PeripheralSignal_t DMASignal<DMASignalUSART::RXDATAV>(const USART_TypeDef* peripheral)
