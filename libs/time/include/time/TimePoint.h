@@ -15,24 +15,6 @@ EXTERNC_BEGIN
  * @{
  */
 
-// struct MissionClock
-//{
-//    typedef std::chrono::miliseconds          duration;
-//    typedef duration::rep                     rep;
-//    typedef duration::period                  period;
-//    typedef std::chrono::time_point<MissionClock> time_point;
-//    static const bool is_steady =             false;
-//
-//    static time_point now() noexcept
-//    {
-//        using namespace std::chrono;
-//        return time_point
-//          (
-//
-//          );
-//    }
-//};
-
 /**
  * @brief Structure that contains decoded point in time.
  *
@@ -57,11 +39,6 @@ typedef struct
  * beginning of the mission itself.
  */
 typedef std::chrono::duration<uint64_t, std::milli> TimeSpan;
-
-/**
- * @brief Type used to represents different between two time spans.
- */
-typedef std::chrono::duration<uint64_t, std::milli> TimeShift;
 
 /**
  * @brief Creates TimeSpan object initialized from time specified in milliseconds.
@@ -97,46 +74,6 @@ TimeSpan TimeSpanFromHours(uint32_t hours);
  * @return Prepared time span object.
  */
 TimeSpan TimeSpanFromDays(uint32_t days);
-
-/**
- * @brief Adds together two TimeSpan objects.
- * @param[in] left TimeSpan value to add.
- * @param[in] right TimeSpan value to add.
- * @return Addition result.
- */
-TimeSpan TimeSpanAdd(TimeSpan left, TimeSpan right);
-
-/**
- * @brief Subtracts two TimeSpan objects.
- * @param[in] left TimeSpan value to subtract from.
- * @param[in] right TimeSpan value to be subtracted.
- * @return Subtraction result.
- */
-TimeShift TimeSpanSub(TimeSpan left, TimeSpan right);
-
-/**
- * @brief Compares two TimeSpan objects.
- * @param[in] left TimeSpan value to compare.
- * @param[in] right TimeSpan value to compare.
- * @return Comparison result. True when two TimeSpans are equal, false otherwise.
- */
-static bool TimeSpanEqual(const TimeSpan left, const TimeSpan right);
-
-/**
- * @brief Compares two TimeSpan objects.
- * @param[in] left TimeSpan value to compare.
- * @param[in] right TimeSpan value to compare.
- * @return Comparison result. True when two TimeSpans are not equal, false otherwise.
- */
-static bool TimeSpanNotEqual(const TimeSpan left, const TimeSpan right);
-
-/**
- * @brief Determines whether left TimeSpan object is strictly smaller than right object.
- * @param[in] left TimeSpan value to compare.
- * @param[in] right TimeSpan value to compare.
- * @return Comparison result. True when left TimeSpan object is strictly smaller than right object, false otherwise.
- */
-static bool TimeSpanLessThan(const TimeSpan left, const TimeSpan right);
 
 /**
  * @brief This procedure builds Time point object.
@@ -223,27 +160,12 @@ static inline bool TimePointNotEqual(TimePoint left, TimePoint right)
 
 static inline bool TimePointEqual(TimePoint left, TimePoint right)
 {
-    return TimeSpanEqual(TimePointToTimeSpan(left), TimePointToTimeSpan(right));
+    return TimePointToTimeSpan(left) == TimePointToTimeSpan(right);
 }
 
 static inline bool TimePointLessThan(TimePoint left, TimePoint right)
 {
-    return TimeSpanLessThan(TimePointToTimeSpan(left), TimePointToTimeSpan(right));
-}
-
-static inline bool TimeSpanEqual(const TimeSpan left, const TimeSpan right)
-{
-    return left == right;
-}
-
-static inline bool TimeSpanNotEqual(const TimeSpan left, const TimeSpan right)
-{
-    return left != right;
-}
-
-static inline bool TimeSpanLessThan(const TimeSpan left, const TimeSpan right)
-{
-    return left < right;
+    return TimePointToTimeSpan(left) < TimePointToTimeSpan(right);
 }
 
 /** @} */

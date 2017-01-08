@@ -33,7 +33,6 @@
 #include "system.h"
 #include "terminal.h"
 
-#include <chrono>
 #include <spidrv.h>
 #include "adxrs453/adxrs453.h"
 
@@ -76,10 +75,6 @@ static void BlinkLed0(void* param)
     {
         GPIO_PinOutToggle(LED_PORT, LED0);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
-
-        std::chrono::milliseconds ms(10);
-
-        LOGF(LOG_LEVEL_INFO, "Blink %d", (int)ms.count());
     }
 }
 

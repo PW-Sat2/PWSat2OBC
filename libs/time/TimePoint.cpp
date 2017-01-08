@@ -28,7 +28,7 @@ TimeSpan TimeSpanFromDays(uint32_t days)
 
 uint32_t TimeSpanToSeconds(TimeSpan span)
 {
-    return std::chrono::duration_cast<std::chrono::duration<uint32_t>>(span).count();
+    return span.count() / 1000;
 }
 
 TimePoint TimePointBuild(uint16_t day, uint8_t hour, uint8_t minute, uint8_t second, uint16_t millisecond)
@@ -74,15 +74,4 @@ TimeSpan TimePointToTimeSpan(TimePoint point)
     result *= 1000;
     result += point.milisecond;
     return TimeSpanFromMilliseconds(result);
-}
-
-TimeSpan TimeSpanAdd(TimeSpan left, TimeSpan right)
-{
-    left += right;
-    return left;
-}
-
-TimeShift TimeSpanSub(TimeSpan left, TimeSpan right)
-{
-    return left - right;
 }
