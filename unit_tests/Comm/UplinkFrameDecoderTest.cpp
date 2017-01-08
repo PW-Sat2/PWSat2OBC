@@ -24,8 +24,14 @@ using telecommands::UplinkProtocol;
 class UplinkFrameDecoderTest : public Test
 {
   protected:
-    UplinkProtocol _proto{0xDDCCBBAA};
+    UplinkFrameDecoderTest();
+
+    UplinkProtocol _proto;
 };
+
+UplinkFrameDecoderTest::UplinkFrameDecoderTest() : _proto(0xAABBCCDD)
+{
+}
 
 TEST_F(UplinkFrameDecoderTest, ShouldDecodeValidFrame)
 {
