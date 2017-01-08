@@ -35,9 +35,9 @@ gsl::span<IHandleTeleCommand*> Telecommands::AllTelecommands()
 }
 
 OBCCommunication::OBCCommunication(II2CBus& systemBus)
-    : UplinkProtocolDecoder(),                                                                                   //
-      SupportedTelecommands(),                                                                                   //
-      TelecommandHandler(UplinkProtocolDecoder, UplinkProtocolDecoder, SupportedTelecommands.AllTelecommands()), //
+    : UplinkProtocolDecoder(),                                                            //
+      SupportedTelecommands(),                                                            //
+      TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.AllTelecommands()), //
       CommDriver(systemBus, TelecommandHandler)
 {
 }
