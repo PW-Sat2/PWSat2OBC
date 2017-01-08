@@ -80,7 +80,7 @@ namespace obc
     struct OBCGPIOBase
     {
         /** @brief Slave Select - Flash1 */
-        const drivers::gpio::OutputPin<TSlaveSelectFlash1> SlaveSelectFlash1;
+        const drivers::gpio::OutputPin<TSlaveSelectFlash1> Flash1ChipSelect;
         /** @brief LED0 */
         const drivers::gpio::OutputPin<TLed0> Led0;
         /** @brief LED1 */
@@ -101,7 +101,7 @@ namespace obc
         {
             CMU_ClockEnable(cmuClock_GPIO, true);
 
-            this->SlaveSelectFlash1.Initialize();
+            this->Flash1ChipSelect.Initialize();
             this->Led0.Initialize();
             this->Led1.Initialize();
             this->SysClear.Initialize();

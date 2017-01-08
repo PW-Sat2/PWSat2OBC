@@ -52,7 +52,7 @@ extern "C" void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* 
 
 extern "C" void vApplicationIdleHook(void)
 {
-    //    EMU_EnterEM1();
+    EMU_EnterEM1();
 }
 
 void I2C0_IRQHandler(void)

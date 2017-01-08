@@ -19,7 +19,9 @@ namespace obc
         */
 
         /**
-         * @brief Storage driver for N25Q
+         * @brief Storage handler for N25Q
+         *
+         * This class manages external flash and it's integration with YAFFS
          */
         class N25QStorage final
         {
@@ -47,6 +49,7 @@ namespace obc
             /** @brief Performs (lengthy) erase operation */
             OSResult Erase();
 
+          private:
             /** @brief SPI driver for N25Q flash slave */
             drivers::spi::EFMSPISlaveInterface ExternalFlashDriverSPI;
 
@@ -56,7 +59,7 @@ namespace obc
             /** @brief N25Q Yaffs device */
             devices::n25q::N25QYaffsDevice<devices::n25q::BlockMapping::Sector, 512_Bytes, 16_MB> ExternalFlash;
 
-          private:
+            /** @brief Device operations */
             services::fs::IYaffsDeviceOperations& _deviceOperations;
         };
 
