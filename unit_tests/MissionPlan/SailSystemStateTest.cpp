@@ -67,7 +67,7 @@ TEST_F(SailSystemStateTest, ShouldUpdateSystemState)
 
 TEST_F(SailSystemStateTest, ShouldOpenSailAfterTimeIfNotOpened)
 {
-    state.Time = TimeSpanAdd(TimeSpanFromHours(40), TimeSpanFromSeconds(1));
+    state.Time = TimeSpanFromHours(40) + TimeSpanFromSeconds(1);
     state.SailOpened = false;
 
     DetermineActions();

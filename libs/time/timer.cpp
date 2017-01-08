@@ -73,9 +73,9 @@ void TimeProvider::AdvanceTime(TimeSpan delta)
         return;
     }
 
-    CurrentTime = TimeSpanAdd(CurrentTime, delta);
-    NotificationTime = TimeSpanAdd(NotificationTime, delta);
-    PersistanceTime = TimeSpanAdd(PersistanceTime, delta);
+    CurrentTime = CurrentTime + delta;
+    NotificationTime = NotificationTime + delta;
+    PersistanceTime = PersistanceTime + delta;
 
     struct TimerState state = BuildTimerState();
 
@@ -93,8 +93,8 @@ bool TimeProvider::SetCurrentTime(TimePoint pointInTime)
     }
 
     CurrentTime = span;
-    NotificationTime = TimeSpanAdd(NotificationPeriod, TimeSpanFromMilliseconds(1));
-    PersistanceTime = TimeSpanAdd(SavePeriod, TimeSpanFromMilliseconds(1));
+    NotificationTime = NotificationPeriod + TimeSpanFromMilliseconds(1);
+    PersistanceTime = SavePeriod + TimeSpanFromMilliseconds(1);
     struct TimerState state = BuildTimerState();
     System::GiveSemaphore(timerLock);
 
@@ -145,8 +145,8 @@ TimerState TimeProvider::BuildTimerState()
 {
     struct TimerState result;
     result.time = CurrentTime;
-    result.saveTime = TimeSpanLessThan(SavePeriod, PersistanceTime);
-    result.sendNotification = TimeSpanLessThan(NotificationPeriod, NotificationTime);
+    result.saveTime = SavePeriod < PersistanceTime;
+    result.sendNotification = NotificationPeriod < NotificationTime;
     if (result.saveTime)
     {
         PersistanceTime = TimeSpanFromMilliseconds(0ull);
@@ -165,13 +165,13 @@ struct TimeSnapshot TimeProvider::ReadFile(IFileSystem& fs, const char* const fi
     struct TimeSnapshot result;
     std::array<uint8_t, sizeof(TimeSpan)> buffer;
     if (!ReadFromFile(fs, filePath, buffer))
+
     {
         LOGF(LOG_LEVEL_WARNING, "Unable to read file: %s.", filePath);
         return result;
     }
 
     Reader reader(buffer);
-
     result.CurrentTime = TimeSpan(reader.ReadQuadWordLE());
     if (!reader.Status())
     {
@@ -342,7 +342,7 @@ bool TimeProvider::LongDelay(TimeSpan delay)
         return false;
     }
 
-    TimePoint time = TimePointFromTimeSpan(TimeSpanAdd(TimePointToTimeSpan(missionTime.Value), delay));
+    TimePoint time = TimePointFromTimeSpan(TimePointToTimeSpan(missionTime.Value) + delay);
 
     return LongDelayUntil(time);
 }

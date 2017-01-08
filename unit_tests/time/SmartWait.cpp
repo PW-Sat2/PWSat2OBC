@@ -57,7 +57,7 @@ TEST_F(SmartWaitTest, ShouldWaitForPulseAndReturnIfDesiredTimeReached)
 
         Option<TimeSpan> currentTime = timeProvider.GetCurrentTime();
 
-        timeProvider.SetCurrentTime(TimePointFromTimeSpan(TimeSpanAdd(currentTime.Value, TimeSpanFromMinutes(1))));
+        timeProvider.SetCurrentTime(TimePointFromTimeSpan(currentTime.Value + TimeSpanFromMinutes(1)));
         return OSResult::Success;
     }));
 
@@ -75,7 +75,7 @@ TEST_F(SmartWaitTest, ShouldWaitForPulseAndReturnIfMissionTimeJumpsOverDesiredTi
 
         Option<TimeSpan> currentTime = timeProvider.GetCurrentTime();
 
-        timeProvider.SetCurrentTime(TimePointFromTimeSpan(TimeSpanAdd(currentTime.Value, TimeSpanFromMinutes(1))));
+        timeProvider.SetCurrentTime(TimePointFromTimeSpan(currentTime.Value + TimeSpanFromMinutes(1)));
         return OSResult::Success;
     }));
 

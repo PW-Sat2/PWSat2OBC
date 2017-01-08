@@ -39,7 +39,7 @@ namespace mission
         UNREFERENCED_PARAMETER(param);
 
         const TimeSpan t = TimeSpanFromHours(40);
-        if (TimeSpanLessThan(state.Time, t))
+        if (state.Time < t)
         {
             return false;
         }

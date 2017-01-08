@@ -34,7 +34,6 @@
 #include "terminal.h"
 
 #include "gpio/gpio.h"
-#include <chrono>
 #include "leuart/leuart.h"
 #include "power_eps/power_eps.h"
 
@@ -74,10 +73,6 @@ static void BlinkLed0(void* param)
     {
         Main.Hardware.Pins.Led0.Toggle();
         vTaskDelay(1000 / portTICK_PERIOD_MS);
-
-        std::chrono::milliseconds ms(10);
-
-        LOGF(LOG_LEVEL_INFO, "Blink %d", (int)ms.count());
     }
 }
 

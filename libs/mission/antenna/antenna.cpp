@@ -435,7 +435,7 @@ namespace mission
         {
             AntennaMissionState* stateDescriptor = (AntennaMissionState*)param;
             const TimeSpan t = TimeSpanFromMinutes(40);
-            if (TimeSpanLessThan(state.Time, t))
+            if (state.Time < t)
             {
                 return false;
             }
