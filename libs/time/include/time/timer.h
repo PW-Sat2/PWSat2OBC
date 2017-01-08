@@ -74,7 +74,7 @@ namespace services
 
             bool operator==(const TimeSnapshot& right) const
             {
-                return TimeSpanEqual(CurrentTime, right.CurrentTime);
+                return CurrentTime == right.CurrentTime;
             }
 
             bool operator!=(const TimeSnapshot& right) const
@@ -84,7 +84,7 @@ namespace services
 
             bool operator<(const TimeSnapshot& right) const
             {
-                return TimeSpanLessThan(CurrentTime, right.CurrentTime);
+                return CurrentTime < right.CurrentTime;
             }
 
             bool operator>(const TimeSnapshot& right) const
