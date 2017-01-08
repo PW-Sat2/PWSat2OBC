@@ -23,17 +23,10 @@ namespace obc
             /** @brief Pin location types */
             enum class Type
             {
-                Unknown,     //!< Unknown
-                Pin,         //!< Pin
-                I2C,         //!< I2C
-                SPI,         //!< SPI
-                LEUART,      //!< LEUART
-                PinContainer //!< PinContainer
-            };
-
-            /** @brief Packs many pins into single type */
-            template <typename... T> struct PinContainer
-            {
+                Unknown,      //!< Unknown
+                Pin,          //!< Pin
+                PinContainer, //!< Pin container,
+                PinGroup      //!< Pin group
             };
 
             /** @brief Detects pin location type */
@@ -41,12 +34,9 @@ namespace obc
             {
                 if (std::is_base_of<io_map::PinTag, T>::value)
                     return Type::Pin;
-                if (std::is_base_of<io_map::I2CPinsTag, T>::value)
-                    return Type::I2C;
-                if (std::is_base_of<io_map::SPIPinsTag, T>::value)
-                    return Type::SPI;
-                if (std::is_base_of<io_map::LEUARTPinsTag, T>::value)
-                    return Type::LEUART;
+
+                if (std::is_base_of<io_map::PinGroupTag, T>::value)
+                    return Type::PinGroup;
 
                 return Type::Unknown;
             }
@@ -75,41 +65,18 @@ namespace obc
                 static constexpr bool value = (LeftPort == RightPort) && (LeftPinNumber == RightPinNumber);
             };
 
-            /** @brief Detects conflicts between I2C pins and Right */
-            template <typename Left, Type RightType, typename Right> struct Conflict<Type::I2C, Left, RightType, Right>
+            /** @brief Detects conflicts between pin group and Right */
+            template <typename Left, Type RightType, typename Right> struct Conflict<Type::PinGroup, Left, RightType, Right>
             {
-                /** @brief Pin container: SDA, SCL */
-                using C = PinContainer<typename Left::SDA, typename Left::SCL>;
-
-                /** @brief true if any I2C pin conflicts with Right */
-                static constexpr bool value = Conflict<Type::PinContainer, C, RightType, Right>::value;
-            };
-
-            /** @brief Detects conflicts between SPI pins and Right */
-            template <typename Left, Type RightType, typename Right> struct Conflict<Type::SPI, Left, RightType, Right>
-            {
-                /** @brief Pin container: MOSI, MISO, CLK */
-                using C = PinContainer<typename Left::MOSI, typename Left::MISO, typename Left::CLK>;
-
-                /** @brief true if any SPI pin conflicts with Right */
-                static constexpr bool value = Conflict<Type::PinContainer, C, RightType, Right>::value;
-            };
-
-            /** @brief Detects conflicts between LEUART pins and Right */
-            template <typename Left, Type RightType, typename Right> struct Conflict<Type::LEUART, Left, RightType, Right>
-            {
-                /** @brief Pin container: TX, RX */
-                using C = PinContainer<typename Left::TX, typename Left::RX>;
-
-                /** @brief true if any LEUART pin conflicts with Right */
-                static constexpr bool value = Conflict<Type::PinContainer, C, RightType, Right>::value;
+                /** @brief true if any pin in group conflicts with Right */
+                static constexpr bool value = Conflict<Type::PinContainer, typename Left::Group::Pins, RightType, Right>::value;
             };
 
             /**
              * @brief Detects conflict between any Pin in container and Right
              */
             template <typename... Pins, Type RightType, typename Right>
-            struct Conflict<Type::PinContainer, PinContainer<Pins...>, RightType, Right>
+            struct Conflict<Type::PinContainer, io_map::PinContainer<Pins...>, RightType, Right>
             {
                 /**
                  * @brief Checks conflict for pin list

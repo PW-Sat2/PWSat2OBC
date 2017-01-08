@@ -17,7 +17,10 @@ N25QStorage::N25QStorage(drivers::spi::EFMSPIInterface& spi, IYaffsDeviceOperati
 
 OSResult N25QStorage::Initialize()
 {
-    this->ExternalFlashDriver.Reset();
+    if (this->ExternalFlashDriver.Reset() != OperationResult::Success)
+    {
+        return OSResult::DeviceNotFound;
+    }
 
     return this->ExternalFlash.Mount(this->_deviceOperations);
 }

@@ -1,5 +1,6 @@
 #include "obc.h"
 #include "io_map.h"
+#include "logger/logger.h"
 
 OBC::OBC()
     : Hardware(&this->PowerControlInterface),   //
