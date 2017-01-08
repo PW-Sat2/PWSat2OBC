@@ -19,7 +19,7 @@ DecodeTelecommandResult UplinkProtocol::Decode(span<const uint8_t> frame)
 {
     Reader r(frame);
 
-    auto code = r.ReadDoubleWordLE();
+    auto code = r.ReadDoubleWordBE();
     auto command = r.ReadByte();
     auto parameters = r.ReadToEnd();
 

@@ -1,3 +1,6 @@
+import struct
+
+from build_config import config
 import devices
 from tests.base import BaseTest
 from system import auto_comm_handling, auto_power_on
@@ -74,7 +77,7 @@ class Test_Comm(BaseTest):
 
         frame = self.system.obc.receive_frame()
 
-        self.assertEqual(frame, "ABC")
+        self.assertEqual(frame[4:], "ABC")
 
     def test_should_remove_frame_after_receive(self):
         event = TestEvent()
@@ -89,12 +92,12 @@ class Test_Comm(BaseTest):
 
     def test_should_receive_biggest_possible_frame(self):
         self.startup()
-        frame = "".join([chr(ord('A') + i % 25) for i in xrange(0, devices.TransmitterDevice.MAX_CONTENT_SIZE)])
+        frame = "".join([chr(ord('A') + i % 25) for i in xrange(0, devices.Comm.MAX_UPLINK_CONTENT_SIZE)])
         self.system.receiver.put_frame(frame)
 
         received_frame = self.system.obc.receive_frame()
 
-        self.assertEqual(received_frame, frame)
+        self.assertEqual(received_frame[4:], frame)
 
     def test_build_receive_frame_response(self):
         self.power_on_obc()
@@ -104,10 +107,10 @@ class Test_Comm(BaseTest):
 
         response = devices.ReceiverDevice.build_frame_response(data, doppler, rssi)
 
-        self.assertEqual(response[0:2], [0x2C, 0x01], "Length")
+        self.assertEqual(response[0:2], [0x30, 0x01], "Length")
         self.assertEqual(response[2:4], [0x9C, 0x01], "Doppler")
         self.assertEqual(response[4:6], [0x76, 0x01], "RSSI")
-        self.assertEqual(response[6:307], [ord('a')] * 300)
+        self.assertEqual(response[10:311], [ord('a')] * 300)
 
     def test_auto_pingpong(self):
         def reset_handler(*args):
@@ -117,7 +120,7 @@ class Test_Comm(BaseTest):
         self.system.comm.receiver.on_reset = reset_handler
         self.power_on_and_wait()
 
-        frame = [0xAA, 0xBB, 0xCC, 0xDD, ord('P')]
+        frame = 'PING'
 
         self.system.receiver.put_frame(frame)
         msg = self.system.transmitter.get_message_from_buffer(20)
