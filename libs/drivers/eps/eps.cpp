@@ -40,25 +40,25 @@ bool EpsOpenSail(void)
     {
         return false;
     }
-    System::SleepTask(100);
+    System::SleepTask(OSTaskTimeSpan(100));
 
     if (!epsControlLCL(EPS_LCL_SAIL_0, false))
     {
         return false;
     }
-    System::SleepTask(100);
+    System::SleepTask(OSTaskTimeSpan(100));
 
     if (!epsControlLCL(EPS_LCL_SAIL_1, true))
     {
         return false;
     }
-    System::SleepTask(100);
+    System::SleepTask(OSTaskTimeSpan(100));
 
     if (!epsControlLCL(EPS_LCL_SAIL_1, false))
     {
         return false;
     }
-    System::SleepTask(100);
+    System::SleepTask(OSTaskTimeSpan(100));
 
     return true;
 }

@@ -309,7 +309,7 @@ namespace mission
         if (this->taskHandle != nullptr)
         {
             System::EventGroupSetBits(this->eventGroup, PauseRequestFlag);
-            System::EventGroupWaitForBits(this->eventGroup, PauseAckFlag, false, true, MAX_DELAY);
+            System::EventGroupWaitForBits(this->eventGroup, PauseAckFlag, false, true, OSTaskTimeSpan(MAX_DELAY));
         }
     }
 
@@ -357,7 +357,8 @@ namespace mission
         LOG(LOG_LEVEL_DEBUG, "Starting mission control task");
         for (;;)
         {
-            const OSEventBits result = System::EventGroupWaitForBits(this->eventGroup, PauseRequestFlag, false, true, 10000);
+            const OSEventBits result =
+                System::EventGroupWaitForBits(this->eventGroup, PauseRequestFlag, false, true, OSTaskTimeSpan(10000));
             if (result == PauseRequestFlag)
             {
                 LOG(LOG_LEVEL_WARNING, "MissionLoop task paused");

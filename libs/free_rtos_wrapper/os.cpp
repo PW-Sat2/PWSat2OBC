@@ -14,12 +14,13 @@ static_assert(static_cast<uint8_t>(TaskPriority::Highest) < configMAX_PRIORITIES
 
 static inline TickType_t ConvertTimeToTicks(const OSTaskTimeSpan span)
 {
-    if (span == MAX_DELAY)
+    const uint64_t time = span.count();
+
+    if (time == MAX_DELAY)
     {
         return portMAX_DELAY;
     }
 
-    const uint64_t time = span;
     return pdMS_TO_TICKS(time);
 }
 
@@ -225,7 +226,7 @@ void System::PulseSet(OSPulseHandle handle)
 
 OSTaskTimeSpan System::GetUptime()
 {
-    return portTICK_PERIOD_MS * xTaskGetTickCount();
+    return OSTaskTimeSpan(static_cast<uint64_t>(portTICK_PERIOD_MS * xTaskGetTickCount()));
 }
 
 void System::Yield()

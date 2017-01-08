@@ -16,7 +16,7 @@ bool I2CLowLevelBus::IsSclLatched()
 
 I2CResult I2CLowLevelBus::ExecuteTransfer(I2C_TransferSeq_TypeDef* seq)
 {
-    Lock lock(this->_lock, MAX_DELAY);
+    Lock lock(this->_lock, OSTaskTimeSpan(MAX_DELAY));
 
     if (!lock())
     {
@@ -39,7 +39,7 @@ I2CResult I2CLowLevelBus::ExecuteTransfer(I2C_TransferSeq_TypeDef* seq)
         return (I2CResult)rawResult;
     }
 
-    if (OS_RESULT_FAILED(this->_resultQueue.Pop(rawResult, io_map::I2C::Timeout * 1000)))
+    if (OS_RESULT_FAILED(this->_resultQueue.Pop(rawResult, OSTaskTimeSpan(I2C_TIMEOUT * 1000))))
     {
         I2CResult ret = I2CResult::Timeout;
 

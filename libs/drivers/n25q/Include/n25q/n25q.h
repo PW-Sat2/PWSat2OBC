@@ -223,13 +223,13 @@ namespace devices
              * Datasheet states that this operation should take maximum 5 ms.
              * Rounded to 10ms as it is single FreeRTOS tick
              */
-            constexpr static std::uint32_t ProgramPageTimeout = 50;
+            static constexpr OSTaskTimeSpan ProgramPageTimeout = OSTaskTimeSpan(50);
             /** @brief Erase subsector operation timeout */
-            constexpr static std::uint32_t EraseSubSectorTimeout = 1.2 * (0.8 * 1000);
+            static constexpr OSTaskTimeSpan EraseSubSectorTimeout = OSTaskTimeSpan(static_cast<uint64_t>(1.2 * (0.8 * 1000)));
             /** @brief Erase sector operation timeout */
-            constexpr static std::uint32_t EraseSectorTimeout = 1.2 * (3 * 1000);
+            static constexpr OSTaskTimeSpan EraseSectorTimeout = OSTaskTimeSpan(static_cast<uint64_t>(1.2 * (3 * 1000)));
             /** @brief Erase chip operation timeout */
-            constexpr static std::uint32_t EraseChipTimeOut = 1.2 * (250 * 1000);
+            static constexpr OSTaskTimeSpan EraseChipTimeOut = OSTaskTimeSpan(static_cast<uint64_t>(1.2 * (250 * 1000)));
             /** @brief Reset timeout */
             constexpr static std::uint32_t ResetTimeout = 10;
             /** @brief Write status register timeout */

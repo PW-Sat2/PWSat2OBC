@@ -36,6 +36,11 @@ enum N25QCommand
     WriteStatusRegister = 0x01
 };
 
+constexpr OSTaskTimeSpan N25QDriver::ProgramPageTimeout;
+constexpr OSTaskTimeSpan N25QDriver::EraseSubSectorTimeout;
+constexpr OSTaskTimeSpan N25QDriver::EraseSectorTimeout;
+constexpr OSTaskTimeSpan N25QDriver::EraseChipTimeOut;
+
 static inline void WriterWriteAddress(Writer* writer, size_t address)
 {
     WriterWriteByte(writer, static_cast<uint8_t>((address >> 2 * 8) & 0xFF));

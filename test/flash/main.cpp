@@ -146,7 +146,7 @@ static void Ping(void* v)
         GPIO_PinOutToggle(io_map::Led0::Port, io_map::Led0::PinNumber);
         GPIO_PinOutToggle(io_map::Led1::Port, io_map::Led1::PinNumber);
 
-        System::SleepTask(1000);
+        System::SleepTask(OSTaskTimeSpan(1000));
     }
 }
 
