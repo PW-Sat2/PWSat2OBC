@@ -67,7 +67,11 @@ namespace obc
         }
     };
 
-    /** @brief Composes all used GPIO pins together */
+    /**
+     * @brief Composes all used GPIO pins together
+     *
+     * @remark All used pin locations must derive from tags defined in base/io_map.h
+     */
     template < //
         typename TSlaveSelectFlash1,
         typename TLed0,

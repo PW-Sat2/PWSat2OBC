@@ -1,5 +1,6 @@
 #include "obc.h"
 #include "io_map.h"
+#include "logger/logger.h"
 
 OBC::OBC()
     : Hardware(&this->PowerControlInterface),   //
@@ -21,5 +22,9 @@ void OBC::Initialize()
 
 void OBC::PostStartInitialization()
 {
-    this->Storage.Initialize();
+    auto r = this->Storage.Initialize();
+    if (OS_RESULT_FAILED(r))
+    {
+        LOGF(LOG_LEVEL_FATAL, "Failed to initialize storage %d", num(r));
+    }
 }

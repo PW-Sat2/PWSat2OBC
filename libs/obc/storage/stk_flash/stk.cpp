@@ -9,7 +9,7 @@ STKStorage::STKStorage(drivers::spi::EFMSPIInterface& spi, FileSystem& fs, obc::
     UNREFERENCED_PARAMETER(pins);
 }
 
-void STKStorage::Initialize()
+OSResult STKStorage::Initialize()
 {
     memset(&rootDevice, 0, sizeof(rootDevice));
     rootDeviceDriver.geometry.pageSize = 512;
@@ -39,8 +39,10 @@ void STKStorage::Initialize()
 
     if (!FileSystemAddDeviceAndMount(&rootDevice))
     {
-        return;
+        return OSResult::DeviceNotFound;
     }
+
+    return OSResult::Success;
 }
 
 OSResult STKStorage::ClearStorage()

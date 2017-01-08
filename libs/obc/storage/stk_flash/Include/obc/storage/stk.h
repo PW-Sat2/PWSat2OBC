@@ -32,8 +32,11 @@ namespace obc
              */
             STKStorage(drivers::spi::EFMSPIInterface& spi, FileSystem& fs, obc::OBCGPIO& pins);
 
-            /** @brief Initializes OBC storage */
-            void Initialize();
+            /**
+             * @brief Initializes OBC storage
+             * @return Operation result
+             */
+            OSResult Initialize();
 
             /**
              * @brief Clears OBC storage

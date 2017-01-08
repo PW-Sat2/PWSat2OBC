@@ -19,7 +19,7 @@ namespace io_map
 
     using SysClear = PinLocation<gpioPortC, 0>;
 
-    struct SPI : public SPIPinsTag
+    struct SPI : public SPIPins<SPI>
     {
         static constexpr USART_TypeDef* Peripheral = USART1;
         static constexpr std::uint8_t Location = 1;
@@ -28,16 +28,17 @@ namespace io_map
         using CLK = PinLocation<gpioPortD, 2>;
     };
 
-    struct LEUART : public LEUARTPinsTag
+    struct LEUART : public LEUARTPins<LEUART>
     {
         static constexpr std::uint8_t Location = LEUART_ROUTE_LOCATION_LOC0;
         static constexpr std::uint32_t Baudrate = 115200;
         static constexpr std::uint8_t InterruptPriority = 6;
+
         using TX = PinLocation<gpioPortD, 4>;
         using RX = PinLocation<gpioPortD, 5>;
     };
 
-    struct I2C_0 : I2CPinsTag
+    struct I2C_0 : public I2CPins<I2C_0>
     {
         static constexpr std::uint32_t Location = I2C_ROUTE_LOCATION_LOC1;
 
@@ -45,7 +46,7 @@ namespace io_map
         using SCL = PinLocation<gpioPortD, 7>;
     };
 
-    struct I2C_1 : I2CPinsTag
+    struct I2C_1 : public I2CPins<I2C_1>
     {
         static constexpr std::uint32_t Location = I2C_ROUTE_LOCATION_LOC0;
 

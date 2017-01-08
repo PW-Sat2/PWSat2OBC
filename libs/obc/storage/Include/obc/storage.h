@@ -39,8 +39,11 @@ namespace obc
          */
         OBCStorageHandler(drivers::spi::EFMSPIInterface& spi, FileSystem& fs, obc::OBCGPIO& pins);
 
-        /** @brief Performs storage initialization */
-        void Initialize();
+        /**
+         * @brief Performs storage initialization
+         * @return Operation result
+         */
+        OSResult Initialize();
 
         /**
          * @brief Clears OBC storage
@@ -65,9 +68,9 @@ namespace obc
     {
     }
 
-    template <typename Storage> inline void obc::OBCStorageHandler<Storage>::Initialize()
+    template <typename Storage> inline OSResult obc::OBCStorageHandler<Storage>::Initialize()
     {
-        this->_storage.Initialize();
+        return this->_storage.Initialize();
     }
 
     template <typename Storage> inline OSResult obc::OBCStorageHandler<Storage>::ClearStorage()
