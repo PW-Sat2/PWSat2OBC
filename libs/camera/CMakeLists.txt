@@ -1,9 +1,9 @@
 set(NAME camera)
 
 set(SOURCES
-    Src/camera_utils.c
-    Src/camera_internal.c
-    Src/camera.c
+    camera_utils.cpp
+    camera_internal.cpp
+    camera.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

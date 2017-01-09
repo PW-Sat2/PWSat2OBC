@@ -60,6 +60,7 @@ target_link_libraries(${NAME}
     spi
     efm_emlib
     uart
+    camera
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

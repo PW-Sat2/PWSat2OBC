@@ -90,21 +90,22 @@ void Uart::DeInitialize(){
 }
 
 UartResult Uart::Read(gsl::span<const uint8_t>data){
-	uint8_t *InData= const_cast<uint8_t*>(data.data());
-	Lock lock(this->rxlock, MAX_DELAY);
+	//uint8_t *InData= const_cast<uint8_t*>(data.data());
+	//Lock lock(this->rxlock, MAX_DELAY);
 
-		if (!lock())
+		/*if (!lock())
 		    {
 		        //LOGF(LOG_LEVEL_ERROR, "[UART] Taking receive semaphore failed.");
 		        return UartResult::Failure;
 		    }
-
+*/
+	this->_init.uart->CMD = USART_CMD_RXEN;
 	 DMADRV_PeripheralMemory(rxDmaCh,
 	        dmadrvPeripheralSignal_USART1_RXDATAV,
-	        (void*)InData,
+	        (void*)data.data(),
 	        (void*)&USART1->RXDATA,
 	        true,
-	        sizeof(data),
+			data.length(),
 	        dmadrvDataSize1,
 			ReceiveDmaComplete,
 	        NULL);
@@ -113,14 +114,14 @@ UartResult Uart::Read(gsl::span<const uint8_t>data){
 
 UartResult Uart::Write(gsl::span<const uint8_t>data){
 	uint8_t *InData= const_cast<uint8_t*>(data.data());
-	Lock lock(this->txlock, MAX_DELAY);
+/*	Lock lock(this->txlock, MAX_DELAY);
 
 	if (!lock())
 	    {
 	        //LOGF(LOG_LEVEL_ERROR, "[UART] Taking transmit semaphore failed.");
 	        return UartResult::Failure;
 	    }
-
+*/
 	DMADRV_MemoryPeripheral(txDmaCh,
 	                          this->txDmaSignal,
 							  (void *)&(this->_init.uart->TXDATA),

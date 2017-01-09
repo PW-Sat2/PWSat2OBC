@@ -37,6 +37,7 @@
 #include "leuart/leuart.h"
 #include "power_eps/power_eps.h"
 #include "uart/Uart.h"
+#include "camera/camera.h"
 
 using devices::comm::CommObject;
 using devices::comm::CommFrame;
@@ -47,10 +48,16 @@ using devices::comm::CommObject;
 using devices::comm::CommFrame;
 using gsl::span;
 using namespace drivers::uart;
+using namespace devices::camera;
 
 OBC Main;
+<<<<<<< HEAD
 mission::ObcMission Mission(Main.timeProvider, Main.antennaDriver, false);
 
+=======
+MissionState Mission(Main);
+static uint8_t out[256];
+>>>>>>> cam driver more OO
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
 extern "C" void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
@@ -176,7 +183,12 @@ void SetupHardware(void)
 
 void UartTask(void* param)
 {
-	const char* testByte="lamakota";
+	//const char* testByte="lamakota";
+
+
+	for(int i =0;i<255;i++){
+	out[i]=0x00;
+	}
 	UNREFERENCED_PARAMETER(param);
 
 	Uart_Init init;
@@ -193,9 +205,12 @@ void UartTask(void* param)
 
 	Uart uart(init);
 	uart.Initialize();
+	Camera camera(uart);
+	camera.CameraInit();
+
 	while (1) {
-	uart.Write(gsl::span<const uint8_t>(reinterpret_cast<const uint8_t*>(testByte), 8));
-	System::SleepTask(10);
+camera.CameraGetJPEGPicture(CameraJPEGResolution::_640x480,out,255);
+	System::SleepTask(1000);
 	}
 
 }

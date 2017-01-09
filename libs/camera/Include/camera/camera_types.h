@@ -1,108 +1,99 @@
 #ifndef _CAMERA_TYPES_H_
 #define _CAMERA_TYPES_H_
-
-#define CameraCmdPrefix     0xAA
-#define CameraCmdLength     6
-#define CameraJPEGFormat    0x07
-
 #include <FreeRTOS.h>
 #include <queue.h>
 
-typedef struct CameraObject_
-{
-    QueueHandle_t uartQueue;
-} CameraObject;
 
-typedef enum {
-    CameraCmd_Initial           = 0x01,
-    CameraCmd_GetPicture        = 0x04,
-    CameraCmd_Snapshot          = 0x05,
-    CameraCmd_SetPackageSize    = 0x06,
-    CameraCmd_SetBaudRate       = 0x07,
-    CameraCmd_Reset             = 0x08,
-    CameraCmd_Data              = 0x0A,
-    CameraCmd_Sync              = 0x0D,
-    CameraCmd_Ack               = 0x0E,
-    CameraCmd_Nak               = 0x0F,
-    CameraCmd_Light             = 0x13,
-    CameraCmd_Invalid           = 0xFF
-}CameraCmd;
+enum class CameraCmd{
+    Initial           = 0x01,
+    GetPicture        = 0x04,
+    Snapshot          = 0x05,
+    SetPackageSize    = 0x06,
+    SetBaudRate       = 0x07,
+    Reset             = 0x08,
+    Data              = 0x0A,
+    Sync              = 0x0D,
+    Ack               = 0x0E,
+    Nak               = 0x0F,
+    Light             = 0x13,
+    Invalid           = 0xFF
+};
 
-typedef enum CameraRAWImageFormat_e {
-    CameraRAWImageFormat_GrayScale  = 0x03,
-    CameraRAWImageFormat_RGB565     = 0x06,
-    CameraRAWImageFormat_CrYCbY     = 0x08,
-    CameraRAWImageFormat_Invalid    = 0xFF
-}CameraRAWImageFormat;
+enum class CameraRAWImageFormat {
+    GrayScale  = 0x03,
+    RGB565     = 0x06,
+    CrYCbY     = 0x08,
+    Invalid    = 0xFF
+};
 
-typedef enum CameraRAWResolution_e {
-    CameraRAWResolution_80x60   = 0x01,
-    CameraRAWResolution_160x120 = 0x03,
-    CameraRAWResolution_128x128 = 0x09,
-    CameraRAWResolution_128x96  = 0x0B,
-    CameraRAWResolution_Invalid = 0xFF
-}CameraRAWResolution;
+enum class CameraRAWResolution {
+    _80x60   = 0x01,
+    _160x120 = 0x03,
+    _128x128 = 0x09,
+    _128x96  = 0x0B,
+    Invalid = 0xFF
+};
 
-typedef enum CameraJPEGResolution_e {
-    CameraJPEGResolution_160x128 = 0x03,
-    CameraJPEGResolution_320x240 = 0x05,
-    CameraJPEGResolution_640x480 = 0x07,
-    CameraJPEGResolution_Invalid = 0xFF
-}CameraJPEGResolution;
+enum class CameraJPEGResolution {
+    _160x128 = 0x03,
+    _320x240 = 0x05,
+    _640x480 = 0x07,
+    Invalid = 0xFF
+};
 
-typedef enum CameraPictureType_e {
-    CameraPictureType_Snapshot  = 0x01,
-    CameraPictureType_RAW       = 0x02,
-    CameraPictureType_JPEG      = 0x05,
-    CameraPictureType_Invalid   = 0xFF
-}CameraPictureType;
+enum class CameraPictureType {
+    Snapshot  = 0x01,
+    RAW       = 0x02,
+    JPEG      = 0x05,
+    Invalid   = 0xFF
+};
 
-typedef enum CameraSnapshotType_e {
-    CameraSnapshotType_Compressed   = 0x00,
-    CameraSnapshotType_Uncompressed = 0x01,
-    CameraSnapshotType_Invalid      = 0xFF,
-}CameraSnapshotType;
+enum class CameraSnapshotType {
+    Compressed   = 0x00,
+    Uncompressed = 0x01,
+    Invalid      = 0xFF,
+};
 
-typedef enum CameraBaudRate_e {
-    CamerBaudRate_2400 = 0,
-    CamerBaudRate_4800,
-    CamerBaudRate_9600,
-    CamerBaudRate_19200,
-    CamerBaudRate_38400,
-    CamerBaudRate_57600,
-    CamerBaudRate_115200,
-    CamerBaudRate_153600,
-    CamerBaudRate_230400,
-    CamerBaudRate_460800,
-    CamerBaudRate_921600,
-    CamerBaudRate_1228800,
-    CamerBaudRate_1843200,
-    CamerBaudRate_3686400
-}CameraBaudRate;
+enum class CameraBaudRate {
+    _2400 = 0,
+    _4800,
+    _9600,
+    _19200,
+    _38400,
+    _57600,
+    _115200,
+    _153600,
+    _230400,
+    _460800,
+    _921600,
+    _1228800,
+    _1843200,
+    _3686400
+};
 
-typedef enum CameraNAKError_e {
-    CameraNAKError_InvalidError                 = 0x00,
-    CameraNAKError_PictureTypeError             = 0x01,
-    CameraNAKError_PictureUpScaleError          = 0x02,
-    CameraNAKError_PictureScaleError            = 0x03,
-    CameraNAKError_UnexpectedReplyError         = 0x04,
-    CameraNAKError_SendPictureTimeoutError      = 0x05,
-    CameraNAKError_UnexpectedCommandError       = 0x06,
-    CameraNAKError_SRAMJPEGTypeError            = 0x07,
-    CameraNAKError_SRAMJPEGSizeError            = 0x08,
-    CameraNAKError_PictureFormatError           = 0x09,
-    CameraNAKError_PictureSizeError             = 0x0A,
-    CameraNAKError_ParameterError               = 0x0B,
-    CameraNAKError_SendRegisterTimeoutError     = 0x0C,
-    CameraNAKError_CommandIDError               = 0x0D,
-    CameraNAKError_PictureNotReadyError         = 0x0F,
-    CameraNAKError_TransferPackageNumberError   = 0x10,
-    CameraNAKError_SetTransferPackageSizeError  = 0x11,
-    CameraNAKError_CommandHeaderError           = 0xF0,
-    CameraNAKError_CommandLengthError           = 0xF1,
-    CameraNAKError_SendPictureError             = 0xF5,
-    CameraNAKError_SendCommandError             = 0xFF
-}CameraNAKError;
+enum class CameraNAKError {
+    InvalidError                 = 0x00,
+    PictureTypeError             = 0x01,
+    PictureUpScaleError          = 0x02,
+    PictureScaleError            = 0x03,
+    UnexpectedReplyError         = 0x04,
+    SendPictureTimeoutError      = 0x05,
+    UnexpectedCommandError       = 0x06,
+    SRAMJPEGTypeError            = 0x07,
+    SRAMJPEGSizeError            = 0x08,
+    PictureFormatError           = 0x09,
+    PictureSizeError             = 0x0A,
+    ParameterError               = 0x0B,
+    SendRegisterTimeoutError     = 0x0C,
+    CommandIDError               = 0x0D,
+    PictureNotReadyError         = 0x0F,
+    TransferPackageNumberError   = 0x10,
+    SetTransferPackageSizeError  = 0x11,
+    CommandHeaderError           = 0xF0,
+    CommandLengthError           = 0xF1,
+    SendPictureError             = 0xF5,
+    SendCommandError             = 0xFF
+};
 
 /*
 struct CameraBaudRateDividers_ {
@@ -127,28 +118,28 @@ struct CameraBaudRateDividers_ {
 };
 */
 
-typedef enum CameraResetType_e {
-    CameraResetType_Reboot  = 0x00,
-    CameraResetType_Flush   = 0x01,
-    CameraResetType_Invalid = 0xFF
-}CameraResetType;
+enum class CameraResetType {
+    Reboot  = 0x00,
+    Flush   = 0x01,
+    Invalid = 0xFF
+};
 
 
-typedef enum CameraLightFreqType_e {
-    CameraLightFreqType_50Hz    = 0x00,
-    CameraLightFreqType_60Hz    = 0x01,
-    CameraLightFreqType_Invalid = 0xFF
-}CameraLightFreqType;
+enum class CameraLightFreqType {
+    _50Hz    = 0x00,
+    _60Hz    = 0x01,
+    Invalid = 0xFF
+};
 
-typedef struct CameraCmdAck_ {
+struct CameraCmdAck {
     CameraCmd type;
     uint8_t ackCounter;
     uint16_t packageId;
-}CameraCmdAck;
+};
 
-typedef struct CameraCmdData_ {
+struct CameraCmdData {
     CameraPictureType type;
     uint32_t dataLength;
-}CameraCmdData;
+};
 
 #endif /* _CAMERA_TYPES_H_ */
