@@ -2,7 +2,7 @@
 #include "struct.h"
 
 SystemState::SystemState() //
-    : Time(TimeSpanFromMilliseconds(0)),
+    : Time(std::chrono::milliseconds(0)),
       SailOpened(false)
 {
     Antenna.Deployed = false;

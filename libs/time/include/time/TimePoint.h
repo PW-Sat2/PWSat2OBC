@@ -33,47 +33,11 @@ typedef struct
 } TimePoint;
 
 /**
- * @brief Type used to measure current mission time in milliseconds.
- *
- * The point with zero time (beginning of time) is considered to be
- * beginning of the mission itself.
- */
-typedef std::chrono::milliseconds TimeSpan;
-
-/**
- * @brief Creates TimeSpan object initialized from time specified in milliseconds.
- * @param[in] milliseconds TimeSpan value in milliseconds.
- * @return Prepared time span object.
- */
-TimeSpan TimeSpanFromMilliseconds(uint64_t milliseconds);
-
-/**
- * @brief Creates TimeSpan object initialized from time specified in seconds.
- * @param[in] seconds TimeSpan value in seconds.
- * @return Prepared time span object.
- */
-TimeSpan TimeSpanFromSeconds(uint32_t seconds);
-
-/**
- * @brief Creates TimeSpan object initialized from time specified in minutes.
- * @param[in] minutes TimeSpan value in minutes.
- * @return Prepared time span object.
- */
-TimeSpan TimeSpanFromMinutes(uint32_t minutes);
-
-/**
- * @brief Creates TimeSpan object initialized from time specified in hours.
- * @param[in] hours TimeSpan value in hours.
- * @return Prepared time span object.
- */
-TimeSpan TimeSpanFromHours(uint32_t hours);
-
-/**
  * @brief Creates TimeSpan object initialized from time specified in days.
  * @param[in] days TimeSpan value in days.
  * @return Prepared time span object.
  */
-TimeSpan TimeSpanFromDays(uint32_t days);
+std::chrono::milliseconds TimeSpanFromDays(uint32_t days);
 
 /**
  * @brief This procedure builds Time point object.
@@ -93,22 +57,14 @@ TimePoint TimePointBuild(uint16_t day, uint8_t hour, uint8_t minute, uint8_t sec
  * @param[in] span Time span to convert.
  * @return Decoded time point object.
  */
-TimePoint TimePointFromTimeSpan(TimeSpan span);
+TimePoint TimePointFromTimeSpan(std::chrono::milliseconds span);
 
 /**
  * @brief This procedure converts decoded time point object into time span value.
  * @param[in] point Time point object to convert.
  * @return Converted time span value.
  */
-TimeSpan TimePointToTimeSpan(TimePoint point);
-
-/**
- * @brief This procedure converts passed timespan value to time span that is
- * measured in seconds.
- * @param[in] span Time span to convert.
- * @return Time span in seconds.
- */
-uint32_t TimeSpanToSeconds(TimeSpan span);
+std::chrono::milliseconds TimePointToTimeSpan(TimePoint point);
 
 /**
  * @brief This procedure normalizes TimePoint object.

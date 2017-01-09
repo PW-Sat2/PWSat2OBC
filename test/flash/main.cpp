@@ -146,7 +146,7 @@ static void Ping(void* v)
         GPIO_PinOutToggle(LED_PORT, LED0);
         GPIO_PinOutToggle(LED_PORT, LED1);
 
-        System::SleepTask(OSTaskTimeSpan(1000));
+        System::SleepTask(std::chrono::seconds(1));
     }
 }
 

@@ -1,33 +1,11 @@
 #include "TimePoint.h"
 
-TimeSpan TimeSpanFromMilliseconds(uint64_t milliseconds)
-{
-    return std::chrono::duration_cast<TimeSpan>(std::chrono::milliseconds(milliseconds));
-}
+using std::chrono::milliseconds;
+using std::chrono::duration_cast;
 
-TimeSpan TimeSpanFromSeconds(uint32_t seconds)
+milliseconds TimeSpanFromDays(uint32_t days)
 {
-    return std::chrono::duration_cast<TimeSpan>(std::chrono::seconds(seconds));
-}
-
-TimeSpan TimeSpanFromMinutes(uint32_t minutes)
-{
-    return std::chrono::duration_cast<TimeSpan>(std::chrono::minutes(minutes));
-}
-
-TimeSpan TimeSpanFromHours(uint32_t hours)
-{
-    return std::chrono::duration_cast<TimeSpan>(std::chrono::hours(hours));
-}
-
-TimeSpan TimeSpanFromDays(uint32_t days)
-{
-    return std::chrono::duration_cast<TimeSpan>(std::chrono::hours(days * 24));
-}
-
-uint32_t TimeSpanToSeconds(TimeSpan span)
-{
-    return std::chrono::duration_cast<std::chrono::seconds>(span).count();
+    return duration_cast<milliseconds>(std::chrono::hours(days * 24));
 }
 
 TimePoint TimePointBuild(uint16_t day, uint8_t hour, uint8_t minute, uint8_t second, uint16_t millisecond)
@@ -46,10 +24,10 @@ TimePoint TimePointNormalize(TimePoint point)
     return TimePointFromTimeSpan(TimePointToTimeSpan(point));
 }
 
-TimePoint TimePointFromTimeSpan(const TimeSpan timeSpan)
+TimePoint TimePointFromTimeSpan(const milliseconds timeSpan)
 {
     TimePoint point = {};
-    uint64_t span = std::chrono::duration_cast<std::chrono::milliseconds>(timeSpan).count();
+    uint64_t span = timeSpan.count();
     point.milisecond = span % 1000;
     span /= 1000;
     point.second = span % 60;
@@ -61,7 +39,7 @@ TimePoint TimePointFromTimeSpan(const TimeSpan timeSpan)
     return point;
 }
 
-TimeSpan TimePointToTimeSpan(TimePoint point)
+milliseconds TimePointToTimeSpan(TimePoint point)
 {
     uint64_t result = point.day;
     result *= 24;
@@ -72,5 +50,5 @@ TimeSpan TimePointToTimeSpan(TimePoint point)
     result += point.second;
     result *= 1000;
     result += point.milisecond;
-    return TimeSpanFromMilliseconds(result);
+    return milliseconds(result);
 }

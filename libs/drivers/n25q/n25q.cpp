@@ -31,10 +31,10 @@ enum N25QCommand
     ClearFlagRegister = 0x50
 };
 
-constexpr OSTaskTimeSpan N25QDriver::ProgramPageTimeout;
-constexpr OSTaskTimeSpan N25QDriver::EraseSubSectorTimeout;
-constexpr OSTaskTimeSpan N25QDriver::EraseSectorTimeout;
-constexpr OSTaskTimeSpan N25QDriver::EraseChipTimeOut;
+constexpr std::chrono::milliseconds N25QDriver::ProgramPageTimeout;
+constexpr std::chrono::milliseconds N25QDriver::EraseSubSectorTimeout;
+constexpr std::chrono::milliseconds N25QDriver::EraseSectorTimeout;
+constexpr std::chrono::milliseconds N25QDriver::EraseChipTimeOut;
 
 N25QDriver::N25QDriver(ISPIInterface& spi) : _spi(spi)
 {
@@ -143,7 +143,7 @@ void N25QDriver::EnableWrite()
     this->Command(N25QCommand::WriteEnable);
 }
 
-bool N25QDriver::WaitBusy(OSTaskTimeSpan timeout)
+bool N25QDriver::WaitBusy(std::chrono::milliseconds timeout)
 {
     Timeout timeoutCheck(timeout);
 

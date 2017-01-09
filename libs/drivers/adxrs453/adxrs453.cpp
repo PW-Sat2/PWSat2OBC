@@ -11,6 +11,7 @@ using std::uint8_t;
 using std::uint16_t;
 using std::int16_t;
 using std::uint32_t;
+using std::chrono::milliseconds;
 
 void GenerateCommand(uint8_t commandByte, uint8_t registerAddress, uint16_t registerValue, uint8_t* sendBuffer)
 {
@@ -31,22 +32,22 @@ void GenerateCommand(uint8_t commandByte, uint8_t registerAddress, uint16_t regi
 Ecode_t SPISendB(ADXRS453_PinLocations_t* locations, SPIDRV_Handle_t handle, const void* buffer, uint8_t length)
 {
     Ecode_t resultCode;
-    System::SleepTask(OSTaskTimeSpan(50));
+    System::SleepTask(milliseconds(50));
     GPIO_PinOutClear((GPIO_Port_TypeDef)locations->csPortLocation, locations->csPinLocation);
     resultCode = SPIDRV_MTransmitB(handle, buffer, length);
     GPIO_PinOutSet((GPIO_Port_TypeDef)locations->csPortLocation, locations->csPinLocation);
-    System::SleepTask(OSTaskTimeSpan(50));
+    System::SleepTask(milliseconds(50));
     return resultCode;
 }
 
 Ecode_t SPIRecvB(ADXRS453_PinLocations_t* locations, SPIDRV_Handle_t handle, void* buffer, uint8_t length)
 {
     Ecode_t resultCode;
-    System::SleepTask(OSTaskTimeSpan(50));
+    System::SleepTask(milliseconds(50));
     GPIO_PinOutClear((GPIO_Port_TypeDef)locations->csPortLocation, locations->csPinLocation);
     resultCode = SPIDRV_MReceiveB(handle, buffer, length);
     GPIO_PinOutSet((GPIO_Port_TypeDef)locations->csPortLocation, locations->csPinLocation);
-    System::SleepTask(OSTaskTimeSpan(50));
+    System::SleepTask(milliseconds(50));
     return resultCode;
 }
 

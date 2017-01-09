@@ -67,7 +67,7 @@ TEST_F(SailSystemStateTest, ShouldUpdateSystemState)
 
 TEST_F(SailSystemStateTest, ShouldOpenSailAfterTimeIfNotOpened)
 {
-    state.Time = TimeSpanFromHours(40) + TimeSpanFromSeconds(1);
+    state.Time = std::chrono::hours(40) + std::chrono::seconds(1);
     state.SailOpened = false;
 
     DetermineActions();
@@ -84,6 +84,6 @@ RC_GTEST_FIXTURE_PROP(SailSystemStateTest, SailCannotBeOpenedIfNotPossible, (con
     if (runnable)
     {
         RC_ASSERT(this->state.SailOpened == false);
-        RC_ASSERT(TimeSpanFromHours(40) < this->state.Time);
+        RC_ASSERT(std::chrono::hours(40) < this->state.Time);
     }
 }

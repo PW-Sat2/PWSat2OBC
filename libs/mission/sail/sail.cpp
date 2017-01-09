@@ -38,7 +38,7 @@ namespace mission
     {
         UNREFERENCED_PARAMETER(param);
 
-        const TimeSpan t = TimeSpanFromHours(40);
+        const auto t = std::chrono::hours(40);
         if (state.Time < t)
         {
             return false;

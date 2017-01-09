@@ -86,7 +86,7 @@ static void SmartWaitTask(void* param)
 
     while (1)
     {
-        Main.timeProvider.LongDelay(TimeSpanFromMinutes(10));
+        Main.timeProvider.LongDelay(std::chrono::minutes(10));
         LOG(LOG_LEVEL_DEBUG, "After wait");
     }
 }

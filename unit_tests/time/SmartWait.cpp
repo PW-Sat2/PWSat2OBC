@@ -52,14 +52,16 @@ TEST_F(SmartWaitTest, ShouldWaitForPulseAndReturnIfDesiredTimeReached)
 {
     timeProvider.SetCurrentTime(TimePointBuild(0, 0, 0, 0, 0));
 
-    EXPECT_CALL(osMock, PulseWait(_, _)).Times(10).WillRepeatedly(Invoke([&](OSPulseHandle handle, const OSTaskTimeSpan timeout) {
-        UNUSED(handle, timeout);
+    EXPECT_CALL(osMock, PulseWait(_, _))
+        .Times(10)
+        .WillRepeatedly(Invoke([&](OSPulseHandle handle, const std::chrono::milliseconds timeout) {
+            UNUSED(handle, timeout);
 
-        Option<TimeSpan> currentTime = timeProvider.GetCurrentTime();
+            Option<std::chrono::milliseconds> currentTime = timeProvider.GetCurrentTime();
 
-        timeProvider.SetCurrentTime(TimePointFromTimeSpan(currentTime.Value + TimeSpanFromMinutes(1)));
-        return OSResult::Success;
-    }));
+            timeProvider.SetCurrentTime(TimePointFromTimeSpan(currentTime.Value + std::chrono::minutes(1)));
+            return OSResult::Success;
+        }));
 
     auto result = timeProvider.LongDelayUntil(TimePointBuild(0, 0, 10, 0, 0));
 
@@ -70,14 +72,16 @@ TEST_F(SmartWaitTest, ShouldWaitForPulseAndReturnIfMissionTimeJumpsOverDesiredTi
 {
     timeProvider.SetCurrentTime(TimePointBuild(0, 0, 0, 0, 0));
 
-    EXPECT_CALL(osMock, PulseWait(_, _)).Times(11).WillRepeatedly(Invoke([&](OSPulseHandle handle, const OSTaskTimeSpan timeout) {
-        UNUSED(handle, timeout);
+    EXPECT_CALL(osMock, PulseWait(_, _))
+        .Times(11)
+        .WillRepeatedly(Invoke([&](OSPulseHandle handle, const std::chrono::milliseconds timeout) {
+            UNUSED(handle, timeout);
 
-        Option<TimeSpan> currentTime = timeProvider.GetCurrentTime();
+            Option<std::chrono::milliseconds> currentTime = timeProvider.GetCurrentTime();
 
-        timeProvider.SetCurrentTime(TimePointFromTimeSpan(currentTime.Value + TimeSpanFromMinutes(1)));
-        return OSResult::Success;
-    }));
+            timeProvider.SetCurrentTime(TimePointFromTimeSpan(currentTime.Value + std::chrono::minutes(1)));
+            return OSResult::Success;
+        }));
 
     auto result = timeProvider.LongDelayUntil(TimePointBuild(0, 0, 10, 30, 0));
 

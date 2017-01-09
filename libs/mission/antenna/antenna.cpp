@@ -332,7 +332,7 @@ namespace mission
                 const OSResult result = driver.DeployAntenna(&driver,
                     step.channel,
                     step.antennaId,
-                    TimeSpanFromSeconds(step.deploymentTimeout),
+                    std::chrono::seconds(step.deploymentTimeout),
                     step.overrideSwitches //
                     );
 
@@ -434,7 +434,7 @@ namespace mission
         static bool AntennaDeploymentCondition(const SystemState& state, void* param)
         {
             AntennaMissionState* stateDescriptor = (AntennaMissionState*)param;
-            const TimeSpan t = TimeSpanFromMinutes(40);
+            const auto t = std::chrono::minutes(40);
             if (state.Time < t)
             {
                 return false;

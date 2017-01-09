@@ -7,6 +7,7 @@
 
 #include "system.h"
 
+using std::chrono::milliseconds;
 using drivers::i2c::II2CBus;
 using drivers::i2c::I2CResult;
 
@@ -40,25 +41,25 @@ bool EpsOpenSail(void)
     {
         return false;
     }
-    System::SleepTask(OSTaskTimeSpan(100));
+    System::SleepTask(milliseconds(100));
 
     if (!epsControlLCL(EPS_LCL_SAIL_0, false))
     {
         return false;
     }
-    System::SleepTask(OSTaskTimeSpan(100));
+    System::SleepTask(milliseconds(100));
 
     if (!epsControlLCL(EPS_LCL_SAIL_1, true))
     {
         return false;
     }
-    System::SleepTask(OSTaskTimeSpan(100));
+    System::SleepTask(milliseconds(100));
 
     if (!epsControlLCL(EPS_LCL_SAIL_1, false))
     {
         return false;
     }
-    System::SleepTask(OSTaskTimeSpan(100));
+    System::SleepTask(milliseconds(100));
 
     return true;
 }

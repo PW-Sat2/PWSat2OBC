@@ -28,7 +28,7 @@ void System::RunScheduler(void)
     }
 }
 
-void System::SleepTask(const OSTaskTimeSpan time)
+void System::SleepTask(const std::chrono::milliseconds time)
 {
     if (OSProxy != nullptr)
     {
@@ -72,7 +72,7 @@ OSResult System::GiveSemaphore(OSSemaphoreHandle semaphore)
     return OSResult::InvalidOperation;
 }
 
-OSResult System::TakeSemaphore(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout)
+OSResult System::TakeSemaphore(OSSemaphoreHandle semaphore, std::chrono::milliseconds timeout)
 {
     if (OSProxy != nullptr)
     {
@@ -113,7 +113,7 @@ OSEventBits System::EventGroupClearBits(OSEventGroupHandle eventGroup, const OSE
 }
 
 OSEventBits System::EventGroupWaitForBits(
-    OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, bool waitAll, bool autoReset, const OSTaskTimeSpan timeout)
+    OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, bool waitAll, bool autoReset, const std::chrono::milliseconds timeout)
 {
     if (OSProxy != nullptr)
     {
@@ -151,7 +151,7 @@ OSQueueHandle System::CreateQueue(size_t maxElementCount, size_t elementSize)
     return nullptr;
 }
 
-bool System::QueueReceive(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout)
+bool System::QueueReceive(OSQueueHandle queue, void* element, std::chrono::milliseconds timeout)
 {
     if (OSProxy != nullptr)
     {
@@ -171,7 +171,7 @@ bool System::QueueReceiveFromISR(OSQueueHandle queue, void* element)
     return false;
 }
 
-bool System::QueueSend(OSQueueHandle queue, const void* element, OSTaskTimeSpan timeout)
+bool System::QueueSend(OSQueueHandle queue, const void* element, std::chrono::milliseconds timeout)
 {
     if (OSProxy != nullptr)
     {
@@ -209,7 +209,7 @@ OSPulseHandle System::CreatePulseAll(void)
     return 0;
 }
 
-OSResult System::PulseWait(OSPulseHandle handle, OSTaskTimeSpan timeout)
+OSResult System::PulseWait(OSPulseHandle handle, std::chrono::milliseconds timeout)
 {
     if (OSProxy != nullptr)
     {
@@ -235,14 +235,14 @@ void System::EndSwitchingISR()
     }
 }
 
-OSTaskTimeSpan System::GetUptime()
+std::chrono::milliseconds System::GetUptime()
 {
     if (OSProxy != nullptr)
     {
         return OSProxy->GetUptime();
     }
 
-    return OSTaskTimeSpan(0);
+    return std::chrono::milliseconds(0);
 }
 
 void System::Yield()

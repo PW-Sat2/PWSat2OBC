@@ -19,7 +19,7 @@ extern "C" {
 
 void yaffsfs_Lock(void)
 {
-    System::TakeSemaphore(yaffsLock, OSTaskTimeSpan(MAX_DELAY));
+    System::TakeSemaphore(yaffsLock, std::chrono::milliseconds(MAX_DELAY));
 }
 
 void yaffsfs_Unlock(void)

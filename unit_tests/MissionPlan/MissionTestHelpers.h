@@ -7,9 +7,9 @@
 
 namespace rc
 {
-    template <> struct Arbitrary<TimeSpan>
+    template <> struct Arbitrary<std::chrono::milliseconds>
     {
-        static Gen<TimeSpan> arbitrary()
+        static Gen<std::chrono::milliseconds> arbitrary()
         {
             auto day = gen::nonNegative<uint16_t>();
             auto hour = gen::inRange(0, 23);
@@ -33,9 +33,9 @@ namespace rc
     {
         static Gen<SystemState> arbitrary()
         {
-            return gen::build<SystemState>(                                //
-                gen::set(&SystemState::Time, gen::arbitrary<TimeSpan>()),  //
-                gen::set(&SystemState::SailOpened, gen::arbitrary<bool>()) //
+            return gen::build<SystemState>(                                                //
+                gen::set(&SystemState::Time, gen::arbitrary<std::chrono::milliseconds>()), //
+                gen::set(&SystemState::SailOpened, gen::arbitrary<bool>())                 //
                 );
         }
     };
