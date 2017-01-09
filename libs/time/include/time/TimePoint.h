@@ -38,7 +38,7 @@ typedef struct
  * The point with zero time (beginning of time) is considered to be
  * beginning of the mission itself.
  */
-typedef std::chrono::duration<uint64_t, std::milli> TimeSpan;
+typedef std::chrono::milliseconds TimeSpan;
 
 /**
  * @brief Creates TimeSpan object initialized from time specified in milliseconds.

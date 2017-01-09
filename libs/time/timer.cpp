@@ -172,7 +172,7 @@ struct TimeSnapshot TimeProvider::ReadFile(IFileSystem& fs, const char* const fi
     }
 
     Reader reader(buffer);
-    result.CurrentTime = TimeSpan(reader.ReadQuadWordLE());
+    result.CurrentTime = TimeSpanFromMilliseconds(reader.ReadQuadWordLE());
     if (!reader.Status())
     {
         LOGF(LOG_LEVEL_WARNING, "Not enough data read from file: %s. ", filePath);

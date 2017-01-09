@@ -147,7 +147,7 @@ constexpr inline bool OS_RESULT_FAILED(OSResult x)
 }
 
 /** @brief Type definition for time span in ms. */
-using OSTaskTimeSpan = std::chrono::duration<uint64_t, std::milli>;
+using OSTaskTimeSpan = std::chrono::milliseconds;
 
 /** @brief Type definition of handle to system task. */
 using OSTaskHandle = void*;

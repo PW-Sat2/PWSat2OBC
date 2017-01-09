@@ -175,9 +175,9 @@ TEST_F(TimerPersistanceTest, TestReadingThreeFilesTwoSame)
 
 TEST_F(TimerPersistanceTest, TestReadingThreeDifferentFiles)
 {
-    std::array<const uint8_t, 8> a{0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x78};
-    std::array<const uint8_t, 8> b{0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99};
-    std::array<const uint8_t, 8> c{0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa};
+    std::array<const uint8_t, 8> a{0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x70};
+    std::array<const uint8_t, 8> b{0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x75};
+    std::array<const uint8_t, 8> c{0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x79};
     EXPECT_CALL(fs, Open(_, _, _))
         .WillOnce(Return(MakeOpenedFile(1)))
         .WillOnce(Return(MakeOpenedFile(2)))
@@ -199,7 +199,7 @@ TEST_F(TimerPersistanceTest, TestReadingThreeDifferentFiles)
     }));
 
     EXPECT_TRUE(provider.Initialize(TimePassedProxy, nullptr));
-    ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x7877665544332211ull)));
+    ASSERT_THAT(GetCurrentTime(), Eq(TimeSpanFromMilliseconds(0x7077665544332211ull)));
 }
 
 TEST_F(TimerPersistanceTest, TestStateSaveError)
