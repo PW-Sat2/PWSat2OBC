@@ -146,9 +146,6 @@ constexpr inline bool OS_RESULT_FAILED(OSResult x)
     return x != OSResult::Success;
 }
 
-/** @brief Type definition for time span in ms. */
-using OSTaskTimeSpan = std::chrono::milliseconds;
-
 /** @brief Type definition of handle to system task. */
 using OSTaskHandle = void*;
 
@@ -225,7 +222,7 @@ class System final : public PureStatic
      * @brief Suspends current task execution for specified time period.
      * @param[in] time Time period in ms.
      */
-    static void SleepTask(const OSTaskTimeSpan time);
+    static void SleepTask(const std::chrono::milliseconds time);
 
     /**
      * @brief Resumes execution of requested task.
@@ -262,7 +259,7 @@ class System final : public PureStatic
      * @return Operation status.
      * @remark This procedure should not be used from within interrupt service routine.
      */
-    static OSResult TakeSemaphore(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout);
+    static OSResult TakeSemaphore(OSSemaphoreHandle semaphore, std::chrono::milliseconds timeout);
 
     /**
      * @brief Releases semaphore.
@@ -343,8 +340,11 @@ class System final : public PureStatic
      * @return The value of the event group at the time either the event bits being waited for became set,
      * or the block time expired.
      */
-    static OSEventBits EventGroupWaitForBits(
-        OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, bool waitAll, bool autoReset, const OSTaskTimeSpan timeout);
+    static OSEventBits EventGroupWaitForBits(OSEventGroupHandle eventGroup,
+        const OSEventBits bitsToWaitFor,
+        bool waitAll,
+        bool autoReset,
+        const std::chrono::milliseconds timeout);
 
     /**
      * @brief Allocates block of memory from OS heap
@@ -377,7 +377,7 @@ class System final : public PureStatic
      * @param[in] timeout Operation timeout in ms.
      * @return TRUE if element was received, FALSE on timeout
      */
-    static bool QueueReceive(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout);
+    static bool QueueReceive(OSQueueHandle queue, void* element, std::chrono::milliseconds timeout);
 
     /**
      * @brief Receives element form queue in interrupt handler
@@ -396,7 +396,7 @@ class System final : public PureStatic
      * @param[in] timeout Operation timeout in ms
      * @return TRUE if element was received, FALSE on timeout
      */
-    static bool QueueSend(OSQueueHandle queue, const void* element, OSTaskTimeSpan timeout);
+    static bool QueueSend(OSQueueHandle queue, const void* element, std::chrono::milliseconds timeout);
 
     /**
      * @brief Sends element to queue in interrupt handler
@@ -434,7 +434,7 @@ class System final : public PureStatic
      * @param[in] timeout Operation timeout in ms
      * @return Wait result
      */
-    static OSResult PulseWait(OSPulseHandle handle, OSTaskTimeSpan timeout);
+    static OSResult PulseWait(OSPulseHandle handle, std::chrono::milliseconds timeout);
 
     /**
      * @brief Sets pulse event
@@ -450,7 +450,7 @@ class System final : public PureStatic
      * @brief Gets number of miliseconds since system start
      * @return Number of miliseconds since system start
      */
-    static OSTaskTimeSpan GetUptime();
+    static std::chrono::milliseconds GetUptime();
 };
 
 /**
@@ -544,7 +544,7 @@ class Lock final : private NotCopyable, private NotMoveable
      * @param[in] semaphore Semaphore to take
      * @param[in] timeout Timeout
      */
-    Lock(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout);
+    Lock(OSSemaphoreHandle semaphore, std::chrono::milliseconds timeout);
 
     /**
      * @brief Releases semaphore (if taken) on object destruction
@@ -584,7 +584,7 @@ template <typename Element, std::size_t Capacity> class Queue final
      * @param[in] timeout Timeout in ms
      * @return Operation result
      */
-    OSResult Push(const Element& element, OSTaskTimeSpan timeout);
+    OSResult Push(const Element& element, std::chrono::milliseconds timeout);
 
     /**
      * @brief Pushes element to queue from interrupt service routine
@@ -599,7 +599,7 @@ template <typename Element, std::size_t Capacity> class Queue final
      * @param[in] timeout Timeout in ms
      * @return Operation result
      */
-    OSResult Pop(Element& element, OSTaskTimeSpan timeout);
+    OSResult Pop(Element& element, std::chrono::milliseconds timeout);
 
   private:
     /** @brief Queue handle */
@@ -618,7 +618,8 @@ template <typename Element, std::size_t Capacity> OSResult Queue<Element, Capaci
     return OSResult::Success;
 }
 
-template <typename Element, std::size_t Capacity> OSResult Queue<Element, Capacity>::Push(const Element& element, OSTaskTimeSpan timeout)
+template <typename Element, std::size_t Capacity>
+OSResult Queue<Element, Capacity>::Push(const Element& element, std::chrono::milliseconds timeout)
 {
     if (System::QueueSend(this->_handle, &element, timeout))
     {
@@ -636,7 +637,8 @@ template <typename Element, std::size_t Capacity> OSResult Queue<Element, Capaci
     return OSResult::Overflow;
 }
 
-template <typename Element, std::size_t Capacity> OSResult Queue<Element, Capacity>::Pop(Element& element, OSTaskTimeSpan timeout)
+template <typename Element, std::size_t Capacity>
+OSResult Queue<Element, Capacity>::Pop(Element& element, std::chrono::milliseconds timeout)
 {
     if (System::QueueReceive(this->_handle, &element, timeout))
     {
@@ -669,7 +671,7 @@ class Timeout final
      * @brief Constructs new Timeout object
      * @param[in] timeout Timeout in miliseconds
      */
-    Timeout(OSTaskTimeSpan timeout);
+    Timeout(std::chrono::milliseconds timeout);
 
     /**
      * @brief Checks is timeout is expired
@@ -681,7 +683,7 @@ class Timeout final
     /**
      * @brief System uptime at which timeout will expire
      */
-    const OSTaskTimeSpan _expireAt;
+    const std::chrono::milliseconds _expireAt;
 };
 
 /** @}*/

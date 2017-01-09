@@ -28,22 +28,22 @@ TimeoutTest::TimeoutTest()
 
 TEST_F(TimeoutTest, ZeroTimeoutWillExpireImmediately)
 {
-    EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(OSTaskTimeSpan(0)));
+    EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(std::chrono::milliseconds(0)));
 
-    Timeout t(OSTaskTimeSpan(0));
+    Timeout t(std::chrono::milliseconds(0));
 
     ASSERT_THAT(t.Expired(), Eq(true));
 }
 
 TEST_F(TimeoutTest, TimeoutWillExpireAfterSpecifiedNumberOfMiliseconds)
 {
-    EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(OSTaskTimeSpan(100)));
+    EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(std::chrono::milliseconds(100)));
 
-    Timeout t(OSTaskTimeSpan(10));
+    Timeout t(std::chrono::milliseconds(10));
 
     ASSERT_THAT(t.Expired(), Eq(false));
 
-    EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(OSTaskTimeSpan(110)));
+    EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(std::chrono::milliseconds(110)));
 
     ASSERT_THAT(t.Expired(), Eq(true));
 }

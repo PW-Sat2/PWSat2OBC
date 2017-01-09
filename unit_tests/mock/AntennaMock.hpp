@@ -19,7 +19,7 @@ struct AntennaMock : public AntennaDriver
     MOCK_METHOD4(DeployAntenna,
         OSResult(AntennaChannel channel,
             AntennaId antennaId,
-            TimeSpan timeout,
+            std::chrono::milliseconds timeout,
             bool overrideSwitches //
             ));
 

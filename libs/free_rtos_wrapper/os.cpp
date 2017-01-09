@@ -12,7 +12,7 @@
 static_assert(static_cast<uint8_t>(TaskPriority::Idle) == 0, "Idle priority must be 0");
 static_assert(static_cast<uint8_t>(TaskPriority::Highest) < configMAX_PRIORITIES, "Priorites up to configMAX_PRIORITIES - 1 are allowed");
 
-static inline TickType_t ConvertTimeToTicks(const OSTaskTimeSpan span)
+static inline TickType_t ConvertTimeToTicks(const std::chrono::milliseconds span)
 {
     const uint64_t time = span.count();
 
@@ -48,7 +48,7 @@ void System::RunScheduler(void)
     vTaskStartScheduler();
 }
 
-void System::SleepTask(const OSTaskTimeSpan time)
+void System::SleepTask(const std::chrono::milliseconds time)
 {
     vTaskDelay(ConvertTimeToTicks(time));
 }
@@ -76,7 +76,7 @@ OSSemaphoreHandle System::CreateBinarySemaphore(uint8_t semaphoreId)
     return s;
 }
 
-OSResult System::TakeSemaphore(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout)
+OSResult System::TakeSemaphore(OSSemaphoreHandle semaphore, std::chrono::milliseconds timeout)
 {
     const BaseType_t result = xSemaphoreTake(semaphore, ConvertTimeToTicks(timeout));
     if (result != pdPASS)
@@ -139,7 +139,7 @@ OSEventBits System::EventGroupWaitForBits(OSEventGroupHandle eventGroup, //
     const OSEventBits bitsToWaitFor,                                     //
     bool waitAll,                                                        //
     bool autoReset,                                                      //
-    const OSTaskTimeSpan timeout                                         //
+    const std::chrono::milliseconds timeout                              //
     )
 {
     return xEventGroupWaitBits(eventGroup, //
@@ -166,7 +166,7 @@ OSQueueHandle System::CreateQueue(size_t maxElementCount, size_t elementSize)
     return xQueueCreate(maxElementCount, elementSize);
 }
 
-bool System::QueueReceive(OSQueueHandle queue, void* element, OSTaskTimeSpan timeout)
+bool System::QueueReceive(OSQueueHandle queue, void* element, std::chrono::milliseconds timeout)
 {
     return xQueueReceive(queue, element, ConvertTimeToTicks(timeout)) == pdTRUE;
 }
@@ -178,7 +178,7 @@ bool System::QueueReceiveFromISR(OSQueueHandle queue, void* element)
     return result;
 }
 
-bool System::QueueSend(OSQueueHandle queue, const void* element, OSTaskTimeSpan timeout)
+bool System::QueueSend(OSQueueHandle queue, const void* element, std::chrono::milliseconds timeout)
 {
     return xQueueSend(queue, element, ConvertTimeToTicks(timeout)) == pdTRUE;
 }
@@ -205,7 +205,7 @@ OSPulseHandle System::CreatePulseAll(void)
     return (OSPulseHandle)System::CreateEventGroup();
 }
 
-OSResult System::PulseWait(OSPulseHandle handle, OSTaskTimeSpan timeout)
+OSResult System::PulseWait(OSPulseHandle handle, std::chrono::milliseconds timeout)
 {
     OSEventBits result = System::EventGroupWaitForBits((OSEventGroupHandle)handle, PULSE_ALL_BITS, true, true, timeout);
 
@@ -224,9 +224,9 @@ void System::PulseSet(OSPulseHandle handle)
     System::EventGroupSetBits((OSEventGroupHandle)handle, PULSE_ALL_BITS);
 }
 
-OSTaskTimeSpan System::GetUptime()
+std::chrono::milliseconds System::GetUptime()
 {
-    return OSTaskTimeSpan(static_cast<uint64_t>(portTICK_PERIOD_MS * xTaskGetTickCount()));
+    return std::chrono::milliseconds(static_cast<uint64_t>(portTICK_PERIOD_MS * xTaskGetTickCount()));
 }
 
 void System::Yield()

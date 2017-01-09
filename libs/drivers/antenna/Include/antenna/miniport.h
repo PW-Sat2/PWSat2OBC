@@ -81,7 +81,7 @@ struct AntennaMiniportDriver
         drivers::i2c::II2CBus* communicationBus,
         AntennaChannel channel,
         AntennaId antennaId,
-        TimeSpan timeout,
+        std::chrono::milliseconds timeout,
         bool override //
         );
 
@@ -96,7 +96,7 @@ struct AntennaMiniportDriver
     OSResult (*InitializeAutomaticDeployment)(struct AntennaMiniportDriver* miniport,
         drivers::i2c::II2CBus* communicationBus,
         AntennaChannel channel,
-        TimeSpan timeout //
+        std::chrono::milliseconds timeout //
         );
 
     /**
@@ -162,7 +162,7 @@ struct AntennaMiniportDriver
         drivers::i2c::II2CBus* communicationBus,
         AntennaChannel channel,
         AntennaId antennaId,
-        TimeSpan* count //
+        std::chrono::milliseconds* count //
         );
 
     /**

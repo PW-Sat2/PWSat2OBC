@@ -44,7 +44,7 @@ namespace services
             /**
              * @brief Current mission time in milliseconds.
              */
-            TimeSpan time;
+            std::chrono::milliseconds time;
 
             /**
              * @brief Flag indicating whether the timer state should be immediately saved.
@@ -66,7 +66,7 @@ namespace services
             /**
              * @brief Current mission time in milliseconds.
              */
-            TimeSpan CurrentTime;
+            std::chrono::milliseconds CurrentTime;
 
             TimeSnapshot() : CurrentTime(0ull)
             {
@@ -147,7 +147,7 @@ namespace services
              *
              * @return Option containing current mission time on success, empty option otherwise.
              */
-            Option<TimeSpan> GetCurrentTime();
+            Option<std::chrono::milliseconds> GetCurrentTime();
 
             /**
              * @brief This procedure returns current mission time in decoded format.
@@ -163,7 +163,7 @@ namespace services
              * timer state save process therefore the procedure may be take some time to complete.
              * @param[in] delta The amount of time that timer state should be moved forward.
              */
-            void AdvanceTime(TimeSpan delta);
+            void AdvanceTime(std::chrono::milliseconds delta);
 
             /**
              * @brief This procedure sets the current mission time to any arbitrary point in time.
@@ -196,7 +196,7 @@ namespace services
              * @param[in] delay Time span to wait
              * @return True if expected time span is elapsed, false in case of error
              */
-            bool LongDelay(TimeSpan delay);
+            bool LongDelay(std::chrono::milliseconds delay);
 
           public:
             /**
@@ -227,7 +227,7 @@ namespace services
              *
              * This value is protected by the timerLock semaphore.
              */
-            TimeSpan CurrentTime;
+            std::chrono::milliseconds CurrentTime;
 
           private:
             /**
@@ -310,7 +310,7 @@ namespace services
              * This value is used to determine whether the time notification should be invoked on next rtc notification.
              * This value is protected by the timerLock semaphore.
              */
-            TimeSpan NotificationTime;
+            std::chrono::milliseconds NotificationTime;
 
             /**
              * @brief Time period since the last timer state save.
@@ -318,7 +318,7 @@ namespace services
              * This value is used to determine whether the time state should be saved on next rtc notification.
              * This value is protected by the timerLock semaphore.
              */
-            TimeSpan PersistanceTime;
+            std::chrono::milliseconds PersistanceTime;
 
             /**
              * @brief Pulse notified on each timer tick

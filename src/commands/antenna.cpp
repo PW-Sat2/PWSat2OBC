@@ -76,7 +76,7 @@ void AntennaDeploy(uint16_t argc, char* argv[])
     const OSResult result = Main.antennaDriver.DeployAntenna(&Main.antennaDriver,
         channel,
         antenna,
-        TimeSpanFromSeconds(10),
+        std::chrono::seconds(10),
         override //
         );
     SendResult(result);

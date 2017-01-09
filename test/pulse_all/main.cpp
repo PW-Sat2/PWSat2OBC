@@ -58,7 +58,7 @@ static void Observer(void* param)
 
     for (;;)
     {
-        OSEventBits bits = System::EventGroupWaitForBits(groupHandle, 0x80, true, true, OSTaskTimeSpan(MAX_DELAY));
+        OSEventBits bits = System::EventGroupWaitForBits(groupHandle, 0x80, true, true, std::chrono::milliseconds(MAX_DELAY));
         LOGF(LOG_LEVEL_INFO, "Received notification with following bits: %ld", bits);
     }
 }
