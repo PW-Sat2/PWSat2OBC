@@ -2,273 +2,319 @@
 #define LIBS_FS_INCLUDE_FS_FS_H_
 
 #include <stdbool.h>
-#include <stdint.h>
+#include <cstdint>
+#include <gsl/span>
 #include "base/os.h"
 #include "system.h"
 
-EXTERNC_BEGIN
-
-#include <yaffs_guts.h>
-
-/**
- * @defgroup fs File system
- *
- * @brief File system API.
- *
- * Wrappers for YAFFS file system.
- * Partitions:
- * - / - NAND memory, 1MB, 1 page per chunk
- *
- * @{
- */
-
-/** @brief Directory handle */
-typedef void* FSDirectoryHandle;
-
-/** @brief File handle */
-typedef int FSFileHandle;
-
-// yaffs imposes 2GB file size limit
-/** @brief Type that represents file size. */
-typedef int32_t FSFileSize;
-
-/**
- * @brief Type that represents file opening status.
- */
-typedef struct
+#include "yaffs.hpp"
+namespace services
 {
-    /** Operation status. */
-    OSResult Status;
-    /** Opened file handle. */
-    FSFileHandle Handle;
-} FSFileOpenResult;
+    namespace fs
+    {
+        /**
+         * @defgroup fs File system
+         *
+         * @brief File system API.
+         *
+         * @{
+         */
 
-/**
- * @brief Type that represents directory opening status.
- */
-typedef struct
-{
-    /** Operation status. */
-    OSResult Status;
-    /** Handle to the opened directory. */
-    FSDirectoryHandle Handle;
-} FSDirectoryOpenResult;
+        /** @brief Directory handle */
+        using DirectoryHandle = void*;
 
-/**
- * @brief Type that represents file read/write operation status.
- */
-typedef struct
-{
-    /** Operation status. */
-    OSResult Status;
-    /** Number of bytes transferred. */
-    FSFileSize BytesTransferred;
-} FSIOResult;
+        /** @brief File handle */
+        using FileHandle = int;
 
-/**
- * @brief Structure exposing file system API
- */
-typedef struct FileSystemTag FileSystem;
+        // yaffs imposes 2GB file size limit
+        /** @brief Type that represents file size. */
+        using FileSize = std::int32_t;
 
-/**
- * @brief Enumerator of all possible file opening modes.
- */
-typedef enum {
-    /** Open file only if it already exist, fail if it does not exist. */
-    FsOpenExisting = 0,
+        /**
+         * @brief General I/O operation result
+         */
+        template <typename TResult> struct IOOperationResult
+        {
+            /**
+             * @brief Ctor
+             * @param status Operation status
+             * @param result Result
+             */
+            IOOperationResult(OSResult status, TResult result);
 
-    /** Opens a file and truncates it so that its size is zero bytes, only if it exists. */
-    FsOpenTruncateExisting = O_TRUNC,
+            /**
+             * @brief Converts to true if operation succeded
+             */
+            inline operator bool() const;
 
-    /** Open file, create a new one if it does not exist. */
-    FsOpenAlways = O_CREAT,
+            /** Operation status. */
+            const OSResult Status;
+            /** Operation result */
+            const TResult Result;
+        };
 
-    /** Always create new file, if it exists truncate its content to zero. */
-    FsOpenCreateAlways = O_CREAT | O_TRUNC,
+        template <typename TResult>
+        IOOperationResult<TResult>::IOOperationResult(OSResult status, TResult result) : Status(status), Result(result)
+        {
+        }
 
-    /** Creates a new file, only if it does not already exist, fail if it exists. */
-    FsOpenCreateNew = O_CREAT | O_EXCL,
+        template <typename TResult> IOOperationResult<TResult>::operator bool() const
+        {
+            return OS_RESULT_SUCCEEDED(this->Status);
+        }
 
-    /** If set, the file offset shall be set to the end of the file prior to each write. */
-    FsOpenAppend = O_APPEND,
-} FSFileOpenFlags;
+        /** @brief Type that represents file opening status. */
+        using FileOpenResult = IOOperationResult<FileHandle>;
+        /** @brief Type that represents directory opening status. */
+        using DirectoryOpenResult = IOOperationResult<DirectoryHandle>;
 
-/**
- * @brief Enumerator of all possible file access modes.
- */
-typedef enum {
-    /** Open only for reading. */
-    FsReadOnly = O_RDONLY,
-    /** Open only for writing. */
-    FsWriteOnly = O_WRONLY,
-    /** Open for reading and writing. */
-    FsReadWrite = O_RDWR,
-} FSFileAccessMode;
+        /** @brief Read/Write operation result */
+        using IOResult = IOOperationResult<gsl::span<const uint8_t>>;
 
-/**
- * @brief Structure exposing file system API
- */
-typedef struct FileSystemTag
-{
-    /**
-     * @brief Opens file
-     * @param[in] fileSystem FileSystem interface for accessing files.
-     * @param[in] path Path to file
-     * @param[in] openFlag File opening flags. @see FSFileOpenFlags for details.
-     * @param[in] accessMode Requested file access mode. @see FSFileAccessMode for details.
-     * @return Operation status. @see FSFileOpenResult for details.
-     */
-    FSFileOpenResult (*open)(FileSystem* fileSystem, const char* path, FSFileOpenFlags openFlag, FSFileAccessMode accessMode);
+        /**
+         * @brief Enumerator of all possible file opening modes.
+         */
+        enum class FileOpen
+        {
+            /** Open file only if it already exist, fail if it does not exist. */
+            Existing = 0,
 
-    /**
-     * @brief Truncates file to given size
-     * @param[in] fileSystem FileSystem interface for accessing files.
-     * @param[in] file File handle
-     * @param[in] length Desired length
-     * @return Operation status.
-     */
-    OSResult (*ftruncate)(FileSystem* fileSystem, FSFileHandle file, FSFileSize length);
+            /** Opens a file and truncates it so that its size is zero bytes, only if it exists. */
+            TruncateExisting = O_TRUNC,
 
-    /**
-     * @brief Writes data to file
-     * @param[in] fileSystem FileSystem interface for accessing files.
-     * @param[in] file File handle
-     * @param[in] buffer Data buffer
-     * @param[in] size Size of data
-     * @return Operation status. @see FSIOResult for details.
-     */
-    FSIOResult (*write)(FileSystem* fileSystem, FSFileHandle file, const void* buffer, FSFileSize size);
+            /** Open file, create a new one if it does not exist. */
+            nAlways = O_CREAT,
 
-    /**
-     * @brief Reads data from file
-     * @param[in] fileSystem FileSystem interface for accessing files.
-     * @param[in] file File handle
-     * @param[out] buffer Data buffer
-     * @param[in] size Size of data
-     * @return Operation status. @see FSIOResult for details.
-     */
-    FSIOResult (*read)(FileSystem* fileSystem, FSFileHandle file, void* buffer, FSFileSize size);
+            /** Always create new file, if it exists truncate its content to zero. */
+            CreateAlways = O_CREAT | O_TRUNC,
 
-    /**
-     * @brief Closes file
-     * @param[in] fileSystem FileSystem interface for accessing files.
-     * @param[in] file File handle
-     * @return Operation status.
-     */
-    OSResult (*close)(FileSystem* fileSystem, FSFileHandle file);
+            /** Creates a new file, only if it does not already exist, fail if it exists. */
+            CreateNew = O_CREAT | O_EXCL,
 
-    /**
-     * @brief Opens directory
-     * @param[in] fileSystem FileSystem interface for accessing files.
-     * @param[in] dirname Directory path
-     * @return Directory handle on success. @see FSDirectoryOpenResult for details.
-     */
-    FSDirectoryOpenResult (*openDirectory)(FileSystem* fileSystem, const char* dirname);
+            /** If set, the file offset shall be set to the end of the file prior to each write. */
+            Append = O_APPEND,
+        };
 
-    /**
-     * @brief Reads name of next entry in directory.
-     * @param[in] fileSystem FileSystem interface for accessing files.
-     * @param[in] directory Directory handle
-     * @return Entry name. NULL if no more entries found.
-     */
-    char* (*readDirectory)(FileSystem* fileSystem, FSDirectoryHandle directory);
+        /**
+         * @brief Enumerator of all possible file access modes.
+         */
+        enum class FileAccess
+        {
+            /** Open only for reading. */
+            ReadOnly = O_RDONLY,
+            /** Open only for writing. */
+            WriteOnly = O_WRONLY,
+            /** Open for reading and writing. */
+            ReadWrite = O_RDWR,
+        };
 
-    /**
-     * @brief Closes directory
-     * @param[in] fileSystem FileSystem interface for accessing files.
-     * @param[in] directory Directory handle
-     * @return Operation status.
-     */
-    OSResult (*closeDirectory)(FileSystem* fileSystem, FSDirectoryHandle directory);
+        /**
+         * @brief Structure exposing file system API
+         */
+        struct IFileSystem
+        {
+            /**
+             * @brief Opens file
+             * @param[in] path Path to file
+             * @param[in] openFlag File opening flags. @see FSFileOpenFlags for details.
+             * @param[in] accessMode Requested file access mode. @see FSFileAccessMode for details.
+             * @return Operation status. @see FSFileOpenResult for details.
+             */
+            virtual FileOpenResult Open(const char* path, FileOpen openFlag, FileAccess accessMode) = 0;
 
-    /**
-     * @brief Formats partition at given mount point. Partition in unmounted before format and mounted again after
-     * @param[in] fileSystem File system interface
-     * @param[in] mountPoint Partition mount point
-     * @return Operation stastus
-     */
-    OSResult (*format)(FileSystem* fileSystem, const char* mountPoint);
+            /**
+             * @brief Truncates file to given size
+             * @param[in] file File handle
+             * @param[in] length Desired length
+             * @return Operation status.
+             */
+            virtual OSResult TruncateFile(FileHandle file, FileSize length) = 0;
 
-    /**
-     * @brief Creates new directory
-     * @param[in] fileSystem File system interface
-     * @param[in] path Path to directory that should be created
-     * @return Operation status
-     */
-    OSResult (*makeDirectory)(FileSystem* fileSystem, const char* path);
+            /**
+             * @brief Writes data to file
+             * @param[in] file File handle
+             * @param[in] buffer Data buffer
+             * @return Operation status. @see FSIOResult for details.
+             */
+            virtual IOResult Write(FileHandle file, gsl::span<const std::uint8_t> buffer) = 0;
 
-    /**
-     * @brief Checks if path exists
-     * @param[in] fileSystem File system interface
-     * @param[in] path Path to check
-     * @return true if path exists
-     */
-    bool (*exists)(FileSystem* fileSystem, const char* path);
+            /**
+             * @brief Reads data from file
+             * @param[in] file File handle
+             * @param[out] buffer Data buffer
+             * @return Operation status. @see FSIOResult for details.
+             */
+            virtual IOResult Read(FileHandle file, gsl::span<std::uint8_t> buffer) = 0;
 
-    /**
-     * @brief Removes all files and directories from specified device
-     * @param[in] fileSystem File system object
-     * @param[in] device Device to clear
-     * @return Operation result
-     */
-    OSResult (*ClearDevice)(FileSystem* fileSystem, yaffs_dev* device);
+            /**
+             * @brief Closes file
+             * @param[in] file File handle
+             * @return Operation status.
+             */
+            virtual OSResult Close(FileHandle file) = 0;
 
-    /**
-     * @brief Syncs file system (speeds up next mount)
-     * @param fileSystem File system
-     */
-    void (*Sync)(FileSystem* fileSystem);
-} FileSystem;
+            /**
+             * @brief Opens directory
+             * @param[in] dirname Directory path
+             * @return Directory handle on success. @see FSDirectoryOpenResult for details.
+             */
+            virtual DirectoryOpenResult OpenDirectory(const char* dirname) = 0;
 
-/**
- * @brief Initializes only API pointers.
- * @param[out] fs File system interface
- */
-void FileSystemAPI(FileSystem* fs);
+            /**
+             * @brief Reads name of next entry in directory.
+             * @param[in] directory Directory handle
+             * @return Entry name. NULL if no more entries found.
+             */
+            virtual char* ReadDirectory(DirectoryHandle directory) = 0;
 
-/**
- * @brief Initializes file system interface (including API)
- * @param[inout] fs File system interface
- */
-void FileSystemInitialize(FileSystem* fs);
+            /**
+             * @brief Closes directory
+             * @param[in] directory Directory handle
+             * @return Operation status.
+             */
+            virtual OSResult CloseDirectory(DirectoryHandle directory) = 0;
 
-/**
- * @brief Adds device and mounts it
- * @param[in] device YAFFS device
- * @return true on success
- */
-bool FileSystemAddDeviceAndMount(yaffs_dev* device);
+            /**
+             * @brief Formats partition at given mount point. Partition in unmounted before format and mounted again after
+             * @param[in] mountPoint Partition mount point
+             * @return Operation status
+             */
+            virtual OSResult Format(const char* mountPoint) = 0;
 
-/**
- * @brief This method is responsible for writing contents of the passed buffer to the selected file.
- *
- * If the selected file exists it will be overwritten, if it does not exist it will be created.
- * @param[in] fs FileSystem interface for accessing files.
- * @param[in] file Path to file that should be saved.
- * @param[in] buffer Pointer to buffer that contains data that should be saved.
- * @param[in] length Size of data in bytes the buffer.
- *
- * @return Operation status. True in case of success, false otherwise.
- */
-bool FileSystemSaveToFile(FileSystem* fs, const char* file, const uint8_t* buffer, FSFileSize length);
+            /**
+             * @brief Creates new directory
+             * @param[in] path Path to directory that should be created
+             * @return Operation status
+             */
+            virtual OSResult MakeDirectory(const char* path) = 0;
 
-/**
- * @brief This procedure is responsible for reading the the contents of the specified file.
- *
- * @param[in] fs FileSystem interface for accessing files.
- * @param[in] filePath Path to the file that contains timer state.
- * @param[in] buffer Pointer to buffer that should be updated with the file contents.
- * @param[in] length Size of the requested data.
- *
- * @return Operation status.
- * @retval true Requested data has been successfully read.
- * @retval false Either selected file was not found, file could not be opened or did not contain
- * requested amount of data.
- */
-bool FileSystemReadFile(FileSystem* fs, const char* const filePath, uint8_t* buffer, FSFileSize length);
+            /**
+             * @brief Checks if path exists
+             * @param[in] path Path to check
+             * @return true if path exists
+             */
+            virtual bool Exists(const char* path) = 0;
+        };
 
-/** @} */
+        /**
+         * @brief Wrapper over file handle
+         */
+        class File : private NotCopyable
+        {
+          public:
+            /**
+             * @brief Move constructor
+             * @param other Other file (will become invalid)
+             */
+            File(File&& other) noexcept;
+            /**
+             * @brief Move operator
+             * @param other Other file (will become invalid)
+             * @return Reference to this
+             */
+            File& operator=(File&& other) noexcept;
 
-EXTERNC_END
+            /** @brief Desctructor */
+            ~File();
+
+            /**
+             * @brief Factory method that opens file
+             * @param fs File system
+             * @param path File path
+             * @param mode Open mode
+             * @param access Access
+             * @return File instance
+             */
+            File(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access);
+
+            /**
+             * @brief Factory method that opens for read
+             * @param fs File system
+             * @param path File path
+             * @param mode Open mode
+             * @param access Access
+             * @return File instance
+             */
+            static File OpenRead(
+                IFileSystem& fs, const char* path, FileOpen mode = FileOpen::Existing, FileAccess access = FileAccess::ReadOnly);
+
+            /**
+             * @brief Factory method that opens for write
+             * @param fs File system
+             * @param path File path
+             * @param mode Open mode
+             * @param access Access
+             * @return File instance
+             */
+            static File OpenWrite(
+                IFileSystem& fs, const char* path, FileOpen mode = FileOpen::Existing, FileAccess access = FileAccess::WriteOnly);
+
+            /** @brief Implicit cast to bool, true if file opened successfully*/
+            inline operator bool();
+
+            /**
+             * @brief Reads from file
+             * @param buffer Buffer
+             * @return Operation result
+             */
+            IOResult Read(gsl::span<uint8_t> buffer);
+
+            /**
+             * @brief Writes to file
+             * @param buffer Buffer
+             * @return Operation result
+             */
+            IOResult Write(gsl::span<const uint8_t> buffer);
+
+            /**
+             * @brief Truncates file to desired size
+             * @param size Desired size
+             * @return Operation result
+             */
+            OSResult Truncate(FileSize size);
+
+          private:
+            /** @brief File system interface */
+            IFileSystem& _fs;
+            /** @brief File handle */
+            FileHandle _handle;
+            /** @brief Flag indicating whether file is opened successfully */
+            bool _valid;
+        };
+
+        File::operator bool()
+        {
+            return this->_valid;
+        }
+
+        /**
+         * @brief This method is responsible for writing contents of the passed buffer to the selected file.
+         *
+         * If the selected file exists it will be overwritten, if it does not exist it will be created.
+         * @param[in] fs FileSystem interface for accessing files.
+         * @param[in] file Path to file that should be saved.
+         * @param[in] buffer Buffer that contains data that should be saved.
+         *
+         * @return Operation status. True in case of success, false otherwise.
+         */
+        bool SaveToFile(IFileSystem& fs, const char* file, gsl::span<const std::uint8_t> buffer);
+
+        /**
+         * @brief This procedure is responsible for reading the the contents of the specified file.
+         *
+         * @param[in] fs FileSystem interface for accessing files.
+         * @param[in] filePath Path to the file that contains timer state.
+         * @param[in] buffer Buffer that should be updated with the file contents.
+         *
+         * @return Operation status.
+         * @retval true Requested data has been successfully read.
+         * @retval false Either selected file was not found, file could not be opened or did not contain
+         * requested amount of data.
+         */
+        bool ReadFromFile(IFileSystem& fs, const char* const filePath, gsl::span<std::uint8_t> buffer);
+
+        /** @} */
+    }
+}
 
 #endif /* LIBS_FS_INCLUDE_FS_FS_H_ */

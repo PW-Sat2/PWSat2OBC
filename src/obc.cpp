@@ -13,12 +13,17 @@ void OBC::Initialize()
 {
     this->Hardware.Initialize();
 
-    this->Communication.Initialize();
+    this->fs.Initialize();
 
-    FileSystemInitialize(&this->fs);
+    this->Communication.Initialize();
 }
 
 void OBC::PostStartInitialization()
 {
-    this->Storage.Initialize();
+    auto r = this->Storage.Initialize();
+
+    if (OS_RESULT_FAILED(r))
+    {
+        LOGF(LOG_LEVEL_FATAL, "Storage initialization failed %d", num(r));
+    }
 }

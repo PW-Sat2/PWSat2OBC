@@ -1,19 +1,24 @@
 #include <string.h>
 #include <cstdint>
+#include <gsl/span>
 #include "base/os.h"
 #include "obc.h"
 #include "system.h"
-
 #include "yaffs.hpp"
 
 using std::uint16_t;
 using std::int8_t;
+using services::fs::File;
+using services::fs::DirectoryOpenResult;
+using services::fs::FileOpen;
+using services::fs::FileAccess;
+using services::fs::DirectoryHandle;
 
 void FSListFiles(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
 
-    const FSDirectoryOpenResult result = Main.fs.openDirectory(&Main.fs, argv[0]);
+    const DirectoryOpenResult result = Main.fs.OpenDirectory(argv[0]);
 
     if (OS_RESULT_FAILED(result.Status))
     {
@@ -23,54 +28,51 @@ void FSListFiles(uint16_t argc, char* argv[])
     }
 
     char* entry;
-    FSDirectoryHandle dir = result.Handle;
-    while ((entry = Main.fs.readDirectory(&Main.fs, dir)) != NULL)
+    DirectoryHandle dir = result.Result;
+    while ((entry = Main.fs.ReadDirectory(dir)) != NULL)
     {
         Main.terminal.Puts(entry);
         Main.terminal.NewLine();
     }
 
-    Main.fs.closeDirectory(&Main.fs, dir);
+    Main.fs.CloseDirectory(dir);
 }
 
 void FSWriteFile(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
 
-    const FSFileOpenResult result = Main.fs.open(&Main.fs, argv[0], FsOpenCreateAlways, FsWriteOnly);
-    if (OS_RESULT_FAILED(result.Status))
+    File f(Main.fs, argv[0], FileOpen::CreateAlways, FileAccess::WriteOnly);
+    if (!f)
     {
         Main.terminal.Puts("Error");
         Main.terminal.NewLine();
         return;
     }
 
-    const FSFileHandle file = result.Handle;
-    Main.fs.ftruncate(&Main.fs, file, 0);
-    Main.fs.write(&Main.fs, file, argv[1], strlen(argv[1]));
-    Main.fs.close(&Main.fs, file);
+    f.Truncate(0);
+    f.Write(gsl::make_span(reinterpret_cast<uint8_t*>(argv[1]), strlen(argv[1])));
 }
 
 void FSReadFile(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
-    const FSFileOpenResult result = Main.fs.open(&Main.fs, argv[0], FsOpenExisting, FsReadOnly);
-    if (OS_RESULT_FAILED(result.Status))
+    File f(Main.fs, argv[0], FileOpen::Existing, FileAccess::ReadOnly);
+    if (!f)
     {
         Main.terminal.Puts("Error");
         Main.terminal.NewLine();
         return;
     }
 
-    char buffer[100];
-    memset(buffer, 0, sizeof(buffer));
-    const FSFileHandle file = result.Handle;
-    Main.fs.read(&Main.fs, file, buffer, sizeof(buffer));
-    Main.fs.close(&Main.fs, file);
+    std::array<uint8_t, 100> buffer;
+    std::fill(buffer.begin(), buffer.end(), 0);
+
+    f.Read(buffer);
 
     buffer[99] = 0;
 
-    Main.terminal.Puts(buffer);
+    Main.terminal.Puts(reinterpret_cast<char*>(buffer.data()));
     Main.terminal.NewLine();
 }
 
@@ -119,7 +121,7 @@ void MakeDirectory(uint16_t argc, char* argv[])
         return;
     }
 
-    Main.fs.makeDirectory(&Main.fs, argv[0]);
+    Main.fs.MakeDirectory(argv[0]);
 }
 
 void EraseFlash(uint16_t argc, char* argv[])
@@ -135,5 +137,5 @@ void SyncFS(uint16_t argc, char* argv[])
 {
     UNUSED(argc, argv);
 
-    Main.fs.Sync(&Main.fs);
+    Main.fs.Sync();
 }

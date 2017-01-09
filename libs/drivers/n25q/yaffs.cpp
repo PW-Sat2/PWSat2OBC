@@ -62,21 +62,18 @@ N25QYaffsDeviceBase::N25QYaffsDeviceBase(const char* mountPoint,
         - this->_device.param.n_reserved_blocks;
 }
 
-OSResult N25QYaffsDeviceBase::Mount()
+OSResult N25QYaffsDeviceBase::Mount(services::fs::IYaffsDeviceOperations& deviceOperations)
 {
-    yaffs_add_device(&this->_device);
-    auto result = yaffs_mount(this->_device.param.name);
-    if (result != -1)
+    auto result = deviceOperations.AddDeviceAndMount(&this->_device);
+    if (OS_RESULT_SUCCEEDED(result))
     {
         LOGF(LOG_LEVEL_INFO, "[Device %s] Mounted successfully", this->_device.param.name);
         return OSResult::Success;
     }
     else
     {
-        auto error = (OSResult)yaffs_get_error();
-
-        LOGF(LOG_LEVEL_ERROR, "[Device %s] Mount failed: %d", this->_device.param.name, num(error));
-        return error;
+        LOGF(LOG_LEVEL_ERROR, "[Device %s] Mount failed: %d", this->_device.param.name, num(result));
+        return result;
     }
 }
 

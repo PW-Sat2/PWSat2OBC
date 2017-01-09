@@ -1,43 +1,75 @@
+
 #include "fs.h"
 #include "logger/logger.h"
 #include "system.h"
 
-bool FileSystemSaveToFile(FileSystem* fs, const char* file, const uint8_t* buffer, FSFileSize length)
+using namespace services::fs;
+
+bool services::fs::SaveToFile(IFileSystem& fs, const char* file, gsl::span<const std::uint8_t> buffer)
 {
-    const FSFileOpenResult result = fs->open(fs, file, FsOpenCreateAlways, FsWriteOnly);
-    if (OS_RESULT_FAILED(result.Status))
+    File f(fs, file, FileOpen::CreateAlways, FileAccess::WriteOnly);
+
+    if (!f)
     {
         LOGF(LOG_LEVEL_WARNING, "Unable to open file: %s", file);
         return false;
     }
 
-    const FSIOResult writeResult = fs->write(fs, result.Handle, buffer, length);
-    const bool status = OS_RESULT_SUCCEEDED(writeResult.Status) && writeResult.BytesTransferred == length;
+    const IOResult writeResult = f.Write(buffer);
+    const bool status = OS_RESULT_SUCCEEDED(writeResult.Status) && writeResult.Result.size() == buffer.size();
     if (!status)
     {
         LOGF(LOG_LEVEL_WARNING, "Unable to update file: %s. Status: 0x%08x", file, num(writeResult.Status));
     }
 
-    fs->close(fs, result.Handle);
     return status;
 }
 
-bool FileSystemReadFile(FileSystem* fs, const char* const filePath, uint8_t* buffer, FSFileSize length)
+bool services::fs::ReadFromFile(IFileSystem& fs, const char* const filePath, gsl::span<std::uint8_t> buffer)
 {
-    const FSFileOpenResult result = fs->open(fs, filePath, FsOpenExisting, FsReadOnly);
-    if (OS_RESULT_FAILED(result.Status))
+    File f(fs, filePath, FileOpen::Existing, FileAccess::ReadOnly);
+    if (!f)
     {
         LOGF(LOG_LEVEL_WARNING, "Unable to open file: %s", filePath);
         return false;
     }
 
-    const FSIOResult readResult = fs->read(fs, result.Handle, buffer, length);
-    const bool status = OS_RESULT_SUCCEEDED(readResult.Status) && readResult.BytesTransferred == length;
+    const IOResult readResult = f.Read(buffer);
+    const bool status = OS_RESULT_SUCCEEDED(readResult.Status) && readResult.Result.size() == buffer.size();
     if (!status)
     {
         LOGF(LOG_LEVEL_WARNING, "Unable to read file: %s. Status: 0x%08x", filePath, num(readResult.Status));
     }
 
-    fs->close(fs, result.Handle);
     return status;
+}
+
+File::~File()
+{
+    if (this->_valid)
+    {
+        this->_fs.Close(this->_handle);
+    }
+}
+
+File::File(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access) : _fs(fs)
+{
+    auto f = fs.Open(path, mode, access);
+    this->_handle = f.Result;
+    this->_valid = f;
+}
+
+IOResult File::Read(gsl::span<uint8_t> buffer)
+{
+    return this->_fs.Read(this->_handle, buffer);
+}
+
+IOResult File::Write(gsl::span<const uint8_t> buffer)
+{
+    return this->_fs.Write(this->_handle, buffer);
+}
+
+OSResult File::Truncate(FileSize size)
+{
+    return this->_fs.TruncateFile(this->_handle, size);
 }

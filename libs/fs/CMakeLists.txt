@@ -1,13 +1,14 @@
 set(NAME fs)
 
 add_library(${NAME} STATIC        
-    fs.cpp
+    yaffs.cpp
     extension.cpp
 )
 
 target_link_libraries(${NAME} PUBLIC
     yaffs
     logger
+    gsl
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

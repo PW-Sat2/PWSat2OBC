@@ -10,7 +10,7 @@
 #include "antenna/miniport.h"
 #include "base/os.h"
 #include "communication.h"
-#include "fs/fs.h"
+#include "fs/yaffs.h"
 #include "hardware.h"
 #include "leuart/line_io.h"
 #include "n25q/n25q.h"
@@ -46,7 +46,7 @@ struct OBC
     void PostStartInitialization();
 
     /** @brief File system object */
-    FileSystem fs;
+    services::fs::YaffsFileSystem fs;
     /** @brief Handle to OBC initialization task. */
     OSTaskHandle initTask;
     /** @brief Flag indicating that OBC software has finished initialization process. */
