@@ -9,21 +9,21 @@ TEST(TimeTest, TestTimePointToTimeSpanConversionBase)
 {
     const auto point = TimePointBuild(40, 12, 12, 35, 876);
     const auto result = TimePointToTimeSpan(point);
-    ASSERT_THAT(result.count(), Eq(3499955876ull));
+    ASSERT_THAT(result.count(), Eq(3499955876ll));
 }
 
 TEST(TimeTest, TestTimePointToTimeSpanConversionExtended)
 {
     const auto point = TimePointBuild(65, 17, 43, 59, 500);
     const auto result = TimePointToTimeSpan(point);
-    ASSERT_THAT(result.count(), Eq(5679839500ull));
+    ASSERT_THAT(result.count(), Eq(5679839500ll));
 }
 
 TEST(TimeTest, TestTimePointToTimeSpanConversionFieldOverflow)
 {
     const auto point = TimePointBuild(4501, 80, 200, 150, 12548);
     const auto result = TimePointToTimeSpan(point);
-    ASSERT_THAT(result.count(), Eq(389186562548ull));
+    ASSERT_THAT(result.count(), Eq(389186562548ll));
 }
 
 TEST(TimeTest, TestTimePointNormalization)
