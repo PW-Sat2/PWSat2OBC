@@ -1,11 +1,6 @@
 #include "efm.h"
-#include <em_cmu.h>
-#include <em_gpio.h>
-#include <em_int.h>
-#include <em_usart.h>
-#include <core_cm3.h>
 
-#include <dmadrv.h>
+#include "efm_support/api.h"
 #include "efm_support/clock.h"
 #include "efm_support/dma.h"
 #include "io_map.h"
@@ -24,7 +19,7 @@ static void* TXPort = const_cast<uint32_t*>(&io_map::SPI::Peripheral->TXDATA);
 
 void EFMSPIInterface::Initialize()
 {
-    CMU_ClockEnable(efm::Clock(io_map::SPI::Peripheral), true);
+    efm::cmu::ClockEnable(efm::Clock(io_map::SPI::Peripheral), true);
 
     USART_InitSync_TypeDef init = USART_INITSYNC_DEFAULT;
     init.master = true;
@@ -35,15 +30,15 @@ void EFMSPIInterface::Initialize()
     init.autoTx = false;
     init.enable = usartDisable;
 
-    USART_InitSync(io_map::SPI::Peripheral, &init);
+    efm::usart::InitSync(io_map::SPI::Peripheral, &init);
 
-    DMADRV_AllocateChannel(&this->_rxChannel, nullptr);
-    DMADRV_AllocateChannel(&this->_txChannel, nullptr);
+    efm::dma::AllocateChannel(&this->_rxChannel, nullptr);
+    efm::dma::AllocateChannel(&this->_txChannel, nullptr);
 
-    io_map::SPI::Peripheral->ROUTE |=
-        USART_ROUTE_CLKPEN | USART_ROUTE_TXPEN | USART_ROUTE_RXPEN | (io_map::SPI::Location << _USART_ROUTE_LOCATION_SHIFT);
+    efm::usart::AmendRoute(io_map::SPI::Peripheral,
+        USART_ROUTE_CLKPEN | USART_ROUTE_TXPEN | USART_ROUTE_RXPEN | (io_map::SPI::Location << _USART_ROUTE_LOCATION_SHIFT));
 
-    USART_Enable(io_map::SPI::Peripheral, usartEnable);
+    efm::usart::Enable(io_map::SPI::Peripheral, usartEnable);
 
     this->_transferGroup = System::CreateEventGroup();
     this->_lock = System::CreateBinarySemaphore();
@@ -54,12 +49,12 @@ void EFMSPIInterface::Write(gsl::span<const std::uint8_t> buffer)
 {
     System::EventGroupClearBits(this->_transferGroup, TransferFinished);
 
-    io_map::SPI::Peripheral->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
+    efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_CLEARRX | USART_CMD_CLEARTX);
 
-    USART_IntClear(io_map::SPI::Peripheral, USART_IntGet(io_map::SPI::Peripheral));
+    efm::usart::IntClear(io_map::SPI::Peripheral, efm::usart::IntGet(io_map::SPI::Peripheral));
 
     uint32_t dummyRx = 0;
-    DMADRV_PeripheralMemory(this->_rxChannel,
+    efm::dma::PeripheralMemory(this->_rxChannel,
         efm::DMASignal<efm::DMASignalUSART::RXDATAV>(io_map::SPI::Peripheral),
         &dummyRx,
         RXPort,
@@ -69,7 +64,7 @@ void EFMSPIInterface::Write(gsl::span<const std::uint8_t> buffer)
         OnTransferFinished,
         this);
 
-    DMADRV_MemoryPeripheral(this->_txChannel,
+    efm::dma::MemoryPeripheral(this->_txChannel,
         efm::DMASignal<efm::DMASignalUSART::TXBL>(io_map::SPI::Peripheral),
         TXPort,
         const_cast<uint8_t*>(buffer.data()),
@@ -86,11 +81,11 @@ void EFMSPIInterface::Read(gsl::span<std::uint8_t> buffer)
 {
     System::EventGroupClearBits(this->_transferGroup, TransferFinished);
 
-    io_map::SPI::Peripheral->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
+    efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_CLEARRX | USART_CMD_CLEARTX);
 
-    USART_IntClear(io_map::SPI::Peripheral, USART_IntGet(io_map::SPI::Peripheral));
+    efm::usart::IntClear(io_map::SPI::Peripheral, efm::usart::IntGet(io_map::SPI::Peripheral));
 
-    DMADRV_PeripheralMemory(this->_rxChannel,
+    efm::dma::PeripheralMemory(this->_rxChannel,
         efm::DMASignal<efm::DMASignalUSART::RXDATAV>(io_map::SPI::Peripheral),
         buffer.data(),
         RXPort,
@@ -101,7 +96,7 @@ void EFMSPIInterface::Read(gsl::span<std::uint8_t> buffer)
         this);
 
     uint32_t dummyTx = 0;
-    DMADRV_MemoryPeripheral(this->_txChannel,
+    efm::dma::MemoryPeripheral(this->_txChannel,
         efm::DMASignal<efm::DMASignalUSART::TXBL>(io_map::SPI::Peripheral),
         TXPort,
         &dummyTx,

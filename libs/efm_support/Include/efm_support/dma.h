@@ -9,6 +9,7 @@ namespace efm
 {
     /**
      * @brief Possible DMA signals for USART peripheral
+     * @ingroup efm_support
      */
     enum class DMASignalUSART
     {
@@ -20,6 +21,7 @@ namespace efm
      * @brief Returns specific DMA signal for given USART peripheral
      * @param peripheral Peripheral base address
      * @return DMA signal
+     * @ingroup efm_support
      */
     template <DMASignalUSART Signal> constexpr DMADRV_PeripheralSignal_t DMASignal(const USART_TypeDef* peripheral) = delete;
 

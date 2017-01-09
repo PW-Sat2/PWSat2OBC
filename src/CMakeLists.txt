@@ -58,6 +58,8 @@ target_link_libraries(${NAME}
     yaffs
     obc_storage
     obc_hardware
+    spi
+    efm_emlib
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

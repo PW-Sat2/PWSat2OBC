@@ -10,8 +10,6 @@ add_library(${NAME} STATIC ${SOURCES})
 target_link_libraries(${NAME} 
 	base
 	gsl
-	emdrv
-	emlib
 	platform
 	logger
 	efm_support

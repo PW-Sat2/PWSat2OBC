@@ -10,7 +10,9 @@ namespace efm
      * @param hw Peripheral base address
      * @return CMU clock
      *
-     * @remark Not all peripheral are supported at the moment - feel free to add new ones if needed
+     * @remark Not all peripherals are supported at the moment - feel free to add new ones if needed
+     *
+     * @ingroup efm_support
      */
     template <typename Peripheral> constexpr CMU_Clock_TypeDef Clock(const Peripheral hw)
     {
