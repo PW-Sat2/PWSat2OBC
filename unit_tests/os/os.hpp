@@ -39,6 +39,8 @@ struct IOS
     virtual OSEventBits EventGroupWaitForBits(
         OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, bool waitAll, bool autoReset, const OSTaskTimeSpan timeout) = 0;
 
+    virtual OSEventBits EventGroupSetBitsISR(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange) = 0;
+
     virtual void* Alloc(std::size_t size) = 0;
     virtual void Free(void* ptr) = 0;
     virtual OSQueueHandle CreateQueue(std::size_t maxElementCount, std::size_t elementSize) = 0;
