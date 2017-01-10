@@ -1,37 +1,19 @@
-include(ExternalProject)
+# Download and unpack rapidcheck at configure time
+configure_file(CMakeLists.txt.in ${CMAKE_CURRENT_BINARY_DIR}/rapidcheck-download/CMakeLists.txt)
+execute_process(COMMAND ${CMAKE_COMMAND} -DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM} -G "${CMAKE_GENERATOR}" .
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/rapidcheck-download
+    )
 
-set(OPTIONS "${CMAKE_CXX_FLAGS} -fexceptions -funwind-tables")
+execute_process(COMMAND ${CMAKE_COMMAND} --build .  
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/rapidcheck-download 
+    )
 
-ExternalProject_Add(rapidcheck_source
-  GIT_REPOSITORY https://github.com/PW-Sat2/rapidcheck.git
-  GIT_TAG newlib
-  PREFIX ${CMAKE_CURRENT_BINARY_DIR}/rapidcheck
-  UPDATE_DISCONNECTED 1
-  INSTALL_COMMAND ""
-  CMAKE_ARGS   
-    -DCMAKE_TOOLCHAIN_FILE=${PROJECT_SOURCE_DIR}/toolchain.cmake
-    "-DCMAKE_CXX_FLAGS=${OPTIONS} -Wno-unused-parameter"
-    -DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}
-    -DCMAKE_BUILD_TYPE:STRING=$<CONFIG>
-  LOG_CONFIGURE ON
-  LOG_BUILD ON
-  EXCLUDE_FROM_ALL 1
-)
+set(RC_ENABLE_GMOCK ON CACHE BOOL "" FORCE)
+set(RC_ENABLE_GTEST ON CACHE BOOL "" FORCE)
+add_compile_options(-fexceptions)
+add_compile_options(-funwind-tables)
+add_compile_options(-Wno-unused-parameter)
 
-ExternalProject_Get_Property(rapidcheck_source source_dir)
-ExternalProject_Get_Property(rapidcheck_source binary_dir)
-
-function(addExternalLib name dependency source_location binary_location include_directory)
-    add_library(${name} INTERFACE)
-    add_dependencies(${name} ${dependency})
-    target_link_libraries(${name} INTERFACE "${binary_location}/${CMAKE_FIND_LIBRARY_PREFIXES}${name}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-    target_include_directories(${name} INTERFACE "${include_directory}")
-endfunction(addExternalLib)
-
-addExternalLib(rapidcheck rapidcheck_source "${source_dir}" "${binary_dir}" "${source_dir}/include")
-
-add_library(rapidcheck.gtest INTERFACE)
-target_include_directories(rapidcheck.gtest INTERFACE "${source_dir}/extras/gtest/include")
-
-add_library(rapidcheck.gmock INTERFACE)
-target_include_directories(rapidcheck.gmock INTERFACE "${source_dir}/extras/gmock/include")
+# Add rapidcheck directly to our build. This adds
+# the following targets: rapidcheck rapidcheck_gtest rapidcheck_gmock
+add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/rapidcheck-src ${CMAKE_CURRENT_BINARY_DIR}/rapidcheck-build)
