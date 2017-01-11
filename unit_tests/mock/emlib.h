@@ -4,6 +4,7 @@
 #include <dmadrv.h>
 #include <em_cmu.h>
 #include <em_usart.h>
+#include <utility>
 #include "gmock/gmock.h"
 
 struct ICMU
@@ -135,8 +136,8 @@ template <typename Mock> ProxyReset<Mock>& ProxyReset<Mock>::operator=(ProxyRese
 {
     ProxyReset<Mock> tmp(std::move(arg));
 
-    this->_released = tmp._released;
-    this->_holder = tmp._holder;
+    std::swap(this->_released, tmp._released);
+    std::swap(this->_holder, tmp._holder);
 
     tmp._released = true;
 

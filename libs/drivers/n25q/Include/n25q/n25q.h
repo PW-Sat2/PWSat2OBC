@@ -182,6 +182,9 @@ namespace devices
             /**
              * @brief Resets device to known state (memory content is not affected)
              * @return Operation status
+             *
+             * This method performs software chip reset and waits until it is operational. If device doesn't respond in time (10ms), timeout
+             * will be returned
              */
             OperationResult Reset();
 
