@@ -24,7 +24,7 @@ struct IOS
 
     virtual void Sleep(const OSTaskTimeSpan time) = 0;
 
-    virtual OSSemaphoreHandle CreateBinarySemaphore() = 0;
+    virtual OSSemaphoreHandle CreateBinarySemaphore(uint8_t semaphoreId = 0) = 0;
 
     virtual OSResult GiveSemaphore(const OSSemaphoreHandle semaphore) = 0;
 
@@ -38,6 +38,8 @@ struct IOS
 
     virtual OSEventBits EventGroupWaitForBits(
         OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, bool waitAll, bool autoReset, const OSTaskTimeSpan timeout) = 0;
+
+    virtual OSEventBits EventGroupSetBitsISR(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange) = 0;
 
     virtual void* Alloc(std::size_t size) = 0;
     virtual void Free(void* ptr) = 0;
@@ -55,6 +57,10 @@ struct IOS
     virtual void PulseSet(OSPulseHandle handle) = 0;
 
     virtual void EndSwitchingISR() = 0;
+
+    virtual OSTaskTimeSpan GetUptime() = 0;
+
+    virtual void Yield() = 0;
 };
 
 class OSReset

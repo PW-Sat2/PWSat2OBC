@@ -7,24 +7,29 @@
 #include "gmock/gmock.h"
 #include "fs/fs.h"
 
-struct FsMock : FileSystem
+struct FsMock : services::fs::IFileSystem
 {
-    FsMock();
-    MOCK_METHOD3(Open, FSFileOpenResult(const std::string& path, FSFileOpenFlags openFlag, FSFileAccessMode accessMode));
-    MOCK_METHOD2(Truncate, OSResult(FSFileHandle file, FSFileSize length));
-    MOCK_METHOD3(Write, FSIOResult(FSFileHandle file, const void* buffer, FSFileSize size));
-    MOCK_METHOD3(Read, FSIOResult(FSFileHandle file, void* buffer, FSFileSize size));
-    MOCK_METHOD1(Close, OSResult(FSFileHandle file));
+    MOCK_METHOD3(
+        Open, services::fs::FileOpenResult(const char* path, services::fs::FileOpen openFlag, services::fs::FileAccess accessMode));
+    MOCK_METHOD2(TruncateFile, OSResult(services::fs::FileHandle file, services::fs::FileSize length));
+    MOCK_METHOD2(Write, services::fs::IOResult(services::fs::FileHandle file, gsl::span<const std::uint8_t> buffer));
+    MOCK_METHOD2(Read, services::fs::IOResult(services::fs::FileHandle file, gsl::span<std::uint8_t> buffer));
+    MOCK_METHOD1(Close, OSResult(services::fs::FileHandle file));
+
+    MOCK_METHOD1(OpenDirectory, services::fs::DirectoryOpenResult(const char*));
+    MOCK_METHOD1(ReadDirectory, char*(services::fs::DirectoryHandle));
+    MOCK_METHOD1(CloseDirectory, OSResult(services::fs::DirectoryHandle));
+    MOCK_METHOD1(Format, OSResult(const char*));
+    MOCK_METHOD1(MakeDirectory, OSResult(const char*));
+    MOCK_METHOD1(Exists, bool(const char*));
 };
 
-FSFileOpenResult MakeOpenedFile(int handle);
+services::fs::FileOpenResult MakeOpenedFile(int handle);
 
-FSFileOpenResult MakeOpenedFile(OSResult result);
+services::fs::FileOpenResult MakeOpenedFile(OSResult result);
 
-FSIOResult MakeFSIOResult(int bytesTransfered);
+services::fs::IOResult MakeFSIOResult(gsl::span<const uint8_t> result);
 
-FSIOResult MakeFSIOResult(OSResult result);
-
-FSIOResult MakeFSIOResult(OSResult result, int bytesTransfered);
+services::fs::IOResult MakeFSIOResult(OSResult result);
 
 #endif

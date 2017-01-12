@@ -3,6 +3,7 @@ set(NAME mission_antenna)
 set(SOURCES
     antenna.cpp
     Include/mission/antenna_state.h
+    Include/mission/antenna_task.hpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -12,6 +13,7 @@ target_link_libraries(${NAME}
     time
     state
     antenna
+    mission
     gsl
 )
 

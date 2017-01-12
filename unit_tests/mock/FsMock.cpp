@@ -1,76 +1,24 @@
 #include "FsMock.hpp"
 #include <utility>
 
-static FSFileOpenResult FsOpen(FileSystem* fileSystem, const char* path, FSFileOpenFlags openFlag, FSFileAccessMode accessMode)
+using namespace services::fs;
+
+FileOpenResult MakeOpenedFile(int handle)
 {
-    auto fsMock = static_cast<FsMock*>(fileSystem);
-    return fsMock->Open(path, openFlag, accessMode);
+    return FileOpenResult(OSResult::Success, handle);
 }
 
-static OSResult FsTruncate(FileSystem* fileSystem, FSFileHandle file, FSFileSize length)
+FileOpenResult MakeOpenedFile(OSResult status)
 {
-    auto fsMock = static_cast<FsMock*>(fileSystem);
-    return fsMock->Truncate(file, length);
+    return FileOpenResult(status, -1);
 }
 
-static FSIOResult FsWrite(FileSystem* fileSystem, FSFileHandle file, const void* buffer, FSFileSize size)
+IOResult MakeFSIOResult(OSResult status)
 {
-    auto fsMock = static_cast<FsMock*>(fileSystem);
-    return fsMock->Write(file, buffer, size);
+    return IOResult(status, 0);
 }
 
-static FSIOResult FsRead(FileSystem* fileSystem, FSFileHandle file, void* buffer, FSFileSize size)
+IOResult MakeFSIOResult(gsl::span<const uint8_t> result)
 {
-    auto fsMock = static_cast<FsMock*>(fileSystem);
-    return fsMock->Read(file, buffer, size);
-}
-
-static OSResult FsClose(FileSystem* fileSystem, FSFileHandle file)
-{
-    auto fsMock = static_cast<FsMock*>(fileSystem);
-    return fsMock->Close(file);
-}
-
-FsMock::FsMock()
-{
-    open = FsOpen;
-    ftruncate = FsTruncate;
-    write = FsWrite;
-    read = FsRead;
-    openDirectory = nullptr;
-    readDirectory = nullptr;
-    closeDirectory = nullptr;
-    close = FsClose;
-}
-
-FSFileOpenResult MakeOpenedFile(int handle)
-{
-    FSFileOpenResult result;
-    result.Status = OSResult::Success;
-    result.Handle = handle;
-    return result;
-}
-
-FSFileOpenResult MakeOpenedFile(OSResult status)
-{
-    FSFileOpenResult result;
-    result.Status = status;
-    result.Handle = -1;
-    return result;
-}
-
-FSIOResult MakeFSIOResult(OSResult status)
-{
-    FSIOResult result;
-    result.Status = status;
-    result.BytesTransferred = 0;
-    return result;
-}
-
-FSIOResult MakeFSIOResult(int bytesTransfered)
-{
-    FSIOResult result;
-    result.Status = OSResult::Success;
-    result.BytesTransferred = bytesTransfered;
-    return result;
+    return IOResult(OSResult::Success, result);
 }

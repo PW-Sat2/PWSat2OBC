@@ -4,13 +4,44 @@
 #pragma once
 
 #include "gmock/gmock.h"
-#include "state/state.h"
+#include "mission/base.hpp"
+#include "state/struct.h"
 
-struct ActionDescriptorMock
+template <typename State, typename Tag> struct ActionDescriptorMock : public mission::Action
 {
-    MOCK_METHOD1(Condition, bool(const SystemState* state));
-    MOCK_METHOD1(Action, void(const SystemState* state));
-    SystemActionDescriptor GetDescriptor();
+    MOCK_METHOD1_T(ConditionProc, bool(const State& state));
+    MOCK_METHOD1_T(ActionProc, void(const State& state));
+    mission::ActionDescriptor<State> BuildAction();
+
+    static bool ConditionEntry(const State& state, void* param);
+
+    static void ActionEntry(const State& state, void* param);
 };
+
+template <typename State, typename Tag>
+bool ActionDescriptorMock<State, Tag>::ConditionEntry(const State& state, //
+    void* param                                                           //
+    )
+{
+    return static_cast<ActionDescriptorMock<State, Tag>*>(param)->ConditionProc(state);
+}
+
+template <typename State, typename Tag>
+void ActionDescriptorMock<State, Tag>::ActionEntry(const State& state, //
+    void* param                                                        //
+    )
+{
+    static_cast<ActionDescriptorMock<State, Tag>*>(param)->ActionProc(state);
+}
+
+template <typename State, typename Tag> mission::ActionDescriptor<State> ActionDescriptorMock<State, Tag>::BuildAction()
+{
+    mission::ActionDescriptor<State> descriptor;
+    descriptor.actionProc = ActionEntry;
+    descriptor.condition = ConditionEntry;
+    descriptor.name = "Mock";
+    descriptor.param = this;
+    return descriptor;
+}
 
 #endif

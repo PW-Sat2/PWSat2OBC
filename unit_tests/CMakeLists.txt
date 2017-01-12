@@ -13,21 +13,26 @@ set(SOURCES
   FileSystem/NANDGeometryTest.cpp
   FileSystem/MemoryDriver.cpp
   FileSystem/EccTest.cpp
+  FileSystem/FileTest.cpp
   Comm/CommTest.cpp
+  Comm/CommFrameTest.cpp
   TeleCommandHandling/TeleCommandHandlingTest.cpp
   base/ReaderTest.cpp
   base/WriterTest.cpp
   MissionPlan/MissionPlanTest.cpp
   MissionPlan/MissionTestHelpers.cpp
   MissionPlan/SailSystemStateTest.cpp
+  MissionPlan/TimeTaskTest.cpp
+  MissionPlan/MissionLoopTest.cpp
   MissionPlan/antenna/DeployAntennasTest.cpp
   MissionPlan/antenna/AntennaMissionStateTest.cpp
   I2C/FallbackI2CBusTest.cpp
   I2C/ErrorHandlingI2CBusTest.cpp
+  N25Q/N25QTest.cpp
+  os/TimeoutTest.cpp
   os/os.cpp
   os/os.hpp
   OsMock.hpp
-  adxrs453/adxrs453Test.cpp
   time/time.cpp
   time/timer.cpp
   time/persistance.cpp
@@ -41,13 +46,13 @@ set(SOURCES
   antenna/antenna.cpp
   antenna/MiniportMock.cpp
   antenna/MiniportMock.hpp
-  mock/ActionDescriptorMock.cpp
   mock/ActionDescriptorMock.hpp
-  mock/UpdateDescriptorMock.cpp
   mock/UpdateDescriptorMock.hpp
-  mock/VerifyDescriprorMock.cpp
   mock/VerifyDescriprorMock.hpp
   imtq/imtqTest.cpp
+  mock/emlib.cpp
+  SPI/SPIMock.cpp
+  SPI/SPIDriverTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -84,12 +89,14 @@ target_link_libraries(${NAME}
     rapidcheck.gtest
     rapidcheck.gmock
     emdrv
-    adxrs453
     time
     gsl
     antenna
+    n25q
     mission_antenna
     imtq
+    mission_sail
+    mission_time
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})

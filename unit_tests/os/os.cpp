@@ -52,11 +52,11 @@ void System::ResumeTask(OSTaskHandle task)
     };
 }
 
-OSSemaphoreHandle System::CreateBinarySemaphore()
+OSSemaphoreHandle System::CreateBinarySemaphore(uint8_t semaphoreId)
 {
     if (OSProxy != nullptr)
     {
-        return OSProxy->CreateBinarySemaphore();
+        return OSProxy->CreateBinarySemaphore(semaphoreId);
     }
 
     return nullptr;
@@ -118,6 +118,16 @@ OSEventBits System::EventGroupWaitForBits(
     if (OSProxy != nullptr)
     {
         return OSProxy->EventGroupWaitForBits(eventGroup, bitsToWaitFor, waitAll, autoReset, timeout);
+    }
+
+    return 0;
+}
+
+OSEventBits System::EventGroupSetBitsISR(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange)
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->EventGroupSetBitsISR(eventGroup, bitsToChange);
     }
 
     return 0;
@@ -232,6 +242,24 @@ void System::EndSwitchingISR()
     if (OSProxy != nullptr)
     {
         OSProxy->EndSwitchingISR();
+    }
+}
+
+OSTaskTimeSpan System::GetUptime()
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->GetUptime();
+    }
+
+    return 0;
+}
+
+void System::Yield()
+{
+    if (OSProxy != nullptr)
+    {
+        OSProxy->Yield();
     }
 }
 

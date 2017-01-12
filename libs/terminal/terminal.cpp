@@ -98,8 +98,6 @@ void Terminal::Loop(Terminal* terminal)
 
         terminal->_stdio.Readline(&terminal->_stdio, input_buffer, COUNT_OF(input_buffer));
 
-        LOGF(LOG_LEVEL_INFO, "Received line %s", input_buffer);
-
         terminal->HandleCommand(input_buffer);
     }
 }

@@ -1,6 +1,6 @@
 #include "MissionTestHelpers.h"
 #include <ostream>
-#include "state/state.h"
+#include "state/struct.h"
 
 void showValue(const SystemState& state, std::ostream& os)
 {

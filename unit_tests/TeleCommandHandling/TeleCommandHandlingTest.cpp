@@ -1,11 +1,12 @@
 #include <algorithm>
 #include <cstdint>
 #include <gsl/span>
+#include "comm/Frame.hpp"
+#include "comm/ITransmitFrame.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "comm/comm.h"
 #include "telecommand_handling/telecommand_handling.h"
 #include "utils.hpp"
 
@@ -21,7 +22,7 @@ using testing::_;
 using testing::Eq;
 using testing::StrEq;
 
-using devices::comm::CommFrame;
+using devices::comm::Frame;
 using devices::comm::ITransmitFrame;
 using namespace telecommands::handling;
 
@@ -60,34 +61,29 @@ TeleCommandHandlingTest::TeleCommandHandlingTest() : handling(deps, deps, span<I
 
 TEST_F(TeleCommandHandlingTest, IncomingFrameShouldBeDecryptedAndDecoded)
 {
-    CommFrame frame;
-    frame.Size = 40;
-
-    EXPECT_CALL(this->deps, Decrypt(_, _)).WillOnce(Return(DecryptFrameResult::Success(frame.Contents)));
-    EXPECT_CALL(this->deps, Decode(_)).WillOnce(Return(DecodeTelecommandResult::Success(0xA, frame.Contents)));
+    std::uint8_t buffer[40] = {};
+    Frame frame(0, 0, 0, buffer);
+    EXPECT_CALL(this->deps, Decrypt(_, _)).WillOnce(Return(DecryptFrameResult::Success(frame.Payload())));
+    EXPECT_CALL(this->deps, Decode(_)).WillOnce(Return(DecodeTelecommandResult::Success(0xA, frame.Payload().subspan(1))));
 
     this->handling.HandleFrame(this->transmitFrame, frame);
 }
 
 TEST_F(TeleCommandHandlingTest, HandlerShouldBeCalledForKnownTelecommand)
 {
-    const char* contents = "ABCD";
+    std::uint8_t buffer[40] = "ABCD";
+    Frame frame(0, 0, 0, buffer);
 
-    CommFrame frame;
-    frame.Size = 50;
-    strcpy((char*)frame.Contents.data(), contents);
+    EXPECT_CALL(this->deps, Decrypt(_, _)).WillOnce(Invoke([](span<const uint8_t> frame, span<uint8_t> decrypted) {
+        auto lastCopied = std::copy(frame.cbegin(), frame.cend(), decrypted.begin());
 
-    EXPECT_CALL(this->deps, Decrypt(_, _))
-        .WillOnce(Invoke([](span<const uint8_t> frame, span<uint8_t> decrypted) {
-            auto lastCopied = std::copy(frame.cbegin(), frame.cend(), decrypted.begin());
+        auto decryptedDataLength = lastCopied - decrypted.begin();
 
-            auto decryptedDataLength = lastCopied - decrypted.begin();
-
-            return DecryptFrameResult::Success(decrypted.subspan(0, decryptedDataLength));
-        }));
-    EXPECT_CALL(this->deps, Decode(_))
-        .WillOnce(Invoke(
-            [](span<const uint8_t> frame) { return DecodeTelecommandResult::Success(frame[0], frame.subspan(1, frame.length() - 1)); }));
+        return DecryptFrameResult::Success(decrypted.subspan(0, decryptedDataLength));
+    }));
+    EXPECT_CALL(this->deps, Decode(_)).WillOnce(Invoke([](span<const uint8_t> frame) {
+        return DecodeTelecommandResult::Success(frame[0], frame.subspan(1, frame.length() - 1));
+    }));
 
     NiceMock<TeleCommandHandlerMock> someCommand;
     EXPECT_CALL(someCommand, Handle(_, _));
@@ -106,7 +102,7 @@ TEST_F(TeleCommandHandlingTest, WhenDecryptionFailsShouldNotAttemptFrameDecoding
 
     EXPECT_CALL(this->deps, Decode(_)).Times(0);
 
-    CommFrame frame;
+    Frame frame;
 
     this->handling.HandleFrame(this->transmitFrame, frame);
 }
@@ -126,7 +122,7 @@ TEST_F(TeleCommandHandlingTest, WhenDecodingFrameShouldNotAttemptInvokingHandler
 
     IncomingTelecommandHandler handler(this->deps, this->deps, span<IHandleTeleCommand*>(telecommands));
 
-    CommFrame frame;
+    Frame frame;
 
     handler.HandleFrame(this->transmitFrame, frame);
 }

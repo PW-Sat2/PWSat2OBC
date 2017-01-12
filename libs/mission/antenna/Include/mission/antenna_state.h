@@ -4,7 +4,8 @@
 #include <cstdint>
 #include "antenna/antenna.h"
 #include "base/os.h"
-#include "state/state.h"
+#include "mission/base.hpp"
+#include "state/struct.h"
 
 namespace mission
 {
@@ -205,23 +206,6 @@ namespace mission
         {
             OverrideStep(0);
         }
-
-        /**
-         * @brief Returns antenna deployment action descriptor.
-         *
-         * @param[in] stateDescriptor Reference to the antenna deployment process state object.
-         * @returns Action descriptor that runs antenna deployment process.
-         */
-        SystemActionDescriptor GetAntennaDeploymentActionDescriptor(AntennaMissionState& stateDescriptor);
-
-        /**
-         * @brief Returns antenna deployment update descriptor.
-         *
-         * @param[in] stateDescriptor Reference to the antenna deployment process state object.
-         * @returns Update descriptor that runs antenna deployment update process.
-         */
-        SystemStateUpdateDescriptor GetAntennaDeploymentUpdateDescriptor(AntennaMissionState& stateDescriptor);
-
         /** @}*/
     }
 }

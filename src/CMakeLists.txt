@@ -1,5 +1,7 @@
 set(NAME pwsat)
 
+generate_version_file(${CMAKE_CURRENT_BINARY_DIR}/gen/version.h)
+
 set(SOURCES
     main.cpp
     terminal.cpp
@@ -9,14 +11,16 @@ set(SOURCES
     commands/antenna.cpp
     commands/file_system.cpp
     commands/i2c_test_command.cpp
+    commands/heap_info.cpp
     commands/rtos_status.cpp
     commands/heap.cpp
+    commands/compile_info.cpp
+    commands/mission.cpp
+    commands/dma.cpp
     obc.h
     obc.cpp
     communication.cpp
-    hardware.cpp
     fault_handlers.cpp
-    mission.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -36,7 +40,6 @@ target_link_libraries(${NAME}
     i2c
     fs
     yaffs_glue
-    adxrs453
     time
     mission
     eps
@@ -47,9 +50,19 @@ target_link_libraries(${NAME}
     assert
     telecommand_handling
     gsl
+    n25q
     antenna
     mission_antenna
+    mission_sail
+    mission_time
+    yaffs
+    obc_storage
+    obc_hardware
+    spi
+    efm_emlib
 )
+
+target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)
 
 target_generate_hex(${NAME})
 

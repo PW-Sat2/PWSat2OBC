@@ -2,6 +2,7 @@
 #include "FreeRTOS.h"
 #include "FreeRTOSConfig.h"
 #include "event_groups.h"
+#include "logger/logger.h"
 #include "queue.h"
 #include "semphr.h"
 #include "task.h"
@@ -61,9 +62,17 @@ void System::ResumeTask(OSTaskHandle task)
     vTaskResume(task);
 }
 
-OSSemaphoreHandle System::CreateBinarySemaphore(void)
+OSSemaphoreHandle System::CreateBinarySemaphore(uint8_t semaphoreId)
 {
-    return xSemaphoreCreateBinary();
+    UNREFERENCED_PARAMETER(semaphoreId);
+    auto s = xSemaphoreCreateBinary();
+
+    if (s == 0)
+    {
+        LOG(LOG_LEVEL_FATAL, "Unable to create binary semaphore");
+    }
+
+    return s;
 }
 
 OSResult System::TakeSemaphore(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout)
@@ -92,6 +101,19 @@ OSResult System::GiveSemaphore(OSSemaphoreHandle semaphore)
     }
 }
 
+OSResult System::GiveSemaphoreISR(OSSemaphoreHandle semaphore)
+{
+    const BaseType_t result = xSemaphoreGiveFromISR(semaphore, nullptr);
+    if (result != pdPASS)
+    {
+        return OSResult::InvalidOperation;
+    }
+    else
+    {
+        return OSResult::Success;
+    }
+}
+
 OSEventGroupHandle System::CreateEventGroup(void)
 {
     return xEventGroupCreate();
@@ -100,6 +122,11 @@ OSEventGroupHandle System::CreateEventGroup(void)
 OSEventBits System::EventGroupSetBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange)
 {
     return xEventGroupSetBits(eventGroup, bitsToChange);
+}
+
+OSEventBits System::EventGroupSetBitsISR(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange)
+{
+    return xEventGroupSetBitsFromISR(eventGroup, bitsToChange, nullptr);
 }
 
 OSEventBits System::EventGroupClearBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange)
@@ -194,4 +221,14 @@ OSResult System::PulseWait(OSPulseHandle handle, OSTaskTimeSpan timeout)
 void System::PulseSet(OSPulseHandle handle)
 {
     System::EventGroupSetBits((OSEventGroupHandle)handle, PULSE_ALL_BITS);
+}
+
+OSTaskTimeSpan System::GetUptime()
+{
+    return portTICK_PERIOD_MS * xTaskGetTickCount();
+}
+
+void System::Yield()
+{
+    portYIELD();
 }

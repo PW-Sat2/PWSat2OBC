@@ -24,7 +24,7 @@ struct OSMock : IOS
 
     MOCK_METHOD1(Sleep, void(const OSTaskTimeSpan time));
 
-    MOCK_METHOD0(CreateBinarySemaphore, OSSemaphoreHandle());
+    MOCK_METHOD1(CreateBinarySemaphore, OSSemaphoreHandle(uint8_t semaphoreId));
 
     MOCK_METHOD2(TakeSemaphore, OSResult(const OSSemaphoreHandle semaphore, const OSTaskTimeSpan time));
 
@@ -39,6 +39,8 @@ struct OSMock : IOS
     MOCK_METHOD5(EventGroupWaitForBits,
         OSEventBits(
             OSEventGroupHandle eventGroup, const OSEventBits bitsToWaitFor, bool waitAll, bool autoReset, const OSTaskTimeSpan timeout));
+
+    MOCK_METHOD2(EventGroupSetBitsISR, OSEventBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange));
 
     MOCK_METHOD1(Alloc, void*(std::size_t size));
     MOCK_METHOD1(Free, void(void* ptr));
@@ -56,6 +58,10 @@ struct OSMock : IOS
     MOCK_METHOD1(PulseSet, void(OSPulseHandle handle));
 
     MOCK_METHOD0(EndSwitchingISR, void());
+
+    MOCK_METHOD0(GetUptime, OSTaskTimeSpan());
+
+    MOCK_METHOD0(Yield, void());
 };
 
 #endif

@@ -2,11 +2,10 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock-matchers.h"
 
-#include "fs/fs.h"
+#include "fs/yaffs.h"
 #include "storage/nand_driver.h"
 #include "system.h"
-#include "yaffs_guts.h"
-#include "yaffsfs.h"
+#include "yaffs.hpp"
 
 #include "MemoryDriver.hpp"
 
@@ -15,6 +14,7 @@ using testing::Eq;
 using testing::Ne;
 using testing::Ge;
 using testing::Test;
+using namespace services::fs;
 
 extern "C" void yaffs_remove_device(struct yaffs_dev* dev);
 
@@ -23,7 +23,7 @@ class FileSystemTest : public Test
   protected:
     yaffs_dev device;
     YaffsNANDDriver driver;
-    FileSystem api;
+    YaffsFileSystem api;
 
     int32_t FillDevice(int file);
 
@@ -62,8 +62,6 @@ FileSystemTest::FileSystemTest()
     device.param.end_block = 1 * 1024 * 1024 / driver.geometry.blockSize - device.param.start_block - device.param.n_reserved_blocks;
 
     yaffs_add_device(&device);
-
-    FileSystemAPI(&api);
 }
 
 FileSystemTest::~FileSystemTest()
@@ -302,9 +300,9 @@ TEST_F(FileSystemTest, ShouldCreateDirectoryWithParents)
 
     yaffs_mount("/");
 
-    api.makeDirectory(&api, path);
+    api.MakeDirectory(path);
 
-    ASSERT_THAT(api.exists(&api, path), Eq(true));
+    ASSERT_THAT(api.Exists(path), Eq(true));
 
     yaffs_unmount("/");
 }
@@ -317,9 +315,9 @@ TEST_F(FileSystemTest, ShouldCreateDirectoryAndParentExist)
 
     yaffs_mkdir("/a", 0777);
 
-    api.makeDirectory(&api, path);
+    api.MakeDirectory(path);
 
-    ASSERT_THAT(api.exists(&api, path), Eq(true));
+    ASSERT_THAT(api.Exists(path), Eq(true));
 
     yaffs_unmount("/");
 }

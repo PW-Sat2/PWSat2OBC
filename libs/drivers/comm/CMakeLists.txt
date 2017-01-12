@@ -2,7 +2,13 @@ set(NAME comm)
 
 set(SOURCES
     comm.cpp
-    Include/comm/comm.h
+    Frame.cpp
+    Include/comm/Beacon.hpp
+    Include/comm/comm.hpp
+    Include/comm/CommDriver.hpp
+    Include/comm/Frame.hpp
+    Include/comm/IHandleFrame.hpp
+    Include/comm/ITransmitFrame.hpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

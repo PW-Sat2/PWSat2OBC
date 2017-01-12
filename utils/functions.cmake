@@ -64,3 +64,23 @@ function(target_asm_listing TARGET)
         DEPENDS ${TARGET}
     )
 endfunction(target_asm_listing)
+
+function(generate_version_file FILENAME)
+    execute_process(
+      COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD 
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      OUTPUT_VARIABLE GIT_COMMIT_HASH
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    
+    execute_process(
+      COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      OUTPUT_VARIABLE GIT_BRANCH
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    
+    cmake_host_system_information(RESULT HOST_NAME QUERY HOSTNAME)
+    
+    configure_file(${CMAKE_SOURCE_DIR}/utils/version.h.template ${FILENAME})
+endfunction(generate_version_file)

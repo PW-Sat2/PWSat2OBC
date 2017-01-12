@@ -1,3 +1,4 @@
+
 #include "os.h"
 
 Lock::Lock(OSSemaphoreHandle semaphore, OSTaskTimeSpan timeout) : _semaphore(semaphore)
@@ -16,4 +17,13 @@ Lock::~Lock()
 bool Lock::operator()()
 {
     return this->_taken;
+}
+
+Timeout::Timeout(std::uint32_t timeout) : _expireAt(System::GetUptime() + timeout)
+{
+}
+
+bool Timeout::Expired()
+{
+    return System::GetUptime() >= this->_expireAt;
 }

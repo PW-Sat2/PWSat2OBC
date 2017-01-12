@@ -12,13 +12,13 @@ class Test_Antenna(BaseTest):
     def test_primary_antenna_is_reset_at_startup(self):
         event = TestEvent()
         self.system.primary_antenna.on_reset = event.set
-        self.system.obc.power_on()
+        self.power_on_and_wait()
         self.assertTrue(event.wait_for_change(1))
 
     def test_backup_antenna_is_reset_at_startup(self):
         event = TestEvent()
         self.system.backup_antenna.on_reset = event.set
-        self.system.obc.power_on()
+        self.power_on_and_wait()
         self.assertTrue(event.wait_for_change(1))
 
     def test_auto_deployment(self):

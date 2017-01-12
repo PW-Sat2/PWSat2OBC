@@ -39,7 +39,7 @@ I2CResult I2CLowLevelBus::ExecuteTransfer(I2C_TransferSeq_TypeDef* seq)
         return (I2CResult)rawResult;
     }
 
-    if (OS_RESULT_FAILED(this->_resultQueue.Pop(rawResult, I2C_TIMEOUT * 1000)))
+    if (OS_RESULT_FAILED(this->_resultQueue.Pop(rawResult, io_map::I2C::Timeout * 1000)))
     {
         I2CResult ret = I2CResult::Timeout;
 
@@ -47,7 +47,7 @@ I2CResult I2CLowLevelBus::ExecuteTransfer(I2C_TransferSeq_TypeDef* seq)
 
         hw->CMD = I2C_CMD_STOP | I2C_CMD_ABORT;
 
-        while (HAS_FLAG(hw->STATUS, I2C_STATUS_PABORT))
+        while (has_flag(hw->STATUS, I2C_STATUS_PABORT))
         {
         }
 
@@ -125,7 +125,7 @@ void I2CLowLevelBus::Initialize()
 
     I2C_IntEnable(hw, I2C_IEN_TXC);
 
-    NVIC_SetPriority(this->_io.IRQn, I2C_IRQ_PRIORITY);
+    NVIC_SetPriority(this->_io.IRQn, io_map::I2C::InterruptPriority);
     NVIC_EnableIRQ(this->_io.IRQn);
 }
 

@@ -132,7 +132,7 @@ enum class OSResult
 /**
  * @brief Macro for verification whether passed OSResult value indicates success.
  */
-static inline bool OS_RESULT_SUCCEEDED(OSResult x)
+constexpr inline bool OS_RESULT_SUCCEEDED(OSResult x)
 {
     return x == OSResult::Success;
 }
@@ -140,7 +140,7 @@ static inline bool OS_RESULT_SUCCEEDED(OSResult x)
 /**
  * @brief Macro for verification whether passed OSResult value indicates failure.
  */
-static inline bool OS_RESULT_FAILED(OSResult x)
+constexpr inline bool OS_RESULT_FAILED(OSResult x)
 {
     return x != OSResult::Success;
 }
@@ -251,7 +251,7 @@ class System final : public PureStatic
      * @brief Creates binary semaphore.
      *
      */
-    static OSSemaphoreHandle CreateBinarySemaphore();
+    static OSSemaphoreHandle CreateBinarySemaphore(std::uint8_t semaphoreId = 0);
 
     /**
      * @brief Acquires semaphore.
@@ -271,6 +271,13 @@ class System final : public PureStatic
      * @remark This procedure should not be used from within interrupt service routine.
      */
     static OSResult GiveSemaphore(OSSemaphoreHandle semaphore);
+
+    /**
+     * @brief Release semaphore from ISR
+     * @param[in] semaphore Semaphore to release
+     * @return Operation status
+     */
+    static OSResult GiveSemaphoreISR(OSSemaphoreHandle semaphore);
 
     /**
      * @brief Creates event group object.
@@ -296,6 +303,23 @@ class System final : public PureStatic
      * @remark This procedure should not be used from within interrupt service routine.
      */
     static OSEventBits EventGroupSetBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange);
+
+    /**
+     * @brief Sets specific bits in the event group from ISR
+     *
+     * @param[in] eventGroup Handle to the event group that should be updated.
+     * @param[in] bitsToChange Bits that should be set.
+     * @returns The value of the event group at the time the call to xEventGroupSetBits() returns.
+     *
+     * There are two reasons why the returned value might have the bits specified by the bitsToChange
+     * parameter cleared:
+     *  - If setting a bit results in a task that was waiting for the bit leaving the blocked state
+     *  then it is possible the bit will have been cleared automatically.
+     *  - Any unblocked (or otherwise Ready state) task that has a priority above that of the task
+     *  that called EventGroupSetBits() will execute and may change the event group value before
+     *  the call to EventGroupSetBits() returns.
+     */
+    static OSEventBits EventGroupSetBitsISR(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange);
 
     /**
      * @brief Clears specific bits in the event group.
@@ -417,6 +441,15 @@ class System final : public PureStatic
      * @param[in] handle Pulse handle
      */
     static void PulseSet(OSPulseHandle handle);
+
+    /** @brief Yields task control */
+    static void Yield();
+
+    /**
+     * @brief Gets number of miliseconds since system start
+     * @return Number of miliseconds since system start
+     */
+    static OSTaskTimeSpan GetUptime();
 };
 
 /**
@@ -502,7 +535,7 @@ template <typename Param, std::uint16_t StackSize, TaskPriority Priority> void T
  * } // semaphore release at the end of scope
  * @endcode
  */
-class Lock final
+class Lock final : private NotCopyable, private NotMoveable
 {
   public:
     /**
@@ -524,11 +557,6 @@ class Lock final
     bool operator()();
 
   private:
-    Lock(const Lock&) = delete;
-    Lock& operator=(const Lock&) = delete;
-    Lock(Lock&&) = delete;
-    Lock& operator=(Lock&&) = delete;
-
     /** @brief Semaphore handle */
     const OSSemaphoreHandle _semaphore;
     /** @brief Flag indicating if semaphore is acquired */
@@ -615,6 +643,45 @@ template <typename Element, std::size_t Capacity> OSResult Queue<Element, Capaci
     }
     return OSResult::Timeout;
 }
+
+/**
+ * @brief Class that allows checking if specified number of miliseconds elapsed
+ *
+ * This class uses system tick count to measure elapsed time.
+ *
+ * Example usage:
+ * @code
+ * Timeout t(10); // start measuring 10ms timeout
+ *
+ * while(some_condition)
+ * {
+ * 	  // lengthy operation
+ *
+ * 	  if(t.Expired()) return Result::Timeout;
+ * }
+ * @endcode
+ */
+class Timeout final
+{
+  public:
+    /**
+     * @brief Constructs new Timeout object
+     * @param[in] timeout Timeout in miliseconds
+     */
+    Timeout(OSTaskTimeSpan timeout);
+
+    /**
+     * @brief Checks is timeout is expired
+     * @return[in] true if timeout specified during construction already expired
+     */
+    bool Expired();
+
+  private:
+    /**
+     * @brief System uptime at which timeout will expire
+     */
+    const OSTaskTimeSpan _expireAt;
+};
 
 /** @}*/
 

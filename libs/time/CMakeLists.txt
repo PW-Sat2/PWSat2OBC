@@ -1,7 +1,7 @@
 set(NAME time)
 
 set(SOURCES
-    time.cpp
+    TimePoint.cpp
     timer.cpp
     include/time/TimePoint.h
     include/time/timer.h
