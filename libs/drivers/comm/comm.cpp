@@ -330,18 +330,17 @@ bool CommObject::SendFrame(span<const std::uint8_t> frame)
 
 bool CommObject::SetBeacon(const Beacon& beaconData)
 {
-    uint8_t buffer[MaxFrameSize + 2];
-    Writer writer;
-    WriterInitialize(&writer, buffer, COUNT_OF(buffer));
-    WriterWriteByte(&writer, num(TransmitterCommand::SetBeacon));
-    WriterWriteWordLE(&writer, beaconData.Period());
-    WriterWriteArray(&writer, beaconData.Contents().data(), beaconData.Contents().size());
-    if (!WriterStatus(&writer))
+    std::array<std::uint8_t, MaxFrameSize + 2> buffer;
+    Writer writer(buffer);
+    writer.WriteByte(num(TransmitterCommand::SetBeacon));
+    writer.WriteWordLE(beaconData.Period());
+    writer.WriteArray(beaconData.Contents());
+    if (!writer.Status())
     {
         return false;
     }
 
-    return this->_low.Write(num(Address::Transmitter), span<const uint8_t>(buffer, WriterGetDataLength(&writer))) == I2CResult::OK;
+    return this->_low.Write(num(Address::Transmitter), writer.UsedSpan()) == I2CResult::OK;
 }
 
 bool CommObject::ClearBeacon()
