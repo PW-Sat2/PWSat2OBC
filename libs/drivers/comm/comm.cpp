@@ -300,9 +300,9 @@ bool CommObject::ReceiveFrame(gsl::span<std::uint8_t> buffer, Frame& frame)
 
 bool CommObject::SendFrame(span<const std::uint8_t> frame)
 {
-    if (frame.size() > MaxFrameSize)
+    if (frame.size() > MaxDownlinkFrameSize)
     {
-        LOGF(LOG_LEVEL_ERROR, "Frame payload is too long. Allowed: %d, Requested: '%d'.", MaxFrameSize, frame.size());
+        LOGF(LOG_LEVEL_ERROR, "Frame payload is too long. Allowed: %d, Requested: '%d'.", MaxDownlinkFrameSize, frame.size());
         return false;
     }
 
@@ -330,7 +330,7 @@ bool CommObject::SendFrame(span<const std::uint8_t> frame)
 
 bool CommObject::SetBeacon(const Beacon& beaconData)
 {
-    std::array<std::uint8_t, MaxFrameSize + 2> buffer;
+    std::array<std::uint8_t, MaxDownlinkFrameSize + 2> buffer;
     Writer writer(buffer);
     writer.WriteByte(num(TransmitterCommand::SetBeacon));
     writer.WriteWordLE(beaconData.Period());

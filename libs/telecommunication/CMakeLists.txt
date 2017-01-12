@@ -3,6 +3,7 @@ set(NAME telecommunication)
 set(SOURCES
     telecommand_handling.cpp
     uplink.cpp
+    downlink.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
