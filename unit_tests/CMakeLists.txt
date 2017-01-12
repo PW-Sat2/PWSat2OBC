@@ -16,6 +16,7 @@ set(SOURCES
   FileSystem/FileTest.cpp
   Comm/CommTest.cpp
   Comm/CommFrameTest.cpp
+  Comm/DownlinkFrameTest.cpp
   Comm/TeleCommandHandlingTest.cpp
   Comm/UplinkFrameDecoderTest.cpp
   base/ReaderTest.cpp

@@ -387,7 +387,7 @@ TEST_F(CommTest, TestGetMixedLineTransmitterResponse)
 
 TEST_F(CommTest, TestSendTooLongFrame)
 {
-    uint8_t buffer[devices::comm::MaxFrameSize + 1] = {0};
+    uint8_t buffer[devices::comm::MaxDownlinkFrameSize + 1] = {0};
     const auto status = comm.SendFrame(buffer);
     ASSERT_THAT(status, Eq(false));
 }
@@ -580,7 +580,7 @@ TEST_F(CommTest, TestSetBeaconFailure)
 
 TEST_F(CommTest, TestSetBeaconSizeOutOfRange)
 {
-    std::uint8_t buffer[MaxFrameSize + 1];
+    std::uint8_t buffer[MaxDownlinkFrameSize + 1];
     Beacon beacon(1, buffer);
     EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon))).Times(0);
     const auto status = comm.SetBeacon(beacon);

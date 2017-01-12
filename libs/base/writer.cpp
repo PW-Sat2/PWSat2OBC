@@ -118,3 +118,19 @@ gsl::span<std::uint8_t> Writer::UsedSpan()
 {
     return this->_buffer.subspan(0, this->_position);
 }
+
+bool Writer::WriteLowerBytesBE(std::uint32_t number, std::uint8_t bytesCount)
+{
+    if (!this->UpdateState(bytesCount))
+    {
+        return false;
+    }
+
+    for (int8_t i = bytesCount - 1; i >= 0; i--)
+    {
+        this->_buffer[this->_position] = (number >> (8 * i)) & 0xFF;
+        this->_position++;
+    }
+
+    return true;
+}

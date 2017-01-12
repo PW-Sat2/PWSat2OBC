@@ -55,7 +55,7 @@ struct ITransmitFrame;
 /**
  * @brief Maximum allowed single frame content length.
  */
-constexpr std::uint16_t MaxFrameSize = 235u;
+constexpr std::uint16_t MaxDownlinkFrameSize = 235u;
 
 /** @brief Maximum size of uplink frame */
 constexpr std::uint16_t MaxUplinkFrameSize = 200u;
@@ -63,7 +63,7 @@ constexpr std::uint16_t MaxUplinkFrameSize = 200u;
 /**
  * @brief Maximum allowed single frame content length.
  */
-constexpr std::uint16_t PrefferedBufferSize = MaxFrameSize + 20;
+constexpr std::uint16_t PrefferedBufferSize = MaxDownlinkFrameSize + 20;
 
 /**
  * @brief This type contains comm receiver telemetry.

@@ -166,3 +166,17 @@ TEST(WriterTest, TestUsedSpan)
     ASSERT_THAT(s.length(), Eq(2));
     ASSERT_THAT(s, testing::ElementsAre(0x55, 0x66));
 }
+
+TEST(WriterTest, TestWriteLowerBytesBE)
+{
+    uint32_t num = 0xAABBCCDD;
+
+    uint8_t array[3];
+    Writer writer(array);
+
+    writer.WriteLowerBytesBE(num, 3);
+
+    ASSERT_THAT(array[0], Eq(0xBB));
+    ASSERT_THAT(array[1], Eq(0xCC));
+    ASSERT_THAT(array[2], Eq(0xDD));
+}

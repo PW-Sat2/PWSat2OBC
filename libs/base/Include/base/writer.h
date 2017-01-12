@@ -101,6 +101,14 @@ class Writer final
     bool WriteArray(gsl::span<const std::uint8_t> buffer);
 
     /**
+     * @brief Writes lower bytes of specified number in big-endian order
+     * @param[in] number Number to write
+     * @param[in] bytesCount Number of lower bytes to write
+     * @return Operation status
+     */
+    bool WriteLowerBytesBE(std::uint32_t number, std::uint8_t bytesCount);
+
+    /**
      * @brief Returns view for used part of buffer
      * @return Span covering used part of buffer
      */
