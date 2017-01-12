@@ -3,11 +3,11 @@
 #include <gsl/span>
 #include "comm/Frame.hpp"
 #include "comm/ITransmitFrame.hpp"
+#include "telecommunication/telecommand_handling.h"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "telecommand_handling/telecommand_handling.h"
 #include "utils.hpp"
 
 using std::uint8_t;

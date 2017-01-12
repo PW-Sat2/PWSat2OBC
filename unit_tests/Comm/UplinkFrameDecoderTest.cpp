@@ -4,11 +4,11 @@
 #include <gsl/span>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "telecommunication/uplink.h"
 
 #include "base/reader.h"
 #include "comm/CommDriver.hpp"
 #include "system.h"
-#include "telecommand_handling/uplink.h"
 
 using std::uint8_t;
 using gsl::span;
