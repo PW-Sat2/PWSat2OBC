@@ -123,6 +123,16 @@ OSEventBits System::EventGroupWaitForBits(
     return 0;
 }
 
+OSEventBits System::EventGroupSetBitsISR(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange)
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->EventGroupSetBitsISR(eventGroup, bitsToChange);
+    }
+
+    return 0;
+}
+
 void* System::Alloc(size_t size)
 {
     if (OSProxy != nullptr)

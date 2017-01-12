@@ -15,3 +15,7 @@
  * @{
  * @}
  */
+
+/**
+ * @defgroup efm_support EFM support utilities
+ */

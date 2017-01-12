@@ -33,9 +33,7 @@
 #include "system.h"
 #include "terminal.h"
 
-#include <spidrv.h>
-#include "adxrs453/adxrs453.h"
-
+#include "gpio/gpio.h"
 #include "leuart/leuart.h"
 #include "power_eps/power_eps.h"
 
@@ -73,7 +71,7 @@ static void BlinkLed0(void* param)
 
     while (1)
     {
-        GPIO_PinOutToggle(LED_PORT, LED0);
+        Main.Hardware.Pins.Led0.Toggle();
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
@@ -103,9 +101,7 @@ static void InitSwoEndpoint(void)
 
 static void ClearState(OBC* obc)
 {
-    GPIO_PinModeSet(SYS_CLEAR_PORT, SYS_CLEAR_PIN, gpioModeInputPull, 1);
-
-    if (GPIO_PinInGet(SYS_CLEAR_PORT, SYS_CLEAR_PIN) == 0)
+    if (obc->Hardware.Pins.SysClear.Input() == false)
     {
         LOG(LOG_LEVEL_WARNING, "Clearing state on startup");
 
@@ -149,57 +145,14 @@ static void ObcInitTask(void* param)
 
     InitializeADCS(&obc->adcs);
 
+    Mission.Initialize();
+
+    System::CreateTask(SmartWaitTask, "SmartWait", 512, NULL, TaskPriority::P1, NULL);
+
     LOG(LOG_LEVEL_INFO, "Intialized");
     Main.initialized = true;
 
     System::SuspendTask(NULL);
-}
-
-void ADXRS(void* param)
-{
-    UNREFERENCED_PARAMETER(param);
-    SPIDRV_HandleData_t handleData;
-    SPIDRV_Handle_t handle = &handleData;
-    SPIDRV_Init_t initData = ADXRS453_SPI;
-    SPIDRV_Init(handle, &initData);
-    GyroInterface_t interface;
-    interface.writeProc = SPISendB;
-    interface.readProc = SPISendRecvB;
-    ADXRS453_Obj_t gyro;
-    gyro.pinLocations = GYRO0;
-    gyro.interface = interface;
-    ADXRS453_Obj_t gyro1;
-    gyro1.pinLocations = GYRO1;
-    gyro1.interface = interface;
-    ADXRS453_Obj_t gyro2;
-    gyro2.pinLocations = GYRO2;
-    gyro2.interface = interface;
-    ADXRS453_Init(&gyro, handle);
-    ADXRS453_Init(&gyro1, handle);
-    ADXRS453_Init(&gyro2, handle);
-
-    while (1)
-    {
-        SPI_TransferReturn_t rate = ADXRS453_GetRate(&gyro, handle);
-        SPI_TransferReturn_t temp = ADXRS453_GetTemperature(&gyro, handle);
-        LOGF(LOG_LEVEL_INFO,
-            "gyro 0 temp: %d ' celcius rate: %d '/sec rotation\n",
-            (int)temp.result.sensorResult,
-            (int)rate.result.sensorResult);
-        rate = ADXRS453_GetRate(&gyro1, handle);
-        temp = ADXRS453_GetTemperature(&gyro1, handle);
-        LOGF(LOG_LEVEL_INFO,
-            "gyro 1 temp: %d ' celcius rate: %d '/sec rotation\n",
-            (int)temp.result.sensorResult,
-            (int)rate.result.sensorResult);
-        rate = ADXRS453_GetRate(&gyro2, handle);
-        temp = ADXRS453_GetTemperature(&gyro2, handle);
-        LOGF(LOG_LEVEL_INFO,
-            "gyro 2 temp: %d ' celcius rate: %d '/sec rotation\n",
-            (int)temp.result.sensorResult,
-            (int)rate.result.sensorResult);
-        vTaskDelay(10 / portTICK_PERIOD_MS);
-    }
 }
 
 void SetupHardware(void)
@@ -232,34 +185,27 @@ int main(void)
 
     LeuartLineIOInit(&Main.IO);
 
-    InitializeTerminal();
-
     EpsInit(&Main.Hardware.I2C.Fallback);
 
     EPSPowerControlInitialize(&Main.PowerControlInterface);
 
     Main.Initialize();
 
+    InitializeTerminal();
+
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 
     SetupAntennas();
 
-    Mission.Initialize();
-
-    GPIO_PinModeSet(LED_PORT, LED0, gpioModePushPull, 0);
-    GPIO_PinModeSet(LED_PORT, LED1, gpioModePushPullDrive, 1);
-    GPIO_DriveModeSet(LED_PORT, gpioDriveModeLowest);
-
-    GPIO_PinOutSet(LED_PORT, LED0);
-    GPIO_PinOutSet(LED_PORT, LED1);
+    Main.Hardware.Pins.Led0.High();
+    Main.Hardware.Pins.Led1.High();
 
     System::CreateTask(BlinkLed0, "Blink0", 512, NULL, TaskPriority::P1, NULL);
-    // System::CreateTask(ADXRS, "ADXRS", 512, NULL, tskIDLE_PRIORITY + 2, NULL);
-    System::CreateTask(ObcInitTask, "Init", 2_KB, &Main, TaskPriority::Highest, &Main.initTask);
-    System::CreateTask(SmartWaitTask, "SmartWait", 512, NULL, TaskPriority::P1, NULL);
+    System::CreateTask(ObcInitTask, "Init", 3_KB, &Main, TaskPriority::Highest, &Main.initTask);
+
     System::RunScheduler();
 
-    GPIO_PinOutToggle(LED_PORT, LED0);
+    Main.Hardware.Pins.Led0.Toggle();
 
     return 0;
 }

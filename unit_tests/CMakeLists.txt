@@ -33,7 +33,6 @@ set(SOURCES
   os/os.cpp
   os/os.hpp
   OsMock.hpp
-  adxrs453/adxrs453Test.cpp
   time/time.cpp
   time/timer.cpp
   time/persistance.cpp
@@ -50,7 +49,9 @@ set(SOURCES
   mock/ActionDescriptorMock.hpp
   mock/UpdateDescriptorMock.hpp
   mock/VerifyDescriprorMock.hpp
+  mock/emlib.cpp
   SPI/SPIMock.cpp
+  SPI/SPIDriverTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -87,7 +88,6 @@ target_link_libraries(${NAME}
     rapidcheck.gtest
     rapidcheck.gmock
     emdrv
-    adxrs453
     time
     gsl
     antenna

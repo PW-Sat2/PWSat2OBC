@@ -12,6 +12,7 @@ namespace devices
     {
         /**
          * @defgroup n25q N25Q Device driver
+         * @ingroup device_drivers
          *
          * This module contains driver for N25Q NOR serial flash memory
          *
@@ -36,8 +37,18 @@ namespace devices
             /** @brief Memory type (should be 0xBA) */
             const std::uint8_t MemoryType;
             /** @brief Memory type (should be 0x18) */
-            const std::uint8_t MemoryCapacity;
+            std::uint8_t MemoryCapacity;
+
+            /** @brief Checks if this id is valid */
+            inline bool IsValid() const;
         };
+
+        bool Id::IsValid() const
+        {
+            return Manufacturer == 0x20 //
+                && MemoryType == 0xBA   //
+                && MemoryCapacity == 0x18;
+        }
 
         /**
          * @brief Possible values in status register
@@ -46,6 +57,10 @@ namespace devices
         {
             WriteDisabled = 1 << 7,           //!< WriteDisabled
             ProtectedAreaFromBottom = 1 << 5, //!< ProtectedAreaFromBottom
+            BlockProtect3 = 1 << 6,           //!< BlockProtect3
+            BlockProtect2 = 1 << 4,           //!< BlockProtect2
+            BlockProtect1 = 1 << 3,           //!< BlockProtect1
+            BlockProtect0 = 1 << 2,           //!< BlockProtect0
             WriteEnabled = 1 << 1,            //!< WriteEnabled
             WriteInProgress = 1 << 0          //!< WriteInProgress
         };
@@ -61,7 +76,8 @@ namespace devices
             EraseError = 1 << 5,                  //!< EraseError
             ProgramError = 1 << 4,                //!< ProgramError
             VPPDisable = 1 << 3,                  //!< VPPDisable
-            ProgramSuspended = 1 << 2             //!< ProgramSuspended
+            ProgramSuspended = 1 << 2,            //!< ProgramSuspended
+            ProtectionError = 1 << 1              //!< Protection error
         };
 
         /**
@@ -163,6 +179,15 @@ namespace devices
              */
             void ClearFlags();
 
+            /**
+             * @brief Resets device to known state (memory content is not affected)
+             * @return Operation status
+             *
+             * This method performs software chip reset and waits until it is operational. If device doesn't respond in time (10ms), timeout
+             * will be returned
+             */
+            OperationResult Reset();
+
           private:
             /** @brief Enables write */
             void EnableWrite();
@@ -198,13 +223,17 @@ namespace devices
              * Datasheet states that this operation should take maximum 5 ms.
              * Rounded to 10ms as it is single FreeRTOS tick
              */
-            constexpr static OSTaskTimeSpan ProgramPageTimeout = 50;
-            /** Erase subsector operation timeout */
-            constexpr static OSTaskTimeSpan EraseSubSectorTimeout = 1.2 * (0.8 * 1000);
-            /** Erase sector operation timeout */
-            constexpr static OSTaskTimeSpan EraseSectorTimeout = 1.2 * (3 * 1000);
-            /** Erase chip operation timeout */
-            constexpr static OSTaskTimeSpan EraseChipTimeOut = 1.2 * (250 * 1000);
+            constexpr static std::uint32_t ProgramPageTimeout = 50;
+            /** @brief Erase subsector operation timeout */
+            constexpr static std::uint32_t EraseSubSectorTimeout = 1.2 * (0.8 * 1000);
+            /** @brief Erase sector operation timeout */
+            constexpr static std::uint32_t EraseSectorTimeout = 1.2 * (3 * 1000);
+            /** @brief Erase chip operation timeout */
+            constexpr static std::uint32_t EraseChipTimeOut = 1.2 * (250 * 1000);
+            /** @brief Reset timeout */
+            constexpr static std::uint32_t ResetTimeout = 10;
+            /** @brief Write status register timeout */
+            constexpr static std::uint32_t WriteStatusRegisterTimeout = 10;
         };
     }
 }

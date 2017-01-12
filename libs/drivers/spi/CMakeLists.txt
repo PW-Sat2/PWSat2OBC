@@ -10,8 +10,10 @@ add_library(${NAME} STATIC ${SOURCES})
 target_link_libraries(${NAME} 
 	base
 	gsl
-	emdrv
-	emlib
+	platform
+	logger
+	efm_support
+	gpio
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

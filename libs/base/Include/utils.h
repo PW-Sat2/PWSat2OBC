@@ -13,7 +13,7 @@
  * @param[in] value Value to convert
  * @return 1 for true, 0 for false
  */
-static inline int ToInt(bool value)
+static constexpr inline int ToInt(bool value)
 {
     return value ? 1 : 0;
 }
@@ -49,7 +49,37 @@ constexpr std::size_t operator"" _MB(unsigned long long int value)
 }
 
 /**
- * @brief Inheriting from this class, will make derived class unconstructible
+ * @brief Just marker indicating that value is in Hz
+ * @param[in] value Value in Hz
+ * @return the same value
+ */
+constexpr std::uint32_t operator"" _Hz(unsigned long long int value)
+{
+    return value;
+}
+
+/**
+ * @brief Converts KHz to Hz
+ * @param[in] value Value in KHz
+ * @return Value in Hz
+ */
+constexpr std::uint32_t operator"" _KHz(unsigned long long int value)
+{
+    return value * 1000_Hz;
+}
+
+/**
+ * @brief Converts MHz to Hz
+ * @param[in] value Value in MHz
+ * @return Value in Hz
+ */
+constexpr std::uint32_t operator"" _MHz(unsigned long long int value)
+{
+    return value * 1000_KHz;
+}
+
+/**
+ * @brief Inheriting from this class, will make derived class unconstructable
  */
 struct PureStatic
 {

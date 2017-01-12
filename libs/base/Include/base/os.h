@@ -273,6 +273,13 @@ class System final : public PureStatic
     static OSResult GiveSemaphore(OSSemaphoreHandle semaphore);
 
     /**
+     * @brief Release semaphore from ISR
+     * @param[in] semaphore Semaphore to release
+     * @return Operation status
+     */
+    static OSResult GiveSemaphoreISR(OSSemaphoreHandle semaphore);
+
+    /**
      * @brief Creates event group object.
      *
      * @return Event group handle on success, NULL otherwise.
@@ -296,6 +303,23 @@ class System final : public PureStatic
      * @remark This procedure should not be used from within interrupt service routine.
      */
     static OSEventBits EventGroupSetBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange);
+
+    /**
+     * @brief Sets specific bits in the event group from ISR
+     *
+     * @param[in] eventGroup Handle to the event group that should be updated.
+     * @param[in] bitsToChange Bits that should be set.
+     * @returns The value of the event group at the time the call to xEventGroupSetBits() returns.
+     *
+     * There are two reasons why the returned value might have the bits specified by the bitsToChange
+     * parameter cleared:
+     *  - If setting a bit results in a task that was waiting for the bit leaving the blocked state
+     *  then it is possible the bit will have been cleared automatically.
+     *  - Any unblocked (or otherwise Ready state) task that has a priority above that of the task
+     *  that called EventGroupSetBits() will execute and may change the event group value before
+     *  the call to EventGroupSetBits() returns.
+     */
+    static OSEventBits EventGroupSetBitsISR(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange);
 
     /**
      * @brief Clears specific bits in the event group.

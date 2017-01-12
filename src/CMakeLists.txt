@@ -16,10 +16,10 @@ set(SOURCES
     commands/heap.cpp
     commands/compile_info.cpp
     commands/mission.cpp
+    commands/dma.cpp
     obc.h
     obc.cpp
     communication.cpp
-    hardware.cpp  
     fault_handlers.cpp
 )
 
@@ -40,7 +40,6 @@ target_link_libraries(${NAME}
     i2c
     fs
     yaffs_glue
-    adxrs453
     time
     mission
     eps
@@ -58,6 +57,9 @@ target_link_libraries(${NAME}
     mission_time
     yaffs
     obc_storage
+    obc_hardware
+    spi
+    efm_emlib
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

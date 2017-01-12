@@ -4,10 +4,12 @@
 
 #include "base/os.h"
 #include "base/reader.h"
+#include "base/writer.h"
 
 #include "n25q.h"
 
 using std::uint8_t;
+using std::uint32_t;
 using std::array;
 using std::min;
 using std::ptrdiff_t;
@@ -28,8 +30,18 @@ enum N25QCommand
     EraseSubsector = 0x20,
     EraseSector = 0xD8,
     EraseChip = 0xC7,
-    ClearFlagRegister = 0x50
+    ClearFlagRegister = 0x50,
+    ResetEnable = 0x66,
+    ResetMemory = 0x99,
+    WriteStatusRegister = 0x01
 };
+
+static inline void WriterWriteAddress(Writer* writer, size_t address)
+{
+    WriterWriteByte(writer, static_cast<uint8_t>((address >> 2 * 8) & 0xFF));
+    WriterWriteByte(writer, static_cast<uint8_t>((address >> 1 * 8) & 0xFF));
+    WriterWriteByte(writer, static_cast<uint8_t>((address >> 0 * 8) & 0xFF));
+}
 
 N25QDriver::N25QDriver(ISPIInterface& spi) : _spi(spi)
 {
@@ -82,9 +94,15 @@ FlagStatus N25QDriver::ReadFlagStatus()
 
 void N25QDriver::ReadMemory(size_t address, span<uint8_t> buffer)
 {
+    array<uint8_t, 4> command;
+    Writer writer;
+
+    WriterInitialize(&writer, command.data(), command.size());
+    WriterWriteByte(&writer, N25QCommand::ReadMemory);
+    WriterWriteAddress(&writer, address);
+
     SPISelectSlave slave(this->_spi);
-    this->Command(N25QCommand::ReadMemory);
-    this->WriteAddress(address);
+    this->_spi.Write(command);
     this->_spi.Read(buffer);
 }
 
@@ -99,10 +117,15 @@ OperationResult N25QDriver::WriteMemory(size_t address, span<const uint8_t> buff
         this->EnableWrite();
 
         {
+            array<uint8_t, 4> command;
+            Writer writer;
+            WriterInitialize(&writer, command.data(), command.size());
+            WriterWriteByte(&writer, N25QCommand::ProgramMemory);
+            WriterWriteAddress(&writer, address + offset);
+
             SPISelectSlave slave(this->_spi);
 
-            this->Command(N25QCommand::ProgramMemory);
-            this->WriteAddress(address + offset);
+            this->_spi.Write(command);
             this->_spi.Write(chunk);
         }
 
@@ -128,7 +151,8 @@ OperationResult N25QDriver::WriteMemory(size_t address, span<const uint8_t> buff
 
 void N25QDriver::Command(const std::uint8_t command, gsl::span<std::uint8_t> response)
 {
-    this->_spi.WriteRead(span<const uint8_t>(&command, 1), response);
+    this->_spi.Write(span<const uint8_t>(&command, 1));
+    this->_spi.Read(response);
 }
 
 void N25QDriver::EnableWrite()
@@ -263,6 +287,58 @@ void N25QDriver::ClearFlags()
     SPISelectSlave select(this->_spi);
 
     this->Command(N25QCommand::ClearFlagRegister);
+}
+
+OperationResult N25QDriver::Reset()
+{
+    {
+        SPISelectSlave select(this->_spi);
+
+        this->Command(N25QCommand::ResetEnable);
+    }
+
+    {
+        SPISelectSlave select(this->_spi);
+
+        this->Command(N25QCommand::ResetMemory);
+    }
+
+    Timeout timeoutCheck(ResetTimeout);
+
+    do
+    {
+        auto id = this->ReadId();
+
+        if (id.IsValid())
+            break;
+
+        if (timeoutCheck.Expired())
+            return OperationResult::Timeout;
+
+        System::Yield();
+    } while (true);
+
+    this->EnableWrite();
+
+    {
+        SPISelectSlave select(this->_spi);
+
+        this->Command(N25QCommand::WriteStatusRegister);
+
+        auto value = static_cast<uint8_t>(Status::ProtectedAreaFromBottom);
+        this->_spi.Write(gsl::make_span(&value, 1));
+    }
+
+    {
+        SPISelectSlave select(this->_spi);
+
+        if (!this->WaitBusy(WriteStatusRegisterTimeout))
+        {
+            return OperationResult::Timeout;
+        }
+    }
+
+    return OperationResult::Success;
 }
 
 void N25QDriver::Command(const std::uint8_t command)

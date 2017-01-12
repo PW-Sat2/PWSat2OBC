@@ -48,7 +48,10 @@ enum Command
     EraseSubsector = 0x20,
     EraseSector = 0xD8,
     EraseChip = 0xC7,
-    ClearFlagRegister = 0x50
+    ClearFlagRegister = 0x50,
+    ResetEnable = 0x66,
+    ResetMemory = 0x99,
+    WriteStatusRegister = 0x01
 };
 
 MATCHER_P(CommandCall, command, std::string("Command " + PrintToString(command)))
@@ -81,29 +84,37 @@ class N25QDriverTest : public Test
         return EXPECT_CALL(this->_spi, Write(CommandCall(command)));
     }
 
-    decltype(auto) ExpectCommandAndRespondOnce(Command command, span<uint8_t> response)
+    void ExpectCommandAndRespondOnce(Command command, span<uint8_t> response)
     {
-        return EXPECT_CALL(this->_spi, WriteRead(CommandCall(command), SpanOfSize(response.size()))).WillOnce(FillBuffer<1>(response));
+        EXPECT_CALL(this->_spi, Write(CommandCall(command)));
+        EXPECT_CALL(this->_spi, Read(SpanOfSize(response.size()))).WillOnce(FillBuffer<0>(response));
     }
 
-    decltype(auto) ExpectCommandAndRespondOnce(Command command, uint8_t response)
+    void ExpectCommandAndRespondOnce(Command command, uint8_t response)
     {
-        return EXPECT_CALL(this->_spi, WriteRead(CommandCall(command), SpanOfSize(1))).WillOnce(FillBuffer<1>(response));
+        EXPECT_CALL(this->_spi, Write(CommandCall(command)));
+        EXPECT_CALL(this->_spi, Read(SpanOfSize(1))).WillOnce(FillBuffer<0>(response));
     }
 
-    decltype(auto) ExpectCommandAndRespondOnce(Command command, Status response)
+    void ExpectCommandAndRespondOnce(Command command, Status response)
     {
-        return EXPECT_CALL(this->_spi, WriteRead(CommandCall(command), SpanOfSize(1))).WillOnce(FillBuffer<1>(num(response)));
+        EXPECT_CALL(this->_spi, Write(CommandCall(command)));
+        EXPECT_CALL(this->_spi, Read(SpanOfSize(1))).WillOnce(FillBuffer<0>(num(response)));
     }
 
-    decltype(auto) ExpectCommandAndRespondOnce(Command command, FlagStatus response)
+    void ExpectCommandAndRespondOnce(Command command, FlagStatus response)
     {
-        return EXPECT_CALL(this->_spi, WriteRead(CommandCall(command), SpanOfSize(1))).WillOnce(FillBuffer<1>(num(response)));
+        EXPECT_CALL(this->_spi, Write(CommandCall(command)));
+        EXPECT_CALL(this->_spi, Read(SpanOfSize(1))).WillOnce(FillBuffer<0>(num(response)));
     }
 
-    decltype(auto) ExpectCommandAndRespondManyTimes(Command command, uint8_t response, uint16_t times)
+    void ExpectCommandAndRespondManyTimes(Command command, uint8_t response, uint16_t times)
     {
-        return EXPECT_CALL(this->_spi, WriteRead(CommandCall(command), SpanOfSize(1))).Times(times).WillRepeatedly(FillBuffer<1>(response));
+        for (auto i = 0; i < times; i++)
+        {
+            EXPECT_CALL(this->_spi, Write(CommandCall(command)));
+            EXPECT_CALL(this->_spi, Read(SpanOfSize(1))).WillOnce(FillBuffer<0>(response));
+        }
     }
 
     void ExpectWaitBusy(uint16_t busyCycles)
@@ -128,9 +139,12 @@ class N25QDriverTest : public Test
     N25QDriver _driver;
     NiceMock<OSMock> _os;
     OSReset _osReset;
+
+    std::array<uint8_t, 3> _incorrectId;
+    std::array<uint8_t, 3> _correctId;
 };
 
-N25QDriverTest::N25QDriverTest() : _driver(_spi)
+N25QDriverTest::N25QDriverTest() : _driver(_spi), _incorrectId{0xAA, 0xBB, 0xCC}, _correctId{0x20, 0xBA, 0x18}
 {
     this->_osReset = InstallProxy(&this->_os);
 
@@ -139,14 +153,12 @@ N25QDriverTest::N25QDriverTest() : _driver(_spi)
 
 TEST_F(N25QDriverTest, ShouldReadIdCorrectly)
 {
-    array<uint8_t, 3> deviceId{0x20, 0xBA, 0x18};
-
     {
         InSequence s;
 
         auto selected = this->_spi.ExpectSelected();
 
-        ExpectCommandAndRespondOnce(Command::ReadId, deviceId);
+        ExpectCommandAndRespondOnce(Command::ReadId, _correctId);
     }
 
     auto id = this->_driver.ReadId();
@@ -197,9 +209,7 @@ TEST_F(N25QDriverTest, ReadRequestShouldBePropertlyFormed)
         InSequence s;
         auto selected = this->_spi.ExpectSelected();
 
-        ExpectCommand(Command::ReadMemory);
-
-        EXPECT_CALL(this->_spi, Write(ElementsAre(0xAB, 0x00, 0x00)));
+        EXPECT_CALL(this->_spi, Write(ElementsAre(Command::ReadMemory, 0xAB, 0x00, 0x00)));
 
         EXPECT_CALL(this->_spi, Read(SpanOfSize(260))).WillOnce(FillBuffer<0>(memory));
     }
@@ -233,9 +243,7 @@ TEST_F(N25QDriverTest, ShouldWriteSinglePage)
         {
             auto selected = this->_spi.ExpectSelected();
 
-            ExpectCommand(Command::ProgramMemory);
-
-            EXPECT_CALL(this->_spi, Write(ElementsAre(0xAB, 0x00, 0x00)));
+            EXPECT_CALL(this->_spi, Write(ElementsAre(Command::ProgramMemory, 0xAB, 0x00, 0x00)));
 
             EXPECT_CALL(this->_spi, Write(ContainerEq(span<const uint8_t>(buffer))));
         }
@@ -274,9 +282,7 @@ TEST_F(N25QDriverTest, ShouldWriteTwoPages)
         {
             auto selected = this->_spi.ExpectSelected();
 
-            ExpectCommand(Command::ProgramMemory);
-
-            EXPECT_CALL(this->_spi, Write(ElementsAre(0xAB, 0x00, 0x00)));
+            EXPECT_CALL(this->_spi, Write(ElementsAre(Command::ProgramMemory, 0xAB, 0x00, 0x00)));
 
             EXPECT_CALL(this->_spi, Write(ContainerEq(span<const uint8_t>(buffer).subspan(0, 256))));
         }
@@ -298,9 +304,7 @@ TEST_F(N25QDriverTest, ShouldWriteTwoPages)
         {
             auto selected = this->_spi.ExpectSelected();
 
-            ExpectCommand(Command::ProgramMemory);
-
-            EXPECT_CALL(this->_spi, Write(ElementsAre(0xAB, 0x01, 0x00)));
+            EXPECT_CALL(this->_spi, Write(ElementsAre(Command::ProgramMemory, 0xAB, 0x01, 0x00)));
 
             EXPECT_CALL(this->_spi, Write(ContainerEq(span<const uint8_t>(buffer).subspan(256, 100))));
         }
@@ -340,9 +344,7 @@ TEST_F(N25QDriverTest, ShouldDetectProgramErrors)
         {
             auto selected = this->_spi.ExpectSelected();
 
-            ExpectCommand(Command::ProgramMemory);
-
-            EXPECT_CALL(this->_spi, Write(ElementsAre(0xAB, 0x00, 0x00)));
+            EXPECT_CALL(this->_spi, Write(ElementsAre(Command::ProgramMemory, 0xAB, 0x00, 0x00)));
 
             EXPECT_CALL(this->_spi, Write(ContainerEq(span<const uint8_t>(buffer).subspan(0, 256))));
         }
@@ -705,4 +707,150 @@ TEST_F(N25QDriverTest, ClearFlagRegister)
     ExpectClearFlags();
 
     this->_driver.ClearFlags();
+}
+
+TEST_F(N25QDriverTest, ShouldResetProperly)
+{
+    {
+        InSequence s;
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::ResetEnable);
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::ResetMemory);
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommandAndRespondOnce(Command::ReadId, _incorrectId);
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommandAndRespondOnce(Command::ReadId, _correctId);
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::WriteEnable);
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::WriteStatusRegister);
+            EXPECT_CALL(this->_spi, Write(ElementsAre(0x20)));
+        }
+
+        ExpectWaitBusy(3);
+    }
+
+    auto result = this->_driver.Reset();
+
+    ASSERT_THAT(result, Eq(OperationResult::Success));
+}
+
+TEST_F(N25QDriverTest, SettingProtectionOnResetCanTimeout)
+{
+    {
+        InSequence s;
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::ResetEnable);
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::ResetMemory);
+        }
+
+        EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0));
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommandAndRespondOnce(Command::ReadId, _correctId);
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::WriteEnable);
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::WriteStatusRegister);
+            EXPECT_CALL(this->_spi, Write(ElementsAre(0x20)));
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0));
+
+            ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
+
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0));
+
+            ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
+
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(std::numeric_limits<uint32_t>::max()));
+        }
+    }
+
+    auto result = this->_driver.Reset();
+
+    ASSERT_THAT(result, Eq(OperationResult::Timeout));
+}
+
+TEST_F(N25QDriverTest, WaitingOnResetCanTimeout)
+{
+    {
+        InSequence s;
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::ResetEnable);
+        }
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommand(Command::ResetMemory);
+        }
+
+        EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0));
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommandAndRespondOnce(Command::ReadId, _incorrectId);
+        }
+        EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0));
+
+        {
+            auto selected = this->_spi.ExpectSelected();
+
+            ExpectCommandAndRespondOnce(Command::ReadId, _incorrectId);
+        }
+        EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(std::numeric_limits<uint32_t>::max()));
+    }
+
+    auto result = this->_driver.Reset();
+
+    ASSERT_THAT(result, Eq(OperationResult::Timeout));
 }

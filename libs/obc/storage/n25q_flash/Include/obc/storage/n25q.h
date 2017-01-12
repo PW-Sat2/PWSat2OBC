@@ -4,6 +4,8 @@
 #include "fs/yaffs.h"
 #include "n25q/n25q.h"
 #include "n25q/yaffs.h"
+#include "obc/gpio.h"
+#include "spi/efm.h"
 
 namespace obc
 {
@@ -17,7 +19,9 @@ namespace obc
         */
 
         /**
-         * @brief Storage driver for N25Q
+         * @brief Storage handler for N25Q
+         *
+         * This class manages external flash and it's integration with YAFFS
          */
         class N25QStorage final
         {
@@ -26,8 +30,9 @@ namespace obc
              * @brief Constructs @ref N25QStorage instance
              * @param[in] spi SPI interface used by external memories
              * @param deviceOperations YAFFS device operations
+             * @param[in] pins GPIO pins (unused)
              */
-            N25QStorage(drivers::spi::ISPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations);
+            N25QStorage(drivers::spi::EFMSPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations, obc::OBCGPIO& pins);
 
             /**
              * @brief Initializes OBC storage
@@ -44,13 +49,17 @@ namespace obc
             /** @brief Performs (lengthy) erase operation */
             OSResult Erase();
 
+          private:
+            /** @brief SPI driver for N25Q flash slave */
+            drivers::spi::EFMSPISlaveInterface ExternalFlashDriverSPI;
+
             /** @brief N25Q flash driver */
             devices::n25q::N25QDriver ExternalFlashDriver;
 
             /** @brief N25Q Yaffs device */
             devices::n25q::N25QYaffsDevice<devices::n25q::BlockMapping::Sector, 512_Bytes, 16_MB> ExternalFlash;
 
-          private:
+            /** @brief Device operations */
             services::fs::IYaffsDeviceOperations& _deviceOperations;
         };
 

@@ -2,8 +2,11 @@
 #define SRC_STORAGE_H_
 
 #include "base/os.h"
+
+#include "fs/fs.h"
 #include "fs/yaffs.h"
-#include "spi/spi.h"
+#include "obc/hardware.h"
+#include "spi/efm.h"
 #include "utils.h"
 
 #ifdef USE_EXTERNAL_FLASH
@@ -34,8 +37,9 @@ namespace obc
          * @brief Initializes @ref OBCStorageHandler instance
          * @param spi SPI interface to use
          * @param deviceOperations YAFFS device operations
+         * @param pins GPIO pins
          */
-        OBCStorageHandler(drivers::spi::ISPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations);
+        OBCStorageHandler(drivers::spi::EFMSPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations, obc::OBCGPIO& pins);
 
         /**
          * @brief Performs storage initialization
@@ -56,12 +60,14 @@ namespace obc
         OSResult Erase();
 
       private:
+        /** @brief Underlying storage implementation */
         Storage _storage;
     };
 
     template <typename Storage>
-    OBCStorageHandler<Storage>::OBCStorageHandler(drivers::spi::ISPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations)
-        : _storage(spi, deviceOperations)
+    OBCStorageHandler<Storage>::OBCStorageHandler(
+        drivers::spi::EFMSPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations, obc::OBCGPIO& pins)
+        : _storage(spi, deviceOperations, pins)
     {
     }
 

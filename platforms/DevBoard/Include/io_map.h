@@ -1,50 +1,76 @@
 #ifndef SRC_IO_MAP_H_
 #define SRC_IO_MAP_H_
 
+#include <cstdint>
+#include <em_device.h>
 #include <em_gpio.h>
+#include <em_usart.h>
 #include <em_system.h>
+#include "base/io_map.h"
 
-#define SYS_CLEAR_PORT gpioPortC
-#define SYS_CLEAR_PIN 0
+/** @cond FALSE */
 
-#define LED_PORT gpioPortE
-#define LED0 2
-#define LED1 3
+namespace io_map
+{
+    using SlaveSelectFlash1 = PinLocation<gpioPortD, 3>;
 
-// LEUART0
-#define LEUART0_PORT gpioPortD
-#define LEUART0_TX 4
-#define LEUART0_RX 5
-#define LEUART0_LOCATION LEUART_ROUTE_LOCATION_LOC0
-#define LEUART0_BAUDRATE 115200
-#define LEUART0_INT_PRIORITY 6
+    using Led0 = PinLocation<gpioPortE, 2>;
+    using Led1 = PinLocation<gpioPortE, 3>;
 
-// I2C
-#ifndef I2C_TIMEOUT
-#define I2C_TIMEOUT 5 // in seconds
-#endif
+    using SysClear = PinLocation<gpioPortC, 0>;
 
-// I2C0
-#define I2C0_BUS_PORT gpioPortD
-#define I2C0_BUS_SDA_PIN 6
-#define I2C0_BUS_SCL_PIN 7
-#define I2C0_BUS_LOCATION I2C_ROUTE_LOCATION_LOC1
+    struct SPI : public SPIPins<SPI>
+    {
+        static constexpr USART_TypeDef* Peripheral = USART1;
+        static constexpr std::uint8_t Location = 1;
+        using MOSI = PinLocation<gpioPortD, 0>;
+        using MISO = PinLocation<gpioPortD, 1>;
+        using CLK = PinLocation<gpioPortD, 2>;
+    };
 
-// I2C1
-#define I2C1_BUS_PORT gpioPortC
-#define I2C1_BUS_SDA_PIN 4
-#define I2C1_BUS_SCL_PIN 5
-#define I2C1_BUS_LOCATION I2C_ROUTE_LOCATION_LOC0
+    struct LEUART : public LEUARTPins<LEUART>
+    {
+        static constexpr std::uint8_t Location = LEUART_ROUTE_LOCATION_LOC0;
+        static constexpr std::uint32_t Baudrate = 115200;
+        static constexpr std::uint8_t InterruptPriority = 6;
 
-#define I2C_IRQ_PRIORITY 6
+        using TX = PinLocation<gpioPortD, 4>;
+        using RX = PinLocation<gpioPortD, 5>;
+    };
 
+    struct I2C_0 : public I2CPins<I2C_0>
+    {
+        static constexpr std::uint32_t Location = I2C_ROUTE_LOCATION_LOC1;
+
+        using SDA = PinLocation<gpioPortD, 6>;
+        using SCL = PinLocation<gpioPortD, 7>;
+    };
+
+    struct I2C_1 : public I2CPins<I2C_1>
+    {
+        static constexpr std::uint32_t Location = I2C_ROUTE_LOCATION_LOC0;
+
+        using SDA = PinLocation<gpioPortC, 4>;
+        using SCL = PinLocation<gpioPortC, 5>;
+    };
+
+    struct I2C
+    {
+        static constexpr std::uint8_t InterruptPriority = 6;
 #ifdef I2C_SINGLE_BUS
-#define I2C_SYSTEM_BUS 1
-#define I2C_PAYLOAD_BUS 1
+        static constexpr std::uint8_t SystemBus = 1;
+        static constexpr std::uint8_t PayloadBus = 1;
 #else
-#define I2C_SYSTEM_BUS 1
-#define I2C_PAYLOAD_BUS 0
+        static constexpr std::uint8_t SystemBus = 1;
+        static constexpr std::uint8_t PayloadBus = 0;
 #endif
+#ifndef I2C_TIMEOUT
+        static constexpr std::uint32_t Timeout = 5; // in seconds
+#else
+        static constexpr std::uint32_t Timeout = I2C_TIMEOUT; // in seconds
+#endif
+    };
+}
 
 // NAND Flash
 #define NAND_POWER_PORT gpioPortB
@@ -70,28 +96,6 @@
 #define EBI_DATA_PORT gpioPortE
 #define EBI_DATA_PIN0 8
 
-#define ADXRS453_SPI_USART_PORT USART1
-#define ADXRS433_SPI_USART_GPIO_PORT gpioPortD
-#define ADXRS433_SPI_USART_GPIO_TX 0
-#define ADXRS433_SPI_USART_GPIO_RX 1
-#define ADXRS433_SPI_USART_GPIO_CLK 2
-#define ADXRS453_SPI_USART_ROUTE_LOCATION _USART_ROUTE_LOCATION_LOC1
-#define GYRO0                                                                                                                              \
-    {                                                                                                                                      \
-        gpioPortA, /* cs port location*/                                                                                                   \
-            12,    /* cs pin location */                                                                                                   \
-    }
-
-#define GYRO1                                                                                                                              \
-    {                                                                                                                                      \
-        gpioPortA, /* cs port location*/                                                                                                   \
-            13,    /* cs pin location */                                                                                                   \
-    }
-
-#define GYRO2                                                                                                                              \
-    {                                                                                                                                      \
-        gpioPortA, /* cs port location*/                                                                                                   \
-            14,    /* cs pin location */                                                                                                   \
-    }
+/** @endcond */
 
 #endif
