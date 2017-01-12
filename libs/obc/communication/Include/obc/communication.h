@@ -4,8 +4,8 @@
 #include <gsl/span>
 #include "comm/CommDriver.hpp"
 #include "i2c/i2c.h"
-#include "telecommand_handling/telecommand_handling.h"
-#include "telecommand_handling/uplink.h"
+#include "telecommunication/telecommand_handling.h"
+#include "telecommunication/uplink.h"
 
 namespace obc
 {

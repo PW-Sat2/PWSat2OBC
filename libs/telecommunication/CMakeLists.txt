@@ -1,4 +1,4 @@
-set(NAME telecommand_handling)
+set(NAME telecommunication)
 
 set(SOURCES
     telecommand_handling.cpp
