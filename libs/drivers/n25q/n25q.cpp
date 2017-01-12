@@ -43,11 +43,11 @@ constexpr std::chrono::seconds N25QDriver::EraseChipTimeOut;
 constexpr std::chrono::milliseconds N25QDriver::ResetTimeout;
 constexpr std::chrono::milliseconds N25QDriver::WriteStatusRegisterTimeout;
 
-static inline void WriterWriteAddress(Writer* writer, size_t address)
+static inline void WriterWriteAddress(Writer& writer, size_t address)
 {
-    WriterWriteByte(writer, static_cast<uint8_t>((address >> 2 * 8) & 0xFF));
-    WriterWriteByte(writer, static_cast<uint8_t>((address >> 1 * 8) & 0xFF));
-    WriterWriteByte(writer, static_cast<uint8_t>((address >> 0 * 8) & 0xFF));
+    writer.WriteByte(static_cast<uint8_t>((address >> 2 * 8) & 0xFF));
+    writer.WriteByte(static_cast<uint8_t>((address >> 1 * 8) & 0xFF));
+    writer.WriteByte(static_cast<uint8_t>((address >> 0 * 8) & 0xFF));
 }
 
 N25QDriver::N25QDriver(ISPIInterface& spi) : _spi(spi)
@@ -102,11 +102,10 @@ FlagStatus N25QDriver::ReadFlagStatus()
 void N25QDriver::ReadMemory(size_t address, span<uint8_t> buffer)
 {
     array<uint8_t, 4> command;
-    Writer writer;
+    Writer writer(command);
 
-    WriterInitialize(&writer, command.data(), command.size());
-    WriterWriteByte(&writer, N25QCommand::ReadMemory);
-    WriterWriteAddress(&writer, address);
+    writer.WriteByte(N25QCommand::ReadMemory);
+    WriterWriteAddress(writer, address);
 
     SPISelectSlave slave(this->_spi);
     this->_spi.Write(command);
@@ -125,10 +124,10 @@ OperationResult N25QDriver::WriteMemory(size_t address, span<const uint8_t> buff
 
         {
             array<uint8_t, 4> command;
-            Writer writer;
-            WriterInitialize(&writer, command.data(), command.size());
-            WriterWriteByte(&writer, N25QCommand::ProgramMemory);
-            WriterWriteAddress(&writer, address + offset);
+            Writer writer(command);
+
+            writer.WriteByte(N25QCommand::ProgramMemory);
+            WriterWriteAddress(writer, address + offset);
 
             SPISelectSlave slave(this->_spi);
 
