@@ -51,3 +51,25 @@ class TestEvent():
 
     def wait_for_change(self, timeout = None):
         return self.flag.wait(timeout)
+
+
+def ensure_byte_list(value):
+    if type(value) is str:
+        return ensure_byte_list(list(value))
+
+    if type(value) is tuple:
+        return ensure_byte_list(list(value))
+
+    if type(value) is not list:
+        return ensure_byte_list([value])
+
+    def ensure_single(v):
+        if type(v) is int:
+            return v
+
+        if type(v) is str:
+            return ord(v)
+
+        return v
+
+    return map(ensure_single, value)

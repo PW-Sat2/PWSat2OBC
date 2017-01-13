@@ -1,5 +1,7 @@
 #include "communication.h"
+#include "gsl/span"
 #include "settings.h"
+#include "telecommunication/downlink.h"
 
 using std::uint8_t;
 using gsl::span;
@@ -7,6 +9,8 @@ using drivers::i2c::II2CBus;
 using devices::comm::ITransmitFrame;
 using obc::PingTelecommand;
 using telecommands::handling::IHandleTeleCommand;
+using telecommunication::DownlinkFrame;
+using telecommunication::APID;
 
 using namespace obc;
 
@@ -16,7 +20,11 @@ void PingTelecommand::Handle(ITransmitFrame& transmitter, span<const uint8_t> pa
 
     const char* response = "PONG";
 
-    transmitter.SendFrame(span<const uint8_t>(reinterpret_cast<const uint8_t*>(response), 4));
+    DownlinkFrame frame(APID::Pong, 0);
+
+    frame.PayloadWriter().WriteArray(gsl::make_span(reinterpret_cast<const uint8_t*>(response), 4));
+
+    transmitter.SendFrame(frame.Frame());
 }
 
 uint8_t PingTelecommand::CommandCode() const

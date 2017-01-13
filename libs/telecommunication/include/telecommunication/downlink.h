@@ -10,6 +10,7 @@ namespace telecommunication
 {
     enum class APID : std::uint8_t
     {
+        Pong = 0x01,
         TelemetryShort = 0x2A,
         TelemetryLong = 0x3F,
         LastItem
