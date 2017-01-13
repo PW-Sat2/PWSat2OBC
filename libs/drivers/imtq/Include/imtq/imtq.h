@@ -80,9 +80,6 @@ namespace devices
         	std::uint16_t getIn0dot1miliAmpsStep();
         	void setIn0dot1miliAmpsStep(std::uint16_t value);
 
-        	float getInAmpere();
-        	void setInAmpere(float value);
-
         	std::uint16_t getInMiliAmpere();
         	void setInMiliAmpere(std::uint16_t value);
 
@@ -94,7 +91,7 @@ namespace devices
         class ImtqDriver final
         {
           public:
-            ImtqDriver(I2CBus& i2cbus);
+            ImtqDriver(drivers::i2c::II2CBus& i2cbus);
 
             bool SendNoOperation();
             bool SoftwareReset();
@@ -103,7 +100,7 @@ namespace devices
             bool StartActuationCurrent(std::array<Current, 3> current, std::chrono::milliseconds duration);
 
           private:
-            I2CBus& i2cbus;
+            drivers::i2c::II2CBus& i2cbus;
 
             bool SendCommand(OpCode opcode);
             bool SendCommand(OpCode opcode, gsl::span<const std::uint8_t> params);

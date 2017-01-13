@@ -3,7 +3,6 @@
 #include <gsl/span>
 #include <string>
 #include <tuple>
-#include <chrono>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "gmock/gmock-matchers.h"
@@ -12,7 +11,10 @@
 #include "i2c/i2c.h"
 #include "os/os.hpp"
 #include "system.h"
+#include "utils.hpp"
+
 #include "imtq/imtq.h"
+
 
 using testing::_;
 using testing::Eq;
@@ -21,7 +23,11 @@ using testing::Ge;
 using testing::StrEq;
 using testing::Return;
 using testing::Invoke;
+using testing::Pointee;
+using testing::ElementsAre;
+using testing::Matches;
 using gsl::span;
+using drivers::i2c::I2CResult;
 
 static const uint8_t ImtqAddress = 0x10;
 
@@ -144,20 +150,17 @@ TEST(ImtqTestDataStructures, CurrentCalculations)
 {
 	devices::imtq::Current current;
 
-	current.setIn0dot1miliAmpsStep(10000u);
-	EXPECT_EQ(current.getIn0dot1miliAmpsStep(), 10000u);
-	EXPECT_FLOAT_EQ(current.getInAmpere(), 1.0);
-	EXPECT_EQ(current.getInMiliAmpere(), 1000u);
+	for(uint32_t c = 1; c < 10000; c += 1000) {
+		current.setIn0dot1miliAmpsStep(c);
+		EXPECT_EQ(current.getIn0dot1miliAmpsStep(), c);
+		EXPECT_EQ(current.getInMiliAmpere(), c/10);
+	}
 
-	current.setInAmpere(0.1);
-	EXPECT_EQ(current.getIn0dot1miliAmpsStep(), 1000u);
-	EXPECT_FLOAT_EQ(current.getInAmpere(), 0.1);
-	EXPECT_EQ(current.getInMiliAmpere(), 100u);
-
-	current.setInMiliAmpere(10u);
-	EXPECT_EQ(current.getIn0dot1miliAmpsStep(), 100u);
-	EXPECT_FLOAT_EQ(current.getInAmpere(), 0.01);
-	EXPECT_EQ(current.getInMiliAmpere(), 10u);
+	for(uint32_t c = 1; c < 10000; c += 1000) {
+		current.setInMiliAmpere(c);
+		EXPECT_EQ(current.getIn0dot1miliAmpsStep(), 10*c);
+		EXPECT_EQ(current.getInMiliAmpere(), c);
+	}
 }
 
 class ImtqTest : public testing::Test
@@ -168,73 +171,58 @@ class ImtqTest : public testing::Test
   protected:
   	devices::imtq::ImtqDriver imtq;
     I2CBusMock i2c;
-    I2CBus low;
 };
 
 
-TEST_F(ImtqTest, TestNoOperationAccepted)
+TEST_F(ImtqTest, TestNoOperation)
 {
-    EXPECT_CALL(i2c, I2CWriteRead(ImtqAddress, 0x02, _, 1, Ne(nullptr), 2))
+	// accepted
+    EXPECT_CALL(i2c, WriteRead(ImtqAddress, ElementsAre(0x02), _))
         .WillOnce(Invoke([](uint8_t /*address*/,
-        		            uint8_t /*command*/,
-							const uint8_t* /*inData*/,
-							uint16_t /*length*/,
-							uint8_t* outData,
-							size_t /*outLength*/) {
+        		            auto /*inData*/,
+							auto outData) {
     		outData[0] = 0x02;
     		outData[1] = 0;
-            return I2CResultOK;
-        }));
-
-    const auto status = imtq.SendNoOperation();
-    ASSERT_THAT(status, Eq(true));
-}
-
-TEST_F(ImtqTest, TestNoOperationRejected)
-{
-	// command rejected
-    EXPECT_CALL(i2c, I2CWriteRead(ImtqAddress, 0x02, _, 1, Ne(nullptr), 2))
-        .WillOnce(Invoke([](uint8_t /*address*/,
-        		            uint8_t /*command*/,
-							const uint8_t* /*inData*/,
-							uint16_t /*length*/,
-							uint8_t* outData,
-							size_t /*outLength*/) {
-    		outData[0] = 0x02;
-    		outData[1] = 1;
-            return I2CResultOK;
+            return I2CResult::OK;
         }));
 
     auto status = imtq.SendNoOperation();
+    ASSERT_THAT(status, Eq(true));
+
+	// command rejected
+    EXPECT_CALL(i2c, WriteRead(ImtqAddress, ElementsAre(0x02), _))
+		.WillOnce(Invoke([](uint8_t /*address*/,
+							auto /*inData*/,
+							auto outData) {
+    		outData[0] = 0x02;
+    		outData[1] = 1;
+            return I2CResult::OK;
+        }));
+
+    status = imtq.SendNoOperation();
     ASSERT_THAT(status, Eq(false));
 
     // bad opcode response
-    EXPECT_CALL(i2c, I2CWriteRead(ImtqAddress, 0x02, _, 1, Ne(nullptr), 2))
+    EXPECT_CALL(i2c, WriteRead(ImtqAddress, ElementsAre(0x02), _))
 		.WillOnce(Invoke([](uint8_t /*address*/,
-							uint8_t /*command*/,
-							const uint8_t* /*inData*/,
-							uint16_t /*length*/,
-							uint8_t* outData,
-							size_t /*outLength*/) {
+							auto /*inData*/,
+							auto outData) {
 			outData[0] = 0x01;
 			outData[1] = 0;
-			return I2CResultOK;
+			return I2CResult::OK;
 		}));
 
 	status = imtq.SendNoOperation();
 	ASSERT_THAT(status, Eq(false));
 
 	// I2C returned fail
-	EXPECT_CALL(i2c, I2CWriteRead(ImtqAddress, 0x02, _, 1, Ne(nullptr), 2))
+	EXPECT_CALL(i2c, WriteRead(ImtqAddress, ElementsAre(0x02), _))
 		.WillOnce(Invoke([](uint8_t /*address*/,
-							uint8_t /*command*/,
-							const uint8_t* /*inData*/,
-							uint16_t /*length*/,
-							uint8_t* outData,
-							size_t /*outLength*/) {
+							auto /*inData*/,
+							auto outData) {
 			outData[0] = 0x02;
 			outData[1] = 0;
-			return I2CResultFailure;
+			return I2CResult::Failure;
 		}));
 
 	status = imtq.SendNoOperation();
@@ -245,60 +233,48 @@ TEST_F(ImtqTest, TestNoOperationRejected)
 TEST_F(ImtqTest, SoftwareReset)
 {
 	// reset OK
-    EXPECT_CALL(i2c, I2CWriteRead(ImtqAddress, 0xAA, _, 1, Ne(nullptr), 2))
-        .WillOnce(Invoke([](uint8_t /*address*/,
-        		            uint8_t /*command*/,
-							const uint8_t* /*inData*/,
-							uint16_t /*length*/,
-							uint8_t* /*outData*/,
-							size_t /*outLength*/) {
-            return I2CResultNack;
+    EXPECT_CALL(i2c, WriteRead(ImtqAddress, ElementsAre(0xAA), _))
+		.WillOnce(Invoke([](uint8_t /*address*/,
+							auto /*inData*/,
+							auto /*outData*/) {
+            return I2CResult::Nack;
         }));
 
     auto status = imtq.SoftwareReset();
     ASSERT_THAT(status, Eq(true));
 
     // fast boot/delay on read
-    EXPECT_CALL(i2c, I2CWriteRead(ImtqAddress, 0xAA, _, 1, Ne(nullptr), 2))
+    EXPECT_CALL(i2c, WriteRead(ImtqAddress, ElementsAre(0xAA), _))
 		.WillOnce(Invoke([](uint8_t /*address*/,
-							uint8_t /*command*/,
-							const uint8_t* /*inData*/,
-							uint16_t /*length*/,
-							uint8_t* outData,
-							size_t /*outLength*/) {
+							auto /*inData*/,
+							auto outData) {
 			outData[0] = 0xFF;
 			outData[1] = 0xFF;
-			return I2CResultOK;
+			return I2CResult::OK;
 		}));
 
 	status = imtq.SoftwareReset();
 	ASSERT_THAT(status, Eq(true));
 
 	// I2C returned fail
-	EXPECT_CALL(i2c, I2CWriteRead(ImtqAddress, 0xAA, _, 1, Ne(nullptr), 2))
+	EXPECT_CALL(i2c, WriteRead(ImtqAddress, ElementsAre(0xAA), _))
 		.WillOnce(Invoke([](uint8_t /*address*/,
-							uint8_t /*command*/,
-							const uint8_t* /*inData*/,
-							uint16_t /*length*/,
-							uint8_t* /*outData*/,
-							size_t /*outLength*/) {
-			return I2CResultFailure;
+							auto /*inData*/,
+							auto /*outData*/) {
+			return I2CResult::Failure;
 		}));
 
 	status = imtq.SoftwareReset();
 	ASSERT_THAT(status, Eq(false));
 
 	// Reset rejected
-	EXPECT_CALL(i2c, I2CWriteRead(ImtqAddress, 0xAA, _, 1, Ne(nullptr), 2))
+	EXPECT_CALL(i2c, WriteRead(ImtqAddress, ElementsAre(0xAA), _))
 		.WillOnce(Invoke([](uint8_t /*address*/,
-							uint8_t /*command*/,
-							const uint8_t* /*inData*/,
-							uint16_t /*length*/,
-							uint8_t* outData,
-							size_t /*outLength*/) {
+							auto /*inData*/,
+							auto outData) {
 			outData[0] = 0xAA;
 			outData[1] = static_cast<uint8_t>(devices::imtq::Status::Error::Rejected);
-			return I2CResultOK;
+			return I2CResult::OK;
 		}));
 
 	status = imtq.SoftwareReset();
@@ -308,64 +284,52 @@ TEST_F(ImtqTest, SoftwareReset)
 TEST_F(ImtqTest, CancelOperation)
 {
 	// command rejected
-	EXPECT_CALL(i2c, I2CWriteRead(ImtqAddress, 0x03, _, 1, Ne(nullptr), 2))
+	EXPECT_CALL(i2c, WriteRead(ImtqAddress, ElementsAre(0x03), _))
 		.WillOnce(Invoke([](uint8_t /*address*/,
-							uint8_t /*command*/,
-							const uint8_t* /*inData*/,
-							uint16_t /*length*/,
-							uint8_t* outData,
-							size_t /*outLength*/) {
+							auto /*inData*/,
+							auto outData) {
 			outData[0] = 0x03;
 			outData[1] = 0;
-			return I2CResultOK;
+			return I2CResult::OK;
 		}));
 
 	auto status = imtq.CancelOperation();
 	ASSERT_THAT(status, Eq(true));
 
 	// command rejected
-    EXPECT_CALL(i2c, I2CWriteRead(ImtqAddress, 0x03, _, 1, Ne(nullptr), 2))
-        .WillOnce(Invoke([](uint8_t /*address*/,
-        		            uint8_t /*command*/,
-							const uint8_t* /*inData*/,
-							uint16_t /*length*/,
-							uint8_t* outData,
-							size_t /*outLength*/) {
+    EXPECT_CALL(i2c, WriteRead(ImtqAddress, ElementsAre(0x03), _))
+		.WillOnce(Invoke([](uint8_t /*address*/,
+							auto /*inData*/,
+							auto outData) {
     		outData[0] = 0x03;
     		outData[1] = 1;
-            return I2CResultOK;
+            return I2CResult::OK;
         }));
 
     status = imtq.CancelOperation();
     ASSERT_THAT(status, Eq(false));
 
     // bad opcode response
-    EXPECT_CALL(i2c, I2CWriteRead(ImtqAddress, 0x03, _, 1, Ne(nullptr), 2))
-		.WillOnce(Invoke([](uint8_t /*address*/,
-							uint8_t /*command*/,
-							const uint8_t* /*inData*/,
-							uint16_t /*length*/,
-							uint8_t* outData,
-							size_t /*outLength*/) {
+    EXPECT_CALL(i2c, WriteRead(ImtqAddress, ElementsAre(0x03), _))
+    	.WillOnce(Invoke([](uint8_t /*address*/,
+							auto /*inData*/,
+							auto outData) {
 			outData[0] = 0x01;
 			outData[1] = 0;
-			return I2CResultOK;
+			return I2CResult::OK;
 		}));
 
 	status = imtq.CancelOperation();
 	ASSERT_THAT(status, Eq(false));
 
 	// I2C returned fail
-	EXPECT_CALL(i2c, I2CWriteRead(ImtqAddress, 0x03, _, 1, Ne(nullptr), 2))
+	EXPECT_CALL(i2c, WriteRead(ImtqAddress, ElementsAre(0x03), _))
 		.WillOnce(Invoke([](uint8_t /*address*/,
-							uint8_t /*command*/,
-							const uint8_t* /*inData*/,
-							uint16_t /*length*/,
-							uint8_t* outData,
-							size_t /*outLength*/) {
+							auto /*inData*/,
+							auto outData) {
 			outData[0] = 0x03;
 			outData[1] = 0;
-			return I2CResultFailure;
+			return I2CResult::Failure;
 		}));
 
 	status = imtq.CancelOperation();
@@ -375,64 +339,52 @@ TEST_F(ImtqTest, CancelOperation)
 TEST_F(ImtqTest, StartMTMMeasurement)
 {
 	// command accepted
-	EXPECT_CALL(i2c, I2CWriteRead(ImtqAddress, 0x04, _, 1, Ne(nullptr), 2))
+	EXPECT_CALL(i2c, WriteRead(ImtqAddress, ElementsAre(0x04), _))
 		.WillOnce(Invoke([](uint8_t /*address*/,
-							uint8_t /*command*/,
-							const uint8_t* /*inData*/,
-							uint16_t /*length*/,
-							uint8_t* outData,
-							size_t /*outLength*/) {
+							auto /*inData*/,
+							auto outData) {
 			outData[0] = 0x04;
 			outData[1] = 0;
-			return I2CResultOK;
+			return I2CResult::OK;
 		}));
 
 	auto status = imtq.StartMTMMeasurement();
 	ASSERT_THAT(status, Eq(true));
 
 	// command rejected
-    EXPECT_CALL(i2c, I2CWriteRead(ImtqAddress, 0x04, _, 1, Ne(nullptr), 2))
-        .WillOnce(Invoke([](uint8_t /*address*/,
-        		            uint8_t /*command*/,
-							const uint8_t* /*inData*/,
-							uint16_t /*length*/,
-							uint8_t* outData,
-							size_t /*outLength*/) {
+    EXPECT_CALL(i2c, WriteRead(ImtqAddress, ElementsAre(0x04), _))
+		.WillOnce(Invoke([](uint8_t /*address*/,
+							auto /*inData*/,
+							auto outData) {
     		outData[0] = 0x04;
     		outData[1] = 1;
-            return I2CResultOK;
+            return I2CResult::OK;
         }));
 
     status = imtq.StartMTMMeasurement();
     ASSERT_THAT(status, Eq(false));
 
     // bad opcode response
-    EXPECT_CALL(i2c, I2CWriteRead(ImtqAddress, 0x04, _, 1, Ne(nullptr), 2))
+    EXPECT_CALL(i2c, WriteRead(ImtqAddress, ElementsAre(0x04), _))
 		.WillOnce(Invoke([](uint8_t /*address*/,
-							uint8_t /*command*/,
-							const uint8_t* /*inData*/,
-							uint16_t /*length*/,
-							uint8_t* outData,
-							size_t /*outLength*/) {
+							auto /*inData*/,
+							auto outData) {
 			outData[0] = 0x01;
 			outData[1] = 0;
-			return I2CResultOK;
+			return I2CResult::OK;
 		}));
 
 	status = imtq.StartMTMMeasurement();
 	ASSERT_THAT(status, Eq(false));
 
 	// I2C returned fail
-	EXPECT_CALL(i2c, I2CWriteRead(ImtqAddress, 0x04, _, 1, Ne(nullptr), 2))
+	EXPECT_CALL(i2c, WriteRead(ImtqAddress, ElementsAre(0x04), _))
 		.WillOnce(Invoke([](uint8_t /*address*/,
-							uint8_t /*command*/,
-							const uint8_t* /*inData*/,
-							uint16_t /*length*/,
-							uint8_t* outData,
-							size_t /*outLength*/) {
+							auto /*inData*/,
+							auto outData) {
 			outData[0] = 0x04;
 			outData[1] = 0;
-			return I2CResultFailure;
+			return I2CResult::Failure;
 		}));
 
 	status = imtq.StartMTMMeasurement();
@@ -444,13 +396,10 @@ TEST_F(ImtqTest, StartActuationCurrent)
 	using namespace std::chrono_literals;
 
 	// command accepted
-	EXPECT_CALL(i2c, I2CWriteRead(ImtqAddress, 0x05, _, 9, Ne(nullptr), 2))
+	EXPECT_CALL(i2c, WriteRead(ImtqAddress, BeginsWith(0x05), _))
 		.WillOnce(Invoke([](uint8_t /*address*/,
-							uint8_t /*command*/,
-							const uint8_t* inData,
-							uint16_t /*length*/,
-							uint8_t* outData,
-							size_t /*outLength*/) {
+							auto inData,
+							auto outData) {
 			EXPECT_EQ(inData[0], 0x05);
 
 			EXPECT_EQ(inData[1], 0xE8);
@@ -465,25 +414,22 @@ TEST_F(ImtqTest, StartActuationCurrent)
 
 			outData[0] = 0x05;
 			outData[1] = 0;
-			return I2CResultOK;
+			return I2CResult::OK;
 		}));
 
 	std::array<devices::imtq::Current, 3> currents;
-	currents[0].setInAmpere(0.1);
-	currents[1].setInAmpere(0.2);
-	currents[2].setInAmpere(0.3);
+	currents[0].setInMiliAmpere(100);
+	currents[1].setInMiliAmpere(200);
+	currents[2].setInMiliAmpere(300);
 
 	auto status = imtq.StartActuationCurrent(currents, 250ms);
 	ASSERT_THAT(status, Eq(true));
 
 	// another values
-	EXPECT_CALL(i2c, I2CWriteRead(ImtqAddress, 0x05, _, 9, Ne(nullptr), 2))
+	EXPECT_CALL(i2c, WriteRead(ImtqAddress, BeginsWith(0x05), _))
 		.WillOnce(Invoke([](uint8_t /*address*/,
-							uint8_t /*command*/,
-							const uint8_t* inData,
-							uint16_t /*length*/,
-							uint8_t* outData,
-							size_t /*outLength*/) {
+							auto inData,
+							auto outData) {
 			EXPECT_EQ(inData[0], 0x05);
 
 			EXPECT_EQ(inData[1], 0x38);
@@ -498,7 +444,7 @@ TEST_F(ImtqTest, StartActuationCurrent)
 
 			outData[0] = 0x05;
 			outData[1] = 0;
-			return I2CResultOK;
+			return I2CResult::OK;
 		}));
 
 	currents[0].setInMiliAmpere(5100);
@@ -509,48 +455,39 @@ TEST_F(ImtqTest, StartActuationCurrent)
 	ASSERT_THAT(status, Eq(true));
 
 	// command rejected
-    EXPECT_CALL(i2c, I2CWriteRead(ImtqAddress, 0x05, _, 9, Ne(nullptr), 2))
-        .WillOnce(Invoke([](uint8_t /*address*/,
-        		            uint8_t /*command*/,
-							const uint8_t* /*inData*/,
-							uint16_t /*length*/,
-							uint8_t* outData,
-							size_t /*outLength*/) {
+    EXPECT_CALL(i2c, WriteRead(ImtqAddress, BeginsWith(0x05), _))
+		.WillOnce(Invoke([](uint8_t /*address*/,
+							auto /*inData*/,
+							auto outData) {
     		outData[0] = 0x05;
     		outData[1] = 1;
-            return I2CResultOK;
+            return I2CResult::OK;
         }));
 
     status = imtq.StartActuationCurrent(currents, 15s);
     ASSERT_THAT(status, Eq(false));
 
     // bad opcode response
-    EXPECT_CALL(i2c, I2CWriteRead(ImtqAddress, 0x05, _, 9, Ne(nullptr), 2))
+    EXPECT_CALL(i2c, WriteRead(ImtqAddress, BeginsWith(0x05), _))
 		.WillOnce(Invoke([](uint8_t /*address*/,
-							uint8_t /*command*/,
-							const uint8_t* /*inData*/,
-							uint16_t /*length*/,
-							uint8_t* outData,
-							size_t /*outLength*/) {
+							auto /*inData*/,
+							auto outData) {
 			outData[0] = 0x01;
 			outData[1] = 0;
-			return I2CResultOK;
+			return I2CResult::OK;
 		}));
 
 	status = imtq.StartActuationCurrent(currents, 15s);
 	ASSERT_THAT(status, Eq(false));
 
 	// I2C returned fail
-	EXPECT_CALL(i2c, I2CWriteRead(ImtqAddress, 0x05, _, 9, Ne(nullptr), 2))
+	EXPECT_CALL(i2c, WriteRead(ImtqAddress, BeginsWith(0x05), _))
 		.WillOnce(Invoke([](uint8_t /*address*/,
-							uint8_t /*command*/,
-							const uint8_t* /*inData*/,
-							uint16_t /*length*/,
-							uint8_t* outData,
-							size_t /*outLength*/) {
+							auto /*inData*/,
+							auto outData) {
 			outData[0] = 0x05;
 			outData[1] = 0;
-			return I2CResultFailure;
+			return I2CResult::Failure;
 		}));
 
 	status = imtq.StartActuationCurrent(currents, 15s);

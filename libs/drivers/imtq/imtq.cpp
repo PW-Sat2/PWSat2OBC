@@ -19,6 +19,7 @@ using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
 using gsl::span;
+using drivers::i2c::I2CResult;
 
 namespace devices
 {
@@ -66,15 +67,6 @@ namespace devices
 			this->value = value;
 		}
 
-		float Current::getInAmpere()
-		{
-			return static_cast<float>(this->value) * 0.0001;
-		}
-		void Current::setInAmpere(float value)
-		{
-			this->value = static_cast<uint16_t>(value * 10000.0);
-		}
-
 		uint16_t Current::getInMiliAmpere()
 		{
 			return this->value/10;
@@ -86,7 +78,7 @@ namespace devices
 
 		// ------------------------- Public functions -------------------------
 
-        ImtqDriver::ImtqDriver(I2CBus& i2cbus) : i2cbus{i2cbus}
+        ImtqDriver::ImtqDriver(drivers::i2c::II2CBus& i2cbus) : i2cbus{i2cbus}
         {
         }
 
@@ -101,15 +93,15 @@ namespace devices
 
             std::array<uint8_t, commandResponseLength> response;
 
-            auto result = i2cbus.WriteRead(&i2cbus, I2Cadress,
-                                           &opcode, 1,
-                                           response.data(), response.size());
+            auto result = i2cbus.WriteRead(I2Cadress,
+                                           gsl::span<const uint8_t, 1>(&opcode, 1),
+                                           response);
 
-            if (result == I2CResultNack)
+            if (result == I2CResult::Nack)
             {
             	return true;
             }
-            if (result != I2CResultOK)
+            if (result != I2CResult::OK)
 			{
 				return false;
 			}
@@ -164,13 +156,11 @@ namespace devices
         {
             std::array<uint8_t, commandResponseLength> response;
 
-            auto result = i2cbus.WriteRead(&i2cbus, I2Cadress,
-                                           params.data(), params.size(),
-                                           response.data(), response.size());
+            auto result = i2cbus.WriteRead(I2Cadress, params, response);
 
             Status status{response[1]};
 
-            if (result != I2CResultOK ||
+            if (result != I2CResult::OK ||
             	status.CmdError() != Status::Error::Accepted ||
                 response[0] != params[0])
             {
