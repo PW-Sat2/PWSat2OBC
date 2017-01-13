@@ -74,7 +74,7 @@ void EFMSPIInterface::Write(gsl::span<const std::uint8_t> buffer)
         OnTransferFinished,
         this);
 
-    System::EventGroupWaitForBits(this->_transferGroup, TransferFinished, true, true, MAX_DELAY);
+    System::EventGroupWaitForBits(this->_transferGroup, TransferFinished, true, true, std::chrono::milliseconds(MAX_DELAY));
 }
 
 void EFMSPIInterface::Read(gsl::span<std::uint8_t> buffer)
@@ -106,7 +106,7 @@ void EFMSPIInterface::Read(gsl::span<std::uint8_t> buffer)
         OnTransferFinished,
         this);
 
-    System::EventGroupWaitForBits(this->_transferGroup, TransferFinished, true, true, MAX_DELAY);
+    System::EventGroupWaitForBits(this->_transferGroup, TransferFinished, true, true, std::chrono::milliseconds(MAX_DELAY));
 }
 
 bool EFMSPIInterface::OnTransferFinished(unsigned int channel, unsigned int sequenceNo, void* param)
@@ -156,7 +156,7 @@ void EFMSPISlaveInterface::Read(gsl::span<std::uint8_t> buffer)
 
 void drivers::spi::EFMSPIInterface::Lock()
 {
-    System::TakeSemaphore(this->_lock, MAX_DELAY);
+    System::TakeSemaphore(this->_lock, std::chrono::milliseconds(MAX_DELAY));
 }
 
 void drivers::spi::EFMSPIInterface::Unlock()

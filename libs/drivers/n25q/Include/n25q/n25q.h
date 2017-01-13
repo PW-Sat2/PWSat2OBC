@@ -234,9 +234,9 @@ namespace devices
             static constexpr std::chrono::milliseconds EraseChipTimeOut =
                 std::chrono::milliseconds(static_cast<uint64_t>(1.2 * (250 * 1000)));
             /** @brief Reset timeout */
-            constexpr static std::uint32_t ResetTimeout = 10;
+            static constexpr std::chrono::milliseconds ResetTimeout = std::chrono::milliseconds(10);
             /** @brief Write status register timeout */
-            constexpr static std::uint32_t WriteStatusRegisterTimeout = 10;
+            static constexpr std::chrono::milliseconds WriteStatusRegisterTimeout = std::chrono::milliseconds(10);
         };
     }
 }

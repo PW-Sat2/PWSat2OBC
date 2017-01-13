@@ -40,6 +40,8 @@ constexpr std::chrono::milliseconds N25QDriver::ProgramPageTimeout;
 constexpr std::chrono::milliseconds N25QDriver::EraseSubSectorTimeout;
 constexpr std::chrono::milliseconds N25QDriver::EraseSectorTimeout;
 constexpr std::chrono::milliseconds N25QDriver::EraseChipTimeOut;
+constexpr std::chrono::milliseconds N25QDriver::ResetTimeout;
+constexpr std::chrono::milliseconds N25QDriver::WriteStatusRegisterTimeout;
 
 static inline void WriterWriteAddress(Writer* writer, size_t address)
 {

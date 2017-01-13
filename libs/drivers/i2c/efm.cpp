@@ -39,7 +39,7 @@ I2CResult I2CLowLevelBus::ExecuteTransfer(I2C_TransferSeq_TypeDef* seq)
         return (I2CResult)rawResult;
     }
 
-    if (OS_RESULT_FAILED(this->_resultQueue.Pop(rawResult, std::chrono::seconds(I2C_TIMEOUT))))
+    if (OS_RESULT_FAILED(this->_resultQueue.Pop(rawResult, std::chrono::seconds(static_cast<uint64_t>(io_map::I2C::Timeout)))))
     {
         I2CResult ret = I2CResult::Timeout;
 
