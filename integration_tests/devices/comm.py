@@ -8,6 +8,43 @@ from threading import Lock
 from utils import *
 from build_config import config
 
+
+class DownlinkFrame:
+    def __init__(self, apid, seq, payload):
+        self._apid = apid
+        self._seq = seq
+        self._payload = payload
+
+    def apid(self):
+        return self._apid
+
+    def seq(self):
+        return self._seq
+
+    def payload(self):
+        return self._payload
+
+    @classmethod
+    def parse(cls, bytes):
+        bytes = ensure_byte_list(bytes)
+
+        apid = (bytes[0] & 0b11111100) >> 2
+        seq = ((bytes[0] & 0b11) << 16) | (bytes[1] << 8) | (bytes[2])
+        payload = bytes[3:]
+
+        return DownlinkFrame(apid, seq, payload)
+
+
+class UplinkFrame:
+    def __init__(self, apid, content, security_code=config['COMM_SECURITY_CODE']):
+        self._bytes = ensure_byte_list(struct.pack('>L',security_code))
+        self._bytes += [apid]
+        self._bytes += ensure_byte_list(content)
+
+    def build(self):
+        return self._bytes
+
+
 class TransmitterDevice(i2cMock.I2CDevice):
     BUFFER_SIZE = 40
 
@@ -52,6 +89,7 @@ class TransmitterDevice(i2cMock.I2CDevice):
     def reset(self):
         with self._lock:
             self._buffer = Queue(TransmitterDevice.BUFFER_SIZE)
+
 
 class ReceiverDevice(i2cMock.I2CDevice):
     def __init__(self):
@@ -114,23 +152,15 @@ class ReceiverDevice(i2cMock.I2CDevice):
 
     @classmethod
     def build_frame_response(cls, content, doppler, rssi):
-        length = len(content) + 4
+        length = len(content)
 
         length_bytes = [length & 0xFF, (length >> 8) & 0xFF]
         doppler_bytes = [doppler & 0xFF, (doppler >> 8) & 0xFF]
         rssi_bytes = [rssi & 0xFF, (rssi >> 8) & 0xFF]
 
-        def numberize(v):
-            if type(v) is int:
-                return v
+        content_bytes = ensure_byte_list(content)
 
-            return ord(v)
-
-        content_bytes = [numberize(c) for c in content]
-
-        code_bytes = [numberize(c) for c in struct.pack('>L', config['COMM_SECURITY_CODE'])]
-
-        return length_bytes + doppler_bytes + rssi_bytes + code_bytes + content_bytes
+        return length_bytes + doppler_bytes + rssi_bytes + content_bytes
 
     def put_frame(self, data):
         with self._lock:
@@ -140,8 +170,9 @@ class ReceiverDevice(i2cMock.I2CDevice):
         with self._lock:
             return self._buffer.qsize()
 
+
 class Comm(object):
-    MAX_UPLINK_CONTENT_SIZE = 200 - 4
+    MAX_UPLINK_FRAME_SIZE = 200
 
     def __init__(self):
         self.transmitter = TransmitterDevice()
@@ -160,3 +191,11 @@ class Comm(object):
 
     def _watchdog_reset(self):
         call(self.on_watchdog_reset, None, self)
+
+    def put_frame(self, frame):
+        self.receiver.put_frame(frame.build())
+
+    def get_frame(self, timeout=None):
+        f = self.transmitter.get_message_from_buffer(timeout)
+
+        return DownlinkFrame.parse(f)
