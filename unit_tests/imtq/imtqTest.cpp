@@ -148,15 +148,15 @@ TEST(ImtqTestDataStructures, Status)
 
 TEST(ImtqTestDataStructures, CurrentCalculations)
 {
-	devices::imtq::Current current;
+	devices::imtq::CurrentMeasurement current;
 
-	for(uint32_t c = 1; c < 10000; c += 1000) {
+	for(uint32_t c = 1; c < 65000; c += 1000) {
 		current.setIn0dot1miliAmpsStep(c);
 		EXPECT_EQ(current.getIn0dot1miliAmpsStep(), c);
 		EXPECT_EQ(current.getInMiliAmpere(), c/10);
 	}
 
-	for(uint32_t c = 1; c < 10000; c += 1000) {
+	for(uint32_t c = 1; c < 6500; c += 1000) {
 		current.setInMiliAmpere(c);
 		EXPECT_EQ(current.getIn0dot1miliAmpsStep(), 10*c);
 		EXPECT_EQ(current.getInMiliAmpere(), c);
@@ -417,7 +417,7 @@ TEST_F(ImtqTest, StartActuationCurrent)
 			return I2CResult::OK;
 		}));
 
-	std::array<devices::imtq::Current, 3> currents;
+	std::array<devices::imtq::CurrentMeasurement, 3> currents;
 	currents[0].setInMiliAmpere(100);
 	currents[1].setInMiliAmpere(200);
 	currents[2].setInMiliAmpere(300);

@@ -58,20 +58,20 @@ namespace devices
 
 		// ------------------------- Current -------------------------
 
-		uint16_t Current::getIn0dot1miliAmpsStep()
+		uint16_t CurrentMeasurement::getIn0dot1miliAmpsStep()
 		{
 			return this->value;
 		}
-		void Current::setIn0dot1miliAmpsStep(uint16_t value)
+		void CurrentMeasurement::setIn0dot1miliAmpsStep(uint16_t value)
 		{
 			this->value = value;
 		}
 
-		uint16_t Current::getInMiliAmpere()
+		uint16_t CurrentMeasurement::getInMiliAmpere()
 		{
 			return this->value/10;
 		}
-		void Current::setInMiliAmpere(uint16_t value)
+		void CurrentMeasurement::setInMiliAmpere(uint16_t value)
 		{
 			this->value = value*10;
 		}
@@ -122,7 +122,7 @@ namespace devices
 			return SendCommand(OpCode::StartMTMMeasurement);
 		}
 
-        bool ImtqDriver::StartActuationCurrent(std::array<Current, 3> current, std::chrono::milliseconds duration)
+        bool ImtqDriver::StartActuationCurrent(Vector3<CurrentMeasurement> current, std::chrono::milliseconds duration)
         {
         	std::array<uint8_t, 8> parameters;
         	Writer writer;
@@ -133,6 +133,36 @@ namespace devices
         	WriterWriteWordLE(&writer, duration.count());
 
         	return this->SendCommand(OpCode::StartActuationCurrent, parameters);
+        }
+
+        bool ImtqDriver::StartActuationDipole(Vector3<Dipole> dipole, std::chrono::milliseconds duration)
+        {
+        	std::array<uint8_t, 8> parameters;
+			Writer writer;
+			WriterInitialize(&writer, parameters.data(), parameters.size());
+			WriterWriteWordLE(&writer, dipole[0].getIn0dot1miliAmpsPerMeterSq());
+			WriterWriteWordLE(&writer, dipole[1].getIn0dot1miliAmpsPerMeterSq());
+			WriterWriteWordLE(&writer, dipole[2].getIn0dot1miliAmpsPerMeterSq());
+			WriterWriteWordLE(&writer, duration.count());
+
+			return this->SendCommand(OpCode::StartActuationDipole, parameters);
+        }
+
+        bool ImtqDriver::StartAllAxisSelfTest()
+        {
+        	// 0x00 means test all axis test
+        	std::array<uint8_t, 1> parameters = {0x00};
+        	return this->SendCommand(OpCode::StartSelfTest, parameters);
+        }
+
+        bool ImtqDriver::StartBDotDetumbling(std::chrono::seconds duration)
+        {
+        	std::array<uint8_t, 2> parameters;
+        	Writer writer;
+        	WriterInitialize(&writer, parameters.data(), parameters.size());
+        	WriterWriteWordLE(&writer, duration.count());
+
+        	return this->SendCommand(OpCode::StartBDOT, parameters);
         }
 
         // ------------------------- Private -------------------------
