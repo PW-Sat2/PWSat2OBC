@@ -57,7 +57,7 @@ TimePoint TimePointBuild(uint16_t day, uint8_t hour, uint8_t minute, uint8_t sec
  * @param[in] span Time span to convert.
  * @return Decoded time point object.
  */
-TimePoint TimePointFromTimeSpan(std::chrono::milliseconds span);
+TimePoint TimePointFromDuration(std::chrono::milliseconds span);
 
 /**
  * @brief This procedure converts decoded time point object into time span value.

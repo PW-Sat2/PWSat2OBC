@@ -38,6 +38,7 @@
 #include "power_eps/power_eps.h"
 
 using services::time::TimeProvider;
+using namespace std::chrono_literals;
 
 OBC Main;
 mission::ObcMission Mission(Main.timeProvider, Main.antennaDriver, false);
@@ -84,7 +85,7 @@ static void SmartWaitTask(void* param)
 
     while (1)
     {
-        Main.timeProvider.LongDelay(std::chrono::minutes(10));
+        Main.timeProvider.LongDelay(10min);
         LOG(LOG_LEVEL_DEBUG, "After wait");
     }
 }

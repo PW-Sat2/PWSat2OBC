@@ -19,7 +19,8 @@
 /**
  * @brief Maximal allowed operation timeout.
  */
-#define MAX_DELAY 0xffffffffUL
+
+static constexpr std::chrono::milliseconds InfiniteTimeout = std::chrono::milliseconds::max();
 
 #ifndef ELAST
 // newlib workaround

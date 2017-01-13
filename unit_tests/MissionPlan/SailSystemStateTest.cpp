@@ -13,6 +13,7 @@
 using testing::Eq;
 using testing::Gt;
 using namespace mission;
+using namespace std::chrono_literals;
 
 struct SailSystemStateTest : public testing::Test
 {
@@ -67,7 +68,7 @@ TEST_F(SailSystemStateTest, ShouldUpdateSystemState)
 
 TEST_F(SailSystemStateTest, ShouldOpenSailAfterTimeIfNotOpened)
 {
-    state.Time = std::chrono::hours(40) + std::chrono::seconds(1);
+    state.Time = 40h + 1s;
     state.SailOpened = false;
 
     DetermineActions();
@@ -84,6 +85,6 @@ RC_GTEST_FIXTURE_PROP(SailSystemStateTest, SailCannotBeOpenedIfNotPossible, (con
     if (runnable)
     {
         RC_ASSERT(this->state.SailOpened == false);
-        RC_ASSERT(std::chrono::hours(40) < this->state.Time);
+        RC_ASSERT(40h < this->state.Time);
     }
 }

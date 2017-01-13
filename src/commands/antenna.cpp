@@ -5,6 +5,8 @@
 #include "terminal.h"
 #include "utils.h"
 
+using namespace std::chrono_literals;
+
 static void SendResult(OSResult result)
 {
     Main.terminal.Printf("%d", result);
@@ -76,7 +78,7 @@ void AntennaDeploy(uint16_t argc, char* argv[])
     const OSResult result = Main.antennaDriver.DeployAntenna(&Main.antennaDriver,
         channel,
         antenna,
-        std::chrono::seconds(10),
+        10s,
         override //
         );
     SendResult(result);

@@ -7,21 +7,21 @@
 #include "semphr.h"
 #include "task.h"
 
+using std::chrono::milliseconds;
+
 #define PULSE_ALL_BITS 0x80
 
 static_assert(static_cast<uint8_t>(TaskPriority::Idle) == 0, "Idle priority must be 0");
 static_assert(static_cast<uint8_t>(TaskPriority::Highest) < configMAX_PRIORITIES, "Priorites up to configMAX_PRIORITIES - 1 are allowed");
 
-static inline TickType_t ConvertTimeToTicks(const std::chrono::milliseconds span)
+static inline TickType_t ConvertTimeToTicks(const milliseconds span)
 {
-    const uint64_t time = span.count();
-
-    if (time == MAX_DELAY)
+    if (span == InfiniteTimeout)
     {
         return portMAX_DELAY;
     }
 
-    return pdMS_TO_TICKS(time);
+    return pdMS_TO_TICKS(span.count());
 }
 
 OSResult System::CreateTask(OSTaskProcedure entryPoint, //
@@ -48,7 +48,7 @@ void System::RunScheduler(void)
     vTaskStartScheduler();
 }
 
-void System::SleepTask(const std::chrono::milliseconds time)
+void System::SleepTask(const milliseconds time)
 {
     vTaskDelay(ConvertTimeToTicks(time));
 }
@@ -76,7 +76,7 @@ OSSemaphoreHandle System::CreateBinarySemaphore(uint8_t semaphoreId)
     return s;
 }
 
-OSResult System::TakeSemaphore(OSSemaphoreHandle semaphore, std::chrono::milliseconds timeout)
+OSResult System::TakeSemaphore(OSSemaphoreHandle semaphore, milliseconds timeout)
 {
     const BaseType_t result = xSemaphoreTake(semaphore, ConvertTimeToTicks(timeout));
     if (result != pdPASS)
@@ -139,7 +139,7 @@ OSEventBits System::EventGroupWaitForBits(OSEventGroupHandle eventGroup, //
     const OSEventBits bitsToWaitFor,                                     //
     bool waitAll,                                                        //
     bool autoReset,                                                      //
-    const std::chrono::milliseconds timeout                              //
+    const milliseconds timeout                                           //
     )
 {
     return xEventGroupWaitBits(eventGroup, //
@@ -166,7 +166,7 @@ OSQueueHandle System::CreateQueue(size_t maxElementCount, size_t elementSize)
     return xQueueCreate(maxElementCount, elementSize);
 }
 
-bool System::QueueReceive(OSQueueHandle queue, void* element, std::chrono::milliseconds timeout)
+bool System::QueueReceive(OSQueueHandle queue, void* element, milliseconds timeout)
 {
     return xQueueReceive(queue, element, ConvertTimeToTicks(timeout)) == pdTRUE;
 }
@@ -178,7 +178,7 @@ bool System::QueueReceiveFromISR(OSQueueHandle queue, void* element)
     return result;
 }
 
-bool System::QueueSend(OSQueueHandle queue, const void* element, std::chrono::milliseconds timeout)
+bool System::QueueSend(OSQueueHandle queue, const void* element, milliseconds timeout)
 {
     return xQueueSend(queue, element, ConvertTimeToTicks(timeout)) == pdTRUE;
 }
@@ -205,7 +205,7 @@ OSPulseHandle System::CreatePulseAll(void)
     return (OSPulseHandle)System::CreateEventGroup();
 }
 
-OSResult System::PulseWait(OSPulseHandle handle, std::chrono::milliseconds timeout)
+OSResult System::PulseWait(OSPulseHandle handle, milliseconds timeout)
 {
     OSEventBits result = System::EventGroupWaitForBits((OSEventGroupHandle)handle, PULSE_ALL_BITS, true, true, timeout);
 
@@ -224,9 +224,12 @@ void System::PulseSet(OSPulseHandle handle)
     System::EventGroupSetBits((OSEventGroupHandle)handle, PULSE_ALL_BITS);
 }
 
-std::chrono::milliseconds System::GetUptime()
+milliseconds System::GetUptime()
 {
-    return std::chrono::milliseconds(static_cast<uint64_t>(portTICK_PERIOD_MS * xTaskGetTickCount()));
+    typedef std::ratio<portTICK_PERIOD_MS, 1> ticksPerMs;
+    typedef std::chrono::duration<int64_t, ticksPerMs> ticks;
+
+    return std::chrono::duration_cast<milliseconds>(ticks(xTaskGetTickCount()));
 }
 
 void System::Yield()

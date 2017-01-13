@@ -12,6 +12,7 @@ using drivers::i2c::I2CResult;
 using std::chrono::milliseconds;
 using std::chrono::seconds;
 using std::chrono::duration_cast;
+using namespace std::chrono_literals;
 
 /**
  * @brief Enumerator of all supported antenna controller commands.
@@ -271,7 +272,7 @@ static OSResult GetAntennaActivationTime(AntennaMiniportDriver* miniport,
 
     if (OS_RESULT_FAILED(result))
     {
-        *span = milliseconds(0);
+        *span = 0ms;
         return OSResult::IOError;
     }
 

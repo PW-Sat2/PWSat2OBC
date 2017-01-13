@@ -28,14 +28,14 @@ static constexpr milliseconds NotificationPeriod(TIMER_NOTIFICATION_PERIOD);
 static constexpr milliseconds SavePeriod(TIMER_SAVE_PERIOD);
 
 TimeProvider::TimeProvider(IFileSystem& fileSystem)
-    : timerLock(nullptr),                                                    //
-      notificationLock(nullptr),                                             //
-      CurrentTime(0ull),                                                     //
-      OnTimePassed(nullptr),                                                 //
-      TimePassedCallbackContext(nullptr), NotificationTime(milliseconds(0)), //
-      PersistanceTime(milliseconds(0)),                                      //
-      TickNotification(nullptr),                                             //
-      FileSystemObject(fileSystem)                                           //
+    : timerLock(nullptr),                                        //
+      notificationLock(nullptr),                                 //
+      CurrentTime(0ull),                                         //
+      OnTimePassed(nullptr),                                     //
+      TimePassedCallbackContext(nullptr), NotificationTime(0ms), //
+      PersistanceTime(0ms),                                      //
+      TickNotification(nullptr),                                 //
+      FileSystemObject(fileSystem)                               //
 {
 }
 
@@ -69,7 +69,7 @@ bool TimeProvider::Initialize(TimePassedCallbackType timePassedCallback, void* t
 
 void TimeProvider::AdvanceTime(milliseconds delta)
 {
-    if (OS_RESULT_FAILED(System::TakeSemaphore(timerLock, milliseconds(MAX_DELAY))))
+    if (OS_RESULT_FAILED(System::TakeSemaphore(timerLock, InfiniteTimeout)))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to acquire timer lock.");
         return;
@@ -88,7 +88,7 @@ void TimeProvider::AdvanceTime(milliseconds delta)
 bool TimeProvider::SetCurrentTime(TimePoint pointInTime)
 {
     const milliseconds span = TimePointToTimeSpan(pointInTime);
-    if (OS_RESULT_FAILED(System::TakeSemaphore(timerLock, milliseconds(MAX_DELAY))))
+    if (OS_RESULT_FAILED(System::TakeSemaphore(timerLock, InfiniteTimeout)))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to acquire timer lock.");
         return false;
@@ -106,7 +106,7 @@ bool TimeProvider::SetCurrentTime(TimePoint pointInTime)
 
 Option<milliseconds> TimeProvider::GetCurrentTime()
 {
-    if (OS_RESULT_FAILED(System::TakeSemaphore(timerLock, milliseconds(MAX_DELAY))))
+    if (OS_RESULT_FAILED(System::TakeSemaphore(timerLock, InfiniteTimeout)))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to acquire timer lock.");
         return None<milliseconds>();
@@ -123,7 +123,7 @@ Option<TimePoint> TimeProvider::GetCurrentMissionTime()
     const Option<milliseconds> result = GetCurrentTime();
     if (result.HasValue)
     {
-        return Some(TimePointFromTimeSpan(result.Value));
+        return Some(TimePointFromDuration(result.Value));
     }
 
     return None<TimePoint>();
@@ -131,7 +131,7 @@ Option<TimePoint> TimeProvider::GetCurrentMissionTime()
 
 void TimeProvider::ProcessChange(TimerState state)
 {
-    if (OS_RESULT_FAILED(System::TakeSemaphore(notificationLock, milliseconds(MAX_DELAY))))
+    if (OS_RESULT_FAILED(System::TakeSemaphore(notificationLock, InfiniteTimeout)))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to acquire notification lock.");
         return;
@@ -165,7 +165,7 @@ TimerState TimeProvider::BuildTimerState()
 struct TimeSnapshot TimeProvider::ReadFile(IFileSystem& fs, const char* const filePath)
 {
     struct TimeSnapshot result;
-    std::array<uint8_t, sizeof(uint64_t)> buffer;
+    std::array<uint8_t, sizeof(milliseconds::rep)> buffer;
     if (!ReadFromFile(fs, filePath, buffer))
 
     {
@@ -250,7 +250,7 @@ void TimeProvider::SendTimeNotification(TimerState state)
 {
     if (state.sendNotification && OnTimePassed != NULL)
     {
-        OnTimePassed(TimePassedCallbackContext, TimePointFromTimeSpan(state.time));
+        OnTimePassed(TimePassedCallbackContext, TimePointFromDuration(state.time));
     }
 
     if (state.sendNotification)
@@ -266,7 +266,7 @@ void TimeProvider::SaveTime(TimerState state)
         return;
     }
 
-    uint8_t buffer[sizeof(milliseconds)];
+    uint8_t buffer[sizeof(milliseconds::rep)];
     Writer writer;
 
     WriterInitialize(&writer, buffer, sizeof(buffer));
@@ -326,7 +326,7 @@ bool TimeProvider::LongDelayUntil(TimePoint time)
             return true;
         }
 
-        if (OS_RESULT_FAILED(System::PulseWait(TickNotification, milliseconds(MAX_DELAY))))
+        if (OS_RESULT_FAILED(System::PulseWait(TickNotification, InfiniteTimeout)))
         {
             return false;
         }
@@ -344,7 +344,7 @@ bool TimeProvider::LongDelay(milliseconds delay)
         return false;
     }
 
-    TimePoint time = TimePointFromTimeSpan(TimePointToTimeSpan(missionTime.Value) + delay);
+    TimePoint time = TimePointFromDuration(TimePointToTimeSpan(missionTime.Value) + delay);
 
     return LongDelayUntil(time);
 }

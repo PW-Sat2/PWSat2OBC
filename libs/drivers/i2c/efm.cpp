@@ -16,7 +16,7 @@ bool I2CLowLevelBus::IsSclLatched()
 
 I2CResult I2CLowLevelBus::ExecuteTransfer(I2C_TransferSeq_TypeDef* seq)
 {
-    Lock lock(this->_lock, std::chrono::milliseconds(MAX_DELAY));
+    Lock lock(this->_lock, InfiniteTimeout);
 
     if (!lock())
     {

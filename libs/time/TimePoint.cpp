@@ -21,10 +21,10 @@ TimePoint TimePointBuild(uint16_t day, uint8_t hour, uint8_t minute, uint8_t sec
 
 TimePoint TimePointNormalize(TimePoint point)
 {
-    return TimePointFromTimeSpan(TimePointToTimeSpan(point));
+    return TimePointFromDuration(TimePointToTimeSpan(point));
 }
 
-TimePoint TimePointFromTimeSpan(const milliseconds timeSpan)
+TimePoint TimePointFromDuration(const milliseconds timeSpan)
 {
     TimePoint point = {};
     uint64_t span = timeSpan.count();

@@ -12,6 +12,8 @@
 #include "logic.hpp"
 #include "traits.hpp"
 
+using namespace std::chrono_literals;
+
 namespace mission
 {
     /**
@@ -309,7 +311,7 @@ namespace mission
         if (this->taskHandle != nullptr)
         {
             System::EventGroupSetBits(this->eventGroup, PauseRequestFlag);
-            System::EventGroupWaitForBits(this->eventGroup, PauseAckFlag, false, true, std::chrono::milliseconds(MAX_DELAY));
+            System::EventGroupWaitForBits(this->eventGroup, PauseAckFlag, false, true, InfiniteTimeout);
         }
     }
 
@@ -357,8 +359,7 @@ namespace mission
         LOG(LOG_LEVEL_DEBUG, "Starting mission control task");
         for (;;)
         {
-            const OSEventBits result =
-                System::EventGroupWaitForBits(this->eventGroup, PauseRequestFlag, false, true, std::chrono::seconds(10));
+            const OSEventBits result = System::EventGroupWaitForBits(this->eventGroup, PauseRequestFlag, false, true, 10s);
             if (result == PauseRequestFlag)
             {
                 LOG(LOG_LEVEL_WARNING, "MissionLoop task paused");

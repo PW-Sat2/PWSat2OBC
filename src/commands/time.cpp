@@ -16,7 +16,7 @@ void JumpToTimeHandler(uint16_t argc, char* argv[])
     char* tail;
     const std::chrono::seconds targetTime = std::chrono::seconds(strtoul(argv[0], &tail, 10));
     LOGF(LOG_LEVEL_INFO, "Jumping to time %lu\n", static_cast<std::uint32_t>(targetTime.count()));
-    Main.timeProvider.SetCurrentTime(TimePointFromTimeSpan(targetTime));
+    Main.timeProvider.SetCurrentTime(TimePointFromDuration(targetTime));
 }
 
 void AdvanceTimeHandler(uint16_t argc, char* argv[])

@@ -41,8 +41,7 @@ using testing::Invoke;
 using testing::ElementsAre;
 using gsl::span;
 using drivers::i2c::I2CResult;
-using std::chrono::milliseconds;
-using std::chrono::seconds;
+using namespace std::chrono_literals;
 
 class AntennaMiniportTest : public testing::Test
 {
@@ -102,14 +101,14 @@ TEST_F(AntennaMiniportTest, TestDisarmingDeploymentFailure)
 TEST_F(AntennaMiniportTest, TestAutomaticDeployment)
 {
     EXPECT_CALL(i2c, Write(ANTENNA_PRIMARY_CHANNEL, BeginsWith(StartDeployment))).WillOnce(Return(I2CResult::OK));
-    const auto status = miniport.InitializeAutomaticDeployment(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, seconds(200));
+    const auto status = miniport.InitializeAutomaticDeployment(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, 200s);
     ASSERT_THAT(status, Eq(OSResult::Success));
 }
 
 TEST_F(AntennaMiniportTest, TestAutomaticDeploymentFailure)
 {
     EXPECT_CALL(i2c, Write(ANTENNA_PRIMARY_CHANNEL, BeginsWith(StartDeployment))).WillOnce(Return(I2CResult::Nack));
-    const auto status = miniport.InitializeAutomaticDeployment(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, seconds(200));
+    const auto status = miniport.InitializeAutomaticDeployment(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, 200s);
     ASSERT_THAT(status, Ne(OSResult::Success));
 }
 
@@ -130,28 +129,28 @@ TEST_F(AntennaMiniportTest, TestCancelAutomaticDeploymentFailure)
 TEST_F(AntennaMiniportTest, TestManualAntennaDeployment)
 {
     EXPECT_CALL(i2c, Write(ANTENNA_PRIMARY_CHANNEL, ElementsAre(DeployAntenna1, 200u))).WillOnce(Return(I2CResult::OK));
-    const auto status = miniport.DeployAntenna(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, seconds(200), false);
+    const auto status = miniport.DeployAntenna(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, 200s, false);
     ASSERT_THAT(status, Eq(OSResult::Success));
 }
 
 TEST_F(AntennaMiniportTest, TestManualAntennaDeploymentFailure)
 {
     EXPECT_CALL(i2c, Write(ANTENNA_PRIMARY_CHANNEL, ElementsAre(DeployAntenna2, 200u))).WillOnce(Return(I2CResult::Nack));
-    const auto status = miniport.DeployAntenna(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, seconds(200), false);
+    const auto status = miniport.DeployAntenna(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, 200s, false);
     ASSERT_THAT(status, Ne(OSResult::Success));
 }
 
 TEST_F(AntennaMiniportTest, TestManualAntennaDeploymentWithOverride)
 {
     EXPECT_CALL(i2c, Write(ANTENNA_PRIMARY_CHANNEL, ElementsAre(DeployAntenna1Override, 200u))).WillOnce(Return(I2CResult::OK));
-    const auto status = miniport.DeployAntenna(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, seconds(200), true);
+    const auto status = miniport.DeployAntenna(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, 200s, true);
     ASSERT_THAT(status, Eq(OSResult::Success));
 }
 
 TEST_F(AntennaMiniportTest, TestManualAntennaDeploymentWithOverrideFailure)
 {
     EXPECT_CALL(i2c, Write(ANTENNA_BACKUP_CHANNEL, ElementsAre(DeployAntenna3Override, 200u))).WillOnce(Return(I2CResult::Nack));
-    const auto status = miniport.DeployAntenna(&miniport, &i2c, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, seconds(200), true);
+    const auto status = miniport.DeployAntenna(&miniport, &i2c, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, 200s, true);
     ASSERT_THAT(status, Ne(OSResult::Success));
 }
 
@@ -225,19 +224,19 @@ TEST_F(AntennaMiniportTest, TestAntennaActivationTime)
             outData[0] = 10;
             return I2CResult::OK;
         }));
-    milliseconds response;
+    std::chrono::milliseconds response;
     const auto status = miniport.GetAntennaActivationTime(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, &response);
     ASSERT_THAT(status, Eq(OSResult::Success));
-    ASSERT_THAT(response, Eq(milliseconds(128000)));
+    ASSERT_THAT(response, Eq(128000ms));
 }
 
 TEST_F(AntennaMiniportTest, TestAntennaActivationTimeFailure)
 {
     EXPECT_CALL(i2c, WriteRead(ANTENNA_PRIMARY_CHANNEL, ElementsAre(QueryActivationTime2), _)).WillOnce(Return(I2CResult::Nack));
-    milliseconds response;
+    std::chrono::milliseconds response;
     const auto status = miniport.GetAntennaActivationTime(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, &response);
     ASSERT_THAT(status, Ne(OSResult::Success));
-    ASSERT_THAT(response, Eq(milliseconds(0)));
+    ASSERT_THAT(response, Eq(0ms));
 }
 
 class AntennaDeploymentStatusTest

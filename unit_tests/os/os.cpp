@@ -1,6 +1,8 @@
 #include "os.hpp"
 #include <utility>
 
+using namespace std::chrono_literals;
+
 static IOS* OSProxy = nullptr;
 
 OSResult System::CreateTask(OSTaskProcedure entryPoint, //
@@ -252,7 +254,7 @@ std::chrono::milliseconds System::GetUptime()
         return OSProxy->GetUptime();
     }
 
-    return std::chrono::milliseconds(0);
+    return 0ms;
 }
 
 void System::Yield()

@@ -13,6 +13,7 @@ using testing::_;
 using testing::Invoke;
 using testing::Return;
 using namespace mission;
+using namespace std::chrono_literals;
 
 struct MissionPlanTest : public testing::Test
 {
@@ -41,7 +42,7 @@ TEST_F(MissionPlanTest, ShouldUpdateStateAccordingToDescriptors)
     }));
 
     EXPECT_CALL(update2, UpdateProc(_)).WillOnce(Invoke([](SystemState& state) {
-        state.Time = std::chrono::milliseconds(100);
+        state.Time = 100ms;
         return UpdateResult::Ok;
     }));
 
@@ -50,7 +51,7 @@ TEST_F(MissionPlanTest, ShouldUpdateStateAccordingToDescriptors)
     const auto result = SystemStateUpdate(state, gsl::make_span(stateDescriptors));
 
     ASSERT_THAT(state.SailOpened, Eq(true));
-    ASSERT_THAT(state.Time, Eq(std::chrono::milliseconds(100)));
+    ASSERT_THAT(state.Time, Eq(100ms));
     ASSERT_THAT(result, Eq(UpdateResult::Ok));
 }
 

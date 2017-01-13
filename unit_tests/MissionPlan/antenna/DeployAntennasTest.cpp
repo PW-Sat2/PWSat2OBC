@@ -17,7 +17,7 @@ using testing::Invoke;
 using mission::antenna::AntennaMissionState;
 using mission::antenna::AntennaTask;
 using namespace mission;
-using std::chrono::minutes;
+using namespace std::chrono_literals;
 
 class DeployAntennasTest : public ::testing::Test
 {
@@ -40,33 +40,33 @@ DeployAntennasTest::DeployAntennasTest()
 
 TEST_F(DeployAntennasTest, TestConditionTimeBeforeThreshold)
 {
-    state.Time = minutes(31);
+    state.Time = 31min;
     ASSERT_FALSE(openAntenna.condition(state, openAntenna.param));
 }
 
 TEST_F(DeployAntennasTest, TestConditionTimeAfterThreshold)
 {
-    state.Time = minutes(41);
+    state.Time = 41min;
     ASSERT_TRUE(openAntenna.condition(state, openAntenna.param));
 }
 
 TEST_F(DeployAntennasTest, TestConditionAntennasAreOpen)
 {
-    state.Time = minutes(41);
+    state.Time = 41min;
     stateDescriptor.OverrideStep(AntennaMissionState::StepCount());
     ASSERT_FALSE(openAntenna.condition(state, openAntenna.param));
 }
 
 TEST_F(DeployAntennasTest, TestConditionAntennasAreNotOpen)
 {
-    state.Time = minutes(41);
+    state.Time = 41min;
     stateDescriptor.OverrideStep(AntennaMissionState::StepCount() - 1);
     ASSERT_TRUE(openAntenna.condition(state, openAntenna.param));
 }
 
 TEST_F(DeployAntennasTest, TestConditionDeploymentInProgress)
 {
-    state.Time = minutes(41);
+    state.Time = 41min;
     AntennaDeploymentStatus status = {};
     status.IsDeploymentActive[1] = true;
     stateDescriptor.Update(status);
@@ -75,7 +75,7 @@ TEST_F(DeployAntennasTest, TestConditionDeploymentInProgress)
 
 TEST_F(DeployAntennasTest, TestConditionOverrideDeploymentState)
 {
-    state.Time = minutes(41);
+    state.Time = 41min;
     state.Antenna.Deployed = true;
     stateDescriptor.OverrideState();
     ASSERT_TRUE(openAntenna.condition(state, openAntenna.param));

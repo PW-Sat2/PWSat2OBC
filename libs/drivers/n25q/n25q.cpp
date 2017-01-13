@@ -38,8 +38,8 @@ enum N25QCommand
 
 constexpr std::chrono::milliseconds N25QDriver::ProgramPageTimeout;
 constexpr std::chrono::milliseconds N25QDriver::EraseSubSectorTimeout;
-constexpr std::chrono::milliseconds N25QDriver::EraseSectorTimeout;
-constexpr std::chrono::milliseconds N25QDriver::EraseChipTimeOut;
+constexpr std::chrono::seconds N25QDriver::EraseSectorTimeout;
+constexpr std::chrono::seconds N25QDriver::EraseChipTimeOut;
 constexpr std::chrono::milliseconds N25QDriver::ResetTimeout;
 constexpr std::chrono::milliseconds N25QDriver::WriteStatusRegisterTimeout;
 

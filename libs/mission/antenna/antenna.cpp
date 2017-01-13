@@ -8,6 +8,8 @@
 #include "system.h"
 #include "time/TimePoint.h"
 
+using namespace std::chrono_literals;
+
 namespace mission
 {
     namespace antenna
@@ -434,7 +436,7 @@ namespace mission
         static bool AntennaDeploymentCondition(const SystemState& state, void* param)
         {
             AntennaMissionState* stateDescriptor = (AntennaMissionState*)param;
-            const auto t = std::chrono::minutes(40);
+            const auto t = 40min;
             if (state.Time < t)
             {
                 return false;

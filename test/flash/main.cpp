@@ -18,6 +18,8 @@
 #include "swo/swo.h"
 #include "system.h"
 
+using namespace std::chrono_literals;
+
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
 extern "C" void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
@@ -146,7 +148,7 @@ static void Ping(void* v)
         GPIO_PinOutToggle(io_map::Led0::Port, io_map::Led0::PinNumber);
         GPIO_PinOutToggle(io_map::Led1::Port, io_map::Led1::PinNumber);
 
-        System::SleepTask(std::chrono::seconds(1));
+        System::SleepTask(1s);
     }
 }
 

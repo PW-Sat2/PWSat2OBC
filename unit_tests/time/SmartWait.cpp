@@ -13,6 +13,7 @@ using testing::_;
 using testing::Invoke;
 using testing::Return;
 using services::time::TimeProvider;
+using namespace std::chrono_literals;
 
 class SmartWaitTest : public Test
 {
@@ -59,7 +60,7 @@ TEST_F(SmartWaitTest, ShouldWaitForPulseAndReturnIfDesiredTimeReached)
 
             Option<std::chrono::milliseconds> currentTime = timeProvider.GetCurrentTime();
 
-            timeProvider.SetCurrentTime(TimePointFromTimeSpan(currentTime.Value + std::chrono::minutes(1)));
+            timeProvider.SetCurrentTime(TimePointFromDuration(currentTime.Value + 1min));
             return OSResult::Success;
         }));
 
@@ -79,7 +80,7 @@ TEST_F(SmartWaitTest, ShouldWaitForPulseAndReturnIfMissionTimeJumpsOverDesiredTi
 
             Option<std::chrono::milliseconds> currentTime = timeProvider.GetCurrentTime();
 
-            timeProvider.SetCurrentTime(TimePointFromTimeSpan(currentTime.Value + std::chrono::minutes(1)));
+            timeProvider.SetCurrentTime(TimePointFromDuration(currentTime.Value + 1min));
             return OSResult::Success;
         }));
 

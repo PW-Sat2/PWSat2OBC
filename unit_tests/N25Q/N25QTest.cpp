@@ -35,6 +35,7 @@ using testing::AtLeast;
 
 using drivers::spi::ISPIInterface;
 using namespace devices::n25q;
+using namespace std::chrono_literals;
 
 enum Command
 {
@@ -148,7 +149,7 @@ N25QDriverTest::N25QDriverTest() : _driver(_spi), _incorrectId{0xAA, 0xBB, 0xCC}
 {
     this->_osReset = InstallProxy(&this->_os);
 
-    ON_CALL(this->_os, GetUptime()).WillByDefault(Return(std::chrono::milliseconds(0)));
+    ON_CALL(this->_os, GetUptime()).WillByDefault(Return(0ms));
 }
 
 TEST_F(N25QDriverTest, ShouldReadIdCorrectly)
@@ -463,11 +464,11 @@ TEST_F(N25QDriverTest, ShouldDetectEraseSubsectorTimeout)
         {
             auto selected = this->_spi.ExpectSelected();
 
-            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(std::chrono::milliseconds(0)));
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0ms));
 
             ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
 
-            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(std::chrono::milliseconds(0)));
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0ms));
 
             ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
 
@@ -580,11 +581,11 @@ TEST_F(N25QDriverTest, ShouldDetectEraseSectorTimeout)
         {
             auto selected = this->_spi.ExpectSelected();
 
-            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(std::chrono::milliseconds(0)));
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0ms));
 
             ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
 
-            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(std::chrono::milliseconds(0)));
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0ms));
 
             ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
 
@@ -685,11 +686,11 @@ TEST_F(N25QDriverTest, EraseChipOperationWillTimeout)
         {
             auto selected = this->_spi.ExpectSelected();
 
-            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(std::chrono::milliseconds(0)));
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0ms));
 
             ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
 
-            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(std::chrono::milliseconds(0)));
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0ms));
 
             ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
 
@@ -776,7 +777,7 @@ TEST_F(N25QDriverTest, SettingProtectionOnResetCanTimeout)
             ExpectCommand(Command::ResetMemory);
         }
 
-        EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(std::chrono::milliseconds(0)));
+        EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0ms));
 
         {
             auto selected = this->_spi.ExpectSelected();
@@ -800,11 +801,11 @@ TEST_F(N25QDriverTest, SettingProtectionOnResetCanTimeout)
         {
             auto selected = this->_spi.ExpectSelected();
 
-            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(std::chrono::milliseconds(0)));
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0ms));
 
             ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
 
-            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(std::chrono::milliseconds(0)));
+            EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0ms));
 
             ExpectCommandAndRespondOnce(Command::ReadStatusRegister, Status::WriteEnabled | Status::WriteInProgress);
 
@@ -834,13 +835,13 @@ TEST_F(N25QDriverTest, WaitingOnResetCanTimeout)
             ExpectCommand(Command::ResetMemory);
         }
 
-        EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(std::chrono::milliseconds(0)));
+        EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0ms));
         {
             auto selected = this->_spi.ExpectSelected();
 
             ExpectCommandAndRespondOnce(Command::ReadId, _incorrectId);
         }
-        EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(std::chrono::milliseconds(0)));
+        EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0ms));
 
         {
             auto selected = this->_spi.ExpectSelected();
