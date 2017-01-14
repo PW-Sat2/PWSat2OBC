@@ -18,7 +18,7 @@ static OSResult FinishDeployment(struct AntennaDriver* driver, AntennaChannel ch
 static OSResult DeployAntenna(struct AntennaDriver* driver,
     AntennaChannel channel,
     AntennaId antennaId,
-    TimeSpan timeout,
+    std::chrono::milliseconds timeout,
     bool overrideSwitches //
     )
 {

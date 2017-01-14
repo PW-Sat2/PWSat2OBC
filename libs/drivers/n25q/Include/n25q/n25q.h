@@ -196,7 +196,7 @@ namespace devices
              * @param[in] timeout Timeout
              * @return true of operation finished, false on timeout
              */
-            bool WaitBusy(OSTaskTimeSpan timeout);
+            bool WaitBusy(std::chrono::milliseconds timeout);
 
             /**
              * @brief Outputs specified address to device
@@ -223,17 +223,17 @@ namespace devices
              * Datasheet states that this operation should take maximum 5 ms.
              * Rounded to 10ms as it is single FreeRTOS tick
              */
-            constexpr static std::uint32_t ProgramPageTimeout = 50;
+            static constexpr std::chrono::milliseconds ProgramPageTimeout = std::chrono::milliseconds(50);
             /** @brief Erase subsector operation timeout */
-            constexpr static std::uint32_t EraseSubSectorTimeout = 1.2 * (0.8 * 1000);
+            static constexpr std::chrono::milliseconds EraseSubSectorTimeout = std::chrono::milliseconds(static_cast<int64_t>(1.2 * 800));
             /** @brief Erase sector operation timeout */
-            constexpr static std::uint32_t EraseSectorTimeout = 1.2 * (3 * 1000);
+            static constexpr std::chrono::seconds EraseSectorTimeout = std::chrono::seconds(static_cast<int64_t>(1.2 * 3));
             /** @brief Erase chip operation timeout */
-            constexpr static std::uint32_t EraseChipTimeOut = 1.2 * (250 * 1000);
+            static constexpr std::chrono::seconds EraseChipTimeOut = std::chrono::seconds(static_cast<int64_t>(1.2 * 250));
             /** @brief Reset timeout */
-            constexpr static std::uint32_t ResetTimeout = 10;
+            static constexpr std::chrono::milliseconds ResetTimeout = std::chrono::milliseconds(10);
             /** @brief Write status register timeout */
-            constexpr static std::uint32_t WriteStatusRegisterTimeout = 10;
+            static constexpr std::chrono::milliseconds WriteStatusRegisterTimeout = std::chrono::milliseconds(10);
         };
     }
 }

@@ -137,7 +137,7 @@ struct AntennaTelemetry
      * Value at index 0 is valid only when ANT_TM_ANTENNA1_ACTIVATION_TIME bit is set in the flags field,
      * Value at index 1 is valid only when ANT_TM_ANTENNA2_ACTIVATION_TIME bit is set in the flags field and so on.
      */
-    TimeSpan ActivationTime[4];
+    std::chrono::milliseconds ActivationTime[4];
 
     /**
      * @brief Array that contains temperatures measured by both primary and backup channels.
@@ -234,7 +234,7 @@ struct AntennaDriver
     OSResult (*DeployAntenna)(struct AntennaDriver* driver,
         AntennaChannel channel,
         AntennaId antennaId,
-        TimeSpan timeout,
+        std::chrono::milliseconds timeout,
         bool overrideSwitches //
         );
 

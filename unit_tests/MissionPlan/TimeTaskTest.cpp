@@ -12,6 +12,7 @@ using testing::Ne;
 using testing::Return;
 using testing::_;
 using namespace mission;
+using namespace std::chrono_literals;
 
 struct TimeTaskTest : public testing::Test
 {
@@ -35,21 +36,21 @@ TimeTaskTest::TimeTaskTest() : provider(fileSystemMock), sailTask(provider), upd
 TEST_F(TimeTaskTest, TestTimeUpdate)
 {
     auto proxy = InstallProxy(&mock);
-    provider.SetCurrentTime(TimePointFromTimeSpan(TimeSpanFromSeconds(12345678)));
+    provider.SetCurrentTime(TimePointFromDuration(12345678s));
 
     EXPECT_CALL(mock, TakeSemaphore(_, _)).WillOnce(Return(OSResult::Success));
     const auto result = updateDescriptor.updateProc(state, updateDescriptor.param);
     ASSERT_THAT(result, Eq(UpdateResult::Ok));
-    ASSERT_THAT(state.Time, Eq(TimeSpanFromSeconds(12345678)));
+    ASSERT_THAT(state.Time, Eq(12345678s));
 }
 
 TEST_F(TimeTaskTest, TestTimeUpdateFailure)
 {
     auto proxy = InstallProxy(&mock);
-    provider.SetCurrentTime(TimePointFromTimeSpan(TimeSpanFromSeconds(12345678)));
+    provider.SetCurrentTime(TimePointFromDuration(12345678s));
 
     EXPECT_CALL(mock, TakeSemaphore(_, _)).WillOnce(Return(OSResult::IOError));
     const auto result = updateDescriptor.updateProc(state, updateDescriptor.param);
     ASSERT_THAT(result, Eq(UpdateResult::Warning));
-    ASSERT_THAT(state.Time, Ne(TimeSpanFromSeconds(12345678)));
+    ASSERT_THAT(state.Time, Ne(12345678s));
 }

@@ -9,6 +9,10 @@
 using gsl::span;
 using drivers::i2c::II2CBus;
 using drivers::i2c::I2CResult;
+using std::chrono::milliseconds;
+using std::chrono::seconds;
+using std::chrono::duration_cast;
+using namespace std::chrono_literals;
 
 /**
  * @brief Enumerator of all supported antenna controller commands.
@@ -142,27 +146,27 @@ static OSResult DeployAntenna(struct AntennaMiniportDriver* miniport,
     II2CBus* communicationBus,
     AntennaChannel channel,
     AntennaId antennaId,
-    TimeSpan timeout,
+    milliseconds timeout,
     bool override //
     )
 {
     UNREFERENCED_PARAMETER(miniport);
     uint8_t buffer[2];
     buffer[0] = (uint8_t)(DEPLOY_ANTENNA + antennaId + GetOverrideFlag(override));
-    buffer[1] = (uint8_t)TimeSpanToSeconds(timeout);
+    buffer[1] = (uint8_t)duration_cast<seconds>(timeout).count();
     return MapStatus(communicationBus->Write(channel, buffer));
 }
 
 static OSResult InitializeAutomaticDeployment(AntennaMiniportDriver* miniport,
     II2CBus* communicationBus,
     AntennaChannel channel,
-    TimeSpan timeout //
+    milliseconds timeout //
     )
 {
     UNREFERENCED_PARAMETER(miniport);
     uint8_t buffer[2];
     buffer[0] = (uint8_t)(START_AUTOMATIC_DEPLOYMENT);
-    buffer[1] = (uint8_t)TimeSpanToSeconds(timeout);
+    buffer[1] = (uint8_t)duration_cast<seconds>(timeout).count();
     return MapStatus(communicationBus->Write(channel, buffer));
 }
 
@@ -253,7 +257,7 @@ static OSResult GetAntennaActivationTime(AntennaMiniportDriver* miniport,
     II2CBus* communicationBus,
     AntennaChannel channel,
     AntennaId antennaId,
-    TimeSpan* span //
+    milliseconds* span //
     )
 {
     UNREFERENCED_PARAMETER(miniport);
@@ -268,13 +272,13 @@ static OSResult GetAntennaActivationTime(AntennaMiniportDriver* miniport,
 
     if (OS_RESULT_FAILED(result))
     {
-        *span = TimeSpanFromMilliseconds(0);
+        *span = 0ms;
         return OSResult::IOError;
     }
 
     Reader reader(output);
     const uint16_t value = reader.ReadWordBE();
-    *span = TimeSpanFromMilliseconds(value * 50);
+    *span = milliseconds(value * 50);
     return OSResult::Success;
 }
 

@@ -61,7 +61,7 @@ static OSResult HardReset(struct AntennaDriver* driver)
 static OSResult DeployAntenna(struct AntennaDriver* driver,
     AntennaChannel channel,
     AntennaId antennaId,
-    TimeSpan timeout,
+    std::chrono::milliseconds timeout,
     bool overrideSwitches //
     )
 {
@@ -201,7 +201,9 @@ static void UpdateActivationTime(struct AntennaDriver* driver, AntennaTelemetry*
     AntennaChannelInfo* backupChannel = GetChannel(driver, ANTENNA_BACKUP_CHANNEL);
     for (int i = 0; i < 4; ++i)
     {
-        TimeSpan primaryValue = {0}, secondaryValue = {0};
+        std::chrono::milliseconds primaryValue(0);
+        std::chrono::milliseconds secondaryValue(0);
+
         const OSResult primary = driver->miniport->GetAntennaActivationTime(driver->miniport,
             primaryChannel->communicationBus,
             ANTENNA_PRIMARY_CHANNEL,

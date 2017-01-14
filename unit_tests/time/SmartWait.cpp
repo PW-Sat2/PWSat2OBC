@@ -13,6 +13,7 @@ using testing::_;
 using testing::Invoke;
 using testing::Return;
 using services::time::TimeProvider;
+using namespace std::chrono_literals;
 
 class SmartWaitTest : public Test
 {
@@ -52,14 +53,16 @@ TEST_F(SmartWaitTest, ShouldWaitForPulseAndReturnIfDesiredTimeReached)
 {
     timeProvider.SetCurrentTime(TimePointBuild(0, 0, 0, 0, 0));
 
-    EXPECT_CALL(osMock, PulseWait(_, _)).Times(10).WillRepeatedly(Invoke([&](OSPulseHandle handle, const OSTaskTimeSpan timeout) {
-        UNUSED(handle, timeout);
+    EXPECT_CALL(osMock, PulseWait(_, _))
+        .Times(10)
+        .WillRepeatedly(Invoke([&](OSPulseHandle handle, const std::chrono::milliseconds timeout) {
+            UNUSED(handle, timeout);
 
-        Option<TimeSpan> currentTime = timeProvider.GetCurrentTime();
+            Option<std::chrono::milliseconds> currentTime = timeProvider.GetCurrentTime();
 
-        timeProvider.SetCurrentTime(TimePointFromTimeSpan(TimeSpanAdd(currentTime.Value, TimeSpanFromMinutes(1))));
-        return OSResult::Success;
-    }));
+            timeProvider.SetCurrentTime(TimePointFromDuration(currentTime.Value + 1min));
+            return OSResult::Success;
+        }));
 
     auto result = timeProvider.LongDelayUntil(TimePointBuild(0, 0, 10, 0, 0));
 
@@ -70,14 +73,16 @@ TEST_F(SmartWaitTest, ShouldWaitForPulseAndReturnIfMissionTimeJumpsOverDesiredTi
 {
     timeProvider.SetCurrentTime(TimePointBuild(0, 0, 0, 0, 0));
 
-    EXPECT_CALL(osMock, PulseWait(_, _)).Times(11).WillRepeatedly(Invoke([&](OSPulseHandle handle, const OSTaskTimeSpan timeout) {
-        UNUSED(handle, timeout);
+    EXPECT_CALL(osMock, PulseWait(_, _))
+        .Times(11)
+        .WillRepeatedly(Invoke([&](OSPulseHandle handle, const std::chrono::milliseconds timeout) {
+            UNUSED(handle, timeout);
 
-        Option<TimeSpan> currentTime = timeProvider.GetCurrentTime();
+            Option<std::chrono::milliseconds> currentTime = timeProvider.GetCurrentTime();
 
-        timeProvider.SetCurrentTime(TimePointFromTimeSpan(TimeSpanAdd(currentTime.Value, TimeSpanFromMinutes(1))));
-        return OSResult::Success;
-    }));
+            timeProvider.SetCurrentTime(TimePointFromDuration(currentTime.Value + 1min));
+            return OSResult::Success;
+        }));
 
     auto result = timeProvider.LongDelayUntil(TimePointBuild(0, 0, 10, 30, 0));
 

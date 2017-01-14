@@ -13,6 +13,7 @@ using testing::_;
 using testing::Invoke;
 using testing::Return;
 using namespace mission;
+using namespace std::chrono_literals;
 
 struct MissionPlanTest : public testing::Test
 {
@@ -28,7 +29,7 @@ MissionPlanTest::MissionPlanTest()
 TEST_F(MissionPlanTest, EmptyStateShouldHaveEmptyValues)
 {
     ASSERT_THAT(state.SailOpened, Eq(false));
-    ASSERT_THAT(state.Time.value, Eq(0ul));
+    ASSERT_THAT(state.Time.count(), Eq(0ul));
     ASSERT_THAT(state.Antenna.Deployed, Eq(false));
 }
 
@@ -41,7 +42,7 @@ TEST_F(MissionPlanTest, ShouldUpdateStateAccordingToDescriptors)
     }));
 
     EXPECT_CALL(update2, UpdateProc(_)).WillOnce(Invoke([](SystemState& state) {
-        state.Time = TimeSpanFromMilliseconds(100);
+        state.Time = 100ms;
         return UpdateResult::Ok;
     }));
 
@@ -50,7 +51,7 @@ TEST_F(MissionPlanTest, ShouldUpdateStateAccordingToDescriptors)
     const auto result = SystemStateUpdate(state, gsl::make_span(stateDescriptors));
 
     ASSERT_THAT(state.SailOpened, Eq(true));
-    ASSERT_THAT(state.Time, Eq(TimeSpanFromMilliseconds(100)));
+    ASSERT_THAT(state.Time, Eq(100ms));
     ASSERT_THAT(result, Eq(UpdateResult::Ok));
 }
 

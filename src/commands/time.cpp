@@ -14,9 +14,9 @@ void JumpToTimeHandler(uint16_t argc, char* argv[])
     }
 
     char* tail;
-    const TimeSpan targetTime = TimeSpanFromSeconds(strtoul(argv[0], &tail, 10));
-    LOGF(LOG_LEVEL_INFO, "Jumping to time %lu\n", static_cast<std::uint32_t>(targetTime.value / 1000));
-    Main.timeProvider.SetCurrentTime(TimePointFromTimeSpan(targetTime));
+    const std::chrono::seconds targetTime = std::chrono::seconds(strtoul(argv[0], &tail, 10));
+    LOGF(LOG_LEVEL_INFO, "Jumping to time %lu\n", static_cast<std::uint32_t>(targetTime.count()));
+    Main.timeProvider.SetCurrentTime(TimePointFromDuration(targetTime));
 }
 
 void AdvanceTimeHandler(uint16_t argc, char* argv[])
@@ -28,8 +28,10 @@ void AdvanceTimeHandler(uint16_t argc, char* argv[])
     }
 
     char* tail;
-    const TimeSpan targetTime = TimeSpanFromMilliseconds(strtoul(argv[0], &tail, 10));
-    LOGF(LOG_LEVEL_INFO, "Advancing time by '%lu' seconds\n", static_cast<std::uint32_t>(targetTime.value / 1000));
+    const std::chrono::milliseconds targetTime = std::chrono::milliseconds(strtoul(argv[0], &tail, 10));
+    LOGF(LOG_LEVEL_INFO,
+        "Advancing time by '%lu' seconds\n",
+        static_cast<std::uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(targetTime).count()));
     Main.timeProvider.AdvanceTime(targetTime);
 }
 
@@ -37,6 +39,6 @@ void CurrentTimeHandler(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
-    TimeSpan span = Main.timeProvider.GetCurrentTime().Value;
-    Main.terminal.Printf("%lu", static_cast<std::uint32_t>(span.value / 1000));
+    std::chrono::milliseconds span = Main.timeProvider.GetCurrentTime().Value;
+    Main.terminal.Printf("%lu", static_cast<std::uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(span).count()));
 }

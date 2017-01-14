@@ -22,7 +22,7 @@ struct SystemState
     SystemState();
 
     /** @brief Current time */
-    TimeSpan Time;
+    std::chrono::milliseconds Time;
 
     /**
      * @brief Current antenna deployment state.
