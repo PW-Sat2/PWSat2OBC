@@ -225,8 +225,7 @@ namespace devices
              */
             static constexpr std::chrono::milliseconds ProgramPageTimeout = std::chrono::milliseconds(50);
             /** @brief Erase subsector operation timeout */
-            static constexpr std::chrono::milliseconds EraseSubSectorTimeout =
-                std::chrono::milliseconds(static_cast<int64_t>(1.2 * (0.8 * 1000)));
+            static constexpr std::chrono::milliseconds EraseSubSectorTimeout = std::chrono::milliseconds(static_cast<int64_t>(1.2 * 800));
             /** @brief Erase sector operation timeout */
             static constexpr std::chrono::seconds EraseSectorTimeout = std::chrono::seconds(static_cast<int64_t>(1.2 * 3));
             /** @brief Erase chip operation timeout */
