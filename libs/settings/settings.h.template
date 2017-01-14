@@ -1,0 +1,11 @@
+#ifndef LIBS_SETTINGS_SETTINGS_H_
+#define LIBS_SETTINGS_SETTINGS_H_
+
+#include <cstdint>
+
+namespace settings
+{
+    constexpr std::uint32_t CommSecurityCode = ${COMM_SECURITY_CODE};
+}
+
+#endif /* LIBS_SETTINGS_SETTINGS_H_TEMPLATE_ */

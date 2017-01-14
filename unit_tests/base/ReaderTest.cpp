@@ -1,9 +1,10 @@
 #include "gtest/gtest.h"
-#include "gmock/gmock-matchers.h"
+#include "gmock/gmock.h"
 #include "base/reader.h"
 #include "system.h"
 
 using testing::Eq;
+using testing::ElementsAre;
 
 TEST(ReaderTest, TestDefaultCtor)
 {
@@ -142,6 +143,16 @@ TEST(ReaderTest, TestReadingDWordLE)
     ASSERT_TRUE(reader.Status());
 }
 
+TEST(ReaderTest, TestReadingDWordBE)
+{
+    Reader reader;
+    uint8_t array[] = {0x55, 0xaa, 0x77, 0xee};
+
+    reader.Initialize(array);
+    ASSERT_THAT(reader.ReadDoubleWordBE(), Eq(0x55AA77EEU));
+    ASSERT_TRUE(reader.Status());
+}
+
 TEST(ReaderTest, TestReadingQuadWordLE)
 {
     Reader reader;
@@ -256,4 +267,27 @@ TEST(ReaderTest, TestRemainigSizeAtTheEnd)
     reader.ReadByte();
     reader.ReadWordBE();
     ASSERT_THAT(reader.RemainingSize(), Eq(0));
+}
+
+TEST(ReaderTest, TestReadingToEnd)
+{
+    std::array<uint8_t, 5> a{1, 2, 3, 4, 5};
+
+    Reader reader(a);
+
+    reader.ReadByte();
+
+    ASSERT_THAT(reader.ReadToEnd(), ElementsAre(2, 3, 4, 5));
+}
+
+TEST(ReaderTest, TestReadingToEndWhenNothingLeftIsCorrect)
+{
+    std::array<uint8_t, 1> a{1};
+
+    Reader reader(a);
+
+    reader.ReadByte();
+
+    ASSERT_THAT(reader.ReadToEnd().size(), Eq(0));
+    ASSERT_THAT(reader.Status(), Eq(true));
 }

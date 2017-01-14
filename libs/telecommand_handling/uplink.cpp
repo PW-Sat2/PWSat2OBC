@@ -1,30 +1,37 @@
-#include "uplink.h"
 #include <algorithm>
+#include "base/reader.h"
+
+#include "uplink.h"
 
 using std::uint8_t;
 using std::copy;
 using gsl::span;
 
 using namespace telecommands;
-using telecommands::handling::DecryptFrameResult;
 using telecommands::handling::DecodeTelecommandFailureReason;
 using telecommands::handling::DecodeTelecommandResult;
 
-DecryptFrameResult UplinkProtocol::Decrypt(span<const uint8_t> frame, span<uint8_t> decrypted)
+UplinkProtocol::UplinkProtocol(std::uint32_t securityCode) : _securityCode(securityCode)
 {
-    auto lastCopied = copy(frame.cbegin(), frame.cend(), decrypted.begin());
-
-    auto decryptedDataLength = lastCopied - decrypted.begin();
-
-    return DecryptFrameResult::Success(decrypted.subspan(0, decryptedDataLength));
 }
 
 DecodeTelecommandResult UplinkProtocol::Decode(span<const uint8_t> frame)
 {
-    if (frame.length() < 1)
+    Reader r(frame);
+
+    auto code = r.ReadDoubleWordBE();
+    auto command = r.ReadByte();
+    auto parameters = r.ReadToEnd();
+
+    if (!r.Status())
     {
-        return DecodeTelecommandResult::Failure(DecodeTelecommandFailureReason::GeneralError);
+        return DecodeTelecommandResult::Failure(DecodeTelecommandFailureReason::MalformedFrame);
     }
 
-    return DecodeTelecommandResult::Success(frame[0], frame.subspan(1, frame.length() - 1));
+    if (code != this->_securityCode)
+    {
+        return DecodeTelecommandResult::Failure(DecodeTelecommandFailureReason::InvalidSecurityCode);
+    }
+
+    return DecodeTelecommandResult::Success(command, parameters);
 }

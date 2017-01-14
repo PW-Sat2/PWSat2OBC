@@ -7,7 +7,7 @@
 #include "telecommand_handling/telecommand_handling.h"
 #include "telecommand_handling/uplink.h"
 
-namespace communication
+namespace obc
 {
     /**@brief Dummy ping telecommand that responds with pong */
     class PingTelecommand final : public telecommands::handling::IHandleTeleCommand

@@ -57,6 +57,9 @@ struct ITransmitFrame;
  */
 constexpr std::uint16_t MaxFrameSize = 235u;
 
+/** @brief Maximum size of uplink frame */
+constexpr std::uint16_t MaxUplinkFrameSize = 200u;
+
 /**
  * @brief Maximum allowed single frame content length.
  */

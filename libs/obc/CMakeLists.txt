@@ -1,2 +1,3 @@
 add_subdirectory(storage)
 add_subdirectory(hardware)
+add_subdirectory(communication)
