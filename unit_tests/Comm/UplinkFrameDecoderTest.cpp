@@ -16,10 +16,10 @@ using testing::Test;
 using testing::Eq;
 using testing::ElementsAre;
 using std::array;
-using telecommands::handling::IDecodeTelecommand;
-using telecommands::handling::DecodeTelecommandResult;
-using telecommands::handling::DecodeTelecommandFailureReason;
-using telecommands::UplinkProtocol;
+using telecommunication::uplink::IDecodeTelecommand;
+using telecommunication::uplink::DecodeTelecommandResult;
+using telecommunication::uplink::DecodeTelecommandFailureReason;
+using telecommunication::uplink::UplinkProtocol;
 
 class UplinkFrameDecoderTest : public Test
 {

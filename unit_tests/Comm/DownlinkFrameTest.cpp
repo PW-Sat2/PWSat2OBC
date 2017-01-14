@@ -13,12 +13,12 @@ using testing::Eq;
 using std::array;
 using std::uint8_t;
 using std::uint32_t;
-using telecommunication::DownlinkFrame;
-using telecommunication::APID;
+using telecommunication::downlink::DownlinkFrame;
+using telecommunication::downlink::DownlinkAPID;
 
 TEST(DownlinkFrameTest, ShouldBuildProperDownlinkFrame)
 {
-    auto apid = APID::TelemetryShort;
+    auto apid = DownlinkAPID::TelemetryShort;
     uint32_t seq = 0x30F0F;
 
     DownlinkFrame frame(apid, seq);
@@ -34,7 +34,7 @@ TEST(DownlinkFrameTest, ShouldBuildProperDownlinkFrame)
 
 TEST(DownlinkFrameTest, ShouldPreventBuildingTooBigFrame)
 {
-    DownlinkFrame frame(APID::TelemetryLong, 1);
+    DownlinkFrame frame(DownlinkAPID::TelemetryLong, 1);
 
     array<uint8_t, DownlinkFrame::MaxPayloadSize> payload;
     payload.fill(0xAA);

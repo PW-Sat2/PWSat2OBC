@@ -8,40 +8,76 @@
 
 namespace telecommunication
 {
-    enum class APID : std::uint8_t
+    namespace downlink
     {
-        Pong = 0x01,
-        TelemetryShort = 0x2A,
-        TelemetryLong = 0x3F,
-        LastItem
-    };
+        /**
+         * @ingroup telecomm_handling
+         * @{
+         */
 
-    class DownlinkFrame final
-    {
-      public:
-        DownlinkFrame(APID apid, std::uint32_t seq);
+        /**
+         * @brief Downlink APID definition
+         *
+         * @remark All values are 6-bit
+         * @remark @ref DownlinkAPID::LastItem must be last item on the enum list
+         */
+        enum class DownlinkAPID : std::uint8_t
+        {
+            Pong = 0x01,           //!< Pong
+            TelemetryShort = 0x2A, //!< TelemetryShort
+            TelemetryLong = 0x3F,  //!< TelemetryLong
+            LastItem               //!< LastItem
+        };
 
-        inline Writer& PayloadWriter();
-        inline gsl::span<uint8_t> Frame();
+        /**
+         * @brief Downlink frame implementation
+         */
+        class DownlinkFrame final
+        {
+          public:
+            /**
+             * @brief Initializes new @ref DownlinkFrame instance
+             * @param apid APID
+             * @param seq Sequence number
+             */
+            DownlinkFrame(DownlinkAPID apid, std::uint32_t seq);
 
-        static constexpr std::uint8_t HeaderSize = 3;
-        static constexpr std::uint8_t MaxPayloadSize = devices::comm::MaxDownlinkFrameSize - HeaderSize;
+            /**
+             * @brief Returns writer that can be used to fill payload part of frame
+             * @return Writer
+             */
+            inline Writer& PayloadWriter();
 
-      private:
-        std::array<uint8_t, devices::comm::MaxDownlinkFrameSize> _frame;
-        Writer _payloadWriter;
-    };
+            /**
+             * @brief Returns undelying byte representation of the frame
+             * @return
+             */
+            inline gsl::span<uint8_t> Frame();
 
-    inline Writer& DownlinkFrame::PayloadWriter()
-    {
-        return this->_payloadWriter;
-    }
+            /** @brief Size of header size */
+            static constexpr std::uint8_t HeaderSize = 3;
+            /** @brief Maximum size of payload inside single frame */
+            static constexpr std::uint8_t MaxPayloadSize = devices::comm::MaxDownlinkFrameSize - HeaderSize;
 
-    inline gsl::span<uint8_t> DownlinkFrame::Frame()
-    {
-        gsl::span<uint8_t> s(this->_frame);
+          private:
+            /** @brief Buffer in which frame is built */
+            std::array<uint8_t, devices::comm::MaxDownlinkFrameSize> _frame;
 
-        return s.subspan(0, 3 + this->_payloadWriter.GetDataLength());
+            /** @brief Writer instance used to build frame payload */
+            Writer _payloadWriter;
+        };
+
+        inline Writer& DownlinkFrame::PayloadWriter()
+        {
+            return this->_payloadWriter;
+        }
+
+        inline gsl::span<uint8_t> DownlinkFrame::Frame()
+        {
+            return gsl::make_span(this->_frame).subspan(0, HeaderSize + this->_payloadWriter.GetDataLength());
+        }
+
+        /** @} */
     }
 }
 

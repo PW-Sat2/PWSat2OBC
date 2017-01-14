@@ -10,7 +10,7 @@
 namespace obc
 {
     /**@brief Dummy ping telecommand that responds with pong */
-    class PingTelecommand final : public telecommands::handling::IHandleTeleCommand
+    class PingTelecommand final : public telecommunication::uplink::IHandleTeleCommand
     {
       public:
         virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
@@ -33,14 +33,14 @@ namespace obc
          * Aggregates all telecommand handlers into single span
          * @return Span with all supported telecommands
          */
-        gsl::span<telecommands::handling::IHandleTeleCommand*> AllTelecommands();
+        gsl::span<telecommunication::uplink::IHandleTeleCommand*> AllTelecommands();
 
       private:
         /** @brief Ping telecommand */
         PingTelecommand _ping;
 
         /** @brief Array containg all telecommand handlers */
-        telecommands::handling::IHandleTeleCommand* _telecommands[1];
+        telecommunication::uplink::IHandleTeleCommand* _telecommands[1];
     };
 
     /**
@@ -60,13 +60,13 @@ namespace obc
         void Initialize();
 
         /** @brief Uplink protocol decoder */
-        telecommands::UplinkProtocol UplinkProtocolDecoder;
+        telecommunication::uplink::UplinkProtocol UplinkProtocolDecoder;
 
         /** @brief Object aggregating supported telecommand */
         Telecommands SupportedTelecommands;
 
         /** @brief Incoming telecommand handler */
-        telecommands::handling::IncomingTelecommandHandler TelecommandHandler;
+        telecommunication::uplink::IncomingTelecommandHandler TelecommandHandler;
 
         /** @brief Low-level comm driver */
         devices::comm::CommObject CommDriver;

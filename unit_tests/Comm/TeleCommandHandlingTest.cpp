@@ -24,7 +24,7 @@ using testing::StrEq;
 
 using devices::comm::Frame;
 using devices::comm::ITransmitFrame;
-using namespace telecommands::handling;
+using namespace telecommunication::uplink;
 
 struct TeleCommandDepsMock : public IDecodeTelecommand
 {
