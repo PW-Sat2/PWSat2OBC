@@ -8,9 +8,9 @@ using gsl::span;
 using drivers::i2c::II2CBus;
 using devices::comm::ITransmitFrame;
 using obc::PingTelecommand;
-using telecommands::handling::IHandleTeleCommand;
-using telecommunication::DownlinkFrame;
-using telecommunication::APID;
+using telecommunication::uplink::IHandleTeleCommand;
+using telecommunication::downlink::DownlinkFrame;
+using telecommunication::downlink::DownlinkAPID;
 
 using namespace obc;
 
@@ -20,7 +20,7 @@ void PingTelecommand::Handle(ITransmitFrame& transmitter, span<const uint8_t> pa
 
     const char* response = "PONG";
 
-    DownlinkFrame frame(APID::Pong, 0);
+    DownlinkFrame frame(DownlinkAPID::Pong, 0);
 
     frame.PayloadWriter().WriteArray(gsl::make_span(reinterpret_cast<const uint8_t*>(response), 4));
 

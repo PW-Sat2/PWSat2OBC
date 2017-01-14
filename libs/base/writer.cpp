@@ -124,7 +124,7 @@ bool Writer::WriteArray(gsl::span<const uint8_t> buffer)
     }
 }
 
-gsl::span<std::uint8_t> Writer::UsedSpan()
+gsl::span<std::uint8_t> Writer::Capture()
 {
     return this->_buffer.subspan(0, this->_position);
 }

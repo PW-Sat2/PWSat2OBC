@@ -227,7 +227,7 @@ TEST(WriterTest, TestUsedSpan)
     writer.WriteByte(0x55);
     writer.WriteByte(0x66);
 
-    auto s = writer.UsedSpan();
+    auto s = writer.Capture();
 
     ASSERT_THAT(s.length(), Eq(2));
     ASSERT_THAT(s, testing::ElementsAre(0x55, 0x66));

@@ -340,7 +340,7 @@ bool CommObject::SetBeacon(const Beacon& beaconData)
         return false;
     }
 
-    return this->_low.Write(num(Address::Transmitter), writer.UsedSpan()) == I2CResult::OK;
+    return this->_low.Write(num(Address::Transmitter), writer.Capture()) == I2CResult::OK;
 }
 
 bool CommObject::ClearBeacon()

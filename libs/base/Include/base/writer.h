@@ -130,7 +130,7 @@ class Writer final
      * @brief Returns view for used part of buffer
      * @return Span covering used part of buffer
      */
-    gsl::span<std::uint8_t> UsedSpan();
+    gsl::span<std::uint8_t> Capture();
 
   private:
     /**

@@ -282,15 +282,15 @@ void TimeProvider::SaveTime(TimerState state)
     do
     {
         errorCount = 0;
-        if (!SaveToFile(FileSystemObject, File0, writer.UsedSpan()))
+        if (!SaveToFile(FileSystemObject, File0, writer.Capture()))
         {
             ++errorCount;
         }
-        if (!SaveToFile(FileSystemObject, File1, writer.UsedSpan()))
+        if (!SaveToFile(FileSystemObject, File1, writer.Capture()))
         {
             ++errorCount;
         }
-        if (!SaveToFile(FileSystemObject, File2, writer.UsedSpan()))
+        if (!SaveToFile(FileSystemObject, File2, writer.Capture()))
         {
             ++errorCount;
         }
