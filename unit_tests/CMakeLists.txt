@@ -88,8 +88,8 @@ target_link_libraries(${NAME}
     base
     mission
     rapidcheck
-    rapidcheck.gtest
-    rapidcheck.gmock
+    rapidcheck_gtest
+    rapidcheck_gmock
     emdrv
     time
     gsl
