@@ -146,23 +146,6 @@ TEST(ImtqTestDataStructures, Status)
 	EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::Rejected);
 }
 
-TEST(ImtqTestDataStructures, CurrentCalculations)
-{
-	devices::imtq::CurrentMeasurement current;
-
-	for(uint32_t c = 1; c < 65000; c += 1000) {
-		current.setIn0dot1miliAmpsStep(c);
-		EXPECT_EQ(current.getIn0dot1miliAmpsStep(), c);
-		EXPECT_EQ(current.getInMiliAmpere(), c/10);
-	}
-
-	for(uint32_t c = 1; c < 6500; c += 1000) {
-		current.setInMiliAmpere(c);
-		EXPECT_EQ(current.getIn0dot1miliAmpsStep(), 10*c);
-		EXPECT_EQ(current.getInMiliAmpere(), c);
-	}
-}
-
 class ImtqTest : public testing::Test
 {
   public:
@@ -417,10 +400,10 @@ TEST_F(ImtqTest, StartActuationCurrent)
 			return I2CResult::OK;
 		}));
 
-	std::array<devices::imtq::CurrentMeasurement, 3> currents;
-	currents[0].setInMiliAmpere(100);
-	currents[1].setInMiliAmpere(200);
-	currents[2].setInMiliAmpere(300);
+	std::array<devices::imtq::Current, 3> currents;
+	currents[0] = 1000;
+	currents[1] = 2000;
+	currents[2] = 3000;
 
 	auto status = imtq.StartActuationCurrent(currents, 250ms);
 	ASSERT_THAT(status, Eq(true));
@@ -447,9 +430,9 @@ TEST_F(ImtqTest, StartActuationCurrent)
 			return I2CResult::OK;
 		}));
 
-	currents[0].setInMiliAmpere(5100);
-	currents[1].setInMiliAmpere(700);
-	currents[2].setInMiliAmpere(4500);
+	currents[0] = 51000;
+	currents[1] = 7000;
+	currents[2] = 45000;
 
 	status = imtq.StartActuationCurrent(currents, 15s);
 	ASSERT_THAT(status, Eq(true));

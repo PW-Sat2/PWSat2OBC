@@ -80,36 +80,11 @@ namespace devices
         	std::uint8_t value;
         };
 
-        class CurrentMeasurement
-        {
-          public:
-        	std::uint16_t getIn0dot1miliAmpsStep();
-        	void setIn0dot1miliAmpsStep(std::uint16_t value);
+        using Current = std::uint16_t;
+        // representation: 1 LSB = 1e-4 A
 
-        	std::uint16_t getInMiliAmpere();
-        	void setInMiliAmpere(std::uint16_t value);
-
-          private:
-        	// representation: 1 LSB = 1e-4 A
-        	std::uint16_t value;
-        };
-
-        class Dipole
-        {
-          public:
-        	std::uint16_t getIn0dot1miliAmpsPerMeterSq()
-        	{
-        		return value;
-        	}
-        	void setIn0dot1miliAmpsPerMeterSq(std::uint16_t value)
-        	{
-        		this->value = value;
-        	}
-
-          private:
-        	// representation: 1 LSB = 1e-4 Am^2
-        	std::uint16_t value;
-        };
+        // representation: 1 LSB = 1e-4 Am^2
+        using Dipole = std::uint16_t;
 
     	enum class Mode
 		{
@@ -118,11 +93,23 @@ namespace devices
 			Detumble = 2
     	};
 
+		enum class Error
+		{
+			OK = 0x00,
+			I2CFailure = 0x01,
+			SPIFailure = 0x02,
+			ADCFailure = 0x04,
+			PWMFailure = 0x08,
+			SystemFailure = 0x10,
+			MagnetometerValuesOusideExpectedRange = 0x20,
+			CoilCurrentsOusideExpectedRange = 0x40
+		};
+
         struct ImtqState
         {
         	Status status;
         	Mode mode;
-        	bool error;
+        	Error error;
         	bool anyParameterUpdatedSinceStartup;
         	std::chrono::seconds uptime;
         };
@@ -132,7 +119,7 @@ namespace devices
 
         struct MagnetometerMeasurementResult
         {
-        	std::array<MagnetometerMeasurement, 3> data;
+        	Vector3<MagnetometerMeasurement> data;
         	bool coilActuationDuringMeasurement;
         };
 
@@ -141,7 +128,7 @@ namespace devices
 
         struct SelfTestResult
         {
-        	enum class SelfTestStep
+        	enum class Step
 			{
 				Init = 0x00, //
 				Xp   = 0x01,
@@ -155,24 +142,14 @@ namespace devices
 
         	struct StepResult
 			{
-				enum class Error
-				{
-					OK = 0x00,
-					I2CFailure = 0x01,
-					SPIFailure = 0x02,
-					ADCFailure = 0x04,
-					PWMFailure = 0x08,
-					SystemFailure = 0x10,
-					MagnetometerValuesOusideExpectedRange = 0x20,
-					CoilCurrentsOusideExpectedRange = 0x40
-				};
+
 
 				Error error;
-				SelfTestStep actualStep;
+				Step actualStep;
 
 				Vector3<MagnetometerMeasurement> RawMagnetometerMeasurement;
 				Vector3<MagnetometerMeasurement> CalibratedMagnetometerMeasurement;
-				Vector3<CurrentMeasurement> CoilCurrent;
+				Vector3<Current> CoilCurrent;
 				Vector3<TemperatureMeasurement> CoilTemperature;
 			};
 
@@ -188,8 +165,8 @@ namespace devices
         	Vector3<MagnetometerMeasurement> filteredMagnetometerMeasurement;
         	Vector3<BDotType> bDotData;
         	Vector3<Dipole> commandedDipole;
-        	Vector3<CurrentMeasurement> commandedCurrent;
-        	Vector3<CurrentMeasurement> measuredCurrent;
+        	Vector3<Current> commandedCurrent;
+        	Vector3<Current> measuredCurrent;
         };
 
         struct HouseKeepingRAW
@@ -206,7 +183,7 @@ namespace devices
         	using VoltageInMiliVolt = std::uint16_t;
 
         	VoltageInMiliVolt digitalVoltage, analogVoltage;
-        	CurrentMeasurement digitalCurrent, analogCurrent;
+        	Current digitalCurrent, analogCurrent;
         	Vector3<VoltageInMiliVolt> coilCurrent;
         	Vector3<TemperatureMeasurement> coilTemperature;
         	TemperatureMeasurement MCUtemperature;
@@ -222,7 +199,7 @@ namespace devices
             bool SoftwareReset();
             bool CancelOperation();
             bool StartMTMMeasurement();
-            bool StartActuationCurrent(Vector3<CurrentMeasurement> current, std::chrono::milliseconds duration);
+            bool StartActuationCurrent(Vector3<Current> current, std::chrono::milliseconds duration);
             bool StartActuationDipole(Vector3<Dipole> dipole, std::chrono::milliseconds duration);
             bool StartAllAxisSelfTest();
             bool StartBDotDetumbling(std::chrono::seconds duration);
@@ -230,7 +207,7 @@ namespace devices
             // ----- Data requests -----
             bool GetSystemState(ImtqState& state);
             bool GetCalibratedMagnetometerData(MagnetometerMeasurementResult& result);
-            bool GetCoilCurrent(Vector3<CurrentMeasurement>& result);
+            bool GetCoilCurrent(Vector3<Current>& result);
             bool GetCoilTemperature(Vector3<TemperatureMeasurement>& result);
             bool GetCommandedActuationDipole(Vector3<Dipole>& result);
             bool GetSelfTestResult(SelfTestResult& result);
@@ -241,8 +218,8 @@ namespace devices
             // ----- Configuration -----
             using Parameter = std::uint16_t; //TODO: change to enum
 
-            bool SetParameter(Parameter id, gsl::span<const uint8_t> value);
             bool GetParameter(Parameter id, gsl::span<uint8_t> result);
+            bool SetParameter(Parameter id, gsl::span<const uint8_t> value);
             bool ResetParameterAndGetDefault(Parameter id, gsl::span<uint8_t> result);
 
           private:
@@ -251,6 +228,9 @@ namespace devices
             bool SendCommand(OpCode opcode);
             bool SendCommand(OpCode opcode, gsl::span<const std::uint8_t> params);
             bool SendCommand(gsl::span<const std::uint8_t> params);
+            bool DataRequest(OpCode opcode, gsl::span<uint8_t> response);
+            bool GetParameterWithOpcode(OpCode opcode, Parameter id, gsl::span<uint8_t> result);
+            bool WriteRead(OpCode opcode, gsl::span<const uint8_t> params, gsl::span<uint8_t> result);
         };
     }
 }

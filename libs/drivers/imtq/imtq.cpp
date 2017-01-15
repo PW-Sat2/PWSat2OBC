@@ -25,8 +25,32 @@ namespace devices
 {
     namespace imtq
     {
-        constexpr int maximumCommandOutputLength = 9,
-                      commandResponseLength = 2;
+    	namespace details
+		{
+    		int16_t UnsignedToSignedWord(uint16_t value)
+			{
+				return *reinterpret_cast<int16_t*>(&value);
+			}
+    		int32_t UnsignedToSignedDoubleWord(uint32_t value)
+    		{
+    			return *reinterpret_cast<int32_t*>(&value);
+    		}
+
+    		int16_t ReadSignedWordLE(Reader& reader)
+    		{
+    			return UnsignedToSignedWord(reader.ReadWordLE());
+    		}
+
+    		int32_t ReadSignedDoubleWordLE(Reader& reader)
+    		{
+    			return UnsignedToSignedDoubleWord(reader.ReadDoubleWordLE());
+    		}
+		}
+#define FOR_AXIS(var) for(uint8_t var = 0; var < 3; ++var)
+
+    	using namespace details;
+
+        constexpr int maximumWriteLength = 11;
 
         // ------------------------- status -------------------------
 
@@ -56,26 +80,6 @@ namespace devices
 			return static_cast<Status::Error>(value & 0b00001111);
 		}
 
-		// ------------------------- Current -------------------------
-
-		uint16_t CurrentMeasurement::getIn0dot1miliAmpsStep()
-		{
-			return this->value;
-		}
-		void CurrentMeasurement::setIn0dot1miliAmpsStep(uint16_t value)
-		{
-			this->value = value;
-		}
-
-		uint16_t CurrentMeasurement::getInMiliAmpere()
-		{
-			return this->value/10;
-		}
-		void CurrentMeasurement::setInMiliAmpere(uint16_t value)
-		{
-			this->value = value*10;
-		}
-
 		// ------------------------- Public functions -------------------------
 
         ImtqDriver::ImtqDriver(drivers::i2c::II2CBus& i2cbus) : i2cbus{i2cbus}
@@ -91,7 +95,7 @@ namespace devices
         {
         	uint8_t opcode = static_cast<uint8_t>(OpCode::SoftwareReset);
 
-            std::array<uint8_t, commandResponseLength> response;
+            std::array<uint8_t, 2> response;
 
             auto result = i2cbus.WriteRead(I2Cadress,
                                            gsl::span<const uint8_t, 1>(&opcode, 1),
@@ -122,14 +126,15 @@ namespace devices
 			return SendCommand(OpCode::StartMTMMeasurement);
 		}
 
-        bool ImtqDriver::StartActuationCurrent(Vector3<CurrentMeasurement> current, std::chrono::milliseconds duration)
+        bool ImtqDriver::StartActuationCurrent(Vector3<Current> current, std::chrono::milliseconds duration)
         {
         	std::array<uint8_t, 8> parameters;
         	Writer writer;
         	WriterInitialize(&writer, parameters.data(), parameters.size());
-        	WriterWriteWordLE(&writer, current[0].getIn0dot1miliAmpsStep());
-        	WriterWriteWordLE(&writer, current[1].getIn0dot1miliAmpsStep());
-        	WriterWriteWordLE(&writer, current[2].getIn0dot1miliAmpsStep());
+        	FOR_AXIS(i)
+        	{
+        		WriterWriteWordLE(&writer, current[i]);
+        	}
         	WriterWriteWordLE(&writer, duration.count());
 
         	return this->SendCommand(OpCode::StartActuationCurrent, parameters);
@@ -140,9 +145,10 @@ namespace devices
         	std::array<uint8_t, 8> parameters;
 			Writer writer;
 			WriterInitialize(&writer, parameters.data(), parameters.size());
-			WriterWriteWordLE(&writer, dipole[0].getIn0dot1miliAmpsPerMeterSq());
-			WriterWriteWordLE(&writer, dipole[1].getIn0dot1miliAmpsPerMeterSq());
-			WriterWriteWordLE(&writer, dipole[2].getIn0dot1miliAmpsPerMeterSq());
+			FOR_AXIS(i)
+			{
+				WriterWriteWordLE(&writer, dipole[i]);
+			}
 			WriterWriteWordLE(&writer, duration.count());
 
 			return this->SendCommand(OpCode::StartActuationDipole, parameters);
@@ -165,38 +171,325 @@ namespace devices
         	return this->SendCommand(OpCode::StartBDOT, parameters);
         }
 
+        bool ImtqDriver::GetSystemState(ImtqState& state)
+        {
+        	std::array<uint8_t, 9> value;
+        	if (!this->DataRequest(OpCode::GetIMTQSystemState, value))
+        	{
+        		return false;
+        	}
+
+        	state.status = static_cast<Status>(value[1]);
+        	state.mode = static_cast<Mode>(value[2]);
+        	state.error = static_cast<Error>(value[3]);
+        	state.anyParameterUpdatedSinceStartup = (value[4] == 1);
+
+        	Reader reader{span<uint8_t, 4>(&value[5], 4)};
+        	state.uptime = std::chrono::seconds{reader.ReadDoubleWordLE()};
+
+        	return true;
+        }
+
+
+
+        bool ImtqDriver::GetCalibratedMagnetometerData(MagnetometerMeasurementResult& result)
+        {
+        	std::array<uint8_t, 15> value;
+        	if (!this->DataRequest(OpCode::GetCalibratedMTMData, value))
+        	{
+        		return false;
+        	}
+
+        	Reader reader{value};
+        	reader.Skip(2);
+        	FOR_AXIS(i)
+        	{
+        		result.data[i] = ReadSignedDoubleWordLE(reader);
+        	}
+
+        	result.coilActuationDuringMeasurement = (value[14] == 1);
+        	return true;
+        }
+
+        bool ImtqDriver::GetCoilCurrent(Vector3<Current>& result)
+        {
+        	std::array<uint8_t, 8> value;
+        	if (!this->DataRequest(OpCode::GetCoilCurrent, value))
+        	{
+        		return false;
+        	}
+
+        	Reader reader{value};
+        	reader.Skip(2);
+
+        	FOR_AXIS(i)
+        	{
+        		result[i] = ReadSignedWordLE(reader);
+        	}
+        	return true;
+        }
+
+		bool ImtqDriver::GetCoilTemperature(Vector3<TemperatureMeasurement>& result)
+		{
+        	std::array<uint8_t, 8> value;
+        	if (!this->DataRequest(OpCode::GetCoilTemperatures, value))
+        	{
+        		return false;
+        	}
+
+        	Reader reader{value};
+        	reader.Skip(2);
+
+        	FOR_AXIS(i)
+        	{
+        		result[i] = ReadSignedWordLE(reader);
+        	}
+        	return true;
+		}
+
+		bool ImtqDriver::GetCommandedActuationDipole(Vector3<Dipole>& result)
+		{
+        	std::array<uint8_t, 8> value;
+        	if (!this->DataRequest(OpCode::GetCommandedActuationDipole, value))
+        	{
+        		return false;
+        	}
+
+        	Reader reader{value};
+        	reader.Skip(2);
+
+        	FOR_AXIS(i)
+        	{
+        		result[i] = ReadSignedWordLE(reader);
+        	}
+        	return true;
+		}
+
+		bool ImtqDriver::GetSelfTestResult(SelfTestResult& result)
+		{
+        	std::array<uint8_t, 320> value;
+        	if (!this->DataRequest(OpCode::GetSelfTest, value))
+        	{
+        		return false;
+        	}
+
+        	Reader reader{value};
+
+        	for(uint8_t step = 0; step < 8; ++step)
+        	{
+        		reader.Skip(2);
+        		result.stepResults[step].error = static_cast<Error>(reader.ReadByte());
+        		result.stepResults[step].actualStep = static_cast<SelfTestResult::Step>(reader.ReadByte());
+        		FOR_AXIS(i)
+        		{
+        			result.stepResults[step].RawMagnetometerMeasurement[i] = ReadSignedDoubleWordLE(reader);
+        		}
+        		FOR_AXIS(i)
+        		{
+        			result.stepResults[step].CalibratedMagnetometerMeasurement[i] = ReadSignedDoubleWordLE(reader);
+        		}
+        		FOR_AXIS(i)
+        		{
+        			result.stepResults[step].CoilCurrent[i] = ReadSignedWordLE(reader);
+        		}
+        		FOR_AXIS(i)
+        		{
+        			result.stepResults[step].CoilTemperature[i] = ReadSignedWordLE(reader);
+        		}
+        	}
+        	return true;
+		}
+
+		bool ImtqDriver::GetDetumbleData(DetumbleData& result)
+		{
+        	std::array<uint8_t, 56> value;
+        	if (!this->DataRequest(OpCode::GetDetumbleData, value))
+        	{
+        		return false;
+        	}
+
+        	Reader reader{value};
+        	reader.Skip(2);
+
+        	FOR_AXIS(i)
+        	{
+        		result.calibratedMagnetometerMeasurement[i] = ReadSignedDoubleWordLE(reader);
+        	}
+        	FOR_AXIS(i)
+        	{
+        		result.filteredMagnetometerMeasurement[i] = ReadSignedDoubleWordLE(reader);
+        	}
+        	FOR_AXIS(i)
+        	{
+        		result.bDotData[i] = ReadSignedDoubleWordLE(reader);
+        	}
+        	FOR_AXIS(i)
+        	{
+        		result.commandedDipole[i] = ReadSignedWordLE(reader);
+        	}
+        	FOR_AXIS(i)
+        	{
+        		result.commandedCurrent[i] = ReadSignedWordLE(reader);
+        	}
+        	FOR_AXIS(i)
+        	{
+        		result.measuredCurrent[i] = ReadSignedWordLE(reader);
+        	}
+        	return true;
+		}
+
+		bool ImtqDriver::GetHouseKeepingRAW(HouseKeepingRAW& result)
+		{
+        	std::array<uint8_t, 24> value;
+        	if (!this->DataRequest(OpCode::GetRAWHousekeepingData, value))
+        	{
+        		return false;
+        	}
+
+        	Reader reader{value};
+        	reader.Skip(2);
+
+        	result.digitalVoltage = reader.ReadWordLE();
+        	result.analogVoltage = reader.ReadWordLE();
+        	result.digitalCurrent = reader.ReadWordLE();
+			result.analogCurrent = reader.ReadWordLE();
+			FOR_AXIS(i)
+			{
+				result.coilCurrent[i] = reader.ReadWordLE();
+			}
+			FOR_AXIS(i)
+			{
+				result.coilTemperature[i] = reader.ReadWordLE();
+			}
+			result.MCUtemperature = reader.ReadWordLE();
+			return true;
+		}
+
+		bool ImtqDriver::GetHouseKeepingEngineering(HouseKeepingEngineering& result)
+		{
+        	std::array<uint8_t, 24> value;
+        	if (!this->DataRequest(OpCode::GetEngineeringHousekeepingData, value))
+        	{
+        		return false;
+        	}
+
+        	Reader reader{value};
+        	reader.Skip(2);
+
+        	result.digitalVoltage = reader.ReadWordLE();
+        	result.analogVoltage = reader.ReadWordLE();
+        	result.digitalCurrent = reader.ReadWordLE();
+			result.analogCurrent = reader.ReadWordLE();
+			FOR_AXIS(i)
+			{
+				result.coilCurrent[i] = ReadSignedWordLE(reader);
+			}
+			FOR_AXIS(i)
+			{
+				result.coilTemperature[i] = ReadSignedWordLE(reader);
+			}
+			result.MCUtemperature = ReadSignedWordLE(reader);
+			return true;
+		}
+
+        // ----- Configuration -----
+
+		bool ImtqDriver::GetParameter(Parameter id, gsl::span<uint8_t> result)
+		{
+			return GetParameterWithOpcode(OpCode::GetParameter, id, result);
+		}
+
+		bool ImtqDriver::SetParameter(Parameter id, gsl::span<const uint8_t> value)
+        {
+			std::array<uint8_t, 11> request;
+			std::array<uint8_t, 12> response;
+
+			Writer writer;
+			WriterInitialize(&writer, &request[0], 3);
+			WriterWriteByte(&writer, static_cast<uint8_t>(OpCode::SetParameter));
+			WriterWriteWordLE(&writer, id);
+			std::copy(value.begin(), value.end(), request.begin() + 3);
+
+			auto i2cstatus = i2cbus.WriteRead(I2Cadress,
+					                          gsl::span<uint8_t>(request.begin(), 3 + value.size()),
+											  gsl::span<uint8_t>(response.begin(), 4 + value.size()));
+
+            Status status{response[1]};
+
+            if (i2cstatus != I2CResult::OK ||
+            	status.CmdError() != Status::Error::Accepted ||
+				static_cast<uint8_t>(OpCode::SetParameter) != response[0] ||
+				! std::equal(value.begin(), value.end(), response.begin() + 4))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        bool ImtqDriver::ResetParameterAndGetDefault(Parameter id, gsl::span<uint8_t> result)
+        {
+        	return GetParameterWithOpcode(OpCode::ResetParameter, id, result);
+        }
+
+
         // ------------------------- Private -------------------------
 
         bool ImtqDriver::SendCommand(OpCode opcode)
         {
-        	uint8_t op = static_cast<uint8_t>(opcode);
-            return SendCommand(span<uint8_t>(&op, 1));
+        	return SendCommand(opcode, {});
         }
 
         bool ImtqDriver::SendCommand(OpCode opcode, span<const uint8_t> params)
         {
-            std::array<uint8_t, maximumCommandOutputLength> output;
-            output[0] = static_cast<uint8_t>(opcode);
-            std::copy(params.begin(), params.end(), output.begin()+1);
-
-            return this->SendCommand(output);
+        	std::array<uint8_t, 2> responseArray;
+            return WriteRead(opcode, params, responseArray);
         }
 
-        bool ImtqDriver::SendCommand(span<const uint8_t> params)
+        bool ImtqDriver::DataRequest(OpCode opcode, span<uint8_t> response)
         {
-            std::array<uint8_t, commandResponseLength> response;
+        	return WriteRead(opcode, {}, response);
+        }
 
-            auto result = i2cbus.WriteRead(I2Cadress, params, response);
+        bool ImtqDriver::GetParameterWithOpcode(OpCode opcode, Parameter id, gsl::span<uint8_t> result)
+        {
+        	std::array<uint8_t, 2> params;
+			Writer writer;
+			WriterInitialize(&writer, params.begin(), 2);
+			WriterWriteWordLE(&writer, id);
 
-            Status status{response[1]};
+			std::array<uint8_t, 12> responseArray;
+			span<uint8_t> response(responseArray.begin(), result.size() + 4);
 
-            if (result != I2CResult::OK ||
-            	status.CmdError() != Status::Error::Accepted ||
-                response[0] != params[0])
+			if (!WriteRead(opcode, params, response) ||
+				!std::equal(params.begin(), params.end(), result.begin()+2))
+			{
+				return false;
+			}
+			std::copy(response.begin() + 4, response.end(), result.begin());
+            return true;
+        }
+
+        bool ImtqDriver::WriteRead(OpCode opcode, span<const uint8_t> params, span<uint8_t> response)
+        {
+            std::array<uint8_t, maximumWriteLength> output;
+            output[0] = static_cast<uint8_t>(opcode);
+            std::copy(params.begin(), params.end(), output.begin()+1);
+            span<uint8_t> request{output.begin(), params.size()+1};
+
+            auto i2cstatus = i2cbus.WriteRead(I2Cadress,
+            		                          request,
+											  response);
+
+            if (i2cstatus != I2CResult::OK ||
+            	static_cast<uint8_t>(opcode) != response[0] ||
+				Status{response[1]}.CmdError() != Status::Error::Accepted)
             {
                 return false;
             }
             return true;
         }
+
+#undef FOR_AXIS
     }
 }
