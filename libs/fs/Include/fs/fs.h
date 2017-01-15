@@ -194,6 +194,13 @@ namespace services
              * @return true if path exists
              */
             virtual bool Exists(const char* path) = 0;
+
+            /**
+             * @brief Gets file size
+             * @param file File handle
+             * @return Size of file
+             */
+            virtual FileSize GetFileSize(FileHandle file) = 0;
         };
 
         /**
@@ -272,6 +279,12 @@ namespace services
              * @return Operation result
              */
             OSResult Truncate(FileSize size);
+
+            /**
+             * @brief Returns size of opened file
+             * @return File size
+             */
+            FileSize Size();
 
           private:
             /** @brief File system interface */

@@ -63,6 +63,6 @@ void I2CTestCommandHandler(uint16_t argc, char* argv[])
     }
     else
     {
-        Main.terminal.Printf("Error %d\n", result);
+        Main.terminal.Printf("Error %d\n", num(result));
     }
 }

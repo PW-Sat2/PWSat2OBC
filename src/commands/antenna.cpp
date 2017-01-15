@@ -9,7 +9,7 @@ using namespace std::chrono_literals;
 
 static void SendResult(OSResult result)
 {
-    Main.terminal.Printf("%d", result);
+    Main.terminal.Printf("%d", num(result));
 }
 
 static bool GetChannel(const char* name, AntennaChannel* channel)
@@ -121,7 +121,7 @@ void AntennaGetDeploymentStatus(uint16_t argc, char* argv[])
     else
     {
         Main.terminal.Printf("%d %d %d %d %d %d %d %d %d %d %d\n",
-            status,
+            num(status),
             ToInt(deploymentStatus.DeploymentStatus[0]),        //
             ToInt(deploymentStatus.DeploymentStatus[1]),        //
             ToInt(deploymentStatus.DeploymentStatus[2]),        //

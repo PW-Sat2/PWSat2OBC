@@ -49,9 +49,7 @@ void ReceiveFrameHandler(uint16_t argc, char* argv[])
     {
         Main.Communication.CommDriver.RemoveFrame();
 
-        auto payload = frame.Payload();
-        auto payloadStr = reinterpret_cast<const char*>(payload.data());
-        Main.terminal.PrintBuffer(gsl::span<const char>(payloadStr, payload.size()));
+        Main.terminal.PrintBuffer(frame.Payload());
     }
 }
 

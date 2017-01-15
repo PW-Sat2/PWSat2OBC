@@ -1,6 +1,9 @@
 #include <string.h>
+#include <array>
 
 #include "base/os.h"
+#include "base/reader.h"
+#include "base/writer.h"
 #include "logger/logger.h"
 #include "system.h"
 #include "terminal.h"
@@ -30,6 +33,12 @@ static void parseCommandLine(char line[],
     }
 }
 
+Terminal::Terminal(LineIO& stdio)
+    : _stdio(stdio), //
+      _task("Terminal", this, Terminal::Loop)
+{
+}
+
 void Terminal::Puts(const char* text)
 {
     this->_stdio.Puts(&this->_stdio, text);
@@ -55,9 +64,14 @@ void Terminal::Printf(const char* text, ...)
     va_end(args);
 }
 
-void Terminal::PrintBuffer(gsl::span<const char> buffer)
+void Terminal::PrintBuffer(gsl::span<const std::uint8_t> buffer)
 {
     this->_stdio.PrintBuffer(buffer);
+}
+
+void Terminal::ReadBuffer(gsl::span<std::uint8_t> buffer)
+{
+    this->_stdio.ReadBuffer(&this->_stdio, buffer);
 }
 
 void Terminal::HandleCommand(char* buffer)
@@ -102,12 +116,6 @@ void Terminal::Loop(Terminal* terminal)
     }
 }
 
-Terminal::Terminal(LineIO& stdio)
-    : _stdio(stdio), //
-      _task("Terminal", this, Terminal::Loop)
-{
-}
-
 void Terminal::Initialize()
 {
     if (OS_RESULT_FAILED(this->_task.Create()))
@@ -123,4 +131,44 @@ void Terminal::Initialize()
 void Terminal::SetCommandList(gsl::span<const TerminalCommandDescription> commands)
 {
     this->_commandList = commands;
+}
+
+TerminalPartialRetrival::TerminalPartialRetrival(Terminal& terminal, gsl::span<uint8_t> buffer)
+    : _terminal(terminal), _buffer(buffer), _remainingLength(0)
+{
+}
+
+void TerminalPartialRetrival::Start()
+{
+    this->_terminal.Puts("#");
+
+    std::array<uint8_t, sizeof(std::uint32_t)> lengthBuffer;
+
+    this->_terminal.ReadBuffer(lengthBuffer);
+
+    Reader r(lengthBuffer);
+    this->_remainingLength = r.ReadDoubleWordLE();
+}
+
+Option<gsl::span<uint8_t>> TerminalPartialRetrival::ReadPart()
+{
+    if (this->_remainingLength == 0)
+    {
+        return Option<gsl::span<uint8_t>>::None();
+    }
+
+    auto partLength = std::min<std::size_t>(this->_buffer.size(), this->_remainingLength);
+    auto part = this->_buffer.subspan(0, partLength);
+
+    std::array<uint8_t, sizeof(std::uint32_t)> partLengthBuffer;
+    Writer w(partLengthBuffer);
+    w.WriteDoubleWordLE(static_cast<std::uint32_t>(part.size()));
+
+    this->_terminal.PrintBuffer(partLengthBuffer);
+
+    this->_terminal.ReadBuffer(part);
+
+    this->_remainingLength -= part.size();
+
+    return Option<gsl::span<uint8_t>>::Some(part);
 }
