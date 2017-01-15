@@ -226,7 +226,7 @@ void System::PulseSet(OSPulseHandle handle)
 
 milliseconds System::GetUptime()
 {
-    typedef std::ratio<portTICK_PERIOD_MS, 1> ticksPerMs;
+    typedef std::ratio<portTICK_PERIOD_MS, 1000> ticksPerMs;
     typedef std::chrono::duration<int64_t, ticksPerMs> ticks;
 
     return std::chrono::duration_cast<milliseconds>(ticks(xTaskGetTickCount()));
