@@ -63,6 +63,7 @@ set(SOURCES
   SPI/SPIDriverTest.cpp
   eigen/eigenTest.cpp
   adcs/AdcsCoordinatorTest.cpp
+  Experiments/Fibo/FiboCalculatorTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -109,6 +110,7 @@ target_link_libraries(${NAME}
     mission_sail
     mission_time
     eigen
+    exp_fibo
     adcs
     mission_adcs
 )
