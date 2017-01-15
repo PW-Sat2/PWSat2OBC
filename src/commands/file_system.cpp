@@ -1,7 +1,12 @@
 #include <string.h>
+#include <algorithm>
+#include <array>
 #include <cstdint>
+#include <cstdlib>
 #include <gsl/span>
 #include "base/os.h"
+#include "base/reader.h"
+#include "base/writer.h"
 #include "obc.h"
 #include "system.h"
 #include "yaffs.hpp"
@@ -42,6 +47,12 @@ void FSWriteFile(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
 
+    std::array<uint8_t, 256> partBuffer;
+
+    TerminalPartialRetrival retr(Main.terminal, partBuffer);
+
+    retr.Start();
+
     File f(Main.fs, argv[0], FileOpen::CreateAlways, FileAccess::WriteOnly);
     if (!f)
     {
@@ -51,7 +62,16 @@ void FSWriteFile(uint16_t argc, char* argv[])
     }
 
     f.Truncate(0);
-    f.Write(gsl::make_span(reinterpret_cast<uint8_t*>(argv[1]), strlen(argv[1])));
+
+    while (true)
+    {
+        auto part = retr.ReadPart();
+
+        if (!part.HasValue)
+            break;
+
+        f.Write(part.Value);
+    }
 }
 
 void FSReadFile(uint16_t argc, char* argv[])
@@ -65,14 +85,25 @@ void FSReadFile(uint16_t argc, char* argv[])
         return;
     }
 
+    char buf[5] = {0};
+    itoa(f.Size(), buf, 10);
+
+    Main.terminal.Puts(buf);
+    Main.terminal.NewLine();
+
     std::array<uint8_t, 100> buffer;
-    std::fill(buffer.begin(), buffer.end(), 0);
 
-    f.Read(buffer);
+    while (true)
+    {
+        auto r = f.Read(buffer);
+        if (!r || r.Result.size() == 0)
+        {
+            break;
+        }
 
-    buffer[99] = 0;
+        Main.terminal.PrintBuffer(r.Result);
+    }
 
-    Main.terminal.Puts(reinterpret_cast<char*>(buffer.data()));
     Main.terminal.NewLine();
 }
 

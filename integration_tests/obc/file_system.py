@@ -1,3 +1,5 @@
+import struct
+
 from .obc_mixin import OBCMixin, command, decode_lines
 
 
@@ -10,13 +12,11 @@ class FileSystemMixin(OBCMixin):
     def list_files(self, path):
         pass
 
-    @command("writeFile {0} {1}")
     def write_file(self, path, content):
-        pass
+        self._terminal.command_with_write_data("writeFile {0}".format(path), content)
 
-    @command("readFile {0}")
     def read_file(self, path):
-        pass
+        return self._terminal.command_with_read_data("readFile {0}".format(path))
 
     @command("sync_fs")
     def sync_fs(self):

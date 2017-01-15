@@ -73,7 +73,13 @@ class Terminal
      * @brief Print not-terminated buffer
      * @param[in] buffer Buffer to print
      */
-    void PrintBuffer(gsl::span<const char> buffer);
+    void PrintBuffer(gsl::span<const std::uint8_t> buffer);
+
+    /**
+     * @brief Reads number of bytes
+     * @param buffer Buffer to read to
+     */
+    void ReadBuffer(gsl::span<std::uint8_t> buffer);
 
   private:
     /**
@@ -109,6 +115,52 @@ class Terminal
      * @brief Command list
      */
     gsl::span<const TerminalCommandDescription> _commandList;
+};
+
+/**
+ * @brief Support class for reading lengthy data from terminal in parts
+ *
+ * Transfer is performed using following protocol:
+ * Host (H), Device (D)
+ * @verbatim
+ * D: #
+ * H: <Data length (32-bit, LE)>
+ * D: <Part length (32-bit LE)>
+ * H: <Requested number of bytes>
+ * D: <Part length (32-bit LE)>
+ * H: <Requested number of bytes>
+ * ...
+ * @endverbatim
+ */
+class TerminalPartialRetrival
+{
+  public:
+    /**
+     * @brief Initializes @see TerminalPartialRetrival instance
+     * @param terminal Terminal
+     * @param buffer Buffer used to store parts
+     */
+    TerminalPartialRetrival(Terminal& terminal, gsl::span<uint8_t> buffer);
+
+    /**
+     * @brief Initializes transfer
+     */
+    void Start();
+
+    /**
+     * @brief Reads single part from terminal
+     * @retval None of no more data to be retrieved
+     * @retval Some with span containing data read in current part
+     */
+    Option<gsl::span<uint8_t>> ReadPart();
+
+  private:
+    /** @brief Terminal */
+    Terminal& _terminal;
+    /** @brief Buffer used to store parts */
+    gsl::span<uint8_t> _buffer;
+    /** @brief Remaining data length */
+    std::size_t _remainingLength;
 };
 
 /** @} */

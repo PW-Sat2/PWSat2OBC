@@ -6,10 +6,12 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include <array>
 
 #include <em_cmu.h>
 #include <em_gpio.h>
 #include <em_leuart.h>
+#include "base/os.h"
 
 #include "dmadrv.h"
 #include "io_map.h"
@@ -17,8 +19,21 @@
 #include "line_io.h"
 #include "system.h"
 
-static SemaphoreHandle_t lineEndReceived;
+static SemaphoreHandle_t transferFinished;
 static unsigned int dmaChannel;
+
+void LEUART0_IRQHandler(void)
+{
+    uint32_t flags = LEUART_IntGet(LEUART0);
+    LEUART_IntClear(LEUART0, flags);
+
+    if (flags & LEUART_IF_SIGF)
+    {
+        xSemaphoreGiveFromISR(transferFinished, NULL);
+    }
+
+    portEND_SWITCHING_ISR(NULL);
+}
 
 static void leuartInit(void)
 {
@@ -38,15 +53,12 @@ static void leuartInit(void)
 
     LEUART0->SIGFRAME = '\n';
 
-    /* Enable LEUART Signal Frame Interrupt */
-    LEUART_IntEnable(LEUART0, LEUART_IEN_SIGF);
-
     /* Enable LEUART0 interrupt vector */
     NVIC_SetPriority(LEUART0_IRQn, io_map::LEUART::InterruptPriority);
 
     LEUART0->ROUTE = LEUART_ROUTE_RXPEN | LEUART_ROUTE_TXPEN | io_map::LEUART::Location;
 
-    lineEndReceived = xSemaphoreCreateBinary();
+    transferFinished = xSemaphoreCreateBinary();
 
     DMADRV_AllocateChannel(&dmaChannel, NULL);
 }
@@ -72,7 +84,7 @@ static void leuartvPrintf(LineIO* io, const char* text, va_list args)
     leuartPuts(io, buf);
 }
 
-static void leuartPrintBuffer(gsl::span<const char> buffer)
+static void leuartPrintBuffer(gsl::span<const std::uint8_t> buffer)
 {
     for (auto c : buffer)
     {
@@ -83,6 +95,8 @@ static void leuartPrintBuffer(gsl::span<const char> buffer)
 static size_t leuartReadline(LineIO* io, char* buffer, size_t bufferLength)
 {
     UNREFERENCED_PARAMETER(io);
+
+    LEUART_IntEnable(LEUART0, LEUART_IEN_SIGF);
 
     DMADRV_PeripheralMemory(dmaChannel,
         dmadrvPeripheralSignal_LEUART0_RXDATAV,
@@ -96,12 +110,14 @@ static size_t leuartReadline(LineIO* io, char* buffer, size_t bufferLength)
 
     NVIC_EnableIRQ(LEUART0_IRQn);
 
-    xSemaphoreTake(lineEndReceived, portMAX_DELAY);
-    portENTER_CRITICAL();
+    xSemaphoreTake(transferFinished, portMAX_DELAY);
+
     DMADRV_StopTransfer(dmaChannel);
 
     NVIC_DisableIRQ(LEUART0_IRQn);
-    portEXIT_CRITICAL();
+
+    LEUART_IntDisable(LEUART0, LEUART_IEN_SIGF);
+
     int remaining = 0;
 
     DMADRV_TransferRemainingCount(dmaChannel, &remaining);
@@ -111,17 +127,33 @@ static size_t leuartReadline(LineIO* io, char* buffer, size_t bufferLength)
     return bufferLength - remaining;
 }
 
-void LEUART0_IRQHandler(void)
+static bool BufferFilled(unsigned int channel, unsigned int sequenceNo, void* userParam)
 {
+    UNUSED(channel, sequenceNo, userParam);
+
+    System::GiveSemaphoreISR(transferFinished);
+
+    return true;
+}
+
+static void leuartReadBuffer(LineIO* io, gsl::span<uint8_t> buffer)
+{
+    UNREFERENCED_PARAMETER(io);
+
+    DMADRV_PeripheralMemory(dmaChannel,
+        dmadrvPeripheralSignal_LEUART0_RXDATAV,
+        buffer.data(),
+        (void*)&LEUART0->RXDATA,
+        true,
+        buffer.size(),
+        dmadrvDataSize1,
+        BufferFilled,
+        NULL);
+
+    System::TakeSemaphore(transferFinished, InfiniteTimeout);
+
     uint32_t flags = LEUART_IntGet(LEUART0);
     LEUART_IntClear(LEUART0, flags);
-
-    if (flags & LEUART_IF_SIGF)
-    {
-        xSemaphoreGiveFromISR(lineEndReceived, NULL);
-    }
-
-    portEND_SWITCHING_ISR(NULL);
 }
 
 void LeuartLineIOInit(LineIO* io)
@@ -133,4 +165,5 @@ void LeuartLineIOInit(LineIO* io)
     io->VPrintf = leuartvPrintf;
     io->Readline = leuartReadline;
     io->PrintBuffer = leuartPrintBuffer;
+    io->ReadBuffer = leuartReadBuffer;
 }
