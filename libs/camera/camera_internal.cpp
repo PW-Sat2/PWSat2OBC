@@ -364,7 +364,7 @@ uint32_t Camera::CameraReceiveData(uint8_t* data, uint32_t dataLength)
     LOG(LOG_LEVEL_INFO, "Finish receiving data.");
     return cmdData.dataLength;
 }
-
+/*
 int8_t Camera::CameraReceiveJPEGData(uint8_t* data, uint16_t dataLength, uint16_t packageSize)
 {
     uint16_t ret = 0;
@@ -392,7 +392,7 @@ int8_t Camera::CameraReceiveJPEGData(uint8_t* data, uint16_t dataLength, uint16_
     }
     return 0;
 }
-
+*/
 void Camera::CameraInit()
 {
 

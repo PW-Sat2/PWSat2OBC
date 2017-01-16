@@ -5,7 +5,8 @@
 #include "em_usart.h"
 #include "em_gpio.h"
 #include "dmadrv.h"
-
+#include "system.h"
+#include "base/os.h"
 
 using namespace drivers::uart;
 
@@ -20,6 +21,8 @@ static bool TransmitDmaComplete(unsigned int channel,
 	(void)channel;
 	(void)sequenceNo;
 	(void)userParam;
+	 System::EventGroupSetBitsISR(This->_transferGroup, TransferTXFinished);
+	 System::EndSwitchingISR();
 	return true;
   }
 
@@ -30,6 +33,8 @@ static bool ReceiveDmaComplete(unsigned int channel,
 	(void)channel;
 	(void)sequenceNo;
 	(void)userParam;
+	System::EventGroupSetBitsISR(This->_transferGroup, TransferRXFinished);
+	System::EndSwitchingISR();
 	return true;
   }
 
@@ -43,6 +48,8 @@ void Uart::InitializeDma(){
 	DMADRV_Init();
 	DMADRV_AllocateChannel(&rxDmaCh, NULL);
 	DMADRV_AllocateChannel(&txDmaCh, NULL);
+	this->rxlock = System::CreateBinarySemaphore();
+	this->txlock = System::CreateBinarySemaphore();
 
 }
 
@@ -110,6 +117,7 @@ UartResult Uart::Read(gsl::span<const uint8_t>data){
 			ReceiveDmaComplete,
 	        NULL);
 	 return UartResult::OK;
+	 System::EventGroupWaitForBits(this->_transferGroup, TransferFinished, true, true, InfiniteTimeout);
 }
 
 UartResult Uart::Write(gsl::span<const uint8_t>data){
@@ -132,4 +140,5 @@ UartResult Uart::Write(gsl::span<const uint8_t>data){
 							  TransmitDmaComplete,
 							  NULL);
 	 return UartResult::OK;
+	 System::EventGroupWaitForBits(this->_transferGroup, TransferFinished, true, true, InfiniteTimeout);
 }
