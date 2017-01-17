@@ -76,6 +76,14 @@ class Reader final
     uint16_t ReadWordLE();
 
     /**
+     * @brief Read single 16 bit word with little-endian memory orientation from the buffer,
+     * convert it into signed value and advance the current buffer position to the next unread byte.
+     * Value is read asuuming 2's complement notation.
+     * @return Read signed word value.
+     */
+    int16_t ReadSignedWordLE();
+
+    /**
      * @brief Read single 16 bit word with big-endian memory orientation from the buffer
      * and advance the current buffer position to the next unread byte.
      * @return Read word.
@@ -88,6 +96,14 @@ class Reader final
      * @return Read double word.
      */
     uint32_t ReadDoubleWordLE();
+
+    /**
+     * @brief Read single 32 bit word with little-endian memory orientation from the buffer,
+     * convert it into signed value and advance the current buffer position to the next unread byte.
+     * Value is read asuuming 2's complement notation.
+     * @return Read signed double word value.
+     */
+    int32_t ReadSignedDoubleWordLE();
 
     /**
      * @brief Read single 32 bit word with big-endian memory orientation from the buffer
