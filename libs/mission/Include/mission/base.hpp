@@ -118,7 +118,19 @@ namespace mission
          * @brief Arbitrary parameter passed to update procedure.
          */
         void* param;
+
+        UpdateResult Execute(State& state) const;
     };
+
+    template <typename State> inline UpdateResult UpdateDescriptor<State>::Execute(State& state) const
+    {
+        if (this->updateProc == nullptr)
+        {
+            return UpdateResult::Warning;
+        }
+
+        return this->updateProc(state, this->param);
+    }
 
     /**
      * @brief Enumerator of all possible state verification results.
@@ -266,7 +278,29 @@ namespace mission
          * @brief Pointer to action specific context object that is  passed to both action & condition procedures.
          */
         void* param;
+
+        inline bool EvaluateCondition(const State& state);
+
+        inline void Execute(const State& state);
     };
+
+    template <typename State> inline bool ActionDescriptor<State>::EvaluateCondition(const State& state)
+    {
+        if (this->condition == nullptr)
+        {
+            return true;
+        }
+
+        return this->condition(state, this->param);
+    }
+
+    template <typename State> inline void ActionDescriptor<State>::Execute(const State& state)
+    {
+        if (this->actionProc != nullptr)
+        {
+            this->actionProc(state, this->param);
+        }
+    }
 }
 
 #endif

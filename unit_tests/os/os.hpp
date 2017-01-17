@@ -42,6 +42,8 @@ struct IOS
         bool autoReset,
         const std::chrono::milliseconds timeout) = 0;
 
+    virtual OSEventBits EventGroupGetBits(OSEventGroupHandle eventGroup) = 0;
+
     virtual OSEventBits EventGroupSetBitsISR(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange) = 0;
 
     virtual void* Alloc(std::size_t size) = 0;

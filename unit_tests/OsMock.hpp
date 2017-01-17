@@ -48,6 +48,8 @@ struct OSMock : IOS
 
     MOCK_METHOD2(EventGroupSetBitsISR, OSEventBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange));
 
+    MOCK_METHOD1(EventGroupGetBits, OSEventBits(OSEventGroupHandle eventGroup));
+
     MOCK_METHOD1(Alloc, void*(std::size_t size));
     MOCK_METHOD1(Free, void(void* ptr));
     MOCK_METHOD2(CreateQueue, OSQueueHandle(std::size_t maxElementCount, std::size_t elementSize));
