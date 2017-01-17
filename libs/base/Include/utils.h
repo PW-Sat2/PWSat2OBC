@@ -121,15 +121,35 @@ template <class T> class Option
         return Option<T>(true, value);
     }
 
+    bool operator==(const T& other) const
+    {
+        if (!this->HasValue)
+        {
+            return false;
+        }
+
+        return this->Value == other;
+    }
+
+    bool operator==(const Option<T>& other) const
+    {
+        if (this->HasValue && other.HasValue)
+        {
+            return this->Value == other.Value;
+        }
+
+        return this->HasValue == other.HasValue;
+    }
+
     /**
       * @brief A flag indicating if this Option instance holds a value.
       */
-    const bool HasValue;
+    bool HasValue;
 
     /**
       * @brief Value held by Option instance if HasValue is true.
       */
-    const T Value;
+    T Value;
 
   private:
     Option(bool hasValue, T&& value) : HasValue(hasValue), Value(std::move(value))

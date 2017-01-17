@@ -330,6 +330,13 @@ class System final : public PureStatic
     static OSEventBits EventGroupClearBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange);
 
     /**
+     * @brief Gets current value of event group
+     * @param eventGroup Event group handle
+     * @return Value of event group from moment of call
+     */
+    static OSEventBits EventGroupGetBits(OSEventGroupHandle eventGroup);
+
+    /**
      * @brief Suspends current task execution until the specific bits in the event group are set.
      *
      * @param[in] eventGroup The affected event group handle.
@@ -602,6 +609,12 @@ template <typename Element, std::size_t Capacity> class Queue final
      */
     OSResult Pop(Element& element, std::chrono::milliseconds timeout);
 
+    /**
+     * @brief Overwrites last element in queue
+     * @param element Element
+     */
+    void Overwrite(const Element& element);
+
   private:
     /** @brief Queue handle */
     OSQueueHandle _handle;
@@ -646,6 +659,11 @@ OSResult Queue<Element, Capacity>::Pop(Element& element, std::chrono::millisecon
         return OSResult::Success;
     }
     return OSResult::Timeout;
+}
+
+template <typename Element, std::size_t Capacity> inline void Queue<Element, Capacity>::Overwrite(const Element& element)
+{
+    System::QueueOverwrite(this->_handle, &element);
 }
 
 /**
