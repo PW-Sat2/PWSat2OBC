@@ -29,11 +29,12 @@ namespace devices
 		{
     		int16_t UnsignedToSignedWord(uint16_t value)
 			{
-				return *reinterpret_cast<int16_t*>(&value);
+				//return *reinterpret_cast<int16_t*>(&value);
+    			return (int16_t)(value);
 			}
     		int32_t UnsignedToSignedDoubleWord(uint32_t value)
     		{
-    			return *reinterpret_cast<int32_t*>(&value);
+    			return (int32_t)(value);
     		}
 
     		int16_t ReadSignedWordLE(Reader& reader)
@@ -53,6 +54,10 @@ namespace devices
         constexpr int maximumWriteLength = 11;
 
         // ------------------------- status -------------------------
+
+        Status::Status() : value{0}
+		{
+		}
 
 		Status::Status(std::uint8_t val) : value{val}
 		{
@@ -80,6 +85,66 @@ namespace devices
 			return static_cast<Status::Error>(value & 0b00001111);
 		}
 
+		uint8_t Status::getValue() const
+		{
+			return this->value;
+		}
+
+		// ------------------------- Error -------------------------
+//		Error::Error() : value{0}
+//		{
+//		}
+//
+//		Error::Error(std::uint8_t val) : value{val}
+//		{
+//		}
+
+		bool Error::Ok()
+		{
+			return (this->value == 0);
+		}
+
+		bool Error::I2CFailure()
+		{
+			return (this->value & 0x01);
+		}
+
+		bool Error::SPIFailure()
+		{
+			return (this->value & 0x02);
+		}
+
+		bool Error::ADCFailure()
+		{
+			return (this->value & 0x04);
+		}
+
+		bool Error::PWMFailure()
+		{
+			return (this->value & 0x08);
+		}
+
+		bool Error::SystemFailure()
+		{
+			return (this->value & 0x10);
+		}
+
+		bool Error::MagnetometerValuesOusideExpectedRange()
+		{
+			return (this->value & 0x20);
+		}
+
+		bool Error::CoilCurrentsOusideExpectedRange()
+		{
+			return (this->value & 0x40);
+		}
+
+		uint8_t Error::GetValue() const
+		{
+			return value;
+		}
+
+
 		// ------------------------- Public functions -------------------------
 
         ImtqDriver::ImtqDriver(drivers::i2c::II2CBus& i2cbus) : i2cbus{i2cbus}
@@ -91,6 +156,7 @@ namespace devices
             return SendCommand(OpCode::NoOperation);
         }
 
+        //TODO: re-think
         bool ImtqDriver::SoftwareReset()
         {
         	uint8_t opcode = static_cast<uint8_t>(OpCode::SoftwareReset);
@@ -401,30 +467,26 @@ namespace devices
 
 		bool ImtqDriver::SetParameter(Parameter id, gsl::span<const uint8_t> value)
         {
-			std::array<uint8_t, 11> request;
-			std::array<uint8_t, 12> response;
-
+			if (value.size() > 8)
+			{
+				return false;
+			}
+			std::array<uint8_t, 10> paramsArray;
 			Writer writer;
-			WriterInitialize(&writer, &request[0], 3);
-			WriterWriteByte(&writer, static_cast<uint8_t>(OpCode::SetParameter));
+			WriterInitialize(&writer, paramsArray.begin(), 3);
 			WriterWriteWordLE(&writer, id);
-			std::copy(value.begin(), value.end(), request.begin() + 3);
+			std::copy(value.begin(), value.end(), paramsArray.begin() + writer.position);
+			span<uint8_t> params{paramsArray.begin(), 2 + value.size()};
 
-			auto i2cstatus = i2cbus.WriteRead(I2Cadress,
-					                          gsl::span<uint8_t>(request.begin(), 3 + value.size()),
-											  gsl::span<uint8_t>(response.begin(), 4 + value.size()));
+			std::array<uint8_t, 12> responseArray;
+			span<uint8_t> response{responseArray.begin(), 4 + value.size()};
 
-            Status status{response[1]};
-
-            if (i2cstatus != I2CResult::OK ||
-            	status.CmdError() != Status::Error::Accepted ||
-				static_cast<uint8_t>(OpCode::SetParameter) != response[0] ||
-				! std::equal(value.begin(), value.end(), response.begin() + 4))
-            {
-                return false;
-            }
-
-            return true;
+			if (!WriteRead(OpCode::SetParameter, params, response) ||
+				!std::equal(params.begin(), params.end(), response.begin() + 2))
+			{
+				return false;
+			}
+			return true;
         }
 
         bool ImtqDriver::ResetParameterAndGetDefault(Parameter id, gsl::span<uint8_t> result)
@@ -453,6 +515,10 @@ namespace devices
 
         bool ImtqDriver::GetParameterWithOpcode(OpCode opcode, Parameter id, gsl::span<uint8_t> result)
         {
+			if (result.size() > 8)
+			{
+				return false;
+			}
         	std::array<uint8_t, 2> params;
 			Writer writer;
 			WriterInitialize(&writer, params.begin(), 2);
@@ -461,8 +527,7 @@ namespace devices
 			std::array<uint8_t, 12> responseArray;
 			span<uint8_t> response(responseArray.begin(), result.size() + 4);
 
-			if (!WriteRead(opcode, params, response) ||
-				!std::equal(params.begin(), params.end(), result.begin()+2))
+			if (!WriteRead(opcode, params, response))
 			{
 				return false;
 			}

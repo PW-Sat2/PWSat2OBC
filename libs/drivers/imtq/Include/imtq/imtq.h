@@ -13,10 +13,6 @@
 
 template<typename T>
 using Vector3 = std::array<T, 3>;
-//template<typename T>
-//class Vector3 : public std::array<T, 3>
-//{
-//};
 
 namespace devices
 {
@@ -69,6 +65,7 @@ namespace devices
 				InternalError = 7
         	};
 
+        	Status();
         	Status(std::uint8_t);
         	bool IsNew();
         	bool InvalidX();
@@ -76,37 +73,52 @@ namespace devices
         	bool InvalidZ();
         	Error CmdError();
 
+        	std::uint8_t getValue() const;
+
           private:
         	std::uint8_t value;
         };
 
-        using Current = std::uint16_t;
         // representation: 1 LSB = 1e-4 A
+        using Current = std::uint16_t;
 
         // representation: 1 LSB = 1e-4 Am^2
         using Dipole = std::uint16_t;
 
-    	enum class Mode
+    	enum class Mode : std::uint8_t
 		{
     		Idle = 0,
 			Selftest = 1,
 			Detumble = 2
     	};
 
-		enum class Error
+		class Error
 		{
-			OK = 0x00,
-			I2CFailure = 0x01,
-			SPIFailure = 0x02,
-			ADCFailure = 0x04,
-			PWMFailure = 0x08,
-			SystemFailure = 0x10,
-			MagnetometerValuesOusideExpectedRange = 0x20,
-			CoilCurrentsOusideExpectedRange = 0x40
+		 public:
+			constexpr Error() : value{0} {};
+			constexpr Error(std::uint8_t val) : value{val} {};
+
+			bool Ok();
+			bool I2CFailure();
+			bool SPIFailure();
+			bool ADCFailure();
+			bool PWMFailure();
+			bool SystemFailure();
+			bool MagnetometerValuesOusideExpectedRange();
+			bool CoilCurrentsOusideExpectedRange();
+
+			std::uint8_t GetValue() const;
+		 private:
+			std::uint8_t value;
 		};
 
         struct ImtqState
         {
+			ImtqState() : status{},
+			  			  mode{Mode::Idle},
+						  error{0},
+						  anyParameterUpdatedSinceStartup{false},
+						  uptime{0} {}
         	Status status;
         	Mode mode;
         	Error error;
@@ -216,11 +228,11 @@ namespace devices
             bool GetHouseKeepingEngineering(HouseKeepingEngineering& result);
 
             // ----- Configuration -----
-            using Parameter = std::uint16_t; //TODO: change to enum
+            using Parameter = std::uint16_t;
 
-            bool GetParameter(Parameter id, gsl::span<uint8_t> result);
-            bool SetParameter(Parameter id, gsl::span<const uint8_t> value);
-            bool ResetParameterAndGetDefault(Parameter id, gsl::span<uint8_t> result);
+            bool GetParameter(Parameter id, gsl::span<std::uint8_t> result);
+            bool SetParameter(Parameter id, gsl::span<const std::uint8_t> value);
+            bool ResetParameterAndGetDefault(Parameter id, gsl::span<std::uint8_t> result);
 
           private:
             drivers::i2c::II2CBus& i2cbus;
@@ -228,9 +240,9 @@ namespace devices
             bool SendCommand(OpCode opcode);
             bool SendCommand(OpCode opcode, gsl::span<const std::uint8_t> params);
             bool SendCommand(gsl::span<const std::uint8_t> params);
-            bool DataRequest(OpCode opcode, gsl::span<uint8_t> response);
-            bool GetParameterWithOpcode(OpCode opcode, Parameter id, gsl::span<uint8_t> result);
-            bool WriteRead(OpCode opcode, gsl::span<const uint8_t> params, gsl::span<uint8_t> result);
+            bool DataRequest(OpCode opcode, gsl::span<std::uint8_t> response);
+            bool GetParameterWithOpcode(OpCode opcode, Parameter id, gsl::span<std::uint8_t> result);
+            bool WriteRead(OpCode opcode, gsl::span<const std::uint8_t> params, gsl::span<std::uint8_t> result);
         };
     }
 }
