@@ -192,14 +192,14 @@ namespace devices
 			return SendCommand(OpCode::StartMTMMeasurement);
 		}
 
-        bool ImtqDriver::StartActuationCurrent(Vector3<Current> current, std::chrono::milliseconds duration)
+        bool ImtqDriver::StartActuationCurrent(const Vector3<Current>& current, std::chrono::milliseconds duration)
         {
         	std::array<uint8_t, 8> parameters;
         	Writer writer;
         	WriterInitialize(&writer, parameters.data(), parameters.size());
         	FOR_AXIS(i)
         	{
-        		WriterWriteWordLE(&writer, current[i]);
+        		WriterWriteSignedWordLE(&writer, current[i]);
         	}
         	WriterWriteWordLE(&writer, duration.count());
 
@@ -215,7 +215,7 @@ namespace devices
 			{
 				WriterWriteWordLE(&writer, dipole[i]);
 			}
-			WriterWriteWordLE(&writer, duration.count());
+			WriterWriteSignedWordLE(&writer, duration.count());
 
 			return this->SendCommand(OpCode::StartActuationDipole, parameters);
         }
@@ -258,13 +258,14 @@ namespace devices
 
 
 
-        bool ImtqDriver::GetCalibratedMagnetometerData(MagnetometerMeasurementResult& result)
+        bool ImtqDriver::GetCalibratedMagnetometerData(MagnetometerMeasurementResult& result, bool& newValue)
         {
         	std::array<uint8_t, 15> value;
         	if (!this->DataRequest(OpCode::GetCalibratedMTMData, value))
         	{
         		return false;
         	}
+        	newValue = Status{value[1]}.IsNew();
 
         	Reader reader{value};
         	reader.Skip(2);
@@ -546,9 +547,11 @@ namespace devices
             		                          request,
 											  response);
 
+            auto status = Status{response[1]};
             if (i2cstatus != I2CResult::OK ||
             	static_cast<uint8_t>(opcode) != response[0] ||
-				Status{response[1]}.CmdError() != Status::Error::Accepted)
+				status.CmdError() != Status::Error::Accepted ||
+				status.InvalidX() || status.InvalidY() || status.InvalidZ())
             {
                 return false;
             }

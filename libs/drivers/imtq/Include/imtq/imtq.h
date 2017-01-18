@@ -80,10 +80,10 @@ namespace devices
         };
 
         // representation: 1 LSB = 1e-4 A
-        using Current = std::uint16_t;
+        using Current = std::int16_t;
 
         // representation: 1 LSB = 1e-4 Am^2
-        using Dipole = std::uint16_t;
+        using Dipole = std::int16_t;
 
     	enum class Mode : std::uint8_t
 		{
@@ -127,7 +127,7 @@ namespace devices
         };
 
         // representation: 1 LSB = 1e-7 T
-        using MagnetometerMeasurement = std::uint32_t;
+        using MagnetometerMeasurement = std::int32_t;
 
         struct MagnetometerMeasurementResult
         {
@@ -136,7 +136,7 @@ namespace devices
         };
 
         // representation: 1 LSB = 1 centigrade
-        using TemperatureMeasurement = std::uint16_t;
+        using TemperatureMeasurement = std::int16_t;
 
         struct SelfTestResult
         {
@@ -154,8 +154,6 @@ namespace devices
 
         	struct StepResult
 			{
-
-
 				Error error;
 				Step actualStep;
 
@@ -171,7 +169,7 @@ namespace devices
         struct DetumbleData
         {
         	// representation -  1e-9 T/s
-        	using BDotType = std::uint32_t;
+        	using BDotType = std::int32_t;
 
         	Vector3<MagnetometerMeasurement> calibratedMagnetometerMeasurement;
         	Vector3<MagnetometerMeasurement> filteredMagnetometerMeasurement;
@@ -196,7 +194,7 @@ namespace devices
 
         	VoltageInMiliVolt digitalVoltage, analogVoltage;
         	Current digitalCurrent, analogCurrent;
-        	Vector3<VoltageInMiliVolt> coilCurrent;
+        	Vector3<Current> coilCurrent;
         	Vector3<TemperatureMeasurement> coilTemperature;
         	TemperatureMeasurement MCUtemperature;
         };
@@ -211,14 +209,14 @@ namespace devices
             bool SoftwareReset();
             bool CancelOperation();
             bool StartMTMMeasurement();
-            bool StartActuationCurrent(Vector3<Current> current, std::chrono::milliseconds duration);
+            bool StartActuationCurrent(const Vector3<Current>& current, std::chrono::milliseconds duration);
             bool StartActuationDipole(Vector3<Dipole> dipole, std::chrono::milliseconds duration);
             bool StartAllAxisSelfTest();
             bool StartBDotDetumbling(std::chrono::seconds duration);
 
             // ----- Data requests -----
             bool GetSystemState(ImtqState& state);
-            bool GetCalibratedMagnetometerData(MagnetometerMeasurementResult& result);
+            bool GetCalibratedMagnetometerData(MagnetometerMeasurementResult& result, bool& newValue);
             bool GetCoilCurrent(Vector3<Current>& result);
             bool GetCoilTemperature(Vector3<TemperatureMeasurement>& result);
             bool GetCommandedActuationDipole(Vector3<Dipole>& result);
