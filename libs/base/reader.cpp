@@ -59,6 +59,11 @@ uint16_t Reader::ReadWordLE()
     }
 }
 
+int16_t Reader::ReadSignedWordLE()
+{
+    return (int16_t)(this->ReadWordLE());
+}
+
 uint16_t Reader::ReadWordBE()
 {
     if (!UpdateState(2))
@@ -89,6 +94,30 @@ uint32_t Reader::ReadDoubleWordLE()
         value += this->buffer[this->position - 3];
         value <<= 8;
         value += this->buffer[this->position - 4];
+        return value;
+    }
+}
+
+int32_t Reader::ReadSignedDoubleWordLE()
+{
+    return (int32_t)(this->ReadDoubleWordLE());
+}
+
+uint32_t Reader::ReadDoubleWordBE()
+{
+    if (!UpdateState(4))
+    {
+        return 0;
+    }
+    else
+    {
+        uint32_t value = this->buffer[this->position - 4];
+        value <<= 8;
+        value += this->buffer[this->position - 3];
+        value <<= 8;
+        value += this->buffer[this->position - 2];
+        value <<= 8;
+        value += this->buffer[this->position - 1];
         return value;
     }
 }
@@ -135,4 +164,9 @@ gsl::span<const uint8_t> Reader::ReadArray(uint16_t length)
 int32_t Reader::RemainingSize()
 {
     return this->buffer.size() - this->position;
+}
+
+gsl::span<const uint8_t> Reader::ReadToEnd()
+{
+    return this->ReadArray(this->RemainingSize());
 }

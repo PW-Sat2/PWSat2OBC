@@ -9,6 +9,7 @@
 
 using drivers::i2c::II2CBus;
 using drivers::i2c::I2CResult;
+using namespace std::chrono_literals;
 
 #define EPS_ADDRESS 12
 
@@ -40,25 +41,25 @@ bool EpsOpenSail(void)
     {
         return false;
     }
-    System::SleepTask(100);
+    System::SleepTask(100ms);
 
     if (!epsControlLCL(EPS_LCL_SAIL_0, false))
     {
         return false;
     }
-    System::SleepTask(100);
+    System::SleepTask(100ms);
 
     if (!epsControlLCL(EPS_LCL_SAIL_1, true))
     {
         return false;
     }
-    System::SleepTask(100);
+    System::SleepTask(100ms);
 
     if (!epsControlLCL(EPS_LCL_SAIL_1, false))
     {
         return false;
     }
-    System::SleepTask(100);
+    System::SleepTask(100ms);
 
     return true;
 }

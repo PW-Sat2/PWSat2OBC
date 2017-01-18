@@ -1,34 +1,11 @@
 #include "TimePoint.h"
 
-TimeSpan TimeSpanFromMilliseconds(uint64_t milliseconds)
-{
-    const TimeSpan span = {milliseconds};
-    return span;
-}
+using std::chrono::milliseconds;
+using std::chrono::duration_cast;
 
-TimeSpan TimeSpanFromSeconds(uint32_t seconds)
+milliseconds TimeSpanFromDays(uint32_t days)
 {
-    return TimeSpanFromMilliseconds(seconds * 1000ull);
-}
-
-TimeSpan TimeSpanFromMinutes(uint32_t minutes)
-{
-    return TimeSpanFromMilliseconds(minutes * 60000ull);
-}
-
-TimeSpan TimeSpanFromHours(uint32_t hours)
-{
-    return TimeSpanFromMilliseconds(hours * 3600000ull);
-}
-
-TimeSpan TimeSpanFromDays(uint32_t days)
-{
-    return TimeSpanFromMilliseconds(days * 24ull * 3600000ull);
-}
-
-uint32_t TimeSpanToSeconds(TimeSpan span)
-{
-    return span.value / 1000;
+    return duration_cast<milliseconds>(std::chrono::hours(days * 24));
 }
 
 TimePoint TimePointBuild(uint16_t day, uint8_t hour, uint8_t minute, uint8_t second, uint16_t millisecond)
@@ -44,13 +21,13 @@ TimePoint TimePointBuild(uint16_t day, uint8_t hour, uint8_t minute, uint8_t sec
 
 TimePoint TimePointNormalize(TimePoint point)
 {
-    return TimePointFromTimeSpan(TimePointToTimeSpan(point));
+    return TimePointFromDuration(TimePointToTimeSpan(point));
 }
 
-TimePoint TimePointFromTimeSpan(const TimeSpan timeSpan)
+TimePoint TimePointFromDuration(const milliseconds timeSpan)
 {
     TimePoint point = {};
-    uint64_t span = timeSpan.value;
+    uint64_t span = timeSpan.count();
     point.milisecond = span % 1000;
     span /= 1000;
     point.second = span % 60;
@@ -62,7 +39,7 @@ TimePoint TimePointFromTimeSpan(const TimeSpan timeSpan)
     return point;
 }
 
-TimeSpan TimePointToTimeSpan(TimePoint point)
+milliseconds TimePointToTimeSpan(TimePoint point)
 {
     uint64_t result = point.day;
     result *= 24;
@@ -73,17 +50,5 @@ TimeSpan TimePointToTimeSpan(TimePoint point)
     result += point.second;
     result *= 1000;
     result += point.milisecond;
-    return TimeSpanFromMilliseconds(result);
-}
-
-TimeSpan TimeSpanAdd(TimeSpan left, TimeSpan right)
-{
-    left.value += right.value;
-    return left;
-}
-
-TimeShift TimeSpanSub(TimeSpan left, TimeSpan right)
-{
-    const TimeShift result = {static_cast<uint8_t>(left.value - right.value)};
-    return result;
+    return milliseconds(result);
 }

@@ -12,7 +12,7 @@ namespace mission
     UpdateResult TimeTask::UpdateProc(SystemState& state, void* param)
     {
         auto timeProvider = static_cast<TimeProvider*>(param);
-        Option<TimeSpan> currentTime = timeProvider->GetCurrentTime();
+        Option<std::chrono::milliseconds> currentTime = timeProvider->GetCurrentTime();
 
         if (currentTime.HasValue)
         {

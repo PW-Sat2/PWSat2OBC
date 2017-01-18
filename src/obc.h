@@ -9,12 +9,12 @@
 #include "antenna/driver.h"
 #include "antenna/miniport.h"
 #include "base/os.h"
-#include "communication.h"
 #include "fs/fs.h"
 #include "fs/yaffs.h"
 #include "leuart/line_io.h"
 #include "n25q/n25q.h"
 #include "n25q/yaffs.h"
+#include "obc/communication.h"
 #include "obc/hardware.h"
 #include "obc/storage.h"
 #include "spi/efm.h"
@@ -75,7 +75,7 @@ struct OBC
     PowerControl PowerControlInterface;
 
     /** @brief Overall satellite <-> Earth communication */
-    communication::OBCCommunication Communication;
+    obc::OBCCommunication Communication;
 
     /** @brief OBC storage */
     obc::OBCStorage Storage;

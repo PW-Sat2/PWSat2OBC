@@ -19,7 +19,6 @@ set(SOURCES
     commands/dma.cpp
     obc.h
     obc.cpp
-    communication.cpp
     fault_handlers.cpp
 )
 
@@ -48,7 +47,6 @@ target_link_libraries(${NAME}
     power_eps
     terminal
     assert
-    telecommand_handling
     gsl
     n25q
     antenna
@@ -57,6 +55,7 @@ target_link_libraries(${NAME}
     mission_time
     yaffs
     obc_storage
+    obc_communication
     obc_hardware
     spi
     efm_emlib

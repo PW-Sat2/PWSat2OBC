@@ -1,8 +1,10 @@
 #include <cstring>
 #include "struct.h"
 
+using namespace std::chrono_literals;
+
 SystemState::SystemState() //
-    : Time(TimeSpanFromMilliseconds(0)),
+    : Time(0ms),
       SailOpened(false)
 {
     Antenna.Deployed = false;

@@ -1,9 +1,10 @@
 #include "gtest/gtest.h"
-#include "gmock/gmock-matchers.h"
+#include "gmock/gmock.h"
 #include "base/reader.h"
 #include "system.h"
 
 using testing::Eq;
+using testing::ElementsAre;
 
 TEST(ReaderTest, TestDefaultCtor)
 {
@@ -102,6 +103,26 @@ TEST(ReaderTest, TestReadingWordLE)
     ASSERT_TRUE(reader.Status());
 }
 
+TEST(ReaderTest, TestReadingSignedWordLE)
+{
+    uint8_t array[] = {0x00, 0x00,
+                       0xFF, 0xFF,
+                       0xFF, 0x7F,
+                       0x00, 0x80,
+                       0x68, 0xC5,
+                       0x98, 0x3A};
+    Reader reader;
+    reader.Initialize(array);
+    
+    ASSERT_THAT(reader.ReadSignedWordLE(), Eq(0));
+    ASSERT_THAT(reader.ReadSignedWordLE(), Eq(-1));
+    ASSERT_THAT(reader.ReadSignedWordLE(), Eq(32767));
+    ASSERT_THAT(reader.ReadSignedWordLE(), Eq(-32768));
+    ASSERT_THAT(reader.ReadSignedWordLE(), Eq(-15000));
+    ASSERT_THAT(reader.ReadSignedWordLE(), Eq(15000));
+    ASSERT_TRUE(reader.Status());
+}
+
 TEST(ReaderTest, TestReadingWordBE)
 {
     Reader reader;
@@ -139,6 +160,41 @@ TEST(ReaderTest, TestReadingDWordLE)
 
     reader.Initialize(array);
     ASSERT_THAT(reader.ReadDoubleWordLE(), Eq(0xEE77AA55U));
+    ASSERT_TRUE(reader.Status());
+}
+
+TEST(ReaderTest, TestReadingSignedDWordLE)
+{
+    uint8_t array[] = {0x0, 0x0, 0x0, 0x0,
+                       0xFF, 0xFF, 0xFF, 0xFF,
+                       0xFF, 0x7F, 0x0, 0x0,
+                       0x0, 0x80, 0xFF, 0xFF,
+                       0xFF, 0xFF, 0xFF, 0x7F,
+                       0x0, 0x0, 0x0, 0x80,
+                       0xD2, 0x2, 0x96, 0x49,
+                       0x2E, 0xFD, 0x69, 0xB6};
+    Reader reader;
+    reader.Initialize(array);
+    
+    ASSERT_THAT(reader.ReadSignedDoubleWordLE(), Eq(0));
+    ASSERT_THAT(reader.ReadSignedDoubleWordLE(), Eq(-1));
+    ASSERT_THAT(reader.ReadSignedDoubleWordLE(), Eq(32767));
+    ASSERT_THAT(reader.ReadSignedDoubleWordLE(), Eq(-32768));
+    ASSERT_THAT(reader.ReadSignedDoubleWordLE(), Eq(2147483647));
+    ASSERT_THAT(reader.ReadSignedDoubleWordLE(), Eq(-2147483648));
+    ASSERT_THAT(reader.ReadSignedDoubleWordLE(), Eq(1234567890));
+    ASSERT_THAT(reader.ReadSignedDoubleWordLE(), Eq(-1234567890));
+
+    ASSERT_TRUE(reader.Status());
+}
+
+TEST(ReaderTest, TestReadingDWordBE)
+{
+    Reader reader;
+    uint8_t array[] = {0x55, 0xaa, 0x77, 0xee};
+
+    reader.Initialize(array);
+    ASSERT_THAT(reader.ReadDoubleWordBE(), Eq(0x55AA77EEU));
     ASSERT_TRUE(reader.Status());
 }
 
@@ -256,4 +312,27 @@ TEST(ReaderTest, TestRemainigSizeAtTheEnd)
     reader.ReadByte();
     reader.ReadWordBE();
     ASSERT_THAT(reader.RemainingSize(), Eq(0));
+}
+
+TEST(ReaderTest, TestReadingToEnd)
+{
+    std::array<uint8_t, 5> a{1, 2, 3, 4, 5};
+
+    Reader reader(a);
+
+    reader.ReadByte();
+
+    ASSERT_THAT(reader.ReadToEnd(), ElementsAre(2, 3, 4, 5));
+}
+
+TEST(ReaderTest, TestReadingToEndWhenNothingLeftIsCorrect)
+{
+    std::array<uint8_t, 1> a{1};
+
+    Reader reader(a);
+
+    reader.ReadByte();
+
+    ASSERT_THAT(reader.ReadToEnd().size(), Eq(0));
+    ASSERT_THAT(reader.Status(), Eq(true));
 }

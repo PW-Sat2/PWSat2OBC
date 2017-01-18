@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <chrono>
 #include "system.h"
 
 EXTERNC_BEGIN
@@ -32,98 +33,11 @@ typedef struct
 } TimePoint;
 
 /**
- * @brief Type used to measure current mission time in milliseconds.
- *
- * The point with zero time (beginning of time) is considered to be
- * beginning of the mission itself.
- */
-typedef struct
-{
-    uint64_t value; ///< Time span length in milliseconds.
-} TimeSpan;
-
-/**
- * @brief Type used to represents different between two time spans.
- */
-typedef struct
-{
-    int64_t value; ///< Time shift length in milliseconds.
-} TimeShift;
-
-/**
- * @brief Creates TimeSpan object initialized from time specified in milliseconds.
- * @param[in] milliseconds TimeSpan value in milliseconds.
- * @return Prepared time span object.
- */
-TimeSpan TimeSpanFromMilliseconds(uint64_t milliseconds);
-
-/**
- * @brief Creates TimeSpan object initialized from time specified in seconds.
- * @param[in] seconds TimeSpan value in seconds.
- * @return Prepared time span object.
- */
-TimeSpan TimeSpanFromSeconds(uint32_t seconds);
-
-/**
- * @brief Creates TimeSpan object initialized from time specified in minutes.
- * @param[in] minutes TimeSpan value in minutes.
- * @return Prepared time span object.
- */
-TimeSpan TimeSpanFromMinutes(uint32_t minutes);
-
-/**
- * @brief Creates TimeSpan object initialized from time specified in hours.
- * @param[in] hours TimeSpan value in hours.
- * @return Prepared time span object.
- */
-TimeSpan TimeSpanFromHours(uint32_t hours);
-
-/**
  * @brief Creates TimeSpan object initialized from time specified in days.
  * @param[in] days TimeSpan value in days.
  * @return Prepared time span object.
  */
-TimeSpan TimeSpanFromDays(uint32_t days);
-
-/**
- * @brief Adds together two TimeSpan objects.
- * @param[in] left TimeSpan value to add.
- * @param[in] right TimeSpan value to add.
- * @return Addition result.
- */
-TimeSpan TimeSpanAdd(TimeSpan left, TimeSpan right);
-
-/**
- * @brief Subtracts two TimeSpan objects.
- * @param[in] left TimeSpan value to subtract from.
- * @param[in] right TimeSpan value to be subtracted.
- * @return Subtraction result.
- */
-TimeShift TimeSpanSub(TimeSpan left, TimeSpan right);
-
-/**
- * @brief Compares two TimeSpan objects.
- * @param[in] left TimeSpan value to compare.
- * @param[in] right TimeSpan value to compare.
- * @return Comparison result. True when two TimeSpans are equal, false otherwise.
- */
-static bool TimeSpanEqual(const TimeSpan left, const TimeSpan right);
-
-/**
- * @brief Compares two TimeSpan objects.
- * @param[in] left TimeSpan value to compare.
- * @param[in] right TimeSpan value to compare.
- * @return Comparison result. True when two TimeSpans are not equal, false otherwise.
- */
-static bool TimeSpanNotEqual(const TimeSpan left, const TimeSpan right);
-
-/**
- * @brief Determines whether left TimeSpan object is strictly smaller than right object.
- * @param[in] left TimeSpan value to compare.
- * @param[in] right TimeSpan value to compare.
- * @return Comparison result. True when left TimeSpan object is strictly smaller than right object, false otherwise.
- */
-static bool TimeSpanLessThan(const TimeSpan left, const TimeSpan right);
+std::chrono::milliseconds TimeSpanFromDays(uint32_t days);
 
 /**
  * @brief This procedure builds Time point object.
@@ -143,22 +57,14 @@ TimePoint TimePointBuild(uint16_t day, uint8_t hour, uint8_t minute, uint8_t sec
  * @param[in] span Time span to convert.
  * @return Decoded time point object.
  */
-TimePoint TimePointFromTimeSpan(TimeSpan span);
+TimePoint TimePointFromDuration(std::chrono::milliseconds span);
 
 /**
  * @brief This procedure converts decoded time point object into time span value.
  * @param[in] point Time point object to convert.
  * @return Converted time span value.
  */
-TimeSpan TimePointToTimeSpan(TimePoint point);
-
-/**
- * @brief This procedure converts passed timespan value to time span that is
- * measured in seconds.
- * @param[in] span Time span to convert.
- * @return Time span in seconds.
- */
-uint32_t TimeSpanToSeconds(TimeSpan span);
+std::chrono::milliseconds TimePointToTimeSpan(TimePoint point);
 
 /**
  * @brief This procedure normalizes TimePoint object.
@@ -210,27 +116,12 @@ static inline bool TimePointNotEqual(TimePoint left, TimePoint right)
 
 static inline bool TimePointEqual(TimePoint left, TimePoint right)
 {
-    return TimeSpanEqual(TimePointToTimeSpan(left), TimePointToTimeSpan(right));
+    return TimePointToTimeSpan(left) == TimePointToTimeSpan(right);
 }
 
 static inline bool TimePointLessThan(TimePoint left, TimePoint right)
 {
-    return TimeSpanLessThan(TimePointToTimeSpan(left), TimePointToTimeSpan(right));
-}
-
-static inline bool TimeSpanEqual(const TimeSpan left, const TimeSpan right)
-{
-    return left.value == right.value;
-}
-
-static inline bool TimeSpanNotEqual(const TimeSpan left, const TimeSpan right)
-{
-    return left.value != right.value;
-}
-
-static inline bool TimeSpanLessThan(const TimeSpan left, const TimeSpan right)
-{
-    return left.value < right.value;
+    return TimePointToTimeSpan(left) < TimePointToTimeSpan(right);
 }
 
 /** @} */

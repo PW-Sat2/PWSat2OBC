@@ -36,6 +36,13 @@ enum N25QCommand
     WriteStatusRegister = 0x01
 };
 
+constexpr std::chrono::milliseconds N25QDriver::ProgramPageTimeout;
+constexpr std::chrono::milliseconds N25QDriver::EraseSubSectorTimeout;
+constexpr std::chrono::seconds N25QDriver::EraseSectorTimeout;
+constexpr std::chrono::seconds N25QDriver::EraseChipTimeOut;
+constexpr std::chrono::milliseconds N25QDriver::ResetTimeout;
+constexpr std::chrono::milliseconds N25QDriver::WriteStatusRegisterTimeout;
+
 static inline void WriterWriteAddress(Writer* writer, size_t address)
 {
     WriterWriteByte(writer, static_cast<uint8_t>((address >> 2 * 8) & 0xFF));
@@ -162,7 +169,7 @@ void N25QDriver::EnableWrite()
     this->Command(N25QCommand::WriteEnable);
 }
 
-bool N25QDriver::WaitBusy(OSTaskTimeSpan timeout)
+bool N25QDriver::WaitBusy(std::chrono::milliseconds timeout)
 {
     Timeout timeoutCheck(timeout);
 

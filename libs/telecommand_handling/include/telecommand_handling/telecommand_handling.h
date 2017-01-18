@@ -17,85 +17,14 @@ namespace telecommands
          * @{
          */
 
-        /** @brief Result of telecommand decryption */
-        enum class DecryptStatus
-        {
-            /** Decryption successful */
-            Success,
-
-            /** Decryption failed */
-            Failed
-        };
-
-        /**
-         * @brief Reason of frame decryption failure
-         */
-        enum class DecryptFrameFailureReason
-        {
-            GeneralError //!< GeneralError
-        };
-
-        /**
-         * @brief Result of frame decryption.  It is (sort of) discrinated union: Success | Failure
-         */
-        class DecryptFrameResult
-        {
-          public:
-            /**
-             * @brief Crates success result
-             * @param[in] decrypted Decrypted frame
-             * @return Success result
-             */
-            static const DecryptFrameResult Success(gsl::span<const std::uint8_t> decrypted);
-
-            /**
-             * @brief Creates failure result
-             * @param[in] reason Failure reason
-             * @return Failure result
-             */
-            static const DecryptFrameResult Failure(DecryptFrameFailureReason reason);
-
-            /** @brief Differentiates success from failure */
-            const bool IsSuccess;
-            /** @brief (Success-only) Decrypted frame */
-            const gsl::span<const std::uint8_t> Decrypted;
-            /** @brief (Failure-only) Failure reason */
-            const DecryptFrameFailureReason FailureReason;
-
-          private:
-            /**
-             * @brief Constructor for success case
-             * @param[in] decrypted Decrypted frame
-             */
-            DecryptFrameResult(gsl::span<const std::uint8_t> decrypted);
-
-            /**
-             * @brief Constructor for failure case
-             * @param[in] reason Failure reason
-             */
-            DecryptFrameResult(DecryptFrameFailureReason reason);
-        };
-
-        /**
-         * Interface describing how incoming frame decryption should be performed
-         */
-        struct IDecryptFrame
-        {
-            /**
-             * @brief Decrypts incoming frame
-             * @param[in] frame Incoming (encrypted) frame
-             * @param[out] decrypted Buffer for decrypted data
-             * @return Operation status
-             */
-            virtual DecryptFrameResult Decrypt(gsl::span<const uint8_t> frame, gsl::span<uint8_t> decrypted) = 0;
-        };
-
         /**
          * @brief Reason of telecommand decoding failure
          */
         enum class DecodeTelecommandFailureReason
         {
-            GeneralError //!< General error
+            MalformedFrame,      //!< Malformed frame
+            InvalidSecurityCode, //!< Invalid security code
+            GeneralError         //!< General error
         };
 
         /**
@@ -182,12 +111,10 @@ namespace telecommands
           public:
             /**
              * Constructs \ref IncomingTelecommandHandler object
-             * @param[in] decryptFrame Frame decryption implementation
              * @param[in] decodeTelecommand Telecommand decoding implementation
              * @param[in] telecommands Array of pointers to telecommands
              */
-            IncomingTelecommandHandler(
-                IDecryptFrame& decryptFrame, IDecodeTelecommand& decodeTelecommand, gsl::span<IHandleTeleCommand*> telecommands);
+            IncomingTelecommandHandler(IDecodeTelecommand& decodeTelecommand, gsl::span<IHandleTeleCommand*> telecommands);
 
             /**
              * Handles incoming frame and dispatches (if possible) telecommand
@@ -206,8 +133,6 @@ namespace telecommands
             void DispatchCommandHandler(
                 devices::comm::ITransmitFrame& transmitter, std::uint8_t commandCode, gsl::span<const uint8_t> parameters);
 
-            /** @brief Frame decryption implementation */
-            IDecryptFrame& _decryptFrame;
             /** @brief Telecommand decoding implementation */
             IDecodeTelecommand& _decodeTelecommand;
             /** @brief Array of pointers to telecommands */

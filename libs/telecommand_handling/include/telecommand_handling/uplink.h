@@ -13,17 +13,14 @@ namespace telecommands
      *
      * This is just dummy implementation that assumes no encoding/encryption and uses first byte in frame as command code.
      */
-    class UplinkProtocol final : public telecommands::handling::IDecryptFrame, public telecommands::handling::IDecodeTelecommand
+    class UplinkProtocol final : public telecommands::handling::IDecodeTelecommand
     {
       public:
         /**
-         * @brief Copies input frame to @p decrypted buffer
-         * @param[in] frame Input frame
-         * @param[in] decrypted Buffer for decrypted data
-         * @return Always success
+         * @brief Initializes @ref UplinkProtocol instance
+         * @param[in] securityCode Security code
          */
-        virtual telecommands::handling::DecryptFrameResult Decrypt(
-            gsl::span<const std::uint8_t> frame, gsl::span<std::uint8_t> decrypted) override;
+        UplinkProtocol(std::uint32_t securityCode);
 
         /**
          * @brief Decodes frame into command code (first byte) and parameters (rest of frame)
@@ -31,6 +28,10 @@ namespace telecommands
          * @return Decoding result
          */
         virtual telecommands::handling::DecodeTelecommandResult Decode(gsl::span<const std::uint8_t> frame) override;
+
+      private:
+        /** @brief Security code */
+        std::uint32_t _securityCode;
     };
 }
 

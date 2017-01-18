@@ -2,6 +2,8 @@
 #include "eps/eps.h"
 #include "state/struct.h"
 
+using namespace std::chrono_literals;
+
 namespace mission
 {
     SailTask::SailTask(bool isSailOpened) : state(isSailOpened)
@@ -38,8 +40,8 @@ namespace mission
     {
         UNREFERENCED_PARAMETER(param);
 
-        const TimeSpan t = TimeSpanFromHours(40);
-        if (TimeSpanLessThan(state.Time, t))
+        const auto t = 40h;
+        if (state.Time < t)
         {
             return false;
         }

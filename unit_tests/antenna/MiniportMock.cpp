@@ -33,7 +33,7 @@ static OSResult DeployAntenna(struct AntennaMiniportDriver* driver,
     II2CBus* /*communicationBus*/,
     AntennaChannel channel,
     AntennaId antennaId,
-    TimeSpan timeout,
+    std::chrono::milliseconds timeout,
     bool override //
     )
 {
@@ -44,7 +44,7 @@ static OSResult DeployAntenna(struct AntennaMiniportDriver* driver,
 static OSResult InitializeAutomaticDeployment(struct AntennaMiniportDriver* driver,
     II2CBus* /*communicationBus*/,
     AntennaChannel channel,
-    TimeSpan timeout //
+    std::chrono::milliseconds timeout //
     )
 {
     auto mock = static_cast<AntennaMiniportMock*>(driver);
@@ -85,7 +85,7 @@ static OSResult GetAntennaActivationTime(struct AntennaMiniportDriver* driver,
     II2CBus* /*communicationBus*/,
     AntennaChannel channel,
     AntennaId antennaId,
-    TimeSpan* count //
+    std::chrono::milliseconds* count //
     )
 {
     auto mock = static_cast<AntennaMiniportMock*>(driver);

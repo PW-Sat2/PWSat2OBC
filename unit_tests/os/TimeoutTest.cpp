@@ -10,6 +10,7 @@
 using testing::Test;
 using testing::Return;
 using testing::Eq;
+using namespace std::chrono_literals;
 
 class TimeoutTest : public Test
 {
@@ -28,22 +29,22 @@ TimeoutTest::TimeoutTest()
 
 TEST_F(TimeoutTest, ZeroTimeoutWillExpireImmediately)
 {
-    EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0));
+    EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0ms));
 
-    Timeout t(0);
+    Timeout t(0ms);
 
     ASSERT_THAT(t.Expired(), Eq(true));
 }
 
 TEST_F(TimeoutTest, TimeoutWillExpireAfterSpecifiedNumberOfMiliseconds)
 {
-    EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(100));
+    EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(100ms));
 
-    Timeout t(10);
+    Timeout t(10ms);
 
     ASSERT_THAT(t.Expired(), Eq(false));
 
-    EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(110));
+    EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(110ms));
 
     ASSERT_THAT(t.Expired(), Eq(true));
 }
