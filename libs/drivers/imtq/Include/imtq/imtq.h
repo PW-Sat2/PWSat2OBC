@@ -3,16 +3,14 @@
 
 #include <stdbool.h>
 #include <array>
-#include <cstdint>
 #include <chrono>
-#include <experimental/optional>
+#include <cstdint>
 #include <gsl/span>
 
 #include "base/os.h"
 #include "i2c/i2c.h"
 
-template<typename T>
-using Vector3 = std::array<T, 3>;
+template <typename T> using Vector3 = std::array<T, 3>;
 
 namespace devices
 {
@@ -54,29 +52,29 @@ namespace devices
         class Status
         {
           public:
-        	enum class Error
-			{
-        		Accepted = 0,
-        		Rejected = 1,
-				InvalidCommandCode = 2,
-				ParameterMissing = 3,
-				ParameterInvalid = 4,
-				CommandUnavailableInCurrentMode = 5,
-				InternalError = 7
-        	};
+            enum class Error
+            {
+                Accepted = 0,
+                Rejected = 1,
+                InvalidCommandCode = 2,
+                ParameterMissing = 3,
+                ParameterInvalid = 4,
+                CommandUnavailableInCurrentMode = 5,
+                InternalError = 7
+            };
 
-        	Status();
-        	Status(std::uint8_t);
-        	bool IsNew();
-        	bool InvalidX();
-        	bool InvalidY();
-        	bool InvalidZ();
-        	Error CmdError();
+            Status();
+            Status(std::uint8_t);
+            bool IsNew();
+            bool InvalidX();
+            bool InvalidY();
+            bool InvalidZ();
+            Error CmdError();
 
-        	std::uint8_t getValue() const;
+            std::uint8_t getValue() const;
 
           private:
-        	std::uint8_t value;
+            std::uint8_t value;
         };
 
         // representation: 1 LSB = 1e-4 A
@@ -85,45 +83,44 @@ namespace devices
         // representation: 1 LSB = 1e-4 Am^2
         using Dipole = std::int16_t;
 
-    	enum class Mode : std::uint8_t
-		{
-    		Idle = 0,
-			Selftest = 1,
-			Detumble = 2
-    	};
+        enum class Mode : std::uint8_t
+        {
+            Idle = 0,
+            Selftest = 1,
+            Detumble = 2
+        };
 
-		class Error
-		{
-		 public:
-			constexpr Error() : value{0} {};
-			constexpr Error(std::uint8_t val) : value{val} {};
+        class Error
+        {
+          public:
+            constexpr Error() : value{0} {};
+            constexpr Error(std::uint8_t val) : value{val} {};
 
-			bool Ok();
-			bool I2CFailure();
-			bool SPIFailure();
-			bool ADCFailure();
-			bool PWMFailure();
-			bool SystemFailure();
-			bool MagnetometerValuesOusideExpectedRange();
-			bool CoilCurrentsOusideExpectedRange();
+            bool Ok();
+            bool I2CFailure();
+            bool SPIFailure();
+            bool ADCFailure();
+            bool PWMFailure();
+            bool SystemFailure();
+            bool MagnetometerValuesOusideExpectedRange();
+            bool CoilCurrentsOusideExpectedRange();
 
-			std::uint8_t GetValue() const;
-		 private:
-			std::uint8_t value;
-		};
+            std::uint8_t GetValue() const;
+
+          private:
+            std::uint8_t value;
+        };
 
         struct ImtqState
         {
-			ImtqState() : status{},
-			  			  mode{Mode::Idle},
-						  error{0},
-						  anyParameterUpdatedSinceStartup{false},
-						  uptime{0} {}
-        	Status status;
-        	Mode mode;
-        	Error error;
-        	bool anyParameterUpdatedSinceStartup;
-        	std::chrono::seconds uptime;
+            ImtqState() : status{}, mode{Mode::Idle}, error{0}, anyParameterUpdatedSinceStartup{false}, uptime{0}
+            {
+            }
+            Status status;
+            Mode mode;
+            Error error;
+            bool anyParameterUpdatedSinceStartup;
+            std::chrono::seconds uptime;
         };
 
         // representation: 1 LSB = 1e-7 T
@@ -131,8 +128,8 @@ namespace devices
 
         struct MagnetometerMeasurementResult
         {
-        	Vector3<MagnetometerMeasurement> data;
-        	bool coilActuationDuringMeasurement;
+            Vector3<MagnetometerMeasurement> data;
+            bool coilActuationDuringMeasurement;
         };
 
         // representation: 1 LSB = 1 centigrade
@@ -140,77 +137,69 @@ namespace devices
 
         struct SelfTestResult
         {
-        	enum class Step
-			{
-				Init = 0x00, //
-				Xp   = 0x01,
-				Xn   = 0x02,
-				Yp   = 0x03,
-				Yn   = 0x04,
-				Zp   = 0x05,
-				Zn   = 0x06,
-				Fina = 0x07
-			};
+            enum class Step
+            {
+                Init = 0x00, //
+                Xp = 0x01,
+                Xn = 0x02,
+                Yp = 0x03,
+                Yn = 0x04,
+                Zp = 0x05,
+                Zn = 0x06,
+                Fina = 0x07
+            };
 
-        	struct StepResult
-			{
-				Error error;
-				Step actualStep;
+            struct StepResult
+            {
+                Error error;
+                Step actualStep;
 
-				Vector3<MagnetometerMeasurement> RawMagnetometerMeasurement;
-				Vector3<MagnetometerMeasurement> CalibratedMagnetometerMeasurement;
-				Vector3<Current> CoilCurrent;
-				Vector3<TemperatureMeasurement> CoilTemperature;
-			};
+                Vector3<MagnetometerMeasurement> RawMagnetometerMeasurement;
+                Vector3<MagnetometerMeasurement> CalibratedMagnetometerMeasurement;
+                Vector3<Current> CoilCurrent;
+                Vector3<TemperatureMeasurement> CoilTemperature;
+            };
 
-        	std::array<StepResult, 8> stepResults;
+            std::array<StepResult, 8> stepResults;
         };
 
         struct DetumbleData
         {
-        	// representation -  1e-9 T/s
-        	using BDotType = std::int32_t;
+            // representation -  1e-9 T/s
+            using BDotType = std::int32_t;
 
-        	Vector3<MagnetometerMeasurement> calibratedMagnetometerMeasurement;
-        	Vector3<MagnetometerMeasurement> filteredMagnetometerMeasurement;
-        	Vector3<BDotType> bDotData;
-        	Vector3<Dipole> commandedDipole;
-        	Vector3<Current> commandedCurrent;
-        	Vector3<Current> measuredCurrent;
+            Vector3<MagnetometerMeasurement> calibratedMagnetometerMeasurement;
+            Vector3<MagnetometerMeasurement> filteredMagnetometerMeasurement;
+            Vector3<BDotType> bDotData;
+            Vector3<Dipole> commandedDipole;
+            Vector3<Current> commandedCurrent;
+            Vector3<Current> measuredCurrent;
         };
 
         struct HouseKeepingRAW
         {
-        	std::uint16_t digitalVoltage, analogVoltage;
-        	std::uint16_t digitalCurrent, analogCurrent;
-        	Vector3<std::uint16_t> coilCurrent;
-        	Vector3<std::uint16_t> coilTemperature;
-        	std::uint16_t MCUtemperature;
+            std::uint16_t digitalVoltage, analogVoltage;
+            std::uint16_t digitalCurrent, analogCurrent;
+            Vector3<std::uint16_t> coilCurrent;
+            Vector3<std::uint16_t> coilTemperature;
+            std::uint16_t MCUtemperature;
         };
 
         struct HouseKeepingEngineering
         {
-        	using VoltageInMiliVolt = std::uint16_t;
+            using VoltageInMiliVolt = std::uint16_t;
 
-        	VoltageInMiliVolt digitalVoltage, analogVoltage;
-        	Current digitalCurrent, analogCurrent;
-        	Vector3<Current> coilCurrent;
-        	Vector3<TemperatureMeasurement> coilTemperature;
-        	TemperatureMeasurement MCUtemperature;
+            VoltageInMiliVolt digitalVoltage, analogVoltage;
+            Current digitalCurrent, analogCurrent;
+            Vector3<Current> coilCurrent;
+            Vector3<TemperatureMeasurement> coilTemperature;
+            TemperatureMeasurement MCUtemperature;
         };
 
         class ImtqDriver final
         {
           public:
             ImtqDriver(drivers::i2c::II2CBus& i2cbus);
-
-            // ----- High-level -----
-            bool PerformSelfTest(SelfTestResult& result);
-            bool ISISBDotDetumbling(std::chrono::seconds duration);
-            bool PWSatDetumbling(const Vector3<Dipole>& dipole,
-            			         Vector3<MagnetometerMeasurement>& mgtmMeasurement);
-
-
 
             // ----- Commands -----
             bool SendNoOperation();

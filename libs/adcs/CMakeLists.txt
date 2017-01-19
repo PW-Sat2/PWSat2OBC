@@ -1,15 +1,19 @@
 set(NAME adcs)
 
 set(SOURCES      
-    adcs.cpp   
+    adcs.cpp
+    imtq.cpp
     Include/adcs/adcs.h
+    Include/adcs/imtq.h
 )
 
 add_library(${NAME} STATIC ${SOURCES})
 
 target_link_libraries(${NAME}
-    base    
+    base
     logger
+    imtq
+    i2c
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
