@@ -20,6 +20,7 @@ using std::uint16_t;
 using std::uint32_t;
 using gsl::span;
 using drivers::i2c::I2CResult;
+using namespace std::chrono_literals;
 
 namespace devices
 {
@@ -151,6 +152,114 @@ namespace devices
         {
         }
 
+        // ---------------------------- High-level ----------------------------
+
+        bool ImtqDriver::PerformSelfTest(SelfTestResult& result)
+        {
+        	ImtqState state;
+        	if (!this->GetSystemState(state))
+			{
+				return false;
+			}
+			if (state.mode != Mode::Idle)
+			{
+				if (!this->CancelOperation())
+				{
+					return false;
+				}
+			}
+
+			System::SleepTask(100ms);
+
+        	if (!this->StartAllAxisSelfTest())
+        	{
+        		return false;
+        	}
+        	// 8 times 3-axis measurement, default integration time 10ms
+        	System::SleepTask(240ms);
+
+        	for(int tries = 0; tries < 10; ++tries)
+        	{
+        		if (!this->GetSystemState(state))
+        		{
+        			return false;
+        		}
+        		if (state.mode == Mode::Idle)
+        		{
+        			break;
+        		}
+        		System::SleepTask(50ms);
+        	}
+        	if (state.mode != Mode::Idle)
+			{
+        		this->CancelOperation();
+				return false;
+			}
+
+        	return this->GetSelfTestResult(result);
+        }
+
+        bool ImtqDriver::ISISBDotDetumbling(std::chrono::seconds duration)
+        {
+        	ImtqState state;
+			if (!this->GetSystemState(state))
+			{
+				return false;
+			}
+			if (state.mode != Mode::Detumble)
+			{
+				if (!this->CancelOperation())
+				{
+					return false;
+				}
+			}
+			return this->StartBDotDetumbling(duration);
+        }
+
+        bool ImtqDriver::PWSatDetumbling(const Vector3<Dipole>& dipole,
+        			                     Vector3<MagnetometerMeasurement>& mgtmMeasurement)
+        {
+        	if (!this->CancelOperation())
+			{
+				return false;
+			}
+
+        	System::SleepTask(10ms); // magnetic field decay
+
+        	this->StartMTMMeasurement();
+
+        	System::SleepTask(30ms); // integration time
+
+        	bool timeout = true;
+        	for(int tries = 0; tries < 10; ++tries)
+			{
+        		MagnetometerMeasurementResult result;
+        		bool newData;
+        		GetCalibratedMagnetometerData(result, newData);
+        		if (result.coilActuationDuringMeasurement)
+        		{
+        			return false;
+        		}
+        		if (newData)
+        		{
+        			mgtmMeasurement = result.data;
+        			timeout = false;
+        			break;
+        		}
+				System::SleepTask(10ms);
+			}
+
+        	if (timeout)
+        	{
+        		return false;
+        	}
+
+        	return this->StartActuationDipole(dipole, 1s);
+
+        }
+
+
+        // ----------------------------- Commands -----------------------------
         bool ImtqDriver::SendNoOperation()
         {
             return SendCommand(OpCode::NoOperation);
@@ -236,6 +345,9 @@ namespace devices
 
         	return this->SendCommand(OpCode::StartBDOT, parameters);
         }
+
+
+        // --------------------------- Data requests --------------------------
 
         bool ImtqDriver::GetSystemState(ImtqState& state)
         {
@@ -459,7 +571,7 @@ namespace devices
 			return true;
 		}
 
-        // ----- Configuration -----
+		// --------------------------- Configuration --------------------------
 
 		bool ImtqDriver::GetParameter(Parameter id, gsl::span<uint8_t> result)
 		{

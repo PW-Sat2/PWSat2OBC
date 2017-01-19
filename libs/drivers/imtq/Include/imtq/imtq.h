@@ -204,6 +204,14 @@ namespace devices
           public:
             ImtqDriver(drivers::i2c::II2CBus& i2cbus);
 
+            // ----- High-level -----
+            bool PerformSelfTest(SelfTestResult& result);
+            bool ISISBDotDetumbling(std::chrono::seconds duration);
+            bool PWSatDetumbling(const Vector3<Dipole>& dipole,
+            			         Vector3<MagnetometerMeasurement>& mgtmMeasurement);
+
+
+
             // ----- Commands -----
             bool SendNoOperation();
             bool SoftwareReset();
