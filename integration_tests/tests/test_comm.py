@@ -1,11 +1,11 @@
 import struct
 
 from build_config import config
-import devices
 from tests.base import BaseTest
 from system import auto_comm_handling, auto_power_on
 from utils import TestEvent
 from obc import *
+from devices import *
 
 class Test_Comm(BaseTest):
     @auto_power_on(False)
@@ -92,7 +92,7 @@ class Test_Comm(BaseTest):
 
     def test_should_receive_biggest_possible_frame(self):
         self.startup()
-        frame = "".join([chr(ord('A') + i % 25) for i in xrange(0, devices.Comm.MAX_UPLINK_CONTENT_SIZE)])
+        frame = "".join([chr(ord('A') + i % 25) for i in xrange(0, Comm.MAX_UPLINK_CONTENT_SIZE)])
         self.system.receiver.put_frame(frame)
 
         received_frame = self.system.obc.receive_frame()
@@ -105,7 +105,7 @@ class Test_Comm(BaseTest):
         doppler = 412
         rssi = 374
 
-        response = devices.ReceiverDevice.build_frame_response(data, doppler, rssi)
+        response = ReceiverDevice.build_frame_response(data, doppler, rssi)
 
         self.assertEqual(response[0:2], [0x30, 0x01], "Length")
         self.assertEqual(response[2:4], [0x9C, 0x01], "Doppler")
@@ -134,3 +134,38 @@ class Test_Comm(BaseTest):
         self.system.comm.on_watchdog_reset = event.set
         self.power_on_and_wait()
         self.assertTrue(event.wait_for_change(5))
+
+    def test_set_baud_rate(self):
+        event = TestEvent()
+        self.system.transmitter.on_set_baudrate = event.set
+        self.startup()
+        self.system.obc.comm_set_bitrate(BaudRate.BaudRate9600)
+        event.wait_for_change(2)
+        self.assertEqual(self.system.transmitter.baud_rate, BaudRate.BaudRate9600)
+
+    def test_get_transmitter_telemetry(self):
+        def get_telemetry_handler(*args):
+            return TransmitterTelemetry.build(0x123, 0x456, 0x789, 0xabc)
+
+        self.system.transmitter.on_get_telemetry = get_telemetry_handler
+        self.startup()
+        telemetry = self.system.obc.comm_get_transmitter_telemetry()
+        self.assertEqual(telemetry.RFReflectedPower, 0x123)
+        self.assertEqual(telemetry.AmplifierTemperature, 0x456)
+        self.assertEqual(telemetry.RFForwardPower, 0x789)
+        self.assertEqual(telemetry.TransmitterCurrentConsumption, 0xabc)
+
+    def test_get_receiver_telemetry(self):
+        def get_telemetry_handler(*args):
+            return ReceiverTelemetry.build(0x123, 0x456, 0x789, 0xabc, 0xdef, 0x234, 0x567)
+
+        self.system.receiver.on_get_telemetry = get_telemetry_handler
+        self.startup()
+        telemetry = self.system.obc.comm_get_receiver_telemetry()
+        self.assertEqual(telemetry.TransmitterCurrentConsumption, 0x123)
+        self.assertEqual(telemetry.ReceiverCurrentConsumption, 0x456)
+        self.assertEqual(telemetry.DopplerOffset, 0x789)
+        self.assertEqual(telemetry.Vcc, 0xabc)
+        self.assertEqual(telemetry.OscilatorTemperature, 0xdef)
+        self.assertEqual(telemetry.AmplifierTemperature, 0x234)
+        self.assertEqual(telemetry.SignalStrength, 0x567)

@@ -135,3 +135,56 @@ void AntennaGetDeploymentStatus(uint16_t argc, char* argv[])
             );
     }
 }
+
+void PrintValue(int value, bool print, const char* name)
+{
+    if (print)
+    {
+        Main.terminal.Printf("%s: '%d'", name, value);
+    }
+    else
+    {
+        Main.terminal.Printf("%s: Unavailable", name);
+    }
+}
+
+void AntennaGetTelemetry(uint16_t /*argc*/, char* /*argv*/ [])
+{
+    auto telemetry = Main.antennaDriver.GetTelemetry(&Main.antennaDriver);
+    PrintValue(telemetry.ActivationCount[0], has_flag(telemetry.flags, ANT_TM_ANTENNA1_ACTIVATION_COUNT), "Antenna 1 activation count");
+    PrintValue(telemetry.ActivationCount[1], has_flag(telemetry.flags, ANT_TM_ANTENNA2_ACTIVATION_COUNT), "Antenna 2 activation count");
+    PrintValue(telemetry.ActivationCount[2], has_flag(telemetry.flags, ANT_TM_ANTENNA3_ACTIVATION_COUNT), "Antenna 3 activation count");
+    PrintValue(telemetry.ActivationCount[3], has_flag(telemetry.flags, ANT_TM_ANTENNA4_ACTIVATION_COUNT), "Antenna 4 activation count");
+
+    PrintValue(
+        telemetry.ActivationTime[0].count(), has_flag(telemetry.flags, ANT_TM_ANTENNA1_ACTIVATION_TIME), "Antenna 1 activation count");
+    PrintValue(
+        telemetry.ActivationTime[1].count(), has_flag(telemetry.flags, ANT_TM_ANTENNA2_ACTIVATION_TIME), "Antenna 2 activation count");
+    PrintValue(
+        telemetry.ActivationTime[2].count(), has_flag(telemetry.flags, ANT_TM_ANTENNA3_ACTIVATION_TIME), "Antenna 3 activation count");
+    PrintValue(
+        telemetry.ActivationTime[3].count(), has_flag(telemetry.flags, ANT_TM_ANTENNA4_ACTIVATION_TIME), "Antenna 4 activation count");
+
+    PrintValue(telemetry.Temperature[0], has_flag(telemetry.flags, ANT_TM_TEMPERATURE1), "Primary controller temperature");
+    PrintValue(telemetry.Temperature[1], has_flag(telemetry.flags, ANT_TM_TEMPERATURE2), "Backup controller temperature");
+}
+
+void AntennaReset(uint16_t argc, char* argv[])
+{
+    AntennaChannel channel;
+    if (argc != 1 || !GetChannel(argv[0], &channel))
+    {
+        Main.terminal.Puts("antenna_reset [primary|backup]\n");
+        return;
+    }
+
+    const OSResult result = Main.antennaDriver.Reset(&Main.antennaDriver, channel);
+    if (OS_RESULT_SUCCEEDED(result))
+    {
+        Main.terminal.Puts("Done");
+    }
+    else
+    {
+        Main.terminal.Printf("Unable to reset antenna. Status: '%d'", result);
+    }
+}

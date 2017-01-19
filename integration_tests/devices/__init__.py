@@ -12,5 +12,8 @@ __all__ = [
     'TimeoutDevice',
     'AntennaController',
     'PRIMARY_ANTENNA_CONTROLLER_ADDRESS',
-    'BACKUP_ANTENNA_CONTROLLER_ADDRESS'
+    'BACKUP_ANTENNA_CONTROLLER_ADDRESS',
+    'BaudRate',
+    'TransmitterTelemetry',
+    'ReceiverTelemetry'
 ]
