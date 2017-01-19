@@ -1,4 +1,6 @@
+import re
 from enum import Enum, unique
+from devices import TransmitterTelemetry, ReceiverTelemetry
 from .obc_mixin import OBCMixin, command, decode_return
 
 @unique
@@ -39,6 +41,45 @@ class CommMixin(OBCMixin):
     def comm_reset(self, module):
         pass
 
+    @command("comm_set_bitrate {0}")
+    def comm_set_bitrate(self, bitrate):
+        pass
+
     def comm_auto_handling(self, enable):
         if not enable:
             self._command("pauseComm")
+
+    @staticmethod
+    def extract_value(string):
+        m = re.search('(.+):\ *\'(\d+)\'', string)
+        return (m.group(1), int(m.group(2)))
+
+    @staticmethod
+    def set_attribute(object, tupple):
+        setattr(object, tupple[0], tupple[1])
+
+    def _parse_transmitter_telemetry(result):
+        telemetry = TransmitterTelemetry()
+        parts = result.split("\n")
+        for part in parts:
+            CommMixin.set_attribute(telemetry, CommMixin.extract_value(part))
+
+        return telemetry
+
+    def _parse_receiver_telemetry(result):
+        telemetry = ReceiverTelemetry()
+        parts = result.split("\n")
+        for part in parts:
+            CommMixin.set_attribute(telemetry, CommMixin.extract_value(part))
+
+        return telemetry
+
+    @decode_return(_parse_transmitter_telemetry)
+    @command("comm_get_telemetry transmitter")
+    def comm_get_transmitter_telemetry(self):
+        pass
+
+    @decode_return(_parse_receiver_telemetry)
+    @command("comm_get_telemetry receiver")
+    def comm_get_receiver_telemetry(self):
+        pass

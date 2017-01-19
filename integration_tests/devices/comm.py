@@ -3,11 +3,11 @@ import struct
 
 import i2cMock
 import time
+from enum import Enum, unique
 from Queue import Queue, Empty
 from threading import Lock
 from utils import *
 from build_config import config
-
 
 class DownlinkFrame:
     def __init__(self, apid, seq, payload):
@@ -44,6 +44,81 @@ class UplinkFrame:
     def build(self):
         return self._bytes
 
+@unique
+class BaudRate(Enum):
+    BaudRate0 = 0
+    BaudRate1200 = 1
+    BaudRate2400 = 2
+    BaudRate4800 = 4
+    BaudRate9600 = 8
+
+    def __str__(self):
+        map = {
+            self.BaudRate0: "0",
+            self.BaudRate1200: "1200",
+            self.BaudRate2400: "2400",
+            self.BaudRate4800: "4800",
+            self.BaudRate9600: "9600",
+        }
+
+        return map[self]
+
+class TransmitterTelemetry(object):
+    def __init__(self):
+        self.RFReflectedPower = 0
+        self.AmplifierTemperature = 0
+        self.RFForwardPower = 0
+        self.TransmitterCurrentConsumption = 0
+
+    @staticmethod
+    def build(rfPower, temperature, forwardPower, current):
+        telemetry = TransmitterTelemetry()
+        telemetry.RFReflectedPower = rfPower
+        telemetry.AmplifierTemperature = temperature
+        telemetry.RFForwardPower = forwardPower
+        telemetry.TransmitterCurrentConsumption = current
+        return telemetry
+
+    def toArray(self):
+        return [
+            lower_byte(self.RFReflectedPower), higher_byte(self.RFReflectedPower),
+            lower_byte(self.AmplifierTemperature), higher_byte(self.AmplifierTemperature),
+            lower_byte(self.RFForwardPower), higher_byte(self.RFForwardPower),
+            lower_byte(self.TransmitterCurrentConsumption), higher_byte(self.TransmitterCurrentConsumption)
+            ]
+
+class ReceiverTelemetry(object):
+    def __init__(self):
+        self.TransmitterCurrentConsumption = 0
+        self.ReceiverCurrentConsumption = 0
+        self.DopplerOffset = 0
+        self.Vcc = 0
+        self.OscilatorTemperature = 0
+        self.AmplifierTemperature = 0
+        self.SignalStrength = 0
+
+    @staticmethod
+    def build(TransmitterCurrentConsumption, ReceiverCurrentConsumption, DopplerOffset, Vcc, OscilatorTemperature, AmplifierTemperature, SignalStrength):
+        telemetry = ReceiverTelemetry()
+        telemetry.TransmitterCurrentConsumption = TransmitterCurrentConsumption
+        telemetry.ReceiverCurrentConsumption = ReceiverCurrentConsumption
+        telemetry.DopplerOffset = DopplerOffset
+        telemetry.Vcc = Vcc
+        telemetry.OscilatorTemperature = OscilatorTemperature
+        telemetry.AmplifierTemperature = AmplifierTemperature
+        telemetry.SignalStrength = SignalStrength
+        return telemetry
+
+    def toArray(self):
+        return [
+            lower_byte(self.TransmitterCurrentConsumption), higher_byte(self.TransmitterCurrentConsumption),
+            lower_byte(self.DopplerOffset), higher_byte(self.DopplerOffset),
+            lower_byte(self.ReceiverCurrentConsumption), higher_byte(self.ReceiverCurrentConsumption),
+            lower_byte(self.Vcc), higher_byte(self.Vcc),
+            lower_byte(self.OscilatorTemperature), higher_byte(self.OscilatorTemperature),
+            lower_byte(self.AmplifierTemperature), higher_byte(self.AmplifierTemperature),
+            lower_byte(self.SignalStrength), higher_byte(self.SignalStrength),
+            ]
 
 class TransmitterDevice(i2cMock.I2CDevice):
     BUFFER_SIZE = 40
@@ -55,8 +130,11 @@ class TransmitterDevice(i2cMock.I2CDevice):
         self.on_hardware_reset = None
         self.on_reset = None
         self.on_send_frame = None
+        self.on_set_baudrate = None
+        self.on_get_telemetry = None
         self._buffer = Queue(TransmitterDevice.BUFFER_SIZE)
         self._lock = Lock()
+        self.baud_rate = BaudRate.BaudRate1200
     
     @i2cMock.command([0xAA])
     def _reset(self):
@@ -83,6 +161,16 @@ class TransmitterDevice(i2cMock.I2CDevice):
             self._buffer.put_nowait(data)
             return [TransmitterDevice.BUFFER_SIZE - self._buffer.qsize()]
 
+    @i2cMock.command([0x28])
+    def _set_baudrate(self, baudrate):
+        baudrate = BaudRate(baudrate)
+        self.baud_rate = call(self.on_set_baudrate, baudrate, baudrate)
+
+    @i2cMock.command([0x26])
+    def _get_telemetry(self):
+        telemetry = call(self.on_get_telemetry, TransmitterTelemetry())
+        return telemetry.toArray()
+
     def get_message_from_buffer(self, timeout=None):
         return self._buffer.get(timeout=timeout)
 
@@ -100,6 +188,7 @@ class ReceiverDevice(i2cMock.I2CDevice):
         self.on_reset = None
         self.on_frame_remove = None
         self.on_frame_receive = None
+        self.on_get_telemetry = None
         self._buffer = Queue()
         self._lock = Lock()
 
@@ -145,6 +234,11 @@ class ReceiverDevice(i2cMock.I2CDevice):
                     self._buffer.get_nowait()
         except Empty:
             pass
+
+    @i2cMock.command([0x1A])
+    def _get_telemetry(self):
+        telemetry = call(self.on_get_telemetry, ReceiverTelemetry())
+        return telemetry.toArray()
 
     def reset(self):
         with self._lock:

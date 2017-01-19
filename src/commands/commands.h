@@ -13,6 +13,8 @@ void GetFramesCountHandler(std::uint16_t argc, char* argv[]);
 void ReceiveFrameHandler(std::uint16_t argc, char* argv[]);
 void CommandPauseComm(std::uint16_t argc, char* argv[]);
 void CommReset(uint16_t argc, char* argv[]);
+void CommGetTelemetry(uint16_t argc, char* argv[]);
+void CommSetBaudRate(uint16_t argc, char* argv[]);
 void OBCGetState(std::uint16_t argc, char* argv[]);
 void FSListFiles(std::uint16_t argc, char* argv[]);
 void FSWriteFile(std::uint16_t argc, char* argv[]);
@@ -28,6 +30,8 @@ void HeapInfoCommand(std::uint16_t argc, char* argv[]);
 void AntennaDeploy(std::uint16_t argc, char* argv[]);
 void AntennaCancelDeployment(std::uint16_t argc, char* argv[]);
 void AntennaGetDeploymentStatus(std::uint16_t argc, char* argv[]);
+void AntennaGetTelemetry(uint16_t argc, char* argv[]);
+void AntennaReset(uint16_t argc, char* argv[]);
 
 void HeapInfo(uint16_t argc, char* argv[]);
 

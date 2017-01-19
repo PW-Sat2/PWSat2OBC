@@ -19,6 +19,12 @@ def pad_to_multiply(s, base):
 def b64pad(s):
     return pad_to_multiply(s, 3, '=')
 
+def lower_byte(value):
+    return value & 0xff
+
+def higher_byte(value):
+    return (value >> 8) & 0xff
+
 class ExtendableFormatter(Formatter):
     _converters = {}
 
