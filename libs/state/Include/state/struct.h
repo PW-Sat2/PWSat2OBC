@@ -4,7 +4,7 @@
 #pragma once
 
 #include <cstdint>
-#include "adcs/adcs.h"
+#include "adcs/adcs.hpp"
 #include "base/os.h"
 #include "time/TimePoint.h"
 
@@ -19,7 +19,7 @@
  */
 struct SystemState
 {
-    SystemState();
+    SystemState(adcs::IAdcsCoordinator& adcsAccess);
 
     /** @brief Current time */
     std::chrono::milliseconds Time;
@@ -40,11 +40,7 @@ struct SystemState
     bool SailOpened;
 
     /** @brief ADCS-related state */
-    struct
-    {
-        /** @brief Current ADCS mode */
-        ADCSMode CurrentMode;
-    } ADCS;
+    adcs::IAdcsCoordinator& adcs;
 };
 
 /** @} */

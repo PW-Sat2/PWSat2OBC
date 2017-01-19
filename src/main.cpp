@@ -14,7 +14,7 @@
 #include <task.h>
 
 #include "SwoEndpoint/SwoEndpoint.h"
-#include "adcs/adcs.h"
+#include "adcs/AdcsExperiment.hpp"
 #include "base/ecc.h"
 #include "base/os.h"
 #include "dmadrv.h"
