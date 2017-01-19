@@ -3,9 +3,10 @@
 
 using namespace std::chrono_literals;
 
-SystemState::SystemState() //
+SystemState::SystemState(adcs::IAdcsCoordinator& adcsAccess) //
     : Time(0ms),
-      SailOpened(false)
+      SailOpened(false),
+      adcs(adcsAccess)
 {
     Antenna.Deployed = false;
     memset(&Antenna.DeploymentState, 0, sizeof(Antenna.DeploymentState));

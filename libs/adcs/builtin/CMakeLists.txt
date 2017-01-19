@@ -1,9 +1,8 @@
-set(NAME adcs)
+set(NAME builtin_detumbling)
 
 set(SOURCES      
-    AdcsCoordinator.cpp   
-    Include/adcs/adcs.hpp
-    Include/adcs/AdcsCoordinator.hpp
+	BuiltinDetumbling.cpp
+    Include/adcs/BuiltinDetumbling.hpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -11,12 +10,10 @@ add_library(${NAME} STATIC ${SOURCES})
 target_link_libraries(${NAME}
     base    
     logger
+    adcs
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/adcs)
 
 target_format_sources(${NAME} "${SOURCES}")
-
-add_subdirectory(builtin)
-add_subdirectory(experiment)

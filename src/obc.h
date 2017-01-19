@@ -5,7 +5,8 @@
 #include <cstdint>
 #include <gsl/span>
 
-#include "adcs/adcs.h"
+#include "adcs/AdcsCoordinator.hpp"
+#include "adcs/AdcsExperiment.hpp"
 #include "antenna/driver.h"
 #include "antenna/miniport.h"
 #include "base/os.h"

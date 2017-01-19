@@ -1,4 +1,4 @@
-#include "adcs/adcs.h"
+#include <CustomAdcs.hpp>
 #include "adcs_mission.h"
 #include "state/struct.h"
 #include "system.h"

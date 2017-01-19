@@ -60,6 +60,7 @@ target_link_libraries(${NAME}
     spi
     efm_emlib
     burtc
+    adcs_experiment
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)
