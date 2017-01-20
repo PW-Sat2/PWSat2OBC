@@ -106,7 +106,7 @@ class AntennaController(i2cMock.I2CDevice):
     @i2cMock.command([0xAA])
     def reset(self):
         self.log.debug("Resetting antenna controller")
-        if(call(self.on_reset, True)):
+        if call(self.on_reset, True):
             self.reset_state()
 
     # antenna icd section 6.2.2
