@@ -4,7 +4,7 @@
 #include <tuple>
 #include "gtest/gtest.h"
 #include "antenna/antenna.h"
-#include "i2c/I2CMock.hpp"
+#include "I2C/I2CMock.hpp"
 #include "time/TimeSpan.hpp"
 #include "utils.hpp"
 
