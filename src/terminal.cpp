@@ -35,6 +35,7 @@ static const TerminalCommandDescription commands[] = {
     {"resume_mission", ResumeMission},
     {"run_mission", RunMission},
     {"dma", DMAInfo},
+    {"imtq", ImtqDriver}
 };
 
 void InitializeTerminal(void)

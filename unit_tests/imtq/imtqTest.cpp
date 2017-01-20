@@ -451,7 +451,7 @@ RC_GTEST_FIXTURE_PROP(ImtqTest, GetSystemState, ())
 	ImtqState state;
 	RC_ASSERT(imtq.GetSystemState(state));
 
-	RC_ASSERT(state.status.getValue() == 0);
+	RC_ASSERT(state.status.GetValue() == 0);
 	RC_ASSERT(static_cast<uint8_t>(state.mode) == mode);
 	RC_ASSERT(state.error.GetValue() == error);
 }

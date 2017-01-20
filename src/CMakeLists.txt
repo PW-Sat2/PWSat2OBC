@@ -17,6 +17,7 @@ set(SOURCES
     commands/compile_info.cpp
     commands/mission.cpp
     commands/dma.cpp
+    commands/imtq.cpp
     obc.h
     obc.cpp
     fault_handlers.cpp

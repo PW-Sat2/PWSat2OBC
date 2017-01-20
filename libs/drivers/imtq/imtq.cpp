@@ -86,7 +86,7 @@ namespace devices
             return static_cast<Status::Error>(value & 0b00001111);
         }
 
-        uint8_t Status::getValue() const
+        uint8_t Status::GetValue() const
         {
             return this->value;
         }

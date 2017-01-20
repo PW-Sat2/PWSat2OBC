@@ -71,7 +71,7 @@ namespace devices
             bool InvalidZ();
             Error CmdError();
 
-            std::uint8_t getValue() const;
+            std::uint8_t GetValue() const;
 
           private:
             std::uint8_t value;

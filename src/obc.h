@@ -22,6 +22,7 @@
 #include "terminal/terminal.h"
 #include "time/timer.h"
 #include "utils.h"
+#include "adcs/imtq.h"
 
 /**
  * @defgroup obc OBC structure
@@ -79,6 +80,9 @@ struct OBC
 
     /** @brief OBC storage */
     obc::OBCStorage Storage;
+
+    /** @brief Imtq handling */
+    adcs::Imtq imtq;
 
     /** @brief Terminal object. */
     Terminal terminal;

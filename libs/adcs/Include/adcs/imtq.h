@@ -21,7 +21,6 @@ namespace adcs
         bool ISISBDotDetumbling(std::chrono::seconds duration);
         bool PWSatDetumbling(const Vector3<Dipole>& dipole, Vector3<MagnetometerMeasurement>& mgtmMeasurement);
 
-      private:
         devices::imtq::ImtqDriver driver;
     };
 }
