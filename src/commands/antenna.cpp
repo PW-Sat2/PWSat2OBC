@@ -60,7 +60,7 @@ static bool GetAntenna(const char* name, AntennaId* antenna)
     return true;
 }
 
-void AntennaDeploy(uint16_t argc, char* argv[])
+void AntennaDeploy(std::uint16_t argc, char* argv[])
 {
     AntennaChannel channel;
     AntennaId antenna;
@@ -85,7 +85,7 @@ void AntennaDeploy(uint16_t argc, char* argv[])
     return;
 }
 
-void AntennaCancelDeployment(uint16_t argc, char* argv[])
+void AntennaCancelDeployment(std::uint16_t argc, char* argv[])
 {
     AntennaChannel channel;
     if (                               //
@@ -100,7 +100,7 @@ void AntennaCancelDeployment(uint16_t argc, char* argv[])
     Main.antennaDriver.FinishDeployment(&Main.antennaDriver, channel);
 }
 
-void AntennaGetDeploymentStatus(uint16_t argc, char* argv[])
+void AntennaGetDeploymentStatus(std::uint16_t argc, char* argv[])
 {
     AntennaChannel channel;
     if (                               //
@@ -148,7 +148,7 @@ void PrintValue(int value, bool print, const char* name)
     }
 }
 
-void AntennaGetTelemetry(uint16_t /*argc*/, char* /*argv*/ [])
+void AntennaGetTelemetry(std::uint16_t /*argc*/, char* /*argv*/ [])
 {
     auto telemetry = Main.antennaDriver.GetTelemetry(&Main.antennaDriver);
     PrintValue(telemetry.ActivationCount[0], has_flag(telemetry.flags, ANT_TM_ANTENNA1_ACTIVATION_COUNT), "Antenna 1 activation count");
@@ -169,7 +169,7 @@ void AntennaGetTelemetry(uint16_t /*argc*/, char* /*argv*/ [])
     PrintValue(telemetry.Temperature[1], has_flag(telemetry.flags, ANT_TM_TEMPERATURE2), "Backup controller temperature");
 }
 
-void AntennaReset(uint16_t argc, char* argv[])
+void AntennaReset(std::uint16_t argc, char* argv[])
 {
     AntennaChannel channel;
     if (argc != 1 || !GetChannel(argv[0], &channel))
@@ -185,6 +185,6 @@ void AntennaReset(uint16_t argc, char* argv[])
     }
     else
     {
-        Main.terminal.Printf("Unable to reset antenna. Status: '%d'", result);
+        Main.terminal.Printf("Unable to reset antenna. Status: '%d'", num(result));
     }
 }

@@ -1,11 +1,8 @@
-import struct
-
-from build_config import config
-from tests.base import BaseTest
-from system import auto_comm_handling, auto_power_on
-from utils import TestEvent
-from obc import *
 from devices import *
+from obc import *
+from tests.base import BaseTest
+from system import auto_power_on
+from utils import TestEvent, ensure_byte_list
 
 class Test_Comm(BaseTest):
     @auto_power_on(False)
@@ -98,7 +95,7 @@ class Test_Comm(BaseTest):
         self.system.comm.receiver.on_reset = reset_handler
         self.power_on_and_wait()
 
-        self.system.comm.put_frame(devices.UplinkFrame(ord('P'), 'ABC'))
+        self.system.comm.put_frame(UplinkFrame(ord('P'), 'ABC'))
 
         msg = self.system.comm.get_frame(20)
 
