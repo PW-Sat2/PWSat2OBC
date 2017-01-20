@@ -17,5 +17,6 @@ __all__ = [
     'BACKUP_ANTENNA_CONTROLLER_ADDRESS',
     'BaudRate',
     'TransmitterTelemetry',
-    'ReceiverTelemetry'
+    'ReceiverTelemetry',
+    'Antenna',
 ]

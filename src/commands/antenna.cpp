@@ -140,11 +140,11 @@ void PrintValue(int value, bool print, const char* name)
 {
     if (print)
     {
-        Main.terminal.Printf("%s: '%d'", name, value);
+        Main.terminal.Printf("%s: '%d'\n", name, value);
     }
     else
     {
-        Main.terminal.Printf("%s: Unavailable", name);
+        Main.terminal.Printf("%s: 'Unavailable'\n", name);
     }
 }
 
@@ -157,13 +157,13 @@ void AntennaGetTelemetry(uint16_t /*argc*/, char* /*argv*/ [])
     PrintValue(telemetry.ActivationCount[3], has_flag(telemetry.flags, ANT_TM_ANTENNA4_ACTIVATION_COUNT), "Antenna 4 activation count");
 
     PrintValue(
-        telemetry.ActivationTime[0].count(), has_flag(telemetry.flags, ANT_TM_ANTENNA1_ACTIVATION_TIME), "Antenna 1 activation count");
+        telemetry.ActivationTime[0].count(), has_flag(telemetry.flags, ANT_TM_ANTENNA1_ACTIVATION_TIME), "Antenna 1 activation time");
     PrintValue(
-        telemetry.ActivationTime[1].count(), has_flag(telemetry.flags, ANT_TM_ANTENNA2_ACTIVATION_TIME), "Antenna 2 activation count");
+        telemetry.ActivationTime[1].count(), has_flag(telemetry.flags, ANT_TM_ANTENNA2_ACTIVATION_TIME), "Antenna 2 activation time");
     PrintValue(
-        telemetry.ActivationTime[2].count(), has_flag(telemetry.flags, ANT_TM_ANTENNA3_ACTIVATION_TIME), "Antenna 3 activation count");
+        telemetry.ActivationTime[2].count(), has_flag(telemetry.flags, ANT_TM_ANTENNA3_ACTIVATION_TIME), "Antenna 3 activation time");
     PrintValue(
-        telemetry.ActivationTime[3].count(), has_flag(telemetry.flags, ANT_TM_ANTENNA4_ACTIVATION_TIME), "Antenna 4 activation count");
+        telemetry.ActivationTime[3].count(), has_flag(telemetry.flags, ANT_TM_ANTENNA4_ACTIVATION_TIME), "Antenna 4 activation time");
 
     PrintValue(telemetry.Temperature[0], has_flag(telemetry.flags, ANT_TM_TEMPERATURE1), "Primary controller temperature");
     PrintValue(telemetry.Temperature[1], has_flag(telemetry.flags, ANT_TM_TEMPERATURE2), "Backup controller temperature");

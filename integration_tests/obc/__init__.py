@@ -10,4 +10,5 @@ __all__ = [
     'AntennaChannel',
     'OverrideSwitches',
     'CommModule',
+    'AntennaTelemetry'
 ]

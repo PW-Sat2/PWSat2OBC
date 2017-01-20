@@ -126,11 +126,43 @@ class TransmitterDevice(i2cMock.I2CDevice):
     def __init__(self):
         super(TransmitterDevice, self).__init__(0x62)
         self.log = logging.getLogger("Comm Transmitter")
+
+        # callback called when watchdog is being reset
+        # expected prototype:
+        # None -> None
         self.on_watchdog_reset = None
+
+        # callback called when hardware reset is being invoked 
+        # expected prototype:
+        # None -> None
         self.on_hardware_reset = None
+
+        # callback called when hardware reset is being invoked 
+        # expected prototype:
+        # None -> None
         self.on_reset = None
+
+        # callback called when new frame is being sent
+        # expected prototype:
+        # byte[] frameContent -> None
+        # parameters:
+        # frameContent byte array that contains frame content
         self.on_send_frame = None
+
+        # callback called when new transmitter baud rate is being set
+        # expected prototype:
+        # BaudRate newBaudRate -> BaudRate|None
+        # parameters:
+        # newBaudRate requested new transmitter baud rate
+        # This callback can override the requested baud rate by returning its own the desired value. 
+        # Returning none indicates that requested baud rate should be used.
         self.on_set_baudrate = None
+
+        # callback called when transmitter telemetry is being requested
+        # expected prototype:
+        # None -> TransmitterTelemetry|None
+        # This callback can override the telemetry retuned by this device by returning the desired response.
+        # Returning None will indicate that default telemetry should be reported.
         self.on_get_telemetry = None
         self._buffer = Queue(TransmitterDevice.BUFFER_SIZE)
         self._lock = Lock()
@@ -183,11 +215,45 @@ class ReceiverDevice(i2cMock.I2CDevice):
     def __init__(self):
         super(ReceiverDevice, self).__init__(0x60)
         self.log = logging.getLogger("Comm Receiver")
+
+        # callback called when watchdog is being reset
+        # expected prototype:
+        # None -> None
         self.on_watchdog_reset = None
+
+        # callback called when hardware reset is being invoked 
+        # expected prototype:
+        # None -> None
         self.on_hardware_reset = None
+
+        # callback called when hardware reset is being invoked 
+        # expected prototype:
+        # None -> None
         self.on_reset = None
+
+        # callback called when frame is being removed from the frame buffer
+        # expected prototype:
+        # ReceiverDevice device -> bool|None
+        # parameters:
+        # device Reference to the affected device
+        # This callback can return bool indicating whether frame should be removed from the buffer.
+        # Returning True|None will indicate that frame should be remove from the buffer.
         self.on_frame_remove = None
+
+        # callback called when frame content is being requested
+        # expected prototype:
+        # ReceiverDevice device -> bool|None
+        # parameters:
+        # device Reference to the affected device
+        # This callback can return bool indicating whether non empty frame should be obtained from the buffer.
+        # Returning True|None will indicate that non empty frame should be returned if it is available.
         self.on_frame_receive = None
+
+        # callback called when receiver telemetry is being requested
+        # expected prototype:
+        # None -> ReceiverTelemetry|None
+        # This callback can override the telemetry retuned by this device by returning the desired response.
+        # Returning None will indicate that default telemetry should be reported.
         self.on_get_telemetry = None
         self._buffer = Queue()
         self._lock = Lock()
@@ -271,8 +337,19 @@ class Comm(object):
     def __init__(self):
         self.transmitter = TransmitterDevice()
         self.receiver = ReceiverDevice()
+
+        # callback called when hardware reset is being invoked 
+        # expected prototype:
+        # None -> bool|None
+        # This callback can return bool value indicating whether the hardware reset should be performed.
+        # Returning True/None indicates that hardware reset should be performed.
         self.on_hardware_reset = None
+
+        # callback called when watchdog is being reset
+        # expected prototype:
+        # None -> None
         self.on_watchdog_reset = None
+
         self.transmitter.on_hardware_reset = self._hwreset
         self.transmitter.on_watchdog_reset = self._watchdog_reset
         self.receiver.on_hardware_reset = self._hwreset
