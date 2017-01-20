@@ -98,6 +98,16 @@ bool WriterWriteByte(Writer* writer, uint8_t byte);
 bool WriterWriteWordLE(Writer* writer, uint16_t word);
 
 /**
+ * @brief Writes single 16 bit signed value with little-endian memory orientation to the buffer
+ * and advances the current buffer position to the next unused byte.
+ * Value is written in 2's complement notation.
+ * @param[in] writer Pointer to the writer object.
+ * @param[in] word Word that should be added to writer output using little endian byte ordering.
+ * @return Operation status.
+ */
+bool WriterWriteSignedWordLE(Writer* writer, int16_t word);
+
+/**
  * @brief Writes single 32 bit word with little-endian memory orientation to the buffer
  * and advances the current buffer position to the next unused byte.
  * @param[in] writer Pointer to the queried reader object.
@@ -105,6 +115,16 @@ bool WriterWriteWordLE(Writer* writer, uint16_t word);
  * @return Operation status.
  */
 bool WriterWriteDoubleWordLE(Writer* writer, uint32_t dword);
+
+/**
+ * @brief Writes single 32 bit signed value with little-endian memory orientation to the buffer
+ * and advances the current buffer position to the next unused byte.
+ * Value is written in 2's complement notation.
+ * @param[in] writer Pointer to the queried reader object.
+ * @param[in] dword Doubleword that should be added to writer output using little endian byte ordering.
+ * @return Operation status.
+ */
+bool WriterWriteSignedDoubleWordLE(Writer* writer, int32_t dword);
 
 /**
  * @brief Writes single 64 bit word with little-endian memory orientation to the buffer

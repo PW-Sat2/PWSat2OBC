@@ -65,6 +65,29 @@ TEST(WriterTest, TestWritingSingleWordLE)
     CheckBuffer(array, WriterGetDataLength(&writer), expected, sizeof(expected));
 }
 
+TEST(WriterTest, TestWritingSignedSingleWordLE)
+{
+    Writer writer;
+    uint8_t array[12];
+
+    const uint8_t expected[] = {0x00, 0x00,
+                                0xFF, 0xFF,
+                                0xFF, 0x7F,
+                                0x00, 0x80,
+                                0x68, 0xC5,
+                                0x98, 0x3A};
+    WriterInitialize(&writer, array, sizeof(array));
+    ASSERT_TRUE(WriterWriteSignedWordLE(&writer, 0));
+    ASSERT_TRUE(WriterWriteSignedWordLE(&writer, -1));
+    ASSERT_TRUE(WriterWriteSignedWordLE(&writer, 32767));
+    ASSERT_TRUE(WriterWriteSignedWordLE(&writer, -32768));
+    ASSERT_TRUE(WriterWriteSignedWordLE(&writer, -15000));
+    ASSERT_TRUE(WriterWriteSignedWordLE(&writer, 15000));
+
+    ASSERT_TRUE(WriterStatus(&writer));
+    CheckBuffer(array, WriterGetDataLength(&writer), expected, sizeof(expected));
+}
+
 TEST(WriterTest, TestWritingSingleDoubleWordLE)
 {
     Writer writer;
@@ -75,6 +98,32 @@ TEST(WriterTest, TestWritingSingleDoubleWordLE)
     ASSERT_TRUE(WriterStatus(&writer));
     CheckBuffer(array, WriterGetDataLength(&writer), expected, sizeof(expected));
 }
+
+TEST(WriterTest, TestWritingSignedDoubleWordLE)
+{
+    Writer writer;
+    uint8_t array[32];
+    const uint8_t expected[32] = {0x0, 0x0, 0x0, 0x0,
+                                  0xFF, 0xFF, 0xFF, 0xFF,
+                                  0xFF, 0x7F, 0x0, 0x0,
+                                  0x0, 0x80, 0xFF, 0xFF,
+                                  0xFF, 0xFF, 0xFF, 0x7F,
+                                  0x0, 0x0, 0x0, 0x80,
+                                  0xD2, 0x2, 0x96, 0x49,
+                                  0x2E, 0xFD, 0x69, 0xB6};
+    WriterInitialize(&writer, array, sizeof(array));
+    ASSERT_TRUE(WriterWriteSignedDoubleWordLE(&writer, 0));
+    ASSERT_TRUE(WriterWriteSignedDoubleWordLE(&writer, -1));
+    ASSERT_TRUE(WriterWriteSignedDoubleWordLE(&writer, 32767));
+    ASSERT_TRUE(WriterWriteSignedDoubleWordLE(&writer, -32768));
+    ASSERT_TRUE(WriterWriteSignedDoubleWordLE(&writer, 2147483647));
+    ASSERT_TRUE(WriterWriteSignedDoubleWordLE(&writer, -2147483648));
+    ASSERT_TRUE(WriterWriteSignedDoubleWordLE(&writer, 1234567890));
+    ASSERT_TRUE(WriterWriteSignedDoubleWordLE(&writer, -1234567890));
+    ASSERT_TRUE(WriterStatus(&writer));
+    CheckBuffer(array, WriterGetDataLength(&writer), expected, sizeof(expected));
+}
+
 
 TEST(WriterTest, TestWritingSingleQuadWordLE)
 {

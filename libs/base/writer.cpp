@@ -52,6 +52,11 @@ bool WriterWriteWordLE(Writer* writer, uint16_t word)
     }
 }
 
+bool WriterWriteSignedWordLE(Writer* writer, int16_t word)
+{
+    return WriterWriteWordLE(writer, static_cast<uint16_t>(word));
+}
+
 bool WriterWriteDoubleWordLE(Writer* writer, uint32_t word)
 {
     if (!WriterUpdateState(writer, 4))
@@ -67,6 +72,11 @@ bool WriterWriteDoubleWordLE(Writer* writer, uint32_t word)
         writer->position += 4;
         return true;
     }
+}
+
+bool WriterWriteSignedDoubleWordLE(Writer* writer, int32_t dword)
+{
+    return WriterWriteDoubleWordLE(writer, static_cast<uint32_t>(dword));
 }
 
 bool WriterWriteQuadWordLE(Writer* writer, uint64_t word)
