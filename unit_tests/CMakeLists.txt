@@ -20,6 +20,7 @@ set(SOURCES
   Comm/UplinkFrameDecoderTest.cpp
   base/ReaderTest.cpp
   base/WriterTest.cpp
+  base/RapidTest.cpp
   MissionPlan/MissionPlanTest.cpp
   MissionPlan/MissionTestHelpers.cpp
   MissionPlan/SailSystemStateTest.cpp
