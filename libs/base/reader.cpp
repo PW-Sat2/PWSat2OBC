@@ -61,7 +61,7 @@ uint16_t Reader::ReadWordLE()
 
 int16_t Reader::ReadSignedWordLE()
 {
-    return (int16_t)(this->ReadWordLE());
+    return static_cast<int16_t>(this->ReadWordLE());
 }
 
 uint16_t Reader::ReadWordBE()
@@ -100,7 +100,7 @@ uint32_t Reader::ReadDoubleWordLE()
 
 int32_t Reader::ReadSignedDoubleWordLE()
 {
-    return (int32_t)(this->ReadDoubleWordLE());
+    return static_cast<int32_t>(this->ReadDoubleWordLE());
 }
 
 uint32_t Reader::ReadDoubleWordBE()
