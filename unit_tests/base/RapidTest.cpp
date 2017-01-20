@@ -62,10 +62,10 @@ RC_GTEST_PROP(WriteReadRapicheck, QuadWordLE, (uint64_t value))
 RC_GTEST_PROP(WriteReadRapicheck, Array, (std::vector<uint8_t> value))
 {
 	RC_PRE(value.size() > 0u);
-	std::unique_ptr<uint8_t[]> array(new uint8_t[value.size()]);
+	std::vector<uint8_t> array(value.size());
 
 	Writer writer;
-	WriterInitialize(&writer, array.get(), value.size());
+	WriterInitialize(&writer, array.data(), array.size());
 	RC_ASSERT(WriterWriteArray(&writer, value.data(), value.size()));
 	RC_ASSERT(WriterStatus(&writer));
 

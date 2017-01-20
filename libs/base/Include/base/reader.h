@@ -78,7 +78,7 @@ class Reader final
     /**
      * @brief Read single 16 bit word with little-endian memory orientation from the buffer,
      * convert it into signed value and advance the current buffer position to the next unread byte.
-     * Value is read asuuming 2's complement notation.
+     * Value is read assuming 2's complement notation.
      * @return Read signed word value.
      */
     int16_t ReadSignedWordLE();
@@ -100,7 +100,7 @@ class Reader final
     /**
      * @brief Read single 32 bit word with little-endian memory orientation from the buffer,
      * convert it into signed value and advance the current buffer position to the next unread byte.
-     * Value is read asuuming 2's complement notation.
+     * Value is read assuming 2's complement notation.
      * @return Read signed double word value.
      */
     int32_t ReadSignedDoubleWordLE();
