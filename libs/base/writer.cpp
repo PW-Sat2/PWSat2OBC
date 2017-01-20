@@ -54,7 +54,7 @@ bool WriterWriteWordLE(Writer* writer, uint16_t word)
 
 bool WriterWriteSignedWordLE(Writer* writer, int16_t word)
 {
-    return WriterWriteWordLE(writer, (uint16_t)(word));
+    return WriterWriteWordLE(writer, static_cast<uint16_t>(word));
 }
 
 bool WriterWriteDoubleWordLE(Writer* writer, uint32_t word)
@@ -76,7 +76,7 @@ bool WriterWriteDoubleWordLE(Writer* writer, uint32_t word)
 
 bool WriterWriteSignedDoubleWordLE(Writer* writer, int32_t dword)
 {
-    return WriterWriteDoubleWordLE(writer, (uint32_t)(dword));
+    return WriterWriteDoubleWordLE(writer, static_cast<uint32_t>(dword));
 }
 
 bool WriterWriteQuadWordLE(Writer* writer, uint64_t word)
