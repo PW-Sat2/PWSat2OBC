@@ -40,6 +40,7 @@ class System:
         self.receiver = self.comm.receiver
         self.primary_antenna = AntennaController(PRIMARY_ANTENNA_CONTROLLER_ADDRESS)
         self.backup_antenna = AntennaController(BACKUP_ANTENNA_CONTROLLER_ADDRESS)
+        self.imtq = Imtq()
 
         self.sys_bus.add_device(self.eps)
         self.payload_bus.add_device(self.eps)
@@ -47,6 +48,7 @@ class System:
         self.sys_bus.add_device(self.receiver)
         self.sys_bus.add_device(self.primary_antenna)
         self.payload_bus.add_device(self.backup_antenna)
+        self.sys_bus.add_device(self.imtq)
 
     def close(self):
         self.sys_bus.stop()
