@@ -47,3 +47,16 @@ Integration tests can be run from command line by calling `integration_tests` ta
 `make integration_test`
 
 That target depends on `pwsat` and `pwsat.flash` targets, so before running tests newest version of software will be built and programmed to Starter Kit. All configuration options will be passed, so no further configuration is needed.
+
+# pyconsole
+Ipython console can be invoked for semi-manual testing. It runs device mocks, allowing user to interact with OBC.
+
+## Requirements:
+* wx [https://www.wxpython.org/download.php#msw](https://www.wxpython.org/download.php#msw)
+* ipython (install via pip)
+
+## Example:
+	make pyconsole
+	from obc import AntennaChannel
+	m = system.obc.antenna_get_status(AntennaChannel.Primary)
+	m.DeploymentState
