@@ -14,7 +14,7 @@ using gsl::span;
 using devices::comm::Frame;
 using devices::comm::ITransmitFrame;
 
-using namespace telecommands::handling;
+using namespace telecommunication::uplink;
 
 IncomingTelecommandHandler::IncomingTelecommandHandler(IDecodeTelecommand& decodeTelecommand, span<IHandleTeleCommand*> telecommands)
     : _decodeTelecommand(decodeTelecommand), //
