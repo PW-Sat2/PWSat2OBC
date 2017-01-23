@@ -1,18 +1,19 @@
-#ifndef LIBS_TELECOMMAND_HANDLING_INCLUDE_TELECOMMAND_HANDLING_TELECOMMAND_HANDLING_H_
-#define LIBS_TELECOMMAND_HANDLING_INCLUDE_TELECOMMAND_HANDLING_TELECOMMAND_HANDLING_H_
+#ifndef LIBS_TELECOMMUNICATION_INCLUDE_TELECOMMUNICATION_TELECOMMAND_HANDLING_H_
+#define LIBS_TELECOMMUNICATION_INCLUDE_TELECOMMUNICATION_TELECOMMAND_HANDLING_H_
 
 #include <cstdint>
 #include <gsl/span>
 #include "comm/IHandleFrame.hpp"
 
-namespace telecommands
+namespace telecommunication
 {
-    namespace handling
+    namespace uplink
     {
         /**
-         * @defgroup telecommand_handling Telecommand handling
+         * @defgroup telecomm_handling Telecommunication handling
+         * @ingroup telecommunication
          *
-         * @brief Library that provides infrastructure for handling telecommands in frames received from @ref LowerCommDriver module
+         * @brief Library that provides infrastructure for handling uplink and downlink frames
          *
          * @{
          */
@@ -30,7 +31,7 @@ namespace telecommands
         /**
          * @brief Result of telecommand decoding. It is (sort of) discrinated union: Success | Failure
          */
-        class DecodeTelecommandResult
+        class DecodeTelecommandResult final
         {
           public:
             /**
@@ -72,7 +73,7 @@ namespace telecommands
         };
 
         /**
-         * Interface describing how incoming frame should be decoded into telecommand
+         * @brief Interface describing how incoming frame should be decoded into telecommand
          */
         struct IDecodeTelecommand
         {
@@ -104,20 +105,20 @@ namespace telecommands
         };
 
         /**
-         * Incoming frame handler that is capable of decoding them and dispatching telecommands
+         * @brief Incoming frame handler that is capable of decoding them and dispatching telecommands
          */
         class IncomingTelecommandHandler final : public devices::comm::IHandleFrame
         {
           public:
             /**
-             * Constructs \ref IncomingTelecommandHandler object
+             * @brief Constructs \ref IncomingTelecommandHandler object
              * @param[in] decodeTelecommand Telecommand decoding implementation
              * @param[in] telecommands Array of pointers to telecommands
              */
             IncomingTelecommandHandler(IDecodeTelecommand& decodeTelecommand, gsl::span<IHandleTeleCommand*> telecommands);
 
             /**
-             * Handles incoming frame and dispatches (if possible) telecommand
+             * @brief Handles incoming frame and dispatches (if possible) telecommand
              * @param[in] transmitter Reference to object used to send response back
              * @param[in] frame Incoming frame
              */
@@ -125,7 +126,7 @@ namespace telecommands
 
           private:
             /**
-             * Dispatches telecommand handler
+             * @brief Dispatches telecommand handler
              * @param[in] transmitter Transmitter used to send response back
              * @param[in] commandCode Command code
              * @param[in] parameters Parameters buffer
@@ -142,4 +143,4 @@ namespace telecommands
 }
 /** @} */
 
-#endif /* LIBS_TELECOMMAND_HANDLING_INCLUDE_TELECOMMAND_HANDLING_TELECOMMAND_HANDLING_H_ */
+#endif /* LIBS_TELECOMMUNICATION_INCLUDE_TELECOMMUNICATION_TELECOMMAND_HANDLING_H_ */

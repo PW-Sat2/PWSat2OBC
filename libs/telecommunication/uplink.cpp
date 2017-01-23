@@ -1,15 +1,12 @@
+#include "uplink.h"
 #include <algorithm>
 #include "base/reader.h"
-
-#include "uplink.h"
 
 using std::uint8_t;
 using std::copy;
 using gsl::span;
 
-using namespace telecommands;
-using telecommands::handling::DecodeTelecommandFailureReason;
-using telecommands::handling::DecodeTelecommandResult;
+using namespace telecommunication::uplink;
 
 UplinkProtocol::UplinkProtocol(std::uint32_t securityCode) : _securityCode(securityCode)
 {
