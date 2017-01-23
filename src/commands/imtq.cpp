@@ -39,7 +39,7 @@ void StartMTMMeasurement(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
-    const bool status = Main.imtq.driver.CancelOperation();
+    const bool status = Main.imtq.driver.StartMTMMeasurement();
     if (!status)
     {
         Main.terminal.Printf("StartMTMMeasurement failed!\n");
