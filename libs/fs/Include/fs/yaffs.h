@@ -58,6 +58,7 @@ namespace services
             virtual OSResult Format(const char* mountPoint) override;
             virtual OSResult MakeDirectory(const char* path) override;
             virtual bool Exists(const char* path) override;
+            virtual FileSize GetFileSize(FileHandle file) override;
 
             virtual OSResult ClearDevice(yaffs_dev* device) override;
 

@@ -73,3 +73,8 @@ OSResult File::Truncate(FileSize size)
 {
     return this->_fs.TruncateFile(this->_handle, size);
 }
+
+FileSize File::Size()
+{
+    return this->_fs.GetFileSize(this->_handle);
+}

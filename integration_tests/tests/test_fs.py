@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from system import wait_for_obc_start
 from tests.base import BaseTest
 
@@ -18,3 +19,19 @@ class FileSystemTests(BaseTest):
 
         read_back = self.system.obc.read_file("/test_file")
         self.assertEqual(read_back, text)
+
+    @wait_for_obc_start()
+    def test_write_read_long_file(self):
+        path = "/b"
+        data = '\n'.join(map(lambda x: x * 25, ['A', 'B', '>', 'C', 'D', 'E', 'F', 'G']))
+
+        self.system.obc.write_file(path, data)
+
+        files = self.system.obc.list_files("/")
+
+        self.assertListEqual(files, ['b', 'lost+found'])
+
+        read_back = self.system.obc.read_file("/b")
+
+        self.assertEqual(read_back, data)
+

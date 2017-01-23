@@ -217,6 +217,15 @@ void YaffsFileSystem::Initialize()
     YaffsGlueInit();
 }
 
+FileSize YaffsFileSystem::GetFileSize(FileHandle file)
+{
+    struct yaffs_stat stat;
+
+    yaffs_fstat(file, &stat);
+
+    return stat.st_size;
+}
+
 OSResult YaffsFileSystem::AddDeviceAndMount(yaffs_dev* device)
 {
     yaffs_add_device(device);

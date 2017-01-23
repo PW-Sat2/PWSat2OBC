@@ -1,4 +1,5 @@
 import logging
+import struct
 
 import serial
 
@@ -31,7 +32,7 @@ class SerialPortTerminal:
 
         return data
 
-    def command(self, cmd):
+    def _command_prologue(self, cmd):
         self.waitForPrompt()
 
         self._serial.reset_input_buffer()
@@ -42,8 +43,43 @@ class SerialPortTerminal:
         self._serial.write(cmd + "\n")
         self._serial.flush()
 
+    def command(self, cmd):
+        self._command_prologue(cmd)
+
         response = self.readUntilPrompt()
         return response.rstrip('\n')
+
+    def command_with_write_data(self, cmd, data):
+        self._command_prologue(cmd)
+
+        self.readUntilPrompt('#')
+
+        self._serial.write(struct.pack('<L', len(data)))
+        self._serial.flush()
+
+        remaining = data
+
+        while len(remaining) > 0:
+            b = self._serial.read(4)
+            part_length = struct.unpack('<L', b)[0]
+
+            part = remaining[0:part_length]
+
+            self._serial.write(part)
+            self._serial.flush()
+
+            remaining = remaining[part_length:]
+
+        return self.readUntilPrompt()
+
+    def command_with_read_data(self, cmd):
+        self._command_prologue(cmd)
+        size = int(self.readUntilPrompt('\n'))
+
+        data = self._serial.read(size)
+        self.readUntilPrompt()
+
+        return data
 
     def reset(self):
         self._serial.reset_input_buffer()
