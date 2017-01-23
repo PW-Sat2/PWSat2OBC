@@ -2,11 +2,13 @@ import logging
 import struct
 
 import i2cMock
+from enum import Enum, unique
 import time
 from Queue import Queue, Empty
 from threading import Lock
 from utils import *
 from build_config import config
+from threading import Timer
 
 
 def from_int16(tab):
@@ -34,39 +36,79 @@ def to_int32_xyz(tab):
 
 
 class Imtq(i2cMock.I2CDevice):
+
+    class Mode:
+        class Type(Enum):
+            idle = 0
+            selftest = 1
+            detumble = 2
+
+        def __init__(self):
+            self.mode = self.Type.idle
+
+        def array(self):
+            return [self.mode.value]
+
+        @property
+        def value(self):
+            return self.mode.value
+
+        def cancel_operation(self):
+            self.mode = self.Type.idle
+
+        def start_detumble(self, time_in_seconds):
+            self.mode = self.Type.detumble
+            self.timer = Timer(time_in_seconds, self.cancel_operation)
+            self.timer.start()
+
+        def start_selftest(self):
+            self.mode = self.Type.selftest
+            self.timer = Timer(0.5, self.cancel_operation)
+            self.timer.start()
+
     def __init__(self):
         super(Imtq, self).__init__(0x10)
         self.log = logging.getLogger("Imtq")
 
         self.status = 0
-        self.mode = 0
+        self.mode = self.Mode()
         self.error = 0
         self.conf = 0
         self.uptime = 0
-        self.mtm_measurement = [0, 0, 0]
+        self.mtm_measurement = [1, 2, 3]
         self.coil_actuation = 0
-        self.coil_current = [0, 0, 0]
-        self.coil_temperature = [0, 0, 0]
-        self.commanded_dipole = [0, 0, 0]
-        self.bdot_data = [0, 0, 0]
+        self.coil_current = [4, 5, 6]
+        self.coil_temperature = [7, 8, 9]
+        self.commanded_dipole = [10, 11, 12]
+        self.bdot_data = [13, 14, 15]
 
-        self.digital_voltage_raw = 0
-        self.analog_voltage_raw = 0
-        self.digital_current_raw = 0
-        self.analog_current_raw = 0
-        self.coil_current_raw = [0, 0, 0]
-        self.coil_temperature_raw = [0, 0, 0]
-        self.mcu_temperature_raw = 0
+        self.digital_voltage_raw = 16
+        self.analog_voltage_raw = 17
+        self.digital_current_raw = 18
+        self.analog_current_raw = 19
+        self.coil_current_raw = [20, 21, 22]
+        self.coil_temperature_raw = [23, 24, 25]
+        self.mcu_temperature_raw = 26
 
-        self.digital_voltage = 0
-        self.analog_voltage = 0
-        self.digital_current = 0
-        self.analog_current = 0
-        self.mcu_temperature = 0
+        self.digital_voltage = 27
+        self.analog_voltage = 28
+        self.digital_current = 29
+        self.analog_current = 30
+        self.mcu_temperature = 31
 
     def update_mtm(self, value):
         self.mtm_measurement = value
         self.status = (1 << 7)
+
+    def update_actuation(self, value):
+        self.commanded_dipole = value
+        self.coil_current = value
+        self.coil_current_raw = value
+        self.coil_actuation = 1
+
+    def clear_actuation(self):
+        self.commanded_dipole = [0, 0, 0]
+        self.coil_actuation = 0
 
     # --- Commands ---
 
@@ -85,11 +127,15 @@ class Imtq(i2cMock.I2CDevice):
     @i2cMock.command([0x03])
     def _cancel_operation(self):
         self.log.info("Cancel operation")
+        self.mode.cancel_operation()
+        self.clear_actuation()
         return [0x03, self.status]
 
     @i2cMock.command([0x04])
     def _start_mtm_measurement(self):
         self.log.info("Start MTM measurement")
+        mtm_timer = Timer(0.05, self.update_mtm, [self.mtm_measurement])
+        mtm_timer.start()
         return [0x04, self.status]
 
     @i2cMock.command([0x05])
@@ -97,24 +143,32 @@ class Imtq(i2cMock.I2CDevice):
         current = [from_int16(data[i:i + 2]) for i in [0, 2, 4]]
         time = from_int16(data[6:])
         self.log.info("Start actuation (current): " + str(current) + " for: " + str(time))
+        self.update_actuation(current)
+        t = Timer(time / 1000.0, self.clear_actuation)
+        t.start()
         return [0x05, self.status]
 
     @i2cMock.command([0x06])
     def _start_actuation_dipole(self, *data):
         dipole = [from_int16(data[i:i+2]) for i in [0, 2, 4]]
         time = from_int16(data[6:])
+        self.update_actuation(dipole)
+        t = Timer(time / 1000.0, self.clear_actuation)
+        t.start()
         self.log.info("Start actuation (dipole): " + str(dipole) + " for: " + str(time))
         return [0x06, self.status]
 
     @i2cMock.command([0x08])
     def _start_self_test(self, *data):
         self.log.info("Start self-test with param %d", data[0])
+        self.mode.start_selftest()
         return [0x08, self.status]
 
     @i2cMock.command([0x09])
     def _start_bdot(self, *data):
         time = from_int16(data[0:])
         self.log.info("Start BDot for %d", time)
+        self.mode.start_detumble(time)
         return [0x09, self.status]
 
     # --- Data retrieval ---
@@ -124,7 +178,7 @@ class Imtq(i2cMock.I2CDevice):
         self.log.info("Get system state")
         return [0x41,
                 self.status,
-                self.mode,
+                self.mode.value,
                 self.error,
                 self.conf,
                 self.uptime]
