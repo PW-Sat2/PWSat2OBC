@@ -9,20 +9,20 @@ from utils import *
 from build_config import config
 
 
-def two_bytes(val):
-    return val[0] + (val[1] << 8)
+def from_int16(tab):
+    return struct.unpack('H', bytearray(tab[0:2]))[0]
+
+
+def from_int32(tab):
+    return struct.unpack('I', bytearray(tab[0:4]))[0]
 
 
 def to_int32(value):
-    return [value & 0xFF,
-            (value & 0xFF00) >> 8,
-            (value & 0xFF0000) >> 16,
-            (value & 0xFF000000) >> 24]
+    return list(struct.pack('I', value))
 
 
 def to_int16(value):
-    return [value & 0xFF,
-            (value & 0xFF00) >> 8]
+    return list(struct.pack('H', value))
 
 
 def to_int16_xyz(tab):
@@ -64,6 +64,10 @@ class Imtq(i2cMock.I2CDevice):
         self.analog_current = 0
         self.mcu_temperature = 0
 
+    def update_mtm(self, value):
+        self.mtm_measurement = value
+        self.status = (1 << 7)
+
     # --- Commands ---
 
     @i2cMock.command([0xAA])
@@ -90,12 +94,16 @@ class Imtq(i2cMock.I2CDevice):
 
     @i2cMock.command([0x05])
     def _start_actuation_current(self, *data):
-        self.log.info("Start actuation (current)")
+        current = [from_int16(data[i:i + 2]) for i in [0, 2, 4]]
+        time = from_int16(data[6:])
+        self.log.info("Start actuation (current): " + str(current) + " for: " + str(time))
         return [0x05, self.status]
 
     @i2cMock.command([0x06])
     def _start_actuation_dipole(self, *data):
-        self.log.info("Start actuation (current)")
+        dipole = [from_int16(data[i:i+2]) for i in [0, 2, 4]]
+        time = from_int16(data[6:])
+        self.log.info("Start actuation (dipole): " + str(dipole) + " for: " + str(time))
         return [0x06, self.status]
 
     @i2cMock.command([0x08])
@@ -105,7 +113,7 @@ class Imtq(i2cMock.I2CDevice):
 
     @i2cMock.command([0x09])
     def _start_bdot(self, *data):
-        time = two_bytes(data[0:])
+        time = from_int16(data[0:])
         self.log.info("Start BDot for %d", time)
         return [0x09, self.status]
 
@@ -124,7 +132,9 @@ class Imtq(i2cMock.I2CDevice):
     @i2cMock.command([0x43])
     def _get_calibrated_mtm(self):
         self.log.info("Get calibrated MTM")
-        return [0x43] + to_int32_xyz(self.mtm_measurement) + [self.coil_actuation]
+        resp = [0x43, self.status] + to_int32_xyz(self.mtm_measurement) + [self.coil_actuation]
+        self.status = 0
+        return resp
 
     @i2cMock.command([0x44])
     def _get_coil_current(self):

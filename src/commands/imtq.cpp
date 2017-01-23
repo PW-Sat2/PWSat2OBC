@@ -74,7 +74,7 @@ void StartActuationDipole(uint16_t argc, char* argv[])
 {
     if (argc != 4)
     {
-        Main.terminal.Printf("imtq current $x $y $z [1e-4 Am^2] $t [ms]");
+        Main.terminal.Printf("imtq dipole $x $y $z [1e-4 Am^2] $t [ms]");
         return;
     }
     Vector3<Dipole> dipole;
@@ -83,7 +83,7 @@ void StartActuationDipole(uint16_t argc, char* argv[])
     dipole[2] = atoi(argv[2]);
     std::chrono::milliseconds time{atoi(argv[3])};
 
-    const bool status = Main.imtq.driver.StartActuationCurrent(dipole, time);
+    const bool status = Main.imtq.driver.StartActuationDipole(dipole, time);
     if (!status)
     {
         Main.terminal.Printf("StartActuationDipole failed!\n");
@@ -414,9 +414,9 @@ static VoidFuncPtr GetDriverCommand(char * name)
 void ShowHelp()
 {
     Main.terminal.Printf("imtq cancel|mtmMeas|current|dipole|\n" //
-                         "selfTestStart|selfTestGet|bdot|\n"
-                         "mtmGet|state|coil|hk|\n"
-                         "get|reset|set");
+                         "  selfTestStart|selfTestGet|bdot|\n"
+                         "  mtmGet|state|coil|hk|\n"
+                         "  get|reset|set");
 }
 
 }
