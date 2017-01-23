@@ -73,7 +73,7 @@ namespace adcs
         return driver.StartBDotDetumbling(duration);
     }
 
-    bool Imtq::PWSatDetumbling(const Vector3<Dipole>& dipole, Vector3<MagnetometerMeasurement>& mgtmMeasurement)
+    bool Imtq::MeasureMagnetometer(Vector3<MagnetometerMeasurement>& mgtmMeasurement)
     {
         if (!driver.CancelOperation())
         {
@@ -86,7 +86,6 @@ namespace adcs
 
         System::SleepTask(30ms); // integration time
 
-        bool timeout = true;
         for (int tries = 0; tries < 10; ++tries)
         {
             MagnetometerMeasurementResult result;
@@ -99,17 +98,20 @@ namespace adcs
             if (newData)
             {
                 mgtmMeasurement = result.data;
-                timeout = false;
-                break;
+                return true;
             }
             System::SleepTask(10ms);
         }
 
-        if (timeout)
+        return false;
+    }
+
+    bool Imtq::PWSatDetumbling(const Vector3<Dipole>& dipole, Vector3<MagnetometerMeasurement>& mgtmMeasurement)
+    {
+        if (!this->MeasureMagnetometer(mgtmMeasurement))
         {
             return false;
         }
-
         return driver.StartActuationDipole(dipole, 1s);
     }
 }

@@ -348,6 +348,55 @@ void SetParameter(uint16_t argc, char* argv[])
     Main.terminal.Printf("SetParameter OK!\n");
 }
 
+void PerformSelfTest(uint16_t argc, char* argv[])
+{
+    UNREFERENCED_PARAMETER(argc);
+    UNREFERENCED_PARAMETER(argv);
+
+    SelfTestResult result;
+    const bool status = Main.imtq.PerformSelfTest(result);
+    if (!status)
+    {
+        Main.terminal.Printf("PerformSelfTest failed!\n");
+        return;
+    }
+    for(auto step : result.stepResults)
+    {
+        Main.terminal.Printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
+                step.error.GetValue(),
+                (int)(step.actualStep),
+                step.RawMagnetometerMeasurement[0],
+                step.RawMagnetometerMeasurement[1],
+                step.RawMagnetometerMeasurement[2],
+                step.CalibratedMagnetometerMeasurement[0],
+                step.CalibratedMagnetometerMeasurement[1],
+                step.CalibratedMagnetometerMeasurement[2],
+                step.CoilCurrent[0],
+                step.CoilCurrent[1],
+                step.CoilCurrent[2],
+                step.CoilTemperature[0],
+                step.CoilTemperature[1],
+                step.CoilTemperature[2]);
+    }
+}
+
+void mtmRead(uint16_t argc, char* argv[])
+{
+    UNREFERENCED_PARAMETER(argc);
+    UNREFERENCED_PARAMETER(argv);
+    Vector3<MagnetometerMeasurement> result;
+    const bool status = Main.imtq.MeasureMagnetometer(result);
+    if (!status)
+    {
+        Main.terminal.Printf("mtmRead failed!\n");
+        return;
+    }
+
+    Main.terminal.Printf("%d %d %d\n",
+            result[0], //
+            result[1], //
+            result[2]);
+}
 
 static VoidFuncPtr GetDriverCommand(char * name)
 {
@@ -407,16 +456,26 @@ static VoidFuncPtr GetDriverCommand(char * name)
     {
         return SetParameter;
     }
+    else if (strcmp(name, "PerformSelfTest") == 0)
+    {
+        return PerformSelfTest;
+    }
+    else if (strcmp(name, "mtmRead") == 0)
+    {
+        return mtmRead;
+    }
     return nullptr;
 }
 
 
 void ShowHelp()
 {
-    Main.terminal.Printf("imtq cancel|mtmMeas|current|dipole|\n" //
-                         "  selfTestStart|selfTestGet|bdot|\n"
-                         "  mtmGet|state|coil|hk|\n"
-                         "  get|reset|set");
+    Main.terminal.Printf("imtq cancel|state|\n"
+                         "     selfTestStart|selfTestGet|PerformSelfTest|\n"
+                         "     mtmMeas|mtmGet|mtmRead\n"
+                         "     current|dipole|bdot|\n"
+                         "     coil|hk|\n"
+                         "     get|reset|set");
 }
 
 }

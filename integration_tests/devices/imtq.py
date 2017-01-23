@@ -193,17 +193,17 @@ class Imtq(i2cMock.I2CDevice):
     @i2cMock.command([0x44])
     def _get_coil_current(self):
         self.log.info("Get coil current")
-        return [0x44] + to_int16_xyz(self.coil_current)
+        return [0x44, self.status] + to_int16_xyz(self.coil_current)
 
     @i2cMock.command([0x45])
     def _get_coil_temperature(self):
         self.log.info("Get coil temperature")
-        return [0x45] + to_int16_xyz(self.coil_temperature)
+        return [0x45, self.status] + to_int16_xyz(self.coil_temperature)
 
     @i2cMock.command([0x46])
     def _get_dipole(self):
         self.log.info("Get commanded dipole")
-        return [0x46] + to_int16_xyz(self.commanded_dipole)
+        return [0x46, self.status] + to_int16_xyz(self.commanded_dipole)
 
     @i2cMock.command([0x47])
     def _get_self_test_result(self):
