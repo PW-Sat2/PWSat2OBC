@@ -9,7 +9,17 @@ class Antenna(object):
     def __init__(self):
         self.deployed = False
         self.activation_count = 0
+        self.activation_time = 0
         self.is_being_deployed = False
+
+    @staticmethod
+    def build(deployed, activation_count, activation_time, deployInProgress):
+        value = Antenna()
+        value.deployed = deployed
+        value.activation_count = activation_count
+        value.activation_time = activation_time
+        value.is_being_deployed = deployInProgress
+        return value
 
     def deployment_in_progress(self):
         return self.is_being_deployed
@@ -58,7 +68,7 @@ class AntennaController(i2cMock.I2CDevice):
         # controller reference to the controller object that is being affected
         # antennaId Identifier of the antenna whose deployment process is being deployed. 
         #   Antenna ids have positive ids, value -1 indicates automatic deployment.
-        # this callback can return bool indicating whether the deployment process state. 
+        # this callback can return bool indicating new deployment process state. 
         # True for the antenna being currently deployed, false in case the deployment process
         # should not start. Returning None will indicate that default behaviour should be used.
         self.on_begin_deployment = None
@@ -96,8 +106,8 @@ class AntennaController(i2cMock.I2CDevice):
     @i2cMock.command([0xAA])
     def reset(self):
         self.log.debug("Resetting antenna controller")
-        self.reset_state()
-        call(self.on_reset, None)
+        if call(self.on_reset, True):
+            self.reset_state()
 
     # antenna icd section 6.2.2
     @i2cMock.command([0xAD])
@@ -168,8 +178,9 @@ class AntennaController(i2cMock.I2CDevice):
         self.log.debug("Beginning automatic antenna deployment on controller")
         self.deployment_in_progress = call(self.on_begin_deployment, True, self, -1)
 
-    def get_antenna_activation_count(self, antenna_id):
+    def _get_antenna_activation_count(self, antenna_id):
         return [self.antenna_state[antenna_id - 1].activation_count]
+
 
     # antenna icd section 6.2.16
     @i2cMock.command([0xB0])
@@ -191,31 +202,35 @@ class AntennaController(i2cMock.I2CDevice):
     def _get_antenna_4_activation_count(self):
         return self._get_antenna_activation_count(4)
 
+    def _get_activation_time(self, antennaId):
+        time = self.antenna_state[antennaId].activation_time
+        return [higher_byte(time), lower_byte(time)]
+
     # antenna icd section 6.2.20
     @i2cMock.command([0xB4])
     def _get_antenna_1_activation_time(self):
-        return [0, 0]
+        return self._get_activation_time(0)
 
     # antenna icd section 6.2.21
     @i2cMock.command([0xB5])
     def _get_antenna_2_activation_time(self):
-        return [0, 0]
+        return self._get_activation_time(1)
 
     # antenna icd section 6.2.22
     @i2cMock.command([0xB6])
     def _get_antenna_3_activation_time(self):
-        return [0, 0]
+        return self._get_activation_time(2)
 
     # antenna icd section 6.2.23
     @i2cMock.command([0xB7])
     def _get_antenna_4_activation_time(self):
-        return [0, 0]
+        return self._get_activation_time(3)
 
     # antenna icd section 6.2.14
     @i2cMock.command([0xC0])
     def _get_temperature(self):
-        result = call(self.on_get_temperature, None) or 0
-        return [(result >> 8) & 0xff, result & 0xff]
+        result = call(self.on_get_temperature, 0)
+        return [higher_byte(result), lower_byte(result)]
 
     @staticmethod
     def update_value(value, condition, flag):

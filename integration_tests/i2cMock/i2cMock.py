@@ -53,7 +53,7 @@ class I2CDevice(object):
         self.freeze_end.wait()
 
     def _missing_handler(self, data):
-        logging.getLogger('Device.{:2X}'.format(self.address)).error('Missing handler for {}'.format(self.address, binascii.hexlify(bytearray(data))))
+        logging.getLogger('Device: 0x{:2X}'.format(self.address)).error('Missing handler for 0x{:2X}'.format(self.address, binascii.hexlify(bytearray(data))))
 
     def _init_handlers(self):
         handlers = []
@@ -70,11 +70,11 @@ class I2CDevice(object):
 class MissingDevice(I2CDevice):
     def __init__(self, address):
         super(MissingDevice, self).__init__(address)
-        self._log = logging.getLogger('MissingDevice.{:2X}'.format(address))
+        self._log = logging.getLogger('MissingDevice: 0x{:2X}'.format(address))
 
     @command([])
     def catch_all(self, *data):
-        self._log.error('Missing handler for {}'.format(self.address, binascii.hexlify(bytearray(data))))
+        self._log.error('Missing handler for 0x{}'.format(self.address, binascii.hexlify(bytearray(data))))
         return [0xCC]
 
 

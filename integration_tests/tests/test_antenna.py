@@ -1,6 +1,6 @@
-import devices
 from tests.base import BaseTest
 from obc import *
+from devices import *
 from utils import TestEvent
 from system import auto_power_on
 
@@ -82,4 +82,38 @@ class Test_Antenna(BaseTest):
         self.assertFalse(result.DeploymentInProgress[1], "Antenna 2 deployment process should not be still be running")
         self.assertFalse(result.DeploymentInProgress[2], "Antenna 3 deployment process should not be still be running")
         self.assertTrue(result.DeploymentInProgress[3], "Antenna 4 deployment process should be still be running")
+
+    def test_get_telemetry(self):
+        def reset_handler():
+            return False
+
+        def primary_temperature():
+            return 0x1ff
+
+        def backup_temperature():
+            return 0x2ff
+
+        self.system.primary_antenna.on_reset = reset_handler
+        self.system.backup_antenna.on_reset = reset_handler
+        self.system.primary_antenna.on_get_temperature = primary_temperature
+        self.system.backup_antenna.on_get_temperature = backup_temperature
+        self.system.primary_antenna.antenna_state = [
+            Antenna.build(True, 0xb0, 0x8765, True),
+            Antenna.build(False, 0xc0, 0x7654, True),
+            Antenna.build(True, 0xd0, 0x6543, False),
+            Antenna.build(False, 0xe0, 0x5432, False),
+            ]
+
+        self.power_on_and_wait()
+        result = self.system.obc.antenna_get_telemetry()
+        self.assertEqual(result.ActivationCount[0], 0xb0);
+        self.assertEqual(result.ActivationCount[1], 0xc0);
+        self.assertEqual(result.ActivationCount[2], 0xd0);
+        self.assertEqual(result.ActivationCount[3], 0xe0);
+        self.assertEqual(result.ActivationTime[0], 0x8765 * 50);
+        self.assertEqual(result.ActivationTime[1], 0x7654 * 50);
+        self.assertEqual(result.ActivationTime[2], 0x6543 * 50);
+        self.assertEqual(result.ActivationTime[3], 0x5432 * 50);
+        self.assertEqual(result.Temperature[0], 0x1ff);
+        self.assertEqual(result.Temperature[1], 0x2ff);
 
