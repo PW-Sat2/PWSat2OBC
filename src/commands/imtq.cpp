@@ -339,7 +339,7 @@ void SetParameter(uint16_t argc, char* argv[])
 
     span<uint8_t> paramData{data.data(), length};
 
-    bool status = Main.imtq.driver.SetParameter(id, data);
+    bool status = Main.imtq.driver.SetParameter(id, paramData);
     if (!status)
     {
         Main.terminal.Printf("SetParameter failed!\n");

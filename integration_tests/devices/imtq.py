@@ -108,6 +108,8 @@ class Imtq(i2cMock.I2CDevice):
 
     def clear_actuation(self):
         self.commanded_dipole = [0, 0, 0]
+        self.coil_current = [0, 0, 0]
+        self.coil_current_raw = [0, 0, 0]
         self.coil_actuation = 0
 
     # --- Commands ---
