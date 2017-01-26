@@ -34,6 +34,7 @@ static const TerminalCommandDescription commands[] = {
     {"suspend_mission", SuspendMission},
     {"resume_mission", ResumeMission},
     {"run_mission", RunMission},
+    {"request_experiment", RequestExperiment},
     {"dma", DMAInfo},
     {"comm_set_bitrate", CommSetBaudRate},
     {"comm_get_telemetry", CommGetTelemetry},

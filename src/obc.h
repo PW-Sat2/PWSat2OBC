@@ -1,6 +1,7 @@
 #ifndef OBC_H
 #define OBC_H
 
+#include <array>
 #include <atomic>
 #include <cstdint>
 #include <gsl/span>
@@ -10,9 +11,11 @@
 #include "antenna/driver.h"
 #include "antenna/miniport.h"
 #include "base/os.h"
+#include "experiment/fibo/fibo.h"
 #include "fs/fs.h"
 #include "fs/yaffs.h"
 #include "leuart/line_io.h"
+#include "mission/experiments.h"
 #include "n25q/n25q.h"
 #include "n25q/yaffs.h"
 #include "obc/adcs.hpp"
@@ -84,6 +87,12 @@ struct OBC
 
     /** @brief Terminal object. */
     Terminal terminal;
+
+    mission::experiments::MissionExperiment ExperimentsController;
+
+    experiment::fibo::FibonacciExperiment Fibo;
+
+    std::array<mission::experiments::IExperiment*, 1> Experiments;
 };
 
 /** @brief Global OBC object. */
