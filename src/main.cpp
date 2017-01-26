@@ -41,7 +41,7 @@ using services::time::TimeProvider;
 using namespace std::chrono_literals;
 
 OBC Main;
-mission::ObcMission Mission(Main.timeProvider, Main.antennaDriver, false, Main.ExperimentsController);
+mission::ObcMission Mission(Main.timeProvider, Main.antennaDriver, false, Main.ExperimentsController, Main.ExperimentsController);
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 

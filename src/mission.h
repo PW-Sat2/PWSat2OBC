@@ -12,7 +12,14 @@
 
 namespace mission
 {
-    typedef MissionLoop<SystemState, TimeTask, antenna::AntennaTask, SailTask, mission::experiments::MissionExperimentComponent> ObcMission;
+    typedef MissionLoop<SystemState, //
+        TimeTask,
+        antenna::AntennaTask,
+        SailTask,
+        mission::experiments::MissionExperimentComponent,
+        mission::experiments::MissionExperimentComponent2 //
+        >
+        ObcMission;
 }
 
 /** @} */
