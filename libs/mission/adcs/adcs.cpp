@@ -1,4 +1,5 @@
 #include "adcs.hpp"
+#include <algorithm>
 #include "adcs/adcs.hpp"
 #include "mission/obc.hpp"
 #include "state/struct.h"
@@ -7,11 +8,8 @@ namespace mission
 {
     namespace adcs
     {
-        constexpr std::uint8_t RetryCount = 3;
-
         AdcsPrimaryTask::AdcsPrimaryTask(::adcs::IAdcsCoordinator& adcsCoordinator) //
             : retryCount(RetryCount),
-              finished(true),
               coordinator(adcsCoordinator)
         {
         }
@@ -44,7 +42,7 @@ namespace mission
                 return false;
             }
 
-            if (!context->finished)
+            if (context->retryCount == 0)
             {
                 return false;
             }
@@ -56,10 +54,13 @@ namespace mission
         {
             const auto context = static_cast<AdcsPrimaryTask*>(param);
             const auto result = context->coordinator.EnableBuiltinDetumbling();
-            context->finished = OS_RESULT_SUCCEEDED(result);
             if (OS_RESULT_SUCCEEDED(result))
             {
                 context->retryCount = 3;
+            }
+            else
+            {
+                context->retryCount = std::max(context->retryCount - 1, 0);
             }
         }
 

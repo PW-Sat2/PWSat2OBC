@@ -26,6 +26,12 @@ namespace mission
           public:
             AdcsPrimaryTask(::adcs::IAdcsCoordinator& adcsCoordinator);
 
+            void Disable();
+
+            void RunDetumbling();
+
+            bool IsDisabled() const;
+
             /**
              * @brief Returns adcs primary detumbling action descriptor.
              *
@@ -61,10 +67,26 @@ namespace mission
              */
             static void AdcsEnablePrimaryDetumbling(const SystemState& state, void* param);
 
+            static constexpr std::uint8_t RetryCount = 3;
+
             std::uint8_t retryCount;
-            bool finished;
             ::adcs::IAdcsCoordinator& coordinator;
         };
+
+        inline void AdcsPrimaryTask::Disable()
+        {
+            this->retryCount = 0;
+        }
+
+        inline void AdcsPrimaryTask::RunDetumbling()
+        {
+            this->retryCount = RetryCount;
+        }
+
+        inline bool AdcsPrimaryTask::IsDisabled() const
+        {
+            return this->retryCount == 0;
+        }
 
         /** @} */
     }
