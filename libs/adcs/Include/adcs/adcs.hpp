@@ -29,7 +29,7 @@ namespace adcs
         virtual OSResult DisableSunPointing() = 0;
     };
 
-    class IAdcsCoordinator
+    struct IAdcsCoordinator
     {
         virtual AdcsMode CurrentMode() const = 0;
 
