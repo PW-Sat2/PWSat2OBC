@@ -3,11 +3,11 @@
 #include "mission/logic.hpp"
 #include "mission/main.hpp"
 #include "mock/ActionDescriptorMock.hpp"
+#include "mock/AdcsMocks.hpp"
 #include "mock/UpdateDescriptorMock.hpp"
 #include "mock/VerifyDescriprorMock.hpp"
 #include "state/struct.h"
 #include "time/TimeSpan.hpp"
-
 using testing::Eq;
 using testing::_;
 using testing::Invoke;
@@ -19,10 +19,11 @@ struct MissionPlanTest : public testing::Test
 {
     MissionPlanTest();
 
+    testing::StrictMock<AdcsCoordinatorMock> adcs;
     SystemState state;
 };
 
-MissionPlanTest::MissionPlanTest()
+MissionPlanTest::MissionPlanTest() : state(adcs)
 {
 }
 

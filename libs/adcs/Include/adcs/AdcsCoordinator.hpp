@@ -8,7 +8,7 @@
 
 namespace adcs
 {
-    class AdcsCoordinator
+    class AdcsCoordinator final : public IAdcsCoordinator
     {
       public:
         AdcsCoordinator(IDetumblingSupport& primaryDetembling, //
@@ -16,18 +16,19 @@ namespace adcs
             ISunPointingSupport& primarySunPointing            //
             );
 
-        AdcsMode CurrentMode() const;
+        virtual AdcsMode CurrentMode() const final override;
 
-        OSResult EnableBuiltinDetumbling();
+        virtual OSResult EnableBuiltinDetumbling() final override;
 
-        OSResult EnableCustomDetumbling();
+        virtual OSResult EnableCustomDetumbling() final override;
 
-        OSResult EnableSunPointing();
+        virtual OSResult EnableSunPointing() final override;
 
-        OSResult Disable();
+        virtual OSResult Disable() final override;
 
       private:
         OSResult SetState(AdcsMode newMode, OSResult operationStatus);
+
         AdcsMode currentMode;
         IDetumblingSupport& builtinDetumbling;
         IDetumblingSupport& customDetumbling;
@@ -37,16 +38,6 @@ namespace adcs
     inline AdcsMode AdcsCoordinator::CurrentMode() const
     {
         return this->currentMode;
-    }
-
-    inline OSResult AdcsCoordinator::SetState(AdcsMode newMode, OSResult operationStatus)
-    {
-        if (OS_RESULT_SUCCEEDED(operationStatus))
-        {
-            this->currentMode = newMode;
-        }
-
-        return operationStatus;
     }
 }
 #endif
