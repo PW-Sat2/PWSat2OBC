@@ -21,8 +21,6 @@ struct SystemState
 {
     SystemState();
 
-    SystemState(adcs::IAdcsCoordinator& adcsAccess);
-
     /** @brief Current time */
     std::chrono::milliseconds Time;
 
@@ -41,8 +39,7 @@ struct SystemState
     /** @brief Flag indicating that sail has been opened */
     bool SailOpened;
 
-    /** @brief ADCS-related state */
-    adcs::IAdcsCoordinator* adcs;
+    adcs::AdcsMode AdcsMode;
 };
 
 /** @} */
