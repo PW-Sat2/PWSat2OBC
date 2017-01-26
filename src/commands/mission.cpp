@@ -1,12 +1,13 @@
 #include "mission.h"
 #include "antenna/antenna.h"
 #include "logger/logger.h"
+#include "obc.h"
 #include "system.h"
 #include "terminal.h"
 
 extern mission::ObcMission Mission;
 
-void SuspendMission(uint16_t argc, char* argv[])
+void SuspendMission(std::uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
@@ -14,7 +15,7 @@ void SuspendMission(uint16_t argc, char* argv[])
     Mission.Suspend();
 }
 
-void ResumeMission(uint16_t argc, char* argv[])
+void ResumeMission(std::uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
@@ -22,10 +23,23 @@ void ResumeMission(uint16_t argc, char* argv[])
     Mission.Suspend();
 }
 
-void RunMission(uint16_t argc, char* argv[])
+void RunMission(std::uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
-    LOG(LOG_LEVEL_INFO, "Received request to suspend automatic mission processing.");
-    Mission.RunOnce();
+    LOG(LOG_LEVEL_INFO, "Received request to run mission processing once");
+    Mission.RequestSingleIteration();
+}
+
+void RequestExperiment(std::uint16_t argc, char* argv[])
+{
+    if (argc != 1)
+    {
+        Main.terminal.Puts("request_experiment <experimentType>");
+        return;
+    }
+
+    std::uint16_t expType = atoi(argv[0]);
+
+    Main.ExperimentsController.RequestExperiment(static_cast<mission::experiments::Experiment>(expType));
 }

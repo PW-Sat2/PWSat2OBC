@@ -16,16 +16,26 @@ namespace mission
             Experiment2
         };
 
+        class ExperimentContext final
+        {
+          public:
+            ExperimentContext(OSEventGroupHandle eventGroup);
+            void WaitForNextCycle();
+
+          private:
+            OSEventGroupHandle _eventGroup;
+        };
+
         struct IExperiment
         {
             virtual Experiment Type() = 0;
-            virtual void Run() = 0;
+            virtual void Run(ExperimentContext& context) = 0;
         };
 
-        class MissionExperiment : public mission::Action
+        class MissionExperiment
         {
           public:
-            MissionExperiment();
+            MissionExperiment(void*);
 
             void SetExperiments(gsl::span<IExperiment*> experiments);
 
@@ -34,8 +44,6 @@ namespace mission
             void RequestExperiment(Experiment experiment);
 
             void BackgroundTask();
-
-            mission::ActionDescriptor<SystemState> BuildAction();
 
             static bool ShouldStartExperiment(const SystemState& state, void* param);
 
@@ -53,6 +61,18 @@ namespace mission
             Queue<Experiment, 1> _queue;
 
             Option<Experiment> _requestedExperiment;
+            Task<MissionExperiment*, 2_KB, TaskPriority::P3> _task;
+        };
+
+        class MissionExperimentComponent : public mission::Action
+        {
+          public:
+            MissionExperimentComponent(MissionExperiment& experimentController);
+
+            mission::ActionDescriptor<SystemState> BuildAction();
+
+          private:
+            MissionExperiment& _experimentController;
         };
     }
 }

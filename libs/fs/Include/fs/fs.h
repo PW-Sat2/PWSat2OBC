@@ -206,21 +206,9 @@ namespace services
         /**
          * @brief Wrapper over file handle
          */
-        class File : private NotCopyable
+        class File : private NotCopyable, private NotMoveable
         {
           public:
-            /**
-             * @brief Move constructor
-             * @param other Other file (will become invalid)
-             */
-            File(File&& other) noexcept;
-            /**
-             * @brief Move operator
-             * @param other Other file (will become invalid)
-             * @return Reference to this
-             */
-            File& operator=(File&& other) noexcept;
-
             /** @brief Desctructor */
             ~File();
 
@@ -233,28 +221,6 @@ namespace services
              * @return File instance
              */
             File(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access);
-
-            /**
-             * @brief Factory method that opens for read
-             * @param fs File system
-             * @param path File path
-             * @param mode Open mode
-             * @param access Access
-             * @return File instance
-             */
-            static File OpenRead(
-                IFileSystem& fs, const char* path, FileOpen mode = FileOpen::Existing, FileAccess access = FileAccess::ReadOnly);
-
-            /**
-             * @brief Factory method that opens for write
-             * @param fs File system
-             * @param path File path
-             * @param mode Open mode
-             * @param access Access
-             * @return File instance
-             */
-            static File OpenWrite(
-                IFileSystem& fs, const char* path, FileOpen mode = FileOpen::Existing, FileAccess access = FileAccess::WriteOnly);
 
             /** @brief Implicit cast to bool, true if file opened successfully*/
             inline operator bool();

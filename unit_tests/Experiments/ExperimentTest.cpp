@@ -28,7 +28,7 @@ using namespace mission::experiments;
 struct ExperimentMock : public IExperiment
 {
     MOCK_METHOD0(Type, Experiment());
-    MOCK_METHOD0(Run, void());
+    MOCK_METHOD1(Run, void(ExperimentContext& context));
 };
 
 class ExperimentTest : public testing::Test
@@ -43,11 +43,12 @@ class ExperimentTest : public testing::Test
     OSEventBits _eventValue;
 
     MissionExperiment _exp;
+    MissionExperimentComponent _mission;
     NiceMock<OSMock> _os;
     OSReset _osReset;
 };
 
-ExperimentTest::ExperimentTest()
+ExperimentTest::ExperimentTest() : _exp(nullptr), _mission(_exp)
 {
     this->_osReset = InstallProxy(&this->_os);
     this->_eventValue = 0;
@@ -76,7 +77,7 @@ TEST_F(ExperimentTest, ShouldStartRequestedExperiment)
     EXPECT_CALL(this->_os, QueueOverwrite(this->_queue, Exp(Experiment::Fibo)));
     SystemState state;
 
-    auto action = _exp.BuildAction();
+    auto action = _mission.BuildAction();
 
     _exp.RequestExperiment(Experiment::Fibo);
 
@@ -90,7 +91,7 @@ TEST_F(ExperimentTest, RepeatedExperimentRequestOverwritePrevious)
 
     SystemState state;
 
-    auto action = _exp.BuildAction();
+    auto action = _mission.BuildAction();
 
     _exp.RequestExperiment(Experiment::Fibo);
     _exp.RequestExperiment(Experiment::Experiment2);
@@ -102,7 +103,7 @@ TEST_F(ExperimentTest, RepeatedExperimentRequestOverwritePrevious)
 TEST_F(ExperimentTest, ShouldIgnoreRequestWhileExperimentIsRunning)
 {
     SystemState state;
-    auto action = _exp.BuildAction();
+    auto action = _mission.BuildAction();
 
     _exp.RequestExperiment(Experiment::Fibo);
 
@@ -118,7 +119,7 @@ TEST_F(ExperimentTest, ShouldIgnoreRequestWhileExperimentIsRunning)
 TEST_F(ExperimentTest, OnceExperimentIsStartedWillNotTryToStartAgain)
 {
     SystemState state;
-    auto action = _exp.BuildAction();
+    auto action = _mission.BuildAction();
 
     _exp.RequestExperiment(Experiment::Fibo);
 
@@ -131,7 +132,7 @@ TEST_F(ExperimentTest, ShouldInvokeExperimentAsRequested)
 {
     NiceMock<ExperimentMock> experiment;
     ON_CALL(experiment, Type()).WillByDefault(Return(Experiment::Fibo));
-    EXPECT_CALL(experiment, Run());
+    EXPECT_CALL(experiment, Run(_));
 
     {
         InSequence s;
@@ -155,11 +156,11 @@ TEST_F(ExperimentTest, ShouldInvokeOneExperimentAfterAnother)
 {
     NiceMock<ExperimentMock> experiment1;
     ON_CALL(experiment1, Type()).WillByDefault(Return(Experiment::Fibo));
-    EXPECT_CALL(experiment1, Run());
+    EXPECT_CALL(experiment1, Run(_));
 
     NiceMock<ExperimentMock> experiment2;
     ON_CALL(experiment2, Type()).WillByDefault(Return(Experiment::Experiment2));
-    EXPECT_CALL(experiment2, Run());
+    EXPECT_CALL(experiment2, Run(_));
 
     {
         InSequence s;

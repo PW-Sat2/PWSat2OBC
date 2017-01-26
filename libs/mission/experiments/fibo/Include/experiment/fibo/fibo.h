@@ -2,6 +2,8 @@
 #define LIBS_MISSION_EXPERIMENTS_FIBO_INCLUDE_EXPERIMENT_FIBO_FIBO_H_
 
 #include <cstdint>
+#include "fs/fs.h"
+#include "mission/experiments.h"
 
 namespace experiment
 {
@@ -18,6 +20,18 @@ namespace experiment
             std::uint32_t _counter;
             std::uint32_t _prev;
             std::uint32_t _current;
+        };
+
+        class FibonacciExperiment final : public mission::experiments::IExperiment
+        {
+          public:
+            FibonacciExperiment(services::fs::IFileSystem& fileSystem);
+
+            virtual mission::experiments::Experiment Type() override;
+            virtual void Run(mission::experiments::ExperimentContext& context) override;
+
+          private:
+            services::fs::IFileSystem& _fileSystem;
         };
     }
 }

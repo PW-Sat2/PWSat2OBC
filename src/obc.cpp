@@ -7,7 +7,10 @@ OBC::OBC()
       timeProvider(fs),                         //
       Communication(Hardware.I2C.Buses.Bus),    //
       Storage(Hardware.SPI, fs, Hardware.Pins), //
-      terminal(this->IO)
+      terminal(this->IO),                       //
+      ExperimentsController(nullptr),           //
+      Fibo(this->fs),                           //
+      Experiments{&Fibo}
 {
 }
 
@@ -28,4 +31,7 @@ void OBC::PostStartInitialization()
     {
         LOGF(LOG_LEVEL_FATAL, "Storage initialization failed %d", num(r));
     }
+
+    this->ExperimentsController.Initialize();
+    this->ExperimentsController.SetExperiments(Experiments);
 }
