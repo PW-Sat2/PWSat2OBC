@@ -16,10 +16,12 @@ set(SOURCES
   FileSystem/FileTest.cpp
   Comm/CommTest.cpp
   Comm/CommFrameTest.cpp
+  Comm/DownlinkFrameTest.cpp
   Comm/TeleCommandHandlingTest.cpp
   Comm/UplinkFrameDecoderTest.cpp
   base/ReaderTest.cpp
   base/WriterTest.cpp
+  base/RapidTest.cpp
   MissionPlan/MissionPlanTest.cpp
   MissionPlan/MissionTestHelpers.cpp
   MissionPlan/SailSystemStateTest.cpp
@@ -84,7 +86,7 @@ target_link_libraries(${NAME}
     yaffs
     storage
     comm
-    telecommand_handling
+    telecommunication
     fs    
     base
     mission

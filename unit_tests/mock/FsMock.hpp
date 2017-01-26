@@ -22,6 +22,7 @@ struct FsMock : services::fs::IFileSystem
     MOCK_METHOD1(Format, OSResult(const char*));
     MOCK_METHOD1(MakeDirectory, OSResult(const char*));
     MOCK_METHOD1(Exists, bool(const char*));
+    MOCK_METHOD1(GetFileSize, services::fs::FileSize(services::fs::FileHandle));
 };
 
 services::fs::FileOpenResult MakeOpenedFile(int handle);

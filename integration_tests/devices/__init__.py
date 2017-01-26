@@ -6,6 +6,8 @@ from imtq import *
 
 __all__ = [
     'EPSDevice',
+    'DownlinkFrame',
+    'UplinkFrame',
     'TransmitterDevice',
     'ReceiverDevice',
     'Comm',
@@ -14,5 +16,9 @@ __all__ = [
     'AntennaController',
     'PRIMARY_ANTENNA_CONTROLLER_ADDRESS',
     'BACKUP_ANTENNA_CONTROLLER_ADDRESS',
-    'Imtq'
+    'Imtq',
+    'BaudRate',
+    'TransmitterTelemetry',
+    'ReceiverTelemetry',
+    'Antenna'
 ]

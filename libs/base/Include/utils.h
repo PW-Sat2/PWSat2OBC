@@ -182,4 +182,9 @@ struct NotMoveable
     NotMoveable& operator=(NotMoveable&& arg) = delete;
 };
 
+constexpr auto MaxValueOnBits(std::uint8_t bitsCount)
+{
+    return (1 << bitsCount) - 1;
+}
+
 #endif

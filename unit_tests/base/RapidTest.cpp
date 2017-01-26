@@ -3,78 +3,72 @@
 #include "rapidcheck.hpp"
 #include "rapidcheck/gtest.h"
 
-#include "system.h"
 #include "base/reader.h"
 #include "base/writer.h"
 
-using testing::Eq;
-using testing::ElementsAre;
-
-
-template<typename WriterFunction, typename ReaderMemberPtr, typename V>
-void WriterReaderRapidCheckTest(WriterFunction w, ReaderMemberPtr r, V value)
+template <typename WriterFunction, typename ReaderMemberPtr, typename V>
+void WriteAndReadRapidCheckTest(WriterFunction w, ReaderMemberPtr r, V value)
 {
-	Writer writer;
-	std::array<uint8_t, sizeof(V)> array;
+    std::array<uint8_t, sizeof(V)> array;
+    Writer writer(array);
 
-	WriterInitialize(&writer, array.begin(), array.size());
-	RC_ASSERT(w(&writer, value));
-	RC_ASSERT(WriterStatus(&writer));
-	RC_ASSERT(WriterRemainingSize(&writer) == 0);
+    RC_ASSERT((writer.*w)(value));
+    RC_ASSERT(writer.Status());
+    RC_ASSERT(writer.RemainingSize() == 0);
 
-	Reader reader{gsl::make_span(array)};
-	V read = (reader.*r)();
-	RC_ASSERT(read == value);
-	RC_ASSERT(reader.Status());
-	RC_ASSERT(reader.RemainingSize() == 0);
+    Reader reader{gsl::make_span(array)};
+    V read = (reader.*r)();
+    RC_ASSERT(read == value);
+    RC_ASSERT(reader.Status());
+    RC_ASSERT(reader.RemainingSize() == 0);
 }
 
-RC_GTEST_PROP(WriteReadRapicheck, Byte, (uint8_t value))
+RC_GTEST_PROP(WriteAndRead, Byte, (uint8_t value))
 {
-	WriterReaderRapidCheckTest(WriterWriteByte, &Reader::ReadByte, value);
+    WriteAndReadRapidCheckTest(&Writer::WriteByte, &Reader::ReadByte, value);
 }
 
-RC_GTEST_PROP(WriteReadRapicheck, WordLE, (uint16_t value))
+RC_GTEST_PROP(WriteAndRead, WordLE, (uint16_t value))
 {
-	WriterReaderRapidCheckTest(WriterWriteWordLE, &Reader::ReadWordLE, value);
+    WriteAndReadRapidCheckTest(&Writer::WriteWordLE, &Reader::ReadWordLE, value);
 }
 
-RC_GTEST_PROP(WriteReadRapicheck, SignedWordLE, (int16_t value))
+RC_GTEST_PROP(WriteAndRead, SignedWordLE, (int16_t value))
 {
-	WriterReaderRapidCheckTest(WriterWriteSignedWordLE, &Reader::ReadSignedWordLE, value);
+    WriteAndReadRapidCheckTest(&Writer::WriteSignedWordLE, &Reader::ReadSignedWordLE, value);
 }
 
-RC_GTEST_PROP(WriteReadRapicheck, DoubleWordLE, (uint32_t value))
+RC_GTEST_PROP(WriteAndRead, DoubleWordLE, (uint32_t value))
 {
-	WriterReaderRapidCheckTest(WriterWriteDoubleWordLE, &Reader::ReadDoubleWordLE, value);
+    WriteAndReadRapidCheckTest(&Writer::WriteDoubleWordLE, &Reader::ReadDoubleWordLE, value);
 }
 
-RC_GTEST_PROP(WriteReadRapicheck, SignedDoubleWordLE, (int32_t value))
+RC_GTEST_PROP(WriteAndRead, SignedDoubleWordLE, (int32_t value))
 {
-	WriterReaderRapidCheckTest(WriterWriteSignedDoubleWordLE, &Reader::ReadSignedDoubleWordLE, value);
+    WriteAndReadRapidCheckTest(&Writer::WriteSignedDoubleWordLE, &Reader::ReadSignedDoubleWordLE, value);
 }
 
-RC_GTEST_PROP(WriteReadRapicheck, QuadWordLE, (uint64_t value))
+RC_GTEST_PROP(WriteAndRead, QuadWordLE, (uint64_t value))
 {
-	WriterReaderRapidCheckTest(WriterWriteQuadWordLE, &Reader::ReadQuadWordLE, value);
+    WriteAndReadRapidCheckTest(&Writer::WriteQuadWordLE, &Reader::ReadQuadWordLE, value);
 }
 
-RC_GTEST_PROP(WriteReadRapicheck, Array, (std::vector<uint8_t> value))
+RC_GTEST_PROP(WriteAndRead, Array, (std::vector<uint8_t> value))
 {
-	RC_PRE(value.size() > 0u);
-	std::unique_ptr<uint8_t[]> array(new uint8_t[value.size()]);
+    RC_PRE(value.size() > 0u);
+    std::vector<uint8_t> array(value.size());
 
-	Writer writer;
-	WriterInitialize(&writer, array.get(), value.size());
-	RC_ASSERT(WriterWriteArray(&writer, value.data(), value.size()));
-	RC_ASSERT(WriterStatus(&writer));
+    Writer writer(array);
 
-	Reader reader{gsl::make_span(array.get(), value.size())};
-	auto read = reader.ReadArray(value.size());
-	for(size_t i = 0; i < value.size(); ++i)
-	{
-		RC_ASSERT(read[i] == value[i]);
-	}
-	RC_ASSERT(reader.Status());
-	RC_ASSERT(reader.RemainingSize() == 0);
+    RC_ASSERT(writer.WriteArray(value));
+    RC_ASSERT(writer.Status());
+
+    Reader reader{array};
+    auto read = reader.ReadArray(value.size());
+    for (size_t i = 0; i < value.size(); ++i)
+    {
+        RC_ASSERT(read[i] == value[i]);
+    }
+    RC_ASSERT(reader.Status());
+    RC_ASSERT(reader.RemainingSize() == 0);
 }
