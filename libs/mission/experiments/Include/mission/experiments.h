@@ -49,6 +49,10 @@ namespace mission
 
             static void StartExperiment(const SystemState& state, void* param);
 
+            static bool ShouldKickExperiment(const SystemState& state, void* param);
+
+            static void KickExperiment(const SystemState& state, void* param);
+
             struct Event
             {
                 static constexpr OSEventBits InProgress = 1 << 0;
@@ -68,6 +72,17 @@ namespace mission
         {
           public:
             MissionExperimentComponent(MissionExperiment& experimentController);
+
+            mission::ActionDescriptor<SystemState> BuildAction();
+
+          private:
+            MissionExperiment& _experimentController;
+        };
+
+        class MissionExperimentComponent2 : public mission::Action
+        {
+          public:
+            MissionExperimentComponent2(MissionExperiment& experimentController);
 
             mission::ActionDescriptor<SystemState> BuildAction();
 

@@ -32,37 +32,6 @@ namespace mission
             this->_requestedExperiment = Some(experiment);
         }
 
-        MissionExperimentComponent::MissionExperimentComponent(MissionExperiment& experimentController)
-            : _experimentController(experimentController)
-        {
-        }
-
-        mission::ActionDescriptor<SystemState> MissionExperimentComponent::BuildAction()
-        {
-            auto d = mission::ActionDescriptor<SystemState>();
-
-            d.name = "StartExp";
-            d.param = &this->_experimentController;
-            d.condition = MissionExperiment::ShouldStartExperiment;
-            d.actionProc = MissionExperiment::StartExperiment;
-
-            return d;
-        }
-
-        bool MissionExperiment::ShouldStartExperiment(const SystemState& state, void* param)
-        {
-            UNREFERENCED_PARAMETER(state);
-
-            auto This = reinterpret_cast<MissionExperiment*>(param);
-
-            auto inProgress = has_flag(System::EventGroupGetBits(This->_event), Event::InProgress);
-
-            if (inProgress)
-                return false;
-
-            return This->_requestedExperiment.HasValue;
-        }
-
         void MissionExperiment::BackgroundTask()
         {
             while (1)
@@ -110,6 +79,20 @@ namespace mission
             this->_experiments = experiments;
         }
 
+        bool MissionExperiment::ShouldStartExperiment(const SystemState& state, void* param)
+        {
+            UNREFERENCED_PARAMETER(state);
+
+            auto This = reinterpret_cast<MissionExperiment*>(param);
+
+            auto inProgress = has_flag(System::EventGroupGetBits(This->_event), Event::InProgress);
+
+            if (inProgress)
+                return false;
+
+            return This->_requestedExperiment.HasValue;
+        }
+
         void MissionExperiment::StartExperiment(const SystemState& state, void* param)
         {
             UNREFERENCED_PARAMETER(state);
@@ -118,8 +101,60 @@ namespace mission
 
             This->_queue.Overwrite(This->_requestedExperiment.Value);
             This->_requestedExperiment = None<Experiment>();
+        }
+
+        bool MissionExperiment::ShouldKickExperiment(const SystemState& state, void* param)
+        {
+            UNREFERENCED_PARAMETER(state);
+
+            auto This = reinterpret_cast<MissionExperiment*>(param);
+
+            auto inProgress = has_flag(System::EventGroupGetBits(This->_event), Event::InProgress);
+
+            return inProgress;
+        }
+
+        void MissionExperiment::KickExperiment(const SystemState& state, void* param)
+        {
+            UNREFERENCED_PARAMETER(state);
+
+            auto This = reinterpret_cast<MissionExperiment*>(param);
 
             System::EventGroupSetBits(This->_event, 1 << 2);
+        }
+
+        MissionExperimentComponent::MissionExperimentComponent(MissionExperiment& experimentController)
+            : _experimentController(experimentController)
+        {
+        }
+
+        mission::ActionDescriptor<SystemState> MissionExperimentComponent::BuildAction()
+        {
+            auto d = mission::ActionDescriptor<SystemState>();
+
+            d.name = "StartExp";
+            d.param = &this->_experimentController;
+            d.condition = MissionExperiment::ShouldStartExperiment;
+            d.actionProc = MissionExperiment::StartExperiment;
+
+            return d;
+        }
+
+        MissionExperimentComponent2::MissionExperimentComponent2(MissionExperiment& experimentController)
+            : _experimentController(experimentController)
+        {
+        }
+
+        mission::ActionDescriptor<SystemState> MissionExperimentComponent2::BuildAction()
+        {
+            auto d = mission::ActionDescriptor<SystemState>();
+
+            d.name = "KickExp";
+            d.param = &this->_experimentController;
+            d.condition = MissionExperiment::ShouldKickExperiment;
+            d.actionProc = MissionExperiment::KickExperiment;
+
+            return d;
         }
 
         ExperimentContext::ExperimentContext(OSEventGroupHandle eventGroup) : _eventGroup(eventGroup)
