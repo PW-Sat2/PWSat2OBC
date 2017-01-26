@@ -21,6 +21,8 @@ void OBC::Initialize()
     this->Fdir.Initalize();
     this->Hardware.Initialize();
 
+    this->UARTDriver.Initialize();
+
     this->fs.Initialize();
 
     this->Communication.Initialize();
