@@ -7,6 +7,7 @@
 
 #include "adcs/AdcsCoordinator.hpp"
 #include "adcs/AdcsExperiment.hpp"
+#include "adcs/ObcAdcs.hpp"
 #include "antenna/driver.h"
 #include "antenna/miniport.h"
 #include "base/os.h"
@@ -54,9 +55,6 @@ struct OBC
     /** @brief Flag indicating that OBC software has finished initialization process. */
     std::atomic<bool> initialized;
 
-    /** @brief ADCS context object */
-    ADCSContext adcs;
-
     /** @brief Persistent timer that measures mission time. */
     services::time::TimeProvider timeProvider;
 
@@ -80,6 +78,9 @@ struct OBC
 
     /** @brief OBC storage */
     obc::OBCStorage Storage;
+
+    /** @brief Adcs subsytem for obc. */
+    obc::ObcAdcs adcs;
 
     /** @brief Terminal object. */
     Terminal terminal;

@@ -158,8 +158,6 @@ static void ObcInitTask(void* param)
         LOG(LOG_LEVEL_ERROR, "Unable to restart comm");
     }
 
-    InitializeADCS(&obc->adcs);
-
     Mission.Initialize();
 
     System::CreateTask(SmartWaitTask, "SmartWait", 512, NULL, TaskPriority::P1, NULL);

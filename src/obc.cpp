@@ -18,6 +18,8 @@ void OBC::Initialize()
     this->fs.Initialize();
 
     this->Communication.Initialize();
+
+    this->adcs.Initialize();
 }
 
 OSResult OBC::PostStartInitialization()
