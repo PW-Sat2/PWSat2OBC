@@ -19,6 +19,8 @@
  */
 struct SystemState
 {
+    SystemState();
+
     SystemState(adcs::IAdcsCoordinator& adcsAccess);
 
     /** @brief Current time */
@@ -40,7 +42,7 @@ struct SystemState
     bool SailOpened;
 
     /** @brief ADCS-related state */
-    adcs::IAdcsCoordinator& adcs;
+    adcs::IAdcsCoordinator* adcs;
 };
 
 /** @} */

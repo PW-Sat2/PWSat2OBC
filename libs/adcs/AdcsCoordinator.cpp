@@ -13,6 +13,16 @@ namespace adcs
     {
     }
 
+    OSResult AdcsCoordinator::SetState(AdcsMode newMode, OSResult operationStatus)
+    {
+        if (OS_RESULT_SUCCEEDED(operationStatus))
+        {
+            this->currentMode = newMode;
+        }
+
+        return operationStatus;
+    }
+
     OSResult AdcsCoordinator::EnableBuiltinDetumbling()
     {
         auto result = Disable();
@@ -57,7 +67,7 @@ namespace adcs
             case AdcsMode::CustomSunpointing:
                 return SetState(AdcsMode::Disabled, this->sunpointAlgorithm.DisableSunPointing());
             default:
-                return OSResult::InvalidOperation;
+                return OSResult::Success;
         }
     }
 }
