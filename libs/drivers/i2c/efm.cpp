@@ -1,5 +1,6 @@
 #include <em_cmu.h>
 #include <em_gpio.h>
+#include <cassert>
 
 #include "base/os.h"
 #include "io_map.h"
@@ -66,8 +67,10 @@ I2CResult I2CLowLevelBus::ExecuteTransfer(I2C_TransferSeq_TypeDef* seq)
 
 I2CResult I2CLowLevelBus::Write(const I2CAddress address, gsl::span<const uint8_t> inData)
 {
+    assert((address & 0b10000000) == 0);
+
     I2C_TransferSeq_TypeDef seq;
-    seq.addr = address;
+    seq.addr = (address << 1);
     seq.flags = I2C_FLAG_WRITE;
     seq.buf[0].len = inData.length();
     seq.buf[0].data = const_cast<uint8_t*>(inData.data());
@@ -79,9 +82,10 @@ I2CResult I2CLowLevelBus::Write(const I2CAddress address, gsl::span<const uint8_
 
 I2CResult I2CLowLevelBus::WriteRead(const I2CAddress address, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData)
 {
-    I2C_TransferSeq_TypeDef seq;
+    assert((address & 0b10000000) == 0);
 
-    seq.addr = address;
+    I2C_TransferSeq_TypeDef seq;
+    seq.addr = (address << 1);
     seq.flags = I2C_FLAG_WRITE_READ;
     seq.buf[0].len = inData.length();
     seq.buf[0].data = const_cast<uint8_t*>(inData.data());
