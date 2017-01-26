@@ -38,6 +38,17 @@ namespace io_map
         using RX = PinLocation<gpioPortD, 5>;
     };
 
+    struct UART : public UARTPins<UART>
+    {
+        static constexpr USART_TypeDef* Peripheral = UART1;
+        static constexpr std::uint32_t Location = UART_ROUTE_LOCATION_LOC2;
+        static constexpr std::uint32_t Baudrate = 115200;
+        static constexpr std::uint8_t InterruptPriority = 6;
+
+        using TX = PinLocation<gpioPortB, 9>;
+        using RX = PinLocation<gpioPortB, 10>;
+    };
+
     struct I2C_0 : public I2CPins<I2C_0>
     {
         static constexpr std::uint32_t Location = I2C_ROUTE_LOCATION_LOC1;

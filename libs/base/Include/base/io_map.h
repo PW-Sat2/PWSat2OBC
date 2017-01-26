@@ -100,6 +100,14 @@ namespace io_map
         };
     };
 
+    template <typename Self> struct UARTPins : public PinGroupTag
+    {
+        struct Group
+        {
+            using Pins = PinContainer<typename Self::RX, typename Self::TX>;
+        };
+    };
+
     /** @} */
 }
 

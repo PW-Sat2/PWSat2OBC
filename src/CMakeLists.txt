@@ -33,6 +33,7 @@ target_link_libraries(${NAME}
     free_rtos_wrapper
     comm
     leuart
+    uart
     swo
     logger
     SwoEndpoint

@@ -67,6 +67,20 @@ namespace obc
         }
     };
 
+    template <typename Location> struct UARTPins
+    {
+        /** @brief TX */
+        const drivers::gpio::OutputPin<typename Location::TX> TX;
+        /** @brief RX */
+        const drivers::gpio::InputPin<typename Location::RX> RX;
+        /** @brief Initializes LEUART pins */
+        void Initialize() const
+        {
+            this->TX.Initialize();
+            this->RX.Initialize();
+        }
+    };
+
     /**
      * @brief Composes all used GPIO pins together
      *
@@ -79,6 +93,7 @@ namespace obc
         typename TSysClear,
         typename TSPI,
         typename TLEUART,
+        typename TUART,
         typename TI2C0,
         typename TI2C1>
     struct OBCGPIOBase
@@ -95,6 +110,9 @@ namespace obc
         const SPIPins<TSPI> SPI;
         /** @brief LEUART */
         const LEUARTPins<TLEUART> LEUART;
+
+        const UARTPins<TUART> UART;
+
         /** @brief I2C0 */
         const I2CPins<TI2C0> I2C_0;
         /** @brief I2C1 */
@@ -111,6 +129,7 @@ namespace obc
             this->SysClear.Initialize();
             this->SPI.Initialize();
             this->LEUART.Initialize();
+            this->UART.Initialize();
             this->I2C_0.Initialize();
             this->I2C_1.Initialize();
         }
@@ -124,6 +143,7 @@ namespace obc
         io_map::SysClear,                                   //
         io_map::SPI,                                        //
         io_map::LEUART,
+        io_map::UART,
         io_map::I2C_0,
         io_map::I2C_1>;
 

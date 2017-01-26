@@ -15,6 +15,8 @@ void OBC::Initialize()
 {
     this->Hardware.Initialize();
 
+    this->UARTDriver.Initialize();
+
     this->fs.Initialize();
 
     this->Communication.Initialize();

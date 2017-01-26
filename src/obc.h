@@ -21,6 +21,7 @@
 #include "storage/nand_driver.h"
 #include "terminal/terminal.h"
 #include "time/timer.h"
+#include "uart/uart.h"
 #include "utils.h"
 
 /**
@@ -79,6 +80,8 @@ struct OBC
 
     /** @brief OBC storage */
     obc::OBCStorage Storage;
+
+    drivers::uart::UART UARTDriver;
 
     /** @brief Terminal object. */
     Terminal terminal;
