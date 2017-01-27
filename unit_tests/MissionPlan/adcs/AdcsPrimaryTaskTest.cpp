@@ -96,3 +96,10 @@ TEST_F(AdcsPrimaryTaskTest, TestPrimaryDetumblingRepeatedFailure)
 
     ASSERT_THAT(this->task.IsDisabled(), Eq(true));
 }
+
+TEST_F(AdcsPrimaryTaskTest, TestAdcsUpdateTask)
+{
+    EXPECT_CALL(coordinator, CurrentMode()).WillOnce(Return(adcs::AdcsMode::CustomSunpointing));
+    this->updateStep.updateProc(this->state, this->updateStep.param);
+    ASSERT_THAT(this->state.AdcsMode, Eq(adcs::AdcsMode::CustomSunpointing));
+}
