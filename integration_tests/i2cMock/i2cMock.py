@@ -143,7 +143,7 @@ class I2CMock(object):
         self._active = True
 
     def add_device(self, device):
-        self._devices[device.address] = device
+        self._devices[2*device.address] = device
 
     def stop(self):
         self._log.debug('Requesting stop')

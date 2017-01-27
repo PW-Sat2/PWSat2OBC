@@ -2,8 +2,8 @@ import logging
 import i2cMock
 from utils import *
 
-PRIMARY_ANTENNA_CONTROLLER_ADDRESS = 0x32
-BACKUP_ANTENNA_CONTROLLER_ADDRESS = 0x34
+PRIMARY_ANTENNA_CONTROLLER_ADDRESS = 0x31
+BACKUP_ANTENNA_CONTROLLER_ADDRESS = 0x32
 
 class Antenna(object):
     def __init__(self):

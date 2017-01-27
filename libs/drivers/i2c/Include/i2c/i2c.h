@@ -70,7 +70,7 @@ namespace drivers
         /**
          * @brief Type of I2C address.
          *
-         * I2C addresses are 7-bit. Least significant bit is ignored and should be zero.
+         * I2C addresses are 7-bit. Most significant bit have to be '0'.
          */
         using I2CAddress = uint8_t;
 

@@ -206,7 +206,7 @@ enum class TransmitterCommand
 enum class Address
 {
     Receiver = 0x60,
-    Transmitter = 0x62,
+    Transmitter = 0x61,
 };
 
 /** @}*/
