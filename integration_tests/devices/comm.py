@@ -124,7 +124,7 @@ class TransmitterDevice(i2cMock.I2CDevice):
     BUFFER_SIZE = 40
 
     def __init__(self):
-        super(TransmitterDevice, self).__init__(0x62)
+        super(TransmitterDevice, self).__init__(0x61)
         self.log = logging.getLogger("Comm Transmitter")
 
         # callback called when watchdog is being reset

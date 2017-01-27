@@ -37,9 +37,9 @@ enum AntennaId
 enum AntennaChannel
 {
     /** Primary hardware controller address. */
-    ANTENNA_PRIMARY_CHANNEL = 0x32,
+    ANTENNA_PRIMARY_CHANNEL = 0x31,
     /** Backup hardware controller address. */
-    ANTENNA_BACKUP_CHANNEL = 0x34,
+    ANTENNA_BACKUP_CHANNEL = 0x32,
 };
 
 /**

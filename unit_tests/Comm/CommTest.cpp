@@ -32,7 +32,7 @@ using drivers::i2c::I2CResult;
 using namespace devices::comm;
 
 static constexpr uint8_t ReceiverAddress = 0x60;
-static constexpr uint8_t TransmitterAddress = 0x62;
+static constexpr uint8_t TransmitterAddress = 0x61;
 
 static constexpr uint8_t ReceverGetTelemetry = 0x1A;
 static constexpr uint8_t ReceiverGetFrameCount = 0x21;
