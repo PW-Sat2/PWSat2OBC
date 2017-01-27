@@ -78,7 +78,7 @@ namespace mission
         {
             UpdateDescriptor<SystemState> descriptor;
             descriptor.name = "Adcs Status Update";
-            descriptor.param = this;
+            descriptor.param = &this->coordinator;
             descriptor.updateProc = AdcsStatusUpdate;
             return descriptor;
         }
