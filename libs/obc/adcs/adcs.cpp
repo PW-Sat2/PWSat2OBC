@@ -1,14 +1,14 @@
-#include "ObcAdcs.hpp"
+#include "adcs.hpp"
 #include "logger/logger.h"
 
-using obc::ObcAdcs;
+using obc::Adcs;
 
-ObcAdcs::ObcAdcs() //
+Adcs::Adcs() //
     : coordinator(primaryDetumbling, experimentalAdcs, experimentalAdcs)
 {
 }
 
-OSResult ObcAdcs::Initialize()
+OSResult Adcs::Initialize()
 {
     const auto result = this->experimentalAdcs.Initialize();
     if (OS_RESULT_FAILED(result))
