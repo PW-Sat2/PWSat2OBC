@@ -52,10 +52,10 @@ set(SOURCES
   mock/ActionDescriptorMock.hpp
   mock/UpdateDescriptorMock.hpp
   mock/VerifyDescriprorMock.hpp
-  imtq/imtqTest.cpp
   mock/emlib.cpp
   SPI/SPIMock.cpp
   SPI/SPIDriverTest.cpp
+  imtq/imtqTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})

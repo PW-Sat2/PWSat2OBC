@@ -26,31 +26,7 @@ namespace devices
 {
     namespace imtq
     {
-        namespace details
-        {
-            int16_t UnsignedToSignedWord(uint16_t value)
-            {
-                // return *reinterpret_cast<int16_t*>(&value);
-                return (int16_t)(value);
-            }
-            int32_t UnsignedToSignedDoubleWord(uint32_t value)
-            {
-                return (int32_t)(value);
-            }
-
-            int16_t ReadSignedWordLE(Reader& reader)
-            {
-                return UnsignedToSignedWord(reader.ReadWordLE());
-            }
-
-            int32_t ReadSignedDoubleWordLE(Reader& reader)
-            {
-                return UnsignedToSignedDoubleWord(reader.ReadDoubleWordLE());
-            }
-        }
 #define FOR_AXIS(var) for (uint8_t var = 0; var < 3; ++var)
-
-        using namespace details;
 
         constexpr int maximumWriteLength = 11;
 
@@ -194,13 +170,13 @@ namespace devices
         bool ImtqDriver::StartActuationCurrent(const Vector3<Current>& current, std::chrono::milliseconds duration)
         {
             std::array<uint8_t, 8> parameters;
-            Writer writer;
-            WriterInitialize(&writer, parameters.data(), parameters.size());
+
+            Writer writer{parameters};
             FOR_AXIS(i)
             {
-                WriterWriteSignedWordLE(&writer, current[i]);
+                writer.WriteSignedWordLE(current[i]);
             }
-            WriterWriteWordLE(&writer, duration.count());
+            writer.WriteWordLE(duration.count());
 
             return this->SendCommand(OpCode::StartActuationCurrent, parameters);
         }
@@ -208,13 +184,13 @@ namespace devices
         bool ImtqDriver::StartActuationDipole(Vector3<Dipole> dipole, std::chrono::milliseconds duration)
         {
             std::array<uint8_t, 8> parameters;
-            Writer writer;
-            WriterInitialize(&writer, parameters.data(), parameters.size());
+
+            Writer writer{parameters};
             FOR_AXIS(i)
             {
-                WriterWriteWordLE(&writer, dipole[i]);
+                writer.WriteWordLE(dipole[i]);
             }
-            WriterWriteSignedWordLE(&writer, duration.count());
+            writer.WriteSignedWordLE(duration.count());
 
             return this->SendCommand(OpCode::StartActuationDipole, parameters);
         }
@@ -229,9 +205,9 @@ namespace devices
         bool ImtqDriver::StartBDotDetumbling(std::chrono::seconds duration)
         {
             std::array<uint8_t, 2> parameters;
-            Writer writer;
-            WriterInitialize(&writer, parameters.data(), parameters.size());
-            WriterWriteWordLE(&writer, duration.count());
+
+            Writer writer{parameters};
+            writer.WriteWordLE(duration.count());
 
             return this->SendCommand(OpCode::StartBDOT, parameters);
         }
@@ -270,7 +246,7 @@ namespace devices
             reader.Skip(2);
             FOR_AXIS(i)
             {
-                result.data[i] = ReadSignedDoubleWordLE(reader);
+                result.data[i] = reader.ReadSignedDoubleWordLE();
             }
 
             result.coilActuationDuringMeasurement = (value[14] == 1);
@@ -290,7 +266,7 @@ namespace devices
 
             FOR_AXIS(i)
             {
-                result[i] = ReadSignedWordLE(reader);
+                result[i] = reader.ReadSignedWordLE();
             }
             return true;
         }
@@ -308,7 +284,7 @@ namespace devices
 
             FOR_AXIS(i)
             {
-                result[i] = ReadSignedWordLE(reader);
+                result[i] = reader.ReadSignedWordLE();
             }
             return true;
         }
@@ -326,7 +302,7 @@ namespace devices
 
             FOR_AXIS(i)
             {
-                result[i] = ReadSignedWordLE(reader);
+                result[i] = reader.ReadSignedWordLE();
             }
             return true;
         }
@@ -348,19 +324,19 @@ namespace devices
                 result.stepResults[step].actualStep = static_cast<SelfTestResult::Step>(reader.ReadByte());
                 FOR_AXIS(i)
                 {
-                    result.stepResults[step].RawMagnetometerMeasurement[i] = ReadSignedDoubleWordLE(reader);
+                    result.stepResults[step].RawMagnetometerMeasurement[i] = reader.ReadSignedDoubleWordLE();
                 }
                 FOR_AXIS(i)
                 {
-                    result.stepResults[step].CalibratedMagnetometerMeasurement[i] = ReadSignedDoubleWordLE(reader);
+                    result.stepResults[step].CalibratedMagnetometerMeasurement[i] = reader.ReadSignedDoubleWordLE();
                 }
                 FOR_AXIS(i)
                 {
-                    result.stepResults[step].CoilCurrent[i] = ReadSignedWordLE(reader);
+                    result.stepResults[step].CoilCurrent[i] = reader.ReadSignedWordLE();
                 }
                 FOR_AXIS(i)
                 {
-                    result.stepResults[step].CoilTemperature[i] = ReadSignedWordLE(reader);
+                    result.stepResults[step].CoilTemperature[i] = reader.ReadSignedWordLE();
                 }
             }
             return true;
@@ -379,27 +355,27 @@ namespace devices
 
             FOR_AXIS(i)
             {
-                result.calibratedMagnetometerMeasurement[i] = ReadSignedDoubleWordLE(reader);
+                result.calibratedMagnetometerMeasurement[i] = reader.ReadSignedDoubleWordLE();
             }
             FOR_AXIS(i)
             {
-                result.filteredMagnetometerMeasurement[i] = ReadSignedDoubleWordLE(reader);
+                result.filteredMagnetometerMeasurement[i] = reader.ReadSignedDoubleWordLE();
             }
             FOR_AXIS(i)
             {
-                result.bDotData[i] = ReadSignedDoubleWordLE(reader);
+                result.bDotData[i] = reader.ReadSignedDoubleWordLE();
             }
             FOR_AXIS(i)
             {
-                result.commandedDipole[i] = ReadSignedWordLE(reader);
+                result.commandedDipole[i] = reader.ReadSignedWordLE();
             }
             FOR_AXIS(i)
             {
-                result.commandedCurrent[i] = ReadSignedWordLE(reader);
+                result.commandedCurrent[i] = reader.ReadSignedWordLE();
             }
             FOR_AXIS(i)
             {
-                result.measuredCurrent[i] = ReadSignedWordLE(reader);
+                result.measuredCurrent[i] = reader.ReadSignedWordLE();
             }
             return true;
         }
@@ -448,13 +424,13 @@ namespace devices
             result.analogCurrent = reader.ReadWordLE();
             FOR_AXIS(i)
             {
-                result.coilCurrent[i] = ReadSignedWordLE(reader);
+                result.coilCurrent[i] = reader.ReadSignedWordLE();
             }
             FOR_AXIS(i)
             {
-                result.coilTemperature[i] = ReadSignedWordLE(reader);
+                result.coilTemperature[i] = reader.ReadSignedWordLE();
             }
-            result.MCUtemperature = ReadSignedWordLE(reader);
+            result.MCUtemperature = reader.ReadSignedWordLE();
             return true;
         }
 
@@ -472,10 +448,10 @@ namespace devices
                 return false;
             }
             std::array<uint8_t, 10> paramsArray;
-            Writer writer;
-            WriterInitialize(&writer, paramsArray.begin(), 3);
-            WriterWriteWordLE(&writer, id);
-            std::copy(value.begin(), value.end(), paramsArray.begin() + writer.position);
+
+            Writer writer{paramsArray};
+            writer.WriteWordLE(id);
+            std::copy(value.begin(), value.end(), paramsArray.begin() + writer.GetDataLength());
             span<uint8_t> params{paramsArray.begin(), 2 + value.size()};
 
             std::array<uint8_t, 12> responseArray;
@@ -518,9 +494,9 @@ namespace devices
                 return false;
             }
             std::array<uint8_t, 2> params;
-            Writer writer;
-            WriterInitialize(&writer, params.begin(), 2);
-            WriterWriteWordLE(&writer, id);
+
+            Writer writer{params};
+            writer.WriteWordLE(id);
 
             std::array<uint8_t, 12> responseArray;
             span<uint8_t> response(responseArray.begin(), result.size() + 4);

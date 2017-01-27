@@ -435,15 +435,15 @@ RC_GTEST_FIXTURE_PROP(ImtqTest, GetSystemState, ())
 							auto outData) {
 			EXPECT_EQ(outData.size(), 9);
 
-			Writer writer;
-			WriterInitialize(&writer, outData.data(), outData.size());
-			WriterWriteByte(&writer, 0x41);
-			WriterWriteByte(&writer, 0);
+			
+			Writer writer{outData};
+			writer.WriteByte(0x41);
+			writer.WriteByte(0);
 
-			WriterWriteByte(&writer, mode); // mode
-			WriterWriteByte(&writer, error); // error
-			WriterWriteByte(&writer, conf); // conf
-			WriterWriteDoubleWordLE(&writer, uptime); // uptime
+			writer.WriteByte(mode);
+			writer.WriteByte(error);
+			writer.WriteByte(conf);
+			writer.WriteDoubleWordLE(uptime);
 
 			return I2CResult::OK;
 		}));
@@ -465,16 +465,16 @@ RC_GTEST_FIXTURE_PROP(ImtqTest, GetCalibratedMagnetometerData,
 							auto outData) {
 			EXPECT_EQ(outData.size(), 15);
 
-			Writer writer;
-			WriterInitialize(&writer, outData.data(), outData.size());
-			WriterWriteByte(&writer, 0x43);
-			WriterWriteByte(&writer, newValue << 7);
+			
+			Writer writer{outData};
+			writer.WriteByte(0x43);
+			writer.WriteByte(newValue << 7);
 
-			WriterWriteSignedDoubleWordLE(&writer, data[0]);
-			WriterWriteSignedDoubleWordLE(&writer, data[1]);
-			WriterWriteSignedDoubleWordLE(&writer, data[2]);
+			writer.WriteSignedDoubleWordLE(data[0]);
+			writer.WriteSignedDoubleWordLE(data[1]);
+			writer.WriteSignedDoubleWordLE(data[2]);
 
-			WriterWriteByte(&writer, coilAct);
+			writer.WriteByte(coilAct);
 
 			return I2CResult::OK;
 		}));
@@ -498,14 +498,14 @@ void testCurrentTempDipole(IMTQ& imtq, I2C& i2c, Method method, uint8_t command,
 							auto outData) {
 			EXPECT_TRUE(outData.size() == 8);
 
-			Writer writer;
-			WriterInitialize(&writer, outData.data(), outData.size());
-			WriterWriteByte(&writer, command);
-			WriterWriteByte(&writer, 0x00);
+			
+			Writer writer{outData};
+			writer.WriteByte(command);
+			writer.WriteByte(0x00);
 
-			WriterWriteSignedWordLE(&writer, data[0]);
-			WriterWriteSignedWordLE(&writer, data[1]);
-			WriterWriteSignedWordLE(&writer, data[2]);
+			writer.WriteSignedWordLE(data[0]);
+			writer.WriteSignedWordLE(data[1]);
+			writer.WriteSignedWordLE(data[2]);
 			return I2CResult::OK;
 		}));
 
@@ -564,31 +564,30 @@ RC_GTEST_FIXTURE_PROP(ImtqTest, GetSelfTestResult, ())
 							auto outData) {
 			EXPECT_TRUE(outData.size() == 320);
 
-			Writer writer;
-			WriterInitialize(&writer, outData.data(), outData.size());
+			Writer writer{outData};
 
 			for(int i = 0; i < 8; ++i) {
-				WriterWriteByte(&writer, 0x47);
-				WriterWriteByte(&writer, 0x00);
+				writer.WriteByte(0x47);
+				writer.WriteByte(0x00);
 
-				WriterWriteByte(&writer, data.stepResults[i].error.GetValue());
-				WriterWriteByte(&writer, i);
+				writer.WriteByte(data.stepResults[i].error.GetValue());
+				writer.WriteByte(i);
 
 				FOR_AXIS(x)
 				{
-					WriterWriteSignedDoubleWordLE(&writer, data.stepResults[i].RawMagnetometerMeasurement[x]);
+					writer.WriteSignedDoubleWordLE(data.stepResults[i].RawMagnetometerMeasurement[x]);
 				}
 				FOR_AXIS(x)
 				{
-					WriterWriteSignedDoubleWordLE(&writer, data.stepResults[i].CalibratedMagnetometerMeasurement[x]);
+					writer.WriteSignedDoubleWordLE(data.stepResults[i].CalibratedMagnetometerMeasurement[x]);
 				}
 				FOR_AXIS(x)
 				{
-					WriterWriteSignedWordLE(&writer, data.stepResults[i].CoilCurrent[x]);
+					writer.WriteSignedWordLE(data.stepResults[i].CoilCurrent[x]);
 				}
 				FOR_AXIS(x)
 				{
-					WriterWriteSignedWordLE(&writer, data.stepResults[i].CoilTemperature[x]);
+					writer.WriteSignedWordLE(data.stepResults[i].CoilTemperature[x]);
 				}
 			}
 			return I2CResult::OK;
@@ -623,35 +622,35 @@ RC_GTEST_FIXTURE_PROP(ImtqTest, GetDetumbleData, ())
 							auto outData) {
 			EXPECT_TRUE(outData.size() == 56);
 
-			Writer writer;
-			WriterInitialize(&writer, outData.data(), outData.size());
+			
+			Writer writer{outData};
 
-			WriterWriteByte(&writer, 0x48);
-			WriterWriteByte(&writer, 0x00);
+			writer.WriteByte(0x48);
+			writer.WriteByte(0x00);
 
 			FOR_AXIS(x)
 			{
-				WriterWriteSignedDoubleWordLE(&writer, data.calibratedMagnetometerMeasurement[x]);
+				writer.WriteSignedDoubleWordLE(data.calibratedMagnetometerMeasurement[x]);
 			}
 			FOR_AXIS(x)
 			{
-				WriterWriteSignedDoubleWordLE(&writer, data.filteredMagnetometerMeasurement[x]);
+				writer.WriteSignedDoubleWordLE(data.filteredMagnetometerMeasurement[x]);
 			}
 			FOR_AXIS(x)
 			{
-				WriterWriteSignedDoubleWordLE(&writer, data.bDotData[x]);
+				writer.WriteSignedDoubleWordLE(data.bDotData[x]);
 			}
 			FOR_AXIS(x)
 			{
-				WriterWriteSignedWordLE(&writer, data.commandedDipole[x]);
+				writer.WriteSignedWordLE(data.commandedDipole[x]);
 			}
 			FOR_AXIS(x)
 			{
-				WriterWriteSignedWordLE(&writer, data.commandedCurrent[x]);
+				writer.WriteSignedWordLE(data.commandedCurrent[x]);
 			}
 			FOR_AXIS(x)
 			{
-				WriterWriteSignedWordLE(&writer, data.measuredCurrent[x]);
+				writer.WriteSignedWordLE(data.measuredCurrent[x]);
 			}
 			return I2CResult::OK;
 		}));
@@ -682,26 +681,26 @@ RC_GTEST_FIXTURE_PROP(ImtqTest, GetHouseKeepingRAW, ())
 							auto outData) {
 			EXPECT_TRUE(outData.size() == 24);
 
-			Writer writer;
-			WriterInitialize(&writer, outData.data(), outData.size());
+			
+			Writer writer{outData};
 
-			WriterWriteByte(&writer, 0x49);
-			WriterWriteByte(&writer, 0x00);
+			writer.WriteByte(0x49);
+			writer.WriteByte(0x00);
 
-			WriterWriteWordLE(&writer, data.digitalVoltage);
-			WriterWriteWordLE(&writer, data.analogVoltage);
-			WriterWriteWordLE(&writer, data.digitalCurrent);
-			WriterWriteWordLE(&writer, data.analogCurrent);
+			writer.WriteWordLE(data.digitalVoltage);
+			writer.WriteWordLE(data.analogVoltage);
+			writer.WriteWordLE(data.digitalCurrent);
+			writer.WriteWordLE(data.analogCurrent);
 
 			FOR_AXIS(x)
 			{
-				WriterWriteWordLE(&writer, data.coilCurrent[x]);
+				writer.WriteWordLE(data.coilCurrent[x]);
 			}
 			FOR_AXIS(x)
 			{
-				WriterWriteWordLE(&writer, data.coilTemperature[x]);
+				writer.WriteWordLE(data.coilTemperature[x]);
 			}
-			WriterWriteWordLE(&writer, data.MCUtemperature);
+			writer.WriteWordLE(data.MCUtemperature);
 			return I2CResult::OK;
 		}));
 
@@ -737,26 +736,26 @@ RC_GTEST_FIXTURE_PROP(ImtqTest, GetHouseKeepingEngineering, ())
 							auto outData) {
 			EXPECT_TRUE(outData.size() == 24);
 
-			Writer writer;
-			WriterInitialize(&writer, outData.data(), outData.size());
+			
+			Writer writer{outData};
 
-			WriterWriteByte(&writer, 0x4A);
-			WriterWriteByte(&writer, 0x00);
+			writer.WriteByte(0x4A);
+			writer.WriteByte(0x00);
 
-			WriterWriteWordLE(&writer, data.digitalVoltage);
-			WriterWriteWordLE(&writer, data.analogVoltage);
-			WriterWriteWordLE(&writer, data.digitalCurrent);
-			WriterWriteWordLE(&writer, data.analogCurrent);
+			writer.WriteWordLE(data.digitalVoltage);
+			writer.WriteWordLE(data.analogVoltage);
+			writer.WriteWordLE(data.digitalCurrent);
+			writer.WriteWordLE(data.analogCurrent);
 
 			FOR_AXIS(x)
 			{
-				WriterWriteWordLE(&writer, data.coilCurrent[x]);
+				writer.WriteWordLE(data.coilCurrent[x]);
 			}
 			FOR_AXIS(x)
 			{
-				WriterWriteWordLE(&writer, data.coilTemperature[x]);
+				writer.WriteWordLE(data.coilTemperature[x]);
 			}
-			WriterWriteWordLE(&writer, data.MCUtemperature);
+			writer.WriteWordLE(data.MCUtemperature);
 			return I2CResult::OK;
 		}));
 
@@ -786,22 +785,22 @@ RC_GTEST_FIXTURE_PROP(ImtqTest, SetParameter, ())
 			EXPECT_TRUE((size_t)inData.size() == 3u + tab.size());
 			EXPECT_TRUE((size_t)outData.size() == 4u + tab.size());
 
-			Writer writer;
-			WriterInitialize(&writer, outData.data(), outData.size());
+			
+			Writer writer{outData};
 			Reader reader{inData};
 			reader.Skip(1);
 
 
-			WriterWriteByte(&writer, 0x82);
-			WriterWriteByte(&writer, 0x00);
+			writer.WriteByte(0x82);
+			writer.WriteByte(0x00);
 
 			uint16_t id = reader.ReadWordLE();
 			EXPECT_EQ(id, param);
-			WriterWriteWordLE(&writer, id);
+			writer.WriteWordLE(id);
 
 			auto value = reader.ReadToEnd();
 			EXPECT_EQ(value, gsl::make_span(tab));
-			WriterWriteArray(&writer, tab.data(), tab.size());
+			writer.WriteArray(tab);
 			return I2CResult::OK;
 		}));
 
@@ -828,14 +827,14 @@ RC_GTEST_FIXTURE_PROP(ImtqTest, GetParameter, ())
 			EXPECT_EQ(id, param);
 
 
-			Writer writer;
-			WriterInitialize(&writer, outData.data(), outData.size());
+			
+			Writer writer{outData};
 
-			WriterWriteByte(&writer, 0x81);
-			WriterWriteByte(&writer, 0x00);
+			writer.WriteByte(0x81);
+			writer.WriteByte(0x00);
 
-			WriterWriteWordLE(&writer, id);
-			WriterWriteArray(&writer, tab.data(), tab.size());
+			writer.WriteWordLE(id);
+			writer.WriteArray(tab);
 			return I2CResult::OK;
 		}));
 
@@ -867,14 +866,14 @@ RC_GTEST_FIXTURE_PROP(ImtqTest, ResetParameter, ())
 			EXPECT_EQ(id, param);
 
 
-			Writer writer;
-			WriterInitialize(&writer, outData.data(), outData.size());
+			
+			Writer writer{outData};
 
-			WriterWriteByte(&writer, 0x83);
-			WriterWriteByte(&writer, 0x00);
+			writer.WriteByte(0x83);
+			writer.WriteByte(0x00);
 
-			WriterWriteWordLE(&writer, id);
-			WriterWriteArray(&writer, tab.data(), tab.size());
+			writer.WriteWordLE(id);
+			writer.WriteArray(tab);
 			return I2CResult::OK;
 		}));
 

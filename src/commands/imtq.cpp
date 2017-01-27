@@ -144,7 +144,7 @@ void GetCalibratedMagnetometerData(uint16_t argc, char* argv[])
         return;
     }
 
-    Main.terminal.Printf("%d %d %d %d\n",
+    Main.terminal.Printf("%ld %ld %ld %d\n",
             result.data[0], //
             result.data[1], //
             result.data[2], //
@@ -225,7 +225,7 @@ void GetSelfTestResult(uint16_t argc, char* argv[])
     }
     for(auto step : result.stepResults)
     {
-        Main.terminal.Printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
+        Main.terminal.Printf("%d %d %ld %ld %ld %ld %ld %ld %d %d %d %d %d %d\n",
                 step.error.GetValue(),
                 (int)(step.actualStep),
                 step.RawMagnetometerMeasurement[0],
@@ -362,7 +362,7 @@ void PerformSelfTest(uint16_t argc, char* argv[])
     }
     for(auto step : result.stepResults)
     {
-        Main.terminal.Printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
+        Main.terminal.Printf("%d %d %ld %ld %ld %ld %ld %ld %d %d %d %d %d %d\n",
                 step.error.GetValue(),
                 (int)(step.actualStep),
                 step.RawMagnetometerMeasurement[0],
@@ -392,7 +392,7 @@ void mtmRead(uint16_t argc, char* argv[])
         return;
     }
 
-    Main.terminal.Printf("%d %d %d\n",
+    Main.terminal.Printf("%ld %ld %ld\n",
             result[0], //
             result[1], //
             result[2]);

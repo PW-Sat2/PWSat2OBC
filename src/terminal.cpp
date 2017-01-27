@@ -39,8 +39,7 @@ static const TerminalCommandDescription commands[] = {
     {"comm_set_bitrate", CommSetBaudRate},
     {"comm_get_telemetry", CommGetTelemetry},
     {"antenna_get_telemetry", AntennaGetTelemetry},
-    {"antenna_reset", AntennaReset},
->>>>>>> origin/master
+    {"antenna_reset", AntennaReset}
 };
 
 void InitializeTerminal(void)
