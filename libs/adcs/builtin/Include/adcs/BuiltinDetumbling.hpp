@@ -7,6 +7,10 @@
 
 namespace adcs
 {
+    /**
+     * @brief This class controlls primary adcs detumbling algorithm.
+     * @ingroup adcs
+     */
     class BuiltinDetumbling final : public IDetumblingSupport
     {
       public:
