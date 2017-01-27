@@ -179,6 +179,7 @@ namespace services
              * @brief This procedure is responsible for reading the last timer state that has been
              * preserved in the persistent memory.
              *
+             * @param[in] fileSystem Reference to the file system sub system that should be used for data access.
              * @return Either last stable timer state that get read from the persistent memory or
              * value indicating zero (initial time).
              */

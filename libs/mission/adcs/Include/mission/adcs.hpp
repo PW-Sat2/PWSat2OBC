@@ -14,22 +14,41 @@ namespace mission
     {
         /**
          * @defgroup MissionADCS System state support for ADCS
-         *
          * @ingroup Mission
          * @{
          */
         /**
-         * @brief ADCS descriptors
+         * @brief Primary adcs mission taks.
+         *
+         * This task is responsible for monitoring the adcs subsystem state and publish its state to the
+         * global system state, plus it is also responsible for enabling built-in detumbling algorithm once the
+         * initial silent period has passed.
          */
         class AdcsPrimaryTask : public Update, Action
         {
           public:
+            /**
+             * @brief ctor.
+             * @param[in] adcsCoordinator Reference to the adcs subsystem controller.
+             *
+             * This reference is used to both monitor the adcs subsystem and to control the primary detumbling algorithm.
+             */
             AdcsPrimaryTask(::adcs::IAdcsCoordinator& adcsCoordinator);
 
+            /**
+             * @brief Disables the primary detumbling algorithm.
+             */
             void Disable();
 
+            /**
+             * @brief Enables the primary detumbling algorithm.
+             */
             void RunDetumbling();
 
+            /**
+             * @brief Retruns information whether the primary detumbling algorithm is disabled.
+             * @returns True when the algorightm is disabled, false othwerwise.
+             */
             bool IsDisabled() const;
 
             /**
@@ -69,7 +88,14 @@ namespace mission
 
             static constexpr std::uint8_t RetryCount = 3;
 
+            /**
+             * @brief Current number of retry attempts to enable primary detumbling algorithm.
+             */
             std::uint8_t retryCount;
+
+            /**
+             * @brief Access to the adcs subsystem controller.
+             */
             ::adcs::IAdcsCoordinator& coordinator;
         };
 

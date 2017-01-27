@@ -7,20 +7,26 @@
 #include <chrono>
 #include "adcs/adcs.hpp"
 #include "base/os.h"
-/**
- * @defgroup adcs (Draft) ADCS implementation
- *
- * @{
- */
 
 namespace adcs
 {
-    /** @brief (Draft) ADCS Context */
+    /**
+     * @brief This class controls both backup detumbling & sun pointing algorithms.
+     * @ingroup adcs
+     *
+     * This module creates its own system task that executes the requested algorithm in it completely asynchronously
+     * in regards to the rest of the system.
+     */
     class AdcsExperiment final : public IDetumblingSupport, public ISunPointingSupport
     {
       public:
+        /** @brief ctor. */
         AdcsExperiment();
 
+        /**
+         * @brief Initializes this module.
+         * @returns Operation status.
+         */
         OSResult Initialize();
 
         virtual OSResult EnableSunPointing() final override;
@@ -31,8 +37,16 @@ namespace adcs
 
         virtual OSResult DisableDetumbling() final override;
 
+        /**
+         * @brief Disables this module.
+         * @returns Operation status.
+         */
         OSResult TurnOff();
 
+        /**
+         * @brief Returns length of single adcs algorithm iteration in milliseconds.
+         * @returns Length of single algorithm iteration.
+         */
         std::chrono::milliseconds GetIterationtTime();
 
       private:
@@ -44,14 +58,23 @@ namespace adcs
             SunPointing
         };
 
+        /**
+         * @brief Adcs task entry point.
+         * @param[in] arg Execution context. This pointer should point to the AdcsExperiment object type.
+         */
         static void TaskEntry(void* arg);
 
+        /**
+         * @brief Performs sinngle algorithm iteration.
+         */
         void HandleCommand();
 
         /** @brief Task handle */
         OSTaskHandle taskHandle;
+
         /** @brief Current ADCS mode */
         std::atomic<AdcsExperimentMode> currentMode;
     };
 }
+
 #endif /* LIBS_ADCS_EXPERIMENT_ADCS_HPP */
