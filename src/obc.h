@@ -7,7 +7,6 @@
 
 #include "adcs/AdcsCoordinator.hpp"
 #include "adcs/AdcsExperiment.hpp"
-#include "adcs/ObcAdcs.hpp"
 #include "antenna/driver.h"
 #include "antenna/miniport.h"
 #include "base/os.h"
@@ -16,6 +15,7 @@
 #include "leuart/line_io.h"
 #include "n25q/n25q.h"
 #include "n25q/yaffs.h"
+#include "obc/adcs.hpp"
 #include "obc/communication.h"
 #include "obc/hardware.h"
 #include "obc/storage.h"
@@ -80,7 +80,7 @@ struct OBC
     obc::OBCStorage Storage;
 
     /** @brief Adcs subsytem for obc. */
-    obc::ObcAdcs adcs;
+    obc::Adcs adcs;
 
     /** @brief Terminal object. */
     Terminal terminal;
