@@ -13,6 +13,11 @@ namespace adcs
     {
     }
 
+    AdcsMode AdcsCoordinator::CurrentMode() const
+    {
+        return this->currentMode;
+    }
+
     OSResult AdcsCoordinator::SetState(AdcsMode newMode, OSResult operationStatus)
     {
         if (OS_RESULT_SUCCEEDED(operationStatus))
@@ -25,6 +30,11 @@ namespace adcs
 
     OSResult AdcsCoordinator::EnableBuiltinDetumbling()
     {
+        if (this->currentMode == AdcsMode::BuiltinDetumbling)
+        {
+            return OSResult::Success;
+        }
+
         auto result = Disable();
         if (OS_RESULT_FAILED(result))
         {
@@ -36,6 +46,11 @@ namespace adcs
 
     OSResult AdcsCoordinator::EnableCustomDetumbling()
     {
+        if (this->currentMode == AdcsMode::CustomDetumbling)
+        {
+            return OSResult::Success;
+        }
+
         auto result = Disable();
         if (OS_RESULT_FAILED(result))
         {
@@ -47,6 +62,11 @@ namespace adcs
 
     OSResult AdcsCoordinator::EnableSunPointing()
     {
+        if (this->currentMode == AdcsMode::CustomSunpointing)
+        {
+            return OSResult::Success;
+        }
+
         auto result = Disable();
         if (OS_RESULT_FAILED(result))
         {
