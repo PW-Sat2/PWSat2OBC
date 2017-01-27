@@ -48,6 +48,33 @@ TEST_F(AdcsCoordinatorTest, EnableExperimentalSunPointing)
     ASSERT_THAT(coordinator.CurrentMode(), Eq(AdcsMode::CustomSunpointing));
 }
 
+TEST_F(AdcsCoordinatorTest, EnablePrimaryDetumblingTwice)
+{
+    EXPECT_CALL(primaryDetumling, EnableDetumbling()).WillOnce(Return(OSResult::Success));
+    coordinator.EnableBuiltinDetumbling();
+    const auto result = coordinator.EnableBuiltinDetumbling();
+    ASSERT_THAT(result, Eq(OSResult::Success));
+    ASSERT_THAT(coordinator.CurrentMode(), Eq(AdcsMode::BuiltinDetumbling));
+}
+
+TEST_F(AdcsCoordinatorTest, EnableExperimentalDetumblingTwice)
+{
+    EXPECT_CALL(experimentalDetumbling, EnableDetumbling()).WillOnce(Return(OSResult::Success));
+    coordinator.EnableCustomDetumbling();
+    const auto result = coordinator.EnableCustomDetumbling();
+    ASSERT_THAT(result, Eq(OSResult::Success));
+    ASSERT_THAT(coordinator.CurrentMode(), Eq(AdcsMode::CustomDetumbling));
+}
+
+TEST_F(AdcsCoordinatorTest, EnableExperimentalSunPointingTwice)
+{
+    EXPECT_CALL(sunPointingAlgorithm, EnableSunPointing()).WillOnce(Return(OSResult::Success));
+    coordinator.EnableSunPointing();
+    const auto result = coordinator.EnableSunPointing();
+    ASSERT_THAT(result, Eq(OSResult::Success));
+    ASSERT_THAT(coordinator.CurrentMode(), Eq(AdcsMode::CustomSunpointing));
+}
+
 TEST_F(AdcsCoordinatorTest, DisablePrimaryDetumbling)
 {
     EXPECT_CALL(primaryDetumling, EnableDetumbling()).WillOnce(Return(OSResult::Success));
