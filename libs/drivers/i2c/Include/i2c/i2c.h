@@ -87,6 +87,8 @@ namespace drivers
              */
             virtual I2CResult Write(const I2CAddress address, gsl::span<const uint8_t> inData) = 0;
 
+            virtual I2CResult Read(const I2CAddress address, gsl::span<uint8_t> outData) = 0;
+
             /**
              * @brief Executes write-read transfer
              * @param[in] address Address of device

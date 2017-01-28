@@ -516,10 +516,14 @@ namespace devices
             std::copy(params.begin(), params.end(), output.begin() + 1);
             span<uint8_t> request{output.begin(), params.size() + 1};
 
-            auto i2cstatus = i2cbus.WriteRead(I2Cadress, request, response);
+            auto i2cstatus1 = i2cbus.Write(I2Cadress, request);
+            System::SleepTask(2ms);
+            auto i2cstatus2 = i2cbus.Read(I2Cadress, response);
 
             auto status = Status{response[1]};
-            if (i2cstatus != I2CResult::OK || static_cast<uint8_t>(opcode) != response[0] || status.CmdError() != Status::Error::Accepted ||
+            if (i2cstatus1 != I2CResult::OK ||
+                i2cstatus2 != I2CResult::OK ||
+                static_cast<uint8_t>(opcode) != response[0] || status.CmdError() != Status::Error::Accepted ||
                 status.InvalidX() || status.InvalidY() || status.InvalidZ())
             {
                 return false;
