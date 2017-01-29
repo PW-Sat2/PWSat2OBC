@@ -24,6 +24,7 @@ target_link_libraries(${NAME}
 )
 
 target_generate_hex(${NAME})
+target_generate_bin(${NAME})
 
 target_memory_report(${NAME})
 

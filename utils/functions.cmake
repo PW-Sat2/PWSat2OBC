@@ -12,6 +12,21 @@ function(target_generate_hex TARGET)
   add_custom_target (${TARGET}.hex ALL DEPENDS ${HEX_OBJ})
 endfunction(target_generate_hex)
 
+function(target_generate_bin TARGET)
+  set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET})
+  set (HEX_OBJ ${EXEC_OBJ}.bin)
+
+  set_target_properties(${TARGET} PROPERTIES HEX_FILE ${HEX_OBJ})
+
+  add_custom_command(OUTPUT ${HEX_OBJ}
+      COMMAND ${CMAKE_OBJCOPY} -O binary ${EXEC_OBJ} ${HEX_OBJ}
+      DEPENDS ${TARGET}
+  )
+
+  add_custom_target (${TARGET}.bin ALL DEPENDS ${HEX_OBJ})
+endfunction(target_generate_bin)
+
+
 function(target_jlink_flash TARGET)
   set(COMMAND_FILE ${CMAKE_BINARY_DIR}/jlink/${TARGET}.flash.jlink)
 
