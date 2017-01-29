@@ -38,7 +38,7 @@
 #define ALIGNMENT(base, align) (((base) + ((align)-1)) & (~((align)-1)))
 
 /* Packet storage. Double buffered version. */
-uint8_t rawPacket[2][ALIGNMENT(sizeof(XMODEM_packet), 4)] __attribute__((aligned(4)));
+uint8_t rawPacket[5][ALIGNMENT(sizeof(XMODEM_packet), 4)] __attribute__((aligned(4)));
 
 /**************************************************************************/ /**
   * @brief Verifies checksum, packet numbering and
@@ -88,6 +88,9 @@ uint32_t XMODEM_upload(uint8_t index)
     uint32_t byte;
     uint32_t sequenceNumber = 1;
     uint8_t *base, data;
+
+    ((void)base);
+    ((void)data);
 
     // Erase sectors in boot table for specified index
     if (index != 0)
@@ -139,7 +142,26 @@ xmodem_transfer:
         // Byte 0 is padding, byte 1 is header
         for (byte = 2; byte < sizeof(XMODEM_packet); byte++)
         {
-            *(((uint8_t*)pkt) + byte) = USART_Rx(BSP_UART_DEBUG);
+            if (byte == 60)
+            {
+                *(((uint8_t*)pkt) + byte) = USART_Rx(BSP_UART_DEBUG);
+            }
+            else if (byte == 45)
+            {
+                *(((uint8_t*)pkt) + byte) = USART_Rx(BSP_UART_DEBUG);
+            }
+            else if (byte == 30)
+            {
+                *(((uint8_t*)pkt) + byte) = USART_Rx(BSP_UART_DEBUG);
+            }
+            else if (byte == 15)
+            {
+                *(((uint8_t*)pkt) + byte) = USART_Rx(BSP_UART_DEBUG);
+            }
+            else
+            {
+                *(((uint8_t*)pkt) + byte) = USART_Rx(BSP_UART_DEBUG);
+            }
         }
 
         if (XMODEM_verifyPacketChecksum(pkt, sequenceNumber) != 0)
@@ -149,8 +171,7 @@ xmodem_transfer:
             continue;
         }
 
-        // Write data to external EEPROM, i.e. Safe Mode
-        if (index == 0)
+        Write data to external EEPROM, i.e.Safe Mode if (index == 0)
         {
             i = 0;
             base = (uint8_t*)(BOOT_SAFEMODE_BASE_DATA + ((sequenceNumber - 1) * XMODEM_DATA_SIZE));

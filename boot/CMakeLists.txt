@@ -1,7 +1,5 @@
 set(NAME boot)
 
-generate_version_file(${CMAKE_CURRENT_BINARY_DIR}/gen/version.h)
-
 set(SOURCES
     background.c
     comms.c
@@ -9,13 +7,15 @@ set(SOURCES
     flash.c
     main.c
     xmodem.c
+    fault_handlers.c
 )
 
 add_executable(${NAME} ${SOURCES})
 
-set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${PLATFORM_LINKER_SCRIPT} -specs=nano.specs -specs=nosys.specs")
+set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${PLATFORM_PATH}/efm32gg.ld -specs=nano.specs -specs=nosys.specs")
 
 target_link_libraries(${NAME}
+      platform
       emlib
       bspLib
       assert
