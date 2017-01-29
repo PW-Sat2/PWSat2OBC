@@ -18,24 +18,24 @@
 #include "base/ecc.h"
 #include "base/os.h"
 #include "dmadrv.h"
+#include "em_burtc.h"
 #include "eps/eps.h"
 #include "fs/fs.h"
+#include "gpio/gpio.h"
 #include "i2c/i2c.h"
 #include "io_map.h"
+#include "leuart/leuart.h"
 #include "leuart/leuart.h"
 #include "logger/logger.h"
 #include "mission.h"
 #include "obc.h"
+#include "power_eps/power_eps.h"
 #include "storage/nand.h"
 #include "storage/nand_driver.h"
 #include "storage/storage.h"
 #include "swo/swo.h"
 #include "system.h"
 #include "terminal.h"
-
-#include "gpio/gpio.h"
-#include "leuart/leuart.h"
-#include "power_eps/power_eps.h"
 
 using services::time::TimeProvider;
 using namespace std::chrono_literals;
@@ -64,6 +64,45 @@ void I2C0_IRQHandler(void)
 void I2C1_IRQHandler(void)
 {
     Main.Hardware.I2C.Peripherals[1].Driver.IRQHandler();
+}
+
+OSSemaphoreHandle timerSemaphore;
+void BURTC_IRQHandler(void)
+{
+    System::GiveSemaphore(timerSemaphore);
+}
+
+void configBURTC(void)
+{
+    BURTC_Init_TypeDef burtcInit = BURTC_INIT_DEFAULT;
+
+    burtcInit.mode = burtcModeEM4;
+    burtcInit.clkSel = burtcClkSelLFRCO;
+    burtcInit.clkDiv = 3;
+
+    BURTC_CompareSet(0, 205);        /* Set top value for comparator */
+    BURTC_IntEnable(BURTC_IF_COMP0); /* Enable compare interrupt flag */
+    NVIC_EnableIRQ(BURTC_IRQn);
+    BURTC_Init(&burtcInit);
+}
+
+static void UpdateTimeProvider(void* param)
+{
+    UNREFERENCED_PARAMETER(param);
+
+    while (1)
+    {
+        System::TakeSemaphore(timerSemaphore, 50ms);
+        Main.timeProvider.AdvanceTime(50ms);
+    }
+}
+
+void configTimer(void)
+{
+    configBURTC();
+
+    timerSemaphore = System::CreateBinarySemaphore();
+    System::CreateTask(UpdateTimeProvider, "UpdateTimeProvider", 512, NULL, TaskPriority::P1, NULL);
 }
 
 static void BlinkLed0(void* param)
@@ -200,6 +239,8 @@ int main(void)
 
     Main.Hardware.Pins.Led0.High();
     Main.Hardware.Pins.Led1.High();
+
+    configTimer();
 
     System::CreateTask(BlinkLed0, "Blink0", 512, NULL, TaskPriority::P1, NULL);
     System::CreateTask(ObcInitTask, "Init", 3_KB, &Main, TaskPriority::Highest, &Main.initTask);
