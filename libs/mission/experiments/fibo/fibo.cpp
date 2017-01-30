@@ -1,4 +1,5 @@
 #include "fibo.h"
+#include "base/writer.h"
 #include "logger/logger.h"
 
 using services::fs::File;
@@ -48,8 +49,6 @@ namespace experiment
 
         void FibonacciExperiment::Run(mission::experiments::ExperimentContext& context)
         {
-            UNREFERENCED_PARAMETER(context);
-
             LOG(LOG_LEVEL_INFO, "Performing Fibo experiment");
 
             File f(this->_fileSystem, "/fibo.dat", FileOpen::CreateAlways, FileAccess::WriteOnly);
@@ -60,15 +59,19 @@ namespace experiment
                 return;
             }
 
-            std::uint8_t b[] = {65, 66, 67};
+            Fibonacci fibo;
 
             for (auto i = 0; i < 5; i++)
             {
-                LOGF(LOG_LEVEL_INFO, "Iteration %d", i);
-                f.Write(b);
-                b[0]++;
-                b[1]++;
-                b[2]++;
+                auto v = fibo.Current();
+
+                std::array<std::uint8_t, sizeof(v)> buf;
+                Writer w(buf);
+                w.WriteDoubleWordLE(v);
+
+                f.Write(buf);
+
+                fibo.Next();
 
                 context.WaitForNextCycle();
             }
