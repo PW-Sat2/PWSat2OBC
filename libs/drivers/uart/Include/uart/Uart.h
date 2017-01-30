@@ -64,6 +64,12 @@ virtual UartResult Write(gsl::span<const uint8_t>data) override;
 virtual UartResult Read(gsl::span<const uint8_t>data) override;
 void Initialize(void);
 void DeInitialize(void);
+static constexpr OSEventBits TransferTXFinished = 1 << 1;
+	            /** @brief Input transfer finished flag */
+	static constexpr OSEventBits TransferRXFinished = 1 << 0;
+    static constexpr OSEventBits TransferFinished = TransferRXFinished | TransferTXFinished;
+    OSEventGroupHandle _transferGroup;
+
 
 private:
 	Uart_Init 				_init;
@@ -72,10 +78,17 @@ private:
 	DMADRV_PeripheralSignal_t  rxDmaSignal;
 	GPIO_Port_TypeDef txPort;
 	GPIO_Port_TypeDef rxPort;
-	OSSemaphoreHandle txlock;
-	OSSemaphoreHandle rxlock;
+	OSSemaphoreHandle _lock;
+
+
 	void InitializeDma(void);
 	void InitializeGpio(void);
+	static bool TransmitDmaComplete(unsigned int channel,
+			                        unsigned int sequenceNo,
+			                        void *userParam);
+	static bool ReceiveDmaComplete(unsigned int channel,
+            unsigned int sequenceNo,
+            void *userParam);
 };
 
 

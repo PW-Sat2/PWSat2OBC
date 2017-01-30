@@ -290,6 +290,12 @@ bool Camera::CameraSync()
     {
         CameraSendCmdSync();
         i--;
+        if (!CameraGetCmdSync())
+               {
+                   LOG(LOG_LEVEL_ERROR, "Receiving Sync command failed.");
+                   return false;
+               }
+               LOG(LOG_LEVEL_INFO, "Received Sync Cmd.");
         if (!CameraGetCmdAckSync( timeMs))
         {
             timeMs++;
@@ -297,12 +303,7 @@ bool Camera::CameraSync()
         }
         LOG(LOG_LEVEL_INFO, "Received Sync Ack Cmd.");
         // If we received data and it's ack for our sync command we wait for sync cmd
-        if (!CameraGetCmdSync())
-        {
-            LOG(LOG_LEVEL_ERROR, "Receiving Sync command failed.");
-            return false;
-        }
-        LOG(LOG_LEVEL_INFO, "Received Sync Cmd.");
+
 
         // We get sync command, so we send ack for this sync and synchronization is done
         Camera::CameraSendCmdAckSync();

@@ -39,25 +39,15 @@
 #include "uart/Uart.h"
 #include "camera/camera.h"
 
-using devices::comm::CommObject;
-using devices::comm::CommFrame;
-
 using services::time::TimeProvider;
 using namespace std::chrono_literals;
-using devices::comm::CommObject;
-using devices::comm::CommFrame;
-using gsl::span;
 using namespace drivers::uart;
 using namespace devices::camera;
 
 OBC Main;
-<<<<<<< HEAD
 mission::ObcMission Mission(Main.timeProvider, Main.antennaDriver, false);
-
-=======
-MissionState Mission(Main);
 static uint8_t out[256];
->>>>>>> cam driver more OO
+
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
 extern "C" void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
@@ -91,7 +81,7 @@ static void BlinkLed0(void* param)
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
-/*
+
 static void SmartWaitTask(void* param)
 {
     UNREFERENCED_PARAMETER(param);
@@ -103,7 +93,7 @@ static void SmartWaitTask(void* param)
         Main.timeProvider.LongDelay(10min);
         LOG(LOG_LEVEL_DEBUG, "After wait");
     }
-}*/
+}
 
 static void InitSwoEndpoint(void)
 {
@@ -181,6 +171,7 @@ void SetupHardware(void)
 }
 
 
+
 void UartTask(void* param)
 {
 	//const char* testByte="lamakota";
@@ -210,7 +201,7 @@ void UartTask(void* param)
 
 	while (1) {
 camera.CameraGetJPEGPicture(CameraJPEGResolution::_640x480,out,255);
-	System::SleepTask(1000);
+vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 
 }

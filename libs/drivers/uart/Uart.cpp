@@ -7,6 +7,7 @@
 #include "dmadrv.h"
 #include "system.h"
 #include "base/os.h"
+#include "event_groups.h"
 
 using namespace drivers::uart;
 
@@ -14,32 +15,33 @@ using namespace drivers::uart;
 static unsigned int               	rxDmaCh;
 static unsigned int              	txDmaCh;
 
-static bool TransmitDmaComplete(unsigned int channel,
+bool Uart::TransmitDmaComplete(unsigned int channel,
 		                        unsigned int sequenceNo,
 		                        void *userParam)
    {
+	auto This = static_cast<Uart*>(userParam);
 	(void)channel;
 	(void)sequenceNo;
-	(void)userParam;
-	 System::EventGroupSetBitsISR(This->_transferGroup, TransferTXFinished);
-	 System::EndSwitchingISR();
+    System::EventGroupSetBitsISR(This->_transferGroup, TransferTXFinished);
+    System::EndSwitchingISR();
 	return true;
   }
 
-static bool ReceiveDmaComplete(unsigned int channel,
+bool Uart::ReceiveDmaComplete(unsigned int channel,
 		                        unsigned int sequenceNo,
 		                        void *userParam)
    {
+	auto This = static_cast<Uart*>(userParam);
 	(void)channel;
 	(void)sequenceNo;
-	(void)userParam;
 	System::EventGroupSetBitsISR(This->_transferGroup, TransferRXFinished);
 	System::EndSwitchingISR();
 	return true;
   }
 
 
-Uart::Uart(Uart_Init &init):_init(init){}
+Uart::Uart(Uart_Init &init):_init(init){
+}
 
 void Uart::InitializeDma(){
 	this->uartClock   = cmuClock_UART1;
@@ -48,8 +50,8 @@ void Uart::InitializeDma(){
 	DMADRV_Init();
 	DMADRV_AllocateChannel(&rxDmaCh, NULL);
 	DMADRV_AllocateChannel(&txDmaCh, NULL);
-	this->rxlock = System::CreateBinarySemaphore();
-	this->txlock = System::CreateBinarySemaphore();
+	//this->rxlock = System::CreateBinarySemaphore();
+	//this->txlock = System::CreateBinarySemaphore();
 
 }
 
@@ -83,6 +85,9 @@ void Uart:: Initialize(){
 	                         << _USART_ROUTE_LOCATION_SHIFT);
 
 	 USART_Enable(_init.uart, usartEnableTx);
+	 this->_transferGroup = System::CreateEventGroup();
+	 this->_lock = System::CreateBinarySemaphore();
+	 System::GiveSemaphore(this->_lock);
 
 }
 void Uart::DeInitialize(){
@@ -92,11 +97,12 @@ void Uart::DeInitialize(){
 	 DMADRV_FreeChannel(rxDmaCh);
 	 DMADRV_DeInit();
 	 CMU_ClockEnable(uartClock, false);
-	 this->_init.uart->CMD = USART_CMD_RXDIS;
-	 this->_init.uart->CMD = USART_CMD_TXDIS;
+	 this->_init.uart->CMD = USART_CMD_RXDIS | USART_CMD_TXDIS;
 }
 
 UartResult Uart::Read(gsl::span<const uint8_t>data){
+    System::EventGroupClearBits(this->_transferGroup, TransferRXFinished);
+
 	//uint8_t *InData= const_cast<uint8_t*>(data.data());
 	//Lock lock(this->rxlock, MAX_DELAY);
 
@@ -106,7 +112,7 @@ UartResult Uart::Read(gsl::span<const uint8_t>data){
 		        return UartResult::Failure;
 		    }
 */
-	this->_init.uart->CMD = USART_CMD_RXEN;
+	this->_init.uart->CMD |= USART_CMD_RXEN;
 	 DMADRV_PeripheralMemory(rxDmaCh,
 	        dmadrvPeripheralSignal_USART1_RXDATAV,
 	        (void*)data.data(),
@@ -115,21 +121,16 @@ UartResult Uart::Read(gsl::span<const uint8_t>data){
 			data.length(),
 	        dmadrvDataSize1,
 			ReceiveDmaComplete,
-	        NULL);
+	        this);
+	 //System::EventGroupWaitForBits(this->_transferGroup, TransferRXFinished, false, true, InfiniteTimeout);
 	 return UartResult::OK;
-	 System::EventGroupWaitForBits(this->_transferGroup, TransferFinished, true, true, InfiniteTimeout);
 }
 
 UartResult Uart::Write(gsl::span<const uint8_t>data){
+    System::EventGroupClearBits(this->_transferGroup, TransferTXFinished);
+    this->_init.uart->CMD |= USART_CMD_TXEN;
 	uint8_t *InData= const_cast<uint8_t*>(data.data());
-/*	Lock lock(this->txlock, MAX_DELAY);
 
-	if (!lock())
-	    {
-	        //LOGF(LOG_LEVEL_ERROR, "[UART] Taking transmit semaphore failed.");
-	        return UartResult::Failure;
-	    }
-*/
 	DMADRV_MemoryPeripheral(txDmaCh,
 	                          this->txDmaSignal,
 							  (void *)&(this->_init.uart->TXDATA),
@@ -138,7 +139,8 @@ UartResult Uart::Write(gsl::span<const uint8_t>data){
 	                          data.length(),
 	                          dmadrvDataSize1,
 							  TransmitDmaComplete,
-							  NULL);
+							  this);
+
+	 System::EventGroupWaitForBits(this->_transferGroup, TransferTXFinished, false, true, InfiniteTimeout);
 	 return UartResult::OK;
-	 System::EventGroupWaitForBits(this->_transferGroup, TransferFinished, true, true, InfiniteTimeout);
 }

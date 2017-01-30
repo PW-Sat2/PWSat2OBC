@@ -9,7 +9,6 @@
 #include "antenna/driver.h"
 #include "antenna/miniport.h"
 #include "base/os.h"
-#include "communication.h"
 #include "fs/fs.h"
 #include "fs/yaffs.h"
 #include "leuart/line_io.h"
