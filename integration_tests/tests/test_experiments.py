@@ -1,3 +1,5 @@
+import struct
+
 from obc.experiments import ExperimentType
 from system import auto_power_on
 from tests.base import BaseTest
@@ -26,5 +28,5 @@ class ExperimentsTest(BaseTest):
         self.assertIn('fibo.dat', files, 'Experiment result file is not present')
 
         result = self.system.obc.read_file('/fibo.dat')
-
-        self.assertEqual(result, 'ABC' + 'BCD' + 'CDE' + 'DEF' + 'EFG')
+        unpacked = struct.unpack('<LLLLL', result)
+        self.assertEqual(unpacked, (1, 1, 2, 3, 5))
