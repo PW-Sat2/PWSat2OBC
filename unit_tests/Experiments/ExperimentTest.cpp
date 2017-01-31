@@ -28,7 +28,9 @@ using namespace mission::experiments;
 struct ExperimentMock : public IExperiment
 {
     MOCK_METHOD0(Type, Experiment());
-    MOCK_METHOD1(Run, void(ExperimentContext& context));
+    MOCK_METHOD0(Start, StartResult());
+    MOCK_METHOD0(Iteration, IterationResult());
+    MOCK_METHOD1(Stop, void(IterationResult lastResult));
 };
 
 class ExperimentTest : public testing::Test
@@ -132,7 +134,9 @@ TEST_F(ExperimentTest, ShouldInvokeExperimentAsRequested)
 {
     NiceMock<ExperimentMock> experiment;
     ON_CALL(experiment, Type()).WillByDefault(Return(Experiment::Fibo));
-    EXPECT_CALL(experiment, Run(_));
+    EXPECT_CALL(experiment, Start());
+    EXPECT_CALL(experiment, Iteration()).WillOnce(Return(IterationResult::Finished));
+    EXPECT_CALL(experiment, Stop(IterationResult::Finished));
 
     {
         InSequence s;
@@ -156,11 +160,15 @@ TEST_F(ExperimentTest, ShouldInvokeOneExperimentAfterAnother)
 {
     NiceMock<ExperimentMock> experiment1;
     ON_CALL(experiment1, Type()).WillByDefault(Return(Experiment::Fibo));
-    EXPECT_CALL(experiment1, Run(_));
+    EXPECT_CALL(experiment1, Start());
+    EXPECT_CALL(experiment1, Iteration()).WillOnce(Return(IterationResult::Finished));
+    EXPECT_CALL(experiment1, Stop(IterationResult::Finished));
 
     NiceMock<ExperimentMock> experiment2;
     ON_CALL(experiment2, Type()).WillByDefault(Return(Experiment::Experiment2));
-    EXPECT_CALL(experiment2, Run(_));
+    EXPECT_CALL(experiment2, Start());
+    EXPECT_CALL(experiment2, Iteration()).WillOnce(Return(IterationResult::Finished));
+    EXPECT_CALL(experiment2, Stop(IterationResult::Finished));
 
     {
         InSequence s;

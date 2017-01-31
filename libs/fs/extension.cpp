@@ -1,4 +1,4 @@
-
+#include <algorithm>
 #include "fs.h"
 #include "logger/logger.h"
 #include "system.h"
@@ -46,13 +46,17 @@ bool services::fs::ReadFromFile(IFileSystem& fs, const char* const filePath, gsl
 
 File::~File()
 {
-    if (this->_valid)
+    if (*this)
     {
-        this->_fs.Close(this->_handle);
+        this->_fs->Close(this->_handle);
     }
 }
 
-File::File(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access) : _fs(fs)
+File::File() : _fs(nullptr)
+{
+}
+
+File::File(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access) : _fs(&fs)
 {
     auto f = fs.Open(path, mode, access);
     this->_handle = f.Result;
@@ -61,20 +65,64 @@ File::File(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access) 
 
 IOResult File::Read(gsl::span<uint8_t> buffer)
 {
-    return this->_fs.Read(this->_handle, buffer);
+    if (!*this)
+    {
+        return IOResult(OSResult::InvalidOperation, gsl::span<const uint8_t>());
+    }
+
+    return this->_fs->Read(this->_handle, buffer);
 }
 
 IOResult File::Write(gsl::span<const uint8_t> buffer)
 {
-    return this->_fs.Write(this->_handle, buffer);
+    if (!*this)
+    {
+        return IOResult(OSResult::InvalidOperation, gsl::span<const uint8_t>());
+    }
+
+    return this->_fs->Write(this->_handle, buffer);
 }
 
 OSResult File::Truncate(FileSize size)
 {
-    return this->_fs.TruncateFile(this->_handle, size);
+    if (!*this)
+    {
+        return OSResult::InvalidOperation;
+    }
+
+    return this->_fs->TruncateFile(this->_handle, size);
 }
 
 FileSize File::Size()
 {
-    return this->_fs.GetFileSize(this->_handle);
+    if (!*this)
+    {
+        return 0;
+    }
+
+    return this->_fs->GetFileSize(this->_handle);
+}
+
+File& File::operator=(File&& other)
+{
+    std::swap(this->_fs, other._fs);
+    std::swap(this->_handle, other._handle);
+    std::swap(this->_valid, other._valid);
+
+    return *this;
+}
+
+OSResult File::Close()
+{
+    if (*this)
+    {
+        this->_fs->Close(this->_handle);
+        this->_fs = nullptr;
+        this->_valid = false;
+        this->_handle = 0;
+
+        return OSResult::Success;
+    }
+
+    return OSResult::InvalidOperation;
 }

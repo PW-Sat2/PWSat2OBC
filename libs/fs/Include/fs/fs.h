@@ -206,11 +206,16 @@ namespace services
         /**
          * @brief Wrapper over file handle
          */
-        class File : private NotCopyable, private NotMoveable
+        class File : private NotCopyable
         {
           public:
             /** @brief Desctructor */
             ~File();
+
+            /**
+             * @brief default ctor
+             */
+            File();
 
             /**
              * @brief Factory method that opens file
@@ -221,6 +226,8 @@ namespace services
              * @return File instance
              */
             File(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access);
+
+            File& operator=(File&& other);
 
             /** @brief Implicit cast to bool, true if file opened successfully*/
             inline operator bool();
@@ -252,9 +259,17 @@ namespace services
              */
             FileSize Size();
 
+            /**
+             * @brief Closes file
+             * @return Operation result
+             *
+             * @brief After calling this method object becomes unusable
+             */
+            OSResult Close();
+
           private:
             /** @brief File system interface */
-            IFileSystem& _fs;
+            IFileSystem* _fs;
             /** @brief File handle */
             FileHandle _handle;
             /** @brief Flag indicating whether file is opened successfully */
@@ -263,7 +278,7 @@ namespace services
 
         File::operator bool()
         {
-            return this->_valid;
+            return this->_fs != nullptr && this->_valid;
         }
 
         /**

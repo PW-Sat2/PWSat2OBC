@@ -52,34 +52,47 @@ namespace experiment
             this->_iterations = iterations;
         }
 
-        void FibonacciExperiment::Run(mission::experiments::ExperimentContext& context)
+        mission::experiments::StartResult FibonacciExperiment::Start()
         {
-            LOG(LOG_LEVEL_INFO, "Performing Fibo experiment");
-
-            File f(this->_fileSystem, "/fibo.dat", FileOpen::CreateAlways, FileAccess::WriteOnly);
-
-            if (!f)
+            this->_file = services::fs::File(this->_fileSystem, "/fibo.dat", FileOpen::CreateAlways, FileAccess::WriteOnly);
+            if (!this->_file)
             {
-                LOG(LOG_LEVEL_ERROR, "Unable to open experiments file");
-                return;
+                LOG(LOG_LEVEL_ERROR, "Opening experiment file failed");
+                return mission::experiments::StartResult::Failure;
             }
 
-            Fibonacci fibo;
+            this->_fibo = Fibonacci();
 
-            for (decltype(this->_iterations) i = 0; i < this->_iterations; i++)
+            return mission::experiments::StartResult::Success;
+        }
+
+        mission::experiments::IterationResult FibonacciExperiment::Iteration()
+        {
+            auto v = this->_fibo.Current();
+
+            std::array<std::uint8_t, sizeof(v)> buf;
+            Writer w(buf);
+            w.WriteDoubleWordLE(v);
+
+            this->_file.Write(buf);
+
+            this->_fibo.Next();
+
+            this->_iterations--;
+
+            if (this->_iterations == 0)
             {
-                auto v = fibo.Current();
-
-                std::array<std::uint8_t, sizeof(v)> buf;
-                Writer w(buf);
-                w.WriteDoubleWordLE(v);
-
-                f.Write(buf);
-
-                fibo.Next();
-
-                context.WaitForNextCycle();
+                return mission::experiments::IterationResult::Finished;
             }
+
+            return mission::experiments::IterationResult::WaitForNextCycle;
+        }
+
+        void FibonacciExperiment::Stop(mission::experiments::IterationResult lastResult)
+        {
+            UNREFERENCED_PARAMETER(lastResult);
+
+            this->_file.Close();
         }
     }
 }

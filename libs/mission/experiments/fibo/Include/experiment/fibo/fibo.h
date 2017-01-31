@@ -30,10 +30,14 @@ namespace experiment
             void Iterations(std::uint32_t iterations);
 
             virtual mission::experiments::Experiment Type() override;
-            virtual void Run(mission::experiments::ExperimentContext& context) override;
+            virtual mission::experiments::StartResult Start() override;
+            virtual mission::experiments::IterationResult Iteration() override;
+            virtual void Stop(mission::experiments::IterationResult lastResult) override;
 
           private:
             services::fs::IFileSystem& _fileSystem;
+            services::fs::File _file;
+            Fibonacci _fibo;
 
             std::uint32_t _iterations;
         };
