@@ -47,7 +47,7 @@ set(SOURCES
   assert.cpp
   antenna/miniport.cpp
   antenna/antenna.cpp
-  antenna/MiniportMock.cpp
+  ntenna/MiniportMock.cpp
   antenna/MiniportMock.hpp
   mock/ActionDescriptorMock.hpp
   mock/UpdateDescriptorMock.hpp
@@ -55,6 +55,8 @@ set(SOURCES
   mock/emlib.cpp
   SPI/SPIMock.cpp
   SPI/SPIDriverTest.cpp
+  imtq/imtqTest.cpp
+  eigen/eigenTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -98,8 +100,10 @@ target_link_libraries(${NAME}
     antenna
     n25q
     mission_antenna
+    imtq
     mission_sail
     mission_time
+    eigen
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
