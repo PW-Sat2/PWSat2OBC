@@ -16,6 +16,20 @@ namespace mission
             Experiment2
         };
 
+        enum class StartResult
+        {
+            Success,
+            Failure
+        };
+
+        enum class IterationResult
+        {
+            Finished,
+            LoopImmediately,
+            WaitForNextCycle,
+            Abort
+        };
+
         class ExperimentContext final
         {
           public:
@@ -29,7 +43,9 @@ namespace mission
         struct IExperiment
         {
             virtual Experiment Type() = 0;
-            virtual void Run(ExperimentContext& context) = 0;
+            virtual StartResult Start() = 0;
+            virtual IterationResult Iteration() = 0;
+            virtual void Stop(IterationResult lastResult) = 0;
         };
 
         class MissionExperiment

@@ -1,4 +1,5 @@
 #include "experiments.h"
+#include <algorithm>
 #include "base/os.h"
 #include "logger/logger.h"
 
@@ -49,18 +50,11 @@ namespace mission
 
                 LOGF(LOG_LEVEL_INFO, "Received experiment %d request", num(experimentType));
 
-                IExperiment* experiment = nullptr;
+                auto experiment = std::find_if(this->_experiments.begin(), this->_experiments.end(), [experimentType](IExperiment* e) {
+                    return e->Type() == experimentType;
+                });
 
-                for (auto e : this->_experiments)
-                {
-                    if (e->Type() == experimentType)
-                    {
-                        experiment = e;
-                        break;
-                    }
-                }
-
-                if (experiment == nullptr)
+                if (experiment == this->_experiments.end())
                 {
                     LOG(LOG_LEVEL_ERROR, "No handler for requested experiment");
                     continue;
@@ -70,7 +64,32 @@ namespace mission
 
                 ExperimentContext context(this->_event);
 
-                experiment->Run(context);
+                auto startResult = (*experiment)->Start();
+
+                if (startResult != StartResult::Success)
+                {
+                    LOGF(LOG_LEVEL_ERROR, "Experiment start failed: %d", num(startResult));
+
+                    continue;
+                }
+
+                IterationResult iterationResult;
+                do
+                {
+                    iterationResult = (*experiment)->Iteration();
+
+                    if (iterationResult == IterationResult::Finished)
+                    {
+                        break;
+                    }
+
+                    if (iterationResult == IterationResult::WaitForNextCycle)
+                    {
+                        context.WaitForNextCycle();
+                    }
+                } while (true);
+
+                (*experiment)->Stop(iterationResult);
             }
         }
 
