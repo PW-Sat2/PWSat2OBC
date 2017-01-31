@@ -47,7 +47,7 @@ set(SOURCES
   assert.cpp
   antenna/miniport.cpp
   antenna/antenna.cpp
-  ntenna/MiniportMock.cpp
+  antenna/MiniportMock.cpp
   antenna/MiniportMock.hpp
   mock/ActionDescriptorMock.hpp
   mock/UpdateDescriptorMock.hpp
@@ -55,7 +55,6 @@ set(SOURCES
   mock/emlib.cpp
   SPI/SPIMock.cpp
   SPI/SPIDriverTest.cpp
-  imtq/imtqTest.cpp
   eigen/eigenTest.cpp
 )
 
@@ -100,7 +99,6 @@ target_link_libraries(${NAME}
     antenna
     n25q
     mission_antenna
-    imtq
     mission_sail
     mission_time
     eigen

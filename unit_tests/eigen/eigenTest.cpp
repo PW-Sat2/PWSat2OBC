@@ -8,7 +8,7 @@
 #include "utils.hpp"
 
 #include <iostream>
-#include <Dense>
+#include <Eigen/Dense>
 
 using testing::_;
 using testing::Eq;
