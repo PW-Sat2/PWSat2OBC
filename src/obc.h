@@ -9,6 +9,7 @@
 #include "antenna/driver.h"
 #include "antenna/miniport.h"
 #include "base/os.h"
+#include "burtc/burtc.hpp"
 #include "fs/fs.h"
 #include "fs/yaffs.h"
 #include "leuart/line_io.h"
@@ -82,6 +83,9 @@ struct OBC
 
     /** @brief Terminal object. */
     Terminal terminal;
+
+    /** @brief BURTC object. */
+    devices::burtc::Burtc Burtc;
 };
 
 /** @brief Global OBC object. */
