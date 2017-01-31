@@ -1,0 +1,19 @@
+cmake_minimum_required(VERSION 2.8.2)
+ 
+project(eigen-download NONE)
+ 
+include(ExternalProject)
+ExternalProject_Add(eigen
+  HG_REPOSITORY https://bitbucket.org/eigen/eigen
+  HG_TAG 3.3.2
+  SOURCE_DIR ${EIGEN_SRC}
+  BINARY_DIR ${EIGEN_BUILD}
+  UPDATE_DISCONNECTED 1
+  CMAKE_COMMANED    ""
+  #arguments necessary to build unitary tests - disabled - not working with current configuration
+  #CMAKE_ARGS "-DCMAKE_REQUIRED_FLAGS=\"--specs=nosys.specs -Wno-error\" -DEIGEN_TEST_CUSTOM_CXX_FLAGS=\"--specs=nosys.specs -Wno-error\""
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND     ""
+  INSTALL_COMMAND   ""
+  TEST_COMMAND      ""
+)
