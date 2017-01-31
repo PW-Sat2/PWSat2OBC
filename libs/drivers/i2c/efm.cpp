@@ -1,6 +1,6 @@
+#include <cassert>
 #include <em_cmu.h>
 #include <em_gpio.h>
-#include <cassert>
 
 #include "base/os.h"
 #include "io_map.h"

@@ -23,7 +23,7 @@ namespace drivers
          *
          * Capabilities:
          * * Thread-safe bus access
-         * * Write and Write-Read transfers
+         * * Write, Read and Write-Read transfers
          * * Dual-bus (System and Payload) configuration
          * * Error-handling
          * * Automatic fallback
@@ -87,6 +87,12 @@ namespace drivers
              */
             virtual I2CResult Write(const I2CAddress address, gsl::span<const uint8_t> inData) = 0;
 
+            /**
+             * @brief Executes read transfer
+             * @param[in] address Address of device
+             * @param[out] outData Buffer for data read from device
+             * @return Transfer result
+             */
             virtual I2CResult Read(const I2CAddress address, gsl::span<uint8_t> outData) = 0;
 
             /**
