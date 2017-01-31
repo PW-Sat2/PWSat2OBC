@@ -80,6 +80,21 @@ I2CResult I2CLowLevelBus::Write(const I2CAddress address, gsl::span<const uint8_
     return ExecuteTransfer(&seq);
 }
 
+I2CResult I2CLowLevelBus::Read(const I2CAddress address, gsl::span<uint8_t> outData)
+{
+    assert((address & 0b10000000) == 0);
+
+    I2C_TransferSeq_TypeDef seq;
+    seq.addr = (address << 1);
+    seq.flags = I2C_FLAG_READ;
+    seq.buf[0].len = outData.length();
+    seq.buf[0].data = const_cast<uint8_t*>(outData.data());
+    seq.buf[1].len = 0;
+    seq.buf[1].data = nullptr;
+
+    return ExecuteTransfer(&seq);
+}
+
 I2CResult I2CLowLevelBus::WriteRead(const I2CAddress address, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData)
 {
     assert((address & 0b10000000) == 0);
