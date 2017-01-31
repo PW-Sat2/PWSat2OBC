@@ -73,6 +73,8 @@ target_jlink_flash(${NAME})
 
 target_format_sources(${NAME} "${SOURCES}")
 
+target_eclipse_debug_configs(${NAME} Run Attach)
+
 add_custom_target(swo_viewer
     COMMAND ${JLINKSWO} -cpufreq 14000000 -device ${DEVICE} -itmmask 0x3
 )
