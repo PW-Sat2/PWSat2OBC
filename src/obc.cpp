@@ -7,7 +7,8 @@ OBC::OBC()
       timeProvider(fs),                         //
       Communication(Hardware.I2C.Buses.Bus),    //
       Storage(Hardware.SPI, fs, Hardware.Pins), //
-      terminal(this->IO)
+      terminal(this->IO),                       //
+      Burtc(this->timeProvider)
 {
 }
 
@@ -18,6 +19,8 @@ void OBC::Initialize()
     this->fs.Initialize();
 
     this->Communication.Initialize();
+
+    this->Burtc.Initialize();
 }
 
 void OBC::PostStartInitialization()

@@ -2,6 +2,7 @@
 
 #include "base/reader.h"
 #include "base/writer.h"
+#include "em_burtc.h"
 #include "logger/logger.h"
 #include "timer.h"
 
@@ -67,6 +68,8 @@ bool TimeProvider::Initialize(TimePassedCallbackType timePassedCallback, void* t
     return result;
 }
 
+uint32_t tempmandro = 0;
+
 void TimeProvider::AdvanceTime(milliseconds delta)
 {
     if (OS_RESULT_FAILED(System::TakeSemaphore(timerLock, InfiniteTimeout)))
@@ -78,6 +81,11 @@ void TimeProvider::AdvanceTime(milliseconds delta)
     CurrentTime = CurrentTime + delta;
     NotificationTime = NotificationTime + delta;
     PersistanceTime = PersistanceTime + delta;
+
+    if ((tempmandro++) % 100 == 0)
+    {
+        LOGF(LOG_LEVEL_ERROR, "TimeProvider: Advancing to %d, f=%d", (int)CurrentTime.count(), (int)BURTC_ClockFreqGet());
+    }
 
     struct TimerState state = BuildTimerState();
 
