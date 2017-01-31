@@ -12,3 +12,7 @@ class ExperimentsMixin(OBCMixin):
     @command("request_experiment {0}")
     def request_experiment(self):
         pass
+
+    @command("set_fibo_iterations {0}")
+    def set_fibo_iterations(self, count):
+        pass

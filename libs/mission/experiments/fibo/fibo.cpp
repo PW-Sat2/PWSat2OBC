@@ -38,13 +38,18 @@ namespace experiment
             return this->_current;
         }
 
-        FibonacciExperiment::FibonacciExperiment(IFileSystem& fileSystem) : _fileSystem(fileSystem)
+        FibonacciExperiment::FibonacciExperiment(IFileSystem& fileSystem) : _fileSystem(fileSystem), _iterations(1)
         {
         }
 
         mission::experiments::Experiment FibonacciExperiment::Type()
         {
             return mission::experiments::Experiment::Fibo;
+        }
+
+        void FibonacciExperiment::Iterations(std::uint32_t iterations)
+        {
+            this->_iterations = iterations;
         }
 
         void FibonacciExperiment::Run(mission::experiments::ExperimentContext& context)
@@ -61,7 +66,7 @@ namespace experiment
 
             Fibonacci fibo;
 
-            for (auto i = 0; i < 5; i++)
+            for (decltype(this->_iterations) i = 0; i < this->_iterations; i++)
             {
                 auto v = fibo.Current();
 

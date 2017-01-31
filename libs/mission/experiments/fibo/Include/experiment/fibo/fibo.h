@@ -27,11 +27,15 @@ namespace experiment
           public:
             FibonacciExperiment(services::fs::IFileSystem& fileSystem);
 
+            void Iterations(std::uint32_t iterations);
+
             virtual mission::experiments::Experiment Type() override;
             virtual void Run(mission::experiments::ExperimentContext& context) override;
 
           private:
             services::fs::IFileSystem& _fileSystem;
+
+            std::uint32_t _iterations;
         };
     }
 }

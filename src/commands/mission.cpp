@@ -31,6 +31,19 @@ void RunMission(std::uint16_t argc, char* argv[])
     Mission.RequestSingleIteration();
 }
 
+void SetFiboIterations(std::uint16_t argc, char* argv[])
+{
+    if (argc != 1)
+    {
+        Main.terminal.Puts("set_fibo_iterations <iterations>");
+        return;
+    }
+
+    std::uint16_t iters = atoi(argv[0]);
+
+    Main.Fibo.Iterations(iters);
+}
+
 void RequestExperiment(std::uint16_t argc, char* argv[])
 {
     if (argc != 1)
