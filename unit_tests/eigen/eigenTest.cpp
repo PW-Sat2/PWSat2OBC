@@ -8,16 +8,16 @@ typedef int EIGENUT_EXCP_TYPE;
 
 #include <Eigen/Dense>
 
-using Eigen::Matrix3d;
-using Eigen::Vector3d;
+using Eigen::Matrix3f;
+using Eigen::Vector3f;
 
 
 // testing creation of basic types by static allocation
 TEST(eigen_sanity, MatVecCreation)
 {
-  Matrix3d m = Matrix3d::Identity();
+  Matrix3f m = Matrix3d::Identity();
   m = (m + Matrix3d::Constant(1.2)) * 50;
-  Vector3d v(1.0, 2.0, 3.0);
+  Vector3f v(1.0, 2.0, 3.0);
   EXPECT_FLOAT_EQ(v[0], 1.0);
   EXPECT_FLOAT_EQ(m(0, 2), 60.0);
   EXPECT_FLOAT_EQ(m(2, 2), 110.0);
