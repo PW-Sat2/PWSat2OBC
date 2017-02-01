@@ -16,3 +16,7 @@ class ExperimentsMixin(OBCMixin):
     @command("set_fibo_iterations {0}")
     def set_fibo_iterations(self, count):
         pass
+
+    @command("abort_experiment")
+    def abort_experiment(self):
+        pass
