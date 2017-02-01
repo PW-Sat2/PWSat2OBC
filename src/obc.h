@@ -31,6 +31,28 @@
  */
 
 /**
+ * @brief Object connects TimeProvider tor BURTC
+ */
+class BurtcTimeProviderAdapter : public devices::burtc::BurtcTickCallback
+{
+  public:
+    /**
+     * @brief Constructs @ref BurtcTimeProviderAdapter object
+     * @param[in] timeProvider Time provider instance that will receive ticks from BURTC.
+     * */
+    BurtcTimeProviderAdapter(services::time::TimeProvider& timeProvider);
+
+    /**
+     * @brief Method that will be called by BURTC.
+     * @param[in] interval Interval that passed since last tick
+     */
+    void virtual Tick(std::chrono::milliseconds interval);
+
+  private:
+    services::time::TimeProvider& _timeProvider;
+};
+
+/**
  * @brief Object that describes global OBC state including drivers.
  */
 struct OBC
@@ -84,6 +106,10 @@ struct OBC
     /** @brief Terminal object. */
     Terminal terminal;
 
+  private:
+    BurtcTimeProviderAdapter burtcHandler;
+
+  public:
     /** @brief BURTC object. */
     devices::burtc::Burtc Burtc;
 };

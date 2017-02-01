@@ -8,7 +8,8 @@ OBC::OBC()
       Communication(Hardware.I2C.Buses.Bus),    //
       Storage(Hardware.SPI, fs, Hardware.Pins), //
       terminal(this->IO),                       //
-      Burtc(this->timeProvider)
+      burtcHandler(timeProvider),               //
+      Burtc(burtcHandler)
 {
 }
 
@@ -31,4 +32,13 @@ void OBC::PostStartInitialization()
     {
         LOGF(LOG_LEVEL_FATAL, "Storage initialization failed %d", num(r));
     }
+}
+
+BurtcTimeProviderAdapter::BurtcTimeProviderAdapter(services::time::TimeProvider& timeProvider) : _timeProvider(timeProvider)
+{
+}
+
+void BurtcTimeProviderAdapter::Tick(std::chrono::milliseconds interval)
+{
+    _timeProvider.AdvanceTime(interval);
 }

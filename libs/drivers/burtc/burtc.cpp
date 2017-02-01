@@ -22,19 +22,19 @@ void BURTC_IRQHandler(void)
     System::GiveSemaphoreISR(burtcInterruptSemaphore);
 }
 
-Burtc::Burtc(services::time::TimeProvider& timeProvider) : _timeProvider(timeProvider), _timeDelta(0)
+Burtc::Burtc(BurtcTickCallback& tickCallback) : _tickCallback(tickCallback), _timeDelta(0)
 {
 }
 
-void Burtc::UpdateTimeProvider(void* task)
+void Burtc::HandleTickTask(void* arg)
 {
-    Burtc* burtcObject = (Burtc*)task;
+    Burtc* burtcObject = static_cast<Burtc*>(arg);
 
     while (1)
     {
         System::TakeSemaphore(burtcInterruptSemaphore, InfiniteTimeout);
 
-        burtcObject->_timeProvider.AdvanceTime(burtcObject->_timeDelta);
+        burtcObject->_tickCallback.Tick(burtcObject->_timeDelta);
     }
 }
 
@@ -42,7 +42,7 @@ void Burtc::Initialize()
 {
     burtcInterruptSemaphore = System::CreateBinarySemaphore();
 
-    System::CreateTask(Burtc::UpdateTimeProvider, "UpdateTimeProvider", 512, this, TaskPriority::P1, NULL);
+    System::CreateTask(Burtc::HandleTickTask, "HandleTickTask", 512, this, TaskPriority::P1, NULL);
 
     ConfigureHardware();
 }
