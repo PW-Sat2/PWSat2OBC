@@ -43,6 +43,7 @@ void RunMission(std::uint16_t argc, char* argv[]);
 void SetFiboIterations(std::uint16_t argc, char* argv[]);
 
 void RequestExperiment(std::uint16_t argc, char* argv[]);
+void AbortExperiment(std::uint16_t argc, char* argv[]);
 
 void DMAInfo(std::uint16_t argc, char* argv[]);
 

@@ -33,6 +33,11 @@ namespace mission
             this->_requestedExperiment = Some(experiment);
         }
 
+        void MissionExperiment::AbortExperiment()
+        {
+            System::EventGroupSetBits(this->_event, Event::AbortRequest);
+        }
+
         void MissionExperiment::BackgroundTask()
         {
             while (1)
@@ -40,8 +45,6 @@ namespace mission
                 Experiment experimentType;
 
                 LOG(LOG_LEVEL_INFO, "Waiting experiment to run");
-
-                System::EventGroupClearBits(this->_event, 1 << 2);
 
                 if (OS_RESULT_FAILED(this->_queue.Pop(experimentType, InfiniteTimeout)))
                 {
@@ -62,13 +65,13 @@ namespace mission
 
                 System::EventGroupSetBits(this->_event, Event::InProgress);
 
-                ExperimentContext context(this->_event);
-
                 auto startResult = (*experiment)->Start();
 
                 if (startResult != StartResult::Success)
                 {
                     LOGF(LOG_LEVEL_ERROR, "Experiment start failed: %d", num(startResult));
+
+                    System::EventGroupClearBits(this->_event, Event::InProgress);
 
                     continue;
                 }
@@ -76,6 +79,16 @@ namespace mission
                 IterationResult iterationResult;
                 do
                 {
+                    auto flags = System::EventGroupGetBits(this->_event);
+
+                    if (has_flag(flags, Event::AbortRequest))
+                    {
+                        System::EventGroupClearBits(this->_event, Event::AbortRequest);
+
+                        iterationResult = IterationResult::Abort;
+                        break;
+                    }
+
                     iterationResult = (*experiment)->Iteration();
 
                     if (iterationResult == IterationResult::Finished)
@@ -85,11 +98,19 @@ namespace mission
 
                     if (iterationResult == IterationResult::WaitForNextCycle)
                     {
-                        context.WaitForNextCycle();
+                        auto flags = System::EventGroupWaitForBits(
+                            this->_event, Event::MissionLoopIterationStarted | Event::AbortRequest, false, false, InfiniteTimeout);
+
+                        if (has_flag(flags, Event::MissionLoopIterationStarted))
+                        {
+                            System::EventGroupClearBits(this->_event, Event::MissionLoopIterationStarted);
+                        }
                     }
                 } while (true);
 
                 (*experiment)->Stop(iterationResult);
+
+                System::EventGroupClearBits(this->_event, Event::InProgress);
             }
         }
 
@@ -174,15 +195,6 @@ namespace mission
             d.actionProc = MissionExperiment::KickExperiment;
 
             return d;
-        }
-
-        ExperimentContext::ExperimentContext(OSEventGroupHandle eventGroup) : _eventGroup(eventGroup)
-        {
-        }
-
-        void ExperimentContext::WaitForNextCycle()
-        {
-            System::EventGroupWaitForBits(this->_eventGroup, 1 << 2, true, true, InfiniteTimeout);
         }
     }
 }

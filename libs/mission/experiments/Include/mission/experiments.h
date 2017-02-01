@@ -30,16 +30,6 @@ namespace mission
             Abort
         };
 
-        class ExperimentContext final
-        {
-          public:
-            ExperimentContext(OSEventGroupHandle eventGroup);
-            void WaitForNextCycle();
-
-          private:
-            OSEventGroupHandle _eventGroup;
-        };
-
         struct IExperiment
         {
             virtual Experiment Type() = 0;
@@ -59,6 +49,8 @@ namespace mission
 
             void RequestExperiment(Experiment experiment);
 
+            void AbortExperiment();
+
             void BackgroundTask();
 
             static bool ShouldStartExperiment(const SystemState& state, void* param);
@@ -72,6 +64,8 @@ namespace mission
             struct Event
             {
                 static constexpr OSEventBits InProgress = 1 << 0;
+                static constexpr OSEventBits AbortRequest = 1 << 1;
+                static constexpr OSEventBits MissionLoopIterationStarted = 1 << 2;
             };
 
           private:

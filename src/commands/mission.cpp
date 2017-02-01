@@ -56,3 +56,10 @@ void RequestExperiment(std::uint16_t argc, char* argv[])
 
     Main.ExperimentsController.RequestExperiment(static_cast<mission::experiments::Experiment>(expType));
 }
+
+void AbortExperiment(std::uint16_t argc, char* argv[])
+{
+    UNUSED(argc, argv);
+
+    Main.ExperimentsController.AbortExperiment();
+}
