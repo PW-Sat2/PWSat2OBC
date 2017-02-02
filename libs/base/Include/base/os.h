@@ -687,6 +687,57 @@ class Timeout final
     const std::chrono::milliseconds _expireAt;
 };
 
+/**
+ * @brief Wrapper around event group synchronization primitive
+ */
+class EventGroup final
+{
+  public:
+    /** @brief Initializes event group */
+    OSResult Initialize();
+
+    /**
+     * @brief Sets bits in event group
+     * @param bits Bits to set
+     * @remark Must not be used from ISR
+     */
+    void Set(OSEventBits bits);
+
+    /**
+     * @brief Sets bits in event group from ISR
+     * @param bits Bits to set
+     */
+    void SetISR(OSEventBits bits);
+
+    /**
+     * @brief Clears bits in event group
+     * @param bits Bits to clear
+     */
+    void Clear(OSEventBits bits);
+
+    /**
+     * @brief Waits until any bit specified by mask is set
+     * @param bits Bits to wait for
+     * @param clearOnExit Should bits be cleared on exit
+     * @param timeout Timeout
+     * @return Event group value at the exit of function
+     */
+    OSEventBits WaitAny(OSEventBits bits, bool clearOnExit, std::chrono::milliseconds timeout);
+
+    /**
+     * @brief Waits until all bits specified by mask are set
+     * @param bits Bits to wait for
+     * @param clearOnExit Should bits be cleared on exit
+     * @param timeout Timeout
+     * @return Event group value at the exit of function
+     */
+    OSEventBits WaitAll(OSEventBits bits, bool clearOnExit, std::chrono::milliseconds timeout);
+
+  private:
+    /** @brief Underlying event group handle */
+    OSEventGroupHandle _handle;
+};
+
 /** @}*/
 
 #endif
