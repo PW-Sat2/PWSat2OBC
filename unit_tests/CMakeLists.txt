@@ -55,6 +55,7 @@ set(SOURCES
   mock/emlib.cpp
   SPI/SPIMock.cpp
   SPI/SPIDriverTest.cpp
+  eigen/eigenTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -100,6 +101,7 @@ target_link_libraries(${NAME}
     mission_antenna
     mission_sail
     mission_time
+    eigen
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
