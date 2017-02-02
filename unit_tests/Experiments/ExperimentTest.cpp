@@ -105,29 +105,29 @@ TEST_F(ExperimentTest, RepeatedExperimentRequestOverwritePrevious)
 TEST_F(ExperimentTest, ShouldIgnoreRequestWhileExperimentIsRunning)
 {
     SystemState state;
-    auto action = _mission.BuildAction();
+    auto startAction = _exp.StartExperimentAction();
 
     _exp.RequestExperiment(Experiment::Fibo);
 
-    action.Execute(state);
+    startAction.Execute(state);
 
     _exp.RequestExperiment(Experiment::Experiment2);
 
     this->_eventValue = 0;
 
-    ASSERT_THAT(action.EvaluateCondition(state), Eq(false));
+    ASSERT_THAT(startAction.EvaluateCondition(state), Eq(false));
 }
 
 TEST_F(ExperimentTest, OnceExperimentIsStartedWillNotTryToStartAgain)
 {
     SystemState state;
-    auto action = _mission.BuildAction();
+    auto startAction = _exp.StartExperimentAction();
 
     _exp.RequestExperiment(Experiment::Fibo);
 
-    action.Execute(state);
+    startAction.Execute(state);
 
-    ASSERT_THAT(action.EvaluateCondition(state), Eq(false));
+    ASSERT_THAT(startAction.EvaluateCondition(state), Eq(false));
 }
 
 TEST_F(ExperimentTest, ShouldInvokeExperimentAsRequested)

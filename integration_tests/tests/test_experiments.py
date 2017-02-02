@@ -55,7 +55,7 @@ class ExperimentsTest(BaseTest):
         self.assertIn('fibo.dat', files, 'Experiment result file is not present')
 
         result = self.system.obc.read_file('/fibo.dat')
-        self.assertEqual(len(result), 2 * 4)
+        self.assertEqual(len(result), 3 * 4)
 
-        unpacked = struct.unpack('<' + 'L' * 2, result)
-        self.assertEqual(unpacked, (1, 1))
+        unpacked = struct.unpack('<' + 'L' * 3, result)
+        self.assertEqual(unpacked, (1, 1, 2))

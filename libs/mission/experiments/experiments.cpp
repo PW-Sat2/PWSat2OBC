@@ -163,38 +163,39 @@ namespace mission
             System::EventGroupSetBits(This->_event, 1 << 2);
         }
 
-        MissionExperimentComponent::MissionExperimentComponent(MissionExperiment& experimentController)
-            : _experimentController(experimentController)
-        {
-        }
-
-        mission::ActionDescriptor<SystemState> MissionExperimentComponent::BuildAction()
+        mission::ActionDescriptor<SystemState> MissionExperiment::StartExperimentAction()
         {
             auto d = mission::ActionDescriptor<SystemState>();
 
             d.name = "StartExp";
-            d.param = &this->_experimentController;
+            d.param = this;
             d.condition = MissionExperiment::ShouldStartExperiment;
             d.actionProc = MissionExperiment::StartExperiment;
 
             return d;
         }
 
-        MissionExperimentComponent2::MissionExperimentComponent2(MissionExperiment& experimentController)
-            : _experimentController(experimentController)
-        {
-        }
-
-        mission::ActionDescriptor<SystemState> MissionExperimentComponent2::BuildAction()
+        mission::ActionDescriptor<SystemState> MissionExperiment::KickExperimentAction()
         {
             auto d = mission::ActionDescriptor<SystemState>();
 
             d.name = "KickExp";
-            d.param = &this->_experimentController;
+            d.param = this;
             d.condition = MissionExperiment::ShouldKickExperiment;
             d.actionProc = MissionExperiment::KickExperiment;
 
             return d;
+        }
+
+        MissionExperimentComponent::MissionExperimentComponent(MissionExperiment& experimentController)
+            : _experimentController(experimentController), //
+              _actions("Experiment", experimentController.StartExperimentAction(), experimentController.KickExperimentAction())
+        {
+        }
+
+        mission::ActionDescriptor<SystemState> MissionExperimentComponent::BuildAction()
+        {
+            return this->_actions.BuildAction();
         }
     }
 }

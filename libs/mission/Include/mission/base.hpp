@@ -3,7 +3,9 @@
 
 #pragma once
 
+#include <array>
 #include <cstdint>
+#include "system.h"
 
 namespace mission
 {
@@ -300,6 +302,86 @@ namespace mission
         {
             this->actionProc(state, this->param);
         }
+    }
+
+    /**
+     * @brief Packs number of actions into single action that can plug into mission loop
+     * @tparam State System state
+     * @tparam Number of actions
+     *
+     * @remark Checking if inner action can be executed is done in "Invoke actions" phase of mission loop
+     */
+    template <typename State, std::size_t Count> class CompositeAction : public Action
+    {
+      public:
+        /**
+         * @brief Constructs composite action from given action descriptors
+         * @param name Name for composite action descriptor
+         * @param descriptors Action descriptors
+         */
+        template <typename... T> CompositeAction(const char* name, T... descriptors) : _name(name), _descriptors{descriptors...}
+        {
+            static_assert(sizeof...(T) == Count, "Descriptors count must equal template parameter");
+        }
+
+        /**
+         * @brief Builds action
+         * @return Action descriptor for composite action
+         */
+        ActionDescriptor<State> BuildAction();
+
+      private:
+        /**
+         * @brief Dummy condition - always returns true
+         * @param state Not used
+         * @param param Not used
+         * @return Always true
+         */
+        static bool CanRun(const State& state, void* param);
+        /**
+         * @brief Executes all runnable actions from composite action
+         * @param state System state
+         * @param param Pointer to CompositeAction object
+         */
+        static void Run(const State& state, void* param);
+
+        /** @brief Composite action name */
+        const char* _name;
+
+        /**
+         * @brief Inner actions descriptors
+         */
+        std::array<ActionDescriptor<State>, Count> _descriptors;
+    };
+
+    template <typename State, std::size_t Count> bool CompositeAction<State, Count>::CanRun(const State& state, void* param)
+    {
+        UNUSED(state, param);
+        return true;
+    }
+
+    template <typename State, std::size_t Count> void CompositeAction<State, Count>::Run(const State& state, void* param)
+    {
+        auto This = reinterpret_cast<CompositeAction<State, Count>*>(param);
+
+        for (auto d : This->_descriptors)
+        {
+            if (d.EvaluateCondition(state))
+            {
+                d.Execute(state);
+            }
+        }
+    }
+
+    template <typename State, std::size_t Count> ActionDescriptor<State> CompositeAction<State, Count>::BuildAction()
+    {
+        ActionDescriptor<State> n;
+        n.param = this;
+        n.name = this->_name;
+        n.actionProc = Run;
+        n.condition = CanRun;
+
+        return n;
     }
 }
 

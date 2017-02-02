@@ -16,8 +16,7 @@ namespace mission
         TimeTask,
         antenna::AntennaTask,
         SailTask,
-        mission::experiments::MissionExperimentComponent,
-        mission::experiments::MissionExperimentComponent2 //
+        mission::experiments::MissionExperimentComponent //
         >
         ObcMission;
 }

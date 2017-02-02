@@ -29,6 +29,7 @@ set(SOURCES
   MissionPlan/MissionLoopTest.cpp
   MissionPlan/antenna/DeployAntennasTest.cpp
   MissionPlan/antenna/AntennaMissionStateTest.cpp
+  MissionPlan/CompositeActionTest.cpp
   I2C/FallbackI2CBusTest.cpp
   I2C/ErrorHandlingI2CBusTest.cpp
   N25Q/N25QTest.cpp

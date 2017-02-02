@@ -274,6 +274,7 @@ namespace mission
           taskHandle(nullptr),
           eventGroup(nullptr)
     {
+        static_assert(sizeof...(Args) == sizeof...(T), "Number of arguments must be equal to number of mission components");
         Setup();
     }
 
