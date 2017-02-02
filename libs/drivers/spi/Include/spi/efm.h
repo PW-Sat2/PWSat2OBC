@@ -69,7 +69,7 @@ namespace drivers
             /** @brief Input data channel */
             unsigned int _rxChannel;
             /** @brief Event group with transfer finished flags */
-            OSEventGroupHandle _transferGroup;
+            EventGroup _transferGroup;
             /** @brief Lock used to synchronize periperhal access */
             OSSemaphoreHandle _lock;
 
