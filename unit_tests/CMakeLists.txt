@@ -131,4 +131,5 @@ if(${ENABLE_COVERAGE})
     )
 endif()
 
+target_eclipse_debug_configs(${NAME} QEmu)
 
