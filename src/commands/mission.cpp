@@ -41,7 +41,7 @@ void SetFiboIterations(std::uint16_t argc, char* argv[])
 
     std::uint16_t iters = atoi(argv[0]);
 
-    Main.Fibo.Iterations(iters);
+    Main.Experiments.Fibo.Iterations(iters);
 }
 
 void RequestExperiment(std::uint16_t argc, char* argv[])
@@ -54,12 +54,12 @@ void RequestExperiment(std::uint16_t argc, char* argv[])
 
     std::uint16_t expType = atoi(argv[0]);
 
-    Main.ExperimentsController.RequestExperiment(static_cast<mission::experiments::Experiment>(expType));
+    Main.Experiments.ExperimentsController.RequestExperiment(gsl::narrow_cast<mission::experiments::ExperimentCode>(expType));
 }
 
 void AbortExperiment(std::uint16_t argc, char* argv[])
 {
     UNUSED(argc, argv);
 
-    Main.ExperimentsController.AbortExperiment();
+    Main.Experiments.ExperimentsController.AbortExperiment();
 }

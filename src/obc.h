@@ -20,6 +20,7 @@
 #include "n25q/yaffs.h"
 #include "obc/adcs.hpp"
 #include "obc/communication.h"
+#include "obc/experiments.hpp"
 #include "obc/hardware.h"
 #include "obc/storage.h"
 #include "spi/efm.h"
@@ -85,14 +86,11 @@ struct OBC
     /** @brief Adcs subsytem for obc. */
     obc::Adcs adcs;
 
+    /** @brief Experiments */
+    obc::OBCExperiments Experiments;
+
     /** @brief Terminal object. */
     Terminal terminal;
-
-    mission::experiments::MissionExperiment ExperimentsController;
-
-    experiment::fibo::FibonacciExperiment Fibo;
-
-    std::array<mission::experiments::IExperiment*, 1> Experiments;
 };
 
 /** @brief Global OBC object. */

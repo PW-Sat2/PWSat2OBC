@@ -27,10 +27,16 @@ using namespace mission::experiments;
 
 struct ExperimentMock : public IExperiment
 {
-    MOCK_METHOD0(Type, Experiment());
+    MOCK_METHOD0(Type, ExperimentCode());
     MOCK_METHOD0(Start, StartResult());
     MOCK_METHOD0(Iteration, IterationResult());
     MOCK_METHOD1(Stop, void(IterationResult lastResult));
+};
+
+struct Experiment
+{
+    static constexpr ExperimentCode Fibo = 0x01;
+    static constexpr ExperimentCode Experiment2 = 0x02;
 };
 
 class ExperimentTest : public testing::Test
@@ -50,13 +56,13 @@ class ExperimentTest : public testing::Test
     OSReset _osReset;
 };
 
-ExperimentTest::ExperimentTest() : _exp(nullptr), _mission(_exp)
+ExperimentTest::ExperimentTest() : _mission(_exp)
 {
     this->_osReset = InstallProxy(&this->_os);
     this->_eventValue = 0;
 
     ON_CALL(this->_os, CreateEventGroup()).WillByDefault(Return(this->_event));
-    ON_CALL(this->_os, CreateQueue(1, sizeof(Experiment))).WillByDefault(Return(this->_queue));
+    ON_CALL(this->_os, CreateQueue(1, sizeof(ExperimentCode))).WillByDefault(Return(this->_queue));
 
     ON_CALL(this->_os, EventGroupSetBits(this->_event, _))
         .WillByDefault(DoAll(SaveArg<1>(&this->_eventValue), ReturnPointee(&this->_eventValue)));
@@ -70,7 +76,7 @@ ExperimentTest::ExperimentTest() : _exp(nullptr), _mission(_exp)
 
 MATCHER_P(Exp, e, "")
 {
-    const auto v = reinterpret_cast<const Experiment*>(arg);
+    const auto v = reinterpret_cast<const ExperimentCode*>(arg);
     return *v == e;
 }
 
@@ -143,7 +149,7 @@ TEST_F(ExperimentTest, ShouldInvokeExperimentAsRequested)
 
         EXPECT_CALL(this->_os, QueueReceive(this->_queue, _, _))
             .WillOnce(Invoke([](OSQueueHandle /*queue*/, void* element, std::chrono::milliseconds /** timeout*/) {
-                *reinterpret_cast<Experiment*>(element) = Experiment::Fibo;
+                *reinterpret_cast<ExperimentCode*>(element) = Experiment::Fibo;
                 return true;
             }));
 
@@ -175,13 +181,13 @@ TEST_F(ExperimentTest, ShouldInvokeOneExperimentAfterAnother)
 
         EXPECT_CALL(this->_os, QueueReceive(this->_queue, _, _))
             .WillOnce(Invoke([](OSQueueHandle /*queue*/, void* element, std::chrono::milliseconds /** timeout*/) {
-                *reinterpret_cast<Experiment*>(element) = Experiment::Experiment2;
+                *reinterpret_cast<ExperimentCode*>(element) = Experiment::Experiment2;
                 return true;
             }));
 
         EXPECT_CALL(this->_os, QueueReceive(this->_queue, _, _))
             .WillOnce(Invoke([](OSQueueHandle /*queue*/, void* element, std::chrono::milliseconds /** timeout*/) {
-                *reinterpret_cast<Experiment*>(element) = Experiment::Fibo;
+                *reinterpret_cast<ExperimentCode*>(element) = Experiment::Fibo;
                 return true;
             }));
 
@@ -205,7 +211,7 @@ TEST_F(ExperimentTest, ShouldAbortExperiment)
 
         EXPECT_CALL(this->_os, QueueReceive(this->_queue, _, _))
             .WillOnce(Invoke([](OSQueueHandle /*queue*/, void* element, std::chrono::milliseconds /** timeout*/) {
-                *reinterpret_cast<Experiment*>(element) = Experiment::Fibo;
+                *reinterpret_cast<ExperimentCode*>(element) = Experiment::Fibo;
                 return true;
             }));
 
@@ -240,7 +246,7 @@ TEST_F(ExperimentTest, ShouldWaitForNextMissionLoopIterationIfRequested)
 
         EXPECT_CALL(this->_os, QueueReceive(this->_queue, _, _))
             .WillOnce(Invoke([](OSQueueHandle /*queue*/, void* element, std::chrono::milliseconds /** timeout*/) {
-                *reinterpret_cast<Experiment*>(element) = Experiment::Fibo;
+                *reinterpret_cast<ExperimentCode*>(element) = Experiment::Fibo;
                 return true;
             }));
 
@@ -285,7 +291,7 @@ TEST_F(ExperimentTest, WhenExperimentStartFailsShouldNotRunIteration)
 
         EXPECT_CALL(this->_os, QueueReceive(this->_queue, _, _))
             .WillOnce(Invoke([](OSQueueHandle /*queue*/, void* element, std::chrono::milliseconds /** timeout*/) {
-                *reinterpret_cast<Experiment*>(element) = Experiment::Fibo;
+                *reinterpret_cast<ExperimentCode*>(element) = Experiment::Fibo;
                 return true;
             }));
 
@@ -313,7 +319,7 @@ TEST_F(ExperimentTest, ShouldStopExperimentWhenIterationFails)
 
         EXPECT_CALL(this->_os, QueueReceive(this->_queue, _, _))
             .WillOnce(Invoke([](OSQueueHandle /*queue*/, void* element, std::chrono::milliseconds /** timeout*/) {
-                *reinterpret_cast<Experiment*>(element) = Experiment::Fibo;
+                *reinterpret_cast<ExperimentCode*>(element) = Experiment::Fibo;
                 return true;
             }));
 

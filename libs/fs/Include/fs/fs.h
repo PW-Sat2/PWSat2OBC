@@ -227,6 +227,11 @@ namespace services
              */
             File(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access);
 
+            /**
+             * @brief Move operator
+             * @param other Other file
+             * @return Reference to this
+             */
             File& operator=(File&& other);
 
             /** @brief Implicit cast to bool, true if file opened successfully*/

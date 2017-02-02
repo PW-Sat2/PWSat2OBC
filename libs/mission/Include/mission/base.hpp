@@ -121,6 +121,11 @@ namespace mission
          */
         void* param;
 
+        /**
+         * @brief performs system state update
+         * @param state System state
+         * @return Update result
+         */
         UpdateResult Execute(State& state) const;
     };
 
@@ -281,8 +286,17 @@ namespace mission
          */
         void* param;
 
+        /**
+         * @brief Evaluates condition for this action
+         * @param state System state
+         * @return true if action is runnable
+         */
         inline bool EvaluateCondition(const State& state);
 
+        /**
+         * @brief Executes action
+         * @param state System state
+         */
         inline void Execute(const State& state);
     };
 
