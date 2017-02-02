@@ -27,7 +27,7 @@ namespace mission
             Finished,
             LoopImmediately,
             WaitForNextCycle,
-            Abort
+            Failure
         };
 
         struct IExperiment
@@ -71,6 +71,8 @@ namespace mission
             static bool ShouldKickExperiment(const SystemState& state, void* param);
 
             static void KickExperiment(const SystemState& state, void* param);
+
+            void RunExperiment(IExperiment& experiment);
 
             gsl::span<IExperiment*> _experiments;
 

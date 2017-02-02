@@ -211,11 +211,13 @@ TEST_F(ExperimentTest, ShouldAbortExperiment)
 
         EXPECT_CALL(experiment, Start());
 
-        EXPECT_CALL(this->_os, EventGroupGetBits(this->_event)).Times(4).WillRepeatedly(Return(MissionExperiment::Event::InProgress));
+        EXPECT_CALL(this->_os, EventGroupGetBits(this->_event)).WillOnce(Return(MissionExperiment::Event::InProgress));
+        EXPECT_CALL(this->_os, EventGroupClearBits(this->_event, MissionExperiment::Event::MissionLoopIterationStarted));
+
         EXPECT_CALL(this->_os, EventGroupGetBits(this->_event)).WillOnce(Return(MissionExperiment::Event::AbortRequest));
 
         EXPECT_CALL(this->_os, EventGroupClearBits(this->_event, MissionExperiment::Event::AbortRequest));
-        EXPECT_CALL(experiment, Stop(IterationResult::Abort));
+        EXPECT_CALL(experiment, Stop(IterationResult::Failure));
 
         EXPECT_CALL(this->_os, EventGroupClearBits(this->_event, MissionExperiment::Event::InProgress));
 
@@ -263,6 +265,63 @@ TEST_F(ExperimentTest, ShouldWaitForNextMissionLoopIterationIfRequested)
                 InfiniteTimeout));
 
         EXPECT_CALL(experiment, Iteration()).WillOnce(Return(IterationResult::Finished));
+
+        EXPECT_CALL(this->_os, QueueReceive(this->_queue, _, _)).WillOnce(Return(false));
+    }
+
+    IExperiment* experiments[] = {&experiment};
+    _exp.SetExperiments(experiments);
+
+    _exp.BackgroundTask();
+}
+
+TEST_F(ExperimentTest, WhenExperimentStartFailsShouldNotRunIteration)
+{
+    NiceMock<ExperimentMock> experiment;
+    ON_CALL(experiment, Type()).WillByDefault(Return(Experiment::Fibo));
+
+    {
+        InSequence s;
+
+        EXPECT_CALL(this->_os, QueueReceive(this->_queue, _, _))
+            .WillOnce(Invoke([](OSQueueHandle /*queue*/, void* element, std::chrono::milliseconds /** timeout*/) {
+                *reinterpret_cast<Experiment*>(element) = Experiment::Fibo;
+                return true;
+            }));
+
+        EXPECT_CALL(experiment, Start()).WillOnce(Return(StartResult::Failure));
+
+        EXPECT_CALL(experiment, Iteration()).Times(0);
+        EXPECT_CALL(experiment, Stop(_)).Times(0);
+
+        EXPECT_CALL(this->_os, QueueReceive(this->_queue, _, _)).WillOnce(Return(false));
+    }
+
+    IExperiment* experiments[] = {&experiment};
+    _exp.SetExperiments(experiments);
+
+    _exp.BackgroundTask();
+}
+
+TEST_F(ExperimentTest, ShouldStopExperimentWhenIterationFails)
+{
+    NiceMock<ExperimentMock> experiment;
+    ON_CALL(experiment, Type()).WillByDefault(Return(Experiment::Fibo));
+
+    {
+        InSequence s;
+
+        EXPECT_CALL(this->_os, QueueReceive(this->_queue, _, _))
+            .WillOnce(Invoke([](OSQueueHandle /*queue*/, void* element, std::chrono::milliseconds /** timeout*/) {
+                *reinterpret_cast<Experiment*>(element) = Experiment::Fibo;
+                return true;
+            }));
+
+        EXPECT_CALL(experiment, Start());
+
+        EXPECT_CALL(experiment, Iteration()).Times(2).WillRepeatedly(Return(IterationResult::LoopImmediately));
+        EXPECT_CALL(experiment, Iteration()).WillOnce(Return(IterationResult::Failure));
+        EXPECT_CALL(experiment, Stop(IterationResult::Failure));
 
         EXPECT_CALL(this->_os, QueueReceive(this->_queue, _, _)).WillOnce(Return(false));
     }
