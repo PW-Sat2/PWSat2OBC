@@ -53,13 +53,8 @@ namespace mission
 
             void BackgroundTask();
 
-            static bool ShouldStartExperiment(const SystemState& state, void* param);
-
-            static void StartExperiment(const SystemState& state, void* param);
-
-            static bool ShouldKickExperiment(const SystemState& state, void* param);
-
-            static void KickExperiment(const SystemState& state, void* param);
+            mission::ActionDescriptor<SystemState> StartExperimentAction();
+            mission::ActionDescriptor<SystemState> KickExperimentAction();
 
             struct Event
             {
@@ -69,6 +64,14 @@ namespace mission
             };
 
           private:
+            static bool ShouldStartExperiment(const SystemState& state, void* param);
+
+            static void StartExperiment(const SystemState& state, void* param);
+
+            static bool ShouldKickExperiment(const SystemState& state, void* param);
+
+            static void KickExperiment(const SystemState& state, void* param);
+
             gsl::span<IExperiment*> _experiments;
 
             OSEventGroupHandle _event;
@@ -87,17 +90,7 @@ namespace mission
 
           private:
             MissionExperiment& _experimentController;
-        };
-
-        class MissionExperimentComponent2 : public mission::Action
-        {
-          public:
-            MissionExperimentComponent2(MissionExperiment& experimentController);
-
-            mission::ActionDescriptor<SystemState> BuildAction();
-
-          private:
-            MissionExperiment& _experimentController;
+            mission::CompositeAction<SystemState, 2> _actions;
         };
     }
 }

@@ -18,8 +18,7 @@ namespace mission
         antenna::AntennaTask,
         SailTask,
         adcs::AdcsPrimaryTask,
-        mission::experiments::MissionExperimentComponent,
-        mission::experiments::MissionExperimentComponent2 //
+        mission::experiments::MissionExperimentComponent//
         >
         ObcMission;
 }
