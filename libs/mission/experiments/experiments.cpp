@@ -12,8 +12,8 @@ namespace mission
             param->BackgroundTask();
         }
 
-        MissionExperiment::MissionExperiment(void*)
-            : _requestedExperiment(None<Experiment>()), _task("Mission experiment", this, TaskEntryPoint)
+        MissionExperiment::MissionExperiment()
+            : _requestedExperiment(None<ExperimentCode>()), _task("Mission experiment", this, TaskEntryPoint)
         {
         }
 
@@ -24,7 +24,7 @@ namespace mission
             this->_task.Create();
         }
 
-        void MissionExperiment::RequestExperiment(Experiment experiment)
+        void MissionExperiment::RequestExperiment(ExperimentCode experiment)
         {
             auto inProgress = (System::EventGroupGetBits(this->_event) & Event::InProgress) == Event::InProgress;
             if (inProgress)
@@ -35,6 +35,8 @@ namespace mission
 
         void MissionExperiment::AbortExperiment()
         {
+            LOG(LOG_LEVEL_WARNING, "Requesting experiment abort");
+
             System::EventGroupSetBits(this->_event, Event::AbortRequest);
         }
 
@@ -42,7 +44,7 @@ namespace mission
         {
             while (1)
             {
-                Experiment experimentType;
+                ExperimentCode experimentType;
 
                 LOG(LOG_LEVEL_INFO, "Waiting experiment to run");
 
@@ -51,7 +53,7 @@ namespace mission
                     return;
                 }
 
-                LOGF(LOG_LEVEL_INFO, "Received experiment %d request", num(experimentType));
+                LOGF(LOG_LEVEL_INFO, "Received experiment %d request", experimentType);
 
                 auto experiment = std::find_if(this->_experiments.begin(), this->_experiments.end(), [experimentType](IExperiment* e) {
                     return e->Type() == experimentType;
@@ -73,6 +75,8 @@ namespace mission
 
         void MissionExperiment::RunExperiment(IExperiment& experiment)
         {
+            LOG(LOG_LEVEL_INFO, "Starting experiment");
+
             auto startResult = experiment.Start();
 
             if (startResult != StartResult::Success)
@@ -90,6 +94,8 @@ namespace mission
                 if (has_flag(flags, Event::AbortRequest))
                 {
                     System::EventGroupClearBits(this->_event, Event::AbortRequest);
+
+                    LOG(LOG_LEVEL_WARNING, "Aborting experiment");
 
                     iterationResult = IterationResult::Failure;
                     break;
@@ -121,7 +127,10 @@ namespace mission
                 }
             } while (true);
 
+            LOG(LOG_LEVEL_DEBUG, "Stopping experiment");
             experiment.Stop(iterationResult);
+
+            LOG(LOG_LEVEL_INFO, "Experiment stopped");
         }
 
         void MissionExperiment::SetExperiments(gsl::span<IExperiment*> experiments)
@@ -150,7 +159,7 @@ namespace mission
             auto This = reinterpret_cast<MissionExperiment*>(param);
 
             This->_queue.Overwrite(This->_requestedExperiment.Value);
-            This->_requestedExperiment = None<Experiment>();
+            This->_requestedExperiment = None<ExperimentCode>();
         }
 
         bool MissionExperiment::ShouldKickExperiment(const SystemState& state, void* param)

@@ -59,6 +59,7 @@ target_link_libraries(${NAME}
     obc_storage
     obc_communication
     obc_hardware
+    obc_experiments
     spi
     efm_emlib
 )

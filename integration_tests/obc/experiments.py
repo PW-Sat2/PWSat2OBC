@@ -1,10 +1,10 @@
-from enum import unique, Enum
+from enum import unique, IntEnum
 
 from .obc_mixin import OBCMixin, command
 
 
 @unique
-class ExperimentType(Enum):
+class ExperimentType(IntEnum):
     Fibo = 1
 
 

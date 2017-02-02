@@ -121,6 +121,13 @@ template <class T> class Option
         return Option<T>(true, value);
     }
 
+    /**
+     * @brief Equality operator
+     * @param other Other value (raw, not option)
+     * @retval false this is None
+     * @retval false this is Some empty and other is not equal to holded value
+     * @retval true this is Some empty and other is equal to holded value
+     */
     bool operator==(const T& other) const
     {
         if (!this->HasValue)
@@ -131,6 +138,14 @@ template <class T> class Option
         return this->Value == other;
     }
 
+    /**
+     * @brief Equality operator
+     * @param other Other value (option)
+     * @retval true when both are None
+     * @retval false when one is None and other is Some
+     * @retval false when both are Some and underlying values are not equal
+     * @retval true when both are Some and underlying values are equal
+     */
     bool operator==(const Option<T>& other) const
     {
         if (this->HasValue && other.HasValue)

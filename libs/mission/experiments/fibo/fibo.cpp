@@ -42,9 +42,9 @@ namespace experiment
         {
         }
 
-        mission::experiments::Experiment FibonacciExperiment::Type()
+        mission::experiments::ExperimentCode FibonacciExperiment::Type()
         {
-            return mission::experiments::Experiment::Fibo;
+            return Code;
         }
 
         void FibonacciExperiment::Iterations(std::uint32_t iterations)
