@@ -65,53 +65,63 @@ namespace mission
 
                 System::EventGroupSetBits(this->_event, Event::InProgress);
 
-                auto startResult = (*experiment)->Start();
-
-                if (startResult != StartResult::Success)
-                {
-                    LOGF(LOG_LEVEL_ERROR, "Experiment start failed: %d", num(startResult));
-
-                    System::EventGroupClearBits(this->_event, Event::InProgress);
-
-                    continue;
-                }
-
-                IterationResult iterationResult;
-                do
-                {
-                    auto flags = System::EventGroupGetBits(this->_event);
-
-                    if (has_flag(flags, Event::AbortRequest))
-                    {
-                        System::EventGroupClearBits(this->_event, Event::AbortRequest);
-
-                        iterationResult = IterationResult::Abort;
-                        break;
-                    }
-
-                    iterationResult = (*experiment)->Iteration();
-
-                    if (iterationResult == IterationResult::Finished)
-                    {
-                        break;
-                    }
-
-                    if (iterationResult == IterationResult::WaitForNextCycle)
-                    {
-                        auto flags = System::EventGroupWaitForBits(
-                            this->_event, Event::MissionLoopIterationStarted | Event::AbortRequest, false, false, InfiniteTimeout);
-
-                        if (has_flag(flags, Event::MissionLoopIterationStarted))
-                        {
-                            System::EventGroupClearBits(this->_event, Event::MissionLoopIterationStarted);
-                        }
-                    }
-                } while (true);
-
-                (*experiment)->Stop(iterationResult);
+                RunExperiment(**experiment);
 
                 System::EventGroupClearBits(this->_event, Event::InProgress);
             }
+        }
+
+        void MissionExperiment::RunExperiment(IExperiment& experiment)
+        {
+            auto startResult = experiment.Start();
+
+            if (startResult != StartResult::Success)
+            {
+                LOGF(LOG_LEVEL_ERROR, "Experiment start failed: %d", num(startResult));
+
+                return;
+            }
+
+            IterationResult iterationResult;
+            do
+            {
+                auto flags = System::EventGroupGetBits(this->_event);
+
+                if (has_flag(flags, Event::AbortRequest))
+                {
+                    System::EventGroupClearBits(this->_event, Event::AbortRequest);
+
+                    iterationResult = IterationResult::Failure;
+                    break;
+                }
+
+                System::EventGroupClearBits(this->_event, Event::MissionLoopIterationStarted);
+
+                iterationResult = experiment.Iteration();
+
+                if (iterationResult == IterationResult::Finished)
+                {
+                    break;
+                }
+
+                if (iterationResult == IterationResult::Failure)
+                {
+                    break;
+                }
+
+                if (iterationResult == IterationResult::WaitForNextCycle)
+                {
+                    auto flags = System::EventGroupWaitForBits(
+                        this->_event, Event::MissionLoopIterationStarted | Event::AbortRequest, false, false, InfiniteTimeout);
+
+                    if (has_flag(flags, Event::MissionLoopIterationStarted))
+                    {
+                        System::EventGroupClearBits(this->_event, Event::MissionLoopIterationStarted);
+                    }
+                }
+            } while (true);
+
+            experiment.Stop(iterationResult);
         }
 
         void MissionExperiment::SetExperiments(gsl::span<IExperiment*> experiments)
