@@ -36,6 +36,7 @@ namespace drivers
                 IRQn_Type irq);
 
             virtual I2CResult Write(const I2CAddress address, gsl::span<const uint8_t> inData) override;
+            virtual I2CResult Read(const I2CAddress address, gsl::span<uint8_t> outData) override;
 
             virtual I2CResult WriteRead(const I2CAddress address, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData) override;
 
