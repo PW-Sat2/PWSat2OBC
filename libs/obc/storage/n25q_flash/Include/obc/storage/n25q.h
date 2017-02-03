@@ -1,6 +1,7 @@
 #ifndef LIBS_OBC_STORAGE_N25Q_FLASH_INCLUDE_OBC_STORAGE_N25Q_H_
 #define LIBS_OBC_STORAGE_N25Q_FLASH_INCLUDE_OBC_STORAGE_N25Q_H_
 
+#include <array>
 #include "fs/yaffs.h"
 #include "n25q/n25q.h"
 #include "n25q/yaffs.h"
@@ -17,6 +18,56 @@ namespace obc
         *
         * @{
         */
+
+        /**
+         * @brief Represents single flash mememory mounted as Yaffs device
+         */
+        class SingleFlash final
+        {
+          public:
+            /**
+             * @brief Ctor
+             * @param mountPoint Mount point
+             * @param slaveSelect Pin used as slave select
+             * @param spi SPI interface
+             * @param deviceOperations Device operations
+             */
+            SingleFlash(const char* mountPoint,
+                const drivers::gpio::Pin& slaveSelect,
+                drivers::spi::EFMSPIInterface& spi,
+                services::fs::IYaffsDeviceOperations& deviceOperations);
+
+            /**
+             * @brief Initializes OBC storage
+             * @return Operation result
+             */
+            OSResult Initialize();
+
+            /**
+             * @brief Clears OBC storage
+             * @return Operation result
+             */
+            OSResult ClearStorage();
+
+            /**
+             * @brief Performs (lengthy) erase operation
+             * @return Operation result
+             */
+            OSResult Erase();
+
+          private:
+            /** @brief SPI driver for N25Q flash slave */
+            drivers::spi::EFMSPISlaveInterface SPI;
+
+            /** @brief N25Q flash driver */
+            devices::n25q::N25QDriver Driver;
+
+            /** @brief N25Q Yaffs device */
+            devices::n25q::N25QYaffsDevice<devices::n25q::BlockMapping::Sector, 512_Bytes, 16_MB> Device;
+
+            /** @brief Device operations */
+            services::fs::IYaffsDeviceOperations& _deviceOperations;
+        };
 
         /**
          * @brief Storage handler for N25Q
@@ -46,21 +97,15 @@ namespace obc
              */
             OSResult ClearStorage();
 
-            /** @brief Performs (lengthy) erase operation */
+            /**
+             * @brief Performs (lengthy) erase operation
+             * @return Operation result
+             */
             OSResult Erase();
 
           private:
-            /** @brief SPI driver for N25Q flash slave */
-            drivers::spi::EFMSPISlaveInterface ExternalFlashDriverSPI;
-
-            /** @brief N25Q flash driver */
-            devices::n25q::N25QDriver ExternalFlashDriver;
-
-            /** @brief N25Q Yaffs device */
-            devices::n25q::N25QYaffsDevice<devices::n25q::BlockMapping::Sector, 512_Bytes, 16_MB> ExternalFlash;
-
-            /** @brief Device operations */
-            services::fs::IYaffsDeviceOperations& _deviceOperations;
+            /** @brief External flashes */
+            SingleFlash _flashes[3];
         };
 
         /** @} */

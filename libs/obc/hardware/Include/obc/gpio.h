@@ -74,6 +74,8 @@ namespace obc
      */
     template < //
         typename TSlaveSelectFlash1,
+        typename TSlaveSelectFlash2,
+        typename TSlaveSelectFlash3,
         typename TLed0,
         typename TLed1,
         typename TSysClear,
@@ -85,6 +87,10 @@ namespace obc
     {
         /** @brief Slave Select - Flash1 */
         const drivers::gpio::OutputPin<TSlaveSelectFlash1> Flash1ChipSelect;
+        /** @brief Slave Select - Flash2 */
+        const drivers::gpio::OutputPin<TSlaveSelectFlash2> Flash2ChipSelect;
+        /** @brief Slave Select - Flash3 */
+        const drivers::gpio::OutputPin<TSlaveSelectFlash3> Flash3ChipSelect;
         /** @brief LED0 */
         const drivers::gpio::OutputPin<TLed0> Led0;
         /** @brief LED1 */
@@ -106,6 +112,8 @@ namespace obc
             CMU_ClockEnable(cmuClock_GPIO, true);
 
             this->Flash1ChipSelect.Initialize();
+            this->Flash2ChipSelect.Initialize();
+            this->Flash3ChipSelect.Initialize();
             this->Led0.Initialize();
             this->Led1.Initialize();
             this->SysClear.Initialize();
@@ -119,6 +127,8 @@ namespace obc
     /** @brief Connects GPIO pins to IO map */
     using OBCGPIO = gpio::VerifyPinsUniqueness<OBCGPIOBase, //
         io_map::SlaveSelectFlash1,                          //
+        io_map::SlaveSelectFlash2,                          //
+        io_map::SlaveSelectFlash3,                          //
         io_map::Led0,                                       //
         io_map::Led1,                                       //
         io_map::SysClear,                                   //
