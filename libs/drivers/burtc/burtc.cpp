@@ -1,12 +1,7 @@
 #include "burtc.hpp"
-#include "base/os.h"
 #include "em_burtc.h"
 #include "em_cmu.h"
-#include "em_emu.h"
-#include "em_gpio.h"
 #include "em_rmu.h"
-#include "logger/logger.h"
-#include "system.h"
 
 using namespace devices::burtc;
 using namespace std::chrono_literals;

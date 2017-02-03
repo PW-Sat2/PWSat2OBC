@@ -31,6 +31,7 @@ class OBC(OBCMixin,
 
     def _command(self, cmd, *args, **kwargs):
         cmdline = self._formatter.vformat(cmd, args, kwargs)
+
         return self._terminal.command(cmdline)
 
     def wait_to_start(self):

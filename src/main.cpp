@@ -1,13 +1,11 @@
 #include <cstdio>
 #include <cstring>
-#include <em_burtc.h>
 #include <em_chip.h>
 #include <em_cmu.h>
 #include <em_dbg.h>
 #include <em_device.h>
 #include <em_emu.h>
 #include <em_gpio.h>
-#include <em_rmu.h>
 #include <gsl/span>
 #include <em_system.h>
 
@@ -22,21 +20,22 @@
 #include "dmadrv.h"
 #include "eps/eps.h"
 #include "fs/fs.h"
-#include "gpio/gpio.h"
 #include "i2c/i2c.h"
 #include "io_map.h"
-#include "leuart/leuart.h"
 #include "leuart/leuart.h"
 #include "logger/logger.h"
 #include "mission.h"
 #include "obc.h"
-#include "power_eps/power_eps.h"
 #include "storage/nand.h"
 #include "storage/nand_driver.h"
 #include "storage/storage.h"
 #include "swo/swo.h"
 #include "system.h"
 #include "terminal.h"
+
+#include "gpio/gpio.h"
+#include "leuart/leuart.h"
+#include "power_eps/power_eps.h"
 
 using services::time::TimeProvider;
 using namespace std::chrono_literals;
