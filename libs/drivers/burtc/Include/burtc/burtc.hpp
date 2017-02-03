@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "time/timer.h"
+#include "base/os.h"
 
 /**
  * @defgroup burtc Backup RTC Driver
@@ -53,7 +53,7 @@ namespace devices
             static constexpr uint32_t PrescalerDivider = 8;
 
           private:
-            static constexpr uint32_t InterruptPriority = 6; // TODO: What priority?
+            static constexpr uint32_t InterruptPriority = 6;
 
             BurtcTickCallback& _tickCallback;
             std::chrono::milliseconds _timeDelta;
@@ -61,7 +61,7 @@ namespace devices
             void ConfigureHardware();
             void StartTask();
 
-            /** @brief Calculates current time interval based on selected oscilator frequency, prescaler and compare value **/
+            /** @brief Calculates current time interval based on selected oscillator frequency, prescaler and compare value **/
             static std::chrono::milliseconds CalculateCurrentTimeInterval();
 
             static void HandleTickTask(void* param);

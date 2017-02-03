@@ -12,7 +12,6 @@ add_library(${NAME} STATIC ${SOURCES})
 target_link_libraries(${NAME} 
 	base 
 	fs 
-	emlib
 	logger
 	)
 
