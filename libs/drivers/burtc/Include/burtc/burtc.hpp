@@ -5,29 +5,18 @@
 
 #include "base/os.h"
 
-/**
- * @defgroup burtc Backup RTC Driver
- *
- * @brief This library provides driver for built-in Backup Real Time Counter.
- *
- * @{
-*/
-
 namespace devices
 {
     namespace burtc
     {
         /**
-         * @brief Interface for callback objects that will receive ticks.
-         */
-        struct BurtcTickCallback
-        {
-            /**
-             * @brief Method that will be called by BURTC.
-             * @param[in] interval Interval that passed since last tick
-             */
-            void virtual Tick(std::chrono::milliseconds interval) = 0;
-        };
+         * @defgroup burtc Backup RTC Driver
+         * @ingroup perhipheral_drivers
+         *
+         * @brief This library provides driver for built-in Backup Real Time Counter.
+         *
+         * @{
+        */
 
         /**
          * @brief BURTC Device
@@ -39,12 +28,17 @@ namespace devices
              * @brief Constructs @ref Burtc object
              * @param[in] tickCallback A pointer to function that will be notified about time changes
              */
-            Burtc(BurtcTickCallback& tickCallback);
+            Burtc(TimeAction& tickCallback);
 
             /**
               * @brief Initializes Burtc device - setups the hardware and starts the FreeRTOS task.
               */
             void Initialize();
+
+            /**
+              * @brief Interrupt handler for BURTC hardware
+              */
+            void IRQHandler();
 
             /** @brief Compare value  */
             static constexpr uint32_t CompareValue = 205;
@@ -55,20 +49,22 @@ namespace devices
           private:
             static constexpr uint32_t InterruptPriority = 6;
 
-            BurtcTickCallback& _tickCallback;
+            TimeAction& _tickCallback;
             std::chrono::milliseconds _timeDelta;
 
             void ConfigureHardware();
             void StartTask();
 
+            Task<Burtc*, 512_Bytes, TaskPriority::P6> _task;
+
             /** @brief Calculates current time interval based on selected oscillator frequency, prescaler and compare value **/
             static std::chrono::milliseconds CalculateCurrentTimeInterval();
 
-            static void HandleTickTask(void* param);
+            static void HandleTickTask(Burtc* burtcObject);
         };
+
+        /** @} */
     }
 }
-
-/** @} */
 
 #endif /* SRC_DRIVERS_BURTC_HPP_ */

@@ -5,28 +5,30 @@ import time
 class TestTime(BaseTest):
     @wait_for_obc_start()
     def test_jump_to_time(self):
-        current_time = self.system.obc.current_time()
+        wait_time_accuracy_ms = 200
+        current_time_ms = self.system.obc.current_time()
+        next_time_ms = current_time_ms + 1000 * 100
 
-        self.assertEqual(current_time, 0)
+        self.system.obc.jump_to_time(next_time_ms / 1000)
 
-        self.system.obc.jump_to_time(100)
+        current_time_ms = self.system.obc.current_time()
 
-        current_time = self.system.obc.current_time()
-
-        self.assertGreaterEqual(current_time, 100)
+        self.assertAlmostEqual(current_time_ms, next_time_ms, places=None, delta=wait_time_accuracy_ms)
 
     @wait_for_obc_start()
     def test_clock_running(self):
         wait_time_s = 3
-        wait_time_accuracy_s = 1
+        wait_time_accuracy_ms = 200
 
-        start_time = self.system.obc.current_time()
+        sys_start_time_s = time.time()
+        obc_start_time_ms = self.system.obc.current_time()
 
         time.sleep(wait_time_s)
 
-        end_time = self.system.obc.current_time()
+        sys_end_time_s = time.time()
+        obc_end_time_ms = self.system.obc.current_time()
 
-        time_difference = end_time - start_time
+        sys_time_difference_ms = 1000*(sys_end_time_s - sys_start_time_s)
+        obc_time_difference_ms = obc_end_time_ms - obc_start_time_ms
 
-        self.assertGreaterEqual(time_difference, wait_time_s - wait_time_accuracy_s)
-        self.assertLessEqual(time_difference, wait_time_s + wait_time_accuracy_s)
+        self.assertAlmostEqual(obc_time_difference_ms, sys_time_difference_ms, places=None, delta=wait_time_accuracy_ms)
