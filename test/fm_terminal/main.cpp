@@ -42,8 +42,15 @@ void Echo(uint16_t argc, char* argv[])
     }
 }
 
+void Restart(std::uint16_t /*argc*/, char* /*argv*/ [])
+{
+    NVIC_SystemReset();
+}
+
 static const TerminalCommandDescription commands[] = {
-    {"SetGroup", SetGroup}, {"echo", Echo},
+    {"SetGroup", SetGroup}, //
+    {"echo", Echo},
+    {"reset", Restart} //
 };
 
 static void InitializeTerminal(void)
