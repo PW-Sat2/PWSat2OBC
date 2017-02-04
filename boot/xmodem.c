@@ -171,7 +171,7 @@ xmodem_transfer:
             continue;
         }
 
-        Write data to external EEPROM, i.e.Safe Mode if (index == 0)
+        if (index == 0)
         {
             i = 0;
             base = (uint8_t*)(BOOT_SAFEMODE_BASE_DATA + ((sequenceNumber - 1) * XMODEM_DATA_SIZE));
