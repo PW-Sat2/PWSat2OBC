@@ -9,7 +9,6 @@
 #include "antenna/driver.h"
 #include "antenna/miniport.h"
 #include "base/os.h"
-#include "burtc/burtc.hpp"
 #include "fs/fs.h"
 #include "fs/yaffs.h"
 #include "leuart/line_io.h"
@@ -29,28 +28,6 @@
  *
  * @{
  */
-
-/**
- * @brief Object connects TimeProvider tor BURTC
- */
-class BurtcTimeProviderAdapter : public devices::burtc::BurtcTickCallback
-{
-  public:
-    /**
-     * @brief Constructs @ref BurtcTimeProviderAdapter object
-     * @param[in] timeProvider Time provider instance that will receive ticks from BURTC.
-     * */
-    BurtcTimeProviderAdapter(services::time::TimeProvider& timeProvider);
-
-    /**
-     * @brief Method that will be called by BURTC.
-     * @param[in] interval Interval that passed since last tick
-     */
-    void virtual Tick(std::chrono::milliseconds interval);
-
-  private:
-    services::time::TimeProvider& _timeProvider;
-};
 
 /**
  * @brief Object that describes global OBC state including drivers.
@@ -79,11 +56,11 @@ struct OBC
     /** @brief ADCS context object */
     ADCSContext adcs;
 
-    /** @brief OBC hardware */
-    obc::OBCHardware Hardware;
-
     /** @brief Persistent timer that measures mission time. */
     services::time::TimeProvider timeProvider;
+
+    /** @brief OBC hardware */
+    obc::OBCHardware Hardware;
 
     /** @brief Low level driver for antenna controller. */
     AntennaMiniportDriver antennaMiniport;
@@ -105,13 +82,6 @@ struct OBC
 
     /** @brief Terminal object. */
     Terminal terminal;
-
-  private:
-    BurtcTimeProviderAdapter burtcHandler;
-
-  public:
-    /** @brief BURTC object. */
-    devices::burtc::Burtc Burtc;
 };
 
 /** @brief Global OBC object. */

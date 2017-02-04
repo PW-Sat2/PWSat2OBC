@@ -64,6 +64,13 @@ void OBCHardware::Initialize()
     this->SPI.Initialize();
 }
 
-OBCHardware::OBCHardware(PowerControl* powerControl) : I2C(powerControl)
+void OBCHardware::PostStartInitialize()
+{
+    this->Burtc.Initialize();
+}
+
+OBCHardware::OBCHardware(PowerControl* powerControl, TimeAction& burtcTickHandler)
+    : I2C(powerControl),      //
+      Burtc(burtcTickHandler) //
 {
 }

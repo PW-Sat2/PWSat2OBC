@@ -2,34 +2,41 @@
 #include "em_burtc.h"
 #include "em_cmu.h"
 #include "em_rmu.h"
+#include "logger/logger.h"
 
 using namespace devices::burtc;
 using namespace std::chrono_literals;
 
 static OSSemaphoreHandle burtcInterruptSemaphore;
 
-void BURTC_IRQHandler(void)
+Burtc::Burtc(TimeAction& tickCallback)
+    : _tickCallback(tickCallback),                         //
+      _timeDelta(0),                                       //
+      _task("HandleTickTask", this, Burtc::HandleTickTask) //
 {
-    uint32_t irq = BURTC_IntGet();
+}
+
+void Burtc::IRQHandler()
+{
+    std::uint32_t irq = BURTC_IntGet();
     BURTC_IntClear(irq);
     BURTC_CompareSet(0, BURTC->COMP0 + Burtc::CompareValue);
 
     System::GiveSemaphoreISR(burtcInterruptSemaphore);
+
+    System::EndSwitchingISR();
 }
 
-Burtc::Burtc(BurtcTickCallback& tickCallback) : _tickCallback(tickCallback), _timeDelta(0)
+void Burtc::HandleTickTask(Burtc* burtcObject)
 {
-}
-
-void Burtc::HandleTickTask(void* arg)
-{
-    Burtc* burtcObject = static_cast<Burtc*>(arg);
-
     while (1)
     {
-        System::TakeSemaphore(burtcInterruptSemaphore, InfiniteTimeout);
+        if (OS_RESULT_FAILED(System::TakeSemaphore(burtcInterruptSemaphore, InfiniteTimeout)))
+        {
+            LOG(LOG_LEVEL_ERROR, "Unable to take burtc interrupt semaphore.");
+        }
 
-        burtcObject->_tickCallback.Tick(burtcObject->_timeDelta);
+        burtcObject->_tickCallback.Invoke(burtcObject->_timeDelta);
     }
 }
 
@@ -37,7 +44,10 @@ void Burtc::Initialize()
 {
     burtcInterruptSemaphore = System::CreateBinarySemaphore();
 
-    System::CreateTask(Burtc::HandleTickTask, "HandleTickTask", 512, this, TaskPriority::P1, NULL);
+    if (OS_RESULT_FAILED(this->_task.Create()))
+    {
+        LOG(LOG_LEVEL_ERROR, "Error. Cannot create burtc task");
+    }
 
     ConfigureHardware();
 }

@@ -4,6 +4,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <chrono>
 #include <cstdint>
 #include <type_traits>
 #include <utility>
@@ -186,5 +187,17 @@ constexpr auto MaxValueOnBits(std::uint8_t bitsCount)
 {
     return (1 << bitsCount) - 1;
 }
+
+/**
+ * @brief Interface for callback objects that will receive ticks.
+ */
+struct TimeAction
+{
+    /**
+     * @brief Method that will be called by BURTC.
+     * @param[in] interval Interval that passed since last tick
+     */
+    void virtual Invoke(std::chrono::milliseconds interval) = 0;
+};
 
 #endif
