@@ -3,6 +3,8 @@
 #include <FreeRTOS.h>
 #include <queue.h>
 #include <task.h>
+#include <em_system.h>
+#include <core_cm3.h>
 
 #include <em_system.h>
 #include <core_cm3.h>
