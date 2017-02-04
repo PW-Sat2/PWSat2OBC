@@ -116,7 +116,7 @@ namespace services
          * values in those files or any of those files is not available the majority vote is done to determine the most
          * likely correct value. In case when all of the values are different the smallest one is selected as the correct one.
          */
-        class TimeProvider
+        class TimeProvider : public TimeAction
         {
           public:
             /**
@@ -197,6 +197,12 @@ namespace services
              * @return True if expected time span is elapsed, false in case of error
              */
             bool LongDelay(std::chrono::milliseconds delay);
+
+            /**
+             * @brief Method that will be called by BURTC.
+             * @param[in] interval Interval that passed since last tick
+             */
+            void virtual Invoke(std::chrono::milliseconds interval) override;
 
           public:
             /**

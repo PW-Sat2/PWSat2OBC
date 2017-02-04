@@ -66,6 +66,11 @@ void I2C1_IRQHandler(void)
     Main.Hardware.I2C.Peripherals[1].Driver.IRQHandler();
 }
 
+void BURTC_IRQHandler(void)
+{
+    Main.Hardware.Burtc.IRQHandler();
+}
+
 static void BlinkLed0(void* param)
 {
     UNREFERENCED_PARAMETER(param);
@@ -123,6 +128,8 @@ static void SetupAntennas(void)
 
 static void ObcInitTask(void* param)
 {
+    LOG(LOG_LEVEL_INFO, "Starting initialization task... ");
+
     auto obc = static_cast<OBC*>(param);
 
     obc->PostStartInitialization();
