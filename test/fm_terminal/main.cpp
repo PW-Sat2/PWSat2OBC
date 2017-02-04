@@ -93,6 +93,8 @@ extern "C" void __libc_init_array(void);
 
 int main(void)
 {
+    SCB->VTOR = 0x80000;
+
     CHIP_Init();
 
     __libc_init_array();
