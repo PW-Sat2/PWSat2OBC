@@ -44,6 +44,7 @@ static const TerminalCommandDescription commands[] = {
     {"antenna_get_telemetry", AntennaGetTelemetry},
     {"antenna_reset", AntennaReset},
     {"reset", ResetHandler},
+    {"rtc", RTCTest},
 };
 
 void InitializeTerminal(void)

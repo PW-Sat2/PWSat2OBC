@@ -17,6 +17,7 @@ set(SOURCES
     commands/compile_info.cpp
     commands/mission.cpp
     commands/dma.cpp
+    commands/rtc.cpp
     obc.h
     obc.cpp
     fault_handlers.cpp
@@ -64,6 +65,7 @@ target_link_libraries(${NAME}
     efm_emlib
     burtc
     obc_adcs
+    rtc
     mission_adcs
 )
 
