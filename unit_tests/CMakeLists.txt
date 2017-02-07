@@ -56,6 +56,7 @@ set(SOURCES
   SPI/SPIMock.cpp
   SPI/SPIDriverTest.cpp
   eigen/eigenTest.cpp
+  adcs/detumblingTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -102,6 +103,7 @@ target_link_libraries(${NAME}
     mission_sail
     mission_time
     eigen
+    adcs
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
