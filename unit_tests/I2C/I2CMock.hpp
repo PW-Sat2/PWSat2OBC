@@ -8,6 +8,9 @@
 
 struct I2CBusMock : drivers::i2c::II2CBus
 {
+    I2CBusMock();
+    virtual ~I2CBusMock();
+
     MOCK_METHOD2(Write,
         drivers::i2c::I2CResult(const drivers::i2c::I2CAddress address,
             gsl::span<const uint8_t> inData //
