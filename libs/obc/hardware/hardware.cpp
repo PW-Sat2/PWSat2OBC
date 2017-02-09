@@ -64,9 +64,9 @@ void OBCHardware::Initialize()
     this->SPI.Initialize();
 }
 
-void OBCHardware::PostStartInitialize()
+OSResult OBCHardware::PostStartInitialize()
 {
-    this->Burtc.Initialize();
+    return this->Burtc.Initialize();
 }
 
 OBCHardware::OBCHardware(PowerControl* powerControl, TimeAction& burtcTickHandler)

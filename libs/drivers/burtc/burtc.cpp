@@ -35,21 +35,31 @@ void Burtc::HandleTickTask(Burtc* burtcObject)
         {
             LOG(LOG_LEVEL_ERROR, "Unable to take burtc interrupt semaphore.");
         }
-
-        burtcObject->_tickCallback.Invoke(burtcObject->_timeDelta);
+        else
+        {
+            burtcObject->_tickCallback.Invoke(burtcObject->_timeDelta);
+        }
     }
 }
 
-void Burtc::Initialize()
+OSResult Burtc::Initialize()
 {
     burtcInterruptSemaphore = System::CreateBinarySemaphore();
+    if (burtcInterruptSemaphore == 0)
+    {
+        return OSResult::InvalidOperation;
+    }
 
-    if (OS_RESULT_FAILED(this->_task.Create()))
+    auto result = this->_task.Create();
+    if (OS_RESULT_FAILED(result))
     {
         LOG(LOG_LEVEL_ERROR, "Error. Cannot create burtc task");
+        return result;
     }
 
     ConfigureHardware();
+
+    return OSResult::Success;
 }
 
 std::chrono::milliseconds Burtc::CalculateCurrentTimeInterval()

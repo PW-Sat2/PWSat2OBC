@@ -44,7 +44,7 @@ struct OBC
     /**
      * @brief Initialization that takes places after starting RTOS
      */
-    void PostStartInitialization();
+    OSResult PostStartInitialization();
 
     /** @brief File system object */
     services::fs::YaffsFileSystem fs;

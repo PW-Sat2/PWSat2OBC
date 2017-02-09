@@ -20,14 +20,21 @@ void OBC::Initialize()
     this->Communication.Initialize();
 }
 
-void OBC::PostStartInitialization()
+OSResult OBC::PostStartInitialization()
 {
-    this->Hardware.PostStartInitialize();
-
-    auto r = this->Storage.Initialize();
-
-    if (OS_RESULT_FAILED(r))
+    auto result = this->Hardware.PostStartInitialize();
+    if (OS_RESULT_FAILED(result))
     {
-        LOGF(LOG_LEVEL_FATAL, "Storage initialization failed %d", num(r));
+        LOGF(LOG_LEVEL_FATAL, "Hardware post start initialization failed %d", num(result));
+        return result;
     }
+
+    result = this->Storage.Initialize();
+    if (OS_RESULT_FAILED(result))
+    {
+        LOGF(LOG_LEVEL_FATAL, "Storage initialization failed %d", num(result));
+        return result;
+    }
+
+    return OSResult::Success;
 }

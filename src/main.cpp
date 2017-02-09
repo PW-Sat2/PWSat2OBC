@@ -132,7 +132,10 @@ static void ObcInitTask(void* param)
 
     auto obc = static_cast<OBC*>(param);
 
-    obc->PostStartInitialization();
+    if (OS_RESULT_FAILED(obc->PostStartInitialization()))
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to initialize hardware after start. ");
+    }
 
     ClearState(obc);
 

@@ -33,7 +33,7 @@ namespace devices
             /**
               * @brief Initializes Burtc device - setups the hardware and starts the FreeRTOS task.
               */
-            void Initialize();
+            OSResult Initialize();
 
             /**
               * @brief Interrupt handler for BURTC hardware

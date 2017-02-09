@@ -105,7 +105,7 @@ namespace obc
         void Initialize();
 
         /** @brief Initializies OBC hardware after FreeRTOS is initialized */
-        void PostStartInitialize();
+        OSResult PostStartInitialize();
 
         /** @brief GPIO Pins */
         OBCGPIO Pins;
