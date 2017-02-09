@@ -33,6 +33,7 @@ set(SOURCES
   I2C/ErrorHandlingI2CBusTest.cpp
   N25Q/N25QTest.cpp
   os/TimeoutTest.cpp
+  os/EventGroupTest.cpp
   os/os.cpp
   os/os.hpp
   OsMock.hpp
