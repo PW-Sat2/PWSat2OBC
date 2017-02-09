@@ -44,7 +44,7 @@ struct OBC
     /**
      * @brief Initialization that takes places after starting RTOS
      */
-    void PostStartInitialization();
+    OSResult PostStartInitialization();
 
     /** @brief File system object */
     services::fs::YaffsFileSystem fs;
@@ -56,11 +56,11 @@ struct OBC
     /** @brief ADCS context object */
     ADCSContext adcs;
 
-    /** @brief OBC hardware */
-    obc::OBCHardware Hardware;
-
     /** @brief Persistent timer that measures mission time. */
     services::time::TimeProvider timeProvider;
+
+    /** @brief OBC hardware */
+    obc::OBCHardware Hardware;
 
     /** @brief Low level driver for antenna controller. */
     AntennaMiniportDriver antennaMiniport;

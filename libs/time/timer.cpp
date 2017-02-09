@@ -85,6 +85,11 @@ void TimeProvider::AdvanceTime(milliseconds delta)
     ProcessChange(state);
 }
 
+void TimeProvider::Invoke(std::chrono::milliseconds interval)
+{
+    AdvanceTime(interval);
+}
+
 bool TimeProvider::SetCurrentTime(TimePoint pointInTime)
 {
     const milliseconds span = TimePointToTimeSpan(pointInTime);
