@@ -45,7 +45,7 @@ void Burtc::HandleTickTask(Burtc* burtcObject)
 OSResult Burtc::Initialize()
 {
     burtcInterruptSemaphore = System::CreateBinarySemaphore();
-    if (burtcInterruptSemaphore == 0)
+    if (burtcInterruptSemaphore == nullptr)
     {
         return OSResult::InvalidOperation;
     }
