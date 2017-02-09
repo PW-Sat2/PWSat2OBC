@@ -220,6 +220,7 @@ TEST_F(ImtqTest, TestFailedCasesDuringNoOperation)
     // reset OK
     EXPECT_CALL(i2c, Write(ImtqAddress, ElementsAre(0xAA))).WillOnce(
             Return(I2CResult::OK));
+
     EXPECT_CALL(i2c, Read(ImtqAddress, _)).WillOnce(Return(I2CResult::Nack));
 
     auto status = imtq.SoftwareReset();
@@ -243,6 +244,13 @@ TEST_F(ImtqTest, TestFailedCasesDuringNoOperation)
     EXPECT_CALL(i2c, Write(ImtqAddress, ElementsAre(0xAA))).WillOnce(
             Return(I2CResult::OK));
     EXPECT_CALL(i2c, Read(ImtqAddress, _)).WillOnce(Return(I2CResult::Failure));
+
+    status = imtq.SoftwareReset();
+    EXPECT_FALSE(status);
+
+    // I2C returned fail
+    EXPECT_CALL(i2c, Write(ImtqAddress, ElementsAre(0xAA))).WillOnce(
+            Return(I2CResult::Nack));
 
     status = imtq.SoftwareReset();
     EXPECT_FALSE(status);

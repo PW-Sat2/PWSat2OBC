@@ -140,7 +140,14 @@ namespace devices
 
             std::array<uint8_t, 2> response;
 
-            auto result = i2cbus.WriteRead(I2Cadress, gsl::span<const uint8_t, 1>(&opcode, 1), response);
+            auto result = i2cbus.Write(I2Cadress, gsl::span<const uint8_t, 1>(&opcode, 1));
+            if (result != I2CResult::OK)
+            {
+                return false;
+            }
+            System::SleepTask(10ms);
+
+            result = i2cbus.Read(I2Cadress, response);
 
             if (result == I2CResult::Nack)
             {
