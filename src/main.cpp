@@ -139,6 +139,10 @@ static void ObcInitTask(void* param)
 
     ClearState(obc);
 
+    obc->fs.MakeDirectory("/a");
+    obc->fs.MakeDirectory("/b");
+    obc->fs.MakeDirectory("/c");
+
     if (!obc->timeProvider.Initialize(nullptr, nullptr))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize persistent timer. ");
