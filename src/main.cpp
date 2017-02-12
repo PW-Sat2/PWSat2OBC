@@ -14,7 +14,7 @@
 #include <task.h>
 
 #include "SwoEndpoint/SwoEndpoint.h"
-#include "adcs/adcs.h"
+#include "adcs/AdcsExperiment.hpp"
 #include "base/ecc.h"
 #include "base/os.h"
 #include "dmadrv.h"
@@ -41,7 +41,7 @@ using services::time::TimeProvider;
 using namespace std::chrono_literals;
 
 OBC Main;
-mission::ObcMission Mission(Main.timeProvider, Main.antennaDriver, false);
+mission::ObcMission Mission(Main.timeProvider, Main.antennaDriver, false, Main.adcs.GetAdcsController());
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
@@ -64,6 +64,11 @@ void I2C0_IRQHandler(void)
 void I2C1_IRQHandler(void)
 {
     Main.Hardware.I2C.Peripherals[1].Driver.IRQHandler();
+}
+
+void BURTC_IRQHandler(void)
+{
+    Main.Hardware.Burtc.IRQHandler();
 }
 
 static void BlinkLed0(void* param)
@@ -123,11 +128,20 @@ static void SetupAntennas(void)
 
 static void ObcInitTask(void* param)
 {
+    LOG(LOG_LEVEL_INFO, "Starting initialization task... ");
+
     auto obc = static_cast<OBC*>(param);
 
-    obc->PostStartInitialization();
+    if (OS_RESULT_FAILED(obc->PostStartInitialization()))
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to initialize hardware after start. ");
+    }
 
     ClearState(obc);
+
+    obc->fs.MakeDirectory("/a");
+    obc->fs.MakeDirectory("/b");
+    obc->fs.MakeDirectory("/c");
 
     if (!obc->timeProvider.Initialize(nullptr, nullptr))
     {
@@ -143,8 +157,6 @@ static void ObcInitTask(void* param)
     {
         LOG(LOG_LEVEL_ERROR, "Unable to restart comm");
     }
-
-    InitializeADCS(&obc->adcs);
 
     Mission.Initialize();
 

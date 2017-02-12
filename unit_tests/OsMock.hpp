@@ -8,6 +8,9 @@
 
 struct OSMock : IOS
 {
+    OSMock();
+    ~OSMock();
+
     MOCK_METHOD6(CreateTask,
         OSResult(OSTaskProcedure entryPoint,
             const char* taskName,

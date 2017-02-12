@@ -116,7 +116,7 @@ namespace services
          * values in those files or any of those files is not available the majority vote is done to determine the most
          * likely correct value. In case when all of the values are different the smallest one is selected as the correct one.
          */
-        class TimeProvider
+        class TimeProvider : public TimeAction
         {
           public:
             /**
@@ -179,6 +179,7 @@ namespace services
              * @brief This procedure is responsible for reading the last timer state that has been
              * preserved in the persistent memory.
              *
+             * @param[in] fileSystem Reference to the file system sub system that should be used for data access.
              * @return Either last stable timer state that get read from the persistent memory or
              * value indicating zero (initial time).
              */
@@ -197,6 +198,12 @@ namespace services
              * @return True if expected time span is elapsed, false in case of error
              */
             bool LongDelay(std::chrono::milliseconds delay);
+
+            /**
+             * @brief Method that will be called by BURTC.
+             * @param[in] interval Interval that passed since last tick
+             */
+            void virtual Invoke(std::chrono::milliseconds interval) override;
 
           public:
             /**
