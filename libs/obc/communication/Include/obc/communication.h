@@ -4,6 +4,7 @@
 #include <gsl/span>
 #include "comm/CommDriver.hpp"
 #include "i2c/i2c.h"
+#include "obc/telecommands/file_system.hpp"
 #include "obc/telecommands/ping.hpp"
 #include "telecommunication/telecommand_handling.h"
 #include "telecommunication/uplink.h"
@@ -19,7 +20,7 @@ namespace obc
         /**
          * Initializes @ref Telecommands object
          */
-        Telecommands();
+        Telecommands(services::fs::IFileSystem& fs);
 
         /**
          * Aggregates all telecommand handlers into single span
@@ -31,8 +32,10 @@ namespace obc
         /** @brief Ping telecommand */
         obc::telecommands::PingTelecommand _ping;
 
+        obc::telecommands::DownladFileTelecommand _downloadFileTelecommand;
+
         /** @brief Array containg all telecommand handlers */
-        telecommunication::uplink::IHandleTeleCommand* _telecommands[1];
+        telecommunication::uplink::IHandleTeleCommand* _telecommands[2];
     };
 
     /**
@@ -44,7 +47,7 @@ namespace obc
          * @brief Initializes @ref OBCCommunication object
          * @param[in] i2cBus I2CBus used by low-level comm driver
          */
-        OBCCommunication(drivers::i2c::II2CBus& i2cBus);
+        OBCCommunication(drivers::i2c::II2CBus& i2cBus, services::fs::IFileSystem& fs);
 
         /**
          * @brief Initializes all communication-related drivers and objects

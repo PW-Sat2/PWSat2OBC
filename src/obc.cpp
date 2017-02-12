@@ -5,7 +5,7 @@
 OBC::OBC()
     : timeProvider(fs),                                     //
       Hardware(&this->PowerControlInterface, timeProvider), //
-      Communication(Hardware.I2C.Buses.Bus),                //
+      Communication(Hardware.I2C.Buses.Bus, fs),            //
       Storage(Hardware.SPI, fs, Hardware.Pins),             //
       terminal(this->IO)                                    //
 {
