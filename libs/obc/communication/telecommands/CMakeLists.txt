@@ -11,6 +11,7 @@ target_link_libraries(${NAME}
 	base
 	telecommunication
 	fs
+	logger
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

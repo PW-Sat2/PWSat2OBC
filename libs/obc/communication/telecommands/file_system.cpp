@@ -3,6 +3,7 @@
 #include "base/reader.h"
 #include "comm/ITransmitFrame.hpp"
 #include "fs/fs.h"
+#include "logger/logger.h"
 #include "system.h"
 #include "telecommunication/downlink.h"
 
@@ -28,7 +29,15 @@ namespace obc
             auto pathLength = r.ReadByte();
             auto path = reinterpret_cast<const char*>(r.ReadArray(pathLength + 1).data());
 
+            LOGF(LOG_LEVEL_INFO, "Sending file %s", path);
+
             File f(this->_fs, path, services::fs::FileOpen::Existing, services::fs::FileAccess::ReadOnly);
+
+            if (!f)
+            {
+                LOG(LOG_LEVEL_ERROR, "Unable to open requested file");
+                return;
+            }
 
             auto fileSize = f.Size();
 

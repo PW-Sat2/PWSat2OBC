@@ -10,9 +10,10 @@ using telecommunication::uplink::IHandleTeleCommand;
 
 using namespace obc;
 
-Telecommands::Telecommands()
-    : _ping(), //
-      _telecommands{&_ping}
+Telecommands::Telecommands(services::fs::IFileSystem& fs)
+    : _ping(),                      //
+      _downloadFileTelecommand(fs), //
+      _telecommands{&_ping, &_downloadFileTelecommand}
 {
 }
 
@@ -21,9 +22,9 @@ gsl::span<IHandleTeleCommand*> Telecommands::AllTelecommands()
     return gsl::span<IHandleTeleCommand*>(this->_telecommands);
 }
 
-OBCCommunication::OBCCommunication(II2CBus& systemBus)
+OBCCommunication::OBCCommunication(II2CBus& systemBus, services::fs::IFileSystem& fs)
     : UplinkProtocolDecoder(settings::CommSecurityCode),                                  //
-      SupportedTelecommands(),                                                            //
+      SupportedTelecommands(fs),                                                          //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.AllTelecommands()), //
       CommDriver(systemBus, TelecommandHandler)
 {
