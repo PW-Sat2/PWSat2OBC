@@ -74,17 +74,17 @@ namespace mission
              *
              * @return True if the deployment action should be performed, false otherwise.
              */
-            static bool AdcsEnablePrimaryDetumblingCondition(const SystemState& state, void* param);
+            static bool AdcsEnableBuiltinDetumblingCondition(const SystemState& state, void* param);
 
             /**
              * @brief This procedure is deployment action entry point.
              *
-             * This procedure runs the antenna deployment process.
+             * This procedure runs the builtin detumbling algorithm.
              * @param[in] state Pointer to global satellite state.
              * @param[in] param Pointer to the deployment condition private context. This pointer should point
              * at the object of AdcsPrimaryTask type.
              */
-            static void AdcsEnablePrimaryDetumbling(const SystemState& state, void* param);
+            static void AdcsEnableBuiltinDetumbling(const SystemState& state, void* param);
 
             static constexpr std::uint8_t RetryCount = 3;
 

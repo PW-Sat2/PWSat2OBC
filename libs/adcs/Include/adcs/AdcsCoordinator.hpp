@@ -24,9 +24,9 @@ namespace adcs
          * @param[in] secondaryDetumbling Reference to the backup detumbling algorithm controller module.
          * @param[in] primarySunPointing Reference to the sun pointing algorithm controller module.
          */
-        AdcsCoordinator(IDetumblingSupport& primaryDetembling, //
-            IDetumblingSupport& secondaryDetumbling,           //
-            ISunPointingSupport& primarySunPointing            //
+        AdcsCoordinator(IDetumblingSupport& builtinDetembling_, //
+            IDetumblingSupport& customDetumbling_,              //
+            ISunPointingSupport& sunpointAlgorithm_             //
             );
 
         virtual AdcsMode CurrentMode() const final override;
