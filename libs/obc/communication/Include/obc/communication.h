@@ -4,20 +4,12 @@
 #include <gsl/span>
 #include "comm/CommDriver.hpp"
 #include "i2c/i2c.h"
+#include "obc/telecommands/ping.hpp"
 #include "telecommunication/telecommand_handling.h"
 #include "telecommunication/uplink.h"
 
 namespace obc
 {
-    /**@brief Dummy ping telecommand that responds with pong */
-    class PingTelecommand final : public telecommunication::uplink::IHandleTeleCommand
-    {
-      public:
-        virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
-
-        virtual std::uint8_t CommandCode() const override;
-    };
-
     /**
      * @brief Object aggregating all supported telecommands
      */
@@ -37,7 +29,7 @@ namespace obc
 
       private:
         /** @brief Ping telecommand */
-        PingTelecommand _ping;
+        obc::telecommands::PingTelecommand _ping;
 
         /** @brief Array containg all telecommand handlers */
         telecommunication::uplink::IHandleTeleCommand* _telecommands[1];
