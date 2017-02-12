@@ -126,6 +126,8 @@ class Writer final
      */
     bool WriteLowerBytesBE(std::uint32_t number, std::uint8_t bytesCount);
 
+    gsl::span<std::uint8_t> Reserve(std::size_t count);
+
     /**
      * @brief Returns view for used part of buffer
      * @return Span covering used part of buffer

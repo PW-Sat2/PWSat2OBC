@@ -1,13 +1,12 @@
 #include <algorithm>
 #include <cstdint>
 #include <gsl/span>
-#include "comm/Frame.hpp"
-#include "comm/ITransmitFrame.hpp"
-#include "telecommunication/telecommand_handling.h"
-
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-
+#include "comm/Frame.hpp"
+#include "comm/ITransmitFrame.hpp"
+#include "mock/comm.hpp"
+#include "telecommunication/telecommand_handling.h"
 #include "utils.hpp"
 
 using std::uint8_t;
@@ -35,11 +34,6 @@ struct TeleCommandHandlerMock : public IHandleTeleCommand
 {
     MOCK_METHOD2(Handle, void(ITransmitFrame&, span<const uint8_t> parameters));
     MOCK_CONST_METHOD0(CommandCode, uint8_t());
-};
-
-struct TransmitFrameMock : public ITransmitFrame
-{
-    MOCK_METHOD1(SendFrame, bool(span<const uint8_t>));
 };
 
 class TeleCommandHandlingTest : public Test
