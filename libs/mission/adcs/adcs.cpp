@@ -29,7 +29,7 @@ namespace mission
             return UpdateResult::Ok;
         }
 
-        bool AdcsPrimaryTask::AdcsEnablePrimaryDetumblingCondition(const SystemState& state, void* param)
+        bool AdcsPrimaryTask::AdcsEnableBuiltinDetumblingCondition(const SystemState& state, void* param)
         {
             const auto context = static_cast<AdcsPrimaryTask*>(param);
             if (!IsInitialSilenPeriodFinished(state.Time))
@@ -50,7 +50,7 @@ namespace mission
             return true;
         }
 
-        void AdcsPrimaryTask::AdcsEnablePrimaryDetumbling(const SystemState& /*state*/, void* param)
+        void AdcsPrimaryTask::AdcsEnableBuiltinDetumbling(const SystemState& /*state*/, void* param)
         {
             const auto context = static_cast<AdcsPrimaryTask*>(param);
             const auto result = context->coordinator.EnableBuiltinDetumbling();
@@ -69,8 +69,8 @@ namespace mission
             ActionDescriptor<SystemState> descriptor;
             descriptor.name = "Enable Primary Adcs Detumbling";
             descriptor.param = this;
-            descriptor.condition = AdcsEnablePrimaryDetumblingCondition;
-            descriptor.actionProc = AdcsEnablePrimaryDetumbling;
+            descriptor.condition = AdcsEnableBuiltinDetumblingCondition;
+            descriptor.actionProc = AdcsEnableBuiltinDetumbling;
             return descriptor;
         }
 

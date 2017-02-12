@@ -3,13 +3,13 @@
 
 namespace adcs
 {
-    AdcsCoordinator::AdcsCoordinator(IDetumblingSupport& primaryDetembling, //
-        IDetumblingSupport& secondaryDetumbling,                            //
-        ISunPointingSupport& primarySunPointing)                            //
-        : currentMode(AdcsMode::Disabled),                                  //
-          builtinDetumbling(primaryDetembling),                             //
-          customDetumbling(secondaryDetumbling),                            //
-          sunpointAlgorithm(primarySunPointing)
+    AdcsCoordinator::AdcsCoordinator(IDetumblingSupport& builtinDetembling_, //
+        IDetumblingSupport& customDetumbling_,                               //
+        ISunPointingSupport& sunpointAlgorithm_)                             //
+        : currentMode(AdcsMode::Disabled),                                   //
+          builtinDetumbling(builtinDetembling_),                             //
+          customDetumbling(customDetumbling_),                               //
+          sunpointAlgorithm(sunpointAlgorithm_)
     {
     }
 
