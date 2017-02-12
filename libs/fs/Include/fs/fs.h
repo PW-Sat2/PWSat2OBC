@@ -108,6 +108,13 @@ namespace services
             ReadWrite = O_RDWR,
         };
 
+        enum class SeekOrigin
+        {
+            Begin,
+            Current,
+            End
+        };
+
         /**
          * @brief Structure exposing file system API
          */
@@ -201,6 +208,15 @@ namespace services
              * @return Size of file
              */
             virtual FileSize GetFileSize(FileHandle file) = 0;
+
+            /**
+             * @brief Changes position in file
+             * @param file File handle
+             * @param origin Point from which seeking starts
+             * @param offset Offset
+             * @return Operation result
+             */
+            virtual OSResult Seek(FileHandle file, SeekOrigin origin, FileSize offset) = 0;
         };
 
         /**
@@ -285,6 +301,8 @@ namespace services
              * @return File size
              */
             FileSize Size();
+
+            OSResult Seek(SeekOrigin origin, FileSize offset);
 
           private:
             /** @brief File system interface */
