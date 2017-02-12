@@ -5,6 +5,7 @@
 #include "antenna_task.hpp"
 #include "gsl/gsl_util"
 #include "mission/base.hpp"
+#include "mission/obc.hpp"
 #include "system.h"
 #include "time/TimePoint.h"
 
@@ -436,8 +437,7 @@ namespace mission
         static bool AntennaDeploymentCondition(const SystemState& state, void* param)
         {
             AntennaMissionState* stateDescriptor = (AntennaMissionState*)param;
-            const auto t = 40min;
-            if (state.Time < t)
+            if (!IsInitialSilenPeriodFinished(state.Time))
             {
                 return false;
             }

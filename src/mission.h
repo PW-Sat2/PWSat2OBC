@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "mission/adcs.hpp"
 #include "mission/antenna_task.hpp"
 #include "mission/main.hpp"
 #include "mission/sail.hpp"
@@ -11,7 +12,7 @@
 
 namespace mission
 {
-    typedef MissionLoop<SystemState, TimeTask, antenna::AntennaTask, SailTask> ObcMission;
+    typedef MissionLoop<SystemState, TimeTask, antenna::AntennaTask, SailTask, adcs::AdcsPrimaryTask> ObcMission;
 }
 
 /** @} */

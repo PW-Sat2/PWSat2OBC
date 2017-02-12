@@ -8,7 +8,7 @@ add_library(${NAME} STATIC ${SOURCES})
 
 target_link_libraries(${NAME}
     time
-    adcs
+    adcs_experiment
     gsl
 )
 

@@ -14,7 +14,7 @@
 #include <task.h>
 
 #include "SwoEndpoint/SwoEndpoint.h"
-#include "adcs/adcs.h"
+#include "adcs/AdcsExperiment.hpp"
 #include "base/ecc.h"
 #include "base/os.h"
 #include "dmadrv.h"
@@ -41,7 +41,7 @@ using services::time::TimeProvider;
 using namespace std::chrono_literals;
 
 OBC Main;
-mission::ObcMission Mission(Main.timeProvider, Main.antennaDriver, false);
+mission::ObcMission Mission(Main.timeProvider, Main.antennaDriver, false, Main.adcs.GetAdcsController());
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
@@ -157,8 +157,6 @@ static void ObcInitTask(void* param)
     {
         LOG(LOG_LEVEL_ERROR, "Unable to restart comm");
     }
-
-    InitializeADCS(&obc->adcs);
 
     Mission.Initialize();
 

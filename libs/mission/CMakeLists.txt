@@ -20,6 +20,8 @@ target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/m
 
 target_format_sources(${NAME} "${SOURCES}")
 
+add_subdirectory(obc)
+add_subdirectory(adcs)
 add_subdirectory(antenna)
 add_subdirectory(sail)
 add_subdirectory(time)
