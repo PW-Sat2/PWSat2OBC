@@ -11,7 +11,7 @@ namespace devices
     {
         /**
          * @defgroup rtc External Real Time Clock driver
-         * @ingroup perhipheral_drivers
+         * @ingroup device_drivers
          *
          * @brief This library provides driver for external Real Time Clock.
          *
@@ -35,8 +35,10 @@ namespace devices
             /**
               * @brief Reads entire time structure from RTC.
               * @param[out] rtcTime A reference to @ref RTCTime that will be used to store the RTC time.
+              *
+              * @return Transfer result - I2CResult::OK when read was successful.
               */
-            void ReadTime(RTCTime& rtcTime);
+            drivers::i2c::I2CResult ReadTime(RTCTime& rtcTime);
 
           private:
             static constexpr std::uint8_t I2CAddress = 0b1010001;
@@ -47,8 +49,6 @@ namespace devices
             static constexpr std::uint8_t DaysNibbleMask = 0x30;
             static constexpr std::uint8_t MonthsNibbleMask = 0x10;
             static constexpr std::uint8_t YearsNibbleMask = 0xF0;
-
-            std::uint8_t ConvertFromBCD(std::uint8_t bcd, std::uint8_t upperNibbleMask);
 
             drivers::i2c::II2CBus& _bus;
         };
@@ -75,7 +75,7 @@ namespace devices
              * @brief Calculates total seconds passed since 1900-01-01 00:00.
              * @return Time converted to total seconds.
              */
-            std::uint32_t ToSeconds()
+            std::chrono::seconds ToDuration()
             {
                 tm t;
                 t.tm_year = 100 + years; // tm_year starts and year 1900, but RTCTime::years starts at 2000
@@ -86,7 +86,7 @@ namespace devices
                 t.tm_sec = seconds;
                 t.tm_isdst = -1;
 
-                return static_cast<std::uint32_t>(mktime(&t));
+                return std::chrono::seconds(mktime(&t));
             }
         };
 

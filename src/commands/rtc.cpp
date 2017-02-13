@@ -36,35 +36,23 @@ static void PrintRTCTime(RTCTime& time)
         time.hours,
         time.minutes,
         time.seconds,
-        time.ToSeconds());
+        static_cast<std::uint32_t>(time.ToDuration().count()));
 }
 
-static bool GetRTCCommand(const char* parameter, std::uint8_t& command)
+static void PrintRTCUsage()
 {
-    if (strcmp(parameter, "test") == 0)
-    {
-        command = 0;
-        return true;
-    }
-    else if (strcmp(parameter, "get") == 0)
-    {
-        command = 1;
-        return true;
-    }
-
-    return false;
+    Main.terminal.Puts("rtc [test|get]");
 }
 
 void RTCTest(std::uint16_t argc, char* argv[])
 {
-    std::uint8_t command;
-    if (argc != 1 || !GetRTCCommand(argv[0], command))
+    if (argc != 1)
     {
-        Main.terminal.Puts("rtc [test|get]");
+        PrintRTCUsage();
         return;
     }
 
-    if (command == 0)
+    if (strcmp(argv[0], "test") == 0)
     {
         RTCObject rtc(Main.Hardware.I2C.Buses.Bus);
 
@@ -85,7 +73,7 @@ void RTCTest(std::uint16_t argc, char* argv[])
         PrintRTCTime(midTime);
 
         Main.terminal.Printf("Time after 2 seconds: ");
-        if (midTime.ToSeconds() >= startTime.ToSeconds() + 1)
+        if (midTime.ToDuration() >= startTime.ToDuration() + 1s)
             Main.terminal.Printf("ok\r\n");
         else
             Main.terminal.Printf("FAIL\r\n");
@@ -99,17 +87,21 @@ void RTCTest(std::uint16_t argc, char* argv[])
         Main.terminal.Printf("+1min: ");
         PrintRTCTime(endTime);
 
-        if (endTime.ToSeconds() >= midTime.ToSeconds() + 60)
+        if (endTime.ToDuration() >= midTime.ToDuration() + 60s)
             Main.terminal.Printf("ok\r\n");
         else
             Main.terminal.Printf("FAIL\r\n");
     }
-    else if (command == 1)
+    else if (strcmp(argv[0], "get") == 0)
     {
         RTCObject rtc(Main.Hardware.I2C.Buses.Bus);
         RTCTime time;
 
         rtc.ReadTime(time);
         PrintRTCTime(time);
+    }
+    else
+    {
+        PrintRTCUsage();
     }
 }

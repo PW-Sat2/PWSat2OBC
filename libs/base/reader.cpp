@@ -44,6 +44,12 @@ uint8_t Reader::ReadByte()
     }
 }
 
+uint8_t Reader::ReadByteBCD(std::uint8_t upperNibbleMask)
+{
+    uint8_t bcdByte = ReadByte();
+    return ((bcdByte & upperNibbleMask) >> 4) * 10 + (bcdByte & 0x0F);
+}
+
 uint16_t Reader::ReadWordLE()
 {
     if (!UpdateState(2))

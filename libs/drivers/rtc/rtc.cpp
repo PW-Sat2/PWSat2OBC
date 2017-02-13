@@ -6,6 +6,7 @@
  */
 
 #include "rtc.hpp"
+#include "base/reader.h"
 #include "logger/logger.h"
 
 using namespace devices::rtc;
@@ -16,7 +17,7 @@ RTCObject::RTCObject(drivers::i2c::II2CBus& bus) : _bus(bus)
 {
 }
 
-void RTCObject::ReadTime(RTCTime& rtcTime)
+I2CResult RTCObject::ReadTime(RTCTime& rtcTime)
 {
     std::array<std::uint8_t, 1> inBuffer;
     std::array<std::uint8_t, 7> outBuffer;
@@ -28,18 +29,18 @@ void RTCObject::ReadTime(RTCTime& rtcTime)
     if (!status)
     {
         LOG(LOG_LEVEL_ERROR, "Unable read time from RTC");
-        return;
+        return result;
     }
 
-    rtcTime.seconds = ConvertFromBCD(outBuffer[0], SecondsNibbleMask);
-    rtcTime.minutes = ConvertFromBCD(outBuffer[1], MinutesNibbleMask);
-    rtcTime.hours = ConvertFromBCD(outBuffer[2], HoursNibbleMask);
-    rtcTime.days = ConvertFromBCD(outBuffer[3], DaysNibbleMask);
-    rtcTime.months = ConvertFromBCD(outBuffer[5], MonthsNibbleMask);
-    rtcTime.years = ConvertFromBCD(outBuffer[6], YearsNibbleMask);
-}
+    Reader reader(outBuffer);
 
-std::uint8_t RTCObject::ConvertFromBCD(std::uint8_t bcd, std::uint8_t upperNibbleMask)
-{
-    return ((bcd & upperNibbleMask) >> 4) * 10 + (bcd & 0x0F);
+    rtcTime.seconds = reader.ReadByteBCD(SecondsNibbleMask);
+    rtcTime.minutes = reader.ReadByteBCD(MinutesNibbleMask);
+    rtcTime.hours = reader.ReadByteBCD(HoursNibbleMask);
+    rtcTime.days = reader.ReadByteBCD(DaysNibbleMask);
+    reader.Skip(1);
+    rtcTime.months = reader.ReadByteBCD(MonthsNibbleMask);
+    rtcTime.years = reader.ReadByteBCD(YearsNibbleMask);
+
+    return I2CResult::OK;
 }
