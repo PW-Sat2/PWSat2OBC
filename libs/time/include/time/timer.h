@@ -72,31 +72,61 @@ namespace services
             {
             }
 
+            /**
+             * @brief Equality operator
+             * @param right Other value
+             * @return true if both values are equal
+             */
             bool operator==(const TimeSnapshot& right) const
             {
                 return CurrentTime == right.CurrentTime;
             }
 
+            /**
+             * @brief Inequality operator
+             * @param right Other value
+             * @return true if both values are not equal
+             */
             bool operator!=(const TimeSnapshot& right) const
             {
                 return !(*this == right);
             }
 
+            /**
+             * @brief Less then operator
+             * @param right Other value
+             * @return true if this is less then other
+             */
             bool operator<(const TimeSnapshot& right) const
             {
                 return CurrentTime < right.CurrentTime;
             }
 
+            /**
+             * @brief Greater then operator
+             * @param right Other value
+             * @return true if this is greater then other
+             */
             bool operator>(const TimeSnapshot& right) const
             {
                 return right < *this;
             }
 
+            /**
+             * @brief Less then or equal operator
+             * @param right Other value
+             * @return true if this is less then or equal to other
+             */
             bool operator<=(const TimeSnapshot& right) const
             {
                 return !(*this > right);
             }
 
+            /**
+             * @brief Greater then or equal operator
+             * @param right Other value
+             * @return true if this is greater then or equal to other
+             */
             bool operator>=(const TimeSnapshot& right) const
             {
                 return !(*this < right);

@@ -18,7 +18,8 @@ namespace obc
     {
       public:
         /**
-         * Initializes @ref Telecommands object
+         * @brief Initializes @ref Telecommands object
+         * @param fs File system
          */
         Telecommands(services::fs::IFileSystem& fs);
 
@@ -31,7 +32,7 @@ namespace obc
       private:
         /** @brief Ping telecommand */
         obc::telecommands::PingTelecommand _ping;
-
+        /** @brief Download file telecommand */
         obc::telecommands::DownladFileTelecommand _downloadFileTelecommand;
 
         /** @brief Array containg all telecommand handlers */
@@ -46,6 +47,7 @@ namespace obc
         /**
          * @brief Initializes @ref OBCCommunication object
          * @param[in] i2cBus I2CBus used by low-level comm driver
+         * @param[in] fs File system
          */
         OBCCommunication(drivers::i2c::II2CBus& i2cBus, services::fs::IFileSystem& fs);
 

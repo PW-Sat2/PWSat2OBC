@@ -98,6 +98,7 @@ namespace obc
         /**
          * @brief Initializes @ref OBCHardware instance
          * @param[in] powerControl Power control interface
+         * @param[in] burtcTickHandler Tick handler for internal (BURTC) clock
          */
         OBCHardware(PowerControl* powerControl, TimeAction& burtcTickHandler);
 
