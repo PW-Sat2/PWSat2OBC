@@ -1,7 +1,7 @@
 #include <iostream>
 #include <gtest/gtest.h>
 #include <adcs_experiments/detumbling.hpp>
-
+#include <system.h>
 
 // checking public interfaces
 TEST(detumbling, interfaces)

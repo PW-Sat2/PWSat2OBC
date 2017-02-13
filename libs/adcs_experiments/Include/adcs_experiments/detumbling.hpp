@@ -26,28 +26,46 @@ class Detumbling
 final
 {
     public:
-
         /** @brief (Draft)   */
         using RowVector3i = Eigen::Matrix< int32_t , 1, 3 >;
+        using RowVector3b = Eigen::Matrix< bool , 1, 3 >;
+
+        /** @brief (Draft)
+         * @unit:
+         */
+        static constexpr float DefaultDt = 0.2;
+        /** @brief (Draft)
+         * @unit:
+         */
+        static constexpr float DefaultWCutOff = 0.2;
+        /** @brief (Draft)
+         * @unit:
+         */
+        static constexpr float DefaultBDotGain = 2.879285e-5; /// XXX unit conv
+        /** @brief (Draft)
+         * @unit:
+         */
+        static constexpr std::array <bool, 3> DefaultCoilsOn =
+        { true, true, true };
 
         /** @brief (Draft)   */
-        struct DetumblingConst_Tag
+        struct DetumblingConstTag
         {
             /** @brief (Draft)   */
-            float dt;
+            float dt = DefaultDt;
             /** @brief (Draft)   */
-            float wCutOff;
+            float wCutOff = DefaultWCutOff;
             /** @brief (Draft)   */
-            float bDotGain;
+            float bDotGain = DefaultBDotGain;
             /** @brief (Draft)   */
-            bool coilsOn[3];
+            std::array <bool, 3> coilsOn = DefaultCoilsOn;
         };
 
         /** @brief (Draft)   */
         struct DetumblingParameters
         {
             /** @brief (Draft)   */
-            struct DetumblingConst_Tag DetumblingConst;
+            struct DetumblingConstTag DetumblingConst;
         };
 
         /** @brief (Draft)   */

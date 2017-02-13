@@ -59,6 +59,7 @@ using std::uint32_t;
 
 namespace adcs
 {
+
 Detumbling::Detumbling()
 {
     //empty
@@ -67,21 +68,11 @@ Detumbling::Detumbling()
 void Detumbling::InitializeDetumbling(DetumblingState& state,
         const DetumblingParameters& parameters)
 {
-    UNUSED(state, parameters);
-    /*
-     ADCSParameters.DetumblingConst.dt = 0.2;
-     ADCSParameters.DetumblingConst.wCutOff = 0.2;
-     ADCSParameters.DetumblingConst.bDotGain = 2.879285e-5;
-     ADCSParameters.DetumblingConst.coilsOn[0] = true;
-     ADCSParameters.DetumblingConst.coilsOn[1] = true;
-     ADCSParameters.DetumblingConst.coilsOn[2] = true;
-
-     for (int i = 0; i < 3; i++)
-     {
-     ADCSState.mtmDotPrevInMemory[i] = 0; //Set the previous time derivative of the magnetic field to zeros.
-     ADCSState.mtmMeasPrevInMemory[i] = 0; //Set the previous MTM measurement to zeros,
-     }
-     */
+    UNUSED1(parameters);
+    //Set the previous time derivative of the magnetic field to zeros.
+    state.mtmDotPrevInMemory = RowVector3i::Zero();
+    //Set the previous MTM measurement to zeros,
+    state.mtmMeasPrevInMemory = RowVector3i::Zero();
 }
 
 void Detumbling::DoDetumbling(DipoleVec& dipole, const MagVec& magnetometer,
