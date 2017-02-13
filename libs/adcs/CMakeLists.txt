@@ -1,8 +1,6 @@
 set(NAME adcs)
 
 set(SOURCES      
-    adcs.cpp   
-    detumbling.cpp
     AdcsCoordinator.cpp   
     Include/adcs/adcs.hpp
     Include/adcs/AdcsCoordinator.hpp
@@ -13,7 +11,6 @@ add_library(${NAME} STATIC ${SOURCES})
 target_link_libraries(${NAME}
     base    
     logger
-    eigen
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

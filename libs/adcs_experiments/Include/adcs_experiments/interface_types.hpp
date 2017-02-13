@@ -8,7 +8,7 @@
 #ifndef INTERFACE_TYPES_HPP_
 #define INTERFACE_TYPES_HPP_
 
-#include <Eigen/Dense>
+#include <array>
 
 namespace adcs
 {
@@ -23,14 +23,14 @@ namespace adcs
  */
 using Dipole = std::int16_t;
 /** @brief (Draft) Dipole Vector (3d) representaiton  */
-using DipoleVec = Eigen::Matrix<Dipole, 3, 1>;
+using DipoleVec = std::array<Dipole, 3>;
 
 /** @brief (Draft) Magnetometer Measurement representaiton
  *          1 LSB = 1e-7 T
  */
 using MagnetometerMeasurement = std::int32_t;
 /** @brief (Draft) Magnetometer Measurement Vector (3d) representaiton */
-using MagVec = Eigen::Matrix<MagnetometerMeasurement, 3, 1>;
+using MagVec = std::array<MagnetometerMeasurement, 3>;
 
 /** @} */
 }

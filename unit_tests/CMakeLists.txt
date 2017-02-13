@@ -62,7 +62,7 @@ set(SOURCES
   SPI/SPIMock.cpp
   SPI/SPIDriverTest.cpp
   eigen/eigenTest.cpp
-  adcs/detumblingTest.cpp
+  adcs_experiments/detumblingTest.cpp
   adcs/AdcsCoordinatorTest.cpp
 )
 
@@ -112,6 +112,7 @@ target_link_libraries(${NAME}
     eigen
     adcs
     mission_adcs
+    adcs_experiments
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
