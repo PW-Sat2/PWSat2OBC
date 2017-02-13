@@ -217,6 +217,8 @@ namespace services
              */
             File();
 
+            File(File&& other) noexcept;
+
             /**
              * @brief Factory method that opens file
              * @param fs File system
@@ -232,7 +234,7 @@ namespace services
              * @param other Other file
              * @return Reference to this
              */
-            File& operator=(File&& other);
+            File& operator=(File&& other) noexcept;
 
             /** @brief Implicit cast to bool, true if file opened successfully*/
             inline operator bool();

@@ -97,7 +97,7 @@ namespace mission
              * @brief Requests experiment to be started in next mission loop
              * @param experiment Experiment type
              */
-            void RequestExperiment(ExperimentCode experiment);
+            bool RequestExperiment(ExperimentCode experiment);
 
             /**
              * @brief Aborts current experiment immediately
@@ -175,7 +175,10 @@ namespace mission
             /** @brief List of available experiments */
             gsl::span<IExperiment*> _experiments;
 
-            /** @brief Event group used for synchronizatio */
+            /** @brief Lock */
+            OSSemaphoreHandle _sync;
+
+            /** @brief Event group used for status reporting */
             OSEventGroupHandle _event;
             /** @brief Queue holding requested experiment */
             Queue<ExperimentCode, 1> _queue;

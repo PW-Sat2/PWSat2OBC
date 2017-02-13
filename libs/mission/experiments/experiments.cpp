@@ -19,18 +19,23 @@ namespace mission
 
         void MissionExperiment::Initialize()
         {
+            this->_sync = System::CreateBinarySemaphore(1);
+            System::GiveSemaphore(this->_sync);
             this->_event = System::CreateEventGroup();
             this->_queue.Create();
             this->_task.Create();
         }
 
-        void MissionExperiment::RequestExperiment(ExperimentCode experiment)
+        bool MissionExperiment::RequestExperiment(ExperimentCode experiment)
         {
             auto inProgress = (System::EventGroupGetBits(this->_event) & Event::InProgress) == Event::InProgress;
             if (inProgress)
-                return;
+                return false;
+
+            Lock lock(this->_sync, InfiniteTimeout);
 
             this->_requestedExperiment = Some(experiment);
+            return true;
         }
 
         void MissionExperiment::AbortExperiment()
@@ -149,6 +154,7 @@ namespace mission
             if (inProgress)
                 return false;
 
+            Lock lock(This->_sync, InfiniteTimeout);
             return This->_requestedExperiment.HasValue;
         }
 
@@ -157,6 +163,8 @@ namespace mission
             UNREFERENCED_PARAMETER(state);
 
             auto This = reinterpret_cast<MissionExperiment*>(param);
+
+            Lock lock(This->_sync, InfiniteTimeout);
 
             This->_queue.Overwrite(This->_requestedExperiment.Value);
             This->_requestedExperiment = None<ExperimentCode>();
@@ -179,7 +187,7 @@ namespace mission
 
             auto This = reinterpret_cast<MissionExperiment*>(param);
 
-            System::EventGroupSetBits(This->_event, 1 << 2);
+            System::EventGroupSetBits(This->_event, Event::MissionLoopIterationStarted);
         }
 
         mission::ActionDescriptor<SystemState> MissionExperiment::StartExperimentAction()

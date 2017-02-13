@@ -52,7 +52,14 @@ File::~File()
     }
 }
 
-File::File() : _fs(nullptr)
+File::File(File&& other) noexcept : _fs(other._fs), _handle(other._handle), _valid(other._valid)
+{
+    other._fs = nullptr;
+    other._valid = false;
+    other._handle = 0;
+}
+
+File::File() : _fs(nullptr), _handle(0), _valid(false)
 {
 }
 
@@ -103,11 +110,15 @@ FileSize File::Size()
     return this->_fs->GetFileSize(this->_handle);
 }
 
-File& File::operator=(File&& other)
+File& File::operator=(File&& other) noexcept
 {
-    std::swap(this->_fs, other._fs);
-    std::swap(this->_handle, other._handle);
-    std::swap(this->_valid, other._valid);
+    File tmp(std::move(other));
+
+    using std::swap;
+
+    swap(this->_fs, tmp._fs);
+    swap(this->_handle, tmp._handle);
+    swap(this->_valid, tmp._valid);
 
     return *this;
 }

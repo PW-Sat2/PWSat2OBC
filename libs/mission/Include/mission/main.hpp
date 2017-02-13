@@ -383,6 +383,8 @@ namespace mission
                 System::EventGroupWaitForBits(this->eventGroup, RunOnceRequestFlag | PauseRequestFlag, false, false, 10s);
             if (has_flag(result, RunOnceRequestFlag))
             {
+                LOG(LOG_LEVEL_DEBUG, "Running mission loop task once");
+
                 RunOnce();
                 System::EventGroupClearBits(this->eventGroup, RunOnceRequestFlag);
                 System::EventGroupSetBits(this->eventGroup, RunOnceFinishedFlag);

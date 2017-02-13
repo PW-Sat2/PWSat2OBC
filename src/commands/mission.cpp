@@ -20,7 +20,7 @@ void ResumeMission(std::uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
     LOG(LOG_LEVEL_INFO, "Received request to resume automatic mission processing.");
-    Mission.Suspend();
+    Mission.Resume();
 }
 
 void RunMission(std::uint16_t argc, char* argv[])

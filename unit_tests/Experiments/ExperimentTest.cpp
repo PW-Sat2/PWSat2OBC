@@ -113,11 +113,14 @@ TEST_F(ExperimentTest, ShouldIgnoreRequestWhileExperimentIsRunning)
     SystemState state;
     auto startAction = _exp.StartExperimentAction();
 
-    _exp.RequestExperiment(Experiment::Fibo);
+    auto r = _exp.RequestExperiment(Experiment::Fibo);
+    ASSERT_THAT(r, Eq(true));
 
     startAction.Execute(state);
+    this->_eventValue = MissionExperiment::Event::InProgress;
 
-    _exp.RequestExperiment(Experiment::Experiment2);
+    r = _exp.RequestExperiment(Experiment::Experiment2);
+    ASSERT_THAT(r, Eq(false));
 
     this->_eventValue = 0;
 
