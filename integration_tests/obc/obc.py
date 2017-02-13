@@ -39,6 +39,9 @@ class OBC(OBCMixin,
         while response != "1":
             response = self._terminal.command("getState")
 
+        self.log.info("OBC reported ready state")
+
+
     def reset(self):
         self._terminal.reset()
 
