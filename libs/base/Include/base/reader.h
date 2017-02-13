@@ -69,6 +69,13 @@ class Reader final
     uint8_t ReadByte();
 
     /**
+     * @brief Read single binary coded decimal byte from the buffer and move the current position to the next byte.
+     * @param[in] upperNibbleMask mask used for byte's upper nibble.
+     * @return Read byte.
+     */
+    uint8_t ReadByteBCD(std::uint8_t upperNibbleMask);
+
+    /**
      * @brief Read single 16 bit word with little-endian memory orientation from the buffer
      * and advance the current buffer position to the next unread byte.
      * @return Read word.
