@@ -16,6 +16,48 @@ namespace obc
 {
     namespace telecommands
     {
+        FileSender::FileSender(const char* path,
+            telecommunication::downlink::DownlinkAPID apid,
+            devices::comm::ITransmitFrame& transmitter,
+            services::fs::IFileSystem& fs)
+            : _file(fs, path, services::fs::FileOpen::Existing, services::fs::FileAccess::ReadOnly), _apid(apid), _transmitter(transmitter)
+        {
+            if (this->IsValid())
+            {
+                this->_fileSize = this->_file.Size();
+
+                this->_lastSeq = static_cast<std::uint32_t>(std::ceil(this->_fileSize / static_cast<float>(DownlinkFrame::MaxPayloadSize)));
+            }
+        }
+
+        bool FileSender::IsValid()
+        {
+            return this->_file;
+        }
+
+        bool FileSender::SendPart(std::uint32_t seq)
+        {
+            if (seq > this->_lastSeq)
+            {
+                return false;
+            }
+
+            DownlinkFrame response(static_cast<DownlinkAPID>(this->_apid), seq);
+
+            if (OS_RESULT_FAILED(this->_file.Seek(SeekOrigin::Begin, seq * DownlinkFrame::MaxPayloadSize)))
+            {
+                return false;
+            }
+
+            auto segmentSize = std::min<std::size_t>(DownlinkFrame::MaxPayloadSize, this->_fileSize - seq * DownlinkFrame::MaxPayloadSize);
+
+            auto buf = response.PayloadWriter().Reserve(segmentSize);
+
+            this->_file.Read(buf);
+
+            return this->_transmitter.SendFrame(response.Frame());
+        }
+
         std::uint8_t DownladFileTelecommand::CommandCode() const
         {
             return 0xAB;
@@ -33,9 +75,9 @@ namespace obc
 
             LOGF(LOG_LEVEL_INFO, "Sending file %s", path);
 
-            File f(this->_fs, path, services::fs::FileOpen::Existing, services::fs::FileAccess::ReadOnly);
+            FileSender sender(path, static_cast<DownlinkAPID>(downlinkApid), transmitter, this->_fs);
 
-            if (!f)
+            if (!sender.IsValid())
             {
                 LOG(LOG_LEVEL_ERROR, "Unable to open requested file");
                 DownlinkFrame errorResponse(DownlinkAPID::FileNotFound, 0);
@@ -46,10 +88,6 @@ namespace obc
                 return;
             }
 
-            auto fileSize = f.Size();
-
-            auto lastSeq = static_cast<std::uint32_t>(std::ceil(f.Size() / static_cast<float>(DownlinkFrame::MaxPayloadSize)));
-
             while (true)
             {
                 auto seq = r.ReadDoubleWordLE();
@@ -59,25 +97,7 @@ namespace obc
                     break;
                 }
 
-                if (seq > lastSeq)
-                {
-                    continue;
-                }
-
-                DownlinkFrame response(static_cast<DownlinkAPID>(downlinkApid), seq);
-
-                if (OS_RESULT_FAILED(f.Seek(SeekOrigin::Begin, seq * DownlinkFrame::MaxPayloadSize)))
-                {
-                    continue;
-                }
-
-                auto segmentSize = std::min<std::size_t>(DownlinkFrame::MaxPayloadSize, fileSize - seq * DownlinkFrame::MaxPayloadSize);
-
-                auto buf = response.PayloadWriter().Reserve(segmentSize);
-
-                f.Read(buf);
-
-                transmitter.SendFrame(response.Frame());
+                sender.SendPart(seq);
             }
         }
     }
