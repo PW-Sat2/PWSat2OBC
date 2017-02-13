@@ -108,11 +108,14 @@ namespace services
             ReadWrite = O_RDWR,
         };
 
+        /**
+         * @brief Determies base for seek operation
+         */
         enum class SeekOrigin
         {
-            Begin,
-            Current,
-            End
+            Begin,   //!< Begining of file
+            Current, //!< Current position
+            End      //!< End of file
         };
 
         /**
@@ -302,6 +305,12 @@ namespace services
              */
             FileSize Size();
 
+            /**
+             * @brief Seeks position in file
+             * @param origin Determies what is used as starting point for offset
+             * @param offset Position offset
+             * @return Operation result
+             */
             OSResult Seek(SeekOrigin origin, FileSize offset);
 
           private:

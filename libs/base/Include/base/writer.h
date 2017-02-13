@@ -126,6 +126,12 @@ class Writer final
      */
     bool WriteLowerBytesBE(std::uint32_t number, std::uint8_t bytesCount);
 
+    /**
+     * @brief Reserves part of buffer for direct operation
+     * @param count Number of bytes to reserve
+     * @return Span with reserved area
+     * @remark If not enough space is available in target buffer, reserved area is trimmed to fit
+     */
     gsl::span<std::uint8_t> Reserve(std::size_t count);
 
     /**

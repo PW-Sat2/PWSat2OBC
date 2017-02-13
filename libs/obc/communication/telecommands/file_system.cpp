@@ -58,6 +58,10 @@ namespace obc
             return this->_transmitter.SendFrame(response.Frame());
         }
 
+        DownladFileTelecommand::DownladFileTelecommand(services::fs::IFileSystem& fs) : _fs(fs)
+        {
+        }
+
         std::uint8_t DownladFileTelecommand::CommandCode() const
         {
             return 0xAB;
