@@ -6,55 +6,10 @@ set(SOURCES
   heap.c
   test.cpp
   utils.cpp
-  Logger/LoggerTest.cpp
-  FileSystem/FileSystemTest.cpp
-  FileSystem/YaffsOSGlue.cpp
-  FileSystem/MemoryDriver.cpp
-  FileSystem/NANDGeometryTest.cpp
-  FileSystem/MemoryDriver.cpp
-  FileSystem/EccTest.cpp
-  FileSystem/FileTest.cpp
-  Comm/CommTest.cpp
-  Comm/CommFrameTest.cpp
-  Comm/DownlinkFrameTest.cpp
-  Comm/TeleCommandHandlingTest.cpp
-  Comm/UplinkFrameDecoderTest.cpp
-  base/ReaderTest.cpp
-  base/WriterTest.cpp
-  base/RapidTest.cpp
-  MissionPlan/MissionPlanTest.cpp
-  MissionPlan/MissionTestHelpers.cpp
-  MissionPlan/SailSystemStateTest.cpp
-  MissionPlan/TimeTaskTest.cpp
-  MissionPlan/MissionLoopTest.cpp
-  MissionPlan/antenna/DeployAntennasTest.cpp
-  MissionPlan/antenna/AntennaMissionStateTest.cpp
-  I2C/FallbackI2CBusTest.cpp
-  I2C/ErrorHandlingI2CBusTest.cpp
-  N25Q/N25QTest.cpp
-  os/TimeoutTest.cpp
   os/os.cpp
   os/os.hpp
   OsMock.hpp
-  time/time.cpp
-  time/timer.cpp
-  time/persistance.cpp
-  time/SmartWait.cpp
-  mock/FsMock.hpp
-  mock/FsMock.cpp
-  mock/AntennaMock.cpp
-  mock/AntennaMock.hpp
   assert.cpp
-  antenna/miniport.cpp
-  antenna/antenna.cpp
-  antenna/MiniportMock.cpp
-  antenna/MiniportMock.hpp
-  mock/ActionDescriptorMock.hpp
-  mock/UpdateDescriptorMock.hpp
-  mock/VerifyDescriprorMock.hpp
-  mock/emlib.cpp
-  SPI/SPIMock.cpp
-  SPI/SPIDriverTest.cpp
   imtq/imtqTest.cpp
 )
 
