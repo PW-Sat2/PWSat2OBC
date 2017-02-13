@@ -56,6 +56,13 @@ MATCHER_P3(IsDownlinkFrame, apidMatcher, seqMatcher, payloadMatcher, "")
         && Matches(payloadMatcher)(payload);
 }
 
+MATCHER_P(StrSpan, innerMatcher, "")
+{
+    const char* s = reinterpret_cast<const char*>(arg.data());
+
+    return Matches(innerMatcher)(s);
+}
+
 TEST_F(DownloadFileTelecommandTest, ShouldTransferRequestedPartsOfFile)
 {
     EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(Eq(static_cast<DownlinkAPID>(0x11)), Eq(0U), Each(Eq(1)))));
@@ -134,6 +141,22 @@ TEST_F(DownloadFileTelecommandTest, ShouldDownloadLastPartOfMultipartFile)
     std::fill_n(file.begin() + 3 * DownlinkFrame::MaxPayloadSize, 20, 4);
 
     this->_fs.AddFile("/a/file", file);
+
+    Buffer<200> buffer;
+    Writer w(buffer);
+    w.WriteByte(0x11);
+    const char path[] = "/a/file";
+    w.WriteByte(strlen(path));
+    w.WriteArray(gsl::span<const uint8_t>(reinterpret_cast<const uint8_t*>(path), strlen(path)));
+    w.WriteByte(0);
+    w.WriteDoubleWordLE(0x3);
+
+    _telecommand.Handle(_transmitFrame, w.Capture());
+}
+
+TEST_F(DownloadFileTelecommandTest, ShouldSendErrorFrameWhenFileNotFound)
+{
+    EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::FileNotFound), Eq(0U), StrSpan(StrEq("/a/file")))));
 
     Buffer<200> buffer;
     Writer w(buffer);

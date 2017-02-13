@@ -27,7 +27,9 @@ namespace obc
 
             auto downlinkApid = r.ReadByte();
             auto pathLength = r.ReadByte();
-            auto path = reinterpret_cast<const char*>(r.ReadArray(pathLength + 1).data());
+            auto pathSpan = r.ReadArray(pathLength);
+            auto path = reinterpret_cast<const char*>(pathSpan.data());
+            r.ReadByte();
 
             LOGF(LOG_LEVEL_INFO, "Sending file %s", path);
 
@@ -36,6 +38,11 @@ namespace obc
             if (!f)
             {
                 LOG(LOG_LEVEL_ERROR, "Unable to open requested file");
+                DownlinkFrame errorResponse(DownlinkAPID::FileNotFound, 0);
+                errorResponse.PayloadWriter().WriteArray(pathSpan);
+
+                transmitter.SendFrame(errorResponse.Frame());
+
                 return;
             }
 
