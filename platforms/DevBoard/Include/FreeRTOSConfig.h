@@ -90,6 +90,10 @@ extern void assertFailed(const char* source, const char* file, uint16_t line);
     }
 #endif
 
+#ifdef DEBUG
+#define configCHECK_FOR_STACK_OVERFLOW 2
+#endif
+
 #define configUSE_PREEMPTION 1
 #define configUSE_IDLE_HOOK 1
 #define configUSE_TICK_HOOK 0
