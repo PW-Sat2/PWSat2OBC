@@ -6,11 +6,13 @@
 #include "logger/logger.h"
 #include "system.h"
 
+
 #include "camera.h"
 #include "uart/Uart.h"
 
 
 using namespace devices::camera;
+using namespace std::chrono_literals;
 
 
 Camera::Camera(drivers::uart::Uart uartBus) : _uartBus(uartBus)
@@ -30,11 +32,13 @@ int32_t Camera::CameraGetJPEGPicture(CameraJPEGResolution resolution,
     uint32_t ret = 0;
 
     do {
-        if (!CameraSync())
-        {
-            LOG(LOG_LEVEL_ERROR, "---------------- Sync failed -------------------------\n");
-            break;
-        }
+
+    	if (!CameraSync())
+    	{
+    		LOG(LOG_LEVEL_ERROR, "---------------- Sync failed -------------------------\n");
+    		break;
+    	}
+
 
         CameraSendCmdJPEGInitial(resolution);
 
@@ -64,11 +68,11 @@ int32_t Camera::CameraGetJPEGPicture(CameraJPEGResolution resolution,
             break;
         }
 
-        CameraSendCmdGetPicture(CameraPictureType::JPEG);
+        CameraSendCmdGetPicture(CameraPictureType::Snapshot);
 
         if (!CameraGetCmdAckGetPicture())
         {
-            LOG(LOG_LEVEL_ERROR, "---------------- ACK GetPicture failed ---------------\n");
+            LOG(LOG_LEVEL_ERROR, "---------------- ACK GetSnapshot failed ---------------\n");
             break;
         }
 
@@ -85,23 +89,23 @@ int32_t Camera::CameraGetJPEGPicture(CameraJPEGResolution resolution,
             break;
         }
 
-        if (CameraPictureType::JPEG != cmdData.type || cmdData.dataLength <= 0)
+        if (CameraPictureType::Snapshot != cmdData.type || cmdData.dataLength <= 0)
         {
             LOG(LOG_LEVEL_ERROR, "---------------- Invalid Cmd Data received -----------\n");
             break;
         }
-       // LOGF(LOG_LEVEL_ERROR, "---------------- Cmd Data received%d ----------------\n", cmdData.dataLength);
-/*
-        ret = CameraReceiveData(data, ret);
-        if (ret == -1) {
+        LOG(LOG_LEVEL_ERROR, "---------------- Cmd Data received ----------------\n");
+
+        ret = CameraReceiveJPEGData(data, cmdData.dataLength,512);
+        if (ret == 0) {
             LOG(LOG_LEVEL_ERROR, "---------------- Invalid Data command ----------------\n");
             break;
         }
         dataLength = ret;
 
         CameraSendCmdAckData();
-*/
-    } while (0);
+
+    } while (1);
     return ret;
 }
 

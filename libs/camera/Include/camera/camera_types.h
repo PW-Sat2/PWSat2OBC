@@ -5,6 +5,7 @@
 
 
 enum class CameraCmd{
+	None			  = 0x00,
     Initial           = 0x01,
     GetPicture        = 0x04,
     Snapshot          = 0x05,

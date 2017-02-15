@@ -89,7 +89,7 @@ uint16_t Camera::CameraGetRAWDataLength(CameraRAWImageFormat format, CameraRAWRe
 
 CameraCmd Camera::CameraParseDataCmd(uint8_t* cmd, uint32_t length, CameraCmdData* cmdData)
 {
-    if (length < 6 || (cmd[0] != CameraCmdPrefix) || ((CameraCmd)cmd[1] != CameraCmd::Data))
+    if (length < 6 || (cmd[6] != CameraCmdPrefix) || ((CameraCmd)cmd[7] != CameraCmd::Data))
     {
         return CameraCmd::Invalid;
     }
@@ -99,12 +99,12 @@ CameraCmd Camera::CameraParseDataCmd(uint8_t* cmd, uint32_t length, CameraCmdDat
         return CameraCmd::Data;
     }
 
-    cmdData->dataLength = (((uint32_t)cmd[3]) | ((uint32_t)cmd[4] << 8) | ((uint32_t)cmd[5] << 16));
-    cmdData->type = CameraGetPictureType(cmd[2]);
+    cmdData->dataLength = (((uint32_t)cmd[9]) | ((uint32_t)cmd[10] << 8) | ((uint32_t)cmd[11] << 16));
+    cmdData->type = CameraGetPictureType(cmd[8]);
     LOG(LOG_LEVEL_INFO, "---------------- Data ----------------\n");
-    LOGF(LOG_LEVEL_INFO, "---------------- %d ----------------\n", cmd[3]);
-    LOGF(LOG_LEVEL_INFO, "---------------- %d ----------------\n", cmd[4]);
-    LOGF(LOG_LEVEL_INFO, "---------------- %d ----------------\n", cmd[5]);
+    LOGF(LOG_LEVEL_INFO, "---------------- %d ----------------\n", cmd[9]);
+    LOGF(LOG_LEVEL_INFO, "---------------- %d ----------------\n", cmd[10]);
+    LOGF(LOG_LEVEL_INFO, "---------------- %d ----------------\n", cmd[11]);
     LOGF(LOG_LEVEL_INFO, "---------------- %d ----------------\n", (int)cmdData->dataLength);
     return CameraCmd::Data;
 }
@@ -129,7 +129,7 @@ CameraCmd Camera::CameraParseAckCmd(uint8_t* cmd, uint32_t length, CameraCmdAck*
 
 CameraCmd Camera::CameraParseSyncCmd(uint8_t* cmd, uint32_t length)
 {
-    if (length < 2 || cmd[0] != CameraCmdPrefix || ((CameraCmd)cmd[1] != CameraCmd::Sync))
+    if (length < 2 || cmd[6] != CameraCmdPrefix || ((CameraCmd)cmd[7] != CameraCmd::Sync))
     {
         return CameraCmd::Invalid;
     }
