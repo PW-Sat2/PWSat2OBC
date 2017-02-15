@@ -55,7 +55,7 @@ namespace devices
             void ConfigureHardware();
             void StartTask();
 
-            Task<Burtc*, 512_Bytes, TaskPriority::P6> _task;
+            Task<Burtc*, 2_KB, TaskPriority::P6> _task;
 
             /** @brief Calculates current time interval based on selected oscillator frequency, prescaler and compare value **/
             static std::chrono::milliseconds CalculateCurrentTimeInterval();

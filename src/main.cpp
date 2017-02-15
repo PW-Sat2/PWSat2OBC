@@ -45,12 +45,6 @@ mission::ObcMission Mission(Main.timeProvider, Main.antennaDriver, false, Main.a
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
-extern "C" void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
-{
-    UNREFERENCED_PARAMETER(pxTask);
-    UNREFERENCED_PARAMETER(pcTaskName);
-}
-
 extern "C" void vApplicationIdleHook(void)
 {
     EMU_EnterEM1();
