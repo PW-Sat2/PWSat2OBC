@@ -5,7 +5,7 @@
 
 #include "mission/adcs.hpp"
 #include "mission/antenna_task.hpp"
-#include "mission/experiments.h"
+#include "mission/experiments.hpp"
 #include "mission/main.hpp"
 #include "mission/sail.hpp"
 #include "mission/time.hpp"
@@ -18,7 +18,7 @@ namespace mission
         antenna::AntennaTask,
         SailTask,
         adcs::AdcsPrimaryTask,
-        mission::experiments::MissionExperimentComponent//
+        mission::experiments::MissionExperimentComponent //
         >
         ObcMission;
 }

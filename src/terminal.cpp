@@ -37,6 +37,7 @@ static const TerminalCommandDescription commands[] = {
     {"set_fibo_iterations", SetFiboIterations},
     {"request_experiment", RequestExperiment},
     {"abort_experiment", AbortExperiment},
+    {"experiment_info", ExperimentInfo},
     {"dma", DMAInfo},
     {"comm_set_bitrate", CommSetBaudRate},
     {"comm_get_telemetry", CommGetTelemetry},

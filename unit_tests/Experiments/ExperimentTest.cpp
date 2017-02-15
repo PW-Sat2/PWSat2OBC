@@ -5,8 +5,9 @@
 #include "gmock/gmock.h"
 #include "OsMock.hpp"
 #include "base/os.h"
+#include "experiments/experiments.h"
 #include "mission/base.hpp"
-#include "mission/experiments.h"
+#include "mission/experiments.hpp"
 #include "system.h"
 #include "utils.h"
 #include "utils.hpp"
@@ -23,6 +24,7 @@ using testing::SaveArg;
 using testing::ReturnPointee;
 using testing::DoAll;
 using testing::Assign;
+using namespace experiments;
 using namespace mission::experiments;
 
 struct ExperimentMock : public IExperiment
@@ -50,7 +52,7 @@ class ExperimentTest : public testing::Test
 
     OSEventBits _eventValue;
 
-    MissionExperiment _exp;
+    ExperimentController _exp;
     MissionExperimentComponent _mission;
     NiceMock<OSMock> _os;
     OSReset _osReset;
@@ -69,7 +71,7 @@ ExperimentTest::ExperimentTest() : _mission(_exp)
 
     ON_CALL(this->_os, EventGroupGetBits(this->_event)).WillByDefault(ReturnPointee(&this->_eventValue));
 
-    ON_CALL(this->_os, QueueOverwrite(this->_queue, _)).WillByDefault(Assign(&this->_eventValue, MissionExperiment::Event::InProgress));
+    ON_CALL(this->_os, QueueOverwrite(this->_queue, _)).WillByDefault(Assign(&this->_eventValue, ExperimentController::Event::InProgress));
 
     this->_exp.Initialize();
 }
@@ -111,13 +113,13 @@ TEST_F(ExperimentTest, RepeatedExperimentRequestOverwritePrevious)
 TEST_F(ExperimentTest, ShouldIgnoreRequestWhileExperimentIsRunning)
 {
     SystemState state;
-    auto startAction = _exp.StartExperimentAction();
+    auto startAction = _mission.StartExperimentAction();
 
     auto r = _exp.RequestExperiment(Experiment::Fibo);
     ASSERT_THAT(r, Eq(true));
 
     startAction.Execute(state);
-    this->_eventValue = MissionExperiment::Event::InProgress;
+    this->_eventValue = ExperimentController::Event::InProgress;
 
     r = _exp.RequestExperiment(Experiment::Experiment2);
     ASSERT_THAT(r, Eq(false));
@@ -130,7 +132,7 @@ TEST_F(ExperimentTest, ShouldIgnoreRequestWhileExperimentIsRunning)
 TEST_F(ExperimentTest, OnceExperimentIsStartedWillNotTryToStartAgain)
 {
     SystemState state;
-    auto startAction = _exp.StartExperimentAction();
+    auto startAction = _mission.StartExperimentAction();
 
     _exp.RequestExperiment(Experiment::Fibo);
 
@@ -220,15 +222,15 @@ TEST_F(ExperimentTest, ShouldAbortExperiment)
 
         EXPECT_CALL(experiment, Start());
 
-        EXPECT_CALL(this->_os, EventGroupGetBits(this->_event)).WillOnce(Return(MissionExperiment::Event::InProgress));
-        EXPECT_CALL(this->_os, EventGroupClearBits(this->_event, MissionExperiment::Event::MissionLoopIterationStarted));
+        EXPECT_CALL(this->_os, EventGroupGetBits(this->_event)).WillOnce(Return(ExperimentController::Event::InProgress));
+        EXPECT_CALL(this->_os, EventGroupClearBits(this->_event, ExperimentController::Event::MissionLoopIterationStarted));
 
-        EXPECT_CALL(this->_os, EventGroupGetBits(this->_event)).WillOnce(Return(MissionExperiment::Event::AbortRequest));
+        EXPECT_CALL(this->_os, EventGroupGetBits(this->_event)).WillOnce(Return(ExperimentController::Event::AbortRequest));
 
-        EXPECT_CALL(this->_os, EventGroupClearBits(this->_event, MissionExperiment::Event::AbortRequest));
+        EXPECT_CALL(this->_os, EventGroupClearBits(this->_event, ExperimentController::Event::AbortRequest));
         EXPECT_CALL(experiment, Stop(IterationResult::Failure));
 
-        EXPECT_CALL(this->_os, EventGroupClearBits(this->_event, MissionExperiment::Event::InProgress));
+        EXPECT_CALL(this->_os, EventGroupClearBits(this->_event, ExperimentController::Event::InProgress));
 
         EXPECT_CALL(this->_os, QueueReceive(this->_queue, _, _)).WillOnce(Return(false));
     }
@@ -259,7 +261,7 @@ TEST_F(ExperimentTest, ShouldWaitForNextMissionLoopIterationIfRequested)
 
         EXPECT_CALL(this->_os,
             EventGroupWaitForBits(this->_event,
-                MissionExperiment::Event::MissionLoopIterationStarted | MissionExperiment::Event::AbortRequest,
+                ExperimentController::Event::MissionLoopIterationStarted | ExperimentController::Event::AbortRequest,
                 false,
                 false,
                 InfiniteTimeout));
@@ -268,7 +270,7 @@ TEST_F(ExperimentTest, ShouldWaitForNextMissionLoopIterationIfRequested)
 
         EXPECT_CALL(this->_os,
             EventGroupWaitForBits(this->_event,
-                MissionExperiment::Event::MissionLoopIterationStarted | MissionExperiment::Event::AbortRequest,
+                ExperimentController::Event::MissionLoopIterationStarted | ExperimentController::Event::AbortRequest,
                 false,
                 false,
                 InfiniteTimeout));
@@ -339,4 +341,16 @@ TEST_F(ExperimentTest, ShouldStopExperimentWhenIterationFails)
     _exp.SetExperiments(experiments);
 
     _exp.BackgroundTask();
+}
+
+TEST_F(ExperimentTest, ShouldUpdateSystemStateWhenNoExperimentIsRunning)
+{
+    SystemState state;
+
+    NiceMock<ExperimentMock> experiment;
+    ON_CALL(experiment, Type()).WillByDefault(Return(Experiment::Fibo));
+
+    _mission.BuildUpdate().Execute(state);
+
+    ASSERT_THAT(state.Experiment.CurrentExperiment, Eq(None<ExperimentCode>()));
 }

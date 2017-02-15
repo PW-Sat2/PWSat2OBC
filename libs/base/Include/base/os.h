@@ -756,6 +756,13 @@ class EventGroup final
      */
     OSEventBits WaitAll(OSEventBits bits, bool clearOnExit, std::chrono::milliseconds timeout);
 
+    /**
+     * @brief Checks if bit is currently set
+     * @param bit Bit to check
+     * @return true if bit is set
+     */
+    bool IsSet(OSEventBits bit);
+
   private:
     /** @brief Underlying event group handle */
     OSEventGroupHandle _handle;

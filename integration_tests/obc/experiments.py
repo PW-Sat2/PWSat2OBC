@@ -1,11 +1,43 @@
 from enum import unique, IntEnum
 
-from .obc_mixin import OBCMixin, command
+from .obc_mixin import OBCMixin, command, decode_return
 
 
 @unique
 class ExperimentType(IntEnum):
     Fibo = 1
+
+
+@unique
+class StartResult(IntEnum):
+    Success = 0
+    Failure = 1
+
+
+@unique
+class IterationResult(IntEnum):
+    Finished = 0
+    LoopImmediately = 1
+    WaitForNextCycle = 2,
+    Failure = 3
+
+
+class ExperimentState:
+    def __init__(self):
+        self.Requested = None
+        self.Current = None
+        self.LastStartResult = None
+        self.LastIterationResult = None
+        self.IterationCounter = None
+
+    def __str__(self):
+        return '''
+Requested: {0!s}
+Current: {1!s}
+LastStartResult: {2!s}
+LastIterationResult: {3!s}
+IterationCounter: {4}
+'''.format(self.Requested, self.Current, self.LastStartResult, self.LastIterationResult, self.IterationCounter)
 
 
 class ExperimentsMixin(OBCMixin):
@@ -19,4 +51,28 @@ class ExperimentsMixin(OBCMixin):
 
     @command("abort_experiment")
     def abort_experiment(self):
+        pass
+
+    def _parse_experiment_state(text):
+        lines = text.strip('\n').split('\n')
+        v = dict(map(lambda x: x.split('\t'), lines))
+
+        def decode(key, type):
+            if v[key] == 'None':
+                return None
+            else:
+                return type(int(v[key]))
+
+        state = ExperimentState()
+        state.Requested = decode('Requested', ExperimentType)
+        state.Current = decode('Current', ExperimentType)
+        state.LastStartResult = decode('LastStartResult', StartResult)
+        state.LastIterationResult = decode('LastIterationResult', IterationResult)
+        state.IterationCounter = int(v['IterationCounter'])
+
+        return state
+
+    @decode_return(_parse_experiment_state)
+    @command("experiment_info")
+    def experiment_info(self):
         pass

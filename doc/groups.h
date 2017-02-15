@@ -27,12 +27,3 @@
  * @{
  * @}
  */
-
-/**
- * @defgroup experiments Experiments
- *
- * @brief Implementation of expermients
- *
- * @{
- * @}
- */

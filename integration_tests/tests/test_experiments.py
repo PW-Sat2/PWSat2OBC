@@ -22,10 +22,25 @@ class ExperimentsTest(BaseTest):
         self.system.obc.set_fibo_iterations(iterations_count)
         self.system.obc.request_experiment(ExperimentType.Fibo)
 
+        state = self.system.obc.experiment_info()
+        self.assertEqual(state.Requested, ExperimentType.Fibo)
+        self.assertIsNone(state.Current)
+
         self.system.obc.run_mission()
 
-        for i in xrange(iterations_count):
+        state = self.system.obc.experiment_info()
+        self.assertIsNone(state.Requested)
+        self.assertEqual(state.Current, ExperimentType.Fibo)
+        self.assertEqual(state.IterationCounter, 1)
+
+        for i in xrange(iterations_count - 1):
+            state = self.system.obc.experiment_info()
+            self.assertEqual(state.IterationCounter, i + 1)
             self.system.obc.run_mission()
+
+        state = self.system.obc.experiment_info()
+        self.assertIsNone(state.Requested)
+        self.assertIsNone(state.Current)
 
         files = self.system.obc.list_files('/')
         self.assertIn('fibo.dat', files, 'Experiment result file is not present')
@@ -55,7 +70,7 @@ class ExperimentsTest(BaseTest):
         self.assertIn('fibo.dat', files, 'Experiment result file is not present')
 
         result = self.system.obc.read_file('/fibo.dat')
-        self.assertEqual(len(result), 3 * 4)
+        self.assertEqual(len(result), 2 * 4)
 
-        unpacked = struct.unpack('<' + 'L' * 3, result)
-        self.assertEqual(unpacked, (1, 1, 2))
+        unpacked = struct.unpack('<' + 'L' * 2, result)
+        self.assertEqual(unpacked, (1, 1))

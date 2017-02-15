@@ -2,8 +2,8 @@
 #define LIBS_MISSION_EXPERIMENTS_FIBO_INCLUDE_EXPERIMENT_FIBO_FIBO_H_
 
 #include <cstdint>
+#include "experiments/experiments.h"
 #include "fs/fs.h"
-#include "mission/experiments.h"
 
 namespace experiment
 {
@@ -50,7 +50,7 @@ namespace experiment
         /**
          * @brief Fibonacci experiment
          */
-        class FibonacciExperiment final : public mission::experiments::IExperiment
+        class FibonacciExperiment final : public experiments::IExperiment
         {
           public:
             /**
@@ -65,15 +65,15 @@ namespace experiment
              */
             void Iterations(std::uint32_t iterations);
 
-            virtual mission::experiments::ExperimentCode Type() override;
-            virtual mission::experiments::StartResult Start() override;
-            virtual mission::experiments::IterationResult Iteration() override;
-            virtual void Stop(mission::experiments::IterationResult lastResult) override;
+            virtual experiments::ExperimentCode Type() override;
+            virtual experiments::StartResult Start() override;
+            virtual experiments::IterationResult Iteration() override;
+            virtual void Stop(experiments::IterationResult lastResult) override;
 
             /**
              * @brief Experiment code
              */
-            static constexpr mission::experiments::ExperimentCode Code = 0x01;
+            static constexpr experiments::ExperimentCode Code = 0x01;
 
           private:
             /** @brief File system */

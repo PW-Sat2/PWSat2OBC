@@ -8,7 +8,7 @@ add_library(${NAME} STATIC ${SOURCES})
 
 target_link_libraries(${NAME} 
 	base
-	mission_experiments
+	experiments
 	fs
 )
 

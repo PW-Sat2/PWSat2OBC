@@ -38,11 +38,11 @@ namespace experiment
             return this->_current;
         }
 
-        FibonacciExperiment::FibonacciExperiment(IFileSystem& fileSystem) : _fileSystem(fileSystem), _iterations(1)
+        FibonacciExperiment::FibonacciExperiment(IFileSystem& fileSystem) : _fileSystem(fileSystem), _iterations(5)
         {
         }
 
-        mission::experiments::ExperimentCode FibonacciExperiment::Type()
+        experiments::ExperimentCode FibonacciExperiment::Type()
         {
             return Code;
         }
@@ -52,21 +52,21 @@ namespace experiment
             this->_iterations = iterations;
         }
 
-        mission::experiments::StartResult FibonacciExperiment::Start()
+        experiments::StartResult FibonacciExperiment::Start()
         {
             this->_file = services::fs::File(this->_fileSystem, "/fibo.dat", FileOpen::CreateAlways, FileAccess::WriteOnly);
             if (!this->_file)
             {
                 LOG(LOG_LEVEL_ERROR, "Opening experiment file failed");
-                return mission::experiments::StartResult::Failure;
+                return experiments::StartResult::Failure;
             }
 
             this->_fibo = Fibonacci();
 
-            return mission::experiments::StartResult::Success;
+            return experiments::StartResult::Success;
         }
 
-        mission::experiments::IterationResult FibonacciExperiment::Iteration()
+        experiments::IterationResult FibonacciExperiment::Iteration()
         {
             auto v = this->_fibo.Current();
 
@@ -82,13 +82,13 @@ namespace experiment
 
             if (this->_iterations == 0)
             {
-                return mission::experiments::IterationResult::Finished;
+                return experiments::IterationResult::Finished;
             }
 
-            return mission::experiments::IterationResult::WaitForNextCycle;
+            return experiments::IterationResult::WaitForNextCycle;
         }
 
-        void FibonacciExperiment::Stop(mission::experiments::IterationResult lastResult)
+        void FibonacciExperiment::Stop(experiments::IterationResult lastResult)
         {
             UNREFERENCED_PARAMETER(lastResult);
 

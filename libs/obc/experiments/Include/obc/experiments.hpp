@@ -3,8 +3,8 @@
 
 #include <array>
 #include "experiment/fibo/fibo.h"
+#include "experiments/experiments.h"
 #include "fs/fs.h"
-#include "mission/experiments.h"
 
 namespace obc
 {
@@ -36,10 +36,10 @@ namespace obc
         experiment::fibo::FibonacciExperiment Fibo;
 
         /** @brief List of all experiments */
-        std::array<mission::experiments::IExperiment*, 1> Experiments;
+        std::array<experiments::IExperiment*, 1> Experiments;
 
         /** @brief Experiments controller */
-        mission::experiments::MissionExperiment ExperimentsController;
+        experiments::ExperimentController ExperimentsController;
     };
 
     /** @} */

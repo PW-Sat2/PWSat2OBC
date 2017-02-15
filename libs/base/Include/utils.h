@@ -94,6 +94,11 @@ template <class T> class Option
 {
   public:
     /**
+     * @brief Default ctor
+     */
+    Option();
+
+    /**
      * @brief Factory method that constructs empty Option instance.
      * @return Empty Option instance.
      */
@@ -216,6 +221,10 @@ template <class T> class Option
     {
     }
 };
+
+template <class T> inline Option<T>::Option() : HasValue(false), Value(T())
+{
+}
 
 /**
  * @brief Factory method that constructs empty Option instance.

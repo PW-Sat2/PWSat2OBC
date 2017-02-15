@@ -217,6 +217,10 @@ namespace services
              */
             File();
 
+            /**
+             * @brief Move ctor
+             * @param other Other file
+             */
             File(File&& other) noexcept;
 
             /**

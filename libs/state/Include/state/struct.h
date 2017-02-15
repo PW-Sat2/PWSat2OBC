@@ -6,6 +6,7 @@
 #include <cstdint>
 #include "adcs/adcs.hpp"
 #include "base/os.h"
+#include "experiments/experiments.h"
 #include "time/TimePoint.h"
 
 /**
@@ -41,6 +42,11 @@ struct SystemState
 
     /** @brief Current adcs operational mode. */
     adcs::AdcsMode AdcsMode;
+
+    /**
+     * @brief Experiment controller status
+     */
+    experiments::ExperimentState Experiment;
 };
 
 /** @} */
