@@ -18,6 +18,7 @@ private :
 
 	uint8_t CameraCmdPrefix = 0xAA;
 	uint8_t CameraCmdLength = 6;
+	uint8_t CameraRetCmdLength=12;
 	uint8_t CameraJPEGFormat= 0x07;
 	drivers::uart::Uart _uartBus;
 
@@ -74,10 +75,10 @@ private :
 	int8_t CameraReceiveJPEGData(uint8_t* data, uint16_t dataLength, uint16_t packageSize);
 	void CameraSendCmdSync(void);
 	void CameraSendCmdAck(CameraCmd cmdAck, uint8_t packageIdLow, uint8_t packageIdHigh);
-	uint32_t CameraGetData(uint8_t* data, uint32_t dataLength, int8_t timeoutMs);
-	bool CameraGetCmd( uint8_t* cmd, uint32_t length, int8_t timeoutMs);
+	uint32_t CameraGetData(uint8_t* data, uint32_t dataLength, int8_t timeoutMs,bool send);
+	bool CameraGetCmd( uint8_t* cmd, uint32_t length, int8_t timeoutMs,bool send);
 	bool CameraGetCmdSync();
-	CameraCmd CameraGetCmdAck(int8_t timeoutMs);
+	CameraCmd CameraGetCmdAck(int8_t timeoutMs, uint8_t length);
 	bool CameraGetCmdAckSync(int8_t timeoutMs);
 	void CameraSendCmdAckSync(void);
 
@@ -92,6 +93,7 @@ int32_t CameraGetJPEGPicture(CameraJPEGResolution resolution, uint8_t * data,
 int32_t CameraGetRAWPicture(CameraRAWImageFormat format,
                             CameraRAWResolution resolution, uint8_t * data, uint32_t dataLength);
 
+bool isSynchronized=false;
 
 void CameraInit();
 };

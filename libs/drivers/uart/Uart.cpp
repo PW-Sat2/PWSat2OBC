@@ -14,15 +14,19 @@ using namespace drivers::uart;
 
 static unsigned int               	rxDmaCh;
 static unsigned int              	txDmaCh;
+using namespace std::chrono_literals;
 
 bool Uart::TransmitDmaComplete(unsigned int channel,
 		                        unsigned int sequenceNo,
 		                        void *userParam)
    {
 	auto This = static_cast<Uart*>(userParam);
-	(void)channel;
 	(void)sequenceNo;
+	if(channel == txDmaCh)
     System::EventGroupSetBitsISR(This->_transferGroup, TransferTXFinished);
+	else {
+		System::EventGroupSetBitsISR(This->_transferGroup, TransferRXFinished);
+	}
     System::EndSwitchingISR();
 	return true;
   }
@@ -104,6 +108,8 @@ UartResult Uart::Read(gsl::span<const uint8_t>data){
     System::EventGroupClearBits(this->_transferGroup, TransferRXFinished);
 
 	//uint8_t *InData= const_cast<uint8_t*>(data.data());
+    uint8_t datadbg = data.length();
+    (void)datadbg;
 	//Lock lock(this->rxlock, MAX_DELAY);
 
 		/*if (!lock())
@@ -120,9 +126,9 @@ UartResult Uart::Read(gsl::span<const uint8_t>data){
 	        true,
 			data.length(),
 	        dmadrvDataSize1,
-			ReceiveDmaComplete,
+			TransmitDmaComplete,
 	        this);
-	 //System::EventGroupWaitForBits(this->_transferGroup, TransferRXFinished, false, true, InfiniteTimeout);
+	// System::EventGroupWaitForBits(this->_transferGroup, TransferFinished, true, true, 1s);
 	 return UartResult::OK;
 }
 
@@ -141,6 +147,6 @@ UartResult Uart::Write(gsl::span<const uint8_t>data){
 							  TransmitDmaComplete,
 							  this);
 
-	 System::EventGroupWaitForBits(this->_transferGroup, TransferTXFinished, false, true, InfiniteTimeout);
+	 System::EventGroupWaitForBits(this->_transferGroup, TransferFinished, true, true, 2s);
 	 return UartResult::OK;
 }

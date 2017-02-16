@@ -46,7 +46,7 @@ using namespace devices::camera;
 
 OBC Main;
 mission::ObcMission Mission(Main.timeProvider, Main.antennaDriver, false);
-static uint8_t out[256];
+static uint8_t out[10000];
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
@@ -200,8 +200,8 @@ void UartTask(void* param)
 	camera.CameraInit();
 
 	while (1) {
-camera.CameraGetJPEGPicture(CameraJPEGResolution::_640x480,out,255);
-vTaskDelay(1000 / portTICK_PERIOD_MS);
+camera.CameraGetJPEGPicture(CameraJPEGResolution::_160x128,out,255);
+System::SleepTask(1s);
 	}
 
 }
