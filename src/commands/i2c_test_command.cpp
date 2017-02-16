@@ -16,7 +16,7 @@ void I2CTestCommandHandler(uint16_t argc, char* argv[])
 
     if (argc != 4)
     {
-        Main.terminal.Puts("i2c <w|wr> <system|payload> <device> <data>\n");
+        Main.terminal.Puts("i2c <r|w|wr> <system|payload> <device> <data>\n");
         return;
     }
 
@@ -50,6 +50,11 @@ void I2CTestCommandHandler(uint16_t argc, char* argv[])
     else if (strcmp(argv[0], "w") == 0)
     {
         result = bus->Write(device, span<const uint8_t>(data, dataLength));
+    }
+    else if (strcmp(argv[0], "r") == 0)
+    {
+        auto p = atoi(argv[3]);
+        result = bus->Read(device, gsl::make_span(output).subspan(0, p));
     }
     else
     {

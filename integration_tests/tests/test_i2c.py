@@ -78,3 +78,19 @@ class I2CTest(BaseTest):
         response = self.system.obc.i2c_transfer('wr', 'system', 0x12, 'abc')
 
         self.assertEqual(response, 'bcd')
+
+    @auto_comm_handling(False)
+    def test_isis_behaviour(self):
+        echo2 = EchoDevice(0x16)
+        self.system.sys_bus.add_device(echo2)
+
+        self.system.obc.i2c_transfer('w', 'system', 0x12, 'abc')
+
+        self.system.obc.i2c_transfer('w', 'system', 0x16, 'def')
+
+        echo1_response = self.system.obc.i2c_transfer('r', 'system', 0x12, '3')
+
+        echo2_response = self.system.obc.i2c_transfer('r', 'system', 0x16, '3')
+
+        self.assertEqual(echo1_response, 'bcd')
+        self.assertEqual(echo2_response, 'efg')

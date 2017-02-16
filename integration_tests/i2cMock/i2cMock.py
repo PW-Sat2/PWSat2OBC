@@ -50,7 +50,10 @@ class I2CDevice(object):
         if handler is None:
             return self._missing_handler(data)
 
-        return handler(self, *args)
+        self.response = handler(self, *args) or []
+
+    def get_response(self):
+        return self.response
 
     def freeze(self):
         self.freeze_end.wait()
@@ -95,6 +98,7 @@ class I2CMock(object):
     CMD_UNLATCH = 0x07
     CMD_STOP = 0x08
     CMD_STOPPED = 0x09
+    CMD_I2C_REQUEST_RESPONSE = 0xA
 
     _port = serial.Serial
 
@@ -118,7 +122,8 @@ class I2CMock(object):
         self._command_handlers = {
             I2CMock.CMD_VERSION: I2CMock._device_command_version,
             I2CMock.CMD_STOPPED: I2CMock._device_command_stopped,
-            I2CMock.CMD_I2C_WRITE: I2CMock._device_command_write
+            I2CMock.CMD_I2C_WRITE: I2CMock._device_command_write,
+            I2CMock.CMD_I2C_REQUEST_RESPONSE: I2CMock._device_command_request_response
         }
 
         self._started = Event()
@@ -239,13 +244,23 @@ class I2CMock(object):
         device = self._device(address)
         device.freeze_end = self._freeze_end
 
-        response = device.handle(data) or []
+        device.handle(data)
+
+        response = device.get_response()
 
         self._log.debug('Generated response %r', response)
 
+    def _device_command_request_response(self, address):
+        address = ord(address)
+
+        self._log.info('Device(%X) read', address)
+        device = self._device(address)
+
+        response = device.get_response()
+
         self._command(I2CMock.CMD_I2C_RESPONSE, response)
 
-        self._log.debug('Response written')
+        self._log.debug('Response written (%r)', response)
 
     def _device(self, address):
         if self._devices.has_key(address):
