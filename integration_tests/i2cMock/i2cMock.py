@@ -7,6 +7,8 @@ import binascii
 import serial.threaded
 import logging
 
+from enum import IntEnum
+
 from utils import hex_data
 
 DEVICE_SELECTED_FOR_WRITE = 'W'
@@ -87,6 +89,23 @@ class MissingDevice(I2CDevice):
 class DeviceMockStopped(Exception):
     pass
 
+class MockPin(IntEnum):
+    PB0 = 0x50
+    PB1 = 0x51
+    PB2 = 0x52
+    PB3 = 0x53
+    PB4 = 0x54
+    PB5 = 0x55
+    PB6 = 0x56
+    PB7 = 0x57
+    PC0 = 0x80
+    PC1 = 0x81
+    PC2 = 0x82
+    PC3 = 0x83
+    PD4 = 0xB4
+    PD5 = 0xB5
+    PD6 = 0xB6
+    PD7 = 0xB7
 
 class I2CMock(object):
     CMD_VERSION = 0x01
@@ -99,6 +118,8 @@ class I2CMock(object):
     CMD_STOP = 0x08
     CMD_STOPPED = 0x09
     CMD_I2C_REQUEST_RESPONSE = 0xA
+    CMD_GPIO_LOW = 0xA1
+    CMD_GPIO_HIGH = 0xA2
 
     _port = serial.Serial
 
@@ -174,6 +195,12 @@ class I2CMock(object):
 
     def disable(self):
         self._command(I2CMock.CMD_I2C_DISABLE)
+
+    def gpio_low(self, pin):
+        self._command(I2CMock.CMD_GPIO_LOW, [int(pin)])
+
+    def gpio_high(self, pin):
+        self._command(I2CMock.CMD_GPIO_HIGH, [int(pin)])
 
     def _command(self, cmd, data=[]):
         raw = ['S', cmd]
