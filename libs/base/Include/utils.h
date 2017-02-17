@@ -106,15 +106,25 @@ template <class T> class Option
     {
         return Option<T>(false, T());
     }
+    //
+    //    /**
+    //     * @brief Factory method that constructs Option instance that holds given value.
+    //     * @param[in] value Value to hold in Option instance.
+    //     * @return Option instance that holds a value.
+    //     */
+    //    static Option<T> Some(T&& value)
+    //    {
+    //        return Option<T>(true, std::move(value));
+    //    }
 
     /**
-     * @brief Factory method that constructs Option instance that holds given value.
-     * @param[in] value Value to hold in Option instance.
-     * @return Option instance that holds a value.
+     * @brief Factory method that constucts Option instance and its value in place
+     * @param args Arguments passed to constructor of T
+     * @return Option instance
      */
-    static Option<T> Some(T&& value)
+    template <typename... Args> static Option<T> Some(Args&&... args)
     {
-        return Option<T>(true, std::move(value));
+        return Option<T>(true, std::forward<Args>(args)...);
     }
 
     /**
@@ -125,81 +135,6 @@ template <class T> class Option
     static Option<T> Some(T& value)
     {
         return Option<T>(true, value);
-    }
-
-    /**
-     * @brief Equality operator
-     * @param other Other value (raw, not option)
-     * @retval false this is None
-     * @retval false this is Some and other is not equal to holded value
-     * @retval true this is Some and other is equal to holded value
-     */
-    bool operator==(const T& other) const
-    {
-        if (!this->HasValue)
-        {
-            return false;
-        }
-
-        return this->Value == other;
-    }
-
-    /**
-     * @brief Inequality operator
-     * @param other Other value (raw, not option)
-     * @retval true this is None
-     * @retval true this is Some and other is not equal to holded value
-     * @retval false this is Some and other is equal to holded value
-     */
-    bool operator!=(const T& other) const
-    {
-        if (!this->HasValue)
-        {
-            return false;
-        }
-
-        return this->Value != other;
-    }
-
-    /**
-     * @brief Equality operator
-     * @param other Other value (option)
-     * @retval true when both are None
-     * @retval false when one is None and other is Some
-     * @retval false when both are Some and underlying values are not equal
-     * @retval true when both are Some and underlying values are equal
-     */
-    bool operator==(const Option<T>& other) const
-    {
-        if (this->HasValue && other.HasValue)
-        {
-            return this->Value == other.Value;
-        }
-
-        return this->HasValue == other.HasValue;
-    }
-
-    /**
-     * @brief Equality operator
-     * @param other Other value (option)
-     * @retval true when both are None
-     * @retval false when one is None and other is Some
-     * @retval false when both are Some and underlying values are not equal
-     * @retval true when both are Some and underlying values are equal
-     */
-    bool operator!=(const Option<T>& other) const
-    {
-        if (this->HasValue && other.HasValue)
-        {
-            return this->Value != other.Value;
-        }
-
-        if (this->HasValue || other.HasValue)
-        {
-            return true;
-        }
-
-        return false;
     }
 
     /**
@@ -245,6 +180,71 @@ template <typename T> static inline Option<std::remove_reference_t<T>> Some(T&& 
     using U = std::remove_reference_t<T>;
 
     return Option<U>::Some(std::forward<U>(value));
+}
+
+/**
+ * @brief Equality operator for @ref Option<T>
+ * @param lhs Left side value
+ * @param rhs Right side value (raw, not option)
+ * @retval false lhs is None
+ * @retval false lhs is Some and rhs is not equal to holded value
+ * @retval true lhs is Some and rhs is equal to holded value
+ */
+template <typename T> bool operator==(const Option<T>& lhs, const T& rhs)
+{
+    if (!lhs.HasValue)
+    {
+        return false;
+    }
+
+    return lhs.Value == rhs;
+}
+
+/**
+ * @brief Inequality operator for @ref Option<T>
+ * @param lhs Left side value
+ * @param rhs Right side value (raw, not option)
+ * @retval true lhs is None
+ * @retval true lhs is Some and rhs is not equal to holded value
+ * @retval false lhs is Some and rhs is equal to holded value
+ */
+template <typename T> bool operator!=(const Option<T>& lhs, const T& rhs)
+{
+    return !(lhs == rhs);
+}
+
+/**
+ * @brief Equality operator for @ref Option<T>
+ * @brief Inequality operator for @ref Option<T>
+ * @param lhs Left side value
+ * @param rhs Right side value (option)
+ * @retval true when both are None
+ * @retval false when one is None and other is Some
+ * @retval false when both are Some and underlying values are not equal
+ * @retval true when both are Some and underlying values are equal
+ */
+template <typename T> bool operator==(const Option<T>& lhs, const Option<T>& rhs)
+{
+    if (lhs.HasValue && rhs.HasValue)
+    {
+        return lhs.Value == rhs.Value;
+    }
+
+    return lhs.HasValue == rhs.HasValue;
+}
+
+/**
+ * @brief Equality operator for @ref Option<T>
+ * @param lhs Left side value
+ * @param rhs Right side value (option)
+ * @retval true when both are None
+ * @retval false when one is None and other is Some
+ * @retval false when both are Some and underlying values are not equal
+ * @retval true when both are Some and underlying values are equal
+ */
+template <typename T> bool operator!=(const Option<T>& lhs, const Option<T>& rhs)
+{
+    return !(lhs == rhs);
 }
 
 /**
