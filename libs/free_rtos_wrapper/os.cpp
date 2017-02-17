@@ -125,6 +125,11 @@ OSEventBits System::EventGroupSetBits(OSEventGroupHandle eventGroup, const OSEve
     return xEventGroupSetBits(eventGroup, bitsToChange);
 }
 
+OSEventBits System::EventGroupGetBits(OSEventGroupHandle eventGroup)
+{
+    return xEventGroupGetBits(eventGroup);
+}
+
 OSEventBits System::EventGroupSetBitsISR(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange)
 {
     return xEventGroupSetBitsFromISR(eventGroup, bitsToChange, nullptr);

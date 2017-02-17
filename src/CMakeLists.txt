@@ -50,13 +50,16 @@ target_link_libraries(${NAME}
     gsl
     n25q
     antenna
+    exp_fibo
     mission_antenna
     mission_sail
     mission_time
+    mission_experiments
     yaffs
     obc_storage
     obc_communication
     obc_hardware
+    obc_experiments
     spi
     efm_emlib
     burtc

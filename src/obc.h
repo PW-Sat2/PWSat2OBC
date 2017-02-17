@@ -1,6 +1,7 @@
 #ifndef OBC_H
 #define OBC_H
 
+#include <array>
 #include <atomic>
 #include <cstdint>
 #include <gsl/span>
@@ -10,6 +11,7 @@
 #include "antenna/driver.h"
 #include "antenna/miniport.h"
 #include "base/os.h"
+#include "experiment/fibo/fibo.h"
 #include "fs/fs.h"
 #include "fs/yaffs.h"
 #include "leuart/line_io.h"
@@ -17,6 +19,7 @@
 #include "n25q/yaffs.h"
 #include "obc/adcs.hpp"
 #include "obc/communication.h"
+#include "obc/experiments.hpp"
 #include "obc/hardware.h"
 #include "obc/storage.h"
 #include "spi/efm.h"
@@ -81,6 +84,9 @@ struct OBC
 
     /** @brief Adcs subsytem for obc. */
     obc::Adcs adcs;
+
+    /** @brief Experiments */
+    obc::OBCExperiments Experiments;
 
     /** @brief Terminal object. */
     Terminal terminal;

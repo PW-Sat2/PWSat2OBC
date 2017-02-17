@@ -7,6 +7,7 @@ OBC::OBC()
       Hardware(&this->PowerControlInterface, timeProvider), //
       Communication(Hardware.I2C.Buses.Bus),                //
       Storage(Hardware.SPI, fs, Hardware.Pins),             //
+      Experiments(fs),                                      //
       terminal(this->IO)                                    //
 {
 }
@@ -38,5 +39,7 @@ OSResult OBC::PostStartInitialization()
         return result;
     }
 
+    this->Experiments.Initialize();
+   
     return OSResult::Success;
 }

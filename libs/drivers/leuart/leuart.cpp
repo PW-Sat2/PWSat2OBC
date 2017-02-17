@@ -136,19 +136,21 @@ static bool BufferFilled(unsigned int channel, unsigned int sequenceNo, void* us
     return true;
 }
 
-static void leuartReadBuffer(LineIO* io, gsl::span<uint8_t> buffer)
+static void leuartExchangeBuffers(LineIO* io, gsl::span<const std::uint8_t> outputBuffer, gsl::span<uint8_t> inputBuffer)
 {
     UNREFERENCED_PARAMETER(io);
 
     DMADRV_PeripheralMemory(dmaChannel,
         dmadrvPeripheralSignal_LEUART0_RXDATAV,
-        buffer.data(),
+        inputBuffer.data(),
         (void*)&LEUART0->RXDATA,
         true,
-        buffer.size(),
+        inputBuffer.size(),
         dmadrvDataSize1,
         BufferFilled,
         NULL);
+
+    leuartPrintBuffer(outputBuffer);
 
     System::TakeSemaphore(transferFinished, InfiniteTimeout);
 
@@ -165,5 +167,5 @@ void LeuartLineIOInit(LineIO* io)
     io->VPrintf = leuartvPrintf;
     io->Readline = leuartReadline;
     io->PrintBuffer = leuartPrintBuffer;
-    io->ReadBuffer = leuartReadBuffer;
+    io->ExchangeBuffers = leuartExchangeBuffers;
 }
