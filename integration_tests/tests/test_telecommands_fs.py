@@ -1,9 +1,5 @@
-import struct
-
-import time
-
-from devices import UplinkFrame
-from system import wait_for_obc_start, auto_power_on
+import telecommand
+from system import auto_power_on
 from tests.base import BaseTest
 from utils import ensure_byte_list, TestEvent
 
@@ -21,6 +17,7 @@ class FileSystemTelecommandsTest(BaseTest):
         self.system.comm.on_hardware_reset = on_reset
 
         self.system.obc.power_on(clean_state=True)
+        self.system.obc.wait_to_start()
 
         e.wait_for_change(1)
 
@@ -33,9 +30,7 @@ class FileSystemTelecommandsTest(BaseTest):
 
         self.system.obc.write_file(p, data)
 
-        seqs = ensure_byte_list(struct.pack('<LLLL', 0, 3, 1, 2))
-
-        self.system.comm.put_frame(UplinkFrame(apid=0xAB, content=[0x11, len(p)] + list(p) + [0x0] + seqs))
+        self.system.comm.put_frame(telecommand.DownloadFile(respond_as=0x11, path=p, seqs=[0, 3, 1, 2]))
 
         frames = [
             self.system.comm.get_frame(20),
@@ -56,9 +51,8 @@ class FileSystemTelecommandsTest(BaseTest):
         self._start()
 
         p = "/a/non_exist"
-        seqs = ensure_byte_list(struct.pack('<LLLL', 0, 3, 1, 2))
 
-        self.system.comm.put_frame(UplinkFrame(apid=0xAB, content=[0x11, len(p)] + list(p) + [0x0] + seqs))
+        self.system.comm.put_frame(telecommand.DownloadFile(respond_as=0x11, path=p, seqs=[0, 3, 1, 2]))
 
         frame = self.system.comm.get_frame(20)
 
