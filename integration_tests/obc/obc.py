@@ -1,5 +1,8 @@
 import logging
 from base64 import b64encode
+
+import time
+
 from utils import ExtendableFormatter
 
 from .experiments import ExperimentsMixin
@@ -38,10 +41,10 @@ class OBC(OBCMixin,
     def wait_to_start(self):
         response = self._terminal.command("getState")
         while response != "1":
+            time.sleep(0.1)
             response = self._terminal.command("getState")
 
         self.log.info("OBC reported ready state")
-
 
     def reset(self):
         self._terminal.reset()

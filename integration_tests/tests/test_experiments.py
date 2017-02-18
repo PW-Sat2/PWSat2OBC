@@ -28,24 +28,26 @@ class ExperimentsTest(BaseTest):
 
         self.system.obc.run_mission()
 
+        self.system.obc.wait_for_experiment_iteration(1, 3)
+
         state = self.system.obc.experiment_info()
         self.assertIsNone(state.Requested)
         self.assertEqual(state.Current, ExperimentType.Fibo)
-        self.assertEqual(state.IterationCounter, 1)
 
         for i in xrange(iterations_count - 1):
-            state = self.system.obc.experiment_info()
-            self.assertEqual(state.IterationCounter, i + 1)
+            self.system.obc.wait_for_experiment_iteration(i + 1, 3)
             self.system.obc.run_mission()
+
+        self.system.obc.wait_for_experiment(None, timeout=3)
 
         state = self.system.obc.experiment_info()
         self.assertIsNone(state.Requested)
         self.assertIsNone(state.Current)
 
-        files = self.system.obc.list_files('/')
+        files = self.system.obc.list_files('/a')
         self.assertIn('fibo.dat', files, 'Experiment result file is not present')
 
-        result = self.system.obc.read_file('/fibo.dat')
+        result = self.system.obc.read_file('/a/fibo.dat')
 
         self.assertEqual(len(result), 7 * 4)
 
@@ -60,16 +62,19 @@ class ExperimentsTest(BaseTest):
 
         for i in xrange(2):
             self.system.obc.run_mission()
+            self.system.obc.wait_for_experiment_iteration(i + 1, 3)
 
         self.system.obc.abort_experiment()
 
         for i in xrange(2):
             self.system.obc.run_mission()
 
-        files = self.system.obc.list_files('/')
+        self.system.obc.wait_for_experiment(None, timeout=3)
+
+        files = self.system.obc.list_files('/a')
         self.assertIn('fibo.dat', files, 'Experiment result file is not present')
 
-        result = self.system.obc.read_file('/fibo.dat')
+        result = self.system.obc.read_file('/a/fibo.dat')
         self.assertEqual(len(result), 2 * 4)
 
         unpacked = struct.unpack('<' + 'L' * 2, result)

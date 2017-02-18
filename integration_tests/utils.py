@@ -2,6 +2,9 @@ from string import Formatter
 from threading import Event
 import inspect
 
+import time
+
+
 def hex_data(data):
     if isinstance(data, basestring):
         data = [ord(c) for c in data]
@@ -79,3 +82,20 @@ def ensure_byte_list(value):
         return v
 
     return map(ensure_single, value)
+
+
+def busy_wait(condition, projection=None, delay=None, timeout=None):
+    end_at = None if timeout is None else time.time() + timeout
+
+    while not condition():
+        if delay is not None:
+            time.sleep(delay)
+
+        if end_at is not None and time.time() > end_at:
+            raise Exception('Waiting has timed out')
+
+    if projection is not None:
+        return projection
+    else:
+        return None
+

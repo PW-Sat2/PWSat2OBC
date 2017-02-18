@@ -1,6 +1,7 @@
 #include "telecommand_handling.h"
 #include <stdalign.h>
 #include <stdint.h>
+#include <algorithm>
 #include <array>
 #include "comm/Frame.hpp"
 #include "logger/logger.h"
@@ -37,17 +38,17 @@ void IncomingTelecommandHandler::HandleFrame(ITransmitFrame& transmitter, Frame&
 
 void IncomingTelecommandHandler::DispatchCommandHandler(ITransmitFrame& transmitter, uint8_t commandCode, span<const uint8_t> parameters)
 {
-    for (auto command : this->_telecommands)
+    auto command = std::find_if(this->_telecommands.begin(), this->_telecommands.end(), [commandCode](IHandleTeleCommand* p) {
+        return p->CommandCode() == commandCode;
+    });
+
+    if (command == this->_telecommands.end())
     {
-        if (command->CommandCode() == commandCode)
-        {
-            LOGF(LOG_LEVEL_DEBUG, "Dispatching telecommand handler for command %d", commandCode);
-
-            command->Handle(transmitter, parameters);
-
-            return;
-        }
+        LOGF(LOG_LEVEL_ERROR, "No telecommand handler for code 0x%X", commandCode);
+        return;
     }
+
+    (*command)->Handle(transmitter, parameters);
 }
 
 DecodeTelecommandResult::DecodeTelecommandResult(DecodeTelecommandFailureReason reason)

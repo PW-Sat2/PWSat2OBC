@@ -76,9 +76,6 @@ struct OBC
     /** @brief Power control interface */
     PowerControl PowerControlInterface;
 
-    /** @brief Overall satellite <-> Earth communication */
-    obc::OBCCommunication Communication;
-
     /** @brief OBC storage */
     obc::OBCStorage Storage;
 
@@ -87,6 +84,9 @@ struct OBC
 
     /** @brief Experiments */
     obc::OBCExperiments Experiments;
+
+    /** @brief Overall satellite <-> Earth communication */
+    obc::OBCCommunication Communication;
 
     /** @brief Terminal object. */
     Terminal terminal;

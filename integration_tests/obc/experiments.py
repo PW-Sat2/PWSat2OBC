@@ -1,11 +1,14 @@
+import time
 from enum import unique, IntEnum
 
+from utils import busy_wait
 from .obc_mixin import OBCMixin, command, decode_return
 
 
 @unique
 class ExperimentType(IntEnum):
     Fibo = 1
+    Detumbling = 2
 
 
 @unique
@@ -76,3 +79,18 @@ class ExperimentsMixin(OBCMixin):
     @command("experiment_info")
     def experiment_info(self):
         pass
+
+    def wait_for_experiment(self, experiment, timeout):
+        def condition():
+            info = self.experiment_info()
+            return info.Current == experiment
+
+        busy_wait(condition, delay=1, timeout=timeout)
+
+    def wait_for_experiment_iteration(self, iteration, timeout):
+        def condition():
+            info = self.experiment_info()
+            return info.IterationCounter == iteration
+
+        busy_wait(condition, timeout=timeout)
+
