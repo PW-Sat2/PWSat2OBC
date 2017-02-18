@@ -4,11 +4,11 @@
 namespace adcs
 {
     AdcsCoordinator::AdcsCoordinator(IDetumblingSupport& builtinDetembling_, //
-        IDetumblingSupport& customDetumbling_,                               //
+        IDetumblingSupport& experimentalDetumbling_,                         //
         ISunPointingSupport& sunpointAlgorithm_)                             //
         : currentMode(AdcsMode::Disabled),                                   //
           builtinDetumbling(builtinDetembling_),                             //
-          customDetumbling(customDetumbling_),                               //
+          experimentalDetumbling(experimentalDetumbling_),                   //
           sunpointAlgorithm(sunpointAlgorithm_)
     {
     }
@@ -44,9 +44,9 @@ namespace adcs
         return SetState(AdcsMode::BuiltinDetumbling, this->builtinDetumbling.EnableDetumbling());
     }
 
-    OSResult AdcsCoordinator::EnableCustomDetumbling()
+    OSResult AdcsCoordinator::EnableExperimentalDetumbling()
     {
-        if (this->currentMode == AdcsMode::CustomDetumbling)
+        if (this->currentMode == AdcsMode::ExperimentalDetumbling)
         {
             return OSResult::Success;
         }
@@ -57,12 +57,12 @@ namespace adcs
             return result;
         }
 
-        return SetState(AdcsMode::CustomDetumbling, this->customDetumbling.EnableDetumbling());
+        return SetState(AdcsMode::ExperimentalDetumbling, this->experimentalDetumbling.EnableDetumbling());
     }
 
     OSResult AdcsCoordinator::EnableSunPointing()
     {
-        if (this->currentMode == AdcsMode::CustomSunpointing)
+        if (this->currentMode == AdcsMode::ExperimentalSunpointing)
         {
             return OSResult::Success;
         }
@@ -73,7 +73,7 @@ namespace adcs
             return result;
         }
 
-        return SetState(AdcsMode::CustomSunpointing, this->sunpointAlgorithm.EnableSunPointing());
+        return SetState(AdcsMode::ExperimentalSunpointing, this->sunpointAlgorithm.EnableSunPointing());
     }
 
     OSResult AdcsCoordinator::Disable()
@@ -82,9 +82,9 @@ namespace adcs
         {
             case AdcsMode::BuiltinDetumbling:
                 return SetState(AdcsMode::Disabled, this->builtinDetumbling.DisableDetumbling());
-            case AdcsMode::CustomDetumbling:
-                return SetState(AdcsMode::Disabled, this->customDetumbling.DisableDetumbling());
-            case AdcsMode::CustomSunpointing:
+            case AdcsMode::ExperimentalDetumbling:
+                return SetState(AdcsMode::Disabled, this->experimentalDetumbling.DisableDetumbling());
+            case AdcsMode::ExperimentalSunpointing:
                 return SetState(AdcsMode::Disabled, this->sunpointAlgorithm.DisableSunPointing());
             default:
                 return OSResult::Success;
