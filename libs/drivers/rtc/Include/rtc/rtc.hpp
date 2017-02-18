@@ -38,7 +38,7 @@ namespace devices
               *
               * @return Transfer result - I2CResult::OK when read was successful.
               */
-            drivers::i2c::I2CResult ReadTime(RTCTime& rtcTime);
+            OSResult ReadTime(RTCTime& rtcTime);
 
           private:
             static constexpr std::uint8_t I2CAddress = 0b1010001;

@@ -17,7 +17,7 @@ RTCObject::RTCObject(drivers::i2c::II2CBus& bus) : _bus(bus)
 {
 }
 
-I2CResult RTCObject::ReadTime(RTCTime& rtcTime)
+OSResult RTCObject::ReadTime(RTCTime& rtcTime)
 {
     std::array<std::uint8_t, 1> inBuffer;
     std::array<std::uint8_t, 7> outBuffer;
@@ -28,8 +28,8 @@ I2CResult RTCObject::ReadTime(RTCTime& rtcTime)
     const bool status = (result == I2CResult::OK);
     if (!status)
     {
-        LOG(LOG_LEVEL_ERROR, "Unable read time from RTC");
-        return result;
+        LOGF(LOG_LEVEL_ERROR, "Unable read time from RTC. Reason: %d", num(result));
+        return OSResult::InvalidOperation;
     }
 
     Reader reader(outBuffer);
@@ -42,5 +42,5 @@ I2CResult RTCObject::ReadTime(RTCTime& rtcTime)
     rtcTime.months = reader.ReadByteBCD(MonthsNibbleMask);
     rtcTime.years = reader.ReadByteBCD(YearsNibbleMask);
 
-    return I2CResult::OK;
+    return OSResult::Success;
 }
