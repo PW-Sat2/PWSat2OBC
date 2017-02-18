@@ -20,7 +20,8 @@ void Burtc::IRQHandler()
 {
     std::uint32_t irq = BURTC_IntGet();
     BURTC_IntClear(irq);
-    BURTC_CompareSet(0, BURTC->COMP0 + Burtc::CompareValue);
+    BURTC_CompareSet(0, BURTC_CompareGet(0) + Burtc::CompareValue);
+    //    LOGF_ISR(LOG_LEVEL_INFO, "dupa %lX %ld -> %ld", irq, BURTC_CounterGet(), BURTC_CompareGet(0));
 
     System::GiveSemaphoreISR(burtcInterruptSemaphore);
 
@@ -62,6 +63,13 @@ OSResult Burtc::Initialize()
     return OSResult::Success;
 }
 
+void Burtc::Start()
+{
+    BURTC_CompareSet(0, BURTC_CounterGet() + CompareValue);
+    NVIC_ClearPendingIRQ(BURTC_IRQn);
+    NVIC_EnableIRQ(BURTC_IRQn);
+}
+
 std::chrono::milliseconds Burtc::CalculateCurrentTimeInterval()
 {
     return std::chrono::milliseconds(1000 * CompareValue / BURTC_ClockFreqGet());
@@ -84,10 +92,6 @@ void Burtc::ConfigureHardware()
     BURTC_IntClear(BURTC_IEN_COMP0);
 
     NVIC_SetPriority(BURTC_IRQn, InterruptPriority);
-    NVIC_ClearPendingIRQ(BURTC_IRQn);
-    NVIC_EnableIRQ(BURTC_IRQn);
-
-    BURTC_CompareSet(0, BURTC_CounterGet() + CompareValue);
 
     BURTC_IntEnable(BURTC_IEN_COMP0);
 }
