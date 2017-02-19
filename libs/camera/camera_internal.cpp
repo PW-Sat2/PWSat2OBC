@@ -397,14 +397,11 @@ int8_t Camera::CameraReceiveJPEGData(uint8_t* data, uint16_t dataLength, uint16_
     uint8_t packageCnt = dataLength / (packageSize - 6) + (dataLength % (packageSize - 6) != 0 ? 1 : 0);
     for (i = 0; i < packageCnt; i++)
     {
-
             ret = CameraGetData(&data[i*packageSize], packageSize, -1,true);
             if (ret > 0)
             {
                 CameraSendCmdAck(CameraCmd::None,i & 0xff,(uint8_t)(i >> 8));
             }
-
-
     }
     return i;
 }

@@ -33,12 +33,14 @@ bool Camera::InitializeJPEGPicture(CameraJPEGResolution resolution) {
 
 	        CameraSendCmdJPEGInitial(resolution);
 
+
 	        if (!CameraGetCmdAckInitial())
 	        {
 	            LOG(LOG_LEVEL_ERROR, "---------------- Ack Initial failed ------------------\n");
 	            isInitialized = false;
 	            return false;
 	        }
+
 
 	        if (!CameraSendCmdSetPackageSize(512))
 	        {
@@ -68,6 +70,7 @@ bool Camera::InitializeJPEGPicture(CameraJPEGResolution resolution) {
 
 
 
+
 int32_t Camera::CameraGetJPEGPicture(uint8_t* data, uint32_t dataLength, bool reset)
 {
 	UNREFERENCED_PARAMETER(data);
@@ -79,12 +82,15 @@ int32_t Camera::CameraGetJPEGPicture(uint8_t* data, uint32_t dataLength, bool re
 				return 0;
 			}
 
+
         CameraSendCmdGetPicture(CameraPictureType::Snapshot);
 
         if (!CameraGetCmdAckGetPicture())
         {
             LOG(LOG_LEVEL_ERROR, "---------------- ACK GetSnapshot failed ---------------\n");
+
             return 0;
+
         }
 
         CameraCmdData cmdData;
@@ -112,7 +118,6 @@ int32_t Camera::CameraGetJPEGPicture(uint8_t* data, uint32_t dataLength, bool re
         	LOG(LOG_LEVEL_ERROR, "---------------- Invalid input buffer size ----------------\n");
         	return 0;
         }
-
         ret = CameraReceiveJPEGData(data, cmdData.dataLength,512);
         if (ret == 0)
         {
@@ -125,8 +130,9 @@ int32_t Camera::CameraGetJPEGPicture(uint8_t* data, uint32_t dataLength, bool re
         	CameraSendCmdReset();
         }
         return ret;
-}
+        CameraSendCmdAckData();
 
+}
 bool Camera::InitializeRAWPicture(CameraRAWImageFormat format, CameraRAWResolution resolution){
 
         if (!CameraSync())

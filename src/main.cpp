@@ -204,6 +204,7 @@ void UartTask(void* param)
 		else {
 			camera.InitializeJPEGPicture(CameraJPEGResolution::_160x128);
 		}
+
 System::SleepTask(1s);
 	}
 

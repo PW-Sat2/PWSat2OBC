@@ -83,6 +83,7 @@ private :
 
 	void CameraSendCmdAck(CameraCmd cmdAck, uint8_t packageIdLow, uint8_t packageIdHigh);
 
+
 	uint32_t CameraGetData(uint8_t* data, uint32_t dataLength, int8_t timeoutMs,bool send);
 
 	bool CameraGetCmd( uint8_t* cmd, uint32_t length, int8_t timeoutMs,bool send);
@@ -90,6 +91,7 @@ private :
 	bool CameraGetCmdSync();
 
 	CameraCmd CameraGetCmdAck(int8_t timeoutMs, uint8_t length);
+
 
 	bool CameraGetCmdAckSync(int8_t timeoutMs);
 
@@ -106,6 +108,7 @@ public :
 	int32_t CameraGetJPEGPicture(uint8_t* data, uint32_t dataLength, bool reset);
 
 	bool InitializeRAWPicture(CameraRAWImageFormat format, CameraRAWResolution resolution);
+
 
 	int32_t CameraGetRAWPicture(uint8_t* data, uint32_t dataLength, bool reset);
 

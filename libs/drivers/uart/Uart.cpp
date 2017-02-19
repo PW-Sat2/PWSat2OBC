@@ -21,6 +21,7 @@ static void* RXPort = const_cast<uint32_t*>(&io_map::UART::Peripheral->RXDATA);
 static void* TXPort = const_cast<uint32_t*>(&io_map::UART::Peripheral->TXDATA);
 static unsigned int               	rxDmaCh;
 static unsigned int              	txDmaCh;
+using namespace std::chrono_literals;
 
 
 
@@ -80,6 +81,7 @@ void Uart::DeInitialize(){
 
 UartResult Uart::Read(gsl::span<const uint8_t>data){
     System::EventGroupClearBits(this->_transferGroup, TransferRXFinished);
+
     efm::usart::Command(io_map::UART::Peripheral, USART_CMD_CLEARRX | USART_CMD_CLEARTX);
     efm::usart::IntClear(io_map::UART::Peripheral, efm::usart::IntGet(io_map::UART::Peripheral));
     efm::dma::PeripheralMemory(rxDmaCh,
@@ -97,6 +99,7 @@ UartResult Uart::Read(gsl::span<const uint8_t>data){
 
 UartResult Uart::Write(gsl::span<const uint8_t>data){
     System::EventGroupClearBits(this->_transferGroup, TransferTXFinished);
+
     efm::usart::Command(io_map::UART::Peripheral, USART_CMD_CLEARRX | USART_CMD_CLEARTX);
     efm::usart::IntClear(io_map::UART::Peripheral, efm::usart::IntGet(io_map::UART::Peripheral));
 	efm::dma::MemoryPeripheral(txDmaCh,
@@ -108,7 +111,6 @@ UartResult Uart::Write(gsl::span<const uint8_t>data){
 	        dmadrvDataSize1,
 			TransmitDmaComplete,
 	        this);
-
 	 System::EventGroupWaitForBits(this->_transferGroup, TransferFinished, true, true, 2s);
 	 return UartResult::OK;
 }
