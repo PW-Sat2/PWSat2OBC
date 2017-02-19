@@ -130,7 +130,6 @@ int32_t Camera::CameraGetJPEGPicture(uint8_t* data, uint32_t dataLength, bool re
         	CameraSendCmdReset();
         }
         return ret;
-        CameraSendCmdAckData();
 
 }
 bool Camera::InitializeRAWPicture(CameraRAWImageFormat format, CameraRAWResolution resolution){
