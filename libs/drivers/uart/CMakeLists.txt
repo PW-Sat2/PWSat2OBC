@@ -13,6 +13,7 @@ target_link_libraries(${NAME} base)
 target_link_libraries(${NAME} platform)
 
 target_link_libraries(${NAME} emlib)
+target_link_libraries(${NAME} efm_support)
 
 target_link_libraries(${NAME} logger)
 target_link_libraries(${NAME} emdrv)

@@ -16,6 +16,9 @@ namespace efm
         {
             USART_InitSync(usart, init);
         }
+        void InitAsync(USART_TypeDef* usart, const USART_InitAsync_TypeDef* init){
+        	USART_InitAsync(usart, init);
+        }
 
         void Enable(USART_TypeDef* usart, USART_Enable_TypeDef enable)
         {
@@ -48,6 +51,24 @@ namespace efm
         Ecode_t AllocateChannel(unsigned int* channelId, void* capabilities)
         {
             return DMADRV_AllocateChannel(channelId, capabilities);
+        }
+        Ecode_t FreeChannel(unsigned int channelId)
+        {
+            return DMADRV_FreeChannel(channelId);
+        }
+
+        Ecode_t Init()
+        {
+        	return	DMADRV_Init();
+        }
+        Ecode_t DeInit()
+        {
+        	return	DMADRV_DeInit();
+        }
+
+        Ecode_t StopTransfer(unsigned int channelId)
+        {
+            return DMADRV_StopTransfer(channelId);
         }
 
         Ecode_t PeripheralMemory(unsigned int channelId,

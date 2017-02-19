@@ -70,32 +70,45 @@ private :
 	uint8_t CameraRAWImageFormatGetComponent(CameraRAWImageFormat format);
 
 	void CameraLogSendCmd(uint8_t* cmd);
-	void CameraLogGetCmd(uint8_t* cmd);
-	void CameraSendCmd(uint8_t* cmd, uint8_t length);
-	int8_t CameraReceiveJPEGData(uint8_t* data, uint16_t dataLength, uint16_t packageSize);
-	void CameraSendCmdSync(void);
-	void CameraSendCmdAck(CameraCmd cmdAck, uint8_t packageIdLow, uint8_t packageIdHigh);
-	uint32_t CameraGetData(uint8_t* data, uint32_t dataLength, int8_t timeoutMs,bool send);
-	bool CameraGetCmd( uint8_t* cmd, uint32_t length, int8_t timeoutMs,bool send);
-	bool CameraGetCmdSync();
-	CameraCmd CameraGetCmdAck(int8_t timeoutMs, uint8_t length);
-	bool CameraGetCmdAckSync(int8_t timeoutMs);
-	void CameraSendCmdAckSync(void);
 
+	void CameraLogGetCmd(uint8_t* cmd);
+
+	void CameraSendCmd(uint8_t* cmd, uint8_t length);
+
+	int8_t CameraReceiveJPEGData(uint8_t* data, uint16_t dataLength, uint16_t packageSize);
+
+	void CameraSendCmdSync(void);
+
+	void CameraSendCmdReset(void);
+
+	void CameraSendCmdAck(CameraCmd cmdAck, uint8_t packageIdLow, uint8_t packageIdHigh);
+
+	uint32_t CameraGetData(uint8_t* data, uint32_t dataLength, int8_t timeoutMs,bool send);
+
+	bool CameraGetCmd( uint8_t* cmd, uint32_t length, int8_t timeoutMs,bool send);
+
+	bool CameraGetCmdSync();
+
+	CameraCmd CameraGetCmdAck(int8_t timeoutMs, uint8_t length);
+
+	bool CameraGetCmdAckSync(int8_t timeoutMs);
+
+	void CameraSendCmdAckSync(void);
 
 public :
 
-Camera(drivers::uart::Uart uartBus);
+	bool isInitialized=false;
 
-int32_t CameraGetJPEGPicture(CameraJPEGResolution resolution, uint8_t * data,
-                             uint32_t dataLength);
+	Camera(drivers::uart::Uart uartBus);
 
-int32_t CameraGetRAWPicture(CameraRAWImageFormat format,
-                            CameraRAWResolution resolution, uint8_t * data, uint32_t dataLength);
+	bool InitializeJPEGPicture(CameraJPEGResolution resolution);
 
-bool isSynchronized=false;
+	int32_t CameraGetJPEGPicture(uint8_t* data, uint32_t dataLength, bool reset);
 
-void CameraInit();
+	bool InitializeRAWPicture(CameraRAWImageFormat format, CameraRAWResolution resolution);
+
+	int32_t CameraGetRAWPicture(uint8_t* data, uint32_t dataLength, bool reset);
+
 };
     }
 }

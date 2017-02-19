@@ -183,11 +183,9 @@ void UartTask(void* param)
 	UNREFERENCED_PARAMETER(param);
 
 	Uart_Init init;
-	init.uart = USART1;
+
 	init.baudRate=9600;
 	init.parity=usartNoParity;
-	init.portLocation=_USART_ROUTE_LOCATION_LOC1;
-	init.baudRate       = 9600;
 	init.oversampling   = usartOVS16;
 	init.dataBits       = usartDatabits8;
 	init.parity         = usartNoParity;
@@ -197,10 +195,15 @@ void UartTask(void* param)
 	Uart uart(init);
 	uart.Initialize();
 	Camera camera(uart);
-	camera.CameraInit();
 
 	while (1) {
-camera.CameraGetJPEGPicture(CameraJPEGResolution::_160x128,out,255);
+
+		if(camera.isInitialized) {
+			camera.CameraGetJPEGPicture(out,10000,false);
+		}
+		else {
+			camera.InitializeJPEGPicture(CameraJPEGResolution::_160x128);
+		}
 System::SleepTask(1s);
 	}
 

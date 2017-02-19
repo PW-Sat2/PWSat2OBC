@@ -189,7 +189,7 @@ void Camera::CameraSendCmdAckData(void)
 
 void Camera::CameraSendCmdSync(void)
 {
-	 cmd[0] = CameraCmdPrefix;
+	 	cmd[0] = CameraCmdPrefix;
 	    cmd[1]= (uint8_t)CameraCmd::Sync;
 	    cmd[2]=0x00;
 	    cmd[3]=0x00;
@@ -197,6 +197,19 @@ void Camera::CameraSendCmdSync(void)
 	    cmd[5]=0x00;
 
     LOG(LOG_LEVEL_INFO, "Sending Sync command.");
+    CameraLogSendCmd(cmd);
+    CameraSendCmd(cmd, CameraCmdLength);
+}
+void Camera::CameraSendCmdReset(void)
+{
+		cmd[0] = CameraCmdPrefix;
+	    cmd[1]= (uint8_t)CameraCmd::Reset;
+	    cmd[2]=0x00;
+	    cmd[3]=0x00;
+	    cmd[4]=0x00;
+	    cmd[5]=0xFF;
+
+    LOG(LOG_LEVEL_INFO, "Sending Rest command.");
     CameraLogSendCmd(cmd);
     CameraSendCmd(cmd, CameraCmdLength);
 }
@@ -396,8 +409,3 @@ int8_t Camera::CameraReceiveJPEGData(uint8_t* data, uint16_t dataLength, uint16_
     return i;
 }
 
-void Camera::CameraInit()
-{
-
-
-}

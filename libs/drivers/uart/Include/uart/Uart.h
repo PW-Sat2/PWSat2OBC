@@ -10,6 +10,8 @@
 #include "base/os.h"
 #include "logger/logger.h"
 #include <gsl/span>
+#include "io_map.h"
+
 
 
 namespace drivers
@@ -18,10 +20,7 @@ namespace drivers
 namespace uart
     {
 
-//typedef void (*UART_Callback_t)(struct Uart_Init *Init,
-//                                    Ecode_t transferStatus,
-//                                    uint8_t *data,
-//									uint32_t transferCount);
+
 enum class UartResult{
 	OK = 0,
 	Timeout = -6,
@@ -40,17 +39,11 @@ struct IUartBus {
 
 
 struct Uart_Init{
-USART_TypeDef             *uart;
-uint32_t             baudRate;
-uint8_t              portLocationTx;
-uint8_t              portLocationRx;
-uint8_t              portLocation;
-USART_Stopbits_TypeDef    stopBits;
-USART_Parity_TypeDef      parity;
-USART_OVS_TypeDef         oversampling;
-USART_Databits_TypeDef dataBits;
-//UART_Callback_t callbackTx;
-//UART_Callback_t callbackRx;
+	uint32_t             baudRate;
+	USART_Stopbits_TypeDef    stopBits;
+	USART_Parity_TypeDef      parity;
+	USART_OVS_TypeDef         oversampling;
+	USART_Databits_TypeDef dataBits;
 };
 
 
@@ -60,22 +53,18 @@ class Uart final : public IUartBus{
 
 public:
 Uart(Uart_Init &init);
-virtual UartResult Write(gsl::span<const uint8_t>data) override;
-virtual UartResult Read(gsl::span<const uint8_t>data) override;
-void Initialize(void);
-void DeInitialize(void);
-static constexpr OSEventBits TransferTXFinished = 1 << 1;
-	            /** @brief Input transfer finished flag */
+	virtual UartResult Write(gsl::span<const uint8_t>data) override;
+	virtual UartResult Read(gsl::span<const uint8_t>data) override;
+	void Initialize(void);
+	void DeInitialize(void);
+	static constexpr OSEventBits TransferTXFinished = 1 << 1;
 	static constexpr OSEventBits TransferRXFinished = 1 << 0;
-    static constexpr OSEventBits TransferFinished = TransferRXFinished | TransferTXFinished;
-    OSEventGroupHandle _transferGroup;
+	static constexpr OSEventBits TransferFinished = TransferRXFinished | TransferTXFinished;
+	OSEventGroupHandle _transferGroup;
 
 
 private:
 	Uart_Init 				_init;
-	CMU_Clock_TypeDef          uartClock;
-	DMADRV_PeripheralSignal_t  txDmaSignal;
-	DMADRV_PeripheralSignal_t  rxDmaSignal;
 	GPIO_Port_TypeDef txPort;
 	GPIO_Port_TypeDef rxPort;
 	OSSemaphoreHandle _lock;
