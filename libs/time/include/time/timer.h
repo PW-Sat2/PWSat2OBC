@@ -72,6 +72,9 @@ namespace services
             {
             }
 
+            /**
+             *  @cond StandardOperators
+             */
             bool operator==(const TimeSnapshot& right) const
             {
                 return CurrentTime == right.CurrentTime;
@@ -101,6 +104,8 @@ namespace services
             {
                 return !(*this < right);
             }
+
+            /** @endcond */
         };
 
         /**

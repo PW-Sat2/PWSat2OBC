@@ -97,7 +97,8 @@ namespace obc
     {
         /**
          * @brief Initializes @ref OBCHardware instance
-         * @param[in] powerControl Power control interface
+         * @param[in] powerControl Power control interface.
+         * @param[in] burtcTickHandler Reference to time notification handler.
          */
         OBCHardware(PowerControl* powerControl, TimeAction& burtcTickHandler);
 
