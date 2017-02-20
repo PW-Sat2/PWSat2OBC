@@ -23,9 +23,7 @@ SingleFlash::SingleFlash(const char* mountPoint,
 N25QStorage::N25QStorage(drivers::spi::EFMSPIInterface& spi, IYaffsDeviceOperations& deviceOperations, obc::OBCGPIO& pins)
     : //
       _flashes{
-          {"/a", pins.Flash1ChipSelect, spi, deviceOperations}, //
-          {"/b", pins.Flash2ChipSelect, spi, deviceOperations}, //
-          {"/c", pins.Flash3ChipSelect, spi, deviceOperations}  //
+          {"/a", pins.Flash1ChipSelect, spi, deviceOperations} //
       }
 
 {

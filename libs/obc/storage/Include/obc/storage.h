@@ -59,7 +59,7 @@ namespace obc
          */
         OSResult Erase();
 
-      private:
+      public:
         /** @brief Underlying storage implementation */
         Storage _storage;
     };

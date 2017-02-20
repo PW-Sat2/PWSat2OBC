@@ -1,5 +1,5 @@
 def build() {
-	bat "cmake -DSYS_BUS_COM=${env.SYS_BUS_COM} -DPAYLOAD_BUS_COM=${env.PAYLOAD_BUS_COM} -DOBC_COM=${env.OBC_COM} -DGPIO_COM=${env.GPIO_COM} -DCMAKE_BUILD_TYPE=Release -DENABLE_LTO=1 -DUSE_SINGLE_BUS=0 -G \"MinGW Makefiles\" ../source"
+	bat "cmake -DSYS_BUS_COM=${env.SYS_BUS_COM} -DPAYLOAD_BUS_COM=${env.PAYLOAD_BUS_COM} -DOBC_COM=${env.OBC_COM} -DGPIO_COM=${env.GPIO_COM} -DCMAKE_BUILD_TYPE=Release -DENABLE_LTO=1 -DUSE_SINGLE_BUS=0 -DUSE_EXTERNAL_FLASH=1 -G \"MinGW Makefiles\" ../source"
 	bat "make pwsat"
 	step([$class: 'ArtifactArchiver', artifacts: 'build/DevBoard/**/*', fingerprint: true])
 }

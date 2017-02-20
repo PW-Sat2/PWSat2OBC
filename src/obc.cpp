@@ -25,6 +25,8 @@ void OBC::Initialize()
 
 OSResult OBC::PostStartInitialization()
 {
+    this->Experiments.Initialize();
+
     auto result = this->Hardware.PostStartInitialize();
     if (OS_RESULT_FAILED(result))
     {

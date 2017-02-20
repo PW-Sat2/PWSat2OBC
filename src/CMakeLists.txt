@@ -18,6 +18,7 @@ set(SOURCES
     commands/mission.cpp
     commands/dma.cpp
     commands/rtc.cpp
+    commands/stress_fs.cpp
     obc.h
     obc.cpp
     fault_handlers.cpp
