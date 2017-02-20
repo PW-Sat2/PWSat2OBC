@@ -9,7 +9,7 @@ using namespace std::chrono_literals;
 
 static void SendResult(OSResult result)
 {
-    Main.terminal.Printf("%d", result);
+    Main.terminal.Printf("%d", num(result));
 }
 
 static bool GetChannel(const char* name, AntennaChannel* channel)
@@ -60,7 +60,7 @@ static bool GetAntenna(const char* name, AntennaId* antenna)
     return true;
 }
 
-void AntennaDeploy(uint16_t argc, char* argv[])
+void AntennaDeploy(std::uint16_t argc, char* argv[])
 {
     AntennaChannel channel;
     AntennaId antenna;
@@ -85,7 +85,7 @@ void AntennaDeploy(uint16_t argc, char* argv[])
     return;
 }
 
-void AntennaCancelDeployment(uint16_t argc, char* argv[])
+void AntennaCancelDeployment(std::uint16_t argc, char* argv[])
 {
     AntennaChannel channel;
     if (                               //
@@ -100,7 +100,7 @@ void AntennaCancelDeployment(uint16_t argc, char* argv[])
     Main.antennaDriver.FinishDeployment(&Main.antennaDriver, channel);
 }
 
-void AntennaGetDeploymentStatus(uint16_t argc, char* argv[])
+void AntennaGetDeploymentStatus(std::uint16_t argc, char* argv[])
 {
     AntennaChannel channel;
     if (                               //
@@ -121,7 +121,7 @@ void AntennaGetDeploymentStatus(uint16_t argc, char* argv[])
     else
     {
         Main.terminal.Printf("%d %d %d %d %d %d %d %d %d %d %d\n",
-            status,
+            num(status),
             ToInt(deploymentStatus.DeploymentStatus[0]),        //
             ToInt(deploymentStatus.DeploymentStatus[1]),        //
             ToInt(deploymentStatus.DeploymentStatus[2]),        //
@@ -133,5 +133,58 @@ void AntennaGetDeploymentStatus(uint16_t argc, char* argv[])
             ToInt(deploymentStatus.IgnoringDeploymentSwitches), //
             ToInt(deploymentStatus.DeploymentSystemArmed)       //
             );
+    }
+}
+
+void PrintValue(int value, bool print, const char* name)
+{
+    if (print)
+    {
+        Main.terminal.Printf("%s: '%d'\n", name, value);
+    }
+    else
+    {
+        Main.terminal.Printf("%s: 'Unavailable'\n", name);
+    }
+}
+
+void AntennaGetTelemetry(std::uint16_t /*argc*/, char* /*argv*/ [])
+{
+    auto telemetry = Main.antennaDriver.GetTelemetry(&Main.antennaDriver);
+    PrintValue(telemetry.ActivationCount[0], has_flag(telemetry.flags, ANT_TM_ANTENNA1_ACTIVATION_COUNT), "Antenna 1 activation count");
+    PrintValue(telemetry.ActivationCount[1], has_flag(telemetry.flags, ANT_TM_ANTENNA2_ACTIVATION_COUNT), "Antenna 2 activation count");
+    PrintValue(telemetry.ActivationCount[2], has_flag(telemetry.flags, ANT_TM_ANTENNA3_ACTIVATION_COUNT), "Antenna 3 activation count");
+    PrintValue(telemetry.ActivationCount[3], has_flag(telemetry.flags, ANT_TM_ANTENNA4_ACTIVATION_COUNT), "Antenna 4 activation count");
+
+    PrintValue(
+        telemetry.ActivationTime[0].count(), has_flag(telemetry.flags, ANT_TM_ANTENNA1_ACTIVATION_TIME), "Antenna 1 activation time");
+    PrintValue(
+        telemetry.ActivationTime[1].count(), has_flag(telemetry.flags, ANT_TM_ANTENNA2_ACTIVATION_TIME), "Antenna 2 activation time");
+    PrintValue(
+        telemetry.ActivationTime[2].count(), has_flag(telemetry.flags, ANT_TM_ANTENNA3_ACTIVATION_TIME), "Antenna 3 activation time");
+    PrintValue(
+        telemetry.ActivationTime[3].count(), has_flag(telemetry.flags, ANT_TM_ANTENNA4_ACTIVATION_TIME), "Antenna 4 activation time");
+
+    PrintValue(telemetry.Temperature[0], has_flag(telemetry.flags, ANT_TM_TEMPERATURE1), "Primary controller temperature");
+    PrintValue(telemetry.Temperature[1], has_flag(telemetry.flags, ANT_TM_TEMPERATURE2), "Backup controller temperature");
+}
+
+void AntennaReset(std::uint16_t argc, char* argv[])
+{
+    AntennaChannel channel;
+    if (argc != 1 || !GetChannel(argv[0], &channel))
+    {
+        Main.terminal.Puts("antenna_reset [primary|backup]\n");
+        return;
+    }
+
+    const OSResult result = Main.antennaDriver.Reset(&Main.antennaDriver, channel);
+    if (OS_RESULT_SUCCEEDED(result))
+    {
+        Main.terminal.Puts("Done");
+    }
+    else
+    {
+        Main.terminal.Printf("Unable to reset antenna. Status: '%d'", num(result));
     }
 }

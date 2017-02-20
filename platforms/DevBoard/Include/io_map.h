@@ -13,6 +13,8 @@
 namespace io_map
 {
     using SlaveSelectFlash1 = PinLocation<gpioPortD, 3>;
+    using SlaveSelectFlash2 = PinLocation<gpioPortB, 11>;
+    using SlaveSelectFlash3 = PinLocation<gpioPortB, 12>;
 
     using Led0 = PinLocation<gpioPortE, 2>;
     using Led1 = PinLocation<gpioPortE, 3>;

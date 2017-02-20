@@ -19,3 +19,11 @@
 /**
  * @defgroup efm_support EFM support utilities
  */
+
+/**
+ * @defgroup telecommunication Telecommunication
+ *
+ * @brief Middle layer between low level comm interface and higher level telecommands and telemetry
+ * @{
+ * @}
+ */

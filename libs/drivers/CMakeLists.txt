@@ -8,3 +8,6 @@ add_subdirectory(antenna)
 add_subdirectory(n25q)
 add_subdirectory(gpio)
 add_subdirectory(uart)
+add_subdirectory(burtc)
+add_subdirectory(rtc)
+

@@ -1,77 +1,86 @@
-#include "adcs/adcs.h"
-#include "adcs_mission.h"
+#include "adcs.hpp"
+#include <algorithm>
+#include "adcs/adcs.hpp"
+#include "mission/obc.hpp"
 #include "state/struct.h"
-#include "system.h"
 
-static SystemStateUpdateResult ADCSUpdate(SystemState* state, void* param)
+namespace mission
 {
-    ADCSContext* adcs = (ADCSContext*)param;
+    namespace adcs
+    {
+        AdcsPrimaryTask::AdcsPrimaryTask(::adcs::IAdcsCoordinator& adcsCoordinator) //
+            : retryCount(RetryCount),
+              coordinator(adcsCoordinator)
+        {
+        }
+        /**
+         * @brief This procedure is adcs status update descriptor entry point.
+         *
+         * This procedure updates the global satellite state with current adcs subsystem state.
+         * @param[in] state Pointer to global satellite state.
+         * @param[in] param Pointer to the deployment condition private context. This pointer should point
+         * at the object of adcs::IAdcsCoordinator type.
+         * @return Operation status.
+         */
+        static UpdateResult AdcsStatusUpdate(SystemState& state, void* param)
+        {
+            const auto context = static_cast<::adcs::IAdcsCoordinator*>(param);
+            state.AdcsMode = context->CurrentMode();
+            return UpdateResult::Ok;
+        }
 
-    state->ADCS.CurrentMode = adcs->CurrentMode;
+        bool AdcsPrimaryTask::AdcsEnableBuiltinDetumblingCondition(const SystemState& state, void* param)
+        {
+            const auto context = static_cast<AdcsPrimaryTask*>(param);
+            if (!IsInitialSilenPeriodFinished(state.Time))
+            {
+                return false;
+            }
 
-    return SystemStateUpdateOK;
-}
+            if (context->coordinator.CurrentMode() != ::adcs::AdcsMode::Disabled)
+            {
+                return false;
+            }
 
-static bool TurnOffCondition(const SystemState* state, void* param)
-{
-    UNREFERENCED_PARAMETER(state);
-    UNREFERENCED_PARAMETER(param);
-    return false; // HAS_FLAG(state->RequestedCommand, TerminalCommandADCSTurnOff);
-}
+            if (context->retryCount == 0)
+            {
+                return false;
+            }
 
-static void TurnOff(const SystemState* state, void* param)
-{
-    UNREFERENCED_PARAMETER(state);
-    ADCSContext* adcs = (ADCSContext*)param;
-    adcs->Command(adcs, ADCSCommandTurnOff);
-}
+            return true;
+        }
 
-static bool DetumbleCondition(const SystemState* state, void* param)
-{
-    UNREFERENCED_PARAMETER(state);
-    UNREFERENCED_PARAMETER(param);
-    return false; // HAS_FLAG(state->RequestedCommand, TerminalCommandADCSDetumble);
-}
+        void AdcsPrimaryTask::AdcsEnableBuiltinDetumbling(const SystemState& /*state*/, void* param)
+        {
+            const auto context = static_cast<AdcsPrimaryTask*>(param);
+            const auto result = context->coordinator.EnableBuiltinDetumbling();
+            if (OS_RESULT_SUCCEEDED(result))
+            {
+                context->retryCount = 3;
+            }
+            else
+            {
+                context->retryCount = std::max(context->retryCount - 1, 0);
+            }
+        }
 
-static void Detumble(const SystemState* state, void* param)
-{
-    UNREFERENCED_PARAMETER(state);
-    ADCSContext* adcs = (ADCSContext*)param;
-    adcs->Command(adcs, ADCSCommandDetumble);
-}
+        ActionDescriptor<SystemState> AdcsPrimaryTask::BuildAction()
+        {
+            ActionDescriptor<SystemState> descriptor;
+            descriptor.name = "Enable Primary Adcs Detumbling";
+            descriptor.param = this;
+            descriptor.condition = AdcsEnableBuiltinDetumblingCondition;
+            descriptor.actionProc = AdcsEnableBuiltinDetumbling;
+            return descriptor;
+        }
 
-static bool SunPointCondition(const SystemState* state, void* param)
-{
-    UNREFERENCED_PARAMETER(state);
-    UNREFERENCED_PARAMETER(param);
-    return false; // HAS_FLAG(state->RequestedCommand, TerminalCommandADCSSunPoint);
-}
-
-static void SunPoint(const SystemState* state, void* param)
-{
-    UNREFERENCED_PARAMETER(state);
-    ADCSContext* adcs = (ADCSContext*)param;
-    adcs->Command(adcs, ADCSCommandSunPoint);
-}
-
-void ADCSInitializeDescriptors(ADCSContext* adcs, ADCSDescriptors* descriptors)
-{
-    descriptors->Update.Name = "ADCS Update";
-    descriptors->Update.Param = adcs;
-    descriptors->Update.UpdateProc = ADCSUpdate;
-
-    descriptors->TurnOff.Name = "ADCS Turn Off";
-    descriptors->TurnOff.Param = adcs;
-    descriptors->TurnOff.Condition = TurnOffCondition;
-    descriptors->TurnOff.ActionProc = TurnOff;
-
-    descriptors->Detumble.Name = "ADCS Detumble";
-    descriptors->Detumble.Param = adcs;
-    descriptors->Detumble.Condition = DetumbleCondition;
-    descriptors->Detumble.ActionProc = Detumble;
-
-    descriptors->SunPoint.Name = "ADCS SunPoint";
-    descriptors->SunPoint.Param = adcs;
-    descriptors->SunPoint.Condition = SunPointCondition;
-    descriptors->SunPoint.ActionProc = SunPoint;
+        UpdateDescriptor<SystemState> AdcsPrimaryTask::BuildUpdate()
+        {
+            UpdateDescriptor<SystemState> descriptor;
+            descriptor.name = "Adcs Status Update";
+            descriptor.param = &this->coordinator;
+            descriptor.updateProc = AdcsStatusUpdate;
+            return descriptor;
+        }
+    }
 }

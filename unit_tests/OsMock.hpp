@@ -8,6 +8,9 @@
 
 struct OSMock : IOS
 {
+    OSMock();
+    ~OSMock();
+
     MOCK_METHOD6(CreateTask,
         OSResult(OSTaskProcedure entryPoint,
             const char* taskName,
@@ -44,6 +47,8 @@ struct OSMock : IOS
             const std::chrono::milliseconds timeout));
 
     MOCK_METHOD2(EventGroupSetBitsISR, OSEventBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange));
+
+    MOCK_METHOD1(EventGroupGetBits, OSEventBits(OSEventGroupHandle eventGroup));
 
     MOCK_METHOD1(Alloc, void*(std::size_t size));
     MOCK_METHOD1(Free, void(void* ptr));

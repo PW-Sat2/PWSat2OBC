@@ -34,7 +34,17 @@ static const TerminalCommandDescription commands[] = {
     {"suspend_mission", SuspendMission},
     {"resume_mission", ResumeMission},
     {"run_mission", RunMission},
+    {"set_fibo_iterations", SetFiboIterations},
+    {"request_experiment", RequestExperiment},
+    {"abort_experiment", AbortExperiment},
+    {"experiment_info", ExperimentInfo},
     {"dma", DMAInfo},
+    {"comm_set_bitrate", CommSetBaudRate},
+    {"comm_get_telemetry", CommGetTelemetry},
+    {"antenna_get_telemetry", AntennaGetTelemetry},
+    {"antenna_reset", AntennaReset},
+    {"reset", ResetHandler},
+    {"rtc", RTCTest},
 };
 
 void InitializeTerminal(void)

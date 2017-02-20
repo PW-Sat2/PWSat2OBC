@@ -1,9 +1,8 @@
 import logging
 from base64 import b64encode
-
-import time
-
 from utils import ExtendableFormatter
+
+from .experiments import ExperimentsMixin
 from .obc_mixin import OBCMixin
 from .file_system import FileSystemMixin
 from .antenna import AntennaMixin
@@ -12,13 +11,15 @@ from .obc_time import TimeMixin
 from .i2c import I2CMixin
 from .mission import MissionMixin
 
+
 class OBC(OBCMixin,
           FileSystemMixin,
           CommMixin,
           TimeMixin,
           I2CMixin,
           AntennaMixin,
-          MissionMixin
+          MissionMixin,
+          ExperimentsMixin
           ):
     def __init__(self, terminal):
         self.log = logging.getLogger("OBC")

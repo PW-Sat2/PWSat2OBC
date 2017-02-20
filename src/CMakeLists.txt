@@ -17,6 +17,7 @@ set(SOURCES
     commands/compile_info.cpp
     commands/mission.cpp
     commands/dma.cpp
+    commands/rtc.cpp
     obc.h
     obc.cpp
     fault_handlers.cpp
@@ -50,17 +51,25 @@ target_link_libraries(${NAME}
     gsl
     n25q
     antenna
+    exp_fibo
     mission_antenna
     mission_sail
     mission_time
+    mission_experiments
     yaffs
     obc_storage
     obc_communication
     obc_hardware
+    obc_experiments
     spi
     efm_emlib
     uart
     camera
+    burtc
+    obc_adcs
+    rtc
+    mission_adcs
+
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)
@@ -74,6 +83,8 @@ target_asm_listing(${NAME})
 target_jlink_flash(${NAME})
 
 target_format_sources(${NAME} "${SOURCES}")
+
+target_eclipse_debug_configs(${NAME} Run Attach)
 
 add_custom_target(swo_viewer
     COMMAND ${JLINKSWO} -cpufreq 14000000 -device ${DEVICE} -itmmask 0x3

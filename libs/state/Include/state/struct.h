@@ -4,8 +4,9 @@
 #pragma once
 
 #include <cstdint>
-#include "adcs/adcs.h"
+#include "adcs/adcs.hpp"
 #include "base/os.h"
+#include "experiments/experiments.h"
 #include "time/TimePoint.h"
 
 /**
@@ -39,12 +40,13 @@ struct SystemState
     /** @brief Flag indicating that sail has been opened */
     bool SailOpened;
 
-    /** @brief ADCS-related state */
-    struct
-    {
-        /** @brief Current ADCS mode */
-        ADCSMode CurrentMode;
-    } ADCS;
+    /** @brief Current adcs operational mode. */
+    adcs::AdcsMode AdcsMode;
+
+    /**
+     * @brief Experiment controller status
+     */
+    experiments::ExperimentState Experiment;
 };
 
 /** @} */

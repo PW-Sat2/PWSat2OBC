@@ -267,8 +267,8 @@ class CommObject final : public ITransmitFrame
     /** @brief Handle to comm background task. */
     void* _pollingTaskHandle;
 
-    /** @brief Handle to event group used to communicate with background task. */
-    OSEventGroupHandle _pollingTaskFlags;
+    /** @brief Event group used to communicate with background task. */
+    EventGroup _pollingTaskFlags;
 };
 
 COMM_END

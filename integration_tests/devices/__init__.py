@@ -5,6 +5,8 @@ from test_devices import EchoDevice, TimeoutDevice
 
 __all__ = [
     'EPSDevice',
+    'DownlinkFrame',
+    'UplinkFrame',
     'TransmitterDevice',
     'ReceiverDevice',
     'Comm',
@@ -12,5 +14,9 @@ __all__ = [
     'TimeoutDevice',
     'AntennaController',
     'PRIMARY_ANTENNA_CONTROLLER_ADDRESS',
-    'BACKUP_ANTENNA_CONTROLLER_ADDRESS'
+    'BACKUP_ANTENNA_CONTROLLER_ADDRESS',
+    'BaudRate',
+    'TransmitterTelemetry',
+    'ReceiverTelemetry',
+    'Antenna',
 ]

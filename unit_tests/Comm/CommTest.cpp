@@ -11,7 +11,7 @@
 #include "comm/CommDriver.hpp"
 #include "comm/Frame.hpp"
 #include "comm/IHandleFrame.hpp"
-#include "i2c/I2CMock.hpp"
+#include "I2C/I2CMock.hpp"
 #include "i2c/i2c.h"
 #include "os/os.hpp"
 #include "system.h"
@@ -32,7 +32,7 @@ using drivers::i2c::I2CResult;
 using namespace devices::comm;
 
 static constexpr uint8_t ReceiverAddress = 0x60;
-static constexpr uint8_t TransmitterAddress = 0x62;
+static constexpr uint8_t TransmitterAddress = 0x61;
 
 static constexpr uint8_t ReceverGetTelemetry = 0x1A;
 static constexpr uint8_t ReceiverGetFrameCount = 0x21;
@@ -387,7 +387,7 @@ TEST_F(CommTest, TestGetMixedLineTransmitterResponse)
 
 TEST_F(CommTest, TestSendTooLongFrame)
 {
-    uint8_t buffer[devices::comm::MaxFrameSize + 1] = {0};
+    uint8_t buffer[devices::comm::MaxDownlinkFrameSize + 1] = {0};
     const auto status = comm.SendFrame(buffer);
     ASSERT_THAT(status, Eq(false));
 }
@@ -580,7 +580,7 @@ TEST_F(CommTest, TestSetBeaconFailure)
 
 TEST_F(CommTest, TestSetBeaconSizeOutOfRange)
 {
-    std::uint8_t buffer[MaxFrameSize + 1];
+    std::uint8_t buffer[MaxDownlinkFrameSize + 1];
     Beacon beacon(1, buffer);
     EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon))).Times(0);
     const auto status = comm.SetBeacon(beacon);

@@ -44,6 +44,12 @@ uint8_t Reader::ReadByte()
     }
 }
 
+uint8_t Reader::ReadByteBCD(std::uint8_t upperNibbleMask)
+{
+    uint8_t bcdByte = ReadByte();
+    return ((bcdByte & upperNibbleMask) >> 4) * 10 + (bcdByte & 0x0F);
+}
+
 uint16_t Reader::ReadWordLE()
 {
     if (!UpdateState(2))
@@ -57,6 +63,11 @@ uint16_t Reader::ReadWordLE()
         value += this->buffer[this->position - 2];
         return value;
     }
+}
+
+int16_t Reader::ReadSignedWordLE()
+{
+    return static_cast<int16_t>(this->ReadWordLE());
 }
 
 uint16_t Reader::ReadWordBE()
@@ -91,6 +102,11 @@ uint32_t Reader::ReadDoubleWordLE()
         value += this->buffer[this->position - 4];
         return value;
     }
+}
+
+int32_t Reader::ReadSignedDoubleWordLE()
+{
+    return static_cast<int32_t>(this->ReadDoubleWordLE());
 }
 
 uint32_t Reader::ReadDoubleWordBE()

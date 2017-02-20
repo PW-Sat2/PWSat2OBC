@@ -15,6 +15,7 @@ target_link_libraries(${NAME}
     antenna
     mission
     gsl
+    mission_obc
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
