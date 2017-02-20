@@ -296,9 +296,9 @@ namespace services
             struct TimeSnapshot ReadFile(services::fs::IFileSystem& fs, const char* const filePath);
 
           private:
-            static constexpr const char* File0 = "/TimeState.0";
-            static constexpr const char* File1 = "/TimeState.1";
-            static constexpr const char* File2 = "/TimeState.2";
+            static constexpr const char* File0 = "/a/TimeState.0";
+            static constexpr const char* File1 = "/a/TimeState.1";
+            static constexpr const char* File2 = "/a/TimeState.2";
 
             /**
              * @brief Pointer to time notification procedure that gets called on time change.

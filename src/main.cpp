@@ -155,6 +155,8 @@ static void ObcInitTask(void* param)
 
     Mission.Initialize();
 
+    obc->Hardware.Burtc.Start();
+
     System::CreateTask(SmartWaitTask, "SmartWait", 512, NULL, TaskPriority::P1, NULL);
 
     LOG(LOG_LEVEL_INFO, "Intialized");
