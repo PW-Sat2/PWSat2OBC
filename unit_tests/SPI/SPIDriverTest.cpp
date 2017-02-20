@@ -109,3 +109,82 @@ TEST_F(SPIDriverTest, ShouldWriteProperly)
 
     spi.Write(buf);
 }
+
+TEST_F(SPIDriverTest, ShouldWritePropertlyMoreThan1024Bytes)
+{
+    auto rxSignal = efm::DMASignal<efm::DMASignalUSART::RXDATAV>(io_map::SPI::Peripheral);
+    auto txSignal = efm::DMASignal<efm::DMASignalUSART::TXBL>(io_map::SPI::Peripheral);
+
+    auto buf = new uint8_t[2148];
+    {
+        InSequence s;
+
+        EXPECT_CALL(this->_dma, AllocateChannel(_, nullptr)).WillOnce(DoAll(SetArgPointee<0>(1), Return(ECODE_EMDRV_DMADRV_OK)));
+        EXPECT_CALL(this->_dma, AllocateChannel(_, nullptr)).WillOnce(DoAll(SetArgPointee<0>(2), Return(ECODE_EMDRV_DMADRV_OK)));
+
+        EXPECT_CALL(this->_usart, Command(io_map::SPI::Peripheral, USART_CMD_CLEARRX | USART_CMD_CLEARTX));
+        EXPECT_CALL(this->_usart, IntClear(io_map::SPI::Peripheral, _));
+
+        EXPECT_CALL(this->_dma, PeripheralMemory(1, rxSignal, _, _, false, 1024, dmadrvDataSize1, _, _));
+        EXPECT_CALL(this->_dma, MemoryPeripheral(2, txSignal, _, buf, true, 1024, dmadrvDataSize1, _, _));
+
+        EXPECT_CALL(this->_usart, Command(io_map::SPI::Peripheral, USART_CMD_CLEARRX | USART_CMD_CLEARTX));
+        EXPECT_CALL(this->_usart, IntClear(io_map::SPI::Peripheral, _));
+
+        EXPECT_CALL(this->_dma, PeripheralMemory(1, rxSignal, _, _, false, 1024, dmadrvDataSize1, _, _));
+        EXPECT_CALL(this->_dma, MemoryPeripheral(2, txSignal, _, buf + 1024, true, 1024, dmadrvDataSize1, _, _));
+
+        EXPECT_CALL(this->_usart, Command(io_map::SPI::Peripheral, USART_CMD_CLEARRX | USART_CMD_CLEARTX));
+        EXPECT_CALL(this->_usart, IntClear(io_map::SPI::Peripheral, _));
+
+        EXPECT_CALL(this->_dma, PeripheralMemory(1, rxSignal, _, _, false, 100, dmadrvDataSize1, _, _));
+        EXPECT_CALL(this->_dma, MemoryPeripheral(2, txSignal, _, buf + 2048, true, 100, dmadrvDataSize1, _, _));
+    }
+
+    EFMSPIInterface spi;
+
+    spi.Initialize();
+
+    spi.Write(gsl::make_span(buf, 2148));
+
+    delete[] buf;
+}
+
+TEST_F(SPIDriverTest, ShouldReadProperlyMoreThan1024Bytes)
+{
+    auto rxSignal = efm::DMASignal<efm::DMASignalUSART::RXDATAV>(io_map::SPI::Peripheral);
+    auto txSignal = efm::DMASignal<efm::DMASignalUSART::TXBL>(io_map::SPI::Peripheral);
+
+    auto buf = new uint8_t[2148];
+
+    {
+        InSequence s;
+
+        EXPECT_CALL(this->_dma, AllocateChannel(_, nullptr)).WillOnce(DoAll(SetArgPointee<0>(1), Return(ECODE_EMDRV_DMADRV_OK)));
+        EXPECT_CALL(this->_dma, AllocateChannel(_, nullptr)).WillOnce(DoAll(SetArgPointee<0>(2), Return(ECODE_EMDRV_DMADRV_OK)));
+
+        EXPECT_CALL(this->_usart, Command(io_map::SPI::Peripheral, USART_CMD_CLEARRX | USART_CMD_CLEARTX));
+        EXPECT_CALL(this->_usart, IntClear(io_map::SPI::Peripheral, _));
+
+        EXPECT_CALL(this->_dma, PeripheralMemory(1, rxSignal, buf, _, true, 1024, dmadrvDataSize1, _, _));
+        EXPECT_CALL(this->_dma, MemoryPeripheral(2, txSignal, _, _, false, 1024, dmadrvDataSize1, _, _));
+
+        EXPECT_CALL(this->_usart, Command(io_map::SPI::Peripheral, USART_CMD_CLEARRX | USART_CMD_CLEARTX));
+        EXPECT_CALL(this->_usart, IntClear(io_map::SPI::Peripheral, _));
+
+        EXPECT_CALL(this->_dma, PeripheralMemory(1, rxSignal, buf + 1024, _, true, 1024, dmadrvDataSize1, _, _));
+        EXPECT_CALL(this->_dma, MemoryPeripheral(2, txSignal, _, _, false, 1024, dmadrvDataSize1, _, _));
+
+        EXPECT_CALL(this->_usart, Command(io_map::SPI::Peripheral, USART_CMD_CLEARRX | USART_CMD_CLEARTX));
+        EXPECT_CALL(this->_usart, IntClear(io_map::SPI::Peripheral, _));
+
+        EXPECT_CALL(this->_dma, PeripheralMemory(1, rxSignal, buf + 2048, _, true, 100, dmadrvDataSize1, _, _));
+        EXPECT_CALL(this->_dma, MemoryPeripheral(2, txSignal, _, _, false, 100, dmadrvDataSize1, _, _));
+    }
+
+    EFMSPIInterface spi;
+
+    spi.Initialize();
+
+    spi.Read(gsl::make_span(buf, 2148));
+}

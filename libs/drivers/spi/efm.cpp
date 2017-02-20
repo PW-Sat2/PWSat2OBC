@@ -47,66 +47,76 @@ void EFMSPIInterface::Initialize()
 
 void EFMSPIInterface::Write(gsl::span<const std::uint8_t> buffer)
 {
-    this->_transferGroup.Clear(TransferFinished);
+    for (decltype(buffer.size()) offset = 0; offset < buffer.size(); offset += 1024)
+    {
+        auto part = buffer.subspan(offset, std::min(1024, buffer.size() - offset));
 
-    efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_CLEARRX | USART_CMD_CLEARTX);
+        this->_transferGroup.Clear(TransferFinished);
 
-    efm::usart::IntClear(io_map::SPI::Peripheral, efm::usart::IntGet(io_map::SPI::Peripheral));
+        efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_CLEARRX | USART_CMD_CLEARTX);
 
-    uint32_t dummyRx = 0;
-    efm::dma::PeripheralMemory(this->_rxChannel,
-        efm::DMASignal<efm::DMASignalUSART::RXDATAV>(io_map::SPI::Peripheral),
-        &dummyRx,
-        RXPort,
-        false,
-        buffer.size(),
-        dmadrvDataSize1,
-        OnTransferFinished,
-        this);
+        efm::usart::IntClear(io_map::SPI::Peripheral, efm::usart::IntGet(io_map::SPI::Peripheral));
 
-    efm::dma::MemoryPeripheral(this->_txChannel,
-        efm::DMASignal<efm::DMASignalUSART::TXBL>(io_map::SPI::Peripheral),
-        TXPort,
-        const_cast<uint8_t*>(buffer.data()),
-        true,
-        buffer.size(),
-        dmadrvDataSize1,
-        OnTransferFinished,
-        this);
+        uint32_t dummyRx = 0;
+        efm::dma::PeripheralMemory(this->_rxChannel,
+            efm::DMASignal<efm::DMASignalUSART::RXDATAV>(io_map::SPI::Peripheral),
+            &dummyRx,
+            RXPort,
+            false,
+            part.size(),
+            dmadrvDataSize1,
+            OnTransferFinished,
+            this);
 
-    this->_transferGroup.WaitAll(TransferFinished, true, InfiniteTimeout);
+        efm::dma::MemoryPeripheral(this->_txChannel,
+            efm::DMASignal<efm::DMASignalUSART::TXBL>(io_map::SPI::Peripheral),
+            TXPort,
+            const_cast<uint8_t*>(part.data()),
+            true,
+            part.size(),
+            dmadrvDataSize1,
+            OnTransferFinished,
+            this);
+
+        this->_transferGroup.WaitAll(TransferFinished, true, InfiniteTimeout);
+    }
 }
 
 void EFMSPIInterface::Read(gsl::span<std::uint8_t> buffer)
 {
-    this->_transferGroup.Clear(TransferFinished);
+    for (decltype(buffer.size()) offset = 0; offset < buffer.size(); offset += 1024)
+    {
+        auto part = buffer.subspan(offset, std::min(1024, buffer.size() - offset));
 
-    efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_CLEARRX | USART_CMD_CLEARTX);
+        this->_transferGroup.Clear(TransferFinished);
 
-    efm::usart::IntClear(io_map::SPI::Peripheral, efm::usart::IntGet(io_map::SPI::Peripheral));
+        efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_CLEARRX | USART_CMD_CLEARTX);
 
-    efm::dma::PeripheralMemory(this->_rxChannel,
-        efm::DMASignal<efm::DMASignalUSART::RXDATAV>(io_map::SPI::Peripheral),
-        buffer.data(),
-        RXPort,
-        true,
-        buffer.size(),
-        dmadrvDataSize1,
-        OnTransferFinished,
-        this);
+        efm::usart::IntClear(io_map::SPI::Peripheral, efm::usart::IntGet(io_map::SPI::Peripheral));
 
-    uint32_t dummyTx = 0;
-    efm::dma::MemoryPeripheral(this->_txChannel,
-        efm::DMASignal<efm::DMASignalUSART::TXBL>(io_map::SPI::Peripheral),
-        TXPort,
-        &dummyTx,
-        false,
-        buffer.size(),
-        dmadrvDataSize1,
-        OnTransferFinished,
-        this);
+        efm::dma::PeripheralMemory(this->_rxChannel,
+            efm::DMASignal<efm::DMASignalUSART::RXDATAV>(io_map::SPI::Peripheral),
+            part.data(),
+            RXPort,
+            true,
+            part.size(),
+            dmadrvDataSize1,
+            OnTransferFinished,
+            this);
 
-    this->_transferGroup.WaitAll(TransferFinished, true, InfiniteTimeout);
+        uint32_t dummyTx = 0;
+        efm::dma::MemoryPeripheral(this->_txChannel,
+            efm::DMASignal<efm::DMASignalUSART::TXBL>(io_map::SPI::Peripheral),
+            TXPort,
+            &dummyTx,
+            false,
+            part.size(),
+            dmadrvDataSize1,
+            OnTransferFinished,
+            this);
+
+        this->_transferGroup.WaitAll(TransferFinished, true, InfiniteTimeout);
+    }
 }
 
 bool EFMSPIInterface::OnTransferFinished(unsigned int channel, unsigned int sequenceNo, void* param)
