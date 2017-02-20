@@ -65,10 +65,6 @@ Uart(Uart_Init &init);
 
 private:
 	Uart_Init 				_init;
-	GPIO_Port_TypeDef txPort;
-	GPIO_Port_TypeDef rxPort;
-	OSSemaphoreHandle _lock;
-
 
 	void InitializeDma(void);
 	void InitializeGpio(void);
