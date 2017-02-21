@@ -19,6 +19,7 @@ set(SOURCES
   Comm/DownlinkFrameTest.cpp
   Comm/TeleCommandHandlingTest.cpp
   Comm/UplinkFrameDecoderTest.cpp
+  Comm/Telecommands/DownloadFileTelecommandTest.cpp
   base/ReaderTest.cpp
   base/WriterTest.cpp
   base/RapidTest.cpp
@@ -116,6 +117,7 @@ target_link_libraries(${NAME}
     exp_fibo
     adcs
     mission_adcs
+    obc_telecommands
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})

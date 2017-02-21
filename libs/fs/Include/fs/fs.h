@@ -109,6 +109,16 @@ namespace services
         };
 
         /**
+         * @brief Determies base for seek operation
+         */
+        enum class SeekOrigin
+        {
+            Begin,   //!< Begining of file
+            Current, //!< Current position
+            End      //!< End of file
+        };
+
+        /**
          * @brief Structure exposing file system API
          */
         struct IFileSystem
@@ -201,6 +211,15 @@ namespace services
              * @return Size of file
              */
             virtual FileSize GetFileSize(FileHandle file) = 0;
+
+            /**
+             * @brief Changes position in file
+             * @param file File handle
+             * @param origin Point from which seeking starts
+             * @param offset Offset
+             * @return Operation result
+             */
+            virtual OSResult Seek(FileHandle file, SeekOrigin origin, FileSize offset) = 0;
         };
 
         /**
@@ -277,6 +296,14 @@ namespace services
              * @brief After calling this method object becomes unusable
              */
             OSResult Close();
+
+            /**
+             * @brief Seeks position in file
+             * @param origin Determies what is used as starting point for offset
+             * @param offset Position offset
+             * @return Operation result
+             */
+            OSResult Seek(SeekOrigin origin, FileSize offset);
 
           private:
             /** @brief File system interface */

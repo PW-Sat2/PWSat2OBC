@@ -9,6 +9,7 @@ from threading import Lock
 from utils import *
 from build_config import config
 
+
 class DownlinkFrame:
     def __init__(self, apid, seq, payload):
         self._apid = apid

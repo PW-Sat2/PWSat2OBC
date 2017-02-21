@@ -137,3 +137,8 @@ OSResult File::Close()
 
     return OSResult::InvalidOperation;
 }
+
+OSResult File::Seek(SeekOrigin origin, FileSize offset)
+{
+    return this->_fs->Seek(this->_handle, origin, offset);
+}

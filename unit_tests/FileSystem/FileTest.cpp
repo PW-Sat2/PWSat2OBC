@@ -105,3 +105,18 @@ TEST_F(FileTest, ShouldTruncateFile)
 
     ASSERT_THAT(r, Eq(OSResult::Success));
 }
+
+TEST_F(FileTest, ShouldSeekToGivenPosition)
+{
+    EXPECT_CALL(this->_fs, Open("/file", _, _)).WillOnce(Return(MakeOpenedFile(1)));
+
+    EXPECT_CALL(this->_fs, Seek(1, SeekOrigin::Begin, 10L)).WillOnce(Return(OSResult::Success));
+
+    EXPECT_CALL(this->_fs, Close(1));
+
+    File f(this->_fs, "/file", FileOpen::CreateNew, FileAccess::WriteOnly);
+
+    auto r = f.Seek(SeekOrigin::Begin, 10);
+
+    ASSERT_THAT(r, Eq(OSResult::Success));
+}
