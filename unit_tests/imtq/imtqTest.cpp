@@ -37,120 +37,120 @@ static const uint8_t ImtqAddress = 0x10;
 
 #define FOR_AXIS(var) for (uint8_t var = 0; var < 3; ++var)
 
-TEST(ImtqTestDataStructures, Status)
-{
-    devices::imtq::Status status{0x00};
-    EXPECT_EQ(status.IsNew(), false);
-    EXPECT_EQ(status.InvalidX(), false);
-    EXPECT_EQ(status.InvalidY(), false);
-    EXPECT_EQ(status.InvalidZ(), false);
-    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::Accepted);
-
-    status = devices::imtq::Status{0x11};
-    EXPECT_EQ(status.IsNew(), false);
-    EXPECT_EQ(status.InvalidX(), false);
-    EXPECT_EQ(status.InvalidY(), false);
-    EXPECT_EQ(status.InvalidZ(), true);
-    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::Rejected);
-
-    status = devices::imtq::Status{0x22};
-    EXPECT_EQ(status.IsNew(), false);
-    EXPECT_EQ(status.InvalidX(), false);
-    EXPECT_EQ(status.InvalidY(), true);
-    EXPECT_EQ(status.InvalidZ(), false);
-    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::InvalidCommandCode);
-
-    status = devices::imtq::Status{0x33};
-    EXPECT_EQ(status.IsNew(), false);
-    EXPECT_EQ(status.InvalidX(), false);
-    EXPECT_EQ(status.InvalidY(), true);
-    EXPECT_EQ(status.InvalidZ(), true);
-    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::ParameterMissing);
-
-    status = devices::imtq::Status{0x44};
-    EXPECT_EQ(status.IsNew(), false);
-    EXPECT_EQ(status.InvalidX(), true);
-    EXPECT_EQ(status.InvalidY(), false);
-    EXPECT_EQ(status.InvalidZ(), false);
-    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::ParameterInvalid);
-
-    status = devices::imtq::Status{0x55};
-    EXPECT_EQ(status.IsNew(), false);
-    EXPECT_EQ(status.InvalidX(), true);
-    EXPECT_EQ(status.InvalidY(), false);
-    EXPECT_EQ(status.InvalidZ(), true);
-    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::CommandUnavailableInCurrentMode);
-
-    status = devices::imtq::Status{0x67};
-    EXPECT_EQ(status.IsNew(), false);
-    EXPECT_EQ(status.InvalidX(), true);
-    EXPECT_EQ(status.InvalidY(), true);
-    EXPECT_EQ(status.InvalidZ(), false);
-    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::InternalError);
-
-    status = devices::imtq::Status{0x70};
-    EXPECT_EQ(status.IsNew(), false);
-    EXPECT_EQ(status.InvalidX(), true);
-    EXPECT_EQ(status.InvalidY(), true);
-    EXPECT_EQ(status.InvalidZ(), true);
-    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::Accepted);
-
-    status = devices::imtq::Status{0x81};
-    EXPECT_EQ(status.IsNew(), true);
-    EXPECT_EQ(status.InvalidX(), false);
-    EXPECT_EQ(status.InvalidY(), false);
-    EXPECT_EQ(status.InvalidZ(), false);
-    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::Rejected);
-
-    status = devices::imtq::Status{0x92};
-    EXPECT_EQ(status.IsNew(), true);
-    EXPECT_EQ(status.InvalidX(), false);
-    EXPECT_EQ(status.InvalidY(), false);
-    EXPECT_EQ(status.InvalidZ(), true);
-    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::InvalidCommandCode);
-
-    status = devices::imtq::Status{0xA3};
-    EXPECT_EQ(status.IsNew(), true);
-    EXPECT_EQ(status.InvalidX(), false);
-    EXPECT_EQ(status.InvalidY(), true);
-    EXPECT_EQ(status.InvalidZ(), false);
-    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::ParameterMissing);
-
-    status = devices::imtq::Status{0xB4};
-    EXPECT_EQ(status.IsNew(), true);
-    EXPECT_EQ(status.InvalidX(), false);
-    EXPECT_EQ(status.InvalidY(), true);
-    EXPECT_EQ(status.InvalidZ(), true);
-    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::ParameterInvalid);
-
-    status = devices::imtq::Status{0xC5};
-    EXPECT_EQ(status.IsNew(), true);
-    EXPECT_EQ(status.InvalidX(), true);
-    EXPECT_EQ(status.InvalidY(), false);
-    EXPECT_EQ(status.InvalidZ(), false);
-    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::CommandUnavailableInCurrentMode);
-
-    status = devices::imtq::Status{0xD7};
-    EXPECT_EQ(status.IsNew(), true);
-    EXPECT_EQ(status.InvalidX(), true);
-    EXPECT_EQ(status.InvalidY(), false);
-    EXPECT_EQ(status.InvalidZ(), true);
-    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::InternalError);
-
-    status = devices::imtq::Status{0xE0};
-    EXPECT_EQ(status.IsNew(), true);
-    EXPECT_EQ(status.InvalidX(), true);
-    EXPECT_EQ(status.InvalidY(), true);
-    EXPECT_EQ(status.InvalidZ(), false);
-    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::Accepted);
-
-    status = devices::imtq::Status{0xF1};
-    EXPECT_EQ(status.IsNew(), true);
-    EXPECT_EQ(status.InvalidX(), true);
-    EXPECT_EQ(status.InvalidY(), true);
-    EXPECT_EQ(status.InvalidZ(), true);
-    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::Rejected);
-}
+//TEST(ImtqTestDataStructures, Status)
+//{
+//    devices::imtq::Status status{0x00};
+//    EXPECT_EQ(status.IsNew(), false);
+//    EXPECT_EQ(status.InvalidX(), false);
+//    EXPECT_EQ(status.InvalidY(), false);
+//    EXPECT_EQ(status.InvalidZ(), false);
+//    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::Accepted);
+//
+//    status = devices::imtq::Status{0x11};
+//    EXPECT_EQ(status.IsNew(), false);
+//    EXPECT_EQ(status.InvalidX(), false);
+//    EXPECT_EQ(status.InvalidY(), false);
+//    EXPECT_EQ(status.InvalidZ(), true);
+//    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::Rejected);
+//
+//    status = devices::imtq::Status{0x22};
+//    EXPECT_EQ(status.IsNew(), false);
+//    EXPECT_EQ(status.InvalidX(), false);
+//    EXPECT_EQ(status.InvalidY(), true);
+//    EXPECT_EQ(status.InvalidZ(), false);
+//    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::InvalidCommandCode);
+//
+//    status = devices::imtq::Status{0x33};
+//    EXPECT_EQ(status.IsNew(), false);
+//    EXPECT_EQ(status.InvalidX(), false);
+//    EXPECT_EQ(status.InvalidY(), true);
+//    EXPECT_EQ(status.InvalidZ(), true);
+//    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::ParameterMissing);
+//
+//    status = devices::imtq::Status{0x44};
+//    EXPECT_EQ(status.IsNew(), false);
+//    EXPECT_EQ(status.InvalidX(), true);
+//    EXPECT_EQ(status.InvalidY(), false);
+//    EXPECT_EQ(status.InvalidZ(), false);
+//    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::ParameterInvalid);
+//
+//    status = devices::imtq::Status{0x55};
+//    EXPECT_EQ(status.IsNew(), false);
+//    EXPECT_EQ(status.InvalidX(), true);
+//    EXPECT_EQ(status.InvalidY(), false);
+//    EXPECT_EQ(status.InvalidZ(), true);
+//    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::CommandUnavailableInCurrentMode);
+//
+//    status = devices::imtq::Status{0x67};
+//    EXPECT_EQ(status.IsNew(), false);
+//    EXPECT_EQ(status.InvalidX(), true);
+//    EXPECT_EQ(status.InvalidY(), true);
+//    EXPECT_EQ(status.InvalidZ(), false);
+//    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::InternalError);
+//
+//    status = devices::imtq::Status{0x70};
+//    EXPECT_EQ(status.IsNew(), false);
+//    EXPECT_EQ(status.InvalidX(), true);
+//    EXPECT_EQ(status.InvalidY(), true);
+//    EXPECT_EQ(status.InvalidZ(), true);
+//    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::Accepted);
+//
+//    status = devices::imtq::Status{0x81};
+//    EXPECT_EQ(status.IsNew(), true);
+//    EXPECT_EQ(status.InvalidX(), false);
+//    EXPECT_EQ(status.InvalidY(), false);
+//    EXPECT_EQ(status.InvalidZ(), false);
+//    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::Rejected);
+//
+//    status = devices::imtq::Status{0x92};
+//    EXPECT_EQ(status.IsNew(), true);
+//    EXPECT_EQ(status.InvalidX(), false);
+//    EXPECT_EQ(status.InvalidY(), false);
+//    EXPECT_EQ(status.InvalidZ(), true);
+//    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::InvalidCommandCode);
+//
+//    status = devices::imtq::Status{0xA3};
+//    EXPECT_EQ(status.IsNew(), true);
+//    EXPECT_EQ(status.InvalidX(), false);
+//    EXPECT_EQ(status.InvalidY(), true);
+//    EXPECT_EQ(status.InvalidZ(), false);
+//    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::ParameterMissing);
+//
+//    status = devices::imtq::Status{0xB4};
+//    EXPECT_EQ(status.IsNew(), true);
+//    EXPECT_EQ(status.InvalidX(), false);
+//    EXPECT_EQ(status.InvalidY(), true);
+//    EXPECT_EQ(status.InvalidZ(), true);
+//    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::ParameterInvalid);
+//
+//    status = devices::imtq::Status{0xC5};
+//    EXPECT_EQ(status.IsNew(), true);
+//    EXPECT_EQ(status.InvalidX(), true);
+//    EXPECT_EQ(status.InvalidY(), false);
+//    EXPECT_EQ(status.InvalidZ(), false);
+//    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::CommandUnavailableInCurrentMode);
+//
+//    status = devices::imtq::Status{0xD7};
+//    EXPECT_EQ(status.IsNew(), true);
+//    EXPECT_EQ(status.InvalidX(), true);
+//    EXPECT_EQ(status.InvalidY(), false);
+//    EXPECT_EQ(status.InvalidZ(), true);
+//    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::InternalError);
+//
+//    status = devices::imtq::Status{0xE0};
+//    EXPECT_EQ(status.IsNew(), true);
+//    EXPECT_EQ(status.InvalidX(), true);
+//    EXPECT_EQ(status.InvalidY(), true);
+//    EXPECT_EQ(status.InvalidZ(), false);
+//    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::Accepted);
+//
+//    status = devices::imtq::Status{0xF1};
+//    EXPECT_EQ(status.IsNew(), true);
+//    EXPECT_EQ(status.InvalidX(), true);
+//    EXPECT_EQ(status.InvalidY(), true);
+//    EXPECT_EQ(status.InvalidZ(), true);
+//    EXPECT_EQ(status.CmdError(), devices::imtq::Status::Error::Rejected);
+//}
 
 class ImtqTest : public testing::Test
 {
@@ -168,7 +168,6 @@ TEST_F(ImtqTest, TestFailedCasesDuringNoOperation)
 {
     // accepted
     EXPECT_CALL(i2c, Write(ImtqAddress, ElementsAre(0x02))).WillOnce(Return(I2CResult::OK));
-
     EXPECT_CALL(i2c, Read(ImtqAddress, _)).WillOnce(Invoke([](uint8_t /*address*/, auto outData) {
         EXPECT_EQ(outData.size(), 2);
         outData[0] = 0x02;
@@ -263,7 +262,7 @@ TEST_F(ImtqTest, TestFailedCasesDuringNoOperation)
                     [](uint8_t /*address*/, auto outData) {
                         EXPECT_EQ(outData.size(), 2);
                         outData[0] = 0xAA;
-                        outData[1] = static_cast<uint8_t>(devices::imtq::Status::Error::Rejected);
+                        outData[1] = 1;
                         return I2CResult::OK;
                     }));
 
@@ -395,12 +394,13 @@ RC_GTEST_FIXTURE_PROP(ImtqTest, GetSystemState, ())
         return I2CResult::OK;
     }));
 
-    ImtqState state;
+    State state;
     RC_ASSERT(imtq.GetSystemState(state));
 
-    RC_ASSERT(state.status.GetValue() == 0);
     RC_ASSERT(static_cast<uint8_t>(state.mode) == mode);
     RC_ASSERT(state.error.GetValue() == error);
+    RC_ASSERT(state.anyParameterUpdatedSinceStartup == conf);
+    RC_ASSERT(state.uptime == std::chrono::seconds{uptime});
 }
 
 RC_GTEST_FIXTURE_PROP(ImtqTest, GetCalibratedMagnetometerData, (std::array<int32_t, 3> data, bool newValue, bool coilAct))

@@ -19,8 +19,8 @@ namespace adcs
 
         bool PerformSelfTest(devices::imtq::SelfTestResult& result);
         bool ISISBDotDetumbling(std::chrono::seconds duration);
-        bool MeasureMagnetometer(Vector3<MagnetometerMeasurement>& mgtmMeasurement);
-        bool PWSatDetumbling(const Vector3<Dipole>& dipole, Vector3<MagnetometerMeasurement>& mgtmMeasurement);
+        bool MeasureMagnetometer(devices::imtq::Vector3<MagnetometerMeasurement>& mgtmMeasurement);
+        bool PWSatDetumbling(const devices::imtq::Vector3<Dipole>& dipole, devices::imtq::Vector3<MagnetometerMeasurement>& mgtmMeasurement);
 
         devices::imtq::ImtqDriver driver;
     };
