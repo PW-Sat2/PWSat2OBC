@@ -51,4 +51,7 @@ void ResetHandler(std::uint16_t argc, char* argv[]);
 
 void RTCTest(std::uint16_t argc, char* argv[]);
 
+void TakeRAWPhotoHandler(uint16_t argc, char* argv[]);
+void TakeJPEGPhotoHandler(uint16_t argc, char* argv[]);
+
 #endif

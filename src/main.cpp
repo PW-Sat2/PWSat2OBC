@@ -36,11 +36,17 @@
 #include "gpio/gpio.h"
 #include "leuart/leuart.h"
 #include "power_eps/power_eps.h"
+#include "uart/Uart.h"
+#include "camera/camera.h"
 
 using services::time::TimeProvider;
 using namespace std::chrono_literals;
+using namespace drivers::uart;
+using namespace devices::camera;
 
 OBC Main;
+
+static uint8_t out[10000];
 mission::ObcMission Mission(
     Main.timeProvider, Main.antennaDriver, false, Main.adcs.GetAdcsController(), Main.Experiments.ExperimentsController);
 
@@ -174,6 +180,42 @@ void SetupHardware(void)
     CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_HFCLKLE);
 }
 
+
+
+void UartTask(void* param)
+{	
+	UNREFERENCED_PARAMETER(param);
+
+	Uart_Init init;
+
+	init.baudRate=9600;
+	init.parity=usartNoParity;
+	init.oversampling   = usartOVS16;
+	init.dataBits       = usartDatabits8;
+	init.parity         = usartNoParity;
+	init.stopBits       = usartStopbits1;
+
+
+	Uart uart(init);
+	uart.Initialize();
+	Camera camera(uart);
+
+	while (1) {
+
+		if(camera.isInitialized) {
+			camera.CameraGetJPEGPicture(out,10000,false);
+		}
+		else {
+			camera.InitializeJPEGPicture(CameraJPEGResolution::_160x128);
+		}
+
+System::SleepTask(1s);
+	}
+
+}
+
+
+
 extern "C" void __libc_init_array(void);
 
 int main(void)
@@ -211,7 +253,10 @@ int main(void)
     Main.Hardware.Pins.Led1.High();
 
     System::CreateTask(BlinkLed0, "Blink0", 512, NULL, TaskPriority::P1, NULL);
-    System::CreateTask(ObcInitTask, "Init", 3_KB, &Main, TaskPriority::Highest, &Main.initTask);
+
+    //System::CreateTask(ADXRS, "ADXRS", 512, NULL, tskIDLE_PRIORITY + 2, NULL);
+    System::CreateTask(UartTask, "uart", 512, NULL, TaskPriority::P1, NULL);
+    System::CreateTask(ObcInitTask, "Init", 512, &Main, TaskPriority::Highest, &Main.initTask);
 
     System::RunScheduler();
 

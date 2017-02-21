@@ -63,10 +63,13 @@ target_link_libraries(${NAME}
     obc_experiments
     spi
     efm_emlib
+    uart
+    camera
     burtc
     obc_adcs
     rtc
     mission_adcs
+
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

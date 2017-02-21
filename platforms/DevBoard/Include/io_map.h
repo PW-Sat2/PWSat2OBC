@@ -30,6 +30,14 @@ namespace io_map
         using CLK = PinLocation<gpioPortD, 2>;
     };
 
+    struct UART : public UARTPins<UART>
+        {
+            static constexpr USART_TypeDef* Peripheral = USART1;
+            static constexpr std::uint8_t Location = 1;
+            using RX = PinLocation<gpioPortD, 0>;
+            using TX = PinLocation<gpioPortD, 1>;
+        };
+
     struct LEUART : public LEUARTPins<LEUART>
     {
         static constexpr std::uint8_t Location = LEUART_ROUTE_LOCATION_LOC0;

@@ -50,6 +50,34 @@ namespace efm
     {
         /***************************************************************************/ /**
           * @brief
+          *   Init USART for asynchronous mode.
+          *
+          * @details
+          *   This function will configure basic settings in order to operate in
+          *   asynchronous mode.
+          *
+          *   Special control setup not covered by this function must be done after
+          *   using this function by direct modification of the CTRL register.
+          *
+          *   Notice that pins used by the USART module must be properly configured
+          *   by the user explicitly, in order for the USART to work as intended.
+          *   (When configuring pins, one should remember to consider the sequence of
+          *   configuration, in order to avoid unintended pulses/glitches on output
+          *   pins.)
+          *
+          * @param[in] usart
+          *   Pointer to USART peripheral register block. (UART does not support this
+          *   mode.)
+          *
+          * @param[in] init
+          *   Pointer to initialization structure used to configure basic async setup.
+          *
+          * @ingroup efm_support
+          ******************************************************************************/
+        void InitAsync(USART_TypeDef* usart, const USART_InitAsync_TypeDef* init);
+
+        /***************************************************************************/ /**
+          * @brief
           *   Init USART for synchronous mode.
           *
           * @details
@@ -74,7 +102,7 @@ namespace efm
           *
           * @ingroup efm_support
           ******************************************************************************/
-        void InitSync(USART_TypeDef* usart, const USART_InitSync_TypeDef* init);
+         void InitSync(USART_TypeDef* usart, const USART_InitSync_TypeDef* init);
 
         /***************************************************************************/ /**
           * @brief
@@ -166,6 +194,66 @@ namespace efm
           * @ingroup efm_support
           ******************************************************************************/
         Ecode_t AllocateChannel(unsigned int* channelId, void* capabilities);
+
+
+        /***************************************************************************/ /**
+         * @brief
+         *  Initialize a DMA driver.
+         *
+         *
+         * @return
+         *  ECODE_EMDRV_DMADRV_OK on success. On failure an appropriate
+         *  DMADRV Ecode_t is returned.
+         *
+         * @ingroup efm_support
+         ******************************************************************************/
+        Ecode_t Init();
+
+        /***************************************************************************/ /**
+         * @brief
+         *  Initialize a DMA driver.
+         *
+         *
+         * @return
+         *  ECODE_EMDRV_DMADRV_OK on success. On failure an appropriate
+         *  DMADRV Ecode_t is returned.
+         *
+         * @ingroup efm_support
+         ******************************************************************************/
+         Ecode_t DeInit();
+
+
+         /***************************************************************************/ /**
+          * @brief
+          *  Stop transfer on a DMA channel.
+          *
+          *
+          * @param[in] channelId
+          * The channel Id assigned by DMADRV.
+          *
+          * @return
+          *  ECODE_EMDRV_DMADRV_OK on success. On failure an appropriate
+          *  DMADRV Ecode_t is returned.
+          *
+          * @ingroup efm_support
+          ******************************************************************************/
+         Ecode_t StopTransfer(unsigned int channelId);
+
+         /***************************************************************************/ /**
+          * @brief
+          *  Deallocate (free) a DMA channel.
+          *
+          *
+          * @param[in] channelId
+          *  Not used.
+          *
+          * @return
+          *  ECODE_EMDRV_DMADRV_OK on success. On failure an appropriate
+          *  DMADRV Ecode_t is returned.
+          *
+          * @ingroup efm_support
+          ******************************************************************************/
+         Ecode_t FreeChannel(unsigned int channelId);
 
         /***************************************************************************/ /**
           * @brief
