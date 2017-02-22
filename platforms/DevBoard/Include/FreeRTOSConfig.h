@@ -98,7 +98,7 @@ extern void assertFailed(const char* source, const char* file, uint16_t line);
 #define configUSE_IDLE_HOOK 1
 #define configUSE_TICK_HOOK 0
 #define configCPU_CLOCK_HZ (14000000UL)
-#define configTICK_RATE_HZ ((TickType_t)1000)
+#define configTICK_RATE_HZ ((TickType_t)100)
 #define configMINIMAL_STACK_SIZE ((unsigned short)70)
 #define configTOTAL_HEAP_SIZE ((size_t)(90 * 1024))
 #define configMAX_TASK_NAME_LEN (10)
