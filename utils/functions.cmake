@@ -84,3 +84,12 @@ function(generate_version_file FILENAME)
     
     configure_file(${CMAKE_SOURCE_DIR}/utils/version.h.template ${FILENAME})
 endfunction(generate_version_file)
+
+function(target_eclipse_debug_configs NAME)
+    get_filename_component(BUILD_DIR_NAME ${CMAKE_BINARY_DIR} NAME) 
+
+    foreach(target ${ARGN})
+        configure_file(${CMAKE_SOURCE_DIR}/utils/${target}.launch.template "${CMAKE_CURRENT_BINARY_DIR}/[${NAME}] ${target}.launch")
+    endforeach(target)
+
+endfunction(target_eclipse_debug_configs)

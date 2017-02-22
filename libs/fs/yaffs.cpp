@@ -226,6 +226,28 @@ FileSize YaffsFileSystem::GetFileSize(FileHandle file)
     return stat.st_size;
 }
 
+OSResult YaffsFileSystem::Seek(FileHandle file, SeekOrigin origin, FileSize offset)
+{
+    std::int16_t whence;
+
+    switch (origin)
+    {
+        case SeekOrigin::Begin:
+            whence = SEEK_SET;
+            break;
+        case SeekOrigin::Current:
+            whence = SEEK_CUR;
+            break;
+        case SeekOrigin::End:
+            whence = SEEK_END;
+            break;
+        default:
+            return OSResult::OutOfRange;
+    }
+
+    return YaffsTranslateError(yaffs_lseek(file, offset, whence));
+}
+
 OSResult YaffsFileSystem::AddDeviceAndMount(yaffs_dev* device)
 {
     yaffs_add_device(device);

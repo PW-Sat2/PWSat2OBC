@@ -330,6 +330,13 @@ class System final : public PureStatic
     static OSEventBits EventGroupClearBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange);
 
     /**
+     * @brief Gets current value of event group
+     * @param eventGroup Event group handle
+     * @return Value of event group from moment of call
+     */
+    static OSEventBits EventGroupGetBits(OSEventGroupHandle eventGroup);
+
+    /**
      * @brief Suspends current task execution until the specific bits in the event group are set.
      *
      * @param[in] eventGroup The affected event group handle.
@@ -602,6 +609,12 @@ template <typename Element, std::size_t Capacity> class Queue final
      */
     OSResult Pop(Element& element, std::chrono::milliseconds timeout);
 
+    /**
+     * @brief Overwrites last element in queue
+     * @param element Element
+     */
+    void Overwrite(const Element& element);
+
   private:
     /** @brief Queue handle */
     OSQueueHandle _handle;
@@ -648,6 +661,11 @@ OSResult Queue<Element, Capacity>::Pop(Element& element, std::chrono::millisecon
     return OSResult::Timeout;
 }
 
+template <typename Element, std::size_t Capacity> inline void Queue<Element, Capacity>::Overwrite(const Element& element)
+{
+    System::QueueOverwrite(this->_handle, &element);
+}
+
 /**
  * @brief Class that allows checking if specified number of miliseconds elapsed
  *
@@ -685,6 +703,69 @@ class Timeout final
      * @brief System uptime at which timeout will expire
      */
     const std::chrono::milliseconds _expireAt;
+};
+
+/**
+ * @brief Wrapper around event group synchronization primitive
+ */
+class EventGroup final
+{
+  public:
+    /**
+     * @brief Default ctor
+     */
+    EventGroup();
+
+    /** @brief Initializes event group */
+    OSResult Initialize();
+
+    /**
+     * @brief Sets bits in event group
+     * @param bits Bits to set
+     * @remark Must not be used from ISR
+     */
+    void Set(OSEventBits bits);
+
+    /**
+     * @brief Sets bits in event group from ISR
+     * @param bits Bits to set
+     */
+    void SetISR(OSEventBits bits);
+
+    /**
+     * @brief Clears bits in event group
+     * @param bits Bits to clear
+     */
+    void Clear(OSEventBits bits);
+
+    /**
+     * @brief Waits until any bit specified by mask is set
+     * @param bits Bits to wait for
+     * @param clearOnExit Should bits be cleared on exit
+     * @param timeout Timeout
+     * @return Event group value at the exit of function
+     */
+    OSEventBits WaitAny(OSEventBits bits, bool clearOnExit, std::chrono::milliseconds timeout);
+
+    /**
+     * @brief Waits until all bits specified by mask are set
+     * @param bits Bits to wait for
+     * @param clearOnExit Should bits be cleared on exit
+     * @param timeout Timeout
+     * @return Event group value at the exit of function
+     */
+    OSEventBits WaitAll(OSEventBits bits, bool clearOnExit, std::chrono::milliseconds timeout);
+
+    /**
+     * @brief Checks if bit is currently set
+     * @param bit Bit to check
+     * @return true if bit is set
+     */
+    bool IsSet(OSEventBits bit);
+
+  private:
+    /** @brief Underlying event group handle */
+    OSEventGroupHandle _handle;
 };
 
 /** @}*/

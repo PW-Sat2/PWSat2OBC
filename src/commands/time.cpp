@@ -40,5 +40,5 @@ void CurrentTimeHandler(uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
     std::chrono::milliseconds span = Main.timeProvider.GetCurrentTime().Value;
-    Main.terminal.Printf("%lu", static_cast<std::uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(span).count()));
+    Main.terminal.Printf("%lu", static_cast<std::uint32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(span).count()));
 }

@@ -1,6 +1,7 @@
 #ifndef SRC_HARDWARE_H_
 #define SRC_HARDWARE_H_
 
+#include "burtc/burtc.hpp"
 #include "gpio.h"
 #include "i2c/efm.h"
 #include "i2c/i2c.h"
@@ -97,11 +98,15 @@ namespace obc
         /**
          * @brief Initializes @ref OBCHardware instance
          * @param[in] powerControl Power control interface
+         * @param[in] burtcTickHandler Tick handler for internal (BURTC) clock
          */
-        OBCHardware(PowerControl* powerControl);
+        OBCHardware(PowerControl* powerControl, TimeAction& burtcTickHandler);
 
-        /** @brief Initialzies OBC hardware */
+        /** @brief Initializies OBC hardware */
         void Initialize();
+
+        /** @brief Initializies OBC hardware after FreeRTOS is initialized */
+        OSResult PostStartInitialize();
 
         /** @brief GPIO Pins */
         OBCGPIO Pins;
@@ -111,6 +116,9 @@ namespace obc
 
         /** @brief SPI interface */
         drivers::spi::EFMSPIInterface SPI;
+
+        /** @brief BURTC object. */
+        devices::burtc::Burtc Burtc;
     };
 }
 /** @} */

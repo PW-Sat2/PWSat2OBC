@@ -36,7 +36,6 @@ I2CResult I2CFallbackBus::Read(const I2CAddress address, gsl::span<uint8_t> outD
     return payloadBusResult;
 }
 
-
 I2CResult I2CFallbackBus::WriteRead(const I2CAddress address, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData)
 {
     const I2CResult systemBusResult = this->_innerBuses.Bus.WriteRead(address, inData, outData);

@@ -1,20 +1,26 @@
 #ifndef OBC_H
 #define OBC_H
 
+#include <array>
 #include <atomic>
 #include <cstdint>
 #include <gsl/span>
 
-#include "adcs/adcs.h"
+#include "adcs/AdcsCoordinator.hpp"
+#include "adcs/AdcsExperiment.hpp"
 #include "antenna/driver.h"
 #include "antenna/miniport.h"
 #include "base/os.h"
+#include "experiment/fibo/fibo.h"
 #include "fs/fs.h"
 #include "fs/yaffs.h"
+#include "imtq/imtq.h"
 #include "leuart/line_io.h"
 #include "n25q/n25q.h"
 #include "n25q/yaffs.h"
+#include "obc/adcs.hpp"
 #include "obc/communication.h"
+#include "obc/experiments.hpp"
 #include "obc/hardware.h"
 #include "obc/storage.h"
 #include "spi/efm.h"
@@ -22,7 +28,6 @@
 #include "terminal/terminal.h"
 #include "time/timer.h"
 #include "utils.h"
-#include "adcs/imtq.h"
 
 /**
  * @defgroup obc OBC structure
@@ -45,7 +50,7 @@ struct OBC
     /**
      * @brief Initialization that takes places after starting RTOS
      */
-    void PostStartInitialization();
+    OSResult PostStartInitialization();
 
     /** @brief File system object */
     services::fs::YaffsFileSystem fs;
@@ -54,14 +59,11 @@ struct OBC
     /** @brief Flag indicating that OBC software has finished initialization process. */
     std::atomic<bool> initialized;
 
-    /** @brief ADCS context object */
-    ADCSContext adcs;
+    /** @brief Persistent timer that measures mission time. */
+    services::time::TimeProvider timeProvider;
 
     /** @brief OBC hardware */
     obc::OBCHardware Hardware;
-
-    /** @brief Persistent timer that measures mission time. */
-    services::time::TimeProvider timeProvider;
 
     /** @brief Low level driver for antenna controller. */
     AntennaMiniportDriver antennaMiniport;
@@ -82,7 +84,13 @@ struct OBC
     obc::OBCStorage Storage;
 
     /** @brief Imtq handling */
-    adcs::Imtq imtq;
+    devices::imtq::ImtqDriver Imtq;
+
+    /** @brief Adcs subsytem for obc. */
+    obc::Adcs adcs;
+
+    /** @brief Experiments */
+    obc::OBCExperiments Experiments;
 
     /** @brief Terminal object. */
     Terminal terminal;

@@ -27,3 +27,10 @@
  * @{
  * @}
  */
+
+/**
+ * @defgroup telecommands Telecommands
+ * @brief This group contains definitions for all supported telecommands
+ * @{
+ * @}
+ */

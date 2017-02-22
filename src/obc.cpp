@@ -3,12 +3,13 @@
 #include "logger/logger.h"
 
 OBC::OBC()
-    : Hardware(&this->PowerControlInterface),   //
-      timeProvider(fs),                         //
-      Communication(Hardware.I2C.Buses.Bus),    //
-      Storage(Hardware.SPI, fs, Hardware.Pins), //
-      imtq(Hardware.I2C.Buses.Bus),             //
-      terminal(this->IO)
+    : timeProvider(fs),                                     //
+      Hardware(&this->PowerControlInterface, timeProvider), //
+      Communication(Hardware.I2C.Buses.Bus, fs),            //
+      Storage(Hardware.SPI, fs, Hardware.Pins),             //
+      Imtq(Hardware.I2C.Buses.Bus),                         //
+      Experiments(fs),                                      //
+      terminal(this->IO)                                    //
 {
 }
 
@@ -19,14 +20,27 @@ void OBC::Initialize()
     this->fs.Initialize();
 
     this->Communication.Initialize();
+
+    this->adcs.Initialize();
 }
 
-void OBC::PostStartInitialization()
+OSResult OBC::PostStartInitialization()
 {
-    auto r = this->Storage.Initialize();
-
-    if (OS_RESULT_FAILED(r))
+    auto result = this->Hardware.PostStartInitialize();
+    if (OS_RESULT_FAILED(result))
     {
-        LOGF(LOG_LEVEL_FATAL, "Storage initialization failed %d", num(r));
+        LOGF(LOG_LEVEL_FATAL, "Hardware post start initialization failed %d", num(result));
+        return result;
     }
+
+    result = this->Storage.Initialize();
+    if (OS_RESULT_FAILED(result))
+    {
+        LOGF(LOG_LEVEL_FATAL, "Storage initialization failed %d", num(result));
+        return result;
+    }
+
+    this->Experiments.Initialize();
+
+    return OSResult::Success;
 }

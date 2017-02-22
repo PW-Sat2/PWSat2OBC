@@ -11,6 +11,67 @@ set(SOURCES
   OsMock.hpp
   assert.cpp
   imtq/imtqTest.cpp
+  Logger/LoggerTest.cpp
+  FileSystem/FileSystemTest.cpp
+  FileSystem/YaffsOSGlue.cpp
+  FileSystem/MemoryDriver.cpp
+  FileSystem/NANDGeometryTest.cpp
+  FileSystem/MemoryDriver.cpp
+  FileSystem/EccTest.cpp
+  FileSystem/FileTest.cpp
+  Comm/CommTest.cpp
+  Comm/CommFrameTest.cpp
+  Comm/DownlinkFrameTest.cpp
+  Comm/TeleCommandHandlingTest.cpp
+  Comm/UplinkFrameDecoderTest.cpp
+  Comm/Telecommands/DownloadFileTelecommandTest.cpp
+  base/ReaderTest.cpp
+  base/WriterTest.cpp
+  base/RapidTest.cpp
+  MissionPlan/MissionPlanTest.cpp
+  MissionPlan/MissionTestHelpers.cpp
+  MissionPlan/SailSystemStateTest.cpp
+  MissionPlan/TimeTaskTest.cpp
+  MissionPlan/MissionLoopTest.cpp
+  MissionPlan/antenna/DeployAntennasTest.cpp
+  MissionPlan/antenna/AntennaMissionStateTest.cpp
+  MissionPlan/CompositeActionTest.cpp
+  MissionPlan/adcs/AdcsPrimaryTaskTest.cpp
+  MissionPlan/obc/ObcTest.cpp
+  I2C/FallbackI2CBusTest.cpp
+  I2C/ErrorHandlingI2CBusTest.cpp
+  I2C/I2CMock.cpp
+  N25Q/N25QTest.cpp
+  os/TimeoutTest.cpp
+  os/EventGroupTest.cpp
+  os/os.cpp
+  os/os.hpp
+  OsMock.hpp
+  OsMock.cpp
+  time/time.cpp
+  time/timer.cpp
+  time/persistance.cpp
+  time/SmartWait.cpp
+  mock/FsMock.hpp
+  mock/FsMock.cpp
+  mock/AntennaMock.cpp
+  mock/AntennaMock.hpp
+  mock/AdcsMocks.hpp
+  mock/ActionDescriptorMock.hpp
+  mock/UpdateDescriptorMock.hpp
+  mock/VerifyDescriprorMock.hpp
+  mock/emlib.cpp
+  assert.cpp
+  antenna/miniport.cpp
+  antenna/antenna.cpp
+  antenna/MiniportMock.cpp
+  antenna/MiniportMock.hpp
+  SPI/SPIMock.cpp
+  SPI/SPIDriverTest.cpp
+  eigen/eigenTest.cpp
+  adcs/AdcsCoordinatorTest.cpp
+  Experiments/Fibo/FiboCalculatorTest.cpp
+  Experiments/ExperimentTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -57,6 +118,12 @@ target_link_libraries(${NAME}
     imtq
     mission_sail
     mission_time
+    eigen
+    mission_experiments
+    exp_fibo
+    adcs
+    mission_adcs
+    obc_telecommands
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
@@ -86,4 +153,5 @@ if(${ENABLE_COVERAGE})
     )
 endif()
 
+target_eclipse_debug_configs(${NAME} QEmu)
 

@@ -47,9 +47,10 @@ typedef struct _LineIO
     /**
      * @brief Reads arbitrary number of bytes
      * @param io @see LineIO structure
-     * @param buffer Buffer that will be filled
+     * @param outputBuffer Buffer that will be sent before reading inputBuffer
+     * @param inputBuffer Buffer that will be filled
      */
-    void (*ReadBuffer)(struct _LineIO* io, gsl::span<std::uint8_t> buffer);
+    void (*ExchangeBuffers)(struct _LineIO* io, gsl::span<const std::uint8_t> outputBuffer, gsl::span<std::uint8_t> inputBuffer);
 } LineIO;
 
 #endif /* LIBS_DRIVERS_LEUART_INCLUDE_LEUART_LINE_IO_H_ */

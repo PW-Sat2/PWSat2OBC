@@ -1,8 +1,19 @@
 #include <stdint.h>
 #include <em_device.h>
 #include <core_cm3.h>
+
+#include <FreeRTOS.h>
+#include <FreeRTOSConfig.h>
+#include <task.h>
+
 #include "swo/swo.h"
 #include "system.h"
+
+static void Hang()
+{
+    for (;;)
+        ;
+}
 
 extern "C" __attribute__((used)) void prvGetRegistersFromStack(uint32_t* pulFaultStackAddress)
 {
@@ -45,8 +56,7 @@ extern "C" __attribute__((used)) void prvGetRegistersFromStack(uint32_t* pulFaul
     SwoPrintfOnChannel(
         3, "CFSR: 0x%X\nHFSR: 0x%X\nMMFAR: 0x%X\nBFAR: 0x%X\nLR: 0x%X\nPC: 0x%X\nPSR: 0x%X", cfsr, hfsr, mmfar, bfar, lr, pc, psr);
 
-    for (;;)
-        ;
+    Hang();
 }
 
 /* The fault handler implementation calls a function called
@@ -61,4 +71,11 @@ __attribute__((naked)) void HardFault_Handler(void)
                    " ldr r2, handler2_address_constHF                          \n"
                    " bx r2                                                     \n"
                    " handler2_address_constHF: .word prvGetRegistersFromStack  \n");
+}
+
+extern "C" void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
+{
+    UNREFERENCED_PARAMETER(pxTask);
+    SwoPrintfOnChannel(3, "Stack overflow inside task: %s", pcTaskName);
+    Hang();
 }

@@ -46,8 +46,9 @@ class SerialPortTerminal:
     def command(self, cmd):
         self._command_prologue(cmd)
 
-        response = self.readUntilPrompt()
-        return response.rstrip('\n')
+        response = self.readUntilPrompt().rstrip('\n')
+        self.log.debug("Command " + cmd + " responded with " + response)
+        return response
 
     def command_with_write_data(self, cmd, data):
         self._command_prologue(cmd)

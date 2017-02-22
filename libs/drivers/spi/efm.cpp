@@ -40,14 +40,14 @@ void EFMSPIInterface::Initialize()
 
     efm::usart::Enable(io_map::SPI::Peripheral, usartEnable);
 
-    this->_transferGroup = System::CreateEventGroup();
+    this->_transferGroup.Initialize();
     this->_lock = System::CreateBinarySemaphore();
     System::GiveSemaphore(this->_lock);
 }
 
 void EFMSPIInterface::Write(gsl::span<const std::uint8_t> buffer)
 {
-    System::EventGroupClearBits(this->_transferGroup, TransferFinished);
+    this->_transferGroup.Clear(TransferFinished);
 
     efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_CLEARRX | USART_CMD_CLEARTX);
 
@@ -74,12 +74,12 @@ void EFMSPIInterface::Write(gsl::span<const std::uint8_t> buffer)
         OnTransferFinished,
         this);
 
-    System::EventGroupWaitForBits(this->_transferGroup, TransferFinished, true, true, InfiniteTimeout);
+    this->_transferGroup.WaitAll(TransferFinished, true, InfiniteTimeout);
 }
 
 void EFMSPIInterface::Read(gsl::span<std::uint8_t> buffer)
 {
-    System::EventGroupClearBits(this->_transferGroup, TransferFinished);
+    this->_transferGroup.Clear(TransferFinished);
 
     efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_CLEARRX | USART_CMD_CLEARTX);
 
@@ -106,7 +106,7 @@ void EFMSPIInterface::Read(gsl::span<std::uint8_t> buffer)
         OnTransferFinished,
         this);
 
-    System::EventGroupWaitForBits(this->_transferGroup, TransferFinished, true, true, InfiniteTimeout);
+    this->_transferGroup.WaitAll(TransferFinished, true, InfiniteTimeout);
 }
 
 bool EFMSPIInterface::OnTransferFinished(unsigned int channel, unsigned int sequenceNo, void* param)
@@ -117,11 +117,11 @@ bool EFMSPIInterface::OnTransferFinished(unsigned int channel, unsigned int sequ
 
     if (channel == This->_rxChannel)
     {
-        System::EventGroupSetBitsISR(This->_transferGroup, TransferRXFinished);
+        This->_transferGroup.SetISR(TransferRXFinished);
     }
     else if (channel == This->_txChannel)
     {
-        System::EventGroupSetBitsISR(This->_transferGroup, TransferTXFinished);
+        This->_transferGroup.SetISR(TransferTXFinished);
     }
 
     System::EndSwitchingISR();

@@ -40,8 +40,7 @@ Beacon::Beacon(std::uint16_t beaconPeriod, gsl::span<const std::uint8_t> content
 CommObject::CommObject(II2CBus& low, IHandleFrame& upperInterface)
     : _low(low),                     //
       _frameHandler(upperInterface), //
-      _pollingTaskHandle(nullptr),   //
-      _pollingTaskFlags(nullptr)
+      _pollingTaskHandle(nullptr)    //
 {
 }
 
@@ -81,15 +80,7 @@ bool CommObject::SendCommandWithResponse(Address address, uint8_t command, span<
 
 OSResult CommObject::Initialize()
 {
-    this->_pollingTaskFlags = System::CreateEventGroup();
-    if (this->_pollingTaskFlags != NULL)
-    {
-        return OSResult::Success;
-    }
-    else
-    {
-        return OSResult::NotEnoughMemory;
-    }
+    return this->_pollingTaskFlags.Initialize();
 }
 
 bool CommObject::Restart()
@@ -118,8 +109,8 @@ bool CommObject::Pause()
 {
     if (this->_pollingTaskHandle != NULL)
     {
-        System::EventGroupSetBits(this->_pollingTaskFlags, TaskFlagPauseRequest);
-        System::EventGroupWaitForBits(this->_pollingTaskFlags, TaskFlagAck, false, true, InfiniteTimeout);
+        this->_pollingTaskFlags.Set(TaskFlagPauseRequest);
+        this->_pollingTaskFlags.WaitAny(TaskFlagAck, true, InfiniteTimeout);
     }
 
     return true;
@@ -474,11 +465,11 @@ void CommObject::CommTask(void* param)
     comm->PollHardware();
     for (;;)
     {
-        const OSEventBits result = System::EventGroupWaitForBits(comm->_pollingTaskFlags, TaskFlagPauseRequest, false, true, 10s);
+        const OSEventBits result = comm->_pollingTaskFlags.WaitAny(TaskFlagPauseRequest, true, 10s);
         if (result == TaskFlagPauseRequest)
         {
             LOG(LOG_LEVEL_WARNING, "Comm task paused");
-            System::EventGroupSetBits(comm->_pollingTaskFlags, TaskFlagAck);
+            comm->_pollingTaskFlags.Set(TaskFlagAck);
             System::SuspendTask(NULL);
         }
         else

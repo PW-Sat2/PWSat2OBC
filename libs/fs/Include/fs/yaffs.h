@@ -59,6 +59,7 @@ namespace services
             virtual OSResult MakeDirectory(const char* path) override;
             virtual bool Exists(const char* path) override;
             virtual FileSize GetFileSize(FileHandle file) override;
+            virtual OSResult Seek(FileHandle file, SeekOrigin origin, FileSize offset) override;
 
             virtual OSResult ClearDevice(yaffs_dev* device) override;
 

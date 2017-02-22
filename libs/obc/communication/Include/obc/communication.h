@@ -4,20 +4,13 @@
 #include <gsl/span>
 #include "comm/CommDriver.hpp"
 #include "i2c/i2c.h"
+#include "obc/telecommands/file_system.hpp"
+#include "obc/telecommands/ping.hpp"
 #include "telecommunication/telecommand_handling.h"
 #include "telecommunication/uplink.h"
 
 namespace obc
 {
-    /**@brief Dummy ping telecommand that responds with pong */
-    class PingTelecommand final : public telecommunication::uplink::IHandleTeleCommand
-    {
-      public:
-        virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
-
-        virtual std::uint8_t CommandCode() const override;
-    };
-
     /**
      * @brief Object aggregating all supported telecommands
      */
@@ -25,9 +18,10 @@ namespace obc
     {
       public:
         /**
-         * Initializes @ref Telecommands object
+         * @brief Initializes @ref Telecommands object
+         * @param fs File system
          */
-        Telecommands();
+        Telecommands(services::fs::IFileSystem& fs);
 
         /**
          * Aggregates all telecommand handlers into single span
@@ -37,10 +31,12 @@ namespace obc
 
       private:
         /** @brief Ping telecommand */
-        PingTelecommand _ping;
+        obc::telecommands::PingTelecommand _ping;
+        /** @brief Download file telecommand */
+        obc::telecommands::DownladFileTelecommand _downloadFileTelecommand;
 
         /** @brief Array containg all telecommand handlers */
-        telecommunication::uplink::IHandleTeleCommand* _telecommands[1];
+        telecommunication::uplink::IHandleTeleCommand* _telecommands[2];
     };
 
     /**
@@ -51,8 +47,9 @@ namespace obc
         /**
          * @brief Initializes @ref OBCCommunication object
          * @param[in] i2cBus I2CBus used by low-level comm driver
+         * @param[in] fs File system
          */
-        OBCCommunication(drivers::i2c::II2CBus& i2cBus);
+        OBCCommunication(drivers::i2c::II2CBus& i2cBus, services::fs::IFileSystem& fs);
 
         /**
          * @brief Initializes all communication-related drivers and objects

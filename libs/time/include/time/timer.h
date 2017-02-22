@@ -72,31 +72,61 @@ namespace services
             {
             }
 
+            /**
+             * @brief Equality operator
+             * @param right Other value
+             * @return true if both values are equal
+             */
             bool operator==(const TimeSnapshot& right) const
             {
                 return CurrentTime == right.CurrentTime;
             }
 
+            /**
+             * @brief Inequality operator
+             * @param right Other value
+             * @return true if both values are not equal
+             */
             bool operator!=(const TimeSnapshot& right) const
             {
                 return !(*this == right);
             }
 
+            /**
+             * @brief Less then operator
+             * @param right Other value
+             * @return true if this is less then other
+             */
             bool operator<(const TimeSnapshot& right) const
             {
                 return CurrentTime < right.CurrentTime;
             }
 
+            /**
+             * @brief Greater then operator
+             * @param right Other value
+             * @return true if this is greater then other
+             */
             bool operator>(const TimeSnapshot& right) const
             {
                 return right < *this;
             }
 
+            /**
+             * @brief Less then or equal operator
+             * @param right Other value
+             * @return true if this is less then or equal to other
+             */
             bool operator<=(const TimeSnapshot& right) const
             {
                 return !(*this > right);
             }
 
+            /**
+             * @brief Greater then or equal operator
+             * @param right Other value
+             * @return true if this is greater then or equal to other
+             */
             bool operator>=(const TimeSnapshot& right) const
             {
                 return !(*this < right);
@@ -116,7 +146,7 @@ namespace services
          * values in those files or any of those files is not available the majority vote is done to determine the most
          * likely correct value. In case when all of the values are different the smallest one is selected as the correct one.
          */
-        class TimeProvider
+        class TimeProvider : public TimeAction
         {
           public:
             /**
@@ -179,6 +209,7 @@ namespace services
              * @brief This procedure is responsible for reading the last timer state that has been
              * preserved in the persistent memory.
              *
+             * @param[in] fileSystem Reference to the file system sub system that should be used for data access.
              * @return Either last stable timer state that get read from the persistent memory or
              * value indicating zero (initial time).
              */
@@ -197,6 +228,12 @@ namespace services
              * @return True if expected time span is elapsed, false in case of error
              */
             bool LongDelay(std::chrono::milliseconds delay);
+
+            /**
+             * @brief Method that will be called by BURTC.
+             * @param[in] interval Interval that passed since last tick
+             */
+            void virtual Invoke(std::chrono::milliseconds interval) override;
 
           public:
             /**
@@ -289,9 +326,9 @@ namespace services
             struct TimeSnapshot ReadFile(services::fs::IFileSystem& fs, const char* const filePath);
 
           private:
-            static constexpr const char* File0 = "/TimeState.0";
-            static constexpr const char* File1 = "/TimeState.1";
-            static constexpr const char* File2 = "/TimeState.2";
+            static constexpr const char* File0 = "/a/TimeState.0";
+            static constexpr const char* File1 = "/a/TimeState.1";
+            static constexpr const char* File2 = "/a/TimeState.2";
 
             /**
              * @brief Pointer to time notification procedure that gets called on time change.

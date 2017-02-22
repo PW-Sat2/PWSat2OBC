@@ -124,6 +124,18 @@ bool Writer::WriteArray(gsl::span<const uint8_t> buffer)
     }
 }
 
+gsl::span<std::uint8_t> Writer::Reserve(std::size_t count)
+{
+    count = std::min<std::size_t>(count, this->_buffer.size() - this->_position);
+
+    auto s = this->_buffer.subspan(this->_position, count);
+
+    UpdateState(count);
+    this->_position += count;
+
+    return s;
+}
+
 gsl::span<std::uint8_t> Writer::Capture()
 {
     return this->_buffer.subspan(0, this->_position);
