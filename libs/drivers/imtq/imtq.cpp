@@ -86,8 +86,8 @@ namespace devices
             {
                 return false;
             }
-            // 8 times 3-axis measurement, default integration time 10ms
-            System::SleepTask(240ms);
+            // 8 times 3-axis measurement, default integration time 10ms + margin
+            System::SleepTask(500ms);
 
             return GetSelfTestResult(result);
         }
@@ -106,7 +106,7 @@ namespace devices
                 return false;
             }
 
-            System::SleepTask(30ms); // integration time
+            System::SleepTask(30ms); // integration time + margin
 
             MagnetometerMeasurementResult value;
             if (!GetCalibratedMagnetometerData(value))
@@ -461,7 +461,7 @@ namespace devices
             span<uint8_t> request{output.begin(), params.size() + 1};
 
             auto i2cstatusWrite = i2cbus.Write(I2Cadress, request);
-            System::SleepTask(2ms);
+            System::SleepTask(10ms);
             auto i2cstatusRead = i2cbus.Read(I2Cadress, response);
 
             auto status = Status{response[1]};

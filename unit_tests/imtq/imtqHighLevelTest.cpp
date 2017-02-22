@@ -81,8 +81,8 @@ TEST_F(ImtqUseTest, PerformSelfTest)
             return I2CResult::OK;
     }));
 
-    EXPECT_CALL(os, Sleep(240ms)).WillOnce(Return());
-    EXPECT_CALL(os, Sleep(2ms)).WillRepeatedly(Return());
+    EXPECT_CALL(os, Sleep(500ms)).WillOnce(Return());
+    EXPECT_CALL(os, Sleep(10ms)).WillRepeatedly(Return());
 
     SelfTestResult result;
     EXPECT_TRUE(imtq.PerformSelfTest(result));
@@ -132,9 +132,8 @@ TEST_F(ImtqUseTest, MeasureMagnetometer)
                 return I2CResult::OK;
         }));
 
-    EXPECT_CALL(os, Sleep(10ms)).WillOnce(Return());
     EXPECT_CALL(os, Sleep(30ms)).WillOnce(Return());
-    EXPECT_CALL(os, Sleep(2ms)).WillRepeatedly(Return());
+    EXPECT_CALL(os, Sleep(10ms)).WillRepeatedly(Return());
 
     Vector3<MagnetometerMeasurement> value = {1, 2, 3};
     EXPECT_TRUE(imtq.MeasureMagnetometer(value));
