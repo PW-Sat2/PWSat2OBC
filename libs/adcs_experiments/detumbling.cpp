@@ -66,7 +66,7 @@ Detumbling::Detumbling()
     //empty
 }
 
-void Detumbling::InitializeDetumbling(DetumblingState& state,
+void Detumbling::initializeDetumbling(DetumblingState& state,
         const DetumblingParameters& param)
 {
     UNUSED1(param);
@@ -78,7 +78,7 @@ void Detumbling::InitializeDetumbling(DetumblingState& state,
     state.isInitialised = true;
 }
 
-void Detumbling::DoDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
+void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
         DetumblingState& state,  const DetumblingParameters& param)///TODO units are wrong
 {
     if (state.isInitialised)

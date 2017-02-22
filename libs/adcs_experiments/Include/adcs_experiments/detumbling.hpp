@@ -86,7 +86,7 @@ final
          * @param[in] parameters
          * @return void
          */
-        void InitializeDetumbling(DetumblingState& state,
+        void initializeDetumbling(DetumblingState& state,
                 const DetumblingParameters& param);
 
         /**
@@ -96,7 +96,7 @@ final
          * @param[in/out] state
          * @return void
          */
-        void DoDetumbling(DipoleVec& dipole, const MagVec& mgmt,
+        void stepDetumbling(DipoleVec& dipole, const MagVec& mgmt,
                 DetumblingState& state, const DetumblingParameters& param);
     };
     }
