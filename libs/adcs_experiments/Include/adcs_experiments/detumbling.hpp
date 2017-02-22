@@ -10,14 +10,18 @@
 
 #include "interface_types.hpp"
 #include <Eigen/Dense>
+#include <array>
+#include <cstdint>
 
 using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
 using std::int32_t;
+using std::array;
 
 using Eigen::Matrix3d;
 using Eigen::Vector3d;
+using Eigen::RowVector3f;
 
 namespace adcs
 {
@@ -27,8 +31,8 @@ final
 {
     public:
         /** @brief (Draft)   */
-        using RowVector3i = Eigen::Matrix< int32_t , 1, 3 >;
-        using RowVector3b = Eigen::Matrix< bool , 1, 3 >;
+       //using RowVector3i = Eigen::Matrix< int32_t , 1, 3 >;
+        //using RowVector3b = Eigen::Matrix< bool , 1, 3 >;
 
         /** @brief (Draft)
          * @unit:
@@ -49,7 +53,7 @@ final
         { true, true, true };
 
         /** @brief (Draft)   */
-        struct DetumblingConstTag
+        struct DetumblingParameters
         {
             /** @brief (Draft)   */
             float dt = DefaultDt;
@@ -62,21 +66,15 @@ final
         };
 
         /** @brief (Draft)   */
-        struct DetumblingParameters
-        {
-            /** @brief (Draft)   */
-            struct DetumblingConstTag DetumblingConst;
-        };
-
-        /** @brief (Draft)   */
         struct DetumblingState
         {
+            bool isInitialised = false;
             /** @brief (Draft)   */
-            RowVector3i mtmDotPrevInMemory;
+            RowVector3f mtmDotPrev;
             /** @brief (Draft)   */
-            RowVector3i mtmMeasPrevInMemory;
+            RowVector3f mtmMeasPrev;
             /** @brief (Draft)   */
-            RowVector3i commDipoleBdot_table;
+            //RowVector3f commDipoleBdot_table;
         };
 
         /** @brief (Draft)   */
@@ -89,7 +87,7 @@ final
          * @return void
          */
         void InitializeDetumbling(DetumblingState& state,
-                const DetumblingParameters& parameters);
+                const DetumblingParameters& param);
 
         /**
          * @brief (Draft)
@@ -98,8 +96,8 @@ final
          * @param[in/out] state
          * @return void
          */
-        void DoDetumbling(DipoleVec& dipole, const MagVec& magnetometer,
-                DetumblingState& state);
+        void DoDetumbling(DipoleVec& dipole, const MagVec& mgmt,
+                DetumblingState& state, const DetumblingParameters& param);
     };
     }
 

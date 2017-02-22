@@ -52,6 +52,7 @@
 
 #include "detumbling.hpp"
 #include <system.h>
+#include <cmath>
 
 using std::uint8_t;
 using std::uint16_t;
@@ -66,19 +67,72 @@ Detumbling::Detumbling()
 }
 
 void Detumbling::InitializeDetumbling(DetumblingState& state,
-        const DetumblingParameters& parameters)
+        const DetumblingParameters& param)
 {
-    UNUSED1(parameters);
+    UNUSED1(param);
     //Set the previous time derivative of the magnetic field to zeros.
-    state.mtmDotPrevInMemory = RowVector3i::Zero();
+    state.mtmDotPrev = RowVector3f::Zero();
     //Set the previous MTM measurement to zeros,
-    state.mtmMeasPrevInMemory = RowVector3i::Zero();
-}
+    state.mtmMeasPrev = RowVector3f::Zero();
 
-void Detumbling::DoDetumbling(DipoleVec& dipole, const MagVec& magnetometer,
-        DetumblingState& state)
+    state.isInitialised = true;
+}
+/*
+
+    if ~DetumblingConst.coilsOn(1,1)
+        commDipoleBdot(1,1) = 0;
+    elseif ~DetumblingConst.coilsOn(2,1)
+        commDipoleBdot(2,1) = 0;
+    elseif ~DetumblingConst.coilsOn(3,1)
+        commDipoleBdot(3,1) = 0;
+    end
+else
+    mtmDot         = [0,0,0]';
+    commDipoleBdot = [0,0,0]';
+end
+*/
+
+void Detumbling::DoDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
+        DetumblingState& state,  const DetumblingParameters& param)///TODO units are wrong
 {
-    UNUSED(dipole, magnetometer, state);
+    if (state.isInitialised)
+    {
+        //conversion of input
+        std::array<float, 3> tmp;
+        std::copy(mgmt_meas.begin(), mgmt_meas.end(), tmp.begin());
+        RowVector3f mgmt_input(tmp.data());
+
+        // magnetic field time derivative
+        RowVector3f mtmDot = state.mtmDotPrev;
+        mtmDot *= expf(-param.wCutOff * param.dt);
+        RowVector3f mtmDotDiff = mgmt_input - state.mtmMeasPrev;
+        mtmDotDiff *= param.wCutOff;
+        mtmDot += mtmDotDiff;
+
+        // commanded magnetic dipole to coils
+        RowVector3f commDipoleBdot = mtmDot;
+        commDipoleBdot *= -param.bDotGain;
+        RowVector3f meas_tmp = mgmt_input;
+        meas_tmp *= 1e-4;
+        commDipoleBdot *= 1e-4 / powf(meas_tmp.norm(), 2);
+
+        if (!param.coilsOn[0]) // XXX only one???
+            commDipoleBdot[0] = 0;
+        else if (!param.coilsOn[1])
+            commDipoleBdot[1] = 0;
+        else if (!param.coilsOn[2])
+            commDipoleBdot[2] = 0;
+
+        // store prev values
+        state.mtmDotPrev = mtmDot;
+        state.mtmMeasPrev = mgmt_input;
+
+        // convert to output
+        std::copy(commDipoleBdot.data(),
+                commDipoleBdot.data() + commDipoleBdot.size(), dipole.begin());
+    }
+// XXX'0'?
+
 }
 
 }
