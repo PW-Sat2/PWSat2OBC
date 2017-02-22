@@ -17,7 +17,7 @@
 #include "base/reader.h"
 #include "base/writer.h"
 
-#include "adcs/imtq.h"
+#include "imtq/imtq.h"
 #include "system.h"
 
 
@@ -36,7 +36,6 @@ using drivers::i2c::I2CResult;
 using namespace std::chrono_literals;
 
 using namespace devices::imtq;
-using namespace adcs;
 
 static const uint8_t ImtqAddress = 0x10;
 
@@ -45,13 +44,13 @@ static const uint8_t ImtqAddress = 0x10;
 class ImtqUseTest : public testing::Test
 {
   public:
-	ImtqUseTest() : imtq{i2c}
+    ImtqUseTest() : imtq{i2c}
     {
-    	this->_reset = InstallProxy(&os);
+        this->_reset = InstallProxy(&os);
     }
 
   protected:
-	Imtq imtq;
+    ImtqDriver imtq;
     OSMock os;
     OSReset _reset;
     I2CBusMock i2c;
@@ -59,86 +58,89 @@ class ImtqUseTest : public testing::Test
 
 TEST_F(ImtqUseTest, PerformSelfTest)
 {
-	EXPECT_CALL(i2c, WriteRead(ImtqAddress, _, _))
-			.WillOnce(Invoke([=](uint8_t /*address*/,
-								auto inData,
-								auto outData) {
-				EXPECT_EQ(inData.size(), 1);
-				EXPECT_EQ(inData[0], 0x41);
-				EXPECT_EQ(outData.size(), 9);
-				outData[0] = 0x41;
-				outData[1] = 0x00;
-				outData[2] = 0x00;
-				outData[3] = 0x00;
-				outData[4] = 0x00;
-				outData[5] = 0x00;
-				outData[6] = 0x00;
-				outData[7] = 0x00;
-				outData[8] = 0x00;
-				return I2CResult::OK;
-		})).WillOnce(Invoke([=](uint8_t /*address*/,
-								auto inData,
-								auto outData) {
-				EXPECT_EQ(inData.size(), 2);
-				EXPECT_EQ(inData[0], 0x08);
-				EXPECT_EQ(inData[1], 0x00);
-				EXPECT_EQ(outData.size(), 2);
-				outData[0] = 0x08;
-				outData[1] = 0x00;
-				return I2CResult::OK;
-		})).WillOnce(Invoke([=](uint8_t /*address*/,
-                                auto inData,
-                                auto outData) {
-                EXPECT_EQ(inData.size(), 1);
-                EXPECT_EQ(inData[0], 0x41);
-                EXPECT_EQ(outData.size(), 9);
-                outData[0] = 0x41;
-                outData[1] = 0x00;
-                outData[2] = 0x00;
-                outData[3] = 0x00;
-                outData[4] = 0x00;
-                outData[5] = 0x00;
-                outData[6] = 0x00;
-                outData[7] = 0x00;
-                outData[8] = 0x00;
-                return I2CResult::OK;
-        })).WillOnce(Invoke([=](uint8_t /*address*/,
-                                auto inData,
-                                auto outData) {
-				EXPECT_EQ(inData.size(), 1);
-				EXPECT_EQ(inData[0], 0x47);
-				EXPECT_EQ(outData.size(), 320);
+    EXPECT_CALL(i2c, Write(ImtqAddress, ElementsAre(0x08, 0x00))).WillOnce(Return(I2CResult::OK));
+    EXPECT_CALL(i2c, Write(ImtqAddress, ElementsAre(0x47))).WillOnce(Return(I2CResult::OK));
 
-				outData[0] = 0x47;
-				for(int i = 1; i < 320; ++i)
-				{
-					outData[i] = 0x00;
-				}
-				return I2CResult::OK;
-		}));
 
-	EXPECT_CALL(os, Sleep(_))
-		   .WillOnce(Invoke([](auto time) {
-			EXPECT_EQ(time, 100ms);
-		})).WillOnce(Invoke([](auto time) {
-			EXPECT_EQ(time, 240ms);
-		}));
+    EXPECT_CALL(i2c, Read(ImtqAddress, _))
+        .WillOnce(Invoke([=](uint8_t /*address*/,
+                            auto outData) {
+            EXPECT_EQ(outData.size(), 2);
+            outData[0] = 0x08;
+            outData[1] = 0x00;
+            return I2CResult::OK;
+    })).WillOnce(Invoke([=](uint8_t /*address*/,
+                            auto outData) {
+            EXPECT_EQ(outData.size(), 320);
 
-	SelfTestResult result;
-	EXPECT_TRUE(imtq.PerformSelfTest(result));
+            outData[0] = 0x47;
+            for(int i = 1; i < 320; ++i)
+            {
+                outData[i] = 0x00;
+            }
+            return I2CResult::OK;
+    }));
 
-	for(int i = 0; i < 8; ++i)
-	{
-		EXPECT_EQ(result.stepResults[i].actualStep, SelfTestResult::Step::Init);
-		EXPECT_EQ(result.stepResults[i].error.GetValue(), 0);
-		for(int j = 0; j < 3; ++j)
-		{
-			EXPECT_EQ(result.stepResults[i].CalibratedMagnetometerMeasurement[j], 0);
-			EXPECT_EQ(result.stepResults[i].CoilCurrent[j], 0);
-			EXPECT_EQ(result.stepResults[i].CoilTemperature[j], 0);
-			EXPECT_EQ(result.stepResults[i].RawMagnetometerMeasurement[j], 0);
-		}
-	}
+    EXPECT_CALL(os, Sleep(240ms)).WillOnce(Return());
+    EXPECT_CALL(os, Sleep(2ms)).WillRepeatedly(Return());
+
+    SelfTestResult result;
+    EXPECT_TRUE(imtq.PerformSelfTest(result));
+
+    for(int i = 0; i < 8; ++i)
+    {
+        EXPECT_EQ(result.stepResults[i].actualStep, SelfTestResult::Step::Init);
+        EXPECT_EQ(result.stepResults[i].error.GetValue(), 0);
+        for(int j = 0; j < 3; ++j)
+        {
+            EXPECT_EQ(result.stepResults[i].CalibratedMagnetometerMeasurement[j], 0);
+            EXPECT_EQ(result.stepResults[i].CoilCurrent[j], 0);
+            EXPECT_EQ(result.stepResults[i].CoilTemperature[j], 0);
+            EXPECT_EQ(result.stepResults[i].RawMagnetometerMeasurement[j], 0);
+        }
+    }
 }
 
+TEST_F(ImtqUseTest, MeasureMagnetometer)
+{
+    EXPECT_CALL(i2c, Write(ImtqAddress, ElementsAre(0x03))).WillOnce(Return(I2CResult::OK));
+    EXPECT_CALL(i2c, Write(ImtqAddress, ElementsAre(0x04))).WillOnce(Return(I2CResult::OK));
+    EXPECT_CALL(i2c, Write(ImtqAddress, ElementsAre(0x43))).WillOnce(Return(I2CResult::OK));
 
+    EXPECT_CALL(i2c, Read(ImtqAddress, _))
+            .WillOnce(Invoke([=](uint8_t /*address*/,
+                                auto outData) {
+                EXPECT_EQ(outData.size(), 2);
+                outData[0] = 0x03;
+                outData[1] = 0x00;
+                return I2CResult::OK;
+         })).WillOnce(Invoke([=](uint8_t /*address*/,
+                                auto outData) {
+                EXPECT_EQ(outData.size(), 2);
+                outData[0] = 0x04;
+                outData[1] = 0x00;
+                return I2CResult::OK;
+         })).WillOnce(Invoke([=](uint8_t /*address*/,
+                                auto outData) {
+                EXPECT_EQ(outData.size(), 15);
+
+                outData[0] = 0x43;
+                for(int i = 1; i < 15; ++i)
+                {
+                    outData[i] = 0x00;
+                }
+                return I2CResult::OK;
+        }));
+
+    EXPECT_CALL(os, Sleep(10ms)).WillOnce(Return());
+    EXPECT_CALL(os, Sleep(30ms)).WillOnce(Return());
+    EXPECT_CALL(os, Sleep(2ms)).WillRepeatedly(Return());
+
+    Vector3<MagnetometerMeasurement> value = {1, 2, 3};
+    EXPECT_TRUE(imtq.MeasureMagnetometer(value));
+
+    for(int i = 0; i < 3; ++i)
+    {
+        EXPECT_EQ(value[i], 0);
+    }
+}

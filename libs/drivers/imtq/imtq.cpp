@@ -92,7 +92,7 @@ namespace devices
             return GetSelfTestResult(result);
         }
 
-        bool ImtqDriver::MeasureMagnetometer(Vector3<MagnetometerMeasurement>& mgtmMeasurement)
+        bool ImtqDriver::MeasureMagnetometer(Vector3<MagnetometerMeasurement>& result)
         {
             if (!CancelOperation())
             {
@@ -108,13 +108,13 @@ namespace devices
 
             System::SleepTask(30ms); // integration time
 
-            MagnetometerMeasurementResult result;
-            if (!GetCalibratedMagnetometerData(result))
+            MagnetometerMeasurementResult value;
+            if (!GetCalibratedMagnetometerData(value))
             {
                 return false;
             }
 
-            mgtmMeasurement = result.data;
+            result = value.data;
 
             return true;
         }

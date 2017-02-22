@@ -11,6 +11,7 @@ set(SOURCES
   OsMock.hpp
   assert.cpp
   imtq/imtqTest.cpp
+  imtq/imtqHighLevelTest.cpp
   Logger/LoggerTest.cpp
   FileSystem/FileSystemTest.cpp
   FileSystem/YaffsOSGlue.cpp
