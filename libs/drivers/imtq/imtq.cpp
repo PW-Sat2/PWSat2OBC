@@ -67,10 +67,54 @@ bool Error::Ok() const
     return (this->value == 0);
 }
 
+std::uint8_t Error::GetValue() const
+{
+    return this->value;
+}
+
 // ------------------------- Public functions -------------------------
 
 ImtqDriver::ImtqDriver(drivers::i2c::II2CBus& i2cbus) : i2cbus{i2cbus}
 {
+}
+
+bool ImtqDriver::PerformSelfTest(SelfTestResult& result)
+{
+    if (!StartAllAxisSelfTest())
+    {
+        return false;
+    }
+    // 8 times 3-axis measurement, default integration time 10ms
+    System::SleepTask(240ms);
+
+    return GetSelfTestResult(result);
+}
+
+bool ImtqDriver::MeasureMagnetometer(Vector3<MagnetometerMeasurement>& mgtmMeasurement)
+{
+    if (!CancelOperation())
+    {
+        return false;
+    }
+
+    System::SleepTask(10ms); // magnetic field decay
+
+    if (!StartMTMMeasurement())
+    {
+        return false;
+    }
+
+    System::SleepTask(30ms); // integration time
+
+    MagnetometerMeasurementResult result;
+    if (!GetCalibratedMagnetometerData(result))
+    {
+        return false;
+    }
+
+    mgtmMeasurement = result.data;
+
+    return true;
 }
 
 // ----------------------------- Commands -----------------------------

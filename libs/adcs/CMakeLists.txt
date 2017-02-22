@@ -1,10 +1,8 @@
 set(NAME adcs)
 
-set(SOURCES      
+set(SOURCES
     adcs.cpp
-    imtq.cpp
     Include/adcs/adcs.h
-    Include/adcs/imtq.h
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -12,7 +10,6 @@ add_library(${NAME} STATIC ${SOURCES})
 target_link_libraries(${NAME}
     base
     logger
-    imtq
     i2c
 )
 

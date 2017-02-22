@@ -345,6 +345,32 @@ class ImtqDriver final
      */
     ImtqDriver(drivers::i2c::II2CBus& i2cbus);
 
+    // ----- Higher-level commands -----
+
+    /**
+     * Performs self test
+     * @param[out] result Self test result
+     * @return Operation status.
+     * This method runs:
+     * 1) starts all axis self-test (TC-OP-08)
+     * 2) waits specified amount of time for command to complete
+     * 3) reads self test result (TC-DR-07)
+     */
+    bool PerformSelfTest(SelfTestResult& result);
+
+    /**
+     * Measures magnetometer, having in mind possible on-going actuation.
+     * @param[out] result Three axis magnetometer measurement
+     * @return Operation status.
+     * This method runs:
+     * 1) cancels on-going actuation (TC-OP-03)
+     * 2) waits wait magnetic field decay
+     * 3) sends magnetometer measurement request (TC-OP-04)
+     * 4) waits until read finishes
+     * 3) reads magnetometer data (TC-DR-03)
+     */
+    bool MeasureMagnetometer(Vector3<MagnetometerMeasurement>& result);
+
     // ----- Commands -----
 
     /**
