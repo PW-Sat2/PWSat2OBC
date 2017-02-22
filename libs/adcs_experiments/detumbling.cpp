@@ -73,24 +73,10 @@ void Detumbling::InitializeDetumbling(DetumblingState& state,
     //Set the previous time derivative of the magnetic field to zeros.
     state.mtmDotPrev = RowVector3f::Zero();
     //Set the previous MTM measurement to zeros,
-    state.mtmMeasPrev = RowVector3f::Zero();
+    state.mtmMeasPrev = RowVector3f::Zero(); // TODO on the first step should be initialised by measurement value
 
     state.isInitialised = true;
 }
-/*
-
-    if ~DetumblingConst.coilsOn(1,1)
-        commDipoleBdot(1,1) = 0;
-    elseif ~DetumblingConst.coilsOn(2,1)
-        commDipoleBdot(2,1) = 0;
-    elseif ~DetumblingConst.coilsOn(3,1)
-        commDipoleBdot(3,1) = 0;
-    end
-else
-    mtmDot         = [0,0,0]';
-    commDipoleBdot = [0,0,0]';
-end
-*/
 
 void Detumbling::DoDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
         DetumblingState& state,  const DetumblingParameters& param)///TODO units are wrong
@@ -103,19 +89,24 @@ void Detumbling::DoDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
         RowVector3f mgmt_input(tmp.data());
 
         // magnetic field time derivative
+        RowVector3f mtmDot = exp(-param.wCutOff * param.dt) * state.mtmDotPrev +
+                param.wCutOff * (mgmt_input - state.mtmMeasPrev);
+/*
         RowVector3f mtmDot = state.mtmDotPrev;
         mtmDot *= expf(-param.wCutOff * param.dt);
         RowVector3f mtmDotDiff = mgmt_input - state.mtmMeasPrev;
         mtmDotDiff *= param.wCutOff;
         mtmDot += mtmDotDiff;
-
+*/
         // commanded magnetic dipole to coils
+        RowVector3f commDipoleBdot = mtmDot * (-param.bDotGain) * 1e-4 / powf((mgmt_input* 1e-4).norm(), 2);
+/*
         RowVector3f commDipoleBdot = mtmDot;
         commDipoleBdot *= -param.bDotGain;
         RowVector3f meas_tmp = mgmt_input;
         meas_tmp *= 1e-4;
         commDipoleBdot *= 1e-4 / powf(meas_tmp.norm(), 2);
-
+*/
         if (!param.coilsOn[0]) // XXX only one???
             commDipoleBdot[0] = 0;
         else if (!param.coilsOn[1])
