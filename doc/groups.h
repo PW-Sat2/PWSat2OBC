@@ -34,3 +34,12 @@
  * @{
  * @}
  */
+
+/**
+ * @defgroup fdir Fault Detection Isolation and Recovery
+ *
+ * @brief This module contains mechanism related to FDIR
+ *
+ * @{
+ * @}
+ */
