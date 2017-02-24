@@ -67,6 +67,7 @@ set(SOURCES
   adcs/AdcsCoordinatorTest.cpp
   Experiments/Fibo/FiboCalculatorTest.cpp
   Experiments/ExperimentTest.cpp
+  ErrorCounterTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -118,6 +119,7 @@ target_link_libraries(${NAME}
     adcs
     mission_adcs
     obc_telecommands
+    error_counter
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
