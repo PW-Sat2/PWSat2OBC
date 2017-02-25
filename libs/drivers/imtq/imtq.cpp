@@ -341,50 +341,12 @@ namespace devices
 
         bool ImtqDriver::GetHouseKeepingRAW(HouseKeepingRAW& result)
         {
-            std::array<uint8_t, 24> value;
-            bool i2cError = this->DataRequest(OpCode::GetRAWHousekeepingData, value);
-
-            Reader reader{value};
-            reader.Skip(2);
-
-            result.digitalVoltage = reader.ReadWordLE();
-            result.analogVoltage = reader.ReadWordLE();
-            result.digitalCurrent = reader.ReadWordLE();
-            result.analogCurrent = reader.ReadWordLE();
-            for(auto& x: result.coilCurrent)
-            {
-                x = reader.ReadWordLE();
-            }
-            for(auto& x: result.coilTemperature)
-            {
-                x = reader.ReadWordLE();
-            }
-            result.MCUtemperature = reader.ReadWordLE();
-            return i2cError;
+            return GetHouseKeeping(OpCode::GetRAWHousekeepingData, result);
         }
 
         bool ImtqDriver::GetHouseKeepingEngineering(HouseKeepingEngineering& result)
         {
-            std::array<uint8_t, 24> value;
-            bool i2cError = this->DataRequest(OpCode::GetEngineeringHousekeepingData, value);
-
-            Reader reader{value};
-            reader.Skip(2);
-
-            result.digitalVoltage = reader.ReadWordLE();
-            result.analogVoltage = reader.ReadWordLE();
-            result.digitalCurrent = reader.ReadWordLE();
-            result.analogCurrent = reader.ReadWordLE();
-            for(auto& x: result.coilCurrent)
-            {
-                x = reader.ReadSignedWordLE();
-            }
-            for(auto& x: result.coilTemperature)
-            {
-                x = reader.ReadSignedWordLE();
-            }
-            result.MCUtemperature = reader.ReadSignedWordLE();
-            return i2cError;
+            return GetHouseKeeping(OpCode::GetEngineeringHousekeepingData, result);
         }
 
         // --------------------------- Configuration --------------------------
@@ -465,6 +427,31 @@ namespace devices
             auto status = Status{response[1]};
             return ((i2cstatusWrite == I2CResult::OK) && (i2cstatusRead == I2CResult::OK) && (opcodeByte == response[0]) &&
                 status.Accepted() && status.InvalidX() == false && status.InvalidY() == false && status.InvalidZ() == false);
+        }
+
+        template<typename Result>
+        bool ImtqDriver::GetHouseKeeping(OpCode opcode, Result& result)
+        {
+            std::array<uint8_t, 24> value;
+            bool i2cError = this->DataRequest(opcode, value);
+
+            Reader reader{value};
+            reader.Skip(2);
+
+            result.digitalVoltage = reader.ReadWordLE();
+            result.analogVoltage = reader.ReadWordLE();
+            result.digitalCurrent = reader.ReadWordLE();
+            result.analogCurrent = reader.ReadWordLE();
+            for(auto& x: result.coilCurrent)
+            {
+                x = reader.ReadWordLE();
+            }
+            for(auto& x: result.coilTemperature)
+            {
+                x = reader.ReadWordLE();
+            }
+            result.MCUtemperature = reader.ReadWordLE();
+            return i2cError;
         }
     }
 }

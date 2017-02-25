@@ -561,6 +561,9 @@ namespace devices
             bool SendCommand(OpCode opcode, gsl::span<const std::uint8_t> params = {});
             bool DataRequest(OpCode opcode, gsl::span<std::uint8_t> response);
             bool WriteRead(OpCode opcode, gsl::span<const std::uint8_t> params, gsl::span<std::uint8_t> result);
+
+            template<typename Result>
+            bool GetHouseKeeping(OpCode opcode, Result& result);
         };
     }
 }
