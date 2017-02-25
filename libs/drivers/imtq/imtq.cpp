@@ -179,6 +179,7 @@ namespace devices
             }
             writer.WriteWordLE(duration.count());
 
+            assert(writer.Status());
             return this->SendCommand(OpCode::StartActuationCurrent, writer.Capture());
         }
 
@@ -193,6 +194,7 @@ namespace devices
             }
             writer.WriteSignedWordLE(duration.count());
 
+            assert(writer.Status());
             return this->SendCommand(OpCode::StartActuationDipole, writer.Capture());
         }
 
@@ -210,6 +212,7 @@ namespace devices
             Writer writer{parameters};
             writer.WriteWordLE(duration.count());
 
+            assert(writer.Status());
             return this->SendCommand(OpCode::StartBDOT, writer.Capture());
         }
 
@@ -227,6 +230,7 @@ namespace devices
             state.anyParameterUpdatedSinceStartup = (reader.ReadByte() == 1);
             state.uptime = std::chrono::seconds{reader.ReadDoubleWordLE()};
 
+            assert(reader.Status());
             return i2cError;
         }
 
@@ -243,6 +247,7 @@ namespace devices
             }
 
             result.coilActuationDuringMeasurement = (reader.ReadByte() == 1);
+            assert(reader.Status());
             return i2cError;
         }
 
@@ -258,6 +263,7 @@ namespace devices
             {
                 x = reader.ReadSignedWordLE();
             }
+            assert(reader.Status());
             return i2cError;
         }
 
@@ -273,6 +279,7 @@ namespace devices
             {
                 x = reader.ReadSignedWordLE();
             }
+            assert(reader.Status());
             return i2cError;
         }
 
@@ -305,6 +312,7 @@ namespace devices
                     x = reader.ReadSignedWordLE();
                 }
             }
+            assert(reader.Status());
             return i2cError;
         }
 
@@ -340,6 +348,7 @@ namespace devices
             {
                 x = reader.ReadSignedWordLE();
             }
+            assert(reader.Status());
             return i2cError;
         }
 
@@ -373,6 +382,7 @@ namespace devices
             std::array<uint8_t, 12> responseArray;
             span<uint8_t> response{responseArray.begin(), 4 + value.size()};
 
+            assert(writer.Status());
             bool OK_communication = WriteRead(OpCode::SetParameter, params, response);
             bool OK_equalReturned = std::equal(params.begin(), params.end(), response.begin() + 2);
             return OK_communication && OK_equalReturned;
@@ -391,6 +401,7 @@ namespace devices
 
             Writer writer{request};
             writer.WriteWordLE(id);
+            assert(writer.Status());
 
             std::array<uint8_t, 12> responseArray;
             span<uint8_t> response{responseArray.begin(), result.size() + 4};
@@ -421,6 +432,7 @@ namespace devices
             Writer outputWriter{output};
             outputWriter.WriteByte(opcodeByte);
             outputWriter.WriteArray(params);
+            assert(outputWriter.Status());
 
             span<uint8_t> request = outputWriter.Capture();
 
@@ -477,6 +489,7 @@ namespace devices
                 x = reader.ReadWordLE();
             }
             result.MCUtemperature = reader.ReadWordLE();
+            assert(reader.Status());
             return i2cError;
         }
     }
