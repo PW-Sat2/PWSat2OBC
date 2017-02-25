@@ -110,7 +110,7 @@ namespace devices
             }
 
             /**
-             * @brief Structure containing Three-axis magnetometer measurement.
+             * @brief Constructor from std::uint8_t (as returned from Imtq hardware) (TC-DR-07).
              */
             constexpr Error(std::uint8_t val) : value{val}
             {
