@@ -47,7 +47,7 @@ class ImtqTest : public testing::Test
     I2CBusMock i2c;
 };
 
-TEST_F(ImtqTest, TestFailedCasesDuringNoOperation)
+TEST_F(ImtqTest, Accepted)
 {
     // accepted
     EXPECT_CALL(i2c, Write(ImtqAddress, ElementsAre(0x02))).WillOnce(Return(I2CResult::OK));
@@ -60,20 +60,30 @@ TEST_F(ImtqTest, TestFailedCasesDuringNoOperation)
 
     auto status = imtq.SendNoOperation();
     EXPECT_TRUE(status);
+    EXPECT_EQ(imtq.LastError, ImtqDriverError::OK);
+}
 
-    // command rejected
-    EXPECT_CALL(i2c, Write(ImtqAddress, ElementsAre(0x02))).WillOnce(Return(I2CResult::OK));
-    EXPECT_CALL(i2c, Read(ImtqAddress, _)).WillOnce(Invoke([](uint8_t /*address*/, auto outData) {
-        EXPECT_EQ(outData.size(), 2);
-        outData[0] = 0x02;
-        outData[1] = 1;
-        return I2CResult::OK;
-    }));
 
-    status = imtq.SendNoOperation();
-    EXPECT_FALSE(status);
+TEST_F(ImtqTest, StatusError)
+{
+    for(int response = 1; response < 0b10000000; ++response)
+    {
+        EXPECT_CALL(i2c, Write(ImtqAddress, ElementsAre(0x02))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, Read(ImtqAddress, _)).WillOnce(Invoke([=](uint8_t /*address*/, auto outData) {
+            EXPECT_EQ(outData.size(), 2);
+            outData[0] = 0x02;
+            outData[1] = response;
+            return I2CResult::OK;
+        }));
+        auto status = imtq.SendNoOperation();
+        EXPECT_FALSE(status);
+        EXPECT_EQ(imtq.LastError, ImtqDriverError::StatusError);
+        EXPECT_EQ(imtq.LastStatus, response);
+    }
+}
 
-    // bad opcode response
+TEST_F(ImtqTest, BadOpcodeResponse)
+{
     EXPECT_CALL(i2c, Write(ImtqAddress, ElementsAre(0x02))).WillOnce(Return(I2CResult::OK));
     EXPECT_CALL(i2c, Read(ImtqAddress, _)).WillOnce(Invoke([](uint8_t /*address*/, auto outData) {
         EXPECT_EQ(outData.size(), 2);
@@ -81,11 +91,21 @@ TEST_F(ImtqTest, TestFailedCasesDuringNoOperation)
         outData[1] = 0;
         return I2CResult::OK;
     }));
-
-    status = imtq.SendNoOperation();
+    auto status = imtq.SendNoOperation();
     EXPECT_FALSE(status);
+    EXPECT_EQ(imtq.LastError, ImtqDriverError::WrongOpcodeInResponse);
+}
 
-    // I2C returned fail
+TEST_F(ImtqTest, I2CWriteFail)
+{
+    EXPECT_CALL(i2c, Write(ImtqAddress, ElementsAre(0x02))).WillOnce(Return(I2CResult::Failure));
+    auto status = imtq.SendNoOperation();
+    EXPECT_FALSE(status);
+    EXPECT_EQ(imtq.LastError, ImtqDriverError::I2CWriteFailed);
+}
+
+TEST_F(ImtqTest, I2CReadFail)
+{
     EXPECT_CALL(i2c, Write(ImtqAddress, ElementsAre(0x02))).WillOnce(Return(I2CResult::OK));
     EXPECT_CALL(i2c, Read(ImtqAddress, _)).WillOnce(Invoke([](uint8_t /*address*/, auto outData) {
         EXPECT_EQ(outData.size(), 2);
@@ -94,8 +114,9 @@ TEST_F(ImtqTest, TestFailedCasesDuringNoOperation)
         return I2CResult::Failure;
     }));
 
-    status = imtq.SendNoOperation();
+    auto status = imtq.SendNoOperation();
     EXPECT_FALSE(status);
+    EXPECT_EQ(imtq.LastError, ImtqDriverError::I2CReadFailed);
 }
 
  TEST_F(ImtqTest, SoftwareReset) {

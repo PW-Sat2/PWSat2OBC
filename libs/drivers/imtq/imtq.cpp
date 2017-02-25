@@ -35,6 +35,10 @@ namespace devices
             Status(std::uint8_t val) : value{val}
             {
             }
+            bool IsOK() const
+            {
+                return ((value & 0b01111111) == 0);
+            }
             bool Accepted() const
             {
                 return (value & 0b1111) == 0;
@@ -424,9 +428,31 @@ namespace devices
             System::SleepTask(10ms);
             auto i2cstatusRead = i2cbus.Read(I2Cadress, response);
 
-            auto status = Status{response[1]};
-            return ((i2cstatusWrite == I2CResult::OK) && (i2cstatusRead == I2CResult::OK) && (opcodeByte == response[0]) &&
-                status.Accepted() && status.InvalidX() == false && status.InvalidY() == false && status.InvalidZ() == false);
+            this->LastStatus = response[1];
+            auto status = Status{LastStatus};
+
+            if (i2cstatusWrite != I2CResult::OK)
+            {
+                LastError = ImtqDriverError::I2CWriteFailed;
+                return false;
+            }
+            if (i2cstatusRead != I2CResult::OK)
+            {
+                LastError = ImtqDriverError::I2CReadFailed;
+                return false;
+            }
+            if (opcodeByte != response[0])
+            {
+                LastError = ImtqDriverError::WrongOpcodeInResponse;
+                return false;
+            }
+            if (! status.IsOK())
+            {
+                LastError = ImtqDriverError::StatusError;
+                return false;
+            }
+            LastError = ImtqDriverError::OK;
+            return true;
         }
 
         template<typename Result>

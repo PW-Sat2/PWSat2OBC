@@ -97,6 +97,39 @@ namespace devices
         };
 
         /**
+         * @brief Imtq driver error, used to determine why command have failed.
+         */
+        enum class ImtqDriverError
+        {
+            /**
+             * @brief No error
+             */
+            OK,
+
+            /**
+             * @brief I2C Write operation failed during command execution
+             */
+            I2CWriteFailed,
+
+            /**
+             * @brief I2C Read operation failed during command execution
+             */
+            I2CReadFailed,
+
+            /**
+             * @brief Imtq returned wrong opcode in response
+             */
+            WrongOpcodeInResponse,
+
+            /**
+             * @brief Error in Status byte returned by Imtq.
+             * Further investigation should be done by sending
+             * ImtqDriver::LastStatus field to the operator.
+             */
+            StatusError,
+        };
+
+        /**
          * @brief Imtq internal error structure used during self-test.
          */
         class Error
@@ -518,6 +551,18 @@ namespace devices
              * @return Operation status.
              */
             bool ResetParameterAndGetDefault(Parameter id, gsl::span<std::uint8_t> result);
+
+
+            /**
+             * @brief Last error occurred during last command execution.
+             */
+            ImtqDriverError LastError;
+
+            /**
+             * @brief Status byte returned from imtq during last command execution.
+             * Defined in Imtq user manual, Table 3-3.
+             */
+            std::uint8_t LastStatus;
 
           private:
             /**
