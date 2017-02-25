@@ -9,7 +9,23 @@ set(SOURCES
   os/os.cpp
   os/os.hpp
   OsMock.hpp
+  OsMock.cpp
+  OsMock.hpp
   assert.cpp
+  I2C/I2CMock.cpp
+  mock/FsMock.hpp
+  mock/FsMock.cpp
+  mock/emlib.cpp
+  mock/AntennaMock.cpp
+  mock/AntennaMock.hpp
+  mock/AdcsMocks.hpp
+  mock/ActionDescriptorMock.hpp
+  mock/UpdateDescriptorMock.hpp
+  mock/VerifyDescriprorMock.hpp
+  SPI/SPIMock.cpp
+  antenna/MiniportMock.cpp
+  antenna/MiniportMock.hpp
+
   imtq/imtqTest.cpp
   imtq/imtqHighLevelTest.cpp
   Logger/LoggerTest.cpp
@@ -41,33 +57,15 @@ set(SOURCES
   MissionPlan/obc/ObcTest.cpp
   I2C/FallbackI2CBusTest.cpp
   I2C/ErrorHandlingI2CBusTest.cpp
-  I2C/I2CMock.cpp
   N25Q/N25QTest.cpp
   os/TimeoutTest.cpp
   os/EventGroupTest.cpp
-  os/os.cpp
-  os/os.hpp
-  OsMock.hpp
-  OsMock.cpp
   time/time.cpp
   time/timer.cpp
   time/persistance.cpp
   time/SmartWait.cpp
-  mock/FsMock.hpp
-  mock/FsMock.cpp
-  mock/AntennaMock.cpp
-  mock/AntennaMock.hpp
-  mock/AdcsMocks.hpp
-  mock/ActionDescriptorMock.hpp
-  mock/UpdateDescriptorMock.hpp
-  mock/VerifyDescriprorMock.hpp
-  mock/emlib.cpp
-  assert.cpp
   antenna/miniport.cpp
   antenna/antenna.cpp
-  antenna/MiniportMock.cpp
-  antenna/MiniportMock.hpp
-  SPI/SPIMock.cpp
   SPI/SPIDriverTest.cpp
   eigen/eigenTest.cpp
   adcs/AdcsCoordinatorTest.cpp
