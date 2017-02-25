@@ -175,7 +175,7 @@ namespace devices
             }
             writer.WriteWordLE(duration.count());
 
-            return this->SendCommand(OpCode::StartActuationCurrent, parameters);
+            return this->SendCommand(OpCode::StartActuationCurrent, writer.Capture());
         }
 
         bool ImtqDriver::StartActuationDipole(Vector3<Dipole> dipole, std::chrono::milliseconds duration)
@@ -189,7 +189,7 @@ namespace devices
             }
             writer.WriteSignedWordLE(duration.count());
 
-            return this->SendCommand(OpCode::StartActuationDipole, parameters);
+            return this->SendCommand(OpCode::StartActuationDipole, writer.Capture());
         }
 
         bool ImtqDriver::StartAllAxisSelfTest()
@@ -206,7 +206,7 @@ namespace devices
             Writer writer{parameters};
             writer.WriteWordLE(duration.count());
 
-            return this->SendCommand(OpCode::StartBDOT, parameters);
+            return this->SendCommand(OpCode::StartBDOT, writer.Capture());
         }
 
         // --------------------------- Data requests --------------------------
@@ -364,7 +364,7 @@ namespace devices
             writer.WriteWordLE(id);
             writer.WriteArray(value);
 
-            span<uint8_t> params{paramsArray.begin(), writer.GetDataLength()};
+            span<uint8_t> params = writer.Capture();
 
             std::array<uint8_t, 12> responseArray;
             span<uint8_t> response{responseArray.begin(), 4 + value.size()};
@@ -418,7 +418,7 @@ namespace devices
             outputWriter.WriteByte(opcodeByte);
             outputWriter.WriteArray(params);
 
-            span<uint8_t> request{output.begin(), params.size() + 1};
+            span<uint8_t> request = outputWriter.Capture();
 
             auto i2cstatusWrite = i2cbus.Write(I2Cadress, request);
             System::SleepTask(10ms);
