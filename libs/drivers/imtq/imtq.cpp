@@ -4,7 +4,7 @@
 @remarks Based on ICD Issue 1.5 2015-07-22
 */
 #include "imtq.h"
-#include "assert.h"
+#include <cassert>
 #include <stdnoreturn.h>
 #include <chrono>
 #include <cstddef>
@@ -27,8 +27,6 @@ namespace devices
 {
     namespace imtq
     {
-#define FOR_AXIS(var) for (uint8_t var = 0; var < 3; ++var)
-
         // ------------------------- status -------------------------
 
         class Status
@@ -171,9 +169,9 @@ namespace devices
             std::array<uint8_t, 8> parameters;
 
             Writer writer{parameters};
-            FOR_AXIS(i)
+            for(auto x: current)
             {
-                writer.WriteSignedWordLE(current[i]);
+                writer.WriteSignedWordLE(x);
             }
             writer.WriteWordLE(duration.count());
 
@@ -185,9 +183,9 @@ namespace devices
             std::array<uint8_t, 8> parameters;
 
             Writer writer{parameters};
-            FOR_AXIS(i)
+            for(auto x: dipole)
             {
-                writer.WriteWordLE(dipole[i]);
+                writer.WriteWordLE(x);
             }
             writer.WriteSignedWordLE(duration.count());
 
@@ -218,11 +216,11 @@ namespace devices
             std::array<uint8_t, 9> value;
             bool i2cError = this->DataRequest(OpCode::GetIMTQSystemState, value);
 
-            state.mode = static_cast<Mode>(value[2]);
-            state.error = Error{value[3]};
-            state.anyParameterUpdatedSinceStartup = (value[4] == 1);
-
-            Reader reader{span<uint8_t, 4>(&value[5], 4)};
+            Reader reader{value};
+            reader.Skip(2);
+            state.mode = static_cast<Mode>(reader.ReadByte());
+            state.error = Error{reader.ReadByte()};
+            state.anyParameterUpdatedSinceStartup = (reader.ReadByte() == 1);
             state.uptime = std::chrono::seconds{reader.ReadDoubleWordLE()};
 
             return i2cError;
@@ -235,12 +233,12 @@ namespace devices
 
             Reader reader{value};
             reader.Skip(2);
-            FOR_AXIS(i)
+            for(auto& x: result.data)
             {
-                result.data[i] = reader.ReadSignedDoubleWordLE();
+                x = reader.ReadSignedDoubleWordLE();
             }
 
-            result.coilActuationDuringMeasurement = (value[14] == 1);
+            result.coilActuationDuringMeasurement = (reader.ReadByte() == 1);
             return i2cError;
         }
 
@@ -252,9 +250,9 @@ namespace devices
             Reader reader{value};
             reader.Skip(2);
 
-            FOR_AXIS(i)
+            for(auto& x: result)
             {
-                result[i] = reader.ReadSignedWordLE();
+                x = reader.ReadSignedWordLE();
             }
             return i2cError;
         }
@@ -267,9 +265,9 @@ namespace devices
             Reader reader{value};
             reader.Skip(2);
 
-            FOR_AXIS(i)
+            for(auto& x: result)
             {
-                result[i] = reader.ReadSignedWordLE();
+                x = reader.ReadSignedWordLE();
             }
             return i2cError;
         }
@@ -286,21 +284,21 @@ namespace devices
                 reader.Skip(2);
                 result.stepResults[step].error = Error{reader.ReadByte()};
                 result.stepResults[step].actualStep = static_cast<SelfTestResult::Step>(reader.ReadByte());
-                FOR_AXIS(i)
+                for(auto& x: result.stepResults[step].RawMagnetometerMeasurement)
                 {
-                    result.stepResults[step].RawMagnetometerMeasurement[i] = reader.ReadSignedDoubleWordLE();
+                    x = reader.ReadSignedDoubleWordLE();
                 }
-                FOR_AXIS(i)
+                for(auto& x: result.stepResults[step].CalibratedMagnetometerMeasurement)
                 {
-                    result.stepResults[step].CalibratedMagnetometerMeasurement[i] = reader.ReadSignedDoubleWordLE();
+                    x = reader.ReadSignedDoubleWordLE();
                 }
-                FOR_AXIS(i)
+                for(auto& x: result.stepResults[step].CoilCurrent)
                 {
-                    result.stepResults[step].CoilCurrent[i] = reader.ReadSignedWordLE();
+                    x = reader.ReadSignedWordLE();
                 }
-                FOR_AXIS(i)
+                for(auto& x: result.stepResults[step].CoilTemperature)
                 {
-                    result.stepResults[step].CoilTemperature[i] = reader.ReadSignedWordLE();
+                    x = reader.ReadSignedWordLE();
                 }
             }
             return i2cError;
@@ -314,29 +312,29 @@ namespace devices
             Reader reader{value};
             reader.Skip(2);
 
-            FOR_AXIS(i)
+            for(auto& x: result.calibratedMagnetometerMeasurement)
             {
-                result.calibratedMagnetometerMeasurement[i] = reader.ReadSignedDoubleWordLE();
+                x = reader.ReadSignedDoubleWordLE();
             }
-            FOR_AXIS(i)
+            for(auto& x: result.filteredMagnetometerMeasurement)
             {
-                result.filteredMagnetometerMeasurement[i] = reader.ReadSignedDoubleWordLE();
+                x = reader.ReadSignedDoubleWordLE();
             }
-            FOR_AXIS(i)
+            for(auto& x: result.bDotData)
             {
-                result.bDotData[i] = reader.ReadSignedDoubleWordLE();
+                x = reader.ReadSignedDoubleWordLE();
             }
-            FOR_AXIS(i)
+            for(auto& x: result.commandedDipole)
             {
-                result.commandedDipole[i] = reader.ReadSignedWordLE();
+                x = reader.ReadSignedWordLE();
             }
-            FOR_AXIS(i)
+            for(auto& x: result.commandedCurrent)
             {
-                result.commandedCurrent[i] = reader.ReadSignedWordLE();
+                x = reader.ReadSignedWordLE();
             }
-            FOR_AXIS(i)
+            for(auto& x: result.measuredCurrent)
             {
-                result.measuredCurrent[i] = reader.ReadSignedWordLE();
+                x = reader.ReadSignedWordLE();
             }
             return i2cError;
         }
@@ -353,13 +351,13 @@ namespace devices
             result.analogVoltage = reader.ReadWordLE();
             result.digitalCurrent = reader.ReadWordLE();
             result.analogCurrent = reader.ReadWordLE();
-            FOR_AXIS(i)
+            for(auto& x: result.coilCurrent)
             {
-                result.coilCurrent[i] = reader.ReadWordLE();
+                x = reader.ReadWordLE();
             }
-            FOR_AXIS(i)
+            for(auto& x: result.coilTemperature)
             {
-                result.coilTemperature[i] = reader.ReadWordLE();
+                x = reader.ReadWordLE();
             }
             result.MCUtemperature = reader.ReadWordLE();
             return i2cError;
@@ -377,13 +375,13 @@ namespace devices
             result.analogVoltage = reader.ReadWordLE();
             result.digitalCurrent = reader.ReadWordLE();
             result.analogCurrent = reader.ReadWordLE();
-            FOR_AXIS(i)
+            for(auto& x: result.coilCurrent)
             {
-                result.coilCurrent[i] = reader.ReadSignedWordLE();
+                x = reader.ReadSignedWordLE();
             }
-            FOR_AXIS(i)
+            for(auto& x: result.coilTemperature)
             {
-                result.coilTemperature[i] = reader.ReadSignedWordLE();
+                x = reader.ReadSignedWordLE();
             }
             result.MCUtemperature = reader.ReadSignedWordLE();
             return i2cError;
@@ -468,7 +466,5 @@ namespace devices
             return ((i2cstatusWrite == I2CResult::OK) && (i2cstatusRead == I2CResult::OK) && (opcodeByte == response[0]) &&
                 status.Accepted() && status.InvalidX() == false && status.InvalidY() == false && status.InvalidZ() == false);
         }
-
-#undef FOR_AXIS
     }
 }

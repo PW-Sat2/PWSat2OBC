@@ -35,8 +35,6 @@ using namespace devices::imtq;
 
 static const uint8_t ImtqAddress = 0x10;
 
-#define FOR_AXIS(var) for (uint8_t var = 0; var < 3; ++var)
-
 class ImtqTest : public testing::Test
 {
   public:
@@ -386,21 +384,21 @@ RC_GTEST_FIXTURE_PROP(ImtqTest, GetSelfTestResult, ())
             writer.WriteByte(data.stepResults[i].error.GetValue());
             writer.WriteByte(i);
 
-            FOR_AXIS(x)
+            for(auto x: data.stepResults[i].RawMagnetometerMeasurement)
             {
-                writer.WriteSignedDoubleWordLE(data.stepResults[i].RawMagnetometerMeasurement[x]);
+                writer.WriteSignedDoubleWordLE(x);
             }
-            FOR_AXIS(x)
+            for(auto x: data.stepResults[i].CalibratedMagnetometerMeasurement)
             {
-                writer.WriteSignedDoubleWordLE(data.stepResults[i].CalibratedMagnetometerMeasurement[x]);
+                writer.WriteSignedDoubleWordLE(x);
             }
-            FOR_AXIS(x)
+            for(auto x: data.stepResults[i].CoilCurrent)
             {
-                writer.WriteSignedWordLE(data.stepResults[i].CoilCurrent[x]);
+                writer.WriteSignedWordLE(x);
             }
-            FOR_AXIS(x)
+            for(auto x: data.stepResults[i].CoilTemperature)
             {
-                writer.WriteSignedWordLE(data.stepResults[i].CoilTemperature[x]);
+                writer.WriteSignedWordLE(x);
             }
         }
         return I2CResult::OK;
@@ -436,29 +434,29 @@ RC_GTEST_FIXTURE_PROP(ImtqTest, GetDetumbleData, ())
         writer.WriteByte(0x48);
         writer.WriteByte(0x00);
 
-        FOR_AXIS(x)
+        for(auto x: data.calibratedMagnetometerMeasurement)
         {
-            writer.WriteSignedDoubleWordLE(data.calibratedMagnetometerMeasurement[x]);
+            writer.WriteSignedDoubleWordLE(x);
         }
-        FOR_AXIS(x)
+        for(auto x: data.filteredMagnetometerMeasurement)
         {
-            writer.WriteSignedDoubleWordLE(data.filteredMagnetometerMeasurement[x]);
+            writer.WriteSignedDoubleWordLE(x);
         }
-        FOR_AXIS(x)
+        for(auto x: data.bDotData)
         {
-            writer.WriteSignedDoubleWordLE(data.bDotData[x]);
+            writer.WriteSignedDoubleWordLE(x);
         }
-        FOR_AXIS(x)
+        for(auto x: data.commandedDipole)
         {
-            writer.WriteSignedWordLE(data.commandedDipole[x]);
+            writer.WriteSignedWordLE(x);
         }
-        FOR_AXIS(x)
+        for(auto x: data.commandedCurrent)
         {
-            writer.WriteSignedWordLE(data.commandedCurrent[x]);
+            writer.WriteSignedWordLE(x);
         }
-        FOR_AXIS(x)
+        for(auto x: data.measuredCurrent)
         {
-            writer.WriteSignedWordLE(data.measuredCurrent[x]);
+            writer.WriteSignedWordLE(x);
         }
         return I2CResult::OK;
     }));
@@ -497,13 +495,13 @@ RC_GTEST_FIXTURE_PROP(ImtqTest, GetHouseKeepingRAW, ())
         writer.WriteWordLE(data.digitalCurrent);
         writer.WriteWordLE(data.analogCurrent);
 
-        FOR_AXIS(x)
+        for(auto x: data.coilCurrent)
         {
-            writer.WriteWordLE(data.coilCurrent[x]);
+            writer.WriteWordLE(x);
         }
-        FOR_AXIS(x)
+        for(auto x: data.coilTemperature)
         {
-            writer.WriteWordLE(data.coilTemperature[x]);
+            writer.WriteWordLE(x);
         }
         writer.WriteWordLE(data.MCUtemperature);
         return I2CResult::OK;
@@ -549,13 +547,13 @@ RC_GTEST_FIXTURE_PROP(ImtqTest, GetHouseKeepingEngineering, ())
         writer.WriteWordLE(data.digitalCurrent);
         writer.WriteWordLE(data.analogCurrent);
 
-        FOR_AXIS(x)
+        for(auto x: data.coilCurrent)
         {
-            writer.WriteWordLE(data.coilCurrent[x]);
+            writer.WriteWordLE(x);
         }
-        FOR_AXIS(x)
+        for(auto x: data.coilTemperature)
         {
-            writer.WriteWordLE(data.coilTemperature[x]);
+            writer.WriteWordLE(x);
         }
         writer.WriteWordLE(data.MCUtemperature);
         return I2CResult::OK;
