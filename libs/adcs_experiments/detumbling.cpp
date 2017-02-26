@@ -31,10 +31,10 @@
  %       mtmDot                   - [3x1], magnetic field time derivative, [Gauss/s]
  %
  %   globals       :
- %       ADCSParameters.DetumblingConst.dt       - [1x1], iteration time step, [s]
- %       ADCSParameters.DetumblingConst.wCutOff  - [1x1], high-pass filter cut off frequency, [rad/s]
- %       ADCSParameters.DetumblingConst.bDotGain - [1x1], B-dot gain, [kg m^2 / s]
- %       ADCSParameters.DetumblingConst.coilsOn  - boolean, [3x1], active magnetic coils
+ %       DetumblingConst.dt       - [1x1], iteration time step, [s]
+ %       DetumblingConst.wCutOff  - [1x1], high-pass filter cut off frequency, [rad/s]
+ %       DetumblingConst.bDotGain - [1x1], B-dot gain, [kg m^2 / s]
+ %       DetumblingConst.coilsOn  - boolean, [3x1], active magnetic coils
  %
  %   locals        :
  %
@@ -74,15 +74,13 @@ void Detumbling::initializeDetumbling(DetumblingState& state,
     state.mtmDotPrev = RowVector3f::Zero();
     //Set the previous MTM measurement to zeros,
     state.mtmMeasPrev = RowVector3f::Zero(); // TODO on the first step should be initialised by measurement value
-
-    state.isInitialised = true;
 }
 
 void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
         DetumblingState& state,  const DetumblingParameters& param)///TODO units are wrong
 {
-    if (state.isInitialised)
-    {
+    
+    
         //conversion of input
         std::array<float, 3> tmp;
         std::copy(mgmt_meas.begin(), mgmt_meas.end(), tmp.begin());
@@ -107,11 +105,11 @@ void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
         meas_tmp *= 1e-4;
         commDipoleBdot *= 1e-4 / powf(meas_tmp.norm(), 2);
 */
-        if (!param.coilsOn[0]) // XXX only one???
+        if (!param.coilsOn[0]) // XXX Fixed: chaged `else if` to `if`
             commDipoleBdot[0] = 0;
-        else if (!param.coilsOn[1])
+        if (!param.coilsOn[1])
             commDipoleBdot[1] = 0;
-        else if (!param.coilsOn[2])
+        if (!param.coilsOn[2])
             commDipoleBdot[2] = 0;
 
         // store prev values
@@ -121,7 +119,7 @@ void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
         // convert to output
         std::copy(commDipoleBdot.data(),
                 commDipoleBdot.data() + commDipoleBdot.size(), dipole.begin());
-    }
+    
 // XXX'0'?
 
 }
