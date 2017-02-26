@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 import telecommand
 from obc.experiments import ExperimentType
@@ -22,15 +22,19 @@ class TestExperimentDetumbling(BaseTest):
         self.system.obc.power_on(clean_state=True)
         self.system.obc.wait_to_start()
 
+
         e.wait_for_change(1)
 
     def test_should_perform_experiment(self):
         self._start()
+        start_time = datetime.now()
+        self.system.rtc.set_response_time(start_time)
 
         self.system.comm.put_frame(telecommand.PerformDetumblingExperiment(duration=timedelta(hours=4)))
 
         self.system.obc.wait_for_experiment(ExperimentType.Detumbling, 40)
 
         self.system.obc.advance_time(timedelta(hours=4).total_seconds() * 1000)
+        self.system.rtc.set_response_time(start_time + timedelta(hours=4))
 
         self.system.obc.wait_for_experiment(None, 20)
