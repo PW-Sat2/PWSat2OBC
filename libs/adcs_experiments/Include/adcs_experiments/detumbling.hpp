@@ -39,36 +39,39 @@ final
          */
         static constexpr float DefaultDt = 0.2;
         /** @brief (Draft)
-         * @unit:
+         * @unit: [s]
          */
         static constexpr float DefaultWCutOff = 0.2;
         /** @brief (Draft)
-         * @unit:
+         * @unit: [rad/s]
          */
         static constexpr float DefaultBDotGain = 2.879285e-5; /// XXX unit conv
         /** @brief (Draft)
-         * @unit:
+         * @unit: [kg*m^2/s]
          */
         static constexpr std::array <bool, 3> DefaultCoilsOn =
         { true, true, true };
 
         /** @brief (Draft)   */
-        struct DetumblingParameters
+        struct DetumblingParameters //Parameters changeable by a telecommand from Earth. Those are constants used in detumbling.
         {
+			/**
+			*	@change: if previous default values would give worse results in detumbling iterative algorithm than commanded from Earth (f.e. better convergence factor) 
+			**/
             /** @brief (Draft)   */
-            float dt = DefaultDt;
+            float dt = DefaultDt; // iteration time step, [s]
             /** @brief (Draft)   */
-            float wCutOff = DefaultWCutOff;
+            float wCutOff = DefaultWCutOff; // high-pass filter cut off frequency, [rad/s]
             /** @brief (Draft)   */
-            float bDotGain = DefaultBDotGain;
+            float bDotGain = DefaultBDotGain; // B-dot gain, [kg m^2 / s] (contant k used to calculate commanded magnetic dipole) 
+											  //s.33 "Dropbox\PW-Sat2 udostepnione\documentation\documentation_phase_c\PW-Sat2-C-01.00-ADCS-CDR.pdf"
             /** @brief (Draft)   */
-            std::array <bool, 3> coilsOn = DefaultCoilsOn;
+            std::array <bool, 3> coilsOn = DefaultCoilsOn; //active magnetic coils
         };
 
         /** @brief (Draft)   */
         struct DetumblingState
         {
-            bool isInitialised = false;
             /** @brief (Draft)   */
             RowVector3f mtmDotPrev;
             /** @brief (Draft)   */
