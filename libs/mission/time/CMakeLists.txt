@@ -14,6 +14,7 @@ target_link_libraries(${NAME}
 	mission 
 	state
 	time
+	rtc
 )
 
 target_format_sources(${NAME} "${SOURCES}")

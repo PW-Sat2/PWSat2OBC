@@ -22,6 +22,7 @@
 #include "obc/experiments.hpp"
 #include "obc/hardware.h"
 #include "obc/storage.h"
+#include "rtc/rtc.hpp"
 #include "spi/efm.h"
 #include "storage/nand_driver.h"
 #include "terminal/terminal.h"
@@ -90,6 +91,9 @@ struct OBC
 
     /** @brief Terminal object. */
     Terminal terminal;
+
+    /** @brief External Real Time Clock.  */
+    devices::rtc::RTCObject rtc;
 };
 
 /** @brief Global OBC object. */

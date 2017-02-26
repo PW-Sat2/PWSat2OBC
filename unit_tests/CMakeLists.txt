@@ -57,6 +57,7 @@ set(SOURCES
   mock/UpdateDescriptorMock.hpp
   mock/VerifyDescriprorMock.hpp
   mock/emlib.cpp
+  mock/RtcMock.hpp
   assert.cpp
   antenna/miniport.cpp
   antenna/antenna.cpp
@@ -120,6 +121,7 @@ target_link_libraries(${NAME}
     adcs
     mission_adcs
     obc_telecommands
+    rtc
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
