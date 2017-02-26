@@ -8,7 +8,8 @@ OBC::OBC()
       Storage(Hardware.SPI, fs, Hardware.Pins),                            //
       Experiments(fs, this->adcs.GetAdcsController(), this->timeProvider), //
       Communication(Hardware.I2C.Buses.Bus, fs, Experiments),              //
-      terminal(this->IO)                                                   //
+      terminal(this->IO),                                   //
+      rtc(Hardware.I2C.Buses.Bus)                           //
 {
 }
 

@@ -60,7 +60,7 @@ TEST_F(SmartWaitTest, ShouldWaitForPulseAndReturnIfDesiredTimeReached)
 
             Option<std::chrono::milliseconds> currentTime = timeProvider.GetCurrentTime();
 
-            timeProvider.SetCurrentTime(TimePointFromDuration(currentTime.Value + 1min));
+            timeProvider.SetCurrentTime(currentTime.Value + 1min);
             return OSResult::Success;
         }));
 
@@ -80,7 +80,7 @@ TEST_F(SmartWaitTest, ShouldWaitForPulseAndReturnIfMissionTimeJumpsOverDesiredTi
 
             Option<std::chrono::milliseconds> currentTime = timeProvider.GetCurrentTime();
 
-            timeProvider.SetCurrentTime(TimePointFromDuration(currentTime.Value + 1min));
+            timeProvider.SetCurrentTime(currentTime.Value + 1min);
             return OSResult::Success;
         }));
 
