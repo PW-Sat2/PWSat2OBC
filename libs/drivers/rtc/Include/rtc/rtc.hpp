@@ -31,6 +31,7 @@ namespace devices
              * @param[in] bus A reference to I2C bus used by RTC.
              */
             RTCObject(drivers::i2c::II2CBus& bus);
+            virtual ~RTCObject(){};
 
             /**
               * @brief Reads entire time structure from RTC.
@@ -38,7 +39,7 @@ namespace devices
               *
               * @return Transfer result - I2CResult::OK when read was successful.
               */
-            OSResult ReadTime(RTCTime& rtcTime);
+            virtual OSResult ReadTime(RTCTime& rtcTime);
 
           private:
             static constexpr std::uint8_t I2CAddress = 0b1010001;

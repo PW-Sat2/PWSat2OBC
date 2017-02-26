@@ -92,14 +92,18 @@ void TimeProvider::Invoke(std::chrono::milliseconds interval)
 
 bool TimeProvider::SetCurrentTime(TimePoint pointInTime)
 {
-    const milliseconds span = TimePointToTimeSpan(pointInTime);
+    return SetCurrentTime(TimePointToTimeSpan(pointInTime));
+}
+
+bool TimeProvider::SetCurrentTime(milliseconds duration)
+{
     if (OS_RESULT_FAILED(System::TakeSemaphore(timerLock, InfiniteTimeout)))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to acquire timer lock.");
         return false;
     }
 
-    CurrentTime = span;
+    CurrentTime = duration;
     NotificationTime = NotificationPeriod + 1ms;
     PersistanceTime = SavePeriod + 1ms;
     struct TimerState state = BuildTimerState();

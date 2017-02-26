@@ -8,7 +8,8 @@ OBC::OBC()
       Communication(Hardware.I2C.Buses.Bus, fs),            //
       Storage(Hardware.SPI, fs, Hardware.Pins),             //
       Experiments(fs),                                      //
-      terminal(this->IO)                                    //
+      terminal(this->IO),                                   //
+      rtc(Hardware.I2C.Buses.Bus)                           //
 {
 }
 
@@ -40,6 +41,6 @@ OSResult OBC::PostStartInitialization()
     }
 
     this->Experiments.Initialize();
-   
+
     return OSResult::Success;
 }
