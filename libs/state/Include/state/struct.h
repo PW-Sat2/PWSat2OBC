@@ -48,6 +48,12 @@ struct SystemState
      */
     experiments::ExperimentState Experiment;
 
+    /**
+     * @brief This procedure returns information whether the antennas responsible for transmission are deployed.
+     * @return Information whether the antennas responsible for transmission are deployed.
+     * @retval true At least one transmitting antenna has been deployed.
+     * @retval false Transmitting antennas are not yet deployed.
+     */
     bool AreTransmittingAntennasDeployed() const;
 };
 
