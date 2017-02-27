@@ -12,9 +12,23 @@
 
 namespace mission
 {
+    /**
+     * @defgroup MissionBeacon Beacon management
+     * @ingroup mission
+     * @{
+     */
+    /**
+     * @brief Beacon state handler.
+     *
+     * This task is responsible for setting & updating the beacon that is being constantly send via the communication module.
+     */
     class BeaconUpdate : public Action
     {
       public:
+        /**
+         * @brief ctor.
+         * @param[in] beaconController Reference to object that is able to update set the beacon in communication module.
+         */
         BeaconUpdate(devices::comm::IBeaconController& beaconController);
 
         /**
@@ -41,14 +55,27 @@ namespace mission
          */
         static void Run(const SystemState& state, void* param);
 
+        /**
+         * @brief Updates current beacons.
+         * @param[in] state Reference to global mission state.
+         */
         void UpdateBeacon(const SystemState& state);
 
         devices::comm::Beacon GenerateBeacon(const SystemState& state);
 
+        /**
+         * @brief Beacon hardware controller.
+         */
         devices::comm::IBeaconController* controller;
 
+        /**
+         * @brief Time of last successful beacon update.
+         */
         std::chrono::milliseconds lastBeaconUpdate;
 
+        /**
+         * @brief Beacon frame builder.
+         */
         telecommunication::downlink::DownlinkFrame frame;
     };
 }

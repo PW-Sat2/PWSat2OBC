@@ -7,12 +7,16 @@
 
 COMM_BEGIN
 
+/**
+ * @brief This interface provides a means of controlling the current beacon state.
+ * @ingroup LowerCommDriver
+ */
 struct IBeaconController
 {
     /**
      * @brief This procedure sets the beacon frame for the passed comm object.
      *
-     * @param[in] beaconData Reference to object describing new beacon.
+     * @param[in] beacon Reference to object describing new beacon.
      * See the definition of the CommBeacon for details.
      * @return Operation status, true in case of success, false otherwise.
      */
