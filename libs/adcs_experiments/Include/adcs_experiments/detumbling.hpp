@@ -52,8 +52,10 @@ final
         static constexpr std::array <bool, 3> DefaultCoilsOn =
         { true, true, true };
 
-        /** @brief (Draft)   */
-        struct DetumblingParameters //Parameters changeable by a telecommand from Earth. Those are constants used in detumbling.
+        /** @brief
+		* Parameters changeable by a telecommand from Earth. Those are constants used in detumbling.
+		*/
+        struct DetumblingParameters 
         {
 			/**
 			*	@detailed: if previous default values would give worse results in detumbling iterative algorithm than commanded from Earth (f.e. better convergence factor) 
