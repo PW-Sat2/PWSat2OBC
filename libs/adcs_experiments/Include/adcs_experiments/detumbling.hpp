@@ -56,16 +56,24 @@ final
         struct DetumblingParameters //Parameters changeable by a telecommand from Earth. Those are constants used in detumbling.
         {
 			/**
-			*	@change: if previous default values would give worse results in detumbling iterative algorithm than commanded from Earth (f.e. better convergence factor) 
+			*	@detailed: if previous default values would give worse results in detumbling iterative algorithm than commanded from Earth (f.e. better convergence factor) 
 			**/
-            /** @brief (Draft)   */
-            float dt = DefaultDt; // iteration time step, [s]
-            /** @brief (Draft)   */
-            float wCutOff = DefaultWCutOff; // high-pass filter cut off frequency, [rad/s]
-            /** @brief (Draft)   */
-            float bDotGain = DefaultBDotGain; // B-dot gain, [kg m^2 / s] (contant k used to calculate commanded magnetic dipole) 
-            /** @brief (Draft)   */
-            std::array <bool, 3> coilsOn = DefaultCoilsOn; //active magnetic coils
+            /** @brief
+			* iteration time step, [s]
+			*/
+            float dt = DefaultDt; 
+            /** @brief
+			* high-pass filter cut off frequency, [rad/s]
+			*/
+            float wCutOff = DefaultWCutOff; 
+            /** @brief
+			* B-dot gain, [kg m^2 / s] (contant k used to calculate commanded magnetic dipole) 
+			*/
+            float bDotGain = DefaultBDotGain;
+            /** @brief
+			* active magnetic coils
+			*/
+            std::array <bool, 3> coilsOn = DefaultCoilsOn; 
         };
 
         /** @brief (Draft)   */
