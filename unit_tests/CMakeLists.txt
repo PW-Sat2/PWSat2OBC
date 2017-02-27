@@ -57,6 +57,8 @@ set(SOURCES
   mock/UpdateDescriptorMock.hpp
   mock/VerifyDescriprorMock.hpp
   mock/emlib.cpp
+  mock/comm.cpp
+  mock/comm.hpp
   assert.cpp
   antenna/miniport.cpp
   antenna/antenna.cpp

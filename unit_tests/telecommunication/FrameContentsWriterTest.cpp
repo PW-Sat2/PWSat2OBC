@@ -11,9 +11,9 @@ using testing::Eq;
 using telecommunication::downlink::FrameContentWriter;
 using telecommunication::downlink::FieldId;
 
-static void CheckBuffer(const uint8_t* current, const uint16_t currentLength, const uint8_t* expected, const uint16_t expectedLength)
+static void CheckBuffer(gsl::span<const std::uint8_t> current, gsl::span<const std::uint8_t> expected)
 {
-    ASSERT_TRUE(std::equal(current, current + currentLength, expected, expected + expectedLength));
+    ASSERT_THAT(current, Eq(expected));
 }
 
 TEST(FrameContentsWriterTest, TestWriteByte)
@@ -23,7 +23,7 @@ TEST(FrameContentsWriterTest, TestWriteByte)
     Writer writer(array);
     FrameContentWriter frameWriter(writer);
     frameWriter.WriteByte(FieldId::TimeStamp, 0x55);
-    CheckBuffer(array, writer.GetDataLength(), expected, sizeof(expected));
+    CheckBuffer(writer.Capture(), expected);
 }
 
 TEST(FrameContentsWriterTest, TestWriteWordLE)
@@ -33,7 +33,7 @@ TEST(FrameContentsWriterTest, TestWriteWordLE)
     Writer writer(array);
     FrameContentWriter frameWriter(writer);
     frameWriter.WriteWordLE(FieldId::TimeStamp, 0x55aa);
-    CheckBuffer(array, writer.GetDataLength(), expected, sizeof(expected));
+    CheckBuffer(writer.Capture(), expected);
 }
 
 TEST(FrameContentsWriterTest, TestWriteDWordLE)
@@ -43,7 +43,7 @@ TEST(FrameContentsWriterTest, TestWriteDWordLE)
     Writer writer(array);
     FrameContentWriter frameWriter(writer);
     frameWriter.WriteDoubleWordLE(FieldId::TimeStamp, 0x55aa77ee);
-    CheckBuffer(array, writer.GetDataLength(), expected, sizeof(expected));
+    CheckBuffer(writer.Capture(), expected);
 }
 
 TEST(FrameContentsWriterTest, TestWriteQWordLE)
@@ -53,7 +53,7 @@ TEST(FrameContentsWriterTest, TestWriteQWordLE)
     Writer writer(array);
     FrameContentWriter frameWriter(writer);
     frameWriter.WriteQuadWordLE(FieldId::None, 0x448855aa66cc77ee);
-    CheckBuffer(array, writer.GetDataLength(), expected, sizeof(expected));
+    CheckBuffer(writer.Capture(), expected);
 }
 
 TEST(FrameContentsWriterTest, TestReset)
@@ -65,5 +65,5 @@ TEST(FrameContentsWriterTest, TestReset)
     frameWriter.WriteDoubleWordLE(FieldId::TimeStamp, 0x55aa77ee);
     frameWriter.Reset();
     frameWriter.WriteQuadWordLE(FieldId::None, 0x448855aa66cc77ee);
-    CheckBuffer(array, writer.GetDataLength(), expected, sizeof(expected));
+    CheckBuffer(writer.Capture(), expected);
 }
