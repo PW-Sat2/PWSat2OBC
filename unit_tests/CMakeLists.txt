@@ -75,6 +75,7 @@ set(SOURCES
   Experiments/ExperimentTest.cpp
   Experiments/ADCS/DetumblingExperimentTest.cpp
   FM25W/FM25WDriverTest.cpp
+  telecommunication/FrameContentsWriterTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
