@@ -14,7 +14,7 @@ namespace mission
     {
         /**
          * @defgroup MissionADCS System state support for ADCS
-         * @ingroup Mission
+         * @ingroup mission
          * @{
          */
         /**

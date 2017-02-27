@@ -140,6 +140,11 @@ class Writer final
      */
     gsl::span<std::uint8_t> Capture();
 
+    /**
+     * @brief Resets reader to the initial state.
+     */
+    void Reset();
+
   private:
     /**
      * @brief Updates internal writer status
@@ -148,11 +153,6 @@ class Writer final
      * @retval false Write operation cannot be performed
      */
     bool UpdateState(std::uint8_t requestedSize);
-
-    /**
-     * @brief Resets reader to the initial state.
-     */
-    inline void Reset();
 
     /**
      * @brief Pointer to the buffer in memory.

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "mission/BeaconUpdate.hpp"
 #include "mission/adcs.hpp"
 #include "mission/antenna_task.hpp"
 #include "mission/experiments.hpp"
@@ -18,7 +19,8 @@ namespace mission
         antenna::AntennaTask,
         SailTask,
         adcs::AdcsPrimaryTask,
-        mission::experiments::MissionExperimentComponent //
+        mission::experiments::MissionExperimentComponent,
+        mission::BeaconUpdate //
         >
         ObcMission;
 }
