@@ -67,6 +67,9 @@ set(SOURCES
   time/SmartWait.cpp
   time/rtc.cpp
   mock/RtcMock.hpp
+  mock/comm.cpp
+  mock/comm.hpp
+  assert.cpp
   antenna/miniport.cpp
   antenna/antenna.cpp
   SPI/SPIDriverTest.cpp
