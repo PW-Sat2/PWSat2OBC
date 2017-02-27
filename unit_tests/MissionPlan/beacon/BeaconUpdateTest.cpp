@@ -71,7 +71,7 @@ TEST_F(BeaconUpdateTest, TestBeaconUpdatePeriodAfterFailedUpdate)
     state.Antenna.Deployed = true;
     state.Antenna.DeploymentState[0] = state.Antenna.DeploymentState[1] = true;
     state.Time = 60min;
-    EXPECT_CALL(controller, SetBeacon(_)).WillOnce(Return(true));
+    EXPECT_CALL(controller, SetBeacon(_)).WillOnce(Return(false));
     auto action = beacon.BuildAction();
     action.actionProc(state, action.param);
     EXPECT_THAT(action.condition(state, action.param), Eq(true));

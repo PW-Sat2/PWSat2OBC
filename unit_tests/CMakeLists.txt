@@ -68,6 +68,7 @@ set(SOURCES
   adcs/AdcsCoordinatorTest.cpp
   Experiments/Fibo/FiboCalculatorTest.cpp
   Experiments/ExperimentTest.cpp
+  telecommunication/FrameContentsWriterTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
