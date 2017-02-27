@@ -64,7 +64,6 @@ final
             float wCutOff = DefaultWCutOff; // high-pass filter cut off frequency, [rad/s]
             /** @brief (Draft)   */
             float bDotGain = DefaultBDotGain; // B-dot gain, [kg m^2 / s] (contant k used to calculate commanded magnetic dipole) 
-											  //s.33 "Dropbox\PW-Sat2 udostepnione\documentation\documentation_phase_c\PW-Sat2-C-01.00-ADCS-CDR.pdf"
             /** @brief (Draft)   */
             std::array <bool, 3> coilsOn = DefaultCoilsOn; //active magnetic coils
         };
