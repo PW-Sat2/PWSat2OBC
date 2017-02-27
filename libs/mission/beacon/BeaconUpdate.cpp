@@ -6,8 +6,15 @@
 namespace mission
 {
     using namespace std::chrono_literals;
+
+    /**
+     * @brief Interval between two subsequent beacon updates
+     */
     static constexpr std::chrono::milliseconds BeaconUpdateInterval = 5min;
 
+    /**
+     * @brief Default beacon send interval.
+     */
     static constexpr std::uint16_t BeaconInterval = 30;
 
     using telecommunication::downlink::FieldId;
@@ -62,6 +69,8 @@ namespace mission
         telecommunication::downlink::FrameContentWriter writer(frame.PayloadWriter());
         writer.Reset();
         writer.WriteQuadWordLE(FieldId::TimeStamp, state.Time.count());
+
+        // TODO beacon interval will probably be adjusted based on current satelite state.
         return devices::comm::Beacon(BeaconInterval, frame.Frame());
     }
 }

@@ -121,11 +121,11 @@ class CommObject final : public ITransmitFrame, public IBeaconController
     /**
      * @brief This procedure sets the beacon frame for the passed comm object.
      *
-     * @param[in] beaconData Reference to object describing new beacon.
+     * @param[in] beacon Reference to object describing new beacon.
      * See the definition of the CommBeacon for details.
      * @return Operation status, true in case of success, false otherwise.
      */
-    virtual bool SetBeacon(const Beacon& beaconData) override final;
+    virtual bool SetBeacon(const Beacon& beacon) override final;
 
     /**
      * @brief Clears any beacon that is currently set in the transceiver. If a beacon transmission
