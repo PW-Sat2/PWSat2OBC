@@ -11,7 +11,7 @@ namespace mission
      */
     static constexpr std::chrono::milliseconds SilentPeriodThreshold = 40min;
 
-    bool IsInitialSilenPeriodFinished(const std::chrono::milliseconds& currentTime)
+    bool IsInitialSilentPeriodFinished(const std::chrono::milliseconds& currentTime)
     {
         return currentTime > SilentPeriodThreshold;
     }

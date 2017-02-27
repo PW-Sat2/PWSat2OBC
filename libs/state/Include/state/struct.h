@@ -47,7 +47,15 @@ struct SystemState
      * @brief Experiment controller status
      */
     experiments::ExperimentState Experiment;
+
+    bool AreTransmittingAntennasDeployed() const;
 };
+
+inline bool SystemState::AreTransmittingAntennasDeployed() const
+{
+    // TODO verify antennas' ids
+    return this->Antenna.Deployed && (this->Antenna.DeploymentState[1] || this->Antenna.DeploymentState[3]);
+}
 
 /** @} */
 

@@ -437,7 +437,7 @@ namespace mission
         static bool AntennaDeploymentCondition(const SystemState& state, void* param)
         {
             AntennaMissionState* stateDescriptor = (AntennaMissionState*)param;
-            if (!IsInitialSilenPeriodFinished(state.Time))
+            if (!IsInitialSilentPeriodFinished(state.Time))
             {
                 return false;
             }

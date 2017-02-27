@@ -1,17 +1,22 @@
 set(NAME telecommunication)
 
 set(SOURCES
+    include/telecommunication/downlink.h
+    include/telecommunication/uplink.h
+    include/telecommunication/telecommand_handling.h
+    include/telecommunication/FrameContentWriter.hpp
     telecommand_handling.cpp
     uplink.cpp
     downlink.cpp
+    FrameContentWriter.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
 
 target_link_libraries(${NAME} 
-	base
-	comm
-	logger
+    base
+    comm
+    logger
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)

@@ -32,7 +32,7 @@ namespace mission
         bool AdcsPrimaryTask::AdcsEnableBuiltinDetumblingCondition(const SystemState& state, void* param)
         {
             const auto context = static_cast<AdcsPrimaryTask*>(param);
-            if (!IsInitialSilenPeriodFinished(state.Time))
+            if (!IsInitialSilentPeriodFinished(state.Time))
             {
                 return false;
             }
