@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "IBeaconController.hpp"
 #include "ITransmitFrame.hpp"
 #include "base/os.h"
 #include "comm.hpp"
@@ -16,7 +17,7 @@ COMM_BEGIN
  * @remark Do not access directly the fields of this type, instead use the comm driver interface to
  * perform requested action.
  */
-class CommObject final : public ITransmitFrame
+class CommObject final : public ITransmitFrame, public IBeaconController
 {
   public:
     /**
@@ -124,7 +125,7 @@ class CommObject final : public ITransmitFrame
      * See the definition of the CommBeacon for details.
      * @return Operation status, true in case of success, false otherwise.
      */
-    bool SetBeacon(const Beacon& beaconData);
+    virtual bool SetBeacon(const Beacon& beaconData) override final;
 
     /**
      * @brief Clears any beacon that is currently set in the transceiver. If a beacon transmission
@@ -132,7 +133,7 @@ class CommObject final : public ITransmitFrame
      *
      * @return Operation status, true in case of success, false otherwise.
      */
-    bool ClearBeacon();
+    virtual bool ClearBeacon() override final;
 
     /**
      * @brief Set the transmitter state when there are no more frames to sent.

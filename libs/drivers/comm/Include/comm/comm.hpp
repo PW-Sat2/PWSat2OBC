@@ -51,6 +51,7 @@ class Beacon;
 
 struct IHandleFrame;
 struct ITransmitFrame;
+struct IBeaconController;
 
 /**
  * @brief Maximum allowed single frame content length.
