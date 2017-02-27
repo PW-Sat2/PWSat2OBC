@@ -30,6 +30,7 @@ set(SOURCES
   MissionPlan/MissionLoopTest.cpp
   MissionPlan/antenna/DeployAntennasTest.cpp
   MissionPlan/antenna/AntennaMissionStateTest.cpp
+  MissionPlan/beacon/BeaconUpdateTest.cpp
   MissionPlan/CompositeActionTest.cpp
   MissionPlan/adcs/AdcsPrimaryTaskTest.cpp
   MissionPlan/obc/ObcTest.cpp
@@ -118,6 +119,7 @@ target_link_libraries(${NAME}
     adcs
     mission_adcs
     obc_telecommands
+    mission_beacon
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
