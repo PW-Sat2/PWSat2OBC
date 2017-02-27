@@ -25,7 +25,6 @@ set(SOURCES
   SPI/SPIMock.cpp
   antenna/MiniportMock.cpp
   antenna/MiniportMock.hpp
-
   imtq/imtqTest.cpp
   imtq/imtqHighLevelTest.cpp
   Logger/LoggerTest.cpp
@@ -53,6 +52,7 @@ set(SOURCES
   MissionPlan/MissionLoopTest.cpp
   MissionPlan/antenna/DeployAntennasTest.cpp
   MissionPlan/antenna/AntennaMissionStateTest.cpp
+  MissionPlan/beacon/BeaconUpdateTest.cpp
   MissionPlan/CompositeActionTest.cpp
   MissionPlan/adcs/AdcsPrimaryTaskTest.cpp
   MissionPlan/obc/ObcTest.cpp
@@ -130,6 +130,7 @@ target_link_libraries(${NAME}
     obc_telecommands
     rtc
     fm25w
+    mission_beacon
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
