@@ -89,7 +89,7 @@ namespace error_counter
          * @param device Device ID
          * @return Value of error counter
          */
-        CounterValue Current(Device device);
+        CounterValue Current(Device device) const;
 
         /**
          * @brief Records single failure of device
@@ -125,7 +125,7 @@ namespace error_counter
         ErrorCounter(ErrorCounting& counting);
 
         /** @brief Current counter value */
-        CounterValue Current();
+        CounterValue Current() const;
         /** @brief Records single failure */
         void Failure();
         /** @brief Records single success */
@@ -140,7 +140,7 @@ namespace error_counter
     {
     }
 
-    template <Device Device> std::uint8_t ErrorCounter<Device>::Current()
+    template <Device Device> std::uint8_t ErrorCounter<Device>::Current() const
     {
         return this->_counting.Current(Device);
     }
@@ -153,6 +153,26 @@ namespace error_counter
     template <Device Device> void ErrorCounter<Device>::Success()
     {
         this->_counting.Success(Device);
+    }
+
+    /**
+     * @brief Operator that can be used to easily kick error counter depending on operation result
+     * @param flag Flag determining whether operation was successful
+     * @param counter Error counter
+     * @return Flag passed as input
+     */
+    template <Device Device> bool operator>>(bool flag, ErrorCounter<Device>& counter)
+    {
+        if (flag)
+        {
+            counter.Success();
+        }
+        else
+        {
+            counter.Failure();
+        }
+
+        return flag;
     }
 
     /** @} */

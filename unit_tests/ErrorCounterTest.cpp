@@ -4,6 +4,7 @@
 #include "gmock/gmock.h"
 #include "base/os.h"
 #include "error_counter/error_counter.hpp"
+#include "mock/error_counter.hpp"
 
 using testing::Eq;
 using testing::NiceMock;
@@ -18,12 +19,6 @@ constexpr Device DeviceB = 2;
 struct ErrorCountingCallbackMock : public IErrorCountingCallback
 {
     MOCK_METHOD2(LimitReached, void(Device, CounterValue));
-};
-
-struct ErrorCountingConfigrationMock : public IErrorCountingConfigration
-{
-    MOCK_METHOD1(Limit, CounterValue(Device device));
-    MOCK_METHOD1(Increment, CounterValue(Device device));
 };
 
 class ErrorCounterTest : public testing::Test
@@ -46,8 +41,6 @@ ErrorCounterTest::ErrorCounterTest()
       _deviceB(this->_counting)
 {
     this->_counting.Handler(this->_callback);
-
-    ON_CALL(this->_config, Increment(_)).WillByDefault(Return(1));
 }
 
 TEST_F(ErrorCounterTest, ShouldStartWithZero)
@@ -87,11 +80,27 @@ TEST_F(ErrorCounterTest, TwoCountersShouldBeIndependent)
 
 TEST_F(ErrorCounterTest, ShouldTriggerCallbackWhenFailureLimitIsReach)
 {
-    EXPECT_CALL(_callback, LimitReached(DeviceA, 5));
+    EXPECT_CALL(_callback, LimitReached(DeviceA, 7));
+
+    ON_CALL(this->_config, Limit(DeviceA)).WillByDefault(Return(7));
 
     this->_deviceA.Failure();
     this->_deviceA.Failure();
     this->_deviceA.Failure();
     this->_deviceA.Failure();
     this->_deviceA.Failure();
+    this->_deviceA.Failure();
+    this->_deviceA.Failure();
+}
+
+TEST_F(ErrorCounterTest, ShouldUpdateCounterBasedOnFlag)
+{
+    false >> this->_deviceA;
+    false >> this->_deviceA;
+
+    ASSERT_THAT(this->_deviceA, Eq(2));
+
+    true >> this->_deviceA;
+
+    ASSERT_THAT(this->_deviceA, Eq(0));
 }

@@ -20,6 +20,7 @@
 #include "obc/adcs.hpp"
 #include "obc/communication.h"
 #include "obc/experiments.hpp"
+#include "obc/fdir.hpp"
 #include "obc/hardware.h"
 #include "obc/storage.h"
 #include "spi/efm.h"
@@ -75,6 +76,8 @@ struct OBC
 
     /** @brief Power control interface */
     PowerControl PowerControlInterface;
+
+    obc::FDIR Fdir;
 
     /** @brief Overall satellite <-> Earth communication */
     obc::OBCCommunication Communication;

@@ -2,7 +2,7 @@
 
 namespace error_counter
 {
-    CounterValue ErrorCounting::Current(Device device)
+    CounterValue ErrorCounting::Current(Device device) const
     {
         Lock l(this->_sync, InfiniteTimeout);
         return this->_counters[device];
@@ -16,7 +16,7 @@ namespace error_counter
 
         this->_counters[device] += increment;
 
-        if (this->_counters[device] >= 5)
+        if (this->_counters[device] >= this->_config.Limit(device))
         {
             if (this->_callback != nullptr)
             {
@@ -44,5 +44,6 @@ namespace error_counter
     void ErrorCounting::Initialize()
     {
         this->_sync = System::CreateBinarySemaphore(1);
+        System::GiveSemaphore(this->_sync);
     }
 }
