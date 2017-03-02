@@ -6,6 +6,7 @@
 #include "i2c/i2c.h"
 #include "obc/experiments.hpp"
 #include "obc/telecommands/experiments.hpp"
+#include "obc/fdir.hpp"
 #include "obc/telecommands/file_system.hpp"
 #include "obc/telecommands/ping.hpp"
 #include "telecommunication/telecommand_handling.h"
@@ -52,11 +53,12 @@ namespace obc
     {
         /**
          * @brief Initializes @ref OBCCommunication object
+         * @param[in] fdir FDIR mechanisms
          * @param[in] i2cBus I2CBus used by low-level comm driver
          * @param[in] fs File system
          * @param[in] experiments Experiments
          */
-        OBCCommunication(drivers::i2c::II2CBus& i2cBus, services::fs::IFileSystem& fs, obc::OBCExperiments& experiments);
+        OBCCommunication(obc::FDIR& fdir, drivers::i2c::II2CBus& i2cBus, services::fs::IFileSystem& fs, obc::OBCExperiments& experiments);
 
         /**
          * @brief Initializes all communication-related drivers and objects

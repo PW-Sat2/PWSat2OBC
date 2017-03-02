@@ -69,6 +69,7 @@ set(SOURCES
   mock/RtcMock.hpp
   mock/comm.cpp
   mock/comm.hpp
+  mock/error_counter.cpp
   assert.cpp
   antenna/miniport.cpp
   antenna/antenna.cpp

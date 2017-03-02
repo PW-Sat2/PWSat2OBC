@@ -60,6 +60,7 @@ target_link_libraries(${NAME}
     mission_time
     mission_experiments
     yaffs
+    obc_fdir
     obc_storage
     obc_communication
     obc_hardware

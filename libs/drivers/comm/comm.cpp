@@ -37,8 +37,9 @@ Beacon::Beacon(std::chrono::seconds beaconPeriod, gsl::span<const std::uint8_t> 
 {
 }
 
-CommObject::CommObject(II2CBus& low, IHandleFrame& upperInterface)
-    : _low(low),                     //
+CommObject::CommObject(error_counter::ErrorCounting& errors, II2CBus& low, IHandleFrame& upperInterface)
+    : _error(errors),                //
+      _low(low),                     //
       _frameHandler(upperInterface), //
       _pollingTaskHandle(nullptr)    //
 {
@@ -118,7 +119,7 @@ bool CommObject::Pause()
 
 bool CommObject::Reset()
 {
-    return this->SendCommand(Address::Receiver, num(ReceiverCommand::HardReset));
+    return this->SendCommand(Address::Receiver, num(ReceiverCommand::HardReset)) >> this->_error;
 }
 
 bool CommObject::ResetTransmitter()

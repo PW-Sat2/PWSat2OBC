@@ -28,11 +28,11 @@ gsl::span<IHandleTeleCommand*> Telecommands::AllTelecommands()
     return gsl::span<IHandleTeleCommand*>(this->_telecommands);
 }
 
-OBCCommunication::OBCCommunication(II2CBus& systemBus, services::fs::IFileSystem& fs, obc::OBCExperiments& experiments)
+OBCCommunication::OBCCommunication(obc::FDIR& fdir, II2CBus& systemBus, services::fs::IFileSystem& fs, obc::OBCExperiments& experiments)
     : UplinkProtocolDecoder(settings::CommSecurityCode),                                  //
       SupportedTelecommands(fs, experiments),                                             //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.AllTelecommands()), //
-      CommDriver(systemBus, TelecommandHandler)
+      CommDriver(fdir.ErrorCounting(), systemBus, TelecommandHandler)
 {
 }
 
