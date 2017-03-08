@@ -53,6 +53,7 @@
 #include "detumbling.hpp"
 #include <system.h>
 #include <cmath>
+#include<iostream> //TODO to be removed
 
 using std::uint8_t;
 using std::uint16_t;
@@ -79,46 +80,56 @@ void Detumbling::initializeDetumbling(DetumblingState& state,
 }
 
 void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
-        DetumblingState& state,  const DetumblingParameters& param)///TODO units are wrong
+        DetumblingState& state, const DetumblingParameters& param) ///TODO units are wrong
 {
     if (state.isInitialised)
     {
-        //conversion of input
+        //conversion of input LSB = 1e-7T
         std::array<float, 3> tmp;
         std::copy(mgmt_meas.begin(), mgmt_meas.end(), tmp.begin());
         RowVector3f mgmt_input(tmp.data());
 
+        mgmt_input *= 1e-2;//1e-5T as matlab
+
         // magnetic field time derivative
-        RowVector3f mtmDot = exp(-param.wCutOff * param.dt) * state.mtmDotPrev +
-                param.wCutOff * (mgmt_input - state.mtmMeasPrev);
-/*
-        RowVector3f mtmDot = state.mtmDotPrev;
-        mtmDot *= expf(-param.wCutOff * param.dt);
-        RowVector3f mtmDotDiff = mgmt_input - state.mtmMeasPrev;
-        mtmDotDiff *= param.wCutOff;
-        mtmDot += mtmDotDiff;
-*/
+        RowVector3f mtmDot = exp(-param.wCutOff * param.dt) * state.mtmDotPrev
+                + param.wCutOff * (mgmt_input - state.mtmMeasPrev);
+
+        std::cout<<mtmDot<<std::endl;//XXX debug
+        /*
+         RowVector3f mtmDot = state.mtmDotPrev;
+         mtmDot *= expf(-param.wCutOff * param.dt);
+         RowVector3f mtmDotDiff = mgmt_input - state.mtmMeasPrev;
+         mtmDotDiff *= param.wCutOff;
+         mtmDot += mtmDotDiff;
+         */
         // commanded magnetic dipole to coils
-        RowVector3f commDipoleBdot = mtmDot * (-param.bDotGain) * 1e-4 / powf((mgmt_input* 1e-4).norm(), 2);
-/*
-        RowVector3f commDipoleBdot = mtmDot;
-        commDipoleBdot *= -param.bDotGain;
-        RowVector3f meas_tmp = mgmt_input;
-        meas_tmp *= 1e-4;
-        commDipoleBdot *= 1e-4 / powf(meas_tmp.norm(), 2);
-*/
-        if (!param.coilsOn[0]) // XXX only one???
-            commDipoleBdot[0] = 0;
-        else if (!param.coilsOn[1])
-            commDipoleBdot[1] = 0;
-        else if (!param.coilsOn[2])
-            commDipoleBdot[2] = 0;
+        RowVector3f commDipoleBdot = mtmDot * (-param.bDotGain) * 1e-4
+                / (powf((mgmt_input * 1e-4).norm(), 2));
+
+        std::cout<<commDipoleBdot<<std::endl;//XXX debug
+        /*
+         RowVector3f commDipoleBdot = mtmDot;
+         commDipoleBdot *= -param.bDotGain;
+         RowVector3f meas_tmp = mgmt_input;
+         meas_tmp *= 1e-4;
+         commDipoleBdot *= 1e-4 / powf(meas_tmp.norm(), 2);
+         */
+        for (int i = 0; i < 3; i++)
+        {
+            if (!param.coilsOn[i])
+            {
+                commDipoleBdot[i] = 0;
+            }
+        }
 
         // store prev values
         state.mtmDotPrev = mtmDot;
         state.mtmMeasPrev = mgmt_input;
 
-        // convert to output
+        commDipoleBdot *= 1e4;
+
+        // convert to output LSB = 1e-4Am^2
         std::copy(commDipoleBdot.data(),
                 commDipoleBdot.data() + commDipoleBdot.size(), dipole.begin());
     }
