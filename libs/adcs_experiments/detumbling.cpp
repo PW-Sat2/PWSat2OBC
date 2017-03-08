@@ -23,23 +23,23 @@
  %
  %   inputs        :
  %       mtmMeas                  - [3x1], magnetometer measurement, [Gauss]
- %       mtmMeasPrev              - [3x1], previous (one iteration back) magnetometer measurement, [Gauss]
- %       mtmDotPrev               - [3x1], previous (one iteration back) magnetic field time derivative, [Gauss/s]
+ %       mtmMeasPrev          - [3x1], previous (one iteration back) magnetometer measurement, [Gauss]
+ %       mtmDotPrev            - [3x1], previous (one iteration back) magnetic field time derivative, [Gauss/s]
  %
  %   outputs       :
- %       commDipoleBdot           - [3x1], commanded magnetic dipole, [A m^2]
- %       mtmDot                   - [3x1], magnetic field time derivative, [Gauss/s]
+ %       commDipoleBdot   - [3x1], commanded magnetic dipole, [A m^2]
+ %       mtmDot                    - [3x1], magnetic field time derivative, [Gauss/s]
  %
  %   params       :
- %       dt       - [1x1], iteration time step, [s]
- %       wCutOff  - [1x1], high-pass filter cut off frequency, [rad/s]
- %       bDotGain - [1x1], B-dot gain, [kg m^2 / s]
- %       coilsOn  - boolean, [3x1], active magnetic coils
+ %       dt                               - [1x1], iteration time step, [s]
+ %       wCutOff                    - [1x1], high-pass filter cut off frequency, [rad/s]
+ %       bDotGain                  - [1x1], B-dot gain, [kg m^2 / s]
+ %       coilsOn                      - boolean, [3x1], active magnetic coils
  %
  %   locals        :
  %
  %   subfunctions  :
- %       vectorNorm               - calculates [3x1] vector norm
+ %       vectorNorm              - calculates [3x1] vector norm
  %
  %   references    :
  %
@@ -62,6 +62,9 @@ using std::uint32_t;
 namespace adcs
 {
 
+// obligatory static definition
+constexpr std::array <bool, 3> Detumbling::DefaultCoilsOn;
+
 Detumbling::Detumbling()
 {
     //empty
@@ -70,17 +73,21 @@ Detumbling::Detumbling()
 void Detumbling::initializeDetumbling(DetumblingState& state,
         const DetumblingParameters& param)
 {
-    UNUSED1(param);
-    //Set the previous time derivative of the magnetic field to zeros.
+    // initialise internal parameters
+    state.params = param;
+    // Set the previous time derivative of the magnetic field to zeros.
     state.mtmDotPrev = RowVector3f::Zero();
-    //Set the previous MTM measurement to zeros,
+    // Set the previous MTM measurement to zeros,
     state.mtmMeasPrev = RowVector3f::Zero(); // TODO on the first step should be initialised by measurement value
 }
 
 void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
-        DetumblingState& state, const DetumblingParameters& param) ///TODO units are wrong
+        DetumblingState& state) ///TODO units are wrong
 {
-        //conversion of input LSB = 1e-7T
+        // prevent of changing params - not really robust
+        const DetumblingParameters& params  = state.params;
+
+        // conversion of input LSB = 1e-7T
         std::array<float, 3> tmp;
         std::copy(mgmt_meas.begin(), mgmt_meas.end(), tmp.begin());
         RowVector3f mgmt_input(tmp.data());
@@ -88,13 +95,13 @@ void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
         mgmt_input *= 1e-2;//1e-5T as matlab
 
         // magnetic field time derivative
-        RowVector3f mtmDot = exp(-param.wCutOff * param.dt) * state.mtmDotPrev
-                + param.wCutOff * (mgmt_input - state.mtmMeasPrev);
+        RowVector3f mtmDot = exp(-params.wCutOff * params.dt) * state.mtmDotPrev
+                + params.wCutOff * (mgmt_input - state.mtmMeasPrev);
 
         std::cout<<mtmDot<<std::endl;//XXX debug
 
         // commanded magnetic dipole to coils
-        RowVector3f commDipoleBdot = mtmDot * (-param.bDotGain) * 1e-4
+        RowVector3f commDipoleBdot = mtmDot * (-params.bDotGain) * 1e-4
                 / (powf((mgmt_input * 1e-4).norm(), 2));
 
         std::cout<<commDipoleBdot<<std::endl;//XXX debug
@@ -102,7 +109,7 @@ void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
         // set inavtive dipoles to zero
         for (int i = 0; i < 3; i++)
         {
-            if (!param.coilsOn[i])
+            if (!params.coilsOn[i])
             {
                 commDipoleBdot[i] = 0;
             }

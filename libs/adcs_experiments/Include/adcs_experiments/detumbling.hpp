@@ -49,8 +49,7 @@ final
         /** @brief (Draft)
          * @unit: [kg*m^2/s]
          */
-        static constexpr std::array <bool, 3> DefaultCoilsOn =
-        { true, true, true };
+        static constexpr std::array <bool, 3> DefaultCoilsOn = {{true, true, true}};
 
         /** @brief
 		* Parameters changeable by a telecommand from Earth. Those are constants used in detumbling.
@@ -75,18 +74,21 @@ final
             /** @brief
 			* active magnetic coils
 			*/
-            std::array <bool, 3> coilsOn = DefaultCoilsOn; 
+            std::array <bool, 3> coilsOn = DefaultCoilsOn;
         };
 
         /** @brief (Draft)   */
         struct DetumblingState
         {
+        private:
             /** @brief (Draft)   */
             RowVector3f mtmDotPrev;
             /** @brief (Draft)   */
             RowVector3f mtmMeasPrev;
             /** @brief (Draft)   */
-            //RowVector3f commDipoleBdot_table;
+            DetumblingParameters params;
+
+            friend class Detumbling;
         };
 
         /** @brief (Draft)   */
@@ -109,7 +111,7 @@ final
          * @return void
          */
         void stepDetumbling(DipoleVec& dipole, const MagVec& mgmt,
-                DetumblingState& state, const DetumblingParameters& param);
+                DetumblingState& state);
     };
     }
 
