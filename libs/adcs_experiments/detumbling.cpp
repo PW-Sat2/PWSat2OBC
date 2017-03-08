@@ -30,11 +30,11 @@
  %       commDipoleBdot           - [3x1], commanded magnetic dipole, [A m^2]
  %       mtmDot                   - [3x1], magnetic field time derivative, [Gauss/s]
  %
- %   globals       :
- %       ADCSParameters.DetumblingConst.dt       - [1x1], iteration time step, [s]
- %       ADCSParameters.DetumblingConst.wCutOff  - [1x1], high-pass filter cut off frequency, [rad/s]
- %       ADCSParameters.DetumblingConst.bDotGain - [1x1], B-dot gain, [kg m^2 / s]
- %       ADCSParameters.DetumblingConst.coilsOn  - boolean, [3x1], active magnetic coils
+ %   params       :
+ %       dt       - [1x1], iteration time step, [s]
+ %       wCutOff  - [1x1], high-pass filter cut off frequency, [rad/s]
+ %       bDotGain - [1x1], B-dot gain, [kg m^2 / s]
+ %       coilsOn  - boolean, [3x1], active magnetic coils
  %
  %   locals        :
  %
@@ -75,15 +75,11 @@ void Detumbling::initializeDetumbling(DetumblingState& state,
     state.mtmDotPrev = RowVector3f::Zero();
     //Set the previous MTM measurement to zeros,
     state.mtmMeasPrev = RowVector3f::Zero(); // TODO on the first step should be initialised by measurement value
-
-    state.isInitialised = true;
 }
 
 void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
         DetumblingState& state, const DetumblingParameters& param) ///TODO units are wrong
 {
-    if (state.isInitialised)
-    {
         //conversion of input LSB = 1e-7T
         std::array<float, 3> tmp;
         std::copy(mgmt_meas.begin(), mgmt_meas.end(), tmp.begin());
@@ -96,25 +92,14 @@ void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
                 + param.wCutOff * (mgmt_input - state.mtmMeasPrev);
 
         std::cout<<mtmDot<<std::endl;//XXX debug
-        /*
-         RowVector3f mtmDot = state.mtmDotPrev;
-         mtmDot *= expf(-param.wCutOff * param.dt);
-         RowVector3f mtmDotDiff = mgmt_input - state.mtmMeasPrev;
-         mtmDotDiff *= param.wCutOff;
-         mtmDot += mtmDotDiff;
-         */
+
         // commanded magnetic dipole to coils
         RowVector3f commDipoleBdot = mtmDot * (-param.bDotGain) * 1e-4
                 / (powf((mgmt_input * 1e-4).norm(), 2));
 
         std::cout<<commDipoleBdot<<std::endl;//XXX debug
-        /*
-         RowVector3f commDipoleBdot = mtmDot;
-         commDipoleBdot *= -param.bDotGain;
-         RowVector3f meas_tmp = mgmt_input;
-         meas_tmp *= 1e-4;
-         commDipoleBdot *= 1e-4 / powf(meas_tmp.norm(), 2);
-         */
+
+        // set inavtive dipoles to zero
         for (int i = 0; i < 3; i++)
         {
             if (!param.coilsOn[i])
@@ -132,7 +117,7 @@ void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
         // convert to output LSB = 1e-4Am^2
         std::copy(commDipoleBdot.data(),
                 commDipoleBdot.data() + commDipoleBdot.size(), dipole.begin());
-    }
+    
 // XXX'0'?
 
 }
