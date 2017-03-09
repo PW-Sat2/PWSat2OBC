@@ -23,6 +23,7 @@ set(SOURCES
   base/ReaderTest.cpp
   base/WriterTest.cpp
   base/RapidTest.cpp
+  base/OnLeaveTest.cpp
   MissionPlan/MissionPlanTest.cpp
   MissionPlan/MissionTestHelpers.cpp
   MissionPlan/SailSystemStateTest.cpp

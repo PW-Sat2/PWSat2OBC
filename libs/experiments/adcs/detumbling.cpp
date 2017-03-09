@@ -33,18 +33,20 @@ namespace experiment
                 return StartResult::Failure;
             }
 
-            r = this->_adcs.EnableExperimentalDetumbling();
-
-            if (OS_RESULT_FAILED(r))
-            {
-                LOGF(LOG_LEVEL_ERROR, "Failed to enable experimental detumbling (%d)", num(r));
-
-                r = this->_adcs.EnableBuiltinDetumbling();
+            auto revert = OnLeave([this]() {
+                auto r = this->_adcs.EnableBuiltinDetumbling();
 
                 if (OS_RESULT_FAILED(r))
                 {
                     LOGF(LOG_LEVEL_FATAL, "Failed to reenable builtin detumbling (%d)", num(r));
                 }
+            });
+
+            r = this->_adcs.EnableExperimentalDetumbling();
+
+            if (OS_RESULT_FAILED(r))
+            {
+                LOGF(LOG_LEVEL_ERROR, "Failed to enable experimental detumbling (%d)", num(r));
 
                 return StartResult::Failure;
             }
@@ -57,6 +59,8 @@ namespace experiment
             }
 
             this->_endAt = start.Value + this->_duration;
+
+            revert.Skip();
 
             return StartResult::Success;
         }

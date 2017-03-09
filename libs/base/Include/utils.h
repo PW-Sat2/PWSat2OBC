@@ -287,4 +287,67 @@ struct TimeAction
     void virtual Invoke(std::chrono::milliseconds interval) = 0;
 };
 
+/**
+ * @brief Holds action (lambda) that will be invoked on destruction unless explictly skipped
+ */
+template <typename Action> class OnLeaveAction final : private NotCopyable
+{
+  public:
+    /**
+     * @brief Ctor
+     * @param action Action to invoke on destruction
+     */
+    OnLeaveAction(Action action);
+
+    /**
+     * @brief Move ctor
+     * @param other Other
+     */
+    OnLeaveAction(OnLeaveAction<Action>&& other) noexcept;
+
+    /**
+     * @brief Destructor
+     */
+    ~OnLeaveAction();
+
+    /**
+     * @brief Skips action invocation
+     */
+    void Skip();
+
+  private:
+    /** @brief Action to invoke */
+    Action _action;
+    /** @brief Flag indicating if action should be skipped */
+    bool _skip;
+};
+
+template <typename Action> OnLeaveAction<Action> OnLeave(Action action)
+{
+    return {action};
+}
+
+template <typename Action> OnLeaveAction<Action>::OnLeaveAction(Action action) : _action(action), _skip(false)
+{
+}
+
+template <typename Action>
+OnLeaveAction<Action>::OnLeaveAction(OnLeaveAction<Action>&& other) noexcept : _action(other._action), _skip(other._skip)
+{
+    other._skip = true;
+}
+
+template <typename Action> OnLeaveAction<Action>::~OnLeaveAction()
+{
+    if (!this->_skip)
+    {
+        this->_action();
+    }
+}
+
+template <typename Action> void OnLeaveAction<Action>::Skip()
+{
+    this->_skip = true;
+}
+
 #endif
