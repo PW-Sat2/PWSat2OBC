@@ -2,14 +2,12 @@
 #include "logger/logger.h"
 #include "state/struct.h"
 
-#include <iostream>
-
 using services::time::TimeProvider;
 using namespace std::literals;
 
 namespace mission
 {
-    TimeTask::TimeTask(std::tuple<TimeProvider&, devices::rtc::RTCObject&> arguments)
+    TimeTask::TimeTask(std::tuple<TimeProvider&, devices::rtc::IRTC&> arguments)
         : provider(std::get<0>(arguments)), //
           rtc(std::get<1>(arguments))       //
     {

@@ -47,7 +47,6 @@ struct TimeTaskTest : public testing::Test
 
 TimeTaskTest::TimeTaskTest()
     : provider(fileSystemMock),                 //
-      rtc(),                                    //
       timeTask(std::tie(provider, rtc)),        //
       updateDescriptor(timeTask.BuildUpdate()), //
       actionDescriptor(timeTask.BuildAction())

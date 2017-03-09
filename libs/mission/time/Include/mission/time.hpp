@@ -32,7 +32,7 @@ namespace mission
          * @brief ctor.
          * @param[in] timeProvider Reference to time providier object.
          */
-        TimeTask(std::tuple<TimeProvider&, devices::rtc::RTCObject&> arguments);
+        TimeTask(std::tuple<TimeProvider&, devices::rtc::IRTC&> arguments);
 
         /**
          * @brief Builds update descriptor for this task.
@@ -77,7 +77,7 @@ namespace mission
         /**
          * @brief External RTC reference.
          */
-        devices::rtc::RTCObject& rtc;
+        devices::rtc::IRTC& rtc;
 
         /**
          * @brief Time of last correction.

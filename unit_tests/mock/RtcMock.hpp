@@ -6,12 +6,10 @@
 #include "gmock/gmock.h"
 #include "rtc/rtc.hpp"
 
-class RtcMock : public devices::rtc::RTCObject
+class RtcMock : public devices::rtc::IRTC
 {
   public:
-    I2CBusMock i2cMock;
-
-    RtcMock() : devices::rtc::RTCObject(i2cMock), readTimeResult(OSResult::Success)
+    RtcMock() : readTimeResult(OSResult::Success)
     {
         fakeTime.seconds = 0;
         fakeTime.minutes = 0;
@@ -21,7 +19,7 @@ class RtcMock : public devices::rtc::RTCObject
         fakeTime.years = 0;
     }
 
-    OSResult ReadTime(devices::rtc::RTCTime& rtcTime) override
+    OSResult ReadTime(devices::rtc::RTCTime& rtcTime)
     {
         rtcTime = fakeTime;
 
