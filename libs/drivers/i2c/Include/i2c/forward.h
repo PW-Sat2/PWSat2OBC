@@ -5,6 +5,7 @@ namespace drivers
 {
     namespace i2c
     {
+        using I2CAddress = uint8_t;
         enum class I2CResult;
         struct II2CBus;
         class I2CLowLevelBus;
