@@ -144,6 +144,7 @@ namespace devices
 
             /**
              * @brief Constructor from std::uint8_t (as returned from Imtq hardware) (TC-DR-07).
+             * @param[in] val Error value, defined in TC-DR-07.
              */
             constexpr Error(std::uint8_t val) : value{val}
             {
