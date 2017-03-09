@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "ICurrentTime.hpp"
 #include "TimePoint.h"
 #include "base/os.h"
 #include "fs/fs.h"
@@ -146,7 +147,7 @@ namespace services
          * values in those files or any of those files is not available the majority vote is done to determine the most
          * likely correct value. In case when all of the values are different the smallest one is selected as the correct one.
          */
-        class TimeProvider : public TimeAction
+        class TimeProvider : public TimeAction, public ICurrentTime
         {
           public:
             /**
@@ -177,7 +178,7 @@ namespace services
              *
              * @return Option containing current mission time on success, empty option otherwise.
              */
-            Option<std::chrono::milliseconds> GetCurrentTime();
+            virtual Option<std::chrono::milliseconds> GetCurrentTime() override;
 
             /**
              * @brief This procedure returns current mission time in decoded format.

@@ -7,7 +7,7 @@
 #include <gsl/span>
 
 #include "adcs/AdcsCoordinator.hpp"
-#include "adcs/AdcsExperiment.hpp"
+#include "adcs/AdcsExperimental.hpp"
 #include "antenna/driver.h"
 #include "antenna/miniport.h"
 #include "base/os.h"
@@ -76,9 +76,6 @@ struct OBC
     /** @brief Power control interface */
     PowerControl PowerControlInterface;
 
-    /** @brief Overall satellite <-> Earth communication */
-    obc::OBCCommunication Communication;
-
     /** @brief OBC storage */
     obc::OBCStorage Storage;
 
@@ -87,6 +84,9 @@ struct OBC
 
     /** @brief Experiments */
     obc::OBCExperiments Experiments;
+
+    /** @brief Overall satellite <-> Earth communication */
+    obc::OBCCommunication Communication;
 
     /** @brief Terminal object. */
     Terminal terminal;

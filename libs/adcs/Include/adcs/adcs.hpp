@@ -30,14 +30,14 @@ namespace adcs
         BuiltinDetumbling,
 
         /**
-         * @brief Currently the backup detumbling algorithm is active.
+         * @brief Currently the experimental detumbling algorithm is active.
          */
-        CustomDetumbling,
+        ExperimentalDetumbling,
 
         /**
          * @brief Currently the sun pointing algorithm is active.
          */
-        CustomSunpointing,
+        ExperimentalSunpointing,
     };
 
     /**
@@ -99,13 +99,13 @@ namespace adcs
         virtual OSResult EnableBuiltinDetumbling() = 0;
 
         /**
-         * @brief Enables backup detumbling algorithm.
+         * @brief Enables experimental detumbling algorithm.
          *
          * Any algorithm that may already be active will be disabled prior to enabling
          * the backup detumbling algorithm.
          * @returns Operation status.
          */
-        virtual OSResult EnableCustomDetumbling() = 0;
+        virtual OSResult EnableExperimentalDetumbling() = 0;
 
         /**
          * @brief Enables sun pointing algorithm.

@@ -3,12 +3,12 @@
 #include "logger/logger.h"
 
 OBC::OBC()
-    : timeProvider(fs),                                     //
-      Hardware(&this->PowerControlInterface, timeProvider), //
-      Communication(Hardware.I2C.Buses.Bus, fs),            //
-      Storage(Hardware.SPI, fs, Hardware.Pins),             //
-      Experiments(fs),                                      //
-      terminal(this->IO)                                    //
+    : timeProvider(fs),                                                    //
+      Hardware(&this->PowerControlInterface, timeProvider),                //
+      Storage(Hardware.SPI, fs, Hardware.Pins),                            //
+      Experiments(fs, this->adcs.GetAdcsController(), this->timeProvider), //
+      Communication(Hardware.I2C.Buses.Bus, fs, Experiments),              //
+      terminal(this->IO)                                                   //
 {
 }
 
@@ -40,6 +40,6 @@ OSResult OBC::PostStartInitialization()
     }
 
     this->Experiments.Initialize();
-   
+
     return OSResult::Success;
 }

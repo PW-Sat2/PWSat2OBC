@@ -4,6 +4,8 @@
 #include <gsl/span>
 #include "comm/CommDriver.hpp"
 #include "i2c/i2c.h"
+#include "obc/experiments.hpp"
+#include "obc/telecommands/experiments.hpp"
 #include "obc/telecommands/file_system.hpp"
 #include "obc/telecommands/ping.hpp"
 #include "telecommunication/telecommand_handling.h"
@@ -20,8 +22,9 @@ namespace obc
         /**
          * @brief Initializes @ref Telecommands object
          * @param fs File system
+         * @param experiments Experiments
          */
-        Telecommands(services::fs::IFileSystem& fs);
+        Telecommands(services::fs::IFileSystem& fs, obc::OBCExperiments& experiments);
 
         /**
          * Aggregates all telecommand handlers into single span
@@ -35,8 +38,11 @@ namespace obc
         /** @brief Download file telecommand */
         obc::telecommands::DownladFileTelecommand _downloadFileTelecommand;
 
+        /** @brief Perform detumbling experiment */
+        obc::telecommands::PerformDetumblingExperiment _performDetumblingExperiment;
+
         /** @brief Array containg all telecommand handlers */
-        telecommunication::uplink::IHandleTeleCommand* _telecommands[2];
+        telecommunication::uplink::IHandleTeleCommand* _telecommands[3];
     };
 
     /**
@@ -48,8 +54,9 @@ namespace obc
          * @brief Initializes @ref OBCCommunication object
          * @param[in] i2cBus I2CBus used by low-level comm driver
          * @param[in] fs File system
+         * @param[in] experiments Experiments
          */
-        OBCCommunication(drivers::i2c::II2CBus& i2cBus, services::fs::IFileSystem& fs);
+        OBCCommunication(drivers::i2c::II2CBus& i2cBus, services::fs::IFileSystem& fs, obc::OBCExperiments& experiments);
 
         /**
          * @brief Initializes all communication-related drivers and objects

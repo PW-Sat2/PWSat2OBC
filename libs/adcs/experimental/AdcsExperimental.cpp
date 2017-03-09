@@ -1,18 +1,18 @@
-#include "AdcsExperiment.hpp"
+#include "AdcsExperimental.hpp"
 #include "logger/logger.h"
 #include "system.h"
 
 using namespace std::chrono_literals;
 
-using adcs::AdcsExperiment;
+using adcs::AdcsExperimental;
 
-AdcsExperiment::AdcsExperiment()
+AdcsExperimental::AdcsExperimental()
     : taskHandle(nullptr), //
       currentMode(AdcsExperimentMode::Disabled)
 {
 }
 
-OSResult AdcsExperiment::Initialize()
+OSResult AdcsExperimental::Initialize()
 {
 #if 0
     // TODO enable this at experimental adcs integration
@@ -22,7 +22,7 @@ OSResult AdcsExperiment::Initialize()
 #endif
 }
 
-void AdcsExperiment::HandleCommand()
+void AdcsExperimental::HandleCommand()
 {
     switch (this->currentMode.load())
     {
@@ -38,7 +38,7 @@ void AdcsExperiment::HandleCommand()
     }
 }
 
-std::chrono::milliseconds AdcsExperiment::GetIterationtTime()
+std::chrono::milliseconds AdcsExperimental::GetIterationtTime()
 {
     switch (this->currentMode.load())
     {
@@ -54,9 +54,9 @@ std::chrono::milliseconds AdcsExperiment::GetIterationtTime()
     }
 }
 
-void AdcsExperiment::TaskEntry(void* arg)
+void AdcsExperimental::TaskEntry(void* arg)
 {
-    auto context = static_cast<AdcsExperiment*>(arg);
+    auto context = static_cast<AdcsExperimental*>(arg);
     for (;;)
     {
         LOGF(LOG_LEVEL_TRACE, "[ADCS] Running ADCS loop. Mode: %d", static_cast<int>(context->currentMode.load()));
@@ -64,29 +64,29 @@ void AdcsExperiment::TaskEntry(void* arg)
     }
 }
 
-OSResult AdcsExperiment::EnableSunPointing()
+OSResult AdcsExperimental::EnableSunPointing()
 {
     this->currentMode = AdcsExperimentMode::SunPointing;
     return OSResult::Success;
 }
 
-OSResult AdcsExperiment::DisableSunPointing()
+OSResult AdcsExperimental::DisableSunPointing()
 {
     return TurnOff();
 }
 
-OSResult AdcsExperiment::EnableDetumbling()
+OSResult AdcsExperimental::EnableDetumbling()
 {
     this->currentMode = AdcsExperimentMode::Detumbling;
     return OSResult::Success;
 }
 
-OSResult AdcsExperiment::DisableDetumbling()
+OSResult AdcsExperimental::DisableDetumbling()
 {
     return TurnOff();
 }
 
-OSResult AdcsExperiment::TurnOff()
+OSResult AdcsExperimental::TurnOff()
 {
     this->currentMode = AdcsExperimentMode::Disabled;
     return OSResult::Success;

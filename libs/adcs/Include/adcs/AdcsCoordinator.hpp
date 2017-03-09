@@ -21,11 +21,11 @@ namespace adcs
         /**
          * @brief ctor.
          * @param[in] builtinDetembling_ Reference to the primary detumbling algorithm controller module.
-         * @param[in] customDetumbling_ Reference to the backup detumbling algorithm controller module.
+         * @param[in] experimentalDetumbling_ Reference to the backup detumbling algorithm controller module.
          * @param[in] sunpointAlgorithm_ Reference to the sun pointing algorithm controller module.
          */
         AdcsCoordinator(IDetumblingSupport& builtinDetembling_, //
-            IDetumblingSupport& customDetumbling_,              //
+            IDetumblingSupport& experimentalDetumbling_,        //
             ISunPointingSupport& sunpointAlgorithm_             //
             );
 
@@ -33,7 +33,7 @@ namespace adcs
 
         virtual OSResult EnableBuiltinDetumbling() final override;
 
-        virtual OSResult EnableCustomDetumbling() final override;
+        virtual OSResult EnableExperimentalDetumbling() final override;
 
         virtual OSResult EnableSunPointing() final override;
 
@@ -60,9 +60,9 @@ namespace adcs
         IDetumblingSupport& builtinDetumbling;
 
         /**
-         * @brief Interface of backup adcs algorithm controller.
+         * @brief Interface of experimental adcs algorithm controller.
          */
-        IDetumblingSupport& customDetumbling;
+        IDetumblingSupport& experimentalDetumbling;
 
         /**
          * @brief Interface of sun pointing algorithm controller.

@@ -61,7 +61,7 @@ TEST_F(AdcsPrimaryTaskTest, TestPrimaryDetumblingConditionActivePeriodAdcsAlread
 TEST_F(AdcsPrimaryTaskTest, TestPrimaryDetumblingConditionActivePeriodAdcsIsDoingSomethingElse)
 {
     this->state.Time = 42min;
-    EXPECT_CALL(coordinator, CurrentMode()).WillOnce(Return(adcs::AdcsMode::CustomSunpointing));
+    EXPECT_CALL(coordinator, CurrentMode()).WillOnce(Return(adcs::AdcsMode::ExperimentalSunpointing));
     ASSERT_THAT(this->primaryAction.condition(this->state, this->primaryAction.param), Eq(false));
 }
 
@@ -99,7 +99,7 @@ TEST_F(AdcsPrimaryTaskTest, TestPrimaryDetumblingRepeatedFailure)
 
 TEST_F(AdcsPrimaryTaskTest, TestAdcsUpdateTask)
 {
-    EXPECT_CALL(coordinator, CurrentMode()).WillOnce(Return(adcs::AdcsMode::CustomSunpointing));
+    EXPECT_CALL(coordinator, CurrentMode()).WillOnce(Return(adcs::AdcsMode::ExperimentalSunpointing));
     this->updateStep.updateProc(this->state, this->updateStep.param);
-    ASSERT_THAT(this->state.AdcsMode, Eq(adcs::AdcsMode::CustomSunpointing));
+    ASSERT_THAT(this->state.AdcsMode, Eq(adcs::AdcsMode::ExperimentalSunpointing));
 }

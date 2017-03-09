@@ -10,6 +10,7 @@ target_link_libraries(${NAME}
     fs
     experiments
     exp_fibo
+    exp_adcs
 )
 
 

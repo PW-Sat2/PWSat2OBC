@@ -23,6 +23,7 @@ set(SOURCES
   base/ReaderTest.cpp
   base/WriterTest.cpp
   base/RapidTest.cpp
+  base/OnLeaveTest.cpp
   MissionPlan/MissionPlanTest.cpp
   MissionPlan/MissionTestHelpers.cpp
   MissionPlan/SailSystemStateTest.cpp
@@ -67,6 +68,7 @@ set(SOURCES
   adcs/AdcsCoordinatorTest.cpp
   Experiments/Fibo/FiboCalculatorTest.cpp
   Experiments/ExperimentTest.cpp
+  Experiments/ADCS/DetumblingExperimentTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
