@@ -82,6 +82,7 @@ set(SOURCES
   ErrorCounterTest.cpp
   FM25W/FM25WDriverTest.cpp
   telecommunication/FrameContentsWriterTest.cpp
+  EPS/EPSDriverTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -134,6 +135,7 @@ target_link_libraries(${NAME}
     adcs
     mission_adcs
     obc_telecommands
+    eps
     rtc
     error_counter
     fm25w
