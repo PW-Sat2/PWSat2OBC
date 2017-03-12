@@ -96,6 +96,20 @@ namespace devices
 
                 return std::chrono::seconds(mktime(&t));
             }
+
+            /**
+             * @brief Checks if the RTC time is valid.
+             * @return True if time is valid, false otherwise.
+             */
+            bool IsValid()
+            {
+                return seconds <= 59 //
+                    && minutes <= 59 //
+                    && hours <= 23   //
+                    && days <= 31    //
+                    && months <= 12  //
+                    && years <= 99;
+            }
         };
 
         /**

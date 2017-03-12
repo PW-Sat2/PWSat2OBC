@@ -87,6 +87,12 @@ namespace mission
             return;
         }
 
+        if (!rtcTime.IsValid())
+        {
+            LOG(LOG_LEVEL_ERROR, "RTC Time is invalid");
+            return;
+        }
+
         auto deltaMcu = time.Value - lastMissionTime.Value;
         auto deltaRtc = rtcTime.ToDuration() - lastExternalClockTime.Value;
 

@@ -238,6 +238,31 @@ TEST_F(TimeTaskTest, CorrectionDoesRunWhenRTCReadFails)
     ASSERT_EQ(mission::TimeCorrectionPeriod, provider.GetCurrentTime().Value);
 }
 
+TEST_F(TimeTaskTest, CorrectionDoesRunWhenRTCReadsInvalidData)
+{
+    auto proxy = InstallProxy(&mock);
+
+    // given
+    // The correct action was run initially
+    SetCurrentTime(0ms);
+    actionDescriptor.Execute(state);
+
+    // when
+    // RTC reads invalid data
+    devices::rtc::RTCTime invalidTime;
+    invalidTime.minutes = 128;
+    rtc.SetTime(invalidTime);
+
+    // And the correct action is run after at least TimeCorrectionPeriod
+    AdvanceTime(mission::TimeCorrectionPeriod);
+
+    actionDescriptor.Execute(state);
+
+    // then
+    // Time provider should not be updated
+    ASSERT_EQ(mission::TimeCorrectionPeriod, provider.GetCurrentTime().Value);
+}
+
 TEST_F(TimeTaskTest, CorrectionDoesRunWhenTimeProviderReadFails)
 {
     auto proxy = InstallProxy(&mock);

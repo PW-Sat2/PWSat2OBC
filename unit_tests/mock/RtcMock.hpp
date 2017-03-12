@@ -35,6 +35,11 @@ class RtcMock : public devices::rtc::IRTC
         fakeTime.hours = timePoint.hour;
     }
 
+    void SetTime(devices::rtc::RTCTime& rtcTime)
+    {
+        fakeTime = rtcTime;
+    }
+
     void AdvanceTime(std::chrono::seconds delta)
     {
         SetTime(fakeTime.ToDuration() + delta);
