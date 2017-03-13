@@ -11,64 +11,6 @@ using drivers::i2c::II2CBus;
 using drivers::i2c::I2CResult;
 using namespace std::chrono_literals;
 
-#define EPS_ADDRESS 12
-
-typedef enum {
-    EPS_LCL_SAIL_0 = 0,
-    EPS_LCL_SAIL_1 = 1,
-} EpsLcl;
-
-static II2CBus* i2c;
-
-static bool epsControlLCL(EpsLcl lcl, uint8_t state)
-{
-    uint8_t data[] = {static_cast<uint8_t>(1 + lcl), state};
-    const I2CResult result = i2c->Write(EPS_ADDRESS, data);
-
-    if (result != I2CResult::OK)
-    {
-        LOGF(LOG_LEVEL_ERROR, "[EPS] ControlLCL %d to state %d failed: %d", lcl, state, num(result));
-    }
-
-    return result == I2CResult::OK;
-}
-
-bool EpsOpenSail(void)
-{
-    LOG(LOG_LEVEL_INFO, "[EPS] Opening sail");
-
-    if (!epsControlLCL(EPS_LCL_SAIL_0, true))
-    {
-        return false;
-    }
-    System::SleepTask(100ms);
-
-    if (!epsControlLCL(EPS_LCL_SAIL_0, false))
-    {
-        return false;
-    }
-    System::SleepTask(100ms);
-
-    if (!epsControlLCL(EPS_LCL_SAIL_1, true))
-    {
-        return false;
-    }
-    System::SleepTask(100ms);
-
-    if (!epsControlLCL(EPS_LCL_SAIL_1, false))
-    {
-        return false;
-    }
-    System::SleepTask(100ms);
-
-    return true;
-}
-
-void EpsInit(II2CBus* bus)
-{
-    i2c = bus;
-}
-
 namespace devices
 {
     namespace eps

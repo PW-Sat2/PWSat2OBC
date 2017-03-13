@@ -7,9 +7,6 @@
 #include "hk.hpp"
 #include "i2c/forward.h"
 
-void EpsInit(drivers::i2c::II2CBus* bus);
-bool EpsOpenSail(void);
-
 namespace devices
 {
     namespace eps

@@ -25,7 +25,7 @@ class System:
             self.obc.power_on(clean_state=True)
 
     def _setup_devices(self):
-        self.eps = EPSDevice()
+        self.eps = EPS()
         self.comm = Comm()
         self.transmitter = self.comm.transmitter
         self.receiver = self.comm.receiver
@@ -34,8 +34,8 @@ class System:
         self.imtq = Imtq()
         self.rtc = RTCDevice()
 
-        self.i2c.add_bus_device(self.eps)
-        self.i2c.add_pld_device(self.eps)
+        self.i2c.add_bus_device(self.eps.controller_a)
+        self.i2c.add_pld_device(self.eps.controller_b)
         self.i2c.add_bus_device(self.transmitter)
         self.i2c.add_bus_device(self.receiver)
         self.i2c.add_bus_device(self.primary_antenna)
