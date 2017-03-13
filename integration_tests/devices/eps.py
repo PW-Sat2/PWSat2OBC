@@ -5,7 +5,7 @@ import i2cMock
 from i2cMock import I2CDevice
 from threading import Event
 
-EPS_DEVICE_ADDRESS = 12
+EPS_DEVICE_ADDRESS = 0x36
 
 
 class LCLTimeoutException(Exception):
@@ -84,7 +84,7 @@ class EPSDevice(I2CDevice):
 
         self.log.debug("LCL_SAIL_1: %s" % str(onoff))
 
-    @i2cMock.command([0xA0])
+    @i2cMock.command([0xE0])
     def trigger_system_power_cycle(self):
         self.log.info("Triggered system power cycle")
         self.power_cycle.set()
