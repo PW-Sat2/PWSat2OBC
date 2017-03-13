@@ -48,7 +48,7 @@ class System:
         self.sys_bus.add_device(self.receiver)
         self.sys_bus.add_device(self.primary_antenna)
         self.payload_bus.add_device(self.backup_antenna)
-        self.sys_bus.add_device(self.rtc)
+        self.payload_bus.add_device(self.rtc)
 
     def close(self):
         self.sys_bus.stop()
