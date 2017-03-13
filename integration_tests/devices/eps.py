@@ -5,7 +5,9 @@ import i2cMock
 from i2cMock import I2CDevice
 from threading import Event
 
-EPS_DEVICE_ADDRESS = 0x36
+from utils import call
+
+EPS_DEVICE_ADDRESS = 0x35
 
 
 class LCLTimeoutException(Exception):
@@ -23,6 +25,7 @@ class LCL:
         self.changes = Queue()
         self.is_on = False
         self.was_on = False
+        self.on_enable = None
 
     def on(self):
         self.is_on = True
@@ -32,6 +35,7 @@ class LCL:
         self.off_event.clear()
 
         self.changes.put(True)
+        call(self.on_enable, True)
 
     def off(self):
         self.is_on = False
@@ -56,41 +60,94 @@ class LCL:
             raise LCLTimeoutException("off")
 
 
-class EPSDevice(I2CDevice):
+class BurnSwitch:
     def __init__(self):
-        super(EPSDevice, self).__init__(EPS_DEVICE_ADDRESS)
+        self.on_enable = None
 
-        self.log = logging.getLogger("EPS")
+    def enable(self):
+        call(self.on_enable, True)
 
-        self.sail0 = LCL()
-        self.sail1 = LCL()
-        self.power_cycle = Event()
 
-    @i2cMock.command([0x01])
-    def lcl_sail_0(self, onoff):
-        if onoff == 1:
-            self.sail0.on()
-        else:
-            self.sail0.off()
+class EPSControllerA(I2CDevice):
+    def __init__(self, eps):
+        super(EPSControllerA, self).__init__(0x35)
+        self._log = logging.getLogger("EPS.B")
+        self._eps = eps
 
-        self.log.debug("LCL_SAIL_0: %s" % str(onoff))
-
-    @i2cMock.command([0x02])
-    def lcl_sail_1(self, onoff):
-        if onoff == 1:
-            self.sail1.on()
-        else:
-            self.sail1.off()
-
-        self.log.debug("LCL_SAIL_1: %s" % str(onoff))
+        self._lcls = [eps.TKmain, eps.SunS, eps.CamNadir, eps.CamWing, eps.SENS, eps.ANTenna]
+        self._burn_switches = [eps.SAILmain, eps.SADSmain]
 
     @i2cMock.command([0xE0])
-    def trigger_system_power_cycle(self):
-        self.log.info("Triggered system power cycle")
-        self.power_cycle.set()
+    def _power_cycle(self):
+        self._log.info("Triggered power cycle")
+        self._eps.power_cycle()
 
-    def wait_for_sail_open(self):
-        self.sail0.wait_for_on(1)
-        self.sail0.wait_for_off(1)
-        self.sail1.wait_for_on(1)
-        self.sail1.wait_for_off(1)
+    @i2cMock.command([0xE1])
+    def _enable_lcl(self, lcl_id):
+        self._log.info("Enable LCL(%d)", lcl_id)
+        self._lcls[lcl_id - 1].on()
+
+    @i2cMock.command([0xE2])
+    def _disable_lcl(self, lcl_id):
+        self._log.info("Disable LCL(%d)", lcl_id)
+        self._lcls[lcl_id - 1].off()
+
+    @i2cMock.command([0xE3])
+    def _enable_burn_switch(self, switch_id):
+        self._log.info("Enable BURN switch(%d)", switch_id)
+        self._burn_switches[switch_id - 1].enable()
+
+
+class EPSControllerB(I2CDevice):
+    def __init__(self, eps):
+        super(EPSControllerB, self).__init__(0x36)
+        self._log = logging.getLogger("EPS.A")
+        self._eps = eps
+
+        self._lcls = [eps.TKred, eps.ANTennaRed]
+        self._burn_switches = [eps.SAILred, eps.SADSred]
+
+    @i2cMock.command([0xE0])
+    def _power_cycle(self):
+        self._log.info("Triggered power cycle")
+        self._eps.power_cycle()
+
+    @i2cMock.command([0xE1])
+    def _enable_lcl(self, lcl_id):
+        self._log.info("Enable LCL(%d)", lcl_id)
+        self._lcls[lcl_id - 1].on()
+
+    @i2cMock.command([0xE2])
+    def _disable_lcl(self, lcl_id):
+        self._log.info("Disable LCL(%d)", lcl_id)
+        self._lcls[lcl_id - 1].off()
+
+    @i2cMock.command([0xE3])
+    def _enable_burn_switch(self, switch_id):
+        self._log.info("Enable BURN switch(%d)", switch_id)
+        self._burn_switches[switch_id - 1].enable()
+
+
+class EPS:
+    def __init__(self):
+        self.TKmain = LCL()
+        self.SunS = LCL()
+        self.CamNadir = LCL()
+        self.CamWing = LCL()
+        self.SENS = LCL()
+        self.ANTenna = LCL()
+        self.TKred = LCL()
+        self.ANTennaRed = LCL()
+
+        self.SAILmain = BurnSwitch()
+        self.SAILred = BurnSwitch()
+        self.SADSmain = BurnSwitch()
+        self.SADSred = BurnSwitch()
+
+        self.on_power_cycle = None
+
+        self.controller_a = EPSControllerA(self)
+        self.controller_b = EPSControllerB(self)
+
+    def power_cycle(self):
+        call(self.on_power_cycle, None)

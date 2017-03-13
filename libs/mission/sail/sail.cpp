@@ -1,12 +1,11 @@
 #include "mission/sail.hpp"
-#include "eps/eps.h"
 #include "state/struct.h"
 
 using namespace std::chrono_literals;
 
 namespace mission
 {
-    SailTask::SailTask(bool isSailOpened) : state(isSailOpened)
+    SailTask::SailTask(std::tuple<bool, services::power::IPowerControl&> args) : state(std::get<0>(args)), _powerControl(&std::get<1>(args))
     {
     }
 
@@ -59,6 +58,6 @@ namespace mission
         auto This = static_cast<SailTask*>(param);
         UNREFERENCED_PARAMETER(state);
         This->state = true;
-        EpsOpenSail();
+        This->_powerControl->OpenSail();
     }
 }

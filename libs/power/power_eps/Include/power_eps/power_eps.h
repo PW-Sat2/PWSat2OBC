@@ -14,6 +14,7 @@ namespace services
             EPSPowerControl(devices::eps::EPSDriver& eps);
 
             virtual void PowerCycle() override;
+            virtual void OpenSail() override;
 
           private:
             devices::eps::EPSDriver& _eps;

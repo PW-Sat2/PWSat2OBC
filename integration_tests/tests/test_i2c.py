@@ -3,6 +3,7 @@ from time import sleep
 from devices import EchoDevice, TimeoutDevice
 from system import auto_comm_handling
 from tests.base import BaseTest
+from utils import TestEvent
 
 
 class I2CTest(BaseTest):
@@ -69,9 +70,13 @@ class I2CTest(BaseTest):
         self.assertEqual(response, 'Error -1')
 
     def test_bus_latch_should_trigger_system_power_cycle(self):
-        self.system.obc.i2c_transfer('wr', 'system', 0x14, chr(0x2))
+        self.system.obc.i2c_transfer('wr', 'payload', 0x14, chr(0x2))
 
-        self.assertTrue(self.system.eps.power_cycle.wait(5), "Power cycle should be triggered")
+        power_cycle_trigger = TestEvent()
+
+        self.system.eps.on_power_cycle = power_cycle_trigger.set()
+
+        self.assertTrue(power_cycle_trigger.wait_for_change(15), "Power cycle should be triggered")
 
         self.system.restart()
 

@@ -17,6 +17,7 @@ namespace services
         struct IPowerControl
         {
             virtual void PowerCycle() = 0;
+            virtual void OpenSail() = 0;
         };
     }
 }

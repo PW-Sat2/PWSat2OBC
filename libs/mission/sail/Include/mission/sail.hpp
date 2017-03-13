@@ -3,7 +3,9 @@
 
 #pragma once
 
+#include <tuple>
 #include "mission/base.hpp"
+#include "power/power.h"
 #include "state/struct.h"
 
 namespace mission
@@ -35,7 +37,7 @@ namespace mission
          * To support single argument construction.
          * @param[in] isSailOpened Initial sail deployment state.
          */
-        SailTask(bool isSailOpened);
+        SailTask(std::tuple<bool, services::power::IPowerControl&> args);
 
         /**
          * @brief Prepares action descriptor for this task.
@@ -86,6 +88,8 @@ namespace mission
         static UpdateResult UpdateProc(SystemState& state, void* param);
 
         bool state;
+
+        services::power::IPowerControl* _powerControl;
     };
 
     inline void SailTask::SetState(bool newState)
