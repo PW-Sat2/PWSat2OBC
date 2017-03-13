@@ -64,19 +64,6 @@ bool EpsOpenSail(void)
     return true;
 }
 
-bool EpsTriggerSystemPowerCycle(void)
-{
-    uint8_t data[] = {0xA0};
-    const I2CResult result = i2c->Write(EPS_ADDRESS, data);
-
-    if (result != I2CResult::OK)
-    {
-        LOGF(LOG_LEVEL_ERROR, "[EPS] EpsTriggerSystemPowerCycle failed: %d", num(result));
-    }
-
-    return result == I2CResult::OK;
-}
-
 void EpsInit(II2CBus* bus)
 {
     i2c = bus;

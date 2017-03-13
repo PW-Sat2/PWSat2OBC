@@ -10,17 +10,16 @@ EXTERNC_BEGIN
  * @{
  */
 
-/**
- * @brief Power control API
- */
-typedef struct _PowerControl
+namespace services
 {
-    /** @brief Extra value used by power control implementation */
-    void* Extra;
-
-    /** @brief Pointer to function that triggers system power cycle */
-    void (*TriggerSystemPowerCycle)(struct _PowerControl* powerControl);
-} PowerControl;
+    namespace power
+    {
+        struct IPowerControl
+        {
+            virtual void PowerCycle() = 0;
+        };
+    }
+}
 
 /** @} */
 

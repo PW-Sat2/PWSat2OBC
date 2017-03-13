@@ -5,15 +5,17 @@
 #include "power_eps.h"
 #include "system.h"
 
-static void TriggerSystemPowerCycle(PowerControl* powerControl)
+namespace services
 {
-    UNREFERENCED_PARAMETER(powerControl);
+    namespace power
+    {
+        EPSPowerControl::EPSPowerControl(devices::eps::EPSDriver& eps) : _eps(eps)
+        {
+        }
 
-    EpsTriggerSystemPowerCycle();
-}
-
-void EPSPowerControlInitialize(PowerControl* powerControl)
-{
-    powerControl->Extra = NULL;
-    powerControl->TriggerSystemPowerCycle = TriggerSystemPowerCycle;
+        void EPSPowerControl::PowerCycle()
+        {
+            this->_eps.PowerCycle();
+        }
+    }
 }
