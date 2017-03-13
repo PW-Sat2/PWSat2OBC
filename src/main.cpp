@@ -199,8 +199,6 @@ int main(void)
 
     EpsInit(&Main.Hardware.I2C.Fallback);
 
-    EPSPowerControlInitialize(&Main.PowerControlInterface);
-
     Main.Initialize();
 
     InitializeTerminal();

@@ -4,10 +4,21 @@
 #include "eps/eps.h"
 #include "power/power.h"
 
-EXTERNC_BEGIN
+namespace services
+{
+    namespace power
+    {
+        class EPSPowerControl final : public IPowerControl
+        {
+          public:
+            EPSPowerControl(devices::eps::EPSDriver& eps);
 
-void EPSPowerControlInitialize(PowerControl* powerControl);
+            virtual void PowerCycle() override;
 
-EXTERNC_END
+          private:
+            devices::eps::EPSDriver& _eps;
+        };
+    }
+}
 
 #endif /* LIBS_POWER_POWER_EPS_INCLUDE_EPS_POWER_EPSPOWER_C_ */

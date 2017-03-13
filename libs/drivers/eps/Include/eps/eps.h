@@ -10,8 +10,6 @@
 void EpsInit(drivers::i2c::II2CBus* bus);
 bool EpsOpenSail(void);
 
-bool EpsTriggerSystemPowerCycle(void);
-
 namespace devices
 {
     namespace eps

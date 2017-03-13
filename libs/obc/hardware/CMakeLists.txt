@@ -13,6 +13,7 @@ target_link_libraries(${NAME}
 	spi
 	power
 	burtc
+	eps
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
