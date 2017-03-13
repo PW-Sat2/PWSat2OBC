@@ -18,7 +18,6 @@
 #include "base/ecc.h"
 #include "base/os.h"
 #include "dmadrv.h"
-#include "eps/eps.h"
 #include "fs/fs.h"
 #include "gpio/gpio.h"
 #include "i2c/i2c.h"
@@ -44,7 +43,7 @@ static constexpr std::uint32_t PersistentStateBaseAddress = 4;
 OBC Main;
 mission::ObcMission Mission(std::tie(Main.timeProvider, Main.rtc),
     Main.antennaDriver,
-    false,
+    std::tuple<bool, services::power::IPowerControl&>(false, Main.PowerControlInterface),
     Main.adcs.GetAdcsController(),
     Main.Experiments.ExperimentsController,
     Main.Communication.CommDriver,
@@ -192,8 +191,6 @@ int main(void)
     DMADRV_Init();
 
     LeuartLineIOInit(&Main.IO);
-
-    EpsInit(&Main.Hardware.I2C.Fallback);
 
     Main.Initialize();
 

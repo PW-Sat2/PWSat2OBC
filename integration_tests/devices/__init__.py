@@ -1,4 +1,4 @@
-from eps import EPSDevice
+from eps import EPS
 from comm import *
 from antenna import *
 from test_devices import EchoDevice, TimeoutDevice
@@ -6,7 +6,7 @@ from imtq import *
 from rtc import RTCDevice
 
 __all__ = [
-    'EPSDevice',
+    'EPS',
     'DownlinkFrame',
     'UplinkFrame',
     'TransmitterDevice',
