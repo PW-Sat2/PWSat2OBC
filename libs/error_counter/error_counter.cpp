@@ -34,5 +34,9 @@ namespace error_counter
 
     ErrorCounting::ErrorCounting(IErrorCountingConfigration& config) : _config(config), _callback(nullptr)
     {
+        for (auto& c : this->_counters)
+        {
+            c = 0;
+        }
     }
 }

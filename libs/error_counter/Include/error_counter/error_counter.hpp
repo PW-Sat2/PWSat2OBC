@@ -4,6 +4,7 @@
 #include <array>
 #include <atomic>
 #include <cstdint>
+#include "utils.h"
 
 namespace error_counter
 {
@@ -59,7 +60,7 @@ namespace error_counter
      * On error, it is incremented by value retrieved from config interface
      * When error limit (also configurable) is reach, callback is invoked
      */
-    class ErrorCounting
+    class ErrorCounting final
     {
       public:
         /** @brief Maximum number of supported devices */
@@ -111,18 +112,18 @@ namespace error_counter
      * @brief Helper class for accessing error counter of single device
      * @tparam Device Device ID
      */
-    template <Device Device> class ErrorCounter
+    template <Device Device> class ErrorCounter final
     {
       public:
         /** @brief Error counting mechanism */
         ErrorCounter(ErrorCounting& counting);
 
         /** @brief Current counter value */
-        CounterValue Current() const;
+        inline CounterValue Current() const;
         /** @brief Records single failure */
-        void Failure();
+        inline void Failure();
         /** @brief Records single success */
-        void Success();
+        inline void Success();
 
       private:
         /** @brief Error counting */

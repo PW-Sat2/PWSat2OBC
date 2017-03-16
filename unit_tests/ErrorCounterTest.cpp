@@ -1,5 +1,6 @@
 #include <array>
 #include <cstdint>
+#include <iostream>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "base/os.h"
@@ -84,13 +85,21 @@ TEST_F(ErrorCounterTest, ShouldTriggerCallbackWhenFailureLimitIsReach)
 
     ON_CALL(this->_config, Limit(DeviceA)).WillByDefault(Return(7));
 
+    std::cout << (int)this->_deviceA.Current() << std::endl;
     this->_deviceA.Failure();
+    std::cout << (int)this->_deviceA.Current() << std::endl;
     this->_deviceA.Failure();
+    std::cout << (int)this->_deviceA.Current() << std::endl;
     this->_deviceA.Failure();
+    std::cout << (int)this->_deviceA.Current() << std::endl;
     this->_deviceA.Failure();
+    std::cout << (int)this->_deviceA.Current() << std::endl;
     this->_deviceA.Failure();
+    std::cout << (int)this->_deviceA.Current() << std::endl;
     this->_deviceA.Failure();
+    std::cout << (int)this->_deviceA.Current() << std::endl;
     this->_deviceA.Failure();
+    std::cout << (int)this->_deviceA.Current() << std::endl;
 }
 
 TEST_F(ErrorCounterTest, ShouldUpdateCounterBasedOnFlag)
