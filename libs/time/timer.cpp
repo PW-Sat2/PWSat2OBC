@@ -69,19 +69,23 @@ bool TimeProvider::Initialize(TimePassedCallbackType timePassedCallback, void* t
 
 void TimeProvider::AdvanceTime(milliseconds delta)
 {
-    if (OS_RESULT_FAILED(System::TakeSemaphore(timerLock, InfiniteTimeout)))
+    struct TimerState state;
+
     {
-        LOG(LOG_LEVEL_ERROR, "Unable to acquire timer lock.");
-        return;
+        Lock lock(this->timerLock, InfiniteTimeout);
+        if (!lock())
+        {
+            LOG(LOG_LEVEL_ERROR, "Unable to acquire timer lock.");
+            return;
+        }
+
+        CurrentTime = CurrentTime + delta;
+        NotificationTime = NotificationTime + delta;
+        PersistanceTime = PersistanceTime + delta;
+
+        state = BuildTimerState();
     }
 
-    CurrentTime = CurrentTime + delta;
-    NotificationTime = NotificationTime + delta;
-    PersistanceTime = PersistanceTime + delta;
-
-    struct TimerState state = BuildTimerState();
-
-    System::GiveSemaphore(timerLock);
     ProcessChange(state);
 }
 
@@ -92,18 +96,26 @@ void TimeProvider::Invoke(std::chrono::milliseconds interval)
 
 bool TimeProvider::SetCurrentTime(TimePoint pointInTime)
 {
-    const milliseconds span = TimePointToTimeSpan(pointInTime);
-    if (OS_RESULT_FAILED(System::TakeSemaphore(timerLock, InfiniteTimeout)))
-    {
-        LOG(LOG_LEVEL_ERROR, "Unable to acquire timer lock.");
-        return false;
-    }
+    return SetCurrentTime(TimePointToTimeSpan(pointInTime));
+}
 
-    CurrentTime = span;
-    NotificationTime = NotificationPeriod + 1ms;
-    PersistanceTime = SavePeriod + 1ms;
-    struct TimerState state = BuildTimerState();
-    System::GiveSemaphore(timerLock);
+bool TimeProvider::SetCurrentTime(milliseconds duration)
+{
+    struct TimerState state;
+
+    {
+        Lock lock(this->timerLock, InfiniteTimeout);
+        if (!lock())
+        {
+            LOG(LOG_LEVEL_ERROR, "Unable to acquire timer lock.");
+            return false;
+        }
+
+        CurrentTime = duration;
+        NotificationTime = NotificationPeriod + 1ms;
+        PersistanceTime = SavePeriod + 1ms;
+        state = BuildTimerState();
+    }
 
     ProcessChange(state);
     return true;
@@ -111,15 +123,14 @@ bool TimeProvider::SetCurrentTime(TimePoint pointInTime)
 
 Option<milliseconds> TimeProvider::GetCurrentTime()
 {
-    if (OS_RESULT_FAILED(System::TakeSemaphore(timerLock, InfiniteTimeout)))
+    Lock lock(this->timerLock, InfiniteTimeout);
+    if (!lock())
     {
         LOG(LOG_LEVEL_ERROR, "Unable to acquire timer lock.");
         return None<milliseconds>();
     }
 
     milliseconds currentTime = CurrentTime;
-
-    System::GiveSemaphore(timerLock);
     return Some(currentTime);
 }
 
@@ -136,7 +147,8 @@ Option<TimePoint> TimeProvider::GetCurrentMissionTime()
 
 void TimeProvider::ProcessChange(TimerState state)
 {
-    if (OS_RESULT_FAILED(System::TakeSemaphore(notificationLock, InfiniteTimeout)))
+    Lock lock(this->notificationLock, InfiniteTimeout);
+    if (!lock())
     {
         LOG(LOG_LEVEL_ERROR, "Unable to acquire notification lock.");
         return;
@@ -144,8 +156,6 @@ void TimeProvider::ProcessChange(TimerState state)
 
     SendTimeNotification(state);
     SaveTime(state);
-
-    System::GiveSemaphore(notificationLock);
 }
 
 TimerState TimeProvider::BuildTimerState()

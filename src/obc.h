@@ -7,7 +7,7 @@
 #include <gsl/span>
 
 #include "adcs/AdcsCoordinator.hpp"
-#include "adcs/AdcsExperiment.hpp"
+#include "adcs/AdcsExperimental.hpp"
 #include "antenna/driver.h"
 #include "antenna/miniport.h"
 #include "base/os.h"
@@ -23,6 +23,7 @@
 #include "obc/experiments.hpp"
 #include "obc/hardware.h"
 #include "obc/storage.h"
+#include "rtc/rtc.hpp"
 #include "spi/efm.h"
 #include "storage/nand_driver.h"
 #include "terminal/terminal.h"
@@ -77,9 +78,6 @@ struct OBC
     /** @brief Power control interface */
     PowerControl PowerControlInterface;
 
-    /** @brief Overall satellite <-> Earth communication */
-    obc::OBCCommunication Communication;
-
     /** @brief OBC storage */
     obc::OBCStorage Storage;
 
@@ -92,8 +90,14 @@ struct OBC
     /** @brief Experiments */
     obc::OBCExperiments Experiments;
 
+    /** @brief Overall satellite <-> Earth communication */
+    obc::OBCCommunication Communication;
+
     /** @brief Terminal object. */
     Terminal terminal;
+
+    /** @brief External Real Time Clock.  */
+    devices::rtc::RTCObject rtc;
 };
 
 /** @brief Global OBC object. */

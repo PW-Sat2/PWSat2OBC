@@ -19,6 +19,7 @@ void OBCGetState(std::uint16_t argc, char* argv[]);
 void FSListFiles(std::uint16_t argc, char* argv[]);
 void FSWriteFile(std::uint16_t argc, char* argv[]);
 void FSReadFile(std::uint16_t argc, char* argv[]);
+void RemoveFile(uint16_t argc, char* argv[]);
 void MountList(std::uint16_t argc, char* argv[]);
 void MakeDirectory(std::uint16_t argc, char* argv[]);
 void EraseFlash(std::uint16_t argc, char* argv[]);
@@ -52,5 +53,7 @@ void ResetHandler(std::uint16_t argc, char* argv[]);
 void RTCTest(std::uint16_t argc, char* argv[]);
 
 void ImtqDriver(uint16_t argc, char* argv[]);
+
+void FRAM(std::uint16_t argc, char* argv[]);
 
 #endif

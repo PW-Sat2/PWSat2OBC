@@ -2,10 +2,11 @@
 
 namespace obc
 {
-    OBCExperiments::OBCExperiments(services::fs::IFileSystem& fs)
+    OBCExperiments::OBCExperiments(services::fs::IFileSystem& fs, adcs::IAdcsCoordinator& adcs, services::time::TimeProvider& time)
         :           //
           Fibo(fs), //
-          Experiments{&Fibo}
+          Detumbling(adcs, time),
+          Experiments{&Fibo, &Detumbling}
     {
     }
 

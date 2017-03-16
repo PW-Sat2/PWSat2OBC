@@ -16,3 +16,7 @@ SPIExpectSelected SPIInterfaceMock::ExpectSelected()
 {
     return SPIExpectSelected(*this);
 }
+
+SPIInterfaceMock::SPIInterfaceMock()
+{
+}

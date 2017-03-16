@@ -12,7 +12,7 @@ struct AdcsCoordinatorMock : adcs::IAdcsCoordinator
 
     MOCK_METHOD0(EnableBuiltinDetumbling, OSResult());
 
-    MOCK_METHOD0(EnableCustomDetumbling, OSResult());
+    MOCK_METHOD0(EnableExperimentalDetumbling, OSResult());
 
     MOCK_METHOD0(EnableSunPointing, OSResult());
 

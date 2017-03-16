@@ -4,7 +4,7 @@
 #pragma once
 
 #include "adcs/AdcsCoordinator.hpp"
-#include "adcs/AdcsExperiment.hpp"
+#include "adcs/AdcsExperimental.hpp"
 #include "adcs/BuiltinDetumbling.hpp"
 
 namespace obc
@@ -46,7 +46,7 @@ namespace obc
         /**
          * @brief Controller of experimental adcs implementation.
          */
-        adcs::AdcsExperiment experimentalAdcs;
+        adcs::AdcsExperimental experimentalAdcs;
 
         /**
          * @brief Adcs subsystem controller.

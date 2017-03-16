@@ -14,7 +14,7 @@
 #include <task.h>
 
 #include "SwoEndpoint/SwoEndpoint.h"
-#include "adcs/AdcsExperiment.hpp"
+#include "adcs/AdcsExperimental.hpp"
 #include "base/ecc.h"
 #include "base/os.h"
 #include "dmadrv.h"
@@ -41,8 +41,11 @@ using services::time::TimeProvider;
 using namespace std::chrono_literals;
 
 OBC Main;
-mission::ObcMission Mission(
-    Main.timeProvider, Main.antennaDriver, false, Main.adcs.GetAdcsController(), Main.Experiments.ExperimentsController);
+mission::ObcMission Mission(std::tie(Main.timeProvider, Main.rtc),
+    Main.antennaDriver,
+    false,
+    Main.adcs.GetAdcsController(),
+    Main.Experiments.ExperimentsController);
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
@@ -135,8 +138,6 @@ static void ObcInitTask(void* param)
     ClearState(obc);
 
     obc->fs.MakeDirectory("/a");
-    obc->fs.MakeDirectory("/b");
-    obc->fs.MakeDirectory("/c");
 
     if (!obc->timeProvider.Initialize(nullptr, nullptr))
     {
@@ -211,7 +212,7 @@ int main(void)
     Main.Hardware.Pins.Led1.High();
 
     System::CreateTask(BlinkLed0, "Blink0", 512, NULL, TaskPriority::P1, NULL);
-    System::CreateTask(ObcInitTask, "Init", 3_KB, &Main, TaskPriority::Highest, &Main.initTask);
+    System::CreateTask(ObcInitTask, "Init", 2_KB, &Main, TaskPriority::Highest, &Main.initTask);
 
     System::RunScheduler();
 

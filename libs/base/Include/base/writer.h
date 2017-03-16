@@ -77,6 +77,14 @@ class Writer final
     bool WriteWordLE(std::uint16_t word);
 
     /**
+     * @brief Writes single 16 bit word with big-endian memory orientation to the buffer
+     * and advances the current buffer position to the next unused byte.
+     * @param[in] word Word that should be added to writer output using big endian byte ordering.
+     * @return Operation status.
+     */
+    bool WriteWordBE(std::uint16_t word);
+
+    /**
      * @brief Writes single 32 bit word with little-endian memory orientation to the buffer
      * and advances the current buffer position to the next unused byte.
      * @param[in] dword Doubleword that should be added to writer output using little endian byte ordering.

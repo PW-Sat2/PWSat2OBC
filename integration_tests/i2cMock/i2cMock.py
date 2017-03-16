@@ -29,6 +29,9 @@ def command(bytes):
 
 class I2CDevice(object):
     def __init__(self, address):
+        if address >= 0x80:
+            raise Exception("I2C address cannot be longer than 7 bits")
+
         self.address = address
         self.handlers = self._init_handlers()
         self.response = None
@@ -74,7 +77,7 @@ class MissingDevice(I2CDevice):
 
     @command([])
     def catch_all(self, *data):
-        self._log.error('Missing handler for 0x{}'.format(self.address, binascii.hexlify(bytearray(data))))
+        self._log.error('Missing handler for 0x{}'.format(binascii.hexlify(bytearray(data))))
         return [0xCC]
 
 
@@ -143,7 +146,7 @@ class I2CMock(object):
         self._active = True
 
     def add_device(self, device):
-        self._devices[2*device.address] = device
+        self._devices[device.address] = device
 
     def stop(self):
         self._log.debug('Requesting stop')
@@ -228,7 +231,7 @@ class I2CMock(object):
         raise DeviceMockStopped()
 
     def _device_command_write(self, address, *data):
-        address = ord(address)
+        address = ord(address) / 2
         data = [ord(c) for c in data]
 
         self._log.info('Device(%X) write(%s)', address, hex_data(data))

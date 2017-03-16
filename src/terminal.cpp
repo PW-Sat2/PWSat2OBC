@@ -44,7 +44,10 @@ static const TerminalCommandDescription commands[] = {{"ping", PingHandler},
     {"antenna_get_telemetry", AntennaGetTelemetry},
     {"antenna_reset", AntennaReset},
     {"reset", ResetHandler},
-    {"rtc", RTCTest}};
+    {"rtc", RTCTest},
+    {"rm", RemoveFile},
+    {"fram", FRAM}
+};
 
 void InitializeTerminal(void)
 {

@@ -45,6 +45,7 @@ set(SOURCES
   base/ReaderTest.cpp
   base/WriterTest.cpp
   base/RapidTest.cpp
+  base/OnLeaveTest.cpp
   MissionPlan/MissionPlanTest.cpp
   MissionPlan/MissionTestHelpers.cpp
   MissionPlan/SailSystemStateTest.cpp
@@ -64,6 +65,7 @@ set(SOURCES
   time/timer.cpp
   time/persistance.cpp
   time/SmartWait.cpp
+  mock/RtcMock.hpp
   antenna/miniport.cpp
   antenna/antenna.cpp
   SPI/SPIDriverTest.cpp
@@ -71,6 +73,8 @@ set(SOURCES
   adcs/AdcsCoordinatorTest.cpp
   Experiments/Fibo/FiboCalculatorTest.cpp
   Experiments/ExperimentTest.cpp
+  Experiments/ADCS/DetumblingExperimentTest.cpp
+  FM25W/FM25WDriverTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -123,6 +127,8 @@ target_link_libraries(${NAME}
     adcs
     mission_adcs
     obc_telecommands
+    rtc
+    fm25w
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})

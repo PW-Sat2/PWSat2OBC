@@ -11,17 +11,17 @@
 namespace adcs
 {
     /**
-     * @brief This class controls both backup detumbling & sun pointing algorithms.
+     * @brief This class controls both experiment detumbling & sun pointing algorithms.
      * @ingroup adcs
      *
      * This module creates its own system task that executes the requested algorithm in it completely asynchronously
      * in regards to the rest of the system.
      */
-    class AdcsExperiment final : public IDetumblingSupport, public ISunPointingSupport
+    class AdcsExperimental final : public IDetumblingSupport, public ISunPointingSupport
     {
       public:
         /** @brief ctor. */
-        AdcsExperiment();
+        AdcsExperimental();
 
         /**
          * @brief Initializes this module.

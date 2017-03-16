@@ -24,7 +24,7 @@ class Test_Comm(BaseTest):
     def test_should_initialize_hardware(self):
         event = TestEvent()
         self.system.comm.on_hardware_reset = event.set
-        self.system.obc.power_on()
+        self.startup()
         self.assertTrue(event.wait_for_change(1))
 
     def test_transmitter_reset(self):

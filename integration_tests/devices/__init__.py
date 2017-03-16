@@ -3,6 +3,7 @@ from comm import *
 from antenna import *
 from test_devices import EchoDevice, TimeoutDevice
 from imtq import *
+from rtc import RTCDevice
 
 __all__ = [
     'EPSDevice',
@@ -20,5 +21,6 @@ __all__ = [
     'BaudRate',
     'TransmitterTelemetry',
     'ReceiverTelemetry',
-    'Antenna'
+    'Antenna',
+    "RTCDevice"
 ]
