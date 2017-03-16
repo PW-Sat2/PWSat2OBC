@@ -29,6 +29,9 @@ def command(bytes):
 
 class I2CDevice(object):
     def __init__(self, address):
+        if address >= 0x80:
+            raise Exception("I2C address cannot be longer than 7 bits")
+
         self.address = address
         self.handlers = self._init_handlers()
         self.response = None
