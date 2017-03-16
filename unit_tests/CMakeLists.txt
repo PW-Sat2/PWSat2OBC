@@ -65,6 +65,7 @@ set(SOURCES
   time/timer.cpp
   time/persistance.cpp
   time/SmartWait.cpp
+  time/rtc.cpp
   mock/RtcMock.hpp
   antenna/miniport.cpp
   antenna/antenna.cpp

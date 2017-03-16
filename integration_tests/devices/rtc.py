@@ -17,7 +17,16 @@ class RTCDevice(I2CDevice):
     def set_response_time(self, response_time):
         time = response_time.time()
         date = response_time.date()
-        self.time_response = [time.second, time.minute, time.hour, date.day, 0, date.month, date.year - 2000]
+        self.time_response = [
+            self.to_bcd(time.second),
+            self.to_bcd(time.minute),
+            self.to_bcd(time.hour),
+            self.to_bcd(date.day), 0,
+            self.to_bcd(date.month),
+            self.to_bcd(date.year - 2000)]
+
+    def to_bcd(self, byte):
+        return ((byte / 10) << 4) | (byte % 10)
 
     @i2cMock.command([0x02])
     def read_time(self):
