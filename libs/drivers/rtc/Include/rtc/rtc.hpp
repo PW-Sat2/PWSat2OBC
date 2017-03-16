@@ -21,9 +21,23 @@ namespace devices
         enum class Registers;
 
         /**
+         * @brief Interface for RTC Device.
+         */
+        struct IRTC
+        {
+            /**
+              * @brief Reads entire time structure from RTC.
+              * @param[out] rtcTime A reference to @ref RTCTime that will be used to store the RTC time.
+              *
+              * @return Transfer result - I2CResult::OK when read was successful.
+              */
+            virtual OSResult ReadTime(RTCTime& rtcTime) = 0;
+        };
+
+        /**
          * @brief RTC Device
          */
-        class RTCObject
+        class RTCObject : public IRTC
         {
           public:
             /**
@@ -32,13 +46,7 @@ namespace devices
              */
             RTCObject(drivers::i2c::II2CBus& bus);
 
-            /**
-              * @brief Reads entire time structure from RTC.
-              * @param[out] rtcTime A reference to @ref RTCTime that will be used to store the RTC time.
-              *
-              * @return Transfer result - I2CResult::OK when read was successful.
-              */
-            OSResult ReadTime(RTCTime& rtcTime);
+            virtual OSResult ReadTime(RTCTime& rtcTime) final override;
 
           private:
             static constexpr std::uint8_t I2CAddress = 0b1010001;
@@ -87,6 +95,20 @@ namespace devices
                 t.tm_isdst = -1;
 
                 return std::chrono::seconds(mktime(&t));
+            }
+
+            /**
+             * @brief Checks if the RTC time is valid.
+             * @return True if time is valid, false otherwise.
+             */
+            bool IsValid()
+            {
+                return seconds <= 59 //
+                    && minutes <= 59 //
+                    && hours <= 23   //
+                    && days <= 31    //
+                    && months <= 12  //
+                    && years <= 99;
             }
         };
 

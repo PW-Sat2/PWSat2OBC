@@ -54,7 +54,7 @@ void RTCTest(std::uint16_t argc, char* argv[])
 
     if (strcmp(argv[0], "test") == 0)
     {
-        RTCObject rtc(Main.Hardware.I2C.Buses.Bus);
+        RTCObject& rtc = Main.rtc;
 
         RTCTime startTime;
         rtc.ReadTime(startTime);
@@ -78,26 +78,35 @@ void RTCTest(std::uint16_t argc, char* argv[])
         else
             Main.terminal.Printf("FAIL\r\n");
 
-        Main.terminal.Printf("Waiting 1 minute...\r\n");
+        Main.terminal.Printf("Waiting 5 minutes...\r\n");
 
-        System::SleepTask(1min + 1s);
+        auto systemTimeStart = Main.timeProvider.GetCurrentTime().Value;
+        System::SleepTask(5min + 1s);
 
         RTCTime endTime;
         rtc.ReadTime(endTime);
-        Main.terminal.Printf("+1min: ");
+        auto systemTimeEnd = Main.timeProvider.GetCurrentTime().Value;
+
+        Main.terminal.Printf("+5min: ");
         PrintRTCTime(endTime);
 
-        if (endTime.ToDuration() >= midTime.ToDuration() + 60s)
+        auto systemDuration = systemTimeEnd - systemTimeStart;
+        auto rtcDuration = std::chrono::duration_cast<std::chrono::milliseconds>((endTime.ToDuration() - midTime.ToDuration()));
+
+        Main.terminal.Printf("System reported %li milliseconds \r\n   RTC reported %li seconds\r\n",
+            static_cast<int32_t>(systemDuration.count()),
+            static_cast<int32_t>(rtcDuration.count()));
+
+        if (endTime.ToDuration() >= midTime.ToDuration() + 5min && std::abs(rtcDuration.count() - systemDuration.count()) <= 1000)
             Main.terminal.Printf("ok\r\n");
         else
             Main.terminal.Printf("FAIL\r\n");
     }
     else if (strcmp(argv[0], "get") == 0)
     {
-        RTCObject rtc(Main.Hardware.I2C.Buses.Bus);
         RTCTime time;
 
-        rtc.ReadTime(time);
+        Main.rtc.ReadTime(time);
         PrintRTCTime(time);
     }
     else

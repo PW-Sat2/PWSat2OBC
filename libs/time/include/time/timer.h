@@ -207,6 +207,16 @@ namespace services
             bool SetCurrentTime(TimePoint pointInTime);
 
             /**
+             * @brief This procedure sets the current mission time to any arbitrary point in time.
+             *
+             * The currently saved time gets immediately preserved and propagated to the notification routine.
+             * @param[in] duration New timer state.
+             *
+             * @return Operation status. True on success, false otherwise.
+             */
+            bool SetCurrentTime(std::chrono::milliseconds duration);
+
+            /**
              * @brief This procedure is responsible for reading the last timer state that has been
              * preserved in the persistent memory.
              *
