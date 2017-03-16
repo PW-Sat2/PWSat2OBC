@@ -46,6 +46,7 @@ static const TerminalCommandDescription commands[] = {
     {"reset", ResetHandler},
     {"rtc", RTCTest},
     {"rm", RemoveFile},
+    {"fram", FRAM},
 };
 
 void InitializeTerminal(void)

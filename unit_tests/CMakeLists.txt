@@ -70,6 +70,7 @@ set(SOURCES
   Experiments/Fibo/FiboCalculatorTest.cpp
   Experiments/ExperimentTest.cpp
   Experiments/ADCS/DetumblingExperimentTest.cpp
+  FM25W/FM25WDriverTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -122,6 +123,7 @@ target_link_libraries(${NAME}
     mission_adcs
     obc_telecommands
     rtc
+    fm25w
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
