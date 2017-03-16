@@ -221,7 +221,10 @@ namespace devices
         bool ImtqDriver::GetSystemState(State& state)
         {
             std::array<uint8_t, 9> value;
-            bool i2cError = this->DataRequest(OpCode::GetIMTQSystemState, value);
+            if (!this->DataRequest(OpCode::GetIMTQSystemState, value))
+            {
+                return false;
+            }
 
             Reader reader{value};
             reader.Skip(2);
@@ -231,13 +234,16 @@ namespace devices
             state.uptime = std::chrono::seconds{reader.ReadDoubleWordLE()};
 
             assert(reader.Status());
-            return i2cError;
+            return true;
         }
 
         bool ImtqDriver::GetCalibratedMagnetometerData(MagnetometerMeasurementResult& result)
         {
             std::array<uint8_t, 15> value;
-            bool i2cError = this->DataRequest(OpCode::GetCalibratedMTMData, value);
+            if (!this->DataRequest(OpCode::GetCalibratedMTMData, value))
+            {
+                return false;
+            }
 
             Reader reader{value};
             reader.Skip(2);
@@ -248,13 +254,16 @@ namespace devices
 
             result.coilActuationDuringMeasurement = (reader.ReadByte() == 1);
             assert(reader.Status());
-            return i2cError;
+            return true;
         }
 
         bool ImtqDriver::GetCoilCurrent(Vector3<Current>& result)
         {
             std::array<uint8_t, 8> value;
-            bool i2cError = this->DataRequest(OpCode::GetCoilCurrent, value);
+            if (!this->DataRequest(OpCode::GetCoilCurrent, value))
+            {
+                return false;
+            }
 
             Reader reader{value};
             reader.Skip(2);
@@ -264,13 +273,16 @@ namespace devices
                 x = reader.ReadSignedWordLE();
             }
             assert(reader.Status());
-            return i2cError;
+            return true;
         }
 
         bool ImtqDriver::GetCoilTemperature(Vector3<TemperatureMeasurement>& result)
         {
             std::array<uint8_t, 8> value;
-            bool i2cError = this->DataRequest(OpCode::GetCoilTemperatures, value);
+            if (!this->DataRequest(OpCode::GetCoilTemperatures, value))
+            {
+                return false;
+            }
 
             Reader reader{value};
             reader.Skip(2);
@@ -280,13 +292,16 @@ namespace devices
                 x = reader.ReadSignedWordLE();
             }
             assert(reader.Status());
-            return i2cError;
+            return true;
         }
 
         bool ImtqDriver::GetSelfTestResult(SelfTestResult& result)
         {
             std::array<uint8_t, 320> value;
-            bool i2cError = this->DataRequest(OpCode::GetSelfTest, value);
+            if (!this->DataRequest(OpCode::GetSelfTest, value))
+            {
+                return false;
+            }
 
             Reader reader{value};
 
@@ -313,13 +328,16 @@ namespace devices
                 }
             }
             assert(reader.Status());
-            return i2cError;
+            return true;
         }
 
         bool ImtqDriver::GetDetumbleData(DetumbleData& result)
         {
             std::array<uint8_t, 56> value;
-            bool i2cError = this->DataRequest(OpCode::GetDetumbleData, value);
+            if (!this->DataRequest(OpCode::GetDetumbleData, value))
+            {
+                return false;
+            }
 
             Reader reader{value};
             reader.Skip(2);
@@ -349,7 +367,7 @@ namespace devices
                 x = reader.ReadSignedWordLE();
             }
             assert(reader.Status());
-            return i2cError;
+            return true;
         }
 
         bool ImtqDriver::GetHouseKeepingRAW(HouseKeepingRAW& result)
@@ -424,41 +442,51 @@ namespace devices
 
         bool ImtqDriver::WriteRead(OpCode opcode, span<const uint8_t> params, span<uint8_t> response)
         {
-            constexpr int maximumWriteLength = 11;
             assert(params.size() <= 10);
+            if (params.size() > 10)
+            {
+                return false;
+            }
+            assert(response.size() >= 2);
+            if (response.size() < 2)
+            {
+                return false;
+            }
+            constexpr int maximumWriteLength = 11;
             const auto opcodeByte = static_cast<uint8_t>(opcode);
 
             std::array<uint8_t, maximumWriteLength> output;
             Writer outputWriter{output};
             outputWriter.WriteByte(opcodeByte);
             outputWriter.WriteArray(params);
-            assert(outputWriter.Status());
 
             span<uint8_t> request = outputWriter.Capture();
 
             auto i2cstatusWrite = i2cbus.Write(I2Cadress, request);
-            System::SleepTask(10ms);
-            auto i2cstatusRead = i2cbus.Read(I2Cadress, response);
-
-            this->LastStatus = response[1];
-            auto status = Status{LastStatus};
-
             if (i2cstatusWrite != I2CResult::OK)
             {
                 LastError = ImtqDriverError::I2CWriteFailed;
                 return false;
             }
+
+            System::SleepTask(10ms);
+
+            auto i2cstatusRead = i2cbus.Read(I2Cadress, response);
             if (i2cstatusRead != I2CResult::OK)
             {
                 LastError = ImtqDriverError::I2CReadFailed;
                 return false;
             }
+
+            this->LastStatus = response[1];
+            auto status = Status{LastStatus};
+
             if (opcodeByte != response[0])
             {
                 LastError = ImtqDriverError::WrongOpcodeInResponse;
                 return false;
             }
-            if (! status.IsOK())
+            if (!status.IsOK())
             {
                 LastError = ImtqDriverError::StatusError;
                 return false;
