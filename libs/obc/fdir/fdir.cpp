@@ -9,7 +9,6 @@ namespace obc
 
     void FDIR::Initalize()
     {
-        this->_errorCounting.Initialize();
     }
 
     void FDIR::PostStartInitialize()

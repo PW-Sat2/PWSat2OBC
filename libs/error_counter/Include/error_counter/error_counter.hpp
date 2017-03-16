@@ -2,8 +2,8 @@
 #define LIBS_ERROR_COUNTER_INCLUDE_ERROR_COUNTER_ERROR_COUNTER_HPP_
 
 #include <array>
+#include <atomic>
 #include <cstdint>
-#include "base/os.h"
 
 namespace error_counter
 {
@@ -80,11 +80,6 @@ namespace error_counter
         void Handler(IErrorCountingCallback& callback);
 
         /**
-         * @brief Initializes error counting
-         */
-        void Initialize();
-
-        /**
          * @brief Returns current value of device's error counter
          * @param device Device ID
          * @return Value of error counter
@@ -105,11 +100,9 @@ namespace error_counter
 
       private:
         /** @brief Error counters */
-        std::array<CounterValue, MaxDevices> _counters;
+        std::array<std::atomic<CounterValue>, MaxDevices> _counters;
         /** @brief Configuration */
         IErrorCountingConfigration& _config;
-        /** @brief Synchronization semaphore */
-        OSSemaphoreHandle _sync;
         /** @brief Callback */
         IErrorCountingCallback* _callback;
     };
