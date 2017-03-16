@@ -58,6 +58,16 @@ TEST(WriterTest, TestWritingSingleWordLE)
     CheckBuffer(array, writer.GetDataLength(), expected, sizeof(expected));
 }
 
+TEST(WriterTest, TestWritingSingleWordBE)
+{
+    uint8_t array[2];
+    const uint8_t expected[2] = {0xAA, 0x55};
+    Writer writer(array);
+    ASSERT_TRUE(writer.WriteWordBE(0xAA55));
+    ASSERT_TRUE(writer.Status());
+    CheckBuffer(array, writer.GetDataLength(), expected, sizeof(expected));
+}
+
 TEST(WriterTest, TestWritingSignedSingleWordLE)
 {
     uint8_t array[12];

@@ -18,6 +18,7 @@ set(SOURCES
     commands/mission.cpp
     commands/dma.cpp
     commands/rtc.cpp
+    commands/fram.cpp
     obc.h
     obc.cpp
     fault_handlers.cpp
@@ -49,6 +50,7 @@ target_link_libraries(${NAME}
     terminal
     assert
     gsl
+    fm25w
     n25q
     antenna
     exp_fibo
