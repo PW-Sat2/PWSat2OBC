@@ -75,9 +75,17 @@ class SerialPortTerminal:
 
     def command_with_read_data(self, cmd):
         self._command_prologue(cmd)
-        size = int(self.readUntilPrompt('\n'))
+        size = self.readUntilPrompt('\n')
+        size = int(size)
 
-        data = self._serial.read(size)
+        data = ''
+
+        while size > 0:
+            part = self._serial.read(size)
+
+            data += part
+            size -= len(part)
+
         self.readUntilPrompt()
 
         return data

@@ -41,7 +41,7 @@ class OBC(OBCMixin,
     def wait_to_start(self):
         response = self._terminal.command("getState")
         while response != "1":
-            time.sleep(0.1)
+            time.sleep(0.2)
             response = self._terminal.command("getState")
 
         self.log.info("OBC reported ready state")
