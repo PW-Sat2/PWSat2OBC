@@ -20,6 +20,8 @@ class SPIExpectSelected
 
 struct SPIInterfaceMock : drivers::spi::ISPIInterface
 {
+    SPIInterfaceMock();
+
     MOCK_METHOD0(Select, void());
     MOCK_METHOD0(Deselect, void());
     MOCK_METHOD1(Write, void(gsl::span<const std::uint8_t> buffer));

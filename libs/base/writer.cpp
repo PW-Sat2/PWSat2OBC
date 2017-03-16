@@ -61,6 +61,21 @@ bool Writer::WriteWordLE(std::uint16_t word)
     }
 }
 
+bool Writer::WriteWordBE(std::uint16_t word)
+{
+    if (!this->UpdateState(2))
+    {
+        return false;
+    }
+    else
+    {
+        this->_buffer[this->_position] = (word >> 8) & 0xff;
+        this->_buffer[this->_position + 1] = word & 0xff;
+        this->_position += 2;
+        return true;
+    }
+}
+
 bool Writer::WriteSignedWordLE(std::int16_t word)
 {
     return this->WriteWordLE(static_cast<std::uint16_t>(word));

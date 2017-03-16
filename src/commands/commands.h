@@ -52,5 +52,6 @@ void ResetHandler(std::uint16_t argc, char* argv[]);
 
 void RTCTest(std::uint16_t argc, char* argv[]);
 
-void StressFS(std::uint16_t argc, char* argv[]);
+void FRAM(std::uint16_t argc, char* argv[]);
+
 #endif
