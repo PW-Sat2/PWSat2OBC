@@ -6,6 +6,8 @@
 namespace mission
 {
     using namespace std::chrono_literals;
+    using std::chrono::duration_cast;
+    using std::chrono::seconds;
 
     /**
      * @brief Interval between two subsequent beacon updates
@@ -56,11 +58,11 @@ namespace mission
         if (this->controller->SetBeacon(beacon))
         {
             this->lastBeaconUpdate = state.Time;
-            LOGF(LOG_LEVEL_INFO, "Beacon set at %llu", state.Time.count());
+            LOGF(LOG_LEVEL_INFO, "Beacon set at %lu", static_cast<std::uint32_t>(duration_cast<seconds>(state.Time).count()));
         }
         else
         {
-            LOGF(LOG_LEVEL_ERROR, "Unable to set beacon at %llu", state.Time.count());
+            LOGF(LOG_LEVEL_ERROR, "Unable to set beacon at %lu", static_cast<std::uint32_t>(duration_cast<seconds>(state.Time).count()));
         }
     }
 
