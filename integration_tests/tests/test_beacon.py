@@ -32,6 +32,7 @@ class Test_Beacon(BaseTest):
             return False
 
         self.system.primary_antenna.on_reset = reset_handler
+        self.system.primary_antenna.begin_deployment()
         self.system.primary_antenna.finish_deployment()
         self.system.comm.transmitter.on_set_beacon = event.set
         self.begin(10)

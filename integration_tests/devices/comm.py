@@ -212,8 +212,9 @@ class TransmitterDevice(i2cMock.I2CDevice):
         telemetry = call(self.on_get_telemetry, TransmitterTelemetry())
         return telemetry.toArray()
 
-    @i2cMock.command(0x14)
-    def _set_beacon(self):
+    @i2cMock.command([0x14])
+    def _set_beacon(self, *data):
+        self.log.info("set beacon: %s", data)
         if call(self.on_set_beacon, True):
             self.reset_queue()
 

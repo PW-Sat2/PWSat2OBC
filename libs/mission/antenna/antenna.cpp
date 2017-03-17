@@ -463,6 +463,7 @@ namespace mission
         {
             UNREFERENCED_PARAMETER(state);
             AntennaMissionState* stateDescriptor = (AntennaMissionState*)param;
+            state.Antenna.Deployed = stateDescriptor->IsFinished();
             if (stateDescriptor->IsFinished())
             {
                 return UpdateResult::Ok;
@@ -496,7 +497,6 @@ namespace mission
                 stateDescriptor->OverrideStep(FinalizationStepIndex);
             }
 
-            state.Antenna.Deployed = stateDescriptor->IsFinished();
             return UpdateResult::Ok;
         }
 
