@@ -99,7 +99,7 @@ bool TimeProvider::SetCurrentTime(TimePoint pointInTime)
     return SetCurrentTime(TimePointToTimeSpan(pointInTime));
 }
 
-bool TimeProvider::SetCurrentTime(milliseconds duration)
+bool TimeProvider::SetCurrentTime(std::chrono::milliseconds duration)
 {
     struct TimerState state;
 
