@@ -7,10 +7,10 @@ from system import auto_power_on
 class Test_Beacon(BaseTest):
     @auto_power_on(False)
     def __init__(self, methodName = 'runTest'):
-        return super(Test_AntennaDeployment, self).__init__(methodName)
+        return super(Test_Beacon, self).__init__(methodName)
 
     def begin_deployment(self):
-        self.system.obc.jump_to_time(42 * 60)
+        self.system.obc.jump_to_time(43 * 60)
 
     def next_step(self):
         self.system.obc.run_mission()
