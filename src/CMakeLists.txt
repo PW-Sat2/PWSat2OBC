@@ -17,6 +17,7 @@ set(SOURCES
     commands/compile_info.cpp
     commands/mission.cpp
     commands/dma.cpp
+    commands/imtq.cpp
     commands/rtc.cpp
     commands/fram.cpp
     obc.h
@@ -44,7 +45,7 @@ target_link_libraries(${NAME}
     time
     mission
     eps
-    adcs
+    imtq
     power
     power_eps
     terminal

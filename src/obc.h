@@ -14,6 +14,7 @@
 #include "experiment/fibo/fibo.h"
 #include "fs/fs.h"
 #include "fs/yaffs.h"
+#include "imtq/imtq.h"
 #include "leuart/line_io.h"
 #include "n25q/n25q.h"
 #include "n25q/yaffs.h"
@@ -79,6 +80,9 @@ struct OBC
 
     /** @brief OBC storage */
     obc::OBCStorage Storage;
+
+    /** @brief Imtq handling */
+    devices::imtq::ImtqDriver Imtq;
 
     /** @brief Adcs subsytem for obc. */
     obc::Adcs adcs;
