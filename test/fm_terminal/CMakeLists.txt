@@ -23,8 +23,9 @@ target_link_libraries(${NAME}
     gpio
 )
 
-target_generate_hex(${NAME})
+
 target_generate_bin(${NAME})
+target_generate_hex(${NAME})
 
 target_memory_report(${NAME})
 
