@@ -6,32 +6,26 @@ using obc::storage::N25QStorage;
 using devices::n25q::OperationResult;
 using services::fs::IYaffsDeviceOperations;
 using drivers::gpio::OutputPin;
-using obc::storage::SingleFlash;
-
-SingleFlash::SingleFlash(const char* mountPoint,
-    const drivers::gpio::Pin& slaveSelect,
-    drivers::spi::EFMSPIInterface& spi,
-    services::fs::IYaffsDeviceOperations& deviceOperations)
-    :                                     //
-      SPI(spi, slaveSelect),              //
-      Driver(SPI),                        //
-      Device(mountPoint, Driver),         //
-      _deviceOperations(deviceOperations) //
-{
-}
 
 N25QStorage::N25QStorage(drivers::spi::EFMSPIInterface& spi, IYaffsDeviceOperations& deviceOperations, obc::OBCGPIO& pins)
-    : //
-      _flashes{
-          {"/a", pins.Flash1ChipSelect, spi, deviceOperations} //
-      }
-
+    :                                      //
+      _deviceOperations(deviceOperations), //
+      _spiSlaves{                          //
+          {spi, pins.Flash1ChipSelect},    //
+          {spi, pins.Flash2ChipSelect},    //
+          {spi, pins.Flash3ChipSelect}},   //
+      _n25qDrivers{                        //
+          {_spiSlaves[0]},                 //
+          {_spiSlaves[1]},                 //
+          {_spiSlaves[2]}},                //
+      _driver(_n25qDrivers),               //
+      Device("/a", _driver)                //
 {
 }
 
-OSResult SingleFlash::Initialize()
+OSResult N25QStorage::Initialize()
 {
-    if (this->Driver.Reset() != OperationResult::Success)
+    if (this->_driver.Reset() != OperationResult::Success)
     {
         return OSResult::DeviceNotFound;
     }
@@ -39,14 +33,14 @@ OSResult SingleFlash::Initialize()
     return this->Device.Mount(this->_deviceOperations);
 }
 
-OSResult SingleFlash::ClearStorage()
+OSResult N25QStorage::ClearStorage()
 {
-    return this->_deviceOperations.ClearDevice(this->Device.Device());
+    return _deviceOperations.ClearDevice(this->Device.Device());
 }
 
-OSResult SingleFlash::Erase()
+OSResult N25QStorage::Erase()
 {
-    auto r = this->Driver.EraseChip();
+    auto r = this->_driver.EraseChip();
     switch (r)
     {
         case OperationResult::Success:
@@ -59,53 +53,7 @@ OSResult SingleFlash::Erase()
     }
 }
 
-OSResult N25QStorage::Initialize()
+devices::n25q::N25QDriver& N25QStorage::GetDriver(uint8_t index)
 {
-    OSResult result = OSResult::Success;
-
-    for (auto& f : this->_flashes)
-    {
-        auto r = f.Initialize();
-
-        if (OS_RESULT_FAILED(r))
-        {
-            result = r;
-        }
-    }
-
-    return result;
-}
-
-OSResult N25QStorage::ClearStorage()
-{
-    OSResult result = OSResult::Success;
-
-    for (auto& f : this->_flashes)
-    {
-        auto r = f.ClearStorage();
-
-        if (OS_RESULT_FAILED(r))
-        {
-            result = r;
-        }
-    }
-
-    return result;
-}
-
-OSResult N25QStorage::Erase()
-{
-    OSResult result = OSResult::Success;
-
-    for (auto& f : this->_flashes)
-    {
-        auto r = f.Erase();
-
-        if (OS_RESULT_FAILED(r))
-        {
-            result = r;
-        }
-    }
-
-    return result;
+    return _n25qDrivers[index];
 }

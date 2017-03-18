@@ -17,6 +17,7 @@ using gsl::span;
 using namespace devices::n25q;
 using drivers::spi::ISPIInterface;
 using drivers::spi::SPISelectSlave;
+using redundancy::Voter;
 
 enum N25QCommand
 {
@@ -99,7 +100,7 @@ FlagStatus N25QDriver::ReadFlagStatus()
     return static_cast<FlagStatus>(status);
 }
 
-void N25QDriver::ReadMemory(size_t address, span<uint8_t> buffer)
+void N25QDriver::ReadMemory(std::size_t address, gsl::span<uint8_t> buffer)
 {
     array<uint8_t, 4> command;
     Writer writer(command);
@@ -112,6 +113,72 @@ void N25QDriver::ReadMemory(size_t address, span<uint8_t> buffer)
     this->_spi.Read(buffer);
 }
 
+OperationWaiter::OperationWaiter(N25QDriver* driver, std::chrono::milliseconds timeout, FlagStatus errorStatus)
+    : _waitResult(None<OperationResult>()), //
+      _driver(driver),                      //
+      _timeout(timeout),                    //
+      _errorStatus(errorStatus)             //
+
+{
+}
+
+OperationWaiter::~OperationWaiter()
+{
+    if (!_waitResult.HasValue)
+    {
+        Wait();
+    }
+}
+
+OperationResult OperationWaiter::Wait()
+{
+    if (_waitResult.HasValue)
+    {
+        return _waitResult.Value;
+    }
+
+    {
+        SPISelectSlave slave(_driver->_spi);
+
+        if (!_driver->WaitBusy(_timeout))
+        {
+            _waitResult = Some(OperationResult::Timeout);
+            return _waitResult.Value;
+        }
+    }
+
+    auto flags = _driver->ReadFlagStatus();
+
+    if (has_flag(flags, _errorStatus))
+    {
+        _waitResult = Some(OperationResult::Failure);
+        return _waitResult.Value;
+    }
+
+    _waitResult = Some(OperationResult::Success);
+    return _waitResult.Value;
+}
+
+OperationWaiter N25QDriver::BeginWriteChunk(size_t address, ptrdiff_t offset, span<const uint8_t> chunk)
+{
+    this->EnableWrite();
+
+    {
+        array<uint8_t, 4> command;
+        Writer writer(command);
+
+        writer.WriteByte(N25QCommand::ProgramMemory);
+        WriterWriteAddress(writer, address + offset);
+
+        SPISelectSlave slave(this->_spi);
+
+        this->_spi.Write(command);
+        this->_spi.Write(chunk);
+    }
+
+    return OperationWaiter(this, ProgramPageTimeout, FlagStatus::ProgramError);
+}
+
 OperationResult N25QDriver::WriteMemory(size_t address, span<const uint8_t> buffer)
 {
     this->ClearFlags();
@@ -120,36 +187,10 @@ OperationResult N25QDriver::WriteMemory(size_t address, span<const uint8_t> buff
     {
         auto chunk = buffer.subspan(offset, min(256, buffer.size() - offset));
 
-        this->EnableWrite();
+        auto chunkWriteResult = BeginWriteChunk(address, offset, chunk).Wait();
 
-        {
-            array<uint8_t, 4> command;
-            Writer writer(command);
-
-            writer.WriteByte(N25QCommand::ProgramMemory);
-            WriterWriteAddress(writer, address + offset);
-
-            SPISelectSlave slave(this->_spi);
-
-            this->_spi.Write(command);
-            this->_spi.Write(chunk);
-        }
-
-        {
-            SPISelectSlave slave(this->_spi);
-
-            if (!this->WaitBusy(ProgramPageTimeout))
-            {
-                return OperationResult::Timeout;
-            }
-        }
-
-        auto flags = this->ReadFlagStatus();
-
-        if (has_flag(flags, FlagStatus::ProgramError))
-        {
-            return OperationResult::Failure;
-        }
+        if (chunkWriteResult != OperationResult::Success)
+            return chunkWriteResult;
     }
 
     return OperationResult::Success;
@@ -194,7 +235,7 @@ bool N25QDriver::WaitBusy(std::chrono::milliseconds timeout)
     return true;
 }
 
-OperationResult N25QDriver::EraseSector(size_t address)
+OperationWaiter N25QDriver::BeginEraseSector(size_t address)
 {
     this->ClearFlags();
 
@@ -207,26 +248,10 @@ OperationResult N25QDriver::EraseSector(size_t address)
         this->WriteAddress(address);
     }
 
-    {
-        SPISelectSlave select(this->_spi);
-
-        if (!this->WaitBusy(EraseSectorTimeout))
-        {
-            return OperationResult::Timeout;
-        }
-    }
-
-    auto flags = this->ReadFlagStatus();
-
-    if (has_flag(flags, FlagStatus::EraseError))
-    {
-        return OperationResult::Failure;
-    }
-
-    return OperationResult::Success;
+    return OperationWaiter(this, EraseSectorTimeout, FlagStatus::EraseError);
 }
 
-OperationResult N25QDriver::EraseSubSector(size_t address)
+OperationWaiter N25QDriver::BeginEraseSubSector(size_t address)
 {
     this->ClearFlags();
 
@@ -239,26 +264,10 @@ OperationResult N25QDriver::EraseSubSector(size_t address)
         this->WriteAddress(address);
     }
 
-    {
-        SPISelectSlave select(this->_spi);
-
-        if (!this->WaitBusy(EraseSubSectorTimeout))
-        {
-            return OperationResult::Timeout;
-        }
-    }
-
-    auto flags = this->ReadFlagStatus();
-
-    if (has_flag(flags, FlagStatus::EraseError))
-    {
-        return OperationResult::Failure;
-    }
-
-    return OperationResult::Success;
+    return OperationWaiter(this, EraseSubSectorTimeout, FlagStatus::EraseError);
 }
 
-OperationResult N25QDriver::EraseChip()
+OperationWaiter N25QDriver::BeginEraseChip()
 {
     this->ClearFlags();
 
@@ -269,23 +278,7 @@ OperationResult N25QDriver::EraseChip()
         this->Command(N25QCommand::EraseChip);
     }
 
-    {
-        SPISelectSlave select(this->_spi);
-
-        if (!this->WaitBusy(EraseChipTimeOut))
-        {
-            return OperationResult::Timeout;
-        }
-    }
-
-    auto flags = this->ReadFlagStatus();
-
-    if (has_flag(flags, FlagStatus::EraseError))
-    {
-        return OperationResult::Failure;
-    }
-
-    return OperationResult::Success;
+    return OperationWaiter(this, EraseChipTimeOut, FlagStatus::EraseError);
 }
 
 void N25QDriver::ClearFlags()

@@ -198,3 +198,134 @@ void RemoveFile(uint16_t /*argc*/, char* argv[])
 
     LOGF(LOG_LEVEL_INFO, "Ret=%d", r);
 }
+
+void TMR(uint16_t argc, char* argv[])
+{
+    UNUSED(argc, argv);
+
+    auto path = "/a/tmr.test";
+
+    {
+        Main.terminal.Puts("Writing test file");
+        Main.terminal.NewLine();
+
+        std::array<uint8_t, 3_KB> buffer;
+        for (uint32_t i = 0; i < 3_KB; ++i)
+        {
+            buffer[i] = (i % 256);
+        }
+
+        File f(Main.fs, path, FileOpen::CreateAlways, FileAccess::WriteOnly);
+        if (!f)
+        {
+            Main.terminal.Puts("Error while writing file");
+            Main.terminal.NewLine();
+            return;
+        }
+
+        f.Truncate(0);
+        f.Write(buffer);
+
+        Main.terminal.Puts("File written");
+        Main.terminal.NewLine();
+    }
+
+    if (argc > 0)
+    {
+        Main.terminal.Puts("Erasing");
+        Main.terminal.NewLine();
+
+        obc::storage::N25QStorage& n25Storage = Main.Storage.GetInternalStorage();
+        auto flash1 = n25Storage.GetDriver(0);
+
+        flash1.BeginEraseChip().Wait();
+    }
+
+    {
+        Main.terminal.Puts("Reading file");
+        Main.terminal.NewLine();
+
+        auto startTime = System::GetUptime(); // Main.timeProvider.GetCurrentTime().Value;
+
+        std::array<uint8_t, 3_KB> buffer;
+        File f(Main.fs, path, FileOpen::Existing, FileAccess::ReadOnly);
+        if (!f)
+        {
+            Main.terminal.Puts("Error while reading file");
+            Main.terminal.NewLine();
+            return;
+        }
+
+        f.Read(buffer);
+
+        auto endTime = System::GetUptime(); // Main.timeProvider.GetCurrentTime().Value;
+
+        bool isOk = true;
+        for (uint32_t i = 0; i < 3_KB && isOk; ++i)
+        {
+            isOk = (buffer[i] == (i % 256));
+        }
+
+        if (!isOk)
+        {
+            Main.terminal.Puts("Failed to read valid file content");
+            Main.terminal.NewLine();
+        }
+        else
+        {
+            Main.terminal.Puts("Looks ok!");
+            Main.terminal.NewLine();
+        }
+
+        auto readDuration = std::chrono::duration_cast<std::chrono::milliseconds>((endTime - startTime));
+
+        Main.terminal.Printf("Read duration: %li ms\r\n", static_cast<int32_t>(readDuration.count()));
+    }
+
+    //
+    //    auto n25Storage = Main.Storage.GetInternalStorage();
+    //    auto flash1 = n25Storage.GetDriver(0);
+    //
+    //    Main.fs.Seek()
+    //
+    //    // Main.Storage
+    //    {
+    //        drivers::spi::EFMSPISlaveInterface spiSlave(Main.Hardware.SPI, Main.Hardware.Pins.Flash1ChipSelect);
+    //        devices::n25q::SingleN25QDriver driver(spiSlave);
+    //        devices::n25q::N25QYaffsDevice<devices::n25q::BlockMapping::Sector, 2_KB, 16_MB> device("/a", driver);
+    //
+    //        services::fs::YaffsFileSystem yaffs;
+    //        yaffs.Initialize();
+    //        device.Mount(yaffs);
+    //
+    //        File f(yaffs, argv[0], FileOpen::Existing, FileAccess::ReadOnly);
+    //
+    //        if (!f)
+    //        {
+    //            Main.terminal.Puts("Error");
+    //            Main.terminal.NewLine();
+    //            return;
+    //        }
+    //
+    //        char buf[10] = {0};
+    //        itoa(f.Size(), buf, 10);
+    //
+    //        Main.terminal.Puts(buf);
+    //        Main.terminal.NewLine();
+    //
+    //        std::array<uint8_t, 100> buffer;
+    //
+    //        while (true)
+    //        {
+    //            auto r = f.Read(buffer);
+    //            if (!r || r.Result.size() == 0)
+    //            {
+    //                break;
+    //            }
+    //
+    //            Main.terminal.PrintBuffer(r.Result);
+    //        }
+    //
+    //        Main.terminal.NewLine();
+    //    }
+}
