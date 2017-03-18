@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <gsl/span>
 #include "base/os.h"
+#include "redundancy.hpp"
 #include "spi/spi.h"
 
 namespace devices
@@ -90,6 +91,8 @@ namespace devices
             Timeout  //!< Timeout
         };
 
+        class OperationWaiter;
+
         /**
          * @brief N25Q low-level driver
          *
@@ -105,6 +108,8 @@ namespace devices
          */
         class N25QDriver final
         {
+            friend class OperationWaiter;
+
           public:
             /**
              * @brief Constructs @ref N25QDriver instance
@@ -136,6 +141,17 @@ namespace devices
             void ReadMemory(std::size_t address, gsl::span<uint8_t> buffer);
 
             /**
+             * @brief Writes (sets 1 to 0) a chunk of data to memory
+             * @param[in] address Start address
+             * @param[in] offset Chunk address offset
+             * @param[in] chunk Buffer
+             * @return Operation waiter
+             *
+             * Operation can take up to 5ms
+             */
+            OperationWaiter BeginWriteChunk(size_t address, ptrdiff_t offset, gsl::span<const uint8_t> chunk);
+
+            /**
              * @brief Writes (sets 1 to 0) to memory
              * @param[in] address Start address
              * @param[in] buffer Buffer
@@ -146,33 +162,33 @@ namespace devices
              *
              * Operation can take up to 5ms per page
              */
-            OperationResult WriteMemory(std::size_t address, gsl::span<const uint8_t> buffer);
+            OperationResult WriteMemory(size_t address, gsl::span<const uint8_t> buffer);
 
             /**
              * @brief Erases single subsector (4KB)
              * @param address Subsctor base address
-             * @return Operation result
+             * @return Operation waiter
              *
              * Operation can take up to 0.8s
              */
-            OperationResult EraseSubSector(std::size_t address);
+            OperationWaiter BeginEraseSubSector(size_t address);
 
             /**
              * @brief Erases single sector (64KB)
              * @param address Sector base address
-             * @return Operation result
+             * @return Operation waiter
              *
              * Operation can take up to 3s
              */
-            OperationResult EraseSector(std::size_t address);
+            OperationWaiter BeginEraseSector(size_t address);
 
             /**
              * @brief Erases whole chip
-             * @return Operation result
+             * @return Operation waiter
              *
              * This operating can take up to 4 minutes, so be patient
              */
-            OperationResult EraseChip();
+            OperationWaiter BeginEraseChip();
 
             /**
              * @brief Clears flag status register
@@ -235,6 +251,133 @@ namespace devices
             /** @brief Write status register timeout */
             static constexpr std::chrono::milliseconds WriteStatusRegisterTimeout = std::chrono::milliseconds(10);
         };
+
+        /**
+         * @brief Object representing waitable operation
+         *
+         *  N25Q operations that support waiting for completion will return object of
+         *  this class
+         */
+        class OperationWaiter
+        {
+          public:
+            /**
+             * @brief Constructs @ref OperationWaiter instance
+             * @param[in] driver N25Q driver
+             * @param[in] timeout Operation timeout
+             * @param[in] errorStatus Potential error status flag
+             */
+            OperationWaiter(N25QDriver* driver, std::chrono::milliseconds timeout, FlagStatus errorStatus);
+
+            /**
+             * @brief Makes sure that the operation was waited for.
+             */
+            ~OperationWaiter();
+
+            /**
+             * @brief Waits for the N25Q operation to finish.
+             * @return Result of the operation
+             */
+            OperationResult Wait();
+
+          private:
+            Option<OperationResult> _waitResult;
+            N25QDriver* _driver;
+            std::chrono::milliseconds _timeout;
+            FlagStatus _errorStatus;
+        };
+
+        /**
+         * @brief Composite N25Q driver that uses 3 separate drivers to achieve redundancy.
+         */
+        class RedundantN25QDriver
+        {
+          public:
+            /**
+             * @brief Constructs @ref RedundantN25QDriver
+             * @param[in] n25qDrivers N25Q drivers used for redundant operations.
+             */
+            RedundantN25QDriver(N25QDriver (&n25qDrivers)[3]);
+
+            /**
+             * @brief Reads data from memory starting from given address.
+             * @param[in] address Start address
+             * @param[out] outputBuffer Output buffer
+             * @param[in] redundantBuffer1 First buffer used for redundant read
+             * @param[in] redundantBuffer2 Second buffer used for redundant read
+             *
+             * If the memory content from drivers is different, bitwise triple modular redundancy
+             * is performed using data from all 3 drivers.
+             *
+             * Reads are performed sequentially. If reads from 2 chips yield the same data, 3rd chip is not read.
+             *
+             */
+            void ReadMemory(std::size_t address,
+                gsl::span<uint8_t> outputBuffer,
+                gsl::span<uint8_t> redundantBuffer1,
+                gsl::span<uint8_t> redundantBuffer2);
+
+            /**
+             * @brief Erases all 3 chips.
+             * @return Operation result
+             *
+             * This operation can take up to 4 minutes, so be patient.
+             * The operation is performed in parallel on 3 chips.
+             */
+            OperationResult EraseChip();
+
+            /**
+             * @brief Erases single subsector (4KB)
+             * @param address Subsctor base address
+             * @return Operation result
+             *
+             * Operation can take up to 0.8s
+             * The operation is performed in parallel on 3 chips.
+             */
+            OperationResult EraseSubSector(size_t address);
+
+            /**
+             * @brief Erases single sector (64KB)
+             * @param address Sector base address
+             * @return Operation result
+             *
+             * Operation can take up to 3s
+             * The operation is performed in parallel on 3 chips.
+             */
+            OperationResult EraseSector(size_t address);
+
+            /**
+             * @brief Writes (sets 1 to 0) to memory
+             * @param[in] address Start address
+             * @param[in] buffer Buffer
+             * @return Operation result
+             *
+             * Write operation spanning more than one page (256 bytes) are splitted into N separate write operations.
+             * In case of failure in one of them, subsequent writes are aborted and memory is left partially written
+             *
+             * Operation can take up to 5ms per page.
+             * The operation is performed in parallel on 3 chips.
+             */
+            OperationResult WriteMemory(size_t address, gsl::span<const uint8_t> buffer);
+
+            /**
+             * @brief Resets device to known state (memory content is not affected)
+             * @return Operation status
+             *
+             * This method performs software chip reset and waits until it is operational. If device doesn't respond in time (10ms), timeout
+             * will be returned.
+             *
+             * This operation is performed sequentially on 3 chips.
+             */
+            OperationResult Reset();
+
+          private:
+            N25QDriver (&_n25qDrivers)[3];
+
+            redundancy::BitwiseCorrector<uint8_t> _bitwiseCorrector;
+        };
+
+        /** @} */
     }
 }
 

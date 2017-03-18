@@ -396,7 +396,7 @@ TEST_F(N25QDriverTest, ShouldEraseSubsector)
         }
     }
 
-    auto result = this->_driver.EraseSubSector(address);
+    auto result = this->_driver.BeginEraseSubSector(address).Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Success));
 }
@@ -433,7 +433,7 @@ TEST_F(N25QDriverTest, ShouldDetectEraseSubsectorError)
         }
     }
 
-    auto result = this->_driver.EraseSubSector(address);
+    auto result = this->_driver.BeginEraseSubSector(address).Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Failure));
 }
@@ -476,7 +476,7 @@ TEST_F(N25QDriverTest, ShouldDetectEraseSubsectorTimeout)
         }
     }
 
-    auto result = this->_driver.EraseSubSector(address);
+    auto result = this->_driver.BeginEraseSubSector(address).Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Timeout));
 }
@@ -513,7 +513,7 @@ TEST_F(N25QDriverTest, ShouldEraseSector)
         }
     }
 
-    auto result = this->_driver.EraseSector(address);
+    auto result = this->_driver.BeginEraseSector(address).Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Success));
 }
@@ -550,7 +550,7 @@ TEST_F(N25QDriverTest, ShouldDetectEraseSectorError)
         }
     }
 
-    auto result = this->_driver.EraseSector(address);
+    auto result = this->_driver.BeginEraseSector(address).Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Failure));
 }
@@ -593,7 +593,7 @@ TEST_F(N25QDriverTest, ShouldDetectEraseSectorTimeout)
         }
     }
 
-    auto result = this->_driver.EraseSector(address);
+    auto result = this->_driver.BeginEraseSector(address).Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Timeout));
 }
@@ -626,7 +626,7 @@ TEST_F(N25QDriverTest, ShouldEraseChip)
         }
     }
 
-    auto result = this->_driver.EraseChip();
+    auto result = this->_driver.BeginEraseChip().Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Success));
 }
@@ -659,7 +659,7 @@ TEST_F(N25QDriverTest, ShouldDetectEraseChipError)
         }
     }
 
-    auto result = this->_driver.EraseChip();
+    auto result = this->_driver.BeginEraseChip().Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Failure));
 }
@@ -698,7 +698,7 @@ TEST_F(N25QDriverTest, EraseChipOperationWillTimeout)
         }
     }
 
-    auto result = this->_driver.EraseChip();
+    auto result = this->_driver.BeginEraseChip().Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Timeout));
 }
