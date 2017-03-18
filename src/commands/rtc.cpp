@@ -41,7 +41,7 @@ static void PrintRTCTime(RTCTime& time)
 
 static void PrintRTCUsage()
 {
-    Main.terminal.Puts("rtc [test|get]");
+    Main.terminal.Puts("rtc [test|get|duration]");
 }
 
 void RTCTest(std::uint16_t argc, char* argv[])
@@ -108,6 +108,13 @@ void RTCTest(std::uint16_t argc, char* argv[])
 
         Main.rtc.ReadTime(time);
         PrintRTCTime(time);
+    }
+    else if (strcmp(argv[0], "duration") == 0)
+    {
+        RTCTime time;
+        Main.rtc.ReadTime(time);
+
+        Main.terminal.Printf("%li\r\n", static_cast<std::uint32_t>(time.ToDuration().count()));
     }
     else
     {

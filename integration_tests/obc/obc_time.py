@@ -17,3 +17,12 @@ class TimeMixin(OBCMixin):
     @command("currentTime")
     def current_time(self):
         pass
+
+    @command("rtc get")
+    def rtc_info(self):
+        pass
+
+    @decode_return(int)
+    @command("rtc duration")
+    def rtc_duration(self):
+        pass
