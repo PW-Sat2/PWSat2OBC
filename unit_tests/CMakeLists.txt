@@ -44,6 +44,7 @@ set(SOURCES
   base/WriterTest.cpp
   base/RapidTest.cpp
   base/OnLeaveTest.cpp
+  base/RedundancyTest.cpp
   MissionPlan/MissionPlanTest.cpp
   MissionPlan/MissionTestHelpers.cpp
   MissionPlan/SailSystemStateTest.cpp

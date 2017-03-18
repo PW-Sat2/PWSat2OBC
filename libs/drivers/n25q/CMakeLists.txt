@@ -2,7 +2,7 @@ set(NAME n25q)
 
 set(SOURCES
     n25q.cpp
-    yaffs.cpp
+    redundant_n25q.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

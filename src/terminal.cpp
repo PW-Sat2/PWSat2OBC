@@ -43,6 +43,7 @@ static const TerminalCommandDescription commands[] = {
     {"rm", RemoveFile},
     {"fram", FRAM},
     {"testflash", TestExternalFlash},
+    {"tmr", TMR},
     {"temp", Temp},
     {"eps", EPSCommand},
     {"wdog", WatchdogCommand},

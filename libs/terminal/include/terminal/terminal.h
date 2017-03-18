@@ -110,7 +110,7 @@ class Terminal
     /**
      * @brief RTOS task with main loop
      */
-    Task<Terminal*, 4_KB, TaskPriority::P4> _task;
+    Task<Terminal*, 6_KB, TaskPriority::P4> _task;
 
     /**
      * @brief Command list
