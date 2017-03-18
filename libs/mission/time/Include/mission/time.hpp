@@ -116,6 +116,9 @@ namespace mission
     /** @brief Minimum value of time correction delta to update the time in time provider. */
     static constexpr std::chrono::milliseconds MinimumTimeCorrection = std::chrono::seconds(2);
 
+    /** @brief Maximum allowed value of time correction delta. */
+    static constexpr std::chrono::milliseconds MaximumTimeCorrection = std::chrono::hours(2);
+
     /** @} */
 }
 

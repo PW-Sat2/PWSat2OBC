@@ -107,19 +107,28 @@ namespace mission
             return;
         }
 
-        if (!provider.SetCurrentTime(correctedMissionTime))
+        if (correctionValue < MaximumTimeCorrection)
         {
-            LOG(LOG_LEVEL_ERROR, "[Time] Unable to set corrected time");
-            return;
+            if (!provider.SetCurrentTime(correctedMissionTime))
+            {
+                LOG(LOG_LEVEL_ERROR, "[Time] Unable to set corrected time");
+                return;
+            }
+
+            if (correctionValue > TimeCorrectionWarningThreshold)
+            {
+                LOGF(LOG_LEVEL_WARNING, "[Time] Large time correction value: %ld ms", static_cast<int32_t>(correctionValue.count()));
+            }
+
+            lastMissionTime = Some(correctedMissionTime);
+        }
+        else
+        {
+            lastMissionTime = time;
+            LOG(LOG_LEVEL_ERROR, "[Time] To big correction value");
         }
 
-        lastMissionTime = Some(correctedMissionTime);
         lastExternalClockTime = Some(rtcTime.ToDuration());
-
-        if (correctionValue > TimeCorrectionWarningThreshold)
-        {
-            LOGF(LOG_LEVEL_WARNING, "[Time] Large time correction value: %ld ms", static_cast<int32_t>(correctionValue.count()));
-        }
     }
 
     void TimeTask::ReadInitialClockValues(const Option<std::chrono::milliseconds>& time)

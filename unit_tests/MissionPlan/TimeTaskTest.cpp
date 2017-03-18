@@ -213,7 +213,7 @@ TEST_F(TimeTaskTest, TestTwoCorrectionsInRow)
     ASSERT_EQ(expected, provider.GetCurrentTime().Value);
 }
 
-TEST_F(TimeTaskTest, CorrectionDoesRunWhenRTCReadFails)
+TEST_F(TimeTaskTest, CorrectionDoesNotRunWhenRTCReadFails)
 {
     auto proxy = InstallProxy(&mock);
 
@@ -238,7 +238,7 @@ TEST_F(TimeTaskTest, CorrectionDoesRunWhenRTCReadFails)
     ASSERT_EQ(mission::TimeCorrectionPeriod, provider.GetCurrentTime().Value);
 }
 
-TEST_F(TimeTaskTest, CorrectionDoesRunWhenRTCReadsInvalidData)
+TEST_F(TimeTaskTest, CorrectionDoesNotRunWhenRTCReadsInvalidData)
 {
     auto proxy = InstallProxy(&mock);
 
@@ -263,7 +263,7 @@ TEST_F(TimeTaskTest, CorrectionDoesRunWhenRTCReadsInvalidData)
     ASSERT_EQ(mission::TimeCorrectionPeriod, provider.GetCurrentTime().Value);
 }
 
-TEST_F(TimeTaskTest, CorrectionDoesRunWhenTimeProviderReadFails)
+TEST_F(TimeTaskTest, CorrectionDoesNotRunWhenTimeProviderReadFails)
 {
     auto proxy = InstallProxy(&mock);
 
@@ -308,4 +308,50 @@ TEST_F(TimeTaskTest, TestCorrectionWithMaximumTimeValue)
     // Time provider should be updated with overflown value
     auto expected = milliseconds::min() + mission::TimeCorrectionPeriod + 2 * mission::MinimumTimeCorrection - 1ms;
     ASSERT_EQ(expected.count(), provider.GetCurrentTime().Value.count());
+}
+
+TEST_F(TimeTaskTest, CorrectionDoesNotRunWhenMaximumCorrectionThresholdReached)
+{
+    auto proxy = InstallProxy(&mock);
+
+    // given
+    // The correct action was run initially with maximum time value
+    SetCurrentTime(0ms);
+    actionDescriptor.Execute(state);
+
+    // when
+    // RTC reports very big time difference
+    AdvanceTime(mission::TimeCorrectionPeriod);
+    rtc.AdvanceTime(duration_cast<seconds>(mission::TimeCorrectionPeriod + 2 * mission::MaximumTimeCorrection));
+    actionDescriptor.Execute(state);
+
+    // then
+    // Time provider should not be updated
+    ASSERT_EQ(mission::TimeCorrectionPeriod, provider.GetCurrentTime().Value);
+}
+
+TEST_F(TimeTaskTest, CorrectionRunsAsNormalAfterMaximumCorrectionThresholdReached)
+{
+    auto proxy = InstallProxy(&mock);
+
+    // given
+    // The correct action was run initially with maximum time value
+    SetCurrentTime(0ms);
+    actionDescriptor.Execute(state);
+
+    // when
+    // RTC reports very big time difference.
+    AdvanceTime(mission::TimeCorrectionPeriod);
+    rtc.AdvanceTime(duration_cast<seconds>(mission::TimeCorrectionPeriod + 2 * mission::MaximumTimeCorrection));
+    actionDescriptor.Execute(state);
+
+    // Another time correction is run with normal rtc operation.
+    AdvanceTime(mission::TimeCorrectionPeriod);
+    rtc.AdvanceTime(duration_cast<seconds>(mission::TimeCorrectionPeriod + 4 * mission::MinimumTimeCorrection));
+    actionDescriptor.Execute(state);
+
+    // then
+    // Time provider should be updated second time.
+    auto expected = 2 * mission::TimeCorrectionPeriod + 2 * mission::MinimumTimeCorrection;
+    ASSERT_EQ(expected, provider.GetCurrentTime().Value);
 }
