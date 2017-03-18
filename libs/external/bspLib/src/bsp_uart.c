@@ -87,7 +87,7 @@ void InitDebug(void)
     // UART config
 
     USART_InitAsync_TypeDef init = USART_INITASYNC_DEFAULT;
-    init.baudrate = 9600;
+    init.baudrate = 112500;
     USART_Reset(BSP_UART_DEBUG);
     USART_InitAsync(BSP_UART_DEBUG, &init);
 
