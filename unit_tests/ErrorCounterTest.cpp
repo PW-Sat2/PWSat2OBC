@@ -58,14 +58,17 @@ TEST_F(ErrorCounterTest, ShouldIncrementCounterOnFailure)
     ASSERT_THAT(this->_deviceA.Current(), Eq(2));
 }
 
-TEST_F(ErrorCounterTest, ShouldClearCounterOnSuccess)
+TEST_F(ErrorCounterTest, ShouldDecrementCounterOnSuccess)
 {
+    ON_CALL(this->_config, Increment(DeviceA)).WillByDefault(Return(5));
+    ON_CALL(this->_config, Decrement(DeviceA)).WillByDefault(Return(2));
+
     this->_deviceA.Failure();
     this->_deviceA.Failure();
 
     this->_deviceA.Success();
 
-    ASSERT_THAT(this->_deviceA.Current(), Eq(0));
+    ASSERT_THAT(this->_deviceA.Current(), Eq(8));
 }
 
 TEST_F(ErrorCounterTest, TwoCountersShouldBeIndependent)
@@ -75,31 +78,18 @@ TEST_F(ErrorCounterTest, TwoCountersShouldBeIndependent)
     this->_deviceB.Failure();
     this->_deviceA.Failure();
 
-    ASSERT_THAT(this->_deviceA.Current(), Eq(3));
-    ASSERT_THAT(this->_deviceB.Current(), Eq(1));
+    ASSERT_THAT(this->_deviceA.Current(), Eq(15));
+    ASSERT_THAT(this->_deviceB.Current(), Eq(5));
 }
 
 TEST_F(ErrorCounterTest, ShouldTriggerCallbackWhenFailureLimitIsReach)
 {
-    EXPECT_CALL(_callback, LimitReached(DeviceA, 7));
+    EXPECT_CALL(_callback, LimitReached(DeviceA, 10));
 
     ON_CALL(this->_config, Limit(DeviceA)).WillByDefault(Return(7));
 
-    std::cout << (int)this->_deviceA.Current() << std::endl;
     this->_deviceA.Failure();
-    std::cout << (int)this->_deviceA.Current() << std::endl;
     this->_deviceA.Failure();
-    std::cout << (int)this->_deviceA.Current() << std::endl;
-    this->_deviceA.Failure();
-    std::cout << (int)this->_deviceA.Current() << std::endl;
-    this->_deviceA.Failure();
-    std::cout << (int)this->_deviceA.Current() << std::endl;
-    this->_deviceA.Failure();
-    std::cout << (int)this->_deviceA.Current() << std::endl;
-    this->_deviceA.Failure();
-    std::cout << (int)this->_deviceA.Current() << std::endl;
-    this->_deviceA.Failure();
-    std::cout << (int)this->_deviceA.Current() << std::endl;
 }
 
 TEST_F(ErrorCounterTest, ShouldUpdateCounterBasedOnFlag)
@@ -107,9 +97,30 @@ TEST_F(ErrorCounterTest, ShouldUpdateCounterBasedOnFlag)
     false >> this->_deviceA;
     false >> this->_deviceA;
 
-    ASSERT_THAT(this->_deviceA, Eq(2));
+    ASSERT_THAT(this->_deviceA, Eq(10));
 
     true >> this->_deviceA;
 
-    ASSERT_THAT(this->_deviceA, Eq(0));
+    ASSERT_THAT(this->_deviceA, Eq(8));
+}
+
+TEST_F(ErrorCounterTest, SucessShouldCutOffCounterAtZero)
+{
+    false >> this->_deviceA;
+    true >> this->_deviceA;
+    true >> this->_deviceA;
+    true >> this->_deviceA;
+
+    ASSERT_THAT(this->_deviceA.Current(), Eq(0));
+}
+
+TEST_F(ErrorCounterTest, FailureShouldCutOffAtMaximumValue)
+{
+    ON_CALL(this->_config, Increment(DeviceA)).WillByDefault(Return(100));
+
+    false >> this->_deviceA;
+    false >> this->_deviceA;
+    false >> this->_deviceA;
+
+    ASSERT_THAT(this->_deviceA.Current(), Eq(std::numeric_limits<CounterValue>::max()));
 }

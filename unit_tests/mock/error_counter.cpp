@@ -5,6 +5,7 @@ using testing::Return;
 
 ErrorCountingConfigrationMock::ErrorCountingConfigrationMock()
 {
-    ON_CALL(*this, Increment(_)).WillByDefault(Return(1));
-    ON_CALL(*this, Limit(_)).WillByDefault(Return(10));
+    ON_CALL(*this, Increment(_)).WillByDefault(Return(5));
+    ON_CALL(*this, Decrement(_)).WillByDefault(Return(2));
+    ON_CALL(*this, Limit(_)).WillByDefault(Return(50));
 }

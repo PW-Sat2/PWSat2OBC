@@ -99,5 +99,39 @@ template <typename T> struct ApplyIf<T, true> final : T
 {
 };
 
+/**
+ * @brief Returns integer type that is wider than given type
+ */
+template <typename T> struct Wider
+{
+};
+
+/**
+ * @brief Specialization for uint8_t
+ */
+template <> struct Wider<std::uint8_t>
+{
+    /** @brief Returns uint16_t */
+    using type = std::uint16_t;
+};
+
+/**
+ * @brief Specialization for uint16_t
+ */
+template <> struct Wider<std::uint16_t>
+{
+    /** @brief Returns uint32_t */
+    using type = std::uint32_t;
+};
+
+/**
+ * @brief Specialization for uint32_t
+ */
+template <> struct Wider<std::uint32_t>
+{
+    /** @brief Returns uint64_t */
+    using type = std::uint64_t;
+};
+
 /** @} */
 #endif /* LIBS_BASE_INCLUDE_TRAITS_HPP_ */

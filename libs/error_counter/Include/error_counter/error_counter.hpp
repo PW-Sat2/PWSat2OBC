@@ -4,6 +4,8 @@
 #include <array>
 #include <atomic>
 #include <cstdint>
+#include <type_traits>
+#include "traits.hpp"
 #include "utils.h"
 
 namespace error_counter
@@ -11,6 +13,13 @@ namespace error_counter
     /**
      * @defgroup error_counter Error counter
      * @ingroup fdir
+     *
+     * Error counting is based on separate error counters associated with specific element (like device).
+     * After successful interactive with device, @ref ErrorCounter::Success() method should be called which will lower current error counter
+     * value
+     * In case of failure call @ref ErrorCounter::Failure() which will increase counter value. After reaching threshold callback method is
+     * called.
+     * Values of increment, decrement and threshold can be configured.
      *
      * @{
      */
@@ -37,6 +46,13 @@ namespace error_counter
          * @return Increment value
          */
         virtual CounterValue Increment(Device device) = 0;
+
+        /**
+         * @brief Returns values by which error counter will be decremented
+         * @param device Device
+         * @return Decrement value
+         */
+        virtual CounterValue Decrement(Device device) = 0;
     };
 
     /**
@@ -54,11 +70,6 @@ namespace error_counter
 
     /**
      * @brief Error counting mechanism
-     *
-     * Each device has associated error counter.
-     * On success, it is set to zero.
-     * On error, it is incremented by value retrieved from config interface
-     * When error limit (also configurable) is reach, callback is invoked
      */
     class ErrorCounting final
     {
@@ -100,8 +111,11 @@ namespace error_counter
         void Success(Device device);
 
       private:
+        /** @brief Type that is being used internally to store error counter */
+        using InternalCounterValue = std::make_signed_t<Wider<CounterValue>::type>;
+
         /** @brief Error counters */
-        std::array<std::atomic<CounterValue>, MaxDevices> _counters;
+        std::array<std::atomic<InternalCounterValue>, MaxDevices> _counters;
         /** @brief Configuration */
         IErrorCountingConfigration& _config;
         /** @brief Callback */
@@ -155,7 +169,7 @@ namespace error_counter
      * @param counter Error counter
      * @return Flag passed as input
      */
-    template <Device Device> bool operator>>(bool flag, ErrorCounter<Device>& counter)
+    template <Device Device> inline bool operator>>(bool flag, ErrorCounter<Device>& counter)
     {
         if (flag)
         {
