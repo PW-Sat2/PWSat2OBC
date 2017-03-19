@@ -1,3 +1,4 @@
+
 /***************************************************************************/ /**
   * @file	bsp_ebi.c
   * @brief	BSP EBI source file.
@@ -132,17 +133,19 @@ void BSP_EBI_Init(void)
 
     init.alePolarity = ebiActiveHigh;
 
+    //    uint16_t factor = 1;
+
     // Address Setup and hold time
     init.addrHoldCycles = 3;
     init.addrSetupCycles = 3;
 
     // Read cycle times
-    init.readStrobeCycles = 10;
+    init.readStrobeCycles = 63;
     init.readHoldCycles = 3;
     init.readSetupCycles = 3;
 
     // Write cycle times
-    init.writeStrobeCycles = 10;
+    init.writeStrobeCycles = 63;
     init.writeHoldCycles = 3;
     init.writeSetupCycles = 3;
 

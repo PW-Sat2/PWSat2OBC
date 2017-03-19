@@ -27,10 +27,23 @@ void COMMS_Init(void)
     uartReceived = 0;
 }
 
+#define BASE BSP_EBI_SRAM1_BASE
+void check(size_t i, char value, size_t* errors)
+{
+    *(volatile uint8_t*)(BASE + i) = value;
+    char r = *(volatile uint8_t*)(BASE + i);
+
+    if (r != value)
+    {
+        char buf[80] = {0};
+        sprintf(buf, "%.6X (%.2X -> %.2X)\n", i, value, r);
+        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)buf, sizeof(buf), true);
+        (*errors)++;
+    }
+}
+
 void testSram(void)
 {
-#define BASE BSP_EBI_SRAM1_BASE
-
     size_t size = 2 * 1024 * 1024;
 
     size_t errors = 0;
@@ -38,16 +51,8 @@ void testSram(void)
     for (size_t i = 0; i < size; i++)
     {
         char value = i % 256;
-        *(uint8_t*)(BASE + i) = value;
-        char r = *(uint8_t*)(BASE + i);
-
-        if (r != value)
-        {
-            char buf[40] = {0};
-            sprintf(buf, "%X\n", i);
-            BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)buf, sizeof(buf), true);
-            errors++;
-        }
+        check(i, 0xFF, &errors);
+        check(i, value, &errors);
     }
 
     if (errors == 0)
@@ -57,6 +62,88 @@ void testSram(void)
     else
     {
         BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"Err\n", 4, true);
+    }
+}
+
+volatile uint8_t* Sram;
+void testSram_FF()
+{
+    Sram = (volatile uint8_t*)BASE;
+
+    size_t size = 1000; // 2 * 1024 * 1024;
+    size_t errors = 0;
+
+    for (size_t i = 0; i < size; i++)
+    {
+        Sram[i] = 0x55;
+    }
+    Delay(10);
+    for (size_t i = 0; i < size; i++)
+    {
+        uint8_t r = Sram[i];
+
+        if (r != 0x55)
+        {
+            char buf[80] = {0};
+            sprintf(buf, "%.6X (%.2X -> %.2X)\n", i, 0x55, r);
+            BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)buf, sizeof(buf), true);
+
+            errors++;
+        }
+    }
+
+    if (errors == 0)
+    {
+        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"------------OK\n", 16, true);
+    }
+    else
+    {
+        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"------------ER\n", 16, true);
+    }
+}
+
+void testSram_M()
+{
+    Sram = (volatile uint8_t*)BASE;
+
+    size_t size = 2 * 1024 * 1024;
+    size_t errors = 0;
+
+    for (size_t i = 0; i < size; i++)
+    {
+        uint8_t expected = i % 256;
+        i[Sram] = expected;
+        //        for (volatile size_t i = 0; i < 100; i++)
+        //            ;
+        //*(volatile uint8_t*)(BASE + i) = i % 256;
+    }
+
+    Delay(10);
+    for (size_t i = 0; i < size; i++)
+    {
+        uint8_t expected = i % 256;
+        uint8_t now = Sram[i];
+
+        //        for (volatile size_t i = 0; i < 100; i++)
+        //            ;
+
+        if (now != expected)
+        {
+            char buf[80] = {0};
+            sprintf(buf, "%.6X (%.2X -> %.2X)\n", i, expected, now);
+            BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)buf, sizeof(buf), true);
+
+            errors++;
+        }
+    }
+
+    if (errors == 0)
+    {
+        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"------------OK\n", 16, true);
+    }
+    else
+    {
+        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"------------ER\n", 16, true);
     }
 }
 
@@ -259,7 +346,10 @@ void COMMS_processMsg(void)
 
         case 'S':
             while (1)
-                testSram();
+            {
+                //                testSram_FF();
+                testSram_M();
+            }
             break;
 
         default:
