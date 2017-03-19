@@ -4,7 +4,7 @@ namespace error_counter
 {
     CounterValue ErrorCounting::Current(Device device) const
     {
-        return this->_counters[device];
+        return static_cast<CounterValue>(this->_counters[device]);
     }
 
     void ErrorCounting::Failure(Device device)
@@ -12,6 +12,13 @@ namespace error_counter
         auto increment = this->_config.Increment(device);
 
         auto prev = this->_counters[device].fetch_add(increment);
+
+        auto overflow = (prev + increment) - std::numeric_limits<CounterValue>::max();
+
+        if (overflow > 0)
+        {
+            this->_counters[device] -= overflow;
+        }
 
         if (prev + increment >= this->_config.Limit(device))
         {
@@ -29,14 +36,16 @@ namespace error_counter
 
     void ErrorCounting::Success(Device device)
     {
-        this->_counters[device] = 0;
+        auto decrement = this->_config.Decrement(device);
+        auto prev = this->_counters[device].fetch_sub(decrement);
+
+        if (prev < decrement)
+        {
+            this->_counters[device] += (decrement - prev);
+        }
     }
 
-    ErrorCounting::ErrorCounting(IErrorCountingConfigration& config) : _config(config), _callback(nullptr)
+    ErrorCounting::ErrorCounting(IErrorCountingConfigration& config) : _counters{}, _config(config), _callback(nullptr)
     {
-        for (auto& c : this->_counters)
-        {
-            c = 0;
-        }
     }
 }

@@ -32,6 +32,11 @@ namespace obc
 
     error_counter::CounterValue FDIR::Increment(error_counter::Device /*device*/)
     {
-        return 1;
+        return 5;
+    }
+
+    error_counter::CounterValue FDIR::Decrement(error_counter::Device /*device*/)
+    {
+        return 2;
     }
 }

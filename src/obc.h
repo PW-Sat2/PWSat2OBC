@@ -79,6 +79,7 @@ struct OBC
     /** @brief Power control interface */
     PowerControl PowerControlInterface;
 
+    /** @brief FDIR mechanisms */
     obc::FDIR Fdir;
 
     /** @brief OBC storage */

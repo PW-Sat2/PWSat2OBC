@@ -172,7 +172,7 @@ TEST_F(CommTest, TestHardwareResetFailureOnHardware)
     i2c.ExpectWriteCommand(ReceiverAddress, HardwareReset).WillOnce(Return(I2CResult::Nack));
     const auto status = comm.Reset();
     ASSERT_THAT(status, Eq(false));
-    ASSERT_THAT(error_counter, Eq(1));
+    ASSERT_THAT(error_counter, Eq(5));
 }
 
 TEST_F(CommTest, TestTransmitterReset)

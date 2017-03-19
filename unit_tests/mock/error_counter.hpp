@@ -10,6 +10,7 @@ struct ErrorCountingConfigrationMock : public error_counter::IErrorCountingConfi
 
     MOCK_METHOD1(Limit, error_counter::CounterValue(error_counter::Device device));
     MOCK_METHOD1(Increment, error_counter::CounterValue(error_counter::Device device));
+    MOCK_METHOD1(Decrement, error_counter::CounterValue(error_counter::Device device));
 };
 
 namespace error_counter
