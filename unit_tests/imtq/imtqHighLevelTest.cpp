@@ -9,7 +9,7 @@
 #include "rapidcheck.hpp"
 #include "rapidcheck/gtest.h"
 #include "OsMock.hpp"
-#include "i2c/I2CMock.hpp"
+#include "I2C/I2CMock.hpp"
 #include "i2c/i2c.h"
 #include "os/os.hpp"
 #include "system.h"
