@@ -70,6 +70,7 @@ target_link_libraries(${NAME}
     obc_adcs
     rtc
     mission_adcs
+    mission_beacon
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

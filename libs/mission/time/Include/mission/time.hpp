@@ -30,7 +30,7 @@ namespace mission
       public:
         /**
          * @brief ctor.
-         * @param[in] timeProvider Reference to time providier object.
+         * @param[in] arguments Reference to time providier argument list.
          */
         TimeTask(std::tuple<TimeProvider&, devices::rtc::IRTC&> arguments);
 
@@ -115,6 +115,9 @@ namespace mission
 
     /** @brief Minimum value of time correction delta to update the time in time provider. */
     static constexpr std::chrono::milliseconds MinimumTimeCorrection = std::chrono::seconds(2);
+
+    /** @brief Maximum allowed value of time correction delta. */
+    static constexpr std::chrono::milliseconds MaximumTimeCorrection = std::chrono::hours(2);
 
     /** @} */
 }

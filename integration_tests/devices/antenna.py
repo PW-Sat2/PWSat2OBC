@@ -273,6 +273,10 @@ class AntennaController(i2cMock.I2CDevice):
         if self.antenna_state[antenna_id].is_deployed():
             self.antenna_state[antenna_id].end_deployment()
 
+    def begin_deployment(self):
+        for antenna in self.antenna_state:
+            antenna.begin_deployment()
+
     def finish_deployment(self):
         if self.deployment_in_progress:
             self.deployment_in_progress = False
@@ -280,7 +284,7 @@ class AntennaController(i2cMock.I2CDevice):
                 antenna.end_deployment()
 
         for antenna in self.antenna_state:
-            if antenna.is_deployed():
+            if antenna.deployment_in_progress():
                 antenna.end_deployment()
 
         self.ignore_deployment_switch = False

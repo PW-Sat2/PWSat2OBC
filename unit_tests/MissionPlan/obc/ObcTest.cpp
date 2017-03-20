@@ -7,10 +7,10 @@ using testing::Eq;
 
 TEST(MissionObcTest, TestIsInitialSilenPeriodFinishedInSilentPeriod)
 {
-    ASSERT_THAT(mission::IsInitialSilenPeriodFinished(39min), Eq(false));
+    ASSERT_THAT(mission::IsInitialSilentPeriodFinished(39min), Eq(false));
 }
 
 TEST(MissionObcTest, TestIsInitialSilenPeriodFinishedOutsideSilentPeriod)
 {
-    ASSERT_THAT(mission::IsInitialSilenPeriodFinished(41min), Eq(true));
+    ASSERT_THAT(mission::IsInitialSilentPeriodFinished(41min), Eq(true));
 }

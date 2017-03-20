@@ -48,9 +48,9 @@ namespace devices
 
             virtual OSResult ReadTime(RTCTime& rtcTime) final override;
 
-          private:
             static constexpr std::uint8_t I2CAddress = 0b1010001;
 
+          private:
             static constexpr std::uint8_t SecondsNibbleMask = 0x70;
             static constexpr std::uint8_t MinutesNibbleMask = 0x70;
             static constexpr std::uint8_t HoursNibbleMask = 0x30;
