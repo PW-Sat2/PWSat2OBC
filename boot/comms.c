@@ -44,6 +44,8 @@ void check(size_t i, char value, size_t* errors)
 
 void testSram(void)
 {
+    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\ntestSram ", 10, true);
+
     size_t size = 2 * 1024 * 1024;
 
     size_t errors = 0;
@@ -57,7 +59,7 @@ void testSram(void)
 
     if (errors == 0)
     {
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"OK\n", 3, true);
+        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"------------OK\n", 16, true);
     }
     else
     {
@@ -68,6 +70,8 @@ void testSram(void)
 volatile uint8_t* Sram;
 void testSram_FF()
 {
+    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\ntestSram_FF ", 13, true);
+
     Sram = (volatile uint8_t*)BASE;
 
     size_t size = 1000; // 2 * 1024 * 1024;
@@ -104,6 +108,8 @@ void testSram_FF()
 
 void testSram_M()
 {
+    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\ntestSram_M ", 12, true);
+
     Sram = (volatile uint8_t*)BASE;
 
     size_t size = 2 * 1024 * 1024;
@@ -347,8 +353,9 @@ void COMMS_processMsg(void)
         case 'S':
             while (1)
             {
-                //                testSram_FF();
                 testSram_M();
+                testSram_FF();
+                testSram();
             }
             break;
 
