@@ -1,4 +1,5 @@
 #include "BeaconUpdate.hpp"
+#include <chrono>
 #include "comm/IBeaconController.hpp"
 #include "logger/logger.h"
 #include "telecommunication/FrameContentWriter.hpp"
@@ -17,7 +18,7 @@ namespace mission
     /**
      * @brief Default beacon send interval.
      */
-    static constexpr std::uint16_t BeaconInterval = 30;
+    static constexpr seconds BeaconInterval = 30s;
 
     using telecommunication::downlink::FieldId;
 

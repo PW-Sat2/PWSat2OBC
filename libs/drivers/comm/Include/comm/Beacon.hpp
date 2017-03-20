@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <chrono>
 #include "comm.hpp"
 
 COMM_BEGIN
@@ -28,13 +29,13 @@ class Beacon
      * @param[in] contents Requested Beacon content.
      */
 
-    Beacon(std::uint16_t beaconPeriod, gsl::span<const std::uint8_t> contents);
+    Beacon(std::chrono::seconds beaconPeriod, gsl::span<const std::uint8_t> contents);
 
     /**
      * @brief Returns repeat interval of the beacon in seconds.
      * @return Time in seconds between two subsequent beacon transmissions.
      */
-    std::uint16_t Period() const;
+    std::chrono::seconds Period() const;
 
     /**
      * @brief Returns beacon frame content.
@@ -46,13 +47,13 @@ class Beacon
     /**
      * @brief Repeat interval of the beacon in seconds.
      */
-    std::uint16_t period;
+    std::chrono::seconds period;
 
     /** @brief Beacon frame contents. */
     gsl::span<const std::uint8_t> payload;
 };
 
-inline std::uint16_t Beacon::Period() const
+inline std::chrono::seconds Beacon::Period() const
 {
     return this->period;
 }
