@@ -3,7 +3,7 @@
 #include "gmock/gmock.h"
 #include "base/writer.h"
 #include "fm25w/fm25w.hpp"
-#include "spi/SPIMock.h"
+#include "SPI/SPIMock.h"
 #include "system.h"
 #include "utils.hpp"
 

@@ -9,7 +9,7 @@
 #include "OsMock.hpp"
 #include "base/reader.h"
 #include "base/writer.h"
-#include "i2c/I2CMock.hpp"
+#include "I2C/I2CMock.hpp"
 #include "i2c/i2c.h"
 #include "os/os.hpp"
 #include "rapidcheck.hpp"
