@@ -30,7 +30,7 @@ namespace mission
       public:
         /**
          * @brief ctor.
-         * @param[in] timeProvider Reference to time providier object.
+         * @param[in] arguments Reference to time providier argument list.
          */
         TimeTask(std::tuple<TimeProvider&, devices::rtc::IRTC&> arguments);
 

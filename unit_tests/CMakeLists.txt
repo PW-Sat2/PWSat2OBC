@@ -25,7 +25,6 @@ set(SOURCES
   SPI/SPIMock.cpp
   antenna/MiniportMock.cpp
   antenna/MiniportMock.hpp
-
   imtq/imtqTest.cpp
   imtq/imtqHighLevelTest.cpp
   Logger/LoggerTest.cpp
@@ -53,6 +52,7 @@ set(SOURCES
   MissionPlan/MissionLoopTest.cpp
   MissionPlan/antenna/DeployAntennasTest.cpp
   MissionPlan/antenna/AntennaMissionStateTest.cpp
+  MissionPlan/beacon/BeaconUpdateTest.cpp
   MissionPlan/CompositeActionTest.cpp
   MissionPlan/adcs/AdcsPrimaryTaskTest.cpp
   MissionPlan/obc/ObcTest.cpp
@@ -67,6 +67,9 @@ set(SOURCES
   time/SmartWait.cpp
   time/rtc.cpp
   mock/RtcMock.hpp
+  mock/comm.cpp
+  mock/comm.hpp
+  assert.cpp
   antenna/miniport.cpp
   antenna/antenna.cpp
   SPI/SPIDriverTest.cpp
@@ -76,6 +79,7 @@ set(SOURCES
   Experiments/ExperimentTest.cpp
   Experiments/ADCS/DetumblingExperimentTest.cpp
   FM25W/FM25WDriverTest.cpp
+  telecommunication/FrameContentsWriterTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -130,6 +134,7 @@ target_link_libraries(${NAME}
     obc_telecommands
     rtc
     fm25w
+    mission_beacon
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})

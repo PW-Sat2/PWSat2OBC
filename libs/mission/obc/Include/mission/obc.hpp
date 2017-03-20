@@ -18,7 +18,7 @@ namespace mission
      * @param[in] currentTime Current queried mission time.
      * @return True if the silent period has passed, false otherwise.
      */
-    bool IsInitialSilenPeriodFinished(const std::chrono::milliseconds& currentTime);
+    bool IsInitialSilentPeriodFinished(const std::chrono::milliseconds& currentTime);
 
     /** @} */
 }

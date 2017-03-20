@@ -1,5 +1,5 @@
 #include <cstdio>
-#include <gtest/gtest.h>
+#include "gmock/gmock.h"
 
 #ifdef ENABLE_COVERAGE
 extern "C" void __gcov_flush(void);
@@ -7,7 +7,7 @@ extern "C" void __gcov_flush(void);
 
 int run(int argc, char** argv)
 {
-    testing::InitGoogleTest(&argc, argv);
+    testing::InitGoogleMock(&argc, argv);
     auto r = RUN_ALL_TESTS();
 
 #ifdef ENABLE_COVERAGE

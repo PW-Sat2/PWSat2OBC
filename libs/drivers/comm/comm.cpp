@@ -27,11 +27,11 @@ using drivers::i2c::I2CResult;
 using namespace COMM;
 using namespace std::chrono_literals;
 
-Beacon::Beacon() : period(0)
+Beacon::Beacon() : period(0s)
 {
 }
 
-Beacon::Beacon(std::uint16_t beaconPeriod, gsl::span<const std::uint8_t> contents)
+Beacon::Beacon(std::chrono::seconds beaconPeriod, gsl::span<const std::uint8_t> contents)
     : period(beaconPeriod), //
       payload(std::move(contents))
 {
@@ -324,7 +324,7 @@ bool CommObject::SetBeacon(const Beacon& beaconData)
     std::array<std::uint8_t, MaxDownlinkFrameSize + 2> buffer;
     Writer writer(buffer);
     writer.WriteByte(num(TransmitterCommand::SetBeacon));
-    writer.WriteWordLE(beaconData.Period());
+    writer.WriteWordLE(gsl::narrow_cast<std::uint16_t>(beaconData.Period().count()));
     writer.WriteArray(beaconData.Contents());
     if (!writer.Status())
     {

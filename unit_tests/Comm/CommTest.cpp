@@ -1,17 +1,16 @@
 #include <algorithm>
-#include <em_i2c.h>
 #include <gsl/span>
 #include <string>
 #include <tuple>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "gmock/gmock-matchers.h"
+#include "I2C/I2CMock.hpp"
 #include "OsMock.hpp"
 #include "comm/Beacon.hpp"
 #include "comm/CommDriver.hpp"
 #include "comm/Frame.hpp"
 #include "comm/IHandleFrame.hpp"
-#include "I2C/I2CMock.hpp"
 #include "i2c/i2c.h"
 #include "os/os.hpp"
 #include "system.h"
@@ -30,6 +29,7 @@ using testing::Matches;
 using gsl::span;
 using drivers::i2c::I2CResult;
 using namespace devices::comm;
+using namespace std::chrono_literals;
 
 static constexpr uint8_t ReceiverAddress = 0x60;
 static constexpr uint8_t TransmitterAddress = 0x61;
@@ -572,7 +572,7 @@ TEST_F(CommTest, TestTransmitterTelemetry)
 TEST_F(CommTest, TestSetBeaconFailure)
 {
     std::uint8_t buffer[1];
-    Beacon beacon(1, buffer);
+    Beacon beacon(1s, buffer);
     EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon))).WillOnce(Return(I2CResult::Nack));
     const auto status = comm.SetBeacon(beacon);
     ASSERT_THAT(status, Eq(false));
@@ -581,7 +581,7 @@ TEST_F(CommTest, TestSetBeaconFailure)
 TEST_F(CommTest, TestSetBeaconSizeOutOfRange)
 {
     std::uint8_t buffer[MaxDownlinkFrameSize + 1];
-    Beacon beacon(1, buffer);
+    Beacon beacon(1s, buffer);
     EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon))).Times(0);
     const auto status = comm.SetBeacon(beacon);
     ASSERT_THAT(status, Eq(false));
@@ -590,7 +590,7 @@ TEST_F(CommTest, TestSetBeaconSizeOutOfRange)
 TEST_F(CommTest, TestSetBeacon)
 {
     const uint8_t data[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
-    Beacon beacon(0x0a0b, data);
+    Beacon beacon(0x0a0bs, data);
     EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon)))
         .WillOnce(Invoke([](uint8_t /*address*/, span<const uint8_t> inData) {
             const uint8_t expected[] = {TransmitterSetBeacon, 0x0b, 0x0a, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
