@@ -22,6 +22,7 @@ set(SOURCES
     commands/fram.cpp
     commands/external_flash.cpp
     commands/obc_state.cpp
+    commands/temp.cpp
     obc.h
     obc.cpp
     fault_handlers.cpp

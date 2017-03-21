@@ -10,6 +10,7 @@
 #include "logger/logger.h"
 #include "power/power.h"
 #include "spi/efm.h"
+#include "temp/efm.hpp"
 
 namespace obc
 {
@@ -119,6 +120,9 @@ namespace obc
 
         /** @brief BURTC object. */
         devices::burtc::Burtc Burtc;
+
+        /** @brief Self-temperature sensor */
+        temp::ADCTemperatureReader MCUTemperature;
     };
 }
 /** @} */
