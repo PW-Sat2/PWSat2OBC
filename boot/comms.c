@@ -27,11 +27,28 @@ void COMMS_Init(void)
     uartReceived = 0;
 }
 
-#define BASE BSP_EBI_SRAM1_BASE
-void check(size_t i, char value, size_t* errors)
+void checkSram(size_t i, char value, size_t* errors)
 {
-    *(volatile uint8_t*)(BASE + i) = value;
-    char r = *(volatile uint8_t*)(BASE + i);
+    *(volatile uint8_t*)(BSP_EBI_SRAM1_BASE + i) = value;
+    char r = *(volatile uint8_t*)(BSP_EBI_SRAM1_BASE + i);
+
+    if (r != value)
+    {
+        char buf[80] = {0};
+        sprintf(buf, "%.6X (%.2X -> %.2X)\n", i, value, r);
+        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)buf, sizeof(buf), true);
+        (*errors)++;
+    }
+}
+
+void checkEeprom(size_t i, char value, size_t* errors)
+{
+    char buf[1] = {0};
+    buf[0] = value;
+
+    BSP_EBI_progEEPROM(i, (uint8_t*)buf, 1);
+
+    char r = *(volatile uint8_t*)(BSP_EBI_EEPROM_BASE + i);
 
     if (r != value)
     {
@@ -44,17 +61,16 @@ void check(size_t i, char value, size_t* errors)
 
 void testSram(void)
 {
-    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\ntestSram ", 10, true);
-
     size_t size = 2 * 1024 * 1024;
-
     size_t errors = 0;
+
+    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\ntestSram ", 10, true);
 
     for (size_t i = 0; i < size; i++)
     {
         char value = i % 256;
-        check(i, 0xFF, &errors);
-        check(i, value, &errors);
+        checkSram(i, 0xFF, &errors);
+        checkSram(i, value, &errors);
     }
 
     if (errors == 0)
@@ -70,12 +86,12 @@ void testSram(void)
 volatile uint8_t* Sram;
 void testSram_FF()
 {
-    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\ntestSram_FF ", 13, true);
-
-    Sram = (volatile uint8_t*)BASE;
-
     size_t size = 1000; // 2 * 1024 * 1024;
     size_t errors = 0;
+
+    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\ntestSram_FF ", 13, true);
+
+    Sram = (volatile uint8_t*)BSP_EBI_SRAM1_BASE;
 
     for (size_t i = 0; i < size; i++)
     {
@@ -108,12 +124,12 @@ void testSram_FF()
 
 void testSram_M()
 {
-    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\ntestSram_M ", 12, true);
-
-    Sram = (volatile uint8_t*)BASE;
-
     size_t size = 2 * 1024 * 1024;
     size_t errors = 0;
+
+    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\ntestSram_M ", 12, true);
+
+    Sram = (volatile uint8_t*)BSP_EBI_SRAM1_BASE;
 
     for (size_t i = 0; i < size; i++)
     {
@@ -121,7 +137,7 @@ void testSram_M()
         i[Sram] = expected;
         //        for (volatile size_t i = 0; i < 100; i++)
         //            ;
-        //*(volatile uint8_t*)(BASE + i) = i % 256;
+        //*(volatile uint8_t*)(BSP_EBI_SRAM1_BASE + i) = i % 256;
     }
 
     Delay(10);
@@ -150,6 +166,39 @@ void testSram_M()
     else
     {
         BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"------------ER\n", 16, true);
+    }
+}
+
+void testEeprom()
+{
+    size_t size = 32 * 1024;
+    size_t errors = 0;
+    size_t progress = 0;
+    char buf[50] = {0};
+
+    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\ntestEeprom ", 12, true);
+
+    for (size_t i = 0; i < size; i++)
+    {
+        char value = i % 256;
+        checkEeprom(i, 0xFF, &errors);
+        checkEeprom(i, value, &errors);
+
+        if(i % 256 == 0)
+        {
+            progress = (i*100)/size;
+            sprintf(buf, "\nAddr. range: %.6X-%.6X (%u%% done)", i, i+255, progress);
+            BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)buf, sizeof(buf), true);
+        }
+    }
+
+    if (errors == 0)
+    {
+        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\n------------OK\n", 17, true);
+    }
+    else
+    {
+        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\nErr\n", 5, true);
     }
 }
 
@@ -358,6 +407,12 @@ void COMMS_processMsg(void)
                 testSram();
             }
             break;
+
+        case 'E':
+            while(1)
+            {
+                testEeprom();
+            }
 
         default:
             // reset message id
