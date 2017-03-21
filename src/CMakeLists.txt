@@ -20,6 +20,7 @@ set(SOURCES
     commands/imtq.cpp
     commands/rtc.cpp
     commands/fram.cpp
+    commands/temp.cpp
     obc.h
     obc.cpp
     fault_handlers.cpp

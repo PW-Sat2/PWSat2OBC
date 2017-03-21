@@ -1,20 +1,15 @@
-set(NAME obc_hardware)
+set(NAME temp)
 
 set(SOURCES
-    hardware.cpp
+    efm.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
 
 target_link_libraries(${NAME} 
-	base
-	gpio
-	i2c
-	spi
-	power
-	burtc
-	temp
+    base
+	emlib
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
-target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/obc)
+target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/${NAME})

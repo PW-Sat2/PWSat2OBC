@@ -4,7 +4,8 @@
 #include "obc.h"
 #include "terminal/terminal.h"
 
-static const TerminalCommandDescription commands[] = {{"ping", PingHandler},
+static const TerminalCommandDescription commands[] = {
+    {"ping", PingHandler},
     {"echo", EchoHandler},
     {"jumpToTime", JumpToTimeHandler},
     {"currentTime", CurrentTimeHandler},
@@ -46,7 +47,8 @@ static const TerminalCommandDescription commands[] = {{"ping", PingHandler},
     {"reset", ResetHandler},
     {"rtc", RTCTest},
     {"rm", RemoveFile},
-    {"fram", FRAM}
+    {"fram", FRAM},
+    {"temp", Temp},
 };
 
 void InitializeTerminal(void)
