@@ -8,6 +8,7 @@
 #include "base/os.h"
 #include "comm.hpp"
 #include "error_counter/error_counter.hpp"
+#include "gsl/span"
 #include "i2c/forward.h"
 
 COMM_BEGIN
@@ -123,6 +124,9 @@ class CommObject final : public ITransmitFrame, public IBeaconController
     /**
      * @brief This procedure sets the beacon frame for the passed comm object.
      *
+     * This procedure will ensure that setting beacon will not erase any frames from
+     * transmitter's output buffer by first sending beacon as a regular frame and setting
+     * the beacon itself only if there are no frames that are waiting to te send by the transmitter.
      * @param[in] beacon Reference to object describing new beacon.
      * See the definition of the CommBeacon for details.
      * @return Operation status, true in case of success, false otherwise.
@@ -256,6 +260,24 @@ class CommObject final : public ITransmitFrame, public IBeaconController
     void ProcessSingleFrame();
 
     /**
+     * @brief This procedure sets the beacon frame for the passed comm object.
+     *
+     * @param[in] beacon Reference to object describing new beacon.
+     * See the definition of the CommBeacon for details.
+     * @return Operation status, true in case of success, false otherwise.
+     */
+    bool UpdateBeacon(const Beacon& beacon);
+
+    /**
+     * @brief Adds the requested frame to the send queue.
+     *
+     * @param[in] frame Buffer containing frame contents.
+     * @param[out] remainingSlots Number of free slots in transmitter's output buffer.
+     * @return Operation status, true in case of success, false otherwise.
+     */
+    bool ScheduleFrameTransmission(gsl::span<const std::uint8_t> frame, std::uint8_t& remainingSlots);
+
+    /**
      * @brief Internal communication module task entry point.
      * @param[in] param Task execution context. This should be pointer to the task owner object.
      */
@@ -276,6 +298,12 @@ class CommObject final : public ITransmitFrame, public IBeaconController
     /** @brief Event group used to communicate with background task. */
     EventGroup _pollingTaskFlags;
 };
+
+inline bool CommObject::SendFrame(gsl::span<const std::uint8_t> frame)
+{
+    std::uint8_t remainingBufferSize;
+    return ScheduleFrameTransmission(frame, remainingBufferSize);
+}
 
 COMM_END
 
