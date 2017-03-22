@@ -41,6 +41,8 @@ int main(void)
 
     BSP_DMA_Init();
     COMMS_Init();
+    GPIO_PinModeSet(gpioPortD, 6, gpioModePushPull, 0); // FLASH LSB
+    GPIO_PinModeSet(gpioPortD, 4, gpioModePushPull, 0); // SRAM LSB
     BSP_EBI_Init();
     BSP_EBI_disableSRAM(bspEbiSram1);
     BSP_EBI_disableSRAM(bspEbiSram2);

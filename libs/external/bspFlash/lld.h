@@ -179,6 +179,8 @@ typedef enum
 *****************************************************/
 #define FLASH_OFFSET(b,o)       (*(( (volatile FLASHDATA*)(b) ) + (o)))
 
+#define USER_SPECIFIC_CMD
+
 #ifdef LLD_DEV_FLASH
 #ifdef TRACE
         #define FLASH_WR(b,o,d)         FlashWrite( b,o,d )

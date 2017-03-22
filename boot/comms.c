@@ -27,6 +27,8 @@ void COMMS_Init(void)
     uartReceived = 0;
 }
 
+// ---------------------- SRAM tests -----------------------------------
+
 void checkSram(size_t i, char value, size_t* errors)
 {
     *(volatile uint8_t*)(BSP_EBI_SRAM1_BASE + i) = value;
@@ -41,22 +43,12 @@ void checkSram(size_t i, char value, size_t* errors)
     }
 }
 
-void checkEeprom(size_t i, char value, size_t* errors)
-{
-    char buf[1] = {0};
-    buf[0] = value;
-
-    BSP_EBI_progEEPROM(i, (uint8_t*)buf, 1);
-
-    char r = *(volatile uint8_t*)(BSP_EBI_EEPROM_BASE + i);
-
-    if (r != value)
-    {
-        char buf[80] = {0};
-        sprintf(buf, "%.6X (%.2X -> %.2X)\n", i, value, r);
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)buf, sizeof(buf), true);
-        (*errors)++;
-    }
+void selectSRAM_LSB(bool on) {
+	if (on) {
+		GPIO_PinOutSet(gpioPortD, 4);
+	} else {
+		GPIO_PinOutClear(gpioPortD, 4);
+	}
 }
 
 void testSram(void)
@@ -93,10 +85,18 @@ void testSram_FF()
 
     Sram = (volatile uint8_t*)BSP_EBI_SRAM1_BASE;
 
+    selectSRAM_LSB(false);
+    for (size_t i = 0; i < size; i++)
+    {
+        Sram[i] = 0x77;
+    }
+
+    selectSRAM_LSB(true);
     for (size_t i = 0; i < size; i++)
     {
         Sram[i] = 0x55;
     }
+    
     Delay(10);
     for (size_t i = 0; i < size; i++)
     {
@@ -135,9 +135,6 @@ void testSram_M()
     {
         uint8_t expected = i % 256;
         i[Sram] = expected;
-        //        for (volatile size_t i = 0; i < 100; i++)
-        //            ;
-        //*(volatile uint8_t*)(BSP_EBI_SRAM1_BASE + i) = i % 256;
     }
 
     Delay(10);
@@ -166,6 +163,26 @@ void testSram_M()
     else
     {
         BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"------------ER\n", 16, true);
+    }
+}
+
+// ---------------------- EEPROM tests -----------------------------------
+
+void checkEeprom(size_t i, char value, size_t* errors)
+{
+    char buf[1] = {0};
+    buf[0] = value;
+
+    BSP_EBI_progEEPROM(i, (uint8_t*)buf, 1);
+
+    char r = *(volatile uint8_t*)(BSP_EBI_EEPROM_BASE + i);
+
+    if (r != value)
+    {
+        char buf[80] = {0};
+        sprintf(buf, "%.6X (%.2X -> %.2X)\n", i, value, r);
+        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)buf, sizeof(buf), true);
+        (*errors)++;
     }
 }
 
@@ -201,6 +218,94 @@ void testEeprom()
         BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\nErr\n", 5, true);
     }
 }
+
+// ---------------------- FLASH -----------------------------------
+
+volatile uint8_t * Flash = (volatile uint8_t*)0x84000000;
+
+void selectFLASH_LSB(bool on) {
+	if (on) {
+		GPIO_PinOutSet(gpioPortD, 6);
+	} else {
+		GPIO_PinOutClear(gpioPortD, 6);
+	}
+}
+
+uint8_t FlashReadUserCmd(uint32_t address)
+{
+    address -= (size_t)Flash;
+    bool lsb = address & 0x1;
+    selectFLASH_LSB(lsb);
+    address >>= 1;
+    address += (size_t)Flash;
+
+
+    volatile uint8_t* memory = (volatile uint8_t*)address;
+
+    // debugLen = sprintf((char*)debugStr, "%lux,%d: %x\n", address, lsb, *memory);
+    // BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+
+    return *memory;
+}
+
+void FlashWriteUserCmd(uint32_t address, uint8_t data)
+{
+    address -= (size_t)Flash;
+    bool lsb = address & 0x1;
+    selectFLASH_LSB(lsb);
+    address >>= 1;
+    address += (size_t)Flash;
+
+    // debugLen = sprintf((char*)debugStr, "%lux,%d = %x\n", address, lsb, data);
+    // BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+
+    volatile uint8_t* memory = (volatile uint8_t*)address;
+    *memory = data;
+}
+
+
+void testFlash() 
+{
+    size_t size = 10000;
+
+    for (size_t offset = 0; offset < size; offset += BSP_EBI_FLASH_LSECTOR_SIZE)
+    {
+        lld_SectorEraseOp((uint8_t*)(BOOT_TABLE_BASE), offset);
+    }
+    debugLen = sprintf((char*)debugStr, "\n\nFlash erase done!\n");
+    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+
+    for(size_t i = 0; i < size; ++i)
+    {
+        lld_ProgramOp((uint8_t*)(BOOT_TABLE_BASE), i, i & 0xFF);
+    }
+    debugLen = sprintf((char*)debugStr, "\n\nFlash programming done!\n");
+    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+
+    int errors = 0;
+    for(size_t i = 0; i < size; ++i)
+    {
+        uint8_t now = FlashReadUserCmd((size_t)Flash + i);
+
+        uint8_t expected = i & 0xFF;
+        if (now != expected)
+        {
+            errors++;
+            debugLen = sprintf((char*)debugStr, "%.6X (%.2X -> %.2X)\n", i, expected, now);
+            BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+        }
+    }
+    if (errors == 0)
+    {
+        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\n------------OK\n", 17, true);
+    }
+    else
+    {
+        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\nErr\n", 5, true);
+    }
+}
+
+// ---------------------- COMMS -----------------------------------
 
 void COMMS_processMsg(void)
 {
@@ -413,6 +518,14 @@ void COMMS_processMsg(void)
             {
                 testEeprom();
             }
+        case 'F':
+        	{
+				uint32_t FlashID = lld_GetDeviceId((uint8_t *)Flash);
+				debugLen = sprintf((char*)debugStr, "\n\nFlash ID: %lx", FlashID);
+				BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+
+                testFlash();
+        	}
 
         default:
             // reset message id
