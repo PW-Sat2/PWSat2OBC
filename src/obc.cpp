@@ -8,7 +8,7 @@ OBC::OBC()
       Storage(Hardware.SPI, fs, Hardware.Pins),                            //
       Imtq(Hardware.I2C.Buses.Bus),                                        //
       Experiments(fs, this->adcs.GetAdcsController(), this->timeProvider), //
-      Communication(Hardware.I2C.Buses.Bus, fs, Experiments),              //
+      Communication(this->Fdir, Hardware.I2C.Buses.Bus, fs, Experiments),              //
       terminal(this->IO),                                                  //
       rtc(Hardware.I2C.Buses.Payload)
 {
@@ -16,6 +16,7 @@ OBC::OBC()
 
 void OBC::Initialize()
 {
+    this->Fdir.Initalize();
     this->Hardware.Initialize();
 
     this->fs.Initialize();
@@ -27,6 +28,8 @@ void OBC::Initialize()
 
 OSResult OBC::PostStartInitialization()
 {
+    this->Fdir.PostStartInitialize();
+
     this->Experiments.Initialize();
 
     auto result = this->Hardware.PostStartInitialize();

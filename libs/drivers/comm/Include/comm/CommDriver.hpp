@@ -7,6 +7,7 @@
 #include "ITransmitFrame.hpp"
 #include "base/os.h"
 #include "comm.hpp"
+#include "error_counter/error_counter.hpp"
 #include "i2c/forward.h"
 
 COMM_BEGIN
@@ -22,10 +23,11 @@ class CommObject final : public ITransmitFrame, public IBeaconController
   public:
     /**
      * Constructs new instance of COMM low-level driver
+     * @param[in] errors Error counting mechanism
      * @param[in] low I2C bus used to communicate with device
      * @param[in] upperInterface Reference to object responsible for interpreting received frames
      */
-    CommObject(drivers::i2c::II2CBus& low, IHandleFrame& upperInterface);
+    CommObject(error_counter::ErrorCounting& errors, drivers::i2c::II2CBus& low, IHandleFrame& upperInterface);
 
     /**
      * @brief This procedure initializes the comm driver object and sets it 'Paused' state.
@@ -258,6 +260,9 @@ class CommObject final : public ITransmitFrame, public IBeaconController
      * @param[in] param Task execution context. This should be pointer to the task owner object.
      */
     [[noreturn]] static void CommTask(void* param);
+
+    /** @brief Error counter */
+    error_counter::ErrorCounter<1> _error;
 
     /** @brief Comm driver lower interface. */
     drivers::i2c::II2CBus& _low;

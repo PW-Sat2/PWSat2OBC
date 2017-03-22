@@ -69,6 +69,7 @@ set(SOURCES
   mock/RtcMock.hpp
   mock/comm.cpp
   mock/comm.hpp
+  mock/error_counter.cpp
   assert.cpp
   antenna/miniport.cpp
   antenna/antenna.cpp
@@ -78,6 +79,7 @@ set(SOURCES
   Experiments/Fibo/FiboCalculatorTest.cpp
   Experiments/ExperimentTest.cpp
   Experiments/ADCS/DetumblingExperimentTest.cpp
+  ErrorCounterTest.cpp
   FM25W/FM25WDriverTest.cpp
   telecommunication/FrameContentsWriterTest.cpp
 )
@@ -133,6 +135,7 @@ target_link_libraries(${NAME}
     mission_adcs
     obc_telecommands
     rtc
+    error_counter
     fm25w
     mission_beacon
 )

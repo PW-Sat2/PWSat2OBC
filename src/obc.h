@@ -21,6 +21,7 @@
 #include "obc/adcs.hpp"
 #include "obc/communication.h"
 #include "obc/experiments.hpp"
+#include "obc/fdir.hpp"
 #include "obc/hardware.h"
 #include "obc/storage.h"
 #include "rtc/rtc.hpp"
@@ -77,6 +78,9 @@ struct OBC
 
     /** @brief Power control interface */
     PowerControl PowerControlInterface;
+
+    /** @brief FDIR mechanisms */
+    obc::FDIR Fdir;
 
     /** @brief OBC storage */
     obc::OBCStorage Storage;
