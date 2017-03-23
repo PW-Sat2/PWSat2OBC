@@ -50,13 +50,6 @@ namespace mission
             bool IsDeploymentInProgress() const;
 
             /**
-             * @brief Returns information whether the antenna deployment part of the entire process is finished.
-             *
-             * @return True is the deployment part of the process is finished, false otherwise.
-             */
-            bool IsDeploymentPartFinished() const;
-
-            /**
              * @brief Returns information whether the entire process is finished.
              *
              * @return True is the entire deployemnt process is finished, false otherwise.
@@ -133,12 +126,6 @@ namespace mission
              */
             static std::uint8_t StepCount();
 
-            /**
-             * @brief Returns total count of the steps that are strictly related to the antenna deployment.
-             * @return Deployment step count.
-             */
-            static std::uint8_t DeploymentStepCount();
-
           private:
             /**
              * @brief Flag indicating whether antenna hardware status should be ignored.
@@ -153,12 +140,12 @@ namespace mission
             /**
              * @brief Current step number.
              */
-            uint8_t _stepNumber;
+            std::uint8_t _stepNumber;
 
             /**
              * @brief Current step retry count.
              */
-            uint8_t _retryCount;
+            std::uint8_t _retryCount;
 
             /**
              * @brief Current antenna driver instance.
