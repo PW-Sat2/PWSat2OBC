@@ -11,7 +11,7 @@ using testing::Eq;
 using namespace std::chrono_literals;
 
 class BeaconUpdateConditionTest //
-    : public testing::TestWithParam<std::tuple<bool, bool, bool, bool, bool, std::chrono::milliseconds, bool>>
+    : public testing::TestWithParam<std::tuple<bool, std::chrono::milliseconds, bool>>
 {
   protected:
     BeaconUpdateConditionTest();
@@ -28,32 +28,20 @@ TEST_P(BeaconUpdateConditionTest, TestBeaconUpdateCondition)
 {
     const auto& param = GetParam();
     state.Antenna.Deployed = std::get<0>(param);
-    state.Antenna.DeploymentState[0] = std::get<1>(param);
-    state.Antenna.DeploymentState[1] = std::get<2>(param);
-    state.Antenna.DeploymentState[2] = std::get<3>(param);
-    state.Antenna.DeploymentState[3] = std::get<4>(param);
-    state.Time = std::get<5>(param);
+    state.Time = std::get<1>(param);
     auto action = beacon.BuildAction();
-    const auto expected = std::get<6>(param);
+    const auto expected = std::get<2>(param);
     EXPECT_THAT(action.condition(state, action.param), Eq(expected));
 }
 
 INSTANTIATE_TEST_CASE_P(MissionBeaconCondition,
     BeaconUpdateConditionTest,
-    testing::Values(std::make_tuple(false, false, false, false, false, 0min, false),
-        std::make_tuple(true, false, false, false, false, 0min, false),
-        std::make_tuple(false, true, false, false, false, 0min, false),
-        std::make_tuple(false, false, true, false, false, 0min, false),
-        std::make_tuple(false, false, false, true, false, 0min, false),
-        std::make_tuple(false, false, false, false, true, 0min, false),
-        std::make_tuple(true, false, true, false, false, 0min, false),
-        std::make_tuple(true, false, true, false, false, 5min, true),
-        std::make_tuple(true, false, false, false, true, 5min, true),
-        std::make_tuple(true, false, true, false, false, 4min, false),
-        std::make_tuple(true, false, false, false, true, 4min, false),
-        std::make_tuple(false, false, true, false, false, 5min, false),
-        std::make_tuple(true, false, false, false, false, 5min, false),
-        std::make_tuple(false, false, false, false, false, 5min, false)), );
+    testing::Values(std::make_tuple(false, 0min, false),
+        std::make_tuple(true, 0min, false),
+        std::make_tuple(false, 4min, false),
+        std::make_tuple(true, 4min, false),
+        std::make_tuple(true, 5min, true),
+        std::make_tuple(false, 5min, false)), );
 
 class BeaconUpdateTest : public testing::Test
 {
