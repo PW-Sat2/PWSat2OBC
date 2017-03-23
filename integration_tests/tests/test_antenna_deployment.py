@@ -53,9 +53,54 @@ class Test_AntennaDeployment(BaseTest):
         self.begin(2)
         self.assertTrue(event.wait_for_change(1), "antenna deployment process was not cancelled")
 
-    def test_deployment_completion(self):
-        event = TestEvent()
-        self.system.backup_antenna.on_deployment_cancel = event.set
-        self.begin(5)
-        self.assertTrue(event.wait_for_change(1), "antenna deployment on backup controller was not cancelled")
+    def test_deployment_arming_sequences(self):
+        primaryBegin = TestEvent()
+        primaryEnd = TestEvent()
+        backupBegin = TestEvent()
+        backupEnd = TestEvent()
+
+        def primaryHandler(newState):
+            if newState:
+                primaryBegin.set()
+            else:
+                primaryEnd.set()
+
+        def backupHandler(newState):
+            if newState:
+                backupBegin.set()
+            else:
+                backupEnd.set()
+
+        def deployemntHandler(*args):
+            return False
+
+        self.system.primary_antenna.on_arm_state_change = primaryHandler
+        self.system.backup_antenna.on_arm_state_change = backupHandler
+        self.system.primary_antenna.on_begin_deployment = deployemntHandler
+        self.system.backup_antenna.on_begin_deployment = deployemntHandler
+        self.begin(14)
+        self.assertTrue(primaryBegin.wait_for_change(1), "primary controller was not armed")
+        self.assertTrue(primaryEnd.wait_for_change(1), "primary controller was not disarmed")
+        self.assertTrue(backupBegin.wait_for_change(1), "backup controller was not armed")
+        self.assertTrue(backupEnd.wait_for_change(1), "backup controller was not disarmed")
+
+    def test_all_antennas_are_deployed_manually(self):
+        list = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+        expected = [0, 1, 1, 1, 1, 1, 1, 1, 1]
+
+        def primaryHandler(controller, antennaId):
+            if antennaId != -1:
+                list[antennaId] = 1
+            return False;
+
+        def backupHandler(controller, antennaId):
+            if antennaId != -1:
+                list[antennaId + 4] = 1
+            return False;
+
+        self.system.primary_antenna.on_begin_deployment = primaryHandler
+        self.system.backup_antenna.on_begin_deployment = backupHandler
+        self.begin(14)
+        self.assertSequenceEqual(list, expected);
+
 

@@ -205,7 +205,7 @@ static OSResult GetDeploymentStatus(AntennaMiniportDriver* miniport,
     if ((value & 0x1000) != 0)
     {
         LOGF(LOG_LEVEL_WARNING,
-            "[ant] Antenna %d deployment status out of range: %d.",
+            "[ant] Antenna %d deployment status out of range: 0x%x.",
             channel,
             value //
             );
@@ -308,7 +308,7 @@ static OSResult GetTemperature(AntennaMiniportDriver* miniport,
     if ((value & 0xfc00) != 0)
     {
         LOGF(LOG_LEVEL_WARNING,
-            "[ant] Antenna %d temperature is out of range: %d.",
+            "[ant] Antenna %d temperature is out of range: 0x%x.",
             channel,
             value //
             );
