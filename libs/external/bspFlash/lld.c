@@ -2164,6 +2164,7 @@ ADDRESS offset,         /* address offset from base address */
 FLASHDATA write_data    /* variable containing data to program */
 )
 {
+	offset <<= 1;
   FLASHDATA read_data = 0;
   DEVSTATUS status;
 
@@ -2218,6 +2219,7 @@ FLASHDATA * base_addr,    /* device base address is system */
 ADDRESS offset        /* address offset from base address */
 )
 {
+	offset <<= 1;
   FLASHDATA         expect_data = (FLASHDATA)0xFFFFFFFF;
   FLASHDATA         actual_data = 0;
   DEVSTATUS         status;

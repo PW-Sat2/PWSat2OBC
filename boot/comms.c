@@ -242,10 +242,12 @@ uint8_t FlashReadUserCmd(uint32_t address)
 
     volatile uint8_t* memory = (volatile uint8_t*)address;
 
-    // debugLen = sprintf((char*)debugStr, "%lux,%d: %x\n", address, lsb, *memory);
+    uint8_t result = *memory;
+
+    // debugLen = sprintf((char*)debugStr, "[R] %.6lX,%.3x: %.2x\n", address - (size_t)Flash, lsb, result);
     // BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
 
-    return *memory;
+    return result;
 }
 
 void FlashWriteUserCmd(uint32_t address, uint8_t data)
@@ -256,19 +258,20 @@ void FlashWriteUserCmd(uint32_t address, uint8_t data)
     address >>= 1;
     address += (size_t)Flash;
 
-    // debugLen = sprintf((char*)debugStr, "%lux,%d = %x\n", address, lsb, data);
+    // debugLen = sprintf((char*)debugStr, "[W] %.6lX+%.3x = %.2x\n", address - (size_t)Flash, lsb, data);
     // BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+
 
     volatile uint8_t* memory = (volatile uint8_t*)address;
     *memory = data;
 }
 
 
-void testFlash() 
+void testFlashIndex()
 {
-    size_t size = 10000;
+    size_t size = 1*100*1024;
 
-    for (size_t offset = 0; offset < size; offset += BSP_EBI_FLASH_LSECTOR_SIZE)
+    for (size_t offset = 0; offset < 2*size; offset += BSP_EBI_FLASH_LSECTOR_SIZE)
     {
         lld_SectorEraseOp((uint8_t*)(BOOT_TABLE_BASE), offset);
     }
@@ -282,10 +285,11 @@ void testFlash()
     debugLen = sprintf((char*)debugStr, "\n\nFlash programming done!\n");
     BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
 
+    selectFLASH_LSB(false);
     int errors = 0;
     for(size_t i = 0; i < size; ++i)
     {
-        uint8_t now = FlashReadUserCmd((size_t)Flash + i);
+        uint8_t now = Flash[i]; // FlashReadUserCmd((size_t)Flash + i);
 
         uint8_t expected = i & 0xFF;
         if (now != expected)
@@ -302,6 +306,69 @@ void testFlash()
     else
     {
         BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\nErr\n", 5, true);
+    }
+}
+
+void testFlashZeros()
+{
+    size_t size = 1*100*1024;
+
+    for (size_t offset = 0; offset < 2*size; offset += BSP_EBI_FLASH_LSECTOR_SIZE)
+    {
+        lld_SectorEraseOp((uint8_t*)(BOOT_TABLE_BASE), offset);
+    }
+    debugLen = sprintf((char*)debugStr, "\n\nFlash erase done!\n");
+    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+
+    for(size_t i = 0; i < size; ++i)
+    {
+        lld_ProgramOp((uint8_t*)(BOOT_TABLE_BASE), i, 0);
+    }
+    debugLen = sprintf((char*)debugStr, "\n\nFlash programming done!\n");
+    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+
+    selectFLASH_LSB(false);
+    int errors = 0;
+    for(size_t i = 0; i < size; ++i)
+    {
+        uint8_t now = Flash[i]; // FlashReadUserCmd((size_t)Flash + i);
+
+        uint8_t expected = 0;
+        if (now != expected)
+        {
+            errors++;
+            debugLen = sprintf((char*)debugStr, "%.6X (%.2X -> %.2X)\n", i, expected, now);
+            BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+        }
+    }
+    if (errors == 0)
+    {
+        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\n------------OK\n", 17, true);
+    }
+    else
+    {
+        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\nErr\n", 5, true);
+    }
+}
+
+void testFlash()
+{
+	testFlashZeros();
+	testFlashIndex();
+}
+
+void getFlash() 
+{
+    size_t size = 2*1024;
+
+    selectFLASH_LSB(false);
+
+    for(size_t i = 0; i < size; ++i)
+    {
+        uint8_t now = Flash[i+0x00080000];
+
+        debugLen = sprintf((char*)debugStr, "%.2X", now);
+        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
     }
 }
 
@@ -525,7 +592,13 @@ void COMMS_processMsg(void)
 				BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
 
                 testFlash();
+                msgId = 0x00;
+                break;
         	}
+        case 'f':
+            getFlash();
+            msgId = 0x00;
+            break;
 
         default:
             // reset message id

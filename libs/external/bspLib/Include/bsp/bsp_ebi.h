@@ -59,7 +59,7 @@
 #define BSP_EBI_SRAM_SIZE   (1024*1024) ///< Size of external SRAM modules
 
 #define BSP_EBI_FLASH_SSECTOR_SIZE ( 8*1024) ///< Size of external FLASH module small sector
-#define BSP_EBI_FLASH_LSECTOR_SIZE (64*1024) ///< Size of external FLASH module large sector
+#define BSP_EBI_FLASH_LSECTOR_SIZE (4*1024) ///< Size of external FLASH module large sector
 
 #define BSP_EBI_EEPROM_POLL_MASK 0x80 ///< Mask for EEPROM data to poll write sequence (see datasheet section 20)
 
