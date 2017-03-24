@@ -40,7 +40,7 @@ TEST(detumbling, interfaces)
 
     for (auto i = 0; i < 10; i++)
     {
-        dtb.stepDetumbling(dipole, mgmt, state, params);
+        dtb.stepDetumbling(dipole, mgmt, state);
     }
 
     std::cout << dipole[0] << " " << dipole[1] << " " << dipole[2] << std::endl;
@@ -84,7 +84,7 @@ TEST(detumbling, cross_validation)
             //std::copy(record.begin()+1, record.begin()+4, mgmt);
             //std::copy(record.begin()+4, record.begin()+7, dipole_exp);
 
-            dtb.stepDetumbling(dipole, mgmt, state, params);
+            dtb.stepDetumbling(dipole, mgmt, state);
 
            EXPECT_FLOAT_EQ(dipole[0], dipole_exp[0]);
            EXPECT_FLOAT_EQ(dipole[1], dipole_exp[1]);
