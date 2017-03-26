@@ -18,6 +18,7 @@
 #include "leuart/line_io.h"
 #include "n25q/n25q.h"
 #include "n25q/yaffs.h"
+#include "obc/PersistentStorageAccess.hpp"
 #include "obc/adcs.hpp"
 #include "obc/communication.h"
 #include "obc/experiments.hpp"
@@ -96,6 +97,10 @@ struct OBC
 
     /** @brief Overall satellite <-> Earth communication */
     obc::OBCCommunication Communication;
+
+    drivers::spi::EFMSPISlaveInterface framSpi;
+
+    obc::PersistentStorageAccess persistentStorage;
 
     /** @brief Terminal object. */
     Terminal terminal;
