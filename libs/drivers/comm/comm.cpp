@@ -321,16 +321,21 @@ bool CommObject::ScheduleFrameTransmission(gsl::span<const std::uint8_t> frame, 
     return status && remainingBufferSize != 0xff;
 }
 
-bool CommObject::SetBeacon(const Beacon& beaconData)
+Option<bool> CommObject::SetBeacon(const Beacon& beaconData)
 {
     std::uint8_t remainingBufferSize = 0;
     const auto result = ScheduleFrameTransmission(beaconData.Contents(), remainingBufferSize);
-    if (!result || remainingBufferSize != (TransmitterBufferSize - 1))
+    if (!result)
     {
-        return false;
+        return Option<bool>::Some(false);
     }
 
-    return UpdateBeacon(beaconData);
+    if (remainingBufferSize != (TransmitterBufferSize - 1))
+    {
+        return Option<bool>::None();
+    }
+
+    return Option<bool>::Some(UpdateBeacon(beaconData));
 }
 
 bool CommObject::UpdateBeacon(const Beacon& beaconData)

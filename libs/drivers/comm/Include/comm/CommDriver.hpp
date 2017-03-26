@@ -129,9 +129,10 @@ class CommObject final : public ITransmitFrame, public IBeaconController
      * the beacon itself only if there are no frames that are waiting to te send by the transmitter.
      * @param[in] beacon Reference to object describing new beacon.
      * See the definition of the CommBeacon for details.
-     * @return Operation status, true in case of success, false otherwise.
+     * @return Operation status, true in case of success, false otherwise, None in case there were frames in
+     * transmitter queue.
      */
-    virtual bool SetBeacon(const Beacon& beacon) override final;
+    virtual Option<bool> SetBeacon(const Beacon& beacon) override final;
 
     /**
      * @brief Clears any beacon that is currently set in the transceiver. If a beacon transmission

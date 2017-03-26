@@ -611,7 +611,7 @@ TEST_F(CommTest, TestSetBeaconTransmitterBufferNotEmpty)
     std::uint8_t buffer[1];
     Beacon beacon(1s, buffer);
     const auto status = comm.SetBeacon(beacon);
-    ASSERT_THAT(status, Eq(false));
+    ASSERT_THAT(status.HasValue, Eq(false));
 }
 
 TEST_F(CommTest, TestSetBeaconTransmitterBufferFull)
@@ -626,7 +626,7 @@ TEST_F(CommTest, TestSetBeaconTransmitterBufferFull)
     std::uint8_t buffer[1];
     Beacon beacon(1s, buffer);
     const auto status = comm.SetBeacon(beacon);
-    ASSERT_THAT(status, Eq(false));
+    ASSERT_THAT(status.HasValue, Eq(false));
 }
 
 TEST_F(CommTest, TestSetBeaconFailure)
