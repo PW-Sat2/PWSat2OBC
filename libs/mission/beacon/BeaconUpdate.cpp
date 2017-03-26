@@ -56,14 +56,20 @@ namespace mission
     void BeaconUpdate::UpdateBeacon(const SystemState& state)
     {
         const auto beacon = GenerateBeacon(state);
-        if (this->controller->SetBeacon(beacon))
+        const auto result = this->controller->SetBeacon(beacon);
+        const auto time = static_cast<std::uint32_t>(duration_cast<seconds>(state.Time).count());
+        if (!result.HasValue)
+        {
+            LOGF(LOG_LEVEL_INFO, "Beacon update rejected at %lu", time);
+        }
+        else if(result.Value)
         {
             this->lastBeaconUpdate = state.Time;
-            LOGF(LOG_LEVEL_INFO, "Beacon set at %lu", static_cast<std::uint32_t>(duration_cast<seconds>(state.Time).count()));
+            LOGF(LOG_LEVEL_INFO, "Beacon set at %lu", time);
         }
         else
         {
-            LOGF(LOG_LEVEL_ERROR, "Unable to set beacon at %lu", static_cast<std::uint32_t>(duration_cast<seconds>(state.Time).count()));
+            LOGF(LOG_LEVEL_ERROR, "Unable to set beacon at %lu", time);
         }
     }
 

@@ -17,7 +17,7 @@ struct TransmitFrameMock : public devices::comm::ITransmitFrame
 struct BeaconControllerMock : public devices::comm::IBeaconController
 {
     BeaconControllerMock();
-    MOCK_METHOD1(SetBeacon, bool(const devices::comm::Beacon& beacon));
+    MOCK_METHOD1(SetBeacon, Option<bool>(const devices::comm::Beacon& beacon));
     MOCK_METHOD0(ClearBeacon, bool());
 };
 
