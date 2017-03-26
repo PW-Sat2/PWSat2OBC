@@ -68,6 +68,7 @@ target_link_libraries(${NAME}
     obc_communication
     obc_hardware
     obc_experiments
+    obc_state
     spi
     efm_emlib
     burtc
