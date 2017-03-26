@@ -42,6 +42,11 @@ namespace mission
                 return false;
             }
 
+            if (!state.Antenna.Deployed)
+            {
+                return false;
+            }
+
             if (context->retryCount == 0)
             {
                 return false;
