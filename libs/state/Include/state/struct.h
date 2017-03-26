@@ -3,11 +3,12 @@
 
 #pragma once
 
-#include <cstdint>
+#include <chrono>
+#include "PersistentState.hpp"
 #include "adcs/adcs.hpp"
+#include "antenna/AntennaState.hpp"
 #include "base/os.h"
 #include "experiments/experiments.h"
-#include "time/TimePoint.h"
 
 /**
  * @defgroup StateDef Satellite state definition
@@ -25,17 +26,8 @@ struct SystemState
     /** @brief Current time */
     std::chrono::milliseconds Time;
 
-    /**
-     * @brief Current antenna deployment state.
-     */
-    struct
-    {
-        /** @brief Flag indicating that antenna deployment process has been completed. */
-        bool Deployed;
-
-        /** @brief Array of flags containing antenna deployment state. */
-        bool DeploymentState[4];
-    } Antenna;
+    /** @brief Current antenna deployment state. */
+    state::AntennaState AntennaState;
 
     /** @brief Flag indicating that sail has been opened */
     bool SailOpened;
@@ -47,6 +39,8 @@ struct SystemState
      * @brief Experiment controller status
      */
     experiments::ExperimentState Experiment;
+
+    state::PersistentState PersistentState;
 };
 
 /** @} */

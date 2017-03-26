@@ -64,6 +64,13 @@ namespace drivers
              */
             static bool OnTransferFinished(unsigned int channel, unsigned int sequenceNo, void* param);
 
+            /** @brief Output transfer finished flag */
+            static constexpr OSEventBits TransferTXFinished = 1 << 1;
+            /** @brief Input transfer finished flag */
+            static constexpr OSEventBits TransferRXFinished = 1 << 0;
+            /** @brief Input and output transfer finished flag */
+            static constexpr OSEventBits TransferFinished = TransferRXFinished | TransferTXFinished;
+
             /** @brief Output data channel */
             unsigned int _txChannel;
             /** @brief Input data channel */
@@ -72,13 +79,6 @@ namespace drivers
             EventGroup _transferGroup;
             /** @brief Lock used to synchronize periperhal access */
             OSSemaphoreHandle _lock;
-
-            /** @brief Output transfer finished flag */
-            static constexpr OSEventBits TransferTXFinished = 1 << 1;
-            /** @brief Input transfer finished flag */
-            static constexpr OSEventBits TransferRXFinished = 1 << 0;
-            /** @brief Input and output transfer finished flag */
-            static constexpr OSEventBits TransferFinished = TransferRXFinished | TransferTXFinished;
         };
 
         /**
