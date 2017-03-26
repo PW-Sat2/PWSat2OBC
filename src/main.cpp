@@ -20,12 +20,15 @@
 #include "dmadrv.h"
 #include "eps/eps.h"
 #include "fs/fs.h"
+#include "gpio/gpio.h"
 #include "i2c/i2c.h"
 #include "io_map.h"
 #include "leuart/leuart.h"
 #include "logger/logger.h"
 #include "mission.h"
 #include "obc.h"
+#include "obc/ObcState.hpp"
+#include "power_eps/power_eps.h"
 #include "storage/nand.h"
 #include "storage/nand_driver.h"
 #include "storage/storage.h"
@@ -33,12 +36,10 @@
 #include "system.h"
 #include "terminal.h"
 
-#include "gpio/gpio.h"
-#include "leuart/leuart.h"
-#include "power_eps/power_eps.h"
-
 using services::time::TimeProvider;
 using namespace std::chrono_literals;
+
+static constexpr std::uint32_t PersistentStateBaseAddress = 4;
 
 OBC Main;
 mission::ObcMission Mission(std::tie(Main.timeProvider, Main.rtc),
@@ -91,7 +92,7 @@ static void InitSwoEndpoint(void)
     }
 }
 
-static void ClearState(OBC* obc)
+static void ProcessState(OBC* obc)
 {
     if (obc->Hardware.Pins.SysClear.Input() == false)
     {
@@ -103,6 +104,10 @@ static void ClearState(OBC* obc)
         }
 
         LOG(LOG_LEVEL_INFO, "All files removed");
+    }
+    else
+    {
+        obc::ReadPersistentState(Mission.GetState().PersistentState, PersistentStateBaseAddress, obc->persistentStorage);
     }
 }
 
@@ -123,7 +128,7 @@ static void ObcInitTask(void* param)
         LOG(LOG_LEVEL_ERROR, "Unable to initialize hardware after start. ");
     }
 
-    ClearState(obc);
+    ProcessState(obc);
 
     obc->fs.MakeDirectory("/a");
 

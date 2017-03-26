@@ -394,7 +394,7 @@ namespace mission
         {
             UNREFERENCED_PARAMETER(state);
             AntennaMissionState* stateDescriptor = (AntennaMissionState*)param;
-            state.Antenna.Deployed = stateDescriptor->IsFinished();
+            state.AntennaState.SetDeployment(stateDescriptor->IsFinished());
             if (stateDescriptor->IsFinished())
             {
                 return UpdateResult::Ok;
@@ -410,11 +410,6 @@ namespace mission
             if (OS_RESULT_FAILED(result))
             {
                 return UpdateResult::Failure;
-            }
-
-            for (int i = 0; i < 4; ++i)
-            {
-                state.Antenna.DeploymentState[i] = deploymentStatus.DeploymentStatus[i] || state.Antenna.DeploymentState[i];
             }
 
             stateDescriptor->Update(deploymentStatus);
