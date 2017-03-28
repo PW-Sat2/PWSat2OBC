@@ -130,13 +130,13 @@ class I2CMock(object):
 
     _port = serial.Serial
 
-    def __init__(self, bus_name, port_name):
+    def __init__(self, bus_name, port_name, baudrate=100000, rtscts=False):
         self._log = logging.getLogger("I2C.%s" % bus_name)
 
         self._port = None
         while self._port is None:
             try:
-                self._port = serial.Serial(port=port_name, baudrate=100000, rtscts=True)
+                self._port = serial.Serial(port=port_name, baudrate=baudrate, rtscts=rtscts)
             except serial.SerialException as e:
                 if not e.args[0].endswith("WindowsError(5, 'Access is denied.')"):
                     raise
@@ -272,6 +272,8 @@ class I2CMock(object):
 
         if self._version == 2:
             self._log.warn('Using DeviceMock v2 compatibility')
+        elif self._version == 4:
+            self._log.warn('Using DeviceMock v4')
         elif self._version != 3:
             raise UnsupportedMockVersion(self._version)
 

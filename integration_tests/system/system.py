@@ -15,7 +15,7 @@ class System:
         self.sys_bus_com = sys_bus_com
         self.payload_bus_com = payload_bus_com
 
-        self.sys_bus = I2CMock('SYS', sys_bus_com)
+        self.sys_bus = I2CMock('SYS', sys_bus_com, baudrate=115200, rtscts=False)
 
         if use_single_bus:
             self.payload_bus = self.sys_bus
