@@ -4,6 +4,7 @@
 #include <adcs_experiments/detumbling.hpp>
 #include <system.h>
 #include <cstring>
+#include <unistd.h>
 
 using adcs::Detumbling;
 using adcs::DipoleVec;
@@ -25,74 +26,58 @@ std::vector<float> getRecord(std::istream& str)
     return result;
 }
 
-// checking public interfaces
-TEST(detumbling, interfaces)
-{
-    Detumbling::DetumblingState state;
-    Detumbling::DetumblingParameters params;
-
-    Detumbling dtb;
-    dtb.initializeDetumbling(state, params);
-
-    DipoleVec dipole;
-    MagVec mgmt =
-    { 100, 200, 300 };
-
-    for (auto i = 0; i < 10; i++)
-    {
-        dtb.stepDetumbling(dipole, mgmt, state);
-    }
-
-    std::cout << dipole[0] << " " << dipole[1] << " " << dipole[2] << std::endl;
-
-    ASSERT_TRUE(false && "Test not implemented!");
-}
-
-#include <unistd.h>
-
 // cross-validation of detumbling against matlab implementation
 TEST(detumbling, cross_validation)
 {
     std::ifstream file("data/bdot_crossvalidation.csv");
+    if (!file)
+    {
+        std::cerr << "Cannot find data  file!" << std::endl;
+        FAIL();
+    }
     std::vector<float> record;
 
-    /*std::cout << (int) (bool) file << " record: ";
-    for (auto x : record)
+    Detumbling::DetumblingState state; //should be initialised by first measurement
+    Detumbling::DetumblingParameters params;
+    DipoleVec dipole, dipole_exp;
+    MagVec mgmt;
+
+    Detumbling dtb;
+    dtb.initializeDetumbling(state, params);
+
+    double input_scale = 1e9;
+    double output_scale = 1e4;
+
+    //while(!file.eof())
+    for (int i = 0; i < 10; i++)
     {
-        std::cout << x << " ";
-    }
-    std::cout << std::endl;*/
+        record = getRecord(file);
+        mgmt[0] = input_scale * record[1];
+        mgmt[1] = input_scale * record[2];
+        mgmt[2] = input_scale * record[3];
+        dipole_exp[0] = output_scale * record[4];
+        dipole_exp[1] = output_scale * record[5];
+        dipole_exp[2] = output_scale * record[6];
+        //std::copy(record.begin()+1, record.begin()+4, mgmt);
+        //std::copy(record.begin()+4, record.begin()+7, dipole_exp);
 
-    Detumbling::DetumblingState state;//should be initialised by first measurement
-        Detumbling::DetumblingParameters params;
-        DipoleVec dipole, dipole_exp;
-            MagVec mgmt;
-
-        Detumbling dtb;
-        dtb.initializeDetumbling(state, params);
-
-        //while(!file.eof())
-        for(int i =0; i<10;i++)
+        if (i == 0)
         {
-            record = getRecord(file);
-            mgmt[0] = record[1];
-            mgmt[1] = record[2];
-            mgmt[2] = record[3];
-            dipole_exp[0] = record[4];
-            dipole_exp[1] = record[5];
-            dipole_exp[2] = record[6];
-            //std::copy(record.begin()+1, record.begin()+4, mgmt);
-            //std::copy(record.begin()+4, record.begin()+7, dipole_exp);
-
-            dtb.stepDetumbling(dipole, mgmt, state);
-
-           EXPECT_FLOAT_EQ(dipole[0], dipole_exp[0]);
-           EXPECT_FLOAT_EQ(dipole[1], dipole_exp[1]);
-           EXPECT_FLOAT_EQ(dipole[2], dipole_exp[2]);
-
+            state.mtmMeasPrev[0] = mgmt[0];
+            state.mtmMeasPrev[1] = mgmt[1];
+            state.mtmMeasPrev[2] = mgmt[2];
         }
 
+        dtb.stepDetumbling(dipole, mgmt, state);
 
+        EXPECT_NEAR(dipole[0], dipole_exp[0], 1.0);
+        EXPECT_NEAR(dipole[1], dipole_exp[1], 1.0);
+        EXPECT_NEAR(dipole[2], dipole_exp[2], 1.0);
 
-    ASSERT_TRUE(false && "Test not implemented!");
+        std::cout<<"Comp:"<<std::endl;
+        std::cout<<dipole[0]<<" == "<< dipole_exp[0] <<std::endl;
+        std::cout<<dipole[1]<<" == "<< dipole_exp[1] <<std::endl;
+        std::cout<<dipole[2]<<" == "<< dipole_exp[2] <<std::endl;
+    }
+    file.close();
 }
