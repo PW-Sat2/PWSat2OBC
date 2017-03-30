@@ -15,9 +15,11 @@ class I2CTest(BaseTest):
 
         self.system.sys_bus.add_bus_device(self.echo)
         self.system.sys_bus.add_pld_device(self.echo)
+        self.system.sys_bus.enable_bus_devices([self.echo.address], True)
 
         self.system.sys_bus.add_bus_device(self.timeoutDevice)
         self.system.sys_bus.add_pld_device(self.timeoutDevice)
+        self.system.sys_bus.enable_pld_devices([self.echo.address], True)
 
     def test_single_transfer(self):
         in_data = '\xb0' * 50
@@ -123,6 +125,7 @@ class I2CTest(BaseTest):
     def test_isis_behaviour(self):
         echo2 = EchoDevice(0x16)
         self.system.sys_bus.add_bus_device(echo2)
+        self.system.sys_bus.enable_bus_devices([echo2.address], True)
 
         self.system.obc.i2c_transfer('w', 'system', 0x12, 'abc')
 

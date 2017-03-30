@@ -131,6 +131,7 @@ class I2CMock(object):
     CMD_I2C_BUS_ENABLE = CMD_BUS_MASK | 0x05
     CMD_I2C_BUS_UNLATCH = CMD_BUS_MASK | 0x07
     CMD_I2C_BUS_REQUEST_RESPONSE = CMD_BUS_MASK | 0xA
+    CMD_I2C_BUS_ENABLE_DEVICES = CMD_BUS_MASK | 0xB
 
     CMD_I2C_PLD_WRITE = CMD_PLD_MASK | 0x02
     CMD_I2C_PLD_RESPONSE = CMD_PLD_MASK | 0x03
@@ -138,6 +139,7 @@ class I2CMock(object):
     CMD_I2C_PLD_ENABLE = CMD_PLD_MASK | 0x05
     CMD_I2C_PLD_UNLATCH = CMD_PLD_MASK | 0x07
     CMD_I2C_PLD_REQUEST_RESPONSE = CMD_PLD_MASK | 0xA
+    CMD_I2C_PLD_ENABLE_DEVICES = CMD_PLD_MASK | 0xB
 
     _port = serial.Serial
 
@@ -196,6 +198,10 @@ class I2CMock(object):
         self._command(I2CMock.CMD_RESTART)
         self._log.debug('Waiting for mock to start')
         self._started.wait()
+
+        self.enable_bus_devices(self._bus_devices.keys(), True)
+        self.enable_pld_devices(self._pld_devices.keys(), True)
+
         self.enable_bus()
         self.enable_payload()
         self._active = True
@@ -206,9 +212,21 @@ class I2CMock(object):
     def add_pld_device(self, device):
         self._pld_devices[device.address] = device
 
+    def enable_bus_devices(self, devices, enabled):
+        mask = enabled << 7
+        args = map(lambda x: x | mask, devices)
+
+        self._command(I2CMock.CMD_I2C_BUS_ENABLE_DEVICES, args)
+
+    def enable_pld_devices(self, devices, enabled):
+        mask = enabled << 7
+        args = map(lambda x: x | mask, devices)
+
+        self._command(I2CMock.CMD_I2C_PLD_ENABLE_DEVICES, args)
+
     def stop(self):
         self._log.debug('Requesting stop')
-        self._command(I2CMock.CMD_I2C_BUS_DISABLE)
+        self.disable()
         self._command(I2CMock.CMD_STOP)
 
         self._freeze_end.set()
