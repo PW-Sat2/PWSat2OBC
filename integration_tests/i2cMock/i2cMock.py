@@ -115,23 +115,36 @@ class UnsupportedMockVersion(Exception):
 
 
 class I2CMock(object):
+    CMD_BUS_MASK = 0b01000000
+    CMD_PLD_MASK = 0b10000000
+
     CMD_VERSION = 0x01
-    CMD_I2C_WRITE = 0x02
-    CMD_I2C_RESPONSE = 0x03
-    CMD_I2C_DISABLE = 0x04
-    CMD_I2C_ENABLE = 0x05
     CMD_RESTART = 0x06
-    CMD_UNLATCH = 0x07
     CMD_STOP = 0x08
     CMD_STOPPED = 0x09
-    CMD_I2C_REQUEST_RESPONSE = 0xA
     CMD_GPIO_LOW = 0xA1
     CMD_GPIO_HIGH = 0xA2
+
+    CMD_I2C_BUS_WRITE = CMD_BUS_MASK | 0x02
+    CMD_I2C_BUS_RESPONSE = CMD_BUS_MASK | 0x03
+    CMD_I2C_BUS_DISABLE = CMD_BUS_MASK | 0x04
+    CMD_I2C_BUS_ENABLE = CMD_BUS_MASK | 0x05
+    CMD_I2C_BUS_UNLATCH = CMD_BUS_MASK | 0x07
+    CMD_I2C_BUS_REQUEST_RESPONSE = CMD_BUS_MASK | 0xA
+
+    CMD_I2C_PLD_WRITE = CMD_PLD_MASK | 0x02
+    CMD_I2C_PLD_RESPONSE = CMD_PLD_MASK | 0x03
+    CMD_I2C_PLD_DISABLE = CMD_PLD_MASK | 0x04
+    CMD_I2C_PLD_ENABLE = CMD_PLD_MASK | 0x05
+    CMD_I2C_PLD_UNLATCH = CMD_PLD_MASK | 0x07
+    CMD_I2C_PLD_REQUEST_RESPONSE = CMD_PLD_MASK | 0xA
 
     _port = serial.Serial
 
     def __init__(self, bus_name, port_name, baudrate=100000, rtscts=False):
-        self._log = logging.getLogger("I2C.%s" % bus_name)
+        self._log = logging.getLogger("I2C")
+        self._bus_log = logging.getLogger("I2C.BUS")
+        self._pld_log = logging.getLogger("I2C.PLD")
 
         self._port = None
         while self._port is None:
@@ -150,17 +163,23 @@ class I2CMock(object):
         self._command_handlers = {
             I2CMock.CMD_VERSION: I2CMock._device_command_version,
             I2CMock.CMD_STOPPED: I2CMock._device_command_stopped,
-            I2CMock.CMD_I2C_WRITE: I2CMock._device_command_write,
-            I2CMock.CMD_I2C_REQUEST_RESPONSE: I2CMock._device_command_request_response
+
+            I2CMock.CMD_I2C_BUS_WRITE: I2CMock._device_command_bus_write,
+            I2CMock.CMD_I2C_BUS_REQUEST_RESPONSE: I2CMock._device_command_bus_request_response,
+
+            I2CMock.CMD_I2C_PLD_WRITE: I2CMock._device_command_pld_write,
+            I2CMock.CMD_I2C_PLD_REQUEST_RESPONSE: I2CMock._device_command_pld_request_response
         }
 
         self._started = Event()
         self._reader_started = Event()
         self._port_lock = Lock()
 
-        self._devices = {}
+        self._bus_devices = {}
+        self._pld_devices = {}
 
         self._version = None
+        self._bus_name = bus_name
 
     def start(self):
         if self._active:
@@ -177,15 +196,19 @@ class I2CMock(object):
         self._command(I2CMock.CMD_RESTART)
         self._log.debug('Waiting for mock to start')
         self._started.wait()
-        self._command(I2CMock.CMD_I2C_ENABLE)
+        self.enable_bus()
+        self.enable_payload()
         self._active = True
 
-    def add_device(self, device):
-        self._devices[device.address] = device
+    def add_bus_device(self, device):
+        self._bus_devices[device.address] = device
+
+    def add_pld_device(self, device):
+        self._pld_devices[device.address] = device
 
     def stop(self):
         self._log.debug('Requesting stop')
-        self._command(I2CMock.CMD_I2C_DISABLE)
+        self._command(I2CMock.CMD_I2C_BUS_DISABLE)
         self._command(I2CMock.CMD_STOP)
 
         self._freeze_end.set()
@@ -200,10 +223,23 @@ class I2CMock(object):
 
     def unlatch(self):
         if self._port.is_open:
-            self._command(I2CMock.CMD_UNLATCH)
+            self._command(I2CMock.CMD_I2C_BUS_UNLATCH)
 
     def disable(self):
-        self._command(I2CMock.CMD_I2C_DISABLE)
+        self.disable_bus()
+        self.disable_payload()
+
+    def disable_bus(self):
+        self._command(I2CMock.CMD_I2C_BUS_DISABLE)
+
+    def disable_payload(self):
+        self._command(I2CMock.CMD_I2C_PLD_DISABLE)
+
+    def enable_bus(self):
+        self._command(I2CMock.CMD_I2C_BUS_ENABLE)
+
+    def enable_payload(self):
+        self._command(I2CMock.CMD_I2C_BUS_ENABLE)
 
     def gpio_low(self, pin):
         self._command(I2CMock.CMD_GPIO_LOW, [int(pin)])
@@ -280,42 +316,68 @@ class I2CMock(object):
     def _device_command_stopped(self):
         raise DeviceMockStopped()
 
-    def _device_command_write(self, address, *data):
+    def _device_command_pld_write(self, address, *data):
         address = ord(address)
         data = [ord(c) for c in data]
 
-        self._log.info('Device(%X) write(%s)', address, hex_data(data))
+        self._pld_log.info('Device(%X) write(%s)', address, hex_data(data))
 
-        device = self._device(address)
+        device = self._pld_device(address)
         device.freeze_end = self._freeze_end
 
         device.handle(data)
 
         response = device.get_response()
 
-        self._log.debug('Generated response %r', response)
+        self._pld_log.debug('Generated response %r', response)
 
-        if self._version == 2:
-            self._log.debug('[COMPATv2]Generated response %r', response)
-
-            self._command(I2CMock.CMD_I2C_RESPONSE, response)
-
-            self._log.debug('[COMPATv2]Response written')
-
-    def _device_command_request_response(self, address):
+    def _device_command_pld_request_response(self, address):
         address = ord(address)
 
-        self._log.info('Device(%X) read', address)
-        device = self._device(address)
+        self._pld_log.info('Device(%X) read', address)
+        device = self._pld_device(address)
 
         response = device.get_response() or []
 
-        self._command(I2CMock.CMD_I2C_RESPONSE, response)
+        self._command(I2CMock.CMD_I2C_PLD_RESPONSE, response)
 
-        self._log.debug('Response written (%r)', response)
+        self._pld_log.debug('Response written (%r)', response)
 
-    def _device(self, address):
-        if self._devices.has_key(address / 2):
-            return self._devices[address / 2]
+    def _device_command_bus_write(self, address, *data):
+        address = ord(address)
+        data = [ord(c) for c in data]
+
+        self._bus_log.info('Device(%X) write(%s)', address, hex_data(data))
+
+        device = self._bus_device(address)
+        device.freeze_end = self._freeze_end
+
+        device.handle(data)
+
+        response = device.get_response()
+
+        self._bus_log.debug('Generated response %r', response)
+
+    def _device_command_bus_request_response(self, address):
+        address = ord(address)
+
+        self._bus_log.info('Device(%X) read', address)
+        device = self._bus_device(address)
+
+        response = device.get_response() or []
+
+        self._command(I2CMock.CMD_I2C_BUS_RESPONSE, response)
+
+        self._bus_log.debug('Response written (%r)', response)
+
+    def _bus_device(self, address):
+        if self._bus_devices.has_key(address / 2):
+            return self._bus_devices[address / 2]
+        else:
+            return MissingDevice(address)
+
+    def _pld_device(self, address):
+        if self._pld_devices.has_key(address / 2):
+            return self._pld_devices[address / 2]
         else:
             return MissingDevice(address)
