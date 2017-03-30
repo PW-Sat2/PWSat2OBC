@@ -17,10 +17,10 @@ class System:
 
         self.sys_bus = I2CMock('SYS', sys_bus_com, baudrate=115200, rtscts=False)
 
-        if use_single_bus:
-            self.payload_bus = self.sys_bus
-        else:
-            self.payload_bus = I2CMock('PLD', payload_bus_com)
+        # if use_single_bus:
+        #     self.payload_bus = self.sys_bus
+        # else:
+        #     self.payload_bus = I2CMock('PLD', payload_bus_com)
 
         self._setup_devices()
 
@@ -28,7 +28,7 @@ class System:
         self.obc.power_off()
 
         self.sys_bus.start()
-        self.payload_bus.start()
+        # self.payload_bus.start()
 
         if auto_power_on:
             self.obc.power_on(clean_state=True)
@@ -43,19 +43,19 @@ class System:
         self.imtq = Imtq()
         self.rtc = RTCDevice()
 
-        self.sys_bus.add_device(self.eps)
-        self.payload_bus.add_device(self.eps)
-        self.sys_bus.add_device(self.transmitter)
-        self.sys_bus.add_device(self.receiver)
-        self.sys_bus.add_device(self.primary_antenna)
-        self.payload_bus.add_device(self.backup_antenna)
-        self.sys_bus.add_device(self.imtq)
-        self.payload_bus.add_device(self.rtc)
+        self.sys_bus.add_bus_device(self.eps)
+        self.sys_bus.add_pld_device(self.eps)
+        self.sys_bus.add_bus_device(self.transmitter)
+        self.sys_bus.add_bus_device(self.receiver)
+        self.sys_bus.add_bus_device(self.primary_antenna)
+        self.sys_bus.add_pld_device(self.backup_antenna)
+        self.sys_bus.add_bus_device(self.imtq)
+        self.sys_bus.add_pld_device(self.rtc)
 
     def close(self):
         self.sys_bus.stop()
-        if not self._use_single_bus:
-            self.payload_bus.stop()
+        # if not self._use_single_bus:
+        #     self.payload_bus.stop()
 
         self.obc.close()
 
@@ -63,9 +63,9 @@ class System:
         self.sys_bus.unfreeze()
         self.sys_bus.unlatch()
 
-        if not self._use_single_bus:
-            self.payload_bus.unfreeze()
-            self.payload_bus.unlatch()
+        # if not self._use_single_bus:
+        #     self.payload_bus.unfreeze()
+        #     self.payload_bus.unlatch()
 
         self.obc.reset()
         self.obc.wait_to_start()

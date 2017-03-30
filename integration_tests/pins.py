@@ -8,7 +8,13 @@ class Pins:
     def __init__(self, com_port):
         self._com_port = com_port
 
-        self._port = serial.Serial(self._com_port, rtscts=False, dsrdtr=False, baudrate=9600)
+        self._port = None
+        while self._port is None:
+            try:
+                self._port = serial.Serial(self._com_port, rtscts=False, dsrdtr=False, baudrate=9600)
+            except serial.SerialException as e:
+                if not e.args[0].endswith("WindowsError(5, 'Access is denied.')"):
+                    raise
 
     def high(self, pin):
         if pin == self.RESET:
