@@ -1,4 +1,5 @@
 import traceback
+from idlelib.PyShell import PORT
 from threading import Thread, Event, Lock
 
 import serial
@@ -90,24 +91,56 @@ class DeviceMockStopped(Exception):
     pass
 
 
-class MockPin(IntEnum):
-    PB0 = 0x50
-    PB1 = 0x51
-    PB2 = 0x52
-    PB3 = 0x53
-    PB4 = 0x54
-    PB5 = 0x55
-    PB6 = 0x56
-    PB7 = 0x57
-    PC0 = 0x80
-    PC1 = 0x81
-    PC2 = 0x82
-    PC3 = 0x83
-    PD4 = 0xB4
-    PD5 = 0xB5
-    PD6 = 0xB6
-    PD7 = 0xB7
+PortA = 0 << 4
+PortB = 1 << 4
+PortC = 2 << 4
+PortD = 3 << 4
+PortF = 4 << 4
 
+
+class MockPin(IntEnum):
+    PA0 = PortA | 0
+    PA1 = PortA | 1
+    PA4 = PortA | 4
+    PA5 = PortA | 5
+    PA6 = PortA | 6
+    PA7 = PortA | 7
+    PA8 = PortA | 8
+    PA9 = PortA | 9
+    PA10 = PortA | 10
+    PA11 = PortA | 11
+    PA12 = PortA | 12
+    PA13 = PortA | 13
+    PA15 = PortA | 15
+    PB0 = PortB | 0
+    PB1 = PortB | 1
+    PB2 = PortB | 2
+    PB3 = PortB | 3
+    PB4 = PortB | 4
+    PB5 = PortB | 5
+    PB6 = PortB | 6
+    PB7 = PortB | 7
+    PB12 = PortB | 12
+    PB13 = PortB | 13
+    PB14 = PortB | 14
+    PB15 = PortB | 15
+    PC0 = PortC | 0
+    PC1 = PortC | 1
+    PC2 = PortC | 2
+    PC3 = PortC | 3
+    PC4 = PortC | 4
+    PC7 = PortC | 7
+    PC9 = PortC | 9
+    PC10 = PortC | 10
+    PC11 = PortC | 11
+    PC12 = PortC | 12
+    PC13 = PortC | 13
+    PD2 = PortD | 2
+    PF1 = PortF | 1
+    PF4 = PortF | 4
+    PF5 = PortF | 5
+    PF6 = PortF | 6
+    PF7 = PortF | 7
 
 class UnsupportedMockVersion(Exception):
     def __init__(self, version):
