@@ -59,13 +59,9 @@ namespace io_map
     struct I2C
     {
         static constexpr std::uint8_t InterruptPriority = 6;
-#ifdef I2C_SINGLE_BUS
-        static constexpr std::uint8_t SystemBus = 1;
-        static constexpr std::uint8_t PayloadBus = 1;
-#else
+
         static constexpr std::uint8_t SystemBus = 1;
         static constexpr std::uint8_t PayloadBus = 0;
-#endif
 #ifndef I2C_TIMEOUT
         static constexpr std::uint32_t Timeout = 5; // in seconds
 #else

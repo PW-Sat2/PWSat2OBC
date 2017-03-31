@@ -181,7 +181,7 @@ class I2CMock(object):
 
     _port = serial.Serial
 
-    def __init__(self, bus_name, port_name, baudrate=100000, rtscts=False):
+    def __init__(self, port_name, baudrate=100000, rtscts=False):
         self._log = logging.getLogger("I2C")
         self._bus_log = logging.getLogger("I2C.BUS")
         self._pld_log = logging.getLogger("I2C.PLD")
@@ -217,7 +217,6 @@ class I2CMock(object):
         self._pld_devices = {}
 
         self._version = None
-        self._bus_name = bus_name
 
     def start(self):
         if self._active:

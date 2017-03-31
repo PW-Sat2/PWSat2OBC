@@ -13,7 +13,7 @@ class Pins:
             try:
                 self._port = serial.Serial(self._com_port, rtscts=False, dsrdtr=False, baudrate=9600)
             except serial.SerialException as e:
-                if not e.args[0].endswith("WindowsError(5, 'Access is denied.')"):
+                if not e.args[0].find("WindowsError(5") > -1:
                     raise
 
     def high(self, pin):

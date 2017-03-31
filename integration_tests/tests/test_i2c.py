@@ -1,8 +1,7 @@
 from time import sleep
-from unittest import skip
 
 from devices import EchoDevice, TimeoutDevice
-from system import auto_comm_handling, require_two_i2c_buses
+from system import auto_comm_handling
 from tests.base import BaseTest
 
 
@@ -13,13 +12,13 @@ class I2CTest(BaseTest):
         self.echo = EchoDevice(0x12)
         self.timeoutDevice = TimeoutDevice(0x14)
 
-        self.system.sys_bus.add_bus_device(self.echo)
-        self.system.sys_bus.add_pld_device(self.echo)
-        self.system.sys_bus.enable_bus_devices([self.echo.address, self.timeoutDevice.address], True)
+        self.system.i2c.add_bus_device(self.echo)
+        self.system.i2c.add_pld_device(self.echo)
+        self.system.i2c.enable_bus_devices([self.echo.address, self.timeoutDevice.address], True)
 
-        self.system.sys_bus.add_bus_device(self.timeoutDevice)
-        self.system.sys_bus.add_pld_device(self.timeoutDevice)
-        self.system.sys_bus.enable_pld_devices([self.echo.address, self.timeoutDevice.address], True)
+        self.system.i2c.add_bus_device(self.timeoutDevice)
+        self.system.i2c.add_pld_device(self.timeoutDevice)
+        self.system.i2c.enable_pld_devices([self.echo.address, self.timeoutDevice.address], True)
 
     def test_single_transfer(self):
         in_data = '\xb0' * 50
@@ -87,15 +86,15 @@ class I2CTest(BaseTest):
         response = self.system.obc.i2c_transfer('wr', 'system', 0x14, chr(0x02))
         self.assertEqual(response, 'Error -7')
 
-        self.system.sys_bus.unlatch()
+        self.system.i2c.unlatch()
         sleep(0.1)
 
         response = self.system.obc.i2c_transfer('wr', 'system', 0x12, 'abc')
         self.assertEqual(response, 'bcd')
 
     def test_should_detect_nak_on_buses(self):
-        self.system.sys_bus.disable_bus()
-        self.system.sys_bus.disable_payload()
+        self.system.i2c.disable_bus()
+        self.system.i2c.disable_payload()
 
         response = self.system.obc.i2c_transfer('wr', 'system', 0x12, 'abc')
 
@@ -105,7 +104,6 @@ class I2CTest(BaseTest):
 
         self.assertEqual(response, 'Error -1')
 
-    @require_two_i2c_buses
     def test_bus_latch_should_trigger_system_power_cycle(self):
         self.system.obc.i2c_transfer('wr', 'system', 0x14, chr(0x2))
 
@@ -120,8 +118,8 @@ class I2CTest(BaseTest):
     @auto_comm_handling(False)
     def test_isis_behaviour(self):
         echo2 = EchoDevice(0x16)
-        self.system.sys_bus.add_bus_device(echo2)
-        self.system.sys_bus.enable_bus_devices([echo2.address], True)
+        self.system.i2c.add_bus_device(echo2)
+        self.system.i2c.enable_bus_devices([echo2.address], True)
 
         self.system.obc.i2c_transfer('w', 'system', 0x12, 'abc')
 
