@@ -60,7 +60,6 @@ class System:
         self.obc.close()
 
     def restart(self):
-        self.sys_bus.unfreeze()
         self.sys_bus.unlatch()
 
         # if not self._use_single_bus:
