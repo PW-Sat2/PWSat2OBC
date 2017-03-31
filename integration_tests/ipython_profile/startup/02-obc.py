@@ -13,13 +13,11 @@ def _prepare_environment():
     logging.basicConfig(level=logging.DEBUG)
 
     obc_com = config['OBC_COM']
-    sys_bus_com = config['SYS_BUS_COM']
-    payload_bus_com = config['PAYLOAD_BUS_COM']
-    use_single_bus = config['SINGLE_BUS']
+    mock_com = config['MOCK_COM']
     gpio_com = config['GPIO_COM']
 
     gpio = Pins(gpio_com)
 
-    return System(obc_com, sys_bus_com, payload_bus_com, use_single_bus, gpio)
+    return System(obc_com, mock_com, gpio)
 
 system = _prepare_environment()
