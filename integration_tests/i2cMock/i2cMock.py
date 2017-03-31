@@ -99,7 +99,6 @@ class MockPin(IntEnum):
     PA0 = PortA | 0
     PA1 = PortA | 1
     PA4 = PortA | 4
-    PA5 = PortA | 5
     PA6 = PortA | 6
     PA7 = PortA | 7
     PA8 = PortA | 8
