@@ -144,67 +144,28 @@ namespace mission
          *
          * Following is the list of the deployment stages that are defined in this array:
          * - Automatic deployment (primary hardware channel)
-         * - Automatic deployment (backup hardware channel)
-         * - Manual deployment (primary hardware channel)
-         * - Manual deployment (backup hardware channel)
-         * - Manual deployment with increased deployment timeout (primary hardware channel)
-         * - Manual deployment with increased deployment timeout (backup hardware channel)
          * - Manual deployment with overridden deployment switches (primary hardware channel)
-         * - Manual deployment with overridden deployment switches (backup hardware channel)
          * - Deployment finalization (primary hardware channel)
+         *
+         * - Automatic deployment (backup hardware channel)
+         * - Manual deployment with overridden deployment switches (backup hardware channel)
          * - Deployment finalization (backup hardware channel)
          */
         static const AntennaDeploymentStep deploymentSteps[] = {
             {ResetDriverStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 0, false},
             {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, DefaultTimeout, false},
-
-            {ResetDriverStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 0, false},
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, DefaultTimeout, false},
-
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, DefaultTimeout, false},
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, DefaultTimeout, false},
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, DefaultTimeout, false},
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, DefaultTimeout, false},
-
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, DefaultTimeout, false},
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, DefaultTimeout, false},
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, DefaultTimeout, false},
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, DefaultTimeout, false},
-
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, MediumTimeout, false},
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, MediumTimeout, false},
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, MediumTimeout, false},
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, MediumTimeout, false},
-
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, MediumTimeout, false},
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, MediumTimeout, false},
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, MediumTimeout, false},
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, MediumTimeout, false},
-
-            {ResetDriverStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 0, false},
             {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, LongTimeout, true},
             {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, LongTimeout, true},
             {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, LongTimeout, true},
             {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, LongTimeout, true},
+            {FinishDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 0, false},
 
             {ResetDriverStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 0, false},
+            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, DefaultTimeout, false},
             {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, LongTimeout, true},
             {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, LongTimeout, true},
             {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, LongTimeout, true},
             {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, LongTimeout, true},
-
-            {ResetDriverStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 0, false},
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, EmergencyTimeout, true},
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, EmergencyTimeout, true},
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, EmergencyTimeout, true},
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, EmergencyTimeout, true},
-
-            {ResetDriverStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 0, false},
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, EmergencyTimeout, true},
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, EmergencyTimeout, true},
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, EmergencyTimeout, true},
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, EmergencyTimeout, true},
-            {FinishDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 0, false},
             {FinishDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 0, false},
         };
 
@@ -212,13 +173,6 @@ namespace mission
          * @brief Number of steps in the antenna deployment process.
          */
         static constexpr uint8_t DeploymentStepLimit = count_of(deploymentSteps);
-
-        /**
-         * @brief Number of the first step in the deployment finalization phase.
-         */
-        static constexpr uint8_t FinalizationStepIndex = count_of(deploymentSteps) - 2;
-
-        static_assert(DeploymentStepLimit > FinalizationStepIndex, "There should be at least one finalization step");
 
         AntennaMissionState::AntennaMissionState(AntennaDriver& antennaDriver)
             : _overrideState(false), //
@@ -246,11 +200,6 @@ namespace mission
             return this->_stepNumber >= DeploymentStepLimit;
         }
 
-        bool AntennaMissionState::IsDeploymentPartFinished() const
-        {
-            return this->_stepNumber >= FinalizationStepIndex;
-        }
-
         void AntennaMissionState::Update(const AntennaDeploymentStatus& status)
         {
             this->_inProgress = status.IsDeploymentActive[0] | //
@@ -262,11 +211,6 @@ namespace mission
         std::uint8_t AntennaMissionState::StepCount()
         {
             return DeploymentStepLimit;
-        }
-
-        std::uint8_t AntennaMissionState::DeploymentStepCount()
-        {
-            return FinalizationStepIndex;
         }
 
         /**
@@ -414,19 +358,6 @@ namespace mission
         }
 
         /**
-         * @brief This procedure checks whether there is currently antenna deployment process in progress.
-         * @param[in] deploymentState Current driver deployment state
-         * @return True if at least one antenna is being deployed, false otherwise.
-         */
-        static bool AreAllAntennasDeployed(const AntennaDeploymentStatus& deploymentState)
-        {
-            return deploymentState.DeploymentStatus[0] & //
-                deploymentState.DeploymentStatus[1] &    //
-                deploymentState.DeploymentStatus[2] &    //
-                deploymentState.DeploymentStatus[3];
-        }
-
-        /**
          * @brief Procedure that verifies whether the antenna deployment process should be executed.
          * @param[in] state Pointer to global satellite state.
          * @param[in] param Pointer to the deployment condition private context. This pointer should point
@@ -487,16 +418,6 @@ namespace mission
             }
 
             stateDescriptor->Update(deploymentStatus);
-
-            if (                                                //
-                !stateDescriptor->IsDeploymentPartFinished() && //
-                !stateDescriptor->OverrideState() &&            //
-                AreAllAntennasDeployed(deploymentStatus)        //
-                )
-            {
-                stateDescriptor->OverrideStep(FinalizationStepIndex);
-            }
-
             return UpdateResult::Ok;
         }
 

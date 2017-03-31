@@ -126,7 +126,8 @@ class AntennaController(i2cMock.I2CDevice):
     def deploy_antenna(self, antanna_id, timeout):
         self.log.debug("Beginning of deployment antenna %d on controller", antanna_id)
         if call(self.on_begin_deployment, True, self, antanna_id):
-            self.antenna_state[antanna_id - 1].begin_deployment()
+            if not self.antenna_state[antanna_id - 1].is_deployed():
+                self.antenna_state[antanna_id - 1].begin_deployment()
 
     # antenna icd section 6.2.4
     @i2cMock.command([0xA1])
@@ -257,7 +258,7 @@ class AntennaController(i2cMock.I2CDevice):
         lsb = self.update_value(lsb, self.antenna_state[3].deployment_in_progress(), 0x2)
         lsb = self.update_value(lsb, self.deployment_in_progress, 0x10)
         lsb = self.update_value(lsb, self.armed, 0x1)
-        return [msb, lsb]
+        return [lsb, msb]
 
     # antenna icd section 6.2.13
     @i2cMock.command([0xA9])

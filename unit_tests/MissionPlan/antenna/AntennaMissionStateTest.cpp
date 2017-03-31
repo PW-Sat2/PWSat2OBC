@@ -21,7 +21,6 @@ AntennaMissionStateTest::AntennaMissionStateTest() : state(driver)
 TEST_F(AntennaMissionStateTest, TestDefaultState)
 {
     ASSERT_THAT(state.IsDeploymentInProgress(), Eq(false));
-    ASSERT_THAT(state.IsDeploymentPartFinished(), Eq(false));
     ASSERT_THAT(state.IsFinished(), Eq(false));
     ASSERT_THAT(state.OverrideState(), Eq(false));
     ASSERT_THAT(state.StepNumber(), Eq(0));
@@ -55,23 +54,10 @@ TEST_F(AntennaMissionStateTest, TestOverrideStep)
     ASSERT_THAT(state.StepNumber(), Eq(50));
 }
 
-TEST_F(AntennaMissionStateTest, TestFinishDeployment)
-{
-    state.OverrideStep(AntennaMissionState::DeploymentStepCount());
-    ASSERT_THAT(state.IsDeploymentPartFinished(), Eq(true));
-    ASSERT_THAT(state.IsFinished(), Eq(false));
-}
-
 TEST_F(AntennaMissionStateTest, TestFinishProcess)
 {
     state.OverrideStep(AntennaMissionState::StepCount());
-    ASSERT_THAT(state.IsDeploymentPartFinished(), Eq(true));
     ASSERT_THAT(state.IsFinished(), Eq(true));
-}
-
-TEST_F(AntennaMissionStateTest, TestStepCounts)
-{
-    ASSERT_THAT(AntennaMissionState::DeploymentStepCount(), Lt(AntennaMissionState::StepCount()));
 }
 
 TEST_F(AntennaMissionStateTest, TestRestart)

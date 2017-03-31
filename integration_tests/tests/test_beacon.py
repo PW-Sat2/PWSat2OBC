@@ -31,10 +31,13 @@ class Test_Beacon(BaseTest):
         def reset_handler(*args):
             return False
 
-        self.system.primary_antenna.on_reset = reset_handler
         self.system.primary_antenna.begin_deployment()
         self.system.primary_antenna.finish_deployment()
+        self.system.backup_antenna.begin_deployment()
+        self.system.backup_antenna.finish_deployment()
+        self.system.primary_antenna.on_reset = reset_handler
+        self.system.backup_antenna.on_reset = reset_handler
         self.system.comm.transmitter.on_set_beacon = event.set
-        self.begin(10)
+        self.begin(18)
         self.assertTrue(event.wait_for_change(1), "beacon should be set once the antennas are deployed")
         pass

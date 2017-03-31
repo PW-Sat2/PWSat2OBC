@@ -5,7 +5,6 @@ from pins import Pins
 import extensions
 from build_config import config
 
-
 class BaseTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(BaseTest, self).__init__(*args, **kwargs)
