@@ -10,5 +10,5 @@ class EchoDevice(i2cMock.I2CDevice):
 class TimeoutDevice(i2cMock.I2CDevice):
     @i2cMock.command([0x02])
     def _freeze(self, *args):
-        self.freeze()
+        self.latch()
         return list(args)

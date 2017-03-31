@@ -27,6 +27,10 @@ def command(bytes):
     return wrapper
 
 
+class LatchBusError(Exception):
+    pass
+
+
 class I2CDevice(object):
     def __init__(self, address):
         if address >= 0x80:
@@ -55,8 +59,8 @@ class I2CDevice(object):
     def get_response(self):
         return self.response
 
-    def freeze(self):
-        self.freeze_end.wait()
+    def latch(self):
+        raise LatchBusError()
 
     def _missing_handler(self, data):
         logging.getLogger('Device: 0x{:2X}'.format(self.address)).error('Missing handler for 0x{:2X}'.format(self.address, binascii.hexlify(bytearray(data))))
@@ -161,6 +165,7 @@ class I2CMock(object):
     CMD_I2C_BUS_UNLATCH = CMD_BUS_MASK | 0x07
     CMD_I2C_BUS_REQUEST_RESPONSE = CMD_BUS_MASK | 0xA
     CMD_I2C_BUS_ENABLE_DEVICES = CMD_BUS_MASK | 0xB
+    CMD_I2C_BUS_LATCH = CMD_BUS_MASK | 0xC
 
     CMD_I2C_PLD_WRITE = CMD_PLD_MASK | 0x02
     CMD_I2C_PLD_RESPONSE = CMD_PLD_MASK | 0x03
@@ -169,6 +174,7 @@ class I2CMock(object):
     CMD_I2C_PLD_UNLATCH = CMD_PLD_MASK | 0x07
     CMD_I2C_PLD_REQUEST_RESPONSE = CMD_PLD_MASK | 0xA
     CMD_I2C_PLD_ENABLE_DEVICES = CMD_PLD_MASK | 0xB
+    CMD_I2C_PLD_LATCH = CMD_PLD_MASK | 0xC
 
     _port = serial.Serial
 
@@ -184,8 +190,6 @@ class I2CMock(object):
             except serial.SerialException as e:
                 if not e.args[0].endswith("WindowsError(5, 'Access is denied.')"):
                     raise
-
-        self._freeze_end = Event()
 
         self._active = False
         self._reader = Thread(target=I2CMock._reader_run, args=(self,))
@@ -217,9 +221,6 @@ class I2CMock(object):
             return
 
         self._log.debug('Starting DeviceMock')
-
-        if self._freeze_end.is_set():
-            self._freeze_end.clear()
 
         self._reader.start()
         self._reader_started.wait()
@@ -258,15 +259,10 @@ class I2CMock(object):
         self.disable()
         self._command(I2CMock.CMD_STOP)
 
-        self._freeze_end.set()
-
         self._reader.join()
         self._port.close()
         self._active = False
         self._log.debug('Stopped')
-
-    def unfreeze(self):
-        self._freeze_end.set()
 
     def unlatch(self):
         if self._port.is_open:
@@ -369,14 +365,17 @@ class I2CMock(object):
 
         self._pld_log.info('Device(%X) write(%s)', address, hex_data(data))
 
-        device = self._pld_device(address)
-        device.freeze_end = self._freeze_end
+        try:
+            device = self._pld_device(address)
 
-        device.handle(data)
+            device.handle(data)
 
-        response = device.get_response()
+            response = device.get_response()
 
-        self._pld_log.debug('Generated response %r', response)
+            self._pld_log.debug('Generated response %r', response)
+        except LatchBusError:
+            self._bus_log.warn('Device request latching bus')
+            self._command(I2CMock.CMD_I2C_PLD_LATCH)
 
     def _device_command_pld_request_response(self, address):
         address = ord(address)
@@ -395,15 +394,17 @@ class I2CMock(object):
         data = [ord(c) for c in data]
 
         self._bus_log.info('Device(%X) write(%s)', address, hex_data(data))
+        try:
+            device = self._bus_device(address)
 
-        device = self._bus_device(address)
-        device.freeze_end = self._freeze_end
+            device.handle(data)
 
-        device.handle(data)
+            response = device.get_response()
 
-        response = device.get_response()
-
-        self._bus_log.debug('Generated response %r', response)
+            self._bus_log.debug('Generated response %r', response)
+        except LatchBusError:
+            self._bus_log.warn('Device request latching bus')
+            self._command(I2CMock.CMD_I2C_BUS_LATCH)
 
     def _device_command_bus_request_response(self, address):
         address = ord(address)
