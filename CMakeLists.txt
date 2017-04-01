@@ -13,6 +13,7 @@ set(MEM_MANAGMENT_TYPE 1)
 
 set(TARGET_PLATFORM "DevBoard" CACHE STRING "Target platform")
 set(SEMIHOSTING false CACHE BOOL "Enable semihosting")
+set(JLINK_SN "" CACHE STRING "J-Link serial number")
 
 set(PLATFORM_PATH ${CMAKE_CURRENT_SOURCE_DIR}/platforms/${TARGET_PLATFORM})
 
@@ -46,6 +47,9 @@ message(STATUS "Using C compiler from ${CMAKE_C_COMPILER}")
 message(STATUS "Target platform ${TARGET_PLATFORM}")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "Code coverage: ${ENABLE_COVERAGE}")
+if(NOT ${JLINK_SN} STREQUAL "")
+message(STATUS "J-Link serial number: ${JLINK_SN}")
+endif()
 
 add_subdirectory(src)
 add_subdirectory(libs)

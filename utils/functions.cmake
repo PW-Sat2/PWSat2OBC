@@ -21,8 +21,18 @@ function(target_jlink_flash TARGET)
 
   unset(HEX_FILE)
 
-  add_custom_target(${TARGET}.flash
-    COMMAND ${JLINK} -device ${DEVICE} -ExitOnError -CommanderScript ${COMMAND_FILE}
+  set(JLINK_ARGS 
+      "-device" ${DEVICE}
+      "-ExitOnError"
+      "-CommanderScript" ${COMMAND_FILE}
+  )
+
+  if(NOT ${JLINK_SN} STREQUAL "")
+      list(APPEND JLINK_ARGS -SelectEmuBySN ${JLINK_SN})
+  endif()
+  
+  add_custom_target(${TARGET}.flash    
+    COMMAND ${JLINK} ${JLINK_ARGS}
     DEPENDS ${TARGET}.hex
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   )

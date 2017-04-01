@@ -44,6 +44,7 @@ Option | Default value | Description
 `MOCK_COM`      | _None_               | Serial port used to communicate with DeviceMock (v4, STM)
 `USE_EXTERNAL_FLASH` | 0				   | Set to 1 to use external N25Q flash memory
 `ENABLE_COVERAGE`  | 0                    | Set to 1 to enable code-coverage for unit tests
+`JLINK_SN` | _None_                       | Serial number of J-Link that will be used to flash EFM
 
 
 ## Outputs

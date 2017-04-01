@@ -1,5 +1,5 @@
 def build() {
-	bat "cmake -DMOCK_COM=${env.MOCK_COM} -DOBC_COM=${env.OBC_COM} -DGPIO_COM=${env.GPIO_COM} -DCMAKE_BUILD_TYPE=Release -DENABLE_LTO=1 -DUSE_EXTERNAL_FLASH=1 -G \"MinGW Makefiles\" ../source"
+	bat "cmake -DJLINK_SN=${env.EFM_JLINK} -DMOCK_COM=${env.MOCK_COM} -DOBC_COM=${env.OBC_COM} -DGPIO_COM=${env.GPIO_COM} -DCMAKE_BUILD_TYPE=Release -DENABLE_LTO=1 -DUSE_EXTERNAL_FLASH=1 -G \"MinGW Makefiles\" ../source"
 	bat "make pwsat"
 	step([$class: 'ArtifactArchiver', artifacts: 'build/DevBoard/**/*', fingerprint: true])
 }
