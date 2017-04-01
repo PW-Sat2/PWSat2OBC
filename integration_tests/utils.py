@@ -99,3 +99,7 @@ def busy_wait(condition, projection=None, delay=None, timeout=None):
     else:
         return None
 
+
+class CompareAsDict:
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__

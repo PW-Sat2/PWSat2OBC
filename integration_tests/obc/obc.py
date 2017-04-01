@@ -14,6 +14,7 @@ from .obc_time import TimeMixin
 from .i2c import I2CMixin
 from .mission import MissionMixin
 from .imtq import ImtqMixin
+from .eps import EPSMixin
 
 
 class OBC(OBCMixin,
@@ -24,13 +25,15 @@ class OBC(OBCMixin,
           AntennaMixin,
           MissionMixin,
           ImtqMixin,
-          ExperimentsMixin
+          ExperimentsMixin,
+          EPSMixin
           ):
     def __init__(self, terminal):
         self.log = logging.getLogger("OBC")
 
         self._formatter = ExtendableFormatter()
         self._formatter.register_conversion('E', lambda d: b64encode(d).rstrip('='))
+        self._formatter.register_conversion('n', lambda d: d.name)
 
         self._terminal = terminal
         self._terminal.reset()
@@ -39,6 +42,11 @@ class OBC(OBCMixin,
         cmdline = self._formatter.vformat(cmd, args, kwargs)
 
         return self._terminal.command(cmdline)
+
+    def _command_no_wait(self, cmd, *args, **kwargs):
+        cmdline = self._formatter.vformat(cmd, args, kwargs)
+
+        return self._terminal.command_no_wait(cmdline)
 
     def wait_to_start(self):
         response = self._terminal.command("getState")

@@ -21,6 +21,7 @@ set(SOURCES
     commands/rtc.cpp
     commands/fram.cpp
     commands/external_flash.cpp
+    commands/eps.cpp
     obc.h
     obc.cpp
     fault_handlers.cpp

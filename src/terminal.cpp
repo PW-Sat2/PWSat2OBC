@@ -50,6 +50,7 @@ static const TerminalCommandDescription commands[] = {
     {"rm", RemoveFile},
     {"fram", FRAM},
     {"testflash", TestExternalFlash},
+    {"eps", EPSCommand},
 };
 
 void InitializeTerminal(void)

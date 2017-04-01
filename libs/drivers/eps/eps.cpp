@@ -81,6 +81,7 @@ namespace devices
 
         bool EPSDriver::PowerCycleA()
         {
+            LOG(LOG_LEVEL_WARNING, "Triggering power cycle (A)");
             std::array<std::uint8_t, 1> command{num(Command::PowerCycle)};
 
             if (this->Write(Controller::A, command) != I2CResult::OK)
@@ -90,11 +91,14 @@ namespace devices
 
             System::SleepTask(PowerCycleTimeout);
 
+            LOG(LOG_LEVEL_ERROR, "Power cycle failed (A)");
+
             return false;
         }
 
         bool EPSDriver::PowerCycleB()
         {
+            LOG(LOG_LEVEL_WARNING, "Triggering power cycle (B)");
             std::array<std::uint8_t, 1> command{num(Command::PowerCycle)};
 
             if (this->Write(Controller::B, command) != I2CResult::OK)
@@ -103,6 +107,8 @@ namespace devices
             }
 
             System::SleepTask(PowerCycleTimeout);
+
+            LOG(LOG_LEVEL_ERROR, "Power cycle failed (B)");
 
             return false;
         }

@@ -2,6 +2,7 @@ from SerialPortTerminal import SerialPortTerminal
 from obc import OBC
 from .antenna import *
 from .comm import *
+from .eps import PowerCycleBy
 
 __all__ = [
     'SerialPortTerminal',
@@ -10,5 +11,6 @@ __all__ = [
     'AntennaChannel',
     'OverrideSwitches',
     'CommModule',
-    'AntennaTelemetry'
+    'AntennaTelemetry',
+    'PowerCycleBy'
 ]

@@ -59,4 +59,6 @@ void FRAM(std::uint16_t argc, char* argv[]);
 
 void TestExternalFlash(std::uint16_t argc, char* argv[]);
 
+void EPSCommand(std::uint16_t argc, char* argv[]);
+
 #endif

@@ -61,6 +61,9 @@ class SerialPortTerminal:
         self.log.debug("Command " + cmd + " responded with " + response)
         return response
 
+    def command_no_wait(self, cmd):
+        self._command_prologue(cmd)
+
     def command_with_write_data(self, cmd, data):
         self._command_prologue(cmd)
 
