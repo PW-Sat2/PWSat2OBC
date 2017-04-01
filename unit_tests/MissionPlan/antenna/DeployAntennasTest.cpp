@@ -76,7 +76,7 @@ TEST_F(DeployAntennasTest, TestConditionDeploymentInProgress)
 TEST_F(DeployAntennasTest, TestConditionOverrideDeploymentState)
 {
     state.Time = 41min;
-    state.Antenna.Deployed = true;
+    state.AntennaState.SetDeployment(true);
     stateDescriptor.OverrideState();
     ASSERT_TRUE(openAntenna.condition(state, openAntenna.param));
 }
@@ -109,7 +109,7 @@ TEST_F(DeployAntennasUpdateTest, TestNothingToDo)
 
 TEST_F(DeployAntennasUpdateTest, TestDeploymentOverridenFailure)
 {
-    state.Antenna.Deployed = true;
+    state.AntennaState.SetDeployment(true);
     stateDescriptor.OverrideState();
     EXPECT_CALL(mock, GetDeploymentStatus(_, _)).WillOnce(Return(OSResult::IOError));
     const auto result = update.updateProc(state, update.param);
@@ -130,11 +130,7 @@ TEST_F(DeployAntennasUpdateTest, TestDeploymentStateUpdateFullDeployment)
             }));
     const auto result = update.updateProc(state, update.param);
     ASSERT_THAT(result, Eq(UpdateResult::Ok));
-    ASSERT_THAT(state.Antenna.Deployed, Eq(false));
-    ASSERT_THAT(state.Antenna.DeploymentState[0], Eq(true));
-    ASSERT_THAT(state.Antenna.DeploymentState[1], Eq(true));
-    ASSERT_THAT(state.Antenna.DeploymentState[2], Eq(true));
-    ASSERT_THAT(state.Antenna.DeploymentState[3], Eq(true));
+    ASSERT_THAT(state.AntennaState.IsDeployed(), Eq(false));
     ASSERT_THAT(stateDescriptor.IsFinished(), Eq(false));
 }
 
@@ -152,11 +148,7 @@ TEST_F(DeployAntennasUpdateTest, TestDeploymentStateUpdatePartialDeployment)
             }));
     const auto result = update.updateProc(state, update.param);
     ASSERT_THAT(result, Eq(UpdateResult::Ok));
-    ASSERT_THAT(state.Antenna.Deployed, Eq(false));
-    ASSERT_THAT(state.Antenna.DeploymentState[0], Eq(true));
-    ASSERT_THAT(state.Antenna.DeploymentState[1], Eq(false));
-    ASSERT_THAT(state.Antenna.DeploymentState[2], Eq(true));
-    ASSERT_THAT(state.Antenna.DeploymentState[3], Eq(false));
+    ASSERT_THAT(state.AntennaState.IsDeployed(), Eq(false));
     ASSERT_THAT(stateDescriptor.IsFinished(), Eq(false));
 }
 
@@ -210,7 +202,7 @@ TEST_F(DeployAntennasUpdateTest, TestDeploymentStateUpdateInProgressFullActivity
 
 TEST_F(DeployAntennasUpdateTest, TestDeploymentStateUpdateOverride)
 {
-    state.Antenna.Deployed = true;
+    state.AntennaState.SetDeployment(true);
     stateDescriptor.OverrideState();
     EXPECT_CALL(mock, GetDeploymentStatus(_, _))
         .WillOnce(Invoke([](AntennaChannel /*channel*/, //
@@ -223,15 +215,15 @@ TEST_F(DeployAntennasUpdateTest, TestDeploymentStateUpdateOverride)
                 return OSResult::Success;
             }));
     update.updateProc(state, update.param);
-    ASSERT_THAT(state.Antenna.Deployed, Eq(false));
+    ASSERT_THAT(state.AntennaState.IsDeployed(), Eq(false));
 }
 
 TEST_F(DeployAntennasUpdateTest, TestUpdateGlobalStateOnFinish)
 {
     stateDescriptor.OverrideStep(AntennaMissionState::StepCount());
-    state.Antenna.Deployed = false;
+    state.AntennaState.SetDeployment(false);
     update.updateProc(state, update.param);
-    ASSERT_THAT(state.Antenna.Deployed, Eq(true));
+    ASSERT_THAT(state.AntennaState.IsDeployed(), Eq(true));
 }
 
 class DeployAntennasActionTest : public ::testing::Test
