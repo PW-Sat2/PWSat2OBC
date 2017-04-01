@@ -5,15 +5,15 @@
 #include "base/reader.h"
 #include "base/writer.h"
 #include "logger/logger.h"
-#include "state/PersistentState.hpp"
+#include "state/struct.h"
 
 namespace obc
 {
     static constexpr std::uint32_t Signature = 0x55aa77ee;
 
-    static constexpr std::uint32_t PersistenStateImageSize = state::PersistentState::Size() + sizeof(Signature);
+    static constexpr std::uint32_t PersistenStateImageSize = state::SystemPersistentState::Size() + sizeof(Signature);
 
-    bool WritePersistentState(const state::PersistentState& stateObject, std::uint32_t baseAddress, IStorageAccess& storage)
+    bool WritePersistentState(const state::SystemPersistentState& stateObject, std::uint32_t baseAddress, IStorageAccess& storage)
     {
         std::uint8_t array[PersistenStateImageSize];
         Writer writer(gsl::make_span(array));
@@ -30,7 +30,7 @@ namespace obc
         return true;
     }
 
-    bool ReadPersistentState(state::PersistentState& stateObject, std::uint32_t baseAddress, IStorageAccess& storage)
+    bool ReadPersistentState(state::SystemPersistentState& stateObject, std::uint32_t baseAddress, IStorageAccess& storage)
     {
         std::uint8_t array[PersistenStateImageSize];
         storage.Read(baseAddress, gsl::make_span(array));
@@ -42,7 +42,7 @@ namespace obc
             )
         {
             LOG(LOG_LEVEL_ERROR, "Unable to parse persistent state image.");
-            stateObject = state::PersistentState();
+            stateObject = state::SystemPersistentState();
             return false;
         }
 

@@ -1,5 +1,5 @@
-#ifndef LIBS_STATE_ISTORAGE_ACCESS_HPP
-#define LIBS_STATE_ISTORAGE_ACCESS_HPP
+#ifndef LIBS_OBC_STATE_ISTORAGE_ACCESS_HPP
+#define LIBS_OBC_STATE_ISTORAGE_ACCESS_HPP
 
 #pragma once
 
@@ -15,4 +15,5 @@ namespace obc
         virtual void Write(std::uint32_t address, gsl::span<const std::uint8_t> span) = 0;
     };
 }
+
 #endif

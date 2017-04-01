@@ -7,8 +7,11 @@ namespace state
 {
     class AntennaConfiguration;
     class AntennaState;
+    class TimeState;
 
-    class PersistentState;
+    template <typename... Parts> class PersistentState;
+
+    typedef PersistentState<AntennaConfiguration, TimeState> SystemPersistentState;
 }
 
 class SystemState;
