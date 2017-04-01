@@ -5,10 +5,12 @@
 
 #include <chrono>
 #include "PersistentState.hpp"
+#include "TimeState.hpp"
 #include "adcs/adcs.hpp"
 #include "antenna/AntennaState.hpp"
 #include "base/os.h"
 #include "experiments/experiments.h"
+#include "fwd.hpp"
 
 /**
  * @defgroup StateDef Satellite state definition
@@ -40,7 +42,7 @@ struct SystemState
      */
     experiments::ExperimentState Experiment;
 
-    state::PersistentState PersistentState;
+    state::SystemPersistentState PersistentState;
 };
 
 /** @} */

@@ -1,8 +1,8 @@
 set(NAME obc_state)
 
 set(SOURCES
-    Include/obc/fwd.hpp
     Include/obc/IStorageAccess.hpp
+    Include/obc/ObcState.hpp
     Include/obc/PersistentStorageAccess.hpp
     ObcState.cpp
     PersistentStorageAccess.cpp
@@ -16,6 +16,7 @@ target_link_libraries(${NAME}
 	state
 	logger
 	spi
+	mission_state
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
