@@ -97,14 +97,19 @@ static void ProcessState(OBC* obc)
 {
     if (obc->Hardware.Pins.SysClear.Input() == false)
     {
-        LOG(LOG_LEVEL_WARNING, "Clearing state on startup");
+        LOG(LOG_LEVEL_WARNING, "Resetting system state");
 
         if (OS_RESULT_FAILED(obc->Storage.ClearStorage()))
         {
-            LOG(LOG_LEVEL_ERROR, "Clearing state failed");
+            LOG(LOG_LEVEL_ERROR, "Storage reset failure");
         }
 
-        LOG(LOG_LEVEL_INFO, "All files removed");
+        if (!obc::WritePersistentState(Mission.GetState().PersistentState, PersistentStateBaseAddress, obc->persistentStorage))
+        {
+            LOG(LOG_LEVEL_ERROR, "Persistent state reset failure");
+        }
+
+        LOG(LOG_LEVEL_INFO, "Completed system state reset");
     }
     else
     {
