@@ -25,7 +25,7 @@ AdcsPrimaryTaskTest::AdcsPrimaryTaskTest() //
       primaryAction(task.BuildAction()),
       updateStep(task.BuildUpdate())
 {
-    this->state.Antenna.Deployed = true;
+    this->state.AntennaState.SetDeployment(true);
     this->state.Time = 42min;
 }
 
@@ -67,7 +67,7 @@ TEST_F(AdcsPrimaryTaskTest, TestPrimaryDetumblingConditionActivePeriodAdcsIsDoin
 
 TEST_F(AdcsPrimaryTaskTest, TestPrimaryDetumblingConditionActivePeriodAntennasNotDeployed)
 {
-    this->state.Antenna.Deployed = false;
+    this->state.AntennaState.SetDeployment(false);
     EXPECT_CALL(coordinator, CurrentMode()).WillOnce(Return(adcs::AdcsMode::Disabled));
     ASSERT_THAT(this->primaryAction.condition(this->state, this->primaryAction.param), Eq(false));
 }

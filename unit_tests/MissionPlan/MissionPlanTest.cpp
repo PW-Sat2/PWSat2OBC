@@ -24,7 +24,7 @@ TEST_F(MissionPlanTest, EmptyStateShouldHaveEmptyValues)
 {
     ASSERT_THAT(state.SailOpened, Eq(false));
     ASSERT_THAT(state.Time.count(), Eq(0ul));
-    ASSERT_THAT(state.Antenna.Deployed, Eq(false));
+    ASSERT_THAT(state.AntennaState.IsDeployed(), Eq(false));
 }
 
 TEST_F(MissionPlanTest, ShouldUpdateStateAccordingToDescriptors)
