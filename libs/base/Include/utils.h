@@ -374,6 +374,12 @@ template <typename Underlying, std::uint8_t BitsCount> class BitValue
      */
     inline operator Underlying() const;
 
+    /**
+     * @brief Extracts holded value
+     * @return holded value
+     */
+    inline Underlying Value() const;
+
   private:
     /** @brief Holded value */
     Underlying _value;
@@ -390,6 +396,11 @@ template <typename Underlying, std::uint8_t BitsCount> constexpr BitValue<Underl
 
 template <typename Underlying, std::uint8_t BitsCount> constexpr BitValue<Underlying, BitsCount>::BitValue() : _value(0)
 {
+}
+
+template <typename Underlying, std::uint8_t BitsCount> inline Underlying BitValue<Underlying, BitsCount>::Value() const
+{
+    return this->_value;
 }
 
 /** @brief 12-bit unsigned int */

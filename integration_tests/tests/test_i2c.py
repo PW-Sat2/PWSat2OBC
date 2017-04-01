@@ -74,7 +74,7 @@ class I2CTest(BaseTest):
 
         power_cycle_trigger = TestEvent()
 
-        self.system.eps.on_power_cycle = power_cycle_trigger.set()
+        self.system.eps.controller_a.on_power_cycle = power_cycle_trigger.set()
 
         self.assertTrue(power_cycle_trigger.wait_for_change(15), "Power cycle should be triggered")
 
