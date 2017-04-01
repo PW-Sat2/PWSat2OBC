@@ -10,9 +10,9 @@ namespace obc
 {
     struct IStorageAccess;
 
-    bool ReadPersistentState(state::PersistentState& state, std::uint32_t baseAddress, IStorageAccess& storage);
+    bool ReadPersistentState(state::SystemPersistentState& state, std::uint32_t baseAddress, IStorageAccess& storage);
 
-    bool WritePersistentState(const state::PersistentState& state, std::uint32_t baseAddress, IStorageAccess& storage);
+    bool WritePersistentState(const state::SystemPersistentState& state, std::uint32_t baseAddress, IStorageAccess& storage);
 }
 
 #endif

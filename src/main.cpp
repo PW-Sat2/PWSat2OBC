@@ -47,7 +47,8 @@ mission::ObcMission Mission(std::tie(Main.timeProvider, Main.rtc),
     false,
     Main.adcs.GetAdcsController(),
     Main.Experiments.ExperimentsController,
-    Main.Communication.CommDriver);
+    Main.Communication.CommDriver,
+    std::tie(Main.persistentStorage, PersistentStateBaseAddress));
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
