@@ -42,6 +42,9 @@ struct SystemState
      */
     experiments::ExperimentState Experiment;
 
+    /**
+     * @brief Satellite's persistent state.
+     */
     state::SystemPersistentState PersistentState;
 };
 
