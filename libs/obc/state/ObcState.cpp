@@ -11,14 +11,15 @@ namespace obc
 {
     static constexpr std::uint32_t Signature = 0x55aa77ee;
 
-    static constexpr std::uint32_t PersistenStateImageSize = state::SystemPersistentState::Size() + sizeof(Signature);
+    static constexpr std::uint32_t TotalImageSize = state::SystemPersistentState::Size() + 2 * sizeof(Signature);
 
     bool WritePersistentState(const state::SystemPersistentState& stateObject, std::uint32_t baseAddress, IStorageAccess& storage)
     {
-        std::uint8_t array[PersistenStateImageSize];
+        std::uint8_t array[TotalImageSize];
         Writer writer(gsl::make_span(array));
         writer.WriteDoubleWordLE(Signature);
         stateObject.Write(writer);
+        writer.WriteDoubleWordLE(Signature);
         if (!writer.Status())
         {
             LOG(LOG_LEVEL_ERROR, "Unable to generate persistent state image.");
@@ -32,13 +33,13 @@ namespace obc
 
     bool ReadPersistentState(state::SystemPersistentState& stateObject, std::uint32_t baseAddress, IStorageAccess& storage)
     {
-        std::uint8_t array[PersistenStateImageSize];
+        std::uint8_t array[TotalImageSize];
         storage.Read(baseAddress, gsl::make_span(array));
         Reader reader(gsl::make_span(array));
-        const auto signature = reader.ReadDoubleWordLE();
-        if (                          //
-            signature != Signature || //
-            !reader.Status()          //
+        const auto header = reader.ReadDoubleWordLE();
+        if (                       //
+            header != Signature || //
+            !reader.Status()       //
             )
         {
             LOG(LOG_LEVEL_ERROR, "Unable to parse persistent state image.");
@@ -47,6 +48,7 @@ namespace obc
         }
 
         stateObject.Read(reader);
-        return reader.Status();
+        const auto footer = reader.ReadDoubleWordLE();
+        return footer == Signature && reader.Status();
     }
 }

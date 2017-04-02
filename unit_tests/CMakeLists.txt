@@ -10,7 +10,6 @@ set(SOURCES
   os/os.hpp
   OsMock.hpp
   OsMock.cpp
-  OsMock.hpp
   assert.cpp
   I2C/I2CMock.cpp
   mock/FsMock.hpp
@@ -69,6 +68,7 @@ set(SOURCES
   mock/RtcMock.hpp
   mock/comm.cpp
   mock/comm.hpp
+  mock/mock.cpp
   mock/error_counter.cpp
   assert.cpp
   antenna/miniport.cpp
@@ -82,6 +82,8 @@ set(SOURCES
   ErrorCounterTest.cpp
   FM25W/FM25WDriverTest.cpp
   telecommunication/FrameContentsWriterTest.cpp
+  state/PersistentStateTest.cpp
+  obc/ObcStateTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -116,6 +118,12 @@ target_link_libraries(${NAME}
     fs    
     base
     mission
+    mission_antenna
+    mission_sail
+    mission_time
+    mission_experiments
+    mission_adcs
+    mission_beacon
     rapidcheck
     rapidcheck_gtest
     rapidcheck_gmock
@@ -124,20 +132,15 @@ target_link_libraries(${NAME}
     gsl
     antenna
     n25q
-    mission_antenna
     imtq
-    mission_sail
-    mission_time
     eigen
-    mission_experiments
     exp_fibo
     adcs
-    mission_adcs
     obc_telecommands
+    obc_state
     rtc
     error_counter
     fm25w
-    mission_beacon
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})

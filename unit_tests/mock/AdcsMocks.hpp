@@ -8,6 +8,8 @@
 
 struct AdcsCoordinatorMock : adcs::IAdcsCoordinator
 {
+    ~AdcsCoordinatorMock();
+
     MOCK_CONST_METHOD0(CurrentMode, adcs::AdcsMode());
 
     MOCK_METHOD0(EnableBuiltinDetumbling, OSResult());
@@ -21,6 +23,8 @@ struct AdcsCoordinatorMock : adcs::IAdcsCoordinator
 
 struct DetumblingMock : adcs::IDetumblingSupport
 {
+    ~DetumblingMock();
+
     MOCK_METHOD0(EnableDetumbling, OSResult());
 
     MOCK_METHOD0(DisableDetumbling, OSResult());
@@ -28,6 +32,8 @@ struct DetumblingMock : adcs::IDetumblingSupport
 
 struct SunPointingMock : adcs::ISunPointingSupport
 {
+    ~SunPointingMock();
+
     MOCK_METHOD0(EnableSunPointing, OSResult());
 
     MOCK_METHOD0(DisableSunPointing, OSResult());
