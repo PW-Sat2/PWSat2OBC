@@ -25,6 +25,10 @@ namespace state
 
         static constexpr std::uint32_t Size();
 
+        bool operator==(const TimeState& arg) const;
+
+        bool operator!=(const TimeState& arg) const;
+
       private:
         std::chrono::milliseconds lastMissionTime;
         std::chrono::milliseconds lastExternalTime;
@@ -43,6 +47,16 @@ namespace state
     constexpr std::uint32_t TimeState::Size()
     {
         return 2 * sizeof(decltype(std::declval<std::chrono::milliseconds>().count()));
+    }
+
+    inline bool TimeState::operator==(const TimeState& arg) const
+    {
+        return this->lastMissionTime == arg.lastMissionTime && this->lastExternalTime == arg.lastExternalTime;
+    }
+
+    inline bool TimeState::operator!=(const TimeState& arg) const
+    {
+        return !(*this == arg);
     }
 }
 
