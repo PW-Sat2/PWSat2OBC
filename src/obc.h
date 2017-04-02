@@ -98,8 +98,14 @@ struct OBC
     /** @brief Overall satellite <-> Earth communication */
     obc::OBCCommunication Communication;
 
+    /**
+     * @brief Fram's spi access
+     */
     drivers::spi::EFMSPISlaveInterface framSpi;
 
+    /**
+     * @brief Object that provides read/write capabilities to persistent storage
+     */
     obc::PersistentStorageAccess persistentStorage;
 
     /** @brief Terminal object. */

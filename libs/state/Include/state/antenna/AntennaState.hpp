@@ -7,14 +7,23 @@ namespace state
 {
     /**
      * @brief Current antenna deployment state.
+     * @ingroup StateDef
      */
     class AntennaState
     {
       public:
         AntennaState();
 
+        /**
+         * @brief Indicates whether the antenna deployment process is completed.
+         * @return Current antenna deployment process status.
+         */
         bool IsDeployed() const;
 
+        /**
+         * @brief Updates antenna deployment status.
+         * @param[in] newState New antenna deployment status.
+         */
         void SetDeployment(bool newState);
 
       private:
