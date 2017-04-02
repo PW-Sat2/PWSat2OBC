@@ -14,6 +14,8 @@ namespace mission
 {
     /**
      * @defgroup MissionBeacon Beacon management
+     *
+     * This module contains components responsible for coordinating beacon transmission and updating its contents.
      * @ingroup mission
      * @{
      */
@@ -61,6 +63,11 @@ namespace mission
          */
         void UpdateBeacon(const SystemState& state);
 
+        /**
+         * @brief This procedure is responsible for generation beacon from current system state.
+         * @param[in] state Reference to current system state.
+         * @return Object that contains new beacon definition.
+         */
         devices::comm::Beacon GenerateBeacon(const SystemState& state);
 
         /**
