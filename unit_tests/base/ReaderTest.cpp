@@ -128,6 +128,21 @@ TEST(ReaderTest, TestReadingWordBE)
     ASSERT_TRUE(reader.Status());
 }
 
+TEST(ReaderTest, TestReadingSignedWordBE) {
+    uint8_t array[] = {0x00, 0x00, 0xFF, 0xFF, 0x7F, 0xFF,
+                       0x80, 0x00, 0xC5, 0x68, 0x3A, 0x98};
+    Reader reader;
+    reader.Initialize(array);
+
+    EXPECT_EQ(reader.ReadSignedWordBE(), 0);
+    EXPECT_EQ(reader.ReadSignedWordBE(), -1);
+    EXPECT_EQ(reader.ReadSignedWordBE(), 32767);
+    EXPECT_EQ(reader.ReadSignedWordBE(), -32768);
+    EXPECT_EQ(reader.ReadSignedWordBE(), -15000);
+    EXPECT_EQ(reader.ReadSignedWordBE(), 15000);
+    EXPECT_TRUE(reader.Status());
+}
+
 TEST(ReaderTest, TestReadingWordLEBeyondEnd)
 {
     Reader reader;

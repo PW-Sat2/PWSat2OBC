@@ -98,6 +98,14 @@ class Reader final
     uint16_t ReadWordBE();
 
     /**
+     * @brief Read single 16 bit word with big-endian memory orientation from
+     * the buffer
+     * and advance the current buffer position to the next unread byte.
+     * @return Read signed word value.
+     */
+    int16_t ReadSignedWordBE();
+
+    /**
      * @brief Read single 32 bit word with little-endian memory orientation from the buffer
      * and advance the current buffer position to the next unread byte.
      * @return Read double word.

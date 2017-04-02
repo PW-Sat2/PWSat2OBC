@@ -85,6 +85,10 @@ uint16_t Reader::ReadWordBE()
     }
 }
 
+int16_t Reader::ReadSignedWordBE() {
+    return static_cast<int16_t>(this->ReadWordBE());
+}
+
 uint32_t Reader::ReadDoubleWordLE()
 {
     if (!UpdateState(4))
