@@ -82,6 +82,7 @@ set(SOURCES
   ErrorCounterTest.cpp
   FM25W/FM25WDriverTest.cpp
   telecommunication/FrameContentsWriterTest.cpp
+  gyro/gyroTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -138,6 +139,7 @@ target_link_libraries(${NAME}
     error_counter
     fm25w
     mission_beacon
+    gyro
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
