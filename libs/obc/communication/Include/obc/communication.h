@@ -4,20 +4,16 @@
 #include <gsl/span>
 #include "comm/CommDriver.hpp"
 #include "i2c/i2c.h"
+#include "obc/experiments.hpp"
+#include "obc/telecommands/experiments.hpp"
+#include "obc/fdir.hpp"
+#include "obc/telecommands/file_system.hpp"
+#include "obc/telecommands/ping.hpp"
 #include "telecommunication/telecommand_handling.h"
 #include "telecommunication/uplink.h"
 
 namespace obc
 {
-    /**@brief Dummy ping telecommand that responds with pong */
-    class PingTelecommand final : public telecommunication::uplink::IHandleTeleCommand
-    {
-      public:
-        virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
-
-        virtual std::uint8_t CommandCode() const override;
-    };
-
     /**
      * @brief Object aggregating all supported telecommands
      */
@@ -25,9 +21,11 @@ namespace obc
     {
       public:
         /**
-         * Initializes @ref Telecommands object
+         * @brief Initializes @ref Telecommands object
+         * @param fs File system
+         * @param experiments Experiments
          */
-        Telecommands();
+        Telecommands(services::fs::IFileSystem& fs, obc::OBCExperiments& experiments);
 
         /**
          * Aggregates all telecommand handlers into single span
@@ -37,10 +35,15 @@ namespace obc
 
       private:
         /** @brief Ping telecommand */
-        PingTelecommand _ping;
+        obc::telecommands::PingTelecommand _ping;
+        /** @brief Download file telecommand */
+        obc::telecommands::DownladFileTelecommand _downloadFileTelecommand;
+
+        /** @brief Perform detumbling experiment */
+        obc::telecommands::PerformDetumblingExperiment _performDetumblingExperiment;
 
         /** @brief Array containg all telecommand handlers */
-        telecommunication::uplink::IHandleTeleCommand* _telecommands[1];
+        telecommunication::uplink::IHandleTeleCommand* _telecommands[3];
     };
 
     /**
@@ -50,9 +53,12 @@ namespace obc
     {
         /**
          * @brief Initializes @ref OBCCommunication object
+         * @param[in] fdir FDIR mechanisms
          * @param[in] i2cBus I2CBus used by low-level comm driver
+         * @param[in] fs File system
+         * @param[in] experiments Experiments
          */
-        OBCCommunication(drivers::i2c::II2CBus& i2cBus);
+        OBCCommunication(obc::FDIR& fdir, drivers::i2c::II2CBus& i2cBus, services::fs::IFileSystem& fs, obc::OBCExperiments& experiments);
 
         /**
          * @brief Initializes all communication-related drivers and objects

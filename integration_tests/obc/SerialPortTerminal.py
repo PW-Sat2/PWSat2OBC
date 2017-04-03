@@ -32,6 +32,17 @@ class SerialPortTerminal:
 
         return data
 
+    def _safe_read(self, size):
+        data = ''
+
+        while size > 0:
+            part = self._serial.read(size)
+
+            data += part
+            size -= len(part)
+
+        return data
+
     def _command_prologue(self, cmd):
         self.waitForPrompt()
 
@@ -61,7 +72,7 @@ class SerialPortTerminal:
         remaining = data
 
         while len(remaining) > 0:
-            b = self._serial.read(4)
+            b = self._safe_read(4)
             part_length = struct.unpack('<L', b)[0]
 
             part = remaining[0:part_length]
@@ -75,9 +86,11 @@ class SerialPortTerminal:
 
     def command_with_read_data(self, cmd):
         self._command_prologue(cmd)
-        size = int(self.readUntilPrompt('\n'))
+        size = self.readUntilPrompt('\n')
+        size = int(size)
 
-        data = self._serial.read(size)
+        data = self._safe_read(size)
+
         self.readUntilPrompt()
 
         return data

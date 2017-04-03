@@ -9,6 +9,7 @@ from threading import Lock
 from utils import *
 from build_config import config
 
+
 class DownlinkFrame:
     def __init__(self, apid, seq, payload):
         self._apid = apid
@@ -164,6 +165,14 @@ class TransmitterDevice(i2cMock.I2CDevice):
         # This callback can override the telemetry retuned by this device by returning the desired response.
         # Returning None will indicate that default telemetry should be reported.
         self.on_get_telemetry = None
+
+        # callback called when beacon is being set
+        # expected prototype:
+        # None -> Boolean | None
+        # This callback can override the beacon set operation by returning information (boolean) whether the 
+        # beacon should be set and frame queue emptied (True) of ignored (False)
+        self.on_set_beacon = None
+
         self._buffer = Queue(TransmitterDevice.BUFFER_SIZE)
         self._lock = Lock()
         self.baud_rate = BaudRate.BaudRate1200
@@ -203,10 +212,19 @@ class TransmitterDevice(i2cMock.I2CDevice):
         telemetry = call(self.on_get_telemetry, TransmitterTelemetry())
         return telemetry.toArray()
 
+    @i2cMock.command([0x14])
+    def _set_beacon(self, *data):
+        self.log.info("set beacon: %s", data)
+        if call(self.on_set_beacon, True):
+            self.reset_queue()
+
     def get_message_from_buffer(self, timeout=None):
         return self._buffer.get(timeout=timeout)
 
     def reset(self):
+        self.reset_queue()
+
+    def reset_queue(self):
         with self._lock:
             self._buffer = Queue(TransmitterDevice.BUFFER_SIZE)
 

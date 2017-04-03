@@ -58,6 +58,16 @@ TEST(WriterTest, TestWritingSingleWordLE)
     CheckBuffer(array, writer.GetDataLength(), expected, sizeof(expected));
 }
 
+TEST(WriterTest, TestWritingSingleWordBE)
+{
+    uint8_t array[2];
+    const uint8_t expected[2] = {0xAA, 0x55};
+    Writer writer(array);
+    ASSERT_TRUE(writer.WriteWordBE(0xAA55));
+    ASSERT_TRUE(writer.Status());
+    CheckBuffer(array, writer.GetDataLength(), expected, sizeof(expected));
+}
+
 TEST(WriterTest, TestWritingSignedSingleWordLE)
 {
     uint8_t array[12];
@@ -245,4 +255,34 @@ TEST(WriterTest, TestWriteLowerBytesBE)
     ASSERT_THAT(array[0], Eq(0xBB));
     ASSERT_THAT(array[1], Eq(0xCC));
     ASSERT_THAT(array[2], Eq(0xDD));
+}
+
+TEST(WriterTest, TestReserveBuffer)
+{
+    uint8_t array[5];
+    Writer writer(array);
+
+    writer.WriteByte(1);
+    auto b = writer.Reserve(3);
+    b[0] = 2;
+    b[1] = 3;
+    b[2] = 4;
+    writer.WriteByte(5);
+
+    ASSERT_THAT(array, testing::ElementsAre(1, 2, 3, 4, 5));
+}
+
+TEST(WriterTest, TestReserveBufferOverflowingBuffer)
+{
+    uint8_t array[3];
+    Writer writer(array);
+
+    auto b = writer.Reserve(5);
+
+    ASSERT_THAT(b.size(), Eq(3));
+    ASSERT_THAT(writer.Status(), Eq(true));
+
+    writer.WriteByte(1);
+
+    ASSERT_THAT(writer.Status(), Eq(false));
 }

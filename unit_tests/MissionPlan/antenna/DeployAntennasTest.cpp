@@ -135,7 +135,6 @@ TEST_F(DeployAntennasUpdateTest, TestDeploymentStateUpdateFullDeployment)
     ASSERT_THAT(state.Antenna.DeploymentState[1], Eq(true));
     ASSERT_THAT(state.Antenna.DeploymentState[2], Eq(true));
     ASSERT_THAT(state.Antenna.DeploymentState[3], Eq(true));
-    ASSERT_THAT(stateDescriptor.IsDeploymentPartFinished(), Eq(true));
     ASSERT_THAT(stateDescriptor.IsFinished(), Eq(false));
 }
 
@@ -158,7 +157,6 @@ TEST_F(DeployAntennasUpdateTest, TestDeploymentStateUpdatePartialDeployment)
     ASSERT_THAT(state.Antenna.DeploymentState[1], Eq(false));
     ASSERT_THAT(state.Antenna.DeploymentState[2], Eq(true));
     ASSERT_THAT(state.Antenna.DeploymentState[3], Eq(false));
-    ASSERT_THAT(stateDescriptor.IsDeploymentPartFinished(), Eq(false));
     ASSERT_THAT(stateDescriptor.IsFinished(), Eq(false));
 }
 
@@ -228,6 +226,14 @@ TEST_F(DeployAntennasUpdateTest, TestDeploymentStateUpdateOverride)
     ASSERT_THAT(state.Antenna.Deployed, Eq(false));
 }
 
+TEST_F(DeployAntennasUpdateTest, TestUpdateGlobalStateOnFinish)
+{
+    stateDescriptor.OverrideStep(AntennaMissionState::StepCount());
+    state.Antenna.Deployed = false;
+    update.updateProc(state, update.param);
+    ASSERT_THAT(state.Antenna.Deployed, Eq(true));
+}
+
 class DeployAntennasActionTest : public ::testing::Test
 {
   protected:
@@ -259,6 +265,24 @@ TEST_F(DeployAntennasActionTest, TestMinimalPath)
 {
     EXPECT_CALL(mock, Reset(ANTENNA_PRIMARY_CHANNEL)).Times(1);
     EXPECT_CALL(mock, DeployAntenna(ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, _, _)).Times(1);
-    Run();
-    Run();
+    EXPECT_CALL(mock, DeployAntenna(ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, _, _)).Times(1);
+    EXPECT_CALL(mock, DeployAntenna(ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, _, _)).Times(1);
+    EXPECT_CALL(mock, DeployAntenna(ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, _, _)).Times(1);
+    EXPECT_CALL(mock, DeployAntenna(ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, _, _)).Times(1);
+    EXPECT_CALL(mock, FinishDeployment(ANTENNA_PRIMARY_CHANNEL)).Times(6);
+    EXPECT_CALL(mock, Reset(ANTENNA_BACKUP_CHANNEL)).Times(1);
+    EXPECT_CALL(mock, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, _, _)).Times(1);
+    EXPECT_CALL(mock, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, _, _)).Times(1);
+    EXPECT_CALL(mock, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, _, _)).Times(1);
+    EXPECT_CALL(mock, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, _, _)).Times(1);
+    EXPECT_CALL(mock, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, _, _)).Times(1);
+    EXPECT_CALL(mock, FinishDeployment(ANTENNA_BACKUP_CHANNEL)).Times(6);
+
+    for (int i = 0; i < 14; ++i)
+    {
+        Run();
+    }
+
+    ASSERT_THAT(stateDescriptor.IsFinished(), Eq(true));
+    ASSERT_THAT(stateDescriptor.IsDeploymentInProgress(), Eq(false));
 }

@@ -62,7 +62,7 @@ namespace obc
             devices::n25q::N25QDriver Driver;
 
             /** @brief N25Q Yaffs device */
-            devices::n25q::N25QYaffsDevice<devices::n25q::BlockMapping::Sector, 512_Bytes, 16_MB> Device;
+            devices::n25q::N25QYaffsDevice<devices::n25q::BlockMapping::Sector, 2_KB, 16_MB> Device;
 
             /** @brief Device operations */
             services::fs::IYaffsDeviceOperations& _deviceOperations;
@@ -104,7 +104,7 @@ namespace obc
 
           private:
             /** @brief External flashes */
-            SingleFlash _flashes[3];
+            SingleFlash _flashes[1];
         };
 
         /** @} */

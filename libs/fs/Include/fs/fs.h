@@ -109,6 +109,16 @@ namespace services
         };
 
         /**
+         * @brief Determies base for seek operation
+         */
+        enum class SeekOrigin
+        {
+            Begin,   //!< Begining of file
+            Current, //!< Current position
+            End      //!< End of file
+        };
+
+        /**
          * @brief Structure exposing file system API
          */
         struct IFileSystem
@@ -201,6 +211,15 @@ namespace services
              * @return Size of file
              */
             virtual FileSize GetFileSize(FileHandle file) = 0;
+
+            /**
+             * @brief Changes position in file
+             * @param file File handle
+             * @param origin Point from which seeking starts
+             * @param offset Offset
+             * @return Operation result
+             */
+            virtual OSResult Seek(FileHandle file, SeekOrigin origin, FileSize offset) = 0;
         };
 
         /**
@@ -209,20 +228,19 @@ namespace services
         class File : private NotCopyable
         {
           public:
-            /**
-             * @brief Move constructor
-             * @param other Other file (will become invalid)
-             */
-            File(File&& other) noexcept;
-            /**
-             * @brief Move operator
-             * @param other Other file (will become invalid)
-             * @return Reference to this
-             */
-            File& operator=(File&& other) noexcept;
-
             /** @brief Desctructor */
             ~File();
+
+            /**
+             * @brief default ctor
+             */
+            File();
+
+            /**
+             * @brief Move ctor
+             * @param other Other file
+             */
+            File(File&& other) noexcept;
 
             /**
              * @brief Factory method that opens file
@@ -235,26 +253,11 @@ namespace services
             File(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access);
 
             /**
-             * @brief Factory method that opens for read
-             * @param fs File system
-             * @param path File path
-             * @param mode Open mode
-             * @param access Access
-             * @return File instance
+             * @brief Move operator
+             * @param other Other file
+             * @return Reference to this
              */
-            static File OpenRead(
-                IFileSystem& fs, const char* path, FileOpen mode = FileOpen::Existing, FileAccess access = FileAccess::ReadOnly);
-
-            /**
-             * @brief Factory method that opens for write
-             * @param fs File system
-             * @param path File path
-             * @param mode Open mode
-             * @param access Access
-             * @return File instance
-             */
-            static File OpenWrite(
-                IFileSystem& fs, const char* path, FileOpen mode = FileOpen::Existing, FileAccess access = FileAccess::WriteOnly);
+            File& operator=(File&& other) noexcept;
 
             /** @brief Implicit cast to bool, true if file opened successfully*/
             inline operator bool();
@@ -286,9 +289,25 @@ namespace services
              */
             FileSize Size();
 
+            /**
+             * @brief Closes file
+             * @return Operation result
+             *
+             * @brief After calling this method object becomes unusable
+             */
+            OSResult Close();
+
+            /**
+             * @brief Seeks position in file
+             * @param origin Determies what is used as starting point for offset
+             * @param offset Position offset
+             * @return Operation result
+             */
+            OSResult Seek(SeekOrigin origin, FileSize offset);
+
           private:
             /** @brief File system interface */
-            IFileSystem& _fs;
+            IFileSystem* _fs;
             /** @brief File handle */
             FileHandle _handle;
             /** @brief Flag indicating whether file is opened successfully */
@@ -297,7 +316,7 @@ namespace services
 
         File::operator bool()
         {
-            return this->_valid;
+            return this->_fs != nullptr && this->_valid;
         }
 
         /**

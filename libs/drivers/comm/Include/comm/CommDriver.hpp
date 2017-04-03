@@ -3,9 +3,11 @@
 
 #pragma once
 
+#include "IBeaconController.hpp"
 #include "ITransmitFrame.hpp"
 #include "base/os.h"
 #include "comm.hpp"
+#include "error_counter/error_counter.hpp"
 #include "i2c/forward.h"
 
 COMM_BEGIN
@@ -16,15 +18,16 @@ COMM_BEGIN
  * @remark Do not access directly the fields of this type, instead use the comm driver interface to
  * perform requested action.
  */
-class CommObject final : public ITransmitFrame
+class CommObject final : public ITransmitFrame, public IBeaconController
 {
   public:
     /**
      * Constructs new instance of COMM low-level driver
+     * @param[in] errors Error counting mechanism
      * @param[in] low I2C bus used to communicate with device
      * @param[in] upperInterface Reference to object responsible for interpreting received frames
      */
-    CommObject(drivers::i2c::II2CBus& low, IHandleFrame& upperInterface);
+    CommObject(error_counter::ErrorCounting& errors, drivers::i2c::II2CBus& low, IHandleFrame& upperInterface);
 
     /**
      * @brief This procedure initializes the comm driver object and sets it 'Paused' state.
@@ -120,11 +123,11 @@ class CommObject final : public ITransmitFrame
     /**
      * @brief This procedure sets the beacon frame for the passed comm object.
      *
-     * @param[in] beaconData Reference to object describing new beacon.
+     * @param[in] beacon Reference to object describing new beacon.
      * See the definition of the CommBeacon for details.
      * @return Operation status, true in case of success, false otherwise.
      */
-    bool SetBeacon(const Beacon& beaconData);
+    virtual bool SetBeacon(const Beacon& beacon) override final;
 
     /**
      * @brief Clears any beacon that is currently set in the transceiver. If a beacon transmission
@@ -132,7 +135,7 @@ class CommObject final : public ITransmitFrame
      *
      * @return Operation status, true in case of success, false otherwise.
      */
-    bool ClearBeacon();
+    virtual bool ClearBeacon() override final;
 
     /**
      * @brief Set the transmitter state when there are no more frames to sent.
@@ -257,6 +260,9 @@ class CommObject final : public ITransmitFrame
      * @param[in] param Task execution context. This should be pointer to the task owner object.
      */
     [[noreturn]] static void CommTask(void* param);
+
+    /** @brief Error counter */
+    error_counter::ErrorCounter<1> _error;
 
     /** @brief Comm driver lower interface. */
     drivers::i2c::II2CBus& _low;

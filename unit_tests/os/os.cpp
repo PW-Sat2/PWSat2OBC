@@ -1,5 +1,6 @@
 #include "os.hpp"
 #include <utility>
+#include "OsMock.hpp"
 
 using namespace std::chrono_literals;
 
@@ -130,6 +131,16 @@ OSEventBits System::EventGroupSetBitsISR(OSEventGroupHandle eventGroup, const OS
     if (OSProxy != nullptr)
     {
         return OSProxy->EventGroupSetBitsISR(eventGroup, bitsToChange);
+    }
+
+    return 0;
+}
+
+OSEventBits System::EventGroupGetBits(OSEventGroupHandle eventGroup)
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->EventGroupGetBits(eventGroup);
     }
 
     return 0;

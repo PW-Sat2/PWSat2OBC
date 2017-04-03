@@ -25,6 +25,8 @@ AdcsPrimaryTaskTest::AdcsPrimaryTaskTest() //
       primaryAction(task.BuildAction()),
       updateStep(task.BuildUpdate())
 {
+    this->state.Antenna.Deployed = true;
+    this->state.Time = 42min;
 }
 
 TEST_F(AdcsPrimaryTaskTest, TestInitialState)
@@ -53,28 +55,31 @@ TEST_F(AdcsPrimaryTaskTest, TestPrimaryDetumblingConditionSilentPeriod)
 
 TEST_F(AdcsPrimaryTaskTest, TestPrimaryDetumblingConditionActivePeriodAdcsAlreadyActive)
 {
-    this->state.Time = 42min;
     EXPECT_CALL(coordinator, CurrentMode()).WillOnce(Return(adcs::AdcsMode::BuiltinDetumbling));
     ASSERT_THAT(this->primaryAction.condition(this->state, this->primaryAction.param), Eq(false));
 }
 
 TEST_F(AdcsPrimaryTaskTest, TestPrimaryDetumblingConditionActivePeriodAdcsIsDoingSomethingElse)
 {
-    this->state.Time = 42min;
-    EXPECT_CALL(coordinator, CurrentMode()).WillOnce(Return(adcs::AdcsMode::CustomSunpointing));
+    EXPECT_CALL(coordinator, CurrentMode()).WillOnce(Return(adcs::AdcsMode::ExperimentalSunpointing));
+    ASSERT_THAT(this->primaryAction.condition(this->state, this->primaryAction.param), Eq(false));
+}
+
+TEST_F(AdcsPrimaryTaskTest, TestPrimaryDetumblingConditionActivePeriodAntennasNotDeployed)
+{
+    this->state.Antenna.Deployed = false;
+    EXPECT_CALL(coordinator, CurrentMode()).WillOnce(Return(adcs::AdcsMode::Disabled));
     ASSERT_THAT(this->primaryAction.condition(this->state, this->primaryAction.param), Eq(false));
 }
 
 TEST_F(AdcsPrimaryTaskTest, TestPrimaryDetumblingConditionSuccess)
 {
-    this->state.Time = 42min;
     EXPECT_CALL(coordinator, CurrentMode()).WillOnce(Return(adcs::AdcsMode::Disabled));
     ASSERT_THAT(this->primaryAction.condition(this->state, this->primaryAction.param), Eq(true));
 }
 
 TEST_F(AdcsPrimaryTaskTest, TestPrimaryDetumblingConditionDisabled)
 {
-    this->state.Time = 42min;
     this->task.Disable();
     EXPECT_CALL(coordinator, CurrentMode()).WillOnce(Return(adcs::AdcsMode::Disabled));
     ASSERT_THAT(this->primaryAction.condition(this->state, this->primaryAction.param), Eq(false));
@@ -99,7 +104,7 @@ TEST_F(AdcsPrimaryTaskTest, TestPrimaryDetumblingRepeatedFailure)
 
 TEST_F(AdcsPrimaryTaskTest, TestAdcsUpdateTask)
 {
-    EXPECT_CALL(coordinator, CurrentMode()).WillOnce(Return(adcs::AdcsMode::CustomSunpointing));
+    EXPECT_CALL(coordinator, CurrentMode()).WillOnce(Return(adcs::AdcsMode::ExperimentalSunpointing));
     this->updateStep.updateProc(this->state, this->updateStep.param);
-    ASSERT_THAT(this->state.AdcsMode, Eq(adcs::AdcsMode::CustomSunpointing));
+    ASSERT_THAT(this->state.AdcsMode, Eq(adcs::AdcsMode::ExperimentalSunpointing));
 }

@@ -27,18 +27,19 @@ using drivers::i2c::I2CResult;
 using namespace COMM;
 using namespace std::chrono_literals;
 
-Beacon::Beacon() : period(0)
+Beacon::Beacon() : period(0s)
 {
 }
 
-Beacon::Beacon(std::uint16_t beaconPeriod, gsl::span<const std::uint8_t> contents)
+Beacon::Beacon(std::chrono::seconds beaconPeriod, gsl::span<const std::uint8_t> contents)
     : period(beaconPeriod), //
       payload(std::move(contents))
 {
 }
 
-CommObject::CommObject(II2CBus& low, IHandleFrame& upperInterface)
-    : _low(low),                     //
+CommObject::CommObject(error_counter::ErrorCounting& errors, II2CBus& low, IHandleFrame& upperInterface)
+    : _error(errors),                //
+      _low(low),                     //
       _frameHandler(upperInterface), //
       _pollingTaskHandle(nullptr)    //
 {
@@ -94,7 +95,7 @@ bool CommObject::Restart()
         }
 
         const OSResult result =
-            System::CreateTask(CommObject::CommTask, "COMM Task", 512, this, TaskPriority::P4, &this->_pollingTaskHandle);
+            System::CreateTask(CommObject::CommTask, "COMM Task", 1_KB, this, TaskPriority::P4, &this->_pollingTaskHandle);
         if (OS_RESULT_FAILED(result))
         {
             LOGF(LOG_LEVEL_ERROR, "[comm] Unable to create background task. Status: 0x%08x.", num(result));
@@ -118,7 +119,7 @@ bool CommObject::Pause()
 
 bool CommObject::Reset()
 {
-    return this->SendCommand(Address::Receiver, num(ReceiverCommand::HardReset));
+    return this->SendCommand(Address::Receiver, num(ReceiverCommand::HardReset)) >> this->_error;
 }
 
 bool CommObject::ResetTransmitter()
@@ -324,7 +325,7 @@ bool CommObject::SetBeacon(const Beacon& beaconData)
     std::array<std::uint8_t, MaxDownlinkFrameSize + 2> buffer;
     Writer writer(buffer);
     writer.WriteByte(num(TransmitterCommand::SetBeacon));
-    writer.WriteWordLE(beaconData.Period());
+    writer.WriteWordLE(gsl::narrow_cast<std::uint16_t>(beaconData.Period().count()));
     writer.WriteArray(beaconData.Contents());
     if (!writer.Status())
     {

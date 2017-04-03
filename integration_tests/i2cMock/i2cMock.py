@@ -7,6 +7,8 @@ import binascii
 import serial.threaded
 import logging
 
+from enum import IntEnum
+
 from utils import hex_data
 
 DEVICE_SELECTED_FOR_WRITE = 'W'
@@ -29,6 +31,9 @@ def command(bytes):
 
 class I2CDevice(object):
     def __init__(self, address):
+        if address >= 0x80:
+            raise Exception("I2C address cannot be longer than 7 bits. Got address=%X" % address)
+
         self.address = address
         self.handlers = self._init_handlers()
         self.response = None
@@ -47,7 +52,10 @@ class I2CDevice(object):
         if handler is None:
             return self._missing_handler(data)
 
-        return handler(self, *args)
+        self.response = handler(self, *args) or []
+
+    def get_response(self):
+        return self.response
 
     def freeze(self):
         self.freeze_end.wait()
@@ -74,12 +82,36 @@ class MissingDevice(I2CDevice):
 
     @command([])
     def catch_all(self, *data):
-        self._log.error('Missing handler for 0x{}'.format(self.address, binascii.hexlify(bytearray(data))))
+        self._log.error('Missing handler for 0x{}'.format(binascii.hexlify(bytearray(data))))
         return [0xCC]
 
 
 class DeviceMockStopped(Exception):
     pass
+
+
+class MockPin(IntEnum):
+    PB0 = 0x50
+    PB1 = 0x51
+    PB2 = 0x52
+    PB3 = 0x53
+    PB4 = 0x54
+    PB5 = 0x55
+    PB6 = 0x56
+    PB7 = 0x57
+    PC0 = 0x80
+    PC1 = 0x81
+    PC2 = 0x82
+    PC3 = 0x83
+    PD4 = 0xB4
+    PD5 = 0xB5
+    PD6 = 0xB6
+    PD7 = 0xB7
+
+
+class UnsupportedMockVersion(Exception):
+    def __init__(self, version):
+        super(UnsupportedMockVersion, self).__init__("Unsupported mock version %d" % version)
 
 
 class I2CMock(object):
@@ -92,6 +124,9 @@ class I2CMock(object):
     CMD_UNLATCH = 0x07
     CMD_STOP = 0x08
     CMD_STOPPED = 0x09
+    CMD_I2C_REQUEST_RESPONSE = 0xA
+    CMD_GPIO_LOW = 0xA1
+    CMD_GPIO_HIGH = 0xA2
 
     _port = serial.Serial
 
@@ -115,7 +150,8 @@ class I2CMock(object):
         self._command_handlers = {
             I2CMock.CMD_VERSION: I2CMock._device_command_version,
             I2CMock.CMD_STOPPED: I2CMock._device_command_stopped,
-            I2CMock.CMD_I2C_WRITE: I2CMock._device_command_write
+            I2CMock.CMD_I2C_WRITE: I2CMock._device_command_write,
+            I2CMock.CMD_I2C_REQUEST_RESPONSE: I2CMock._device_command_request_response
         }
 
         self._started = Event()
@@ -123,6 +159,8 @@ class I2CMock(object):
         self._port_lock = Lock()
 
         self._devices = {}
+
+        self._version = None
 
     def start(self):
         if self._active:
@@ -143,7 +181,7 @@ class I2CMock(object):
         self._active = True
 
     def add_device(self, device):
-        self._devices[2*device.address] = device
+        self._devices[device.address] = device
 
     def stop(self):
         self._log.debug('Requesting stop')
@@ -166,6 +204,12 @@ class I2CMock(object):
 
     def disable(self):
         self._command(I2CMock.CMD_I2C_DISABLE)
+
+    def gpio_low(self, pin):
+        self._command(I2CMock.CMD_GPIO_LOW, [int(pin)])
+
+    def gpio_high(self, pin):
+        self._command(I2CMock.CMD_GPIO_HIGH, [int(pin)])
 
     def _command(self, cmd, data=[]):
         raw = ['S', cmd]
@@ -221,8 +265,15 @@ class I2CMock(object):
         return cmd, data
 
     def _device_command_version(self, version):
-        self._log.info('Device mock version %d', ord(version))
+        self._version = ord(version)
+
+        self._log.info('Device mock version %d', self._version)
         self._started.set()
+
+        if self._version == 2:
+            self._log.warn('Using DeviceMock v2 compatibility')
+        elif self._version != 3:
+            raise UnsupportedMockVersion(self._version)
 
     def _device_command_stopped(self):
         raise DeviceMockStopped()
@@ -236,16 +287,33 @@ class I2CMock(object):
         device = self._device(address)
         device.freeze_end = self._freeze_end
 
-        response = device.handle(data) or []
+        device.handle(data)
+
+        response = device.get_response()
 
         self._log.debug('Generated response %r', response)
 
+        if self._version == 2:
+            self._log.debug('[COMPATv2]Generated response %r', response)
+
+            self._command(I2CMock.CMD_I2C_RESPONSE, response)
+
+            self._log.debug('[COMPATv2]Response written')
+
+    def _device_command_request_response(self, address):
+        address = ord(address)
+
+        self._log.info('Device(%X) read', address)
+        device = self._device(address)
+
+        response = device.get_response() or []
+
         self._command(I2CMock.CMD_I2C_RESPONSE, response)
 
-        self._log.debug('Response written')
+        self._log.debug('Response written (%r)', response)
 
     def _device(self, address):
-        if self._devices.has_key(address):
-            return self._devices[address]
+        if self._devices.has_key(address / 2):
+            return self._devices[address / 2]
         else:
             return MissingDevice(address)

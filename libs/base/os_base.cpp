@@ -68,3 +68,10 @@ OSEventBits EventGroup::WaitAll(OSEventBits bits, bool clearOnExit, std::chrono:
 {
     return System::EventGroupWaitForBits(this->_handle, bits, true, clearOnExit, timeout);
 }
+
+bool EventGroup::IsSet(OSEventBits bit)
+{
+    auto f = System::EventGroupGetBits(this->_handle);
+
+    return has_flag(f, bit);
+}

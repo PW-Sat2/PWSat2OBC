@@ -94,6 +94,11 @@ template <class T> class Option
 {
   public:
     /**
+     * @brief Default ctor
+     */
+    Option();
+
+    /**
      * @brief Factory method that constructs empty Option instance.
      * @return Empty Option instance.
      */
@@ -103,13 +108,13 @@ template <class T> class Option
     }
 
     /**
-     * @brief Factory method that constructs Option instance that holds given value.
-     * @param[in] value Value to hold in Option instance.
-     * @return Option instance that holds a value.
+     * @brief Factory method that constucts Option instance and its value in place
+     * @param args Arguments passed to constructor of T
+     * @return Option instance
      */
-    static Option<T> Some(T&& value)
+    template <typename... Args> static Option<T> Some(Args&&... args)
     {
-        return Option<T>(true, std::move(value));
+        return Option<T>(true, std::forward<Args>(args)...);
     }
 
     /**
@@ -125,12 +130,12 @@ template <class T> class Option
     /**
       * @brief A flag indicating if this Option instance holds a value.
       */
-    const bool HasValue;
+    bool HasValue;
 
     /**
       * @brief Value held by Option instance if HasValue is true.
       */
-    const T Value;
+    T Value;
 
   private:
     Option(bool hasValue, T&& value) : HasValue(hasValue), Value(std::move(value))
@@ -141,6 +146,10 @@ template <class T> class Option
     {
     }
 };
+
+template <class T> inline Option<T>::Option() : HasValue(false), Value(T())
+{
+}
 
 /**
  * @brief Factory method that constructs empty Option instance.
@@ -161,6 +170,84 @@ template <typename T> static inline Option<std::remove_reference_t<T>> Some(T&& 
     using U = std::remove_reference_t<T>;
 
     return Option<U>::Some(std::forward<U>(value));
+}
+
+/**
+ * @brief Equality operator for @ref Option<T>
+ * @param lhs Left side value
+ * @param rhs Right side value (raw, not option)
+ * @retval false lhs is None
+ * @retval false lhs is Some and rhs is not equal to holded value
+ * @retval true lhs is Some and rhs is equal to holded value
+ */
+template <typename T> static inline bool operator==(const Option<T>& lhs, const T& rhs)
+{
+    if (!lhs.HasValue)
+    {
+        return false;
+    }
+
+    return lhs.Value == rhs;
+}
+
+/**
+ * @brief Equality operator for @ref Option<T>
+ * @param lhs Right side value (raw, not option)
+ * @param rhs Left side value
+ * @retval false rhs is None
+ * @retval false rhs is Some and lhs is not equal to holded value
+ * @retval true rhs is Some and lhs is equal to holded value
+ */
+template <typename T> bool operator==(const T& lhs, const Option<T>& rhs)
+{
+    return rhs == lhs;
+}
+
+/**
+ * @brief Inequality operator for @ref Option<T>
+ * @param lhs Left side value
+ * @param rhs Right side value (raw, not option)
+ * @retval true lhs is None
+ * @retval true lhs is Some and rhs is not equal to holded value
+ * @retval false lhs is Some and rhs is equal to holded value
+ */
+template <typename T> inline bool operator!=(const Option<T>& lhs, const T& rhs)
+{
+    return !(lhs == rhs);
+}
+
+/**
+ * @brief Equality operator for @ref Option<T>
+ * @brief Inequality operator for @ref Option<T>
+ * @param lhs Left side value
+ * @param rhs Right side value (option)
+ * @retval true when both are None
+ * @retval false when one is None and other is Some
+ * @retval false when both are Some and underlying values are not equal
+ * @retval true when both are Some and underlying values are equal
+ */
+template <typename T> bool operator==(const Option<T>& lhs, const Option<T>& rhs)
+{
+    if (lhs.HasValue && rhs.HasValue)
+    {
+        return lhs.Value == rhs.Value;
+    }
+
+    return lhs.HasValue == rhs.HasValue;
+}
+
+/**
+ * @brief Equality operator for @ref Option<T>
+ * @param lhs Left side value
+ * @param rhs Right side value (option)
+ * @retval true when both are None
+ * @retval false when one is None and other is Some
+ * @retval false when both are Some and underlying values are not equal
+ * @retval true when both are Some and underlying values are equal
+ */
+template <typename T> inline bool operator!=(const Option<T>& lhs, const Option<T>& rhs)
+{
+    return !(lhs == rhs);
 }
 
 /**
@@ -199,5 +286,68 @@ struct TimeAction
      */
     void virtual Invoke(std::chrono::milliseconds interval) = 0;
 };
+
+/**
+ * @brief Holds action (lambda) that will be invoked on destruction unless explictly skipped
+ */
+template <typename Action> class OnLeaveAction final : private NotCopyable
+{
+  public:
+    /**
+     * @brief Ctor
+     * @param action Action to invoke on destruction
+     */
+    OnLeaveAction(Action action);
+
+    /**
+     * @brief Move ctor
+     * @param other Other
+     */
+    OnLeaveAction(OnLeaveAction<Action>&& other) noexcept;
+
+    /**
+     * @brief Destructor
+     */
+    ~OnLeaveAction();
+
+    /**
+     * @brief Skips action invocation
+     */
+    void Skip();
+
+  private:
+    /** @brief Action to invoke */
+    Action _action;
+    /** @brief Flag indicating if action should be skipped */
+    bool _skip;
+};
+
+template <typename Action> OnLeaveAction<Action> OnLeave(Action action)
+{
+    return {action};
+}
+
+template <typename Action> OnLeaveAction<Action>::OnLeaveAction(Action action) : _action(action), _skip(false)
+{
+}
+
+template <typename Action>
+OnLeaveAction<Action>::OnLeaveAction(OnLeaveAction<Action>&& other) noexcept : _action(std::move(other._action)), _skip(other._skip)
+{
+    other._skip = true;
+}
+
+template <typename Action> OnLeaveAction<Action>::~OnLeaveAction()
+{
+    if (!this->_skip)
+    {
+        this->_action();
+    }
+}
+
+template <typename Action> void OnLeaveAction<Action>::Skip()
+{
+    this->_skip = true;
+}
 
 #endif

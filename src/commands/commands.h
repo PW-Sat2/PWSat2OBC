@@ -19,6 +19,7 @@ void OBCGetState(std::uint16_t argc, char* argv[]);
 void FSListFiles(std::uint16_t argc, char* argv[]);
 void FSWriteFile(std::uint16_t argc, char* argv[]);
 void FSReadFile(std::uint16_t argc, char* argv[]);
+void RemoveFile(uint16_t argc, char* argv[]);
 void MountList(std::uint16_t argc, char* argv[]);
 void MakeDirectory(std::uint16_t argc, char* argv[]);
 void EraseFlash(std::uint16_t argc, char* argv[]);
@@ -40,8 +41,19 @@ void CompileInfo(std::uint16_t argc, char* argv[]);
 void SuspendMission(std::uint16_t argc, char* argv[]);
 void ResumeMission(std::uint16_t argc, char* argv[]);
 void RunMission(std::uint16_t argc, char* argv[]);
+void SetFiboIterations(std::uint16_t argc, char* argv[]);
+
+void RequestExperiment(std::uint16_t argc, char* argv[]);
+void AbortExperiment(std::uint16_t argc, char* argv[]);
+void ExperimentInfo(std::uint16_t argc, char* argv[]);
 
 void DMAInfo(std::uint16_t argc, char* argv[]);
 void ResetHandler(std::uint16_t argc, char* argv[]);
+
+void RTCTest(std::uint16_t argc, char* argv[]);
+
+void ImtqDriver(uint16_t argc, char* argv[]);
+
+void FRAM(std::uint16_t argc, char* argv[]);
 
 #endif

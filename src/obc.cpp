@@ -3,16 +3,20 @@
 #include "logger/logger.h"
 
 OBC::OBC()
-    : timeProvider(fs),                                     //
-      Hardware(&this->PowerControlInterface, timeProvider), //
-      Communication(Hardware.I2C.Buses.Bus),                //
-      Storage(Hardware.SPI, fs, Hardware.Pins),             //
-      terminal(this->IO)                                    //
+    : timeProvider(fs),                                                    //
+      Hardware(&this->PowerControlInterface, timeProvider),                //
+      Storage(Hardware.SPI, fs, Hardware.Pins),                            //
+      Imtq(Hardware.I2C.Buses.Bus),                                        //
+      Experiments(fs, this->adcs.GetAdcsController(), this->timeProvider), //
+      Communication(this->Fdir, Hardware.I2C.Buses.Bus, fs, Experiments),              //
+      terminal(this->IO),                                                  //
+      rtc(Hardware.I2C.Buses.Payload)
 {
 }
 
 void OBC::Initialize()
 {
+    this->Fdir.Initalize();
     this->Hardware.Initialize();
 
     this->fs.Initialize();
@@ -24,6 +28,10 @@ void OBC::Initialize()
 
 OSResult OBC::PostStartInitialization()
 {
+    this->Fdir.PostStartInitialize();
+
+    this->Experiments.Initialize();
+
     auto result = this->Hardware.PostStartInitialize();
     if (OS_RESULT_FAILED(result))
     {
@@ -37,6 +45,8 @@ OSResult OBC::PostStartInitialization()
         LOGF(LOG_LEVEL_FATAL, "Storage initialization failed %d", num(result));
         return result;
     }
+
+    this->Experiments.Initialize();
 
     return OSResult::Success;
 }

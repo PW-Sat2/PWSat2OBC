@@ -27,3 +27,19 @@
  * @{
  * @}
  */
+
+/**
+ * @defgroup telecommands Telecommands
+ * @brief This group contains definitions for all supported telecommands
+ * @{
+ * @}
+ */
+
+/**
+ * @defgroup fdir Fault Detection Isolation and Recovery
+ *
+ * @brief This module contains mechanism related to FDIR
+ *
+ * @{
+ * @}
+ */

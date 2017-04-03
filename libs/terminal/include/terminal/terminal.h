@@ -77,9 +77,10 @@ class Terminal
 
     /**
      * @brief Reads number of bytes
-     * @param buffer Buffer to read to
+     * @param outputBuffer Buffer that will be sent before reading inputBuffer
+     * @param inputBuffer Buffer that will be filled
      */
-    void ReadBuffer(gsl::span<std::uint8_t> buffer);
+    void ExchangeBuffers(gsl::span<const std::uint8_t> outputBuffer, gsl::span<std::uint8_t> inputBuffer);
 
   private:
     /**

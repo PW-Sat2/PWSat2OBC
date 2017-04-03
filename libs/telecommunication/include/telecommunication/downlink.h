@@ -24,6 +24,8 @@ namespace telecommunication
         enum class DownlinkAPID : std::uint8_t
         {
             Pong = 0x01,           //!< Pong
+            FileNotFound = 0x2,    //!< Error frame: file not found
+            Beacon = 0x3,          //!< Beacon
             TelemetryShort = 0x2A, //!< TelemetryShort
             TelemetryLong = 0x3F,  //!< TelemetryLong
             LastItem               //!< LastItem

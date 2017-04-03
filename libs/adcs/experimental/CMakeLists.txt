@@ -1,8 +1,8 @@
-set(NAME adcs_experiment)
+set(NAME adcs_experimental)
 
 set(SOURCES      
-    AdcsExperiment.cpp
-    Include/adcs/AdcsExperiment.hpp
+    AdcsExperimental.cpp
+    Include/adcs/AdcsExperimental.hpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

@@ -36,6 +36,11 @@ namespace devices
             OSResult Initialize();
 
             /**
+             * @brief Starts ticking
+             */
+            void Start();
+
+            /**
               * @brief Interrupt handler for BURTC hardware
               */
             void IRQHandler();
@@ -53,9 +58,8 @@ namespace devices
             std::chrono::milliseconds _timeDelta;
 
             void ConfigureHardware();
-            void StartTask();
 
-            Task<Burtc*, 512_Bytes, TaskPriority::P6> _task;
+            Task<Burtc*, 2_KB, TaskPriority::P6> _task;
 
             /** @brief Calculates current time interval based on selected oscillator frequency, prescaler and compare value **/
             static std::chrono::milliseconds CalculateCurrentTimeInterval();

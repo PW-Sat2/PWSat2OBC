@@ -77,6 +77,14 @@ class Writer final
     bool WriteWordLE(std::uint16_t word);
 
     /**
+     * @brief Writes single 16 bit word with big-endian memory orientation to the buffer
+     * and advances the current buffer position to the next unused byte.
+     * @param[in] word Word that should be added to writer output using big endian byte ordering.
+     * @return Operation status.
+     */
+    bool WriteWordBE(std::uint16_t word);
+
+    /**
      * @brief Writes single 32 bit word with little-endian memory orientation to the buffer
      * and advances the current buffer position to the next unused byte.
      * @param[in] dword Doubleword that should be added to writer output using little endian byte ordering.
@@ -127,10 +135,23 @@ class Writer final
     bool WriteLowerBytesBE(std::uint32_t number, std::uint8_t bytesCount);
 
     /**
+     * @brief Reserves part of buffer for direct operation
+     * @param count Number of bytes to reserve
+     * @return Span with reserved area
+     * @remark If not enough space is available in target buffer, reserved area is trimmed to fit
+     */
+    gsl::span<std::uint8_t> Reserve(std::size_t count);
+
+    /**
      * @brief Returns view for used part of buffer
      * @return Span covering used part of buffer
      */
     gsl::span<std::uint8_t> Capture();
+
+    /**
+     * @brief Resets reader to the initial state.
+     */
+    void Reset();
 
   private:
     /**
@@ -140,11 +161,6 @@ class Writer final
      * @retval false Write operation cannot be performed
      */
     bool UpdateState(std::uint8_t requestedSize);
-
-    /**
-     * @brief Resets reader to the initial state.
-     */
-    inline void Reset();
 
     /**
      * @brief Pointer to the buffer in memory.

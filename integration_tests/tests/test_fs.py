@@ -22,9 +22,7 @@ class FileSystemTests(BaseTest):
         self.assertEqual(read_back, text)
 
     @parameterized.expand([
-        ("/a",),
-        ("/b",),
-        ("/c",)
+        ("/a",)
     ])
     @wait_for_obc_start()
     def test_write_read_long_file(self, base):

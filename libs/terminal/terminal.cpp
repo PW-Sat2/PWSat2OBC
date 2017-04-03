@@ -69,9 +69,9 @@ void Terminal::PrintBuffer(gsl::span<const std::uint8_t> buffer)
     this->_stdio.PrintBuffer(buffer);
 }
 
-void Terminal::ReadBuffer(gsl::span<std::uint8_t> buffer)
+void Terminal::ExchangeBuffers(gsl::span<const std::uint8_t> outputBuffer, gsl::span<std::uint8_t> inputBuffer)
 {
-    this->_stdio.ReadBuffer(&this->_stdio, buffer);
+    this->_stdio.ExchangeBuffers(&this->_stdio, outputBuffer, inputBuffer);
 }
 
 void Terminal::HandleCommand(char* buffer)
@@ -140,11 +140,11 @@ TerminalPartialRetrival::TerminalPartialRetrival(Terminal& terminal, gsl::span<u
 
 void TerminalPartialRetrival::Start()
 {
-    this->_terminal.Puts("#");
-
     std::array<uint8_t, sizeof(std::uint32_t)> lengthBuffer;
 
-    this->_terminal.ReadBuffer(lengthBuffer);
+    uint8_t prompt = static_cast<uint8_t>('#');
+
+    this->_terminal.ExchangeBuffers(gsl::make_span(&prompt, 1), lengthBuffer);
 
     Reader r(lengthBuffer);
     this->_remainingLength = r.ReadDoubleWordLE();
@@ -164,9 +164,7 @@ Option<gsl::span<uint8_t>> TerminalPartialRetrival::ReadPart()
     Writer w(partLengthBuffer);
     w.WriteDoubleWordLE(static_cast<std::uint32_t>(part.size()));
 
-    this->_terminal.PrintBuffer(partLengthBuffer);
-
-    this->_terminal.ReadBuffer(part);
+    this->_terminal.ExchangeBuffers(partLengthBuffer, part);
 
     this->_remainingLength -= part.size();
 

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "ICurrentTime.hpp"
 #include "TimePoint.h"
 #include "base/os.h"
 #include "fs/fs.h"
@@ -72,31 +73,61 @@ namespace services
             {
             }
 
+            /**
+             * @brief Equality operator
+             * @param right Other value
+             * @return true if both values are equal
+             */
             bool operator==(const TimeSnapshot& right) const
             {
                 return CurrentTime == right.CurrentTime;
             }
 
+            /**
+             * @brief Inequality operator
+             * @param right Other value
+             * @return true if both values are not equal
+             */
             bool operator!=(const TimeSnapshot& right) const
             {
                 return !(*this == right);
             }
 
+            /**
+             * @brief Less then operator
+             * @param right Other value
+             * @return true if this is less then other
+             */
             bool operator<(const TimeSnapshot& right) const
             {
                 return CurrentTime < right.CurrentTime;
             }
 
+            /**
+             * @brief Greater then operator
+             * @param right Other value
+             * @return true if this is greater then other
+             */
             bool operator>(const TimeSnapshot& right) const
             {
                 return right < *this;
             }
 
+            /**
+             * @brief Less then or equal operator
+             * @param right Other value
+             * @return true if this is less then or equal to other
+             */
             bool operator<=(const TimeSnapshot& right) const
             {
                 return !(*this > right);
             }
 
+            /**
+             * @brief Greater then or equal operator
+             * @param right Other value
+             * @return true if this is greater then or equal to other
+             */
             bool operator>=(const TimeSnapshot& right) const
             {
                 return !(*this < right);
@@ -116,7 +147,7 @@ namespace services
          * values in those files or any of those files is not available the majority vote is done to determine the most
          * likely correct value. In case when all of the values are different the smallest one is selected as the correct one.
          */
-        class TimeProvider : public TimeAction
+        class TimeProvider : public TimeAction, public ICurrentTime
         {
           public:
             /**
@@ -147,7 +178,7 @@ namespace services
              *
              * @return Option containing current mission time on success, empty option otherwise.
              */
-            Option<std::chrono::milliseconds> GetCurrentTime();
+            virtual Option<std::chrono::milliseconds> GetCurrentTime() override;
 
             /**
              * @brief This procedure returns current mission time in decoded format.
@@ -174,6 +205,16 @@ namespace services
              * @return Operation status. True on success, false otherwise.
              */
             bool SetCurrentTime(TimePoint pointInTime);
+
+            /**
+             * @brief This procedure sets the current mission time to any arbitrary point in time.
+             *
+             * The currently saved time gets immediately preserved and propagated to the notification routine.
+             * @param[in] duration New timer state.
+             *
+             * @return Operation status. True on success, false otherwise.
+             */
+            bool SetCurrentTime(std::chrono::milliseconds duration);
 
             /**
              * @brief This procedure is responsible for reading the last timer state that has been
@@ -296,9 +337,9 @@ namespace services
             struct TimeSnapshot ReadFile(services::fs::IFileSystem& fs, const char* const filePath);
 
           private:
-            static constexpr const char* File0 = "/TimeState.0";
-            static constexpr const char* File1 = "/TimeState.1";
-            static constexpr const char* File2 = "/TimeState.2";
+            static constexpr const char* File0 = "/a/TimeState.0";
+            static constexpr const char* File1 = "/a/TimeState.1";
+            static constexpr const char* File2 = "/a/TimeState.2";
 
             /**
              * @brief Pointer to time notification procedure that gets called on time change.

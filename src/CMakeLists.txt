@@ -17,6 +17,9 @@ set(SOURCES
     commands/compile_info.cpp
     commands/mission.cpp
     commands/dma.cpp
+    commands/imtq.cpp
+    commands/rtc.cpp
+    commands/fram.cpp
     obc.h
     obc.cpp
     fault_handlers.cpp
@@ -42,26 +45,33 @@ target_link_libraries(${NAME}
     time
     mission
     eps
-    adcs
+    imtq
     power
     power_eps
     terminal
     assert
     gsl
+    fm25w
     n25q
     antenna
+    exp_fibo
     mission_antenna
     mission_sail
     mission_time
+    mission_experiments
     yaffs
+    obc_fdir
     obc_storage
     obc_communication
     obc_hardware
+    obc_experiments
     spi
     efm_emlib
     burtc
     obc_adcs
+    rtc
     mission_adcs
+    mission_beacon
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

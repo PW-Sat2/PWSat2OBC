@@ -1,11 +1,11 @@
 #include <algorithm>
-#include <em_i2c.h>
 #include <gsl/span>
 #include <string>
 #include <tuple>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "gmock/gmock-matchers.h"
+#include "I2C/I2CMock.hpp"
 #include "OsMock.hpp"
 #include "comm/Beacon.hpp"
 #include "comm/CommDriver.hpp"
@@ -13,6 +13,7 @@
 #include "comm/IHandleFrame.hpp"
 #include "I2C/I2CMock.hpp"
 #include "i2c/i2c.h"
+#include "mock/error_counter.hpp"
 #include "os/os.hpp"
 #include "system.h"
 #include "utils.hpp"
@@ -30,6 +31,7 @@ using testing::Matches;
 using gsl::span;
 using drivers::i2c::I2CResult;
 using namespace devices::comm;
+using namespace std::chrono_literals;
 
 static constexpr uint8_t ReceiverAddress = 0x60;
 static constexpr uint8_t TransmitterAddress = 0x61;
@@ -77,6 +79,9 @@ struct CommTest : public testing::Test
     I2CBusMock i2c;
     OSReset reset;
     std::uint8_t dataBuffer[devices::comm::PrefferedBufferSize];
+    ErrorCountingConfigrationMock errorsConfig;
+    error_counter::ErrorCounting errors;
+    error_counter::ErrorCounter<1> error_counter;
 
     void MockFrameCount(std::uint16_t frameCount);
 
@@ -85,7 +90,7 @@ struct CommTest : public testing::Test
     void MockRemoveFrame(I2CResult result);
 };
 
-CommTest::CommTest() : comm(i2c, frameHandler)
+CommTest::CommTest() : comm(errors, i2c, frameHandler), errors(errorsConfig), error_counter(errors)
 {
     reset = SetupOs(comm, system);
 }
@@ -127,7 +132,7 @@ void CommTest::MockRemoveFrame(I2CResult result)
 
 TEST_F(CommTest, TestInitializationDoesNotTouchHardware)
 {
-    CommObject commObject(i2c, frameHandler);
+    CommObject commObject(errors, i2c, frameHandler);
 
     EXPECT_CALL(i2c, WriteRead(_, _, _)).Times(0);
     EXPECT_CALL(i2c, Write(_, _)).Times(0);
@@ -137,7 +142,7 @@ TEST_F(CommTest, TestInitializationDoesNotTouchHardware)
 
 TEST_F(CommTest, TestInitializationAllocationFailure)
 {
-    CommObject commObject(i2c, frameHandler);
+    CommObject commObject(errors, i2c, frameHandler);
 
     EXPECT_CALL(system, CreateEventGroup()).WillOnce(Return(nullptr));
 
@@ -148,7 +153,7 @@ TEST_F(CommTest, TestInitializationAllocationFailure)
 
 TEST_F(CommTest, TestInitialization)
 {
-    CommObject commObject(i2c, frameHandler);
+    CommObject commObject(errors, i2c, frameHandler);
 
     const auto status = commObject.Initialize();
 
@@ -167,6 +172,7 @@ TEST_F(CommTest, TestHardwareResetFailureOnHardware)
     i2c.ExpectWriteCommand(ReceiverAddress, HardwareReset).WillOnce(Return(I2CResult::Nack));
     const auto status = comm.Reset();
     ASSERT_THAT(status, Eq(false));
+    ASSERT_THAT(error_counter, Eq(5));
 }
 
 TEST_F(CommTest, TestTransmitterReset)
@@ -572,7 +578,7 @@ TEST_F(CommTest, TestTransmitterTelemetry)
 TEST_F(CommTest, TestSetBeaconFailure)
 {
     std::uint8_t buffer[1];
-    Beacon beacon(1, buffer);
+    Beacon beacon(1s, buffer);
     EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon))).WillOnce(Return(I2CResult::Nack));
     const auto status = comm.SetBeacon(beacon);
     ASSERT_THAT(status, Eq(false));
@@ -581,7 +587,7 @@ TEST_F(CommTest, TestSetBeaconFailure)
 TEST_F(CommTest, TestSetBeaconSizeOutOfRange)
 {
     std::uint8_t buffer[MaxDownlinkFrameSize + 1];
-    Beacon beacon(1, buffer);
+    Beacon beacon(1s, buffer);
     EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon))).Times(0);
     const auto status = comm.SetBeacon(beacon);
     ASSERT_THAT(status, Eq(false));
@@ -590,7 +596,7 @@ TEST_F(CommTest, TestSetBeaconSizeOutOfRange)
 TEST_F(CommTest, TestSetBeacon)
 {
     const uint8_t data[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
-    Beacon beacon(0x0a0b, data);
+    Beacon beacon(0x0a0bs, data);
     EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon)))
         .WillOnce(Invoke([](uint8_t /*address*/, span<const uint8_t> inData) {
             const uint8_t expected[] = {TransmitterSetBeacon, 0x0b, 0x0a, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
@@ -735,6 +741,8 @@ TEST_F(CommTest, TestDoubleRestart)
 struct CommReceiverTelemetryTest : public testing::TestWithParam<std::tuple<int, uint8_t, I2CResult>>
 {
     CommReceiverTelemetryTest();
+    ErrorCountingConfigrationMock errorsConfig;
+    error_counter::ErrorCounting errors;
     CommObject comm;
     FrameHandlerMock frameHandler;
     I2CBusMock i2c;
@@ -742,7 +750,7 @@ struct CommReceiverTelemetryTest : public testing::TestWithParam<std::tuple<int,
     OSReset reset;
 };
 
-CommReceiverTelemetryTest::CommReceiverTelemetryTest() : comm(i2c, frameHandler)
+CommReceiverTelemetryTest::CommReceiverTelemetryTest() : errors(errorsConfig), comm(errors, i2c, frameHandler)
 {
     reset = SetupOs(comm, system);
 }
@@ -780,6 +788,8 @@ INSTANTIATE_TEST_CASE_P(CommReceiverTelemetryValuesOutOfRange,
 struct CommTransmitterTelemetryTest : public testing::TestWithParam<std::tuple<int, uint8_t, I2CResult>>
 {
     CommTransmitterTelemetryTest();
+    ErrorCountingConfigrationMock errorsConfig;
+    error_counter::ErrorCounting errors;
     CommObject comm;
     FrameHandlerMock frameHandler;
     I2CBusMock i2c;
@@ -787,7 +797,7 @@ struct CommTransmitterTelemetryTest : public testing::TestWithParam<std::tuple<i
     OSReset reset;
 };
 
-CommTransmitterTelemetryTest::CommTransmitterTelemetryTest() : comm(i2c, frameHandler)
+CommTransmitterTelemetryTest::CommTransmitterTelemetryTest() : errors(errorsConfig), comm(errors, i2c, frameHandler)
 {
     reset = SetupOs(comm, system);
 }

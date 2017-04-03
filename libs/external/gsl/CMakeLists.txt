@@ -3,7 +3,7 @@ include(ExternalProject)
 ExternalProject_Add(gsl_source
   GIT_REPOSITORY https://github.com/Novakov/GSL.git
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/gsl
-  GIT_TAG a3e5a56c65168d9a91614986da2ca6fffa6805b9
+  GIT_TAG 24b694d5cdb14b33b8509b871f968eb532d4fca8
   UPDATE_DISCONNECTED 1
   CONFIGURE_COMMAND ""
   INSTALL_COMMAND ""
@@ -20,4 +20,4 @@ function(addExternalLib name dependency include_directory)
     target_include_directories(${name} INTERFACE "${include_directory}")
 endfunction(addExternalLib)
 
-addExternalLib(gsl gsl_source "${source_dir}")
+addExternalLib(gsl gsl_source "${source_dir}/include")

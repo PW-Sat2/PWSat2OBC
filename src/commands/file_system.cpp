@@ -104,7 +104,7 @@ void FSReadFile(uint16_t argc, char* argv[])
         return;
     }
 
-    char buf[5] = {0};
+    char buf[10] = {0};
     itoa(f.Size(), buf, 10);
 
     Main.terminal.Puts(buf);
@@ -188,4 +188,13 @@ void SyncFS(uint16_t argc, char* argv[])
     UNUSED(argc, argv);
 
     Main.fs.Sync();
+}
+
+void RemoveFile(uint16_t /*argc*/, char* argv[])
+{
+    const char* path = argv[0];
+
+    auto r = yaffs_unlink(path);
+
+    LOGF(LOG_LEVEL_INFO, "Ret=%d", r);
 }

@@ -21,4 +21,3 @@ class Test_SailTest(BaseTest):
         self.assertTrue(self.system.eps.sail1.wait_for_change(10))
         self.assertFalse(self.system.eps.sail1.wait_for_change(10))
 
-

@@ -8,8 +8,9 @@ add_library(${NAME} STATIC ${SOURCES})
 
 target_link_libraries(${NAME}
     time
-    adcs_experiment
+    adcs_experimental
     gsl
+    experiments
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

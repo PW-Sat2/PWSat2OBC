@@ -1,24 +1,30 @@
 #ifndef OBC_H
 #define OBC_H
 
+#include <array>
 #include <atomic>
 #include <cstdint>
 #include <gsl/span>
 
 #include "adcs/AdcsCoordinator.hpp"
-#include "adcs/AdcsExperiment.hpp"
+#include "adcs/AdcsExperimental.hpp"
 #include "antenna/driver.h"
 #include "antenna/miniport.h"
 #include "base/os.h"
+#include "experiment/fibo/fibo.h"
 #include "fs/fs.h"
 #include "fs/yaffs.h"
+#include "imtq/imtq.h"
 #include "leuart/line_io.h"
 #include "n25q/n25q.h"
 #include "n25q/yaffs.h"
 #include "obc/adcs.hpp"
 #include "obc/communication.h"
+#include "obc/experiments.hpp"
+#include "obc/fdir.hpp"
 #include "obc/hardware.h"
 #include "obc/storage.h"
+#include "rtc/rtc.hpp"
 #include "spi/efm.h"
 #include "storage/nand_driver.h"
 #include "terminal/terminal.h"
@@ -73,17 +79,29 @@ struct OBC
     /** @brief Power control interface */
     PowerControl PowerControlInterface;
 
-    /** @brief Overall satellite <-> Earth communication */
-    obc::OBCCommunication Communication;
+    /** @brief FDIR mechanisms */
+    obc::FDIR Fdir;
 
     /** @brief OBC storage */
     obc::OBCStorage Storage;
 
+    /** @brief Imtq handling */
+    devices::imtq::ImtqDriver Imtq;
+
     /** @brief Adcs subsytem for obc. */
     obc::Adcs adcs;
 
+    /** @brief Experiments */
+    obc::OBCExperiments Experiments;
+
+    /** @brief Overall satellite <-> Earth communication */
+    obc::OBCCommunication Communication;
+
     /** @brief Terminal object. */
     Terminal terminal;
+
+    /** @brief External Real Time Clock.  */
+    devices::rtc::RTCObject rtc;
 };
 
 /** @brief Global OBC object. */
