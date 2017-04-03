@@ -34,7 +34,7 @@ using drivers::i2c::I2CResult;
 using namespace devices::gyro;
 using namespace std::chrono_literals;
 
-static const uint8_t _addr = 0x68;
+static const uint8_t _addr = 0x34;
 
 class GyroTest : public testing::Test
 {
