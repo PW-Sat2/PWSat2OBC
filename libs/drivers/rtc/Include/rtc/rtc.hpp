@@ -48,6 +48,9 @@ namespace devices
 
             virtual OSResult ReadTime(RTCTime& rtcTime) final override;
 
+            /**
+             * @brief RTC i2c address.
+             */
             static constexpr std::uint8_t I2CAddress = 0b1010001;
 
           private:

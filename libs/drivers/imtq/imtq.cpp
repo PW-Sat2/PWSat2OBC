@@ -382,12 +382,12 @@ namespace devices
 
         // --------------------------- Configuration --------------------------
 
-        bool ImtqDriver::GetParameter(Parameter id, gsl::span<uint8_t> result)
+        bool ImtqDriver::GetParameter(Parameter id, gsl::span<std::uint8_t> result)
         {
             return GetOrResetParameter(OpCode::GetParameter, id, result);
         }
 
-        bool ImtqDriver::SetParameter(Parameter id, gsl::span<const uint8_t> value)
+        bool ImtqDriver::SetParameter(Parameter id, gsl::span<const std::uint8_t> value)
         {
             std::array<uint8_t, 10> paramsArray;
 
