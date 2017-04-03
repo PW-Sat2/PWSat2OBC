@@ -11,7 +11,7 @@
 namespace mission
 {
     /**
-     * @defgroup mission_state Mission fragment responsible for management of persistent satellite state.
+     * @defgroup mission_state Persistent state
      * @ingroup mission
      *
      * Module that contains mission tasks that are related strictly to management of satellite persistent state.

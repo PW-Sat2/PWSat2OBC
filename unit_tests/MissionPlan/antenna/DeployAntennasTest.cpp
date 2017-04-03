@@ -36,6 +36,7 @@ DeployAntennasTest::DeployAntennasTest()
       openAntenna(task.BuildAction()), //
       stateDescriptor(task.state)
 {
+    state.Time = 41min;
 }
 
 TEST_F(DeployAntennasTest, TestConditionTimeBeforeThreshold)
@@ -46,27 +47,23 @@ TEST_F(DeployAntennasTest, TestConditionTimeBeforeThreshold)
 
 TEST_F(DeployAntennasTest, TestConditionTimeAfterThreshold)
 {
-    state.Time = 41min;
     ASSERT_TRUE(openAntenna.condition(state, openAntenna.param));
 }
 
 TEST_F(DeployAntennasTest, TestConditionAntennasAreOpen)
 {
-    state.Time = 41min;
     stateDescriptor.OverrideStep(AntennaMissionState::StepCount());
     ASSERT_FALSE(openAntenna.condition(state, openAntenna.param));
 }
 
 TEST_F(DeployAntennasTest, TestConditionAntennasAreNotOpen)
 {
-    state.Time = 41min;
     stateDescriptor.OverrideStep(AntennaMissionState::StepCount() - 1);
     ASSERT_TRUE(openAntenna.condition(state, openAntenna.param));
 }
 
 TEST_F(DeployAntennasTest, TestConditionDeploymentInProgress)
 {
-    state.Time = 41min;
     AntennaDeploymentStatus status = {};
     status.IsDeploymentActive[1] = true;
     stateDescriptor.Update(status);
@@ -75,7 +72,6 @@ TEST_F(DeployAntennasTest, TestConditionDeploymentInProgress)
 
 TEST_F(DeployAntennasTest, TestConditionOverrideDeploymentState)
 {
-    state.Time = 41min;
     state.AntennaState.SetDeployment(true);
     stateDescriptor.OverrideState();
     ASSERT_TRUE(openAntenna.condition(state, openAntenna.param));
@@ -277,4 +273,11 @@ TEST_F(DeployAntennasActionTest, TestMinimalPath)
 
     ASSERT_THAT(stateDescriptor.IsFinished(), Eq(true));
     ASSERT_THAT(stateDescriptor.IsDeploymentInProgress(), Eq(false));
+}
+
+TEST_F(DeployAntennasActionTest, TestDeploymentDisabled)
+{
+    state.PersistentState.Set(state::AntennaConfiguration(true));
+    Run();
+    ASSERT_THAT(stateDescriptor.IsFinished(), Eq(true));
 }

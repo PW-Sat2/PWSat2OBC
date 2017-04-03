@@ -13,6 +13,16 @@ namespace mission
         /**
          * @brief Mission part related to antenna deployment.
          * @ingroup mission_atenna
+         *
+         * This components provides two mission fragments related to antenna deployment: Action & Update parts.
+         *
+         * The purpose of the Update part is to keep updating the global satellite state with current antenna
+         * deployment status.
+         *
+         * The purpose of Action part is to coordinate the antenna deployment. This part is executed
+         * only if following condition are met:
+         * - The initial silent mission period is over
+         * - The antennas are not curretnly being deployed
          */
         struct AntennaTask : public Update, public Action
         {
