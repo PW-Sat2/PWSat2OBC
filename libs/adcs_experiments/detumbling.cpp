@@ -5,55 +5,51 @@
  *      Author: weclewski
  */
 
-/* MATLAB:
- % ============================================================================
- %
- %                           detumbling procedure
- %
- % This procedure calculates the commanded magnetic dipole for the coils in
- % the detumbling mode based on the B-Dot control law. A high-pass filter for
- % the magnetic field time derivative is included.
- % NOTE: Current magnetic field time derivative output (mtmDot) is the input
- % in the next iteration (mtmDotPrev). Initialize the previous magnetic field
- % time derivative with 0.
- %
- % Author: Pawel Jaworski
- %         pawel.jaworski0@wp.pl
- % Date:   december 2016
- %
- %   inputs        :
- %       mtmMeas                  - [3x1], magnetometer measurement, [Gauss]
- %       mtmMeasPrev          - [3x1], previous (one iteration back) magnetometer measurement, [Gauss]
- %       mtmDotPrev            - [3x1], previous (one iteration back) magnetic field time derivative, [Gauss/s]
- %
- %   outputs       :
- %       commDipoleBdot   - [3x1], commanded magnetic dipole, [A m^2]
- %       mtmDot                    - [3x1], magnetic field time derivative, [Gauss/s]
- %
- %   params       :
- %       dt                               - [1x1], iteration time step, [s]
- %       wCutOff                    - [1x1], high-pass filter cut off frequency, [rad/s]
- %       bDotGain                  - [1x1], B-dot gain, [kg m^2 / s]
- %       coilsOn                      - boolean, [3x1], active magnetic coils
- %
- %   locals        :
- %
- %   subfunctions  :
- %       vectorNorm              - calculates [3x1] vector norm
- %
- %   references    :
- %
- %
- % ============================================================================
- C:
-
- Lsb of mtmMeas in int32 representation is 1e-9 [T] = 1e-5 [Gauss]
+/* BASED ON MATLAB:
+% ============================================================================
+%
+%                           detumbling procedure
+%
+% This procedure calculates the commanded magnetic dipole for the coils in
+% the detumbling mode based on the B-Dot control law. A high-pass filter for
+% the magnetic field time derivative is included.
+% NOTE: Current magnetic field time derivative output (mtmDot) is the input
+% in the next iteration (mtmDotPrev). Initialize the previous magnetic field
+% time derivative with 0.
+%
+% Author: Pawel Jaworski
+%         pawel.jaworski0@wp.pl
+% Date:   14 june 2016
+%
+%   inputs      :
+%       mtmMeas                  - [3x1], magnetometer measurement, [T]
+%       mtmMeasPrev              - [3x1], previous (one iteration back) magnetometer measurement, [T]
+%       mtmDotPrev               - [3x1], previous (one iteration back) magnetic field time derivative, [T/s]
+%
+%   outputs     :
+%       commDipoleBdot           - [3x1], commanded magnetic dipole, [A m^2]
+%       mtmDot                   - [3x1], magnetic field time derivative, [T/s]
+%
+%   globals     :
+%       DetumblingConst.dt       - scalar, iteration time step, [s]
+%       DetumblingConst.wCutOff  - scalar, high-pass filter cut off frequency, [rad/s]
+%       DetumblingConst.bDotGain - scalar, B-dot gain, [kg m^2 / s]
+%
+%   locals      :
+%
+%   coupling    :
+%       vectorNorm               - calculates [3x1] vector norm
+%
+% ============================================================================
  */
 
 #include "detumbling.hpp"
 #include <system.h>
 #include <cmath>
-#include<iostream> //TODO to be removed
+
+#ifdef ADCS_DETUMBLIG_DEBUG
+#include<iostream>
+#endif
 
 using std::uint8_t;
 using std::uint16_t;
@@ -63,7 +59,7 @@ namespace adcs
 {
 
 // obligatory static definition
-constexpr std::array <bool, 3> Detumbling::DefaultCoilsOn;
+constexpr std::array<bool, 3> Detumbling::DefaultCoilsOn;
 
 Detumbling::Detumbling()
 {
@@ -73,61 +69,75 @@ Detumbling::Detumbling()
 void Detumbling::initializeDetumbling(DetumblingState& state,
         const DetumblingParameters& param)
 {
-    // initialise internal parameters
-    state.params = param;
-    // Set the previous time derivative of the magnetic field to zeros.
-    state.mtmDotPrev = RowVector3f::Zero();
-    // Set the previous MTM measurement to zeros,
-    state.mtmMeasPrev = RowVector3f::Zero(); // TODO on the first step should be initialised by measurement value
+    // initialize state with provided parameters
+    state = DetumblingState(param);
 }
 
 void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
-        DetumblingState& state) ///TODO units are wrong
+        DetumblingState& state)
 {
-        // prevent of changing params - not really robust
-        const DetumblingParameters& params  = state.params;
+    RowVector3f mgmt_input;
 
-        // conversion of input LSB = 1e-7T
-        std::array<float, 3> tmp;
-        std::copy(mgmt_meas.begin(), mgmt_meas.end(), tmp.begin());
-        RowVector3f mgmt_input(tmp.data());
+    for (int i = 0; i < 3; i++)
+    {
+        mgmt_input[i] = mgmt_meas[i];
+    }
 
-        mgmt_input *= 1e-2;//1e-5T as matlab
+    // magnetic field time derivative
+    RowVector3f mtmDot = exp(-state.params.wCutOff * state.params.dt)
+            * state.mtmDotPrev
+            + state.params.wCutOff * (mgmt_input - state.mtmMeasPrev);
 
-        // magnetic field time derivative
-        RowVector3f mtmDot = exp(-params.wCutOff * params.dt) * state.mtmDotPrev
-                + params.wCutOff * (mgmt_input - state.mtmMeasPrev);
+    // commanded magnetic dipole to coils
+    RowVector3f commDipoleBdot;
+    if (!mgmt_input.isZero(0.0))
+    {
+        commDipoleBdot = mtmDot * (-state.params.bDotGain)
+                / (powf((mgmt_input).norm(), 2));
+    }
+    else
+    {
+        commDipoleBdot = RowVector3f::Zero();
+    }
 
-        std::cout<<mtmDot<<std::endl;//XXX debug
+#ifdef ADCS_DETUMBLIG_DEBUG
+    std::cout << "mgmt_meas: ";
+    for(int i =0; i<3;i++)
+    {
+        std::cout << mgmt_meas[i] << " ";
+    }
+    std::cout << std::endl;
+    std::cout << "mgmt_input: ";
+    std::cout << mgmt_input << std::endl;
+    std::cout << "exp: ";
+    std::cout << exp(-state.params.wCutOff * state.params.dt) << std::endl;
+    std::cout << "state.mtmDotPrev: ";
+    std::cout << state.mtmDotPrev << std::endl;
+    std::cout << "state.mtmMeasPrev: ";
+    std::cout << state.mtmMeasPrev << std::endl;
+    std::cout << "mtmDot: ";
+    std::cout << mtmDot << std::endl;
+    std::cout << "commDipoleBdot: ";
+    std::cout << commDipoleBdot << std::endl;
+#endif
 
-        // commanded magnetic dipole to coils
-        RowVector3f commDipoleBdot = mtmDot * (-params.bDotGain) * 1e-4
-                / (powf((mgmt_input * 1e-4).norm(), 2));
-
-        std::cout<<commDipoleBdot<<std::endl;//XXX debug
-
-        // set inavtive dipoles to zero
-        for (int i = 0; i < 3; i++)
+    // set inavtive dipoles to zero
+    for (int i = 0; i < 3; i++)
+    {
+        if (!state.params.coilsOn[i])
         {
-            if (!params.coilsOn[i])
-            {
-                commDipoleBdot[i] = 0;
-            }
+            commDipoleBdot[i] = 0;
         }
+    }
 
-        // store prev values
-        state.mtmDotPrev = mtmDot;
-        state.mtmMeasPrev = mgmt_input;
+    // store prev values
+    state.mtmDotPrev = mtmDot;
+    state.mtmMeasPrev = mgmt_input;
 
-        commDipoleBdot *= 1e4;
-
-        // convert to output LSB = 1e-4Am^2
-        std::copy(commDipoleBdot.data(),
-                commDipoleBdot.data() + commDipoleBdot.size(), dipole.begin());
-    
-// XXX'0'?
-
+    for (int i = 0; i < 3; i++)
+    {
+        dipole[i] = commDipoleBdot[i];
+    }
 }
-
 }
 

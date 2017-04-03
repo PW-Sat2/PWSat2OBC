@@ -31,9 +31,8 @@ final
 {
     public:
         /** @brief (Draft)   */
-       //using RowVector3i = Eigen::Matrix< int32_t , 1, 3 >;
+        //using RowVector3i = Eigen::Matrix< int32_t , 1, 3 >;
         //using RowVector3b = Eigen::Matrix< bool , 1, 3 >;
-
         /** @brief (Draft)
          * @unit:
          */
@@ -45,49 +44,84 @@ final
         /** @brief (Draft)
          * @unit: [rad/s]
          */
-        static constexpr float DefaultBDotGain = 2.879285e-5; /// XXX unit conv
+        static constexpr float DefaultBDotGain = 2.879285e-5 * 1e15; // unit conv - original gain * convwersion
         /** @brief (Draft)
          * @unit: [kg*m^2/s]
          */
-        static constexpr std::array <bool, 3> DefaultCoilsOn = {{true, true, true}};
+        static constexpr std::array<bool, 3> DefaultCoilsOn =
+        { true, true, true };
 
         /** @brief
-		* Parameters changeable by a telecommand from Earth. Those are constants used in detumbling.
-		*/
-        struct DetumblingParameters 
+         * Parameters changeable by a telecommand from Earth. Those are constants used in detumbling.
+         */
+        class DetumblingParameters
         {
-			/**
-			*	@detailed: if previous default values would give worse results in detumbling iterative algorithm than commanded from Earth (f.e. better convergence factor) 
-			**/
+        public:
+            DetumblingParameters()
+            {
+            }
+
+            DetumblingParameters(const DetumblingParameters& p) :
+                    dt(p.dt), wCutOff(p.wCutOff), bDotGain(p.bDotGain), coilsOn(
+                            p.coilsOn)
+            {
+            }
+            /**
+             *	@detailed: if previous default values would give worse results in detumbling iterative algorithm than commanded from Earth (f.e. better convergence factor)
+             **/
             /** @brief
-			* iteration time step, [s]
-			*/
-            float dt = DefaultDt; 
+             * iteration time step, [s]
+             */
+            float dt = DefaultDt;
             /** @brief
-			* high-pass filter cut off frequency, [rad/s]
-			*/
-            float wCutOff = DefaultWCutOff; 
+             * high-pass filter cut off frequency, [rad/s]
+             */
+            float wCutOff = DefaultWCutOff;
             /** @brief
-			* B-dot gain, [kg m^2 / s] (contant k used to calculate commanded magnetic dipole) 
-			*/
+             * B-dot gain, [kg m^2 / s] (contant k used to calculate commanded magnetic dipole)
+             */
             float bDotGain = DefaultBDotGain;
             /** @brief
-			* active magnetic coils
-			*/
-            std::array <bool, 3> coilsOn = DefaultCoilsOn;
+             * active magnetic coils
+             */
+            std::array<bool, 3> coilsOn = DefaultCoilsOn;
         };
 
         /** @brief (Draft)   */
-        struct DetumblingState
+        class DetumblingState
         {
-        private:
+        public:
+            DetumblingState(){};
+            DetumblingState(const DetumblingParameters& p) :
+                    params(DetumblingParameters(p))
+            {
+                mtmDotPrev = RowVector3f::Zero();
+                mtmMeasPrev = RowVector3f::Zero();
+            }
+
+            DetumblingState(const DetumblingState& s) :
+                    mtmDotPrev(s.mtmDotPrev), mtmMeasPrev(s.mtmMeasPrev)
+            {
+                (DetumblingParameters&) params = s.params;
+            }
+
+            DetumblingState& operator=(const DetumblingState& s)
+
+            {
+                mtmDotPrev = s.mtmDotPrev;
+                mtmMeasPrev = s.mtmMeasPrev;
+                (DetumblingParameters&)params = s.params;
+                return *this;
+            }
+
             /** @brief (Draft)   */
             RowVector3f mtmDotPrev;
             /** @brief (Draft)   */
             RowVector3f mtmMeasPrev;
             /** @brief (Draft)   */
-            DetumblingParameters params;
+            const DetumblingParameters params;
 
+            // allow only algorithm to access state
             friend class Detumbling;
         };
 
@@ -105,8 +139,8 @@ final
 
         /**
          * @brief (Draft)
-         * @param[out] dipole
-         * @param[in] magnetometer
+         * @param[out] dipole [1e-4 Am2]
+         * @param[in] magnetometer [1e-7 T]
          * @param[in/out] state
          * @return void
          */
