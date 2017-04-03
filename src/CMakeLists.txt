@@ -20,6 +20,7 @@ set(SOURCES
     commands/imtq.cpp
     commands/rtc.cpp
     commands/fram.cpp
+    commands/gyro.cpp
     obc.h
     obc.cpp
     fault_handlers.cpp
@@ -72,6 +73,7 @@ target_link_libraries(${NAME}
     rtc
     mission_adcs
     mission_beacon
+    gyro
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

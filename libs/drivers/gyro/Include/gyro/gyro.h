@@ -1,5 +1,5 @@
-#ifndef SRC_DEVICES_IMTQ_H_
-#define SRC_DEVICES_IMTQ_H_
+#ifndef SRC_DEVICES_GYRO_H_
+#define SRC_DEVICES_GYRO_H_
 
 #include <stdbool.h>
 #include <array>
@@ -31,7 +31,7 @@ namespace gyro
 /**
  * @brief I2C address of gyroscope with A0 = 0. 7-bit notation.
  */
-constexpr std::uint8_t I2Cadress = 0x68;
+constexpr std::uint8_t I2Cadress = 0x34;
 
 /**
  * @brief Data readed from gyroscope.
@@ -79,9 +79,10 @@ class GyroDriver final
  private:
     drivers::i2c::II2CBus& i2cbus;
 };
+
 }
 }
 
 /** @}*/
 
-#endif /* SRC_DEVICES_IMTQ_H_ */
+#endif /* SRC_DEVICES_GYRO_H_ */

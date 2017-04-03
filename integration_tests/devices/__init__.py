@@ -3,6 +3,7 @@ from comm import *
 from antenna import *
 from test_devices import EchoDevice, TimeoutDevice
 from imtq import *
+from gyro import *
 from rtc import RTCDevice
 
 __all__ = [
@@ -22,5 +23,6 @@ __all__ = [
     'TransmitterTelemetry',
     'ReceiverTelemetry',
     'Antenna',
-    "RTCDevice"
+    "RTCDevice",
+    "Gyro"
 ]

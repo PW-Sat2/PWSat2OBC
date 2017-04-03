@@ -54,6 +54,8 @@ void RTCTest(std::uint16_t argc, char* argv[]);
 
 void ImtqDriver(uint16_t argc, char* argv[]);
 
+void GyroDriver(uint16_t argc, char* argv[]);
+
 void FRAM(std::uint16_t argc, char* argv[]);
 
 #endif

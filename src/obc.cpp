@@ -7,8 +7,9 @@ OBC::OBC()
       Hardware(&this->PowerControlInterface, timeProvider),                //
       Storage(Hardware.SPI, fs, Hardware.Pins),                            //
       Imtq(Hardware.I2C.Buses.Bus),                                        //
+      Gyro(Hardware.I2C.Buses.Payload),                                    //
       Experiments(fs, this->adcs.GetAdcsController(), this->timeProvider), //
-      Communication(this->Fdir, Hardware.I2C.Buses.Bus, fs, Experiments),              //
+      Communication(this->Fdir, Hardware.I2C.Buses.Bus, fs, Experiments),  //
       terminal(this->IO),                                                  //
       rtc(Hardware.I2C.Buses.Payload)
 {

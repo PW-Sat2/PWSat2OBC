@@ -15,6 +15,7 @@
 #include "fs/fs.h"
 #include "fs/yaffs.h"
 #include "imtq/imtq.h"
+#include "gyro/gyro.h"
 #include "leuart/line_io.h"
 #include "n25q/n25q.h"
 #include "n25q/yaffs.h"
@@ -87,6 +88,9 @@ struct OBC
 
     /** @brief Imtq handling */
     devices::imtq::ImtqDriver Imtq;
+
+    /** @brief Gyroscope handling */
+    devices::gyro::GyroDriver Gyro;
 
     /** @brief Adcs subsytem for obc. */
     obc::Adcs adcs;

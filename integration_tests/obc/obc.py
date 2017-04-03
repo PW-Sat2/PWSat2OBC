@@ -14,6 +14,7 @@ from .obc_time import TimeMixin
 from .i2c import I2CMixin
 from .mission import MissionMixin
 from .imtq import ImtqMixin
+from .gyro import GyroMixin
 
 
 class OBC(OBCMixin,
@@ -24,6 +25,7 @@ class OBC(OBCMixin,
           AntennaMixin,
           MissionMixin,
           ImtqMixin,
+          GyroMixin,
           ExperimentsMixin
           ):
     def __init__(self, terminal):

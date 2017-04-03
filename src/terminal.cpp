@@ -46,7 +46,8 @@ static const TerminalCommandDescription commands[] = {{"ping", PingHandler},
     {"reset", ResetHandler},
     {"rtc", RTCTest},
     {"rm", RemoveFile},
-    {"fram", FRAM}
+    {"fram", FRAM},
+    {"gyro", GyroDriver}
 };
 
 void InitializeTerminal(void)
