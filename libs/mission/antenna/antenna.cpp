@@ -351,10 +351,17 @@ namespace mission
          */
         static void AntennaDeploymentAction(const SystemState& state, void* param)
         {
-            AntennaMissionState* stateDescriptor = (AntennaMissionState*)param;
-            const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor->StepNumber()];
-            DeploymentProcedure* procedure = step.procedure;
-            procedure(state, *stateDescriptor, stateDescriptor->Driver());
+            auto stateDescriptor = static_cast<AntennaMissionState*>(param);
+            if (state.PersistentState.Get<state::AntennaConfiguration>().IsDeploymentDisabled())
+            {
+                stateDescriptor->Finish();
+            }
+            else
+            {
+                const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor->StepNumber()];
+                DeploymentProcedure* procedure = step.procedure;
+                procedure(state, *stateDescriptor, stateDescriptor->Driver());
+            }
         }
 
         /**
