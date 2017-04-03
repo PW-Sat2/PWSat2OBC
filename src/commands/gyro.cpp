@@ -44,11 +44,11 @@ namespace gyro_commands
             return;
         }
 
-        Main.terminal.Printf("%d %d %d %d\n",       //
-                             result->X,             //
-                             result->Y,             //
-                             result->Z,             //
-                             result->temperature);  //
+        Main.terminal.Printf("%d %d %d %d\n", //
+            result->X,                        //
+            result->Y,                        //
+            result->Z,                        //
+            result->temperature);             //
     }
 
     static VoidFuncPtr GetDriverCommand(char* name)
