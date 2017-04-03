@@ -2,45 +2,7 @@
  * detumbling.cpp
  *
  *  Created on: 25 Jan 2017
- *      Author: weclewski
- */
-
-/* BASED ON MATLAB:
-% ============================================================================
-%
-%                           detumbling procedure
-%
-% This procedure calculates the commanded magnetic dipole for the coils in
-% the detumbling mode based on the B-Dot control law. A high-pass filter for
-% the magnetic field time derivative is included.
-% NOTE: Current magnetic field time derivative output (mtmDot) is the input
-% in the next iteration (mtmDotPrev). Initialize the previous magnetic field
-% time derivative with 0.
-%
-% Author: Pawel Jaworski
-%         pawel.jaworski0@wp.pl
-% Date:   14 june 2016
-%
-%   inputs      :
-%       mtmMeas                  - [3x1], magnetometer measurement, [T]
-%       mtmMeasPrev              - [3x1], previous (one iteration back) magnetometer measurement, [T]
-%       mtmDotPrev               - [3x1], previous (one iteration back) magnetic field time derivative, [T/s]
-%
-%   outputs     :
-%       commDipoleBdot           - [3x1], commanded magnetic dipole, [A m^2]
-%       mtmDot                   - [3x1], magnetic field time derivative, [T/s]
-%
-%   globals     :
-%       DetumblingConst.dt       - scalar, iteration time step, [s]
-%       DetumblingConst.wCutOff  - scalar, high-pass filter cut off frequency, [rad/s]
-%       DetumblingConst.bDotGain - scalar, B-dot gain, [kg m^2 / s]
-%
-%   locals      :
-%
-%   coupling    :
-%       vectorNorm               - calculates [3x1] vector norm
-%
-% ============================================================================
+ *      Author: PWeclewski based on Matlab code by PJaworski
  */
 
 #include "detumbling.hpp"
@@ -61,7 +23,8 @@ namespace adcs
 // obligatory static definition
 constexpr std::array<bool, 3> Detumbling::DefaultCoilsOn;
 
-Detumbling::Detumbling()
+Detumbling::Detumbling() :
+        mtmDotExp(0.0f)
 {
     //empty
 }
@@ -71,6 +34,7 @@ void Detumbling::initializeDetumbling(DetumblingState& state,
 {
     // initialize state with provided parameters
     state = DetumblingState(param);
+    mtmDotExp = exp(-state.params.wCutOff * state.params.dt);
 }
 
 void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
@@ -78,14 +42,13 @@ void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
 {
     RowVector3f mgmt_input;
 
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < mgmt_input.size(); i++)
     {
         mgmt_input[i] = mgmt_meas[i];
     }
 
     // magnetic field time derivative
-    RowVector3f mtmDot = exp(-state.params.wCutOff * state.params.dt)
-            * state.mtmDotPrev
+    RowVector3f mtmDot = mtmDotExp * state.mtmDotPrev
             + state.params.wCutOff * (mgmt_input - state.mtmMeasPrev);
 
     // commanded magnetic dipole to coils
@@ -102,7 +65,7 @@ void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
 
 #ifdef ADCS_DETUMBLIG_DEBUG
     std::cout << "mgmt_meas: ";
-    for(int i =0; i<3;i++)
+    for(unsigned int i = 0; i < mgmt_meas.size();i++)
     {
         std::cout << mgmt_meas[i] << " ";
     }
@@ -122,7 +85,7 @@ void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
 #endif
 
     // set inavtive dipoles to zero
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < commDipoleBdot.size(); i++)
     {
         if (!state.params.coilsOn[i])
         {
@@ -134,7 +97,7 @@ void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
     state.mtmDotPrev = mtmDot;
     state.mtmMeasPrev = mgmt_input;
 
-    for (int i = 0; i < 3; i++)
+    for (unsigned int i = 0; i < dipole.size(); i++)
     {
         dipole[i] = commDipoleBdot[i];
     }

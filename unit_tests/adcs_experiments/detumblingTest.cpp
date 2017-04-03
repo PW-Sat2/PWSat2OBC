@@ -52,7 +52,6 @@ TEST(detumbling, cross_validation)
     double output_scale = 1e4;
 
     while(!file.eof())
-    //for (int i = 0; i < 10; i++)
     {
         record = getRecord(file);
         mgmt[0] = input_scale * record[1];

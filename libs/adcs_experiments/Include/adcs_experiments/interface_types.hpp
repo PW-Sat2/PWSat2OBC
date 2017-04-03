@@ -2,7 +2,7 @@
  * interface_types.hpp
  *
  *  Created on: 7 Feb 2017
- *      Author: weclewski
+ *      Author: PWeclewski
  */
 
 #ifndef INTERFACE_TYPES_HPP_
@@ -13,7 +13,7 @@
 namespace adcs
 {
 /**
- * @defgroup adcs_types (Draft) ADCS public types
+ * @defgroup adcs_types  ADCS interface types
  *
  * @{
  */
@@ -22,6 +22,7 @@ namespace adcs
  *          1 LSB = 1e-4 Am^2
  */
 using Dipole = std::int16_t;
+
 /** @brief (Draft) Dipole Vector (3d) representaiton  */
 using DipoleVec = std::array<Dipole, 3>;
 
@@ -29,6 +30,7 @@ using DipoleVec = std::array<Dipole, 3>;
  *          1 LSB = 1e-7 T
  */
 using MagnetometerMeasurement = std::int32_t;
+
 /** @brief (Draft) Magnetometer Measurement Vector (3d) representaiton */
 using MagVec = std::array<MagnetometerMeasurement, 3>;
 
