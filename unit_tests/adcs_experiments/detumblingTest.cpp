@@ -5,6 +5,7 @@
 #include <system.h>
 #include <cstring>
 #include <unistd.h>
+#include "adcsDetumblingUtConfig.h"
 
 using adcs::Detumbling;
 using adcs::DipoleVec;
@@ -29,7 +30,7 @@ std::vector<float> getRecord(std::istream& str)
 // cross-validation of detumbling against matlab implementation
 TEST(detumbling, cross_validation)
 {
-    std::ifstream file("data/bdot_crossvalidation.csv");
+    std::ifstream file(DETUMBLIG_UT_DATA_FILE_PATH "/bdot_crossvalidation.csv");
     if (!file)
     {
         std::cerr << "Cannot find data  file!" << std::endl;

@@ -1,6 +1,6 @@
 set(NAME unit_tests)
 
-include_directories(adcs_experiments)
+add_subdirectory(adcs_experiments)
 
 set(SOURCES
   semihosting.cpp
