@@ -48,7 +48,7 @@ mission::ObcMission Mission(std::tie(Main.timeProvider, Main.rtc),
     Main.adcs.GetAdcsController(),
     Main.Experiments.ExperimentsController,
     Main.Communication.CommDriver,
-    std::tie(Main.persistentStorage, PersistentStateBaseAddress));
+    std::tie(Main.Hardware.PersistentStorage, PersistentStateBaseAddress));
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
@@ -104,7 +104,7 @@ static void ProcessState(OBC* obc)
             LOG(LOG_LEVEL_ERROR, "Storage reset failure");
         }
 
-        if (!obc::WritePersistentState(Mission.GetState().PersistentState, PersistentStateBaseAddress, obc->persistentStorage))
+        if (!obc::WritePersistentState(Mission.GetState().PersistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage))
         {
             LOG(LOG_LEVEL_ERROR, "Persistent state reset failure");
         }
@@ -113,7 +113,7 @@ static void ProcessState(OBC* obc)
     }
     else
     {
-        obc::ReadPersistentState(Mission.GetState().PersistentState, PersistentStateBaseAddress, obc->persistentStorage);
+        obc::ReadPersistentState(Mission.GetState().PersistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage);
     }
 }
 

@@ -8,6 +8,7 @@
 
 struct StorageAccessMock : public obc::IStorageAccess
 {
+    StorageAccessMock();
     ~StorageAccessMock();
 
     MOCK_METHOD2(Read, void(std::uint32_t address, gsl::span<std::uint8_t> span));
