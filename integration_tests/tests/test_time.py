@@ -1,5 +1,8 @@
 import logging
 
+from nose.tools import nottest
+from nose_parameterized import parameterized
+
 from system import wait_for_obc_start
 from datetime import datetime, timedelta
 from tests.base import BaseTest
@@ -32,7 +35,7 @@ class TestTime(BaseTest):
         sys_end_time_s = time.time()
         obc_end_time_ms = self.system.obc.current_time()
 
-        sys_time_difference_ms = 1000*(sys_end_time_s - sys_start_time_s)
+        sys_time_difference_ms = 1000 * (sys_end_time_s - sys_start_time_s)
         obc_time_difference_ms = obc_end_time_ms - obc_start_time_ms
 
         self.assertAlmostEqual(obc_time_difference_ms, sys_time_difference_ms, places=None, delta=wait_time_accuracy_ms)
@@ -47,12 +50,11 @@ class TestTime(BaseTest):
         self.system.rtc.set_response_time(start_time + elapsed_time_delta)
         time_end = self.system.obc.rtc_duration()
 
-        self.assertEquals(5*60, time_end - time_start)
+        self.assertEquals(5 * 60, time_end - time_start)
 
-    @wait_for_obc_start()
-    def test_time_correction(self):
+    @nottest
+    def run_time_correction_test(self, start_time):
         log = logging.getLogger("test_time_correction")
-        start_time = datetime.now()
 
         self.system.obc.jump_to_time(0)
         obc_start_s = self.system.obc.current_time() / 1000
@@ -76,3 +78,11 @@ class TestTime(BaseTest):
         expected_s = obc_start_s + elapsed_time_delta.total_seconds() + (elapsed_time_error_delta.total_seconds() / 2)
 
         self.assertEquals(expected_s, corrected_s)
+
+    @wait_for_obc_start()
+    def test_time_correction_on_month_boundary(self):
+        self.run_time_correction_test(datetime(year=2017, month=3, day=31, hour=23, minute=38, second=00))
+
+    @wait_for_obc_start()
+    def test_time_correction_now(self):
+        self.run_time_correction_test(datetime.now())
