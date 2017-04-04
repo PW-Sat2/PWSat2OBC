@@ -3,9 +3,7 @@ set(NAME obc_state)
 set(SOURCES
     Include/obc/IStorageAccess.hpp
     Include/obc/ObcState.hpp
-    Include/obc/PersistentStorageAccess.hpp
     ObcState.cpp
-    PersistentStorageAccess.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
