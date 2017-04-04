@@ -9,8 +9,6 @@ OBC::OBC()
       Imtq(Hardware.I2C.Buses.Bus),                                        //
       Experiments(fs, this->adcs.GetAdcsController(), this->timeProvider), //
       Communication(this->Fdir, Hardware.I2C.Buses.Bus, fs, Experiments),  //
-      framSpi(Hardware.SPI, Hardware.Pins.Flash1ChipSelect),               //
-      persistentStorage(framSpi),                                          //
       terminal(this->IO),                                                  //
       rtc(Hardware.I2C.Buses.Payload)
 {

@@ -70,7 +70,9 @@ OSResult OBCHardware::PostStartInitialize()
 }
 
 OBCHardware::OBCHardware(PowerControl* powerControl, TimeAction& burtcTickHandler)
-    : I2C(powerControl),      //
-      Burtc(burtcTickHandler) //
+    : I2C(powerControl),                   //
+      Burtc(burtcTickHandler),             //
+      FramSpi(SPI, Pins.Flash1ChipSelect), // TODO Fix chip select pint once it has been selected
+      PersistentStorage(FramSpi)           //
 {
 }
