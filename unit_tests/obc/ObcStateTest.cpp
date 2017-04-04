@@ -95,10 +95,10 @@ TEST_F(ObcStateTest, TestReadingStateInvalidForwardSignagure)
     EXPECT_CALL(storage, Read(8, _)).WillOnce(Invoke([](std::uint32_t, gsl::span<std::uint8_t> buffer) {
         memset(buffer.data(), 0x00, buffer.size());
         const auto size = buffer.size();
-        buffer[size - 4] = 0xee;
-        buffer[size - 3] = 0x77;
-        buffer[size - 2] = 0xaa;
-        buffer[size - 1] = 0x55;
+        buffer[size - 4u] = 0xee;
+        buffer[size - 3u] = 0x77;
+        buffer[size - 2u] = 0xaa;
+        buffer[size - 1u] = 0x55;
     }));
 
     ASSERT_FALSE(obc::ReadPersistentState(this->stateObject, 8, this->storage));
