@@ -575,20 +575,82 @@ TEST_F(CommTest, TestTransmitterTelemetry)
     ASSERT_THAT(telemetry.TransmitterCurrentConsumption, Eq(0x0807));
 }
 
-TEST_F(CommTest, TestSetBeaconFailure)
+TEST_F(CommTest, TestSetBeaconTransmittFailure)
 {
     std::uint8_t buffer[1];
     Beacon beacon(1s, buffer);
+    EXPECT_CALL(i2c, WriteRead(TransmitterAddress, _, _)).WillOnce(Return(I2CResult::Failure));
+    const auto status = comm.SetBeacon(beacon);
+    ASSERT_THAT(status, Eq(false));
+}
+
+TEST_F(CommTest, TestSetBeaconTransmitterRejected)
+{
+    EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon))).Times(0);
+    EXPECT_CALL(i2c, WriteRead(TransmitterAddress, BeginsWith(TransmitterSendFrame), _))
+        .WillOnce(Invoke([](uint8_t /*address*/, span<const uint8_t> /*inData*/, span<uint8_t> outData) {
+            outData[0] = 0xff;
+            return I2CResult::OK;
+        }));
+
+    std::uint8_t buffer[1];
+    Beacon beacon(1s, buffer);
+    const auto status = comm.SetBeacon(beacon);
+    ASSERT_THAT(status, Eq(false));
+}
+
+TEST_F(CommTest, TestSetBeaconTransmitterBufferNotEmpty)
+{
+    EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon))).Times(0);
+    EXPECT_CALL(i2c, WriteRead(TransmitterAddress, BeginsWith(TransmitterSendFrame), _))
+        .WillOnce(Invoke([](uint8_t /*address*/, span<const uint8_t> /*inData*/, span<uint8_t> outData) {
+            outData[0] = 38;
+            return I2CResult::OK;
+        }));
+
+    std::uint8_t buffer[1];
+    Beacon beacon(1s, buffer);
+    const auto status = comm.SetBeacon(beacon);
+    ASSERT_THAT(status.HasValue, Eq(false));
+}
+
+TEST_F(CommTest, TestSetBeaconTransmitterBufferFull)
+{
+    EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon))).Times(0);
+    EXPECT_CALL(i2c, WriteRead(TransmitterAddress, BeginsWith(TransmitterSendFrame), _))
+        .WillOnce(Invoke([](uint8_t /*address*/, span<const uint8_t> /*inData*/, span<uint8_t> outData) {
+            outData[0] = 0;
+            return I2CResult::OK;
+        }));
+
+    std::uint8_t buffer[1];
+    Beacon beacon(1s, buffer);
+    const auto status = comm.SetBeacon(beacon);
+    ASSERT_THAT(status.HasValue, Eq(false));
+}
+
+TEST_F(CommTest, TestSetBeaconFailure)
+{
+    EXPECT_CALL(i2c, WriteRead(TransmitterAddress, BeginsWith(TransmitterSendFrame), _))
+        .WillOnce(Invoke([](uint8_t /*address*/, span<const uint8_t> /*inData*/, span<uint8_t> outData) {
+            outData[0] = 39;
+            return I2CResult::OK;
+        }));
     EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon))).WillOnce(Return(I2CResult::Nack));
+
+    std::uint8_t buffer[1];
+    Beacon beacon(1s, buffer);
     const auto status = comm.SetBeacon(beacon);
     ASSERT_THAT(status, Eq(false));
 }
 
 TEST_F(CommTest, TestSetBeaconSizeOutOfRange)
 {
+    EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon))).Times(0);
+    EXPECT_CALL(i2c, WriteRead(TransmitterAddress, BeginsWith(TransmitterSendFrame), _)).Times(0);
+
     std::uint8_t buffer[MaxDownlinkFrameSize + 1];
     Beacon beacon(1s, buffer);
-    EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon))).Times(0);
     const auto status = comm.SetBeacon(beacon);
     ASSERT_THAT(status, Eq(false));
 }
@@ -597,6 +659,15 @@ TEST_F(CommTest, TestSetBeacon)
 {
     const uint8_t data[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
     Beacon beacon(0x0a0bs, data);
+    EXPECT_CALL(i2c, WriteRead(TransmitterAddress, BeginsWith(TransmitterSendFrame), _))
+        .WillOnce(Invoke([](uint8_t /*address*/, span<const uint8_t> inData, span<uint8_t> outData) {
+            const uint8_t expected[] = {TransmitterSendFrame, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
+            EXPECT_THAT(inData, Eq(span<const uint8_t>(expected)));
+
+            outData[0] = 39;
+            return I2CResult::OK;
+        }));
+
     EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon)))
         .WillOnce(Invoke([](uint8_t /*address*/, span<const uint8_t> inData) {
             const uint8_t expected[] = {TransmitterSetBeacon, 0x0b, 0x0a, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
