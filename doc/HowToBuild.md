@@ -41,7 +41,7 @@ Option | Default value | Description
 `CMAKE_BUILD_TYPE` | `DEBUG`              | Type of build: `DEBUG` or `RELEASE`
 `OBC_COM`          | _None_               | Serial port used to communicate with OBC terminal
 `GPIO_COM`		  | _None_				 | Serial port used for GPIO operations (OBC reset and clean state request)
-`MOCK   _COM`      | _None_               | Serial port used to communicate with DeviceMock (v4, STM)
+`MOCK_COM`      | _None_               | Serial port used to communicate with DeviceMock (v4, STM)
 `USE_EXTERNAL_FLASH` | 0				   | Set to 1 to use external N25Q flash memory
 `ENABLE_COVERAGE`  | 0                    | Set to 1 to enable code-coverage for unit tests
 

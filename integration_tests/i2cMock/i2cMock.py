@@ -145,6 +145,7 @@ class MockPin(IntEnum):
     PF6 = PortF | 6
     PF7 = PortF | 7
 
+
 class UnsupportedMockVersion(Exception):
     def __init__(self, version):
         super(UnsupportedMockVersion, self).__init__("Unsupported mock version %d" % version)
@@ -181,7 +182,7 @@ class I2CMock(object):
 
     _port = serial.Serial
 
-    def __init__(self, port_name, baudrate=100000, rtscts=False):
+    def __init__(self, port_name):
         self._log = logging.getLogger("I2C")
         self._bus_log = logging.getLogger("I2C.BUS")
         self._pld_log = logging.getLogger("I2C.PLD")
@@ -189,7 +190,7 @@ class I2CMock(object):
         self._port = None
         while self._port is None:
             try:
-                self._port = serial.Serial(port=port_name, baudrate=baudrate, rtscts=rtscts)
+                self._port = serial.Serial(port=port_name, baudrate=115200, rtscts=False)
             except serial.SerialException as e:
                 if not e.args[0].endswith("WindowsError(5, 'Access is denied.')"):
                     raise
@@ -351,11 +352,7 @@ class I2CMock(object):
         self._log.info('Device mock version %d', self._version)
         self._started.set()
 
-        if self._version == 2:
-            self._log.warn('Using DeviceMock v2 compatibility')
-        elif self._version == 4:
-            self._log.warn('Using DeviceMock v4')
-        elif self._version != 3:
+        if self._version != 4:
             raise UnsupportedMockVersion(self._version)
 
     def _device_command_stopped(self):
