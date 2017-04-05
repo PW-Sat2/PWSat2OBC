@@ -212,3 +212,19 @@ TEST_F(RTCObjectTest, FullRTCDate)
     ASSERT_THAT(time.months, Eq(3));
     ASSERT_THAT(time.years, Eq(17));
 }
+
+TEST(RTCTimeTest, DecodeRTCTimeProperly)
+{
+    RTCTime rtcTime;
+    memset(&rtcTime, 0, sizeof(rtcTime));
+    rtcTime.years = 17;
+    rtcTime.months = 3;
+    rtcTime.days = 31;
+    rtcTime.hours = 5;
+    rtcTime.minutes = 10;
+    rtcTime.seconds = 59;
+
+    auto sinceEpoch = rtcTime.ToDuration();
+
+    ASSERT_THAT(sinceEpoch.count(), Eq(1490937059));
+}

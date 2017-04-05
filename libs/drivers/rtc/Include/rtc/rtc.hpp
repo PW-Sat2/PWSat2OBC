@@ -83,11 +83,11 @@ namespace devices
              * @brief Calculates total seconds passed since 1900-01-01 00:00.
              * @return Time converted to total seconds.
              */
-            std::chrono::seconds ToDuration()
+            std::chrono::seconds ToDuration() const
             {
                 tm t;
                 t.tm_year = 100 + years; // tm_year starts and year 1900, but RTCTime::years starts at 2000
-                t.tm_mon = months;
+                t.tm_mon = months - 1;
                 t.tm_mday = days;
                 t.tm_hour = hours;
                 t.tm_min = minutes;
