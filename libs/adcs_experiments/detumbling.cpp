@@ -1,44 +1,33 @@
-/*
- * detumbling.cpp
- *
- *  Created on: 25 Jan 2017
- *      Author: PWeclewski based on Matlab code by PJaworski
- */
-
 #include "detumbling.hpp"
-#include <system.h>
 #include <cmath>
+#include <cstdint>
+#include <system.h>
 
 #ifdef ADCS_DETUMBLIG_DEBUG
-#include<iostream>
+#include <iostream>
 #endif
 
 using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
 
-namespace adcs
-{
+using Eigen::RowVector3f;
 
-// obligatory static definition
-constexpr std::array<bool, 3> Detumbling::DefaultCoilsOn;
+using namespace adcs;
 
 Detumbling::Detumbling() :
         mtmDotExp(0.0f)
 {
-    //empty
 }
 
-void Detumbling::initializeDetumbling(DetumblingState& state,
-        const DetumblingParameters& param)
+void Detumbling::initializeDetumbling(DetumblingState& state, const DetumblingParameters& param)
 {
     // initialize state with provided parameters
     state = DetumblingState(param);
     mtmDotExp = exp(-state.params.wCutOff * state.params.dt);
 }
 
-void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
-        DetumblingState& state)
+void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas, DetumblingState& state)
 {
     RowVector3f mgmt_input;
 
@@ -48,15 +37,13 @@ void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
     }
 
     // magnetic field time derivative
-    RowVector3f mtmDot = mtmDotExp * state.mtmDotPrev
-            + state.params.wCutOff * (mgmt_input - state.mtmMeasPrev);
+    RowVector3f mtmDot = mtmDotExp * state.mtmDotPrev + state.params.wCutOff * (mgmt_input - state.mtmMeasPrev);
 
     // commanded magnetic dipole to coils
     RowVector3f commDipoleBdot;
     if (!mgmt_input.isZero(0.0))
     {
-        commDipoleBdot = mtmDot * (-state.params.bDotGain)
-                / (powf((mgmt_input).norm(), 2));
+        commDipoleBdot = mtmDot * (-state.params.bDotGain) / (powf((mgmt_input).norm(), 2));
     }
     else
     {
@@ -65,7 +52,7 @@ void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
 
 #ifdef ADCS_DETUMBLIG_DEBUG
     std::cout << "mgmt_meas: ";
-    for(unsigned int i = 0; i < mgmt_meas.size();i++)
+    for (unsigned int i = 0; i < mgmt_meas.size(); i++)
     {
         std::cout << mgmt_meas[i] << " ";
     }
@@ -102,5 +89,3 @@ void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas,
         dipole[i] = commDipoleBdot[i];
     }
 }
-}
-

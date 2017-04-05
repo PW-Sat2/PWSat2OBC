@@ -2,6 +2,8 @@ set(NAME adcs_experiments)
 
 set(SOURCES      
     detumbling.cpp
+    Include/adcs_experiments/detumbling.hpp
+    Include/adcs_experiments/interface_types.hpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
