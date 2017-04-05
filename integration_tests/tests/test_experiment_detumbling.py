@@ -34,7 +34,7 @@ class TestExperimentDetumbling(BaseTest):
 
         self.system.obc.wait_for_experiment(ExperimentType.Detumbling, 40)
 
-        self.system.obc.advance_time(timedelta(hours=4).total_seconds() * 1000)
-        self.system.rtc.set_response_time(start_time + timedelta(hours=4))
+        self.system.obc.advance_time(timedelta(hours=4, minutes=1).total_seconds() * 1000)
+        self.system.rtc.set_response_time(start_time + timedelta(hours=4, minutes=1))
 
         self.system.obc.wait_for_experiment(None, 20)
