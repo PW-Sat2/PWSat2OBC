@@ -15,6 +15,7 @@ void CommandPauseComm(std::uint16_t argc, char* argv[]);
 void CommReset(std::uint16_t argc, char* argv[]);
 void CommGetTelemetry(std::uint16_t argc, char* argv[]);
 void CommSetBaudRate(std::uint16_t argc, char* argv[]);
+void CommSetIdleState(std::uint16_t argc, char* argv[]);
 void OBCGetState(std::uint16_t argc, char* argv[]);
 void FSListFiles(std::uint16_t argc, char* argv[]);
 void FSWriteFile(std::uint16_t argc, char* argv[]);

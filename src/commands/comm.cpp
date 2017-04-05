@@ -208,6 +208,19 @@ void CommSetBaudRate(uint16_t argc, char* argv[])
     }
 }
 
+void CommSetIdleState(std::uint16_t argc, char* argv[])
+{
+    if (argc != 1)
+    {
+        Main.terminal.Puts("comm_set_idle_state <0|1>");
+        return;
+    }
+
+    const bool enable = strcmp(argv[0], "1") == 0;
+
+    Main.Communication.CommDriver.SetTransmitterStateWhenIdle(enable ? IdleState::On : IdleState::Off);
+}
+
 void OBCGetState(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
