@@ -163,6 +163,21 @@ void CommGetTelemetry(uint16_t argc, char* argv[])
     }
 }
 
+void CommTransmitterState(uint16_t /*argc*/, char* /*argv*/ [])
+{
+    TransmitterState state;
+    if (!Main.Communication.CommDriver.GetTransmitterState(state))
+    {
+        Main.terminal.Puts("Unable to get transmitter state");
+        return;
+    }
+
+    Main.terminal.Printf("\nStateWhenIdle: %d\nTransmitterBitRate: %d\nBeaconState: %d\n",
+        static_cast<int>(state.StateWhenIdle),
+        static_cast<int>(state.TransmitterBitRate),
+        static_cast<int>(state.BeaconState));
+}
+
 static bool GetBitRate(const char* name, Bitrate& bitRate)
 {
     if (strcmp(name, "1200") == 0)
