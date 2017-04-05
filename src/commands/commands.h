@@ -14,6 +14,7 @@ void ReceiveFrameHandler(std::uint16_t argc, char* argv[]);
 void CommandPauseComm(std::uint16_t argc, char* argv[]);
 void CommReset(std::uint16_t argc, char* argv[]);
 void CommGetTelemetry(std::uint16_t argc, char* argv[]);
+void CommTransmitterState(uint16_t /*argc*/, char* /*argv*/ []);
 void CommSetBaudRate(std::uint16_t argc, char* argv[]);
 void CommSetIdleState(std::uint16_t argc, char* argv[]);
 void WaitForOBCInitialization(std::uint16_t argc, char* argv[]);

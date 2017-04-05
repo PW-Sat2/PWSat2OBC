@@ -43,6 +43,7 @@ static const TerminalCommandDescription commands[] = {
     {"comm_set_bitrate", CommSetBaudRate},
     {"comm_get_telemetry", CommGetTelemetry},
     {"comm_set_idle_state", CommSetIdleState},
+    {"comm_get_transmitter_state", CommTransmitterState},
     {"antenna_get_telemetry", AntennaGetTelemetry},
     {"antenna_reset", AntennaReset},
     {"reset", ResetHandler},
