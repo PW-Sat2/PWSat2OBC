@@ -249,8 +249,7 @@ class CommObject final : public ITransmitFrame, public IBeaconController
      * @param[out] outBuffer Buffer for the device's response.
      * @return Operation status, true in case of success, false otherwise.
      */
-    bool SendBufferWithResponse(Address address, //
-        std::uint8_t commandCode,
+    bool SendBufferWithResponse(Address address,   //
         gsl::span<const std::uint8_t> inputBuffer, //
         gsl::span<uint8_t> outBuffer               //
         );

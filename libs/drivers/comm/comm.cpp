@@ -70,17 +70,21 @@ bool CommObject::SendCommand(Address address, uint8_t command)
 }
 
 bool CommObject::SendBufferWithResponse(Address address, //
-    std::uint8_t commandCode,
-    gsl::span<const std::uint8_t> inputBuffer, //
-    gsl::span<uint8_t> outBuffer               //
+    gsl::span<const std::uint8_t> inputBuffer,           //
+    gsl::span<uint8_t> outBuffer                         //
     )
 {
+    if (inputBuffer.empty())
+    {
+        return false;
+    }
+
     I2CResult result = this->_low.Write(num(address), inputBuffer);
     if (result != I2CResult::OK)
     {
         LOGF(LOG_LEVEL_ERROR,
             "[comm] Unable to send request (%d) to %d, Reason: %d",
-            static_cast<int>(commandCode),
+            static_cast<int>(inputBuffer[0]),
             num(address),
             num(result));
         return false;
@@ -93,7 +97,7 @@ bool CommObject::SendBufferWithResponse(Address address, //
     {
         LOGF(LOG_LEVEL_ERROR,
             "[comm] Unable to read response to %d from %d, Reason: %d",
-            static_cast<int>(commandCode),
+            static_cast<int>(inputBuffer[0]),
             num(address),
             num(result));
     }
@@ -103,7 +107,7 @@ bool CommObject::SendBufferWithResponse(Address address, //
 
 bool CommObject::SendCommandWithResponse(Address address, uint8_t command, span<uint8_t> outBuffer)
 {
-    return SendBufferWithResponse(address, command, gsl::span<const uint8_t>(&command, 1), outBuffer);
+    return SendBufferWithResponse(address, gsl::span<const uint8_t>(&command, 1), outBuffer);
 }
 
 OSResult CommObject::Initialize()
@@ -330,7 +334,6 @@ bool CommObject::ScheduleFrameTransmission(gsl::span<const std::uint8_t> frame, 
     memcpy(cmd + 1, frame.data(), frame.size());
 
     const bool status = SendBufferWithResponse(Address::Transmitter, //
-        cmd[0],                                                      //
         gsl::span<const std::uint8_t>(cmd, 1 + frame.size()),        //
         gsl::span<std::uint8_t>(&remainingBufferSize, 1)             //
         );
@@ -402,12 +405,10 @@ bool CommObject::SetTransmitterBitRate(Bitrate bitrate)
 
 bool CommObject::GetTransmitterState(TransmitterState& state)
 {
-    std::uint8_t command = num(TransmitterCommand::GetState);
     std::uint8_t response;
-    const bool status = SendBufferWithResponse(Address::Transmitter, //
-        command,                                                     //
-        gsl::span<const std::uint8_t>(&command, 1),                  //
-        gsl::span<std::uint8_t>(&response, 1)                        //
+    const bool status = SendCommandWithResponse(Address::Transmitter, //
+        num(TransmitterCommand::GetState),                            //
+        gsl::span<std::uint8_t>(&response, 1)                         //
         );
     if (!status)
     {
