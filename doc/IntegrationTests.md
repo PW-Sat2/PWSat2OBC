@@ -3,7 +3,7 @@
 ## Things needed:
 ### Hardware
 * EFM32GG Starter Kit
-* Serial Port (for example  FT4232 Mini Module)
+* Serial Port (for example FT4232 Mini Module)
 * DeviceMock:
     * Two when using both I2C buses
     * One when using single I2C bus (default)
@@ -22,19 +22,22 @@
  * RTS from GPIO serial port to RST on starter kit
  * DTR from GPIO serial port to PC0 on starter kit
  * GND from serial port to GND on starter kit
-* Starter Kit <-> DeviceMock (System Bus)
+* Starter Kit <-> STM DeviceMock
  * GND
- * I2C bus: SDA (PC4), SCL (PC5)
-* Starter Kit <-> DeviceMock (Payload Bus)
- * GND
- * I2C bus: SDA (PD6), SCL (PD7)
+ * I2C System Bus
+ 	* STK: SDA (PC4), SCL (PC5)
+	* STM: SDA (PB9), SCL (PB8)
+ * I2C Payload Bus
+ 	* STK: SDA (PD6), SCL (PD7)
+	* STM: SDA (PB11), SCL (PB10)
+
+STM pinout can be found here: [http://www.st.com/content/ccc/resource/technical/document/user_manual/98/2e/fa/4b/e0/82/43/b7/DM00105823.pdf/files/DM00105823.pdf/jcr:content/translations/en.DM00105823.pdf](http://www.st.com/content/ccc/resource/technical/document/user_manual/98/2e/fa/4b/e0/82/43/b7/DM00105823.pdf/files/DM00105823.pdf/jcr:content/translations/en.DM00105823.pdf), page 28, figure 10.
 
 ## Serial ports
 Four (three for single bus mode) serial ports are used in integration tests:
  1. Terminal (called `OBC_COM`) used by tests to control behavior of OBC software 
  1. GPIO (called `GPIO_COM`) used by tests to reset OBC and request cleaning state at startup
- 1. DeviceMock (called `SYS_BUS_COM`) used to simulate all devices that OBC needs to communicate with on System Bus (and Payload Bus in single bus mode)
- 1. DeviceMock (called `PAYLOAD_BUS_COM`) used to simulate devices connected to Payload Bus (not used in single bus mode, as everything goes through system bus)
+ 1. STM DeviceMock (called `MOCK_COM`) used to simulate all devices that OBC needs to communicate with on System and Payload Bus
 
 ## Integration tests
 Integration tests are written using Python and nosetests. In order to execute, information about serial ports is required. During creation of build system file `integration_tests/config.py` is created in build directory that contains all required information. That means that mention folder must be added to `PYTHONPATH` when executing tests. In PyCharm is can be achived by adding another source directory

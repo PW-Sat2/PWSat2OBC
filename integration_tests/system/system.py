@@ -12,7 +12,7 @@ class System:
         self.obc_com = obc_com
         self.mock_com = mock_com
 
-        self.i2c = I2CMock(mock_com, baudrate=115200, rtscts=False)
+        self.i2c = I2CMock(mock_com)
 
         self._setup_devices()
 

@@ -28,42 +28,6 @@ class I2CTest(BaseTest):
 
         self.assertEqual(response, out_data)
 
-        in_data = 'b'
-        out_data = ''.join([chr(ord(c) + 1) for c in in_data])
-
-        response = self.system.obc.i2c_transfer('wr', 'system', 0x12, in_data)
-
-        self.assertEqual(response, out_data)
-
-    def test_single_transfer_both_buses(self):
-        in_data = '\xb0' * 50
-        out_data = ''.join([chr(ord(c) + 1) for c in in_data])
-
-        response = self.system.obc.i2c_transfer('wr', 'system', 0x12, in_data)
-
-        self.assertEqual(response, out_data)
-
-        in_data = 'b'
-        out_data = ''.join([chr(ord(c) + 1) for c in in_data])
-
-        response = self.system.obc.i2c_transfer('wr', 'system', 0x12, in_data)
-
-        self.assertEqual(response, out_data)
-
-        in_data = '\xb0' * 50
-        out_data = ''.join([chr(ord(c) + 1) for c in in_data])
-
-        response = self.system.obc.i2c_transfer('wr', 'payload', 0x12, in_data)
-
-        self.assertEqual(response, out_data)
-
-        in_data = 'b'
-        out_data = ''.join([chr(ord(c) + 1) for c in in_data])
-
-        response = self.system.obc.i2c_transfer('wr', 'payload', 0x12, in_data)
-
-        self.assertEqual(response, out_data)
-
     def test_single_transfer_payload(self):
         in_data = 'abc'
         out_data = ''.join([chr(ord(c) + 1) for c in in_data])
