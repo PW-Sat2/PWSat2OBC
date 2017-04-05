@@ -141,3 +141,22 @@ class Test_Comm(BaseTest):
         self.assertEqual(telemetry.OscilatorTemperature, 0xdef)
         self.assertEqual(telemetry.AmplifierTemperature, 0x234)
         self.assertEqual(telemetry.SignalStrength, 0x567)
+
+    def test_set_idle_state(self):
+        enabled = TestEvent()
+        disabled = TestEvent()
+
+        def on_set_idle_state(state):
+            if state:
+                enabled.set()
+            else:
+                disabled.set()
+
+        self.system.transmitter.on_set_idle_state = on_set_idle_state
+        self.startup()
+
+        self.system.obc.comm_set_idle_state(True)
+        self.assertTrue(enabled.wait_for_change(1))
+
+        self.system.obc.comm_set_idle_state(False)
+        self.assertTrue(disabled.wait_for_change(1))
