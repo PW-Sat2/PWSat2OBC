@@ -244,15 +244,13 @@ class CommObject final : public ITransmitFrame, public IBeaconController
      * by 2ms delay in order to give the hardware time to prepare the response in case it does not support
      * i2c clock stretching for signaling that it is not ready with the answer.
      * @param[in] address Address of the device which should receive the command.
-     * @param[in] command Command code of request being send. Strictly for logging purposes.
      * @param[in] inputBuffer Buffer with the data frame that should be send to the hardware.
      * @param[out] outBuffer Buffer for the device's response.
      * @return Operation status, true in case of success, false otherwise.
      */
-    bool SendBufferWithResponse(Address address, //
-        std::uint8_t commandCode,
+    bool SendBufferWithResponse(Address address,    //
         gsl::span<const std::uint8_t> inputBuffer, //
-        gsl::span<uint8_t> outBuffer               //
+        gsl::span<uint8_t> outBuffer                //
         );
     /**
      * @brief This procedure will try to download the oldest not yet processed frame from the hardware.
