@@ -4,6 +4,7 @@
 #pragma once
 
 #include "comm.hpp"
+#include "utils.h"
 
 COMM_BEGIN
 
@@ -20,7 +21,7 @@ struct IBeaconController
      * See the definition of the CommBeacon for details.
      * @return Operation status, true in case of success, false otherwise.
      */
-    virtual bool SetBeacon(const Beacon& beacon) = 0;
+    virtual Option<bool> SetBeacon(const Beacon& beacon) = 0;
 
     /**
      * @brief Clears any beacon that is currently set in the transceiver. If a beacon transmission

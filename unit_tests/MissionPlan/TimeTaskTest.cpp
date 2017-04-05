@@ -23,8 +23,8 @@ struct TimeTaskTest : public testing::Test
 {
     TimeTaskTest();
 
-    OSMock mock;
-    FsMock fileSystemMock;
+    testing::NiceMock<OSMock> mock;
+    testing::NiceMock<FsMock> fileSystemMock;
     SystemState state;
     TimeProvider provider;
     RtcMock rtc;

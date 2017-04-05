@@ -27,6 +27,8 @@ using drivers::i2c::I2CResult;
 using namespace COMM;
 using namespace std::chrono_literals;
 
+static constexpr std::uint8_t TransmitterBufferSize = 40;
+
 Beacon::Beacon() : period(0s)
 {
 }
@@ -290,7 +292,7 @@ bool CommObject::ReceiveFrame(gsl::span<std::uint8_t> buffer, Frame& frame)
     return status;
 }
 
-bool CommObject::SendFrame(span<const std::uint8_t> frame)
+bool CommObject::ScheduleFrameTransmission(gsl::span<const std::uint8_t> frame, std::uint8_t& remainingBufferSize)
 {
     if (frame.size() > MaxDownlinkFrameSize)
     {
@@ -301,7 +303,6 @@ bool CommObject::SendFrame(span<const std::uint8_t> frame)
     uint8_t cmd[PrefferedBufferSize];
     cmd[0] = num(TransmitterCommand::SendFrame);
     memcpy(cmd + 1, frame.data(), frame.size());
-    uint8_t remainingBufferSize;
 
     const bool status = (this->_low.WriteRead(num(Address::Transmitter), //
                              span<const uint8_t>(cmd, 1 + frame.size()), //
@@ -320,7 +321,24 @@ bool CommObject::SendFrame(span<const std::uint8_t> frame)
     return status && remainingBufferSize != 0xff;
 }
 
-bool CommObject::SetBeacon(const Beacon& beaconData)
+Option<bool> CommObject::SetBeacon(const Beacon& beaconData)
+{
+    std::uint8_t remainingBufferSize = 0;
+    const auto result = ScheduleFrameTransmission(beaconData.Contents(), remainingBufferSize);
+    if (!result)
+    {
+        return Option<bool>::Some(false);
+    }
+
+    if (remainingBufferSize != (TransmitterBufferSize - 1))
+    {
+        return Option<bool>::None();
+    }
+
+    return Option<bool>::Some(UpdateBeacon(beaconData));
+}
+
+bool CommObject::UpdateBeacon(const Beacon& beaconData)
 {
     std::array<std::uint8_t, MaxDownlinkFrameSize + 2> buffer;
     Writer writer(buffer);
