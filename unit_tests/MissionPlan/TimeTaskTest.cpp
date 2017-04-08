@@ -42,6 +42,11 @@ struct TimeTaskTest : public testing::Test
         auto newTime = provider.GetCurrentTime().Value + delta;
         SetCurrentTime(newTime);
     }
+
+    void SetPersistentState(milliseconds missionTime, milliseconds rtcTime)
+    {
+        state.PersistentState.Set(state::TimeState(missionTime, rtcTime));
+    }
 };
 
 TimeTaskTest::TimeTaskTest()
@@ -73,13 +78,6 @@ TEST_F(TimeTaskTest, TestTimeUpdateFailure)
     ASSERT_THAT(state.Time, Ne(12345678s));
 }
 
-TEST_F(TimeTaskTest, TestInitialCorrectCondition)
-{
-    // given The correction was not run
-    // then correction condition returns true
-    ASSERT_TRUE(actionDescriptor.EvaluateCondition(state));
-}
-
 TEST_F(TimeTaskTest, TestCorrectConditionBeforeTimeCorrectionPeriod)
 {
     auto proxy = InstallProxy(&mock);
@@ -87,11 +85,11 @@ TEST_F(TimeTaskTest, TestCorrectConditionBeforeTimeCorrectionPeriod)
     // given
     // The correction was less than TimeCorrectionPeriod ago
     SetCurrentTime(0ms);
-    actionDescriptor.Execute(state);
+    SetPersistentState(0ms, rtc.GetTime());
 
     // then
     // CorrectTimeCondition returns false
-    AdvanceTime(mission::TimeCorrectionPeriod - 1s);
+    AdvanceTime(mission::TimeTask::TimeCorrectionPeriod - 1s);
     ASSERT_FALSE(actionDescriptor.EvaluateCondition(state));
 }
 
@@ -102,11 +100,11 @@ TEST_F(TimeTaskTest, TestCorrectConditionAfterTimeCorrectionPeriod)
     // given
     // The correction was at least TimeCorrectionPeriod ago
     SetCurrentTime(0ms);
-    actionDescriptor.Execute(state);
+    SetPersistentState(0ms, rtc.GetTime());
 
     // then
     // CorrectTimeCondition returns true
-    AdvanceTime(mission::TimeCorrectionPeriod + 1s);
+    AdvanceTime(mission::TimeTask::TimeCorrectionPeriod + 1s);
     ASSERT_TRUE(actionDescriptor.EvaluateCondition(state));
 }
 
@@ -117,19 +115,23 @@ TEST_F(TimeTaskTest, TestCorrectionWithTimeUpdate)
     // given
     // The correct action was run initially
     SetCurrentTime(0ms);
-    actionDescriptor.Execute(state);
+    SetPersistentState(0ms, rtc.GetTime());
 
     // when
     // MCU runs much faster than RTC
     // And the correct action is run after at least TimeCorrectionPeriod
-    AdvanceTime(mission::TimeCorrectionPeriod + 4 * mission::MinimumTimeCorrection);
-    rtc.AdvanceTime(duration_cast<seconds>(mission::TimeCorrectionPeriod));
+
+    AdvanceTime(mission::TimeTask::TimeCorrectionPeriod + 8s);
+    rtc.AdvanceTime(duration_cast<seconds>(mission::TimeTask::TimeCorrectionPeriod));
     actionDescriptor.Execute(state);
 
     // then
     // Time provider should be updated
-    auto expected = mission::TimeCorrectionPeriod + 2 * mission::MinimumTimeCorrection;
+    auto expected = mission::TimeTask::TimeCorrectionPeriod + 4s;
     ASSERT_EQ(expected, provider.GetCurrentTime().Value);
+    const auto persistentTime = state.PersistentState.Get<state::TimeState>();
+    ASSERT_THAT(persistentTime.LastMissionTime(), Eq(expected));
+    ASSERT_THAT(persistentTime.LastExternalTime(), Eq(rtc.GetTime()));
 }
 
 TEST_F(TimeTaskTest, TestCorrectionWithTimeUpdate_RTCFaster)
@@ -139,41 +141,22 @@ TEST_F(TimeTaskTest, TestCorrectionWithTimeUpdate_RTCFaster)
     // given
     // The correct action was run initially
     SetCurrentTime(0ms);
-    actionDescriptor.Execute(state);
+    SetPersistentState(0ms, rtc.GetTime());
 
     // when
     // MCU runs much slower than RTC
     // And the correct action is run after at least TimeCorrectionPeriod
-    AdvanceTime(mission::TimeCorrectionPeriod);
-    rtc.AdvanceTime(duration_cast<seconds>(mission::TimeCorrectionPeriod + 4 * mission::MinimumTimeCorrection));
+    AdvanceTime(mission::TimeTask::TimeCorrectionPeriod);
+    rtc.AdvanceTime(duration_cast<seconds>(mission::TimeTask::TimeCorrectionPeriod + 8s));
     actionDescriptor.Execute(state);
 
     // then
     // Time provider should be updated
-    auto expected = mission::TimeCorrectionPeriod + 2 * mission::MinimumTimeCorrection;
+    auto expected = mission::TimeTask::TimeCorrectionPeriod + 4s;
     ASSERT_EQ(expected, provider.GetCurrentTime().Value);
-}
-
-TEST_F(TimeTaskTest, TestTooSmallCorrection)
-{
-    auto proxy = InstallProxy(&mock);
-
-    // given
-    // The correct action was run initially
-    SetCurrentTime(0ms);
-    actionDescriptor.Execute(state);
-
-    // when
-    // MCU runs much slower than RTC
-    // And the correct action is run after TimeCorrectionPeriod
-    AdvanceTime(mission::TimeCorrectionPeriod);
-    rtc.AdvanceTime(duration_cast<seconds>(mission::TimeCorrectionPeriod + mission::MinimumTimeCorrection / 2));
-    actionDescriptor.Execute(state);
-
-    // then
-    // Time provider should not be updated
-    auto expected = mission::TimeCorrectionPeriod;
-    ASSERT_EQ(expected, provider.GetCurrentTime().Value);
+    const auto persistentTime = state.PersistentState.Get<state::TimeState>();
+    ASSERT_THAT(persistentTime.LastMissionTime(), Eq(expected));
+    ASSERT_THAT(persistentTime.LastExternalTime(), Eq(rtc.GetTime()));
 }
 
 TEST_F(TimeTaskTest, TestTwoCorrectionsInRow)
@@ -183,12 +166,12 @@ TEST_F(TimeTaskTest, TestTwoCorrectionsInRow)
     // given
     // The correct action was run initially
     SetCurrentTime(0ms);
-    actionDescriptor.Execute(state);
+    SetPersistentState(0ms, rtc.GetTime());
 
     // when
     // MCU runs much slower than RTC
-    auto mcuDelta = mission::TimeCorrectionPeriod;
-    auto rtcDelta = duration_cast<seconds>(mission::TimeCorrectionPeriod + 4 * mission::MinimumTimeCorrection);
+    auto mcuDelta = mission::TimeTask::TimeCorrectionPeriod;
+    auto rtcDelta = duration_cast<seconds>(mission::TimeTask::TimeCorrectionPeriod + 8s);
 
     // And auto correction is run twice
     AdvanceTime(mcuDelta);
@@ -215,13 +198,13 @@ TEST_F(TimeTaskTest, CorrectionDoesNotRunWhenRTCReadFails)
     // given
     // The correct action was run initially
     SetCurrentTime(0ms);
-    actionDescriptor.Execute(state);
+    SetPersistentState(0ms, rtc.GetTime());
 
     // when
     // MCU runs much faster than RTC
     // And the correct action is run after at least TimeCorrectionPeriod
-    AdvanceTime(mission::TimeCorrectionPeriod);
-    rtc.AdvanceTime(duration_cast<seconds>(mission::TimeCorrectionPeriod + 4 * mission::MinimumTimeCorrection));
+    AdvanceTime(mission::TimeTask::TimeCorrectionPeriod);
+    rtc.AdvanceTime(duration_cast<seconds>(mission::TimeTask::TimeCorrectionPeriod + 8s));
 
     // And the RTC cannot be read
     rtc.SetReadResult(OSResult::IOError);
@@ -230,7 +213,7 @@ TEST_F(TimeTaskTest, CorrectionDoesNotRunWhenRTCReadFails)
 
     // then
     // Time provider should not be updated
-    ASSERT_EQ(mission::TimeCorrectionPeriod, provider.GetCurrentTime().Value);
+    ASSERT_EQ(mission::TimeTask::TimeCorrectionPeriod, provider.GetCurrentTime().Value);
 }
 
 TEST_F(TimeTaskTest, CorrectionDoesNotRunWhenRTCReadsInvalidData)
@@ -240,7 +223,7 @@ TEST_F(TimeTaskTest, CorrectionDoesNotRunWhenRTCReadsInvalidData)
     // given
     // The correct action was run initially
     SetCurrentTime(0ms);
-    actionDescriptor.Execute(state);
+    SetPersistentState(0ms, rtc.GetTime());
 
     // when
     // RTC reads invalid data
@@ -249,13 +232,13 @@ TEST_F(TimeTaskTest, CorrectionDoesNotRunWhenRTCReadsInvalidData)
     rtc.SetTime(invalidTime);
 
     // And the correct action is run after at least TimeCorrectionPeriod
-    AdvanceTime(mission::TimeCorrectionPeriod);
+    AdvanceTime(mission::TimeTask::TimeCorrectionPeriod);
 
     actionDescriptor.Execute(state);
 
     // then
     // Time provider should not be updated
-    ASSERT_EQ(mission::TimeCorrectionPeriod, provider.GetCurrentTime().Value);
+    ASSERT_EQ(mission::TimeTask::TimeCorrectionPeriod, provider.GetCurrentTime().Value);
 }
 
 TEST_F(TimeTaskTest, CorrectionDoesNotRunWhenTimeProviderReadFails)
@@ -265,13 +248,13 @@ TEST_F(TimeTaskTest, CorrectionDoesNotRunWhenTimeProviderReadFails)
     // given
     // The correct action was run initially
     SetCurrentTime(0ms);
-    actionDescriptor.Execute(state);
+    SetPersistentState(0ms, rtc.GetTime());
 
     // when
     // MCU runs much faster than RTC
     // And the correct action is run after at least TimeCorrectionPeriod
-    AdvanceTime(mission::TimeCorrectionPeriod);
-    rtc.AdvanceTime(duration_cast<seconds>(mission::TimeCorrectionPeriod + 4 * mission::MinimumTimeCorrection));
+    AdvanceTime(mission::TimeTask::TimeCorrectionPeriod);
+    rtc.AdvanceTime(duration_cast<seconds>(mission::TimeTask::TimeCorrectionPeriod + 8s));
 
     // And the correction action will fail to read time from TimeProvider
     EXPECT_CALL(mock, TakeSemaphore(_, _)).WillOnce(Return(OSResult::IOError)).WillRepeatedly(Return(OSResult::Success));
@@ -280,7 +263,7 @@ TEST_F(TimeTaskTest, CorrectionDoesNotRunWhenTimeProviderReadFails)
 
     // then
     // Time provider should not be updated.
-    ASSERT_EQ(mission::TimeCorrectionPeriod, provider.GetCurrentTime().Value);
+    ASSERT_EQ(mission::TimeTask::TimeCorrectionPeriod, provider.GetCurrentTime().Value);
 }
 
 TEST_F(TimeTaskTest, TestCorrectionWithMaximumTimeValue)
@@ -290,18 +273,18 @@ TEST_F(TimeTaskTest, TestCorrectionWithMaximumTimeValue)
     // given
     // The correct action was run initially with maximum time value
     SetCurrentTime(milliseconds::max());
-    actionDescriptor.Execute(state);
+    SetPersistentState(milliseconds::max(), rtc.GetTime());
 
     // when
     // MCU runs much slower than RTC
     // And the correct action is run after at least TimeCorrectionPeriod
-    AdvanceTime(mission::TimeCorrectionPeriod);
-    rtc.AdvanceTime(duration_cast<seconds>(mission::TimeCorrectionPeriod + 4 * mission::MinimumTimeCorrection));
+    AdvanceTime(mission::TimeTask::TimeCorrectionPeriod);
+    rtc.AdvanceTime(duration_cast<seconds>(mission::TimeTask::TimeCorrectionPeriod + 8s));
     actionDescriptor.Execute(state);
 
     // then
     // Time provider should be updated with overflown value
-    auto expected = milliseconds::min() + mission::TimeCorrectionPeriod + 2 * mission::MinimumTimeCorrection - 1ms;
+    auto expected = milliseconds::min() + mission::TimeTask::TimeCorrectionPeriod + 4s - 1ms;
     ASSERT_EQ(expected.count(), provider.GetCurrentTime().Value.count());
 }
 
@@ -312,17 +295,20 @@ TEST_F(TimeTaskTest, CorrectionDoesNotRunWhenMaximumCorrectionThresholdReached)
     // given
     // The correct action was run initially with maximum time value
     SetCurrentTime(0ms);
-    actionDescriptor.Execute(state);
+    SetPersistentState(0ms, rtc.GetTime());
 
     // when
     // RTC reports very big time difference
-    AdvanceTime(mission::TimeCorrectionPeriod);
-    rtc.AdvanceTime(duration_cast<seconds>(mission::TimeCorrectionPeriod + 2 * mission::MaximumTimeCorrection));
+    AdvanceTime(mission::TimeTask::TimeCorrectionPeriod);
+    rtc.AdvanceTime(duration_cast<seconds>(mission::TimeTask::TimeCorrectionPeriod + 2 * mission::TimeTask::MaximumTimeCorrection));
     actionDescriptor.Execute(state);
 
     // then
     // Time provider should not be updated
-    ASSERT_EQ(mission::TimeCorrectionPeriod, provider.GetCurrentTime().Value);
+    ASSERT_EQ(mission::TimeTask::TimeCorrectionPeriod, provider.GetCurrentTime().Value);
+    const auto persistentTime = state.PersistentState.Get<state::TimeState>();
+    ASSERT_THAT(persistentTime.LastMissionTime(), Eq(mission::TimeTask::TimeCorrectionPeriod));
+    ASSERT_THAT(persistentTime.LastExternalTime(), Eq(rtc.GetTime()));
 }
 
 TEST_F(TimeTaskTest, CorrectionRunsAsNormalAfterMaximumCorrectionThresholdReached)
@@ -336,17 +322,17 @@ TEST_F(TimeTaskTest, CorrectionRunsAsNormalAfterMaximumCorrectionThresholdReache
 
     // when
     // RTC reports very big time difference.
-    AdvanceTime(mission::TimeCorrectionPeriod);
-    rtc.AdvanceTime(duration_cast<seconds>(mission::TimeCorrectionPeriod + 2 * mission::MaximumTimeCorrection));
+    AdvanceTime(mission::TimeTask::TimeCorrectionPeriod);
+    rtc.AdvanceTime(duration_cast<seconds>(mission::TimeTask::TimeCorrectionPeriod + 2 * mission::TimeTask::MaximumTimeCorrection));
     actionDescriptor.Execute(state);
 
     // Another time correction is run with normal rtc operation.
-    AdvanceTime(mission::TimeCorrectionPeriod);
-    rtc.AdvanceTime(duration_cast<seconds>(mission::TimeCorrectionPeriod + 4 * mission::MinimumTimeCorrection));
+    AdvanceTime(mission::TimeTask::TimeCorrectionPeriod);
+    rtc.AdvanceTime(duration_cast<seconds>(mission::TimeTask::TimeCorrectionPeriod + 8s));
     actionDescriptor.Execute(state);
 
     // then
     // Time provider should be updated second time.
-    auto expected = 2 * mission::TimeCorrectionPeriod + 2 * mission::MinimumTimeCorrection;
+    auto expected = 2 * mission::TimeTask::TimeCorrectionPeriod + 4s;
     ASSERT_EQ(expected, provider.GetCurrentTime().Value);
 }
