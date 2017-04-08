@@ -29,6 +29,24 @@ namespace mission
     {
       public:
         /**
+         * @brief Minimal period of time correction.
+         * @ingroup mission_time
+         */
+        static constexpr std::chrono::milliseconds TimeCorrectionPeriod = std::chrono::minutes(15);
+
+        /**
+         * @brief Warning level of time correction delta after which warning will be logged.
+         * @ingroup mission_time
+         */
+        static constexpr std::chrono::milliseconds TimeCorrectionWarningThreshold = std::chrono::seconds(15);
+
+        /**
+         * @brief Maximum allowed value of time correction delta.
+         * @ingroup mission_time
+         */
+        static constexpr std::chrono::milliseconds MaximumTimeCorrection = std::chrono::hours(2);
+
+        /**
          * @brief ctor.
          * @param[in] arguments Reference to time providier argument list.
          */
@@ -45,6 +63,15 @@ namespace mission
          * @return Action descriptor - the time correction task.
          */
         ActionDescriptor<SystemState> BuildAction();
+
+        static std::chrono::milliseconds PerformTimeCorrection(std::chrono::milliseconds missionTime, //
+            std::chrono::milliseconds externalTime,                                                   //
+            const state::TimeState& synchronizationState                                              //
+            );
+
+        UpdateResult UpdateSatelliteTime(SystemState& state);
+
+        void UpdatePersistentState(state::SystemPersistentState& state);
 
       private:
         /**
@@ -67,8 +94,9 @@ namespace mission
          * @param[in] state Reference to global mission state.
          * @param[in] param Current execution context.
          */
-        static void CorrectTime(const SystemState& state, void* param);
+        static void CorrectTimeProxy(const SystemState& state, void* param);
 
+        void CorrectTime(const SystemState& state);
         /**
          * @brief Time provider reference.
          */
@@ -78,46 +106,7 @@ namespace mission
          * @brief External RTC reference.
          */
         devices::rtc::IRTC& rtc;
-
-        /**
-         * @brief Time of last correction.
-         */
-        Option<std::chrono::milliseconds> lastTimeCorrection;
-
-        /**
-         * @brief Last seen value of internal mission time.
-         */
-        Option<std::chrono::milliseconds> lastMissionTime;
-
-        /**
-         * @brief Last seen value of external RTC.
-         */
-        Option<std::chrono::seconds> lastExternalClockTime;
-
-        /**
-         * @brief Procedure that reads initial clock values.
-         * @param[in] time Reference current mission time.
-         */
-        void ReadInitialClockValues(const Option<std::chrono::milliseconds>& time);
-
-        /**
-         * @brief Procedure corrects mission time based on external RTC.
-         * @param[in] time Reference current mission time.
-         */
-        void CorrectTime(const Option<std::chrono::milliseconds>& time);
     };
-
-    /** @brief Minimal period of time correction. */
-    static constexpr std::chrono::milliseconds TimeCorrectionPeriod = std::chrono::minutes(15);
-
-    /** @brief Warning level of time correction delta after which warning will be logged. */
-    static constexpr std::chrono::milliseconds TimeCorrectionWarningThreshold = std::chrono::seconds(15);
-
-    /** @brief Minimum value of time correction delta to update the time in time provider. */
-    static constexpr std::chrono::milliseconds MinimumTimeCorrection = std::chrono::seconds(2);
-
-    /** @brief Maximum allowed value of time correction delta. */
-    static constexpr std::chrono::milliseconds MaximumTimeCorrection = std::chrono::hours(2);
 
     /** @} */
 }
