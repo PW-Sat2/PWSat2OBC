@@ -104,7 +104,7 @@ namespace state
 
     inline constexpr std::uint32_t TimeState::Size()
     {
-        return 2 * sizeof(decltype(std::declval<std::chrono::milliseconds>().count()));
+        return sizeof(decltype(lastMissionTime)::rep) + sizeof(decltype(lastExternalTime)::rep);
     }
 
     inline bool TimeState::operator==(const TimeState& arg) const

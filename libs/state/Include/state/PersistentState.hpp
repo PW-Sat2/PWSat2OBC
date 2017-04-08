@@ -5,10 +5,65 @@
 
 #include <cstdint>
 #include <tuple>
+#include <type_traits>
 #include "antenna/AntennaConfiguration.hpp"
 
 namespace state
 {
+    namespace details
+    {
+        /**
+         * @brief Declaration of helper type for verification that all Persistent state parts meet its requirements.
+         * @ingroup StateDef
+         */
+        template <typename... Objects> struct CheckObject;
+
+        /**
+         * @brief Helper type for verification that all Persistent state parts meet its requirements.
+         * @ingroup StateDef
+         */
+        template <typename Object, typename... Objects> struct CheckObject<Object, Objects...>
+        {
+            /**
+             * @brief Type of pointer to method that is responsible for reading part of the persistent state from
+             * its serialized form.
+             * @param[in] reader Buffer reader for serialized persistent state.
+             */
+            typedef void (Object::*ReadType)(Reader& reader);
+
+            /**
+             * @brief Type of pointer to method that is responsible for writing part of the persistent state to
+             * its serialized form.
+             * @param[in] writer Buffer writer for serialized persistent state.
+             */
+            typedef void (Object::*WriteType)(Writer& reader) const;
+            static_assert(std::is_convertible<decltype(&Object::Read), ReadType>::value,
+                "Persistent state part should be able to read its contents from Buffer reader.");
+
+            static_assert(std::is_convertible<decltype(&Object::Write), WriteType>::value,
+                "Persistent state part should be able to write its contents to Buffer writer.");
+
+            static_assert(Object::Size() > 0, "Persistent state part should report non zero size.");
+
+            /**
+             * @brief Verification helper
+             */
+            static constexpr bool Value = CheckObject<Objects...>::Value;
+        };
+
+        /**
+         * @brief Persistent state part verification terminator.
+         * @ingroup StateDef
+         */
+        template <> struct CheckObject<>
+        {
+            /**
+             * @brief Verification helper
+             */
+            static constexpr bool Value = true;
+        };
+    }
+
     /**
      * @ingroup StateDef
      * @brief Type that combines together persistent parts of the satellite state.
@@ -22,10 +77,30 @@ namespace state
      * void Write(Writer& writer) const;
      * static constexpr std::uint32_t Size();
      * @endcode
+     *
+     * @tparam StatePolicy Type that provides state tracking capabilities. This type can be used to turn on or off
+     * verification whether the Persistent State has been modifed since it has been last read/written.
+     * This type should provide interface that is compatible with:
+     * @code{.cpp}
+     * T()
+     * void NotifyModified()
+     * void NotifySaved()
+     * bool IsModified() const
+     * @endcode
      */
-    template <typename... Parts> class PersistentState
+    template <typename StatePolicy, typename... Parts> class PersistentState
     {
       public:
+        static_assert(std::is_member_function_pointer<decltype(&StatePolicy::NotifyModified)>::value,
+            "StatePolicy should have void NotifyModified() method.");
+
+        static_assert(std::is_member_function_pointer<decltype(&StatePolicy::NotifySaved)>::value,
+            "StatePolicy should have void NotifySaved() method.");
+
+        static_assert(std::is_member_function_pointer<decltype(&StatePolicy::IsModified)>::value,
+            "StatePolicy should have bool IsModified() method.");
+
+        static_assert(::state::details::CheckObject<Parts...>::Value, "Persistent state part verification failed.");
         /**
          * @brief Return reference to selected part of the persistent state.
          * @tparam Object Type of the object that should be accessed.
@@ -104,76 +179,82 @@ namespace state
         template <typename Object> static void Read(Reader& reader, Object& object);
 
         std::tuple<Parts...> parts;
-        mutable bool modified = false;
+        mutable StatePolicy statePolicy;
     };
 
-    template <typename... Parts> template <typename Object> const Object& PersistentState<Parts...>::Get() const
+    template <typename StatePolicy, typename... Parts>
+    template <typename Object>
+    const Object& PersistentState<StatePolicy, Parts...>::Get() const
     {
         return std::get<Object>(this->parts);
     }
 
-    template <typename... Parts> template <typename Object> void PersistentState<Parts...>::Set(Object object)
+    template <typename StatePolicy, typename... Parts>
+    template <typename Object>
+    void PersistentState<StatePolicy, Parts...>::Set(Object object)
     {
         std::get<Object>(this->parts) = std::move(object);
-        this->modified = true;
+        statePolicy.NotifyModified();
     }
 
-    template <typename... Parts> void PersistentState<Parts...>::Read(Reader& reader)
+    template <typename StatePolicy, typename... Parts> void PersistentState<StatePolicy, Parts...>::Read(Reader& reader)
     {
         Read(reader, std::get<Parts>(parts)...);
     }
 
-    template <typename... Parts> void PersistentState<Parts...>::Write(Writer& writer) const
+    template <typename StatePolicy, typename... Parts> void PersistentState<StatePolicy, Parts...>::Write(Writer& writer) const
     {
         Write(writer, std::get<Parts>(parts)...);
     }
 
-    template <typename... Parts>
+    template <typename StatePolicy, typename... Parts>
     template <typename Object, typename... Objects>
-    inline void PersistentState<Parts...>::Write(Writer& writer, //
-        const Object& object,                                    //
-        const Objects&... objects                                //
+    inline void PersistentState<StatePolicy, Parts...>::Write(Writer& writer, //
+        const Object& object,                                                 //
+        const Objects&... objects                                             //
         )
     {
         object.Write(writer);
         Write(writer, objects...);
     }
 
-    template <typename... Parts>
+    template <typename StatePolicy, typename... Parts>
     template <typename Object>
-    inline void PersistentState<Parts...>::Write(Writer& writer, const Object& object)
+    inline void PersistentState<StatePolicy, Parts...>::Write(Writer& writer, const Object& object)
     {
         object.Write(writer);
     }
 
-    template <typename... Parts> void PersistentState<Parts...>::Capture(Writer& writer) const
+    template <typename StatePolicy, typename... Parts> void PersistentState<StatePolicy, Parts...>::Capture(Writer& writer) const
     {
         Write(writer);
-        this->modified = false;
+        statePolicy.NotifySaved();
     }
 
-    template <typename... Parts>
+    template <typename StatePolicy, typename... Parts>
     template <typename Object, typename... Objects>
-    inline void PersistentState<Parts...>::Read(Reader& reader, //
-        Object& object,                                         //
-        Objects&... objects                                     //
+    inline void PersistentState<StatePolicy, Parts...>::Read(Reader& reader, //
+        Object& object,                                                      //
+        Objects&... objects                                                  //
         )
     {
         object.Read(reader);
         Read(reader, objects...);
     }
 
-    template <typename... Parts> template <typename Object> inline void PersistentState<Parts...>::Read(Reader& reader, Object& object)
+    template <typename StatePolicy, typename... Parts>
+    template <typename Object>
+    inline void PersistentState<StatePolicy, Parts...>::Read(Reader& reader, Object& object)
     {
         object.Read(reader);
     }
 
-    template <typename... Parts> bool PersistentState<Parts...>::IsModified() const
+    template <typename StatePolicy, typename... Parts> bool PersistentState<StatePolicy, Parts...>::IsModified() const
     {
-        return this->modified;
+        return statePolicy.IsModified();
     }
 
-    template <typename... Parts> inline constexpr std::uint32_t PersistentState<Parts...>::Size()
+    template <typename StatePolicy, typename... Parts> inline constexpr std::uint32_t PersistentState<StatePolicy, Parts...>::Size()
     {
         return Calculate<Parts...>::Size;
     }
