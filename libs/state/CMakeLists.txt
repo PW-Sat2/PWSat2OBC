@@ -3,13 +3,14 @@ set(NAME state)
 set(SOURCES
     Include/state/antenna/AntennaConfiguration.hpp
     Include/state/antenna/AntennaState.hpp
-    Include/state/TimeState.hpp
+    Include/state/time/TimeState.hpp
+    Include/state/time/TimeCorrectionConfiguration.hpp
     Include/state/struct.h
     Include/state/PersistentState.hpp
     Include/state/fwd.hpp
     state.cpp
     Antenna.cpp
-    TimeState.cpp
+    time.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

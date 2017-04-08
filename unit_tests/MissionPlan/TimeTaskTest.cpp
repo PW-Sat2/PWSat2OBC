@@ -134,6 +134,33 @@ TEST_F(TimeTaskTest, TestCorrectionWithTimeUpdate)
     ASSERT_THAT(persistentTime.LastExternalTime(), Eq(rtc.GetTime()));
 }
 
+TEST_F(TimeTaskTest, TestCorrectionWithTimeUpdateCustomCorrectionWeights)
+{
+    auto proxy = InstallProxy(&mock);
+
+    // given
+    // The correct action was run initially
+    SetCurrentTime(0ms);
+    SetPersistentState(0ms, rtc.GetTime());
+    state.PersistentState.Set(state::TimeCorrectionConfiguration(1, 3));
+
+    // when
+    // MCU runs much faster than RTC
+    // And the correct action is run after at least TimeCorrectionPeriod
+
+    AdvanceTime(mission::TimeTask::TimeCorrectionPeriod + 8s);
+    rtc.AdvanceTime(duration_cast<seconds>(mission::TimeTask::TimeCorrectionPeriod));
+    actionDescriptor.Execute(state);
+
+    // then
+    // Time provider should be updated
+    auto expected = mission::TimeTask::TimeCorrectionPeriod + 2s;
+    ASSERT_EQ(expected, provider.GetCurrentTime().Value);
+    const auto persistentTime = state.PersistentState.Get<state::TimeState>();
+    ASSERT_THAT(persistentTime.LastMissionTime(), Eq(expected));
+    ASSERT_THAT(persistentTime.LastExternalTime(), Eq(rtc.GetTime()));
+}
+
 TEST_F(TimeTaskTest, TestCorrectionWithTimeUpdate_RTCFaster)
 {
     auto proxy = InstallProxy(&mock);
