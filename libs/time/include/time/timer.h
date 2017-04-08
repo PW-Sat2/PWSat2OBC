@@ -9,14 +9,6 @@
 #include "fs/fs.h"
 #include "utils.h"
 
-#ifndef TIMER_NOTIFICATION_PERIOD
-#define TIMER_NOTIFICATION_PERIOD 5000
-#endif
-
-#ifndef TIMER_SAVE_PERIOD
-#define TIMER_SAVE_PERIOD (15 * 60 * 1000)
-#endif
-
 namespace services
 {
     namespace time
@@ -46,11 +38,6 @@ namespace services
              * @brief Current mission time in milliseconds.
              */
             std::chrono::milliseconds time;
-
-            /**
-             * @brief Flag indicating whether the timer state should be immediately saved.
-             */
-            bool saveTime;
 
             /**
              * @brief Flag indicating whether the timer notification should be immediately called.
@@ -152,14 +139,13 @@ namespace services
           public:
             /**
              *  @brief Constructor for timer object.
-             *
-             *  @param[in] fileSystem Pointer to file system object that should be used to read persistent state.
              */
-            TimeProvider(services::fs::IFileSystem& fileSystem);
+            TimeProvider();
 
             /**
              * @brief Initializes the timer object.
              *
+             * @param[in] startTime Initial time.
              * @param[in] timePassedCallback Pointer to time notification routine that should be called
              * on mission time change.
              * @param[in] timePassedCallbackContext timePassedCallback context pointer. This value is not used by the timer itself.
@@ -169,8 +155,9 @@ namespace services
              * Besides the time initialization this procedure will automatically restores the timer state from the persistent state
              * saved in the files on local flash memory, therefore make sure that file system module is already initialized.
              */
-            bool Initialize(TimePassedCallbackType timePassedCallback, //
-                void* timePassedCallbackContext                        //
+            bool Initialize(std::chrono::milliseconds startTime, //
+                TimePassedCallbackType timePassedCallback,       //
+                void* timePassedCallbackContext                  //
                 );
 
             /**
@@ -217,16 +204,6 @@ namespace services
             bool SetCurrentTime(std::chrono::milliseconds duration);
 
             /**
-             * @brief This procedure is responsible for reading the last timer state that has been
-             * preserved in the persistent memory.
-             *
-             * @param[in] fileSystem Reference to the file system sub system that should be used for data access.
-             * @return Either last stable timer state that get read from the persistent memory or
-             * value indicating zero (initial time).
-             */
-            struct TimeSnapshot CurrentPersistentTime(services::fs::IFileSystem& fileSystem);
-
-            /**
              * @brief Waits until given timepoint. Wait is directed by timer notifications
              * @param[in] time Wanted time point
              * @return True if expected time point is reached, false in case of error
@@ -258,38 +235,6 @@ namespace services
             static constexpr uint8_t NOTIFICATION_LOCK_ID = 2;
 
           private:
-            /**
-             * @brief Semaphore used to protect internal timer state.
-             *
-             * This value is used to synchronize access to current mission time.
-             */
-            OSSemaphoreHandle timerLock;
-
-            /**
-             * @brief Semaphore used to ensure that only one time notification callback is being executed at any given time.
-             */
-            OSSemaphoreHandle notificationLock;
-
-            /**
-             * @brief Current mission time in milliseconds.
-             *
-             * This value is protected by the timerLock semaphore.
-             */
-            std::chrono::milliseconds CurrentTime;
-
-          private:
-            /**
-             * @brief This procedure is responsible for saving specified timer state.
-             *
-             * This method does not determine whether or not state should be saved, for that it
-             * uses information from the state object that should be prepared in advance by the caller
-             * to avoid excessive timer locking in order to obtain stable timer state. The value
-             * that gets saved comes from the state object not the timer itself.
-             *
-             * @param[in] state The state of the timer object that should be saved.
-             */
-            void SaveTime(TimerState state);
-
             /**
              * @brief This method is responsible for rtc timer notification post processing.
              *
@@ -325,21 +270,31 @@ namespace services
             TimerState BuildTimerState();
 
             /**
-             * @brief This procedure is responsible for reading timer state from single file.
+             * @brief Semaphore used to protect internal timer state.
              *
-             * When selected file does not exist or is empty/corrupted this procedure return
-             * default state with time state set to zero (beginning of time).
-             * @param[in] fs FileSystem interface for accessing files.
-             * @param[in] filePath Path to the file that contains timer state.
-             *
-             * @return Read timer state or default (zero) state in case of errors.
+             * This value is used to synchronize access to current mission time.
              */
-            struct TimeSnapshot ReadFile(services::fs::IFileSystem& fs, const char* const filePath);
+            OSSemaphoreHandle timerLock;
 
-          private:
-            static constexpr const char* File0 = "/a/TimeState.0";
-            static constexpr const char* File1 = "/a/TimeState.1";
-            static constexpr const char* File2 = "/a/TimeState.2";
+            /**
+             * @brief Semaphore used to ensure that only one time notification callback is being executed at any given time.
+             */
+            OSSemaphoreHandle notificationLock;
+
+            /**
+             * @brief Current mission time in milliseconds.
+             *
+             * This value is protected by the timerLock semaphore.
+             */
+            std::chrono::milliseconds currentTime;
+
+            /**
+             * @brief Time period since last timer notification.
+             *
+             * This value is used to determine whether the time notification should be invoked on next rtc notification.
+             * This value is protected by the timerLock semaphore.
+             */
+            std::chrono::milliseconds notificationTime;
 
             /**
              * @brief Pointer to time notification procedure that gets called on time change.
@@ -353,30 +308,9 @@ namespace services
             void* TimePassedCallbackContext;
 
             /**
-             * @brief Time period since last timer notification.
-             *
-             * This value is used to determine whether the time notification should be invoked on next rtc notification.
-             * This value is protected by the timerLock semaphore.
-             */
-            std::chrono::milliseconds NotificationTime;
-
-            /**
-             * @brief Time period since the last timer state save.
-             *
-             * This value is used to determine whether the time state should be saved on next rtc notification.
-             * This value is protected by the timerLock semaphore.
-             */
-            std::chrono::milliseconds PersistanceTime;
-
-            /**
              * @brief Pulse notified on each timer tick
              */
             OSPulseHandle TickNotification;
-
-            /**
-             * @brief File system object that is used to save/restore timer state.
-             */
-            services::fs::IFileSystem& FileSystemObject;
         };
 
         /** @}*/
