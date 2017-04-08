@@ -1,19 +1,17 @@
+from datetime import datetime
 import logging
 from base64 import b64encode
 
-import time
-
 from utils import ExtendableFormatter
-
-from .experiments import ExperimentsMixin
-from .obc_mixin import OBCMixin
-from .file_system import FileSystemMixin
 from .antenna import AntennaMixin
 from .comm import CommMixin
-from .obc_time import TimeMixin
+from .experiments import ExperimentsMixin
+from .file_system import FileSystemMixin
 from .i2c import I2CMixin
-from .mission import MissionMixin
 from .imtq import ImtqMixin
+from .mission import MissionMixin
+from .obc_mixin import OBCMixin
+from .obc_time import TimeMixin
 
 
 class OBC(OBCMixin,
@@ -41,12 +39,15 @@ class OBC(OBCMixin,
         return self._terminal.command(cmdline)
 
     def wait_to_start(self):
-        response = self._terminal.command("getState")
-        while response != "1":
-            time.sleep(0.2)
-            response = self._terminal.command("getState")
+        self.log.debug("Waiting for OBC initialization finish")
 
-        self.log.info("OBC reported ready state")
+        start = datetime.now()
+
+        self._command("wait_for_init")
+
+        end = datetime.now()
+        duration = end - start
+        self.log.info("OBC initialization done in %s", str(duration))
 
     def reset(self):
         self._terminal.reset()

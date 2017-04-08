@@ -220,10 +220,3 @@ void CommSetIdleState(std::uint16_t argc, char* argv[])
 
     Main.Communication.CommDriver.SetTransmitterStateWhenIdle(enable ? IdleState::On : IdleState::Off);
 }
-
-void OBCGetState(uint16_t argc, char* argv[])
-{
-    UNREFERENCED_PARAMETER(argc);
-    UNREFERENCED_PARAMETER(argv);
-    Main.terminal.Printf("%d\n", atomic_load(&Main.initialized) ? 1 : 0);
-}
