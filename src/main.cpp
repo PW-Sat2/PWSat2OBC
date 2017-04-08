@@ -81,19 +81,6 @@ static void BlinkLed0(void* param)
     }
 }
 
-static void SmartWaitTask(void* param)
-{
-    UNREFERENCED_PARAMETER(param);
-
-    LOG(LOG_LEVEL_DEBUG, "Wait start");
-
-    while (1)
-    {
-        Main.timeProvider.LongDelay(10min);
-        LOG(LOG_LEVEL_DEBUG, "After wait");
-    }
-}
-
 static void InitSwoEndpoint(void)
 {
     void* swoEndpointHandle = SwoEndpointInit();
@@ -159,8 +146,6 @@ static void ObcInitTask(void* param)
 
     obc->Hardware.Burtc.Start();
 
-    System::CreateTask(SmartWaitTask, "SmartWait", 512, NULL, TaskPriority::P1, NULL);
-
     LOG(LOG_LEVEL_INFO, "Intialized");
     Main.initialized = true;
 
@@ -213,7 +198,7 @@ int main(void)
     Main.Hardware.Pins.Led1.High();
 
     System::CreateTask(BlinkLed0, "Blink0", 512, NULL, TaskPriority::P1, NULL);
-    System::CreateTask(ObcInitTask, "Init", 2_KB, &Main, TaskPriority::Highest, &Main.initTask);
+    System::CreateTask(ObcInitTask, "Init", 4_KB, &Main, TaskPriority::Highest, &Main.initTask);
 
     System::RunScheduler();
 

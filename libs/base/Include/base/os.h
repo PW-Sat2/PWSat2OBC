@@ -206,7 +206,7 @@ class System final : public PureStatic
      *
      * @param[in] entryPoint Pointer to task procedure.
      * @param[in] taskName Name of the new task.
-     * @param[in] stackSize Size of the new task's stack in words.
+     * @param[in] stackSize Size of the new task's stack in bytes.
      * @param[in] taskParameter Pointer to caller supplied object task context.
      * @param[in] priority New task priority.
      * @param[out] taskHandle Pointer to variable that will be filled with the created task handle.
@@ -462,7 +462,11 @@ class System final : public PureStatic
 };
 
 /**
- * RTOS Task wrapper
+ * @brief RTOS Task wrapper
+ * @tparam Param Type of parameter passed to task procedure
+ * @tparam StackSize Size of stack in bytes
+ * @tparam Priority Priority assigned to task
+ *
  */
 template <typename Param, std::uint16_t StackSize, TaskPriority Priority> class Task final
 {
@@ -514,7 +518,7 @@ Task<Param, StackSize, Priority>::Task(const char* name, Param param, HandlerTyp
 
 template <typename Param, std::uint16_t StackSize, TaskPriority Priority> OSResult Task<Param, StackSize, Priority>::Create()
 {
-    return System::CreateTask(EntryPoint, this->_taskName, StackSize / 2, static_cast<void*>(this), Priority, &this->_handle);
+    return System::CreateTask(EntryPoint, this->_taskName, StackSize, static_cast<void*>(this), Priority, &this->_handle);
 }
 
 template <typename Param, std::uint16_t StackSize, TaskPriority Priority> void Task<Param, StackSize, Priority>::EntryPoint(void* param)

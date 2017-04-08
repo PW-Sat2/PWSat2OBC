@@ -29,6 +29,7 @@ void TaskListCommand(uint16_t argc, char* argv[])
     {
         auto& t = tasks[i];
 
-        Main.terminal.Printf("%-6c\t%-10s\t%8d\n", TaskStatuses[t.eCurrentState], t.pcTaskName, t.usStackHighWaterMark);
+        Main.terminal.Printf(
+            "%-6c\t%-10s\t%8d\n", TaskStatuses[t.eCurrentState], t.pcTaskName, t.usStackHighWaterMark * sizeof(StackType_t));
     }
 }
