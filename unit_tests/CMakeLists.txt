@@ -62,7 +62,6 @@ set(SOURCES
   os/EventGroupTest.cpp
   time/time.cpp
   time/timer.cpp
-  time/persistance.cpp
   time/SmartWait.cpp
   time/rtc.cpp
   mock/RtcMock.hpp
