@@ -7,29 +7,58 @@
 
 namespace state
 {
+    /**
+     * @ingroup persistent_state
+     * @brief This type represents time correction/synchronization configuration.
+     *
+     * It contains weights that are used in time correction weighted average formula.
+     * The sum of all weights must not be zero.
+     */
     class TimeCorrectionConfiguration
     {
       public:
+        /**
+         * @brief default ctor.
+         *
+         * Initializes this object with both weights set to 1.
+         */
         TimeCorrectionConfiguration();
 
-        TimeCorrectionConfiguration(std::uint16_t missionTimeWeight, std::uint16_t externalTimeWeight);
-
-        std::uint16_t MissionTimeFactor() const noexcept;
-
-        std::uint16_t ExternalTimeFactor() const noexcept;
-
-        std::uint32_t Total() const noexcept;
+        /**
+         * @brief ctor.
+         * @param[in] missionTimeWeight Weight assigned to internal clock.
+         * @param[in] externalTimeWeight Weight assigned to external clock.
+         */
+        TimeCorrectionConfiguration(std::int16_t missionTimeWeight, std::int16_t externalTimeWeight);
 
         /**
-         * @brief Read the time subsystem state from passed reader.
+         * @brief Returns weight for internal clock.
+         * @return Weight for internal clock.
+         */
+        std::int16_t MissionTimeFactor() const noexcept;
+
+        /**
+         * @brief Returns weight for external clock.
+         * @return Weight for external clock.
+         */
+        std::int16_t ExternalTimeFactor() const noexcept;
+
+        /**
+         * @brief Returns sum of all weights.
+         * @return Returns sum of all weights.
+         */
+        std::int32_t Total() const noexcept;
+
+        /**
+         * @brief Reads the configuration object from passed reader.
          * @param[in] reader Buffer reader that should be used to read the serialized state.
          */
         void Read(Reader& reader);
 
         /**
-         * @brief Write the time state to passed buffer writer object.
+         * @brief Writes the configuration object to passed buffer writer object.
          * @param[in] writer Buffer writer object that should be used to write the serialized state
-         * of the time subsystem state.
+         * of the configuration object.
          */
         void Write(Writer& writer) const;
 
@@ -54,23 +83,30 @@ namespace state
         bool operator!=(const TimeCorrectionConfiguration& arg) const;
 
       private:
-        std::uint16_t missionTimeFactor;
-        std::uint16_t externalTimeFactor;
+        /**
+         * @brief Weight assigned to internal clock.
+         */
+        std::int16_t missionTimeFactor;
+
+        /**
+         * @brief Weight assigned to external clock.
+         */
+        std::int16_t externalTimeFactor;
     };
 
-    inline std::uint16_t TimeCorrectionConfiguration::MissionTimeFactor() const noexcept
+    inline std::int16_t TimeCorrectionConfiguration::MissionTimeFactor() const noexcept
     {
         return this->missionTimeFactor;
     }
 
-    inline std::uint16_t TimeCorrectionConfiguration::ExternalTimeFactor() const noexcept
+    inline std::int16_t TimeCorrectionConfiguration::ExternalTimeFactor() const noexcept
     {
         return this->externalTimeFactor;
     }
 
-    inline std::uint32_t TimeCorrectionConfiguration::Total() const noexcept
+    inline std::int32_t TimeCorrectionConfiguration::Total() const noexcept
     {
-        return static_cast<std::uint32_t>(this->missionTimeFactor) + static_cast<std::uint32_t>(this->externalTimeFactor);
+        return static_cast<std::int32_t>(this->missionTimeFactor) + static_cast<std::int32_t>(this->externalTimeFactor);
     }
 
     inline bool TimeCorrectionConfiguration::operator==(const TimeCorrectionConfiguration& arg) const

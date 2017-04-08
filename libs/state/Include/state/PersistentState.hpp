@@ -69,7 +69,6 @@ namespace state
      * @brief Type that combines together persistent parts of the satellite state.
      * @tparam Parts List of types that are considered important and supposed to be persisted between
      * satellite restarts. There should not be any type duplicates on this list.
-     *
      * Every type that is supposed to be part of persistent state should implement interface that is compatible to:
      * @code{.cpp}
      * T();
