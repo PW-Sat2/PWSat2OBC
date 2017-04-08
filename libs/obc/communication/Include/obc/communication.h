@@ -37,7 +37,7 @@ namespace obc
         /** @brief Ping telecommand */
         obc::telecommands::PingTelecommand _ping;
         /** @brief Download file telecommand */
-        obc::telecommands::DownladFileTelecommand _downloadFileTelecommand;
+        obc::telecommands::DownloadFileTelecommand _downloadFileTelecommand;
 
         /** @brief Perform detumbling experiment */
         obc::telecommands::PerformDetumblingExperiment _performDetumblingExperiment;

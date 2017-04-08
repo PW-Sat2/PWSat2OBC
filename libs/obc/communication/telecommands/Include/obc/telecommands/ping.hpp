@@ -10,6 +10,11 @@ namespace obc
         /**
          * @brief Dummy ping telecommand that responds with pong
          * @ingroup telecommands
+         * @telecommand
+         *
+         * Command code: 0x50
+         *
+         * Parameters: none
          */
         class PingTelecommand final : public telecommunication::uplink::IHandleTeleCommand
         {

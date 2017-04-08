@@ -58,16 +58,16 @@ namespace obc
             return this->_transmitter.SendFrame(response.Frame());
         }
 
-        DownladFileTelecommand::DownladFileTelecommand(services::fs::IFileSystem& fs) : _fs(fs)
+        DownloadFileTelecommand::DownloadFileTelecommand(services::fs::IFileSystem& fs) : _fs(fs)
         {
         }
 
-        std::uint8_t DownladFileTelecommand::CommandCode() const
+        std::uint8_t DownloadFileTelecommand::CommandCode() const
         {
             return 0xAB;
         }
 
-        void DownladFileTelecommand::Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters)
+        void DownloadFileTelecommand::Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters)
         {
             Reader r(parameters);
 
