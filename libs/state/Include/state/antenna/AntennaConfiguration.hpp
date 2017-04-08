@@ -6,13 +6,10 @@
 #include <cstdint>
 #include "base/fwd.hpp"
 
-/**
- * @addtogroup StateDef
- * @{
- */
 namespace state
 {
     /**
+     * @ingroup persistent_state
      * @brief This type contains antenna deployment process configuration.
      */
     class AntennaConfiguration
@@ -96,5 +93,4 @@ namespace state
     }
 }
 
-/** @} */
 #endif

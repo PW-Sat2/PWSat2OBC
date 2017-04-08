@@ -6,13 +6,10 @@
 #include <chrono>
 #include "base/fwd.hpp"
 
-/**
- * @addtogroup StateDef
- * @{
- */
 namespace state
 {
     /**
+     * @ingroup persistent_state
      * @brief This type contains information related to time subsystem state, primarily synchronization between
      * internal clock and external real time clock.
      */
@@ -117,7 +114,5 @@ namespace state
         return !(*this == arg);
     }
 }
-
-/** @} */
 
 #endif

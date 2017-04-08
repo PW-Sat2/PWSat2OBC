@@ -15,12 +15,7 @@
 #include "time/TimeState.hpp"
 
 /**
- * @defgroup StateDef Satellite state definition
- *
- * @{
- */
-
-/**
+ * @ingroup StateDef
  * @brief State of the satellite
  */
 struct SystemState
@@ -49,7 +44,5 @@ struct SystemState
      */
     mutable state::SystemPersistentState PersistentState;
 };
-
-/** @} */
 
 #endif /* LIBS_STATE_INCLUDE_STATE_STRUCT_H_ */

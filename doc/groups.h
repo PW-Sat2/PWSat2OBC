@@ -43,3 +43,19 @@
  * @{
  * @}
  */
+
+/**
+ * @defgroup StateDef Satellite state definition
+ *
+ * @brief This module contains elements that are part current satellite state.
+ * @{
+ * @}
+ */
+
+/**
+ * @defgroup persistent_state Persistent satellite state
+ *
+ * @brief This module contains elements that are part of the satellite's non volatile state.
+ * @{
+ * @}
+ */

@@ -22,13 +22,8 @@ namespace mission
 
     UpdateResult TimeTask::UpdateProc(SystemState& state, void* param)
     {
-        auto task = static_cast<TimeTask*>(param);
-        return task->UpdateSatelliteTime(state);
-    }
-
-    UpdateResult TimeTask::UpdateSatelliteTime(SystemState& state)
-    {
-        auto currentTime = provider.GetCurrentTime();
+        auto provider = static_cast<TimeProvider*>(param);
+        auto currentTime = provider->GetCurrentTime();
         if (currentTime.HasValue)
         {
             state.Time = currentTime.Value;
@@ -45,7 +40,7 @@ namespace mission
         UpdateDescriptor<SystemState> descriptor;
         descriptor.name = "Time State Update";
         descriptor.updateProc = UpdateProc;
-        descriptor.param = this;
+        descriptor.param = &this->provider;
         return descriptor;
     }
 
