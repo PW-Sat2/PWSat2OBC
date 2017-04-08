@@ -82,6 +82,8 @@ set(SOURCES
   FM25W/FM25WDriverTest.cpp
   telecommunication/FrameContentsWriterTest.cpp
   state/PersistentStateTest.cpp
+  state/PersistentTimeStateTest.cpp
+  state/AntennaConfigTest.cpp
   obc/ObcStateTest.cpp
 )
 

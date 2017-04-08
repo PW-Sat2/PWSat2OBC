@@ -6,12 +6,13 @@
 #include <chrono>
 #include "PersistentState.hpp"
 #include "StatePolicies.hpp"
-#include "TimeState.hpp"
 #include "adcs/adcs.hpp"
 #include "antenna/AntennaState.hpp"
 #include "base/os.h"
 #include "experiments/experiments.h"
 #include "fwd.hpp"
+#include "time/TimeCorrectionConfiguration.hpp"
+#include "time/TimeState.hpp"
 
 /**
  * @defgroup StateDef Satellite state definition

@@ -8,12 +8,13 @@ namespace state
     class AntennaConfiguration;
     class AntennaState;
     class TimeState;
+    class TimeCorrectionConfiguration;
 
     struct NoTrackingStatePolicy;
     class StateTrackingPolicy;
     template <typename StatePolicy, typename... Parts> class PersistentState;
 
-    typedef PersistentState<StateTrackingPolicy, AntennaConfiguration, TimeState> SystemPersistentState;
+    typedef PersistentState<StateTrackingPolicy, AntennaConfiguration, TimeState, TimeCorrectionConfiguration> SystemPersistentState;
 }
 
 class SystemState;

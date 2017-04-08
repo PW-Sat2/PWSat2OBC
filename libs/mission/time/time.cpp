@@ -1,5 +1,6 @@
 #include "Include/mission/time.hpp"
 #include "logger/logger.h"
+#include "state/Time/TimeCorrectionConfiguration.hpp"
 #include "state/struct.h"
 
 using services::time::TimeProvider;
@@ -93,7 +94,10 @@ namespace mission
         }
 
         const auto currentRtcTime = rtcTime.ToDuration();
-        auto newTime = PerformTimeCorrection(time.Value, currentRtcTime, state.PersistentState.Get<state::TimeState>());
+        auto newTime = PerformTimeCorrection(time.Value,
+            currentRtcTime,
+            state.PersistentState.Get<state::TimeState>(),
+            state.PersistentState.Get<state::TimeCorrectionConfiguration>());
         if (!provider.SetCurrentTime(newTime))
         {
             LOG(LOG_LEVEL_ERROR, "[Time] Unable to set corrected time");
@@ -105,15 +109,17 @@ namespace mission
 
     std::chrono::milliseconds TimeTask::PerformTimeCorrection(std::chrono::milliseconds missionTime, //
         std::chrono::milliseconds externalTime,                                                      //
-        const state::TimeState& synchronizationState                                                 //
-        )
+        const state::TimeState& synchronizationState,                                                //
+        const state::TimeCorrectionConfiguration& correctionConfiguation)
     {
         auto deltaMcu = missionTime - synchronizationState.LastMissionTime();
         auto deltaRtc = externalTime - synchronizationState.LastExternalTime();
         deltaMcu = deltaMcu < 0ms ? 0ms : deltaMcu;
         deltaRtc = deltaRtc < 0s ? 0s : deltaRtc;
 
-        auto correctedMissionTime = synchronizationState.LastMissionTime() + (deltaMcu + deltaRtc) / 2;
+        auto correctedMissionTime = synchronizationState.LastMissionTime() +
+            (deltaMcu * correctionConfiguation.MissionTimeFactor() + deltaRtc * correctionConfiguation.ExternalTimeFactor()) /
+                correctionConfiguation.Total();
         auto correctionValue = correctedMissionTime > missionTime ? correctedMissionTime - missionTime : missionTime - correctedMissionTime;
 
         if (correctionValue < MaximumTimeCorrection)
