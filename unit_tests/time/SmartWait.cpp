@@ -27,7 +27,7 @@ class SmartWaitTest : public Test
     OSReset osGuard;
 };
 
-SmartWaitTest::SmartWaitTest() : timeProvider(fs)
+SmartWaitTest::SmartWaitTest()
 {
     osGuard = InstallProxy(&osMock);
 
