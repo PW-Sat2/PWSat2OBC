@@ -66,7 +66,8 @@ namespace mission
 
         static std::chrono::milliseconds PerformTimeCorrection(std::chrono::milliseconds missionTime, //
             std::chrono::milliseconds externalTime,                                                   //
-            const state::TimeState& synchronizationState                                              //
+            const state::TimeState& synchronizationState,                                             //
+            const state::TimeCorrectionConfiguration& correctionConfiguation                          //
             );
 
         UpdateResult UpdateSatelliteTime(SystemState& state);
