@@ -57,15 +57,25 @@ namespace obc
         /**
          * @brief Download any file
          * @ingroup telecommands
+         * @telecommand
+         *
+         * Command code: 0xAB
+         *
+         * Parameters:
+         *  - 8-bit - APID that will be used in response
+         *  - 8-bit - Path length
+         *  - String - path to file
+         *  - 8-bit - Byte '0'
+         *  - Array of 32-bit LE - Sequence numbers of parts that will be send
          */
-        class DownladFileTelecommand final : public telecommunication::uplink::IHandleTeleCommand
+        class DownloadFileTelecommand final : public telecommunication::uplink::IHandleTeleCommand
         {
           public:
             /**
              * @brief Ctor
              * @param fs File system
              */
-            DownladFileTelecommand(services::fs::IFileSystem& fs);
+            DownloadFileTelecommand(services::fs::IFileSystem& fs);
 
             virtual std::uint8_t CommandCode() const override;
 
