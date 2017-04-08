@@ -1,7 +1,7 @@
-#include "time/TimeState.hpp"
 #include "base/reader.h"
 #include "base/writer.h"
 #include "time/TimeCorrectionConfiguration.hpp"
+#include "time/TimeState.hpp"
 
 using namespace std::chrono_literals;
 
@@ -39,7 +39,7 @@ namespace state
     {
     }
 
-    TimeCorrectionConfiguration::TimeCorrectionConfiguration(std::uint16_t missionTimeWeight, std::uint16_t externalTimeWeight)
+    TimeCorrectionConfiguration::TimeCorrectionConfiguration(std::int16_t missionTimeWeight, std::int16_t externalTimeWeight)
         : missionTimeFactor(missionTimeWeight), //
           externalTimeFactor(externalTimeWeight)
     {
@@ -47,13 +47,13 @@ namespace state
 
     void TimeCorrectionConfiguration::Read(Reader& reader)
     {
-        this->missionTimeFactor = reader.ReadWordLE();
-        this->externalTimeFactor = reader.ReadWordLE();
+        this->missionTimeFactor = reader.ReadSignedWordLE();
+        this->externalTimeFactor = reader.ReadSignedWordLE();
     }
 
     void TimeCorrectionConfiguration::Write(Writer& writer) const
     {
-        writer.WriteWordLE(this->missionTimeFactor);
-        writer.WriteWordLE(this->externalTimeFactor);
+        writer.WriteSignedWordLE(this->missionTimeFactor);
+        writer.WriteSignedWordLE(this->externalTimeFactor);
     }
 }
