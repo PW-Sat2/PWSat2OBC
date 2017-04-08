@@ -50,6 +50,11 @@ class RtcMock : public devices::rtc::IRTC
         readTimeResult = result;
     }
 
+    std::chrono::seconds GetTime()
+    {
+        return this->fakeTime.ToDuration();
+    }
+
   private:
     devices::rtc::RTCTime fakeTime;
     OSResult readTimeResult;

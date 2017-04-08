@@ -37,7 +37,7 @@ namespace state
          *
          * @return Current mission time in milliseconds as seen on internal clock.
          */
-        const std::chrono::milliseconds LastMissionTime() const;
+        const std::chrono::milliseconds& LastMissionTime() const;
 
         /**
          * @brief Returns current mission time in milliseconds as seen on external clock
@@ -45,7 +45,7 @@ namespace state
          *
          * @return Current mission time in milliseconds as seen on external clock.
          */
-        const std::chrono::milliseconds LastExternalTime() const;
+        const std::chrono::milliseconds& LastExternalTime() const;
 
         /**
          * @brief Read the time subsystem state from passed reader.
@@ -92,12 +92,12 @@ namespace state
         std::chrono::milliseconds lastExternalTime;
     };
 
-    inline const std::chrono::milliseconds TimeState::LastMissionTime() const
+    inline const std::chrono::milliseconds& TimeState::LastMissionTime() const
     {
         return this->lastMissionTime;
     }
 
-    inline const std::chrono::milliseconds TimeState::LastExternalTime() const
+    inline const std::chrono::milliseconds& TimeState::LastExternalTime() const
     {
         return this->lastExternalTime;
     }

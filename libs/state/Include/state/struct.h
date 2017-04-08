@@ -46,7 +46,7 @@ struct SystemState
     /**
      * @brief Satellite's persistent state.
      */
-    state::SystemPersistentState PersistentState;
+    mutable state::SystemPersistentState PersistentState;
 };
 
 /** @} */
