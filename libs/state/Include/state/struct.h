@@ -5,6 +5,7 @@
 
 #include <chrono>
 #include "PersistentState.hpp"
+#include "StatePolicies.hpp"
 #include "TimeState.hpp"
 #include "adcs/adcs.hpp"
 #include "antenna/AntennaState.hpp"

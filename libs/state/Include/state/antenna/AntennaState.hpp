@@ -12,6 +12,9 @@ namespace state
     class AntennaState
     {
       public:
+        /**
+         * @brief .ctor
+         */
         AntennaState();
 
         /**

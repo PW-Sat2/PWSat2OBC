@@ -4,6 +4,7 @@
 #include "base/reader.h"
 #include "base/writer.h"
 #include "state/PersistentState.hpp"
+#include "state/StatePolicies.hpp"
 
 namespace
 {
@@ -123,7 +124,7 @@ namespace
     class PersistentStateTest : public testing::Test
     {
       protected:
-        state::PersistentState<SimpleState, ComplexState> state;
+        state::PersistentState<state::StateTrackingPolicy, SimpleState, ComplexState> state;
     };
 
     TEST_F(PersistentStateTest, TestDefaultState)
