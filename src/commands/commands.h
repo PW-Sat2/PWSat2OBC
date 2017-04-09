@@ -56,4 +56,6 @@ void Temp(std::uint16_t argc, char* argv[]);
 
 void EPSCommand(std::uint16_t argc, char* argv[]);
 
+void StateCommandHandler(uint16_t argc, char* argv[]);
+
 #endif
