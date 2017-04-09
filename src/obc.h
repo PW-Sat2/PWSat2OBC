@@ -44,6 +44,7 @@
 struct OBC
 {
   public:
+    /** @brief State flag: OBC initialization finished */
     static constexpr OSEventBits InitializationFinishedFlag = 1;
 
     /** @brief Constructs @ref OBC object  */

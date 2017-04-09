@@ -380,6 +380,13 @@ template <typename Underlying, std::uint8_t BitsCount> class BitValue
      */
     inline Underlying Value() const;
 
+    /**
+     * @brief Default assignment operator
+     * @param other Other BitValue
+     * @return Reference to this BitValue
+     */
+    constexpr BitValue<Underlying, BitsCount>& operator=(const BitValue<Underlying, BitsCount>& other) = default;
+
   private:
     /** @brief Holded value */
     Underlying _value;
@@ -401,6 +408,42 @@ template <typename Underlying, std::uint8_t BitsCount> constexpr BitValue<Underl
 template <typename Underlying, std::uint8_t BitsCount> inline Underlying BitValue<Underlying, BitsCount>::Value() const
 {
     return this->_value;
+}
+
+template <typename Underlying, std::uint8_t BitsCount>
+inline bool operator<(BitValue<Underlying, BitsCount>& lhs, BitValue<Underlying, BitsCount>& rhs)
+{
+    return lhs.Value() < rhs.Value();
+}
+
+template <typename Underlying, std::uint8_t BitsCount>
+inline bool operator>(BitValue<Underlying, BitsCount>& lhs, BitValue<Underlying, BitsCount>& rhs)
+{
+    return rhs < lhs;
+}
+
+template <typename Underlying, std::uint8_t BitsCount>
+inline bool operator<=(BitValue<Underlying, BitsCount>& lhs, BitValue<Underlying, BitsCount>& rhs)
+{
+    return !(lhs > rhs);
+}
+
+template <typename Underlying, std::uint8_t BitsCount>
+inline bool operator>=(BitValue<Underlying, BitsCount>& lhs, BitValue<Underlying, BitsCount>& rhs)
+{
+    return !(lhs < rhs);
+}
+
+template <typename Underlying, std::uint8_t BitsCount>
+inline bool operator==(BitValue<Underlying, BitsCount>& lhs, BitValue<Underlying, BitsCount>& rhs)
+{
+    return lhs.Value() == rhs.Value();
+}
+
+template <typename Underlying, std::uint8_t BitsCount>
+inline bool operator!=(BitValue<Underlying, BitsCount>& lhs, BitValue<Underlying, BitsCount>& rhs)
+{
+    return !(lhs == rhs);
 }
 
 /** @brief 12-bit unsigned int */

@@ -136,6 +136,7 @@ namespace obc
          */
         obc::PersistentStorageAccess PersistentStorage;
 
+        /** @brief EPS driver*/
         devices::eps::EPSDriver EPS;
     };
 }
