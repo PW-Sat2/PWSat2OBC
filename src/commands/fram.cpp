@@ -39,11 +39,45 @@ static void Read(std::uint16_t address, gsl::span<uint8_t> value)
     fram.Read(address, value);
 }
 
+static bool TestSingleFRAM(devices::fm25w::FM25WDriver& fram)
+{
+    std::uint16_t address = 5;
+
+    {
+        std::array<std::uint8_t, 16> writeBuffer;
+
+        for (auto i = 0; i < 16; i++)
+        {
+            writeBuffer[i] = i;
+        }
+
+        auto toWrite = gsl::make_span(writeBuffer);
+
+        fram.Write(address, toWrite);
+    }
+
+    {
+        std::array<std::uint8_t, 16> readBuffer;
+        fram.Read(address, readBuffer);
+
+        bool isOk = true;
+        for (auto i = 0; i < 16; i++)
+        {
+            if (readBuffer[i] != i)
+            {
+                isOk = false;
+            }
+        }
+
+        return isOk;
+    }
+}
+
 void FRAM(std::uint16_t argc, char* argv[])
 {
     if (argc == 0)
     {
-        Main.terminal.Puts("fram <status|write|read>\n");
+        Main.terminal.Puts("fram <status|write|read|testall>\n");
         return;
     }
 
@@ -87,5 +121,35 @@ void FRAM(std::uint16_t argc, char* argv[])
         Main.terminal.Puts("\n");
 
         Write(address, toWrite);
+    }
+
+    if (strcmp(argv[0], "testall") == 0)
+    {
+        if (strcmp(argv[1], "f") != 0)
+        {
+            Main.terminal.Printf("This operation writes to all flashes. Add \"f\" parameter to proceed.");
+            return;
+        }
+
+        drivers::spi::EFMSPISlaveInterface spi1(Main.Hardware.SPI, Main.Hardware.Pins.Flash1ChipSelect);
+        drivers::spi::EFMSPISlaveInterface spi2(Main.Hardware.SPI, Main.Hardware.Pins.Flash2ChipSelect);
+        drivers::spi::EFMSPISlaveInterface spi3(Main.Hardware.SPI, Main.Hardware.Pins.Flash3ChipSelect);
+
+        devices::fm25w::FM25WDriver fram1(spi1);
+        devices::fm25w::FM25WDriver fram2(spi2);
+        devices::fm25w::FM25WDriver fram3(spi3);
+
+        auto isOk1 = TestSingleFRAM(fram1);
+        auto isOk2 = TestSingleFRAM(fram2);
+        auto isOk3 = TestSingleFRAM(fram3);
+
+        Main.terminal.Printf("Fram 1 read write ok: %d\r\n", isOk1);
+        Main.terminal.Printf("Fram 2 read write ok: %d\r\n", isOk2);
+        Main.terminal.Printf("Fram 3 read write ok: %d\r\n", isOk3);
+
+        if (!isOk1 || !isOk2 || !isOk3)
+        {
+            Main.terminal.Printf("SOME FRAMS ARE INVALID!");
+        }
     }
 }
