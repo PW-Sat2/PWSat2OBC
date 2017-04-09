@@ -42,7 +42,7 @@ namespace mission
     bool BeaconUpdate::ShouldUpdateBeacon(const SystemState& state, void* param)
     {
         auto This = static_cast<BeaconUpdate*>(param);
-        return state.Antenna.Deployed && //
+        return state.AntennaState.IsDeployed() && //
             ((state.Time - This->lastBeaconUpdate) >= BeaconUpdateInterval);
     }
 
@@ -79,7 +79,7 @@ namespace mission
         writer.Reset();
         writer.WriteQuadWordLE(FieldId::TimeStamp, state.Time.count());
 
-        // TODO beacon interval will probably be adjusted based on current satelite state.
+        // TODO beacon interval will probably be adjusted based on current satellite state.
         return devices::comm::Beacon(BeaconInterval, frame.Frame());
     }
 }

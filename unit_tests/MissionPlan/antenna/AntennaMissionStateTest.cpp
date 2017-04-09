@@ -70,6 +70,12 @@ TEST_F(AntennaMissionStateTest, TestRestart)
     ASSERT_THAT(state.StepNumber(), Eq(1));
 }
 
+TEST_F(AntennaMissionStateTest, TestFinish)
+{
+    state.Finish();
+    ASSERT_TRUE(state.IsFinished());
+}
+
 TEST_F(AntennaMissionStateTest, TestOverrideState)
 {
     state.OverrideDeploymentState();

@@ -1,6 +1,7 @@
 #ifndef SRC_HARDWARE_H_
 #define SRC_HARDWARE_H_
 
+#include "PersistentStorageAccess.hpp"
 #include "burtc/burtc.hpp"
 #include "gpio.h"
 #include "i2c/efm.h"
@@ -123,6 +124,16 @@ namespace obc
 
         /** @brief Self-temperature sensor */
         temp::ADCTemperatureReader MCUTemperature;
+
+        /**
+         * @brief Fram's spi access
+         */
+        drivers::spi::EFMSPISlaveInterface FramSpi;
+
+        /**
+         * @brief Object that provides read/write capabilities to persistent storage
+         */
+        obc::PersistentStorageAccess PersistentStorage;
     };
 }
 /** @} */

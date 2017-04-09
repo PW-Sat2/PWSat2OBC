@@ -299,7 +299,7 @@ namespace services
 
             /**
              * @brief Seeks position in file
-             * @param origin Determies what is used as starting point for offset
+             * @param origin Determines what is used as starting point for offset
              * @param offset Position offset
              * @return Operation result
              */

@@ -351,10 +351,17 @@ namespace mission
          */
         static void AntennaDeploymentAction(const SystemState& state, void* param)
         {
-            AntennaMissionState* stateDescriptor = (AntennaMissionState*)param;
-            const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor->StepNumber()];
-            DeploymentProcedure* procedure = step.procedure;
-            procedure(state, *stateDescriptor, stateDescriptor->Driver());
+            auto stateDescriptor = static_cast<AntennaMissionState*>(param);
+            if (state.PersistentState.Get<state::AntennaConfiguration>().IsDeploymentDisabled())
+            {
+                stateDescriptor->Finish();
+            }
+            else
+            {
+                const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor->StepNumber()];
+                DeploymentProcedure* procedure = step.procedure;
+                procedure(state, *stateDescriptor, stateDescriptor->Driver());
+            }
         }
 
         /**
@@ -394,7 +401,7 @@ namespace mission
         {
             UNREFERENCED_PARAMETER(state);
             AntennaMissionState* stateDescriptor = (AntennaMissionState*)param;
-            state.Antenna.Deployed = stateDescriptor->IsFinished();
+            state.AntennaState.SetDeployment(stateDescriptor->IsFinished());
             if (stateDescriptor->IsFinished())
             {
                 return UpdateResult::Ok;
@@ -410,11 +417,6 @@ namespace mission
             if (OS_RESULT_FAILED(result))
             {
                 return UpdateResult::Failure;
-            }
-
-            for (int i = 0; i < 4; ++i)
-            {
-                state.Antenna.DeploymentState[i] = deploymentStatus.DeploymentStatus[i] || state.Antenna.DeploymentState[i];
             }
 
             stateDescriptor->Update(deploymentStatus);

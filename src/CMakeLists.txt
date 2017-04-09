@@ -62,12 +62,14 @@ target_link_libraries(${NAME}
     mission_sail
     mission_time
     mission_experiments
+    mission_state
     yaffs
     obc_fdir
     obc_storage
     obc_communication
     obc_hardware
     obc_experiments
+    obc_state
     spi
     efm_emlib
     burtc

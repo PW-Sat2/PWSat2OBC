@@ -1,22 +1,20 @@
-set(NAME obc_hardware)
+set(NAME obc_state)
 
 set(SOURCES
-    hardware.cpp
-    Include/obc/PersistentStorageAccess.hpp
-    PersistentStorageAccess.cpp
+    Include/obc/IStorageAccess.hpp
+    Include/obc/ObcState.hpp
+    ObcState.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
 
 target_link_libraries(${NAME} 
 	base
-	gpio
-	i2c
+	fm25w
+	state
+	logger
 	spi
-	power
-	burtc
-	mcu_temp
-	obc_state
+	mission_state
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
