@@ -35,7 +35,7 @@ namespace mission
          * @brief ctor.
          *
          * To support single argument construction.
-         * @param[in] isSailOpened Initial sail deployment state.
+         * @param[in] args Tuple of: initial sail deployment state, power control interface
          */
         SailTask(std::tuple<bool, services::power::IPowerControl&> args);
 

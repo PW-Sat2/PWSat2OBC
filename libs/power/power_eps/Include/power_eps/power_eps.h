@@ -8,15 +8,24 @@ namespace services
 {
     namespace power
     {
+        /**
+         * @brief EPS Power control
+         * @ingroup power
+         */
         class EPSPowerControl final : public IPowerControl
         {
           public:
+            /**
+             * @brief Ctor
+             * @param eps EPS driver
+             */
             EPSPowerControl(devices::eps::EPSDriver& eps);
 
             virtual void PowerCycle() override;
             virtual void OpenSail() override;
 
           private:
+            /** @brief EPS driver */
             devices::eps::EPSDriver& _eps;
         };
     }

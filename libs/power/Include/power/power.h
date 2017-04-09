@@ -5,24 +5,34 @@
 
 EXTERNC_BEGIN
 
-/**
- * @defgroup power Power Control interface
- * @{
- */
-
 namespace services
 {
     namespace power
     {
+        /**
+         * @defgroup power Power Control interface
+         * @{
+         */
+
+        /**
+         * @brief Power control API
+         */
         struct IPowerControl
         {
+            /**
+             * @brief Performs power cycle
+             */
             virtual void PowerCycle() = 0;
+
+            /**
+             * @brief Performs sail opening sequence
+             */
             virtual void OpenSail() = 0;
         };
+
+        /** @} */
     }
 }
-
-/** @} */
 
 EXTERNC_END
 
