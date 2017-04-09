@@ -14,7 +14,7 @@ static const TerminalCommandDescription commands[] = {
     {"receiveFrame", ReceiveFrameHandler},
     {"pauseComm", CommandPauseComm},
     {"comm_reset", CommReset},
-    {"getState", OBCGetState},
+    {"wait_for_init", WaitForOBCInitialization},
     {"listFiles", FSListFiles},
     {"writeFile", FSWriteFile},
     {"readFile", FSReadFile},

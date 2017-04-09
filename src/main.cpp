@@ -147,7 +147,7 @@ static void ObcInitTask(void* param)
     obc->Hardware.Burtc.Start();
 
     LOG(LOG_LEVEL_INFO, "Intialized");
-    Main.initialized = true;
+    Main.StateFlags.Set(OBC::InitializationFinishedFlag);
 
     System::SuspendTask(NULL);
 }
