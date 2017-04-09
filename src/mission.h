@@ -27,6 +27,6 @@ namespace mission
         ObcMission;
 }
 
-/** @} */
+extern mission::ObcMission Mission;
 
 #endif /* SRC_MISSION_H_ */

@@ -12,7 +12,7 @@ from .imtq import ImtqMixin
 from .mission import MissionMixin
 from .obc_mixin import OBCMixin
 from .obc_time import TimeMixin
-
+from .state import StateMixin
 
 class OBC(OBCMixin,
           FileSystemMixin,
@@ -22,7 +22,8 @@ class OBC(OBCMixin,
           AntennaMixin,
           MissionMixin,
           ImtqMixin,
-          ExperimentsMixin
+          ExperimentsMixin,
+          StateMixin
           ):
     def __init__(self, terminal):
         self.log = logging.getLogger("OBC")

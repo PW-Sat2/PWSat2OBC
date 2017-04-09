@@ -100,6 +100,7 @@ namespace state
             "StatePolicy should have bool IsModified() method.");
 
         static_assert(::state::details::CheckObject<Parts...>::Value, "Persistent state part verification failed.");
+
         /**
          * @brief Return reference to selected part of the persistent state.
          * @tparam Object Type of the object that should be accessed.
