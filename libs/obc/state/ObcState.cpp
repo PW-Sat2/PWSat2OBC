@@ -18,7 +18,7 @@ namespace obc
         std::uint8_t array[TotalImageSize];
         Writer writer(gsl::make_span(array));
         writer.WriteDoubleWordLE(Signature);
-        stateObject.Write(writer);
+        stateObject.Capture(writer);
         writer.WriteDoubleWordLE(Signature);
         if (!writer.Status())
         {

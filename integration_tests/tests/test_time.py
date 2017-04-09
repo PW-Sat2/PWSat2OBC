@@ -54,20 +54,18 @@ class TestTime(BaseTest):
 
     @nottest
     def run_time_correction_test(self, start_time):
+        self.system.obc.suspend_mission()
         log = logging.getLogger("test_time_correction")
 
+        self.system.rtc.set_response_time(start_time)
         self.system.obc.jump_to_time(0)
         obc_start_s = self.system.obc.current_time() / 1000
-
-        log.info("Force first run of time correction")
-        self.system.rtc.set_response_time(start_time)
-        self.system.obc.run_mission()
 
         log.info("Move forward by enough time to cause another time correction")
         elapsed_time_delta = timedelta(minutes=20)
         elapsed_time_error_delta = timedelta(minutes=5)
 
-        self.system.obc.jump_to_time(obc_start_s + elapsed_time_delta.total_seconds())
+        self.system.obc.advance_time(elapsed_time_delta.total_seconds() * 1000)
         self.system.rtc.set_response_time(start_time + elapsed_time_delta + elapsed_time_error_delta)
 
         log.info("Run another time correction")

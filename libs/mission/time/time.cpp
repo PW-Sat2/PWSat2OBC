@@ -6,13 +6,16 @@
 using services::time::TimeProvider;
 using namespace std::literals;
 
+using std::chrono::milliseconds;
+using std::chrono::duration_cast;
+
 namespace mission
 {
-    constexpr std::chrono::milliseconds TimeTask::TimeCorrectionPeriod;
+    constexpr milliseconds TimeTask::TimeCorrectionPeriod;
 
-    constexpr std::chrono::milliseconds TimeTask::TimeCorrectionWarningThreshold;
+    constexpr milliseconds TimeTask::TimeCorrectionWarningThreshold;
 
-    constexpr std::chrono::milliseconds TimeTask::MaximumTimeCorrection;
+    constexpr milliseconds TimeTask::MaximumTimeCorrection;
 
     TimeTask::TimeTask(std::tuple<TimeProvider&, devices::rtc::IRTC&> arguments)
         : provider(std::get<0>(arguments)), //
@@ -88,7 +91,7 @@ namespace mission
             return;
         }
 
-        const auto currentRtcTime = rtcTime.ToDuration();
+        const auto currentRtcTime = duration_cast<milliseconds>(rtcTime.ToDuration());
         auto newTime = PerformTimeCorrection(time.Value,
             currentRtcTime,
             state.PersistentState.Get<state::TimeState>(),
@@ -102,13 +105,14 @@ namespace mission
         state.PersistentState.Set(state::TimeState(newTime, currentRtcTime));
     }
 
-    std::chrono::milliseconds TimeTask::PerformTimeCorrection(std::chrono::milliseconds missionTime, //
-        std::chrono::milliseconds externalTime,                                                      //
-        const state::TimeState& synchronizationState,                                                //
+    milliseconds TimeTask::PerformTimeCorrection(milliseconds missionTime, //
+        milliseconds externalTime,                                         //
+        const state::TimeState& synchronizationState,                      //
         const state::TimeCorrectionConfiguration& correctionConfiguation)
     {
         auto deltaMcu = missionTime - synchronizationState.LastMissionTime();
         auto deltaRtc = externalTime - synchronizationState.LastExternalTime();
+
         deltaMcu = deltaMcu < 0ms ? 0ms : deltaMcu;
         deltaRtc = deltaRtc < 0s ? 0s : deltaRtc;
 
@@ -121,14 +125,14 @@ namespace mission
         {
             if (correctionValue > TimeCorrectionWarningThreshold)
             {
-                LOGF(LOG_LEVEL_WARNING, "[Time] Large time correction value: %ld ms", static_cast<int32_t>(correctionValue.count()));
+                LOGF(LOG_LEVEL_WARNING, "[Time] Large time correction value: %lu ms", static_cast<uint32_t>(correctionValue.count()));
             }
 
             return correctedMissionTime;
         }
         else
         {
-            LOGF(LOG_LEVEL_ERROR, "[Time] To big correction value: %lld", correctedMissionTime.count());
+            LOGF(LOG_LEVEL_ERROR, "[Time] To big correction value: %lu ms", static_cast<uint32_t>(correctedMissionTime.count()));
             return missionTime;
         }
     }
