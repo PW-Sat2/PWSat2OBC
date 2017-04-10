@@ -33,7 +33,7 @@ namespace adcs
              * @unit [s]
              * @default 0.2
              */
-            float dt = 0.2;
+            static constexpr float dt = 0.2;
 
             /** @brief high-pass filter cut off frequency
              * @unit [rad/s]

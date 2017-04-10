@@ -3,10 +3,6 @@
 #include <cstdint>
 #include <system.h>
 
-#ifdef ADCS_DETUMBLIG_DEBUG
-#include <iostream>
-#endif
-
 using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
@@ -49,27 +45,6 @@ void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas, Detu
     {
         commDipoleBdot = RowVector3f::Zero();
     }
-
-#ifdef ADCS_DETUMBLIG_DEBUG
-    std::cout << "mgmt_meas: ";
-    for (unsigned int i = 0; i < mgmt_meas.size(); i++)
-    {
-        std::cout << mgmt_meas[i] << " ";
-    }
-    std::cout << std::endl;
-    std::cout << "mgmt_input: ";
-    std::cout << mgmt_input << std::endl;
-    std::cout << "exp: ";
-    std::cout << exp(-state.params.wCutOff * state.params.dt) << std::endl;
-    std::cout << "state.mtmDotPrev: ";
-    std::cout << state.mtmDotPrev << std::endl;
-    std::cout << "state.mtmMeasPrev: ";
-    std::cout << state.mtmMeasPrev << std::endl;
-    std::cout << "mtmDot: ";
-    std::cout << mtmDot << std::endl;
-    std::cout << "commDipoleBdot: ";
-    std::cout << commDipoleBdot << std::endl;
-#endif
 
     // set inavtive dipoles to zero
     for (int i = 0; i < commDipoleBdot.size(); i++)
