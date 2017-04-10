@@ -5,7 +5,7 @@
 #include <system.h>
 #include <cstring>
 #include <unistd.h>
-#include "adcsDetumblingUtConfig.h"
+#include "adcs_experiments/adcsDetumblingUtConfig.h"
 
 using adcs::Detumbling;
 using adcs::DipoleVec;
