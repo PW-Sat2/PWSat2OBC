@@ -3,7 +3,7 @@
 
 #include <Eigen/Dense>
 #include <array>
-#include "interface_types.hpp"
+#include "InterfaceTypes.hpp"
 
 namespace adcs
 {

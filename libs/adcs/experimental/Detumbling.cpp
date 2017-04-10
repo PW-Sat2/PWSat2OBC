@@ -1,4 +1,4 @@
-#include "detumbling.hpp"
+#include "Detumbling.hpp"
 #include <cmath>
 #include <cstdint>
 #include <system.h>

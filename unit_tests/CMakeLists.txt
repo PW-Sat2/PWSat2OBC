@@ -1,6 +1,6 @@
 set(NAME unit_tests)
 
-add_subdirectory(adcs_experiments)
+add_subdirectory(adcs)
 
 set(SOURCES
   semihosting.cpp
@@ -77,7 +77,7 @@ set(SOURCES
   antenna/antenna.cpp
   SPI/SPIDriverTest.cpp
   eigen/eigenTest.cpp
-  adcs_experiments/detumblingTest.cpp
+  adcs/experimental/detumblingTest.cpp
   adcs/AdcsCoordinatorTest.cpp
   Experiments/Fibo/FiboCalculatorTest.cpp
   Experiments/ExperimentTest.cpp
@@ -136,7 +136,6 @@ target_link_libraries(${NAME}
     exp_fibo
     adcs
     mission_adcs
-    adcs_experiments
     obc_telecommands
     rtc
     error_counter

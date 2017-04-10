@@ -1,11 +1,11 @@
 #include <iostream>
 #include <fstream>
 #include <gtest/gtest.h>
-#include <adcs_experiments/detumbling.hpp>
+#include <adcs/Detumbling.hpp>
 #include <system.h>
 #include <cstring>
 #include <unistd.h>
-#include "adcs_experiments/adcsDetumblingUtConfig.h"
+#include "adcs/experimental/adcsDetumblingUtConfig.h"
 
 using adcs::Detumbling;
 using adcs::DipoleVec;
