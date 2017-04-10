@@ -26,7 +26,7 @@ namespace adcs
         /**
          * @brief Set of detumbling algorithm  parameters
          */
-        class DetumblingParameters final
+        class Parameters final
         {
           public:
             /** @brief iteration time step
@@ -57,13 +57,13 @@ namespace adcs
         /**
          * @brief State of detumbling algorithm
          */
-        class DetumblingState final
+        class State final
         {
           public:
-            DetumblingState() = default;
+            State() = default;
 
-            DetumblingState(const DetumblingParameters& p)
-                : mtmDotPrev(Eigen::RowVector3f::Zero()), mtmMeasPrev(Eigen::RowVector3f::Zero()), params(DetumblingParameters(p))
+            State(const Parameters& p)
+                : mtmDotPrev(Eigen::RowVector3f::Zero()), mtmMeasPrev(Eigen::RowVector3f::Zero()), params(Parameters(p))
             {
             }
 
@@ -74,7 +74,7 @@ namespace adcs
             Eigen::RowVector3f mtmMeasPrev;
 
             /** @brief Set of algorithm parameters   */
-            DetumblingParameters params;
+            Parameters params;
         };
 
         Detumbling();
@@ -89,7 +89,7 @@ namespace adcs
          * @param[in] parameters set
          * @return void
          */
-        void initializeDetumbling(DetumblingState& state, const DetumblingParameters& param);
+        void initialize(State& state, const Parameters& param);
 
         /**
          * @brief Detumbling step function
@@ -102,7 +102,7 @@ namespace adcs
          * @param[in/out] state container
          * @return void
          */
-        void stepDetumbling(DipoleVec& dipole, const MagVec& mgmt, DetumblingState& state);
+        void step(DipoleVec& dipole, const MagVec& mgmt, State& state);
 
       private:
         // field to store exp value calculated once on initialisation

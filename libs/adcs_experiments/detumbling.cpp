@@ -16,14 +16,14 @@ Detumbling::Detumbling() :
 {
 }
 
-void Detumbling::initializeDetumbling(DetumblingState& state, const DetumblingParameters& param)
+void Detumbling::initialize(State& state, const Parameters& param)
 {
     // initialize state with provided parameters
-    state = DetumblingState(param);
+    state = State(param);
     mtmDotExp = exp(-state.params.wCutOff * state.params.dt);
 }
 
-void Detumbling::stepDetumbling(DipoleVec& dipole, const MagVec& mgmt_meas, DetumblingState& state)
+void Detumbling::step(DipoleVec& dipole, const MagVec& mgmt_meas, State& state)
 {
     RowVector3f mgmt_input;
 

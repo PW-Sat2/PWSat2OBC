@@ -38,13 +38,13 @@ TEST(detumbling, cross_validation)
     }
     std::vector<float> record;
 
-    Detumbling::DetumblingState state; //should be initialised by first measurement
-    Detumbling::DetumblingParameters params;
+    Detumbling::State state; //should be initialised by first measurement
+    Detumbling::Parameters params;
     DipoleVec dipole, dipole_exp;
     MagVec mgmt;
 
     Detumbling dtb;
-    dtb.initializeDetumbling(state, params);
+    dtb.initialize(state, params);
 
     // matlab sim is working with different units
     // input: Sim [T] --> OBC [1e-7 T]
@@ -72,7 +72,7 @@ TEST(detumbling, cross_validation)
         std::cout << "out2: " << record[6] << " " << output_scale << " " << record[6] * output_scale << " " << (int) (record[6] * output_scale) << std::endl;
 #endif
 
-        dtb.stepDetumbling(dipole, mgmt, state);
+        dtb.step(dipole, mgmt, state);
 
         EXPECT_NEAR(dipole[0], dipole_exp[0], 1.0);
         EXPECT_NEAR(dipole[1], dipole_exp[1], 1.0);
