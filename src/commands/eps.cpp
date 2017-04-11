@@ -3,6 +3,7 @@
 
 using devices::eps::LCL;
 using devices::eps::BurnSwitch;
+using devices::eps::EPSDriver;
 
 static void Usage()
 {
@@ -108,12 +109,12 @@ void EPSCommand(std::uint16_t argc, char* argv[])
 
         if (strcmp(argv[1], "A") == 0)
         {
-            result = eps.PowerCycleA();
+            result = eps.PowerCycle(EPSDriver::Controller::A);
         }
 
         else if (strcmp(argv[1], "B") == 0)
         {
-            result = eps.PowerCycleB();
+            result = eps.PowerCycle(EPSDriver::Controller::B);
         }
         else if (strcmp(argv[1], "Auto") == 0)
         {
@@ -130,12 +131,12 @@ void EPSCommand(std::uint16_t argc, char* argv[])
 
         if (strcmp(argv[1], "A") == 0)
         {
-            result = eps.DisableOverheatSubmodeA();
+            result = eps.DisableOverheatSubmode(EPSDriver::Controller::A);
         }
 
         else if (strcmp(argv[1], "B") == 0)
         {
-            result = eps.DisableOverheatSubmodeB();
+            result = eps.DisableOverheatSubmode(EPSDriver::Controller::B);
         }
 
         Main.terminal.Puts(result ? "1" : "0");

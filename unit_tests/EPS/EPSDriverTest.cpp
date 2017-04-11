@@ -29,15 +29,13 @@ class EPSDriverTest : public testing::Test
 
     NiceMock<I2CBusMock> _bus;
     NiceMock<I2CBusMock> _payload;
-    I2CInterface _i2c;
     EPSDriver _eps;
 
     ErrorCode _errorA;
     ErrorCode _errorB;
 };
 
-EPSDriverTest::EPSDriverTest()
-    : _i2c(this->_bus, this->_payload), _eps(this->_i2c), _errorA(ErrorCode::NoError), _errorB(ErrorCode::NoError)
+EPSDriverTest::EPSDriverTest() : _eps(this->_bus, this->_payload), _errorA(ErrorCode::NoError), _errorB(ErrorCode::NoError)
 {
     ON_CALL(this->_bus, WriteRead(EPSDriver::ControllerA, ElementsAre(0), SpanOfSize(1)))
         .WillByDefault(Invoke([this](I2CAddress, gsl::span<const uint8_t>, gsl::span<uint8_t> response) {
@@ -397,7 +395,7 @@ TEST_F(EPSDriverTest, ShouldFailAfterPowerCycleATimeout)
 {
     EXPECT_CALL(this->_bus, Write(EPSDriver::ControllerA, ElementsAre(0xE0))).WillOnce(Return(I2CResult::OK));
 
-    auto r = this->_eps.PowerCycleA();
+    auto r = this->_eps.PowerCycle(EPSDriver::Controller::A);
     ASSERT_THAT(r, Eq(false));
 }
 
@@ -405,7 +403,7 @@ TEST_F(EPSDriverTest, ShouldFailAfterPowerCycleBTimeout)
 {
     EXPECT_CALL(this->_payload, Write(EPSDriver::ControllerB, ElementsAre(0xE0))).WillOnce(Return(I2CResult::OK));
 
-    auto r = this->_eps.PowerCycleB();
+    auto r = this->_eps.PowerCycle(EPSDriver::Controller::B);
     ASSERT_THAT(r, Eq(false));
 }
 
@@ -413,7 +411,7 @@ TEST_F(EPSDriverTest, ShouldFailIfNackOnPowerCycleA)
 {
     EXPECT_CALL(this->_bus, Write(EPSDriver::ControllerA, ElementsAre(0xE0))).WillOnce(Return(I2CResult::Nack));
 
-    auto r = this->_eps.PowerCycleA();
+    auto r = this->_eps.PowerCycle(EPSDriver::Controller::A);
     ASSERT_THAT(r, Eq(false));
 }
 
@@ -421,7 +419,7 @@ TEST_F(EPSDriverTest, ShouldFailIfNackOnPowerCycleB)
 {
     EXPECT_CALL(this->_payload, Write(EPSDriver::ControllerB, ElementsAre(0xE0))).WillOnce(Return(I2CResult::Nack));
 
-    auto r = this->_eps.PowerCycleB();
+    auto r = this->_eps.PowerCycle(EPSDriver::Controller::B);
     ASSERT_THAT(r, Eq(false));
 }
 
@@ -438,7 +436,7 @@ TEST_F(EPSDriverTest, ShouldDisableOverheatSubmodeA)
 {
     EXPECT_CALL(this->_bus, Write(EPSDriver::ControllerA, ElementsAre(0xE4))).WillOnce(Return(I2CResult::OK));
 
-    auto r = this->_eps.DisableOverheatSubmodeA();
+    auto r = this->_eps.DisableOverheatSubmode(EPSDriver::Controller::A);
     ASSERT_THAT(r, Eq(true));
 }
 
@@ -446,7 +444,7 @@ TEST_F(EPSDriverTest, ShouldDisableOverheatSubmodeAFail)
 {
     EXPECT_CALL(this->_bus, Write(EPSDriver::ControllerA, ElementsAre(0xE4))).WillOnce(Return(I2CResult::Nack));
 
-    auto r = this->_eps.DisableOverheatSubmodeA();
+    auto r = this->_eps.DisableOverheatSubmode(EPSDriver::Controller::A);
     ASSERT_THAT(r, Eq(false));
 }
 
@@ -454,7 +452,7 @@ TEST_F(EPSDriverTest, ShouldDisableOverheatSubmodeB)
 {
     EXPECT_CALL(this->_payload, Write(EPSDriver::ControllerB, ElementsAre(0xE4))).WillOnce(Return(I2CResult::OK));
 
-    auto r = this->_eps.DisableOverheatSubmodeB();
+    auto r = this->_eps.DisableOverheatSubmode(EPSDriver::Controller::B);
     ASSERT_THAT(r, Eq(true));
 }
 
@@ -462,14 +460,14 @@ TEST_F(EPSDriverTest, ShouldDisableOverheatSubmodeBFail)
 {
     EXPECT_CALL(this->_payload, Write(EPSDriver::ControllerB, ElementsAre(0xE4))).WillOnce(Return(I2CResult::Nack));
 
-    auto r = this->_eps.DisableOverheatSubmodeB();
+    auto r = this->_eps.DisableOverheatSubmode(EPSDriver::Controller::B);
     ASSERT_THAT(r, Eq(false));
 }
 
 TEST_F(EPSDriverTest, ShouldReadErrorCodeA)
 {
     this->_errorA = ErrorCode::OnFire;
-    auto errorCode = this->_eps.GetErrorCodeA();
+    auto errorCode = this->_eps.GetErrorCode(EPSDriver::Controller::A);
 
     ASSERT_THAT(errorCode, Eq(ErrorCode::OnFire));
 }
@@ -477,7 +475,7 @@ TEST_F(EPSDriverTest, ShouldReadErrorCodeA)
 TEST_F(EPSDriverTest, ShouldReadErrorCodeB)
 {
     this->_errorB = ErrorCode::OnFire;
-    auto errorCode = this->_eps.GetErrorCodeB();
+    auto errorCode = this->_eps.GetErrorCode(EPSDriver::Controller::B);
 
     ASSERT_THAT(errorCode, Eq(ErrorCode::OnFire));
 }
@@ -487,7 +485,7 @@ TEST_F(EPSDriverTest, ShouldReturnCommFailureOnReadErrorCodeANack)
     EXPECT_CALL(this->_bus, WriteRead(EPSDriver::ControllerA, ElementsAre(0x0), SpanOfSize(1))).WillOnce(Return(I2CResult::Nack));
 
     this->_errorA = ErrorCode::OnFire;
-    auto errorCode = this->_eps.GetErrorCodeA();
+    auto errorCode = this->_eps.GetErrorCode(EPSDriver::Controller::A);
 
     ASSERT_THAT(errorCode, Eq(ErrorCode::CommunicationFailure));
 }
@@ -497,7 +495,7 @@ TEST_F(EPSDriverTest, ShouldReturnCommFailureOnReadErrorCodeBNack)
     EXPECT_CALL(this->_payload, WriteRead(EPSDriver::ControllerB, ElementsAre(0x0), SpanOfSize(1))).WillOnce(Return(I2CResult::Nack));
 
     this->_errorA = ErrorCode::OnFire;
-    auto errorCode = this->_eps.GetErrorCodeB();
+    auto errorCode = this->_eps.GetErrorCode(EPSDriver::Controller::B);
 
     ASSERT_THAT(errorCode, Eq(ErrorCode::CommunicationFailure));
 }

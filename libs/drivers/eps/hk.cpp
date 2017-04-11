@@ -1,4 +1,5 @@
 #include "hk.hpp"
+#include "base/reader.h"
 
 namespace devices
 {

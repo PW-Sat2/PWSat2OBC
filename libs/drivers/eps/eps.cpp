@@ -1,10 +1,9 @@
-#include "base/os.h"
-
 #include "eps.h"
-
+#include "base/os.h"
+#include "base/reader.h"
+#include "gsl/span"
 #include "i2c/i2c.h"
 #include "logger/logger.h"
-
 #include "system.h"
 
 using drivers::i2c::II2CBus;
@@ -26,7 +25,8 @@ namespace devices
             DisableOverheatSubmode = 0xE4,
         };
 
-        EPSDriver::EPSDriver(drivers::i2c::I2CInterface& i2c) : _i2c(i2c)
+        EPSDriver::EPSDriver(drivers::i2c::II2CBus& controllerABus, drivers::i2c::II2CBus& controllerBBus)
+            : _controllerABus(controllerABus), _controllerBBus(controllerBBus)
         {
         }
 
@@ -79,44 +79,27 @@ namespace devices
             return Some(housekeeping);
         }
 
-        bool EPSDriver::PowerCycleA()
+        bool EPSDriver::PowerCycle(Controller controller)
         {
-            LOG(LOG_LEVEL_WARNING, "Triggering power cycle (A)");
+            LOGF(LOG_LEVEL_WARNING, "Triggering power cycle (%s)", controller == Controller::A ? "A" : "B");
             std::array<std::uint8_t, 1> command{num(Command::PowerCycle)};
 
-            if (this->Write(Controller::A, command) != I2CResult::OK)
+            if (this->Write(controller, command) != I2CResult::OK)
             {
                 return false;
             }
 
             System::SleepTask(PowerCycleTimeout);
 
-            LOG(LOG_LEVEL_ERROR, "Power cycle failed (A)");
-
-            return false;
-        }
-
-        bool EPSDriver::PowerCycleB()
-        {
-            LOG(LOG_LEVEL_WARNING, "Triggering power cycle (B)");
-            std::array<std::uint8_t, 1> command{num(Command::PowerCycle)};
-
-            if (this->Write(Controller::B, command) != I2CResult::OK)
-            {
-                return false;
-            }
-
-            System::SleepTask(PowerCycleTimeout);
-
-            LOG(LOG_LEVEL_ERROR, "Power cycle failed (B)");
+            LOGF(LOG_LEVEL_ERROR, "Power cycle failed (%s)", controller == Controller::A ? "A" : "B");
 
             return false;
         }
 
         bool EPSDriver::PowerCycle()
         {
-            this->PowerCycleA();
-            this->PowerCycleB();
+            this->PowerCycle(Controller::A);
+            this->PowerCycle(Controller::B);
             return false;
         }
 
@@ -150,42 +133,10 @@ namespace devices
             return GetErrorCode(controller);
         }
 
-        I2CResult EPSDriver::Write(Controller controller, const gsl::span<std::uint8_t> inData)
-        {
-            switch (controller)
-            {
-                case Controller::A:
-                    return this->_i2c.Bus.Write(ControllerA, inData);
-                case Controller::B:
-                    return this->_i2c.Payload.Write(ControllerB, inData);
-                default:
-                    return I2CResult::Failure;
-            }
-        }
-
-        bool EPSDriver::DisableOverheatSubmodeA()
+        bool EPSDriver::DisableOverheatSubmode(Controller controller)
         {
             std::array<std::uint8_t, 1> command{num(Command::DisableOverheatSubmode)};
-            return this->Write(Controller::A, command) == I2CResult::OK;
-        }
-
-        bool EPSDriver::DisableOverheatSubmodeB()
-        {
-            std::array<std::uint8_t, 1> command{num(Command::DisableOverheatSubmode)};
-            return this->Write(Controller::B, command) == I2CResult::OK;
-        }
-
-        I2CResult EPSDriver::WriteRead(Controller controller, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData)
-        {
-            switch (controller)
-            {
-                case Controller::A:
-                    return this->_i2c.Bus.WriteRead(ControllerA, inData, outData);
-                case Controller::B:
-                    return this->_i2c.Payload.WriteRead(ControllerB, inData, outData);
-                default:
-                    return I2CResult::Failure;
-            }
+            return this->Write(controller, command) == I2CResult::OK;
         }
 
         ErrorCode EPSDriver::EnableBurnSwitch(bool main, BurnSwitch burnSwitch)
@@ -217,14 +168,30 @@ namespace devices
             return static_cast<ErrorCode>(response[0]);
         }
 
-        ErrorCode EPSDriver::GetErrorCodeA()
+        I2CResult EPSDriver::Write(Controller controller, const gsl::span<std::uint8_t> inData)
         {
-            return GetErrorCode(Controller::A);
+            switch (controller)
+            {
+                case Controller::A:
+                    return this->_controllerABus.Write(ControllerA, inData);
+                case Controller::B:
+                    return this->_controllerBBus.Write(ControllerB, inData);
+                default:
+                    return I2CResult::Failure;
+            }
         }
 
-        ErrorCode EPSDriver::GetErrorCodeB()
+        I2CResult EPSDriver::WriteRead(Controller controller, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData)
         {
-            return GetErrorCode(Controller::B);
+            switch (controller)
+            {
+                case Controller::A:
+                    return this->_controllerABus.WriteRead(ControllerA, inData, outData);
+                case Controller::B:
+                    return this->_controllerBBus.WriteRead(ControllerB, inData, outData);
+                default:
+                    return I2CResult::Failure;
+            }
         }
     }
 }

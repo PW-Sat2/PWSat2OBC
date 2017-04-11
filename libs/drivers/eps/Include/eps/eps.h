@@ -3,7 +3,8 @@
 
 #include <stdbool.h>
 #include <cstdint>
-#include "base/reader.h"
+#include "base/fwd.hpp"
+#include "gsl/span"
 #include "hk.hpp"
 #include "i2c/forward.h"
 
@@ -58,6 +59,15 @@ namespace devices
         class EPSDriver
         {
           public:
+            /**
+             * @brief Available controller
+             */
+            enum class Controller
+            {
+                A, //!< A
+                B  //!< B
+            };
+
             /** @brief Controller A address */
             static constexpr drivers::i2c::I2CAddress ControllerA = 0b0110101;
             /** @brief Controller B address */
@@ -65,9 +75,10 @@ namespace devices
 
             /**
              * @brief Ctor
-             * @param i2c I2C interface
+             * @param controllerABus I2C interface for controller A
+             * @param controllerBBus I2C interface for controller B
              */
-            EPSDriver(drivers::i2c::I2CInterface& i2c);
+            EPSDriver(drivers::i2c::II2CBus& controllerABus, drivers::i2c::II2CBus& controllerBBus);
 
             /**
              * @brief Reads housekeeping of controller A
@@ -82,14 +93,11 @@ namespace devices
 
             /**
              * @brief Performs power cycle by controller A
+             * @param controller Controller to use
              * @return This function will return only on failure
              */
-            bool PowerCycleA();
-            /**
-             * @brief Performs power cycle by controller B
-             * @return This function will return only on failure
-             */
-            bool PowerCycleB();
+            bool PowerCycle(Controller controller);
+
             /**
              * @brief Performs power cycle
              * @return This function will return only on failure
@@ -112,15 +120,11 @@ namespace devices
             ErrorCode DisableLCL(LCL lcl);
 
             /**
-             * @brief Disables overheat submode on controller A
+             * @brief Disables overheat submode on selected controller
+             * @param controller Controller to use
              * @return Operation result
              */
-            bool DisableOverheatSubmodeA();
-            /**
-             * @brief Disables overheat submode on controller B
-             * @return Operation result
-             */
-            bool DisableOverheatSubmodeB();
+            bool DisableOverheatSubmode(Controller controller);
 
             /**
              * @brief Enables burn switch
@@ -131,35 +135,17 @@ namespace devices
             ErrorCode EnableBurnSwitch(bool main, BurnSwitch burnSwitch);
 
             /**
-             * @brief Returns error code from controller A
-             * @return Error code of controller A
-             */
-            ErrorCode GetErrorCodeA();
-            /**
-             * @brief Returns error code from controller B
-             * @return Error code of controller B
-             */
-            ErrorCode GetErrorCodeB();
-
-          private:
-            /** @brief I2C interface */
-            drivers::i2c::I2CInterface& _i2c;
-
-            /**
-             * @brief Available controller
-             */
-            enum class Controller
-            {
-                A, //!< A
-                B  //!< B
-            };
-
-            /**
              * @brief Returns error code from chosen controller
              * @param controller Controller to check
              * @return Error code
              */
             ErrorCode GetErrorCode(Controller controller);
+
+          private:
+            /** @brief I2C interface for controller A */
+            drivers::i2c::II2CBus& _controllerABus;
+            /** @brief I2C interface for controller B */
+            drivers::i2c::II2CBus& _controllerBBus;
 
             /**
              * @brief Performs write operation to selected controller
