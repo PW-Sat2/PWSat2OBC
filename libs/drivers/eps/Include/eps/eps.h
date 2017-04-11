@@ -65,9 +65,10 @@ namespace devices
 
             /**
              * @brief Ctor
-             * @param i2c I2C interface
+             * @param controllerABus I2C interface for controller A
+             * @param controllerBBus I2C interface for controller B
              */
-            EPSDriver(drivers::i2c::I2CInterface& i2c);
+            EPSDriver(drivers::i2c::II2CBus& controllerABus, drivers::i2c::II2CBus& controllerBBus);
 
             /**
              * @brief Reads housekeeping of controller A
@@ -142,8 +143,10 @@ namespace devices
             ErrorCode GetErrorCodeB();
 
           private:
-            /** @brief I2C interface */
-            drivers::i2c::I2CInterface& _i2c;
+            /** @brief I2C interface for controller A */
+            drivers::i2c::II2CBus& _controllerABus;
+            /** @brief I2C interface for controller B */
+            drivers::i2c::II2CBus& _controllerBBus;
 
             /**
              * @brief Available controller
