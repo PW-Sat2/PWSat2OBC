@@ -29,15 +29,13 @@ class EPSDriverTest : public testing::Test
 
     NiceMock<I2CBusMock> _bus;
     NiceMock<I2CBusMock> _payload;
-    I2CInterface _i2c;
     EPSDriver _eps;
 
     ErrorCode _errorA;
     ErrorCode _errorB;
 };
 
-EPSDriverTest::EPSDriverTest()
-    : _i2c(this->_bus, this->_payload), _eps(this->_i2c), _errorA(ErrorCode::NoError), _errorB(ErrorCode::NoError)
+EPSDriverTest::EPSDriverTest() : _eps(this->_bus, this->_payload), _errorA(ErrorCode::NoError), _errorB(ErrorCode::NoError)
 {
     ON_CALL(this->_bus, WriteRead(EPSDriver::ControllerA, ElementsAre(0), SpanOfSize(1)))
         .WillByDefault(Invoke([this](I2CAddress, gsl::span<const uint8_t>, gsl::span<uint8_t> response) {

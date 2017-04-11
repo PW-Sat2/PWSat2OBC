@@ -1,7 +1,7 @@
 #ifndef LIBS_DRIVERS_EPS_INCLUDE_EPS_HK_HPP_
 #define LIBS_DRIVERS_EPS_INCLUDE_EPS_HK_HPP_
 
-#include "base/reader.h"
+#include "base/fwd.hpp"
 #include "utils.h"
 
 namespace devices
