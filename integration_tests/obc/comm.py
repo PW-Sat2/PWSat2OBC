@@ -29,7 +29,7 @@ class CommMixin(OBCMixin):
         pass
 
     @decode_return(int)
-    @command("com get frame_count")
+    @command("comm get frame_count")
     def get_frame_count(self):
         pass
 
