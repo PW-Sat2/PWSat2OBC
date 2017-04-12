@@ -25,7 +25,7 @@ namespace mission
         UpdateResult result = UpdateResult::Ok;
         for (const auto& descriptor : descriptors)
         {
-            auto descriptorResult = descriptor.updateProc(state, descriptor.param);
+            auto descriptorResult = descriptor.Execute(state);
             if (descriptorResult == UpdateResult::Warning)
             {
                 result = UpdateResult::Warning;
@@ -87,7 +87,7 @@ namespace mission
 
         for (auto& descriptor : actions)
         {
-            if (descriptor.condition(state, descriptor.param))
+            if (descriptor.EvaluateCondition(state))
             {
                 target[runnableIdx++] = &descriptor;
             }
@@ -110,7 +110,7 @@ namespace mission
     {
         for (auto descriptor : actions)
         {
-            descriptor->actionProc(state, descriptor->param);
+            descriptor->Execute(state);
         }
     }
 }

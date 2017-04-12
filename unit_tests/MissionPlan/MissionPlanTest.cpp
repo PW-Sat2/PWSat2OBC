@@ -17,14 +17,8 @@ using namespace std::chrono_literals;
 
 struct MissionPlanTest : public testing::Test
 {
-    MissionPlanTest();
-
     SystemState state;
 };
-
-MissionPlanTest::MissionPlanTest()
-{
-}
 
 TEST_F(MissionPlanTest, EmptyStateShouldHaveEmptyValues)
 {

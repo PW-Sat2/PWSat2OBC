@@ -65,6 +65,13 @@ void OBCHardware::Initialize()
     this->UART.Initialize();
 }
 
-OBCHardware::OBCHardware(PowerControl* powerControl) : I2C(powerControl)
+OSResult OBCHardware::PostStartInitialize()
+{
+    return this->Burtc.Initialize();
+}
+
+OBCHardware::OBCHardware(PowerControl* powerControl, TimeAction& burtcTickHandler)
+    : I2C(powerControl),      //
+      Burtc(burtcTickHandler) //
 {
 }

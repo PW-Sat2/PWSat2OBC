@@ -135,6 +135,16 @@ OSEventBits System::EventGroupSetBitsISR(OSEventGroupHandle eventGroup, const OS
     return 0;
 }
 
+OSEventBits System::EventGroupGetBits(OSEventGroupHandle eventGroup)
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->EventGroupGetBits(eventGroup);
+    }
+
+    return 0;
+}
+
 void* System::Alloc(size_t size)
 {
     if (OSProxy != nullptr)

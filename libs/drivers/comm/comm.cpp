@@ -40,8 +40,7 @@ Beacon::Beacon(std::uint16_t beaconPeriod, gsl::span<const std::uint8_t> content
 CommObject::CommObject(II2CBus& low, IHandleFrame& upperInterface)
     : _low(low),                     //
       _frameHandler(upperInterface), //
-      _pollingTaskHandle(nullptr),   //
-      _pollingTaskFlags(nullptr)
+      _pollingTaskHandle(nullptr)    //
 {
 }
 
@@ -81,15 +80,7 @@ bool CommObject::SendCommandWithResponse(Address address, uint8_t command, span<
 
 OSResult CommObject::Initialize()
 {
-    this->_pollingTaskFlags = System::CreateEventGroup();
-    if (this->_pollingTaskFlags != NULL)
-    {
-        return OSResult::Success;
-    }
-    else
-    {
-        return OSResult::NotEnoughMemory;
-    }
+    return this->_pollingTaskFlags.Initialize();
 }
 
 bool CommObject::Restart()
@@ -118,8 +109,8 @@ bool CommObject::Pause()
 {
     if (this->_pollingTaskHandle != NULL)
     {
-        System::EventGroupSetBits(this->_pollingTaskFlags, TaskFlagPauseRequest);
-        System::EventGroupWaitForBits(this->_pollingTaskFlags, TaskFlagAck, false, true, InfiniteTimeout);
+        this->_pollingTaskFlags.Set(TaskFlagPauseRequest);
+        this->_pollingTaskFlags.WaitAny(TaskFlagAck, true, InfiniteTimeout);
     }
 
     return true;
@@ -300,9 +291,9 @@ bool CommObject::ReceiveFrame(gsl::span<std::uint8_t> buffer, Frame& frame)
 
 bool CommObject::SendFrame(span<const std::uint8_t> frame)
 {
-    if (frame.size() > MaxFrameSize)
+    if (frame.size() > MaxDownlinkFrameSize)
     {
-        LOGF(LOG_LEVEL_ERROR, "Frame payload is too long. Allowed: %d, Requested: '%d'.", MaxFrameSize, frame.size());
+        LOGF(LOG_LEVEL_ERROR, "Frame payload is too long. Allowed: %d, Requested: '%d'.", MaxDownlinkFrameSize, frame.size());
         return false;
     }
 
@@ -330,18 +321,17 @@ bool CommObject::SendFrame(span<const std::uint8_t> frame)
 
 bool CommObject::SetBeacon(const Beacon& beaconData)
 {
-    uint8_t buffer[MaxFrameSize + 2];
-    Writer writer;
-    WriterInitialize(&writer, buffer, COUNT_OF(buffer));
-    WriterWriteByte(&writer, num(TransmitterCommand::SetBeacon));
-    WriterWriteWordLE(&writer, beaconData.Period());
-    WriterWriteArray(&writer, beaconData.Contents().data(), beaconData.Contents().size());
-    if (!WriterStatus(&writer))
+    std::array<std::uint8_t, MaxDownlinkFrameSize + 2> buffer;
+    Writer writer(buffer);
+    writer.WriteByte(num(TransmitterCommand::SetBeacon));
+    writer.WriteWordLE(beaconData.Period());
+    writer.WriteArray(beaconData.Contents());
+    if (!writer.Status())
     {
         return false;
     }
 
-    return this->_low.Write(num(Address::Transmitter), span<const uint8_t>(buffer, WriterGetDataLength(&writer))) == I2CResult::OK;
+    return this->_low.Write(num(Address::Transmitter), writer.Capture()) == I2CResult::OK;
 }
 
 bool CommObject::ClearBeacon()
@@ -475,11 +465,11 @@ void CommObject::CommTask(void* param)
     comm->PollHardware();
     for (;;)
     {
-        const OSEventBits result = System::EventGroupWaitForBits(comm->_pollingTaskFlags, TaskFlagPauseRequest, false, true, 10s);
+        const OSEventBits result = comm->_pollingTaskFlags.WaitAny(TaskFlagPauseRequest, true, 10s);
         if (result == TaskFlagPauseRequest)
         {
             LOG(LOG_LEVEL_WARNING, "Comm task paused");
-            System::EventGroupSetBits(comm->_pollingTaskFlags, TaskFlagAck);
+            comm->_pollingTaskFlags.Set(TaskFlagAck);
             System::SuspendTask(NULL);
         }
         else

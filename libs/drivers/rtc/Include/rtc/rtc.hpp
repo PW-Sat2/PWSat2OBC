@@ -1,0 +1,116 @@
+#ifndef SRC_DRIVERS_RTC_INCLUDE_RTC_HPP_
+#define SRC_DRIVERS_RTC_INCLUDE_RTC_HPP_
+
+#pragma once
+
+#include "i2c/i2c.h"
+
+namespace devices
+{
+    namespace rtc
+    {
+        /**
+         * @defgroup rtc External Real Time Clock driver
+         * @ingroup device_drivers
+         *
+         * @brief This library provides driver for external Real Time Clock.
+         *
+         * @{
+        */
+        struct RTCTime;
+        enum class Registers;
+
+        /**
+         * @brief RTC Device
+         */
+        class RTCObject
+        {
+          public:
+            /**
+             * @brief Constructs @ref RTCObject object
+             * @param[in] bus A reference to I2C bus used by RTC.
+             */
+            RTCObject(drivers::i2c::II2CBus& bus);
+
+            /**
+              * @brief Reads entire time structure from RTC.
+              * @param[out] rtcTime A reference to @ref RTCTime that will be used to store the RTC time.
+              *
+              * @return Transfer result - I2CResult::OK when read was successful.
+              */
+            OSResult ReadTime(RTCTime& rtcTime);
+
+          private:
+            static constexpr std::uint8_t I2CAddress = 0b1010001;
+
+            static constexpr std::uint8_t SecondsNibbleMask = 0x70;
+            static constexpr std::uint8_t MinutesNibbleMask = 0x70;
+            static constexpr std::uint8_t HoursNibbleMask = 0x30;
+            static constexpr std::uint8_t DaysNibbleMask = 0x30;
+            static constexpr std::uint8_t MonthsNibbleMask = 0x10;
+            static constexpr std::uint8_t YearsNibbleMask = 0xF0;
+
+            drivers::i2c::II2CBus& _bus;
+        };
+
+        /**
+         * @brief Structure representing time retrieved from RTC.
+         */
+        struct RTCTime
+        {
+            /** @brief Seconds 0 to 59 */
+            std::uint8_t seconds;
+            /** @brief Minutes 0 to 59 */
+            std::uint8_t minutes;
+            /** @brief Hours 0 to 23 */
+            std::uint8_t hours;
+            /** @brief Days 1 to 31 */
+            std::uint8_t days;
+            /** @brief months 1 to 12  */
+            std::uint8_t months;
+            /** @brief years 0 to 99  */
+            std::uint8_t years;
+
+            /**
+             * @brief Calculates total seconds passed since 1900-01-01 00:00.
+             * @return Time converted to total seconds.
+             */
+            std::chrono::seconds ToDuration()
+            {
+                tm t;
+                t.tm_year = 100 + years; // tm_year starts and year 1900, but RTCTime::years starts at 2000
+                t.tm_mon = months;
+                t.tm_mday = days;
+                t.tm_hour = hours;
+                t.tm_min = minutes;
+                t.tm_sec = seconds;
+                t.tm_isdst = -1;
+
+                return std::chrono::seconds(mktime(&t));
+            }
+        };
+
+        /**
+         * @brief Time register addresses available in RTC.
+         */
+        enum class Registers
+        {
+            /** @brief Seconds register **/
+            VL_seconds = 0x02,
+            /** @brief Minutes register **/
+            minutes = 0x03,
+            /** @brief Hours register **/
+            hours = 0x04,
+            /** @brief Days register **/
+            days = 0x05,
+            /** @brief Months register **/
+            century_months = 0x07,
+            /** @brief Years register **/
+            years = 0x08
+        };
+
+        /** @} */
+    }
+}
+
+#endif /* SRC_DRIVERS_RTC_INCLUDE_RTC_HPP_ */

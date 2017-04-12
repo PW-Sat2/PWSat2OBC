@@ -103,6 +103,21 @@ TEST(ReaderTest, TestReadingWordLE)
     ASSERT_TRUE(reader.Status());
 }
 
+TEST(ReaderTest, TestReadingSignedWordLE)
+{
+    uint8_t array[] = {0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x7F, 0x00, 0x80, 0x68, 0xC5, 0x98, 0x3A};
+    Reader reader;
+    reader.Initialize(array);
+
+    ASSERT_THAT(reader.ReadSignedWordLE(), Eq(0));
+    ASSERT_THAT(reader.ReadSignedWordLE(), Eq(-1));
+    ASSERT_THAT(reader.ReadSignedWordLE(), Eq(32767));
+    ASSERT_THAT(reader.ReadSignedWordLE(), Eq(-32768));
+    ASSERT_THAT(reader.ReadSignedWordLE(), Eq(-15000));
+    ASSERT_THAT(reader.ReadSignedWordLE(), Eq(15000));
+    ASSERT_TRUE(reader.Status());
+}
+
 TEST(ReaderTest, TestReadingWordBE)
 {
     Reader reader;
@@ -140,6 +155,55 @@ TEST(ReaderTest, TestReadingDWordLE)
 
     reader.Initialize(array);
     ASSERT_THAT(reader.ReadDoubleWordLE(), Eq(0xEE77AA55U));
+    ASSERT_TRUE(reader.Status());
+}
+
+TEST(ReaderTest, TestReadingSignedDWordLE)
+{
+    uint8_t array[] = {0x0,
+        0x0,
+        0x0,
+        0x0,
+        0xFF,
+        0xFF,
+        0xFF,
+        0xFF,
+        0xFF,
+        0x7F,
+        0x0,
+        0x0,
+        0x0,
+        0x80,
+        0xFF,
+        0xFF,
+        0xFF,
+        0xFF,
+        0xFF,
+        0x7F,
+        0x0,
+        0x0,
+        0x0,
+        0x80,
+        0xD2,
+        0x2,
+        0x96,
+        0x49,
+        0x2E,
+        0xFD,
+        0x69,
+        0xB6};
+    Reader reader;
+    reader.Initialize(array);
+
+    ASSERT_THAT(reader.ReadSignedDoubleWordLE(), Eq(0));
+    ASSERT_THAT(reader.ReadSignedDoubleWordLE(), Eq(-1));
+    ASSERT_THAT(reader.ReadSignedDoubleWordLE(), Eq(32767));
+    ASSERT_THAT(reader.ReadSignedDoubleWordLE(), Eq(-32768));
+    ASSERT_THAT(reader.ReadSignedDoubleWordLE(), Eq(2147483647));
+    ASSERT_THAT(reader.ReadSignedDoubleWordLE(), Eq(-2147483648));
+    ASSERT_THAT(reader.ReadSignedDoubleWordLE(), Eq(1234567890));
+    ASSERT_THAT(reader.ReadSignedDoubleWordLE(), Eq(-1234567890));
+
     ASSERT_TRUE(reader.Status());
 }
 
@@ -290,4 +354,24 @@ TEST(ReaderTest, TestReadingToEndWhenNothingLeftIsCorrect)
 
     ASSERT_THAT(reader.ReadToEnd().size(), Eq(0));
     ASSERT_THAT(reader.Status(), Eq(true));
+}
+
+TEST(ReaderTest, TestReadingSingleBCDByte)
+{
+    Reader reader;
+    uint8_t array[] = {0x11, 0xaa};
+
+    reader.Initialize(array);
+    ASSERT_THAT(reader.ReadByteBCD(0xf0), Eq(11));
+    ASSERT_TRUE(reader.Status());
+}
+
+TEST(ReaderTest, TestReadingSingleBCDByteWithPartialNibbleMask)
+{
+    Reader reader;
+    uint8_t array[] = {0b10100010, 0xaa};
+
+    reader.Initialize(array);
+    ASSERT_THAT(reader.ReadByteBCD(0b00110000), Eq(22));
+    ASSERT_TRUE(reader.Status());
 }

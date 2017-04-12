@@ -3,6 +3,7 @@
 
 #include <stdarg.h>
 #include <stddef.h>
+#include <cstdint>
 #include <gsl/span>
 
 /**
@@ -32,16 +33,24 @@ typedef struct _LineIO
      * @brief Procedure that print given buffer char-by-char. Useful for not null terminated strings
      * @param[in] buffer Buffer to print
      */
-    void (*PrintBuffer)(gsl::span<const char> buffer);
+    void (*PrintBuffer)(gsl::span<const std::uint8_t> buffer);
 
     /**
-     *
-     * @param io Procedure that reads single line of text
+     * @brief Procedure that reads single line of text
+     * @param io @see LineIO structure
      * @param buffer Buffer that will hold upcoming data
      * @param bufferLength Maximum length of buffer
      * @return Count of read characters
      */
     size_t (*Readline)(struct _LineIO* io, char* buffer, size_t bufferLength);
+
+    /**
+     * @brief Reads arbitrary number of bytes
+     * @param io @see LineIO structure
+     * @param outputBuffer Buffer that will be sent before reading inputBuffer
+     * @param inputBuffer Buffer that will be filled
+     */
+    void (*ExchangeBuffers)(struct _LineIO* io, gsl::span<const std::uint8_t> outputBuffer, gsl::span<std::uint8_t> inputBuffer);
 } LineIO;
 
 #endif /* LIBS_DRIVERS_LEUART_INCLUDE_LEUART_LINE_IO_H_ */

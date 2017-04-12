@@ -25,6 +25,7 @@ namespace drivers
             I2CFallbackBus(I2CInterface& buses);
 
             virtual I2CResult Write(const I2CAddress address, gsl::span<const uint8_t> inData) override;
+            virtual I2CResult Read(const I2CAddress address, gsl::span<uint8_t> outData) override;
 
             virtual I2CResult WriteRead(const I2CAddress address, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData) override;
 
@@ -58,6 +59,7 @@ namespace drivers
             I2CErrorHandlingBus(II2CBus& innerBus, BusErrorHandler handler, void* context);
 
             virtual I2CResult Write(const I2CAddress address, gsl::span<const uint8_t> inData) override;
+            virtual I2CResult Read(const I2CAddress address, gsl::span<uint8_t> outnData) override;
 
             virtual I2CResult WriteRead(const I2CAddress address, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData) override;
 

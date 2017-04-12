@@ -22,3 +22,11 @@ IOResult MakeFSIOResult(gsl::span<const uint8_t> result)
 {
     return IOResult(OSResult::Success, result);
 }
+
+FsMock::FsMock()
+{
+}
+
+FsMock::~FsMock()
+{
+}

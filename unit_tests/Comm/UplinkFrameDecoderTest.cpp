@@ -4,11 +4,11 @@
 #include <gsl/span>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "telecommunication/uplink.h"
 
 #include "base/reader.h"
 #include "comm/CommDriver.hpp"
 #include "system.h"
-#include "telecommand_handling/uplink.h"
 
 using std::uint8_t;
 using gsl::span;
@@ -16,10 +16,10 @@ using testing::Test;
 using testing::Eq;
 using testing::ElementsAre;
 using std::array;
-using telecommands::handling::IDecodeTelecommand;
-using telecommands::handling::DecodeTelecommandResult;
-using telecommands::handling::DecodeTelecommandFailureReason;
-using telecommands::UplinkProtocol;
+using telecommunication::uplink::IDecodeTelecommand;
+using telecommunication::uplink::DecodeTelecommandResult;
+using telecommunication::uplink::DecodeTelecommandFailureReason;
+using telecommunication::uplink::UplinkProtocol;
 
 class UplinkFrameDecoderTest : public Test
 {

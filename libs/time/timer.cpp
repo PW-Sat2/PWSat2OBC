@@ -85,6 +85,11 @@ void TimeProvider::AdvanceTime(milliseconds delta)
     ProcessChange(state);
 }
 
+void TimeProvider::Invoke(std::chrono::milliseconds interval)
+{
+    AdvanceTime(interval);
+}
+
 bool TimeProvider::SetCurrentTime(TimePoint pointInTime)
 {
     const milliseconds span = TimePointToTimeSpan(pointInTime);
@@ -267,31 +272,30 @@ void TimeProvider::SaveTime(TimerState state)
     }
 
     uint8_t buffer[sizeof(milliseconds::rep)];
-    Writer writer;
 
-    WriterInitialize(&writer, buffer, sizeof(buffer));
-    WriterWriteQuadWordLE(&writer, state.time.count());
-    if (!WriterStatus(&writer))
+    Writer writer(buffer);
+    writer.WriteQuadWordLE(state.time.count());
+
+    if (!writer.Status())
     {
         return;
     }
 
-    const uint16_t length = WriterGetDataLength(&writer);
     int retryCounter = 0;
     int errorCount = 0;
     int totalErrorCount = 0;
     do
     {
         errorCount = 0;
-        if (!SaveToFile(FileSystemObject, File0, gsl::make_span(buffer, length)))
+        if (!SaveToFile(FileSystemObject, File0, writer.Capture()))
         {
             ++errorCount;
         }
-        if (!SaveToFile(FileSystemObject, File1, gsl::make_span(buffer, length)))
+        if (!SaveToFile(FileSystemObject, File1, writer.Capture()))
         {
             ++errorCount;
         }
-        if (!SaveToFile(FileSystemObject, File2, gsl::make_span(buffer, length)))
+        if (!SaveToFile(FileSystemObject, File2, writer.Capture()))
         {
             ++errorCount;
         }

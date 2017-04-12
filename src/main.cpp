@@ -15,7 +15,7 @@
 #include <task.h>
 
 #include "SwoEndpoint/SwoEndpoint.h"
-#include "adcs/adcs.h"
+#include "adcs/AdcsExperiment.hpp"
 #include "base/ecc.h"
 #include "base/os.h"
 #include "dmadrv.h"
@@ -47,16 +47,12 @@ using namespace drivers::uart;
 using namespace devices::camera;
 
 OBC Main;
-mission::ObcMission Mission(Main.timeProvider, Main.antennaDriver, false);
+
 static uint8_t CameraPicBuf[10000];
+mission::ObcMission Mission(
+    Main.timeProvider, Main.antennaDriver, false, Main.adcs.GetAdcsController(), Main.Experiments.ExperimentsController);
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
-
-extern "C" void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
-{
-    UNREFERENCED_PARAMETER(pxTask);
-    UNREFERENCED_PARAMETER(pcTaskName);
-}
 
 extern "C" void vApplicationIdleHook(void)
 {
@@ -71,6 +67,11 @@ void I2C0_IRQHandler(void)
 void I2C1_IRQHandler(void)
 {
     Main.Hardware.I2C.Peripherals[1].Driver.IRQHandler();
+}
+
+void BURTC_IRQHandler(void)
+{
+    Main.Hardware.Burtc.IRQHandler();
 }
 
 static void BlinkLed0(void* param)
@@ -130,11 +131,20 @@ static void SetupAntennas(void)
 
 static void ObcInitTask(void* param)
 {
+    LOG(LOG_LEVEL_INFO, "Starting initialization task... ");
+
     auto obc = static_cast<OBC*>(param);
 
-    obc->PostStartInitialization();
+    if (OS_RESULT_FAILED(obc->PostStartInitialization()))
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to initialize hardware after start. ");
+    }
 
     ClearState(obc);
+
+    obc->fs.MakeDirectory("/a");
+    obc->fs.MakeDirectory("/b");
+    obc->fs.MakeDirectory("/c");
 
     if (!obc->timeProvider.Initialize(nullptr, nullptr))
     {
@@ -150,8 +160,6 @@ static void ObcInitTask(void* param)
     {
         LOG(LOG_LEVEL_ERROR, "Unable to restart comm");
     }
-
-    InitializeADCS(&obc->adcs);
 
     Mission.Initialize();
 
@@ -175,21 +183,17 @@ void SetupHardware(void)
 
 
 void UartTask(void* param)
-{
+
+{	
 	UNREFERENCED_PARAMETER(param);
-
-
-
-
-		Camera camera(Main.Hardware.UART);
 
 		while (1) {
 
-			if(camera.isInitialized) {
-				camera.CameraGetJPEGPicture(gsl::span<uint8_t>(CameraPicBuf,10000),false);
+			if(Main.camera.isInitialized) {
+				Main.camera.CameraGetJPEGPicture(gsl::span<uint8_t>(CameraPicBuf,10000),false);
 			}
 			else {
-				camera.InitializeJPEGPicture(CameraJPEGResolution::_160x128);
+				Main.camera.InitializeJPEGPicture(CameraJPEGResolution::_160x128);
 			}
 
 System::SleepTask(1s);

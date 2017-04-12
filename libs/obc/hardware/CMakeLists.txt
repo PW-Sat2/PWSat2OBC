@@ -13,6 +13,7 @@ target_link_libraries(${NAME}
 	spi
 	power
 	uart
+	burtc
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

@@ -151,7 +151,7 @@ inline bool Frame::IsRssiValid() const
 
 inline bool Frame::IsSizeValid() const
 {
-    return this->fullFrameSize <= MaxFrameSize;
+    return this->fullFrameSize <= MaxDownlinkFrameSize;
 }
 
 inline bool Frame::IsComplete() const

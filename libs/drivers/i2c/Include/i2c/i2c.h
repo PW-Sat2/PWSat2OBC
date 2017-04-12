@@ -23,7 +23,7 @@ namespace drivers
          *
          * Capabilities:
          * * Thread-safe bus access
-         * * Write and Write-Read transfers
+         * * Write, Read and Write-Read transfers
          * * Dual-bus (System and Payload) configuration
          * * Error-handling
          * * Automatic fallback
@@ -70,7 +70,7 @@ namespace drivers
         /**
          * @brief Type of I2C address.
          *
-         * I2C addresses are 7-bit. Least significant bit is ignored and should be zero.
+         * I2C addresses are 7-bit. Most significant bit have to be '0'.
          */
         using I2CAddress = uint8_t;
 
@@ -86,6 +86,14 @@ namespace drivers
              * @return Transfer result
              */
             virtual I2CResult Write(const I2CAddress address, gsl::span<const uint8_t> inData) = 0;
+
+            /**
+             * @brief Executes read transfer
+             * @param[in] address Address of device
+             * @param[out] outData Buffer for data read from device
+             * @return Transfer result
+             */
+            virtual I2CResult Read(const I2CAddress address, gsl::span<uint8_t> outData) = 0;
 
             /**
              * @brief Executes write-read transfer

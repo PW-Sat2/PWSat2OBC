@@ -1,3 +1,4 @@
+import re
 from enum import Enum, unique
 from .obc_mixin import OBCMixin, command, decode_return
 
@@ -54,6 +55,12 @@ class AntennaStatus:
         self.SystemArmed = False
         self.IgnoringSwitches = False
 
+class AntennaTelemetry(object):
+    def __init__(self):
+        self.ActivationCount = [0, 0, 0, 0]
+        self.ActivationTime = [0, 0, 0, 0]
+        self.Temperature = [0, 0]
+
 class AntennaMixin(OBCMixin):
     def __init__(self):
         pass
@@ -83,4 +90,32 @@ class AntennaMixin(OBCMixin):
     @decode_return(_parse_deployment_state)
     @command("antenna_get_status {0}")
     def antenna_get_status(self, channel):
+        pass
+
+    @staticmethod
+    def extract_value(string):
+        m = re.search('([^:]+):\ *\'(\w+)\'', string)
+        if(m.group(2) == "Unavailable"):
+            return None
+        else:
+            return int(m.group(2))
+
+    def _parse_telemetry(result):
+        telemetry = AntennaTelemetry()
+        parts = result.split("\n")
+        telemetry.ActivationCount[0] = AntennaMixin.extract_value(parts[0])
+        telemetry.ActivationCount[1] = AntennaMixin.extract_value(parts[1])
+        telemetry.ActivationCount[2] = AntennaMixin.extract_value(parts[2])
+        telemetry.ActivationCount[3] = AntennaMixin.extract_value(parts[3])
+        telemetry.ActivationTime[0] = AntennaMixin.extract_value(parts[4])
+        telemetry.ActivationTime[1] = AntennaMixin.extract_value(parts[5])
+        telemetry.ActivationTime[2] = AntennaMixin.extract_value(parts[6])
+        telemetry.ActivationTime[3] = AntennaMixin.extract_value(parts[7])
+        telemetry.Temperature[0] = AntennaMixin.extract_value(parts[8])
+        telemetry.Temperature[1] = AntennaMixin.extract_value(parts[9])
+        return telemetry
+
+    @decode_return(_parse_telemetry)
+    @command("antenna_get_telemetry")
+    def antenna_get_telemetry(self):
         pass

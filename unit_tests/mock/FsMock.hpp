@@ -9,6 +9,9 @@
 
 struct FsMock : services::fs::IFileSystem
 {
+    FsMock();
+    ~FsMock();
+
     MOCK_METHOD3(
         Open, services::fs::FileOpenResult(const char* path, services::fs::FileOpen openFlag, services::fs::FileAccess accessMode));
     MOCK_METHOD2(TruncateFile, OSResult(services::fs::FileHandle file, services::fs::FileSize length));
@@ -22,6 +25,7 @@ struct FsMock : services::fs::IFileSystem
     MOCK_METHOD1(Format, OSResult(const char*));
     MOCK_METHOD1(MakeDirectory, OSResult(const char*));
     MOCK_METHOD1(Exists, bool(const char*));
+    MOCK_METHOD1(GetFileSize, services::fs::FileSize(services::fs::FileHandle));
 };
 
 services::fs::FileOpenResult MakeOpenedFile(int handle);

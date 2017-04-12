@@ -7,6 +7,7 @@
 #include <gmock/gmock.h>
 
 #include "gmock/gmock-generated-matchers.h"
+#include "utils.h"
 
 class Hex
 {
@@ -29,6 +30,18 @@ class Hex
 };
 
 void PrintTo(const Hex& num, ::std::ostream* os);
+
+template <typename T> void PrintTo(const Option<T>& value, ::std::ostream* os)
+{
+    if (value.HasValue)
+    {
+        *os << "Some(" << testing::PrintToString(value.Value) << ")";
+    }
+    else
+    {
+        *os << "None";
+    }
+}
 
 MATCHER_P(DataEqStr, n, "")
 {
