@@ -359,7 +359,7 @@ Option<bool> CommObject::SetBeacon(const Beacon& beaconData)
         return Option<bool>::Some(false);
     }
 
-    if (remainingBufferSize != (TransmitterBufferSize - 1))
+    if (remainingBufferSize < (TransmitterBufferSize - 1))
     {
         return Option<bool>::None();
     }

@@ -709,6 +709,22 @@ TEST_F(CommTest, TestSetBeacon)
     ASSERT_THAT(status, Eq(true));
 }
 
+TEST_F(CommTest, TestSetBeaconBufferEmpty)
+{
+    const uint8_t data[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
+    const uint8_t expectedBeacon[] = {TransmitterSetBeacon, 0x0b, 0x0a, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
+    const uint8_t expectedFrame[] = {TransmitterSendFrame, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
+    Beacon beacon(0x0a0bs, data);
+    ExpectSendFrame(expectedFrame, 40);
+    EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon)))
+        .WillOnce(Invoke([=](uint8_t /*address*/, span<const uint8_t> inData) {
+            EXPECT_THAT(inData, Eq(span<const uint8_t>(expectedBeacon)));
+            return I2CResult::OK;
+        }));
+    const auto status = comm.SetBeacon(beacon);
+    ASSERT_THAT(status, Eq(true));
+}
+
 TEST_F(CommTest, TestPauseNonExistingTask)
 {
     OSMock system;
