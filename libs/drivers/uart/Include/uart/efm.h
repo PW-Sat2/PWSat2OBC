@@ -42,9 +42,6 @@ private:
 	static bool TransmitDmaComplete(unsigned int channel,
 			                        unsigned int sequenceNo,
 			                        void *userParam);
-	static bool ReceiveDmaComplete(unsigned int channel,
-            unsigned int sequenceNo,
-            void *userParam);
 };
 
 

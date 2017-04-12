@@ -11,6 +11,7 @@
 #include "efm_support/api.h"
 #include "efm_support/clock.h"
 #include "efm_support/dma.h"
+#include "efm.h"
 
 using namespace drivers::uart;
 
@@ -21,11 +22,17 @@ static unsigned int               	rxDmaCh;
 static unsigned int              	txDmaCh;
 
 
+
+EFMUartInterface::EFMUartInterface(){}
+
+
+
+
 bool EFMUartInterface::TransmitDmaComplete(unsigned int channel,
 		                        unsigned int sequenceNo,
 		                        void *userParam)
    {
-	auto This = static_cast<Uart*>(userParam);
+	auto This = static_cast<EFMUartInterface*>(userParam);
 	(void)sequenceNo;
 	if(channel == txDmaCh)
     System::EventGroupSetBitsISR(This->_transferGroup, TransferTXFinished);
@@ -37,20 +44,13 @@ bool EFMUartInterface::TransmitDmaComplete(unsigned int channel,
   }
 
 
-
-
-EFMUartInterface::EFMUartInterface(){
-
-}
-
-
 void EFMUartInterface::InitializeDma(){
 	efm::dma::Init();
 	efm::dma::AllocateChannel(&rxDmaCh, nullptr);
 	efm::dma::AllocateChannel(&txDmaCh, nullptr);
 }
 
-void EFMUartInterface::Initialize(){
+void EFMUartInterface::Initialize(void){
 	 USART_InitAsync_TypeDef usartInit = USART_INITASYNC_DEFAULT;
 	 usartInit.baudrate = 9600;
 	 usartInit.stopbits = usartStopbits1;
@@ -60,7 +60,7 @@ void EFMUartInterface::Initialize(){
 	 efm::cmu::ClockEnable(efm::Clock(io_map::UART::Peripheral), true);
 	 efm::usart::InitAsync(io_map::UART::Peripheral, &usartInit);
 	 efm::usart::IntClear(io_map::UART::Peripheral, ~0x0);
-	 Uart::InitializeDma();
+	 EFMUartInterface::InitializeDma();
 	 efm::usart::AmendRoute(io_map::UART::Peripheral,
 	         USART_ROUTE_CLKPEN | USART_ROUTE_TXPEN | USART_ROUTE_RXPEN | (io_map::UART::Location << _USART_ROUTE_LOCATION_SHIFT));
 	 efm::usart::Enable(io_map::UART::Peripheral, usartEnable);
