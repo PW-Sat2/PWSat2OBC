@@ -9,6 +9,8 @@
 #include "logger/logger.h"
 #include "power/power.h"
 #include "spi/efm.h"
+#include "uart/efm.h"
+#include "uart/uart.h"
 
 namespace obc
 {
@@ -111,6 +113,8 @@ namespace obc
 
         /** @brief SPI interface */
         drivers::spi::EFMSPIInterface SPI;
+        /** @brief UART interface */
+        drivers::uart::EFMUartInterface UART;
     };
 }
 /** @} */

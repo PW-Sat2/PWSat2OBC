@@ -22,6 +22,8 @@
 #include "terminal/terminal.h"
 #include "time/timer.h"
 #include "utils.h"
+#include "camera/camera.h"
+
 
 /**
  * @defgroup obc OBC structure
@@ -82,6 +84,8 @@ struct OBC
 
     /** @brief Terminal object. */
     Terminal terminal;
+    /** @brief Camera object. */
+    devices::camera::Camera camera;
 };
 
 /** @brief Global OBC object. */

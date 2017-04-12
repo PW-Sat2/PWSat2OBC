@@ -1,21 +1,18 @@
 #include <FreeRTOS.h>
 #include <queue.h>
 #include <task.h>
-
+#include "base/os.h"
 #include "leuart/leuart.h"
 #include "logger/logger.h"
 #include "system.h"
-
-
 #include "camera.h"
-#include "uart/Uart.h"
 
 
 using namespace devices::camera;
 using namespace std::chrono_literals;
 
 
-Camera::Camera(drivers::uart::Uart uartBus) : _uartBus(uartBus)
+Camera::Camera(drivers::uart::IUartInterface& uartBus) : _uartBus(uartBus)
 {
 }
 
@@ -71,10 +68,9 @@ bool Camera::InitializeJPEGPicture(CameraJPEGResolution resolution) {
 
 
 
-int32_t Camera::CameraGetJPEGPicture(uint8_t* data, uint32_t dataLength, bool reset)
+int32_t Camera::CameraGetJPEGPicture(gsl::span<const uint8_t> data, bool reset)
 {
 	UNREFERENCED_PARAMETER(data);
-	UNREFERENCED_PARAMETER(dataLength);
 	uint32_t ret = 0;
 
 	if(!isInitialized)
@@ -113,12 +109,12 @@ int32_t Camera::CameraGetJPEGPicture(uint8_t* data, uint32_t dataLength, bool re
         }
         LOG(LOG_LEVEL_ERROR, "---------------- Cmd Data received ----------------\n");
 
-        if(cmdData.dataLength > dataLength)
+        if(cmdData.dataLength > (uint32_t)data.length())
         {
         	LOG(LOG_LEVEL_ERROR, "---------------- Invalid input buffer size ----------------\n");
         	return 0;
         }
-        ret = CameraReceiveJPEGData(data, cmdData.dataLength,512);
+        ret = CameraReceiveJPEGData(data,512);
         if (ret == 0)
         {
             LOG(LOG_LEVEL_ERROR, "---------------- Invalid Data command ----------------\n");
@@ -166,8 +162,7 @@ bool Camera::InitializeRAWPicture(CameraRAWImageFormat format, CameraRAWResoluti
 
 
 
-int32_t Camera::CameraGetRAWPicture(uint8_t* data,
-                            uint32_t dataLength,bool reset)
+int32_t Camera::CameraGetRAWPicture(gsl::span<const uint8_t>data, bool reset)
 {
 
 	uint32_t imageLength = 0;
@@ -193,7 +188,7 @@ int32_t Camera::CameraGetRAWPicture(uint8_t* data,
             return 0;
         }
 
-        ret = CameraReceiveData(data, dataLength);
+        ret = CameraReceiveData(data);
         if (ret == 0)
         {
             LOG(LOG_LEVEL_ERROR, "---------------- Invalid Data command ----------------\n");

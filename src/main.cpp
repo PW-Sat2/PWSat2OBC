@@ -1,3 +1,4 @@
+#include "base/os.h"
 #include <cstdio>
 #include <cstring>
 #include <em_chip.h>
@@ -36,8 +37,9 @@
 #include "gpio/gpio.h"
 #include "leuart/leuart.h"
 #include "power_eps/power_eps.h"
-#include "uart/Uart.h"
 #include "camera/camera.h"
+#include "uart/efm.h"
+#include "commands/commands.h"
 
 using services::time::TimeProvider;
 using namespace std::chrono_literals;
@@ -46,7 +48,7 @@ using namespace devices::camera;
 
 OBC Main;
 mission::ObcMission Mission(Main.timeProvider, Main.antennaDriver, false);
-static uint8_t out[10000];
+static uint8_t CameraPicBuf[10000];
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
@@ -174,39 +176,25 @@ void SetupHardware(void)
 
 void UartTask(void* param)
 {
-	//const char* testByte="lamakota";
-
-
-	for(int i =0;i<255;i++){
-	out[i]=0x00;
-	}
 	UNREFERENCED_PARAMETER(param);
 
-	Uart_Init init;
-
-	init.baudRate=9600;
-	init.parity=usartNoParity;
-	init.oversampling   = usartOVS16;
-	init.dataBits       = usartDatabits8;
-	init.parity         = usartNoParity;
-	init.stopBits       = usartStopbits1;
 
 
-	Uart uart(init);
-	uart.Initialize();
-	Camera camera(uart);
 
-	while (1) {
+		Camera camera(Main.Hardware.UART);
 
-		if(camera.isInitialized) {
-			camera.CameraGetJPEGPicture(out,10000,false);
-		}
-		else {
-			camera.InitializeJPEGPicture(CameraJPEGResolution::_160x128);
-		}
+		while (1) {
+
+			if(camera.isInitialized) {
+				camera.CameraGetJPEGPicture(gsl::span<uint8_t>(CameraPicBuf,10000),false);
+			}
+			else {
+				camera.InitializeJPEGPicture(CameraJPEGResolution::_160x128);
+			}
 
 System::SleepTask(1s);
 	}
+
 
 }
 

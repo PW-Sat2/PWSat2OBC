@@ -1,8 +1,8 @@
 #ifndef _CAMERA_H_
 #define _CAMERA_H_
 
+#include <uart/uart.h>
 #include "camera_types.h"
-#include "uart/Uart.h"
 
 
 namespace devices
@@ -20,7 +20,7 @@ private :
 	uint8_t CameraCmdLength = 6;
 	uint8_t CameraRetCmdLength=12;
 	uint8_t CameraJPEGFormat= 0x07;
-	drivers::uart::Uart _uartBus;
+	drivers::uart::IUartInterface& _uartBus;
 
 
 	bool CameraGetCmdData(CameraCmdData *cmdData);
@@ -37,7 +37,7 @@ private :
 
 	bool CameraSync();
 
-	uint32_t CameraReceiveData(uint8_t* data, uint32_t dataLength);
+	uint32_t CameraReceiveData(gsl::span<const uint8_t> data);
 
 	void CameraSendCmdSnapshot(CameraSnapshotType type);
 
@@ -51,11 +51,11 @@ private :
 
 	uint16_t CameraGetRAWDataLength(CameraRAWImageFormat format, CameraRAWResolution rawResolution);
 
-	CameraCmd CameraParseDataCmd(uint8_t *cmd, uint32_t length, CameraCmdData *cmdData);
+	CameraCmd CameraParseDataCmd(gsl::span<const uint8_t> cmd, CameraCmdData *cmdData);
 
-	CameraCmd CameraParseAckCmd(uint8_t *cmd, uint32_t length, CameraCmdAck *cmdAck);
+	CameraCmd CameraParseAckCmd(gsl::span<const uint8_t> cmd, CameraCmdAck *cmdAck);
 
-	CameraCmd CameraParseSyncCmd(uint8_t *cmd, uint32_t length);
+	CameraCmd CameraParseSyncCmd(gsl::span<const uint8_t>cmd, uint8_t length);
 
 	bool CameraCmdAckInit(CameraCmdAck *cmdAck);
 
@@ -69,13 +69,13 @@ private :
 
 	uint8_t CameraRAWImageFormatGetComponent(CameraRAWImageFormat format);
 
-	void CameraLogSendCmd(uint8_t* cmd);
+	void CameraLogSendCmd(gsl::span<const uint8_t> cmd);
 
-	void CameraLogGetCmd(uint8_t* cmd);
+	void CameraLogGetCmd(gsl::span<const uint8_t> cmd);
 
-	void CameraSendCmd(uint8_t* cmd, uint8_t length);
+	void CameraSendCmd(gsl::span<const uint8_t> cmd);
 
-	int8_t CameraReceiveJPEGData(uint8_t* data, uint16_t dataLength, uint16_t packageSize);
+	int8_t CameraReceiveJPEGData(gsl::span<const uint8_t> , uint16_t packageSize);
 
 	void CameraSendCmdSync(void);
 
@@ -84,16 +84,16 @@ private :
 	void CameraSendCmdAck(CameraCmd cmdAck, uint8_t packageIdLow, uint8_t packageIdHigh);
 
 
-	uint32_t CameraGetData(uint8_t* data, uint32_t dataLength, int8_t timeoutMs,bool send);
+	uint32_t CameraGetData(gsl::span<const uint8_t>data,bool send);
 
-	bool CameraGetCmd( uint8_t* cmd, uint32_t length, int8_t timeoutMs,bool send);
+	bool CameraGetCmd(gsl::span<const uint8_t> cmd, uint32_t length,bool send);
 
 	bool CameraGetCmdSync();
 
-	CameraCmd CameraGetCmdAck(int8_t timeoutMs, uint8_t length);
+	CameraCmd CameraGetCmdAck(uint8_t length);
 
 
-	bool CameraGetCmdAckSync(int8_t timeoutMs);
+	bool CameraGetCmdAckSync();
 
 	void CameraSendCmdAckSync(void);
 
@@ -101,16 +101,16 @@ public :
 
 	bool isInitialized=false;
 
-	Camera(drivers::uart::Uart uartBus);
+	Camera(drivers::uart::IUartInterface& uartBus);
 
 	bool InitializeJPEGPicture(CameraJPEGResolution resolution);
 
-	int32_t CameraGetJPEGPicture(uint8_t* data, uint32_t dataLength, bool reset);
+	int32_t CameraGetJPEGPicture(gsl::span<const uint8_t> data, bool reset);
 
 	bool InitializeRAWPicture(CameraRAWImageFormat format, CameraRAWResolution resolution);
 
 
-	int32_t CameraGetRAWPicture(uint8_t* data, uint32_t dataLength, bool reset);
+	int32_t CameraGetRAWPicture(gsl::span<const uint8_t> data, bool reset);
 
 };
     }

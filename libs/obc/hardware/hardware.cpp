@@ -62,6 +62,7 @@ void OBCHardware::Initialize()
     this->Pins.Initialize();
     this->I2C.Initialize();
     this->SPI.Initialize();
+    this->UART.Initialize();
 }
 
 OBCHardware::OBCHardware(PowerControl* powerControl) : I2C(powerControl)

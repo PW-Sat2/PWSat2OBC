@@ -19,7 +19,7 @@ CameraPictureType Camera::CameraGetPictureType(uint8_t type)
     }
 }
 
-CameraCmd Camera::CameraGetCmdType(unsigned char cmd)
+CameraCmd Camera::CameraGetCmdType(uint8_t cmd)
 {
     switch (cmd)
     {
@@ -87,9 +87,9 @@ uint16_t Camera::CameraGetRAWDataLength(CameraRAWImageFormat format, CameraRAWRe
     return ((uint16_t)CameraRAWImageFormatGetComponent(format)) * CameraRAWResolutionGetSquare(resolution);
 }
 
-CameraCmd Camera::CameraParseDataCmd(uint8_t* cmd, uint32_t length, CameraCmdData* cmdData)
+CameraCmd Camera::CameraParseDataCmd(gsl::span<const uint8_t> cmd, CameraCmdData* cmdData)
 {
-    if (length < 6 || (cmd[6] != CameraCmdPrefix) || ((CameraCmd)cmd[7] != CameraCmd::Data))
+    if (cmd.length() < 6 || (cmd[6] != CameraCmdPrefix) || ((CameraCmd)cmd[7] != CameraCmd::Data))
     {
         return CameraCmd::Invalid;
     }
@@ -109,9 +109,9 @@ CameraCmd Camera::CameraParseDataCmd(uint8_t* cmd, uint32_t length, CameraCmdDat
     return CameraCmd::Data;
 }
 
-CameraCmd Camera::CameraParseAckCmd(uint8_t* cmd, uint32_t length, CameraCmdAck* cmdAck)
+CameraCmd Camera::CameraParseAckCmd(gsl::span<const uint8_t> cmd, CameraCmdAck* cmdAck)
 {
-    if (length < 6 || (cmd[0] != CameraCmdPrefix) || ((CameraCmd)cmd[1] != CameraCmd::Ack))
+    if (cmd.length() < 6 || (cmd[0] != CameraCmdPrefix) || ((CameraCmd)cmd[1] != CameraCmd::Ack))
     {
         return CameraCmd::Invalid;
     }
@@ -127,7 +127,7 @@ CameraCmd Camera::CameraParseAckCmd(uint8_t* cmd, uint32_t length, CameraCmdAck*
     return CameraCmd::Ack;
 }
 
-CameraCmd Camera::CameraParseSyncCmd(uint8_t* cmd, uint32_t length)
+CameraCmd Camera::CameraParseSyncCmd(gsl::span<const uint8_t> cmd, uint8_t length)
 {
     if (length < 2 || cmd[6] != CameraCmdPrefix || ((CameraCmd)cmd[7] != CameraCmd::Sync))
     {
