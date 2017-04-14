@@ -124,7 +124,6 @@ boot:
     while (1)
         ;
 }
-
 void waitForComms(uint32_t timeoutTicks_ms)
 {
     // Setup SysTick Timer for 1 msec interrupts
