@@ -7,6 +7,11 @@
 
 #include "comms.h"
 
+#include <em_burtc.h>
+#include <em_cmu.h>
+#include <em_emu.h>
+#include <em_rmu.h>
+
 #define UPLOADBLOCKSIZE 256
 
 uint8_t msgId;
@@ -184,10 +189,10 @@ void testEeprom()
         checkEeprom(i, 0xFF, &errors);
         checkEeprom(i, value, &errors);
 
-        if(i % 256 == 0)
+        if (i % 256 == 0)
         {
-            progress = (i*100)/size;
-            sprintf(buf, "\nAddr. range: %.6X-%.6X (%u%% done)", i, i+255, progress);
+            progress = (i * 100) / size;
+            sprintf(buf, "\nAddr. range: %.6X-%.6X (%u%% done)", i, i + 255, progress);
             BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)buf, sizeof(buf), true);
         }
     }
@@ -199,6 +204,34 @@ void testEeprom()
     else
     {
         BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\nErr\n", 5, true);
+    }
+}
+
+void testBurtc(void)
+{
+    CMU_ClockEnable(cmuClock_HFLE, true);
+    CMU->LFCLKSEL = 0;
+    CMU_OscillatorEnable(cmuOsc_LFRCO, true, true);
+    RMU_ResetControl(rmuResetBU, rmuResetModeClear);
+
+    BURTC_Init_TypeDef init = BURTC_INIT_DEFAULT;
+    init.clkSel = burtcClkSelLFRCO;
+    init.mode = burtcModeEM4;
+    init.clkDiv = burtcClkDiv_128;
+
+    BURTC_Init(&init);
+
+    while (1)
+    {
+        uint32_t cnt = BURTC_CounterGet();
+
+        char buf[30] = {0};
+
+        sprintf(buf, "RTC=%ld\n", cnt);
+
+        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)buf, sizeof(buf), true);
+
+        DelayMilliseconds(500);
     }
 }
 
@@ -409,10 +442,14 @@ void COMMS_processMsg(void)
             break;
 
         case 'E':
-            while(1)
+            while (1)
             {
                 testEeprom();
             }
+
+        case 'T':
+            testBurtc();
+            break;
 
         default:
             // reset message id
