@@ -117,7 +117,7 @@ void COMMS_Init(void)
   ******************************************************************************/
 uint8_t processTLM(uint8_t id, uint8_t* txBuffer)
 {
-    uint8_t tlmLen;
+    uint8_t tlmLen = 0;
     uint8_t i;
     uint8_t processed = 1;
 
