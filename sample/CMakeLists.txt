@@ -10,7 +10,7 @@ set(SOURCES
 
 add_executable(${NAME} ${SOURCES})
 
-set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${PLATFORM_PATH}/efm32gg_upper.ld -specs=nano.specs -specs=nosys.specs")
+set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${UPPER_LINKER_SCRIPT} -specs=nano.specs -specs=nosys.specs")
 
 target_link_libraries(${NAME}
     platform
