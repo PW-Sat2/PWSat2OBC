@@ -20,49 +20,49 @@ bool Camera::InitializeJPEGPicture(CameraJPEGResolution resolution) {
 
 
 
-	    	if (!CameraSync())
-	    	{
-	    		LOG(LOG_LEVEL_ERROR, "---------------- Sync failed -------------------------\n");
-	    		isInitialized = false;
-	    		return false;
-	    	}
+	if (!CameraSync())
+	{
+		LOG(LOG_LEVEL_ERROR, "---------------- Sync failed -------------------------\n");
+		isInitialized = false;
+		return false;
+	}
 
 
-	        CameraSendCmdJPEGInitial(resolution);
+	CameraSendCmdJPEGInitial(resolution);
 
 
-	        if (!CameraGetCmdAckInitial())
-	        {
-	            LOG(LOG_LEVEL_ERROR, "---------------- Ack Initial failed ------------------\n");
-	            isInitialized = false;
-	            return false;
-	        }
+	if (!CameraGetCmdAckInitial())
+	{
+		LOG(LOG_LEVEL_ERROR, "---------------- Ack Initial failed ------------------\n");
+		isInitialized = false;
+		return false;
+	}
 
 
-	        if (!CameraSendCmdSetPackageSize(512))
-	        {
-	            LOG(LOG_LEVEL_ERROR, "---------------- Send Cmd Set Package failed ---------\n");
-	            isInitialized = false;
-	            return false;
-	        }
+	if (!CameraSendCmdSetPackageSize(512))
+	{
+		LOG(LOG_LEVEL_ERROR, "---------------- Send Cmd Set Package failed ---------\n");
+		isInitialized = false;
+		return false;
+	}
 
-	        if (!CameraGetCmdAckSetPackageSize())
-	        {
-	            LOG(LOG_LEVEL_ERROR, "---------------- ACK Set Package Size failed ---------\n");
-	            isInitialized = false;
-	            return false;
-	        }
+	if (!CameraGetCmdAckSetPackageSize())
+	{
+		LOG(LOG_LEVEL_ERROR, "---------------- ACK Set Package Size failed ---------\n");
+		isInitialized = false;
+		return false;
+	}
 
-	        CameraSendCmdSnapshot(CameraSnapshotType::Compressed);
+	CameraSendCmdSnapshot(CameraSnapshotType::Compressed);
 
-	        if (!CameraGetCmdAckSnapshot())
-	        {
-	            LOG(LOG_LEVEL_ERROR, "---------------- ACK Snapshot failed -----------------\n");
-	            isInitialized = false;
-	            return false;
-	        }
-	        isInitialized = true;
-	        return true;
+	if (!CameraGetCmdAckSnapshot())
+	{
+		LOG(LOG_LEVEL_ERROR, "---------------- ACK Snapshot failed -----------------\n");
+		isInitialized = false;
+		return false;
+	}
+	isInitialized = true;
+	return true;
 }
 
 
@@ -74,89 +74,89 @@ int32_t Camera::CameraGetJPEGPicture(gsl::span<const uint8_t> data, bool reset)
 	uint32_t ret = 0;
 
 	if(!isInitialized)
-			{
-				return 0;
-			}
+	{
+		return 0;
+	}
 
 
-        CameraSendCmdGetPicture(CameraPictureType::Snapshot);
+	CameraSendCmdGetPicture(CameraPictureType::Snapshot);
 
-        if (!CameraGetCmdAckGetPicture())
-        {
-            LOG(LOG_LEVEL_ERROR, "---------------- ACK GetSnapshot failed ---------------\n");
+	if (!CameraGetCmdAckGetPicture())
+	{
+		LOG(LOG_LEVEL_ERROR, "---------------- ACK GetSnapshot failed ---------------\n");
 
-            return 0;
+		return 0;
 
-        }
+	}
 
-        CameraCmdData cmdData;
-        if (!CameraCmdDataInit(&cmdData))
-        {
-            LOG(LOG_LEVEL_ERROR, "---------------- Init Cmd Data struct failed ---------\n");
-            return 0;
-        }
+	CameraCmdData cmdData;
+	if (!CameraCmdDataInit(&cmdData))
+	{
+		LOG(LOG_LEVEL_ERROR, "---------------- Init Cmd Data struct failed ---------\n");
+		return 0;
+	}
 
-        if (!CameraGetCmdData(&cmdData))
-        {
-            LOG(LOG_LEVEL_ERROR, "---------------- Get Cmd Data failed -----------------\n");
-            return 0;
-        }
+	if (!CameraGetCmdData(&cmdData))
+	{
+		LOG(LOG_LEVEL_ERROR, "---------------- Get Cmd Data failed -----------------\n");
+		return 0;
+	}
 
-        if (CameraPictureType::Snapshot != cmdData.type || cmdData.dataLength <= 0)
-        {
-            LOG(LOG_LEVEL_ERROR, "---------------- Invalid Cmd Data received -----------\n");
-            return 0;
-        }
-        LOG(LOG_LEVEL_ERROR, "---------------- Cmd Data received ----------------\n");
+	if (CameraPictureType::Snapshot != cmdData.type || cmdData.dataLength <= 0)
+	{
+		LOG(LOG_LEVEL_ERROR, "---------------- Invalid Cmd Data received -----------\n");
+		return 0;
+	}
+	LOG(LOG_LEVEL_ERROR, "---------------- Cmd Data received ----------------\n");
 
-        if(cmdData.dataLength > (uint32_t)data.length())
-        {
-        	LOG(LOG_LEVEL_ERROR, "---------------- Invalid input buffer size ----------------\n");
-        	return 0;
-        }
-        ret = CameraReceiveJPEGData(data,512);
-        if (ret == 0)
-        {
-            LOG(LOG_LEVEL_ERROR, "---------------- Invalid Data command ----------------\n");
-            return 0;
-        }
-        if(reset)
-        {
-        	isInitialized=false;
-        	CameraSendCmdReset();
-        }
-        return ret;
+	if(cmdData.dataLength > (uint32_t)data.length())
+	{
+		LOG(LOG_LEVEL_ERROR, "---------------- Invalid input buffer size ----------------\n");
+		return 0;
+	}
+	ret = CameraReceiveJPEGData(data,512);
+	if (ret == 0)
+	{
+		LOG(LOG_LEVEL_ERROR, "---------------- Invalid Data command ----------------\n");
+		return 0;
+	}
+	if(reset)
+	{
+		isInitialized=false;
+		CameraSendCmdReset();
+	}
+	return ret;
 
 }
 bool Camera::InitializeRAWPicture(CameraRAWImageFormat format, CameraRAWResolution resolution){
 
-        if (!CameraSync())
-        {
-            LOG(LOG_LEVEL_ERROR, "---------------- Sync failed -------------------------\n");
-            isInitialized = false;
-            return false;
-        }
+	if (!CameraSync())
+	{
+		LOG(LOG_LEVEL_ERROR, "---------------- Sync failed -------------------------\n");
+		isInitialized = false;
+		return false;
+	}
 
-        CameraSendCmdRAWInitial(format, resolution);
+	CameraSendCmdRAWInitial(format, resolution);
 
-        if (!CameraGetCmdAckInitial())
-        {
-            LOG(LOG_LEVEL_ERROR, "---------------- ACK Initial failed ------------------\n");
-            isInitialized = false;
-            return false;
-        }
+	if (!CameraGetCmdAckInitial())
+	{
+		LOG(LOG_LEVEL_ERROR, "---------------- ACK Initial failed ------------------\n");
+		isInitialized = false;
+		return false;
+	}
 
-        CameraSendCmdSnapshot(CameraSnapshotType::Uncompressed);
+	CameraSendCmdSnapshot(CameraSnapshotType::Uncompressed);
 
-        if (!CameraGetCmdAckSnapshot())
-        {
-            LOG(LOG_LEVEL_ERROR, "---------------- ACK Snapshot failed -----------------\n");
-            isInitialized = false;
-            return false;
-        }
-        isInitialized = true;
-        return true;
-    }
+	if (!CameraGetCmdAckSnapshot())
+	{
+		LOG(LOG_LEVEL_ERROR, "---------------- ACK Snapshot failed -----------------\n");
+		isInitialized = false;
+		return false;
+	}
+	isInitialized = true;
+	return true;
+}
 
 
 
@@ -167,40 +167,40 @@ int32_t Camera::CameraGetRAWPicture(gsl::span<const uint8_t>data, bool reset)
 
 	uint32_t imageLength = 0;
 	uint32_t ret = 0;
-		if(!isInitialized)
-		{
-			return 0;
-		}
+	if(!isInitialized)
+	{
+		return 0;
+	}
 
 
-        CameraSendCmdGetPicture(CameraPictureType::RAW);
+	CameraSendCmdGetPicture(CameraPictureType::RAW);
 
-        if (!CameraGetCmdAckGetPicture())
-        {
-            LOG(LOG_LEVEL_ERROR, "---------------- ACK GetPicture failed----------------\n");
-            return 0;
-        }
+	if (!CameraGetCmdAckGetPicture())
+	{
+		LOG(LOG_LEVEL_ERROR, "---------------- ACK GetPicture failed----------------\n");
+		return 0;
+	}
 
-        imageLength = CameraGetRAWDataLength(CameraRAWImageFormat::RGB565, CameraRAWResolution::_160x120);
-        if (imageLength == 0)
-        {
-            LOG(LOG_LEVEL_ERROR, "---------------- Get Data Length failed --------------\n");
-            return 0;
-        }
+	imageLength = CameraGetRAWDataLength(CameraRAWImageFormat::RGB565, CameraRAWResolution::_160x120);
+	if (imageLength == 0)
+	{
+		LOG(LOG_LEVEL_ERROR, "---------------- Get Data Length failed --------------\n");
+		return 0;
+	}
 
-        ret = CameraReceiveData(data);
-        if (ret == 0)
-        {
-            LOG(LOG_LEVEL_ERROR, "---------------- Invalid Data command ----------------\n");
-            return 0;
-        }
+	ret = CameraReceiveData(data);
+	if (ret == 0)
+	{
+		LOG(LOG_LEVEL_ERROR, "---------------- Invalid Data command ----------------\n");
+		return 0;
+	}
 
-        CameraSendCmdAckData();
-        if(reset)
-        {
-        isInitialized=false;
-        CameraSendCmdReset();
-        }
+	CameraSendCmdAckData();
+	if(reset)
+	{
+		isInitialized=false;
+		CameraSendCmdReset();
+	}
 
-    return ret;
+	return ret;
 }
