@@ -16,11 +16,11 @@ def from_int16(tab):
 
 
 def from_int32(tab):
-    return struct.unpack('I', bytearray(tab[0:4]))[0]
+    return struct.unpack('i', bytearray(tab[0:4]))[0]
 
 
 def to_int32(value):
-    return list(struct.pack('I', value))
+    return list(struct.pack('i', value))
 
 
 def to_int16(value):

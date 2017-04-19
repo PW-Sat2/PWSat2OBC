@@ -2,6 +2,8 @@ set(NAME obc_hardware)
 
 set(SOURCES
     hardware.cpp
+    Include/obc/PersistentStorageAccess.hpp
+    PersistentStorageAccess.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -13,6 +15,8 @@ target_link_libraries(${NAME}
 	spi
 	power
 	burtc
+	mcu_temp
+	obc_state
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

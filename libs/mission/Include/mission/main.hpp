@@ -309,7 +309,7 @@ namespace mission
         }
 
         if (OS_RESULT_FAILED(
-                System::CreateTask(MissionLoopControlTask, "MissionLoopControl", 2048, this, TaskPriority::P2, &this->taskHandle)))
+                System::CreateTask(MissionLoopControlTask, "MissionLoopControl", 4_KB, this, TaskPriority::P2, &this->taskHandle)))
         {
             LOG(LOG_LEVEL_ERROR, "Unable to initialize mission state. Reason: unable to create task. ");
             return false;

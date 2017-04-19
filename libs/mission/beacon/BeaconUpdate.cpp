@@ -42,7 +42,7 @@ namespace mission
     bool BeaconUpdate::ShouldUpdateBeacon(const SystemState& state, void* param)
     {
         auto This = static_cast<BeaconUpdate*>(param);
-        return state.Antenna.Deployed && //
+        return state.AntennaState.IsDeployed() && //
             ((state.Time - This->lastBeaconUpdate) >= BeaconUpdateInterval);
     }
 
@@ -55,14 +55,20 @@ namespace mission
     void BeaconUpdate::UpdateBeacon(const SystemState& state)
     {
         const auto beacon = GenerateBeacon(state);
-        if (this->controller->SetBeacon(beacon))
+        const auto result = this->controller->SetBeacon(beacon);
+        const auto time = static_cast<std::uint32_t>(duration_cast<seconds>(state.Time).count());
+        if (!result.HasValue)
+        {
+            LOGF(LOG_LEVEL_INFO, "Beacon update rejected at %lu", time);
+        }
+        else if(result.Value)
         {
             this->lastBeaconUpdate = state.Time;
-            LOGF(LOG_LEVEL_INFO, "Beacon set at %lu", static_cast<std::uint32_t>(duration_cast<seconds>(state.Time).count()));
+            LOGF(LOG_LEVEL_INFO, "Beacon set at %lu", time);
         }
         else
         {
-            LOGF(LOG_LEVEL_ERROR, "Unable to set beacon at %lu", static_cast<std::uint32_t>(duration_cast<seconds>(state.Time).count()));
+            LOGF(LOG_LEVEL_ERROR, "Unable to set beacon at %lu", time);
         }
     }
 
@@ -73,7 +79,7 @@ namespace mission
         writer.Reset();
         writer.WriteQuadWordLE(FieldId::TimeStamp, state.Time.count());
 
-        // TODO beacon interval will probably be adjusted based on current satelite state.
+        // TODO beacon interval will probably be adjusted based on current satellite state.
         return devices::comm::Beacon(BeaconInterval, frame.Frame());
     }
 }

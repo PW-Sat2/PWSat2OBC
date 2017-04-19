@@ -42,7 +42,7 @@ namespace mission
                 return false;
             }
 
-            if (!state.Antenna.Deployed)
+            if (!state.AntennaState.IsDeployed())
             {
                 return false;
             }

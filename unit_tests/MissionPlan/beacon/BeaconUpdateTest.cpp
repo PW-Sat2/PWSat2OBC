@@ -27,7 +27,7 @@ BeaconUpdateConditionTest::BeaconUpdateConditionTest() : beacon(controller)
 TEST_P(BeaconUpdateConditionTest, TestBeaconUpdateCondition)
 {
     const auto& param = GetParam();
-    state.Antenna.Deployed = std::get<0>(param);
+    state.AntennaState.SetDeployment(std::get<0>(param));
     state.Time = std::get<1>(param);
     auto action = beacon.BuildAction();
     const auto expected = std::get<2>(param);
@@ -65,10 +65,9 @@ TEST_F(BeaconUpdateTest, TestBeaconUpdate)
 
 TEST_F(BeaconUpdateTest, TestBeaconUpdatePeriodAfterSuccessfulUpdate)
 {
-    state.Antenna.Deployed = true;
-    state.Antenna.DeploymentState[0] = state.Antenna.DeploymentState[1] = true;
+    state.AntennaState.SetDeployment(true);
     state.Time = 60min;
-    EXPECT_CALL(controller, SetBeacon(_)).WillOnce(Return(true));
+    EXPECT_CALL(controller, SetBeacon(_)).WillOnce(Return(Option<bool>::Some(true)));
     auto action = beacon.BuildAction();
     action.actionProc(state, action.param);
     state.Time = 64min;
@@ -79,10 +78,19 @@ TEST_F(BeaconUpdateTest, TestBeaconUpdatePeriodAfterSuccessfulUpdate)
 
 TEST_F(BeaconUpdateTest, TestBeaconUpdatePeriodAfterFailedUpdate)
 {
-    state.Antenna.Deployed = true;
-    state.Antenna.DeploymentState[0] = state.Antenna.DeploymentState[1] = true;
+    state.AntennaState.SetDeployment(true);
     state.Time = 60min;
-    EXPECT_CALL(controller, SetBeacon(_)).WillOnce(Return(false));
+    EXPECT_CALL(controller, SetBeacon(_)).WillOnce(Return(Option<bool>::Some(false)));
+    auto action = beacon.BuildAction();
+    action.actionProc(state, action.param);
+    EXPECT_THAT(action.condition(state, action.param), Eq(true));
+}
+
+TEST_F(BeaconUpdateTest, TestBeaconUpdatePeriodAfterRejectedUpdate)
+{
+    state.AntennaState.SetDeployment(true);
+    state.Time = 60min;
+    EXPECT_CALL(controller, SetBeacon(_)).WillOnce(Return(Option<bool>::None()));
     auto action = beacon.BuildAction();
     action.actionProc(state, action.param);
     EXPECT_THAT(action.condition(state, action.param), Eq(true));

@@ -12,6 +12,7 @@ namespace obc
         /**
          * @brief Perform detumbling experiment
          * @ingroup telecommands
+         * @telecommand
          *
          * Code: 0x0D
          *

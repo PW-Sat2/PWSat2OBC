@@ -17,6 +17,8 @@ OBC::OBC()
 
 void OBC::Initialize()
 {
+    this->StateFlags.Initialize();
+
     this->Fdir.Initalize();
     this->Hardware.Initialize();
 

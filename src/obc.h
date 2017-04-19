@@ -44,6 +44,8 @@
 struct OBC
 {
   public:
+    static constexpr OSEventBits InitializationFinishedFlag = 1;
+
     /** @brief Constructs @ref OBC object  */
     OBC();
 
@@ -60,7 +62,7 @@ struct OBC
     /** @brief Handle to OBC initialization task. */
     OSTaskHandle initTask;
     /** @brief Flag indicating that OBC software has finished initialization process. */
-    std::atomic<bool> initialized;
+    EventGroup StateFlags;
 
     /** @brief Persistent timer that measures mission time. */
     services::time::TimeProvider timeProvider;

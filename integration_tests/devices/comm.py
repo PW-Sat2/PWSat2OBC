@@ -121,6 +121,7 @@ class ReceiverTelemetry(object):
             lower_byte(self.SignalStrength), higher_byte(self.SignalStrength),
             ]
 
+
 class TransmitterDevice(i2cMock.I2CDevice):
     BUFFER_SIZE = 40
 
@@ -173,6 +174,11 @@ class TransmitterDevice(i2cMock.I2CDevice):
         # beacon should be set and frame queue emptied (True) of ignored (False)
         self.on_set_beacon = None
 
+        # callback called when idle state is being set
+        # callback prototype:
+        # bool -> None
+        self.on_set_idle_state = None
+
         self._buffer = Queue(TransmitterDevice.BUFFER_SIZE)
         self._lock = Lock()
         self.baud_rate = BaudRate.BaudRate1200
@@ -217,6 +223,10 @@ class TransmitterDevice(i2cMock.I2CDevice):
         self.log.info("set beacon: %s", data)
         if call(self.on_set_beacon, True):
             self.reset_queue()
+
+    @i2cMock.command([0x24])
+    def _set_idle_state(self, enabled):
+        call(self.on_set_idle_state, None, enabled)
 
     def get_message_from_buffer(self, timeout=None):
         return self._buffer.get(timeout=timeout)

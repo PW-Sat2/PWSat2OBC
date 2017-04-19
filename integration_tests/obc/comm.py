@@ -83,3 +83,7 @@ class CommMixin(OBCMixin):
     @command("comm_get_telemetry receiver")
     def comm_get_receiver_telemetry(self):
         pass
+
+    @command("comm_set_idle_state {0:d}")
+    def comm_set_idle_state(self, enabled):
+        pass

@@ -4,7 +4,8 @@
 #include "obc.h"
 #include "terminal/terminal.h"
 
-static const TerminalCommandDescription commands[] = {{"ping", PingHandler},
+static const TerminalCommandDescription commands[] = {
+    {"ping", PingHandler},
     {"echo", EchoHandler},
     {"jumpToTime", JumpToTimeHandler},
     {"currentTime", CurrentTimeHandler},
@@ -13,7 +14,7 @@ static const TerminalCommandDescription commands[] = {{"ping", PingHandler},
     {"receiveFrame", ReceiveFrameHandler},
     {"pauseComm", CommandPauseComm},
     {"comm_reset", CommReset},
-    {"getState", OBCGetState},
+    {"wait_for_init", WaitForOBCInitialization},
     {"listFiles", FSListFiles},
     {"writeFile", FSWriteFile},
     {"readFile", FSReadFile},
@@ -41,13 +42,17 @@ static const TerminalCommandDescription commands[] = {{"ping", PingHandler},
     {"imtq", ImtqDriver},
     {"comm_set_bitrate", CommSetBaudRate},
     {"comm_get_telemetry", CommGetTelemetry},
+    {"comm_set_idle_state", CommSetIdleState},
     {"antenna_get_telemetry", AntennaGetTelemetry},
     {"antenna_reset", AntennaReset},
     {"reset", ResetHandler},
     {"rtc", RTCTest},
     {"rm", RemoveFile},
     {"fram", FRAM},
-    {"gyro", GyroDriver}};
+    {"testflash", TestExternalFlash},
+    {"temp", Temp},
+    {"gyro", GyroDriver},
+};
 
 void InitializeTerminal(void)
 {

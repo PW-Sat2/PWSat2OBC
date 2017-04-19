@@ -28,7 +28,7 @@ using gsl::span;
 using services::fs::File;
 using services::fs::FileHandle;
 using services::fs::SeekOrigin;
-using obc::telecommands::DownladFileTelecommand;
+using obc::telecommands::DownloadFileTelecommand;
 using telecommunication::downlink::DownlinkFrame;
 using telecommunication::downlink::DownlinkAPID;
 
@@ -40,7 +40,7 @@ class DownloadFileTelecommandTest : public testing::Test
     testing::NiceMock<TransmitFrameMock> _transmitFrame;
     testing::NiceMock<FsMock> _fs;
 
-    obc::telecommands::DownladFileTelecommand _telecommand{_fs};
+    obc::telecommands::DownloadFileTelecommand _telecommand{_fs};
 };
 
 MATCHER_P3(IsDownlinkFrame, apidMatcher, seqMatcher, payloadMatcher, "")

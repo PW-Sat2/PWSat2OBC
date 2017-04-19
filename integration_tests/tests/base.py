@@ -12,16 +12,14 @@ class BaseTest(unittest.TestCase):
 
     def setUp(self):
         obc_com = config['OBC_COM']
-        sys_bus_com = config['SYS_BUS_COM']
-        payload_bus_com = config['PAYLOAD_BUS_COM']
-        use_single_bus = config['SINGLE_BUS']
+        mock_com = config['MOCK_COM']
         gpio_com = config['GPIO_COM']
 
         self.gpio = Pins(gpio_com)
 
         extensions.set_up(test_id=self.id())
 
-        self.system = System(obc_com, sys_bus_com, payload_bus_com, use_single_bus, self.gpio, self.auto_power_on)
+        self.system = System(obc_com, mock_com, self.gpio, self.auto_power_on)
 
     def tearDown(self):
         self.system.obc.sync_fs()
