@@ -34,7 +34,7 @@ using drivers::i2c::I2CResult;
 using namespace devices::gyro;
 using namespace std::chrono_literals;
 
-static const uint8_t _addr = 0x34;
+static const uint8_t _addr = 0x68;
 
 class GyroTest : public testing::Test
 {
@@ -73,7 +73,7 @@ TEST_F(GyroTest, initHappyCase)
             WillOnce(Return(I2CResult::OK));
 
     // config
-    EXPECT_CALL(i2c, Write(_addr, ElementsAre(0x15, 1, 0b11110, 0b1100101))).
+    EXPECT_CALL(i2c, Write(_addr, ElementsAre(0x15, 1, 0b11110, 0b1000101))).
             WillOnce(Return(I2CResult::OK));
 
     EXPECT_CALL(os, Sleep(100ms)).WillOnce(Return());
@@ -159,7 +159,7 @@ TEST_F(GyroTest, config2Failed)
             WillOnce(Return(I2CResult::OK));
 
     // config
-    EXPECT_CALL(i2c, Write(_addr, ElementsAre(0x15, 1, 0b11110, 0b1100101))).
+    EXPECT_CALL(i2c, Write(_addr, ElementsAre(0x15, 1, 0b11110, 0b1000101))).
             WillOnce(Return(I2CResult::Failure));
 
     EXPECT_FALSE(gyro.init());
@@ -185,7 +185,7 @@ TEST_F(GyroTest, i2cFailedAfterConfiguration)
             WillOnce(Return(I2CResult::OK));
 
     // config
-    EXPECT_CALL(i2c, Write(_addr, ElementsAre(0x15, 1, 0b11110, 0b1100101))).
+    EXPECT_CALL(i2c, Write(_addr, ElementsAre(0x15, 1, 0b11110, 0b1000101))).
             WillOnce(Return(I2CResult::OK));
 
     EXPECT_CALL(os, Sleep(100ms)).WillOnce(Return());
@@ -222,7 +222,7 @@ TEST_F(GyroTest, pllNotLocked)
             WillOnce(Return(I2CResult::OK));
 
     // config
-    EXPECT_CALL(i2c, Write(_addr, ElementsAre(0x15, 1, 0b11110, 0b1100101))).
+    EXPECT_CALL(i2c, Write(_addr, ElementsAre(0x15, 1, 0b11110, 0b1000101))).
             WillOnce(Return(I2CResult::OK));
 
     EXPECT_CALL(os, Sleep(100ms)).WillOnce(Return());
@@ -247,7 +247,7 @@ TEST_F(GyroTest, readHappyCase)
             WillOnce(Invoke([&](uint8_t, auto, auto read) {
         EXPECT_EQ(read.size(), 9);
 
-        read[0] = 0b101;
+        read[0] = 0b1;
         read[1] = 1;
         read[2] = 2;
         read[3] = 3;
@@ -275,7 +275,7 @@ RC_GTEST_FIXTURE_PROP(GyroTest, rcHappyCase, (int16_t rTemp, int16_t rGyroX, int
         EXPECT_EQ(read.size(), 9);
 
         Writer writer{read};
-        writer.WriteByte(0b101);
+        writer.WriteByte(0b1);
 
         writer.WriteLowerBytesBE(rTemp, 2);
         writer.WriteLowerBytesBE(rGyroX, 2);
@@ -303,7 +303,7 @@ TEST_F(GyroTest, readI2CFail)
                 WillOnce(Invoke([=](uint8_t, auto, auto read) {
             EXPECT_EQ(read.size(), 9);
 
-            read[0] = 0b101;
+            read[0] = 0b1;
             read[1] = 1;
             read[2] = 2;
             read[3] = 3;
@@ -333,7 +333,7 @@ TEST_F(GyroTest, readGyroNotReady)
             return I2CResult::OK;
         }));
 
-        if (status == 0b101)
+        if (status == 1)
             EXPECT_TRUE(gyro.read());
         else
             EXPECT_FALSE(gyro.read());

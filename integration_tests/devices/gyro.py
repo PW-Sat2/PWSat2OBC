@@ -3,7 +3,7 @@ import logging, struct, i2cMock
 
 class Gyro(i2cMock.I2CDevice):
     def __init__(self):
-        super(Gyro, self).__init__(0x34)
+        super(Gyro, self).__init__(0x68)
         self.log = logging.getLogger("Gyro")
         self.data = {}
         self.reset()
@@ -56,7 +56,7 @@ class Gyro(i2cMock.I2CDevice):
             self.log.info("Config invalid - wrong DLPF_CFG!")
             return
 
-        if (self.data[0x17] & 0b10111111) != 0b00100101:
+        if (self.data[0x17] & 0b10111111) != 0b101:
             self.log.info("Config invalid - wrong Interrupt configuration!")
             return
 
@@ -81,8 +81,11 @@ class Gyro(i2cMock.I2CDevice):
         response = []
         while register in self.data:
             response.append(self.data[register])
-            register += 1
 
+            if register == 0x1A and self.data[register] == 0b101:
+                self.data[register] = 1
+
+            register += 1
         return response
 
     def handle_command(self, cmd, data):

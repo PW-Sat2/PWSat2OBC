@@ -31,7 +31,7 @@ namespace devices
         /**
          * @brief I2C address of gyroscope with A0 = 0. 7-bit notation.
          */
-        constexpr std::uint8_t I2Cadress = 0x34;
+        constexpr std::uint8_t I2Cadress = 0x68;
 
         /**
          * @brief Data readed from gyroscope.

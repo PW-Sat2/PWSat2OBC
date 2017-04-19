@@ -83,6 +83,7 @@ class DetailedDriver
             auto i2cstatusWrite = i2cbus.Write(I2Cadress, data);
             if (i2cstatusWrite != I2CResult::OK)
             {
+                LOGF(LOG_LEVEL_ERROR, "[gyro] Unable to configure gyro, Reason: %d", num(i2cstatusWrite));
                 return false;
             }
         }
@@ -107,12 +108,13 @@ class DetailedDriver
                 0x15, // base address
                 1,    // 0x15, prescaler
                 0x1E, // 0x16
-                0x65  // 0x17
+                0x45  // 0x17
             };
 
             auto i2cstatusWrite = i2cbus.Write(I2Cadress, data);
             if (i2cstatusWrite != I2CResult::OK)
             {
+                LOGF(LOG_LEVEL_ERROR, "[gyro] Unable to configure gyro, Reason: %d", num(i2cstatusWrite));
                 return false;
             }
         }
@@ -125,14 +127,16 @@ class DetailedDriver
         std::array<uint8_t, 9> data;
         if (!this->read_register(Registers::INT_STATUS, data))
         {
+            LOG(LOG_LEVEL_ERROR, "[gyro] Unable to read data from gyro");
             return {};
         }
 
         Reader reader{data};
 
         uint8_t status = reader.ReadByte();
-        if (status != 0b101)
+        if (status != 1)
         {
+            LOGF(LOG_LEVEL_ERROR, "[gyro] Incorrect status byte: %d", status);
             return {};
         }
 
@@ -164,6 +168,7 @@ class DetailedDriver
         auto i2cstatusWrite = i2cbus.Write(I2Cadress, data);
         if (i2cstatusWrite != I2CResult::OK)
         {
+            LOG(LOG_LEVEL_ERROR, "[gyro] Unable to write register");
             return false;
         }
         return true;
@@ -175,6 +180,7 @@ class DetailedDriver
         auto i2cstatusWrite = i2cbus.WriteRead(I2Cadress, data, value);
         if (i2cstatusWrite != I2CResult::OK)
         {
+            LOG(LOG_LEVEL_ERROR, "[gyro] Unable to read register");
             return false;
         }
         return true;
@@ -188,16 +194,19 @@ bool GyroDriver::init()
     DetailedDriver driver{i2cbus};
     if (!driver.hardware_reset())
     {
+        LOG(LOG_LEVEL_ERROR, "[gyro] Hardware reset failed");
         return false;
     }
 
     if (!driver.device_present())
     {
+        LOG(LOG_LEVEL_ERROR, "[gyro] Device does not respond");
         return false;
     }
 
     if (!driver.config())
     {
+        LOG(LOG_LEVEL_ERROR, "[gyro] Device cannot be configured");
         return false;
     }
 
@@ -205,6 +214,7 @@ bool GyroDriver::init()
 
     if (!driver.pll_and_data_ready())
     {
+        LOG(LOG_LEVEL_ERROR, "[gyro] PLL not locked");
         return false;
     }
 
