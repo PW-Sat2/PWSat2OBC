@@ -1,6 +1,8 @@
 #include "uart.h"
 #include <stdio.h>
+#include <dmadrv.h>
 #include <em_cmu.h>
+#include <em_gpio.h>
 #include <em_usart.h>
 #include "io_map.h"
 #include "logger/logger.h"
@@ -8,8 +10,14 @@
 
 static drivers::uart::UART* uart = nullptr;
 
+#define DEBUG_UART
+
 void UART1_RX_IRQHandler()
 {
+#ifdef DEBUG_UART
+    GPIO_PinOutClear(gpioPortC, 11);
+#endif
+
     if (uart != nullptr)
     {
         uart->OnReceived();
@@ -28,6 +36,10 @@ namespace drivers
             this->_lineIO.ExchangeBuffers = ExchangeBuffers;
             this->_lineIO.Readline = Readline;
             this->_lineIO.VPrintf = VPrintf;
+
+            this->_receivedLineEnd = System::CreateBinarySemaphore(0);
+            System::GiveSemaphore(this->_receivedLineEnd);
+
             ::uart = this;
         }
 
@@ -50,6 +62,13 @@ namespace drivers
             NVIC_EnableIRQ(IRQn::UART1_RX_IRQn);
 
             USART_Enable(io_map::UART::Peripheral, usartEnable);
+
+#ifdef DEBUG_UART
+            GPIO_PinModeSet(gpioPortC, 11, gpioModePushPull, 1);
+            GPIO_PinModeSet(gpioPortC, 12, gpioModePushPull, 1);
+#endif
+
+            DMADRV_AllocateChannel(&this->_rxChannel, nullptr);
         }
 
         LineIO& UART::GetLineIO()
@@ -88,23 +107,39 @@ namespace drivers
         {
             auto This = reinterpret_cast<UART*>(io->extra);
 
-            for (decltype(bufferLength) i = 0; i < bufferLength; i++)
-            {
-                std::uint8_t b;
-                This->_queue.Pop(b, InfiniteTimeout);
+#ifdef DEBUG_UART
+            GPIO_PinOutClear(gpioPortC, 12);
+#endif
+            System::TakeSemaphore(This->_receivedLineEnd, InfiniteTimeout);
 
-                char c = static_cast<char>(b);
+            DMADRV_PeripheralMemory(This->_rxChannel,
+                dmadrvPeripheralSignal_UART1_RXDATAV,
+                buffer,
+                const_cast<void*>(reinterpret_cast<volatile void*>(&io_map::UART::Peripheral->RXDATA)),
+                true,
+                bufferLength,
+                dmadrvDataSize1,
+                nullptr,
+                nullptr);
 
-                if (c == '\n')
-                {
-                    buffer[i] = '\0';
-                    return i;
-                }
+            System::TakeSemaphore(This->_receivedLineEnd, InfiniteTimeout);
 
-                buffer[i] = c;
-            }
+            DMADRV_StopTransfer(This->_rxChannel);
 
-            return bufferLength;
+            int remaining = 0;
+
+            auto x = DMADRV_TransferRemainingCount(This->_rxChannel, &remaining);
+
+            LOGF(LOG_LEVEL_INFO, "Received line end. R=%d X=%lX", remaining, x);
+
+            buffer[bufferLength - remaining - 1] = '\0';
+
+            System::GiveSemaphore(This->_receivedLineEnd);
+
+#ifdef DEBUG_UART
+            GPIO_PinOutSet(gpioPortC, 12);
+#endif
+            return bufferLength - remaining;
         }
 
         void UART::ExchangeBuffers(LineIO* io, gsl::span<const std::uint8_t> outputBuffer, gsl::span<uint8_t> inputBuffer)
@@ -131,9 +166,13 @@ namespace drivers
         {
             auto b = USART_RxDataGet(io_map::UART::Peripheral);
 
-            this->_queue.PushISR(b);
+            if (b == '\n')
+            {
+                System::GiveSemaphoreISR(this->_receivedLineEnd);
+                System::EndSwitchingISR();
+            }
 
-            System::EndSwitchingISR();
+            GPIO_PinOutSet(gpioPortC, 11);
         }
     }
 }

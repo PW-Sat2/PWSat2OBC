@@ -134,6 +134,8 @@ static void ObcInitTask(void* param)
 
     LOG(LOG_LEVEL_INFO, "Starting initialization task... ");
 
+    InitializeTerminal();
+
     auto obc = static_cast<OBC*>(param);
 
     if (OS_RESULT_FAILED(obc->PostStartInitialization()))
@@ -178,6 +180,8 @@ void SetupHardware(void)
 
     CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_HFCLKLE);
     CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_HFCLKLE);
+
+    CMU_HFRCOBandSet(cmuHFRCOBand_28MHz);
 }
 
 extern "C" void __libc_init_array(void);
@@ -203,8 +207,6 @@ int main(void)
 
     Main.Initialize();
 
-    InitializeTerminal();
-
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 
     SetupAntennas();
@@ -213,7 +215,7 @@ int main(void)
     Main.Hardware.Pins.Led1.High();
 
     System::CreateTask(BlinkLed0, "Blink0", 512, NULL, TaskPriority::P1, NULL);
-    System::CreateTask(ObcInitTask, "Init", 4_KB, &Main, TaskPriority::Highest, &Main.initTask);
+    System::CreateTask(ObcInitTask, "Init", 4_KB, &Main, TaskPriority::P14, &Main.initTask);
 
     System::RunScheduler();
 

@@ -140,12 +140,12 @@ void BSP_EBI_Init(void)
     init.addrSetupCycles = 3;
 
     // Read cycle times
-    init.readStrobeCycles = 63;
+    init.readStrobeCycles = 10;
     init.readHoldCycles = 3;
     init.readSetupCycles = 3;
 
     // Write cycle times
-    init.writeStrobeCycles = 63;
+    init.writeStrobeCycles = 10;
     init.writeHoldCycles = 3;
     init.writeSetupCycles = 3;
 

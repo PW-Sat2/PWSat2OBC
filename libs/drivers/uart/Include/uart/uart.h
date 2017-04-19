@@ -30,6 +30,9 @@ namespace drivers
 
             LineIO _lineIO;
             Queue<std::uint8_t, 50> _queue;
+            OSSemaphoreHandle _receivedLineEnd;
+
+            unsigned int _rxChannel;
         };
     }
 }

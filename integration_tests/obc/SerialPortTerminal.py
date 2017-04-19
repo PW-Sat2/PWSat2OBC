@@ -107,7 +107,13 @@ class SerialPortTerminal:
         self._gpio.high(self._gpio.RESET)
         self._gpio.low(self._gpio.RESET)
         self._gpio.high(self._gpio.RESET)
-        self.readUntilPrompt('@')
+
+        c = ''
+        while c != '@':
+            c = self._serial.read(1)
+
+            if c == '#':
+                self._handle_bootloader()
 
     def power_off(self):
         self.log.debug("power off")
@@ -146,3 +152,6 @@ class SerialPortTerminal:
                 return False
 
         return True
+    def _handle_bootloader(self):
+        self._serial.write("B\x05")
+

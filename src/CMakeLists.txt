@@ -89,6 +89,7 @@ target_link_libraries(${NAME}
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)
 
 target_generate_hex(${NAME})
+target_generate_bin(${NAME})
 
 target_memory_report(${NAME})
 

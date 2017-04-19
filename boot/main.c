@@ -53,6 +53,9 @@ int main(void)
 
     waitForComms(COMMS_TIMEOUT);
 
+    debugLen = sprintf((char*)debugStr, "\nTimeout exceeded - booting");
+    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+
     bootIndex = BOOT_getBootIndex();
 
     if (bootIndex == 0)
@@ -130,6 +133,8 @@ void waitForComms(uint32_t timeoutTicks_ms)
     SysTick_Config(CMU_ClockFreqGet(cmuClock_CORE) / 1000);
 
     msTicks = 0;
+
+    BSP_UART_txByte(BSP_UART_DEBUG, '#');
 
     do
     {

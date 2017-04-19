@@ -9,7 +9,7 @@ OBC::OBC()
       Imtq(Hardware.I2C.Buses.Bus),                                        //
       Experiments(fs, this->adcs.GetAdcsController(), this->timeProvider), //
       Communication(this->Fdir, Hardware.I2C.Buses.Bus, fs, Experiments),  //
-      terminal(this->IO),                                                  //
+      terminal(this->UARTDriver.GetLineIO()),                              //
       rtc(Hardware.I2C.Buses.Payload)
 {
 }
