@@ -235,6 +235,9 @@ void testBurtc(void)
     }
 }
 
+extern void resetPeripherals(void);
+extern void restClocks(void);
+
 void COMMS_processMsg(void)
 {
     uint8_t index, entry, *data;
@@ -402,6 +405,8 @@ void COMMS_processMsg(void)
             debugLen = sprintf((char*)debugStr, "...Done!");
             BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
 
+            uartReceived = 0;
+
             // reset message id
             msgId = 0x00;
 
@@ -449,6 +454,29 @@ void COMMS_processMsg(void)
 
         case 'T':
             testBurtc();
+            break;
+
+        case 'B':
+            uartReceived = 0;
+
+            index = USART_Rx(BSP_UART_DEBUG);
+
+            // test boot index
+            if (index > BOOT_TABLE_SIZE)
+            {
+                debugLen = sprintf((char*)debugStr, "\n\nError: Boot index out of bounds!");
+                BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+                return;
+            }
+
+            BOOT_setBootIndex(index);
+            BOOT_resetBootCounter();
+
+            debugLen = sprintf((char*)debugStr, "...Done!");
+            BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+
+            // reset message id
+            msgId = 0x00;
             break;
 
         default:

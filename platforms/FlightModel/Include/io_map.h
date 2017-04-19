@@ -5,6 +5,7 @@
 #include <em_device.h>
 #include <em_gpio.h>
 #include <em_usart.h>
+#include <em_wdog.h>
 #include <em_system.h>
 #include "base/io_map.h"
 
@@ -54,10 +55,10 @@ namespace io_map
 
     struct I2C_0 : public I2CPins<I2C_0>
     {
-        static constexpr std::uint32_t Location = I2C_ROUTE_LOCATION_LOC1;
+        static constexpr std::uint32_t Location = I2C_ROUTE_LOCATION_LOC2;
 
-        using SDA = PinLocation<gpioPortD, 6>;
-        using SCL = PinLocation<gpioPortD, 7>;
+        using SDA = PinLocation<gpioPortC, 6>;
+        using SCL = PinLocation<gpioPortC, 7>;
     };
 
     struct I2C_1 : public I2CPins<I2C_1>
@@ -71,18 +72,18 @@ namespace io_map
     struct I2C
     {
         static constexpr std::uint8_t InterruptPriority = 6;
-#ifdef I2C_SINGLE_BUS
-        static constexpr std::uint8_t SystemBus = 1;
+        static constexpr std::uint8_t SystemBus = 0;
         static constexpr std::uint8_t PayloadBus = 1;
-#else
-        static constexpr std::uint8_t SystemBus = 1;
-        static constexpr std::uint8_t PayloadBus = 0;
-#endif
 #ifndef I2C_TIMEOUT
         static constexpr std::uint32_t Timeout = 5; // in seconds
 #else
         static constexpr std::uint32_t Timeout = I2C_TIMEOUT; // in seconds
 #endif
+    };
+
+    struct Watchdog
+    {
+        static constexpr WDOG_PeriodSel_TypeDef Period = wdogPeriod_1k; // About 1 second
     };
 }
 
