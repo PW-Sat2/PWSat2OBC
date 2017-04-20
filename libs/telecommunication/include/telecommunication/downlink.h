@@ -23,6 +23,7 @@ namespace telecommunication
          */
         enum class DownlinkAPID : std::uint8_t
         {
+            Success = 0x0,         //!< Success frame
             Pong = 0x01,           //!< Pong
             FileNotFound = 0x2,    //!< Error frame: file not found
             Beacon = 0x3,          //!< Beacon

@@ -17,3 +17,13 @@ class DownloadFile(Telecommand):
         seqs_bytes = ensure_byte_list(struct.pack('<' + 'L' * len(self._seqs), *self._seqs))
 
         return [self._respond_as, len(self._path)] + list(self._path) + [0x0] + seqs_bytes
+
+class RemoveFile(Telecommand):
+    def __init__(self, path):
+        self._path = path
+
+    def apid(self):
+        return 0xAC
+
+    def payload(self):
+        return [len(self._path)] + list(self._path) + [0x0]

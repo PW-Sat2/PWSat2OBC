@@ -39,6 +39,13 @@ FileOpenResult YaffsFileSystem::Open(const char* path, FileOpen openFlag, FileAc
     return FileOpenResult(YaffsTranslateError(status), status);
 }
 
+OSResult YaffsFileSystem::Unlink(const char* path)
+{
+    auto status = yaffs_unlink(path);
+
+    return YaffsTranslateError(status);
+}
+
 OSResult YaffsFileSystem::TruncateFile(FileHandle file, FileSize length)
 {
     return YaffsTranslateError(yaffs_ftruncate(file, length));
