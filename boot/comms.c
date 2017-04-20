@@ -142,9 +142,6 @@ void testSram_M()
     {
         uint8_t expected = i % 256;
         i[Sram] = expected;
-        //        for (volatile size_t i = 0; i < 100; i++)
-        //            ;
-        //*(volatile uint8_t*)(BSP_EBI_SRAM1_BASE + i) = i % 256;
     }
 
     Delay(10);
@@ -152,9 +149,6 @@ void testSram_M()
     {
         uint8_t expected = i % 256;
         uint8_t now = Sram[i];
-
-        //        for (volatile size_t i = 0; i < 100; i++)
-        //            ;
 
         if (now != expected)
         {
@@ -293,7 +287,7 @@ void COMMS_processMsg(void)
                 {
                     data = (uint8_t*)(BOOT_TABLE_BASE + BOOT_getOffsetDescription(entry) + i);
 
-                    if (*data == '\r')
+                    if (*data == '\r' || *data == '\n')
                     {
                         break;
                     }
