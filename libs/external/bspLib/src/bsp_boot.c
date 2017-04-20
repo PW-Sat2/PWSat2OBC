@@ -487,7 +487,7 @@ void BOOT_programDescription(uint8_t index, uint8_t* buffer)
     uint32_t offset, i;
 
     // Write data to external FLASH, i.e. Nominal Mode
-    if (index > 0 && index < BOOT_TABLE_SIZE)
+    if (index >= 1 && index <= BOOT_TABLE_SIZE)
     {
         base = (uint8_t*)BOOT_TABLE_BASE;
         offset = BOOT_getOffsetDescription(index);

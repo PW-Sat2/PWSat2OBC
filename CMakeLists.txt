@@ -51,6 +51,7 @@ add_subdirectory(utils)
 add_subdirectory(test)
 add_subdirectory(boot)
 add_subdirectory(sample)
+add_subdirectory(tools)
 
 message(STATUS "Using C compiler from ${CMAKE_C_COMPILER}")
 message(STATUS "Target platform ${TARGET_PLATFORM}")
