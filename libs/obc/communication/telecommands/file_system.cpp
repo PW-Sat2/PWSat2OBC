@@ -99,5 +99,38 @@ namespace obc
                 sender.SendPart(seq);
             }
         }
+
+        RemoveFileTelecommand::RemoveFileTelecommand(services::fs::IFileSystem& fs) : _fs(fs)
+        {
+        }
+
+        void RemoveFileTelecommand::Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters)
+        {
+            Reader r(parameters);
+
+            auto downlinkApid = r.ReadByte();
+            auto pathLength = r.ReadByte();
+            auto pathSpan = r.ReadArray(pathLength);
+            auto path = reinterpret_cast<const char*>(pathSpan.data());
+
+            LOGF(LOG_LEVEL_INFO, "Removing file %s", path);
+
+            auto unlinkResult = this->_fs.Unlink(path);
+
+            if (OS_RESULT_FAILED(unlinkResult))
+            {
+                LOGF(LOG_LEVEL_ERROR, "Unable to open file %s, error %d", path, (int)unlinkResult);
+            }
+            else
+            {
+                LOGF(LOG_LEVEL_INFO, "File removed %s", path);
+            }
+
+            DownlinkFrame response(static_cast<DownlinkAPID>(downlinkApid), 0);
+            response.PayloadWriter().WriteByte(static_cast<uint8_t>(unlinkResult));
+            response.PayloadWriter().WriteArray(pathSpan);
+
+            transmitter.SendFrame(response.Frame());
+        }
     }
 }

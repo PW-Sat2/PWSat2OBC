@@ -83,6 +83,35 @@ namespace obc
             /** @brief File system */
             services::fs::IFileSystem& _fs;
         };
+
+        /**
+         * @brief Remove existing file
+         * @ingroup telecommands
+         * @telecommand
+         *
+         * Command code: 0xAC
+         *
+         * Parameters:
+         *  - 8-bit - APID that will be used in response
+         *  - 8-bit - Path length
+         *  - String - path to file
+         *  - 8-bit - Byte '0'
+         */
+        class RemoveFileTelecommand final : public telecommunication::uplink::Telecommand<0xAC>
+        {
+          public:
+            /**
+             * @brief Ctor
+             * @param fs File system
+             */
+            RemoveFileTelecommand(services::fs::IFileSystem& fs);
+
+            virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
+
+          private:
+            /** @brief File system */
+            services::fs::IFileSystem& _fs;
+        };
     }
 }
 

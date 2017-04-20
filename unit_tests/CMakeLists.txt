@@ -40,6 +40,7 @@ set(SOURCES
   Comm/TeleCommandHandlingTest.cpp
   Comm/UplinkFrameDecoderTest.cpp
   Comm/Telecommands/DownloadFileTelecommandTest.cpp
+  Comm/Telecommands/RemoveFileTelecommandTest.cpp
   base/ReaderTest.cpp
   base/WriterTest.cpp
   base/RapidTest.cpp
