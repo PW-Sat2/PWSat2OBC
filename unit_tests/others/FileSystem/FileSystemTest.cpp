@@ -322,4 +322,21 @@ namespace
 
         yaffs_unmount("/");
     }
+
+    TEST_F(FileSystemTest, ShouldRemoveExistingFile)
+    {
+        const char path[] = "/file";
+
+        yaffs_mount("/");
+
+        auto file = yaffs_open(path, O_CREAT | O_WRONLY, S_IRWXU);
+
+        yaffs_close(file);
+
+        yaffs_unlink(path);
+
+        ASSERT_THAT(api.Exists(path), Eq(false));
+
+        yaffs_unmount("/");
+    }
 }

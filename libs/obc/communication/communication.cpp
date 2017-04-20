@@ -16,6 +16,7 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir, II2CBus& systemBus, services
       SupportedTelecommands(                                                  //
           PingTelecommand(),                                                  //
           DownloadFileTelecommand(fs),                                        //
+          RemoveFileTelecommand(fs),                                          //
           PerformDetumblingExperiment(experiments),                           //
           AbortExperiment(experiments)                                        //
           ),                                                                  //
