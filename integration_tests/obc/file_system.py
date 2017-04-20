@@ -21,3 +21,7 @@ class FileSystemMixin(OBCMixin):
     @command("sync_fs")
     def sync_fs(self):
         pass
+
+    @command("erase {0}")
+    def erase(self, chip_index):
+        pass
