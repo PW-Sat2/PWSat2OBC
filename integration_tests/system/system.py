@@ -6,7 +6,7 @@ from obc import OBC, SerialPortTerminal
 
 
 class System:
-    def __init__(self, obc_com, mock_com, gpio, auto_power_on=True):
+    def __init__(self, obc_com, mock_com, gpio, boot_handler, auto_power_on=True):
         self.log = logging.getLogger("system")
 
         self.obc_com = obc_com
@@ -16,7 +16,7 @@ class System:
 
         self._setup_devices()
 
-        self.obc = OBC(SerialPortTerminal(obc_com, gpio))
+        self.obc = OBC(SerialPortTerminal(obc_com, gpio, boot_handler))
         self.obc.power_off()
 
         self.i2c.start()

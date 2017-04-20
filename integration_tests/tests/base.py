@@ -4,6 +4,8 @@ from system import System
 from pins import Pins
 import extensions
 from build_config import config
+from obc.boot import BootToIndex, BootToUpper
+
 
 class BaseTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
@@ -14,12 +16,13 @@ class BaseTest(unittest.TestCase):
         obc_com = config['OBC_COM']
         mock_com = config['MOCK_COM']
         gpio_com = config['GPIO_COM']
+        boot_handler = BootToUpper() if config['BOOT_UPPER'] else BootToIndex(config['BOOT_INDEX'])
 
         self.gpio = Pins(gpio_com)
 
         extensions.set_up(test_id=self.id())
 
-        self.system = System(obc_com, mock_com, self.gpio, self.auto_power_on)
+        self.system = System(obc_com, mock_com, self.gpio, boot_handler, self.auto_power_on)
 
     def tearDown(self):
         self.system.obc.sync_fs()
