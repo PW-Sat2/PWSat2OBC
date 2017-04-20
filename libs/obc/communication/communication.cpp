@@ -13,11 +13,13 @@ using namespace obc;
 Telecommands::Telecommands(services::fs::IFileSystem& fs, obc::OBCExperiments& experiments)
     : _ping(),                                   //
       _downloadFileTelecommand(fs),              //
+      _removeFileTelecommand(fs),                //
       _performDetumblingExperiment(experiments), //
       _telecommands{
           //
           &_ping,
           &_downloadFileTelecommand,
+          &_removeFileTelecommand,
           &_performDetumblingExperiment,
       }
 {

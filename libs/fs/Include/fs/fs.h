@@ -65,6 +65,7 @@ namespace services
 
         /** @brief Type that represents file opening status. */
         using FileOpenResult = IOOperationResult<FileHandle>;
+
         /** @brief Type that represents directory opening status. */
         using DirectoryOpenResult = IOOperationResult<DirectoryHandle>;
 
@@ -131,6 +132,13 @@ namespace services
              * @return Operation status. @see FSFileOpenResult for details.
              */
             virtual FileOpenResult Open(const char* path, FileOpen openFlag, FileAccess accessMode) = 0;
+
+            /**
+             * @brief Unlinks a file
+             * @param[in] path Path to file
+             * @return Operation status.
+             */
+            virtual OSResult Unlink(const char* path) = 0;
 
             /**
              * @brief Truncates file to given size

@@ -36,14 +36,18 @@ namespace obc
       private:
         /** @brief Ping telecommand */
         obc::telecommands::PingTelecommand _ping;
+
         /** @brief Download file telecommand */
         obc::telecommands::DownloadFileTelecommand _downloadFileTelecommand;
+
+        /** @brief Remove file telecommand */
+        obc::telecommands::RemoveFileTelecommand _removeFileTelecommand;
 
         /** @brief Perform detumbling experiment */
         obc::telecommands::PerformDetumblingExperiment _performDetumblingExperiment;
 
         /** @brief Array containg all telecommand handlers */
-        telecommunication::uplink::IHandleTeleCommand* _telecommands[3];
+        telecommunication::uplink::IHandleTeleCommand* _telecommands[4];
     };
 
     /**

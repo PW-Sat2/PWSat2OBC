@@ -47,12 +47,42 @@ class FileSystemTelecommandsTest(BaseTest):
 
         self.assertAlmostEqual(received, data)
 
-    def test_should_respond_with_error_frame_for_non_existent_file(self):
+    def test_should_respond_with_error_frame_for_non_existent_file_when_downloading(self):
         self._start()
 
         p = "/a/non_exist"
 
         self.system.comm.put_frame(telecommand.DownloadFile(respond_as=0x11, path=p, seqs=[0, 3, 1, 2]))
+
+        frame = self.system.comm.get_frame(20)
+
+        self.assertEqual(frame.apid(), 2)
+        self.assertEqual(frame.seq(), 0)
+        self.assertEqual(frame.payload(), ensure_byte_list(p))
+
+    def test_should_remove_file(self):
+        self._start()
+
+        data = "content"
+
+        p = "/a/test"
+
+        self.system.obc.write_file(p, data)
+
+        self.system.comm.put_frame(telecommand.RemoveFile(path=p))
+
+        frame = self.system.comm.get_frame(20)
+
+        self.assertEqual(frame.apid(), 0)
+        self.assertEqual(frame.seq(), 0)
+        self.assertEqual(frame.payload(), ensure_byte_list(p))
+
+    def test_should_respond_with_error_frame_for_non_existent_file_when_removing(self):
+        self._start()
+
+        p = "/a/non_exist"
+
+        self.system.comm.put_frame(telecommand.RemoveFile(path=p))
 
         frame = self.system.comm.get_frame(20)
 
