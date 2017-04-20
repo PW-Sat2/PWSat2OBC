@@ -11,6 +11,7 @@
 #include <em_cmu.h>
 #include <em_emu.h>
 #include <em_rmu.h>
+#include "boot.h"
 
 #define UPLOADBLOCKSIZE 256
 
@@ -204,34 +205,6 @@ void testEeprom()
     else
     {
         BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\nErr\n", 5, true);
-    }
-}
-
-void testBurtc(void)
-{
-    CMU_ClockEnable(cmuClock_HFLE, true);
-    CMU->LFCLKSEL = 0;
-    CMU_OscillatorEnable(cmuOsc_LFRCO, true, true);
-    RMU_ResetControl(rmuResetBU, rmuResetModeClear);
-
-    BURTC_Init_TypeDef init = BURTC_INIT_DEFAULT;
-    init.clkSel = burtcClkSelLFRCO;
-    init.mode = burtcModeEM4;
-    init.clkDiv = burtcClkDiv_128;
-
-    BURTC_Init(&init);
-
-    while (1)
-    {
-        uint32_t cnt = BURTC_CounterGet();
-
-        char buf[30] = {0};
-
-        sprintf(buf, "RTC=%ld\n", cnt);
-
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)buf, sizeof(buf), true);
-
-        DelayMilliseconds(500);
     }
 }
 
@@ -452,16 +425,10 @@ void COMMS_processMsg(void)
                 testEeprom();
             }
 
-        case 'T':
-            testBurtc();
-            break;
-
         case 'B':
             uartReceived = 0;
 
             index = USART_Rx(BSP_UART_DEBUG);
-
-            // test boot index
             if (index > BOOT_TABLE_SIZE)
             {
                 debugLen = sprintf((char*)debugStr, "\n\nError: Boot index out of bounds!");
@@ -469,11 +436,11 @@ void COMMS_processMsg(void)
                 return;
             }
 
-            BOOT_setBootIndex(index);
-            BOOT_resetBootCounter();
-
-            debugLen = sprintf((char*)debugStr, "...Done!");
+            debugLen = sprintf((char*)debugStr, "\nBooting index: %d", index);
             BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+
+            uint32_t bootAddress = LoadApplication(index);
+            BootToAddress(bootAddress);
 
             // reset message id
             msgId = 0x00;

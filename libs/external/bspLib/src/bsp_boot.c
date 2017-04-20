@@ -214,10 +214,13 @@ void BOOT_boot(uint32_t bootAddress)
     uint32_t sp = *((uint32_t*)bootAddress);
     uint32_t pc = *((uint32_t*)bootAddress + 1);
 
-    __set_MSP(sp);
-    __set_PSP(sp);
-
-    asm volatile("mov pc, %0" ::"r"(pc));
+    asm volatile("ldr r0, %0\n"
+                 "ldr r1, %1\n"
+                 "MSR msp, r0\n"
+                 "MSR psp, r0\n"
+                 "mov pc, r1\n" ::"m"(sp),
+                 "m"(pc)
+                 : "sp");
 }
 
 /**************************************************************************/ /**

@@ -134,7 +134,12 @@ class SerialPortTerminal:
 
         self.log.debug("Waiting for OBC to come up")
 
-        self.readUntilPrompt('@')
+        c = ''
+        while c != '@':
+            c = self._serial.read(1)
+
+            if c == '#':
+                self._handle_bootloader()
 
         self.log.debug("OBC startup done")
 
