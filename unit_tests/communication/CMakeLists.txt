@@ -4,6 +4,7 @@ set(SOURCES
   TeleCommandHandlingTest.cpp
   FrameContentsWriterTest.cpp
   Telecommands/DownloadFileTelecommandTest.cpp
+  Telecommands/RemoveFileTelecommandTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})

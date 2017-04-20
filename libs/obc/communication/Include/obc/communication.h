@@ -108,6 +108,7 @@ namespace obc
     using Telecommands = TelecommandsHolder< //
         obc::telecommands::PingTelecommand,
         obc::telecommands::DownloadFileTelecommand,
+        obc::telecommands::RemoveFileTelecommand,
         obc::telecommands::PerformDetumblingExperiment,
         obc::telecommands::AbortExperiment //
         >;
