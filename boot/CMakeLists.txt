@@ -8,6 +8,7 @@ set(SOURCES
     main.c
     xmodem.c
     fault_handlers.c
+    boot.c
 )
 
 add_executable(${NAME} ${SOURCES})

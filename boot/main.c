@@ -4,6 +4,7 @@
   * @author  Pieter Botma
   * @version 2.0
   ******************************************************************************/
+#include "boot.h"
 #include "includes.h"
 
 #define COMMS_TIMEOUT 5000 // milliseconds
@@ -23,7 +24,8 @@ int main(void)
 {
     uint8_t bootIndex;
     uint32_t bootAddress;
-    BOOT_DownloadResult_Typedef downloadError;
+
+    //    BOOT_DownloadResult_Typedef downloadError;
 
     CHIP_Init();
 
@@ -62,70 +64,30 @@ int main(void)
     {
         debugLen = sprintf((char*)debugStr, "\n\nSafe Mode boot index... Booting safe mode!");
         BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
-
-        goto boot;
     }
-
-    if (!verifyBootIndex(bootIndex))
+    else if (!verifyBootIndex(bootIndex))
     {
         bootIndex = 0;
-        BOOT_setBootIndex(bootIndex);
+        BOOT_setBootIndex(0);
 
         debugLen = sprintf((char*)debugStr, "\n\nInvalid boot index... Booting safe mode!");
         BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
-
-        goto boot;
     }
-
-    if (!verifyBootCounter())
+    else if (!verifyBootCounter())
     {
         bootIndex = 0;
-        BOOT_setBootIndex(bootIndex);
+        BOOT_setBootIndex(0);
 
         debugLen = sprintf((char*)debugStr, "\n\nBoot counter expired... Booting safe mode!");
         BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
-
-        goto boot;
-    }
-
-    BOOT_decBootCounter();
-
-    if (verifyApplicationCRC(bootIndex))
-    {
-        debugLen = sprintf((char*)debugStr, "\n\nBooting application!");
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
-
-        goto boot;
-    }
-
-    downloadError = BOOT_tryDownloadEntryToApplicationSpace(bootIndex);
-
-    if (downloadError)
-    {
-        bootIndex = 0;
-        BOOT_setBootIndex(bootIndex);
-
-        debugLen = sprintf((char*)debugStr, "\n\nUnable to load application (Error: %d)... Booting safe mode!", downloadError);
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
-
-        goto boot;
     }
     else
     {
-        debugLen = sprintf((char*)debugStr, "\n\nBooting application!");
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+        BOOT_decBootCounter();
     }
 
-boot:
-
-    resetPeripherals();
-    restClocks();
-
-    bootAddress = (bootIndex == 0) ? BOOT_SAFEMODE_BASE_CODE : BOOT_APPLICATION_BASE;
-    BOOT_boot(bootAddress);
-
-    while (1)
-        ;
+    bootAddress = LoadApplication(bootIndex);
+    BootToAddress(bootAddress);
 }
 void waitForComms(uint32_t timeoutTicks_ms)
 {
@@ -153,31 +115,4 @@ uint8_t verifyBootIndex(uint8_t bootIndex)
 uint8_t verifyBootCounter(void)
 {
     return (BOOT_getBootCounter() > 0);
-}
-
-uint8_t verifyApplicationCRC(uint8_t entryIndex)
-{
-    uint8_t *startAddr, *endAddr;
-    uint16_t expectedCRC, actualCRC;
-
-    startAddr = (uint8_t*)(BOOT_APPLICATION_BASE);
-    endAddr = (uint8_t*)(startAddr + BOOT_getLen(entryIndex));
-
-    actualCRC = BOOT_calcCRC(startAddr, endAddr);
-    expectedCRC = BOOT_getCRC(entryIndex);
-
-    return (actualCRC == expectedCRC);
-}
-
-void resetPeripherals(void)
-{
-    MSC_Deinit();
-    DMA_Reset();
-    USART_Reset(BSP_UART_DEBUG);
-}
-
-void restClocks(void)
-{
-    CMU->HFCORECLKEN0 &= ~CMU_HFCORECLKEN0_DMA;
-    CMU->HFPERCLKEN0 &= ~CMU_HFPERCLKEN0_UART1;
 }
