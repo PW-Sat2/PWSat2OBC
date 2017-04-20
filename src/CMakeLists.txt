@@ -95,7 +95,7 @@ target_memory_report(${NAME})
 
 target_asm_listing(${NAME})
 
-target_jlink_flash(${NAME})
+target_jlink_flash(${NAME} ${UPPER_ADDRESS})
 
 target_format_sources(${NAME} "${SOURCES}")
 

@@ -6,10 +6,11 @@ import time
 
 
 class SerialPortTerminal:
-    def __init__(self, comPort, gpio):
+    def __init__(self, comPort, gpio, boot_handler):
         self.log = logging.getLogger("OBCTerm")
 
         self._gpio = gpio
+        self._boot_handler = boot_handler
 
         self._serial = serial.Serial(comPort, baudrate=115200, timeout=1, rtscts=False)
         self._gpio.high(self._gpio.RESET)
@@ -108,12 +109,7 @@ class SerialPortTerminal:
         self._gpio.low(self._gpio.RESET)
         self._gpio.high(self._gpio.RESET)
 
-        c = ''
-        while c != '@':
-            c = self._serial.read(1)
-
-            if c == '#':
-                self._handle_bootloader()
+        self._boot()
 
     def power_off(self):
         self.log.debug("power off")
@@ -134,12 +130,7 @@ class SerialPortTerminal:
 
         self.log.debug("Waiting for OBC to come up")
 
-        c = ''
-        while c != '@':
-            c = self._serial.read(1)
-
-            if c == '#':
-                self._handle_bootloader()
+        self._boot()
 
         self.log.debug("OBC startup done")
 
@@ -157,6 +148,12 @@ class SerialPortTerminal:
                 return False
 
         return True
-    def _handle_bootloader(self):
-        self._serial.write("B\x05")
+
+    def _boot(self):
+        c = ''
+        while c != '@':
+            c = self._serial.read(1)
+
+            if c == '#':
+                self._boot_handler.boot(self._serial.write)
 

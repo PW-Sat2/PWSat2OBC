@@ -12,6 +12,7 @@
 #include <em_emu.h>
 #include <em_rmu.h>
 #include "boot.h"
+#include "bsp/bsp_boot.h"
 
 #define UPLOADBLOCKSIZE 256
 
@@ -445,6 +446,12 @@ void COMMS_processMsg(void)
             // reset message id
             msgId = 0x00;
             break;
+
+        case 'u':
+            debugLen = sprintf((char*)debugStr, "\n\nBooting to upper half ");
+            BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+
+            BootToAddress(BOOT_APPLICATION_BASE);
 
         default:
             // reset message id
