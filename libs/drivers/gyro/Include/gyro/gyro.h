@@ -5,9 +5,9 @@
 #include <array>
 #include <chrono>
 #include <cstdint>
-#include <experimental/optional>
 #include <gsl/span>
 
+#include "utils.h"
 #include "base/os.h"
 #include "i2c/i2c.h"
 
@@ -76,7 +76,7 @@ namespace devices
              * @brief Reads data from gyroscope
              * @return Three-axis raw gyroscope reading. If read failed than empty value is returned.
              */
-            std::experimental::optional<GyroRawData> read();
+            Option<GyroRawData> read();
 
           private:
             drivers::i2c::II2CBus& i2cbus;

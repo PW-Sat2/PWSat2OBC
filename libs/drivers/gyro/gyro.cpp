@@ -122,13 +122,13 @@ class DetailedDriver
         return true;
     }
 
-    std::experimental::optional<GyroRawData> get_raw()
+    Option<GyroRawData> get_raw()
     {
         std::array<uint8_t, 9> data;
         if (!this->read_register(Registers::INT_STATUS, data))
         {
             LOG(LOG_LEVEL_ERROR, "[gyro] Unable to read data from gyro");
-            return {};
+            return Option<GyroRawData>::None();
         }
 
         Reader reader{data};
@@ -149,7 +149,7 @@ class DetailedDriver
         assert(reader.Status());
         assert(reader.RemainingSize() == 0);
 
-        return gyroData;
+        return Option<GyroRawData>::Some(gyroData);
     }
 
   private:
@@ -221,7 +221,7 @@ bool GyroDriver::init()
     return true;
 }
 
-std::experimental::optional<GyroRawData> GyroDriver::read()
+Option<GyroRawData> GyroDriver::read()
 {
     DetailedDriver driver{i2cbus};
     return driver.get_raw();

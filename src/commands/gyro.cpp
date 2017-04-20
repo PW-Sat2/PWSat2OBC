@@ -17,60 +17,55 @@ using gsl::span;
 using namespace devices::gyro;
 typedef void (*VoidFuncPtr)(uint16_t argc, char* argv[]);
 
-namespace gyro_commands
+static void init(uint16_t argc, char* argv[])
 {
-    void init(uint16_t argc, char* argv[])
+    UNREFERENCED_PARAMETER(argc);
+    UNREFERENCED_PARAMETER(argv);
+
+    const bool status = Main.Hardware.Gyro.init();
+    if (!status)
     {
-        UNREFERENCED_PARAMETER(argc);
-        UNREFERENCED_PARAMETER(argv);
-
-        const bool status = Main.Gyro.init();
-        if (!status)
-        {
-            Main.terminal.Printf("Gyro init failed!\n");
-            return;
-        }
-    }
-
-    void read(uint16_t argc, char* argv[])
-    {
-        UNREFERENCED_PARAMETER(argc);
-        UNREFERENCED_PARAMETER(argv);
-
-        const auto result = Main.Gyro.read();
-        if (!result)
-        {
-            Main.terminal.Printf("Gyro read failed!\n");
-            return;
-        }
-
-        Main.terminal.Printf("%d %d %d %d\n", //
-            result->X,                        //
-            result->Y,                        //
-            result->Z,                        //
-            result->temperature);             //
-    }
-
-    static VoidFuncPtr GetDriverCommand(char* name)
-    {
-        if (strcmp(name, "init") == 0)
-        {
-            return init;
-        }
-        else if (strcmp(name, "read") == 0)
-        {
-            return read;
-        }
-        return nullptr;
-    }
-
-    void ShowHelp()
-    {
-        Main.terminal.Printf("gyro init|read\n");
+        Main.terminal.Printf("Gyro init failed!\n");
+        return;
     }
 }
 
-using namespace gyro_commands;
+static void read(uint16_t argc, char* argv[])
+{
+    UNREFERENCED_PARAMETER(argc);
+    UNREFERENCED_PARAMETER(argv);
+
+    const auto result = Main.Hardware.Gyro.read();
+    if (!result.HasValue)
+    {
+        Main.terminal.Printf("Gyro read failed!\n");
+        return;
+    }
+
+    Main.terminal.Printf("%d %d %d %d\n",      //
+        result.Value.X,                        //
+        result.Value.Y,                        //
+        result.Value.Z,                        //
+        result.Value.temperature);             //
+}
+
+static VoidFuncPtr GetDriverCommand(char* name)
+{
+    if (strcmp(name, "init") == 0)
+    {
+        return init;
+    }
+    else if (strcmp(name, "read") == 0)
+    {
+        return read;
+    }
+    return nullptr;
+}
+
+static void ShowHelp()
+{
+    Main.terminal.Printf("gyro init|read\n");
+}
 
 void GyroDriver(uint16_t argc, char* argv[])
 {

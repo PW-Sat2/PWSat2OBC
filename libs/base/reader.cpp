@@ -85,7 +85,8 @@ uint16_t Reader::ReadWordBE()
     }
 }
 
-int16_t Reader::ReadSignedWordBE() {
+int16_t Reader::ReadSignedWordBE()
+{
     return static_cast<int16_t>(this->ReadWordBE());
 }
 

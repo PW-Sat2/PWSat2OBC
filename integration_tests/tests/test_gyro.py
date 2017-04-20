@@ -14,7 +14,7 @@ class Test_Gyro(BaseTest):
 
         try:
             self.system.obc.gyro_read()
-            self.assertFalse(True)
+            self.fail("Gyro read didn't fail despite not initialised device!")
         except ValueError:
             pass
 

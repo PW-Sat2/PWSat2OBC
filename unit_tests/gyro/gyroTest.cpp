@@ -260,12 +260,12 @@ TEST_F(GyroTest, readHappyCase)
     }));
 
     auto gyroData = gyro.read();
-    EXPECT_TRUE(gyroData);
+    EXPECT_TRUE(gyroData.HasValue);
 
-    EXPECT_EQ((1 << 8) | 2, gyroData->temperature);
-    EXPECT_EQ((3 << 8) | 4, gyroData->X);
-    EXPECT_EQ((5 << 8) | 6, gyroData->Y);
-    EXPECT_EQ((7 << 8) | 8, gyroData->Z);
+    EXPECT_EQ((1 << 8) | 2, gyroData.Value.temperature);
+    EXPECT_EQ((3 << 8) | 4, gyroData.Value.X);
+    EXPECT_EQ((5 << 8) | 6, gyroData.Value.Y);
+    EXPECT_EQ((7 << 8) | 8, gyroData.Value.Z);
 }
 
 RC_GTEST_FIXTURE_PROP(GyroTest, rcHappyCase, (int16_t rTemp, int16_t rGyroX, int16_t rGyroY, int16_t rGyroZ))
@@ -287,12 +287,12 @@ RC_GTEST_FIXTURE_PROP(GyroTest, rcHappyCase, (int16_t rTemp, int16_t rGyroX, int
     }));
 
     auto gyroData = gyro.read();
-    EXPECT_TRUE(gyroData);
+    EXPECT_TRUE(gyroData.HasValue);
 
-    EXPECT_EQ(rTemp, gyroData->temperature);
-    EXPECT_EQ(rGyroX, gyroData->X);
-    EXPECT_EQ(rGyroY, gyroData->Y);
-    EXPECT_EQ(rGyroZ, gyroData->Z);
+    EXPECT_EQ(rTemp, gyroData.Value.temperature);
+    EXPECT_EQ(rGyroX, gyroData.Value.X);
+    EXPECT_EQ(rGyroY, gyroData.Value.Y);
+    EXPECT_EQ(rGyroZ, gyroData.Value.Z);
 }
 
 TEST_F(GyroTest, readI2CFail)
@@ -316,7 +316,7 @@ TEST_F(GyroTest, readI2CFail)
             return static_cast<I2CResult>(i2cresult);
         }));
 
-        EXPECT_FALSE(gyro.read());
+        EXPECT_FALSE(gyro.read().HasValue);
     }
 }
 
@@ -334,8 +334,8 @@ TEST_F(GyroTest, readGyroNotReady)
         }));
 
         if (status == 1)
-            EXPECT_TRUE(gyro.read());
+            EXPECT_TRUE(gyro.read().HasValue);
         else
-            EXPECT_FALSE(gyro.read());
+            EXPECT_FALSE(gyro.read().HasValue);
     }
 }

@@ -12,6 +12,7 @@
 #include "power/power.h"
 #include "spi/efm.h"
 #include "temp/efm.hpp"
+#include "gyro/gyro.h"
 
 namespace obc
 {
@@ -134,6 +135,9 @@ namespace obc
          * @brief Object that provides read/write capabilities to persistent storage
          */
         obc::PersistentStorageAccess PersistentStorage;
+
+        /** @brief Gyroscope handling */
+        devices::gyro::GyroDriver Gyro;
     };
 }
 /** @} */

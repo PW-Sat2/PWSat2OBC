@@ -73,6 +73,7 @@ OBCHardware::OBCHardware(PowerControl* powerControl, TimeAction& burtcTickHandle
     : I2C(powerControl),                 //
       Burtc(burtcTickHandler),           //
       FramSpi(SPI, Pins.FramChipSelect), //
-      PersistentStorage(FramSpi)         //
+      PersistentStorage(FramSpi),        //
+      Gyro(I2C.Buses.Payload)            //
 {
 }

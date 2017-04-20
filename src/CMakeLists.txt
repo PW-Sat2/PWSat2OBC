@@ -78,7 +78,6 @@ target_link_libraries(${NAME}
     rtc
     mission_adcs
     mission_beacon
-    gyro
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)
