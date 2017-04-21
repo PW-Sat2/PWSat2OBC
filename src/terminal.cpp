@@ -45,6 +45,8 @@ static const TerminalCommandDescription commands[] = {
     {"testflash", TestExternalFlash},
     {"temp", Temp},
     {"eps", EPSCommand},
+    {"wdog", WatchdogCommand},
+    {"hang", Hang},
 };
 
 void InitializeTerminal(void)

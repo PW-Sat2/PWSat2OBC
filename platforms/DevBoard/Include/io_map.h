@@ -5,6 +5,7 @@
 #include <em_device.h>
 #include <em_gpio.h>
 #include <em_usart.h>
+#include <em_wdog.h>
 #include <em_system.h>
 #include "base/io_map.h"
 
@@ -68,6 +69,11 @@ namespace io_map
 #else
         static constexpr std::uint32_t Timeout = I2C_TIMEOUT; // in seconds
 #endif
+    };
+
+    struct Watchdog
+    {
+        static constexpr WDOG_PeriodSel_TypeDef Period = wdogPeriod_1k; // About 1 second
     };
 }
 
