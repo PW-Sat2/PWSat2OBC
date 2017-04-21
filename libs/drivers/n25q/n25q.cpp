@@ -17,7 +17,6 @@ using gsl::span;
 using namespace devices::n25q;
 using drivers::spi::ISPIInterface;
 using drivers::spi::SPISelectSlave;
-using redundancy::Voter;
 
 enum N25QCommand
 {
@@ -159,7 +158,7 @@ OperationResult OperationWaiter::Wait()
     return _waitResult.Value;
 }
 
-OperationWaiter N25QDriver::BeginWriteChunk(size_t address, ptrdiff_t offset, span<const uint8_t> chunk)
+OperationWaiter N25QDriver::BeginWritePage(size_t address, ptrdiff_t offset, span<const uint8_t> page)
 {
     this->EnableWrite();
 
@@ -173,27 +172,10 @@ OperationWaiter N25QDriver::BeginWriteChunk(size_t address, ptrdiff_t offset, sp
         SPISelectSlave slave(this->_spi);
 
         this->_spi.Write(command);
-        this->_spi.Write(chunk);
+        this->_spi.Write(page);
     }
 
     return OperationWaiter(this, ProgramPageTimeout, FlagStatus::ProgramError);
-}
-
-OperationResult N25QDriver::WriteMemory(size_t address, span<const uint8_t> buffer)
-{
-    this->ClearFlags();
-
-    for (ptrdiff_t offset = 0; offset < buffer.size(); offset += 256)
-    {
-        auto chunk = buffer.subspan(offset, min(256, buffer.size() - offset));
-
-        auto chunkWriteResult = BeginWriteChunk(address, offset, chunk).Wait();
-
-        if (chunkWriteResult != OperationResult::Success)
-            return chunkWriteResult;
-    }
-
-    return OperationResult::Success;
 }
 
 void N25QDriver::Command(const std::uint8_t command, gsl::span<std::uint8_t> response)

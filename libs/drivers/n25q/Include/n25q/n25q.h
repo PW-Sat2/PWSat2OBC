@@ -141,28 +141,15 @@ namespace devices
             void ReadMemory(std::size_t address, gsl::span<uint8_t> buffer);
 
             /**
-             * @brief Writes (sets 1 to 0) a chunk of data to memory
+             * @brief Writes (sets 1 to 0) a page of data to memory
              * @param[in] address Start address
-             * @param[in] offset Chunk address offset
-             * @param[in] chunk Buffer
+             * @param[in] offset Page address offset
+             * @param[in] page Page buffer, must be at most 256 bytes long
              * @return Operation waiter
              *
              * Operation can take up to 5ms
              */
-            OperationWaiter BeginWriteChunk(size_t address, ptrdiff_t offset, gsl::span<const uint8_t> chunk);
-
-            /**
-             * @brief Writes (sets 1 to 0) to memory
-             * @param[in] address Start address
-             * @param[in] buffer Buffer
-             * @return Operation result
-             *
-             * Write operation spanning more than one page (256 bytes) are splitted into N separate write operations.
-             * In case of failure in one of them, subsequent writes are aborted and memory is left partially written
-             *
-             * Operation can take up to 5ms per page
-             */
-            OperationResult WriteMemory(size_t address, gsl::span<const uint8_t> buffer);
+            OperationWaiter BeginWritePage(size_t address, ptrdiff_t offset, gsl::span<const uint8_t> page);
 
             /**
              * @brief Erases single subsector (4KB)
@@ -303,14 +290,16 @@ namespace devices
              * @brief Reads data from memory starting from given address.
              * @param[in] address Start address
              * @param[out] outputBuffer Output buffer
-             * @param[in] redundantBuffer1 First buffer used for redundant read
-             * @param[in] redundantBuffer2 Second buffer used for redundant read
+             * @param[out] redundantBuffer1 First buffer used for redundant read
+             * @param[out] redundantBuffer2 Second buffer used for redundant read
+             *
+             * All buffers should have the same length. If not, the length of shortest buffer will be used as data size.
              *
              * If the memory content from drivers is different, bitwise triple modular redundancy
              * is performed using data from all 3 drivers.
              *
              * Reads are performed sequentially. If reads from 2 chips yield the same data, 3rd chip is not read.
-             *
+             * This means that redundantBuffer2 will only be written if outputBuffer and redundantBuffer1 hold different data.
              */
             void ReadMemory(std::size_t address,
                 gsl::span<uint8_t> outputBuffer,
@@ -373,8 +362,6 @@ namespace devices
 
           private:
             N25QDriver (&_n25qDrivers)[3];
-
-            redundancy::BitwiseCorrector<uint8_t> _bitwiseCorrector;
         };
 
         /** @} */
