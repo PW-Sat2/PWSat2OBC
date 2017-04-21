@@ -17,6 +17,7 @@ target_link_libraries(${NAME}
 	burtc
 	mcu_temp
 	obc_state
+	eps
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

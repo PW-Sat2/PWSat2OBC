@@ -24,6 +24,7 @@
 #include "obc/fdir.hpp"
 #include "obc/hardware.h"
 #include "obc/storage.h"
+#include "power_eps/power_eps.h"
 #include "rtc/rtc.hpp"
 #include "spi/efm.h"
 #include "storage/nand_driver.h"
@@ -43,6 +44,7 @@
 struct OBC
 {
   public:
+    /** @brief State flag: OBC initialization finished */
     static constexpr OSEventBits InitializationFinishedFlag = 1;
 
     /** @brief Constructs @ref OBC object  */
@@ -79,7 +81,7 @@ struct OBC
     LineIO IO;
 
     /** @brief Power control interface */
-    PowerControl PowerControlInterface;
+    services::power::EPSPowerControl PowerControlInterface;
 
     /** @brief FDIR mechanisms */
     obc::FDIR Fdir;
