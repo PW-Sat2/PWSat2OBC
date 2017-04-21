@@ -19,6 +19,15 @@ namespace services
              * @return Mission time
              */
             virtual Option<std::chrono::milliseconds> GetCurrentTime() = 0;
+
+            /**
+             * @brief Sets current mission time.
+             *
+             * @param[in] duration Mission time.
+             *
+             * @return Operation status. True on success, false otherwise.
+             */
+            virtual bool SetCurrentTime(std::chrono::milliseconds duration) = 0;
         };
     }
 }
