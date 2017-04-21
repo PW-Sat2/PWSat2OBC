@@ -10,7 +10,8 @@ using std::ptrdiff_t;
 using gsl::span;
 
 using namespace devices::n25q;
-using redundancy::Voter;
+using redundancy::Vote;
+using redundancy::CorrectBuffer;
 
 RedundantN25QDriver::RedundantN25QDriver(N25QDriver (&n25qDrivers)[3]) : _n25qDrivers(n25qDrivers)
 {
@@ -22,17 +23,24 @@ void RedundantN25QDriver::ReadMemory(    //
     gsl::span<uint8_t> redundantBuffer1, //
     gsl::span<uint8_t> redundantBuffer2)
 {
-    _n25qDrivers[0].ReadMemory(address, outputBuffer);
-    _n25qDrivers[1].ReadMemory(address, redundantBuffer1);
+    auto bufferLength = std::min(outputBuffer.length(), std::min(redundantBuffer1.length(), redundantBuffer2.length()));
 
-    if (outputBuffer == redundantBuffer1)
+    auto normalizedOutputBuffer = outputBuffer.subspan(0, bufferLength);
+    auto normalizedRedundantBuffer1 = redundantBuffer1.subspan(0, bufferLength);
+
+    _n25qDrivers[0].ReadMemory(address, normalizedOutputBuffer);
+    _n25qDrivers[1].ReadMemory(address, normalizedRedundantBuffer1);
+
+    if (normalizedOutputBuffer == normalizedRedundantBuffer1)
     {
         return;
     }
 
     {
-        _n25qDrivers[2].ReadMemory(address, redundantBuffer2);
-        _bitwiseCorrector.CorrectAll(outputBuffer, redundantBuffer1, redundantBuffer2);
+        auto normalizedRedundantBuffer2 = redundantBuffer2.subspan(0, bufferLength);
+
+        _n25qDrivers[2].ReadMemory(address, normalizedRedundantBuffer2);
+        CorrectBuffer(normalizedOutputBuffer, normalizedRedundantBuffer1, normalizedRedundantBuffer2);
     }
 }
 
@@ -46,7 +54,7 @@ OperationResult RedundantN25QDriver::EraseChip()
     auto d2Result = d2Wait.Wait();
     auto d3Result = d3Wait.Wait();
 
-    auto votedResult = Voter<OperationResult>::Vote(d1Result, d2Result, d3Result);
+    auto votedResult = Vote(d1Result, d2Result, d3Result);
 
     if (!votedResult.HasValue)
         return OperationResult::Failure;
@@ -64,7 +72,7 @@ OperationResult RedundantN25QDriver::EraseSubSector(size_t address)
     auto d2Result = d2Wait.Wait();
     auto d3Result = d3Wait.Wait();
 
-    auto votedResult = Voter<OperationResult>::Vote(d1Result, d2Result, d3Result);
+    auto votedResult = Vote(d1Result, d2Result, d3Result);
 
     if (!votedResult.HasValue)
         return OperationResult::Failure;
@@ -82,7 +90,7 @@ OperationResult RedundantN25QDriver::EraseSector(size_t address)
     auto d2Result = d2Wait.Wait();
     auto d3Result = d3Wait.Wait();
 
-    auto votedResult = Voter<OperationResult>::Vote(d1Result, d2Result, d3Result);
+    auto votedResult = Vote(d1Result, d2Result, d3Result);
 
     if (!votedResult.HasValue)
         return OperationResult::Failure;
@@ -94,17 +102,17 @@ OperationResult RedundantN25QDriver::WriteMemory(size_t address, gsl::span<const
 {
     for (ptrdiff_t offset = 0; offset < buffer.size(); offset += 256)
     {
-        auto chunk = buffer.subspan(offset, min(256, buffer.size() - offset));
+        auto page = buffer.subspan(offset, min(256, buffer.size() - offset));
 
-        auto d1Waiter = _n25qDrivers[0].BeginWriteChunk(address, offset, chunk);
-        auto d2Waiter = _n25qDrivers[1].BeginWriteChunk(address, offset, chunk);
-        auto d3Waiter = _n25qDrivers[2].BeginWriteChunk(address, offset, chunk);
+        auto d1Waiter = _n25qDrivers[0].BeginWritePage(address, offset, page);
+        auto d2Waiter = _n25qDrivers[1].BeginWritePage(address, offset, page);
+        auto d3Waiter = _n25qDrivers[2].BeginWritePage(address, offset, page);
 
         auto d1Result = d1Waiter.Wait();
         auto d2Result = d2Waiter.Wait();
         auto d3Result = d3Waiter.Wait();
 
-        auto votedResult = Voter<OperationResult>::Vote(d1Result, d2Result, d3Result);
+        auto votedResult = Vote(d1Result, d2Result, d3Result);
         if (!votedResult.HasValue)
             return OperationResult::Failure;
         if (votedResult.Value != OperationResult::Success)
@@ -120,7 +128,7 @@ OperationResult RedundantN25QDriver::Reset()
     auto d2Result = _n25qDrivers[1].Reset();
     auto d3Result = _n25qDrivers[2].Reset();
 
-    auto votedResult = Voter<OperationResult>::Vote(d1Result, d2Result, d3Result);
+    auto votedResult = Vote(d1Result, d2Result, d3Result);
     if (!votedResult.HasValue)
         return OperationResult::Failure;
     if (votedResult.Value != OperationResult::Success)

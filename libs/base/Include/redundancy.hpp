@@ -12,67 +12,58 @@ namespace redundancy
      */
 
     /**
-     * @brief Class used for TMR voting.
+     * @brief Votes the actual value based on 3 provided inputs.
+     * @param[in] a First input
+     * @param[in] b Second input
+     * @param[in] c Third input
      * @tparam T Type used for majority vote. Must implement == operation.
+     * @return Value based on majority vote, or None if all parameters are different.
      */
-    template <typename T> struct Voter
+    template <typename T> static Option<T> Vote(T a, T b, T c)
     {
-        /**
-         * @brief Votes the actual value based on 3 provided inputs.
-         * @param[in] a First input
-         * @param[in] b Second input
-         * @param[in] c Third input
-         * @return Value based on majority vote, or None if all parameters are different.
-         */
-        static Option<T> Vote(T a, T b, T c)
-        {
-            if (a == b || a == c)
-                return Some(a);
-            if (b == c)
-                return Some(b);
+        if (a == b || a == c)
+            return Some(a);
+        if (b == c)
+            return Some(b);
 
-            return None<T>();
-        }
-    };
+        return None<T>();
+    }
 
     /**
-     * @brief Provides bitwise TMR.
-     * @tparam T Type used for majority vote. Must implement bitwise & and | operations.
+     * @brief Performs bitwise majority vote based on three inputs.
+     * @param[in] a First input
+     * @param[in] b Second input
+     * @param[in] c Third input
+     * @tparam T Type used for majority vote. Must be integral or enum type
+     * @return Value calculated from bitwise majority vote.
      */
-    template <typename T> struct BitwiseCorrector
+    template <typename T> T Correct(T a, T b, T c)
     {
-        /**
-         * @brief Performs bitwise majority vote based on three inputs.
-         * @param[in] a First input
-         * @param[in] b Second input
-         * @param[in] c Third input
-         * @return Value calculated from bitwise majority vote.
-         */
-        T Correct(T a, T b, T c)
+        static_assert(std::is_integral<T>::value || std::is_enum<T>::value, "Correction requires integral or enum type");
+        return (a & b) | (b & c) | (a & c);
+    }
+
+    /**
+     * @brief Performs bitwise majority votes on entire data buffers.
+     * @param[in,out] buffer1 First input
+     * @param[in] buffer2 Second input
+     * @param[in] buffer3 Third input
+     * @tparam T Type used for majority vote. Must be integral or enum type
+     * @return True if all buffers are of the same size, False otherwise.
+     */
+    template <typename T> bool CorrectBuffer(gsl::span<T> buffer1, gsl::span<T> buffer2, gsl::span<T> buffer3)
+    {
+        static_assert(std::is_integral<T>::value || std::is_enum<T>::value, "Correction requires integral or enum type");
+        if (buffer1.length() != buffer2.length() || buffer2.length() != buffer3.length())
+            return false;
+
+        for (auto i = 0; i < buffer1.length(); ++i)
         {
-            return (a & b) | (b & c) | (a & c);
+            buffer1[i] = Correct(buffer1[i], buffer2[i], buffer3[i]);
         }
 
-        /**
-         * @brief Performs bitwise majority votes on entire data buffers.
-         * @param[in,out] buffer1 First input
-         * @param[in] buffer2 Second input
-         * @param[in] buffer3 Third input
-         * @return True if all buffers are of the same size, False otherwise.
-         */
-        bool CorrectAll(gsl::span<T> buffer1, gsl::span<T> buffer2, gsl::span<T> buffer3)
-        {
-            if (buffer1.length() != buffer2.length() || buffer2.length() != buffer3.length())
-                return false;
-
-            for (auto i = 0; i < buffer1.length(); ++i)
-            {
-                buffer1[i] = Correct(buffer1[i], buffer2[i], buffer3[i]);
-            }
-
-            return true;
-        }
-    };
+        return true;
+    }
 
     /** @} */
 }
