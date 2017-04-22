@@ -131,5 +131,76 @@ template <> struct Wider<std::uint32_t>
     using type = std::uint64_t;
 };
 
+/**
+ * @brief Checks if type is in list
+ * @tparam T Type to check
+ * @tparam List Template pack for checking
+ */
+template <typename T, typename... List> class IsInList
+{
+  private:
+    /**
+     * @brief Check logic - single step
+     * @return Value indicating whether type is in list
+     */
+    template <std::uint8_t Tag, typename Head, typename... Rest> static constexpr bool Check()
+    {
+        if (std::is_same<T, Head>::value)
+        {
+            return true;
+        }
+
+        return Check<0, Rest...>();
+    }
+
+    /**
+     * @brief Check logic - stop condition
+     * @return Always false
+     */
+    template <std::uint8_t Tag> static constexpr bool Check()
+    {
+        return false;
+    }
+
+  public:
+    /** @brief Value indicating whether type is in list */
+    static constexpr bool value = Check<0, List...>();
+};
+
+/**
+ * @brief Checks if types in template pack are unique
+ * @tparam Ts Template pack to check
+ */
+template <typename... Ts> class AreTypesUnique
+{
+  private:
+    /**
+     * @brief Check logic - single step
+     * @return Value indicating whether types in template pack are unique
+     */
+    template <std::uint8_t Tag, typename Head, typename... Rest> static constexpr bool IsUnique()
+    {
+        if (IsInList<Head, Rest...>::value)
+        {
+            return false;
+        }
+
+        return IsUnique<0, Rest...>();
+    }
+
+    /**
+     * @brief Check logic - stop condition
+     * @return Always true
+     */
+    template <std::uint8_t Tag> static constexpr bool IsUnique()
+    {
+        return true;
+    }
+
+  public:
+    /** @brief Value indicating whether types in template pack are unique */
+    static constexpr bool value = IsUnique<0, Ts...>();
+};
+
 /** @} */
 #endif /* LIBS_BASE_INCLUDE_TRAITS_HPP_ */
