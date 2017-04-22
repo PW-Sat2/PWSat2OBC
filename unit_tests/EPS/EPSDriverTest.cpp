@@ -33,6 +33,7 @@ class EPSDriverTest : public testing::Test
     NiceMock<I2CBusMock> _payload;
     NiceMock<ErrorCountingConfigrationMock> _errorCountingConfig;
     error_counter::ErrorCounting _errorCounting;
+    EPSDriver::ErrorCounter _errorCounter;
 
     EPSDriver _eps;
 
@@ -41,8 +42,8 @@ class EPSDriverTest : public testing::Test
 };
 
 EPSDriverTest::EPSDriverTest()
-    : _errorCounting(this->_errorCountingConfig), _eps(this->_errorCounting, this->_bus, this->_payload), _errorA(ErrorCode::NoError),
-      _errorB(ErrorCode::NoError)
+    : _errorCounting(this->_errorCountingConfig), _errorCounter(this->_errorCounting),
+      _eps(this->_errorCounting, this->_bus, this->_payload), _errorA(ErrorCode::NoError), _errorB(ErrorCode::NoError)
 {
     ON_CALL(this->_bus, WriteRead(EPSDriver::ControllerA, ElementsAre(0), SpanOfSize(1)))
         .WillByDefault(Invoke([this](I2CAddress, gsl::span<const uint8_t>, gsl::span<uint8_t> response) {
@@ -307,11 +308,11 @@ RC_GTEST_FIXTURE_PROP(EPSDriverTest, ReadHousekeepingA, (HouseheepingControllerA
     ON_CALL(this->_bus, WriteRead(EPSDriver::ControllerA, ElementsAre(0), _))
         .WillByDefault(DoAll(FillBuffer<2>(buffer), Return(I2CResult::OK)));
 
-    this->_errorCounting.Failure(EPSDriver::ErrorCounter);
+    this->_errorCounter.Failure();
 
     auto result = this->_eps.ReadHousekeepingA();
 
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(3));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(3));
     RC_ASSERT(result.HasValue);
 
     auto hk = result.Value;
@@ -385,11 +386,11 @@ RC_GTEST_FIXTURE_PROP(EPSDriverTest, ReadHousekeepingB, (HouseheepingControllerB
     ON_CALL(this->_payload, WriteRead(EPSDriver::ControllerB, ElementsAre(0), _))
         .WillByDefault(DoAll(FillBuffer<2>(buffer), Return(I2CResult::OK)));
 
-    this->_errorCounting.Failure(EPSDriver::ErrorCounter);
+    this->_errorCounter.Failure();
 
     auto result = this->_eps.ReadHousekeepingB();
 
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(3));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(3));
     RC_ASSERT(result.HasValue);
 
     auto hk = result.Value;
@@ -411,7 +412,7 @@ TEST_F(EPSDriverTest, ShouldReturnNoneOnNackWhenReadingHousekeepingA)
     auto result = this->_eps.ReadHousekeepingA();
 
     ASSERT_THAT(result.HasValue, Eq(false));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(5));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
 }
 
 TEST_F(EPSDriverTest, ShouldReturnNoneOnNackWhenReadingHousekeepingB)
@@ -421,7 +422,7 @@ TEST_F(EPSDriverTest, ShouldReturnNoneOnNackWhenReadingHousekeepingB)
     auto result = this->_eps.ReadHousekeepingB();
 
     ASSERT_THAT(result.HasValue, Eq(false));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(5));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
 }
 
 TEST_F(EPSDriverTest, ShouldFailAfterPowerCycleATimeout)
@@ -430,7 +431,7 @@ TEST_F(EPSDriverTest, ShouldFailAfterPowerCycleATimeout)
 
     auto r = this->_eps.PowerCycle(EPSDriver::Controller::A);
     ASSERT_THAT(r, Eq(false));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(5));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
 }
 
 TEST_F(EPSDriverTest, ShouldFailAfterPowerCycleBTimeout)
@@ -447,7 +448,7 @@ TEST_F(EPSDriverTest, ShouldFailIfNackOnPowerCycleA)
 
     auto r = this->_eps.PowerCycle(EPSDriver::Controller::A);
     ASSERT_THAT(r, Eq(false));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(5));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
 }
 
 TEST_F(EPSDriverTest, ShouldFailIfNackOnPowerCycleB)
@@ -456,7 +457,7 @@ TEST_F(EPSDriverTest, ShouldFailIfNackOnPowerCycleB)
 
     auto r = this->_eps.PowerCycle(EPSDriver::Controller::B);
     ASSERT_THAT(r, Eq(false));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(5));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
 }
 
 TEST_F(EPSDriverTest, ShouldFallbackToControllerBOnPowerCycleIfControllerANack)
@@ -466,18 +467,18 @@ TEST_F(EPSDriverTest, ShouldFallbackToControllerBOnPowerCycleIfControllerANack)
 
     auto r = this->_eps.PowerCycle();
     ASSERT_THAT(r, Eq(false));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(10));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(10));
 }
 
 TEST_F(EPSDriverTest, ShouldDisableOverheatSubmodeA)
 {
     EXPECT_CALL(this->_bus, Write(EPSDriver::ControllerA, ElementsAre(0xE4))).WillOnce(Return(I2CResult::OK));
 
-    this->_errorCounting.Failure(EPSDriver::ErrorCounter);
+    this->_errorCounter.Failure();
 
     auto r = this->_eps.DisableOverheatSubmode(EPSDriver::Controller::A);
     ASSERT_THAT(r, Eq(true));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(3));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(3));
 }
 
 TEST_F(EPSDriverTest, ShouldDisableOverheatSubmodeAFail)
@@ -486,18 +487,18 @@ TEST_F(EPSDriverTest, ShouldDisableOverheatSubmodeAFail)
 
     auto r = this->_eps.DisableOverheatSubmode(EPSDriver::Controller::A);
     ASSERT_THAT(r, Eq(false));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(5));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
 }
 
 TEST_F(EPSDriverTest, ShouldDisableOverheatSubmodeB)
 {
     EXPECT_CALL(this->_payload, Write(EPSDriver::ControllerB, ElementsAre(0xE4))).WillOnce(Return(I2CResult::OK));
 
-    this->_errorCounting.Failure(EPSDriver::ErrorCounter);
+    this->_errorCounter.Failure();
 
     auto r = this->_eps.DisableOverheatSubmode(EPSDriver::Controller::B);
     ASSERT_THAT(r, Eq(true));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(3));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(3));
 }
 
 TEST_F(EPSDriverTest, ShouldDisableOverheatSubmodeBFail)
@@ -506,29 +507,29 @@ TEST_F(EPSDriverTest, ShouldDisableOverheatSubmodeBFail)
 
     auto r = this->_eps.DisableOverheatSubmode(EPSDriver::Controller::B);
     ASSERT_THAT(r, Eq(false));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(5));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
 }
 
 TEST_F(EPSDriverTest, ShouldReadErrorCodeA)
 {
-    this->_errorCounting.Failure(EPSDriver::ErrorCounter);
+    this->_errorCounter.Failure();
 
     this->_errorA = ErrorCode::OnFire;
     auto errorCode = this->_eps.GetErrorCode(EPSDriver::Controller::A);
 
     ASSERT_THAT(errorCode, Eq(ErrorCode::OnFire));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(3));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(3));
 }
 
 TEST_F(EPSDriverTest, ShouldReadErrorCodeB)
 {
-    this->_errorCounting.Failure(EPSDriver::ErrorCounter);
+    this->_errorCounter.Failure();
 
     this->_errorB = ErrorCode::OnFire;
     auto errorCode = this->_eps.GetErrorCode(EPSDriver::Controller::B);
 
     ASSERT_THAT(errorCode, Eq(ErrorCode::OnFire));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(3));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(3));
 }
 
 TEST_F(EPSDriverTest, ShouldReturnCommFailureOnReadErrorCodeANack)
@@ -539,7 +540,7 @@ TEST_F(EPSDriverTest, ShouldReturnCommFailureOnReadErrorCodeANack)
     auto errorCode = this->_eps.GetErrorCode(EPSDriver::Controller::A);
 
     ASSERT_THAT(errorCode, Eq(ErrorCode::CommunicationFailure));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(5));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
 }
 
 TEST_F(EPSDriverTest, ShouldReturnCommFailureOnReadErrorCodeBNack)
@@ -550,7 +551,7 @@ TEST_F(EPSDriverTest, ShouldReturnCommFailureOnReadErrorCodeBNack)
     auto errorCode = this->_eps.GetErrorCode(EPSDriver::Controller::B);
 
     ASSERT_THAT(errorCode, Eq(ErrorCode::CommunicationFailure));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(5));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
 }
 
 enum class Controller
@@ -613,11 +614,11 @@ TEST_P(EPSDriverLCLOperationsTest, ShouldEnableLCL)
 {
     EXPECT_CALL(Bus(), Write(Address(), ElementsAre(0xE1, _))).WillOnce(Return(I2CResult::OK));
 
-    this->_errorCounting.Failure(EPSDriver::ErrorCounter);
+    this->_errorCounter.Failure();
 
     auto r = this->_eps.EnableLCL(LCLToUse());
     ASSERT_THAT(r, Eq(ErrorCode::NoError));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(1));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(1));
 }
 
 TEST_P(EPSDriverLCLOperationsTest, ShouldReturnErrorOnEnableLCLCommunictionFail)
@@ -626,7 +627,7 @@ TEST_P(EPSDriverLCLOperationsTest, ShouldReturnErrorOnEnableLCLCommunictionFail)
 
     auto r = this->_eps.EnableLCL(LCLToUse());
     ASSERT_THAT(r, Eq(ErrorCode::CommunicationFailure));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(5));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
 }
 
 TEST_P(EPSDriverLCLOperationsTest, ShouldReturnErrorOnEnableLCLWhenErrorIsReportedAfterAction)
@@ -635,18 +636,18 @@ TEST_P(EPSDriverLCLOperationsTest, ShouldReturnErrorOnEnableLCLWhenErrorIsReport
 
     auto r = this->_eps.EnableLCL(LCLToUse());
     ASSERT_THAT(r, Eq(ErrorCode::OnFire));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(5));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
 }
 
 TEST_P(EPSDriverLCLOperationsTest, ShouldDisableLCL)
 {
     EXPECT_CALL(Bus(), Write(Address(), ElementsAre(0xE2, _))).WillOnce(Return(I2CResult::OK));
 
-    this->_errorCounting.Failure(EPSDriver::ErrorCounter);
+    this->_errorCounter.Failure();
 
     auto r = this->_eps.DisableLCL(LCLToUse());
     ASSERT_THAT(r, Eq(ErrorCode::NoError));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(1));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(1));
 }
 
 TEST_P(EPSDriverLCLOperationsTest, ShouldReturnErrorOnDisableLCLCommunictionFail)
@@ -655,7 +656,7 @@ TEST_P(EPSDriverLCLOperationsTest, ShouldReturnErrorOnDisableLCLCommunictionFail
 
     auto r = this->_eps.DisableLCL(LCLToUse());
     ASSERT_THAT(r, Eq(ErrorCode::CommunicationFailure));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(5));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
 }
 
 TEST_P(EPSDriverLCLOperationsTest, ShouldReturnErrorOnDisableLCLWhenErrorIsReportedAfterAction)
@@ -664,7 +665,7 @@ TEST_P(EPSDriverLCLOperationsTest, ShouldReturnErrorOnDisableLCLWhenErrorIsRepor
 
     auto r = this->_eps.DisableLCL(LCLToUse());
     ASSERT_THAT(r, Eq(ErrorCode::OnFire));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(5));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
 }
 
 INSTANTIATE_TEST_CASE_P(LCLTests,
@@ -740,11 +741,11 @@ TEST_P(EPSDriverEnableBurnSwitchTest, ShouldEnableBurnSwitch)
 {
     EXPECT_CALL(Bus(), Write(Address(), ElementsAre(0xE3, ID()))).WillOnce(Return(I2CResult::OK));
 
-    this->_errorCounting.Failure(EPSDriver::ErrorCounter);
+    this->_errorCounter.Failure();
 
     auto r = this->_eps.EnableBurnSwitch(UseMain(), Switch());
     ASSERT_THAT(r, Eq(ErrorCode::NoError));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(1));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(1));
 }
 
 TEST_P(EPSDriverEnableBurnSwitchTest, ShouldReturnCommunicationErrorWhenCommunicationFails)
@@ -753,7 +754,7 @@ TEST_P(EPSDriverEnableBurnSwitchTest, ShouldReturnCommunicationErrorWhenCommunic
 
     auto r = this->_eps.EnableBurnSwitch(UseMain(), Switch());
     ASSERT_THAT(r, Eq(ErrorCode::CommunicationFailure));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(5));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
 }
 
 TEST_P(EPSDriverEnableBurnSwitchTest, ShouldReturnErrorCodeSetAfterEnableBurnSwitch)
@@ -763,7 +764,7 @@ TEST_P(EPSDriverEnableBurnSwitchTest, ShouldReturnErrorCodeSetAfterEnableBurnSwi
 
     auto r = this->_eps.EnableBurnSwitch(UseMain(), Switch());
     ASSERT_THAT(r, Eq(ErrorCode::OnFire));
-    ASSERT_THAT(this->_errorCounting.Current(EPSDriver::ErrorCounter), Eq(5));
+    ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
 }
 
 INSTANTIATE_TEST_CASE_P(EnableBurnSwitch,

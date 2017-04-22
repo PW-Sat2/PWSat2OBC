@@ -73,8 +73,6 @@ namespace devices
             static constexpr drivers::i2c::I2CAddress ControllerA = 0b0110101;
             /** @brief Controller B address */
             static constexpr drivers::i2c::I2CAddress ControllerB = 0b0110110;
-            /** @brief Error counter device ID */
-            static constexpr error_counter::Device ErrorCounter = 5;
 
             /**
              * @brief Ctor
@@ -146,9 +144,11 @@ namespace devices
              */
             ErrorCode GetErrorCode(Controller controller);
 
+            /** @brief Error counter type */
+            using ErrorCounter = error_counter::ErrorCounter<5>;
           private:
             /** @brief Error counter */
-            error_counter::ErrorCounter<EPSDriver::ErrorCounter> _error;
+            ErrorCounter _error;
 
             /** @brief I2C interface for controller A */
             drivers::i2c::II2CBus& _controllerABus;
