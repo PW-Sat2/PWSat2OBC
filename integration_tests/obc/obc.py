@@ -13,6 +13,7 @@ from .mission import MissionMixin
 from .obc_mixin import OBCMixin
 from .obc_time import TimeMixin
 from .eps import EPSMixin
+from .error_counters import ErrorCountersMixin
 
 
 class OBC(OBCMixin,
@@ -24,7 +25,8 @@ class OBC(OBCMixin,
           MissionMixin,
           ImtqMixin,
           ExperimentsMixin,
-          EPSMixin
+          EPSMixin,
+          ErrorCountersMixin
           ):
     def __init__(self, terminal):
         self.log = logging.getLogger("OBC")

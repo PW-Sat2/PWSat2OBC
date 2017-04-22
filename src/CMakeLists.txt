@@ -24,6 +24,7 @@ set(SOURCES
     commands/obc_state.cpp
     commands/temp.cpp
     commands/eps.cpp
+    commands/error_counters.cpp
     obc.h
     obc.cpp
     fault_handlers.cpp

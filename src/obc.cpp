@@ -3,14 +3,14 @@
 #include "logger/logger.h"
 
 OBC::OBC()
-    : timeProvider(fs),                                                    //
-      Hardware(this->PowerControlInterface, timeProvider),                 //
-      PowerControlInterface(this->Hardware.EPS),                           //
-      Storage(Hardware.SPI, fs, Hardware.Pins),                            //
-      Imtq(Hardware.I2C.Buses.Bus),                                        //
-      Experiments(fs, this->adcs.GetAdcsController(), this->timeProvider), //
-      Communication(this->Fdir, Hardware.I2C.Buses.Bus, fs, Experiments),  //
-      terminal(this->IO),                                                  //
+    : timeProvider(fs),                                                                //
+      Hardware(this->Fdir.ErrorCounting(), this->PowerControlInterface, timeProvider), //
+      PowerControlInterface(this->Hardware.EPS),                                       //
+      Storage(Hardware.SPI, fs, Hardware.Pins),                                        //
+      Imtq(Hardware.I2C.Buses.Bus),                                                    //
+      Experiments(fs, this->adcs.GetAdcsController(), this->timeProvider),             //
+      Communication(this->Fdir, Hardware.I2C.Buses.Bus, fs, Experiments),              //
+      terminal(this->IO),                                                              //
       rtc(Hardware.I2C.Buses.Payload)
 {
 }
