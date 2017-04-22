@@ -26,6 +26,7 @@ set(SOURCES
     commands/eps.cpp
     commands/watchdog.cpp
     commands/state.cpp
+    commands/error_counters.cpp
     obc.h
     obc.cpp
     fault_handlers.cpp

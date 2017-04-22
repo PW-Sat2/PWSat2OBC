@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <cstdint>
 #include "base/fwd.hpp"
+#include "error_counter/error_counter.hpp"
 #include "gsl/span"
 #include "hk.hpp"
 #include "i2c/forward.h"
@@ -72,13 +73,17 @@ namespace devices
             static constexpr drivers::i2c::I2CAddress ControllerA = 0b0110101;
             /** @brief Controller B address */
             static constexpr drivers::i2c::I2CAddress ControllerB = 0b0110110;
+            /** @brief Error counter device ID */
+            static constexpr error_counter::Device ErrorCounter = 5;
 
             /**
              * @brief Ctor
+             * @param errorCounting Error counting mechanism
              * @param controllerABus I2C interface for controller A
              * @param controllerBBus I2C interface for controller B
              */
-            EPSDriver(drivers::i2c::II2CBus& controllerABus, drivers::i2c::II2CBus& controllerBBus);
+            EPSDriver(
+                error_counter::ErrorCounting& errorCounting, drivers::i2c::II2CBus& controllerABus, drivers::i2c::II2CBus& controllerBBus);
 
             /**
              * @brief Reads housekeeping of controller A
@@ -142,6 +147,9 @@ namespace devices
             ErrorCode GetErrorCode(Controller controller);
 
           private:
+            /** @brief Error counter */
+            error_counter::ErrorCounter<EPSDriver::ErrorCounter> _error;
+
             /** @brief I2C interface for controller A */
             drivers::i2c::II2CBus& _controllerABus;
             /** @brief I2C interface for controller B */

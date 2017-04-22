@@ -193,3 +193,13 @@ class EPSTest(BaseTest):
         result = self.system.obc.read_housekeeping_b()
 
         self.assertEqual(result, expected)
+
+    def test_fail_to_enable_lcl_should_raise_error_count(self):
+        self.system.i2c.enable_bus_devices([self.system. eps.controller_a.address], False)
+        result = self.system.obc.enable_lcl(0x01)
+
+        self.assertEqual(result, 0xFF + 1)
+
+        counters = self.system.obc.error_counters()
+
+        self.assertEqual(counters[self.system.eps.ERROR_COUNTER], 5)

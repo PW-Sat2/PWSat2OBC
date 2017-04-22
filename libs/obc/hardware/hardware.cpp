@@ -69,11 +69,12 @@ OSResult OBCHardware::PostStartInitialize()
     return this->Burtc.Initialize();
 }
 
-OBCHardware::OBCHardware(services::power::IPowerControl& powerControl, TimeAction& burtcTickHandler)
-    : I2C(powerControl),                                //
-      Burtc(burtcTickHandler),                          //
-      FramSpi(SPI, Pins.FramChipSelect),                //
-      PersistentStorage(FramSpi),                       //
-      EPS(this->I2C.Buses.Bus, this->I2C.Buses.Payload) //
+OBCHardware::OBCHardware(
+    error_counter::ErrorCounting& errorCounting, services::power::IPowerControl& powerControl, TimeAction& burtcTickHandler)
+    : I2C(powerControl),                                               //
+      Burtc(burtcTickHandler),                                         //
+      FramSpi(SPI, Pins.FramChipSelect),                               //
+      PersistentStorage(FramSpi),                                      //
+      EPS(errorCounting, this->I2C.Buses.Bus, this->I2C.Buses.Payload) //
 {
 }
