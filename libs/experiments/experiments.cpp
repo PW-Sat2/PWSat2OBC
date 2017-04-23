@@ -72,6 +72,7 @@ namespace experiments
                 continue;
             }
 
+            this->_event.Clear(Event::AbortRequest);
             this->_event.Set(Event::InProgress);
 
             {

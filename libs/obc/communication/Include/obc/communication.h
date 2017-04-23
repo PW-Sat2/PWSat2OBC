@@ -5,8 +5,8 @@
 #include "comm/CommDriver.hpp"
 #include "i2c/i2c.h"
 #include "obc/experiments.hpp"
-#include "obc/telecommands/experiments.hpp"
 #include "obc/fdir.hpp"
+#include "obc/telecommands/experiments.hpp"
 #include "obc/telecommands/file_system.hpp"
 #include "obc/telecommands/ping.hpp"
 #include "telecommunication/telecommand_handling.h"
@@ -42,8 +42,11 @@ namespace obc
         /** @brief Perform detumbling experiment */
         obc::telecommands::PerformDetumblingExperiment _performDetumblingExperiment;
 
+        /** @brief Abort experiment */
+        obc::telecommands::AbortExperiment _abortExperiment;
+
         /** @brief Array containg all telecommand handlers */
-        telecommunication::uplink::IHandleTeleCommand* _telecommands[3];
+        telecommunication::uplink::IHandleTeleCommand* _telecommands[4];
     };
 
     /**

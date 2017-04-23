@@ -220,6 +220,8 @@ TEST_F(ExperimentTest, ShouldAbortExperiment)
                 return true;
             }));
 
+        EXPECT_CALL(this->_os, EventGroupClearBits(this->_event, ExperimentController::Event::AbortRequest));
+
         EXPECT_CALL(experiment, Start());
 
         EXPECT_CALL(this->_os, EventGroupGetBits(this->_event)).WillOnce(Return(ExperimentController::Event::InProgress));

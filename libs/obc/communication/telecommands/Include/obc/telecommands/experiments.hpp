@@ -37,6 +37,25 @@ namespace obc
           private:
             obc::OBCExperiments& _experiments;
         };
+
+        class AbortExperiment final : public telecommunication::uplink::IHandleTeleCommand
+        {
+          public:
+            /**
+             * @brief Ctor
+             * @param experiments OBC Experiments
+             */
+            AbortExperiment(obc::OBCExperiments& experiments);
+
+            /** @brief Command code */
+            static constexpr std::uint8_t Code = 0x0E;
+
+            virtual std::uint8_t CommandCode() const override;
+            virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
+
+          private:
+            obc::OBCExperiments& _experiments;
+        };
     }
 }
 

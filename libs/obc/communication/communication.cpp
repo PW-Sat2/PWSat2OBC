@@ -14,11 +14,12 @@ Telecommands::Telecommands(services::fs::IFileSystem& fs, obc::OBCExperiments& e
     : _ping(),                                   //
       _downloadFileTelecommand(fs),              //
       _performDetumblingExperiment(experiments), //
+      _abortExperiment(experiments),             //
       _telecommands{
-          //
-          &_ping,
-          &_downloadFileTelecommand,
-          &_performDetumblingExperiment,
+          &_ping,                        //
+          &_downloadFileTelecommand,     //
+          &_performDetumblingExperiment, //
+          &_abortExperiment,             //
       }
 {
 }
