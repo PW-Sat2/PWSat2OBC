@@ -4,8 +4,6 @@
 #include "logger/logger.h"
 #include "telecommunication/downlink.h"
 
-#include "base/os.h"
-
 #include "comm/ITransmitFrame.hpp"
 
 using std::uint8_t;
@@ -32,15 +30,19 @@ namespace obc
         {
             Reader r(parameters);
 
-            auto operation = static_cast<TimeOperations>(r.ReadByte());
+            auto operationAsByte = r.ReadByte();
+            auto operation = static_cast<TimeOperations>(operationAsByte);
 
             DownlinkFrame response(DownlinkAPID::TimeStatus, 0);
             auto payloadWriter = response.PayloadWriter();
 
+            // write original operation code in response
+            payloadWriter.WriteByte(operationAsByte);
+
             switch (operation)
             {
             case TimeOperations::ReadOnly:
-            	payloadWriter.WriteByte(num(OSResult::Success));
+            	GenerateReadbackResponse(payloadWriter, OSResult::Success, 0);
             	break;
 
             case TimeOperations::Time:
@@ -56,7 +58,7 @@ namespace obc
             	break;
 
             default:
-            	payloadWriter.WriteByte(num(OSResult::InvalidArgument));
+            	GenerateReadbackResponse(payloadWriter, OSResult::InvalidArgument, 0);
             	break;
             }
 
@@ -71,19 +73,19 @@ namespace obc
         	bool setTimeResult = _time.SetCurrentTime(millisecons);
         	auto result = setTimeResult ? OSResult::Success : OSResult::IOError;
 
-        	responseWriter.WriteByte(num(result));
+        	GenerateReadbackResponse(responseWriter, result, newTime);
         }
 
         void TimeTelecommand::SetTimeCorrectionFactor(Reader& reader, Writer& responseWriter)
         {
         	UNREFERENCED_PARAMETER(reader);
-        	responseWriter.WriteByte(num(OSResult::NotImplemented));
+        	GenerateReadbackResponse(responseWriter, OSResult::NotImplemented, -1);
         }
 
         void TimeTelecommand::SetRtcCorrectionFactor(Reader& reader, Writer& responseWriter)
         {
         	UNREFERENCED_PARAMETER(reader);
-        	responseWriter.WriteByte(num(OSResult::NotImplemented));
+        	GenerateReadbackResponse(responseWriter, OSResult::NotImplemented, -1);
         }
 
         void TimeTelecommand::GenerateTimeStateResponse(Writer& payloadWriter)
@@ -91,6 +93,12 @@ namespace obc
         	auto currentTime = _time.GetCurrentTime();
         	uint64_t milisecondsTime = currentTime.HasValue ? currentTime.Value.count() : 0;
             payloadWriter.WriteQuadWordLE(milisecondsTime);
+        }
+
+        void TimeTelecommand::GenerateReadbackResponse(Writer& responseWriter, OSResult result, uint64_t argument)
+        {
+        	responseWriter.WriteByte(num(result));
+        	responseWriter.WriteQuadWordLE(argument);
         }
     }
 }

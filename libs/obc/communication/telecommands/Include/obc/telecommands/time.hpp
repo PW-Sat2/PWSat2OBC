@@ -4,6 +4,7 @@
 #include "telecommunication/telecommand_handling.h"
 #include "base/writer.h"
 #include "base/reader.h"
+#include "base/os.h"
 
 #include "time/ICurrentTime.hpp"
 
@@ -24,7 +25,12 @@ namespace obc
          *  	- TimeOperations::ReadOnly 	- none
          *  	- TimeOperations::Time  	- 64-bit LE - New mission time.
          *
-         * Response: Full internal Time status
+         * Response:
+         * Part 1: Readback
+         *  - 8-bit - Specific option, see TimeOperations.
+         *  - 8-bit - status result
+         *  - 64-bit LE - input argument expanded to 64-bit LE.
+         * Part 2: Time telemetry
          *  - 64-bit LE - Current mission time.
          */
         class TimeTelecommand final : public telecommunication::uplink::IHandleTeleCommand
@@ -57,6 +63,7 @@ namespace obc
             services::time::ICurrentTime& _time;
 
             void GenerateTimeStateResponse(Writer& responseWriter);
+            void GenerateReadbackResponse(Writer& responseWriter, OSResult result, uint64_t argument);
 
             void SetTime(Reader& reader, Writer& responseWriter);
             void SetTimeCorrectionFactor(Reader& reader, Writer& responseWriter);
