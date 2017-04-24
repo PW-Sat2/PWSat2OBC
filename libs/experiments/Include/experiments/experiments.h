@@ -200,7 +200,7 @@ namespace experiments
         std::uint32_t _iterationCounter;
 
         /** @brief Background task */
-        Task<ExperimentController*, 2_KB, TaskPriority::P3> _task;
+        Task<ExperimentController*, 4_KB, TaskPriority::P3> _task;
     };
 
     /** @} */

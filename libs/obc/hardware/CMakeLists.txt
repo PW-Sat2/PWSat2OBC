@@ -18,6 +18,7 @@ target_link_libraries(${NAME}
 	mcu_temp
 	obc_state
 	gyro
+	eps
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

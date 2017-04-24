@@ -183,7 +183,10 @@ namespace experiments
     void ExperimentController::StartExperiment()
     {
         Lock lock(this->_sync, InfiniteTimeout);
-
+        if (!this->_requestedExperiment.HasValue)
+        {
+            LOG(LOG_LEVEL_WARNING, "Starting experiment without requested experiment");
+        }
         this->_queue.Overwrite(this->_requestedExperiment.Value);
         this->_requestedExperiment = None<ExperimentCode>();
     }

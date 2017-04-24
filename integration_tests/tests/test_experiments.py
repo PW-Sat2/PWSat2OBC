@@ -38,7 +38,7 @@ class ExperimentsTest(BaseTest):
             self.system.obc.wait_for_experiment_iteration(i + 1, 3)
             self.system.obc.run_mission()
 
-        self.system.obc.wait_for_experiment(None, timeout=3)
+        self.system.obc.wait_for_experiment(None, timeout=5)
 
         state = self.system.obc.experiment_info()
         self.assertIsNone(state.Requested)

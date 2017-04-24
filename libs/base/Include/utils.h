@@ -350,4 +350,105 @@ template <typename Action> void OnLeaveAction<Action>::Skip()
     this->_skip = true;
 }
 
+/**
+ * @brief Type wrapping integer of non-standard size
+ * @tparam Integer type that will be used to hold smaller value
+ * @tparam BitsCount Number of bits used by number
+ */
+template <typename Underlying, std::uint8_t BitsCount> class BitValue
+{
+  public:
+    /** @brief Mask used to trim value */
+    static constexpr Underlying Mask = ~(~0 << BitsCount);
+
+    /** @brief Default ctor */
+    constexpr BitValue();
+    /**
+     * @brief Initializes with given value
+     * @param v Initial value
+     */
+    constexpr BitValue(Underlying v);
+
+    /**
+     * @brief Extracts holded value
+     */
+    inline operator Underlying() const;
+
+    /**
+     * @brief Extracts holded value
+     * @return holded value
+     */
+    inline Underlying Value() const;
+
+    /**
+     * @brief Default assignment operator
+     * @param other Other BitValue
+     * @return Reference to this BitValue
+     */
+    constexpr BitValue<Underlying, BitsCount>& operator=(const BitValue<Underlying, BitsCount>& other) = default;
+
+  private:
+    /** @brief Holded value */
+    Underlying _value;
+};
+
+template <typename Underlying, std::uint8_t BitsCount> BitValue<Underlying, BitsCount>::operator Underlying() const
+{
+    return this->_value;
+}
+
+template <typename Underlying, std::uint8_t BitsCount> constexpr BitValue<Underlying, BitsCount>::BitValue(Underlying v) : _value(v & Mask)
+{
+}
+
+template <typename Underlying, std::uint8_t BitsCount> constexpr BitValue<Underlying, BitsCount>::BitValue() : _value(0)
+{
+}
+
+template <typename Underlying, std::uint8_t BitsCount> inline Underlying BitValue<Underlying, BitsCount>::Value() const
+{
+    return this->_value;
+}
+
+template <typename Underlying, std::uint8_t BitsCount>
+inline bool operator<(BitValue<Underlying, BitsCount>& lhs, BitValue<Underlying, BitsCount>& rhs)
+{
+    return lhs.Value() < rhs.Value();
+}
+
+template <typename Underlying, std::uint8_t BitsCount>
+inline bool operator>(BitValue<Underlying, BitsCount>& lhs, BitValue<Underlying, BitsCount>& rhs)
+{
+    return rhs < lhs;
+}
+
+template <typename Underlying, std::uint8_t BitsCount>
+inline bool operator<=(BitValue<Underlying, BitsCount>& lhs, BitValue<Underlying, BitsCount>& rhs)
+{
+    return !(lhs > rhs);
+}
+
+template <typename Underlying, std::uint8_t BitsCount>
+inline bool operator>=(BitValue<Underlying, BitsCount>& lhs, BitValue<Underlying, BitsCount>& rhs)
+{
+    return !(lhs < rhs);
+}
+
+template <typename Underlying, std::uint8_t BitsCount>
+inline bool operator==(BitValue<Underlying, BitsCount>& lhs, BitValue<Underlying, BitsCount>& rhs)
+{
+    return lhs.Value() == rhs.Value();
+}
+
+template <typename Underlying, std::uint8_t BitsCount>
+inline bool operator!=(BitValue<Underlying, BitsCount>& lhs, BitValue<Underlying, BitsCount>& rhs)
+{
+    return !(lhs == rhs);
+}
+
+/** @brief 12-bit unsigned int */
+using uint12_t = BitValue<std::uint16_t, 12>;
+/** @brief 10-bit unsigned int */
+using uint10_t = BitValue<std::uint16_t, 10>;
+
 #endif

@@ -8,14 +8,7 @@ void EchoHandler(std::uint16_t argc, char* argv[]);
 void JumpToTimeHandler(std::uint16_t argc, char* argv[]);
 void CurrentTimeHandler(std::uint16_t argc, char* argv[]);
 void AdvanceTimeHandler(std::uint16_t argc, char* argv[]);
-void SendFrameHandler(std::uint16_t argc, char* argv[]);
-void GetFramesCountHandler(std::uint16_t argc, char* argv[]);
-void ReceiveFrameHandler(std::uint16_t argc, char* argv[]);
-void CommandPauseComm(std::uint16_t argc, char* argv[]);
-void CommReset(std::uint16_t argc, char* argv[]);
-void CommGetTelemetry(std::uint16_t argc, char* argv[]);
-void CommSetBaudRate(std::uint16_t argc, char* argv[]);
-void CommSetIdleState(std::uint16_t argc, char* argv[]);
+void Comm(std::uint16_t argc, char* argv[]);
 void WaitForOBCInitialization(std::uint16_t argc, char* argv[]);
 void FSListFiles(std::uint16_t argc, char* argv[]);
 void FSWriteFile(std::uint16_t argc, char* argv[]);
@@ -62,5 +55,7 @@ void FRAM(std::uint16_t argc, char* argv[]);
 void TestExternalFlash(std::uint16_t argc, char* argv[]);
 
 void Temp(std::uint16_t argc, char* argv[]);
+
+void EPSCommand(std::uint16_t argc, char* argv[]);
 
 #endif

@@ -85,6 +85,7 @@ set(SOURCES
   state/PersistentStateTest.cpp
   obc/ObcStateTest.cpp
   gyro/gyroTest.cpp
+  EPS/EPSDriverTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -139,6 +140,7 @@ target_link_libraries(${NAME}
     adcs
     obc_telecommands
     obc_state
+    eps
     rtc
     error_counter
     fm25w

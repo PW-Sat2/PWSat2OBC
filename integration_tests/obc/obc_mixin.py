@@ -11,6 +11,9 @@ class OBCMixin:
     def _command(self, cmd, *args, **kwargs):
         pass
 
+    def _command_no_wait(self, cmd, *args, **kwargs):
+        pass
+
 
 def decode_return(decoder):
     def wrap(f):
@@ -34,6 +37,13 @@ def decode_base64():
 def decode_lines():
     def p(s):
         return s.split('\n')
+
+    return decode_return(p)
+
+
+def decode_bool():
+    def p(s):
+        return s == '1'
 
     return decode_return(p)
 

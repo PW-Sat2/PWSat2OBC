@@ -3,6 +3,7 @@
 
 #include "PersistentStorageAccess.hpp"
 #include "burtc/burtc.hpp"
+#include "eps/eps.h"
 #include "gpio.h"
 #include "i2c/efm.h"
 #include "i2c/i2c.h"
@@ -47,7 +48,7 @@ namespace obc
             uint16_t sclPin,
             CMU_Clock_TypeDef clock,
             IRQn_Type irq,
-            PowerControl* powerControl);
+            services::power::IPowerControl& powerControl);
 
         /**
          * @brief Low-level driver
@@ -78,7 +79,7 @@ namespace obc
     struct OBCHardwareI2C final
     {
         /** @brief Creates I2C-related objected */
-        OBCHardwareI2C(PowerControl* powerControl);
+        OBCHardwareI2C(services::power::IPowerControl& powerControl);
 
         /** @brief Initializes I2C peripherals and drivers */
         void Initialize();
@@ -103,7 +104,7 @@ namespace obc
          * @param[in] powerControl Power control interface
          * @param[in] burtcTickHandler Tick handler for internal (BURTC) clock
          */
-        OBCHardware(PowerControl* powerControl, TimeAction& burtcTickHandler);
+        OBCHardware(services::power::IPowerControl&, TimeAction& burtcTickHandler);
 
         /** @brief Initializies OBC hardware */
         void Initialize();
@@ -138,6 +139,9 @@ namespace obc
 
         /** @brief Gyroscope handling */
         devices::gyro::GyroDriver Gyro;
+
+        /** @brief EPS driver*/
+        devices::eps::EPSDriver EPS;
     };
 }
 /** @} */
