@@ -2,6 +2,7 @@ import logging
 import struct
 
 import serial
+import time
 
 
 class SerialPortTerminal:
@@ -134,3 +135,14 @@ class SerialPortTerminal:
     def close(self):
         self._serial.close()
 
+    def wait_for_boot(self, timeout=None):
+        end = None if timeout is None else time.time() + timeout
+
+        c = ''
+        while c != '@':
+            c = self._serial.read(1)
+
+            if time.time() > end:
+                return False
+
+        return True

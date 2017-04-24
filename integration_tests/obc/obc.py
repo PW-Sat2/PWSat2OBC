@@ -14,6 +14,7 @@ from .mission import MissionMixin
 from .obc_mixin import OBCMixin
 from .obc_time import TimeMixin
 from .eps import EPSMixin
+from .watchdog import WatchdogMixin
 
 
 class OBC(OBCMixin,
@@ -26,7 +27,8 @@ class OBC(OBCMixin,
           ImtqMixin,
           GyroMixin,
           ExperimentsMixin,
-          EPSMixin
+          EPSMixin,
+          WatchdogMixin
           ):
     def __init__(self, terminal):
         self.log = logging.getLogger("OBC")
@@ -73,3 +75,6 @@ class OBC(OBCMixin,
 
     def ping(self):
         return self._command("ping")
+
+    def wait_for_boot(self, timeout=None):
+        return self._terminal.wait_for_boot(timeout)

@@ -46,6 +46,8 @@ static const TerminalCommandDescription commands[] = {
     {"temp", Temp},
     {"gyro", GyroDriver},
     {"eps", EPSCommand},
+    {"wdog", WatchdogCommand},
+    {"hang", Hang},
 };
 
 void InitializeTerminal(void)
