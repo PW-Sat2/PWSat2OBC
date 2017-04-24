@@ -19,7 +19,7 @@ namespace obc
          * Parameters:
          *  * 32-bit LE - experiment duration in seconds
          */
-        class PerformDetumblingExperiment final : public telecommunication::uplink::IHandleTeleCommand
+        class PerformDetumblingExperiment final : public telecommunication::uplink::Telecommand<0x0D>
         {
           public:
             /**
@@ -28,10 +28,6 @@ namespace obc
              */
             PerformDetumblingExperiment(obc::OBCExperiments& experiments);
 
-            /** @brief Command code */
-            static constexpr std::uint8_t Code = 0x0D;
-
-            virtual std::uint8_t CommandCode() const override;
             virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
 
           private:
@@ -49,7 +45,7 @@ namespace obc
          * Code: 0x0E
          * Parameters: None
          */
-        class AbortExperiment final : public telecommunication::uplink::IHandleTeleCommand
+        class AbortExperiment final : public telecommunication::uplink::Telecommand<0x0E>
         {
           public:
             /**
@@ -58,10 +54,6 @@ namespace obc
              */
             AbortExperiment(obc::OBCExperiments& experiments);
 
-            /** @brief Command code */
-            static constexpr std::uint8_t Code = 0x0E;
-
-            virtual std::uint8_t CommandCode() const override;
             virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
 
           private:

@@ -12,11 +12,6 @@ namespace obc
         {
         }
 
-        std::uint8_t PerformDetumblingExperiment::CommandCode() const
-        {
-            return Code;
-        }
-
         void PerformDetumblingExperiment::Handle(devices::comm::ITransmitFrame& /*transmitter*/, gsl::span<const std::uint8_t> parameters)
         {
             Reader r(parameters);
@@ -32,11 +27,6 @@ namespace obc
 
         AbortExperiment::AbortExperiment(obc::OBCExperiments& experiments) : _experiments(experiments)
         {
-        }
-
-        std::uint8_t AbortExperiment::CommandCode() const
-        {
-            return Code;
         }
 
         void AbortExperiment::Handle(devices::comm::ITransmitFrame& /*transmitter*/, gsl::span<const std::uint8_t> /*parameters*/)
