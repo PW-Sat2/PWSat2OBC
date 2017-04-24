@@ -9,30 +9,17 @@ using drivers::i2c::II2CBus;
 using telecommunication::uplink::IHandleTeleCommand;
 
 using namespace obc;
-
-Telecommands::Telecommands(services::fs::IFileSystem& fs, obc::OBCExperiments& experiments)
-    : _ping(),                                   //
-      _downloadFileTelecommand(fs),              //
-      _performDetumblingExperiment(experiments), //
-      _abortExperiment(experiments),             //
-      _telecommands{
-          &_ping,                        //
-          &_downloadFileTelecommand,     //
-          &_performDetumblingExperiment, //
-          &_abortExperiment,             //
-      }
-{
-}
-
-gsl::span<IHandleTeleCommand*> Telecommands::AllTelecommands()
-{
-    return gsl::span<IHandleTeleCommand*>(this->_telecommands);
-}
+using namespace obc::telecommands;
 
 OBCCommunication::OBCCommunication(obc::FDIR& fdir, II2CBus& systemBus, services::fs::IFileSystem& fs, obc::OBCExperiments& experiments)
-    : UplinkProtocolDecoder(settings::CommSecurityCode),                                  //
-      SupportedTelecommands(fs, experiments),                                             //
-      TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.AllTelecommands()), //
+    : UplinkProtocolDecoder(settings::CommSecurityCode),                      //
+      SupportedTelecommands(                                                  //
+          PingTelecommand(),                                                  //
+          DownloadFileTelecommand(fs),                                        //
+          PerformDetumblingExperiment(experiments),                           //
+          AbortExperiment(experiments)                                        //
+          ),                                                                  //
+      TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get()), //
       CommDriver(fdir.ErrorCounting(), systemBus, TelecommandHandler)
 {
 }

@@ -10,7 +10,7 @@ namespace obc
     namespace telecommands
     {
         /**
-         * @brief Perform detumbling experiment
+         * @brief Performs detumbling experiment
          * @ingroup telecommands
          * @telecommand
          *
@@ -35,9 +35,20 @@ namespace obc
             virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
 
           private:
+            /** @brief Experiments controller */
             obc::OBCExperiments& _experiments;
         };
 
+        /**
+         * @brief Aborts currently running experiment
+         * @ingroup experiments
+         * @telecommand
+         *
+         * @remark If no experiment is running, the command is ignored
+         *
+         * Code: 0x0E
+         * Parameters: None
+         */
         class AbortExperiment final : public telecommunication::uplink::IHandleTeleCommand
         {
           public:
@@ -54,6 +65,7 @@ namespace obc
             virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
 
           private:
+            /** @brief Experiments controller */
             obc::OBCExperiments& _experiments;
         };
     }

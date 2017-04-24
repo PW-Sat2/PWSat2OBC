@@ -1,7 +1,9 @@
 #ifndef SRC_COMMUNICATION_H_
 #define SRC_COMMUNICATION_H_
 
+#include <array>
 #include <gsl/span>
+#include <tuple>
 #include "comm/CommDriver.hpp"
 #include "i2c/i2c.h"
 #include "obc/experiments.hpp"
@@ -15,39 +17,75 @@
 namespace obc
 {
     /**
-     * @brief Object aggregating all supported telecommands
+     * @defgroup obc_communication OBC Telecommunication
+     * @ingroup obc
+     *
+     * @{
      */
-    class Telecommands final
+
+    /**
+     * @brief Helper type for holding many telecommands
+     * @tparam Telecommands Types of telecommands
+     */
+    template <typename... Telecommands> class TelecommandsHolder final
     {
       public:
         /**
-         * @brief Initializes @ref Telecommands object
-         * @param fs File system
-         * @param experiments Experiments
+         * @brief Ctor
+         * @param telecommands Telecommands instances
          */
-        Telecommands(services::fs::IFileSystem& fs, obc::OBCExperiments& experiments);
+        TelecommandsHolder(Telecommands&&... telecommands);
 
         /**
-         * Aggregates all telecommand handlers into single span
-         * @return Span with all supported telecommands
+         * @brief Gets list of telecommands
+         * @return List of telecommands
          */
-        gsl::span<telecommunication::uplink::IHandleTeleCommand*> AllTelecommands();
+        gsl::span<telecommunication::uplink::IHandleTeleCommand*> Get();
 
       private:
-        /** @brief Ping telecommand */
-        obc::telecommands::PingTelecommand _ping;
-        /** @brief Download file telecommand */
-        obc::telecommands::DownloadFileTelecommand _downloadFileTelecommand;
+        /**
+         * @brief Initialize pointers - single step
+         */
+        template <std::size_t N, typename Head, typename... Rest> void InitPtr()
+        {
+            auto& ref = std::get<N>(this->_telecommands);
 
-        /** @brief Perform detumbling experiment */
-        obc::telecommands::PerformDetumblingExperiment _performDetumblingExperiment;
+            this->_pointers[N] = reinterpret_cast<telecommunication::uplink::IHandleTeleCommand*>(&ref);
 
-        /** @brief Abort experiment */
-        obc::telecommands::AbortExperiment _abortExperiment;
+            InitPtr<N + 1, Rest...>();
+        }
 
-        /** @brief Array containg all telecommand handlers */
-        telecommunication::uplink::IHandleTeleCommand* _telecommands[4];
+        /**
+         * @brief Initialize pointers - stop condition
+         */
+        template <std::size_t N> void InitPtr()
+        {
+        }
+
+        /** @brief Telecommand instances */
+        std::tuple<Telecommands...> _telecommands;
+        /** @brief Pointers to telecommands */
+        std::array<telecommunication::uplink::IHandleTeleCommand*, sizeof...(Telecommands)> _pointers;
     };
+
+    template <typename... Telecommands>
+    TelecommandsHolder<Telecommands...>::TelecommandsHolder(Telecommands&&... telecommands) : _telecommands{telecommands...}
+    {
+        InitPtr<0, Telecommands...>();
+    }
+
+    template <typename... Telecommands> gsl::span<telecommunication::uplink::IHandleTeleCommand*> TelecommandsHolder<Telecommands...>::Get()
+    {
+        return this->_pointers;
+    }
+
+    /** @brief Typedef with all supported telecommands */
+    using Telecommands = TelecommandsHolder< //
+        obc::telecommands::PingTelecommand,
+        obc::telecommands::DownloadFileTelecommand,
+        obc::telecommands::PerformDetumblingExperiment,
+        obc::telecommands::AbortExperiment //
+        >;
 
     /**
      * @brief OBC <-> Earth communication
@@ -80,6 +118,8 @@ namespace obc
         /** @brief Low-level comm driver */
         devices::comm::CommObject CommDriver;
     };
+
+    /** @} */
 }
 
 #endif /* SRC_COMMUNICATION_H_ */
