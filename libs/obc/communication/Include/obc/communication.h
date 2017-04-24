@@ -66,6 +66,27 @@ namespace obc
         std::tuple<Telecommands...> _telecommands;
         /** @brief Pointers to telecommands */
         std::array<telecommunication::uplink::IHandleTeleCommand*, sizeof...(Telecommands)> _pointers;
+
+        /**
+         * @brief
+         * @return
+         */
+        template <bool Tag, std::uint8_t Head, std::uint8_t... Rest> static constexpr bool AreCodesUnique()
+        {
+            if (ValuesTrait<std::uint8_t>::IsInList<Head, Rest...>())
+            {
+                return false;
+            }
+
+            return AreCodesUnique<true, Rest...>();
+        }
+
+        template <bool Tag> static constexpr bool AreCodesUnique()
+        {
+            return true;
+        }
+
+        static_assert(AreCodesUnique<true, Telecommands::Code...>(), "Telecommand codes must be unique");
     };
 
     template <typename... Telecommands>
