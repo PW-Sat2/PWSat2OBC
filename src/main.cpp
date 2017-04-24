@@ -34,6 +34,7 @@
 #include "swo/swo.h"
 #include "system.h"
 #include "terminal.h"
+#include "watchdog/watchdog.hpp"
 
 using services::time::TimeProvider;
 using namespace std::chrono_literals;
@@ -54,6 +55,11 @@ const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 extern "C" void vApplicationIdleHook(void)
 {
     EMU_EnterEM1();
+}
+
+extern "C" void vApplicationTickHook(void)
+{
+    drivers::watchdog::InternalWatchdog::Kick();
 }
 
 void I2C0_IRQHandler(void)
@@ -124,6 +130,8 @@ static void SetupAntennas(void)
 
 static void ObcInitTask(void* param)
 {
+    drivers::watchdog::InternalWatchdog::Enable();
+
     LOG(LOG_LEVEL_INFO, "Starting initialization task... ");
 
     auto obc = static_cast<OBC*>(param);
