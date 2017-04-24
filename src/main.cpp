@@ -145,7 +145,8 @@ static void ObcInitTask(void* param)
 
     obc->fs.MakeDirectory("/a");
 
-    if (!obc->timeProvider.Initialize(nullptr, nullptr))
+    const auto missionTime = Mission.GetState().PersistentState.Get<state::TimeState>().LastMissionTime();
+    if (!obc->timeProvider.Initialize(missionTime, nullptr, nullptr))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize persistent timer. ");
     }

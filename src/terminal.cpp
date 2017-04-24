@@ -47,6 +47,7 @@ static const TerminalCommandDescription commands[] = {
     {"eps", EPSCommand},
     {"wdog", WatchdogCommand},
     {"hang", Hang},
+    {"state", StateCommandHandler},
 };
 
 void InitializeTerminal(void)

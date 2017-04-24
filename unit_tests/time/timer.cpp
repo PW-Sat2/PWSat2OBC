@@ -14,6 +14,7 @@ using testing::_;
 using testing::Return;
 using services::time::TimeProvider;
 using std::chrono::milliseconds;
+using namespace std::chrono_literals;
 
 struct TimeNotificationHandler
 {
@@ -46,7 +47,7 @@ class TimerTest : public testing::Test
     OSSemaphoreHandle notificationLockHandle = reinterpret_cast<void*>(2);
 };
 
-TimerTest::TimerTest() : provider(fs)
+TimerTest::TimerTest()
 {
     ON_CALL(fs, Open(_, _, _)).WillByDefault(Return(MakeOpenedFile(1)));
     ON_CALL(fs, Write(_, _)).WillByDefault(Return(MakeFSIOResult(0)));
@@ -65,7 +66,7 @@ void TimerTest::Initialize()
 
     EXPECT_CALL(os, CreatePulseAll()).WillOnce(Return(reinterpret_cast<void*>(3)));
 
-    EXPECT_TRUE(provider.Initialize(TimePassedProxy, &timeHandler));
+    EXPECT_TRUE(provider.Initialize(0ms, TimePassedProxy, &timeHandler));
 }
 
 std::chrono::milliseconds TimerTest::GetCurrentTime()
@@ -92,7 +93,7 @@ TEST_F(TimerTest, TestDefaultState)
     EXPECT_CALL(os, CreateBinarySemaphore(TimeProvider::TIMER_LOCK_ID)).WillOnce(Return(timerLockHandle));
     EXPECT_CALL(os, CreateBinarySemaphore(TimeProvider::NOTIFICATION_LOCK_ID)).WillOnce(Return(notificationLockHandle));
     ON_CALL(os, CreatePulseAll()).WillByDefault(Return(reinterpret_cast<void*>(3)));
-    const auto result = provider.Initialize(TimePassedProxy, &timeHandler);
+    const auto result = provider.Initialize(0ms, TimePassedProxy, &timeHandler);
     ASSERT_THAT(result, Eq(true));
     ASSERT_THAT(GetCurrentTime(), Eq(milliseconds(0ull)));
     const auto time = GetMissionTime();
@@ -106,7 +107,7 @@ TEST_F(TimerTest, TestDefaultState)
 TEST_F(TimerTest, TestInitializationFailure)
 {
     ON_CALL(os, CreateBinarySemaphore(_)).WillByDefault(Return(nullptr));
-    const auto result = provider.Initialize(TimePassedProxy, &timeHandler);
+    const auto result = provider.Initialize(0ms, TimePassedProxy, &timeHandler);
     ASSERT_THAT(result, Eq(false));
 }
 
@@ -114,7 +115,7 @@ TEST_F(TimerTest, TestInitializationSecondFailure)
 {
     this->guard = InstallProxy(&os);
     EXPECT_CALL(os, CreateBinarySemaphore(_)).WillOnce(Return(reinterpret_cast<void*>(this))).WillOnce(Return(nullptr));
-    const auto result = provider.Initialize(TimePassedProxy, &timeHandler);
+    const auto result = provider.Initialize(0ms, TimePassedProxy, &timeHandler);
     ASSERT_THAT(result, Eq(false));
 }
 

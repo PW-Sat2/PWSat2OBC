@@ -41,6 +41,5 @@ OSResult RTCObject::ReadTime(RTCTime& rtcTime)
     reader.Skip(1);
     rtcTime.months = reader.ReadByteBCD(MonthsNibbleMask);
     rtcTime.years = reader.ReadByteBCD(YearsNibbleMask);
-
     return OSResult::Success;
 }

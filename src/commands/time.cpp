@@ -1,9 +1,14 @@
 #include <cstdint>
 #include <cstdlib>
 #include "logger/logger.h"
+#include "mission.h"
 #include "obc.h"
 #include "time/TimePoint.h"
 #include "time/timer.h"
+
+using std::chrono::seconds;
+using std::chrono::milliseconds;
+using std::chrono::duration_cast;
 
 void JumpToTimeHandler(uint16_t argc, char* argv[])
 {
@@ -14,9 +19,25 @@ void JumpToTimeHandler(uint16_t argc, char* argv[])
     }
 
     char* tail;
-    const std::chrono::seconds targetTime = std::chrono::seconds(strtoul(argv[0], &tail, 10));
-    LOGF(LOG_LEVEL_INFO, "Jumping to time %lu\n", static_cast<std::uint32_t>(targetTime.count()));
+    const auto targetTime = seconds(strtoul(argv[0], &tail, 10));
+    devices::rtc::RTCTime rtcTime;
+    if (OS_RESULT_FAILED(Main.rtc.ReadTime(rtcTime)))
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to retrieve time from external RTC");
+        return;
+    }
+
+    const auto externalTime = duration_cast<milliseconds>(rtcTime.ToDuration());
+
+    LOGF(LOG_LEVEL_INFO,
+        "Jumping to time 0x%x%xms 0x%x%xms\n",
+        static_cast<unsigned int>(targetTime.count() >> 32),
+        static_cast<unsigned int>(targetTime.count()),
+        static_cast<unsigned int>(externalTime.count() >> 32),
+        static_cast<unsigned int>(externalTime.count()));
+
     Main.timeProvider.SetCurrentTime(targetTime);
+    Mission.GetState().PersistentState.Set(state::TimeState(targetTime, externalTime));
 }
 
 void AdvanceTimeHandler(uint16_t argc, char* argv[])
@@ -28,10 +49,8 @@ void AdvanceTimeHandler(uint16_t argc, char* argv[])
     }
 
     char* tail;
-    const std::chrono::milliseconds targetTime = std::chrono::milliseconds(strtoul(argv[0], &tail, 10));
-    LOGF(LOG_LEVEL_INFO,
-        "Advancing time by '%lu' seconds\n",
-        static_cast<std::uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(targetTime).count()));
+    const auto targetTime = milliseconds(strtoul(argv[0], &tail, 10));
+    LOGF(LOG_LEVEL_INFO, "Advancing time by '%lu' seconds\n", static_cast<std::uint32_t>(duration_cast<seconds>(targetTime).count()));
     Main.timeProvider.AdvanceTime(targetTime);
 }
 
@@ -39,6 +58,6 @@ void CurrentTimeHandler(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
-    std::chrono::milliseconds span = Main.timeProvider.GetCurrentTime().Value;
-    Main.terminal.Printf("%lu", static_cast<std::uint32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(span).count()));
+    auto span = Main.timeProvider.GetCurrentTime().Value;
+    Main.terminal.Printf("%lu", static_cast<std::uint32_t>(duration_cast<milliseconds>(span).count()));
 }

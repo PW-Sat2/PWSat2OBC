@@ -1,6 +1,8 @@
-#include "TimeState.hpp"
 #include "base/reader.h"
 #include "base/writer.h"
+#include "time/TimeCorrectionConfiguration.hpp"
+#include "time/TimeState.hpp"
+
 using namespace std::chrono_literals;
 
 namespace state
@@ -29,5 +31,29 @@ namespace state
     {
         writer.WriteQuadWordLE(this->lastMissionTime.count());
         writer.WriteQuadWordLE(this->lastExternalTime.count());
+    }
+
+    TimeCorrectionConfiguration::TimeCorrectionConfiguration()
+        : missionTimeFactor(1), //
+          externalTimeFactor(1)
+    {
+    }
+
+    TimeCorrectionConfiguration::TimeCorrectionConfiguration(std::int16_t missionTimeWeight, std::int16_t externalTimeWeight)
+        : missionTimeFactor(missionTimeWeight), //
+          externalTimeFactor(externalTimeWeight)
+    {
+    }
+
+    void TimeCorrectionConfiguration::Read(Reader& reader)
+    {
+        this->missionTimeFactor = reader.ReadSignedWordLE();
+        this->externalTimeFactor = reader.ReadSignedWordLE();
+    }
+
+    void TimeCorrectionConfiguration::Write(Writer& writer) const
+    {
+        writer.WriteSignedWordLE(this->missionTimeFactor);
+        writer.WriteSignedWordLE(this->externalTimeFactor);
     }
 }
