@@ -68,12 +68,12 @@ namespace obc
         std::array<telecommunication::uplink::IHandleTeleCommand*, sizeof...(Telecommands)> _pointers;
 
         /**
-         * @brief
-         * @return
+         * @brief Checks if command codes are unique
+         * @return true if command codes are unique
          */
         template <bool Tag, std::uint8_t Head, std::uint8_t... Rest> static constexpr bool AreCodesUnique()
         {
-            if (ValuesTrait<std::uint8_t>::IsInList<Head, Rest...>())
+            if (IsValueInList<std::uint8_t>::IsInList<Head, Rest...>())
             {
                 return false;
             }
@@ -81,6 +81,10 @@ namespace obc
             return AreCodesUnique<true, Rest...>();
         }
 
+        /**
+         * @brief Checks if command codes are unique (stop condition)
+         * @return Always true
+         */
         template <bool Tag> static constexpr bool AreCodesUnique()
         {
             return true;

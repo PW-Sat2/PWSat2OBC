@@ -132,9 +132,9 @@ template <> struct Wider<std::uint32_t>
 };
 
 /**
- * @brief Compile time traits for values
+ * @brief Checks if value is in list
  */
-template <typename ValueType> struct ValuesTrait
+template <typename ValueType> struct IsValueInList
 {
     /**
      * @brief Checks if values is in list

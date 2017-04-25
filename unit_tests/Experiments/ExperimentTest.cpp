@@ -26,6 +26,7 @@ using testing::DoAll;
 using testing::Assign;
 using namespace experiments;
 using namespace mission::experiments;
+using namespace std::chrono_literals;
 
 struct ExperimentMock : public IExperiment
 {
@@ -221,15 +222,18 @@ TEST_F(ExperimentTest, ShouldAbortExperiment)
             }));
 
         EXPECT_CALL(this->_os, EventGroupClearBits(this->_event, ExperimentController::Event::AbortRequest));
+        EXPECT_CALL(this->_os, EventGroupSetBits(this->_event, ExperimentController::Event::InProgress));
 
         EXPECT_CALL(experiment, Start());
 
-        EXPECT_CALL(this->_os, EventGroupGetBits(this->_event)).WillOnce(Return(ExperimentController::Event::InProgress));
+        EXPECT_CALL(this->_os, EventGroupWaitForBits(this->_event, ExperimentController::Event::AbortRequest, false, true, 0ms))
+            .WillOnce(Return(0));
+
         EXPECT_CALL(this->_os, EventGroupClearBits(this->_event, ExperimentController::Event::MissionLoopIterationStarted));
 
-        EXPECT_CALL(this->_os, EventGroupGetBits(this->_event)).WillOnce(Return(ExperimentController::Event::AbortRequest));
+        EXPECT_CALL(this->_os, EventGroupWaitForBits(this->_event, ExperimentController::Event::AbortRequest, false, true, 0ms))
+            .WillOnce(Return(ExperimentController::Event::AbortRequest));
 
-        EXPECT_CALL(this->_os, EventGroupClearBits(this->_event, ExperimentController::Event::AbortRequest));
         EXPECT_CALL(experiment, Stop(IterationResult::Failure));
 
         EXPECT_CALL(this->_os, EventGroupClearBits(this->_event, ExperimentController::Event::InProgress));
@@ -257,27 +261,45 @@ TEST_F(ExperimentTest, ShouldWaitForNextMissionLoopIterationIfRequested)
                 return true;
             }));
 
+        EXPECT_CALL(this->_os, EventGroupClearBits(this->_event, ExperimentController::Event::AbortRequest));
+        EXPECT_CALL(this->_os, EventGroupSetBits(this->_event, ExperimentController::Event::InProgress));
+
         EXPECT_CALL(experiment, Start());
 
+        EXPECT_CALL(this->_os, EventGroupWaitForBits(this->_event, ExperimentController::Event::AbortRequest, false, true, 0ms))
+            .WillOnce(Return(false));
+
+        EXPECT_CALL(this->_os, EventGroupClearBits(this->_event, ExperimentController::Event::MissionLoopIterationStarted));
+
         EXPECT_CALL(experiment, Iteration()).WillOnce(Return(IterationResult::WaitForNextCycle));
+
+        EXPECT_CALL(this->_os, EventGroupSetBits(this->_event, ExperimentController::Event::MissionLoopNotificationReqested));
 
         EXPECT_CALL(this->_os,
             EventGroupWaitForBits(this->_event,
                 ExperimentController::Event::MissionLoopIterationStarted | ExperimentController::Event::AbortRequest,
                 false,
                 false,
-                InfiniteTimeout));
+                InfiniteTimeout))
+            .WillOnce(Return(ExperimentController::Event::MissionLoopIterationStarted));
 
-        EXPECT_CALL(experiment, Iteration()).WillOnce(Return(IterationResult::WaitForNextCycle));
+        EXPECT_CALL(this->_os, EventGroupWaitForBits(this->_event, ExperimentController::Event::AbortRequest, false, true, 0ms))
+            .WillOnce(Return(ExperimentController::Event::MissionLoopIterationStarted));
 
-        EXPECT_CALL(this->_os,
-            EventGroupWaitForBits(this->_event,
-                ExperimentController::Event::MissionLoopIterationStarted | ExperimentController::Event::AbortRequest,
-                false,
-                false,
-                InfiniteTimeout));
+        EXPECT_CALL(this->_os, EventGroupClearBits(this->_event, ExperimentController::Event::MissionLoopIterationStarted));
 
         EXPECT_CALL(experiment, Iteration()).WillOnce(Return(IterationResult::Finished));
+
+        EXPECT_CALL(this->_os, EventGroupClearBits(this->_event, ExperimentController::Event::InProgress));
+        //
+        //        EXPECT_CALL(this->_os,
+        //            EventGroupWaitForBits(this->_event,
+        //                ExperimentController::Event::MissionLoopIterationStarted | ExperimentController::Event::AbortRequest,
+        //                false,
+        //                false,
+        //                InfiniteTimeout));
+        //
+        //        EXPECT_CALL(experiment, Iteration()).WillOnce(Return(IterationResult::Finished));
 
         EXPECT_CALL(this->_os, QueueReceive(this->_queue, _, _)).WillOnce(Return(false));
     }
