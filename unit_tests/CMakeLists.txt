@@ -62,7 +62,6 @@ set(SOURCES
   os/EventGroupTest.cpp
   time/time.cpp
   time/timer.cpp
-  time/persistance.cpp
   time/SmartWait.cpp
   time/rtc.cpp
   mock/RtcMock.hpp
@@ -83,6 +82,8 @@ set(SOURCES
   FM25W/FM25WDriverTest.cpp
   telecommunication/FrameContentsWriterTest.cpp
   state/PersistentStateTest.cpp
+  state/PersistentTimeStateTest.cpp
+  state/AntennaConfigTest.cpp
   obc/ObcStateTest.cpp
   gyro/gyroTest.cpp
   EPS/EPSDriverTest.cpp

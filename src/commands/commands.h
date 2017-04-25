@@ -61,4 +61,6 @@ void EPSCommand(std::uint16_t argc, char* argv[]);
 void WatchdogCommand(std::uint16_t argc, char* argv[]);
 void Hang(std::uint16_t argc, char* argv[]);
 
+void StateCommandHandler(uint16_t argc, char* argv[]);
+
 #endif

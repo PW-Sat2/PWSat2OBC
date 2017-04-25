@@ -69,7 +69,6 @@ namespace state
      * @brief Type that combines together persistent parts of the satellite state.
      * @tparam Parts List of types that are considered important and supposed to be persisted between
      * satellite restarts. There should not be any type duplicates on this list.
-     *
      * Every type that is supposed to be part of persistent state should implement interface that is compatible to:
      * @code{.cpp}
      * T();
@@ -101,6 +100,7 @@ namespace state
             "StatePolicy should have bool IsModified() method.");
 
         static_assert(::state::details::CheckObject<Parts...>::Value, "Persistent state part verification failed.");
+
         /**
          * @brief Return reference to selected part of the persistent state.
          * @tparam Object Type of the object that should be accessed.

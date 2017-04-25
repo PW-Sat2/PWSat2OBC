@@ -6,20 +6,16 @@
 #include <chrono>
 #include "PersistentState.hpp"
 #include "StatePolicies.hpp"
-#include "TimeState.hpp"
 #include "adcs/adcs.hpp"
 #include "antenna/AntennaState.hpp"
 #include "base/os.h"
 #include "experiments/experiments.h"
 #include "fwd.hpp"
+#include "time/TimeCorrectionConfiguration.hpp"
+#include "time/TimeState.hpp"
 
 /**
- * @defgroup StateDef Satellite state definition
- *
- * @{
- */
-
-/**
+ * @ingroup StateDef
  * @brief State of the satellite
  */
 struct SystemState
@@ -46,9 +42,7 @@ struct SystemState
     /**
      * @brief Satellite's persistent state.
      */
-    state::SystemPersistentState PersistentState;
+    mutable state::SystemPersistentState PersistentState;
 };
-
-/** @} */
 
 #endif /* LIBS_STATE_INCLUDE_STATE_STRUCT_H_ */
