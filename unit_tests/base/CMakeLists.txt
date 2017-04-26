@@ -16,6 +16,7 @@ set(SOURCES
     mock/FsMock.cpp
     mock/mock.cpp
     mock/error_counter.cpp
+    I2C/I2CMock.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -34,5 +35,6 @@ target_link_libraries(${NAME}
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/mock)
+target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/I2C)
 
 target_compile_options(${NAME} PRIVATE "-fexceptions")

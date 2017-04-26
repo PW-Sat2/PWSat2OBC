@@ -1,10 +1,8 @@
 set(NAME unit_tests)
 
 set(SOURCES
-  I2C/I2CMock.cpp
+  adcs/AdcsCoordinatorTest.cpp  
   SPI/SPIMock.cpp
-  antenna/MiniportMock.cpp
-  antenna/MiniportMock.hpp
   imtq/imtqTest.cpp
   imtq/imtqHighLevelTest.cpp
   Logger/LoggerTest.cpp
@@ -15,12 +13,6 @@ set(SOURCES
   FileSystem/MemoryDriver.cpp
   FileSystem/EccTest.cpp
   FileSystem/FileTest.cpp
-  Comm/CommTest.cpp
-  Comm/CommFrameTest.cpp
-  Comm/DownlinkFrameTest.cpp
-  Comm/TeleCommandHandlingTest.cpp
-  Comm/UplinkFrameDecoderTest.cpp
-  Comm/Telecommands/DownloadFileTelecommandTest.cpp
   base/ReaderTest.cpp
   base/WriterTest.cpp
   base/RapidTest.cpp
@@ -44,12 +36,9 @@ set(SOURCES
   time/time.cpp
   time/timer.cpp
   time/SmartWait.cpp
-  time/rtc.cpp  
-  antenna/miniport.cpp
-  antenna/antenna.cpp
+  time/rtc.cpp    
   SPI/SPIDriverTest.cpp
-  eigen/eigenTest.cpp
-  adcs/AdcsCoordinatorTest.cpp
+  eigen/eigenTest.cpp  
   Experiments/Fibo/FiboCalculatorTest.cpp
   Experiments/ExperimentTest.cpp
   Experiments/ADCS/DetumblingExperimentTest.cpp
@@ -59,8 +48,9 @@ set(SOURCES
   state/PersistentStateTest.cpp
   state/PersistentTimeStateTest.cpp
   state/AntennaConfigTest.cpp
-  obc/ObcStateTest.cpp
-  EPS/EPSDriverTest.cpp
+  obc/ObcStateTest.cpp  
+  Comm/TeleCommandHandlingTest.cpp
+  Comm/Telecommands/DownloadFileTelecommandTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -73,7 +63,7 @@ else()
   set(LD_COVERAGE )    
 endif(${ENABLE_COVERAGE})
 
-set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_CURRENT_LIST_DIR}/linker.ld -u _printf_float -specs=rdimon.specs ${LD_COVERAGE}")
+set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_CURRENT_LIST_DIR}/../base/linker.ld -u _printf_float -specs=rdimon.specs ${LD_COVERAGE}")
 
 target_memory_report(${NAME})
 

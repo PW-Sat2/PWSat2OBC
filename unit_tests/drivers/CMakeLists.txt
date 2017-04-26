@@ -1,7 +1,15 @@
-set(NAME unit_tests_empty)
+set(NAME unit_tests_drivers)
 
 set(SOURCES
-  dummy.cpp
+  antenna/MiniportMock.cpp
+  antenna/MiniportMock.hpp
+  antenna/miniport.cpp
+  antenna/antenna.cpp
+  Comm/CommTest.cpp
+  Comm/CommFrameTest.cpp
+  Comm/DownlinkFrameTest.cpp
+  Comm/UplinkFrameDecoderTest.cpp
+  EPS/EPSDriverTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -22,7 +30,12 @@ target_asm_listing(${NAME})
 
 target_compile_options(${NAME} PRIVATE "-fexceptions")
 
-target_link_libraries(${NAME}    
+target_link_libraries(${NAME}
+    telecommunication    
+    eps
+    rapidcheck
+    rapidcheck_gtest
+    rapidcheck_gmock
     unit_tests_base
 )
 
