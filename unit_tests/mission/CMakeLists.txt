@@ -1,10 +1,19 @@
-set(NAME unit_tests_properties)
+set(NAME unit_tests_mission)
 
 set(SOURCES
-  EPS/EPSDriverTest.cpp  
-  imtq/imtqTest.cpp
-  MissionPlan/MissionTestHelpers.cpp
+  MissionPlan/MissionPlanTest.cpp
   MissionPlan/SailSystemStateTest.cpp
+  MissionPlan/TimeTaskTest.cpp
+  MissionPlan/MissionLoopTest.cpp
+  MissionPlan/antenna/DeployAntennasTest.cpp
+  MissionPlan/antenna/AntennaMissionStateTest.cpp
+  MissionPlan/beacon/BeaconUpdateTest.cpp
+  MissionPlan/CompositeActionTest.cpp
+  MissionPlan/adcs/AdcsPrimaryTaskTest.cpp
+  MissionPlan/obc/ObcTest.cpp    
+  Experiments/Fibo/FiboCalculatorTest.cpp
+  Experiments/ExperimentTest.cpp
+  Experiments/ADCS/DetumblingExperimentTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -25,15 +34,16 @@ target_asm_listing(${NAME})
 
 target_compile_options(${NAME} PRIVATE "-fexceptions")
 
-target_link_libraries(${NAME}    
-    eps
-    fm25w
-    imtq
+target_link_libraries(${NAME} 
     mission
+    mission_antenna
     mission_sail
-    rapidcheck
-    rapidcheck_gtest
-    rapidcheck_gmock
+    mission_time
+    mission_experiments
+    mission_adcs
+    mission_beacon   
+    exp_fibo
+    exp_adcs
     unit_tests_base
 )
 

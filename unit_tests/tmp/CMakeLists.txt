@@ -15,26 +15,12 @@ set(SOURCES
   base/RapidTest.cpp
   base/OnLeaveTest.cpp
   base/RedundancyTest.cpp
-  MissionPlan/MissionPlanTest.cpp
-  MissionPlan/MissionTestHelpers.cpp
-  MissionPlan/SailSystemStateTest.cpp
-  MissionPlan/TimeTaskTest.cpp
-  MissionPlan/MissionLoopTest.cpp
-  MissionPlan/antenna/DeployAntennasTest.cpp
-  MissionPlan/antenna/AntennaMissionStateTest.cpp
-  MissionPlan/beacon/BeaconUpdateTest.cpp
-  MissionPlan/CompositeActionTest.cpp
-  MissionPlan/adcs/AdcsPrimaryTaskTest.cpp
-  MissionPlan/obc/ObcTest.cpp    
   os/TimeoutTest.cpp
   os/EventGroupTest.cpp
   time/time.cpp
   time/timer.cpp
   time/SmartWait.cpp
   eigen/eigenTest.cpp  
-  Experiments/Fibo/FiboCalculatorTest.cpp
-  Experiments/ExperimentTest.cpp
-  Experiments/ADCS/DetumblingExperimentTest.cpp
   ErrorCounterTest.cpp    
   state/PersistentStateTest.cpp
   state/PersistentTimeStateTest.cpp
@@ -72,14 +58,7 @@ target_link_libraries(${NAME}
     comm
     telecommunication
     fs    
-    base
-    mission
-    mission_antenna
-    mission_sail
-    mission_time
-    mission_experiments
-    mission_adcs
-    mission_beacon
+    base    
     rapidcheck
     rapidcheck_gtest
     rapidcheck_gmock

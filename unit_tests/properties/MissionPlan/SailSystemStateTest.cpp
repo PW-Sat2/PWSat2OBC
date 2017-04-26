@@ -1,9 +1,9 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock-matchers.h"
+#include "MissionTestHelpers.h"
 #include "rapidcheck.hpp"
 #include "rapidcheck/gtest.h"
 
-#include "MissionTestHelpers.h"
 #include "mission/logic.hpp"
 #include "mission/sail.hpp"
 #include "state/struct.h"
@@ -54,26 +54,6 @@ void SailSystemStateTest::DetermineActions()
     ActionDescriptor<SystemState>* runnableDescriptors[count_of(descriptors)];
 
     runnable = !SystemDetermineActions(state, gsl::make_span(descriptors), gsl::make_span(runnableDescriptors)).empty();
-}
-
-TEST_F(SailSystemStateTest, ShouldUpdateSystemState)
-{
-    sailTask.SetState(true);
-
-    UpdateState();
-
-    ASSERT_THAT(updateResult, Eq(UpdateResult::Ok));
-    ASSERT_THAT(state.SailOpened, Eq(true));
-}
-
-TEST_F(SailSystemStateTest, ShouldOpenSailAfterTimeIfNotOpened)
-{
-    state.Time = 40h + 1s;
-    state.SailOpened = false;
-
-    DetermineActions();
-
-    ASSERT_THAT(runnable, Eq(true));
 }
 
 RC_GTEST_FIXTURE_PROP(SailSystemStateTest, SailCannotBeOpenedIfNotPossible, (const SystemState& state))
