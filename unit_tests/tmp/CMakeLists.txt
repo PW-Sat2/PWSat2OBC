@@ -30,19 +30,16 @@ set(SOURCES
   time/time.cpp
   time/timer.cpp
   time/SmartWait.cpp
-  time/rtc.cpp      
   eigen/eigenTest.cpp  
   Experiments/Fibo/FiboCalculatorTest.cpp
   Experiments/ExperimentTest.cpp
   Experiments/ADCS/DetumblingExperimentTest.cpp
-  ErrorCounterTest.cpp  
-  telecommunication/FrameContentsWriterTest.cpp
+  ErrorCounterTest.cpp    
   state/PersistentStateTest.cpp
   state/PersistentTimeStateTest.cpp
   state/AntennaConfigTest.cpp
   obc/ObcStateTest.cpp  
-  Comm/TeleCommandHandlingTest.cpp
-  Comm/Telecommands/DownloadFileTelecommandTest.cpp
+  
 )
 
 add_executable(${NAME} ${SOURCES})
