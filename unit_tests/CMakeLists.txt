@@ -3,7 +3,8 @@ add_subdirectory(empty)
 add_subdirectory(drivers)
 add_subdirectory(communication)
 add_subdirectory(mission)
+add_subdirectory(state)
 
 add_subdirectory(properties)
 
-add_subdirectory(tmp)
+add_subdirectory(others)

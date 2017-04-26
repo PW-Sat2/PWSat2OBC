@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include "gtest/gtest.h"
 #include "gmock/gmock-matchers.h"
-
 #include "fs/yaffs.h"
-#include "storage/nand_driver.h"
-#include "system.h"
 #include "yaffs.hpp"
 
-#include "MemoryDriver.hpp"
+#include "FileSystem/MemoryDriver.hpp"
+
+#include "storage/nand_driver.h"
+#include "system.h"
 
 using testing::StrEq;
 using testing::Eq;

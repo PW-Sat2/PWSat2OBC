@@ -1,7 +1,8 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock-matchers.h"
-#include "time/TimeSpan.hpp"
+#include "TimeSpan.hpp"
 #include "time/TimePoint.h"
+#include "time/TimeSpan.hpp"
 
 using testing::Eq;
 
