@@ -68,7 +68,7 @@ namespace obc
          *  - 8-bit - Byte '0'
          *  - Array of 32-bit LE - Sequence numbers of parts that will be send
          */
-        class DownloadFileTelecommand final : public telecommunication::uplink::IHandleTeleCommand
+        class DownloadFileTelecommand final : public telecommunication::uplink::Telecommand<0xAB>
         {
           public:
             /**
@@ -76,8 +76,6 @@ namespace obc
              * @param fs File system
              */
             DownloadFileTelecommand(services::fs::IFileSystem& fs);
-
-            virtual std::uint8_t CommandCode() const override;
 
             virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
 

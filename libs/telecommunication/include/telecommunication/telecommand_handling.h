@@ -105,6 +105,27 @@ namespace telecommunication
         };
 
         /**
+         * @brief Helper class for implementing telecommands
+         * @tparam Code Telecommand code
+         */
+        template <std::uint8_t TCode> struct Telecommand : public IHandleTeleCommand
+        {
+            /** @brief Telecommand code */
+            static constexpr auto Code = TCode;
+
+            /**
+             * @brief Returns command code
+             * @return Command code
+             */
+            virtual std::uint8_t CommandCode() const override final;
+        };
+
+        template <std::uint8_t TCode> std::uint8_t telecommunication::uplink::Telecommand<TCode>::CommandCode() const
+        {
+            return TCode;
+        }
+
+        /**
          * @brief Incoming frame handler that is capable of decoding them and dispatching telecommands
          */
         class IncomingTelecommandHandler final : public devices::comm::IHandleFrame
@@ -141,6 +162,7 @@ namespace telecommunication
         };
     }
 }
+
 /** @} */
 
 #endif /* LIBS_TELECOMMUNICATION_INCLUDE_TELECOMMUNICATION_TELECOMMAND_HANDLING_H_ */

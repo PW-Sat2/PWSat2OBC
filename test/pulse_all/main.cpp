@@ -52,6 +52,10 @@ extern "C" void vApplicationIdleHook(void)
     EMU_EnterEM1();
 }
 
+extern "C" void vApplicationTickHook(void)
+{
+}
+
 static void Observer(void* param)
 {
     OSEventGroupHandle groupHandle = *((OSEventGroupHandle*)param);
