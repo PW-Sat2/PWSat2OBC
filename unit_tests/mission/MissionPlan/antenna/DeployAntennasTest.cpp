@@ -1,6 +1,5 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock-matchers.h"
-#include "MissionPlan/MissionTestHelpers.h"
 #include "mission/antenna_state.h"
 #include "mission/antenna_task.hpp"
 #include "mission/base.hpp"

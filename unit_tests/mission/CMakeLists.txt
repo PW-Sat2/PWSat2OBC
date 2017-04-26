@@ -1,31 +1,19 @@
-set(NAME unit_tests)
+set(NAME unit_tests_mission)
 
 set(SOURCES
-  adcs/AdcsCoordinatorTest.cpp    
-  Logger/LoggerTest.cpp
-  FileSystem/FileSystemTest.cpp
-  FileSystem/YaffsOSGlue.cpp
-  FileSystem/MemoryDriver.cpp
-  FileSystem/NANDGeometryTest.cpp
-  FileSystem/MemoryDriver.cpp
-  FileSystem/EccTest.cpp
-  FileSystem/FileTest.cpp
-  base/ReaderTest.cpp
-  base/WriterTest.cpp
-  base/RapidTest.cpp
-  base/OnLeaveTest.cpp
-  os/TimeoutTest.cpp
-  os/EventGroupTest.cpp
-  time/time.cpp
-  time/timer.cpp
-  time/SmartWait.cpp
-  eigen/eigenTest.cpp  
-  ErrorCounterTest.cpp    
-  state/PersistentStateTest.cpp
-  state/PersistentTimeStateTest.cpp
-  state/AntennaConfigTest.cpp
-  obc/ObcStateTest.cpp  
-  
+  MissionPlan/MissionPlanTest.cpp
+  MissionPlan/SailSystemStateTest.cpp
+  MissionPlan/TimeTaskTest.cpp
+  MissionPlan/MissionLoopTest.cpp
+  MissionPlan/antenna/DeployAntennasTest.cpp
+  MissionPlan/antenna/AntennaMissionStateTest.cpp
+  MissionPlan/beacon/BeaconUpdateTest.cpp
+  MissionPlan/CompositeActionTest.cpp
+  MissionPlan/adcs/AdcsPrimaryTaskTest.cpp
+  MissionPlan/obc/ObcTest.cpp    
+  Experiments/Fibo/FiboCalculatorTest.cpp
+  Experiments/ExperimentTest.cpp
+  Experiments/ADCS/DetumblingExperimentTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -46,40 +34,22 @@ target_asm_listing(${NAME})
 
 target_compile_options(${NAME} PRIVATE "-fexceptions")
 
-target_link_libraries(${NAME}
-    m
-    platform
-    spi
-    emlib
-    logger
-    yaffs
-    storage
-    comm
-    telecommunication
-    fs    
-    base    
-    rapidcheck
-    rapidcheck_gtest
-    rapidcheck_gmock
-    emdrv
-    time
-    gsl
-    antenna    
-    eigen
+target_link_libraries(${NAME} 
+    mission
+    mission_antenna
+    mission_sail
+    mission_time
+    mission_experiments
+    mission_adcs
+    mission_beacon   
     exp_fibo
-    adcs
-    obc_telecommands
-    obc_state
-    eps
-    rtc
-    error_counter
-    fm25w
+    exp_adcs
     unit_tests_base
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
 
-add_custom_target(unit_tests.run
+add_custom_target(${NAME}.run
   COMMAND ${QEMU} -board generic -mcu ${QEMU_MCU} -nographic -monitor null -image ${EXEC_OBJ} -semihosting-config "arg=tests,arg=--gtest_output=xml:${OUTPUT_PATH}/unit-tests.xml"
 
   DEPENDS ${NAME}
