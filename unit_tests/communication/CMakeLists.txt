@@ -1,24 +1,9 @@
-set(NAME unit_tests_drivers)
+set(NAME unit_tests_communication)
 
 set(SOURCES
-  antenna/MiniportMock.cpp
-  antenna/MiniportMock.hpp
-  antenna/miniport.cpp
-  antenna/antenna.cpp
-  Comm/CommTest.cpp
-  Comm/CommFrameTest.cpp
-  Comm/DownlinkFrameTest.cpp
-  Comm/UplinkFrameDecoderTest.cpp
-  EPS/EPSDriverTest.cpp
-  SPI/SPIDriverTest.cpp
-  FM25W/FM25WDriverTest.cpp
-  I2C/FallbackI2CBusTest.cpp
-  I2C/ErrorHandlingI2CBusTest.cpp
-  N25Q/N25QTest.cpp
-  N25Q/RedundantN25QTest.cpp
-  imtq/imtqTest.cpp
-  imtq/imtqHighLevelTest.cpp
-  rtc.cpp
+  TeleCommandHandlingTest.cpp
+  FrameContentsWriterTest.cpp
+  Telecommands/DownloadFileTelecommandTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -39,14 +24,9 @@ target_asm_listing(${NAME})
 
 target_compile_options(${NAME} PRIVATE "-fexceptions")
 
-target_link_libraries(${NAME}
-    telecommunication    
-    eps    
-    spi
-    fm25w
-    n25q
-    imtq
-    rtc
+target_link_libraries(${NAME}    
+    telecommunication
+    obc_telecommands
     unit_tests_base
 )
 
