@@ -1,10 +1,7 @@
 set(NAME unit_tests)
 
 set(SOURCES
-  adcs/AdcsCoordinatorTest.cpp  
-  SPI/SPIMock.cpp
-  imtq/imtqTest.cpp
-  imtq/imtqHighLevelTest.cpp
+  adcs/AdcsCoordinatorTest.cpp    
   Logger/LoggerTest.cpp
   FileSystem/FileSystemTest.cpp
   FileSystem/YaffsOSGlue.cpp
@@ -27,23 +24,18 @@ set(SOURCES
   MissionPlan/beacon/BeaconUpdateTest.cpp
   MissionPlan/CompositeActionTest.cpp
   MissionPlan/adcs/AdcsPrimaryTaskTest.cpp
-  MissionPlan/obc/ObcTest.cpp
-  I2C/FallbackI2CBusTest.cpp
-  I2C/ErrorHandlingI2CBusTest.cpp
-  N25Q/N25QTest.cpp
+  MissionPlan/obc/ObcTest.cpp    
   os/TimeoutTest.cpp
   os/EventGroupTest.cpp
   time/time.cpp
   time/timer.cpp
   time/SmartWait.cpp
-  time/rtc.cpp    
-  SPI/SPIDriverTest.cpp
+  time/rtc.cpp      
   eigen/eigenTest.cpp  
   Experiments/Fibo/FiboCalculatorTest.cpp
   Experiments/ExperimentTest.cpp
   Experiments/ADCS/DetumblingExperimentTest.cpp
-  ErrorCounterTest.cpp
-  FM25W/FM25WDriverTest.cpp
+  ErrorCounterTest.cpp  
   telecommunication/FrameContentsWriterTest.cpp
   state/PersistentStateTest.cpp
   state/PersistentTimeStateTest.cpp
@@ -96,9 +88,7 @@ target_link_libraries(${NAME}
     emdrv
     time
     gsl
-    antenna
-    n25q
-    imtq
+    antenna    
     eigen
     exp_fibo
     adcs

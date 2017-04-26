@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "gmock/gmock-matchers.h"
-#include "I2CMock.hpp"
+#include "I2C/I2CMock.hpp"
 #include "i2c/wrappers.h"
 #include "system.h"
 
