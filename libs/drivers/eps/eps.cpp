@@ -14,6 +14,22 @@ namespace devices
 {
     namespace eps
     {
+        template <error_counter::Device Device>
+        static constexpr I2CResult operator>>(I2CResult result, error_counter::ErrorCounter<Device>& counter)
+        {
+            (result == I2CResult::OK) >> counter;
+
+            return result;
+        }
+
+        template <error_counter::Device Device>
+        static constexpr ErrorCode operator>>(ErrorCode result, error_counter::ErrorCounter<Device>& counter)
+        {
+            (result == ErrorCode::NoError) >> counter;
+
+            return result;
+        }
+
         static constexpr auto PowerCycleTimeout = 3s + 1s;
 
         enum class Command
@@ -25,8 +41,9 @@ namespace devices
             DisableOverheatSubmode = 0xE4,
         };
 
-        EPSDriver::EPSDriver(drivers::i2c::II2CBus& controllerABus, drivers::i2c::II2CBus& controllerBBus)
-            : _controllerABus(controllerABus), _controllerBBus(controllerBBus)
+        EPSDriver::EPSDriver(
+            error_counter::ErrorCounting& errorCounting, drivers::i2c::II2CBus& controllerABus, drivers::i2c::II2CBus& controllerBBus)
+            : _error(errorCounting), _controllerABus(controllerABus), _controllerBBus(controllerBBus)
         {
         }
 
@@ -39,6 +56,7 @@ namespace devices
 
             if (result != I2CResult::OK)
             {
+                this->_error.Failure();
                 return None<hk::HouseheepingControllerA>();
             }
 
@@ -48,9 +66,11 @@ namespace devices
 
             if (!housekeeping.ReadFrom(r))
             {
+                this->_error.Failure();
                 return None<hk::HouseheepingControllerA>();
             }
 
+            this->_error.Success();
             return Some(housekeeping);
         }
 
@@ -63,6 +83,7 @@ namespace devices
 
             if (result != I2CResult::OK)
             {
+                this->_error.Failure();
                 return None<hk::HouseheepingControllerB>();
             }
 
@@ -73,9 +94,11 @@ namespace devices
 
             if (!housekeeping.ReadFrom(r))
             {
+                this->_error.Failure();
                 return None<hk::HouseheepingControllerB>();
             }
 
+            this->_error.Success();
             return Some(housekeeping);
         }
 
@@ -86,10 +109,13 @@ namespace devices
 
             if (this->Write(controller, command) != I2CResult::OK)
             {
+                this->_error.Failure();
                 return false;
             }
 
             System::SleepTask(PowerCycleTimeout);
+
+            this->_error.Failure();
 
             LOGF(LOG_LEVEL_ERROR, "Power cycle failed (%s)", controller == Controller::A ? "A" : "B");
 
@@ -112,10 +138,11 @@ namespace devices
 
             if (this->Write(controller, command) != I2CResult::OK)
             {
+                this->_error.Failure();
                 return ErrorCode::CommunicationFailure;
             }
 
-            return GetErrorCode(controller);
+            return GetErrorCode(controller) >> this->_error;
         }
 
         ErrorCode EPSDriver::DisableLCL(LCL lcl)
@@ -127,16 +154,17 @@ namespace devices
 
             if (this->Write(controller, command) != I2CResult::OK)
             {
+                this->_error.Failure();
                 return ErrorCode::CommunicationFailure;
             }
 
-            return GetErrorCode(controller);
+            return GetErrorCode(controller) >> this->_error;
         }
 
         bool EPSDriver::DisableOverheatSubmode(Controller controller)
         {
             std::array<std::uint8_t, 1> command{num(Command::DisableOverheatSubmode)};
-            return this->Write(controller, command) == I2CResult::OK;
+            return (this->Write(controller, command) == I2CResult::OK) >> this->_error;
         }
 
         ErrorCode EPSDriver::EnableBurnSwitch(bool main, BurnSwitch burnSwitch)
@@ -147,10 +175,11 @@ namespace devices
 
             if (this->Write(controller, command) != I2CResult::OK)
             {
+                this->_error.Failure();
                 return ErrorCode::CommunicationFailure;
             }
 
-            return GetErrorCode(controller);
+            return GetErrorCode(controller) >> this->_error;
         }
 
         ErrorCode EPSDriver::GetErrorCode(Controller controller)
@@ -158,7 +187,7 @@ namespace devices
             std::array<std::uint8_t, 1> command{0x0};
             std::array<std::uint8_t, 1> response;
 
-            auto r = this->WriteRead(controller, command, response);
+            auto r = this->WriteRead(controller, command, response) >> this->_error;
 
             if (r != I2CResult::OK)
             {

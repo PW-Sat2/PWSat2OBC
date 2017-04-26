@@ -15,6 +15,8 @@ from .obc_time import TimeMixin
 from .eps import EPSMixin
 from .watchdog import WatchdogMixin
 from .state import StateMixin
+from .error_counters import ErrorCountersMixin
+
 
 class OBC(OBCMixin,
           FileSystemMixin,
@@ -27,7 +29,8 @@ class OBC(OBCMixin,
           ExperimentsMixin,
           EPSMixin,
           WatchdogMixin,
-          StateMixin
+          StateMixin,
+          ErrorCountersMixin
           ):
     def __init__(self, terminal):
         self.log = logging.getLogger("OBC")

@@ -3,7 +3,7 @@
 #include "logger/logger.h"
 
 OBC::OBC()
-    : Hardware(this->PowerControlInterface, timeProvider),                 //
+    : Hardware(this->Fdir.ErrorCounting(), this->PowerControlInterface, timeProvider),                 //
       PowerControlInterface(this->Hardware.EPS),                           //
       Storage(Hardware.SPI, fs, Hardware.Pins),                            //
       Imtq(Hardware.I2C.Buses.Bus),                                        //
