@@ -5,7 +5,6 @@
 
 #include "OsMock.hpp"
 #include "base/os.h"
-#include "os.hpp"
 
 using testing::Test;
 using testing::Return;
