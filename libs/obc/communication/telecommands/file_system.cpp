@@ -62,11 +62,6 @@ namespace obc
         {
         }
 
-        std::uint8_t DownloadFileTelecommand::CommandCode() const
-        {
-            return 0xAB;
-        }
-
         void DownloadFileTelecommand::Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters)
         {
             Reader r(parameters);

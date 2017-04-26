@@ -14,11 +14,6 @@ namespace obc
 {
     namespace telecommands
     {
-        uint8_t PingTelecommand::CommandCode() const
-        {
-            return static_cast<uint8_t>('P');
-        }
-
         void PingTelecommand::Handle(ITransmitFrame& transmitter, span<const uint8_t> parameters)
         {
             UNREFERENCED_PARAMETER(parameters);

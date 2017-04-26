@@ -10,7 +10,7 @@ namespace obc
     namespace telecommands
     {
         /**
-         * @brief Perform detumbling experiment
+         * @brief Performs detumbling experiment
          * @ingroup telecommands
          * @telecommand
          *
@@ -19,7 +19,7 @@ namespace obc
          * Parameters:
          *  * 32-bit LE - experiment duration in seconds
          */
-        class PerformDetumblingExperiment final : public telecommunication::uplink::IHandleTeleCommand
+        class PerformDetumblingExperiment final : public telecommunication::uplink::Telecommand<0x0D>
         {
           public:
             /**
@@ -28,13 +28,36 @@ namespace obc
              */
             PerformDetumblingExperiment(obc::OBCExperiments& experiments);
 
-            /** @brief Command code */
-            static constexpr std::uint8_t Code = 0x0D;
-
-            virtual std::uint8_t CommandCode() const override;
             virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
 
           private:
+            /** @brief Experiments controller */
+            obc::OBCExperiments& _experiments;
+        };
+
+        /**
+         * @brief Aborts currently running experiment
+         * @ingroup experiments
+         * @telecommand
+         *
+         * @remark If no experiment is running, the command is ignored
+         *
+         * Code: 0x0E
+         * Parameters: None
+         */
+        class AbortExperiment final : public telecommunication::uplink::Telecommand<0x0E>
+        {
+          public:
+            /**
+             * @brief Ctor
+             * @param experiments OBC Experiments
+             */
+            AbortExperiment(obc::OBCExperiments& experiments);
+
+            virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
+
+          private:
+            /** @brief Experiments controller */
             obc::OBCExperiments& _experiments;
         };
     }

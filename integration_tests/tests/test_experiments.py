@@ -79,3 +79,15 @@ class ExperimentsTest(BaseTest):
 
         unpacked = struct.unpack('<' + 'L' * 2, result)
         self.assertEqual(unpacked, (1, 1))
+
+    def test_aborting_when_no_experiment_is_running_has_no_effect(self):
+        self.begin()
+
+        self.system.obc.abort_experiment()
+
+        self.system.obc.run_mission()
+
+        self.system.obc.set_fibo_iterations(100)
+        self.system.obc.request_experiment(ExperimentType.Fibo)
+        self.system.obc.run_mission()
+        self.system.obc.wait_for_experiment(ExperimentType.Fibo, 15)

@@ -16,12 +16,10 @@ namespace obc
          *
          * Parameters: none
          */
-        class PingTelecommand final : public telecommunication::uplink::IHandleTeleCommand
+        class PingTelecommand final : public telecommunication::uplink::Telecommand<0x50>
         {
           public:
             virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
-
-            virtual std::uint8_t CommandCode() const override;
         };
     }
 }

@@ -13,3 +13,10 @@ class PerformDetumblingExperiment(Telecommand):
     def __init__(self, duration):
         self._duration = duration
 
+
+class AbortExperiment(Telecommand):
+    def apid(self):
+        return 0x0E
+
+    def payload(self):
+        return []

@@ -131,5 +131,29 @@ template <> struct Wider<std::uint32_t>
     using type = std::uint64_t;
 };
 
+/**
+ * @brief Checks if value is in list
+ */
+template <typename ValueType> struct IsValueInList
+{
+    /**
+     * @brief Checks if values is in list
+     * @return true if value is in list
+     */
+    template <ValueType Value, ValueType Head, ValueType... Rest> static constexpr bool IsInList()
+    {
+        return Value == Head || IsInList<Value, Rest...>();
+    }
+
+    /**
+     * @brief Checks if values is in list (stop condition)
+     * @return Always false
+     */
+    template <ValueType Value> static constexpr bool IsInList()
+    {
+        return false;
+    }
+};
+
 /** @} */
 #endif /* LIBS_BASE_INCLUDE_TRAITS_HPP_ */
