@@ -2,9 +2,9 @@
 #include "gmock/gmock.h"
 #include "gmock/gmock-matchers.h"
 #include "OsMock.hpp"
-#include "TimeSpan.hpp"
 #include "mock/FsMock.hpp"
 #include "os/os.hpp"
+#include "time/TimeSpan.hpp"
 
 #include "time/timer.h"
 

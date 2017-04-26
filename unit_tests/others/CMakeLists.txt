@@ -1,4 +1,4 @@
-set(NAME unit_tests)
+set(NAME unit_tests_others)
 
 set(SOURCES
   adcs/AdcsCoordinatorTest.cpp    
@@ -12,7 +12,6 @@ set(SOURCES
   FileSystem/FileTest.cpp
   base/ReaderTest.cpp
   base/WriterTest.cpp
-  base/RapidTest.cpp
   base/OnLeaveTest.cpp
   os/TimeoutTest.cpp
   os/EventGroupTest.cpp
@@ -21,11 +20,6 @@ set(SOURCES
   time/SmartWait.cpp
   eigen/eigenTest.cpp  
   ErrorCounterTest.cpp    
-  state/PersistentStateTest.cpp
-  state/PersistentTimeStateTest.cpp
-  state/AntennaConfigTest.cpp
-  obc/ObcStateTest.cpp  
-  
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -47,20 +41,17 @@ target_asm_listing(${NAME})
 target_compile_options(${NAME} PRIVATE "-fexceptions")
 
 target_link_libraries(${NAME}
+    yaffs
     m
     platform
     spi
     emlib
     logger
-    yaffs
     storage
     comm
     telecommunication
     fs    
-    base    
-    rapidcheck
-    rapidcheck_gtest
-    rapidcheck_gmock
+    base       
     emdrv
     time
     gsl
@@ -68,8 +59,7 @@ target_link_libraries(${NAME}
     eigen
     exp_fibo
     adcs
-    obc_telecommands
-    obc_state
+    obc_telecommands    
     eps
     rtc
     error_counter
@@ -79,7 +69,7 @@ target_link_libraries(${NAME}
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
 
-add_custom_target(unit_tests.run
+add_custom_target(${NAME}.run
   COMMAND ${QEMU} -board generic -mcu ${QEMU_MCU} -nographic -monitor null -image ${EXEC_OBJ} -semihosting-config "arg=tests,arg=--gtest_output=xml:${OUTPUT_PATH}/unit-tests.xml"
 
   DEPENDS ${NAME}
