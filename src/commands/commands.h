@@ -63,4 +63,6 @@ void Hang(std::uint16_t argc, char* argv[]);
 
 void StateCommandHandler(uint16_t argc, char* argv[]);
 
+void ErrorCountersCommand(std::uint16_t argc, char* argv[]);
+
 #endif

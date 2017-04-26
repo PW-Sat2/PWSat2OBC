@@ -212,6 +212,9 @@ class CommObject final : public ITransmitFrame, public IBeaconController
      */
     void PollHardware();
 
+    /** @brief Error counter type */
+    using ErrorCounter = error_counter::ErrorCounter<1>;
+
   private:
     /**
      * @brief Sends passed no argument command to the device with requested address.
@@ -248,9 +251,9 @@ class CommObject final : public ITransmitFrame, public IBeaconController
      * @param[out] outBuffer Buffer for the device's response.
      * @return Operation status, true in case of success, false otherwise.
      */
-    bool SendBufferWithResponse(Address address,    //
+    bool SendBufferWithResponse(Address address,   //
         gsl::span<const std::uint8_t> inputBuffer, //
-        gsl::span<uint8_t> outBuffer                //
+        gsl::span<uint8_t> outBuffer               //
         );
     /**
      * @brief This procedure will try to download the oldest not yet processed frame from the hardware.
@@ -303,7 +306,7 @@ class CommObject final : public ITransmitFrame, public IBeaconController
     [[noreturn]] static void CommTask(void* param);
 
     /** @brief Error counter */
-    error_counter::ErrorCounter<1> _error;
+    ErrorCounter _error;
 
     /** @brief Comm driver lower interface. */
     drivers::i2c::II2CBus& _low;

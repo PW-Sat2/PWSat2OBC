@@ -49,6 +49,7 @@ static const TerminalCommandDescription commands[] = {
     {"wdog", WatchdogCommand},
     {"hang", Hang},
     {"state", StateCommandHandler},
+    {"error_counters", ErrorCountersCommand},
 };
 
 void InitializeTerminal(void)

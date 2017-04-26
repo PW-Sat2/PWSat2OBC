@@ -4,6 +4,7 @@
 #include "PersistentStorageAccess.hpp"
 #include "burtc/burtc.hpp"
 #include "eps/eps.h"
+#include "error_counter/error_counter.hpp"
 #include "gpio.h"
 #include "i2c/efm.h"
 #include "i2c/i2c.h"
@@ -101,10 +102,11 @@ namespace obc
     {
         /**
          * @brief Initializes @ref OBCHardware instance
+         * @param[in] errorCounting Error counting mechanism
          * @param[in] powerControl Power control interface
          * @param[in] burtcTickHandler Tick handler for internal (BURTC) clock
          */
-        OBCHardware(services::power::IPowerControl&, TimeAction& burtcTickHandler);
+        OBCHardware(error_counter::ErrorCounting& errorCounting, services::power::IPowerControl&, TimeAction& burtcTickHandler);
 
         /** @brief Initializies OBC hardware */
         void Initialize();
