@@ -3,13 +3,13 @@
 #include "logger/logger.h"
 
 OBC::OBC()
-    : Hardware(this->Fdir.ErrorCounting(), this->PowerControlInterface, timeProvider),                 //
-      PowerControlInterface(this->Hardware.EPS),                           //
-      Storage(Hardware.SPI, fs, Hardware.Pins),                            //
-      Imtq(Hardware.I2C.Buses.Bus),                                        //
-      Experiments(fs, this->adcs.GetAdcsController(), this->timeProvider), //
-      Communication(this->Fdir, Hardware.I2C.Buses.Bus, fs, Experiments),  //
-      terminal(this->UARTDriver.GetLineIO()),                              //
+    : Hardware(this->Fdir.ErrorCounting(), this->PowerControlInterface, timeProvider), //
+      PowerControlInterface(this->Hardware.EPS),                                       //
+      Storage(Hardware.SPI, fs, Hardware.Pins),                                        //
+      Imtq(Hardware.I2C.Buses.Bus),                                                    //
+      Experiments(fs, this->adcs.GetAdcsController(), this->timeProvider),             //
+      Communication(this->Fdir, Hardware.I2C.Buses.Bus, fs, Experiments),              //
+      terminal(this->UARTDriver.GetLineIO()),                                          //
       rtc(Hardware.I2C.Buses.Payload)
 {
 }
@@ -19,9 +19,9 @@ void OBC::Initialize()
     this->StateFlags.Initialize();
 
     this->Fdir.Initalize();
-    this->Hardware.Initialize();
 
     this->UARTDriver.Initialize();
+    this->Hardware.Initialize();
 
     this->fs.Initialize();
 

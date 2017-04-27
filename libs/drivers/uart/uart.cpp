@@ -12,10 +12,11 @@ static drivers::uart::UART* uart = nullptr;
 
 #define DEBUG_UART
 
-void UART1_RX_IRQHandler()
+__attribute__((optimize("O3"))) void UART1_RX_IRQHandler()
 {
 #ifdef DEBUG_UART
-    GPIO_PinOutClear(gpioPortC, 11);
+    GPIO->P[gpioPortC].DOUTCLR = 1 << 11;
+//    GPIO_PinOutClear(gpioPortC, 11);
 #endif
 
     if (uart != nullptr)
@@ -37,8 +38,7 @@ namespace drivers
             this->_lineIO.Readline = Readline;
             this->_lineIO.VPrintf = VPrintf;
 
-            this->_receivedLineEnd = System::CreateBinarySemaphore(0);
-            System::GiveSemaphore(this->_receivedLineEnd);
+            this->_event.Initialize();
 
             ::uart = this;
         }
@@ -59,16 +59,17 @@ namespace drivers
             USART_IntEnable(io_map::UART::Peripheral, UART_IEN_RXDATAV);
 
             NVIC_SetPriority(IRQn::UART1_RX_IRQn, io_map::UART::InterruptPriority);
+            NVIC_SetPriority(io_map::UART::WakeUpInterrupt, io_map::UART::WakeUpInterruptPriority);
             NVIC_EnableIRQ(IRQn::UART1_RX_IRQn);
+            NVIC_EnableIRQ(io_map::UART::WakeUpInterrupt);
 
             USART_Enable(io_map::UART::Peripheral, usartEnable);
 
 #ifdef DEBUG_UART
             GPIO_PinModeSet(gpioPortC, 11, gpioModePushPull, 1);
             GPIO_PinModeSet(gpioPortC, 12, gpioModePushPull, 1);
+            GPIO_PinModeSet(gpioPortC, 13, gpioModePushPull, 1);
 #endif
-
-            DMADRV_AllocateChannel(&this->_rxChannel, nullptr);
         }
 
         LineIO& UART::GetLineIO()
@@ -103,43 +104,105 @@ namespace drivers
             }
         }
 
-        size_t UART::Readline(struct _LineIO* io, char* buffer, std::size_t bufferLength)
+        size_t UART::Readline(struct _LineIO* io, char* buffer, std::size_t /*bufferLength*/)
         {
             auto This = reinterpret_cast<UART*>(io->extra);
+
+            This->_event.Clear(Event::LineEndReceived);
 
 #ifdef DEBUG_UART
             GPIO_PinOutClear(gpioPortC, 12);
 #endif
-            System::TakeSemaphore(This->_receivedLineEnd, InfiniteTimeout);
+            //            DMADRV_PeripheralMemory(This->_rxChannel,
+            //                dmadrvPeripheralSignal_UART1_RXDATAV,
+            //                buffer,
+            //                const_cast<void*>(reinterpret_cast<volatile void*>(&io_map::UART::Peripheral->RXDATA)),
+            //                true,
+            //                bufferLength,
+            //                dmadrvDataSize1,
+            //                OnDma,
+            //                This);
 
-            DMADRV_PeripheralMemory(This->_rxChannel,
-                dmadrvPeripheralSignal_UART1_RXDATAV,
-                buffer,
-                const_cast<void*>(reinterpret_cast<volatile void*>(&io_map::UART::Peripheral->RXDATA)),
-                true,
-                bufferLength,
-                dmadrvDataSize1,
-                nullptr,
-                nullptr);
+            This->_buffer = buffer;
 
-            System::TakeSemaphore(This->_receivedLineEnd, InfiniteTimeout);
+            This->_event.WaitAny(Event::LineEndReceived, true, InfiniteTimeout);
 
-            DMADRV_StopTransfer(This->_rxChannel);
+            //            int remaining = 0;
+            //            DMADRV_TransferRemainingCount(This->_rxChannel, &remaining);
 
-            int remaining = 0;
+            LOGF(LOG_LEVEL_DEBUG, "Buffer: '%s' (%d %d %d %d)", buffer, buffer[0], buffer[1], buffer[2], buffer[3]);
 
-            auto x = DMADRV_TransferRemainingCount(This->_rxChannel, &remaining);
+            //            if ((size_t)remaining == bufferLength)
+            //            {
+            //#ifdef DEBUG_UART
+            //                GPIO_PinOutSet(gpioPortC, 12);
+            //#endif
+            //
+            //                buffer[0] = 0;
+            //                return 0;
+            //            }
+            //
+            //            if (buffer[bufferLength - remaining - 1] == '\n')
+            //            {
+            //                buffer[bufferLength - remaining - 1] = 0;
+            //            }
+            //
+            //            else if (buffer[bufferLength - remaining - 1] != '\n')
+            //            {
+            //                buffer[bufferLength - remaining] = 0;
+            //                remaining--;
+            //            }
 
-            LOGF(LOG_LEVEL_INFO, "Received line end. R=%d X=%lX", remaining, x);
+            *(This->_buffer - 1) = 0;
 
-            buffer[bufferLength - remaining - 1] = '\0';
-
-            System::GiveSemaphore(This->_receivedLineEnd);
-
+//            while (1)
+//            {
+//
+//                if (static_cast<std::size_t>(remaining) == bufferLength)
+//                    continue;
+//
+//                volatile char* c = &buffer[bufferLength - remaining - 1];
+//
+//                if (*c == '\n')
+//                    break;
+//            }
 #ifdef DEBUG_UART
             GPIO_PinOutSet(gpioPortC, 12);
 #endif
-            return bufferLength - remaining;
+
+            //            DMADRV_StopTransfer(This->_rxChannel);
+            //            LOGF(LOG_LEVEL_INFO, "Received line end. R=%d", remaining);
+
+            //            buffer[bufferLength - remaining - 1] = '\0';
+
+            return (This->_buffer - buffer);
+
+            //            while (1)
+            //                buffer[0] = 0;
+            //
+            //            char* place = buffer;
+            //
+            //            while (true)
+            //            {
+            //#ifdef DEBUG_UART
+            //                GPIO_PinOutClear(gpioPortC, 12);
+            //#endif
+            //
+            //                *place = USART_Rx(io_map::UART::Peripheral);
+            //
+            //#ifdef DEBUG_UART
+            //                GPIO_PinOutSet(gpioPortC, 12);
+            //#endif
+            //
+            //                if (*place == '\n')
+            //                {
+            //                    *place = 0;
+            //                    break;
+            //                }
+            //                place++;
+            //            }
+            //
+            //            return place - buffer;
         }
 
         void UART::ExchangeBuffers(LineIO* io, gsl::span<const std::uint8_t> outputBuffer, gsl::span<uint8_t> inputBuffer)
@@ -162,17 +225,45 @@ namespace drivers
             USART_IntEnable(io_map::UART::Peripheral, UART_IEN_RXDATAV);
         }
 
-        void UART::OnReceived()
+        __attribute__((optimize("O3"))) void UART::OnReceived()
         {
-            auto b = USART_RxDataGet(io_map::UART::Peripheral);
-
+            auto b = io_map::UART::Peripheral->RXDATA & 0x0FF;
+            *this->_buffer = b;
+            this->_buffer++;
             if (b == '\n')
             {
-                System::GiveSemaphoreISR(this->_receivedLineEnd);
-                System::EndSwitchingISR();
+                //                            System::GiveSemaphoreISR(this->_receivedLineEnd);
+                //                            System::EndSwitchingISR();
+                //                DMADRV_StopTransfer(this->_rxChannel);
+                //                auto x = ((DMA_DESCRIPTOR_TypeDef*)(DMA->CTRLBASE)) + this->_rxChannel;
+                //                x->CTRL &= ~(_DMA_CTRL_N_MINUS_1_MASK);
+
+                //                DMA->CHENC = 1 << this->_rxChannel;
+                //                DMA->IFS = 1 << this->_rxChannel;
+                //                NVIC_SetPendingIRQ(IRQn_Type::DMA_IRQn);
+
+                NVIC_SetPendingIRQ(io_map::UART::WakeUpInterrupt);
             }
 
-            GPIO_PinOutSet(gpioPortC, 11);
+            GPIO->P[gpioPortC].DOUTSET = 1 << 11;
+        }
+
+        void UART::OnWakeUpInterrupt()
+        {
+            this->_event.SetISR(Event::LineEndReceived);
+        }
+
+        bool UART::OnDma(unsigned int /*channel*/, unsigned int /*sequenceNo*/, void* userParam)
+        {
+            GPIO->P[gpioPortC].DOUTCLR = 1 << 13;
+
+            auto This = reinterpret_cast<UART*>(userParam);
+
+            This->_event.SetISR(Event::LineEndReceived);
+
+            GPIO->P[gpioPortC].DOUTSET = 1 << 13;
+
+            return true;
         }
     }
 }

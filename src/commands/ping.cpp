@@ -18,7 +18,7 @@ void PingHandler(uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
 
-    Main.terminal.Puts("pong2");
+    Main.terminal.Puts("pong");
 }
 
 void EchoHandler(uint16_t argc, char* argv[])

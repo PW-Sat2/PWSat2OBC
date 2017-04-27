@@ -11,7 +11,7 @@ using drivers::spi::EFMSPISlaveInterface;
 
 static void Status()
 {
-    EFMSPISlaveInterface spi(Main.Hardware.SPI, Main.Hardware.Pins.Flash1ChipSelect);
+    EFMSPISlaveInterface spi(Main.Hardware.SPI, Main.Hardware.Pins.Fram1ChipSelect);
 
     FM25WDriver fram(spi);
 
@@ -22,7 +22,7 @@ static void Status()
 
 static void Write(std::uint16_t address, gsl::span<const std::uint8_t> value)
 {
-    EFMSPISlaveInterface spi(Main.Hardware.SPI, Main.Hardware.Pins.Flash1ChipSelect);
+    EFMSPISlaveInterface spi(Main.Hardware.SPI, Main.Hardware.Pins.Fram1ChipSelect);
 
     FM25WDriver fram(spi);
 
@@ -33,7 +33,7 @@ static void Write(std::uint16_t address, gsl::span<const std::uint8_t> value)
 
 static void Read(std::uint16_t address, gsl::span<uint8_t> value)
 {
-    EFMSPISlaveInterface spi(Main.Hardware.SPI, Main.Hardware.Pins.Flash1ChipSelect);
+    EFMSPISlaveInterface spi(Main.Hardware.SPI, Main.Hardware.Pins.Fram1ChipSelect);
 
     FM25WDriver fram(spi);
     fram.Read(address, value);
@@ -131,9 +131,9 @@ void FRAM(std::uint16_t argc, char* argv[])
             return;
         }
 
-        drivers::spi::EFMSPISlaveInterface spi1(Main.Hardware.SPI, Main.Hardware.Pins.Flash1ChipSelect);
-        drivers::spi::EFMSPISlaveInterface spi2(Main.Hardware.SPI, Main.Hardware.Pins.Flash2ChipSelect);
-        drivers::spi::EFMSPISlaveInterface spi3(Main.Hardware.SPI, Main.Hardware.Pins.Flash3ChipSelect);
+        drivers::spi::EFMSPISlaveInterface spi1(Main.Hardware.SPI, Main.Hardware.Pins.Fram1ChipSelect);
+        drivers::spi::EFMSPISlaveInterface spi2(Main.Hardware.SPI, Main.Hardware.Pins.Fram2ChipSelect);
+        drivers::spi::EFMSPISlaveInterface spi3(Main.Hardware.SPI, Main.Hardware.Pins.Fram3ChipSelect);
 
         devices::fm25w::FM25WDriver fram1(spi1);
         devices::fm25w::FM25WDriver fram2(spi2);

@@ -28,9 +28,6 @@
 #include "obc.h"
 #include "obc/ObcState.hpp"
 #include "power_eps/power_eps.h"
-#include "storage/nand.h"
-#include "storage/nand_driver.h"
-#include "storage/storage.h"
 #include "swo/swo.h"
 #include "system.h"
 #include "terminal.h"
@@ -75,6 +72,11 @@ void I2C1_IRQHandler(void)
 void BURTC_IRQHandler(void)
 {
     Main.Hardware.Burtc.IRQHandler();
+}
+
+void LESENSE_IRQHandler()
+{
+    Main.UARTDriver.OnWakeUpInterrupt();
 }
 
 static void BlinkLed0(void* param)
@@ -181,7 +183,9 @@ void SetupHardware(void)
     CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_HFCLKLE);
     CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_HFCLKLE);
 
-    CMU_HFRCOBandSet(cmuHFRCOBand_28MHz);
+    CMU_OscillatorEnable(cmuOsc_HFXO, true, true);
+    CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
+    CMU_OscillatorEnable(cmuOsc_HFRCO, false, true);
 }
 
 extern "C" void __libc_init_array(void);
@@ -194,6 +198,8 @@ int main(void)
 
     CHIP_Init();
 
+    drivers::watchdog::InternalWatchdog::Disable();
+
     SetupHardware();
 
     SwoEnable();
@@ -203,7 +209,7 @@ int main(void)
 
     DMADRV_Init();
 
-    LeuartLineIOInit(&Main.IO);
+    //    LeuartLineIOInit(&Main.IO);
 
     Main.Initialize();
 

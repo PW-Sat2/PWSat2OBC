@@ -60,7 +60,7 @@ class SerialPortTerminal:
         self._command_prologue(cmd)
 
         response = self.readUntilPrompt().rstrip('\n')
-        self.log.debug("Command " + cmd + " responded with " + response)
+        self.log.debug("Command " + cmd + " responded with '" + response + "'")
         return response
 
     def command_no_wait(self, cmd):
@@ -138,22 +138,19 @@ class SerialPortTerminal:
         self._serial.close()
 
     def wait_for_boot(self, timeout=None):
+        return self._boot(timeout)
+
+    def _boot(self, timeout=None):
         end = None if timeout is None else time.time() + timeout
-
-        c = ''
-        while c != '@':
-            c = self._serial.read(1)
-
-            if time.time() > end:
-                return False
-
-        return True
-
-    def _boot(self):
         c = ''
         while c != '@':
             c = self._serial.read(1)
 
             if c == '#':
                 self._boot_handler.boot(self._serial.write)
+
+            if end is not None and time.time() > end:
+                return False
+
+        return True
 

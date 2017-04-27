@@ -13,23 +13,26 @@
 
 namespace io_map
 {
-    using SlaveSelectFlash1 = PinLocation<gpioPortD, 3>;
-    using SlaveSelectFlash2 = PinLocation<gpioPortB, 11>;
-    using SlaveSelectFlash3 = PinLocation<gpioPortB, 12>;
-    using DummyFramChipSelect = PinLocation<gpioPortC, 3>;
+    using SlaveSelectFlash1 = PinLocation<gpioPortA, 8>;
+    using SlaveSelectFlash2 = PinLocation<gpioPortA, 9>;
+    using SlaveSelectFlash3 = PinLocation<gpioPortA, 10>;
 
-    using Led0 = PinLocation<gpioPortE, 2>;
-    using Led1 = PinLocation<gpioPortE, 3>;
+    using SlaveSelectFram1 = PinLocation<gpioPortA, 11>;
+    using SlaveSelectFram2 = PinLocation<gpioPortA, 12>;
+    using SlaveSelectFram3 = PinLocation<gpioPortA, 13>;
+
+    using Led0 = PinLocation<gpioPortD, 1>;
+    using Led1 = PinLocation<gpioPortD, 2>;
 
     using SysClear = PinLocation<gpioPortC, 0>;
 
     struct SPI : public SPIPins<SPI>
     {
-        static constexpr USART_TypeDef* Peripheral = USART1;
+        static constexpr USART_TypeDef* Peripheral = USART0;
         static constexpr std::uint8_t Location = 1;
-        using MOSI = PinLocation<gpioPortD, 0>;
-        using MISO = PinLocation<gpioPortD, 1>;
-        using CLK = PinLocation<gpioPortD, 2>;
+        using MOSI = PinLocation<gpioPortE, 7>;
+        using MISO = PinLocation<gpioPortE, 6>;
+        using CLK = PinLocation<gpioPortE, 5>;
     };
 
     struct LEUART : public LEUARTPins<LEUART>
@@ -47,7 +50,9 @@ namespace io_map
         static constexpr USART_TypeDef* Peripheral = UART1;
         static constexpr std::uint32_t Location = UART_ROUTE_LOCATION_LOC2;
         static constexpr std::uint32_t Baudrate = 115200;
-        static constexpr std::uint8_t InterruptPriority = 6;
+        static constexpr std::uint8_t InterruptPriority = 0;
+        static constexpr IRQn WakeUpInterrupt = IRQn::LESENSE_IRQn;
+        static constexpr std::uint8_t WakeUpInterruptPriority = 5;
 
         using TX = PinLocation<gpioPortB, 9>;
         using RX = PinLocation<gpioPortB, 10>;

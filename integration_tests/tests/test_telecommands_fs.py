@@ -1,3 +1,5 @@
+from nose.tools import nottest
+
 import telecommand
 from system import auto_power_on
 from tests.base import BaseTest
@@ -20,7 +22,7 @@ class FileSystemTelecommandsTest(BaseTest):
         self.system.obc.wait_to_start()
 
         e.wait_for_change(1)
-
+    @nottest
     def test_receive_multipart_file(self):
         self._start()
 

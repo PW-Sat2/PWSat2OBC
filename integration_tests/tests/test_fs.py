@@ -1,4 +1,6 @@
 from datetime import datetime
+
+from nose.tools import nottest
 from nose_parameterized import parameterized
 
 from system import wait_for_obc_start
@@ -7,6 +9,7 @@ from tests.base import BaseTest
 
 class FileSystemTests(BaseTest):
     @wait_for_obc_start()
+    @nottest
     def test_write_read_file(self):
         text = datetime.now().isoformat()
         self.system.obc.write_file("/a/test_file", text)
@@ -25,6 +28,7 @@ class FileSystemTests(BaseTest):
         ("/a",)
     ])
     @wait_for_obc_start()
+    @nottest
     def test_write_read_long_file(self, base):
         path = base + "/file"
         data = '\n'.join(map(lambda x: x * 25, ['A', 'B', '>', 'C', 'D', 'E', 'F', 'G']))
