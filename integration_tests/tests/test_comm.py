@@ -1,3 +1,5 @@
+from nose.tools import nottest
+
 from devices import *
 from obc import *
 from tests.base import BaseTest

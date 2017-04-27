@@ -1,5 +1,7 @@
 from time import sleep
 
+from nose.tools import nottest
+
 from devices import EchoDevice, TimeoutDevice
 from system import auto_comm_handling
 from tests.base import BaseTest
@@ -20,7 +22,7 @@ class I2CTest(BaseTest):
         self.system.i2c.add_bus_device(self.timeoutDevice)
         self.system.i2c.add_pld_device(self.timeoutDevice)
         self.system.i2c.enable_pld_devices([self.echo.address, self.timeoutDevice.address], True)
-
+    @nottest
     def test_single_transfer(self):
         in_data = '\xb0' * 50
         out_data = ''.join([chr(ord(c) + 1) for c in in_data])
@@ -28,7 +30,7 @@ class I2CTest(BaseTest):
         response = self.system.obc.i2c_transfer('wr', 'system', 0x12, in_data)
 
         self.assertEqual(response, out_data)
-
+    @nottest
     def test_single_transfer_payload(self):
         in_data = 'abc'
         out_data = ''.join([chr(ord(c) + 1) for c in in_data])
@@ -36,7 +38,7 @@ class I2CTest(BaseTest):
         response = self.system.obc.i2c_transfer('wr', 'payload', 0x12, in_data)
 
         self.assertEqual(response, out_data)
-
+    @nottest
     def test_transfer_on_both_buses(self):
         response = self.system.obc.i2c_transfer('wr', 'system', 0x12, 'abc')
 
@@ -47,6 +49,7 @@ class I2CTest(BaseTest):
         self.assertEqual(response, 'efg')
 
     @auto_comm_handling(False)
+    @nottest
     def test_should_be_able_to_transfer_on_unlatched_bis(self):
         response = self.system.obc.i2c_transfer('wr', 'system', 0x14, chr(0x02))
         self.assertEqual(response, 'Error -7')

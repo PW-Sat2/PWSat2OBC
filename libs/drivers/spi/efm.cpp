@@ -134,7 +134,7 @@ bool EFMSPIInterface::OnTransferFinished(unsigned int channel, unsigned int sequ
         This->_transferGroup.SetISR(TransferTXFinished);
     }
 
-    System::EndSwitchingISR();
+    //    System::EndSwitchingISR();
 
     return true;
 }

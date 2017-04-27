@@ -20,6 +20,7 @@ namespace drivers
             LineIO& GetLineIO();
 
             void OnReceived();
+            void OnWakeUpInterrupt();
 
           private:
             static void Puts(struct _LineIO* io, const char* s);
@@ -28,11 +29,19 @@ namespace drivers
             static size_t Readline(struct _LineIO* io, char* buffer, std::size_t bufferLength);
             static void ExchangeBuffers(LineIO* io, gsl::span<const std::uint8_t> outputBuffer, gsl::span<uint8_t> inputBuffer);
 
+            static bool OnDma(unsigned int channel, unsigned int sequenceNo, void* userParam);
+
             LineIO _lineIO;
             Queue<std::uint8_t, 50> _queue;
-            OSSemaphoreHandle _receivedLineEnd;
+            EventGroup _event;
+            char* _buffer;
 
             unsigned int _rxChannel;
+
+            struct Event
+            {
+                static constexpr OSEventBits LineEndReceived = 1 << 0;
+            };
         };
     }
 }

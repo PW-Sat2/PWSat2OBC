@@ -70,6 +70,10 @@ extern "C" void vApplicationIdleHook(void)
     EMU_EnterEM1();
 }
 
+extern "C" void vApplicationTickHook(void)
+{
+}
+
 static void InitSwoEndpoint(void)
 {
     void* swoEndpointHandle = SwoEndpointInit();

@@ -23,6 +23,7 @@ class TestTime(BaseTest):
         self.assertAlmostEqual(current_time_ms, next_time_ms, places=None, delta=wait_time_accuracy_ms)
 
     @wait_for_obc_start()
+    @nottest
     def test_clock_running(self):
         wait_time_s = 3
         wait_time_accuracy_ms = 200
@@ -78,6 +79,7 @@ class TestTime(BaseTest):
         self.assertEquals(expected_s, corrected_s)
 
     @wait_for_obc_start()
+    @nottest
     def test_time_correction_on_month_boundary(self):
         self.run_time_correction_test(datetime(year=2017, month=3, day=31, hour=23, minute=38, second=00))
 

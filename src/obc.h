@@ -27,7 +27,6 @@
 #include "power_eps/power_eps.h"
 #include "rtc/rtc.hpp"
 #include "spi/efm.h"
-#include "storage/nand_driver.h"
 #include "terminal/terminal.h"
 #include "time/timer.h"
 #include "uart/uart.h"

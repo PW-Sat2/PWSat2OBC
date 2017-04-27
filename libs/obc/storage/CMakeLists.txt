@@ -6,7 +6,6 @@ target_link_libraries(${NAME} INTERFACE
     fs
     yaffs
     n25q
-    storage
     obc_hardware
 )
 
