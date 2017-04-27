@@ -13,6 +13,7 @@
 #include "obc/telecommands/experiments.hpp"
 #include "obc/telecommands/file_system.hpp"
 #include "obc/telecommands/ping.hpp"
+#include "obc/telecommands/time.hpp"
 #include "telecommunication/telecommand_handling.h"
 #include "telecommunication/uplink.h"
 #include "time/ICurrentTime.hpp"
@@ -114,7 +115,8 @@ namespace obc
         obc::telecommands::EnterIdleStateTelecommand,
         obc::telecommands::RemoveFileTelecommand,
         obc::telecommands::PerformDetumblingExperiment,
-        obc::telecommands::AbortExperiment //
+        obc::telecommands::AbortExperiment,
+		obc::telecommands::TimeTelecommand//
         >;
 
     /**
@@ -130,6 +132,7 @@ namespace obc
          * @param[in] idleStateController Idle state controller
          * @param[in] fs File system
          * @param[in] experiments Experiments
+         * @param[in] time Time provider
          */
         OBCCommunication(obc::FDIR& fdir,
             drivers::i2c::II2CBus& i2cBus,

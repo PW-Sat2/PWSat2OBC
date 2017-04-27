@@ -33,7 +33,7 @@ namespace obc
          * Part 2: Time telemetry
          *  - 64-bit LE - Current mission time.
          */
-        class TimeTelecommand final : public telecommunication::uplink::IHandleTeleCommand
+        class TimeTelecommand final : public telecommunication::uplink::Telecommand<0x54>
         {
           public:
             /**
@@ -43,11 +43,6 @@ namespace obc
         	TimeTelecommand(services::time::ICurrentTime& time);
 
             virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
-
-            virtual std::uint8_t CommandCode() const override;
-
-            /** @brief Command code */
-            static constexpr std::uint8_t Code = 0x54; // 'T'
 
             enum class TimeOperations : std::uint8_t
             {

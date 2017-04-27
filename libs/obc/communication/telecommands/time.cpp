@@ -21,11 +21,6 @@ namespace obc
 		{
 		}
 
-        uint8_t TimeTelecommand::CommandCode() const
-        {
-            return Code;
-        }
-
         void TimeTelecommand::Handle(ITransmitFrame& transmitter, span<const uint8_t> parameters)
         {
             Reader r(parameters);
