@@ -36,12 +36,15 @@ enum N25QCommand
     WriteStatusRegister = 0x01
 };
 
+constexpr std::ptrdiff_t N25QDriver::PageSize;
 constexpr std::chrono::milliseconds N25QDriver::ProgramPageTimeout;
 constexpr std::chrono::milliseconds N25QDriver::EraseSubSectorTimeout;
 constexpr std::chrono::seconds N25QDriver::EraseSectorTimeout;
 constexpr std::chrono::seconds N25QDriver::EraseChipTimeOut;
 constexpr std::chrono::milliseconds N25QDriver::ResetTimeout;
 constexpr std::chrono::milliseconds N25QDriver::WriteStatusRegisterTimeout;
+
+extern "C" void assertFailed(const char* source, const char* file, uint16_t line);
 
 static inline void WriterWriteAddress(Writer& writer, size_t address)
 {
@@ -112,7 +115,7 @@ void N25QDriver::ReadMemory(std::size_t address, gsl::span<uint8_t> buffer)
     this->_spi.Read(buffer);
 }
 
-OperationWaiter::OperationWaiter(N25QDriver* driver, std::chrono::milliseconds timeout, FlagStatus errorStatus)
+OperationWaiter::OperationWaiter(IN25QDriver* driver, std::chrono::milliseconds timeout, FlagStatus errorStatus)
     : _waitResult(None<OperationResult>()), //
       _driver(driver),                      //
       _timeout(timeout),                    //
@@ -121,9 +124,21 @@ OperationWaiter::OperationWaiter(N25QDriver* driver, std::chrono::milliseconds t
 {
 }
 
+OperationWaiter::OperationWaiter(OperationWaiter&& other)
+    : _waitResult(other._waitResult),  //
+      _driver(other._driver),          //
+      _timeout(other._timeout),        //
+      _errorStatus(other._errorStatus) //
+{
+    other._waitResult = None<OperationResult>();
+    other._driver = nullptr;
+    other._timeout = std::chrono::milliseconds(0);
+    other._errorStatus = FlagStatus::Clear;
+}
+
 OperationWaiter::~OperationWaiter()
 {
-    if (!_waitResult.HasValue)
+    if (_driver != nullptr && !_waitResult.HasValue)
     {
         Wait();
     }
@@ -136,30 +151,32 @@ OperationResult OperationWaiter::Wait()
         return _waitResult.Value;
     }
 
-    {
-        SPISelectSlave slave(_driver->_spi);
-
-        if (!_driver->WaitBusy(_timeout))
-        {
-            _waitResult = Some(OperationResult::Timeout);
-            return _waitResult.Value;
-        }
-    }
-
-    auto flags = _driver->ReadFlagStatus();
-
-    if (has_flag(flags, _errorStatus))
-    {
-        _waitResult = Some(OperationResult::Failure);
-        return _waitResult.Value;
-    }
-
-    _waitResult = Some(OperationResult::Success);
+    _waitResult = Some(_driver->WaitForOperation(_timeout, _errorStatus));
     return _waitResult.Value;
+}
+
+OperationWaiter& OperationWaiter::operator=(OperationWaiter&& other) noexcept
+{
+    OperationWaiter tmp(std::move(other));
+
+    using std::swap;
+
+    swap(this->_waitResult, tmp._waitResult);
+    swap(this->_driver, tmp._driver);
+    swap(this->_timeout, tmp._timeout);
+    swap(this->_errorStatus, tmp._errorStatus);
+
+    return *this;
 }
 
 OperationWaiter N25QDriver::BeginWritePage(size_t address, ptrdiff_t offset, span<const uint8_t> page)
 {
+    if (page.length() > PageSize)
+    {
+        assertFailed("N25QDriver", __FILE__, __LINE__);
+        return OperationWaiter(nullptr, std::chrono::milliseconds(0), FlagStatus::ProgramError);
+    }
+
     this->EnableWrite();
 
     {
@@ -215,6 +232,26 @@ bool N25QDriver::WaitBusy(std::chrono::milliseconds timeout)
     } while (true);
 
     return true;
+}
+
+OperationResult N25QDriver::WaitForOperation(std::chrono::milliseconds timeout, FlagStatus errorStatus)
+{
+    {
+        SPISelectSlave slave(_spi);
+
+        if (!WaitBusy(timeout))
+        {
+            return OperationResult::Timeout;
+        }
+    }
+
+    auto flags = ReadFlagStatus();
+    if (has_flag(flags, errorStatus))
+    {
+        return OperationResult::Failure;
+    }
+
+    return OperationResult::Success;
 }
 
 OperationWaiter N25QDriver::BeginEraseSector(size_t address)

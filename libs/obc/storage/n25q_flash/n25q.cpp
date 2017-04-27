@@ -8,18 +8,18 @@ using services::fs::IYaffsDeviceOperations;
 using drivers::gpio::OutputPin;
 
 N25QStorage::N25QStorage(drivers::spi::EFMSPIInterface& spi, IYaffsDeviceOperations& deviceOperations, obc::OBCGPIO& pins)
-    :                                      //
-      _deviceOperations(deviceOperations), //
-      _spiSlaves{                          //
-          {spi, pins.Flash1ChipSelect},    //
-          {spi, pins.Flash2ChipSelect},    //
-          {spi, pins.Flash3ChipSelect}},   //
-      _n25qDrivers{                        //
-          {_spiSlaves[0]},                 //
-          {_spiSlaves[1]},                 //
-          {_spiSlaves[2]}},                //
-      _driver(_n25qDrivers),               //
-      Device("/a", _driver)                //
+    :                                                                  //
+      _deviceOperations(deviceOperations),                             //
+      _spiSlaves{                                                      //
+          {spi, pins.Flash1ChipSelect},                                //
+          {spi, pins.Flash2ChipSelect},                                //
+          {spi, pins.Flash3ChipSelect}},                               //
+      _n25qDrivers{                                                    //
+          {_spiSlaves[0]},                                             //
+          {_spiSlaves[1]},                                             //
+          {_spiSlaves[2]}},                                            //
+      _driver{{&_n25qDrivers[0], &_n25qDrivers[1], &_n25qDrivers[2]}}, //
+      Device("/a", _driver)                                            //
 {
 }
 

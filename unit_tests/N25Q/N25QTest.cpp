@@ -637,13 +637,6 @@ TEST_F(N25QDriverTest, EraseChipOperationWillTimeout)
     ASSERT_THAT(result, Eq(OperationResult::Timeout));
 }
 
-TEST_F(N25QDriverTest, ClearFlagRegister)
-{
-    ExpectClearFlags();
-
-    this->_driver.ClearFlags();
-}
-
 TEST_F(N25QDriverTest, ShouldResetProperly)
 {
     {

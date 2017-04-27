@@ -14,6 +14,7 @@ target_link_libraries(${NAME}
 	yaffs
 	logger
 	fs
+	assert
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
