@@ -40,3 +40,11 @@ target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/I
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/SPI)
 
 target_compile_options(${NAME} PRIVATE "-fexceptions")
+
+if(${ENABLE_COVERAGE})
+  set(LD_COVERAGE "-fprofile-arcs")
+  target_link_libraries(${NAME} gcov)
+  target_compile_definitions(${NAME} PRIVATE ENABLE_COVERAGE=1)
+else()
+  set(LD_COVERAGE )    
+endif(${ENABLE_COVERAGE})
