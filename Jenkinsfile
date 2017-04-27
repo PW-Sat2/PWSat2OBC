@@ -5,8 +5,9 @@ def build() {
 }
 
 def unitTests() {
-	bat "make unit_tests.run"
-	step([$class: 'JUnitResultArchiver', testResults: 'build/DevBoard/unit-tests.xml'])
+	bat "make unit_tests"
+	bat "make unit_tests.run -j1"
+	step([$class: 'JUnitResultArchiver', testResults: 'build/DevBoard/unit_tests_*.xml'])
 }
 
 def reports() {
