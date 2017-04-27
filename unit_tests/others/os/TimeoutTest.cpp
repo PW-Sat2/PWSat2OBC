@@ -10,40 +10,42 @@ using testing::Test;
 using testing::Return;
 using testing::Eq;
 using namespace std::chrono_literals;
-
-class TimeoutTest : public Test
+namespace
 {
-  public:
-    TimeoutTest();
+    class TimeoutTest : public Test
+    {
+      public:
+        TimeoutTest();
 
-  protected:
-    OSMock _os;
-    OSReset _reset;
-};
+      protected:
+        OSMock _os;
+        OSReset _reset;
+    };
 
-TimeoutTest::TimeoutTest()
-{
-    this->_reset = InstallProxy(&this->_os);
-}
+    TimeoutTest::TimeoutTest()
+    {
+        this->_reset = InstallProxy(&this->_os);
+    }
 
-TEST_F(TimeoutTest, ZeroTimeoutWillExpireImmediately)
-{
-    EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0ms));
+    TEST_F(TimeoutTest, ZeroTimeoutWillExpireImmediately)
+    {
+        EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(0ms));
 
-    Timeout t(0ms);
+        Timeout t(0ms);
 
-    ASSERT_THAT(t.Expired(), Eq(true));
-}
+        ASSERT_THAT(t.Expired(), Eq(true));
+    }
 
-TEST_F(TimeoutTest, TimeoutWillExpireAfterSpecifiedNumberOfMiliseconds)
-{
-    EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(100ms));
+    TEST_F(TimeoutTest, TimeoutWillExpireAfterSpecifiedNumberOfMiliseconds)
+    {
+        EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(100ms));
 
-    Timeout t(10ms);
+        Timeout t(10ms);
 
-    ASSERT_THAT(t.Expired(), Eq(false));
+        ASSERT_THAT(t.Expired(), Eq(false));
 
-    EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(110ms));
+        EXPECT_CALL(this->_os, GetUptime()).WillRepeatedly(Return(110ms));
 
-    ASSERT_THAT(t.Expired(), Eq(true));
+        ASSERT_THAT(t.Expired(), Eq(true));
+    }
 }

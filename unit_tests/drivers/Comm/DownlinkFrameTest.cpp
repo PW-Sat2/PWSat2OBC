@@ -15,30 +15,32 @@ using std::uint8_t;
 using std::uint32_t;
 using telecommunication::downlink::DownlinkFrame;
 using telecommunication::downlink::DownlinkAPID;
-
-TEST(DownlinkFrameTest, ShouldBuildProperDownlinkFrame)
+namespace
 {
-    auto apid = DownlinkAPID::TelemetryShort;
-    uint32_t seq = 0x30F0F;
+    TEST(DownlinkFrameTest, ShouldBuildProperDownlinkFrame)
+    {
+        auto apid = DownlinkAPID::TelemetryShort;
+        uint32_t seq = 0x30F0F;
 
-    DownlinkFrame frame(apid, seq);
+        DownlinkFrame frame(apid, seq);
 
-    frame.PayloadWriter().WriteByte(0x42);
+        frame.PayloadWriter().WriteByte(0x42);
 
-    ASSERT_THAT(frame.Frame().length(), Eq(4));
-    ASSERT_THAT(frame.Frame()[0], Eq(0b10101011));
-    ASSERT_THAT(frame.Frame()[1], Eq(0x0F));
-    ASSERT_THAT(frame.Frame()[2], Eq(0x0F));
-    ASSERT_THAT(frame.Frame()[3], Eq(0x42));
-}
+        ASSERT_THAT(frame.Frame().length(), Eq(4));
+        ASSERT_THAT(frame.Frame()[0], Eq(0b10101011));
+        ASSERT_THAT(frame.Frame()[1], Eq(0x0F));
+        ASSERT_THAT(frame.Frame()[2], Eq(0x0F));
+        ASSERT_THAT(frame.Frame()[3], Eq(0x42));
+    }
 
-TEST(DownlinkFrameTest, ShouldPreventBuildingTooBigFrame)
-{
-    DownlinkFrame frame(DownlinkAPID::TelemetryLong, 1);
+    TEST(DownlinkFrameTest, ShouldPreventBuildingTooBigFrame)
+    {
+        DownlinkFrame frame(DownlinkAPID::TelemetryLong, 1);
 
-    array<uint8_t, DownlinkFrame::MaxPayloadSize> payload;
-    payload.fill(0xAA);
+        array<uint8_t, DownlinkFrame::MaxPayloadSize> payload;
+        payload.fill(0xAA);
 
-    ASSERT_THAT(frame.PayloadWriter().WriteArray(payload), Eq(true));
-    ASSERT_THAT(frame.PayloadWriter().WriteByte(0xAA), Eq(false));
+        ASSERT_THAT(frame.PayloadWriter().WriteArray(payload), Eq(true));
+        ASSERT_THAT(frame.PayloadWriter().WriteByte(0xAA), Eq(false));
+    }
 }

@@ -7,18 +7,20 @@
 
 using testing::ElementsAre;
 using experiment::fibo::Fibonacci;
-
-TEST(FiboCalculatorTest, X)
+namespace
 {
-    Fibonacci f;
-    std::array<std::uint32_t, 10> results;
-
-    for (auto& i : results)
+    TEST(FiboCalculatorTest, X)
     {
-        i = f.Current();
+        Fibonacci f;
+        std::array<std::uint32_t, 10> results;
 
-        f.Next();
+        for (auto& i : results)
+        {
+            i = f.Current();
+
+            f.Next();
+        }
+
+        ASSERT_THAT(results, ElementsAre(1, 1, 2, 3, 5, 8, 13, 21, 34, 55));
     }
-
-    ASSERT_THAT(results, ElementsAre(1, 1, 2, 3, 5, 8, 13, 21, 34, 55));
 }
