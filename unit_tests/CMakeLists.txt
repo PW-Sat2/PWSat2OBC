@@ -20,7 +20,7 @@ foreach(target ${UNIT_TEST_EXECUTABLES})
     list(APPEND UNIT_TEST_RUNS ${target}.run)
 endforeach()
 
-add_custom_target(unit_tests.run ALL DEPENDS ${UNIT_TEST_RUNS})
+add_custom_target(unit_tests.run DEPENDS ${UNIT_TEST_RUNS})
 
 add_custom_target(unit_tests.coverage
             COMMAND ${CMAKE_COMMAND} -E make_directory ${REPORTS_PATH}/coverage

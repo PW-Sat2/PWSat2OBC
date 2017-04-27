@@ -11,75 +11,77 @@ using testing::Return;
 using testing::Eq;
 
 using namespace drivers::i2c;
-
-class ErrorHandlingI2CBusTest : public Test
+namespace
 {
-  protected:
-    testing::NiceMock<I2CBusMock> innerBus;
-
-    I2CErrorHandlingBus bus;
-
-    static I2CResult HandlerProc(II2CBus& bus, I2CResult result, I2CAddress address, void* context)
+    class ErrorHandlingI2CBusTest : public Test
     {
-        return static_cast<ErrorHandlingI2CBusTest*>(context)->Handler(bus, result, address, context);
+      protected:
+        testing::NiceMock<I2CBusMock> innerBus;
+
+        I2CErrorHandlingBus bus;
+
+        static I2CResult HandlerProc(II2CBus& bus, I2CResult result, I2CAddress address, void* context)
+        {
+            return static_cast<ErrorHandlingI2CBusTest*>(context)->Handler(bus, result, address, context);
+        }
+
+        MOCK_METHOD4(Handler, I2CResult(II2CBus& bus, I2CResult result, I2CAddress address, void* context));
+
+      public:
+        ErrorHandlingI2CBusTest();
+    };
+
+    ErrorHandlingI2CBusTest::ErrorHandlingI2CBusTest() : bus(innerBus, HandlerProc, this)
+    {
     }
 
-    MOCK_METHOD4(Handler, I2CResult(II2CBus& bus, I2CResult result, I2CAddress address, void* context));
+    TEST_F(ErrorHandlingI2CBusTest, WriteReadShouldCallInnerBusAndPassthroughSuccess)
+    {
+        EXPECT_CALL(innerBus, WriteRead(_, _, _)).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(*this, Handler(_, _, _, _)).Times(0);
 
-  public:
-    ErrorHandlingI2CBusTest();
-};
+        uint8_t in[] = {1, 2, 3};
+        uint8_t out[3] = {0};
 
-ErrorHandlingI2CBusTest::ErrorHandlingI2CBusTest() : bus(innerBus, HandlerProc, this)
-{
-}
+        auto r = bus.WriteRead(0x20, in, out);
 
-TEST_F(ErrorHandlingI2CBusTest, WriteReadShouldCallInnerBusAndPassthroughSuccess)
-{
-    EXPECT_CALL(innerBus, WriteRead(_, _, _)).WillOnce(Return(I2CResult::OK));
-    EXPECT_CALL(*this, Handler(_, _, _, _)).Times(0);
+        ASSERT_THAT(r, Eq(I2CResult::OK));
+    }
 
-    uint8_t in[] = {1, 2, 3};
-    uint8_t out[3] = {0};
+    TEST_F(ErrorHandlingI2CBusTest, WriteReadShouldCallInnerBusAndExecuteHandlerOnError)
+    {
+        EXPECT_CALL(innerBus, WriteRead(_, _, _)).WillOnce(Return(I2CResult::BusErr));
+        EXPECT_CALL(*this, Handler(_, _, _, _)).WillOnce(Return(I2CResult::OK));
 
-    auto r = bus.WriteRead(0x20, in, out);
+        uint8_t in[] = {1, 2, 3};
+        uint8_t out[3] = {0};
 
-    ASSERT_THAT(r, Eq(I2CResult::OK));
-}
+        auto r = bus.WriteRead(0x20, in, out);
 
-TEST_F(ErrorHandlingI2CBusTest, WriteReadShouldCallInnerBusAndExecuteHandlerOnError)
-{
-    EXPECT_CALL(innerBus, WriteRead(_, _, _)).WillOnce(Return(I2CResult::BusErr));
-    EXPECT_CALL(*this, Handler(_, _, _, _)).WillOnce(Return(I2CResult::OK));
+        ASSERT_THAT(r, Eq(I2CResult::OK));
+    }
 
-    uint8_t in[] = {1, 2, 3};
-    uint8_t out[3] = {0};
+    TEST_F(ErrorHandlingI2CBusTest, WriteShouldCallInnerBusAndPassthroughSuccess)
+    {
+        EXPECT_CALL(innerBus, Write(_, _)).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(*this, Handler(_, _, _, _)).Times(0);
 
-    auto r = bus.WriteRead(0x20, in, out);
+        uint8_t in[] = {1, 2, 3};
 
-    ASSERT_THAT(r, Eq(I2CResult::OK));
-}
+        auto r = bus.Write(0x20, in);
 
-TEST_F(ErrorHandlingI2CBusTest, WriteShouldCallInnerBusAndPassthroughSuccess)
-{
-    EXPECT_CALL(innerBus, Write(_, _)).WillOnce(Return(I2CResult::OK));
-    EXPECT_CALL(*this, Handler(_, _, _, _)).Times(0);
+        ASSERT_THAT(r, Eq(I2CResult::OK));
+    }
 
-    uint8_t in[] = {1, 2, 3};
+    TEST_F(ErrorHandlingI2CBusTest, WriteShouldCallInnerBusAndExecuteHandlerOnError)
+    {
+        EXPECT_CALL(innerBus, Write(_, _)).WillOnce(Return(I2CResult::BusErr));
+        EXPECT_CALL(*this, Handler(_, _, _, _)).WillOnce(Return(I2CResult::OK));
 
-    auto r = bus.Write(0x20, in);
+        uint8_t in[] = {1, 2, 3};
 
-    ASSERT_THAT(r, Eq(I2CResult::OK));
-}
+        auto r = bus.Write(0x20, in);
 
-TEST_F(ErrorHandlingI2CBusTest, WriteShouldCallInnerBusAndExecuteHandlerOnError)
-{
-    EXPECT_CALL(innerBus, Write(_, _)).WillOnce(Return(I2CResult::BusErr));
-    EXPECT_CALL(*this, Handler(_, _, _, _)).WillOnce(Return(I2CResult::OK));
-
-    uint8_t in[] = {1, 2, 3};
-
-    auto r = bus.Write(0x20, in);
-
-    ASSERT_THAT(r, Eq(I2CResult::OK));
+        ASSERT_THAT(r, Eq(I2CResult::OK));
+    }
 }

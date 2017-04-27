@@ -11,64 +11,66 @@ using testing::Eq;
 using testing::Gt;
 using namespace mission;
 using namespace std::chrono_literals;
-
-struct SailSystemStateTest : public testing::Test
+namespace
 {
-    SailSystemStateTest();
+    struct SailSystemStateTest : public testing::Test
+    {
+        SailSystemStateTest();
 
-    mission::SailTask sailTask;
-    mission::UpdateDescriptor<SystemState> updateDescriptor;
-    mission::ActionDescriptor<SystemState> openSailAction;
+        mission::SailTask sailTask;
+        mission::UpdateDescriptor<SystemState> updateDescriptor;
+        mission::ActionDescriptor<SystemState> openSailAction;
 
-    SystemState state;
+        SystemState state;
 
-    bool sailOpened;
+        bool sailOpened;
 
-    UpdateResult updateResult;
+        UpdateResult updateResult;
 
-    bool runnable;
+        bool runnable;
 
-    void UpdateState();
-    void DetermineActions();
-};
+        void UpdateState();
+        void DetermineActions();
+    };
 
-SailSystemStateTest::SailSystemStateTest() : updateResult(UpdateResult::Ok), runnable(false)
-{
-    this->updateDescriptor = this->sailTask.BuildUpdate();
-    this->openSailAction = this->sailTask.BuildAction();
-}
+    SailSystemStateTest::SailSystemStateTest() : updateResult(UpdateResult::Ok), runnable(false)
+    {
+        this->updateDescriptor = this->sailTask.BuildUpdate();
+        this->openSailAction = this->sailTask.BuildAction();
+    }
 
-void SailSystemStateTest::UpdateState()
-{
-    UpdateDescriptor<SystemState> descriptors[] = {updateDescriptor};
+    void SailSystemStateTest::UpdateState()
+    {
+        UpdateDescriptor<SystemState> descriptors[] = {updateDescriptor};
 
-    updateResult = SystemStateUpdate(state, gsl::make_span(descriptors));
-}
+        updateResult = SystemStateUpdate(state, gsl::make_span(descriptors));
+    }
 
-void SailSystemStateTest::DetermineActions()
-{
-    ActionDescriptor<SystemState> descriptors[] = {openSailAction};
-    ActionDescriptor<SystemState>* runnableDescriptors[count_of(descriptors)];
+    void SailSystemStateTest::DetermineActions()
+    {
+        ActionDescriptor<SystemState> descriptors[] = {openSailAction};
+        ActionDescriptor<SystemState>* runnableDescriptors[count_of(descriptors)];
 
-    runnable = !SystemDetermineActions(state, gsl::make_span(descriptors), gsl::make_span(runnableDescriptors)).empty();
-}
+        runnable = !SystemDetermineActions(state, gsl::make_span(descriptors), gsl::make_span(runnableDescriptors)).empty();
+    }
 
-TEST_F(SailSystemStateTest, ShouldUpdateSystemState)
-{
-    sailTask.SetState(true);
+    TEST_F(SailSystemStateTest, ShouldUpdateSystemState)
+    {
+        sailTask.SetState(true);
 
-    UpdateState();
+        UpdateState();
 
-    ASSERT_THAT(updateResult, Eq(UpdateResult::Ok));
-    ASSERT_THAT(state.SailOpened, Eq(true));
-}
+        ASSERT_THAT(updateResult, Eq(UpdateResult::Ok));
+        ASSERT_THAT(state.SailOpened, Eq(true));
+    }
 
-TEST_F(SailSystemStateTest, ShouldOpenSailAfterTimeIfNotOpened)
-{
-    state.Time = 40h + 1s;
-    state.SailOpened = false;
+    TEST_F(SailSystemStateTest, ShouldOpenSailAfterTimeIfNotOpened)
+    {
+        state.Time = 40h + 1s;
+        state.SailOpened = false;
 
-    DetermineActions();
+        DetermineActions();
 
-    ASSERT_THAT(runnable, Eq(true));
+        ASSERT_THAT(runnable, Eq(true));
+    }
 }

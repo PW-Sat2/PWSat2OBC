@@ -24,40 +24,6 @@ using testing::Return;
 using testing::Invoke;
 using testing::Assign;
 
-class EPSDriverTest : public testing::Test
-{
-  protected:
-    EPSDriverTest();
-
-    NiceMock<I2CBusMock> _bus;
-    NiceMock<I2CBusMock> _payload;
-    NiceMock<ErrorCountingConfigrationMock> _errorCountingConfig;
-    error_counter::ErrorCounting _errorCounting;
-    EPSDriver::ErrorCounter _errorCounter;
-
-    EPSDriver _eps;
-
-    ErrorCode _errorA;
-    ErrorCode _errorB;
-};
-
-EPSDriverTest::EPSDriverTest()
-    : _errorCounting(this->_errorCountingConfig), _errorCounter(this->_errorCounting),
-      _eps(this->_errorCounting, this->_bus, this->_payload), _errorA(ErrorCode::NoError), _errorB(ErrorCode::NoError)
-{
-    ON_CALL(this->_bus, WriteRead(EPSDriver::ControllerA, ElementsAre(0), SpanOfSize(1)))
-        .WillByDefault(Invoke([this](I2CAddress, gsl::span<const uint8_t>, gsl::span<uint8_t> response) {
-            response[0] = static_cast<uint8_t>(num(this->_errorA) & 0xFF);
-            return I2CResult::OK;
-        }));
-
-    ON_CALL(this->_payload, WriteRead(EPSDriver::ControllerB, ElementsAre(0), SpanOfSize(1)))
-        .WillByDefault(Invoke([this](I2CAddress, gsl::span<const uint8_t>, gsl::span<uint8_t> response) {
-            response[0] = static_cast<uint8_t>(num(this->_errorB) & 0xFF);
-            return I2CResult::OK;
-        }));
-}
-
 namespace rc
 {
     template <typename Underlying, std::uint8_t BitsCount> struct Arbitrary<BitValue<Underlying, BitsCount>>
@@ -249,158 +215,195 @@ namespace rc
     };
 }
 
-RC_GTEST_FIXTURE_PROP(EPSDriverTest, ReadHousekeepingA, (HouseheepingControllerA input))
+namespace
 {
-    std::array<std::uint8_t, 72> buffer;
-    Writer w(buffer);
+    class EPSDriverTest : public testing::Test
+    {
+      protected:
+        EPSDriverTest();
 
-    w.WriteByte(0);
+        NiceMock<I2CBusMock> _bus;
+        NiceMock<I2CBusMock> _payload;
+        NiceMock<ErrorCountingConfigrationMock> _errorCountingConfig;
+        error_counter::ErrorCounting _errorCounting;
+        EPSDriver::ErrorCounter _errorCounter;
 
-    w.WriteWordLE(input.MPPT_X.SOL_CURR);
-    w.WriteWordLE(input.MPPT_X.SOL_VOLT);
-    w.WriteWordLE(input.MPPT_X.SOL_OUT_VOLT);
-    w.WriteWordLE(input.MPPT_X.TEMP);
-    w.WriteByte(num(input.MPPT_X.STATE));
+        EPSDriver _eps;
 
-    w.WriteWordLE(input.MPPT_Y_PLUS.SOL_CURR);
-    w.WriteWordLE(input.MPPT_Y_PLUS.SOL_VOLT);
-    w.WriteWordLE(input.MPPT_Y_PLUS.SOL_OUT_VOLT);
-    w.WriteWordLE(input.MPPT_Y_PLUS.TEMP);
-    w.WriteByte(num(input.MPPT_Y_PLUS.STATE));
+        ErrorCode _errorA;
+        ErrorCode _errorB;
+    };
 
-    w.WriteWordLE(input.MPPT_Y_MINUS.SOL_CURR);
-    w.WriteWordLE(input.MPPT_Y_MINUS.SOL_VOLT);
-    w.WriteWordLE(input.MPPT_Y_MINUS.SOL_OUT_VOLT);
-    w.WriteWordLE(input.MPPT_Y_MINUS.TEMP);
-    w.WriteByte(num(input.MPPT_Y_MINUS.STATE));
+    EPSDriverTest::EPSDriverTest()
+        : _errorCounting(this->_errorCountingConfig), _errorCounter(this->_errorCounting),
+          _eps(this->_errorCounting, this->_bus, this->_payload), _errorA(ErrorCode::NoError), _errorB(ErrorCode::NoError)
+    {
+        ON_CALL(this->_bus, WriteRead(EPSDriver::ControllerA, ElementsAre(0), SpanOfSize(1)))
+            .WillByDefault(Invoke([this](I2CAddress, gsl::span<const uint8_t>, gsl::span<uint8_t> response) {
+                response[0] = static_cast<uint8_t>(num(this->_errorA) & 0xFF);
+                return I2CResult::OK;
+            }));
 
-    w.WriteWordLE(input.DISTR.CURR_3V3);
-    w.WriteWordLE(input.DISTR.VOLT_3V3);
-    w.WriteWordLE(input.DISTR.CURR_5V);
-    w.WriteWordLE(input.DISTR.VOLT_5V);
-    w.WriteWordLE(input.DISTR.CURR_VBAT);
-    w.WriteWordLE(input.DISTR.VOLT_VBAT);
-    w.WriteWordLE(input.DISTR.TEMP);
-    w.WriteByte(num(input.DISTR.LCL_STATE));
-    w.WriteByte(num(input.DISTR.LCL_FLAGB));
+        ON_CALL(this->_payload, WriteRead(EPSDriver::ControllerB, ElementsAre(0), SpanOfSize(1)))
+            .WillByDefault(Invoke([this](I2CAddress, gsl::span<const uint8_t>, gsl::span<uint8_t> response) {
+                response[0] = static_cast<uint8_t>(num(this->_errorB) & 0xFF);
+                return I2CResult::OK;
+            }));
+    }
 
-    w.WriteWordLE(input.BATC.VOLT_A);
-    w.WriteWordLE(input.BATC.CHRG_CURR);
-    w.WriteWordLE(input.BATC.DCHRG_CURR);
-    w.WriteWordLE(input.BATC.TEMP);
-    w.WriteByte(num(input.BATC.STATE));
+    RC_GTEST_FIXTURE_PROP(EPSDriverTest, ReadHousekeepingA, (HouseheepingControllerA input))
+    {
+        std::array<std::uint8_t, 72> buffer;
+        Writer w(buffer);
 
-    w.WriteWordLE(input.BP.TEMP_A);
-    w.WriteWordLE(input.BP.TEMP_B);
+        w.WriteByte(0);
 
-    w.WriteWordLE(input.CTRLB.VOLT_3V3d);
+        w.WriteWordLE(input.MPPT_X.SOL_CURR);
+        w.WriteWordLE(input.MPPT_X.SOL_VOLT);
+        w.WriteWordLE(input.MPPT_X.SOL_OUT_VOLT);
+        w.WriteWordLE(input.MPPT_X.TEMP);
+        w.WriteByte(num(input.MPPT_X.STATE));
 
-    w.WriteByte(input.CTRLA.ERR);
-    w.WriteWordLE(input.CTRLA.PWR_CYCLES);
-    w.WriteDoubleWordLE(input.CTRLA.UPTIME);
-    w.WriteWordLE(input.CTRLA.TEMP);
+        w.WriteWordLE(input.MPPT_Y_PLUS.SOL_CURR);
+        w.WriteWordLE(input.MPPT_Y_PLUS.SOL_VOLT);
+        w.WriteWordLE(input.MPPT_Y_PLUS.SOL_OUT_VOLT);
+        w.WriteWordLE(input.MPPT_Y_PLUS.TEMP);
+        w.WriteByte(num(input.MPPT_Y_PLUS.STATE));
 
-    w.WriteWordLE(input.DCDC3V3.TEMP);
-    w.WriteWordLE(input.DCDC5V.TEMP);
+        w.WriteWordLE(input.MPPT_Y_MINUS.SOL_CURR);
+        w.WriteWordLE(input.MPPT_Y_MINUS.SOL_VOLT);
+        w.WriteWordLE(input.MPPT_Y_MINUS.SOL_OUT_VOLT);
+        w.WriteWordLE(input.MPPT_Y_MINUS.TEMP);
+        w.WriteByte(num(input.MPPT_Y_MINUS.STATE));
 
-    RC_ASSERT(w.Status());
+        w.WriteWordLE(input.DISTR.CURR_3V3);
+        w.WriteWordLE(input.DISTR.VOLT_3V3);
+        w.WriteWordLE(input.DISTR.CURR_5V);
+        w.WriteWordLE(input.DISTR.VOLT_5V);
+        w.WriteWordLE(input.DISTR.CURR_VBAT);
+        w.WriteWordLE(input.DISTR.VOLT_VBAT);
+        w.WriteWordLE(input.DISTR.TEMP);
+        w.WriteByte(num(input.DISTR.LCL_STATE));
+        w.WriteByte(num(input.DISTR.LCL_FLAGB));
 
-    ON_CALL(this->_bus, WriteRead(EPSDriver::ControllerA, ElementsAre(0), _))
-        .WillByDefault(DoAll(FillBuffer<2>(buffer), Return(I2CResult::OK)));
+        w.WriteWordLE(input.BATC.VOLT_A);
+        w.WriteWordLE(input.BATC.CHRG_CURR);
+        w.WriteWordLE(input.BATC.DCHRG_CURR);
+        w.WriteWordLE(input.BATC.TEMP);
+        w.WriteByte(num(input.BATC.STATE));
 
-    this->_errorCounter.Failure();
+        w.WriteWordLE(input.BP.TEMP_A);
+        w.WriteWordLE(input.BP.TEMP_B);
 
-    auto result = this->_eps.ReadHousekeepingA();
+        w.WriteWordLE(input.CTRLB.VOLT_3V3d);
 
-    ASSERT_THAT(this->_errorCounter.Current(), Eq(3));
-    RC_ASSERT(result.HasValue);
+        w.WriteByte(input.CTRLA.ERR);
+        w.WriteWordLE(input.CTRLA.PWR_CYCLES);
+        w.WriteDoubleWordLE(input.CTRLA.UPTIME);
+        w.WriteWordLE(input.CTRLA.TEMP);
 
-    auto hk = result.Value;
+        w.WriteWordLE(input.DCDC3V3.TEMP);
+        w.WriteWordLE(input.DCDC5V.TEMP);
 
-    RC_ASSERT(hk.MPPT_X.SOL_VOLT == input.MPPT_X.SOL_VOLT);
-    RC_ASSERT(hk.MPPT_X.SOL_CURR == input.MPPT_X.SOL_CURR);
-    RC_ASSERT(hk.MPPT_X.SOL_OUT_VOLT == input.MPPT_X.SOL_OUT_VOLT);
-    RC_ASSERT(hk.MPPT_X.TEMP == input.MPPT_X.TEMP);
-    RC_ASSERT(hk.MPPT_X.STATE == input.MPPT_X.STATE);
+        RC_ASSERT(w.Status());
 
-    RC_ASSERT(hk.MPPT_Y_PLUS.SOL_CURR == input.MPPT_Y_PLUS.SOL_CURR);
-    RC_ASSERT(hk.MPPT_Y_PLUS.SOL_VOLT == input.MPPT_Y_PLUS.SOL_VOLT);
-    RC_ASSERT(hk.MPPT_Y_PLUS.SOL_OUT_VOLT == input.MPPT_Y_PLUS.SOL_OUT_VOLT);
-    RC_ASSERT(hk.MPPT_Y_PLUS.TEMP == input.MPPT_Y_PLUS.TEMP);
-    RC_ASSERT(hk.MPPT_Y_PLUS.STATE == input.MPPT_Y_PLUS.STATE);
+        ON_CALL(this->_bus, WriteRead(EPSDriver::ControllerA, ElementsAre(0), _))
+            .WillByDefault(DoAll(FillBuffer<2>(buffer), Return(I2CResult::OK)));
 
-    RC_ASSERT(hk.MPPT_Y_MINUS.SOL_CURR == input.MPPT_Y_MINUS.SOL_CURR);
-    RC_ASSERT(hk.MPPT_Y_MINUS.SOL_VOLT == input.MPPT_Y_MINUS.SOL_VOLT);
-    RC_ASSERT(hk.MPPT_Y_MINUS.SOL_OUT_VOLT == input.MPPT_Y_MINUS.SOL_OUT_VOLT);
-    RC_ASSERT(hk.MPPT_Y_MINUS.TEMP == input.MPPT_Y_MINUS.TEMP);
-    RC_ASSERT(hk.MPPT_Y_MINUS.STATE == input.MPPT_Y_MINUS.STATE);
+        this->_errorCounter.Failure();
 
-    RC_ASSERT(hk.DISTR.TEMP == input.DISTR.TEMP);
-    RC_ASSERT(hk.DISTR.VOLT_3V3 == input.DISTR.VOLT_3V3);
-    RC_ASSERT(hk.DISTR.CURR_3V3 == input.DISTR.CURR_3V3);
-    RC_ASSERT(hk.DISTR.VOLT_5V == input.DISTR.VOLT_5V);
-    RC_ASSERT(hk.DISTR.CURR_5V == input.DISTR.CURR_5V);
-    RC_ASSERT(hk.DISTR.VOLT_VBAT == input.DISTR.VOLT_VBAT);
-    RC_ASSERT(hk.DISTR.CURR_VBAT == input.DISTR.CURR_VBAT);
-    RC_ASSERT(hk.DISTR.LCL_STATE == input.DISTR.LCL_STATE);
-    RC_ASSERT(hk.DISTR.LCL_FLAGB == input.DISTR.LCL_FLAGB);
+        auto result = this->_eps.ReadHousekeepingA();
 
-    RC_ASSERT(hk.BATC.VOLT_A == input.BATC.VOLT_A);
-    RC_ASSERT(hk.BATC.CHRG_CURR == input.BATC.CHRG_CURR);
-    RC_ASSERT(hk.BATC.DCHRG_CURR == input.BATC.DCHRG_CURR);
-    RC_ASSERT(hk.BATC.TEMP == input.BATC.TEMP);
-    RC_ASSERT(hk.BATC.STATE == input.BATC.STATE);
+        ASSERT_THAT(this->_errorCounter.Current(), Eq(3));
+        RC_ASSERT(result.HasValue);
 
-    RC_ASSERT(hk.BP.TEMP_A == input.BP.TEMP_A);
-    RC_ASSERT(hk.BP.TEMP_B == input.BP.TEMP_B);
+        auto hk = result.Value;
 
-    RC_ASSERT(hk.CTRLB.VOLT_3V3d == input.CTRLB.VOLT_3V3d);
+        RC_ASSERT(hk.MPPT_X.SOL_VOLT == input.MPPT_X.SOL_VOLT);
+        RC_ASSERT(hk.MPPT_X.SOL_CURR == input.MPPT_X.SOL_CURR);
+        RC_ASSERT(hk.MPPT_X.SOL_OUT_VOLT == input.MPPT_X.SOL_OUT_VOLT);
+        RC_ASSERT(hk.MPPT_X.TEMP == input.MPPT_X.TEMP);
+        RC_ASSERT(hk.MPPT_X.STATE == input.MPPT_X.STATE);
 
-    RC_ASSERT(hk.CTRLA.ERR == input.CTRLA.ERR);
-    RC_ASSERT(hk.CTRLA.PWR_CYCLES == input.CTRLA.PWR_CYCLES);
-    RC_ASSERT(hk.CTRLA.UPTIME == input.CTRLA.UPTIME);
-    RC_ASSERT(hk.CTRLA.TEMP == input.CTRLA.TEMP);
+        RC_ASSERT(hk.MPPT_Y_PLUS.SOL_CURR == input.MPPT_Y_PLUS.SOL_CURR);
+        RC_ASSERT(hk.MPPT_Y_PLUS.SOL_VOLT == input.MPPT_Y_PLUS.SOL_VOLT);
+        RC_ASSERT(hk.MPPT_Y_PLUS.SOL_OUT_VOLT == input.MPPT_Y_PLUS.SOL_OUT_VOLT);
+        RC_ASSERT(hk.MPPT_Y_PLUS.TEMP == input.MPPT_Y_PLUS.TEMP);
+        RC_ASSERT(hk.MPPT_Y_PLUS.STATE == input.MPPT_Y_PLUS.STATE);
 
-    RC_ASSERT(hk.DCDC3V3.TEMP == input.DCDC3V3.TEMP);
+        RC_ASSERT(hk.MPPT_Y_MINUS.SOL_CURR == input.MPPT_Y_MINUS.SOL_CURR);
+        RC_ASSERT(hk.MPPT_Y_MINUS.SOL_VOLT == input.MPPT_Y_MINUS.SOL_VOLT);
+        RC_ASSERT(hk.MPPT_Y_MINUS.SOL_OUT_VOLT == input.MPPT_Y_MINUS.SOL_OUT_VOLT);
+        RC_ASSERT(hk.MPPT_Y_MINUS.TEMP == input.MPPT_Y_MINUS.TEMP);
+        RC_ASSERT(hk.MPPT_Y_MINUS.STATE == input.MPPT_Y_MINUS.STATE);
 
-    RC_ASSERT(hk.DCDC5V.TEMP == input.DCDC5V.TEMP);
-}
+        RC_ASSERT(hk.DISTR.TEMP == input.DISTR.TEMP);
+        RC_ASSERT(hk.DISTR.VOLT_3V3 == input.DISTR.VOLT_3V3);
+        RC_ASSERT(hk.DISTR.CURR_3V3 == input.DISTR.CURR_3V3);
+        RC_ASSERT(hk.DISTR.VOLT_5V == input.DISTR.VOLT_5V);
+        RC_ASSERT(hk.DISTR.CURR_5V == input.DISTR.CURR_5V);
+        RC_ASSERT(hk.DISTR.VOLT_VBAT == input.DISTR.VOLT_VBAT);
+        RC_ASSERT(hk.DISTR.CURR_VBAT == input.DISTR.CURR_VBAT);
+        RC_ASSERT(hk.DISTR.LCL_STATE == input.DISTR.LCL_STATE);
+        RC_ASSERT(hk.DISTR.LCL_FLAGB == input.DISTR.LCL_FLAGB);
 
-RC_GTEST_FIXTURE_PROP(EPSDriverTest, ReadHousekeepingB, (HouseheepingControllerB input))
-{
-    std::array<std::uint8_t, 16> buffer;
-    Writer w(buffer);
+        RC_ASSERT(hk.BATC.VOLT_A == input.BATC.VOLT_A);
+        RC_ASSERT(hk.BATC.CHRG_CURR == input.BATC.CHRG_CURR);
+        RC_ASSERT(hk.BATC.DCHRG_CURR == input.BATC.DCHRG_CURR);
+        RC_ASSERT(hk.BATC.TEMP == input.BATC.TEMP);
+        RC_ASSERT(hk.BATC.STATE == input.BATC.STATE);
 
-    w.WriteByte(0);
+        RC_ASSERT(hk.BP.TEMP_A == input.BP.TEMP_A);
+        RC_ASSERT(hk.BP.TEMP_B == input.BP.TEMP_B);
 
-    w.WriteWordLE(input.BP.TEMP_C);
-    w.WriteWordLE(input.BATC.VOLT_B);
-    w.WriteWordLE(input.CTRLA.VOLT_3V3d);
-    w.WriteByte(input.CTRLB.ERR);
-    w.WriteWordLE(input.CTRLB.PWR_CYCLES);
-    w.WriteDoubleWordLE(input.CTRLB.UPTIME);
-    w.WriteWordLE(input.CTRLB.TEMP);
+        RC_ASSERT(hk.CTRLB.VOLT_3V3d == input.CTRLB.VOLT_3V3d);
 
-    RC_ASSERT(w.Status());
+        RC_ASSERT(hk.CTRLA.ERR == input.CTRLA.ERR);
+        RC_ASSERT(hk.CTRLA.PWR_CYCLES == input.CTRLA.PWR_CYCLES);
+        RC_ASSERT(hk.CTRLA.UPTIME == input.CTRLA.UPTIME);
+        RC_ASSERT(hk.CTRLA.TEMP == input.CTRLA.TEMP);
 
-    ON_CALL(this->_payload, WriteRead(EPSDriver::ControllerB, ElementsAre(0), _))
-        .WillByDefault(DoAll(FillBuffer<2>(buffer), Return(I2CResult::OK)));
+        RC_ASSERT(hk.DCDC3V3.TEMP == input.DCDC3V3.TEMP);
 
-    this->_errorCounter.Failure();
+        RC_ASSERT(hk.DCDC5V.TEMP == input.DCDC5V.TEMP);
+    }
 
-    auto result = this->_eps.ReadHousekeepingB();
+    RC_GTEST_FIXTURE_PROP(EPSDriverTest, ReadHousekeepingB, (HouseheepingControllerB input))
+    {
+        std::array<std::uint8_t, 16> buffer;
+        Writer w(buffer);
 
-    ASSERT_THAT(this->_errorCounter.Current(), Eq(3));
-    RC_ASSERT(result.HasValue);
+        w.WriteByte(0);
 
-    auto hk = result.Value;
+        w.WriteWordLE(input.BP.TEMP_C);
+        w.WriteWordLE(input.BATC.VOLT_B);
+        w.WriteWordLE(input.CTRLA.VOLT_3V3d);
+        w.WriteByte(input.CTRLB.ERR);
+        w.WriteWordLE(input.CTRLB.PWR_CYCLES);
+        w.WriteDoubleWordLE(input.CTRLB.UPTIME);
+        w.WriteWordLE(input.CTRLB.TEMP);
 
-    RC_ASSERT(hk.BP.TEMP_C == input.BP.TEMP_C);
+        RC_ASSERT(w.Status());
 
-    RC_ASSERT(hk.CTRLA.VOLT_3V3d == input.CTRLA.VOLT_3V3d);
+        ON_CALL(this->_payload, WriteRead(EPSDriver::ControllerB, ElementsAre(0), _))
+            .WillByDefault(DoAll(FillBuffer<2>(buffer), Return(I2CResult::OK)));
 
-    RC_ASSERT(hk.CTRLB.ERR == input.CTRLB.ERR);
-    RC_ASSERT(hk.CTRLB.PWR_CYCLES == input.CTRLB.PWR_CYCLES);
-    RC_ASSERT(hk.CTRLB.UPTIME == input.CTRLB.UPTIME);
-    RC_ASSERT(hk.CTRLB.TEMP == input.CTRLB.TEMP);
+        this->_errorCounter.Failure();
+
+        auto result = this->_eps.ReadHousekeepingB();
+
+        ASSERT_THAT(this->_errorCounter.Current(), Eq(3));
+        RC_ASSERT(result.HasValue);
+
+        auto hk = result.Value;
+
+        RC_ASSERT(hk.BP.TEMP_C == input.BP.TEMP_C);
+
+        RC_ASSERT(hk.CTRLA.VOLT_3V3d == input.CTRLA.VOLT_3V3d);
+
+        RC_ASSERT(hk.CTRLB.ERR == input.CTRLB.ERR);
+        RC_ASSERT(hk.CTRLB.PWR_CYCLES == input.CTRLB.PWR_CYCLES);
+        RC_ASSERT(hk.CTRLB.UPTIME == input.CTRLB.UPTIME);
+        RC_ASSERT(hk.CTRLB.TEMP == input.CTRLB.TEMP);
+    }
 }

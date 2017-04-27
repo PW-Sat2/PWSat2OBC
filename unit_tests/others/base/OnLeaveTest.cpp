@@ -5,33 +5,35 @@
 
 using std::uint8_t;
 using testing::Eq;
-
-TEST(OnLeaveTest, ShouldBeCalledOnBlockLeaving)
+namespace
 {
-    std::uint8_t counter = 10;
-
+    TEST(OnLeaveTest, ShouldBeCalledOnBlockLeaving)
     {
-        auto e = OnLeave([&counter]() { counter++; });
+        std::uint8_t counter = 10;
 
-        counter *= 2;
+        {
+            auto e = OnLeave([&counter]() { counter++; });
+
+            counter *= 2;
+        }
+
+        ASSERT_THAT(counter, Eq(21));
     }
 
-    ASSERT_THAT(counter, Eq(21));
-}
-
-TEST(OnLeaveTest, ShouldNotBeCalledOnBlockLeavingIfOrderedToSkip)
-{
-    std::uint8_t counter = 10;
-
+    TEST(OnLeaveTest, ShouldNotBeCalledOnBlockLeavingIfOrderedToSkip)
     {
-        auto e = OnLeave([&counter]() { counter++; });
+        std::uint8_t counter = 10;
 
-        counter *= 2;
+        {
+            auto e = OnLeave([&counter]() { counter++; });
 
-        e.Skip();
+            counter *= 2;
 
-        counter *= 3;
+            e.Skip();
+
+            counter *= 3;
+        }
+
+        ASSERT_THAT(counter, Eq(60));
     }
-
-    ASSERT_THAT(counter, Eq(60));
 }

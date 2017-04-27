@@ -4,13 +4,15 @@
 
 using namespace std::chrono_literals;
 using testing::Eq;
-
-TEST(MissionObcTest, TestIsInitialSilenPeriodFinishedInSilentPeriod)
+namespace
 {
-    ASSERT_THAT(mission::IsInitialSilentPeriodFinished(39min), Eq(false));
-}
+    TEST(MissionObcTest, TestIsInitialSilenPeriodFinishedInSilentPeriod)
+    {
+        ASSERT_THAT(mission::IsInitialSilentPeriodFinished(39min), Eq(false));
+    }
 
-TEST(MissionObcTest, TestIsInitialSilenPeriodFinishedOutsideSilentPeriod)
-{
-    ASSERT_THAT(mission::IsInitialSilentPeriodFinished(41min), Eq(true));
+    TEST(MissionObcTest, TestIsInitialSilenPeriodFinishedOutsideSilentPeriod)
+    {
+        ASSERT_THAT(mission::IsInitialSilentPeriodFinished(41min), Eq(true));
+    }
 }
