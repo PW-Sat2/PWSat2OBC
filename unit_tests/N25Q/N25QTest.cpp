@@ -233,8 +233,6 @@ TEST_F(N25QDriverTest, ShouldWriteSinglePage)
     {
         InSequence s;
 
-        ExpectClearFlags();
-
         {
             auto selected = this->_spi.ExpectSelected();
 
@@ -258,69 +256,7 @@ TEST_F(N25QDriverTest, ShouldWriteSinglePage)
         }
     }
 
-    auto result = this->_driver.WriteMemory(address, buffer);
-    ASSERT_THAT(result, Eq(OperationResult::Success));
-}
-
-TEST_F(N25QDriverTest, ShouldWriteTwoPages)
-{
-    const uint32_t address = 0xAB0000;
-
-    array<uint8_t, 356> buffer;
-    buffer.fill(0xCC);
-
-    {
-        InSequence s;
-
-        ExpectClearFlags();
-
-        {
-            auto selected = this->_spi.ExpectSelected();
-
-            ExpectCommand(Command::WriteEnable);
-        }
-
-        {
-            auto selected = this->_spi.ExpectSelected();
-
-            EXPECT_CALL(this->_spi, Write(ElementsAre(Command::ProgramMemory, 0xAB, 0x00, 0x00)));
-
-            EXPECT_CALL(this->_spi, Write(ContainerEq(span<const uint8_t>(buffer).subspan(0, 256))));
-        }
-
-        ExpectWaitBusy(4);
-
-        {
-            auto selected = this->_spi.ExpectSelected();
-
-            ExpectCommandAndRespondOnce(Command::ReadFlagStatusRegister, FlagStatus::Clear);
-        }
-
-        {
-            auto selected = this->_spi.ExpectSelected();
-
-            ExpectCommand(Command::WriteEnable);
-        }
-
-        {
-            auto selected = this->_spi.ExpectSelected();
-
-            EXPECT_CALL(this->_spi, Write(ElementsAre(Command::ProgramMemory, 0xAB, 0x01, 0x00)));
-
-            EXPECT_CALL(this->_spi, Write(ContainerEq(span<const uint8_t>(buffer).subspan(256, 100))));
-        }
-
-        ExpectWaitBusy(3);
-
-        {
-            auto selected = this->_spi.ExpectSelected();
-
-            ExpectCommandAndRespondOnce(Command::ReadFlagStatusRegister, FlagStatus::Clear);
-        }
-    }
-
-    auto result = this->_driver.WriteMemory(address, buffer);
-
+    auto result = this->_driver.BeginWritePage(address, 0, buffer).Wait();
     ASSERT_THAT(result, Eq(OperationResult::Success));
 }
 
@@ -328,13 +264,11 @@ TEST_F(N25QDriverTest, ShouldDetectProgramErrors)
 {
     const uint32_t address = 0xAB0000;
 
-    array<uint8_t, 356> buffer;
+    array<uint8_t, 256> buffer;
     buffer.fill(0xCC);
 
     {
         InSequence s;
-
-        ExpectClearFlags();
 
         {
             auto selected = this->_spi.ExpectSelected();
@@ -359,7 +293,7 @@ TEST_F(N25QDriverTest, ShouldDetectProgramErrors)
         }
     }
 
-    auto result = this->_driver.WriteMemory(address, buffer);
+    auto result = this->_driver.BeginWritePage(address, 0, buffer).Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Failure));
 }
@@ -396,7 +330,7 @@ TEST_F(N25QDriverTest, ShouldEraseSubsector)
         }
     }
 
-    auto result = this->_driver.EraseSubSector(address);
+    auto result = this->_driver.BeginEraseSubSector(address).Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Success));
 }
@@ -433,7 +367,7 @@ TEST_F(N25QDriverTest, ShouldDetectEraseSubsectorError)
         }
     }
 
-    auto result = this->_driver.EraseSubSector(address);
+    auto result = this->_driver.BeginEraseSubSector(address).Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Failure));
 }
@@ -476,7 +410,7 @@ TEST_F(N25QDriverTest, ShouldDetectEraseSubsectorTimeout)
         }
     }
 
-    auto result = this->_driver.EraseSubSector(address);
+    auto result = this->_driver.BeginEraseSubSector(address).Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Timeout));
 }
@@ -513,7 +447,7 @@ TEST_F(N25QDriverTest, ShouldEraseSector)
         }
     }
 
-    auto result = this->_driver.EraseSector(address);
+    auto result = this->_driver.BeginEraseSector(address).Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Success));
 }
@@ -550,7 +484,7 @@ TEST_F(N25QDriverTest, ShouldDetectEraseSectorError)
         }
     }
 
-    auto result = this->_driver.EraseSector(address);
+    auto result = this->_driver.BeginEraseSector(address).Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Failure));
 }
@@ -593,7 +527,7 @@ TEST_F(N25QDriverTest, ShouldDetectEraseSectorTimeout)
         }
     }
 
-    auto result = this->_driver.EraseSector(address);
+    auto result = this->_driver.BeginEraseSector(address).Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Timeout));
 }
@@ -626,7 +560,7 @@ TEST_F(N25QDriverTest, ShouldEraseChip)
         }
     }
 
-    auto result = this->_driver.EraseChip();
+    auto result = this->_driver.BeginEraseChip().Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Success));
 }
@@ -659,7 +593,7 @@ TEST_F(N25QDriverTest, ShouldDetectEraseChipError)
         }
     }
 
-    auto result = this->_driver.EraseChip();
+    auto result = this->_driver.BeginEraseChip().Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Failure));
 }
@@ -698,16 +632,9 @@ TEST_F(N25QDriverTest, EraseChipOperationWillTimeout)
         }
     }
 
-    auto result = this->_driver.EraseChip();
+    auto result = this->_driver.BeginEraseChip().Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Timeout));
-}
-
-TEST_F(N25QDriverTest, ClearFlagRegister)
-{
-    ExpectClearFlags();
-
-    this->_driver.ClearFlags();
 }
 
 TEST_F(N25QDriverTest, ShouldResetProperly)
