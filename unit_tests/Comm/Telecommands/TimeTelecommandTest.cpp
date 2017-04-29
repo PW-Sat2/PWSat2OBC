@@ -37,10 +37,6 @@ class TimeTelecommandTest : public testing::Test
     testing::NiceMock<CurrentTimeMock> _time;
 
     obc::telecommands::TimeTelecommand _telecommand{_time};
-
-    // consts
-    const uint8_t Apid = 0x4;
-
 };
 
 MATCHER_P3(IsDownlinkFrame, apidMatcher, seqMatcher, payloadMatcher, "")
@@ -56,11 +52,39 @@ MATCHER_P3(IsDownlinkFrame, apidMatcher, seqMatcher, payloadMatcher, "")
         && Matches(payloadMatcher)(payload);
 }
 
+
+MATCHER_P4(IsTimeDownlinkPayloadMatcher, optionMatcher, resultMatcher, argumentMatcher, telemetryMatcher, "")
+{
+	// TODO: How to pass buffer from one matcher to other matcher?
+	const uint8_t *buffer = arg.data();
+
+    auto option = buffer[0];
+    auto result = buffer[1];
+
+    // I want uint64_t, so C magic - get address of next byte, think it is byte array, rethink it is ULL array, get first element.
+    uint64_t argument = *(uint64_t*)(uint8_t*)(&(buffer[2]));
+
+    auto payload = &(buffer[10]);
+
+    return Matches(optionMatcher)(option) //
+        && Matches(resultMatcher)(result)   //
+        && Matches(argumentMatcher)(argument)
+		&& Matches(telemetryMatcher)(payload);
+}
+
 TEST_F(TimeTelecommandTest, ShouldOnlyReturnStatusWhenInReadOnlyMode)
 {
 	EXPECT_CALL(_time, SetCurrentTime(_)).Times(0);
 	EXPECT_CALL(_time, GetCurrentTime()).Times(1);
-    EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(Eq(static_cast<DownlinkAPID>(Apid)), _, _)));
+    EXPECT_CALL(_transmitFrame, SendFrame(
+    		IsDownlinkFrame(
+    				Eq(DownlinkAPID::TimeStatus),
+					_,
+					IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::ReadOnly)),
+							Eq(num(OSResult::Success)),
+							_,
+							_
+							))));
 
     Buffer<200> buffer;
     Writer w(buffer);
@@ -77,7 +101,15 @@ TEST_F(TimeTelecommandTest, ShouldSetTimeWhenTimeOptionProvided)
 
 	EXPECT_CALL(_time, SetCurrentTime(Eq(currentTimeAsMilliseconds))).Times(1);
 	EXPECT_CALL(_time, GetCurrentTime()).Times(1);
-    EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(Eq(static_cast<DownlinkAPID>(Apid)), _, _)));
+    EXPECT_CALL(_transmitFrame, SendFrame(
+    		IsDownlinkFrame(
+    				Eq(DownlinkAPID::TimeStatus),
+					_,
+					IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::Time)),
+							Eq(num(OSResult::Success)),
+							Eq(currentTimeToSend),
+							_
+							))));
 
     Buffer<200> buffer;
     Writer w(buffer);
@@ -89,30 +121,100 @@ TEST_F(TimeTelecommandTest, ShouldSetTimeWhenTimeOptionProvided)
 
 TEST_F(TimeTelecommandTest, ShouldSendErrorFrameWhenSetTimeCorrectionOptionProvided)
 {
+	int16_t correction = 0x1234;
+
 	EXPECT_CALL(_time, SetCurrentTime(_)).Times(0);
 	EXPECT_CALL(_time, GetCurrentTime()).Times(1);
 
-    EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::FileNotFound), _, _)));
+    EXPECT_CALL(_transmitFrame, SendFrame(
+    		IsDownlinkFrame(
+    				Eq(DownlinkAPID::TimeStatus),
+					_,
+					IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::TimeCorrection)),
+							Eq(num(OSResult::NotImplemented)),
+							Eq(static_cast<uint64_t>(correction)),
+							_
+							))));
 
     Buffer<200> buffer;
     Writer w(buffer);
     w.WriteByte(0x02); // write time correction data command
-    w.WriteQuadWordLE(0x12345678);
+    w.WriteWordLE(correction);
 
     _telecommand.Handle(_transmitFrame, w.Capture());
 }
 
 TEST_F(TimeTelecommandTest, ShouldSendErrorFrameWhenSetRtcTimeCorrectionOptionProvided)
 {
+	int16_t correction = 0x1234;
+
 	EXPECT_CALL(_time, SetCurrentTime(_)).Times(0);
 	EXPECT_CALL(_time, GetCurrentTime()).Times(1);
 
-    EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::FileNotFound), _, _)));
+    EXPECT_CALL(_transmitFrame, SendFrame(
+    		IsDownlinkFrame(
+    				Eq(DownlinkAPID::TimeStatus),
+					_,
+					IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::RTCCorrection)),
+							Eq(num(OSResult::NotImplemented)),
+							Eq(static_cast<uint64_t>(correction)),
+							_
+							))));
 
     Buffer<200> buffer;
     Writer w(buffer);
     w.WriteByte(0x03); // write rtc time correction data command
-    w.WriteQuadWordLE(0x12345678);
+    w.WriteWordLE(correction);
+
+    _telecommand.Handle(_transmitFrame, w.Capture());
+}
+
+TEST_F(TimeTelecommandTest, ShouldSendErrorFrameWhenNegativeSetTimeCorrectionOptionProvided)
+{
+	int16_t correction = -1234;
+
+	EXPECT_CALL(_time, SetCurrentTime(_)).Times(0);
+	EXPECT_CALL(_time, GetCurrentTime()).Times(1);
+
+    EXPECT_CALL(_transmitFrame, SendFrame(
+    		IsDownlinkFrame(
+    				Eq(DownlinkAPID::TimeStatus),
+					_,
+					IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::TimeCorrection)),
+							Eq(num(OSResult::NotImplemented)),
+							Eq(static_cast<uint64_t>(correction)),
+							_
+							))));
+
+    Buffer<200> buffer;
+    Writer w(buffer);
+    w.WriteByte(0x02); // write time correction data command
+    w.WriteWordLE(correction);
+
+    _telecommand.Handle(_transmitFrame, w.Capture());
+}
+
+TEST_F(TimeTelecommandTest, ShouldSendErrorFrameWhenNegativeSetRtcTimeCorrectionOptionProvided)
+{
+	int16_t correction = -1234;
+
+	EXPECT_CALL(_time, SetCurrentTime(_)).Times(0);
+	EXPECT_CALL(_time, GetCurrentTime()).Times(1);
+
+    EXPECT_CALL(_transmitFrame, SendFrame(
+    		IsDownlinkFrame(
+    				Eq(DownlinkAPID::TimeStatus),
+					_,
+					IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::RTCCorrection)),
+							Eq(num(OSResult::NotImplemented)),
+							Eq(static_cast<uint64_t>(correction)),
+							_
+							))));
+
+    Buffer<200> buffer;
+    Writer w(buffer);
+    w.WriteByte(0x03); // write rtc time correction data command
+    w.WriteWordLE(correction);
 
     _telecommand.Handle(_transmitFrame, w.Capture());
 }
