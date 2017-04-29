@@ -51,7 +51,7 @@ namespace adcs
              * @unit [-]
              * @default {true, true, true}
              */
-            std::array<bool, 3> coilsOn {{true, true, true}};
+            std::array<bool, 3> coilsOn{{true, true, true}};
         };
 
         /**
@@ -62,10 +62,7 @@ namespace adcs
           public:
             State() = default;
 
-            State(const Parameters& p)
-                : mtmDotPrev(Eigen::RowVector3f::Zero()), mtmMeasPrev(Eigen::RowVector3f::Zero()), params(Parameters(p))
-            {
-            }
+            State(const Parameters& p);
 
             /** @brief Value of magnetic field derivative preserved from previous step   */
             Eigen::RowVector3f mtmDotPrev;

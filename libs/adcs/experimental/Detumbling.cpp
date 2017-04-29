@@ -11,8 +11,12 @@ using Eigen::RowVector3f;
 
 using namespace adcs;
 
-Detumbling::Detumbling() :
-        mtmDotExp(0.0f)
+Detumbling::State::State(const Parameters& p)
+    : mtmDotPrev(Eigen::RowVector3f::Zero()), mtmMeasPrev(Eigen::RowVector3f::Zero()), params(Parameters(p))
+{
+}
+
+Detumbling::Detumbling() : mtmDotExp(0.0f)
 {
 }
 
@@ -39,7 +43,7 @@ void Detumbling::step(DipoleVec& dipole, const MagVec& mgmt_meas, State& state)
     RowVector3f commDipoleBdot;
     if (!mgmt_input.isZero(0.0))
     {
-        commDipoleBdot = mtmDot * (-state.params.bDotGain) / (powf((mgmt_input).norm(), 2));
+        commDipoleBdot = mtmDot * (-state.params.bDotGain) / (powf(mgmt_input.norm(), 2));
     }
     else
     {
