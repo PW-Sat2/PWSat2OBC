@@ -73,14 +73,14 @@ namespace obc
 
         void TimeTelecommand::SetTimeCorrectionFactor(Reader& reader, Writer& responseWriter)
         {
-        	UNREFERENCED_PARAMETER(reader);
-        	GenerateReadbackResponse(responseWriter, OSResult::NotImplemented, -1);
+        	auto correction = reader.ReadSignedWordLE();
+        	GenerateReadbackResponse(responseWriter, OSResult::NotImplemented, static_cast<uint64_t>(correction));
         }
 
         void TimeTelecommand::SetRtcCorrectionFactor(Reader& reader, Writer& responseWriter)
         {
-        	UNREFERENCED_PARAMETER(reader);
-        	GenerateReadbackResponse(responseWriter, OSResult::NotImplemented, -1);
+        	auto correction = reader.ReadSignedWordLE();
+        	GenerateReadbackResponse(responseWriter, OSResult::NotImplemented, static_cast<uint64_t>(correction));
         }
 
         void TimeTelecommand::GenerateTimeStateResponse(Writer& payloadWriter)
