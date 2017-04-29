@@ -1,5 +1,5 @@
-#ifndef LIBS_OBC_COMMUNICATION_TELECOMMANDS_INCLUDE_OBC_TELECOMMANDS_TIME_HPP_
-#define LIBS_OBC_COMMUNICATION_TELECOMMANDS_INCLUDE_OBC_TELECOMMANDS_TIME_HPP_
+#ifndef LIBS_OBC_COMMUNICATION_TELECOMMANDS_INCLUDE_OBC_TELECOMMANDS_TIMETELECOMMAND_HPP_
+#define LIBS_OBC_COMMUNICATION_TELECOMMANDS_INCLUDE_OBC_TELECOMMANDS_TIMETELECOMMAND_HPP_
 
 #include "base/os.h"
 #include "base/reader.h"
@@ -17,7 +17,7 @@ namespace obc
          * @ingroup telecommands
          * @telecommand
          *
-         * Command code: 0xAB
+         * Command code: 0x54
          *
          * Parameters:
          *  - 8-bit - Specific option, see TimeOperations.
@@ -26,7 +26,7 @@ namespace obc
          *  	- TimeOperations::Time  	- 64-bit LE - New mission time.
          *
          * Response:
-         * Part 1: Readback
+         * Part 1: Status and readback
          *  - 8-bit - Specific option, see TimeOperations.
          *  - 8-bit - status result
          *  - 64-bit LE - input argument expanded to 64-bit LE.
@@ -44,6 +44,7 @@ namespace obc
 
             virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
 
+            /** @brief Operations allowed by Time Telecommand */
             enum class TimeOperations : std::uint8_t
             {
                 ReadOnly = 0,
@@ -66,4 +67,4 @@ namespace obc
     }
 }
 
-#endif /* LIBS_OBC_COMMUNICATION_TELECOMMANDS_INCLUDE_OBC_TELECOMMANDS_TIME_HPP_ */
+#endif /* LIBS_OBC_COMMUNICATION_TELECOMMANDS_INCLUDE_OBC_TELECOMMANDS_TIMETELECOMMAND_HPP_ */

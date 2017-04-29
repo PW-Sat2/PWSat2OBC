@@ -7,7 +7,7 @@
 #include "base/writer.h"
 #include "mock/comm.hpp"
 #include "mock/time.hpp"
-#include "obc/telecommands/time.hpp"
+#include "obc/telecommands/TimeTelecommand.hpp"
 #include "telecommunication/downlink.h"
 #include "telecommunication/telecommand_handling.h"
 #include "utils.hpp"
@@ -45,7 +45,7 @@ MATCHER_P3(IsDownlinkFrame, apidMatcher, seqMatcher, payloadMatcher, "")
     std::uint32_t seq = ((arg[0] & 0b11) << 16) //
         | (arg[1] << 8)                         //
         | (arg[2]);
-    auto payload = arg.subspan(3);
+    gsl::span<const std::uint8_t> payload = arg.subspan(3);
 
     return Matches(apidMatcher)(apid) //
         && Matches(seqMatcher)(seq)   //
@@ -54,19 +54,21 @@ MATCHER_P3(IsDownlinkFrame, apidMatcher, seqMatcher, payloadMatcher, "")
 
 MATCHER_P4(IsTimeDownlinkPayloadMatcher, optionMatcher, resultMatcher, argumentMatcher, telemetryMatcher, "")
 {
-    const uint8_t* buffer = arg.data();
+    auto reader = Reader(arg);
+    auto option = reader.ReadByte();
+    auto result = reader.ReadByte();
+    uint64_t argument = reader.ReadQuadWordLE();
+    auto payload = reader.ReadToEnd();
 
-    auto option = buffer[0];
-    auto result = buffer[1];
+    return Matches(optionMatcher)(option)     //
+        && Matches(resultMatcher)(result)     //
+        && Matches(argumentMatcher)(argument) //
+        && Matches(telemetryMatcher)(payload);
+}
 
-    // I want uint64_t, so C magic - get address of next byte, think it is byte array, rethink it is ULL array, get first element.
-    uint64_t argument = *(uint64_t*)(uint8_t*)(&(buffer[2]));
-
-    auto payload = &(buffer[10]);
-
-    return Matches(optionMatcher)(option) //
-        && Matches(resultMatcher)(result) //
-        && Matches(argumentMatcher)(argument) && Matches(telemetryMatcher)(payload);
+MATCHER(TimeTelemetryMatcher, "")
+{
+    return arg.size() >= static_cast<int32_t>(sizeof(uint64_t));
 }
 
 TEST_F(TimeTelecommandTest, ShouldOnlyReturnStatusWhenInReadOnlyMode)
@@ -76,7 +78,8 @@ TEST_F(TimeTelecommandTest, ShouldOnlyReturnStatusWhenInReadOnlyMode)
     EXPECT_CALL(_transmitFrame,
         SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::TimeStatus),
             _,
-            IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::ReadOnly)), Eq(num(OSResult::Success)), _, _))));
+            IsTimeDownlinkPayloadMatcher(
+                Eq(num(TimeTelecommand::TimeOperations::ReadOnly)), Eq(num(OSResult::Success)), _, TimeTelemetryMatcher()))));
 
     Buffer<200> buffer;
     Writer w(buffer);
@@ -96,8 +99,10 @@ TEST_F(TimeTelecommandTest, ShouldSetTimeWhenTimeOptionProvided)
     EXPECT_CALL(_transmitFrame,
         SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::TimeStatus),
             _,
-            IsTimeDownlinkPayloadMatcher(
-                Eq(num(TimeTelecommand::TimeOperations::Time)), Eq(num(OSResult::Success)), Eq(currentTimeToSend), _))));
+            IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::Time)),
+                Eq(num(OSResult::Success)),
+                Eq(currentTimeToSend),
+                TimeTelemetryMatcher()))));
 
     Buffer<200> buffer;
     Writer w(buffer);
@@ -120,7 +125,7 @@ TEST_F(TimeTelecommandTest, ShouldSendErrorFrameWhenSetTimeCorrectionOptionProvi
             IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::TimeCorrection)),
                 Eq(num(OSResult::NotImplemented)),
                 Eq(static_cast<uint64_t>(correction)),
-                _))));
+                TimeTelemetryMatcher()))));
 
     Buffer<200> buffer;
     Writer w(buffer);
@@ -143,7 +148,7 @@ TEST_F(TimeTelecommandTest, ShouldSendErrorFrameWhenSetRtcTimeCorrectionOptionPr
             IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::RTCCorrection)),
                 Eq(num(OSResult::NotImplemented)),
                 Eq(static_cast<uint64_t>(correction)),
-                _))));
+                TimeTelemetryMatcher()))));
 
     Buffer<200> buffer;
     Writer w(buffer);
@@ -166,7 +171,7 @@ TEST_F(TimeTelecommandTest, ShouldSendErrorFrameWhenNegativeSetTimeCorrectionOpt
             IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::TimeCorrection)),
                 Eq(num(OSResult::NotImplemented)),
                 Eq(static_cast<uint64_t>(correction)),
-                _))));
+                TimeTelemetryMatcher()))));
 
     Buffer<200> buffer;
     Writer w(buffer);
@@ -189,12 +194,29 @@ TEST_F(TimeTelecommandTest, ShouldSendErrorFrameWhenNegativeSetRtcTimeCorrection
             IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::RTCCorrection)),
                 Eq(num(OSResult::NotImplemented)),
                 Eq(static_cast<uint64_t>(correction)),
-                _))));
+                TimeTelemetryMatcher()))));
 
     Buffer<200> buffer;
     Writer w(buffer);
     w.WriteByte(0x03); // write rtc time correction data command
     w.WriteWordLE(correction);
+
+    _telecommand.Handle(_transmitFrame, w.Capture());
+}
+
+TEST_F(TimeTelecommandTest, ShouldSendErrorFrameWhenInvalidOptionProvided)
+{
+    EXPECT_CALL(_time, SetCurrentTime(_)).Times(0);
+    EXPECT_CALL(_time, GetCurrentTime()).Times(1);
+
+    EXPECT_CALL(_transmitFrame,
+        SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::TimeStatus),
+            _,
+            IsTimeDownlinkPayloadMatcher(Eq(127), Eq(num(OSResult::InvalidArgument)), _, TimeTelemetryMatcher()))));
+
+    Buffer<200> buffer;
+    Writer w(buffer);
+    w.WriteByte(127);
 
     _telecommand.Handle(_transmitFrame, w.Capture());
 }

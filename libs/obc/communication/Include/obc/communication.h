@@ -13,7 +13,7 @@
 #include "obc/telecommands/experiments.hpp"
 #include "obc/telecommands/file_system.hpp"
 #include "obc/telecommands/ping.hpp"
-#include "obc/telecommands/time.hpp"
+#include "obc/telecommands/TimeTelecommand.hpp"
 #include "telecommunication/telecommand_handling.h"
 #include "telecommunication/uplink.h"
 #include "time/ICurrentTime.hpp"

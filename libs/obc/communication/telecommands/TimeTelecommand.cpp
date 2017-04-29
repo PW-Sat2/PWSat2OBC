@@ -1,4 +1,4 @@
-#include "time.hpp"
+#include "TimeTelecommand.hpp"
 
 #include "base/reader.h"
 #include "logger/logger.h"
@@ -28,7 +28,7 @@ namespace obc
             auto operation = static_cast<TimeOperations>(operationAsByte);
 
             DownlinkFrame response(DownlinkAPID::TimeStatus, 0);
-            auto payloadWriter = response.PayloadWriter();
+            Writer& payloadWriter = response.PayloadWriter();
 
             // write original operation code in response
             payloadWriter.WriteByte(operationAsByte);
