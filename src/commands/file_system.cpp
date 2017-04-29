@@ -193,6 +193,7 @@ void EraseFlash(uint16_t argc, char* argv[])
     }
     else
     {
+#ifdef USE_EXTERNAL_FLASH
         auto flashIndex = strtol(argv[0], nullptr, 10);
         if (flashIndex < 0 || flashIndex >= 3)
         {
@@ -207,6 +208,10 @@ void EraseFlash(uint16_t argc, char* argv[])
         auto r = flash.BeginEraseChip().Wait();
 
         Main.terminal.Printf("Erase result: %d ...", num(r));
+#else
+        Main.terminal.Puts("Erasing single chip is not supported on STK Storage");
+        Main.terminal.NewLine();
+#endif
     }
 }
 
