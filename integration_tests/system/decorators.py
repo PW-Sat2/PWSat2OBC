@@ -36,9 +36,3 @@ def auto_power_on(auto_power_on):
             return result
         return wrapper
     return wrap
-
-def require_two_i2c_buses(f):
-    if config['SINGLE_BUS']:
-        return nottest(f)
-    else:
-        return f

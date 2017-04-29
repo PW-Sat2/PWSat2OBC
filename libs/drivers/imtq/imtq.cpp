@@ -4,8 +4,8 @@
 @remarks Based on ICD Issue 1.5 2015-07-22
 */
 #include "imtq.h"
-#include <cassert>
 #include <stdnoreturn.h>
+#include <cassert>
 #include <chrono>
 #include <cstddef>
 #include <cstdlib>
@@ -29,32 +29,64 @@ namespace devices
     {
         // ------------------------- status -------------------------
 
+        /**
+         * @brief iMTQ status
+         */
         class Status
         {
           public:
+            /**
+             * @brief Ctor
+             * @param val Status value
+             */
             Status(std::uint8_t val) : value{val}
             {
             }
+            /**
+             * @brief Is OK?
+             * @return true if ok
+             */
             bool IsOK() const
             {
                 return ((value & 0b01111111) == 0);
             }
+
+            /**
+             * @brief Is Accepted?
+             * @return true if accepted
+             */
             bool Accepted() const
             {
                 return (value & 0b1111) == 0;
             }
+            /**
+             * @brief Is new?
+             * @return true if new
+             */
             bool IsNew() const
             {
                 return value & 0b10000000;
             }
+            /**
+             * @brief Is X invalid?
+             * @return true if X is invalid
+             */
             bool InvalidX() const
             {
                 return value & 0b01000000;
             }
+            /**
+             * @brief Is Y invalid?
+             * @return true if Y is invalid
+             */
             bool InvalidY() const
             {
                 return value & 0b00100000;
             }
+            /**
+             * @brief Is Z invalid?
+             * @return true if Z is invalid
+             */
             bool InvalidZ() const
             {
                 return value & 0b00010000;
@@ -173,7 +205,7 @@ namespace devices
             std::array<uint8_t, 8> parameters;
 
             Writer writer{parameters};
-            for(auto x: current)
+            for (auto x : current)
             {
                 writer.WriteSignedWordLE(x);
             }
@@ -188,7 +220,7 @@ namespace devices
             std::array<uint8_t, 8> parameters;
 
             Writer writer{parameters};
-            for(auto x: dipole)
+            for (auto x : dipole)
             {
                 writer.WriteWordLE(x);
             }
@@ -247,7 +279,7 @@ namespace devices
 
             Reader reader{value};
             reader.Skip(2);
-            for(auto& x: result.data)
+            for (auto& x : result.data)
             {
                 x = reader.ReadSignedDoubleWordLE();
             }
@@ -268,7 +300,7 @@ namespace devices
             Reader reader{value};
             reader.Skip(2);
 
-            for(auto& x: result)
+            for (auto& x : result)
             {
                 x = reader.ReadSignedWordLE();
             }
@@ -287,7 +319,7 @@ namespace devices
             Reader reader{value};
             reader.Skip(2);
 
-            for(auto& x: result)
+            for (auto& x : result)
             {
                 x = reader.ReadSignedWordLE();
             }
@@ -310,19 +342,19 @@ namespace devices
                 reader.Skip(2);
                 result.stepResults[step].error = Error{reader.ReadByte()};
                 result.stepResults[step].actualStep = static_cast<SelfTestResult::Step>(reader.ReadByte());
-                for(auto& x: result.stepResults[step].RawMagnetometerMeasurement)
+                for (auto& x : result.stepResults[step].RawMagnetometerMeasurement)
                 {
                     x = reader.ReadSignedDoubleWordLE();
                 }
-                for(auto& x: result.stepResults[step].CalibratedMagnetometerMeasurement)
+                for (auto& x : result.stepResults[step].CalibratedMagnetometerMeasurement)
                 {
                     x = reader.ReadSignedDoubleWordLE();
                 }
-                for(auto& x: result.stepResults[step].CoilCurrent)
+                for (auto& x : result.stepResults[step].CoilCurrent)
                 {
                     x = reader.ReadSignedWordLE();
                 }
-                for(auto& x: result.stepResults[step].CoilTemperature)
+                for (auto& x : result.stepResults[step].CoilTemperature)
                 {
                     x = reader.ReadSignedWordLE();
                 }
@@ -342,27 +374,27 @@ namespace devices
             Reader reader{value};
             reader.Skip(2);
 
-            for(auto& x: result.calibratedMagnetometerMeasurement)
+            for (auto& x : result.calibratedMagnetometerMeasurement)
             {
                 x = reader.ReadSignedDoubleWordLE();
             }
-            for(auto& x: result.filteredMagnetometerMeasurement)
+            for (auto& x : result.filteredMagnetometerMeasurement)
             {
                 x = reader.ReadSignedDoubleWordLE();
             }
-            for(auto& x: result.bDotData)
+            for (auto& x : result.bDotData)
             {
                 x = reader.ReadSignedDoubleWordLE();
             }
-            for(auto& x: result.commandedDipole)
+            for (auto& x : result.commandedDipole)
             {
                 x = reader.ReadSignedWordLE();
             }
-            for(auto& x: result.commandedCurrent)
+            for (auto& x : result.commandedCurrent)
             {
                 x = reader.ReadSignedWordLE();
             }
-            for(auto& x: result.measuredCurrent)
+            for (auto& x : result.measuredCurrent)
             {
                 x = reader.ReadSignedWordLE();
             }
@@ -382,12 +414,12 @@ namespace devices
 
         // --------------------------- Configuration --------------------------
 
-        bool ImtqDriver::GetParameter(Parameter id, gsl::span<uint8_t> result)
+        bool ImtqDriver::GetParameter(Parameter id, gsl::span<std::uint8_t> result)
         {
             return GetOrResetParameter(OpCode::GetParameter, id, result);
         }
 
-        bool ImtqDriver::SetParameter(Parameter id, gsl::span<const uint8_t> value)
+        bool ImtqDriver::SetParameter(Parameter id, gsl::span<const std::uint8_t> value)
         {
             std::array<uint8_t, 10> paramsArray;
 
@@ -495,8 +527,7 @@ namespace devices
             return true;
         }
 
-        template<typename Result>
-        bool ImtqDriver::GetHouseKeeping(OpCode opcode, Result& result)
+        template <typename Result> bool ImtqDriver::GetHouseKeeping(OpCode opcode, Result& result)
         {
             std::array<uint8_t, 24> value;
             bool i2cError = this->DataRequest(opcode, value);
@@ -508,11 +539,11 @@ namespace devices
             result.analogVoltage = reader.ReadWordLE();
             result.digitalCurrent = reader.ReadWordLE();
             result.analogCurrent = reader.ReadWordLE();
-            for(auto& x: result.coilCurrent)
+            for (auto& x : result.coilCurrent)
             {
                 x = reader.ReadWordLE();
             }
-            for(auto& x: result.coilTemperature)
+            for (auto& x : result.coilTemperature)
             {
                 x = reader.ReadWordLE();
             }

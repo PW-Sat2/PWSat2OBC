@@ -20,6 +20,14 @@ set(SOURCES
     commands/imtq.cpp
     commands/rtc.cpp
     commands/fram.cpp
+    commands/external_flash.cpp
+    commands/obc_state.cpp
+    commands/temp.cpp
+    commands/eps.cpp
+    commands/watchdog.cpp
+    commands/state.cpp
+    commands/error_counters.cpp
+    checks/error_counters.cpp
     obc.h
     obc.cpp
     fault_handlers.cpp
@@ -59,12 +67,14 @@ target_link_libraries(${NAME}
     mission_sail
     mission_time
     mission_experiments
+    mission_state
     yaffs
     obc_fdir
     obc_storage
     obc_communication
     obc_hardware
     obc_experiments
+    obc_state
     spi
     efm_emlib
     burtc
@@ -72,6 +82,7 @@ target_link_libraries(${NAME}
     rtc
     mission_adcs
     mission_beacon
+    watchdog
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

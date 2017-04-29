@@ -19,56 +19,6 @@ namespace obc
         */
 
         /**
-         * @brief Represents single flash mememory mounted as Yaffs device
-         */
-        class SingleFlash final
-        {
-          public:
-            /**
-             * @brief Ctor
-             * @param mountPoint Mount point
-             * @param slaveSelect Pin used as slave select
-             * @param spi SPI interface
-             * @param deviceOperations Device operations
-             */
-            SingleFlash(const char* mountPoint,
-                const drivers::gpio::Pin& slaveSelect,
-                drivers::spi::EFMSPIInterface& spi,
-                services::fs::IYaffsDeviceOperations& deviceOperations);
-
-            /**
-             * @brief Initializes OBC storage
-             * @return Operation result
-             */
-            OSResult Initialize();
-
-            /**
-             * @brief Clears OBC storage
-             * @return Operation result
-             */
-            OSResult ClearStorage();
-
-            /**
-             * @brief Performs (lengthy) erase operation
-             * @return Operation result
-             */
-            OSResult Erase();
-
-          private:
-            /** @brief SPI driver for N25Q flash slave */
-            drivers::spi::EFMSPISlaveInterface SPI;
-
-            /** @brief N25Q flash driver */
-            devices::n25q::N25QDriver Driver;
-
-            /** @brief N25Q Yaffs device */
-            devices::n25q::N25QYaffsDevice<devices::n25q::BlockMapping::Sector, 2_KB, 16_MB> Device;
-
-            /** @brief Device operations */
-            services::fs::IYaffsDeviceOperations& _deviceOperations;
-        };
-
-        /**
          * @brief Storage handler for N25Q
          *
          * This class manages external flash and it's integration with YAFFS
@@ -102,9 +52,23 @@ namespace obc
              */
             OSResult Erase();
 
+            /**
+             * @brief Gives access to low-level N25Q drivers.
+             * @param[in] index Index (0, 1 or 2) of the driver to return.
+             * @return Low-level N25Q driver
+             */
+            devices::n25q::N25QDriver& GetDriver(uint8_t index);
+
           private:
-            /** @brief External flashes */
-            SingleFlash _flashes[1];
+            services::fs::IYaffsDeviceOperations& _deviceOperations;
+
+            drivers::spi::EFMSPISlaveInterface _spiSlaves[3];
+
+            devices::n25q::N25QDriver _n25qDrivers[3];
+
+            devices::n25q::RedundantN25QDriver _driver;
+
+            devices::n25q::N25QYaffsDevice<devices::n25q::BlockMapping::Sector, 2_KB, 16_MB> Device;
         };
 
         /** @} */

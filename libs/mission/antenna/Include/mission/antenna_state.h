@@ -121,6 +121,11 @@ namespace mission
             void Restart();
 
             /**
+             * @brief Immediately finishes the antenna deployment process.
+             */
+            void Finish();
+
+            /**
              * @brief Returns total count of the deployment steps.
              * @return Total deployment step count.
              */
@@ -192,6 +197,11 @@ namespace mission
         inline void AntennaMissionState::Restart()
         {
             OverrideStep(0);
+        }
+
+        inline void AntennaMissionState::Finish()
+        {
+            OverrideStep(StepCount());
         }
         /** @}*/
     }

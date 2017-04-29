@@ -1,19 +1,21 @@
+from datetime import datetime
 import logging
 from base64 import b64encode
 
-import time
-
 from utils import ExtendableFormatter
-
-from .experiments import ExperimentsMixin
-from .obc_mixin import OBCMixin
-from .file_system import FileSystemMixin
 from .antenna import AntennaMixin
 from .comm import CommMixin
-from .obc_time import TimeMixin
+from .experiments import ExperimentsMixin
+from .file_system import FileSystemMixin
 from .i2c import I2CMixin
-from .mission import MissionMixin
 from .imtq import ImtqMixin
+from .mission import MissionMixin
+from .obc_mixin import OBCMixin
+from .obc_time import TimeMixin
+from .eps import EPSMixin
+from .watchdog import WatchdogMixin
+from .state import StateMixin
+from .error_counters import ErrorCountersMixin
 
 
 class OBC(OBCMixin,
@@ -24,13 +26,18 @@ class OBC(OBCMixin,
           AntennaMixin,
           MissionMixin,
           ImtqMixin,
-          ExperimentsMixin
+          ExperimentsMixin,
+          EPSMixin,
+          WatchdogMixin,
+          StateMixin,
+          ErrorCountersMixin
           ):
     def __init__(self, terminal):
         self.log = logging.getLogger("OBC")
 
         self._formatter = ExtendableFormatter()
         self._formatter.register_conversion('E', lambda d: b64encode(d).rstrip('='))
+        self._formatter.register_conversion('n', lambda d: d.name)
 
         self._terminal = terminal
         self._terminal.reset()
@@ -40,13 +47,21 @@ class OBC(OBCMixin,
 
         return self._terminal.command(cmdline)
 
-    def wait_to_start(self):
-        response = self._terminal.command("getState")
-        while response != "1":
-            time.sleep(0.2)
-            response = self._terminal.command("getState")
+    def _command_no_wait(self, cmd, *args, **kwargs):
+        cmdline = self._formatter.vformat(cmd, args, kwargs)
 
-        self.log.info("OBC reported ready state")
+        return self._terminal.command_no_wait(cmdline)
+
+    def wait_to_start(self):
+        self.log.debug("Waiting for OBC initialization finish")
+
+        start = datetime.now()
+
+        self._command("wait_for_init")
+
+        end = datetime.now()
+        duration = end - start
+        self.log.info("OBC initialization done in %s", str(duration))
 
     def reset(self):
         self._terminal.reset()
@@ -62,3 +77,6 @@ class OBC(OBCMixin,
 
     def ping(self):
         return self._command("ping")
+
+    def wait_for_boot(self, timeout=None):
+        return self._terminal.wait_for_boot(timeout)

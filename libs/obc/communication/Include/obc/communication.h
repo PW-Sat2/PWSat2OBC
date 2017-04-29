@@ -1,12 +1,14 @@
 #ifndef SRC_COMMUNICATION_H_
 #define SRC_COMMUNICATION_H_
 
+#include <array>
 #include <gsl/span>
+#include <tuple>
 #include "comm/CommDriver.hpp"
 #include "i2c/i2c.h"
 #include "obc/experiments.hpp"
-#include "obc/telecommands/experiments.hpp"
 #include "obc/fdir.hpp"
+#include "obc/telecommands/experiments.hpp"
 #include "obc/telecommands/file_system.hpp"
 #include "obc/telecommands/ping.hpp"
 #include "telecommunication/telecommand_handling.h"
@@ -15,36 +17,100 @@
 namespace obc
 {
     /**
-     * @brief Object aggregating all supported telecommands
+     * @defgroup obc_communication OBC Telecommunication
+     * @ingroup obc
+     *
+     * @{
      */
-    class Telecommands final
+
+    /**
+     * @brief Helper type for holding many telecommands
+     * @tparam Telecommands Types of telecommands
+     */
+    template <typename... Telecommands> class TelecommandsHolder final
     {
       public:
         /**
-         * @brief Initializes @ref Telecommands object
-         * @param fs File system
-         * @param experiments Experiments
+         * @brief Ctor
+         * @param telecommands Telecommands instances
          */
-        Telecommands(services::fs::IFileSystem& fs, obc::OBCExperiments& experiments);
+        TelecommandsHolder(Telecommands&&... telecommands);
 
         /**
-         * Aggregates all telecommand handlers into single span
-         * @return Span with all supported telecommands
+         * @brief Gets list of telecommands
+         * @return List of telecommands
          */
-        gsl::span<telecommunication::uplink::IHandleTeleCommand*> AllTelecommands();
+        gsl::span<telecommunication::uplink::IHandleTeleCommand*> Get();
 
       private:
-        /** @brief Ping telecommand */
-        obc::telecommands::PingTelecommand _ping;
-        /** @brief Download file telecommand */
-        obc::telecommands::DownladFileTelecommand _downloadFileTelecommand;
+        /**
+         * @brief Initialize pointers - single step
+         */
+        template <std::size_t N, typename Head, typename... Rest> void InitPtr()
+        {
+            auto& ref = std::get<N>(this->_telecommands);
 
-        /** @brief Perform detumbling experiment */
-        obc::telecommands::PerformDetumblingExperiment _performDetumblingExperiment;
+            this->_pointers[N] = reinterpret_cast<telecommunication::uplink::IHandleTeleCommand*>(&ref);
 
-        /** @brief Array containg all telecommand handlers */
-        telecommunication::uplink::IHandleTeleCommand* _telecommands[3];
+            InitPtr<N + 1, Rest...>();
+        }
+
+        /**
+         * @brief Initialize pointers - stop condition
+         */
+        template <std::size_t N> void InitPtr()
+        {
+        }
+
+        /** @brief Telecommand instances */
+        std::tuple<Telecommands...> _telecommands;
+        /** @brief Pointers to telecommands */
+        std::array<telecommunication::uplink::IHandleTeleCommand*, sizeof...(Telecommands)> _pointers;
+
+        /**
+         * @brief Checks if command codes are unique
+         * @return true if command codes are unique
+         */
+        template <bool Tag, std::uint8_t Head, std::uint8_t... Rest> static constexpr bool AreCodesUnique()
+        {
+            if (IsValueInList<std::uint8_t>::IsInList<Head, Rest...>())
+            {
+                return false;
+            }
+
+            return AreCodesUnique<true, Rest...>();
+        }
+
+        /**
+         * @brief Checks if command codes are unique (stop condition)
+         * @return Always true
+         */
+        template <bool Tag> static constexpr bool AreCodesUnique()
+        {
+            return true;
+        }
+
+        static_assert(AreCodesUnique<true, Telecommands::Code...>(), "Telecommand codes must be unique");
     };
+
+    template <typename... Telecommands>
+    TelecommandsHolder<Telecommands...>::TelecommandsHolder(Telecommands&&... telecommands) : _telecommands{telecommands...}
+    {
+        InitPtr<0, Telecommands...>();
+    }
+
+    template <typename... Telecommands> gsl::span<telecommunication::uplink::IHandleTeleCommand*> TelecommandsHolder<Telecommands...>::Get()
+    {
+        return this->_pointers;
+    }
+
+    /** @brief Typedef with all supported telecommands */
+    using Telecommands = TelecommandsHolder< //
+        obc::telecommands::PingTelecommand,
+        obc::telecommands::DownloadFileTelecommand,
+        obc::telecommands::PerformDetumblingExperiment,
+        obc::telecommands::AbortExperiment //
+        >;
 
     /**
      * @brief OBC <-> Earth communication
@@ -77,6 +143,8 @@ namespace obc
         /** @brief Low-level comm driver */
         devices::comm::CommObject CommDriver;
     };
+
+    /** @} */
 }
 
 #endif /* SRC_COMMUNICATION_H_ */

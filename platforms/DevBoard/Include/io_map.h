@@ -5,6 +5,7 @@
 #include <em_device.h>
 #include <em_gpio.h>
 #include <em_usart.h>
+#include <em_wdog.h>
 #include <em_system.h>
 #include "base/io_map.h"
 
@@ -15,6 +16,7 @@ namespace io_map
     using SlaveSelectFlash1 = PinLocation<gpioPortD, 3>;
     using SlaveSelectFlash2 = PinLocation<gpioPortB, 11>;
     using SlaveSelectFlash3 = PinLocation<gpioPortB, 12>;
+    using DummyFramChipSelect = PinLocation<gpioPortC, 3>;
 
     using Led0 = PinLocation<gpioPortE, 2>;
     using Led1 = PinLocation<gpioPortE, 3>;
@@ -59,18 +61,19 @@ namespace io_map
     struct I2C
     {
         static constexpr std::uint8_t InterruptPriority = 6;
-#ifdef I2C_SINGLE_BUS
-        static constexpr std::uint8_t SystemBus = 1;
-        static constexpr std::uint8_t PayloadBus = 1;
-#else
+
         static constexpr std::uint8_t SystemBus = 1;
         static constexpr std::uint8_t PayloadBus = 0;
-#endif
 #ifndef I2C_TIMEOUT
         static constexpr std::uint32_t Timeout = 5; // in seconds
 #else
         static constexpr std::uint32_t Timeout = I2C_TIMEOUT; // in seconds
 #endif
+    };
+
+    struct Watchdog
+    {
+        static constexpr WDOG_PeriodSel_TypeDef Period = wdogPeriod_1k; // About 1 second
     };
 }
 

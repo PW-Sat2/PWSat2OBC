@@ -1,7 +1,6 @@
 set(NAME integration_tests)
 
-set(SYS_BUS_COM "XXX-MOCK" CACHE STRING "Serial port for system bus mock")
-set(PAYLOAD_BUS_COM "XXX-PAYLOAD" CACHE STRING "Serial port for payload bus mock")
+set(MOCK_COM "STM_MOCK" CACHE STRING "Serial port of STM mock")
 set(OBC_COM "XXX-OBC" CACHE STRING "Serial port for OBC terminal")
 set(GPIO_COM "XXX-GPIO" CACHE STRING "Serial port for GPIO")
 
@@ -23,11 +22,5 @@ add_custom_target(pyconsole
     DEPENDS ${NAME}.deps
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
-
-if(${USE_SINGLE_BUS})
-    set(PY_USE_SINGLE_BUS "True")
-else()
-    set(PY_USE_SINGLE_BUS "False")
-endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.py.template ${CMAKE_CURRENT_BINARY_DIR}/config.py)

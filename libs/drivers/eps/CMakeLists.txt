@@ -2,6 +2,7 @@ set(NAME eps)
 
 set(SOURCES
     eps.cpp
+    hk.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -10,6 +11,7 @@ target_link_libraries(${NAME}
     i2c    
     logger
     base
+    error_counter
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

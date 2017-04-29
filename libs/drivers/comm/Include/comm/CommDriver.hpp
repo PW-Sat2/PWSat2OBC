@@ -212,6 +212,9 @@ class CommObject final : public ITransmitFrame, public IBeaconController
      */
     void PollHardware();
 
+    /** @brief Error counter type */
+    using ErrorCounter = error_counter::ErrorCounter<1>;
+
   private:
     /**
      * @brief Sends passed no argument command to the device with requested address.
@@ -229,11 +232,29 @@ class CommObject final : public ITransmitFrame, public IBeaconController
      * additional bytes that are send by the device that will not fit into the passed buffer will be discarded.
      * @param[in] address Address of the device which should receive the command.
      * @param[in] command Command code to send.
-     * @param[out] outBuffer Buffer for the device response.
+     * @param[out] outBuffer Buffer for the device's response.
      * @return Operation status, true in case of success, false otherwise.
      */
     bool SendCommandWithResponse(Address address, std::uint8_t command, gsl::span<std::uint8_t> outBuffer);
 
+    /**
+     * @brief Sends contents of passed data buffer to the device with requested address.
+     *
+     * This method expected to receive response from the device that should be written to the passed buffer.
+     * This method will try to read at most the number of bytes that is equal to the passed buffer size, any
+     * additional bytes that are send by the device that will not fit into the passed buffer will be discarded.
+     * This method uses two i2c transactions one for writing data, one for reading the data that are separated
+     * by 2ms delay in order to give the hardware time to prepare the response in case it does not support
+     * i2c clock stretching for signaling that it is not ready with the answer.
+     * @param[in] address Address of the device which should receive the command.
+     * @param[in] inputBuffer Buffer with the data frame that should be send to the hardware.
+     * @param[out] outBuffer Buffer for the device's response.
+     * @return Operation status, true in case of success, false otherwise.
+     */
+    bool SendBufferWithResponse(Address address,   //
+        gsl::span<const std::uint8_t> inputBuffer, //
+        gsl::span<uint8_t> outBuffer               //
+        );
     /**
      * @brief This procedure will try to download the oldest not yet processed frame from the hardware.
      *
@@ -285,7 +306,7 @@ class CommObject final : public ITransmitFrame, public IBeaconController
     [[noreturn]] static void CommTask(void* param);
 
     /** @brief Error counter */
-    error_counter::ErrorCounter<1> _error;
+    ErrorCounter _error;
 
     /** @brief Comm driver lower interface. */
     drivers::i2c::II2CBus& _low;

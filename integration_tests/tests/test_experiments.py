@@ -38,7 +38,7 @@ class ExperimentsTest(BaseTest):
             self.system.obc.wait_for_experiment_iteration(i + 1, 3)
             self.system.obc.run_mission()
 
-        self.system.obc.wait_for_experiment(None, timeout=3)
+        self.system.obc.wait_for_experiment(None, timeout=5)
 
         state = self.system.obc.experiment_info()
         self.assertIsNone(state.Requested)
@@ -79,3 +79,15 @@ class ExperimentsTest(BaseTest):
 
         unpacked = struct.unpack('<' + 'L' * 2, result)
         self.assertEqual(unpacked, (1, 1))
+
+    def test_aborting_when_no_experiment_is_running_has_no_effect(self):
+        self.begin()
+
+        self.system.obc.abort_experiment()
+
+        self.system.obc.run_mission()
+
+        self.system.obc.set_fibo_iterations(100)
+        self.system.obc.request_experiment(ExperimentType.Fibo)
+        self.system.obc.run_mission()
+        self.system.obc.wait_for_experiment(ExperimentType.Fibo, 15)

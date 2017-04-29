@@ -1,9 +1,11 @@
 #ifndef LIBS_DRIVERS_N25Q_INCLUDE_N25Q_N25Q_H_
 #define LIBS_DRIVERS_N25Q_INCLUDE_N25Q_N25Q_H_
 
+#include <array>
 #include <cstdint>
 #include <gsl/span>
 #include "base/os.h"
+#include "redundancy.hpp"
 #include "spi/spi.h"
 
 namespace devices
@@ -90,10 +92,83 @@ namespace devices
             Timeout  //!< Timeout
         };
 
+        class OperationWaiter;
+
+        /**
+         * @brief An interface for N25Q low-level driver.
+         *
+         * See @ref N25QDriver for details.
+         */
+        struct IN25QDriver
+        {
+            /**
+            * @brief Reads data from memory starting from given address
+            * @param[in] address Start address
+            * @param[out] buffer Buffer
+            */
+            virtual void ReadMemory(std::size_t address, gsl::span<uint8_t> buffer) = 0;
+
+            /**
+             * @brief Writes (sets 1 to 0) a page of data to memory
+             * @param[in] address Start address
+             * @param[in] offset Page address offset
+             * @param[in] page Page buffer, must be at most 256 bytes long
+             * @return Operation waiter
+             *
+             * Operation can take up to 5ms
+             */
+            virtual OperationWaiter BeginWritePage(size_t address, ptrdiff_t offset, gsl::span<const uint8_t> page) = 0;
+
+            /**
+             * @brief Erases single subsector (4KB)
+             * @param address Subsctor base address
+             * @return Operation waiter
+             *
+             * Operation can take up to 0.8s
+             */
+            virtual OperationWaiter BeginEraseSubSector(size_t address) = 0;
+
+            /**
+             * @brief Erases single sector (64KB)
+             * @param address Sector base address
+             * @return Operation waiter
+             *
+             * Operation can take up to 3s
+             */
+            virtual OperationWaiter BeginEraseSector(size_t address) = 0;
+
+            /**
+             * @brief Erases whole chip
+             * @return Operation waiter
+             *
+             * This operating can take up to 4 minutes, so be patient
+             */
+            virtual OperationWaiter BeginEraseChip() = 0;
+
+            /**
+             * @brief Resets device to known state (memory content is not affected)
+             * @return Operation status
+             *
+             * This method performs software chip reset and waits until it is operational. If device doesn't respond in time (10ms), timeout
+             * will be returned
+             */
+            virtual OperationResult Reset() = 0;
+
+            /**
+             * @brief Waits for current operation to complete.
+             * @param[in] timeout Operation timeout
+             * @param[in] status Status that indicates error
+             * @return Operation status
+             *
+             * This method will be automatically called by @ref OperationWaiter
+             */
+            virtual OperationResult WaitForOperation(std::chrono::milliseconds timeout, FlagStatus status) = 0;
+        };
+
         /**
          * @brief N25Q low-level driver
          *
-         * This is low-level driver which provides following capabilites:
+         * This is low-level driver which provides following capabilities:
          *  * Reading ID
          *  * Reading status and flag status
          *  * Reading memory of any size
@@ -102,8 +177,10 @@ namespace devices
          *
          *  All write-related operations can fail or timeout.
          *  Timeouts are based on maximum times specified in datasheet + some margin of error (20%)
+         *  All operations that return @ref OperationWaiter must be completed by calling OperationWaiter::Wait before beginning next
+         * operation.
          */
-        class N25QDriver final
+        class N25QDriver final : public IN25QDriver
         {
           public:
             /**
@@ -113,71 +190,48 @@ namespace devices
             N25QDriver(drivers::spi::ISPIInterface& spi);
 
             /**
-             * @brief Read device ID
-             * @return Device id
-             */
-            Id ReadId();
-            /**
-             * @brief Read status register
-             * @return Status register value
-             */
-            Status ReadStatus();
-            /**
-             * @brief Read flag status register
-             * @return Flag status register value
-             */
-            FlagStatus ReadFlagStatus();
-
-            /**
              * @brief Reads data from memory starting from given address
              * @param[in] address Start address
              * @param[out] buffer Buffer
              */
-            void ReadMemory(std::size_t address, gsl::span<uint8_t> buffer);
+            virtual void ReadMemory(std::size_t address, gsl::span<uint8_t> buffer) override;
 
             /**
-             * @brief Writes (sets 1 to 0) to memory
+             * @brief Writes (sets 1 to 0) a page of data to memory
              * @param[in] address Start address
-             * @param[in] buffer Buffer
-             * @return Operation result
+             * @param[in] offset Page address offset
+             * @param[in] page Page buffer, must be at most 256 bytes long
+             * @return Operation waiter
              *
-             * Write operation spanning more than one page (256 bytes) are splitted into N separate write operations.
-             * In case of failure in one of them, subsequent writes are aborted and memory is left partially written
-             *
-             * Operation can take up to 5ms per page
+             * Operation can take up to 5ms
              */
-            OperationResult WriteMemory(std::size_t address, gsl::span<const uint8_t> buffer);
+            virtual OperationWaiter BeginWritePage(size_t address, ptrdiff_t offset, gsl::span<const uint8_t> page) override;
 
             /**
              * @brief Erases single subsector (4KB)
              * @param address Subsctor base address
-             * @return Operation result
+             * @return Operation waiter
              *
              * Operation can take up to 0.8s
              */
-            OperationResult EraseSubSector(std::size_t address);
+            virtual OperationWaiter BeginEraseSubSector(size_t address) override;
 
             /**
              * @brief Erases single sector (64KB)
              * @param address Sector base address
-             * @return Operation result
+             * @return Operation waiter
              *
              * Operation can take up to 3s
              */
-            OperationResult EraseSector(std::size_t address);
+            virtual OperationWaiter BeginEraseSector(size_t address) override;
 
             /**
              * @brief Erases whole chip
-             * @return Operation result
+             * @return Operation waiter
              *
              * This operating can take up to 4 minutes, so be patient
              */
-            OperationResult EraseChip();
-
-            /**
-             * @brief Clears flag status register
-             */
-            void ClearFlags();
+            virtual OperationWaiter BeginEraseChip() override;
 
             /**
              * @brief Resets device to known state (memory content is not affected)
@@ -186,17 +240,54 @@ namespace devices
              * This method performs software chip reset and waits until it is operational. If device doesn't respond in time (10ms), timeout
              * will be returned
              */
-            OperationResult Reset();
+            virtual OperationResult Reset() override;
+
+            /**
+             * @brief Waits for current operation to complete.
+             * @param[in] timeout Operation timeout
+             * @param[in] status Status that indicates error
+             * @return Operation status
+             *
+             * This method will be automatically called by @ref OperationWaiter
+             */
+            virtual OperationResult WaitForOperation(std::chrono::milliseconds timeout, FlagStatus status) override;
+
+            /**
+             * @brief Read device ID
+             * @return Device id
+             */
+            Id ReadId();
+
+            /**
+             * @brief Read flag status register
+             * @return Flag status register value
+             */
+            FlagStatus ReadFlagStatus();
+
+            /**
+             * @brief Read status register
+             * @return Status register value
+             */
+            Status ReadStatus();
+
+            /** @brief Maximum size of single data page, used when writing data to chip. */
+            static constexpr std::ptrdiff_t PageSize = 256;
 
           private:
+            /**
+           * @brief Waits for device to finish current operation
+           * @param[in] timeout Timeout
+           * @return true of operation finished, false on timeout
+           */
+            bool WaitBusy(std::chrono::milliseconds timeout);
+
+            /**
+             * @brief Clears flag status register
+             */
+            void ClearFlags();
+
             /** @brief Enables write */
             void EnableWrite();
-            /**
-             * @brief Waits for device to finish current operation
-             * @param[in] timeout Timeout
-             * @return true of operation finished, false on timeout
-             */
-            bool WaitBusy(std::chrono::milliseconds timeout);
 
             /**
              * @brief Outputs specified address to device
@@ -235,6 +326,146 @@ namespace devices
             /** @brief Write status register timeout */
             static constexpr std::chrono::milliseconds WriteStatusRegisterTimeout = std::chrono::milliseconds(10);
         };
+
+        /**
+         * @brief Object representing waitable operation
+         *
+         *  N25Q operations that support waiting for completion will return object of
+         *  this class
+         */
+        class OperationWaiter : private NotCopyable
+        {
+          public:
+            /**
+             * @brief Constructs @ref OperationWaiter instance
+             * @param[in] driver N25Q driver
+             * @param[in] timeout Operation timeout
+             * @param[in] errorStatus Potential error status flag
+             */
+            OperationWaiter(IN25QDriver* driver, std::chrono::milliseconds timeout, FlagStatus errorStatus);
+
+            /**
+             * @brief Move constructor
+             * @param other Other Operation Waiter
+             */
+            OperationWaiter(OperationWaiter&& other);
+
+            /**
+             * @brief Makes sure that the operation was waited for.
+             */
+            ~OperationWaiter();
+
+            /**
+             * @brief Waits for the N25Q operation to finish.
+             * @return Result of the operation
+             */
+            OperationResult Wait();
+
+            /**
+             * @brief Move operator
+             * @param other Other Operation Waiter
+             * @return Reference to this
+             */
+            OperationWaiter& operator=(OperationWaiter&& other) noexcept;
+
+          private:
+            Option<OperationResult> _waitResult;
+            IN25QDriver* _driver;
+            std::chrono::milliseconds _timeout;
+            FlagStatus _errorStatus;
+        };
+
+        /**
+         * @brief Composite N25Q driver that uses 3 separate drivers to achieve redundancy.
+         */
+        class RedundantN25QDriver
+        {
+          public:
+            /**
+             * @brief Constructs @ref RedundantN25QDriver
+             * @param[in] n25qDrivers N25Q drivers used for redundant operations.
+             */
+            RedundantN25QDriver(std::array<IN25QDriver*, 3> n25qDrivers);
+
+            /**
+             * @brief Reads data from memory starting from given address.
+             * @param[in] address Start address
+             * @param[out] outputBuffer Output buffer
+             * @param[out] redundantBuffer1 First buffer used for redundant read
+             * @param[out] redundantBuffer2 Second buffer used for redundant read
+             *
+             * All buffers should have the same length. If not, the length of shortest buffer will be used as data size.
+             *
+             * If the memory content from drivers is different, bitwise triple modular redundancy
+             * is performed using data from all 3 drivers.
+             *
+             * Reads are performed sequentially. If reads from 2 chips yield the same data, 3rd chip is not read.
+             * This means that redundantBuffer2 will only be written if outputBuffer and redundantBuffer1 hold different data.
+             */
+            void ReadMemory(std::size_t address,
+                gsl::span<uint8_t> outputBuffer,
+                gsl::span<uint8_t> redundantBuffer1,
+                gsl::span<uint8_t> redundantBuffer2);
+
+            /**
+             * @brief Erases all 3 chips.
+             * @return Operation result
+             *
+             * This operation can take up to 4 minutes, so be patient.
+             * The operation is performed in parallel on 3 chips.
+             */
+            OperationResult EraseChip();
+
+            /**
+             * @brief Erases single subsector (4KB)
+             * @param address Subsctor base address
+             * @return Operation result
+             *
+             * Operation can take up to 0.8s
+             * The operation is performed in parallel on 3 chips.
+             */
+            OperationResult EraseSubSector(size_t address);
+
+            /**
+             * @brief Erases single sector (64KB)
+             * @param address Sector base address
+             * @return Operation result
+             *
+             * Operation can take up to 3s
+             * The operation is performed in parallel on 3 chips.
+             */
+            OperationResult EraseSector(size_t address);
+
+            /**
+             * @brief Writes (sets 1 to 0) to memory
+             * @param[in] address Start address
+             * @param[in] buffer Buffer
+             * @return Operation result
+             *
+             * Write operation spanning more than one page (256 bytes) are splitted into N separate write operations.
+             * In case of failure in one of them, subsequent writes are aborted and memory is left partially written
+             *
+             * Operation can take up to 5ms per page.
+             * The operation is performed in parallel on 3 chips.
+             */
+            OperationResult WriteMemory(size_t address, gsl::span<const uint8_t> buffer);
+
+            /**
+             * @brief Resets device to known state (memory content is not affected)
+             * @return Operation status
+             *
+             * This method performs software chip reset and waits until it is operational. If device doesn't respond in time (10ms), timeout
+             * will be returned.
+             *
+             * This operation is performed sequentially on 3 chips.
+             */
+            OperationResult Reset();
+
+          private:
+            std::array<IN25QDriver*, 3> _n25qDrivers;
+        };
+
+        /** @} */
     }
 }
 

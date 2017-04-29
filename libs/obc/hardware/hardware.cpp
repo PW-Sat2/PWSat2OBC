@@ -16,10 +16,10 @@ I2CSingleBus::I2CSingleBus(I2C_TypeDef* hw,
     uint16_t sclPin,
     CMU_Clock_TypeDef clock,
     IRQn_Type irq,
-    PowerControl* powerControl)
+    services::power::IPowerControl& powerControl)
     : //
       Driver(hw, location, port, sdaPin, sclPin, clock, irq),
-      ErrorHandling(Driver, I2CErrorHandler, powerControl)
+      ErrorHandling(Driver, I2CErrorHandler, &powerControl)
 {
 }
 
@@ -28,19 +28,19 @@ I2CResult I2CSingleBus::I2CErrorHandler(II2CBus& bus, I2CResult result, I2CAddre
     UNREFERENCED_PARAMETER(bus);
     UNREFERENCED_PARAMETER(address);
 
-    auto power = reinterpret_cast<PowerControl*>(context);
+    auto power = reinterpret_cast<services::power::IPowerControl*>(context);
 
     if (result == I2CResult::ClockLatched)
     {
         LOG(LOG_LEVEL_FATAL, "SCL latched. Triggering power cycle");
-        power->TriggerSystemPowerCycle(power);
+        power->PowerCycle();
         return result;
     }
 
     return result;
 }
 
-OBCHardwareI2C::OBCHardwareI2C(PowerControl* powerControl)
+OBCHardwareI2C::OBCHardwareI2C(services::power::IPowerControl& powerControl)
     : //
       Peripherals{
           {I2C0, I2C_0::Location, I2C_0::SDA::Port, I2C_0::SDA::PinNumber, I2C_0::SCL::PinNumber, cmuClock_I2C0, I2C0_IRQn, powerControl},
@@ -69,8 +69,12 @@ OSResult OBCHardware::PostStartInitialize()
     return this->Burtc.Initialize();
 }
 
-OBCHardware::OBCHardware(PowerControl* powerControl, TimeAction& burtcTickHandler)
-    : I2C(powerControl),      //
-      Burtc(burtcTickHandler) //
+OBCHardware::OBCHardware(
+    error_counter::ErrorCounting& errorCounting, services::power::IPowerControl& powerControl, TimeAction& burtcTickHandler)
+    : I2C(powerControl),                                               //
+      Burtc(burtcTickHandler),                                         //
+      FramSpi(SPI, Pins.FramChipSelect),                               //
+      PersistentStorage(FramSpi),                                      //
+      EPS(errorCounting, this->I2C.Buses.Bus, this->I2C.Buses.Payload) //
 {
 }

@@ -24,30 +24,30 @@ class CommMixin(OBCMixin):
     def __init__(self):
         pass
 
-    @command("sendFrame {0}")
+    @command("comm send_frame {0}")
     def send_frame(self, data):
         pass
 
     @decode_return(int)
-    @command("getFramesCount")
+    @command("comm get frame_count")
     def get_frame_count(self):
         pass
 
-    @command("receiveFrame")
+    @command("comm receive_frame")
     def receive_frame(self):
         pass
 
-    @command("comm_reset {0}")
+    @command("comm reset {0}")
     def comm_reset(self, module):
         pass
 
-    @command("comm_set_bitrate {0}")
+    @command("comm set bitrate {0}")
     def comm_set_bitrate(self, bitrate):
         pass
 
     def comm_auto_handling(self, enable):
         if not enable:
-            self._command("pauseComm")
+            self._command("comm pause")
 
     @staticmethod
     def extract_value(string):
@@ -75,11 +75,15 @@ class CommMixin(OBCMixin):
         return telemetry
 
     @decode_return(_parse_transmitter_telemetry)
-    @command("comm_get_telemetry transmitter")
+    @command("comm get telemetry transmitter")
     def comm_get_transmitter_telemetry(self):
         pass
 
     @decode_return(_parse_receiver_telemetry)
-    @command("comm_get_telemetry receiver")
+    @command("comm get telemetry receiver")
     def comm_get_receiver_telemetry(self):
+        pass
+
+    @command("comm set idle_state {0:d}")
+    def comm_set_idle_state(self, enabled):
         pass

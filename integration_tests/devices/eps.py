@@ -1,3 +1,4 @@
+import struct
 from Queue import Queue, Empty
 import logging
 
@@ -5,7 +6,155 @@ import i2cMock
 from i2cMock import I2CDevice
 from threading import Event
 
-EPS_DEVICE_ADDRESS = 12
+from utils import call, CompareAsDict
+
+
+class MPPT(CompareAsDict):
+    def __init__(self):
+        self.SOL_VOLT = 0
+        self.SOL_CURR = 0
+        self.SOL_OUT_VOLT = 0
+        self.TEMP = 0
+        self.STATE = 0
+
+    def bytes(self):
+        return list(struct.pack('<HHHHB', self.SOL_CURR, self.SOL_VOLT, self.SOL_OUT_VOLT, self.TEMP, self.STATE))
+
+
+class DISTR(CompareAsDict):
+    def __init__(self):
+        self.TEMP = 0
+        self.VOLT_3V3 = 0
+        self.CURR_3V3 = 0
+        self.VOLT_5V = 0
+        self.CURR_5V = 0
+        self.VOLT_VBAT = 0
+        self.CURR_VBAT = 0
+        self.LCL_STATE = 0
+        self.LCL_FLAGB = 0
+
+    def bytes(self):
+        return list(struct.pack('<HHHHHHHBB',
+                                self.CURR_3V3,
+                                self.VOLT_3V3,
+                                self.CURR_5V,
+                                self.VOLT_5V,
+                                self.CURR_VBAT,
+                                self.VOLT_VBAT,
+                                self.TEMP,
+                                self.LCL_STATE,
+                                self.LCL_FLAGB
+                                ))
+
+
+class BATC_A(CompareAsDict):
+    def __init__(self):
+        self.VOLT_A = 0
+        self.CHRG_CURR = 0
+        self.DCHRG_CURR = 0
+        self.TEMP = 0
+        self.STATE = 0
+
+    def bytes(self):
+        return list(struct.pack('<HHHHB',
+                                self.VOLT_A,
+                                self.CHRG_CURR,
+                                self.DCHRG_CURR,
+                                self.TEMP,
+                                self.STATE))
+
+
+class BATC_B(CompareAsDict):
+    def __init__(self):
+        self.VOLT_B = 0
+
+    def bytes(self):
+        return list(struct.pack('<H', self.VOLT_B))
+
+
+class BP_A(CompareAsDict):
+    def __init__(self):
+        self.TEMP_A = 0
+        self.TEMP_B = 0
+
+    def bytes(self):
+        return list(struct.pack('<HH', self.TEMP_A, self.TEMP_B))
+
+
+class BP_B(CompareAsDict):
+    def __init__(self):
+        self.TEMP_C = 0
+
+    def bytes(self):
+        return list(struct.pack('<H', self.TEMP_C))
+
+
+class OtherController(CompareAsDict):
+    def __init__(self):
+        self.VOLT_3V3d = 0
+
+    def bytes(self):
+        return list(struct.pack('<H', self.VOLT_3V3d))
+
+
+class ThisController(CompareAsDict):
+    def __init__(self):
+        self.ERR = 0
+        self.PWR_CYCLES = 0
+        self.UPTIME = 0
+        self.TEMP = 0
+
+    def bytes(self):
+        return list(struct.pack('<BHIH',
+                                self.ERR,
+                                self.PWR_CYCLES,
+                                self.UPTIME,
+                                self.TEMP))
+
+
+class DCDC(CompareAsDict):
+    def __init__(self):
+        self.TEMP = 0
+
+    def bytes(self):
+        return list(struct.pack('<H', self.TEMP))
+
+
+class HousekeepingA(CompareAsDict):
+    def __init__(self):
+        self.MPPT_X = MPPT()
+        self.MPPT_Y_PLUS = MPPT()
+        self.MPPT_Y_MINUS = MPPT()
+        self.DISTR = DISTR()
+        self.BATC = BATC_A()
+        self.BP = BP_A()
+        self.CTRLB = OtherController()
+        self.CTRLA = ThisController()
+        self.DCDC3V3 = DCDC()
+        self.DCDC5V = DCDC()
+
+    def bytes(self):
+        return self.MPPT_X.bytes() \
+               + self.MPPT_Y_PLUS.bytes() \
+               + self.MPPT_Y_MINUS.bytes() \
+               + self.DISTR.bytes() \
+               + self.BATC.bytes() \
+               + self.BP.bytes() \
+               + self.CTRLB.bytes() \
+               + self.CTRLA.bytes() \
+               + self.DCDC3V3.bytes() \
+               + self.DCDC5V.bytes()
+
+
+class HousekeepingB(CompareAsDict):
+    def __init__(self):
+        self.BP = BP_B()
+        self.BATC = BATC_B()
+        self.CTRLA = OtherController()
+        self.CTRLB = ThisController()
+
+    def bytes(self):
+        return sum(map(lambda x: x.bytes(), [self.BP, self.BATC, self.CTRLA, self.CTRLB]), [])
 
 
 class LCLTimeoutException(Exception):
@@ -23,6 +172,11 @@ class LCL:
         self.changes = Queue()
         self.is_on = False
         self.was_on = False
+        self.on_enable = None
+        self.on_disable = None
+
+    def arrange_on(self):
+        self.is_on = True
 
     def on(self):
         self.is_on = True
@@ -32,6 +186,7 @@ class LCL:
         self.off_event.clear()
 
         self.changes.put(True)
+        call(self.on_enable, True)
 
     def off(self):
         self.is_on = False
@@ -40,6 +195,7 @@ class LCL:
         self.off_event.set()
 
         self.changes.put(False)
+        call(self.on_disable, True)
 
     def wait_for_change(self, timeout=None):
         try:
@@ -56,41 +212,123 @@ class LCL:
             raise LCLTimeoutException("off")
 
 
-class EPSDevice(I2CDevice):
+class BurnSwitch:
     def __init__(self):
-        super(EPSDevice, self).__init__(EPS_DEVICE_ADDRESS)
+        self.on_enable = None
 
-        self.log = logging.getLogger("EPS")
+    def enable(self):
+        call(self.on_enable, True)
 
-        self.sail0 = LCL()
-        self.sail1 = LCL()
-        self.power_cycle = Event()
 
-    @i2cMock.command([0x01])
-    def lcl_sail_0(self, onoff):
-        if onoff == 1:
-            self.sail0.on()
-        else:
-            self.sail0.off()
+class EPSControllerA(I2CDevice):
+    def __init__(self, eps):
+        super(EPSControllerA, self).__init__(0x35)
+        self._log = logging.getLogger("EPS.A")
+        self._eps = eps
 
-        self.log.debug("LCL_SAIL_0: %s" % str(onoff))
+        self._lcls = [eps.TKmain, eps.SunS, eps.CamNadir, eps.CamWing, eps.SENS, eps.ANTenna]
+        self._burn_switches = [eps.SAILmain, eps.SADSmain]
 
-    @i2cMock.command([0x02])
-    def lcl_sail_1(self, onoff):
-        if onoff == 1:
-            self.sail1.on()
-        else:
-            self.sail1.off()
+        self.on_power_cycle = None
+        self.on_disable_overheat_submode = None
+        self.on_get_housekeeping = None
 
-        self.log.debug("LCL_SAIL_1: %s" % str(onoff))
+        self.hk = HousekeepingA()
 
-    @i2cMock.command([0xA0])
-    def trigger_system_power_cycle(self):
-        self.log.info("Triggered system power cycle")
-        self.power_cycle.set()
+    @i2cMock.command([0xE0])
+    def _power_cycle(self):
+        self._log.info("Triggered power cycle")
+        call(self.on_power_cycle, None)
 
-    def wait_for_sail_open(self):
-        self.sail0.wait_for_on(1)
-        self.sail0.wait_for_off(1)
-        self.sail1.wait_for_on(1)
-        self.sail1.wait_for_off(1)
+    @i2cMock.command([0xE1])
+    def _enable_lcl(self, lcl_id):
+        self._log.info("Enable LCL(%d)", lcl_id)
+        self._lcls[lcl_id - 1].on()
+
+    @i2cMock.command([0xE2])
+    def _disable_lcl(self, lcl_id):
+        self._log.info("Disable LCL(%d)", lcl_id)
+        self._lcls[lcl_id - 1].off()
+
+    @i2cMock.command([0xE3])
+    def _enable_burn_switch(self, switch_id):
+        self._log.info("Enable BURN switch(%d)", switch_id)
+        self._burn_switches[switch_id - 1].enable()
+
+    @i2cMock.command([0xE4])
+    def _disable_overheat_submode(self):
+        self._log.info("Disable overheat submode")
+        call(self.on_disable_overheat_submode, None)
+
+    @i2cMock.command([0x0])
+    def _housekeeping(self):
+        hk = call(self.on_get_housekeeping, default=self.hk)
+        return [hk.CTRLA.ERR] + hk.bytes()
+
+
+class EPSControllerB(I2CDevice):
+    def __init__(self, eps):
+        super(EPSControllerB, self).__init__(0x36)
+        self._log = logging.getLogger("EPS.A")
+        self._eps = eps
+
+        self._lcls = [eps.TKred, eps.ANTennaRed]
+        self._burn_switches = [eps.SAILred, eps.SADSred]
+
+        self.on_power_cycle = None
+        self.on_disable_overheat_submode = None
+        self.on_get_housekeeping = None
+
+        self.hk = HousekeepingB()
+
+    @i2cMock.command([0xE0])
+    def _power_cycle(self):
+        self._log.info("Triggered power cycle")
+        call(self.on_power_cycle, None)
+
+    @i2cMock.command([0xE1])
+    def _enable_lcl(self, lcl_id):
+        self._log.info("Enable LCL(%d)", lcl_id)
+        self._lcls[lcl_id - 1].on()
+
+    @i2cMock.command([0xE2])
+    def _disable_lcl(self, lcl_id):
+        self._log.info("Disable LCL(%d)", lcl_id)
+        self._lcls[lcl_id - 1].off()
+
+    @i2cMock.command([0xE3])
+    def _enable_burn_switch(self, switch_id):
+        self._log.info("Enable BURN switch(%d)", switch_id)
+        self._burn_switches[switch_id - 1].enable()
+
+    @i2cMock.command([0xE4])
+    def _disable_overheat_submode(self):
+        self._log.info("Disable overheat submode")
+        call(self.on_disable_overheat_submode, None)
+
+    @i2cMock.command([0x0])
+    def _housekeeping(self):
+        hk = call(self.on_get_housekeeping, default=self.hk)
+        return [hk.CTRLB.ERR] + hk.bytes()
+
+
+class EPS:
+    ERROR_COUNTER = 5
+
+    def __init__(self):
+        self.TKmain = LCL()
+        self.SunS = LCL()
+        self.CamNadir = LCL()
+        self.CamWing = LCL()
+        self.SENS = LCL()
+        self.ANTenna = LCL()
+        self.TKred = LCL()
+        self.ANTennaRed = LCL()
+
+        self.SAILmain = BurnSwitch()
+        self.SAILred = BurnSwitch()
+        self.SADSmain = BurnSwitch()
+        self.SADSred = BurnSwitch()
+
+        self.controller_a = EPSControllerA(self)
+        self.controller_b = EPSControllerB(self)

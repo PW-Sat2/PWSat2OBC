@@ -69,16 +69,45 @@ bool CommObject::SendCommand(Address address, uint8_t command)
     return status;
 }
 
-bool CommObject::SendCommandWithResponse(Address address, uint8_t command, span<uint8_t> outBuffer)
+bool CommObject::SendBufferWithResponse(Address address, //
+    gsl::span<const std::uint8_t> inputBuffer,           //
+    gsl::span<uint8_t> outBuffer                         //
+    )
 {
-    const I2CResult result = this->_low.WriteRead(num(address), span<const uint8_t>(&command, 1), outBuffer);
-    const bool status = (result == I2CResult::OK);
+    if (inputBuffer.empty())
+    {
+        return false;
+    }
+
+    I2CResult result = this->_low.Write(num(address), inputBuffer);
+    if (result != I2CResult::OK)
+    {
+        LOGF(LOG_LEVEL_ERROR,
+            "[comm] Unable to send request (%d) to %d, Reason: %d",
+            static_cast<int>(inputBuffer[0]),
+            num(address),
+            num(result));
+        return false;
+    }
+
+    System::SleepTask(2ms);
+    result = this->_low.Read(num(address), outBuffer);
+    const auto status = (result == I2CResult::OK);
     if (!status)
     {
-        LOGF(LOG_LEVEL_ERROR, "[comm] Unable to send command %d to %d, Reason: %d", command, num(address), num(result));
+        LOGF(LOG_LEVEL_ERROR,
+            "[comm] Unable to read response to %d from %d, Reason: %d",
+            static_cast<int>(inputBuffer[0]),
+            num(address),
+            num(result));
     }
 
     return status;
+}
+
+bool CommObject::SendCommandWithResponse(Address address, uint8_t command, span<uint8_t> outBuffer)
+{
+    return SendBufferWithResponse(address, gsl::span<const uint8_t>(&command, 1), outBuffer);
 }
 
 OSResult CommObject::Initialize()
@@ -97,7 +126,7 @@ bool CommObject::Restart()
         }
 
         const OSResult result =
-            System::CreateTask(CommObject::CommTask, "COMM Task", 1_KB, this, TaskPriority::P4, &this->_pollingTaskHandle);
+            System::CreateTask(CommObject::CommTask, "COMM Task", 4_KB, this, TaskPriority::P4, &this->_pollingTaskHandle);
         if (OS_RESULT_FAILED(result))
         {
             LOGF(LOG_LEVEL_ERROR, "[comm] Unable to create background task. Status: 0x%08x.", num(result));
@@ -300,14 +329,14 @@ bool CommObject::ScheduleFrameTransmission(gsl::span<const std::uint8_t> frame, 
         return false;
     }
 
-    uint8_t cmd[PrefferedBufferSize];
+    std::uint8_t cmd[PrefferedBufferSize];
     cmd[0] = num(TransmitterCommand::SendFrame);
     memcpy(cmd + 1, frame.data(), frame.size());
 
-    const bool status = (this->_low.WriteRead(num(Address::Transmitter), //
-                             span<const uint8_t>(cmd, 1 + frame.size()), //
-                             span<uint8_t>(&remainingBufferSize, 1)      //
-                             ) == I2CResult::OK);
+    const bool status = SendBufferWithResponse(Address::Transmitter, //
+        gsl::span<const std::uint8_t>(cmd, 1 + frame.size()),        //
+        gsl::span<std::uint8_t>(&remainingBufferSize, 1)             //
+        );
     if (!status)
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Failed to send frame");
@@ -330,7 +359,7 @@ Option<bool> CommObject::SetBeacon(const Beacon& beaconData)
         return Option<bool>::Some(false);
     }
 
-    if (remainingBufferSize != (TransmitterBufferSize - 1))
+    if (remainingBufferSize < (TransmitterBufferSize - 1))
     {
         return Option<bool>::None();
     }
@@ -376,12 +405,11 @@ bool CommObject::SetTransmitterBitRate(Bitrate bitrate)
 
 bool CommObject::GetTransmitterState(TransmitterState& state)
 {
-    uint8_t command = num(TransmitterCommand::GetState);
-    uint8_t response;
-    const bool status = this->_low.WriteRead(num(Address::Transmitter), //
-                            span<const uint8_t>(&command, 1),           //
-                            span<uint8_t>(&response, 1)                 //
-                            ) == I2CResult::OK;
+    std::uint8_t response;
+    const bool status = SendCommandWithResponse(Address::Transmitter, //
+        num(TransmitterCommand::GetState),                            //
+        gsl::span<std::uint8_t>(&response, 1)                         //
+        );
     if (!status)
     {
         return false;

@@ -18,41 +18,48 @@
 #include "base/ecc.h"
 #include "base/os.h"
 #include "dmadrv.h"
-#include "eps/eps.h"
 #include "fs/fs.h"
+#include "gpio/gpio.h"
 #include "i2c/i2c.h"
 #include "io_map.h"
 #include "leuart/leuart.h"
 #include "logger/logger.h"
 #include "mission.h"
 #include "obc.h"
+#include "obc/ObcState.hpp"
+#include "power_eps/power_eps.h"
 #include "storage/nand.h"
 #include "storage/nand_driver.h"
 #include "storage/storage.h"
 #include "swo/swo.h"
 #include "system.h"
 #include "terminal.h"
-
-#include "gpio/gpio.h"
-#include "leuart/leuart.h"
-#include "power_eps/power_eps.h"
+#include "watchdog/watchdog.hpp"
 
 using services::time::TimeProvider;
 using namespace std::chrono_literals;
 
+static constexpr std::uint32_t PersistentStateBaseAddress = 4;
+
 OBC Main;
 mission::ObcMission Mission(std::tie(Main.timeProvider, Main.rtc),
     Main.antennaDriver,
-    false,
+    std::tuple<bool, services::power::IPowerControl&>(false, Main.PowerControlInterface),
     Main.adcs.GetAdcsController(),
     Main.Experiments.ExperimentsController,
-    Main.Communication.CommDriver);
+    Main.Communication.CommDriver,
+    std::tie(Main.Hardware.PersistentStorage, PersistentStateBaseAddress));
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
 extern "C" void vApplicationIdleHook(void)
 {
     EMU_EnterEM1();
+}
+
+extern "C" void vApplicationTickHook(void)
+{
+    drivers::watchdog::InternalWatchdog::Kick();
 }
 
 void I2C0_IRQHandler(void)
@@ -81,19 +88,6 @@ static void BlinkLed0(void* param)
     }
 }
 
-static void SmartWaitTask(void* param)
-{
-    UNREFERENCED_PARAMETER(param);
-
-    LOG(LOG_LEVEL_DEBUG, "Wait start");
-
-    while (1)
-    {
-        Main.timeProvider.LongDelay(10min);
-        LOG(LOG_LEVEL_DEBUG, "After wait");
-    }
-}
-
 static void InitSwoEndpoint(void)
 {
     void* swoEndpointHandle = SwoEndpointInit();
@@ -104,18 +98,27 @@ static void InitSwoEndpoint(void)
     }
 }
 
-static void ClearState(OBC* obc)
+static void ProcessState(OBC* obc)
 {
     if (obc->Hardware.Pins.SysClear.Input() == false)
     {
-        LOG(LOG_LEVEL_WARNING, "Clearing state on startup");
+        LOG(LOG_LEVEL_WARNING, "Resetting system state");
 
         if (OS_RESULT_FAILED(obc->Storage.ClearStorage()))
         {
-            LOG(LOG_LEVEL_ERROR, "Clearing state failed");
+            LOG(LOG_LEVEL_ERROR, "Storage reset failure");
         }
 
-        LOG(LOG_LEVEL_INFO, "All files removed");
+        if (!obc::WritePersistentState(Mission.GetState().PersistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage))
+        {
+            LOG(LOG_LEVEL_ERROR, "Persistent state reset failure");
+        }
+
+        LOG(LOG_LEVEL_INFO, "Completed system state reset");
+    }
+    else
+    {
+        obc::ReadPersistentState(Mission.GetState().PersistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage);
     }
 }
 
@@ -127,6 +130,8 @@ static void SetupAntennas(void)
 
 static void ObcInitTask(void* param)
 {
+    drivers::watchdog::InternalWatchdog::Enable();
+
     LOG(LOG_LEVEL_INFO, "Starting initialization task... ");
 
     auto obc = static_cast<OBC*>(param);
@@ -136,11 +141,12 @@ static void ObcInitTask(void* param)
         LOG(LOG_LEVEL_ERROR, "Unable to initialize hardware after start. ");
     }
 
-    ClearState(obc);
+    ProcessState(obc);
 
     obc->fs.MakeDirectory("/a");
 
-    if (!obc->timeProvider.Initialize(nullptr, nullptr))
+    const auto missionTime = Mission.GetState().PersistentState.Get<state::TimeState>().LastMissionTime();
+    if (!obc->timeProvider.Initialize(missionTime, nullptr, nullptr))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize persistent timer. ");
     }
@@ -159,10 +165,8 @@ static void ObcInitTask(void* param)
 
     obc->Hardware.Burtc.Start();
 
-    System::CreateTask(SmartWaitTask, "SmartWait", 512, NULL, TaskPriority::P1, NULL);
-
     LOG(LOG_LEVEL_INFO, "Intialized");
-    Main.initialized = true;
+    Main.StateFlags.Set(OBC::InitializationFinishedFlag);
 
     System::SuspendTask(NULL);
 }
@@ -197,10 +201,6 @@ int main(void)
 
     LeuartLineIOInit(&Main.IO);
 
-    EpsInit(&Main.Hardware.I2C.Fallback);
-
-    EPSPowerControlInitialize(&Main.PowerControlInterface);
-
     Main.Initialize();
 
     InitializeTerminal();
@@ -213,7 +213,7 @@ int main(void)
     Main.Hardware.Pins.Led1.High();
 
     System::CreateTask(BlinkLed0, "Blink0", 512, NULL, TaskPriority::P1, NULL);
-    System::CreateTask(ObcInitTask, "Init", 2_KB, &Main, TaskPriority::Highest, &Main.initTask);
+    System::CreateTask(ObcInitTask, "Init", 4_KB, &Main, TaskPriority::Highest, &Main.initTask);
 
     System::RunScheduler();
 

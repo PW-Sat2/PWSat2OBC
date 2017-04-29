@@ -2,6 +2,7 @@ import logging
 import struct
 
 import serial
+import time
 
 
 class SerialPortTerminal:
@@ -60,6 +61,9 @@ class SerialPortTerminal:
         response = self.readUntilPrompt().rstrip('\n')
         self.log.debug("Command " + cmd + " responded with " + response)
         return response
+
+    def command_no_wait(self, cmd):
+        self._command_prologue(cmd)
 
     def command_with_write_data(self, cmd, data):
         self._command_prologue(cmd)
@@ -131,3 +135,14 @@ class SerialPortTerminal:
     def close(self):
         self._serial.close()
 
+    def wait_for_boot(self, timeout=None):
+        end = None if timeout is None else time.time() + timeout
+
+        c = ''
+        while c != '@':
+            c = self._serial.read(1)
+
+            if time.time() > end:
+                return False
+
+        return True

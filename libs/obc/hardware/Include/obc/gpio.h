@@ -66,7 +66,6 @@ namespace obc
             this->RX.Initialize();
         }
     };
-
     /**
      * @brief Composes all used GPIO pins together
      *
@@ -82,7 +81,8 @@ namespace obc
         typename TSPI,
         typename TLEUART,
         typename TI2C0,
-        typename TI2C1>
+        typename TI2C1,
+        typename TFramChipSelect>
     struct OBCGPIOBase
     {
         /** @brief Slave Select - Flash1 */
@@ -105,6 +105,8 @@ namespace obc
         const I2CPins<TI2C0> I2C_0;
         /** @brief I2C1 */
         const I2CPins<TI2C1> I2C_1;
+        /** @brief Fram Chip Select */
+        const drivers::gpio::OutputPin<TFramChipSelect> FramChipSelect;
 
         /** @brief Initializes GPIO pins */
         void Initialize() const
@@ -121,6 +123,7 @@ namespace obc
             this->LEUART.Initialize();
             this->I2C_0.Initialize();
             this->I2C_1.Initialize();
+            this->FramChipSelect.Initialize();
         }
     };
 
@@ -135,7 +138,8 @@ namespace obc
         io_map::SPI,                                        //
         io_map::LEUART,
         io_map::I2C_0,
-        io_map::I2C_1>;
+        io_map::I2C_1,
+        io_map::DummyFramChipSelect>;
 
     /** @} */
 }

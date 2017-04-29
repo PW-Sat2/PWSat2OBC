@@ -41,11 +41,10 @@ Option | Default value | Description
 `CMAKE_BUILD_TYPE` | `DEBUG`              | Type of build: `DEBUG` or `RELEASE`
 `OBC_COM`          | _None_               | Serial port used to communicate with OBC terminal
 `GPIO_COM`		  | _None_				 | Serial port used for GPIO operations (OBC reset and clean state request)
-`SYS_BUS_COM`      | _None_               | Serial port used to communicate with System Bus mock
-`PAYLOAD_BUS_COM`  | _None_               | Serial port used to communicate with Payload Bus mock
-`USE_SINGLE_BUS`   | 1                    | Set to 1 to enable only one I2C bus. Payload bus will be redirected to System Bus. Set to 0 to use both buses
+`MOCK_COM`      | _None_               | Serial port used to communicate with DeviceMock (v4, STM)
 `USE_EXTERNAL_FLASH` | 0				   | Set to 1 to use external N25Q flash memory
 `ENABLE_COVERAGE`  | 0                    | Set to 1 to enable code-coverage for unit tests
+`JLINK_SN` | _None_                       | Serial number of J-Link that will be used to flash EFM
 
 
 ## Outputs

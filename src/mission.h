@@ -4,6 +4,7 @@
 #pragma once
 
 #include "mission/BeaconUpdate.hpp"
+#include "mission/PersistentStateSave.hpp"
 #include "mission/adcs.hpp"
 #include "mission/antenna_task.hpp"
 #include "mission/experiments.hpp"
@@ -20,11 +21,12 @@ namespace mission
         SailTask,
         adcs::AdcsPrimaryTask,
         mission::experiments::MissionExperimentComponent,
-        mission::BeaconUpdate //
+        mission::BeaconUpdate,
+        mission::PeristentStateSave //
         >
         ObcMission;
 }
 
-/** @} */
+extern mission::ObcMission Mission;
 
 #endif /* SRC_MISSION_H_ */

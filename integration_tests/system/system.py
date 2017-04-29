@@ -1,40 +1,31 @@
 import logging
 
-from obc import OBC, SerialPortTerminal
 from devices import *
 from i2cMock import I2CMock
-from pins import Pins
+from obc import OBC, SerialPortTerminal
+
 
 class System:
-    def __init__(self, obc_com, sys_bus_com, payload_bus_com, use_single_bus, gpio, auto_power_on = True):
+    def __init__(self, obc_com, mock_com, gpio, auto_power_on=True):
         self.log = logging.getLogger("system")
 
-        self._use_single_bus = use_single_bus
-
         self.obc_com = obc_com
-        self.sys_bus_com = sys_bus_com
-        self.payload_bus_com = payload_bus_com
+        self.mock_com = mock_com
 
-        self.sys_bus = I2CMock('SYS', sys_bus_com)
-
-        if use_single_bus:
-            self.payload_bus = self.sys_bus
-        else:
-            self.payload_bus = I2CMock('PLD', payload_bus_com)
+        self.i2c = I2CMock(mock_com)
 
         self._setup_devices()
 
         self.obc = OBC(SerialPortTerminal(obc_com, gpio))
         self.obc.power_off()
 
-        self.sys_bus.start()
-        self.payload_bus.start()
+        self.i2c.start()
 
         if auto_power_on:
             self.obc.power_on(clean_state=True)
 
     def _setup_devices(self):
-        self.eps = EPSDevice()
+        self.eps = EPS()
         self.comm = Comm()
         self.transmitter = self.comm.transmitter
         self.receiver = self.comm.receiver
@@ -43,29 +34,20 @@ class System:
         self.imtq = Imtq()
         self.rtc = RTCDevice()
 
-        self.sys_bus.add_device(self.eps)
-        self.payload_bus.add_device(self.eps)
-        self.sys_bus.add_device(self.transmitter)
-        self.sys_bus.add_device(self.receiver)
-        self.sys_bus.add_device(self.primary_antenna)
-        self.payload_bus.add_device(self.backup_antenna)
-        self.sys_bus.add_device(self.imtq)
-        self.payload_bus.add_device(self.rtc)
+        self.i2c.add_bus_device(self.eps.controller_a)
+        self.i2c.add_pld_device(self.eps.controller_b)
+        self.i2c.add_bus_device(self.transmitter)
+        self.i2c.add_bus_device(self.receiver)
+        self.i2c.add_bus_device(self.primary_antenna)
+        self.i2c.add_pld_device(self.backup_antenna)
+        self.i2c.add_bus_device(self.imtq)
+        self.i2c.add_pld_device(self.rtc)
 
     def close(self):
-        self.sys_bus.stop()
-        if not self._use_single_bus:
-            self.payload_bus.stop()
-
+        self.i2c.stop()
         self.obc.close()
 
     def restart(self):
-        self.sys_bus.unfreeze()
-        self.sys_bus.unlatch()
-
-        if not self._use_single_bus:
-            self.payload_bus.unfreeze()
-            self.payload_bus.unlatch()
-
+        self.i2c.unlatch()
         self.obc.reset()
         self.obc.wait_to_start()

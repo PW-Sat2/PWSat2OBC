@@ -1,74 +1,72 @@
+#include <vector>
 #include "gtest/gtest.h"
-#include "gmock/gmock.h"
-#include "rapidcheck.hpp"
+#include "rapidcheck.h"
 #include "rapidcheck/gtest.h"
 
-#include "base/reader.h"
-#include "base/writer.h"
-
-template <typename WriterFunction, typename ReaderMemberPtr, typename V>
-void WriteAndReadRapidCheckTest(WriterFunction w, ReaderMemberPtr r, V value)
+RC_GTEST_PROP(RapidCheck, Test1, (const std::vector<int>& l0))
 {
-    std::array<uint8_t, sizeof(V)> array;
-    Writer writer(array);
-
-    RC_ASSERT((writer.*w)(value));
-    RC_ASSERT(writer.Status());
-    RC_ASSERT(writer.RemainingSize() == 0);
-
-    Reader reader{gsl::make_span(array)};
-    V read = (reader.*r)();
-    RC_ASSERT(read == value);
-    RC_ASSERT(reader.Status());
-    RC_ASSERT(reader.RemainingSize() == 0);
+    auto l1 = l0;
+    std::reverse(begin(l1), end(l1));
+    std::reverse(begin(l1), end(l1));
+    RC_ASSERT(l0 == l1);
 }
 
-RC_GTEST_PROP(WriteAndRead, Byte, (uint8_t value))
+RC_GTEST_PROP(RapidCheck, Test2, (const int a, const int b))
 {
-    WriteAndReadRapidCheckTest(&Writer::WriteByte, &Reader::ReadByte, value);
-}
+    int r1 = a + b;
+    int r2 = b + a;
 
-RC_GTEST_PROP(WriteAndRead, WordLE, (uint16_t value))
-{
-    WriteAndReadRapidCheckTest(&Writer::WriteWordLE, &Reader::ReadWordLE, value);
-}
-
-RC_GTEST_PROP(WriteAndRead, SignedWordLE, (int16_t value))
-{
-    WriteAndReadRapidCheckTest(&Writer::WriteSignedWordLE, &Reader::ReadSignedWordLE, value);
-}
-
-RC_GTEST_PROP(WriteAndRead, DoubleWordLE, (uint32_t value))
-{
-    WriteAndReadRapidCheckTest(&Writer::WriteDoubleWordLE, &Reader::ReadDoubleWordLE, value);
-}
-
-RC_GTEST_PROP(WriteAndRead, SignedDoubleWordLE, (int32_t value))
-{
-    WriteAndReadRapidCheckTest(&Writer::WriteSignedDoubleWordLE, &Reader::ReadSignedDoubleWordLE, value);
-}
-
-RC_GTEST_PROP(WriteAndRead, QuadWordLE, (uint64_t value))
-{
-    WriteAndReadRapidCheckTest(&Writer::WriteQuadWordLE, &Reader::ReadQuadWordLE, value);
-}
-
-RC_GTEST_PROP(WriteAndRead, Array, (std::vector<uint8_t> value))
-{
-    RC_PRE(value.size() > 0u);
-    std::vector<uint8_t> array(value.size());
-
-    Writer writer(array);
-
-    RC_ASSERT(writer.WriteArray(value));
-    RC_ASSERT(writer.Status());
-
-    Reader reader{array};
-    auto read = reader.ReadArray(value.size());
-    for (size_t i = 0; i < value.size(); ++i)
+    if (r2 > 5)
     {
-        RC_ASSERT(read[i] == value[i]);
+        r2++;
     }
-    RC_ASSERT(reader.Status());
-    RC_ASSERT(reader.RemainingSize() == 0);
+
+    RC_ASSERT(r1 == r2);
+}
+
+struct SomeState
+{
+    int a;
+    int b;
+    int result;
+};
+
+std::ostream& operator<<(std::ostream& os, const SomeState& state)
+{
+    os << "(a=" << state.a << ", b=" << state.b << ")";
+}
+
+namespace rc
+{
+    template <> struct Arbitrary<SomeState>
+    {
+        static Gen<SomeState> arbitrary()
+        {
+            return gen::build<SomeState>(
+                gen::set(&SomeState::a, gen::inRange(-20, 20)), gen::set(&SomeState::b, gen::inRange(-20, 20)));
+        }
+    };
+}
+
+void calculate(SomeState* state)
+{
+    state->result = state->a + state->b;
+    if (state->result > 10)
+    {
+        state->result *= -1;
+    }
+}
+
+RC_GTEST_PROP(RapidCheck, Test3, (SomeState state))
+{
+    calculate(&state);
+
+    int expected = state.a + state.b;
+
+    if (expected > 10)
+    {
+        expected = -expected;
+    }
+
+    RC_ASSERT(state.result == expected);
 }

@@ -4,16 +4,12 @@
 #include "obc.h"
 #include "terminal/terminal.h"
 
-static const TerminalCommandDescription commands[] = {{"ping", PingHandler},
+static const TerminalCommandDescription commands[] = {
+    {"ping", PingHandler},
     {"echo", EchoHandler},
     {"jumpToTime", JumpToTimeHandler},
     {"currentTime", CurrentTimeHandler},
-    {"sendFrame", SendFrameHandler},
-    {"getFramesCount", GetFramesCountHandler},
-    {"receiveFrame", ReceiveFrameHandler},
-    {"pauseComm", CommandPauseComm},
-    {"comm_reset", CommReset},
-    {"getState", OBCGetState},
+    {"wait_for_init", WaitForOBCInitialization},
     {"listFiles", FSListFiles},
     {"writeFile", FSWriteFile},
     {"readFile", FSReadFile},
@@ -39,14 +35,20 @@ static const TerminalCommandDescription commands[] = {{"ping", PingHandler},
     {"experiment_info", ExperimentInfo},
     {"dma", DMAInfo},
     {"imtq", ImtqDriver},
-    {"comm_set_bitrate", CommSetBaudRate},
-    {"comm_get_telemetry", CommGetTelemetry},
+    {"comm", Comm},
     {"antenna_get_telemetry", AntennaGetTelemetry},
     {"antenna_reset", AntennaReset},
     {"reset", ResetHandler},
     {"rtc", RTCTest},
     {"rm", RemoveFile},
-    {"fram", FRAM}
+    {"fram", FRAM},
+    {"testflash", TestExternalFlash},
+    {"temp", Temp},
+    {"eps", EPSCommand},
+    {"wdog", WatchdogCommand},
+    {"hang", Hang},
+    {"state", StateCommandHandler},
+    {"error_counters", ErrorCountersCommand},
 };
 
 void InitializeTerminal(void)

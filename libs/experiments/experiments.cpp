@@ -72,6 +72,7 @@ namespace experiments
                 continue;
             }
 
+            this->_event.Clear(Event::AbortRequest);
             this->_event.Set(Event::InProgress);
 
             {
@@ -115,10 +116,8 @@ namespace experiments
         IterationResult iterationResult;
         do
         {
-            if (this->_event.IsSet(Event::AbortRequest))
+            if (has_flag(this->_event.WaitAny(Event::AbortRequest, true, 0s), Event::AbortRequest))
             {
-                this->_event.Clear(Event::AbortRequest);
-
                 LOG(LOG_LEVEL_WARNING, "Aborting experiment");
 
                 iterationResult = IterationResult::Failure;
@@ -149,12 +148,12 @@ namespace experiments
             {
                 this->_event.Set(Event::MissionLoopNotificationReqested);
 
-                auto flags = this->_event.WaitAny(Event::MissionLoopIterationStarted | Event::AbortRequest, false, InfiniteTimeout);
+                this->_event.WaitAny(Event::MissionLoopIterationStarted | Event::AbortRequest, false, InfiniteTimeout);
 
-                if (has_flag(flags, Event::MissionLoopIterationStarted))
-                {
-                    this->_event.Clear(Event::MissionLoopIterationStarted);
-                }
+                //                if (has_flag(flags, Event::MissionLoopIterationStarted))
+                //                {
+                //                    this->_event.Clear(Event::MissionLoopIterationStarted);
+                //                }
             }
         } while (true);
 
@@ -183,7 +182,10 @@ namespace experiments
     void ExperimentController::StartExperiment()
     {
         Lock lock(this->_sync, InfiniteTimeout);
-
+        if (!this->_requestedExperiment.HasValue)
+        {
+            LOG(LOG_LEVEL_WARNING, "Starting experiment without requested experiment");
+        }
         this->_queue.Overwrite(this->_requestedExperiment.Value);
         this->_requestedExperiment = None<ExperimentCode>();
     }

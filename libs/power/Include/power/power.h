@@ -5,24 +5,34 @@
 
 EXTERNC_BEGIN
 
-/**
- * @defgroup power Power Control interface
- * @{
- */
-
-/**
- * @brief Power control API
- */
-typedef struct _PowerControl
+namespace services
 {
-    /** @brief Extra value used by power control implementation */
-    void* Extra;
+    namespace power
+    {
+        /**
+         * @defgroup power Power Control interface
+         * @{
+         */
 
-    /** @brief Pointer to function that triggers system power cycle */
-    void (*TriggerSystemPowerCycle)(struct _PowerControl* powerControl);
-} PowerControl;
+        /**
+         * @brief Power control API
+         */
+        struct IPowerControl
+        {
+            /**
+             * @brief Performs power cycle
+             */
+            virtual void PowerCycle() = 0;
 
-/** @} */
+            /**
+             * @brief Performs sail opening sequence
+             */
+            virtual void OpenSail() = 0;
+        };
+
+        /** @} */
+    }
+}
 
 EXTERNC_END
 

@@ -32,7 +32,9 @@ OSResult System::CreateTask(OSTaskProcedure entryPoint, //
     OSTaskHandle* taskHandle                            //
     )
 {
-    const BaseType_t result = xTaskCreate(entryPoint, taskName, stackSize, taskParameter, static_cast<uint8_t>(priority), taskHandle);
+    const auto rtosStackSize = stackSize / sizeof(StackType_t);
+
+    const BaseType_t result = xTaskCreate(entryPoint, taskName, rtosStackSize, taskParameter, static_cast<uint8_t>(priority), taskHandle);
     if (result != pdPASS)
     {
         return OSResult::NotEnoughMemory;

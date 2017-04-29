@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 #include <algorithm>
 #include <array>
@@ -176,11 +177,42 @@ void MakeDirectory(uint16_t argc, char* argv[])
 
 void EraseFlash(uint16_t argc, char* argv[])
 {
-    UNUSED(argc, argv);
+    if (argc == 0)
+    {
+        Main.terminal.Puts("erase <all|[0|1|2]>");
+        return;
+    }
 
-    auto r = Main.Storage.Erase();
+    if (strcmp(argv[0], "all") == 0)
+    {
+        Main.terminal.Puts("Erasing all flashes ...");
+        Main.terminal.NewLine();
 
-    Main.terminal.Printf("Erase result: %d", num(r));
+        auto r = Main.Storage.Erase();
+        Main.terminal.Printf("Erase result: %d", num(r));
+    }
+    else
+    {
+#ifdef USE_EXTERNAL_FLASH
+        auto flashIndex = strtol(argv[0], nullptr, 10);
+        if (flashIndex < 0 || flashIndex >= 3)
+        {
+            Main.terminal.Puts("Flash index must in range <0;2>");
+            return;
+        }
+
+        Main.terminal.Printf("Erasing single flash: %ld ...", flashIndex);
+        Main.terminal.NewLine();
+
+        auto flash = Main.Storage.GetInternalStorage().GetDriver(flashIndex);
+        auto r = flash.BeginEraseChip().Wait();
+
+        Main.terminal.Printf("Erase result: %d ...", num(r));
+#else
+        Main.terminal.Puts("Erasing single chip is not supported on STK Storage");
+        Main.terminal.NewLine();
+#endif
+    }
 }
 
 void SyncFS(uint16_t argc, char* argv[])
