@@ -6,14 +6,14 @@
 
 class CurrentTimeMock : public services::time::ICurrentTime
 {
-public:
+  public:
     MOCK_METHOD0(GetCurrentTime, Option<std::chrono::milliseconds>());
 
     MOCK_METHOD1(SetCurrentTime, bool(std::chrono::milliseconds));
 
     CurrentTimeMock();
 
-private:
+  private:
     std::chrono::milliseconds _fakeTime;
 };
 

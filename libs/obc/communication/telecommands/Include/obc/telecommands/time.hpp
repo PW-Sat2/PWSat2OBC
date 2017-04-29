@@ -1,10 +1,10 @@
 #ifndef LIBS_OBC_COMMUNICATION_TELECOMMANDS_INCLUDE_OBC_TELECOMMANDS_TIME_HPP_
 #define LIBS_OBC_COMMUNICATION_TELECOMMANDS_INCLUDE_OBC_TELECOMMANDS_TIME_HPP_
 
-#include "telecommunication/telecommand_handling.h"
-#include "base/writer.h"
-#include "base/reader.h"
 #include "base/os.h"
+#include "base/reader.h"
+#include "base/writer.h"
+#include "telecommunication/telecommand_handling.h"
 
 #include "time/ICurrentTime.hpp"
 
@@ -40,20 +40,19 @@ namespace obc
              * @brief Ctor
              * @param fs File system
              */
-        	TimeTelecommand(services::time::ICurrentTime& time);
+            TimeTelecommand(services::time::ICurrentTime& time);
 
             virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
 
             enum class TimeOperations : std::uint8_t
             {
-            	ReadOnly = 0,
-                Time = 1,        //!< New Mission Time is set
-                TimeCorrection,  //!< Time Correction is set
-                RTCCorrection,   //!< RTC Correction is set
+                ReadOnly = 0,
+                Time = 1,       //!< New Mission Time is set
+                TimeCorrection, //!< Time Correction is set
+                RTCCorrection,  //!< RTC Correction is set
             };
 
-           private:
-
+          private:
             /** @brief Current time provider */
             services::time::ICurrentTime& _time;
 

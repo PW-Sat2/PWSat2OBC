@@ -116,7 +116,7 @@ namespace obc
         obc::telecommands::RemoveFileTelecommand,
         obc::telecommands::PerformDetumblingExperiment,
         obc::telecommands::AbortExperiment,
-		obc::telecommands::TimeTelecommand//
+        obc::telecommands::TimeTelecommand //
         >;
 
     /**

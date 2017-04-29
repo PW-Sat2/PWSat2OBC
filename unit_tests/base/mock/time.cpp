@@ -11,7 +11,7 @@ CurrentTimeMock::CurrentTimeMock() : _fakeTime(0)
     ON_CALL(*this, GetCurrentTime()).WillByDefault(Invoke([this]() {
         if (_fakeTime == _fakeTime.zero())
         {
-        	_fakeTime = milliseconds(static_cast<uint64_t>(time(0)));
+            _fakeTime = milliseconds(static_cast<uint64_t>(time(0)));
         }
 
         return Some(_fakeTime);
@@ -22,4 +22,3 @@ CurrentTimeMock::CurrentTimeMock() : _fakeTime(0)
         return true;
     }));
 }
-

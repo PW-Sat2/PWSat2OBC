@@ -25,7 +25,7 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           RemoveFileTelecommand(fs),                                          //
           PerformDetumblingExperiment(experiments),                           //
           AbortExperiment(experiments),
-		  TimeTelecommand(time)//
+          TimeTelecommand(time)                                               //
           ),                                                                  //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get()), //
       CommDriver(fdir.ErrorCounting(), systemBus, TelecommandHandler)

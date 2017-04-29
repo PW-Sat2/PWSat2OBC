@@ -5,8 +5,8 @@
 #include "gmock/gmock.h"
 #include "base/reader.h"
 #include "base/writer.h"
-#include "mock/time.hpp"
 #include "mock/comm.hpp"
+#include "mock/time.hpp"
 #include "obc/telecommands/time.hpp"
 #include "telecommunication/downlink.h"
 #include "telecommunication/telecommand_handling.h"
@@ -52,11 +52,9 @@ MATCHER_P3(IsDownlinkFrame, apidMatcher, seqMatcher, payloadMatcher, "")
         && Matches(payloadMatcher)(payload);
 }
 
-
 MATCHER_P4(IsTimeDownlinkPayloadMatcher, optionMatcher, resultMatcher, argumentMatcher, telemetryMatcher, "")
 {
-	// TODO: How to pass buffer from one matcher to other matcher?
-	const uint8_t *buffer = arg.data();
+    const uint8_t* buffer = arg.data();
 
     auto option = buffer[0];
     auto result = buffer[1];
@@ -67,24 +65,18 @@ MATCHER_P4(IsTimeDownlinkPayloadMatcher, optionMatcher, resultMatcher, argumentM
     auto payload = &(buffer[10]);
 
     return Matches(optionMatcher)(option) //
-        && Matches(resultMatcher)(result)   //
-        && Matches(argumentMatcher)(argument)
-		&& Matches(telemetryMatcher)(payload);
+        && Matches(resultMatcher)(result) //
+        && Matches(argumentMatcher)(argument) && Matches(telemetryMatcher)(payload);
 }
 
 TEST_F(TimeTelecommandTest, ShouldOnlyReturnStatusWhenInReadOnlyMode)
 {
-	EXPECT_CALL(_time, SetCurrentTime(_)).Times(0);
-	EXPECT_CALL(_time, GetCurrentTime()).Times(1);
-    EXPECT_CALL(_transmitFrame, SendFrame(
-    		IsDownlinkFrame(
-    				Eq(DownlinkAPID::TimeStatus),
-					_,
-					IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::ReadOnly)),
-							Eq(num(OSResult::Success)),
-							_,
-							_
-							))));
+    EXPECT_CALL(_time, SetCurrentTime(_)).Times(0);
+    EXPECT_CALL(_time, GetCurrentTime()).Times(1);
+    EXPECT_CALL(_transmitFrame,
+        SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::TimeStatus),
+            _,
+            IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::ReadOnly)), Eq(num(OSResult::Success)), _, _))));
 
     Buffer<200> buffer;
     Writer w(buffer);
@@ -95,21 +87,17 @@ TEST_F(TimeTelecommandTest, ShouldOnlyReturnStatusWhenInReadOnlyMode)
 
 TEST_F(TimeTelecommandTest, ShouldSetTimeWhenTimeOptionProvided)
 {
-	time_t currentTime = time(0);
-	uint64_t currentTimeToSend = static_cast<uint64_t>(currentTime);
-	auto currentTimeAsMilliseconds = std::chrono::milliseconds(currentTimeToSend);
+    time_t currentTime = time(0);
+    uint64_t currentTimeToSend = static_cast<uint64_t>(currentTime);
+    auto currentTimeAsMilliseconds = std::chrono::milliseconds(currentTimeToSend);
 
-	EXPECT_CALL(_time, SetCurrentTime(Eq(currentTimeAsMilliseconds))).Times(1);
-	EXPECT_CALL(_time, GetCurrentTime()).Times(1);
-    EXPECT_CALL(_transmitFrame, SendFrame(
-    		IsDownlinkFrame(
-    				Eq(DownlinkAPID::TimeStatus),
-					_,
-					IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::Time)),
-							Eq(num(OSResult::Success)),
-							Eq(currentTimeToSend),
-							_
-							))));
+    EXPECT_CALL(_time, SetCurrentTime(Eq(currentTimeAsMilliseconds))).Times(1);
+    EXPECT_CALL(_time, GetCurrentTime()).Times(1);
+    EXPECT_CALL(_transmitFrame,
+        SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::TimeStatus),
+            _,
+            IsTimeDownlinkPayloadMatcher(
+                Eq(num(TimeTelecommand::TimeOperations::Time)), Eq(num(OSResult::Success)), Eq(currentTimeToSend), _))));
 
     Buffer<200> buffer;
     Writer w(buffer);
@@ -121,20 +109,18 @@ TEST_F(TimeTelecommandTest, ShouldSetTimeWhenTimeOptionProvided)
 
 TEST_F(TimeTelecommandTest, ShouldSendErrorFrameWhenSetTimeCorrectionOptionProvided)
 {
-	int16_t correction = 0x1234;
+    int16_t correction = 0x1234;
 
-	EXPECT_CALL(_time, SetCurrentTime(_)).Times(0);
-	EXPECT_CALL(_time, GetCurrentTime()).Times(1);
+    EXPECT_CALL(_time, SetCurrentTime(_)).Times(0);
+    EXPECT_CALL(_time, GetCurrentTime()).Times(1);
 
-    EXPECT_CALL(_transmitFrame, SendFrame(
-    		IsDownlinkFrame(
-    				Eq(DownlinkAPID::TimeStatus),
-					_,
-					IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::TimeCorrection)),
-							Eq(num(OSResult::NotImplemented)),
-							Eq(static_cast<uint64_t>(correction)),
-							_
-							))));
+    EXPECT_CALL(_transmitFrame,
+        SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::TimeStatus),
+            _,
+            IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::TimeCorrection)),
+                Eq(num(OSResult::NotImplemented)),
+                Eq(static_cast<uint64_t>(correction)),
+                _))));
 
     Buffer<200> buffer;
     Writer w(buffer);
@@ -146,20 +132,18 @@ TEST_F(TimeTelecommandTest, ShouldSendErrorFrameWhenSetTimeCorrectionOptionProvi
 
 TEST_F(TimeTelecommandTest, ShouldSendErrorFrameWhenSetRtcTimeCorrectionOptionProvided)
 {
-	int16_t correction = 0x1234;
+    int16_t correction = 0x1234;
 
-	EXPECT_CALL(_time, SetCurrentTime(_)).Times(0);
-	EXPECT_CALL(_time, GetCurrentTime()).Times(1);
+    EXPECT_CALL(_time, SetCurrentTime(_)).Times(0);
+    EXPECT_CALL(_time, GetCurrentTime()).Times(1);
 
-    EXPECT_CALL(_transmitFrame, SendFrame(
-    		IsDownlinkFrame(
-    				Eq(DownlinkAPID::TimeStatus),
-					_,
-					IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::RTCCorrection)),
-							Eq(num(OSResult::NotImplemented)),
-							Eq(static_cast<uint64_t>(correction)),
-							_
-							))));
+    EXPECT_CALL(_transmitFrame,
+        SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::TimeStatus),
+            _,
+            IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::RTCCorrection)),
+                Eq(num(OSResult::NotImplemented)),
+                Eq(static_cast<uint64_t>(correction)),
+                _))));
 
     Buffer<200> buffer;
     Writer w(buffer);
@@ -171,20 +155,18 @@ TEST_F(TimeTelecommandTest, ShouldSendErrorFrameWhenSetRtcTimeCorrectionOptionPr
 
 TEST_F(TimeTelecommandTest, ShouldSendErrorFrameWhenNegativeSetTimeCorrectionOptionProvided)
 {
-	int16_t correction = -1234;
+    int16_t correction = -1234;
 
-	EXPECT_CALL(_time, SetCurrentTime(_)).Times(0);
-	EXPECT_CALL(_time, GetCurrentTime()).Times(1);
+    EXPECT_CALL(_time, SetCurrentTime(_)).Times(0);
+    EXPECT_CALL(_time, GetCurrentTime()).Times(1);
 
-    EXPECT_CALL(_transmitFrame, SendFrame(
-    		IsDownlinkFrame(
-    				Eq(DownlinkAPID::TimeStatus),
-					_,
-					IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::TimeCorrection)),
-							Eq(num(OSResult::NotImplemented)),
-							Eq(static_cast<uint64_t>(correction)),
-							_
-							))));
+    EXPECT_CALL(_transmitFrame,
+        SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::TimeStatus),
+            _,
+            IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::TimeCorrection)),
+                Eq(num(OSResult::NotImplemented)),
+                Eq(static_cast<uint64_t>(correction)),
+                _))));
 
     Buffer<200> buffer;
     Writer w(buffer);
@@ -196,20 +178,18 @@ TEST_F(TimeTelecommandTest, ShouldSendErrorFrameWhenNegativeSetTimeCorrectionOpt
 
 TEST_F(TimeTelecommandTest, ShouldSendErrorFrameWhenNegativeSetRtcTimeCorrectionOptionProvided)
 {
-	int16_t correction = -1234;
+    int16_t correction = -1234;
 
-	EXPECT_CALL(_time, SetCurrentTime(_)).Times(0);
-	EXPECT_CALL(_time, GetCurrentTime()).Times(1);
+    EXPECT_CALL(_time, SetCurrentTime(_)).Times(0);
+    EXPECT_CALL(_time, GetCurrentTime()).Times(1);
 
-    EXPECT_CALL(_transmitFrame, SendFrame(
-    		IsDownlinkFrame(
-    				Eq(DownlinkAPID::TimeStatus),
-					_,
-					IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::RTCCorrection)),
-							Eq(num(OSResult::NotImplemented)),
-							Eq(static_cast<uint64_t>(correction)),
-							_
-							))));
+    EXPECT_CALL(_transmitFrame,
+        SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::TimeStatus),
+            _,
+            IsTimeDownlinkPayloadMatcher(Eq(num(TimeTelecommand::TimeOperations::RTCCorrection)),
+                Eq(num(OSResult::NotImplemented)),
+                Eq(static_cast<uint64_t>(correction)),
+                _))));
 
     Buffer<200> buffer;
     Writer w(buffer);
