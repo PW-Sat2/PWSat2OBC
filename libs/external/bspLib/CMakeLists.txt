@@ -16,7 +16,5 @@ target_compile_definitions(${NAME} PUBLIC -DCubeCompV3B)
 
 set_target_properties(${NAME} PROPERTIES COMPILE_FLAGS "\
     -Wno-unused-parameter \
-    -Wno-strict-prototypes \
     -Wno-unused-but-set-variable \
-    -Wno-old-style-declaration \
 ")
