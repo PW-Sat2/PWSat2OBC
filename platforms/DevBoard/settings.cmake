@@ -14,6 +14,8 @@ else()
     message(STATUS "Flash: Internal (STK NAND)")
 endif()
 
+add_definitions(-DUSE_LEUART)
+add_definitions(-DSLOWER_CLOCK)
 
 set (ARCH cortex-m3)
 set (CHIP EFM32GG)

@@ -24,7 +24,7 @@ void EFMSPIInterface::Initialize()
 
     USART_InitSync_TypeDef init = USART_INITSYNC_DEFAULT;
     init.master = true;
-    init.baudrate = 20_MHz;
+    init.baudrate = io_map::SPI::Baudrate;
     init.msbf = true;
     init.clockMode = usartClockMode0;
     init.databits = usartDatabits8;

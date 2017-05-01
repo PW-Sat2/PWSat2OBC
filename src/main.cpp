@@ -184,9 +184,11 @@ void SetupHardware(void)
     CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_HFCLKLE);
     CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_HFCLKLE);
 
+#ifndef SLOWER_CLOCK
     CMU_OscillatorEnable(cmuOsc_HFXO, true, true);
     CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
     CMU_OscillatorEnable(cmuOsc_HFRCO, false, true);
+#endif
 }
 
 extern "C" void __libc_init_array(void);
@@ -210,7 +212,9 @@ int main(void)
 
     DMADRV_Init();
 
-    //    LeuartLineIOInit(&Main.IO);
+#ifdef USE_LEUART
+    LeuartLineIOInit(&Main.IO);
+#endif
 
     Main.Initialize();
 
