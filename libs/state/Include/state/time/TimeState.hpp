@@ -16,6 +16,8 @@ namespace state
     class TimeState
     {
       public:
+        static constexpr int Id = 1;
+
         /**
          * @brief ctor.
          */
@@ -77,6 +79,8 @@ namespace state
          */
         bool operator!=(const TimeState& arg) const;
 
+        bool IsDifferent(const TimeState& state) const;
+
       private:
         /**
          * @brief Current mission time in milliseconds as seen on internal clock.
@@ -112,6 +116,12 @@ namespace state
     inline bool TimeState::operator!=(const TimeState& arg) const
     {
         return !(*this == arg);
+    }
+
+    inline bool TimeState::IsDifferent(const TimeState& state) const
+    {
+        return (this->lastMissionTime - state.lastMissionTime) >= std::chrono::seconds(60) ||
+            (this->lastExternalTime - state.lastExternalTime) >= std::chrono::seconds(60);
     }
 }
 
