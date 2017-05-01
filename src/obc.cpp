@@ -9,7 +9,7 @@ OBC::OBC()
       Imtq(Hardware.I2C.Buses.Bus),                                                    //
       Experiments(fs, this->adcs.GetAdcsController(), this->timeProvider),             //
       Communication(this->Fdir, Hardware.I2C.Buses.Bus, fs, Experiments),              //
-      terminal(this->UARTDriver.GetLineIO()),                                          //
+      terminal(this->GetLineIO()),                                                     //
       rtc(Hardware.I2C.Buses.Payload)
 {
 }
@@ -20,7 +20,10 @@ void OBC::Initialize()
 
     this->Fdir.Initalize();
 
+#ifndef USE_LEUART
     this->UARTDriver.Initialize();
+#endif
+
     this->Hardware.Initialize();
 
     this->fs.Initialize();

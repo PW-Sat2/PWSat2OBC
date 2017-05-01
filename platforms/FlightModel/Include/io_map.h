@@ -8,6 +8,7 @@
 #include <em_wdog.h>
 #include <em_system.h>
 #include "base/io_map.h"
+#include "utils.h"
 
 /** @cond FALSE */
 
@@ -28,6 +29,7 @@ namespace io_map
 
     struct SPI : public SPIPins<SPI>
     {
+        static constexpr std::uint32_t Baudrate = 20_MHz;
         static constexpr USART_TypeDef* Peripheral = USART0;
         static constexpr std::uint8_t Location = 1;
         using MOSI = PinLocation<gpioPortE, 7>;

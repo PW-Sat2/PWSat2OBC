@@ -148,8 +148,11 @@ namespace obc
             this->Led1.Initialize();
             this->SysClear.Initialize();
             this->SPI.Initialize();
-            //            this->LEUART.Initialize();
+#ifdef USE_LEUART
+            this->LEUART.Initialize();
+#else
             this->UART.Initialize();
+#endif
             this->I2C_0.Initialize();
             this->I2C_1.Initialize();
         }

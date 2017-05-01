@@ -200,7 +200,7 @@ static FlashStatus readPage(FlashNANDInterface* flash, uint32_t offset, uint8_t*
 
     EBI_StartNandEccGen();
 
-    __packed uint32_t* p = (__packed uint32_t*)buffer;
+    auto p = (__packed uint32_t*)buffer;
     for (uint32_t i = 0; i < length / 4; i++)
     {
         *(p + i) = *(flash->data32);
@@ -265,7 +265,7 @@ static FlashStatus writePage(FlashNANDInterface* flash, uint32_t offset, uint8_t
 
     EBI_StartNandEccGen();
 
-    __packed uint32_t* const p = (__packed uint32_t * const)buffer;
+    const auto p = (__packed uint32_t * const)buffer;
     for (uint32_t i = 0; i < length / 4; i++)
     {
         *(flash->data32) = *(p + i);

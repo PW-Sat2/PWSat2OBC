@@ -58,6 +58,8 @@ struct OBC
      */
     OSResult PostStartInitialization();
 
+    inline LineIO& GetLineIO();
+
     /** @brief File system object */
     services::fs::YaffsFileSystem fs;
     /** @brief Handle to OBC initialization task. */
@@ -110,6 +112,15 @@ struct OBC
     /** @brief External Real Time Clock.  */
     devices::rtc::RTCObject rtc;
 };
+
+LineIO& OBC::GetLineIO()
+{
+#ifdef USE_LEUART
+    return this->IO;
+#endif
+
+    return this->UARTDriver.GetLineIO();
+}
 
 /** @brief Global OBC object. */
 extern OBC Main;
