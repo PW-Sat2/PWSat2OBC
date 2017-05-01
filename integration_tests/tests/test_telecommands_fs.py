@@ -22,7 +22,7 @@ class FileSystemTelecommandsTest(BaseTest):
         self.system.obc.wait_to_start()
 
         e.wait_for_change(1)
-    @nottest
+
     def test_receive_multipart_file(self):
         self._start()
 

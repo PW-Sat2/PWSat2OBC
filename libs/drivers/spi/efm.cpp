@@ -1,5 +1,6 @@
 #include "efm.h"
 
+#include <em_gpio.h>
 #include "efm_support/api.h"
 #include "efm_support/clock.h"
 #include "efm_support/dma.h"
@@ -135,7 +136,6 @@ bool EFMSPIInterface::OnTransferFinished(unsigned int channel, unsigned int sequ
     }
 
     //    System::EndSwitchingISR();
-
     return true;
 }
 EFMSPISlaveInterface::EFMSPISlaveInterface(EFMSPIInterface& spi, const drivers::gpio::Pin& pin) : _spi(spi), _pin(pin)

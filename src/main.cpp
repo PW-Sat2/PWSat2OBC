@@ -77,6 +77,7 @@ void BURTC_IRQHandler(void)
 void LESENSE_IRQHandler()
 {
     Main.UARTDriver.OnWakeUpInterrupt();
+    System::EndSwitchingISR();
 }
 
 static void BlinkLed0(void* param)

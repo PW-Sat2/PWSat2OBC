@@ -45,4 +45,7 @@ class TestExperimentsTelecommands(BaseTest):
         self.system.obc.wait_for_experiment(None, 15)
 
         self.system.obc.request_experiment(ExperimentType.Fibo)
+
         self.system.obc.wait_for_experiment(ExperimentType.Fibo, 15)
+        self.system.obc.abort_experiment()
+        self.system.obc.wait_for_experiment(None, 15)
