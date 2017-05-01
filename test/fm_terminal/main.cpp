@@ -27,6 +27,12 @@ OSEventGroupHandle GlobalEventGroup;
 drivers::uart::UART uart;
 Terminal TerminalObject(uart.GetLineIO());
 
+void LESENSE_IRQHandler()
+{
+    uart.OnWakeUpInterrupt();
+    System::EndSwitchingISR();
+}
+
 void SetGroup(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
@@ -47,9 +53,15 @@ void Restart(std::uint16_t /*argc*/, char* /*argv*/ [])
     NVIC_SystemReset();
 }
 
+void Id(std::uint16_t /*argc*/, char* /*argv*/ [])
+{
+    TerminalObject.Printf("I'm '%s'", __FILE__);
+}
+
 static const TerminalCommandDescription commands[] = {
     {"SetGroup", SetGroup}, //
     {"echo", Echo},
+    {"id", Id},        //
     {"reset", Restart} //
 };
 

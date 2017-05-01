@@ -32,6 +32,16 @@ static uint8_t verifyApplicationCRC(uint8_t entryIndex)
     return (actualCRC == expectedCRC);
 }
 
+static uint8_t verifyBootIndex(uint8_t bootIndex)
+{
+    return ((bootIndex > 0) && (bootIndex <= BOOT_TABLE_SIZE));
+}
+
+static uint8_t verifyBootCounter(void)
+{
+    return (BOOT_getBootCounter() > 0);
+}
+
 void BootToAddress(uint32_t baseAddress)
 {
     resetPeripherals();
@@ -80,4 +90,42 @@ uint32_t LoadApplication(uint8_t bootIndex)
 
         return BOOT_APPLICATION_BASE;
     }
+}
+
+void ProceedWithBooting()
+{
+    char debugStr[80] = {0};
+    auto debugLen = sprintf((char*)debugStr, "\nTimeout exceeded - booting");
+    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+
+    auto bootIndex = BOOT_getBootIndex();
+
+    if (bootIndex == 0)
+    {
+        debugLen = sprintf((char*)debugStr, "\n\nSafe Mode boot index... Booting safe mode!");
+        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+    }
+    else if (!verifyBootIndex(bootIndex))
+    {
+        bootIndex = 0;
+        BOOT_setBootIndex(0);
+
+        debugLen = sprintf((char*)debugStr, "\n\nInvalid boot index... Booting safe mode!");
+        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+    }
+    else if (!verifyBootCounter())
+    {
+        bootIndex = 0;
+        BOOT_setBootIndex(0);
+
+        debugLen = sprintf((char*)debugStr, "\n\nBoot counter expired... Booting safe mode!");
+        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+    }
+    else
+    {
+        BOOT_decBootCounter();
+    }
+
+    auto bootAddress = LoadApplication(bootIndex);
+    BootToAddress(bootAddress);
 }

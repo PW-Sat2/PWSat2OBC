@@ -6,4 +6,6 @@
 uint32_t LoadApplication(uint8_t index);
 void BootToAddress(uint32_t baseAddress);
 
+void ProceedWithBooting();
+
 #endif /* BOOT_BOOT_H_ */
