@@ -9,6 +9,12 @@ set(SOURCES
     xmodem.cpp
     fault_handlers.c
     boot.cpp
+    
+    commands/test.cpp
+    commands/booting.cpp
+    commands/settings.cpp
+    commands/upload.cpp
+    commands/boot_table.cpp
 )
 
 add_executable(${NAME} ${SOURCES})

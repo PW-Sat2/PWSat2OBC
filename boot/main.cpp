@@ -22,11 +22,6 @@ void restClocks(void);
   ******************************************************************************/
 int main(void)
 {
-    uint8_t bootIndex;
-    uint32_t bootAddress;
-
-    //    BOOT_DownloadResult_Typedef downloadError;
-
     CHIP_Init();
 
     // set up general clocks
@@ -50,44 +45,14 @@ int main(void)
     BSP_EBI_enableSRAM(bspEbiSram1);
     BSP_EBI_enableSRAM(bspEbiSram2);
 
-    debugLen = sprintf((char*)debugStr, "\n\nBootloader (b = boot, s = set, x = XMODEM upload, l = list entries, r = reset):");
+    char debugStr[80] = {0};
+
+    auto debugLen = sprintf((char*)debugStr, "\n\nBootloader (b = boot, s = set, x = XMODEM upload, l = list entries, r = reset):");
     BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
 
     waitForComms(COMMS_TIMEOUT);
 
-    debugLen = sprintf((char*)debugStr, "\nTimeout exceeded - booting");
-    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
-
-    bootIndex = BOOT_getBootIndex();
-
-    if (bootIndex == 0)
-    {
-        debugLen = sprintf((char*)debugStr, "\n\nSafe Mode boot index... Booting safe mode!");
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
-    }
-    else if (!verifyBootIndex(bootIndex))
-    {
-        bootIndex = 0;
-        BOOT_setBootIndex(0);
-
-        debugLen = sprintf((char*)debugStr, "\n\nInvalid boot index... Booting safe mode!");
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
-    }
-    else if (!verifyBootCounter())
-    {
-        bootIndex = 0;
-        BOOT_setBootIndex(0);
-
-        debugLen = sprintf((char*)debugStr, "\n\nBoot counter expired... Booting safe mode!");
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
-    }
-    else
-    {
-        BOOT_decBootCounter();
-    }
-
-    bootAddress = LoadApplication(bootIndex);
-    BootToAddress(bootAddress);
+    ProceedWithBooting();
 }
 void waitForComms(uint32_t timeoutTicks_ms)
 {
@@ -105,14 +70,4 @@ void waitForComms(uint32_t timeoutTicks_ms)
     } while ((msTicks < timeoutTicks_ms) || uartReceived);
 
     SysTick->CTRL &= (~SysTick_CTRL_ENABLE_Msk); // disable SysTick timer
-}
-
-uint8_t verifyBootIndex(uint8_t bootIndex)
-{
-    return ((bootIndex > 0) && (bootIndex <= BOOT_TABLE_SIZE));
-}
-
-uint8_t verifyBootCounter(void)
-{
-    return (BOOT_getBootCounter() > 0);
 }
