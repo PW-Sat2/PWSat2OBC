@@ -21,6 +21,11 @@ extern "C" void assertEFM(const char* /*file*/, int /*line*/)
         ;
 }
 
+void SysTick_Handler()
+{
+    USART_Tx(io_map::UART::Peripheral, '!');
+}
+
 int main(void)
 {
     SCB->VTOR = 0x12000000;
@@ -44,6 +49,9 @@ int main(void)
     USART_Enable(io_map::UART::Peripheral, usartEnable);
 
     USART_Tx(io_map::UART::Peripheral, '!');
+
+    SysTick_Config(SystemCoreClockGet());
+    NVIC_EnableIRQ(IRQn_Type::SysTick_IRQn);
 
     while (1)
         ;
