@@ -37,10 +37,13 @@ namespace drivers
             char* _buffer;
 
             unsigned int _rxChannel;
+            unsigned int _txChannel;
 
             struct Event
             {
                 static constexpr OSEventBits LineEndReceived = 1 << 0;
+                static constexpr OSEventBits TransferRXFinished = 1 << 1;
+                static constexpr OSEventBits TransferTXFinished = 1 << 2;
             };
         };
     }

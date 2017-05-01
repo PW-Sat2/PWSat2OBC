@@ -66,9 +66,6 @@ void AbortExperiment(std::uint16_t argc, char* argv[])
 
 void ExperimentInfo(std::uint16_t argc, char* argv[])
 {
-    LOG(LOG_LEVEL_DEBUG, "ExpInfo");
-    //    Main.terminal.Puts("X");
-
     UNUSED(argc, argv);
     auto state = Main.Experiments.ExperimentsController.CurrentState();
 

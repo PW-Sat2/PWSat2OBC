@@ -31,10 +31,10 @@ class BaseTest(unittest.TestCase):
         self.gpio.close()
         extensions.tear_down(test_id=self.id())
 
-    def power_on_obc(self):
-        self.system.obc.power_on()
+    def power_on_obc(self, clean_state=False):
+        self.system.obc.power_on(clean_state=clean_state)
 
-    def power_on_and_wait(self):
-        self.power_on_obc()
+    def power_on_and_wait(self, clean_state=False):
+        self.power_on_obc(clean_state=clean_state)
         self.system.obc.wait_to_start()
 

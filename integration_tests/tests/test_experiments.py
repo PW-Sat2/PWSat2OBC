@@ -104,10 +104,16 @@ class ExperimentsTest(BaseTest):
 
         self.system.obc.run_mission()
 
-        self.system.obc.set_fibo_iterations(100)
+        self.system.obc.set_fibo_iterations(2)
         self.system.obc.request_experiment(ExperimentType.Fibo)
         self.system.obc.run_mission()
         self.system.obc.wait_for_experiment(ExperimentType.Fibo, 15)
+        self.system.obc.wait_for_experiment_iteration(1, 15)
+
+        self.system.obc.run_mission()
+        self.system.obc.wait_for_experiment_iteration(2, 15)
+        self.system.obc.wait_for_experiment(None, 15)
+
     @nottest
     def test_x(self):
         self.begin()

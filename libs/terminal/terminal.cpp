@@ -80,8 +80,6 @@ void Terminal::HandleCommand(char* buffer)
     uint16_t argc = 0;
     char* args[8] = {0};
 
-    LOGF(LOG_LEVEL_INFO, "CMD: '%s'", buffer);
-
     parseCommandLine(buffer, &commandName, args, &argc, COUNT_OF(args));
 
     for (auto& command : this->_commandList)

@@ -22,7 +22,7 @@ class System:
         self.i2c.start()
 
         if auto_power_on:
-            self.obc.power_on(clean_state=True)
+            self.obc.power_on(clean_state=False)
 
     def _setup_devices(self):
         self.eps = EPS()
