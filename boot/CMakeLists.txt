@@ -1,14 +1,14 @@
 set(NAME boot)
 
 set(SOURCES
-    background.c
-    comms.c
-    crc.c
-    flash.c
-    main.c
-    xmodem.c
+    background.cpp
+    comms.cpp
+    crc.cpp
+    flash.cpp
+    main.cpp
+    xmodem.cpp
     fault_handlers.c
-    boot.c
+    boot.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -36,8 +36,6 @@ target_format_sources(${NAME} "${SOURCES}")
 
 set_target_properties(${NAME} PROPERTIES COMPILE_FLAGS "\
     -Wno-unused-parameter \
-    -Wno-strict-prototypes \
     -Wno-unused-but-set-variable \
-    -Wno-old-style-declaration \
 ")
 
