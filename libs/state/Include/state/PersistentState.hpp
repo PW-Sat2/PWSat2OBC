@@ -72,8 +72,18 @@ namespace state
      * Every type that is supposed to be part of persistent state should implement interface that is compatible to:
      * @code{.cpp}
      * T();
+     * // @brief This function is responsible for reading complete state from the passed buffer reader object.
+     * // @param[in] reader buffer reader that should be used to read the serialized state.
      * void Read(Reader& reader);
+     *
+     * // @brief The Write function is responsible for writing current object state to the passed writer object.
+     * // @param[in] writer Buffer writer object that should be used to write the serialized state.
      * void Write(Writer& writer) const;
+     *
+     * // @brief This procedure is responsible to return size of this object in its serialized form.
+     * //
+     * // If the size is by definition variable, then this function should return highest possible size
+     * // that is possible to be generated.
      * static constexpr std::uint32_t Size();
      * @endcode
      *
@@ -81,9 +91,23 @@ namespace state
      * verification whether the Persistent State has been modifed since it has been last read/written.
      * This type should provide interface that is compatible with:
      * @code{.cpp}
-     * T()
-     * void NotifyModified()
+     *
+     * // @brief Default construction.
+     * //
+     * // Persistent state policies should be default constructible.
+     * T();
+     *
+     * // @brief This function is used to notify state policy that there has been modification of at least
+     * // one persistent state part.
+     * void NotifyModified();
+     *
+     * // @brief This function is used to notify state policy that all changes to the persistent state
+     * // have been saved and from now the persistent state should be considered unchanged.
      * void NotifySaved()
+     *
+     * // @brief This function is used by the persistent state to query the policy whether there have been
+     * // any state changes since last state save.
+     * // @return True when there has been at least one state modification, false otherwise.
      * bool IsModified() const
      * @endcode
      */

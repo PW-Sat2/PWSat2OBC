@@ -45,6 +45,9 @@ struct SystemState
      */
     mutable state::SystemPersistentState PersistentState;
 
+    /**
+     * @brief Container of all used telemetry elements.
+     */
     mutable state::ManagedTelemetry telemetry;
 };
 
