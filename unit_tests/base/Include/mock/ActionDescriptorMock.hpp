@@ -10,12 +10,12 @@
 template <typename State, typename Tag> struct ActionDescriptorMock : public mission::Action
 {
     MOCK_METHOD1_T(ConditionProc, bool(const State& state));
-    MOCK_METHOD1_T(ActionProc, void(const State& state));
+    MOCK_METHOD1_T(ActionProc, void(State& state));
     mission::ActionDescriptor<State> BuildAction();
 
     static bool ConditionEntry(const State& state, void* param);
 
-    static void ActionEntry(const State& state, void* param);
+    static void ActionEntry(State& state, void* param);
 };
 
 template <typename State, typename Tag>
@@ -27,8 +27,8 @@ bool ActionDescriptorMock<State, Tag>::ConditionEntry(const State& state, //
 }
 
 template <typename State, typename Tag>
-void ActionDescriptorMock<State, Tag>::ActionEntry(const State& state, //
-    void* param                                                        //
+void ActionDescriptorMock<State, Tag>::ActionEntry(State& state, //
+    void* param                                                  //
     )
 {
     static_cast<ActionDescriptorMock<State, Tag>*>(param)->ActionProc(state);

@@ -246,7 +246,7 @@ namespace mission
      * @param[in] param Pointer to action specific context.
      * @tparam State Type of the state this action operates on.
      */
-    template <typename State> using ActionProc = void (*)(const State& state, void* param);
+    template <typename State> using ActionProc = void (*)(State& state, void* param);
 
     /**
      * @brief Type of the procedure that verifies whether or not action should be performed in current state.
@@ -297,7 +297,7 @@ namespace mission
          * @brief Executes action
          * @param state System state
          */
-        inline void Execute(const State& state);
+        inline void Execute(State& state);
     };
 
     template <typename State> inline bool ActionDescriptor<State>::EvaluateCondition(const State& state)
@@ -310,7 +310,7 @@ namespace mission
         return this->condition(state, this->param);
     }
 
-    template <typename State> inline void ActionDescriptor<State>::Execute(const State& state)
+    template <typename State> inline void ActionDescriptor<State>::Execute(State& state)
     {
         if (this->actionProc != nullptr)
         {
@@ -357,7 +357,7 @@ namespace mission
          * @param state System state
          * @param param Pointer to CompositeAction object
          */
-        static void Run(const State& state, void* param);
+        static void Run(State& state, void* param);
 
         /** @brief Composite action name */
         const char* _name;
@@ -374,7 +374,7 @@ namespace mission
         return true;
     }
 
-    template <typename State, std::size_t Count> void CompositeAction<State, Count>::Run(const State& state, void* param)
+    template <typename State, std::size_t Count> void CompositeAction<State, Count>::Run(State& state, void* param)
     {
         auto This = reinterpret_cast<CompositeAction<State, Count>*>(param);
 

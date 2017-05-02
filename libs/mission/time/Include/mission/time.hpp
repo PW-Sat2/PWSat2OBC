@@ -136,13 +136,13 @@ namespace mission
          * @param[in] state Reference to global mission state.
          * @param[in] param Current execution context.
          */
-        static void CorrectTimeProxy(const SystemState& state, void* param);
+        static void CorrectTimeProxy(SystemState& state, void* param);
 
         /**
          * @brief Time correction procedure, that will correct current time based on the external RTC.
          * @param[in] state Reference to global mission state.
          */
-        void CorrectTime(const SystemState& state);
+        void CorrectTime(SystemState& state);
 
         /**
          * @brief Time provider reference.

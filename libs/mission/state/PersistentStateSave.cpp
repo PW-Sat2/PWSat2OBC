@@ -32,13 +32,13 @@ namespace mission
         return state.PersistentState.IsModified();
     }
 
-    void PeristentStateSave::SaveState(const SystemState& state, void* param)
+    void PeristentStateSave::SaveState(SystemState& state, void* param)
     {
         auto This = static_cast<PeristentStateSave*>(param);
         This->SaveState(state);
     }
 
-    void PeristentStateSave::SaveState(const SystemState& state)
+    void PeristentStateSave::SaveState(SystemState& state)
     {
         obc::WritePersistentState(state.PersistentState, this->baseAddress, this->storageAccess);
     }

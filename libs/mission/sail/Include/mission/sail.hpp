@@ -78,7 +78,7 @@ namespace mission
          * @param[in] state Current mission state.
          * @param[in] param Execution context.
          */
-        static void OpenSail(const SystemState& state, void* param);
+        static void OpenSail(SystemState& state, void* param);
 
         /**
          * @brief Updates global mission state.
