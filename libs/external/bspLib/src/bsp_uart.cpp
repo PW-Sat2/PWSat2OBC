@@ -29,6 +29,7 @@
   ******************************************************************************/
 
 #include "bsp_uart.h"
+#include <cstring>
 
 /***************************************************************************/ /**
   * @addtogroup BSP_Library
@@ -219,7 +220,7 @@ void BSP_UART_txByte(USART_TypeDef* usart, uint8_t data)
   * @param[in] wait
   *   Determines if function should wait for transmission to finish.
   ******************************************************************************/
-void BSP_UART_txBuffer(USART_TypeDef* usart, uint8_t* buff, uint16_t len, bool wait)
+void BSP_UART_txBuffer(USART_TypeDef* usart, const uint8_t* buff, uint16_t len, bool wait)
 {
     // Implement transmission using DMA to free up MCU
     DMA_ActivateBasic(DMA_CHANNEL_DEBUG_TX, // activate channel selected
@@ -236,6 +237,12 @@ void BSP_UART_txBuffer(USART_TypeDef* usart, uint8_t* buff, uint16_t len, bool w
     if (wait)
         while (debugTxInProgress)
             ;
+}
+
+void BSP_UART_Puts(USART_TypeDef* usart, const char* str)
+{
+    auto length = strlen(str);
+    BSP_UART_txBuffer(usart, reinterpret_cast<const uint8_t*>(str), length, true);
 }
 
 /***************************************************************************/ /**
