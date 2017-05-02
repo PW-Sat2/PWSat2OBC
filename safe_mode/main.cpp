@@ -54,7 +54,13 @@ int main(void)
     NVIC_EnableIRQ(IRQn_Type::SysTick_IRQn);
 
     while (1)
-        ;
+    {
+        auto r = USART_Rx(io_map::UART::Peripheral);
+        if (r == 'r')
+        {
+            NVIC_SystemReset();
+        }
+    }
 
     return 0;
 }
