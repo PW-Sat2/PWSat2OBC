@@ -5,12 +5,13 @@ set(SOURCES
   MissionPlan/SailSystemStateTest.cpp
   MissionPlan/TimeTaskTest.cpp
   MissionPlan/MissionLoopTest.cpp
+  MissionPlan/TelemetryTest.cpp
   MissionPlan/antenna/DeployAntennasTest.cpp
   MissionPlan/antenna/AntennaMissionStateTest.cpp
   MissionPlan/beacon/BeaconUpdateTest.cpp
   MissionPlan/CompositeActionTest.cpp
   MissionPlan/adcs/AdcsPrimaryTaskTest.cpp
-  MissionPlan/obc/ObcTest.cpp    
+  MissionPlan/obc/ObcTest.cpp
   Experiments/Fibo/FiboCalculatorTest.cpp
   Experiments/ExperimentTest.cpp
   Experiments/ADCS/DetumblingExperimentTest.cpp
@@ -25,7 +26,8 @@ target_link_libraries(${NAME}
     mission_time
     mission_experiments
     mission_adcs
-    mission_beacon   
+    mission_beacon
+    mission_telemetry
     exp_fibo
     exp_adcs
     unit_tests_base

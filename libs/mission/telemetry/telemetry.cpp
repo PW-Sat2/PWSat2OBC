@@ -82,6 +82,7 @@ namespace mission
                     this->configuration.previousFileName);
                 return false;
             }
+
             file = services::fs::File(this->provider,
                 this->configuration.currentFileName,
                 services::fs::FileOpen::OpenAlways,
