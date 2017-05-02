@@ -4,6 +4,7 @@
 #pragma once
 
 #include <type_traits>
+#include "fwd.hpp"
 
 template <typename Type> struct ITelemetryContainer
 {
