@@ -16,6 +16,9 @@ namespace state
     class TimeState
     {
       public:
+        /**
+         * @brief TimeState telemetry unique identifer.
+         */
         static constexpr int Id = 1;
 
         /**
@@ -79,6 +82,14 @@ namespace state
          */
         bool operator!=(const TimeState& arg) const;
 
+        /**
+         * @brief Minor state change fluctuation discriminator.
+         *
+         * This method will report that two objects are different if any of its members
+         * differs for at least a minute.
+         * @param[in] state Object to compare to.
+         * @return True whether the two objects differ enough to be considered different, false otherwise.
+         */
         bool IsDifferent(const TimeState& state) const;
 
       private:
@@ -116,12 +127,6 @@ namespace state
     inline bool TimeState::operator!=(const TimeState& arg) const
     {
         return !(*this == arg);
-    }
-
-    inline bool TimeState::IsDifferent(const TimeState& state) const
-    {
-        return (this->lastMissionTime - state.lastMissionTime) >= std::chrono::seconds(60) ||
-            (this->lastExternalTime - state.lastExternalTime) >= std::chrono::seconds(60);
     }
 }
 
