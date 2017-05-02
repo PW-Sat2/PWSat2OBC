@@ -33,7 +33,9 @@ struct Command
     const CommandHandler Handler;
 };
 
-static std::array<Command, 11> Commands = {
+static void PrintHelp();
+
+static std::array<Command, 12> Commands = {
     Command{'T', "Test", Test}, //
     Command{'S', "Test SRAM", TestSRAM},
     Command{'E', "Test EEPROM", TestEEPROM},
@@ -45,6 +47,7 @@ static std::array<Command, 11> Commands = {
     Command{'x', "Upload application", UploadApplication},
     Command{'z', "Upload safe mode", UploadSafeMode},
     Command{'l', "Print boot table", PrintBootTable},
+    Command{'?', "Print help", PrintHelp},
 };
 
 #define UPLOADBLOCKSIZE 256
@@ -107,4 +110,12 @@ void BSP_UART_DEBUG_IRQHandler(void)
 
     // enable interrupt
     BSP_UART_DEBUG->IEN |= USART_IEN_RXDATAV;
+}
+
+void PrintHelp()
+{
+    for (auto& c : Commands)
+    {
+        BSP_UART_Printf<60>(BSP_UART_DEBUG, "\n%c - %s", c.CommandId, c.HelpMessage);
+    }
 }
