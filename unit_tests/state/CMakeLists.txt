@@ -4,6 +4,7 @@ set(SOURCES
   state/PersistentStateTest.cpp
   state/PersistentTimeStateTest.cpp
   state/AntennaConfigTest.cpp
+  state/TelemetryTest.cpp
   obc/ObcStateTest.cpp 
 )
 
@@ -28,6 +29,7 @@ target_compile_options(${NAME} PRIVATE "-fexceptions")
 target_link_libraries(${NAME}    
     obc_state
     unit_tests_base
+    state
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})

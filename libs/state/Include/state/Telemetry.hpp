@@ -11,38 +11,35 @@
 
 namespace state
 {
-    template <typename Owner, typename Type> struct TelemetryContainer : public ITelemetryContainer<Type>
+    namespace details
     {
-        virtual Owner& GetOwner() = 0;
+        template <typename Owner, typename Type> struct TelemetryContainer : public ITelemetryContainer<Type>
+        {
+            virtual Owner& GetOwner() = 0;
 
-        virtual const Owner& GetOwner() const = 0;
+            virtual const Owner& GetOwner() const = 0;
 
-        virtual const Type& Get() const final override;
+            virtual const Type& Get() const final override;
 
-        virtual void Set(const Type& value) final override;
+            virtual void Set(const Type& value) final override;
 
-        virtual void SetVolatile(const Type& value) final override;
-    };
+            virtual void SetVolatile(const Type& value) final override;
+        };
 
-    template <typename Owner, typename Type> const Type& TelemetryContainer<Owner, Type>::Get() const
-    {
-        return GetOwner().template Get<Type>();
-    }
+        template <typename Owner, typename Type> const Type& TelemetryContainer<Owner, Type>::Get() const
+        {
+            return GetOwner().template Get<Type>();
+        }
 
-    template <typename Owner, typename Type> void TelemetryContainer<Owner, Type>::Set(const Type& value)
-    {
-        GetOwner().Set(value);
-    }
+        template <typename Owner, typename Type> void TelemetryContainer<Owner, Type>::Set(const Type& value)
+        {
+            GetOwner().Set(value);
+        }
 
-    template <typename Owner, typename Type> void TelemetryContainer<Owner, Type>::SetVolatile(const Type& value)
-    {
-        GetOwner().SetVolatile(value);
-    }
-
-    template <typename... Type> class Telemetry final : public TelemetryContainer<Telemetry<Type...>, Type>...
-    {
-      public:
-        static_assert(AreTypesUnique<Type...>::value, "Telemetry types should be unique");
+        template <typename Owner, typename Type> void TelemetryContainer<Owner, Type>::SetVolatile(const Type& value)
+        {
+            GetOwner().SetVolatile(value);
+        }
 
         template <typename... Args> struct UniqueIdVerifier;
 
@@ -60,19 +57,29 @@ namespace state
 
         template <typename Base, typename... Args> struct TotalSize<Base, Args...>
         {
-            static constexpr bool Value = Base::Size() + TotalSize<Args...>::Value;
+            static constexpr int Value = Base::Size() + TotalSize<Args...>::Value;
         };
 
         template <typename Base> struct TotalSize<Base>
         {
-            static constexpr bool Value = Base::Size();
+            static constexpr int Value = Base::Size();
         };
+    }
 
-        static_assert(UniqueIdVerifier<Type...>::IsUnique, "Telemetry type identifiers should be unique");
+    /**
+     * @brief Class that is responsible for keeping together complete satellite telemetry information.
+     * @ingroup StateDef
+     */
+    template <typename... Type> class Telemetry final : public details::TelemetryContainer<Telemetry<Type...>, Type>...
+    {
+      public:
+        static_assert(AreTypesUnique<Type...>::value, "Telemetry types should be unique");
+
+        static_assert(details::UniqueIdVerifier<Type...>::IsUnique, "Telemetry type identifiers should be unique");
 
         static constexpr int TypeCount = sizeof...(Type);
 
-        static constexpr int PayloadSize = TotalSize<Type...>::Value;
+        static constexpr int PayloadSize = details::TotalSize<Type...>::Value;
 
         static constexpr int TotalSerializedSize = PayloadSize + 2 * TypeCount * sizeof(std::uint8_t);
 
@@ -109,10 +116,14 @@ namespace state
 
         template <int Tag, typename T, typename... Args> void CommitCaptureInternal();
 
-        template <int Tag> void CommitCapturedInternal() const;
+        template <int Tag> void CommitCaptureInternal();
 
         Container storage;
     };
+
+    template <typename... Type> constexpr int Telemetry<Type...>::TypeCount;
+    template <typename... Type> constexpr int Telemetry<Type...>::PayloadSize;
+    template <typename... Type> constexpr int Telemetry<Type...>::TotalSerializedSize;
 
     template <typename... Type> Telemetry<Type...>& Telemetry<Type...>::GetOwner()
     {
@@ -174,7 +185,7 @@ namespace state
 
     template <typename... Type> inline void Telemetry<Type...>::CommitCapture()
     {
-        return CommitCaptureInternal<0, Type...>();
+        CommitCaptureInternal<0, Type...>();
     }
 
     template <typename... Type>
@@ -199,9 +210,10 @@ namespace state
     template <typename... Type> template <int Tag, typename T, typename... Args> inline void Telemetry<Type...>::CommitCaptureInternal()
     {
         std::get<ElementContainer<T>>(this->storage).second = false;
+        CommitCaptureInternal<0, Args...>();
     }
 
-    template <typename... Type> template <int Tag> inline void Telemetry<Type...>::CommitCapturedInternal() const
+    template <typename... Type> template <int Tag> inline void Telemetry<Type...>::CommitCaptureInternal()
     {
     }
 }
