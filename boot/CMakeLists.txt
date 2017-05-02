@@ -3,7 +3,6 @@ set(NAME boot)
 set(SOURCES
     background.cpp
     comms.cpp
-    crc.cpp
     flash.cpp
     main.cpp
     xmodem.cpp
@@ -26,6 +25,7 @@ target_link_libraries(${NAME}
       emlib
       bspLib
       assert
+      base
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

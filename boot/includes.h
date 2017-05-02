@@ -49,8 +49,8 @@
 
 // application library
 #include "background.h"
+#include "base/crc.h"
 #include "comms.h"
-#include "crc.h"
 #include "flash.h"
 #include "xmodem.h"
 

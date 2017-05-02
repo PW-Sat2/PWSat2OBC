@@ -1,6 +1,6 @@
+#include "base/crc.h"
 #include "bsp/bsp_boot.h"
 #include "bsp/bsp_uart.h"
-#include "crc.h"
 #include "xmodem.h"
 
 void UploadApplication()
