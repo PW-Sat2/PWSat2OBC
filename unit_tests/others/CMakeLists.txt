@@ -1,7 +1,10 @@
 set(NAME unit_tests_others)
 
+add_subdirectory(adcs)
+
 set(SOURCES
-  adcs/AdcsCoordinatorTest.cpp    
+  adcs/AdcsCoordinatorTest.cpp
+  adcs/experimental/detumblingTest.cpp  
   Logger/LoggerTest.cpp
   FileSystem/FileSystemTest.cpp
   FileSystem/YaffsOSGlue.cpp
@@ -44,6 +47,7 @@ target_link_libraries(${NAME}
     eigen
     exp_fibo
     adcs
+    adcs_experimental
     obc_telecommands    
     eps
     rtc
