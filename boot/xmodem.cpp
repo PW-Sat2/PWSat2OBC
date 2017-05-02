@@ -28,10 +28,10 @@
 #include "xmodem.h"
 #include <stdio.h>
 #include "em_system.h"
+#include "base/crc.h"
 #include "bsp/bsp_boot.h"
 #include "bsp/bsp_ebi.h"
 #include "bsp/bsp_uart.h"
-#include "crc.h"
 #include "flash.h"
 #include "lld.h"
 

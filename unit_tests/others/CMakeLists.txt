@@ -14,6 +14,7 @@ set(SOURCES
   base/WriterTest.cpp
   base/OnLeaveTest.cpp
   base/RedundancyTest.cpp
+  base/CRCTest.cpp
   os/TimeoutTest.cpp
   os/EventGroupTest.cpp
   time/time.cpp
