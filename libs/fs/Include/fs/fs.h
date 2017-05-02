@@ -6,8 +6,8 @@
 #include <gsl/span>
 #include "base/os.h"
 #include "system.h"
-
 #include "yaffs.hpp"
+
 namespace services
 {
     namespace fs
@@ -43,7 +43,7 @@ namespace services
             IOOperationResult(OSResult status, TResult result);
 
             /**
-             * @brief Converts to true if operation succeded
+             * @brief Converts to true if operation succeeded
              */
             inline operator bool() const;
 
@@ -83,7 +83,7 @@ namespace services
             TruncateExisting = O_TRUNC,
 
             /** Open file, create a new one if it does not exist. */
-            nAlways = O_CREAT,
+            OpenAlways = O_CREAT,
 
             /** Always create new file, if it exists truncate its content to zero. */
             CreateAlways = O_CREAT | O_TRUNC,
@@ -109,7 +109,7 @@ namespace services
         };
 
         /**
-         * @brief Determies base for seek operation
+         * @brief Determines base for seek operation
          */
         enum class SeekOrigin
         {
@@ -131,6 +131,24 @@ namespace services
              * @return Operation status. @see FSFileOpenResult for details.
              */
             virtual FileOpenResult Open(const char* path, FileOpen openFlag, FileAccess accessMode) = 0;
+
+            /**
+             * @brief Unlinks a file
+             * @param[in] path Path to file
+             * @return Operation status.
+             */
+            virtual OSResult Unlink(const char* path) = 0;
+
+            /**
+             * @brief Moves specified file to target location.
+             *
+             * If moved file does not exist this function will return failure. If the target file exists
+             * it will be overwritten be the moved file.
+             * @param[in] from Path to file to be moved.
+             * @param[in] to Path to new file location.
+             * @return Operation status. @see FSFileOpenResult for details.
+             */
+            virtual OSResult Move(const char* from, const char* to) = 0;
 
             /**
              * @brief Truncates file to given size
@@ -185,7 +203,8 @@ namespace services
             virtual OSResult CloseDirectory(DirectoryHandle directory) = 0;
 
             /**
-             * @brief Formats partition at given mount point. Partition in unmounted before format and mounted again after
+             * @brief Formats partition at given mount point. Partition is
+             * unmounted before format and mounted again afterwards.
              * @param[in] mountPoint Partition mount point
              * @return Operation status
              */
