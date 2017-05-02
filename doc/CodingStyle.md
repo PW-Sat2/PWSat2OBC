@@ -1,10 +1,10 @@
-## PW-Sat2 Code Style
+## PW-Sat 2 Code Style
 
 This short document describes preferred style for the OBC C source files.
 
 #### Indentation
 
-PW-Sat2 source code uses 4 spaces for statement indentation. Having short indentation style should not be read as encouragement for writing code with deeply nested code blocks. When you need more than three indentation levels than you are doing something wrong or you are trying to put too much logic in single function. In both cases the code should be fixed so it can be easily read & understood.
+PW-Sat 2 source code uses 4 spaces for statement indentation. Having short indentation style should not be read as encouragement for writing code with deeply nested code blocks. When you need more than three indentation levels than you are doing something wrong or you are trying to put too much logic in single function. In both cases the code should be fixed so it can be easily read & understood.
 
 Do not put multiple statements in single line. Such style is much more error prone:
 
@@ -66,7 +66,7 @@ but **not**:
 
 #### Braces
 
-PW-Sat2 follows [BSD/Allman](https://en.wikipedia.org/wiki/Indent_style#Allman_style) style of putting braces in the source code with some additional guidelines.
+PW-Sat 2 follows [BSD/Allman](https://en.wikipedia.org/wiki/Indent_style#Allman_style) style of putting braces in the source code with some additional guidelines.
 
 The opening & closing braces should be put either in the same row or the same column:
 
@@ -200,7 +200,7 @@ instead of this:
 
 Naming is one of the most important aspects, which cannot be ignored.
 
-PW-Sat2 uses [Camel Case](https://en.wikipedia.org/wiki/CamelCase) naming convention for all declared/defined symbols with some exceptions.
+PW-Sat 2 uses [Camel Case](https://en.wikipedia.org/wiki/CamelCase) naming convention for all declared/defined symbols with some exceptions.
 
 Names should be descriptive and represent the purpose of the symbol, but **do not** go to the extremes and use names like *temporaryObjectCounterWithCorrection*. Too long names do not provide much value and only take long time to type. Try to avoid single/double character names except for special cases like temporaries or loop counters. Avoid using abbreviations.
 
@@ -233,9 +233,9 @@ whereas functions/global variables should be prefixed with module name in upper 
 
 #### Automatic Formatting
 
-For the moment the Pw-Sat2 project is using [clang-format](http://clang.llvm.org/docs/ClangFormat.html) utility for automatic source code formatting. Its mostly complete configuration file that will automatically apply majority of the formatting rules described above is available [here](../.clang-format). Be advised, the minimum supported version of clang format is 3.7.
+For the moment the PW-Sat 2 project is using [clang-format](http://clang.llvm.org/docs/ClangFormat.html) utility for automatic source code formatting. Its mostly complete configuration file that will automatically apply majority of the formatting rules described above is available [here](../.clang-format). Be advised, the minimum supported version of clang format is 3.7.
 
-The source code formatting with the Clang-Format utility has been integrated into Pw-Sat2 build system. Almost every C/C++ module in the repository supports special build target for automatic module wide source code formatting. The build targets for source code formatting contain '.format' suffix i.e. for logger module the target that should be invoked to reformat all of its files would be:
+The source code formatting with the Clang-Format utility has been integrated into PW-Sat 2 build system. Almost every C/C++ module in the repository supports special build target for automatic module wide source code formatting. The build targets for source code formatting contain '.format' suffix i.e. for logger module the target that should be invoked to reformat all of its files would be:
 
     make logger.format
 
