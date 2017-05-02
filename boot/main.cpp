@@ -47,7 +47,7 @@ int main(void)
 
     char debugStr[80] = {0};
 
-    auto debugLen = sprintf((char*)debugStr, "\n\nBootloader (b = boot, s = set, x = XMODEM upload, l = list entries, r = reset):");
+    auto debugLen = sprintf((char*)debugStr, "\n\nBootloader (? = help):");
     BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
 
     waitForComms(COMMS_TIMEOUT);
