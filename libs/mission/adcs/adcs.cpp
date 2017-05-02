@@ -55,7 +55,7 @@ namespace mission
             return true;
         }
 
-        void AdcsPrimaryTask::AdcsEnableBuiltinDetumbling(const SystemState& /*state*/, void* param)
+        void AdcsPrimaryTask::AdcsEnableBuiltinDetumbling(SystemState& /*state*/, void* param)
         {
             const auto context = static_cast<AdcsPrimaryTask*>(param);
             const auto result = context->coordinator.EnableBuiltinDetumbling();

@@ -47,7 +47,7 @@ namespace mission
          * @param[in] state Reference to global mission state, that should contain the persistent part
          * that is supposed to be saved.
          */
-        void SaveState(const SystemState& state);
+        void SaveState(SystemState& state);
 
       private:
         /**
@@ -63,7 +63,7 @@ namespace mission
          * @param[in] state Reference to global mission state.
          * @param[in] param Current execution context.
          */
-        static void SaveState(const SystemState& state, void* param);
+        static void SaveState(SystemState& state, void* param);
 
         /**
          * @brief Storage controller that should be used to write the serialized form of the

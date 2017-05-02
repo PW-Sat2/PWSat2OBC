@@ -80,7 +80,7 @@ namespace mission
          * Once the process is complete the telemetry container is notified that all changes are saved.
          * @param[in] state Reference to global mission state.
          */
-        void Save(const SystemState& state);
+        void Save(SystemState& state);
 
         /**
          * @brief This procedure is responsible for appending the passed data frame to the current
@@ -107,7 +107,7 @@ namespace mission
          * @param[in] state Reference to global mission state.
          * @param[in] param Current execution context.
          */
-        static void SaveProxy(const SystemState& state, void* param);
+        static void SaveProxy(SystemState& state, void* param);
 
         /**
          * @brief File system provider.

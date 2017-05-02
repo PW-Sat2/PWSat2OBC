@@ -73,7 +73,7 @@ namespace mission
             return This->_experimentController.IsExperimentRequested();
         }
 
-        void MissionExperimentComponent::StartExperiment(const SystemState& state, void* param)
+        void MissionExperimentComponent::StartExperiment(SystemState& state, void* param)
         {
             UNREFERENCED_PARAMETER(state);
 
@@ -91,7 +91,7 @@ namespace mission
             return This->_experimentController.InProgress();
         }
 
-        void MissionExperimentComponent::KickExperiment(const SystemState& state, void* param)
+        void MissionExperimentComponent::KickExperiment(SystemState& state, void* param)
         {
             UNREFERENCED_PARAMETER(state);
 

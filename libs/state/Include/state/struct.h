@@ -43,12 +43,12 @@ struct SystemState
     /**
      * @brief Satellite's persistent state.
      */
-    mutable state::SystemPersistentState PersistentState;
+    state::SystemPersistentState PersistentState;
 
     /**
      * @brief Container of all used telemetry elements.
      */
-    mutable state::ManagedTelemetry telemetry;
+    state::ManagedTelemetry telemetry;
 };
 
 #endif /* LIBS_STATE_INCLUDE_STATE_STRUCT_H_ */

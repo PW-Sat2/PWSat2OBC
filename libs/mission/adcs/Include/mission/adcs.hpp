@@ -84,7 +84,7 @@ namespace mission
              * @param[in] param Pointer to the deployment condition private context. This pointer should point
              * at the object of AdcsPrimaryTask type.
              */
-            static void AdcsEnableBuiltinDetumbling(const SystemState& state, void* param);
+            static void AdcsEnableBuiltinDetumbling(SystemState& state, void* param);
 
             static constexpr std::uint8_t RetryCount = 3;
 

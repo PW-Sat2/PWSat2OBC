@@ -46,7 +46,7 @@ namespace mission
             ((state.Time - This->lastBeaconUpdate) >= BeaconUpdateInterval);
     }
 
-    void BeaconUpdate::Run(const SystemState& state, void* param)
+    void BeaconUpdate::Run(SystemState& state, void* param)
     {
         auto This = static_cast<BeaconUpdate*>(param);
         This->UpdateBeacon(state);
@@ -61,7 +61,7 @@ namespace mission
         {
             LOGF(LOG_LEVEL_INFO, "Beacon update rejected at %lu", time);
         }
-        else if(result.Value)
+        else if (result.Value)
         {
             this->lastBeaconUpdate = state.Time;
             LOGF(LOG_LEVEL_INFO, "Beacon set at %lu", time);

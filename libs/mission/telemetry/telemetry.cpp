@@ -26,13 +26,13 @@ namespace mission
         return state.telemetry.IsModified();
     }
 
-    void TelemetryTask::SaveProxy(const SystemState& state, void* param)
+    void TelemetryTask::SaveProxy(SystemState& state, void* param)
     {
         auto This = static_cast<TelemetryTask*>(param);
         This->Save(state);
     }
 
-    void TelemetryTask::Save(const SystemState& state)
+    void TelemetryTask::Save(SystemState& state)
     {
         std::array<std::uint8_t, state::ManagedTelemetry::TotalSerializedSize> buffer;
         Writer writer(buffer);
