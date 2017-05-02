@@ -8,19 +8,26 @@
 #include <type_traits>
 #include "antenna/AntennaConfiguration.hpp"
 
+/**
+ * @defgroup persistent_state_details Persistent State Helpers
+ * @ingroup persistent_state_container
+ *
+ * @brief This module contains helper types for persistent state container.
+ */
+
 namespace state
 {
     namespace details
     {
         /**
          * @brief Declaration of helper type for verification that all Persistent state parts meet its requirements.
-         * @ingroup StateDef
+         * @ingroup persistent_state_details
          */
         template <typename... Objects> struct CheckObject;
 
         /**
          * @brief Helper type for verification that all Persistent state parts meet its requirements.
-         * @ingroup StateDef
+         * @ingroup persistent_state_details
          */
         template <typename Object, typename... Objects> struct CheckObject<Object, Objects...>
         {
@@ -53,7 +60,7 @@ namespace state
 
         /**
          * @brief Persistent state part verification terminator.
-         * @ingroup StateDef
+         * @ingroup persistent_state_details
          */
         template <> struct CheckObject<>
         {
@@ -65,7 +72,7 @@ namespace state
     }
 
     /**
-     * @ingroup StateDef
+     * @ingroup persistent_state_container
      * @brief Type that combines together persistent parts of the satellite state.
      * @tparam Parts List of types that are considered important and supposed to be persisted between
      * satellite restarts. There should not be any type duplicates on this list.
