@@ -45,7 +45,9 @@ mission::ObcMission Mission(std::tie(Main.timeProvider, Main.rtc),
     Main.adcs.GetAdcsController(),
     Main.Experiments.ExperimentsController,
     Main.Communication.CommDriver,
-    std::tie(Main.Hardware.PersistentStorage, PersistentStateBaseAddress));
+    std::tie(Main.Hardware.PersistentStorage, PersistentStateBaseAddress),
+    std::tuple<services::fs::IFileSystem&, mission::TelemetryConfiguration>(
+        Main.fs, mission::TelemetryConfiguration{"/telemetry.current", "/telemetry.previous", 512_KB}));
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 

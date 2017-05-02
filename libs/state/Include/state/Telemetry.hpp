@@ -5,6 +5,7 @@
 
 #include <tuple>
 #include "base/ITelemetryContainer.hpp"
+#include "base/writer.h"
 #include "fwd.hpp"
 #include "traits.hpp"
 
@@ -55,7 +56,25 @@ namespace state
             static constexpr bool IsUnique = true;
         };
 
+        template <typename... Args> struct TotalSize;
+
+        template <typename Base, typename... Args> struct TotalSize<Base, Args...>
+        {
+            static constexpr bool Value = Base::Size() + TotalSize<Args...>::Value;
+        };
+
+        template <typename Base> struct TotalSize<Base>
+        {
+            static constexpr bool Value = Base::Size();
+        };
+
         static_assert(UniqueIdVerifier<Type...>::IsUnique, "Telemetry type identifiers should be unique");
+
+        static constexpr int TypeCount = sizeof...(Type);
+
+        static constexpr int PayloadSize = TotalSize<Type...>::Value;
+
+        static constexpr int TotalSerializedSize = PayloadSize + 2 * TypeCount * sizeof(std::uint8_t);
 
         virtual Telemetry<Type...>& GetOwner() final override;
 
@@ -67,12 +86,32 @@ namespace state
 
         template <typename Arg> const Arg& Get() const;
 
+        bool IsModified() const;
+
+        void WriteModified(Writer& writer) const;
+
+        void CommitCapture();
+
       private:
         template <typename Arg> bool IsDifferent(const Arg& arg) const;
 
-        template <typename Arg> using Container = std::pair<Arg, bool>;
+        template <typename Arg> using ElementContainer = std::pair<Arg, bool>;
 
-        std::tuple<Container<Type>...> storage;
+        typedef std::tuple<ElementContainer<Type>...> Container;
+
+        template <int Tag, typename T, typename... Args> bool IsModifiedInternal() const;
+
+        template <int Tag> bool IsModifiedInternal() const;
+
+        template <int Tag, typename T, typename... Args> void WriteModifiedInternal(Writer& writer) const;
+
+        template <int Tag> void WriteModifiedInternal(Writer& writer) const;
+
+        template <int Tag, typename T, typename... Args> void CommitCaptureInternal();
+
+        template <int Tag> void CommitCapturedInternal() const;
+
+        Container storage;
     };
 
     template <typename... Type> Telemetry<Type...>& Telemetry<Type...>::GetOwner()
@@ -89,7 +128,7 @@ namespace state
     {
         if (IsDifferent(arg))
         {
-            auto& entry = std::get<Container<Arg>>(storage);
+            auto& entry = std::get<ElementContainer<Arg>>(this->storage);
             entry.first = arg;
             entry.second = true;
         }
@@ -99,18 +138,71 @@ namespace state
     {
         if (IsDifferent(arg))
         {
-            std::get<Container<Arg>>(storage).first = arg;
+            std::get<ElementContainer<Arg>>(this->storage).first = arg;
         }
     }
 
     template <typename... Type> template <typename Arg> const Arg& Telemetry<Type...>::Get() const
     {
-        return std::get<Container<Arg>>(storage).first;
+        return std::get<ElementContainer<Arg>>(this->storage).first;
     }
 
     template <typename... Type> template <typename Arg> bool Telemetry<Type...>::IsDifferent(const Arg& arg) const
     {
-        return std::get<Container<Arg>>(this->storage).first.IsDifferent(arg);
+        return std::get<ElementContainer<Arg>>(this->storage).first.IsDifferent(arg);
+    }
+
+    template <typename... Type> inline bool Telemetry<Type...>::IsModified() const
+    {
+        return IsModifiedInternal<0, Type...>();
+    }
+
+    template <typename... Type> template <int Tag, typename T, typename... Args> inline bool Telemetry<Type...>::IsModifiedInternal() const
+    {
+        return std::get<ElementContainer<T>>(this->storage).second || IsModifiedInternal<0, Args...>();
+    }
+
+    template <typename... Type> template <int Tag> inline bool Telemetry<Type...>::IsModifiedInternal() const
+    {
+        return false;
+    }
+
+    template <typename... Type> inline void Telemetry<Type...>::WriteModified(Writer& writer) const
+    {
+        return WriteModifiedInternal<0, Type...>(writer);
+    }
+
+    template <typename... Type> inline void Telemetry<Type...>::CommitCapture()
+    {
+        return CommitCaptureInternal<0, Type...>();
+    }
+
+    template <typename... Type>
+    template <int Tag, typename T, typename... Args>
+    inline void Telemetry<Type...>::WriteModifiedInternal(Writer& writer) const
+    {
+        const auto& entry = std::get<ElementContainer<T>>(this->storage);
+        if (entry.second)
+        {
+            writer.WriteByte(T::Id);
+            entry.first.Write(writer);
+            writer.WriteByte(T::Id);
+        }
+
+        WriteModifiedInternal<0, Args...>(writer);
+    }
+
+    template <typename... Type> template <int Tag> inline void Telemetry<Type...>::WriteModifiedInternal(Writer& /*writer*/) const
+    {
+    }
+
+    template <typename... Type> template <int Tag, typename T, typename... Args> inline void Telemetry<Type...>::CommitCaptureInternal()
+    {
+        std::get<ElementContainer<T>>(this->storage).second = false;
+    }
+
+    template <typename... Type> template <int Tag> inline void Telemetry<Type...>::CommitCapturedInternal() const
+    {
     }
 }
 

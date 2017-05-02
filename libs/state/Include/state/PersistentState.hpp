@@ -115,7 +115,7 @@ namespace state
          * @param[in] object New value of the selected part of the persistent state.
          * @tparam Object Type of the object that should be accessed.
          */
-        template <typename Object> void Set(Object object);
+        template <typename Object> void Set(const Object& object);
 
         /**
          * @brief Read the persistent state from the passed object reader.
@@ -191,7 +191,7 @@ namespace state
 
     template <typename StatePolicy, typename... Parts>
     template <typename Object>
-    void PersistentState<StatePolicy, Parts...>::Set(Object object)
+    void PersistentState<StatePolicy, Parts...>::Set(const Object& object)
     {
         std::get<Object>(this->parts) = std::move(object);
         statePolicy.NotifyModified();

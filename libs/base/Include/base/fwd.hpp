@@ -6,4 +6,6 @@
 class Reader;
 class Writer;
 
+template <typename Type> struct ITelemetryContainer;
+
 #endif

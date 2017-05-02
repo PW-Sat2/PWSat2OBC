@@ -45,7 +45,7 @@ struct SystemState
      */
     mutable state::SystemPersistentState PersistentState;
 
-    mutable state::Telemetry<state::TimeState> telemetry;
+    mutable state::ManagedTelemetry telemetry;
 };
 
 #endif /* LIBS_STATE_INCLUDE_STATE_STRUCT_H_ */

@@ -15,6 +15,10 @@ namespace state
     template <typename StatePolicy, typename... Parts> class PersistentState;
 
     typedef PersistentState<StateTrackingPolicy, AntennaConfiguration, TimeState, TimeCorrectionConfiguration> SystemPersistentState;
+
+    template <typename... Type> class Telemetry;
+
+    typedef Telemetry<state::TimeState> ManagedTelemetry;
 }
 
 class SystemState;
