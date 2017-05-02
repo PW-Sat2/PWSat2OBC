@@ -21,6 +21,7 @@ namespace mission
     /**
      * @brief This class is responsible for serializing the satellite persistent state
      * and save it to a dedicated memory.
+     * @mission_task
      *
      * This fragment is run every time the persistent's state modification marker is set.
      * Running this fragment will generate the new persistent state serialized form and save it to the

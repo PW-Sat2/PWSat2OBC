@@ -20,6 +20,7 @@ namespace mission
 
     /**
      * @brief Task that is responsible for deploying the sail at the end of the primary satelite mission.
+     * @mission_task
      */
     class SailTask : public Action, public Update
     {

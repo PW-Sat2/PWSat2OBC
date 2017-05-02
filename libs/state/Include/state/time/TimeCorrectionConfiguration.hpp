@@ -10,6 +10,7 @@ namespace state
     /**
      * @ingroup persistent_state
      * @brief This type represents time correction/synchronization configuration.
+     * @persistent_state
      *
      * It contains weights that are used in time correction weighted average formula.
      * The sum of all weights must not be zero.

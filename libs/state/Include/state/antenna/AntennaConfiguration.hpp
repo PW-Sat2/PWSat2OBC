@@ -11,6 +11,7 @@ namespace state
     /**
      * @ingroup persistent_state
      * @brief This type contains antenna deployment process configuration.
+     * @persistent_state
      */
     class AntennaConfiguration
     {

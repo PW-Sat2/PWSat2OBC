@@ -11,6 +11,7 @@ namespace mission
     {
         /**
          * @brief Component connecting experiments to mission loop
+         * @mission_task
          */
         class MissionExperimentComponent : public mission::Action, public mission::Update
         {
