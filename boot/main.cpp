@@ -5,6 +5,7 @@
   * @version 2.0
   ******************************************************************************/
 #include "boot.h"
+#include "boot/params.hpp"
 #include "includes.h"
 
 #define COMMS_TIMEOUT 5000 // milliseconds
@@ -17,12 +18,17 @@ void resetPeripherals(void);
 void restClocks(void);
 
 /***************************************************************************/ /**
+
   * @brief  Main function
   * Main is called from _program_start, see assembly startup file
   ******************************************************************************/
 int main(void)
 {
     CHIP_Init();
+
+    boot::Marker = 0xAA;
+    boot::Marker2 = 0xBB;
+    boot::Marker3 = 0xCC;
 
     // set up general clocks
     CMU_OscillatorEnable(cmuOsc_HFRCO, true, true);

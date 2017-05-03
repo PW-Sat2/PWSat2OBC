@@ -15,6 +15,7 @@ MEMORY
 {
   FLASH (rx) : ORIGIN = 0x00080000, LENGTH = 524288
   RAM (rwx)  : ORIGIN = 0x88000000, LENGTH = 131072
+  INTERNAL_RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 131072
 }
 
 /* Linker script to place sections and symbol values. Should be used together
@@ -132,6 +133,8 @@ SECTIONS
   */
 
   __etext = .;
+
+  INCLUDE "boot_params.ld"
 
   .data : AT (__etext)
   {

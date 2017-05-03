@@ -18,7 +18,7 @@ set(SOURCES
 
 add_executable(${NAME} ${SOURCES})
 
-set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${LOWER_LINKER_SCRIPT} -specs=nano.specs -specs=nosys.specs")
+set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${LOWER_LINKER_SCRIPT} -L ${PLATFORM_PATH} -Wl,--check-sections -specs=nano.specs -specs=nosys.specs")
 
 target_link_libraries(${NAME}
       platform
@@ -26,6 +26,7 @@ target_link_libraries(${NAME}
       bspLib
       assert
       base
+      boot_params
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

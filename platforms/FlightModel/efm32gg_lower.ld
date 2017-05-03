@@ -15,6 +15,8 @@ MEMORY
   RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 131072
 }
 
+REGION_ALIAS("INTERNAL_RAM", RAM)
+
 /* Linker script to place sections and symbol values. Should be used together
  * with other linker script that defines memory regions FLASH and RAM.
  * It references following symbols, which must be defined in code:
@@ -130,6 +132,8 @@ SECTIONS
 
   __etext = .;
 
+  INCLUDE "boot_params.ld"
+
   .data : AT (__etext)
   {
     __data_start__ = .;
@@ -191,7 +195,7 @@ SECTIONS
   .stack_dummy (COPY):
   {
     KEEP(*(.stack*))
-  } > RAM
+  } > RAM 
 
   /* Set stack top to end of RAM, and stack limit move down by
    * size of stack_dummy section */
