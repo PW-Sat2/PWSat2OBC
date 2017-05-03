@@ -61,6 +61,8 @@ uint32_t LoadApplication(uint8_t bootIndex)
     size_t debugLen;
     uint8_t debugStr[256];
 
+    boot::Index = bootIndex;
+
     if (bootIndex == 0)
     {
         return BOOT_SAFEMODE_BASE_CODE;

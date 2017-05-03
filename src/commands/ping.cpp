@@ -39,5 +39,5 @@ void ResetHandler(uint16_t argc, char* argv[])
 
 void BootParamsCommand(std::uint16_t /*argc*/, char* /*argv*/ [])
 {
-    Main.terminal.Printf("MagicNumber=%lX\nReason=%X", boot::MagicNumber, num(boot::BootReason));
+    Main.terminal.Printf("MagicNumber=%lX\nReason=%X\nIndex=%d", boot::MagicNumber, num(boot::BootReason), boot::Index);
 }

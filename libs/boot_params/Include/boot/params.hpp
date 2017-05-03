@@ -19,6 +19,7 @@ namespace boot
 
     extern std::uint32_t MagicNumber;
     extern Reason BootReason;
+    extern std::uint8_t Index;
 }
 
 #endif /* LIBS_BOOT_PARAMS_INCLUDE_BOOT_PARAMS_HPP_ */

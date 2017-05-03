@@ -53,7 +53,7 @@ int main(void)
 
     char msg[256] = {0};
 
-    sprintf(msg, "Magic: 0x%lX\nReason=%d\n", boot::MagicNumber, num(boot::BootReason));
+    sprintf(msg, "Magic: 0x%lX\nReason=%d\nIndex=%d\n", boot::MagicNumber, num(boot::BootReason), boot::Index);
 
     char* c = msg;
 
