@@ -1,5 +1,6 @@
 #include "boot.h"
 #include <em_usart.h>
+#include "boot/params.hpp"
 #include "bsp/bsp_boot.h"
 #include "bsp/bsp_uart.h"
 
@@ -47,6 +48,8 @@ void BootToAddress(uint32_t baseAddress)
     resetPeripherals();
     resetClocks();
 
+    boot::MagicNumber = boot::BootloaderMagicNumber;
+
     BOOT_boot(baseAddress);
 
     while (1)
@@ -76,6 +79,7 @@ uint32_t LoadApplication(uint8_t bootIndex)
     if (downloadError)
     {
         bootIndex = 0;
+        boot::BootReason = boot::Reason::DownloadError;
         BOOT_setBootIndex(bootIndex);
 
         debugLen = sprintf((char*)debugStr, "\n\nUnable to load application (Error: %d)... Booting safe mode!", downloadError);
@@ -100,6 +104,8 @@ void ProceedWithBooting()
 
     auto bootIndex = BOOT_getBootIndex();
 
+    boot::BootReason = boot::Reason::SelectedIndex;
+
     if (bootIndex == 0)
     {
         debugLen = sprintf((char*)debugStr, "\n\nSafe Mode boot index... Booting safe mode!");
@@ -110,6 +116,8 @@ void ProceedWithBooting()
         bootIndex = 0;
         BOOT_setBootIndex(0);
 
+        boot::BootReason = boot::Reason::InvalidBootIndex;
+
         debugLen = sprintf((char*)debugStr, "\n\nInvalid boot index... Booting safe mode!");
         BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
     }
@@ -117,6 +125,8 @@ void ProceedWithBooting()
     {
         bootIndex = 0;
         BOOT_setBootIndex(0);
+
+        boot::BootReason = boot::Reason::CounterExpired;
 
         debugLen = sprintf((char*)debugStr, "\n\nBoot counter expired... Booting safe mode!");
         BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);

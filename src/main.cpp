@@ -17,6 +17,7 @@
 #include "adcs/AdcsExperimental.hpp"
 #include "base/ecc.h"
 #include "base/os.h"
+#include "boot/params.hpp"
 #include "dmadrv.h"
 #include "fs/fs.h"
 #include "gpio/gpio.h"
@@ -228,6 +229,18 @@ int main(void)
 #ifdef USE_LEUART
     LeuartLineIOInit(&Main.IO);
 #endif
+
+    if (boot::MagicNumber != boot::BootloaderMagicNumber)
+    {
+        LOGF(LOG_LEVEL_WARNING,
+            "No boot information from bootloader (expected: 0x%lX, got: 0x%lX)",
+            boot::BootloaderMagicNumber,
+            boot::MagicNumber);
+    }
+    else
+    {
+        LOG(LOG_LEVEL_DEBUG, "Received boot information from bootloader");
+    }
 
     Main.Initialize();
 

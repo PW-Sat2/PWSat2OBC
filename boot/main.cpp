@@ -26,10 +26,6 @@ int main(void)
 {
     CHIP_Init();
 
-    boot::Marker = 0xAA;
-    boot::Marker2 = 0xBB;
-    boot::Marker3 = 0xCC;
-
     // set up general clocks
     CMU_OscillatorEnable(cmuOsc_HFRCO, true, true);
     CMU_OscillatorEnable(cmuOsc_LFRCO, true, true);
