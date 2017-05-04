@@ -6,6 +6,7 @@
 
 static const TerminalCommandDescription commands[] = {
     {"ping", PingHandler},
+    {"id", IdHandler},
     {"echo", EchoHandler},
     {"jumpToTime", JumpToTimeHandler},
     {"currentTime", CurrentTimeHandler},

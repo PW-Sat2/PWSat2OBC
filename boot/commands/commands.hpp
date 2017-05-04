@@ -7,6 +7,7 @@ void TestEEPROM();
 
 void BootUpper();
 void BootToSelected();
+void TMRBoot();
 
 void SetBootIndex();
 
