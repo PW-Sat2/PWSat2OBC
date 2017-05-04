@@ -52,6 +52,7 @@ static const TerminalCommandDescription commands[] = {
     {"state", StateCommandHandler},
     {"error_counters", ErrorCountersCommand},
     {"boot_params", BootParamsCommand},
+    {"f", TestFlash},
 };
 
 void InitializeTerminal(void)
