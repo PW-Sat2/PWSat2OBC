@@ -1,0 +1,14 @@
+@echo off
+set CMD_FILE=%TEMP%\download_safe_mode.jlink
+set DUMP_FILE=%1
+
+
+echo. > %CMD_FILE%
+echo si 1 >> %CMD_FILE%
+echo speed auto >> %CMD_FILE%
+echo savebin "%DUMP_FILE%", ${BASE_ADDRESS}, ${LENGTH} >> %CMD_FILE%
+echo exit >> %CMD_FILE%
+
+"${JLINK}" -device ${DEVICE} -ExitOnError -CommanderScript "%CMD_FILE%"
+
+del %CMD_FILE%
