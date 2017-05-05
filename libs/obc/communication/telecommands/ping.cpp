@@ -2,11 +2,11 @@
 
 #include "telecommunication/downlink.h"
 
-#include "comm/ITransmitFrame.hpp"
+#include "comm/ITransmitter.hpp"
 
 using std::uint8_t;
 using gsl::span;
-using devices::comm::ITransmitFrame;
+using devices::comm::ITransmitter;
 using telecommunication::downlink::DownlinkFrame;
 using telecommunication::downlink::DownlinkAPID;
 
@@ -14,7 +14,7 @@ namespace obc
 {
     namespace telecommands
     {
-        void PingTelecommand::Handle(ITransmitFrame& transmitter, span<const uint8_t> parameters)
+        void PingTelecommand::Handle(ITransmitter& transmitter, span<const uint8_t> parameters)
         {
             UNREFERENCED_PARAMETER(parameters);
 

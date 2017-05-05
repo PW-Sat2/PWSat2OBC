@@ -54,10 +54,10 @@ namespace
                 w.WriteDoubleWordLE(seq);
             }
 
-            _telecommand.Handle(_transmitFrame, w.Capture());
+            _telecommand.Handle(_transmitter, w.Capture());
         }
 
-        testing::NiceMock<TransmitFrameMock> _transmitFrame;
+        testing::NiceMock<TransmitterMock> _transmitter;
         testing::NiceMock<FsMock> _fs;
 
         obc::telecommands::DownloadFileTelecommand _telecommand{_fs};
@@ -92,8 +92,8 @@ namespace
         expectedPayload2[0] = 0xFF;
         expectedPayload2[1] = static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::Success);
 
-        EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray(expectedPayload1))));
-        EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(1U), ElementsAreArray(expectedPayload2))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray(expectedPayload1))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(1U), ElementsAreArray(expectedPayload2))));
 
         constexpr uint8_t maxFileDataSize = DownlinkFrame::MaxPayloadSize - 2;
         Buffer<3 * maxFileDataSize> file;
@@ -110,7 +110,7 @@ namespace
     {
         const std::string path{"/a/file"};
 
-        EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(_, _, SpanOfSize(22))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(_, _, SpanOfSize(22))));
 
         Buffer<20> file;
         std::fill(file.begin(), file.end(), 1);
@@ -124,7 +124,7 @@ namespace
     {
         const std::string path{"/a/file"};
 
-        EXPECT_CALL(_transmitFrame, SendFrame(_)).Times(0);
+        EXPECT_CALL(_transmitter, SendFrame(_)).Times(0);
 
         Buffer<20> file;
         std::fill(file.begin(), file.end(), 1);
@@ -145,7 +145,7 @@ namespace
         expectedPayload[0] = 0xFF;
         expectedPayload[1] = static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::Success);
 
-        EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(_, _, ElementsAreArray(expectedPayload))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(_, _, ElementsAreArray(expectedPayload))));
 
         constexpr uint8_t maxFileDataSize = DownlinkFrame::MaxPayloadSize - 2;
         Buffer<maxFileDataSize * 3 + 20> file;
@@ -169,7 +169,7 @@ namespace
         expectedPayload[1] = static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::FileNotFound);
         std::copy(path.begin(), path.end(), expectedPayload.begin() + 2);
 
-        EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray(expectedPayload))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray(expectedPayload))));
 
         this->SendRequest(0xFF, path, std::array<uint16_t, 1>{0x3});
     }
