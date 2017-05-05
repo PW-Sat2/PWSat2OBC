@@ -14,11 +14,13 @@
 #include "utils.hpp"
 
 using std::array;
+using std::copy;
 using std::uint8_t;
 using testing::_;
 using testing::Invoke;
 using testing::Eq;
 using testing::Each;
+using testing::ElementsAreArray;
 using testing::StrEq;
 using testing::Return;
 using testing::Matches;
@@ -38,6 +40,23 @@ namespace
     class DownloadFileTelecommandTest : public testing::Test
     {
       protected:
+        template <std::size_t Size> void SendRequest(uint8_t correlationId, const std::string& path, const std::array<uint16_t, Size> seqs)
+        {
+            Buffer<200> buffer;
+            Writer w(buffer);
+            w.WriteByte(correlationId);
+            w.WriteByte(path.length());
+            w.WriteArray(gsl::span<const uint8_t>(reinterpret_cast<const uint8_t*>(path.data()), path.length()));
+            w.WriteByte(0);
+
+            for (auto& seq : seqs)
+            {
+                w.WriteDoubleWordLE(seq);
+            }
+
+            _telecommand.Handle(_transmitFrame, w.Capture());
+        }
+
         testing::NiceMock<TransmitFrameMock> _transmitFrame;
         testing::NiceMock<FsMock> _fs;
 
@@ -57,117 +76,101 @@ namespace
             && Matches(payloadMatcher)(payload);
     }
 
-    MATCHER_P(StrSpan, innerMatcher, "")
-    {
-        const char* s = reinterpret_cast<const char*>(arg.data());
-
-        return Matches(innerMatcher)(s);
-    }
-
     TEST_F(DownloadFileTelecommandTest, ShouldTransferRequestedPartsOfFile)
     {
-        EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(Eq(static_cast<DownlinkAPID>(0x11)), Eq(0U), Each(Eq(1)))));
-        EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(Eq(static_cast<DownlinkAPID>(0x11)), Eq(1U), Each(Eq(2)))));
+        const std::string path{"/a/file"};
 
-        Buffer<3 * DownlinkFrame::MaxPayloadSize> file;
-        std::fill_n(file.begin(), DownlinkFrame::MaxPayloadSize, 1);
-        std::fill_n(file.begin() + DownlinkFrame::MaxPayloadSize, DownlinkFrame::MaxPayloadSize, 2);
-        std::fill_n(file.begin() + 2 * DownlinkFrame::MaxPayloadSize, DownlinkFrame::MaxPayloadSize, 3);
+        std::array<uint8_t, DownlinkFrame::MaxPayloadSize> expectedPayload1;
+        std::array<uint8_t, DownlinkFrame::MaxPayloadSize> expectedPayload2;
 
-        this->_fs.AddFile("/a/file", file);
+        expectedPayload1.fill(1);
+        expectedPayload2.fill(2);
 
-        Buffer<200> buffer;
-        Writer w(buffer);
-        w.WriteByte(0x11);
-        const char path[] = "/a/file";
-        w.WriteByte(strlen(path));
-        w.WriteArray(gsl::span<const uint8_t>(reinterpret_cast<const uint8_t*>(path), strlen(path)));
-        w.WriteByte(0);
-        w.WriteDoubleWordLE(0x1);
-        w.WriteDoubleWordLE(0x0);
+        expectedPayload1[0] = 0xFF;
+        expectedPayload1[1] = static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::Success);
 
-        _telecommand.Handle(_transmitFrame, w.Capture());
+        expectedPayload2[0] = 0xFF;
+        expectedPayload2[1] = static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::Success);
+
+        EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray(expectedPayload1))));
+        EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(1U), ElementsAreArray(expectedPayload2))));
+
+        constexpr uint8_t maxFileDataSize = DownlinkFrame::MaxPayloadSize - 2;
+        Buffer<3 * maxFileDataSize> file;
+        std::fill_n(file.begin(), maxFileDataSize, 1);
+        std::fill_n(file.begin() + maxFileDataSize, maxFileDataSize, 2);
+        std::fill_n(file.begin() + 2 * maxFileDataSize, maxFileDataSize, 3);
+
+        this->_fs.AddFile(path.c_str(), file);
+
+        this->SendRequest(0xFF, path, std::array<uint16_t, 2>{0x1, 0x0});
     }
 
     TEST_F(DownloadFileTelecommandTest, ShouldSendSmallerPartThanMaximumIfNoEnoughDataLength)
     {
-        EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(_, _, SpanOfSize(20))));
+        const std::string path{"/a/file"};
+
+        EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(_, _, SpanOfSize(22))));
 
         Buffer<20> file;
         std::fill(file.begin(), file.end(), 1);
 
-        this->_fs.AddFile("/a/file", file);
+        this->_fs.AddFile(path.c_str(), file);
 
-        Buffer<200> buffer;
-        Writer w(buffer);
-        w.WriteByte(0x11);
-        const char path[] = "/a/file";
-        w.WriteByte(strlen(path));
-        w.WriteArray(gsl::span<const uint8_t>(reinterpret_cast<const uint8_t*>(path), strlen(path)));
-        w.WriteByte(0);
-        w.WriteDoubleWordLE(0x0);
-
-        _telecommand.Handle(_transmitFrame, w.Capture());
+        this->SendRequest(0xFF, path, std::array<uint16_t, 1>{0x0});
     }
 
     TEST_F(DownloadFileTelecommandTest, ShouldNotSendFrameForSequenceNumberBeyondFile)
     {
+        const std::string path{"/a/file"};
+
         EXPECT_CALL(_transmitFrame, SendFrame(_)).Times(0);
 
         Buffer<20> file;
         std::fill(file.begin(), file.end(), 1);
 
-        this->_fs.AddFile("/a/file", file);
+        this->_fs.AddFile(path.c_str(), file);
 
-        Buffer<200> buffer;
-        Writer w(buffer);
-        w.WriteByte(0x11);
-        const char path[] = "/a/file";
-        w.WriteByte(strlen(path));
-        w.WriteArray(gsl::span<const uint8_t>(reinterpret_cast<const uint8_t*>(path), strlen(path)));
-        w.WriteByte(0);
-        w.WriteDoubleWordLE(0x20);
-
-        _telecommand.Handle(_transmitFrame, w.Capture());
+        this->SendRequest(0xFF, path, std::array<uint16_t, 1>{0x20});
     }
 
     TEST_F(DownloadFileTelecommandTest, ShouldDownloadLastPartOfMultipartFile)
     {
-        EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(_, _, AllOf(SpanOfSize(20), Each(Eq(4))))));
+        const std::string path{"/a/file"};
 
-        Buffer<DownlinkFrame::MaxPayloadSize * 3 + 20> file;
-        std::fill_n(file.begin(), DownlinkFrame::MaxPayloadSize, 1);
-        std::fill_n(file.begin() + DownlinkFrame::MaxPayloadSize, DownlinkFrame::MaxPayloadSize, 2);
-        std::fill_n(file.begin() + 2 * DownlinkFrame::MaxPayloadSize, DownlinkFrame::MaxPayloadSize, 3);
-        std::fill_n(file.begin() + 3 * DownlinkFrame::MaxPayloadSize, 20, 4);
+        std::array<uint8_t, 22> expectedPayload;
 
-        this->_fs.AddFile("/a/file", file);
+        expectedPayload.fill(4);
 
-        Buffer<200> buffer;
-        Writer w(buffer);
-        w.WriteByte(0x11);
-        const char path[] = "/a/file";
-        w.WriteByte(strlen(path));
-        w.WriteArray(gsl::span<const uint8_t>(reinterpret_cast<const uint8_t*>(path), strlen(path)));
-        w.WriteByte(0);
-        w.WriteDoubleWordLE(0x3);
+        expectedPayload[0] = 0xFF;
+        expectedPayload[1] = static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::Success);
 
-        _telecommand.Handle(_transmitFrame, w.Capture());
+        EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(_, _, ElementsAreArray(expectedPayload))));
+
+        constexpr uint8_t maxFileDataSize = DownlinkFrame::MaxPayloadSize - 2;
+        Buffer<maxFileDataSize * 3 + 20> file;
+        std::fill_n(file.begin(), maxFileDataSize, 1);
+        std::fill_n(file.begin() + maxFileDataSize, maxFileDataSize, 2);
+        std::fill_n(file.begin() + 2 * maxFileDataSize, maxFileDataSize, 3);
+        std::fill_n(file.begin() + 3 * maxFileDataSize, 20, 4);
+
+        this->_fs.AddFile(path.c_str(), file);
+
+        this->SendRequest(0xFF, path, std::array<uint16_t, 1>{0x3});
     }
 
     TEST_F(DownloadFileTelecommandTest, ShouldSendErrorFrameWhenFileNotFound)
     {
-        EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::FileNotFound), Eq(0U), StrSpan(StrEq("/a/file")))));
+        const std::string path{"/a/file"};
 
-        Buffer<200> buffer;
-        Writer w(buffer);
-        w.WriteByte(0x11);
-        const char path[] = "/a/file";
-        w.WriteByte(strlen(path));
-        w.WriteArray(gsl::span<const uint8_t>(reinterpret_cast<const uint8_t*>(path), strlen(path)));
-        w.WriteByte(0);
-        w.WriteDoubleWordLE(0x3);
+        std::array<uint8_t, 9> expectedPayload;
 
-        _telecommand.Handle(_transmitFrame, w.Capture());
+        expectedPayload[0] = 0xFF;
+        expectedPayload[1] = static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::FileNotFound);
+        std::copy(path.begin(), path.end(), expectedPayload.begin() + 2);
+
+        EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray(expectedPayload))));
+
+        this->SendRequest(0xFF, path, std::array<uint16_t, 1>{0x3});
     }
 }
