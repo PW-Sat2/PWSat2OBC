@@ -70,6 +70,9 @@ namespace obc
         class DownloadFileTelecommand final : public telecommunication::uplink::Telecommand<0xAB>
         {
           public:
+            /**
+             * @brief Error codes for downloading files
+             */
             enum class ErrorCode : std::uint8_t
             {
                 Success = 0x00,
@@ -112,7 +115,7 @@ namespace obc
              */
             RemoveFileTelecommand(services::fs::IFileSystem& fs);
 
-            virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
+            virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
 
           private:
             /** @brief File system */

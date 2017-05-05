@@ -42,6 +42,7 @@ static constexpr std::uint32_t PersistentStateBaseAddress = 4;
 OBC Main;
 mission::ObcMission Mission(std::tie(Main.timeProvider, Main.rtc),
     Main.antennaDriver,
+    Main.Communication.CommDriver,
     std::tuple<bool, services::power::IPowerControl&>(false, Main.PowerControlInterface),
     Main.adcs.GetAdcsController(),
     Main.Experiments.ExperimentsController,

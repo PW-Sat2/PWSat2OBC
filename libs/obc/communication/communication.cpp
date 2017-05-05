@@ -11,11 +11,17 @@ using telecommunication::uplink::IHandleTeleCommand;
 using namespace obc;
 using namespace obc::telecommands;
 
-OBCCommunication::OBCCommunication(obc::FDIR& fdir, II2CBus& systemBus, services::fs::IFileSystem& fs, obc::OBCExperiments& experiments)
+OBCCommunication::OBCCommunication(obc::FDIR& fdir,
+    II2CBus& systemBus,
+    services::time::ICurrentTime& currentTime,
+    mission::IIdleStateController& idleStateController,
+    services::fs::IFileSystem& fs,
+    obc::OBCExperiments& experiments)
     : UplinkProtocolDecoder(settings::CommSecurityCode),                      //
       SupportedTelecommands(                                                  //
           PingTelecommand(),                                                  //
           DownloadFileTelecommand(fs),                                        //
+          EnterIdleStateTelecommand(currentTime, idleStateController),        //
           RemoveFileTelecommand(fs),                                          //
           PerformDetumblingExperiment(experiments),                           //
           AbortExperiment(experiments)                                        //

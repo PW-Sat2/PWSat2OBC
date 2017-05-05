@@ -121,7 +121,7 @@ namespace obc
         {
         }
 
-        void RemoveFileTelecommand::Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters)
+        void RemoveFileTelecommand::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
         {
             Reader r(parameters);
 

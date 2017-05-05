@@ -77,7 +77,6 @@ target_link_libraries(${NAME}
     burtc
     obc_adcs
     rtc
-    watchdog
     mission_antenna
     mission_sail
     mission_time
@@ -86,6 +85,7 @@ target_link_libraries(${NAME}
     mission_adcs
     mission_beacon
     mission_telemetry
+    mission_comm
     watchdog
     boot_params
 )
