@@ -16,11 +16,10 @@ namespace obc
 {
     namespace telecommands
     {
-        FileSender::FileSender(const char* path,
-            telecommunication::downlink::DownlinkAPID apid,
-            devices::comm::ITransmitFrame& transmitter,
-            services::fs::IFileSystem& fs)
-            : _file(fs, path, services::fs::FileOpen::Existing, services::fs::FileAccess::ReadOnly), _apid(apid), _transmitter(transmitter)
+        FileSender::FileSender(
+            const char* path, uint8_t correlationId, devices::comm::ITransmitFrame& transmitter, services::fs::IFileSystem& fs)
+            : _file(fs, path, services::fs::FileOpen::Existing, services::fs::FileAccess::ReadOnly), _correlationId(correlationId),
+              _transmitter(transmitter)
         {
             if (this->IsValid())
             {
@@ -37,19 +36,24 @@ namespace obc
 
         bool FileSender::SendPart(std::uint32_t seq)
         {
+            constexpr uint8_t maxFileDataSize = DownlinkFrame::MaxPayloadSize - 2;
+
             if (seq > this->_lastSeq)
             {
                 return false;
             }
 
-            DownlinkFrame response(static_cast<DownlinkAPID>(this->_apid), seq);
+            DownlinkFrame response(DownlinkAPID::Operation, seq);
 
-            if (OS_RESULT_FAILED(this->_file.Seek(SeekOrigin::Begin, seq * DownlinkFrame::MaxPayloadSize)))
+            if (OS_RESULT_FAILED(this->_file.Seek(SeekOrigin::Begin, seq * maxFileDataSize)))
             {
                 return false;
             }
 
-            auto segmentSize = std::min<std::size_t>(DownlinkFrame::MaxPayloadSize, this->_fileSize - seq * DownlinkFrame::MaxPayloadSize);
+            response.PayloadWriter().WriteByte(_correlationId);
+            response.PayloadWriter().WriteByte(static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::Success));
+
+            auto segmentSize = std::min<std::size_t>(maxFileDataSize, this->_fileSize - seq * maxFileDataSize);
 
             auto buf = response.PayloadWriter().Reserve(segmentSize);
 
@@ -66,20 +70,35 @@ namespace obc
         {
             Reader r(parameters);
 
-            auto downlinkApid = r.ReadByte();
+            auto correlationId = r.ReadByte();
             auto pathLength = r.ReadByte();
             auto pathSpan = r.ReadArray(pathLength);
             auto path = reinterpret_cast<const char*>(pathSpan.data());
-            r.ReadByte();
+            auto terminationByte = r.ReadByte();
+
+            if (!r.Status() || terminationByte != 0)
+            {
+                LOG(LOG_LEVEL_ERROR, "Malformed request");
+                DownlinkFrame errorResponse(DownlinkAPID::Operation, 0);
+                errorResponse.PayloadWriter().WriteByte(correlationId);
+                errorResponse.PayloadWriter().WriteByte(static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::MalformedRequest));
+                errorResponse.PayloadWriter().WriteByte(0);
+
+                transmitter.SendFrame(errorResponse.Frame());
+
+                return;
+            }
 
             LOGF(LOG_LEVEL_INFO, "Sending file %s", path);
 
-            FileSender sender(path, static_cast<DownlinkAPID>(downlinkApid), transmitter, this->_fs);
+            FileSender sender(path, correlationId, transmitter, this->_fs);
 
             if (!sender.IsValid())
             {
                 LOG(LOG_LEVEL_ERROR, "Unable to open requested file");
-                DownlinkFrame errorResponse(DownlinkAPID::FileNotFound, 0);
+                DownlinkFrame errorResponse(DownlinkAPID::Operation, 0);
+                errorResponse.PayloadWriter().WriteByte(correlationId);
+                errorResponse.PayloadWriter().WriteByte(static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::FileNotFound));
                 errorResponse.PayloadWriter().WriteArray(pathSpan);
 
                 transmitter.SendFrame(errorResponse.Frame());
