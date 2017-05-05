@@ -21,6 +21,7 @@ set (ARCH cortex-m3)
 set (CHIP EFM32GG)
 set (DEVICE EFM32GG990F1024)
 set (QEMU_MCU ${DEVICE}_BIG)
+set (SAFE_MODE_LINKER_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/efm32gg.ld)
 
 if(${ENABLE_COVERAGE})
     set (CCOVERAGE "-fprofile-arcs -ftest-coverage")

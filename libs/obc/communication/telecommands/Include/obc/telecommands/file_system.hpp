@@ -39,6 +39,8 @@ namespace obc
             bool SendPart(std::uint32_t seq);
 
           private:
+            /** @brief Maximum size of file data in a payload */
+            static constexpr uint8_t MaxFileDataSize = telecommunication::downlink::DownlinkFrame::MaxPayloadSize - 2;
             /** @brief File to send */
             services::fs::File _file;
             /** @brief Operation correlation id */
