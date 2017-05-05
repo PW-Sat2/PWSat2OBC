@@ -24,7 +24,10 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           EnterIdleStateTelecommand(currentTime, idleStateController),        //
           RemoveFileTelecommand(fs),                                          //
           PerformDetumblingExperiment(experiments),                           //
-          AbortExperiment(experiments)                                        //
+          AbortExperiment(experiments),                                       //
+          EraseBootTableEntry(),                                              //
+          WriteProgramPart(),                                                 //
+          FinalizeProgramEntry()                                              //
           ),                                                                  //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get()), //
       CommDriver(fdir.ErrorCounting(), systemBus, TelecommandHandler)

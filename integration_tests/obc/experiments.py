@@ -92,5 +92,5 @@ class ExperimentsMixin(OBCMixin):
             info = self.experiment_info()
             return info.IterationCounter == iteration
 
-        busy_wait(condition, timeout=timeout)
+        busy_wait(condition, delay=0.1, timeout=timeout)
 
