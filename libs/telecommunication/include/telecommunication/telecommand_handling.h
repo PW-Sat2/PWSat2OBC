@@ -95,7 +95,7 @@ namespace telecommunication
              * @param[in] transmitter Reference to object that can be used to send response back
              * @param[in] parameters Parameters contained in telecommand frame
              */
-            virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) = 0;
+            virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) = 0;
 
             /**
              * @brief Returns command code associated with this telecommand
@@ -143,7 +143,7 @@ namespace telecommunication
              * @param[in] transmitter Reference to object used to send response back
              * @param[in] frame Incoming frame
              */
-            virtual void HandleFrame(devices::comm::ITransmitFrame& transmitter, devices::comm::Frame& frame) override;
+            virtual void HandleFrame(devices::comm::ITransmitter& transmitter, devices::comm::Frame& frame) override;
 
           private:
             /**
@@ -153,7 +153,7 @@ namespace telecommunication
              * @param[in] parameters Parameters buffer
              */
             void DispatchCommandHandler(
-                devices::comm::ITransmitFrame& transmitter, std::uint8_t commandCode, gsl::span<const uint8_t> parameters);
+                devices::comm::ITransmitter& transmitter, std::uint8_t commandCode, gsl::span<const uint8_t> parameters);
 
             /** @brief Telecommand decoding implementation */
             IDecodeTelecommand& _decodeTelecommand;
