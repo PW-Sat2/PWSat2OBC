@@ -13,6 +13,7 @@
 #include "obc/telecommands/experiments.hpp"
 #include "obc/telecommands/file_system.hpp"
 #include "obc/telecommands/ping.hpp"
+#include "obc/telecommands/program_upload.hpp"
 #include "telecommunication/telecommand_handling.h"
 #include "telecommunication/uplink.h"
 #include "time/ICurrentTime.hpp"
@@ -114,7 +115,10 @@ namespace obc
         obc::telecommands::EnterIdleStateTelecommand,
         obc::telecommands::RemoveFileTelecommand,
         obc::telecommands::PerformDetumblingExperiment,
-        obc::telecommands::AbortExperiment //
+        obc::telecommands::AbortExperiment,     //
+        obc::telecommands::EraseBootTableEntry, //
+        obc::telecommands::WriteProgramPart,    //
+        obc::telecommands::FinalizeProgramEntry //
         >;
 
     /**

@@ -31,4 +31,11 @@ void TestFlash(std::uint16_t /*argc*/, char* /*argv*/ [])
 
         Main.terminal.Printf("\n\nEntry: %d\nDescription: '%s'\nValid: %s", i, buf, isValid ? "Yes" : "No");
     }
+
+    auto e = bootTable.Entry(2);
+    e.Erase();
+    e.Description("Some entry");
+    e.Crc(0xABCD);
+    e.MarkAsValid();
+    e.Length(345);
 }

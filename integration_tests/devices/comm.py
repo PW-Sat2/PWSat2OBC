@@ -37,6 +37,8 @@ class DownlinkFrame:
 
 
 class UplinkFrame:
+    MAX_PAYLOAD_SIZE = 200 - 5
+
     def __init__(self, apid, content, security_code=config['COMM_SECURITY_CODE']):
         self._bytes = ensure_byte_list(struct.pack('>L',security_code))
         self._bytes += [apid]
