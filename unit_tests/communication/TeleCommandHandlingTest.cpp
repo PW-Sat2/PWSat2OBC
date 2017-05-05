@@ -4,7 +4,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "comm/Frame.hpp"
-#include "comm/ITransmitFrame.hpp"
+#include "comm/ITransmitter.hpp"
 #include "mock/comm.hpp"
 #include "telecommunication/telecommand_handling.h"
 #include "utils.hpp"
@@ -22,7 +22,7 @@ using testing::Eq;
 using testing::StrEq;
 
 using devices::comm::Frame;
-using devices::comm::ITransmitFrame;
+using devices::comm::ITransmitter;
 using namespace telecommunication::uplink;
 namespace
 {
@@ -33,7 +33,7 @@ namespace
 
     struct TeleCommandHandlerMock : public IHandleTeleCommand
     {
-        MOCK_METHOD2(Handle, void(ITransmitFrame&, span<const uint8_t> parameters));
+        MOCK_METHOD2(Handle, void(ITransmitter&, span<const uint8_t> parameters));
         MOCK_CONST_METHOD0(CommandCode, uint8_t());
     };
 
@@ -45,7 +45,7 @@ namespace
       protected:
         IncomingTelecommandHandler handling;
         NiceMock<TeleCommandDepsMock> deps;
-        TransmitFrameMock transmitFrame;
+        TransmitterMock transmitter;
     };
 
     TeleCommandHandlingTest::TeleCommandHandlingTest() : handling(deps, span<IHandleTeleCommand*, 0>())
@@ -58,7 +58,7 @@ namespace
         Frame frame(0, 0, 0, buffer);
         EXPECT_CALL(this->deps, Decode(_)).WillOnce(Return(DecodeTelecommandResult::Success(0xA, frame.Payload().subspan(1))));
 
-        this->handling.HandleFrame(this->transmitFrame, frame);
+        this->handling.HandleFrame(this->transmitter, frame);
     }
 
     TEST_F(TeleCommandHandlingTest, HandlerShouldBeCalledForKnownTelecommand)
@@ -78,7 +78,7 @@ namespace
 
         IncomingTelecommandHandler handler(deps, span<IHandleTeleCommand*>(commands));
 
-        handler.HandleFrame(this->transmitFrame, frame);
+        handler.HandleFrame(this->transmitter, frame);
     }
 
     TEST_F(TeleCommandHandlingTest, WhenDecodingFrameShouldNotAttemptInvokingHandler)
@@ -94,6 +94,6 @@ namespace
 
         Frame frame;
 
-        handler.HandleFrame(this->transmitFrame, frame);
+        handler.HandleFrame(this->transmitter, frame);
     }
 }

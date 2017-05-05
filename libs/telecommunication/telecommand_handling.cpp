@@ -13,7 +13,7 @@ using std::array;
 using gsl::span;
 
 using devices::comm::Frame;
-using devices::comm::ITransmitFrame;
+using devices::comm::ITransmitter;
 
 using namespace telecommunication::uplink;
 
@@ -23,7 +23,7 @@ IncomingTelecommandHandler::IncomingTelecommandHandler(IDecodeTelecommand& decod
 {
 }
 
-void IncomingTelecommandHandler::HandleFrame(ITransmitFrame& transmitter, Frame& frame)
+void IncomingTelecommandHandler::HandleFrame(ITransmitter& transmitter, Frame& frame)
 {
     auto decodeResult = this->_decodeTelecommand.Decode(frame.Payload());
 
@@ -36,7 +36,7 @@ void IncomingTelecommandHandler::HandleFrame(ITransmitFrame& transmitter, Frame&
     this->DispatchCommandHandler(transmitter, decodeResult.CommandCode, decodeResult.Parameters);
 }
 
-void IncomingTelecommandHandler::DispatchCommandHandler(ITransmitFrame& transmitter, uint8_t commandCode, span<const uint8_t> parameters)
+void IncomingTelecommandHandler::DispatchCommandHandler(ITransmitter& transmitter, uint8_t commandCode, span<const uint8_t> parameters)
 {
     auto command = std::find_if(this->_telecommands.begin(), this->_telecommands.end(), [commandCode](IHandleTeleCommand* p) {
         return p->CommandCode() == commandCode;
