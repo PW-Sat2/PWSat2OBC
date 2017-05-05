@@ -65,6 +65,11 @@ target_link_libraries(${NAME}
     n25q
     antenna
     exp_fibo
+    mission_antenna
+    mission_sail
+    mission_time
+    mission_experiments
+    mission_state
     yaffs
     obc_fdir
     obc_storage
@@ -86,6 +91,7 @@ target_link_libraries(${NAME}
     mission_adcs
     mission_beacon
     mission_telemetry
+    mission_comm
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

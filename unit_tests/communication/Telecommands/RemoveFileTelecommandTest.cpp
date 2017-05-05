@@ -33,7 +33,7 @@ namespace
     class RemoveFileTelecommandTest : public testing::Test
     {
       protected:
-        testing::NiceMock<TransmitFrameMock> _transmitFrame;
+        testing::NiceMock<TransmitterMock> _transmitter;
         testing::NiceMock<FsMock> _fs;
 
         obc::telecommands::RemoveFileTelecommand _telecommand{_fs};
@@ -62,7 +62,7 @@ namespace
         expectedPayload[1] = 0x00;
         std::copy(path.begin(), path.end(), expectedPayload.begin() + 2);
 
-        EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray(expectedPayload))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray(expectedPayload))));
 
         Buffer<1> file;
         this->_fs.AddFile(path.c_str(), file);
@@ -74,7 +74,7 @@ namespace
         w.WriteArray(gsl::span<const uint8_t>(reinterpret_cast<const uint8_t*>(path.data()), path.length()));
         w.WriteByte(0);
 
-        _telecommand.Handle(_transmitFrame, w.Capture());
+        _telecommand.Handle(_transmitter, w.Capture());
     }
 
     TEST_F(RemoveFileTelecommandTest, ShouldSendErrorFrameWhenFileNotFound)
@@ -87,7 +87,7 @@ namespace
         expectedPayload[1] = static_cast<uint8_t>(OSResult::NotFound);
         std::copy(path.begin(), path.end(), expectedPayload.begin() + 2);
 
-        EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray(expectedPayload))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray(expectedPayload))));
 
         ON_CALL(this->_fs, Unlink(_)).WillByDefault(Return(OSResult::NotFound));
 
@@ -98,7 +98,7 @@ namespace
         w.WriteArray(gsl::span<const uint8_t>(reinterpret_cast<const uint8_t*>(path.data()), path.length()));
         w.WriteByte(0);
 
-        _telecommand.Handle(_transmitFrame, w.Capture());
+        _telecommand.Handle(_transmitter, w.Capture());
     }
 
     TEST_F(RemoveFileTelecommandTest, ShouldSendErrorFrameWhenPathNotNullTerminated)
@@ -107,7 +107,7 @@ namespace
 
         std::array<uint8_t, 3> expectedPayload{0xFF, static_cast<uint8_t>(OSResult::InvalidArgument), 0x00};
 
-        EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray(expectedPayload))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray(expectedPayload))));
 
         Buffer<200> buffer;
         Writer w(buffer);
@@ -115,7 +115,7 @@ namespace
         w.WriteByte(2);
         w.WriteArray(gsl::span<const uint8_t>(reinterpret_cast<const uint8_t*>(path.data()), path.length()));
         w.WriteByte(0);
-        _telecommand.Handle(_transmitFrame, w.Capture());
+        _telecommand.Handle(_transmitter, w.Capture());
     }
 
     TEST_F(RemoveFileTelecommandTest, ShouldSendErrorFrameWhenDataTooShort)
@@ -124,12 +124,12 @@ namespace
 
         std::array<uint8_t, 3> expectedPayload{0xFF, static_cast<uint8_t>(OSResult::InvalidArgument), 0x00};
 
-        EXPECT_CALL(_transmitFrame, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray(expectedPayload))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray(expectedPayload))));
 
         Buffer<200> buffer;
         Writer w(buffer);
         w.WriteByte(0xFF);
         w.WriteByte(0xFF);
-        _telecommand.Handle(_transmitFrame, w.Capture());
+        _telecommand.Handle(_transmitter, w.Capture());
     }
 }
