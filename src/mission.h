@@ -7,6 +7,7 @@
 #include "mission/PersistentStateSave.hpp"
 #include "mission/adcs.hpp"
 #include "mission/antenna_task.hpp"
+#include "mission/comm.hpp"
 #include "mission/experiments.hpp"
 #include "mission/main.hpp"
 #include "mission/sail.hpp"
@@ -18,6 +19,7 @@ namespace mission
     typedef MissionLoop<SystemState, //
         TimeTask,
         antenna::AntennaTask,
+        CommTask,
         SailTask,
         adcs::AdcsPrimaryTask,
         mission::experiments::MissionExperimentComponent,

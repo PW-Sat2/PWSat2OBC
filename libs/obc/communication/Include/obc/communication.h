@@ -6,13 +6,16 @@
 #include <tuple>
 #include "comm/CommDriver.hpp"
 #include "i2c/i2c.h"
+#include "mission/comm.hpp"
 #include "obc/experiments.hpp"
 #include "obc/fdir.hpp"
+#include "obc/telecommands/comm.hpp"
 #include "obc/telecommands/experiments.hpp"
 #include "obc/telecommands/file_system.hpp"
 #include "obc/telecommands/ping.hpp"
 #include "telecommunication/telecommand_handling.h"
 #include "telecommunication/uplink.h"
+#include "time/ICurrentTime.hpp"
 
 namespace obc
 {
@@ -108,6 +111,7 @@ namespace obc
     using Telecommands = TelecommandsHolder< //
         obc::telecommands::PingTelecommand,
         obc::telecommands::DownloadFileTelecommand,
+        obc::telecommands::EnterIdleStateTelecommand,
         obc::telecommands::PerformDetumblingExperiment,
         obc::telecommands::AbortExperiment //
         >;
@@ -121,10 +125,17 @@ namespace obc
          * @brief Initializes @ref OBCCommunication object
          * @param[in] fdir FDIR mechanisms
          * @param[in] i2cBus I2CBus used by low-level comm driver
+         * @param[in] currentTime Current time
+         * @param[in] commTask Mission comm task
          * @param[in] fs File system
          * @param[in] experiments Experiments
          */
-        OBCCommunication(obc::FDIR& fdir, drivers::i2c::II2CBus& i2cBus, services::fs::IFileSystem& fs, obc::OBCExperiments& experiments);
+        OBCCommunication(obc::FDIR& fdir,
+            drivers::i2c::II2CBus& i2cBus,
+            services::time::ICurrentTime& currentTime,
+            mission::IIdleStateController& idleStateController,
+            services::fs::IFileSystem& fs,
+            obc::OBCExperiments& experiments);
 
         /**
          * @brief Initializes all communication-related drivers and objects
@@ -134,7 +145,7 @@ namespace obc
         /** @brief Uplink protocol decoder */
         telecommunication::uplink::UplinkProtocol UplinkProtocolDecoder;
 
-        /** @brief Object aggregating supported telecommand */
+        /** @brief Object aggregating supported telecommands */
         Telecommands SupportedTelecommands;
 
         /** @brief Incoming telecommand handler */

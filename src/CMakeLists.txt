@@ -64,6 +64,7 @@ target_link_libraries(${NAME}
     antenna
     exp_fibo
     mission_antenna
+    mission_comm
     mission_sail
     mission_time
     mission_experiments
