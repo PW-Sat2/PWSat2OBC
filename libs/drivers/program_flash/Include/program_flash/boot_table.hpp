@@ -2,6 +2,7 @@
 #define LIBS_DRIVERS_PROGRAM_FLASH_INCLUDE_PROGRAM_FLASH_BOOT_TABLE_HPP_
 
 #include <cstdint>
+#include <gsl/span>
 #include "utils.h"
 
 namespace program_flash
@@ -9,7 +10,7 @@ namespace program_flash
     class ProgramEntry
     {
       public:
-        ProgramEntry(std::uint8_t* tableBase, std::uint8_t index);
+        ProgramEntry(std::uint8_t* flashBase, std::uint8_t* tableBase, std::uint8_t index);
 
         inline const char* Description() const
         {
@@ -22,9 +23,19 @@ namespace program_flash
             return (*marker) == 0xAA;
         }
 
+        void Erase();
+
+        void Description(const char* description);
+        void Crc(std::uint16_t crc);
+        void MarkAsValid();
+        void Length(std::uint32_t length);
+        void WriteContent(std::size_t offset, gsl::span<const std::uint8_t> content);
+
       private:
         static constexpr std::size_t Size = 512_KB;
+        static constexpr std::size_t LargeSectorSize = 64_KB;
 
+        std::uint8_t* _flashBase;
         std::uint8_t* _base;
     };
 
@@ -57,7 +68,7 @@ namespace program_flash
 
         inline ProgramEntry Entry(std::uint8_t index)
         {
-            return ProgramEntry(this->_flashBase, index);
+            return ProgramEntry(this->_flashBase, this->_flashBase, index);
         }
 
       private:

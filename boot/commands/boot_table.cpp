@@ -22,7 +22,7 @@ void PrintBootTable()
         {
             auto data = (uint8_t*)(BOOT_TABLE_BASE + BOOT_getOffsetDescription(entry) + i);
 
-            if (*data == '\r' || *data == '\n')
+            if (*data == '\r' || *data == '\n' || *data == '\0')
             {
                 break;
             }
