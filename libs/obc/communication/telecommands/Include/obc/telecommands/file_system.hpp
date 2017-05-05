@@ -68,6 +68,9 @@ namespace obc
         class DownloadFileTelecommand final : public telecommunication::uplink::Telecommand<0xAB>
         {
           public:
+            /**
+             * @brief Error codes for downloading files
+             */
             enum class ErrorCode : std::uint8_t
             {
                 Success = 0x00,

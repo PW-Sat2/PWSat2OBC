@@ -1,6 +1,7 @@
 set(NAME obc_telecommands)
 
 set(SOURCES
+    comm.cpp
     ping.cpp
     file_system.cpp
     experiments.cpp
@@ -11,6 +12,7 @@ add_library(${NAME} STATIC ${SOURCES})
 target_link_libraries(${NAME} 
 	base
 	telecommunication
+	mission_comm
 	fs
 	logger
 	obc_experiments
