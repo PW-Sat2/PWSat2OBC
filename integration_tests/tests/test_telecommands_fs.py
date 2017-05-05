@@ -30,7 +30,7 @@ class FileSystemTelecommandsTest(BaseTest):
 
         self.system.obc.write_file(p, data)
 
-        self.system.comm.put_frame(telecommand.DownloadFile(respond_as=0x11, path=p, seqs=[0, 3, 1, 2]))
+        self.system.comm.put_frame(telecommand.DownloadFile(correlation_id=0x11, path=p, seqs=[0, 3, 1, 2]))
 
         frames = [
             self.system.comm.get_frame(20),
@@ -43,7 +43,7 @@ class FileSystemTelecommandsTest(BaseTest):
 
         received = ''
         for f in frames:
-            received += ''.join([chr(b) for b in f.payload()])
+            received += ''.join([chr(b) for b in f.payload()[2:]])
 
         self.assertAlmostEqual(received, data)
 
@@ -52,10 +52,10 @@ class FileSystemTelecommandsTest(BaseTest):
 
         p = "/a/non_exist"
 
-        self.system.comm.put_frame(telecommand.DownloadFile(respond_as=0x11, path=p, seqs=[0, 3, 1, 2]))
+        self.system.comm.put_frame(telecommand.DownloadFile(correlation_id=0x11, path=p, seqs=[0, 3, 1, 2]))
 
         frame = self.system.comm.get_frame(20)
 
         self.assertEqual(frame.apid(), 2)
         self.assertEqual(frame.seq(), 0)
-        self.assertEqual(frame.payload(), ensure_byte_list(p))
+        self.assertEqual(frame.payload(), [0x11, 1] + ensure_byte_list(p))

@@ -5,9 +5,9 @@ from utils import ensure_byte_list
 
 
 class DownloadFile(Telecommand):
-    def __init__(self, path, respond_as, seqs):
+    def __init__(self, path, correlation_id, seqs):
         self._path = path
-        self._respond_as = respond_as
+        self._correlation_id = correlation_id
         self._seqs = seqs
 
     def apid(self):
@@ -16,4 +16,4 @@ class DownloadFile(Telecommand):
     def payload(self):
         seqs_bytes = ensure_byte_list(struct.pack('<' + 'L' * len(self._seqs), *self._seqs))
 
-        return [self._respond_as, len(self._path)] + list(self._path) + [0x0] + seqs_bytes
+        return [self._correlation_id, len(self._path)] + list(self._path) + [0x0] + seqs_bytes
