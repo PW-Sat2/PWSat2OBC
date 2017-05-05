@@ -21,6 +21,7 @@ add_unit_tests(${NAME} ${SOURCES})
 target_link_libraries(${NAME} 
     mission
     mission_antenna
+    mission_comm
     mission_sail
     mission_time
     mission_experiments
