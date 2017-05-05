@@ -1,6 +1,6 @@
 #include "comm.hpp"
 
-TransmitFrameMock::TransmitFrameMock()
+TransmitterMock::TransmitterMock()
 {
 }
 

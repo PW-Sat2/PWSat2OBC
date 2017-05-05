@@ -4,7 +4,7 @@
 #pragma once
 
 #include "IBeaconController.hpp"
-#include "ITransmitFrame.hpp"
+#include "ITransmitter.hpp"
 #include "base/os.h"
 #include "comm.hpp"
 #include "error_counter/error_counter.hpp"
@@ -19,7 +19,7 @@ COMM_BEGIN
  * @remark Do not access directly the fields of this type, instead use the comm driver interface to
  * perform requested action.
  */
-class CommObject final : public ITransmitFrame, public IBeaconController
+class CommObject final : public ITransmitter, public IBeaconController
 {
   public:
     /**

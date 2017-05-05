@@ -8,7 +8,7 @@ set(SOURCES
     Include/comm/CommDriver.hpp
     Include/comm/Frame.hpp
     Include/comm/IHandleFrame.hpp
-    Include/comm/ITransmitFrame.hpp
+    Include/comm/ITransmitter.hpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

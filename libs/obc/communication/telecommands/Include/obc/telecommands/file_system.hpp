@@ -23,7 +23,7 @@ namespace obc
              * @param transmitter Transmitter
              * @param fs File system
              */
-            FileSender(const char* path, uint8_t correlationId, devices::comm::ITransmitFrame& transmitter, services::fs::IFileSystem& fs);
+            FileSender(const char* path, uint8_t correlationId, devices::comm::ITransmitter& transmitter, services::fs::IFileSystem& fs);
 
             /**
              * @brief Checks if requested operation is valid
@@ -46,7 +46,7 @@ namespace obc
             /** @brief Operation correlation id */
             uint8_t _correlationId;
             /** @brief Transmitter */
-            devices::comm::ITransmitFrame& _transmitter;
+            devices::comm::ITransmitter& _transmitter;
             /** @brief Opened file size */
             services::fs::FileSize _fileSize;
             /** @brief Last sequence number available for file */
@@ -83,7 +83,7 @@ namespace obc
              */
             DownloadFileTelecommand(services::fs::IFileSystem& fs);
 
-            virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
+            virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
 
           private:
             /** @brief File system */

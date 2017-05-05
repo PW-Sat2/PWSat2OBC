@@ -28,7 +28,7 @@ namespace obc
              */
             PerformDetumblingExperiment(obc::OBCExperiments& experiments);
 
-            virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
+            virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
 
           private:
             /** @brief Experiments controller */
@@ -54,7 +54,7 @@ namespace obc
              */
             AbortExperiment(obc::OBCExperiments& experiments);
 
-            virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
+            virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
 
           private:
             /** @brief Experiments controller */
