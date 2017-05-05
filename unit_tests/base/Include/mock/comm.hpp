@@ -11,8 +11,12 @@
 struct TransmitterMock : public devices::comm::ITransmitter
 {
     TransmitterMock();
-    MOCK_METHOD1(SetTransmitterStateWhenIdle, bool(devices::comm::IdleState));
     MOCK_METHOD1(SendFrame, bool(gsl::span<const std::uint8_t>));
+    MOCK_METHOD1(GetTransmitterTelemetry, bool(devices::comm::TransmitterTelemetry&));
+    MOCK_METHOD1(SetTransmitterStateWhenIdle, bool(devices::comm::IdleState));
+    MOCK_METHOD1(SetTransmitterBitRate, bool(devices::comm::Bitrate));
+    MOCK_METHOD1(GetTransmitterState, bool(devices::comm::TransmitterState&));
+    MOCK_METHOD0(ResetTransmitter, bool());
 };
 
 struct BeaconControllerMock : public devices::comm::IBeaconController
