@@ -69,7 +69,7 @@ namespace
 
     struct FrameHandlerMock : IHandleFrame
     {
-        MOCK_METHOD2(HandleFrame, void(ITransmitFrame&, Frame&));
+        MOCK_METHOD2(HandleFrame, void(ITransmitter&, Frame&));
     };
 
     struct CommTest : public testing::Test

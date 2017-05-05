@@ -12,7 +12,7 @@ namespace obc
         {
         }
 
-        void PerformDetumblingExperiment::Handle(devices::comm::ITransmitFrame& /*transmitter*/, gsl::span<const std::uint8_t> parameters)
+        void PerformDetumblingExperiment::Handle(devices::comm::ITransmitter& /*transmitter*/, gsl::span<const std::uint8_t> parameters)
         {
             Reader r(parameters);
 
@@ -29,7 +29,7 @@ namespace obc
         {
         }
 
-        void AbortExperiment::Handle(devices::comm::ITransmitFrame& /*transmitter*/, gsl::span<const std::uint8_t> /*parameters*/)
+        void AbortExperiment::Handle(devices::comm::ITransmitter& /*transmitter*/, gsl::span<const std::uint8_t> /*parameters*/)
         {
             LOG(LOG_LEVEL_INFO, "Aborting experiment");
             this->_experiments.ExperimentsController.AbortExperiment();

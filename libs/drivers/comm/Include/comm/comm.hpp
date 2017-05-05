@@ -50,7 +50,7 @@ class Frame;
 class Beacon;
 
 struct IHandleFrame;
-struct ITransmitFrame;
+struct ITransmitter;
 struct IBeaconController;
 
 /**
