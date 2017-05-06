@@ -34,6 +34,12 @@ namespace devices
         constexpr std::uint8_t I2Cadress = 0x68;
 
         /**
+         * @brief Delay in milliseconds between device configuration and status register check.
+         * This accounts for PLL lock and measurement time.
+         */
+        constexpr std::chrono::milliseconds ConfigDelay{100};
+
+        /**
          * @brief Data readed from gyroscope.
          */
         struct GyroRawData

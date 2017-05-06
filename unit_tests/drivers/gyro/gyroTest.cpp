@@ -16,6 +16,7 @@ using testing::_;
 using testing::Return;
 using testing::Invoke;
 using testing::ElementsAre;
+using ::testing::InSequence;
 using drivers::i2c::I2CResult;
 using namespace devices::gyro;
 using namespace std::chrono_literals;
@@ -39,8 +40,10 @@ class GyroTest : public testing::Test
 
 // -------------------------- init ----------------------------------
 
-TEST_F(GyroTest, initHappyCase)
+TEST_F(GyroTest, init_happyCase)
 {
+    InSequence dummy;
+    
     // hardware reset
     EXPECT_CALL(i2c, Write(_addr, ElementsAre(0x3E, (1 << 7)))).
             WillOnce(Return(I2CResult::OK));
@@ -76,7 +79,7 @@ TEST_F(GyroTest, initHappyCase)
     EXPECT_TRUE(gyro.init());
 }
 
-TEST_F(GyroTest, hardwareResetFailed)
+TEST_F(GyroTest, init_hardwareResetFailed)
 {
     // hardware reset
     EXPECT_CALL(i2c, Write(_addr, ElementsAre(0x3E, (1 << 7)))).
@@ -85,8 +88,10 @@ TEST_F(GyroTest, hardwareResetFailed)
     EXPECT_FALSE(gyro.init());
 }
 
-TEST_F(GyroTest, deviceNotPresent)
+TEST_F(GyroTest, init_deviceNotPresent)
 {
+    InSequence dummy;
+
     // hardware reset
     EXPECT_CALL(i2c, Write(_addr, ElementsAre(0x3E, (1 << 7)))).
             WillOnce(Return(I2CResult::OK));
@@ -103,10 +108,12 @@ TEST_F(GyroTest, deviceNotPresent)
     EXPECT_FALSE(gyro.init());
 }
 
-TEST_F(GyroTest, config1Failed)
+TEST_F(GyroTest, init_powerManagementConfigurationFailed)
 {
+    InSequence dummy;
+
     // hardware reset
-        EXPECT_CALL(i2c, Write(_addr, ElementsAre(0x3E, (1 << 7)))).
+    EXPECT_CALL(i2c, Write(_addr, ElementsAre(0x3E, (1 << 7)))).
                 WillOnce(Return(I2CResult::OK));
 
     // who am I?
@@ -125,8 +132,10 @@ TEST_F(GyroTest, config1Failed)
     EXPECT_FALSE(gyro.init());
 }
 
-TEST_F(GyroTest, config2Failed)
+TEST_F(GyroTest, init_deviceConfigurationFailed)
 {
+    InSequence dummy;
+
     // hardware reset
     EXPECT_CALL(i2c, Write(_addr, ElementsAre(0x3E, (1 << 7)))).
             WillOnce(Return(I2CResult::OK));
@@ -151,8 +160,10 @@ TEST_F(GyroTest, config2Failed)
     EXPECT_FALSE(gyro.init());
 }
 
-TEST_F(GyroTest, i2cFailedAfterConfiguration)
+TEST_F(GyroTest, init_i2cFailedAfterConfiguration)
 {
+    InSequence dummy;
+
     // hardware reset
     EXPECT_CALL(i2c, Write(_addr, ElementsAre(0x3E, (1 << 7)))).
             WillOnce(Return(I2CResult::OK));
@@ -188,8 +199,10 @@ TEST_F(GyroTest, i2cFailedAfterConfiguration)
     EXPECT_TRUE(gyro.init());
 }
 
-TEST_F(GyroTest, pllNotLocked)
+TEST_F(GyroTest, init_pllNotLocked)
 {
+    InSequence dummy;
+
     // hardware reset
     EXPECT_CALL(i2c, Write(_addr, ElementsAre(0x3E, (1 << 7)))).
             WillOnce(Return(I2CResult::OK));
@@ -227,7 +240,7 @@ TEST_F(GyroTest, pllNotLocked)
 
 // -------------------------- read ----------------------------------
 
-TEST_F(GyroTest, readHappyCase)
+TEST_F(GyroTest, read_happyCase)
 {
     EXPECT_CALL(i2c, WriteRead(_addr, ElementsAre(0x1A), _)).
             WillOnce(Invoke([&](uint8_t, auto, auto read) {
@@ -254,7 +267,7 @@ TEST_F(GyroTest, readHappyCase)
     EXPECT_EQ((7 << 8) | 8, gyroData.Value.Z);
 }
 
-TEST_F(GyroTest, readI2CFail)
+TEST_F(GyroTest, read_I2CFailed)
 {
     for(int i2cresult = -9; i2cresult < 0; i2cresult++)
     {
@@ -279,7 +292,7 @@ TEST_F(GyroTest, readI2CFail)
     }
 }
 
-TEST_F(GyroTest, readGyroNotReady)
+TEST_F(GyroTest, read_dataNotReady)
 {
     for(int status = 0; status <= 0xFF; ++status)
     {

@@ -25,7 +25,7 @@ using namespace std::chrono_literals;
 
 using namespace devices::gyro;
 
-enum Registers
+enum class Registers
 {
     WHO_AM_I = 0x00,
     SMPLRT_DIV = 0x15,
@@ -210,7 +210,7 @@ bool GyroDriver::init()
         return false;
     }
 
-    System::SleepTask(100ms);
+    System::SleepTask(ConfigDelay);
 
     if (!driver.pll_and_data_ready())
     {
