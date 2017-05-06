@@ -32,6 +32,7 @@ class System:
         self.primary_antenna = AntennaController(PRIMARY_ANTENNA_CONTROLLER_ADDRESS)
         self.backup_antenna = AntennaController(BACKUP_ANTENNA_CONTROLLER_ADDRESS)
         self.imtq = Imtq()
+        self.gyro = Gyro()
         self.rtc = RTCDevice()
 
         self.i2c.add_bus_device(self.eps.controller_a)
@@ -42,6 +43,7 @@ class System:
         self.i2c.add_pld_device(self.backup_antenna)
         self.i2c.add_bus_device(self.imtq)
         self.i2c.add_pld_device(self.rtc)
+        self.i2c.add_pld_device(self.gyro)
 
     def close(self):
         self.i2c.stop()

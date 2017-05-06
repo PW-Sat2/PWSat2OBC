@@ -9,6 +9,7 @@ from .experiments import ExperimentsMixin
 from .file_system import FileSystemMixin
 from .i2c import I2CMixin
 from .imtq import ImtqMixin
+from .gyro import GyroMixin
 from .mission import MissionMixin
 from .obc_mixin import OBCMixin
 from .obc_time import TimeMixin
@@ -26,6 +27,7 @@ class OBC(OBCMixin,
           AntennaMixin,
           MissionMixin,
           ImtqMixin,
+          GyroMixin,
           ExperimentsMixin,
           EPSMixin,
           WatchdogMixin,

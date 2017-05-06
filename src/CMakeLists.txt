@@ -20,6 +20,7 @@ set(SOURCES
     commands/imtq.cpp
     commands/rtc.cpp
     commands/fram.cpp
+    commands/gyro.cpp
     commands/external_flash.cpp
     commands/obc_state.cpp
     commands/temp.cpp

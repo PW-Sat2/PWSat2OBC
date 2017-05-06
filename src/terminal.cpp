@@ -44,6 +44,7 @@ static const TerminalCommandDescription commands[] = {
     {"fram", FRAM},
     {"testflash", TestExternalFlash},
     {"temp", Temp},
+    {"gyro", GyroDriver},
     {"eps", EPSCommand},
     {"wdog", WatchdogCommand},
     {"hang", Hang},

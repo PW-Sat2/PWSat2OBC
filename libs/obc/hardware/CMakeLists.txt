@@ -17,6 +17,7 @@ target_link_libraries(${NAME}
 	burtc
 	mcu_temp
 	obc_state
+	gyro
 	eps
 )
 
