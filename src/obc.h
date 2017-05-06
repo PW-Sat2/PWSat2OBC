@@ -27,9 +27,9 @@
 #include "power_eps/power_eps.h"
 #include "rtc/rtc.hpp"
 #include "spi/efm.h"
-#include "storage/nand_driver.h"
 #include "terminal/terminal.h"
 #include "time/timer.h"
+#include "uart/uart.h"
 #include "utils.h"
 
 /**
@@ -57,6 +57,12 @@ struct OBC
      * @brief Initialization that takes places after starting RTOS
      */
     OSResult PostStartInitialization();
+
+    /**
+     * @brief Returns current LineIO implementation
+     * @return Line IO implementation
+     */
+    inline LineIO& GetLineIO();
 
     /** @brief File system object */
     services::fs::YaffsFileSystem fs;
@@ -89,6 +95,9 @@ struct OBC
     /** @brief OBC storage */
     obc::OBCStorage Storage;
 
+    /** @brief UART driver */
+    drivers::uart::UART UARTDriver;
+
     /** @brief Imtq handling */
     devices::imtq::ImtqDriver Imtq;
 
@@ -107,6 +116,15 @@ struct OBC
     /** @brief External Real Time Clock.  */
     devices::rtc::RTCObject rtc;
 };
+
+LineIO& OBC::GetLineIO()
+{
+#ifdef USE_LEUART
+    return this->IO;
+#endif
+
+    return this->UARTDriver.GetLineIO();
+}
 
 /** @brief Global OBC object. */
 extern OBC Main;

@@ -35,7 +35,7 @@ set(SOURCES
 
 add_executable(${NAME} ${SOURCES})
 
-set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${PLATFORM_LINKER_SCRIPT} -specs=nano.specs -specs=nosys.specs")
+set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${UPPER_LINKER_SCRIPT} -specs=nano.specs -specs=nosys.specs")
 
 target_link_libraries(${NAME}
     platform
@@ -44,6 +44,7 @@ target_link_libraries(${NAME}
     free_rtos_wrapper
     comm
     leuart
+    uart
     swo
     logger
     SwoEndpoint
@@ -88,12 +89,13 @@ target_link_libraries(${NAME}
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)
 
 target_generate_hex(${NAME})
+target_generate_bin(${NAME})
 
 target_memory_report(${NAME})
 
 target_asm_listing(${NAME})
 
-target_jlink_flash(${NAME})
+target_jlink_flash(${NAME} ${UPPER_ADDRESS})
 
 target_format_sources(${NAME} "${SOURCES}")
 

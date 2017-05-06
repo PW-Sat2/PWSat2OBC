@@ -27,6 +27,9 @@ namespace efm
 
     template <> constexpr DMADRV_PeripheralSignal_t DMASignal<DMASignalUSART::RXDATAV>(const USART_TypeDef* peripheral)
     {
+        if (peripheral == USART0)
+            return dmadrvPeripheralSignal_USART0_RXDATAV;
+
         if (peripheral == USART1)
             return dmadrvPeripheralSignal_USART1_RXDATAV;
 
@@ -35,6 +38,9 @@ namespace efm
 
     template <> constexpr DMADRV_PeripheralSignal_t DMASignal<DMASignalUSART::TXBL>(const USART_TypeDef* peripheral)
     {
+        if (peripheral == USART0)
+            return dmadrvPeripheralSignal_USART0_TXBL;
+
         if (peripheral == USART1)
             return dmadrvPeripheralSignal_USART1_TXBL;
 

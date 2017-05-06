@@ -73,7 +73,7 @@ OBCHardware::OBCHardware(
     error_counter::ErrorCounting& errorCounting, services::power::IPowerControl& powerControl, TimeAction& burtcTickHandler)
     : I2C(powerControl),                                               //
       Burtc(burtcTickHandler),                                         //
-      FramSpi(SPI, Pins.FramChipSelect),                               //
+      FramSpi(SPI, Pins.Fram1ChipSelect),                              //
       PersistentStorage(FramSpi),                                      //
       EPS(errorCounting, this->I2C.Buses.Bus, this->I2C.Buses.Payload) //
 {

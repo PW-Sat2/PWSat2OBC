@@ -1,8 +1,8 @@
 si 1
-speed 4000
+speed auto
 r
 halt
-loadbin "${HEX_FILE}", 0x0
+loadbin "${HEX_FILE}", ${BASE_ADDRESS}
 r
 g
 exit

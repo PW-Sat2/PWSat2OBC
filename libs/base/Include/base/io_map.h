@@ -100,6 +100,23 @@ namespace io_map
         };
     };
 
+    /**
+    * @brief Base type for type describing UART location
+    *
+    * Derived type must provide following inner types:
+    *  - TX - valid @ref PinTag for TX pin
+    *  - RX - valid @ref PinTag for RX pin
+    */
+    template <typename Self> struct UARTPins : public PinGroupTag
+    {
+        /** @brief UART pins group */
+        struct Group
+        {
+            /** @brief UART pins container */
+            using Pins = PinContainer<typename Self::RX, typename Self::TX>;
+        };
+    };
+
     /** @} */
 }
 

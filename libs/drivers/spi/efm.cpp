@@ -1,5 +1,6 @@
 #include "efm.h"
 
+#include <em_gpio.h>
 #include "efm_support/api.h"
 #include "efm_support/clock.h"
 #include "efm_support/dma.h"
@@ -23,7 +24,7 @@ void EFMSPIInterface::Initialize()
 
     USART_InitSync_TypeDef init = USART_INITSYNC_DEFAULT;
     init.master = true;
-    init.baudrate = 7_MHz;
+    init.baudrate = io_map::SPI::Baudrate;
     init.msbf = true;
     init.clockMode = usartClockMode0;
     init.databits = usartDatabits8;
@@ -134,8 +135,7 @@ bool EFMSPIInterface::OnTransferFinished(unsigned int channel, unsigned int sequ
         This->_transferGroup.SetISR(TransferTXFinished);
     }
 
-    System::EndSwitchingISR();
-
+    //    System::EndSwitchingISR();
     return true;
 }
 EFMSPISlaveInterface::EFMSPISlaveInterface(EFMSPIInterface& spi, const drivers::gpio::Pin& pin) : _spi(spi), _pin(pin)

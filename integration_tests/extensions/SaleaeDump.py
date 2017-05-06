@@ -13,7 +13,7 @@ class SaleaeDump:
 
     def set_up_once(self):
         self._connection = Saleae()
-        self._connection.set_capture_seconds(90)
+        self._connection.set_capture_seconds(300)
 
     def set_up(self, **kwargs):
         self._connection.capture_start()
