@@ -6,10 +6,11 @@ import time
 
 
 class SerialPortTerminal:
-    def __init__(self, comPort, gpio):
+    def __init__(self, comPort, gpio, boot_handler):
         self.log = logging.getLogger("OBCTerm")
 
         self._gpio = gpio
+        self._boot_handler = boot_handler
 
         self._serial = serial.Serial(comPort, baudrate=115200, timeout=1, rtscts=False)
         self._gpio.high(self._gpio.RESET)
@@ -59,7 +60,7 @@ class SerialPortTerminal:
         self._command_prologue(cmd)
 
         response = self.readUntilPrompt().rstrip('\n')
-        self.log.debug("Command " + cmd + " responded with " + response)
+        self.log.debug("Command " + cmd + " responded with '" + response + "'")
         return response
 
     def command_no_wait(self, cmd):
@@ -107,7 +108,8 @@ class SerialPortTerminal:
         self._gpio.high(self._gpio.RESET)
         self._gpio.low(self._gpio.RESET)
         self._gpio.high(self._gpio.RESET)
-        self.readUntilPrompt('@')
+
+        self._boot()
 
     def power_off(self):
         self.log.debug("power off")
@@ -128,7 +130,7 @@ class SerialPortTerminal:
 
         self.log.debug("Waiting for OBC to come up")
 
-        self.readUntilPrompt('@')
+        self._boot()
 
         self.log.debug("OBC startup done")
 
@@ -136,13 +138,19 @@ class SerialPortTerminal:
         self._serial.close()
 
     def wait_for_boot(self, timeout=None):
-        end = None if timeout is None else time.time() + timeout
+        return self._boot(timeout)
 
+    def _boot(self, timeout=None):
+        end = None if timeout is None else time.time() + timeout
         c = ''
         while c != '@':
             c = self._serial.read(1)
 
-            if time.time() > end:
+            if c == '#':
+                self._boot_handler.boot(self._serial.write)
+
+            if end is not None and time.time() > end:
                 return False
 
         return True
+

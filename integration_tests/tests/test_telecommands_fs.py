@@ -1,3 +1,5 @@
+from nose.tools import nottest
+
 import telecommand
 from system import auto_power_on
 from tests.base import BaseTest

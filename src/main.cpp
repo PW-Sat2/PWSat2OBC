@@ -28,9 +28,6 @@
 #include "obc.h"
 #include "obc/ObcState.hpp"
 #include "power_eps/power_eps.h"
-#include "storage/nand.h"
-#include "storage/nand_driver.h"
-#include "storage/storage.h"
 #include "swo/swo.h"
 #include "system.h"
 #include "terminal.h"
@@ -75,6 +72,23 @@ void I2C1_IRQHandler(void)
 void BURTC_IRQHandler(void)
 {
     Main.Hardware.Burtc.IRQHandler();
+}
+
+void LESENSE_IRQHandler()
+{
+    Main.UARTDriver.OnWakeUpInterrupt();
+    System::EndSwitchingISR();
+}
+
+__attribute__((optimize("O3"))) void UART1_RX_IRQHandler()
+{
+#define DEBUG_UART
+#ifdef DEBUG_UART
+    GPIO->P[gpioPortC].DOUTCLR = 1 << 11;
+#endif
+#undef DEBUG_UART
+
+    Main.UARTDriver.OnReceived();
 }
 
 static void BlinkLed0(void* param)
@@ -134,6 +148,8 @@ static void ObcInitTask(void* param)
 
     LOG(LOG_LEVEL_INFO, "Starting initialization task... ");
 
+    InitializeTerminal();
+
     auto obc = static_cast<OBC*>(param);
 
     if (OS_RESULT_FAILED(obc->PostStartInitialization()))
@@ -178,6 +194,12 @@ void SetupHardware(void)
 
     CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_HFCLKLE);
     CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_HFCLKLE);
+
+#ifndef SLOWER_CLOCK
+    CMU_OscillatorEnable(cmuOsc_HFXO, true, true);
+    CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
+    CMU_OscillatorEnable(cmuOsc_HFRCO, false, true);
+#endif
 }
 
 extern "C" void __libc_init_array(void);
@@ -190,6 +212,8 @@ int main(void)
 
     CHIP_Init();
 
+    drivers::watchdog::InternalWatchdog::Disable();
+
     SetupHardware();
 
     SwoEnable();
@@ -199,11 +223,11 @@ int main(void)
 
     DMADRV_Init();
 
+#ifdef USE_LEUART
     LeuartLineIOInit(&Main.IO);
+#endif
 
     Main.Initialize();
-
-    InitializeTerminal();
 
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 
@@ -213,7 +237,7 @@ int main(void)
     Main.Hardware.Pins.Led1.High();
 
     System::CreateTask(BlinkLed0, "Blink0", 512, NULL, TaskPriority::P1, NULL);
-    System::CreateTask(ObcInitTask, "Init", 4_KB, &Main, TaskPriority::Highest, &Main.initTask);
+    System::CreateTask(ObcInitTask, "Init", 4_KB, &Main, TaskPriority::P14, &Main.initTask);
 
     System::RunScheduler();
 

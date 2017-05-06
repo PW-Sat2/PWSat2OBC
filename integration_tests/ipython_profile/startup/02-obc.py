@@ -1,3 +1,6 @@
+from obc.boot import BootToUpper, BootToIndex
+
+
 def _prepare_environment():
     import logging
 
@@ -15,9 +18,10 @@ def _prepare_environment():
     obc_com = config['OBC_COM']
     mock_com = config['MOCK_COM']
     gpio_com = config['GPIO_COM']
+    boot_handler = BootToUpper() if config['BOOT_UPPER'] else BootToIndex(config['BOOT_INDEX'])
 
     gpio = Pins(gpio_com)
 
-    return System(obc_com, mock_com, gpio)
+    return System(obc_com, mock_com, gpio, boot_handler)
 
 system = _prepare_environment()
