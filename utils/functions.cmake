@@ -9,7 +9,7 @@ function(target_generate_hex TARGET)
       DEPENDS ${TARGET}
   )
 
-  add_custom_target (${TARGET}.hex ALL DEPENDS ${HEX_OBJ})
+  add_custom_target (${TARGET}.hex DEPENDS ${HEX_OBJ})
 endfunction(target_generate_hex)
 
 function(target_generate_bin TARGET)
@@ -23,7 +23,7 @@ function(target_generate_bin TARGET)
       DEPENDS ${TARGET}
   )
 
-  add_custom_target (${TARGET}.bin ALL DEPENDS ${BIN_OBJ})
+  add_custom_target (${TARGET}.bin DEPENDS ${BIN_OBJ})
 endfunction(target_generate_bin)
 
 

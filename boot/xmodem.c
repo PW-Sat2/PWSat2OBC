@@ -174,24 +174,24 @@ xmodem_transfer:
         if (index == 0)
         {
             i = 0;
-            base = (uint8_t*)(BOOT_SAFEMODE_BASE_DATA + ((sequenceNumber - 1) * XMODEM_DATA_SIZE));
+            volatile uint8_t* area = (uint8_t*)(BOOT_SAFEMODE_BASE_DATA + ((sequenceNumber - 1) * XMODEM_DATA_SIZE));
 
             do
             {
                 // Unlock commands
-                *((uint8_t*)(BOOT_SAFEMODE_BASE_DATA + 0x5555)) = 0xAA;
-                *((uint8_t*)(BOOT_SAFEMODE_BASE_DATA + 0x2AAA)) = 0x55;
-                *((uint8_t*)(BOOT_SAFEMODE_BASE_DATA + 0x5555)) = 0xA0;
+                *((volatile uint8_t*)(BOOT_SAFEMODE_BASE_DATA + 0x5555)) = 0xAA;
+                *((volatile uint8_t*)(BOOT_SAFEMODE_BASE_DATA + 0x2AAA)) = 0x55;
+                *((volatile uint8_t*)(BOOT_SAFEMODE_BASE_DATA + 0x5555)) = 0xA0;
 
                 // Write to page (can only write in 64 bytes at a time)
                 do
                 {
-                    *(base + i) = pkt->data[i];
+                    *(area + i) = pkt->data[i];
                     i++;
                 } while ((i < XMODEM_DATA_SIZE) && ((i % 64) != 0));
 
                 // Poll write sequence completion
-                while (((*(base + i - 1)) & 0x80) != (pkt->data[i - 1] & 0x80))
+                while (((*(area + i - 1)) & 0x80) != (pkt->data[i - 1] & 0x80))
                     ;
             } while (i < XMODEM_DATA_SIZE);
         }

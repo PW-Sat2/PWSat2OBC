@@ -517,7 +517,7 @@ void BSP_EBI_disableSRAM(BSP_EBI_SRAMSelect_TypeDef module)
   ******************************************************************************/
 void BSP_EBI_progEEPROM(uint32_t offset, uint8_t* buffer, uint8_t len)
 {
-    uint8_t* eepromAddr = (uint8_t*)(BSP_EBI_EEPROM_BASE + offset);
+    volatile uint8_t* eepromAddr = (volatile uint8_t*)(BSP_EBI_EEPROM_BASE + offset);
 
     int i = 0;
 
@@ -525,9 +525,9 @@ void BSP_EBI_progEEPROM(uint32_t offset, uint8_t* buffer, uint8_t len)
     do
     {
         // Unlock commands
-        *(uint8_t*)(BSP_EBI_EEPROM_BASE + 0x5555) = 0xAA;
-        *(uint8_t*)(BSP_EBI_EEPROM_BASE + 0x2AAA) = 0x55;
-        *(uint8_t*)(BSP_EBI_EEPROM_BASE + 0x5555) = 0xA0;
+        *(volatile uint8_t*)(BSP_EBI_EEPROM_BASE + 0x5555) = 0xAA;
+        *(volatile uint8_t*)(BSP_EBI_EEPROM_BASE + 0x2AAA) = 0x55;
+        *(volatile uint8_t*)(BSP_EBI_EEPROM_BASE + 0x5555) = 0xA0;
 
         do
         {
