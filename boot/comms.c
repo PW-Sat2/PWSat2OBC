@@ -55,7 +55,8 @@ void checkEeprom(size_t i, char value, size_t* errors)
 
     BSP_EBI_progEEPROM(i, (uint8_t*)buf, 1);
 
-    char r = *(volatile uint8_t*)(BSP_EBI_EEPROM_BASE + i);
+    //    char r = *(volatile uint8_t*)(BSP_EBI_EEPROM_BASE + i);
+    char r = *(volatile uint8_t*)(BOOT_SAFEMODE_BASE_CODE + i);
 
     if (r != value)
     {

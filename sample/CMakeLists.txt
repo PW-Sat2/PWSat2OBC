@@ -8,7 +8,7 @@ set(SOURCES
     tests.c
 )
 
-add_executable(${NAME} ${SOURCES})
+add_executable(${NAME} EXCLUDE_FROM_ALL ${SOURCES})
 
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${UPPER_LINKER_SCRIPT} -specs=nano.specs -specs=nosys.specs")
 
