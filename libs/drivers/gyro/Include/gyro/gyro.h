@@ -1,14 +1,6 @@
 #ifndef SRC_DEVICES_GYRO_H_
 #define SRC_DEVICES_GYRO_H_
 
-#include <stdbool.h>
-#include <array>
-#include <chrono>
-#include <cstdint>
-#include <gsl/span>
-
-#include "utils.h"
-#include "base/os.h"
 #include "i2c/i2c.h"
 
 /**
@@ -32,6 +24,12 @@ namespace devices
          * @brief I2C address of gyroscope with A0 = 0. 7-bit notation.
          */
         constexpr std::uint8_t I2Cadress = 0x68;
+
+        /**
+         * @brief Delay in milliseconds between device configuration and status register check.
+         * This accounts for PLL lock and measurement time.
+         */
+        constexpr std::chrono::milliseconds ConfigDelay{100};
 
         /**
          * @brief Data readed from gyroscope.

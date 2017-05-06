@@ -1,20 +1,9 @@
-#include <string.h>
-#include <cstdint>
-#include <gsl/span>
-#include <gsl/span>
-#include "commands.h"
-#include "logger/logger.h"
 #include "obc.h"
-#include "system.h"
-#include "terminal.h"
-
-#include "imtq/imtq.h"
 
 using std::uint16_t;
-using std::uint8_t;
-using gsl::span;
 
 using namespace devices::gyro;
+
 typedef void (*VoidFuncPtr)(uint16_t argc, char* argv[]);
 
 static void init(uint16_t argc, char* argv[])
@@ -42,11 +31,11 @@ static void read(uint16_t argc, char* argv[])
         return;
     }
 
-    Main.terminal.Printf("%d %d %d %d\n",      //
-        result.Value.X,                        //
-        result.Value.Y,                        //
-        result.Value.Z,                        //
-        result.Value.temperature);             //
+    Main.terminal.Printf("%d %d %d %d\n",            //
+        static_cast<int>(result.Value.X),            //
+        static_cast<int>(result.Value.Y),            //
+        static_cast<int>(result.Value.Z),            //
+        static_cast<int>(result.Value.temperature)); //
 }
 
 static VoidFuncPtr GetDriverCommand(char* name)
