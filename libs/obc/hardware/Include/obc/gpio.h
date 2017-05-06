@@ -67,6 +67,7 @@ namespace obc
         }
     };
 
+    /** @brief Structure describing UART pins */
     template <typename Location> struct UARTPins
     {
         /** @brief TX */
@@ -125,7 +126,7 @@ namespace obc
         const SPIPins<TSPI> SPI;
         /** @brief LEUART */
         const LEUARTPins<TLEUART> LEUART;
-
+        /** @brief UART */
         const UARTPins<TUART> UART;
 
         /** @brief I2C0 */

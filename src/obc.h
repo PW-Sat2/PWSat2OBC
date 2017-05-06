@@ -58,6 +58,10 @@ struct OBC
      */
     OSResult PostStartInitialization();
 
+    /**
+     * @brief Returns current LineIO implementation
+     * @return Line IO implementation
+     */
     inline LineIO& GetLineIO();
 
     /** @brief File system object */

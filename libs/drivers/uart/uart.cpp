@@ -8,22 +8,7 @@
 #include "logger/logger.h"
 #include "system.h"
 
-static drivers::uart::UART* uart = nullptr;
-
 #define DEBUG_UART
-
-__attribute__((optimize("O3"))) void UART1_RX_IRQHandler()
-{
-#ifdef DEBUG_UART
-    GPIO->P[gpioPortC].DOUTCLR = 1 << 11;
-//    GPIO_PinOutClear(gpioPortC, 11);
-#endif
-
-    if (uart != nullptr)
-    {
-        uart->OnReceived();
-    }
-}
 
 namespace drivers
 {
@@ -39,14 +24,10 @@ namespace drivers
             this->_lineIO.VPrintf = VPrintf;
 
             this->_event.Initialize();
-
-            ::uart = this;
         }
 
         void UART::Initialize()
         {
-            this->_queue.Create();
-
             USART_InitAsync_TypeDef init = USART_INITASYNC_DEFAULT;
             init.baudrate = io_map::UART::Baudrate;
             init.enable = usartDisable;
@@ -106,15 +87,16 @@ namespace drivers
             }
         }
 
-        size_t UART::Readline(struct _LineIO* io, char* buffer, std::size_t /*bufferLength*/)
+        size_t UART::Readline(struct _LineIO* io, char* buffer, std::size_t bufferLength)
         {
             auto This = reinterpret_cast<UART*>(io->extra);
 
             This->_event.Clear(Event::LineEndReceived);
-
+#ifdef DEBUG_UART
             GPIO_PinOutClear(gpioPortC, 12);
-
+#endif
             This->_buffer = buffer;
+            This->_bufferEnd = buffer + bufferLength;
 
             NVIC_EnableIRQ(IRQn::UART1_RX_IRQn);
 
@@ -122,7 +104,10 @@ namespace drivers
 
             NVIC_DisableIRQ(IRQn::UART1_RX_IRQn);
 
+#ifdef DEBUG_UART
             GPIO_PinOutSet(gpioPortC, 12);
+#endif
+
             *(This->_buffer - 1) = 0;
 
             return (This->_buffer - buffer);
@@ -166,18 +151,24 @@ namespace drivers
             auto b = io_map::UART::Peripheral->RXDATA & 0x0FF;
             *this->_buffer = b;
             this->_buffer++;
-            if (b == '\n')
+            if (b == '\n' || this->_buffer == this->_bufferEnd)
             {
+#ifdef DEBUG_UART
                 GPIO_PinOutClear(gpioPortC, 13);
+#endif
+
                 NVIC_SetPendingIRQ(io_map::UART::WakeUpInterrupt);
             }
-
+#ifdef DEBUG_UART
             GPIO->P[gpioPortC].DOUTSET = 1 << 11;
+#endif
         }
 
         void UART::OnWakeUpInterrupt()
         {
+#ifdef DEBUG_UART
             GPIO_PinOutSet(gpioPortC, 13);
+#endif
             this->_event.SetISR(Event::LineEndReceived);
         }
 
