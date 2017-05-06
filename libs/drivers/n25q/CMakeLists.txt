@@ -2,7 +2,7 @@ set(NAME n25q)
 
 set(SOURCES
     n25q.cpp
-    yaffs.cpp
+    redundant_n25q.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -14,6 +14,7 @@ target_link_libraries(${NAME}
 	yaffs
 	logger
 	fs
+	assert
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

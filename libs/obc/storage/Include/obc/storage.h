@@ -59,6 +59,12 @@ namespace obc
          */
         OSResult Erase();
 
+        /**
+         * @brief Gives access to the actual storage object
+         * @return Internal storage object.
+         */
+        Storage& GetInternalStorage();
+
       private:
         /** @brief Underlying storage implementation */
         Storage _storage;
@@ -84,6 +90,11 @@ namespace obc
     template <typename Storage> inline OSResult obc::OBCStorageHandler<Storage>::Erase()
     {
         return this->_storage.Erase();
+    }
+
+    template <typename Storage> inline Storage& obc::OBCStorageHandler<Storage>::GetInternalStorage()
+    {
+        return this->_storage;
     }
 
 #ifdef USE_EXTERNAL_FLASH

@@ -1,6 +1,6 @@
 #include "Include/mission/time.hpp"
 #include "logger/logger.h"
-#include "state/Time/TimeCorrectionConfiguration.hpp"
+#include "state/time/TimeCorrectionConfiguration.hpp"
 #include "state/struct.h"
 
 using services::time::TimeProvider;
