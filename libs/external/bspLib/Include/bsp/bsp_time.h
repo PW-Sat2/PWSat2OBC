@@ -9,7 +9,7 @@
 
 #include "em_cmu.h"
 
-volatile uint32_t msTicks; 					///< Runtime counter in ms, used for general purpose.
+extern volatile uint32_t msTicks; ///< Runtime counter in ms, used for general purpose.
 
 void BSP_Clocks_Init(void);
 void SysTick_Handler(void);

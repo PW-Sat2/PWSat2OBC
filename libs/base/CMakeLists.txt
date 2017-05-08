@@ -5,11 +5,13 @@ set(SOURCES
     writer.cpp
     ecc.cpp
     os_base.cpp
+    crc.cpp
     Include/base/reader.h
     Include/base/writer.h
     Include/system.h
     Include/base/os.h
     Include/base/ecc.h
+    Include/base/crc.h
 )
 
 add_library(${NAME} STATIC ${SOURCES})

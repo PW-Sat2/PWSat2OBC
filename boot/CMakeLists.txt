@@ -1,14 +1,19 @@
 set(NAME boot)
 
 set(SOURCES
-    background.c
-    comms.c
-    crc.c
-    flash.c
-    main.c
-    xmodem.c
+    background.cpp
+    comms.cpp
+    flash.cpp
+    main.cpp
+    xmodem.cpp
     fault_handlers.c
-    boot.c
+    boot.cpp
+    
+    commands/test.cpp
+    commands/booting.cpp
+    commands/settings.cpp
+    commands/upload.cpp
+    commands/boot_table.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -20,6 +25,7 @@ target_link_libraries(${NAME}
       emlib
       bspLib
       assert
+      base
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)
@@ -36,8 +42,6 @@ target_format_sources(${NAME} "${SOURCES}")
 
 set_target_properties(${NAME} PROPERTIES COMPILE_FLAGS "\
     -Wno-unused-parameter \
-    -Wno-strict-prototypes \
     -Wno-unused-but-set-variable \
-    -Wno-old-style-declaration \
 ")
 

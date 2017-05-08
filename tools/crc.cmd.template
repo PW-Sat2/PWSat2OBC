@@ -1,0 +1,6 @@
+@echo off
+
+set PYTHON="${PYTHON_EXECUTABLE}"
+set F="${CMAKE_SOURCE_DIR}/integration_tests/tools/crc.py"
+
+%PYTHON% %F% %*
