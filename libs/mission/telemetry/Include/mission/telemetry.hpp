@@ -44,6 +44,7 @@ namespace mission
     /**
      * @brief This task is responsible for observing the telemetry container state and as soon
      * as change is observed extract save it to telemetry event file.
+     * @mission_task
      *
      * This task uses two files for saving the state of the telemetry changes:
      * - current telemetry file - This file is actively used and contains the most recent telemetry changes.

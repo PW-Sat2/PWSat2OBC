@@ -19,6 +19,7 @@ namespace mission
          */
         /**
          * @brief Primary adcs mission taks.
+         * @mission_task
          *
          * This task is responsible for monitoring the adcs subsystem state and publish its state to the
          * global system state, plus it is also responsible for enabling built-in detumbling algorithm once the

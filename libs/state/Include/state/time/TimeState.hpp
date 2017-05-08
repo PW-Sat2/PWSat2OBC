@@ -12,6 +12,8 @@ namespace state
      * @ingroup persistent_state
      * @brief This type contains information related to time subsystem state, primarily synchronization between
      * internal clock and external real time clock.
+     * @persistent_state
+     * @telemetry_element
      */
     class TimeState
     {

@@ -13,6 +13,7 @@ namespace mission
         /**
          * @brief Mission part related to antenna deployment.
          * @ingroup mission_atenna
+         * @mission_task
          *
          * This components provides two mission fragments related to antenna deployment: Action & Update parts.
          *

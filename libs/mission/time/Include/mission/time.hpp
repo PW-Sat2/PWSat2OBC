@@ -24,6 +24,7 @@ namespace mission
     /**
      * @brief Task that is responsible for updating current state in global mission state object
      * and correct time based on external RTC.
+     * @mission_task
      *
      * The time synchronization process is run once every 15 minutes assuming that synchronization process succeeds.
      * The time synchronization process will adjust current mission time. The process takes as its input:
