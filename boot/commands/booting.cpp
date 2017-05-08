@@ -7,27 +7,21 @@ using std::uint8_t;
 
 void BootUpper()
 {
-    char debugStr[60] = {0};
-    auto debugLen = sprintf((char*)debugStr, "\n\nBooting to upper half ");
-    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+    BSP_UART_Puts(BSP_UART_DEBUG, "\n\nBooting to upper half ");
 
     BootToAddress(BOOT_APPLICATION_BASE);
 }
 
 void BootToSelected()
 {
-    char debugStr[60] = {0};
-
     auto index = USART_Rx(BSP_UART_DEBUG);
     if (index > BOOT_TABLE_SIZE)
     {
-        auto debugLen = sprintf((char*)debugStr, "\n\nError: Boot index out of bounds!");
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nError: Boot index out of bounds!");
         return;
     }
 
-    auto debugLen = sprintf((char*)debugStr, "\nBooting index: %d", index);
-    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+    BSP_UART_Printf<60>(BSP_UART_DEBUG, "\nBooting index: %d", index);
 
     BootToAddress(LoadApplication(index));
 }

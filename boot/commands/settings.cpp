@@ -3,22 +3,17 @@
 
 void SetBootIndex()
 {
-    char debugStr[80];
-
-    auto debugLen = sprintf((char*)debugStr, "\n\nNew Boot Index: ");
-    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+    BSP_UART_Puts(BSP_UART_DEBUG, "\n\nNew Boot Index: ");
 
     // get boot index
     auto index = USART_Rx(BSP_UART_DEBUG);
 
-    debugLen = sprintf((char*)debugStr, "%d", index);
-    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+    BSP_UART_Printf<4>(BSP_UART_DEBUG, "%d", index);
 
     // test boot index
     if (index > BOOT_TABLE_SIZE)
     {
-        debugLen = sprintf((char*)debugStr, "\n\nError: Boot index out of bounds!");
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nError: Boot index out of bounds!");
         return;
     }
 
@@ -26,6 +21,5 @@ void SetBootIndex()
     BOOT_setBootIndex(index);
     BOOT_resetBootCounter();
 
-    debugLen = sprintf((char*)debugStr, "...Done!");
-    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+    BSP_UART_Puts(BSP_UART_DEBUG, "...Done!");
 }

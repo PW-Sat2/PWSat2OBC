@@ -5,32 +5,26 @@
 
 void UploadApplication()
 {
-    char debugStr[80] = {0};
-    auto debugLen = sprintf((char*)debugStr, "\n\nBoot Index: ");
-    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+    BSP_UART_Puts(BSP_UART_DEBUG, "\n\nBoot Index: ");
 
     // get boot index
     auto index = USART_Rx(BSP_UART_DEBUG);
 
-    debugLen = sprintf((char*)debugStr, "%d", index);
-    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+    BSP_UART_Printf<4>(BSP_UART_DEBUG, "%d", index);
 
     // test boot index
     if (index == 0x00)
     {
-        debugLen = sprintf((char*)debugStr, "\nError: Cant override safe mode program!");
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+        BSP_UART_Puts(BSP_UART_DEBUG, "\nError: Cant override safe mode program!");
         return;
     }
     if (index > BOOT_TABLE_SIZE)
     {
-        debugLen = sprintf((char*)debugStr, "\nError: Boot index out of bounds!");
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+        BSP_UART_Puts(BSP_UART_DEBUG, "\nError: Boot index out of bounds!");
         return;
     }
 
-    debugLen = sprintf((char*)debugStr, "\nUpload Binary: ");
-    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+    BSP_UART_Puts(BSP_UART_DEBUG, "\nUpload Binary: ");
 
     auto len = XMODEM_upload(index);
 
@@ -48,8 +42,7 @@ void UploadApplication()
     // mark entry as valid
     BOOT_setValid(index);
 
-    debugLen = sprintf((char*)debugStr, "\nBoot Description: ");
-    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+    BSP_UART_Puts(BSP_UART_DEBUG, "\nBoot Description: ");
 
     uint8_t desc[BOOT_ENTRY_DESCRIPTION_SIZE];
 
@@ -73,8 +66,7 @@ void UploadApplication()
     BOOT_setBootIndex(index);
     BOOT_resetBootCounter();
 
-    debugLen = sprintf((char*)debugStr, "...Done!");
-    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+    BSP_UART_Puts(BSP_UART_DEBUG, "...Done!");
 }
 
 void UploadSafeMode()

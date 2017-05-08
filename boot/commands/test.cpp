@@ -8,9 +8,7 @@ static void checkSram(size_t i, char value, size_t* errors)
 
     if (r != value)
     {
-        char buf[80] = {0};
-        sprintf(buf, "%.6X (%.2X -> %.2X)\n", i, value, r);
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)buf, sizeof(buf), true);
+        BSP_UART_Printf<80>(BSP_UART_DEBUG, "%.6X (%.2X -> %.2X)\n", i, value, r);
         (*errors)++;
     }
 }
@@ -20,7 +18,7 @@ static void testSram_FF()
     size_t size = 1000; // 2 * 1024 * 1024;
     size_t errors = 0;
 
-    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\ntestSram_FF ", 13, true);
+    BSP_UART_Puts(BSP_UART_DEBUG, "\ntestSram_FF ");
 
     auto Sram = (volatile uint8_t*)BSP_EBI_SRAM1_BASE;
 
@@ -35,9 +33,7 @@ static void testSram_FF()
 
         if (r != 0x55)
         {
-            char buf[80] = {0};
-            sprintf(buf, "%.6X (%.2X -> %.2X)\n", i, 0x55, r);
-            BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)buf, sizeof(buf), true);
+            BSP_UART_Printf<80>(BSP_UART_DEBUG, "%.6X (%.2X -> %.2X)\n", i, 0x55, r);
 
             errors++;
         }
@@ -45,11 +41,11 @@ static void testSram_FF()
 
     if (errors == 0)
     {
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"------------OK\n", 16, true);
+        BSP_UART_Puts(BSP_UART_DEBUG, "------------OK\n");
     }
     else
     {
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"------------ER\n", 16, true);
+        BSP_UART_Puts(BSP_UART_DEBUG, "------------ER\n");
     }
 }
 
@@ -58,7 +54,7 @@ static void testSram_M()
     size_t size = 2 * 1024 * 1024;
     size_t errors = 0;
 
-    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\ntestSram_M ", 12, true);
+    BSP_UART_Puts(BSP_UART_DEBUG, "\ntestSram_M ");
 
     auto Sram = (volatile uint8_t*)BSP_EBI_SRAM1_BASE;
 
@@ -76,9 +72,7 @@ static void testSram_M()
 
         if (now != expected)
         {
-            char buf[80] = {0};
-            sprintf(buf, "%.6X (%.2X -> %.2X)\n", i, expected, now);
-            BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)buf, sizeof(buf), true);
+            BSP_UART_Printf<80>(BSP_UART_DEBUG, "%.6X (%.2X -> %.2X)\n", i, expected, now);
 
             errors++;
         }
@@ -86,11 +80,11 @@ static void testSram_M()
 
     if (errors == 0)
     {
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"------------OK\n", 16, true);
+        BSP_UART_Puts(BSP_UART_DEBUG, "------------OK\n");
     }
     else
     {
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"------------ER\n", 16, true);
+        BSP_UART_Puts(BSP_UART_DEBUG, "------------ER\n");
     }
 }
 
@@ -99,7 +93,7 @@ static void SRAMTestModulo(void)
     size_t size = 2 * 1024 * 1024;
     size_t errors = 0;
 
-    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\ntestSram ", 10, true);
+    BSP_UART_Puts(BSP_UART_DEBUG, "\ntestSram ");
 
     for (size_t i = 0; i < size; i++)
     {
@@ -110,11 +104,11 @@ static void SRAMTestModulo(void)
 
     if (errors == 0)
     {
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"------------OK\n", 16, true);
+        BSP_UART_Puts(BSP_UART_DEBUG, "------------OK\n");
     }
     else
     {
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"Err\n", 4, true);
+        BSP_UART_Puts(BSP_UART_DEBUG, "------------ER\n");
     }
 }
 
@@ -129,9 +123,7 @@ void checkEeprom(size_t i, char value, size_t* errors)
 
     if (r != value)
     {
-        char buf[80] = {0};
-        sprintf(buf, "%.6X (%.2X -> %.2X)\n", i, value, r);
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)buf, sizeof(buf), true);
+        BSP_UART_Printf<80>(BSP_UART_DEBUG, "%.6X (%.2X -> %.2X)\n", i, value, r);
         (*errors)++;
     }
 }
@@ -158,9 +150,8 @@ void TestEEPROM()
         size_t size = 32 * 1024;
         size_t errors = 0;
         size_t progress = 0;
-        char buf[50] = {0};
 
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\ntestEeprom ", 12, true);
+        BSP_UART_Puts(BSP_UART_DEBUG, "\ntestEeprom ");
 
         for (size_t i = 0; i < size; i++)
         {
@@ -171,18 +162,17 @@ void TestEEPROM()
             if (i % 256 == 0)
             {
                 progress = (i * 100) / size;
-                sprintf(buf, "\nAddr. range: %.6X-%.6X (%u%% done)", i, i + 255, progress);
-                BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)buf, sizeof(buf), true);
+                BSP_UART_Printf<80>(BSP_UART_DEBUG, "\nAddr. range: %.6X-%.6X (%u%% done)", i, i + 255, progress);
             }
         }
 
         if (errors == 0)
         {
-            BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\n------------OK\n", 17, true);
+            BSP_UART_Puts(BSP_UART_DEBUG, "------------OK\n");
         }
         else
         {
-            BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)"\nErr\n", 5, true);
+            BSP_UART_Puts(BSP_UART_DEBUG, "------------ER\n");
         }
     }
 }
