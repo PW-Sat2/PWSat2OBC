@@ -56,7 +56,7 @@ namespace mission
          * @param[in] state Reference to global mission state.
          * @param[in] param Current execution context.
          */
-        static void Run(const SystemState& state, void* param);
+        static void Run(SystemState& state, void* param);
 
         /**
          * @brief Updates current beacons.

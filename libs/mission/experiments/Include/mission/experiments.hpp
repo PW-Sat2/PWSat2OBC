@@ -62,7 +62,7 @@ namespace mission
              * @param state System state
              * @param param Pointer to @ref MissionExperiment
              */
-            static void StartExperiment(const SystemState& state, void* param);
+            static void StartExperiment(SystemState& state, void* param);
 
             /**
              * @brief Condition for 'Kick experiment' action
@@ -77,7 +77,7 @@ namespace mission
              * @param state System state
              * @param param Pointer to @ref MissionExperiment
              */
-            static void KickExperiment(const SystemState& state, void* param);
+            static void KickExperiment(SystemState& state, void* param);
 
             /** @brief Experiment controller */
             ::experiments::ExperimentController& _experimentController;
