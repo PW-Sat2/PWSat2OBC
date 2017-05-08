@@ -7,6 +7,7 @@ set(SOURCES
     Include/state/time/TimeCorrectionConfiguration.hpp
     Include/state/struct.h
     Include/state/PersistentState.hpp
+    Include/state/Telemetry.hpp
     Include/state/fwd.hpp
     state.cpp
     Antenna.cpp

@@ -134,13 +134,18 @@ namespace devices
             std::array<std::uint8_t, ChunkSize> _redundantReadBuffer2;
         };
 
+        /** @brief Mapping from block size type to size in bytes */
         template <BlockMapping blockMapping> struct BlockSize;
+        /** @brief Mapping from block size type Sector to size in bytes */
         template <> struct BlockSize<BlockMapping::Sector>
         {
+            /** @brief Block size */
             static constexpr size_t value = 64_KB;
         };
+        /** @brief Mapping from block size type SubSector to size in bytes */
         template <> struct BlockSize<BlockMapping::SubSector>
         {
+            /** @brief Block size */
             static constexpr size_t value = 4_KB;
         };
 

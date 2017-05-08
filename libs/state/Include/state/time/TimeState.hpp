@@ -12,10 +12,17 @@ namespace state
      * @ingroup persistent_state
      * @brief This type contains information related to time subsystem state, primarily synchronization between
      * internal clock and external real time clock.
+     * @persistent_state
+     * @telemetry_element
      */
     class TimeState
     {
       public:
+        /**
+         * @brief TimeState telemetry unique identifer.
+         */
+        static constexpr int Id = 1;
+
         /**
          * @brief ctor.
          */
@@ -76,6 +83,16 @@ namespace state
          * @return Operation status.
          */
         bool operator!=(const TimeState& arg) const;
+
+        /**
+         * @brief Minor state change fluctuation discriminator.
+         *
+         * This method will report that two objects are different if any of its members
+         * differs for at least a minute.
+         * @param[in] state Object to compare to.
+         * @return True whether the two objects differ enough to be considered different, false otherwise.
+         */
+        bool IsDifferent(const TimeState& state) const;
 
       private:
         /**

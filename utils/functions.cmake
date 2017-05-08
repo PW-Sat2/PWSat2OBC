@@ -9,10 +9,25 @@ function(target_generate_hex TARGET)
       DEPENDS ${TARGET}
   )
 
-  add_custom_target (${TARGET}.hex ALL DEPENDS ${HEX_OBJ})
+  add_custom_target (${TARGET}.hex DEPENDS ${HEX_OBJ})
 endfunction(target_generate_hex)
 
-function(target_jlink_flash TARGET)
+function(target_generate_bin TARGET)
+  set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET})
+  set (BIN_OBJ ${EXEC_OBJ}.bin)
+
+  set_target_properties(${TARGET} PROPERTIES BIN_FILE ${BIN_OBJ})
+
+  add_custom_command(OUTPUT ${BIN_OBJ}
+      COMMAND ${CMAKE_OBJCOPY} -O binary ${EXEC_OBJ} ${BIN_OBJ}
+      DEPENDS ${TARGET}
+  )
+
+  add_custom_target (${TARGET}.bin DEPENDS ${BIN_OBJ})
+endfunction(target_generate_bin)
+
+
+function(target_jlink_flash TARGET BASE_ADDRESS)
   set(COMMAND_FILE ${CMAKE_BINARY_DIR}/jlink/${TARGET}.flash.jlink)
 
   get_property(HEX_FILE TARGET ${TARGET} PROPERTY HEX_FILE)

@@ -19,6 +19,7 @@ set(SOURCES
   imtq/imtqTest.cpp
   imtq/imtqHighLevelTest.cpp
   rtc.cpp
+  gyro/gyroTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
@@ -32,5 +33,6 @@ target_link_libraries(${NAME}
     imtq
     rtc
     unit_tests_base
+    gyro
 )
 

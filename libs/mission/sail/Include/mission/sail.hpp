@@ -20,6 +20,7 @@ namespace mission
 
     /**
      * @brief Task that is responsible for deploying the sail at the end of the primary satelite mission.
+     * @mission_task
      */
     class SailTask : public Action, public Update
     {
@@ -77,7 +78,7 @@ namespace mission
          * @param[in] state Current mission state.
          * @param[in] param Execution context.
          */
-        static void OpenSail(const SystemState& state, void* param);
+        static void OpenSail(SystemState& state, void* param);
 
         /**
          * @brief Updates global mission state.

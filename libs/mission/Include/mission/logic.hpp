@@ -104,9 +104,7 @@ namespace mission
      * @param[in] state System state
      * @param[in] actions List of action descriptors to run.
      */
-    template <typename State>
-    void SystemDispatchActions(const State& state, //
-        gsl::span<ActionDescriptor<State>*> actions)
+    template <typename State> void SystemDispatchActions(State& state, gsl::span<ActionDescriptor<State>*> actions)
     {
         for (auto descriptor : actions)
         {

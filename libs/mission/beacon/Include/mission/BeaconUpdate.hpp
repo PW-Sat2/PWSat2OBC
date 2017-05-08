@@ -21,6 +21,7 @@ namespace mission
      */
     /**
      * @brief Beacon state handler.
+     * @mission_task
      *
      * This task is responsible for setting & updating the beacon that is being constantly send via the communication module.
      */
@@ -55,7 +56,7 @@ namespace mission
          * @param[in] state Reference to global mission state.
          * @param[in] param Current execution context.
          */
-        static void Run(const SystemState& state, void* param);
+        static void Run(SystemState& state, void* param);
 
         /**
          * @brief Updates current beacons.

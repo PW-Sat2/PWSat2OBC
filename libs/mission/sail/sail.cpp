@@ -53,7 +53,7 @@ namespace mission
         return true;
     }
 
-    void SailTask::OpenSail(const SystemState& state, void* param)
+    void SailTask::OpenSail(SystemState& state, void* param)
     {
         auto This = static_cast<SailTask*>(param);
         UNREFERENCED_PARAMETER(state);

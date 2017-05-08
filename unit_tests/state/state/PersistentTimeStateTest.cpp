@@ -2,8 +2,8 @@
 #include "gmock/gmock-matchers.h"
 #include "base/reader.h"
 #include "base/writer.h"
-#include "state/Time/TimeCorrectionConfiguration.hpp"
-#include "state/Time/TimeState.hpp"
+#include "state/time/TimeCorrectionConfiguration.hpp"
+#include "state/time/TimeState.hpp"
 
 using namespace std::chrono_literals;
 using testing::Eq;

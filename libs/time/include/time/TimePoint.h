@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include <stdbool.h>
-#include <stdint.h>
 #include <chrono>
+#include <cstdint>
+#include <type_traits>
 #include "system.h"
 
 EXTERNC_BEGIN
@@ -124,8 +124,23 @@ static inline bool TimePointLessThan(TimePoint left, TimePoint right)
     return TimePointToTimeSpan(left) < TimePointToTimeSpan(right);
 }
 
-/** @} */
-
 EXTERNC_END
+
+/**
+ * @brief Returns the absolute value of the duration d.
+ * @param[in] d Duration whose absolute should be calculated.
+ *
+ * @remark The function does not participate in the overload resolution unless std::numeric_limits<Rep>::is_signed is true.
+ * Backported from C++ 17
+ */
+template <class Rep,
+    class Period,
+    class = std::enable_if_t<std::chrono::duration<Rep, Period>::min() < std::chrono::duration<Rep, Period>::zero()>>
+constexpr std::chrono::duration<Rep, Period> abs(std::chrono::duration<Rep, Period> d)
+{
+    return d >= d.zero() ? d : -d;
+}
+
+/** @} */
 
 #endif

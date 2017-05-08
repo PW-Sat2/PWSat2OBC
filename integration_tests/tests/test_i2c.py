@@ -1,5 +1,7 @@
 from time import sleep
 
+from nose.tools import nottest
+
 from devices import EchoDevice, TimeoutDevice
 from system import auto_comm_handling
 from tests.base import BaseTest

@@ -1,3 +1,5 @@
+from nose.tools import nottest
+
 from devices.eps import HousekeepingA, HousekeepingB
 from obc import PowerCycleBy
 from tests.base import BaseTest
@@ -5,6 +7,7 @@ from utils import TestEvent
 
 
 class EPSTest(BaseTest):
+
     def test_enable_lcl(self):
         ev = TestEvent()
 

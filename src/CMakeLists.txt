@@ -20,6 +20,7 @@ set(SOURCES
     commands/imtq.cpp
     commands/rtc.cpp
     commands/fram.cpp
+    commands/gyro.cpp
     commands/external_flash.cpp
     commands/obc_state.cpp
     commands/temp.cpp
@@ -35,7 +36,7 @@ set(SOURCES
 
 add_executable(${NAME} ${SOURCES})
 
-set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${PLATFORM_LINKER_SCRIPT} -specs=nano.specs -specs=nosys.specs")
+set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${UPPER_LINKER_SCRIPT} -specs=nano.specs -specs=nosys.specs")
 
 target_link_libraries(${NAME}
     platform
@@ -44,6 +45,7 @@ target_link_libraries(${NAME}
     free_rtos_wrapper
     comm
     leuart
+    uart
     swo
     logger
     SwoEndpoint
@@ -63,11 +65,6 @@ target_link_libraries(${NAME}
     n25q
     antenna
     exp_fibo
-    mission_antenna
-    mission_sail
-    mission_time
-    mission_experiments
-    mission_state
     yaffs
     obc_fdir
     obc_storage
@@ -80,20 +77,27 @@ target_link_libraries(${NAME}
     burtc
     obc_adcs
     rtc
+    watchdog
+    mission_antenna
+    mission_sail
+    mission_time
+    mission_experiments
+    mission_state
     mission_adcs
     mission_beacon
-    watchdog
+    mission_telemetry
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)
 
 target_generate_hex(${NAME})
+target_generate_bin(${NAME})
 
 target_memory_report(${NAME})
 
 target_asm_listing(${NAME})
 
-target_jlink_flash(${NAME})
+target_jlink_flash(${NAME} ${UPPER_ADDRESS})
 
 target_format_sources(${NAME} "${SOURCES}")
 

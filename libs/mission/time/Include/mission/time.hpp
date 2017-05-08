@@ -24,6 +24,7 @@ namespace mission
     /**
      * @brief Task that is responsible for updating current state in global mission state object
      * and correct time based on external RTC.
+     * @mission_task
      *
      * The time synchronization process is run once every 15 minutes assuming that synchronization process succeeds.
      * The time synchronization process will adjust current mission time. The process takes as its input:
@@ -135,13 +136,13 @@ namespace mission
          * @param[in] state Reference to global mission state.
          * @param[in] param Current execution context.
          */
-        static void CorrectTimeProxy(const SystemState& state, void* param);
+        static void CorrectTimeProxy(SystemState& state, void* param);
 
         /**
          * @brief Time correction procedure, that will correct current time based on the external RTC.
          * @param[in] state Reference to global mission state.
          */
-        void CorrectTime(const SystemState& state);
+        void CorrectTime(SystemState& state);
 
         /**
          * @brief Time provider reference.

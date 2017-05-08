@@ -66,6 +66,22 @@ namespace obc
             this->RX.Initialize();
         }
     };
+
+    /** @brief Structure describing UART pins */
+    template <typename Location> struct UARTPins
+    {
+        /** @brief TX */
+        const drivers::gpio::OutputPin<typename Location::TX> TX;
+        /** @brief RX */
+        const drivers::gpio::InputPin<typename Location::RX> RX;
+        /** @brief Initializes UART pins */
+        void Initialize() const
+        {
+            this->TX.Initialize();
+            this->RX.Initialize();
+        }
+    };
+
     /**
      * @brief Composes all used GPIO pins together
      *
@@ -75,14 +91,17 @@ namespace obc
         typename TSlaveSelectFlash1,
         typename TSlaveSelectFlash2,
         typename TSlaveSelectFlash3,
+        typename TSlaveSelectFram1,
+        typename TSlaveSelectFram2,
+        typename TSlaveSelectFram3,
         typename TLed0,
         typename TLed1,
         typename TSysClear,
         typename TSPI,
         typename TLEUART,
+        typename TUART,
         typename TI2C0,
-        typename TI2C1,
-        typename TFramChipSelect>
+        typename TI2C1>
     struct OBCGPIOBase
     {
         /** @brief Slave Select - Flash1 */
@@ -91,6 +110,12 @@ namespace obc
         const drivers::gpio::OutputPin<TSlaveSelectFlash2> Flash2ChipSelect;
         /** @brief Slave Select - Flash3 */
         const drivers::gpio::OutputPin<TSlaveSelectFlash3> Flash3ChipSelect;
+        /** @brief Slave Select - Fram1 */
+        const drivers::gpio::OutputPin<TSlaveSelectFram1> Fram1ChipSelect;
+        /** @brief Slave Select - Fram2 */
+        const drivers::gpio::OutputPin<TSlaveSelectFram2> Fram2ChipSelect;
+        /** @brief Slave Select - Fram3 */
+        const drivers::gpio::OutputPin<TSlaveSelectFram3> Fram3ChipSelect;
         /** @brief LED0 */
         const drivers::gpio::OutputPin<TLed0> Led0;
         /** @brief LED1 */
@@ -101,12 +126,13 @@ namespace obc
         const SPIPins<TSPI> SPI;
         /** @brief LEUART */
         const LEUARTPins<TLEUART> LEUART;
+        /** @brief UART */
+        const UARTPins<TUART> UART;
+
         /** @brief I2C0 */
         const I2CPins<TI2C0> I2C_0;
         /** @brief I2C1 */
         const I2CPins<TI2C1> I2C_1;
-        /** @brief Fram Chip Select */
-        const drivers::gpio::OutputPin<TFramChipSelect> FramChipSelect;
 
         /** @brief Initializes GPIO pins */
         void Initialize() const
@@ -116,14 +142,20 @@ namespace obc
             this->Flash1ChipSelect.Initialize();
             this->Flash2ChipSelect.Initialize();
             this->Flash3ChipSelect.Initialize();
+            this->Fram1ChipSelect.Initialize();
+            this->Fram2ChipSelect.Initialize();
+            this->Fram3ChipSelect.Initialize();
             this->Led0.Initialize();
             this->Led1.Initialize();
             this->SysClear.Initialize();
             this->SPI.Initialize();
+#ifdef USE_LEUART
             this->LEUART.Initialize();
+#else
+            this->UART.Initialize();
+#endif
             this->I2C_0.Initialize();
             this->I2C_1.Initialize();
-            this->FramChipSelect.Initialize();
         }
     };
 
@@ -132,14 +164,17 @@ namespace obc
         io_map::SlaveSelectFlash1,                          //
         io_map::SlaveSelectFlash2,                          //
         io_map::SlaveSelectFlash3,                          //
+        io_map::SlaveSelectFram1,                           //
+        io_map::SlaveSelectFram2,                           //
+        io_map::SlaveSelectFram3,                           //
         io_map::Led0,                                       //
         io_map::Led1,                                       //
         io_map::SysClear,                                   //
         io_map::SPI,                                        //
         io_map::LEUART,
+        io_map::UART,
         io_map::I2C_0,
-        io_map::I2C_1,
-        io_map::DummyFramChipSelect>;
+        io_map::I2C_1>;
 
     /** @} */
 }

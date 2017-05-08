@@ -1,5 +1,7 @@
 import logging
 
+from nose.tools import nottest
+
 from tests.base import BaseTest
 
 

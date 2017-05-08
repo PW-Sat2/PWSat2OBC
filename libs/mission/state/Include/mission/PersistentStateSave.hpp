@@ -21,6 +21,7 @@ namespace mission
     /**
      * @brief This class is responsible for serializing the satellite persistent state
      * and save it to a dedicated memory.
+     * @mission_task
      *
      * This fragment is run every time the persistent's state modification marker is set.
      * Running this fragment will generate the new persistent state serialized form and save it to the
@@ -47,7 +48,7 @@ namespace mission
          * @param[in] state Reference to global mission state, that should contain the persistent part
          * that is supposed to be saved.
          */
-        void SaveState(const SystemState& state);
+        void SaveState(SystemState& state);
 
       private:
         /**
@@ -63,7 +64,7 @@ namespace mission
          * @param[in] state Reference to global mission state.
          * @param[in] param Current execution context.
          */
-        static void SaveState(const SystemState& state, void* param);
+        static void SaveState(SystemState& state, void* param);
 
         /**
          * @brief Storage controller that should be used to write the serialized form of the

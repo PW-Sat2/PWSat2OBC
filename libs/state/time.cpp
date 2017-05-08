@@ -1,9 +1,12 @@
 #include "base/reader.h"
 #include "base/writer.h"
 #include "time/TimeCorrectionConfiguration.hpp"
+#include "time/TimePoint.h"
 #include "time/TimeState.hpp"
 
 using namespace std::chrono_literals;
+using std::chrono::seconds;
+using std::chrono::duration_cast;
 
 namespace state
 {
@@ -31,6 +34,14 @@ namespace state
     {
         writer.WriteQuadWordLE(this->lastMissionTime.count());
         writer.WriteQuadWordLE(this->lastExternalTime.count());
+    }
+
+    bool TimeState::IsDifferent(const TimeState& state) const
+    {
+        static const auto resolution = 60s;
+        const auto missionDifference = duration_cast<seconds>(this->lastMissionTime - state.lastMissionTime);
+        const auto externalDifference = duration_cast<seconds>(this->lastExternalTime - state.lastExternalTime);
+        return resolution < abs(missionDifference) || resolution < abs(externalDifference);
     }
 
     TimeCorrectionConfiguration::TimeCorrectionConfiguration()

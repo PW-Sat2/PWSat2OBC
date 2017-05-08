@@ -1,6 +1,6 @@
-#include "Include/mission/time.hpp"
+#include "mission/time.hpp"
 #include "logger/logger.h"
-#include "state/Time/TimeCorrectionConfiguration.hpp"
+#include "state/time/TimeCorrectionConfiguration.hpp"
 #include "state/struct.h"
 
 using services::time::TimeProvider;
@@ -63,13 +63,13 @@ namespace mission
         return (state.Time - timeState.LastMissionTime()) >= TimeCorrectionPeriod;
     }
 
-    void TimeTask::CorrectTimeProxy(const SystemState& state, void* param)
+    void TimeTask::CorrectTimeProxy(SystemState& state, void* param)
     {
         TimeTask* This = static_cast<TimeTask*>(param);
         This->CorrectTime(state);
     }
 
-    void TimeTask::CorrectTime(const SystemState& state)
+    void TimeTask::CorrectTime(SystemState& state)
     {
         auto time = this->provider.GetCurrentTime();
         if (!time.HasValue)

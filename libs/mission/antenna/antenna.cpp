@@ -349,7 +349,7 @@ namespace mission
          * @param[in] param Pointer to the deployment condition private context. This pointer should point
          * at the object of AntennaMissionState type.
          */
-        static void AntennaDeploymentAction(const SystemState& state, void* param)
+        static void AntennaDeploymentAction(SystemState& state, void* param)
         {
             auto stateDescriptor = static_cast<AntennaMissionState*>(param);
             if (state.PersistentState.Get<state::AntennaConfiguration>().IsDeploymentDisabled())

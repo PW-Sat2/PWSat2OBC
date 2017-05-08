@@ -6,6 +6,7 @@
 #include <chrono>
 #include "PersistentState.hpp"
 #include "StatePolicies.hpp"
+#include "Telemetry.hpp"
 #include "adcs/adcs.hpp"
 #include "antenna/AntennaState.hpp"
 #include "base/os.h"
@@ -42,7 +43,12 @@ struct SystemState
     /**
      * @brief Satellite's persistent state.
      */
-    mutable state::SystemPersistentState PersistentState;
+    state::SystemPersistentState PersistentState;
+
+    /**
+     * @brief Container of all used telemetry elements.
+     */
+    state::ManagedTelemetry telemetry;
 };
 
 #endif /* LIBS_STATE_INCLUDE_STATE_STRUCT_H_ */

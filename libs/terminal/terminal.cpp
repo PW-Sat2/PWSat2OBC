@@ -93,6 +93,8 @@ void Terminal::HandleCommand(char* buffer)
             return;
         }
     }
+
+    LOGF(LOG_LEVEL_WARNING, "Unknown command '%s'", commandName);
 }
 
 void Terminal::Loop(Terminal* terminal)
