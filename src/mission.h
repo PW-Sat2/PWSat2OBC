@@ -10,6 +10,7 @@
 #include "mission/experiments.hpp"
 #include "mission/main.hpp"
 #include "mission/sail.hpp"
+#include "mission/telemetry.hpp"
 #include "mission/time.hpp"
 #include "state/struct.h"
 
@@ -22,7 +23,8 @@ namespace mission
         adcs::AdcsPrimaryTask,
         mission::experiments::MissionExperimentComponent,
         mission::BeaconUpdate,
-        mission::PeristentStateSave //
+        mission::PeristentStateSave,
+        mission::TelemetryTask //
         >
         ObcMission;
 }

@@ -8,19 +8,26 @@
 #include <type_traits>
 #include "antenna/AntennaConfiguration.hpp"
 
+/**
+ * @defgroup persistent_state_details Persistent State Helpers
+ * @ingroup persistent_state_container
+ *
+ * @brief This module contains helper types for persistent state container.
+ */
+
 namespace state
 {
     namespace details
     {
         /**
          * @brief Declaration of helper type for verification that all Persistent state parts meet its requirements.
-         * @ingroup StateDef
+         * @ingroup persistent_state_details
          */
         template <typename... Objects> struct CheckObject;
 
         /**
          * @brief Helper type for verification that all Persistent state parts meet its requirements.
-         * @ingroup StateDef
+         * @ingroup persistent_state_details
          */
         template <typename Object, typename... Objects> struct CheckObject<Object, Objects...>
         {
@@ -53,7 +60,7 @@ namespace state
 
         /**
          * @brief Persistent state part verification terminator.
-         * @ingroup StateDef
+         * @ingroup persistent_state_details
          */
         template <> struct CheckObject<>
         {
@@ -65,15 +72,25 @@ namespace state
     }
 
     /**
-     * @ingroup StateDef
+     * @ingroup persistent_state_container
      * @brief Type that combines together persistent parts of the satellite state.
      * @tparam Parts List of types that are considered important and supposed to be persisted between
      * satellite restarts. There should not be any type duplicates on this list.
      * Every type that is supposed to be part of persistent state should implement interface that is compatible to:
      * @code{.cpp}
      * T();
+     * // @brief This function is responsible for reading complete state from the passed buffer reader object.
+     * // @param[in] reader buffer reader that should be used to read the serialized state.
      * void Read(Reader& reader);
+     *
+     * // @brief The Write function is responsible for writing current object state to the passed writer object.
+     * // @param[in] writer Buffer writer object that should be used to write the serialized state.
      * void Write(Writer& writer) const;
+     *
+     * // @brief This procedure is responsible to return size of this object in its serialized form.
+     * //
+     * // If the size is by definition variable, then this function should return highest possible size
+     * // that is possible to be generated.
      * static constexpr std::uint32_t Size();
      * @endcode
      *
@@ -81,9 +98,23 @@ namespace state
      * verification whether the Persistent State has been modifed since it has been last read/written.
      * This type should provide interface that is compatible with:
      * @code{.cpp}
-     * T()
-     * void NotifyModified()
+     *
+     * // @brief Default construction.
+     * //
+     * // Persistent state policies should be default constructible.
+     * T();
+     *
+     * // @brief This function is used to notify state policy that there has been modification of at least
+     * // one persistent state part.
+     * void NotifyModified();
+     *
+     * // @brief This function is used to notify state policy that all changes to the persistent state
+     * // have been saved and from now the persistent state should be considered unchanged.
      * void NotifySaved()
+     *
+     * // @brief This function is used by the persistent state to query the policy whether there have been
+     * // any state changes since last state save.
+     * // @return True when there has been at least one state modification, false otherwise.
      * bool IsModified() const
      * @endcode
      */
@@ -115,7 +146,7 @@ namespace state
          * @param[in] object New value of the selected part of the persistent state.
          * @tparam Object Type of the object that should be accessed.
          */
-        template <typename Object> void Set(Object object);
+        template <typename Object> void Set(const Object& object);
 
         /**
          * @brief Read the persistent state from the passed object reader.
@@ -191,7 +222,7 @@ namespace state
 
     template <typename StatePolicy, typename... Parts>
     template <typename Object>
-    void PersistentState<StatePolicy, Parts...>::Set(Object object)
+    void PersistentState<StatePolicy, Parts...>::Set(const Object& object)
     {
         std::get<Object>(this->parts) = std::move(object);
         statePolicy.NotifyModified();

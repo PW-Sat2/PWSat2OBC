@@ -6,7 +6,14 @@
 namespace state
 {
     /**
-     * @ingroup StateDef
+     * @defgroup persistent_state_container_policies State Tracking Policies
+     * @ingroup persistent_state_container
+     *
+     * @brief This module contains policies for different persistent state container state tracking variants.
+     * @{
+     */
+
+    /**
      * @brief State tracking policy for Persistent state.
      *
      * This policy does not track anything but always report that state has been changed.
@@ -39,7 +46,7 @@ namespace state
     };
 
     /**
-     * @ingroup StateDef
+     * @ingroup persistent_state_container_policies
      * @brief State tracking policy for Persistent state.
      *
      *
@@ -86,6 +93,7 @@ namespace state
     {
         return this->isModified;
     }
+    /** @} */
 }
 
 #endif

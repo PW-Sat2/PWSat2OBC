@@ -118,6 +118,8 @@ namespace
 
         yaffs_close(file);
 
+        yaffs_unlink("/file");
+
         yaffs_unmount("/");
 
         yaffs_mount("/");
@@ -319,6 +321,91 @@ namespace
         api.MakeDirectory(path);
 
         ASSERT_THAT(api.Exists(path), Eq(true));
+
+        yaffs_unmount("/");
+    }
+
+    TEST_F(FileSystemTest, ShouldRemoveExistingFile)
+    {
+        const char path[] = "/file";
+
+        yaffs_mount("/");
+
+        auto file = yaffs_open(path, O_CREAT | O_WRONLY, S_IRWXU);
+
+        yaffs_close(file);
+
+        yaffs_unlink(path);
+
+        ASSERT_THAT(api.Exists(path), Eq(false));
+
+        yaffs_unmount("/");
+    }
+
+    TEST_F(FileSystemTest, ShouldRemoveNonExistingFile)
+    {
+        const char path[] = "/file";
+
+        yaffs_mount("/");
+
+        ASSERT_THAT(api.Unlink(path), Ne(OSResult::Success));
+
+        ASSERT_THAT(api.Exists(path), Eq(false));
+
+        yaffs_unmount("/");
+    }
+
+    TEST_F(FileSystemTest, ShouldMoveExistingFile)
+    {
+        const char* path = "/file";
+
+        const char* target = "/target";
+
+        yaffs_mount("/");
+
+        auto file = yaffs_open(path, O_CREAT | O_WRONLY, S_IRWXU);
+
+        yaffs_close(file);
+
+        ASSERT_THAT(api.Move(path, target), Eq(OSResult::Success));
+
+        ASSERT_THAT(api.Exists(path), Eq(false));
+        ASSERT_THAT(api.Exists(target), Eq(true));
+
+        yaffs_unmount("/");
+    }
+
+    TEST_F(FileSystemTest, MoveNonExistingFile)
+    {
+        const char* path = "/file";
+
+        const char* target = "/target";
+
+        yaffs_mount("/");
+
+        ASSERT_THAT(api.Move(path, target), Ne(OSResult::Success));
+
+        ASSERT_THAT(api.Exists(path), Eq(false));
+        ASSERT_THAT(api.Exists(target), Eq(false));
+
+        yaffs_unmount("/");
+    }
+
+    TEST_F(FileSystemTest, MoveToExistingFile)
+    {
+        const char* path = "/file";
+
+        const char* target = "/target";
+
+        yaffs_mount("/");
+
+        yaffs_close(yaffs_open(path, O_CREAT | O_WRONLY, S_IRWXU));
+        yaffs_close(yaffs_open(target, O_CREAT | O_WRONLY, S_IRWXU));
+
+        ASSERT_THAT(api.Move(path, target), Eq(OSResult::Success));
+
+        ASSERT_THAT(api.Exists(path), Eq(false));
+        ASSERT_THAT(api.Exists(target), Eq(true));
 
         yaffs_unmount("/");
     }
