@@ -3,5 +3,6 @@ from experiments import *
 
 __all__ = [
     'DownloadFile',
+    'RemoveFile',
     'PerformDetumblingExperiment'
 ]

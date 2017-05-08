@@ -65,6 +65,7 @@ namespace services
 
         /** @brief Type that represents file opening status. */
         using FileOpenResult = IOOperationResult<FileHandle>;
+
         /** @brief Type that represents directory opening status. */
         using DirectoryOpenResult = IOOperationResult<DirectoryHandle>;
 

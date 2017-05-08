@@ -19,14 +19,11 @@ namespace obc
             /**
              * @brief Ctor
              * @param path Path to file that will be send
-             * @param apid APID that will be used in downlink frames
+             * @param correlationId Operation correlation id
              * @param transmitter Transmitter
              * @param fs File system
              */
-            FileSender(const char* path,
-                telecommunication::downlink::DownlinkAPID apid,
-                devices::comm::ITransmitFrame& transmitter,
-                services::fs::IFileSystem& fs);
+            FileSender(const char* path, uint8_t correlationId, devices::comm::ITransmitFrame& transmitter, services::fs::IFileSystem& fs);
 
             /**
              * @brief Checks if requested operation is valid
@@ -44,8 +41,8 @@ namespace obc
           private:
             /** @brief File to send */
             services::fs::File _file;
-            /** @brief APID used is downlink frames */
-            telecommunication::downlink::DownlinkAPID _apid;
+            /** @brief Operation correlation id */
+            uint8_t _correlationId;
             /** @brief Transmitter */
             devices::comm::ITransmitFrame& _transmitter;
             /** @brief Opened file size */
@@ -62,7 +59,7 @@ namespace obc
          * Command code: 0xAB
          *
          * Parameters:
-         *  - 8-bit - APID that will be used in response
+         *  - 8-bit - Operation correlation id that will be used in response
          *  - 8-bit - Path length
          *  - String - path to file
          *  - 8-bit - Byte '0'
@@ -71,11 +68,47 @@ namespace obc
         class DownloadFileTelecommand final : public telecommunication::uplink::Telecommand<0xAB>
         {
           public:
+            enum class ErrorCode : std::uint8_t
+            {
+                Success = 0x00,
+                FileNotFound = 0x01,
+                MalformedRequest = 0x02
+            };
+
             /**
              * @brief Ctor
              * @param fs File system
              */
             DownloadFileTelecommand(services::fs::IFileSystem& fs);
+
+            virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
+
+          private:
+            /** @brief File system */
+            services::fs::IFileSystem& _fs;
+        };
+
+        /**
+         * @brief Remove existing file
+         * @ingroup telecommands
+         * @telecommand
+         *
+         * Command code: 0xAC
+         *
+         * Parameters:
+         *  - 8-bit - APID that will be used in response
+         *  - 8-bit - Path length
+         *  - String - path to file
+         *  - 8-bit - Byte '0'
+         */
+        class RemoveFileTelecommand final : public telecommunication::uplink::Telecommand<0xAC>
+        {
+          public:
+            /**
+             * @brief Ctor
+             * @param fs File system
+             */
+            RemoveFileTelecommand(services::fs::IFileSystem& fs);
 
             virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
 
