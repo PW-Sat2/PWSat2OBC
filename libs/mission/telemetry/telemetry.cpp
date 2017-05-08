@@ -56,7 +56,7 @@ namespace mission
         }
     }
 
-    bool TelemetryTask::SaveToFile(gsl::span<const std::uint8_t> frame)
+    bool TelemetryTask::SaveToFile(gsl::span<const std::uint8_t> buffer)
     {
         services::fs::File file(this->provider, //
             this->configuration.currentFileName,
@@ -94,6 +94,6 @@ namespace mission
             }
         }
 
-        return static_cast<bool>(file.Write(frame));
+        return static_cast<bool>(file.Write(buffer));
     }
 }
