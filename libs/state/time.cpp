@@ -1,7 +1,7 @@
-#include <cmath>
 #include "base/reader.h"
 #include "base/writer.h"
 #include "time/TimeCorrectionConfiguration.hpp"
+#include "time/TimePoint.h"
 #include "time/TimeState.hpp"
 
 using namespace std::chrono_literals;
@@ -38,9 +38,10 @@ namespace state
 
     bool TimeState::IsDifferent(const TimeState& state) const
     {
+        static const auto resolution = 60s;
         const auto missionDifference = duration_cast<seconds>(this->lastMissionTime - state.lastMissionTime);
         const auto externalDifference = duration_cast<seconds>(this->lastExternalTime - state.lastExternalTime);
-        return std::abs(missionDifference.count()) >= 60 || std::abs(externalDifference.count()) >= 60;
+        return resolution < abs(missionDifference) || resolution < abs(externalDifference);
     }
 
     TimeCorrectionConfiguration::TimeCorrectionConfiguration()

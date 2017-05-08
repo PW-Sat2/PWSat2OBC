@@ -86,10 +86,10 @@ namespace mission
          * @brief This procedure is responsible for appending the passed data frame to the current
          * telemetry event file.
          *
-         * @param[in] frame Buffer with data frame that should be added to file.
+         * @param[in] buffer Buffer with data frame that should be added to file.
          * @return Operation status, true on success, false otherwise.
          */
-        bool SaveToFile(gsl::span<const std::uint8_t> frame);
+        bool SaveToFile(gsl::span<const std::uint8_t> buffer);
 
       private:
         /**
