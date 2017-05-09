@@ -3,6 +3,9 @@ set(NAME adcs_experimental)
 set(SOURCES      
     AdcsExperimental.cpp
     Include/adcs/AdcsExperimental.hpp
+    Detumbling.cpp
+    Include/adcs/Detumbling.hpp
+    Include/adcs/InterfaceTypes.hpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -11,6 +14,7 @@ target_link_libraries(${NAME}
     base    
     logger
     adcs
+    eigen
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

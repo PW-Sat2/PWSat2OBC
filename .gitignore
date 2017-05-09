@@ -20,3 +20,5 @@ integration_tests/ipython_profile/log
 integration_tests/ipython_profile/pid
 integration_tests/ipython_profile/security
 integration_tests/ipython_profile/history.sqlite
+
+*.swp
