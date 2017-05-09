@@ -36,8 +36,6 @@ namespace obc
 
         bool FileSender::SendPart(std::uint32_t seq)
         {
-            constexpr uint8_t maxFileDataSize = DownlinkFrame::MaxPayloadSize - 2;
-
             if (seq > this->_lastSeq)
             {
                 return false;
@@ -45,7 +43,7 @@ namespace obc
 
             DownlinkFrame response(DownlinkAPID::Operation, seq);
 
-            if (OS_RESULT_FAILED(this->_file.Seek(SeekOrigin::Begin, seq * maxFileDataSize)))
+            if (OS_RESULT_FAILED(this->_file.Seek(SeekOrigin::Begin, seq * MaxFileDataSize)))
             {
                 return false;
             }
@@ -53,7 +51,7 @@ namespace obc
             response.PayloadWriter().WriteByte(_correlationId);
             response.PayloadWriter().WriteByte(static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::Success));
 
-            auto segmentSize = std::min<std::size_t>(maxFileDataSize, this->_fileSize - seq * maxFileDataSize);
+            auto segmentSize = std::min<std::size_t>(MaxFileDataSize, this->_fileSize - seq * MaxFileDataSize);
 
             auto buf = response.PayloadWriter().Reserve(segmentSize);
 
