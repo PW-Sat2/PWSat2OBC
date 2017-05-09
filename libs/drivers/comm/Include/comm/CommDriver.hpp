@@ -4,7 +4,7 @@
 #pragma once
 
 #include "IBeaconController.hpp"
-#include "ITransmitFrame.hpp"
+#include "ITransmitter.hpp"
 #include "base/os.h"
 #include "comm.hpp"
 #include "error_counter/error_counter.hpp"
@@ -19,7 +19,7 @@ COMM_BEGIN
  * @remark Do not access directly the fields of this type, instead use the comm driver interface to
  * perform requested action.
  */
-class CommObject final : public ITransmitFrame, public IBeaconController
+class CommObject final : public ITransmitter, public IBeaconController
 {
   public:
     /**
@@ -105,7 +105,7 @@ class CommObject final : public ITransmitFrame, public IBeaconController
      * @param[in] frame Buffer containing frame contents.
      * @return Operation status, true in case of success, false otherwise.
      */
-    bool SendFrame(gsl::span<const std::uint8_t> frame);
+    virtual bool SendFrame(gsl::span<const std::uint8_t> frame) override final;
 
     /**
      * @brief Requests the contents of the oldest received frame from the queue.
@@ -148,7 +148,7 @@ class CommObject final : public ITransmitFrame, public IBeaconController
      * @param[in] requestedState New transmitter state when it is idle.
      * @return Operation status, true in case of success, false otherwise.
      */
-    bool SetTransmitterStateWhenIdle(IdleState requestedState);
+    virtual bool SetTransmitterStateWhenIdle(IdleState requestedState) override final;
 
     /**
      * @brief Set the transmitter baud rate.
@@ -156,7 +156,7 @@ class CommObject final : public ITransmitFrame, public IBeaconController
      * @param[in] bitrate New transmitter baud rate.
      * @return Operation status, true in case of success, false otherwise.
      */
-    bool SetTransmitterBitRate(Bitrate bitrate);
+    virtual bool SetTransmitterBitRate(Bitrate bitrate) override final;
 
     /**
      * @brief Queries the comm driver object for current transmitter state.
@@ -167,7 +167,7 @@ class CommObject final : public ITransmitFrame, public IBeaconController
      *
      * The contents of the state object is undefined in case of the failure.
      */
-    bool GetTransmitterState(TransmitterState& state);
+    virtual bool GetTransmitterState(TransmitterState& state) override final;
 
     /**
      * @brief Resets the hardware associated with the requested comm object.
@@ -181,7 +181,7 @@ class CommObject final : public ITransmitFrame, public IBeaconController
      *
      * @return Operation status, true in case of success, false otherwise.
      */
-    bool ResetTransmitter();
+    virtual bool ResetTransmitter() override final;
 
     /**
      * @brief Resets the receiver hardware associated with the requested comm object.

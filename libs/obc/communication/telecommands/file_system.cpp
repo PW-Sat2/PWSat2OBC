@@ -1,7 +1,7 @@
 #include "file_system.hpp"
 #include <cmath>
 #include "base/reader.h"
-#include "comm/ITransmitFrame.hpp"
+#include "comm/ITransmitter.hpp"
 #include "fs/fs.h"
 #include "logger/logger.h"
 #include "system.h"
@@ -17,7 +17,7 @@ namespace obc
     namespace telecommands
     {
         FileSender::FileSender(
-            const char* path, uint8_t correlationId, devices::comm::ITransmitFrame& transmitter, services::fs::IFileSystem& fs)
+            const char* path, uint8_t correlationId, devices::comm::ITransmitter& transmitter, services::fs::IFileSystem& fs)
             : _file(fs, path, services::fs::FileOpen::Existing, services::fs::FileAccess::ReadOnly), _correlationId(correlationId),
               _transmitter(transmitter)
         {
@@ -64,7 +64,7 @@ namespace obc
         {
         }
 
-        void DownloadFileTelecommand::Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters)
+        void DownloadFileTelecommand::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
         {
             Reader r(parameters);
 
@@ -121,7 +121,7 @@ namespace obc
         {
         }
 
-        void RemoveFileTelecommand::Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters)
+        void RemoveFileTelecommand::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
         {
             Reader r(parameters);
 

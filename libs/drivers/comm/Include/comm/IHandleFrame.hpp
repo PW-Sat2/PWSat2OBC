@@ -19,7 +19,7 @@ struct IHandleFrame
      * @param[in] frame Reference to structure describing received frame
      *
      */
-    virtual void HandleFrame(ITransmitFrame& transmitter, Frame& frame) = 0;
+    virtual void HandleFrame(ITransmitter& transmitter, Frame& frame) = 0;
 };
 
 COMM_END
