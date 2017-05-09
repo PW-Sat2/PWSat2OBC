@@ -5,6 +5,7 @@
 #include <em_emu.h>
 #include <em_usart.h>
 
+#include "boot/params.hpp"
 #include "io_map.h"
 #include "system.h"
 
@@ -49,6 +50,18 @@ int main(void)
     USART_Enable(io_map::UART::Peripheral, usartEnable);
 
     USART_Tx(io_map::UART::Peripheral, '!');
+
+    char msg[256] = {0};
+
+    sprintf(msg, "Magic: 0x%lX\nReason=%d\nIndex=%d\n", boot::MagicNumber, num(boot::BootReason), boot::Index);
+
+    char* c = msg;
+
+    while (*c != '\0')
+    {
+        USART_Tx(io_map::UART::Peripheral, *c);
+        c++;
+    }
 
     SysTick_Config(SystemCoreClockGet());
     NVIC_EnableIRQ(IRQn_Type::SysTick_IRQn);

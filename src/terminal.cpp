@@ -50,6 +50,7 @@ static const TerminalCommandDescription commands[] = {
     {"hang", Hang},
     {"state", StateCommandHandler},
     {"error_counters", ErrorCountersCommand},
+    {"boot_params", BootParamsCommand},
 };
 
 void InitializeTerminal(void)

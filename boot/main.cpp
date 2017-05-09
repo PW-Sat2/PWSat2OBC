@@ -5,6 +5,7 @@
   * @version 2.0
   ******************************************************************************/
 #include "boot.h"
+#include "boot/params.hpp"
 #include "includes.h"
 
 #define COMMS_TIMEOUT 5000 // milliseconds
@@ -17,6 +18,7 @@ void resetPeripherals(void);
 void restClocks(void);
 
 /***************************************************************************/ /**
+
   * @brief  Main function
   * Main is called from _program_start, see assembly startup file
   ******************************************************************************/

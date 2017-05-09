@@ -6,6 +6,7 @@
 #include <em_system.h>
 #include <core_cm3.h>
 
+#include "boot/params.hpp"
 #include "commands.h"
 #include "obc.h"
 #include "system.h"
@@ -34,4 +35,9 @@ void ResetHandler(uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
     NVIC_SystemReset();
+}
+
+void BootParamsCommand(std::uint16_t /*argc*/, char* /*argv*/ [])
+{
+    Main.terminal.Printf("MagicNumber=%lX\nReason=%X\nIndex=%d", boot::MagicNumber, num(boot::BootReason), boot::Index);
 }

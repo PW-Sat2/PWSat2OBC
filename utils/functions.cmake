@@ -19,7 +19,7 @@ function(target_generate_bin TARGET)
   set_target_properties(${TARGET} PROPERTIES BIN_FILE ${BIN_OBJ})
 
   add_custom_command(OUTPUT ${BIN_OBJ}
-      COMMAND ${CMAKE_OBJCOPY} -O binary ${EXEC_OBJ} ${BIN_OBJ}
+      COMMAND ${CMAKE_OBJCOPY} -R .boot_params -O binary ${EXEC_OBJ} ${BIN_OBJ}
       DEPENDS ${TARGET}
   )
 
