@@ -14,6 +14,7 @@
 #include "obc/telecommands/file_system.hpp"
 #include "obc/telecommands/ping.hpp"
 #include "obc/telecommands/program_upload.hpp"
+#include "program_flash/fwd.hpp"
 #include "telecommunication/telecommand_handling.h"
 #include "telecommunication/uplink.h"
 #include "time/ICurrentTime.hpp"
@@ -134,13 +135,15 @@ namespace obc
          * @param[in] idleStateController Idle state controller
          * @param[in] fs File system
          * @param[in] experiments Experiments
+         * @param[in] bootTable Boot table
          */
         OBCCommunication(obc::FDIR& fdir,
             drivers::i2c::II2CBus& i2cBus,
             services::time::ICurrentTime& currentTime,
             mission::IIdleStateController& idleStateController,
             services::fs::IFileSystem& fs,
-            obc::OBCExperiments& experiments);
+            obc::OBCExperiments& experiments,
+            program_flash::BootTable& bootTable);
 
         /**
          * @brief Initializes all communication-related drivers and objects
