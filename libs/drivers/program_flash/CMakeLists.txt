@@ -2,6 +2,7 @@ set(NAME program_flash)
 
 set(SOURCES
     boot_table.cpp
+    flash_driver.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

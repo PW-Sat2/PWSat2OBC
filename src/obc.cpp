@@ -4,13 +4,15 @@
 #include "mission.h"
 
 OBC::OBC()
-    : Hardware(this->Fdir.ErrorCounting(), this->PowerControlInterface, timeProvider),                 //
-      PowerControlInterface(this->Hardware.EPS),                                                       //
-      Storage(Hardware.SPI, fs, Hardware.Pins),                                                        //
-      Imtq(Hardware.I2C.Buses.Bus),                                                                    //
-      Experiments(fs, this->adcs.GetAdcsController(), this->timeProvider),                             //
-      Communication(this->Fdir, Hardware.I2C.Buses.Bus, this->timeProvider, Mission, fs, Experiments), //
-      terminal(this->GetLineIO()),                                                                     //
+    : FlashDriver(reinterpret_cast<uint8_t*>(0x84000000)),                                                        //
+      BootTable(FlashDriver),                                                                                     //
+      Hardware(this->Fdir.ErrorCounting(), this->PowerControlInterface, timeProvider),                            //
+      PowerControlInterface(this->Hardware.EPS),                                                                  //
+      Storage(Hardware.SPI, fs, Hardware.Pins),                                                                   //
+      Imtq(Hardware.I2C.Buses.Bus),                                                                               //
+      Experiments(fs, this->adcs.GetAdcsController(), this->timeProvider),                                        //
+      Communication(this->Fdir, Hardware.I2C.Buses.Bus, this->timeProvider, Mission, fs, Experiments, BootTable), //
+      terminal(this->GetLineIO()),                                                                                //
       rtc(Hardware.I2C.Buses.Payload)
 {
 }
@@ -18,6 +20,10 @@ OBC::OBC()
 void OBC::Initialize()
 {
     this->StateFlags.Initialize();
+
+    this->FlashDriver.Initialize();
+
+    this->BootTable.Initialize();
 
     this->Fdir.Initalize();
 
