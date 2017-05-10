@@ -2,18 +2,20 @@
 #include <array>
 #include <bitset>
 #include "base/reader.h"
-#include "comm/ITransmitFrame.hpp"
+#include "comm/ITransmitter.hpp"
 #include "logger/logger.h"
 #include "program_flash/boot_table.hpp"
 #include "telecommunication/downlink.h"
-
-constexpr std::uint8_t* FlashBase = reinterpret_cast<std::uint8_t*>(0x84000000);
 
 namespace obc
 {
     namespace telecommands
     {
-        void EraseBootTableEntry::Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters)
+        EraseBootTableEntry::EraseBootTableEntry(program_flash::BootTable& bootTable) : _bootTable(bootTable)
+        {
+        }
+
+        void EraseBootTableEntry::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
         {
             if (parameters.size() != 1)
             {
@@ -22,13 +24,11 @@ namespace obc
 
             std::bitset<8> selectedEntries(parameters[0]);
 
-            program_flash::BootTable bootTable(FlashBase);
-
             for (auto i = 0; i < 7; i++)
             {
                 if (selectedEntries[i])
                 {
-                    bootTable.Entry(i + 1).Erase();
+                    this->_bootTable.Entry(i + 1).Erase();
                 }
             }
 
@@ -38,7 +38,11 @@ namespace obc
             transmitter.SendFrame(response.Frame());
         }
 
-        void WriteProgramPart::Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters)
+        WriteProgramPart::WriteProgramPart(program_flash::BootTable& bootTable) : _bootTable(bootTable)
+        {
+        }
+
+        void WriteProgramPart::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
         {
             Reader r(parameters);
 
@@ -51,15 +55,13 @@ namespace obc
                 return;
             }
 
-            program_flash::BootTable bootTable(FlashBase);
-
             LOGF(LOG_LEVEL_INFO, "Uploading program part %d to 0x%X", content.size(), offset);
 
             for (auto i = 0; i < 7; i++)
             {
                 if (selectedEntries[i])
                 {
-                    bootTable.Entry(i + 1).WriteContent(offset, content);
+                    this->_bootTable.Entry(i + 1).WriteContent(offset, content);
                 }
             }
 
@@ -70,7 +72,11 @@ namespace obc
             transmitter.SendFrame(response.Frame());
         }
 
-        void FinalizeProgramEntry::Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters)
+        FinalizeProgramEntry::FinalizeProgramEntry(program_flash::BootTable& bootTable) : _bootTable(bootTable)
+        {
+        }
+
+        void FinalizeProgramEntry::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
         {
             Reader r(parameters);
 
@@ -87,15 +93,13 @@ namespace obc
                 return;
             }
 
-            program_flash::BootTable bootTable(FlashBase);
-
             LOG(LOG_LEVEL_INFO, "Finalizing entries");
 
             for (auto i = 0; i < 7; i++)
             {
                 if (selectedEntries[i])
                 {
-                    auto e = bootTable.Entry(i + 1);
+                    auto e = this->_bootTable.Entry(i + 1);
                     e.Crc(expectedCrc);
                     e.Length(length);
                     e.Description(description.data());

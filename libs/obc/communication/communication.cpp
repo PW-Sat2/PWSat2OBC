@@ -16,7 +16,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
     services::time::ICurrentTime& currentTime,
     mission::IIdleStateController& idleStateController,
     services::fs::IFileSystem& fs,
-    obc::OBCExperiments& experiments)
+    obc::OBCExperiments& experiments,
+    program_flash::BootTable& bootTable)
     : UplinkProtocolDecoder(settings::CommSecurityCode),                      //
       SupportedTelecommands(                                                  //
           PingTelecommand(),                                                  //
@@ -25,9 +26,9 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           RemoveFileTelecommand(fs),                                          //
           PerformDetumblingExperiment(experiments),                           //
           AbortExperiment(experiments),                                       //
-          EraseBootTableEntry(),                                              //
-          WriteProgramPart(),                                                 //
-          FinalizeProgramEntry()                                              //
+          EraseBootTableEntry(bootTable),                                     //
+          WriteProgramPart(bootTable),                                        //
+          FinalizeProgramEntry(bootTable)                                     //
           ),                                                                  //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get()), //
       CommDriver(fdir.ErrorCounting(), systemBus, TelecommandHandler)

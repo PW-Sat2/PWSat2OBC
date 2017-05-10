@@ -59,7 +59,7 @@ class UploadProgramTest(BaseTest):
         print f
 
         # finalize entry
-        name = 'Uploaded'
+        name = 'Uploaded2'
         self.system.comm.put_frame(FinalizeProgramEntry([2], length, crc, name))
 
         f = self.system.comm.get_frame(20)

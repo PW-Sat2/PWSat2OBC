@@ -18,6 +18,7 @@ set(SOURCES
     mock/error_counter.cpp
     I2C/I2CMock.cpp
     SPI/SPIMock.cpp
+    fault_handlers.c
 )
 
 add_library(${NAME} STATIC ${SOURCES})
