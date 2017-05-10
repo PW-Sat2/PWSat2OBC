@@ -17,6 +17,7 @@ set(SOURCES
     mock/mock.cpp
     mock/error_counter.cpp
     mock/time.cpp
+    mock/TimeCorrectionProviderMock.cpp
     I2C/I2CMock.cpp
     SPI/SPIMock.cpp
 )

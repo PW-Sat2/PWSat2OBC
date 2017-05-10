@@ -16,7 +16,10 @@ namespace obc
 {
     namespace telecommands
     {
-        TimeTelecommand::TimeTelecommand(services::time::ICurrentTime& time) : _time(time)
+        TimeTelecommand::TimeTelecommand(services::time::ICurrentTime& time, //
+            state::ITimeCorrectionProvider& timeCorrection)
+            : _time(time), //
+              _timeCorrection(timeCorrection)
         {
         }
 
@@ -73,13 +76,15 @@ namespace obc
         void TimeTelecommand::SetTimeCorrectionFactor(Reader& reader, Writer& responseWriter)
         {
             auto correction = reader.ReadSignedWordLE();
-            GenerateReadbackResponse(responseWriter, OSResult::NotImplemented, static_cast<uint64_t>(correction));
+            _timeCorrection.SetCurrentTimeCorrectionFactor(correction);
+            GenerateReadbackResponse(responseWriter, OSResult::Success, static_cast<uint64_t>(correction));
         }
 
         void TimeTelecommand::SetRtcCorrectionFactor(Reader& reader, Writer& responseWriter)
         {
             auto correction = reader.ReadSignedWordLE();
-            GenerateReadbackResponse(responseWriter, OSResult::NotImplemented, static_cast<uint64_t>(correction));
+            _timeCorrection.SetCurrentExternalTimeCorrectionFactor(correction);
+            GenerateReadbackResponse(responseWriter, OSResult::Success, static_cast<uint64_t>(correction));
         }
 
         void TimeTelecommand::GenerateTimeStateResponse(Writer& payloadWriter)
@@ -87,6 +92,11 @@ namespace obc
             auto currentTime = _time.GetCurrentTime();
             uint64_t milisecondsTime = currentTime.HasValue ? currentTime.Value.count() : 0;
             payloadWriter.WriteQuadWordLE(milisecondsTime);
+
+            auto timeCorrection = _timeCorrection.GetCurrentTimeCorrectionFactor();
+            payloadWriter.WriteSignedWordLE(timeCorrection);
+            auto externalTimeCorrection = _timeCorrection.GetCurrentExternalTimeCorrectionFactor();
+            payloadWriter.WriteSignedWordLE(externalTimeCorrection);
         }
 
         void TimeTelecommand::GenerateReadbackResponse(Writer& responseWriter, OSResult result, uint64_t argument)

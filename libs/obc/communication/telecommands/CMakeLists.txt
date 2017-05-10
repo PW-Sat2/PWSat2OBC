@@ -17,6 +17,7 @@ target_link_libraries(${NAME}
 	fs
 	logger
 	obc_experiments
+	state
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

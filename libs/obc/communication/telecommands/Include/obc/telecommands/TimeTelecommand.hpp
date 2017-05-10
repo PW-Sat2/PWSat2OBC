@@ -6,6 +6,7 @@
 #include "base/writer.h"
 #include "telecommunication/telecommand_handling.h"
 
+#include "state/time/ITimeCorrectionProvider.hpp"
 #include "time/ICurrentTime.hpp"
 
 namespace obc
@@ -40,7 +41,7 @@ namespace obc
              * @brief Ctor
              * @param fs File system
              */
-            TimeTelecommand(services::time::ICurrentTime& time);
+            TimeTelecommand(services::time::ICurrentTime& time, state::ITimeCorrectionProvider& _timeCorrection);
 
             virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
 
@@ -56,6 +57,7 @@ namespace obc
           private:
             /** @brief Current time provider */
             services::time::ICurrentTime& _time;
+            state::ITimeCorrectionProvider& _timeCorrection;
 
             void GenerateTimeStateResponse(Writer& responseWriter);
             void GenerateReadbackResponse(Writer& responseWriter, OSResult result, uint64_t argument);

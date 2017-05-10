@@ -16,7 +16,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
     services::time::ICurrentTime& currentTime,
     mission::IIdleStateController& idleStateController,
     services::fs::IFileSystem& fs,
-    obc::OBCExperiments& experiments)
+    obc::OBCExperiments& experiments,
+    state::ITimeCorrectionProvider&& timeCorrectionProvider)
     : UplinkProtocolDecoder(settings::CommSecurityCode),               //
       SupportedTelecommands(                                           //
           PingTelecommand(),                                           //
@@ -25,7 +26,7 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           RemoveFileTelecommand(fs),                                   //
           PerformDetumblingExperiment(experiments),                    //
           AbortExperiment(experiments),
-          TimeTelecommand(currentTime)                                        //
+          TimeTelecommand(currentTime, timeCorrectionProvider)                //
           ),                                                                  //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get()), //
       CommDriver(fdir.ErrorCounting(), systemBus, TelecommandHandler)
