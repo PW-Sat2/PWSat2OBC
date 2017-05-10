@@ -33,7 +33,7 @@ template <std::size_t Size> using Buffer = std::array<uint8_t, Size>;
 class TimeTelecommandTest : public testing::Test
 {
   protected:
-    testing::NiceMock<TransmitFrameMock> _transmitFrame;
+    testing::NiceMock<TransmitterMock> _transmitFrame;
     testing::NiceMock<CurrentTimeMock> _time;
 
     obc::telecommands::TimeTelecommand _telecommand{_time};

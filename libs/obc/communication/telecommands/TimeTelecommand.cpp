@@ -4,11 +4,11 @@
 #include "logger/logger.h"
 #include "telecommunication/downlink.h"
 
-#include "comm/ITransmitFrame.hpp"
+#include "comm/ITransmitter.hpp"
 
 using std::uint8_t;
 using gsl::span;
-using devices::comm::ITransmitFrame;
+using devices::comm::ITransmitter;
 using telecommunication::downlink::DownlinkFrame;
 using telecommunication::downlink::DownlinkAPID;
 
@@ -20,7 +20,7 @@ namespace obc
         {
         }
 
-        void TimeTelecommand::Handle(ITransmitFrame& transmitter, span<const uint8_t> parameters)
+        void TimeTelecommand::Handle(ITransmitter& transmitter, span<const uint8_t> parameters)
         {
             Reader r(parameters);
 

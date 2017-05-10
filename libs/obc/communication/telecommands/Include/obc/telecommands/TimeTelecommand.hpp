@@ -42,7 +42,7 @@ namespace obc
              */
             TimeTelecommand(services::time::ICurrentTime& time);
 
-            virtual void Handle(devices::comm::ITransmitFrame& transmitter, gsl::span<const std::uint8_t> parameters) override;
+            virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
 
             /** @brief Operations allowed by Time Telecommand */
             enum class TimeOperations : std::uint8_t
