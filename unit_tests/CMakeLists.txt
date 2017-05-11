@@ -2,14 +2,12 @@ include(common.cmake)
 set(UNIT_TEST_EXECUTABLES "" CACHE INTERNAL "unit tests list" FORCE)
 
 add_subdirectory(base)
-add_subdirectory(empty)
-add_subdirectory(drivers)
-add_subdirectory(communication)
-add_subdirectory(mission)
-add_subdirectory(state)
 
 add_subdirectory(properties)
-
+add_subdirectory(mission)
+add_subdirectory(drivers)
+add_subdirectory(communication)
+add_subdirectory(state)
 add_subdirectory(others)
 
 message(STATUS "Unit tests=${UNIT_TEST_EXECUTABLES}")
