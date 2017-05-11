@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <chrono>
 #include "base/os.h"
 
 namespace adcs
@@ -22,58 +23,56 @@ namespace adcs
         /**
          * @brief Adcs is currently disabled.
          */
-        Disabled,
+        Disabled = -1,
 
         /**
          * @brief Currently the primary detumbling algorithm is active.
          */
-        BuiltinDetumbling,
+        BuiltinDetumbling = 0,
 
         /**
          * @brief Currently the experimental detumbling algorithm is active.
          */
-        ExperimentalDetumbling,
+        ExperimentalDetumbling = 1,
 
         /**
          * @brief Currently the sun pointing algorithm is active.
          */
-        ExperimentalSunpointing,
+        ExperimentalSunpointing = 2,
     };
 
     /**
-     * @brief Controll interface of detumbling algorithm.
+     * @brief Control interface of ADCS algorithm.
      */
-    struct IDetumblingSupport
+    struct IAdcsProcessor
     {
         /**
-         * @brief Enables the current detumbling algorithm.
+         * @brief Initializes adcs processor.
          * @returns Operation status.
          */
-        virtual OSResult EnableDetumbling() = 0;
+        virtual OSResult Initialize() = 0;
 
         /**
-         * @brief Disables the current detumbling algorithm.
+         * @brief Enable method.
          * @returns Operation status.
          */
-        virtual OSResult DisableDetumbling() = 0;
-    };
-
-    /**
-     * @brief Control interface of sun pointing algorithm.
-     */
-    struct ISunPointingSupport
-    {
-        /**
-         * @brief Enables the current sun pointing algorithm.
-         * @returns Operation status.
-         */
-        virtual OSResult EnableSunPointing() = 0;
+        virtual OSResult Enable() = 0;
 
         /**
-         * @brief Disables the current sun pointing algorithm.
+         * @brief Disable method.
          * @returns Operation status.
          */
-        virtual OSResult DisableSunPointing() = 0;
+        virtual OSResult Disable() = 0;
+
+        /**
+         * @brief Processes ADCS algorithm.
+         */
+        virtual void Process() = 0;
+
+        /**
+         * @brief Wait time between calls of Process method.
+         */
+        virtual std::chrono::milliseconds GetWait() const = 0;
     };
 
     /**
@@ -84,7 +83,13 @@ namespace adcs
     struct IAdcsCoordinator
     {
         /**
-         * @brief Rreturns current adcs subsystem operational mode.
+         * @brief Initializes ADCS coordinator.
+         * @returns Operation status.
+         */
+        virtual OSResult Initialize() = 0;
+
+        /**
+         * @brief Returns current adcs subsystem operational mode.
          * @returns Current subsystem operational mode
          */
         virtual AdcsMode CurrentMode() const = 0;
