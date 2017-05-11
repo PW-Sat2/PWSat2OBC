@@ -11,6 +11,8 @@ struct AdcsCoordinatorMock : adcs::IAdcsCoordinator
     AdcsCoordinatorMock();
     ~AdcsCoordinatorMock();
 
+    MOCK_METHOD0(Initialize, OSResult());
+
     MOCK_CONST_METHOD0(CurrentMode, adcs::AdcsMode());
 
     MOCK_METHOD0(EnableBuiltinDetumbling, OSResult());
@@ -22,24 +24,32 @@ struct AdcsCoordinatorMock : adcs::IAdcsCoordinator
     MOCK_METHOD0(Disable, OSResult());
 };
 
-struct DetumblingMock : adcs::IDetumblingSupport
+struct DetumblingMock : adcs::IAdcsProcessor
 {
     DetumblingMock();
     ~DetumblingMock();
 
-    MOCK_METHOD0(EnableDetumbling, OSResult());
+    MOCK_METHOD0(Enable, OSResult());
 
-    MOCK_METHOD0(DisableDetumbling, OSResult());
+    MOCK_METHOD0(Disable, OSResult());
+
+    MOCK_METHOD0(Process, void());
+
+    MOCK_CONST_METHOD0(GetFrequency, std::chrono::hertz());
 };
 
-struct SunPointingMock : adcs::ISunPointingSupport
+struct SunPointingMock : adcs::IAdcsProcessor
 {
     SunPointingMock();
     ~SunPointingMock();
 
-    MOCK_METHOD0(EnableSunPointing, OSResult());
+    MOCK_METHOD0(Enable, OSResult());
 
-    MOCK_METHOD0(DisableSunPointing, OSResult());
+    MOCK_METHOD0(Disable, OSResult());
+
+    MOCK_METHOD0(Process, void());
+
+    MOCK_CONST_METHOD0(GetFrequency, std::chrono::hertz());
 };
 
 #endif

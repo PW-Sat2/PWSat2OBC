@@ -4,8 +4,10 @@
 #pragma once
 
 #include "adcs/AdcsCoordinator.hpp"
-#include "adcs/AdcsExperimental.hpp"
 #include "adcs/BuiltinDetumbling.hpp"
+#include "adcs/ExperimentalDetumbling.hpp"
+#include "imtq/imtq.h"
+#include "time/ICurrentTime.hpp"
 
 namespace obc
 {
@@ -23,7 +25,7 @@ namespace obc
     {
       public:
         /** ctor. */
-        Adcs();
+        Adcs(devices::imtq::IImtqDriver& imtqDriver_, services::time::ICurrentTime& currentTime_);
 
         /**
          * @brief Initializes adcs subsystem.
@@ -35,18 +37,12 @@ namespace obc
          * @brief Returns interface of adcs subsystem controller.
          * @return Reference to adcs subsystem controller.
          */
-        adcs::IAdcsCoordinator& GetAdcsController();
+        adcs::IAdcsCoordinator& GetAdcsCoordinator();
 
       private:
-        /**
-         * @brief Controller of imtq based detumbling algorithm.
-         */
-        adcs::BuiltinDetumbling primaryDetumbling;
-
-        /**
-         * @brief Controller of experimental adcs implementation.
-         */
-        adcs::AdcsExperimental experimentalAdcs;
+        adcs::BuiltinDetumbling builtinDetumbling;
+        adcs::ExperimentalDetumbling experimentalDetumbling;
+        adcs::BuiltinDetumbling experimentalSunpointing;
 
         /**
          * @brief Adcs subsystem controller.
@@ -54,7 +50,7 @@ namespace obc
         adcs::AdcsCoordinator coordinator;
     };
 
-    inline adcs::IAdcsCoordinator& Adcs::GetAdcsController()
+    inline adcs::IAdcsCoordinator& Adcs::GetAdcsCoordinator()
     {
         return this->coordinator;
     }

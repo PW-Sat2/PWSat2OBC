@@ -14,7 +14,6 @@
 #include <task.h>
 
 #include "SwoEndpoint/SwoEndpoint.h"
-#include "adcs/AdcsExperimental.hpp"
 #include "base/ecc.h"
 #include "base/os.h"
 #include "boot/params.hpp"
@@ -44,7 +43,7 @@ mission::ObcMission Mission(std::tie(Main.timeProvider, Main.rtc),
     Main.antennaDriver,
     Main.Communication.CommDriver,
     std::tuple<bool, services::power::IPowerControl&>(false, Main.PowerControlInterface),
-    Main.adcs.GetAdcsController(),
+    Main.adcs.GetAdcsCoordinator(),
     Main.Experiments.ExperimentsController,
     Main.Communication.CommDriver,
     std::tie(Main.Hardware.PersistentStorage, PersistentStateBaseAddress));
