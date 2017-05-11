@@ -3,8 +3,11 @@
 
 #pragma once
 
+#include <array>
+#include <chrono>
 #include "adcs.hpp"
 #include "base/os.h"
+#include "time/ICurrentTime.hpp"
 
 namespace adcs
 {
@@ -24,10 +27,13 @@ namespace adcs
          * @param[in] experimentalDetumbling_ Reference to the backup detumbling algorithm controller module.
          * @param[in] sunpointAlgorithm_ Reference to the sun pointing algorithm controller module.
          */
-        AdcsCoordinator(IDetumblingSupport& builtinDetembling_, //
-            IDetumblingSupport& experimentalDetumbling_,        //
-            ISunPointingSupport& sunpointAlgorithm_             //
+        AdcsCoordinator(IAdcsProcessor& builtinDetumbling_, //
+            IAdcsProcessor& experimentalDetumbling_,        //
+            IAdcsProcessor& sunpointAlgorithm_,             //
+            services::time::ICurrentTime& currentTime_      //
             );
+
+        virtual OSResult Initialize() final override;
 
         virtual AdcsMode CurrentMode() const final override;
 
@@ -41,6 +47,12 @@ namespace adcs
 
       private:
         /**
+         * @brief Adcs task entry point.
+         * @param[in] arg Execution context. This pointer should point to the AdcsExperiment object type.
+         */
+        static void TaskEntry(void* arg);
+
+        /**
          * @brief Update the state based on the pased operation status.
          *
          * @param[in] newMode Proposed new adcs operating mode.
@@ -50,24 +62,25 @@ namespace adcs
         OSResult SetState(AdcsMode newMode, OSResult operationStatus);
 
         /**
+         * @brief Iteration loop.
+         */
+        void Loop();
+
+        /** @brief Task handle. */
+        OSTaskHandle taskHandle;
+
+        /** @brief Current time. */
+        services::time::ICurrentTime& currentTime;
+
+        /**
          * @brief Current adcs operational mode.
          */
         AdcsMode currentMode;
 
         /**
-         * @brief Interface of primary adcs algorithm controller.
+         * @brief Adcs processors.
          */
-        IDetumblingSupport& builtinDetumbling;
-
-        /**
-         * @brief Interface of experimental adcs algorithm controller.
-         */
-        IDetumblingSupport& experimentalDetumbling;
-
-        /**
-         * @brief Interface of sun pointing algorithm controller.
-         */
-        ISunPointingSupport& sunpointAlgorithm;
+        std::array<IAdcsProcessor*, 3> adcsProcessors;
     };
 }
 #endif

@@ -11,6 +11,7 @@ add_library(${NAME} STATIC ${SOURCES})
 target_link_libraries(${NAME}
     base
     logger
+    time
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
