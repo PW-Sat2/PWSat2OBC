@@ -95,7 +95,7 @@ namespace mission
             std::uint8_t retryCount;
 
             /**
-             * @brief Access to the adcs subsystem controller.
+             * @brief Access to the adcs subsystem coordinator.
              */
             ::adcs::IAdcsCoordinator& coordinator;
         };

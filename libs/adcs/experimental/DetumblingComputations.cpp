@@ -1,4 +1,4 @@
-#include "Detumbling.hpp"
+#include <DetumblingComputations.hpp>
 #include <cmath>
 #include <cstdint>
 #include <system.h>
@@ -11,23 +11,22 @@ using Eigen::RowVector3f;
 
 using namespace adcs;
 
-Detumbling::State::State(const Parameters& p)
+DetumblingComputations::State::State(const Parameters& p)
     : mtmDotPrev(Eigen::RowVector3f::Zero()), mtmMeasPrev(Eigen::RowVector3f::Zero()), params(Parameters(p))
 {
 }
 
-Detumbling::Detumbling() : mtmDotExp(0.0f)
+DetumblingComputations::DetumblingComputations() : mtmDotExp(0.0f)
 {
 }
 
-void Detumbling::initialize(State& state, const Parameters& param)
+DetumblingComputations::State DetumblingComputations::initialize(const Parameters& param)
 {
-    // initialize state with provided parameters
-    state = State(param);
-    mtmDotExp = exp(-state.params.wCutOff * state.params.dt);
+    mtmDotExp = exp(-param.wCutOff * param.dt);
+    return State(param);
 }
 
-void Detumbling::step(DipoleVec& dipole, const MagVec& mgmt_meas, State& state)
+DipoleVec DetumblingComputations::step(const MagVec& mgmt_meas, State& state)
 {
     RowVector3f mgmt_input;
 
@@ -63,8 +62,11 @@ void Detumbling::step(DipoleVec& dipole, const MagVec& mgmt_meas, State& state)
     state.mtmDotPrev = mtmDot;
     state.mtmMeasPrev = mgmt_input;
 
+    DipoleVec dipole;
     for (unsigned int i = 0; i < dipole.size(); i++)
     {
         dipole[i] = commDipoleBdot[i];
     }
+
+    return dipole;
 }

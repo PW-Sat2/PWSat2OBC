@@ -46,4 +46,4 @@ class TestExperimentDetumbling(BaseTest):
         self.system.rtc.set_response_time(start_time + timedelta(hours=4, minutes=1))
 
         log.info('Waiting for experiment finish')
-        self.system.obc.wait_for_experiment(None, 20)
+        self.system.obc.wait_for_experiment(None, 25)

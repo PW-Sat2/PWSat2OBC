@@ -59,8 +59,10 @@ OBC::OBC()
       BootSettings(this->Hardware.PersistentStorage.GetRedundantDriver()),             //
       Hardware(this->Fdir.ErrorCounting(), this->PowerControlInterface, timeProvider), //
       PowerControlInterface(this->Hardware.EPS),                                       //
-      Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),                                        //
-      Experiments(fs, this->adcs.GetAdcsController(), this->timeProvider),             //
+      Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),            //
+      Imtq(this->Fdir.ErrorCounting(), Hardware.I2C.Buses.Bus),                        //
+      adcs(this->Imtq, this->timeProvider),                                            //
+      Experiments(fs, this->adcs.GetAdcsCoordinator(), this->timeProvider),            //
       Communication(                                                                   //
           this->Fdir,
           this->Hardware.CommDriver,
@@ -125,7 +127,6 @@ OSResult OBC::InitializeRunlevel1()
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize telemetry acquisition loop.");
     }
-
 
     drivers::watchdog::InternalWatchdog::Enable();
     BootSettings.ConfirmBoot();

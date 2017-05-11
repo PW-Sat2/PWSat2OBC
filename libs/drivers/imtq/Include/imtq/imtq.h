@@ -366,9 +366,190 @@ namespace devices
         };
 
         /**
+         * @brief Interface for Imtq commanding.
+         */
+        struct IImtqDriver
+        {
+            /**
+             * Performs self test
+             * @param[out] result Self test result
+             * @return Operation status.
+             * This method runs:
+             * 1) starts all axis self-test (TC-OP-08)
+             * 2) waits specified amount of time for command to complete
+             * 3) reads self test result (TC-DR-07)
+             */
+            virtual bool PerformSelfTest(SelfTestResult& result) = 0;
+
+            /**
+             * Measures magnetometer, having in mind possible on-going actuation.
+             * @param[out] result Three axis magnetometer measurement
+             * @return Operation status.
+             * This method runs:
+             * 1) cancels on-going actuation (TC-OP-03)
+             * 2) waits wait magnetic field decay
+             * 3) sends magnetometer measurement request (TC-OP-04)
+             * 4) waits until read finishes
+             * 3) reads magnetometer data (TC-DR-03)
+             */
+            virtual bool MeasureMagnetometer(Vector3<MagnetometerMeasurement>& result) = 0;
+
+            // ----- Commands -----
+
+            /**
+             * @brief Performs SoftwareReset (TC-OP-01)
+             * @return Operation status.
+             */
+            virtual bool SoftwareReset() = 0;
+
+            /**
+             * @brief Sends NoOperation command (TC-OP-02)
+             * @return Operation status.
+             */
+            virtual bool SendNoOperation() = 0;
+
+            /**
+             * @brief Cancels current imtq operation (detumbling/self-test) (TC-OP-03)
+             * @return Operation status.
+             */
+            virtual bool CancelOperation() = 0;
+
+            /**
+             * @brief Initiates magnetometer measurement (TC-OP-04)
+             * @return Operation status.
+             */
+            virtual bool StartMTMMeasurement() = 0;
+
+            /**
+             * @brief Starts current-based actuation for specified time (TC-OP-05)
+             * @param[in] current Three-axis current values for X, Y and Z axes.
+             * @param[in] duration Duration of actuation, after which it will be cancelled automatically. 1ms resolution, maximum time 65
+             * seconds.
+             * @return Operation status.
+             */
+            virtual bool StartActuationCurrent(const Vector3<Current>& current, std::chrono::milliseconds duration) = 0;
+
+            /**
+             * @brief Starts dipole-based actuation for specified time (TC-OP-06)
+             * @param[in] dipole Three-axis dipole values for X, Y and Z axes.
+             * @param[in] duration Duration of actuation, after which it will be cancelled automatically. 1ms resolution, maximum time 65
+             * seconds.
+             * @return Operation status.
+             */
+            virtual bool StartActuationDipole(Vector3<Dipole> dipole, std::chrono::milliseconds duration) = 0;
+
+            /**
+             * @brief Starts self test (TC-OP-08)
+             * @return Operation status.
+             */
+            virtual bool StartAllAxisSelfTest() = 0;
+
+            /**
+             * @brief Starts internal detumbling (TC-OP-09)
+             * @param[in] duration Duration of detumbling. Resolution 1 second, maximum duration 65535 seconds.
+             * @return Operation status.
+             */
+            virtual bool StartBDotDetumbling(std::chrono::seconds duration) = 0;
+
+            // ----- Data requests -----
+            /**
+             * @brief Reads imtq State (TC-DR-01)
+             * @param[out] state State structure read from imtq
+             * @return Operation status.
+             */
+            virtual bool GetSystemState(State& state) = 0;
+
+            /**
+             * @brief Reads calibrated magnetometer data (TC-DR-03)
+             * @param[out] result Magnetometer measurement
+             * @return Operation status.
+             * This command should be used after StartMTMMeasurement, having in mind magnetometer integration time.
+             */
+            virtual bool GetCalibratedMagnetometerData(MagnetometerMeasurementResult& result) = 0;
+
+            /**
+             * @brief Reads coil current (TC-DR-04)
+             * @param[out] result Three-axis coil current measurement
+             * @return Operation status.
+             * This value is updated internally each 1ms.
+             */
+            virtual bool GetCoilCurrent(Vector3<Current>& result) = 0;
+
+            /**
+             * @brief Reads coil temperature (TC-DR-05)
+             * @param[out] result Three-axis coil temperature measurement
+             * @return Operation status.
+             * This value is updated internally each 1ms.
+             */
+            virtual bool GetCoilTemperature(Vector3<TemperatureMeasurement>& result) = 0;
+
+            /**
+             * @brief Reads self-test result (TC-DR-07)
+             * @param[out] result Self-test result
+             * @return Operation status.
+             * This command should be used after StartAllAxisSelfTest, having in mind self-test time.
+             */
+            virtual bool GetSelfTestResult(SelfTestResult& result) = 0;
+
+            /**
+             * @brief Reads imtq detumbling state (TC-DR-08)
+             * @param[out] result Detumble data structure.
+             * @return Operation status.
+             * This value is updated internally each 1s.
+             */
+            virtual bool GetDetumbleData(DetumbleData& result) = 0;
+
+            /**
+             * @brief Reads HouseKeeping - RAW type (TC-DR-09)
+             * @param[out] result RAW HouseKeeping read from imtq
+             * @return Operation status.
+             * This value is updated internally each 1ms.
+             */
+            virtual bool GetHouseKeepingRAW(HouseKeepingRAW& result) = 0;
+
+            /**
+             * @brief Reads HouseKeeping - Engineering type (TC-DR-10)
+             * @param[out] result Engineering HouseKeeping read from imtq
+             * @return Operation status.
+             * This value is updated internally each 1ms.
+             */
+            virtual bool GetHouseKeepingEngineering(HouseKeepingEngineering& result) = 0;
+
+            // ----- Configuration -----
+            /**
+             * @brief Parameter alias type
+             */
+            using Parameter = std::uint16_t;
+
+            /**
+             * @brief Reads specified parameter from imtq memory (TC-CF-01)
+             * @param[in] id Parameter id
+             * @param[out] result Parameter value. Should be span, with correct length, to memory to write result to.
+             * @return Operation status.
+             */
+            virtual bool GetParameter(Parameter id, gsl::span<std::uint8_t> result) = 0;
+
+            /**
+             * @brief Sets specified parameter in imtq memory (TC-CF-02)
+             * @param[in] id Parameter id
+             * @param[in] value Parameter value. Should be span, with correct length, to memory containing parameter value.
+             * @return Operation status.
+             */
+            virtual bool SetParameter(Parameter id, gsl::span<const std::uint8_t> value) = 0;
+
+            /**
+             * @brief Resets specified parameter in imtq memory to default one and reads it (TC-CF-03)
+             * @param[in] id Parameter id
+             * @param[out] result Parameter value. Should be span, with correct length, to memory to write result to.
+             * @return Operation status.
+             */
+            virtual bool ResetParameterAndGetDefault(Parameter id, gsl::span<std::uint8_t> result) = 0;
+        };
+
+        /**
          * @brief Low level driver for Imtq commanding.
          */
-        class ImtqDriver final
+        class ImtqDriver final : public IImtqDriver
         {
           public:
             /**
@@ -389,7 +570,7 @@ namespace devices
              * 2) waits specified amount of time for command to complete
              * 3) reads self test result (TC-DR-07)
              */
-            bool PerformSelfTest(SelfTestResult& result);
+            virtual bool PerformSelfTest(SelfTestResult& result) override;
 
             /**
              * Measures magnetometer, having in mind possible on-going actuation.
@@ -402,7 +583,7 @@ namespace devices
              * 4) waits until read finishes
              * 3) reads magnetometer data (TC-DR-03)
              */
-            bool MeasureMagnetometer(Vector3<MagnetometerMeasurement>& result);
+            virtual bool MeasureMagnetometer(Vector3<MagnetometerMeasurement>& result) override;
 
             // ----- Commands -----
 
@@ -410,25 +591,25 @@ namespace devices
              * @brief Performs SoftwareReset (TC-OP-01)
              * @return Operation status.
              */
-            bool SoftwareReset();
+            virtual bool SoftwareReset() override;
 
             /**
              * @brief Sends NoOperation command (TC-OP-02)
              * @return Operation status.
              */
-            bool SendNoOperation();
+            virtual bool SendNoOperation() override;
 
             /**
              * @brief Cancels current imtq operation (detumbling/self-test) (TC-OP-03)
              * @return Operation status.
              */
-            bool CancelOperation();
+            virtual bool CancelOperation() override;
 
             /**
              * @brief Initiates magnetometer measurement (TC-OP-04)
              * @return Operation status.
              */
-            bool StartMTMMeasurement();
+            virtual bool StartMTMMeasurement() override;
 
             /**
              * @brief Starts current-based actuation for specified time (TC-OP-05)
@@ -437,7 +618,7 @@ namespace devices
              * seconds.
              * @return Operation status.
              */
-            bool StartActuationCurrent(const Vector3<Current>& current, std::chrono::milliseconds duration);
+            virtual bool StartActuationCurrent(const Vector3<Current>& current, std::chrono::milliseconds duration) override;
 
             /**
              * @brief Starts dipole-based actuation for specified time (TC-OP-06)
@@ -446,20 +627,20 @@ namespace devices
              * seconds.
              * @return Operation status.
              */
-            bool StartActuationDipole(Vector3<Dipole> dipole, std::chrono::milliseconds duration);
+            virtual bool StartActuationDipole(Vector3<Dipole> dipole, std::chrono::milliseconds duration) override;
 
             /**
              * @brief Starts self test (TC-OP-08)
              * @return Operation status.
              */
-            bool StartAllAxisSelfTest();
+            virtual bool StartAllAxisSelfTest() override;
 
             /**
              * @brief Starts internal detumbling (TC-OP-09)
              * @param[in] duration Duration of detumbling. Resolution 1 second, maximum duration 65535 seconds.
              * @return Operation status.
              */
-            bool StartBDotDetumbling(std::chrono::seconds duration);
+            virtual bool StartBDotDetumbling(std::chrono::seconds duration) override;
 
             // ----- Data requests -----
             /**
@@ -467,7 +648,7 @@ namespace devices
              * @param[out] state State structure read from imtq
              * @return Operation status.
              */
-            bool GetSystemState(State& state);
+            virtual bool GetSystemState(State& state) override;
 
             /**
              * @brief Reads calibrated magnetometer data (TC-DR-03)
@@ -475,7 +656,7 @@ namespace devices
              * @return Operation status.
              * This command should be used after StartMTMMeasurement, having in mind magnetometer integration time.
              */
-            bool GetCalibratedMagnetometerData(MagnetometerMeasurementResult& result);
+            virtual bool GetCalibratedMagnetometerData(MagnetometerMeasurementResult& result) override;
 
             /**
              * @brief Reads coil current (TC-DR-04)
@@ -483,7 +664,7 @@ namespace devices
              * @return Operation status.
              * This value is updated internally each 1ms.
              */
-            bool GetCoilCurrent(Vector3<Current>& result);
+            virtual bool GetCoilCurrent(Vector3<Current>& result) override;
 
             /**
              * @brief Reads coil temperature (TC-DR-05)
@@ -491,7 +672,7 @@ namespace devices
              * @return Operation status.
              * This value is updated internally each 1ms.
              */
-            bool GetCoilTemperature(Vector3<TemperatureMeasurement>& result);
+            virtual bool GetCoilTemperature(Vector3<TemperatureMeasurement>& result) override;
 
             /**
              * @brief Reads self-test result (TC-DR-07)
@@ -499,7 +680,7 @@ namespace devices
              * @return Operation status.
              * This command should be used after StartAllAxisSelfTest, having in mind self-test time.
              */
-            bool GetSelfTestResult(SelfTestResult& result);
+            virtual bool GetSelfTestResult(SelfTestResult& result) override;
 
             /**
              * @brief Reads imtq detumbling state (TC-DR-08)
@@ -507,7 +688,7 @@ namespace devices
              * @return Operation status.
              * This value is updated internally each 1s.
              */
-            bool GetDetumbleData(DetumbleData& result);
+            virtual bool GetDetumbleData(DetumbleData& result) override;
 
             /**
              * @brief Reads HouseKeeping - RAW type (TC-DR-09)
@@ -515,7 +696,7 @@ namespace devices
              * @return Operation status.
              * This value is updated internally each 1ms.
              */
-            bool GetHouseKeepingRAW(HouseKeepingRAW& result);
+            virtual bool GetHouseKeepingRAW(HouseKeepingRAW& result) override;
 
             /**
              * @brief Reads HouseKeeping - Engineering type (TC-DR-10)
@@ -523,7 +704,7 @@ namespace devices
              * @return Operation status.
              * This value is updated internally each 1ms.
              */
-            bool GetHouseKeepingEngineering(HouseKeepingEngineering& result);
+            virtual bool GetHouseKeepingEngineering(HouseKeepingEngineering& result) override;
 
             // ----- Configuration -----
             /**
@@ -537,7 +718,7 @@ namespace devices
              * @param[out] result Parameter value. Should be span, with correct length, to memory to write result to.
              * @return Operation status.
              */
-            bool GetParameter(Parameter id, gsl::span<std::uint8_t> result);
+            virtual bool GetParameter(Parameter id, gsl::span<std::uint8_t> result) override;
 
             /**
              * @brief Sets specified parameter in imtq memory (TC-CF-02)
@@ -545,7 +726,7 @@ namespace devices
              * @param[in] value Parameter value. Should be span, with correct length, to memory containing parameter value.
              * @return Operation status.
              */
-            bool SetParameter(Parameter id, gsl::span<const std::uint8_t> value);
+            virtual bool SetParameter(Parameter id, gsl::span<const std::uint8_t> value) override;
 
             /**
              * @brief Resets specified parameter in imtq memory to default one and reads it (TC-CF-03)
@@ -553,7 +734,7 @@ namespace devices
              * @param[out] result Parameter value. Should be span, with correct length, to memory to write result to.
              * @return Operation status.
              */
-            bool ResetParameterAndGetDefault(Parameter id, gsl::span<std::uint8_t> result);
+            virtual bool ResetParameterAndGetDefault(Parameter id, gsl::span<std::uint8_t> result);
 
             /**
              * @brief Last error occurred during last command execution.
