@@ -118,18 +118,66 @@ namespace devices
         {
         }
 
-        bool ImtqDriver::PerformSelfTest(SelfTestResult& result)
+        bool ImtqDriver::PerformSelfTest(SelfTestResult& result, bool tryToFixIsisErrors)
         {
             ErrorReporter errorContext(_error);
+
+            // Disable actuations
+            if (!CancelOperationInternal(errorContext.Counter()))
+            {
+                return false;
+            }
+            System::SleepTask(10ms);
+
+            DetumbleData detumbleData;
+            if (tryToFixIsisErrors)
+            {
+                // Measure reference magnetometer data
+                if (!StartMTMMeasurementInternal(errorContext.Counter()))
+                {
+                    return false;
+                }
+                System::SleepTask(10ms);
+                if (!GetDetumbleData(detumbleData))
+                {
+                    return false;
+                }
+            }
+
+            // Do the self-test
             if (!StartAllAxisSelfTestInternal(errorContext.Counter()))
             {
                 return false;
             }
+            // 4s per axis + 1s for initialization + margin
+            System::SleepTask(15s);
+            if (!GetSelfTestResultInternal(result, errorContext.Counter()))
+            {
+                return false;
+            }
 
-            // 8 times 3-axis measurement, default integration time 10ms + margin
-            System::SleepTask(500ms);
+            if (tryToFixIsisErrors)
+            {
+                // Reset errors on steps that give plausible results
+                for (auto axis : {0, 1, 2})
+                {
+                    auto positiveStep = (int)SelfTestResult::Step::Xp + 2 * axis;
+                    auto negativeStep = positiveStep + 1;
 
-            return GetSelfTestResultInternal(result, errorContext.Counter());
+                    if (result.stepResults[positiveStep].CalibratedMagnetometerMeasurement[axis] >
+                        detumbleData.calibratedMagnetometerMeasurement[axis])
+                    {
+                        result.stepResults[positiveStep].error = Error();
+                    }
+                    if (result.stepResults[negativeStep].CalibratedMagnetometerMeasurement[axis] <
+                        detumbleData.calibratedMagnetometerMeasurement[axis])
+                    {
+                        result.stepResults[negativeStep].error = Error();
+                    }
+                }
+            }
+
+            return true;
         }
 
         bool ImtqDriver::MeasureMagnetometer(Vector3<MagnetometerMeasurement>& result)
@@ -571,7 +619,6 @@ namespace devices
             outputWriter.WriteArray(params);
 
             span<uint8_t> request = outputWriter.Capture();
-
             auto i2cstatusWrite = i2cbus.Write(I2Cadress, request);
             if (i2cstatusWrite != I2CResult::OK)
             {

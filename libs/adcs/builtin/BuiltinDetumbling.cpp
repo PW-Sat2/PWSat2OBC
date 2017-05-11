@@ -2,13 +2,22 @@
 
 namespace adcs
 {
-    OSResult BuiltinDetumbling::EnableDetumbling()
+    OSResult BuiltinDetumbling::Enable()
     {
         return OSResult::Success;
     }
 
-    OSResult BuiltinDetumbling::DisableDetumbling()
+    OSResult BuiltinDetumbling::Disable()
     {
         return OSResult::Success;
+    }
+
+    void BuiltinDetumbling::Process()
+    {
+    }
+
+    std::chrono::milliseconds BuiltinDetumbling::GetWait() const
+    {
+        return std::chrono::milliseconds{1};
     }
 }

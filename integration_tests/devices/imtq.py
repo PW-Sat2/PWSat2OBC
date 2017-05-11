@@ -12,6 +12,10 @@ from threading import Timer
 
 
 def from_int16(tab):
+    return struct.unpack('h', ensure_string(tab[0:2]))[0]
+
+
+def from_uint16(tab):
     return struct.unpack('H', ensure_string(tab[0:2]))[0]
 
 
@@ -19,20 +23,36 @@ def from_int32(tab):
     return struct.unpack('i', ensure_string(tab[0:4]))[0]
 
 
+def to_uint32(value):
+    return list(struct.pack('I', value))
+
+
 def to_int32(value):
     return list(struct.pack('i', value))
 
 
-def to_int16(value):
+def to_uint16(value):
     return list(struct.pack('H', value))
+
+
+def to_int16(value):
+    return list(struct.pack('h', value))
 
 
 def to_int16_xyz(tab):
     return to_int16(tab[0]) + to_int16(tab[1]) + to_int16(tab[2])
 
 
+def to_uint16_xyz(tab):
+    return to_uint16(tab[0]) + to_uint16(tab[1]) + to_uint16(tab[2])
+
+
 def to_int32_xyz(tab):
     return to_int32(tab[0]) + to_int32(tab[1]) + to_int32(tab[2])
+
+
+def to_uint32_xyz(tab):
+    return to_uint32(tab[0]) + to_uint32(tab[1]) + to_uint32(tab[2])
 
 
 class Imtq(i2cMock.I2CDevice):
@@ -142,7 +162,7 @@ class Imtq(i2cMock.I2CDevice):
     @i2cMock.command([0x05])
     def _start_actuation_current(self, *data):
         current = [from_int16(data[i:i + 2]) for i in [0, 2, 4]]
-        time = from_int16(data[6:])
+        time = from_uint16(data[6:])
         self.log.info("Start actuation (current): " + str(current) + " for: " + str(time))
         self.update_actuation(current)
         t = Timer(time / 1000.0, self.clear_actuation)
@@ -152,7 +172,7 @@ class Imtq(i2cMock.I2CDevice):
     @i2cMock.command([0x06])
     def _start_actuation_dipole(self, *data):
         dipole = [from_int16(data[i:i+2]) for i in [0, 2, 4]]
-        time = from_int16(data[6:])
+        time = from_uint16(data[6:])
         self.update_actuation(dipole)
         t = Timer(time / 1000.0, self.clear_actuation)
         t.start()
@@ -167,7 +187,7 @@ class Imtq(i2cMock.I2CDevice):
 
     @i2cMock.command([0x09])
     def _start_bdot(self, *data):
-        time = from_int16(data[0:])
+        time = from_uint16(data[0:])
         self.log.info("Start BDot for %d", time)
         self.mode.start_detumble(time)
         return [0x09, self.status]
@@ -224,25 +244,25 @@ class Imtq(i2cMock.I2CDevice):
                to_int16_xyz(self.coil_current)
 
     @i2cMock.command([0x49])
-    def _get_detumble_data(self):
+    def _get_raw_housekeeping_data(self):
         self.log.info("Get RAW HK")
         return [0x49, self.status] + \
-               to_int16(self.digital_voltage_raw) + \
-               to_int16(self.analog_voltage_raw) + \
-               to_int16(self.digital_current_raw) + \
-               to_int16(self.analog_current_raw) + \
-               to_int16_xyz(self.coil_current_raw) + \
-               to_int16_xyz(self.coil_temperature_raw) + \
-               to_int16(self.mcu_temperature_raw)
+               to_uint16(self.digital_voltage_raw) + \
+               to_uint16(self.analog_voltage_raw) + \
+               to_uint16(self.digital_current_raw) + \
+               to_uint16(self.analog_current_raw) + \
+               to_uint16_xyz(self.coil_current_raw) + \
+               to_uint16_xyz(self.coil_temperature_raw) + \
+               to_uint16(self.mcu_temperature_raw)
 
     @i2cMock.command([0x4A])
-    def _get_detumble_data(self):
+    def _get_eng_housekeeping_data(self):
         self.log.info("Get Engineering HK")
         return [0x4A, self.status] + \
-               to_int16(self.digital_voltage) + \
-               to_int16(self.analog_voltage) + \
-               to_int16(self.digital_current) + \
-               to_int16(self.analog_current) + \
+               to_uint16(self.digital_voltage) + \
+               to_uint16(self.analog_voltage) + \
+               to_uint16(self.digital_current) + \
+               to_uint16(self.analog_current) + \
                to_int16_xyz(self.coil_current) + \
                to_int16_xyz(self.coil_temperature) + \
                to_int16(self.mcu_temperature)
