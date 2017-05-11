@@ -7,7 +7,6 @@
 #include <gsl/span>
 
 #include "adcs/AdcsCoordinator.hpp"
-#include "adcs/AdcsExperimental.hpp"
 #include "antenna/driver.h"
 #include "antenna/miniport.h"
 #include "base/os.h"

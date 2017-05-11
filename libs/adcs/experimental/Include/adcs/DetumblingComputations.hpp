@@ -1,6 +1,8 @@
 #ifndef ADCS_DETUMBLING_HPP_
 #define ADCS_DETUMBLING_HPP_
 
+#undef sort
+
 #include <Eigen/Dense>
 #include <array>
 #include "InterfaceTypes.hpp"
@@ -20,7 +22,7 @@ namespace adcs
      * the detumbling mode based on the B-Dot control law. A high-pass filter for
      * the magnetic field time derivative is included.
      * */
-    class Detumbling final
+    class DetumblingComputations final
     {
       public:
         /**
@@ -74,7 +76,7 @@ namespace adcs
             Parameters params;
         };
 
-        Detumbling();
+        DetumblingComputations();
 
         /**
          * @brief Detumbling algorithm initialization function
@@ -82,11 +84,10 @@ namespace adcs
          * This function should be called before first step of algorithm
          * and  every time user intend to change parameters
          *
-         * @param[out] state container
          * @param[in] parameters set
-         * @return void
+         * @return state container
          */
-        void initialize(State& state, const Parameters& parameters);
+        State initialize(const Parameters& parameters);
 
         /**
          * @brief Detumbling step function
@@ -94,12 +95,11 @@ namespace adcs
          * This function calculates value to be commanded to dipoles
          * based on magnetometer measurements and preserved state
          *
-         * @param[out] dipole to be commanded to dipoles \[1e-4 Am2\]
          * @param[in] magnetometer measurement \[1e-7 T\]
          * @param[in,out] state container
-         * @return void
+         * @return values to be comanded to dipoles [1e-4 Am2]
          */
-        void step(DipoleVec& dipole, const MagVec& magnetometer, State& state);
+        DipoleVec step(const MagVec& magnetometer, State& state);
 
       private:
         /** field to store exp value calculated once on initialization */
