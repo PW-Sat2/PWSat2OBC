@@ -1,7 +1,6 @@
 #include <string.h>
 #include <cstdint>
 #include <gsl/span>
-#include <gsl/span>
 #include "commands.h"
 #include "logger/logger.h"
 #include "obc.h"
@@ -221,6 +220,39 @@ namespace imtq_commands
         }
     }
 
+    void GetDetumbleData(uint16_t argc, char* argv[])
+    {
+        UNREFERENCED_PARAMETER(argc);
+        UNREFERENCED_PARAMETER(argv);
+        DetumbleData detumbleData;
+        const bool status = Main.Hardware.Imtq.GetDetumbleData(detumbleData);
+        if (!status)
+        {
+            Main.terminal.Printf("GetDetumbleData failed!\n");
+            return;
+        }
+
+        Main.terminal.Printf("%ld %ld %ld %ld %ld %ld %ld %ld %ld %d %d %d %d %d %d %d %d %d\n",
+            detumbleData.calibratedMagnetometerMeasurement[0],
+            detumbleData.calibratedMagnetometerMeasurement[1],
+            detumbleData.calibratedMagnetometerMeasurement[2],
+            detumbleData.filteredMagnetometerMeasurement[0],
+            detumbleData.filteredMagnetometerMeasurement[1],
+            detumbleData.filteredMagnetometerMeasurement[2],
+            detumbleData.bDotData[0],
+            detumbleData.bDotData[1],
+            detumbleData.bDotData[2],
+            detumbleData.commandedDipole[0],
+            detumbleData.commandedDipole[1],
+            detumbleData.commandedDipole[2],
+            detumbleData.commandedCurrent[0],
+            detumbleData.commandedCurrent[1],
+            detumbleData.commandedCurrent[2],
+            detumbleData.measuredCurrent[0],
+            detumbleData.measuredCurrent[1],
+            detumbleData.measuredCurrent[2]);
+    }
+
     void GetHouseKeepingEngineering(uint16_t argc, char* argv[])
     {
         UNREFERENCED_PARAMETER(argc);
@@ -329,10 +361,16 @@ namespace imtq_commands
     void PerformSelfTest(uint16_t argc, char* argv[])
     {
         UNREFERENCED_PARAMETER(argc);
-        UNREFERENCED_PARAMETER(argv);
+        if (argc != 1)
+        {
+            Main.terminal.Printf("imtq PerformSelfTest $fix");
+            return;
+        }
+        std::string fixText(argv[0]);
+        bool fix = (fixText == "t") || (fixText == "true") || (fixText == "1");
 
         SelfTestResult result;
-        const bool status = Main.Hardware.Imtq.PerformSelfTest(result);
+        const bool status = Main.Hardware.Imtq.PerformSelfTest(result, fix);
         if (!status)
         {
             Main.terminal.Printf("PerformSelfTest failed!\n");
@@ -410,6 +448,10 @@ namespace imtq_commands
         {
             return GetSelfTestResult;
         }
+        else if (strcmp(name, "detumbleGet") == 0)
+        {
+            return GetDetumbleData;
+        }
         else if (strcmp(name, "state") == 0)
         {
             return GetSystemState;
@@ -450,7 +492,7 @@ namespace imtq_commands
         Main.terminal.Printf("imtq cancel|state|\n"
                              "     selfTestStart|selfTestGet|PerformSelfTest|\n"
                              "     mtmMeas|mtmGet|mtmRead\n"
-                             "     current|dipole|bdot|\n"
+                             "     current|dipole|bdot|detumbleGet\n"
                              "     coil|hk|\n"
                              "     get|reset|set");
     }

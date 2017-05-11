@@ -4,7 +4,8 @@ add_subdirectory(adcs)
 
 set(SOURCES
   adcs/AdcsCoordinatorTest.cpp
-  adcs/experimental/detumblingTest.cpp  
+  adcs/experimental/DetumblingComputationsTest.cpp  
+  adcs/experimental/ExperimentalDetumblingTest.cpp  
   Logger/LoggerTest.cpp
   FileSystem/FileSystemTest.cpp
   FileSystem/YaffsOSGlue.cpp
@@ -20,6 +21,7 @@ set(SOURCES
   base/CRCTest.cpp
   base/BitWriterTest.cpp
   base/CounterTest.cpp
+  base/hertzTest.cpp
   os/TimeoutTest.cpp
   os/EventGroupTest.cpp
   time/time.cpp
