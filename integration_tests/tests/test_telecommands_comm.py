@@ -61,4 +61,4 @@ class CommTelecommandsTest(BaseTest):
         self.assertEqual(frame.seq(), 0)
         self.assertEqual(frame.payload(), [0x11, 0])
 
-        self.assertTrue(event.wait_for_change(10))
+        self.assertTrue(event.wait_for_change(30))

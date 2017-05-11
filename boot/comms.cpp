@@ -52,9 +52,9 @@ static std::array<Command, 12> Commands = {
 
 #define UPLOADBLOCKSIZE 256
 
-static uint8_t msgId;
+static volatile uint8_t msgId;
 
-uint8_t uartReceived;
+volatile uint8_t uartReceived;
 
 void COMMS_Init(void)
 {

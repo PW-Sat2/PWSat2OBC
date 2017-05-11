@@ -18,6 +18,6 @@
 void COMMS_Init(void);
 void COMMS_processMsg(void);
 
-extern uint8_t uartReceived;
+extern volatile uint8_t uartReceived;
 
 #endif
