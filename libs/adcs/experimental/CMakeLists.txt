@@ -1,10 +1,10 @@
 set(NAME adcs_experimental)
 
 set(SOURCES      
-    AdcsExperimental.cpp
-    Include/adcs/AdcsExperimental.hpp
-    Detumbling.cpp
-    Include/adcs/Detumbling.hpp
+    DetumblingComputations.cpp
+    ExperimentalDetumbling.cpp
+    ExperimentalSunPointing.cpp
+    Include/adcs/DetumblingComputations.hpp
     Include/adcs/InterfaceTypes.hpp
 )
 
@@ -15,6 +15,7 @@ target_link_libraries(${NAME}
     logger
     adcs
     eigen
+    imtq
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
