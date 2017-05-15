@@ -1,3 +1,4 @@
+#include "gyro/telemetry.hpp"
 #include "obc.h"
 
 using std::uint16_t;
@@ -31,11 +32,11 @@ static void read(uint16_t argc, char* argv[])
         return;
     }
 
-    Main.terminal.Printf("%d %d %d %d\n",            //
-        static_cast<int>(result.Value.X),            //
-        static_cast<int>(result.Value.Y),            //
-        static_cast<int>(result.Value.Z),            //
-        static_cast<int>(result.Value.temperature)); //
+    Main.terminal.Printf("%d %d %d %d\n",              //
+        static_cast<int>(result.Value.X()),            //
+        static_cast<int>(result.Value.Y()),            //
+        static_cast<int>(result.Value.Z()),            //
+        static_cast<int>(result.Value.Temperature())); //
 }
 
 static VoidFuncPtr GetDriverCommand(char* name)
