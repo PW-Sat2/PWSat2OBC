@@ -213,8 +213,16 @@ enum class Address
     Transmitter = 0x61,
 };
 
+/**
+ * @brief Interface of object capable providing complete comm telemetry.
+ */
 struct ICommTelemetryProvider
 {
+    /**
+     * @brief Acquires complete current comm hardware telemetry.
+     * @param[out] telemetry Object that should be filled with updated telemetry.
+     * @return Operation status. True on success, false otherwise.
+     */
     virtual bool GetTelemetry(CommTelemetry& telemetry) = 0;
 };
 /** @}*/

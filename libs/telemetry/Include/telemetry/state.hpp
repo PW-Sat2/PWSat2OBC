@@ -10,8 +10,15 @@
 
 namespace telemetry
 {
+    /**
+     * @brief This type represents state of telemetry acquisition loop.
+     * @ingroup telemetry
+     */
     struct TelemetryState
     {
+        /**
+         * @brief Container for all telemetry elements currently collected by acquisition loop.
+         */
         ManagedTelemetry telemetry;
     };
 }

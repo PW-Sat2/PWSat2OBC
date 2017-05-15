@@ -11,7 +11,7 @@
  *
  * This driver is responsible for
  *  - direct communication with the hardware,
- *  - initialisation and data readout
+ *  - initialization and data readout
  *
  *  @{
  */
@@ -32,7 +32,7 @@ namespace devices
         constexpr std::chrono::milliseconds ConfigDelay{100};
 
         /**
-         * @brief Data readed from gyroscope.
+         * @brief Data read from gyroscope.
          */
         struct GyroRawData
         {
@@ -57,13 +57,13 @@ namespace devices
             }
 
             /**
-             * @brief Responsible for initialising gyroscope.
+             * @brief Responsible for initializing gyroscope.
              * @return Operation status.
              * Re-sets all internal registers to known and proper state.
              * After finish gyroscope will be in free-running mode and data will be available for reading.
              *
              * Settings applied:
-             * 	 - Sample rate divider of 1,
+             *   - Sample rate divider of 1,
              *   - 5 Hz cut-off Low Pass Filter,
              *   - 500 Hz sample rate,
              *   - PLL with X Gyro reference clock source
