@@ -70,19 +70,19 @@ void CommTelemetry::Write(Writer& writer) const
 
 bool CommTelemetry::IsDifferent(const CommTelemetry& arg) const
 {
-    return this->transmitterCurrentConsumption != arg.transmitterCurrentConsumption &&    //
-        this->receiverCurrentConsumption != this->receiverCurrentConsumption &&           //
-        this->dopplerOffset != this->dopplerOffset &&                                     //
-        this->vcc != this->vcc &&                                                         //
-        this->oscilatorTemperature != this->oscilatorTemperature &&                       //
-        this->receiverAmplifierTemperature != this->receiverAmplifierTemperature &&       //
-        this->signalStrength != this->signalStrength &&                                   //
-        this->rFReflectedPower != this->rFReflectedPower &&                               //
-        this->transmitterAmplifierTemperature != this->transmitterAmplifierTemperature && //
-        this->rFForwardPower != this->rFForwardPower &&                                   //
-        this->transmitterState.BeaconState != this->transmitterState.BeaconState &&       //
-        this->transmitterState.StateWhenIdle != this->transmitterState.StateWhenIdle &&   //
-        this->transmitterState.TransmitterBitRate != this->transmitterState.TransmitterBitRate;
+    return this->transmitterCurrentConsumption != arg.transmitterCurrentConsumption ||  //
+        this->receiverCurrentConsumption != arg.receiverCurrentConsumption ||           //
+        this->dopplerOffset != arg.dopplerOffset ||                                     //
+        this->vcc != arg.vcc ||                                                         //
+        this->oscilatorTemperature != arg.oscilatorTemperature ||                       //
+        this->receiverAmplifierTemperature != arg.receiverAmplifierTemperature ||       //
+        this->signalStrength != arg.signalStrength ||                                   //
+        this->rFReflectedPower != arg.rFReflectedPower ||                               //
+        this->transmitterAmplifierTemperature != arg.transmitterAmplifierTemperature || //
+        this->rFForwardPower != arg.rFForwardPower ||                                   //
+        this->transmitterState.BeaconState != arg.transmitterState.BeaconState ||       //
+        this->transmitterState.StateWhenIdle != arg.transmitterState.StateWhenIdle ||   //
+        this->transmitterState.TransmitterBitRate != arg.transmitterState.TransmitterBitRate;
 }
 
 COMM_END
