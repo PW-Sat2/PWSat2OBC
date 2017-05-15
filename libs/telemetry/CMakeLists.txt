@@ -2,6 +2,7 @@ set(NAME telemetry)
 
 set(SOURCES
     Include/telemetry/state.hpp
+    SystemStartup.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
