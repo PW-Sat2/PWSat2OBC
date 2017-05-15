@@ -7,6 +7,27 @@
 
 namespace program_flash
 {
+    enum class FlashStatus : std::uint8_t
+    {
+        StatusUnknown = 0,
+        NotBusy,
+        Busy,
+        ExceededTimeLimits,
+        Suspend,
+        WriteBufferAbort,
+        StatusGetProblem,
+        VerifyError,
+        BytesPerOpWrong,
+        EraseError,
+        ProgramError,
+        SectorLock,
+        ProgramSuspend,      /* Device is in program suspend mode */
+        ProgramSuspendError, /* Device program suspend error */
+        EraseSuspend,        /* Device is in erase suspend mode */
+        EraseSuspendError,   /* Device erase suspend error */
+        BusyInOtherBank      /* Busy operation in other bank */
+    };
+
     struct IFlashDriver;
 
     class FlashSpan
@@ -18,10 +39,10 @@ namespace program_flash
 
         inline std::uint8_t const* Data() const;
 
-        inline void Erase(std::size_t sectorOffset);
+        inline FlashStatus Erase(std::size_t sectorOffset);
 
-        inline void Program(std::size_t offset, std::uint8_t value);
-        inline void Program(std::size_t offset, gsl::span<const std::uint8_t> value);
+        inline FlashStatus Program(std::size_t offset, std::uint8_t value);
+        inline FlashStatus Program(std::size_t offset, gsl::span<const std::uint8_t> value);
 
         inline IFlashDriver& Driver();
         inline std::size_t BaseOffset() const;
@@ -42,9 +63,9 @@ namespace program_flash
     struct IFlashDriver
     {
         virtual std::uint8_t const* At(std::size_t offset) const = 0;
-        virtual void Program(std::size_t offset, std::uint8_t value) = 0;
-        virtual void Program(std::size_t offset, gsl::span<const std::uint8_t> value) = 0;
-        virtual void EraseSector(std::size_t sectorOfffset) = 0;
+        virtual FlashStatus Program(std::size_t offset, std::uint8_t value) = 0;
+        virtual FlashStatus Program(std::size_t offset, gsl::span<const std::uint8_t> value) = 0;
+        virtual FlashStatus EraseSector(std::size_t sectorOfffset) = 0;
 
         virtual std::uint32_t DeviceId() const = 0;
         virtual std::uint32_t BootConfig() const = 0;
@@ -82,10 +103,10 @@ namespace program_flash
             return this->_flashBase + offset;
         }
 
-        virtual void EraseSector(std::size_t sectorOfffset) override;
+        virtual FlashStatus EraseSector(std::size_t sectorOfffset) override;
 
-        virtual void Program(std::size_t offset, std::uint8_t value) override;
-        virtual void Program(std::size_t offset, gsl::span<const std::uint8_t> value) override;
+        virtual FlashStatus Program(std::size_t offset, std::uint8_t value) override;
+        virtual FlashStatus Program(std::size_t offset, gsl::span<const std::uint8_t> value) override;
 
         static constexpr std::size_t LargeSectorSize = 64_KB;
 
@@ -101,9 +122,9 @@ namespace program_flash
         return this->_flash.At(this->_offset + offset);
     }
 
-    inline void FlashSpan::Erase(std::size_t sectorOffset)
+    inline FlashStatus FlashSpan::Erase(std::size_t sectorOffset)
     {
-        this->_flash.EraseSector(this->_offset + sectorOffset);
+        return this->_flash.EraseSector(this->_offset + sectorOffset);
     }
 
     inline std::uint8_t const* FlashSpan::Data() const
@@ -111,9 +132,9 @@ namespace program_flash
         return this->At(0);
     }
 
-    inline void FlashSpan::Program(std::size_t offset, std::uint8_t value)
+    inline FlashStatus FlashSpan::Program(std::size_t offset, std::uint8_t value)
     {
-        this->_flash.Program(this->_offset + offset, value);
+        return this->_flash.Program(this->_offset + offset, value);
     }
 
     inline IFlashDriver& FlashSpan::Driver()
@@ -121,9 +142,9 @@ namespace program_flash
         return this->_flash;
     }
 
-    inline void FlashSpan::Program(std::size_t offset, gsl::span<const std::uint8_t> value)
+    inline FlashStatus FlashSpan::Program(std::size_t offset, gsl::span<const std::uint8_t> value)
     {
-        this->_flash.Program(this->_offset + offset, value);
+        return this->_flash.Program(this->_offset + offset, value);
     }
 
     inline std::size_t FlashSpan::BaseOffset() const

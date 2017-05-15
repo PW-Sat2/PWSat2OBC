@@ -33,6 +33,7 @@ target_link_libraries(${NAME}
     obc_state
     antenna
     mission_comm
+    telecommunication
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

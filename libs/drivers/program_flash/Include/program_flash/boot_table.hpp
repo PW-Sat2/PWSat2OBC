@@ -3,11 +3,48 @@
 
 #include <cstdint>
 #include <gsl/span>
+#include <tuple>
 #include "flash_driver.hpp"
 #include "utils.h"
 
 namespace program_flash
 {
+    template <typename TSuccess, typename TError> class Result
+    {
+      public:
+        Result(TSuccess value) : _isSuccess(true), _success(value)
+        {
+        }
+        Result(TError value) : _isSuccess(false), _error(value)
+        {
+        }
+
+        inline bool IsSuccess() const
+        {
+            return this->_isSuccess;
+        }
+
+        inline TSuccess Success() const
+        {
+            return this->_success;
+        }
+
+        inline TError Error() const
+        {
+            return this->_error;
+        }
+
+        inline operator bool() const
+        {
+            return this->_isSuccess;
+        }
+
+      private:
+        bool _isSuccess;
+        TSuccess _success;
+        TError _error;
+    };
+
     class ProgramEntry
     {
       public:
@@ -24,32 +61,34 @@ namespace program_flash
             return (*marker) == 0xAA;
         }
 
-        void Erase();
+        Result<FlashStatus, std::tuple<FlashStatus, std::size_t>> Erase();
 
-        void Description(const char* description);
+        FlashStatus Description(const char* description);
 
         inline std::uint16_t Crc() const
         {
             return *reinterpret_cast<const std::uint16_t*>(this->_crc.Data());
         }
 
-        void Crc(std::uint16_t crc);
+        FlashStatus Crc(std::uint16_t crc);
 
-        void MarkAsValid();
+        FlashStatus MarkAsValid();
 
         inline std::uint32_t Length() const
         {
             return *reinterpret_cast<const std::uint32_t*>(this->_length.Data());
         }
 
-        void Length(std::uint32_t length);
+        FlashStatus Length(std::uint32_t length);
 
         inline const std::uint8_t* Content() const
         {
             return this->_program.Data();
         }
 
-        void WriteContent(std::size_t offset, gsl::span<const std::uint8_t> content);
+        FlashStatus WriteContent(std::size_t offset, gsl::span<const std::uint8_t> content);
+
+        std::uint16_t CalculateCrc() const;
 
       private:
         static constexpr std::size_t Size = 512_KB;

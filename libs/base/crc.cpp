@@ -64,3 +64,18 @@ uint16_t CRC_calc(uint8_t* start, uint8_t* end)
     }
     return crc;
 }
+
+uint16_t CRC_calc(gsl::span<const uint8_t> buffer)
+{
+    uint16_t crc = 0;
+
+    for (auto data : buffer)
+    {
+        crc = (crc >> 8) | (crc << 8);
+        crc ^= data;
+        crc ^= (crc & 0xff) >> 4;
+        crc ^= crc << 12;
+        crc ^= (crc & 0xff) << 5;
+    }
+    return crc;
+}
