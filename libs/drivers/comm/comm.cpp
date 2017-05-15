@@ -10,6 +10,7 @@
 #include <cstring>
 #include "Beacon.hpp"
 #include "CommDriver.hpp"
+#include "CommTelemetry.hpp"
 #include "Frame.hpp"
 #include "IHandleFrame.hpp"
 #include "base/os.h"
@@ -428,6 +429,33 @@ bool CommObject::GetTransmitterState(TransmitterState& state)
     };
 
     state.TransmitterBitRate = conversionArray[(response & 0x0c) >> 2];
+    return true;
+}
+
+bool CommObject::GetTelemetry(CommTelemetry& telemetry)
+{
+    TransmitterTelemetry transmitter;
+    ReceiverTelemetry receiver;
+    TransmitterState state;
+    if (!GetTransmitterTelemetry(transmitter))
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire transmitter telemetry. ");
+        return false;
+    }
+
+    if (!GetReceiverTelemetry(receiver))
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire receiver telemetry. ");
+        return false;
+    }
+
+    if (!GetTransmitterState(state))
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire transmitter state. ");
+        return false;
+    }
+
+    telemetry = CommTelemetry(receiver, transmitter, state);
     return true;
 }
 

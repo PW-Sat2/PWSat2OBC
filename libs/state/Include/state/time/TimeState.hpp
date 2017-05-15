@@ -19,7 +19,7 @@ namespace state
     {
       public:
         /**
-         * @brief TimeState telemetry unique identifer.
+         * @brief TimeState telemetry unique identifier.
          */
         static constexpr int Id = 1;
 

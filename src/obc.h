@@ -66,8 +66,10 @@ struct OBC
 
     /** @brief File system object */
     services::fs::YaffsFileSystem fs;
+
     /** @brief Handle to OBC initialization task. */
     OSTaskHandle initTask;
+
     /** @brief Flag indicating that OBC software has finished initialization process. */
     EventGroup StateFlags;
 
@@ -121,9 +123,9 @@ LineIO& OBC::GetLineIO()
 {
 #ifdef USE_LEUART
     return this->IO;
-#endif
-
+#else
     return this->UARTDriver.GetLineIO();
+#endif
 }
 
 /** @brief Global OBC object. */

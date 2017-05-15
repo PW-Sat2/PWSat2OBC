@@ -14,6 +14,7 @@ target_link_libraries(${NAME}
     obc_state
     unit_tests_base
     state
+    telemetry
 )
 
 

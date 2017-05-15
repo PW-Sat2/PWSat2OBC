@@ -26,11 +26,11 @@ namespace
 
         IOResult WriteSuccessful();
 
-        SystemState state;
+        telemetry::TelemetryState state;
         testing::NiceMock<FsMock> fs;
         mission::TelemetryConfiguration config;
         mission::TelemetryTask task;
-        mission::ActionDescriptor<SystemState> descriptor;
+        mission::ActionDescriptor<telemetry::TelemetryState> descriptor;
     };
 
     TelemetryTest::TelemetryTest()
