@@ -5,6 +5,7 @@ set(SOURCES
   state/PersistentTimeStateTest.cpp
   state/AntennaConfigTest.cpp
   state/TelemetryTest.cpp
+  state/BootStateTest.cpp
   obc/ObcStateTest.cpp 
   telemetry/CommTelemetryAcquisitionTest.cpp
 )

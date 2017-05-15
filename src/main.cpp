@@ -156,6 +156,21 @@ static void ProcessState(OBC* obc)
     persistentState.Set(boot);
 }
 
+static void AuditSystemStartup()
+{
+    const auto& persistentState = Mission.GetState().PersistentState;
+    const auto bootCounter = persistentState.Get<state::BootState>().BootCounter();
+    auto& telemetry = TelemetryAcquisition.GetState().telemetry;
+    if (boot::IsBootInformationAvailable())
+    {
+        telemetry.Set(telemetry::SystemStartup(bootCounter, boot::Index));
+    }
+    else
+    {
+        telemetry.Set(telemetry::SystemStartup(bootCounter, 0xff));
+    }
+}
+
 static void SetupAntennas(void)
 {
     AntennaMiniportInitialize(&Main.antennaMiniport);
@@ -178,6 +193,7 @@ static void ObcInitTask(void* param)
     }
 
     ProcessState(obc);
+    AuditSystemStartup();
 
     obc->fs.MakeDirectory("/a");
 
@@ -278,7 +294,7 @@ int main(void)
     LeuartLineIOInit(&Main.IO);
 #endif
 
-    if (boot::MagicNumber != boot::BootloaderMagicNumber)
+    if (boot::IsBootInformationAvailable())
     {
         LOGF(LOG_LEVEL_WARNING,
             "No boot information from bootloader (expected: 0x%lX, got: 0x%lX)",
