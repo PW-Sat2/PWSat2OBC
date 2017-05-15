@@ -19,6 +19,7 @@ namespace mission
 
     /**
      * @brief Task that is responsible for control of the communication.
+     * @mission_task
      */
     class CommTask : public Action, public IIdleStateController
     {
@@ -27,6 +28,7 @@ namespace mission
          * @brief ctor.
          *
          * To support single argument construction.
+         * @param[in] transmitter Reference to object providing frame sending capability.
          */
         CommTask(devices::comm::ITransmitter& transmitter);
 
