@@ -8,6 +8,7 @@
 #include "Telemetry.hpp"
 #include "comm/CommTelemetry.hpp"
 #include "fwd.hpp"
+#include "gyro/telemetry.hpp"
 #include "state/time/TimeState.hpp"
 
 namespace telemetry

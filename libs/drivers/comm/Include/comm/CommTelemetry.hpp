@@ -20,7 +20,7 @@ class CommTelemetry
     /**
      * @brief TimeState telemetry unique identifier.
      */
-    static constexpr int Id = 4;
+    static constexpr int Id = 12;
 
     /**
      * @brief ctor.

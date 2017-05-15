@@ -9,6 +9,7 @@ set(SOURCES
   obc/ObcStateTest.cpp 
   telemetry/CommTelemetryAcquisitionTest.cpp
   telemetry/SystemStartupTest.cpp
+  telemetry/GyroTelemetryAcquisitionTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
@@ -19,6 +20,7 @@ target_link_libraries(${NAME}
     state
     telemetry
     telemetry_comm
+    telemetry_gyro
 )
 
 
