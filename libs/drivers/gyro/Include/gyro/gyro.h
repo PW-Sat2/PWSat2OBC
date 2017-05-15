@@ -4,7 +4,7 @@
 #include "i2c/i2c.h"
 
 /**
- * @defgroup ITG-3200 gyroscope low level driver
+ * @defgroup ITG-3200 Low level gyroscope driver
  * @ingroup device_drivers
  *
  * @brief This module is a low level ITG-3200 gyroscope module driver.

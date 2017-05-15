@@ -129,6 +129,7 @@ static void InitSwoEndpoint(void)
 
 static void ProcessState(OBC* obc)
 {
+    auto& persistentState = Mission.GetState().PersistentState;
     if (obc->Hardware.Pins.SysClear.Input() == false)
     {
         LOG(LOG_LEVEL_WARNING, "Resetting system state");
@@ -138,7 +139,7 @@ static void ProcessState(OBC* obc)
             LOG(LOG_LEVEL_ERROR, "Storage reset failure");
         }
 
-        if (!obc::WritePersistentState(Mission.GetState().PersistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage))
+        if (!obc::WritePersistentState(persistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage))
         {
             LOG(LOG_LEVEL_ERROR, "Persistent state reset failure");
         }
@@ -147,8 +148,12 @@ static void ProcessState(OBC* obc)
     }
     else
     {
-        obc::ReadPersistentState(Mission.GetState().PersistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage);
+        obc::ReadPersistentState(persistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage);
     }
+
+    auto boot = persistentState.Get<state::BootState>();
+    boot = state::BootState(boot.BootCounter() + 1);
+    persistentState.Set(boot);
 }
 
 static void SetupAntennas(void)

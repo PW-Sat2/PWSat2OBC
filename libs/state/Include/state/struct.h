@@ -10,6 +10,7 @@
 #include "antenna/AntennaConfiguration.hpp"
 #include "antenna/AntennaState.hpp"
 #include "base/os.h"
+#include "boot/BootState.hpp"
 #include "experiments/experiments.h"
 #include "fwd.hpp"
 #include "time/TimeCorrectionConfiguration.hpp"
