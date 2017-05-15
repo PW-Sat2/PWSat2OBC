@@ -200,7 +200,7 @@ bool CommObject::RemoveFrame()
 
 bool CommObject::GetReceiverTelemetry(ReceiverTelemetry& telemetry)
 {
-    uint8_t buffer[sizeof(ReceiverTelemetry)];
+    uint8_t buffer[sizeof(ReceiverTelemetry)] = {0};
     const bool status = this->SendCommandWithResponse(Address::Receiver, num(ReceiverCommand::GetTelemetry), span<uint8_t>(buffer));
     if (!status)
     {
@@ -233,7 +233,7 @@ bool CommObject::GetReceiverTelemetry(ReceiverTelemetry& telemetry)
 
 bool CommObject::GetTransmitterTelemetry(TransmitterTelemetry& telemetry)
 {
-    uint8_t buffer[sizeof(TransmitterTelemetry)];
+    uint8_t buffer[sizeof(TransmitterTelemetry)] = {0};
     const bool status = this->SendCommandWithResponse(Address::Transmitter, num(TransmitterCommand::GetTelemetry), span<uint8_t>(buffer));
     if (!status)
     {
@@ -406,7 +406,7 @@ bool CommObject::SetTransmitterBitRate(Bitrate bitrate)
 
 bool CommObject::GetTransmitterState(TransmitterState& state)
 {
-    std::uint8_t response;
+    std::uint8_t response = 0;
     const bool status = SendCommandWithResponse(Address::Transmitter, //
         num(TransmitterCommand::GetState),                            //
         gsl::span<std::uint8_t>(&response, 1)                         //

@@ -1,4 +1,4 @@
-set(NAME comm_telemetry)
+set(NAME telemetry_comm)
 
 set(SOURCES
     Include/telemetry/collect_comm.hpp
