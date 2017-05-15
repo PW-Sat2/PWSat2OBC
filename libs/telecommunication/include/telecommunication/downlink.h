@@ -26,6 +26,7 @@ namespace telecommunication
             Pong = 0x01,           //!< Pong
             Operation = 0x2,       //!< Operation command
             Beacon = 0x3,          //!< Beacon
+            ProgramUpload = 0x4,   //!< Program upload operation status
             TelemetryShort = 0x2A, //!< TelemetryShort
             TelemetryLong = 0x3F,  //!< TelemetryLong
             LastItem               //!< LastItem
@@ -54,7 +55,7 @@ namespace telecommunication
              * @brief Returns undelying byte representation of the frame
              * @return
              */
-            inline gsl::span<uint8_t> Frame();
+            inline gsl::span<const uint8_t> Frame();
 
             /** @brief Size of header size */
             static constexpr std::uint8_t HeaderSize = 3;
@@ -74,7 +75,7 @@ namespace telecommunication
             return this->_payloadWriter;
         }
 
-        inline gsl::span<uint8_t> DownlinkFrame::Frame()
+        inline gsl::span<const uint8_t> DownlinkFrame::Frame()
         {
             return gsl::make_span(this->_frame).subspan(0, HeaderSize + this->_payloadWriter.GetDataLength());
         }

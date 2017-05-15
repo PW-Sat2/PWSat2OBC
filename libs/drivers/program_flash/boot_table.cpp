@@ -1,5 +1,6 @@
 #include "boot_table.hpp"
 #include <array>
+#include "base/crc.h"
 #include "lld.h"
 #include "logger/logger.h"
 
@@ -27,15 +28,21 @@ namespace program_flash
     {
     }
 
-    void ProgramEntry::Erase()
+    Result<FlashStatus, std::tuple<FlashStatus, std::size_t>> ProgramEntry::Erase()
     {
         for (std::size_t sectorOffset = 0; sectorOffset < Size; sectorOffset += FlashDriver::LargeSectorSize)
         {
-            this->_entrySpan.Erase(sectorOffset);
+            auto status = this->_entrySpan.Erase(sectorOffset);
+            if (status != FlashStatus::NotBusy)
+            {
+                return {std::make_tuple(status, sectorOffset)};
+            }
         }
+
+        return {FlashStatus::NotBusy};
     }
 
-    void ProgramEntry::Description(const char* description)
+    FlashStatus ProgramEntry::Description(const char* description)
     {
         auto offset = 0;
 
@@ -43,30 +50,34 @@ namespace program_flash
 
         while (*c != '\0')
         {
-            this->_description.Program(offset, *c);
+            auto r = this->_description.Program(offset, *c);
+
+            if (r != FlashStatus::NotBusy)
+                return r;
 
             c++;
             offset++;
         }
 
-        this->_description.Program(offset, 0x0);
+        return this->_description.Program(offset, 0x0);
     }
 
-    void ProgramEntry::Crc(std::uint16_t crc)
+    FlashStatus ProgramEntry::Crc(std::uint16_t crc)
     {
-        std::uint8_t lower = static_cast<std::uint8_t>(crc & 0x00FF);
-        std::uint8_t higher = static_cast<std::uint8_t>((crc & 0xFF00) >> 8);
+        std::array<std::uint8_t, 2> bytes{
+            static_cast<std::uint8_t>(crc & 0x00FF), //
+            static_cast<std::uint8_t>((crc & 0xFF00) >> 8),
+        };
 
-        this->_crc.Program(0, lower);
-        this->_crc.Program(1, higher);
+        return this->_crc.Program(0, bytes);
     }
 
-    void ProgramEntry::MarkAsValid()
+    FlashStatus ProgramEntry::MarkAsValid()
     {
-        this->_isValid.Program(0, 0xAA);
+        return this->_isValid.Program(0, 0xAA);
     }
 
-    void ProgramEntry::Length(std::uint32_t length)
+    FlashStatus ProgramEntry::Length(std::uint32_t length)
     {
         std::array<std::uint8_t, 4> bytes{
             static_cast<std::uint8_t>((length & 0x000000FF) >> 0),
@@ -75,11 +86,18 @@ namespace program_flash
             static_cast<std::uint8_t>((length & 0xFF000000) >> 24),
         };
 
-        this->_length.Program(0, bytes);
+        return this->_length.Program(0, bytes);
     }
 
-    void ProgramEntry::WriteContent(std::size_t offset, gsl::span<const std::uint8_t> content)
+    FlashStatus ProgramEntry::WriteContent(std::size_t offset, gsl::span<const std::uint8_t> content)
     {
-        this->_program.Program(offset, content);
+        return this->_program.Program(offset, content);
+    }
+
+    std::uint16_t ProgramEntry::CalculateCrc() const
+    {
+        auto programArea = gsl::make_span(this->Content(), this->Length());
+
+        return CRC_calc(programArea);
     }
 }

@@ -14,23 +14,31 @@ namespace program_flash
         this->_bootConfig = lld_ReadCfiWord(this->_flashBase, 0x9E);
     }
 
-    void FlashDriver::EraseSector(std::size_t sectorOfffset)
+    FlashStatus FlashDriver::EraseSector(std::size_t sectorOfffset)
     {
         auto d = lld_SectorEraseOp(this->_flashBase, sectorOfffset);
         LOGF(LOG_LEVEL_DEBUG, "Erase %d", d);
+        return static_cast<FlashStatus>(d);
     }
 
-    void FlashDriver::Program(std::size_t offset, std::uint8_t value)
+    FlashStatus FlashDriver::Program(std::size_t offset, std::uint8_t value)
     {
-        lld_ProgramOp(this->_flashBase, offset, value);
+        return static_cast<FlashStatus>(lld_ProgramOp(this->_flashBase, offset, value));
     }
 
-    void FlashDriver::Program(std::size_t offset, gsl::span<const std::uint8_t> value)
+    FlashStatus FlashDriver::Program(std::size_t offset, gsl::span<const std::uint8_t> value)
     {
         for (decltype(value.size()) i = 0; i < value.size(); i++)
         {
-            lld_ProgramOp(this->_flashBase, offset + i, value[i]);
+            auto d = static_cast<FlashStatus>(lld_ProgramOp(this->_flashBase, offset + i, value[i]));
+
+            if (d != FlashStatus::NotBusy)
+            {
+                return d;
+            }
         }
+
+        return FlashStatus::NotBusy;
     }
 
     FlashSpan::FlashSpan(IFlashDriver& flash, std::size_t offset) : _flash(flash), _offset(offset)
