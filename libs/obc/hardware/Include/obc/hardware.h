@@ -108,7 +108,7 @@ namespace obc
          */
         OBCHardware(error_counter::ErrorCounting& errorCounting, services::power::IPowerControl&, TimeAction& burtcTickHandler);
 
-        /** @brief Initializies OBC hardware */
+        /** @brief Initializes OBC hardware */
         void Initialize();
 
         /** @brief Initializies OBC hardware after FreeRTOS is initialized */

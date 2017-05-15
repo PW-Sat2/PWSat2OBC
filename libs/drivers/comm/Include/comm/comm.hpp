@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <gsl/span>
+#include "base/fwd.hpp"
 
 #define COMM_BEGIN                                                                                                                         \
     namespace devices                                                                                                                      \
@@ -48,10 +49,12 @@ COMM_BEGIN
 
 class Frame;
 class Beacon;
+class CommTelemetry;
 
 struct IHandleFrame;
 struct ITransmitter;
 struct IBeaconController;
+struct ICommTelemetryProvider;
 
 /**
  * @brief Maximum allowed single frame content length.
@@ -210,6 +213,10 @@ enum class Address
     Transmitter = 0x61,
 };
 
+struct ICommTelemetryProvider
+{
+    virtual bool GetTelemetry(CommTelemetry& telemetry) = 0;
+};
 /** @}*/
 COMM_END
 

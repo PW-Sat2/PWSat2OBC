@@ -3,6 +3,7 @@ set(NAME comm)
 set(SOURCES
     comm.cpp
     Frame.cpp
+    CommTelemetry.cpp
     Include/comm/Beacon.hpp
     Include/comm/comm.hpp
     Include/comm/CommDriver.hpp

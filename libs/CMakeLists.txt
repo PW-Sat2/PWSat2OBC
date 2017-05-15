@@ -20,4 +20,4 @@ add_subdirectory(settings)
 add_subdirectory(experiments)
 add_subdirectory(error_counter)
 add_subdirectory(boot_params)
-
+add_subdirectory(telemetry)

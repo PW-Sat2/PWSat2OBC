@@ -47,7 +47,9 @@ mission::ObcMission Mission(std::tie(Main.timeProvider, Main.rtc),
     Main.adcs.GetAdcsController(),
     Main.Experiments.ExperimentsController,
     Main.Communication.CommDriver,
-    std::tie(Main.Hardware.PersistentStorage, PersistentStateBaseAddress),
+    std::tie(Main.Hardware.PersistentStorage, PersistentStateBaseAddress));
+
+telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Communication.CommDriver,
     std::tuple<services::fs::IFileSystem&, mission::TelemetryConfiguration>(
         Main.fs, mission::TelemetryConfiguration{"/telemetry.current", "/telemetry.previous", 512_KB}));
 
@@ -181,7 +183,15 @@ static void ObcInitTask(void* param)
         LOG(LOG_LEVEL_ERROR, "Unable to restart comm");
     }
 
-    Mission.Initialize();
+    if (!Mission.Initialize())
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to initialize mission loop.");
+    }
+
+    if (!TelemetryAcquisition.Initialize())
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to initialize telemetry acquisition loop.");
+    }
 
     obc->Hardware.Burtc.Start();
 

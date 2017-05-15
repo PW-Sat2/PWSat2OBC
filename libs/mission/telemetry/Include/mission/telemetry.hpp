@@ -8,7 +8,7 @@
 #include "fs/fs.h"
 #include "gsl/span"
 #include "mission/base.hpp"
-#include "state/struct.h"
+#include "telemetry/state.hpp"
 
 namespace mission
 {
@@ -72,7 +72,7 @@ namespace mission
          * @brief Builds action descriptor for this task.
          * @return Action descriptor - the telemetry change save task.
          */
-        ActionDescriptor<SystemState> BuildAction();
+        ActionDescriptor<telemetry::TelemetryState> BuildAction();
 
         /**
          * @brief This procedure extracts modified parts of the telemetry and saves it to the telemetry
@@ -81,7 +81,7 @@ namespace mission
          * Once the process is complete the telemetry container is notified that all changes are saved.
          * @param[in] state Reference to global mission state.
          */
-        void Save(SystemState& state);
+        void Save(telemetry::TelemetryState& state);
 
         /**
          * @brief This procedure is responsible for appending the passed data frame to the current
@@ -99,7 +99,7 @@ namespace mission
          * @param[in] param Current execution context.
          * @return true if there are telemetry changes that should be saved, false otherwise.
          */
-        static bool SaveCondition(const SystemState& state, void* param);
+        static bool SaveCondition(const telemetry::TelemetryState& state, void* param);
 
         /**
          * @brief This procedure is responsible for appending the passed data frame to the current
@@ -108,7 +108,7 @@ namespace mission
          * @param[in] state Reference to global mission state.
          * @param[in] param Current execution context.
          */
-        static void SaveProxy(SystemState& state, void* param);
+        static void SaveProxy(telemetry::TelemetryState& state, void* param);
 
         /**
          * @brief File system provider.

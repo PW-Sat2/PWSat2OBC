@@ -26,10 +26,11 @@ target_asm_listing(${NAME})
 
 target_compile_options(${NAME} PRIVATE "-fexceptions")
 
-target_link_libraries(${NAME}    
+target_link_libraries(${NAME}
     obc_state
     unit_tests_base
     state
+    telemetry
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})

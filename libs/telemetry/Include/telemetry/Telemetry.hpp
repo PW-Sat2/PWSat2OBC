@@ -16,7 +16,7 @@
  *
  * @brief This module contains telemetry management routines.
  */
-namespace state
+namespace telemetry
 {
     namespace details
     {
