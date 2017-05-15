@@ -10,6 +10,7 @@
 #include "OsMock.hpp"
 #include "comm/Beacon.hpp"
 #include "comm/CommDriver.hpp"
+#include "comm/CommTelemetry.hpp"
 #include "comm/Frame.hpp"
 #include "comm/IHandleFrame.hpp"
 #include "i2c/i2c.h"
@@ -633,6 +634,43 @@ namespace
         ASSERT_THAT(telemetry.AmplifierTemperature, Eq(0x0403));
         ASSERT_THAT(telemetry.RFForwardPower, Eq(0x0605));
         ASSERT_THAT(telemetry.TransmitterCurrentConsumption, Eq(0x0807));
+    }
+
+    TEST_F(CommTest, TestGetTelemetryTransmitterFailure)
+    {
+        CommTelemetry telemetry;
+        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetTelemetry))).WillOnce(Return(I2CResult::Nack));
+        const auto status = comm.GetTelemetry(telemetry);
+        ASSERT_THAT(status, Eq(false));
+    }
+
+    TEST_F(CommTest, TestGetTelemetryReceiverFailure)
+    {
+        CommTelemetry telemetry;
+        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetTelemetry))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, Write(ReceiverAddress, ElementsAre(ReceverGetTelemetry))).WillOnce(Return(I2CResult::Nack));
+        const auto status = comm.GetTelemetry(telemetry);
+        ASSERT_THAT(status, Eq(false));
+    }
+
+    TEST_F(CommTest, TestGetTelemetryTransmitterStateFailure)
+    {
+        CommTelemetry telemetry;
+        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetTelemetry))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, Write(ReceiverAddress, ElementsAre(ReceverGetTelemetry))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetState))).WillOnce(Return(I2CResult::Nack));
+        const auto status = comm.GetTelemetry(telemetry);
+        ASSERT_THAT(status, Eq(false));
+    }
+
+    TEST_F(CommTest, TestGetTelemetry)
+    {
+        CommTelemetry telemetry;
+        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetTelemetry))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, Write(ReceiverAddress, ElementsAre(ReceverGetTelemetry))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetState))).WillOnce(Return(I2CResult::OK));
+        const auto status = comm.GetTelemetry(telemetry);
+        ASSERT_THAT(status, Eq(true));
     }
 
     TEST_F(CommTest, TestSetBeaconTransmittFailure)

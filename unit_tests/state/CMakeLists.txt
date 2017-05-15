@@ -6,6 +6,7 @@ set(SOURCES
   state/AntennaConfigTest.cpp
   state/TelemetryTest.cpp
   obc/ObcStateTest.cpp 
+  telemetry/CommTelemetryAcquisitionTest.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -31,6 +32,7 @@ target_link_libraries(${NAME}
     unit_tests_base
     state
     telemetry
+    telemetry_comm
 )
 
 set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
