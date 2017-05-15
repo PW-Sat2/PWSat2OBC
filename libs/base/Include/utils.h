@@ -118,16 +118,6 @@ template <class T> class Option
     }
 
     /**
-     * @brief Factory method that constructs Option instance that holds given value.
-     * @param[in] value Value to hold in Option instance.
-     * @return Option instance that holds a value.
-     */
-    static Option<T> Some(T& value)
-    {
-        return Option<T>(true, value);
-    }
-
-    /**
       * @brief A flag indicating if this Option instance holds a value.
       */
     bool HasValue;
@@ -138,16 +128,18 @@ template <class T> class Option
     T Value;
 
   private:
-    Option(bool hasValue, T&& value) : HasValue(hasValue), Value(std::move(value))
-    {
-    }
-
-    Option(bool hasValue, T& value) : HasValue(hasValue), Value(value)
-    {
-    }
+    template <typename... Args> Option(bool hasValue, Args&&... values);
 };
 
-template <class T> inline Option<T>::Option() : HasValue(false), Value(T())
+template <typename T> inline Option<T>::Option() : HasValue(false), Value(T())
+{
+}
+
+template <typename T>
+template <typename... Args>
+Option<T>::Option(bool hasValue, Args&&... values) //
+    : HasValue(hasValue),                          //
+      Value(std::forward<Args>(values)...)
 {
 }
 
