@@ -228,7 +228,11 @@ TAB_SIZE = 4
 # "Side Effects:". You can put \n's in the value part of an alias to insert
 # newlines.
 
-ALIASES += "telecommand=\xrefitem tc_list \"\" \"\"" "mission_task=\xrefitem mission_task_list \"\" \"\"" "telemetry_element=\xrefitem telemetry_element_list \"\" \"\"" "persistent_state=\xrefitem persistent_state_list \"\" \"\""
+ALIASES += "telecommand=\xrefitem tc_list \"\" \"\"" \
+    "mission_task=\xrefitem mission_task_list \"\" \"\"" \
+    "telemetry_element=\xrefitem telemetry_element_list \"\" \"\"" \
+    "persistent_state=\xrefitem persistent_state_list \"\" \"\"" \
+    "telemetry_acquisition=\xrefitem telemetry_acquisition_list \"\" \"\""
 
 # This tag can be used to specify a number of word-keyword mappings (TCL only).
 # A mapping has the form "name=value". For example adding "class=itcl::class"
