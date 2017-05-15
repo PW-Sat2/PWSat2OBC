@@ -25,7 +25,7 @@ namespace devices
             /**
              * @brief GyroscopeTelemetry telemetry unique identifier.
              */
-            static constexpr std::uint32_t Id = 4;
+            static constexpr std::uint32_t Id = 13;
 
             /**
              * @brief ctor.

@@ -17,6 +17,7 @@
 #include "state/struct.h"
 #include "telemetry/collect_comm.hpp"
 #include "telemetry/state.hpp"
+#include "telemetry/collect_gyro.hpp"
 
 namespace mission
 {

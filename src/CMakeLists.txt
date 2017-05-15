@@ -93,6 +93,7 @@ target_link_libraries(${NAME}
     boot_params
     telemetry
     telemetry_comm
+    telemetry_gyro
     program_flash
     scrubber
 )
