@@ -23,7 +23,7 @@ namespace mission
          * The purpose of Action part is to coordinate the antenna deployment. This part is executed
          * only if following condition are met:
          * - The initial silent mission period is over
-         * - The antennas are not curretnly being deployed
+         * - The antennas are not currently being deployed
          */
         struct AntennaTask : public Update, public Action
         {

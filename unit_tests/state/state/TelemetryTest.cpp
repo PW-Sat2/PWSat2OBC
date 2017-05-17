@@ -2,7 +2,7 @@
 #include "gmock/gmock-matchers.h"
 #include "base/reader.h"
 #include "base/writer.h"
-#include "state/Telemetry.hpp"
+#include "telemetry/Telemetry.hpp"
 
 namespace
 {
@@ -130,7 +130,7 @@ namespace
         return this->byte;
     }
 
-    typedef state::Telemetry<SimpleObject, ComplexObject> Telemetry;
+    typedef telemetry::Telemetry<SimpleObject, ComplexObject> Telemetry;
 
     class TelemetryTest : public testing::Test
     {

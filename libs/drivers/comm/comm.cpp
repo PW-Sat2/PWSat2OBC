@@ -10,6 +10,7 @@
 #include <cstring>
 #include "Beacon.hpp"
 #include "CommDriver.hpp"
+#include "CommTelemetry.hpp"
 #include "Frame.hpp"
 #include "IHandleFrame.hpp"
 #include "base/os.h"
@@ -199,7 +200,7 @@ bool CommObject::RemoveFrame()
 
 bool CommObject::GetReceiverTelemetry(ReceiverTelemetry& telemetry)
 {
-    uint8_t buffer[sizeof(ReceiverTelemetry)];
+    uint8_t buffer[sizeof(ReceiverTelemetry)] = {0};
     const bool status = this->SendCommandWithResponse(Address::Receiver, num(ReceiverCommand::GetTelemetry), span<uint8_t>(buffer));
     if (!status)
     {
@@ -232,7 +233,7 @@ bool CommObject::GetReceiverTelemetry(ReceiverTelemetry& telemetry)
 
 bool CommObject::GetTransmitterTelemetry(TransmitterTelemetry& telemetry)
 {
-    uint8_t buffer[sizeof(TransmitterTelemetry)];
+    uint8_t buffer[sizeof(TransmitterTelemetry)] = {0};
     const bool status = this->SendCommandWithResponse(Address::Transmitter, num(TransmitterCommand::GetTelemetry), span<uint8_t>(buffer));
     if (!status)
     {
@@ -405,7 +406,7 @@ bool CommObject::SetTransmitterBitRate(Bitrate bitrate)
 
 bool CommObject::GetTransmitterState(TransmitterState& state)
 {
-    std::uint8_t response;
+    std::uint8_t response = 0;
     const bool status = SendCommandWithResponse(Address::Transmitter, //
         num(TransmitterCommand::GetState),                            //
         gsl::span<std::uint8_t>(&response, 1)                         //
@@ -428,6 +429,33 @@ bool CommObject::GetTransmitterState(TransmitterState& state)
     };
 
     state.TransmitterBitRate = conversionArray[(response & 0x0c) >> 2];
+    return true;
+}
+
+bool CommObject::GetTelemetry(CommTelemetry& telemetry)
+{
+    TransmitterTelemetry transmitter;
+    ReceiverTelemetry receiver;
+    TransmitterState state;
+    if (!GetTransmitterTelemetry(transmitter))
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire transmitter telemetry. ");
+        return false;
+    }
+
+    if (!GetReceiverTelemetry(receiver))
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire receiver telemetry. ");
+        return false;
+    }
+
+    if (!GetTransmitterState(state))
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire transmitter state. ");
+        return false;
+    }
+
+    telemetry = CommTelemetry(receiver, transmitter, state);
     return true;
 }
 

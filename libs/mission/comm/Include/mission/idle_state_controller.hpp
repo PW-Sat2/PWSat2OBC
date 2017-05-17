@@ -8,7 +8,7 @@ namespace mission
     /**
      * @brief Idle state controller.
      *
-     * @ingroup comm
+     * @ingroup mission
      */
     struct IIdleStateController
     {

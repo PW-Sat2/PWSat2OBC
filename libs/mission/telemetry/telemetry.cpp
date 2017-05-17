@@ -1,7 +1,7 @@
 #include "mission/telemetry.hpp"
 #include <cassert>
 #include "logger/logger.h"
-#include "state/struct.h"
+#include "telemetry/state.hpp"
 
 namespace mission
 {
@@ -11,9 +11,9 @@ namespace mission
     {
     }
 
-    ActionDescriptor<SystemState> TelemetryTask::BuildAction()
+    ActionDescriptor<telemetry::TelemetryState> TelemetryTask::BuildAction()
     {
-        ActionDescriptor<SystemState> descriptor;
+        ActionDescriptor<telemetry::TelemetryState> descriptor;
         descriptor.name = "Save telemetry to file";
         descriptor.param = this;
         descriptor.condition = SaveCondition;
@@ -21,22 +21,22 @@ namespace mission
         return descriptor;
     }
 
-    bool TelemetryTask::SaveCondition(const SystemState& state, void* /*param*/)
+    bool TelemetryTask::SaveCondition(const telemetry::TelemetryState& state, void* /*param*/)
     {
         return state.telemetry.IsModified();
     }
 
-    void TelemetryTask::SaveProxy(SystemState& state, void* param)
+    void TelemetryTask::SaveProxy(telemetry::TelemetryState& state, void* param)
     {
         auto This = static_cast<TelemetryTask*>(param);
         This->Save(state);
     }
 
-    void TelemetryTask::Save(SystemState& state)
+    void TelemetryTask::Save(telemetry::TelemetryState& stateObject)
     {
-        std::array<std::uint8_t, state::ManagedTelemetry::TotalSerializedSize> buffer;
+        std::array<std::uint8_t, telemetry::ManagedTelemetry::TotalSerializedSize> buffer;
         Writer writer(buffer);
-        state.telemetry.WriteModified(writer);
+        stateObject.telemetry.WriteModified(writer);
         assert(writer.Status());
         if (!writer.Status())
         {
@@ -52,7 +52,7 @@ namespace mission
 
         if (SaveToFile(content))
         {
-            state.telemetry.CommitCapture();
+            stateObject.telemetry.CommitCapture();
         }
     }
 

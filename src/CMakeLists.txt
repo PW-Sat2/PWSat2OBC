@@ -88,6 +88,8 @@ target_link_libraries(${NAME}
     mission_comm
     watchdog
     boot_params
+    telemetry
+    telemetry_comm
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

@@ -70,6 +70,5 @@
  
  /**
  * @defgroup telemetry Telemetry
- * @ingroup StateDef
  * @brief This module is responsible for telemetry management.
  */

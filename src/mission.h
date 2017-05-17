@@ -14,6 +14,8 @@
 #include "mission/telemetry.hpp"
 #include "mission/time.hpp"
 #include "state/struct.h"
+#include "telemetry/collect_comm.hpp"
+#include "telemetry/state.hpp"
 
 namespace mission
 {
@@ -25,12 +27,22 @@ namespace mission
         adcs::AdcsPrimaryTask,
         mission::experiments::MissionExperimentComponent,
         mission::BeaconUpdate,
-        mission::PeristentStateSave,
-        mission::TelemetryTask //
+        mission::PeristentStateSave //
         >
         ObcMission;
 }
 
+namespace telemetry
+{
+    typedef mission::MissionLoop<TelemetryState, //
+        CommTelemetryAcquisition,                //
+        mission::TelemetryTask                   //
+        >
+        ObcTelemetryAcquisition;
+}
+
 extern mission::ObcMission Mission;
+
+extern telemetry::ObcTelemetryAcquisition TelemetryAcquisition;
 
 #endif /* SRC_MISSION_H_ */

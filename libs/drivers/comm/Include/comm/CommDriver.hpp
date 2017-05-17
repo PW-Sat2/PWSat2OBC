@@ -19,7 +19,10 @@ COMM_BEGIN
  * @remark Do not access directly the fields of this type, instead use the comm driver interface to
  * perform requested action.
  */
-class CommObject final : public ITransmitter, public IBeaconController
+
+class CommObject final : public ITransmitter,      //
+                         public IBeaconController, //
+                         public ICommTelemetryProvider
 {
   public:
     /**
@@ -211,6 +214,8 @@ class CommObject final : public ITransmitter, public IBeaconController
      * Additionally it resets hardware watchdog either via transmitter or via receiver.
      */
     void PollHardware();
+
+    virtual bool GetTelemetry(CommTelemetry& telemetry) final override;
 
     /** @brief Error counter type */
     using ErrorCounter = error_counter::ErrorCounter<1>;
