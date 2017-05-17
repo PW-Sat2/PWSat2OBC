@@ -29,7 +29,7 @@ class WriteProgramPart(Telecommand):
         for e in self._entries:
             mask |= 1 << (e - 1)
 
-        return list(struct.pack('<BH', mask, self._offset)) + list(self._content)
+        return list(struct.pack('<BI', mask, self._offset)) + list(self._content)
 
     def __init__(self, entries, offset, content):
         self._offset = offset
@@ -46,7 +46,7 @@ class FinalizeProgramEntry(Telecommand):
         for e in self._entries:
             mask |= 1 << (e - 1)
 
-        return list(struct.pack('<BHH', mask, self._length, self._expected_crc)) + list(self._name)
+        return list(struct.pack('<BIH', mask, self._length, self._expected_crc)) + list(self._name)
 
     def __init__(self, entries, length, expected_crc, name):
         self._entries = entries

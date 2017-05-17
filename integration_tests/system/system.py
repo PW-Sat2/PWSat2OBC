@@ -3,6 +3,7 @@ import logging
 from devices import *
 from i2cMock import I2CMock
 from obc import OBC, SerialPortTerminal
+import response_frames
 
 
 class System:
@@ -25,8 +26,11 @@ class System:
             self.obc.power_on(clean_state=False)
 
     def _setup_devices(self):
+        self.frame_decoder = response_frames.FrameDecoder()
+        self.frame_decoder.add_frame_types(response_frames.frame_types)
+
         self.eps = EPS()
-        self.comm = Comm()
+        self.comm = Comm(self.frame_decoder)
         self.transmitter = self.comm.transmitter
         self.receiver = self.comm.receiver
         self.primary_antenna = AntennaController(PRIMARY_ANTENNA_CONTROLLER_ADDRESS)

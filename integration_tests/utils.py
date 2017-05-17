@@ -11,7 +11,7 @@ def hex_data(data):
 
     return str(['%X' % b for b in data])
 
-def pad_to_multiply(s, base):
+def pad_to_multiply(s, base, char):
     l = base - len(s) % base
     if l < base:
         padding = char * l
@@ -82,6 +82,28 @@ def ensure_byte_list(value):
         return v
 
     return map(ensure_single, value)
+
+
+def ensure_string(value):
+    if type(value) is str:
+        return value
+
+    if type(value) is tuple:
+        return ensure_string(list(value))
+
+    if type(value) is not list:
+        return ensure_string(list(value))
+
+    def ensure_single(v):
+        if type(v) is int:
+            return chr(v)
+
+        if type(v) is str:
+            return v
+
+        return v
+
+    return ''.join(map(ensure_single, value))
 
 
 def busy_wait(condition, projection=None, delay=None, timeout=None):

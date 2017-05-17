@@ -10,7 +10,7 @@ from utils import *
 from build_config import config
 
 
-class DownlinkFrame:
+class DownlinkFrame(object):
     def __init__(self, apid, seq, payload):
         self._apid = apid
         self._seq = seq
@@ -34,6 +34,9 @@ class DownlinkFrame:
         payload = bytes[3:]
 
         return DownlinkFrame(apid, seq, payload)
+
+    def __str__(self):
+        return 'APID: {} Seq: {} Payload: {}'.format(self._apid, self._seq, self._payload)
 
 
 class UplinkFrame:
@@ -364,7 +367,9 @@ class ReceiverDevice(i2cMock.I2CDevice):
 class Comm(object):
     MAX_UPLINK_FRAME_SIZE = 200
 
-    def __init__(self):
+    def __init__(self, frame_decoder):
+        self._frame_decoder = frame_decoder
+
         self.transmitter = TransmitterDevice()
         self.receiver = ReceiverDevice()
 
@@ -399,4 +404,4 @@ class Comm(object):
     def get_frame(self, timeout=None):
         f = self.transmitter.get_message_from_buffer(timeout)
 
-        return DownlinkFrame.parse(f)
+        return self._frame_decoder.decode(DownlinkFrame.parse(f))

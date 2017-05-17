@@ -1,4 +1,5 @@
 import telecommand
+from response_frames.operation import OperationSuccessFrame
 from system import auto_power_on
 from tests.base import BaseTest
 from utils import ensure_byte_list, TestEvent
@@ -36,9 +37,9 @@ class CommTelecommandsTest(BaseTest):
 
         frame = self.system.comm.get_frame(20)
 
-        self.assertEqual(frame.apid(), 2)
+        self.assertIsInstance(frame, OperationSuccessFrame)
         self.assertEqual(frame.seq(), 0)
-        self.assertEqual(frame.payload(), [0x11, 0])
+        self.assertEqual(frame.correlation_id, 0x11)
 
         self.assertTrue(event.wait_for_change(1))
 
@@ -56,9 +57,8 @@ class CommTelecommandsTest(BaseTest):
         self.system.comm.put_frame(telecommand.EnterIdleState(correlation_id=0x11, duration=1))
 
         frame = self.system.comm.get_frame(20)
-
-        self.assertEqual(frame.apid(), 2)
+        self.assertIsInstance(frame, OperationSuccessFrame)
         self.assertEqual(frame.seq(), 0)
-        self.assertEqual(frame.payload(), [0x11, 0])
+        self.assertEqual(frame.correlation_id, 0x11)
 
         self.assertTrue(event.wait_for_change(30))
