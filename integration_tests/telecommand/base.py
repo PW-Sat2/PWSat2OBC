@@ -1,4 +1,4 @@
-from devices import UplinkFrame
+from devices import UplinkFrame, DownlinkFrame
 
 
 class Telecommand:
@@ -18,3 +18,12 @@ class Telecommand:
 
     def build(self):
         return self.frame().build()
+
+
+class TelecommandResponse(DownlinkFrame):
+    def __init__(self, apid, seq, payload):
+        super(TelecommandResponse, self).__init__(apid, seq, payload)
+
+    def decode(self):
+        raise NotImplemented()
+

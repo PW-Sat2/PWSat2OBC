@@ -2,6 +2,7 @@ from nose.tools import nottest
 
 from devices import *
 from obc import *
+from response_frames.pong import PongFrame
 from tests.base import BaseTest
 from system import auto_power_on
 from utils import TestEvent, ensure_byte_list
@@ -100,7 +101,7 @@ class Test_Comm(BaseTest):
         self.system.comm.put_frame(UplinkFrame(ord('P'), 'ABC'))
 
         msg = self.system.comm.get_frame(20)
-
+        self.assertIsInstance(msg, PongFrame)
         self.assertEqual(msg.payload(), ensure_byte_list("PONG"))
 
     def test_auto_watchdog_reset(self):
