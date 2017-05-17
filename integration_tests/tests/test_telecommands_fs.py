@@ -1,6 +1,7 @@
 from nose.tools import nottest
 
 import telecommand
+from response_frames.operation import OperationErrorFrame
 from system import auto_power_on
 from tests.base import BaseTest
 from utils import ensure_byte_list, TestEvent
@@ -58,9 +59,10 @@ class FileSystemTelecommandsTest(BaseTest):
 
         frame = self.system.comm.get_frame(20)
 
-        self.assertEqual(frame.apid(), 2)
+        self.assertIsInstance(frame, OperationErrorFrame)
         self.assertEqual(frame.seq(), 0)
-        self.assertEqual(frame.payload(), [0x11, 1] + ensure_byte_list(p))
+        self.assertEqual(frame.correlation_id, 0x11)
+        self.assertEqual(frame.error_code, 1)
 
     def test_should_remove_file(self):
         self._start()
@@ -77,7 +79,7 @@ class FileSystemTelecommandsTest(BaseTest):
 
         self.assertEqual(frame.apid(), 2)
         self.assertEqual(frame.seq(), 0)
-        self.assertEqual(frame.payload(), [0x11, 0] + ensure_byte_list(p))
+        self.assertEqual(frame.response, ensure_byte_list(p))
 
     def test_should_report_error_when_removing_non_existent_file(self):
         self._start()
@@ -88,6 +90,8 @@ class FileSystemTelecommandsTest(BaseTest):
 
         frame = self.system.comm.get_frame(20)
 
-        self.assertEqual(frame.apid(), 2)
+        self.assertIsInstance(frame, OperationErrorFrame)
         self.assertEqual(frame.seq(), 0)
-        self.assertEqual(frame.payload(), [0x11, 0xFE] + ensure_byte_list(p))
+        self.assertEqual(frame.correlation_id, 0x11)
+        self.assertEqual(frame.error_code, 0xFE)
+        self.assertEqual(frame.response, ensure_byte_list(p))
