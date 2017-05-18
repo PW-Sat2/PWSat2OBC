@@ -6,6 +6,7 @@ set(SOURCES
   Telecommands/DownloadFileTelecommandTest.cpp
   Telecommands/EnterIdleStateTelecommandTest.cpp
   Telecommands/RemoveFileTelecommandTest.cpp
+  Telecommands/SetTimeCorrectionConfigTelecommandTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
