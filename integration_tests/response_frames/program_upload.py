@@ -8,7 +8,7 @@ from utils import ensure_string
 class EntryEraseSuccessFrame(ResponseFrame):
     @classmethod
     def matches(cls, payload):
-        return len(payload) >= 3 and payload[0:2] == [0, 0xFF]
+        return len(payload) >= 3 and payload[0:2] == [0, 0]
 
     def decode(self):
         self.entries = self.payload()[2]
@@ -18,7 +18,7 @@ class EntryEraseSuccessFrame(ResponseFrame):
 class EntryProgramPartWriteSuccess(ResponseFrame):
     @classmethod
     def matches(cls, payload):
-        return len(payload) == 8 and payload[0:2] == [1, 0xFF]
+        return len(payload) == 8 and payload[0:2] == [1, 0]
 
     def decode(self):
         (_, _, self.entries, self.offset, self.size) = struct.unpack('<BBBIB', ensure_string(self.payload()))
@@ -28,7 +28,7 @@ class EntryProgramPartWriteSuccess(ResponseFrame):
 class EntryFinalizeSuccess(ResponseFrame):
     @classmethod
     def matches(cls, payload):
-        return len(payload) == 5 and payload[0:2] == [2, 0xFF]
+        return len(payload) == 5 and payload[0:2] == [2, 0]
 
     def decode(self):
         (_, _, self.entries, self.crc) = struct.unpack('<BBBH', ensure_string(self.payload()))

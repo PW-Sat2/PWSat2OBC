@@ -39,7 +39,7 @@ namespace obc
                         DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
                         auto& writer = response.PayloadWriter();
                         writer.WriteByte(0);
-                        writer.WriteByte(0x00);
+                        writer.WriteByte(1);
                         writer.WriteByte(static_cast<std::uint8_t>(std::get<0>(result.Error())));
                         writer.WriteByte(1 << i);
                         writer.WriteDoubleWordLE(std::get<1>(result.Error()));
@@ -53,7 +53,7 @@ namespace obc
             DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
             auto& writer = response.PayloadWriter();
             writer.WriteByte(0);
-            writer.WriteByte(0xFF);
+            writer.WriteByte(0);
             writer.WriteByte(parameters[0]);
 
             transmitter.SendFrame(response.Frame());
@@ -89,7 +89,7 @@ namespace obc
                         DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
                         auto& writer = response.PayloadWriter();
                         writer.WriteByte(1);
-                        writer.WriteByte(0x0);
+                        writer.WriteByte(1);
                         writer.WriteByte(static_cast<std::uint8_t>(r));
                         writer.WriteByte(1 << i);
                         writer.WriteDoubleWordLE(offset);
@@ -103,7 +103,7 @@ namespace obc
             DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
             auto& writer = response.PayloadWriter();
             writer.WriteByte(1);
-            writer.WriteByte(0xFF);
+            writer.WriteByte(0);
             writer.WriteByte(parameters[0]);
             writer.WriteDoubleWordLE(offset);
             writer.WriteByte(content.size());
@@ -160,7 +160,7 @@ namespace obc
                         DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
                         auto& writer = response.PayloadWriter();
                         writer.WriteByte(2);
-                        writer.WriteByte(0x0);
+                        writer.WriteByte(1);
                         writer.WriteByte(static_cast<std::uint8_t>(r));
                         writer.WriteByte(1 << i);
 
@@ -175,7 +175,7 @@ namespace obc
                         DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
                         auto& writer = response.PayloadWriter();
                         writer.WriteByte(2);
-                        writer.WriteByte(0x01);
+                        writer.WriteByte(2);
                         writer.WriteByte(1 << i);
                         writer.WriteWordLE(actualCrc);
 
@@ -188,7 +188,7 @@ namespace obc
             DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
             auto& writer = response.PayloadWriter();
             writer.WriteByte(2);
-            writer.WriteByte(0xFF);
+            writer.WriteByte(0);
             writer.WriteByte(parameters[0]);
             writer.WriteWordLE(expectedCrc);
 
