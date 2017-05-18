@@ -67,13 +67,14 @@ OBC::OBC()
           this->timeProvider,
           Mission,
           Mission,
+          Mission,
           fs,
           Experiments,
           BootTable,
           BootSettings,
-          TelemetryAcquisition),                               //
+          TelemetryAcquisition),                                                   //
       Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index), //
-      terminal(this->GetLineIO())                              //
+      terminal(this->GetLineIO())                                                  //
 {
 }
 
@@ -84,6 +85,14 @@ void OBC::InitializeRunlevel0()
 
 OSResult OBC::InitializeRunlevel1()
 {
+    auto& persistentState = Mission.GetState().PersistentState;
+    auto result = persistentState.Initialize();
+    if (OS_RESULT_FAILED(result))
+    {
+        LOGF(LOG_LEVEL_FATAL, "Persistent state initialization failed %d", num(result));
+        return result;
+    }
+
     this->Fdir.Initalize();
 
     this->Hardware.Initialize();
@@ -99,7 +108,7 @@ OSResult OBC::InitializeRunlevel1()
 
     this->adcs.Initialize();
 
-    auto result = this->Storage.Initialize();
+    result = this->Storage.Initialize();
     if (OS_RESULT_FAILED(result))
     {
         LOGF(LOG_LEVEL_FATAL, "Storage initialization failed %d", num(result));
@@ -113,7 +122,7 @@ OSResult OBC::InitializeRunlevel1()
 
     this->fs.MakeDirectory("/a");
 
-    const auto missionTime = Mission.GetState().PersistentState.Get<state::TimeState>().LastMissionTime();
+    const auto missionTime = persistentState.Get<state::TimeState>().LastMissionTime();
     if (!this->timeProvider.Initialize(missionTime, TimePassed, nullptr))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize persistent timer. ");

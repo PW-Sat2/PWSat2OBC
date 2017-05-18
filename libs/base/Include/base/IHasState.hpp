@@ -4,7 +4,7 @@
 #include <type_traits>
 
 /**
- * @brief Interface marking object as statefull.
+ * @brief Interface marking object as stateful.
  * @ingroup StateDef
  */
 template <typename State> struct IHasState

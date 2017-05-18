@@ -8,6 +8,7 @@
 
 #include "time/timer.h"
 
+using testing::An;
 using testing::Eq;
 using testing::Ne;
 using testing::_;
@@ -107,7 +108,7 @@ namespace
 
     TEST_F(TimerTest, TestInitializationFailure)
     {
-        ON_CALL(os, CreateBinarySemaphore(_)).WillByDefault(Return(nullptr));
+        ON_CALL(os, CreateBinarySemaphore(An<uint8_t>())).WillByDefault(Return(nullptr));
         const auto result = provider.Initialize(0ms, TimePassedProxy, &timeHandler);
         ASSERT_THAT(result, Eq(false));
     }
@@ -115,7 +116,7 @@ namespace
     TEST_F(TimerTest, TestInitializationSecondFailure)
     {
         this->guard = InstallProxy(&os);
-        EXPECT_CALL(os, CreateBinarySemaphore(_)).WillOnce(Return(reinterpret_cast<void*>(this))).WillOnce(Return(nullptr));
+        EXPECT_CALL(os, CreateBinarySemaphore(An<uint8_t>())).WillOnce(Return(reinterpret_cast<void*>(this))).WillOnce(Return(nullptr));
         const auto result = provider.Initialize(0ms, TimePassedProxy, &timeHandler);
         ASSERT_THAT(result, Eq(false));
     }
