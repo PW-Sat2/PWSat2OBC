@@ -1,7 +1,12 @@
 #include "BuiltinDetumbling.hpp"
+#include <chrono>
 
 namespace adcs
 {
+    BuiltinDetumbling::BuiltinDetumbling(devices::imtq::IImtqDriver& imtqDriver_) : imtqDriver(imtqDriver_)
+    {
+    }
+
     OSResult BuiltinDetumbling::Enable()
     {
         return OSResult::Success;
@@ -9,15 +14,16 @@ namespace adcs
 
     OSResult BuiltinDetumbling::Disable()
     {
-        return OSResult::Success;
+        return imtqDriver.CancelOperation() ? OSResult::Success : OSResult::IOError;
     }
 
     void BuiltinDetumbling::Process()
     {
+        imtqDriver.StartBDotDetumbling(chrono_extensions::period_cast<std::chrono::seconds>(BuiltinDetumbling::Frequency));
     }
 
-    std::chrono::hertz BuiltinDetumbling::GetFrequency() const
+    chrono_extensions::hertz BuiltinDetumbling::GetFrequency() const
     {
-        return std::chrono::hertz(1);
+        return BuiltinDetumbling::Frequency;
     }
 }
