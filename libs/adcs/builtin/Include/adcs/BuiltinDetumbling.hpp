@@ -4,6 +4,8 @@
 #pragma once
 
 #include "adcs/adcs.hpp"
+#include "base/hertz.hpp"
+#include "imtq/imtq.h"
 
 namespace adcs
 {
@@ -14,6 +16,8 @@ namespace adcs
     class BuiltinDetumbling final : public IAdcsProcessor
     {
       public:
+        BuiltinDetumbling(devices::imtq::IImtqDriver& imtqDriver_);
+
         virtual OSResult Enable() final override;
 
         virtual OSResult Disable() final override;
@@ -23,7 +27,7 @@ namespace adcs
         virtual std::chrono::hertz GetFrequency() const final override;
 
       private:
-        // TODO integrate imtq here
+        devices::imtq::IImtqDriver& imtqDriver;
     };
 }
 
