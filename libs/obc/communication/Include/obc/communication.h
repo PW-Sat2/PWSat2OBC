@@ -15,6 +15,7 @@
 #include "obc/telecommands/ping.hpp"
 #include "obc/telecommands/program_upload.hpp"
 #include "program_flash/fwd.hpp"
+#include "obc/telecommands/time.hpp"
 #include "telecommunication/telecommand_handling.h"
 #include "telecommunication/uplink.h"
 #include "time/ICurrentTime.hpp"
@@ -115,6 +116,7 @@ namespace obc
         obc::telecommands::DownloadFileTelecommand,
         obc::telecommands::EnterIdleStateTelecommand,
         obc::telecommands::RemoveFileTelecommand,
+        obc::telecommands::SetTimeCorrectionConfigTelecommand,
         obc::telecommands::PerformDetumblingExperiment,
         obc::telecommands::AbortExperiment,     //
         obc::telecommands::ListFilesTelecommand,//
@@ -134,6 +136,7 @@ namespace obc
          * @param[in] i2cBus I2CBus used by low-level comm driver
          * @param[in] currentTime Current time
          * @param[in] idleStateController Idle state controller
+         * @param[in] stateContainer Container for OBC state
          * @param[in] fs File system
          * @param[in] experiments Experiments
          * @param[in] bootTable Boot table
@@ -142,6 +145,7 @@ namespace obc
             drivers::i2c::II2CBus& i2cBus,
             services::time::ICurrentTime& currentTime,
             mission::IIdleStateController& idleStateController,
+            IHasState<SystemState>& stateContainer,
             services::fs::IFileSystem& fs,
             obc::OBCExperiments& experiments,
             program_flash::BootTable& bootTable);

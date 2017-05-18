@@ -6,6 +6,7 @@ set(SOURCES
     file_system.cpp
     experiments.cpp
     program_upload.cpp
+    time.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
