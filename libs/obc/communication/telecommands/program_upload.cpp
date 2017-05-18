@@ -10,11 +10,96 @@
 using telecommunication::downlink::DownlinkAPID;
 using telecommunication::downlink::DownlinkFrame;
 using program_flash::FlashStatus;
+using std::get;
 
 namespace obc
 {
     namespace telecommands
     {
+        static inline DownlinkFrame EraseEntryError(std::uint8_t errorCode, std::uint8_t entry, std::uint32_t offset)
+        {
+            DownlinkFrame frame(DownlinkAPID::ProgramUpload, 0);
+            auto& writer = frame.PayloadWriter();
+            writer.WriteByte(0);
+            writer.WriteByte(1);
+            writer.WriteByte(errorCode);
+            writer.WriteByte(1 << entry);
+            writer.WriteDoubleWordLE(offset);
+
+            return frame;
+        }
+
+        static inline DownlinkFrame EraseEntrySuccess(std::uint8_t entries)
+        {
+            DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
+            auto& writer = response.PayloadWriter();
+            writer.WriteByte(0);
+            writer.WriteByte(0);
+            writer.WriteByte(entries);
+            return response;
+        }
+
+        static inline DownlinkFrame WriteProgramError(std::uint8_t errorCode, std::uint8_t entry, std::uint32_t offset)
+        {
+            DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
+            auto& writer = response.PayloadWriter();
+            writer.WriteByte(1);
+            writer.WriteByte(1);
+            writer.WriteByte(errorCode);
+            writer.WriteByte(1 << entry);
+            writer.WriteDoubleWordLE(offset);
+            return response;
+        }
+
+        static inline DownlinkFrame WriteProgramSuccess(std::uint8_t entries, std::uint32_t offset, std::uint8_t size)
+        {
+            DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
+            auto& writer = response.PayloadWriter();
+            writer.WriteByte(1);
+            writer.WriteByte(0);
+            writer.WriteByte(entries);
+            writer.WriteDoubleWordLE(offset);
+            writer.WriteByte(size);
+
+            return response;
+        }
+
+        static inline DownlinkFrame FinalizeEntryWriteError(std::uint8_t errorCode, std::uint8_t entry)
+        {
+            DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
+            auto& writer = response.PayloadWriter();
+            writer.WriteByte(2);
+            writer.WriteByte(1);
+            writer.WriteByte(errorCode);
+            writer.WriteByte(1 << entry);
+
+            return response;
+        }
+
+        static inline DownlinkFrame FinalizeEntryCRCError(std::uint8_t entry, std::uint16_t actualCrc)
+        {
+            DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
+            auto& writer = response.PayloadWriter();
+            writer.WriteByte(2);
+            writer.WriteByte(2);
+            writer.WriteByte(1 << entry);
+            writer.WriteWordLE(actualCrc);
+
+            return response;
+        }
+
+        static inline DownlinkFrame FinalizeEntrySuccess(std::uint8_t entries, std::uint16_t crc)
+        {
+            DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
+            auto& writer = response.PayloadWriter();
+            writer.WriteByte(2);
+            writer.WriteByte(0);
+            writer.WriteByte(entries);
+            writer.WriteWordLE(crc);
+
+            return response;
+        }
+
         EraseBootTableEntry::EraseBootTableEntry(program_flash::BootTable& bootTable) : _bootTable(bootTable)
         {
         }
@@ -36,27 +121,13 @@ namespace obc
 
                     if (!result)
                     {
-                        DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
-                        auto& writer = response.PayloadWriter();
-                        writer.WriteByte(0);
-                        writer.WriteByte(1);
-                        writer.WriteByte(static_cast<std::uint8_t>(std::get<0>(result.Error())));
-                        writer.WriteByte(1 << i);
-                        writer.WriteDoubleWordLE(std::get<1>(result.Error()));
-
-                        transmitter.SendFrame(response.Frame());
+                        transmitter.SendFrame(EraseEntryError(num(get<0>(result.Error())), i, get<1>(result.Error())).Frame());
                         return;
                     }
                 }
             }
 
-            DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
-            auto& writer = response.PayloadWriter();
-            writer.WriteByte(0);
-            writer.WriteByte(0);
-            writer.WriteByte(parameters[0]);
-
-            transmitter.SendFrame(response.Frame());
+            transmitter.SendFrame(EraseEntrySuccess(parameters[0]).Frame());
         }
 
         WriteProgramPart::WriteProgramPart(program_flash::BootTable& bootTable) : _bootTable(bootTable)
@@ -86,29 +157,13 @@ namespace obc
 
                     if (r != FlashStatus::NotBusy)
                     {
-                        DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
-                        auto& writer = response.PayloadWriter();
-                        writer.WriteByte(1);
-                        writer.WriteByte(1);
-                        writer.WriteByte(static_cast<std::uint8_t>(r));
-                        writer.WriteByte(1 << i);
-                        writer.WriteDoubleWordLE(offset);
-
-                        transmitter.SendFrame(response.Frame());
+                        transmitter.SendFrame(WriteProgramError(num(r), i, offset).Frame());
                         return;
                     }
                 }
             }
 
-            DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
-            auto& writer = response.PayloadWriter();
-            writer.WriteByte(1);
-            writer.WriteByte(0);
-            writer.WriteByte(parameters[0]);
-            writer.WriteDoubleWordLE(offset);
-            writer.WriteByte(content.size());
-
-            transmitter.SendFrame(response.Frame());
+            transmitter.SendFrame(WriteProgramSuccess(parameters[0], offset, content.size()).Frame());
         }
 
         FinalizeProgramEntry::FinalizeProgramEntry(program_flash::BootTable& bootTable) : _bootTable(bootTable)
@@ -157,14 +212,7 @@ namespace obc
 
                     if (r != FlashStatus::NotBusy)
                     {
-                        DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
-                        auto& writer = response.PayloadWriter();
-                        writer.WriteByte(2);
-                        writer.WriteByte(1);
-                        writer.WriteByte(static_cast<std::uint8_t>(r));
-                        writer.WriteByte(1 << i);
-
-                        transmitter.SendFrame(response.Frame());
+                        transmitter.SendFrame(FinalizeEntryWriteError(num(r), i).Frame());
                         return;
                     }
 
@@ -172,27 +220,13 @@ namespace obc
 
                     if (actualCrc != expectedCrc)
                     {
-                        DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
-                        auto& writer = response.PayloadWriter();
-                        writer.WriteByte(2);
-                        writer.WriteByte(2);
-                        writer.WriteByte(1 << i);
-                        writer.WriteWordLE(actualCrc);
-
-                        transmitter.SendFrame(response.Frame());
+                        transmitter.SendFrame(FinalizeEntryCRCError(i, actualCrc).Frame());
                         return;
                     }
                 }
             }
 
-            DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
-            auto& writer = response.PayloadWriter();
-            writer.WriteByte(2);
-            writer.WriteByte(0);
-            writer.WriteByte(parameters[0]);
-            writer.WriteWordLE(expectedCrc);
-
-            transmitter.SendFrame(response.Frame());
+            transmitter.SendFrame(FinalizeEntrySuccess(parameters[0], expectedCrc).Frame());
         }
     }
 }

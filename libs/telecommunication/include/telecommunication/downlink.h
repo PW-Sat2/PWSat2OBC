@@ -35,7 +35,7 @@ namespace telecommunication
         /**
          * @brief Downlink frame implementation
          */
-        class DownlinkFrame final
+        class DownlinkFrame
         {
           public:
             /**
