@@ -29,6 +29,7 @@ set(SOURCES
     commands/state.cpp
     commands/error_counters.cpp
     commands/program_flash.cpp
+    commands/scrub.cpp
     checks/error_counters.cpp
     obc.h
     obc.cpp
@@ -93,6 +94,7 @@ target_link_libraries(${NAME}
     telemetry
     telemetry_comm
     program_flash
+    scrubber
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

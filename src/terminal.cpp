@@ -52,6 +52,7 @@ static const TerminalCommandDescription commands[] = {
     {"state", StateCommandHandler},
     {"error_counters", ErrorCountersCommand},
     {"boot_params", BootParamsCommand},
+    {"scrub", ScrubRAM},
     {"f", TestFlash},
 };
 
