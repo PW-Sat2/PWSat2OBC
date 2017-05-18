@@ -4,6 +4,7 @@
 #include <cstdint>
 
 void PingHandler(std::uint16_t argc, char* argv[]);
+void IdHandler(std::uint16_t argc, char* argv[]);
 void EchoHandler(std::uint16_t argc, char* argv[]);
 void BootParamsCommand(std::uint16_t argc, char* argv[]);
 void JumpToTimeHandler(std::uint16_t argc, char* argv[]);

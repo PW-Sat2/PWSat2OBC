@@ -65,6 +65,20 @@ namespace redundancy
         return true;
     }
 
+    template <typename T> bool CorrectBuffer(gsl::span<T> output, gsl::span<T> buffer1, gsl::span<T> buffer2, gsl::span<T> buffer3)
+    {
+        static_assert(std::is_integral<T>::value || std::is_enum<T>::value, "Correction requires integral or enum type");
+        if (output.length() != buffer1.length() || buffer1.length() != buffer2.length() || buffer2.length() != buffer3.length())
+            return false;
+
+        for (auto i = 0; i < buffer1.length(); ++i)
+        {
+            output[i] = Correct(buffer1[i], buffer2[i], buffer3[i]);
+        }
+
+        return true;
+    }
+
     /** @} */
 }
 
