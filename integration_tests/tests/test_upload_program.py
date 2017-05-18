@@ -29,7 +29,7 @@ class UploadProgramTest(BaseTest):
         e.wait_for_change(1)
 
     # @skip('Manual test')
-    def test_upload(self):
+    def test_uplfoad(self):
         log = logging.getLogger("test_program_upload")
 
         self._start()

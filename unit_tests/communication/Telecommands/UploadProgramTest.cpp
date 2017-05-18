@@ -160,19 +160,19 @@ TEST_F(UploadProgramTest, ProgramSequence)
 
 TEST_F(UploadProgramTest, WriteProgramByTelecommands)
 {
-    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(0, 0xFF, 1)))).Times(1);
+    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(0, 0, 1)))).Times(1);
 
     this->HandleFrame(this->_eraseTelecommand, 1);
 
-    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(1, 0xFF, 1, 0, 4, 0, 0, 5))))
+    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(1, 0, 1, 0, 4, 0, 0, 5))))
         .Times(1);
     this->HandleFrame(this->_writePartTelecommand, 1, 0x00, 0x04, 0x00, 0x00, 'P', 'a', 'r', 't', 0);
 
-    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(1, 0xFF, 1, 0, 0, 0, 0, 8))))
+    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(1, 0, 1, 0, 0, 0, 0, 8))))
         .Times(1);
     this->HandleFrame(this->_writePartTelecommand, 1, 0x00, 0x00, 0x00, 0x00, 'P', 'r', 'o', 'g', 'r', 'a', 'm', 0);
 
-    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(2, 0xFF, 1, 0x84, 0xD8))));
+    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(2, 0, 1, 0x84, 0xD8))));
     this->HandleFrame(this->_finalizeTelecommand, 1, 0x12, 0x13, 0x00, 0x00, 0x84, 0xD8, 'T', 'e', 's', 't');
 
     auto entry = this->_bootTable.Entry(1);
@@ -189,7 +189,7 @@ TEST_F(UploadProgramTest, ResponseWithEraseError)
     ON_CALL(this->_flashMock, EraseSector(0x00080000 + 5 * 64_KB)).WillByDefault(Return(FlashStatus::EraseError));
 
     EXPECT_CALL(
-        this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(0, 0x00, 9, 1, 0x00, 0x0, 0x05, 0x00))))
+        this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(0, 1, 9, 1, 0x00, 0x0, 0x05, 0x00))))
         .Times(1);
 
     this->HandleFrame(this->_eraseTelecommand, 1);
@@ -200,8 +200,8 @@ TEST_F(UploadProgramTest, ResponseWithProgramErrorOnWritePart)
     ON_CALL(this->_flashMock, Program(0x00080400 + 256_KB, A<gsl::span<const std::uint8_t>>()))
         .WillByDefault(Return(FlashStatus::ProgramError));
 
-    EXPECT_CALL(this->_transmitter,
-        SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(1, 0x00, 10, 1, 0x00, 0x00, 0x04, 0x00))))
+    EXPECT_CALL(
+        this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(1, 1, 10, 1, 0x00, 0x00, 0x04, 0x00))))
         .Times(1);
 
     this->HandleFrame(this->_writePartTelecommand, 1, 0x00, 0x00, 0x04, 0x00, 'P', 'a', 'r', 't', 0);
@@ -211,15 +211,14 @@ TEST_F(UploadProgramTest, ResponseWithProgramErrorOnFinalize)
 {
     ON_CALL(this->_flashMock, Program(0x00080000, A<gsl::span<const std::uint8_t>>())).WillByDefault(Return(FlashStatus::ProgramError));
 
-    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(2, 0x00, 10, 1)))).Times(1);
+    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(2, 1, 10, 1)))).Times(1);
 
     this->HandleFrame(this->_finalizeTelecommand, 1, 0x12, 0x13, 0x14, 0x15, 0xAB, 0xCD, 'T', 'e', 's', 't');
 }
 
 TEST_F(UploadProgramTest, ResponseWithErrorOnFinalizeWithIncorrectCRC)
 {
-    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(2, 0x01, 1, 0xC7, 0xD5))))
-        .Times(1);
+    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(2, 2, 1, 0xC7, 0xD5)))).Times(1);
 
     this->HandleFrame(this->_finalizeTelecommand, 1, 0x12, 0x13, 0x00, 0x00, 0xAB, 0xCD, 'T', 'e', 's', 't');
 }
