@@ -4,6 +4,7 @@ add_subdirectory(adcs)
 
 set(SOURCES
   adcs/AdcsCoordinatorTest.cpp
+  adcs/builtin/BuiltinDetumblingTest.cpp  
   adcs/experimental/DetumblingComputationsTest.cpp  
   adcs/experimental/ExperimentalDetumblingTest.cpp  
   Logger/LoggerTest.cpp
@@ -52,6 +53,7 @@ target_link_libraries(${NAME}
     exp_fibo
     adcs
     adcs_experimental
+    builtin_detumbling
     obc_telecommands    
     eps
     rtc
