@@ -46,9 +46,35 @@ namespace devices
         using Address = std::uint16_t;
 
         /**
+         * @brief FM25W driver interface
+         */
+        struct IFM25WDriver
+        {
+            /**
+             * @brief Reads status register
+             * @return Status register
+             */
+            virtual Option<Status> ReadStatus() = 0;
+
+            /**
+             * @brief Reads from memory
+             * @param address Base address
+             * @param buffer Buffer for data
+             */
+            virtual void Read(Address address, gsl::span<std::uint8_t> buffer) = 0;
+
+            /**
+             * @brief Writes to memory
+             * @param address Base address
+             * @param buffer Buffer with data
+             */
+            virtual void Write(Address address, gsl::span<const std::uint8_t> buffer) = 0;
+        };
+
+        /**
          * @brief FM25W driver
          */
-        class FM25WDriver
+        class FM25WDriver : public IFM25WDriver
         {
           public:
             /**
@@ -58,28 +84,75 @@ namespace devices
             FM25WDriver(drivers::spi::ISPIInterface& spi);
 
             /**
-             * @brief Reads status register
+             * @brief Reads status register. Method always returns Some value.
              * @return Status register
              */
-            Status ReadStatus();
+            virtual Option<Status> ReadStatus() override;
+
             /**
              * @brief Reads from memory
              * @param address Base address
              * @param buffer Buffer for data
              */
-            void Read(Address address, gsl::span<std::uint8_t> buffer);
+            virtual void Read(Address address, gsl::span<std::uint8_t> buffer) override;
+
             /**
              * @brief Writes to memory
              * @param address Base address
              * @param buffer Buffer with data
              */
-            void Write(Address address, gsl::span<const std::uint8_t> buffer);
+            virtual void Write(Address address, gsl::span<const std::uint8_t> buffer) override;
 
           private:
             /** @brief SPI interface */
             drivers::spi::ISPIInterface& _spi;
         };
 
+        /**
+         * @brief  Composite FM25W driver that uses 3 separate drivers to achieve redundancy.
+         */
+        class RedundantFM25WDriver : public IFM25WDriver
+        {
+          public:
+            /**
+             * @brief Ctor
+             * @param fm25wDrivers Driver used for redundancy
+             */
+            RedundantFM25WDriver(std::array<IFM25WDriver*, 3> fm25wDrivers);
+
+            /**
+             * @brief Reads status register
+             * @return Status register or None if all drivers report different status
+             */
+            virtual Option<Status> ReadStatus() override;
+
+            /**
+               * @brief Reads data from memory starting from given address.
+               * @param[in] address Start address
+               * @param[out] outputBuffer Output buffer
+               *
+               * If the memory content from drivers is different, bitwise triple modular redundancy
+               * is performed using data from all 3 drivers.
+               *
+               * Reads are performed sequentially. If reads from 2 chips yield the same data, 3rd chip is not read.
+               */
+            virtual void Read(Address address, gsl::span<uint8_t> outputBuffer) override;
+
+            /**
+             * @brief Writes to all drivers.
+             * @param address[in] Base address
+             * @param buffe[in]r Buffer with data
+             */
+            virtual void Write(Address address, gsl::span<const std::uint8_t> buffer) override;
+
+          private:
+            std::array<IFM25WDriver*, 3> _fm25wDrivers;
+
+            void Read(Address address,
+                gsl::span<uint8_t> outputBuffer,     //
+                gsl::span<uint8_t> redundantBuffer1, //
+                gsl::span<uint8_t> redundantBuffer2);
+        };
         /** @} */
     }
 }

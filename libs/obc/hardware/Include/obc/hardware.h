@@ -6,6 +6,7 @@
 #include "eps/eps.h"
 #include "error_counter/error_counter.hpp"
 #include "gpio.h"
+#include "gyro/gyro.h"
 #include "i2c/efm.h"
 #include "i2c/i2c.h"
 #include "i2c/wrappers.h"
@@ -14,7 +15,6 @@
 #include "power/power.h"
 #include "spi/efm.h"
 #include "temp/efm.hpp"
-#include "gyro/gyro.h"
 
 namespace obc
 {
@@ -132,7 +132,7 @@ namespace obc
         /**
          * @brief Fram's spi access
          */
-        drivers::spi::EFMSPISlaveInterface FramSpi;
+        drivers::spi::EFMSPISlaveInterface FramSpi[3];
 
         /**
          * @brief Object that provides read/write capabilities to persistent storage

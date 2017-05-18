@@ -24,15 +24,18 @@ namespace obc
          * @brief ctor.
          * @param[in] spi Reference to spi bus controller that should be used to access the memory.
          */
-        PersistentStorageAccess(drivers::spi::ISPIInterface& spi);
+        PersistentStorageAccess(std::array<drivers::spi::ISPIInterface*, 3> spis);
 
         virtual void Read(std::uint32_t address, gsl::span<std::uint8_t> span) final override;
 
         virtual void Write(std::uint32_t address, gsl::span<const std::uint8_t> span) final override;
 
       private:
-        /** @brief Fram memory controller. */
-        devices::fm25w::FM25WDriver fram;
+        /** @brief Fram memory controllers. */
+        devices::fm25w::FM25WDriver _fm25wDrivers[3];
+
+        /** @brief Redundant Fram memory driver. */
+        devices::fm25w::RedundantFM25WDriver _driver;
     };
 }
 
