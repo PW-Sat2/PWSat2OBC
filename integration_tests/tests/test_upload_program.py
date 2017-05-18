@@ -1,5 +1,6 @@
 import logging
 from math import ceil
+from unittest import skip
 
 from crc import calc_crc, pad
 from response_frames.program_upload import EntryEraseSuccessFrame, EntryProgramPartWriteSuccess, EntryFinalizeSuccess

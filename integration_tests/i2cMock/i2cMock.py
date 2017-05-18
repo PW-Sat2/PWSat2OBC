@@ -78,9 +78,9 @@ class I2CDevice(object):
 
 
 class MissingDevice(I2CDevice):
-    def __init__(self, address):
+    def __init__(self, bus_name, address):
         super(MissingDevice, self).__init__(address)
-        self._log = logging.getLogger('MissingDevice: 0x{:2X}'.format(address))
+        self._log = logging.getLogger('MissingDevice: {}.0x{:2X}'.format(bus_name, address))
 
     @command([])
     def catch_all(self, *data):
@@ -418,10 +418,10 @@ class I2CMock(object):
         if self._bus_devices.has_key(address / 2):
             return self._bus_devices[address / 2]
         else:
-            return MissingDevice(address)
+            return MissingDevice('BUS', address)
 
     def _pld_device(self, address):
         if self._pld_devices.has_key(address / 2):
             return self._pld_devices[address / 2]
         else:
-            return MissingDevice(address)
+            return MissingDevice('PLD', address)
