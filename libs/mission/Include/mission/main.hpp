@@ -6,6 +6,7 @@
 #include <array>
 #include <type_traits>
 #include "base.hpp"
+#include "base/IHasState.hpp"
 #include "base/os.h"
 #include "gsl/span"
 #include "logger/logger.h"
@@ -96,11 +97,11 @@ namespace mission
      * @tparam T Parameter pack that defines currently supported actions. All actions from this list should be able to
      * operate on a state whose type is State.
      */
-    template <typename State, typename... T> struct MissionLoop final : public T...
+    template <typename State, typename... T> struct MissionLoop final : public IHasState<State>, public T...
     {
       public:
         /**
-         * @brief Type of the current mission state object.
+         * @brief Type of the state object.
          */
         typedef typename std::remove_reference<State>::type StateType;
 
@@ -199,13 +200,13 @@ namespace mission
          * @brief Current mission state accessor.
          * @return Reference to current mission state.
          */
-        const StateType& GetState() const noexcept;
+        virtual const StateType& GetState() const noexcept override final;
 
         /**
          * @brief Current mission state accessor.
          * @return Reference to current mission state.
          */
-        StateType& GetState() noexcept;
+        virtual StateType& GetState() noexcept override final;
 
       private:
         /**
@@ -270,9 +271,7 @@ namespace mission
     template <typename State, typename... T>
     template <typename... Args>
     MissionLoop<State, T...>::MissionLoop(Args&&... args) //
-        : T(std::forward<Args>(args))...,
-          taskHandle(nullptr),
-          eventGroup(nullptr)
+        : T(std::forward<Args>(args))..., taskHandle(nullptr), eventGroup(nullptr)
     {
         static_assert(sizeof...(Args) == sizeof...(T), "Number of arguments must be equal to number of mission components");
         Setup();
