@@ -26,6 +26,7 @@
 #include "obc/storage.h"
 #include "power_eps/power_eps.h"
 #include "rtc/rtc.hpp"
+#include "scrubber/ram.hpp"
 #include "spi/efm.h"
 #include "terminal/terminal.h"
 #include "time/timer.h"
@@ -130,6 +131,10 @@ LineIO& OBC::GetLineIO()
 
 /** @brief Global OBC object. */
 extern OBC Main;
+
+/** @brief RAM Scrubber */
+using Scrubber =
+    scrubber::RAMScrubber<io_map::RAMScrubbing::MemoryStart, io_map::RAMScrubbing::MemorySize, io_map::RAMScrubbing::CycleSize>;
 
 /** @} */
 

@@ -6,6 +6,7 @@
 #include <em_device.h>
 #include <em_emu.h>
 #include <em_gpio.h>
+#include <em_timer.h>
 #include <gsl/span>
 #include <em_system.h>
 
@@ -19,6 +20,7 @@
 #include "base/os.h"
 #include "boot/params.hpp"
 #include "dmadrv.h"
+#include "efm_support/clock.h"
 #include "fs/fs.h"
 #include "gpio/gpio.h"
 #include "i2c/i2c.h"
@@ -84,6 +86,12 @@ void LESENSE_IRQHandler()
 {
     Main.UARTDriver.OnWakeUpInterrupt();
     System::EndSwitchingISR();
+}
+
+void TIMER0_IRQHandler()
+{
+    Scrubber::Scrub();
+    TIMER_IntClear(io_map::RAMScrubbing::TimerHW, TIMER_IFC_OF);
 }
 
 __attribute__((optimize("O3"))) void UART1_RX_IRQHandler()
@@ -201,6 +209,27 @@ static void ObcInitTask(void* param)
     System::SuspendTask(NULL);
 }
 
+static void SetupRAMScrubbing()
+{
+    CMU_ClockEnable(efm::Clock(io_map::RAMScrubbing::TimerHW), true);
+
+    TIMER_Init_TypeDef init = TIMER_INIT_DEFAULT;
+    init.count2x = false;
+    init.enable = false;
+    init.mode = timerModeUp;
+    init.prescale = io_map::RAMScrubbing::Prescaler;
+
+    TIMER_Init(TIMER0, &init);
+
+    TIMER_TopSet(TIMER0, io_map::RAMScrubbing::TimerTop);
+
+    TIMER_IntEnable(io_map::RAMScrubbing::TimerHW, TIMER_IEN_OF);
+
+    NVIC_EnableIRQ(io_map::RAMScrubbing::IRQ);
+
+    TIMER_Enable(io_map::RAMScrubbing::TimerHW, true);
+}
+
 void SetupHardware(void)
 {
     CMU_ClockEnable(cmuClock_GPIO, true);
@@ -214,6 +243,8 @@ void SetupHardware(void)
     CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
     CMU_OscillatorEnable(cmuOsc_HFRCO, false, true);
 #endif
+
+    SetupRAMScrubbing();
 }
 
 extern "C" void __libc_init_array(void);

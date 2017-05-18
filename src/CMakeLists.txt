@@ -28,6 +28,7 @@ set(SOURCES
     commands/watchdog.cpp
     commands/state.cpp
     commands/error_counters.cpp
+    commands/scrub.cpp
     checks/error_counters.cpp
     obc.h
     obc.cpp
@@ -90,6 +91,7 @@ target_link_libraries(${NAME}
     boot_params
     telemetry
     telemetry_comm
+    scrubber
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

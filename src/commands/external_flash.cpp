@@ -1,3 +1,4 @@
+#include "dmadrv.h"
 #include "obc.h"
 
 using drivers::spi::EFMSPISlaveInterface;
