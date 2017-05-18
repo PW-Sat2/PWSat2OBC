@@ -2,7 +2,7 @@
   * @file
   * @brief CRC16 routines for XMODEM and verification.
   * @author Energy Micro AS
- * @version 1.63
+  * @version 1.63
   ******************************************************************************
   * @section License
   * <b>(C) Copyright 2009 Energy Micro AS, http://www.energymicro.com</b>
@@ -32,7 +32,19 @@
 #include <stdint.h>
 #include <gsl/span>
 
+/**
+ * @brief Calculates CRC for given area
+ * @param start Pointer to first byte of area
+ * @param end Pointer to first byte after area
+ * @return Calculated crc
+ */
 uint16_t CRC_calc(uint8_t* start, uint8_t* end);
+
+/**
+ * @brief Calculates CRC for given area
+ * @param buffer Span containing area
+ * @return Calculated crc
+ */
 uint16_t CRC_calc(gsl::span<const uint8_t> buffer);
 
 #endif

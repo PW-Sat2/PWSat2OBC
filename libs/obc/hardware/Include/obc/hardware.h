@@ -6,15 +6,16 @@
 #include "eps/eps.h"
 #include "error_counter/error_counter.hpp"
 #include "gpio.h"
+#include "gyro/gyro.h"
 #include "i2c/efm.h"
 #include "i2c/i2c.h"
 #include "i2c/wrappers.h"
 #include "io_map.h"
 #include "logger/logger.h"
 #include "power/power.h"
+#include "program_flash/flash_driver.hpp"
 #include "spi/efm.h"
 #include "temp/efm.hpp"
-#include "gyro/gyro.h"
 
 namespace obc
 {
@@ -119,6 +120,9 @@ namespace obc
 
         /** @brief I2C */
         OBCHardwareI2C I2C;
+
+        /** @brief Program flash driver */
+        program_flash::FlashDriver FlashDriver;
 
         /** @brief SPI interface */
         drivers::spi::EFMSPIInterface SPI;

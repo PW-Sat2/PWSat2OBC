@@ -4,8 +4,7 @@
 #include "mission.h"
 
 OBC::OBC()
-    : FlashDriver(reinterpret_cast<uint8_t*>(0x84000000)),                                                        //
-      BootTable(FlashDriver),                                                                                     //
+    : BootTable(Hardware.FlashDriver),                                                                            //
       Hardware(this->Fdir.ErrorCounting(), this->PowerControlInterface, timeProvider),                            //
       PowerControlInterface(this->Hardware.EPS),                                                                  //
       Storage(Hardware.SPI, fs, Hardware.Pins),                                                                   //
@@ -21,10 +20,6 @@ void OBC::Initialize()
 {
     this->StateFlags.Initialize();
 
-    this->FlashDriver.Initialize();
-
-    this->BootTable.Initialize();
-
     this->Fdir.Initalize();
 
 #ifndef USE_LEUART
@@ -32,6 +27,8 @@ void OBC::Initialize()
 #endif
 
     this->Hardware.Initialize();
+
+    this->BootTable.Initialize();
 
     this->fs.Initialize();
 

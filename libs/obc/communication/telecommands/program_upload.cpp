@@ -81,7 +81,7 @@ namespace obc
             DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
             auto& writer = response.PayloadWriter();
             writer.WriteByte(2);
-            writer.WriteByte(2);
+            writer.WriteByte(20);
             writer.WriteByte(1 << entry);
             writer.WriteWordLE(actualCrc);
 
