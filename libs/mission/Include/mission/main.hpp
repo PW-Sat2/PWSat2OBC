@@ -280,9 +280,7 @@ namespace mission
     template <typename State, typename... T>
     template <typename... Args>
     MissionLoop<State, T...>::MissionLoop(Args&&... args) //
-        : T(std::forward<Args>(args))...,
-          taskHandle(nullptr),
-          eventGroup(nullptr)
+        : T(std::forward<Args>(args))..., taskHandle(nullptr), eventGroup(nullptr)
     {
         static_assert(sizeof...(Args) == sizeof...(T), "Number of arguments must be equal to number of mission components");
         Setup();
