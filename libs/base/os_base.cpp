@@ -1,4 +1,3 @@
-
 #include "os.h"
 
 Lock::Lock(OSSemaphoreHandle semaphore, std::chrono::milliseconds timeout) : _semaphore(semaphore)

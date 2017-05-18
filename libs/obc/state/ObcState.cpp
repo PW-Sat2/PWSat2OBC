@@ -18,7 +18,12 @@ namespace obc
         std::uint8_t array[TotalImageSize];
         Writer writer(gsl::make_span(array));
         writer.WriteDoubleWordLE(Signature);
-        stateObject.Capture(writer);
+        if (!stateObject.Capture(writer))
+        {
+            LOG(LOG_LEVEL_ERROR, "Unable to capture persistent state.");
+            return false;
+        }
+
         writer.WriteDoubleWordLE(Signature);
         if (!writer.Status())
         {
@@ -47,7 +52,12 @@ namespace obc
             return false;
         }
 
-        stateObject.Read(reader);
+        if (!stateObject.Read(reader))
+        {
+            LOG(LOG_LEVEL_ERROR, "Unable read state object.");
+            return false;
+        }
+
         const auto footer = reader.ReadDoubleWordLE();
         return footer == Signature && reader.Status();
     }

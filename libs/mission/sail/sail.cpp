@@ -73,7 +73,14 @@ namespace mission
     {
         auto This = static_cast<OpenSailTask*>(param);
 
-        auto currentState = state.PersistentState.Get<state::SailState>().CurrentState();
+        state::SailState sailState;
+        if (!state.PersistentState.Get(sailState))
+        {
+            LOG(LOG_LEVEL_ERROR, "Can't get sail state");
+            return UpdateResult::Failure;
+        }
+
+        auto currentState = sailState.CurrentState();
 
         auto open = [&state, This]() {
             state.PersistentState.Set(state::SailState(state::SailOpeningState::Opening));
@@ -132,7 +139,14 @@ namespace mission
     {
         auto This = static_cast<OpenSailTask*>(param);
 
-        if (state.PersistentState.Get<state::SailState>().CurrentState() != state::SailOpeningState::Opening)
+        state::SailState sailState;
+        if (!state.PersistentState.Get(sailState))
+        {
+            LOG(LOG_LEVEL_ERROR, "Can't get sail state");
+            return false;
+        }
+
+        if (sailState.CurrentState() != state::SailOpeningState::Opening)
         {
             return false;
         }

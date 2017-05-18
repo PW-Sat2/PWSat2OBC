@@ -14,14 +14,14 @@ namespace state
 
     struct NoTrackingStatePolicy;
     class StateTrackingPolicy;
-    template <typename StatePolicy, typename... Parts> class PersistentState;
+    template <typename StatePolicy, typename... Parts> class LockablePersistentState;
 
-    typedef PersistentState<StateTrackingPolicy, //
-        AntennaConfiguration,                    //
-        TimeState,                               //
-        TimeCorrectionConfiguration,             //
-        BootState,                               //
-        SailState                                //
+    typedef LockablePersistentState<StateTrackingPolicy, //
+        AntennaConfiguration,                            //
+        TimeState,                                       //
+        TimeCorrectionConfiguration,                     //
+        BootState,                                       //
+        SailState                                        //
         >
         SystemPersistentState;
 }

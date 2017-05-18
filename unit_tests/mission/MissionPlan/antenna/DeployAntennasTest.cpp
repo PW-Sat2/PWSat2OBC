@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock-matchers.h"
+#include "OsMock.hpp"
 #include "mission/antenna_state.h"
 #include "mission/antenna_task.hpp"
 #include "mission/base.hpp"
@@ -229,6 +230,9 @@ namespace
 
         void Run();
 
+        testing::NiceMock<OSMock> os;
+        OSReset osReset;
+
         AntennaMock mock;
 
         SystemState state;
@@ -242,6 +246,9 @@ namespace
           openAntenna(task.BuildAction()), //
           stateDescriptor(task.state)
     {
+        osReset = InstallProxy(&os);
+        ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
+        ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResult::Success));
     }
 
     void DeployAntennasActionTest::Run()

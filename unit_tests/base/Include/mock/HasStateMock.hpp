@@ -8,6 +8,10 @@ template <typename State> struct HasStateMock : public IHasState<State>
 {
     typedef typename std::remove_reference<State>::type StateType;
 
+    HasStateMock() = default;
+
+    ~HasStateMock() = default;
+
     MOCK_METHOD0_T(MockGetState, StateType&());
 
     MOCK_CONST_METHOD0_T(MockGetState, const StateType&());
