@@ -75,8 +75,6 @@ struct OBC
     /** @brief Flag indicating that OBC software has finished initialization process. */
     EventGroup StateFlags;
 
-    program_flash::FlashDriver FlashDriver;
-
     /** @brief Boot Table */
     program_flash::BootTable BootTable;
 

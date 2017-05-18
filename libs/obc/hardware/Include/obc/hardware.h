@@ -13,6 +13,7 @@
 #include "io_map.h"
 #include "logger/logger.h"
 #include "power/power.h"
+#include "program_flash/flash_driver.hpp"
 #include "spi/efm.h"
 #include "temp/efm.hpp"
 
@@ -119,6 +120,9 @@ namespace obc
 
         /** @brief I2C */
         OBCHardwareI2C I2C;
+
+        /** @brief Program flash driver */
+        program_flash::FlashDriver FlashDriver;
 
         /** @brief SPI interface */
         drivers::spi::EFMSPIInterface SPI;

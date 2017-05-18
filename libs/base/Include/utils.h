@@ -251,6 +251,74 @@ template <typename T> inline bool operator!=(const Option<T>& lhs, const Option<
 }
 
 /**
+ * @brief Class capturing two possible outcomes of operation
+ * @tparam TSuccess type of success result
+ * @tparam TError type of error result
+ */
+template <typename TSuccess, typename TError> class Result
+{
+  public:
+    /**
+     * @brief Success ctor
+     * @param value Success value
+     */
+    Result(TSuccess value) : _isSuccess(true), _success(value)
+    {
+    }
+
+    /**
+     * @brief Error ctor
+     * @param value Error value
+     */
+    Result(TError value) : _isSuccess(false), _error(value)
+    {
+    }
+
+    /**
+     * @brief Checks if object represents success outcome
+     * @return Is success?
+     */
+    inline bool IsSuccess() const
+    {
+        return this->_isSuccess;
+    }
+
+    /**
+     * @brief Returns success value
+     * @return Success value
+     */
+    inline TSuccess Success() const
+    {
+        return this->_success;
+    }
+
+    /**
+     * @brief Returns error value
+     * @return Error value
+     */
+    inline TError Error() const
+    {
+        return this->_error;
+    }
+
+    /**
+     * @brief Checks if object represents success outcome
+     */
+    inline operator bool() const
+    {
+        return this->_isSuccess;
+    }
+
+  private:
+    /** @brief Is success flag */
+    bool _isSuccess;
+    /** @brief Success value */
+    TSuccess _success;
+    /** @brief Error value */
+    TError _error;
+};
+
+/**
  * @brief Private-inherit this class to prevent copy-operations
  */
 struct NotCopyable
