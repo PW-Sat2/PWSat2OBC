@@ -218,7 +218,8 @@ TEST_F(UploadProgramTest, ResponseWithProgramErrorOnFinalize)
 
 TEST_F(UploadProgramTest, ResponseWithErrorOnFinalizeWithIncorrectCRC)
 {
-    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(2, 2, 1, 0xC7, 0xD5)))).Times(1);
+    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(2, 20, 1, 0xC7, 0xD5))))
+        .Times(1);
 
     this->HandleFrame(this->_finalizeTelecommand, 1, 0x12, 0x13, 0x00, 0x00, 0xAB, 0xCD, 'T', 'e', 's', 't');
 }

@@ -62,6 +62,7 @@ void OBCHardware::Initialize()
     this->Pins.Initialize();
     this->I2C.Initialize();
     this->SPI.Initialize();
+    this->FlashDriver.Initialize();
 }
 
 OSResult OBCHardware::PostStartInitialize()
@@ -72,6 +73,7 @@ OSResult OBCHardware::PostStartInitialize()
 OBCHardware::OBCHardware(
     error_counter::ErrorCounting& errorCounting, services::power::IPowerControl& powerControl, TimeAction& burtcTickHandler)
     : I2C(powerControl),                                               //
+      FlashDriver(reinterpret_cast<std::uint8_t*>(0x84000000)),        //
       Burtc(burtcTickHandler),                                         //
       FramSpi(SPI, Pins.Fram1ChipSelect),                              //
       PersistentStorage(FramSpi),                                      //
