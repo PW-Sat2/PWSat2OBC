@@ -15,6 +15,7 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
     II2CBus& systemBus,
     services::time::ICurrentTime& currentTime,
     mission::IIdleStateController& idleStateController,
+    IHasState<SystemState>& stateContainer,
     services::fs::IFileSystem& fs,
     obc::OBCExperiments& experiments,
     program_flash::BootTable& bootTable)
@@ -24,6 +25,7 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           DownloadFileTelecommand(fs),                                        //
           EnterIdleStateTelecommand(currentTime, idleStateController),        //
           RemoveFileTelecommand(fs),                                          //
+          SetTimeCorrectionConfigTelecommand(stateContainer),                 //
           PerformDetumblingExperiment(experiments),                           //
           AbortExperiment(experiments),                                       //
           ListFilesTelecommand(fs),                                           //

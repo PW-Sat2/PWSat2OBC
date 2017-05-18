@@ -5,6 +5,7 @@ set(SOURCES
     ping.cpp
     file_system.cpp
     experiments.cpp
+    time.cpp
     program_upload.cpp
 )
 
