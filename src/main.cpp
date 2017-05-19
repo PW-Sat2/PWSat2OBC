@@ -53,7 +53,8 @@ mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc),
 
 telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver,
     std::tuple<services::fs::IFileSystem&, mission::TelemetryConfiguration>(
-        Main.fs, mission::TelemetryConfiguration{"/telemetry.current", "/telemetry.previous", 512_KB}));
+        Main.fs, mission::TelemetryConfiguration{"/telemetry.current", "/telemetry.previous", 512_KB}),
+    Main.Hardware.Gyro);
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 

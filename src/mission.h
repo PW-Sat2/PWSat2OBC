@@ -39,7 +39,8 @@ namespace telemetry
 {
     typedef mission::MissionLoop<TelemetryState, //
         CommTelemetryAcquisition,                //
-        mission::TelemetryTask                   //
+        mission::TelemetryTask,                  //
+        GyroTelemetryAcquisition,                //
         >
         ObcTelemetryAcquisition;
 }
