@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "ErrorCounters.hpp"
 #include "ProgramState.hpp"
 #include "SystemStartup.hpp"
 #include "Telemetry.hpp"

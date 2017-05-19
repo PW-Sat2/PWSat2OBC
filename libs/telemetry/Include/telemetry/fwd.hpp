@@ -11,11 +11,14 @@ namespace telemetry
 {
     class SystemStartup;
     class ProgramState;
+    class ErrorCountingTelemetry;
+
     template <typename... Type> class Telemetry;
 
     typedef Telemetry<SystemStartup,      //
         ProgramState,                     //
         state::TimeState,                 //
+        ErrorCountingTelemetry,           //
         devices::comm::CommTelemetry,     //
         devices::gyro::GyroscopeTelemetry //
         >

@@ -94,6 +94,7 @@ target_link_libraries(${NAME}
     telemetry
     telemetry_comm
     telemetry_gyro
+    telemetry_fdir
     program_flash
     scrubber
 )
