@@ -33,6 +33,11 @@ void LESENSE_IRQHandler()
     System::EndSwitchingISR();
 }
 
+__attribute__((optimize("O3"))) void UART1_RX_IRQHandler()
+{
+    uart.OnReceived();
+}
+
 void SetGroup(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
@@ -69,12 +74,6 @@ static void InitializeTerminal(void)
 {
     TerminalObject.Initialize();
     TerminalObject.SetCommandList(gsl::span<const TerminalCommandDescription>(commands));
-}
-
-extern "C" void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
-{
-    UNREFERENCED_PARAMETER(pxTask);
-    UNREFERENCED_PARAMETER(pcTaskName);
 }
 
 extern "C" void vApplicationIdleHook(void)
@@ -114,8 +113,12 @@ int main(void)
     CMU_ClockEnable(cmuClock_GPIO, true);
     CMU_ClockEnable(cmuClock_DMA, true);
 
-    CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFRCO);
-    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFRCO);
+    CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_HFCLKLE);
+    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_HFCLKLE);
+
+    CMU_OscillatorEnable(cmuOsc_HFXO, true, true);
+    CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
+    CMU_OscillatorEnable(cmuOsc_HFRCO, false, true);
 
     SwoEnable();
 
