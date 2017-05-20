@@ -1,0 +1,7 @@
+@echo off
+
+set PYTHON=${PYTHON_EXECUTABLE}
+set TESTS_DIR=${CMAKE_SOURCE_DIR}/integration_tests
+
+set PYTHONPATH=${CMAKE_BINARY_DIR}/integration_tests
+"%PYTHON%" -m nose -w "%TESTS_DIR%" %*
