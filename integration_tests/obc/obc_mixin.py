@@ -34,6 +34,13 @@ def decode_base64():
     return decode_return(p)
 
 
+def decode_words():
+    def p(s):
+        return s.split()
+
+    return decode_return(p)
+
+
 def decode_lines():
     def p(s):
         return s.split('\n')

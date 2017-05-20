@@ -12,6 +12,7 @@ set(SOURCES
   EPS/EPSDriverTest.cpp
   SPI/SPIDriverTest.cpp
   FM25W/FM25WDriverTest.cpp
+  FM25W/RedundantFM25WDriverTest.cpp
   I2C/FallbackI2CBusTest.cpp
   I2C/ErrorHandlingI2CBusTest.cpp
   N25Q/N25QTest.cpp

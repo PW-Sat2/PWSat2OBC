@@ -37,3 +37,29 @@ class TestTMR(BaseTest):
 
         self.assertNotEqual("Should not be PW-SAT2", test_file_content)
 
+    @wait_for_obc_start()
+    def test_fram_redundant_read_write(self):
+        self.system.obc.fram_write('r', 0, ['1', '2', '3'])
+
+        fram_value = self.system.obc.fram_read('r', 0, 3)
+
+        self.assertEquals(['1', '2', '3'], fram_value)
+
+    @wait_for_obc_start()
+    def test_fram_single_failure(self):
+        self.system.obc.fram_write('r', 0, ['1', '2', '3'])
+        self.system.obc.fram_write('0', 0, ['6', '6', '6'])
+
+        fram_value = self.system.obc.fram_read('r', 0, 3)
+
+        self.assertEquals(['1', '2', '3'], fram_value)
+
+    @wait_for_obc_start()
+    def test_fram_double_failure(self):
+        self.system.obc.fram_write('r', 0, ['1', '2', '3'])
+        self.system.obc.fram_write('0', 0, ['6', '6', '6'])
+        self.system.obc.fram_write('1', 0, ['6', '6', '6'])
+
+        fram_value = self.system.obc.fram_read('r', 0, 3)
+
+        self.assertEquals(['6', '6', '6'], fram_value)
