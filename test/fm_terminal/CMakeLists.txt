@@ -2,6 +2,7 @@ set(NAME fm_terminal)
 
 set(SOURCES
     main.cpp
+    fault_handlers.cpp
 )
 
 add_executable(${NAME} EXCLUDE_FROM_ALL ${SOURCES})
