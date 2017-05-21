@@ -4,6 +4,7 @@
   * @author  Pieter Botma
   * @version 2.0
   ******************************************************************************/
+#include <em_rmu.h>
 #include <em_usart.h>
 #include "boot.h"
 #include "boot/params.hpp"

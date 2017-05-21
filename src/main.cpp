@@ -35,6 +35,7 @@
 #include "swo/swo.h"
 #include "system.h"
 #include "terminal.h"
+#include "watchdog/external.hpp"
 #include "watchdog/internal.hpp"
 
 using services::time::TimeProvider;
@@ -53,7 +54,7 @@ mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc),
 
 telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver,
     std::tuple<services::fs::IFileSystem&, mission::TelemetryConfiguration>(
-        Main.fs, mission::TelemetryConfiguration{"/telemetry.current", "/telemetry.previous", 512_KB}),
+        Main.fs, mission::TelemetryConfiguration{"/a/telemetry.current", "/a/telemetry.previous", 512_KB}),
     Main.Hardware.Gyro,
     Main.Fdir,
     Main.Hardware.EPS);
@@ -67,6 +68,7 @@ extern "C" void vApplicationIdleHook(void)
 
 extern "C" void vApplicationTickHook(void)
 {
+    drivers::watchdog::ExternalWatchdog::Kick();
 }
 
 void I2C0_IRQHandler(void)
@@ -130,7 +132,7 @@ static void InitSwoEndpoint(void)
 
 static void ObcInitTask(void* param)
 {
-    drivers::watchdog::InternalWatchdog::Enable();
+    drivers::watchdog::ExternalWatchdog::Enable();
 
     LOG(LOG_LEVEL_INFO, "Starting initialization task... ");
     LOGF(LOG_LEVEL_INFO, "Requested runlevel %d", num(boot::RequestedRunlevel));
