@@ -29,6 +29,7 @@
 #include "terminal/terminal.h"
 #include "time/timer.h"
 #include "utils.h"
+#include "watchdog/pin.hpp"
 
 /**
  * @defgroup obc OBC structure
@@ -129,6 +130,9 @@ using Scrubber =
     scrubber::RAMScrubber<io_map::RAMScrubbing::MemoryStart, io_map::RAMScrubbing::MemorySize, io_map::RAMScrubbing::CycleSize>;
 
 static constexpr std::uint32_t PersistentStateBaseAddress = 4;
+
+/** @brief External watchdog */
+using ExternalWatchdog = drivers::watchdog::PinWatchdog<io_map::Watchdog::ExternalWatchdogPin>;
 
 /** @} */
 

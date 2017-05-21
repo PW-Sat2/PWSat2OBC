@@ -92,6 +92,7 @@ namespace io_map
     struct Watchdog
     {
         static constexpr WDOG_PeriodSel_TypeDef Period = wdogPeriod_64k; // About 1 second
+        using ExternalWatchdogPin = PinLocation<gpioPortF, 9>;
     };
 
     struct ProgramFlash
