@@ -67,6 +67,7 @@ extern "C" void vApplicationIdleHook(void)
 
 extern "C" void vApplicationTickHook(void)
 {
+    ExternalWatchdog::Kick();
 }
 
 void I2C0_IRQHandler(void)
@@ -130,7 +131,7 @@ static void InitSwoEndpoint(void)
 
 static void ObcInitTask(void* param)
 {
-    drivers::watchdog::InternalWatchdog::Enable();
+    ExternalWatchdog::Enable();
 
     LOG(LOG_LEVEL_INFO, "Starting initialization task...");
     LOGF(LOG_LEVEL_INFO, "Requested runlevel %d", num(boot::RequestedRunlevel));

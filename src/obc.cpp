@@ -116,6 +116,8 @@ OSResult OBC::InitializeRunlevel1()
         LOG(LOG_LEVEL_ERROR, "Unable to initialize telemetry acquisition loop.");
     }
 
+    drivers::watchdog::InternalWatchdog::Enable();
+
     BootSettings.ConfirmLastBoot();
 
     LOG(LOG_LEVEL_INFO, "Initialized");

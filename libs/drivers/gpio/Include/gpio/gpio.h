@@ -93,6 +93,11 @@ namespace drivers
              * @brief Configures GPIO pin to be output
              */
             void Initialize() const;
+
+            /**
+             * @brief Disables GPIO pin
+             */
+            void Deinitialize() const;
         };
 
         template <typename Location, bool DefaultState> OutputPin<Location, DefaultState>::OutputPin() : Pin(Port, PinNumber)
@@ -102,6 +107,11 @@ namespace drivers
         template <typename Location, bool DefaultState> void OutputPin<Location, DefaultState>::Initialize() const
         {
             GPIO_PinModeSet(Port, PinNumber, gpioModePushPull, ToInt(DefaultState));
+        }
+
+        template <typename Location, bool DefaultState> void OutputPin<Location, DefaultState>::Deinitialize() const
+        {
+            GPIO_PinModeSet(Port, PinNumber, gpioModeDisabled, ToInt(DefaultState));
         }
 
         /**
