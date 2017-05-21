@@ -93,6 +93,7 @@ namespace io_map
     {
         static constexpr WDOG_PeriodSel_TypeDef Period = wdogPeriod_64k;       // About 1 minute
         static constexpr WDOG_PeriodSel_TypeDef BootTimeout = wdogPeriod_16k; // About 16 second
+        using ExternalWatchdogPin = PinLocation<gpioPortF, 9>;
     };
 
     struct ProgramFlash

@@ -6,14 +6,8 @@ namespace drivers
     namespace watchdog
     {
         /**
-         * @defgroup watchdogs Watchdog drivers
-         * @ingroup peripheral_drivers
-         *
-         * @{
-         */
-
-        /**
          * @brief Driver for internal (MCU) watchdog
+         * @ingroup watchdog
          */
         class InternalWatchdog
         {

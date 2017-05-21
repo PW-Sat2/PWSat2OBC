@@ -51,14 +51,14 @@
  * @{
  * @}
  */
- 
- /**
- * @defgroup persistent_state_container Persistent Satellite State
- * @ingroup StateDef
- *
- * @brief This module contains implementation of the tyeps responsible for managing the
- * satellite persistent state elements.
- */
+
+/**
+* @defgroup persistent_state_container Persistent Satellite State
+* @ingroup StateDef
+*
+* @brief This module contains implementation of the tyeps responsible for managing the
+* satellite persistent state elements.
+*/
 
 /**
  * @defgroup persistent_state Persistent Satellite State
@@ -67,8 +67,16 @@
  * @{
  * @}
  */
- 
- /**
- * @defgroup telemetry Telemetry
- * @brief This module is responsible for telemetry management.
- */
+
+/**
+* @defgroup telemetry Telemetry
+* @brief This module is responsible for telemetry management.
+*/
+
+/**
+* @defgroup watchdogs Watchdog drivers
+* @ingroup peripheral_drivers
+*
+* @{
+* @}
+*/
