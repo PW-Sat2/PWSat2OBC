@@ -469,8 +469,10 @@ bool CommObject::ResetWatchdogTransmitter()
     return this->SendCommand(Address::Transmitter, num(TransmitterCommand::ResetWatchdog));
 }
 
-void CommObject::PollHardware()
+bool CommObject::PollHardware()
 {
+    bool anyFrame = false;
+
     auto frameResponse = this->GetFrameCount();
     if (!frameResponse.status)
     {
@@ -478,6 +480,7 @@ void CommObject::PollHardware()
     }
     else if (frameResponse.frameCount > 0)
     {
+        anyFrame = true;
         LOGF(LOG_LEVEL_INFO, "[comm] Got %d frames", static_cast<int>(frameResponse.frameCount));
         for (decltype(frameResponse.frameCount) i = 0; i < frameResponse.frameCount; i++)
         {
@@ -489,6 +492,8 @@ void CommObject::PollHardware()
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Unable to reset comm watchdog. ");
     }
+
+    return anyFrame;
 }
 
 bool CommObject::GetFrame(gsl::span<std::uint8_t> buffer, int retryCount, Frame& frame)
@@ -537,10 +542,12 @@ void CommObject::ProcessSingleFrame()
 void CommObject::CommTask(void* param)
 {
     CommObject* comm = (CommObject*)param;
+
     comm->PollHardware();
+
     for (;;)
     {
-        const OSEventBits result = comm->_pollingTaskFlags.WaitAny(TaskFlagPauseRequest, true, 10s);
+        const OSEventBits result = comm->_pollingTaskFlags.WaitAny(TaskFlagPauseRequest, true, 1s);
         if (result == TaskFlagPauseRequest)
         {
             LOG(LOG_LEVEL_WARNING, "Comm task paused");
@@ -549,7 +556,9 @@ void CommObject::CommTask(void* param)
         }
         else
         {
-            comm->PollHardware();
+            while (comm->PollHardware())
+            {
+            }
         }
     }
 }

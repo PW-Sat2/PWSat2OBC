@@ -802,7 +802,8 @@ namespace
     {
         i2c.ExpectWriteCommand(ReceiverAddress, ReceiverWatchdogReset).WillOnce(Return(I2CResult::OK));
         MockFrameCount(0);
-        comm.PollHardware();
+        auto result = comm.PollHardware();
+        ASSERT_THAT(result, Eq(false));
     }
 
     TEST_F(CommTest, TestPollHardwareProcessesValidFrames)
@@ -813,7 +814,8 @@ namespace
         MockFrame(buffer, 1, 2);
         MockRemoveFrame(I2CResult::OK);
         EXPECT_CALL(frameHandler, HandleFrame(_, _)).Times(1);
-        comm.PollHardware();
+        auto result = comm.PollHardware();
+        ASSERT_THAT(result, Eq(true));
     }
 
     TEST_F(CommTest, TestPollHardwareInValidFramesAreRemoved)

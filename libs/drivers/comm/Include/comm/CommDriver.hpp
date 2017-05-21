@@ -209,11 +209,12 @@ class CommObject final : public ITransmitter,      //
 
     /**
      * @brief This procedure queries current hardware for state changes.
+     * @returns True if any frame was received
      *
      * This function queries the state of the underlying hardware and processes any not yet received frames.
      * Additionally it resets hardware watchdog either via transmitter or via receiver.
      */
-    void PollHardware();
+    bool PollHardware();
 
     virtual bool GetTelemetry(CommTelemetry& telemetry) final override;
 
