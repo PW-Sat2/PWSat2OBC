@@ -36,37 +36,6 @@ namespace rc
         }
     };
 
-    template <> struct Arbitrary<HouseheepingControllerA>
-    {
-        static auto arbitrary()
-        {
-            return gen::build<HouseheepingControllerA>(           //
-                gen::set(&HouseheepingControllerA::MPPT_X),       //
-                gen::set(&HouseheepingControllerA::MPPT_Y_PLUS),  //
-                gen::set(&HouseheepingControllerA::MPPT_Y_MINUS), //
-                gen::set(&HouseheepingControllerA::DISTR),        //
-                gen::set(&HouseheepingControllerA::BATC),         //
-                gen::set(&HouseheepingControllerA::BP),           //
-                gen::set(&HouseheepingControllerA::CTRLB),        //
-                gen::set(&HouseheepingControllerA::CTRLA),        //
-                gen::set(&HouseheepingControllerA::DCDC3V3),      //
-                gen::set(&HouseheepingControllerA::DCDC5V)        //
-                );
-        }
-    };
-
-    template <> struct Arbitrary<HouseheepingControllerB>
-    {
-        static auto arbitrary()
-        {
-            return gen::build<HouseheepingControllerB>(    //
-                gen::set(&HouseheepingControllerB::BP),    //
-                gen::set(&HouseheepingControllerB::CTRLB), //
-                gen::set(&HouseheepingControllerB::CTRLA)  //
-                );
-        }
-    };
-
     template <>
     struct Arbitrary<MPPT_STATE>
         : public ArbitraryBitmask<MPPT_STATE, MPPT_STATE::A, MPPT_STATE::B, MPPT_STATE::C, MPPT_STATE::D, MPPT_STATE::E, MPPT_STATE::F>
@@ -112,105 +81,134 @@ namespace rc
     {
     };
 
-    template <> struct Arbitrary<HouseheepingControllerA::MPPT_HK>
+    template <> struct Arbitrary<MPPT_HK>
     {
         static auto arbitrary()
         {
-            using T = HouseheepingControllerA::MPPT_HK;
-
+            using T = MPPT_HK;
             return gen::build<T>(           //
                 gen::set(&T::SOL_VOLT),     //
                 gen::set(&T::SOL_CURR),     //
                 gen::set(&T::SOL_OUT_VOLT), //
-                gen::set(&T::TEMP),         //
-                gen::set(&T::STATE));
+                gen::set(&T::Temperature),  //
+                gen::set(&T::MpptState));
         }
     };
 
-    template <> struct Arbitrary<HouseheepingControllerA::DISTR_HK>
+    template <> struct Arbitrary<DISTR_HK>
     {
         static auto arbitrary()
         {
-            using T = HouseheepingControllerA::DISTR_HK;
-
-            return gen::build<T>(        //
-                gen::set(&T::TEMP),      //
-                gen::set(&T::VOLT_3V3),  //
-                gen::set(&T::CURR_3V3),  //
-                gen::set(&T::VOLT_5V),   //
-                gen::set(&T::CURR_5V),   //
-                gen::set(&T::VOLT_VBAT), //
-                gen::set(&T::CURR_VBAT), //
-                gen::set(&T::LCL_STATE), //
-                gen::set(&T::LCL_FLAGB)  //
+            using T = DISTR_HK;
+            return gen::build<T>(          //
+                gen::set(&T::Temperature), //
+                gen::set(&T::VOLT_3V3),    //
+                gen::set(&T::CURR_3V3),    //
+                gen::set(&T::VOLT_5V),     //
+                gen::set(&T::CURR_5V),     //
+                gen::set(&T::VOLT_VBAT),   //
+                gen::set(&T::CURR_VBAT),   //
+                gen::set(&T::LCL_STATE),   //
+                gen::set(&T::LCL_FLAGB)    //
                 );
         }
     };
 
-    template <> struct Arbitrary<HouseheepingControllerA::BATC_HK>
+    template <> struct Arbitrary<BATCPrimaryState>
     {
         static auto arbitrary()
         {
-            using T = HouseheepingControllerA::BATC_HK;
-
+            using T = BATCPrimaryState;
             return gen::build<T>(gen::set(&T::VOLT_A), //
-                gen::set(&T::CHRG_CURR),               //
-                gen::set(&T::DCHRG_CURR),              //
-                gen::set(&T::TEMP),                    //
-                gen::set(&T::STATE)                    //
+                gen::set(&T::ChargeCurrent),           //
+                gen::set(&T::DischargeCurrent),        //
+                gen::set(&T::Temperature),             //
+                gen::set(&T::State)                    //
                 );
         }
     };
 
-    template <> struct Arbitrary<HouseheepingControllerA::BP_HK>
+    template <> struct Arbitrary<BATCSecondaryState>
     {
         static auto arbitrary()
         {
-            using T = HouseheepingControllerA::BP_HK;
-
-            return gen::build<T>(gen::set(&T::TEMP_A), gen::set(&T::TEMP_B));
+            using T = BATCSecondaryState;
+            return gen::build<T>(gen::set(&T::voltB));
         }
     };
 
-    template <> struct Arbitrary<OtherController>
+    template <> struct Arbitrary<BatteryPackPrimaryState>
     {
         static auto arbitrary()
         {
-            using T = OtherController;
-
-            return gen::build<T>(gen::set(&T::VOLT_3V3d));
+            return gen::build<BatteryPackPrimaryState>(           //
+                gen::set(&BatteryPackPrimaryState::temperatureA), //
+                gen::set(&BatteryPackPrimaryState::temperatureB));
         }
     };
 
-    template <> struct Arbitrary<ThisController>
+    template <> struct Arbitrary<OtherControllerState>
     {
         static auto arbitrary()
         {
-            using T = ThisController;
-            return gen::build<T>(gen::set(&T::ERR), //
-                gen::set(&T::PWR_CYCLES),           //
-                gen::set(&T::UPTIME),               //
-                gen::set(&T::TEMP)                  //
+            return gen::build<OtherControllerState>(gen::set(&OtherControllerState::VOLT_3V3d));
+        }
+    };
+
+    template <> struct Arbitrary<ThisControllerState>
+    {
+        static auto arbitrary()
+        {
+            return gen::build<ThisControllerState>(gen::set(&ThisControllerState::powerCycleCount), //
+                gen::set(&ThisControllerState::temperature),                                        //
+                gen::set(&ThisControllerState::uptime),                                             //
+                gen::set(&ThisControllerState::errorCode));
+        }
+    };
+
+    template <> struct Arbitrary<DCDC_HK>
+    {
+        static auto arbitrary()
+        {
+            return gen::build<DCDC_HK>(gen::set(&DCDC_HK::temperature));
+        }
+    };
+
+    template <> struct Arbitrary<BatteryPackSecondaryState>
+    {
+        static auto arbitrary()
+        {
+            return gen::build<BatteryPackSecondaryState>(gen::set(&BatteryPackSecondaryState::temperatureC));
+        }
+    };
+
+    template <> struct Arbitrary<ControllerATelemetry>
+    {
+        static auto arbitrary()
+        {
+            return gen::build<ControllerATelemetry>(         //
+                gen::set(&ControllerATelemetry::mpptX),      //
+                gen::set(&ControllerATelemetry::mpptYPlus),  //
+                gen::set(&ControllerATelemetry::mpptYMinus), //
+                gen::set(&ControllerATelemetry::distr),      //
+                gen::set(&ControllerATelemetry::batc),       //
+                gen::set(&ControllerATelemetry::bp),         //
+                gen::set(&ControllerATelemetry::other),      //
+                gen::set(&ControllerATelemetry::current),    //
+                gen::set(&ControllerATelemetry::dcdc3V3),    //
+                gen::set(&ControllerATelemetry::dcdc5V)      //
                 );
         }
     };
 
-    template <> struct Arbitrary<HouseheepingControllerA::DCDC_HK>
+    template <> struct Arbitrary<ControllerBTelemetry>
     {
         static auto arbitrary()
         {
-            using T = HouseheepingControllerA::DCDC_HK;
-            return gen::build<T>(gen::set(&T::TEMP));
-        }
-    };
-
-    template <> struct Arbitrary<HouseheepingControllerB::BP_HK>
-    {
-        static auto arbitrary()
-        {
-            using T = HouseheepingControllerB::BP_HK;
-
-            return gen::build<T>(gen::set(&T::TEMP_C));
+            return gen::build<ControllerBTelemetry>(gen::set(&ControllerBTelemetry::bp), //
+                gen::set(&ControllerBTelemetry::batc),                                   //
+                gen::set(&ControllerBTelemetry::other),                                  //
+                gen::set(&ControllerBTelemetry::current));
         }
     };
 }
@@ -251,59 +249,59 @@ namespace
             }));
     }
 
-    RC_GTEST_FIXTURE_PROP(EPSDriverTest, ReadHousekeepingA, (HouseheepingControllerA input))
+    RC_GTEST_FIXTURE_PROP(EPSDriverTest, ReadHousekeepingA, (ControllerATelemetry input))
     {
         std::array<std::uint8_t, 72> buffer;
         Writer w(buffer);
 
         w.WriteByte(0);
 
-        w.WriteWordLE(input.MPPT_X.SOL_CURR);
-        w.WriteWordLE(input.MPPT_X.SOL_VOLT);
-        w.WriteWordLE(input.MPPT_X.SOL_OUT_VOLT);
-        w.WriteWordLE(input.MPPT_X.TEMP);
-        w.WriteByte(num(input.MPPT_X.STATE));
+        w.WriteWordLE(input.mpptX.SOL_CURR);
+        w.WriteWordLE(input.mpptX.SOL_VOLT);
+        w.WriteWordLE(input.mpptX.SOL_OUT_VOLT);
+        w.WriteWordLE(input.mpptX.Temperature);
+        w.WriteByte(num(input.mpptX.MpptState));
 
-        w.WriteWordLE(input.MPPT_Y_PLUS.SOL_CURR);
-        w.WriteWordLE(input.MPPT_Y_PLUS.SOL_VOLT);
-        w.WriteWordLE(input.MPPT_Y_PLUS.SOL_OUT_VOLT);
-        w.WriteWordLE(input.MPPT_Y_PLUS.TEMP);
-        w.WriteByte(num(input.MPPT_Y_PLUS.STATE));
+        w.WriteWordLE(input.mpptYPlus.SOL_CURR);
+        w.WriteWordLE(input.mpptYPlus.SOL_VOLT);
+        w.WriteWordLE(input.mpptYPlus.SOL_OUT_VOLT);
+        w.WriteWordLE(input.mpptYPlus.Temperature);
+        w.WriteByte(num(input.mpptYPlus.MpptState));
 
-        w.WriteWordLE(input.MPPT_Y_MINUS.SOL_CURR);
-        w.WriteWordLE(input.MPPT_Y_MINUS.SOL_VOLT);
-        w.WriteWordLE(input.MPPT_Y_MINUS.SOL_OUT_VOLT);
-        w.WriteWordLE(input.MPPT_Y_MINUS.TEMP);
-        w.WriteByte(num(input.MPPT_Y_MINUS.STATE));
+        w.WriteWordLE(input.mpptYMinus.SOL_CURR);
+        w.WriteWordLE(input.mpptYMinus.SOL_VOLT);
+        w.WriteWordLE(input.mpptYMinus.SOL_OUT_VOLT);
+        w.WriteWordLE(input.mpptYMinus.Temperature);
+        w.WriteByte(num(input.mpptYMinus.MpptState));
 
-        w.WriteWordLE(input.DISTR.CURR_3V3);
-        w.WriteWordLE(input.DISTR.VOLT_3V3);
-        w.WriteWordLE(input.DISTR.CURR_5V);
-        w.WriteWordLE(input.DISTR.VOLT_5V);
-        w.WriteWordLE(input.DISTR.CURR_VBAT);
-        w.WriteWordLE(input.DISTR.VOLT_VBAT);
-        w.WriteWordLE(input.DISTR.TEMP);
-        w.WriteByte(num(input.DISTR.LCL_STATE));
-        w.WriteByte(num(input.DISTR.LCL_FLAGB));
+        w.WriteWordLE(input.distr.CURR_3V3);
+        w.WriteWordLE(input.distr.VOLT_3V3);
+        w.WriteWordLE(input.distr.CURR_5V);
+        w.WriteWordLE(input.distr.VOLT_5V);
+        w.WriteWordLE(input.distr.CURR_VBAT);
+        w.WriteWordLE(input.distr.VOLT_VBAT);
+        w.WriteWordLE(input.distr.Temperature);
+        w.WriteByte(num(input.distr.LCL_STATE));
+        w.WriteByte(num(input.distr.LCL_FLAGB));
 
-        w.WriteWordLE(input.BATC.VOLT_A);
-        w.WriteWordLE(input.BATC.CHRG_CURR);
-        w.WriteWordLE(input.BATC.DCHRG_CURR);
-        w.WriteWordLE(input.BATC.TEMP);
-        w.WriteByte(num(input.BATC.STATE));
+        w.WriteWordLE(input.batc.VOLT_A);
+        w.WriteWordLE(input.batc.ChargeCurrent);
+        w.WriteWordLE(input.batc.DischargeCurrent);
+        w.WriteWordLE(input.batc.Temperature);
+        w.WriteByte(num(input.batc.State));
 
-        w.WriteWordLE(input.BP.TEMP_A);
-        w.WriteWordLE(input.BP.TEMP_B);
+        w.WriteWordLE(input.bp.temperatureA);
+        w.WriteWordLE(input.bp.temperatureB);
 
-        w.WriteWordLE(input.CTRLB.VOLT_3V3d);
+        w.WriteWordLE(input.other.VOLT_3V3d);
 
-        w.WriteByte(input.CTRLA.ERR);
-        w.WriteWordLE(input.CTRLA.PWR_CYCLES);
-        w.WriteDoubleWordLE(input.CTRLA.UPTIME);
-        w.WriteWordLE(input.CTRLA.TEMP);
+        w.WriteByte(input.current.errorCode);
+        w.WriteWordLE(input.current.powerCycleCount);
+        w.WriteDoubleWordLE(input.current.uptime);
+        w.WriteWordLE(input.current.temperature);
 
-        w.WriteWordLE(input.DCDC3V3.TEMP);
-        w.WriteWordLE(input.DCDC5V.TEMP);
+        w.WriteWordLE(input.dcdc3V3.temperature);
+        w.WriteWordLE(input.dcdc5V.temperature);
 
         RC_ASSERT(w.Status());
 
@@ -319,69 +317,69 @@ namespace
 
         auto hk = result.Value;
 
-        RC_ASSERT(hk.MPPT_X.SOL_VOLT == input.MPPT_X.SOL_VOLT);
-        RC_ASSERT(hk.MPPT_X.SOL_CURR == input.MPPT_X.SOL_CURR);
-        RC_ASSERT(hk.MPPT_X.SOL_OUT_VOLT == input.MPPT_X.SOL_OUT_VOLT);
-        RC_ASSERT(hk.MPPT_X.TEMP == input.MPPT_X.TEMP);
-        RC_ASSERT(hk.MPPT_X.STATE == input.MPPT_X.STATE);
+        RC_ASSERT(hk.mpptX.SOL_VOLT == input.mpptX.SOL_VOLT);
+        RC_ASSERT(hk.mpptX.SOL_CURR == input.mpptX.SOL_CURR);
+        RC_ASSERT(hk.mpptX.SOL_OUT_VOLT == input.mpptX.SOL_OUT_VOLT);
+        RC_ASSERT(hk.mpptX.Temperature == input.mpptX.Temperature);
+        RC_ASSERT(hk.mpptX.MpptState == input.mpptX.MpptState);
 
-        RC_ASSERT(hk.MPPT_Y_PLUS.SOL_CURR == input.MPPT_Y_PLUS.SOL_CURR);
-        RC_ASSERT(hk.MPPT_Y_PLUS.SOL_VOLT == input.MPPT_Y_PLUS.SOL_VOLT);
-        RC_ASSERT(hk.MPPT_Y_PLUS.SOL_OUT_VOLT == input.MPPT_Y_PLUS.SOL_OUT_VOLT);
-        RC_ASSERT(hk.MPPT_Y_PLUS.TEMP == input.MPPT_Y_PLUS.TEMP);
-        RC_ASSERT(hk.MPPT_Y_PLUS.STATE == input.MPPT_Y_PLUS.STATE);
+        RC_ASSERT(hk.mpptYPlus.SOL_CURR == input.mpptYPlus.SOL_CURR);
+        RC_ASSERT(hk.mpptYPlus.SOL_VOLT == input.mpptYPlus.SOL_VOLT);
+        RC_ASSERT(hk.mpptYPlus.SOL_OUT_VOLT == input.mpptYPlus.SOL_OUT_VOLT);
+        RC_ASSERT(hk.mpptYPlus.Temperature == input.mpptYPlus.Temperature);
+        RC_ASSERT(hk.mpptYPlus.MpptState == input.mpptYPlus.MpptState);
 
-        RC_ASSERT(hk.MPPT_Y_MINUS.SOL_CURR == input.MPPT_Y_MINUS.SOL_CURR);
-        RC_ASSERT(hk.MPPT_Y_MINUS.SOL_VOLT == input.MPPT_Y_MINUS.SOL_VOLT);
-        RC_ASSERT(hk.MPPT_Y_MINUS.SOL_OUT_VOLT == input.MPPT_Y_MINUS.SOL_OUT_VOLT);
-        RC_ASSERT(hk.MPPT_Y_MINUS.TEMP == input.MPPT_Y_MINUS.TEMP);
-        RC_ASSERT(hk.MPPT_Y_MINUS.STATE == input.MPPT_Y_MINUS.STATE);
+        RC_ASSERT(hk.mpptYMinus.SOL_CURR == input.mpptYMinus.SOL_CURR);
+        RC_ASSERT(hk.mpptYMinus.SOL_VOLT == input.mpptYMinus.SOL_VOLT);
+        RC_ASSERT(hk.mpptYMinus.SOL_OUT_VOLT == input.mpptYMinus.SOL_OUT_VOLT);
+        RC_ASSERT(hk.mpptYMinus.Temperature == input.mpptYMinus.Temperature);
+        RC_ASSERT(hk.mpptYMinus.MpptState == input.mpptYMinus.MpptState);
 
-        RC_ASSERT(hk.DISTR.TEMP == input.DISTR.TEMP);
-        RC_ASSERT(hk.DISTR.VOLT_3V3 == input.DISTR.VOLT_3V3);
-        RC_ASSERT(hk.DISTR.CURR_3V3 == input.DISTR.CURR_3V3);
-        RC_ASSERT(hk.DISTR.VOLT_5V == input.DISTR.VOLT_5V);
-        RC_ASSERT(hk.DISTR.CURR_5V == input.DISTR.CURR_5V);
-        RC_ASSERT(hk.DISTR.VOLT_VBAT == input.DISTR.VOLT_VBAT);
-        RC_ASSERT(hk.DISTR.CURR_VBAT == input.DISTR.CURR_VBAT);
-        RC_ASSERT(hk.DISTR.LCL_STATE == input.DISTR.LCL_STATE);
-        RC_ASSERT(hk.DISTR.LCL_FLAGB == input.DISTR.LCL_FLAGB);
+        RC_ASSERT(hk.distr.Temperature == input.distr.Temperature);
+        RC_ASSERT(hk.distr.VOLT_3V3 == input.distr.VOLT_3V3);
+        RC_ASSERT(hk.distr.CURR_3V3 == input.distr.CURR_3V3);
+        RC_ASSERT(hk.distr.VOLT_5V == input.distr.VOLT_5V);
+        RC_ASSERT(hk.distr.CURR_5V == input.distr.CURR_5V);
+        RC_ASSERT(hk.distr.VOLT_VBAT == input.distr.VOLT_VBAT);
+        RC_ASSERT(hk.distr.CURR_VBAT == input.distr.CURR_VBAT);
+        RC_ASSERT(hk.distr.LCL_STATE == input.distr.LCL_STATE);
+        RC_ASSERT(hk.distr.LCL_FLAGB == input.distr.LCL_FLAGB);
 
-        RC_ASSERT(hk.BATC.VOLT_A == input.BATC.VOLT_A);
-        RC_ASSERT(hk.BATC.CHRG_CURR == input.BATC.CHRG_CURR);
-        RC_ASSERT(hk.BATC.DCHRG_CURR == input.BATC.DCHRG_CURR);
-        RC_ASSERT(hk.BATC.TEMP == input.BATC.TEMP);
-        RC_ASSERT(hk.BATC.STATE == input.BATC.STATE);
+        RC_ASSERT(hk.batc.VOLT_A == input.batc.VOLT_A);
+        RC_ASSERT(hk.batc.ChargeCurrent == input.batc.ChargeCurrent);
+        RC_ASSERT(hk.batc.DischargeCurrent == input.batc.DischargeCurrent);
+        RC_ASSERT(hk.batc.Temperature == input.batc.Temperature);
+        RC_ASSERT(hk.batc.State == input.batc.State);
 
-        RC_ASSERT(hk.BP.TEMP_A == input.BP.TEMP_A);
-        RC_ASSERT(hk.BP.TEMP_B == input.BP.TEMP_B);
+        RC_ASSERT(hk.bp.temperatureA == input.bp.temperatureA);
+        RC_ASSERT(hk.bp.temperatureB == input.bp.temperatureB);
 
-        RC_ASSERT(hk.CTRLB.VOLT_3V3d == input.CTRLB.VOLT_3V3d);
+        RC_ASSERT(hk.other.VOLT_3V3d == input.other.VOLT_3V3d);
 
-        RC_ASSERT(hk.CTRLA.ERR == input.CTRLA.ERR);
-        RC_ASSERT(hk.CTRLA.PWR_CYCLES == input.CTRLA.PWR_CYCLES);
-        RC_ASSERT(hk.CTRLA.UPTIME == input.CTRLA.UPTIME);
-        RC_ASSERT(hk.CTRLA.TEMP == input.CTRLA.TEMP);
+        RC_ASSERT(hk.current.errorCode == input.current.errorCode);
+        RC_ASSERT(hk.current.powerCycleCount == input.current.powerCycleCount);
+        RC_ASSERT(hk.current.uptime == input.current.uptime);
+        RC_ASSERT(hk.current.temperature == input.current.temperature);
 
-        RC_ASSERT(hk.DCDC3V3.TEMP == input.DCDC3V3.TEMP);
+        RC_ASSERT(hk.dcdc3V3.temperature == input.dcdc3V3.temperature);
 
-        RC_ASSERT(hk.DCDC5V.TEMP == input.DCDC5V.TEMP);
+        RC_ASSERT(hk.dcdc5V.temperature == input.dcdc5V.temperature);
     }
 
-    RC_GTEST_FIXTURE_PROP(EPSDriverTest, ReadHousekeepingB, (HouseheepingControllerB input))
+    RC_GTEST_FIXTURE_PROP(EPSDriverTest, ReadHousekeepingB, (ControllerBTelemetry input))
     {
         std::array<std::uint8_t, 16> buffer;
         Writer w(buffer);
 
         w.WriteByte(0);
 
-        w.WriteWordLE(input.BP.TEMP_C);
-        w.WriteWordLE(input.BATC.VOLT_B);
-        w.WriteWordLE(input.CTRLA.VOLT_3V3d);
-        w.WriteByte(input.CTRLB.ERR);
-        w.WriteWordLE(input.CTRLB.PWR_CYCLES);
-        w.WriteDoubleWordLE(input.CTRLB.UPTIME);
-        w.WriteWordLE(input.CTRLB.TEMP);
+        w.WriteWordLE(input.bp.temperatureC);
+        w.WriteWordLE(input.batc.voltB);
+        w.WriteWordLE(input.other.VOLT_3V3d);
+        w.WriteByte(input.current.errorCode);
+        w.WriteWordLE(input.current.powerCycleCount);
+        w.WriteDoubleWordLE(input.current.uptime);
+        w.WriteWordLE(input.current.temperature);
 
         RC_ASSERT(w.Status());
 
@@ -397,13 +395,13 @@ namespace
 
         auto hk = result.Value;
 
-        RC_ASSERT(hk.BP.TEMP_C == input.BP.TEMP_C);
+        RC_ASSERT(hk.bp.temperatureC == input.bp.temperatureC);
 
-        RC_ASSERT(hk.CTRLA.VOLT_3V3d == input.CTRLA.VOLT_3V3d);
+        RC_ASSERT(hk.other.VOLT_3V3d == input.other.VOLT_3V3d);
 
-        RC_ASSERT(hk.CTRLB.ERR == input.CTRLB.ERR);
-        RC_ASSERT(hk.CTRLB.PWR_CYCLES == input.CTRLB.PWR_CYCLES);
-        RC_ASSERT(hk.CTRLB.UPTIME == input.CTRLB.UPTIME);
-        RC_ASSERT(hk.CTRLB.TEMP == input.CTRLB.TEMP);
+        RC_ASSERT(hk.current.errorCode == input.current.errorCode);
+        RC_ASSERT(hk.current.powerCycleCount == input.current.powerCycleCount);
+        RC_ASSERT(hk.current.uptime == input.current.uptime);
+        RC_ASSERT(hk.current.temperature == input.current.temperature);
     }
 }

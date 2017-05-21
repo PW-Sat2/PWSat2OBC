@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include <stdbool.h>
 #include <chrono>
 #include <cstdint>
+#include <limits>
 #include <type_traits>
 #include <utility>
 
@@ -517,5 +517,29 @@ inline bool operator!=(BitValue<Underlying, BitsCount>& lhs, BitValue<Underlying
 using uint12_t = BitValue<std::uint16_t, 12>;
 /** @brief 10-bit unsigned integer */
 using uint10_t = BitValue<std::uint16_t, 10>;
+
+template <typename T> struct BitSizeOf
+{
+    static constexpr std::uint32_t Value = std::numeric_limits<T>::digits;
+};
+
+template <typename T, std::uint8_t BitCount> struct BitSizeOf<BitValue<T, BitCount>>
+{
+    static constexpr std::uint32_t Value = BitValue<T, BitCount>::Size;
+};
+
+template <typename T> constexpr std::uint32_t BitLength = BitSizeOf<T>::Value;
+
+template <typename T, typename... Args> struct AggregateSize
+{
+    static constexpr std::uint32_t Value = BitLength<T> + AggregateSize<Args...>::Value;
+};
+
+template <typename T> struct AggregateSize<T>
+{
+    static constexpr std::uint32_t Value = BitLength<T>;
+};
+
+template <typename... Args> constexpr const std::uint32_t Aggregate = AggregateSize<Args...>::Value;
 
 #endif

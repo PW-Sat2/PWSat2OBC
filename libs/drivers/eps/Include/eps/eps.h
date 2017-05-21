@@ -87,12 +87,13 @@ namespace devices
              * @brief Reads housekeeping of controller A
              * @return Housekeeping of controller A
              */
-            Option<hk::HouseheepingControllerA> ReadHousekeepingA();
+            Option<hk::ControllerATelemetry> ReadHousekeepingA();
+
             /**
              * @brief Reads housekeeping of controller B
              * @return Housekeeping of controller B
              */
-            Option<hk::HouseheepingControllerB> ReadHousekeepingB();
+            Option<hk::ControllerBTelemetry> ReadHousekeepingB();
 
             /**
              * @brief Performs power cycle by controller A
@@ -146,6 +147,7 @@ namespace devices
 
             /** @brief Error counter type */
             using ErrorCounter = error_counter::ErrorCounter<5>;
+
           private:
             /** @brief Error counter */
             ErrorCounter _error;

@@ -47,7 +47,7 @@ namespace devices
         {
         }
 
-        Option<hk::HouseheepingControllerA> EPSDriver::ReadHousekeepingA()
+        Option<hk::ControllerATelemetry> EPSDriver::ReadHousekeepingA()
         {
             std::array<std::uint8_t, 1> command{0x0};
             std::array<std::uint8_t, 72> response;
@@ -57,24 +57,24 @@ namespace devices
             if (result != I2CResult::OK)
             {
                 this->_error.Failure();
-                return None<hk::HouseheepingControllerA>();
+                return None<hk::ControllerATelemetry>();
             }
 
-            hk::HouseheepingControllerA housekeeping;
+            hk::ControllerATelemetry housekeeping;
             Reader r(response);
             r.ReadByte(); // error flag register
 
             if (!housekeeping.ReadFrom(r))
             {
                 this->_error.Failure();
-                return None<hk::HouseheepingControllerA>();
+                return None<hk::ControllerATelemetry>();
             }
 
             this->_error.Success();
             return Some(housekeeping);
         }
 
-        Option<hk::HouseheepingControllerB> EPSDriver::ReadHousekeepingB()
+        Option<hk::ControllerBTelemetry> EPSDriver::ReadHousekeepingB()
         {
             std::array<std::uint8_t, 1> command{0x0};
             std::array<std::uint8_t, 16> response;
@@ -84,10 +84,10 @@ namespace devices
             if (result != I2CResult::OK)
             {
                 this->_error.Failure();
-                return None<hk::HouseheepingControllerB>();
+                return None<hk::ControllerBTelemetry>();
             }
 
-            hk::HouseheepingControllerB housekeeping;
+            hk::ControllerBTelemetry housekeeping;
             Reader r(response);
 
             r.ReadByte(); // error flag register
@@ -95,7 +95,7 @@ namespace devices
             if (!housekeeping.ReadFrom(r))
             {
                 this->_error.Failure();
-                return None<hk::HouseheepingControllerB>();
+                return None<hk::ControllerBTelemetry>();
             }
 
             this->_error.Success();

@@ -6,6 +6,7 @@
 #include <cstdint>
 #include "fwd.hpp"
 #include "gsl/span"
+#include "system.h"
 
 /**
  * @brief Buffer bit writer
@@ -138,6 +139,13 @@ class BitWriter
     template <typename Underlying, std::uint8_t BitsCount> bool Write(const BitValue<Underlying, BitsCount>& value);
 
     /**
+     * @brief Appends generic value to the buffer and moves the current position to the next free bit.
+     * @param[in] value Value that should be added to writer output.
+     * @return Operation status.
+     */
+    template <typename T> bool Write(T value);
+
+    /**
      * @brief Returns view for used part of buffer
      * @return Span covering used part of buffer including last partially used byte.
      */
@@ -233,6 +241,11 @@ class BitWriter
 template <typename Underlying, std::uint8_t BitsCount> inline bool BitWriter::Write(const BitValue<Underlying, BitsCount>& value)
 {
     return Write(value.Value(), BitsCount);
+}
+
+template <typename T> inline bool BitWriter::Write(T value)
+{
+    return Write(num(value));
 }
 
 inline void BitWriter::Initialize(gsl::span<std::uint8_t> view)
