@@ -34,6 +34,11 @@ namespace services
              * @return Operation result
              */
             virtual OSResult ClearDevice(yaffs_dev* device) = 0;
+
+            /**
+             * @brief Syncs file system (speeds up next mount)
+             */
+            virtual void Sync() = 0;
         };
 
         /**
@@ -65,10 +70,7 @@ namespace services
 
             virtual OSResult ClearDevice(yaffs_dev* device) override;
 
-            /**
-             * @brief Syncs file system (speeds up next mount)
-             */
-            void Sync();
+            virtual void Sync() override;
 
             virtual OSResult AddDeviceAndMount(yaffs_dev* device) override;
         };
