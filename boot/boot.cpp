@@ -138,6 +138,8 @@ void ProceedWithBooting()
         BOOT_decBootCounter();
     }
 
+    GPIO_PinModeSet(gpioPortF, 9, gpioModeDisabled, 1);
+
     auto bootAddress = LoadApplication(bootIndex);
     BootToAddress(bootAddress);
 }

@@ -9,6 +9,7 @@ add_library(${NAME} STATIC ${SOURCES})
 target_link_libraries(${NAME} 
 	emlib
 	platform
+	gpio
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

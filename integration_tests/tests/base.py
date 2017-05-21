@@ -1,3 +1,4 @@
+import logging
 import unittest
 
 from system import System
@@ -13,6 +14,9 @@ class BaseTest(unittest.TestCase):
         self.auto_power_on = True
 
     def setUp(self):
+        log = logging.getLogger("BaseTest")
+        log.info("Starting test setup")
+
         obc_com = config['OBC_COM']
         mock_com = config['MOCK_COM']
         gpio_com = config['GPIO_COM']
@@ -32,12 +36,18 @@ class BaseTest(unittest.TestCase):
         if self.auto_power_on:
             self.system.obc.wait_to_start()
 
+        log.info("Test setup finished")
+
     def tearDown(self):
+        log = logging.getLogger("BaseTest")
+        log.info("Starting test tear down")
         self.system.obc.sync_fs()
 
         self.system.close()
         self.gpio.close()
         extensions.tear_down(test_id=self.id())
+
+        log.info("Test tear down finished")
 
     def power_on_obc(self, clean_state=False):
         self.system.obc.power_on(clean_state=clean_state)
