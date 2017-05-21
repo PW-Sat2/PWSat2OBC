@@ -35,7 +35,7 @@
 #include "swo/swo.h"
 #include "system.h"
 #include "terminal.h"
-#include "watchdog/watchdog.hpp"
+#include "watchdog/internal.hpp"
 
 using services::time::TimeProvider;
 using namespace std::chrono_literals;
@@ -67,7 +67,6 @@ extern "C" void vApplicationIdleHook(void)
 
 extern "C" void vApplicationTickHook(void)
 {
-    drivers::watchdog::InternalWatchdog::Kick();
 }
 
 void I2C0_IRQHandler(void)
