@@ -73,7 +73,11 @@ namespace devices
             auto status2 = _fm25wDrivers[1]->ReadStatus();
             auto status3 = _fm25wDrivers[2]->ReadStatus();
 
-            return Vote(status1.Value, status2.Value, status3.Value);
+            auto votingValue = Vote(status1, status2, status3);
+            if (!votingValue.HasValue)
+                return None<Status>();
+
+            return votingValue.Value;
         }
 
         void RedundantFM25WDriver::Read(Address address, gsl::span<uint8_t> outputBuffer)
