@@ -1,7 +1,7 @@
 set(NAME watchdog)
 
 set(SOURCES
-    watchdog.cpp
+    internal.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
