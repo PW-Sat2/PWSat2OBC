@@ -1,7 +1,7 @@
-#include "watchdog/watchdog.hpp"
 #include <FreeRTOS.h>
 #include <cstdint>
 #include "obc.h"
+#include "watchdog/internal.hpp"
 
 using drivers::watchdog::InternalWatchdog;
 
