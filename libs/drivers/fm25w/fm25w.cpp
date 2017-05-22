@@ -1,5 +1,6 @@
 #include "fm25w.hpp"
 #include <array>
+#include <cstring>
 #include "base/writer.h"
 #include "redundancy.hpp"
 #include "utils.h"
@@ -107,7 +108,9 @@ namespace devices
             _fm25wDrivers[0]->Read(address, normalizedOutputBuffer);
             _fm25wDrivers[1]->Read(address, normalizedRedundantBuffer1);
 
-            if (normalizedOutputBuffer == normalizedRedundantBuffer1)
+            auto compareResult = memcmp(normalizedOutputBuffer.data(), normalizedRedundantBuffer1.data(), bufferLength) == 0;
+
+            if (compareResult)
             {
                 return;
             }
