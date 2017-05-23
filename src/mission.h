@@ -9,6 +9,7 @@
 #include "mission/antenna_task.hpp"
 #include "mission/comm.hpp"
 #include "mission/experiments.hpp"
+#include "mission/fs.hpp"
 #include "mission/main.hpp"
 #include "mission/sail.hpp"
 #include "mission/telemetry.hpp"
@@ -27,7 +28,8 @@ namespace mission
         adcs::AdcsPrimaryTask,
         mission::experiments::MissionExperimentComponent,
         mission::BeaconUpdate,
-        mission::PeristentStateSave //
+        mission::PeristentStateSave, //
+        FileSystemTask               //
         >
         ObcMission;
 }

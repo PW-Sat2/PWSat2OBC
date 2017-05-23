@@ -6,6 +6,7 @@ set(SOURCES
   MissionPlan/TimeTaskTest.cpp
   MissionPlan/MissionLoopTest.cpp
   MissionPlan/TelemetryTest.cpp
+  MissionPlan/FileSystemTaskTest.cpp
   MissionPlan/antenna/DeployAntennasTest.cpp
   MissionPlan/antenna/AntennaMissionStateTest.cpp
   MissionPlan/beacon/BeaconUpdateTest.cpp
@@ -29,6 +30,7 @@ target_link_libraries(${NAME}
     mission_adcs
     mission_beacon
     mission_telemetry
+    mission_fs
     exp_fibo
     exp_adcs
     unit_tests_base
