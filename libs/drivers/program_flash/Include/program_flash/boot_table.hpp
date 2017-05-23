@@ -154,8 +154,9 @@ namespace program_flash
 
         /**
          * @brief Initializes boot table
+         * @return Operation result
          */
-        void Initialize();
+        OSResult Initialize();
 
         /**
          * @brief Returns flash device ID

@@ -10,16 +10,18 @@ namespace program_flash
     {
     }
 
-    void BootTable::Initialize()
+    OSResult BootTable::Initialize()
     {
         this->_deviceId = this->_flash.DeviceId();
         this->_bootConfig = this->_flash.BootConfig();
 
-        while (this->_deviceId != 0x00530000 || this->_bootConfig != 0x00000002)
-            ;
+        if (this->_deviceId != 0x00530000 || this->_bootConfig != 0x00000002)
+            return OSResult::NotSupported;
 
         this->_bootIndex = this->_flash.At(0);
         this->_bootCounter = this->_flash.At(0x00002000);
+
+        return OSResult::Success;
     }
 
     ProgramEntry::ProgramEntry(IFlashDriver& flash, std::uint8_t index)
