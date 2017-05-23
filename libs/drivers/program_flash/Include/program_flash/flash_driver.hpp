@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <gsl/span>
+#include "base/os.h"
 #include "utils.h"
 
 namespace program_flash
@@ -231,9 +232,17 @@ namespace program_flash
         static constexpr std::size_t LargeSectorSize = 64_KB;
 
       private:
+        /**
+         * @brief Waits for device to become ready
+         * @param offset Offset used to select bank which needs to become ready
+         * @return true if device is idle
+         */
+        bool WaitForIdle(std::size_t offset);
+
+        /** @brief Synchronization */
+        OSSemaphoreHandle _sync;
         /** @brief Pointer for memory area mapped to flash device */
         std::uint8_t* _flashBase;
-
         /** @brief Device ID */
         std::uint32_t _deviceId;
         /** @brief Boot config */
