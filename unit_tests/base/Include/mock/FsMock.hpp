@@ -16,6 +16,12 @@ struct OpenedFile
     gsl::span<std::uint8_t>::iterator Position;
 };
 
+struct OpenedDir
+{
+    std::string path;
+    std::map<std::string, gsl::span<std::uint8_t>>::iterator Position;
+};
+
 class FsMock : public services::fs::IFileSystem
 {
   public:
@@ -38,6 +44,7 @@ class FsMock : public services::fs::IFileSystem
     MOCK_METHOD1(MakeDirectory, OSResult(const char*));
     MOCK_METHOD1(Exists, bool(const char*));
     MOCK_METHOD1(GetFileSize, services::fs::FileSize(services::fs::FileHandle));
+    MOCK_METHOD2(GetFileSize, services::fs::FileSize(const char* dir, const char* file));
     MOCK_METHOD3(Seek, OSResult(services::fs::FileHandle file, services::fs::SeekOrigin origin, services::fs::FileSize offset));
 
     void AddFile(const char* path, gsl::span<std::uint8_t> contents);
@@ -46,6 +53,9 @@ class FsMock : public services::fs::IFileSystem
     std::map<std::string, gsl::span<std::uint8_t>> _files;
     services::fs::FileHandle _nextHandle;
     std::map<services::fs::FileHandle, OpenedFile> _opened;
+
+    std::uint32_t _nextDirHandle;
+    std::map<services::fs::DirectoryHandle, OpenedDir> _openedDirs;
 };
 
 services::fs::FileOpenResult MakeOpenedFile(int handle);

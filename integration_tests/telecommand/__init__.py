@@ -8,8 +8,8 @@ __all__ = [
     'EnterIdleState',
     'RemoveFile',
     'PerformDetumblingExperiment',
-    'PerformDetumblingExperiment',
     'EraseBootTableEntry',
     'WriteProgramPart',
-    'FinalizeProgramEntry'
+    'FinalizeProgramEntry',
+    'ListFiles'
 ]

@@ -136,7 +136,7 @@ namespace obc
 
             if (!r.Status() || terminationByte != 0)
             {
-                LOG(LOG_LEVEL_ERROR, "Malformed request");
+                LOG(LOG_LEVEL_ERROR, "Remove file: malformed request");
                 response.PayloadWriter().WriteByte(static_cast<uint8_t>(OSResult::InvalidArgument));
                 response.PayloadWriter().WriteByte(0);
                 transmitter.SendFrame(response.Frame());
@@ -160,6 +160,80 @@ namespace obc
             response.PayloadWriter().WriteArray(pathSpan);
 
             transmitter.SendFrame(response.Frame());
+        }
+
+        ListFilesTelecommand::ListFilesTelecommand(services::fs::IFileSystem& fs) : _fs(fs)
+        {
+        }
+
+        void ListFilesTelecommand::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
+        {
+            Reader r(parameters);
+
+            auto correlationId = r.ReadByte();
+            auto path = reinterpret_cast<const char*>(r.ReadToEnd().data());
+
+            if (!r.Status() || parameters[parameters.size() - 1] != 0)
+            {
+                DownlinkFrame response(DownlinkAPID::Operation, 0);
+                response.PayloadWriter().WriteByte(correlationId);
+                LOG(LOG_LEVEL_ERROR, "List files: malformed request");
+                response.PayloadWriter().WriteByte(static_cast<uint8_t>(OSResult::InvalidArgument));
+
+                transmitter.SendFrame(response.Frame());
+                return;
+            }
+
+            auto dir = this->_fs.OpenDirectory(path);
+
+            if (!dir)
+            {
+                DownlinkFrame response(DownlinkAPID::Operation, 0);
+
+                auto& writer = response.PayloadWriter();
+                writer.WriteByte(correlationId);
+                writer.WriteByte(num(dir.Status));
+                transmitter.SendFrame(response.Frame());
+                return;
+            }
+
+            bool moreFiles = true;
+
+            char* name = this->_fs.ReadDirectory(dir.Result);
+
+            std::uint32_t seq = 0;
+
+            while (moreFiles)
+            {
+                DownlinkFrame response(DownlinkAPID::Operation, seq);
+
+                auto& writer = response.PayloadWriter();
+                writer.WriteByte(correlationId);
+
+                while (true)
+                {
+                    if (name == nullptr)
+                    {
+                        moreFiles = false;
+                        break;
+                    }
+
+                    auto nameLen = strlen(name);
+                    if (writer.RemainingSize() < static_cast<std::int32_t>(nameLen + 5))
+                        break;
+
+                    writer.WriteArray(gsl::make_span(reinterpret_cast<uint8_t*>(name), nameLen));
+                    writer.WriteByte(0);
+                    writer.WriteDoubleWordLE(this->_fs.GetFileSize(path, name));
+
+                    name = this->_fs.ReadDirectory(dir.Result);
+                }
+
+                transmitter.SendFrame(response.Frame());
+                seq++;
+            }
+
+            this->_fs.CloseDirectory(dir.Result);
         }
     }
 }
