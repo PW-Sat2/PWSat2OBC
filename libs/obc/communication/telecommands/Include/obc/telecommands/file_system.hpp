@@ -121,6 +121,29 @@ namespace obc
             /** @brief File system */
             services::fs::IFileSystem& _fs;
         };
+
+        /**
+         * @brief List files in given path
+         * @ingroup telecommands
+         * @telecommand
+         *
+         * Command code: 0xAD
+         * Parameters:
+         *  - 8-bit - correlation id
+         *  - string - path to directory
+         *  - 8-bit - byte '0'
+         */
+        class ListFilesTelecommand : public telecommunication::uplink::Telecommand<0x0F>
+        {
+          public:
+            ListFilesTelecommand(services::fs::IFileSystem& fs);
+
+            virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
+
+          private:
+            /** @brief File system */
+            services::fs::IFileSystem& _fs;
+        };
     }
 }
 

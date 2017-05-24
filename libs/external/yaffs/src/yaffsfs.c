@@ -31,15 +31,6 @@
 #define YAFFSFS_RW_SHIFT (13)
 #define YAFFSFS_RW_SIZE (1 << YAFFSFS_RW_SHIFT)
 
-/* Some forward references */
-static struct yaffs_obj* yaffsfs_FindObject(struct yaffs_obj* relativeDirectory,
-    const YCHAR* path,
-    int symDepth,
-    int getEquiv,
-    struct yaffs_obj** dirOut,
-    int* notDir,
-    int* loop);
-
 static void yaffsfs_RemoveObjectCallback(struct yaffs_obj* obj);
 static yaffs_DIR* yaffsfs_opendir_reldir_no_lock(struct yaffs_obj* reldir, const YCHAR* dirname);
 static int yaffsfs_closedir_no_lock(yaffs_DIR* dirent);
@@ -764,13 +755,8 @@ static struct yaffs_obj* yaffsfs_FindDirectory(
 /*
  * yaffsfs_FindObject turns a path for an existing object into the object
  */
-static struct yaffs_obj* yaffsfs_FindObject(struct yaffs_obj* relDir,
-    const YCHAR* path,
-    int symDepth,
-    int getEquiv,
-    struct yaffs_obj** dirOut,
-    int* notDir,
-    int* loop)
+struct yaffs_obj* yaffsfs_FindObject(
+    struct yaffs_obj* relDir, const YCHAR* path, int symDepth, int getEquiv, struct yaffs_obj** dirOut, int* notDir, int* loop)
 {
     struct yaffs_obj* dir;
     struct yaffs_obj* obj;
@@ -1001,8 +987,8 @@ int yaffs_open_sharing_reldir(struct yaffs_obj* reldir, const YCHAR* path, int o
                     }
                 }
 
-                if ((!sharedReadAllowed && readRequested) || (!shareRead && alreadyReading) ||
-                    (!sharedWriteAllowed && writeRequested) || (!shareWrite && alreadyWriting))
+                if ((!sharedReadAllowed && readRequested) || (!shareRead && alreadyReading) || (!sharedWriteAllowed && writeRequested) ||
+                    (!shareWrite && alreadyWriting))
                 {
                     openDenied = __LINE__;
                     yaffsfs_SetError(-EBUSY);
@@ -1266,8 +1252,7 @@ static int yaffsfs_do_read(int handle, void* vbuf, unsigned int nbyte, int isPre
 
         endPos = pos + nbyte;
 
-        if (pos < 0 || pos > YAFFS_MAX_FILE_SIZE || nbyte > YAFFS_MAX_FILE_SIZE || endPos < 0 ||
-            endPos > YAFFS_MAX_FILE_SIZE)
+        if (pos < 0 || pos > YAFFS_MAX_FILE_SIZE || nbyte > YAFFS_MAX_FILE_SIZE || endPos < 0 || endPos > YAFFS_MAX_FILE_SIZE)
         {
             totalRead = -1;
             nbyte = 0;
@@ -1386,8 +1371,7 @@ static int yaffsfs_do_write(int handle, const void* vbuf, unsigned int nbyte, in
         pos = startPos;
         endPos = pos + nbyte;
 
-        if (pos < 0 || pos > YAFFS_MAX_FILE_SIZE || nbyte > YAFFS_MAX_FILE_SIZE || endPos < 0 ||
-            endPos > YAFFS_MAX_FILE_SIZE)
+        if (pos < 0 || pos > YAFFS_MAX_FILE_SIZE || nbyte > YAFFS_MAX_FILE_SIZE || endPos < 0 || endPos > YAFFS_MAX_FILE_SIZE)
         {
             totalWritten = -1;
             nbyte = 0;
@@ -1716,8 +1700,7 @@ int yaffs_fgetfl(int fd, int* flags)
 
 static int rename_file_over_dir(struct yaffs_obj* obj, struct yaffs_obj* newobj)
 {
-    if (obj && obj->variant_type != YAFFS_OBJECT_TYPE_DIRECTORY && newobj &&
-        newobj->variant_type == YAFFS_OBJECT_TYPE_DIRECTORY)
+    if (obj && obj->variant_type != YAFFS_OBJECT_TYPE_DIRECTORY && newobj && newobj->variant_type == YAFFS_OBJECT_TYPE_DIRECTORY)
         return 1;
     else
         return 0;
@@ -1725,8 +1708,7 @@ static int rename_file_over_dir(struct yaffs_obj* obj, struct yaffs_obj* newobj)
 
 static int rename_dir_over_file(struct yaffs_obj* obj, struct yaffs_obj* newobj)
 {
-    if (obj && obj->variant_type == YAFFS_OBJECT_TYPE_DIRECTORY && newobj &&
-        newobj->variant_type != YAFFS_OBJECT_TYPE_DIRECTORY)
+    if (obj && obj->variant_type == YAFFS_OBJECT_TYPE_DIRECTORY && newobj && newobj->variant_type != YAFFS_OBJECT_TYPE_DIRECTORY)
         return 1;
     else
         return 0;
@@ -1914,8 +1896,7 @@ static int yaffsfs_DoStat(struct yaffs_obj* obj, struct yaffs_stat* buf)
     return retVal;
 }
 
-static int yaffsfs_DoStatOrLStat_reldir(
-    struct yaffs_obj* reldir, const YCHAR* path, struct yaffs_stat* buf, int doLStat)
+static int yaffsfs_DoStatOrLStat_reldir(struct yaffs_obj* reldir, const YCHAR* path, struct yaffs_stat* buf, int doLStat)
 {
     struct yaffs_obj* obj = NULL;
     struct yaffs_obj* dir = NULL;
@@ -2129,8 +2110,7 @@ static int yaffs_do_setxattr_reldir(
 
     int retVal = -1;
 
-    if (yaffsfs_CheckMemRegion(path, 0, 0) < 0 || yaffsfs_CheckMemRegion(name, 0, 0) < 0 ||
-        yaffsfs_CheckMemRegion(data, size, 0) < 0)
+    if (yaffsfs_CheckMemRegion(path, 0, 0) < 0 || yaffsfs_CheckMemRegion(name, 0, 0) < 0 || yaffsfs_CheckMemRegion(data, size, 0) < 0)
     {
         yaffsfs_SetError(-EFAULT);
         return -1;
@@ -2170,14 +2150,12 @@ static int yaffs_do_setxattr_reldir(
     return retVal;
 }
 
-int yaffs_setxattr_reldir(
-    struct yaffs_obj* reldir, const YCHAR* path, const char* name, const void* data, int size, int flags)
+int yaffs_setxattr_reldir(struct yaffs_obj* reldir, const YCHAR* path, const char* name, const void* data, int size, int flags)
 {
     return yaffs_do_setxattr_reldir(reldir, path, name, data, size, flags, 1);
 }
 
-int yaffs_setxattr_reldev(
-    struct yaffs_dev* dev, const YCHAR* path, const char* name, const void* data, int size, int flags)
+int yaffs_setxattr_reldev(struct yaffs_dev* dev, const YCHAR* path, const char* name, const void* data, int size, int flags)
 {
     return yaffs_setxattr_reldir(ROOT_DIR(dev), path, name, data, size, flags);
 }
@@ -2187,14 +2165,12 @@ int yaffs_setxattr(const YCHAR* path, const char* name, const void* data, int si
     return yaffs_setxattr_reldir(NULL, path, name, data, size, flags);
 }
 
-int yaffs_lsetxattr_reldir(
-    struct yaffs_obj* reldir, const YCHAR* path, const char* name, const void* data, int size, int flags)
+int yaffs_lsetxattr_reldir(struct yaffs_obj* reldir, const YCHAR* path, const char* name, const void* data, int size, int flags)
 {
     return yaffs_do_setxattr_reldir(reldir, path, name, data, size, flags, 0);
 }
 
-int yaffs_lsetxattr_reldev(
-    struct yaffs_dev* dev, const YCHAR* path, const char* name, const void* data, int size, int flags)
+int yaffs_lsetxattr_reldev(struct yaffs_dev* dev, const YCHAR* path, const char* name, const void* data, int size, int flags)
 {
     return yaffs_lsetxattr_reldir(ROOT_DIR(dev), path, name, data, size, flags);
 }
@@ -2236,8 +2212,7 @@ int yaffs_fsetxattr(int fd, const char* name, const void* data, int size, int fl
     return retVal;
 }
 
-static int yaffs_do_getxattr_reldir(
-    struct yaffs_obj* reldir, const YCHAR* path, const char* name, void* data, int size, int follow)
+static int yaffs_do_getxattr_reldir(struct yaffs_obj* reldir, const YCHAR* path, const char* name, void* data, int size, int follow)
 {
     struct yaffs_obj* obj;
     struct yaffs_obj* dir;
@@ -2245,8 +2220,7 @@ static int yaffs_do_getxattr_reldir(
     int notDir = 0;
     int loop = 0;
 
-    if (yaffsfs_CheckMemRegion(path, 0, 0) < 0 || yaffsfs_CheckMemRegion(name, 0, 0) < 0 ||
-        yaffsfs_CheckMemRegion(data, size, 1) < 0)
+    if (yaffsfs_CheckMemRegion(path, 0, 0) < 0 || yaffsfs_CheckMemRegion(name, 0, 0) < 0 || yaffsfs_CheckMemRegion(data, size, 1) < 0)
     {
         yaffsfs_SetError(-EFAULT);
         return -1;
@@ -3296,8 +3270,7 @@ int yaffs_unmount(const YCHAR* path)
     return yaffs_unmount2(path, 0);
 }
 
-int yaffs_format_common(
-    struct yaffs_dev* dev, const YCHAR* path, int unmount_flag, int force_unmount_flag, int remount_flag)
+int yaffs_format_common(struct yaffs_dev* dev, const YCHAR* path, int unmount_flag, int force_unmount_flag, int remount_flag)
 {
     int retVal = 0;
     int result;
