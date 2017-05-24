@@ -6,5 +6,6 @@ __all__ = [
     'DownloadFile',
     'EnterIdleState',
     'RemoveFile',
-    'PerformDetumblingExperiment'
+    'PerformDetumblingExperiment',
+    'ListFiles'
 ]

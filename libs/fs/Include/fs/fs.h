@@ -233,6 +233,14 @@ namespace services
             virtual FileSize GetFileSize(FileHandle file) = 0;
 
             /**
+             * @brief Gets file size
+             * @param dir Directory containing file
+             * @param file File name
+             * @return Size of file
+             */
+            virtual FileSize GetFileSize(const char* dir, const char* file) = 0;
+
+            /**
              * @brief Changes position in file
              * @param file File handle
              * @param origin Point from which seeking starts

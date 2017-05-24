@@ -114,7 +114,8 @@ namespace obc
         obc::telecommands::EnterIdleStateTelecommand,
         obc::telecommands::RemoveFileTelecommand,
         obc::telecommands::PerformDetumblingExperiment,
-        obc::telecommands::AbortExperiment //
+        obc::telecommands::AbortExperiment,     //
+        obc::telecommands::ListFilesTelecommand //
         >;
 
     /**

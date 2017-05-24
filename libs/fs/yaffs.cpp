@@ -238,6 +238,30 @@ FileSize YaffsFileSystem::GetFileSize(FileHandle file)
     return stat.st_size;
 }
 
+extern "C" struct yaffs_obj* yaffsfs_FindObject(
+    struct yaffs_obj* relDir, const YCHAR* path, int symDepth, int getEquiv, struct yaffs_obj** dirOut, int* notDir, int* loop);
+
+FileSize YaffsFileSystem::GetFileSize(const char* dir, const char* file)
+{
+    if (dir == nullptr)
+    {
+        struct yaffs_stat stat;
+        yaffs_stat(file, &stat);
+
+        return stat.st_size;
+    }
+
+    yaffs_obj* dirObject = yaffsfs_FindObject(nullptr, dir, 0, 1, nullptr, nullptr, nullptr);
+
+    if (dirObject == nullptr)
+        return -1;
+
+    struct yaffs_stat stat;
+    yaffs_stat_reldir(dirObject, file, &stat);
+
+    return stat.st_size;
+}
+
 OSResult YaffsFileSystem::Seek(FileHandle file, SeekOrigin origin, FileSize offset)
 {
     std::int16_t whence;
