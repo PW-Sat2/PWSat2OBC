@@ -46,3 +46,4 @@ set_target_properties(${NAME} PROPERTIES COMPILE_FLAGS "\
     -Wno-unused-but-set-variable \
 ")
 
+target_eclipse_debug_configs(${NAME} Run Attach)
