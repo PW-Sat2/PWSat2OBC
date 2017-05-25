@@ -67,6 +67,7 @@ static bool StateGet(int argc, char* argv[])
 
         case StateType::TimeConfig:
         {
+            ReaderLock(Mission.GetState().PersistentState.Lock);
             const auto config = Mission.GetState().PersistentState.Get<state::TimeCorrectionConfiguration>();
             Main.terminal.Printf("%d %d\n", static_cast<int>(config.MissionTimeFactor()), static_cast<int>(config.ExternalTimeFactor()));
             return true;
@@ -131,6 +132,7 @@ static bool StateSet(int argc, char* argv[])
             char* tail;
             auto internalFactor = static_cast<std::int16_t>(strtol(argv[1], &tail, 10));
             auto externalFactor = static_cast<std::int16_t>(strtol(argv[2], &tail, 10));
+            WriterLock(persistentState.Lock);
             persistentState.Set(state::TimeCorrectionConfiguration(internalFactor, externalFactor));
             return true;
         }

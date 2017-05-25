@@ -19,6 +19,153 @@ bool Lock::operator()()
     return this->_taken;
 }
 
+ReaderWriterLock::ReaderWriterLock()
+    : resourceSemaphore(System::CreateBinarySemaphore()),  //
+      readCountSemaphore(System::CreateBinarySemaphore()), //
+      serviceSemaphore(System::CreateBinarySemaphore()),   //
+      readCount(0),                                        //
+      isWriterLockAcquired(false)                          //
+{
+    System::GiveSemaphore(resourceSemaphore);
+    System::GiveSemaphore(readCountSemaphore);
+    System::GiveSemaphore(serviceSemaphore);
+}
+
+bool ReaderWriterLock::AcquireReaderLock()
+{
+    if (!OS_RESULT_SUCCEEDED(System::TakeSemaphore(serviceSemaphore, InfiniteTimeout)))
+    {
+        return false;
+    }
+
+    if (!OS_RESULT_SUCCEEDED(System::TakeSemaphore(readCountSemaphore, InfiniteTimeout)))
+    {
+        System::GiveSemaphore(serviceSemaphore);
+        return false;
+    }
+
+    if (readCount == 0)
+    {
+        if (!OS_RESULT_SUCCEEDED(System::TakeSemaphore(resourceSemaphore, InfiniteTimeout)))
+        {
+            System::GiveSemaphore(serviceSemaphore);
+            System::GiveSemaphore(readCountSemaphore);
+            return false;
+        }
+    }
+
+    readCount++;
+
+    System::GiveSemaphore(serviceSemaphore);
+    System::GiveSemaphore(readCountSemaphore);
+
+    return true;
+}
+
+bool ReaderWriterLock::AcquireWriterLock()
+{
+    if (!OS_RESULT_SUCCEEDED(System::TakeSemaphore(serviceSemaphore, InfiniteTimeout)))
+    {
+        return false;
+    }
+
+    if (!OS_RESULT_SUCCEEDED(System::TakeSemaphore(resourceSemaphore, InfiniteTimeout)))
+    {
+        System::GiveSemaphore(serviceSemaphore);
+        return false;
+    }
+
+    isWriterLockAcquired = true;
+
+    System::GiveSemaphore(serviceSemaphore);
+
+    return true;
+}
+
+bool ReaderWriterLock::ReleaseReaderLock()
+{
+    if (readCount == 0)
+    {
+        return false;
+    }
+
+    if (!OS_RESULT_SUCCEEDED(System::TakeSemaphore(readCountSemaphore, InfiniteTimeout)))
+    {
+        return false;
+    }
+
+    readCount--;
+
+    if (readCount == 0)
+    {
+        System::GiveSemaphore(resourceSemaphore);
+    }
+
+    System::GiveSemaphore(readCountSemaphore);
+
+    return true;
+}
+
+void ReaderWriterLock::ReleaseWriterLock()
+{
+    if (!isWriterLockAcquired)
+    {
+        return;
+    }
+
+    System::GiveSemaphore(resourceSemaphore);
+}
+
+bool ReaderWriterLock::IsReaderLockAcquired() const
+{
+    return readCount > 0;
+}
+
+bool ReaderWriterLock::IsWriterLockAcquired() const
+{
+    return isWriterLockAcquired;
+}
+
+ReaderLock::ReaderLock(ReaderWriterLock& readerWriterLock) : readerWriterLock(readerWriterLock)
+{
+    taken = readerWriterLock.AcquireReaderLock();
+}
+
+ReaderLock::~ReaderLock()
+{
+    if (!taken)
+    {
+        return;
+    }
+
+    readerWriterLock.ReleaseReaderLock();
+}
+
+bool ReaderLock::operator()()
+{
+    return taken;
+}
+
+WriterLock::WriterLock(ReaderWriterLock& readerWriterLock) : readerWriterLock(readerWriterLock)
+{
+    taken = readerWriterLock.AcquireWriterLock();
+}
+
+WriterLock::~WriterLock()
+{
+    if (!taken)
+    {
+        return;
+    }
+
+    readerWriterLock.ReleaseWriterLock();
+}
+
+bool WriterLock::operator()()
+{
+    return taken;
+}
+
 Timeout::Timeout(std::chrono::milliseconds timeout) : _expireAt(System::GetUptime() + timeout)
 {
 }
