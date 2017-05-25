@@ -7,6 +7,7 @@
 #include <tuple>
 #include <type_traits>
 #include "base/fwd.hpp"
+#include "base/os.h"
 #include "traits.hpp"
 
 /**
@@ -131,6 +132,9 @@ namespace state
             "StatePolicy should have bool IsModified() method.");
 
         static_assert(::state::details::CheckObject<Parts...>::Value, "Persistent state part verification failed.");
+
+        /** @brief Reader-Writer lock object for synchronization */
+        static ReaderWriterLock Lock;
 
         /**
          * @brief Return reference to selected part of the persistent state.
@@ -289,6 +293,8 @@ namespace state
     {
         return Calculate<Parts...>::Size;
     }
+
+    template <typename StatePolicy, typename... Parts> ReaderWriterLock PersistentState<StatePolicy, Parts...>::Lock;
 }
 
 #endif

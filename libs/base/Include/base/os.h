@@ -593,6 +593,186 @@ inline Lock::operator bool()
 }
 
 /**
+ * @brief Reader-Writer lock state.
+ */
+struct ReaderWriterLock final : private NotCopyable, private NotMoveable
+{
+  public:
+    /**
+     * @brief Constructs @ref ReaderWriterLock object
+     */
+    ReaderWriterLock();
+
+    /**
+     * @brief Acquires reader lock
+     * @param[in] timeout Timeout
+     * @return true if acquire was successful
+     *
+     * May wait up to 3 times timeout value, due to multiple semaphore locks.
+     */
+    bool AcquireReaderLock(std::chrono::milliseconds timeout);
+
+    /**
+     * @brief Acquires writer lock
+     * @param[in] timeout Timeout
+     * @return true if acquire was successful
+     *
+     * May wait up to 2 times timeout value, due to multiple semaphore locks.
+     */
+    bool AcquireWriterLock(std::chrono::milliseconds timeout);
+
+    /**
+     * @brief Releases reader lock
+     * @param[in] timeout Timeout
+     * @return true if release was successful
+     */
+    bool ReleaseReaderLock(std::chrono::milliseconds timeout);
+
+    /**
+     * @brief Releases writer lock
+     * @return true if release was successful
+     */
+    bool ReleaseWriterLock();
+
+    /**
+     * @brief Returns true when reader lock is currently acquired
+     * @return true if lock is acquired
+     */
+    bool IsReaderLockAcquired() const;
+
+    /**
+     * @brief Returns true when writer lock is currently acquired
+     * @return true if lock is acquired
+     */
+    bool IsWriterLockAcquired() const;
+
+  private:
+    /** @brief Semaphore used to synchronize access to the resource */
+    OSSemaphoreHandle resourceSemaphore;
+
+    /** @brief Semaphore used to synchronize access to the ReadCount field */
+    OSSemaphoreHandle readCountSemaphore;
+
+    /** @brief Semaphore used to synchronize waiting queue */
+    OSSemaphoreHandle serviceSemaphore;
+
+    /** @brief Counter of current read locks */
+    int readCount;
+
+    /** @brief Flag indicating whether writer lock is currently acquired */
+    bool isWriterLockAcquired;
+};
+
+/**
+ * @brief Helper reader lock class.
+ *
+ * When created it locks ReaderWriterLock for reading and releases it at the end of the scope
+ *
+ * Usage:
+ *
+ * @code
+ * {
+ * 	ReaderLock lock(this->readerWriterLock);
+ *
+ * 	if(!lock())
+ * 	{
+ * 		// take failed
+ * 		return;
+ * 	}
+ *
+ * 	// do something
+ * } // lock release at the end of the scope
+ * @endcode
+ */
+class ReaderLock final : private NotCopyable, private NotMoveable
+{
+  public:
+    /**
+     * @brief Constructs @ref ReaderLock object and tries to lock ReaderWriterLock for reading
+     * @param[in] readerWriterLock Reader-Writer lock object used for synchronization
+     * @param[in] timeout Timeout
+     *
+     * May wait up to 3 times timeout value, due to multiple semaphore locks.
+     */
+    ReaderLock(ReaderWriterLock& readerWriterLock, std::chrono::milliseconds timeout);
+
+    /**
+     * @brief Releases lock (if taken) on object destruction
+     *
+     * This destructor internally acquires lock and may wait up to the timeout value provided in the constructor.
+     */
+    ~ReaderLock();
+
+    /**
+     * @brief Checks whether lock has been successful
+     * @return true if lock was successful
+     */
+    bool operator()();
+
+  private:
+    /** @brief Reader writer lock object */
+    ReaderWriterLock& readerWriterLock;
+
+    /** @brief Timeout */
+    std::chrono::milliseconds timeout;
+
+    /** @brief Flag indicating if lock is acquired */
+    bool taken;
+};
+
+/**
+ * @brief Helper writer lock class.
+ *
+ * When created it locks ReaderWriterLock for writing and releases it at the end of the scope
+ *
+ * Usage:
+ *
+ * @code
+ * {
+ * 	WriterLock lock(this->readerWriterLock);
+ *
+ * 	if(!lock())
+ * 	{
+ * 		// take failed
+ * 		return;
+ * 	}
+ *
+ * 	// do something
+ * } // lock release at the end of the scope
+ * @endcode
+ */
+class WriterLock final : private NotCopyable, private NotMoveable
+{
+  public:
+    /**
+     * @brief Constructs @ref WriterLock object and tries to lock ReaderWriterLock for writing
+     * @param[in] readerWriterLock Reader-Writer lock object used for synchronization
+     * @param[in] timeout Timeout
+     *
+     * May wait up to 2 times timeout value, due to multiple semaphore locks.
+     */
+    WriterLock(ReaderWriterLock& readerWriterLock, std::chrono::milliseconds timeout);
+
+    /**
+     * @brief Releases lock (if taken) on object destruction
+     */
+    ~WriterLock();
+
+    /**
+     * @brief Checks whether lock has been successful
+     * @return true if lock was successful
+     */
+    bool operator()();
+
+  private:
+    /** @brief Reader writer lock object */
+    ReaderWriterLock& readerWriterLock;
+
+    /** @brief Flag indicating if lock is acquired */
+    bool taken;
+};
+
+/**
  * @brief RTOS queue wrapper
  */
 template <typename Element, std::size_t Capacity> class Queue final

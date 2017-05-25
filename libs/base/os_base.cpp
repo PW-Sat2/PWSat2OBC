@@ -1,4 +1,3 @@
-
 #include "os.h"
 
 Lock::Lock(OSSemaphoreHandle semaphore, std::chrono::milliseconds timeout) : _semaphore(semaphore)
@@ -12,6 +11,157 @@ Lock::~Lock()
     {
         System::GiveSemaphore(this->_semaphore);
     }
+}
+
+ReaderWriterLock::ReaderWriterLock()
+    : resourceSemaphore(System::CreateBinarySemaphore()),  //
+      readCountSemaphore(System::CreateBinarySemaphore()), //
+      serviceSemaphore(System::CreateBinarySemaphore()),   //
+      readCount(0),                                        //
+      isWriterLockAcquired(false)                          //
+{
+    System::GiveSemaphore(resourceSemaphore);
+    System::GiveSemaphore(readCountSemaphore);
+    System::GiveSemaphore(serviceSemaphore);
+}
+
+bool ReaderWriterLock::AcquireReaderLock(std::chrono::milliseconds timeout)
+{
+    if (!OS_RESULT_SUCCEEDED(System::TakeSemaphore(serviceSemaphore, timeout)))
+    {
+        return false;
+    }
+
+    if (!OS_RESULT_SUCCEEDED(System::TakeSemaphore(readCountSemaphore, timeout)))
+    {
+        System::GiveSemaphore(serviceSemaphore);
+        return false;
+    }
+
+    if (readCount == 0)
+    {
+        if (!OS_RESULT_SUCCEEDED(System::TakeSemaphore(resourceSemaphore, timeout)))
+        {
+            System::GiveSemaphore(serviceSemaphore);
+            System::GiveSemaphore(readCountSemaphore);
+            return false;
+        }
+    }
+
+    readCount++;
+
+    System::GiveSemaphore(serviceSemaphore);
+    System::GiveSemaphore(readCountSemaphore);
+
+    return true;
+}
+
+bool ReaderWriterLock::AcquireWriterLock(std::chrono::milliseconds timeout)
+{
+    if (!OS_RESULT_SUCCEEDED(System::TakeSemaphore(serviceSemaphore, timeout)))
+    {
+        return false;
+    }
+
+    if (!OS_RESULT_SUCCEEDED(System::TakeSemaphore(resourceSemaphore, timeout)))
+    {
+        System::GiveSemaphore(serviceSemaphore);
+        return false;
+    }
+
+    isWriterLockAcquired = true;
+
+    System::GiveSemaphore(serviceSemaphore);
+
+    return true;
+}
+
+bool ReaderWriterLock::ReleaseReaderLock(std::chrono::milliseconds timeout)
+{
+    if (readCount == 0)
+    {
+        return false;
+    }
+
+    if (!OS_RESULT_SUCCEEDED(System::TakeSemaphore(readCountSemaphore, timeout)))
+    {
+        return false;
+    }
+
+    readCount--;
+
+    if (readCount == 0)
+    {
+        System::GiveSemaphore(resourceSemaphore);
+    }
+
+    System::GiveSemaphore(readCountSemaphore);
+
+    return true;
+}
+
+bool ReaderWriterLock::ReleaseWriterLock()
+{
+    if (!isWriterLockAcquired)
+    {
+        return false;
+    }
+
+    isWriterLockAcquired = false;
+
+    System::GiveSemaphore(resourceSemaphore);
+
+    return true;
+}
+
+bool ReaderWriterLock::IsReaderLockAcquired() const
+{
+    return readCount > 0;
+}
+
+bool ReaderWriterLock::IsWriterLockAcquired() const
+{
+    return isWriterLockAcquired;
+}
+
+ReaderLock::ReaderLock(ReaderWriterLock& readerWriterLock, std::chrono::milliseconds timeout)
+    : readerWriterLock(readerWriterLock), timeout(timeout), taken(readerWriterLock.AcquireReaderLock(timeout))
+{
+}
+
+ReaderLock::~ReaderLock()
+{
+    if (!taken)
+    {
+        return;
+    }
+
+    readerWriterLock.ReleaseReaderLock(timeout);
+}
+
+bool ReaderLock::operator()()
+{
+    return taken;
+}
+
+WriterLock::WriterLock(ReaderWriterLock& readerWriterLock, std::chrono::milliseconds timeout)
+    : readerWriterLock(readerWriterLock), taken(readerWriterLock.AcquireWriterLock(timeout))
+{
+}
+
+WriterLock::~WriterLock()
+{
+    if (!taken)
+    {
+        return;
+    }
+
+    readerWriterLock.ReleaseWriterLock();
+}
+
+bool WriterLock::operator()()
+{
+    return taken;
 }
 
 Timeout::Timeout(std::chrono::milliseconds timeout) : _expireAt(System::GetUptime() + timeout)
