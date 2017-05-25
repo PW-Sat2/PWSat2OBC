@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <cstring>
 
 #include "base/os.h"
 
@@ -32,7 +33,9 @@ void RedundantN25QDriver::ReadMemory(    //
     _n25qDrivers[0]->ReadMemory(address, normalizedOutputBuffer);
     _n25qDrivers[1]->ReadMemory(address, normalizedRedundantBuffer1);
 
-    if (normalizedOutputBuffer == normalizedRedundantBuffer1)
+    auto compareResult = memcmp(normalizedOutputBuffer.data(), normalizedRedundantBuffer1.data(), normalizedOutputBuffer.size()) == 0;
+
+    if (compareResult)
     {
         return;
     }
