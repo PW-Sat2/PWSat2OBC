@@ -18,3 +18,4 @@ target_link_libraries(${NAME}
     obc_telecommands
     unit_tests_base
 )
+
