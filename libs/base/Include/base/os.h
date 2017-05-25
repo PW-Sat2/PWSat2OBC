@@ -577,6 +577,162 @@ class Lock final : private NotCopyable, private NotMoveable
 };
 
 /**
+ * @brief Reader-Writer lock state.
+ */
+struct ReaderWriterLock final : private NotCopyable, private NotMoveable
+{
+  public:
+    /**
+     * @brief Constructs @ref ReaderWriterLock object
+     */
+    ReaderWriterLock();
+
+    /**
+     * @brief Acquires reader lock
+     */
+    bool AcquireReaderLock();
+
+    /**
+     * @brief Acquires writer lock
+     */
+    bool AcquireWriterLock();
+
+    /**
+     * @brief Releases reader lock
+     */
+    bool ReleaseReaderLock();
+
+    /**
+     * @brief Releases writer lock
+     */
+    void ReleaseWriterLock();
+
+    /**
+     * @brief Returns true when reader lock is currently acquired
+     */
+    bool IsReaderLockAcquired() const;
+
+    /**
+     * @brief Returns true when writer lock is currently acquired
+     */
+    bool IsWriterLockAcquired() const;
+
+  private:
+    /** @brief Semaphore used to synchronize access to the resource */
+    OSSemaphoreHandle resourceSemaphore;
+
+    /** @brief Semaphore used to synchronize access to the ReadCount field */
+    OSSemaphoreHandle readCountSemaphore;
+
+    /** @brief Semaphore used to synchronize waiting queue */
+    OSSemaphoreHandle serviceSemaphore;
+
+    /** @brief Counter of current read locks */
+    int readCount;
+
+    /** @brief Flag indicating whether writer lock is currently acquired */
+    bool isWriterLockAcquired;
+};
+
+/**
+ * @brief Helper reader lock class.
+ *
+ * When created it locks ReaderWriterLock for reading and releases it at the end of the scope
+ *
+ * Usage:
+ *
+ * @code
+ * {
+ * 	ReaderLock lock(this->readerWriterLock);
+ *
+ * 	if(!lock())
+ * 	{
+ * 		// take failed
+ * 		return;
+ * 	}
+ *
+ * 	// do something
+ * } // lock release at the end of the scope
+ * @endcode
+ */
+class ReaderLock final : private NotCopyable, private NotMoveable
+{
+  public:
+    /**
+     * @brief Constructs @ref ReaderLock object and tries to lock ReaderWriterLock for reading
+     * @param[in] readerWriterLock Reader-Writer lock object used for synchronization
+     */
+    ReaderLock(ReaderWriterLock& readerWriterLock);
+
+    /**
+     * @brief Releases lock (if taken) on object destruction
+     */
+    ~ReaderLock();
+
+    /**
+     * @brief Checks whether lock has been successful
+     * @return true if lock was successful
+     */
+    bool operator()();
+
+  private:
+    /** @brief Reader writer lock object */
+    ReaderWriterLock& readerWriterLock;
+
+    /** @brief Flag indicating if lock is acquired */
+    bool taken;
+};
+
+/**
+ * @brief Helper writer lock class.
+ *
+ * When created it locks ReaderWriterLock for writing and releases it at the end of the scope
+ *
+ * Usage:
+ *
+ * @code
+ * {
+ * 	WriterLock lock(this->readerWriterLock);
+ *
+ * 	if(!lock())
+ * 	{
+ * 		// take failed
+ * 		return;
+ * 	}
+ *
+ * 	// do something
+ * } // lock release at the end of the scope
+ * @endcode
+ */
+class WriterLock final : private NotCopyable, private NotMoveable
+{
+  public:
+    /**
+     * @brief Constructs @ref WriterLock object and tries to lock ReaderWriterLock for writing
+     * @param[in] readerWriterLock Reader-Writer lock object used for synchronization
+     */
+    WriterLock(ReaderWriterLock& readerWriterLock);
+
+    /**
+     * @brief Releases lock (if taken) on object destruction
+     */
+    ~WriterLock();
+
+    /**
+     * @brief Checks whether lock has been successful
+     * @return true if lock was successful
+     */
+    bool operator()();
+
+  private:
+    /** @brief Reader writer lock object */
+    ReaderWriterLock& readerWriterLock;
+
+    /** @brief Flag indicating if lock is acquired */
+    bool taken;
+};
+
+/**
  * @brief RTOS queue wrapper
  */
 template <typename Element, std::size_t Capacity> class Queue final

@@ -45,7 +45,16 @@ namespace obc
                 externalTimeWeight);
 
             auto& persistentState = stateContainer.GetState().PersistentState;
-            persistentState.Set(state::TimeCorrectionConfiguration(missionTimeWeight, externalTimeWeight));
+            {
+                WriterLock lock(persistentState.Lock);
+                if (!lock())
+                {
+                    LOG(LOG_LEVEL_ERROR, "Unable to acquire PersistentState lock.");
+                    return;
+                }
+
+                persistentState.Set(state::TimeCorrectionConfiguration(missionTimeWeight, externalTimeWeight));
+            }
 
             response.PayloadWriter().WriteByte(0);
             transmitter.SendFrame(response.Frame());

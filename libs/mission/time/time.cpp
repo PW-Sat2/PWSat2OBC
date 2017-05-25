@@ -1,7 +1,7 @@
 #include "mission/time.hpp"
 #include "logger/logger.h"
-#include "state/time/TimeCorrectionConfiguration.hpp"
 #include "state/struct.h"
+#include "state/time/TimeCorrectionConfiguration.hpp"
 
 using services::time::TimeProvider;
 using namespace std::literals;
@@ -92,17 +92,38 @@ namespace mission
         }
 
         const auto currentRtcTime = duration_cast<milliseconds>(rtcTime.ToDuration());
-        auto newTime = PerformTimeCorrection(time.Value,
-            currentRtcTime,
-            state.PersistentState.Get<state::TimeState>(),
-            state.PersistentState.Get<state::TimeCorrectionConfiguration>());
-        if (!provider.SetCurrentTime(newTime))
+
+        std::chrono::milliseconds newTime;
         {
-            LOG(LOG_LEVEL_ERROR, "[Time] Unable to set corrected time");
-            return;
+            ReaderLock lock(state.PersistentState.Lock);
+            if (!lock())
+            {
+                LOG(LOG_LEVEL_ERROR, "Unable to acquire PersistentState lock.");
+                return;
+            }
+
+            newTime = PerformTimeCorrection(time.Value,
+                currentRtcTime,
+                state.PersistentState.Get<state::TimeState>(),
+                state.PersistentState.Get<state::TimeCorrectionConfiguration>());
         }
 
-        state.PersistentState.Set(state::TimeState(newTime, currentRtcTime));
+        {
+            WriterLock lock(state.PersistentState.Lock);
+            if (!lock())
+            {
+                LOG(LOG_LEVEL_ERROR, "[Time] Unable to acquire PersistentState lock.");
+                return;
+            }
+
+            if (!provider.SetCurrentTime(newTime))
+            {
+                LOG(LOG_LEVEL_ERROR, "[Time] Unable to set corrected time");
+                return;
+            }
+
+            state.PersistentState.Set(state::TimeState(newTime, currentRtcTime));
+        }
     }
 
     milliseconds TimeTask::PerformTimeCorrection(milliseconds missionTime, //
