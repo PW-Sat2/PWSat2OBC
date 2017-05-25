@@ -11,41 +11,23 @@ using devices::fm25w::RedundantFM25WDriver;
 using devices::fm25w::Status;
 using drivers::spi::EFMSPISlaveInterface;
 
-static void Status(IFM25WDriver* fram)
+static void Status(IFM25WDriver& fram)
 {
-    if (fram == nullptr)
-    {
-        Main.terminal.Puts("Invalid fram\n");
-        return;
-    }
-
-    auto sr = fram->ReadStatus();
+    auto sr = fram.ReadStatus();
 
     Main.terminal.Printf("Status register=%X\n", num(sr.Value));
 }
 
-static void Write(IFM25WDriver* fram, std::uint16_t address, gsl::span<const std::uint8_t> value)
+static void Write(IFM25WDriver& fram, std::uint16_t address, gsl::span<const std::uint8_t> value)
 {
-    if (fram == nullptr)
-    {
-        Main.terminal.Puts("Invalid fram\n");
-        return;
-    }
-
-    fram->Write(address, value);
+    fram.Write(address, value);
 
     Status(fram);
 }
 
-static void Read(IFM25WDriver* fram, std::uint16_t address, gsl::span<uint8_t> value)
+static void Read(IFM25WDriver& fram, std::uint16_t address, gsl::span<uint8_t> value)
 {
-    if (fram == nullptr)
-    {
-        Main.terminal.Puts("Invalid fram\n");
-        return;
-    }
-
-    fram->Read(address, value);
+    fram.Read(address, value);
 }
 
 static void WriteSingleFRAM(devices::fm25w::IFM25WDriver& fram)
@@ -107,15 +89,17 @@ static bool TestSingleFRAM(devices::fm25w::IFM25WDriver& fram)
     return ReadSingleFRAM(fram);
 }
 
-static IFM25WDriver* ParseFRAMIndex(char index, std::array<IFM25WDriver*, 3>& drivers, RedundantFM25WDriver* redundantDriver)
+static IFM25WDriver& ParseFRAMIndex(char index, std::array<IFM25WDriver*, 3>& drivers, RedundantFM25WDriver& redundantDriver)
 {
-    if (index == 'r')
-        return redundantDriver;
-
     if (index >= '0' && index < '3')
-        return drivers[static_cast<uint8_t>(index - '0')];
+        return *drivers[static_cast<uint8_t>(index - '0')];
 
-    return nullptr;
+    return redundantDriver;
+}
+
+static bool IsFRAMIndexValid(char index)
+{
+    return index == 'r' || (index >= '0' && index < '3');
 }
 
 void FRAM(std::uint16_t argc, char* argv[])
@@ -126,32 +110,40 @@ void FRAM(std::uint16_t argc, char* argv[])
         return;
     }
 
-    drivers::spi::EFMSPISlaveInterface spi1(Main.Hardware.SPI, Main.Hardware.Pins.Fram1ChipSelect);
-    drivers::spi::EFMSPISlaveInterface spi2(Main.Hardware.SPI, Main.Hardware.Pins.Fram2ChipSelect);
-    drivers::spi::EFMSPISlaveInterface spi3(Main.Hardware.SPI, Main.Hardware.Pins.Fram3ChipSelect);
+    auto& fram1 = Main.Hardware.PersistentStorage.GetSingleDriver<0>();
+    auto& fram2 = Main.Hardware.PersistentStorage.GetSingleDriver<1>();
+    auto& fram3 = Main.Hardware.PersistentStorage.GetSingleDriver<2>();
 
-    devices::fm25w::FM25WDriver fram1(spi1);
-    devices::fm25w::FM25WDriver fram2(spi2);
-    devices::fm25w::FM25WDriver fram3(spi3);
+    auto& redundantDriver = Main.Hardware.PersistentStorage.GetRedundantDriver();
 
     std::array<devices::fm25w::IFM25WDriver*, 3> drivers{&fram1, &fram2, &fram3};
 
-    devices::fm25w::RedundantFM25WDriver redundantDriver{drivers};
-
     if (strcmp(argv[0], "status") == 0)
     {
-        auto fram = ParseFRAMIndex(argv[1][0], drivers, &redundantDriver);
+        if (!IsFRAMIndexValid(argv[1][0]))
+        {
+            Main.terminal.Puts("Invalid fram\n");
+            return;
+        }
+
+        auto& fram = ParseFRAMIndex(argv[1][0], drivers, redundantDriver);
         Status(fram);
     }
 
     if (strcmp(argv[0], "read") == 0)
     {
+        if (!IsFRAMIndexValid(argv[1][0]))
+        {
+            Main.terminal.Puts("Invalid fram\n");
+            return;
+        }
+
         std::uint16_t address = atoi(argv[2]);
         std::array<std::uint8_t, 16> buf;
 
         auto toRead = gsl::make_span(buf).subspan(0, atoi(argv[3]));
 
-        auto fram = ParseFRAMIndex(argv[1][0], drivers, &redundantDriver);
+        auto& fram = ParseFRAMIndex(argv[1][0], drivers, redundantDriver);
         Read(fram, address, toRead);
 
         for (auto b : toRead)
@@ -162,6 +154,12 @@ void FRAM(std::uint16_t argc, char* argv[])
 
     if (strcmp(argv[0], "write") == 0)
     {
+        if (!IsFRAMIndexValid(argv[1][0]))
+        {
+            Main.terminal.Puts("Invalid fram\n");
+            return;
+        }
+
         std::uint16_t address = atoi(argv[2]);
         std::array<std::uint8_t, 16> buf;
 
@@ -179,7 +177,8 @@ void FRAM(std::uint16_t argc, char* argv[])
 
         Main.terminal.Puts("\n");
 
-        auto fram = ParseFRAMIndex(argv[1][0], drivers, &redundantDriver);
+        auto& fram = ParseFRAMIndex(argv[1][0], drivers, redundantDriver);
+
         Write(fram, address, toWrite);
     }
 
@@ -190,14 +189,6 @@ void FRAM(std::uint16_t argc, char* argv[])
             Main.terminal.Printf("This operation writes to all flashes. Add \"f\" parameter to proceed.");
             return;
         }
-
-        drivers::spi::EFMSPISlaveInterface spi1(Main.Hardware.SPI, Main.Hardware.Pins.Fram1ChipSelect);
-        drivers::spi::EFMSPISlaveInterface spi2(Main.Hardware.SPI, Main.Hardware.Pins.Fram2ChipSelect);
-        drivers::spi::EFMSPISlaveInterface spi3(Main.Hardware.SPI, Main.Hardware.Pins.Fram3ChipSelect);
-
-        devices::fm25w::FM25WDriver fram1(spi1);
-        devices::fm25w::FM25WDriver fram2(spi2);
-        devices::fm25w::FM25WDriver fram3(spi3);
 
         auto isOk1 = TestSingleFRAM(fram1);
         auto isOk2 = TestSingleFRAM(fram2);
@@ -220,18 +211,6 @@ void FRAM(std::uint16_t argc, char* argv[])
             Main.terminal.Printf("This operation writes to all flashes. Add \"f\" parameter to proceed.");
             return;
         }
-
-        drivers::spi::EFMSPISlaveInterface spi1(Main.Hardware.SPI, Main.Hardware.Pins.Fram1ChipSelect);
-        drivers::spi::EFMSPISlaveInterface spi2(Main.Hardware.SPI, Main.Hardware.Pins.Fram2ChipSelect);
-        drivers::spi::EFMSPISlaveInterface spi3(Main.Hardware.SPI, Main.Hardware.Pins.Fram3ChipSelect);
-
-        devices::fm25w::FM25WDriver fram1(spi1);
-        devices::fm25w::FM25WDriver fram2(spi2);
-        devices::fm25w::FM25WDriver fram3(spi3);
-
-        std::array<devices::fm25w::IFM25WDriver*, 3> drivers{&fram1, &fram2, &fram3};
-
-        devices::fm25w::RedundantFM25WDriver redundantDriver{drivers};
 
         Main.terminal.Printf("Starting single FRAM failing test\r\n");
 

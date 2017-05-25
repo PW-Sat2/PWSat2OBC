@@ -25,4 +25,9 @@ namespace obc
     {
         _driver.Write(gsl::narrow_cast<std::uint16_t>(address), span);
     }
+
+    devices::fm25w::RedundantFM25WDriver& PersistentStorageAccess::GetRedundantDriver()
+    {
+        return _driver;
+    }
 }

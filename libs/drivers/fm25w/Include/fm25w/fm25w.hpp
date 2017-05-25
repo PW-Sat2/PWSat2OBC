@@ -74,7 +74,7 @@ namespace devices
         /**
          * @brief FM25W driver
          */
-        class FM25WDriver : public IFM25WDriver
+        class FM25WDriver : public IFM25WDriver, NotCopyable, NotMoveable
         {
           public:
             /**
@@ -111,7 +111,7 @@ namespace devices
         /**
          * @brief  Composite FM25W driver that uses 3 separate drivers to achieve redundancy.
          */
-        class RedundantFM25WDriver : public IFM25WDriver
+        class RedundantFM25WDriver : public IFM25WDriver, NotCopyable, NotMoveable
         {
           public:
             /**
