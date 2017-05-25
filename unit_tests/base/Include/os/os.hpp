@@ -26,6 +26,8 @@ struct IOS
 
     virtual OSSemaphoreHandle CreateBinarySemaphore(uint8_t semaphoreId = 0) = 0;
 
+    virtual OSSemaphoreHandle CreateBinarySemaphore(OSSemaphoreBuffer& semaphoreBuffer) = 0;
+
     virtual OSResult GiveSemaphore(const OSSemaphoreHandle semaphore) = 0;
 
     virtual OSResult TakeSemaphore(const OSSemaphoreHandle semaphore, const std::chrono::milliseconds timeout) = 0;

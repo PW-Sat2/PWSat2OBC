@@ -29,6 +29,8 @@ struct OSMock : IOS
 
     MOCK_METHOD1(CreateBinarySemaphore, OSSemaphoreHandle(uint8_t semaphoreId));
 
+    MOCK_METHOD1(CreateBinarySemaphore, OSSemaphoreHandle(OSSemaphoreBuffer& semaphoreBuffer));
+
     MOCK_METHOD2(TakeSemaphore, OSResult(const OSSemaphoreHandle semaphore, const std::chrono::milliseconds time));
 
     MOCK_METHOD1(GiveSemaphore, OSResult(const OSSemaphoreHandle semaphore));

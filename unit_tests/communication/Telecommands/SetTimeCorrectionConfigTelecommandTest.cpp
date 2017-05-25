@@ -3,19 +3,23 @@
 #include <cmath>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "OsMock.hpp"
 #include "base/reader.h"
 #include "base/writer.h"
 #include "mock/HasStateMock.hpp"
 #include "mock/comm.hpp"
 #include "mock/time.hpp"
 #include "obc/telecommands/time.hpp"
+#include "os/os.hpp"
 #include "telecommunication/downlink.h"
 #include "telecommunication/telecommand_handling.h"
 #include "utils.hpp"
 
 using std::array;
 using std::uint8_t;
+using testing::_;
 using testing::Eq;
+using testing::Return;
 using testing::ReturnRef;
 
 using telecommunication::downlink::DownlinkFrame;
@@ -28,11 +32,21 @@ namespace
     class SetTimeCorrectionConfigTelecommandTest : public testing::Test
     {
       protected:
+        SetTimeCorrectionConfigTelecommandTest();
         testing::NiceMock<TransmitterMock> _transmitter;
         testing::NiceMock<HasStateMock<SystemState>> _stateContainer;
 
+        testing::NiceMock<OSMock> os;
+        OSReset guard;
+
         obc::telecommands::SetTimeCorrectionConfigTelecommand _telecommand{_stateContainer};
     };
+
+    SetTimeCorrectionConfigTelecommandTest::SetTimeCorrectionConfigTelecommandTest()
+    {
+        this->guard = InstallProxy(&os);
+        ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
+    }
 
     TEST_F(SetTimeCorrectionConfigTelecommandTest, ShouldSetState)
     {

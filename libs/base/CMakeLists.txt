@@ -19,6 +19,7 @@ add_library(${NAME} STATIC ${SOURCES})
 
 target_link_libraries(${NAME}
     gsl
+    freeRTOS
 )
 
 target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Include)

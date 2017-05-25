@@ -65,6 +65,16 @@ OSSemaphoreHandle System::CreateBinarySemaphore(uint8_t semaphoreId)
     return nullptr;
 }
 
+OSSemaphoreHandle System::CreateBinarySemaphore(OSSemaphoreBuffer& semaphoreBuffer)
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->CreateBinarySemaphore(semaphoreBuffer);
+    }
+
+    return nullptr;
+}
+
 OSResult System::GiveSemaphore(OSSemaphoreHandle semaphore)
 {
     if (OSProxy != nullptr)

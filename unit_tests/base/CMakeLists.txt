@@ -25,6 +25,7 @@ add_library(${NAME} STATIC ${SOURCES})
 
 target_link_libraries(${NAME} 
     base
+    free_rtos_wrapper
     gtest
     gmock
     platform

@@ -78,6 +78,11 @@ OSSemaphoreHandle System::CreateBinarySemaphore(uint8_t semaphoreId)
     return s;
 }
 
+OSSemaphoreHandle System::CreateBinarySemaphore(OSSemaphoreBuffer& semaphoreBuffer)
+{
+    return xSemaphoreCreateBinaryStatic(&semaphoreBuffer);
+}
+
 OSResult System::TakeSemaphore(OSSemaphoreHandle semaphore, milliseconds timeout)
 {
     const BaseType_t result = xSemaphoreTake(semaphore, ConvertTimeToTicks(timeout));
