@@ -31,8 +31,12 @@ class CommTelemetry
      * @param[in] receiver Current receiver telemetry
      * @param[in] transmitter Current transmitter telemetry
      * @param[in] state Current transmitter configuration
+     * @param[in] uptime Current transmitter uptime
      */
-    CommTelemetry(const ReceiverTelemetry& receiver, const TransmitterTelemetry& transmitter, const TransmitterState& state);
+    CommTelemetry(const ReceiverTelemetry& receiver, //
+        const TransmitterTelemetry& transmitter,
+        const TransmitterState& state,
+        const Uptime& uptime);
 
     /**
      * @brief Write the comm telemetry to passed buffer writer object.
@@ -78,13 +82,7 @@ class CommTelemetry
     /** @brief Raw measurement value of the instantaneous RF forward power at the transmitter port. */
     uint12_t rFForwardPower;
 
-    BitValue<std::uint8_t, 6> transmitterUptimeSeconds;
-
-    BitValue<std::uint8_t, 5> transmitterUptimeMinutes;
-
-    BitValue<std::uint8_t, 5> transmitterUptimeHours;
-
-    std::uint8_t transmitterUptimeDays;
+    Uptime transmitterUptime;
 
     bool transmitterIdleState;
 
@@ -93,12 +91,12 @@ class CommTelemetry
 
 constexpr std::uint32_t CommTelemetry::BitSize()
 {
-    return 10 * uint12_t::Size +                                  //
-        decltype(CommTelemetry::transmitterUptimeSeconds)::Size + //
-        decltype(CommTelemetry::transmitterUptimeMinutes)::Size + //
-        decltype(CommTelemetry::transmitterUptimeHours)::Size +   //
-        decltype(CommTelemetry::transmitterUptimeSeconds)::Size + //
-        8 + 2;
+    return 10 * uint12_t::Size +          //
+        decltype(Uptime::seconds)::Size + //
+        decltype(Uptime::minutes)::Size + //
+        decltype(Uptime::hours)::Size +   //
+        decltype(Uptime::days)::Size +    //
+        2;
 }
 
 COMM_END

@@ -103,6 +103,15 @@ class CommObject final : public ITransmitter,      //
     bool GetTransmitterTelemetry(TransmitterTelemetry& telemetry);
 
     /**
+     * @brief Queries the comm driver for the transmitter uptime.
+     *
+     * @param[out] uptime Reference to object that should be filled with current transmitter uptime.
+     * @return Operation status, true in case of success, false otherwise.
+     *
+     * The contents of the telemetry object is undefined in case of the failure.
+     */
+    bool GetTransmitterUptime(Uptime& uptime);
+    /**
      * @brief Adds the requested frame to the send queue.
      *
      * @param[in] frame Buffer containing frame contents.

@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <gsl/span>
 #include "base/fwd.hpp"
+#include "utils.h"
 
 #define COMM_BEGIN                                                                                                                         \
     namespace devices                                                                                                                      \
@@ -174,6 +175,32 @@ struct TransmitterState
 };
 
 /**
+ * @brief This type represents amount of time that comm hardware has been active.
+ */
+struct Uptime
+{
+    /**
+     * @brief Second part of the uptime value.
+     */
+    BitValue<std::uint8_t, 6> seconds;
+
+    /**
+     * @brief Minute part of the uptime value.
+     */
+    BitValue<std::uint8_t, 6> minutes;
+
+    /**
+     * @brief Hour part of the uptime value.
+     */
+    BitValue<std::uint8_t, 5> hours;
+
+    /**
+     * @brief Day part of the uptime value.
+     */
+    BitValue<std::uint8_t, 8> days;
+};
+
+/**
  * @brief Enumerator for all supported comm frame receiver commands.
  */
 enum class ReceiverCommand
@@ -181,6 +208,7 @@ enum class ReceiverCommand
     SoftReset = 0xAA,
     HardReset = 0xAB,
     ResetWatchdog = 0xCC,
+    GetUptime = 0x40,
     GetFrameCount = 0x21,
     GetFrame = 0x22,
     RemoveFrame = 0x24,
@@ -201,6 +229,7 @@ enum class TransmitterCommand
     ClearBeacon = 0x1f,
     SetIdleState = 0x24,
     SetBitRate = 0x28,
+    GetUptime = 0x40,
     GetState = 0x41
 };
 
