@@ -427,7 +427,7 @@ template <typename Underlying, std::uint8_t BitsCount> class BitValue
 {
   public:
     /** @brief Mask used to trim value */
-    static constexpr Underlying Mask = ~(~0 << BitsCount);
+    static constexpr Underlying Mask = ~(~0ull << BitsCount);
 
     /** @brief Default ctor */
     constexpr BitValue();
@@ -438,13 +438,13 @@ template <typename Underlying, std::uint8_t BitsCount> class BitValue
     constexpr BitValue(Underlying v);
 
     /**
-     * @brief Extracts holded value
+     * @brief Extracts held value
      */
     inline operator Underlying() const;
 
     /**
-     * @brief Extracts holded value
-     * @return holded value
+     * @brief Extracts held value
+     * @return Held value
      */
     inline Underlying Value() const;
 
@@ -456,7 +456,7 @@ template <typename Underlying, std::uint8_t BitsCount> class BitValue
     constexpr BitValue<Underlying, BitsCount>& operator=(const BitValue<Underlying, BitsCount>& other) = default;
 
   private:
-    /** @brief Holded value */
+    /** @brief Held value */
     Underlying _value;
 };
 
