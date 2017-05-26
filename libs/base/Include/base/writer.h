@@ -28,14 +28,14 @@ class Writer final
     Writer();
 
     /**
-     * @brief Initializes generic buffer reader.
+     * @brief Initializes generic buffer writer.
      *
      * @param[in] view Window into memory buffer to which the data is written.
      */
     Writer(gsl::span<std::uint8_t> view);
 
     /**
-     * @brief Initializes generic buffer writter.
+     * @brief Initializes generic buffer writer.
      *
      * @param[in] view Window into memory buffer to which the data is written.
      */
@@ -49,7 +49,7 @@ class Writer final
     inline bool Status() const;
 
     /**
-     * @brief Returns the number of not bytes already written to the buffer.
+     * @brief Returns the number of bytes already written to the buffer.
      * @return Number of bytes already written to the buffer.
      */
     inline std::uint16_t GetDataLength() const;
@@ -182,6 +182,12 @@ class Writer final
      */
     bool _isValid;
 };
+
+inline void Writer::Initialize(gsl::span<std::uint8_t> view)
+{
+    this->_buffer = view;
+    this->Reset();
+}
 
 inline bool Writer::Status() const
 {

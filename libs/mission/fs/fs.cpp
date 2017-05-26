@@ -4,6 +4,8 @@ using namespace std::literals;
 
 namespace mission
 {
+    constexpr std::chrono::milliseconds FileSystemTask::SyncPeriod;
+
     FileSystemTask::FileSystemTask(services::fs::IYaffsDeviceOperations& deviceOperations)
         : _deviceOperations{deviceOperations}, _lastUpdate{None<std::chrono::milliseconds>()}
     {

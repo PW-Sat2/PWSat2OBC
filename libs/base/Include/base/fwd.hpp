@@ -3,9 +3,12 @@
 
 #pragma once
 
+#include <cstdint>
+
 class Reader;
 class Writer;
 
 template <typename Type> struct ITelemetryContainer;
+template <typename Underlying, std::uint8_t BitsCount> class BitValue;
 
 #endif

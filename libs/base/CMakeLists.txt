@@ -6,6 +6,7 @@ set(SOURCES
     ecc.cpp
     os_base.cpp
     crc.cpp
+    BitWriter.cpp
     Include/base/reader.h
     Include/base/writer.h
     Include/system.h
