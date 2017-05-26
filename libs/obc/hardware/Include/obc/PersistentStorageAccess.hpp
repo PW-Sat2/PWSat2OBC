@@ -22,18 +22,38 @@ namespace obc
       public:
         /**
          * @brief ctor.
-         * @param[in] spi Reference to spi bus controller that should be used to access the memory.
+         * @param[in] spi Array of pointers to spi bus controllers that will be used to access 3 memory chips.
          */
-        PersistentStorageAccess(drivers::spi::ISPIInterface& spi);
+        PersistentStorageAccess(std::array<drivers::spi::ISPIInterface*, 3> spis);
 
         virtual void Read(std::uint32_t address, gsl::span<std::uint8_t> span) final override;
 
         virtual void Write(std::uint32_t address, gsl::span<const std::uint8_t> span) final override;
 
+        /**
+         * @brief Retrieves driver for single FRAM chip.
+         * @tparam DriverIndex Index of the driver from range <0;2>
+         */
+        template <uint8_t DriverIndex> devices::fm25w::FM25WDriver& GetSingleDriver();
+
+        /**
+         * @brief Retrieves redundant FRAM driver.
+         */
+        devices::fm25w::RedundantFM25WDriver& GetRedundantDriver();
+
       private:
-        /** @brief Fram memory controller. */
-        devices::fm25w::FM25WDriver fram;
+        /** @brief Fram memory controllers. */
+        devices::fm25w::FM25WDriver _fm25wDrivers[3];
+
+        /** @brief Redundant Fram memory driver. */
+        devices::fm25w::RedundantFM25WDriver _driver;
     };
+
+    template <uint8_t DriverIndex> devices::fm25w::FM25WDriver& PersistentStorageAccess::GetSingleDriver()
+    {
+        static_assert(DriverIndex >= 0 && DriverIndex < 3, "Driver index must be 0, 1 or 2");
+        return _fm25wDrivers[DriverIndex];
+    }
 }
 
 /** @} */
