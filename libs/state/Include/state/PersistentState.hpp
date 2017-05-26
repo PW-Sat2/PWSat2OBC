@@ -6,7 +6,8 @@
 #include <cstdint>
 #include <tuple>
 #include <type_traits>
-#include "antenna/AntennaConfiguration.hpp"
+#include "base/fwd.hpp"
+#include "traits.hpp"
 
 /**
  * @defgroup persistent_state_details Persistent State Helpers
@@ -44,11 +45,10 @@ namespace state
              * @param[in] writer Buffer writer for serialized persistent state.
              */
             typedef void (Object::*WriteType)(Writer& reader) const;
-            static_assert(std::is_convertible<decltype(&Object::Read), ReadType>::value,
-                "Persistent state part should be able to read its contents from Buffer reader.");
 
-            static_assert(std::is_convertible<decltype(&Object::Write), WriteType>::value,
-                "Persistent state part should be able to write its contents to Buffer writer.");
+            static_assert(HasRead<Object, Reader&>::Value, "Persistent state part should be able to read its contents from Buffer reader.");
+
+            static_assert(HasWrite<Object, Writer&>::Value, "Persistent state part should be able to write its contents to Buffer writer.");
 
             static_assert(Object::Size() > 0, "Persistent state part should report non zero size.");
 

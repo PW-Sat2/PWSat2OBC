@@ -96,6 +96,13 @@ class BitWriter
     bool WriteQuadWord(std::uint64_t value, std::uint8_t length);
 
     /**
+     * @brief Appends 8-bit value to the buffer and moves the current position to the next free bit.
+     * @param[in] value Value that should be added to writer output.
+     * @return Operation status.
+     */
+    bool Write(std::uint8_t value);
+
+    /**
      * @brief Appends 16-bit value to the buffer and moves the current position to the next free bit.
      * @param[in] value Value that should be added to writer output.
      * @return Operation status.
@@ -143,6 +150,17 @@ class BitWriter
 
   private:
     void WriteWord(std::uint16_t value, std::uint8_t* position, std::uint8_t length);
+
+    /**
+     * @brief Appends n-bit value to the buffer and moves the current position to the next free bit.
+     * @param[in] value Value that should be added to writer output.
+     * @param[in] length Size of the value in bits.
+     *
+     * @remark Only the lowest length bits will be written to writer output, if the value contains number
+     * that is longer than provided length it will be truncated.
+     * @return Operation status.
+     */
+    bool Write(std::uint8_t value, std::uint8_t length);
 
     /**
      * @brief Appends n-bit value to the buffer and moves the current position to the next free bit.
@@ -241,6 +259,11 @@ inline gsl::span<std::uint8_t> BitWriter::Capture()
     }
 
     return this->_buffer.subspan(0, GetByteDataLength());
+}
+
+inline bool BitWriter::Write(std::uint8_t value, std::uint8_t length)
+{
+    return WriteWord(value, length);
 }
 
 inline bool BitWriter::Write(std::uint16_t value, std::uint8_t length)

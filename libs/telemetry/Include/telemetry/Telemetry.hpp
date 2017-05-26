@@ -4,6 +4,7 @@
 #pragma once
 
 #include <cstdint>
+#include <limits>
 #include <tuple>
 #include "base/ITelemetryContainer.hpp"
 #include "base/writer.h"
@@ -105,7 +106,7 @@ namespace telemetry
         template <typename Base, typename... Args> struct AreIdsUnique<Base, Args...>
         {
             /**
-             * @brief This value indicates whether the values of Type::Id for all types in the {Base, Args..} list are unique.
+             * @brief This value indicates whether the values of Type::Id for all types in the {Base, Args...} list are unique.
              */
             static constexpr bool Value = !IsValueInList<int>::IsInList<Base::Id, Args::Id...>() && AreIdsUnique<Args...>::Value;
         };
@@ -141,7 +142,7 @@ namespace telemetry
             /**
              * @brief This variable contains sum of serialized sizes of all types from Args collection plus Base type.
              */
-            static constexpr int Value = Base::Size() + TotalSize<Args...>::Value;
+            static constexpr int Value = Base::BitSize() + TotalSize<Args...>::Value;
         };
 
         /**
@@ -155,7 +156,7 @@ namespace telemetry
             /**
              * @brief This variable contains total serialized size of Base type.
              */
-            static constexpr int Value = Base::Size();
+            static constexpr int Value = Base::BitSize();
         };
     }
 
@@ -180,34 +181,16 @@ namespace telemetry
      * // of telemetry changes.
      * static constexpr int Id;
      *
-     * // @brief This function is responsible for reading complete state from the passed buffer reader object.
-     * // @param[in] reader buffer reader that should be used to read the serialized state.
-     * void Read(Reader& reader);
-     *
      * // @brief The Write function is responsible for writing current object state to the passed writer object.
      * // @param[in] writer Buffer writer object that should be used to write the serialized state.
-     * void Write(Writer& writer) const;
+     * // @tparam WriterType Type of writer that is currently used by the telemetry.
+     * void Write(WriterType& writer) const;
      *
-     * // @brief This function is used to discriminate minor changes/fluctuations in telemetry state.
-     * //
-     * // The purpose of this function is to limit the number of state changes that are saved as the
-     * // important telemetry changes in the telemetry event file.
-     * //
-     * // Since writing general purpose algorithm to determine whether telemetry change is significant
-     * // or not is not possible the burden of determination whether the scale of the observed change
-     * // in any particular telemetry part is placed on that telemetry part itself which should be
-     * // be capable by itself to determine the necessary threshold and check if it has been crossed.
-     * // @param[in] arg Previous observed telemetry state.
-     * // @return Information whether the two objects differ enough to be considered different.
-     * // @retval true The two objects are different.
-     * // @retval false The two objects are considered to be equal.
-     * bool IsDifferent(const Type& arg) const;
-     *
-     * // @brief This procedure is responsible to return size of this object in its serialized form.
+     * // @brief This procedure is responsible to return size of this object's serialized form in bits.
      * //
      * // If the size is by definition variable, then this function should return highest possible size
      * // that is possible to be generated.
-     * static constexpr std::uint32_t Size();
+     * static constexpr std::uint32_t BitSize();
      * @endcode
      *
      */
@@ -231,7 +214,8 @@ namespace telemetry
         /**
          * @brief This variable contains serialized size of entire telemetry container.
          */
-        static constexpr int TotalSerializedSize = PayloadSize + 2 * TypeCount * sizeof(std::uint8_t);
+        static constexpr int TotalSerializedSize =
+            (PayloadSize + std::numeric_limits<std::uint8_t>::digits - 1) / std::numeric_limits<std::uint8_t>::digits;
 
         virtual Telemetry<Type...>& GetOwner() final override;
 
@@ -276,7 +260,13 @@ namespace telemetry
          * @brief This function is responsible for writing modified telemetry elements to the passed buffer writer.
          * @param[in] writer Buffer writer object that should be used to write the serialized state.
          */
-        void WriteModified(Writer& writer) const;
+        template <typename WriterType> void WriteModified(WriterType& writer) const;
+
+        /**
+         * @brief This function is responsible for writing all telemetry elements to the passed buffer writer.
+         * @param[in] writer Buffer writer object that should be used to write the serialized state.
+         */
+        template <typename WriterType> void Write(WriterType& writer) const;
 
         /**
          * @brief Informs telemetry container that all changes have been saved. And from now on the telemetry
@@ -285,14 +275,6 @@ namespace telemetry
         void CommitCapture();
 
       private:
-        /**
-         * @brief Verifies whether the passed object is considered to be different from the one
-         * currently stored.
-         * @param[in] arg Object to be examined.
-         * @return True if passed object is considered to be significantly different, false otherwise.
-         */
-        template <typename Arg> bool IsDifferent(const Arg& arg) const;
-
         /**
          * @brief Telemetry element wrapper that attaches precalculated information whether it
          * has been mofidied since last save.
@@ -306,9 +288,13 @@ namespace telemetry
 
         template <int Tag> bool IsModifiedInternal() const;
 
-        template <int Tag, typename T, typename... Args> void WriteModifiedInternal(Writer& writer) const;
+        template <typename WriterType, typename T, typename... Args> void WriteModifiedInternal(WriterType& writer) const;
 
-        template <int Tag> void WriteModifiedInternal(Writer& writer) const;
+        template <typename WriterType> void WriteModifiedInternal(WriterType& writer) const;
+
+        template <typename WriterType, typename T, typename... Args> void WriteInternal(WriterType& writer) const;
+
+        template <typename WriterType> void WriteInternal(WriterType& writer) const;
 
         template <int Tag, typename T, typename... Args> void CommitCaptureInternal();
 
@@ -336,30 +322,19 @@ namespace telemetry
 
     template <typename... Type> template <typename Arg> void Telemetry<Type...>::Set(const Arg& arg)
     {
-        if (IsDifferent(arg))
-        {
-            auto& entry = std::get<ElementContainer<Arg>>(this->storage);
-            entry.first = arg;
-            entry.second = true;
-        }
+        auto& entry = std::get<ElementContainer<Arg>>(this->storage);
+        entry.first = arg;
+        entry.second = true;
     }
 
     template <typename... Type> template <typename Arg> void Telemetry<Type...>::SetVolatile(const Arg& arg)
     {
-        if (IsDifferent(arg))
-        {
-            std::get<ElementContainer<Arg>>(this->storage).first = arg;
-        }
+        std::get<ElementContainer<Arg>>(this->storage).first = arg;
     }
 
     template <typename... Type> template <typename Arg> const Arg& Telemetry<Type...>::Get() const
     {
         return std::get<ElementContainer<Arg>>(this->storage).first;
-    }
-
-    template <typename... Type> template <typename Arg> bool Telemetry<Type...>::IsDifferent(const Arg& arg) const
-    {
-        return std::get<ElementContainer<Arg>>(this->storage).first.IsDifferent(arg);
     }
 
     template <typename... Type> inline bool Telemetry<Type...>::IsModified() const
@@ -377,9 +352,14 @@ namespace telemetry
         return false;
     }
 
-    template <typename... Type> inline void Telemetry<Type...>::WriteModified(Writer& writer) const
+    template <typename... Type> template <typename WriterType> inline void Telemetry<Type...>::WriteModified(WriterType& writer) const
     {
-        return WriteModifiedInternal<0, Type...>(writer);
+        return WriteModifiedInternal<WriterType, Type...>(writer);
+    }
+
+    template <typename... Type> template <typename WriterType> inline void Telemetry<Type...>::Write(WriterType& writer) const
+    {
+        return WriteInternal<WriterType, Type...>(writer);
     }
 
     template <typename... Type> inline void Telemetry<Type...>::CommitCapture()
@@ -388,21 +368,34 @@ namespace telemetry
     }
 
     template <typename... Type>
-    template <int Tag, typename T, typename... Args>
-    inline void Telemetry<Type...>::WriteModifiedInternal(Writer& writer) const
+    template <typename WriterType, typename T, typename... Args>
+    inline void Telemetry<Type...>::WriteModifiedInternal(WriterType& writer) const
     {
         const auto& entry = std::get<ElementContainer<T>>(this->storage);
         if (entry.second)
         {
-            writer.WriteByte(T::Id);
             entry.first.Write(writer);
-            writer.WriteByte(T::Id);
         }
 
-        WriteModifiedInternal<0, Args...>(writer);
+        WriteModifiedInternal<WriterType, Args...>(writer);
     }
 
-    template <typename... Type> template <int Tag> inline void Telemetry<Type...>::WriteModifiedInternal(Writer& /*writer*/) const
+    template <typename... Type>
+    template <typename WriterType>
+    inline void Telemetry<Type...>::WriteModifiedInternal(WriterType& /*writer*/) const
+    {
+    }
+
+    template <typename... Type>
+    template <typename WriterType, typename T, typename... Args>
+    inline void Telemetry<Type...>::WriteInternal(WriterType& writer) const
+    {
+        const auto& entry = std::get<ElementContainer<T>>(this->storage);
+        entry.first.Write(writer);
+        WriteModifiedInternal<WriterType, Args...>(writer);
+    }
+
+    template <typename... Type> template <typename WriterType> inline void Telemetry<Type...>::WriteInternal(WriterType& /*writer*/) const
     {
     }
 

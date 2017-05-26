@@ -5,7 +5,7 @@
 
 #include <type_traits>
 #include "fwd.hpp"
-
+#include "traits.hpp"
 /**
  * @brief Interface of telemetry container for single telemetry element.
  * @ingroup telemetry
@@ -16,39 +16,7 @@
  */
 template <typename Type> struct ITelemetryContainer
 {
-    /**
-     * @brief Type of pointer to method that is responsible for reading part of the persistent state from
-     * its serialized form.
-     * @param[in] reader Buffer reader for serialized persistent state.
-     */
-    typedef void (Type::*ReadType)(Reader& reader);
-
-    /**
-     * @brief Type of pointer to method that is responsible for writing part of the persistent state to
-     * its serialized form.
-     * @param[in] writer Buffer writer for serialized persistent state.
-     */
-    typedef void (Type::*WriteType)(Writer& reader) const;
-
-    /**
-     * @brief Type of pointer to method that is responsible for determination whether two objects of the
-     * Type type are considered to be significantly different, meaning the values that they contain
-     * are different enough to be considered above usual fluctuations.
-     * @param[in] arg Reference to object to compare to.
-     * @return True when both objects are not considered almost the same, false otherwise.
-     */
-    typedef bool (Type::*StateDiscriminator)(const Type& arg) const;
-
-    static_assert(std::is_convertible<decltype(&Type::Read), ReadType>::value,
-        "Telemetry type should be able to read its contents from Buffer reader.");
-
-    static_assert(std::is_convertible<decltype(&Type::Write), WriteType>::value,
-        "Telemetry type should be able to write its contents to Buffer writer.");
-
-    static_assert(std::is_convertible<decltype(&Type::IsDifferent), StateDiscriminator>::value,
-        "Telemetry type should be able to differentiate major/minor state changes.");
-
-    static_assert(Type::Size() > 0, "Telemetry type should report non zero size.");
+    static_assert(Type::BitSize() > 0, "Telemetry type should report non zero size.");
 
     static_assert(Type::Id != 0, "Telemetry type should have non zero identifier.");
 

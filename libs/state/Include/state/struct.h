@@ -7,6 +7,7 @@
 #include "PersistentState.hpp"
 #include "StatePolicies.hpp"
 #include "adcs/adcs.hpp"
+#include "antenna/AntennaConfiguration.hpp"
 #include "antenna/AntennaState.hpp"
 #include "base/os.h"
 #include "experiments/experiments.h"

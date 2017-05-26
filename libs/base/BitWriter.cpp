@@ -57,6 +57,11 @@ inline bool BitWriter::UpdateStatus(std::uint8_t length, std::uint8_t lengthLimi
             ((this->_bitPosition + length) <= this->_bitLimit));
 }
 
+bool BitWriter::Write(std::uint8_t value)
+{
+    return WriteWord(value, BitsPerByte);
+}
+
 bool BitWriter::Write(std::uint16_t value)
 {
     return WriteWord(value, BitsPerWord);
