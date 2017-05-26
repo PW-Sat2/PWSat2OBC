@@ -65,10 +65,23 @@ namespace state
         void Write(Writer& writer) const;
 
         /**
+         * @brief Write the time state to passed buffer writer object.
+         * @param[in] writer Buffer writer object that should be used to write the serialized state
+         * of the time subsystem state.
+         */
+        void Write(BitWriter& writer) const;
+
+        /**
          * @brief Returns size of the serialized state in bytes.
          * @return Size of the serialized state in bytes.
          */
         static constexpr std::uint32_t Size();
+
+        /**
+         * @brief Returns size of the serialized state in bits.
+         * @return Size of the serialized state in bytes.
+         */
+        static constexpr std::uint32_t BitSize();
 
         /**
          * @brief Equality operator.
@@ -119,6 +132,11 @@ namespace state
     inline constexpr std::uint32_t TimeState::Size()
     {
         return sizeof(decltype(lastMissionTime)::rep) + sizeof(decltype(lastExternalTime)::rep);
+    }
+
+    inline constexpr std::uint32_t TimeState::BitSize()
+    {
+        return sizeof(decltype(lastMissionTime)::rep) * 8 + sizeof(std::chrono::seconds::rep) * 8;
     }
 
     inline bool TimeState::operator==(const TimeState& arg) const

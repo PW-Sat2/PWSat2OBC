@@ -2,6 +2,7 @@
 #include <cassert>
 #include "logger/logger.h"
 #include "telemetry/state.hpp"
+#include "base/BitWriter.hpp"
 
 namespace mission
 {
@@ -35,12 +36,12 @@ namespace mission
     void TelemetryTask::Save(telemetry::TelemetryState& stateObject)
     {
         std::array<std::uint8_t, telemetry::ManagedTelemetry::TotalSerializedSize> buffer;
-        Writer writer(buffer);
+        BitWriter writer(buffer);
         stateObject.telemetry.WriteModified(writer);
         assert(writer.Status());
         if (!writer.Status())
         {
-            LOGF(LOG_LEVEL_ERROR, "Insufficient buffer space for telemetry: '%d'.", static_cast<int>(writer.GetDataLength()));
+            LOGF(LOG_LEVEL_ERROR, "Insufficient buffer space for telemetry: '%d'.", static_cast<int>(writer.GetBitDataLength()));
             return;
         }
 

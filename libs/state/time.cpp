@@ -1,3 +1,4 @@
+#include "base/BitWriter.hpp"
 #include "base/reader.h"
 #include "base/writer.h"
 #include "time/TimeCorrectionConfiguration.hpp"
@@ -34,6 +35,12 @@ namespace state
     {
         writer.WriteQuadWordLE(this->lastMissionTime.count());
         writer.WriteQuadWordLE(this->lastExternalTime.count());
+    }
+
+    void TimeState::Write(BitWriter& writer) const
+    {
+        writer.Write(static_cast<std::uint64_t>(this->lastMissionTime.count()));
+        writer.Write(static_cast<std::uint32_t>(duration_cast<seconds>(this->lastExternalTime).count()));
     }
 
     bool TimeState::IsDifferent(const TimeState& state) const

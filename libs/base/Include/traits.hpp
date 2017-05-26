@@ -226,5 +226,47 @@ template <typename ValueType> struct IsValueInList
     }
 };
 
+/**
+ * @brief Traits that can be used to determine whether passed type contains Write method
+ * that accepts requested parameters.
+ * @tparam Type Queried type
+ * @tparam Args Parameter pack that contains types of Write method arguments.
+ */
+template <typename Type, typename... Args> class HasWrite
+{
+    template <typename C, typename = decltype(std::declval<C>().Write(std::declval<Args>()...))> static std::true_type test(int);
+
+    template <typename C> static std::false_type test(...);
+
+  public:
+    /**
+     * @brief Flag indicating whether the Type type contains Write(Args...) method.
+     *
+     * True on success, false otherwise.
+     */
+    static constexpr bool Value = decltype(test<Type>(0))::value;
+};
+
+/**
+ * @brief Traits that can be used to determine whether passed type contains Read method
+ * that accepts requested parameters.
+ * @tparam Type Queried type
+ * @tparam Args Parameter pack that contains types of Read method arguments.
+ */
+template <typename Type, typename... Args> class HasRead
+{
+    template <typename C, typename = decltype(std::declval<C>().Read(std::declval<Args>()...))> static std::true_type test(int);
+
+    template <typename C> static std::false_type test(...);
+
+  public:
+    /**
+     * @brief Flag indicating whether the Type type contains Read(Args...) method.
+     *
+     * True on success, false otherwise.
+     */
+    static constexpr bool Value = decltype(test<Type>(0))::value;
+};
+
 /** @} */
 #endif /* LIBS_BASE_INCLUDE_TRAITS_HPP_ */
