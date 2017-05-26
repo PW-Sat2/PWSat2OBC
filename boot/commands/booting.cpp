@@ -135,3 +135,19 @@ void TMRBoot()
 
     BootToAddress(BOOT_APPLICATION_BASE);
 }
+
+void SetRunlevel()
+{
+    BSP_UART_Puts(BSP_UART_DEBUG, "\nRunlevel: ");
+
+    std::uint8_t runlevel = BSP_UART_rxByte(BSP_UART_DEBUG);
+
+    if (runlevel > 2)
+    {
+        BSP_UART_Puts(BSP_UART_DEBUG, "Invalid runlevel\n");
+        return;
+    }
+
+    boot::RequestedRunlevel = static_cast<boot::Runlevel>(runlevel);
+    BSP_UART_Printf<20>(BSP_UART_DEBUG, "\nRunlevel set to %d\n", runlevel);
+}

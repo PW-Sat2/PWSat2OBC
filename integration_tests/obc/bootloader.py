@@ -6,6 +6,7 @@ class OBCBootloader(Bootloader):
         self._port = port
 
     def wait_for_prompt(self):
+        self._port.write('\n')
         c = self._port.read(1)
 
         while c != '#':

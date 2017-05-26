@@ -35,10 +35,24 @@ class BootToUpper:
 
 
 class SelectRunlevel:
-    def __init__(self, next_handler):
-        self._next_handler = next_handler
+    def __init__(self, runlevel):
+        self._runlevel = runlevel
+
+    def boot(self, next_handler, bootloader):
+        bootloader.wait_for_prompt()
+        print 'I want runlevel!'
+
+        bootloader.write('R' + chr(self._runlevel))
+
+        next_handler.boot(bootloader)
+
+
+class BootHandlerChain:
+    def __init__(self, chain):
+        self._chain = chain
 
     def boot(self, bootloader):
-        bootloader.wait_for_prompt()
-        # select runlevel
-        self._next_handler.boot(bootloader)
+        if len(self._chain) == 1:
+            self._chain[0].boot(bootloader)
+        else:
+            self._chain[0].boot(BootHandlerChain(self._chain[1:]), bootloader)

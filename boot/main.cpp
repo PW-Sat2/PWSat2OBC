@@ -43,7 +43,6 @@ static void Initialize()
 void waitForComms(uint32_t timeoutTicks_ms)
 {
     BSP_UART_txByte(BSP_UART_DEBUG, '#');
-
     while (true)
     {
         COMMS_processMsg();
@@ -81,6 +80,8 @@ static bool StayInBootloader()
 int main(void)
 {
     Initialize();
+
+    boot::RequestedRunlevel = boot::Runlevel::Runlevel2;
 
     auto d = StayInBootloader();
 

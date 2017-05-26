@@ -4,7 +4,7 @@ from system import System
 from pins import Pins
 import extensions
 from build_config import config
-from obc.boot import BootToIndex, BootToUpper
+from obc.boot import BootToIndex, BootToUpper, BootHandlerChain
 
 
 class BaseTest(unittest.TestCase):
@@ -22,7 +22,15 @@ class BaseTest(unittest.TestCase):
 
         extensions.set_up(test_id=self.id())
 
-        self.system = System(obc_com, mock_com, self.gpio, boot_handler, self.auto_power_on)
+        boot_wrappers = self.__getattribute__(self._testMethodName).boot_wrappers or []
+
+        boot_wrappers += [boot_handler]
+
+        print 'Boot chain: {}'.format(boot_wrappers)
+
+        boot_handler_chain = BootHandlerChain(boot_wrappers)
+
+        self.system = System(obc_com, mock_com, self.gpio, boot_handler_chain, self.auto_power_on)
 
     def tearDown(self):
         self.system.obc.sync_fs()
