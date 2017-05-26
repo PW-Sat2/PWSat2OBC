@@ -258,6 +258,35 @@ bool CommObject::GetTransmitterTelemetry(TransmitterTelemetry& telemetry)
     return reader.Status();
 }
 
+bool CommObject::GetTransmitterUptime(Uptime& uptime)
+{
+    std::uint8_t buffer[4] = {0};
+    const bool status = this->SendCommandWithResponse(Address::Transmitter, num(TransmitterCommand::GetUptime), span<uint8_t>(buffer));
+    if (!status)
+    {
+        return status;
+    }
+
+    Reader reader(buffer);
+    const std::uint8_t seconds = reader.ReadByte();
+    const std::uint8_t minutes = reader.ReadByte();
+    const std::uint8_t hours = reader.ReadByte();
+    uptime.days = reader.ReadByte();
+
+    if ((seconds & 0xc0) != 0 || //
+        (minutes & 0xc0) != 0 || //
+        (hours & 0xe0) != 0)
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Received invalid transmitter uptime. ");
+        return false;
+    }
+
+    uptime.seconds = seconds;
+    uptime.minutes = minutes;
+    uptime.hours = hours;
+    return reader.Status();
+}
+
 /**
  * @brief Get the span that is suited to receive the frame with specified length.
  * @ingroup LowerCommDriver
@@ -437,6 +466,7 @@ bool CommObject::GetTelemetry(CommTelemetry& telemetry)
     TransmitterTelemetry transmitter;
     ReceiverTelemetry receiver;
     TransmitterState state;
+    Uptime uptime;
     if (!GetTransmitterTelemetry(transmitter))
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire transmitter telemetry. ");
@@ -455,7 +485,13 @@ bool CommObject::GetTelemetry(CommTelemetry& telemetry)
         return false;
     }
 
-    telemetry = CommTelemetry(receiver, transmitter, state);
+    if (!GetTransmitterUptime(uptime))
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire transmitter uptime. ");
+        return false;
+    }
+
+    telemetry = CommTelemetry(receiver, transmitter, state, uptime);
     return true;
 }
 
