@@ -8,7 +8,7 @@
 namespace adcs
 {
     /**
-     * @defgroup adcs_detumbling  implementaiton of detumbling algorithm
+     * @defgroup adcs_detumbling  implementation of detumbling algorithm
      *
      * @{
      */
@@ -45,7 +45,7 @@ namespace adcs
              * @unit [kg m^2 / s]
              * @default 2.879285e-5 * 1e15 -- unit conv - original gain * convwersion
              */
-            float bDotGain = 2.879285e-5 * 1e15; // unit conv - original gain * convwersion
+            float bDotGain = 2.879285e-5 * 1e15; // unit conv - original gain * conversion
 
             /** @brief state of flags enabling coils
              * @unit [-]
@@ -77,16 +77,16 @@ namespace adcs
         Detumbling();
 
         /**
-         * @brief Detumbling algorithm initialisation function
+         * @brief Detumbling algorithm initialization function
          *
-         * This function sould be called before first step of algorithm
+         * This function should be called before first step of algorithm
          * and  every time user intend to change parameters
          *
          * @param[out] state container
          * @param[in] parameters set
          * @return void
          */
-        void initialize(State& state, const Parameters& param);
+        void initialize(State& state, const Parameters& parameters);
 
         /**
          * @brief Detumbling step function
@@ -94,15 +94,15 @@ namespace adcs
          * This function calculates value to be commanded to dipoles
          * based on magnetometer measurements and preserved state
          *
-         * @param[out] values to be comanded to dipoles [1e-4 Am2]
-         * @param[in]  magnetometer measurement [1e-7 T]
-         * @param[in/out] state container
+         * @param[out] dipole to be commanded to dipoles \[1e-4 Am2\]
+         * @param[in] magnetometer measurement \[1e-7 T\]
+         * @param[in,out] state container
          * @return void
          */
-        void step(DipoleVec& dipole, const MagVec& mgmt, State& state);
+        void step(DipoleVec& dipole, const MagVec& magnetometer, State& state);
 
       private:
-        // field to store exp value calculated once on initialisation
+        /** field to store exp value calculated once on initialization */
         float mtmDotExp;
     };
     /** @} */
