@@ -140,8 +140,8 @@ namespace devices
 
             /**
              * @brief Writes to all drivers.
-             * @param address[in] Base address
-             * @param buffe[in]r Buffer with data
+             * @param[in] address Base address
+             * @param[in] buffer Buffer with data
              */
             virtual void Write(Address address, gsl::span<const std::uint8_t> buffer) override;
 
