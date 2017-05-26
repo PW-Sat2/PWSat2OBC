@@ -1,16 +1,23 @@
 from base import BaseTest
-from system import wait_for_obc_start
+from system import wait_for_obc_start, runlevel
 from utils import TestEvent
 
 INFINITY_TIME = 999999
 
 
 class Test_SailTest(BaseTest):
+    @runlevel(1)
     def test_pingpong(self):
         self.system.obc.wait_to_start()
         l = self.system.obc.ping()
 
         self.assertEqual("pong", l)
+
+        boot_params = self.system.obc._command("boot_params")
+
+        p = boot_params.find("runlevel=1")
+
+        self.assertGreater(p, 0)
 
     @wait_for_obc_start()
     def test_happy_path(self):

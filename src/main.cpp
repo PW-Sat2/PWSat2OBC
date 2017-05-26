@@ -162,6 +162,7 @@ static void ObcInitTask(void* param)
     drivers::watchdog::InternalWatchdog::Enable();
 
     LOG(LOG_LEVEL_INFO, "Starting initialization task... ");
+    LOGF(LOG_LEVEL_INFO, "Requested runlevel %d", num(boot::RequestedRunlevel));
 
     InitializeTerminal();
 
@@ -279,6 +280,8 @@ int main(void)
             "No boot information from bootloader (expected: 0x%lX, got: 0x%lX)",
             boot::BootloaderMagicNumber,
             boot::MagicNumber);
+
+        boot::RequestedRunlevel = boot::Runlevel::Runlevel2;
     }
     else
     {
