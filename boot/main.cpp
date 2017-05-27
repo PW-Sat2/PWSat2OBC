@@ -42,7 +42,6 @@ static void Initialize()
 
 void waitForComms(uint32_t timeoutTicks_ms)
 {
-    BSP_UART_txByte(BSP_UART_DEBUG, '#');
     while (true)
     {
         COMMS_processMsg();

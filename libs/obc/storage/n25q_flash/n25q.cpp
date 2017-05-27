@@ -23,7 +23,7 @@ N25QStorage::N25QStorage(drivers::spi::EFMSPIInterface& spi, IYaffsDeviceOperati
 {
 }
 
-OSResult N25QStorage::Initialize()
+OSResult N25QStorage::InitializeRunlevel1()
 {
     if (this->_driver.Reset() != OperationResult::Success)
     {

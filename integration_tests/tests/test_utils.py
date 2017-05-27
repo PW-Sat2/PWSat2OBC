@@ -12,7 +12,6 @@ class UtilsTests(TestCase):
         ('ABC', [65, 66, 67]),
         ((1, 2, 3), [1, 2, 3])
     ])
-    @x(2)
     def test_ensure_byte_list(self, input, output):
         result = ensure_byte_list(input)
         self.assertEqual(result, output)

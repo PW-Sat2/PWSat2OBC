@@ -23,10 +23,7 @@ namespace obc
         FDIR();
 
         /** @brief Performs initialization */
-        void Initalize();
-
-        /** @brief Performs post-start initialization */
-        void PostStartInitialize();
+        void InitalizeRunlevel1();
 
         /**
          * @brief Returns reference to error counting mechanism

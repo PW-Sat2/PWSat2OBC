@@ -40,11 +40,9 @@
 using services::time::TimeProvider;
 using namespace std::chrono_literals;
 
-static constexpr std::uint32_t PersistentStateBaseAddress = 4;
-
 OBC Main;
-mission::ObcMission Mission(std::tie(Main.timeProvider, Main.rtc),
-    Main.antennaDriver,
+mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc),
+    Main.Hardware.antennaDriver,
     Main.Communication.CommDriver,
     std::tuple<bool, services::power::IPowerControl&>(false, Main.PowerControlInterface),
     Main.adcs.GetAdcsController(),
@@ -86,7 +84,7 @@ void BURTC_IRQHandler(void)
 
 void LESENSE_IRQHandler()
 {
-    Main.UARTDriver.OnWakeUpInterrupt();
+    Main.Hardware.UARTDriver.OnWakeUpInterrupt();
     System::EndSwitchingISR();
 }
 
@@ -104,7 +102,7 @@ __attribute__((optimize("O3"))) void UART1_RX_IRQHandler()
 #endif
 #undef DEBUG_UART
 
-    Main.UARTDriver.OnReceived();
+    Main.Hardware.UARTDriver.OnReceived();
 }
 
 static void BlinkLed0(void* param)
@@ -128,35 +126,6 @@ static void InitSwoEndpoint(void)
     }
 }
 
-static void ProcessState(OBC* obc)
-{
-    auto& persistentState = Mission.GetState().PersistentState;
-    if (obc->Hardware.Pins.SysClear.Input() == false)
-    {
-        LOG(LOG_LEVEL_WARNING, "Resetting system state");
-
-        if (OS_RESULT_FAILED(obc->Storage.ClearStorage()))
-        {
-            LOG(LOG_LEVEL_ERROR, "Storage reset failure");
-        }
-
-        if (!obc::WritePersistentState(persistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage))
-        {
-            LOG(LOG_LEVEL_ERROR, "Persistent state reset failure");
-        }
-
-        LOG(LOG_LEVEL_INFO, "Completed system state reset");
-    }
-    else
-    {
-        obc::ReadPersistentState(persistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage);
-    }
-
-    auto boot = persistentState.Get<state::BootState>();
-    boot = state::BootState(boot.BootCounter() + 1);
-    persistentState.Set(boot);
-}
-
 static void AuditSystemStartup()
 {
     const auto& persistentState = Mission.GetState().PersistentState;
@@ -175,12 +144,6 @@ static void AuditSystemStartup()
     efm::mcu::ResetBootReason();
 }
 
-static void SetupAntennas(void)
-{
-    AntennaMiniportInitialize(&Main.antennaMiniport);
-    AntennaDriverInitialize(&Main.antennaDriver, &Main.antennaMiniport, &Main.Hardware.I2C.Buses.Bus, &Main.Hardware.I2C.Buses.Payload);
-}
-
 static void ObcInitTask(void* param)
 {
     drivers::watchdog::InternalWatchdog::Enable();
@@ -188,50 +151,14 @@ static void ObcInitTask(void* param)
     LOG(LOG_LEVEL_INFO, "Starting initialization task... ");
     LOGF(LOG_LEVEL_INFO, "Requested runlevel %d", num(boot::RequestedRunlevel));
 
-    InitializeTerminal();
-
     auto obc = static_cast<OBC*>(param);
 
-    if (OS_RESULT_FAILED(obc->PostStartInitialization()))
+    if (OS_RESULT_FAILED(obc->InitializeRunlevel1()))
     {
-        LOG(LOG_LEVEL_ERROR, "Unable to initialize hardware after start. ");
+        LOG(LOG_LEVEL_ERROR, "Unable to initialize OBC. ");
     }
 
-    ProcessState(obc);
     AuditSystemStartup();
-
-    obc->fs.MakeDirectory("/a");
-
-    const auto missionTime = Mission.GetState().PersistentState.Get<state::TimeState>().LastMissionTime();
-    if (!obc->timeProvider.Initialize(missionTime, nullptr, nullptr))
-    {
-        LOG(LOG_LEVEL_ERROR, "Unable to initialize persistent timer. ");
-    }
-
-    if (OS_RESULT_FAILED(Main.antennaDriver.HardReset(&Main.antennaDriver)))
-    {
-        LOG(LOG_LEVEL_ERROR, "Unable to reset both antenna controllers. ");
-    }
-
-    if (!obc->Communication.CommDriver.Restart())
-    {
-        LOG(LOG_LEVEL_ERROR, "Unable to restart comm");
-    }
-
-    if (!Mission.Initialize())
-    {
-        LOG(LOG_LEVEL_ERROR, "Unable to initialize mission loop.");
-    }
-
-    if (!TelemetryAcquisition.Initialize())
-    {
-        LOG(LOG_LEVEL_ERROR, "Unable to initialize telemetry acquisition loop.");
-    }
-
-    obc->Hardware.Burtc.Start();
-
-    LOG(LOG_LEVEL_INFO, "Intialized");
-    Main.StateFlags.Set(OBC::InitializationFinishedFlag);
 
     System::SuspendTask(NULL);
 }
@@ -316,8 +243,6 @@ int main(void)
     Main.Initialize();
 
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
-
-    SetupAntennas();
 
     Main.Hardware.Pins.Led0.High();
     Main.Hardware.Pins.Led1.High();

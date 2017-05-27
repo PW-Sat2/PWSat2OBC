@@ -10,7 +10,7 @@ namespace obc
     {
     }
 
-    void OBCExperiments::Initialize()
+    void OBCExperiments::InitializeRunlevel1()
     {
         this->ExperimentsController.SetExperiments(this->Experiments);
         this->ExperimentsController.Initialize();

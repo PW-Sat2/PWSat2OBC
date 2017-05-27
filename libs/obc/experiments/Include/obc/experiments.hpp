@@ -33,7 +33,7 @@ namespace obc
         /**
          * @brief Performs initialization
          */
-        void Initialize();
+        void InitializeRunlevel1();
 
         /** @brief Fibonacci experiment */
         experiment::fibo::FibonacciExperiment Fibo;

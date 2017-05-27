@@ -14,7 +14,13 @@ class SerialPortTerminal:
         self._gpio = gpio
         self._boot_handler = boot_handler
 
-        self._serial = serial.Serial(comPort, baudrate=115200, timeout=1, rtscts=False)
+        self._serial = None
+        while self._serial is None:
+            try:
+                self._serial = serial.Serial(comPort, baudrate=115200, timeout=1, rtscts=False)
+            except serial.SerialException as e:
+                if e.message.find('WindowsError(5,') == -1:
+                    raise
         self._gpio.high(self._gpio.RESET)
 
     def waitForPrompt(self, terminator='>'):

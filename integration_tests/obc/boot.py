@@ -8,7 +8,7 @@ class Bootloader:
         pass
 
     @abstractmethod
-    def wait_for_prompt(self):
+    def wait_for_prompt(self, trigger=None, prompt=None):
         raise NotImplemented()
 
     @abstractmethod
@@ -40,9 +40,11 @@ class SelectRunlevel:
 
     def boot(self, next_handler, bootloader):
         bootloader.wait_for_prompt()
-        print 'I want runlevel!'
 
-        bootloader.write('R' + chr(self._runlevel))
+        bootloader.write('R')
+        bootloader.wait_for_prompt(trigger=False, prompt=':')
+
+        bootloader.write(chr(self._runlevel))
 
         next_handler.boot(bootloader)
 

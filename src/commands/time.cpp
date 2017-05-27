@@ -21,7 +21,7 @@ void JumpToTimeHandler(uint16_t argc, char* argv[])
     char* tail;
     const auto targetTime = seconds(strtoul(argv[0], &tail, 10));
     devices::rtc::RTCTime rtcTime;
-    if (OS_RESULT_FAILED(Main.rtc.ReadTime(rtcTime)))
+    if (OS_RESULT_FAILED(Main.Hardware.rtc.ReadTime(rtcTime)))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to retrieve time from external RTC");
         return;
