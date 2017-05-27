@@ -3,6 +3,7 @@ set(NAME mission_state)
 set(SOURCES    
     Include/mission/PersistentStateSave.hpp
     PersistentStateSave.cpp
+    TimeCorrectionProvider.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

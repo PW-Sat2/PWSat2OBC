@@ -201,7 +201,7 @@ namespace services
              *
              * @return Operation status. True on success, false otherwise.
              */
-            bool SetCurrentTime(std::chrono::milliseconds duration);
+            virtual bool SetCurrentTime(std::chrono::milliseconds duration);
 
             /**
              * @brief Waits until given timepoint. Wait is directed by timer notifications

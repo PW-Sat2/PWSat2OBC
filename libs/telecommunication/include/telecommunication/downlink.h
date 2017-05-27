@@ -26,6 +26,7 @@ namespace telecommunication
             Pong = 0x01,           //!< Pong
             Operation = 0x2,       //!< Operation command
             Beacon = 0x3,          //!< Beacon
+            TimeStatus = 0x4,      //!< Time status
             TelemetryShort = 0x2A, //!< TelemetryShort
             TelemetryLong = 0x3F,  //!< TelemetryLong
             LastItem               //!< LastItem

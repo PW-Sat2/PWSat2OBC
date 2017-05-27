@@ -9,10 +9,12 @@
 #include "mission/comm.hpp"
 #include "obc/experiments.hpp"
 #include "obc/fdir.hpp"
+#include "obc/telecommands/TimeTelecommand.hpp"
 #include "obc/telecommands/comm.hpp"
 #include "obc/telecommands/experiments.hpp"
 #include "obc/telecommands/file_system.hpp"
 #include "obc/telecommands/ping.hpp"
+#include "state/struct.h"
 #include "telecommunication/telecommand_handling.h"
 #include "telecommunication/uplink.h"
 #include "time/ICurrentTime.hpp"
@@ -114,7 +116,8 @@ namespace obc
         obc::telecommands::EnterIdleStateTelecommand,
         obc::telecommands::RemoveFileTelecommand,
         obc::telecommands::PerformDetumblingExperiment,
-        obc::telecommands::AbortExperiment //
+        obc::telecommands::AbortExperiment,
+        obc::telecommands::TimeTelecommand //
         >;
 
     /**
@@ -130,13 +133,15 @@ namespace obc
          * @param[in] idleStateController Idle state controller
          * @param[in] fs File system
          * @param[in] experiments Experiments
+         * @param[in] timeCorrection Time Correction provider
          */
         OBCCommunication(obc::FDIR& fdir,
             drivers::i2c::II2CBus& i2cBus,
             services::time::ICurrentTime& currentTime,
             mission::IIdleStateController& idleStateController,
             services::fs::IFileSystem& fs,
-            obc::OBCExperiments& experiments);
+            obc::OBCExperiments& experiments,
+            state::ITimeCorrectionProvider&& timeCorrectionProvider);
 
         /**
          * @brief Initializes all communication-related drivers and objects
