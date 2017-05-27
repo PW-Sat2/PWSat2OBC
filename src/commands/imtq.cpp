@@ -24,7 +24,7 @@ namespace imtq_commands
     {
         UNREFERENCED_PARAMETER(argc);
         UNREFERENCED_PARAMETER(argv);
-        const bool status = Main.Imtq.CancelOperation();
+        const bool status = Main.Hardware.Imtq.CancelOperation();
         if (!status)
         {
             Main.terminal.Printf("CancelOperation failed!\n");
@@ -37,7 +37,7 @@ namespace imtq_commands
     {
         UNREFERENCED_PARAMETER(argc);
         UNREFERENCED_PARAMETER(argv);
-        const bool status = Main.Imtq.StartMTMMeasurement();
+        const bool status = Main.Hardware.Imtq.StartMTMMeasurement();
         if (!status)
         {
             Main.terminal.Printf("StartMTMMeasurement failed!\n");
@@ -59,7 +59,7 @@ namespace imtq_commands
         current[2] = atoi(argv[2]);
         std::chrono::milliseconds time{atoi(argv[3])};
 
-        const bool status = Main.Imtq.StartActuationCurrent(current, time);
+        const bool status = Main.Hardware.Imtq.StartActuationCurrent(current, time);
         if (!status)
         {
             Main.terminal.Printf("StartActuationCurrent failed!\n");
@@ -81,7 +81,7 @@ namespace imtq_commands
         dipole[2] = atoi(argv[2]);
         std::chrono::milliseconds time{atoi(argv[3])};
 
-        const bool status = Main.Imtq.StartActuationDipole(dipole, time);
+        const bool status = Main.Hardware.Imtq.StartActuationDipole(dipole, time);
         if (!status)
         {
             Main.terminal.Printf("StartActuationDipole failed!\n");
@@ -94,7 +94,7 @@ namespace imtq_commands
     {
         UNREFERENCED_PARAMETER(argc);
         UNREFERENCED_PARAMETER(argv);
-        const bool status = Main.Imtq.StartAllAxisSelfTest();
+        const bool status = Main.Hardware.Imtq.StartAllAxisSelfTest();
         if (!status)
         {
             Main.terminal.Printf("StartAllAxisSelfTest failed!\n");
@@ -112,7 +112,7 @@ namespace imtq_commands
         }
         std::chrono::seconds time{atoi(argv[0])};
 
-        const bool status = Main.Imtq.StartBDotDetumbling(time);
+        const bool status = Main.Hardware.Imtq.StartBDotDetumbling(time);
         if (!status)
         {
             Main.terminal.Printf("StartBDotDetumbling failed!\n");
@@ -127,7 +127,7 @@ namespace imtq_commands
         UNREFERENCED_PARAMETER(argv);
         MagnetometerMeasurementResult result;
 
-        const bool status = Main.Imtq.GetCalibratedMagnetometerData(result);
+        const bool status = Main.Hardware.Imtq.GetCalibratedMagnetometerData(result);
         if (!status)
         {
             Main.terminal.Printf("GetCalibratedMagnetometerData failed!\n");
@@ -147,7 +147,7 @@ namespace imtq_commands
         UNREFERENCED_PARAMETER(argv);
         State state;
 
-        const bool status = Main.Imtq.GetSystemState(state);
+        const bool status = Main.Hardware.Imtq.GetSystemState(state);
         if (!status)
         {
             Main.terminal.Printf("GetSystemState failed!\n");
@@ -166,7 +166,7 @@ namespace imtq_commands
         UNREFERENCED_PARAMETER(argc);
         UNREFERENCED_PARAMETER(argv);
         Vector3<Current> current;
-        bool status = Main.Imtq.GetCoilCurrent(current);
+        bool status = Main.Hardware.Imtq.GetCoilCurrent(current);
         if (!status)
         {
             Main.terminal.Printf("GetCoilCurrent failed!\n");
@@ -174,7 +174,7 @@ namespace imtq_commands
         }
 
         Vector3<TemperatureMeasurement> temp;
-        status = Main.Imtq.GetCoilTemperature(temp);
+        status = Main.Hardware.Imtq.GetCoilTemperature(temp);
         if (!status)
         {
             Main.terminal.Printf("GetCoilTemperature failed!\n");
@@ -195,7 +195,7 @@ namespace imtq_commands
         UNREFERENCED_PARAMETER(argc);
         UNREFERENCED_PARAMETER(argv);
         SelfTestResult result;
-        const bool status = Main.Imtq.GetSelfTestResult(result);
+        const bool status = Main.Hardware.Imtq.GetSelfTestResult(result);
         if (!status)
         {
             Main.terminal.Printf("GetSelfTestResult failed!\n");
@@ -227,7 +227,7 @@ namespace imtq_commands
         UNREFERENCED_PARAMETER(argv);
         HouseKeepingEngineering result;
 
-        bool status = Main.Imtq.GetHouseKeepingEngineering(result);
+        bool status = Main.Hardware.Imtq.GetHouseKeepingEngineering(result);
         if (!status)
         {
             Main.terminal.Printf("GetHouseKeepingEngineering failed!\n");
@@ -260,7 +260,7 @@ namespace imtq_commands
         std::array<uint8_t, 8> data;
         span<uint8_t> paramData{data.data(), length};
 
-        bool status = Main.Imtq.GetParameter(id, paramData);
+        bool status = Main.Hardware.Imtq.GetParameter(id, paramData);
         if (!status)
         {
             Main.terminal.Printf("GetParameter failed!\n");
@@ -286,7 +286,7 @@ namespace imtq_commands
         std::array<uint8_t, 8> data;
         span<uint8_t> paramData{data.data(), length};
 
-        bool status = Main.Imtq.ResetParameterAndGetDefault(id, paramData);
+        bool status = Main.Hardware.Imtq.ResetParameterAndGetDefault(id, paramData);
         if (!status)
         {
             Main.terminal.Printf("ResetParameter failed!\n");
@@ -317,7 +317,7 @@ namespace imtq_commands
 
         span<uint8_t> paramData{data.data(), length};
 
-        bool status = Main.Imtq.SetParameter(id, paramData);
+        bool status = Main.Hardware.Imtq.SetParameter(id, paramData);
         if (!status)
         {
             Main.terminal.Printf("SetParameter failed!\n");
@@ -332,7 +332,7 @@ namespace imtq_commands
         UNREFERENCED_PARAMETER(argv);
 
         SelfTestResult result;
-        const bool status = Main.Imtq.PerformSelfTest(result);
+        const bool status = Main.Hardware.Imtq.PerformSelfTest(result);
         if (!status)
         {
             Main.terminal.Printf("PerformSelfTest failed!\n");
@@ -363,7 +363,7 @@ namespace imtq_commands
         UNREFERENCED_PARAMETER(argc);
         UNREFERENCED_PARAMETER(argv);
         Vector3<MagnetometerMeasurement> result;
-        const bool status = Main.Imtq.MeasureMagnetometer(result);
+        const bool status = Main.Hardware.Imtq.MeasureMagnetometer(result);
         if (!status)
         {
             Main.terminal.Printf("mtmRead failed!\n");

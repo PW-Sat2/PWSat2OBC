@@ -149,7 +149,7 @@ namespace obc
         /**
          * @brief Initializes all communication-related drivers and objects
          */
-        void Initialize();
+        void InitializeRunlevel1();
 
         /** @brief Uplink protocol decoder */
         telecommunication::uplink::UplinkProtocol UplinkProtocolDecoder;

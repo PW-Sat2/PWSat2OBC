@@ -54,7 +54,7 @@ void RTCTest(std::uint16_t argc, char* argv[])
 
     if (strcmp(argv[0], "test") == 0)
     {
-        RTCObject& rtc = Main.rtc;
+        RTCObject& rtc = Main.Hardware.rtc;
 
         RTCTime startTime;
         rtc.ReadTime(startTime);
@@ -106,13 +106,13 @@ void RTCTest(std::uint16_t argc, char* argv[])
     {
         RTCTime time;
 
-        Main.rtc.ReadTime(time);
+        Main.Hardware.rtc.ReadTime(time);
         PrintRTCTime(time);
     }
     else if (strcmp(argv[0], "duration") == 0)
     {
         RTCTime time;
-        Main.rtc.ReadTime(time);
+        Main.Hardware.rtc.ReadTime(time);
 
         Main.terminal.Printf("%li\r\n", static_cast<std::uint32_t>(time.ToDuration().count()));
     }

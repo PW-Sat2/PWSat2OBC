@@ -36,7 +36,7 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
 {
 }
 
-void OBCCommunication::Initialize()
+void OBCCommunication::InitializeRunlevel1()
 {
     this->CommDriver.Initialize();
 }

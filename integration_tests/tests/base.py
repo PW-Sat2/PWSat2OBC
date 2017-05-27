@@ -22,7 +22,7 @@ class BaseTest(unittest.TestCase):
 
         extensions.set_up(test_id=self.id())
 
-        boot_wrappers = self.__getattribute__(self._testMethodName).boot_wrappers or []
+        boot_wrappers = self._get_boot_wrappers(self._testMethodName)
 
         boot_wrappers += [boot_handler]
 
@@ -46,3 +46,8 @@ class BaseTest(unittest.TestCase):
         self.power_on_obc(clean_state=clean_state)
         self.system.obc.wait_to_start()
 
+    def _get_boot_wrappers(self, test):
+        try:
+            return self.__getattribute__(self._testMethodName).boot_wrappers or []
+        except AttributeError:
+            return []

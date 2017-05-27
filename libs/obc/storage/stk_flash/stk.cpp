@@ -5,13 +5,14 @@
 
 using obc::storage::STKStorage;
 
-STKStorage::STKStorage(drivers::spi::EFMSPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations, obc::OBCGPIO& pins) : _deviceOperations(deviceOperations)
+STKStorage::STKStorage(drivers::spi::EFMSPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations, obc::OBCGPIO& pins)
+    : _deviceOperations(deviceOperations)
 {
     UNREFERENCED_PARAMETER(spi);
     UNREFERENCED_PARAMETER(pins);
 }
 
-OSResult STKStorage::Initialize()
+OSResult STKStorage::InitializeRunlevel1()
 {
     memset(&rootDevice, 0, sizeof(rootDevice));
     rootDeviceDriver.geometry.pageSize = 512;

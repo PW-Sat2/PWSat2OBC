@@ -7,14 +7,11 @@ namespace obc
     {
     }
 
-    void FDIR::Initalize()
-    {
-    }
-
-    void FDIR::PostStartInitialize()
+    void FDIR::InitalizeRunlevel1()
     {
         this->_errorCounting.Handler(*this);
     }
+
     error_counter::ErrorCounting& FDIR::ErrorCounting()
     {
         return this->_errorCounting;

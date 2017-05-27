@@ -8,13 +8,11 @@
 
 #include "adcs/AdcsCoordinator.hpp"
 #include "adcs/AdcsExperimental.hpp"
-#include "antenna/driver.h"
-#include "antenna/miniport.h"
+
 #include "base/os.h"
 #include "experiment/fibo/fibo.h"
 #include "fs/fs.h"
 #include "fs/yaffs.h"
-#include "imtq/imtq.h"
 #include "leuart/line_io.h"
 #include "n25q/n25q.h"
 #include "n25q/yaffs.h"
@@ -26,13 +24,10 @@
 #include "obc/storage.h"
 #include "power_eps/power_eps.h"
 #include "program_flash/boot_table.hpp"
-#include "program_flash/flash_driver.hpp"
-#include "rtc/rtc.hpp"
 #include "scrubber/ram.hpp"
 #include "spi/efm.h"
 #include "terminal/terminal.h"
 #include "time/timer.h"
-#include "uart/uart.h"
 #include "utils.h"
 
 /**
@@ -59,7 +54,7 @@ struct OBC
     /**
      * @brief Initialization that takes places after starting RTOS
      */
-    OSResult PostStartInitialization();
+    OSResult InitializeRunlevel1();
 
     /**
      * @brief Returns current LineIO implementation
@@ -85,12 +80,6 @@ struct OBC
     /** @brief OBC hardware */
     obc::OBCHardware Hardware;
 
-    /** @brief Low level driver for antenna controller. */
-    AntennaMiniportDriver antennaMiniport;
-
-    /** @brief High level driver for antenna subsystem. */
-    AntennaDriver antennaDriver;
-
     /** @brief Standard text based IO. */
     LineIO IO;
 
@@ -103,12 +92,6 @@ struct OBC
     /** @brief OBC storage */
     obc::OBCStorage Storage;
 
-    /** @brief UART driver */
-    drivers::uart::UART UARTDriver;
-
-    /** @brief Imtq handling */
-    devices::imtq::ImtqDriver Imtq;
-
     /** @brief Adcs subsytem for obc. */
     obc::Adcs adcs;
 
@@ -120,9 +103,6 @@ struct OBC
 
     /** @brief Terminal object. */
     Terminal terminal;
-
-    /** @brief External Real Time Clock.  */
-    devices::rtc::RTCObject rtc;
 };
 
 LineIO& OBC::GetLineIO()
@@ -130,7 +110,7 @@ LineIO& OBC::GetLineIO()
 #ifdef USE_LEUART
     return this->IO;
 #else
-    return this->UARTDriver.GetLineIO();
+    return this->Hardware.UARTDriver.GetLineIO();
 #endif
 }
 
@@ -140,6 +120,8 @@ extern OBC Main;
 /** @brief RAM Scrubber */
 using Scrubber =
     scrubber::RAMScrubber<io_map::RAMScrubbing::MemoryStart, io_map::RAMScrubbing::MemorySize, io_map::RAMScrubbing::CycleSize>;
+
+static constexpr std::uint32_t PersistentStateBaseAddress = 4;
 
 /** @} */
 
