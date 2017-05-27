@@ -22,7 +22,7 @@ namespace obc
       public:
         /**
          * @brief ctor.
-         * @param[in] spi Array of pointers to spi bus controllers that will be used to access 3 memory chips.
+         * @param[in] spis Array of pointers to spi bus controllers that will be used to access 3 memory chips.
          */
         PersistentStorageAccess(std::array<drivers::spi::ISPIInterface*, 3> spis);
 
@@ -33,6 +33,7 @@ namespace obc
         /**
          * @brief Retrieves driver for single FRAM chip.
          * @tparam DriverIndex Index of the driver from range <0;2>
+         * @return Reference to requested storage driver object.
          */
         template <uint8_t DriverIndex> devices::fm25w::FM25WDriver& GetSingleDriver();
 

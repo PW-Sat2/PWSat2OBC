@@ -65,6 +65,15 @@ namespace redundancy
         return true;
     }
 
+    /**
+     * @brief Performs bitwise majority votes on entire data buffers.
+     * @param[out] output Buffer for corrected result
+     * @param[in] buffer1 First input
+     * @param[in] buffer2 Second input
+     * @param[in] buffer3 Third input
+     * @tparam T Type used for majority vote. Must be integral or enum type
+     * @return True if all buffers are of the same size, False otherwise.
+     */
     template <typename T> bool CorrectBuffer(gsl::span<T> output, gsl::span<T> buffer1, gsl::span<T> buffer2, gsl::span<T> buffer3)
     {
         static_assert(std::is_integral<T>::value || std::is_enum<T>::value, "Correction requires integral or enum type");
