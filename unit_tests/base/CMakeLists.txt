@@ -18,6 +18,7 @@ set(SOURCES
     mock/error_counter.cpp
     I2C/I2CMock.cpp
     SPI/SPIMock.cpp
+    fault_handlers.c
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -32,6 +33,7 @@ target_link_libraries(${NAME}
     obc_state
     antenna
     mission_comm
+    telecommunication
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

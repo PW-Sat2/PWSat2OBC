@@ -25,6 +25,8 @@
 #include "obc/hardware.h"
 #include "obc/storage.h"
 #include "power_eps/power_eps.h"
+#include "program_flash/boot_table.hpp"
+#include "program_flash/flash_driver.hpp"
 #include "rtc/rtc.hpp"
 #include "spi/efm.h"
 #include "terminal/terminal.h"
@@ -72,6 +74,9 @@ struct OBC
 
     /** @brief Flag indicating that OBC software has finished initialization process. */
     EventGroup StateFlags;
+
+    /** @brief Boot Table */
+    program_flash::BootTable BootTable;
 
     /** @brief Persistent timer that measures mission time. */
     services::time::TimeProvider timeProvider;

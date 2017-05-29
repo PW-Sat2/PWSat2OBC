@@ -1,7 +1,7 @@
 from unittest import TestCase
 from nose_parameterized import parameterized
 
-from utils import ensure_byte_list
+from utils import ensure_byte_list, ensure_string
 
 
 class UtilsTests(TestCase):
@@ -15,5 +15,18 @@ class UtilsTests(TestCase):
     ])
     def test_ensure_byte_list(self, input, output):
         result = ensure_byte_list(input)
+
+        self.assertEqual(result, output)
+
+    @parameterized.expand([
+        ([1], '\x01'),
+        ([1, 2], '\x01\x02'),
+        (['A', 'B', 'C'], 'ABC'),
+        ('A', 'A'),
+        ('ABC', 'ABC'),
+        ((1, 2, 3), '\x01\x02\x03')
+    ])
+    def test_ensure_string(self, input, output):
+        result = ensure_string(input)
 
         self.assertEqual(result, output)

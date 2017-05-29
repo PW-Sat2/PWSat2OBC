@@ -165,6 +165,18 @@ void BSP_EBI_Init(void)
     GPIO_IntConfig(gpioPortB, 2, false, true, false);
 #endif
 
+    DEVSTATUS dev_status;
+
+    do
+    {
+        dev_status = lld_StatusGet((uint8_t*)0x84000000, 0);
+
+        if (dev_status != DEV_BUSY)
+        {
+            break;
+        }
+    } while (true);
+
     // Read the Flash configuration:
     FlashID = lld_GetDeviceId((uint8_t*)0x84000000);
     FlashID = FlashID & 0x00FF0000;
