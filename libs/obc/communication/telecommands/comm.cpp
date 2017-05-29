@@ -7,7 +7,7 @@
 #include "system.h"
 #include "telecommunication/downlink.h"
 
-using telecommunication::downlink::DownlinkFrame;
+using telecommunication::downlink::CorrelatedDownlinkFrame;
 using telecommunication::downlink::DownlinkAPID;
 
 namespace obc
@@ -29,8 +29,7 @@ namespace obc
             auto correlationId = r.ReadByte();
             auto duration = r.ReadByte();
 
-            DownlinkFrame response(DownlinkAPID::Operation, 0);
-            response.PayloadWriter().WriteByte(correlationId);
+            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
 
             if (!r.Status())
             {
