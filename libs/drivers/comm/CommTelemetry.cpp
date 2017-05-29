@@ -39,8 +39,8 @@ void CommTelemetry::Write(BitWriter& writer) const
     writer.Write(this->receiverAmplifierTemperature);
     writer.Write(this->signalStrength);
     writer.Write(this->rFReflectedPower);
-    writer.Write(this->transmitterAmplifierTemperature);
     writer.Write(this->rFForwardPower);
+    writer.Write(this->transmitterAmplifierTemperature);
     writer.Write(this->transmitterUptime.seconds);
     writer.Write(this->transmitterUptime.minutes);
     writer.Write(this->transmitterUptime.hours);
