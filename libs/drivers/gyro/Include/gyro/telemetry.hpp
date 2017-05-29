@@ -66,31 +66,16 @@ namespace devices
             int16_t Temperature() const noexcept;
 
             /**
-             * @brief Read the system startup telemetry element subsystem state from passed reader.
-             * @param[in] reader Buffer reader that should be used to read the serialized state.
-             */
-            void Read(Reader& reader);
-
-            /**
              * @brief Write the system startup telemetry element to passed buffer writer object.
              * @param[in] writer Buffer writer object that should be used to write the serialized state.
              */
-            void Write(Writer& writer) const;
+            void Write(BitWriter& writer) const;
 
             /**
              * @brief Returns size of the serialized state in bytes.
              * @return Size of the serialized state in bytes.
              */
-            static constexpr std::uint32_t Size();
-
-            /**
-             * @brief Reports when two system startup objects are different.
-             *
-             * @remark Used by Telemetry container.
-             * @param[in] state Object to compare to.
-             * @return True whether the two objects are different, false otherwise.
-             */
-            bool IsDifferent(const GyroscopeTelemetry& state) const;
+            static constexpr std::uint32_t BitSize();
 
           private:
             int16_t x;           ///< Measurement along x axis.
@@ -119,17 +104,9 @@ namespace devices
             return this->temperature;
         }
 
-        constexpr std::uint32_t GyroscopeTelemetry::Size()
+        constexpr std::uint32_t GyroscopeTelemetry::BitSize()
         {
-            return 4 * sizeof(int16_t);
-        }
-
-        inline bool GyroscopeTelemetry::IsDifferent(const GyroscopeTelemetry& state) const
-        {
-            return this->x != state.x || //
-                this->y != state.y ||    //
-                this->z != state.z ||    //
-                this->temperature != state.temperature;
+            return 8 * 4 * sizeof(std::uint16_t);
         }
 
         /** @} */

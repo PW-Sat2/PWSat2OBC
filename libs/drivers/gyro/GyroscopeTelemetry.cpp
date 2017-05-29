@@ -1,5 +1,4 @@
-#include "base/reader.h"
-#include "base/writer.h"
+#include "base/BitWriter.hpp"
 #include "gyro/telemetry.hpp"
 
 namespace devices
@@ -10,25 +9,17 @@ namespace devices
         {
         }
 
-        GyroscopeTelemetry::GyroscopeTelemetry(int16_t xMes, int16_t yMes, int16_t zMEs, int16_t temp)
-            : x(xMes), y(yMes), z(zMEs), temperature(temp)
+        GyroscopeTelemetry::GyroscopeTelemetry(int16_t xMes, int16_t yMes, int16_t zMes, int16_t temp)
+            : x(xMes), y(yMes), z(zMes), temperature(temp)
         {
         }
 
-        void GyroscopeTelemetry::Read(Reader& reader)
+        void GyroscopeTelemetry::Write(BitWriter& writer) const
         {
-            this->x = reader.ReadSignedWordLE();
-            this->y = reader.ReadSignedWordLE();
-            this->z = reader.ReadSignedWordLE();
-            this->temperature = reader.ReadSignedWordLE();
-        }
-
-        void GyroscopeTelemetry::Write(Writer& writer) const
-        {
-            writer.WriteSignedWordLE(this->x);
-            writer.WriteSignedWordLE(this->y);
-            writer.WriteSignedWordLE(this->z);
-            writer.WriteSignedWordLE(this->temperature);
+            writer.Write(static_cast<std::uint16_t>(this->x));
+            writer.Write(static_cast<std::uint16_t>(this->y));
+            writer.Write(static_cast<std::uint16_t>(this->z));
+            writer.Write(static_cast<std::uint16_t>(this->temperature));
         }
     }
 }
