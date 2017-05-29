@@ -16,5 +16,11 @@ namespace telecommunication
             uint32_t header = (num(apid) << 18) | (seq & 0x3FFFF);
             w.WriteLowerBytesBE(header, HeaderSize);
         }
+
+        CorrelatedDownlinkFrame::CorrelatedDownlinkFrame(DownlinkAPID apid, std::uint32_t seq, std::uint8_t correlationId)
+            : DownlinkFrame(apid, seq)
+        {
+            PayloadWriter().WriteByte(correlationId);
+        }
     }
 }
