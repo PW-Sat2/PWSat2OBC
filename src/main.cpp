@@ -20,6 +20,7 @@
 #include "base/os.h"
 #include "boot/params.hpp"
 #include "dmadrv.h"
+#include "efm_support/api.h"
 #include "efm_support/clock.h"
 #include "fs/fs.h"
 #include "gpio/gpio.h"
@@ -159,16 +160,19 @@ static void ProcessState(OBC* obc)
 static void AuditSystemStartup()
 {
     const auto& persistentState = Mission.GetState().PersistentState;
+    const auto bootReason = efm::mcu::GetBootReason();
     const auto bootCounter = persistentState.Get<state::BootState>().BootCounter();
     auto& telemetry = TelemetryAcquisition.GetState().telemetry;
     if (boot::IsBootInformationAvailable())
     {
-        telemetry.Set(telemetry::SystemStartup(bootCounter, boot::Index));
+        telemetry.Set(telemetry::SystemStartup(bootCounter, boot::Index, bootReason));
     }
     else
     {
-        telemetry.Set(telemetry::SystemStartup(bootCounter, 0xff));
+        telemetry.Set(telemetry::SystemStartup(bootCounter, 0xff, bootReason));
     }
+
+    efm::mcu::ResetBootReason();
 }
 
 static void SetupAntennas(void)

@@ -1,6 +1,7 @@
 #ifndef LIBS_EFM_SUPPORT_INCLUDE_EFM_SUPPORT_API_H_
 #define LIBS_EFM_SUPPORT_INCLUDE_EFM_SUPPORT_API_H_
 
+#include <cstdint>
 #include <em_cmu.h>
 #include <em_usart.h>
 #include "dmadrv.h"
@@ -264,6 +265,23 @@ namespace efm
             DMADRV_DataSize_t size,
             DMADRV_Callback_t callback,
             void* cbUserParam);
+    }
+
+    namespace mcu
+    {
+        /**
+         * @brief This function returns information about the reason of last mcu startup/reset.
+         *
+         * By definition the value returned by this function is mcu specific refer to its documentation
+         * how to interpret this value.
+         * @return Mcu specific information about the reason of last startup/reset.
+         */
+        std::uint32_t GetBootReason();
+
+        /**
+         * @brief This procedure clears current information about last mcu starup/reset cause.
+         */
+        void ResetBootReason();
     }
 
     /** @} */
