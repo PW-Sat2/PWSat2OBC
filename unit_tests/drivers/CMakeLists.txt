@@ -8,6 +8,7 @@ set(SOURCES
   Comm/CommTest.cpp
   Comm/CommFrameTest.cpp
   Comm/DownlinkFrameTest.cpp
+  Comm/CommTelemetryTest.cpp
   Comm/UplinkFrameDecoderTest.cpp
   EPS/EPSDriverTest.cpp
   SPI/SPIDriverTest.cpp
