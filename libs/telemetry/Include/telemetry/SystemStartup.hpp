@@ -32,8 +32,9 @@ namespace telemetry
          * @brief ctor.
          * @param[in] counter Current boot counter value.
          * @param[in] index Currently used boot index.
+         * @param[in] reason Reason of last mcu reset.
          */
-        SystemStartup(std::uint32_t counter, std::uint8_t index);
+        SystemStartup(std::uint32_t counter, std::uint8_t index, std::uint32_t reason);
 
         /**
          * @brief Returns current boot counter.
@@ -48,37 +49,33 @@ namespace telemetry
         std::uint8_t BootIndex() const noexcept;
 
         /**
-         * @brief Read the system startup telemetry element subsystem state from passed reader.
-         * @param[in] reader Buffer reader that should be used to read the serialized state.
+         * @brief Returns reason of the last mcu reset.
+         * @return reason of the last mcu reset.
          */
-        void Read(Reader& reader);
+        std::uint32_t BootReason() const noexcept;
 
         /**
          * @brief Write the system startup telemetry element to passed buffer writer object.
          * @param[in] writer Buffer writer object that should be used to write the serialized state.
          */
-        void Write(Writer& writer) const;
+        void Write(BitWriter& writer) const;
 
         /**
          * @brief Returns size of the serialized state in bytes.
          * @return Size of the serialized state in bytes.
          */
-        static constexpr std::uint32_t Size();
-
-        /**
-         * @brief Reports when two system startup objects are different.
-         *
-         * @remark Used by Telemetry container.
-         * @param[in] state Object to compare to.
-         * @return True whether the two objects are different, false otherwise.
-         */
-        bool IsDifferent(const SystemStartup& state) const;
+        static constexpr std::uint32_t BitSize();
 
       private:
         /**
          * @brief Current boot counter value.
          */
         std::uint32_t bootCounter;
+
+        /**
+         * @brief Reason of the last mcu reset
+         */
+        std::uint32_t bootReason;
 
         /**
          * @brief Current boot index.
@@ -96,14 +93,14 @@ namespace telemetry
         return this->bootIndex;
     }
 
-    constexpr std::uint32_t SystemStartup::Size()
+    inline std::uint32_t SystemStartup::BootReason() const noexcept
     {
-        return sizeof(std::uint32_t) + sizeof(std::uint8_t);
+        return this->bootReason;
     }
 
-    inline bool SystemStartup::IsDifferent(const SystemStartup& state) const
+    constexpr std::uint32_t SystemStartup::BitSize()
     {
-        return this->bootCounter != state.bootCounter || this->bootIndex != state.bootIndex;
+        return 8 * (2 * sizeof(std::uint32_t) + sizeof(std::uint8_t));
     }
 }
 

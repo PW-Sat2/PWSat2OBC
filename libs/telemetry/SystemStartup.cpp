@@ -1,26 +1,23 @@
 #include "telemetry/SystemStartup.hpp"
-#include "base/reader.h"
-#include "base/writer.h"
+#include "base/BitWriter.hpp"
 
 namespace telemetry
 {
-    SystemStartup::SystemStartup() : bootCounter(0), bootIndex(0)
+    SystemStartup::SystemStartup() : bootCounter(0), bootReason(0), bootIndex(0)
     {
     }
 
-    SystemStartup::SystemStartup(std::uint32_t counter, std::uint8_t index) : bootCounter(counter), bootIndex(index)
+    SystemStartup::SystemStartup(std::uint32_t counter, std::uint8_t index, std::uint32_t reason) //
+        : bootCounter(counter),
+          bootReason(reason),
+          bootIndex(index)
     {
     }
 
-    void SystemStartup::Read(Reader& reader)
+    void SystemStartup::Write(BitWriter& writer) const
     {
-        this->bootCounter = reader.ReadQuadWordLE();
-        this->bootIndex = reader.ReadByte();
-    }
-
-    void SystemStartup::Write(Writer& writer) const
-    {
-        writer.WriteQuadWordLE(this->bootCounter);
-        writer.WriteByte(this->bootIndex);
+        writer.Write(this->bootCounter);
+        writer.Write(this->bootIndex);
+        writer.Write(this->bootReason);
     }
 }
