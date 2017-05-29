@@ -6,6 +6,9 @@
 
 namespace program_flash
 {
+    static constexpr std::uint32_t ExpectedDeviceId = 0x00530000;
+    static constexpr std::uint32_t ExpectedDeviceBootConfig = 0x00000002;
+
     BootTable::BootTable(IFlashDriver& flash) : _flash(flash)
     {
     }
@@ -15,7 +18,7 @@ namespace program_flash
         this->_deviceId = this->_flash.DeviceId();
         this->_bootConfig = this->_flash.BootConfig();
 
-        if (this->_deviceId != 0x00530000 || this->_bootConfig != 0x00000002)
+        if (this->_deviceId != ExpectedDeviceId || this->_bootConfig != ExpectedDeviceBootConfig)
             return OSResult::NotSupported;
 
         this->_bootIndex = this->_flash.At(0);

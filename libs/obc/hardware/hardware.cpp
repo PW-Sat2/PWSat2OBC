@@ -73,7 +73,7 @@ OSResult OBCHardware::PostStartInitialize()
 OBCHardware::OBCHardware(
     error_counter::ErrorCounting& errorCounting, services::power::IPowerControl& powerControl, TimeAction& burtcTickHandler)
     : I2C(powerControl),                                               //
-      FlashDriver(reinterpret_cast<std::uint8_t*>(0x84000000)),        //
+      FlashDriver(io_map::ProgramFlash::FlashBase),                    //
       Burtc(burtcTickHandler),                                         //
       FramSpi{                                                         //
           {SPI, Pins.Fram1ChipSelect},                                 //

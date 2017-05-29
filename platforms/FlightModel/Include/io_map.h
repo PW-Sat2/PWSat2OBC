@@ -92,6 +92,11 @@ namespace io_map
     {
         static constexpr WDOG_PeriodSel_TypeDef Period = wdogPeriod_1k; // About 1 second
     };
+
+    struct ProgramFlash
+    {
+        static constexpr std::uint8_t* FlashBase = reinterpret_cast<std::uint8_t*>(0x84000000);
+    };
 }
 
 // NAND Flash
