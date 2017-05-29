@@ -21,7 +21,7 @@ namespace state
         /**
          * @brief TimeState telemetry unique identifier.
          */
-        static constexpr int Id = 2;
+        static constexpr int Id = 3;
 
         /**
          * @brief ctor.

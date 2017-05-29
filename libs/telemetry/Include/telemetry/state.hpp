@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "ProgramState.hpp"
 #include "SystemStartup.hpp"
 #include "Telemetry.hpp"
 #include "comm/CommTelemetry.hpp"
