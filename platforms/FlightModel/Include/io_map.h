@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <em_device.h>
 #include <em_gpio.h>
+#include <em_timer.h>
 #include <em_usart.h>
 #include <em_wdog.h>
 #include <em_system.h>
@@ -96,6 +97,17 @@ namespace io_map
     struct ProgramFlash
     {
         static constexpr std::uint8_t* FlashBase = reinterpret_cast<std::uint8_t*>(0x84000000);
+    };
+
+    struct RAMScrubbing
+    {
+        static constexpr auto TimerHW = TIMER0;
+        static constexpr auto Prescaler = timerPrescale1024;
+        static constexpr auto TimerTop = 468;
+        static constexpr auto IRQ = IRQn_Type::TIMER0_IRQn;
+        static constexpr std::size_t MemoryStart = 0x88000000;
+        static constexpr std::size_t MemorySize = 1_MB;
+        static constexpr std::size_t CycleSize = 8;
     };
 }
 
