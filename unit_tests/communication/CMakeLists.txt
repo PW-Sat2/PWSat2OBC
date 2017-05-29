@@ -6,13 +6,17 @@ set(SOURCES
   Telecommands/DownloadFileTelecommandTest.cpp
   Telecommands/EnterIdleStateTelecommandTest.cpp
   Telecommands/RemoveFileTelecommandTest.cpp
+  Telecommands/SetTimeCorrectionConfigTelecommandTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
 
-target_link_libraries(${NAME}    
+target_link_libraries(${NAME}
     telecommunication
     obc_telecommands
+    state
+    free_rtos_wrapper
+    base
     unit_tests_base
 )
 
