@@ -80,6 +80,23 @@ namespace telecommunication
             return gsl::make_span(this->_frame).subspan(0, HeaderSize + this->_payloadWriter.GetDataLength());
         }
 
+        /**
+         * @brief Helper class for building correlated downlink frame
+         */
+        class CorrelatedDownlinkFrame : public DownlinkFrame
+        {
+          public:
+            /**
+             * @brief Initializes new @ref DownlinkFrame instance
+             * @param apid APID
+             * @param seq Sequence number
+             */
+            CorrelatedDownlinkFrame(DownlinkAPID apid, std::uint32_t seq, std::uint8_t correlationId);
+
+            /** @brief Maximum size of payload inside single frame */
+            static constexpr std::uint8_t MaxPayloadSize = DownlinkFrame::MaxPayloadSize - 1;
+        };
+
         /** @} */
     }
 }

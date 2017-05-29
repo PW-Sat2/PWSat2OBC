@@ -7,7 +7,7 @@
 #include "system.h"
 #include "telecommunication/downlink.h"
 
-using telecommunication::downlink::DownlinkFrame;
+using telecommunication::downlink::CorrelatedDownlinkFrame;
 using telecommunication::downlink::DownlinkAPID;
 using services::fs::File;
 using services::fs::SeekOrigin;
@@ -25,7 +25,8 @@ namespace obc
             {
                 this->_fileSize = this->_file.Size();
 
-                this->_lastSeq = static_cast<std::uint32_t>(std::ceil(this->_fileSize / static_cast<float>(DownlinkFrame::MaxPayloadSize)));
+                this->_lastSeq =
+                    static_cast<std::uint32_t>(std::ceil(this->_fileSize / static_cast<float>(CorrelatedDownlinkFrame::MaxPayloadSize)));
             }
         }
 
@@ -41,14 +42,13 @@ namespace obc
                 return false;
             }
 
-            DownlinkFrame response(DownlinkAPID::Operation, seq);
+            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, seq, _correlationId);
 
             if (OS_RESULT_FAILED(this->_file.Seek(SeekOrigin::Begin, seq * MaxFileDataSize)))
             {
                 return false;
             }
 
-            response.PayloadWriter().WriteByte(_correlationId);
             response.PayloadWriter().WriteByte(static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::Success));
 
             auto segmentSize = std::min<std::size_t>(MaxFileDataSize, this->_fileSize - seq * MaxFileDataSize);
@@ -77,8 +77,7 @@ namespace obc
             if (!r.Status() || terminationByte != 0)
             {
                 LOG(LOG_LEVEL_ERROR, "Malformed request");
-                DownlinkFrame errorResponse(DownlinkAPID::Operation, 0);
-                errorResponse.PayloadWriter().WriteByte(correlationId);
+                CorrelatedDownlinkFrame errorResponse(DownlinkAPID::Operation, 0, correlationId);
                 errorResponse.PayloadWriter().WriteByte(static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::MalformedRequest));
                 errorResponse.PayloadWriter().WriteByte(0);
 
@@ -94,8 +93,7 @@ namespace obc
             if (!sender.IsValid())
             {
                 LOG(LOG_LEVEL_ERROR, "Unable to open requested file");
-                DownlinkFrame errorResponse(DownlinkAPID::Operation, 0);
-                errorResponse.PayloadWriter().WriteByte(correlationId);
+                CorrelatedDownlinkFrame errorResponse(DownlinkAPID::Operation, 0, correlationId);
                 errorResponse.PayloadWriter().WriteByte(static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::FileNotFound));
                 errorResponse.PayloadWriter().WriteArray(pathSpan);
 
@@ -131,12 +129,11 @@ namespace obc
             auto path = reinterpret_cast<const char*>(pathSpan.data());
             auto terminationByte = r.ReadByte();
 
-            DownlinkFrame response(DownlinkAPID::Operation, 0);
-            response.PayloadWriter().WriteByte(correlationId);
+            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
 
             if (!r.Status() || terminationByte != 0)
             {
-                LOG(LOG_LEVEL_ERROR, "Malformed request");
+                LOG(LOG_LEVEL_ERROR, "Remove file: malformed request");
                 response.PayloadWriter().WriteByte(static_cast<uint8_t>(OSResult::InvalidArgument));
                 response.PayloadWriter().WriteByte(0);
                 transmitter.SendFrame(response.Frame());
@@ -160,6 +157,76 @@ namespace obc
             response.PayloadWriter().WriteArray(pathSpan);
 
             transmitter.SendFrame(response.Frame());
+        }
+
+        ListFilesTelecommand::ListFilesTelecommand(services::fs::IFileSystem& fs) : _fs(fs)
+        {
+        }
+
+        void ListFilesTelecommand::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
+        {
+            Reader r(parameters);
+
+            auto correlationId = r.ReadByte();
+            auto path = reinterpret_cast<const char*>(r.ReadToEnd().data());
+
+            if (!r.Status() || parameters[parameters.size() - 1] != 0)
+            {
+                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+                LOG(LOG_LEVEL_ERROR, "List files: malformed request");
+                response.PayloadWriter().WriteByte(static_cast<uint8_t>(OSResult::InvalidArgument));
+
+                transmitter.SendFrame(response.Frame());
+                return;
+            }
+
+            auto dir = this->_fs.OpenDirectory(path);
+
+            if (!dir)
+            {
+                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+
+                auto& writer = response.PayloadWriter();
+                writer.WriteByte(num(dir.Status));
+                transmitter.SendFrame(response.Frame());
+                return;
+            }
+
+            bool moreFiles = true;
+
+            char* name = this->_fs.ReadDirectory(dir.Result);
+
+            std::uint32_t seq = 0;
+
+            while (moreFiles)
+            {
+                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, seq, correlationId);
+                auto& writer = response.PayloadWriter();
+
+                while (true)
+                {
+                    if (name == nullptr)
+                    {
+                        moreFiles = false;
+                        break;
+                    }
+
+                    auto nameLen = strlen(name);
+                    if (writer.RemainingSize() < static_cast<std::int32_t>(nameLen + 5))
+                        break;
+
+                    writer.WriteArray(gsl::make_span(reinterpret_cast<uint8_t*>(name), nameLen));
+                    writer.WriteByte(0);
+                    writer.WriteDoubleWordLE(this->_fs.GetFileSize(path, name));
+
+                    name = this->_fs.ReadDirectory(dir.Result);
+                }
+
+                transmitter.SendFrame(response.Frame());
+                seq++;
+            }
+
+            this->_fs.CloseDirectory(dir.Result);
         }
     }
 }

@@ -117,6 +117,7 @@ namespace obc
         obc::telecommands::RemoveFileTelecommand,
         obc::telecommands::PerformDetumblingExperiment,
         obc::telecommands::AbortExperiment,     //
+        obc::telecommands::ListFilesTelecommand,//
         obc::telecommands::EraseBootTableEntry, //
         obc::telecommands::WriteProgramPart,    //
         obc::telecommands::FinalizeProgramEntry //

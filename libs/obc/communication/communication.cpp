@@ -26,6 +26,7 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           RemoveFileTelecommand(fs),                                          //
           PerformDetumblingExperiment(experiments),                           //
           AbortExperiment(experiments),                                       //
+          ListFilesTelecommand(fs),                                           //
           EraseBootTableEntry(bootTable),                                     //
           WriteProgramPart(bootTable),                                        //
           FinalizeProgramEntry(bootTable)                                     //

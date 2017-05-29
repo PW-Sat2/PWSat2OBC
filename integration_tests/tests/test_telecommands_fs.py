@@ -1,3 +1,5 @@
+import struct
+
 from nose.tools import nottest
 
 import telecommand
@@ -17,6 +19,7 @@ class FileSystemTelecommandsTest(BaseTest):
 
         def on_reset(_):
             e.set()
+
         self.system.comm.on_hardware_reset = on_reset
 
         self.system.obc.power_on(clean_state=True)
@@ -95,3 +98,34 @@ class FileSystemTelecommandsTest(BaseTest):
         self.assertEqual(frame.correlation_id, 0x11)
         self.assertEqual(frame.error_code, 0xFE)
         self.assertEqual(frame.response, ensure_byte_list(p))
+        self.assertEqual(frame.payload(), [0x11, 0xFE] + ensure_byte_list(p))
+
+    def test_should_list_files(self):
+        self._start()
+
+        self.system.obc.write_file('/a/file1', 'ABC')
+        self.system.obc.write_file('/a/file2', 'DEFG')
+        self.system.obc.write_file('/a/file3', 'HI')
+
+        self.system.comm.put_frame(telecommand.ListFiles(correlation_id=0x11, path='/a'))
+
+        frame = self.system.comm.get_frame(20)
+
+        self.assertEqual(frame.apid(), 2)
+        self.assertEqual(frame.seq(), 0)
+        self.assertEqual(frame.payload()[0], 0x11)
+
+        rest = frame.payload()[1:]
+        files = []
+        while len(rest) > 0:
+            l = rest.index(0)
+            p = ''.join(map(chr, rest[0:l]))
+            (size,) = struct.unpack('<L', ''.join(map(chr, rest[l + 1: l + 5])))
+
+            rest = rest[l+5:]
+            files.append((p, size))
+
+        self.assertIn(('file1', 3), files)
+        self.assertIn(('file2', 4), files)
+        self.assertIn(('file3', 2), files)
+
