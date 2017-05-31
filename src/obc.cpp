@@ -78,16 +78,6 @@ OSResult OBC::InitializeRunlevel1()
         LOG(LOG_LEVEL_ERROR, "Unable to initialize persistent timer. ");
     }
 
-    if (OS_RESULT_FAILED(this->Hardware.antennaDriver.HardReset(&this->Hardware.antennaDriver)))
-    {
-        LOG(LOG_LEVEL_ERROR, "Unable to reset both antenna controllers. ");
-    }
-
-    if (!this->Communication.CommDriver.Restart())
-    {
-        LOG(LOG_LEVEL_ERROR, "Unable to restart comm");
-    }
-
     if (!Mission.Initialize())
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize mission loop.");
@@ -98,10 +88,26 @@ OSResult OBC::InitializeRunlevel1()
         LOG(LOG_LEVEL_ERROR, "Unable to initialize telemetry acquisition loop.");
     }
 
-    this->Hardware.Burtc.Start();
-
     LOG(LOG_LEVEL_INFO, "Intialized");
     this->StateFlags.Set(OBC::InitializationFinishedFlag);
+
+    return OSResult::Success;
+}
+
+OSResult OBC::InitializeRunlevel2()
+{
+    this->Communication.CommDriver.Resume();
+
+    if (OS_RESULT_FAILED(this->Hardware.antennaDriver.HardReset(&this->Hardware.antennaDriver)))
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to reset both antenna controllers. ");
+    }
+
+    Mission.Resume();
+
+    TelemetryAcquisition.Resume();
+
+    this->Hardware.Burtc.Start();
 
     return OSResult::Success;
 }

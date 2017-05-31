@@ -315,6 +315,8 @@ namespace mission
             return false;
         }
 
+        System::SuspendTask(this->taskHandle);
+
         return true;
     }
 

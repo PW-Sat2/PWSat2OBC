@@ -57,6 +57,12 @@ class CommObject final : public ITransmitter,      //
     bool Pause();
 
     /**
+     * @brief Resumes automatic handling of incoming messages
+     * @return Operation result
+     */
+    bool Resume();
+
+    /**
      * @brief Restarts the comm driver.
      *
      * @return Operation status, true in case of success, false otherwise.

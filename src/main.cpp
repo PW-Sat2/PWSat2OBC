@@ -155,7 +155,12 @@ static void ObcInitTask(void* param)
 
     if (OS_RESULT_FAILED(obc->InitializeRunlevel1()))
     {
-        LOG(LOG_LEVEL_ERROR, "Unable to initialize OBC. ");
+        LOG(LOG_LEVEL_ERROR, "Unable to initialize runlevel 1. ");
+    }
+
+    if (OS_RESULT_FAILED(obc->InitializeRunlevel2()))
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to initialize runlevel 2. ");
     }
 
     AuditSystemStartup();

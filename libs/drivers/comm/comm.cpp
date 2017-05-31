@@ -113,29 +113,34 @@ bool CommObject::SendCommandWithResponse(Address address, uint8_t command, span<
 
 OSResult CommObject::Initialize()
 {
-    return this->_pollingTaskFlags.Initialize();
+    OSResult result = this->_pollingTaskFlags.Initialize();
+    if (OS_RESULT_FAILED(result))
+    {
+        LOGF(LOG_LEVEL_FATAL, "[comm] Unable to create polling task flags (%d)", num(result));
+        return result;
+    }
+
+    result = System::CreateTask(CommObject::CommTask, "COMM Task", 4_KB, this, TaskPriority::P4, &this->_pollingTaskHandle);
+    if (OS_RESULT_FAILED(result))
+    {
+        LOGF(LOG_LEVEL_ERROR, "[comm] Unable to create background task (%d)", num(result));
+        return result;
+    }
+
+    System::SuspendTask(this->_pollingTaskHandle);
+
+    return OSResult::Success;
 }
 
 bool CommObject::Restart()
 {
-    if (this->_pollingTaskHandle == nullptr)
+    if (!this->Reset())
     {
-        if (!this->Reset())
-        {
-            LOG(LOG_LEVEL_ERROR, "[comm] Unable reset comm hardware. ");
-            return false;
-        }
-
-        const OSResult result =
-            System::CreateTask(CommObject::CommTask, "COMM Task", 4_KB, this, TaskPriority::P4, &this->_pollingTaskHandle);
-        if (OS_RESULT_FAILED(result))
-        {
-            LOGF(LOG_LEVEL_ERROR, "[comm] Unable to create background task. Status: 0x%08x.", num(result));
-            return false;
-        }
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable reset comm hardware. ");
+        return false;
     }
 
-    return true;
+    return this->Resume();
 }
 
 bool CommObject::Pause()
@@ -144,6 +149,17 @@ bool CommObject::Pause()
     {
         this->_pollingTaskFlags.Set(TaskFlagPauseRequest);
         this->_pollingTaskFlags.WaitAny(TaskFlagAck, true, InfiniteTimeout);
+    }
+
+    return true;
+}
+
+bool CommObject::Resume()
+{
+    if (this->_pollingTaskHandle != NULL)
+    {
+        this->_pollingTaskFlags.Clear(TaskFlagPauseRequest | TaskFlagAck);
+        System::ResumeTask(this->_pollingTaskHandle);
     }
 
     return true;
