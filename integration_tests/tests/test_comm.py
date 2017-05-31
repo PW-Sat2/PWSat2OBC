@@ -13,7 +13,7 @@ class Test_Comm(BaseTest):
         super(Test_Comm, self).__init__(methodName)
 
     def module_reset(self, module, event):
-        self.power_on_and_wait()
+        self.power_on_obc()
         self.system.obc.comm_reset(module)
         self.assertTrue(event.wait_for_change(1))
 
@@ -21,7 +21,7 @@ class Test_Comm(BaseTest):
     def test_should_initialize_hardware(self):
         event = TestEvent()
         self.system.comm.on_hardware_reset = event.set
-        self.power_on_and_wait()
+        self.power_on_obc()
         self.assertTrue(event.wait_for_change(1))
 
     @runlevel(1)
@@ -92,7 +92,7 @@ class Test_Comm(BaseTest):
         
         self.system.comm.on_hardware_reset = reset_handler
         self.system.comm.receiver.on_reset = reset_handler
-        self.power_on_and_wait()
+        self.power_on_obc()
 
         self.system.comm.put_frame(UplinkFrame(ord('P'), 'ABC'))
 
@@ -104,7 +104,7 @@ class Test_Comm(BaseTest):
     def test_auto_watchdog_reset(self):
         event = TestEvent()
         self.system.comm.on_watchdog_reset = event.set
-        self.power_on_and_wait()
+        self.power_on_obc()
         self.assertTrue(event.wait_for_change(5))
 
     @runlevel(1)

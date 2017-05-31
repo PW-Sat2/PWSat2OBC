@@ -90,6 +90,7 @@ namespace telecommunication
              * @brief Initializes new @ref DownlinkFrame instance
              * @param apid APID
              * @param seq Sequence number
+             * @param correlationId Correlation ID
              */
             CorrelatedDownlinkFrame(DownlinkAPID apid, std::uint32_t seq, std::uint8_t correlationId);
 

@@ -147,10 +147,13 @@ namespace obc
             program_flash::BootTable& bootTable);
 
         /**
-         * @brief Initializes all communication-related drivers and objects
+         * @brief Initializes all communication at runlevel 1
          */
         void InitializeRunlevel1();
 
+        /**
+         * @brief Initializes all communication at runlevel 2
+         */
         void InitializeRunlevel2();
 
         /** @brief Uplink protocol decoder */

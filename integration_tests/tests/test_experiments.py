@@ -17,7 +17,7 @@ class ExperimentsTest(BaseTest):
     def test_should_conduct_experiment(self):
         iterations_count = 7
 
-        self.power_on_and_wait()
+        self.power_on_obc()
 
         self.system.obc.set_fibo_iterations(iterations_count)
         self.system.obc.request_experiment(ExperimentType.Fibo)
@@ -56,7 +56,7 @@ class ExperimentsTest(BaseTest):
 
     @runlevel(1)
     def test_should_abort_experiment(self):
-        self.power_on_and_wait()
+        self.power_on_obc()
         log = logging.getLogger("TEST")
         self.system.obc.set_fibo_iterations(10)
         self.system.obc.request_experiment(ExperimentType.Fibo)
@@ -97,7 +97,7 @@ class ExperimentsTest(BaseTest):
 
     @runlevel(1)
     def test_aborting_when_no_experiment_is_running_has_no_effect(self):
-        self.power_on_and_wait()
+        self.power_on_obc()
 
         self.system.obc.abort_experiment()
 

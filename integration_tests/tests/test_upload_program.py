@@ -24,8 +24,7 @@ class UploadProgramTest(BaseTest):
 
         self.system.comm.on_hardware_reset = on_reset
 
-        self.system.obc.power_on(clean_state=False)
-        self.system.obc.wait_to_start()
+        self.power_on_obc()
 
         e.wait_for_change(1)
 

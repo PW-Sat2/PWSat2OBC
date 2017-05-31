@@ -1,10 +1,5 @@
 import logging
 
-from nose.tools import nottest
-from nose_parameterized import parameterized
-
-from system import wait_for_obc_start
-from datetime import datetime, timedelta
 from tests.base import BaseTest
 import time
 from unittest import skip
