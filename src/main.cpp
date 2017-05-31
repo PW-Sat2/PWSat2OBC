@@ -153,14 +153,28 @@ static void ObcInitTask(void* param)
 
     auto obc = static_cast<OBC*>(param);
 
-    if (OS_RESULT_FAILED(obc->InitializeRunlevel1()))
+    if (boot::RequestedRunlevel >= boot::Runlevel::Runlevel1)
     {
-        LOG(LOG_LEVEL_ERROR, "Unable to initialize runlevel 1. ");
+        if (OS_RESULT_FAILED(obc->InitializeRunlevel1()))
+        {
+            LOG(LOG_LEVEL_ERROR, "Unable to initialize runlevel 1. ");
+        }
+        else
+        {
+            LOG(LOG_LEVEL_ERROR, "Runlevel 1 initialized");
+        }
     }
 
-    if (OS_RESULT_FAILED(obc->InitializeRunlevel2()))
+    if (boot::RequestedRunlevel >= boot::Runlevel::Runlevel2)
     {
-        LOG(LOG_LEVEL_ERROR, "Unable to initialize runlevel 2. ");
+        if (OS_RESULT_FAILED(obc->InitializeRunlevel2()))
+        {
+            LOG(LOG_LEVEL_ERROR, "Unable to initialize runlevel 2. ");
+        }
+        else
+        {
+            LOG(LOG_LEVEL_ERROR, "Runlevel 2 initialized");
+        }
     }
 
     AuditSystemStartup();
