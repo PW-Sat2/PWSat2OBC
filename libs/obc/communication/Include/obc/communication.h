@@ -116,11 +116,11 @@ namespace obc
         obc::telecommands::EnterIdleStateTelecommand,
         obc::telecommands::RemoveFileTelecommand,
         obc::telecommands::PerformDetumblingExperiment,
-        obc::telecommands::AbortExperiment,     //
-        obc::telecommands::ListFilesTelecommand,//
-        obc::telecommands::EraseBootTableEntry, //
-        obc::telecommands::WriteProgramPart,    //
-        obc::telecommands::FinalizeProgramEntry //
+        obc::telecommands::AbortExperiment,      //
+        obc::telecommands::ListFilesTelecommand, //
+        obc::telecommands::EraseBootTableEntry,  //
+        obc::telecommands::WriteProgramPart,     //
+        obc::telecommands::FinalizeProgramEntry  //
         >;
 
     /**
@@ -150,6 +150,8 @@ namespace obc
          * @brief Initializes all communication-related drivers and objects
          */
         void InitializeRunlevel1();
+
+        void InitializeRunlevel2();
 
         /** @brief Uplink protocol decoder */
         telecommunication::uplink::UplinkProtocol UplinkProtocolDecoder;

@@ -51,10 +51,9 @@ struct OBC
     /** @brief Initializes every object in OBC structure that needs initialization */
     void Initialize();
 
-    /**
-     * @brief Initialization that takes places after starting RTOS
-     */
     OSResult InitializeRunlevel1();
+
+    OSResult InitializeRunlevel2();
 
     /**
      * @brief Returns current LineIO implementation

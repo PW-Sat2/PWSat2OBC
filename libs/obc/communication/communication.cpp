@@ -1,5 +1,6 @@
 #include "communication.h"
 #include "gsl/span"
+#include "logger/logger.h"
 #include "settings.h"
 #include "telecommunication/downlink.h"
 
@@ -39,4 +40,13 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
 void OBCCommunication::InitializeRunlevel1()
 {
     this->CommDriver.Initialize();
+    if (!this->CommDriver.Restart())
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to restart comm");
+    }
+}
+
+void OBCCommunication::InitializeRunlevel2()
+{
+    this->CommDriver.Resume();
 }
