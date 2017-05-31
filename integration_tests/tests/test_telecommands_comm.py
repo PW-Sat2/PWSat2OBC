@@ -1,6 +1,6 @@
 import telecommand
 from response_frames.operation import OperationSuccessFrame
-from system import auto_power_on
+from system import auto_power_on, runlevel
 from tests.base import BaseTest
 from utils import ensure_byte_list, TestEvent
 
@@ -17,11 +17,11 @@ class CommTelecommandsTest(BaseTest):
             e.set()
         self.system.comm.on_hardware_reset = on_reset
 
-        self.system.obc.power_on(clean_state=True)
-        self.system.obc.wait_to_start()
+        self.power_on_and_wait(clean_state=True)
 
         e.wait_for_change(1)
 
+    @runlevel(2)
     def test_enter_idle_state(self):
         event = TestEvent()
 
@@ -43,6 +43,7 @@ class CommTelecommandsTest(BaseTest):
 
         self.assertTrue(event.wait_for_change(1))
 
+    @runlevel(2)
     def test_leave_idle_state(self):
         event = TestEvent()
 

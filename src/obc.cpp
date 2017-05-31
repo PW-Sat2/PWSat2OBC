@@ -96,7 +96,7 @@ OSResult OBC::InitializeRunlevel1()
 
 OSResult OBC::InitializeRunlevel2()
 {
-    this->Communication.CommDriver.Resume();
+    this->Communication.InitializeRunlevel2();
 
     if (OS_RESULT_FAILED(this->Hardware.antennaDriver.HardReset(&this->Hardware.antennaDriver)))
     {

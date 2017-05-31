@@ -10,7 +10,6 @@ import time
 from unittest import skip
 
 class TestTMR(BaseTest):
-    @wait_for_obc_start()
     @skip('Manual test')
     def test_success_when_single_erase(self):
         log = logging.getLogger("test_tmr")
@@ -22,7 +21,6 @@ class TestTMR(BaseTest):
 
         self.assertEquals("PW-SAT2", test_file_content)
 
-    @wait_for_obc_start()
     def test_failure_when_double_erase(self):
         log = logging.getLogger("test_tmr")
 
@@ -40,7 +38,6 @@ class TestTMR(BaseTest):
 
         self.system.restart()
 
-    @wait_for_obc_start()
     def test_fram_redundant_read_write(self):
         self.system.obc.fram_write('r', 0, ['1', '2', '3'])
 
@@ -48,7 +45,6 @@ class TestTMR(BaseTest):
 
         self.assertEquals(['1', '2', '3'], fram_value)
 
-    @wait_for_obc_start()
     def test_fram_single_failure(self):
         self.system.obc.fram_write('r', 0, ['1', '2', '3'])
         self.system.obc.fram_write('0', 0, ['6', '6', '6'])
@@ -57,7 +53,6 @@ class TestTMR(BaseTest):
 
         self.assertEquals(['1', '2', '3'], fram_value)
 
-    @wait_for_obc_start()
     def test_fram_double_failure(self):
         self.system.obc.fram_write('r', 0, ['1', '2', '3'])
         self.system.obc.fram_write('0', 0, ['6', '6', '6'])
