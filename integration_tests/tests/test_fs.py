@@ -1,9 +1,8 @@
 from datetime import datetime
 
-from nose.tools import nottest
 from nose_parameterized import parameterized
 
-from system import wait_for_obc_start
+from system import runlevel
 from tests.base import BaseTest
 import logging
 from utils import ensure_byte_list
@@ -12,7 +11,7 @@ def safe(l):
     return str(map(lambda x:ensure_byte_list(x), l))
 
 class FileSystemTests(BaseTest):
-    @wait_for_obc_start()
+    @runlevel(2)
     def test_write_read_file(self):
         log = logging.getLogger("test")
 
@@ -47,7 +46,7 @@ class FileSystemTests(BaseTest):
     @parameterized.expand([
         ("/a",)
     ])
-    @wait_for_obc_start()
+    @runlevel(2)
     def test_write_read_long_file(self, base):
         path = base + "/file"
         data = '\n'.join(map(lambda x: x * 25, ['A', 'B', '>', 'C', 'D', 'E', 'F', 'G']))

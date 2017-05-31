@@ -40,13 +40,13 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
 void OBCCommunication::InitializeRunlevel1()
 {
     this->CommDriver.Initialize();
-    if (!this->CommDriver.Restart())
-    {
-        LOG(LOG_LEVEL_ERROR, "Unable to restart comm");
-    }
 }
 
 void OBCCommunication::InitializeRunlevel2()
 {
+    if (!this->CommDriver.Restart())
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to restart comm");
+    }
     this->CommDriver.Resume();
 }

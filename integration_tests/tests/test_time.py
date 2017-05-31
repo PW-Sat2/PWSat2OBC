@@ -1,16 +1,14 @@
 import logging
+import time
+from datetime import datetime, timedelta
 
 from nose.tools import nottest
-from nose_parameterized import parameterized
 
-from system import wait_for_obc_start
-from datetime import datetime, timedelta
+from system import runlevel
 from tests.base import BaseTest
-import time
 
 
 class TestTime(BaseTest):
-    @wait_for_obc_start()
     def test_jump_to_time(self):
         wait_time_accuracy_ms = 200
         current_time_ms = self.system.obc.current_time()
@@ -22,7 +20,6 @@ class TestTime(BaseTest):
 
         self.assertAlmostEqual(current_time_ms, next_time_ms, places=None, delta=wait_time_accuracy_ms)
 
-    @wait_for_obc_start()
     def test_clock_running(self):
         wait_time_s = 3
         wait_time_accuracy_ms = 200
@@ -40,7 +37,6 @@ class TestTime(BaseTest):
 
         self.assertAlmostEqual(obc_time_difference_ms, sys_time_difference_ms, places=None, delta=wait_time_accuracy_ms)
 
-    @wait_for_obc_start()
     def test_rtc_communication(self):
         start_time = datetime.now()
         self.system.rtc.set_response_time(start_time)
@@ -54,7 +50,6 @@ class TestTime(BaseTest):
 
     @nottest
     def run_time_correction_test(self, start_time):
-        self.system.obc.suspend_mission()
         log = logging.getLogger("test_time_correction")
 
         self.system.rtc.set_response_time(start_time)
@@ -77,10 +72,10 @@ class TestTime(BaseTest):
 
         self.assertEquals(expected_s, corrected_s)
 
-    @wait_for_obc_start()
+    @runlevel(1)
     def test_time_correction_on_month_boundary(self):
         self.run_time_correction_test(datetime(year=2017, month=3, day=31, hour=23, minute=38, second=00))
 
-    @wait_for_obc_start()
+    @runlevel(1)
     def test_time_correction_now(self):
         self.run_time_correction_test(datetime.now())

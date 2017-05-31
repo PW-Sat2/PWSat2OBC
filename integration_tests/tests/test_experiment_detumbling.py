@@ -2,7 +2,7 @@ from datetime import timedelta, datetime
 
 import telecommand
 from obc.experiments import ExperimentType
-from system import auto_power_on
+from system import auto_power_on, runlevel
 from tests.base import BaseTest
 from utils import TestEvent
 
@@ -24,6 +24,7 @@ class TestExperimentDetumbling(BaseTest):
 
         e.wait_for_change(1)
 
+    @runlevel(2)
     def test_should_perform_experiment(self):
         self._start()
         start_time = datetime.now()

@@ -1,13 +1,12 @@
-import devices
+from system import auto_power_on, runlevel
 from tests.base import BaseTest
-from obc import *
 from utils import TestEvent
-from system import auto_power_on
+
 
 class Test_AntennaDeployment(BaseTest):
     @auto_power_on(False)
-    def __init__(self, methodName = 'runTest'):
-        return super(Test_AntennaDeployment, self).__init__(methodName)
+    def __init__(self, methodName='runTest'):
+        super(Test_AntennaDeployment, self).__init__(methodName)
 
     def begin_deployment(self):
         self.system.obc.jump_to_time(42 * 60)
@@ -20,39 +19,42 @@ class Test_AntennaDeployment(BaseTest):
             self.next_step()
             count -= 1
 
-    def begin(self, count = 1):
+    def begin(self, count=1):
         self.power_on_and_wait()
-        self.system.obc.suspend_mission()
         self.begin_deployment()
         self.run_steps(count)
 
+    @runlevel(1)
     def test_antennas_are_not_deployed_too_soon(self):
         event = TestEvent()
         self.system.primary_antenna.on_begin_deployment = event.set
         self.power_on_and_wait()
-        self.system.obc.suspend_mission()
         self.system.obc.jump_to_time(20 * 60)
         self.next_step()
         self.assertFalse(event.wait_for_change(1), "antenna deployment process began too soon")
 
+    @runlevel(1)
     def test_process_begins_automatically_by_controller_reset(self):
         event = TestEvent()
         self.system.primary_antenna.on_reset = event.set
         self.begin(1)
         self.assertTrue(event.wait_for_change(1), "antenna controller was not reset")
 
+    @runlevel(1)
     def test_process_begins_automatically(self):
         event = TestEvent()
         self.system.primary_antenna.on_begin_deployment = event.set
         self.begin(2)
         self.assertTrue(event.wait_for_change(1), "antenna deployment process did not began when it should")
 
+    @runlevel(1)
     def test_deployment_is_cancelled_on_retry(self):
         event = TestEvent()
         self.system.primary_antenna.on_deployment_cancel = event.set
         self.begin(2)
         self.assertTrue(event.wait_for_change(1), "antenna deployment process was not cancelled")
 
+    @runlevel(1)
     def test_deployment_arming_sequences(self):
         primaryBegin = TestEvent()
         primaryEnd = TestEvent()
@@ -84,6 +86,7 @@ class Test_AntennaDeployment(BaseTest):
         self.assertTrue(backupBegin.wait_for_change(1), "backup controller was not armed")
         self.assertTrue(backupEnd.wait_for_change(1), "backup controller was not disarmed")
 
+    @runlevel(1)
     def test_all_antennas_are_deployed_manually(self):
         list = [0, 0, 0, 0, 0, 0, 0, 0, 0]
         expected = [0, 1, 1, 1, 1, 1, 1, 1, 1]
@@ -91,16 +94,14 @@ class Test_AntennaDeployment(BaseTest):
         def primaryHandler(controller, antennaId):
             if antennaId != -1:
                 list[antennaId] = 1
-            return False;
+            return False
 
         def backupHandler(controller, antennaId):
             if antennaId != -1:
                 list[antennaId + 4] = 1
-            return False;
+            return False
 
         self.system.primary_antenna.on_begin_deployment = primaryHandler
         self.system.backup_antenna.on_begin_deployment = backupHandler
         self.begin(14)
-        self.assertSequenceEqual(list, expected);
-
-
+        self.assertSequenceEqual(list, expected)

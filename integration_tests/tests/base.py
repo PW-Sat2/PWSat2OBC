@@ -31,6 +31,8 @@ class BaseTest(unittest.TestCase):
         boot_handler_chain = BootHandlerChain(boot_wrappers)
 
         self.system = System(obc_com, mock_com, self.gpio, boot_handler_chain, self.auto_power_on)
+        if self.auto_power_on:
+            self.system.obc.wait_to_start()
 
     def tearDown(self):
         self.system.obc.sync_fs()
