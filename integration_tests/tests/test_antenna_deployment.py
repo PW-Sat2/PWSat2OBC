@@ -20,7 +20,7 @@ class Test_AntennaDeployment(BaseTest):
             count -= 1
 
     def begin(self, count=1):
-        self.power_on_and_wait()
+        self.power_on_obc()
         self.begin_deployment()
         self.run_steps(count)
 
@@ -28,7 +28,7 @@ class Test_AntennaDeployment(BaseTest):
     def test_antennas_are_not_deployed_too_soon(self):
         event = TestEvent()
         self.system.primary_antenna.on_begin_deployment = event.set
-        self.power_on_and_wait()
+        self.power_on_obc()
         self.system.obc.jump_to_time(20 * 60)
         self.next_step()
         self.assertFalse(event.wait_for_change(1), "antenna deployment process began too soon")

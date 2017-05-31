@@ -259,7 +259,7 @@ int main(void)
         LOG(LOG_LEVEL_DEBUG, "Received boot information from bootloader");
     }
 
-    Main.Initialize();
+    Main.InitializeRunlevel0();
 
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 

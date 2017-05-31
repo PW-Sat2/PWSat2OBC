@@ -57,7 +57,7 @@ void OBCHardwareI2C::Initialize()
     this->Peripherals[1].Driver.Initialize();
 }
 
-void OBCHardware::InitializeRunlevel1()
+void OBCHardware::Initialize()
 {
     this->Pins.Initialize();
     this->I2C.Initialize();

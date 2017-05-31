@@ -22,7 +22,7 @@ class Test_Beacon(BaseTest):
             count -= 1
 
     def begin(self, count=1):
-        self.power_on_and_wait()
+        self.power_on_obc()
         self.begin_deployment()
         self.run_steps(count)
 

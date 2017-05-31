@@ -115,7 +115,7 @@ namespace obc
         OBCHardware(error_counter::ErrorCounting& errorCounting, services::power::IPowerControl&, TimeAction& burtcTickHandler);
 
         /** @brief Initializes OBC hardware */
-        void InitializeRunlevel1();
+        void Initialize();
 
         /** @brief GPIO Pins */
         OBCGPIO Pins;

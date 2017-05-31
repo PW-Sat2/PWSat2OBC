@@ -26,8 +26,6 @@ class BaseTest(unittest.TestCase):
 
         boot_wrappers += [boot_handler]
 
-        print 'Boot chain: {}'.format(boot_wrappers)
-
         boot_handler_chain = BootHandlerChain(boot_wrappers)
 
         self.system = System(obc_com, mock_com, self.gpio, boot_handler_chain, self.auto_power_on)
@@ -43,9 +41,6 @@ class BaseTest(unittest.TestCase):
 
     def power_on_obc(self, clean_state=False):
         self.system.obc.power_on(clean_state=clean_state)
-
-    def power_on_and_wait(self, clean_state=False):
-        self.power_on_obc(clean_state=clean_state)
         self.system.obc.wait_to_start()
 
     def _get_boot_wrappers(self, test):

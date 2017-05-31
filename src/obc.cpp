@@ -39,16 +39,16 @@ OBC::OBC()
 {
 }
 
-void OBC::Initialize()
+void OBC::InitializeRunlevel0()
 {
     this->StateFlags.Initialize();
 }
 
 OSResult OBC::InitializeRunlevel1()
 {
-    this->Fdir.InitalizeRunlevel1();
+    this->Fdir.Initalize();
 
-    this->Hardware.InitializeRunlevel1();
+    this->Hardware.Initialize();
     InitializeTerminal();
 
     this->BootTable.Initialize();
@@ -59,7 +59,7 @@ OSResult OBC::InitializeRunlevel1()
 
     this->adcs.Initialize();
 
-    auto result = this->Storage.InitializeRunlevel1();
+    auto result = this->Storage.Initialize();
     if (OS_RESULT_FAILED(result))
     {
         LOGF(LOG_LEVEL_FATAL, "Storage initialization failed %d", num(result));

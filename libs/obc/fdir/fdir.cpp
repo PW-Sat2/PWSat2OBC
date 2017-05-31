@@ -7,7 +7,7 @@ namespace obc
     {
     }
 
-    void FDIR::InitalizeRunlevel1()
+    void FDIR::Initalize()
     {
         this->_errorCounting.Handler(*this);
     }

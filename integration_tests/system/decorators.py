@@ -16,16 +16,6 @@ def auto_comm_handling(enable_auto_comm):
     return wrap
 
 
-def wait_for_obc_start():
-    def wrap(f):
-        @wraps(f)
-        def wrapper(self, *args, **kwargs):
-            self.system.obc.wait_to_start()
-            return f(self, *args, **kwargs)
-        return wrapper
-    return wrap
-
-
 def auto_power_on(auto_power_on):
     def wrap(f):
         @wraps(f)

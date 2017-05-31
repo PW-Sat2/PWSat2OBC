@@ -14,14 +14,14 @@ class Test_Antenna(BaseTest):
     def test_primary_antenna_is_reset_at_startup(self):
         event = TestEvent()
         self.system.primary_antenna.on_reset = event.set
-        self.power_on_and_wait()
+        self.power_on_obc()
         self.assertTrue(event.wait_for_change(1))
 
     @runlevel(2)
     def test_backup_antenna_is_reset_at_startup(self):
         event = TestEvent()
         self.system.backup_antenna.on_reset = event.set
-        self.power_on_and_wait()
+        self.power_on_obc()
         self.assertTrue(event.wait_for_change(1))
 
     @runlevel(1)
@@ -32,7 +32,7 @@ class Test_Antenna(BaseTest):
                 event.set()
 
         self.system.primary_antenna.on_begin_deployment = handler
-        self.power_on_and_wait()
+        self.power_on_obc()
         self.system.obc.antenna_deploy(AntennaChannel.Primary, AntennaId.Auto, OverrideSwitches.Disabled)
         self.assertTrue(event.wait_for_change(1))
 
@@ -44,7 +44,7 @@ class Test_Antenna(BaseTest):
                 event.set()
 
         self.system.primary_antenna.on_begin_deployment = handler
-        self.power_on_and_wait()
+        self.power_on_obc()
         self.system.obc.antenna_deploy(AntennaChannel.Primary, AntennaId.Antenna2, OverrideSwitches.Disabled)
         self.assertTrue(event.wait_for_change(1))
 
@@ -56,7 +56,7 @@ class Test_Antenna(BaseTest):
                 event.set()
 
         self.system.backup_antenna.on_begin_deployment = handler
-        self.power_on_and_wait()
+        self.power_on_obc()
         result = self.system.obc.antenna_deploy(AntennaChannel.Backup, AntennaId.Antenna2, OverrideSwitches.Enabled)
         self.assertTrue(event.wait_for_change(1))
         self.assertTrue(self.system.backup_antenna.ignore_deployment_switch)
@@ -65,7 +65,7 @@ class Test_Antenna(BaseTest):
     def test_deployment_finalization(self):
         event = TestEvent()
         self.system.backup_antenna.on_deployment_cancel = event.set
-        self.power_on_and_wait()
+        self.power_on_obc()
         result = self.system.obc.antenna_cancel_deployment(AntennaChannel.Backup)
         self.assertTrue(event.wait_for_change(1))
 
@@ -75,7 +75,7 @@ class Test_Antenna(BaseTest):
             return [0x0f, 0xe0]
 
         self.system.backup_antenna.on_get_deployment_status = return_state
-        self.power_on_and_wait()
+        self.power_on_obc()
         result = self.system.obc.antenna_get_status(AntennaChannel.Backup)
         self.assertTrue(result.Status)
         self.assertTrue(result.SystemArmed)
@@ -113,7 +113,7 @@ class Test_Antenna(BaseTest):
             Antenna.build(False, 0xe0, 0x5432, False),
             ]
 
-        self.power_on_and_wait()
+        self.power_on_obc()
         result = self.system.obc.antenna_get_telemetry()
         self.assertEqual(result.ActivationCount[0], 0xb0);
         self.assertEqual(result.ActivationCount[1], 0xc0);
