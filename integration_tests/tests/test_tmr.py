@@ -7,10 +7,11 @@ from system import wait_for_obc_start
 from datetime import datetime, timedelta
 from tests.base import BaseTest
 import time
-
+from unittest import skip
 
 class TestTMR(BaseTest):
     @wait_for_obc_start()
+    @skip('Manual test')
     def test_success_when_single_erase(self):
         log = logging.getLogger("test_tmr")
         self.system.obc.write_file("/a/tmr.test", "PW-SAT2")
@@ -36,6 +37,8 @@ class TestTMR(BaseTest):
         test_file_content = self.system.obc.read_file("/a/tmr.test")
 
         self.assertNotEqual("Should not be PW-SAT2", test_file_content)
+
+        self.system.restart()
 
     @wait_for_obc_start()
     def test_fram_redundant_read_write(self):
