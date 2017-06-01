@@ -45,7 +45,7 @@ namespace obc
          * @brief Performs storage initialization
          * @return Operation result
          */
-        OSResult InitializeRunlevel1();
+        OSResult Initialize();
 
         /**
          * @brief Clears OBC storage
@@ -77,9 +77,9 @@ namespace obc
     {
     }
 
-    template <typename Storage> inline OSResult obc::OBCStorageHandler<Storage>::InitializeRunlevel1()
+    template <typename Storage> inline OSResult obc::OBCStorageHandler<Storage>::Initialize()
     {
-        return this->_storage.InitializeRunlevel1();
+        return this->_storage.Initialize();
     }
 
     template <typename Storage> inline OSResult obc::OBCStorageHandler<Storage>::ClearStorage()
