@@ -35,7 +35,7 @@ inline void BitWriter::Reset()
     this->_isValid = this->_buffer.length() > 0;
 }
 
-static std::uint32_t BitsToByes(std::uint32_t bits)
+static inline std::uint32_t BitsToBytes(std::uint32_t bits)
 {
     return (bits + BitsPerByte - 1) / BitsPerByte;
 }
@@ -47,7 +47,7 @@ std::uint32_t BitWriter::GetBitDataLength() const
 
 std::uint32_t BitWriter::GetByteDataLength() const
 {
-    return BitsToByes(this->_bitPosition) + this->_bytePosition;
+    return BitsToBytes(this->_bitPosition) + this->_bytePosition;
 }
 
 inline bool BitWriter::UpdateStatus(std::uint8_t length, std::uint8_t lengthLimit)
@@ -83,7 +83,7 @@ void BitWriter::WriteWord(std::uint16_t value, std::uint8_t* position, std::uint
         (*position & WordMask[this->_bitPosition]);
 
     const std::uint32_t bits = length + this->_bitPosition;
-    const std::uint32_t bytes = BitsToByes(bits);
+    const std::uint32_t bytes = BitsToBytes(bits);
     *position++ = combined;
     if (bytes > 1)
     {
