@@ -155,6 +155,7 @@ namespace devices
 
             bool ControllerATelemetry::ReadFrom(Reader& reader)
             {
+                this->WhoAmI = reader.ReadByte();
                 this->mpptX.ReadFrom(reader);
                 this->mpptYPlus.ReadFrom(reader);
                 this->mpptYMinus.ReadFrom(reader);
@@ -184,6 +185,7 @@ namespace devices
 
             bool ControllerBTelemetry::ReadFrom(Reader& reader)
             {
+                this->WhoAmI = reader.ReadByte();
                 this->bp.ReadFrom(reader);
                 this->batc.ReadFrom(reader);
                 this->other.ReadFrom(reader);
