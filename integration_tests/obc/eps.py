@@ -12,6 +12,12 @@ class PowerCycleBy(Enum):
     Auto = 'Auto'
 
 
+class ResetWatchdogOn(Enum):
+    A = 'A'
+    B = 'B'
+    Both = 'Both'
+
+
 class EPSMixin(OBCMixin):
     @decode_return(int)
     @command("eps enable_lcl {0}")
@@ -60,4 +66,7 @@ class EPSMixin(OBCMixin):
     def read_housekeeping_b(self):
         pass
 
-
+    @decode_return(int)
+    @command("eps reset_watchdog {0!n}")
+    def eps_reset_watchdog(self, controller):
+        pass
