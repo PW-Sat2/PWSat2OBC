@@ -50,7 +50,8 @@ mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc),
     Main.Experiments.ExperimentsController,
     Main.Hardware.CommDriver,
     std::tie(Main.Hardware.PersistentStorage, PersistentStateBaseAddress),
-    Main.fs);
+    Main.fs,
+    Main.Hardware.EPS);
 
 telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver,
     std::tuple<services::fs::IFileSystem&, mission::TelemetryConfiguration>(
