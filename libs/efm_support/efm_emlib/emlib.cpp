@@ -1,5 +1,5 @@
+#include <em_device.h>
 #include "efm_support/api.h"
-#include "mcu.h"
 
 namespace efm
 {
