@@ -89,6 +89,7 @@ target_link_libraries(${NAME}
     mission_telemetry
     mission_comm
     mission_fs
+    mission_watchdog
     watchdog
     boot_params
     telemetry
