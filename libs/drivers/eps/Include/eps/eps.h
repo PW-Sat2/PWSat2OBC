@@ -176,6 +176,10 @@ namespace devices
              */
             ErrorCode ResetWatchdog(Controller controller);
 
+            /**
+             * @brief Resets both watchdogs
+             */
+            inline void ResetWatchdog();
 
             /** @brief Error counter type */
             using ErrorCounter = error_counter::ErrorCounter<5>;
@@ -206,6 +210,12 @@ namespace devices
              */
             drivers::i2c::I2CResult WriteRead(Controller controller, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData);
         };
+
+        void EPSDriver::ResetWatchdog()
+        {
+            this->ResetWatchdog(Controller::A);
+            this->ResetWatchdog(Controller::B);
+        }
 
         /** @} */
     }
