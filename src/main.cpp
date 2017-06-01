@@ -42,15 +42,15 @@ using namespace std::chrono_literals;
 OBC Main;
 mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc),
     Main.Hardware.antennaDriver,
-    Main.Communication.CommDriver,
+    Main.Hardware.CommDriver,
     std::tuple<bool, services::power::IPowerControl&>(false, Main.PowerControlInterface),
     Main.adcs.GetAdcsController(),
     Main.Experiments.ExperimentsController,
-    Main.Communication.CommDriver,
+    Main.Hardware.CommDriver,
     std::tie(Main.Hardware.PersistentStorage, PersistentStateBaseAddress),
     Main.fs);
 
-telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Communication.CommDriver,
+telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver,
     std::tuple<services::fs::IFileSystem&, mission::TelemetryConfiguration>(
         Main.fs, mission::TelemetryConfiguration{"/telemetry.current", "/telemetry.previous", 512_KB}));
 

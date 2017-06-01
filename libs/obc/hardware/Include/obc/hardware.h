@@ -5,6 +5,7 @@
 #include "antenna/driver.h"
 #include "antenna/miniport.h"
 #include "burtc/burtc.hpp"
+#include "comm/CommDriver.hpp"
 #include "eps/eps.h"
 #include "error_counter/error_counter.hpp"
 #include "gpio.h"
@@ -165,6 +166,9 @@ namespace obc
 
         /** @brief External Real Time Clock.  */
         devices::rtc::RTCObject rtc;
+
+        /** @brief Low-level comm driver */
+        devices::comm::CommObject CommDriver;
     };
 }
 /** @} */

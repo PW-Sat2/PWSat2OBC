@@ -38,7 +38,7 @@ namespace obc
              * @brief Initializes OBC storage
              * @return Operation result
              */
-            OSResult InitializeRunlevel1();
+            OSResult Initialize();
 
             /**
              * @brief Clears OBC storage

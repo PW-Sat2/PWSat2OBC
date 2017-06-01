@@ -40,11 +40,11 @@ Beacon::Beacon(std::chrono::seconds beaconPeriod, gsl::span<const std::uint8_t> 
 {
 }
 
-CommObject::CommObject(error_counter::ErrorCounting& errors, II2CBus& low, IHandleFrame& upperInterface)
-    : _error(errors),                //
-      _low(low),                     //
-      _frameHandler(upperInterface), //
-      _pollingTaskHandle(nullptr)    //
+CommObject::CommObject(error_counter::ErrorCounting& errors, II2CBus& low)
+    : _error(errors),             //
+      _low(low),                  //
+      _frameHandler(nullptr),     //
+      _pollingTaskHandle(nullptr) //
 {
 }
 
@@ -546,7 +546,9 @@ void CommObject::ProcessSingleFrame()
     if (status && frame.Verify())
     {
         LOGF(LOG_LEVEL_INFO, "[comm] Received frame %d bytes. ", static_cast<int>(frame.Size()));
-        this->_frameHandler.HandleFrame(*this, frame);
+        auto handler = this->_frameHandler;
+        if (handler != nullptr)
+            handler->HandleFrame(*this, frame);
     }
 
     if (!this->RemoveFrame())

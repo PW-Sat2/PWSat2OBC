@@ -69,6 +69,8 @@ void OBCHardware::Initialize()
     this->FlashDriver.Initialize();
 
     this->Burtc.Initialize();
+
+    this->CommDriver.Initialize();
 }
 
 OBCHardware::OBCHardware(
@@ -87,7 +89,8 @@ OBCHardware::OBCHardware(
       Gyro(I2C.Buses.Payload),                                          //
       EPS(errorCounting, this->I2C.Buses.Bus, this->I2C.Buses.Payload), //
       Imtq(I2C.Buses.Bus),                                              //
-      rtc(I2C.Buses.Payload)                                            //
+      rtc(I2C.Buses.Payload),                                           //
+      CommDriver(errorCounting, I2C.Buses.Bus)                          //
 {
     AntennaMiniportInitialize(&antennaMiniport);
     AntennaDriverInitialize(&antennaDriver, &antennaMiniport, &I2C.Buses.Bus, &I2C.Buses.Payload);

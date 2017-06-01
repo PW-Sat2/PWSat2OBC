@@ -55,6 +55,7 @@ namespace
         auto proxy = InstallProxy(&mock);
         EXPECT_CALL(mock, CreateEventGroup()).WillOnce(Return(this));
         EXPECT_CALL(mock, CreateTask(_, _, _, _, _, _)).WillOnce(Return(OSResult::Success));
+        EXPECT_CALL(mock, SuspendTask(_));
         const auto status = mission.Initialize();
         ASSERT_THAT(status, Eq(true));
     }
