@@ -232,6 +232,7 @@ class EPSControllerA(I2CDevice):
         self.on_power_cycle = None
         self.on_disable_overheat_submode = None
         self.on_get_housekeeping = None
+        self.on_reset_watchdog = None
 
         self.hk = HousekeepingA()
 
@@ -260,10 +261,15 @@ class EPSControllerA(I2CDevice):
         self._log.info("Disable overheat submode")
         call(self.on_disable_overheat_submode, None)
 
+    @i2cMock.command([0xE5])
+    def _reset_watchdog(self):
+        self._log.info("Resetting watchdog")
+        call(self.on_reset_watchdog, None)
+
     @i2cMock.command([0x0])
     def _housekeeping(self):
         hk = call(self.on_get_housekeeping, default=self.hk)
-        return [hk.CTRLA.ERR] + hk.bytes()
+        return [hk.CTRLA.ERR, 0x61] + hk.bytes()
 
 
 class EPSControllerB(I2CDevice):
@@ -278,6 +284,7 @@ class EPSControllerB(I2CDevice):
         self.on_power_cycle = None
         self.on_disable_overheat_submode = None
         self.on_get_housekeeping = None
+        self.on_reset_watchdog = None
 
         self.hk = HousekeepingB()
 
@@ -306,10 +313,15 @@ class EPSControllerB(I2CDevice):
         self._log.info("Disable overheat submode")
         call(self.on_disable_overheat_submode, None)
 
+    @i2cMock.command([0xE5])
+    def _reset_watchdog(self):
+        self._log.info("Resetting watchdog")
+        call(self.on_reset_watchdog, None)
+
     @i2cMock.command([0x0])
     def _housekeeping(self):
         hk = call(self.on_get_housekeeping, default=self.hk)
-        return [hk.CTRLB.ERR] + hk.bytes()
+        return [hk.CTRLB.ERR, 0x9D] + hk.bytes()
 
 
 class EPS:

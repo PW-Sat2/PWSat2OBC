@@ -1,7 +1,7 @@
 from nose.tools import nottest
 
 from devices.eps import HousekeepingA, HousekeepingB
-from obc import PowerCycleBy
+from obc import PowerCycleBy, ResetWatchdogOn
 from system import runlevel
 from tests.base import BaseTest
 from utils import TestEvent
@@ -217,3 +217,31 @@ class EPSTest(BaseTest):
         counters = self.system.obc.error_counters()
 
         self.assertEqual(counters[self.system.eps.ERROR_COUNTER], 5)
+
+    def test_reset_watchdog_a(self):
+        ev = TestEvent()
+        self.system.eps.controller_a.on_reset_watchdog = ev.set
+
+        self.system.obc.eps_reset_watchdog(ResetWatchdogOn.A)
+
+        self.assertTrue(ev.wait_for_change(1), "Watchdog should be reseted (controller A)")
+
+    def test_reset_watchdog_b(self):
+        ev = TestEvent()
+        self.system.eps.controller_b.on_reset_watchdog = ev.set
+
+        self.system.obc.eps_reset_watchdog(ResetWatchdogOn.B)
+
+        self.assertTrue(ev.wait_for_change(1), "Watchdog should be reseted (controller A)")
+
+    def test_reset_watchdog_both(self):
+        ev_a = TestEvent()
+        ev_b = TestEvent()
+
+        self.system.eps.controller_a.on_reset_watchdog = ev_a.set
+        self.system.eps.controller_b.on_reset_watchdog = ev_b.set
+
+        self.system.obc.eps_reset_watchdog(ResetWatchdogOn.Both)
+
+        self.assertTrue(ev_a.wait_for_change(1), "Watchdog should be reseted (controller A)")
+        self.assertTrue(ev_b.wait_for_change(1), "Watchdog should be reseted (controller B)")
