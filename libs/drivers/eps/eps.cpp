@@ -39,6 +39,7 @@ namespace devices
             DisableLCL = 0xE2,
             EnableBurnSwitch = 0xE3,
             DisableOverheatSubmode = 0xE4,
+            ResetWatchdog = 0xE5
         };
 
         EPSDriver::EPSDriver(
@@ -50,7 +51,7 @@ namespace devices
         Option<hk::ControllerATelemetry> EPSDriver::ReadHousekeepingA()
         {
             std::array<std::uint8_t, 1> command{0x0};
-            std::array<std::uint8_t, 72> response;
+            std::array<std::uint8_t, 73> response;
 
             auto result = this->WriteRead(Controller::A, command, response);
 
@@ -70,6 +71,12 @@ namespace devices
                 return None<hk::ControllerATelemetry>();
             }
 
+            if (housekeeping.WhoAmI != ControllerAId)
+            {
+                this->_error.Failure();
+                return None<hk::ControllerATelemetry>();
+            }
+
             this->_error.Success();
             return Some(housekeeping);
         }
@@ -77,7 +84,7 @@ namespace devices
         Option<hk::ControllerBTelemetry> EPSDriver::ReadHousekeepingB()
         {
             std::array<std::uint8_t, 1> command{0x0};
-            std::array<std::uint8_t, 16> response;
+            std::array<std::uint8_t, 17> response;
 
             auto result = this->WriteRead(Controller::B, command, response);
 
@@ -93,6 +100,12 @@ namespace devices
             r.ReadByte(); // error flag register
 
             if (!housekeeping.ReadFrom(r))
+            {
+                this->_error.Failure();
+                return None<hk::ControllerBTelemetry>();
+            }
+
+            if (housekeeping.WhoAmI != ControllerBId)
             {
                 this->_error.Failure();
                 return None<hk::ControllerBTelemetry>();
@@ -195,6 +208,19 @@ namespace devices
             }
 
             return static_cast<ErrorCode>(response[0]);
+        }
+
+        ErrorCode EPSDriver::ResetWatchdog(Controller controller)
+        {
+            std::array<std::uint8_t, 1> command{num(Command::ResetWatchdog)};
+
+            if (this->Write(controller, command) != I2CResult::OK)
+            {
+                this->_error.Failure();
+                return ErrorCode::CommunicationFailure;
+            }
+
+            return GetErrorCode(controller) >> this->_error;
         }
 
         I2CResult EPSDriver::Write(Controller controller, const gsl::span<std::uint8_t> inData)

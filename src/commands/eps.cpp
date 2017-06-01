@@ -198,4 +198,27 @@ void EPSCommand(std::uint16_t argc, char* argv[])
 
         return;
     }
+
+    if (strcmp(argv[0], "reset_watchdog") == 0)
+    {
+        bool result = false;
+
+        if (strcmp(argv[1], "A") == 0)
+        {
+            result = eps.ResetWatchdog(EPSDriver::Controller::A) == devices::eps::ErrorCode::NoError;
+        }
+
+        else if (strcmp(argv[1], "B") == 0)
+        {
+            result = eps.ResetWatchdog(EPSDriver::Controller::B) == devices::eps::ErrorCode::NoError;
+        }
+        else if (strcmp(argv[1], "Both") == 0)
+        {
+            result = eps.ResetWatchdog(EPSDriver::Controller::A) == devices::eps::ErrorCode::NoError;
+            result = result && eps.ResetWatchdog(EPSDriver::Controller::B) == devices::eps::ErrorCode::NoError;
+        }
+
+        Main.terminal.Puts(result ? "1" : "0");
+        return;
+    }
 }
