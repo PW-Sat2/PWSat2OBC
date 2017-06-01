@@ -35,7 +35,7 @@ struct Command
 
 static void PrintHelp();
 
-static std::array<Command, 14> Commands = {
+static std::array<Command, 15> Commands = {
     Command{'T', "Test", Test}, //
     Command{'S', "Test SRAM", TestSRAM},
     Command{'E', "Test EEPROM", TestEEPROM},
@@ -50,6 +50,7 @@ static std::array<Command, 14> Commands = {
     Command{'?', "Print help", PrintHelp},
     Command{'t', "TMR boot", TMRBoot},
     Command{'R', "Runlevel", SetRunlevel},
+    Command{'f', "Test FRAMs", TestFRAM},
 };
 
 #define UPLOADBLOCKSIZE 256

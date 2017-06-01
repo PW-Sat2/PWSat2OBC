@@ -128,7 +128,7 @@ extern OBC Main;
 using Scrubber =
     scrubber::RAMScrubber<io_map::RAMScrubbing::MemoryStart, io_map::RAMScrubbing::MemorySize, io_map::RAMScrubbing::CycleSize>;
 
-static constexpr std::uint32_t PersistentStateBaseAddress = 4;
+static constexpr std::uint32_t PersistentStateBaseAddress = 16;
 
 /** @} */
 
