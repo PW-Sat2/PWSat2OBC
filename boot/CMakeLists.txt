@@ -8,12 +8,14 @@ set(SOURCES
     xmodem.cpp
     fault_handlers.c
     boot.cpp
+    spi.cpp
     
     commands/test.cpp
     commands/booting.cpp
     commands/settings.cpp
     commands/upload.cpp
     commands/boot_table.cpp
+    commands/fram.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -27,6 +29,8 @@ target_link_libraries(${NAME}
       assert
       base
       boot_params
+      fm25w
+      gpio
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

@@ -17,4 +17,6 @@ void UploadSafeMode();
 
 void PrintBootTable();
 
+void TestFRAM();
+
 #endif /* BOOT_COMMANDS_COMMANDS_HPP_ */
