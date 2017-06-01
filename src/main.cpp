@@ -20,6 +20,7 @@
 #include "base/os.h"
 #include "boot/params.hpp"
 #include "dmadrv.h"
+#include "efm_support/api.h"
 #include "efm_support/clock.h"
 #include "fs/fs.h"
 #include "gpio/gpio.h"
@@ -129,6 +130,7 @@ static void InitSwoEndpoint(void)
 
 static void ProcessState(OBC* obc)
 {
+    auto& persistentState = Mission.GetState().PersistentState;
     if (obc->Hardware.Pins.SysClear.Input() == false)
     {
         LOG(LOG_LEVEL_WARNING, "Resetting system state");
@@ -138,7 +140,7 @@ static void ProcessState(OBC* obc)
             LOG(LOG_LEVEL_ERROR, "Storage reset failure");
         }
 
-        if (!obc::WritePersistentState(Mission.GetState().PersistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage))
+        if (!obc::WritePersistentState(persistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage))
         {
             LOG(LOG_LEVEL_ERROR, "Persistent state reset failure");
         }
@@ -147,8 +149,30 @@ static void ProcessState(OBC* obc)
     }
     else
     {
-        obc::ReadPersistentState(Mission.GetState().PersistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage);
+        obc::ReadPersistentState(persistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage);
     }
+
+    auto boot = persistentState.Get<state::BootState>();
+    boot = state::BootState(boot.BootCounter() + 1);
+    persistentState.Set(boot);
+}
+
+static void AuditSystemStartup()
+{
+    const auto& persistentState = Mission.GetState().PersistentState;
+    const auto bootReason = efm::mcu::GetBootReason();
+    const auto bootCounter = persistentState.Get<state::BootState>().BootCounter();
+    auto& telemetry = TelemetryAcquisition.GetState().telemetry;
+    if (boot::IsBootInformationAvailable())
+    {
+        telemetry.Set(telemetry::SystemStartup(bootCounter, boot::Index, bootReason));
+    }
+    else
+    {
+        telemetry.Set(telemetry::SystemStartup(bootCounter, 0xff, bootReason));
+    }
+
+    efm::mcu::ResetBootReason();
 }
 
 static void SetupAntennas(void)
@@ -173,6 +197,7 @@ static void ObcInitTask(void* param)
     }
 
     ProcessState(obc);
+    AuditSystemStartup();
 
     obc->fs.MakeDirectory("/a");
 
@@ -273,7 +298,7 @@ int main(void)
     LeuartLineIOInit(&Main.IO);
 #endif
 
-    if (boot::MagicNumber != boot::BootloaderMagicNumber)
+    if (boot::IsBootInformationAvailable())
     {
         LOGF(LOG_LEVEL_WARNING,
             "No boot information from bootloader (expected: 0x%lX, got: 0x%lX)",

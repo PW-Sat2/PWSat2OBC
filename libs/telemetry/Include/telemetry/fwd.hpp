@@ -8,9 +8,16 @@
 
 namespace telemetry
 {
+    class SystemStartup;
+    class ProgramState;
     template <typename... Type> class Telemetry;
 
-    typedef Telemetry<state::TimeState, devices::comm::CommTelemetry> ManagedTelemetry;
+    typedef Telemetry<SystemStartup, //
+        ProgramState,                //
+        state::TimeState,            //
+        devices::comm::CommTelemetry //
+        >
+        ManagedTelemetry;
 }
 
 #endif

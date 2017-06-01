@@ -11,6 +11,7 @@ set(SOURCES
     state.cpp
     Antenna.cpp
     time.cpp
+    boot.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

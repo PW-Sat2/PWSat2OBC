@@ -19,7 +19,7 @@ class CommTelemetry
     /**
      * @brief TimeState telemetry unique identifier.
      */
-    static constexpr int Id = 2;
+    static constexpr int Id = 4;
 
     /**
      * @brief ctor.
@@ -40,14 +40,13 @@ class CommTelemetry
 
     /**
      * @brief Write the comm telemetry to passed buffer writer object.
-     * @param[in] writer Buffer writer object that should be used to write the serialized state
-     * of the time subsystem state.
+     * @param[in] writer Buffer writer object that should be used to write the serialized state.
      */
     void Write(BitWriter& writer) const;
 
     /**
-     * @brief Returns size of the serialized state in bytes.
-     * @return Size of the serialized state in bytes.
+     * @brief Returns size of the serialized state in bits.
+     * @return Size of the serialized state in bits.
      */
     static constexpr std::uint32_t BitSize();
 

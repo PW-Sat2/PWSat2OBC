@@ -21,7 +21,7 @@ namespace state
         /**
          * @brief TimeState telemetry unique identifier.
          */
-        static constexpr int Id = 1;
+        static constexpr int Id = 3;
 
         /**
          * @brief ctor.
@@ -59,8 +59,7 @@ namespace state
 
         /**
          * @brief Write the time state to passed buffer writer object.
-         * @param[in] writer Buffer writer object that should be used to write the serialized state
-         * of the time subsystem state.
+         * @param[in] writer Buffer writer object that should be used to write the serialized state.
          */
         void Write(Writer& writer) const;
 

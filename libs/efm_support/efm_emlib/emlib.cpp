@@ -1,3 +1,4 @@
+#include <em_device.h>
 #include "efm_support/api.h"
 
 namespace efm
@@ -74,6 +75,21 @@ namespace efm
             void* cbUserParam)
         {
             return DMADRV_MemoryPeripheral(channelId, peripheralSignal, dst, src, srcInc, len, size, callback, cbUserParam);
+        }
+    }
+
+    namespace mcu
+    {
+        std::uint32_t GetBootReason()
+        {
+            return RMU->RSTCAUSE;
+        }
+
+        void ResetBootReason()
+        {
+            RMU->CMD |= RMU_CMD_RCCLR;
+            EMU->AUXCTRL |= EMU_AUXCTRL_HRCCLR;
+            EMU->AUXCTRL &= ~EMU_AUXCTRL_HRCCLR;
         }
     }
 }
