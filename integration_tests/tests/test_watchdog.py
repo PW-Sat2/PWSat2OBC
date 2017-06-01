@@ -1,9 +1,6 @@
 import logging
 from unittest import skip
 
-from nose.tools import nottest
-
-from system import wait_for_obc_start
 from tests.base import BaseTest
 from utils import TestEvent
 
@@ -19,7 +16,6 @@ class WatchdogTest(BaseTest):
 
         self.assertTrue(rebooted, "MCU should be rebooted")
 
-    @wait_for_obc_start()
     def test_should_kick_watchdog_in_mission_loop(self):
         self.system.obc.suspend_mission()
 
