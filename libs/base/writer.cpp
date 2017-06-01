@@ -12,12 +12,6 @@ Writer::Writer(gsl::span<std::uint8_t> view)
     this->Initialize(std::move(view));
 }
 
-void Writer::Initialize(gsl::span<std::uint8_t> view)
-{
-    this->_buffer = view;
-    this->Reset();
-}
-
 bool Writer::UpdateState(std::uint8_t requestedSize)
 {
     if (this->_isValid)

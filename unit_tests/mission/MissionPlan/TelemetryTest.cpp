@@ -70,7 +70,7 @@ namespace
     TEST_F(TelemetryTest, TestSaveChange)
     {
         EXPECT_CALL(fs, Open(_, _, _)).WillOnce(Return(OpenSuccessful(10)));
-        EXPECT_CALL(fs, Write(10, SizeIs(18))).WillOnce(Return(WriteSuccessful()));
+        EXPECT_CALL(fs, Write(10, SizeIs(12))).WillOnce(Return(WriteSuccessful()));
         EXPECT_CALL(fs, GetFileSize(10)).WillOnce(Return(0));
         EXPECT_CALL(fs, Close(10));
         state.telemetry.Set(state::TimeState(5min, 10min));
@@ -81,7 +81,7 @@ namespace
     TEST_F(TelemetryTest, TestSaveChangeSlightlyBelowLimit)
     {
         EXPECT_CALL(fs, Open(_, _, _)).WillOnce(Return(OpenSuccessful(10)));
-        EXPECT_CALL(fs, Write(10, SizeIs(18))).WillOnce(Return(WriteSuccessful()));
+        EXPECT_CALL(fs, Write(10, SizeIs(12))).WillOnce(Return(WriteSuccessful()));
         EXPECT_CALL(fs, GetFileSize(10)).WillOnce(Return(1023));
         state.telemetry.Set(state::TimeState(5min, 10min));
         this->descriptor.Execute(this->state);
@@ -107,7 +107,7 @@ namespace
     TEST_F(TelemetryTest, TestSaveChangeOverLimitSuccess)
     {
         EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(OpenSuccessful(10)));
-        EXPECT_CALL(fs, Write(10, SizeIs(18))).WillOnce(Return(WriteSuccessful()));
+        EXPECT_CALL(fs, Write(10, SizeIs(12))).WillOnce(Return(WriteSuccessful()));
         EXPECT_CALL(fs, GetFileSize(10)).WillOnce(Return(1024));
         EXPECT_CALL(fs, Move(this->config.currentFileName, this->config.previousFileName)).WillOnce(Return(OSResult::Success));
         EXPECT_CALL(fs, Close(10)).Times(2);
@@ -119,7 +119,7 @@ namespace
     TEST_F(TelemetryTest, TestSaveChangeOverLimitArchivizerFailure)
     {
         EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(OpenSuccessful(10)));
-        EXPECT_CALL(fs, Write(10, SizeIs(18))).Times(0);
+        EXPECT_CALL(fs, Write(10, SizeIs(12))).Times(0);
         EXPECT_CALL(fs, GetFileSize(10)).WillOnce(Return(1024));
         EXPECT_CALL(fs, Move(this->config.currentFileName, this->config.previousFileName)).WillOnce(Return(OSResult::IOError));
         state.telemetry.Set(state::TimeState(5min, 10min));
@@ -130,7 +130,7 @@ namespace
     TEST_F(TelemetryTest, TestSaveChangeOverLimitFileReopenFailure)
     {
         EXPECT_CALL(fs, Open(_, _, _)).WillOnce(Return(OpenSuccessful(10))).WillOnce(Return(FileOpenResult(OSResult::IOError, 0)));
-        EXPECT_CALL(fs, Write(10, SizeIs(18))).Times(0);
+        EXPECT_CALL(fs, Write(10, SizeIs(12))).Times(0);
         EXPECT_CALL(fs, GetFileSize(10)).WillOnce(Return(1024));
         EXPECT_CALL(fs, Move(this->config.currentFileName, this->config.previousFileName)).WillOnce(Return(OSResult::Success));
         state.telemetry.Set(state::TimeState(5min, 10min));

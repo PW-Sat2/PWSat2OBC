@@ -1,25 +1,18 @@
 #include "CommTelemetry.hpp"
-#include "base/Reader.h"
-#include "base/Writer.h"
+#include "base/BitWriter.hpp"
 
 COMM_BEGIN
 
 CommTelemetry::CommTelemetry()
-    : transmitterCurrentConsumption(0),   //
-      receiverCurrentConsumption(0),      //
-      dopplerOffset(0),                   //
-      vcc(0),                             //
-      oscilatorTemperature(0),            //
-      receiverAmplifierTemperature(0),    //
-      signalStrength(0),                  //
-      rFReflectedPower(0),                //
-      transmitterAmplifierTemperature(0), //
-      rFForwardPower(0),                  //
-      transmitterState{}
+    : transmitterIdleState(false), //
+      beaconState(false)
 {
 }
 
-CommTelemetry::CommTelemetry(const ReceiverTelemetry& receiver, const TransmitterTelemetry& transmitter, const TransmitterState& state)
+CommTelemetry::CommTelemetry(const ReceiverTelemetry& receiver, //
+    const TransmitterTelemetry& transmitter,
+    const TransmitterState& state,
+    const Uptime& uptime)
     : transmitterCurrentConsumption(transmitter.TransmitterCurrentConsumption), //
       receiverCurrentConsumption(receiver.ReceiverCurrentConsumption),          //
       dopplerOffset(receiver.DopplerOffset),                                    //
@@ -30,59 +23,30 @@ CommTelemetry::CommTelemetry(const ReceiverTelemetry& receiver, const Transmitte
       rFReflectedPower(transmitter.RFReflectedPower),                           //
       transmitterAmplifierTemperature(transmitter.AmplifierTemperature),        //
       rFForwardPower(transmitter.RFForwardPower),                               //
-      transmitterState(state)
+      transmitterUptime(uptime),                                                //
+      transmitterIdleState(state.StateWhenIdle == IdleState::On),               //
+      beaconState(state.BeaconState)                                            //
 {
 }
 
-void CommTelemetry::Read(Reader& reader)
+void CommTelemetry::Write(BitWriter& writer) const
 {
-    this->transmitterCurrentConsumption = reader.ReadWordLE();
-    this->receiverCurrentConsumption = reader.ReadWordLE();
-    this->dopplerOffset = reader.ReadWordLE();
-    this->vcc = reader.ReadWordLE();
-    this->oscilatorTemperature = reader.ReadWordLE();
-    this->receiverAmplifierTemperature = reader.ReadWordLE();
-    this->signalStrength = reader.ReadWordLE();
-    this->rFReflectedPower = reader.ReadWordLE();
-    this->transmitterAmplifierTemperature = reader.ReadWordLE();
-    this->rFForwardPower = reader.ReadWordLE();
-    this->transmitterState.BeaconState = (reader.ReadByte() != 0);
-    this->transmitterState.StateWhenIdle = static_cast<IdleState>(reader.ReadByte());
-    this->transmitterState.TransmitterBitRate = static_cast<Bitrate>(reader.ReadByte());
-}
-
-void CommTelemetry::Write(Writer& writer) const
-{
-    writer.WriteWordLE(this->transmitterCurrentConsumption);
-    writer.WriteWordLE(this->receiverCurrentConsumption);
-    writer.WriteWordLE(this->dopplerOffset);
-    writer.WriteWordLE(this->vcc);
-    writer.WriteWordLE(this->oscilatorTemperature);
-    writer.WriteWordLE(this->receiverAmplifierTemperature);
-    writer.WriteWordLE(this->signalStrength);
-    writer.WriteWordLE(this->rFReflectedPower);
-    writer.WriteWordLE(this->transmitterAmplifierTemperature);
-    writer.WriteWordLE(this->rFForwardPower);
-    writer.WriteByte(this->transmitterState.BeaconState);
-    writer.WriteByte(num(this->transmitterState.StateWhenIdle));
-    writer.WriteByte(num(this->transmitterState.TransmitterBitRate));
-}
-
-bool CommTelemetry::IsDifferent(const CommTelemetry& arg) const
-{
-    return this->transmitterCurrentConsumption != arg.transmitterCurrentConsumption ||  //
-        this->receiverCurrentConsumption != arg.receiverCurrentConsumption ||           //
-        this->dopplerOffset != arg.dopplerOffset ||                                     //
-        this->vcc != arg.vcc ||                                                         //
-        this->oscilatorTemperature != arg.oscilatorTemperature ||                       //
-        this->receiverAmplifierTemperature != arg.receiverAmplifierTemperature ||       //
-        this->signalStrength != arg.signalStrength ||                                   //
-        this->rFReflectedPower != arg.rFReflectedPower ||                               //
-        this->transmitterAmplifierTemperature != arg.transmitterAmplifierTemperature || //
-        this->rFForwardPower != arg.rFForwardPower ||                                   //
-        this->transmitterState.BeaconState != arg.transmitterState.BeaconState ||       //
-        this->transmitterState.StateWhenIdle != arg.transmitterState.StateWhenIdle ||   //
-        this->transmitterState.TransmitterBitRate != arg.transmitterState.TransmitterBitRate;
+    writer.Write(this->transmitterCurrentConsumption);
+    writer.Write(this->receiverCurrentConsumption);
+    writer.Write(this->dopplerOffset);
+    writer.Write(this->vcc);
+    writer.Write(this->oscilatorTemperature);
+    writer.Write(this->receiverAmplifierTemperature);
+    writer.Write(this->signalStrength);
+    writer.Write(this->rFReflectedPower);
+    writer.Write(this->rFForwardPower);
+    writer.Write(this->transmitterAmplifierTemperature);
+    writer.Write(this->transmitterUptime.seconds);
+    writer.Write(this->transmitterUptime.minutes);
+    writer.Write(this->transmitterUptime.hours);
+    writer.Write(this->transmitterUptime.days);
+    writer.Write(this->transmitterIdleState);
+    writer.Write(this->beaconState);
 }
 
 COMM_END

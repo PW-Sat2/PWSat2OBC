@@ -427,9 +427,16 @@ template <typename Underlying, std::uint8_t BitsCount> class BitValue
 {
   public:
     /** @brief Mask used to trim value */
-    static constexpr Underlying Mask = ~(~0 << BitsCount);
+    static constexpr Underlying Mask = ~(~0ull << BitsCount);
 
-    /** @brief Default ctor */
+    /**
+     * @brief Public constant that contains size of the value in bits.
+     */
+    static constexpr int Size = BitsCount;
+
+    /**
+     * @brief Default .ctor
+     */
     constexpr BitValue();
     /**
      * @brief Initializes with given value
@@ -438,15 +445,15 @@ template <typename Underlying, std::uint8_t BitsCount> class BitValue
     constexpr BitValue(Underlying v);
 
     /**
-     * @brief Extracts holded value
+     * @brief Extracts held value
      */
-    inline operator Underlying() const;
+    operator Underlying() const;
 
     /**
-     * @brief Extracts holded value
-     * @return holded value
+     * @brief Extracts held value
+     * @return Held value
      */
-    inline Underlying Value() const;
+    Underlying Value() const;
 
     /**
      * @brief Default assignment operator
@@ -456,7 +463,7 @@ template <typename Underlying, std::uint8_t BitsCount> class BitValue
     constexpr BitValue<Underlying, BitsCount>& operator=(const BitValue<Underlying, BitsCount>& other) = default;
 
   private:
-    /** @brief Holded value */
+    /** @brief Held value */
     Underlying _value;
 };
 
@@ -514,9 +521,9 @@ inline bool operator!=(BitValue<Underlying, BitsCount>& lhs, BitValue<Underlying
     return !(lhs == rhs);
 }
 
-/** @brief 12-bit unsigned int */
+/** @brief 12-bit unsigned integer */
 using uint12_t = BitValue<std::uint16_t, 12>;
-/** @brief 10-bit unsigned int */
+/** @brief 10-bit unsigned integer */
 using uint10_t = BitValue<std::uint16_t, 10>;
 
 #endif

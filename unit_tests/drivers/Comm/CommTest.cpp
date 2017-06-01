@@ -55,6 +55,7 @@ namespace
     static constexpr uint8_t TransmitterGetTelemetry = 0x26;
     static constexpr uint8_t TransmitterSetBitrate = 0x28;
     static constexpr uint8_t TransmitterGetState = 0x41;
+    static constexpr uint8_t TransmitterGetUptime = 0x40;
     static constexpr uint8_t TransmitterReset = 0xAA;
     static constexpr uint8_t TransmitterWatchdogReset = 0xCC;
 
@@ -445,6 +446,74 @@ namespace
         ASSERT_THAT(state.TransmitterBitRate, Eq(Bitrate::Comm4800bps));
     }
 
+    TEST_F(CommTest, TestGetTransmitterUptimeRequestFailure)
+    {
+        Uptime state;
+        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetUptime))).WillOnce(Return(I2CResult::Nack));
+        const auto status = comm.GetTransmitterUptime(state);
+        ASSERT_THAT(status, Eq(false));
+    }
+
+    TEST_F(CommTest, TestGetTransmitterUptimeResponseFailure)
+    {
+        Uptime state;
+        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetUptime))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, Read(TransmitterAddress, _)).WillOnce(Return(I2CResult::Nack));
+        const auto status = comm.GetTransmitterUptime(state);
+        ASSERT_THAT(status, Eq(false));
+    }
+
+    TEST_F(CommTest, TestGetTransmitterUptimeInvalidResponseSeconds)
+    {
+        Uptime state;
+        EXPECT_CALL(i2c, Read(TransmitterAddress, _)).WillOnce(Invoke([](uint8_t /*address*/, auto outData) {
+            outData[0] = 0xff;
+            return I2CResult::OK;
+        }));
+        const auto status = comm.GetTransmitterUptime(state);
+        ASSERT_THAT(status, Eq(false));
+    }
+
+    TEST_F(CommTest, TestGetTransmitterUptimeInvalidResponseMinutes)
+    {
+        Uptime state;
+        EXPECT_CALL(i2c, Read(TransmitterAddress, _)).WillOnce(Invoke([](uint8_t /*address*/, auto outData) {
+            outData[1] = 0xff;
+            return I2CResult::OK;
+        }));
+        const auto status = comm.GetTransmitterUptime(state);
+        ASSERT_THAT(status, Eq(false));
+    }
+
+    TEST_F(CommTest, TestGetTransmitterUptimeInvalidResponseHours)
+    {
+        Uptime state;
+        EXPECT_CALL(i2c, Read(TransmitterAddress, _)).WillOnce(Invoke([](uint8_t /*address*/, auto outData) {
+            outData[2] = 0xff;
+            return I2CResult::OK;
+        }));
+        const auto status = comm.GetTransmitterUptime(state);
+        ASSERT_THAT(status, Eq(false));
+    }
+
+    TEST_F(CommTest, TestGetTransmitterUptime)
+    {
+        Uptime state;
+        EXPECT_CALL(i2c, Read(TransmitterAddress, _)).WillOnce(Invoke([](uint8_t /*address*/, auto outData) {
+            outData[0] = 0x3f;
+            outData[1] = 0x0f;
+            outData[2] = 0x19;
+            outData[3] = 0x85;
+            return I2CResult::OK;
+        }));
+        const auto status = comm.GetTransmitterUptime(state);
+        ASSERT_THAT(status, Eq(true));
+        ASSERT_THAT(state.seconds, Eq(0x3f));
+        ASSERT_THAT(state.minutes, Eq(0x0f));
+        ASSERT_THAT(state.hours, Eq(0x19));
+        ASSERT_THAT(state.days, Eq(0x85));
+    }
+
     TEST_F(CommTest, TestSendTooLongFrame)
     {
         uint8_t buffer[devices::comm::MaxDownlinkFrameSize + 1] = {0};
@@ -663,12 +732,24 @@ namespace
         ASSERT_THAT(status, Eq(false));
     }
 
+    TEST_F(CommTest, TestGetTelemetryTransmitterUptimeFailure)
+    {
+        CommTelemetry telemetry;
+        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetTelemetry))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, Write(ReceiverAddress, ElementsAre(ReceverGetTelemetry))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetState))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetUptime))).WillOnce(Return(I2CResult::Nack));
+        const auto status = comm.GetTelemetry(telemetry);
+        ASSERT_THAT(status, Eq(false));
+    }
+
     TEST_F(CommTest, TestGetTelemetry)
     {
         CommTelemetry telemetry;
         EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetTelemetry))).WillOnce(Return(I2CResult::OK));
         EXPECT_CALL(i2c, Write(ReceiverAddress, ElementsAre(ReceverGetTelemetry))).WillOnce(Return(I2CResult::OK));
         EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetState))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetUptime))).WillOnce(Return(I2CResult::OK));
         const auto status = comm.GetTelemetry(telemetry);
         ASSERT_THAT(status, Eq(true));
     }
