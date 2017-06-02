@@ -55,9 +55,27 @@ namespace devices
         };
 
         /**
+         * @brief Interface of object capable providing complete eps telemetry.
+         */
+        struct IEpsTelemetryProvider
+        {
+            /**
+             * @brief Reads housekeeping of controller A
+             * @return Housekeeping of controller A
+             */
+            virtual Option<hk::ControllerATelemetry> ReadHousekeepingA() = 0;
+
+            /**
+             * @brief Reads housekeeping of controller B
+             * @return Housekeeping of controller B
+             */
+            virtual Option<hk::ControllerBTelemetry> ReadHousekeepingB() = 0;
+        };
+
+        /**
          * @brief EPS driver
          */
-        class EPSDriver
+        class EPSDriver final : public IEpsTelemetryProvider
         {
           public:
             /**
@@ -71,6 +89,7 @@ namespace devices
 
             /** @brief Controller A address */
             static constexpr drivers::i2c::I2CAddress ControllerA = 0b0110101;
+
             /** @brief Controller B address */
             static constexpr drivers::i2c::I2CAddress ControllerB = 0b0110110;
 
@@ -80,23 +99,24 @@ namespace devices
              * @param controllerABus I2C interface for controller A
              * @param controllerBBus I2C interface for controller B
              */
-            EPSDriver(
-                error_counter::ErrorCounting& errorCounting, drivers::i2c::II2CBus& controllerABus, drivers::i2c::II2CBus& controllerBBus);
+            EPSDriver(error_counter::ErrorCounting& errorCounting, //
+                drivers::i2c::II2CBus& controllerABus,             //
+                drivers::i2c::II2CBus& controllerBBus);
 
             /**
              * @brief Reads housekeeping of controller A
              * @return Housekeeping of controller A
              */
-            Option<hk::ControllerATelemetry> ReadHousekeepingA();
+            virtual Option<hk::ControllerATelemetry> ReadHousekeepingA() final override;
 
             /**
              * @brief Reads housekeeping of controller B
              * @return Housekeeping of controller B
              */
-            Option<hk::ControllerBTelemetry> ReadHousekeepingB();
+            virtual Option<hk::ControllerBTelemetry> ReadHousekeepingB() final override;
 
             /**
-             * @brief Performs power cycle by controller A
+             * @brief Performs power cycle using specified constroller.
              * @param controller Controller to use
              * @return This function will return only on failure
              */

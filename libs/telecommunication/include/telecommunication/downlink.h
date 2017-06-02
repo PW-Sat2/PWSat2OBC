@@ -23,13 +23,12 @@ namespace telecommunication
          */
         enum class DownlinkAPID : std::uint8_t
         {
-            Pong = 0x01,           //!< Pong
-            Operation = 0x2,       //!< Operation command
-            Beacon = 0x3,          //!< Beacon
-            ProgramUpload = 0x4,   //!< Program upload operation status
-            TelemetryShort = 0x2A, //!< TelemetryShort
-            TelemetryLong = 0x3F,  //!< TelemetryLong
-            LastItem               //!< LastItem
+            Pong = 0x01,         //!< Pong
+            Operation = 0x2,     //!< Operation command
+            Beacon = 0x3,        //!< Beacon
+            ProgramUpload = 0x4, //!< Program upload operation status
+            Telemetry = 0x3F,    //!< TelemetryLong
+            LastItem             //!< LastItem
         };
 
         /**
@@ -52,7 +51,7 @@ namespace telecommunication
             inline Writer& PayloadWriter();
 
             /**
-             * @brief Returns undelying byte representation of the frame
+             * @brief Returns underlying byte representation of the frame
              * @return
              */
             inline gsl::span<const uint8_t> Frame();
@@ -90,7 +89,7 @@ namespace telecommunication
              * @brief Initializes new @ref DownlinkFrame instance
              * @param apid APID
              * @param seq Sequence number
-             * @param correlationId Correlation ID
+             * @param correlationId Identifier of the request that prompted sending this frame.
              */
             CorrelatedDownlinkFrame(DownlinkAPID apid, std::uint32_t seq, std::uint8_t correlationId);
 

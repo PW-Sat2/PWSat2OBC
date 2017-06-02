@@ -18,7 +18,7 @@ class CommTelemetry
 {
   public:
     /**
-     * @brief TimeState telemetry unique identifier.
+     * @brief Comm telemetry unique identifier.
      */
     static constexpr int Id = 12;
 
@@ -176,6 +176,8 @@ constexpr std::uint32_t CommTelemetry::BitSize()
         decltype(Uptime::days)::Size +    //
         2;
 }
+
+static_assert(CommTelemetry::BitSize() == 147, "Incorrect telemetry format");
 
 inline uint12_t CommTelemetry::TransmitterCurrentConsumption() const noexcept
 {

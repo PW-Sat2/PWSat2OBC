@@ -90,8 +90,16 @@ namespace devices
                  */
                 void ReadFrom(Reader& reader);
 
-                void Write(BitWriter& writer);
+                /**
+                 * @brief Write the object to passed buffer writer object.
+                 * @param[in] writer Buffer writer object that should be used to write the serialized state.
+                 */
+                void Write(BitWriter& writer) const;
 
+                /**
+                 * @brief Returns size of the serialized state in bits.
+                 * @return Size of the serialized state in bits.
+                 */
                 static constexpr std::uint32_t BitSize();
 
                 /** @brief VOLT_3V3d, volts */
@@ -102,6 +110,8 @@ namespace devices
             {
                 return Aggregate<decltype(VOLT_3V3d)>;
             }
+
+            static_assert(OtherControllerState::BitSize() == 10, "Incorrect telemetry format");
 
             /**
              * @brief Housekeeping of the 'this' controller
@@ -116,9 +126,18 @@ namespace devices
                  */
                 void ReadFrom(Reader& reader);
 
-                void Write(BitWriter& writer);
+                /**
+                 * @brief Write the object to passed buffer writer object.
+                 * @param[in] writer Buffer writer object that should be used to write the serialized state.
+                 */
+                void Write(BitWriter& writer) const;
 
+                /**
+                 * @brief Returns size of the serialized state in bits.
+                 * @return Size of the serialized state in bits.
+                 */
                 static constexpr std::uint32_t BitSize();
+
                 /** @brief Number of power cycles */
                 std::uint16_t powerCycleCount;
 
@@ -137,6 +156,8 @@ namespace devices
                 return Aggregate<decltype(powerCycleCount), decltype(temperature), decltype(uptime), decltype(errorCode)>;
             }
 
+            static_assert(ThisControllerState::BitSize() == 66, "Incorrect telemetry format");
+
             /** @brief DCDC status*/
             struct DCDC_HK
             {
@@ -146,8 +167,16 @@ namespace devices
                  */
                 void ReadFrom(Reader& reader);
 
-                void Write(BitWriter& writer);
+                /**
+                 * @brief Write the object to passed buffer writer object.
+                 * @param[in] writer Buffer writer object that should be used to write the serialized state.
+                 */
+                void Write(BitWriter& writer) const;
 
+                /**
+                 * @brief Returns size of the serialized state in bits.
+                 * @return Size of the serialized state in bits.
+                 */
                 static constexpr std::uint32_t BitSize();
 
                 /** @brief DCDC: Temperature, Celsius*/
@@ -158,6 +187,8 @@ namespace devices
             {
                 return Aggregate<decltype(temperature)>;
             }
+
+            static_assert(DCDC_HK::BitSize() == 10, "Incorrect telemetry format");
 
             /** @brief DISTR status*/
             struct DISTR_HK
@@ -170,8 +201,16 @@ namespace devices
                  */
                 void ReadFrom(Reader& reader);
 
-                void Write(BitWriter& writer);
+                /**
+                 * @brief Write the object to passed buffer writer object.
+                 * @param[in] writer Buffer writer object that should be used to write the serialized state.
+                 */
+                void Write(BitWriter& writer) const;
 
+                /**
+                 * @brief Returns size of the serialized state in bits.
+                 * @return Size of the serialized state in bits.
+                 */
                 static constexpr std::uint32_t BitSize();
 
                 /** @brief DISTR: temperature, Celsius */
@@ -215,9 +254,16 @@ namespace devices
                     decltype(LCL_FLAGB)>;
             }
 
+            static_assert(DISTR_HK::BitSize() == 86, "Incorrect telemetry format");
+
             /** @brief MPPT status */
             struct MPPT_HK
             {
+                /**
+                 * @brief Size of the Mppt state field in bits.
+                 */
+                static constexpr std::uint8_t StateBitSize = 6;
+
                 MPPT_HK();
 
                 /**
@@ -226,8 +272,16 @@ namespace devices
                  */
                 void ReadFrom(Reader& reader);
 
-                void Write(BitWriter& writer);
+                /**
+                 * @brief Write the object to passed buffer writer object.
+                 * @param[in] writer Buffer writer object that should be used to write the serialized state.
+                 */
+                void Write(BitWriter& writer) const;
 
+                /**
+                 * @brief Returns size of the serialized state in bits.
+                 * @return Size of the serialized state in bits.
+                 */
                 static constexpr std::uint32_t BitSize();
 
                 /** @brief MPPT: SOL_VOLT, volts*/
@@ -244,12 +298,10 @@ namespace devices
 
             constexpr std::uint32_t MPPT_HK::BitSize()
             {
-                return Aggregate<decltype(SOL_VOLT), //
-                    decltype(SOL_CURR),              //
-                    decltype(SOL_OUT_VOLT),          //
-                    decltype(Temperature),           //
-                    decltype(MpptState)>;
+                return Aggregate<decltype(SOL_VOLT), decltype(SOL_CURR), decltype(SOL_OUT_VOLT), decltype(Temperature)> + StateBitSize;
             }
+
+            static_assert(MPPT_HK::BitSize() == 54, "Incorrect telemetry format");
 
             /** @brief BATC status*/
             struct BATCPrimaryState
@@ -262,8 +314,16 @@ namespace devices
                  */
                 void ReadFrom(Reader& reader);
 
-                void Write(BitWriter& writer);
+                /**
+                 * @brief Write the object to passed buffer writer object.
+                 * @param[in] writer Buffer writer object that should be used to write the serialized state.
+                 */
+                void Write(BitWriter& writer) const;
 
+                /**
+                 * @brief Returns size of the serialized state in bits.
+                 * @return Size of the serialized state in bits.
+                 */
                 static constexpr std::uint32_t BitSize();
 
                 /** @brief BATC: VOLT_A, volts*/
@@ -287,6 +347,8 @@ namespace devices
                     decltype(State)>;
             }
 
+            static_assert(BATCPrimaryState::BitSize() == 48, "Incorrect telemetry format");
+
             /** @brief Battery Pack status*/
             struct BatteryPackPrimaryState
             {
@@ -296,8 +358,16 @@ namespace devices
                  */
                 void ReadFrom(Reader& reader);
 
-                void Write(BitWriter& writer);
+                /**
+                 * @brief Write the object to passed buffer writer object.
+                 * @param[in] writer Buffer writer object that should be used to write the serialized state.
+                 */
+                void Write(BitWriter& writer) const;
 
+                /**
+                 * @brief Returns size of the serialized state in bits.
+                 * @return Size of the serialized state in bits.
+                 */
                 static constexpr std::uint32_t BitSize();
 
                 /** @brief Temp A, Celsius*/
@@ -312,6 +382,8 @@ namespace devices
                 return Aggregate<decltype(temperatureA), decltype(temperatureB)>;
             }
 
+            static_assert(BatteryPackPrimaryState::BitSize() == 24, "Incorrect telemetry format");
+
             /** @brief Battery Pack status*/
             struct BatteryPackSecondaryState
             {
@@ -321,8 +393,16 @@ namespace devices
                  */
                 void ReadFrom(Reader& reader);
 
-                void Write(BitWriter& writer);
+                /**
+                 * @brief Write the object to passed buffer writer object.
+                 * @param[in] writer Buffer writer object that should be used to write the serialized state.
+                 */
+                void Write(BitWriter& writer) const;
 
+                /**
+                 * @brief Returns size of the serialized state in bits.
+                 * @return Size of the serialized state in bits.
+                 */
                 static constexpr std::uint32_t BitSize();
 
                 /** @brief Battery Pack: Temp C, Celsius*/
@@ -334,6 +414,8 @@ namespace devices
                 return Aggregate<decltype(temperatureC)>;
             }
 
+            static_assert(BatteryPackSecondaryState::BitSize() == 10, "Incorrect telemetry format");
+
             /** @brief Battery Controller status*/
             struct BATCSecondaryState
             {
@@ -343,8 +425,16 @@ namespace devices
                  */
                 void ReadFrom(Reader& reader);
 
-                void Write(BitWriter& writer);
+                /**
+                 * @brief Write the object to passed buffer writer object.
+                 * @param[in] writer Buffer writer object that should be used to write the serialized state.
+                 */
+                void Write(BitWriter& writer) const;
 
+                /**
+                 * @brief Returns size of the serialized state in bits.
+                 * @return Size of the serialized state in bits.
+                 */
                 static constexpr std::uint32_t BitSize();
 
                 /** @brief BATC: temp B, Celsius*/
@@ -356,13 +446,18 @@ namespace devices
                 return Aggregate<decltype(voltB)>;
             }
 
+            static_assert(BATCSecondaryState::BitSize() == 10, "Incorrect telemetry format");
+
             /**
              * @brief Housekeeping of controller A
              * @telemetry_element
              */
             struct ControllerATelemetry
             {
-                static const std::uint32_t Id = 6;
+                /**
+                 * @brief Eps controller A telemetry unique identifier.
+                 */
+                static const std::uint32_t Id = 14;
 
                 /**
                  * @brief Reads part of input stream
@@ -372,14 +467,14 @@ namespace devices
                 bool ReadFrom(Reader& reader);
 
                 /**
-                 * @brief Write the system startup telemetry element to passed buffer writer object.
+                 * @brief Write the object to passed buffer writer object.
                  * @param[in] writer Buffer writer object that should be used to write the serialized state.
                  */
-                void Write(BitWriter& writer);
+                void Write(BitWriter& writer) const;
 
                 /**
-                 * @brief Returns size of the serialized state in bytes.
-                 * @return Size of the serialized state in bytes.
+                 * @brief Returns size of the serialized state in bits.
+                 * @return Size of the serialized state in bits.
                  */
                 static constexpr std::uint32_t BitSize();
 
@@ -428,12 +523,19 @@ namespace devices
                     decltype(dcdc5V)::BitSize();
             }
 
+            static_assert(ControllerATelemetry::BitSize() == 416, "Incorrect telemetry format");
+
             /**
              * @brief Housekeeping of controller B
              * @telemetry_element
              */
             struct ControllerBTelemetry
             {
+                /**
+                 * @brief Eps controller B telemetry unique identifier.
+                 */
+                static const std::uint32_t Id = 15;
+
                 /**
                  * @brief Reads part of input stream
                  * @param reader Reader over input stream
@@ -442,14 +544,14 @@ namespace devices
                 bool ReadFrom(Reader& reader);
 
                 /**
-                 * @brief Write the system startup telemetry element to passed buffer writer object.
+                 * @brief Write the object to passed buffer writer object.
                  * @param[in] writer Buffer writer object that should be used to write the serialized state.
                  */
-                void Write(BitWriter& writer);
+                void Write(BitWriter& writer) const;
 
                 /**
-                 * @brief Returns size of the serialized state in bytes.
-                 * @return Size of the serialized state in bytes.
+                 * @brief Returns size of the serialized state in bits.
+                 * @return Size of the serialized state in bits.
                  */
                 static constexpr std::uint32_t BitSize();
 
@@ -473,6 +575,8 @@ namespace devices
                     decltype(other)::BitSize() + //
                     decltype(current)::BitSize();
             }
+
+            static_assert(ControllerBTelemetry::BitSize() == 96, "Incorrect telemetry format");
 
             /** @} */
         }

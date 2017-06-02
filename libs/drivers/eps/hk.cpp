@@ -13,7 +13,7 @@ namespace devices
                 this->VOLT_3V3d = reader.ReadWordLE();
             }
 
-            void OtherControllerState::Write(BitWriter& writer)
+            void OtherControllerState::Write(BitWriter& writer) const
             {
                 writer.Write(this->VOLT_3V3d);
             }
@@ -30,7 +30,7 @@ namespace devices
                 this->temperature = reader.ReadWordLE();
             }
 
-            void ThisControllerState::Write(BitWriter& writer)
+            void ThisControllerState::Write(BitWriter& writer) const
             {
                 writer.Write(this->errorCode);
                 writer.Write(this->powerCycleCount);
@@ -43,7 +43,7 @@ namespace devices
                 this->temperature = reader.ReadWordLE();
             }
 
-            void DCDC_HK::Write(BitWriter& writer)
+            void DCDC_HK::Write(BitWriter& writer) const
             {
                 writer.Write(this->temperature);
             }
@@ -65,7 +65,7 @@ namespace devices
                 this->LCL_FLAGB = static_cast<decltype(this->LCL_FLAGB)>(reader.ReadByte());
             }
 
-            void DISTR_HK::Write(BitWriter& writer)
+            void DISTR_HK::Write(BitWriter& writer) const
             {
                 writer.Write(this->Temperature);
                 writer.Write(this->VOLT_3V3);
@@ -91,13 +91,13 @@ namespace devices
                 this->MpptState = static_cast<decltype(this->MpptState)>(reader.ReadByte());
             }
 
-            void MPPT_HK::Write(BitWriter& writer)
+            void MPPT_HK::Write(BitWriter& writer) const
             {
                 writer.Write(this->SOL_VOLT);
                 writer.Write(this->SOL_CURR);
                 writer.Write(this->SOL_OUT_VOLT);
                 writer.Write(this->Temperature);
-                writer.Write(this->MpptState);
+                writer.WriteWord(num(this->MpptState), StateBitSize);
             }
 
             BATCPrimaryState::BATCPrimaryState() : State(BATC_STATE::None)
@@ -113,7 +113,7 @@ namespace devices
                 this->State = static_cast<decltype(this->State)>(reader.ReadByte());
             }
 
-            void BATCPrimaryState::Write(BitWriter& writer)
+            void BATCPrimaryState::Write(BitWriter& writer) const
             {
                 writer.Write(this->VOLT_A);
                 writer.Write(this->ChargeCurrent);
@@ -128,7 +128,7 @@ namespace devices
                 this->temperatureB = reader.ReadWordLE();
             }
 
-            void BatteryPackPrimaryState::Write(BitWriter& writer)
+            void BatteryPackPrimaryState::Write(BitWriter& writer) const
             {
                 writer.Write(this->temperatureA);
                 writer.Write(this->temperatureB);
@@ -139,7 +139,7 @@ namespace devices
                 this->temperatureC = reader.ReadWordLE();
             }
 
-            void BatteryPackSecondaryState::Write(BitWriter& writer)
+            void BatteryPackSecondaryState::Write(BitWriter& writer) const
             {
                 writer.Write(this->temperatureC);
             }
@@ -148,7 +148,7 @@ namespace devices
                 this->voltB = reader.ReadWordLE();
             }
 
-            void BATCSecondaryState::Write(BitWriter& writer)
+            void BATCSecondaryState::Write(BitWriter& writer) const
             {
                 writer.Write(this->voltB);
             }
@@ -168,7 +168,7 @@ namespace devices
                 return reader.Status();
             }
 
-            void ControllerATelemetry::Write(BitWriter& writer)
+            void ControllerATelemetry::Write(BitWriter& writer) const
             {
                 this->mpptX.Write(writer);
                 this->mpptYPlus.Write(writer);
@@ -191,7 +191,7 @@ namespace devices
                 return reader.Status();
             }
 
-            void ControllerBTelemetry::Write(BitWriter& writer)
+            void ControllerBTelemetry::Write(BitWriter& writer) const
             {
                 this->bp.Write(writer);
                 this->batc.Write(writer);
