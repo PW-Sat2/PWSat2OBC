@@ -3,6 +3,7 @@
 #include "n25q/n25q.h"
 #include "obc/storage/n25q.h"
 #include "rtc/rtc.hpp"
+#include "imtq/imtq.h"
 #include "traits.hpp"
 
 namespace
@@ -20,6 +21,7 @@ namespace
     using Everything = VerifyUniqueness<           //
         devices::eps::EPSDriver,                   //
         devices::comm::CommObject,                 //
+        devices::imtq::ImtqDriver,                 //
         devices::rtc::RTCObject,                   //
         obc::storage::error_counters::N25QDriver1, //
         obc::storage::error_counters::N25QDriver2, //
