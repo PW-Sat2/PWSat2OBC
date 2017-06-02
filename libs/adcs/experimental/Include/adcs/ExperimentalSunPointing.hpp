@@ -13,6 +13,11 @@ namespace adcs
     class ExperimentalSunPointing final : public IAdcsProcessor
     {
       public:
+        /**
+         * @brief Ctor.
+         *
+         * @param[in] imtqDriver_ Low level imtq module driver.
+         */
         ExperimentalSunPointing(devices::imtq::IImtqDriver& imtqDriver_);
 
         virtual OSResult Enable() override final;
@@ -23,7 +28,11 @@ namespace adcs
 
         virtual std::chrono::hertz GetFrequency() const override final;
 
+        /** @brief Algorithm refresh frequency. */
+        static constexpr std::chrono::hertz Frequency = std::chrono::hertz{1.0};
+
       private:
+        /** @brief Low level imtq module driver. */
         devices::imtq::IImtqDriver& imtqDriver;
     };
 }
