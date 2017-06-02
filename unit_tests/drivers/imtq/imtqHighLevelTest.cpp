@@ -11,6 +11,7 @@
 #include "base/reader.h"
 #include "base/writer.h"
 #include "i2c/i2c.h"
+#include "mock/error_counter.hpp"
 #include "os/os.hpp"
 #include "system.h"
 #include "utils.hpp"
@@ -42,12 +43,15 @@ namespace
     class ImtqUseTest : public testing::Test
     {
       public:
-        ImtqUseTest() : imtq{i2c}
+        ImtqUseTest() : errors{errorsConfig}, imtq{errors, i2c}
         {
             this->_reset = InstallProxy(&os);
         }
 
       protected:
+        testing::NiceMock<ErrorCountingConfigrationMock> errorsConfig;
+        error_counter::ErrorCounting errors;
+
         ImtqDriver imtq;
         OSMock os;
         OSReset _reset;
