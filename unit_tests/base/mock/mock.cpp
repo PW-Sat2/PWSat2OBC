@@ -1,6 +1,7 @@
 #include "AdcsMocks.hpp"
 #include "GyroMock.hpp"
 #include "StorageAccessMock.hpp"
+#include "mock/fm25w.hpp"
 
 GyroscopeMock::GyroscopeMock()
 {
@@ -39,5 +40,13 @@ SunPointingMock::SunPointingMock()
 }
 
 SunPointingMock::~SunPointingMock()
+{
+}
+
+FM25WDriverMock::FM25WDriverMock()
+{
+}
+
+FM25WDriverMock::~FM25WDriverMock()
 {
 }

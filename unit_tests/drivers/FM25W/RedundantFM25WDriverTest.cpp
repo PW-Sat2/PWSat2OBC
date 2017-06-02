@@ -4,6 +4,7 @@
 #include "SPI/SPIMock.h"
 #include "base/writer.h"
 #include "fm25w/fm25w.hpp"
+#include "mock/fm25w.hpp"
 #include "system.h"
 #include "utils.hpp"
 
@@ -19,15 +20,6 @@ using gsl::span;
 using namespace devices::fm25w;
 namespace
 {
-    struct FM25WDriverMock : public IFM25WDriver
-    {
-        MOCK_METHOD0(ReadStatus, Option<Status>());
-
-        MOCK_METHOD2(Read, void(Address address, gsl::span<std::uint8_t> buffer));
-
-        MOCK_METHOD2(Write, void(Address address, gsl::span<const std::uint8_t> buffer));
-    };
-
     class RedundantFM25WDriverTest : public testing::Test
     {
       protected:

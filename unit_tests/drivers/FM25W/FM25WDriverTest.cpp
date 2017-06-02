@@ -4,6 +4,7 @@
 #include "SPI/SPIMock.h"
 #include "base/writer.h"
 #include "fm25w/fm25w.hpp"
+#include "mock/fm25w.hpp"
 #include "system.h"
 #include "utils.hpp"
 
