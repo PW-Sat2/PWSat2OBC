@@ -24,6 +24,10 @@ namespace boot
 
         void MarkAsValid();
 
+        bool WasLastBootConfirmed() const;
+        bool ConfirmLastBoot();
+        bool UnconfirmLastBoot();
+
         static constexpr std::uint8_t DefaultBootSlot = 0b111;
         static constexpr std::uint8_t DefaultFailsafeBootSlot = 0b111000;
         static constexpr std::uint16_t DefaultBootCounter = 0xFF;
@@ -32,6 +36,7 @@ namespace boot
 
       private:
         static constexpr std::uint32_t MagicNumber = 0x7D53C5D5;
+        static constexpr std::uint8_t BootConfirmedFlag = 0x21;
 
         devices::fm25w::IFM25WDriver& _fram;
     };
