@@ -66,6 +66,7 @@ void SetBootIndex()
     }
 
     Bootloader.Settings.BootCounter(boot::BootSettings::DefaultBootCounter);
+    Bootloader.Settings.ConfirmLastBoot();
     Bootloader.Settings.MarkAsValid();
 
     BSP_UART_Puts(BSP_UART_DEBUG, "New boot slots set\n");

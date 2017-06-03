@@ -91,4 +91,28 @@ namespace boot
         Writer(buf).WriteDoubleWordLE(MagicNumber);
         this->_fram.Write(0, buf);
     }
+
+    bool BootSettings::WasLastBootConfirmed() const
+    {
+        std::uint8_t buf = 0;
+        this->_fram.Read(9, {&buf, 1});
+
+        return buf == BootConfirmedFlag;
+    }
+
+    bool BootSettings::ConfirmLastBoot()
+    {
+        std::uint8_t buf = BootConfirmedFlag;
+        this->_fram.Write(9, {&buf, 1});
+
+        return WasLastBootConfirmed();
+    }
+
+    bool BootSettings::UnconfirmLastBoot()
+    {
+        std::uint8_t buf = 0;
+        this->_fram.Write(9, {&buf, 1});
+
+        return !WasLastBootConfirmed();
+    }
 }

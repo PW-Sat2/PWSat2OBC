@@ -175,10 +175,29 @@ static std::uint32_t LoadApplication(std::uint8_t slotsMask)
     return BOOT_APPLICATION_BASE;
 }
 
+static void ResolveFailedBoot()
+{
+    auto currentSlots = Bootloader.Settings.BootSlots();
+
+    if (currentSlots == boot::BootSettings::SafeModeBootSlot)
+    {
+        return;
+    }
+
+    if (!Bootloader.Settings.WasLastBootConfirmed())
+    {
+        BSP_UART_Puts(BSP_UART_DEBUG, "Last boot not confirmed - switch to failsafe slots");
+
+        auto failsafe = Bootloader.Settings.FailsafeBootSlots();
+        Bootloader.Settings.BootSlots(failsafe);
+    }
+}
+
 void ProceedWithBooting()
 {
     BSP_UART_Puts(BSP_UART_DEBUG, "\nTimeout exceeded - booting");
 
+    ResolveFailedBoot();
     auto slotsMask = Bootloader.Settings.BootSlots();
 
     boot::BootReason = boot::Reason::SelectedIndex;
@@ -212,5 +231,8 @@ void ProceedWithBooting()
     }
 
     auto baseAddress = LoadApplication(slotsMask);
+
+    Bootloader.Settings.UnconfirmLastBoot();
+
     BootToAddress(baseAddress);
 }
