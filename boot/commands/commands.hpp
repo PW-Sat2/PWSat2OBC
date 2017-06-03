@@ -11,13 +11,12 @@ void TMRBoot();
 void SetRunlevel();
 
 void SetBootIndex();
+void ShowBootSettings();
 
 void UploadApplication();
 void UploadSafeMode();
 
 void PrintBootTable();
-
-void TestFRAM();
-void ShowBootSettings();
+void EraseBootTable();
 
 #endif /* BOOT_COMMANDS_COMMANDS_HPP_ */
