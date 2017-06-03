@@ -1,5 +1,5 @@
 /***************************************************************************/ /**
-  * @file
+c  * @file
   * @brief   CubeComputer Test Program Main.
   * @author  Pieter Botma
   * @version 2.0
@@ -104,15 +104,17 @@ int main(void)
 }
 
 OBCBootloader::OBCBootloader()
-    :                                    //
-      Settings(_fram),                   //
-      _fram1Spi(_spi),                   //
-      _fram2Spi(_spi),                   //
-      _fram3Spi(_spi),                   //
-      _fram1(_fram1Spi),                 //
-      _fram2(_fram2Spi),                 //
-      _fram3(_fram3Spi),                 //
-      _fram({&_fram1, &_fram2, &_fram3}) //
+    :                                         //
+      Settings(_fram),                        //
+      BootTable(_flash),                      //
+      _fram1Spi(_spi),                        //
+      _fram2Spi(_spi),                        //
+      _fram3Spi(_spi),                        //
+      _fram1(_fram1Spi),                      //
+      _fram2(_fram2Spi),                      //
+      _fram3(_fram3Spi),                      //
+      _fram({&_fram1, &_fram2, &_fram3}),     //
+      _flash(io_map::ProgramFlash::FlashBase) //
 {
 }
 
@@ -123,4 +125,7 @@ void OBCBootloader::Initialize()
     this->_fram1Spi.Initialize();
     this->_fram2Spi.Initialize();
     this->_fram3Spi.Initialize();
+
+    this->_flash.Initialize();
+    this->BootTable.Initialize();
 }

@@ -37,7 +37,7 @@ void BootToAddress(uint32_t baseAddress)
         ;
 }
 
-static void ProgramBlock(gsl::span<std::uint32_t> data, std::uint32_t* base)
+static void ProgramBlock(gsl::span<const std::uint32_t> data, std::uint32_t* base)
 {
     MSC->LOCK = MSC_UNLOCK_CODE;
     MSC->WRITECTRL |= MSC_WRITECTRL_WREN | MSC_WRITECTRL_RWWEN;
@@ -76,7 +76,9 @@ void LoadApplicationTMR(std::array<std::uint8_t, 3> slots)
     BSP_UART_Printf<30>(BSP_UART_DEBUG, "\nTMR boot on slots %d, %d and %d", slots[0], slots[1], slots[2]);
 
     std::array<uint32_t, 3> lengths{
-        BOOT_getLen(slots[0]), BOOT_getLen(slots[1]), BOOT_getLen(slots[2]),
+        Bootloader.BootTable.Entry(slots[0]).Length(),
+        Bootloader.BootTable.Entry(slots[1]).Length(),
+        Bootloader.BootTable.Entry(slots[2]).Length(),
     };
 
     auto length = redundancy::Correct(lengths[0], lengths[1], lengths[2]);
@@ -87,14 +89,16 @@ void LoadApplicationTMR(std::array<std::uint8_t, 3> slots)
     constexpr std::size_t PageSize = 4_KB;
     constexpr std::size_t ChunksCount = PageSize / sizeof(ChunkType);
 
-    std::array<std::uint64_t, 3> programOffsets{
-        BOOT_getOffsetProgram(slots[0]), BOOT_getOffsetProgram(slots[1]), BOOT_getOffsetProgram(slots[2]),
+    std::array<const std::uint8_t*, 3> programOffsets{
+        Bootloader.BootTable.Entry(slots[0]).Content(),
+        Bootloader.BootTable.Entry(slots[1]).Content(),
+        Bootloader.BootTable.Entry(slots[2]).Content(),
     };
 
-    std::array<ChunkType*, 3> programBases{
-        reinterpret_cast<ChunkType*>(BOOT_TABLE_BASE + programOffsets[0]),
-        reinterpret_cast<ChunkType*>(BOOT_TABLE_BASE + programOffsets[1]),
-        reinterpret_cast<ChunkType*>(BOOT_TABLE_BASE + programOffsets[2]),
+    std::array<const ChunkType*, 3> programBases{
+        reinterpret_cast<const ChunkType*>(programOffsets[0]),
+        reinterpret_cast<const ChunkType*>(programOffsets[1]),
+        reinterpret_cast<const ChunkType*>(programOffsets[2]),
     };
 
     BSP_UART_Printf<30>(BSP_UART_DEBUG, "\nBase: %p", (void*)programBases[0]);
@@ -107,7 +111,7 @@ void LoadApplicationTMR(std::array<std::uint8_t, 3> slots)
 
     for (auto offset = 0U; offset < length / sizeof(ChunkType); offset += ChunksCount)
     {
-        std::array<gsl::span<ChunkType, ChunksCount>, 3> pageSpans{
+        std::array<gsl::span<const ChunkType, ChunksCount>, 3> pageSpans{
             gsl::make_span(programBases[0] + offset, ChunksCount), //
             gsl::make_span(programBases[1] + offset, ChunksCount), //
             gsl::make_span(programBases[2] + offset, ChunksCount), //
@@ -117,7 +121,7 @@ void LoadApplicationTMR(std::array<std::uint8_t, 3> slots)
 
         auto internalFlashPage = gsl::make_span(ptr, ChunksCount);
 
-        redundancy::CorrectBuffer<ChunkType>(pageBuffer, pageSpans[0], pageSpans[1], pageSpans[2]);
+        redundancy::CorrectBuffer<const ChunkType>(pageBuffer, pageSpans[0], pageSpans[1], pageSpans[2]);
 
         bool internalOk = internalFlashPage == gsl::make_span(pageBuffer);
 

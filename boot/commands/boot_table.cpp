@@ -1,38 +1,27 @@
 #include "bsp/bsp_boot.h"
 #include "bsp/bsp_uart.h"
+#include "main.hpp"
 
 void PrintBootTable()
 {
     BSP_UART_Puts(BSP_UART_DEBUG, "\n\nBoot Table Entries:\n");
 
-    for (decltype(BOOT_TABLE_SIZE) entry = 1; entry <= BOOT_TABLE_SIZE; entry++)
+    for (auto entry = 1; entry <= program_flash::BootTable::EntriesCount; entry++)
     {
         BSP_UART_Printf<5>(BSP_UART_DEBUG, "\n%d. ", entry);
 
-        // check if entry is valid
-        if (*(uint8_t*)(BOOT_TABLE_BASE + BOOT_getOffsetValid(entry)) != BOOT_ENTRY_ISVALID)
+        auto e = Bootloader.BootTable.Entry(entry);
+
+        if (!e.IsValid())
         {
             BSP_UART_Puts(BSP_UART_DEBUG, "Not Valid!");
 
             continue;
         }
 
-        // display description
-        for (decltype(BOOT_ENTRY_DESCRIPTION_SIZE) i = 0; i < BOOT_ENTRY_DESCRIPTION_SIZE; i++)
-        {
-            auto data = (uint8_t*)(BOOT_TABLE_BASE + BOOT_getOffsetDescription(entry) + i);
+        BSP_UART_Puts(BSP_UART_DEBUG, e.Description());
 
-            if (*data == '\r' || *data == '\n' || *data == '\0')
-            {
-                break;
-            }
-
-            USART_Tx(BSP_UART_DEBUG, *data);
-        }
-
-        auto crc = BOOT_getCRC(entry);
-        auto size = BOOT_getLen(entry);
-        BSP_UART_Printf<50>(BSP_UART_DEBUG, " (CRC: %.4X Size: %ld bytes)", crc, size);
+        BSP_UART_Printf<50>(BSP_UART_DEBUG, " (CRC: %.4X Size: %ld bytes)", e.Crc(), e.Length());
     }
 }
 

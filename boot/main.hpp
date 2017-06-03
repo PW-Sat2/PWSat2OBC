@@ -3,8 +3,10 @@
 
 #include <array>
 #include "boot/settings.hpp"
+#include "flash_driver.hpp"
 #include "fm25w/fm25w.hpp"
 #include "io_map.h"
+#include "program_flash/boot_table.hpp"
 #include "spi.hpp"
 
 class OBCBootloader
@@ -14,6 +16,8 @@ class OBCBootloader
     void Initialize();
 
     boot::BootSettings Settings;
+
+    program_flash::BootTable BootTable;
 
   private:
     SPIPeripheral _spi;
@@ -26,6 +30,8 @@ class OBCBootloader
     devices::fm25w::FM25WDriver _fram3;
 
     devices::fm25w::RedundantFM25WDriver _fram;
+
+    StandaloneFlashDriver _flash;
 };
 
 extern OBCBootloader Bootloader;
