@@ -16,6 +16,7 @@
 #include "mission/time.hpp"
 #include "state/struct.h"
 #include "telemetry/collect_comm.hpp"
+#include "telemetry/collect_eps.hpp"
 #include "telemetry/collect_fdir.hpp"
 #include "telemetry/collect_gyro.hpp"
 #include "telemetry/state.hpp"
@@ -42,7 +43,8 @@ namespace telemetry
         CommTelemetryAcquisition,                //
         mission::TelemetryTask,                  //
         GyroTelemetryAcquisition,                //
-        ErrorCounterTelemetryAcquisition         //
+        ErrorCounterTelemetryAcquisition,        //
+        EpsTelemetryAcquisition                  //
         >
         ObcTelemetryAcquisition;
 }
