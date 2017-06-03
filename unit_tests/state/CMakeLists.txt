@@ -23,6 +23,7 @@ target_link_libraries(${NAME}
     telemetry
     telemetry_comm
     telemetry_gyro
+    telemetry_eps
 )
 
 

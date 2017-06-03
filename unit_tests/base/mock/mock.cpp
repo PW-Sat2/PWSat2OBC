@@ -1,6 +1,7 @@
 #include "AdcsMocks.hpp"
 #include "GyroMock.hpp"
 #include "StorageAccessMock.hpp"
+#include "eps.hpp"
 
 GyroscopeMock::GyroscopeMock()
 {
@@ -39,5 +40,13 @@ SunPointingMock::SunPointingMock()
 }
 
 SunPointingMock::~SunPointingMock()
+{
+}
+
+EpsTelemetryProviderMock::EpsTelemetryProviderMock()
+{
+}
+
+EpsTelemetryProviderMock::~EpsTelemetryProviderMock()
 {
 }

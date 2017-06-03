@@ -31,6 +31,7 @@ target_link_libraries(${NAME}
     adcs
     comm
     gyro
+    eps
     obc_state
     antenna
     mission_comm

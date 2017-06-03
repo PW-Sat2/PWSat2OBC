@@ -1,4 +1,4 @@
-#include "collect_comm.hpp"
+#include "collect_eps.hpp"
 #include "logger/logger.h"
 
 namespace telemetry
@@ -18,12 +18,12 @@ namespace telemetry
 
     mission::UpdateResult EpsTelemetryAcquisition::UpdateEpsTelemetry(telemetry::TelemetryState& state)
     {
-        mission::UpdateResult state = mission::UpdateResult::Ok;
+        mission::UpdateResult status = mission::UpdateResult::Ok;
         const auto primary = this->provider->ReadHousekeepingA();
         if (!primary.HasValue)
         {
             LOG(LOG_LEVEL_ERROR, "Unable to acquire primary eps telemetry. ");
-            state = mission::UpdateResult::Failure;
+            status = mission::UpdateResult::Failure;
         }
         else
         {
@@ -34,14 +34,14 @@ namespace telemetry
         if (!secondary.HasValue)
         {
             LOG(LOG_LEVEL_ERROR, "Unable to acquire secondary eps telemetry. ");
-            state = mission::UpdateResult::Failure;
+            status = mission::UpdateResult::Failure;
         }
         else
         {
             state.telemetry.Set(secondary.Value);
         }
 
-        return state;
+        return status;
     }
 
     mission::UpdateResult EpsTelemetryAcquisition::UpdateProc(telemetry::TelemetryState& state, void* param)
