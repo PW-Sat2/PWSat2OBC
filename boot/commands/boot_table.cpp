@@ -35,3 +35,10 @@ void PrintBootTable()
         BSP_UART_Printf<50>(BSP_UART_DEBUG, " (CRC: %.4X Size: %ld bytes)", crc, size);
     }
 }
+
+void EraseBootTable()
+{
+    BSP_UART_Puts(BSP_UART_DEBUG, "\nErasing program flash....");
+    auto result = lld_ChipEraseOp(reinterpret_cast<FLASHDATA*>(BOOT_TABLE_BASE));
+    BSP_UART_Printf<40>(BSP_UART_DEBUG, "\nDone (%d)", result);
+}

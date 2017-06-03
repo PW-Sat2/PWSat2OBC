@@ -15,7 +15,6 @@ set(SOURCES
     commands/settings.cpp
     commands/upload.cpp
     commands/boot_table.cpp
-    commands/fram.cpp
 )
 
 add_executable(${NAME} ${SOURCES})

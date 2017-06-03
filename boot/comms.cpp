@@ -50,8 +50,8 @@ static std::array<Command, 16> Commands = {
     Command{'?', "Print help", PrintHelp},
     Command{'t', "TMR boot", TMRBoot},
     Command{'R', "Runlevel", SetRunlevel},
-    Command{'f', "Test FRAMs", TestFRAM},
     Command{'C', "Current boot settings", ShowBootSettings},
+    Command{'e', "Erase program flash", EraseBootTable},
 };
 
 #define UPLOADBLOCKSIZE 256
