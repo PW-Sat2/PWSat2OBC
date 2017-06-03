@@ -2,28 +2,73 @@
 #include "bsp/bsp_boot.h"
 #include "bsp/bsp_uart.h"
 #include "main.hpp"
+#include "utils.h"
+
+static Option<std::uint8_t> ReadBootSlots()
+{
+    std::bitset<6> result(0);
+
+    for (auto i = 0; i < 3; i++)
+    {
+        BSP_UART_Printf<20>(BSP_UART_DEBUG, "\tSlot %d: ", i);
+        auto index = USART_Rx(BSP_UART_DEBUG);
+
+        BSP_UART_txByte(BSP_UART_DEBUG, index);
+
+        if (index < '0' || index >= '6')
+        {
+            BSP_UART_Puts(BSP_UART_DEBUG, "\tInvalid boot index\n");
+            return None<std::uint8_t>();
+        }
+
+        result[index - '0'] = true;
+    }
+
+    if (result.count() != 3)
+    {
+        BSP_UART_Puts(BSP_UART_DEBUG, "\t3 slots must be selected\n");
+        return None<std::uint8_t>();
+    }
+
+    return Some(static_cast<std::uint8_t>(result.to_ulong()));
+}
 
 void SetBootIndex()
 {
-    BSP_UART_Puts(BSP_UART_DEBUG, "\n\nNew Boot Index: ");
+    BSP_UART_Puts(BSP_UART_DEBUG, "\n\nNew Boot slots (Primary):\n");
 
-    // get boot index
-    auto index = USART_Rx(BSP_UART_DEBUG);
+    auto bootSlots = ReadBootSlots();
 
-    BSP_UART_Printf<4>(BSP_UART_DEBUG, "%d", index);
-
-    // test boot index
-    if (index > BOOT_TABLE_SIZE)
+    if (!bootSlots.HasValue)
     {
-        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nError: Boot index out of bounds!");
         return;
     }
 
-    // upload new program to internal flash
-    BOOT_setBootIndex(index);
-    BOOT_resetBootCounter();
+    BSP_UART_Puts(BSP_UART_DEBUG, "\n\nNew Boot slots (failsafe):\n");
 
-    BSP_UART_Puts(BSP_UART_DEBUG, "...Done!");
+    auto failsafeBootSlots = ReadBootSlots();
+
+    if (!failsafeBootSlots.HasValue)
+    {
+        return;
+    }
+
+    if (!Bootloader.Settings.BootSlots(bootSlots.Value))
+    {
+        BSP_UART_Puts(BSP_UART_DEBUG, "Failed to set boot slots\n");
+        return;
+    }
+
+    if (!Bootloader.Settings.FailsafeBootSlots(failsafeBootSlots.Value))
+    {
+        BSP_UART_Puts(BSP_UART_DEBUG, "Failed to set failsafe boot slots\n");
+        return;
+    }
+
+    Bootloader.Settings.BootCounter(boot::BootSettings::DefaultBootCounter);
+    Bootloader.Settings.MarkAsValid();
+
+    BSP_UART_Puts(BSP_UART_DEBUG, "New boot slots set\n");
 }
 
 static void PrintBootSlots(std::uint8_t slots)
