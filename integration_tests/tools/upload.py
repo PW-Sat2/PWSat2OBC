@@ -1,8 +1,7 @@
-import logging
-import serial
-import sys
-import xmodem
 import argparse
+
+import serial
+import xmodem
 
 parser = argparse.ArgumentParser()
 
@@ -19,6 +18,10 @@ class Bootloader:
         self._port = port
 
     def wait(self):
+        self._wait_for('&')
+        self._port.write('S')
+        self._wait_for(':')
+        self._port.write('\n')
         self._wait_for('#')
 
     def upload_binary(self, index, description, stream):
@@ -66,12 +69,6 @@ class Bootloader:
         packet_size = 128
 
         print 'Transfered: {:.3} KB ({} errors)'.format(success_count * packet_size / 1024.0, error_count)
-
-
-# obc_com = 'COM10'
-# slot = 6
-# description = 'App'
-# path = 'D:\\PW-Sat\\obc-build\\build\\FlightModel\\bin\\fm_terminal.bin'
 
 port = serial.Serial(port=args.port, baudrate=115200)
 print args
