@@ -8,6 +8,7 @@
 #include "comm/CommDriver.hpp"
 #include "eps/eps.h"
 #include "error_counter/error_counter.hpp"
+#include "flash/s29jl.hpp"
 #include "gpio.h"
 #include "gyro/driver.hpp"
 #include "i2c/efm.h"
@@ -125,7 +126,7 @@ namespace obc
         OBCHardwareI2C I2C;
 
         /** @brief Program flash driver */
-        program_flash::FlashDriver FlashDriver;
+        devices::s29jl::FlashDriver FlashDriver;
 
         /** @brief SPI interface */
         drivers::spi::EFMSPIInterface SPI;

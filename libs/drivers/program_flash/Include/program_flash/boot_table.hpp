@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <gsl/span>
 #include <tuple>
+#include "base/os.h"
 #include "flash_driver.hpp"
 #include "utils.h"
 
