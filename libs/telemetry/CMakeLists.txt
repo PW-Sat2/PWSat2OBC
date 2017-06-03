@@ -6,6 +6,7 @@ set(SOURCES
     ProgramState.cpp
     ErrorCounters.cpp
     ExperimentTelemetry.cpp
+    state.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
