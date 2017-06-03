@@ -32,7 +32,7 @@ namespace program_flash
 
     Result<FlashStatus, std::tuple<FlashStatus, std::size_t>> ProgramEntry::Erase()
     {
-        for (std::size_t sectorOffset = 0; sectorOffset < Size; sectorOffset += FlashDriver::LargeSectorSize)
+        for (std::size_t sectorOffset = 0; sectorOffset < Size; sectorOffset += IFlashDriver::LargeSectorSize)
         {
             auto status = this->_entrySpan.Erase(sectorOffset);
             if (status != FlashStatus::NotBusy)
