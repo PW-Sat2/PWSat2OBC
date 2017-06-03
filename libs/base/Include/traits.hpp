@@ -227,7 +227,7 @@ template <typename ValueType> struct IsValueInList
 };
 
 /**
- * @brief Traits that can be used to determine whether passed type contains Write method
+ * @brief Trait that can be used to determine whether passed type contains Write method
  * that accepts requested parameters.
  * @tparam Type Queried type
  * @tparam Args Parameter pack that contains types of Write method arguments.
@@ -248,7 +248,7 @@ template <typename Type, typename... Args> class HasWrite
 };
 
 /**
- * @brief Traits that can be used to determine whether passed type contains Read method
+ * @brief Trait that can be used to determine whether passed type contains Read method
  * that accepts requested parameters.
  * @tparam Type Queried type
  * @tparam Args Parameter pack that contains types of Read method arguments.
@@ -266,6 +266,34 @@ template <typename Type, typename... Args> class HasRead
      * True on success, false otherwise.
      */
     static constexpr bool Value = decltype(test<Type>(0))::value;
+};
+
+/**
+ * @brief Traits that can be used to determine whether passed type contains Initialize method
+ * that accepts requested parameters.
+ * @tparam Type Queried type
+ * @tparam Args Parameter pack that contains types of Read method arguments.
+ */
+template <typename Type, typename... Args> class HasInitialize
+{
+    template <typename C, typename = decltype(std::declval<C>().Initialize(std::declval<Args>()...))> static std::true_type test(int);
+
+    template <typename C> static std::false_type test(...);
+
+  public:
+    /**
+     * @brief Type indicating whether the Type type contains Initialize(Args...) method.
+     *
+     * std::true_type on success, std::false_type otherwise.
+     */
+    typedef decltype(test<Type>(0)) ValueType;
+
+    /**
+     * @brief Flag indicating whether the Type type contains Initialize(Args...) method.
+     *
+     * True on success, false otherwise.
+     */
+    static constexpr bool Value = ValueType::value;
 };
 
 /** @} */

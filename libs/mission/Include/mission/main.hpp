@@ -245,6 +245,10 @@ namespace mission
          */
         static void MissionLoopControlTask(void* param);
 
+        bool Initialize(std::true_type);
+
+        bool Initialize(std::false_type);
+
         /** @brief Time period between subsequent mission iterations. */
         std::chrono::milliseconds iterationPeriod;
 
@@ -304,6 +308,22 @@ namespace mission
     {
     }
 
+    template <typename State, typename... T> bool MissionLoop<State, T...>::Initialize(std::true_type)
+    {
+        if (!this->state.Initialize())
+        {
+            LOG(LOG_LEVEL_ERROR, "Unable to initialize mission state. Reason: state initialization failure. ");
+            return false;
+        }
+
+        return true;
+    }
+
+    template <typename State, typename... T> inline bool MissionLoop<State, T...>::Initialize(std::false_type)
+    {
+        return true;
+    }
+
     template <typename State, typename... T> bool MissionLoop<State, T...>::Initialize(std::chrono::milliseconds timePeriod)
     {
         this->iterationPeriod = timePeriod;
@@ -311,6 +331,12 @@ namespace mission
         if (this->eventGroup == nullptr)
         {
             LOG(LOG_LEVEL_ERROR, "Unable to initialize mission state. Reason: event group.");
+            return false;
+        }
+
+        using type = typename HasInitialize<State>::ValueType;
+        if (!Initialize(type()))
+        {
             return false;
         }
 
@@ -322,7 +348,6 @@ namespace mission
         }
 
         System::SuspendTask(this->taskHandle);
-
         return true;
     }
 
