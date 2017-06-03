@@ -21,9 +21,6 @@ namespace program_flash
         if (this->_deviceId != ExpectedDeviceId || this->_bootConfig != ExpectedDeviceBootConfig)
             return OSResult::NotSupported;
 
-        this->_bootIndex = this->_flash.At(0);
-        this->_bootCounter = this->_flash.At(0x00002000);
-
         return OSResult::Success;
     }
 

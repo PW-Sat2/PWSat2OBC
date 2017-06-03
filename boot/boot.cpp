@@ -24,30 +24,6 @@ static void resetClocks(void)
     CMU->HFPERCLKEN0 &= ~CMU_HFPERCLKEN0_USART0;
 }
 
-static uint8_t verifyApplicationCRC(uint8_t entryIndex)
-{
-    uint8_t *startAddr, *endAddr;
-    uint16_t expectedCRC, actualCRC;
-
-    startAddr = (uint8_t*)(BOOT_APPLICATION_BASE);
-    endAddr = (uint8_t*)(startAddr + BOOT_getLen(entryIndex));
-
-    actualCRC = BOOT_calcCRC(startAddr, endAddr);
-    expectedCRC = BOOT_getCRC(entryIndex);
-
-    return (actualCRC == expectedCRC);
-}
-
-static uint8_t verifyBootIndex(uint8_t bootIndex)
-{
-    return ((bootIndex > 0) && (bootIndex <= BOOT_TABLE_SIZE));
-}
-
-static uint8_t verifyBootCounter(void)
-{
-    return (BOOT_getBootCounter() > 0);
-}
-
 void BootToAddress(uint32_t baseAddress)
 {
     resetPeripherals();
@@ -59,48 +35,6 @@ void BootToAddress(uint32_t baseAddress)
 
     while (1)
         ;
-}
-
-uint32_t LoadApplication(uint8_t bootIndex)
-{
-    size_t debugLen;
-    uint8_t debugStr[256];
-
-    boot::Index = bootIndex;
-
-    if (bootIndex == 0)
-    {
-        return BOOT_SAFEMODE_BASE_CODE;
-    }
-
-    if (verifyApplicationCRC(bootIndex))
-    {
-        debugLen = sprintf((char*)debugStr, "\n\nBooting application!");
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
-
-        return BOOT_APPLICATION_BASE;
-    }
-
-    BOOT_DownloadResult_Typedef downloadError = BOOT_tryDownloadEntryToApplicationSpace(bootIndex);
-
-    if (downloadError)
-    {
-        bootIndex = 0;
-        boot::BootReason = boot::Reason::DownloadError;
-        BOOT_setBootIndex(bootIndex);
-
-        debugLen = sprintf((char*)debugStr, "\n\nUnable to load application (Error: %d)... Booting safe mode!", downloadError);
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
-
-        return BOOT_SAFEMODE_BASE_CODE;
-    }
-    else
-    {
-        debugLen = sprintf((char*)debugStr, "\n\nBooting application!");
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
-
-        return BOOT_APPLICATION_BASE;
-    }
 }
 
 static void ProgramBlock(gsl::span<std::uint32_t> data, std::uint32_t* base)
@@ -201,48 +135,20 @@ void LoadApplicationTMR(std::array<std::uint8_t, 3> slots)
     BSP_UART_Puts(BSP_UART_DEBUG, "\nDone");
 }
 
-void ProceedWithBooting()
+static std::uint32_t LoadApplication(std::uint8_t slotsMask)
 {
-    BSP_UART_Puts(BSP_UART_DEBUG, "\nTimeout exceeded - booting");
-
-    auto slotsMask = std::bitset<6>(Bootloader.Settings.BootSlots());
-
-    auto bootIndex = BOOT_getBootIndex();
-
-    boot::BootReason = boot::Reason::SelectedIndex;
-
-    if (bootIndex == 0)
+    if (slotsMask == boot::BootSettings::SafeModeBootSlot)
     {
-        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nSafe Mode boot index... Booting safe mode!");
-    }
-    else if (!verifyBootIndex(bootIndex))
-    {
-        bootIndex = 0;
-        BOOT_setBootIndex(0);
-
-        boot::BootReason = boot::Reason::InvalidBootIndex;
-
-        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nInvalid boot index... Booting safe mode!");
-    }
-    else if (!verifyBootCounter())
-    {
-        bootIndex = 0;
-        BOOT_setBootIndex(0);
-
-        boot::BootReason = boot::Reason::CounterExpired;
-
-        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nBoot counter expired... Booting safe mode!");
-    }
-    else
-    {
-        BOOT_decBootCounter();
+        return BOOT_SAFEMODE_BASE_CODE;
     }
 
     std::array<std::uint8_t, 3> slots{0, 0, 0};
 
+    std::bitset<6> mask(slotsMask);
+
     for (auto i = 0, j = 0; i < 6; i++)
     {
-        if (slotsMask[i])
+        if (mask[i])
         {
             slots[j] = i + 1;
             j++;
@@ -253,5 +159,46 @@ void ProceedWithBooting()
     }
 
     LoadApplicationTMR(slots);
-    BootToAddress(BOOT_APPLICATION_BASE);
+
+    return BOOT_APPLICATION_BASE;
+}
+
+void ProceedWithBooting()
+{
+    BSP_UART_Puts(BSP_UART_DEBUG, "\nTimeout exceeded - booting");
+
+    auto slotsMask = Bootloader.Settings.BootSlots();
+
+    boot::BootReason = boot::Reason::SelectedIndex;
+
+    if (slotsMask == boot::BootSettings::SafeModeBootSlot)
+    {
+        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nSafe Mode boot index... Booting safe mode!");
+    }
+    else if (__builtin_popcount(slotsMask) != 3)
+    {
+        slotsMask = boot::BootSettings::SafeModeBootSlot;
+        Bootloader.Settings.BootSlots(boot::BootSettings::SafeModeBootSlot);
+
+        boot::BootReason = boot::Reason::InvalidBootIndex;
+
+        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nInvalid boot index... Booting safe mode!");
+    }
+    else if (Bootloader.Settings.BootCounter() == 0)
+    {
+        slotsMask = boot::BootSettings::SafeModeBootSlot;
+        Bootloader.Settings.BootSlots(boot::BootSettings::SafeModeBootSlot);
+
+        boot::BootReason = boot::Reason::CounterExpired;
+
+        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nBoot counter expired... Booting safe mode!");
+    }
+    else
+    {
+        auto counter = Bootloader.Settings.BootCounter();
+        Bootloader.Settings.BootCounter(counter - 1);
+    }
+
+    auto baseAddress = LoadApplication(slotsMask);
+    BootToAddress(baseAddress);
 }

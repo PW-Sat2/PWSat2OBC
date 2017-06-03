@@ -6,8 +6,6 @@ void TestSRAM();
 void TestEEPROM();
 
 void BootUpper();
-void BootToSelected();
-void TMRBoot();
 void SetRunlevel();
 
 void SetBootIndex();
