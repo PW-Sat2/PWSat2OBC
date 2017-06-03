@@ -4,6 +4,7 @@
 #pragma once
 
 #include "ErrorCounters.hpp"
+#include "Experiments.hpp"
 #include "ProgramState.hpp"
 #include "SystemStartup.hpp"
 #include "Telemetry.hpp"
@@ -25,6 +26,8 @@ namespace telemetry
          */
         ManagedTelemetry telemetry;
     };
+
+    static_assert(ManagedTelemetry::TotalSerializedSize <= (devices::comm::MaxDownlinkFrameSize - 3), "Telemetry is too large");
 }
 
 #endif
