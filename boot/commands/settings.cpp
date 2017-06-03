@@ -73,6 +73,12 @@ void SetBootIndex()
 
 static void PrintBootSlots(std::uint8_t slots)
 {
+    if (slots == boot::BootSettings::SafeModeBootSlot)
+    {
+        BSP_UART_Puts(BSP_UART_DEBUG, "Safe Mode");
+        return;
+    }
+
     std::bitset<6> bits(slots & 0b00111111);
 
     for (auto i = 0; i < 6; i++)

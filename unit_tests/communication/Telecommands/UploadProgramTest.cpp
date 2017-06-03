@@ -88,24 +88,6 @@ UploadProgramTest::UploadProgramTest()
     this->_bootTable.Initialize();
 }
 
-TEST_F(UploadProgramTest, ReadBootIndex)
-{
-    this->_flash[0] = 1;
-
-    auto bootIndex = this->_bootTable.BootIndex();
-
-    ASSERT_THAT(bootIndex, Eq(1));
-}
-
-TEST_F(UploadProgramTest, ReadBootCounter)
-{
-    this->_flash[0x00002000] = 16;
-
-    auto bootCounter = this->_bootTable.BootCounter();
-
-    ASSERT_THAT(bootCounter, Eq(16));
-}
-
 TEST_F(UploadProgramTest, ReadProgramDetails)
 {
     this->_flash[0x00080000] = 0x12;

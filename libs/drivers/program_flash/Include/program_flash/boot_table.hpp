@@ -177,24 +177,6 @@ namespace program_flash
         }
 
         /**
-         * @brief Returns current boot index
-         * @return Currently selected boot index
-         */
-        inline std::uint8_t BootIndex() const
-        {
-            return *this->_bootIndex;
-        }
-
-        /**
-         * @brief Returns current boot counter
-         * @return Current boot counter
-         */
-        inline std::uint8_t BootCounter() const
-        {
-            return *this->_bootCounter;
-        }
-
-        /**
          * @brief Returns entry from boot table
          * @param index Entry index (from 1 to 7)
          * @return Program entry
@@ -207,16 +189,10 @@ namespace program_flash
       private:
         /** @brief Flash driver */
         IFlashDriver& _flash;
-
         /** @brief Flash device ID */
         std::uint32_t _deviceId;
         /** @brief Flash device boot config */
         std::uint8_t _bootConfig;
-
-        /** @brief Pointer to boot index */
-        std::uint8_t const* _bootIndex;
-        /** @brief Pointer to boot counter */
-        std::uint8_t const* _bootCounter;
     };
 
     /** @} */

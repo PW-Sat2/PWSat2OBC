@@ -11,11 +11,7 @@ void TestFlash(std::uint16_t /*argc*/, char* /*argv*/ [])
 
     auto bootTable = Main.BootTable;
 
-    Main.terminal.Printf("\nDeviceID: 0x%lX\nBootConfig: 0x%X\nBoot index: %d\nBoot counter: %d",
-        bootTable.DeviceId(),
-        bootTable.BootConfig(),
-        bootTable.BootIndex(),
-        bootTable.BootCounter());
+    Main.terminal.Printf("\nDeviceID: 0x%lX\nBootConfig: 0x%X", bootTable.DeviceId(), bootTable.BootConfig());
 
     for (auto i = 1; i <= 7; i++)
     {

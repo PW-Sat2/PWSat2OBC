@@ -35,12 +35,11 @@ struct Command
 
 static void PrintHelp();
 
-static std::array<Command, 16> Commands = {
+static std::array<Command, 14> Commands = {
     Command{'T', "Test", Test}, //
     Command{'S', "Test SRAM", TestSRAM},
     Command{'E', "Test EEPROM", TestEEPROM},
     Command{'u', "Boot to upper half", BootUpper},
-    Command{'B', "Select index and boot", BootToSelected},
     Command{'s', "Set boot index", SetBootIndex},
     Command{'r', "Restart", NVIC_SystemReset},
     Command{'b', "Continue booting", ProceedWithBooting},
@@ -48,7 +47,6 @@ static std::array<Command, 16> Commands = {
     Command{'z', "Upload safe mode", UploadSafeMode},
     Command{'l', "Print boot table", PrintBootTable},
     Command{'?', "Print help", PrintHelp},
-    Command{'t', "TMR boot", TMRBoot},
     Command{'R', "Runlevel", SetRunlevel},
     Command{'C', "Current boot settings", ShowBootSettings},
     Command{'e', "Erase program flash", EraseBootTable},
