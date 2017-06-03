@@ -12,7 +12,6 @@ namespace telemetry
      * @brief This type represents telemetry element related to the system startup event.
      * @telemetry_element
      * @ingroup telemetry
-     *
      * This type records some useful information regarding system startup.
      */
     class SystemStartup

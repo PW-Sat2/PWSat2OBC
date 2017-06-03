@@ -5,6 +5,7 @@ set(SOURCES
     SystemStartup.cpp
     ProgramState.cpp
     ErrorCounters.cpp
+    ExperimentTelemetry.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -18,6 +19,7 @@ target_link_libraries(${NAME}
     gyro
     eps
     error_counter
+    experiments
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
@@ -29,3 +31,4 @@ add_subdirectory(comm)
 add_subdirectory(gyro)
 add_subdirectory(fdir)
 add_subdirectory(eps)
+add_subdirectory(experiments)

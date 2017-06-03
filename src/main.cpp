@@ -57,7 +57,8 @@ telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver
         Main.fs, mission::TelemetryConfiguration{"/telemetry.current", "/telemetry.previous", 512_KB, 10}),
     Main.Hardware.Gyro,
     Main.Fdir,
-    Main.Hardware.EPS);
+    Main.Hardware.EPS,
+    Main.Experiments.ExperimentsController);
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 

@@ -13,6 +13,7 @@ namespace telemetry
     class SystemStartup;
     class ProgramState;
     class ErrorCountingTelemetry;
+    class ExperimentTelemetry;
 
     template <typename... Type> class Telemetry;
 
@@ -20,6 +21,7 @@ namespace telemetry
         ProgramState,                           //
         state::TimeState,                       //
         ErrorCountingTelemetry,                 //
+        ExperimentTelemetry,                    //
         devices::comm::CommTelemetry,           //
         devices::gyro::GyroscopeTelemetry,      //
         devices::eps::hk::ControllerATelemetry, //

@@ -11,8 +11,7 @@
 namespace telemetry
 {
     /**
-     * @brief This type represents telemetry element related to
-     * state of hardware error counters.
+     * @brief This type represents telemetry element related to state of hardware error counters.
      * @telemetry_element
      * @ingroup telemetry
      */

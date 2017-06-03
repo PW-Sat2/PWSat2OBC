@@ -97,6 +97,7 @@ target_link_libraries(${NAME}
     telemetry_gyro
     telemetry_fdir
     telemetry_eps
+    telemetry_exp
     program_flash
     scrubber
     boot_settings
