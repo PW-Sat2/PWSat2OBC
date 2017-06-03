@@ -34,7 +34,7 @@ namespace
     };
 
     TelemetryTest::TelemetryTest()
-        : config{"/current", "/previous", 1024}, //
+        : config{"/current", "/previous", 1024, 3}, //
           task(std::tie(fs, config))
     {
         this->descriptor = task.BuildAction();
@@ -59,6 +59,25 @@ namespace
     {
         state.telemetry.Set(state::TimeState(5min, 10min));
         ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
+    }
+
+    TEST_F(TelemetryTest, TestSkipConditionWithChanges)
+    {
+        state.telemetry.Set(state::TimeState(5min, 10min));
+        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
+        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
+        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
+        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
+    }
+
+    TEST_F(TelemetryTest, TestSkipConditionWithChangesArrivingVeryLate)
+    {
+        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
+        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
+        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
+        state.telemetry.Set(state::TimeState(5min, 10min));
+        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
+        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
     }
 
     TEST_F(TelemetryTest, TestActionNoStateChanges)
