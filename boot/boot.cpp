@@ -1,6 +1,7 @@
 #include "boot.h"
 #include <bitset>
 #include <em_usart.h>
+#include <em_wdog.h>
 #include "boot/params.hpp"
 #include "bsp/bsp_boot.h"
 #include "bsp/bsp_uart.h"
@@ -30,6 +31,13 @@ void BootToAddress(uint32_t baseAddress)
     resetClocks();
 
     boot::MagicNumber = boot::BootloaderMagicNumber;
+
+    WDOG_Init_TypeDef init = WDOG_INIT_DEFAULT;
+    init.debugRun = false;
+    init.enable = true;
+    init.perSel = io_map::Watchdog::BootTimeout;
+
+    WDOGn_Init(WDOG, &init);
 
     BOOT_boot(baseAddress);
 
