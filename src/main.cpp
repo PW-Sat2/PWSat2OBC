@@ -53,7 +53,7 @@ mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc),
 
 telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver,
     std::tuple<services::fs::IFileSystem&, mission::TelemetryConfiguration>(
-        Main.fs, mission::TelemetryConfiguration{"/telemetry.current", "/telemetry.previous", 512_KB}),
+        Main.fs, mission::TelemetryConfiguration{"/telemetry.current", "/telemetry.previous", 512_KB, 10}),
     Main.Hardware.Gyro,
     Main.Fdir,
     Main.Hardware.EPS);
@@ -133,7 +133,7 @@ static void ObcInitTask(void* param)
 {
     drivers::watchdog::InternalWatchdog::Enable();
 
-    LOG(LOG_LEVEL_INFO, "Starting initialization task... ");
+    LOG(LOG_LEVEL_INFO, "Starting initialization task...");
     LOGF(LOG_LEVEL_INFO, "Requested runlevel %d", num(boot::RequestedRunlevel));
 
     auto obc = static_cast<OBC*>(param);
