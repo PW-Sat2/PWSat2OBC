@@ -31,6 +31,7 @@ target_link_libraries(${NAME}
       boot_params
       fm25w
       gpio
+      boot_settings
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)
