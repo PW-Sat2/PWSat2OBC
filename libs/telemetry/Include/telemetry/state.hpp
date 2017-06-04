@@ -5,6 +5,7 @@
 
 #include "ErrorCounters.hpp"
 #include "Experiments.hpp"
+#include "McuTemperature.hpp"
 #include "ProgramState.hpp"
 #include "SystemStartup.hpp"
 #include "Telemetry.hpp"
