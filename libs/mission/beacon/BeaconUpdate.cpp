@@ -4,6 +4,7 @@
 #include "comm/IBeaconController.hpp"
 #include "logger/logger.h"
 #include "telecommunication/FrameContentWriter.hpp"
+#include "telecommunication/beacon.hpp"
 #include "telemetry/state.hpp"
 
 namespace mission
@@ -82,24 +83,9 @@ namespace mission
     Option<devices::comm::Beacon> BeaconUpdate::GenerateBeacon()
     {
         auto& writer = frame.PayloadWriter();
-        auto& telemetry = this->telemetryState->GetState();
-
-        writer.Reset();
-        writer.WriteByte(telecommunication::downlink::BeaconMarker);
+        if (!WriteBeaconPayload(this->telemetryState->GetState(), writer))
         {
-            Lock lock(telemetry.bufferLock, 5s);
-            if (!static_cast<bool>(lock))
-            {
-                LOG(LOG_LEVEL_ERROR, "[beacon] Unable to acquire access to telemetry.");
-                return Option<devices::comm::Beacon>::None();
-            }
-
-            writer.WriteArray(telemetry.lastSerializedTelemetry);
-        }
-
-        if (!writer.Status())
-        {
-            LOG(LOG_LEVEL_ERROR, "[beacon] Unable to fit telemetry in single comm frame.");
+            LOG(LOG_LEVEL_ERROR, "[beacon] Unable to acquire access to telemetry.");
             return Option<devices::comm::Beacon>::None();
         }
 

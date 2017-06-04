@@ -63,3 +63,25 @@ class CommTelecommandsTest(BaseTest):
         self.assertEqual(frame.correlation_id, 0x11)
 
         self.assertTrue(event.wait_for_change(30))
+
+    @runlevel(2)
+    def test_send_beacon(self):
+        event = TestEvent()
+
+        def on_set_idle_state(state):
+            if state:
+                event.set()
+
+        self.system.transmitter.on_set_idle_state = on_set_idle_state
+
+        self._start()
+
+        self.system.comm.put_frame(telecommand.SendBeacon())
+
+        frame = self.system.comm.get_frame(20)
+
+        self.assertIsInstance(frame, OperationSuccessFrame)
+        self.assertEqual(frame.seq(), 0)
+        self.assertEqual(frame.correlation_id, 0x11)
+
+        self.assertTrue(event.wait_for_change(1))
