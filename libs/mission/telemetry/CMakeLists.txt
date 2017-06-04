@@ -3,6 +3,7 @@ set(NAME mission_telemetry)
 set(SOURCES
     Include/mission/telemetry.hpp
     telemetry.cpp
+    TelemetrySerialization.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

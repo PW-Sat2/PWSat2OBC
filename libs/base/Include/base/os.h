@@ -565,9 +565,15 @@ class Lock final : private NotCopyable, private NotMoveable
 
     /**
      * @brief Checks if semaphore has been taken
-     * @return true if taking semaphore was succesful
+     * @return true if taking semaphore was successful
      */
     bool operator()();
+
+    /**
+     * @brief Checks if semaphore has been taken
+     * @return true if taking semaphore was successful
+     */
+    explicit operator bool();
 
   private:
     /** @brief Semaphore handle */
@@ -575,6 +581,16 @@ class Lock final : private NotCopyable, private NotMoveable
     /** @brief Flag indicating if semaphore is acquired */
     bool _taken;
 };
+
+inline bool Lock::operator()()
+{
+    return this->_taken;
+}
+
+inline Lock::operator bool()
+{
+    return this->_taken;
+}
 
 /**
  * @brief RTOS queue wrapper

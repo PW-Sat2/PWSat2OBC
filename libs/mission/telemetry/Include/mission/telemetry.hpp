@@ -13,15 +13,8 @@
 namespace mission
 {
     /**
-     * @defgroup mission_telemetry Telemetry serialization
-     * @ingroup mission
-     *
-     * @brief Module that saves current telemetry state to files.
-     * @{
-     */
-
-    /**
      * @brief This type contains configuration of telemetry saving task.
+     * @ingroup telemetry
      */
     struct TelemetryConfiguration
     {
@@ -52,6 +45,7 @@ namespace mission
      * @brief This task is responsible for observing the telemetry container state and as soon
      * as change is observed extract save it to telemetry event file.
      * @telemetry_acquisition
+     * @ingroup telemetry
      *
      * This task uses two files for saving the state of the telemetry changes:
      * - current telemetry file - This file is actively used and contains the most recent telemetry changes.
@@ -145,8 +139,6 @@ namespace mission
          */
         std::uint8_t delay;
     };
-
-    /** @} */
 }
 
 #endif /* LIBS_MISSION_INCLUDE_MISSION_TELEMETRY_HPP_ */
