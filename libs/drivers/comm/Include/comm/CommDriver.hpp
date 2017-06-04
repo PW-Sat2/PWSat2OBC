@@ -56,12 +56,6 @@ class CommObject final : public ITransmitter,      //
     bool Pause();
 
     /**
-     * @brief Resumes automatic handling of incoming messages
-     * @return Operation result
-     */
-    bool Resume();
-
-    /**
      * @brief Restarts the comm driver.
      *
      * @return Operation status, true in case of success, false otherwise.
@@ -330,6 +324,12 @@ class CommObject final : public ITransmitter,      //
      * @param[in] param Task execution context. This should be pointer to the task owner object.
      */
     [[noreturn]] static void CommTask(void* param);
+
+    /**
+     * @brief Resumes automatic handling of incoming messages
+     * @return Operation result
+     */
+    bool Resume();
 
     /** @brief Error counter */
     ErrorCounter _error;

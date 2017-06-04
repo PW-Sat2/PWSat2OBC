@@ -181,7 +181,7 @@ namespace
         commObject.Initialize();
     }
 
-    TEST_F(CommTest, TestInitializationAllocationFailure)
+    TEST_F(CommTest, TestInitializationEventGroupAllocationFailure)
     {
         CommObject commObject(errors, i2c);
 
@@ -192,9 +192,22 @@ namespace
         ASSERT_THAT(status, Ne(OSResult::Success));
     }
 
+    TEST_F(CommTest, TestInitializationTaskCreationFailure)
+    {
+        CommObject commObject(errors, i2c);
+
+        EXPECT_CALL(system, CreateTask(_, _, _, _, _, _)).WillOnce(Return(OSResult::AccessDenied));
+
+        const auto status = commObject.Initialize();
+
+        ASSERT_THAT(status, Ne(OSResult::Success));
+    }
+
     TEST_F(CommTest, TestInitialization)
     {
         CommObject commObject(errors, i2c);
+
+        EXPECT_CALL(system, SuspendTask(_));
 
         const auto status = commObject.Initialize();
 
@@ -945,11 +958,15 @@ namespace
     TEST_F(CommTest, TestRestartResetFailure)
     {
         i2c.ExpectWriteCommand(ReceiverAddress, HardwareReset).WillOnce(Return(I2CResult::Nack));
+
+        EXPECT_CALL(system, ResumeTask(_)).Times(0);
+
         ASSERT_THAT(comm.Restart(), Eq(false));
     }
 
     TEST_F(CommTest, TestRestart)
     {
+        EXPECT_CALL(system, ResumeTask(_));
         i2c.ExpectWriteCommand(ReceiverAddress, HardwareReset).WillOnce(Return(I2CResult::OK));
         ASSERT_THAT(comm.Restart(), Eq(true));
     }

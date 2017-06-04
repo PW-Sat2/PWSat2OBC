@@ -145,22 +145,16 @@ bool CommObject::Restart()
 
 bool CommObject::Pause()
 {
-    if (this->_pollingTaskHandle != NULL)
-    {
-        this->_pollingTaskFlags.Set(TaskFlagPauseRequest);
-        this->_pollingTaskFlags.WaitAny(TaskFlagAck, true, InfiniteTimeout);
-    }
+    this->_pollingTaskFlags.Set(TaskFlagPauseRequest);
+    this->_pollingTaskFlags.WaitAny(TaskFlagAck, true, InfiniteTimeout);
 
     return true;
 }
 
 bool CommObject::Resume()
 {
-    if (this->_pollingTaskHandle != NULL)
-    {
-        this->_pollingTaskFlags.Clear(TaskFlagPauseRequest | TaskFlagAck);
-        System::ResumeTask(this->_pollingTaskHandle);
-    }
+    this->_pollingTaskFlags.Clear(TaskFlagPauseRequest | TaskFlagAck);
+    System::ResumeTask(this->_pollingTaskHandle);
 
     return true;
 }

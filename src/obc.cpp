@@ -1,4 +1,6 @@
 #include "obc.h"
+#include "boot/params.hpp"
+#include "efm_support/api.h"
 #include "io_map.h"
 #include "logger/logger.h"
 #include "mission.h"
@@ -26,6 +28,24 @@ static void ProcessState(OBC* obc)
     {
         obc::ReadPersistentState(Mission.GetState().PersistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage);
     }
+}
+
+static void AuditSystemStartup()
+{
+    const auto& persistentState = Mission.GetState().PersistentState;
+    const auto bootReason = efm::mcu::GetBootReason();
+    const auto bootCounter = persistentState.Get<state::BootState>().BootCounter();
+    auto& telemetry = TelemetryAcquisition.GetState().telemetry;
+    if (boot::IsBootInformationAvailable())
+    {
+        telemetry.Set(telemetry::SystemStartup(bootCounter, boot::Index, bootReason));
+    }
+    else
+    {
+        telemetry.Set(telemetry::SystemStartup(bootCounter, 0xff, bootReason));
+    }
+
+    efm::mcu::ResetBootReason();
 }
 
 OBC::OBC()
@@ -69,6 +89,7 @@ OSResult OBC::InitializeRunlevel1()
     this->Experiments.InitializeRunlevel1();
 
     ProcessState(this);
+    AuditSystemStartup();
 
     this->fs.MakeDirectory("/a");
 
