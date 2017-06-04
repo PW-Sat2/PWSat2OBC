@@ -69,7 +69,7 @@ void SetBootIndex()
     Bootloader.Settings.ConfirmLastBoot();
     Bootloader.Settings.MarkAsValid();
 
-    BSP_UART_Puts(BSP_UART_DEBUG, "New boot slots set\n");
+    BSP_UART_Puts(BSP_UART_DEBUG, "\nNew boot slots set\n");
 }
 
 static void PrintBootSlots(std::uint8_t slots)
