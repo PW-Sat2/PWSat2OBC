@@ -33,6 +33,7 @@ namespace boot
         static constexpr std::uint16_t DefaultBootCounter = 0xFF;
 
         static constexpr std::uint8_t SafeModeBootSlot = 0b01000000;
+        static constexpr std::uint8_t UpperBootSlot = 0b10000000;
 
       private:
         static constexpr std::uint32_t MagicNumber = 0x7D53C5D5;

@@ -108,3 +108,15 @@ void ShowBootSettings()
     BSP_UART_Printf<40>(BSP_UART_DEBUG, "\nBoot counter: %d", counter);
     BSP_UART_Puts(BSP_UART_DEBUG, "\n");
 }
+
+void SetBootSlotToSafeMode()
+{
+    Bootloader.Settings.BootSlots(boot::BootSettings::SafeModeBootSlot);
+    BSP_UART_Puts(BSP_UART_DEBUG, "\nPrimary boot slot set to safe-mode\n");
+}
+
+void SetBootSlotToUpper()
+{
+    Bootloader.Settings.BootSlots(boot::BootSettings::UpperBootSlot);
+    BSP_UART_Puts(BSP_UART_DEBUG, "\nPrimary boot slot set to upper\n");
+}
