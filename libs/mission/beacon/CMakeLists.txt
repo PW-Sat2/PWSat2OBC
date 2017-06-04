@@ -18,6 +18,7 @@ target_link_libraries(${NAME}
     time
     base
     telecommunication
+    telemetry
 )
 
 target_format_sources(${NAME} "${SOURCES}")

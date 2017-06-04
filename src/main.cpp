@@ -41,24 +41,24 @@ using services::time::TimeProvider;
 using namespace std::chrono_literals;
 
 OBC Main;
-mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc),
-    Main.Hardware.antennaDriver,
-    Main.Hardware.CommDriver,
-    std::tuple<bool, services::power::IPowerControl&>(false, Main.PowerControlInterface),
-    Main.adcs.GetAdcsController(),
-    Main.Experiments.ExperimentsController,
-    Main.Hardware.CommDriver,
-    std::tie(Main.Hardware.PersistentStorage, PersistentStateBaseAddress),
-    Main.fs,
-    Main.Hardware.EPS);
 
 telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver,
-    std::tuple<services::fs::IFileSystem&, mission::TelemetryConfiguration>(
-        Main.fs, mission::TelemetryConfiguration{"/telemetry.current", "/telemetry.previous", 512_KB, 10}),
+    std::make_tuple(std::ref(Main.fs), mission::TelemetryConfiguration{"/telemetry.current", "/telemetry.previous", 512_KB, 10}),
     Main.Hardware.Gyro,
     Main.Fdir,
     Main.Hardware.EPS,
     Main.Experiments.ExperimentsController);
+
+mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc),
+    Main.Hardware.antennaDriver,
+    Main.Hardware.CommDriver,
+    std::make_tuple(false, std::ref(Main.PowerControlInterface)),
+    Main.adcs.GetAdcsController(),
+    Main.Experiments.ExperimentsController,
+    std::make_pair(std::ref(Main.Hardware.CommDriver), std::ref(TelemetryAcquisition)),
+    std::tie(Main.Hardware.PersistentStorage, PersistentStateBaseAddress),
+    Main.fs,
+    Main.Hardware.EPS);
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 

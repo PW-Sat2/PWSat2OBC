@@ -4,11 +4,13 @@
 #pragma once
 
 #include <chrono>
+#include "base/fwd.hpp"
 #include "comm/Beacon.hpp"
 #include "comm/comm.hpp"
 #include "mission/base.hpp"
 #include "state/struct.h"
 #include "telecommunication/downlink.h"
+#include "telemetry/fwd.hpp"
 
 namespace mission
 {
@@ -30,9 +32,9 @@ namespace mission
       public:
         /**
          * @brief ctor.
-         * @param[in] beaconController Reference to object that is able to update set the beacon in communication module.
+         * @param[in] arguments Beacon update task dependencies.
          */
-        BeaconUpdate(devices::comm::IBeaconController& beaconController);
+        BeaconUpdate(std::pair<devices::comm::IBeaconController&, IHasState<telemetry::TelemetryState>&> arguments);
 
         /**
          * @brief Returns action descriptor for this task.
@@ -66,15 +68,16 @@ namespace mission
 
         /**
          * @brief This procedure is responsible for generation beacon from current system state.
-         * @param[in] state Reference to current system state.
-         * @return Object that contains new beacon definition.
+         * @return Object that contains new beacon definition or empty object in case of failures.
          */
-        devices::comm::Beacon GenerateBeacon(const SystemState& state);
+        Option<devices::comm::Beacon> GenerateBeacon();
 
         /**
          * @brief Beacon hardware controller.
          */
         devices::comm::IBeaconController* controller;
+
+        IHasState<telemetry::TelemetryState>* telemetryState;
 
         /**
          * @brief Time of last successful beacon update.

@@ -1,8 +1,10 @@
 #include "BeaconUpdate.hpp"
 #include <chrono>
+#include "base/IHasState.hpp"
 #include "comm/IBeaconController.hpp"
 #include "logger/logger.h"
 #include "telecommunication/FrameContentWriter.hpp"
+#include "telemetry/state.hpp"
 
 namespace mission
 {
@@ -13,7 +15,7 @@ namespace mission
     /**
      * @brief Interval between two subsequent beacon updates
      */
-    static constexpr std::chrono::milliseconds BeaconUpdateInterval = 5min;
+    static constexpr std::chrono::milliseconds BeaconUpdateInterval = 30s;
 
     /**
      * @brief Default beacon send interval.
@@ -22,9 +24,10 @@ namespace mission
 
     using telecommunication::downlink::FieldId;
 
-    BeaconUpdate::BeaconUpdate(devices::comm::IBeaconController& beaconController) //
-        : controller(&beaconController),                                           //
-          lastBeaconUpdate(0s),
+    BeaconUpdate::BeaconUpdate(std::pair<devices::comm::IBeaconController&, IHasState<telemetry::TelemetryState>&> arguments)
+        : controller(&arguments.first),      //
+          telemetryState(&arguments.second), //
+          lastBeaconUpdate(0s),              //
           frame(telecommunication::downlink::DownlinkAPID::Beacon, 0)
     {
     }
@@ -54,8 +57,13 @@ namespace mission
 
     void BeaconUpdate::UpdateBeacon(const SystemState& state)
     {
-        const auto beacon = GenerateBeacon(state);
-        const auto result = this->controller->SetBeacon(beacon);
+        const auto beacon = GenerateBeacon();
+        if (!beacon.HasValue)
+        {
+            return;
+        }
+
+        const auto result = this->controller->SetBeacon(beacon.Value);
         const auto time = static_cast<std::uint32_t>(duration_cast<seconds>(state.Time).count());
         if (!result.HasValue)
         {
@@ -72,14 +80,29 @@ namespace mission
         }
     }
 
-    devices::comm::Beacon BeaconUpdate::GenerateBeacon(const SystemState& state)
+    Option<devices::comm::Beacon> BeaconUpdate::GenerateBeacon()
     {
-        // TODO update & move it to separate controller
-        telecommunication::downlink::FrameContentWriter writer(frame.PayloadWriter());
-        writer.Reset();
-        writer.WriteQuadWordLE(FieldId::TimeStamp, state.Time.count());
+        auto& writer = frame.PayloadWriter();
+        auto& telemetry = this->telemetryState->GetState();
+        {
+            Lock lock(telemetry.bufferLock, 5s);
+            if (!static_cast<bool>(lock))
+            {
+                LOG(LOG_LEVEL_ERROR, "[beacon] Unable to acquire access to telemetry.");
+                return Option<devices::comm::Beacon>::None();
+            }
+
+            writer.Reset();
+            writer.WriteArray(telemetry.lastSerializedTelemetry);
+        }
+
+        if (!writer.Status())
+        {
+            LOG(LOG_LEVEL_ERROR, "[beacon] Unable to fit telemetry in single comm frame.");
+            return Option<devices::comm::Beacon>::None();
+        }
 
         // TODO beacon interval will probably be adjusted based on current satellite state.
-        return devices::comm::Beacon(BeaconInterval, frame.Frame());
+        return Option<devices::comm::Beacon>::Some(BeaconInterval, frame.Frame());
     }
 }
