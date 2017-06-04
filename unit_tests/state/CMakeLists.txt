@@ -13,6 +13,7 @@ set(SOURCES
   telemetry/ErrorCountingTelemetryTest.cpp
   telemetry/EpsTelemetryAcquisitionTest.cpp
   telemetry/ExperimentTelemetryTest.cpp
+  telemetry/McuTemperatureTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})

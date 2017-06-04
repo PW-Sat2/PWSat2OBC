@@ -22,6 +22,7 @@
 #include "telemetry/collect_exp.hpp"
 #include "telemetry/collect_fdir.hpp"
 #include "telemetry/collect_gyro.hpp"
+#include "telemetry/collect_temp.hpp"
 #include "telemetry/state.hpp"
 
 namespace mission
@@ -52,6 +53,7 @@ namespace telemetry
         ErrorCounterTelemetryAcquisition,        //
         EpsTelemetryAcquisition,                 //
         ExperimentTelemetryAcquisition,          //
+        McuTempTelemetryAcquisition,             //
         TelemetrySerialization                   //
         >
         ObcTelemetryAcquisition;

@@ -2,6 +2,7 @@
 #define LIBS_DRIVERS_MCU_TEMP_INCLUDE_TEMP_MCU_HPP_
 
 #include <cstdint>
+#include "utils.h"
 
 namespace temp
 {
@@ -24,6 +25,12 @@ namespace temp
          * @remark Measured temperature is multiplied by 10
          */
         virtual std::int16_t ReadCelsius() = 0;
+
+        /**
+         * @brief Reads raw temperature value.
+         * @return Raw temperature value.
+         */
+        virtual BitValue<std::uint16_t, 12> ReadRaw() = 0;
     };
 
     /**@} */
