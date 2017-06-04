@@ -184,6 +184,11 @@ static void ResolveFailedBoot()
         return;
     }
 
+    if (currentSlots == boot::BootSettings::UpperBootSlot)
+    {
+        return;
+    }
+
     if (!Bootloader.Settings.WasLastBootConfirmed())
     {
         BSP_UART_Puts(BSP_UART_DEBUG, "\nLast boot not confirmed - switch to failsafe slots");
@@ -204,7 +209,12 @@ void ProceedWithBooting()
 
     if (slotsMask == boot::BootSettings::SafeModeBootSlot)
     {
-        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nSafe Mode boot index... Booting safe mode!");
+        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nSafe Mode boot slot... Booting safe mode!");
+    }
+    else if (slotsMask == boot::BootSettings::UpperBootSlot)
+    {
+        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nUpper boot slot... Booting to upper");
+        BootToAddress(BOOT_APPLICATION_BASE);
     }
     else if (__builtin_popcount(slotsMask) != 3)
     {

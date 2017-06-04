@@ -10,6 +10,8 @@ void SetRunlevel();
 
 void SetBootIndex();
 void ShowBootSettings();
+void SetBootSlotToSafeMode();
+void SetBootSlotToUpper();
 
 void UploadApplication();
 void UploadSafeMode();
