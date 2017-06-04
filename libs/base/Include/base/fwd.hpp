@@ -9,6 +9,8 @@ class Reader;
 class Writer;
 class BitWriter;
 
+template <typename State> struct IHasState;
+
 template <typename Type> struct ITelemetryContainer;
 template <typename Underlying, std::uint8_t BitsCount> class BitValue;
 

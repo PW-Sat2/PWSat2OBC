@@ -15,6 +15,8 @@ namespace telemetry
     class ErrorCountingTelemetry;
     class ExperimentTelemetry;
 
+    struct TelemetryState;
+
     template <typename... Type> class Telemetry;
 
     typedef Telemetry<SystemStartup,            //
