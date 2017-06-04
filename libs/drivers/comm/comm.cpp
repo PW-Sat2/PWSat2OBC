@@ -56,6 +56,7 @@ enum TaskFlag
 {
     TaskFlagPauseRequest = 1,
     TaskFlagAck = 2,
+    TaskFlagRunning = 4
 };
 
 bool CommObject::SendCommand(Address address, uint8_t command)
@@ -134,6 +135,11 @@ OSResult CommObject::Initialize()
 
 bool CommObject::Restart()
 {
+    if (this->_pollingTaskFlags.IsSet(TaskFlagRunning))
+    {
+        return false;
+    }
+
     if (!this->Reset())
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Unable reset comm hardware. ");
@@ -145,22 +151,16 @@ bool CommObject::Restart()
 
 bool CommObject::Pause()
 {
-    if (this->_pollingTaskHandle != NULL)
-    {
-        this->_pollingTaskFlags.Set(TaskFlagPauseRequest);
-        this->_pollingTaskFlags.WaitAny(TaskFlagAck, true, InfiniteTimeout);
-    }
+    this->_pollingTaskFlags.Set(TaskFlagPauseRequest);
+    this->_pollingTaskFlags.WaitAny(TaskFlagAck, true, InfiniteTimeout);
 
     return true;
 }
 
 bool CommObject::Resume()
 {
-    if (this->_pollingTaskHandle != NULL)
-    {
-        this->_pollingTaskFlags.Clear(TaskFlagPauseRequest | TaskFlagAck);
-        System::ResumeTask(this->_pollingTaskHandle);
-    }
+    this->_pollingTaskFlags.Clear(TaskFlagPauseRequest | TaskFlagAck);
+    System::ResumeTask(this->_pollingTaskHandle);
 
     return true;
 }
@@ -597,6 +597,8 @@ void CommObject::CommTask(void* param)
 {
     CommObject* comm = (CommObject*)param;
 
+    comm->_pollingTaskFlags.Set(TaskFlagRunning);
+
     comm->PollHardware();
 
     for (;;)
@@ -605,6 +607,7 @@ void CommObject::CommTask(void* param)
         if (result == TaskFlagPauseRequest)
         {
             LOG(LOG_LEVEL_WARNING, "Comm task paused");
+            comm->_pollingTaskFlags.Clear(TaskFlagRunning);
             comm->_pollingTaskFlags.Set(TaskFlagAck);
             System::SuspendTask(NULL);
         }

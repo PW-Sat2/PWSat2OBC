@@ -126,24 +126,6 @@ static void InitSwoEndpoint(void)
     }
 }
 
-static void AuditSystemStartup()
-{
-    const auto& persistentState = Mission.GetState().PersistentState;
-    const auto bootReason = efm::mcu::GetBootReason();
-    const auto bootCounter = persistentState.Get<state::BootState>().BootCounter();
-    auto& telemetry = TelemetryAcquisition.GetState().telemetry;
-    if (boot::IsBootInformationAvailable())
-    {
-        telemetry.Set(telemetry::SystemStartup(bootCounter, boot::Index, bootReason));
-    }
-    else
-    {
-        telemetry.Set(telemetry::SystemStartup(bootCounter, 0xff, bootReason));
-    }
-
-    efm::mcu::ResetBootReason();
-}
-
 static void ObcInitTask(void* param)
 {
     drivers::watchdog::InternalWatchdog::Enable();
@@ -176,8 +158,6 @@ static void ObcInitTask(void* param)
             LOG(LOG_LEVEL_ERROR, "Runlevel 2 initialized");
         }
     }
-
-    AuditSystemStartup();
 
     System::SuspendTask(NULL);
 }
@@ -245,7 +225,7 @@ int main(void)
     LeuartLineIOInit(&Main.IO);
 #endif
 
-    if (boot::IsBootInformationAvailable())
+    if (!boot::IsBootInformationAvailable())
     {
         LOGF(LOG_LEVEL_WARNING,
             "No boot information from bootloader (expected: 0x%lX, got: 0x%lX)",
