@@ -4,7 +4,7 @@ import struct
 from nose.tools import nottest
 
 from obc.experiments import ExperimentType
-from system import auto_power_on
+from system import auto_power_on, runlevel
 from tests.base import BaseTest
 
 
@@ -13,14 +13,11 @@ class ExperimentsTest(BaseTest):
     def __init__(self, methodName='runTest'):
         super(ExperimentsTest, self).__init__(methodName)
 
-    def begin(self):
-        self.power_on_and_wait()
-        self.system.obc.suspend_mission()
-
+    @runlevel(1)
     def test_should_conduct_experiment(self):
         iterations_count = 7
 
-        self.begin()
+        self.power_on_obc()
 
         self.system.obc.set_fibo_iterations(iterations_count)
         self.system.obc.request_experiment(ExperimentType.Fibo)
@@ -57,8 +54,9 @@ class ExperimentsTest(BaseTest):
         unpacked = struct.unpack('<' + 'L' * iterations_count, result)
         self.assertEqual(unpacked, (1, 1, 2, 3, 5, 8, 13))
 
+    @runlevel(1)
     def test_should_abort_experiment(self):
-        self.begin()
+        self.power_on_obc()
         log = logging.getLogger("TEST")
         self.system.obc.set_fibo_iterations(10)
         self.system.obc.request_experiment(ExperimentType.Fibo)
@@ -97,8 +95,9 @@ class ExperimentsTest(BaseTest):
         unpacked = struct.unpack('<' + 'L' * 2, result)
         self.assertEqual(unpacked, (1, 1))
 
+    @runlevel(1)
     def test_aborting_when_no_experiment_is_running_has_no_effect(self):
-        self.begin()
+        self.power_on_obc()
 
         self.system.obc.abort_experiment()
 
@@ -113,17 +112,3 @@ class ExperimentsTest(BaseTest):
         self.system.obc.run_mission()
         self.system.obc.wait_for_experiment_iteration(2, 15)
         self.system.obc.wait_for_experiment(None, 15)
-
-    @nottest
-    def test_x(self):
-        self.begin()
-
-        for x in xrange(0, 1):
-            self.system.obc.set_fibo_iterations(100)
-            self.system.obc.request_experiment(ExperimentType.Fibo)
-
-            for y in xrange(0, 100):
-                self.system.obc.run_mission()
-                e = self.system.obc.experiment_info()
-
-            self.system.obc.abort_experiment()

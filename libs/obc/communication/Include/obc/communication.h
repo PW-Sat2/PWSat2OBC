@@ -116,11 +116,11 @@ namespace obc
         obc::telecommands::EnterIdleStateTelecommand,
         obc::telecommands::RemoveFileTelecommand,
         obc::telecommands::PerformDetumblingExperiment,
-        obc::telecommands::AbortExperiment,     //
-        obc::telecommands::ListFilesTelecommand,//
-        obc::telecommands::EraseBootTableEntry, //
-        obc::telecommands::WriteProgramPart,    //
-        obc::telecommands::FinalizeProgramEntry //
+        obc::telecommands::AbortExperiment,      //
+        obc::telecommands::ListFilesTelecommand, //
+        obc::telecommands::EraseBootTableEntry,  //
+        obc::telecommands::WriteProgramPart,     //
+        obc::telecommands::FinalizeProgramEntry  //
         >;
 
     /**
@@ -131,7 +131,7 @@ namespace obc
         /**
          * @brief Initializes @ref OBCCommunication object
          * @param[in] fdir FDIR mechanisms
-         * @param[in] i2cBus I2CBus used by low-level comm driver
+         * @param[in] commDriver Comm driver
          * @param[in] currentTime Current time
          * @param[in] idleStateController Idle state controller
          * @param[in] fs File system
@@ -139,7 +139,7 @@ namespace obc
          * @param[in] bootTable Boot table
          */
         OBCCommunication(obc::FDIR& fdir,
-            drivers::i2c::II2CBus& i2cBus,
+            devices::comm::CommObject& commDriver,
             services::time::ICurrentTime& currentTime,
             mission::IIdleStateController& idleStateController,
             services::fs::IFileSystem& fs,
@@ -147,9 +147,17 @@ namespace obc
             program_flash::BootTable& bootTable);
 
         /**
-         * @brief Initializes all communication-related drivers and objects
+         * @brief Initializes all communication at runlevel 1
          */
-        void Initialize();
+        void InitializeRunlevel1();
+
+        /**
+         * @brief Initializes all communication at runlevel 2
+         */
+        void InitializeRunlevel2();
+
+        /** @brief Comm driver */
+        devices::comm::CommObject& Comm;
 
         /** @brief Uplink protocol decoder */
         telecommunication::uplink::UplinkProtocol UplinkProtocolDecoder;
@@ -159,9 +167,6 @@ namespace obc
 
         /** @brief Incoming telecommand handler */
         telecommunication::uplink::IncomingTelecommandHandler TelecommandHandler;
-
-        /** @brief Low-level comm driver */
-        devices::comm::CommObject CommDriver;
     };
 
     /** @} */

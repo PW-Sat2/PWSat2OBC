@@ -98,9 +98,10 @@ namespace
         void MockRemoveFrame(I2CResult result);
     };
 
-    CommTest::CommTest() : comm(errors, i2c, frameHandler), errors(errorsConfig), error_counter(errors)
+    CommTest::CommTest() : comm(errors, i2c), errors(errorsConfig), error_counter(errors)
     {
         reset = SetupOs(comm, system);
+        comm.SetFrameHandler(frameHandler);
     }
 
     void CommTest::MockFrameCount(std::uint16_t frameCount)
@@ -172,7 +173,7 @@ namespace
 
     TEST_F(CommTest, TestInitializationDoesNotTouchHardware)
     {
-        CommObject commObject(errors, i2c, frameHandler);
+        CommObject commObject(errors, i2c);
 
         EXPECT_CALL(i2c, WriteRead(_, _, _)).Times(0);
         EXPECT_CALL(i2c, Write(_, _)).Times(0);
@@ -180,9 +181,9 @@ namespace
         commObject.Initialize();
     }
 
-    TEST_F(CommTest, TestInitializationAllocationFailure)
+    TEST_F(CommTest, TestInitializationEventGroupAllocationFailure)
     {
-        CommObject commObject(errors, i2c, frameHandler);
+        CommObject commObject(errors, i2c);
 
         EXPECT_CALL(system, CreateEventGroup()).WillOnce(Return(nullptr));
 
@@ -191,9 +192,22 @@ namespace
         ASSERT_THAT(status, Ne(OSResult::Success));
     }
 
+    TEST_F(CommTest, TestInitializationTaskCreationFailure)
+    {
+        CommObject commObject(errors, i2c);
+
+        EXPECT_CALL(system, CreateTask(_, _, _, _, _, _)).WillOnce(Return(OSResult::AccessDenied));
+
+        const auto status = commObject.Initialize();
+
+        ASSERT_THAT(status, Ne(OSResult::Success));
+    }
+
     TEST_F(CommTest, TestInitialization)
     {
-        CommObject commObject(errors, i2c, frameHandler);
+        CommObject commObject(errors, i2c);
+
+        EXPECT_CALL(system, SuspendTask(_));
 
         const auto status = commObject.Initialize();
 
@@ -944,33 +958,25 @@ namespace
     TEST_F(CommTest, TestRestartResetFailure)
     {
         i2c.ExpectWriteCommand(ReceiverAddress, HardwareReset).WillOnce(Return(I2CResult::Nack));
-        ASSERT_THAT(comm.Restart(), Eq(false));
-    }
 
-    TEST_F(CommTest, TestRestartTaskCreationFailure)
-    {
-        i2c.ExpectWriteCommand(ReceiverAddress, HardwareReset).WillOnce(Return(I2CResult::OK));
-        EXPECT_CALL(system, CreateTask(_, _, _, _, _, _)).WillOnce(Return(OSResult::IOError));
+        EXPECT_CALL(system, ResumeTask(_)).Times(0);
+
         ASSERT_THAT(comm.Restart(), Eq(false));
     }
 
     TEST_F(CommTest, TestRestart)
     {
+        EXPECT_CALL(system, ResumeTask(_));
         i2c.ExpectWriteCommand(ReceiverAddress, HardwareReset).WillOnce(Return(I2CResult::OK));
-        EXPECT_CALL(system, CreateTask(_, _, _, _, _, _)).WillOnce(Return(OSResult::Success));
         ASSERT_THAT(comm.Restart(), Eq(true));
     }
 
-    TEST_F(CommTest, TestDoubleRestart)
+    TEST_F(CommTest, TestRestartFailIfAlreadyRunning)
     {
-        i2c.ExpectWriteCommand(ReceiverAddress, HardwareReset).WillOnce(Return(I2CResult::OK));
-        EXPECT_CALL(system, CreateTask(_, _, _, _, _, _)).WillOnce(Invoke([](auto, auto, auto, auto, auto, auto handle) {
-            *handle = reinterpret_cast<void*>(1);
-            return OSResult::Success;
-        }));
-
-        ASSERT_THAT(comm.Restart(), Eq(true));
-        ASSERT_THAT(comm.Restart(), Eq(true));
+        ON_CALL(system, EventGroupGetBits(_)).WillByDefault(Return(4));
+        EXPECT_CALL(system, ResumeTask(_)).Times(0);
+        i2c.ExpectWriteCommand(ReceiverAddress, HardwareReset).Times(0);
+        ASSERT_THAT(comm.Restart(), Eq(false));
     }
 
     struct CommReceiverTelemetryTest : public testing::TestWithParam<std::tuple<int, uint8_t, I2CResult>>
@@ -985,7 +991,7 @@ namespace
         OSReset reset;
     };
 
-    CommReceiverTelemetryTest::CommReceiverTelemetryTest() : errors(errorsConfig), comm(errors, i2c, frameHandler)
+    CommReceiverTelemetryTest::CommReceiverTelemetryTest() : errors(errorsConfig), comm(errors, i2c)
     {
         reset = SetupOs(comm, system);
     }
@@ -1032,7 +1038,7 @@ namespace
         OSReset reset;
     };
 
-    CommTransmitterTelemetryTest::CommTransmitterTelemetryTest() : errors(errorsConfig), comm(errors, i2c, frameHandler)
+    CommTransmitterTelemetryTest::CommTransmitterTelemetryTest() : errors(errorsConfig), comm(errors, i2c)
     {
         reset = SetupOs(comm, system);
     }

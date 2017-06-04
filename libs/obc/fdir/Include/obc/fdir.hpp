@@ -25,9 +25,6 @@ namespace obc
         /** @brief Performs initialization */
         void Initalize();
 
-        /** @brief Performs post-start initialization */
-        void PostStartInitialize();
-
         /**
          * @brief Returns reference to error counting mechanism
          * @return Reference to errour counting mechanism

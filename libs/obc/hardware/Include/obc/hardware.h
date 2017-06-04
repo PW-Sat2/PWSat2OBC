@@ -2,7 +2,10 @@
 #define SRC_HARDWARE_H_
 
 #include "PersistentStorageAccess.hpp"
+#include "antenna/driver.h"
+#include "antenna/miniport.h"
 #include "burtc/burtc.hpp"
+#include "comm/CommDriver.hpp"
 #include "eps/eps.h"
 #include "error_counter/error_counter.hpp"
 #include "gpio.h"
@@ -10,12 +13,15 @@
 #include "i2c/efm.h"
 #include "i2c/i2c.h"
 #include "i2c/wrappers.h"
+#include "imtq/imtq.h"
 #include "io_map.h"
 #include "logger/logger.h"
 #include "power/power.h"
 #include "program_flash/flash_driver.hpp"
+#include "rtc/rtc.hpp"
 #include "spi/efm.h"
 #include "temp/efm.hpp"
+#include "uart/uart.h"
 
 namespace obc
 {
@@ -112,9 +118,6 @@ namespace obc
         /** @brief Initializes OBC hardware */
         void Initialize();
 
-        /** @brief Initializies OBC hardware after FreeRTOS is initialized */
-        OSResult PostStartInitialize();
-
         /** @brief GPIO Pins */
         OBCGPIO Pins;
 
@@ -148,6 +151,24 @@ namespace obc
 
         /** @brief EPS driver*/
         devices::eps::EPSDriver EPS;
+
+        /** @brief Low level driver for antenna controller. */
+        AntennaMiniportDriver antennaMiniport;
+
+        /** @brief High level driver for antenna subsystem. */
+        AntennaDriver antennaDriver;
+
+        /** @brief Imtq handling */
+        devices::imtq::ImtqDriver Imtq;
+
+        /** @brief UART driver */
+        drivers::uart::UART UARTDriver;
+
+        /** @brief External Real Time Clock.  */
+        devices::rtc::RTCObject rtc;
+
+        /** @brief Low-level comm driver */
+        devices::comm::CommObject CommDriver;
     };
 }
 /** @} */

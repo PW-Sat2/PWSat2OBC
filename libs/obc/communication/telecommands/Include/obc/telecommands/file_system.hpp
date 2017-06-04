@@ -136,6 +136,10 @@ namespace obc
         class ListFilesTelecommand : public telecommunication::uplink::Telecommand<0x0F>
         {
           public:
+            /**
+             * @brief Ctor
+             * @param fs File system
+             */
             ListFilesTelecommand(services::fs::IFileSystem& fs);
 
             virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;

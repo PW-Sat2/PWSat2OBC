@@ -75,7 +75,7 @@ void AntennaDeploy(std::uint16_t argc, char* argv[])
     }
 
     const bool override = (argc > 2) && (strcmp(argv[2], "override") == 0);
-    const OSResult result = Main.antennaDriver.DeployAntenna(&Main.antennaDriver,
+    const OSResult result = Main.Hardware.antennaDriver.DeployAntenna(&Main.Hardware.antennaDriver,
         channel,
         antenna,
         10s,
@@ -97,7 +97,7 @@ void AntennaCancelDeployment(std::uint16_t argc, char* argv[])
         return;
     }
 
-    Main.antennaDriver.FinishDeployment(&Main.antennaDriver, channel);
+    Main.Hardware.antennaDriver.FinishDeployment(&Main.Hardware.antennaDriver, channel);
 }
 
 void AntennaGetDeploymentStatus(std::uint16_t argc, char* argv[])
@@ -113,7 +113,7 @@ void AntennaGetDeploymentStatus(std::uint16_t argc, char* argv[])
     }
 
     AntennaDeploymentStatus deploymentStatus;
-    const OSResult status = Main.antennaDriver.GetDeploymentStatus(&Main.antennaDriver, channel, &deploymentStatus);
+    const OSResult status = Main.Hardware.antennaDriver.GetDeploymentStatus(&Main.Hardware.antennaDriver, channel, &deploymentStatus);
     if (OS_RESULT_FAILED(status))
     {
         SendResult(status);
@@ -150,7 +150,7 @@ void PrintValue(int value, bool print, const char* name)
 
 void AntennaGetTelemetry(std::uint16_t /*argc*/, char* /*argv*/ [])
 {
-    auto telemetry = Main.antennaDriver.GetTelemetry(&Main.antennaDriver);
+    auto telemetry = Main.Hardware.antennaDriver.GetTelemetry(&Main.Hardware.antennaDriver);
     PrintValue(telemetry.ActivationCount[0], has_flag(telemetry.flags, ANT_TM_ANTENNA1_ACTIVATION_COUNT), "Antenna 1 activation count");
     PrintValue(telemetry.ActivationCount[1], has_flag(telemetry.flags, ANT_TM_ANTENNA2_ACTIVATION_COUNT), "Antenna 2 activation count");
     PrintValue(telemetry.ActivationCount[2], has_flag(telemetry.flags, ANT_TM_ANTENNA3_ACTIVATION_COUNT), "Antenna 3 activation count");
@@ -178,7 +178,7 @@ void AntennaReset(std::uint16_t argc, char* argv[])
         return;
     }
 
-    const OSResult result = Main.antennaDriver.Reset(&Main.antennaDriver, channel);
+    const OSResult result = Main.Hardware.antennaDriver.Reset(&Main.Hardware.antennaDriver, channel);
     if (OS_RESULT_SUCCEEDED(result))
     {
         Main.terminal.Puts("Done");

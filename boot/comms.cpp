@@ -35,7 +35,7 @@ struct Command
 
 static void PrintHelp();
 
-static std::array<Command, 13> Commands = {
+static std::array<Command, 14> Commands = {
     Command{'T', "Test", Test}, //
     Command{'S', "Test SRAM", TestSRAM},
     Command{'E', "Test EEPROM", TestEEPROM},
@@ -49,6 +49,7 @@ static std::array<Command, 13> Commands = {
     Command{'l', "Print boot table", PrintBootTable},
     Command{'?', "Print help", PrintHelp},
     Command{'t', "TMR boot", TMRBoot},
+    Command{'R', "Runlevel", SetRunlevel},
 };
 
 #define UPLOADBLOCKSIZE 256
@@ -79,6 +80,11 @@ void COMMS_processMsg(void)
     {
         uartReceived = 1;
         command->Handler();
+    }
+
+    if (msgId != 0)
+    {
+        BSP_UART_txByte(BSP_UART_DEBUG, '#');
     }
 
     msgId = 0;
@@ -119,4 +125,6 @@ void PrintHelp()
     {
         BSP_UART_Printf<60>(BSP_UART_DEBUG, "\n%c - %s", c.CommandId, c.HelpMessage);
     }
+
+    BSP_UART_txByte(BSP_UART_DEBUG, '\n');
 }

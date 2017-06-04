@@ -40,11 +40,11 @@ Beacon::Beacon(std::chrono::seconds beaconPeriod, gsl::span<const std::uint8_t> 
 {
 }
 
-CommObject::CommObject(error_counter::ErrorCounting& errors, II2CBus& low, IHandleFrame& upperInterface)
-    : _error(errors),                //
-      _low(low),                     //
-      _frameHandler(upperInterface), //
-      _pollingTaskHandle(nullptr)    //
+CommObject::CommObject(error_counter::ErrorCounting& errors, II2CBus& low)
+    : _error(errors),             //
+      _low(low),                  //
+      _frameHandler(nullptr),     //
+      _pollingTaskHandle(nullptr) //
 {
 }
 
@@ -56,6 +56,7 @@ enum TaskFlag
 {
     TaskFlagPauseRequest = 1,
     TaskFlagAck = 2,
+    TaskFlagRunning = 4
 };
 
 bool CommObject::SendCommand(Address address, uint8_t command)
@@ -113,38 +114,53 @@ bool CommObject::SendCommandWithResponse(Address address, uint8_t command, span<
 
 OSResult CommObject::Initialize()
 {
-    return this->_pollingTaskFlags.Initialize();
+    OSResult result = this->_pollingTaskFlags.Initialize();
+    if (OS_RESULT_FAILED(result))
+    {
+        LOGF(LOG_LEVEL_FATAL, "[comm] Unable to create polling task flags (%d)", num(result));
+        return result;
+    }
+
+    result = System::CreateTask(CommObject::CommTask, "COMM Task", 4_KB, this, TaskPriority::P4, &this->_pollingTaskHandle);
+    if (OS_RESULT_FAILED(result))
+    {
+        LOGF(LOG_LEVEL_ERROR, "[comm] Unable to create background task (%d)", num(result));
+        return result;
+    }
+
+    System::SuspendTask(this->_pollingTaskHandle);
+
+    return OSResult::Success;
 }
 
 bool CommObject::Restart()
 {
-    if (this->_pollingTaskHandle == nullptr)
+    if (this->_pollingTaskFlags.IsSet(TaskFlagRunning))
     {
-        if (!this->Reset())
-        {
-            LOG(LOG_LEVEL_ERROR, "[comm] Unable reset comm hardware. ");
-            return false;
-        }
-
-        const OSResult result =
-            System::CreateTask(CommObject::CommTask, "COMM Task", 4_KB, this, TaskPriority::P4, &this->_pollingTaskHandle);
-        if (OS_RESULT_FAILED(result))
-        {
-            LOGF(LOG_LEVEL_ERROR, "[comm] Unable to create background task. Status: 0x%08x.", num(result));
-            return false;
-        }
+        return false;
     }
 
-    return true;
+    if (!this->Reset())
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable reset comm hardware. ");
+        return false;
+    }
+
+    return this->Resume();
 }
 
 bool CommObject::Pause()
 {
-    if (this->_pollingTaskHandle != NULL)
-    {
-        this->_pollingTaskFlags.Set(TaskFlagPauseRequest);
-        this->_pollingTaskFlags.WaitAny(TaskFlagAck, true, InfiniteTimeout);
-    }
+    this->_pollingTaskFlags.Set(TaskFlagPauseRequest);
+    this->_pollingTaskFlags.WaitAny(TaskFlagAck, true, InfiniteTimeout);
+
+    return true;
+}
+
+bool CommObject::Resume()
+{
+    this->_pollingTaskFlags.Clear(TaskFlagPauseRequest | TaskFlagAck);
+    System::ResumeTask(this->_pollingTaskHandle);
 
     return true;
 }
@@ -566,7 +582,9 @@ void CommObject::ProcessSingleFrame()
     if (status && frame.Verify())
     {
         LOGF(LOG_LEVEL_INFO, "[comm] Received frame %d bytes. ", static_cast<int>(frame.Size()));
-        this->_frameHandler.HandleFrame(*this, frame);
+        auto handler = this->_frameHandler;
+        if (handler != nullptr)
+            handler->HandleFrame(*this, frame);
     }
 
     if (!this->RemoveFrame())
@@ -579,6 +597,8 @@ void CommObject::CommTask(void* param)
 {
     CommObject* comm = (CommObject*)param;
 
+    comm->_pollingTaskFlags.Set(TaskFlagRunning);
+
     comm->PollHardware();
 
     for (;;)
@@ -587,8 +607,10 @@ void CommObject::CommTask(void* param)
         if (result == TaskFlagPauseRequest)
         {
             LOG(LOG_LEVEL_WARNING, "Comm task paused");
+            comm->_pollingTaskFlags.Clear(TaskFlagRunning);
             comm->_pollingTaskFlags.Set(TaskFlagAck);
             System::SuspendTask(NULL);
+            comm->_pollingTaskFlags.Set(TaskFlagRunning);
         }
         else
         {

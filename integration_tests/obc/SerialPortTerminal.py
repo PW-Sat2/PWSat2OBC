@@ -4,6 +4,8 @@ import struct
 import serial
 import time
 
+from .bootloader import OBCBootloader
+
 
 class SerialPortTerminal:
     def __init__(self, comPort, gpio, boot_handler):
@@ -12,7 +14,13 @@ class SerialPortTerminal:
         self._gpio = gpio
         self._boot_handler = boot_handler
 
-        self._serial = serial.Serial(comPort, baudrate=115200, timeout=1, rtscts=False)
+        self._serial = None
+        while self._serial is None:
+            try:
+                self._serial = serial.Serial(comPort, baudrate=115200, timeout=1, rtscts=False)
+            except serial.SerialException as e:
+                if e.message.find('WindowsError(5,') == -1:
+                    raise
         self._gpio.high(self._gpio.RESET)
 
     def waitForPrompt(self, terminator='>'):
@@ -140,14 +148,22 @@ class SerialPortTerminal:
     def wait_for_boot(self, timeout=None):
         return self._boot(timeout)
 
+    def _stay_in_bootloader(self):
+        self._serial.write('S')
+
+        c = self._serial.read(1)
+        while c != 'O':
+            c = self._serial.read(1)
+
     def _boot(self, timeout=None):
         end = None if timeout is None else time.time() + timeout
         c = ''
         while c != '@':
             c = self._serial.read(1)
 
-            if c == '#':
-                self._boot_handler.boot(self._serial.write)
+            if c == '&':
+                self._stay_in_bootloader()
+                self._boot_handler.boot(OBCBootloader(self._serial))
 
             if end is not None and time.time() > end:
                 return False

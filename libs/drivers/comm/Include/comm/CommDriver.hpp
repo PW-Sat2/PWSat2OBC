@@ -29,9 +29,8 @@ class CommObject final : public ITransmitter,      //
      * Constructs new instance of COMM low-level driver
      * @param[in] errors Error counting mechanism
      * @param[in] low I2C bus used to communicate with device
-     * @param[in] upperInterface Reference to object responsible for interpreting received frames
      */
-    CommObject(error_counter::ErrorCounting& errors, drivers::i2c::II2CBus& low, IHandleFrame& upperInterface);
+    CommObject(error_counter::ErrorCounting& errors, drivers::i2c::II2CBus& low);
 
     /**
      * @brief This procedure initializes the comm driver object and sets it 'Paused' state.
@@ -67,6 +66,15 @@ class CommObject final : public ITransmitter,      //
      * Calling this method twice without intermediate call to the CommPause procedure leads to undefined behavior.
      */
     bool Restart();
+
+    /**
+     * @brief Sets handler that will be called for every received frame
+     * @param[in] handler Reference to object responsible for interpreting received frames
+     *
+     * @remark This method must be called when COMM driver is suspended (like just after initialisation). No internal synchronization is
+     * performed
+     */
+    inline void SetFrameHandler(IHandleFrame& handler);
 
     /**
      * @brief Queries comm driver for a number of received and not yet processed frames.
@@ -320,6 +328,12 @@ class CommObject final : public ITransmitter,      //
      */
     [[noreturn]] static void CommTask(void* param);
 
+    /**
+     * @brief Resumes automatic handling of incoming messages
+     * @return Operation result
+     */
+    bool Resume();
+
     /** @brief Error counter */
     ErrorCounter _error;
 
@@ -327,7 +341,7 @@ class CommObject final : public ITransmitter,      //
     drivers::i2c::II2CBus& _low;
 
     /** @brief Comm driver upper interface. */
-    IHandleFrame& _frameHandler;
+    IHandleFrame* _frameHandler;
 
     /** @brief Handle to comm background task. */
     void* _pollingTaskHandle;
@@ -340,6 +354,11 @@ inline bool CommObject::SendFrame(gsl::span<const std::uint8_t> frame)
 {
     std::uint8_t remainingBufferSize;
     return ScheduleFrameTransmission(frame, remainingBufferSize);
+}
+
+inline void CommObject::SetFrameHandler(IHandleFrame& handler)
+{
+    this->_frameHandler = &handler;
 }
 
 COMM_END

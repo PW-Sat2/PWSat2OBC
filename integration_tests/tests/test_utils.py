@@ -3,7 +3,6 @@ from nose_parameterized import parameterized
 
 from utils import ensure_byte_list, ensure_string
 
-
 class UtilsTests(TestCase):
     @parameterized.expand([
         (1, [1]),
@@ -15,7 +14,6 @@ class UtilsTests(TestCase):
     ])
     def test_ensure_byte_list(self, input, output):
         result = ensure_byte_list(input)
-
         self.assertEqual(result, output)
 
     @parameterized.expand([

@@ -9,12 +9,9 @@ namespace obc
 
     void FDIR::Initalize()
     {
-    }
-
-    void FDIR::PostStartInitialize()
-    {
         this->_errorCounting.Handler(*this);
     }
+
     error_counter::ErrorCounting& FDIR::ErrorCounting()
     {
         return this->_errorCounting;

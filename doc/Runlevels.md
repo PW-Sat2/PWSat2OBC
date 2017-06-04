@@ -25,7 +25,7 @@ Runlevel 1 is implemented by bootloader. Switching to higher runlevel is achieve
 Runlevels 2 and 3 are manifested in code by methods on @ref OBC class. Each of them is responsible for enabling all required services. Additionaly specific services/behaviours can be enebled by terminal command. 
 
 ## How-to: staying on bootloader runlevel
-During startup bootloader waits for T<sub>boot\_select</sub> milliseconds to receive character 'S' on UART. If it is not received, normal boot procedure is performed. Otherwise OBC responds with 'O' and enters runlevel 0.
+During startup bootloader outputs character '&' on UART than waits for T<sub>boot\_select</sub> milliseconds to receive character 'S'. If it is not received, normal boot procedure is performed. Otherwise OBC responds with 'O' and enters runlevel 0.
 
 ## How-to: running OBC in runlevel 2
 OBC runlevel is selected in bootloader, so procedure to enter runlevel to is as follows:

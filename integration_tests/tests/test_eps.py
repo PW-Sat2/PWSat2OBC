@@ -2,12 +2,13 @@ from nose.tools import nottest
 
 from devices.eps import HousekeepingA, HousekeepingB
 from obc import PowerCycleBy
+from system import runlevel
 from tests.base import BaseTest
 from utils import TestEvent
 
 
 class EPSTest(BaseTest):
-
+    @runlevel(1)
     def test_enable_lcl(self):
         ev = TestEvent()
 
@@ -25,6 +26,7 @@ class EPSTest(BaseTest):
 
         self.assertTrue(ev.wait_for_change(0), "Should enable TKred LCL (controller B)")
 
+    @runlevel(1)
     def test_disable_lcl(self):
         ev = TestEvent()
 
@@ -44,6 +46,7 @@ class EPSTest(BaseTest):
 
         self.assertTrue(ev.wait_for_change(0), "Should disable TKred LCL (controller B)")
 
+    @runlevel(1)
     def test_power_cycle_a(self):
         ev = TestEvent()
 
@@ -54,6 +57,7 @@ class EPSTest(BaseTest):
         self.assertTrue(ev.wait_for_change(1), "Should trigger power cycle (controller A)")
         self.system.restart()
 
+    @runlevel(1)
     def test_power_cycle_b(self):
         ev = TestEvent()
 
@@ -64,6 +68,7 @@ class EPSTest(BaseTest):
         self.assertTrue(ev.wait_for_change(1), "Should trigger power cycle (controller A)")
         self.system.restart()
 
+    @runlevel(1)
     def test_power_cycle_auto_fallback_to_b_when_not_restart_by_a(self):
         pc_a = TestEvent()
         pc_b = TestEvent()
@@ -78,6 +83,7 @@ class EPSTest(BaseTest):
 
         self.system.restart()
 
+    @runlevel(1)
     def test_power_cycle_auto_fallback_to_b_when_a_not_responding(self):
         pc_b = TestEvent()
 
@@ -91,6 +97,7 @@ class EPSTest(BaseTest):
 
         self.system.restart()
 
+    @runlevel(1)
     def test_disable_overheat_mode(self):
         ev = TestEvent()
 
@@ -108,6 +115,7 @@ class EPSTest(BaseTest):
 
         self.assertTrue(ev.wait_for_change(1), "Should disable overheat mode (controller B)")
 
+    @runlevel(1)
     def test_enable_burn_switch(self):
         ev = TestEvent()
 
@@ -125,6 +133,7 @@ class EPSTest(BaseTest):
 
         self.assertTrue(ev.wait_for_change(1), "Burn switch should be enabled (controller B)")
 
+    @runlevel(1)
     def test_read_housekeeping_a(self):
         expected = HousekeepingA()
 
@@ -181,6 +190,7 @@ class EPSTest(BaseTest):
 
         self.assertEqual(result, expected)
 
+    @runlevel(1)
     def test_read_housekeeping_b(self):
         expected = HousekeepingB()
         expected.BP.TEMP_C = 1
@@ -197,6 +207,7 @@ class EPSTest(BaseTest):
 
         self.assertEqual(result, expected)
 
+    @runlevel(1)
     def test_fail_to_enable_lcl_should_raise_error_count(self):
         self.system.i2c.enable_bus_devices([self.system. eps.controller_a.address], False)
         result = self.system.obc.enable_lcl(0x01)

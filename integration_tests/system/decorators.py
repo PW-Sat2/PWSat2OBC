@@ -1,7 +1,6 @@
 from functools import wraps
 
-from nose.tools import nottest
-from build_config import config
+from obc.boot import SelectRunlevel
 
 
 def auto_comm_handling(enable_auto_comm):
@@ -17,16 +16,6 @@ def auto_comm_handling(enable_auto_comm):
     return wrap
 
 
-def wait_for_obc_start():
-    def wrap(f):
-        @wraps(f)
-        def wrapper(self, *args, **kwargs):
-            self.system.obc.wait_to_start()
-            return f(self, *args, **kwargs)
-        return wrapper
-    return wrap
-
-
 def auto_power_on(auto_power_on):
     def wrap(f):
         @wraps(f)
@@ -36,3 +25,15 @@ def auto_power_on(auto_power_on):
             return result
         return wrapper
     return wrap
+
+
+def runlevel(requested_runlevel):
+    def wrap(f):
+        try:
+            f.boot_wrappers += [SelectRunlevel(requested_runlevel)]
+        except AttributeError:
+            f.boot_wrappers = [SelectRunlevel(requested_runlevel)]
+        return f
+
+    return wrap
+

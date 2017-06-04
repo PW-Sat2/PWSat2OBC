@@ -4,7 +4,7 @@ from nose.tools import nottest
 
 import telecommand
 from response_frames.operation import OperationErrorFrame
-from system import auto_power_on
+from system import auto_power_on, runlevel
 from tests.base import BaseTest
 from utils import ensure_byte_list, TestEvent
 
@@ -22,11 +22,11 @@ class FileSystemTelecommandsTest(BaseTest):
 
         self.system.comm.on_hardware_reset = on_reset
 
-        self.system.obc.power_on(clean_state=True)
-        self.system.obc.wait_to_start()
+        self.power_on_obc(clean_state=True)
 
         e.wait_for_change(1)
 
+    @runlevel(2)
     def test_receive_multipart_file(self):
         self._start()
 
@@ -53,6 +53,7 @@ class FileSystemTelecommandsTest(BaseTest):
 
         self.assertAlmostEqual(received, data)
 
+    @runlevel(2)
     def test_should_respond_with_error_frame_for_non_existent_file_when_downloading(self):
         self._start()
 
@@ -67,6 +68,7 @@ class FileSystemTelecommandsTest(BaseTest):
         self.assertEqual(frame.correlation_id, 0x11)
         self.assertEqual(frame.error_code, 1)
 
+    @runlevel(2)
     def test_should_remove_file(self):
         self._start()
 
@@ -84,6 +86,7 @@ class FileSystemTelecommandsTest(BaseTest):
         self.assertEqual(frame.seq(), 0)
         self.assertEqual(frame.response, ensure_byte_list(p))
 
+    @runlevel(2)
     def test_should_report_error_when_removing_non_existent_file(self):
         self._start()
 
@@ -100,6 +103,7 @@ class FileSystemTelecommandsTest(BaseTest):
         self.assertEqual(frame.response, ensure_byte_list(p))
         self.assertEqual(frame.payload(), [0x11, 0xFE] + ensure_byte_list(p))
 
+    @runlevel(2)
     def test_should_list_files(self):
         self._start()
 

@@ -3,7 +3,7 @@ from time import sleep
 from nose.tools import nottest
 
 from devices import EchoDevice, TimeoutDevice
-from system import auto_comm_handling
+from system import auto_comm_handling, runlevel
 from tests.base import BaseTest
 from utils import TestEvent
 
@@ -48,7 +48,7 @@ class I2CTest(BaseTest):
 
         self.assertEqual(response, 'efg')
 
-    @auto_comm_handling(False)
+    @runlevel(1)
     def test_should_be_able_to_transfer_on_unlatched_bis(self):
         response = self.system.obc.i2c_transfer('wr', 'system', 0x14, chr(0x02))
         self.assertEqual(response, 'Error -7')
@@ -86,7 +86,7 @@ class I2CTest(BaseTest):
 
         self.assertEqual(response, 'bcd')
 
-    @auto_comm_handling(False)
+    @runlevel(1)
     def test_isis_behaviour(self):
         echo2 = EchoDevice(0x16)
         self.system.i2c.add_bus_device(echo2)

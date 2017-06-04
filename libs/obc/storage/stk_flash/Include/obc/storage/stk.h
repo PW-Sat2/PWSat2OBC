@@ -3,9 +3,9 @@
 
 #include "fs/fs.h"
 #include "fs/yaffs.h"
-#include "spi/spi.h"
 #include "obc/gpio.h"
 #include "spi/efm.h"
+#include "spi/spi.h"
 #include "storage/nand.h"
 #include "storage/nand_driver.h"
 
@@ -38,7 +38,7 @@ namespace obc
              * @brief Initializes OBC storage
              * @return Operation result
              */
-            OSResult Initialize();
+            OSResult InitializeRunlevel1();
 
             /**
              * @brief Clears OBC storage
