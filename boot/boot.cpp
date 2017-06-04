@@ -186,7 +186,7 @@ static void ResolveFailedBoot()
 
     if (!Bootloader.Settings.WasLastBootConfirmed())
     {
-        BSP_UART_Puts(BSP_UART_DEBUG, "Last boot not confirmed - switch to failsafe slots");
+        BSP_UART_Puts(BSP_UART_DEBUG, "\nLast boot not confirmed - switch to failsafe slots");
 
         auto failsafe = Bootloader.Settings.FailsafeBootSlots();
         Bootloader.Settings.BootSlots(failsafe);

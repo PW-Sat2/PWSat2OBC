@@ -50,6 +50,7 @@ static void AuditSystemStartup()
 
 OBC::OBC()
     : BootTable(Hardware.FlashDriver),                                                                               //
+      BootSettings(this->Hardware.PersistentStorage.GetRedundantDriver()),                                           //
       Hardware(this->Fdir.ErrorCounting(), this->PowerControlInterface, timeProvider),                               //
       PowerControlInterface(this->Hardware.EPS),                                                                     //
       Storage(Hardware.SPI, fs, Hardware.Pins),                                                                      //
@@ -108,6 +109,8 @@ OSResult OBC::InitializeRunlevel1()
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize telemetry acquisition loop.");
     }
+
+    BootSettings.ConfirmLastBoot();
 
     LOG(LOG_LEVEL_INFO, "Intialized");
     this->StateFlags.Set(OBC::InitializationFinishedFlag);

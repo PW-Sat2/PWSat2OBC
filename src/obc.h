@@ -10,6 +10,7 @@
 #include "adcs/AdcsExperimental.hpp"
 
 #include "base/os.h"
+#include "boot/settings.hpp"
 #include "experiment/fibo/fibo.h"
 #include "fs/fs.h"
 #include "fs/yaffs.h"
@@ -80,6 +81,9 @@ struct OBC
 
     /** @brief Boot Table */
     program_flash::BootTable BootTable;
+
+    /** @brief Boot settings */
+    boot::BootSettings BootSettings;
 
     /** @brief Persistent timer that measures mission time. */
     services::time::TimeProvider timeProvider;
