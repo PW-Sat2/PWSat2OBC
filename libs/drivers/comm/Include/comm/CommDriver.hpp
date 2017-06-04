@@ -56,12 +56,6 @@ class CommObject final : public ITransmitter,      //
     bool Pause();
 
     /**
-     * @brief Resumes automatic handling of incoming messages
-     * @return Operation result
-     */
-    bool Resume();
-
-    /**
      * @brief Restarts the comm driver.
      *
      * @return Operation status, true in case of success, false otherwise.
@@ -76,6 +70,9 @@ class CommObject final : public ITransmitter,      //
     /**
      * @brief Sets handler that will be called for every received frame
      * @param[in] handler Reference to object responsible for interpreting received frames
+     *
+     * @remark This method must be called when COMM driver is suspended (like just after initialisation). No internal synchronization is
+     * performed
      */
     inline void SetFrameHandler(IHandleFrame& handler);
 
@@ -330,6 +327,12 @@ class CommObject final : public ITransmitter,      //
      * @param[in] param Task execution context. This should be pointer to the task owner object.
      */
     [[noreturn]] static void CommTask(void* param);
+
+    /**
+     * @brief Resumes automatic handling of incoming messages
+     * @return Operation result
+     */
+    bool Resume();
 
     /** @brief Error counter */
     ErrorCounter _error;

@@ -48,5 +48,4 @@ void OBCCommunication::InitializeRunlevel2()
     {
         LOG(LOG_LEVEL_ERROR, "Unable to restart comm");
     }
-    this->Comm.Resume();
 }
