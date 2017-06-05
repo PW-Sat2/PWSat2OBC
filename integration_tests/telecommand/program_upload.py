@@ -10,7 +10,7 @@ class EraseBootTableEntry(Telecommand):
     def payload(self):
         mask = 0
         for e in self._entries:
-            mask |= 1 << (e - 1)
+            mask |= 1 << e
 
         return [mask]
 
@@ -27,7 +27,7 @@ class WriteProgramPart(Telecommand):
     def payload(self):
         mask = 0
         for e in self._entries:
-            mask |= 1 << (e - 1)
+            mask |= 1 << e
 
         return list(struct.pack('<BI', mask, self._offset)) + list(self._content)
 
@@ -44,7 +44,7 @@ class FinalizeProgramEntry(Telecommand):
     def payload(self):
         mask = 0
         for e in self._entries:
-            mask |= 1 << (e - 1)
+            mask |= 1 << e
 
         return list(struct.pack('<BIH', mask, self._length, self._expected_crc)) + list(self._name)
 

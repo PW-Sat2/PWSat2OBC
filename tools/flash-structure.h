@@ -25,12 +25,6 @@ struct Entry
 };
 
 public struct Flash
-{
-	unsigned char bootIndex;
-	$shift_by(0x00002000 - 1);
-	unsigned char bootCounter;
-	$shift_by(0x00002000 - 1);
-	[format("b16")] unsigned short crc;
-	$shift_by(0x00080000 - 0x00004000 - 1 - 1);
-	Entry entries[7];
+{	
+	Entry entries[6];
 };

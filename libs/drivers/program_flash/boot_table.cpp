@@ -25,8 +25,8 @@ namespace program_flash
     }
 
     ProgramEntry::ProgramEntry(IFlashDriver& flash, std::uint8_t index)
-        : _entrySpan(flash.Span(0x00080000 + (index - 1) * Size)), _length(_entrySpan), _crc(_entrySpan), _isValid(_entrySpan),
-          _description(_entrySpan), _program(_entrySpan)
+        : _entrySpan(flash.Span(index * Size)), _length(_entrySpan), _crc(_entrySpan), _isValid(_entrySpan), _description(_entrySpan),
+          _program(_entrySpan)
     {
     }
 
