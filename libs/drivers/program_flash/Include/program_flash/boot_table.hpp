@@ -187,6 +187,7 @@ namespace program_flash
             return ProgramEntry(this->_flash, index);
         }
 
+        /** @brief Number of entries in boot table */
         static constexpr std::uint8_t EntriesCount = 6;
 
       private:
