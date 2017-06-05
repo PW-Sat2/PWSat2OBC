@@ -24,7 +24,7 @@ void Detumbling::initialize(State& state, const Parameters& param)
 {
     // initialize state with provided parameters
     state = State(param);
-    mtmDotExp = exp(-state.params.wCutOff * state.params.dt);
+    mtmDotExp = expf(-state.params.wCutOff * state.params.dt);
 }
 
 void Detumbling::step(DipoleVec& dipole, const MagVec& mgmt_meas, State& state)
@@ -41,9 +41,9 @@ void Detumbling::step(DipoleVec& dipole, const MagVec& mgmt_meas, State& state)
 
     // commanded magnetic dipole to coils
     RowVector3f commDipoleBdot;
-    if (!mgmt_input.isZero(0.0))
+    if (!mgmt_input.isZero(0.0f)) //TODO accur
     {
-        commDipoleBdot = mtmDot * (-state.params.bDotGain) / (powf(mgmt_input.norm(), 2));
+        commDipoleBdot = mtmDot * (-state.params.bDotGain) / (powf(mgmt_input.norm(), 2.0f));
     }
     else
     {
@@ -55,7 +55,7 @@ void Detumbling::step(DipoleVec& dipole, const MagVec& mgmt_meas, State& state)
     {
         if (!state.params.coilsOn[i])
         {
-            commDipoleBdot[i] = 0;
+            commDipoleBdot[i] = 0.0f;
         }
     }
 

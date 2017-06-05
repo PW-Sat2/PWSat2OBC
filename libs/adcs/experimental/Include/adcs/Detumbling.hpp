@@ -33,19 +33,19 @@ namespace adcs
              * @unit [s]
              * @default 0.2
              */
-            static constexpr float dt = 0.2;
+            static constexpr float dt = 0.2f;
 
             /** @brief high-pass filter cut off frequency
              * @unit [rad/s]
              * @default 0.2
              */
-            float wCutOff = 0.2;
+            float wCutOff = 0.2f;
 
             /** @brief B-dot gain
              * @unit [kg m^2 / s]
              * @default 2.879285e-5 * 1e15 -- unit conv - original gain * convwersion
              */
-            float bDotGain = 2.879285e-5 * 1e15; // unit conv - original gain * convwersion
+            float bDotGain = 2.879285e-5f * 1e15f; // unit conv - original gain * convwersion
 
             /** @brief state of flags enabling coils
              * @unit [-]
