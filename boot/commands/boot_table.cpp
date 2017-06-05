@@ -6,7 +6,7 @@ void PrintBootTable()
 {
     BSP_UART_Puts(BSP_UART_DEBUG, "\n\nBoot Table Entries:\n");
 
-    for (auto entry = 1; entry <= program_flash::BootTable::EntriesCount; entry++)
+    for (auto entry = 0; entry < program_flash::BootTable::EntriesCount; entry++)
     {
         BSP_UART_Printf<5>(BSP_UART_DEBUG, "\n%d. ", entry);
 
@@ -23,6 +23,8 @@ void PrintBootTable()
 
         BSP_UART_Printf<50>(BSP_UART_DEBUG, " (CRC: %.4X Size: %ld bytes)", e.Crc(), e.Length());
     }
+
+    BSP_UART_Puts(BSP_UART_DEBUG, "\n");
 }
 
 void EraseBootTable()

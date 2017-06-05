@@ -14,14 +14,28 @@ void StandaloneFlashDriver::Initialize()
     this->_bootConfig = lld_ReadCfiWord(this->_flashBase, 0x9E);
 }
 
-FlashStatus StandaloneFlashDriver::EraseSector(std::size_t sectorOfffset)
+FlashStatus StandaloneFlashDriver::EraseSector(std::size_t sectorOffset)
 {
-    if (!WaitForIdle(sectorOfffset))
+    if (!WaitForIdle(sectorOffset))
     {
         return FlashStatus::Busy;
     }
 
-    auto d = lld_SectorEraseOp(this->_flashBase, sectorOfffset);
+    if (sectorOffset == 0)
+    {
+        // First 64KB of flash is using 8KB erase sectors, not 64KB as rest of flash
+        for (std::size_t i = 0; i < 64_KB; i += 8_KB)
+        {
+            volatile auto d = static_cast<FlashStatus>(lld_SectorEraseOp(this->_flashBase, i));
+
+            if (d != FlashStatus::NotBusy)
+                return d;
+        }
+
+        return FlashStatus::NotBusy;
+    }
+
+    auto d = lld_SectorEraseOp(this->_flashBase, sectorOffset);
     return static_cast<FlashStatus>(d);
 }
 

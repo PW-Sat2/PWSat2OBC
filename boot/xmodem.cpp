@@ -34,6 +34,7 @@
 #include "bsp/bsp_uart.h"
 #include "flash.h"
 #include "lld.h"
+#include "program_flash/boot_table.hpp"
 
 #define ALIGNMENT(base, align) (((base) + ((align)-1)) & (~((align)-1)))
 
@@ -81,10 +82,10 @@ int XMODEM_verifyPacketChecksum(XMODEM_packet* pkt, int sequenceNumber)
   *   The index where data should be saved in the boot table.
   *
   *****************************************************************************/
-uint32_t XMODEM_upload(uint8_t index)
+uint32_t XMODEM_upload(program_flash::ProgramEntry* entry)
 {
     XMODEM_packet* pkt;
-    uint32_t offset, i;
+    uint32_t i;
     uint32_t byte;
     uint32_t sequenceNumber = 1;
     uint8_t *base, data;
@@ -93,10 +94,9 @@ uint32_t XMODEM_upload(uint8_t index)
     ((void)data);
 
     // Erase sectors in boot table for specified index
-    if (index != 0)
+    if (entry != nullptr)
     {
-        for (offset = 0; offset < BOOT_TABLE_ENTRY_SIZE; offset += BSP_EBI_FLASH_LSECTOR_SIZE)
-            lld_SectorEraseOp((uint8_t*)(BOOT_TABLE_BASE), (BOOT_getOffsetEntry(index) + offset));
+        entry->Erase();
     }
 
     // Send one start transmission packet. Wait for a response. If there is no
@@ -171,7 +171,7 @@ xmodem_transfer:
             continue;
         }
 
-        if (index == 0)
+        if (entry == nullptr)
         {
             i = 0;
             volatile uint8_t* area = (uint8_t*)(BOOT_SAFEMODE_BASE_DATA + ((sequenceNumber - 1) * XMODEM_DATA_SIZE));
@@ -198,15 +198,7 @@ xmodem_transfer:
         // Write data to external FLASH, i.e. Nominal Mode
         else
         {
-            base = (uint8_t*)BOOT_TABLE_BASE;
-            offset = (BOOT_getOffsetProgram(index) + (sequenceNumber - 1) * XMODEM_DATA_SIZE);
-
-            // Write to flash (write 1 byte at a time)
-            for (i = 0; i < XMODEM_DATA_SIZE; i++)
-            {
-                data = pkt->data[i];
-                lld_ProgramOp(base, (offset + i), data);
-            }
+            entry->WriteContent((sequenceNumber - 1) * XMODEM_DATA_SIZE, {pkt->data, XMODEM_DATA_SIZE});
         }
 
         sequenceNumber++;
