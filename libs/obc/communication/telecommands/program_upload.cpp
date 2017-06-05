@@ -117,7 +117,7 @@ namespace obc
             {
                 if (selectedEntries[i])
                 {
-                    auto result = this->_bootTable.Entry(i + 1).Erase();
+                    auto result = this->_bootTable.Entry(i).Erase();
 
                     if (!result)
                     {
@@ -153,7 +153,7 @@ namespace obc
             {
                 if (selectedEntries[i])
                 {
-                    auto r = this->_bootTable.Entry(i + 1).WriteContent(offset, content);
+                    auto r = this->_bootTable.Entry(i).WriteContent(offset, content);
 
                     if (r != FlashStatus::NotBusy)
                     {
@@ -201,7 +201,7 @@ namespace obc
             {
                 if (selectedEntries[i])
                 {
-                    auto e = this->_bootTable.Entry(i + 1);
+                    auto e = this->_bootTable.Entry(i);
 
                     FlashStatus r = FlashStatus::NotBusy;
 

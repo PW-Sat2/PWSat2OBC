@@ -53,6 +53,8 @@ void SetBootIndex()
         return;
     }
 
+    Bootloader.Settings.MarkAsValid();
+
     if (!Bootloader.Settings.BootSlots(bootSlots.Value))
     {
         BSP_UART_Puts(BSP_UART_DEBUG, "Failed to set boot slots\n");
@@ -67,7 +69,6 @@ void SetBootIndex()
 
     Bootloader.Settings.BootCounter(boot::BootSettings::DefaultBootCounter);
     Bootloader.Settings.ConfirmLastBoot();
-    Bootloader.Settings.MarkAsValid();
 
     BSP_UART_Puts(BSP_UART_DEBUG, "\nNew boot slots set\n");
 }
@@ -77,6 +78,12 @@ static void PrintBootSlots(std::uint8_t slots)
     if (slots == boot::BootSettings::SafeModeBootSlot)
     {
         BSP_UART_Puts(BSP_UART_DEBUG, "Safe Mode");
+        return;
+    }
+
+    if (slots == boot::BootSettings::UpperBootSlot)
+    {
+        BSP_UART_Puts(BSP_UART_DEBUG, "Upper");
         return;
     }
 

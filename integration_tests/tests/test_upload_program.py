@@ -35,7 +35,7 @@ class UploadProgramTest(BaseTest):
         self._start()
 
         # erase entry
-        self.system.comm.put_frame(EraseBootTableEntry([2]))
+        self.system.comm.put_frame(EraseBootTableEntry([0, 1, 2]))
 
         # wait for response
         f = self.system.comm.get_frame(20)
@@ -54,8 +54,8 @@ class UploadProgramTest(BaseTest):
         parts = int(ceil(length / float(WriteProgramPart.MAX_PART_SIZE)))
 
         for i in xrange(0, length, WriteProgramPart.MAX_PART_SIZE):
-            part = content[i:i+WriteProgramPart.MAX_PART_SIZE]
-            self.system.comm.put_frame(WriteProgramPart(entries=[2], offset=i, content=part))
+            part = content[i:i + WriteProgramPart.MAX_PART_SIZE]
+            self.system.comm.put_frame(WriteProgramPart(entries=[0, 1, 2], offset=i, content=part))
 
         log.info("Total parts {}\nlength: {}\nCRC: {:X}".format(parts, length, crc))
 
@@ -65,8 +65,7 @@ class UploadProgramTest(BaseTest):
 
         # finalize entry
         name = 'Uploaded2'
-        self.system.comm.put_frame(FinalizeProgramEntry([2], length, crc, name))
+        self.system.comm.put_frame(FinalizeProgramEntry([0, 1, 2], length, crc, name))
 
         f = self.system.comm.get_frame(20)
         self.assertIsInstance(f, EntryFinalizeSuccess)
-
