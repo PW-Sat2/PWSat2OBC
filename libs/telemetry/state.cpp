@@ -6,6 +6,12 @@ namespace telemetry
     bool TelemetryState::Initialize()
     {
         this->bufferLock = System::CreateBinarySemaphore(0x20);
-        return this->bufferLock != nullptr;
+        auto status = this->bufferLock != nullptr;
+        if (status)
+        {
+            status = OS_RESULT_SUCCEEDED(System::GiveSemaphore(this->bufferLock));
+        }
+
+        return status;
     }
 }
