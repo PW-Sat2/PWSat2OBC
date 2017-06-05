@@ -15,7 +15,7 @@ static Option<std::uint8_t> ReadBootSlots()
 
         BSP_UART_txByte(BSP_UART_DEBUG, index);
 
-        if (index < '0' || index >= '6')
+        if (index < '0' || (index - '0') >= program_flash::BootTable::EntriesCount)
         {
             BSP_UART_Puts(BSP_UART_DEBUG, "\tInvalid boot index\n");
             return None<std::uint8_t>();
@@ -87,9 +87,9 @@ static void PrintBootSlots(std::uint8_t slots)
         return;
     }
 
-    std::bitset<6> bits(slots & 0b00111111);
+    std::bitset<program_flash::BootTable::EntriesCount> bits(slots);
 
-    for (auto i = 0; i < 6; i++)
+    for (auto i = 0; i < program_flash::BootTable::EntriesCount; i++)
     {
         if (bits[i])
         {
