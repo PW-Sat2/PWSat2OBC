@@ -187,7 +187,7 @@ namespace program_flash
             return ProgramEntry(this->_flash, index);
         }
 
-        static constexpr std::uint8_t EntriesCount = 7;
+        static constexpr std::uint8_t EntriesCount = 6;
 
       private:
         /** @brief Flash driver */
