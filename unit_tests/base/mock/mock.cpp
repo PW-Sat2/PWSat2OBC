@@ -1,5 +1,14 @@
 #include "AdcsMocks.hpp"
+#include "GyroMock.hpp"
 #include "StorageAccessMock.hpp"
+
+GyroscopeMock::GyroscopeMock()
+{
+}
+
+GyroscopeMock::~GyroscopeMock()
+{
+}
 
 StorageAccessMock::StorageAccessMock()
 {

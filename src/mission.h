@@ -16,6 +16,7 @@
 #include "mission/time.hpp"
 #include "state/struct.h"
 #include "telemetry/collect_comm.hpp"
+#include "telemetry/collect_gyro.hpp"
 #include "telemetry/state.hpp"
 
 namespace mission
@@ -38,7 +39,8 @@ namespace telemetry
 {
     typedef mission::MissionLoop<TelemetryState, //
         CommTelemetryAcquisition,                //
-        mission::TelemetryTask                   //
+        mission::TelemetryTask,                  //
+        GyroTelemetryAcquisition                 //
         >
         ObcTelemetryAcquisition;
 }

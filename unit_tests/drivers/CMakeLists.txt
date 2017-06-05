@@ -22,6 +22,7 @@ set(SOURCES
   imtq/imtqHighLevelTest.cpp
   rtc.cpp
   gyro/gyroTest.cpp
+  gyro/GyroTelemetryTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})

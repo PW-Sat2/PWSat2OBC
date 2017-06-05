@@ -9,7 +9,7 @@
 #include "eps/eps.h"
 #include "error_counter/error_counter.hpp"
 #include "gpio.h"
-#include "gyro/gyro.h"
+#include "gyro/driver.hpp"
 #include "i2c/efm.h"
 #include "i2c/i2c.h"
 #include "i2c/wrappers.h"

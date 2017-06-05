@@ -12,6 +12,7 @@ COMM_BEGIN
 /**
  * @brief This class represents complete communication module telemetry object as it is presented and exposed
  * to the rest of the system.
+ * @telemetry_element
  */
 class CommTelemetry
 {
@@ -19,7 +20,7 @@ class CommTelemetry
     /**
      * @brief TimeState telemetry unique identifier.
      */
-    static constexpr int Id = 4;
+    static constexpr int Id = 12;
 
     /**
      * @brief ctor.
