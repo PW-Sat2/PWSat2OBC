@@ -111,9 +111,9 @@ namespace obc
                 return;
             }
 
-            std::bitset<8> selectedEntries(parameters[0]);
+            std::bitset<program_flash::BootTable::EntriesCount> selectedEntries(parameters[0]);
 
-            for (auto i = 0; i < 7; i++)
+            for (auto i = 0; i < program_flash::BootTable::EntriesCount; i++)
             {
                 if (selectedEntries[i])
                 {
@@ -138,7 +138,7 @@ namespace obc
         {
             Reader r(parameters);
 
-            std::bitset<8> selectedEntries(r.ReadByte());
+            std::bitset<program_flash::BootTable::EntriesCount> selectedEntries(r.ReadByte());
             auto offset = r.ReadDoubleWordLE();
             auto content = r.ReadToEnd();
 
@@ -149,7 +149,7 @@ namespace obc
 
             LOGF(LOG_LEVEL_INFO, "Uploading program part %d to 0x%lX", content.size(), offset);
 
-            for (auto i = 0; i < 7; i++)
+            for (auto i = 0; i < program_flash::BootTable::EntriesCount; i++)
             {
                 if (selectedEntries[i])
                 {
@@ -182,7 +182,7 @@ namespace obc
         {
             Reader r(parameters);
 
-            std::bitset<8> selectedEntries(r.ReadByte());
+            std::bitset<program_flash::BootTable::EntriesCount> selectedEntries(r.ReadByte());
             auto length = r.ReadDoubleWordLE();
             auto expectedCrc = r.ReadWordLE();
 
@@ -197,7 +197,7 @@ namespace obc
 
             LOG(LOG_LEVEL_INFO, "Finalizing entries");
 
-            for (auto i = 0; i < 7; i++)
+            for (auto i = 0; i < program_flash::BootTable::EntriesCount; i++)
             {
                 if (selectedEntries[i])
                 {

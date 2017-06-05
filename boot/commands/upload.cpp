@@ -14,7 +14,7 @@ void UploadApplication()
 
     BSP_UART_Printf<4>(BSP_UART_DEBUG, "%d", index);
 
-    if (index > 6)
+    if (index >= program_flash::BootTable::EntriesCount)
     {
         BSP_UART_Puts(BSP_UART_DEBUG, "\nError: Boot index out of bounds!");
         return;
