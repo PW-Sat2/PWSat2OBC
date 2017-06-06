@@ -1,4 +1,5 @@
 #include "hk.hpp"
+#include "base/BitWriter.hpp"
 #include "base/reader.h"
 
 namespace devices
@@ -7,32 +8,51 @@ namespace devices
     {
         namespace hk
         {
-            bool HouseheepingControllerA::ReadFrom(Reader& reader)
+            void OtherControllerState::ReadFrom(Reader& reader)
             {
-                this->MPPT_X.ReadFrom(reader);
-                this->MPPT_Y_PLUS.ReadFrom(reader);
-                this->MPPT_Y_MINUS.ReadFrom(reader);
-                this->DISTR.ReadFrom(reader);
-                this->BATC.ReadFrom(reader);
-                this->BP.ReadFrom(reader);
-                this->CTRLB.ReadFrom(reader);
-                this->CTRLA.ReadFrom(reader);
-                this->DCDC3V3.ReadFrom(reader);
-                this->DCDC5V.ReadFrom(reader);
-
-                return reader.Status();
+                this->VOLT_3V3d = reader.ReadWordLE();
             }
 
-            void HouseheepingControllerA::MPPT_HK::ReadFrom(Reader& reader)
+            void OtherControllerState::Write(BitWriter& writer) const
             {
-                this->SOL_CURR = reader.ReadWordLE();
-                this->SOL_VOLT = reader.ReadWordLE();
-                this->SOL_OUT_VOLT = reader.ReadWordLE();
-                this->TEMP = reader.ReadWordLE();
-                this->STATE = static_cast<decltype(this->STATE)>(reader.ReadByte());
+                writer.Write(this->VOLT_3V3d);
             }
 
-            void HouseheepingControllerA::DISTR_HK::ReadFrom(Reader& reader)
+            ThisControllerState::ThisControllerState() : powerCycleCount(0), uptime(0), errorCode(0)
+            {
+            }
+
+            void ThisControllerState::ReadFrom(Reader& reader)
+            {
+                this->errorCode = reader.ReadByte();
+                this->powerCycleCount = reader.ReadWordLE();
+                this->uptime = reader.ReadDoubleWordLE();
+                this->temperature = reader.ReadWordLE();
+            }
+
+            void ThisControllerState::Write(BitWriter& writer) const
+            {
+                writer.Write(this->errorCode);
+                writer.Write(this->powerCycleCount);
+                writer.Write(this->uptime);
+                writer.Write(this->temperature);
+            }
+
+            void DCDC_HK::ReadFrom(Reader& reader)
+            {
+                this->temperature = reader.ReadWordLE();
+            }
+
+            void DCDC_HK::Write(BitWriter& writer) const
+            {
+                writer.Write(this->temperature);
+            }
+
+            DISTR_HK::DISTR_HK() : LCL_STATE(DISTR_LCL_STATE::None), LCL_FLAGB(DISTR_LCL_FLAGB::None)
+            {
+            }
+
+            void DISTR_HK::ReadFrom(Reader& reader)
             {
                 this->CURR_3V3 = reader.ReadWordLE();
                 this->VOLT_3V3 = reader.ReadWordLE();
@@ -40,62 +60,143 @@ namespace devices
                 this->VOLT_5V = reader.ReadWordLE();
                 this->CURR_VBAT = reader.ReadWordLE();
                 this->VOLT_VBAT = reader.ReadWordLE();
-                this->TEMP = reader.ReadWordLE();
+                this->Temperature = reader.ReadWordLE();
                 this->LCL_STATE = static_cast<decltype(this->LCL_STATE)>(reader.ReadByte());
                 this->LCL_FLAGB = static_cast<decltype(this->LCL_FLAGB)>(reader.ReadByte());
             }
 
-            void HouseheepingControllerA::BATC_HK::ReadFrom(Reader& reader)
+            void DISTR_HK::Write(BitWriter& writer) const
+            {
+                writer.Write(this->Temperature);
+                writer.Write(this->VOLT_3V3);
+                writer.Write(this->CURR_3V3);
+                writer.Write(this->VOLT_5V);
+                writer.Write(this->CURR_5V);
+                writer.Write(this->VOLT_VBAT);
+                writer.Write(this->CURR_VBAT);
+                writer.Write(this->LCL_STATE);
+                writer.Write(this->LCL_FLAGB);
+            }
+
+            MPPT_HK::MPPT_HK() : MpptState(MPPT_STATE::None)
+            {
+            }
+
+            void MPPT_HK::ReadFrom(Reader& reader)
+            {
+                this->SOL_CURR = reader.ReadWordLE();
+                this->SOL_VOLT = reader.ReadWordLE();
+                this->SOL_OUT_VOLT = reader.ReadWordLE();
+                this->Temperature = reader.ReadWordLE();
+                this->MpptState = static_cast<decltype(this->MpptState)>(reader.ReadByte());
+            }
+
+            void MPPT_HK::Write(BitWriter& writer) const
+            {
+                writer.Write(this->SOL_VOLT);
+                writer.Write(this->SOL_CURR);
+                writer.Write(this->SOL_OUT_VOLT);
+                writer.Write(this->Temperature);
+                writer.WriteWord(num(this->MpptState), StateBitSize);
+            }
+
+            BATCPrimaryState::BATCPrimaryState() : State(BATC_STATE::None)
+            {
+            }
+
+            void BATCPrimaryState::ReadFrom(Reader& reader)
             {
                 this->VOLT_A = reader.ReadWordLE();
-                this->CHRG_CURR = reader.ReadWordLE();
-                this->DCHRG_CURR = reader.ReadWordLE();
-                this->TEMP = reader.ReadWordLE();
-                this->STATE = static_cast<decltype(this->STATE)>(reader.ReadByte());
+                this->ChargeCurrent = reader.ReadWordLE();
+                this->DischargeCurrent = reader.ReadWordLE();
+                this->Temperature = reader.ReadWordLE();
+                this->State = static_cast<decltype(this->State)>(reader.ReadByte());
             }
 
-            void HouseheepingControllerA::BP_HK::ReadFrom(Reader& reader)
+            void BATCPrimaryState::Write(BitWriter& writer) const
             {
-                this->TEMP_A = reader.ReadWordLE();
-                this->TEMP_B = reader.ReadWordLE();
+                writer.Write(this->VOLT_A);
+                writer.Write(this->ChargeCurrent);
+                writer.Write(this->DischargeCurrent);
+                writer.Write(this->Temperature);
+                writer.Write(this->State);
             }
 
-            void OtherController::ReadFrom(Reader& reader)
+            void BatteryPackPrimaryState::ReadFrom(Reader& reader)
             {
-                this->VOLT_3V3d = reader.ReadWordLE();
+                this->temperatureA = reader.ReadWordLE();
+                this->temperatureB = reader.ReadWordLE();
             }
 
-            void ThisController::ReadFrom(Reader& reader)
+            void BatteryPackPrimaryState::Write(BitWriter& writer) const
             {
-                this->ERR = reader.ReadByte();
-                this->PWR_CYCLES = reader.ReadWordLE();
-                this->UPTIME = reader.ReadDoubleWordLE();
-                this->TEMP = reader.ReadWordLE();
+                writer.Write(this->temperatureA);
+                writer.Write(this->temperatureB);
             }
 
-            void HouseheepingControllerA::DCDC_HK::ReadFrom(Reader& reader)
+            void BatteryPackSecondaryState::ReadFrom(Reader& reader)
             {
-                this->TEMP = reader.ReadWordLE();
+                this->temperatureC = reader.ReadWordLE();
             }
 
-            bool HouseheepingControllerB::ReadFrom(Reader& reader)
+            void BatteryPackSecondaryState::Write(BitWriter& writer) const
             {
-                this->BP.ReadFrom(reader);
-                this->BATC.ReadFrom(reader);
-                this->CTRLA.ReadFrom(reader);
-                this->CTRLB.ReadFrom(reader);
+                writer.Write(this->temperatureC);
+            }
+            void BATCSecondaryState::ReadFrom(Reader& reader)
+            {
+                this->voltB = reader.ReadWordLE();
+            }
 
+            void BATCSecondaryState::Write(BitWriter& writer) const
+            {
+                writer.Write(this->voltB);
+            }
+
+            bool ControllerATelemetry::ReadFrom(Reader& reader)
+            {
+                this->mpptX.ReadFrom(reader);
+                this->mpptYPlus.ReadFrom(reader);
+                this->mpptYMinus.ReadFrom(reader);
+                this->distr.ReadFrom(reader);
+                this->batc.ReadFrom(reader);
+                this->bp.ReadFrom(reader);
+                this->other.ReadFrom(reader);
+                this->current.ReadFrom(reader);
+                this->dcdc3V3.ReadFrom(reader);
+                this->dcdc5V.ReadFrom(reader);
                 return reader.Status();
             }
 
-            void HouseheepingControllerB::BP_HK::ReadFrom(Reader& reader)
+            void ControllerATelemetry::Write(BitWriter& writer) const
             {
-                this->TEMP_C = reader.ReadWordLE();
+                this->mpptX.Write(writer);
+                this->mpptYPlus.Write(writer);
+                this->mpptYMinus.Write(writer);
+                this->distr.Write(writer);
+                this->batc.Write(writer);
+                this->bp.Write(writer);
+                this->current.Write(writer);
+                this->other.Write(writer);
+                this->dcdc3V3.Write(writer);
+                this->dcdc5V.Write(writer);
             }
 
-            void HouseheepingControllerB::BATC_HK::ReadFrom(Reader& reader)
+            bool ControllerBTelemetry::ReadFrom(Reader& reader)
             {
-                this->VOLT_B = reader.ReadWordLE();
+                this->bp.ReadFrom(reader);
+                this->batc.ReadFrom(reader);
+                this->other.ReadFrom(reader);
+                this->current.ReadFrom(reader);
+                return reader.Status();
+            }
+
+            void ControllerBTelemetry::Write(BitWriter& writer) const
+            {
+                this->bp.Write(writer);
+                this->batc.Write(writer);
+                this->current.Write(writer);
+                this->other.Write(writer);
             }
         }
     }

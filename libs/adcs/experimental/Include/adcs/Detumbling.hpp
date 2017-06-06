@@ -43,7 +43,7 @@ namespace adcs
 
             /** @brief B-dot gain
              * @unit [kg m^2 / s]
-             * @default 2.879285e-5 * 1e15 -- unit conv - original gain * convwersion
+             * @default 2.879285e-5 * 1e15 -- unit conv - original gain * conversion
              */
             float bDotGain = 2.879285e-5 * 1e15; // unit conv - original gain * conversion
 
@@ -62,6 +62,10 @@ namespace adcs
           public:
             State() = default;
 
+            /**
+             * @brief ctor.
+             * @param p Reference to detumbling algorithm parameters.
+             */
             State(const Parameters& p);
 
             /** @brief Value of magnetic field derivative preserved from previous step   */

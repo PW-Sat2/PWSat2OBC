@@ -137,8 +137,8 @@ namespace obc
         {
           public:
             /**
-             * @brief Ctor
-             * @param fs File system
+             * @brief ctor.
+             * @param[in] fs Reference to object providing access to filesystem services.
              */
             ListFilesTelecommand(services::fs::IFileSystem& fs);
 

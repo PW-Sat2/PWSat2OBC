@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include <stdbool.h>
 #include <chrono>
 #include <cstdint>
+#include <limits>
 #include <type_traits>
 #include <utility>
 
 /**
- * @brief Converts bool value to 1 or 0
+ * @brief Converts boolean value to 1 or 0
  * @param[in] value Value to convert
  * @return 1 for true, 0 for false
  */
@@ -348,7 +348,8 @@ struct TimeAction
 };
 
 /**
- * @brief Holds action (lambda) that will be invoked on destruction unless explictly skipped
+ * @brief Holds action (lambda) that will be invoked on destruction unless explicitly skipped.
+ * @ingroup utilities
  */
 template <typename Action> class OnLeaveAction final : private NotCopyable
 {
@@ -414,6 +415,7 @@ template <typename Action> void OnLeaveAction<Action>::Skip()
  * @brief Type wrapping integer of non-standard size
  * @tparam Integer type that will be used to hold smaller value
  * @tparam BitsCount Number of bits used by number
+ * @ingroup utilities
  */
 template <typename Underlying, std::uint8_t BitsCount> class BitValue
 {
@@ -515,7 +517,101 @@ inline bool operator!=(BitValue<Underlying, BitsCount>& lhs, BitValue<Underlying
 
 /** @brief 12-bit unsigned integer */
 using uint12_t = BitValue<std::uint16_t, 12>;
+
 /** @brief 10-bit unsigned integer */
 using uint10_t = BitValue<std::uint16_t, 10>;
+
+namespace details
+{
+    /**
+     * @brief Type that extracts size in bits of the selected type.
+     * @tparam T Queried type.
+     * @tparam flag Flag indicating whether the selected type is an enumeration
+     */
+    template <typename T, bool flag> struct BitSizeOf;
+
+    /**
+     * @brief Type that extracts size in bits of the selected type.
+     * @tparam T Queried type.
+     * @remark Specialization for enumerations
+     */
+    template <typename T> struct BitSizeOf<T, true>
+    {
+        /**
+         * @brief This value contanins queried type size in bits.
+         */
+        static constexpr std::uint32_t Value = std::numeric_limits<std::underlying_type_t<T>>::digits;
+    };
+
+    /**
+     * @brief Type that extracts size in bits of the selected type.
+     * @tparam T Queried type.
+     * @remark Specialization for non-enumerations
+     */
+    template <typename T> struct BitSizeOf<T, false>
+    {
+        /**
+         * @brief This value contains queried type size in bits.
+         */
+        static constexpr std::uint32_t Value = std::numeric_limits<T>::digits;
+    };
+
+    /**
+     * @brief Type that extracts size in bits of the selected type.
+     * @tparam T Queried type.
+     * @remark Specialization for BitValues
+     */
+    template <typename T, std::uint8_t BitCount> struct BitSizeOf<BitValue<T, BitCount>, false>
+    {
+        /**
+         * @brief This value contains queried type size in bits.
+         */
+        static constexpr std::uint32_t Value = BitValue<T, BitCount>::Size;
+    };
+}
+
+/**
+ * @brief Template variable that holds size of the selected type in bits.
+ * @tparam T Queried type.
+ */
+template <typename T> constexpr std::uint32_t BitLength = details::BitSizeOf<T, std::is_enum<T>::value>::Value;
+
+namespace details
+{
+    /**
+     * @brief Template variable that aggregates sizes of all passed types in bits.
+     *
+     * @remark Specialization for two or more types.
+     * @tparam T type whose length in bits should be recorded.
+     * @tparam Args list of types whose length in bits should be recorded.
+     */
+    template <typename T, typename... Args> struct AggregateSize
+    {
+        /**
+         * @brief This value contains aggregates size in bits of all queried types.
+         */
+        static constexpr std::uint32_t Value = BitLength<T> + AggregateSize<Args...>::Value;
+    };
+
+    /**
+     * @brief Template variable that aggregates sizes of all passed types in bits.
+     *
+     * @remark Specialization for single type.
+     * @tparam T type whose length in bits should be recorded.
+     */
+    template <typename T> struct AggregateSize<T>
+    {
+        /**
+         * @brief This value contains queried type size in bits.
+         */
+        static constexpr std::uint32_t Value = BitLength<T>;
+    };
+}
+
+/**
+ * @brief Template variable that aggregates sizes of all passed types in bits.
+ * @tparam Args List of types whose sizes in bits should be aggregated.
+ */
+template <typename... Args> constexpr const std::uint32_t Aggregate = details::AggregateSize<Args...>::Value;
 
 #endif

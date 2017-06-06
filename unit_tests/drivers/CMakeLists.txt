@@ -11,6 +11,7 @@ set(SOURCES
   Comm/CommTelemetryTest.cpp
   Comm/UplinkFrameDecoderTest.cpp
   EPS/EPSDriverTest.cpp
+  EPS/EpsTelemetryTest.cpp
   SPI/SPIDriverTest.cpp
   FM25W/FM25WDriverTest.cpp
   FM25W/RedundantFM25WDriverTest.cpp

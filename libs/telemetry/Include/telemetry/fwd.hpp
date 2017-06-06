@@ -4,6 +4,7 @@
 #pragma once
 
 #include "comm/comm.hpp"
+#include "eps/eps.h"
 #include "gyro/gyro.h"
 #include "state/fwd.hpp"
 
@@ -15,12 +16,14 @@ namespace telemetry
 
     template <typename... Type> class Telemetry;
 
-    typedef Telemetry<SystemStartup,      //
-        ProgramState,                     //
-        state::TimeState,                 //
-        ErrorCountingTelemetry,           //
-        devices::comm::CommTelemetry,     //
-        devices::gyro::GyroscopeTelemetry //
+    typedef Telemetry<SystemStartup,            //
+        ProgramState,                           //
+        state::TimeState,                       //
+        ErrorCountingTelemetry,                 //
+        devices::comm::CommTelemetry,           //
+        devices::gyro::GyroscopeTelemetry,      //
+        devices::eps::hk::ControllerATelemetry, //
+        devices::eps::hk::ControllerBTelemetry  //
         >
         ManagedTelemetry;
 }

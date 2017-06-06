@@ -16,6 +16,7 @@ target_link_libraries(${NAME}
     state
     comm
     gyro
+    eps
     error_counter
 )
 
@@ -27,3 +28,4 @@ target_format_sources(${NAME} "${SOURCES}")
 add_subdirectory(comm)
 add_subdirectory(gyro)
 add_subdirectory(fdir)
+add_subdirectory(eps)

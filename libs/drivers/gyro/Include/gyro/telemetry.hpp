@@ -109,6 +109,7 @@ namespace devices
             return 8 * 4 * sizeof(std::uint16_t);
         }
 
+        static_assert(GyroscopeTelemetry::BitSize() == 64, "Incorrect telemetry format");
         /** @} */
     }
 }

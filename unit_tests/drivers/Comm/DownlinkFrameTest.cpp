@@ -19,7 +19,7 @@ namespace
 {
     TEST(DownlinkFrameTest, ShouldBuildProperDownlinkFrame)
     {
-        auto apid = DownlinkAPID::TelemetryShort;
+        auto apid = DownlinkAPID::Telemetry;
         uint32_t seq = 0x30F0F;
 
         DownlinkFrame frame(apid, seq);
@@ -27,7 +27,7 @@ namespace
         frame.PayloadWriter().WriteByte(0x42);
 
         ASSERT_THAT(frame.Frame().length(), Eq(4));
-        ASSERT_THAT(frame.Frame()[0], Eq(0b10101011));
+        ASSERT_THAT(frame.Frame()[0], Eq(0xFF));
         ASSERT_THAT(frame.Frame()[1], Eq(0x0F));
         ASSERT_THAT(frame.Frame()[2], Eq(0x0F));
         ASSERT_THAT(frame.Frame()[3], Eq(0x42));
@@ -35,7 +35,7 @@ namespace
 
     TEST(DownlinkFrameTest, ShouldPreventBuildingTooBigFrame)
     {
-        DownlinkFrame frame(DownlinkAPID::TelemetryLong, 1);
+        DownlinkFrame frame(DownlinkAPID::Telemetry, 1);
 
         array<uint8_t, DownlinkFrame::MaxPayloadSize> payload;
         payload.fill(0xAA);

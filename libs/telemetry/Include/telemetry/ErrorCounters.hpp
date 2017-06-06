@@ -34,7 +34,7 @@ namespace telemetry
          */
         ErrorCountingTelemetry();
 
-        /*
+        /**
          * @brief ctor.
          * @param[in] state Current error counters' values
          */
