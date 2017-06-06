@@ -4,9 +4,11 @@ add_subdirectory(adcs)
 
 set(SOURCES
   adcs/AdcsCoordinatorTest.cpp
-  adcs/builtin/BuiltinDetumblingTest.cpp  
+  adcs/builtin/BuiltinDetumblingTest.cpp
   adcs/experimental/DetumblingComputationsTest.cpp  
   adcs/experimental/ExperimentalDetumblingTest.cpp  
+  adcs/experimental/sunPointingTest.cpp
+  adcs/experimental/Include/adcs/dataFileTools.hpp
   Logger/LoggerTest.cpp
   FileSystem/FileSystemTest.cpp
   FileSystem/YaffsOSGlue.cpp
