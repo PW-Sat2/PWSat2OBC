@@ -214,6 +214,8 @@ static void ResolveFailedBoot()
 
         auto failsafe = Bootloader.Settings.FailsafeBootSlots();
         Bootloader.Settings.BootSlots(failsafe);
+
+        boot::BootReason = boot::Reason::BootNotConfirmed;
     }
 }
 
@@ -245,11 +247,11 @@ void ProceedWithBooting()
 {
     BSP_UART_Puts(BSP_UART_DEBUG, "\nTimeout exceeded - booting");
 
+    boot::BootReason = boot::Reason::PrimaryBootSlots;
+
     ResolveFailedBoot();
 
     auto slotsMask = Bootloader.Settings.BootSlots();
-
-    boot::BootReason = boot::Reason::SelectedIndex;
 
     if (slotsMask == boot::BootSettings::SafeModeBootSlot)
     {
@@ -257,11 +259,13 @@ void ProceedWithBooting()
     }
     else if (slotsMask == boot::BootSettings::UpperBootSlot)
     {
+        boot::BootReason = boot::Reason::PrimaryBootSlots;
         BSP_UART_Puts(BSP_UART_DEBUG, "\n\nUpper boot slot... Booting to upper");
         BootToAddress(BOOT_APPLICATION_BASE);
     }
     else if (!IsBootSlotsValid(slotsMask))
     {
+        boot::BootReason = boot::Reason::InvalidPrimaryBootSlots;
         slotsMask = Bootloader.Settings.FailsafeBootSlots();
 
         BSP_UART_Puts(BSP_UART_DEBUG, "\n\nFalling back to failsafe boot slots");
@@ -273,6 +277,8 @@ void ProceedWithBooting()
         else
         {
             BSP_UART_Puts(BSP_UART_DEBUG, "\n\nFailsafe boot slots invalid...Falling back to safe mode");
+
+            boot::BootReason = boot::Reason::InvalidFailsafeBootSlots;
             slotsMask = boot::BootSettings::SafeModeBootSlot;
             Bootloader.Settings.BootSlots(boot::BootSettings::SafeModeBootSlot);
         }
@@ -291,6 +297,8 @@ void ProceedWithBooting()
         auto counter = Bootloader.Settings.BootCounter();
         Bootloader.Settings.BootCounter(counter - 1);
     }
+
+    boot::Index = slotsMask;
 
     auto baseAddress = LoadApplication(slotsMask);
 

@@ -114,9 +114,9 @@ void ShowBootSettings()
     PrintBootSlots(failsafeBootSlots);
 
     BSP_UART_Printf<40>(BSP_UART_DEBUG, "\nBoot counter: %d", counter);
-    BSP_UART_Puts(BSP_UART_DEBUG, "\n");
-
     BSP_UART_Printf<40>(BSP_UART_DEBUG, "\nLast boot: %s", confirmed ? "Confirmed" : "Not confirmed");
+
+    BSP_UART_Puts(BSP_UART_DEBUG, "\n");
 }
 
 void SetBootSlotToSafeMode()

@@ -10,6 +10,7 @@
 
 #include "SwoEndpoint/SwoEndpoint.h"
 #include "base/os.h"
+#include "boot/params.hpp"
 #include "dmadrv.h"
 #include "gpio/gpio.h"
 #include "io_map.h"
@@ -63,11 +64,18 @@ void Id(std::uint16_t /*argc*/, char* /*argv*/ [])
     TerminalObject.Printf("I'm '%s'", __FILE__);
 }
 
+void BootParams(std::uint16_t /*argc*/, char* /*argv*/ [])
+{
+    TerminalObject.Printf("Slots: %.2X\n", boot::Index);
+    TerminalObject.Printf("Reason: %d\n", num(boot::BootReason));
+}
+
 static const TerminalCommandDescription commands[] = {
     {"SetGroup", SetGroup}, //
     {"echo", Echo},
-    {"id", Id},        //
-    {"reset", Restart} //
+    {"id", Id},         //
+    {"reset", Restart}, //
+    {"bp", BootParams}, //
 };
 
 static void InitializeTerminal(void)
