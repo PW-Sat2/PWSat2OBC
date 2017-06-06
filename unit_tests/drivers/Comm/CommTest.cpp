@@ -6,7 +6,6 @@
 #include "gmock/gmock.h"
 #include "gmock/gmock-matchers.h"
 #include "I2C/I2CMock.hpp"
-#include "I2C/I2CMock.hpp"
 #include "OsMock.hpp"
 #include "comm/Beacon.hpp"
 #include "comm/CommDriver.hpp"
@@ -288,12 +287,20 @@ namespace
         ASSERT_THAT(result.frameCount, Eq(0));
     }
 
-    TEST_F(CommTest, TestGetFrameCount)
+    TEST_F(CommTest, TestGetFrameCountOnLimit)
     {
-        MockFrameCount(257);
+        MockFrameCount(64);
         const auto result = comm.GetFrameCount();
         ASSERT_THAT(result.status, Eq(true));
-        ASSERT_THAT(result.frameCount, Eq(257));
+        ASSERT_THAT(result.frameCount, Eq(64));
+    }
+
+    TEST_F(CommTest, TestGetFrameCountAboveLimit)
+    {
+        MockFrameCount(65);
+        const auto result = comm.GetFrameCount();
+        ASSERT_THAT(result.status, Eq(false));
+        ASSERT_THAT(result.frameCount, Eq(0));
     }
 
     TEST_F(CommTest, TestClearBeaconFailure)
