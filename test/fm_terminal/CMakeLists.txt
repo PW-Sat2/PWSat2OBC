@@ -22,6 +22,7 @@ target_link_libraries(${NAME}
     terminal
     uart
     gpio
+    boot_params
 )
 
 

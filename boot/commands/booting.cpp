@@ -2,6 +2,7 @@
 #include <cstdint>
 #include "boot.h"
 #include "boot/params.hpp"
+#include "boot/settings.hpp"
 #include "bsp/bsp_boot.h"
 #include "bsp/bsp_uart.h"
 #include "redundancy.hpp"
@@ -14,7 +15,7 @@ void BootUpper()
     BSP_UART_Puts(BSP_UART_DEBUG, "\n\nBooting to upper half ");
 
     boot::BootReason = boot::Reason::BootToUpper;
-    boot::Index = 8;
+    boot::Index = boot::BootSettings::UpperBootSlot;
 
     BootToAddress(BOOT_APPLICATION_BASE);
 }
