@@ -30,6 +30,8 @@ using namespace std::chrono_literals;
 
 static constexpr std::uint8_t TransmitterBufferSize = 40;
 
+static constexpr std::uint8_t ReceiverBufferSize = 64;
+
 Beacon::Beacon() : period(0s)
 {
 }
@@ -195,9 +197,15 @@ ReceiverFrameCount CommObject::GetFrameCount()
     Reader reader(buffer);
     result.frameCount = reader.ReadWordLE();
     result.status = reader.Status();
-    if (reader.Status())
+    if (!reader.Status())
     {
-        LOGF(LOG_LEVEL_INFO, "There are %d frames.", static_cast<int>(result.frameCount));
+        LOG(LOG_LEVEL_INFO, "Incomplete frame count response.");
+    }
+    else if (result.frameCount > ReceiverBufferSize)
+    {
+        LOGF(LOG_LEVEL_INFO, "Detected invalid number of incoming frames: '%d'.", static_cast<int>(result.frameCount));
+        result.frameCount = 0;
+        result.status = false;
     }
 
     return result;
