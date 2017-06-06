@@ -105,6 +105,7 @@ void ShowBootSettings()
     auto counter = Bootloader.Settings.BootCounter();
     auto bootSlots = Bootloader.Settings.BootSlots();
     auto failsafeBootSlots = Bootloader.Settings.FailsafeBootSlots();
+    auto confirmed = Bootloader.Settings.WasLastBootConfirmed();
 
     BSP_UART_Puts(BSP_UART_DEBUG, "\nBoot slots: ");
     PrintBootSlots(bootSlots);
@@ -114,6 +115,8 @@ void ShowBootSettings()
 
     BSP_UART_Printf<40>(BSP_UART_DEBUG, "\nBoot counter: %d", counter);
     BSP_UART_Puts(BSP_UART_DEBUG, "\n");
+
+    BSP_UART_Printf<40>(BSP_UART_DEBUG, "\nLast boot: %s", confirmed ? "Confirmed" : "Not confirmed");
 }
 
 void SetBootSlotToSafeMode()

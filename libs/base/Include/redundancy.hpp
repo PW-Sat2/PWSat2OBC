@@ -44,6 +44,17 @@ namespace redundancy
     }
 
     /**
+     * @brief Performs bitwise majority vote based on three elements in array.
+     * @param[in] elements Array with three elements
+     * @tparam T Type used for majority vote. Must be integral or enum type
+     * @return Value calculated from bitwise majority vote.
+     */
+    template <typename T> inline T Correct(std::array<T, 3>& elements)
+    {
+        return Correct(elements[0], elements[1], elements[2]);
+    }
+
+    /**
      * @brief Performs bitwise majority votes on entire data buffers.
      * @param[in,out] buffer1 First input
      * @param[in] buffer2 Second input
