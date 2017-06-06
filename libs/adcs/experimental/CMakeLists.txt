@@ -3,9 +3,11 @@ set(NAME adcs_experimental)
 set(SOURCES      
     AdcsExperimental.cpp
     Include/adcs/AdcsExperimental.hpp
+    Include/adcs/InterfaceTypes.hpp
     Detumbling.cpp
     Include/adcs/Detumbling.hpp
-    Include/adcs/InterfaceTypes.hpp
+    SunPointing.cpp
+    Include/adcs/SunPointing.hpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
