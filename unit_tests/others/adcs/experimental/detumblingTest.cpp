@@ -1,12 +1,12 @@
-#include <adcs/Detumbling.hpp>
-#include <cstring>
-#include <fstream>
 #include <iostream>
-#include <system.h>
-#include <unistd.h>
+#include <fstream>
 #include <gtest/gtest.h>
-#include "Include/adcs/dataFileTools.hpp"
+#include <adcs/Detumbling.hpp>
+#include <system.h>
+#include <cstring>
+#include <unistd.h>
 #include "adcs/experimental/adcsUtConfig.h"
+#include "Include/adcs/dataFileTools.hpp"
 
 using adcs::Detumbling;
 using adcs::DipoleVec;
