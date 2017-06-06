@@ -10,6 +10,7 @@ set(SOURCES
   telemetry/CommTelemetryAcquisitionTest.cpp
   telemetry/SystemStartupTest.cpp
   telemetry/GyroTelemetryAcquisitionTest.cpp
+  telemetry/ErrorCountingTelemetryTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
