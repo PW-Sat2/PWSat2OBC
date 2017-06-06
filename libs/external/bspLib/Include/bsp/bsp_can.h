@@ -30,7 +30,7 @@
 #ifndef BSP_CAN_H_
 #define BSP_CAN_H_
 #include <stdint.h>
-#include "mcp2515.h"
+#include "MCP2515.h"
 #include "em_cmu.h"
 #include "em_gpio.h"
 #include "em_usart.h"

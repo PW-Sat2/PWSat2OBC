@@ -5,6 +5,7 @@ add_subdirectory(adcs)
 set(SOURCES
   adcs/AdcsCoordinatorTest.cpp
   adcs/experimental/detumblingTest.cpp  
+  adcs/experimental/sunPointingTest.cpp
   adcs/experimental/Include/adcs/dataFileTools.hpp  
   Logger/LoggerTest.cpp
   FileSystem/FileSystemTest.cpp
