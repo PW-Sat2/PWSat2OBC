@@ -10,11 +10,11 @@ namespace boot
     enum class Reason
     {
         BootToUpper,
-        SelectedIndex,
-        CounterExpired,
-        InvalidEntry,
-        DownloadError,
-        InvalidBootIndex
+        PrimaryBootSlots,
+        BootNotConfirmed,
+        InvalidPrimaryBootSlots,
+        InvalidFailsafeBootSlots,
+        CounterExpired
     };
 
     enum class Runlevel : std::uint8_t
