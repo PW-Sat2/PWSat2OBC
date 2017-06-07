@@ -2,6 +2,7 @@ from fs import *
 from comm import *
 from experiments import *
 from program_upload import *
+from boot_settings import *
 
 __all__ = [
     'DownloadFile',
@@ -11,5 +12,6 @@ __all__ = [
     'EraseBootTableEntry',
     'WriteProgramPart',
     'FinalizeProgramEntry',
-    'ListFiles'
+    'ListFiles',
+    'SetBootSlots'
 ]

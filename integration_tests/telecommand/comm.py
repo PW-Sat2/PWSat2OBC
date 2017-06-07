@@ -1,7 +1,4 @@
-import struct
-
 from telecommand.base import Telecommand
-from utils import ensure_byte_list
 
 
 class EnterIdleState(Telecommand):
