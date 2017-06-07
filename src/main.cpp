@@ -47,7 +47,8 @@ telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver
     Main.Hardware.Gyro,
     Main.Fdir,
     Main.Hardware.EPS,
-    Main.Experiments.ExperimentsController);
+    Main.Experiments.ExperimentsController,
+    0);
 
 mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc),
     Main.Hardware.antennaDriver,
