@@ -2,7 +2,7 @@
 
 ## Tools needed
 Build process requires following tools:
-* CMake
+* CMake 3.1 or newer
 * GNU ARM Embedded toolchain 5.4 (gcc-arm-none-eabi)
 * Tools for build system used by CMake (e.g. GNU make)
 * SEGGER J-Link (https://www.segger.com/jlink-software.html)
@@ -10,6 +10,7 @@ Build process requires following tools:
 * Doxygen
 * Python 2.7
 * Clang (for `clang-format`)
+* IronPython & WxWidgets (for interactive python console) 
 
 ### Ready-made pack for Windows
 For Windows people ready-made pack with all necessary tools is located here: https://www.dropbox.com/s/zrf3c5uy9ujo687/PWSat-Toolchain.zip?dl=0
@@ -20,7 +21,7 @@ Quick start packages:
 * `apt-get install cmake`
 * install arm-none-eabi-gcc version 5.4 from https://launchpad.net/gcc-arm-embedded and add it to PATH
 * Only 32-bits build is delivered so follow http://askubuntu.com/questions/454253/how-to-run-32-bit-app-in-ubuntu-64-bit if you are using 64-bits Ubuntu
-* Qemu for now not working
+* Qemu for now is not working
 
 ## Building
 1. Clone repository (e.g. `C:\Work\repo`)
@@ -37,14 +38,15 @@ Option | Default value | Description
 `ARM_TOOLCHAIN`    | _None_               | Path to folder with toolchain binaries
 `JLINK_PATH`       | _None_               | Path to folder with J-Link binaries
 `CLANG_PATH`       | _None_               | Path to clang binaries
-`TARGET_PLATFORM`  | `DevBoard`           | Platform that should be used as build target. For now only one is supported: `DevBoard`
+`TARGET_PLATFORM`  | `FlightModel`        | Platform that should be used as build target. The supported ones are: `FlightModel` & (less so) `DevBoard`
 `CMAKE_BUILD_TYPE` | `DEBUG`              | Type of build: `DEBUG` or `RELEASE`
 `OBC_COM`          | _None_               | Serial port used to communicate with OBC terminal
-`GPIO_COM`		  | _None_				 | Serial port used for GPIO operations (OBC reset and clean state request)
-`MOCK_COM`      | _None_               | Serial port used to communicate with DeviceMock (v4, STM)
-`USE_EXTERNAL_FLASH` | 0				   | Set to 1 to use external N25Q flash memory
+`GPIO_COM`         | _None_               | Serial port used for GPIO operations (OBC reset and clean state request)
+`MOCK_COM`         | _None_               | Serial port used to communicate with DeviceMock (v4, STM)
+`USE_EXTERNAL_FLASH` | 0                  | Set to 1 to use external N25Q flash memory
 `ENABLE_COVERAGE`  | 0                    | Set to 1 to enable code-coverage for unit tests
-`JLINK_SN` | _None_                       | Serial number of J-Link that will be used to flash EFM
+`JLINK_SN`         | _None_               | Serial number of J-Link that will be used to flash EFM
+`IPYTHON_PATH`     | _None_               | Path to folder that contains IPython interpreter
 
 
 ## Outputs
