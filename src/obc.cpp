@@ -55,14 +55,22 @@ static void TimePassed(void* /*context*/, TimePoint /*currentTime*/)
 }
 
 OBC::OBC()
-    : BootTable(Hardware.FlashDriver),                                                                               //
-      BootSettings(this->Hardware.PersistentStorage.GetRedundantDriver()),                                           //
-      Hardware(this->Fdir.ErrorCounting(), this->PowerControlInterface, timeProvider),                               //
-      PowerControlInterface(this->Hardware.EPS),                                                                     //
-      Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),                                          //
-      Experiments(fs, this->adcs.GetAdcsController(), this->timeProvider),                                           //
-      Communication(this->Fdir, this->Hardware.CommDriver, this->timeProvider, Mission, fs, Experiments, BootTable), //
-      terminal(this->GetLineIO())                                                                                    //
+    : BootTable(Hardware.FlashDriver),                                                 //
+      BootSettings(this->Hardware.PersistentStorage.GetRedundantDriver()),             //
+      Hardware(this->Fdir.ErrorCounting(), this->PowerControlInterface, timeProvider), //
+      PowerControlInterface(this->Hardware.EPS),                                       //
+      Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),                                        //
+      Experiments(fs, this->adcs.GetAdcsController(), this->timeProvider),             //
+      Communication(                                                                   //
+          this->Fdir,
+          this->Hardware.CommDriver,
+          this->timeProvider,
+          Mission,
+          fs,
+          Experiments,
+          BootTable,
+          BootSettings),          //
+      terminal(this->GetLineIO()) //
 {
 }
 
