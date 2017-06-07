@@ -59,3 +59,6 @@ class ResponseFrame(DownlinkFrame):
 
     def decode(self):
         pass
+
+    def __str__(self):
+        return "[{}] {}".format(type(self), DownlinkFrame.__str__(self))
