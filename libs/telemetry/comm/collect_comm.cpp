@@ -23,7 +23,7 @@ namespace telemetry
         if (!this->provider->GetTelemetry(telemetry))
         {
             LOG(LOG_LEVEL_ERROR, "Unable to acquire comm telemetry. ");
-            return mission::UpdateResult::Failure;
+            return mission::UpdateResult::Warning;
         }
 
         state.telemetry.Set(telemetry);

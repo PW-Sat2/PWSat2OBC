@@ -18,6 +18,11 @@ namespace telemetry
     {
       public:
         /**
+         * @brief ctor.
+         * @param p dummy
+         */
+        TelemetrySerialization(int p);
+        /**
          * @brief Builds update descriptor for this task.
          * @return Action descriptor - the telemetry change save task.
          */

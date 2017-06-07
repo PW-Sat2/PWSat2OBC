@@ -22,7 +22,7 @@ namespace telemetry
         if (!status.HasValue)
         {
             LOG(LOG_LEVEL_ERROR, "Unable to acquire gyroscope telemetry. ");
-            return mission::UpdateResult::Failure;
+            return mission::UpdateResult::Warning;
         }
 
         state.telemetry.Set(status.Value);

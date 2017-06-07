@@ -8,6 +8,10 @@ namespace telemetry
 {
     using namespace std::chrono_literals;
 
+    TelemetrySerialization::TelemetrySerialization(int /*p*/)
+    {
+    }
+
     mission::UpdateDescriptor<TelemetryState> TelemetrySerialization::BuildUpdate()
     {
         mission::UpdateDescriptor<telemetry::TelemetryState> descriptor;
