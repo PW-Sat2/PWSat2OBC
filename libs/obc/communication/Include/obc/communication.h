@@ -9,6 +9,7 @@
 #include "mission/comm.hpp"
 #include "obc/experiments.hpp"
 #include "obc/fdir.hpp"
+#include "obc/telecommands/boot_settings.hpp"
 #include "obc/telecommands/comm.hpp"
 #include "obc/telecommands/experiments.hpp"
 #include "obc/telecommands/file_system.hpp"
@@ -116,11 +117,12 @@ namespace obc
         obc::telecommands::EnterIdleStateTelecommand,
         obc::telecommands::RemoveFileTelecommand,
         obc::telecommands::PerformDetumblingExperiment,
-        obc::telecommands::AbortExperiment,      //
-        obc::telecommands::ListFilesTelecommand, //
-        obc::telecommands::EraseBootTableEntry,  //
-        obc::telecommands::WriteProgramPart,     //
-        obc::telecommands::FinalizeProgramEntry  //
+        obc::telecommands::AbortExperiment,        //
+        obc::telecommands::ListFilesTelecommand,   //
+        obc::telecommands::EraseBootTableEntry,    //
+        obc::telecommands::WriteProgramPart,       //
+        obc::telecommands::FinalizeProgramEntry,   //
+        obc::telecommands::SetBootSlotsTelecommand //
         >;
 
     /**
@@ -137,6 +139,7 @@ namespace obc
          * @param[in] fs File system
          * @param[in] experiments Experiments
          * @param[in] bootTable Boot table
+         * @param[in] bootSettings Boot settings
          */
         OBCCommunication(obc::FDIR& fdir,
             devices::comm::CommObject& commDriver,
@@ -144,7 +147,8 @@ namespace obc
             mission::IIdleStateController& idleStateController,
             services::fs::IFileSystem& fs,
             obc::OBCExperiments& experiments,
-            program_flash::BootTable& bootTable);
+            program_flash::BootTable& bootTable,
+            boot::BootSettings& bootSettings);
 
         /**
          * @brief Initializes all communication at runlevel 1
