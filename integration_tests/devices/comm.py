@@ -29,8 +29,13 @@ class DownlinkFrame(object):
     def parse(cls, bytes):
         bytes = ensure_byte_list(bytes)
 
-        apid = (bytes[0] & 0b11111100) >> 2
-        seq = ((bytes[0] & 0b11) << 16) | (bytes[1] << 8) | (bytes[2])
+        num = 0
+        num |= bytes[0] << 0
+        num |= bytes[1] << 8
+        num |= bytes[2] << 16
+
+        apid = num & 0b00111111
+        seq = num >> 6
         payload = bytes[3:]
 
         return DownlinkFrame(apid, seq, payload)

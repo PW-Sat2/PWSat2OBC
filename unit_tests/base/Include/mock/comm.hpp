@@ -40,15 +40,16 @@ struct CommTelemetryProviderMock : public devices::comm::ICommTelemetryProvider
 
 MATCHER_P3(IsDownlinkFrame, apidMatcher, seqMatcher, payloadMatcher, "")
 {
-    auto apid = static_cast<telecommunication::downlink::DownlinkAPID>((arg[0] & 0b11111100) >> 2);
-    std::uint32_t seq = ((arg[0] & 0b11) << 16) //
-        | (arg[1] << 8)                         //
-        | (arg[2]);
+    auto num = arg[0] | (arg[1] << 8) | (arg[2] << 16);
+
+    auto apid = static_cast<telecommunication::downlink::DownlinkAPID>(num & 0x3F);
+    std::uint32_t seq = (num >> 6) & 0x3FFFF;
     auto payload = arg.subspan(3);
 
     return testing::Matches(apidMatcher)(apid) //
         && testing::Matches(seqMatcher)(seq)   //
         && testing::Matches(payloadMatcher)(payload);
+    ;
 }
 
 #endif /* UNIT_TESTS_MOCK_COMM_HPP_ */

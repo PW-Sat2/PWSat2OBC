@@ -50,13 +50,13 @@ class Frame3(ResponseFrame):
 
 class CommSupportTest(TestCase):
     def test_parse_downlink_frame(self):
-        bytes = '\x04\x00\x00PONG'
+        bytes = '\x42\xD5\x76PONG'
 
         frame = DownlinkFrame.parse(bytes)
 
         self.assertIsNotNone(frame)
-        self.assertEqual(frame.apid(), 0x01)
-        self.assertEqual(frame.seq(), 0x0)
+        self.assertEqual(frame.apid(), 0x02)
+        self.assertEqual(frame.seq(), 0x1DB55)
         self.assertEqual(frame.payload(), ensure_byte_list('PONG'))
 
     def test_build_uplink_frame(self):
