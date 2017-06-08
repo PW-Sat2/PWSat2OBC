@@ -43,6 +43,11 @@ namespace drivers
              * @return true if pin is high
              */
             inline bool Input() const;
+            /**
+             * @brief Gets pin number
+             * @return Pin number
+             */
+            inline std::uint16_t PinNumber() const;
 
           private:
             /** @brief Port */
@@ -69,6 +74,11 @@ namespace drivers
         bool Pin::Input() const
         {
             return GPIO_PinInGet(this->_port, this->_pin);
+        }
+
+        std::uint16_t Pin::PinNumber() const
+        {
+            return _pin;
         }
 
         /**
@@ -135,6 +145,46 @@ namespace drivers
         template <typename Location, bool DefaultState> void InputPin<Location, DefaultState>::Initialize() const
         {
             GPIO_PinModeSet(Port, PinNumber, gpioModeInputPull, ToInt(DefaultState));
+        }
+
+        /**
+        * @brief Interrupt input pin class
+        * @tparam Location Type with two static members: Port and PinNumber
+        * @tparam DefaultState true if pin pull up should be enabled
+        * @tparam RisingEdge true if interrupt should be triggered on rising edge
+        * @tparam FallingEdge true if interrupt should br triggered on falling edge
+        * @tparam IsEnabled true if interrupt should be enabled during initialization
+        */
+        template <typename Location, bool DefaultState = true, bool RisingEdge = false, bool FallingEdge = false, bool IsEnabled = true>
+        class InterruptPin final : public Pin
+        {
+          public:
+            /** @brief Port */
+            static constexpr auto Port = Location::Port;
+            /** @brief Pin number */
+            static constexpr auto PinNumber = Location::PinNumber;
+
+            /**
+             * @brief Default ctor
+             */
+            InterruptPin();
+
+            /**
+             * @brief Configures GPIO pin to be input and interrupt
+             */
+            void Initialize() const;
+        };
+
+        template <typename Location, bool DefaultState, bool RisingEdge, bool FallingEdge, bool IsEnabled>
+        InterruptPin<Location, DefaultState, RisingEdge, FallingEdge, IsEnabled>::InterruptPin() : Pin(Port, PinNumber)
+        {
+        }
+
+        template <typename Location, bool DefaultState, bool RisingEdge, bool FallingEdge, bool IsEnabled>
+        void InterruptPin<Location, DefaultState, RisingEdge, FallingEdge, IsEnabled>::Initialize() const
+        {
+            GPIO_PinModeSet(Port, PinNumber, gpioModeInputPull, ToInt(DefaultState));
+            GPIO_IntConfig(Port, PinNumber, RisingEdge, FallingEdge, IsEnabled);
         }
 
         /** @} */

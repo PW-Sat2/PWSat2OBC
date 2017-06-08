@@ -17,6 +17,7 @@
 #include "imtq/imtq.h"
 #include "io_map.h"
 #include "logger/logger.h"
+#include "payload/payload.h"
 #include "power/power.h"
 #include "program_flash/flash_driver.hpp"
 #include "rtc/rtc.hpp"
@@ -170,6 +171,9 @@ namespace obc
 
         /** @brief Low-level comm driver */
         devices::comm::CommObject CommDriver;
+
+        /** @brief Payload driver*/
+        drivers::payload::PayloadDriver PayloadDriver;
     };
 }
 /** @} */

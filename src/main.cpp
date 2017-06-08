@@ -85,6 +85,21 @@ void BURTC_IRQHandler(void)
     Main.Hardware.Burtc.IRQHandler();
 }
 
+void GPIO_EVEN_IRQHandler(void)
+{
+    std::uint32_t irq = GPIO_IntGet();
+    if (irq & Main.Hardware.PayloadDriver.IRQMask())
+    {
+        Main.Hardware.PayloadDriver.IRQHandler();
+    }
+    else
+    {
+        LOG(LOG_LEVEL_WARNING, "Unknown GPIO interrupt occurred");
+        GPIO_IntClear(irq);
+        System::EndSwitchingISR();
+    }
+}
+
 void LESENSE_IRQHandler()
 {
     Main.Hardware.UARTDriver.OnWakeUpInterrupt();

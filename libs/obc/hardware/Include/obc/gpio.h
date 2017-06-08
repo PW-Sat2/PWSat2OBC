@@ -101,7 +101,8 @@ namespace obc
         typename TLEUART,
         typename TUART,
         typename TI2C0,
-        typename TI2C1>
+        typename TI2C1,
+        typename TPayloadInterrupt>
     struct OBCGPIOBase
     {
         /** @brief Slave Select - Flash1 */
@@ -134,6 +135,9 @@ namespace obc
         /** @brief I2C1 */
         const I2CPins<TI2C1> I2C_1;
 
+        /** @brief PayloadInterrupt */
+        const drivers::gpio::InterruptPin<TPayloadInterrupt, false, true> PayloadInterrupt;
+
         /** @brief Initializes GPIO pins */
         void Initialize() const
         {
@@ -156,6 +160,8 @@ namespace obc
 #endif
             this->I2C_0.Initialize();
             this->I2C_1.Initialize();
+
+            this->PayloadInterrupt.Initialize();
         }
     };
 
@@ -174,7 +180,8 @@ namespace obc
         io_map::LEUART,
         io_map::UART,
         io_map::I2C_0,
-        io_map::I2C_1>;
+        io_map::I2C_1,
+        io_map::PayloadInterrupt>;
 
     /** @} */
 }

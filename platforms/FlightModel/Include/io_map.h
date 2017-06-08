@@ -27,6 +27,7 @@ namespace io_map
     using Led1 = PinLocation<gpioPortD, 2>;
 
     using SysClear = PinLocation<gpioPortC, 0>;
+    using PayloadInterrupt = PinLocation<gpioPortE, 0>;
 
     struct SPI : public SPIPins<SPI>
     {
