@@ -1,8 +1,10 @@
 #include "dmadrv.h"
 #include "obc.h"
+#include "obc/storage/n25q.h"
 
 using drivers::spi::EFMSPISlaveInterface;
 using devices::n25q::N25QDriver;
+using namespace obc::storage::error_counters;
 
 void TestExternalFlash(std::uint16_t argc, char* argv[])
 {
@@ -12,9 +14,9 @@ void TestExternalFlash(std::uint16_t argc, char* argv[])
     EFMSPISlaveInterface spi2(Main.Hardware.SPI, Main.Hardware.Pins.Flash2ChipSelect);
     EFMSPISlaveInterface spi3(Main.Hardware.SPI, Main.Hardware.Pins.Flash3ChipSelect);
 
-    N25QDriver flash1(spi1);
-    N25QDriver flash2(spi2);
-    N25QDriver flash3(spi3);
+    N25QDriver flash1(Main.Fdir.ErrorCounting(), N25QDriver1::ErrorCounter::DeviceId, spi1);
+    N25QDriver flash2(Main.Fdir.ErrorCounting(), N25QDriver2::ErrorCounter::DeviceId, spi2);
+    N25QDriver flash3(Main.Fdir.ErrorCounting(), N25QDriver3::ErrorCounter::DeviceId, spi3);
 
     auto id1 = flash1.ReadId();
     auto id2 = flash2.ReadId();

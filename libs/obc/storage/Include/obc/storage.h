@@ -39,7 +39,12 @@ namespace obc
          * @param deviceOperations YAFFS device operations
          * @param pins GPIO pins
          */
-        OBCStorageHandler(drivers::spi::EFMSPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations, obc::OBCGPIO& pins);
+        OBCStorageHandler(                                          //
+            error_counter::ErrorCounting& errors,                   //
+            drivers::spi::EFMSPIInterface& spi,                     //
+            services::fs::IYaffsDeviceOperations& deviceOperations, //
+            obc::OBCGPIO& pins                                      //
+            );
 
         /**
          * @brief Performs storage initialization
@@ -71,9 +76,13 @@ namespace obc
     };
 
     template <typename Storage>
-    OBCStorageHandler<Storage>::OBCStorageHandler(
-        drivers::spi::EFMSPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations, obc::OBCGPIO& pins)
-        : _storage(spi, deviceOperations, pins)
+    OBCStorageHandler<Storage>::OBCStorageHandler(              //
+        error_counter::ErrorCounting& errors,                   //
+        drivers::spi::EFMSPIInterface& spi,                     //
+        services::fs::IYaffsDeviceOperations& deviceOperations, //
+        obc::OBCGPIO& pins                                      //
+        )
+        : _storage(errors, spi, deviceOperations, pins)
     {
     }
 

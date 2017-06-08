@@ -13,6 +13,7 @@
 #include "OsMock.hpp"
 #include "SPI/SPIMock.h"
 #include "base/os.h"
+#include "mock/error_counter.hpp"
 #include "os/os.hpp"
 
 using std::array;
@@ -136,6 +137,10 @@ class N25QDriverTest : public Test
         }
     }
 
+    testing::NiceMock<ErrorCountingConfigrationMock> _errorsConfig;
+    error_counter::ErrorCounting _errors;
+    error_counter::ErrorCounter<1> _error_counter;
+
     StrictMock<SPIInterfaceMock> _spi;
     N25QDriver _driver;
     NiceMock<OSMock> _os;
@@ -145,7 +150,13 @@ class N25QDriverTest : public Test
     std::array<uint8_t, 3> _correctId;
 };
 
-N25QDriverTest::N25QDriverTest() : _driver(_spi), _incorrectId{0xAA, 0xBB, 0xCC}, _correctId{0x20, 0xBA, 0x18}
+N25QDriverTest::N25QDriverTest()
+    :                                 //
+      _errors{_errorsConfig},         //
+      _error_counter{_errors},        //
+      _driver{_errors, 1, _spi},      //
+      _incorrectId{0xAA, 0xBB, 0xCC}, //
+      _correctId{0x20, 0xBA, 0x18}    //
 {
     this->_osReset = InstallProxy(&this->_os);
 
@@ -167,6 +178,7 @@ TEST_F(N25QDriverTest, ShouldReadIdCorrectly)
     ASSERT_THAT(id.Manufacturer, Eq(0x20));
     ASSERT_THAT(id.MemoryType, Eq(0xBA));
     ASSERT_THAT(id.MemoryCapacity, Eq(0x18));
+    ASSERT_THAT(_error_counter, Eq(0));
 }
 
 TEST_F(N25QDriverTest, ShouldReadStatusRegisterCorrectly)
@@ -182,6 +194,7 @@ TEST_F(N25QDriverTest, ShouldReadStatusRegisterCorrectly)
     auto status = this->_driver.ReadStatus();
 
     ASSERT_THAT(status, Eq(Status::WriteDisabled | Status::WriteInProgress));
+    ASSERT_THAT(_error_counter, Eq(0));
 }
 
 TEST_F(N25QDriverTest, ShouldReadFlagStatusRegisterCorrectly)
@@ -197,6 +210,7 @@ TEST_F(N25QDriverTest, ShouldReadFlagStatusRegisterCorrectly)
     auto status = this->_driver.ReadFlagStatus();
 
     ASSERT_THAT(status, Eq(FlagStatus::EraseSuspended | FlagStatus::ProgramError));
+    ASSERT_THAT(_error_counter, Eq(0));
 }
 
 TEST_F(N25QDriverTest, ReadRequestShouldBePropertlyFormed)
@@ -221,6 +235,7 @@ TEST_F(N25QDriverTest, ReadRequestShouldBePropertlyFormed)
     this->_driver.ReadMemory(address, buffer);
 
     ASSERT_THAT(buffer, ContainerEq(memory));
+    ASSERT_THAT(_error_counter, Eq(0));
 }
 
 TEST_F(N25QDriverTest, ShouldWriteSinglePage)
@@ -258,6 +273,7 @@ TEST_F(N25QDriverTest, ShouldWriteSinglePage)
 
     auto result = this->_driver.BeginWritePage(address, 0, buffer).Wait();
     ASSERT_THAT(result, Eq(OperationResult::Success));
+    ASSERT_THAT(_error_counter, Eq(0));
 }
 
 TEST_F(N25QDriverTest, ShouldDetectProgramErrors)
@@ -296,6 +312,7 @@ TEST_F(N25QDriverTest, ShouldDetectProgramErrors)
     auto result = this->_driver.BeginWritePage(address, 0, buffer).Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Failure));
+    ASSERT_THAT(_error_counter, Eq(5));
 }
 
 TEST_F(N25QDriverTest, ShouldEraseSubsector)
@@ -333,6 +350,7 @@ TEST_F(N25QDriverTest, ShouldEraseSubsector)
     auto result = this->_driver.BeginEraseSubSector(address).Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Success));
+    ASSERT_THAT(_error_counter, Eq(0));
 }
 
 TEST_F(N25QDriverTest, ShouldDetectEraseSubsectorError)
@@ -370,6 +388,7 @@ TEST_F(N25QDriverTest, ShouldDetectEraseSubsectorError)
     auto result = this->_driver.BeginEraseSubSector(address).Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Failure));
+    ASSERT_THAT(_error_counter, Eq(5));
 }
 
 TEST_F(N25QDriverTest, ShouldDetectEraseSubsectorTimeout)
@@ -413,6 +432,7 @@ TEST_F(N25QDriverTest, ShouldDetectEraseSubsectorTimeout)
     auto result = this->_driver.BeginEraseSubSector(address).Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Timeout));
+    ASSERT_THAT(_error_counter, Eq(5));
 }
 
 TEST_F(N25QDriverTest, ShouldEraseSector)
@@ -450,6 +470,7 @@ TEST_F(N25QDriverTest, ShouldEraseSector)
     auto result = this->_driver.BeginEraseSector(address).Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Success));
+    ASSERT_THAT(_error_counter, Eq(0));
 }
 
 TEST_F(N25QDriverTest, ShouldDetectEraseSectorError)
@@ -487,6 +508,7 @@ TEST_F(N25QDriverTest, ShouldDetectEraseSectorError)
     auto result = this->_driver.BeginEraseSector(address).Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Failure));
+    ASSERT_THAT(_error_counter, Eq(5));
 }
 
 TEST_F(N25QDriverTest, ShouldDetectEraseSectorTimeout)
@@ -530,6 +552,7 @@ TEST_F(N25QDriverTest, ShouldDetectEraseSectorTimeout)
     auto result = this->_driver.BeginEraseSector(address).Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Timeout));
+    ASSERT_THAT(_error_counter, Eq(5));
 }
 
 TEST_F(N25QDriverTest, ShouldEraseChip)
@@ -563,6 +586,7 @@ TEST_F(N25QDriverTest, ShouldEraseChip)
     auto result = this->_driver.BeginEraseChip().Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Success));
+    ASSERT_THAT(_error_counter, Eq(0));
 }
 
 TEST_F(N25QDriverTest, ShouldDetectEraseChipError)
@@ -596,6 +620,7 @@ TEST_F(N25QDriverTest, ShouldDetectEraseChipError)
     auto result = this->_driver.BeginEraseChip().Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Failure));
+    ASSERT_THAT(_error_counter, Eq(5));
 }
 
 TEST_F(N25QDriverTest, EraseChipOperationWillTimeout)
@@ -635,6 +660,8 @@ TEST_F(N25QDriverTest, EraseChipOperationWillTimeout)
     auto result = this->_driver.BeginEraseChip().Wait();
 
     ASSERT_THAT(result, Eq(OperationResult::Timeout));
+
+    ASSERT_THAT(_error_counter, Eq(5));
 }
 
 TEST_F(N25QDriverTest, ShouldResetProperly)
@@ -685,6 +712,7 @@ TEST_F(N25QDriverTest, ShouldResetProperly)
     auto result = this->_driver.Reset();
 
     ASSERT_THAT(result, Eq(OperationResult::Success));
+    ASSERT_THAT(_error_counter, Eq(0));
 }
 
 TEST_F(N25QDriverTest, SettingProtectionOnResetCanTimeout)
@@ -743,6 +771,7 @@ TEST_F(N25QDriverTest, SettingProtectionOnResetCanTimeout)
     auto result = this->_driver.Reset();
 
     ASSERT_THAT(result, Eq(OperationResult::Timeout));
+    ASSERT_THAT(_error_counter, Eq(5));
 }
 
 TEST_F(N25QDriverTest, WaitingOnResetCanTimeout)
@@ -781,4 +810,5 @@ TEST_F(N25QDriverTest, WaitingOnResetCanTimeout)
     auto result = this->_driver.Reset();
 
     ASSERT_THAT(result, Eq(OperationResult::Timeout));
+    ASSERT_THAT(_error_counter, Eq(5));
 }

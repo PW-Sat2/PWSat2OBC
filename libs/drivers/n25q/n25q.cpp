@@ -53,11 +53,33 @@ static inline void WriterWriteAddress(Writer& writer, size_t address)
     writer.WriteByte(static_cast<uint8_t>((address >> 0 * 8) & 0xFF));
 }
 
-N25QDriver::N25QDriver(ISPIInterface& spi) : _spi(spi)
+N25QDriver::N25QDriver(                   //
+    error_counter::ErrorCounting& errors, //
+    error_counter::Device deviceId,       //
+    ISPIInterface& spi)
+    : _spi(spi),          //
+      _errors(errors),    //
+      _deviceId(deviceId) //
+
 {
 }
 
 Id N25QDriver::ReadId()
+{
+    auto id = ReadIdWithoutErrorHandling();
+    if (!id.IsValid())
+    {
+        _errors.Failure(_deviceId);
+    }
+    else
+    {
+        _errors.Success(_deviceId);
+    }
+
+    return id;
+}
+
+Id N25QDriver::ReadIdWithoutErrorHandling()
 {
     array<uint8_t, 3> response;
 
@@ -241,6 +263,7 @@ OperationResult N25QDriver::WaitForOperation(std::chrono::milliseconds timeout, 
 
         if (!WaitBusy(timeout))
         {
+            _errors.Failure(_deviceId);
             return OperationResult::Timeout;
         }
     }
@@ -248,9 +271,11 @@ OperationResult N25QDriver::WaitForOperation(std::chrono::milliseconds timeout, 
     auto flags = ReadFlagStatus();
     if (has_flag(flags, errorStatus))
     {
+        _errors.Failure(_deviceId);
         return OperationResult::Failure;
     }
 
+    _errors.Success(_deviceId);
     return OperationResult::Success;
 }
 
@@ -325,13 +350,16 @@ OperationResult N25QDriver::Reset()
 
     do
     {
-        auto id = this->ReadId();
+        auto id = this->ReadIdWithoutErrorHandling();
 
         if (id.IsValid())
             break;
 
         if (timeoutCheck.Expired())
+        {
+            _errors.Failure(_deviceId);
             return OperationResult::Timeout;
+        }
 
         System::Yield();
     } while (true);
@@ -352,10 +380,12 @@ OperationResult N25QDriver::Reset()
 
         if (!this->WaitBusy(WriteStatusRegisterTimeout))
         {
+            _errors.Failure(_deviceId);
             return OperationResult::Timeout;
         }
     }
 
+    _errors.Success(_deviceId);
     return OperationResult::Success;
 }
 

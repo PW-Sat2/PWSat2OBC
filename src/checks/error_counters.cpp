@@ -1,5 +1,7 @@
 #include "comm/CommDriver.hpp"
 #include "eps/eps.h"
+#include "n25q/n25q.h"
+#include "obc/storage/n25q.h"
 #include "rtc/rtc.hpp"
 #include "traits.hpp"
 
@@ -15,10 +17,13 @@ namespace
     };
 
     /** @brief Typedef with all declared error counters */
-    using Everything = VerifyUniqueness< //
-        devices::eps::EPSDriver,         //
-        devices::comm::CommObject,       //
-        devices::rtc::RTCObject          //
+    using Everything = VerifyUniqueness<           //
+        devices::eps::EPSDriver,                   //
+        devices::comm::CommObject,                 //
+        devices::rtc::RTCObject,                   //
+        obc::storage::error_counters::N25QDriver1, //
+        obc::storage::error_counters::N25QDriver2, //
+        obc::storage::error_counters::N25QDriver3  //
         >;
 
     static_assert(Everything::IsOk, "Device IDs for error counting must be unique");
