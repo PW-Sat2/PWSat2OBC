@@ -19,17 +19,17 @@ namespace
 {
     TEST(DownlinkFrameTest, ShouldBuildProperDownlinkFrame)
     {
-        auto apid = DownlinkAPID::Telemetry;
-        uint32_t seq = 0x30F0F;
+        auto apid = DownlinkAPID::Operation;
+        uint32_t seq = 0x1DB55;
 
         DownlinkFrame frame(apid, seq);
 
         frame.PayloadWriter().WriteByte(0x42);
 
         ASSERT_THAT(frame.Frame().length(), Eq(4));
-        ASSERT_THAT(frame.Frame()[0], Eq(0xFF));
-        ASSERT_THAT(frame.Frame()[1], Eq(0x0F));
-        ASSERT_THAT(frame.Frame()[2], Eq(0x0F));
+        ASSERT_THAT(frame.Frame()[0], Eq(0x42));
+        ASSERT_THAT(frame.Frame()[1], Eq(0xD5));
+        ASSERT_THAT(frame.Frame()[2], Eq(0x76));
         ASSERT_THAT(frame.Frame()[3], Eq(0x42));
     }
 
