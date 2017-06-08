@@ -89,7 +89,7 @@ OBCHardware::OBCHardware(
       Gyro(I2C.Buses.Payload),                                          //
       EPS(errorCounting, this->I2C.Buses.Bus, this->I2C.Buses.Payload), //
       Imtq(I2C.Buses.Bus),                                              //
-      rtc(I2C.Buses.Payload),                                           //
+      rtc(errorCounting, I2C.Buses.Payload),                            //
       CommDriver(errorCounting, I2C.Buses.Bus)                          //
 {
     AntennaMiniportInitialize(&antennaMiniport);

@@ -1,5 +1,6 @@
 #include "comm/CommDriver.hpp"
 #include "eps/eps.h"
+#include "rtc/rtc.hpp"
 #include "traits.hpp"
 
 namespace
@@ -16,7 +17,8 @@ namespace
     /** @brief Typedef with all declared error counters */
     using Everything = VerifyUniqueness< //
         devices::eps::EPSDriver,         //
-        devices::comm::CommObject        //
+        devices::comm::CommObject,       //
+        devices::rtc::RTCObject          //
         >;
 
     static_assert(Everything::IsOk, "Device IDs for error counting must be unique");
