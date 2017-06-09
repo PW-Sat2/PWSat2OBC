@@ -198,16 +198,6 @@ xmodem_transfer:
         // Write data to external FLASH, i.e. Nominal Mode
         else
         {
-            //            base = (uint8_t*)BOOT_TABLE_BASE;
-            //            offset = (BOOT_getOffsetProgram(index) + (sequenceNumber - 1) * XMODEM_DATA_SIZE);
-            //
-            //            // Write to flash (write 1 byte at a time)
-            //            for (i = 0; i < XMODEM_DATA_SIZE; i++)
-            //            {
-            //                data = pkt->data[i];
-            //                lld_ProgramOp(base, (offset + i), data);
-            //            }
-
             entry->WriteContent((sequenceNumber - 1) * XMODEM_DATA_SIZE, {pkt->data, XMODEM_DATA_SIZE});
         }
 

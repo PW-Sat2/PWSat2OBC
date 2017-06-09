@@ -12,15 +12,17 @@ void UploadApplication()
     // get boot index
     auto index = USART_Rx(BSP_UART_DEBUG);
 
-    BSP_UART_Printf<4>(BSP_UART_DEBUG, "%d", index);
+    BSP_UART_txByte(BSP_UART_DEBUG, index);
 
-    if (index >= program_flash::BootTable::EntriesCount)
+    if (index < '0' || index - '0' >= program_flash::BootTable::EntriesCount)
     {
         BSP_UART_Puts(BSP_UART_DEBUG, "\nError: Boot index out of bounds!");
         return;
     }
 
     BSP_UART_Puts(BSP_UART_DEBUG, "\nUpload Binary: ");
+
+    index = index - '0';
 
     auto entry = Bootloader.BootTable.Entry(index);
 
