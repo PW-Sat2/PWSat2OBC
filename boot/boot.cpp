@@ -283,7 +283,7 @@ void ProceedWithBooting()
             Bootloader.Settings.BootSlots(boot::BootSettings::SafeModeBootSlot);
         }
     }
-    else if (Bootloader.Settings.BootCounter() == 0)
+    else if (Bootloader.Settings.BootCounter() >= boot::BootSettings::BootCounterTop)
     {
         slotsMask = boot::BootSettings::SafeModeBootSlot;
         Bootloader.Settings.BootSlots(boot::BootSettings::SafeModeBootSlot);
@@ -295,7 +295,7 @@ void ProceedWithBooting()
     else
     {
         auto counter = Bootloader.Settings.BootCounter();
-        Bootloader.Settings.BootCounter(counter - 1);
+        Bootloader.Settings.BootCounter(counter + 1);
     }
 
     boot::Index = slotsMask;
