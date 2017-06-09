@@ -11,6 +11,7 @@ using testing::Eq;
 using testing::_;
 using testing::Invoke;
 using testing::Return;
+using testing::Each;
 using std::copy;
 
 class BootSettingsTest : public testing::Test
@@ -188,4 +189,15 @@ TEST_F(BootSettingsTest, ShouldClearLastBootConfirmedFlag)
 {
     _settings.UnconfirmLastBoot();
     ASSERT_THAT(this->_memory[8], Eq(0));
+}
+
+TEST_F(BootSettingsTest, TestErase)
+{
+    _settings.BootSlots(0b111);
+    _settings.FailsafeBootSlots(0b111000);
+    _settings.MarkAsValid();
+
+    _settings.Erase();
+
+    ASSERT_THAT(gsl::make_span(this->_memory).subspan(0, 9), Each(Eq(0xFF)));
 }

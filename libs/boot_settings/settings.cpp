@@ -139,4 +139,12 @@ namespace boot
 
         return !WasLastBootConfirmed();
     }
+
+    void BootSettings::Erase()
+    {
+        array<std::uint8_t, BootFields::Size> buf;
+        buf.fill(0xFF);
+
+        this->_fram.Write(0, buf);
+    }
 }
