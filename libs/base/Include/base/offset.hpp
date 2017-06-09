@@ -48,6 +48,24 @@ template <typename... Elements> class Offsets
         return 0xFFFF;
     }
 
+    /**
+     * @brief Calculates size occupied by all elements
+     * @return Size in bytes
+     */
+    template <std::size_t Acc, typename Head, typename... Rest> static constexpr std::size_t CalcSize()
+    {
+        return CalcSize<Acc + sizeof(typename Head::Underlying), Rest...>();
+    }
+
+    /**
+     * @brief Calculates size occupied by all elements - final step
+     * @return Accumulator value
+     */
+    template <std::size_t Acc> static constexpr std::size_t CalcSize()
+    {
+        return Acc;
+    }
+
   public:
     /**
      * @brief Finds offset of single element
@@ -57,6 +75,9 @@ template <typename... Elements> class Offsets
     {
         return FindOffset<0, Element, Elements...>();
     }
+
+    /** @brief Size occupied by all elements */
+    static constexpr std::size_t Size = CalcSize<0, Elements...>();
 };
 
 #endif /* LIBS_BASE_INCLUDE_BASE_OFFSET_HPP_ */

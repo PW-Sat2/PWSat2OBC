@@ -92,6 +92,11 @@ namespace boot
          */
         bool UnconfirmLastBoot();
 
+        /**
+         * @brief Erases all settings
+         */
+        void Erase();
+
         /** @brief Default value: boot slots (0, 1, 2) */
         static constexpr std::uint8_t DefaultBootSlot = 0b111;
         /** @brief Default value: failsafe boot slots (3, 4, 5) */
