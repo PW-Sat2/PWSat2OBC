@@ -60,14 +60,14 @@ namespace boot
          * @brief Returns current boot counter value
          * @return Boot counter value
          */
-        std::uint16_t BootCounter() const;
+        std::uint32_t BootCounter() const;
 
         /**
          * @brief Sets new boot counter value
          * @param counter Counter value
          * @return Operation result
          */
-        bool BootCounter(std::uint16_t counter);
+        bool BootCounter(std::uint32_t counter);
 
         /**
          * @brief Marks stored values as valid by writing magic number
@@ -101,13 +101,16 @@ namespace boot
         static constexpr std::uint8_t DefaultBootSlot = 0b111;
         /** @brief Default value: failsafe boot slots (3, 4, 5) */
         static constexpr std::uint8_t DefaultFailsafeBootSlot = 0b111000;
-        /** @brief Default value: boot counter (255) */
-        static constexpr std::uint16_t DefaultBootCounter = 0xFF;
+        /** @brief Default value: boot counter (0) */
+        static constexpr std::uint32_t DefaultBootCounter = 0;
 
         /** @brief Special boot slots: safe-mode */
         static constexpr std::uint8_t SafeModeBootSlot = 0b01000000;
         /** @brief Special boot slots: boot to upper half without flashing */
         static constexpr std::uint8_t UpperBootSlot = 0b10000000;
+
+        /** @brief Boot counter top value */
+        static constexpr std::uint32_t BootCounterTop = 0xFFFF;
 
       private:
         /** @brief Magic number */

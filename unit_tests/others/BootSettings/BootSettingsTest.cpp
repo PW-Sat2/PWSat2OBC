@@ -140,8 +140,10 @@ TEST_F(BootSettingsTest, ShouldReadBootCounter)
 {
     this->_memory[6] = 0xAB;
     this->_memory[7] = 0xCD;
+    this->_memory[8] = 0xEF;
+    this->_memory[9] = 0x01;
     auto result = _settings.BootCounter();
-    ASSERT_THAT(result, Eq(0xCDAB));
+    ASSERT_THAT(result, Eq(0x01EFCDABUL));
 }
 
 TEST_F(BootSettingsTest, ShouldReadDefaultBootCounterIfNoValidSignatureFound)
@@ -150,15 +152,17 @@ TEST_F(BootSettingsTest, ShouldReadDefaultBootCounterIfNoValidSignatureFound)
     this->_memory[6] = 0xAB;
     this->_memory[7] = 0xCD;
     auto result = _settings.BootCounter();
-    ASSERT_THAT(result, Eq(0xFF));
+    ASSERT_THAT(result, Eq(0UL));
 }
 
 TEST_F(BootSettingsTest, ShouldWriteBootCounter)
 {
-    auto result = _settings.BootCounter(0xCDAB);
+    auto result = _settings.BootCounter(0x01EFCDAB);
     ASSERT_THAT(result, Eq(true));
     ASSERT_THAT(this->_memory[6], Eq(0xAB));
     ASSERT_THAT(this->_memory[7], Eq(0xCD));
+    ASSERT_THAT(this->_memory[8], Eq(0xEF));
+    ASSERT_THAT(this->_memory[9], Eq(0x01));
 }
 
 TEST_F(BootSettingsTest, ShouldReturnErrorWhenSettingBootCounterReadBackReturnsDifferentValue)
@@ -170,11 +174,11 @@ TEST_F(BootSettingsTest, ShouldReturnErrorWhenSettingBootCounterReadBackReturnsD
 
 TEST_F(BootSettingsTest, ShouldReturnIfLastBootConfirmedFlagIsSet)
 {
-    this->_memory[8] = 0x21;
+    this->_memory[10] = 0x21;
     auto result = _settings.WasLastBootConfirmed();
     ASSERT_THAT(result, Eq(true));
 
-    this->_memory[8] = 0x12;
+    this->_memory[10] = 0x12;
     result = _settings.WasLastBootConfirmed();
     ASSERT_THAT(result, Eq(false));
 }
@@ -182,13 +186,13 @@ TEST_F(BootSettingsTest, ShouldReturnIfLastBootConfirmedFlagIsSet)
 TEST_F(BootSettingsTest, ShouldSetLastBootConfirmedFlag)
 {
     _settings.ConfirmLastBoot();
-    ASSERT_THAT(this->_memory[8], Eq(0x21));
+    ASSERT_THAT(this->_memory[10], Eq(0x21));
 }
 
 TEST_F(BootSettingsTest, ShouldClearLastBootConfirmedFlag)
 {
     _settings.UnconfirmLastBoot();
-    ASSERT_THAT(this->_memory[8], Eq(0));
+    ASSERT_THAT(this->_memory[10], Eq(0));
 }
 
 TEST_F(BootSettingsTest, TestErase)

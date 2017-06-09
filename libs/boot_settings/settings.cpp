@@ -22,7 +22,7 @@ namespace boot
     {
     };
 
-    struct BootCounterField : public Element<std::uint16_t>
+    struct BootCounterField : public Element<std::uint32_t>
     {
     };
 
@@ -84,24 +84,24 @@ namespace boot
         return this->FailsafeBootSlots() == slots;
     }
 
-    std::uint16_t BootSettings::BootCounter() const
+    std::uint32_t BootSettings::BootCounter() const
     {
         if (!this->CheckMagicNumber())
         {
             return DefaultBootCounter;
         }
 
-        array<std::uint8_t, 2> buf;
+        array<std::uint8_t, 4> buf;
         this->_fram.Read(BootFields::Offset<BootCounterField>(), buf);
 
-        return Reader(buf).ReadWordLE();
+        return Reader(buf).ReadDoubleWordLE();
     }
 
-    bool BootSettings::BootCounter(std::uint16_t counter)
+    bool BootSettings::BootCounter(std::uint32_t counter)
     {
-        array<std::uint8_t, 2> buf;
+        array<std::uint8_t, 4> buf;
 
-        Writer(buf).WriteWordLE(counter);
+        Writer(buf).WriteDoubleWordLE(counter);
 
         this->_fram.Write(BootFields::Offset<BootCounterField>(), buf);
 
