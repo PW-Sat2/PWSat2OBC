@@ -79,7 +79,7 @@ TEST_F(BootSettingsTest, ShouldWriteValidSignature)
 
 TEST_F(BootSettingsTest, ShouldReadBootSlot)
 {
-    this->_memory[5] = 0xAB;
+    this->_memory[4] = 0xAB;
     auto result = _settings.BootSlots();
     ASSERT_THAT(result, Eq(0xAB));
 }
@@ -87,7 +87,7 @@ TEST_F(BootSettingsTest, ShouldReadBootSlot)
 TEST_F(BootSettingsTest, ShouldReturnDefaultBootSlotIfNoValidSignatureFound)
 {
     InvalidMagicNumber();
-    this->_memory[5] = 0xAB;
+    this->_memory[4] = 0xAB;
     auto result = _settings.BootSlots();
     ASSERT_THAT(result, Eq(0b111));
 }
@@ -96,7 +96,7 @@ TEST_F(BootSettingsTest, ShouldWriteBootSlot)
 {
     auto result = _settings.BootSlots(0b000111);
     ASSERT_THAT(result, Eq(true));
-    ASSERT_THAT(this->_memory[5], Eq(0b000111));
+    ASSERT_THAT(this->_memory[4], Eq(0b000111));
 }
 
 TEST_F(BootSettingsTest, ShouldReturnErrorWhenSettingBootSlotsReadBackReturnsDifferentValue)
@@ -108,7 +108,7 @@ TEST_F(BootSettingsTest, ShouldReturnErrorWhenSettingBootSlotsReadBackReturnsDif
 
 TEST_F(BootSettingsTest, ShouldReadFailsafeBootSlot)
 {
-    this->_memory[6] = 0xAB;
+    this->_memory[5] = 0xAB;
     auto result = _settings.FailsafeBootSlots();
     ASSERT_THAT(result, Eq(0xAB));
 }
@@ -117,13 +117,13 @@ TEST_F(BootSettingsTest, ShouldWriteFailsafeBootSlot)
 {
     auto result = _settings.FailsafeBootSlots(0b000111);
     ASSERT_THAT(result, Eq(true));
-    ASSERT_THAT(this->_memory[6], Eq(0b000111));
+    ASSERT_THAT(this->_memory[5], Eq(0b000111));
 }
 
 TEST_F(BootSettingsTest, ShouldReturnDefaultFailsafeBootSlotIfNoValidSignatureFound)
 {
     InvalidMagicNumber();
-    this->_memory[6] = 0xAB;
+    this->_memory[5] = 0xAB;
     auto result = _settings.FailsafeBootSlots();
     ASSERT_THAT(result, Eq(0b111000));
 }
@@ -137,8 +137,8 @@ TEST_F(BootSettingsTest, ShouldReturnErrorWhenSettingFailsafeBootSlotsReadBackRe
 
 TEST_F(BootSettingsTest, ShouldReadBootCounter)
 {
-    this->_memory[7] = 0xAB;
-    this->_memory[8] = 0xCD;
+    this->_memory[6] = 0xAB;
+    this->_memory[7] = 0xCD;
     auto result = _settings.BootCounter();
     ASSERT_THAT(result, Eq(0xCDAB));
 }
@@ -146,8 +146,8 @@ TEST_F(BootSettingsTest, ShouldReadBootCounter)
 TEST_F(BootSettingsTest, ShouldReadDefaultBootCounterIfNoValidSignatureFound)
 {
     InvalidMagicNumber();
-    this->_memory[7] = 0xAB;
-    this->_memory[8] = 0xCD;
+    this->_memory[6] = 0xAB;
+    this->_memory[7] = 0xCD;
     auto result = _settings.BootCounter();
     ASSERT_THAT(result, Eq(0xFF));
 }
@@ -156,8 +156,8 @@ TEST_F(BootSettingsTest, ShouldWriteBootCounter)
 {
     auto result = _settings.BootCounter(0xCDAB);
     ASSERT_THAT(result, Eq(true));
-    ASSERT_THAT(this->_memory[7], Eq(0xAB));
-    ASSERT_THAT(this->_memory[8], Eq(0xCD));
+    ASSERT_THAT(this->_memory[6], Eq(0xAB));
+    ASSERT_THAT(this->_memory[7], Eq(0xCD));
 }
 
 TEST_F(BootSettingsTest, ShouldReturnErrorWhenSettingBootCounterReadBackReturnsDifferentValue)
@@ -169,11 +169,11 @@ TEST_F(BootSettingsTest, ShouldReturnErrorWhenSettingBootCounterReadBackReturnsD
 
 TEST_F(BootSettingsTest, ShouldReturnIfLastBootConfirmedFlagIsSet)
 {
-    this->_memory[9] = 0x21;
+    this->_memory[8] = 0x21;
     auto result = _settings.WasLastBootConfirmed();
     ASSERT_THAT(result, Eq(true));
 
-    this->_memory[9] = 0x12;
+    this->_memory[8] = 0x12;
     result = _settings.WasLastBootConfirmed();
     ASSERT_THAT(result, Eq(false));
 }
@@ -181,11 +181,11 @@ TEST_F(BootSettingsTest, ShouldReturnIfLastBootConfirmedFlagIsSet)
 TEST_F(BootSettingsTest, ShouldSetLastBootConfirmedFlag)
 {
     _settings.ConfirmLastBoot();
-    ASSERT_THAT(this->_memory[9], Eq(0x21));
+    ASSERT_THAT(this->_memory[8], Eq(0x21));
 }
 
 TEST_F(BootSettingsTest, ShouldClearLastBootConfirmedFlag)
 {
     _settings.UnconfirmLastBoot();
-    ASSERT_THAT(this->_memory[9], Eq(0));
+    ASSERT_THAT(this->_memory[8], Eq(0));
 }

@@ -1,5 +1,7 @@
 #include "settings.hpp"
 #include <array>
+#include <type_traits>
+#include "base/offset.hpp"
 #include "base/reader.h"
 #include "base/writer.h"
 #include "fm25w/fm25w.hpp"
@@ -8,6 +10,28 @@ using std::array;
 
 namespace boot
 {
+    struct MagicNumberField : public Element<std::uint32_t>
+    {
+    };
+
+    struct BootSlotsField : public Element<std::uint8_t>
+    {
+    };
+
+    struct FailsafeBootSlotsField : public Element<std::uint8_t>
+    {
+    };
+
+    struct BootCounterField : public Element<std::uint16_t>
+    {
+    };
+
+    struct BootConfirmedField : public Element<std::uint8_t>
+    {
+    };
+
+    using BootFields = Offsets<MagicNumberField, BootSlotsField, FailsafeBootSlotsField, BootCounterField, BootConfirmedField>;
+
     BootSettings::BootSettings(devices::fm25w::IFM25WDriver& fram) : _fram(fram)
     {
     }
@@ -15,7 +39,7 @@ namespace boot
     bool BootSettings::CheckMagicNumber() const
     {
         array<std::uint8_t, 4> buf;
-        this->_fram.Read(0, buf);
+        this->_fram.Read(BootFields::Offset<MagicNumberField>(), buf);
 
         return Reader(buf).ReadDoubleWordLE() == MagicNumber;
     }
@@ -29,14 +53,14 @@ namespace boot
 
         std::uint8_t r = 0;
 
-        this->_fram.Read(5, {&r, 1});
+        this->_fram.Read(BootFields::Offset<BootSlotsField>(), {&r, 1});
 
         return r;
     }
 
     bool BootSettings::BootSlots(std::uint8_t slots)
     {
-        this->_fram.Write(5, {&slots, 1});
+        this->_fram.Write(BootFields::Offset<BootSlotsField>(), {&slots, 1});
         return this->BootSlots() == slots;
     }
 
@@ -49,14 +73,14 @@ namespace boot
 
         std::uint8_t r = 0;
 
-        this->_fram.Read(6, {&r, 1});
+        this->_fram.Read(BootFields::Offset<FailsafeBootSlotsField>(), {&r, 1});
 
         return r;
     }
 
     bool BootSettings::FailsafeBootSlots(std::uint8_t slots)
     {
-        this->_fram.Write(6, {&slots, 1});
+        this->_fram.Write(BootFields::Offset<FailsafeBootSlotsField>(), {&slots, 1});
         return this->FailsafeBootSlots() == slots;
     }
 
@@ -68,7 +92,7 @@ namespace boot
         }
 
         array<std::uint8_t, 2> buf;
-        this->_fram.Read(7, buf);
+        this->_fram.Read(BootFields::Offset<BootCounterField>(), buf);
 
         return Reader(buf).ReadWordLE();
     }
@@ -79,7 +103,7 @@ namespace boot
 
         Writer(buf).WriteWordLE(counter);
 
-        this->_fram.Write(7, buf);
+        this->_fram.Write(BootFields::Offset<BootCounterField>(), buf);
 
         return this->BootCounter() == counter;
     }
@@ -89,13 +113,13 @@ namespace boot
         array<std::uint8_t, 4> buf;
 
         Writer(buf).WriteDoubleWordLE(MagicNumber);
-        this->_fram.Write(0, buf);
+        this->_fram.Write(BootFields::Offset<MagicNumberField>(), buf);
     }
 
     bool BootSettings::WasLastBootConfirmed() const
     {
         std::uint8_t buf = 0;
-        this->_fram.Read(9, {&buf, 1});
+        this->_fram.Read(BootFields::Offset<BootConfirmedField>(), {&buf, 1});
 
         return buf == BootConfirmedFlag;
     }
@@ -103,7 +127,7 @@ namespace boot
     bool BootSettings::ConfirmLastBoot()
     {
         std::uint8_t buf = BootConfirmedFlag;
-        this->_fram.Write(9, {&buf, 1});
+        this->_fram.Write(BootFields::Offset<BootConfirmedField>(), {&buf, 1});
 
         return WasLastBootConfirmed();
     }
@@ -111,7 +135,7 @@ namespace boot
     bool BootSettings::UnconfirmLastBoot()
     {
         std::uint8_t buf = 0;
-        this->_fram.Write(9, {&buf, 1});
+        this->_fram.Write(BootFields::Offset<BootConfirmedField>(), {&buf, 1});
 
         return !WasLastBootConfirmed();
     }
