@@ -45,19 +45,6 @@ namespace
         obc::telecommands::EnterIdleStateTelecommand _telecommand{_currentTime, _idleStateController};
     };
 
-    MATCHER_P3(IsDownlinkFrame, apidMatcher, seqMatcher, payloadMatcher, "")
-    {
-        DownlinkAPID apid = static_cast<DownlinkAPID>((arg[0] & 0b11111100) >> 2);
-        std::uint32_t seq = ((arg[0] & 0b11) << 16) //
-            | (arg[1] << 8)                         //
-            | (arg[2]);
-        auto payload = arg.subspan(3);
-
-        return Matches(apidMatcher)(apid) //
-            && Matches(seqMatcher)(seq)   //
-            && Matches(payloadMatcher)(payload);
-    }
-
     TEST_F(EnterIdleStateTelecommandTest, ShouldSetIdleState)
     {
         ON_CALL(_currentTime, GetCurrentTime())

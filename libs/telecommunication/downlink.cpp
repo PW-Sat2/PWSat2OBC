@@ -1,4 +1,5 @@
 #include "downlink.h"
+#include "base/BitWriter.hpp"
 #include "utils.h"
 
 namespace telecommunication
@@ -11,10 +12,9 @@ namespace telecommunication
         {
             this->_frame.fill(0);
 
-            Writer w(this->_frame);
-
-            uint32_t header = (num(apid) << 18) | (seq & 0x3FFFF);
-            w.WriteLowerBytesBE(header, HeaderSize);
+            BitWriter w(this->_frame);
+            w.WriteWord(num(apid), 6);
+            w.WriteDoubleWord(seq, 18);
         }
 
         CorrelatedDownlinkFrame::CorrelatedDownlinkFrame(DownlinkAPID apid, std::uint32_t seq, std::uint8_t correlationId)
