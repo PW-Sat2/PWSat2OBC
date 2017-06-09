@@ -116,8 +116,10 @@ namespace error_counter
 
         /** @brief Error counters */
         std::array<std::atomic<InternalCounterValue>, MaxDevices> _counters;
+
         /** @brief Configuration */
         IErrorCountingConfigration& _config;
+
         /** @brief Callback */
         IErrorCountingCallback* _callback;
     };
@@ -139,10 +141,81 @@ namespace error_counter
         /** @brief Records single success */
         inline void Success();
 
+        /** @brief Device Id */
+        static constexpr auto DeviceId = Device;
+
       private:
         /** @brief Error counting */
         ErrorCounting& _counting;
     };
+
+    /**
+     * @brief Error counter that will report single error even if multiple errors occured.
+     */
+    class AggregatedErrorCounter
+    {
+      public:
+        /** @brief Ctor */
+        AggregatedErrorCounter();
+
+        /** @brief Records single failure */
+        inline void Failure();
+        /**
+         * @brief Current value
+         * @return Current aggregated result value
+         */
+        inline bool GetAggregatedResult() const;
+
+        /**
+         * @brief Report the aggregated state to real actual counter
+         * @param[in] errorCounter Error counter to report result to
+         * @return Aggregated result value
+         */
+        template <error_counter::Device Device> bool ReportResult(ErrorCounter<Device>& errorCounter);
+
+      private:
+        uint32_t _errorCount;
+    };
+
+    /**
+     * @brief Create instance of this class to guarantee error counter updating in current scope
+     */
+    template <Device Device> class AggregatedErrorReporter : public NotMoveable, NotCopyable
+    {
+      public:
+        /** @brief Ctor */
+        AggregatedErrorReporter(ErrorCounter<Device>& errorCounter);
+
+        /**
+         * @brief Destructor reports Failure or Success to error counter
+         */
+        ~AggregatedErrorReporter();
+
+        /**
+         * @brief Gives access to actual error counter
+         * @return Reference to error counter used to report errors
+         */
+        inline AggregatedErrorCounter& Counter();
+
+      private:
+        AggregatedErrorCounter _counter;
+        ErrorCounter<Device>& _errorCounter;
+    };
+
+    template <Device Device>
+    AggregatedErrorReporter<Device>::AggregatedErrorReporter(ErrorCounter<Device>& errorCounter) : _errorCounter(errorCounter)
+    {
+    }
+
+    template <Device Device> AggregatedErrorReporter<Device>::~AggregatedErrorReporter()
+    {
+        _counter.ReportResult(_errorCounter);
+    }
+
+    template <Device Device> AggregatedErrorCounter& AggregatedErrorReporter<Device>::Counter()
+    {
+        return _counter;
+    }
 
     template <Device Device> ErrorCounter<Device>::ErrorCounter(ErrorCounting& counting) : _counting(counting)
     {
@@ -163,6 +236,21 @@ namespace error_counter
         this->_counting.Success(Device);
     }
 
+    void AggregatedErrorCounter::Failure()
+    {
+        _errorCount++;
+    }
+
+    bool AggregatedErrorCounter::GetAggregatedResult() const
+    {
+        return _errorCount == 0;
+    }
+
+    template <error_counter::Device Device> bool AggregatedErrorCounter::ReportResult(ErrorCounter<Device>& errorCounter)
+    {
+        return GetAggregatedResult() >> errorCounter;
+    }
+
     /**
      * @brief Operator that can be used to easily kick error counter depending on operation result
      * @param flag Flag determining whether operation was successful
@@ -176,6 +264,22 @@ namespace error_counter
             counter.Success();
         }
         else
+        {
+            counter.Failure();
+        }
+
+        return flag;
+    }
+
+    /**
+     * @brief Operator that can be used to easily kick error counter depending on operation result
+     * @param flag Flag determining whether operation was successful
+     * @param counter Error counter
+     * @return Flag passed as input
+     */
+    inline bool operator>>(bool flag, AggregatedErrorCounter& counter)
+    {
+        if (!flag)
         {
             counter.Failure();
         }

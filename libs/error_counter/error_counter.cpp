@@ -48,4 +48,8 @@ namespace error_counter
     ErrorCounting::ErrorCounting(IErrorCountingConfigration& config) : _counters{}, _config(config), _callback(nullptr)
     {
     }
+
+    AggregatedErrorCounter::AggregatedErrorCounter() : _errorCount(0)
+    {
+    }
 }
