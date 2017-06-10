@@ -70,7 +70,9 @@ OBC::OBC()
           Experiments,
           BootTable,
           BootSettings),          //
+      Scrubbing(this->Hardware, this->BootTable, boot::Index), //
       terminal(this->GetLineIO()) //
+
 {
 }
 
@@ -147,6 +149,15 @@ OSResult OBC::InitializeRunlevel2()
     TelemetryAcquisition.Resume();
 
     this->Hardware.Burtc.Start();
+
+    if (boot::BootReason != boot::Reason::BootToUpper)
+    {
+        this->Scrubbing.InitializeRunlevel2();
+    }
+    else
+    {
+        LOG(LOG_LEVEL_WARNING, "[obc] Not starting scrubbing as boot to upper detected");
+    }
 
     return OSResult::Success;
 }

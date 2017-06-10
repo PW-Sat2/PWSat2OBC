@@ -22,6 +22,7 @@
 #include "obc/experiments.hpp"
 #include "obc/fdir.hpp"
 #include "obc/hardware.h"
+#include "obc/scrubbing.hpp"
 #include "obc/storage.h"
 #include "power_eps/power_eps.h"
 #include "program_flash/boot_table.hpp"
@@ -112,6 +113,9 @@ struct OBC
 
     /** @brief Overall satellite <-> Earth communication */
     obc::OBCCommunication Communication;
+
+    /** @brief Scrubbing mechanism */
+    obc::OBCScrubbing Scrubbing;
 
     /** @brief Terminal object. */
     Terminal terminal;
