@@ -233,6 +233,8 @@ int main(void)
             boot::MagicNumber);
 
         boot::RequestedRunlevel = boot::Runlevel::Runlevel2;
+        boot::Index = 0;
+        boot::BootReason = boot::Reason::BootToUpper;
     }
     else
     {

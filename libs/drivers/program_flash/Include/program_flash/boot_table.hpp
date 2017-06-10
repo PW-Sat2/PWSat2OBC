@@ -123,10 +123,20 @@ namespace program_flash
          */
         std::uint16_t CalculateCrc() const;
 
-      private:
+        inline gsl::span<const std::uint8_t> WholeEntry() const
+        {
+            return {_entrySpan.Data(), Size};
+        }
+
+        inline std::size_t InFlashOffset() const
+        {
+            return this->_entrySpan.BaseOffset();
+        }
+
         /** @brief Size of single entry */
         static constexpr std::size_t Size = 512_KB;
 
+      private:
         /** @brief Span for whole entry */
         FlashSpan _entrySpan;
         /** @brief Span for entry length */

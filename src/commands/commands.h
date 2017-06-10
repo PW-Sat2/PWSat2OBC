@@ -70,5 +70,6 @@ void ErrorCountersCommand(std::uint16_t argc, char* argv[]);
 void TestFlash(std::uint16_t argc, char* argv[]);
 
 void ScrubRAM(std::uint16_t argc, char* argv[]);
+void ScrubProgram(std::uint16_t argc, char* argv[]);
 
 #endif

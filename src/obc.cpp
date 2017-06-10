@@ -62,7 +62,9 @@ OBC::OBC()
       Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),                                          //
       Experiments(fs, this->adcs.GetAdcsController(), this->timeProvider),                                           //
       Communication(this->Fdir, this->Hardware.CommDriver, this->timeProvider, Mission, fs, Experiments, BootTable), //
+      Scrubbing(this->Hardware, this->BootTable, boot::Index),                                                       //
       terminal(this->GetLineIO())                                                                                    //
+
 {
 }
 
@@ -139,6 +141,15 @@ OSResult OBC::InitializeRunlevel2()
     TelemetryAcquisition.Resume();
 
     this->Hardware.Burtc.Start();
+
+    if (boot::BootReason != boot::Reason::BootToUpper)
+    {
+        this->Scrubbing.InitializeRunlevel2();
+    }
+    else
+    {
+        LOG(LOG_LEVEL_WARNING, "[obc] Not starting scrubbing as boot to upper detected");
+    }
 
     return OSResult::Success;
 }

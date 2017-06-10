@@ -74,6 +74,7 @@ target_link_libraries(${NAME}
     obc_hardware
     obc_experiments
     obc_state
+    obc_scrubbing
     spi
     efm_emlib
     burtc
