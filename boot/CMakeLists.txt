@@ -8,6 +8,8 @@ set(SOURCES
     xmodem.cpp
     fault_handlers.c
     boot.cpp
+    spi.cpp
+    flash_driver.cpp
     
     commands/test.cpp
     commands/booting.cpp
@@ -27,6 +29,10 @@ target_link_libraries(${NAME}
       assert
       base
       boot_params
+      fm25w
+      gpio
+      boot_settings
+      program_flash
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

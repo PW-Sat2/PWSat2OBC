@@ -28,7 +28,7 @@ class Bootloader:
         self._port.write('x')
 
         self._wait_for('Boot Index: ')
-        self._port.write(chr(index))
+        self._port.write(str(index))
 
         print 'Boot index selected'
 

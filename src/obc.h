@@ -10,6 +10,7 @@
 #include "adcs/AdcsExperimental.hpp"
 
 #include "base/os.h"
+#include "boot/settings.hpp"
 #include "experiment/fibo/fibo.h"
 #include "fs/fs.h"
 #include "fs/yaffs.h"
@@ -81,6 +82,9 @@ struct OBC
     /** @brief Boot Table */
     program_flash::BootTable BootTable;
 
+    /** @brief Boot settings */
+    boot::BootSettings BootSettings;
+
     /** @brief Persistent timer that measures mission time. */
     services::time::TimeProvider timeProvider;
 
@@ -128,7 +132,7 @@ extern OBC Main;
 using Scrubber =
     scrubber::RAMScrubber<io_map::RAMScrubbing::MemoryStart, io_map::RAMScrubbing::MemorySize, io_map::RAMScrubbing::CycleSize>;
 
-static constexpr std::uint32_t PersistentStateBaseAddress = 4;
+static constexpr std::uint32_t PersistentStateBaseAddress = 16;
 
 /** @} */
 

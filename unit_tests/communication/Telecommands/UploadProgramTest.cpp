@@ -88,22 +88,28 @@ UploadProgramTest::UploadProgramTest()
     this->_bootTable.Initialize();
 }
 
-TEST_F(UploadProgramTest, ReadBootIndex)
+TEST_F(UploadProgramTest, ReadFirstProgramDetails)
 {
-    this->_flash[0] = 1;
+    this->_flash[0x00000000] = 0x12;
+    this->_flash[0x00000001] = 0x13;
+    this->_flash[0x00000002] = 0;
+    this->_flash[0x00000003] = 0;
 
-    auto bootIndex = this->_bootTable.BootIndex();
+    this->_flash[0x00000020] = 0xAB;
+    this->_flash[0x00000021] = 0xCD;
 
-    ASSERT_THAT(bootIndex, Eq(1));
-}
+    this->_flash[0x00000040] = 0xAA;
 
-TEST_F(UploadProgramTest, ReadBootCounter)
-{
-    this->_flash[0x00002000] = 16;
+    strcpy(reinterpret_cast<char*>(&this->_flash[0x00000080]), "Test");
+    strcpy(reinterpret_cast<char*>(&this->_flash[0x00000400]), "Program");
 
-    auto bootCounter = this->_bootTable.BootCounter();
+    auto entry = this->_bootTable.Entry(0);
 
-    ASSERT_THAT(bootCounter, Eq(16));
+    ASSERT_THAT(entry.Length(), Eq(0x1312U));
+    ASSERT_THAT(entry.Crc(), Eq(0xCDAB));
+    ASSERT_THAT(entry.IsValid(), Eq(true));
+    ASSERT_THAT(entry.Description(), StrEq("Test"));
+    ASSERT_THAT(reinterpret_cast<const char*>(entry.Content()), StrEq("Program"));
 }
 
 TEST_F(UploadProgramTest, ReadProgramDetails)
@@ -175,7 +181,7 @@ TEST_F(UploadProgramTest, WriteProgramByTelecommands)
     EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(2, 0, 1, 0x84, 0xD8))));
     this->HandleFrame(this->_finalizeTelecommand, 1, 0x12, 0x13, 0x00, 0x00, 0x84, 0xD8, 'T', 'e', 's', 't');
 
-    auto entry = this->_bootTable.Entry(1);
+    auto entry = this->_bootTable.Entry(0);
     ASSERT_THAT(entry.Length(), Eq(0x1312U));
     ASSERT_THAT(entry.Crc(), Eq(0xD884));
     ASSERT_THAT(entry.IsValid(), Eq(true));
@@ -186,7 +192,7 @@ TEST_F(UploadProgramTest, WriteProgramByTelecommands)
 
 TEST_F(UploadProgramTest, ResponseWithEraseError)
 {
-    ON_CALL(this->_flashMock, EraseSector(0x00080000 + 5 * 64_KB)).WillByDefault(Return(FlashStatus::EraseError));
+    ON_CALL(this->_flashMock, EraseSector(0x00000000 + 5 * 64_KB)).WillByDefault(Return(FlashStatus::EraseError));
 
     EXPECT_CALL(
         this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(0, 1, 9, 1, 0x00, 0x0, 0x05, 0x00))))
@@ -197,7 +203,7 @@ TEST_F(UploadProgramTest, ResponseWithEraseError)
 
 TEST_F(UploadProgramTest, ResponseWithProgramErrorOnWritePart)
 {
-    ON_CALL(this->_flashMock, Program(0x00080400 + 256_KB, A<gsl::span<const std::uint8_t>>()))
+    ON_CALL(this->_flashMock, Program(0x00000400 + 256_KB, A<gsl::span<const std::uint8_t>>()))
         .WillByDefault(Return(FlashStatus::ProgramError));
 
     EXPECT_CALL(
@@ -209,7 +215,7 @@ TEST_F(UploadProgramTest, ResponseWithProgramErrorOnWritePart)
 
 TEST_F(UploadProgramTest, ResponseWithProgramErrorOnFinalize)
 {
-    ON_CALL(this->_flashMock, Program(0x00080000, A<gsl::span<const std::uint8_t>>())).WillByDefault(Return(FlashStatus::ProgramError));
+    ON_CALL(this->_flashMock, Program(0x00000000, A<gsl::span<const std::uint8_t>>())).WillByDefault(Return(FlashStatus::ProgramError));
 
     EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(2, 1, 10, 1)))).Times(1);
 

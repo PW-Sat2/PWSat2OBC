@@ -2,6 +2,7 @@
 #include "GyroMock.hpp"
 #include "StorageAccessMock.hpp"
 #include "eps.hpp"
+#include "mock/fm25w.hpp"
 
 GyroscopeMock::GyroscopeMock()
 {
@@ -48,5 +49,13 @@ EpsTelemetryProviderMock::EpsTelemetryProviderMock()
 }
 
 EpsTelemetryProviderMock::~EpsTelemetryProviderMock()
+{
+}
+
+FM25WDriverMock::FM25WDriverMock()
+{
+}
+
+FM25WDriverMock::~FM25WDriverMock()
 {
 }

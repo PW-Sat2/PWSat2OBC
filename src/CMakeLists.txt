@@ -98,6 +98,7 @@ target_link_libraries(${NAME}
     telemetry_eps
     program_flash
     scrubber
+    boot_settings
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

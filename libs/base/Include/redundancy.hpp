@@ -44,6 +44,17 @@ namespace redundancy
     }
 
     /**
+     * @brief Performs bitwise majority vote based on three elements in array.
+     * @param[in] elements Array with three elements
+     * @tparam T Type used for majority vote. Must be integral or enum type
+     * @return Value calculated from bitwise majority vote.
+     */
+    template <typename T> inline T Correct(std::array<T, 3>& elements)
+    {
+        return Correct(elements[0], elements[1], elements[2]);
+    }
+
+    /**
      * @brief Performs bitwise majority votes on entire data buffers.
      * @param[in,out] buffer1 First input
      * @param[in] buffer2 Second input
@@ -74,7 +85,8 @@ namespace redundancy
      * @tparam T Type used for majority vote. Must be integral or enum type
      * @return True if all buffers are of the same size, False otherwise.
      */
-    template <typename T> bool CorrectBuffer(gsl::span<T> output, gsl::span<T> buffer1, gsl::span<T> buffer2, gsl::span<T> buffer3)
+    template <typename T>
+    bool CorrectBuffer(gsl::span<std::remove_cv_t<T>> output, gsl::span<T> buffer1, gsl::span<T> buffer2, gsl::span<T> buffer3)
     {
         static_assert(std::is_integral<T>::value || std::is_enum<T>::value, "Correction requires integral or enum type");
         if (output.length() != buffer1.length() || buffer1.length() != buffer2.length() || buffer2.length() != buffer3.length())

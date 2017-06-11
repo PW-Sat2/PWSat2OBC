@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <gsl/span>
 #include <tuple>
+#include "base/os.h"
 #include "flash_driver.hpp"
 #include "utils.h"
 
@@ -177,24 +178,6 @@ namespace program_flash
         }
 
         /**
-         * @brief Returns current boot index
-         * @return Currently selected boot index
-         */
-        inline std::uint8_t BootIndex() const
-        {
-            return *this->_bootIndex;
-        }
-
-        /**
-         * @brief Returns current boot counter
-         * @return Current boot counter
-         */
-        inline std::uint8_t BootCounter() const
-        {
-            return *this->_bootCounter;
-        }
-
-        /**
          * @brief Returns entry from boot table
          * @param index Entry index (from 1 to 7)
          * @return Program entry
@@ -204,19 +187,16 @@ namespace program_flash
             return ProgramEntry(this->_flash, index);
         }
 
+        /** @brief Number of entries in boot table */
+        static constexpr std::uint8_t EntriesCount = 6;
+
       private:
         /** @brief Flash driver */
         IFlashDriver& _flash;
-
         /** @brief Flash device ID */
         std::uint32_t _deviceId;
         /** @brief Flash device boot config */
         std::uint8_t _bootConfig;
-
-        /** @brief Pointer to boot index */
-        std::uint8_t const* _bootIndex;
-        /** @brief Pointer to boot counter */
-        std::uint8_t const* _bootCounter;
     };
 
     /** @} */

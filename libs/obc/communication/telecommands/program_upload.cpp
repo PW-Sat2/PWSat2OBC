@@ -111,13 +111,13 @@ namespace obc
                 return;
             }
 
-            std::bitset<8> selectedEntries(parameters[0]);
+            std::bitset<program_flash::BootTable::EntriesCount> selectedEntries(parameters[0]);
 
-            for (auto i = 0; i < 7; i++)
+            for (auto i = 0; i < program_flash::BootTable::EntriesCount; i++)
             {
                 if (selectedEntries[i])
                 {
-                    auto result = this->_bootTable.Entry(i + 1).Erase();
+                    auto result = this->_bootTable.Entry(i).Erase();
 
                     if (!result)
                     {
@@ -138,7 +138,7 @@ namespace obc
         {
             Reader r(parameters);
 
-            std::bitset<8> selectedEntries(r.ReadByte());
+            std::bitset<program_flash::BootTable::EntriesCount> selectedEntries(r.ReadByte());
             auto offset = r.ReadDoubleWordLE();
             auto content = r.ReadToEnd();
 
@@ -149,11 +149,11 @@ namespace obc
 
             LOGF(LOG_LEVEL_INFO, "Uploading program part %d to 0x%lX", content.size(), offset);
 
-            for (auto i = 0; i < 7; i++)
+            for (auto i = 0; i < program_flash::BootTable::EntriesCount; i++)
             {
                 if (selectedEntries[i])
                 {
-                    auto r = this->_bootTable.Entry(i + 1).WriteContent(offset, content);
+                    auto r = this->_bootTable.Entry(i).WriteContent(offset, content);
 
                     if (r != FlashStatus::NotBusy)
                     {
@@ -182,7 +182,7 @@ namespace obc
         {
             Reader r(parameters);
 
-            std::bitset<8> selectedEntries(r.ReadByte());
+            std::bitset<program_flash::BootTable::EntriesCount> selectedEntries(r.ReadByte());
             auto length = r.ReadDoubleWordLE();
             auto expectedCrc = r.ReadWordLE();
 
@@ -197,11 +197,11 @@ namespace obc
 
             LOG(LOG_LEVEL_INFO, "Finalizing entries");
 
-            for (auto i = 0; i < 7; i++)
+            for (auto i = 0; i < program_flash::BootTable::EntriesCount; i++)
             {
                 if (selectedEntries[i])
                 {
-                    auto e = this->_bootTable.Entry(i + 1);
+                    auto e = this->_bootTable.Entry(i);
 
                     FlashStatus r = FlashStatus::NotBusy;
 

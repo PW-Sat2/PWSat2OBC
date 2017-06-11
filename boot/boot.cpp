@@ -1,8 +1,14 @@
 #include "boot.h"
+#include <bitset>
 #include <em_usart.h>
+#include <em_wdog.h>
 #include "boot/params.hpp"
 #include "bsp/bsp_boot.h"
 #include "bsp/bsp_uart.h"
+#include "main.hpp"
+#include "redundancy.hpp"
+
+using program_flash::ProgramEntry;
 
 static void resetPeripherals(void)
 {
@@ -11,36 +17,14 @@ static void resetPeripherals(void)
     MSC_Deinit();
     DMA_Reset();
     USART_Reset(BSP_UART_DEBUG);
+    USART_Reset(USART0);
 }
 
 static void resetClocks(void)
 {
     CMU->HFCORECLKEN0 &= ~CMU_HFCORECLKEN0_DMA;
     CMU->HFPERCLKEN0 &= ~CMU_HFPERCLKEN0_UART1;
-}
-
-static uint8_t verifyApplicationCRC(uint8_t entryIndex)
-{
-    uint8_t *startAddr, *endAddr;
-    uint16_t expectedCRC, actualCRC;
-
-    startAddr = (uint8_t*)(BOOT_APPLICATION_BASE);
-    endAddr = (uint8_t*)(startAddr + BOOT_getLen(entryIndex));
-
-    actualCRC = BOOT_calcCRC(startAddr, endAddr);
-    expectedCRC = BOOT_getCRC(entryIndex);
-
-    return (actualCRC == expectedCRC);
-}
-
-static uint8_t verifyBootIndex(uint8_t bootIndex)
-{
-    return ((bootIndex > 0) && (bootIndex <= BOOT_TABLE_SIZE));
-}
-
-static uint8_t verifyBootCounter(void)
-{
-    return (BOOT_getBootCounter() > 0);
+    CMU->HFPERCLKEN0 &= ~CMU_HFPERCLKEN0_USART0;
 }
 
 void BootToAddress(uint32_t baseAddress)
@@ -50,94 +34,275 @@ void BootToAddress(uint32_t baseAddress)
 
     boot::MagicNumber = boot::BootloaderMagicNumber;
 
+    WDOG_Init_TypeDef init = WDOG_INIT_DEFAULT;
+    init.debugRun = false;
+    init.enable = true;
+    init.perSel = io_map::Watchdog::BootTimeout;
+
+    WDOGn_Init(WDOG, &init);
+
     BOOT_boot(baseAddress);
 
     while (1)
         ;
 }
 
-uint32_t LoadApplication(uint8_t bootIndex)
+static void ProgramBlock(gsl::span<const std::uint32_t> data, std::uint32_t* base)
 {
-    size_t debugLen;
-    uint8_t debugStr[256];
+    MSC->LOCK = MSC_UNLOCK_CODE;
+    MSC->WRITECTRL |= MSC_WRITECTRL_WREN | MSC_WRITECTRL_RWWEN;
 
-    boot::Index = bootIndex;
+    // erase page
+    MSC->ADDRB = reinterpret_cast<std::uint32_t>(base);
+    MSC->WRITECMD = MSC_WRITECMD_LADDRIM;
+    MSC->WRITECMD = MSC_WRITECMD_ERASEPAGE;
 
-    if (bootIndex == 0)
+    while ((MSC->STATUS & MSC_STATUS_BUSY))
+        ;
+
+    // program page
+    MSC->ADDRB = reinterpret_cast<std::uint32_t>(base);
+    MSC->WRITECMD = MSC_WRITECMD_LADDRIM;
+
+    MSC->WDATA = data[0];
+    MSC->WRITECMD = MSC_WRITECMD_WRITETRIG;
+
+    for (auto i = data.begin() + 1; i != data.end(); i++)
+    {
+        while (!(MSC->STATUS & MSC_STATUS_WDATAREADY))
+            ;
+
+        MSC->WDATA = *i;
+    }
+
+    while (!(MSC->STATUS & MSC_STATUS_WDATAREADY))
+        ;
+
+    MSC->WRITECMD = MSC_WRITECMD_WRITEEND;
+}
+
+template <typename Input, std::size_t Count, typename Mapper, typename Output = decltype(std::declval<Mapper>()(std::declval<Input&>()))>
+std::array<Output, Count> Map(Input (&input)[Count], Mapper map)
+{
+    std::array<Output, Count> result;
+    for (std::size_t i = 0; i < Count; i++)
+    {
+        result[i] = map(input[i]);
+    }
+
+    return result;
+}
+
+template <typename Input, std::size_t Count, typename Mapper, typename Output = decltype(std::declval<Mapper>()(std::declval<Input&>()))>
+std::array<Output, Count> Map(std::array<Input, Count>& input, Mapper map)
+{
+    std::array<Output, Count> result;
+    for (std::size_t i = 0; i < Count; i++)
+    {
+        result[i] = map(input[i]);
+    }
+
+    return result;
+}
+
+void LoadApplicationTMR(std::array<std::uint8_t, 3> slots)
+{
+    BSP_UART_Printf<30>(BSP_UART_DEBUG, "\nTMR boot on slots %d, %d and %d", slots[0], slots[1], slots[2]);
+
+    ProgramEntry entries[] = {
+        Bootloader.BootTable.Entry(slots[0]), Bootloader.BootTable.Entry(slots[1]), Bootloader.BootTable.Entry(slots[2]),
+    };
+
+    auto lengths = Map(entries, [](ProgramEntry& entry) { return entry.Length(); });
+
+    auto length = redundancy::Correct(lengths);
+
+    BSP_UART_Printf<30>(BSP_UART_DEBUG, "\nProgram length: %ld", length);
+
+    using ChunkType = uint32_t;
+    constexpr std::size_t PageSize = 4_KB;
+    constexpr std::size_t ChunksCount = PageSize / sizeof(ChunkType);
+
+    auto programBases = Map(entries, [](ProgramEntry& entry) { return reinterpret_cast<const ChunkType*>(entry.Content()); });
+
+    BSP_UART_Printf<30>(BSP_UART_DEBUG, "\nBase: %p", (void*)programBases[0]);
+    BSP_UART_Printf<30>(BSP_UART_DEBUG, "\nBase: %p", (void*)programBases[1]);
+    BSP_UART_Printf<30>(BSP_UART_DEBUG, "\nBase: %p", (void*)programBases[2]);
+
+    auto internalFlashBase = reinterpret_cast<ChunkType*>(BOOT_APPLICATION_BASE);
+
+    std::array<ChunkType, ChunksCount> pageBuffer;
+
+    for (auto offset = 0U; offset < length / sizeof(ChunkType); offset += ChunksCount)
+    {
+        auto pageSpans = Map(programBases, [offset](const ChunkType*& entry) { return gsl::make_span(entry + offset, ChunksCount); });
+
+        auto ptr = internalFlashBase + offset;
+
+        auto internalFlashPage = gsl::make_span(ptr, ChunksCount);
+
+        redundancy::CorrectBuffer<const ChunkType>(pageBuffer, pageSpans[0], pageSpans[1], pageSpans[2]);
+
+        bool internalOk = internalFlashPage == gsl::make_span(pageBuffer);
+
+        if (!internalOk)
+        {
+            BSP_UART_Printf<30>(BSP_UART_DEBUG, "\nPage %p: NOT OK", (void*)internalFlashPage.data());
+        }
+
+        if (!internalOk)
+        {
+            ProgramBlock(pageBuffer, internalFlashPage.data());
+        }
+    }
+
+    BSP_UART_Puts(BSP_UART_DEBUG, "\nDone");
+}
+
+static std::array<std::uint8_t, 3> ToSlotNumbers(std::uint8_t slotsMask)
+{
+    std::array<std::uint8_t, 3> slots{0, 0, 0};
+
+    std::bitset<6> mask(slotsMask);
+
+    for (auto i = 0, j = 0; i < 6; i++)
+    {
+        if (mask[i])
+        {
+            slots[j] = i;
+            j++;
+        }
+
+        if (j == 3)
+            break;
+    }
+
+    return slots;
+}
+
+static std::uint32_t LoadApplication(std::uint8_t slotsMask)
+{
+    if (slotsMask == boot::BootSettings::SafeModeBootSlot)
     {
         return BOOT_SAFEMODE_BASE_CODE;
     }
 
-    if (verifyApplicationCRC(bootIndex))
-    {
-        debugLen = sprintf((char*)debugStr, "\n\nBooting application!");
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+    auto slots = ToSlotNumbers(slotsMask);
 
-        return BOOT_APPLICATION_BASE;
+    LoadApplicationTMR(slots);
+
+    return BOOT_APPLICATION_BASE;
+}
+
+static void ResolveFailedBoot()
+{
+    auto currentSlots = Bootloader.Settings.BootSlots();
+
+    if (currentSlots == boot::BootSettings::SafeModeBootSlot)
+    {
+        return;
     }
 
-    BOOT_DownloadResult_Typedef downloadError = BOOT_tryDownloadEntryToApplicationSpace(bootIndex);
-
-    if (downloadError)
+    if (currentSlots == boot::BootSettings::UpperBootSlot)
     {
-        bootIndex = 0;
-        boot::BootReason = boot::Reason::DownloadError;
-        BOOT_setBootIndex(bootIndex);
-
-        debugLen = sprintf((char*)debugStr, "\n\nUnable to load application (Error: %d)... Booting safe mode!", downloadError);
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
-
-        return BOOT_SAFEMODE_BASE_CODE;
+        return;
     }
-    else
+
+    if (!Bootloader.Settings.WasLastBootConfirmed())
     {
-        debugLen = sprintf((char*)debugStr, "\n\nBooting application!");
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+        BSP_UART_Puts(BSP_UART_DEBUG, "\nLast boot not confirmed - switch to failsafe slots");
 
-        return BOOT_APPLICATION_BASE;
+        auto failsafe = Bootloader.Settings.FailsafeBootSlots();
+        Bootloader.Settings.BootSlots(failsafe);
+
+        boot::BootReason = boot::Reason::BootNotConfirmed;
     }
+}
+
+bool IsBootSlotsValid(std::uint8_t mask)
+{
+    if (__builtin_popcount(mask) != 3)
+    {
+        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nThree boot slots must be selected");
+        return false;
+    }
+
+    auto slots = ToSlotNumbers(mask);
+    auto isValid = redundancy::Correct( //
+        Bootloader.BootTable.Entry(slots[0]).IsValid(),
+        Bootloader.BootTable.Entry(slots[1]).IsValid(),
+        Bootloader.BootTable.Entry(slots[2]).IsValid() //
+        );
+
+    if (!isValid)
+    {
+        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nBoot slots are not valid");
+        return false;
+    }
+
+    return true;
 }
 
 void ProceedWithBooting()
 {
-    char debugStr[80] = {0};
-    auto debugLen = sprintf((char*)debugStr, "\nTimeout exceeded - booting");
-    BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+    BSP_UART_Puts(BSP_UART_DEBUG, "\nTimeout exceeded - booting");
 
-    auto bootIndex = BOOT_getBootIndex();
+    boot::BootReason = boot::Reason::PrimaryBootSlots;
 
-    boot::BootReason = boot::Reason::SelectedIndex;
+    ResolveFailedBoot();
 
-    if (bootIndex == 0)
+    auto slotsMask = Bootloader.Settings.BootSlots();
+
+    if (slotsMask == boot::BootSettings::SafeModeBootSlot)
     {
-        debugLen = sprintf((char*)debugStr, "\n\nSafe Mode boot index... Booting safe mode!");
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nSafe Mode boot slot... Booting safe mode!");
     }
-    else if (!verifyBootIndex(bootIndex))
+    else if (slotsMask == boot::BootSettings::UpperBootSlot)
     {
-        bootIndex = 0;
-        BOOT_setBootIndex(0);
-
-        boot::BootReason = boot::Reason::InvalidBootIndex;
-
-        debugLen = sprintf((char*)debugStr, "\n\nInvalid boot index... Booting safe mode!");
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+        boot::BootReason = boot::Reason::PrimaryBootSlots;
+        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nUpper boot slot... Booting to upper");
+        BootToAddress(BOOT_APPLICATION_BASE);
     }
-    else if (!verifyBootCounter())
+    else if (!IsBootSlotsValid(slotsMask))
     {
-        bootIndex = 0;
-        BOOT_setBootIndex(0);
+        boot::BootReason = boot::Reason::InvalidPrimaryBootSlots;
+        slotsMask = Bootloader.Settings.FailsafeBootSlots();
+
+        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nFalling back to failsafe boot slots");
+
+        if (IsBootSlotsValid(slotsMask))
+        {
+            Bootloader.Settings.BootSlots(slotsMask);
+        }
+        else
+        {
+            BSP_UART_Puts(BSP_UART_DEBUG, "\n\nFailsafe boot slots invalid...Falling back to safe mode");
+
+            boot::BootReason = boot::Reason::InvalidFailsafeBootSlots;
+            slotsMask = boot::BootSettings::SafeModeBootSlot;
+            Bootloader.Settings.BootSlots(boot::BootSettings::SafeModeBootSlot);
+        }
+    }
+    else if (Bootloader.Settings.BootCounter() >= boot::BootSettings::BootCounterTop)
+    {
+        slotsMask = boot::BootSettings::SafeModeBootSlot;
+        Bootloader.Settings.BootSlots(boot::BootSettings::SafeModeBootSlot);
 
         boot::BootReason = boot::Reason::CounterExpired;
 
-        debugLen = sprintf((char*)debugStr, "\n\nBoot counter expired... Booting safe mode!");
-        BSP_UART_txBuffer(BSP_UART_DEBUG, (uint8_t*)debugStr, debugLen, true);
+        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nBoot counter expired... Booting safe mode!");
     }
     else
     {
-        BOOT_decBootCounter();
+        auto counter = Bootloader.Settings.BootCounter();
+        Bootloader.Settings.BootCounter(counter + 1);
     }
 
-    auto bootAddress = LoadApplication(bootIndex);
-    BootToAddress(bootAddress);
+    boot::Index = slotsMask;
+
+    auto baseAddress = LoadApplication(slotsMask);
+
+    Bootloader.Settings.UnconfirmLastBoot();
+
+    BootToAddress(baseAddress);
 }

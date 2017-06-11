@@ -91,7 +91,8 @@ namespace io_map
 
     struct Watchdog
     {
-        static constexpr WDOG_PeriodSel_TypeDef Period = wdogPeriod_1k; // About 1 second
+        static constexpr WDOG_PeriodSel_TypeDef Period = wdogPeriod_1k;       // About 1 second
+        static constexpr WDOG_PeriodSel_TypeDef BootTimeout = wdogPeriod_16k; // About 16 second
     };
 
     struct ProgramFlash

@@ -21,21 +21,18 @@ namespace program_flash
         if (this->_deviceId != ExpectedDeviceId || this->_bootConfig != ExpectedDeviceBootConfig)
             return OSResult::NotSupported;
 
-        this->_bootIndex = this->_flash.At(0);
-        this->_bootCounter = this->_flash.At(0x00002000);
-
         return OSResult::Success;
     }
 
     ProgramEntry::ProgramEntry(IFlashDriver& flash, std::uint8_t index)
-        : _entrySpan(flash.Span(0x00080000 + (index - 1) * Size)), _length(_entrySpan), _crc(_entrySpan), _isValid(_entrySpan),
-          _description(_entrySpan), _program(_entrySpan)
+        : _entrySpan(flash.Span(index * Size)), _length(_entrySpan), _crc(_entrySpan), _isValid(_entrySpan), _description(_entrySpan),
+          _program(_entrySpan)
     {
     }
 
     Result<FlashStatus, std::tuple<FlashStatus, std::size_t>> ProgramEntry::Erase()
     {
-        for (std::size_t sectorOffset = 0; sectorOffset < Size; sectorOffset += FlashDriver::LargeSectorSize)
+        for (std::size_t sectorOffset = 0; sectorOffset < Size; sectorOffset += IFlashDriver::LargeSectorSize)
         {
             auto status = this->_entrySpan.Erase(sectorOffset);
             if (status != FlashStatus::NotBusy)
