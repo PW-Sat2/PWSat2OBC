@@ -68,7 +68,7 @@ class SerialPortTerminal:
         self._command_prologue(cmd)
 
         response = self.readUntilPrompt().rstrip('\n')
-        self.log.debug("Command " + cmd + " responded with '" + response + "'")
+        self.log.info("Command " + cmd + " responded with '" + response + "'")
         return response
 
     def command_no_wait(self, cmd):

@@ -54,6 +54,8 @@ class I2CDevice(object):
         if handler is None:
             return self._missing_handler(data)
 
+        self._get_logger().info("%s.%s(%s)", type(self).__name__, handler.__name__, hex_data(args))
+
         self.response = handler(self, *args) or []
 
     def get_response(self):
@@ -63,7 +65,7 @@ class I2CDevice(object):
         raise LatchBusError()
 
     def _missing_handler(self, data):
-        logging.getLogger('Device: 0x{:2X}'.format(self.address)).error('Missing handler for 0x{:2X}'.format(self.address, binascii.hexlify(bytearray(data))))
+        self._get_logger().error('Missing handler for 0x{:2X}'.format(self.address, binascii.hexlify(bytearray(data))))
 
     def _init_handlers(self):
         handlers = []
@@ -75,6 +77,9 @@ class I2CDevice(object):
                 pass
 
         return handlers
+
+    def _get_logger(self):
+        return logging.getLogger('Device 0x{:2X}'.format(self.address))
 
 
 class MissingDevice(I2CDevice):
@@ -359,7 +364,7 @@ class I2CMock(object):
         address = ord(address)
         data = [ord(c) for c in data]
 
-        self._pld_log.info('Device(%X) write(%s)', address, hex_data(data))
+        self._pld_log.debug('Device(0x%X) write(%s)', address / 2, hex_data(data))
 
         try:
             device = self._pld_device(address)
@@ -376,7 +381,7 @@ class I2CMock(object):
     def _device_command_pld_request_response(self, address):
         address = ord(address)
 
-        self._pld_log.info('Device(%X) read', address)
+        self._pld_log.debug('Device(0x%X) read', address / 2)
         device = self._pld_device(address)
 
         response = device.get_response() or []
@@ -389,12 +394,11 @@ class I2CMock(object):
         address = ord(address)
         data = [ord(c) for c in data]
 
-        self._bus_log.info('Device(%X) write(%s)', address, hex_data(data))
+        self._bus_log.debug('Device(0x%X) write(%s)', address / 2, hex_data(data))
         try:
             device = self._bus_device(address)
 
             device.handle(data)
-
             response = device.get_response()
 
             self._bus_log.debug('Generated response %r', response)
@@ -405,7 +409,7 @@ class I2CMock(object):
     def _device_command_bus_request_response(self, address):
         address = ord(address)
 
-        self._bus_log.info('Device(%X) read', address)
+        self._bus_log.debug('Device(0x%X) read', address / 2)
         device = self._bus_device(address)
 
         response = device.get_response() or []
@@ -418,7 +422,7 @@ class I2CMock(object):
         if self._bus_devices.has_key(address / 2):
             return self._bus_devices[address / 2]
         else:
-            return MissingDevice('BUS', address)
+            return MissingDevice('BUS', address / 2)
 
     def _pld_device(self, address):
         if self._pld_devices.has_key(address / 2):

@@ -195,18 +195,15 @@ class TransmitterDevice(i2cMock.I2CDevice):
     
     @i2cMock.command([0xAA])
     def _reset(self):
-        self.log.info("Reset")
         call(self.on_reset, None)
         self.reset()
 
     @i2cMock.command([0xAB])
     def _hwreset(self):
-        self.log.info("Hardware Reset")
         call(self.on_hardware_reset, None)
 
     @i2cMock.command([0xCC])
     def _watchdog_reset(self):
-        self.log.info("Watchdog Reset")
         call(self.on_watchdog_reset, None)
 
     @i2cMock.command([0x10])
@@ -298,18 +295,15 @@ class ReceiverDevice(i2cMock.I2CDevice):
 
     @i2cMock.command([0xAA])
     def _reset(self):
-        self.log.info("Reset")
         call(self.on_reset, None)
         self.reset()
 
     @i2cMock.command([0xAB])
     def _hwreset(self):
-        self.log.info("Hardware reset")
         call(self.on_hardware_reset, None)
 
     @i2cMock.command([0xCC])
     def _watchdog_reset(self):
-        self.log.info("Watchdog Reset")
         call(self.on_watchdog_reset, None)
 
     @i2cMock.command([0x21])
