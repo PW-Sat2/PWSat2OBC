@@ -173,6 +173,11 @@ namespace program_flash
             return this->_copy.Program(offset, byte);
         }
 
+        inline gsl::span<const std::uint8_t> Content() const
+        {
+            return {this->_copy.Data(), 64_KB};
+        }
+
       private:
         FlashSpan _copy;
     };

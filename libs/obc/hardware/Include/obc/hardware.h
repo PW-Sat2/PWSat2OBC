@@ -17,6 +17,7 @@
 #include "imtq/imtq.h"
 #include "io_map.h"
 #include "logger/logger.h"
+#include "msc/msc.hpp"
 #include "power/power.h"
 #include "program_flash/flash_driver.hpp"
 #include "rtc/rtc.hpp"
@@ -141,6 +142,9 @@ namespace obc
          * @brief Fram's spi access
          */
         drivers::spi::EFMSPISlaveInterface FramSpi[3];
+
+        /** @brief MCU internal flash driver */
+        drivers::msc::MCUMemoryController MCUFlash;
 
         /**
          * @brief Object that provides read/write capabilities to persistent storage
