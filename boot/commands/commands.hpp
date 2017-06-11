@@ -15,6 +15,7 @@ void SetBootSlotToUpper();
 
 void UploadApplication();
 void UploadSafeMode();
+void CopyBootloader();
 
 void PrintBootTable();
 void EraseBootTable();

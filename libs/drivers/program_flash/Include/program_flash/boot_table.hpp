@@ -151,6 +151,32 @@ namespace program_flash
         FlashSpanAt<1024> _program;
     };
 
+    class BootloaderCopy
+    {
+      public:
+        BootloaderCopy(IFlashDriver& flash, std::uint8_t index) : _copy(flash, 3_MB + 64_KB * index)
+        {
+        }
+
+        inline FlashStatus Erase()
+        {
+            return this->_copy.Erase(0);
+        }
+
+        inline FlashStatus Write(std::size_t offset, gsl::span<std::uint8_t> contents)
+        {
+            return this->_copy.Program(offset, contents);
+        }
+
+        inline FlashStatus Write(std::size_t offset, std::uint8_t byte)
+        {
+            return this->_copy.Program(offset, byte);
+        }
+
+      private:
+        FlashSpan _copy;
+    };
+
     /**
      * @brief Boot table
      */
@@ -197,8 +223,16 @@ namespace program_flash
             return ProgramEntry(this->_flash, index);
         }
 
+        inline BootloaderCopy GetBootloaderCopy(std::uint8_t index)
+        {
+            return BootloaderCopy(this->_flash, index);
+        }
+
         /** @brief Number of entries in boot table */
         static constexpr std::uint8_t EntriesCount = 6;
+
+        /** @brief Number of bootloader copies */
+        static constexpr std::uint8_t BootloaderCopies = 5;
 
       private:
         /** @brief Flash driver */

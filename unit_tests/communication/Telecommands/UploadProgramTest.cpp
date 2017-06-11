@@ -17,6 +17,7 @@ using testing::Return;
 using testing::StrEq;
 using testing::Each;
 using testing::ElementsAre;
+using testing::ElementsAreArray;
 using telecommunication::downlink::DownlinkAPID;
 using program_flash::FlashStatus;
 
@@ -162,6 +163,17 @@ TEST_F(UploadProgramTest, ProgramSequence)
     ASSERT_THAT(entry.IsValid(), Eq(true));
     ASSERT_THAT(entry.Description(), StrEq("Test"));
     ASSERT_THAT(reinterpret_cast<const char*>(entry.Content()), StrEq("Program"));
+}
+
+TEST_F(UploadProgramTest, ShouldWriteBootloaderCopy)
+{
+    std::uint8_t items[] = {1, 3, 5, 7, 9, 2, 4, 6, 8, 0};
+
+    auto copy = this->_bootTable.GetBootloaderCopy(1);
+    copy.Erase();
+    copy.Write(0, items);
+
+    ASSERT_THAT(gsl::make_span(&this->_flash[3_MB + 64_KB], 10), ElementsAreArray(items, 10));
 }
 
 TEST_F(UploadProgramTest, WriteProgramByTelecommands)

@@ -5,6 +5,8 @@
 #include "program_flash/boot_table.hpp"
 #include "xmodem.h"
 
+using program_flash::FlashStatus;
+
 void UploadApplication()
 {
     BSP_UART_Puts(BSP_UART_DEBUG, "\n\nBoot Index: ");
@@ -60,4 +62,46 @@ void UploadApplication()
 void UploadSafeMode()
 {
     XMODEM_upload(nullptr);
+}
+
+void CopyBootloader()
+{
+    BSP_UART_Puts(BSP_UART_DEBUG, "\nCopying current bootloader to external flash....\n");
+
+    gsl::span<std::uint8_t> sourceSpan(reinterpret_cast<std::uint8_t*>(1), 64_KB - 1);
+    std::uint8_t* firstByteOfBootloader = reinterpret_cast<std::uint8_t*>(0);
+
+    for (std::uint8_t i = 0; i < program_flash::BootTable::BootloaderCopies; i++)
+    {
+        BSP_UART_Printf<10>(BSP_UART_DEBUG, "\tCopy %d:\t", i);
+
+        auto copy = Bootloader.BootTable.GetBootloaderCopy(i);
+
+        BSP_UART_Puts(BSP_UART_DEBUG, "Erasing\t");
+        auto r = copy.Erase();
+        if (r != FlashStatus::NotBusy)
+        {
+            BSP_UART_Printf<10>(BSP_UART_DEBUG, "Failed %d\n", num(r));
+            return;
+        }
+
+        BSP_UART_Puts(BSP_UART_DEBUG, "Programing\t");
+        r = copy.Write(0, *firstByteOfBootloader);
+        if (r != FlashStatus::NotBusy)
+        {
+            BSP_UART_Printf<10>(BSP_UART_DEBUG, "Failed %d\n", num(r));
+            return;
+        }
+
+        r = copy.Write(1, sourceSpan);
+        if (r != FlashStatus::NotBusy)
+        {
+            BSP_UART_Printf<10>(BSP_UART_DEBUG, "Failed %d\n", num(r));
+            return;
+        }
+
+        BSP_UART_Puts(BSP_UART_DEBUG, "\n");
+    }
+
+    BSP_UART_Puts(BSP_UART_DEBUG, "Copy done\n");
 }
