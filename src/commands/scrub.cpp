@@ -44,54 +44,63 @@ std::array<Output, Count> Map(std::array<Input, Count>& input, Mapper map)
     return result;
 }
 
-// static constexpr std::size_t ScrubSize = program_flash::IFlashDriver::LargeSectorSize;
-//
-// static std::array<uint8_t, ScrubSize> ScrubBuffer;
-//
-// static inline bool FastSpanCompare(const gsl::span<const uint8_t>& a, const gsl::span<const uint8_t>& b)
-//{
-//    return memcmp(a.data(), b.data(), a.size()) == 0;
-//}
+static inline bool FastSpanCompare(const gsl::span<const uint8_t> a, const gsl::span<const uint8_t> b)
+{
+    return memcmp(a.data(), b.data(), a.size()) == 0;
+}
+
+static std::array<uint8_t, 64_KB> Scrub;
+
+static constexpr std::size_t MCUFlashEraseSector = 4_KB;
 
 void ScrubProgram(std::uint16_t /*argc*/, char* /*argv*/ [])
 {
-    //    std::array<uint8_t, 3> slots{0, 1, 2};
-    //
-    //    program_flash::ProgramEntry entries[] = {
-    //        Main.BootTable.Entry(slots[0]), Main.BootTable.Entry(slots[1]), Main.BootTable.Entry(slots[2])};
-    //
-    //    for (std::size_t scrubOffset = 0; scrubOffset < program_flash::ProgramEntry::Size; scrubOffset += ScrubSize)
-    //    {
-    //        auto scrubSpans =
-    //            Map(entries, [scrubOffset](program_flash::ProgramEntry& entry) { return entry.WholeEntry().subspan(scrubOffset,
-    //            ScrubSize); });
-    //
-    //        redundancy::CorrectBuffer(ScrubBuffer, scrubSpans[0], scrubSpans[1], scrubSpans[2]);
-    //
-    //        gsl::span<uint8_t> bufferSpan = ScrubBuffer;
-    //
-    //        auto isCorrect = Map(scrubSpans, [bufferSpan](const gsl::span<const uint8_t>& s) { return FastSpanCompare(s, bufferSpan); });
-    //
-    //        Main.terminal.Printf("Offset 0x%X:\n", scrubOffset);
-    //        Main.terminal.Printf("Correct[0]=%s\n", isCorrect[0] ? "Yes" : "No");
-    //        Main.terminal.Printf("Correct[1]=%s\n", isCorrect[1] ? "Yes" : "No");
-    //        Main.terminal.Printf("Correct[2]=%s\n\n", isCorrect[2] ? "Yes" : "No");
-    //
-    //        for (auto i = 0; i < 3; i++)
-    //        {
-    //            if (isCorrect[i])
-    //            {
-    //                continue;
-    //            }
-    //
-    //            // calc offset inside flash
-    //            auto flashOffset = entries[i].InFlashOffset() + scrubOffset;
-    //
-    //            // erase
-    //            Main.Hardware.FlashDriver.EraseSector(flashOffset);
-    //
-    //            // program correctBuffer
-    //            Main.Hardware.FlashDriver.Program(flashOffset, ScrubBuffer);
-    //        }
-    //    }
+    program_flash::BootloaderCopy copies[] = {
+        Main.BootTable.GetBootloaderCopy(0),
+        Main.BootTable.GetBootloaderCopy(1),
+        Main.BootTable.GetBootloaderCopy(2),
+        Main.BootTable.GetBootloaderCopy(3),
+        Main.BootTable.GetBootloaderCopy(4),
+    };
+
+    std::array<gsl::span<const uint8_t>, 5> spans = Map(copies, [](program_flash::BootloaderCopy& copy) { return copy.Content(); });
+
+    redundancy::CorrectBuffer(gsl::make_span(Scrub), spans);
+
+    for (std::uint8_t i = 0; i < 5; i++)
+    {
+        auto r = FastSpanCompare(Scrub, spans[i]);
+
+        if (r)
+        {
+            Main.terminal.Printf("Slot %d: OK\n", i);
+        }
+        else
+        {
+            Main.terminal.Printf("Slot %d: NOT OK\n", i);
+        }
+    }
+
+    auto bootloaderStart = reinterpret_cast<const uint8_t*>(0);
+
+    auto& msc = Main.Hardware.MCUFlash;
+
+    for (std::size_t offset = 0; offset < 64_KB; offset += MCUFlashEraseSector)
+    {
+        auto chunk = gsl::make_span(Scrub).subspan(offset, MCUFlashEraseSector);
+
+        auto isOk = memcmp(bootloaderStart + offset, chunk.data(), MCUFlashEraseSector) == 0;
+
+        if (isOk)
+        {
+            Main.terminal.Printf("Page 0x%X: OK\n", offset);
+        }
+        else
+        {
+            Main.terminal.Printf("Page 0x%X: NOT OK\n", offset);
+
+            msc.Erase(offset);
+            msc.Program(offset, chunk);
+        }
+    }
 }

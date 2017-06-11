@@ -83,7 +83,7 @@ namespace redundancy
         return true;
     }
 
-    template <typename T> bool CorrectBuffer(gsl::span<T> result, const std::array<gsl::span<T>, 5>& buffers)
+    template <typename T> bool CorrectBuffer(gsl::span<T> result, const std::array<gsl::span<const T>, 5>& buffers)
     {
         static_assert(std::is_integral<T>::value || std::is_enum<T>::value, "Correction requires integral or enum type");
         if (buffers[0].length() != buffers[1].length() || buffers[1].length() != buffers[2].length() ||

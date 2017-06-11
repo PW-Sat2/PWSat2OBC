@@ -26,6 +26,7 @@ target_link_libraries(${NAME}
 	uart
 	comm
 	flash_s29jl
+	msc
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

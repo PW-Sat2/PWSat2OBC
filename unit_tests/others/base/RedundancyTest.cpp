@@ -104,7 +104,7 @@ TEST(RedundancyTest5, ShouldAllBytesInArray)
 
     uint8_t expect[] = {0b10100000, 0b01010101, 0b11110001};
 
-    std::array<gsl::span<uint8_t>, 5> spans{array1, array2, array3, array4, array5};
+    std::array<gsl::span<const uint8_t>, 5> spans{array1, array2, array3, array4, array5};
 
     std::array<uint8_t, 3> result{0};
 
