@@ -3,6 +3,9 @@ set(NAME payload)
 set(SOURCES
     Include/payload/payload.h
     payload.cpp
+    commands/base.cpp
+    commands/RadFET.cpp
+    devices.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

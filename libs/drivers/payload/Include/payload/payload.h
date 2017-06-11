@@ -8,6 +8,8 @@
 #include "i2c/i2c.h"
 #include "utils.h"
 
+#include "interfaces.h"
+
 namespace drivers
 {
     namespace payload
@@ -65,19 +67,6 @@ namespace drivers
         };
 
         /**
-         * @brief Payload driver interface
-         */
-        struct IPayloadDriver
-        {
-            /**
-             * @brief StartsReturns pointer to data at given offset
-             * @param offset Offset into flash (0 means first byte of flash)
-             * @return Status
-             */
-            virtual OSResult RefreshRadFET() = 0;
-        };
-
-        /**
          * @brief Payload driver
          */
         class PayloadDriver : public IPayloadDriver
@@ -100,8 +89,6 @@ namespace drivers
              */
             void Initialize();
 
-            virtual OSResult RefreshRadFET();
-
             void IRQHandler();
 
             inline uint16_t IRQMask()
@@ -109,23 +96,22 @@ namespace drivers
                 return 1 << (_interruptPin.PinNumber() / 2);
             }
 
+            virtual bool IsBusy() const override;
+            virtual OSResult PayloadRead(gsl::span<std::uint8_t> outData, gsl::span<std::uint8_t> inData) override;
+            virtual OSResult PayloadWrite(gsl::span<std::uint8_t> outData) override;
+            virtual OSResult WaitForData() override;
+
           private:
             /*
              * @brief DefaultTimeout Default timeout for Payload operations. 30 minutes.
              */
-            static constexpr std::chrono::milliseconds DefaultTimeout = std::chrono::milliseconds(1800000);
-            static constexpr uint32_t DefaultTimeout2 = 1800000;
-            // TODO: fix that
+            static constexpr uint32_t DefaultTimeout = 1800000;
 
             drivers::i2c::II2CBus& _i2c;
             const drivers::gpio::Pin& _interruptPin;
 
             /** @brief Synchronization */
             OSSemaphoreHandle _sync;
-
-            OSResult PerformCommand(PayloadCommands command);
-            OSResult PerformDataRead(uint8_t address, gsl::span<uint8_t> buffer);
-            OSResult ValidateData(gsl::span<uint8_t> buffer);
         };
 
         /* @} */
