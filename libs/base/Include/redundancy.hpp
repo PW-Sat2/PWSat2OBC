@@ -43,6 +43,13 @@ namespace redundancy
         return (a & b) | (b & c) | (a & c);
     }
 
+    template <typename T> T Correct(T a, T b, T c, T d, T e)
+    {
+        static_assert(std::is_integral<T>::value || std::is_enum<T>::value, "Correction requires integral or enum type");
+        return (c & d & e) | (b & d & e) | (b & c & e) | (b & c & d) | (a & d & e) | (a & c & e) | (a & c & d) | (a & b & e) | (a & b & d) |
+            (a & b & c);
+    }
+
     /**
      * @brief Performs bitwise majority vote based on three elements in array.
      * @param[in] elements Array with three elements
@@ -71,6 +78,22 @@ namespace redundancy
         for (auto i = 0; i < buffer1.length(); ++i)
         {
             buffer1[i] = Correct(buffer1[i], buffer2[i], buffer3[i]);
+        }
+
+        return true;
+    }
+
+    template <typename T> bool CorrectBuffer(gsl::span<T> result, const std::array<gsl::span<T>, 5>& buffers)
+    {
+        static_assert(std::is_integral<T>::value || std::is_enum<T>::value, "Correction requires integral or enum type");
+        if (buffers[0].length() != buffers[1].length() || buffers[1].length() != buffers[2].length() ||
+            buffers[2].length() != buffers[3].length() || buffers[3].length() != buffers[4].length() ||
+            result.length() != buffers[0].length())
+            return false;
+
+        for (auto i = 0; i < result.length(); ++i)
+        {
+            result[i] = Correct(buffers[0][i], buffers[1][i], buffers[2][i], buffers[3][i], buffers[4][i]);
         }
 
         return true;
