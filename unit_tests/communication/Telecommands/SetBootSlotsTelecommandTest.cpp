@@ -69,3 +69,29 @@ TEST_F(SetBootSlotsTelecommandTest, ShouldSendErrorFrameForInvalidRequest)
 
     Run(0x0, 0x02);
 }
+
+TEST_F(SetBootSlotsTelecommandTest, ShouldSendErrorFrameForInvalidBootSlot)
+{
+    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0x0, ElementsAre(0x11, 0xE1))));
+
+    _settings.BootSlots(0x15);
+    _settings.FailsafeBootSlots(0x13);
+
+    Run(0x11, 0x00, 0x31);
+
+    ASSERT_THAT(_settings.BootSlots(), Eq(0x15));
+    ASSERT_THAT(_settings.FailsafeBootSlots(), Eq(0x13));
+}
+
+TEST_F(SetBootSlotsTelecommandTest, ShouldSendErrorFrameForInvalidFailsafeBootSlot)
+{
+    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0x0, ElementsAre(0x11, 0xE2))));
+
+    _settings.BootSlots(0x15);
+    _settings.FailsafeBootSlots(0x13);
+
+    Run(0x11, 0x31, 0x00);
+
+    ASSERT_THAT(_settings.BootSlots(), Eq(0x15));
+    ASSERT_THAT(_settings.FailsafeBootSlots(), Eq(0x13));
+}

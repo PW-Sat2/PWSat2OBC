@@ -172,27 +172,21 @@ TEST_F(BootSettingsTest, ShouldReturnErrorWhenSettingBootCounterReadBackReturnsD
     ASSERT_THAT(result, Eq(false));
 }
 
-TEST_F(BootSettingsTest, ShouldReturnIfLastBootConfirmedFlagIsSet)
+TEST_F(BootSettingsTest, ShouldReturnLastConfirmedBootCounter)
 {
-    this->_memory[10] = 0x21;
-    auto result = _settings.WasLastBootConfirmed();
-    ASSERT_THAT(result, Eq(true));
-
     this->_memory[10] = 0x12;
-    result = _settings.WasLastBootConfirmed();
-    ASSERT_THAT(result, Eq(false));
+    this->_memory[11] = 0x34;
+    this->_memory[12] = 0x56;
+    this->_memory[13] = 0x78;
+    auto result = _settings.LastConfirmedBootCounter();
+    ASSERT_THAT(result, Eq(0x78563412UL));
 }
 
-TEST_F(BootSettingsTest, ShouldSetLastBootConfirmedFlag)
+TEST_F(BootSettingsTest, ShouldSetLastBootConfirmedBootCounter)
 {
-    _settings.ConfirmLastBoot();
-    ASSERT_THAT(this->_memory[10], Eq(0x21));
-}
-
-TEST_F(BootSettingsTest, ShouldClearLastBootConfirmedFlag)
-{
-    _settings.UnconfirmLastBoot();
-    ASSERT_THAT(this->_memory[10], Eq(0));
+    _settings.BootCounter(0x1234);
+    _settings.ConfirmBoot();
+    ASSERT_THAT(_settings.LastConfirmedBootCounter(), Eq(0x1234UL));
 }
 
 TEST_F(BootSettingsTest, TestErase)
@@ -204,4 +198,21 @@ TEST_F(BootSettingsTest, TestErase)
     _settings.Erase();
 
     ASSERT_THAT(gsl::make_span(this->_memory).subspan(0, 9), Each(Eq(0xFF)));
+}
+
+TEST_F(BootSettingsTest, ShouldCheckIfBootSlotIsValid)
+{
+    ASSERT_THAT(boot::BootSettings::IsValidBootSlot(0b10000000), Eq(true));
+    ASSERT_THAT(boot::BootSettings::IsValidBootSlot(0b01000000), Eq(true));
+
+    ASSERT_THAT(boot::BootSettings::IsValidBootSlot(0b11000000), Eq(false));
+    ASSERT_THAT(boot::BootSettings::IsValidBootSlot(0b00000000), Eq(false));
+
+    ASSERT_THAT(boot::BootSettings::IsValidBootSlot(0b00000001), Eq(false));
+    ASSERT_THAT(boot::BootSettings::IsValidBootSlot(0b00000011), Eq(false));
+    ASSERT_THAT(boot::BootSettings::IsValidBootSlot(0b00001111), Eq(false));
+
+    ASSERT_THAT(boot::BootSettings::IsValidBootSlot(0b00000111), Eq(true));
+    ASSERT_THAT(boot::BootSettings::IsValidBootSlot(0b00111000), Eq(true));
+    ASSERT_THAT(boot::BootSettings::IsValidBootSlot(0b00101010), Eq(true));
 }

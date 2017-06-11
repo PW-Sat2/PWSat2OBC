@@ -9,7 +9,7 @@ def _parse_boot_settings(s):
         'Primary': int(m['Primary boot slots'].strip(), 16),
         'Failsafe': int(m['Failsafe boot slots'].strip(), 16),
         'Counter': int(m['Boot counter'].strip()),
-        'Confirmed': m['Boot confirmed'].strip() == "Yes"
+        'LastConfirmedCounter': int(m['Last confirmed boot counter'].strip())
     }
 
 

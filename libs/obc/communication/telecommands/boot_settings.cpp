@@ -30,6 +30,24 @@ namespace obc
                 return;
             }
 
+            if (!boot::BootSettings::IsValidBootSlot(bootSlots))
+            {
+                telecommunication::downlink::CorrelatedDownlinkFrame frame(DownlinkAPID::Operation, 0x0, correlationId);
+                frame.PayloadWriter().WriteByte(0xE1);
+
+                transmitter.SendFrame(frame.Frame());
+                return;
+            }
+
+            if (!boot::BootSettings::IsValidBootSlot(failsafeBootSlots))
+            {
+                telecommunication::downlink::CorrelatedDownlinkFrame frame(DownlinkAPID::Operation, 0x0, correlationId);
+                frame.PayloadWriter().WriteByte(0xE2);
+
+                transmitter.SendFrame(frame.Frame());
+                return;
+            }
+
             this->_settings.BootSlots(bootSlots);
             this->_settings.FailsafeBootSlots(failsafeBootSlots);
             this->_settings.MarkAsValid();
