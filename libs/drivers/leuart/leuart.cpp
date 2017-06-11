@@ -92,9 +92,10 @@ static void leuartPrintBuffer(gsl::span<const std::uint8_t> buffer)
     }
 }
 
-static size_t leuartReadline(LineIO* io, char* buffer, size_t bufferLength)
+static size_t leuartReadline(LineIO* io, char* buffer, size_t bufferLength, char promptChar)
 {
     UNREFERENCED_PARAMETER(io);
+    UNREFERENCED_PARAMETER(promptChar);
 
     LEUART_IntEnable(LEUART0, LEUART_IEN_SIGF);
 

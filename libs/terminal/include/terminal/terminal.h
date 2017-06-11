@@ -84,11 +84,6 @@ class Terminal
 
   private:
     /**
-     * @brief Sends prefix
-     */
-    void SendPrefix();
-
-    /**
      * @brief Handles incoming command
      * @param[in] buffer Buffer with incoming command
      *

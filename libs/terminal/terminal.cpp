@@ -49,11 +49,6 @@ void Terminal::NewLine()
     this->Puts("\n");
 }
 
-void Terminal::SendPrefix()
-{
-    this->Puts(">");
-}
-
 void Terminal::Printf(const char* text, ...)
 {
     va_list args;
@@ -99,22 +94,17 @@ void Terminal::HandleCommand(char* buffer)
 
 void Terminal::Loop(Terminal* terminal)
 {
-    bool firstRun = true;
+    char prompt = '\0';
 
     while (1)
     {
         char input_buffer[100] = {0};
 
-        if (!firstRun)
-        {
-            terminal->SendPrefix();
-        }
-
-        firstRun = false;
-
-        terminal->_stdio.Readline(&terminal->_stdio, input_buffer, COUNT_OF(input_buffer));
+        terminal->_stdio.Readline(&terminal->_stdio, input_buffer, COUNT_OF(input_buffer), prompt);
 
         terminal->HandleCommand(input_buffer);
+
+        prompt = '>';
     }
 }
 
