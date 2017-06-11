@@ -22,7 +22,7 @@ class BootSettingsTelecomandsTest(BaseTest):
         e.wait_for_change(1)
 
     @runlevel(2)
-    def test_x(self):
+    def test_set_boot_settings(self):
         self._start()
         self.system.comm.put_frame(SetBootSlots(correlation_id=0x14, primary=0b111, failsafe=0b111000))
 

@@ -172,27 +172,21 @@ TEST_F(BootSettingsTest, ShouldReturnErrorWhenSettingBootCounterReadBackReturnsD
     ASSERT_THAT(result, Eq(false));
 }
 
-TEST_F(BootSettingsTest, ShouldReturnIfLastBootConfirmedFlagIsSet)
+TEST_F(BootSettingsTest, ShouldReturnLastConfirmedBootCounter)
 {
-    this->_memory[10] = 0x21;
-    auto result = _settings.WasLastBootConfirmed();
-    ASSERT_THAT(result, Eq(true));
-
     this->_memory[10] = 0x12;
-    result = _settings.WasLastBootConfirmed();
-    ASSERT_THAT(result, Eq(false));
+    this->_memory[11] = 0x34;
+    this->_memory[12] = 0x56;
+    this->_memory[13] = 0x78;
+    auto result = _settings.LastConfirmedBootCounter();
+    ASSERT_THAT(result, Eq(0x78563412UL));
 }
 
-TEST_F(BootSettingsTest, ShouldSetLastBootConfirmedFlag)
+TEST_F(BootSettingsTest, ShouldSetLastBootConfirmedBootCounter)
 {
-    _settings.ConfirmLastBoot();
-    ASSERT_THAT(this->_memory[10], Eq(0x21));
-}
-
-TEST_F(BootSettingsTest, ShouldClearLastBootConfirmedFlag)
-{
-    _settings.UnconfirmLastBoot();
-    ASSERT_THAT(this->_memory[10], Eq(0));
+    _settings.BootCounter(0x1234);
+    _settings.ConfirmBoot();
+    ASSERT_THAT(_settings.LastConfirmedBootCounter(), Eq(0x1234UL));
 }
 
 TEST_F(BootSettingsTest, TestErase)

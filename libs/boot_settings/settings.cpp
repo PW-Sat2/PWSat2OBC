@@ -26,11 +26,11 @@ namespace boot
     {
     };
 
-    struct BootConfirmedField : public Element<std::uint8_t>
+    struct LastConfirmedBootCounterField : public Element<std::uint32_t>
     {
     };
 
-    using BootFields = Offsets<MagicNumberField, BootSlotsField, FailsafeBootSlotsField, BootCounterField, BootConfirmedField>;
+    using BootFields = Offsets<MagicNumberField, BootSlotsField, FailsafeBootSlotsField, BootCounterField, LastConfirmedBootCounterField>;
 
     BootSettings::BootSettings(devices::fm25w::IFM25WDriver& fram) : _fram(fram)
     {
@@ -116,28 +116,28 @@ namespace boot
         this->_fram.Write(BootFields::Offset<MagicNumberField>(), buf);
     }
 
-    bool BootSettings::WasLastBootConfirmed() const
+    std::uint32_t BootSettings::LastConfirmedBootCounter() const
     {
-        std::uint8_t buf = 0;
-        this->_fram.Read(BootFields::Offset<BootConfirmedField>(), {&buf, 1});
+        array<std::uint8_t, 4> buf;
+        this->_fram.Read(BootFields::Offset<LastConfirmedBootCounterField>(), buf);
 
-        return buf == BootConfirmedFlag;
+        Reader r(buf);
+
+        return r.ReadDoubleWordLE();
     }
 
-    bool BootSettings::ConfirmLastBoot()
+    bool BootSettings::ConfirmBoot()
     {
-        std::uint8_t buf = BootConfirmedFlag;
-        this->_fram.Write(BootFields::Offset<BootConfirmedField>(), {&buf, 1});
+        auto counter = this->BootCounter();
 
-        return WasLastBootConfirmed();
-    }
+        array<std::uint8_t, 4> buf;
 
-    bool BootSettings::UnconfirmLastBoot()
-    {
-        std::uint8_t buf = 0;
-        this->_fram.Write(BootFields::Offset<BootConfirmedField>(), {&buf, 1});
+        Writer w(buf);
+        w.WriteDoubleWordLE(counter);
 
-        return !WasLastBootConfirmed();
+        this->_fram.Write(BootFields::Offset<LastConfirmedBootCounterField>(), buf);
+
+        return this->LastConfirmedBootCounter() == counter;
     }
 
     void BootSettings::Erase()

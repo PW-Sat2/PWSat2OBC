@@ -75,22 +75,16 @@ namespace boot
         void MarkAsValid();
 
         /**
-         * @brief Checks if last boot was confirmed
-         * @return true if boot was confirmed
+         * @brief Returns value of boot counter of last confirmed boot
+         * @return Boot counter value of last confirmed boot
          */
-        bool WasLastBootConfirmed() const;
+        std::uint32_t LastConfirmedBootCounter() const;
 
         /**
-         * @brief Confirms last boot
+         * @brief Confirms current boot
          * @return Operation result
          */
-        bool ConfirmLastBoot();
-
-        /**
-         * @brief Marks boot as unconfirmed
-         * @return Operation result
-         */
-        bool UnconfirmLastBoot();
+        bool ConfirmBoot();
 
         /**
          * @brief Erases all settings
@@ -115,8 +109,6 @@ namespace boot
       private:
         /** @brief Magic number */
         static constexpr std::uint32_t MagicNumber = 0x7D53C5D5;
-        /** @brief Boot confirmed flag value */
-        static constexpr std::uint8_t BootConfirmedFlag = 0x21;
 
         /** @brief FRAM driver */
         devices::fm25w::IFM25WDriver& _fram;
