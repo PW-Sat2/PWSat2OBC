@@ -87,7 +87,7 @@ namespace drivers
             }
         }
 
-        size_t UART::Readline(struct _LineIO* io, char* buffer, std::size_t bufferLength)
+        size_t UART::Readline(struct _LineIO* io, char* buffer, std::size_t bufferLength, char promptChar)
         {
             auto This = reinterpret_cast<UART*>(io->extra);
 
@@ -99,6 +99,11 @@ namespace drivers
             This->_bufferEnd = buffer + bufferLength;
 
             NVIC_EnableIRQ(IRQn::UART1_RX_IRQn);
+
+            if (promptChar != '\0')
+            {
+                USART_Tx(io_map::UART::Peripheral, promptChar);
+            }
 
             This->_event.WaitAny(Event::LineEndReceived, true, InfiniteTimeout);
 

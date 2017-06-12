@@ -71,9 +71,10 @@ namespace drivers
              * @param io @see LineIO structure
              * @param buffer Buffer that will hold upcoming data
              * @param bufferLength Maximum length of buffer
+             * @param promptChar Character to send as prompt before waiting for line read. Pass '\0' to not send any prompt.
              * @return Count of read characters
              */
-            static size_t Readline(struct _LineIO* io, char* buffer, std::size_t bufferLength);
+            static size_t Readline(struct _LineIO* io, char* buffer, std::size_t bufferLength, char promptChar);
             /**
              * @brief Reads arbitrary number of bytes
              * @param io @see LineIO structure
