@@ -97,6 +97,13 @@ class BitWriter
     bool WriteQuadWord(std::uint64_t value, std::uint8_t length);
 
     /**
+     * @brief Appends array of bytes to the writer output.
+     * @param[in] buffer Array of bytes that should be added to writer output.
+     * @return Operation status.
+     */
+    bool WriteSpan(gsl::span<const std::uint8_t> buffer);
+
+    /**
      * @brief Appends 8-bit value to the buffer and moves the current position to the next free bit.
      * @param[in] value Value that should be added to writer output.
      * @return Operation status.
@@ -203,7 +210,7 @@ class BitWriter
      */
     bool Write(std::uint64_t value, std::uint8_t length);
 
-    bool UpdateStatus(std::uint8_t length, std::uint8_t lengthLimit);
+    bool UpdateStatus(std::uint32_t length, std::uint32_t lengthLimit);
 
     /**
      * @brief Pointer to the buffer in memory.
