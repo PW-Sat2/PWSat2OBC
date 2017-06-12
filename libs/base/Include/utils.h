@@ -614,4 +614,9 @@ namespace details
  */
 template <typename... Args> constexpr const std::uint32_t Aggregate = details::AggregateSize<Args...>::Value;
 
+template <std::size_t Alignment> constexpr bool IsAligned(const void* ptr)
+{
+    return (reinterpret_cast<std::size_t>(ptr) & (Alignment - 1)) == 0;
+}
+
 #endif
