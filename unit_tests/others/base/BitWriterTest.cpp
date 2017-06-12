@@ -423,4 +423,30 @@ namespace
         ASSERT_TRUE(writer.Status());
         CheckBuffer(writer.Capture(), gsl::make_span(expected));
     }
+
+    TEST(BitWriterTest, TestWritingArrayAligned)
+    {
+        uint8_t array[] = {0x11, 0x99, 0xaa};
+        uint8_t buffer[3];
+        const uint8_t expected[] = {0x11, 0x99, 0xaa};
+        BitWriter writer(buffer);
+        writer.WriteSpan(gsl::make_span(array));
+        ASSERT_TRUE(writer.Status());
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(24u));
+        CheckBuffer(writer.Capture(), gsl::make_span(expected));
+    }
+
+    TEST(BitWriterTest, TestWritingArrayUnaligned)
+    {
+        uint8_t array[] = {0x11, 0x99, 0xaa};
+        uint8_t buffer[4];
+        const uint8_t expected[] = {0x23, 0x32, 0x55, 0x03};
+        BitWriter writer(buffer);
+        writer.Write(true);
+        writer.WriteSpan(gsl::make_span(array));
+        writer.Write(true);
+        ASSERT_TRUE(writer.Status());
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(26u));
+        CheckBuffer(writer.Capture(), gsl::make_span(expected));
+    }
 }
