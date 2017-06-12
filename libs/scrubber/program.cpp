@@ -1,6 +1,7 @@
 #include "program.hpp"
 #include <bitset>
 #include <cstring>
+#include "base/array_map.hpp"
 #include "logger/logger.h"
 #include "redundancy.hpp"
 
@@ -8,36 +9,6 @@ namespace scrubber
 {
     namespace
     {
-        template <typename Input,
-            std::size_t Count,
-            typename Mapper,
-            typename Output = decltype(std::declval<Mapper>()(std::declval<Input&>()))>
-        std::array<Output, Count> Map(Input (&input)[Count], Mapper map)
-        {
-            std::array<Output, Count> result;
-            for (std::size_t i = 0; i < Count; i++)
-            {
-                result[i] = map(input[i]);
-            }
-
-            return result;
-        }
-
-        template <typename Input,
-            std::size_t Count,
-            typename Mapper,
-            typename Output = decltype(std::declval<Mapper>()(std::declval<Input&>()))>
-        std::array<Output, Count> Map(std::array<Input, Count>& input, Mapper map)
-        {
-            std::array<Output, Count> result;
-            for (std::size_t i = 0; i < Count; i++)
-            {
-                result[i] = map(input[i]);
-            }
-
-            return result;
-        }
-
         static inline bool FastSpanCompare(const gsl::span<const uint8_t> a, const gsl::span<const uint8_t> b)
         {
             return memcmp(a.data(), b.data(), a.size()) == 0;

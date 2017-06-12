@@ -2,6 +2,7 @@ set(NAME scrubber)
 
 set(SOURCES
     program.cpp
+    bootloader_copies.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

@@ -175,8 +175,10 @@ namespace program_flash
 
         inline gsl::span<const std::uint8_t> Content() const
         {
-            return {this->_copy.Data(), 64_KB};
+            return {this->_copy.Data(), Size};
         }
+
+        static constexpr std::size_t Size = 64_KB;
 
       private:
         FlashSpan _copy;
