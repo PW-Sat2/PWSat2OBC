@@ -66,7 +66,7 @@ namespace mission
      * The telemetry archivization process is done by removing \a previous \a telemetry \a file and
      * changing \a current \a telemetry \a file name to \a previous \a telemetry \a file name.
      */
-    class TelemetryTask : public Action
+    class TelemetryTask : public Action, public Update
     {
       public:
         /**
@@ -76,8 +76,14 @@ namespace mission
         TelemetryTask(std::tuple<services::fs::IFileSystem&, TelemetryConfiguration> arguments);
 
         /**
+         * @brief Builds update descriptor for this task.
+         * @return Update descriptor for the telemetry save task.
+         */
+        UpdateDescriptor<telemetry::TelemetryState> BuildUpdate();
+
+        /**
          * @brief Builds action descriptor for this task.
-         * @return Action descriptor - the telemetry change save task.
+         * @return Action descriptor - the telemetry save task.
          */
         ActionDescriptor<telemetry::TelemetryState> BuildAction();
 
@@ -116,6 +122,8 @@ namespace mission
          * @param[in] param Current execution context.
          */
         static void SaveProxy(telemetry::TelemetryState& state, void* param);
+
+        static UpdateResult UpdateState(telemetry::TelemetryState& state, void* param);
 
         /**
          * @brief File system provider.

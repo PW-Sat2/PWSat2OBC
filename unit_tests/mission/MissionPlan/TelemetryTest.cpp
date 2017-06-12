@@ -31,6 +31,7 @@ namespace
         mission::TelemetryConfiguration config;
         mission::TelemetryTask task;
         mission::ActionDescriptor<telemetry::TelemetryState> descriptor;
+        mission::UpdateDescriptor<telemetry::TelemetryState> update;
     };
 
     TelemetryTest::TelemetryTest()
@@ -38,6 +39,7 @@ namespace
           task(std::tie(fs, config))
     {
         this->descriptor = task.BuildAction();
+        this->update = task.BuildUpdate();
     }
 
     inline FileOpenResult TelemetryTest::OpenSuccessful(int handle)
@@ -58,25 +60,45 @@ namespace
     TEST_F(TelemetryTest, TestConditionWithChanges)
     {
         state.telemetry.Set(state::TimeState(5min, 10min));
-        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
+        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
     }
 
     TEST_F(TelemetryTest, TestSkipConditionWithChanges)
     {
         state.telemetry.Set(state::TimeState(5min, 10min));
+        this->update.Execute(this->state);
         ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
+        this->update.Execute(this->state);
         ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
+        this->update.Execute(this->state);
         ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
+        this->update.Execute(this->state);
         ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
     }
 
     TEST_F(TelemetryTest, TestSkipConditionWithChangesArrivingVeryLate)
     {
-        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
-        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
-        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
+        this->update.Execute(this->state);
+        this->update.Execute(this->state);
+        this->update.Execute(this->state);
         state.telemetry.Set(state::TimeState(5min, 10min));
+        this->update.Execute(this->state);
         ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
+    }
+
+    TEST_F(TelemetryTest, TestConditionStability)
+    {
+        state.telemetry.Set(state::TimeState(5min, 10min));
+        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
+        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
+        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
+        this->update.Execute(this->state);
+        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
+        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
+        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
+        this->update.Execute(this->state);
+        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
+        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
         ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
     }
 

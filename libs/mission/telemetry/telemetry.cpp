@@ -10,8 +10,17 @@ namespace mission
         : provider(std::get<0>(arguments)),      //
           configuration(std::get<1>(arguments)), //
           frequency(configuration.delay),        //
-          delay(0)
+          delay(configuration.delay)
     {
+    }
+
+    UpdateDescriptor<telemetry::TelemetryState> TelemetryTask::BuildUpdate()
+    {
+        UpdateDescriptor<telemetry::TelemetryState> descriptor;
+        descriptor.name = "Save telemetry to file update";
+        descriptor.param = this;
+        descriptor.updateProc = UpdateState;
+        return descriptor;
     }
 
     ActionDescriptor<telemetry::TelemetryState> TelemetryTask::BuildAction()
@@ -24,15 +33,21 @@ namespace mission
         return descriptor;
     }
 
-    bool TelemetryTask::SaveCondition(const telemetry::TelemetryState& state, void* param)
+    UpdateResult TelemetryTask::UpdateState(telemetry::TelemetryState& /*state*/, void* param)
     {
         auto This = static_cast<TelemetryTask*>(param);
-        if (This->delay >= This->frequency)
+        if (++This->delay >= This->frequency)
         {
             This->delay = 0;
         }
 
-        return This->delay++ == 0 && state.telemetry.IsModified();
+        return UpdateResult::Ok;
+    }
+
+    bool TelemetryTask::SaveCondition(const telemetry::TelemetryState& state, void* param)
+    {
+        auto This = static_cast<TelemetryTask*>(param);
+        return This->delay == 0 && state.telemetry.IsModified();
     }
 
     void TelemetryTask::SaveProxy(telemetry::TelemetryState& state, void* param)
