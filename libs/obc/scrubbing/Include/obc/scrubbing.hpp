@@ -4,6 +4,7 @@
 #include "base/os.h"
 #include "obc/hardware_fwd.hpp"
 #include "program_flash/fwd.hpp"
+#include "scrubber/bootloader_copies.hpp"
 #include "scrubber/program.hpp"
 
 namespace obc
@@ -20,6 +21,7 @@ namespace obc
 
         scrubber::ProgramScrubber _primarySlotsScrubber;
         scrubber::ProgramScrubber _secondarySlotsScrubber;
+        scrubber::BootloaderCopiesScrubber _bootloaderCopies;
 
         Task<OBCScrubbing*, 2_KB, TaskPriority::P6> _scrubberTask;
     };

@@ -7,12 +7,13 @@ using namespace std::chrono_literals;
 
 namespace obc
 {
-    alignas(4) static scrubber::ProgramScrubber::ScrubBuffer ProgramScrubbingBuffer;
+    alignas(4) static std::array<std::uint8_t, 64_KB> ScrubbingBuffer;
 
     OBCScrubbing::OBCScrubbing(OBCHardware& hardware, program_flash::BootTable& bootTable, std::uint8_t primaryBootSlots)
         : //
-          _primarySlotsScrubber(ProgramScrubbingBuffer, bootTable, hardware.FlashDriver, primaryBootSlots),
-          _secondarySlotsScrubber(ProgramScrubbingBuffer, bootTable, hardware.FlashDriver, (~primaryBootSlots) & 0b111111),
+          _primarySlotsScrubber(ScrubbingBuffer, bootTable, hardware.FlashDriver, primaryBootSlots),
+          _secondarySlotsScrubber(ScrubbingBuffer, bootTable, hardware.FlashDriver, (~primaryBootSlots) & 0b111111),
+          _bootloaderCopies(ScrubbingBuffer, bootTable), //
           _scrubberTask("Scrubber", this, ScrubberTask)
     {
     }
@@ -28,6 +29,7 @@ namespace obc
         {
             This->_primarySlotsScrubber.ScrubSlots();
             This->_secondarySlotsScrubber.ScrubSlots();
+            This->_bootloaderCopies.Scrub();
 
             System::SleepTask(7min);
         }
