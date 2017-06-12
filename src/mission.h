@@ -14,6 +14,7 @@
 #include "mission/sail.hpp"
 #include "mission/telemetry.hpp"
 #include "mission/time.hpp"
+#include "mission/watchdog.hpp"
 #include "state/struct.h"
 #include "telemetry/collect_comm.hpp"
 #include "telemetry/collect_eps.hpp"
@@ -23,6 +24,8 @@
 
 namespace mission
 {
+    using EPSWatchdogTask = WatchdogTask<devices::eps::EPSDriver>;
+
     typedef MissionLoop<SystemState, //
         TimeTask,
         antenna::AntennaTask,
@@ -32,7 +35,8 @@ namespace mission
         mission::experiments::MissionExperimentComponent,
         mission::BeaconUpdate,
         mission::PeristentStateSave, //
-        FileSystemTask               //
+        FileSystemTask,              //
+        EPSWatchdogTask              //
         >
         ObcMission;
 }

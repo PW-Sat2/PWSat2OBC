@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta, datetime
 
 import telecommand
@@ -27,14 +28,21 @@ class TestExperimentDetumbling(BaseTest):
     @runlevel(2)
     def test_should_perform_experiment(self):
         self._start()
+
+        log = logging.getLogger("TEST")
+
         start_time = datetime.now()
         self.system.rtc.set_response_time(start_time)
 
+        log.info('Sending telecommand')
         self.system.comm.put_frame(telecommand.PerformDetumblingExperiment(duration=timedelta(hours=4)))
 
+        log.info('Waiting for experiment')
         self.system.obc.wait_for_experiment(ExperimentType.Detumbling, 40)
 
+        log.info('Advancing time')
         self.system.obc.advance_time(timedelta(hours=4, minutes=1).total_seconds() * 1000)
         self.system.rtc.set_response_time(start_time + timedelta(hours=4, minutes=1))
 
+        log.info('Waiting for experiment finish')
         self.system.obc.wait_for_experiment(None, 20)

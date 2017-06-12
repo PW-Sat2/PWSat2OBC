@@ -5,6 +5,7 @@
 #include "logger/logger.h"
 #include "mission.h"
 #include "terminal.h"
+#include "watchdog/internal.hpp"
 
 static void ProcessState(OBC* obc)
 {
@@ -46,6 +47,11 @@ static void AuditSystemStartup()
     }
 
     efm::mcu::ResetBootReason();
+}
+
+static void TimePassed(void* /*context*/, TimePoint /*currentTime*/)
+{
+    drivers::watchdog::InternalWatchdog::Kick();
 }
 
 OBC::OBC()
@@ -95,7 +101,7 @@ OSResult OBC::InitializeRunlevel1()
     this->fs.MakeDirectory("/a");
 
     const auto missionTime = Mission.GetState().PersistentState.Get<state::TimeState>().LastMissionTime();
-    if (!this->timeProvider.Initialize(missionTime, nullptr, nullptr))
+    if (!this->timeProvider.Initialize(missionTime, TimePassed, nullptr))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize persistent timer. ");
     }
@@ -109,6 +115,8 @@ OSResult OBC::InitializeRunlevel1()
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize telemetry acquisition loop.");
     }
+
+    drivers::watchdog::InternalWatchdog::Enable();
 
     BootSettings.ConfirmLastBoot();
 

@@ -89,9 +89,13 @@ namespace devices
 
             /** @brief Controller A address */
             static constexpr drivers::i2c::I2CAddress ControllerA = 0b0110101;
+            /** @brief Controller A Id */
+            static constexpr std::uint8_t ControllerAId = 0x61;
 
             /** @brief Controller B address */
             static constexpr drivers::i2c::I2CAddress ControllerB = 0b0110110;
+            /** @brief Controller B Id */
+            static constexpr std::uint8_t ControllerBId = 0x9D;
 
             /**
              * @brief Ctor
@@ -165,6 +169,18 @@ namespace devices
              */
             ErrorCode GetErrorCode(Controller controller);
 
+            /**
+             * @brief Resets EPS watchdog timer
+             * @param controller Controller on which watchdog should be reseted
+             * @return Operation result
+             */
+            ErrorCode ResetWatchdog(Controller controller);
+
+            /**
+             * @brief Resets both watchdogs
+             */
+            inline void ResetWatchdog();
+
             /** @brief Error counter type */
             using ErrorCounter = error_counter::ErrorCounter<5>;
 
@@ -194,6 +210,12 @@ namespace devices
              */
             drivers::i2c::I2CResult WriteRead(Controller controller, gsl::span<const uint8_t> inData, gsl::span<uint8_t> outData);
         };
+
+        void EPSDriver::ResetWatchdog()
+        {
+            this->ResetWatchdog(Controller::A);
+            this->ResetWatchdog(Controller::B);
+        }
 
         /** @} */
     }

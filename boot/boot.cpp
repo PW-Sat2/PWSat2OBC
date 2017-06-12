@@ -304,5 +304,7 @@ void ProceedWithBooting()
 
     Bootloader.Settings.UnconfirmLastBoot();
 
+    GPIO_PinModeSet(gpioPortF, 9, gpioModeDisabled, 1);
+
     BootToAddress(baseAddress);
 }

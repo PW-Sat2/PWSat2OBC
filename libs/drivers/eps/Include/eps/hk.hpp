@@ -22,13 +22,17 @@ namespace devices
              */
             enum class MPPT_STATE : std::uint8_t
             {
-                None = 0, //!< None
-                A = 1,    //!< A
-                B = 2,    //!< B
-                C = 4,    //!< C
-                D = 8,    //!< D
-                E = 16,   //!< E
-                F = 32    //!< F
+                None = 0,                          //!< None
+                MaximumPowerPointReached = 1 << 0, //!< MaximumPowerPointReached
+                NoSolarPanel = 0b00 << 1,          //!< NoSolarPanel
+                BatteryIsFull = 0b01 << 1,         //!< BatteryIsFull
+                MPPTBatteryCharge = 0b10 << 1,     //!< MPPTBatteryCharge
+                FixedPointConversion = 0b11 << 1,  //!< FixedPointConversion
+                A = 1 << 3,                        //!< F
+                B = 1 << 4,                        //!< F
+                C = 1 << 5,                        //!< F
+                D = 1 << 6,                        //!< F
+                E = 1 << 7,                        //!< F
             };
 
             /**
@@ -36,31 +40,27 @@ namespace devices
              */
             enum class DISTR_LCL_STATE : std::uint8_t
             {
-                None = 0, //!< None
-                A = 1,    //!< A
-                B = 2,    //!< B
-                C = 4,    //!< C
-                D = 8,    //!< D
-                E = 16,   //!< E
-                F = 32,   //!< F
-                G = 64,   //!< G
-                H = 128   //!< H
+                None = 0,          //!< None
+                TKmain = 1 << 0,   //!< TKmain
+                SunS = 1 << 1,     //!< SunS
+                CamNadir = 1 << 2, //!< CamNadir
+                CamWing = 1 << 3,  //!< CamWing
+                SENS = 1 << 4,     //!< SENS
+                Antenna = 1 << 5   //!< Antenna
             };
 
             /**
-             * @brief DISTR LCL flags
+             * @brief DISTR LCL Overcurrent protection flags
              */
             enum class DISTR_LCL_FLAGB : std::uint8_t
             {
-                None = 0, //!< None
-                A = 1,    //!< A
-                B = 2,    //!< B
-                C = 4,    //!< C
-                D = 8,    //!< D
-                E = 16,   //!< E
-                F = 32,   //!< F
-                G = 64,   //!< G
-                H = 128   //!< H
+                None = 0,          //!< None
+                TKmain = 1 << 0,   //!< TKmain
+                SunS = 1 << 1,     //!< SunS
+                CamNadir = 1 << 2, //!< CamNadir
+                CamWing = 1 << 3,  //!< CamWing
+                SENS = 1 << 4,     //!< SENS
+                Antenna = 1 << 5   //!< Antenna
             };
 
             /**
@@ -478,6 +478,9 @@ namespace devices
                  */
                 static constexpr std::uint32_t BitSize();
 
+                /** @brief Who Am I register (should be 0x61) */
+                std::uint8_t WhoAmI;
+
                 /** @brief MPPT_X */
                 MPPT_HK mpptX;
 
@@ -554,6 +557,9 @@ namespace devices
                  * @return Size of the serialized state in bits.
                  */
                 static constexpr std::uint32_t BitSize();
+
+                /** @brief Who Am I register (should be 0x9D) */
+                std::uint8_t WhoAmI;
 
                 /** @brief Battery Pack status*/
                 BatteryPackSecondaryState bp;

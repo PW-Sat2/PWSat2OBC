@@ -89,7 +89,7 @@ namespace
 
     TEST(DISTR_HKTest, TestSerialization)
     {
-        std::uint8_t expected[] = {0xff, 0xc7, 0x0b, 0x9e, 0xf4, 0xc3, 0xca, 0x06, 0x3a, 0x20, 0x08};
+        std::uint8_t expected[] = {0xff, 0xc7, 0x0b, 0x9e, 0xf4, 0xc3, 0xca, 0x06, 0x3a, 0x01, 0x01};
         DISTR_HK state;
         state.Temperature = 0x3ff;
         state.VOLT_3V3 = 0x2f1;
@@ -98,8 +98,8 @@ namespace
         state.CURR_5V = 0x2c3;
         state.VOLT_VBAT = 0x1b2;
         state.CURR_VBAT = 0x3a0;
-        state.LCL_STATE = DISTR_LCL_STATE::H;
-        state.LCL_FLAGB = DISTR_LCL_FLAGB::F;
+        state.LCL_STATE = DISTR_LCL_STATE::CamNadir;
+        state.LCL_FLAGB = DISTR_LCL_FLAGB::CamNadir;
         RunTest(state, gsl::make_span(expected));
     }
 
@@ -115,13 +115,13 @@ namespace
 
     TEST(MPPT_HKTest, TestSerialization)
     {
-        std::uint8_t expected[] = {0x23, 0x61, 0x45, 0x89, 0xc7, 0xab, 0x20};
+        std::uint8_t expected[] = {0x23, 0x61, 0x45, 0x89, 0xc7, 0xab, 0x06};
         MPPT_HK state;
         state.SOL_VOLT = 0x123;
         state.SOL_CURR = 0x456;
         state.SOL_OUT_VOLT = 0x789;
         state.Temperature = 0xabc;
-        state.MpptState = MPPT_STATE::F;
+        state.MpptState = MPPT_STATE::FixedPointConversion;
         RunTest(state, gsl::make_span(expected));
     }
 

@@ -2,7 +2,7 @@ from SerialPortTerminal import SerialPortTerminal
 from obc import OBC
 from .antenna import *
 from .comm import *
-from .eps import PowerCycleBy
+from .eps import PowerCycleBy, ResetWatchdogOn
 
 __all__ = [
     'SerialPortTerminal',
@@ -12,5 +12,6 @@ __all__ = [
     'OverrideSwitches',
     'CommModule',
     'AntennaTelemetry',
-    'PowerCycleBy'
+    'PowerCycleBy',
+    'ResetWatchdogOn'
 ]

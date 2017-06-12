@@ -21,6 +21,8 @@ using testing::DoAll;
 using testing::Return;
 using testing::Invoke;
 using testing::Assign;
+using gsl::span;
+using std::uint8_t;
 
 namespace
 {
@@ -71,6 +73,36 @@ namespace
     TEST_F(EPSDriverTest, ShouldReturnNoneOnNackWhenReadingHousekeepingB)
     {
         EXPECT_CALL(this->_payload, WriteRead(EPSDriver::ControllerB, ElementsAre(0), _)).WillOnce(Return(I2CResult::Nack));
+
+        auto result = this->_eps.ReadHousekeepingB();
+
+        ASSERT_THAT(result.HasValue, Eq(false));
+        ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
+    }
+
+    TEST_F(EPSDriverTest, ShouldReturnNoneOnWhenReadingHousekeepingAWithWrongId)
+    {
+        EXPECT_CALL(this->_bus, WriteRead(EPSDriver::ControllerA, ElementsAre(0), _))
+            .WillOnce(Invoke([](I2CAddress /*address*/, span<const uint8_t> /*input*/, span<uint8_t> output) {
+                output[0] = 0;
+                output[1] = 12;
+                return I2CResult::OK;
+            }));
+
+        auto result = this->_eps.ReadHousekeepingA();
+
+        ASSERT_THAT(result.HasValue, Eq(false));
+        ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
+    }
+
+    TEST_F(EPSDriverTest, ShouldReturnNoneOnWhenReadingHousekeepingBWithWrongId)
+    {
+        EXPECT_CALL(this->_payload, WriteRead(EPSDriver::ControllerB, ElementsAre(0), _))
+            .WillOnce(Invoke([](I2CAddress /*address*/, span<const uint8_t> /*input*/, span<uint8_t> output) {
+                output[0] = 0;
+                output[1] = 12;
+                return I2CResult::OK;
+            }));
 
         auto result = this->_eps.ReadHousekeepingB();
 
@@ -204,6 +236,72 @@ namespace
         auto errorCode = this->_eps.GetErrorCode(EPSDriver::Controller::B);
 
         ASSERT_THAT(errorCode, Eq(ErrorCode::CommunicationFailure));
+        ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
+    }
+
+    TEST_F(EPSDriverTest, ShouldResetWatchdogInControllerA)
+    {
+        EXPECT_CALL(this->_bus, Write(EPSDriver::ControllerA, ElementsAre(0xE5))).WillOnce(Return(I2CResult::OK));
+
+        this->_errorCounter.Failure();
+
+        auto errorCode = this->_eps.ResetWatchdog(EPSDriver::Controller::A);
+
+        ASSERT_THAT(errorCode, Eq(ErrorCode::NoError));
+        ASSERT_THAT(this->_errorCounter.Current(), Eq(1));
+    }
+
+    TEST_F(EPSDriverTest, ShouldResetWatchdogInControllerB)
+    {
+        EXPECT_CALL(this->_payload, Write(EPSDriver::ControllerB, ElementsAre(0xE5))).WillOnce(Return(I2CResult::OK));
+
+        this->_errorCounter.Failure();
+
+        auto errorCode = this->_eps.ResetWatchdog(EPSDriver::Controller::B);
+
+        ASSERT_THAT(errorCode, Eq(ErrorCode::NoError));
+        ASSERT_THAT(this->_errorCounter.Current(), Eq(1));
+    }
+
+    TEST_F(EPSDriverTest, ShouldReturnErrorWhenReceivedNackOnResetingWatchdogOnControllerA)
+    {
+        EXPECT_CALL(this->_bus, Write(EPSDriver::ControllerA, ElementsAre(0xE5))).WillOnce(Return(I2CResult::Nack));
+
+        auto errorCode = this->_eps.ResetWatchdog(EPSDriver::Controller::A);
+
+        ASSERT_THAT(errorCode, Eq(ErrorCode::CommunicationFailure));
+        ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
+    }
+
+    TEST_F(EPSDriverTest, ShouldReturnErrorWhenReceivedNackOnResetingWatchdogOnControllerB)
+    {
+        EXPECT_CALL(this->_payload, Write(EPSDriver::ControllerB, ElementsAre(0xE5))).WillOnce(Return(I2CResult::Nack));
+
+        auto errorCode = this->_eps.ResetWatchdog(EPSDriver::Controller::B);
+
+        ASSERT_THAT(errorCode, Eq(ErrorCode::CommunicationFailure));
+        ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
+    }
+
+    TEST_F(EPSDriverTest, ShouldReturnErrorWhenReceivedErroOnResetingWatchdogOnControllerA)
+    {
+        EXPECT_CALL(this->_bus, Write(EPSDriver::ControllerA, ElementsAre(0xE5))).WillOnce(Return(I2CResult::OK));
+
+        this->_errorA = ErrorCode::OnFire;
+        auto errorCode = this->_eps.ResetWatchdog(EPSDriver::Controller::A);
+
+        ASSERT_THAT(errorCode, Eq(ErrorCode::OnFire));
+        ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
+    }
+
+    TEST_F(EPSDriverTest, ShouldReturnErrorWhenReceivedErroOnResetingWatchdogOnControllerB)
+    {
+        EXPECT_CALL(this->_payload, Write(EPSDriver::ControllerB, ElementsAre(0xE5))).WillOnce(Return(I2CResult::OK));
+
+        this->_errorB = ErrorCode::OnFire;
+        auto errorCode = this->_eps.ResetWatchdog(EPSDriver::Controller::B);
+
+        ASSERT_THAT(errorCode, Eq(ErrorCode::OnFire));
         ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
     }
 

@@ -37,34 +37,39 @@ namespace rc
     };
 
     template <>
-    struct Arbitrary<MPPT_STATE>
-        : public ArbitraryBitmask<MPPT_STATE, MPPT_STATE::A, MPPT_STATE::B, MPPT_STATE::C, MPPT_STATE::D, MPPT_STATE::E, MPPT_STATE::F>
+    struct Arbitrary<MPPT_STATE> : public ArbitraryBitmask<MPPT_STATE,
+                                       MPPT_STATE::MaximumPowerPointReached,
+                                       MPPT_STATE::NoSolarPanel,
+                                       MPPT_STATE::BatteryIsFull,
+                                       MPPT_STATE::MPPTBatteryCharge,
+                                       MPPT_STATE::FixedPointConversion,
+                                       MPPT_STATE::A,
+                                       MPPT_STATE::B,
+                                       MPPT_STATE::C,
+                                       MPPT_STATE::D,
+                                       MPPT_STATE::E>
     {
     };
 
     template <>
     struct Arbitrary<DISTR_LCL_STATE> : public ArbitraryBitmask<DISTR_LCL_STATE,
-                                            DISTR_LCL_STATE::A,
-                                            DISTR_LCL_STATE::B,
-                                            DISTR_LCL_STATE::C,
-                                            DISTR_LCL_STATE::D,
-                                            DISTR_LCL_STATE::E,
-                                            DISTR_LCL_STATE::F,
-                                            DISTR_LCL_STATE::G,
-                                            DISTR_LCL_STATE::H>
+                                            DISTR_LCL_STATE::TKmain,
+                                            DISTR_LCL_STATE::SunS,
+                                            DISTR_LCL_STATE::CamNadir,
+                                            DISTR_LCL_STATE::CamWing,
+                                            DISTR_LCL_STATE::SENS,
+                                            DISTR_LCL_STATE::Antenna>
     {
     };
 
     template <>
     struct Arbitrary<DISTR_LCL_FLAGB> : public ArbitraryBitmask<DISTR_LCL_FLAGB,
-                                            DISTR_LCL_FLAGB::A,
-                                            DISTR_LCL_FLAGB::B,
-                                            DISTR_LCL_FLAGB::C,
-                                            DISTR_LCL_FLAGB::D,
-                                            DISTR_LCL_FLAGB::E,
-                                            DISTR_LCL_FLAGB::F,
-                                            DISTR_LCL_FLAGB::G,
-                                            DISTR_LCL_FLAGB::H>
+                                            DISTR_LCL_FLAGB::TKmain,
+                                            DISTR_LCL_FLAGB::SunS,
+                                            DISTR_LCL_FLAGB::CamNadir,
+                                            DISTR_LCL_FLAGB::CamWing,
+                                            DISTR_LCL_FLAGB::SENS,
+                                            DISTR_LCL_FLAGB::Antenna>
     {
     };
 
@@ -251,11 +256,12 @@ namespace
 
     RC_GTEST_FIXTURE_PROP(EPSDriverTest, ReadHousekeepingA, (ControllerATelemetry input))
     {
-        std::array<std::uint8_t, 72> buffer;
+        std::array<std::uint8_t, 73> buffer;
         Writer w(buffer);
 
         w.WriteByte(0);
 
+        w.WriteByte(0x61);
         w.WriteWordLE(input.mpptX.SOL_CURR);
         w.WriteWordLE(input.mpptX.SOL_VOLT);
         w.WriteWordLE(input.mpptX.SOL_OUT_VOLT);
@@ -317,6 +323,7 @@ namespace
 
         auto hk = result.Value;
 
+        RC_ASSERT(hk.WhoAmI == 0x61);
         RC_ASSERT(hk.mpptX.SOL_VOLT == input.mpptX.SOL_VOLT);
         RC_ASSERT(hk.mpptX.SOL_CURR == input.mpptX.SOL_CURR);
         RC_ASSERT(hk.mpptX.SOL_OUT_VOLT == input.mpptX.SOL_OUT_VOLT);
@@ -368,10 +375,11 @@ namespace
 
     RC_GTEST_FIXTURE_PROP(EPSDriverTest, ReadHousekeepingB, (ControllerBTelemetry input))
     {
-        std::array<std::uint8_t, 16> buffer;
+        std::array<std::uint8_t, 17> buffer;
         Writer w(buffer);
 
         w.WriteByte(0);
+        w.WriteByte(0x9D);
 
         w.WriteWordLE(input.bp.temperatureC);
         w.WriteWordLE(input.batc.voltB);
@@ -395,6 +403,7 @@ namespace
 
         auto hk = result.Value;
 
+        RC_ASSERT(hk.WhoAmI == 0x9D);
         RC_ASSERT(hk.bp.temperatureC == input.bp.temperatureC);
 
         RC_ASSERT(hk.other.VOLT_3V3d == input.other.VOLT_3V3d);
