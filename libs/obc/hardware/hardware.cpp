@@ -82,10 +82,10 @@ OBCHardware::OBCHardware(
           {SPI, Pins.Fram1ChipSelect},                                  //
           {SPI, Pins.Fram2ChipSelect},                                  //
           {SPI, Pins.Fram3ChipSelect}},                                 //
-      PersistentStorage{{                                               //
-          &FramSpi[0],                                                  //
-          &FramSpi[1],                                                  //
-          &FramSpi[2]}},                                                //
+      PersistentStorage{errorCounting,                                  //
+          {&FramSpi[0],                                                 //
+              &FramSpi[1],                                              //
+              &FramSpi[2]}},                                            //
       Gyro(I2C.Buses.Payload),                                          //
       EPS(errorCounting, this->I2C.Buses.Bus, this->I2C.Buses.Payload), //
       Imtq(errorCounting, I2C.Buses.Bus),                               //

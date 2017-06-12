@@ -4,6 +4,7 @@
 #include "SPI/SPIMock.h"
 #include "base/writer.h"
 #include "fm25w/fm25w.hpp"
+#include "mock/error_counter.hpp"
 #include "mock/fm25w.hpp"
 #include "system.h"
 #include "utils.hpp"
@@ -25,11 +26,18 @@ namespace
       protected:
         RedundantFM25WDriverTest();
 
+        testing::NiceMock<ErrorCountingConfigrationMock> _errorsConfig;
+        error_counter::ErrorCounting _errors;
+        RedundantFM25WDriver::ErrorCounter _error_counter;
+
         StrictMock<FM25WDriverMock> _fm25wDriver[3];
         RedundantFM25WDriver _driver;
     };
 
-    RedundantFM25WDriverTest::RedundantFM25WDriverTest() : _driver{{&_fm25wDriver[0], &_fm25wDriver[1], &_fm25wDriver[2]}}
+    RedundantFM25WDriverTest::RedundantFM25WDriverTest()
+        : _errors{_errorsConfig},                                                  //
+          _error_counter{_errors},                                                 //
+          _driver{_errors, {&_fm25wDriver[0], &_fm25wDriver[1], &_fm25wDriver[2]}} //
     {
     }
 
@@ -42,6 +50,7 @@ namespace
         auto status = _driver.ReadStatus();
 
         ASSERT_THAT(status, Eq(Some(Status::WriteEnabled)));
+        ASSERT_THAT(_error_counter, Eq(0));
     }
 
     TEST_F(RedundantFM25WDriverTest, ShouldVoteForStatusRegisterValue)
@@ -53,6 +62,7 @@ namespace
         auto status = _driver.ReadStatus();
 
         ASSERT_THAT(status, Eq(Some(Status::WriteProtect0)));
+        ASSERT_THAT(_error_counter, Eq(0));
     }
 
     TEST_F(RedundantFM25WDriverTest, ShouldReturnNoneIfAllStatusesAreDifferent)
@@ -64,6 +74,7 @@ namespace
         auto status = _driver.ReadStatus();
 
         ASSERT_THAT(status, Eq(None<Status>()));
+        ASSERT_THAT(_error_counter, Eq(5));
     }
 
     TEST_F(RedundantFM25WDriverTest, ShouldWriteToAllDrivers)
@@ -101,6 +112,7 @@ namespace
         _driver.Read(address, buffer);
 
         ASSERT_THAT(buffer, Eq(expectedOutputBuffer));
+        ASSERT_THAT(_error_counter, Eq(0));
     }
 
     TEST_F(RedundantFM25WDriverTest, ShouldReadThirdDriverIfTwoFirstDiffer)
@@ -128,6 +140,7 @@ namespace
         _driver.Read(address, buffer);
 
         ASSERT_THAT(buffer, Eq(expectedOutputBuffer));
+        ASSERT_THAT(_error_counter, Eq(5));
     }
 
     TEST_F(RedundantFM25WDriverTest, ShouldReadIn1KBChunks)
