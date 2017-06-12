@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "I2C/I2CMock.hpp"
+#include "mock/error_counter.hpp"
 
 #include "rtc/rtc.hpp"
 
@@ -14,17 +15,22 @@ using testing::Invoke;
 using testing::ElementsAre;
 using gsl::span;
 using drivers::i2c::I2CResult;
+
 namespace
 {
     class RTCObjectTest : public testing::Test
     {
       protected:
         RTCObjectTest();
+
+        testing::NiceMock<ErrorCountingConfigrationMock> errorsConfig;
+        error_counter::ErrorCounting errors;
         I2CBusMock i2c;
         RTCObject rtc;
+        RTCObject::ErrorCounter error_counter;
     };
 
-    RTCObjectTest::RTCObjectTest() : rtc(i2c)
+    RTCObjectTest::RTCObjectTest() : errors{errorsConfig}, rtc{errors, i2c}, error_counter{errors}
     {
     }
 
@@ -45,6 +51,7 @@ namespace
         ASSERT_THAT(time.days, Eq(0));
         ASSERT_THAT(time.months, Eq(0));
         ASSERT_THAT(time.years, Eq(0));
+        ASSERT_THAT(error_counter, Eq(0));
     }
 
     TEST_F(RTCObjectTest, Seconds)
@@ -65,6 +72,7 @@ namespace
         ASSERT_THAT(time.days, Eq(0));
         ASSERT_THAT(time.months, Eq(0));
         ASSERT_THAT(time.years, Eq(0));
+        ASSERT_THAT(error_counter, Eq(0));
     }
 
     TEST_F(RTCObjectTest, Minutes)
@@ -85,6 +93,7 @@ namespace
         ASSERT_THAT(time.days, Eq(0));
         ASSERT_THAT(time.months, Eq(0));
         ASSERT_THAT(time.years, Eq(0));
+        ASSERT_THAT(error_counter, Eq(0));
     }
 
     TEST_F(RTCObjectTest, Hours)
@@ -105,6 +114,7 @@ namespace
         ASSERT_THAT(time.days, Eq(0));
         ASSERT_THAT(time.months, Eq(0));
         ASSERT_THAT(time.years, Eq(0));
+        ASSERT_THAT(error_counter, Eq(0));
     }
 
     TEST_F(RTCObjectTest, Days)
@@ -125,6 +135,7 @@ namespace
         ASSERT_THAT(time.days, Eq(23));
         ASSERT_THAT(time.months, Eq(0));
         ASSERT_THAT(time.years, Eq(0));
+        ASSERT_THAT(error_counter, Eq(0));
     }
 
     TEST_F(RTCObjectTest, IgnoredField)
@@ -145,6 +156,7 @@ namespace
         ASSERT_THAT(time.days, Eq(0));
         ASSERT_THAT(time.months, Eq(0));
         ASSERT_THAT(time.years, Eq(0));
+        ASSERT_THAT(error_counter, Eq(0));
     }
 
     TEST_F(RTCObjectTest, Months)
@@ -165,6 +177,7 @@ namespace
         ASSERT_THAT(time.days, Eq(0));
         ASSERT_THAT(time.months, Eq(11));
         ASSERT_THAT(time.years, Eq(0));
+        ASSERT_THAT(error_counter, Eq(0));
     }
 
     TEST_F(RTCObjectTest, Years)
@@ -185,6 +198,7 @@ namespace
         ASSERT_THAT(time.days, Eq(0));
         ASSERT_THAT(time.months, Eq(0));
         ASSERT_THAT(time.years, Eq(23));
+        ASSERT_THAT(error_counter, Eq(0));
     }
 
     TEST_F(RTCObjectTest, FullRTCDate)
@@ -212,6 +226,18 @@ namespace
         ASSERT_THAT(time.days, Eq(16));
         ASSERT_THAT(time.months, Eq(3));
         ASSERT_THAT(time.years, Eq(17));
+        ASSERT_THAT(error_counter, Eq(0));
+    }
+
+    TEST_F(RTCObjectTest, TestI2CFailure)
+    {
+        EXPECT_CALL(i2c, WriteRead(RTCObject::I2CAddress, ElementsAre((std::uint8_t)Registers::VL_seconds), _))
+            .WillOnce(Invoke(
+                [=](uint8_t /*address*/, span<const uint8_t> /*inData*/, span<uint8_t> /* outData */) { return I2CResult::Failure; }));
+
+        RTCTime time;
+        ASSERT_THAT(rtc.ReadTime(time), Eq(OSResult::InvalidOperation));
+        ASSERT_THAT(error_counter, Eq(5));
     }
 
     TEST(RTCTimeTest, DecodeRTCTimeProperly)
