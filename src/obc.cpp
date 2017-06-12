@@ -100,21 +100,20 @@ OSResult OBC::InitializeRunlevel1()
         LOG(LOG_LEVEL_ERROR, "Unable to initialize persistent timer. ");
     }
 
-    if (!Mission.Initialize())
+    if (!Mission.Initialize(10s))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize mission loop.");
     }
 
-    if (!TelemetryAcquisition.Initialize())
+    if (!TelemetryAcquisition.Initialize(30s))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize telemetry acquisition loop.");
     }
 
     BootSettings.ConfirmLastBoot();
 
-    LOG(LOG_LEVEL_INFO, "Intialized");
+    LOG(LOG_LEVEL_INFO, "Initialized");
     this->StateFlags.Set(OBC::InitializationFinishedFlag);
-
     return OSResult::Success;
 }
 
