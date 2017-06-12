@@ -89,8 +89,8 @@ namespace devices
 
         void RedundantFM25WDriver::Read(Address address, gsl::span<uint8_t> outputBuffer)
         {
-            std::array<uint8_t, 1_KB> redundantBuffer1;
-            std::array<uint8_t, 1_KB> redundantBuffer2;
+            alignas(4) std::array<uint8_t, 1_KB> redundantBuffer1;
+            alignas(4) std::array<uint8_t, 1_KB> redundantBuffer2;
 
             for (ptrdiff_t offset = 0; offset < outputBuffer.length(); offset += 1_KB)
             {

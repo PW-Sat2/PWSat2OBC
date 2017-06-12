@@ -53,7 +53,7 @@ static bool ReadSingleFRAM(devices::fm25w::IFM25WDriver& fram)
     std::uint16_t address = 5;
 
     {
-        std::array<std::uint8_t, 16> readBuffer;
+        alignas(4) std::array<std::uint8_t, 16> readBuffer;
         fram.Read(address, readBuffer);
 
         bool isOk = true;
@@ -139,7 +139,7 @@ void FRAM(std::uint16_t argc, char* argv[])
         }
 
         std::uint16_t address = atoi(argv[2]);
-        std::array<std::uint8_t, 16> buf;
+        alignas(4) std::array<std::uint8_t, 16> buf;
 
         auto toRead = gsl::make_span(buf).subspan(0, atoi(argv[3]));
 

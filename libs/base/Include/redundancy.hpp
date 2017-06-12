@@ -75,9 +75,25 @@ namespace redundancy
         if (buffer1.length() != buffer2.length() || buffer2.length() != buffer3.length())
             return false;
 
-        for (auto i = 0; i < buffer1.length(); ++i)
+        if (buffer1.length() % 4 != 0)
         {
-            buffer1[i] = Correct(buffer1[i], buffer2[i], buffer3[i]);
+            return false;
+        }
+
+        auto length = buffer1.length() / sizeof(std::uint32_t);
+
+        auto a = reinterpret_cast<std::uint32_t*>(buffer1.data());
+        auto b = reinterpret_cast<const std::uint32_t*>(buffer2.data());
+        auto c = reinterpret_cast<const std::uint32_t*>(buffer3.data());
+
+        if (!(IsAligned<4>(a) && IsAligned<4>(b) && IsAligned<4>(c)))
+        {
+            return false;
+        }
+
+        for (decltype(length) i = 0; i < length; ++i)
+        {
+            a[i] = Correct(a[i], b[i], c[i]);
         }
 
         return true;
@@ -91,9 +107,29 @@ namespace redundancy
             result.length() != buffers[0].length())
             return false;
 
-        for (auto i = 0; i < result.length(); ++i)
+        if (result.length() % 4 != 0)
         {
-            result[i] = Correct(buffers[0][i], buffers[1][i], buffers[2][i], buffers[3][i], buffers[4][i]);
+            return false;
+        }
+
+        auto length = result.length() / sizeof(std::uint32_t);
+
+        auto r = reinterpret_cast<std::uint32_t*>(result.data());
+
+        auto a = reinterpret_cast<const std::uint32_t*>(buffers[0].data());
+        auto b = reinterpret_cast<const std::uint32_t*>(buffers[1].data());
+        auto c = reinterpret_cast<const std::uint32_t*>(buffers[2].data());
+        auto d = reinterpret_cast<const std::uint32_t*>(buffers[3].data());
+        auto e = reinterpret_cast<const std::uint32_t*>(buffers[4].data());
+
+        if (!(IsAligned<4>(a) && IsAligned<4>(b) && IsAligned<4>(c) && IsAligned<4>(d) && IsAligned<4>(e)))
+        {
+            return false;
+        }
+
+        for (decltype(length) i = 0; i < length; ++i)
+        {
+            r[i] = Correct(a[i], b[i], c[i], d[i], e[i]);
         }
 
         return true;
@@ -115,9 +151,27 @@ namespace redundancy
         if (output.length() != buffer1.length() || buffer1.length() != buffer2.length() || buffer2.length() != buffer3.length())
             return false;
 
-        for (auto i = 0; i < buffer1.length(); ++i)
+        if (output.length() % 4 != 0)
         {
-            output[i] = Correct(buffer1[i], buffer2[i], buffer3[i]);
+            return false;
+        }
+
+        auto length = output.length() / sizeof(std::uint32_t);
+
+        auto r = reinterpret_cast<std::uint32_t*>(output.data());
+
+        auto a = reinterpret_cast<const std::uint32_t*>(buffer1.data());
+        auto b = reinterpret_cast<const std::uint32_t*>(buffer2.data());
+        auto c = reinterpret_cast<const std::uint32_t*>(buffer3.data());
+
+        if (!(IsAligned<4>(a) && IsAligned<4>(b) && IsAligned<4>(c)))
+        {
+            return false;
+        }
+
+        for (decltype(length) i = 0; i < length; ++i)
+        {
+            r[i] = Correct(a[i], b[i], c[i]);
         }
 
         return true;

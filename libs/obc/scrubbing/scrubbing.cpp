@@ -7,7 +7,7 @@ using namespace std::chrono_literals;
 
 namespace obc
 {
-    static scrubber::ProgramScrubber::ScrubBuffer ProgramScrubbingBuffer;
+    alignas(4) static scrubber::ProgramScrubber::ScrubBuffer ProgramScrubbingBuffer;
 
     OBCScrubbing::OBCScrubbing(OBCHardware& hardware, program_flash::BootTable& bootTable, std::uint8_t primaryBootSlots)
         : //

@@ -131,7 +131,7 @@ void LoadApplicationTMR(std::array<std::uint8_t, 3> slots)
 
     auto internalFlashBase = reinterpret_cast<ChunkType*>(BOOT_APPLICATION_BASE);
 
-    std::array<ChunkType, ChunksCount> pageBuffer;
+    alignas(4) std::array<ChunkType, ChunksCount> pageBuffer;
 
     for (auto offset = 0U; offset < length / sizeof(ChunkType); offset += ChunksCount)
     {

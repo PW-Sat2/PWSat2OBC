@@ -38,7 +38,7 @@ namespace boot
 
     bool BootSettings::CheckMagicNumber() const
     {
-        array<std::uint8_t, 4> buf;
+        alignas(4) array<std::uint8_t, 4> buf;
         this->_fram.Read(BootFields::Offset<MagicNumberField>(), buf);
 
         return Reader(buf).ReadDoubleWordLE() == MagicNumber;
@@ -51,7 +51,7 @@ namespace boot
             return DefaultBootSlot;
         }
 
-        std::uint8_t r = 0;
+        alignas(4) std::uint8_t r = 0;
 
         this->_fram.Read(BootFields::Offset<BootSlotsField>(), {&r, 1});
 
@@ -71,7 +71,7 @@ namespace boot
             return DefaultFailsafeBootSlot;
         }
 
-        std::uint8_t r = 0;
+        alignas(4) std::uint8_t r = 0;
 
         this->_fram.Read(BootFields::Offset<FailsafeBootSlotsField>(), {&r, 1});
 
@@ -91,7 +91,7 @@ namespace boot
             return DefaultBootCounter;
         }
 
-        array<std::uint8_t, 4> buf;
+        alignas(4) array<std::uint8_t, 4> buf;
         this->_fram.Read(BootFields::Offset<BootCounterField>(), buf);
 
         return Reader(buf).ReadDoubleWordLE();
