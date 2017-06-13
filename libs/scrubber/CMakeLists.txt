@@ -2,7 +2,7 @@ set(NAME scrubber)
 
 set(SOURCES
     program.cpp
-    bootloader_copies.cpp
+    bootloader.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -10,6 +10,7 @@ add_library(${NAME} STATIC ${SOURCES})
 target_link_libraries(${NAME} PUBLIC
 	base
 	program_flash
+	msc
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

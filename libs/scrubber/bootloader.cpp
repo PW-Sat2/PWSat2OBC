@@ -1,19 +1,22 @@
-#include "bootloader_copies.hpp"
+#include "bootloader.hpp"
 #include <cstring>
 #include "base/array_map.hpp"
 #include "logger/logger.h"
+#include "msc/msc.hpp"
 #include "redundancy.hpp"
 
 using program_flash::BootloaderCopy;
+using drivers::msc::MCUMemoryController;
 
 namespace scrubber
 {
-    BootloaderCopiesScrubber::BootloaderCopiesScrubber(ScrubBuffer& scrubBuffer, program_flash::BootTable& bootTable)
-        : _scrubBuffer(scrubBuffer), _bootTable(bootTable)
+    BootloaderScrubber::BootloaderScrubber(
+        ScrubBuffer& scrubBuffer, program_flash::BootTable& bootTable, drivers::msc::MCUMemoryController& mcuFlash)
+        : _scrubBuffer(scrubBuffer), _bootTable(bootTable), _mcuFlash(mcuFlash)
     {
     }
 
-    void BootloaderCopiesScrubber::Scrub()
+    void BootloaderScrubber::Scrub()
     {
         LOG(LOG_LEVEL_INFO, "[scrub] Scrubbing bootloader copies");
 
@@ -47,6 +50,27 @@ namespace scrubber
             copies[i].Write(0, this->_scrubBuffer);
         }
 
-        LOG(LOG_LEVEL_INFO, "[scrub] Fnished scrubbing bootloader copies");
+        LOG(LOG_LEVEL_INFO, "[scrub] Scrubbing bootloader in MCU");
+
+        auto bootloaderStart = reinterpret_cast<std::uint8_t*>(0);
+
+        for (std::size_t offset = 0; offset < program_flash::BootloaderCopy::Size; offset += MCUMemoryController::SectorSize)
+        {
+            auto isOk = memcmp(bootloaderStart + offset, this->_scrubBuffer.data() + offset, MCUMemoryController::SectorSize) == 0;
+
+            if (isOk)
+            {
+                continue;
+            }
+
+            LOGF(LOG_LEVEL_WARNING, "[scrub] Rewriting MCU bootloader at offset 0x%X", offset);
+            this->_mcuFlash.Erase(offset);
+
+            auto validPart = gsl::make_span(this->_scrubBuffer).subspan(offset, MCUMemoryController::SectorSize);
+
+            this->_mcuFlash.Program(offset, validPart);
+        }
+
+        LOG(LOG_LEVEL_INFO, "[scrub] Finished scrubbing bootloader");
     }
 }
