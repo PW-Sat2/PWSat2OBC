@@ -13,7 +13,7 @@ namespace obc
         : //
           _primarySlotsScrubber(ScrubbingBuffer, bootTable, hardware.FlashDriver, primaryBootSlots),
           _secondarySlotsScrubber(ScrubbingBuffer, bootTable, hardware.FlashDriver, (~primaryBootSlots) & 0b111111),
-          _bootloaderCopies(ScrubbingBuffer, bootTable), //
+          _bootloaderScrubber(ScrubbingBuffer, bootTable, hardware.MCUFlash), //
           _scrubberTask("Scrubber", this, ScrubberTask)
     {
     }
@@ -29,7 +29,7 @@ namespace obc
         {
             This->_primarySlotsScrubber.ScrubSlots();
             This->_secondarySlotsScrubber.ScrubSlots();
-            This->_bootloaderCopies.Scrub();
+            This->_bootloaderScrubber.Scrub();
 
             System::SleepTask(7min);
         }
