@@ -1,6 +1,7 @@
 #include "devices.h"
 
 #include "commands/RadFET.h"
+#include "commands/base_code.hpp"
 
 using namespace drivers::payload;
 

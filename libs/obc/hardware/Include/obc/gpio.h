@@ -137,7 +137,7 @@ namespace obc
         const I2CPins<TI2C1> I2C_1;
 
         /** @brief PayloadInterrupt */
-        const drivers::gpio::InterruptPin<TPayloadInterrupt, false, true> PayloadInterrupt;
+        const drivers::gpio::InterruptPin<TPayloadInterrupt, false, false, true> PayloadInterrupt;
 
         /** @brief Initializes GPIO pins */
         void Initialize() const

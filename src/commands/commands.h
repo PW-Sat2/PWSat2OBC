@@ -71,4 +71,6 @@ void TestFlash(std::uint16_t argc, char* argv[]);
 
 void ScrubRAM(std::uint16_t argc, char* argv[]);
 
+void PayloadDriver(std::uint16_t argc, char* argv[]);
+
 #endif

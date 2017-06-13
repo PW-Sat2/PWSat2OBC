@@ -2,6 +2,7 @@
 #define LIBS_DRIVERS_PAYLOAD_INCLUDE_TELEMETRY_H_
 
 #include <cstdint>
+#include <cstring>
 
 namespace drivers
 {
@@ -47,14 +48,21 @@ namespace drivers
                 std::array<std::uint32_t, 3> vth;
             };
 
+            uint8_t who_am_i;
             SunsRef suns_ref;
             Temperatures temperatures;
             Photodiodes photodiodes;
             Housekeeping housekeeping;
             Radfet radfet;
-        };
 
-        static_assert(sizeof(PayloadTelemetry) == 56, "Incorrect size of Telemetry structure (padding?)");
+            void init()
+            {
+                std::memset(this, 0xFF, sizeof(PayloadTelemetry));
+            }
+        } __attribute__((packed));
+
+        static_assert(sizeof(PayloadTelemetry) == 57, "Incorrect size of Telemetry structure (padding?)");
+        static_assert(std::is_pod<PayloadTelemetry>::value, "POD");
     }
 }
 

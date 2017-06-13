@@ -30,6 +30,7 @@ set(SOURCES
     commands/error_counters.cpp
     commands/program_flash.cpp
     commands/scrub.cpp
+    commands/payload.cpp
     checks/error_counters.cpp
     obc.h
     obc.cpp

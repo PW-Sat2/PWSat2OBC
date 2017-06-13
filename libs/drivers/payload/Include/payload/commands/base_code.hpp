@@ -1,3 +1,6 @@
+#ifndef LIBS_DRIVERS_PAYLOAD_INCLUDE_PAYLOAD_COMMANDS_BASE_CODE_HPP_
+#define LIBS_DRIVERS_PAYLOAD_INCLUDE_PAYLOAD_COMMANDS_BASE_CODE_HPP_
+
 #include "commands/base.h"
 #include "logger/logger.h"
 
@@ -28,11 +31,8 @@ template <std::uint8_t TCommandCode> OSResult PayloadCommand<TCommandCode>::Exec
         return result;
     }
 
+    // Validation should not cancel save.
     result = Validate();
-    if (result != OSResult::Success)
-    {
-        return result;
-    }
 
     result = Save();
     if (result != OSResult::Success)
@@ -70,3 +70,5 @@ template <std::uint8_t TCommandCode> OSResult PayloadCommand<TCommandCode>::Exec
 
     return OSResult::Success;
 }
+
+#endif /* LIBS_DRIVERS_PAYLOAD_INCLUDE_PAYLOAD_COMMANDS_BASE_CODE_HPP_ */

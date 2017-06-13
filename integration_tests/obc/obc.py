@@ -18,6 +18,7 @@ from .watchdog import WatchdogMixin
 from .state import StateMixin
 from .error_counters import ErrorCountersMixin
 from .fram import FRAMMixin
+from .payload import PayloadMixin
 
 class OBC(OBCMixin,
           FileSystemMixin,
@@ -33,7 +34,8 @@ class OBC(OBCMixin,
           WatchdogMixin,
           StateMixin,
           ErrorCountersMixin,
-          FRAMMixin
+          FRAMMixin,
+          PayloadMixin
           ):
     def __init__(self, terminal):
         self.log = logging.getLogger("OBC")

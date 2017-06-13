@@ -1,4 +1,5 @@
 #include "commands/RadFET.h"
+#include "commands/base_code.hpp"
 #include "logger/logger.h"
 
 #include <cstring>

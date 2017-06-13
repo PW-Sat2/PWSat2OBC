@@ -22,51 +22,6 @@ namespace drivers
          */
 
         /**
-         * @brief Commands for payload
-         */
-        enum class PayloadCommands : std::uint8_t
-        {
-            RefreshSunS = 0x80,
-            RefreshTemperatures = 0x81,
-            RefreshPhotodiodes = 0x82,
-            RefreshRadFET = 0x83,
-            RefreshHousekeeping = 0x84
-        };
-
-        enum class PayloadDataCodes : std::uint8_t
-        {
-            WhoAmI = 0x00,
-            ActualDataFlag = 0x01,
-            BusyDataFlag = 0x02,
-            ErrorFlag = 0x03,
-            StatusFlag = 0x04,
-            SunSRefV1 = 0x05,
-            SunSRefV2 = 0x07,
-            SunSRefV3 = 0x09,
-            SunSRefV4 = 0x0B,
-            SunSRefV5 = 0x0D,
-            Xp_PHD = 0x0F,
-            Xm_PHD = 0x11,
-            Yp_PHD = 0x13,
-            Ym_PHD = 0x15,
-            SupplyTemperature = 0x17,
-            XpTemperature = 0x19,
-            XmTemperature = 0x1B,
-            YpTemperature = 0x1D,
-            YmTemperature = 0x1F,
-            SADSTemperature = 0x21,
-            SailTemperature = 0x23,
-            GyroTemperature = 0x25,
-            SupplyTemperature2 = 0x27,
-            INT_3V3d = 0x29,
-            OBC_3V3 = 0x31,
-            RadFETTemperature = 0x29,
-            RadFET_VTH1 = 0x2D,
-            RadFET_VTH2 = 0x31,
-            RadFET_VTH3 = 0x35
-        };
-
-        /**
          * @brief Payload driver
          */
         class PayloadDriver : public IPayloadDriver
