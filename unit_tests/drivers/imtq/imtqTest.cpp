@@ -11,6 +11,7 @@
 #include "base/reader.h"
 #include "base/writer.h"
 #include "i2c/i2c.h"
+#include "mock/error_counter.hpp"
 #include "os/os.hpp"
 #include "system.h"
 #include "utils.hpp"
@@ -37,13 +38,16 @@ namespace
     class ImtqTest : public testing::Test
     {
       public:
-        ImtqTest() : imtq(i2c)
+        ImtqTest() : errors{errorsConfig}, imtq{errors, i2c}, error_counter{errors}
         {
         }
 
       protected:
+        testing::NiceMock<ErrorCountingConfigrationMock> errorsConfig;
+        error_counter::ErrorCounting errors;
         devices::imtq::ImtqDriver imtq;
         I2CBusMock i2c;
+        devices::imtq::ImtqDriver::ErrorCounter error_counter;
     };
 
     TEST_F(ImtqTest, Accepted)
@@ -60,6 +64,7 @@ namespace
         auto status = imtq.SendNoOperation();
         EXPECT_TRUE(status);
         EXPECT_EQ(imtq.LastError, ImtqDriverError::OK);
+        EXPECT_EQ(error_counter, 0);
     }
 
     TEST_F(ImtqTest, StatusError)
@@ -77,6 +82,7 @@ namespace
             EXPECT_FALSE(status);
             EXPECT_EQ(imtq.LastError, ImtqDriverError::StatusError);
             EXPECT_EQ(imtq.LastStatus, response);
+            EXPECT_EQ(error_counter, 0);
         }
     }
 
@@ -92,6 +98,7 @@ namespace
         auto status = imtq.SendNoOperation();
         EXPECT_FALSE(status);
         EXPECT_EQ(imtq.LastError, ImtqDriverError::WrongOpcodeInResponse);
+        EXPECT_EQ(error_counter, 0);
     }
 
     TEST_F(ImtqTest, I2CWriteFail)
@@ -100,6 +107,7 @@ namespace
         auto status = imtq.SendNoOperation();
         EXPECT_FALSE(status);
         EXPECT_EQ(imtq.LastError, ImtqDriverError::I2CWriteFailed);
+        EXPECT_EQ(error_counter, 5);
     }
 
     TEST_F(ImtqTest, I2CReadFail)
@@ -115,18 +123,21 @@ namespace
         auto status = imtq.SendNoOperation();
         EXPECT_FALSE(status);
         EXPECT_EQ(imtq.LastError, ImtqDriverError::I2CReadFailed);
+        EXPECT_EQ(error_counter, 5);
     }
 
-    TEST_F(ImtqTest, SoftwareReset)
+    TEST_F(ImtqTest, SoftwareReset_Ok)
     {
-        // reset OK
         EXPECT_CALL(i2c, Write(ImtqAddress, ElementsAre(0xAA))).WillOnce(Return(I2CResult::OK));
-
         EXPECT_CALL(i2c, Read(ImtqAddress, _)).WillOnce(Return(I2CResult::Nack));
 
         auto status = imtq.SoftwareReset();
         EXPECT_TRUE(status);
+        EXPECT_EQ(error_counter, 0);
+    }
 
+    TEST_F(ImtqTest, SoftwareReset_FastBootDelayOnRead)
+    {
         // fast boot/delay on read
         EXPECT_CALL(i2c, Write(ImtqAddress, ElementsAre(0xAA))).WillOnce(Return(I2CResult::OK));
         EXPECT_CALL(i2c, Read(ImtqAddress, _)).WillOnce(Invoke([](uint8_t /*address*/, auto outData) {
@@ -136,23 +147,32 @@ namespace
             return I2CResult::OK;
         }));
 
-        status = imtq.SoftwareReset();
+        auto status = imtq.SoftwareReset();
         EXPECT_TRUE(status);
+        EXPECT_EQ(error_counter, 0);
+    }
 
-        // I2C returned fail
+    TEST_F(ImtqTest, SoftwareReset_I2CReadReturnedFail)
+    {
         EXPECT_CALL(i2c, Write(ImtqAddress, ElementsAre(0xAA))).WillOnce(Return(I2CResult::OK));
         EXPECT_CALL(i2c, Read(ImtqAddress, _)).WillOnce(Return(I2CResult::Failure));
 
-        status = imtq.SoftwareReset();
+        auto status = imtq.SoftwareReset();
         EXPECT_FALSE(status);
+        EXPECT_EQ(error_counter, 5);
+    }
 
-        // I2C returned fail
+    TEST_F(ImtqTest, SoftwareReset_I2CWriteReturnedFail)
+    {
         EXPECT_CALL(i2c, Write(ImtqAddress, ElementsAre(0xAA))).WillOnce(Return(I2CResult::Nack));
 
-        status = imtq.SoftwareReset();
+        auto status = imtq.SoftwareReset();
         EXPECT_FALSE(status);
+        EXPECT_EQ(error_counter, 5);
+    }
 
-        // Reset rejected
+    TEST_F(ImtqTest, SoftwareReset_ResetRejected)
+    {
         EXPECT_CALL(i2c, Write(ImtqAddress, ElementsAre(0xAA))).WillOnce(Return(I2CResult::OK));
         EXPECT_CALL(i2c, Read(ImtqAddress, _)).WillOnce(Invoke([](uint8_t /*address*/, auto outData) {
             EXPECT_EQ(outData.size(), 2);
@@ -161,8 +181,9 @@ namespace
             return I2CResult::OK;
         }));
 
-        status = imtq.SoftwareReset();
+        auto status = imtq.SoftwareReset();
         EXPECT_FALSE(status);
+        EXPECT_EQ(error_counter, 0);
     }
 
     TEST_F(ImtqTest, CancelOperation)
@@ -175,6 +196,7 @@ namespace
         }));
 
         EXPECT_TRUE(imtq.CancelOperation());
+        EXPECT_EQ(error_counter, 0);
     }
 
     TEST_F(ImtqTest, StartMTMMeasurement)
@@ -188,6 +210,7 @@ namespace
         }));
 
         EXPECT_TRUE(imtq.StartMTMMeasurement());
+        EXPECT_EQ(error_counter, 0);
     }
 
     TEST_F(ImtqTest, StartAllAxisSelfTest)
@@ -204,6 +227,7 @@ namespace
 
         auto status = imtq.StartAllAxisSelfTest();
         EXPECT_TRUE(status);
+        EXPECT_EQ(error_counter, 0);
     }
 
     inline bool operator==(const SelfTestResult::StepResult a, const SelfTestResult::StepResult b)

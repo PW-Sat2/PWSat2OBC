@@ -11,6 +11,7 @@
 #include "base/reader.h"
 #include "base/writer.h"
 #include "i2c/i2c.h"
+#include "mock/error_counter.hpp"
 #include "os/os.hpp"
 #include "rapidcheck.hpp"
 #include "rapidcheck/gtest.h"
@@ -39,11 +40,13 @@ namespace
     class ImtqTest : public testing::Test
     {
       public:
-        ImtqTest() : imtq(i2c)
+        ImtqTest() : errors{errorsConfig}, imtq{errors, i2c}
         {
         }
 
       protected:
+        testing::NiceMock<ErrorCountingConfigrationMock> errorsConfig;
+        error_counter::ErrorCounting errors;
         devices::imtq::ImtqDriver imtq;
         I2CBusMock i2c;
     };

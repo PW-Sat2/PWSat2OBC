@@ -8,6 +8,7 @@
 #include <gsl/span>
 
 #include "base/os.h"
+#include "error_counter/error_counter.hpp"
 #include "i2c/i2c.h"
 
 /**
@@ -372,9 +373,10 @@ namespace devices
           public:
             /**
              * Constructs new instance of Imtq low-level driver
+             * @param[in] errors Error counting mechanism
              * @param[in] i2cbus I2C bus used to communicate with device
              */
-            ImtqDriver(drivers::i2c::II2CBus& i2cbus);
+            ImtqDriver(error_counter::ErrorCounting& errors, drivers::i2c::II2CBus& i2cbus);
 
             // ----- Higher-level commands -----
 
@@ -553,7 +555,6 @@ namespace devices
              */
             bool ResetParameterAndGetDefault(Parameter id, gsl::span<std::uint8_t> result);
 
-
             /**
              * @brief Last error occurred during last command execution.
              */
@@ -564,6 +565,9 @@ namespace devices
              * Defined in Imtq user manual, Table 3-3.
              */
             std::uint8_t LastStatus;
+
+            /** @brief Error counter type */
+            using ErrorCounter = error_counter::ErrorCounter<6>;
 
           private:
             /**
@@ -600,16 +604,49 @@ namespace devices
                 ResetParameter = 0x83
             };
 
+            using ErrorReporter = error_counter::AggregatedErrorReporter<ErrorCounter::DeviceId>;
+
+            ErrorCounter _error;
             drivers::i2c::II2CBus& i2cbus;
 
-            bool GetOrResetParameter(OpCode opcode, Parameter id, gsl::span<std::uint8_t> result);
+            bool CancelOperationInternal(error_counter::AggregatedErrorCounter& resultAggregator);
+            bool StartMTMMeasurementInternal(error_counter::AggregatedErrorCounter& resultAggregator);
+            bool GetCalibratedMagnetometerDataInternal(                 //
+                MagnetometerMeasurementResult& result,                  //
+                error_counter::AggregatedErrorCounter& resultAggregator //
+                );
+            bool StartAllAxisSelfTestInternal(error_counter::AggregatedErrorCounter& resultAggregator);
+            bool GetSelfTestResultInternal( //
+                SelfTestResult& result,     //
+                error_counter::AggregatedErrorCounter& resultAggregator);
 
-            bool SendCommand(OpCode opcode, gsl::span<const std::uint8_t> params = {});
-            bool DataRequest(OpCode opcode, gsl::span<std::uint8_t> response);
-            bool WriteRead(OpCode opcode, gsl::span<const std::uint8_t> params, gsl::span<std::uint8_t> result);
+            bool GetOrResetParameter(                                   //
+                OpCode opcode,                                          //
+                Parameter id,                                           //
+                gsl::span<std::uint8_t> result,                         //
+                error_counter::AggregatedErrorCounter& resultAggregator //
+                );
 
-            template<typename Result>
-            bool GetHouseKeeping(OpCode opcode, Result& result);
+            bool SendCommandWithErrorHandling(OpCode opcode, gsl::span<const uint8_t> params = {});
+            bool SendCommand(                                            //
+                OpCode opcode,                                           //
+                error_counter::AggregatedErrorCounter& resultAggregator, //
+                gsl::span<const std::uint8_t> params = {}                //
+                );
+
+            bool DataRequestWithErrorHandling(OpCode opcode, gsl::span<uint8_t> response);
+            bool DataRequest(                                           //
+                OpCode opcode,                                          //
+                gsl::span<std::uint8_t> response,                       //
+                error_counter::AggregatedErrorCounter& resultAggregator //
+                );
+
+            bool WriteRead(OpCode opcode,
+                gsl::span<const std::uint8_t> params,
+                gsl::span<std::uint8_t> result,
+                error_counter::AggregatedErrorCounter& resultAggregator);
+
+            template <typename Result> bool GetHouseKeepingWithErrorHandling(OpCode opcode, Result& result);
         };
     }
 }

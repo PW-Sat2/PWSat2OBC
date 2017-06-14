@@ -13,6 +13,7 @@ target_link_libraries(${NAME}
     logger
     i2c
     gsl
+    error_counter
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
