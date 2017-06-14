@@ -57,6 +57,7 @@ namespace drivers
             virtual OSResult WaitForData() override;
 
           private:
+            static constexpr uint32_t InterruptPriority = 6;
             /*
              * @brief DefaultTimeout Default timeout for Payload operations. 30 minutes.
              */

@@ -15,7 +15,12 @@ PayloadDriver::PayloadDriver(drivers::i2c::II2CBus& communicationBus, const driv
 void PayloadDriver::IRQHandler()
 {
     GPIO_IntClear(IRQMask());
-    System::GiveSemaphoreISR(_sync);
+    auto value = _interruptPin.Input();
+    if (!value)
+    {
+        System::GiveSemaphoreISR(_sync);
+    }
+
     System::EndSwitchingISR();
 }
 
@@ -24,6 +29,8 @@ void PayloadDriver::Initialize()
     _sync = System::CreateBinarySemaphore();
 
     auto interruptBank = _interruptPin.PinNumber() % 2 ? GPIO_ODD_IRQn : GPIO_EVEN_IRQn;
+
+    NVIC_SetPriority(interruptBank, InterruptPriority);
     NVIC_EnableIRQ(interruptBank);
 }
 

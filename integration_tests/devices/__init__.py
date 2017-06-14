@@ -6,6 +6,7 @@ from imtq import *
 from gyro import *
 from rtc import RTCDevice
 from payload import Payload
+from gpio import GPIODriver
 
 __all__ = [
     'EPS',
@@ -26,5 +27,6 @@ __all__ = [
     'Antenna',
     "RTCDevice",
     "Gyro",
-    "Payload"
+    "Payload",
+    "GPIODriver"
 ]

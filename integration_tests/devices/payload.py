@@ -1,4 +1,5 @@
 import logging
+import struct
 
 import i2cMock
 from i2cMock import I2CDevice
@@ -6,11 +7,12 @@ from threading import Timer
 
 
 class Payload(I2CDevice):
-    def __init__(self, pin):
+    def __init__(self, gpioDriver, pin):
         super(Payload, self).__init__(0b0110000)
 
         self.log = logging.getLogger("Payload")
         self.pin = pin
+        self.gpioDriver = gpioDriver
         self.whoami = [0x53]
         self.SunS_Ref = [0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF]
         self.Temperatures = [0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF]
@@ -33,12 +35,10 @@ class Payload(I2CDevice):
         self.gpio_low(self.pin)
 
     def gpio_low(self, pin):
-        pass
-        #I2CDevice.gpio_low(pin)
+        self.gpioDriver.gpio_low(pin)
 
     def gpio_high(self, pin):
-        pass
-        #super(Payload, self).gpio_high(pin)
+        self.gpioDriver.gpio_high(pin)
 
     # Commands
 
@@ -70,7 +70,7 @@ class Payload(I2CDevice):
     def measure_radfet(self):
         self.log.debug("Measure RadFET")
         self.RadFET = [0x00500001, 0x00500002, 0x00500003, 0x00500004]
-        self.default_processing_time = 1 # 30
+        self.default_processing_time = 30
         self.mock_processing_start()
 
     # Data Reads
@@ -78,29 +78,52 @@ class Payload(I2CDevice):
     @i2cMock.command([0x00])
     def read_whoami(self):
         self.log.debug("Read Who am I")
-        return self.whoami or [0xFF]
+        return list(struct.pack('<B', self.whoami))
 
     @i2cMock.command([0x01])
     def read_suns_ref(self):
         self.log.debug("Read SunS Voltages")
-        return self.SunS_Ref or [0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF]
+        return list(struct.pack('<HHHHH',
+                                self.SunS_Ref[0],
+                                self.SunS_Ref[1],
+                                self.SunS_Ref[2],
+                                self.SunS_Ref[3],
+                                self.SunS_Ref[4]))
 
     @i2cMock.command([11])
     def read_temperatures(self):
         self.log.debug("Read Temperatures")
-        return self.Temperatures or [0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF]
+        return list(struct.pack('<HHHHHHHHH',
+                                self.Temperatures[0],
+                                self.Temperatures[1],
+                                self.Temperatures[2],
+                                self.Temperatures[3],
+                                self.Temperatures[4],
+                                self.Temperatures[5],
+                                self.Temperatures[6],
+                                self.Temperatures[7],
+                                self.Temperatures[8]))
 
     @i2cMock.command([29])
     def read_photodiodes(self):
         self.log.debug("Read Photodiodes")
-        return self.Photodiodes or [0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF]
+        return list(struct.pack('<HHHHH',
+                                self.Photodiodes[0],
+                                self.Photodiodes[1],
+                                self.Photodiodes[2],
+                                self.Photodiodes[3],
+                                self.Photodiodes[4]))
 
     @i2cMock.command([37])
     def read_housekeeping(self):
         self.log.debug("Read Housekeeping")
-        return self.Housekeeping or [0xFFFF, 0xFFFF]
+        return list(struct.pack('<HH', self.Housekeeping[0], self.Housekeeping[1]))
 
     @i2cMock.command([41])
     def read_radfet(self):
         self.log.debug("Read RadFET")
-        return self.RadFET or [0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF]
+        return list(struct.pack('<LLLL',
+                                self.RadFET[0],
+                                self.RadFET[1],
+                                self.RadFET[2],
+                                self.RadFET[3]))
