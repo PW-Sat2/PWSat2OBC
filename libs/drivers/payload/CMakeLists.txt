@@ -4,6 +4,11 @@ set(SOURCES
     Include/payload/payload.h
     payload.cpp
     commands/RadFET.cpp
+    commands/Housekeeping.cpp
+    commands/Photodiodes.cpp
+    commands/SunS.cpp
+    commands/Temperatures.cpp
+    commands/Whoami.cpp
     devices.cpp
 )
 

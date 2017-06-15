@@ -1,5 +1,5 @@
-#ifndef LIBS_DRIVERS_PAYLOAD_INCLUDE_PAYLOAD_COMMANDS_RADFET_H_
-#define LIBS_DRIVERS_PAYLOAD_INCLUDE_PAYLOAD_COMMANDS_RADFET_H_
+#ifndef LIBS_DRIVERS_PAYLOAD_INCLUDE_PAYLOAD_COMMANDS_WHOAMI_H_
+#define LIBS_DRIVERS_PAYLOAD_INCLUDE_PAYLOAD_COMMANDS_WHOAMI_H_
 
 #include "commands/base.h"
 #include "telemetry.h"
@@ -10,14 +10,15 @@ namespace drivers
     {
         namespace commands
         {
-            class RadFETCommand : public PayloadCommand<0x84>
+            class WhoamiCommand : public PayloadCommand<0x00>
             {
               public:
                 /**
                  * @brief Constructs @ref PayloadCommand object
                  * @param[in] driver A hardware driver
                  */
-                RadFETCommand(IPayloadDriver& driver);
+                WhoamiCommand(IPayloadDriver& driver);
+                virtual OSResult Execute() override;
 
               protected:
                 virtual gsl::span<std::uint8_t> GetBuffer() override;
@@ -26,14 +27,10 @@ namespace drivers
                 virtual OSResult Save() override;
 
               private:
-                union RadFETTelemetryBuffered {
-                    PayloadTelemetry::Radfet data;
-                    std::array<uint8_t, sizeof(PayloadTelemetry::Radfet)> buffer;
-                    static_assert(sizeof(data) == sizeof(buffer), "Incorrect size buffered Telemetry");
-                } _telemetry;
+                std::array<uint8_t, 1> _telemetry;
             };
         }
     }
 }
 
-#endif /* LIBS_DRIVERS_PAYLOAD_INCLUDE_PAYLOAD_COMMANDS_RADFET_H_ */
+#endif /* LIBS_DRIVERS_PAYLOAD_INCLUDE_PAYLOAD_COMMANDS_WHOAMI_H_ */

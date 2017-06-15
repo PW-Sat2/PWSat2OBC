@@ -1,5 +1,5 @@
-#ifndef LIBS_DRIVERS_PAYLOAD_INCLUDE_PAYLOAD_COMMANDS_RADFET_H_
-#define LIBS_DRIVERS_PAYLOAD_INCLUDE_PAYLOAD_COMMANDS_RADFET_H_
+#ifndef LIBS_DRIVERS_PAYLOAD_INCLUDE_PAYLOAD_COMMANDS_TEMPERATURES_H_
+#define LIBS_DRIVERS_PAYLOAD_INCLUDE_PAYLOAD_COMMANDS_TEMPERATURES_H_
 
 #include "commands/base.h"
 #include "telemetry.h"
@@ -10,14 +10,14 @@ namespace drivers
     {
         namespace commands
         {
-            class RadFETCommand : public PayloadCommand<0x84>
+            class TemperaturesCommand : public PayloadCommand<0x81>
             {
               public:
                 /**
                  * @brief Constructs @ref PayloadCommand object
                  * @param[in] driver A hardware driver
                  */
-                RadFETCommand(IPayloadDriver& driver);
+                TemperaturesCommand(IPayloadDriver& driver);
 
               protected:
                 virtual gsl::span<std::uint8_t> GetBuffer() override;
@@ -26,9 +26,9 @@ namespace drivers
                 virtual OSResult Save() override;
 
               private:
-                union RadFETTelemetryBuffered {
-                    PayloadTelemetry::Radfet data;
-                    std::array<uint8_t, sizeof(PayloadTelemetry::Radfet)> buffer;
+                union TemperaturesTelemetryBuffered {
+                    PayloadTelemetry::Temperatures data;
+                    std::array<uint8_t, sizeof(PayloadTelemetry::Temperatures)> buffer;
                     static_assert(sizeof(data) == sizeof(buffer), "Incorrect size buffered Telemetry");
                 } _telemetry;
             };
@@ -36,4 +36,4 @@ namespace drivers
     }
 }
 
-#endif /* LIBS_DRIVERS_PAYLOAD_INCLUDE_PAYLOAD_COMMANDS_RADFET_H_ */
+#endif /* LIBS_DRIVERS_PAYLOAD_INCLUDE_PAYLOAD_COMMANDS_TEMPERATURES_H_ */

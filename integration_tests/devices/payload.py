@@ -13,7 +13,7 @@ class Payload(I2CDevice):
         self.log = logging.getLogger("Payload")
         self.pin = pin
         self.gpioDriver = gpioDriver
-        self.whoami = [0x53]
+        self.whoami = 0x53
         self.SunS_Ref = [0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF]
         self.Temperatures = [0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF]
         self.Photodiodes = [0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF]
@@ -57,13 +57,13 @@ class Payload(I2CDevice):
     @i2cMock.command([0x82])
     def measure_photodiodes(self):
         self.log.debug("Measure Photodiodes")
-        self.SunS_Ref = [0x0301, 0x0302, 0x0303, 0x0304, 0x0305]
+        self.Photodiodes = [0x0301, 0x0302, 0x0303, 0x0304, 0x0305]
         self.mock_processing_start()
 
     @i2cMock.command([0x83])
     def measure_housekeeping(self):
         self.log.debug("Measure Housekeeping")
-        self.SunS_Ref = [0x0401, 0x0402]
+        self.Housekeeping = [0x0401, 0x0402]
         self.mock_processing_start()
 
     @i2cMock.command([0x84])
@@ -107,12 +107,11 @@ class Payload(I2CDevice):
     @i2cMock.command([29])
     def read_photodiodes(self):
         self.log.debug("Read Photodiodes")
-        return list(struct.pack('<HHHHH',
+        return list(struct.pack('<HHHH',
                                 self.Photodiodes[0],
                                 self.Photodiodes[1],
                                 self.Photodiodes[2],
-                                self.Photodiodes[3],
-                                self.Photodiodes[4]))
+                                self.Photodiodes[3]))
 
     @i2cMock.command([37])
     def read_housekeeping(self):

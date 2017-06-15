@@ -23,17 +23,18 @@ namespace drivers
                 /** @brief Telecommand code */
                 static constexpr auto CommandCode = TCommandCode;
 
-                OSResult Execute();
+                virtual OSResult Execute();
 
               protected:
                 virtual gsl::span<std::uint8_t> GetBuffer() = 0;
                 virtual uint8_t GetDataAddress() const = 0;
                 virtual OSResult Validate() const = 0;
                 virtual OSResult Save() = 0;
+                OSResult ExecuteDataCommand();
 
-              private:
                 IPayloadDriver& _driver;
 
+              private:
                 OSResult ExecuteCommand();
                 OSResult ExecuteDataRead(uint8_t address, gsl::span<uint8_t> buffer);
             };

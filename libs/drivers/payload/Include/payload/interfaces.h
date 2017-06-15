@@ -50,6 +50,11 @@ namespace drivers
               * @brief Starts measuring RadFET data.
               */
             virtual OSResult MeasureRadFET() = 0;
+
+            /**
+             * @briesf Gets Payload Who Am I flag.
+             */
+            virtual OSResult GetWhoami() = 0;
         };
     }
 }

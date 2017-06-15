@@ -1,6 +1,11 @@
 #include "devices.h"
 
+#include "commands/Housekeeping.h"
+#include "commands/Photodiodes.h"
 #include "commands/RadFET.h"
+#include "commands/SunS.h"
+#include "commands/Temperatures.h"
+#include "commands/Whoami.h"
 #include "commands/base_code.hpp"
 
 using namespace drivers::payload;
@@ -9,24 +14,34 @@ PayloadDeviceDriver::PayloadDeviceDriver(IPayloadDriver& driver) : _driver(drive
 {
 }
 
+OSResult PayloadDeviceDriver::GetWhoami()
+{
+    commands::WhoamiCommand command(_driver);
+    return command.Execute();
+}
+
 OSResult PayloadDeviceDriver::MeasureSunSRef()
 {
-    return OSResult::NotImplemented;
+    commands::SunSCommand command(_driver);
+    return command.Execute();
 }
 
 OSResult PayloadDeviceDriver::MeasureTemperatures()
 {
-    return OSResult::NotImplemented;
+    commands::TemperaturesCommand command(_driver);
+    return command.Execute();
 }
 
 OSResult PayloadDeviceDriver::MeasurePhotodiodes()
 {
-    return OSResult::NotImplemented;
+    commands::PhotodiodesCommand command(_driver);
+    return command.Execute();
 }
 
 OSResult PayloadDeviceDriver::MeasureHousekeeping()
 {
-    return OSResult::NotImplemented;
+    commands::HousekeepingCommand command(_driver);
+    return command.Execute();
 }
 
 OSResult PayloadDeviceDriver::MeasureRadFET()

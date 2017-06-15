@@ -22,10 +22,15 @@ template <std::uint8_t TCommandCode> OSResult PayloadCommand<TCommandCode>::Exec
 
     _driver.WaitForData();
 
+    return ExecuteDataCommand();
+}
+
+template <std::uint8_t TCommandCode> OSResult PayloadCommand<TCommandCode>::ExecuteDataCommand()
+{
     auto dataAddress = GetDataAddress();
     auto buffer = GetBuffer();
 
-    result = ExecuteDataRead(dataAddress, buffer);
+    auto result = ExecuteDataRead(dataAddress, buffer);
     if (result != OSResult::Success)
     {
         return result;

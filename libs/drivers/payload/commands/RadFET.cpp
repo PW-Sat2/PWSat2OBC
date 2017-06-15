@@ -2,8 +2,6 @@
 #include "commands/base_code.hpp"
 #include "logger/logger.h"
 
-#include <cstring>
-
 using namespace drivers::payload::commands;
 
 RadFETCommand::RadFETCommand(IPayloadDriver& driver) : PayloadCommand(driver)

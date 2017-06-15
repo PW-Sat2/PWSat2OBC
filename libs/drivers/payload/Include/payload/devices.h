@@ -24,6 +24,7 @@ namespace drivers
              */
             PayloadDeviceDriver(IPayloadDriver& driver);
 
+            virtual OSResult GetWhoami() override;
             virtual OSResult MeasureSunSRef() override;
             virtual OSResult MeasureTemperatures() override;
             virtual OSResult MeasurePhotodiodes() override;
