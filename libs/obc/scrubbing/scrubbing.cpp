@@ -1,5 +1,6 @@
 #include "scrubbing.hpp"
 #include <chrono>
+#include "logger/logger.h"
 #include "obc/hardware.h"
 #include "program_flash/fwd.hpp"
 
@@ -20,18 +21,44 @@ namespace obc
 
     void OBCScrubbing::InitializeRunlevel2()
     {
+        this->_control.Initialize();
         this->_scrubberTask.Create();
     }
 
     void OBCScrubbing::ScrubberTask(OBCScrubbing* This)
     {
+        auto notifyRunOnce = false;
+
         while (1)
         {
+            This->_control.Set(Event::Running);
+
             This->_primarySlotsScrubber.ScrubSlots();
             This->_secondarySlotsScrubber.ScrubSlots();
             This->_bootloaderScrubber.Scrub();
 
-            System::SleepTask(7min);
+            This->_control.Clear(Event::Running);
+
+            if (notifyRunOnce)
+            {
+                This->_control.Set(Event::RunOnceFinished);
+            }
+
+            auto f = This->_control.WaitAny(Event::RunOnceRequested, true, IterationInterval);
+
+            notifyRunOnce = has_flag(f, Event::RunOnceRequested);
+
+            if (notifyRunOnce)
+            {
+                LOG(LOG_LEVEL_INFO, "[scrub] Run once requested");
+            }
         }
+    }
+
+    void OBCScrubbing::RunOnce()
+    {
+        this->_control.Clear(Event::RunOnceFinished);
+        this->_control.Set(Event::RunOnceRequested);
+        this->_control.WaitAny(Event::RunOnceFinished, false, InfiniteTimeout);
     }
 }
