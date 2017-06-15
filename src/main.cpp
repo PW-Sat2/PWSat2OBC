@@ -103,12 +103,6 @@ void TIMER0_IRQHandler()
 
 __attribute__((optimize("O3"))) void UART1_RX_IRQHandler()
 {
-#define DEBUG_UART
-#ifdef DEBUG_UART
-    GPIO->P[gpioPortC].DOUTCLR = 1 << 11;
-#endif
-#undef DEBUG_UART
-
     Main.Hardware.UARTDriver.OnReceived();
 }
 
