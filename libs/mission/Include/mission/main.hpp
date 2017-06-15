@@ -4,6 +4,7 @@
 #pragma once
 
 #include <array>
+#include <chrono>
 #include <type_traits>
 #include "base.hpp"
 #include "base/os.h"
@@ -169,9 +170,10 @@ namespace mission
 
         /**
          * @brief Initializes mission loop task.
+         * @param[in] timePeriod Time period between two subsequent mission interations.
          * @return Operation status, true on success, false otherwise.
          */
-        bool Initialize();
+        bool Initialize(std::chrono::milliseconds timePeriod);
 
         /**
          * @brief Suspends indefinitely execution of mission loop.
@@ -243,6 +245,9 @@ namespace mission
          */
         static void MissionLoopControlTask(void* param);
 
+        /** @brief Time period between subsequent mission iterations. */
+        std::chrono::milliseconds iterationPeriod;
+
         /** Current mission state. */
         State state;
 
@@ -299,8 +304,9 @@ namespace mission
     {
     }
 
-    template <typename State, typename... T> bool MissionLoop<State, T...>::Initialize()
+    template <typename State, typename... T> bool MissionLoop<State, T...>::Initialize(std::chrono::milliseconds timePeriod)
     {
+        this->iterationPeriod = timePeriod;
         this->eventGroup = System::CreateEventGroup();
         if (this->eventGroup == nullptr)
         {
@@ -382,7 +388,7 @@ namespace mission
         for (;;)
         {
             const OSEventBits result =
-                System::EventGroupWaitForBits(this->eventGroup, RunOnceRequestFlag | PauseRequestFlag, false, false, 10s);
+                System::EventGroupWaitForBits(this->eventGroup, RunOnceRequestFlag | PauseRequestFlag, false, false, this->iterationPeriod);
             if (has_flag(result, RunOnceRequestFlag))
             {
                 LOG(LOG_LEVEL_DEBUG, "Running mission loop task once");

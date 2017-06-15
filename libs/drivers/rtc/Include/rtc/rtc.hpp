@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "error_counter/error_counter.hpp"
 #include "i2c/i2c.h"
 
 namespace devices
@@ -42,16 +43,23 @@ namespace devices
           public:
             /**
              * @brief Constructs @ref RTCObject object
+             * @param[in] errors Error counting mechanism
              * @param[in] bus A reference to I2C bus used by RTC.
              */
-            RTCObject(drivers::i2c::II2CBus& bus);
+            RTCObject(error_counter::ErrorCounting& errors, drivers::i2c::II2CBus& bus);
 
             virtual OSResult ReadTime(RTCTime& rtcTime) final override;
 
             /** @brief Address of RTC device */
             static constexpr std::uint8_t I2CAddress = 0b1010001;
 
+            /** @brief Error counter type */
+            using ErrorCounter = error_counter::ErrorCounter<7>;
+
           private:
+            /** @brief Error reporter type */
+            using ErrorReporter = error_counter::AggregatedErrorReporter<ErrorCounter::DeviceId>;
+
             static constexpr std::uint8_t SecondsNibbleMask = 0x70;
             static constexpr std::uint8_t MinutesNibbleMask = 0x70;
             static constexpr std::uint8_t HoursNibbleMask = 0x30;
@@ -59,6 +67,7 @@ namespace devices
             static constexpr std::uint8_t MonthsNibbleMask = 0x10;
             static constexpr std::uint8_t YearsNibbleMask = 0xF0;
 
+            ErrorCounter _error;
             drivers::i2c::II2CBus& _bus;
         };
 

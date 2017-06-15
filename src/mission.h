@@ -14,15 +14,19 @@
 #include "mission/sail.hpp"
 #include "mission/telemetry.hpp"
 #include "mission/time.hpp"
+#include "mission/watchdog.hpp"
 #include "state/struct.h"
 #include "telemetry/collect_comm.hpp"
 #include "telemetry/collect_eps.hpp"
+#include "telemetry/collect_exp.hpp"
 #include "telemetry/collect_fdir.hpp"
 #include "telemetry/collect_gyro.hpp"
 #include "telemetry/state.hpp"
 
 namespace mission
 {
+    using EPSWatchdogTask = WatchdogTask<devices::eps::EPSDriver>;
+
     typedef MissionLoop<SystemState, //
         TimeTask,
         antenna::AntennaTask,
@@ -32,7 +36,8 @@ namespace mission
         mission::experiments::MissionExperimentComponent,
         mission::BeaconUpdate,
         mission::PeristentStateSave, //
-        FileSystemTask               //
+        FileSystemTask,              //
+        EPSWatchdogTask              //
         >
         ObcMission;
 }
@@ -44,7 +49,8 @@ namespace telemetry
         mission::TelemetryTask,                  //
         GyroTelemetryAcquisition,                //
         ErrorCounterTelemetryAcquisition,        //
-        EpsTelemetryAcquisition                  //
+        EpsTelemetryAcquisition,                 //
+        ExperimentTelemetryAcquisition           //
         >
         ObcTelemetryAcquisition;
 }

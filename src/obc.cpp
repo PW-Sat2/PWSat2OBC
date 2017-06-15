@@ -5,6 +5,7 @@
 #include "logger/logger.h"
 #include "mission.h"
 #include "terminal.h"
+#include "watchdog/internal.hpp"
 
 static void ProcessState(OBC* obc)
 {
@@ -48,12 +49,17 @@ static void AuditSystemStartup()
     efm::mcu::ResetBootReason();
 }
 
+static void TimePassed(void* /*context*/, TimePoint /*currentTime*/)
+{
+    drivers::watchdog::InternalWatchdog::Kick();
+}
+
 OBC::OBC()
     : BootTable(Hardware.FlashDriver),                                                                               //
       BootSettings(this->Hardware.PersistentStorage.GetRedundantDriver()),                                           //
       Hardware(this->Fdir.ErrorCounting(), this->PowerControlInterface, timeProvider),                               //
       PowerControlInterface(this->Hardware.EPS),                                                                     //
-      Storage(Hardware.SPI, fs, Hardware.Pins),                                                                      //
+      Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),                                          //
       Experiments(fs, this->adcs.GetAdcsController(), this->timeProvider),                                           //
       Communication(this->Fdir, this->Hardware.CommDriver, this->timeProvider, Mission, fs, Experiments, BootTable), //
       terminal(this->GetLineIO())                                                                                    //
@@ -94,26 +100,27 @@ OSResult OBC::InitializeRunlevel1()
     this->fs.MakeDirectory("/a");
 
     const auto missionTime = Mission.GetState().PersistentState.Get<state::TimeState>().LastMissionTime();
-    if (!this->timeProvider.Initialize(missionTime, nullptr, nullptr))
+    if (!this->timeProvider.Initialize(missionTime, TimePassed, nullptr))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize persistent timer. ");
     }
 
-    if (!Mission.Initialize())
+    if (!Mission.Initialize(10s))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize mission loop.");
     }
 
-    if (!TelemetryAcquisition.Initialize())
+    if (!TelemetryAcquisition.Initialize(30s))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize telemetry acquisition loop.");
     }
 
+    drivers::watchdog::InternalWatchdog::Enable();
+
     BootSettings.ConfirmLastBoot();
 
-    LOG(LOG_LEVEL_INFO, "Intialized");
+    LOG(LOG_LEVEL_INFO, "Initialized");
     this->StateFlags.Set(OBC::InitializationFinishedFlag);
-
     return OSResult::Success;
 }
 

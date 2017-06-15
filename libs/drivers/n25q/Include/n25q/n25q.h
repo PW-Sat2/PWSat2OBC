@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <gsl/span>
 #include "base/os.h"
+#include "error_counter/error_counter.hpp"
 #include "redundancy.hpp"
 #include "spi/spi.h"
 
@@ -185,9 +186,11 @@ namespace devices
           public:
             /**
              * @brief Constructs @ref N25QDriver instance
+             * @param[in] errors Errors counting mechanism
+             * @param[in] deviceId Id associated with this N25Q chip, used for error counting.
              * @param[in] spi SPI interface to use
              */
-            N25QDriver(drivers::spi::ISPIInterface& spi);
+            N25QDriver(error_counter::ErrorCounting& errors, error_counter::Device deviceId, drivers::spi::ISPIInterface& spi);
 
             /**
              * @brief Reads data from memory starting from given address
@@ -275,10 +278,10 @@ namespace devices
 
           private:
             /**
-           * @brief Waits for device to finish current operation
-           * @param[in] timeout Timeout
-           * @return true of operation finished, false on timeout
-           */
+             * @brief Waits for device to finish current operation
+             * @param[in] timeout Timeout
+             * @return true of operation finished, false on timeout
+             */
             bool WaitBusy(std::chrono::milliseconds timeout);
 
             /**
@@ -307,8 +310,19 @@ namespace devices
              */
             void Command(const std::uint8_t command);
 
+            /**
+             * @brief Reads Id without reporting errors
+             * @return Device id
+             */
+            Id ReadIdWithoutErrorHandling();
+
             /** @brief SPI interface */
             drivers::spi::ISPIInterface& _spi;
+
+            /** @brief Error counting mechanism */
+            error_counter::ErrorCounting& _errors;
+            /** @brief Device ID assigned to this chip - used for error counting */
+            error_counter::Device _deviceId;
 
             /** @brief Program page operation timeout
              * Datasheet states that this operation should take maximum 5 ms.

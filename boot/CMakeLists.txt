@@ -10,6 +10,7 @@ set(SOURCES
     boot.cpp
     spi.cpp
     flash_driver.cpp
+    error_counter.cpp
     
     commands/test.cpp
     commands/booting.cpp
@@ -33,6 +34,7 @@ target_link_libraries(${NAME}
       gpio
       boot_settings
       program_flash
+      error_counter
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

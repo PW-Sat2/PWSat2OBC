@@ -13,12 +13,14 @@ using namespace devices::rtc;
 using drivers::i2c::II2CBus;
 using drivers::i2c::I2CResult;
 
-RTCObject::RTCObject(drivers::i2c::II2CBus& bus) : _bus(bus)
+RTCObject::RTCObject(error_counter::ErrorCounting& errors, drivers::i2c::II2CBus& bus) : _error(errors), _bus(bus)
 {
 }
 
 OSResult RTCObject::ReadTime(RTCTime& rtcTime)
 {
+    ErrorReporter errorContext(_error);
+
     std::array<std::uint8_t, 1> inBuffer;
     std::array<std::uint8_t, 7> outBuffer;
 
@@ -29,6 +31,7 @@ OSResult RTCObject::ReadTime(RTCTime& rtcTime)
     if (!status)
     {
         LOGF(LOG_LEVEL_ERROR, "Unable read time from RTC. Reason: %d", num(result));
+        errorContext.Counter().Failure();
         return OSResult::InvalidOperation;
     }
 

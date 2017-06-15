@@ -21,7 +21,7 @@ set(SOURCES
   N25Q/RedundantN25QTest.cpp
   imtq/imtqTest.cpp
   imtq/imtqHighLevelTest.cpp
-  rtc.cpp
+  RTC/RTCTest.cpp
   gyro/gyroTest.cpp
   gyro/GyroTelemetryTest.cpp
 )

@@ -39,6 +39,13 @@ namespace mission
          * @brief Maximal size of single telemetry event file.
          */
         std::int32_t maxFileSize;
+
+        /**
+         * @brief This value determines how often the telemetry should be saved.
+         *
+         * Counts mission iterations.
+         */
+        std::uint8_t delay;
     };
 
     /**
@@ -57,9 +64,9 @@ namespace mission
      * it is archived.
      *
      * The telemetry archivization process is done by removing \a previous \a telemetry \a file and
-     * changing \a current \a telemetry \a file to namd of the \a previous \a telemetry \a file.
+     * changing \a current \a telemetry \a file name to \a previous \a telemetry \a file name.
      */
-    class TelemetryTask : public Action
+    class TelemetryTask : public Action, public Update
     {
       public:
         /**
@@ -69,8 +76,14 @@ namespace mission
         TelemetryTask(std::tuple<services::fs::IFileSystem&, TelemetryConfiguration> arguments);
 
         /**
+         * @brief Builds update descriptor for this task.
+         * @return Update descriptor for the telemetry save task.
+         */
+        UpdateDescriptor<telemetry::TelemetryState> BuildUpdate();
+
+        /**
          * @brief Builds action descriptor for this task.
-         * @return Action descriptor - the telemetry change save task.
+         * @return Action descriptor - the telemetry save task.
          */
         ActionDescriptor<telemetry::TelemetryState> BuildAction();
 
@@ -110,6 +123,8 @@ namespace mission
          */
         static void SaveProxy(telemetry::TelemetryState& state, void* param);
 
+        static UpdateResult UpdateState(telemetry::TelemetryState& state, void* param);
+
         /**
          * @brief File system provider.
          */
@@ -119,6 +134,16 @@ namespace mission
          * @bier Current configuration
          */
         TelemetryConfiguration configuration;
+
+        /**
+         * @brief This value determines how often the telemetry should be saved.
+         */
+        std::uint8_t frequency;
+
+        /**
+         * Counts mission iterations.
+         */
+        std::uint8_t delay;
     };
 
     /** @} */

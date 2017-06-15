@@ -89,6 +89,7 @@ target_link_libraries(${NAME}
     mission_telemetry
     mission_comm
     mission_fs
+    mission_watchdog
     watchdog
     boot_params
     telemetry
@@ -96,6 +97,7 @@ target_link_libraries(${NAME}
     telemetry_gyro
     telemetry_fdir
     telemetry_eps
+    telemetry_exp
     program_flash
     scrubber
     boot_settings

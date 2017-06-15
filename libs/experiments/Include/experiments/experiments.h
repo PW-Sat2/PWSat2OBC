@@ -20,7 +20,7 @@ namespace experiments
     /**
      * @brief Experiment start result
      */
-    enum class StartResult
+    enum class StartResult : std::uint8_t
     {
         Success, //!< Success
         Failure  //!< Failure
@@ -29,8 +29,9 @@ namespace experiments
     /**
      * @brief Experiment iteration result
      */
-    enum class IterationResult
+    enum class IterationResult : std::uint8_t
     {
+        None,             //!< No iterations yet
         Finished,         //!< Experiment is finished
         LoopImmediately,  //!< Immediately run next iteration
         WaitForNextCycle, //!< Run next iteration when next mission loop cycle begins
@@ -84,9 +85,21 @@ namespace experiments
     };
 
     /**
+     * @brief Interface of object responsible for controlling currently performed experiment.
+     */
+    struct IExperimentController
+    {
+        /**
+         * @brief Dumps current experiment state.
+         * @return Current experiment execution state.
+         */
+        virtual ExperimentState CurrentState() = 0;
+    };
+
+    /**
      * @brief Coordinates experiment execution
      */
-    class ExperimentController
+    class ExperimentController final : public IExperimentController
     {
       public:
         /**
@@ -145,11 +158,7 @@ namespace experiments
          */
         void NotifyLoopIterationStart();
 
-        /**
-         * @brief Dumps current state
-         * @return Current experiment execution state
-         */
-        ExperimentState CurrentState();
+        virtual ExperimentState CurrentState() final override;
 
         /**
          * @brief Events used in synchronization

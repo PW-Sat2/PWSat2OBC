@@ -32,7 +32,12 @@ namespace obc
              * @param deviceOperations YAFFS device operations
              * @param[in] pins GPIO pins (unused)
              */
-            N25QStorage(drivers::spi::EFMSPIInterface& spi, services::fs::IYaffsDeviceOperations& deviceOperations, obc::OBCGPIO& pins);
+            N25QStorage(                                                //
+                error_counter::ErrorCounting& errors,                   //
+                drivers::spi::EFMSPIInterface& spi,                     //
+                services::fs::IYaffsDeviceOperations& deviceOperations, //
+                obc::OBCGPIO& pins                                      //
+                );
 
             /**
              * @brief Initializes OBC storage
@@ -70,6 +75,30 @@ namespace obc
 
             devices::n25q::N25QYaffsDevice<devices::n25q::BlockMapping::Sector, 2_KB, 16_MB> Device;
         };
+
+        namespace error_counters
+        {
+            /** @brief Defines error counter with embedded device id in first flash chip driver */
+            struct N25QDriver1
+            {
+                /** @brief Error counter type */
+                using ErrorCounter = error_counter::ErrorCounter<8>;
+            };
+
+            /** @brief Defines error counter with embedded device id in second flash chip driver */
+            struct N25QDriver2
+            {
+                /** @brief Error counter type */
+                using ErrorCounter = error_counter::ErrorCounter<9>;
+            };
+
+            /** @brief Defines error counter with embedded device id in third flash chip driver */
+            struct N25QDriver3
+            {
+                /** @brief Error counter type */
+                using ErrorCounter = error_counter::ErrorCounter<10>;
+            };
+        }
 
         /** @} */
     }

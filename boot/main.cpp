@@ -104,17 +104,17 @@ int main(void)
 }
 
 OBCBootloader::OBCBootloader()
-    :                                         //
-      Settings(_fram),                        //
-      BootTable(_flash),                      //
-      _fram1Spi(_spi),                        //
-      _fram2Spi(_spi),                        //
-      _fram3Spi(_spi),                        //
-      _fram1(_fram1Spi),                      //
-      _fram2(_fram2Spi),                      //
-      _fram3(_fram3Spi),                      //
-      _fram({&_fram1, &_fram2, &_fram3}),     //
-      _flash(io_map::ProgramFlash::FlashBase) //
+    :                                                     //
+      Settings(_fram),                                    //
+      BootTable(_flash),                                  //
+      _fram1Spi(_spi),                                    //
+      _fram2Spi(_spi),                                    //
+      _fram3Spi(_spi),                                    //
+      _fram1(_fram1Spi),                                  //
+      _fram2(_fram2Spi),                                  //
+      _fram3(_fram3Spi),                                  //
+      _fram(_error_counter, {&_fram1, &_fram2, &_fram3}), //
+      _flash(io_map::ProgramFlash::FlashBase)             //
 {
 }
 
