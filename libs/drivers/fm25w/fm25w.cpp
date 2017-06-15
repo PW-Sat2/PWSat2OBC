@@ -64,7 +64,9 @@ namespace devices
             }
         }
 
-        RedundantFM25WDriver::RedundantFM25WDriver(std::array<IFM25WDriver*, 3> fm25wDrivers) : _fm25wDrivers(fm25wDrivers)
+        RedundantFM25WDriver::RedundantFM25WDriver(error_counter::IErrorCounting& errors, std::array<IFM25WDriver*, 3> fm25wDrivers)
+            : _error(errors),             //
+              _fm25wDrivers(fm25wDrivers) //
         {
         }
 
@@ -76,8 +78,12 @@ namespace devices
 
             auto votingValue = Vote(status1, status2, status3);
             if (!votingValue.HasValue)
+            {
+                _error.Failure();
                 return None<Status>();
+            }
 
+            _error.Success();
             return votingValue.Value;
         }
 
@@ -112,10 +118,12 @@ namespace devices
 
             if (compareResult)
             {
+                _error.Success();
                 return;
             }
 
             {
+                _error.Failure();
                 auto normalizedRedundantBuffer2 = redundantBuffer2.subspan(0, bufferLength);
 
                 _fm25wDrivers[2]->Read(address, normalizedRedundantBuffer2);

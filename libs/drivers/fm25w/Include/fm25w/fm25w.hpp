@@ -2,6 +2,7 @@
 #define UNIT_TESTS_FM25W_INCLUDE_FM25W_FM25W_HPP_
 
 #include <cstdint>
+#include "error_counter/error_counter.hpp"
 #include "spi/spi.h"
 
 namespace devices
@@ -116,9 +117,10 @@ namespace devices
           public:
             /**
              * @brief Ctor
+             * @param errors Error counting mechanism
              * @param fm25wDrivers Driver used for redundancy
              */
-            RedundantFM25WDriver(std::array<IFM25WDriver*, 3> fm25wDrivers);
+            RedundantFM25WDriver(error_counter::IErrorCounting& errors, std::array<IFM25WDriver*, 3> fm25wDrivers);
 
             /**
              * @brief Reads status register
@@ -145,7 +147,13 @@ namespace devices
              */
             virtual void Write(Address address, gsl::span<const std::uint8_t> buffer) override;
 
+            /** @brief Error counter type */
+            using ErrorCounter = error_counter::ErrorCounter<11>;
+
           private:
+            /** @brief Error counter */
+            ErrorCounter _error;
+
             std::array<IFM25WDriver*, 3> _fm25wDrivers;
 
             void Read(Address address,

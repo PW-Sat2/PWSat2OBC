@@ -3,6 +3,7 @@
 
 #include <array>
 #include "boot/settings.hpp"
+#include "error_counter.hpp"
 #include "flash_driver.hpp"
 #include "fm25w/fm25w.hpp"
 #include "io_map.h"
@@ -20,6 +21,8 @@ class OBCBootloader
     program_flash::BootTable BootTable;
 
   private:
+    BootErrorCounter _error_counter;
+
     SPIPeripheral _spi;
     SPIDevice<io_map::SlaveSelectFram1> _fram1Spi;
     SPIDevice<io_map::SlaveSelectFram2> _fram2Spi;

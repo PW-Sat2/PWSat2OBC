@@ -69,9 +69,34 @@ namespace error_counter
     };
 
     /**
+     * @brief Interface for error counting mechanism
+     */
+    struct IErrorCounting
+    {
+        /**
+         * @brief Returns current value of device's error counter
+         * @param device Device ID
+         * @return Value of error counter
+         */
+        virtual CounterValue Current(Device device) const = 0;
+
+        /**
+         * @brief Records single failure of device
+         * @param device Device ID
+         */
+        virtual void Failure(Device device) = 0;
+
+        /**
+         * @brief Records single success of device
+         * @param device Device ID
+         */
+        virtual void Success(Device device) = 0;
+    };
+
+    /**
      * @brief Error counting mechanism
      */
-    class ErrorCounting final
+    class ErrorCounting final : public IErrorCounting
     {
       public:
         /** @brief Maximum number of supported devices */
@@ -96,19 +121,19 @@ namespace error_counter
          * @param device Device ID
          * @return Value of error counter
          */
-        CounterValue Current(Device device) const;
+        virtual CounterValue Current(Device device) const override;
 
         /**
          * @brief Records single failure of device
          * @param device Device ID
          */
-        void Failure(Device device);
+        virtual void Failure(Device device) override;
 
         /**
          * @brief Records single success of device
          * @param device Device ID
          */
-        void Success(Device device);
+        virtual void Success(Device device) override;
 
       private:
         /** @brief Type that is being used internally to store error counter */
@@ -132,7 +157,7 @@ namespace error_counter
     {
       public:
         /** @brief Error counting mechanism */
-        ErrorCounter(ErrorCounting& counting);
+        ErrorCounter(IErrorCounting& counting);
 
         /** @brief Current counter value */
         inline CounterValue Current() const;
@@ -146,7 +171,7 @@ namespace error_counter
 
       private:
         /** @brief Error counting */
-        ErrorCounting& _counting;
+        IErrorCounting& _counting;
     };
 
     /**
@@ -217,7 +242,7 @@ namespace error_counter
         return _counter;
     }
 
-    template <Device Device> ErrorCounter<Device>::ErrorCounter(ErrorCounting& counting) : _counting(counting)
+    template <Device Device> ErrorCounter<Device>::ErrorCounter(IErrorCounting& counting) : _counting(counting)
     {
     }
 
