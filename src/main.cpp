@@ -49,6 +49,7 @@ telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver
     Main.Hardware.EPS,
     Main.Experiments.ExperimentsController,
     Main.Hardware.MCUTemperature,
+    Main.Hardware.antennaDriver,
     0);
 
 mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc),

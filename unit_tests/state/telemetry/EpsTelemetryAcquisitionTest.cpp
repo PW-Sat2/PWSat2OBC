@@ -39,7 +39,7 @@ namespace
         EXPECT_CALL(eps, ReadHousekeepingA()).WillOnce(Return(Option<ControllerATelemetry>::None()));
         EXPECT_CALL(eps, ReadHousekeepingB()).WillOnce(Return(Option<ControllerBTelemetry>::None()));
         const auto result = Run();
-        ASSERT_THAT(result, Ne(mission::UpdateResult::Ok));
+        ASSERT_THAT(result, Eq(mission::UpdateResult::Warning));
         ASSERT_THAT(state.telemetry.IsModified(), Eq(false));
     }
 
@@ -48,7 +48,7 @@ namespace
         EXPECT_CALL(eps, ReadHousekeepingA()).WillOnce(Return(Option<ControllerATelemetry>::Some(ControllerATelemetry{})));
         EXPECT_CALL(eps, ReadHousekeepingB()).WillOnce(Return(Option<ControllerBTelemetry>::None()));
         const auto result = Run();
-        ASSERT_THAT(result, Ne(mission::UpdateResult::Ok));
+        ASSERT_THAT(result, Eq(mission::UpdateResult::Warning));
         ASSERT_THAT(state.telemetry.IsModified(), Eq(true));
     }
 
@@ -57,7 +57,7 @@ namespace
         EXPECT_CALL(eps, ReadHousekeepingA()).WillOnce(Return(Option<ControllerATelemetry>::None()));
         EXPECT_CALL(eps, ReadHousekeepingB()).WillOnce(Return(Option<ControllerBTelemetry>::Some(ControllerBTelemetry{})));
         const auto result = Run();
-        ASSERT_THAT(result, Ne(mission::UpdateResult::Ok));
+        ASSERT_THAT(result, Eq(mission::UpdateResult::Warning));
         ASSERT_THAT(state.telemetry.IsModified(), Eq(true));
     }
 }

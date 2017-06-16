@@ -100,6 +100,7 @@ target_link_libraries(${NAME}
     telemetry_eps
     telemetry_exp
     telemetry_temp
+    telemetry_ant
     program_flash
     scrubber
     boot_settings
