@@ -87,7 +87,7 @@ namespace mission
         /**
          * @brief Beacon frame builder.
          */
-        telecommunication::downlink::DownlinkFrame frame;
+        telecommunication::downlink::RawFrame frame;
     };
 }
 

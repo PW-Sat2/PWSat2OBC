@@ -44,7 +44,7 @@ namespace telemetry
         std::array<std::uint8_t, ManagedTelemetry::TotalSerializedSize> lastSerializedTelemetry;
     };
 
-    static_assert(ManagedTelemetry::TotalSerializedSize <= (devices::comm::MaxDownlinkFrameSize - 3), "Telemetry is too large");
+    static_assert(ManagedTelemetry::TotalSerializedSize <= (devices::comm::MaxDownlinkFrameSize - 1), "Telemetry is too large");
 }
 
 #endif

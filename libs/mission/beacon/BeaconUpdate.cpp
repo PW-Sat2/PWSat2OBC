@@ -27,8 +27,7 @@ namespace mission
     BeaconUpdate::BeaconUpdate(std::pair<devices::comm::IBeaconController&, IHasState<telemetry::TelemetryState>&> arguments)
         : controller(&arguments.first),      //
           telemetryState(&arguments.second), //
-          lastBeaconUpdate(0s),              //
-          frame(telecommunication::downlink::DownlinkAPID::Beacon, 0)
+          lastBeaconUpdate(0s)
     {
     }
 
@@ -84,6 +83,9 @@ namespace mission
     {
         auto& writer = frame.PayloadWriter();
         auto& telemetry = this->telemetryState->GetState();
+
+        writer.Reset();
+        writer.WriteByte(telecommunication::downlink::BeaconMarker);
         {
             Lock lock(telemetry.bufferLock, 5s);
             if (!static_cast<bool>(lock))
@@ -92,7 +94,6 @@ namespace mission
                 return Option<devices::comm::Beacon>::None();
             }
 
-            writer.Reset();
             writer.WriteArray(telemetry.lastSerializedTelemetry);
         }
 
@@ -102,7 +103,6 @@ namespace mission
             return Option<devices::comm::Beacon>::None();
         }
 
-        // TODO beacon interval will probably be adjusted based on current satellite state.
         return Option<devices::comm::Beacon>::Some(BeaconInterval, frame.Frame());
     }
 }
