@@ -16,11 +16,25 @@ namespace devices
 {
     namespace antenna
     {
+        /**
+         * @brief Class that contains antenna deployment activation counts
+         * @remark Part of the antenna telemetry
+         * @telemetry_element
+         * @ingroup antenna
+         */
         class ActivationCounts
         {
           public:
+            /** ctor. */
             ActivationCounts();
 
+            /**
+             * @brief ctor.
+             * @param antenna1 Number of deployment activations for first antenna.
+             * @param antenna2 Number of deployment activations for second antenna.
+             * @param antenna3 Number of deployment activations for third antenna.
+             * @param antenna4 Number of deployment activations for fourth antenna.
+             */
             ActivationCounts(std::uint8_t antenna1, std::uint8_t antenna2, std::uint8_t antenna3, std::uint8_t antenna4);
 
             /**
@@ -35,13 +49,19 @@ namespace devices
              */
             static constexpr std::uint32_t BitSize();
 
+            /**
+             * @brief Returns activation count of queried antenna
+             * @param antenna Queried antenna identifier
+             * @return Deployment activation count.
+             */
             std::uint8_t GetActivationCount(AntennaId antenna) const;
 
+            /**
+             * @brief Updates number of deployment activations of specified antenna
+             * @param antenna Identifier of antenna whose deployment counter should be updated.
+             * @param count New deployment count value.
+             */
             void SetActivationCount(AntennaId antenna, std::uint8_t count);
-
-            gsl::span<std::uint8_t> GetActivationCounts();
-
-            gsl::span<const std::uint8_t> GetActivationCounts() const;
 
           private:
             typedef std::array<std::uint8_t, 4> Collection;
@@ -63,23 +83,29 @@ namespace devices
             this->counts[antenna - ANTENNA1_ID] = count;
         }
 
-        inline gsl::span<std::uint8_t> ActivationCounts::GetActivationCounts()
-        {
-            return gsl::make_span(this->counts);
-        }
-
-        inline gsl::span<const std::uint8_t> ActivationCounts::GetActivationCounts() const
-        {
-            return gsl::make_span(this->counts);
-        }
-
+        /**
+         * @brief Class that contains antenna deployment activation times
+         * @remark Part of the antenna telemetry
+         * @ingroup antenna
+         */
         class ActivationTimes
         {
           public:
-            static constexpr std::uint8_t TimeLength = 12;
+            /**
+             * @brief Size in bits of single serialized field that contains antenna deployment activation time.
+             */
+            static constexpr std::uint32_t TimeLength = 12;
 
+            /** ctor. */
             ActivationTimes();
 
+            /**
+             * @brief ctor.
+             * @param antenna1 The cumulative antenna 1 deployment activation time.
+             * @param antenna2 The cumulative antenna 2 deployment activation time.
+             * @param antenna3 The cumulative antenna 3 deployment activation time.
+             * @param antenna4 The cumulative antenna 4 deployment activation time.
+             */
             ActivationTimes(std::chrono::seconds antenna1, //
                 std::chrono::seconds antenna2,             //
                 std::chrono::seconds antenna3,             //
@@ -97,13 +123,19 @@ namespace devices
              */
             static constexpr std::uint32_t BitSize();
 
+            /**
+             * @brief Returns cumulative deployment activation time of queried antenna
+             * @param antenna Queried antenna identifier
+             * @return Cumulative deployment activation time.
+             */
             std::chrono::seconds GetActivationTime(AntennaId antenna) const;
 
+            /**
+             * @brief Updates cumulative deployment activation time of specified antenna
+             * @param antenna Identifier of antenna whose deployment time should be updated.
+             * @param time New cumulative deployment activation time.
+             */
             void SetActivationTime(AntennaId antenna, std::chrono::seconds time);
-
-            gsl::span<std::chrono::seconds> GetActivationTimes();
-
-            gsl::span<const std::chrono::seconds> GetActivationTimes() const;
 
           private:
             typedef std::array<std::chrono::seconds, 4> Collection;
@@ -125,16 +157,9 @@ namespace devices
             this->times[antenna - ANTENNA1_ID] = time;
         }
 
-        inline gsl::span<std::chrono::seconds> ActivationTimes::GetActivationTimes()
-        {
-            return gsl::make_span(this->times);
-        }
-
-        inline gsl::span<const std::chrono::seconds> ActivationTimes::GetActivationTimes() const
-        {
-            return gsl::make_span(this->times);
-        }
-
+        /**
+         * @brief This type represents telemetry of the antenna deployment subsystem.
+         */
         class AntennaTelemetry
         {
           public:
@@ -143,6 +168,7 @@ namespace devices
              */
             static constexpr int Id = 9;
 
+            /** ctor. */
             AntennaTelemetry();
 
             /**
@@ -157,20 +183,62 @@ namespace devices
              */
             static constexpr std::uint32_t BitSize();
 
+            /**
+             * @brief This function returns the object that contains total antenna deployment activation counts
+             * one the queried channel.
+             * @param channel Queried antenna controller
+             * @return Reference to object with antenna deployment activation counts.
+             */
             const ActivationCounts& GetActivationCounts(AntennaChannel channel) const;
 
+            /**
+             * @brief Updates telemetry with new antenna deployment activation counts for specified channel
+             * @param channel Channel whose state should be updated.
+             * @param counts New antenna deployment activation counts.
+             */
             void SetActivationCounts(AntennaChannel channel, const ActivationCounts& counts);
 
+            /**
+             * @brief This function returns the object that contains cumulative antenna deployment times
+             * one the queried channel.
+             * @param channel Queried antenna controller
+             * @return Reference to object with antenna deployment times.
+             */
             const ActivationTimes& GetActivationTimes(AntennaChannel channel) const;
 
+            /**
+             * @brief Updates telemetry with new cumulative antenna deployment times for specified channel
+             * @param channel Channel whose state should be updated.
+             * @param times New antenna deployment times.
+             */
             void SetActivationTimes(AntennaChannel channel, const ActivationTimes& times);
 
+            /**
+             * Updates deployment status of specific antenna as seen on the specified channel.
+             * @param channel Channel that reported this status.
+             * @param antenna Identifier of the antenna whose deployment status should be updated
+             * @param status New deployment status.
+             */
             void SetDeploymentStatus(AntennaChannel channel, AntennaId antenna, bool status);
 
+            /**
+             * @brief Queries requested antenna deployment status as seen on the specified channel.
+             * @param channel Queried channel.
+             * @param antenna Queried antenna identifier.
+             * @return Requested antenna deployment status. True for being deployed false otherwise.
+             */
             bool GetDeploymentStatus(AntennaChannel channel, AntennaId antenna) const;
 
+            /**
+             * @brief Requests combined antenna deployment status.
+             * @return Combined antenna deployment status.
+             */
             std::uint8_t GetDeploymentStatus() const;
 
+            /**
+             * @brief Updates combined antenna deployment status.
+             * @param value New combined antenna deployment status.
+             */
             void SetDeploymentStatus(std::uint8_t value);
 
           private:
