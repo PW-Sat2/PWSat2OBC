@@ -7,6 +7,16 @@
 
 namespace scrubber
 {
+    class ProgramScrubbingStatus
+    {
+      public:
+        ProgramScrubbingStatus(std::uint32_t iterations, std::size_t offset, std::uint32_t slotsCorrected);
+
+        const std::uint32_t IterationsCount;
+        const std::size_t Offset;
+        const std::uint32_t SlotsCorrected;
+    };
+
     class ProgramScrubber
     {
       public:
@@ -19,6 +29,8 @@ namespace scrubber
 
         void ScrubSlots();
 
+        ProgramScrubbingStatus Status();
+
       private:
         ScrubBuffer& _buffer;
         program_flash::BootTable& _bootTable;
@@ -26,6 +38,8 @@ namespace scrubber
         std::uint8_t _slotsMask;
 
         std::size_t _offset;
+        std::uint32_t _iterationsCount;
+        std::uint32_t _slotsCorrected;
     };
 }
 

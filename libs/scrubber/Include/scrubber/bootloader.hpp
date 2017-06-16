@@ -8,6 +8,16 @@
 
 namespace scrubber
 {
+    class BootloaderScrubbingStatus
+    {
+      public:
+        BootloaderScrubbingStatus(std::uint32_t iterationsCount, std::uint32_t copiesCorrected, std::uint32_t mcuPagesCorrected);
+
+        const std::uint32_t IterationsCount;
+        const std::uint32_t CopiesCorrected;
+        const std::uint32_t MUCPagesCorrected;
+    };
+
     class BootloaderScrubber
     {
       public:
@@ -17,10 +27,15 @@ namespace scrubber
 
         void Scrub();
 
+        BootloaderScrubbingStatus Status();
+
       private:
         ScrubBuffer& _scrubBuffer;
         program_flash::BootTable& _bootTable;
         drivers::msc::MCUMemoryController& _mcuFlash;
+        std::uint32_t _iterationsCount;
+        std::uint32_t _copiesCorrected;
+        std::uint32_t _mcuPagesCorrected;
     };
 }
 
