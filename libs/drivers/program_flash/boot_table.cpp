@@ -102,4 +102,14 @@ namespace program_flash
 
         return CRC_calc(programArea);
     }
+
+    bool BootTable::Lock(std::chrono::milliseconds timeout)
+    {
+        return this->_flash.Lock(timeout);
+    }
+
+    void BootTable::Unlock()
+    {
+        this->_flash.Unlock();
+    }
 }

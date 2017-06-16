@@ -235,6 +235,18 @@ namespace program_flash
             return BootloaderCopy(this->_flash, index);
         }
 
+        /**
+         * @brief Locks entire boot table
+         * @param timeout Take lock timeout
+         * @return true if lock was taken, false otherwise
+         */
+        bool Lock(std::chrono::milliseconds timeout);
+
+        /**
+         * @brief Unlocks previously locked boot table
+         */
+        void Unlock();
+
         /** @brief Number of entries in boot table */
         static constexpr std::uint8_t EntriesCount = 6;
 

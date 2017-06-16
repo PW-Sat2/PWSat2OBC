@@ -5,6 +5,8 @@
 #include "logger/logger.h"
 #include "redundancy.hpp"
 
+using namespace std::chrono_literals;
+
 namespace scrubber
 {
     static inline bool FastSpanCompare(const gsl::span<const uint8_t> a, const gsl::span<const uint8_t> b)
@@ -50,7 +52,13 @@ namespace scrubber
 
         std::array<uint8_t, 3> slots = DecodeSlotsMask(this->_slotsMask);
 
-        // lock
+        UniqueLock<program_flash::BootTable> lock(this->_bootTable, 0s);
+
+        if (!lock())
+        {
+            LOG(LOG_LEVEL_WARNING, "[scrub] Unable to take boot table lock - skipping program scrubbing");
+            return;
+        }
 
         program_flash::ProgramEntry entries[] = {
             this->_bootTable.Entry(slots[0]), this->_bootTable.Entry(slots[1]), this->_bootTable.Entry(slots[2]),
@@ -82,8 +90,6 @@ namespace scrubber
 
             this->_slotsCorrected++;
         }
-
-        // unlock
 
         this->_offset += ScrubSize;
 

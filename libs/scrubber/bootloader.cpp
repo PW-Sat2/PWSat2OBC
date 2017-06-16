@@ -7,6 +7,7 @@
 
 using program_flash::BootloaderCopy;
 using drivers::msc::MCUMemoryController;
+using namespace std::chrono_literals;
 
 namespace scrubber
 {
@@ -26,6 +27,14 @@ namespace scrubber
     void BootloaderScrubber::Scrub()
     {
         LOG(LOG_LEVEL_INFO, "[scrub] Scrubbing bootloader copies");
+
+        UniqueLock<program_flash::BootTable> lock(this->_bootTable, 0s);
+
+        if (!lock())
+        {
+            LOG(LOG_LEVEL_WARNING, "[scrub] Unable to take boot table lock - skipping program scrubbing");
+            return;
+        }
 
         BootloaderCopy copies[] = {
             _bootTable.GetBootloaderCopy(0),
