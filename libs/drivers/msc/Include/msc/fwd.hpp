@@ -5,7 +5,7 @@ namespace drivers
 {
     namespace msc
     {
-        class MCUMemoryController;
+        class IMCUFlash;
     }
 }
 

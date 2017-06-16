@@ -9,13 +9,22 @@ namespace drivers
 {
     namespace msc
     {
-        class MCUMemoryController
+        struct IMCUFlash
         {
-          public:
-            void Erase(std::size_t sectorOffset);
-            void Program(std::size_t sectorOffset, gsl::span<std::uint8_t> buffer);
+            virtual void Erase(std::size_t sectorOffset) = 0;
+            virtual void Program(std::size_t sectorOffset, gsl::span<std::uint8_t> buffer) = 0;
+            virtual std::uint8_t const* Begin() const = 0;
 
             static constexpr std::size_t SectorSize = 4_KB;
+        };
+
+        class MCUMemoryController : public IMCUFlash
+        {
+          public:
+            virtual void Erase(std::size_t sectorOffset) override;
+            virtual void Program(std::size_t sectorOffset, gsl::span<std::uint8_t> buffer) override;
+
+            virtual std::uint8_t const* Begin() const override;
         };
     }
 }

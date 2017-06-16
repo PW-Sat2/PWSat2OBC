@@ -24,5 +24,10 @@ namespace drivers
 
             MSC_Deinit();
         }
+
+        std::uint8_t const* MCUMemoryController::Begin() const
+        {
+            return reinterpret_cast<std::uint8_t const*>(0);
+        }
     }
 }
