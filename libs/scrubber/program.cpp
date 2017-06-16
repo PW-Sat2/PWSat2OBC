@@ -7,37 +7,40 @@
 
 namespace scrubber
 {
-    namespace
+    static inline bool FastSpanCompare(const gsl::span<const uint8_t> a, const gsl::span<const uint8_t> b)
     {
-        static inline bool FastSpanCompare(const gsl::span<const uint8_t> a, const gsl::span<const uint8_t> b)
-        {
-            return memcmp(a.data(), b.data(), a.size()) == 0;
-        }
+        return memcmp(a.data(), b.data(), a.size()) == 0;
+    }
 
-        static std::array<uint8_t, 3> DecodeSlotsMask(std::uint8_t mask)
-        {
-            std::array<uint8_t, 3> result{0, 0, 0};
-            std::bitset<program_flash::BootTable::EntriesCount> slots(mask);
+    static std::array<uint8_t, 3> DecodeSlotsMask(std::uint8_t mask)
+    {
+        std::array<uint8_t, 3> result{0, 0, 0};
+        std::bitset<program_flash::BootTable::EntriesCount> slots(mask);
 
-            auto j = 0;
-            for (std::uint8_t i = 0; i < program_flash::BootTable::EntriesCount; i++)
+        auto j = 0;
+        for (std::uint8_t i = 0; i < program_flash::BootTable::EntriesCount; i++)
+        {
+            if (slots[i])
             {
-                if (slots[i])
-                {
-                    result[j] = i;
-                    j++;
-                }
-                if (j == 3)
-                    break;
+                result[j] = i;
+                j++;
             }
-
-            return result;
+            if (j == 3)
+                break;
         }
+
+        return result;
+    }
+
+    ProgramScrubbingStatus::ProgramScrubbingStatus(std::uint32_t iterations, std::size_t offset, std::uint32_t slotsCorrected)
+        : IterationsCount(iterations), Offset(offset), SlotsCorrected(slotsCorrected)
+    {
     }
 
     ProgramScrubber::ProgramScrubber(
         ScrubBuffer& buffer, program_flash::BootTable& bootTable, program_flash::IFlashDriver& flashDriver, std::uint8_t slotsMask)
-        : _buffer(buffer), _bootTable(bootTable), _flashDriver(flashDriver), _slotsMask(slotsMask), _offset(0)
+        : _buffer(buffer), _bootTable(bootTable), _flashDriver(flashDriver), _slotsMask(slotsMask), _offset(0), _iterationsCount(0),
+          _slotsCorrected(0)
     {
     }
 
@@ -76,6 +79,8 @@ namespace scrubber
             this->_flashDriver.EraseSector(flashOffset);
 
             this->_flashDriver.Program(flashOffset, this->_buffer);
+
+            this->_slotsCorrected++;
         }
 
         // unlock
@@ -86,6 +91,14 @@ namespace scrubber
         {
             this->_offset = 0;
         }
+
+        this->_iterationsCount++;
+
         LOG(LOG_LEVEL_MIN, "[scrub] Done");
+    }
+
+    ProgramScrubbingStatus ProgramScrubber::Status()
+    {
+        return ProgramScrubbingStatus(this->_iterationsCount, this->_offset, this->_slotsCorrected);
     }
 }

@@ -2,6 +2,20 @@
 
 static void Status()
 {
+    auto status = Main.Scrubbing.Status();
+    Main.terminal.Printf("Iterations count: %ld\n", status.IterationsCount);
+
+    Main.terminal.Printf("PrimarySlots.Iterations count: %ld\n", status.PrimarySlots.IterationsCount);
+    Main.terminal.Printf("PrimarySlots.Offset: 0x%X\n", status.PrimarySlots.Offset);
+    Main.terminal.Printf("PrimarySlots.Slots corrected: %ld\n", status.PrimarySlots.SlotsCorrected);
+
+    Main.terminal.Printf("SecondarySlots.Iterations count: %ld\n", status.SecondarySlots.IterationsCount);
+    Main.terminal.Printf("SecondarySlots.Offset: 0x%X\n", status.SecondarySlots.Offset);
+    Main.terminal.Printf("SecondarySlots.Slots corrected: %ld\n", status.SecondarySlots.SlotsCorrected);
+
+    Main.terminal.Printf("Bootloader.IterationsCount: %ld\n", status.Bootloader.IterationsCount);
+    Main.terminal.Printf("Bootloader.Copies corrected: %ld\n", status.Bootloader.CopiesCorrected);
+    Main.terminal.Printf("Bootloader.MCU pages corrected: %ld\n", status.Bootloader.MUCPagesCorrected);
 }
 
 static void Kick()

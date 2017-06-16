@@ -10,9 +10,16 @@ using drivers::msc::MCUMemoryController;
 
 namespace scrubber
 {
+    BootloaderScrubbingStatus::BootloaderScrubbingStatus(
+        std::uint32_t iterationsCount, std::uint32_t copiesCorrected, std::uint32_t mcuPagesCorrected)
+        : IterationsCount(iterationsCount), CopiesCorrected(copiesCorrected), MUCPagesCorrected(mcuPagesCorrected)
+    {
+    }
+
     BootloaderScrubber::BootloaderScrubber(
         ScrubBuffer& scrubBuffer, program_flash::BootTable& bootTable, drivers::msc::MCUMemoryController& mcuFlash)
-        : _scrubBuffer(scrubBuffer), _bootTable(bootTable), _mcuFlash(mcuFlash)
+        : _scrubBuffer(scrubBuffer), _bootTable(bootTable), _mcuFlash(mcuFlash), _iterationsCount(0), _copiesCorrected(0),
+          _mcuPagesCorrected(0)
     {
     }
 
@@ -72,5 +79,9 @@ namespace scrubber
         }
 
         LOG(LOG_LEVEL_INFO, "[scrub] Finished scrubbing bootloader");
+    }
+    BootloaderScrubbingStatus BootloaderScrubber::Status()
+    {
+        return BootloaderScrubbingStatus(this->_iterationsCount, this->_copiesCorrected, this->_mcuPagesCorrected);
     }
 }

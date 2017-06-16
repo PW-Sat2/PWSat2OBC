@@ -10,6 +10,20 @@
 
 namespace obc
 {
+    class ScrubbingStatus final
+    {
+      public:
+        ScrubbingStatus(std::uint32_t iterationsCount,
+            const scrubber::ProgramScrubbingStatus primarySlots,
+            const scrubber::ProgramScrubbingStatus secondarySlots,
+            const scrubber::BootloaderScrubbingStatus bootloader);
+
+        const std::uint32_t IterationsCount;
+        const scrubber::ProgramScrubbingStatus PrimarySlots;
+        const scrubber::ProgramScrubbingStatus SecondarySlots;
+        const scrubber::BootloaderScrubbingStatus Bootloader;
+    };
+
     class OBCScrubbing
     {
       public:
@@ -18,6 +32,8 @@ namespace obc
         void InitializeRunlevel2();
 
         void RunOnce();
+
+        ScrubbingStatus Status();
 
       private:
         static void ScrubberTask(OBCScrubbing* This);
@@ -28,6 +44,8 @@ namespace obc
 
         Task<OBCScrubbing*, 2_KB, TaskPriority::P6> _scrubberTask;
         EventGroup _control;
+
+        std::uint32_t _iterationsCount;
 
         static constexpr auto IterationInterval = std::chrono::minutes(7);
 
