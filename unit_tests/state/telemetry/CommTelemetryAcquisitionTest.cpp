@@ -39,7 +39,7 @@ namespace
     {
         EXPECT_CALL(comm, GetTelemetry(_)).WillOnce(Return(false));
         const auto result = Run();
-        ASSERT_THAT(result, Ne(mission::UpdateResult::Ok));
+        ASSERT_THAT(result, Eq(mission::UpdateResult::Warning));
         ASSERT_THAT(state.telemetry.IsModified(), Eq(false));
     }
 
