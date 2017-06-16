@@ -52,9 +52,9 @@ namespace obc
         {
             This->_control.Set(Event::Running);
 
-            This->_primarySlotsScrubber.ScrubSlots();
-            This->_secondarySlotsScrubber.ScrubSlots();
-            This->_bootloaderScrubber.Scrub();
+            This->_primarySlotsScrubberCounter.DoAndGoDown([This]() { This->_primarySlotsScrubber.ScrubSlots(); });
+            This->_secondarySlotsScrubberCounter.DoAndGoDown([This]() { This->_secondarySlotsScrubber.ScrubSlots(); });
+            This->_bootloaderScrubberCounter.DoAndGoDown([This]() { This->_bootloaderScrubber.Scrub(); });
 
             This->_control.Clear(Event::Running);
 

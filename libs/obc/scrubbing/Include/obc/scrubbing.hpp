@@ -2,6 +2,7 @@
 #define LIBS_OBC_SCRUBBING_INCLUDE_OBC_SCRUBBING_HPP_
 
 #include <chrono>
+#include "base/counter.hpp"
 #include "base/os.h"
 #include "obc/hardware_fwd.hpp"
 #include "program_flash/fwd.hpp"
@@ -38,8 +39,13 @@ namespace obc
       private:
         static void ScrubberTask(OBCScrubbing* This);
 
+        counter::Counter<std::uint8_t, 0, 1, 1> _primarySlotsScrubberCounter;
         scrubber::ProgramScrubber _primarySlotsScrubber;
+
+        counter::Counter<std::uint8_t, 0, 1, 1> _secondarySlotsScrubberCounter;
         scrubber::ProgramScrubber _secondarySlotsScrubber;
+
+        counter::Counter<std::uint8_t, 0, 7, 7> _bootloaderScrubberCounter;
         scrubber::BootloaderScrubber _bootloaderScrubber;
 
         Task<OBCScrubbing*, 2_KB, TaskPriority::P6> _scrubberTask;
