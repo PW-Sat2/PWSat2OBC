@@ -410,6 +410,15 @@ namespace
         CheckBuffer(writer.Capture(), gsl::make_span(expected));
     }
 
+    TEST(BitWriterTest, TestWritingFailureBufferSizeExceeded)
+    {
+        uint8_t array[3];
+        BitWriter writer(array);
+        ASSERT_TRUE(writer.WriteWord(0x12, 15));
+        ASSERT_FALSE(writer.WriteWord(0x12, 10));
+        ASSERT_FALSE(writer.Status());
+    }
+
     TEST(BitWriterTest, TestWritingPartialQuadBitWord)
     {
         uint8_t array[9];

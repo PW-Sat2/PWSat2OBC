@@ -5,10 +5,12 @@
 
 #include "gmock/gmock.h"
 #include "antenna/driver.h"
+#include "antenna/telemetry.hpp"
 
 struct AntennaMock : public AntennaDriver
 {
     AntennaMock();
+    ~AntennaMock();
 
     MOCK_METHOD1(Reset, OSResult(AntennaChannel channel));
 
@@ -27,7 +29,7 @@ struct AntennaMock : public AntennaDriver
 
     MOCK_METHOD2(GetTemperature, OSResult(AntennaChannel channel, uint16_t* temperature));
 
-    MOCK_METHOD0(GetTelemetry, AntennaTelemetry());
+    MOCK_METHOD1(GetTelemetry, OSResult(devices::antenna::AntennaTelemetry& telemetry));
 };
 
 #endif

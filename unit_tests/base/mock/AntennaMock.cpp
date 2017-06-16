@@ -35,9 +35,9 @@ static OSResult GetTemperature(struct AntennaDriver* driver, AntennaChannel chan
     return static_cast<AntennaMock*>(driver)->GetTemperature(channel, temperature);
 }
 
-static AntennaTelemetry GetTelemetry(struct AntennaDriver* driver)
+static OSResult GetTelemetry(struct AntennaDriver* driver, devices::antenna::AntennaTelemetry& telemetry)
 {
-    return static_cast<AntennaMock*>(driver)->GetTelemetry();
+    return static_cast<AntennaMock*>(driver)->GetTelemetry(telemetry);
 }
 
 AntennaMock::AntennaMock()
@@ -49,4 +49,8 @@ AntennaMock::AntennaMock()
     AntennaDriver::GetDeploymentStatus = ::GetDeploymentStatus;
     AntennaDriver::GetTemperature = ::GetTemperature;
     AntennaDriver::GetTelemetry = ::GetTelemetry;
+}
+
+AntennaMock::~AntennaMock()
+{
 }

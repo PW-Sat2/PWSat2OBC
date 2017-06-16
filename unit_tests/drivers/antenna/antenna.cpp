@@ -3,6 +3,7 @@
 #include "I2C/I2CMock.hpp"
 #include "MiniportMock.hpp"
 #include "antenna/driver.h"
+#include "antenna/telemetry.hpp"
 
 using testing::Eq;
 using testing::Ne;
@@ -10,6 +11,8 @@ using testing::_;
 using testing::Return;
 using testing::Invoke;
 using namespace std::chrono_literals;
+using devices::antenna::AntennaTelemetry;
+
 namespace
 {
     class AntennaDriverTest : public testing::Test
@@ -111,70 +114,112 @@ namespace
         ASSERT_THAT(status, Ne(OSResult::Success));
     }
 
-    TEST_F(AntennaDriverTest, TestGetTelemetryPositiveTestSecondaryChannel)
+    TEST_F(AntennaDriverTest, TestGetTelemetryPositiveTest)
     {
-        EXPECT_CALL(primary, GetTemperature(ANTENNA_BACKUP_CHANNEL, _)).WillOnce(Return(OSResult::Success));
-        EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_BACKUP_CHANNEL, _, _)).Times(4).WillRepeatedly(Return(OSResult::Success));
-        EXPECT_CALL(primary, GetAntennaActivationTime(ANTENNA_BACKUP_CHANNEL, _, _)).Times(4).WillRepeatedly(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetAntennaActivationCount(_, _, _)).Times(8).WillRepeatedly(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetAntennaActivationTime(_, _, _)).Times(8).WillRepeatedly(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetDeploymentStatus(_, _)).Times(2).WillRepeatedly(Return(OSResult::Success));
 
-        EXPECT_CALL(primary, GetTemperature(ANTENNA_PRIMARY_CHANNEL, _)).WillOnce(Return(OSResult::DeviceNotFound));
+        AntennaTelemetry telemetry;
+        const auto result = driver.GetTelemetry(&driver, telemetry);
+        ASSERT_THAT(result, Eq(OSResult::Success));
+    }
+
+    TEST_F(AntennaDriverTest, TestGetTelemetryPositiveTestChannels)
+    {
+        EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, _)).WillOnce(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, _)).WillOnce(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, _)).WillOnce(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, _)).WillOnce(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, _)).WillOnce(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, _)).WillOnce(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, _)).WillOnce(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, _)).WillOnce(Return(OSResult::Success));
+
+        EXPECT_CALL(primary, GetAntennaActivationTime(ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, _)).WillOnce(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetAntennaActivationTime(ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, _)).WillOnce(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetAntennaActivationTime(ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, _)).WillOnce(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetAntennaActivationTime(ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, _)).WillOnce(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetAntennaActivationTime(ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, _)).WillOnce(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetAntennaActivationTime(ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, _)).WillOnce(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetAntennaActivationTime(ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, _)).WillOnce(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetAntennaActivationTime(ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, _)).WillOnce(Return(OSResult::Success));
+
+        EXPECT_CALL(primary, GetDeploymentStatus(ANTENNA_PRIMARY_CHANNEL, _)).WillOnce(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetDeploymentStatus(ANTENNA_BACKUP_CHANNEL, _)).WillOnce(Return(OSResult::Success));
+
+        AntennaTelemetry telemetry;
+        const auto result = driver.GetTelemetry(&driver, telemetry);
+        ASSERT_THAT(result, Eq(OSResult::Success));
+    }
+
+    TEST_F(AntennaDriverTest, TestGetTelemetryFailureOnDeploymentStatusPrimaryChannel)
+    {
+        EXPECT_CALL(primary, GetAntennaActivationCount(_, _, _)).Times(8).WillRepeatedly(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetAntennaActivationTime(_, _, _)).Times(8).WillRepeatedly(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetDeploymentStatus(_, _)).WillOnce(Return(OSResult::IOError)).WillOnce(Return(OSResult::Success));
+
+        AntennaTelemetry telemetry;
+        const auto result = driver.GetTelemetry(&driver, telemetry);
+        ASSERT_THAT(result, Ne(OSResult::Success));
+    }
+
+    TEST_F(AntennaDriverTest, TestGetTelemetryFailureOnDeploymentStatusBackupChannel)
+    {
+        EXPECT_CALL(primary, GetAntennaActivationCount(_, _, _)).Times(8).WillRepeatedly(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetAntennaActivationTime(_, _, _)).Times(8).WillRepeatedly(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetDeploymentStatus(_, _)).WillOnce(Return(OSResult::Success)).WillOnce(Return(OSResult::IOError));
+
+        AntennaTelemetry telemetry;
+        const auto result = driver.GetTelemetry(&driver, telemetry);
+        ASSERT_THAT(result, Ne(OSResult::Success));
+    }
+
+    TEST_F(AntennaDriverTest, TestGetTelemetryFailureActivationCountPrimaryChannel)
+    {
+        EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_PRIMARY_CHANNEL, _, _)).WillOnce(Return(OSResult::IOError));
         EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_PRIMARY_CHANNEL, _, _))
-            .Times(4)
-            .WillRepeatedly(Return(OSResult::DeviceNotFound));
-        EXPECT_CALL(primary, GetAntennaActivationTime(ANTENNA_PRIMARY_CHANNEL, _, _))
-            .Times(4)
-            .WillRepeatedly(Return(OSResult::DeviceNotFound));
+            .Times(3)
+            .WillRepeatedly(Return(OSResult::Success))
+            .RetiresOnSaturation();
 
-        const auto result = driver.GetTelemetry(&driver);
-        ASSERT_THAT(result.flags,
-            Eq(static_cast<uint32_t>(ANT_TM_ANTENNA1_ACTIVATION_COUNT | //
-                ANT_TM_ANTENNA2_ACTIVATION_COUNT |                      //
-                ANT_TM_ANTENNA3_ACTIVATION_COUNT |                      //
-                ANT_TM_ANTENNA4_ACTIVATION_COUNT |                      //
-                ANT_TM_ANTENNA1_ACTIVATION_TIME |                       //
-                ANT_TM_ANTENNA2_ACTIVATION_TIME |                       //
-                ANT_TM_ANTENNA3_ACTIVATION_TIME |                       //
-                ANT_TM_ANTENNA4_ACTIVATION_TIME |                       //
-                ANT_TM_TEMPERATURE2                                     //
-                )));
+        EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_BACKUP_CHANNEL, _, _)).WillRepeatedly(Return(OSResult::Success));
+
+        EXPECT_CALL(primary, GetAntennaActivationTime(_, _, _)).Times(8).WillRepeatedly(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetDeploymentStatus(_, _)).Times(2).WillRepeatedly(Return(OSResult::Success));
+
+        AntennaTelemetry telemetry;
+        const auto result = driver.GetTelemetry(&driver, telemetry);
+        ASSERT_THAT(result, Ne(OSResult::Success));
     }
 
-    TEST_F(AntennaDriverTest, TestGetTelemetryPositiveTestPrimaryChannel)
+    TEST_F(AntennaDriverTest, TestGetTelemetryFailureActivationCountBackupChannel)
     {
-        EXPECT_CALL(primary, GetTemperature(ANTENNA_PRIMARY_CHANNEL, _)).WillOnce(Return(OSResult::Success));
-        EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_PRIMARY_CHANNEL, _, _)).Times(4).WillRepeatedly(Return(OSResult::Success));
-        EXPECT_CALL(primary, GetAntennaActivationTime(ANTENNA_PRIMARY_CHANNEL, _, _)).Times(4).WillRepeatedly(Return(OSResult::Success));
-
-        EXPECT_CALL(primary, GetTemperature(ANTENNA_BACKUP_CHANNEL, _)).WillOnce(Return(OSResult::DeviceNotFound));
+        EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_BACKUP_CHANNEL, _, _)).WillOnce(Return(OSResult::IOError));
         EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_BACKUP_CHANNEL, _, _))
-            .Times(4)
-            .WillRepeatedly(Return(OSResult::DeviceNotFound));
-        EXPECT_CALL(primary, GetAntennaActivationTime(ANTENNA_BACKUP_CHANNEL, _, _))
-            .Times(4)
-            .WillRepeatedly(Return(OSResult::DeviceNotFound));
+            .Times(3)
+            .WillRepeatedly(Return(OSResult::Success))
+            .RetiresOnSaturation();
 
-        const auto result = driver.GetTelemetry(&driver);
-        ASSERT_THAT(result.flags,
-            Eq(static_cast<uint32_t>(ANT_TM_ANTENNA1_ACTIVATION_COUNT | //
-                ANT_TM_ANTENNA2_ACTIVATION_COUNT |                      //
-                ANT_TM_ANTENNA3_ACTIVATION_COUNT |                      //
-                ANT_TM_ANTENNA4_ACTIVATION_COUNT |                      //
-                ANT_TM_ANTENNA1_ACTIVATION_TIME |                       //
-                ANT_TM_ANTENNA2_ACTIVATION_TIME |                       //
-                ANT_TM_ANTENNA3_ACTIVATION_TIME |                       //
-                ANT_TM_ANTENNA4_ACTIVATION_TIME |                       //
-                ANT_TM_TEMPERATURE1                                     //
-                )));
+        EXPECT_CALL(primary, GetAntennaActivationCount(ANTENNA_PRIMARY_CHANNEL, _, _)).WillRepeatedly(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetAntennaActivationTime(_, _, _)).Times(8).WillRepeatedly(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetDeploymentStatus(_, _)).Times(2).WillRepeatedly(Return(OSResult::Success));
+
+        AntennaTelemetry telemetry;
+        const auto result = driver.GetTelemetry(&driver, telemetry);
+        ASSERT_THAT(result, Ne(OSResult::Success));
     }
 
-    TEST_F(AntennaDriverTest, TestGetTelemetryBothChannelsFailure)
+    TEST_F(AntennaDriverTest, TestGetTelemetryFailureActivationTimes)
     {
-        EXPECT_CALL(primary, GetTemperature(_, _)).WillRepeatedly(Return(OSResult::DeviceNotFound));
-        EXPECT_CALL(primary, GetAntennaActivationCount(_, _, _)).WillRepeatedly(Return(OSResult::DeviceNotFound));
-        EXPECT_CALL(primary, GetAntennaActivationTime(_, _, _)).WillRepeatedly(Return(OSResult::DeviceNotFound));
+        EXPECT_CALL(primary, GetAntennaActivationCount(_, _, _)).Times(8).WillRepeatedly(Return(OSResult::Success));
+        EXPECT_CALL(primary, GetAntennaActivationTime(_, _, _)).WillOnce(Return(OSResult::IOError));
+        EXPECT_CALL(primary, GetAntennaActivationTime(_, _, _)).Times(7).WillRepeatedly(Return(OSResult::Success)).RetiresOnSaturation();
+        EXPECT_CALL(primary, GetDeploymentStatus(_, _)).Times(2).WillRepeatedly(Return(OSResult::Success));
 
-        const auto result = driver.GetTelemetry(&driver);
-        ASSERT_THAT(result.flags, Eq(0u));
+        AntennaTelemetry telemetry;
+        const auto result = driver.GetTelemetry(&driver, telemetry);
+        ASSERT_THAT(result, Ne(OSResult::Success));
     }
 
     TEST_F(AntennaDriverTest, TestAutoDeployAntennaArmsDeploymentSystem)

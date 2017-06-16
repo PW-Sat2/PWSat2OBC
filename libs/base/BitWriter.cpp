@@ -55,7 +55,7 @@ inline bool BitWriter::UpdateStatus(std::uint32_t length, std::uint32_t lengthLi
 {
     return (this->_isValid = this->_isValid && //
             (length <= lengthLimit) &&         //
-            ((this->_bitPosition + length) <= this->_bitLimit));
+            ((GetBitDataLength() + length) <= this->_bitLimit));
 }
 
 bool BitWriter::Write(std::uint8_t value)

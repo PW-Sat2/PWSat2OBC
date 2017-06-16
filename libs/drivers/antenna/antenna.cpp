@@ -3,10 +3,19 @@
 #include "base/os.h"
 #include "driver.h"
 #include "miniport.h"
+#include "telemetry.hpp"
 
 using drivers::i2c::II2CBus;
 using drivers::i2c::I2CResult;
 
+using devices::antenna::ActivationCounts;
+using devices::antenna::ActivationTimes;
+using devices::antenna::AntennaTelemetry;
+
+static OSResult Merge(OSResult left, OSResult right)
+{
+    return OS_RESULT_FAILED(left) ? left : right;
+}
 /**
  * @brief Returns pointer to the structure that contains status of the requested
  * hardware channel.
@@ -139,30 +148,59 @@ static OSResult GetDeploymentStatus(struct AntennaDriver* driver,
         );
 }
 
-static void UpdateActivationCount(struct AntennaDriver* driver, AntennaTelemetry* telemetry)
+static OSResult UpdateDeploymentStatus(struct AntennaDriver* driver, AntennaTelemetry& telemetry)
 {
-    const uint16_t flags[] = {
-        ANT_TM_ANTENNA1_ACTIVATION_COUNT,
-        ANT_TM_ANTENNA2_ACTIVATION_COUNT,
-        ANT_TM_ANTENNA3_ACTIVATION_COUNT,
-        ANT_TM_ANTENNA4_ACTIVATION_COUNT,
-    };
+    const AntennaChannel channels[] = {ANTENNA_FIRST_CHANNEL, ANTENNA_BACKUP_CHANNEL};
+    OSResult status = OSResult::Success;
+    for (auto i = 0u; i < count_of(channels); ++i)
+    {
+        AntennaDeploymentStatus deploymentStatus;
+        const auto result = GetDeploymentStatus(driver, channels[i], &deploymentStatus);
+        if (OS_RESULT_FAILED(result))
+        {
+            status = result;
+        }
+        else
+        {
+            telemetry.SetDeploymentStatus(channels[i], ANTENNA1_ID, deploymentStatus.DeploymentStatus[0]);
+            telemetry.SetDeploymentStatus(channels[i], ANTENNA2_ID, deploymentStatus.DeploymentStatus[1]);
+            telemetry.SetDeploymentStatus(channels[i], ANTENNA3_ID, deploymentStatus.DeploymentStatus[2]);
+            telemetry.SetDeploymentStatus(channels[i], ANTENNA4_ID, deploymentStatus.DeploymentStatus[3]);
+        }
+    }
 
+    return status;
+}
+
+static OSResult UpdateActivationCount(struct AntennaDriver* driver, AntennaTelemetry& telemetry)
+{
     const AntennaId ids[] = {
         ANTENNA1_ID, ANTENNA2_ID, ANTENNA3_ID, ANTENNA4_ID,
     };
 
+    OSResult status = OSResult::Success;
     AntennaChannelInfo* primaryChannel = GetChannel(driver, ANTENNA_PRIMARY_CHANNEL);
     AntennaChannelInfo* backupChannel = GetChannel(driver, ANTENNA_BACKUP_CHANNEL);
-    for (int i = 0; i < 4; ++i)
+    ActivationCounts primaryCounter;
+    ActivationCounts secondaryCounter;
+    for (auto i = 0u; i < count_of(ids); ++i)
     {
-        uint16_t primaryValue = 0, secondaryValue = 0;
+        uint8_t primaryValue = 0, secondaryValue = 0;
         const OSResult primary = driver->miniport->GetAntennaActivationCount(driver->miniport,
             primaryChannel->communicationBus,
             ANTENNA_PRIMARY_CHANNEL,
             ids[i],
             &primaryValue //
             );
+
+        if (OS_RESULT_SUCCEEDED(primary))
+        {
+            primaryCounter.SetActivationCount(ids[i], primaryValue);
+        }
+        else
+        {
+            status = primary;
+        }
 
         const OSResult secondary = driver->miniport->GetAntennaActivationCount(driver->miniport,
             backupChannel->communicationBus,
@@ -171,35 +209,33 @@ static void UpdateActivationCount(struct AntennaDriver* driver, AntennaTelemetry
             &secondaryValue //
             );
 
-        if (OS_RESULT_SUCCEEDED(primary))
+        if (OS_RESULT_SUCCEEDED(secondary))
         {
-            telemetry->ActivationCount[i] = primaryValue;
-            telemetry->flags |= flags[i];
+            secondaryCounter.SetActivationCount(ids[i], secondaryValue);
         }
-        else if (OS_RESULT_SUCCEEDED(secondary))
+        else
         {
-            telemetry->ActivationCount[1] = secondaryValue;
-            telemetry->flags |= flags[i];
+            status = secondary;
         }
     }
+
+    telemetry.SetActivationCounts(ANTENNA_PRIMARY_CHANNEL, primaryCounter);
+    telemetry.SetActivationCounts(ANTENNA_BACKUP_CHANNEL, secondaryCounter);
+    return status;
 }
 
-static void UpdateActivationTime(struct AntennaDriver* driver, AntennaTelemetry* telemetry)
+static OSResult UpdateActivationTime(struct AntennaDriver* driver, AntennaTelemetry& telemetry)
 {
-    const uint16_t flags[] = {
-        ANT_TM_ANTENNA1_ACTIVATION_TIME,
-        ANT_TM_ANTENNA2_ACTIVATION_TIME,
-        ANT_TM_ANTENNA3_ACTIVATION_TIME,
-        ANT_TM_ANTENNA4_ACTIVATION_TIME, //
-    };
-
     const AntennaId ids[] = {
         ANTENNA1_ID, ANTENNA2_ID, ANTENNA3_ID, ANTENNA4_ID,
     };
 
+    OSResult status = OSResult::Success;
     AntennaChannelInfo* primaryChannel = GetChannel(driver, ANTENNA_PRIMARY_CHANNEL);
     AntennaChannelInfo* backupChannel = GetChannel(driver, ANTENNA_BACKUP_CHANNEL);
-    for (int i = 0; i < 4; ++i)
+    ActivationTimes primaryCounter;
+    ActivationTimes secondaryCounter;
+    for (auto i = 0u; i < count_of(ids); ++i)
     {
         std::chrono::milliseconds primaryValue(0);
         std::chrono::milliseconds secondaryValue(0);
@@ -211,6 +247,15 @@ static void UpdateActivationTime(struct AntennaDriver* driver, AntennaTelemetry*
             &primaryValue //
             );
 
+        if (OS_RESULT_SUCCEEDED(primary))
+        {
+            primaryCounter.SetActivationTime(ids[i], std::chrono::duration_cast<std::chrono::seconds>(primaryValue));
+        }
+        else
+        {
+            status = primary;
+        }
+
         const OSResult secondary = driver->miniport->GetAntennaActivationTime(driver->miniport,
             backupChannel->communicationBus,
             ANTENNA_BACKUP_CHANNEL,
@@ -218,55 +263,26 @@ static void UpdateActivationTime(struct AntennaDriver* driver, AntennaTelemetry*
             &secondaryValue //
             );
 
-        if (OS_RESULT_SUCCEEDED(primary))
+        if (OS_RESULT_SUCCEEDED(secondary))
         {
-            telemetry->ActivationTime[i] = primaryValue;
-            telemetry->flags |= flags[i];
+            secondaryCounter.SetActivationTime(ids[i], std::chrono::duration_cast<std::chrono::seconds>(secondaryValue));
         }
-        else if (OS_RESULT_SUCCEEDED(secondary))
+        else
         {
-            telemetry->ActivationTime[1] = secondaryValue;
-            telemetry->flags |= flags[i];
+            status = secondary;
         }
     }
+
+    telemetry.SetActivationTimes(ANTENNA_PRIMARY_CHANNEL, primaryCounter);
+    telemetry.SetActivationTimes(ANTENNA_BACKUP_CHANNEL, secondaryCounter);
+    return status;
 }
 
-static void UpdateTelemetryTemperature(struct AntennaDriver* driver, AntennaTelemetry* telemetry)
+static OSResult GetTelemetry(struct AntennaDriver* driver, AntennaTelemetry& telemetry)
 {
-    AntennaChannelInfo* primaryChannel = GetChannel(driver, ANTENNA_PRIMARY_CHANNEL);
-    AntennaChannelInfo* backupChannel = GetChannel(driver, ANTENNA_BACKUP_CHANNEL);
-    uint16_t primaryValue = 0, secondaryValue = 0;
-    const OSResult primary = driver->miniport->GetTemperature(driver->miniport,
-        primaryChannel->communicationBus,
-        ANTENNA_PRIMARY_CHANNEL,
-        &primaryValue //
+    return Merge(UpdateDeploymentStatus(driver, telemetry),
+        Merge(UpdateActivationCount(driver, telemetry), UpdateActivationTime(driver, telemetry)) //
         );
-    const OSResult secondary = driver->miniport->GetTemperature(driver->miniport,
-        backupChannel->communicationBus,
-        ANTENNA_BACKUP_CHANNEL,
-        &secondaryValue //
-        );
-    if (OS_RESULT_SUCCEEDED(primary))
-    {
-        telemetry->Temperature[0] = primaryValue;
-        telemetry->flags |= ANT_TM_TEMPERATURE1;
-    }
-
-    if (OS_RESULT_SUCCEEDED(secondary))
-    {
-        telemetry->Temperature[1] = secondaryValue;
-        telemetry->flags |= ANT_TM_TEMPERATURE2;
-    }
-}
-
-static AntennaTelemetry GetTelemetry(struct AntennaDriver* driver)
-{
-    AntennaTelemetry telemetry;
-    memset(&telemetry, 0, sizeof(telemetry));
-    UpdateTelemetryTemperature(driver, &telemetry);
-    UpdateActivationCount(driver, &telemetry);
-    UpdateActivationTime(driver, &telemetry);
-    return telemetry;
 }
 
 void AntennaDriverInitialize(AntennaDriver* driver,

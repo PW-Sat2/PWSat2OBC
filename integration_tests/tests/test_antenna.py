@@ -96,21 +96,20 @@ class Test_Antenna(BaseTest):
         def reset_handler():
             return False
 
-        def primary_temperature():
-            return 0x1ff
-
-        def backup_temperature():
-            return 0x2ff
-
         self.system.primary_antenna.on_reset = reset_handler
         self.system.backup_antenna.on_reset = reset_handler
-        self.system.primary_antenna.on_get_temperature = primary_temperature
-        self.system.backup_antenna.on_get_temperature = backup_temperature
         self.system.primary_antenna.antenna_state = [
             Antenna.build(True, 0xb0, 0x8765, True),
             Antenna.build(False, 0xc0, 0x7654, True),
             Antenna.build(True, 0xd0, 0x6543, False),
             Antenna.build(False, 0xe0, 0x5432, False),
+            ]
+
+        self.system.backup_antenna.antenna_state = [
+            Antenna.build(False, 0x10, 0x1234, True),
+            Antenna.build(True, 0x20, 0x5678, True),
+            Antenna.build(False, 0x30, 0x90ab, False),
+            Antenna.build(True, 0x40, 0xcdef, False),
             ]
 
         self.power_on_obc()
@@ -119,10 +118,20 @@ class Test_Antenna(BaseTest):
         self.assertEqual(result.ActivationCount[1], 0xc0);
         self.assertEqual(result.ActivationCount[2], 0xd0);
         self.assertEqual(result.ActivationCount[3], 0xe0);
-        self.assertEqual(result.ActivationTime[0], 0x8765 * 50);
-        self.assertEqual(result.ActivationTime[1], 0x7654 * 50);
-        self.assertEqual(result.ActivationTime[2], 0x6543 * 50);
-        self.assertEqual(result.ActivationTime[3], 0x5432 * 50);
-        self.assertEqual(result.Temperature[0], 0x1ff);
-        self.assertEqual(result.Temperature[1], 0x2ff);
+
+        self.assertEqual(result.ActivationCount[4], 0x10);
+        self.assertEqual(result.ActivationCount[5], 0x20);
+        self.assertEqual(result.ActivationCount[6], 0x30);
+        self.assertEqual(result.ActivationCount[7], 0x40);
+
+        self.assertEqual(result.ActivationTime[0], 0x8765 / 20);
+        self.assertEqual(result.ActivationTime[1], 0x7654 / 20);
+        self.assertEqual(result.ActivationTime[2], 0x6543 / 20);
+        self.assertEqual(result.ActivationTime[3], 0x5432 / 20);
+
+        self.assertEqual(result.ActivationTime[4], 0x1234 / 20);
+        self.assertEqual(result.ActivationTime[5], 0x5678 / 20);
+        self.assertEqual(result.ActivationTime[6], 0x90ab / 20);
+        self.assertEqual(result.ActivationTime[7], 0xcdef / 20);
+
 

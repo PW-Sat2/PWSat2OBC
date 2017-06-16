@@ -31,125 +31,6 @@ enum AntenaPortStatus
 };
 
 /**
- * @brief Flags indicating which telemetry fields have the updated values.
- */
-enum TelemetryField
-{
-    /**
-     * @brief Antenna 1 activation count.
-     *
-     * AntennaTelemetry::ActivationCount[0] field is valid.
-     */
-    ANT_TM_ANTENNA1_ACTIVATION_COUNT = 1 << 0,
-
-    /**
-     * @brief Antenna 2 activation count.
-     *
-     * AntennaTelemetry::ActivationCount[1] field is valid.
-     */
-    ANT_TM_ANTENNA2_ACTIVATION_COUNT = 1 << 1,
-
-    /**
-     * @brief Antenna 3 activation count.
-     *
-     * AntennaTelemetry::ActivationCount[2] field is valid.
-     */
-    ANT_TM_ANTENNA3_ACTIVATION_COUNT = 1 << 2,
-
-    /**
-     * @brief Antenna 4 activation count.
-     *
-     * AntennaTelemetry::ActivationCount[3] field is valid.
-     */
-    ANT_TM_ANTENNA4_ACTIVATION_COUNT = 1 << 3,
-
-    /**
-     * @brief Antenna 1 activation time.
-     *
-     * AntennaTelemetry::ActivationTime[0] field is valid.
-     */
-    ANT_TM_ANTENNA1_ACTIVATION_TIME = 1 << 4,
-
-    /**
-     * @brief Antenna 2 activation time.
-     *
-     * AntennaTelemetry::ActivationTime[1] field is valid.
-     */
-    ANT_TM_ANTENNA2_ACTIVATION_TIME = 1 << 5,
-
-    /**
-     * @brief Antenna 3 activation time.
-     *
-     * AntennaTelemetry::ActivationTime[2] field is valid.
-     */
-    ANT_TM_ANTENNA3_ACTIVATION_TIME = 1 << 6,
-
-    /**
-     * @brief Antenna 4 activation time.
-     *
-     * AntennaTelemetry::ActivationTime[3] field is valid.
-     */
-    ANT_TM_ANTENNA4_ACTIVATION_TIME = 1 << 7,
-
-    /**
-     * @brief Primary channel temperature.
-     *
-     * AntennaTelemetry::Temperature[0] field is valid.
-     */
-    ANT_TM_TEMPERATURE1 = 1 << 8,
-
-    /**
-     * @brief Secondary channel temperature.
-     *
-     * AntennaTelemetry::Temperature[1] field is valid.
-     */
-    ANT_TM_TEMPERATURE2 = 1 << 9,
-};
-
-/**
- * @brief This type represents the telemetry of the entire antenna deployment module.
- */
-struct AntennaTelemetry
-{
-    /**
-     * @brief Flag field containing information which members of this type contain valid information.
-     *
-     * An indicated member field can be treated as valid only when its corresponding bit is set.
-     * @see TelemetryField enumerator for list of the supported flags and their corresponding fields.
-     */
-    uint32_t flags;
-
-    /**
-   * @brief Array that contains information how many times specific antenna has been tried to be deployed.
-   *
-   * Value at index 0 corresponds to the antenna 1, value at index 1 corresponds to antenna 2 and so on.
-   *
-   * Value at index 0 is valid only when ANT_TM_ANTENNA1_ACTIVATION_COUNT bit is set in the flags field,
-   * Value at index 1 is valid only when ANT_TM_ANTENNA2_ACTIVATION_COUNT bit is set in the flags field and so on.
-   */
-    uint8_t ActivationCount[4];
-
-    /**
-     * @brief Array that contains information how long specific antenna deployment took place.
-     *
-     * Value at index 0 corresponds to the antenna 1, value at index 1 corresponds to antenna 2 and so on.
-     *
-     * Value at index 0 is valid only when ANT_TM_ANTENNA1_ACTIVATION_TIME bit is set in the flags field,
-     * Value at index 1 is valid only when ANT_TM_ANTENNA2_ACTIVATION_TIME bit is set in the flags field and so on.
-     */
-    std::chrono::milliseconds ActivationTime[4];
-
-    /**
-     * @brief Array that contains temperatures measured by both primary and backup channels.
-     *
-     * Value at index 0 corresponds to the primary channel and is valid only when the ANT_TM_TEMPERATURE1 bit is set
-     * in the flags field. Value at index 1 corresponds to the backup channel and is valid only when the ANT_TM_TEMPERATURE2
-     * bit is set in the flags field.
-     */
-    uint16_t Temperature[2];
-};
-
-/**
  * @brief This structure contains status of the specific hardware channel.
  */
 struct AntennaChannelInfo
@@ -261,12 +142,13 @@ struct AntennaDriver
     /**
      * @brief Pointer to the procedure that queries hardware for its current state.
      * @param[in] driver Current driver instance.
+     * @param[out] telemetry Reference to boject that should be filled with updated antenna telemetry.
      * @return Object that contains global antenna subsystem state as best at it could be determined in current state.
      *
      * This procedure can return partial response. To check what fields of the returned object are valid
      * inspect the content of the flags field. @see AntennaTelemetry type definition for details.
      */
-    AntennaTelemetry (*GetTelemetry)(struct AntennaDriver* driver);
+    OSResult (*GetTelemetry)(struct AntennaDriver* driver, devices::antenna::AntennaTelemetry& telemetry);
 };
 
 /**

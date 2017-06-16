@@ -18,6 +18,14 @@
  * @{
  */
 
+namespace devices
+{
+    namespace antenna
+    {
+        class AntennaTelemetry;
+    }
+}
+
 /**
  * @brief Antenna unique identifiers.
  */
@@ -36,8 +44,10 @@ enum AntennaId
  */
 enum AntennaChannel
 {
+    /** Dummy value to range checks */
+    ANTENNA_FIRST_CHANNEL = 0x31,
     /** Primary hardware controller address. */
-    ANTENNA_PRIMARY_CHANNEL = 0x31,
+    ANTENNA_PRIMARY_CHANNEL = ANTENNA_FIRST_CHANNEL,
     /** Backup hardware controller address. */
     ANTENNA_BACKUP_CHANNEL = 0x32,
 };
