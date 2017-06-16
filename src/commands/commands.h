@@ -67,8 +67,6 @@ void StateCommandHandler(uint16_t argc, char* argv[]);
 
 void ErrorCountersCommand(std::uint16_t argc, char* argv[]);
 
-void TestFlash(std::uint16_t argc, char* argv[]);
-
 void Scrubbing(std::uint16_t argc, char* argv[]);
 
 void BootSettingsCommand(std::uint16_t argc, char* argv[]);

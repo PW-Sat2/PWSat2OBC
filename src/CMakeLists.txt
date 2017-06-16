@@ -28,7 +28,6 @@ set(SOURCES
     commands/watchdog.cpp
     commands/state.cpp
     commands/error_counters.cpp
-    commands/program_flash.cpp
     commands/scrub.cpp
     commands/boot_settings.cpp
     checks/error_counters.cpp
