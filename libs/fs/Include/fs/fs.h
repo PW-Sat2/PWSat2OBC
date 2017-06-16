@@ -248,6 +248,13 @@ namespace services
              * @return Operation result
              */
             virtual OSResult Seek(FileHandle file, SeekOrigin origin, FileSize offset) = 0;
+
+            /**
+             * @brief Queries the specified device for its free space size.
+             * @param devicePath Path to the device mount point.
+             * @return The specified device's free space in bytes or 0xffffffff in case of errors.
+             */
+            virtual std::uint32_t GetFreeSpace(const char* devicePath) = 0;
         };
 
         /**

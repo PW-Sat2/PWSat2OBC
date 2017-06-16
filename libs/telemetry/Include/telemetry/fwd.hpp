@@ -17,6 +17,7 @@ namespace telemetry
     class ExperimentTelemetry;
     class McuTemperature;
     class GpioState;
+    class FileSystemTelemetry;
 
     struct TelemetryState;
 
@@ -26,6 +27,7 @@ namespace telemetry
         ProgramState,                           //
         state::TimeState,                       //
         ErrorCountingTelemetry,                 //
+        FileSystemTelemetry,                    //
         devices::antenna::AntennaTelemetry,     //
         ExperimentTelemetry,                    //
         devices::gyro::GyroscopeTelemetry,      //

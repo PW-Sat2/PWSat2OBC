@@ -5,7 +5,6 @@
 
 #include <map>
 #include <string>
-#include <string>
 #include "gmock/gmock.h"
 #include "fs/fs.h"
 
@@ -46,6 +45,7 @@ class FsMock : public services::fs::IFileSystem
     MOCK_METHOD1(GetFileSize, services::fs::FileSize(services::fs::FileHandle));
     MOCK_METHOD2(GetFileSize, services::fs::FileSize(const char* dir, const char* file));
     MOCK_METHOD3(Seek, OSResult(services::fs::FileHandle file, services::fs::SeekOrigin origin, services::fs::FileSize offset));
+    MOCK_METHOD1(GetFreeSpace, std::uint32_t(const char* devicePath));
 
     void AddFile(const char* path, gsl::span<std::uint8_t> contents);
 

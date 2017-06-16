@@ -9,6 +9,7 @@ set(SOURCES
     state.cpp
     McuTemperature.cpp
     GpioState.cpp
+    FileSystemTelemetry.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -23,6 +24,7 @@ target_link_libraries(${NAME}
     eps
     error_counter
     experiments
+    fs
     antenna
 )
 
@@ -40,3 +42,4 @@ add_subdirectory(serialization)
 add_subdirectory(temp)
 add_subdirectory(ant)
 add_subdirectory(gpio)
+add_subdirectory(fs)
