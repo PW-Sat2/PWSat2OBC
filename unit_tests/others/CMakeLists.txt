@@ -28,6 +28,9 @@ set(SOURCES
   eigen/eigenTest.cpp  
   ErrorCounterTest.cpp    
   BootSettings/BootSettingsTest.cpp
+  Scrubbing/shared.cpp
+  Scrubbing/ProgramScrubbingTest.cpp
+  Scrubbing/BootloaderScrubbingTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
@@ -59,6 +62,7 @@ target_link_libraries(${NAME}
     fm25w
     unit_tests_base
     boot_settings
+    scrubber
 )
 
 

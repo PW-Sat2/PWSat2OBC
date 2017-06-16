@@ -17,8 +17,7 @@ namespace scrubber
     {
     }
 
-    BootloaderScrubber::BootloaderScrubber(
-        ScrubBuffer& scrubBuffer, program_flash::BootTable& bootTable, drivers::msc::MCUMemoryController& mcuFlash)
+    BootloaderScrubber::BootloaderScrubber(ScrubBuffer& scrubBuffer, program_flash::BootTable& bootTable, drivers::msc::IMCUFlash& mcuFlash)
         : _scrubBuffer(scrubBuffer), _bootTable(bootTable), _mcuFlash(mcuFlash), _iterationsCount(0), _copiesCorrected(0),
           _mcuPagesCorrected(0)
     {
@@ -32,7 +31,7 @@ namespace scrubber
 
         if (!lock())
         {
-            LOG(LOG_LEVEL_WARNING, "[scrub] Unable to take boot table lock - skipping program scrubbing");
+            LOG(LOG_LEVEL_WARNING, "[scrub] Unable to take boot table lock - skipping bootloader scrubbing");
             return;
         }
 
@@ -64,11 +63,13 @@ namespace scrubber
 
             copies[i].Erase();
             copies[i].Write(0, this->_scrubBuffer);
+
+            this->_copiesCorrected++;
         }
 
         LOG(LOG_LEVEL_INFO, "[scrub] Scrubbing bootloader in MCU");
 
-        auto bootloaderStart = reinterpret_cast<std::uint8_t*>(0);
+        auto bootloaderStart = this->_mcuFlash.Begin();
 
         for (std::size_t offset = 0; offset < program_flash::BootloaderCopy::Size; offset += MCUMemoryController::SectorSize)
         {

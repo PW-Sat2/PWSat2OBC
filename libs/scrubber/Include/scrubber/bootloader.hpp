@@ -23,7 +23,7 @@ namespace scrubber
       public:
         using ScrubBuffer = std::array<std::uint8_t, program_flash::BootloaderCopy::Size>;
 
-        BootloaderScrubber(ScrubBuffer& scrubBuffer, program_flash::BootTable& bootTable, drivers::msc::MCUMemoryController& mcuFlash);
+        BootloaderScrubber(ScrubBuffer& scrubBuffer, program_flash::BootTable& bootTable, drivers::msc::IMCUFlash& mcuFlash);
 
         void Scrub();
 
@@ -32,7 +32,7 @@ namespace scrubber
       private:
         ScrubBuffer& _scrubBuffer;
         program_flash::BootTable& _bootTable;
-        drivers::msc::MCUMemoryController& _mcuFlash;
+        drivers::msc::IMCUFlash& _mcuFlash;
         std::uint32_t _iterationsCount;
         std::uint32_t _copiesCorrected;
         std::uint32_t _mcuPagesCorrected;
