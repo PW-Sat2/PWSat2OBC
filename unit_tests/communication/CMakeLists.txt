@@ -13,8 +13,9 @@ set(SOURCES
 
 add_unit_tests(${NAME} ${SOURCES})
 
-target_link_libraries(${NAME}  
-    program_flash  
+target_link_libraries(${NAME}
+    base
+    program_flash 
     unit_tests_base
     telecommunication
     obc_telecommands
