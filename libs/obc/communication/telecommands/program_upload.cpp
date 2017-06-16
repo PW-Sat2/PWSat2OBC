@@ -113,6 +113,8 @@ namespace obc
 
             std::bitset<program_flash::BootTable::EntriesCount> selectedEntries(parameters[0]);
 
+            UniqueLock<program_flash::BootTable> lock(this->_bootTable, InfiniteTimeout);
+
             for (auto i = 0; i < program_flash::BootTable::EntriesCount; i++)
             {
                 if (selectedEntries[i])
@@ -148,6 +150,8 @@ namespace obc
             }
 
             LOGF(LOG_LEVEL_INFO, "Uploading program part %d to 0x%lX", content.size(), offset);
+
+            UniqueLock<program_flash::BootTable> lock(this->_bootTable, InfiniteTimeout);
 
             for (auto i = 0; i < program_flash::BootTable::EntriesCount; i++)
             {
@@ -196,6 +200,8 @@ namespace obc
             }
 
             LOG(LOG_LEVEL_INFO, "Finalizing entries");
+
+            UniqueLock<program_flash::BootTable> lock(this->_bootTable, InfiniteTimeout);
 
             for (auto i = 0; i < program_flash::BootTable::EntriesCount; i++)
             {

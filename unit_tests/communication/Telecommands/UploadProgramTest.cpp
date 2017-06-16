@@ -30,6 +30,8 @@ struct FlashDriverMock : public program_flash::IFlashDriver
 
     MOCK_CONST_METHOD0(DeviceId, std::uint32_t());
     MOCK_CONST_METHOD0(BootConfig, std::uint32_t());
+    MOCK_METHOD1(Lock, bool(std::chrono::milliseconds timeout));
+    MOCK_METHOD0(Unlock, void());
 };
 
 static std::array<std::uint8_t, 4_MB> Flash;
