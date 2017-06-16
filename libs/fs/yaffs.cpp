@@ -281,6 +281,11 @@ OSResult YaffsFileSystem::Seek(FileHandle file, SeekOrigin origin, FileSize offs
     return YaffsTranslateError(yaffs_lseek(file, offset, whence));
 }
 
+std::uint32_t YaffsFileSystem::GetFreeSpace(const char* devicePath)
+{
+    return yaffs_freespace(devicePath);
+}
+
 OSResult YaffsFileSystem::AddDeviceAndMount(yaffs_dev* device)
 {
     yaffs_add_device(device);

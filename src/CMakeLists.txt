@@ -103,6 +103,7 @@ target_link_libraries(${NAME}
     telemetry_temp
     telemetry_ant
     telemetry_gpio
+    telemetry_fs
     program_flash
     scrubber
     boot_settings

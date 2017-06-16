@@ -69,6 +69,8 @@ namespace services
             virtual FileSize GetFileSize(const char* dir, const char* file) override;
             virtual OSResult Seek(FileHandle file, SeekOrigin origin, FileSize offset) override;
 
+            virtual std::uint32_t GetFreeSpace(const char* devicePath) override;
+
             virtual OSResult ClearDevice(yaffs_dev* device) override;
 
             virtual void Sync() override;
