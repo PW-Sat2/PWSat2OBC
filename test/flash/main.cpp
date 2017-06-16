@@ -13,7 +13,6 @@
 #include "base/os.h"
 #include "dmadrv.h"
 #include "io_map.h"
-#include "leuart/leuart.h"
 #include "logger/logger.h"
 #include "swo/swo.h"
 #include "system.h"
@@ -85,12 +84,14 @@ static bool ReadId(void)
         return false;
     }
 
+#if 0
+        LOGF(LOG_LEVEL_INFO, "Status: 0x%X", st);
+        LOGF(LOG_LEVEL_INFO, "Manufacturer: 0x%X", response[0]);
+        LOGF(LOG_LEVEL_INFO, "Mem type: 0x%X", response[1]);
+        LOGF(LOG_LEVEL_INFO, "Mem capacity: 0x%X", response[2]);
+#endif
+
     return true;
-    //
-    //    LOGF(LOG_LEVEL_INFO, "Status: 0x%X", st);
-    //    LOGF(LOG_LEVEL_INFO, "Manufacturer: 0x%X", response[0]);
-    //    LOGF(LOG_LEVEL_INFO, "Mem type: 0x%X", response[1]);
-    //    LOGF(LOG_LEVEL_INFO, "Mem capacity: 0x%X", response[2]);
 }
 
 static void SPITest(void* a)

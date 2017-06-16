@@ -15,6 +15,7 @@ set(SOURCES
   telemetry/ExperimentTelemetryTest.cpp
   telemetry/McuTemperatureTest.cpp
   telemetry/AntennaTelemetryAcquisitionTest.cpp
+  telemetry/GpioStateTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})

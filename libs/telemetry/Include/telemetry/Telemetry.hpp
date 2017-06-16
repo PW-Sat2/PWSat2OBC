@@ -199,8 +199,6 @@ namespace telemetry
       public:
         static_assert(AreTypesUnique<Type...>::value, "Telemetry types should be unique");
 
-        static_assert(details::AreIdsUnique<Type...>::Value, "Telemetry type identifiers should be unique");
-
         /**
          * @brief This variable contains number of currently managed telemetry elements.
          */

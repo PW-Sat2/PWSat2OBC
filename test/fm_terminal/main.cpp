@@ -14,12 +14,17 @@
 #include "dmadrv.h"
 #include "gpio/gpio.h"
 #include "io_map.h"
+
+#ifdef USE_LEUART
 #include "leuart/leuart.h"
+#else
+#include "uart/uart.h"
+#endif
+
 #include "logger/logger.h"
 #include "swo/swo.h"
 #include "system.h"
 #include "terminal/terminal.h"
-#include "uart/uart.h"
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 

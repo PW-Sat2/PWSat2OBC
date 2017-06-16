@@ -8,6 +8,7 @@ set(SOURCES
     ExperimentTelemetry.cpp
     state.cpp
     McuTemperature.cpp
+    GpioState.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -38,3 +39,4 @@ add_subdirectory(experiments)
 add_subdirectory(serialization)
 add_subdirectory(temp)
 add_subdirectory(ant)
+add_subdirectory(gpio)

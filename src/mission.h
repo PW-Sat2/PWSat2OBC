@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "io_map.h"
 #include "mission/BeaconUpdate.hpp"
 #include "mission/PersistentStateSave.hpp"
 #include "mission/TelemetrySerialization.hpp"
@@ -22,6 +23,7 @@
 #include "telemetry/collect_eps.hpp"
 #include "telemetry/collect_exp.hpp"
 #include "telemetry/collect_fdir.hpp"
+#include "telemetry/collect_gpio.hpp"
 #include "telemetry/collect_gyro.hpp"
 #include "telemetry/collect_temp.hpp"
 #include "telemetry/state.hpp"
@@ -57,7 +59,8 @@ namespace telemetry
         ExperimentTelemetryAcquisition,          //
         McuTempTelemetryAcquisition,             //
         AntennaTelemetryAcquisition,             //
-        TelemetrySerialization                   //
+        GpioTelemetryAcquisition<io_map::SailDeployed>,
+        TelemetrySerialization //
         >
         ObcTelemetryAcquisition;
 }

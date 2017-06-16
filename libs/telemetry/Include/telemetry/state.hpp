@@ -12,6 +12,7 @@
 #include "antenna/telemetry.hpp"
 #include "comm/CommTelemetry.hpp"
 #include "fwd.hpp"
+#include "gpio.hpp"
 #include "gyro/telemetry.hpp"
 #include "state/time/TimeState.hpp"
 #include "system.h"
