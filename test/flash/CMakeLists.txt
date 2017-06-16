@@ -14,9 +14,9 @@ target_link_libraries(${NAME}
     freeRTOS
     base
     swo
-    leuart
     logger
     SwoEndpoint
+    emdrv
     free_rtos_wrapper
 )
 

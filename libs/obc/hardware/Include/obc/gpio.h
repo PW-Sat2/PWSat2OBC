@@ -97,13 +97,17 @@ namespace obc
         typename TLed0,
         typename TLed1,
         typename TSPI,
+#ifdef USE_LEUART
         typename TLEUART,
+#else
         typename TUART,
+#endif
         typename TI2C0,
         typename TI2C1,
         typename TExternalWatchdogPin,
         typename TBSP,
-        typename TMemoryModules>
+        typename TMemoryModules,
+        typename TSailState>
     struct OBCGPIOBase
     {
         /** @brief Slave Select - Flash1 */
@@ -124,10 +128,13 @@ namespace obc
         const drivers::gpio::OutputPin<TLed1> Led1;
         /** @brief SPI */
         const SPIPins<TSPI> SPI;
+#ifdef USE_LEUART
         /** @brief LEUART */
         const LEUARTPins<TLEUART> LEUART;
+#else
         /** @brief UART */
         const UARTPins<TUART> UART;
+#endif
 
         /** @brief I2C0 */
         const I2CPins<TI2C0> I2C_0;
@@ -169,13 +176,17 @@ namespace obc
         io_map::Led0,                                       //
         io_map::Led1,                                       //
         io_map::SPI,                                        //
+#ifdef USE_LEUART
         io_map::LEUART,
+#else
         io_map::UART,
+#endif
         io_map::I2C_0,
         io_map::I2C_1,
         io_map::Watchdog::ExternalWatchdogPin,
         io_map::BSP,
-        io_map::MemoryModules>;
+        io_map::MemoryModules,
+        io_map::SailDeployed>;
 
     /** @} */
 }
