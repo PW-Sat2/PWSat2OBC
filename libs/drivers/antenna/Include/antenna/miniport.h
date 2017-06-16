@@ -142,7 +142,7 @@ struct AntennaMiniportDriver
         drivers::i2c::II2CBus* communicationBus,
         AntennaChannel channel,
         AntennaId antennaId,
-        uint16_t* count //
+        uint8_t* count //
         );
 
     /**

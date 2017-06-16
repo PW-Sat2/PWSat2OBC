@@ -3,9 +3,11 @@ set(NAME antenna)
 set(SOURCES
     miniport.cpp
     antenna.cpp
+    telemetry.cpp
     Include/antenna/antenna.h
     Include/antenna/miniport.h
     Include/antenna/driver.h
+    Include/antenna/telemetry.hpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

@@ -231,7 +231,7 @@ static OSResult GetAntennaActivationCount(AntennaMiniportDriver* miniport,
     II2CBus* communicationBus,
     AntennaChannel channel,
     AntennaId antennaId,
-    uint16_t* count //
+    uint8_t* count //
     )
 {
     UNREFERENCED_PARAMETER(miniport);

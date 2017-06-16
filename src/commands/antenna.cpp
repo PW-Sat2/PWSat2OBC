@@ -1,4 +1,5 @@
 #include "antenna/antenna.h"
+#include "antenna/telemetry.hpp"
 #include "logger/logger.h"
 #include "obc.h"
 #include "system.h"
@@ -136,37 +137,39 @@ void AntennaGetDeploymentStatus(std::uint16_t argc, char* argv[])
     }
 }
 
-void PrintValue(int value, bool print, const char* name)
+void PrintValue(int value, const char* name)
 {
-    if (print)
-    {
-        Main.terminal.Printf("%s: '%d'\n", name, value);
-    }
-    else
-    {
-        Main.terminal.Printf("%s: 'Unavailable'\n", name);
-    }
+    Main.terminal.Printf("%s: '%d'\n", name, value);
 }
 
 void AntennaGetTelemetry(std::uint16_t /*argc*/, char* /*argv*/ [])
 {
-    auto telemetry = Main.Hardware.antennaDriver.GetTelemetry(&Main.Hardware.antennaDriver);
-    PrintValue(telemetry.ActivationCount[0], has_flag(telemetry.flags, ANT_TM_ANTENNA1_ACTIVATION_COUNT), "Antenna 1 activation count");
-    PrintValue(telemetry.ActivationCount[1], has_flag(telemetry.flags, ANT_TM_ANTENNA2_ACTIVATION_COUNT), "Antenna 2 activation count");
-    PrintValue(telemetry.ActivationCount[2], has_flag(telemetry.flags, ANT_TM_ANTENNA3_ACTIVATION_COUNT), "Antenna 3 activation count");
-    PrintValue(telemetry.ActivationCount[3], has_flag(telemetry.flags, ANT_TM_ANTENNA4_ACTIVATION_COUNT), "Antenna 4 activation count");
+    devices::antenna::AntennaTelemetry telemetry;
+    Main.Hardware.antennaDriver.GetTelemetry(&Main.Hardware.antennaDriver, telemetry);
+    auto& counts1 = telemetry.GetActivationCounts(ANTENNA_PRIMARY_CHANNEL);
+    auto& counts2 = telemetry.GetActivationCounts(ANTENNA_BACKUP_CHANNEL);
+    auto& times1 = telemetry.GetActivationTimes(ANTENNA_PRIMARY_CHANNEL);
+    auto& times2 = telemetry.GetActivationTimes(ANTENNA_BACKUP_CHANNEL);
 
-    PrintValue(
-        telemetry.ActivationTime[0].count(), has_flag(telemetry.flags, ANT_TM_ANTENNA1_ACTIVATION_TIME), "Antenna 1 activation time");
-    PrintValue(
-        telemetry.ActivationTime[1].count(), has_flag(telemetry.flags, ANT_TM_ANTENNA2_ACTIVATION_TIME), "Antenna 2 activation time");
-    PrintValue(
-        telemetry.ActivationTime[2].count(), has_flag(telemetry.flags, ANT_TM_ANTENNA3_ACTIVATION_TIME), "Antenna 3 activation time");
-    PrintValue(
-        telemetry.ActivationTime[3].count(), has_flag(telemetry.flags, ANT_TM_ANTENNA4_ACTIVATION_TIME), "Antenna 4 activation time");
+    PrintValue(counts1.GetActivationCount(ANTENNA1_ID), "Antenna 1 activation count (primary)");
+    PrintValue(counts1.GetActivationCount(ANTENNA2_ID), "Antenna 2 activation count (primary)");
+    PrintValue(counts1.GetActivationCount(ANTENNA3_ID), "Antenna 3 activation count (primary)");
+    PrintValue(counts1.GetActivationCount(ANTENNA4_ID), "Antenna 4 activation count (primary)");
 
-    PrintValue(telemetry.Temperature[0], has_flag(telemetry.flags, ANT_TM_TEMPERATURE1), "Primary controller temperature");
-    PrintValue(telemetry.Temperature[1], has_flag(telemetry.flags, ANT_TM_TEMPERATURE2), "Backup controller temperature");
+    PrintValue(counts2.GetActivationCount(ANTENNA1_ID), "Antenna 1 activation count (secondary)");
+    PrintValue(counts2.GetActivationCount(ANTENNA2_ID), "Antenna 2 activation count (secondary)");
+    PrintValue(counts2.GetActivationCount(ANTENNA3_ID), "Antenna 3 activation count (secondary)");
+    PrintValue(counts2.GetActivationCount(ANTENNA4_ID), "Antenna 4 activation count (secondary)");
+
+    PrintValue(times1.GetActivationTime(ANTENNA1_ID).count(), "Antenna 1 activation time (primary)");
+    PrintValue(times1.GetActivationTime(ANTENNA2_ID).count(), "Antenna 2 activation time (primary)");
+    PrintValue(times1.GetActivationTime(ANTENNA3_ID).count(), "Antenna 3 activation time (primary)");
+    PrintValue(times1.GetActivationTime(ANTENNA4_ID).count(), "Antenna 4 activation time (primary)");
+
+    PrintValue(times2.GetActivationTime(ANTENNA1_ID).count(), "Antenna 1 activation time (secondary)");
+    PrintValue(times2.GetActivationTime(ANTENNA2_ID).count(), "Antenna 2 activation time (secondary)");
+    PrintValue(times2.GetActivationTime(ANTENNA3_ID).count(), "Antenna 3 activation time (secondary)");
+    PrintValue(times2.GetActivationTime(ANTENNA4_ID).count(), "Antenna 4 activation time (secondary)");
 }
 
 void AntennaReset(std::uint16_t argc, char* argv[])

@@ -163,7 +163,7 @@ namespace
                 outData[0] = 10;
                 return I2CResult::OK;
             }));
-        uint16_t response;
+        uint8_t response;
         const auto status = miniport.GetAntennaActivationCount(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, &response);
         ASSERT_THAT(status, Eq(OSResult::Success));
         ASSERT_THAT(response, Eq(10u));
@@ -172,7 +172,7 @@ namespace
     TEST_F(AntennaMiniportTest, TestAntennaActivationCountFailure)
     {
         EXPECT_CALL(i2c, WriteRead(ANTENNA_BACKUP_CHANNEL, ElementsAre(QueryActivationCount2), _)).WillOnce(Return(I2CResult::Nack));
-        uint16_t response;
+        uint8_t response;
         const auto status = miniport.GetAntennaActivationCount(&miniport, &i2c, ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, &response);
         ASSERT_THAT(status, Ne(OSResult::Success));
         ASSERT_THAT(response, Eq(0u));
