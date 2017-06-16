@@ -188,29 +188,52 @@ namespace
         ASSERT_THAT(writer.Capture(), Eq(gsl::make_span(expected)));
     }
 
-    struct AntennaTelemetryTest : public testing::TestWithParam<std::tuple<AntennaChannel, AntennaId, uint8_t>>
+    struct AntennaTelemetryTest : public testing::TestWithParam<std::tuple<AntennaChannel, AntennaId, uint8_t, uint8_t>>
     {
     };
 
-    TEST_P(AntennaTelemetryTest, DeploymentStatus)
+    TEST_P(AntennaTelemetryTest, GetDeploymentStatusPositive)
     {
         const auto channel = std::get<0>(GetParam());
         const auto antenna = std::get<1>(GetParam());
-        const auto result = std::get<2>(GetParam());
+        const auto baseValue = std::get<2>(GetParam());
 
         AntennaTelemetry telemetry;
+        telemetry.SetDeploymentStatus(baseValue);
         telemetry.SetDeploymentStatus(channel, antenna, true);
-        ASSERT_THAT(telemetry.GetDeploymentStatus(), Eq(result));
+        ASSERT_THAT(telemetry.GetDeploymentStatus(channel, antenna), Eq(true));
+    }
+
+    TEST_P(AntennaTelemetryTest, GetDeploymentStatusNegative)
+    {
+        const auto channel = std::get<0>(GetParam());
+        const auto antenna = std::get<1>(GetParam());
+        const auto baseValue = std::get<2>(GetParam());
+
+        AntennaTelemetry telemetry;
+        telemetry.SetDeploymentStatus(baseValue);
+        telemetry.SetDeploymentStatus(channel, antenna, false);
+        ASSERT_THAT(telemetry.GetDeploymentStatus(channel, antenna), Eq(false));
+        ASSERT_THAT(telemetry.GetDeploymentStatus(), Eq(baseValue));
     }
 
     INSTANTIATE_TEST_CASE_P(AntennaTelemetryDeploymentStatus,
         AntennaTelemetryTest,
-        testing::Values(std::make_tuple(ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, 0x01),
-            std::make_tuple(ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, 0x02),
-            std::make_tuple(ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, 0x04),
-            std::make_tuple(ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, 0x08),
-            std::make_tuple(ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, 0x10),
-            std::make_tuple(ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, 0x20),
-            std::make_tuple(ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, 0x40),
-            std::make_tuple(ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, 0x80)), );
+        testing::Values(std::make_tuple(ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, 0, 0x01),
+            std::make_tuple(ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, 0, 0x02),
+            std::make_tuple(ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, 0, 0x04),
+            std::make_tuple(ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, 0, 0x08),
+            std::make_tuple(ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, 0, 0x10),
+            std::make_tuple(ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, 0, 0x20),
+            std::make_tuple(ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, 0, 0x40),
+            std::make_tuple(ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, 0, 0x80),
+
+            std::make_tuple(ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, ~0x01, 0xff),
+            std::make_tuple(ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, ~0x02, 0xff),
+            std::make_tuple(ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, ~0x04, 0xff),
+            std::make_tuple(ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, ~0x08, 0xff),
+            std::make_tuple(ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, ~0x10, 0xff),
+            std::make_tuple(ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, ~0x20, 0xff),
+            std::make_tuple(ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, ~0x40, 0xff),
+            std::make_tuple(ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, ~0x80, 0xff)), );
 }
