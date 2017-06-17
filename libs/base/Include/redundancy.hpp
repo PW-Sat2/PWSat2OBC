@@ -43,6 +43,16 @@ namespace redundancy
         return (a & b) | (b & c) | (a & c);
     }
 
+    /**
+    * @brief Performs bitwise majority vote based on five inputs.
+    * @param[in] a First input
+    * @param[in] b Second input
+    * @param[in] c Third input
+    * @param[in] d Fourth input
+    * @param[in] e Fifth input
+    * @tparam T Type used for majority vote. Must be integral or enum type
+    * @return Value calculated from bitwise majority vote.
+    */
     template <typename T> T Correct(T a, T b, T c, T d, T e)
     {
         static_assert(std::is_integral<T>::value || std::is_enum<T>::value, "Correction requires integral or enum type");
@@ -66,11 +76,18 @@ namespace redundancy
      * @param[in,out] buffer1 First input
      * @param[in] buffer2 Second input
      * @param[in] buffer3 Third input
-     * @tparam T Type used for majority vote. Must be integral or enum type
-     * @return True if all buffers are of the same size, False otherwise.
+     * @return True if all buffers are valid, False otherwise
+     * @remark All buffer must have length that is multiply of 4 and be aligned to 4 bytes
      */
     bool CorrectBuffer(gsl::span<std::uint8_t> buffer1, gsl::span<const std::uint8_t> buffer2, gsl::span<const std::uint8_t> buffer3);
 
+    /**
+     * @brief Performs bitwise majority voting on entire data buffer
+     * @param result Buffer for result
+     * @param buffers Array for five spans containing inputs
+     * @return True if all buffers are valid, False otherwise
+     * @remark All buffer must have length that is multiply of 4 and be aligned to 4 bytes
+     */
     bool CorrectBuffer(gsl::span<std::uint8_t> result, const std::array<gsl::span<const std::uint8_t>, 5>& buffers);
 
     /**

@@ -247,7 +247,7 @@ void ProceedWithBooting()
     }
     else if (slotsMask == boot::BootSettings::UpperBootSlot)
     {
-        boot::BootReason = boot::Reason::PrimaryBootSlots;
+        boot::BootReason = boot::Reason::BootToUpper;
         BSP_UART_Puts(BSP_UART_DEBUG, "\n\nUpper boot slot... Booting to upper");
         BootToAddress(BOOT_APPLICATION_BASE);
     }
