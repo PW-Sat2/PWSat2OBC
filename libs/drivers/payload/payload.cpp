@@ -18,7 +18,7 @@ void PayloadDriver::IRQHandler()
     auto value = _interruptPin.Input();
     if (!value)
     {
-        System::GiveSemaphoreISR(_sync);
+        RaiseDataReadyISR();
     }
 
     System::EndSwitchingISR();
@@ -69,7 +69,19 @@ OSResult PayloadDriver::WaitForData()
     auto result = System::TakeSemaphore(_sync, std::chrono::milliseconds(DefaultTimeout));
     if (result != OSResult::Success)
     {
-        LOGF(LOG_LEVEL_ERROR, "Take semaphore for PAyload synchronisation failed. Reason: %d", num(result));
+        LOGF(LOG_LEVEL_ERROR, "Take semaphore for Payload synchronisation failed. Reason: %d", num(result));
+        return result;
+    }
+
+    return OSResult::Success;
+}
+
+OSResult PayloadDriver::RaiseDataReadyISR()
+{
+    auto result = System::GiveSemaphoreISR(_sync);
+    if (result != OSResult::Success)
+    {
+        LOGF(LOG_LEVEL_ERROR, "Give semaphore for Paload synchronisation failed. Reason: %d", num(result));
         return result;
     }
 

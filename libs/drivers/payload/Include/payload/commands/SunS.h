@@ -10,6 +10,9 @@ namespace drivers
     {
         namespace commands
         {
+            /**
+             * @brief Command for executing SunS Reference Voltages measurements and data retrieval
+             */
             class SunSCommand : public PayloadCommand<0x80>
             {
               public:

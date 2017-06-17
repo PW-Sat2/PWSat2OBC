@@ -10,6 +10,9 @@ namespace drivers
     {
         namespace commands
         {
+            /**
+             * @brief Command for executing Temperatures measurements and data retrieval
+             */
             class TemperaturesCommand : public PayloadCommand<0x81>
             {
               public:

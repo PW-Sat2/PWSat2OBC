@@ -30,6 +30,8 @@
  * I2C Payload Bus
  	* STK: SDA (PD6), SCL (PD7)
 	* STM: SDA (PB11), SCL (PB10)
+ * Payload Busy/Interrupt Pin
+ 	* STM: PA8 <-> STK: PE0
 
 STM pinout can be found here: [http://www.st.com/content/ccc/resource/technical/document/user_manual/98/2e/fa/4b/e0/82/43/b7/DM00105823.pdf/files/DM00105823.pdf/jcr:content/translations/en.DM00105823.pdf](http://www.st.com/content/ccc/resource/technical/document/user_manual/98/2e/fa/4b/e0/82/43/b7/DM00105823.pdf/files/DM00105823.pdf/jcr:content/translations/en.DM00105823.pdf), page 28, figure 10.
 

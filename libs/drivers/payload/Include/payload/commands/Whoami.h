@@ -10,6 +10,12 @@ namespace drivers
     {
         namespace commands
         {
+            /**
+             * @brief Command for executing Who Am I data retrieval
+             *
+             * This command has overriden Execute method to exclude "measure" part of other commands.
+             * Also the Command Code is ignored for this reason.
+             */
             class WhoamiCommand : public PayloadCommand<0x00>
             {
               public:

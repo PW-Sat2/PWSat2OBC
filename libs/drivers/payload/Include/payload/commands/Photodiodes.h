@@ -10,6 +10,9 @@ namespace drivers
     {
         namespace commands
         {
+            /**
+             * @brief Command for executing Photodiodes measurements and data retrieval
+             */
             class PhotodiodesCommand : public PayloadCommand<0x82>
             {
               public:

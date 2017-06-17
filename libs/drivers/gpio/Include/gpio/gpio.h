@@ -154,7 +154,7 @@ namespace drivers
 
         template <typename Location, bool DefaultState> void InputPin<Location, DefaultState>::Initialize() const
         {
-            GPIO_PinModeSet(Port, PinNumber, gpioModeInputPull, ToInt(DefaultState));
+            GPIO_PinModeSet(Port, PinNumber, gpioModeInputPullFilter, ToInt(DefaultState));
         }
 
         /**

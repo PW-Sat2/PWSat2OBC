@@ -10,6 +10,9 @@ namespace drivers
     {
         namespace commands
         {
+            /**
+             * @brief Command for executing RadFET measurements and data retrieval
+             */
             class RadFETCommand : public PayloadCommand<0x84>
             {
               public:

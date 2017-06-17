@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <gsl/span>
 #include "base/os.h"
-//#include "utils.h"
 
 #include "interfaces.h"
 
@@ -13,7 +12,16 @@ namespace drivers
     namespace payload
     {
         /**
-         * @brief Payload driver
+         * @defgroup payload_devices Payload Devices Driver
+         * @ingroup payload
+         *
+         * @brief This module contains high level driver for Payload Devices.
+         *
+         * @{
+         */
+
+        /**
+         * @brief Payload Device driver
          */
         class PayloadDeviceDriver : public IPayloadDeviceDriver
         {
@@ -24,11 +32,40 @@ namespace drivers
              */
             PayloadDeviceDriver(IPayloadDriver& driver);
 
+            /**
+             * @brief Gets Payload Who Am I flag.
+             * @return Result status.
+             */
             virtual OSResult GetWhoami() override;
+
+            /**
+              * @brief Starts measuring SunS reference voltages.
+              * @return Result status.
+              */
             virtual OSResult MeasureSunSRef() override;
+
+            /**
+              * @brief Starts measuring Temperature data.
+              * @return Result status.
+              */
             virtual OSResult MeasureTemperatures() override;
+
+            /**
+              * @brief Starts measuring Photodiodes data.
+              * @return Result status.
+              */
             virtual OSResult MeasurePhotodiodes() override;
+
+            /**
+              * @brief Starts measuring housekeeping data.
+              * @return Result status.
+              */
             virtual OSResult MeasureHousekeeping() override;
+
+            /**
+              * @brief Starts measuring RadFET data.
+              * @return Result status.
+              */
             virtual OSResult MeasureRadFET() override;
 
           private:

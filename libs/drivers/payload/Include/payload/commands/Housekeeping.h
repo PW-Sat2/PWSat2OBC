@@ -10,6 +10,9 @@ namespace drivers
     {
         namespace commands
         {
+            /**
+             * @brief Command for executing Housekeeping measurements and data retrieval
+             */
             class HousekeepingCommand : public PayloadCommand<0x83>
             {
               public:
