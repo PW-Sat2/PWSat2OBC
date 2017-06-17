@@ -3,22 +3,55 @@
 
 namespace counter
 {
+    /**
+     * @brief Simple counter
+     */
     template <typename Type, Type Bottom, Type Top, Type Start = Bottom> class Counter
     {
       public:
+        /**
+         * @brief Ctor
+         */
         Counter();
 
+        /**
+         * @brief Returns current counter value
+         * @return Current counter value
+         */
         Type Value() const;
+        /**
+         * @brief Checks if counter reached top value
+         * @return true of counter is at the top value
+         */
         bool IsTop() const;
+        /**
+         * @brief Checks if counter reached bottom value
+         * @return true of counter is at the bottom value
+         */
         bool IsBottom() const;
 
+        /**
+         * @brief Moves counter up by one
+         */
         void GoUp();
+        /**
+         * @brief Moves counter down by one
+         */
         void GoDown();
 
+        /**
+         * @brief Invoke actions if counter is at bottom and goes down by one
+         * @param action Action to invoke at bottom
+         */
         template <typename Action> void DoAndGoDown(Action action);
+        /**
+         * @brief Invoke actions if counter is at top and goes up by one
+         * @param action Action to invoke at top
+         */
         template <typename Action> void DoAndGoUp(Action action);
 
       private:
+        /** @brief Counter value */
         Type _value;
     };
 
