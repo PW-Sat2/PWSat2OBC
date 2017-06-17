@@ -214,6 +214,12 @@ namespace program_flash
             return {this->_copy.Data(), Size};
         }
 
+        /**
+         * @brief Calculates CRC of whole bootloader copy
+         * @return CRC of bootloader copy
+         */
+        std::uint16_t CalculateCrc() const;
+
         /** @brief Size of bootloader copy */
         static constexpr std::size_t Size = 64_KB;
 

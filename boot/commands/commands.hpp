@@ -20,4 +20,5 @@ void CopyBootloader();
 void PrintBootTable();
 void EraseBootTable();
 
+void Check();
 #endif /* BOOT_COMMANDS_COMMANDS_HPP_ */

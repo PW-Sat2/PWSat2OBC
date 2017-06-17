@@ -112,4 +112,9 @@ namespace program_flash
     {
         this->_flash.Unlock();
     }
+
+    std::uint16_t BootloaderCopy::CalculateCrc() const
+    {
+        return CRC_calc(this->Content());
+    }
 }
