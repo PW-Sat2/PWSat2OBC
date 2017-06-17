@@ -6,6 +6,8 @@
 
 namespace mission
 {
+    using namespace std::chrono_literals;
+
     TelemetryTask::TelemetryTask(std::tuple<services::fs::IFileSystem&, TelemetryConfiguration> arguments)
         : provider(std::get<0>(arguments)),      //
           configuration(std::get<1>(arguments)), //
@@ -44,10 +46,10 @@ namespace mission
         return UpdateResult::Ok;
     }
 
-    bool TelemetryTask::SaveCondition(const telemetry::TelemetryState& state, void* param)
+    bool TelemetryTask::SaveCondition(const telemetry::TelemetryState& /*state*/, void* param)
     {
         auto This = static_cast<TelemetryTask*>(param);
-        return This->delay == 0 && state.telemetry.IsModified();
+        return This->delay == 0;
     }
 
     void TelemetryTask::SaveProxy(telemetry::TelemetryState& state, void* param)
@@ -58,25 +60,25 @@ namespace mission
 
     void TelemetryTask::Save(telemetry::TelemetryState& stateObject)
     {
-        std::array<std::uint8_t, telemetry::ManagedTelemetry::TotalSerializedSize> buffer;
-        BitWriter writer(buffer);
-        stateObject.telemetry.WriteModified(writer);
-        assert(writer.Status());
-        if (!writer.Status())
+        decltype(telemetry::TelemetryState::lastSerializedTelemetry) content;
+
         {
-            LOGF(LOG_LEVEL_ERROR, "Insufficient buffer space for telemetry: '%d'.", static_cast<int>(writer.GetBitDataLength()));
-            return;
+            Lock lock(stateObject.bufferLock, 5s);
+            if (static_cast<bool>(lock))
+            {
+                memcpy(content.data(), stateObject.lastSerializedTelemetry.data(), content.size());
+            }
+            else
+            {
+                LOG(LOG_LEVEL_WARNING, "Unable to acquire access to serialized telemetry. ");
+                this->delay = frequency;
+                return;
+            }
         }
 
-        auto content = writer.Capture();
-        if (content.empty())
+        if (!SaveToFile(content))
         {
-            return;
-        }
-
-        if (SaveToFile(content))
-        {
-            stateObject.telemetry.CommitCapture();
+            this->delay = frequency;
         }
     }
 
