@@ -1,4 +1,5 @@
 #include "base/crc.h"
+#include "base/gcc_workaround.hpp"
 #include "bsp/bsp_boot.h"
 #include "bsp/bsp_uart.h"
 #include "main.hpp"
@@ -69,7 +70,7 @@ void CopyBootloader()
     BSP_UART_Puts(BSP_UART_DEBUG, "\nCopying current bootloader to external flash....\n");
 
     gsl::span<std::uint8_t> sourceSpan(reinterpret_cast<std::uint8_t*>(1), 64_KB - 1);
-    std::uint8_t* firstByteOfBootloader = reinterpret_cast<std::uint8_t*>(0);
+    //    auto firstByteOfBootloader = reinterpret_cast<volatile std::uint8_t*>(0xABCD);
 
     for (std::uint8_t i = 0; i < program_flash::BootTable::BootloaderCopies; i++)
     {
@@ -86,7 +87,7 @@ void CopyBootloader()
         }
 
         BSP_UART_Puts(BSP_UART_DEBUG, "Programing\t");
-        r = copy.Write(0, *firstByteOfBootloader);
+        r = copy.Write(0, gcc_workaround::ReadByte0());
         if (r != FlashStatus::NotBusy)
         {
             BSP_UART_Printf<10>(BSP_UART_DEBUG, "Failed %d\n", num(r));
