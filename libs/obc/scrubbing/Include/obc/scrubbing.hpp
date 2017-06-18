@@ -2,8 +2,8 @@
 #define LIBS_OBC_SCRUBBING_INCLUDE_OBC_SCRUBBING_HPP_
 
 #include <chrono>
-#include "base/counter.hpp"
 #include "base/os.h"
+#include "base/time_counter.hpp"
 #include "obc/hardware_fwd.hpp"
 #include "program_flash/fwd.hpp"
 #include "scrubber/bootloader.hpp"
@@ -88,17 +88,17 @@ namespace obc
         static void ScrubberTask(OBCScrubbing* This);
 
         /** @brief Primary slots scrubber counter */
-        counter::Counter<std::uint8_t, 0, 1, 1> _primarySlotsScrubberCounter;
+        time_counter::TimeCounter<OBCScrubbing*, time_counter::min<7>, time_counter::min<1>> _primarySlotsScrubberCounter;
         /** @brief Primary slots scrubber */
         scrubber::ProgramScrubber _primarySlotsScrubber;
 
         /** @brief Secondary slots scrubber counter */
-        counter::Counter<std::uint8_t, 0, 1, 1> _secondarySlotsScrubberCounter;
+        time_counter::TimeCounter<OBCScrubbing*, time_counter::min<7>, time_counter::min<2>> _secondarySlotsScrubberCounter;
         /** @brief Secondary slots scrubber */
         scrubber::ProgramScrubber _secondarySlotsScrubber;
 
         /** @brief Bootloader scrubber counter */
-        counter::Counter<std::uint8_t, 0, 7, 7> _bootloaderScrubberCounter;
+        time_counter::TimeCounter<OBCScrubbing*, time_counter::min<60>, time_counter::min<30>> _bootloaderScrubberCounter;
         /** @brief Bootloader scrubber */
         scrubber::BootloaderScrubber _bootloaderScrubber;
 
