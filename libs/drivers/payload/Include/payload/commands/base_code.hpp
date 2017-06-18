@@ -6,7 +6,8 @@
 
 using namespace drivers::payload::commands;
 
-template <std::uint8_t TCommandCode> OSResult PayloadCommand<TCommandCode>::Execute()
+template <std::uint8_t TCommandCode, class TOutputDataType>
+OSResult PayloadCommand<TCommandCode, TOutputDataType>::Execute(TOutputDataType& output)
 {
     if (_driver.IsBusy())
     {
@@ -20,12 +21,17 @@ template <std::uint8_t TCommandCode> OSResult PayloadCommand<TCommandCode>::Exec
         return result;
     }
 
-    _driver.WaitForData();
+    result = _driver.WaitForData();
+    if (result != OSResult::Success)
+    {
+        return result;
+    }
 
-    return ExecuteDataCommand();
+    return ExecuteDataCommand(output);
 }
 
-template <std::uint8_t TCommandCode> OSResult PayloadCommand<TCommandCode>::ExecuteDataCommand()
+template <std::uint8_t TCommandCode, class TOutputDataType>
+OSResult PayloadCommand<TCommandCode, TOutputDataType>::ExecuteDataCommand(TOutputDataType& output)
 {
     auto dataAddress = GetDataAddress();
     auto buffer = GetBuffer();
@@ -39,7 +45,7 @@ template <std::uint8_t TCommandCode> OSResult PayloadCommand<TCommandCode>::Exec
     // Validation should not cancel save.
     result = Validate();
 
-    result = Save();
+    result = Save(output);
     if (result != OSResult::Success)
     {
         return result;
@@ -48,7 +54,7 @@ template <std::uint8_t TCommandCode> OSResult PayloadCommand<TCommandCode>::Exec
     return OSResult::Success;
 }
 
-template <std::uint8_t TCommandCode> OSResult PayloadCommand<TCommandCode>::ExecuteCommand()
+template <std::uint8_t TCommandCode, class TOutputDataType> OSResult PayloadCommand<TCommandCode, TOutputDataType>::ExecuteCommand()
 {
     std::array<std::uint8_t, 1> commandBuffer = {CommandCode};
 
@@ -62,7 +68,8 @@ template <std::uint8_t TCommandCode> OSResult PayloadCommand<TCommandCode>::Exec
     return OSResult::Success;
 }
 
-template <std::uint8_t TCommandCode> OSResult PayloadCommand<TCommandCode>::ExecuteDataRead(uint8_t address, gsl::span<uint8_t> buffer)
+template <std::uint8_t TCommandCode, class TOutputDataType>
+OSResult PayloadCommand<TCommandCode, TOutputDataType>::ExecuteDataRead(uint8_t address, gsl::span<uint8_t> buffer)
 {
     std::array<std::uint8_t, 1> commandBuffer = {address};
 

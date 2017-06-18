@@ -25,6 +25,15 @@ namespace drivers
         struct PayloadTelemetry
         {
             /**
+             * @brief Status registers.
+             *
+             */
+            struct Status
+            {
+                uint8_t who_am_i;
+            };
+
+            /**
              * @brief SunS Reference Voltages telemetry structure.
              */
             struct SunsRef
@@ -80,7 +89,7 @@ namespace drivers
             /**
              * @brief Who Am I register data.
              */
-            uint8_t who_am_i;
+            Status status;
 
             /**
              * @brief RadFET telemetry data.

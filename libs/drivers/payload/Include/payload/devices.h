@@ -34,39 +34,45 @@ namespace drivers
 
             /**
              * @brief Gets Payload Who Am I flag.
+             * @param output Retrieved data.
              * @return Result status.
              */
-            virtual OSResult GetWhoami() override;
+            virtual OSResult GetWhoami(PayloadTelemetry::Status& output) override;
 
             /**
               * @brief Starts measuring SunS reference voltages.
+              * @param output Retrieved data.
               * @return Result status.
               */
-            virtual OSResult MeasureSunSRef() override;
+            virtual OSResult MeasureSunSRef(PayloadTelemetry::SunsRef& output) override;
 
             /**
               * @brief Starts measuring Temperature data.
+              * @param output Retrieved data.
               * @return Result status.
               */
-            virtual OSResult MeasureTemperatures() override;
+            virtual OSResult MeasureTemperatures(PayloadTelemetry::Temperatures& output) override;
 
             /**
               * @brief Starts measuring Photodiodes data.
+              * @param output Retrieved data.
               * @return Result status.
               */
-            virtual OSResult MeasurePhotodiodes() override;
+            virtual OSResult MeasurePhotodiodes(PayloadTelemetry::Photodiodes& output) override;
 
             /**
               * @brief Starts measuring housekeeping data.
+              * @param output Retrieved data.
               * @return Result status.
               */
-            virtual OSResult MeasureHousekeeping() override;
+            virtual OSResult MeasureHousekeeping(PayloadTelemetry::Housekeeping& output) override;
 
             /**
               * @brief Starts measuring RadFET data.
+              * @param output Retrieved data.
               * @return Result status.
               */
-            virtual OSResult MeasureRadFET() override;
+            virtual OSResult MeasureRadFET(PayloadTelemetry::Radfet& output) override;
 
           private:
             IPayloadDriver& _driver;

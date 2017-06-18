@@ -14,38 +14,38 @@ PayloadDeviceDriver::PayloadDeviceDriver(IPayloadDriver& driver) : _driver(drive
 {
 }
 
-OSResult PayloadDeviceDriver::GetWhoami()
+OSResult PayloadDeviceDriver::GetWhoami(PayloadTelemetry::Status& output)
 {
     commands::WhoamiCommand command(_driver);
-    return command.Execute();
+    return command.Execute(output);
 }
 
-OSResult PayloadDeviceDriver::MeasureSunSRef()
+OSResult PayloadDeviceDriver::MeasureSunSRef(PayloadTelemetry::SunsRef& output)
 {
     commands::SunSCommand command(_driver);
-    return command.Execute();
+    return command.Execute(output);
 }
 
-OSResult PayloadDeviceDriver::MeasureTemperatures()
+OSResult PayloadDeviceDriver::MeasureTemperatures(PayloadTelemetry::Temperatures& output)
 {
     commands::TemperaturesCommand command(_driver);
-    return command.Execute();
+    return command.Execute(output);
 }
 
-OSResult PayloadDeviceDriver::MeasurePhotodiodes()
+OSResult PayloadDeviceDriver::MeasurePhotodiodes(PayloadTelemetry::Photodiodes& output)
 {
     commands::PhotodiodesCommand command(_driver);
-    return command.Execute();
+    return command.Execute(output);
 }
 
-OSResult PayloadDeviceDriver::MeasureHousekeeping()
+OSResult PayloadDeviceDriver::MeasureHousekeeping(PayloadTelemetry::Housekeeping& output)
 {
     commands::HousekeepingCommand command(_driver);
-    return command.Execute();
+    return command.Execute(output);
 }
 
-OSResult PayloadDeviceDriver::MeasureRadFET()
+OSResult PayloadDeviceDriver::MeasureRadFET(PayloadTelemetry::Radfet& output)
 {
     commands::RadFETCommand command(_driver);
-    return command.Execute();
+    return command.Execute(output);
 }

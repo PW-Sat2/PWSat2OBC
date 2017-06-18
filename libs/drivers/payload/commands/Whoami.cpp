@@ -6,10 +6,10 @@ using namespace drivers::payload::commands;
 
 WhoamiCommand::WhoamiCommand(IPayloadDriver& driver) : PayloadCommand(driver)
 {
-    _telemetry.fill(0xFF);
+    _telemetry.buffer.fill(0xFF);
 }
 
-OSResult WhoamiCommand::Execute()
+OSResult WhoamiCommand::Execute(PayloadTelemetry::Status& output)
 {
     if (_driver.IsBusy())
     {
@@ -18,22 +18,22 @@ OSResult WhoamiCommand::Execute()
     }
 
     // skip command processing
-    return ExecuteDataCommand();
+    return ExecuteDataCommand(output);
 }
 
 gsl::span<std::uint8_t> WhoamiCommand::GetBuffer()
 {
-    return _telemetry;
+    return _telemetry.buffer;
 }
 
 uint8_t WhoamiCommand::GetDataAddress() const
 {
-    return offsetof(PayloadTelemetry, who_am_i);
+    return offsetof(PayloadTelemetry, status);
 }
 
 OSResult WhoamiCommand::Validate() const
 {
-    if (_telemetry[0] == 0xFF)
+    if (_telemetry.data.who_am_i == 0xFF)
     {
         LOG(LOG_LEVEL_ERROR, "Invalid whoami response");
         return OSResult::InvalidMessage;
@@ -42,8 +42,9 @@ OSResult WhoamiCommand::Validate() const
     return OSResult::Success;
 }
 
-OSResult WhoamiCommand::Save()
+OSResult WhoamiCommand::Save(PayloadTelemetry::Status& output)
 {
-    LOGF(LOG_LEVEL_DEBUG, "Payload Who am I response: %x.", _telemetry[0]);
+    LOGF(LOG_LEVEL_DEBUG, "Payload Who am I response: %u (0x%x).", _telemetry.data.who_am_i, _telemetry.data.who_am_i);
+    output = _telemetry.data;
     return OSResult::Success;
 }

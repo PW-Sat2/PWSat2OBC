@@ -92,18 +92,26 @@ namespace drivers
              */
             virtual OSResult RaiseDataReadyISR() override;
 
+            /**
+             * @brief Method setting timeout for data wait.
+             * @param newTimeout The new timeout in milliseconds.
+             */
+            virtual void SetDataTimeout(std::chrono::milliseconds newTimeout) override;
+
           private:
             static constexpr uint32_t InterruptPriority = 6;
             /*
              * @brief DefaultTimeout Default timeout for Payload operations. 30 minutes.
              */
-            static constexpr uint32_t DefaultTimeout = 1800000;
+            static constexpr std::chrono::milliseconds DefaultTimeout = std::chrono::milliseconds(1800000);
 
             drivers::i2c::II2CBus& _i2c;
             const drivers::gpio::Pin& _interruptPin;
 
             /** @brief Synchronization */
             OSSemaphoreHandle _sync;
+
+            std::chrono::milliseconds _dataWaitTimeout;
         };
 
         /* @} */

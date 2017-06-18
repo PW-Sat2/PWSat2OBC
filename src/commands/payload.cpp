@@ -13,8 +13,10 @@ static void RadFET(IPayloadDeviceDriver& driver, uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
 
+    PayloadTelemetry::Radfet result;
+
     Main.terminal.Printf("Starting RadFet Test!\n");
-    auto status = driver.MeasureRadFET();
+    auto status = driver.MeasureRadFET(result);
 
     if (status != OSResult::Success)
     {
@@ -23,6 +25,11 @@ static void RadFET(IPayloadDeviceDriver& driver, uint16_t argc, char* argv[])
     }
     else
     {
+        Main.terminal.Printf("%ld %ld %ld %ld\n",
+            result.temperature, //
+            result.vth[0],      //
+            result.vth[1],
+            result.vth[2]);
         Main.terminal.Printf("Success!");
     }
 }
@@ -32,8 +39,10 @@ static void Temperatures(IPayloadDeviceDriver& driver, uint16_t argc, char* argv
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
 
+    PayloadTelemetry::Temperatures result;
+
     Main.terminal.Printf("Starting Temperatures Test!\n");
-    auto status = driver.MeasureTemperatures();
+    auto status = driver.MeasureTemperatures(result);
 
     if (status != OSResult::Success)
     {
@@ -42,6 +51,16 @@ static void Temperatures(IPayloadDeviceDriver& driver, uint16_t argc, char* argv
     }
     else
     {
+        Main.terminal.Printf("%d %d %d %d %d %d %d %d %d\n",
+            result.supply,
+            result.Xp,
+            result.Xn,
+            result.Yp,
+            result.Yn,
+            result.sads,
+            result.sail,
+            result.cam_nadir,
+            result.cam_wing);
         Main.terminal.Printf("Success!");
     }
 }
@@ -51,8 +70,10 @@ static void Photodiodes(IPayloadDeviceDriver& driver, uint16_t argc, char* argv[
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
 
+    PayloadTelemetry::Photodiodes result;
+
     Main.terminal.Printf("Starting Photodiode Test!\n");
-    auto status = driver.MeasurePhotodiodes();
+    auto status = driver.MeasurePhotodiodes(result);
 
     if (status != OSResult::Success)
     {
@@ -61,6 +82,7 @@ static void Photodiodes(IPayloadDeviceDriver& driver, uint16_t argc, char* argv[
     }
     else
     {
+        Main.terminal.Printf("%d %d %d %d\n", result.Xp, result.Xn, result.Yp, result.Yn);
         Main.terminal.Printf("Success!");
     }
 }
@@ -70,8 +92,10 @@ static void SunS(IPayloadDeviceDriver& driver, uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
 
+    PayloadTelemetry::SunsRef result;
+
     Main.terminal.Printf("Starting SunS Test!\n");
-    auto status = driver.MeasureSunSRef();
+    auto status = driver.MeasureSunSRef(result);
 
     if (status != OSResult::Success)
     {
@@ -80,6 +104,12 @@ static void SunS(IPayloadDeviceDriver& driver, uint16_t argc, char* argv[])
     }
     else
     {
+        Main.terminal.Printf("%d %d %d %d %d\n",
+            result.voltages[0], //
+            result.voltages[1], //
+            result.voltages[2],
+            result.voltages[3],
+            result.voltages[4]);
         Main.terminal.Printf("Success!");
     }
 }
@@ -89,8 +119,10 @@ static void Housekeeping(IPayloadDeviceDriver& driver, uint16_t argc, char* argv
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
 
+    PayloadTelemetry::Housekeeping result;
+
     Main.terminal.Printf("Starting Housekeeping Test!\n");
-    auto status = driver.MeasureHousekeeping();
+    auto status = driver.MeasureHousekeeping(result);
 
     if (status != OSResult::Success)
     {
@@ -99,6 +131,7 @@ static void Housekeeping(IPayloadDeviceDriver& driver, uint16_t argc, char* argv
     }
     else
     {
+        Main.terminal.Printf("%d %d\n", result.int_3v3d, result.obc_3v3d);
         Main.terminal.Printf("Success!");
     }
 }
@@ -108,8 +141,10 @@ static void Whoami(IPayloadDeviceDriver& driver, uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
 
+    PayloadTelemetry::Status result;
+
     Main.terminal.Printf("Starting Whoami Test!\n");
-    auto status = driver.GetWhoami();
+    auto status = driver.GetWhoami(result);
 
     if (status != OSResult::Success)
     {
@@ -118,6 +153,7 @@ static void Whoami(IPayloadDeviceDriver& driver, uint16_t argc, char* argv[])
     }
     else
     {
+        Main.terminal.Printf("%d (0x%x)\n", result.who_am_i, result.who_am_i);
         Main.terminal.Printf("Success!");
     }
 }

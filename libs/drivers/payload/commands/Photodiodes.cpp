@@ -48,12 +48,14 @@ OSResult PhotodiodesCommand::Validate() const
     return OSResult::Success;
 }
 
-OSResult PhotodiodesCommand::Save()
+OSResult PhotodiodesCommand::Save(PayloadTelemetry::Photodiodes& output)
 {
-    LOGF(LOG_LEVEL_DEBUG, "Photodiode Xp voltage: %x.", _telemetry.data.Xp);
-    LOGF(LOG_LEVEL_DEBUG, "Photodiode Xn voltage: %x.", _telemetry.data.Xn);
-    LOGF(LOG_LEVEL_DEBUG, "Photodiode Yp voltage: %x.", _telemetry.data.Yp);
-    LOGF(LOG_LEVEL_DEBUG, "Photodiode Yn voltage: %x.", _telemetry.data.Yn);
+    LOGF(LOG_LEVEL_DEBUG, "Photodiode Xp voltage: %u.", _telemetry.data.Xp);
+    LOGF(LOG_LEVEL_DEBUG, "Photodiode Xn voltage: %u.", _telemetry.data.Xn);
+    LOGF(LOG_LEVEL_DEBUG, "Photodiode Yp voltage: %u.", _telemetry.data.Yp);
+    LOGF(LOG_LEVEL_DEBUG, "Photodiode Yn voltage: %u.", _telemetry.data.Yn);
+
+    output = _telemetry.data;
 
     return OSResult::Success;
 }

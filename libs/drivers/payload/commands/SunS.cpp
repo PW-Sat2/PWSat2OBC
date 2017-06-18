@@ -33,12 +33,14 @@ OSResult SunSCommand::Validate() const
     return OSResult::Success;
 }
 
-OSResult SunSCommand::Save()
+OSResult SunSCommand::Save(PayloadTelemetry::SunsRef& output)
 {
     for (uint8_t i = 0; i < _telemetry.data.voltages.size(); ++i)
     {
-        LOGF(LOG_LEVEL_DEBUG, "SunS Ref voltage %u: %x", i + 1, _telemetry.data.voltages[i]);
+        LOGF(LOG_LEVEL_DEBUG, "SunS Ref voltage %u: %u", i + 1, _telemetry.data.voltages[i]);
     }
+
+    output = _telemetry.data;
 
     return OSResult::Success;
 }

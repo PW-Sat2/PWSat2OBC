@@ -16,7 +16,7 @@ namespace drivers
              * This command has overriden Execute method to exclude "measure" part of other commands.
              * Also the Command Code is ignored for this reason.
              */
-            class WhoamiCommand : public PayloadCommand<0x00>
+            class WhoamiCommand : public PayloadCommand<0x00, PayloadTelemetry::Status>
             {
               public:
                 /**
@@ -24,16 +24,20 @@ namespace drivers
                  * @param[in] driver A hardware driver
                  */
                 WhoamiCommand(IPayloadDriver& driver);
-                virtual OSResult Execute() override;
+                virtual OSResult Execute(PayloadTelemetry::Status& output) override;
 
               protected:
                 virtual gsl::span<std::uint8_t> GetBuffer() override;
                 virtual uint8_t GetDataAddress() const override;
                 virtual OSResult Validate() const override;
-                virtual OSResult Save() override;
+                virtual OSResult Save(PayloadTelemetry::Status& output) override;
 
               private:
-                std::array<uint8_t, 1> _telemetry;
+                union StatusTelemetryBuffered {
+                    PayloadTelemetry::Status data;
+                    std::array<uint8_t, sizeof(PayloadTelemetry::Status)> buffer;
+                    static_assert(sizeof(data) == sizeof(buffer), "Incorrect size buffered Telemetry");
+                } _telemetry;
             };
         }
     }

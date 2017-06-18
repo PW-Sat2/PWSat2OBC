@@ -36,10 +36,12 @@ OSResult HousekeepingCommand::Validate() const
     return OSResult::Success;
 }
 
-OSResult HousekeepingCommand::Save()
+OSResult HousekeepingCommand::Save(PayloadTelemetry::Housekeeping& output)
 {
-    LOGF(LOG_LEVEL_DEBUG, "INT voltage: %x.", _telemetry.data.int_3v3d);
-    LOGF(LOG_LEVEL_DEBUG, "OBC voltage: %x.", _telemetry.data.obc_3v3d);
+    LOGF(LOG_LEVEL_DEBUG, "INT voltage: %u.", _telemetry.data.int_3v3d);
+    LOGF(LOG_LEVEL_DEBUG, "OBC voltage: %u.", _telemetry.data.obc_3v3d);
+
+    output = _telemetry.data;
 
     return OSResult::Success;
 }

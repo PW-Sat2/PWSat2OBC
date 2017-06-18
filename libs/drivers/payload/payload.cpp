@@ -8,7 +8,8 @@ using drivers::i2c::I2CResult;
 PayloadDriver::PayloadDriver(drivers::i2c::II2CBus& communicationBus, const drivers::gpio::Pin& interruptPin)
     : _i2c(communicationBus),      //
       _interruptPin(interruptPin), //
-      _sync(nullptr)               //
+      _sync(nullptr),              //
+      _dataWaitTimeout(DefaultTimeout)
 {
 }
 
@@ -66,7 +67,7 @@ OSResult PayloadDriver::PayloadWrite(gsl::span<std::uint8_t> outData)
 
 OSResult PayloadDriver::WaitForData()
 {
-    auto result = System::TakeSemaphore(_sync, std::chrono::milliseconds(DefaultTimeout));
+    auto result = System::TakeSemaphore(_sync, _dataWaitTimeout);
     if (result != OSResult::Success)
     {
         LOGF(LOG_LEVEL_ERROR, "Take semaphore for Payload synchronisation failed. Reason: %d", num(result));
@@ -86,4 +87,9 @@ OSResult PayloadDriver::RaiseDataReadyISR()
     }
 
     return OSResult::Success;
+}
+
+void PayloadDriver::SetDataTimeout(std::chrono::milliseconds newTimeout)
+{
+    _dataWaitTimeout = newTimeout;
 }

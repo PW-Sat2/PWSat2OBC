@@ -15,7 +15,7 @@ namespace drivers
              * Base class for all Commands for Payload manipulation.
              * The template argument is command code.
              */
-            template <std::uint8_t TCommandCode> class PayloadCommand
+            template <std::uint8_t TCommandCode, class TOutputDataType> class PayloadCommand
             {
               public:
                 /**
@@ -33,7 +33,7 @@ namespace drivers
                  * @brief Executes command.
                  * @returns Result status.
                  */
-                virtual OSResult Execute();
+                virtual OSResult Execute(TOutputDataType& output);
 
               protected:
                 /**
@@ -55,16 +55,18 @@ namespace drivers
                 virtual OSResult Validate() const = 0;
 
                 /**
-                  * @brief The method ssaving retrieved data.
+                  * @brief The method saving retrieved data.
+                  * @param output Data retrieved by command.
                   * @returns Result status.
                   */
-                virtual OSResult Save() = 0;
+                virtual OSResult Save(TOutputDataType& output) = 0;
 
                 /**
                  * @brief The method performing full data request command - read, validate and save.
+                 * @param output Data retrieved by command.
                  * @returns Result status.
                  */
-                OSResult ExecuteDataCommand();
+                OSResult ExecuteDataCommand(TOutputDataType& output);
 
                 /**
                  * @brief The hardware driver.

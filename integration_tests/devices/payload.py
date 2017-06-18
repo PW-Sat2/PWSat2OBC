@@ -45,31 +45,31 @@ class Payload(I2CDevice):
     @i2cMock.command([0x80])
     def measure_suns(self):
         self.log.debug("Measure SunS")
-        self.SunS_Ref = [0x0101, 0x0102, 0x0103, 0x0104, 0x0105]
+        self.SunS_Ref = [101, 102, 103, 104, 105]
         self.mock_processing_start()
 
     @i2cMock.command([0x81])
     def measure_temperatures(self):
         self.log.debug("Measure Temperatures")
-        self.Temperatures = [0x0201, 0x0202, 0x0203, 0x0204, 0x0205, 0x0206, 0x0207, 0x0208, 0x0209]
+        self.Temperatures = [201, 202, 203, 204, 205, 206, 207, 208, 209]
         self.mock_processing_start()
 
     @i2cMock.command([0x82])
     def measure_photodiodes(self):
         self.log.debug("Measure Photodiodes")
-        self.Photodiodes = [0x0301, 0x0302, 0x0303, 0x0304, 0x0305]
+        self.Photodiodes = [301, 302, 303, 304, 305]
         self.mock_processing_start()
 
     @i2cMock.command([0x83])
     def measure_housekeeping(self):
         self.log.debug("Measure Housekeeping")
-        self.Housekeeping = [0x0401, 0x0402]
+        self.Housekeeping = [401, 402]
         self.mock_processing_start()
 
     @i2cMock.command([0x84])
     def measure_radfet(self):
         self.log.debug("Measure RadFET")
-        self.RadFET = [0x00500001, 0x00500002, 0x00500003, 0x00500004]
+        self.RadFET = [500001, 500002, 500003, 500004]
         self.default_processing_time = 30
         self.mock_processing_start()
 

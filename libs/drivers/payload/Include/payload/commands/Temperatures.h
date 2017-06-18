@@ -13,7 +13,7 @@ namespace drivers
             /**
              * @brief Command for executing Temperatures measurements and data retrieval
              */
-            class TemperaturesCommand : public PayloadCommand<0x81>
+            class TemperaturesCommand : public PayloadCommand<0x81, PayloadTelemetry::Temperatures>
             {
               public:
                 /**
@@ -26,7 +26,7 @@ namespace drivers
                 virtual gsl::span<std::uint8_t> GetBuffer() override;
                 virtual uint8_t GetDataAddress() const override;
                 virtual OSResult Validate() const override;
-                virtual OSResult Save() override;
+                virtual OSResult Save(PayloadTelemetry::Temperatures& output) override;
 
               private:
                 union TemperaturesTelemetryBuffered {

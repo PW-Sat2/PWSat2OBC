@@ -91,17 +91,19 @@ OSResult TemperaturesCommand::Validate() const
     return OSResult::Success;
 }
 
-OSResult TemperaturesCommand::Save()
+OSResult TemperaturesCommand::Save(PayloadTelemetry::Temperatures& output)
 {
-    LOGF(LOG_LEVEL_DEBUG, "Temperature supply: %x.", _telemetry.data.supply);
-    LOGF(LOG_LEVEL_DEBUG, "Temperature Xp: %x.", _telemetry.data.Xp);
-    LOGF(LOG_LEVEL_DEBUG, "Temperature Xn: %x.", _telemetry.data.Xn);
-    LOGF(LOG_LEVEL_DEBUG, "Temperature Yp: %x.", _telemetry.data.Yp);
-    LOGF(LOG_LEVEL_DEBUG, "Temperature Yn: %x.", _telemetry.data.Yn);
-    LOGF(LOG_LEVEL_DEBUG, "Temperature SADS: %x.", _telemetry.data.sads);
-    LOGF(LOG_LEVEL_DEBUG, "Temperature SAIL: %x.", _telemetry.data.sail);
-    LOGF(LOG_LEVEL_DEBUG, "Temperature CAM Nadir: %x.", _telemetry.data.cam_nadir);
-    LOGF(LOG_LEVEL_DEBUG, "Temperature CAM Wing: %x.", _telemetry.data.cam_wing);
+    LOGF(LOG_LEVEL_DEBUG, "Temperature supply: %u.", _telemetry.data.supply);
+    LOGF(LOG_LEVEL_DEBUG, "Temperature Xp: %u.", _telemetry.data.Xp);
+    LOGF(LOG_LEVEL_DEBUG, "Temperature Xn: %u.", _telemetry.data.Xn);
+    LOGF(LOG_LEVEL_DEBUG, "Temperature Yp: %u.", _telemetry.data.Yp);
+    LOGF(LOG_LEVEL_DEBUG, "Temperature Yn: %u.", _telemetry.data.Yn);
+    LOGF(LOG_LEVEL_DEBUG, "Temperature SADS: %u.", _telemetry.data.sads);
+    LOGF(LOG_LEVEL_DEBUG, "Temperature SAIL: %u.", _telemetry.data.sail);
+    LOGF(LOG_LEVEL_DEBUG, "Temperature CAM Nadir: %u.", _telemetry.data.cam_nadir);
+    LOGF(LOG_LEVEL_DEBUG, "Temperature CAM Wing: %u.", _telemetry.data.cam_wing);
+
+    output = _telemetry.data;
 
     return OSResult::Success;
 }

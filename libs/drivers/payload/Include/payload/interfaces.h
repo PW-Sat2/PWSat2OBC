@@ -5,6 +5,8 @@
 #include <gsl/span>
 #include "base/os.h"
 
+#include "telemetry.h"
+
 namespace drivers
 {
     namespace payload
@@ -56,6 +58,12 @@ namespace drivers
              * @return Result status.
              */
             virtual OSResult RaiseDataReadyISR() = 0;
+
+            /**
+             * @brief Method setting timeout for data wait.
+             * @param newTimeout The new timeout in milliseconds.
+             */
+            virtual void SetDataTimeout(std::chrono::milliseconds newTimeout) = 0;
         };
 
         /**
@@ -65,39 +73,45 @@ namespace drivers
         {
             /**
              * @brief Starts measuring SunS reference voltages.
+             * @param output Retrieved data.
              * @return Result status.
              */
-            virtual OSResult MeasureSunSRef() = 0;
+            virtual OSResult MeasureSunSRef(PayloadTelemetry::SunsRef& output) = 0;
 
             /**
               * @brief Starts measuring Temperature data.
+              * @param output Retrieved data.
               * @return Result status.
               */
-            virtual OSResult MeasureTemperatures() = 0;
+            virtual OSResult MeasureTemperatures(PayloadTelemetry::Temperatures& output) = 0;
 
             /**
               * @brief Starts measuring Photodiodes data.
+              * @param output Retrieved data.
               * @return Result status.
               */
-            virtual OSResult MeasurePhotodiodes() = 0;
+            virtual OSResult MeasurePhotodiodes(PayloadTelemetry::Photodiodes& output) = 0;
 
             /**
               * @brief Starts measuring housekeeping data.
+              * @param output Retrieved data.
               * @return Result status.
               */
-            virtual OSResult MeasureHousekeeping() = 0;
+            virtual OSResult MeasureHousekeeping(PayloadTelemetry::Housekeeping& output) = 0;
 
             /**
               * @brief Starts measuring RadFET data.
+              * @param output Retrieved data.
               * @return Result status.
               */
-            virtual OSResult MeasureRadFET() = 0;
+            virtual OSResult MeasureRadFET(PayloadTelemetry::Radfet& output) = 0;
 
             /**
              * @brief Gets Payload Who Am I flag.
+             * @param output Retrieved data.
              * @return Result status.
              */
-            virtual OSResult GetWhoami() = 0;
+            virtual OSResult GetWhoami(PayloadTelemetry::Status& output) = 0;
         };
 
         /* @} */

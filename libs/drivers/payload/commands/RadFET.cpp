@@ -39,13 +39,15 @@ OSResult RadFETCommand::Validate() const
     return OSResult::Success;
 }
 
-OSResult RadFETCommand::Save()
+OSResult RadFETCommand::Save(PayloadTelemetry::Radfet& output)
 {
-    LOGF(LOG_LEVEL_DEBUG, "RadFET temperature: %lx.", _telemetry.data.temperature);
+    LOGF(LOG_LEVEL_DEBUG, "RadFET temperature: %lu.", _telemetry.data.temperature);
     for (uint8_t i = 0; i < _telemetry.data.vth.size(); ++i)
     {
-        LOGF(LOG_LEVEL_DEBUG, "RadFet voltage %u: %lx", i + 1, _telemetry.data.vth[i]);
+        LOGF(LOG_LEVEL_DEBUG, "RadFet voltage %u: %lu", i + 1, _telemetry.data.vth[i]);
     }
+
+    output = _telemetry.data;
 
     return OSResult::Success;
 }

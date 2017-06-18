@@ -13,7 +13,7 @@ namespace drivers
             /**
              * @brief Command for executing SunS Reference Voltages measurements and data retrieval
              */
-            class SunSCommand : public PayloadCommand<0x80>
+            class SunSCommand : public PayloadCommand<0x80, PayloadTelemetry::SunsRef>
             {
               public:
                 /**
@@ -26,7 +26,7 @@ namespace drivers
                 virtual gsl::span<std::uint8_t> GetBuffer() override;
                 virtual uint8_t GetDataAddress() const override;
                 virtual OSResult Validate() const override;
-                virtual OSResult Save() override;
+                virtual OSResult Save(PayloadTelemetry::SunsRef& output) override;
 
               private:
                 union SunSRefTelemetryBuffered {

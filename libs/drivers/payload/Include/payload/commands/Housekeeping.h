@@ -13,7 +13,7 @@ namespace drivers
             /**
              * @brief Command for executing Housekeeping measurements and data retrieval
              */
-            class HousekeepingCommand : public PayloadCommand<0x83>
+            class HousekeepingCommand : public PayloadCommand<0x83, PayloadTelemetry::Housekeeping>
             {
               public:
                 /**
@@ -26,7 +26,7 @@ namespace drivers
                 virtual gsl::span<std::uint8_t> GetBuffer() override;
                 virtual uint8_t GetDataAddress() const override;
                 virtual OSResult Validate() const override;
-                virtual OSResult Save() override;
+                virtual OSResult Save(PayloadTelemetry::Housekeeping& output) override;
 
               private:
                 union HousekeepingTelemetryBuffered {
