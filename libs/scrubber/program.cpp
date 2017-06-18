@@ -1,7 +1,7 @@
 #include "program.hpp"
+#include <algorithm>
 #include <bitset>
 #include <cstring>
-#include "base/array_map.hpp"
 #include "logger/logger.h"
 #include "redundancy.hpp"
 
@@ -64,13 +64,19 @@ namespace scrubber
             this->_bootTable.Entry(slots[0]), this->_bootTable.Entry(slots[1]), this->_bootTable.Entry(slots[2]),
         };
 
-        auto scrubSpans = Map(entries, [this](program_flash::ProgramEntry& entry) { //
+        std::array<gsl::span<const std::uint8_t>, 3> scrubSpans;
+
+        std::transform(std::begin(entries), std::end(entries), scrubSpans.begin(), [this](program_flash::ProgramEntry& entry) { //
             return entry.WholeEntry().subspan(this->_offset, ScrubSize);
         });
 
         redundancy::CorrectBuffer(this->_buffer, scrubSpans[0], scrubSpans[1], scrubSpans[2]);
 
-        auto isCorrect = Map(scrubSpans, [this](const gsl::span<const uint8_t>& s) { return FastSpanCompare(s, this->_buffer); });
+        std::array<bool, 3> isCorrect;
+
+        std::transform(scrubSpans.begin(), scrubSpans.end(), isCorrect.begin(), [this](const gsl::span<const uint8_t>& s) {
+            return FastSpanCompare(s, this->_buffer);
+        });
 
         LOGF(LOG_LEVEL_INFO, "[scrub] Check result: %d, %d, %d", isCorrect[0], isCorrect[1], isCorrect[2]);
 

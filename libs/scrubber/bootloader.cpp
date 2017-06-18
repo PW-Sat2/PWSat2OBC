@@ -1,6 +1,6 @@
 #include "bootloader.hpp"
+#include <algorithm>
 #include <cstring>
-#include "base/array_map.hpp"
 #include "logger/logger.h"
 #include "msc/msc.hpp"
 #include "redundancy.hpp"
@@ -43,14 +43,17 @@ namespace scrubber
             _bootTable.GetBootloaderCopy(4),
         };
 
-        std::array<gsl::span<const std::uint8_t>, 5> spans = Map(copies, [](BootloaderCopy& copy) { return copy.Content(); });
+        std::array<gsl::span<const std::uint8_t>, 5> spans;
+
+        std::transform(std::begin(copies), std::end(copies), spans.begin(), [](BootloaderCopy& copy) { return copy.Content(); });
 
         redundancy::CorrectBuffer(gsl::make_span(this->_scrubBuffer), spans);
 
-        auto isCorrect = Map(spans,
-            [this](gsl::span<const std::uint8_t>& copy) { //
-                return memcmp(this->_scrubBuffer.data(), copy.data(), copy.size()) == 0;
-            });
+        std::array<bool, 5> isCorrect;
+
+        std::transform(spans.begin(), spans.end(), isCorrect.begin(), [this](gsl::span<const std::uint8_t>& copy) { //
+            return memcmp(this->_scrubBuffer.data(), copy.data(), copy.size()) == 0;
+        });
 
         for (std::uint8_t i = 0; i < count_of(copies); i++)
         {
@@ -86,6 +89,7 @@ namespace scrubber
             auto validPart = gsl::make_span(this->_scrubBuffer).subspan(offset, MCUMemoryController::SectorSize);
 
             this->_mcuFlash.Program(offset, validPart);
+            this->_mcuPagesCorrected++;
         }
 
         LOG(LOG_LEVEL_INFO, "[scrub] Finished scrubbing bootloader");

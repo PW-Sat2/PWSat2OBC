@@ -70,7 +70,6 @@ void CopyBootloader()
     BSP_UART_Puts(BSP_UART_DEBUG, "\nCopying current bootloader to external flash....\n");
 
     gsl::span<std::uint8_t> sourceSpan(reinterpret_cast<std::uint8_t*>(1), 64_KB - 1);
-    //    auto firstByteOfBootloader = reinterpret_cast<volatile std::uint8_t*>(0xABCD);
 
     for (std::uint8_t i = 0; i < program_flash::BootTable::BootloaderCopies; i++)
     {
