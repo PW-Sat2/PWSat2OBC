@@ -6,6 +6,7 @@ set(SOURCES
     file_system.cpp
     experiments.cpp
     program_upload.cpp
+    boot_settings.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -18,6 +19,7 @@ target_link_libraries(${NAME}
 	logger
 	obc_experiments
 	program_flash
+	boot_settings
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

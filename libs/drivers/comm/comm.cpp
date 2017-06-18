@@ -134,7 +134,7 @@ OSResult CommObject::Initialize()
         return result;
     }
 
-    result = System::CreateTask(CommObject::CommTask, "COMM Task", 4_KB, this, TaskPriority::P4, &this->_pollingTaskHandle);
+    result = System::CreateTask(CommObject::CommTask, "COMM Task", 6_KB, this, TaskPriority::P4, &this->_pollingTaskHandle);
     if (OS_RESULT_FAILED(result))
     {
         LOGF(LOG_LEVEL_ERROR, "[comm] Unable to create background task (%d)", num(result));

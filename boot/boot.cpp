@@ -208,9 +208,17 @@ static void ResolveFailedBoot()
         return;
     }
 
-    if (!Bootloader.Settings.WasLastBootConfirmed())
+    auto counter = Bootloader.Settings.BootCounter();
+    auto lastConfirmed = Bootloader.Settings.LastConfirmedBootCounter();
+
+    if (counter - lastConfirmed > 0)
     {
-        BSP_UART_Puts(BSP_UART_DEBUG, "\nLast boot not confirmed - switch to failsafe slots");
+        BSP_UART_Puts(BSP_UART_DEBUG, "\nLast boot not confirmed - still trying");
+    }
+
+    if ((counter - lastConfirmed) >= 10)
+    {
+        BSP_UART_Puts(BSP_UART_DEBUG, "\nLast 10 boots not confirmed - switch to failsafe slots");
 
         auto failsafe = Bootloader.Settings.FailsafeBootSlots();
         Bootloader.Settings.BootSlots(failsafe);
@@ -301,10 +309,6 @@ void ProceedWithBooting()
     boot::Index = slotsMask;
 
     auto baseAddress = LoadApplication(slotsMask);
-
-    Bootloader.Settings.UnconfirmLastBoot();
-
-    GPIO_PinModeSet(gpioPortF, 9, gpioModeDisabled, 1);
 
     BootToAddress(baseAddress);
 }
