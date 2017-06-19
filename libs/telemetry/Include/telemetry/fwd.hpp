@@ -18,6 +18,8 @@ namespace telemetry
     class McuTemperature;
     class GpioState;
     class FileSystemTelemetry;
+    class InternalTimeTelemetry;
+    class ExternalTimeTelemetry;
 
     struct TelemetryState;
 
@@ -25,7 +27,8 @@ namespace telemetry
 
     typedef Telemetry<SystemStartup,            //
         ProgramState,                           //
-        state::TimeState,                       //
+        InternalTimeTelemetry,                  //
+        ExternalTimeTelemetry,                  //
         ErrorCountingTelemetry,                 //
         FileSystemTelemetry,                    //
         devices::antenna::AntennaTelemetry,     //

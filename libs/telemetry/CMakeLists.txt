@@ -10,6 +10,7 @@ set(SOURCES
     McuTemperature.cpp
     GpioState.cpp
     FileSystemTelemetry.cpp
+    TimeTelemetry.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -43,3 +44,4 @@ add_subdirectory(temp)
 add_subdirectory(ant)
 add_subdirectory(gpio)
 add_subdirectory(fs)
+add_subdirectory(time)

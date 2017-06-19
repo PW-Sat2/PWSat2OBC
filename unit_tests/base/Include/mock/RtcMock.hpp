@@ -5,6 +5,7 @@
 
 #include "gmock/gmock.h"
 #include "rtc/rtc.hpp"
+#include "time/TimePoint.h"
 
 class RtcMock : public devices::rtc::IRTC
 {
