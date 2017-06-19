@@ -180,6 +180,17 @@ namespace program_flash
         virtual std::uint32_t BootConfig() const = 0;
 
         /**
+         * @brief Locks entire flash device
+         * @param timeout Take lock timeout
+         * @return true if lock was taken, false otherwise
+         */
+        virtual bool Lock(std::chrono::milliseconds timeout) = 0;
+        /**
+         * @brief Unlocks previously locked flash device
+         */
+        virtual void Unlock() = 0;
+
+        /**
          * @brief Creates span starting at given offset
          * @param offset Offset from first byt of flash
          * @return

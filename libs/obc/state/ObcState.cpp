@@ -33,7 +33,7 @@ namespace obc
 
     bool ReadPersistentState(state::SystemPersistentState& stateObject, std::uint32_t baseAddress, IStorageAccess& storage)
     {
-        std::uint8_t array[TotalImageSize];
+        alignas(4) std::uint8_t array[TotalImageSize];
         storage.Read(baseAddress, gsl::make_span(array));
         Reader reader(gsl::make_span(array));
         const auto header = reader.ReadDoubleWordLE();

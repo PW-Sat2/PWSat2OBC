@@ -1,5 +1,7 @@
 #include "boot.h"
 #include <bitset>
+#include <cstring>
+#include <em_msc.h>
 #include <em_usart.h>
 #include <em_wdog.h>
 #include "boot/params.hpp"
@@ -47,38 +49,12 @@ void BootToAddress(uint32_t baseAddress)
         ;
 }
 
-static void ProgramBlock(gsl::span<const std::uint32_t> data, std::uint32_t* base)
+static void ProgramBlock(gsl::span<const std::uint8_t> data, const std::uint8_t* base)
 {
-    MSC->LOCK = MSC_UNLOCK_CODE;
-    MSC->WRITECTRL |= MSC_WRITECTRL_WREN | MSC_WRITECTRL_RWWEN;
+    auto ptr = reinterpret_cast<std::uint32_t*>(const_cast<std::uint8_t*>(base));
 
-    // erase page
-    MSC->ADDRB = reinterpret_cast<std::uint32_t>(base);
-    MSC->WRITECMD = MSC_WRITECMD_LADDRIM;
-    MSC->WRITECMD = MSC_WRITECMD_ERASEPAGE;
-
-    while ((MSC->STATUS & MSC_STATUS_BUSY))
-        ;
-
-    // program page
-    MSC->ADDRB = reinterpret_cast<std::uint32_t>(base);
-    MSC->WRITECMD = MSC_WRITECMD_LADDRIM;
-
-    MSC->WDATA = data[0];
-    MSC->WRITECMD = MSC_WRITECMD_WRITETRIG;
-
-    for (auto i = data.begin() + 1; i != data.end(); i++)
-    {
-        while (!(MSC->STATUS & MSC_STATUS_WDATAREADY))
-            ;
-
-        MSC->WDATA = *i;
-    }
-
-    while (!(MSC->STATUS & MSC_STATUS_WDATAREADY))
-        ;
-
-    MSC->WRITECMD = MSC_WRITECMD_WRITEEND;
+    MSC_ErasePage(ptr);
+    MSC_WriteWord(ptr, data.data(), data.size());
 }
 
 template <typename Input, std::size_t Count, typename Mapper, typename Output = decltype(std::declval<Mapper>()(std::declval<Input&>()))>
@@ -123,27 +99,29 @@ void LoadApplicationTMR(std::array<std::uint8_t, 3> slots)
     constexpr std::size_t PageSize = 4_KB;
     constexpr std::size_t ChunksCount = PageSize / sizeof(ChunkType);
 
-    auto programBases = Map(entries, [](ProgramEntry& entry) { return reinterpret_cast<const ChunkType*>(entry.Content()); });
+    auto programBases = Map(entries, [](ProgramEntry& entry) { return entry.Content(); });
 
     BSP_UART_Printf<30>(BSP_UART_DEBUG, "\nBase: %p", (void*)programBases[0]);
     BSP_UART_Printf<30>(BSP_UART_DEBUG, "\nBase: %p", (void*)programBases[1]);
     BSP_UART_Printf<30>(BSP_UART_DEBUG, "\nBase: %p", (void*)programBases[2]);
 
-    auto internalFlashBase = reinterpret_cast<ChunkType*>(BOOT_APPLICATION_BASE);
+    auto internalFlashBase = reinterpret_cast<const std::uint8_t*>(BOOT_APPLICATION_BASE);
 
-    std::array<ChunkType, ChunksCount> pageBuffer;
+    alignas(4) std::array<std::uint8_t, PageSize> pageBuffer;
 
-    for (auto offset = 0U; offset < length / sizeof(ChunkType); offset += ChunksCount)
+    MSC_Init();
+
+    for (auto offset = 0U; offset < length; offset += PageSize)
     {
-        auto pageSpans = Map(programBases, [offset](const ChunkType*& entry) { return gsl::make_span(entry + offset, ChunksCount); });
+        auto pageSpans = Map(programBases, [offset](const std::uint8_t*& entry) { return gsl::make_span(entry + offset, PageSize); });
 
         auto ptr = internalFlashBase + offset;
 
         auto internalFlashPage = gsl::make_span(ptr, ChunksCount);
 
-        redundancy::CorrectBuffer<const ChunkType>(pageBuffer, pageSpans[0], pageSpans[1], pageSpans[2]);
+        redundancy::CorrectBuffer(pageBuffer, pageSpans[0], pageSpans[1], pageSpans[2]);
 
-        bool internalOk = internalFlashPage == gsl::make_span(pageBuffer);
+        bool internalOk = memcmp(pageBuffer.data(), ptr, pageBuffer.size()) == 0;
 
         if (!internalOk)
         {
@@ -152,9 +130,11 @@ void LoadApplicationTMR(std::array<std::uint8_t, 3> slots)
 
         if (!internalOk)
         {
-            ProgramBlock(pageBuffer, internalFlashPage.data());
+            ProgramBlock(pageBuffer, ptr);
         }
     }
+
+    MSC_Deinit();
 
     BSP_UART_Puts(BSP_UART_DEBUG, "\nDone");
 }
@@ -267,7 +247,7 @@ void ProceedWithBooting()
     }
     else if (slotsMask == boot::BootSettings::UpperBootSlot)
     {
-        boot::BootReason = boot::Reason::PrimaryBootSlots;
+        boot::BootReason = boot::Reason::BootToUpper;
         BSP_UART_Puts(BSP_UART_DEBUG, "\n\nUpper boot slot... Booting to upper");
         BootToAddress(BOOT_APPLICATION_BASE);
     }

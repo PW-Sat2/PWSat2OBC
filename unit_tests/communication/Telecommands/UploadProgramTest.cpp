@@ -5,6 +5,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "mock/comm.hpp"
+#include "mock/flash_driver.hpp"
 #include "obc/telecommands/program_upload.hpp"
 #include "program_flash/boot_table.hpp"
 #include "utils.h"
@@ -17,21 +18,9 @@ using testing::Return;
 using testing::StrEq;
 using testing::Each;
 using testing::ElementsAre;
+using testing::ElementsAreArray;
 using telecommunication::downlink::DownlinkAPID;
 using program_flash::FlashStatus;
-
-struct FlashDriverMock : public program_flash::IFlashDriver
-{
-    MOCK_CONST_METHOD1(At, std::uint8_t const*(std::size_t offset));
-    MOCK_METHOD2(Program, FlashStatus(std::size_t offset, std::uint8_t value));
-    MOCK_METHOD2(Program, FlashStatus(std::size_t offset, gsl::span<const std::uint8_t> value));
-    MOCK_METHOD1(EraseSector, FlashStatus(std::size_t sectorOfffset));
-
-    MOCK_CONST_METHOD0(DeviceId, std::uint32_t());
-    MOCK_CONST_METHOD0(BootConfig, std::uint32_t());
-};
-
-static std::array<std::uint8_t, 4_MB> Flash;
 
 class UploadProgramTest : public testing::Test
 {
@@ -39,8 +28,8 @@ class UploadProgramTest : public testing::Test
     UploadProgramTest();
 
   protected:
-    gsl::span<std::uint8_t> _flash;
     testing::NiceMock<FlashDriverMock> _flashMock;
+    gsl::span<std::uint8_t> _flash;
     program_flash::BootTable _bootTable;
 
     testing::NiceMock<TransmitterMock> _transmitter;
@@ -58,33 +47,9 @@ class UploadProgramTest : public testing::Test
 };
 
 UploadProgramTest::UploadProgramTest()
-    : _flash(Flash), _bootTable(_flashMock), _eraseTelecommand(_bootTable), _writePartTelecommand(_bootTable),
+    : _flash(this->_flashMock.Storage()), _bootTable(_flashMock), _eraseTelecommand(_bootTable), _writePartTelecommand(_bootTable),
       _finalizeTelecommand(_bootTable)
 {
-    Flash.fill(0xA5);
-
-    ON_CALL(this->_flashMock, DeviceId()).WillByDefault(Return(0x00530000));
-    ON_CALL(this->_flashMock, BootConfig()).WillByDefault(Return(0x00000002));
-
-    ON_CALL(this->_flashMock, At(_)).WillByDefault(Invoke([this](std::size_t offset) { return this->_flash.data() + offset; }));
-
-    ON_CALL(this->_flashMock, EraseSector(_)).WillByDefault(Invoke([this](std::size_t sectorOffset) {
-        auto sector = this->_flash.subspan(sectorOffset, 512_KB);
-        std::fill(sector.begin(), sector.end(), 0xFF);
-        return FlashStatus::NotBusy;
-    }));
-
-    ON_CALL(this->_flashMock, Program(_, A<gsl::span<const std::uint8_t>>()))
-        .WillByDefault(Invoke([this](std::size_t offset, gsl::span<const std::uint8_t> value) {
-            std::copy(value.begin(), value.end(), this->_flash.begin() + offset);
-
-            return FlashStatus::NotBusy;
-        }));
-    ON_CALL(this->_flashMock, Program(_, A<std::uint8_t>())).WillByDefault(Invoke([this](std::size_t offset, std::uint8_t value) {
-        this->_flash[offset] = value;
-        return FlashStatus::NotBusy;
-    }));
-
     this->_bootTable.Initialize();
 }
 
@@ -162,6 +127,17 @@ TEST_F(UploadProgramTest, ProgramSequence)
     ASSERT_THAT(entry.IsValid(), Eq(true));
     ASSERT_THAT(entry.Description(), StrEq("Test"));
     ASSERT_THAT(reinterpret_cast<const char*>(entry.Content()), StrEq("Program"));
+}
+
+TEST_F(UploadProgramTest, ShouldWriteBootloaderCopy)
+{
+    std::uint8_t items[] = {1, 3, 5, 7, 9, 2, 4, 6, 8, 0};
+
+    auto copy = this->_bootTable.GetBootloaderCopy(1);
+    copy.Erase();
+    copy.Write(0, items);
+
+    ASSERT_THAT(gsl::make_span(&this->_flash[3_MB + 64_KB], 10), ElementsAreArray(items, 10));
 }
 
 TEST_F(UploadProgramTest, WriteProgramByTelecommands)

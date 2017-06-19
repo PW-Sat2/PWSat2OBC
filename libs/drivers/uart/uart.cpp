@@ -8,8 +8,6 @@
 #include "logger/logger.h"
 #include "system.h"
 
-#define DEBUG_UART
-
 namespace drivers
 {
     namespace uart
@@ -47,12 +45,6 @@ namespace drivers
 
             DMADRV_AllocateChannel(&this->_rxChannel, nullptr);
             DMADRV_AllocateChannel(&this->_txChannel, nullptr);
-
-#ifdef DEBUG_UART
-            GPIO_PinModeSet(gpioPortC, 11, gpioModePushPull, 1);
-            GPIO_PinModeSet(gpioPortC, 12, gpioModePushPull, 1);
-            GPIO_PinModeSet(gpioPortC, 13, gpioModePushPull, 1);
-#endif
         }
 
         LineIO& UART::GetLineIO()
@@ -92,9 +84,7 @@ namespace drivers
             auto This = reinterpret_cast<UART*>(io->extra);
 
             This->_event.Clear(Event::LineEndReceived);
-#ifdef DEBUG_UART
-            GPIO_PinOutClear(gpioPortC, 12);
-#endif
+
             This->_buffer = buffer;
             This->_bufferEnd = buffer + bufferLength;
 
@@ -108,10 +98,6 @@ namespace drivers
             This->_event.WaitAny(Event::LineEndReceived, true, InfiniteTimeout);
 
             NVIC_DisableIRQ(IRQn::UART1_RX_IRQn);
-
-#ifdef DEBUG_UART
-            GPIO_PinOutSet(gpioPortC, 12);
-#endif
 
             *(This->_buffer - 1) = 0;
 
@@ -158,22 +144,12 @@ namespace drivers
             this->_buffer++;
             if (b == '\n' || this->_buffer == this->_bufferEnd)
             {
-#ifdef DEBUG_UART
-                GPIO_PinOutClear(gpioPortC, 13);
-#endif
-
                 NVIC_SetPendingIRQ(io_map::UART::WakeUpInterrupt);
             }
-#ifdef DEBUG_UART
-            GPIO->P[gpioPortC].DOUTSET = 1 << 11;
-#endif
         }
 
         void UART::OnWakeUpInterrupt()
         {
-#ifdef DEBUG_UART
-            GPIO_PinOutSet(gpioPortC, 13);
-#endif
             this->_event.SetISR(Event::LineEndReceived);
         }
 

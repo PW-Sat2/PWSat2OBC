@@ -129,9 +129,9 @@ namespace devices
             /** @brief Block mapping */
             const BlockMapping _blockMapping;
             /** @brief First buffer for redundant reads */
-            std::array<std::uint8_t, ChunkSize> _redundantReadBuffer1;
+            alignas(4) std::array<std::uint8_t, ChunkSize> _redundantReadBuffer1;
             /** @brief Second buffer for redundant reads */
-            std::array<std::uint8_t, ChunkSize> _redundantReadBuffer2;
+            alignas(4) std::array<std::uint8_t, ChunkSize> _redundantReadBuffer2;
         };
 
         /** @brief Mapping from block size type to size in bytes */

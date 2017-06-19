@@ -28,7 +28,6 @@ set(SOURCES
     commands/watchdog.cpp
     commands/state.cpp
     commands/error_counters.cpp
-    commands/program_flash.cpp
     commands/scrub.cpp
     commands/boot_settings.cpp
     checks/error_counters.cpp
@@ -75,6 +74,7 @@ target_link_libraries(${NAME}
     obc_hardware
     obc_experiments
     obc_state
+    obc_scrubbing
     spi
     efm_emlib
     burtc

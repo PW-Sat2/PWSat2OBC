@@ -7,6 +7,7 @@ set(SOURCES
     os_base.cpp
     crc.cpp
     BitWriter.cpp
+    redundancy.cpp
     Include/base/reader.h
     Include/base/writer.h
     Include/system.h

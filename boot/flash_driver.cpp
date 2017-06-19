@@ -86,3 +86,12 @@ bool StandaloneFlashDriver::WaitForIdle(std::size_t offset)
 
     return dev_status == DEV_NOT_BUSY;
 }
+
+bool StandaloneFlashDriver::Lock(std::chrono::milliseconds /*timeout*/)
+{
+    return true;
+}
+
+void StandaloneFlashDriver::Unlock()
+{
+}

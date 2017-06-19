@@ -1,9 +1,17 @@
 set(NAME scrubber)
 
-add_library(${NAME} INTERFACE)
+set(SOURCES
+    program.cpp
+    bootloader.cpp
+)
 
-target_link_libraries(${NAME} INTERFACE
+add_library(${NAME} STATIC ${SOURCES})
+
+target_link_libraries(${NAME} PUBLIC
 	base
+	program_flash
+	msc
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
+target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/scrubber)

@@ -122,11 +122,13 @@ void ShowBootSettings()
 void SetBootSlotToSafeMode()
 {
     Bootloader.Settings.BootSlots(boot::BootSettings::SafeModeBootSlot);
+    Bootloader.Settings.MarkAsValid();
     BSP_UART_Puts(BSP_UART_DEBUG, "\nPrimary boot slot set to safe-mode\n");
 }
 
 void SetBootSlotToUpper()
 {
     Bootloader.Settings.BootSlots(boot::BootSettings::UpperBootSlot);
+    Bootloader.Settings.MarkAsValid();
     BSP_UART_Puts(BSP_UART_DEBUG, "\nPrimary boot slot set to upper\n");
 }
