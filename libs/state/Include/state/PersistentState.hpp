@@ -133,9 +133,6 @@ namespace state
 
         static_assert(::state::details::CheckObject<Parts...>::Value, "Persistent state part verification failed.");
 
-        /** @brief Reader-Writer lock object for synchronization */
-        static ReaderWriterLock Lock;
-
         /**
          * @brief Return reference to selected part of the persistent state.
          * @tparam Object Type of the object that should be accessed.
@@ -293,8 +290,6 @@ namespace state
     {
         return Calculate<Parts...>::Size;
     }
-
-    template <typename StatePolicy, typename... Parts> ReaderWriterLock PersistentState<StatePolicy, Parts...>::Lock;
 }
 
 #endif

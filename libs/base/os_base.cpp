@@ -20,9 +20,25 @@ ReaderWriterLock::ReaderWriterLock()
       readCount(0),                                        //
       isWriterLockAcquired(false)                          //
 {
-    System::GiveSemaphore(resourceSemaphore);
-    System::GiveSemaphore(readCountSemaphore);
-    System::GiveSemaphore(serviceSemaphore);
+}
+
+OSResult ReaderWriterLock::Initialize()
+{
+    OSResult result;
+
+    result = System::GiveSemaphore(resourceSemaphore);
+    if (!OS_RESULT_SUCCEEDED(result))
+    {
+        return result;
+    }
+
+    result = System::GiveSemaphore(readCountSemaphore);
+    if (!OS_RESULT_SUCCEEDED(result))
+    {
+        return result;
+    }
+
+    return System::GiveSemaphore(serviceSemaphore);
 }
 
 bool ReaderWriterLock::AcquireReaderLock(std::chrono::milliseconds timeout)
@@ -78,17 +94,15 @@ bool ReaderWriterLock::AcquireWriterLock(std::chrono::milliseconds timeout)
 
 bool ReaderWriterLock::ReleaseReaderLock(std::chrono::milliseconds timeout)
 {
-    if (readCount == 0)
-    {
-        return false;
-    }
-
     if (!OS_RESULT_SUCCEEDED(System::TakeSemaphore(readCountSemaphore, timeout)))
     {
         return false;
     }
 
-    readCount--;
+    if (readCount > 0)
+    {
+        readCount--;
+    }
 
     if (readCount == 0)
     {
@@ -116,7 +130,16 @@ bool ReaderWriterLock::ReleaseWriterLock()
 
 bool ReaderWriterLock::IsReaderLockAcquired() const
 {
-    return readCount > 0;
+    if (!OS_RESULT_SUCCEEDED(System::TakeSemaphore(readCountSemaphore, InfiniteTimeout)))
+    {
+        return true;
+    }
+
+    auto isAcquired = readCount > 0;
+
+    System::GiveSemaphore(readCountSemaphore);
+
+    return isAcquired;
 }
 
 bool ReaderWriterLock::IsWriterLockAcquired() const
@@ -139,11 +162,6 @@ ReaderLock::~ReaderLock()
     readerWriterLock.ReleaseReaderLock(timeout);
 }
 
-bool ReaderLock::operator()()
-{
-    return taken;
-}
-
 WriterLock::WriterLock(ReaderWriterLock& readerWriterLock, std::chrono::milliseconds timeout)
     : readerWriterLock(readerWriterLock), taken(readerWriterLock.AcquireWriterLock(timeout))
 {
@@ -157,11 +175,6 @@ WriterLock::~WriterLock()
     }
 
     readerWriterLock.ReleaseWriterLock();
-}
-
-bool WriterLock::operator()()
-{
-    return taken;
 }
 
 Timeout::Timeout(std::chrono::milliseconds timeout) : _expireAt(System::GetUptime() + timeout)

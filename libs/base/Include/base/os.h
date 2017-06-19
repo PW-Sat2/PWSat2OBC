@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <atomic>
 #include <chrono>
 #include <cstdint>
 #include <type_traits>
@@ -604,6 +605,12 @@ struct ReaderWriterLock final : private NotCopyable, private NotMoveable
     ReaderWriterLock();
 
     /**
+     * @brief Initializes @ref ReaderWriterLock object
+     * @return Operation status
+     */
+    OSResult Initialize();
+
+    /**
      * @brief Acquires reader lock
      * @param[in] timeout Timeout
      * @return true if acquire was successful
@@ -660,7 +667,7 @@ struct ReaderWriterLock final : private NotCopyable, private NotMoveable
     int readCount;
 
     /** @brief Flag indicating whether writer lock is currently acquired */
-    bool isWriterLockAcquired;
+    std::atomic<bool> isWriterLockAcquired;
 };
 
 /**
@@ -720,6 +727,11 @@ class ReaderLock final : private NotCopyable, private NotMoveable
     bool taken;
 };
 
+inline bool ReaderLock::operator()()
+{
+    return taken;
+}
+
 /**
  * @brief Helper writer lock class.
  *
@@ -771,6 +783,11 @@ class WriterLock final : private NotCopyable, private NotMoveable
     /** @brief Flag indicating if lock is acquired */
     bool taken;
 };
+
+inline bool WriterLock::operator()()
+{
+    return taken;
+}
 
 /**
  * @brief RTOS queue wrapper
