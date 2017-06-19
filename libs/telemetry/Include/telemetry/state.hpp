@@ -10,6 +10,7 @@
 #include "ProgramState.hpp"
 #include "SystemStartup.hpp"
 #include "Telemetry.hpp"
+#include "TimeTelemetry.hpp"
 #include "antenna/telemetry.hpp"
 #include "comm/CommTelemetry.hpp"
 #include "fwd.hpp"
