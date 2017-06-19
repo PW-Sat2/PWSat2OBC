@@ -14,12 +14,14 @@ namespace temp
       public:
         virtual std::int16_t ReadCelsius() override;
 
+        virtual BitValue<std::uint16_t, 12> ReadRaw() override;
+
       private:
         /**
          * @brief Reads raw value of temperature sensor
          * @return Raw value
          */
-        std::uint16_t ReadRaw();
+        std::uint16_t ReadRawInternal();
     };
 }
 

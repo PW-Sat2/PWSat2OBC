@@ -14,6 +14,7 @@ namespace telemetry
     class ProgramState;
     class ErrorCountingTelemetry;
     class ExperimentTelemetry;
+    class McuTemperature;
 
     struct TelemetryState;
 
@@ -23,6 +24,7 @@ namespace telemetry
         ProgramState,                           //
         state::TimeState,                       //
         ErrorCountingTelemetry,                 //
+        McuTemperature,                         //
         ExperimentTelemetry,                    //
         devices::comm::CommTelemetry,           //
         devices::gyro::GyroscopeTelemetry,      //

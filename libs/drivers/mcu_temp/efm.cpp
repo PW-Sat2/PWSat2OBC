@@ -5,7 +5,7 @@
 
 namespace temp
 {
-    std::uint16_t ADCTemperatureReader::ReadRaw()
+    std::uint16_t ADCTemperatureReader::ReadRawInternal()
     {
         CMU_ClockEnable(cmuClock_ADC0, true);
 
@@ -34,9 +34,14 @@ namespace temp
         return sample;
     }
 
+    BitValue<std::uint16_t, 12> ADCTemperatureReader::ReadRaw()
+    {
+        return BitValue<std::uint16_t, 12>(ReadRawInternal());
+    }
+
     std::int16_t ADCTemperatureReader::ReadCelsius()
     {
-        auto adcSample = this->ReadRaw();
+        auto adcSample = this->ReadRawInternal();
 
         /* Factory calibration temperature from device information page. */
         std::int16_t cal_temp_0 = ((DEVINFO->CAL & _DEVINFO_CAL_TEMP_MASK) >> _DEVINFO_CAL_TEMP_SHIFT);
