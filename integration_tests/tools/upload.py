@@ -7,8 +7,8 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("port", help="Serial port used to communicate with OBC")
 parser.add_argument("file", help="Binary file to upload")
-parser.add_argument("index", help="Slot for binary file (0=safe mode, 1-7 applications)")
 parser.add_argument("description", help="Description for binary")
+parser.add_argument("index", help="Slot for binary file (0-5)", nargs='+')
 
 args = parser.parse_args()
 
@@ -80,5 +80,7 @@ bootloader.wait()
 
 print 'Bootloader ready'
 
-with file(args.file, 'rb') as f:
-    bootloader.upload_binary(int(args.index), args.description, f)
+for slot in args.index:
+    with file(args.file, 'rb') as f:
+        print 'Uploading to slot {}'.format(slot)
+        bootloader.upload_binary(int(slot), args.description, f)
