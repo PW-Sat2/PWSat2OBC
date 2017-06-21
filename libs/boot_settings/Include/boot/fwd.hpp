@@ -3,6 +3,9 @@
 
 namespace boot
 {
+    /** @brief Size of boot settings */
+    constexpr std::size_t BootSettingsSize = 16;
+
     class BootSettings;
 }
 

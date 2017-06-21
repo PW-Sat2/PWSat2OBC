@@ -72,7 +72,7 @@ OBC::OBC()
           BootTable,
           BootSettings,
           TelemetryAcquisition),                               //
-      Scrubbing(this->Hardware, this->BootTable, boot::Index), //
+      Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index), //
       terminal(this->GetLineIO())                              //
 {
 }
@@ -90,6 +90,8 @@ OSResult OBC::InitializeRunlevel1()
     InitializeTerminal();
 
     this->BootTable.Initialize();
+
+    this->BootSettings.Initialize();
 
     this->fs.Initialize();
 

@@ -2,6 +2,7 @@
 #define LIBS_BOOT_SETTINGS_INCLUDE_BOOT_SETTINGS_HPP_
 
 #include <cstdint>
+#include "base/os.h"
 #include "fm25w/fwd.hpp"
 
 namespace boot
@@ -22,6 +23,11 @@ namespace boot
          * @param fram FRAM drvier
          */
         BootSettings(devices::fm25w::IFM25WDriver& fram);
+
+        /**
+         * @brief Performs initialization
+         */
+        void Initialize();
 
         /**
          * @brief Checks if memory contains valid magic number
@@ -92,6 +98,18 @@ namespace boot
         void Erase();
 
         /**
+         * @brief Locks boot settings
+         * @param timeout Timeout
+         * @return Operation status
+         */
+        bool Lock(std::chrono::milliseconds timeout);
+
+        /**
+         * @brief Unlocks boot settings
+         */
+        void Unlock();
+
+        /**
          * @brief Checks if boot slots mask is valid
          * @param mask Boot slots mask
          * @return true if mask is valid, false otherwise
@@ -116,6 +134,8 @@ namespace boot
       private:
         /** @brief Magic number */
         static constexpr std::uint32_t MagicNumber = 0x7D53C5D5;
+
+        OSSemaphoreHandle _sync;
 
         /** @brief FRAM driver */
         devices::fm25w::IFM25WDriver& _fram;

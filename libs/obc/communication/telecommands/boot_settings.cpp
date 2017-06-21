@@ -48,6 +48,8 @@ namespace obc
                 return;
             }
 
+            UniqueLock<decltype(this->_settings)> lock(this->_settings, InfiniteTimeout);
+
             this->_settings.BootSlots(bootSlots);
             this->_settings.FailsafeBootSlots(failsafeBootSlots);
             this->_settings.MarkAsValid();

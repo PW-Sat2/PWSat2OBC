@@ -11,6 +11,7 @@ set(SOURCES
     spi.cpp
     flash_driver.cpp
     error_counter.cpp
+    dummy_os.cpp
     
     commands/test.cpp
     commands/booting.cpp
