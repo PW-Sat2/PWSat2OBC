@@ -14,11 +14,15 @@ set(SOURCES
 add_unit_tests(${NAME} ${SOURCES})
 
 target_link_libraries(${NAME}
+    -Wl,--start-group
     base
-    program_flash 
     unit_tests_base
+    program_flash 
     telecommunication
     obc_telecommands
     boot_settings
+    -Wl,--end-group 
 )
+
+SET( CMAKE_LINKER_FLAGS  "${CMAKE_LINKER_FLAGS} -l$<TARGET_FILE:MyLib>" )
 

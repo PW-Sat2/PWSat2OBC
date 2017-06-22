@@ -48,7 +48,6 @@ namespace
 
     TEST_F(EnterIdleStateTelecommandTest, ShouldSetIdleState)
     {
-        System::Yield(); // TODO find out what's going on
         ON_CALL(_currentTime, GetCurrentTime())
             .WillByDefault(Return(Option<std::chrono::milliseconds>::Some(std::chrono::milliseconds{0})));
         EXPECT_CALL(_idleStateController, EnterTransmitterStateWhenIdle(Eq(std::chrono::milliseconds{1000})));
