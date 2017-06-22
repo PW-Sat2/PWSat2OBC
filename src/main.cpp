@@ -236,6 +236,7 @@ int main(void)
         boot::RequestedRunlevel = boot::Runlevel::Runlevel2;
         boot::Index = 0;
         boot::BootReason = boot::Reason::BootToUpper;
+        boot::ClearStateOnStartup = false;
     }
     else
     {

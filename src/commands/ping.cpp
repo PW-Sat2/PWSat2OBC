@@ -44,9 +44,10 @@ void ResetHandler(uint16_t argc, char* argv[])
 
 void BootParamsCommand(std::uint16_t /*argc*/, char* /*argv*/ [])
 {
-    Main.terminal.Printf("MagicNumber=%lX\nReason=%X\nIndex=%d\nRequested runlevel=%d\n",
+    Main.terminal.Printf("MagicNumber=%lX\nReason=%X\nIndex=%d\nRequested runlevel=%d\nClear state=%s\n",
         boot::MagicNumber,
         num(boot::BootReason),
         boot::Index,
-        num(boot::RequestedRunlevel));
+        num(boot::RequestedRunlevel),
+        boot::ClearStateOnStartup ? "Yes" : "No");
 }
