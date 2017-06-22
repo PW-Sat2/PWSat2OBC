@@ -35,7 +35,7 @@ struct Command
 
 static void PrintHelp();
 
-static std::array<Command, 18> Commands = {
+static std::array<Command, 19> Commands = {
     Command{'T', "Test", Test}, //
     Command{'S', "Test SRAM", TestSRAM},
     Command{'E', "Test EEPROM", TestEEPROM},
@@ -51,6 +51,7 @@ static std::array<Command, 18> Commands = {
     Command{'l', "Print boot table", PrintBootTable},
     Command{'?', "Print help", PrintHelp},
     Command{'R', "Runlevel", SetRunlevel},
+    Command{'N', "Set clear state flag", SetClearState},
     Command{'C', "Current boot settings", ShowBootSettings},
     Command{'e', "Erase program flash", EraseBootTable},
     Command{'H', "Check OBC settings", Check},

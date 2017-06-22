@@ -28,6 +28,7 @@ namespace boot
     extern volatile Reason BootReason;
     extern volatile std::uint8_t Index;
     extern volatile Runlevel RequestedRunlevel;
+    extern volatile bool ClearStateOnStartup;
 
     /**
      * @brief Returns information whether boot parameters have been set.

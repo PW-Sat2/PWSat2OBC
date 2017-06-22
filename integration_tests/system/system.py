@@ -23,7 +23,7 @@ class System:
         self.i2c.start()
 
         if auto_power_on:
-            self.obc.power_on(clean_state=False)
+            self.obc.power_on()
 
     def _setup_devices(self):
         self.frame_decoder = response_frames.FrameDecoder()

@@ -26,8 +26,6 @@ namespace io_map
     using Led0 = PinLocation<gpioPortD, 1>;
     using Led1 = PinLocation<gpioPortD, 2>;
 
-    using SysClear = PinLocation<gpioPortC, 0>;
-
     struct SPI : public SPIPins<SPI>
     {
         static constexpr std::uint32_t Baudrate = 20_MHz;
@@ -164,7 +162,7 @@ namespace io_map
 
         struct Group
         {
-            using Pins = PinContainer<SRAMBuffer, EDAC, EBIConfig>;
+            using Pins = PinContainer<SRAMPower, SRAMBuffer, EDAC, EBIConfig>;
         };
     };
 }

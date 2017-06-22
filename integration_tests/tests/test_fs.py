@@ -28,7 +28,7 @@ class FileSystemTests(BaseTest):
 
         log.info("Before power off")
         self.system.obc.power_off()
-        self.system.obc.power_on(clean_state=False)
+        self.system.obc.power_on()
         self.system.obc.wait_to_start()
 
         log.info("After power off")

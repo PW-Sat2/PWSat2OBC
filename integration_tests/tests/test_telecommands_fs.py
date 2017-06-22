@@ -22,7 +22,7 @@ class FileSystemTelecommandsTest(BaseTest):
 
         self.system.comm.on_hardware_reset = on_reset
 
-        self.power_on_obc(clean_state=True)
+        self.power_on_obc()
 
         e.wait_for_change(1)
 

@@ -9,7 +9,7 @@
 
 static void ProcessState(OBC* obc)
 {
-    if (obc->Hardware.Pins.SysClear.Input() == false)
+    if (boot::ClearStateOnStartup)
     {
         LOG(LOG_LEVEL_WARNING, "Resetting system state");
 
@@ -59,7 +59,7 @@ OBC::OBC()
       BootSettings(this->Hardware.PersistentStorage.GetRedundantDriver()),             //
       Hardware(this->Fdir.ErrorCounting(), this->PowerControlInterface, timeProvider), //
       PowerControlInterface(this->Hardware.EPS),                                       //
-      Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),                                        //
+      Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),            //
       Experiments(fs, this->adcs.GetAdcsController(), this->timeProvider),             //
       Communication(                                                                   //
           this->Fdir,
@@ -69,9 +69,9 @@ OBC::OBC()
           fs,
           Experiments,
           BootTable,
-          BootSettings),          //
+          BootSettings),                                       //
       Scrubbing(this->Hardware, this->BootTable, boot::Index), //
-      terminal(this->GetLineIO()) //
+      terminal(this->GetLineIO())                              //
 
 {
 }
@@ -125,7 +125,6 @@ OSResult OBC::InitializeRunlevel1()
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize telemetry acquisition loop.");
     }
-
 
     drivers::watchdog::InternalWatchdog::Enable();
     BootSettings.ConfirmBoot();

@@ -7,6 +7,7 @@ void TestEEPROM();
 
 void BootUpper();
 void SetRunlevel();
+void SetClearState();
 
 void SetBootIndex();
 void ShowBootSettings();

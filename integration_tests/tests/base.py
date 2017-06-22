@@ -49,8 +49,8 @@ class BaseTest(unittest.TestCase):
 
         log.info("Test tear down finished")
 
-    def power_on_obc(self, clean_state=False):
-        self.system.obc.power_on(clean_state=clean_state)
+    def power_on_obc(self):
+        self.system.obc.power_on()
         self.system.obc.wait_to_start()
 
     def _get_boot_wrappers(self, test):
