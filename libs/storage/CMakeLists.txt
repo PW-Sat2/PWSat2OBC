@@ -1,7 +1,7 @@
 set(NAME storage)
 
 set(SOURCES    
-    nand.cpp
+
     nand_driver.cpp
     nand_calculator.cpp
 )

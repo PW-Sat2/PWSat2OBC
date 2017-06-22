@@ -91,7 +91,7 @@ namespace io_map
 
     struct Watchdog
     {
-        static constexpr WDOG_PeriodSel_TypeDef Period = wdogPeriod_64k;       // About 1 minute
+        static constexpr WDOG_PeriodSel_TypeDef Period = wdogPeriod_64k;      // About 1 minute
         static constexpr WDOG_PeriodSel_TypeDef BootTimeout = wdogPeriod_16k; // About 16 second
         using ExternalWatchdogPin = PinLocation<gpioPortF, 9>;
     };
@@ -112,30 +112,6 @@ namespace io_map
         static constexpr std::size_t CycleSize = 8;
     };
 }
-
-// NAND Flash
-#define NAND_POWER_PORT gpioPortB
-#define NAND_POWER_PIN 15
-#define NAND_READY_PORT gpioPortD
-#define NAND_READY_PIN 15
-#define NAND_CE_PORT gpioPortD
-#define NAND_CE_PIN 14
-#define NAND_WP_PORT gpioPortD
-#define NAND_WP_PIN 13
-#define NAND_ALE_BIT 24
-#define NAND_CLE_BIT 25
-
-#define EBI_ALE_PORT gpioPortC
-#define EBI_ALE_PIN 1
-#define EBI_CLE_PORT gpioPortC
-#define EBI_CLE_PIN 2
-#define EBI_WE_PORT gpioPortF
-#define EBI_WE_PIN 8
-#define EBI_RE_PORT gpioPortF
-#define EBI_RE_PIN 9
-
-#define EBI_DATA_PORT gpioPortE
-#define EBI_DATA_PIN0 8
 
 /** @endcond */
 
