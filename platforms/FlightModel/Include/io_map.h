@@ -111,6 +111,62 @@ namespace io_map
         static constexpr std::size_t MemorySize = 1_MB;
         static constexpr std::size_t CycleSize = 8;
     };
+
+    struct BSP : public PinGroupTag
+    {
+        struct SRAMPower : public PinGroupTag
+        {
+            using SRAM1 = PinLocation<gpioPortC, 0>;
+            using SRAM2 = PinLocation<gpioPortC, 1>;
+
+            struct Group
+            {
+                using Pins = PinContainer<SRAM1, SRAM2>;
+            };
+        };
+
+        struct SRAMBuffer : public PinGroupTag
+        {
+            using SRAM1 = PinLocation<gpioPortC, 14>;
+            using SRAM2 = PinLocation<gpioPortC, 15>;
+
+            struct Group
+            {
+                using Pins = PinContainer<SRAM1, SRAM2>;
+            };
+        };
+
+        struct EDAC : public PinGroupTag
+        {
+            using Control1 = PinLocation<gpioPortE, 2>;
+            using Control2 = PinLocation<gpioPortE, 3>;
+
+            using ErrorPins = PortPins<gpioPortB, 0, 2>;
+
+            struct Group
+            {
+                using Pins = PinContainer<Control1, Control2, ErrorPins>;
+            };
+        };
+
+        struct EBIConfig : public PinGroupTag
+        {
+            using Address0__7 = PortPins<gpioPortE, 8, 9, 10, 11, 12, 13, 14, 15>;
+            using Address9_15 = PortPins<gpioPortA, 0, 1, 2, 3, 4, 5, 6, 15>;
+            using ChipSelects = PortPins<gpioPortD, 9, 10, 11, 12>;
+            using ControlPins = PortPins<gpioPortF, 3, 4, 5>;
+
+            struct Group
+            {
+                using Pins = PinContainer<Address0__7, Address9_15, ChipSelects, ControlPins>;
+            };
+        };
+
+        struct Group
+        {
+            using Pins = PinContainer<SRAMBuffer, EDAC, EBIConfig>;
+        };
+    };
 }
 
 /** @endcond */

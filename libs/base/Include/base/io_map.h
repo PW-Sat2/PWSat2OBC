@@ -117,6 +117,14 @@ namespace io_map
         };
     };
 
+    template <GPIO_Port_TypeDef Port, std::uint32_t... PinNumbers> struct PortPins : public PinGroupTag
+    {
+        struct Group
+        {
+            using Pins = PinContainer<PinLocation<Port, PinNumbers>...>;
+        };
+    };
+
     /** @} */
 }
 

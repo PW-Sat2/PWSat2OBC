@@ -102,7 +102,8 @@ namespace obc
         typename TUART,
         typename TI2C0,
         typename TI2C1,
-        typename TExternalWatchdogPin>
+        typename TExternalWatchdogPin,
+        typename TBSP>
     struct OBCGPIOBase
     {
         /** @brief Slave Select - Flash1 */
@@ -176,7 +177,8 @@ namespace obc
         io_map::UART,
         io_map::I2C_0,
         io_map::I2C_1,
-        io_map::Watchdog::ExternalWatchdogPin>;
+        io_map::Watchdog::ExternalWatchdogPin,
+        io_map::BSP>;
 
     /** @} */
 }
