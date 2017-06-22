@@ -9,6 +9,10 @@ from threading import Lock
 from utils import *
 from build_config import config
 
+class BeaconFrame(object):
+    def __init__(self, payload):
+        self._payload = payload
+        pass
 
 class DownlinkFrame(object):
     def __init__(self, apid, seq, payload):
@@ -403,4 +407,4 @@ class Comm(object):
     def get_frame(self, timeout=None):
         f = self.transmitter.get_message_from_buffer(timeout)
 
-        return self._frame_decoder.decode(DownlinkFrame.parse(f))
+        return self._frame_decoder.decode(f)

@@ -26,8 +26,7 @@ class System:
             self.obc.power_on(clean_state=False)
 
     def _setup_devices(self):
-        self.frame_decoder = response_frames.FrameDecoder()
-        self.frame_decoder.add_frame_types(response_frames.frame_types)
+        self.frame_decoder = response_frames.FrameDecoder(response_frames.frame_factories)
 
         self.eps = EPS()
         self.comm = Comm(self.frame_decoder)
