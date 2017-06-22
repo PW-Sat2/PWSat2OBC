@@ -16,6 +16,7 @@ set(SOURCES
     mock/FsMock.cpp
     mock/mock.cpp
     mock/error_counter.cpp
+    mock/flash_driver.cpp
     I2C/I2CMock.cpp
     SPI/SPIMock.cpp
     fault_handlers.c
@@ -36,6 +37,7 @@ target_link_libraries(${NAME}
     antenna
     mission_comm
     telecommunication
+    program_flash
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

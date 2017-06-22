@@ -18,6 +18,7 @@ class TestExperimentDetumbling(BaseTest):
 
         def on_reset(_):
             e.set()
+            return False
         self.system.comm.on_hardware_reset = on_reset
 
         self.system.obc.power_on(clean_state=True)

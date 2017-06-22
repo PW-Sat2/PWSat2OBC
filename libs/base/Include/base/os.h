@@ -565,9 +565,15 @@ class Lock final : private NotCopyable, private NotMoveable
 
     /**
      * @brief Checks if semaphore has been taken
-     * @return true if taking semaphore was succesful
+     * @return true if taking semaphore was successful
      */
     bool operator()();
+
+    /**
+     * @brief Checks if semaphore has been taken
+     * @return true if taking semaphore was successful
+     */
+    explicit operator bool();
 
   private:
     /** @brief Semaphore handle */
@@ -575,6 +581,16 @@ class Lock final : private NotCopyable, private NotMoveable
     /** @brief Flag indicating if semaphore is acquired */
     bool _taken;
 };
+
+inline bool Lock::operator()()
+{
+    return this->_taken;
+}
+
+inline Lock::operator bool()
+{
+    return this->_taken;
+}
 
 /**
  * @brief RTOS queue wrapper
@@ -771,6 +787,57 @@ class EventGroup final
     /** @brief Underlying event group handle */
     OSEventGroupHandle _handle;
 };
+
+/**
+ * @brief Class providing 'universal' lock for all objects that provide `Lock` and `Unlock` methods
+ * @tparam Type of object being locked
+ */
+template <typename T> class UniqueLock : private NotMoveable, private NotCopyable
+{
+  public:
+    /**
+     * @brief Ctor
+     * @param target Object to lock
+     * @param timeout Timeout
+     */
+    UniqueLock(T& target, std::chrono::milliseconds timeout);
+
+    /**
+     * @brief Destructor. Releases the lock if taken in ctor
+     */
+    ~UniqueLock();
+
+    /**
+     * @brief Checks if lock has been taken successfully
+     * @return true if lock has been taken
+     */
+    bool operator()();
+
+  private:
+    /** @brief Object being locked */
+    T& _target;
+    /** @brief Flag indicating whether lock has been taken */
+    bool _taken;
+};
+
+template <typename T> UniqueLock<T>::UniqueLock(T& target, std::chrono::milliseconds timeout) : _target(target)
+{
+    this->_taken = this->_target.Lock(timeout);
+}
+
+template <typename T> UniqueLock<T>::~UniqueLock()
+{
+    if (this->_taken)
+    {
+        this->_target.Unlock();
+        this->_taken = false;
+    }
+}
+
+template <typename T> bool UniqueLock<T>::operator()()
+{
+    return this->_taken;
+}
 
 /** @}*/
 

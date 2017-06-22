@@ -18,6 +18,7 @@ from .watchdog import WatchdogMixin
 from .state import StateMixin
 from .error_counters import ErrorCountersMixin
 from .fram import FRAMMixin
+from .boot_settings import BootSettingsMixin
 from .payload import PayloadMixin
 
 class OBC(OBCMixin,
@@ -35,6 +36,7 @@ class OBC(OBCMixin,
           StateMixin,
           ErrorCountersMixin,
           FRAMMixin,
+          BootSettingsMixin,
           PayloadMixin
           ):
     def __init__(self, terminal):

@@ -37,6 +37,9 @@ class StandaloneFlashDriver : public program_flash::IFlashDriver
     virtual program_flash::FlashStatus Program(std::size_t offset, std::uint8_t value) override;
     virtual program_flash::FlashStatus Program(std::size_t offset, gsl::span<const std::uint8_t> value) override;
 
+    virtual bool Lock(std::chrono::milliseconds timeout) override;
+    virtual void Unlock() override;
+
     /** @brief Size of sector (erase unit) */
     static constexpr std::size_t LargeSectorSize = 64_KB;
 

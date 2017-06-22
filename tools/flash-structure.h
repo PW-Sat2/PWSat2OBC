@@ -24,7 +24,13 @@ struct Entry
 	}
 };
 
+struct BootloaderCopy
+{
+	unsigned char content[64 * 1024];
+};
+
 public struct Flash
 {	
 	Entry entries[6];
+	BootloaderCopy copies[5];
 };

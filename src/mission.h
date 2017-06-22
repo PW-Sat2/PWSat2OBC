@@ -5,6 +5,7 @@
 
 #include "mission/BeaconUpdate.hpp"
 #include "mission/PersistentStateSave.hpp"
+#include "mission/TelemetrySerialization.hpp"
 #include "mission/adcs.hpp"
 #include "mission/antenna_task.hpp"
 #include "mission/comm.hpp"
@@ -21,6 +22,7 @@
 #include "telemetry/collect_exp.hpp"
 #include "telemetry/collect_fdir.hpp"
 #include "telemetry/collect_gyro.hpp"
+#include "telemetry/collect_temp.hpp"
 #include "telemetry/state.hpp"
 
 namespace mission
@@ -50,7 +52,9 @@ namespace telemetry
         GyroTelemetryAcquisition,                //
         ErrorCounterTelemetryAcquisition,        //
         EpsTelemetryAcquisition,                 //
-        ExperimentTelemetryAcquisition           //
+        ExperimentTelemetryAcquisition,          //
+        McuTempTelemetryAcquisition,             //
+        TelemetrySerialization                   //
         >
         ObcTelemetryAcquisition;
 }

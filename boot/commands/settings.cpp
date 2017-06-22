@@ -68,7 +68,7 @@ void SetBootIndex()
     }
 
     Bootloader.Settings.BootCounter(boot::BootSettings::DefaultBootCounter);
-    Bootloader.Settings.ConfirmLastBoot();
+    Bootloader.Settings.ConfirmBoot();
 
     BSP_UART_Puts(BSP_UART_DEBUG, "\nNew boot slots set\n");
 }
@@ -103,9 +103,9 @@ void ShowBootSettings()
     BSP_UART_Puts(BSP_UART_DEBUG, "\nBoot settings:");
 
     auto counter = Bootloader.Settings.BootCounter();
+    auto counterLastConfirmed = Bootloader.Settings.LastConfirmedBootCounter();
     auto bootSlots = Bootloader.Settings.BootSlots();
     auto failsafeBootSlots = Bootloader.Settings.FailsafeBootSlots();
-    auto confirmed = Bootloader.Settings.WasLastBootConfirmed();
 
     BSP_UART_Puts(BSP_UART_DEBUG, "\nBoot slots: ");
     PrintBootSlots(bootSlots);
@@ -114,7 +114,7 @@ void ShowBootSettings()
     PrintBootSlots(failsafeBootSlots);
 
     BSP_UART_Printf<40>(BSP_UART_DEBUG, "\nBoot counter: %ld", counter);
-    BSP_UART_Printf<40>(BSP_UART_DEBUG, "\nLast boot: %s", confirmed ? "Confirmed" : "Not confirmed");
+    BSP_UART_Printf<40>(BSP_UART_DEBUG, "\nLast confirmed boot counter: %ld", counterLastConfirmed);
 
     BSP_UART_Puts(BSP_UART_DEBUG, "\n");
 }
@@ -122,11 +122,13 @@ void ShowBootSettings()
 void SetBootSlotToSafeMode()
 {
     Bootloader.Settings.BootSlots(boot::BootSettings::SafeModeBootSlot);
+    Bootloader.Settings.MarkAsValid();
     BSP_UART_Puts(BSP_UART_DEBUG, "\nPrimary boot slot set to safe-mode\n");
 }
 
 void SetBootSlotToUpper()
 {
     Bootloader.Settings.BootSlots(boot::BootSettings::UpperBootSlot);
+    Bootloader.Settings.MarkAsValid();
     BSP_UART_Puts(BSP_UART_DEBUG, "\nPrimary boot slot set to upper\n");
 }

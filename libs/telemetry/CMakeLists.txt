@@ -6,6 +6,8 @@ set(SOURCES
     ProgramState.cpp
     ErrorCounters.cpp
     ExperimentTelemetry.cpp
+    state.cpp
+    McuTemperature.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -32,3 +34,5 @@ add_subdirectory(gyro)
 add_subdirectory(fdir)
 add_subdirectory(eps)
 add_subdirectory(experiments)
+add_subdirectory(serialization)
+add_subdirectory(temp)

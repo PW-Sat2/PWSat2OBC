@@ -45,6 +45,9 @@ namespace devices
             virtual program_flash::FlashStatus Program(std::size_t offset, std::uint8_t value) override;
             virtual program_flash::FlashStatus Program(std::size_t offset, gsl::span<const std::uint8_t> value) override;
 
+            virtual bool Lock(std::chrono::milliseconds timeout) override;
+            virtual void Unlock() override;
+
           private:
             /**
              * @brief Waits for device to become ready

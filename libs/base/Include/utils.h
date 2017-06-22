@@ -614,4 +614,16 @@ namespace details
  */
 template <typename... Args> constexpr const std::uint32_t Aggregate = details::AggregateSize<Args...>::Value;
 
+/**
+ * @brief Checks if pointer is aligned
+ * @param ptr Pointer to check
+ * @return true if pointer is aligned to Alignment bytes, false otherwise
+ */
+template <std::size_t Alignment> constexpr bool IsAligned(const void* ptr)
+{
+    static_assert(Alignment != 0 && ((Alignment & (Alignment - 1)) == 0), "Alignment must be power of 2");
+
+    return (reinterpret_cast<std::size_t>(ptr) & (Alignment - 1)) == 0;
+}
+
 #endif

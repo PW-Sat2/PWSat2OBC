@@ -26,6 +26,7 @@ target_link_libraries(${NAME}
 	uart
 	comm
 	flash_s29jl
+	msc
 	payload
 )
 

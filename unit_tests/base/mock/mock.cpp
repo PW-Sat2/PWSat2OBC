@@ -2,6 +2,7 @@
 #include "GyroMock.hpp"
 #include "StorageAccessMock.hpp"
 #include "eps.hpp"
+#include "mock/HasStateMock.hpp"
 #include "mock/fm25w.hpp"
 
 GyroscopeMock::GyroscopeMock()

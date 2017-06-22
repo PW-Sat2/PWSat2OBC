@@ -19,8 +19,6 @@ namespace devices
             this->_sync = System::CreateBinarySemaphore(1);
             System::GiveSemaphore(this->_sync);
 
-            Lock lock(this->_sync, InfiniteTimeout);
-
             WaitForIdle(0x0);
             this->_deviceId = lld_GetDeviceId(this->_flashBase) & 0x00FF0000;
             this->_bootConfig = lld_ReadCfiWord(this->_flashBase, 0x9E);
@@ -28,8 +26,6 @@ namespace devices
 
         FlashStatus FlashDriver::EraseSector(std::size_t sectorOffset)
         {
-            Lock lock(this->_sync, InfiniteTimeout);
-
             if (!WaitForIdle(sectorOffset))
             {
                 return FlashStatus::Busy;
@@ -56,8 +52,6 @@ namespace devices
 
         FlashStatus FlashDriver::Program(std::size_t offset, std::uint8_t value)
         {
-            Lock lock(this->_sync, InfiniteTimeout);
-
             if (!WaitForIdle(offset))
             {
                 return FlashStatus::Busy;
@@ -68,8 +62,6 @@ namespace devices
 
         FlashStatus FlashDriver::Program(std::size_t offset, gsl::span<const std::uint8_t> value)
         {
-            Lock lock(this->_sync, InfiniteTimeout);
-
             if (!WaitForIdle(offset))
             {
                 return FlashStatus::Busy;
@@ -110,6 +102,16 @@ namespace devices
             } while (true);
 
             return dev_status == DEV_NOT_BUSY;
+        }
+
+        bool FlashDriver::Lock(std::chrono::milliseconds timeout)
+        {
+            return OS_RESULT_SUCCEEDED(System::TakeSemaphore(this->_sync, timeout));
+        }
+
+        void FlashDriver::Unlock()
+        {
+            System::GiveSemaphore(this->_sync);
         }
     }
 }

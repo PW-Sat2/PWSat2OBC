@@ -25,11 +25,57 @@ namespace telecommunication
         {
             Pong = 0x01,         //!< Pong
             Operation = 0x2,     //!< Operation command
-            Beacon = 0x3,        //!< Beacon
             ProgramUpload = 0x4, //!< Program upload operation status
             Telemetry = 0x3F,    //!< TelemetryLong
+            Forbidden = 0x2D,    //!< Reserved apid due to beacon collision
             LastItem             //!< LastItem
         };
+
+        /**
+         * @brief Byte that can be used to detect beacon frame.
+         */
+        constexpr std::uint8_t BeaconMarker = 0xCD;
+
+        /**
+         * @brief Type that represents raw downlink frame.
+         */
+        class RawFrame
+        {
+          public:
+            /**
+             * @brief Initializes new @ref RawFrame instance
+             */
+            RawFrame();
+
+            /**
+             * @brief Returns writer that can be used to fill payload part of frame
+             * @return Writer
+             */
+            Writer& PayloadWriter();
+
+            /**
+             * @brief Returns underlying byte representation of the frame
+             * @return
+             */
+            gsl::span<const uint8_t> Frame();
+
+          private:
+            /** @brief Buffer in which frame is built */
+            std::array<uint8_t, devices::comm::MaxDownlinkFrameSize> _frame;
+
+            /** @brief Writer instance used to build frame payload */
+            Writer _payloadWriter;
+        };
+
+        inline Writer& RawFrame::PayloadWriter()
+        {
+            return this->_payloadWriter;
+        }
+
+        inline gsl::span<const uint8_t> RawFrame::Frame()
+        {
+            return this->_payloadWriter.Capture();
+        }
 
         /**
          * @brief Downlink frame implementation

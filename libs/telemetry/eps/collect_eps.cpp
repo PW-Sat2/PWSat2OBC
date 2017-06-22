@@ -23,7 +23,7 @@ namespace telemetry
         if (!primary.HasValue)
         {
             LOG(LOG_LEVEL_ERROR, "Unable to acquire primary eps telemetry. ");
-            status = mission::UpdateResult::Failure;
+            status = mission::UpdateResult::Warning;
         }
         else
         {

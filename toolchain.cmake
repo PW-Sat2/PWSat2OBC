@@ -27,7 +27,7 @@ find_program(JLINKSWO NAMES JLinkSWOViewerCL PATHS $ENV{ARM_TOOLCHAIN} $ENV{JLIN
 find_program(JLinkGDBServer NAMES JLinkGDBServerCL PATHS $ENV{ARM_TOOLCHAIN} $ENV{JLINK_PATH})
 
 FIND_PACKAGE(PythonInterp 2.7)
-find_program(IPYTHON NAMES ipython)
+find_program(IPYTHON NAMES ipython HINTS $ENV{IPYTHON_PATH})
 
 FIND_PACKAGE(Doxygen)
 

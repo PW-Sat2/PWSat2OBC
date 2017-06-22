@@ -28,8 +28,8 @@ set(SOURCES
     commands/watchdog.cpp
     commands/state.cpp
     commands/error_counters.cpp
-    commands/program_flash.cpp
     commands/scrub.cpp
+    commands/boot_settings.cpp
     commands/payload.cpp
     checks/error_counters.cpp
     obc.h
@@ -75,6 +75,7 @@ target_link_libraries(${NAME}
     obc_hardware
     obc_experiments
     obc_state
+    obc_scrubbing
     spi
     efm_emlib
     burtc
@@ -99,6 +100,7 @@ target_link_libraries(${NAME}
     telemetry_fdir
     telemetry_eps
     telemetry_exp
+    telemetry_temp
     program_flash
     scrubber
     boot_settings

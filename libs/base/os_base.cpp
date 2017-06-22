@@ -14,11 +14,6 @@ Lock::~Lock()
     }
 }
 
-bool Lock::operator()()
-{
-    return this->_taken;
-}
-
 Timeout::Timeout(std::chrono::milliseconds timeout) : _expireAt(System::GetUptime() + timeout)
 {
 }

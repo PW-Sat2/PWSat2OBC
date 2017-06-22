@@ -8,6 +8,7 @@ set(SOURCES
   Telecommands/RemoveFileTelecommandTest.cpp
   Telecommands/UploadProgramTest.cpp
   Telecommands/ListFilesTelecommandTest.cpp
+  Telecommands/SetBootSlotsTelecommandTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
@@ -17,5 +18,6 @@ target_link_libraries(${NAME}
     unit_tests_base
     telecommunication
     obc_telecommands
+    boot_settings
 )
 
