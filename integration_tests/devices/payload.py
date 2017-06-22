@@ -18,7 +18,7 @@ class Payload(I2CDevice):
         self.Temperatures = [0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF]
         self.Photodiodes = [0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF]
         self.Housekeeping = [0xFFFF, 0xFFFF]
-        self.RadFET = [0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF]
+        self.RadFET = [0xFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF]
         self.default_processing_time = 1
 
     def mock_processing_start(self):
@@ -67,10 +67,22 @@ class Payload(I2CDevice):
         self.mock_processing_start()
 
     @i2cMock.command([0x84])
+    def radfet_on(self):
+        self.log.debug("RadFET On")
+        self.RadFET = [50, 500001, 500002, 500003, 500004]
+        self.mock_processing_start()
+
+    @i2cMock.command([0x85])
     def measure_radfet(self):
         self.log.debug("Measure RadFET")
-        self.RadFET = [500001, 500002, 500003, 500004]
+        self.RadFET = [51, 510001, 510002, 510003, 510004]
         self.default_processing_time = 30
+        self.mock_processing_start()
+
+    @i2cMock.command([0x86])
+    def radfet_off(self):
+        self.log.debug("RadFET off")
+        self.RadFET = [52, 520001, 520002, 520003, 520004]
         self.mock_processing_start()
 
     # Data Reads
@@ -121,8 +133,9 @@ class Payload(I2CDevice):
     @i2cMock.command([41])
     def read_radfet(self):
         self.log.debug("Read RadFET")
-        return list(struct.pack('<LLLL',
+        return list(struct.pack('<BLLLL',
                                 self.RadFET[0],
                                 self.RadFET[1],
                                 self.RadFET[2],
-                                self.RadFET[3]))
+                                self.RadFET[3],
+                                self.RadFET[4]))

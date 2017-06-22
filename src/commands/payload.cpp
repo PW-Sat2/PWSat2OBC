@@ -8,15 +8,39 @@ using namespace drivers::payload;
 
 typedef void (*VoidFuncPtr)(IPayloadDeviceDriver& driver, uint16_t argc, char* argv[]);
 
+static void ShowHelp()
+{
+    Main.terminal.Printf("payload temps|photo|suns|house|who|radfet on|radfet read|radfet off\n");
+}
+
 static void RadFET(IPayloadDeviceDriver& driver, uint16_t argc, char* argv[])
 {
-    UNREFERENCED_PARAMETER(argc);
-    UNREFERENCED_PARAMETER(argv);
+    if (argc < 1)
+    {
+        ShowHelp();
+        return;
+    }
+
+    auto option = argv[0];
 
     PayloadTelemetry::Radfet result;
+    OSResult status = OSResult::InvalidArgument;
 
-    Main.terminal.Printf("Starting RadFet Test!\n");
-    auto status = driver.MeasureRadFET(result);
+    if (strcmp(option, "on") == 0)
+    {
+        Main.terminal.Printf("Starting RadFet.\n");
+        status = driver.RadFETOn(result);
+    }
+    else if (strcmp(option, "read") == 0)
+    {
+        Main.terminal.Printf("Starting RadFet Measurements.\n");
+        status = driver.MeasureRadFET(result);
+    }
+    else if (strcmp(option, "off") == 0)
+    {
+        Main.terminal.Printf("Stopping RadFet.\n");
+        status = driver.RadFETOff(result);
+    }
 
     if (status != OSResult::Success)
     {
@@ -25,7 +49,8 @@ static void RadFET(IPayloadDeviceDriver& driver, uint16_t argc, char* argv[])
     }
     else
     {
-        Main.terminal.Printf("%ld %ld %ld %ld\n",
+        Main.terminal.Printf("%d %ld %ld %ld %ld\n",
+            result.status,      //
             result.temperature, //
             result.vth[0],      //
             result.vth[1],
@@ -186,11 +211,6 @@ static VoidFuncPtr GetDriverCommand(char* name)
     }
     else
         return nullptr;
-}
-
-static void ShowHelp()
-{
-    Main.terminal.Printf("payload radfet|temps|photo|suns|house|who\n");
 }
 
 void PayloadDriver(uint16_t argc, char* argv[])

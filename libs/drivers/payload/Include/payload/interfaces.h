@@ -100,11 +100,25 @@ namespace drivers
             virtual OSResult MeasureHousekeeping(PayloadTelemetry::Housekeeping& output) = 0;
 
             /**
+              * @brief Turns on RadFET.
+              * @param output Retrieved data.
+              * @return Result status.
+              */
+            virtual OSResult RadFETOn(PayloadTelemetry::Radfet& output) = 0;
+
+            /**
               * @brief Starts measuring RadFET data.
               * @param output Retrieved data.
               * @return Result status.
               */
             virtual OSResult MeasureRadFET(PayloadTelemetry::Radfet& output) = 0;
+
+            /**
+              * @brief Turns off RadFET.
+              * @param output Retrieved data.
+              * @return Result status.
+              */
+            virtual OSResult RadFETOff(PayloadTelemetry::Radfet& output) = 0;
 
             /**
              * @brief Gets Payload Who Am I flag.

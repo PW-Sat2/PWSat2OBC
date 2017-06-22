@@ -5,10 +5,6 @@ class PayloadMixin(OBCMixin):
     def __init__(self):
         pass
 
-    @command("payload radfet")
-    def payload_radfet(self):
-        pass
-
     @command("payload temps")
     def payload_temps(self):
         pass
@@ -27,4 +23,16 @@ class PayloadMixin(OBCMixin):
 
     @command("payload house")
     def payload_housekeeping(self):
+        pass
+
+    @command("payload radfet on")
+    def payload_radfet_on(self):
+        pass
+
+    @command("payload radfet read")
+    def payload_radfet_read(self):
+        pass
+
+    @command("payload radfet off")
+    def payload_radfet_off(self):
         pass

@@ -13,14 +13,14 @@ namespace drivers
             /**
              * @brief Command for executing RadFET measurements and data retrieval
              */
-            class RadFETCommand : public PayloadCommand<0x84, PayloadTelemetry::Radfet>
+            template <std::uint8_t TCommandCode> class RadFETBaseCommand : public PayloadCommand<TCommandCode, PayloadTelemetry::Radfet>
             {
               public:
                 /**
-                 * @brief Constructs @ref PayloadCommand object
+                 * @brief Constructs @ref RadFETBaseCommand object
                  * @param[in] driver A hardware driver
                  */
-                RadFETCommand(IPayloadDriver& driver);
+                RadFETBaseCommand(IPayloadDriver& driver);
 
               protected:
                 virtual gsl::span<std::uint8_t> GetBuffer() override;
@@ -34,6 +34,36 @@ namespace drivers
                     std::array<uint8_t, sizeof(PayloadTelemetry::Radfet)> buffer;
                     static_assert(sizeof(data) == sizeof(buffer), "Incorrect size buffered Telemetry");
                 } _telemetry;
+            };
+
+            class RadFETOnCommand : public RadFETBaseCommand<0x84>
+            {
+              public:
+                /**
+                 * @brief Constructs @ref RadFETOnCommand object
+                 * @param[in] driver A hardware driver
+                 */
+                RadFETOnCommand(IPayloadDriver& driver) : RadFETBaseCommand(driver){};
+            };
+
+            class RadFETMeasureCommand : public RadFETBaseCommand<0x85>
+            {
+              public:
+                /**
+                 * @brief Constructs @ref RadFETMeasureCommand object
+                 * @param[in] driver A hardware driver
+                 */
+                RadFETMeasureCommand(IPayloadDriver& driver) : RadFETBaseCommand(driver){};
+            };
+
+            class RadFETOffCommand : public RadFETBaseCommand<0x86>
+            {
+              public:
+                /**
+                 * @brief Constructs @ref RadFETOffCommand object
+                 * @param[in] driver A hardware driver
+                 */
+                RadFETOffCommand(IPayloadDriver& driver) : RadFETBaseCommand(driver){};
             };
         }
     }

@@ -82,9 +82,10 @@ namespace drivers
              */
             struct Radfet
             {
+                std::uint8_t status;
                 std::uint32_t temperature;
                 std::array<std::uint32_t, 3> vth;
-            };
+            } __attribute__((packed));
 
             /**
              * @brief Who Am I register data.
@@ -121,7 +122,7 @@ namespace drivers
          */
         __attribute__((packed));
 
-        static_assert(sizeof(PayloadTelemetry) == 57, "Incorrect size of Telemetry structure (padding?)");
+        static_assert(sizeof(PayloadTelemetry) == 58, "Incorrect size of Telemetry structure (padding?)");
         static_assert(std::is_pod<PayloadTelemetry>::value, "POD");
 
         /* @} */

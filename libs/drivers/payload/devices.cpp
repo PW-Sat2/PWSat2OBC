@@ -3,6 +3,7 @@
 #include "commands/Housekeeping.h"
 #include "commands/Photodiodes.h"
 #include "commands/RadFET.h"
+#include "commands/RadFET_code.hpp"
 #include "commands/SunS.h"
 #include "commands/Temperatures.h"
 #include "commands/Whoami.h"
@@ -44,8 +45,20 @@ OSResult PayloadDeviceDriver::MeasureHousekeeping(PayloadTelemetry::Housekeeping
     return command.Execute(output);
 }
 
+OSResult PayloadDeviceDriver::RadFETOn(PayloadTelemetry::Radfet& output)
+{
+    commands::RadFETOnCommand command(_driver);
+    return command.Execute(output);
+}
+
 OSResult PayloadDeviceDriver::MeasureRadFET(PayloadTelemetry::Radfet& output)
 {
-    commands::RadFETCommand command(_driver);
+    commands::RadFETMeasureCommand command(_driver);
+    return command.Execute(output);
+}
+
+OSResult PayloadDeviceDriver::RadFETOff(PayloadTelemetry::Radfet& output)
+{
+    commands::RadFETOffCommand command(_driver);
     return command.Execute(output);
 }

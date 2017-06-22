@@ -68,11 +68,25 @@ namespace drivers
             virtual OSResult MeasureHousekeeping(PayloadTelemetry::Housekeeping& output) override;
 
             /**
+              * @brief Turns on RadFET.
+              * @param output Retrieved data.
+              * @return Result status.
+              */
+            virtual OSResult RadFETOn(PayloadTelemetry::Radfet& output) override;
+
+            /**
               * @brief Starts measuring RadFET data.
               * @param output Retrieved data.
               * @return Result status.
               */
             virtual OSResult MeasureRadFET(PayloadTelemetry::Radfet& output) override;
+
+            /**
+              * @brief Turns off RadFET.
+              * @param output Retrieved data.
+              * @return Result status.
+              */
+            virtual OSResult RadFETOff(PayloadTelemetry::Radfet& output) override;
 
           private:
             IPayloadDriver& _driver;
