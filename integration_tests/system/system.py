@@ -32,8 +32,8 @@ class System:
         self.comm = Comm(self.frame_decoder)
         self.transmitter = self.comm.transmitter
         self.receiver = self.comm.receiver
-        self.primary_antenna = AntennaController(PRIMARY_ANTENNA_CONTROLLER_ADDRESS)
-        self.backup_antenna = AntennaController(BACKUP_ANTENNA_CONTROLLER_ADDRESS)
+        self.primary_antenna = AntennaController(PRIMARY_ANTENNA_CONTROLLER_ADDRESS, "Primary Antenna")
+        self.backup_antenna = AntennaController(BACKUP_ANTENNA_CONTROLLER_ADDRESS, "Backup Antenna")
         self.imtq = Imtq()
         self.gyro = Gyro()
         self.rtc = RTCDevice()

@@ -74,7 +74,17 @@ class BaudRate(Enum):
             self.BaudRate2400: "2400",
             self.BaudRate4800: "4800",
             self.BaudRate9600: "9600",
-        }
+            }
+        return map[self]
+
+    def get_code(self):
+        map = {
+            self.BaudRate0: 0,
+            self.BaudRate1200: 0,
+            self.BaudRate2400: 1,
+            self.BaudRate4800: 2,
+            self.BaudRate9600: 3,
+            }
 
         return map[self]
 
@@ -140,8 +150,7 @@ class TransmitterDevice(i2cMock.I2CDevice):
     BUFFER_SIZE = 40
 
     def __init__(self):
-        super(TransmitterDevice, self).__init__(0x61)
-        self.log = logging.getLogger("Comm Transmitter")
+        super(TransmitterDevice, self).__init__(0x61, "Transmitter")
 
         # callback called when watchdog is being reset
         # expected prototype:
@@ -196,6 +205,8 @@ class TransmitterDevice(i2cMock.I2CDevice):
         self._buffer = Queue(TransmitterDevice.BUFFER_SIZE)
         self._lock = Lock()
         self.baud_rate = BaudRate.BaudRate1200
+        self.beacon_active = False
+        self.transmitter_active = False
     
     @i2cMock.command([0xAA])
     def _reset(self):
@@ -217,6 +228,7 @@ class TransmitterDevice(i2cMock.I2CDevice):
         call(self.on_send_frame, None, self, data)
         with self._lock:
             self._buffer.put_nowait(data)
+            self.beacon_active = False
             return [TransmitterDevice.BUFFER_SIZE - self._buffer.qsize()]
 
     @i2cMock.command([0x28])
@@ -234,10 +246,27 @@ class TransmitterDevice(i2cMock.I2CDevice):
         self.log.info("set beacon: %s", data)
         if call(self.on_set_beacon, True):
             self.reset_queue()
+            self.beacon_active = True
 
     @i2cMock.command([0x24])
     def _set_idle_state(self, enabled):
-        call(self.on_set_idle_state, None, enabled)
+        self.transmitter_active = call(self.on_set_idle_state, enabled, enabled)
+
+    @i2cMock.command([0x41])
+    def _report_state(self):
+        response = call(self.on_set_idle_state, None)
+        if response is not None:
+            return response
+
+        response = 0;
+        if self.beacon_active:
+            response |= 1
+
+        if self.transmitter_active:
+            response |= 2
+
+        response |= (0x3 & self.baud_rate.get_code()) << 2
+        return [response]
 
     def get_message_from_buffer(self, timeout=None):
         return self._buffer.get(timeout=timeout)
@@ -252,8 +281,7 @@ class TransmitterDevice(i2cMock.I2CDevice):
 
 class ReceiverDevice(i2cMock.I2CDevice):
     def __init__(self):
-        super(ReceiverDevice, self).__init__(0x60)
-        self.log = logging.getLogger("Comm Receiver")
+        super(ReceiverDevice, self).__init__(0x60, "Receiver")
 
         # callback called when watchdog is being reset
         # expected prototype:

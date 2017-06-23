@@ -6,10 +6,13 @@ import time
 
 
 def hex_data(data):
+    if data is None:
+        return []
+
     if isinstance(data, basestring):
         data = [ord(c) for c in data]
 
-    return str(['%X' % b for b in data])
+    return str(['0x%X' % b for b in data])
 
 def pad_to_multiply(s, base, char):
     l = base - len(s) % base

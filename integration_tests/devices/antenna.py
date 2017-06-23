@@ -39,9 +39,8 @@ class Antenna(object):
         self.is_being_deployed = False
 
 class AntennaController(i2cMock.I2CDevice):
-    def __init__(self, address):
-        super(AntennaController, self).__init__(address)
-        self.log = logging.getLogger("Antenna" + str(address))
+    def __init__(self, address, name):
+        super(AntennaController, self).__init__(address, name)
         self.armed = False
         self.ignore_deployment_switch = False
         self.antenna_state = [Antenna(), Antenna(), Antenna(), Antenna()]
