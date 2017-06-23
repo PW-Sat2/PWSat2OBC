@@ -103,6 +103,7 @@ target_link_libraries(${NAME}
     program_flash
     scrubber
     boot_settings
+    obc_memory
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

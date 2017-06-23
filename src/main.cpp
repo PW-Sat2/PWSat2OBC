@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <cstring>
+#include <em_acmp.h>
 #include <em_chip.h>
 #include <em_cmu.h>
 #include <em_dbg.h>
@@ -99,6 +100,21 @@ void TIMER0_IRQHandler()
 {
     Scrubber::Scrub();
     TIMER_IntClear(io_map::RAMScrubbing::TimerHW, TIMER_IFC_OF);
+}
+
+void ACMP0_IRQHandler()
+{
+    if (has_flag(ACMP_IntGet(ACMP0), ACMP_IF_EDGE))
+    {
+        Main.Memory.HandleLatchup(obc::MemoryChip::SRAM1);
+        ACMP_IntClear(ACMP0, ACMP_IFC_EDGE);
+    }
+
+    if (has_flag(ACMP_IntGet(ACMP1), ACMP_IF_EDGE))
+    {
+        Main.Memory.HandleLatchup(obc::MemoryChip::SRAM2);
+        ACMP_IntClear(ACMP1, ACMP_IFC_EDGE);
+    }
 }
 
 __attribute__((optimize("O3"))) void UART1_RX_IRQHandler()
