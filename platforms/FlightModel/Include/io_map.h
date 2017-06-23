@@ -160,9 +160,21 @@ namespace io_map
             };
         };
 
+        struct Latchup
+        {
+            static constexpr auto HW = ACMP0;
+            using SRAM1 = PinLocation<gpioPortC, 2>;
+            using SRAM2 = PinLocation<gpioPortC, 8>;
+
+            struct Group
+            {
+                using Pins = PinContainer<SRAM1, SRAM2>;
+            };
+        };
+
         struct Group
         {
-            using Pins = PinContainer<SRAMPower, SRAMBuffer, EDAC, EBIConfig>;
+            using Pins = PinContainer<SRAMPower, SRAMBuffer, EDAC, EBIConfig, Latchup>;
         };
     };
 }
