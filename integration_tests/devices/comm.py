@@ -3,6 +3,7 @@ import struct
 
 import i2cMock
 import time
+import datetime
 from enum import Enum, unique
 from Queue import Queue, Empty
 from threading import Lock
@@ -202,6 +203,16 @@ class TransmitterDevice(i2cMock.I2CDevice):
         # bool -> None
         self.on_set_idle_state = None
 
+        # callback called when current state is being requested
+        # callback prototype:
+        # None -> byte[]
+        self.on_report_state = None
+
+        # callback called when uptime is being requested
+        # callback prototype:
+        # None -> byte[]
+        self.on_report_uptime = None
+
         self._buffer = Queue(TransmitterDevice.BUFFER_SIZE)
         self._lock = Lock()
         self.baud_rate = BaudRate.BaudRate1200
@@ -252,9 +263,18 @@ class TransmitterDevice(i2cMock.I2CDevice):
     def _set_idle_state(self, enabled):
         self.transmitter_active = call(self.on_set_idle_state, enabled, enabled)
 
+    @i2cMock.command([0x40])
+    def _report_uptime(self):
+        response = call(self.on_report_uptime, None)
+        if response is not None:
+            return response
+        
+        now = datetime.datetime.now()
+        return [now.second, now.minute, now.hour, now.day]
+
     @i2cMock.command([0x41])
     def _report_state(self):
-        response = call(self.on_set_idle_state, None)
+        response = call(self.on_report_state, None)
         if response is not None:
             return response
 
