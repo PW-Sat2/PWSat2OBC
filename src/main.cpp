@@ -106,13 +106,13 @@ void ACMP0_IRQHandler()
 {
     if (has_flag(ACMP_IntGet(ACMP0), ACMP_IF_EDGE))
     {
-        Main.Memory.HandleLatchup(obc::MemoryChip::SRAM1);
+        Main.Memory.HandleLatchup(obc::MemoryModule::SRAM1);
         ACMP_IntClear(ACMP0, ACMP_IFC_EDGE);
     }
 
     if (has_flag(ACMP_IntGet(ACMP1), ACMP_IF_EDGE))
     {
-        Main.Memory.HandleLatchup(obc::MemoryChip::SRAM2);
+        Main.Memory.HandleLatchup(obc::MemoryModule::SRAM2);
         ACMP_IntClear(ACMP1, ACMP_IFC_EDGE);
     }
 }
