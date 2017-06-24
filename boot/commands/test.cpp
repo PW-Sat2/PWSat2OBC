@@ -176,3 +176,26 @@ void TestEEPROM()
         }
     }
 }
+
+void Recovery()
+{
+    BSP_UART_Printf<50>(BSP_UART_DEBUG,
+        "\nSRAM1: %s SRAM2: %s\n",
+        BSP_SEE_isSramLatched(bspSeeSram1) ? "Latched" : "Not latched",
+        BSP_SEE_isSramLatched(bspSeeSram2) ? "Latched" : "Not latched");
+
+    if (BSP_SEE_isSramLatched(bspSeeSram1))
+    {
+        BSP_SEE_tryLatchupRecovery(bspSeeSram1, 5);
+    };
+
+    if (BSP_SEE_isSramLatched(bspSeeSram2))
+    {
+        BSP_SEE_tryLatchupRecovery(bspSeeSram2, 5);
+    };
+
+    BSP_UART_Printf<50>(BSP_UART_DEBUG,
+        "\nSRAM1: %s SRAM2: %s\n",
+        BSP_SEE_isSramLatched(bspSeeSram1) ? "Latched" : "Not latched",
+        BSP_SEE_isSramLatched(bspSeeSram2) ? "Latched" : "Not latched");
+}

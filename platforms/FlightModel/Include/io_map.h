@@ -112,38 +112,13 @@ namespace io_map
 
     struct BSP : public PinGroupTag
     {
-        struct SRAMPower : public PinGroupTag
-        {
-            using SRAM1 = PinLocation<gpioPortC, 0>;
-            using SRAM2 = PinLocation<gpioPortC, 1>;
-
-            struct Group
-            {
-                using Pins = PinContainer<SRAM1, SRAM2>;
-            };
-        };
-
-        struct SRAMBuffer : public PinGroupTag
-        {
-            using SRAM1 = PinLocation<gpioPortC, 14>;
-            using SRAM2 = PinLocation<gpioPortC, 15>;
-
-            struct Group
-            {
-                using Pins = PinContainer<SRAM1, SRAM2>;
-            };
-        };
-
         struct EDAC : public PinGroupTag
         {
-            using Control1 = PinLocation<gpioPortE, 2>;
-            using Control2 = PinLocation<gpioPortE, 3>;
-
             using ErrorPins = PortPins<gpioPortB, 0, 2>;
 
             struct Group
             {
-                using Pins = PinContainer<Control1, Control2, ErrorPins>;
+                using Pins = PinContainer<ErrorPins>;
             };
         };
 
@@ -174,7 +149,43 @@ namespace io_map
 
         struct Group
         {
-            using Pins = PinContainer<SRAMPower, SRAMBuffer, EDAC, EBIConfig, Latchup>;
+            using Pins = PinContainer<EDAC, EBIConfig, Latchup>;
+        };
+    };
+
+    template <std::uint8_t Memory> struct MemoryModule;
+
+    template <> struct MemoryModule<1> : public PinGroupTag
+    {
+        using Control = PinLocation<gpioPortE, 2>;
+        using Buffer = PinLocation<gpioPortC, 14>;
+        using Power = PinLocation<gpioPortC, 0>;
+        static constexpr decltype(auto) Comparator = ACMP0;
+
+        struct Group
+        {
+            using Pins = PinContainer<Control, Buffer, Power>;
+        };
+    };
+
+    template <> struct MemoryModule<2>
+    {
+        using Control = PinLocation<gpioPortE, 3>;
+        using Buffer = PinLocation<gpioPortC, 15>;
+        using Power = PinLocation<gpioPortC, 1>;
+        static constexpr decltype(auto) Comparator = ACMP1;
+
+        struct Group
+        {
+            using Pins = PinContainer<Control, Buffer, Power>;
+        };
+    };
+
+    struct MemoryModules : public PinGroupTag
+    {
+        struct Group
+        {
+            using Pins = PinContainer<MemoryModule<1>, MemoryModule<2>>;
         };
     };
 }

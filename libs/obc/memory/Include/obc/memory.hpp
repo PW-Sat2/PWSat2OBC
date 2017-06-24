@@ -13,6 +13,11 @@ namespace obc
     {
       public:
         void HandleLatchup(MemoryChip memory);
+        void Recover();
+
+      private:
+        bool _sram1Latched = false;
+        bool _sram2Latched = false;
     };
 }
 
