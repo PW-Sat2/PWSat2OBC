@@ -391,7 +391,7 @@ uint8_t BSP_EBI_enableSRAM(BSP_EBI_SRAMSelect_TypeDef module)
 
             Delay(3); // Wait for 3ms for in-rush currents to pass.
 
-            if (false && ACMP0->STATUS & ACMP_STATUS_ACMPOUT) // disable SRAM if a latch is detected (over current condition)
+            if (ACMP0->STATUS & ACMP_STATUS_ACMPOUT) // disable SRAM if a latch is detected (over current condition)
             {
                 BSP_EBI_Sram1PowOff(); // Turn of the switch to SRAM 1
                 result = 0;            // Result set to 0 as SRAM 1 could not be turned on successfully
@@ -432,7 +432,7 @@ uint8_t BSP_EBI_enableSRAM(BSP_EBI_SRAMSelect_TypeDef module)
 
             Delay(3); // Wait for 3ms for in-rush currents to pass.
 
-            if (false && ACMP1->STATUS & ACMP_STATUS_ACMPOUT) // Disable SRAM if latch is detected
+            if (ACMP1->STATUS & ACMP_STATUS_ACMPOUT) // Disable SRAM if latch is detected
             {
                 BSP_EBI_Sram2PowOff(); // Turn of the switch to SRAM 2
                 result = 0;            // Set result to 0 because SRAM 2 could not be turned on successfully

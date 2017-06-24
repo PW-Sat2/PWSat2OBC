@@ -71,4 +71,6 @@ void Scrubbing(std::uint16_t argc, char* argv[]);
 
 void BootSettingsCommand(std::uint16_t argc, char* argv[]);
 
+void MemoryCommand(std::uint16_t argc, char* argv[]);
+
 #endif

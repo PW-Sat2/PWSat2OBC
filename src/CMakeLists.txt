@@ -30,6 +30,7 @@ set(SOURCES
     commands/error_counters.cpp
     commands/scrub.cpp
     commands/boot_settings.cpp
+    commands/memory.cpp
     checks/error_counters.cpp
     obc.h
     obc.cpp
