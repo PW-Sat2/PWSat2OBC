@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <atomic>
 #include "antenna_state.h"
 #include "mission/base.hpp"
 
@@ -50,6 +51,23 @@ namespace mission
              * @brief State of the antenna mission deployment task.
              */
             AntennaMissionState state;
+        };
+
+        class StopAntennaDeploymentTask : public mission::Action
+        {
+          public:
+            StopAntennaDeploymentTask(std::uint8_t mark);
+
+            mission::ActionDescriptor<SystemState> BuildAction();
+
+            void DisableDeployment();
+
+          private:
+            static bool Condition(const SystemState& state, void* param);
+
+            static void Action(SystemState& state, void*);
+
+            std::atomic<bool> _shouldDisable{false};
         };
     }
 }

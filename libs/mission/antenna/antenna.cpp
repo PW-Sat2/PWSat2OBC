@@ -446,6 +446,36 @@ namespace mission
             return descriptor;
         }
 
+        StopAntennaDeploymentTask::StopAntennaDeploymentTask(std::uint8_t /*mark*/)
+        {
+        }
+        mission::ActionDescriptor<SystemState> StopAntennaDeploymentTask::BuildAction()
+        {
+            mission::ActionDescriptor<SystemState> action;
+            action.name = "Stop antenna deployment";
+            action.param = this;
+            action.condition = Condition;
+            action.actionProc = Action;
+            return action;
+        }
+
+        void StopAntennaDeploymentTask::DisableDeployment()
+        {
+            this->_shouldDisable = true;
+        }
+
+        bool StopAntennaDeploymentTask::Condition(const SystemState& state, void* param)
+        {
+            auto This = reinterpret_cast<StopAntennaDeploymentTask*>(param);
+            auto alreadyDisabled = state.PersistentState.Get<state::AntennaConfiguration>().IsDeploymentDisabled();
+            return This->_shouldDisable && !alreadyDisabled && state.AntennaState.IsDeployed();
+        }
+
+        void StopAntennaDeploymentTask::Action(SystemState& state, void*)
+        {
+            state.PersistentState.Set(state::AntennaConfiguration(true));
+        }
+
         /** @}*/
     }
 }
