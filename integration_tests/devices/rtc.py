@@ -6,9 +6,8 @@ from i2cMock import I2CDevice
 
 class RTCDevice(I2CDevice):
     def __init__(self):
-        super(RTCDevice, self).__init__(0b1010001)
+        super(RTCDevice, self).__init__(0b1010001, "RTC")
 
-        self.log = logging.getLogger("RTC")
         self.time_response = [0, 0, 0, 0, 0, 0, 0]
 
     def set_response_array(self, response_array):

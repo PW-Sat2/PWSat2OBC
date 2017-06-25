@@ -67,8 +67,7 @@ class Imtq(i2cMock.I2CDevice):
             self.timer.start()
 
     def __init__(self):
-        super(Imtq, self).__init__(0x10)
-        self.log = logging.getLogger("Imtq")
+        super(Imtq, self).__init__(0x10, "Imtq")
 
         self.status = 0
         self.mode = self.Mode()

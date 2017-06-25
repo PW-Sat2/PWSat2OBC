@@ -222,8 +222,7 @@ class BurnSwitch:
 
 class EPSControllerA(I2CDevice):
     def __init__(self, eps):
-        super(EPSControllerA, self).__init__(0x35)
-        self._log = logging.getLogger("EPS.A")
+        super(EPSControllerA, self).__init__(0x35, "EPS.A")
         self._eps = eps
 
         self._lcls = [eps.TKmain, eps.SunS, eps.CamNadir, eps.CamWing, eps.SENS, eps.ANTenna]
@@ -238,32 +237,32 @@ class EPSControllerA(I2CDevice):
 
     @i2cMock.command([0xE0])
     def _power_cycle(self):
-        self._log.info("Triggered power cycle")
+        self.log.info("Triggered power cycle")
         call(self.on_power_cycle, None)
 
     @i2cMock.command([0xE1])
     def _enable_lcl(self, lcl_id):
-        self._log.info("Enable LCL(%d)", lcl_id)
+        self.log.info("Enable LCL(%d)", lcl_id)
         self._lcls[lcl_id - 1].on()
 
     @i2cMock.command([0xE2])
     def _disable_lcl(self, lcl_id):
-        self._log.info("Disable LCL(%d)", lcl_id)
+        self.log.info("Disable LCL(%d)", lcl_id)
         self._lcls[lcl_id - 1].off()
 
     @i2cMock.command([0xE3])
     def _enable_burn_switch(self, switch_id):
-        self._log.info("Enable BURN switch(%d)", switch_id)
+        self.log.info("Enable BURN switch(%d)", switch_id)
         self._burn_switches[switch_id - 1].enable()
 
     @i2cMock.command([0xE4])
     def _disable_overheat_submode(self):
-        self._log.info("Disable overheat submode")
+        self.log.info("Disable overheat submode")
         call(self.on_disable_overheat_submode, None)
 
     @i2cMock.command([0xE5])
     def _reset_watchdog(self):
-        self._log.info("Resetting watchdog")
+        self.log.info("Resetting watchdog")
         call(self.on_reset_watchdog, None)
 
     @i2cMock.command([0x0])
@@ -274,8 +273,7 @@ class EPSControllerA(I2CDevice):
 
 class EPSControllerB(I2CDevice):
     def __init__(self, eps):
-        super(EPSControllerB, self).__init__(0x36)
-        self._log = logging.getLogger("EPS.A")
+        super(EPSControllerB, self).__init__(0x36, "EPS.B")
         self._eps = eps
 
         self._lcls = [eps.TKred, eps.ANTennaRed]
@@ -290,32 +288,32 @@ class EPSControllerB(I2CDevice):
 
     @i2cMock.command([0xE0])
     def _power_cycle(self):
-        self._log.info("Triggered power cycle")
+        self.log.info("Triggered power cycle")
         call(self.on_power_cycle, None)
 
     @i2cMock.command([0xE1])
     def _enable_lcl(self, lcl_id):
-        self._log.info("Enable LCL(%d)", lcl_id)
+        self.log.info("Enable LCL(%d)", lcl_id)
         self._lcls[lcl_id - 1].on()
 
     @i2cMock.command([0xE2])
     def _disable_lcl(self, lcl_id):
-        self._log.info("Disable LCL(%d)", lcl_id)
+        self.log.info("Disable LCL(%d)", lcl_id)
         self._lcls[lcl_id - 1].off()
 
     @i2cMock.command([0xE3])
     def _enable_burn_switch(self, switch_id):
-        self._log.info("Enable BURN switch(%d)", switch_id)
+        self.log.info("Enable BURN switch(%d)", switch_id)
         self._burn_switches[switch_id - 1].enable()
 
     @i2cMock.command([0xE4])
     def _disable_overheat_submode(self):
-        self._log.info("Disable overheat submode")
+        self.log.info("Disable overheat submode")
         call(self.on_disable_overheat_submode, None)
 
     @i2cMock.command([0xE5])
     def _reset_watchdog(self):
-        self._log.info("Resetting watchdog")
+        self.log.info("Resetting watchdog")
         call(self.on_reset_watchdog, None)
 
     @i2cMock.command([0x0])

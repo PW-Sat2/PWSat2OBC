@@ -117,12 +117,13 @@ namespace obc
         obc::telecommands::EnterIdleStateTelecommand,
         obc::telecommands::RemoveFileTelecommand,
         obc::telecommands::PerformDetumblingExperiment,
-        obc::telecommands::AbortExperiment,        //
-        obc::telecommands::ListFilesTelecommand,   //
-        obc::telecommands::EraseBootTableEntry,    //
-        obc::telecommands::WriteProgramPart,       //
-        obc::telecommands::FinalizeProgramEntry,   //
-        obc::telecommands::SetBootSlotsTelecommand //
+        obc::telecommands::AbortExperiment,         //
+        obc::telecommands::ListFilesTelecommand,    //
+        obc::telecommands::EraseBootTableEntry,     //
+        obc::telecommands::WriteProgramPart,        //
+        obc::telecommands::FinalizeProgramEntry,    //
+        obc::telecommands::SetBootSlotsTelecommand, //
+        obc::telecommands::SendBeaconTelecommand    //
         >;
 
     /**
@@ -140,6 +141,7 @@ namespace obc
          * @param[in] experiments Experiments
          * @param[in] bootTable Boot table
          * @param[in] bootSettings Boot settings
+         * @param[in] telemetry Reference to object that contains current telemetry state.
          */
         OBCCommunication(obc::FDIR& fdir,
             devices::comm::CommObject& commDriver,
@@ -148,7 +150,8 @@ namespace obc
             services::fs::IFileSystem& fs,
             obc::OBCExperiments& experiments,
             program_flash::BootTable& bootTable,
-            boot::BootSettings& bootSettings);
+            boot::BootSettings& bootSettings,
+            IHasState<telemetry::TelemetryState>& telemetry);
 
         /**
          * @brief Initializes all communication at runlevel 1

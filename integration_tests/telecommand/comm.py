@@ -11,3 +11,13 @@ class EnterIdleState(Telecommand):
 
     def payload(self):
         return [self._correlation_id, self._duration]
+
+class SendBeacon(Telecommand):
+    def __init__(self):
+        pass
+
+    def apid(self):
+        return 0xAE
+
+    def payload(self):
+        return []

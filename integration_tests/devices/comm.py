@@ -3,12 +3,17 @@ import struct
 
 import i2cMock
 import time
+import datetime
 from enum import Enum, unique
 from Queue import Queue, Empty
 from threading import Lock
 from utils import *
 from build_config import config
 
+class BeaconFrame(object):
+    def __init__(self, payload):
+        self._payload = payload
+        pass
 
 class DownlinkFrame(object):
     def __init__(self, apid, seq, payload):
@@ -70,7 +75,17 @@ class BaudRate(Enum):
             self.BaudRate2400: "2400",
             self.BaudRate4800: "4800",
             self.BaudRate9600: "9600",
-        }
+            }
+        return map[self]
+
+    def get_code(self):
+        map = {
+            self.BaudRate0: 0,
+            self.BaudRate1200: 0,
+            self.BaudRate2400: 1,
+            self.BaudRate4800: 2,
+            self.BaudRate9600: 3,
+            }
 
         return map[self]
 
@@ -136,8 +151,7 @@ class TransmitterDevice(i2cMock.I2CDevice):
     BUFFER_SIZE = 40
 
     def __init__(self):
-        super(TransmitterDevice, self).__init__(0x61)
-        self.log = logging.getLogger("Comm Transmitter")
+        super(TransmitterDevice, self).__init__(0x61, "Transmitter")
 
         # callback called when watchdog is being reset
         # expected prototype:
@@ -189,9 +203,21 @@ class TransmitterDevice(i2cMock.I2CDevice):
         # bool -> None
         self.on_set_idle_state = None
 
+        # callback called when current state is being requested
+        # callback prototype:
+        # None -> byte[]
+        self.on_report_state = None
+
+        # callback called when uptime is being requested
+        # callback prototype:
+        # None -> byte[]
+        self.on_report_uptime = None
+
         self._buffer = Queue(TransmitterDevice.BUFFER_SIZE)
         self._lock = Lock()
         self.baud_rate = BaudRate.BaudRate1200
+        self.beacon_active = False
+        self.transmitter_active = False
     
     @i2cMock.command([0xAA])
     def _reset(self):
@@ -213,6 +239,7 @@ class TransmitterDevice(i2cMock.I2CDevice):
         call(self.on_send_frame, None, self, data)
         with self._lock:
             self._buffer.put_nowait(data)
+            self.beacon_active = False
             return [TransmitterDevice.BUFFER_SIZE - self._buffer.qsize()]
 
     @i2cMock.command([0x28])
@@ -230,10 +257,36 @@ class TransmitterDevice(i2cMock.I2CDevice):
         self.log.info("set beacon: %s", data)
         if call(self.on_set_beacon, True):
             self.reset_queue()
+            self.beacon_active = True
 
     @i2cMock.command([0x24])
     def _set_idle_state(self, enabled):
-        call(self.on_set_idle_state, None, enabled)
+        self.transmitter_active = call(self.on_set_idle_state, enabled, enabled)
+
+    @i2cMock.command([0x40])
+    def _report_uptime(self):
+        response = call(self.on_report_uptime, None)
+        if response is not None:
+            return response
+        
+        now = datetime.datetime.now()
+        return [now.second, now.minute, now.hour, now.day]
+
+    @i2cMock.command([0x41])
+    def _report_state(self):
+        response = call(self.on_report_state, None)
+        if response is not None:
+            return response
+
+        response = 0;
+        if self.beacon_active:
+            response |= 1
+
+        if self.transmitter_active:
+            response |= 2
+
+        response |= (0x3 & self.baud_rate.get_code()) << 2
+        return [response]
 
     def get_message_from_buffer(self, timeout=None):
         return self._buffer.get(timeout=timeout)
@@ -248,8 +301,7 @@ class TransmitterDevice(i2cMock.I2CDevice):
 
 class ReceiverDevice(i2cMock.I2CDevice):
     def __init__(self):
-        super(ReceiverDevice, self).__init__(0x60)
-        self.log = logging.getLogger("Comm Receiver")
+        super(ReceiverDevice, self).__init__(0x60, "Receiver")
 
         # callback called when watchdog is being reset
         # expected prototype:
@@ -403,4 +455,4 @@ class Comm(object):
     def get_frame(self, timeout=None):
         f = self.transmitter.get_message_from_buffer(timeout)
 
-        return self._frame_decoder.decode(DownlinkFrame.parse(f))
+        return self._frame_decoder.decode(f)

@@ -1,10 +1,12 @@
 #include "comm.hpp"
 #include <cmath>
+#include "base/IHasState.hpp"
 #include "base/reader.h"
 #include "comm/ITransmitter.hpp"
 #include "comm/comm.hpp"
 #include "logger/logger.h"
 #include "system.h"
+#include "telecommunication/beacon.hpp"
 #include "telecommunication/downlink.h"
 
 using telecommunication::downlink::CorrelatedDownlinkFrame;
@@ -14,6 +16,8 @@ namespace obc
 {
     namespace telecommands
     {
+        using namespace devices::comm;
+
         EnterIdleStateTelecommand::EnterIdleStateTelecommand(
             services::time::ICurrentTime& currentTime, mission::IIdleStateController& idleStateController)
             : _currentTime(currentTime), _idleStateController(idleStateController)
@@ -22,8 +26,6 @@ namespace obc
 
         void EnterIdleStateTelecommand::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
         {
-            using namespace devices::comm;
-
             Reader r(parameters);
 
             auto correlationId = r.ReadByte();
@@ -65,6 +67,20 @@ namespace obc
             }
 
             transmitter.SendFrame(response.Frame());
+        }
+
+        SendBeaconTelecommand::SendBeaconTelecommand(IHasState<telemetry::TelemetryState>& provider) : telemetryState(provider)
+        {
+        }
+
+        void SendBeaconTelecommand::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> /*parameters*/)
+        {
+            telecommunication::downlink::RawFrame frame;
+            auto& writer = frame.PayloadWriter();
+            if (WriteBeaconPayload(this->telemetryState.GetState(), writer))
+            {
+                transmitter.SendFrame(frame.Frame());
+            }
         }
     }
 }
