@@ -154,7 +154,7 @@ namespace drivers
 
         template <typename Location, bool DefaultState> void InputPin<Location, DefaultState>::Initialize() const
         {
-            GPIO_PinModeSet(Port, PinNumber, gpioModeInputPullFilter, ToInt(DefaultState));
+            GPIO_PinModeSet(Port, PinNumber, gpioModeInputPull, ToInt(DefaultState));
         }
 
         /**
@@ -193,7 +193,7 @@ namespace drivers
         template <typename Location, bool DefaultState, bool RisingEdge, bool FallingEdge, bool IsEnabled>
         void InterruptPin<Location, DefaultState, RisingEdge, FallingEdge, IsEnabled>::Initialize() const
         {
-            GPIO_PinModeSet(Port, PinNumber, gpioModeInputPull, ToInt(DefaultState));
+            GPIO_PinModeSet(Port, PinNumber, gpioModeInputPullFilter, ToInt(DefaultState));
             GPIO_IntConfig(Port, PinNumber, RisingEdge, FallingEdge, IsEnabled);
         }
 
