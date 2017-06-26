@@ -77,7 +77,7 @@ OSResult PayloadCommand<TCommandCode, TOutputDataType>::ExecuteDataRead(uint8_t 
     if (result != OSResult::Success)
     {
         LOGF(LOG_LEVEL_ERROR, "Unable to perform RadFET refresh. Reason: %d", num(result));
-        return OSResult::InvalidOperation;
+        return result;
     }
 
     return OSResult::Success;

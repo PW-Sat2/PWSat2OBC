@@ -24,6 +24,7 @@ set(SOURCES
   RTC/RTCTest.cpp
   gyro/gyroTest.cpp
   gyro/GyroTelemetryTest.cpp
+  payload/PayloadDeviceDriverTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
@@ -38,5 +39,6 @@ target_link_libraries(${NAME}
     rtc
     unit_tests_base
     gyro
+    payload
 )
 
