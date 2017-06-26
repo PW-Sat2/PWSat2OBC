@@ -4,6 +4,7 @@
 #include "OsMock.hpp"
 #include "mission/telemetry.hpp"
 #include "mock/FsMock.hpp"
+#include "telemetry/TimeTelemetry.hpp"
 
 namespace
 {
@@ -60,13 +61,13 @@ namespace
 
     TEST_F(TelemetryTest, TestConditionWithChanges)
     {
-        state.telemetry.Set(state::TimeState(5min, 10min));
+        state.telemetry.Set(telemetry::InternalTimeTelemetry(10min));
         ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
     }
 
     TEST_F(TelemetryTest, TestSkipConditionWithChanges)
     {
-        state.telemetry.Set(state::TimeState(5min, 10min));
+        state.telemetry.Set(telemetry::InternalTimeTelemetry(10min));
         this->update.Execute(this->state);
         ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
         this->update.Execute(this->state);
@@ -82,14 +83,14 @@ namespace
         this->update.Execute(this->state);
         this->update.Execute(this->state);
         this->update.Execute(this->state);
-        state.telemetry.Set(state::TimeState(5min, 10min));
+        state.telemetry.Set(telemetry::InternalTimeTelemetry(10min));
         this->update.Execute(this->state);
         ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
     }
 
     TEST_F(TelemetryTest, TestConditionStability)
     {
-        state.telemetry.Set(state::TimeState(5min, 10min));
+        state.telemetry.Set(telemetry::InternalTimeTelemetry(10min));
         ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
         ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
         ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
@@ -118,7 +119,7 @@ namespace
         EXPECT_CALL(fs, Close(10));
         EXPECT_CALL(os, TakeSemaphore(_, _)).WillOnce(Return(OSResult::Success));
         EXPECT_CALL(os, GiveSemaphore(_)).WillOnce(Return(OSResult::Success));
-        state.telemetry.Set(state::TimeState(5min, 10min));
+        state.telemetry.Set(telemetry::InternalTimeTelemetry(10min));
         this->descriptor.Execute(this->state);
     }
 
@@ -152,7 +153,7 @@ namespace
         EXPECT_CALL(os, TakeSemaphore(_, _)).WillOnce(Return(OSResult::Success));
         EXPECT_CALL(fs, Write(10, _)).WillOnce(Return(WriteSuccessful()));
         EXPECT_CALL(fs, GetFileSize(10)).WillOnce(Return(1023));
-        state.telemetry.Set(state::TimeState(5min, 10min));
+        state.telemetry.Set(telemetry::InternalTimeTelemetry(10min));
         this->descriptor.Execute(this->state);
     }
 
@@ -161,7 +162,7 @@ namespace
         auto guard = InstallProxy(&os);
         EXPECT_CALL(fs, Open(_, _, _)).WillOnce(Return(FileOpenResult(OSResult::IOError, 0)));
         EXPECT_CALL(os, TakeSemaphore(_, _)).WillOnce(Return(OSResult::Success));
-        state.telemetry.Set(state::TimeState(5min, 10min));
+        state.telemetry.Set(telemetry::InternalTimeTelemetry(10min));
         this->descriptor.Execute(this->state);
         ASSERT_THAT(state.telemetry.IsModified(), Eq(true));
     }
@@ -172,7 +173,7 @@ namespace
         EXPECT_CALL(os, TakeSemaphore(_, _)).WillOnce(Return(OSResult::Success));
         EXPECT_CALL(fs, Open(_, _, _)).WillOnce(Return(OpenSuccessful(10)));
         EXPECT_CALL(fs, Write(10, _)).WillOnce(Return(IOResult(OSResult::IOError, gsl::span<const std::uint8_t>())));
-        state.telemetry.Set(state::TimeState(5min, 10min));
+        state.telemetry.Set(telemetry::InternalTimeTelemetry(10min));
         this->descriptor.Execute(this->state);
     }
 
@@ -185,7 +186,7 @@ namespace
         EXPECT_CALL(fs, GetFileSize(10)).WillOnce(Return(1024));
         EXPECT_CALL(fs, Move(this->config.currentFileName, this->config.previousFileName)).WillOnce(Return(OSResult::Success));
         EXPECT_CALL(fs, Close(10)).Times(2);
-        state.telemetry.Set(state::TimeState(5min, 10min));
+        state.telemetry.Set(telemetry::InternalTimeTelemetry(10min));
         this->descriptor.Execute(this->state);
     }
 
@@ -197,7 +198,7 @@ namespace
         EXPECT_CALL(fs, Write(10, _)).Times(0);
         EXPECT_CALL(fs, GetFileSize(10)).WillOnce(Return(1024));
         EXPECT_CALL(fs, Move(this->config.currentFileName, this->config.previousFileName)).WillOnce(Return(OSResult::IOError));
-        state.telemetry.Set(state::TimeState(5min, 10min));
+        state.telemetry.Set(telemetry::InternalTimeTelemetry(10min));
         this->descriptor.Execute(this->state);
     }
 
@@ -209,7 +210,7 @@ namespace
         EXPECT_CALL(fs, Write(10, _)).Times(0);
         EXPECT_CALL(fs, GetFileSize(10)).WillOnce(Return(1024));
         EXPECT_CALL(fs, Move(this->config.currentFileName, this->config.previousFileName)).WillOnce(Return(OSResult::Success));
-        state.telemetry.Set(state::TimeState(5min, 10min));
+        state.telemetry.Set(telemetry::InternalTimeTelemetry(10min));
         this->descriptor.Execute(this->state);
     }
 }
