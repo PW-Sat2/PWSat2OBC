@@ -28,6 +28,8 @@ struct IOS
 
     virtual OSResult GiveSemaphore(const OSSemaphoreHandle semaphore) = 0;
 
+    virtual OSResult GiveSemaphoreISR(const OSSemaphoreHandle semaphore) = 0;
+
     virtual OSResult TakeSemaphore(const OSSemaphoreHandle semaphore, const std::chrono::milliseconds timeout) = 0;
 
     virtual OSEventGroupHandle CreateEventGroup() = 0;

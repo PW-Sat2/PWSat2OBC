@@ -441,4 +441,99 @@ namespace
         ASSERT_THAT(result.int_3v3d, Eq(0x2525u));
         ASSERT_THAT(result.obc_3v3d, Eq(0x2525u));
     }
+
+    TEST_F(PayloadDeviceDriverTest, SunSValidationDoesntCancelProcessing)
+    {
+        EXPECT_CALL(driver, IsBusy()).WillOnce(Invoke([]() { return false; }));
+
+        EXPECT_CALL(driver, PayloadWrite(ElementsAre(0x80))).Times(1).WillOnce(Invoke([=](span<const uint8_t> /*outData*/) {
+            return OSResult::Success;
+        }));
+
+        EXPECT_CALL(driver, PayloadRead(ElementsAre(1), _)).WillOnce(Invoke([=](span<const uint8_t> /*inData*/, span<uint8_t> outData) {
+            std::fill(outData.begin(), outData.end(), 0xFFu);
+            return OSResult::Success;
+        }));
+
+        EXPECT_CALL(driver, WaitForData()).Times(1);
+
+        PayloadTelemetry::SunsRef result;
+        ASSERT_THAT(payload.MeasureSunSRef(result), Eq(OSResult::Success));
+    }
+
+    TEST_F(PayloadDeviceDriverTest, TemperaturesValidationDoesntCancelProcessing)
+    {
+        EXPECT_CALL(driver, IsBusy()).WillOnce(Invoke([]() { return false; }));
+
+        EXPECT_CALL(driver, PayloadWrite(ElementsAre(0x81))).Times(1).WillOnce(Invoke([=](span<const uint8_t> /*outData*/) {
+            return OSResult::Success;
+        }));
+
+        EXPECT_CALL(driver, PayloadRead(ElementsAre(11), _)).WillOnce(Invoke([=](span<const uint8_t> /*inData*/, span<uint8_t> outData) {
+            std::fill(outData.begin(), outData.end(), 0xFFu);
+            return OSResult::Success;
+        }));
+
+        EXPECT_CALL(driver, WaitForData()).Times(1);
+
+        PayloadTelemetry::Temperatures result;
+        ASSERT_THAT(payload.MeasureTemperatures(result), Eq(OSResult::Success));
+    }
+
+    TEST_F(PayloadDeviceDriverTest, PhotodiodesValidationDoesntCancelProcessing)
+    {
+        EXPECT_CALL(driver, IsBusy()).WillOnce(Invoke([]() { return false; }));
+
+        EXPECT_CALL(driver, PayloadWrite(ElementsAre(0x82))).Times(1).WillOnce(Invoke([=](span<const uint8_t> /*outData*/) {
+            return OSResult::Success;
+        }));
+
+        EXPECT_CALL(driver, PayloadRead(ElementsAre(29), _)).WillOnce(Invoke([=](span<const uint8_t> /*inData*/, span<uint8_t> outData) {
+            std::fill(outData.begin(), outData.end(), 0xFFu);
+            return OSResult::Success;
+        }));
+
+        EXPECT_CALL(driver, WaitForData()).Times(1);
+
+        PayloadTelemetry::Photodiodes result;
+        ASSERT_THAT(payload.MeasurePhotodiodes(result), Eq(OSResult::Success));
+    }
+
+    TEST_F(PayloadDeviceDriverTest, HousekeepingValidationDoesntCancelProcessing)
+    {
+        EXPECT_CALL(driver, IsBusy()).WillOnce(Invoke([]() { return false; }));
+
+        EXPECT_CALL(driver, PayloadWrite(ElementsAre(0x83))).Times(1).WillOnce(Invoke([=](span<const uint8_t> /*outData*/) {
+            return OSResult::Success;
+        }));
+
+        EXPECT_CALL(driver, PayloadRead(ElementsAre(37), _)).WillOnce(Invoke([=](span<const uint8_t> /*inData*/, span<uint8_t> outData) {
+            std::fill(outData.begin(), outData.end(), 0xFFu);
+            return OSResult::Success;
+        }));
+
+        EXPECT_CALL(driver, WaitForData()).Times(1);
+
+        PayloadTelemetry::Housekeeping result;
+        ASSERT_THAT(payload.MeasureHousekeeping(result), Eq(OSResult::Success));
+    }
+
+    TEST_F(PayloadDeviceDriverTest, RadFETValidationDoesntCancelProcessing)
+    {
+        EXPECT_CALL(driver, IsBusy()).WillOnce(Invoke([]() { return false; }));
+
+        EXPECT_CALL(driver, PayloadWrite(ElementsAre(0x86))).Times(1).WillOnce(Invoke([=](span<const uint8_t> /*outData*/) {
+            return OSResult::Success;
+        }));
+
+        EXPECT_CALL(driver, PayloadRead(ElementsAre(41), _)).WillOnce(Invoke([=](span<const uint8_t> /*inData*/, span<uint8_t> outData) {
+            std::fill(outData.begin(), outData.end(), 0xFFu);
+            return OSResult::Success;
+        }));
+
+        EXPECT_CALL(driver, WaitForData()).Times(1);
+
+        PayloadTelemetry::Radfet result;
+        ASSERT_THAT(payload.RadFETOff(result), Eq(OSResult::Success));
+    }
 }

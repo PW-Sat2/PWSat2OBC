@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <gsl/span>
 #include "base/os.h"
-#include "gpio/gpio.h"
+#include "gpio/InterruptPinDriver.h"
 #include "i2c/i2c.h"
 #include "utils.h"
 
@@ -37,9 +37,9 @@ namespace drivers
             /**
              * @brief Ctor
              * @param communicationBus I2C bus for communication
-             * @param interruptPin Interrupt/busy pin
+             * @param interruptPinDriver Interrupt/busy pin driver
              */
-            PayloadDriver(drivers::i2c::II2CBus& communicationBus, const drivers::gpio::Pin& interruptPin);
+            PayloadDriver(drivers::i2c::II2CBus& communicationBus, drivers::gpio::IInterruptPinDriver& interruptPinDriver);
 
             /**
              * @brief Performs driver initialization
@@ -50,14 +50,6 @@ namespace drivers
              * @brief Interrupt handler for Payload GPIO pin.
              */
             void IRQHandler();
-
-            /**
-             * @brief Returns mask for setting and clearing interrupt registers. Calculated from interrupt pin number.
-             */
-            inline uint32_t IRQMask()
-            {
-                return 1 << (_interruptPin.PinNumber());
-            }
 
             /**
              * @brief Returns value indicating if payload is busy and performing measurements.
@@ -106,7 +98,7 @@ namespace drivers
             static constexpr std::chrono::milliseconds DefaultTimeout = std::chrono::milliseconds(1800000);
 
             drivers::i2c::II2CBus& _i2c;
-            const drivers::gpio::Pin& _interruptPin;
+            drivers::gpio::IInterruptPinDriver& _interruptPinDriver;
 
             /** @brief Synchronization */
             OSSemaphoreHandle _sync;

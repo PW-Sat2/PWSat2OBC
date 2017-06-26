@@ -92,7 +92,7 @@ void BURTC_IRQHandler(void)
 void GPIO_EVEN_IRQHandler(void)
 {
     std::uint32_t irq = GPIO_IntGet();
-    if (irq & Main.Hardware.PayloadDriver.IRQMask())
+    if (irq & Main.Hardware.PayloadInterruptDriver.IRQMask())
     {
         Main.Hardware.PayloadDriver.IRQHandler();
     }

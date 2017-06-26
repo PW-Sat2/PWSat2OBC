@@ -2,6 +2,7 @@ set(NAME gpio)
 
 set(SOURCES
     gpio.cpp
+    InterruptPinDriver.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

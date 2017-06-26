@@ -33,6 +33,8 @@ struct OSMock : IOS
 
     MOCK_METHOD1(GiveSemaphore, OSResult(const OSSemaphoreHandle semaphore));
 
+    MOCK_METHOD1(GiveSemaphoreISR, OSResult(const OSSemaphoreHandle semaphore));
+
     MOCK_METHOD0(CreateEventGroup, OSEventGroupHandle());
 
     MOCK_METHOD2(EventGroupSetBits, OSEventBits(OSEventGroupHandle eventGroup, const OSEventBits bitsToChange));

@@ -176,6 +176,9 @@ namespace obc
         /** @brief Low-level comm driver */
         devices::comm::CommObject CommDriver;
 
+        /** @bries Payload Interrupt Driver */
+        drivers::gpio::InterruptPinDriver PayloadInterruptDriver;
+
         /** @brief Payload driver*/
         drivers::payload::PayloadDriver PayloadDriver;
     };

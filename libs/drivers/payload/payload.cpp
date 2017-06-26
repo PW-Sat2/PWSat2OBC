@@ -1,22 +1,23 @@
 #include "payload.h"
 #include <em_gpio.h>
+#include "gpio/InterruptPinDriver.h"
 #include "logger/logger.h"
 
 using namespace drivers::payload;
 using drivers::i2c::I2CResult;
 
-PayloadDriver::PayloadDriver(drivers::i2c::II2CBus& communicationBus, const drivers::gpio::Pin& interruptPin)
-    : _i2c(communicationBus),      //
-      _interruptPin(interruptPin), //
-      _sync(nullptr),              //
+PayloadDriver::PayloadDriver(drivers::i2c::II2CBus& communicationBus, drivers::gpio::IInterruptPinDriver& interruptPinDriver)
+    : _i2c(communicationBus),                  //
+      _interruptPinDriver(interruptPinDriver), //
+      _sync(nullptr),                          //
       _dataWaitTimeout(DefaultTimeout)
 {
 }
 
 void PayloadDriver::IRQHandler()
 {
-    GPIO_IntClear(IRQMask());
-    auto value = _interruptPin.Input();
+    _interruptPinDriver.ClearInterrupt();
+    auto value = _interruptPinDriver.Value();
     if (!value)
     {
         RaiseDataReadyISR();
@@ -28,16 +29,12 @@ void PayloadDriver::IRQHandler()
 void PayloadDriver::Initialize()
 {
     _sync = System::CreateBinarySemaphore();
-
-    auto interruptBank = _interruptPin.PinNumber() % 2 ? GPIO_ODD_IRQn : GPIO_EVEN_IRQn;
-
-    NVIC_SetPriority(interruptBank, InterruptPriority);
-    NVIC_EnableIRQ(interruptBank);
+    _interruptPinDriver.EnableInterrupt(InterruptPriority);
 }
 
 bool PayloadDriver::IsBusy() const
 {
-    return _interruptPin.Input();
+    return _interruptPinDriver.Value();
 }
 
 OSResult PayloadDriver::PayloadRead(gsl::span<std::uint8_t> outData, gsl::span<std::uint8_t> inData)
@@ -52,6 +49,7 @@ OSResult PayloadDriver::PayloadRead(gsl::span<std::uint8_t> outData, gsl::span<s
 
     return OSResult::Success;
 }
+
 OSResult PayloadDriver::PayloadWrite(gsl::span<std::uint8_t> outData)
 {
     auto result = _i2c.Write(I2CAddress, outData);

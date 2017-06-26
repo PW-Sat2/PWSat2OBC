@@ -25,6 +25,7 @@ set(SOURCES
   gyro/gyroTest.cpp
   gyro/GyroTelemetryTest.cpp
   payload/PayloadDeviceDriverTest.cpp
+  payload/PayloadHardwareDriverTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
