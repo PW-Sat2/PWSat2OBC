@@ -89,6 +89,7 @@ namespace io_map
     struct ProgramFlash
     {
         static constexpr std::uint8_t* FlashBase = reinterpret_cast<std::uint8_t*>(0x84000000);
+        static constexpr std::uint8_t* ApplicatonBase = reinterpret_cast<std::uint8_t*>(0x00080000);
     };
 
     struct RAMScrubbing
