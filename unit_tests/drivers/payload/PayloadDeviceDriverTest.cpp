@@ -121,7 +121,31 @@ namespace
         ASSERT_THAT(payload.MeasureSunSRef(result), Eq(OSResult::Busy));
     }
 
-    TEST_F(PayloadDeviceDriverTest, MeasureRadFETBusy)
+    TEST_F(PayloadDeviceDriverTest, MeasureRadFETOnBusy)
+    {
+        EXPECT_CALL(driver, IsBusy()).WillOnce(Invoke([]() { return true; }));
+
+        EXPECT_CALL(driver, PayloadRead(_, _)).Times(0);
+        EXPECT_CALL(driver, PayloadWrite(_)).Times(0);
+        EXPECT_CALL(driver, WaitForData()).Times(0);
+
+        PayloadTelemetry::Radfet result;
+        ASSERT_THAT(payload.RadFETOn(result), Eq(OSResult::Busy));
+    }
+
+    TEST_F(PayloadDeviceDriverTest, MeasureRadFETOffBusy)
+    {
+        EXPECT_CALL(driver, IsBusy()).WillOnce(Invoke([]() { return true; }));
+
+        EXPECT_CALL(driver, PayloadRead(_, _)).Times(0);
+        EXPECT_CALL(driver, PayloadWrite(_)).Times(0);
+        EXPECT_CALL(driver, WaitForData()).Times(0);
+
+        PayloadTelemetry::Radfet result;
+        ASSERT_THAT(payload.RadFETOff(result), Eq(OSResult::Busy));
+    }
+
+    TEST_F(PayloadDeviceDriverTest, MeasureRadFETReadBusy)
     {
         EXPECT_CALL(driver, IsBusy()).WillOnce(Invoke([]() { return true; }));
 
@@ -133,7 +157,7 @@ namespace
         ASSERT_THAT(payload.MeasureRadFET(result), Eq(OSResult::Busy));
     }
 
-    TEST_F(PayloadDeviceDriverTest, MeasureRadFETSuccessful)
+    TEST_F(PayloadDeviceDriverTest, MeasureRadFETOnSuccessful)
     {
         EXPECT_CALL(driver, IsBusy()).WillOnce(Invoke([]() { return false; }));
 
@@ -149,8 +173,59 @@ namespace
         EXPECT_CALL(driver, WaitForData()).Times(1);
 
         PayloadTelemetry::Radfet result;
+        ASSERT_THAT(payload.RadFETOn(result), Eq(OSResult::Success));
+
+        ASSERT_THAT(result.status, Eq(0x01u));
+        ASSERT_THAT(result.temperature, Eq(0x01010101u));
+        ASSERT_THAT(result.vth[0], Eq(0x01010101u));
+        ASSERT_THAT(result.vth[1], Eq(0x01010101u));
+        ASSERT_THAT(result.vth[2], Eq(0x01010101u));
+    }
+
+    TEST_F(PayloadDeviceDriverTest, MeasureRadFETSuccessful)
+    {
+        EXPECT_CALL(driver, IsBusy()).WillOnce(Invoke([]() { return false; }));
+
+        EXPECT_CALL(driver, PayloadWrite(ElementsAre(0x85))).Times(1).WillOnce(Invoke([=](span<const uint8_t> /*outData*/) {
+            return OSResult::Success;
+        }));
+
+        EXPECT_CALL(driver, PayloadRead(ElementsAre(41), _)).WillOnce(Invoke([=](span<const uint8_t> /*inData*/, span<uint8_t> outData) {
+            std::fill(outData.begin(), outData.end(), 0x01);
+            return OSResult::Success;
+        }));
+
+        EXPECT_CALL(driver, WaitForData()).Times(1);
+
+        PayloadTelemetry::Radfet result;
         ASSERT_THAT(payload.MeasureRadFET(result), Eq(OSResult::Success));
 
+        ASSERT_THAT(result.status, Eq(0x01u));
+        ASSERT_THAT(result.temperature, Eq(0x01010101u));
+        ASSERT_THAT(result.vth[0], Eq(0x01010101u));
+        ASSERT_THAT(result.vth[1], Eq(0x01010101u));
+        ASSERT_THAT(result.vth[2], Eq(0x01010101u));
+    }
+
+    TEST_F(PayloadDeviceDriverTest, MeasureRadFETOffSuccessful)
+    {
+        EXPECT_CALL(driver, IsBusy()).WillOnce(Invoke([]() { return false; }));
+
+        EXPECT_CALL(driver, PayloadWrite(ElementsAre(0x86))).Times(1).WillOnce(Invoke([=](span<const uint8_t> /*outData*/) {
+            return OSResult::Success;
+        }));
+
+        EXPECT_CALL(driver, PayloadRead(ElementsAre(41), _)).WillOnce(Invoke([=](span<const uint8_t> /*inData*/, span<uint8_t> outData) {
+            std::fill(outData.begin(), outData.end(), 0x01);
+            return OSResult::Success;
+        }));
+
+        EXPECT_CALL(driver, WaitForData()).Times(1);
+
+        PayloadTelemetry::Radfet result;
+        ASSERT_THAT(payload.RadFETOff(result), Eq(OSResult::Success));
+
+        ASSERT_THAT(result.status, Eq(0x01u));
         ASSERT_THAT(result.temperature, Eq(0x01010101u));
         ASSERT_THAT(result.vth[0], Eq(0x01010101u));
         ASSERT_THAT(result.vth[1], Eq(0x01010101u));
@@ -161,7 +236,7 @@ namespace
     {
         EXPECT_CALL(driver, IsBusy()).WillOnce(Invoke([]() { return false; }));
 
-        EXPECT_CALL(driver, PayloadWrite(ElementsAre(0x84))).Times(1).WillOnce(Invoke([=](span<const uint8_t> /*outData*/) {
+        EXPECT_CALL(driver, PayloadWrite(ElementsAre(0x85))).Times(1).WillOnce(Invoke([=](span<const uint8_t> /*outData*/) {
             return OSResult::Success;
         }));
 
@@ -177,7 +252,7 @@ namespace
     {
         EXPECT_CALL(driver, IsBusy()).WillOnce(Invoke([]() { return false; }));
 
-        EXPECT_CALL(driver, PayloadWrite(ElementsAre(0x84))).Times(1).WillOnce(Invoke([=](span<const uint8_t> /*outData*/) {
+        EXPECT_CALL(driver, PayloadWrite(ElementsAre(0x85))).Times(1).WillOnce(Invoke([=](span<const uint8_t> /*outData*/) {
             return OSResult::InvalidOperation;
         }));
 
@@ -192,7 +267,7 @@ namespace
     {
         EXPECT_CALL(driver, IsBusy()).WillOnce(Invoke([]() { return false; }));
 
-        EXPECT_CALL(driver, PayloadWrite(ElementsAre(0x84))).Times(1).WillOnce(Invoke([=](span<const uint8_t> /*outData*/) {
+        EXPECT_CALL(driver, PayloadWrite(ElementsAre(0x85))).Times(1).WillOnce(Invoke([=](span<const uint8_t> /*outData*/) {
             return OSResult::Success;
         }));
 
