@@ -28,6 +28,7 @@
 #include "telemetry/collect_gpio.hpp"
 #include "telemetry/collect_gyro.hpp"
 #include "telemetry/collect_internal_time.hpp"
+#include "telemetry/collect_program.hpp"
 #include "telemetry/collect_temp.hpp"
 #include "telemetry/state.hpp"
 
@@ -66,6 +67,7 @@ namespace telemetry
         FileSystemTelemetryAcquisition,   //
         InternalTimeTelemetryAcquisition, //
         ExternalTimeTelemetryAcquisition, //
+        ProgramCrcTelemetryAcquisition,   //
         TelemetrySerialization            //
         >
         ObcTelemetryAcquisition;
