@@ -35,7 +35,7 @@ struct Command
 
 static void PrintHelp();
 
-static std::array<Command, 20> Commands = {
+static Command Commands[] = {
     Command{'T', "Test", Test}, //
     Command{'S', "Test SRAM", TestSRAM},
     Command{'E', "Test EEPROM", TestEEPROM},
@@ -80,9 +80,9 @@ void COMMS_processMsg(void)
 
     auto x = msgId;
 
-    auto command = std::find_if(Commands.begin(), Commands.end(), [x](Command& cmd) { return cmd.CommandId == x; });
+    auto command = std::find_if(std::begin(Commands), std::end(Commands), [x](Command& cmd) { return cmd.CommandId == x; });
 
-    if (command != Commands.end())
+    if (command != std::end(Commands))
     {
         uartReceived = 1;
         command->Handler();
@@ -127,7 +127,7 @@ void BSP_UART_DEBUG_IRQHandler(void)
 
 void PrintHelp()
 {
-    for (auto& c : Commands)
+    for (auto& c : gsl::make_span(Commands))
     {
         BSP_UART_Printf<60>(BSP_UART_DEBUG, "\n%c - %s", c.CommandId, c.HelpMessage);
     }
