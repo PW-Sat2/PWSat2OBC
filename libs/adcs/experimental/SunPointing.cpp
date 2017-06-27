@@ -815,4 +815,9 @@ void SunPointing::step(DipoleVec& dipole, const MagVec& mtmMeas, bool mtmFlag,
     state.pEkfPrev = pEkf;
     state.ctrlTorquePrev = ctrlTorque;
     state.ekfConvCountPrev = ekfConvCount;
+
+    for(int i = 0; i < commDipoleSP.size(); i++)
+    {
+        dipole[i] = commDipoleSP[i];
+    }
 }
