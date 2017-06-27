@@ -66,6 +66,7 @@ OBC::OBC()
           this->Hardware.CommDriver,
           this->timeProvider,
           Mission,
+          Mission,
           fs,
           Experiments,
           BootTable,

@@ -53,14 +53,19 @@ namespace mission
             AntennaMissionState state;
         };
 
-        class StopAntennaDeploymentTask : public mission::Action
+        struct IDisableAntennaDeployment
+        {
+            virtual void DisableDeployment() = 0;
+        };
+
+        class StopAntennaDeploymentTask : public mission::Action, public IDisableAntennaDeployment
         {
           public:
             StopAntennaDeploymentTask(std::uint8_t mark);
 
             mission::ActionDescriptor<SystemState> BuildAction();
 
-            void DisableDeployment();
+            virtual void DisableDeployment() override;
 
           private:
             static bool Condition(const SystemState& state, void* param);
