@@ -9,6 +9,7 @@
 #include "mission/comm.hpp"
 #include "obc/experiments.hpp"
 #include "obc/fdir.hpp"
+#include "obc/telecommands/antenna.hpp"
 #include "obc/telecommands/boot_settings.hpp"
 #include "obc/telecommands/comm.hpp"
 #include "obc/telecommands/experiments.hpp"
@@ -123,7 +124,8 @@ namespace obc
         obc::telecommands::WriteProgramPart,        //
         obc::telecommands::FinalizeProgramEntry,    //
         obc::telecommands::SetBootSlotsTelecommand, //
-        obc::telecommands::SendBeaconTelecommand    //
+        obc::telecommands::SendBeaconTelecommand,   //
+        obc::telecommands::StopAntennaDeployment    //
         >;
 
     /**
@@ -147,6 +149,7 @@ namespace obc
             devices::comm::CommObject& commDriver,
             services::time::ICurrentTime& currentTime,
             mission::IIdleStateController& idleStateController,
+            mission::antenna::IDisableAntennaDeployment& disableAntennaDeployment,
             services::fs::IFileSystem& fs,
             obc::OBCExperiments& experiments,
             program_flash::BootTable& bootTable,
