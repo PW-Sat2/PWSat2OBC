@@ -9,7 +9,7 @@
 
 static void ProcessState(OBC* obc)
 {
-    if (obc->Hardware.Pins.SysClear.Input() == false)
+    if (boot::ClearStateOnStartup)
     {
         LOG(LOG_LEVEL_WARNING, "Resetting system state");
 

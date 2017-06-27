@@ -96,13 +96,14 @@ namespace obc
         typename TSlaveSelectFram3,
         typename TLed0,
         typename TLed1,
-        typename TSysClear,
         typename TSPI,
         typename TLEUART,
         typename TUART,
         typename TI2C0,
         typename TI2C1,
-        typename TExternalWatchdogPin>
+        typename TExternalWatchdogPin,
+        typename TBSP,
+        typename TMemoryModules>
     struct OBCGPIOBase
     {
         /** @brief Slave Select - Flash1 */
@@ -121,8 +122,6 @@ namespace obc
         const drivers::gpio::OutputPin<TLed0> Led0;
         /** @brief LED1 */
         const drivers::gpio::OutputPin<TLed1> Led1;
-        /** @brief SysClear */
-        const drivers::gpio::InputPin<TSysClear> SysClear;
         /** @brief SPI */
         const SPIPins<TSPI> SPI;
         /** @brief LEUART */
@@ -148,7 +147,6 @@ namespace obc
             this->Fram3ChipSelect.Initialize();
             this->Led0.Initialize();
             this->Led1.Initialize();
-            this->SysClear.Initialize();
             this->SPI.Initialize();
 #ifdef USE_LEUART
             this->LEUART.Initialize();
@@ -170,13 +168,14 @@ namespace obc
         io_map::SlaveSelectFram3,                           //
         io_map::Led0,                                       //
         io_map::Led1,                                       //
-        io_map::SysClear,                                   //
         io_map::SPI,                                        //
         io_map::LEUART,
         io_map::UART,
         io_map::I2C_0,
         io_map::I2C_1,
-        io_map::Watchdog::ExternalWatchdogPin>;
+        io_map::Watchdog::ExternalWatchdogPin,
+        io_map::BSP,
+        io_map::MemoryModules>;
 
     /** @} */
 }

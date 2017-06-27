@@ -22,6 +22,7 @@
 #include "obc/experiments.hpp"
 #include "obc/fdir.hpp"
 #include "obc/hardware.h"
+#include "obc/memory.hpp"
 #include "obc/scrubbing.hpp"
 #include "obc/storage.h"
 #include "power_eps/power_eps.h"
@@ -116,6 +117,9 @@ struct OBC
 
     /** @brief Scrubbing mechanism */
     obc::OBCScrubbing Scrubbing;
+
+    /** @brief Memory management */
+    obc::OBCMemory Memory;
 
     /** @brief Terminal object. */
     Terminal terminal;
