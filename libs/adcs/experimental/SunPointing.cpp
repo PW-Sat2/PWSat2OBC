@@ -9,6 +9,12 @@ SunPointing::SunPointing()
 {
 }
 
+SunPointing::State::State(const Parameters& p)
+	:xEkfPrev(Vector5f::Zero()), pEkfPrev(Matrix55f::Zero()), ctrlTorquePrev(Vector3f::Zero()), ekfConvCountPrev(0), params(Parameters(p))
+{
+}
+
+
 void SunPointing::initialize(State& state, const Parameters& param)
 {
     UNUSED1(state);

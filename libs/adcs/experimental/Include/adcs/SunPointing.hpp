@@ -179,11 +179,7 @@ namespace adcs
           public:
             State() = default;
 
-            State(const Parameters& p)
-                : xEkfPrev(Vector5f::Zero()), pEkfPrev(Matrix55f::Zero()), ctrlTorquePrev(Vector3f::Zero()), ekfConvCountPrev(0),
-                  params(Parameters(p))
-            {
-            }
+            State(const Parameters& p);
 
             /** @brief previous state vector from EKF   */
             Vector5f xEkfPrev;
