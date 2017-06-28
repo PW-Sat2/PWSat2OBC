@@ -3,6 +3,9 @@
 #include <cstdint>
 #include <system.h>
 
+// XXX TO BE REMOVED XXX
+#include <iostream>
+
 using namespace adcs;
 
 // XXX TO BE REMOVED XXX
@@ -481,11 +484,13 @@ void ExtendedKalmanFilter(Vector5f& xEkf, Matrix55f& pEkf, Vector5f& innov,
 
     // Discrete Jacobian for state transition
     Matrix55f jacobianF;
-    jacobianF << dLatDot_dLat, dLatDot_dLong, dLatDot_dOmega, dLongDot_dLat, dLongDot_dLong, dLongDot_dOmega, Matrix<
-            float, 3, 2>::Zero(), dOmegaDot_dOmega;
+    //XXX vectors transposed to fit it - investigate!!!
+    jacobianF << dLatDot_dLat, dLatDot_dLong, RowVector3f(dLatDot_dOmega), dLongDot_dLat, dLongDot_dLong, RowVector3f(dLongDot_dOmega), Matrix<float, 3, 2>::Zero(), dOmegaDot_dOmega;
+    //std::cout << jacobianF<<std::endl;
+    //jacobianF.block(2, 0, 3, 2) = Matrix<float, 3, 2>::Zero();
+    //jacobianF.block(2, 2, 3, 3) = dOmegaDot_dOmega;
 
     Matrix55f stateTrans = Matrix55f::Identity() + state.params.dt * jacobianF;
-
     // Prediction of covariance matrix P
     Matrix55f P_prio1 = stateTrans * state.pEkfPrev * stateTrans.transpose();
     Matrix55f P_prio2 = (state.params.dt
@@ -640,12 +645,10 @@ void SpinController(Vector3f& commDipoleSP, const Vector3f& angrateEst,
     Matrix3f nutSelect = Matrix3f::Zero();
     Vector3f ctrltorq = Vector3f::Zero();
     float bnorm = 0;
-
 // Commanded angular rates ------------------------------------------------
     assert(state.params.spinComm.size() == 3);
     spinCommNorm = Vector3f(state.params.spinComm.data()).norm(); //Map<Matrix3f>(state.params.spinComm, 3).norm();//XXX norm/normalize (3)?
     angrateComm_s = spinCommNorm * s2s_bodyEst; // in satellite frame (current orientation)
-
 // Control torque ---------------------------------------------------------
 // angular momentum error
     assert(state.params.inertia.size() == 3 * 3);
@@ -659,30 +662,27 @@ void SpinController(Vector3f& commDipoleSP, const Vector3f& angrateEst,
     nutSelect << 0, 0, 0, //
     0, 1, 0, //
     0, 0, 1;
-
 // control law
     ctrltorq = state.params.ctrlGains.k * K_error
             + state.params.ctrlGains.kp * P_error
                     * (Vector3f() << 1.0f, 0.0f, 0.0f).finished()
             - state.params.ctrlGains.kn * nutSelect * angrateEst;
-
 // Commanded magnetic dipole ----------------------------------------------
     bnorm = (mtmMeas * 1e-4f).norm();
     commDipoleSP = skew(mtmMeas * 1e-4f) * ctrltorq / powf(bnorm, 2.0f);
 
-    if (!state.params.coilsOn[1]) // XXX param??
+    if (!state.params.coilsOn[0]) // XXX param??
     {
-        commDipoleSP(1, 1) = 0;
+        commDipoleSP[0] = 0;
+    }
+    else if (!state.params.coilsOn[1])
+    {
+        commDipoleSP[1] = 0;
     }
     else if (!state.params.coilsOn[2])
     {
-        commDipoleSP(2, 1) = 0;
+        commDipoleSP[2] = 0;
     }
-    else if (!state.params.coilsOn[3])
-    {
-        commDipoleSP(3, 1) = 0;
-    }
-
 }
 
 SunPointing::SunPointing()
@@ -796,7 +796,6 @@ void SunPointing::step(DipoleVec& dipole, const MagVec& mtmMeas, bool mtmFlag,
     }
 
     ExtractSunVandRate(s2s_bodyEst, angrateEst, xEkf, state);
-
 // CONTROL ----------------------------------------------------------------
     if (!mtmFlag || !EKFisConv)
     {
@@ -818,6 +817,7 @@ void SunPointing::step(DipoleVec& dipole, const MagVec& mtmMeas, bool mtmFlag,
 
     for(int i = 0; i < commDipoleSP.size(); i++)
     {
-        dipole[i] = commDipoleSP[i];
+        dipole[i] = commDipoleSP[i] * 1e4;
     }
+    std::cout<<"commDipoleSP[0]: " << commDipoleSP[0] <<std::endl;
 }
