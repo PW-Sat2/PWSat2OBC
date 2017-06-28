@@ -12,11 +12,11 @@ from threading import Timer
 
 
 def from_int16(tab):
-    return struct.unpack('H', bytearray(tab[0:2]))[0]
+    return struct.unpack('H', ensure_string(tab[0:2]))[0]
 
 
 def from_int32(tab):
-    return struct.unpack('i', bytearray(tab[0:4]))[0]
+    return struct.unpack('i', ensure_string(tab[0:4]))[0]
 
 
 def to_int32(value):
