@@ -8,22 +8,30 @@
 
 namespace telemetry
 {
+    using namespace std::chrono_literals;
+
     ProgramCrcTelemetryAcquisition::ProgramCrcTelemetryAcquisition(program_flash::BootTable& bootTable) : _bootTable(bootTable)
     {
     }
 
     std::uint32_t ProgramCrcTelemetryAcquisition::GetLength(std::uint8_t index)
     {
-        UniqueLock<program_flash::BootTable> lock(this->_bootTable, InfiniteTimeout);
-        auto e = this->_bootTable.Entry(index);
-        if (!e.IsValid())
+        UniqueLock<program_flash::BootTable> lock(this->_bootTable, 10s);
+        if (!lock())
         {
             return 0;
         }
-        else
+
+        for (int i = 0; i < 8; ++i)
         {
-            return e.Length();
+            auto e = this->_bootTable.Entry(i);
+            if ((index & (1 << i)) != 0 && e.IsValid())
+            {
+                return e.Length();
+            }
         }
+
+        return 0;
     }
 
     mission::UpdateDescriptor<telemetry::TelemetryState> ProgramCrcTelemetryAcquisition::BuildUpdate()
