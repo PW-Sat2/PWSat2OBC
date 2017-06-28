@@ -16,41 +16,38 @@ using adcs::GyroVec;
 
 enum ESPDataIdx
 {
-    t = 0,                   // 1x1
-    mtmMeas = 1,             // 3x1
-    ssMeas = 4,              // 2x1
-    ssMgyroMeas = 6,         // 3x1
-    ssMmtmFlag = 9,          // 1x1
-    ssMssFlag = 10,          // 1x1
-    ssMgyroFlag = 11,        // 1x1
-    ssMX_EKF_Prev = 16,      // 5x1
-    ssMP_EKF_Prev = 41,      // 5x5
-    ssMctrlTorquePrev = 44,  // 3x1
-    ssMEKFconvCountPrev = 45,  // 1x1
-    ssMcommDipoleSP = 48,    // 3x1
-    ssMctrlTorque = 51,      // 3x1
-    ssMX_EKF = 56,           // 5x1
-    ssMP_EKF = 81,           // 5x5
-    ssMinnov = 86,           // 5x1
-    ssMinnovCov = 111,       // 5x5
-    ssMEKFisInit = 112,      // 1x1
-    ssMEKFisConv = 113,      // 1x1
-    ssMEKFconvCount = 114    // 1x1
-
+    ESP_t = 0,                // 1x1
+    ESP_mtmMeas = 1,          // 3x1
+    ESP_ssMeas = 4,           // 2x1
+    ESP_gyroMeas = 6,         // 3x1
+    ESP_mtmFlag = 9,          // 1x1
+    ESP_ssFlag = 10,          // 1x1
+    ESP_gyroFlag = 11,        // 1x1
+    ESP_X_EKF_Prev = 16,      // 5x1
+    ESP_p_EKF_Prev = 41,      // 5x5
+    ESP_ctrlTorquePrev = 44,  // 3x1
+    ESP_EKFconvCountPrev = 45,// 1x1
+    ESP_commDipoleSP = 48,    // 3x1
+    ESP_ctrlTorque = 51,      // 3x1
+    ESP_X_EKF = 56,           // 5x1
+    ESP_P_EKF = 81,           // 5x5
+    ESP_innov = 86,           // 5x1
+    ESP_innovCov = 111,       // 5x5
+    ESP_EKFisInit = 112,      // 1x1
+    ESP_EKFisConv = 113,      // 1x1
+    ESP_EKFconvCount = 114,   // 1x1
+    ESPDataIdx_size
 };
 
 // cross-validation of detumbling against matlab implementation
 TEST(sunpointing, cross_validation)
 {
-    std::cout << "SUNPOINTING TEST... EMPTY" << std::endl;
+    std::cout << "SUNPOINTING TEST... NOT REPRESENTATIVE!!!" << std::endl;
 
-    std::ifstream
-    file(
-            ADCS_UT_DATA_FILE_PATH "/sunpointing_crossvalidation.csv");
+    std::ifstream file(ADCS_UT_DATA_FILE_PATH "/sunpointing_crossvalidation.csv");
     if (!file)
     {
-        std::cerr << "Cannot find data  file!" << std::endl;
-        FAIL();
+        FAIL() << "Cannot find data  file!" << std::endl;
     }
     std::vector<float> record;
 
@@ -62,45 +59,62 @@ TEST(sunpointing, cross_validation)
 
     // matlab sim is working with different units
     // input: Sim [T] --> OBC [1e-7 T]
-    //double input_scale = 1e7;
+    float input_scale = 1.0f;//1e7f;
     // output: Sim [Am2] --> OBC [1e-4 Am2]
-    //double output_scale = 1e4;
+    float output_scale = 1e4f;
 
-    while (!file.eof())
+    //while (!file.eof())
+    for(int i = 0; i< 2; i++)
     {
         record = dataFileTools::getRecord(file); // TODO change to sunpointing data pool
-
-#ifdef ADCS_DETUMBLIG_DEBUG
-        std::cout << "time: " << record[0] << std::endl;
-        std::cout << "in0: " << record[1] << " " << input_scale << " " << record[1] * input_scale << " " << (int)(record[1] * input_scale)
+        if (record.size() != ESPDataIdx_size)
+        {
+            if (file.eof())
+            {
+                break;
+            }
+            else
+            {
+                FAIL()<< "Data record has size different than expected (got: " << record.size() << " but expected: " << ESPDataIdx_size << ")" << std::endl;
+            }
+        }
+//#define ADCS_SUNPOINTING_DEBUG
+#ifdef ADCS_SUNPOINTING_DEBUG
+        std::cout << "time: " << record[ESP_t] << std::endl;
+        std::cout << "in0: " << record[ESP_mtmMeas] << " " << input_scale << " " << record[ESP_mtmMeas] * input_scale << " " << (int)(record[1] * input_scale)
         << std::endl;
-        std::cout << "in1: " << record[2] << " " << input_scale << " " << record[2] * input_scale << " " << (int)(record[2] * input_scale)
+        std::cout << "in1: " << record[ESP_ssMeas] << " " << input_scale << " " << record[ESP_ssMeas] * input_scale << " " << (int)(record[2] * input_scale)
         << std::endl;
-        std::cout << "in2: " << record[3] << " " << input_scale << " " << record[3] * input_scale << " " << (int)(record[3] * input_scale)
+        std::cout << "in2: " << record[ESP_gyroMeas] << " " << input_scale << " " << record[ESP_gyroMeas] * input_scale << " " << (int)(record[3] * input_scale)
         << std::endl;
-        std::cout << "out0: " << record[4] << " " << output_scale << " " << record[4] * output_scale << " "
-        << (int)(record[4] * output_scale) << std::endl;
-        std::cout << "out1: " << record[5] << " " << output_scale << " " << record[5] * output_scale << " "
-        << (int)(record[5] * output_scale) << std::endl;
-        std::cout << "out2: " << record[6] << " " << output_scale << " " << record[6] * output_scale << " "
-        << (int)(record[6] * output_scale) << std::endl;
+        std::cout << "out0: " << record[ESP_commDipoleSP] << " " << output_scale << " " << record[ESP_commDipoleSP] * output_scale << " "
+        << (int)(record[ESP_commDipoleSP] * output_scale) << std::endl;
+        std::cout << "out1: " << record[ESP_commDipoleSP+1] << " " << output_scale << " " << record[ESP_commDipoleSP+1] * output_scale << " "
+        << (int)(record[ESP_commDipoleSP+1] * output_scale) << std::endl;
+        std::cout << "out2: " << record[ESP_commDipoleSP+2] << " " << output_scale << " " << record[ESP_commDipoleSP+2] * output_scale << " "
+        << (int)(record[ESP_commDipoleSP+2] * output_scale) << std::endl;
+#else
+        UNUSED1(input_scale);
 #endif
         DipoleVec dipole;
-        MagVec mtmMeas;
-        bool mtmFlag = false;
-        SunsVec ssMeas;
-        bool ssFlag = false;
-        GyroVec gyrMeas;
-        bool gyrFlag = false;
+        MagVec mtmMeas = {int32_t(record[ESP_mtmMeas+0]), int32_t(record[ESP_mtmMeas+1]), int32_t(record[ESP_mtmMeas+2])};
+        bool mtmFlag = (record[ESP_mtmFlag] != 0);
+        SunsVec ssMeas = {record[ESP_ssMeas+0], record[ESP_ssMeas+1]};
+        bool ssFlag = (record[ESP_ssFlag] != 0);
+        GyroVec gyrMeas = {record[ESP_gyroMeas+0], record[ESP_gyroMeas+1], record[ESP_gyroMeas+2]};
+        bool gyrFlag = (record[ESP_gyroFlag] != 0);
         sp.step(dipole, mtmMeas, mtmFlag, ssMeas, ssFlag, gyrMeas, gyrFlag,
                 state);
-        /*
-         sp.step(dipole, mgmt, state);
 
-         EXPECT_NEAR(dipole[0], dipole_exp[0], 1.0);
-         EXPECT_NEAR(dipole[1], dipole_exp[1], 1.0);
-         EXPECT_NEAR(dipole[2], dipole_exp[2], 1.0);
-         */
+        EXPECT_NEAR(dipole[0], record[ESP_commDipoleSP+0] * output_scale, 1.0);
+        EXPECT_NEAR(dipole[1], record[ESP_commDipoleSP+1] * output_scale, 1.0);
+        EXPECT_NEAR(dipole[2], record[ESP_commDipoleSP+2] * output_scale, 1.0);
+
+#ifdef ADCS_SUNPOINTING_DEBUG
+        std::cout << "EXPECT_NEAR(" << dipole[0] << " == " << record[ESP_commDipoleSP+0] * output_scale << ")" << std::endl;
+        std::cout << "EXPECT_NEAR(" << dipole[1] << " == " << record[ESP_commDipoleSP+1] * output_scale << ")" << std::endl;
+        std::cout << "EXPECT_NEAR(" << dipole[2] << " == " << record[ESP_commDipoleSP+2] * output_scale << ")" << std::endl;
+#endif
     }
     file.close();
 }
