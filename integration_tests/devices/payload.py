@@ -8,9 +8,8 @@ from threading import Timer
 
 class Payload(I2CDevice):
     def __init__(self, gpioDriver, pin):
-        super(Payload, self).__init__(0b0110000)
+        super(Payload, self).__init__(0b0110000, "Payload")
 
-        self.log = logging.getLogger("Payload")
         self.pin = pin
         self.gpioDriver = gpioDriver
         self.whoami = 0x53
