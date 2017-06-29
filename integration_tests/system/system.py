@@ -23,18 +23,17 @@ class System:
         self.i2c.start()
 
         if auto_power_on:
-            self.obc.power_on(clean_state=False)
+            self.obc.power_on()
 
     def _setup_devices(self):
-        self.frame_decoder = response_frames.FrameDecoder()
-        self.frame_decoder.add_frame_types(response_frames.frame_types)
+        self.frame_decoder = response_frames.FrameDecoder(response_frames.frame_factories)
 
         self.eps = EPS()
         self.comm = Comm(self.frame_decoder)
         self.transmitter = self.comm.transmitter
         self.receiver = self.comm.receiver
-        self.primary_antenna = AntennaController(PRIMARY_ANTENNA_CONTROLLER_ADDRESS)
-        self.backup_antenna = AntennaController(BACKUP_ANTENNA_CONTROLLER_ADDRESS)
+        self.primary_antenna = AntennaController(PRIMARY_ANTENNA_CONTROLLER_ADDRESS, "Primary Antenna")
+        self.backup_antenna = AntennaController(BACKUP_ANTENNA_CONTROLLER_ADDRESS, "Backup Antenna")
         self.imtq = Imtq()
         self.gyro = Gyro()
         self.rtc = RTCDevice()

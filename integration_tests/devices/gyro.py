@@ -3,8 +3,7 @@ import logging, struct, i2cMock
 
 class Gyro(i2cMock.I2CDevice):
     def __init__(self):
-        super(Gyro, self).__init__(0x68)
-        self.log = logging.getLogger("Gyro")
+        super(Gyro, self).__init__(0x68, "Gyro")
         self.data = {}
         self.reset()
         self.initialised = False

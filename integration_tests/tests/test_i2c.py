@@ -12,8 +12,8 @@ class I2CTest(BaseTest):
     def setUp(self):
         BaseTest.setUp(self)
 
-        self.echo = EchoDevice(0x12)
-        self.timeoutDevice = TimeoutDevice(0x14)
+        self.echo = EchoDevice(0x12, "Echo")
+        self.timeoutDevice = TimeoutDevice(0x14, "Timeout")
 
         self.system.i2c.add_bus_device(self.echo)
         self.system.i2c.add_pld_device(self.echo)
@@ -88,7 +88,7 @@ class I2CTest(BaseTest):
 
     @runlevel(1)
     def test_isis_behaviour(self):
-        echo2 = EchoDevice(0x16)
+        echo2 = EchoDevice(0x16, "Echo")
         self.system.i2c.add_bus_device(echo2)
         self.system.i2c.enable_bus_devices([echo2.address], True)
 

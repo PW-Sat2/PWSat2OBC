@@ -123,16 +123,12 @@ class SerialPortTerminal:
         self.log.debug("power off")
         self._gpio.low(self._gpio.RESET)
 
-    def power_on(self, clean_state):
+    def power_on(self):
         self.log.debug("Powering OBC on")
         self._serial.reset_input_buffer()
         self._serial.reset_output_buffer()
         self._serial.flushInput()
         self._serial.flush()
-        if clean_state:
-            self._gpio.low(self._gpio.CLEAN)
-        else:
-            self._gpio.high(self._gpio.CLEAN)
 
         self._gpio.high(self._gpio.RESET)
 

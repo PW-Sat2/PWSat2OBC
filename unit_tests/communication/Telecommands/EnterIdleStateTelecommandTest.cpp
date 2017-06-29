@@ -3,6 +3,7 @@
 #include <cmath>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "base/os.h"
 #include "base/reader.h"
 #include "base/writer.h"
 #include "mock/IdleStateControllerMock.hpp"

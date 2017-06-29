@@ -79,8 +79,8 @@ class OBC(OBCMixin,
     def power_off(self):
         self._terminal.power_off()
 
-    def power_on(self, clean_state=False):
-        self._terminal.power_on(clean_state)
+    def power_on(self):
+        self._terminal.power_on()
 
     def ping(self):
         return self._command("ping")

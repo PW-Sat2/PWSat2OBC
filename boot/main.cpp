@@ -90,6 +90,7 @@ int main(void)
     Initialize();
 
     boot::RequestedRunlevel = boot::Runlevel::Runlevel2;
+    boot::ClearStateOnStartup = false;
 
     auto d = StayInBootloader();
 

@@ -7,6 +7,7 @@ void TestEEPROM();
 
 void BootUpper();
 void SetRunlevel();
+void SetClearState();
 
 void SetBootIndex();
 void ShowBootSettings();
@@ -21,4 +22,5 @@ void PrintBootTable();
 void EraseBootTable();
 
 void Check();
+void Recovery();
 #endif /* BOOT_COMMANDS_COMMANDS_HPP_ */

@@ -12,11 +12,11 @@ from threading import Timer
 
 
 def from_int16(tab):
-    return struct.unpack('H', bytearray(tab[0:2]))[0]
+    return struct.unpack('H', ensure_string(tab[0:2]))[0]
 
 
 def from_int32(tab):
-    return struct.unpack('i', bytearray(tab[0:4]))[0]
+    return struct.unpack('i', ensure_string(tab[0:4]))[0]
 
 
 def to_int32(value):
@@ -67,8 +67,7 @@ class Imtq(i2cMock.I2CDevice):
             self.timer.start()
 
     def __init__(self):
-        super(Imtq, self).__init__(0x10)
-        self.log = logging.getLogger("Imtq")
+        super(Imtq, self).__init__(0x10, "Imtq")
 
         self.status = 0
         self.mode = self.Mode()

@@ -26,7 +26,6 @@ namespace io_map
     using Led0 = PinLocation<gpioPortD, 1>;
     using Led1 = PinLocation<gpioPortD, 2>;
 
-    using SysClear = PinLocation<gpioPortC, 0>;
     using PayloadInterrupt = PinLocation<gpioPortE, 0>;
 
     struct SPI : public SPIPins<SPI>
@@ -92,7 +91,7 @@ namespace io_map
 
     struct Watchdog
     {
-        static constexpr WDOG_PeriodSel_TypeDef Period = wdogPeriod_64k;       // About 1 minute
+        static constexpr WDOG_PeriodSel_TypeDef Period = wdogPeriod_64k;      // About 1 minute
         static constexpr WDOG_PeriodSel_TypeDef BootTimeout = wdogPeriod_16k; // About 16 second
         using ExternalWatchdogPin = PinLocation<gpioPortF, 9>;
     };
@@ -112,31 +111,86 @@ namespace io_map
         static constexpr std::size_t MemorySize = 1_MB;
         static constexpr std::size_t CycleSize = 8;
     };
+
+    struct BSP : public PinGroupTag
+    {
+        struct EDAC : public PinGroupTag
+        {
+            using ErrorPins = PortPins<gpioPortB, 0, 2>;
+
+            struct Group
+            {
+                using Pins = PinContainer<ErrorPins>;
+            };
+        };
+
+        struct EBIConfig : public PinGroupTag
+        {
+            using Address0__7 = PortPins<gpioPortE, 8, 9, 10, 11, 12, 13, 14, 15>;
+            using Address9_15 = PortPins<gpioPortA, 0, 1, 2, 3, 4, 5, 6, 15>;
+            using ChipSelects = PortPins<gpioPortD, 9, 10, 11, 12>;
+            using ControlPins = PortPins<gpioPortF, 3, 4, 5>;
+
+            struct Group
+            {
+                using Pins = PinContainer<Address0__7, Address9_15, ChipSelects, ControlPins>;
+            };
+        };
+
+        struct Latchup
+        {
+            static constexpr auto HW = ACMP0;
+            using SRAM1 = PinLocation<gpioPortC, 2>;
+            using SRAM2 = PinLocation<gpioPortC, 8>;
+
+            struct Group
+            {
+                using Pins = PinContainer<SRAM1, SRAM2>;
+            };
+        };
+
+        struct Group
+        {
+            using Pins = PinContainer<EDAC, EBIConfig, Latchup>;
+        };
+    };
+
+    template <std::uint8_t Memory> struct MemoryModule;
+
+    template <> struct MemoryModule<1> : public PinGroupTag
+    {
+        using Control = PinLocation<gpioPortE, 2>;
+        using Buffer = PinLocation<gpioPortC, 14>;
+        using Power = PinLocation<gpioPortC, 0>;
+        static constexpr decltype(auto) Comparator = ACMP0;
+
+        struct Group
+        {
+            using Pins = PinContainer<Control, Buffer, Power>;
+        };
+    };
+
+    template <> struct MemoryModule<2>
+    {
+        using Control = PinLocation<gpioPortE, 3>;
+        using Buffer = PinLocation<gpioPortC, 15>;
+        using Power = PinLocation<gpioPortC, 1>;
+        static constexpr decltype(auto) Comparator = ACMP1;
+
+        struct Group
+        {
+            using Pins = PinContainer<Control, Buffer, Power>;
+        };
+    };
+
+    struct MemoryModules : public PinGroupTag
+    {
+        struct Group
+        {
+            using Pins = PinContainer<MemoryModule<1>, MemoryModule<2>>;
+        };
+    };
 }
-
-// NAND Flash
-#define NAND_POWER_PORT gpioPortB
-#define NAND_POWER_PIN 15
-#define NAND_READY_PORT gpioPortD
-#define NAND_READY_PIN 15
-#define NAND_CE_PORT gpioPortD
-#define NAND_CE_PIN 14
-#define NAND_WP_PORT gpioPortD
-#define NAND_WP_PIN 13
-#define NAND_ALE_BIT 24
-#define NAND_CLE_BIT 25
-
-#define EBI_ALE_PORT gpioPortC
-#define EBI_ALE_PIN 1
-#define EBI_CLE_PORT gpioPortC
-#define EBI_CLE_PIN 2
-#define EBI_WE_PORT gpioPortF
-#define EBI_WE_PIN 8
-#define EBI_RE_PORT gpioPortF
-#define EBI_RE_PIN 9
-
-#define EBI_DATA_PORT gpioPortE
-#define EBI_DATA_PIN0 8
 
 /** @endcond */
 

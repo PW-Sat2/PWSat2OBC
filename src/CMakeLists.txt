@@ -31,6 +31,7 @@ set(SOURCES
     commands/scrub.cpp
     commands/boot_settings.cpp
     commands/payload.cpp
+    commands/memory.cpp
     checks/error_counters.cpp
     obc.h
     obc.cpp
@@ -104,6 +105,7 @@ target_link_libraries(${NAME}
     program_flash
     scrubber
     boot_settings
+    obc_memory
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

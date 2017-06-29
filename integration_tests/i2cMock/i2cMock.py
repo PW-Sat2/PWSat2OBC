@@ -32,14 +32,16 @@ class LatchBusError(Exception):
 
 
 class I2CDevice(object):
-    def __init__(self, address):
+    def __init__(self, address, name):
         if address >= 0x80:
             raise Exception("I2C address cannot be longer than 7 bits. Got address=%X" % address)
 
+        self.name = name
         self.address = address
         self.handlers = self._init_handlers()
         self.response = None
         self.freeze_end = None
+        self.log = self._get_logger()
 
     def handle(self, data):
         self.response = None
@@ -54,7 +56,7 @@ class I2CDevice(object):
         if handler is None:
             return self._missing_handler(data)
 
-        self._get_logger().info("%s.%s(%s)", type(self).__name__, handler.__name__, hex_data(args))
+        self.log.info("%s.%s(%s)", type(self).__name__, handler.__name__, hex_data(args))
 
         self.response = handler(self, *args) or []
 
@@ -65,7 +67,7 @@ class I2CDevice(object):
         raise LatchBusError()
 
     def _missing_handler(self, data):
-        self._get_logger().error('Missing handler for 0x{:2X}'.format(self.address, binascii.hexlify(bytearray(data))))
+        self.log.error('Missing handler for [{}]'.format(binascii.hexlify(bytearray(data))))
 
     def _init_handlers(self):
         handlers = []
@@ -79,7 +81,7 @@ class I2CDevice(object):
         return handlers
 
     def _get_logger(self):
-        return logging.getLogger('Device 0x{:2X}'.format(self.address))
+        return logging.getLogger('{}(0x{:2X})'.format(self.name, self.address))
 
 
 class MissingDevice(I2CDevice):
@@ -327,7 +329,7 @@ class I2CMock(object):
             while self._port.is_open:
                 (cmd, data) = self._read_command()
 
-                self._log.debug("Received command %X (%s)", cmd, hex_data(data))
+                self._log.debug("Received command 0x%X (%s)", cmd, hex_data(data))
 
                 self._command_handlers[cmd](self, *data)
         except DeviceMockStopped:
@@ -373,7 +375,7 @@ class I2CMock(object):
 
             response = device.get_response()
 
-            self._pld_log.debug('Generated response %r', response)
+            self._pld_log.debug('Generated response %s', hex_data(bytearray(response)))
         except LatchBusError:
             self._bus_log.warn('Device request latching bus')
             self._command(I2CMock.CMD_I2C_PLD_LATCH)
@@ -388,7 +390,7 @@ class I2CMock(object):
 
         self._command(I2CMock.CMD_I2C_PLD_RESPONSE, response)
 
-        self._pld_log.debug('Response written (%r)', response)
+        self._pld_log.debug('Response written (%s)', hex_data(bytearray(response)))
 
     def _device_command_bus_write(self, address, *data):
         address = ord(address)
@@ -401,7 +403,7 @@ class I2CMock(object):
             device.handle(data)
             response = device.get_response()
 
-            self._bus_log.debug('Generated response %r', response)
+            self._bus_log.debug('Generated response %s', hex_data(bytearray(response)))
         except LatchBusError:
             self._bus_log.warn('Device request latching bus')
             self._command(I2CMock.CMD_I2C_BUS_LATCH)
@@ -416,7 +418,7 @@ class I2CMock(object):
 
         self._command(I2CMock.CMD_I2C_BUS_RESPONSE, response)
 
-        self._bus_log.debug('Response written (%r)', response)
+        self._bus_log.debug('Response written (%s)', hex_data(bytearray(response)))
 
     def _bus_device(self, address):
         if self._bus_devices.has_key(address / 2):
