@@ -55,6 +55,7 @@ static const TerminalCommandDescription commands[] = {
     {"scrub", Scrubbing},
     {"boot_settings", BootSettingsCommand},
     {"memory", MemoryCommand},
+    {"runlevel", RunlevelCommand},
 };
 
 void InitializeTerminal(void)

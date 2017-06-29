@@ -36,4 +36,3 @@ def runlevel(requested_runlevel):
         return f
 
     return wrap
-
