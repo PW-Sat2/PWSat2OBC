@@ -19,6 +19,8 @@ from .state import StateMixin
 from .error_counters import ErrorCountersMixin
 from .fram import FRAMMixin
 from .boot_settings import BootSettingsMixin
+from .runlevel import RunlevelMixin
+
 
 class OBC(OBCMixin,
           FileSystemMixin,
@@ -35,7 +37,8 @@ class OBC(OBCMixin,
           StateMixin,
           ErrorCountersMixin,
           FRAMMixin,
-          BootSettingsMixin
+          BootSettingsMixin,
+          RunlevelMixin
           ):
     def __init__(self, terminal):
         self.log = logging.getLogger("OBC")

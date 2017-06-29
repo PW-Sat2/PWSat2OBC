@@ -4,6 +4,7 @@
 #include "antenna_state.h"
 #include "antenna_task.hpp"
 #include "gsl/gsl_util"
+#include "logger/logger.h"
 #include "mission/base.hpp"
 #include "mission/obc.hpp"
 #include "system.h"
@@ -352,8 +353,12 @@ namespace mission
         static void AntennaDeploymentAction(SystemState& state, void* param)
         {
             auto stateDescriptor = static_cast<AntennaMissionState*>(param);
+
+            LOGF(LOG_LEVEL_DEBUG, "[ant] Executing antenna deployment step %d", stateDescriptor->StepNumber());
+
             if (state.PersistentState.Get<state::AntennaConfiguration>().IsDeploymentDisabled())
             {
+                LOG(LOG_LEVEL_DEBUG, "[ant] Antenna deployment disabled");
                 stateDescriptor->Finish();
             }
             else
@@ -468,11 +473,14 @@ namespace mission
         {
             auto This = reinterpret_cast<StopAntennaDeploymentTask*>(param);
             auto alreadyDisabled = state.PersistentState.Get<state::AntennaConfiguration>().IsDeploymentDisabled();
+
             return This->_shouldDisable && !alreadyDisabled && state.AntennaState.IsDeployed();
         }
 
         void StopAntennaDeploymentTask::Action(SystemState& state, void*)
         {
+            LOG(LOG_LEVEL_INFO, "[ant] Disabling antenna deployment");
+
             state.PersistentState.Set(state::AntennaConfiguration(true));
         }
 
