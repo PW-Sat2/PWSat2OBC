@@ -35,17 +35,13 @@ namespace time_counter
     template <std::int32_t Count> using min = Duration<Count, std::chrono::minutes>;
 
     /**
-     * @brief Type of action called by counter
-     */
-    template <typename Param> using CounterAction = void (*)(Param p);
-
-    /**
      * @brief Time counter
      * @tparam Param Type of parameter passed to callback
      * @tparam Period Counter period
      * @tparam StartDelay Initial value of counter. By default 0
      */
-    template <typename Param, typename Period, typename StartDelay = Duration<0, std::chrono::milliseconds>> class TimeCounter
+    template <typename Action, typename Param, typename Period, typename StartDelay = Duration<0, std::chrono::milliseconds>>
+    class TimeCounter
     {
       public:
         /**
@@ -58,7 +54,7 @@ namespace time_counter
          * @param action Callback
          * @param param Parameter that will be passed to callback
          */
-        TimeCounter(CounterAction<Param> action, Param param);
+        TimeCounter(Action action, Param param);
 
         /**
          * @brief Returns remaining time
@@ -85,30 +81,30 @@ namespace time_counter
         /** @brief Current value */
         std::chrono::milliseconds _value;
         /** @brief Callback */
-        CounterAction<Param> _action;
+        Action _action;
         /** @brief Parameter for callback */
         Param _param;
     };
 
-    template <typename Param, typename Period, typename StartDelay>
-    TimeCounter<Param, Period, StartDelay>::TimeCounter() : _value(StartDelay::value), _action(nullptr)
+    template <typename Action, typename Param, typename Period, typename StartDelay>
+    TimeCounter<Action, Param, Period, StartDelay>::TimeCounter() : _value(StartDelay::value), _action(nullptr)
     {
     }
 
-    template <typename Param, typename Period, typename StartDelay>
-    TimeCounter<Param, Period, StartDelay>::TimeCounter(CounterAction<Param> action, Param param)
+    template <typename Action, typename Param, typename Period, typename StartDelay>
+    TimeCounter<Action, Param, Period, StartDelay>::TimeCounter(Action action, Param param)
         : _value(StartDelay::value), _action(action), _param(param)
     {
     }
 
-    template <typename Param, typename Period, typename StartDelay>
-    std::chrono::milliseconds TimeCounter<Param, Period, StartDelay>::TimeToZero()
+    template <typename Action, typename Param, typename Period, typename StartDelay>
+    std::chrono::milliseconds TimeCounter<Action, Param, Period, StartDelay>::TimeToZero()
     {
         return this->_value;
     }
 
-    template <typename Param, typename Period, typename StartDelay>
-    std::chrono::milliseconds TimeCounter<Param, Period, StartDelay>::Step(std::chrono::milliseconds delta)
+    template <typename Action, typename Param, typename Period, typename StartDelay>
+    std::chrono::milliseconds TimeCounter<Action, Param, Period, StartDelay>::Step(std::chrono::milliseconds delta)
     {
         if (this->_value == decltype(this->_value)::zero())
         {
@@ -127,8 +123,8 @@ namespace time_counter
         return this->_value;
     }
 
-    template <typename Param, typename Period, typename StartDelay>
-    bool TimeCounter<Param, Period, StartDelay>::DoOnBottom()
+    template <typename Action, typename Param, typename Period, typename StartDelay>
+    bool TimeCounter<Action, Param, Period, StartDelay>::DoOnBottom()
     {
         if (this->_value == decltype(this->_value)::zero())
         {
@@ -149,6 +145,8 @@ namespace time_counter
      */
     template <typename... Counters> std::chrono::milliseconds SleepTime(Counters&... counters)
     {
+        static_assert(sizeof...(Counters) > 0, "Specify at least one counter");
+
         std::array<std::chrono::milliseconds, sizeof...(Counters)> times{counters.TimeToZero()...};
         auto m = std::min_element(times.begin(), times.end());
 
@@ -162,6 +160,7 @@ namespace time_counter
      */
     template <typename... Counters> void Step(std::chrono::milliseconds delta, Counters&... counters)
     {
+        static_assert(sizeof...(Counters) > 0, "Specify at least one counter");
         std::array<std::chrono::milliseconds, sizeof...(Counters)>{counters.Step(delta)...};
     }
 
@@ -171,6 +170,7 @@ namespace time_counter
      */
     template <typename... Counters> void DoOnBottom(Counters&... counters)
     {
+        static_assert(sizeof...(Counters) > 0, "Specify at least one counter");
         std::array<bool, sizeof...(Counters)>{counters.DoOnBottom()...};
     }
 

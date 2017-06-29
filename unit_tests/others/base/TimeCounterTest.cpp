@@ -3,6 +3,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "base/time_counter.hpp"
+#include "utils.h"
 
 using namespace std::chrono_literals;
 
@@ -15,8 +16,8 @@ namespace
 {
     TEST(TimeCounterTest, ShouldGetMinimalSleepTimeForAllCounters)
     {
-        TimeCounter<int, min<1>, s<10>> a;
-        TimeCounter<int, min<2>, s<15>> b;
+        TimeCounter<Action<int>, int, min<1>, s<10>> a;
+        TimeCounter<Action<int>, int, min<2>, s<15>> b;
 
         auto sleepTime = time_counter::SleepTime(a, b);
 
@@ -25,8 +26,8 @@ namespace
 
     TEST(TimeCounterTest, ShouldReturnZeroWhenNoDelayTime)
     {
-        TimeCounter<int, min<1>> a;
-        TimeCounter<int, min<2>> b;
+        TimeCounter<Action<int>, int, min<1>> a;
+        TimeCounter<Action<int>, int, min<2>> b;
 
         auto sleepTime = time_counter::SleepTime(a, b);
 
@@ -35,7 +36,7 @@ namespace
 
     TEST(TimeCounterTest, SteppingWhenOnZeroShouldMoveBackToTop)
     {
-        TimeCounter<int, min<1>> a;
+        TimeCounter<Action<int>, int, min<1>> a;
         ASSERT_THAT(a.TimeToZero(), Eq(0s));
 
         a.Step(10s);
@@ -45,7 +46,7 @@ namespace
 
     TEST(TimeCounterTest, SimpleCycle)
     {
-        TimeCounter<int, min<1>> a;
+        TimeCounter<Action<int>, int, min<1>> a;
         ASSERT_THAT(a.TimeToZero(), Eq(0s));
 
         a.Step(10s);
@@ -63,8 +64,8 @@ namespace
 
     TEST(TimeCounterTest, ShouldPerformStepOnAllCounters)
     {
-        TimeCounter<int, min<1>, s<10>> a;
-        TimeCounter<int, min<2>, s<45>> b;
+        TimeCounter<Action<int>, int, min<1>, s<10>> a;
+        TimeCounter<Action<int>, int, min<2>, s<45>> b;
 
         Step(15s, a, b);
 
@@ -78,11 +79,11 @@ namespace
         bool flag2 = false;
         bool flag3 = false;
 
-        time_counter::CounterAction<bool*> mark = [](bool* arg) { *arg = true; };
+        Action<bool*> mark = [](bool* arg) { *arg = true; };
 
-        TimeCounter<bool*, min<1>> a(mark, &flag1);
-        TimeCounter<bool*, min<2>, s<45>> b(mark, &flag2);
-        TimeCounter<bool*, min<2>> c(mark, &flag3);
+        TimeCounter<Action<bool*>, bool*, min<1>> a(mark, &flag1);
+        TimeCounter<Action<bool*>, bool*, min<2>, s<45>> b(mark, &flag2);
+        TimeCounter<Action<bool*>, bool*, min<2>> c(mark, &flag3);
 
         time_counter::DoOnBottom(a, b, c);
 
