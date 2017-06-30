@@ -126,6 +126,23 @@ namespace mission
             void Finish();
 
             /**
+             * @brief Sets current operation timeout in mission iterations.
+             * @param cycleCount Number of mission iterations before operation times out.
+             */
+            void SetTimeout(std::int8_t cycleCount);
+
+            /**
+             * @brief Mission iteration notification procedure.
+             */
+            void NextCycle();
+
+            /**
+             * @brief Queries the state whether the current operation has timed out.
+             * @return True in case of timeout, false otherwise.
+             */
+            bool TimedOut() const;
+
+            /**
              * @brief Returns total count of the deployment steps.
              * @return Total deployment step count.
              */
@@ -138,7 +155,7 @@ namespace mission
             bool _overrideState;
 
             /**
-             * @brief Flag indicating whether the antennas are being curretnly deployed.
+             * @brief Flag indicating whether the antennas are being currently deployed.
              */
             bool _inProgress;
 
@@ -151,6 +168,11 @@ namespace mission
              * @brief Current step retry count.
              */
             std::uint8_t _retryCount;
+
+            /**
+             * @brief Number of mission iteration cycles before current operation times out.
+             */
+            std::int8_t _cycleCount;
 
             /**
              * @brief Current antenna driver instance.
@@ -203,6 +225,22 @@ namespace mission
         {
             OverrideStep(StepCount());
         }
+
+        inline void AntennaMissionState::SetTimeout(std::int8_t cycleCount)
+        {
+            this->_cycleCount = cycleCount;
+        }
+
+        inline void AntennaMissionState::NextCycle()
+        {
+            --this->_cycleCount;
+        }
+
+        inline bool AntennaMissionState::TimedOut() const
+        {
+            return this->_cycleCount <= 0;
+        }
+
         /** @}*/
     }
 }
