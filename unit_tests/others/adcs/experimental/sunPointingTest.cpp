@@ -96,7 +96,7 @@ TEST(sunpointing, cross_validation)
 #else
         UNUSED1(input_scale);
 #endif
-        DipoleVec dipole;
+        DipoleVec dipole = {0, 0, 0};
         MagVec mtmMeas = {int32_t(record[ESP_mtmMeas+0]), int32_t(record[ESP_mtmMeas+1]), int32_t(record[ESP_mtmMeas+2])};
         bool mtmFlag = (record[ESP_mtmFlag] != 0);
         SunsVec ssMeas = {record[ESP_ssMeas+0], record[ESP_ssMeas+1]};
