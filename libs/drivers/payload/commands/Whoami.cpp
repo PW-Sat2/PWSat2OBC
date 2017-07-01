@@ -31,15 +31,9 @@ uint8_t WhoamiCommand::GetDataAddress() const
     return offsetof(PayloadTelemetry, status);
 }
 
-OSResult WhoamiCommand::Validate() const
+bool WhoamiCommand::Validate(const PayloadTelemetry::Status& data)
 {
-    if (_telemetry.data.who_am_i == 0xFF)
-    {
-        LOG(LOG_LEVEL_ERROR, "Invalid whoami response");
-        return OSResult::InvalidMessage;
-    }
-
-    return OSResult::Success;
+    return data.who_am_i == ValidWhoAmIResponse;
 }
 
 OSResult WhoamiCommand::Save(PayloadTelemetry::Status& output)

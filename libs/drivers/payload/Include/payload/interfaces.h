@@ -126,6 +126,13 @@ namespace drivers
              * @return Result status.
              */
             virtual OSResult GetWhoami(PayloadTelemetry::Status& output) = 0;
+
+            /**
+             * @brief Validates Payload Who Am I flag.
+             * @param data Retrieved data.
+             * @return True if data is correct, false otherwise.
+             */
+            virtual bool ValidateWhoami(const PayloadTelemetry::Status& data) const = 0;
         };
 
         /* @} */

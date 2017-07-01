@@ -91,7 +91,6 @@ namespace drivers
             virtual void SetDataTimeout(std::chrono::milliseconds newTimeout) override;
 
           private:
-            static constexpr uint32_t InterruptPriority = 6;
             /*
              * @brief DefaultTimeout Default timeout for Payload operations. 30 minutes.
              */

@@ -11,7 +11,7 @@ using testing::Invoke;
 class InterruptPinDriverMock : public drivers::gpio::IInterruptPinDriver
 {
   public:
-    MOCK_METHOD1(EnableInterrupt, void(const int32_t));
+    MOCK_METHOD0(EnableInterrupt, void());
 
     MOCK_METHOD0(ClearInterrupt, void());
 
@@ -22,10 +22,7 @@ class InterruptPinDriverMock : public drivers::gpio::IInterruptPinDriver
         _pin = newValue;
     }
 
-    InterruptPinDriverMock() : _pin(0)
-    {
-        ON_CALL(*this, Value()).WillByDefault(Invoke([this]() { return _pin; }));
-    }
+    InterruptPinDriverMock();
 
   private:
     bool _pin;

@@ -40,6 +40,13 @@ namespace drivers
             virtual OSResult GetWhoami(PayloadTelemetry::Status& output) override;
 
             /**
+             * @brief Validates Payload Who Am I flag.
+             * @param data Retrieved data.
+             * @return True if data is correct, false otherwise.
+             */
+            virtual bool ValidateWhoami(const PayloadTelemetry::Status& data) const override;
+
+            /**
               * @brief Starts measuring SunS reference voltages.
               * @param output Retrieved data.
               * @return Result status.

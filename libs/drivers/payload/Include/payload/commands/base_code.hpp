@@ -7,6 +7,11 @@
 using namespace drivers::payload::commands;
 
 template <std::uint8_t TCommandCode, class TOutputDataType>
+PayloadCommand<TCommandCode, TOutputDataType>::PayloadCommand(IPayloadDriver& driver) : _driver(driver)
+{
+}
+
+template <std::uint8_t TCommandCode, class TOutputDataType>
 OSResult PayloadCommand<TCommandCode, TOutputDataType>::Execute(TOutputDataType& output)
 {
     if (_driver.IsBusy())
@@ -41,9 +46,6 @@ OSResult PayloadCommand<TCommandCode, TOutputDataType>::ExecuteDataCommand(TOutp
     {
         return result;
     }
-
-    // Validation should not cancel save.
-    result = Validate();
 
     result = Save(output);
     if (result != OSResult::Success)

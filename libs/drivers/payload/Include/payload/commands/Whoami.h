@@ -26,10 +26,16 @@ namespace drivers
                 WhoamiCommand(IPayloadDriver& driver);
                 virtual OSResult Execute(PayloadTelemetry::Status& output) override;
 
+                /**
+                 * @brief Method for validation of returned data.
+                 * @param data The data to validate
+                 * @returns True vhen data is valid, false when invalid.
+                 */
+                static bool Validate(const PayloadTelemetry::Status& data);
+
               protected:
                 virtual gsl::span<std::uint8_t> GetBuffer() override;
                 virtual uint8_t GetDataAddress() const override;
-                virtual OSResult Validate() const override;
                 virtual OSResult Save(PayloadTelemetry::Status& output) override;
 
               private:
@@ -38,6 +44,8 @@ namespace drivers
                     std::array<uint8_t, sizeof(PayloadTelemetry::Status)> buffer;
                     static_assert(sizeof(data) == sizeof(buffer), "Incorrect size buffered Telemetry");
                 } _telemetry;
+
+                static constexpr uint8_t ValidWhoAmIResponse = 0x53;
             };
         }
     }

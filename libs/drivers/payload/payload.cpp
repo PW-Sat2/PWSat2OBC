@@ -29,7 +29,7 @@ void PayloadDriver::IRQHandler()
 void PayloadDriver::Initialize()
 {
     _sync = System::CreateBinarySemaphore();
-    _interruptPinDriver.EnableInterrupt(InterruptPriority);
+    _interruptPinDriver.EnableInterrupt();
 }
 
 bool PayloadDriver::IsBusy() const

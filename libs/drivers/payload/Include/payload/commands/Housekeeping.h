@@ -25,7 +25,6 @@ namespace drivers
               protected:
                 virtual gsl::span<std::uint8_t> GetBuffer() override;
                 virtual uint8_t GetDataAddress() const override;
-                virtual OSResult Validate() const override;
                 virtual OSResult Save(PayloadTelemetry::Housekeeping& output) override;
 
               private:

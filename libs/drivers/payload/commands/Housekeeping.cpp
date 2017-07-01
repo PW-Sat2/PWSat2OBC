@@ -19,23 +19,6 @@ uint8_t HousekeepingCommand::GetDataAddress() const
     return offsetof(PayloadTelemetry, housekeeping);
 }
 
-OSResult HousekeepingCommand::Validate() const
-{
-    if (_telemetry.data.int_3v3d == 0xFFFF)
-    {
-        LOG(LOG_LEVEL_ERROR, "Invalid Int voltage");
-        return OSResult::InvalidMessage;
-    }
-
-    if (_telemetry.data.obc_3v3d == 0xFFFF)
-    {
-        LOG(LOG_LEVEL_ERROR, "Invalid OBC voltage");
-        return OSResult::InvalidMessage;
-    }
-
-    return OSResult::Success;
-}
-
 OSResult HousekeepingCommand::Save(PayloadTelemetry::Housekeeping& output)
 {
     LOGF(LOG_LEVEL_DEBUG, "INT voltage: %u.", _telemetry.data.int_3v3d);

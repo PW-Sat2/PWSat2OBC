@@ -26,7 +26,11 @@ namespace io_map
     using Led0 = PinLocation<gpioPortD, 1>;
     using Led1 = PinLocation<gpioPortD, 2>;
 
-    using PayloadInterrupt = PinLocation<gpioPortE, 0>;
+    struct Payload
+    {
+        static constexpr std::uint8_t InterruptPriority = 6;
+        using PayloadInterrupt = PinLocation<gpioPortE, 0>;
+    };
 
     struct SPI : public SPIPins<SPI>
     {

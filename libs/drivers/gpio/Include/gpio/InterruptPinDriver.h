@@ -15,12 +15,12 @@ namespace drivers
         struct IInterruptPinDriver
         {
           public:
-            /** @brief Enables interrupt for pin
-             * @param interruptPriority Priority of pin interrupt
-             */
-            virtual void EnableInterrupt(const int32_t interruptPriority) = 0;
+            /** @brief Enables interrupt for pin  */
+            virtual void EnableInterrupt() = 0;
+
             /** @brief Clears interrupt active flag for pin low */
             virtual void ClearInterrupt() = 0;
+
             /**
              * @brief Reads pin's input
              * @return true if pin is high
@@ -40,10 +40,8 @@ namespace drivers
              */
             InterruptPinDriver(const Pin& pin);
 
-            /** @brief Enables interrupt for pin
-             * @param interruptPriority Priority of pin interrupt
-             */
-            virtual void EnableInterrupt(const int32_t interruptPriority) override;
+            /** @brief Enables interrupt for pin */
+            virtual void EnableInterrupt() override;
 
             /** @brief Clears interrupt active flag for pin low */
             virtual void ClearInterrupt() override;
@@ -57,10 +55,7 @@ namespace drivers
             /**
              * @brief Returns mask for setting and clearing interrupt registers. Calculated from interrupt pin number.
              */
-            inline uint32_t IRQMask()
-            {
-                return 1 << (_pin.PinNumber());
-            }
+            uint32_t IRQMask();
 
           private:
             /** @brief Pin */

@@ -19,35 +19,6 @@ uint8_t PhotodiodesCommand::GetDataAddress() const
     return offsetof(PayloadTelemetry, photodiodes);
 }
 
-OSResult PhotodiodesCommand::Validate() const
-{
-    if (_telemetry.data.Xp == 0xFFFF)
-    {
-        LOG(LOG_LEVEL_ERROR, "Invalid Xp voltage");
-        return OSResult::InvalidMessage;
-    }
-
-    if (_telemetry.data.Xn == 0xFFFF)
-    {
-        LOG(LOG_LEVEL_ERROR, "Invalid Xn voltage");
-        return OSResult::InvalidMessage;
-    }
-
-    if (_telemetry.data.Yp == 0xFFFF)
-    {
-        LOG(LOG_LEVEL_ERROR, "Invalid Yp voltage");
-        return OSResult::InvalidMessage;
-    }
-
-    if (_telemetry.data.Yn == 0xFFFF)
-    {
-        LOG(LOG_LEVEL_ERROR, "Invalid Yn voltage");
-        return OSResult::InvalidMessage;
-    }
-
-    return OSResult::Success;
-}
-
 OSResult PhotodiodesCommand::Save(PayloadTelemetry::Photodiodes& output)
 {
     LOGF(LOG_LEVEL_DEBUG, "Photodiode Xp voltage: %u.", _telemetry.data.Xp);

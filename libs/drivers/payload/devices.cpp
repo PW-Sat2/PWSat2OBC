@@ -21,6 +21,11 @@ OSResult PayloadDeviceDriver::GetWhoami(PayloadTelemetry::Status& output)
     return command.Execute(output);
 }
 
+bool PayloadDeviceDriver::ValidateWhoami(const PayloadTelemetry::Status& data) const
+{
+    return commands::WhoamiCommand::Validate(data);
+}
+
 OSResult PayloadDeviceDriver::MeasureSunSRef(PayloadTelemetry::SunsRef& output)
 {
     commands::SunSCommand command(_driver);

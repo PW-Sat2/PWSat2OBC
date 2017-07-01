@@ -22,9 +22,7 @@ namespace drivers
                  * @brief Constructs @ref PayloadCommand object
                  * @param[in] driver A reference to hardware driver for payload.
                  */
-                PayloadCommand(IPayloadDriver& driver) : _driver(driver)
-                {
-                }
+                PayloadCommand(IPayloadDriver& driver);
 
                 /** @brief Telecommand code */
                 static constexpr auto CommandCode = TCommandCode;
@@ -47,12 +45,6 @@ namespace drivers
                   * @returns Address of data that will be retrieved by this command.
                   */
                 virtual uint8_t GetDataAddress() const = 0;
-
-                /**
-                  * @brief The method performing validation of retrieved data.
-                  * @returns Result status.
-                  */
-                virtual OSResult Validate() const = 0;
 
                 /**
                   * @brief The method saving retrieved data.

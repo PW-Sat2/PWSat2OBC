@@ -9,6 +9,8 @@
 class PayloadHardwareDriverMock : public drivers::payload::IPayloadDriver
 {
   public:
+    PayloadHardwareDriverMock();
+
     MOCK_CONST_METHOD0(IsBusy, bool());
 
     MOCK_METHOD2(PayloadRead, OSResult(gsl::span<std::uint8_t>, gsl::span<std::uint8_t>));

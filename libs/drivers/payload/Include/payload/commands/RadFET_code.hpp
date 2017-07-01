@@ -23,32 +23,6 @@ template <std::uint8_t TCommandCode> uint8_t RadFETBaseCommand<TCommandCode>::Ge
     return offsetof(PayloadTelemetry, radfet);
 }
 
-template <std::uint8_t TCommandCode> OSResult RadFETBaseCommand<TCommandCode>::Validate() const
-{
-    if (_telemetry.data.status == 0xFFu)
-    {
-        LOG(LOG_LEVEL_ERROR, "Invalid RadFet status");
-        return OSResult::InvalidMessage;
-    }
-
-    if (_telemetry.data.temperature == 0xFFFFFFFFu)
-    {
-        LOG(LOG_LEVEL_ERROR, "Invalid RadFet temperature");
-        return OSResult::InvalidMessage;
-    }
-
-    for (uint32_t i = 0; i < _telemetry.data.vth.size(); ++i)
-    {
-        if (_telemetry.data.vth[i] == 0xFFFFFFFFu)
-        {
-            LOGF(LOG_LEVEL_ERROR, "Invalid RadFet voltage %lu", i + 1);
-            return OSResult::InvalidMessage;
-        }
-    }
-
-    return OSResult::Success;
-}
-
 template <std::uint8_t TCommandCode> OSResult RadFETBaseCommand<TCommandCode>::Save(PayloadTelemetry::Radfet& output)
 {
     LOGF(LOG_LEVEL_DEBUG, "RadFET status: %u (0x%x).", _telemetry.data.status, _telemetry.data.status);

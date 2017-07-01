@@ -179,7 +179,7 @@ namespace obc
         io_map::UART,
         io_map::I2C_0,
         io_map::I2C_1,
-        io_map::PayloadInterrupt,
+        io_map::Payload::PayloadInterrupt,
         io_map::Watchdog::ExternalWatchdogPin,
         io_map::BSP,
         io_map::MemoryModules>;
