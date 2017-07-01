@@ -299,6 +299,14 @@ namespace mission
             AntennaDriver& driver //
             )
         {
+            const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
+
+            LOGF(LOG_LEVEL_INFO,
+                "[ant] [Step%d] Regular deployment (channel %d, antenna %d)",
+                stateDescriptor.StepNumber(),
+                step.channel,
+                step.antennaId);
+
             StopDeployment(state, stateDescriptor, driver);
             BeginDeployment(state, stateDescriptor, driver);
         }
@@ -310,6 +318,8 @@ namespace mission
         {
             UNREFERENCED_PARAMETER(state);
             const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
+
+            LOGF(LOG_LEVEL_INFO, "[ant] [Step%d] Reseting driver %d", stateDescriptor.StepNumber(), step.channel);
 
             std::uint8_t counter = RetryLimit;
             while (counter-- > 0)
@@ -332,6 +342,9 @@ namespace mission
         {
             UNREFERENCED_PARAMETER(state);
             const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
+
+            LOGF(LOG_LEVEL_INFO, "[ant] [Step%d] Finish deployment %d", stateDescriptor.StepNumber(), step.channel);
+
             if (EndDeployment(driver, step.channel, RetryLimit))
             {
                 stateDescriptor.NextStep();
