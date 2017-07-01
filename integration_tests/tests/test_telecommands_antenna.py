@@ -1,5 +1,5 @@
-from devices import AntennaController
-from system import runlevel
+rom obc.boot import SelectRunlevel
+from system import runlevel, clear_state
 from telecommand.antenna import StopAntennaDeployment
 from tests.base import BaseTest
 from utils import TestEvent
@@ -7,11 +7,10 @@ from utils import TestEvent
 
 class TestTelecommandsAntenna(BaseTest):
     @runlevel(1)
-    def test_x(self):
+    @clear_state()
+    def test_disable_antenna_deployment(self):
         self.system.obc.runlevel_start_comm()
         self.system.obc.jump_to_time(41 * 60)
-
-        print self.system.obc._command("state set antenna 0")
 
         being_deployed = TestEvent()
 
@@ -34,7 +33,7 @@ class TestTelecommandsAntenna(BaseTest):
 
         self.system.obc.run_mission()
 
-        self.system.restart()
+        self.system.restart(boot_chain=[SelectRunlevel(1)])
 
         minutes_since_start = self.system.obc.current_time() / 60.0 / 1000.0
         self.assertGreaterEqual(minutes_since_start, 40, "Should retain mission time during restart")

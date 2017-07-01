@@ -1,6 +1,6 @@
 from functools import wraps
 
-from obc.boot import SelectRunlevel
+from obc.boot import SelectRunlevel, ClearState
 
 
 def auto_comm_handling(enable_auto_comm):
@@ -33,6 +33,17 @@ def runlevel(requested_runlevel):
             f.boot_wrappers += [SelectRunlevel(requested_runlevel)]
         except AttributeError:
             f.boot_wrappers = [SelectRunlevel(requested_runlevel)]
+        return f
+
+    return wrap
+
+
+def clear_state():
+    def wrap(f):
+        try:
+            f.boot_wrappers += [ClearState()]
+        except AttributeError:
+            f.boot_wrappers = [ClearState()]
         return f
 
     return wrap

@@ -274,5 +274,7 @@ int main(void)
 
     Main.Hardware.Pins.Led0.Toggle();
 
+    GPIO_PinOutGet(gpioPortA, 8);
+
     return 0;
 }
