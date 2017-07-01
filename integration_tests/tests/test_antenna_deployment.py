@@ -1,4 +1,4 @@
-from system import auto_power_on, runlevel
+from system import auto_power_on, runlevel, clear_state
 from tests.base import BaseTest
 from utils import TestEvent
 
@@ -25,6 +25,7 @@ class Test_AntennaDeployment(BaseTest):
         self.run_steps(count)
 
     @runlevel(1)
+    @clear_state()
     def test_antennas_are_not_deployed_too_soon(self):
         event = TestEvent()
         self.system.primary_antenna.on_begin_deployment = event.set
@@ -34,6 +35,7 @@ class Test_AntennaDeployment(BaseTest):
         self.assertFalse(event.wait_for_change(1), "antenna deployment process began too soon")
 
     @runlevel(1)
+    @clear_state()
     def test_process_begins_automatically_by_controller_reset(self):
         event = TestEvent()
         self.system.primary_antenna.on_reset = event.set
@@ -41,6 +43,7 @@ class Test_AntennaDeployment(BaseTest):
         self.assertTrue(event.wait_for_change(1), "antenna controller was not reset")
 
     @runlevel(1)
+    @clear_state()
     def test_process_begins_automatically(self):
         event = TestEvent()
         self.system.primary_antenna.on_begin_deployment = event.set
@@ -48,6 +51,7 @@ class Test_AntennaDeployment(BaseTest):
         self.assertTrue(event.wait_for_change(1), "antenna deployment process did not began when it should")
 
     @runlevel(1)
+    @clear_state()
     def test_deployment_is_cancelled_on_retry(self):
         event = TestEvent()
         self.system.primary_antenna.on_deployment_cancel = event.set
@@ -55,6 +59,7 @@ class Test_AntennaDeployment(BaseTest):
         self.assertTrue(event.wait_for_change(1), "antenna deployment process was not cancelled")
 
     @runlevel(1)
+    @clear_state()
     def test_deployment_arming_sequences(self):
         primaryBegin = TestEvent()
         primaryEnd = TestEvent()
@@ -87,6 +92,7 @@ class Test_AntennaDeployment(BaseTest):
         self.assertTrue(backupEnd.wait_for_change(1), "backup controller was not disarmed")
 
     @runlevel(1)
+    @clear_state()
     def test_all_antennas_are_deployed_manually(self):
         list = [0, 0, 0, 0, 0, 0, 0, 0, 0]
         expected = [0, 1, 1, 1, 1, 1, 1, 1, 1]

@@ -4,10 +4,11 @@ from devices import *
 from i2cMock import I2CMock
 from obc import OBC, SerialPortTerminal
 import response_frames
+from obc.boot import BootHandler
 
 
 class System:
-    def __init__(self, obc_com, mock_com, gpio, boot_handler, auto_power_on=True):
+    def __init__(self, obc_com, mock_com, gpio, final_boot_handler):
         self.log = logging.getLogger("system")
 
         self.obc_com = obc_com
@@ -17,13 +18,12 @@ class System:
 
         self._setup_devices()
 
-        self.obc = OBC(SerialPortTerminal(obc_com, gpio, boot_handler))
+        self.obc = OBC(SerialPortTerminal(obc_com, gpio))
         self.obc.power_off()
 
         self.i2c.start()
 
-        if auto_power_on:
-            self.obc.power_on()
+        self._final_boot_handler = final_boot_handler
 
     def _setup_devices(self):
         self.frame_decoder = response_frames.FrameDecoder(response_frames.frame_factories)
@@ -52,7 +52,10 @@ class System:
         self.i2c.stop()
         self.obc.close()
 
-    def restart(self):
+    def restart(self, boot_chain=None):
+        if boot_chain is None:
+            boot_chain = []
+
         self.i2c.unlatch()
-        self.obc.reset()
+        self.obc.reset(boot_handler=BootHandler(boot_chain + [self._final_boot_handler]))
         self.obc.wait_to_start()

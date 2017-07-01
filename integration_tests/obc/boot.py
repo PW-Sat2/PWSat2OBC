@@ -38,7 +38,7 @@ class SelectRunlevel:
     def __init__(self, runlevel):
         self._runlevel = runlevel
 
-    def boot(self, next_handler, bootloader):
+    def boot(self, bootloader):
         bootloader.wait_for_prompt()
 
         bootloader.write('R')
@@ -46,15 +46,23 @@ class SelectRunlevel:
 
         bootloader.write(chr(self._runlevel))
 
-        next_handler.boot(bootloader)
 
-
-class BootHandlerChain:
-    def __init__(self, chain):
-        self._chain = chain
+class ClearState:
+    def __init__(self,):
+        pass
 
     def boot(self, bootloader):
-        if len(self._chain) == 1:
-            self._chain[0].boot(bootloader)
-        else:
-            self._chain[0].boot(BootHandlerChain(self._chain[1:]), bootloader)
+        bootloader.wait_for_prompt()
+
+        bootloader.write('N')
+        bootloader.wait_for_prompt(trigger=False, prompt=':')
+        bootloader.write('Y')
+
+
+class BootHandler:
+    def __init__(self, steps):
+        self._steps = steps
+
+    def boot(self, bootloader):
+        for step in self._steps:
+            step.boot(bootloader)

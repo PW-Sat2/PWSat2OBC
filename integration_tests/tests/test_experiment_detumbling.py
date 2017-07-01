@@ -21,7 +21,7 @@ class TestExperimentDetumbling(BaseTest):
             return False
         self.system.comm.on_hardware_reset = on_reset
 
-        self.system.obc.power_on()
+        self.power_on_obc()
         self.system.obc.wait_to_start()
 
         e.wait_for_change(1)
