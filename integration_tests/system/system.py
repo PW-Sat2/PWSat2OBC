@@ -19,7 +19,6 @@ class System:
         self._setup_devices()
 
         self.obc = OBC(SerialPortTerminal(obc_com, gpio))
-        self.obc.power_off()
 
         self.i2c.start()
 

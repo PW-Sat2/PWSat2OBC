@@ -1,4 +1,4 @@
-rom obc.boot import SelectRunlevel
+from obc.boot import SelectRunlevel
 from system import runlevel, clear_state
 from telecommand.antenna import StopAntennaDeployment
 from tests.base import BaseTest
