@@ -268,7 +268,12 @@ class EPSControllerA(I2CDevice):
     @i2cMock.command([0x0])
     def _housekeeping(self):
         hk = call(self.on_get_housekeeping, default=self.hk)
-        return [hk.CTRLA.ERR, 0x61] + hk.bytes()
+        return [0x61] + hk.bytes()
+
+    @i2cMock.command([0x4B])
+    def _error_code(self):
+        hk = call(self.on_get_housekeeping, default=self.hk)
+        return hk.bytes()[0x4B - 1:]
 
 
 class EPSControllerB(I2CDevice):
@@ -319,7 +324,12 @@ class EPSControllerB(I2CDevice):
     @i2cMock.command([0x0])
     def _housekeeping(self):
         hk = call(self.on_get_housekeeping, default=self.hk)
-        return [hk.CTRLB.ERR, 0x9D] + hk.bytes()
+        return [0x9D] + hk.bytes()
+
+    @i2cMock.command([0x07])
+    def _error_code(self):
+        hk = call(self.on_get_housekeeping, default=self.hk)
+        return hk.bytes()[0x07 - 1:]
 
 
 class EPS:
