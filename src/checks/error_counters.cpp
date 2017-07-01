@@ -1,10 +1,10 @@
 #include "comm/CommDriver.hpp"
 #include "eps/eps.h"
-#include "n25q/n25q.h"
 #include "fm25w/fm25w.hpp"
+#include "imtq/imtq.h"
+#include "n25q/n25q.h"
 #include "obc/storage/n25q.h"
 #include "rtc/rtc.hpp"
-#include "imtq/imtq.h"
 #include "traits.hpp"
 
 namespace
@@ -20,14 +20,14 @@ namespace
 
     /** @brief Typedef with all declared error counters */
     using Everything = VerifyUniqueness<           //
-        devices::eps::EPSDriver,                   //
-        devices::comm::CommObject,                 //
-        devices::imtq::ImtqDriver,                 //
-        devices::fm25w::RedundantFM25WDriver,      //
-        devices::rtc::RTCObject,                   //
-        obc::storage::error_counters::N25QDriver1, //
-        obc::storage::error_counters::N25QDriver2, //
-        obc::storage::error_counters::N25QDriver3  //
+        devices::eps::EPSDriver,                   // 5
+        devices::comm::CommObject,                 // 1
+        devices::imtq::ImtqDriver,                 // 6
+        devices::fm25w::RedundantFM25WDriver,      // 11
+        devices::rtc::RTCObject,                   // 7
+        obc::storage::error_counters::N25QDriver1, // 8
+        obc::storage::error_counters::N25QDriver2, // 9
+        obc::storage::error_counters::N25QDriver3  // 10
         >;
 
     static_assert(Everything::IsOk, "Device IDs for error counting must be unique");

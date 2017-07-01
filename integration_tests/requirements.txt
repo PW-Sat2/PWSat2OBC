@@ -4,3 +4,4 @@ rednose
 colorlog
 saleae
 nose-parameterized
+bitarray

@@ -218,6 +218,9 @@ class TransmitterDevice(i2cMock.I2CDevice):
         self.baud_rate = BaudRate.BaudRate1200
         self.beacon_active = False
         self.transmitter_active = False
+
+        self.current_beacon = None
+        self.current_beacon_timestamp = None
     
     @i2cMock.command([0xAA])
     def _reset(self):
@@ -254,6 +257,9 @@ class TransmitterDevice(i2cMock.I2CDevice):
 
     @i2cMock.command([0x14])
     def _set_beacon(self, *data):
+        self.current_beacon = data[3:]
+        self.current_beacon_timestamp = time.localtime()
+
         self.log.info("set beacon: %s", data)
         if call(self.on_set_beacon, True):
             self.reset_queue()
