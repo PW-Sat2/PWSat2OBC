@@ -20,7 +20,6 @@ class SerialPortTerminal:
             except serial.SerialException as e:
                 if e.message.find('WindowsError(5,') == -1:
                     raise
-        self._gpio.high(self._gpio.RESET)
 
     def waitForPrompt(self, terminator='>'):
         self._serial.reset_input_buffer()
