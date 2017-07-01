@@ -11,7 +11,7 @@ set(ENABLE_COVERAGE FALSE CACHE BOOL "Enable code coverage")
 
 set(MEM_MANAGMENT_TYPE 1)
 
-set(TARGET_PLATFORM "FlightModel" CACHE STRING "Target platform")
+set(TARGET_PLATFORM "EngModel" CACHE STRING "Target platform")
 set(SEMIHOSTING false CACHE BOOL "Enable semihosting")
 set(JLINK_SN "" CACHE STRING "J-Link serial number")
 
