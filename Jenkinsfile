@@ -1,13 +1,13 @@
 def build() {
-	bat "cmake -DJLINK_SN=${env.EFM_JLINK_FM} -DMOCK_COM=${env.MOCK_COM_FM} -DOBC_COM=${env.OBC_COM_FM} -DGPIO_COM=${env.GPIO_COM_FM} -DTARGET_PLATFORM=FlightModel -DCMAKE_BUILD_TYPE=Release -DENABLE_LTO=1 -G \"MinGW Makefiles\" ../source"
+	bat "cmake -DJLINK_SN=${env.EFM_JLINK_FM} -DMOCK_COM=${env.MOCK_COM_FM} -DOBC_COM=${env.OBC_COM_FM} -DGPIO_COM=${env.GPIO_COM_FM} -DTARGET_PLATFORM=EngModel -DCMAKE_BUILD_TYPE=Release -DENABLE_LTO=1 -G \"MinGW Makefiles\" ../source"
 	bat "make pwsat boot fm_terminal"
-	step([$class: 'ArtifactArchiver', artifacts: 'build/FlightModel/**/*', fingerprint: true])
+	step([$class: 'ArtifactArchiver', artifacts: 'build/EngModel/**/*', fingerprint: true])
 }
 
 def unitTests() {
 	bat "make unit_tests"
 	bat "make unit_tests.run -j1"
-	step([$class: 'JUnitResultArchiver', testResults: 'build/FlightModel/unit_tests_*.xml'])
+	step([$class: 'JUnitResultArchiver', testResults: 'build/EngModel/unit_tests_*.xml'])
 }
 
 def reports() {
@@ -17,7 +17,7 @@ def reports() {
 		allowMissing: false,
 		alwaysLinkToLastBuild: false,
 		keepAll: false,
-		reportDir: 'build/FlightModel/reports/memory',
+		reportDir: 'build/EngModel/reports/memory',
 		reportFiles: 'index.html',
 		reportName: 'Memory usage'
   ])
@@ -27,7 +27,7 @@ def integrationTests() {
 	lock('hardware') {
 		bat "make boot.flash"
 		bat "make integration_tests"
-		step([$class: 'JUnitResultArchiver', testResults: 'build/FlightModel/integration-tests.xml'])
+		step([$class: 'JUnitResultArchiver', testResults: 'build/EngModel/integration-tests.xml'])
 	}
 }
 
@@ -50,7 +50,7 @@ def coverage() {
 		allowMissing: false,
 		alwaysLinkToLastBuild: false,
 		keepAll: false,
-		reportDir: 'build/FlightModel/reports/coverage',
+		reportDir: 'build/EngModel/reports/coverage',
 		reportFiles: 'index.html',
 		reportName: 'Code Coverage'
     ])

@@ -15,18 +15,16 @@
 
 namespace io_map
 {
-    using SlaveSelectFlash1 = PinLocation<gpioPortA, 13>;
-    using SlaveSelectFlash2 = PinLocation<gpioPortA, 11>;
-    using SlaveSelectFlash3 = PinLocation<gpioPortA, 8>;
+    using SlaveSelectFlash1 = PinLocation<gpioPortA, 8>;
+    using SlaveSelectFlash2 = PinLocation<gpioPortA, 9>;
+    using SlaveSelectFlash3 = PinLocation<gpioPortA, 10>;
 
-    using SlaveSelectFram1 = PinLocation<gpioPortA, 12>;
-    using SlaveSelectFram2 = PinLocation<gpioPortA, 10>;
-    using SlaveSelectFram3 = PinLocation<gpioPortA, 9>;
+    using SlaveSelectFram1 = PinLocation<gpioPortA, 11>;
+    using SlaveSelectFram2 = PinLocation<gpioPortA, 12>;
+    using SlaveSelectFram3 = PinLocation<gpioPortA, 13>;
 
     using Led0 = PinLocation<gpioPortD, 1>;
     using Led1 = PinLocation<gpioPortD, 2>;
-
-    using SailDeployed = PinLocation<gpioPortD, 4>;
 
     struct SPI : public SPIPins<SPI>
     {
@@ -36,6 +34,16 @@ namespace io_map
         using MOSI = PinLocation<gpioPortE, 7>;
         using MISO = PinLocation<gpioPortE, 6>;
         using CLK = PinLocation<gpioPortE, 5>;
+    };
+
+    struct LEUART : public LEUARTPins<LEUART>
+    {
+        static constexpr std::uint8_t Location = LEUART_ROUTE_LOCATION_LOC0;
+        static constexpr std::uint32_t Baudrate = 115200;
+        static constexpr std::uint8_t InterruptPriority = 6;
+
+        using TX = PinLocation<gpioPortD, 4>;
+        using RX = PinLocation<gpioPortD, 5>;
     };
 
     struct UART : public UARTPins<UART>
@@ -89,7 +97,6 @@ namespace io_map
     struct ProgramFlash
     {
         static constexpr std::uint8_t* FlashBase = reinterpret_cast<std::uint8_t*>(0x84000000);
-        static constexpr std::uint8_t* ApplicatonBase = reinterpret_cast<std::uint8_t*>(0x00080000);
     };
 
     struct RAMScrubbing
