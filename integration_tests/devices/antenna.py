@@ -38,6 +38,24 @@ class Antenna(object):
     def cancel_deployment(self):
         self.is_being_deployed = False
 
+    def __repr__(self):
+        s = ''
+
+        if self.deployed:
+            s += "Deployed"
+        else:
+            s += "Not deployed"
+
+        if self.is_being_deployed:
+            s += " (deploying)"
+        else:
+            s += ' (not deploying)'
+
+        s += ' Activated: {}'.format(self.activation_count)
+
+        return s
+
+
 class AntennaController(i2cMock.I2CDevice):
     def __init__(self, address, name):
         super(AntennaController, self).__init__(address, name)

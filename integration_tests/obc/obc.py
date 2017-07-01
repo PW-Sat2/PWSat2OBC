@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 from base64 import b64encode
 
@@ -46,6 +46,7 @@ class OBC(OBCMixin,
         self._formatter = ExtendableFormatter()
         self._formatter.register_conversion('E', lambda d: b64encode(d).rstrip('='))
         self._formatter.register_conversion('n', lambda d: d.name)
+        self._formatter.register_conversion('t', self._format_timedelta)
 
         self._terminal = terminal
 
@@ -58,6 +59,15 @@ class OBC(OBCMixin,
         cmdline = self._formatter.vformat(cmd, args, kwargs)
 
         return self._terminal.command_no_wait(cmdline)
+
+    def _format_timedelta(self, d):
+        if type(d) is int:
+            return str(d)
+
+        if type(d) is timedelta:
+            return str(int(d.total_seconds() * 1000))
+
+        raise TypeError('Must be int or timedelta')
 
     def wait_to_start(self):
         self.log.debug("Waiting for OBC initialization finish")
