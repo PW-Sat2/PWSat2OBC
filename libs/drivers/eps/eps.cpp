@@ -51,7 +51,7 @@ namespace devices
         Option<hk::ControllerATelemetry> EPSDriver::ReadHousekeepingA()
         {
             std::array<std::uint8_t, 1> command{0x0};
-            std::array<std::uint8_t, 73> response;
+            std::array<std::uint8_t, 72> response;
 
             auto result = this->WriteRead(Controller::A, command, response);
 
@@ -63,7 +63,6 @@ namespace devices
 
             hk::ControllerATelemetry housekeeping;
             Reader r(response);
-            r.ReadByte(); // error flag register
 
             if (!housekeeping.ReadFrom(r))
             {
@@ -84,7 +83,7 @@ namespace devices
         Option<hk::ControllerBTelemetry> EPSDriver::ReadHousekeepingB()
         {
             std::array<std::uint8_t, 1> command{0x0};
-            std::array<std::uint8_t, 17> response;
+            std::array<std::uint8_t, 16> response;
 
             auto result = this->WriteRead(Controller::B, command, response);
 
@@ -96,8 +95,6 @@ namespace devices
 
             hk::ControllerBTelemetry housekeeping;
             Reader r(response);
-
-            r.ReadByte(); // error flag register
 
             if (!housekeeping.ReadFrom(r))
             {
@@ -197,7 +194,17 @@ namespace devices
 
         ErrorCode EPSDriver::GetErrorCode(Controller controller)
         {
-            std::array<std::uint8_t, 1> command{0x0};
+            std::array<std::uint8_t, 1> command;
+
+            if (controller == Controller::A)
+            {
+                command[0] = 0x4B;
+            }
+            else
+            {
+                command[0] = 0x07;
+            }
+
             std::array<std::uint8_t, 1> response;
 
             auto r = this->WriteRead(controller, command, response) >> this->_error;
