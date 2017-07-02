@@ -4,3 +4,4 @@ rednose
 colorlog
 saleae
 nose-parameterized
+pypiwin32; sys_platform == 'win32'
