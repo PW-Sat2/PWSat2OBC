@@ -390,7 +390,7 @@ namespace telemetry
     {
         const auto& entry = std::get<ElementContainer<T>>(this->storage);
         entry.first.Write(writer);
-        WriteModifiedInternal<WriterType, Args...>(writer);
+        WriteInternal<WriterType, Args...>(writer);
     }
 
     template <typename... Type> template <typename WriterType> inline void Telemetry<Type...>::WriteInternal(WriterType& /*writer*/) const
