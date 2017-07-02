@@ -1,3 +1,5 @@
+import sys
+
 from SaleaeDump import SaleaeDump
 import os
 
@@ -9,6 +11,10 @@ def initialize_extensions():
 
     if 'CAPTURE_LINES' in os.environ and os.environ['CAPTURE_LINES'] == '1':
         _extensions.append(SaleaeDump(config['CAPTURES_OUTPUT']))
+
+    if sys.platform == 'win32':
+        import report_progress
+        _extensions.append(report_progress.Win32ReportProgress())
 
 
 def set_up_once():

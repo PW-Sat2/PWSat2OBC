@@ -1,4 +1,5 @@
 #include <em_device.h>
+#include <em_rmu.h>
 #include "efm_support/api.h"
 
 namespace efm
@@ -87,9 +88,7 @@ namespace efm
 
         void ResetBootReason()
         {
-            RMU->CMD |= RMU_CMD_RCCLR;
-            EMU->AUXCTRL |= EMU_AUXCTRL_HRCCLR;
-            EMU->AUXCTRL &= ~EMU_AUXCTRL_HRCCLR;
+            RMU_ResetCauseClear();
         }
     }
 }
