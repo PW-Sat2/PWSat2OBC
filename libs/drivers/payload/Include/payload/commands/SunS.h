@@ -25,14 +25,10 @@ namespace drivers
               protected:
                 virtual gsl::span<std::uint8_t> GetBuffer() override;
                 virtual uint8_t GetDataAddress() const override;
-                virtual OSResult Save(PayloadTelemetry::SunsRef& output) override;
+                virtual OSResult Save(gsl::span<uint8_t> buffer, PayloadTelemetry::SunsRef& output) override;
 
               private:
-                union SunSRefTelemetryBuffered {
-                    PayloadTelemetry::SunsRef data;
-                    std::array<uint8_t, sizeof(PayloadTelemetry::SunsRef)> buffer;
-                    static_assert(sizeof(data) == sizeof(buffer), "Incorrect size buffered Telemetry");
-                } _telemetry;
+                std::array<uint8_t, PayloadTelemetry::SunsRef::DeviceDataLength> _buffer;
             };
         }
     }

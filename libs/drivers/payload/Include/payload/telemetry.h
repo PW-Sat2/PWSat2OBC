@@ -31,6 +31,8 @@ namespace drivers
             struct Status
             {
                 uint8_t who_am_i;
+                static constexpr uint8_t DeviceDataAddress = 0;
+                static constexpr uint8_t DeviceDataLength = 1;
             };
 
             /**
@@ -39,6 +41,8 @@ namespace drivers
             struct SunsRef
             {
                 std::array<std::uint16_t, 5> voltages;
+                static constexpr uint8_t DeviceDataAddress = 1;
+                static constexpr uint8_t DeviceDataLength = 10;
             };
 
             /**
@@ -55,6 +59,8 @@ namespace drivers
                 std::uint16_t sail;
                 std::uint16_t cam_nadir;
                 std::uint16_t cam_wing;
+                static constexpr uint8_t DeviceDataAddress = 11;
+                static constexpr uint8_t DeviceDataLength = 18;
             };
 
             /**
@@ -66,6 +72,8 @@ namespace drivers
                 std::uint16_t Xn;
                 std::uint16_t Yp;
                 std::uint16_t Yn;
+                static constexpr uint8_t DeviceDataAddress = 29;
+                static constexpr uint8_t DeviceDataLength = 8;
             };
 
             /**
@@ -75,6 +83,8 @@ namespace drivers
             {
                 std::uint16_t int_3v3d;
                 std::uint16_t obc_3v3d;
+                static constexpr uint8_t DeviceDataAddress = 37;
+                static constexpr uint8_t DeviceDataLength = 4;
             };
 
             /**
@@ -85,44 +95,11 @@ namespace drivers
                 std::uint8_t status;
                 std::uint32_t temperature;
                 std::array<std::uint32_t, 3> vth;
-            } __attribute__((packed));
+                static constexpr uint8_t DeviceDataAddress = 41;
+                static constexpr uint8_t DeviceDataLength = 17;
+            };
+        };
 
-            /**
-             * @brief Who Am I register data.
-             */
-            Status status;
-
-            /**
-             * @brief RadFET telemetry data.
-             */
-            SunsRef suns_ref;
-
-            /**
-             * @brief Temperature telemetry data.
-             */
-            Temperatures temperatures;
-
-            /**
-             * @brief Photodiodes telemetry data.
-             */
-            Photodiodes photodiodes;
-
-            /**
-             * @brief Housekeeping telemetry data.
-             */
-            Housekeeping housekeeping;
-
-            /**
-             * @brief RadFET telemetry data.
-             */
-            Radfet radfet;
-        }
-        /**
-         * @brief Packing of structure to ensure contignous address space equal to Payload address space.
-         */
-        __attribute__((packed));
-
-        static_assert(sizeof(PayloadTelemetry) == 58, "Incorrect size of Telemetry structure (padding?)");
         static_assert(std::is_pod<PayloadTelemetry>::value, "POD");
 
         /* @} */

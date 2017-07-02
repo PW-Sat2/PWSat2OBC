@@ -48,10 +48,11 @@ namespace drivers
 
                 /**
                   * @brief The method saving retrieved data.
+                  * @param buffer The buffer of data retrieved from device.
                   * @param output Data retrieved by command.
                   * @returns Result status.
                   */
-                virtual OSResult Save(TOutputDataType& output) = 0;
+                virtual OSResult Save(gsl::span<uint8_t> buffer, TOutputDataType& output) = 0;
 
                 /**
                  * @brief The method performing full data request command - read, validate and save.

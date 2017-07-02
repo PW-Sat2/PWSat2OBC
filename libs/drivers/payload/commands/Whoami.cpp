@@ -1,4 +1,5 @@
 #include "commands/Whoami.h"
+#include "base/reader.h"
 #include "commands/base_code.hpp"
 #include "logger/logger.h"
 
@@ -6,7 +7,7 @@ using namespace drivers::payload::commands;
 
 WhoamiCommand::WhoamiCommand(IPayloadDriver& driver) : PayloadCommand(driver)
 {
-    _telemetry.buffer.fill(0xFF);
+    _buffer.fill(0xFF);
 }
 
 OSResult WhoamiCommand::Execute(PayloadTelemetry::Status& output)
@@ -23,12 +24,12 @@ OSResult WhoamiCommand::Execute(PayloadTelemetry::Status& output)
 
 gsl::span<std::uint8_t> WhoamiCommand::GetBuffer()
 {
-    return _telemetry.buffer;
+    return _buffer;
 }
 
 uint8_t WhoamiCommand::GetDataAddress() const
 {
-    return offsetof(PayloadTelemetry, status);
+    return PayloadTelemetry::Status::DeviceDataAddress;
 }
 
 bool WhoamiCommand::Validate(const PayloadTelemetry::Status& data)
@@ -36,9 +37,17 @@ bool WhoamiCommand::Validate(const PayloadTelemetry::Status& data)
     return data.who_am_i == ValidWhoAmIResponse;
 }
 
-OSResult WhoamiCommand::Save(PayloadTelemetry::Status& output)
+OSResult WhoamiCommand::Save(gsl::span<uint8_t> buffer, PayloadTelemetry::Status& output)
 {
-    LOGF(LOG_LEVEL_DEBUG, "Payload Who am I response: %u (0x%x).", _telemetry.data.who_am_i, _telemetry.data.who_am_i);
-    output = _telemetry.data;
+    Reader r(buffer);
+    output.who_am_i = r.ReadByte();
+    LOGF(LOG_LEVEL_DEBUG, "Payload Who am I response: %u (0x%x).", output.who_am_i, output.who_am_i);
+
+    if (!r.Status())
+    {
+        LOG(LOG_LEVEL_ERROR, "Malformed request");
+        return OSResult::InvalidMessage;
+    }
+
     return OSResult::Success;
 }

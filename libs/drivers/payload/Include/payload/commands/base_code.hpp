@@ -47,7 +47,7 @@ OSResult PayloadCommand<TCommandCode, TOutputDataType>::ExecuteDataCommand(TOutp
         return result;
     }
 
-    result = Save(output);
+    result = Save(buffer, output);
     if (result != OSResult::Success)
     {
         return result;

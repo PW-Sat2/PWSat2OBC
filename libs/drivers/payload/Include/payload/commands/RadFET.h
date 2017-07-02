@@ -25,14 +25,10 @@ namespace drivers
               protected:
                 virtual gsl::span<std::uint8_t> GetBuffer() override;
                 virtual uint8_t GetDataAddress() const override;
-                virtual OSResult Save(PayloadTelemetry::Radfet& output) override;
+                virtual OSResult Save(gsl::span<uint8_t> buffer, PayloadTelemetry::Radfet& output) override;
 
               private:
-                union RadFETTelemetryBuffered {
-                    PayloadTelemetry::Radfet data;
-                    std::array<uint8_t, sizeof(PayloadTelemetry::Radfet)> buffer;
-                    static_assert(sizeof(data) == sizeof(buffer), "Incorrect size buffered Telemetry");
-                } _telemetry;
+                std::array<uint8_t, PayloadTelemetry::Radfet::DeviceDataLength> _buffer;
             };
 
             class RadFETOnCommand : public RadFETBaseCommand<0x84>

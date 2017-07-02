@@ -36,15 +36,10 @@ namespace drivers
               protected:
                 virtual gsl::span<std::uint8_t> GetBuffer() override;
                 virtual uint8_t GetDataAddress() const override;
-                virtual OSResult Save(PayloadTelemetry::Status& output) override;
+                virtual OSResult Save(gsl::span<uint8_t> buffer, PayloadTelemetry::Status& output) override;
 
               private:
-                union StatusTelemetryBuffered {
-                    PayloadTelemetry::Status data;
-                    std::array<uint8_t, sizeof(PayloadTelemetry::Status)> buffer;
-                    static_assert(sizeof(data) == sizeof(buffer), "Incorrect size buffered Telemetry");
-                } _telemetry;
-
+                std::array<uint8_t, PayloadTelemetry::Status::DeviceDataLength> _buffer;
                 static constexpr uint8_t ValidWhoAmIResponse = 0x53;
             };
         }
