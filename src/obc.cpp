@@ -126,7 +126,6 @@ OSResult OBC::InitializeRunlevel1()
         LOG(LOG_LEVEL_ERROR, "Unable to initialize telemetry acquisition loop.");
     }
 
-    drivers::watchdog::InternalWatchdog::Enable();
     BootSettings.ConfirmBoot();
 
     LOG(LOG_LEVEL_INFO, "Initialized");
@@ -157,6 +156,8 @@ OSResult OBC::InitializeRunlevel2()
     {
         LOG(LOG_LEVEL_WARNING, "[obc] Not starting scrubbing as boot to upper detected");
     }
+
+    drivers::watchdog::InternalWatchdog::Enable();
 
     return OSResult::Success;
 }
