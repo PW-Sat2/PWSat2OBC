@@ -20,7 +20,7 @@ uint8_t HousekeepingCommand::GetDataAddress() const
     return PayloadTelemetry::Housekeeping::DeviceDataAddress;
 }
 
-OSResult HousekeepingCommand::Save(gsl::span<uint8_t> buffer, PayloadTelemetry::Housekeeping& output)
+OSResult HousekeepingCommand::Save(gsl::span<uint8_t>& buffer, PayloadTelemetry::Housekeeping& output)
 {
     Reader r(buffer);
 

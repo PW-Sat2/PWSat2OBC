@@ -20,7 +20,7 @@ uint8_t TemperaturesCommand::GetDataAddress() const
     return PayloadTelemetry::Temperatures::DeviceDataAddress;
 }
 
-OSResult TemperaturesCommand::Save(gsl::span<uint8_t> buffer, PayloadTelemetry::Temperatures& output)
+OSResult TemperaturesCommand::Save(gsl::span<uint8_t>& buffer, PayloadTelemetry::Temperatures& output)
 {
     Reader r(buffer);
     output.supply = r.ReadWordLE();

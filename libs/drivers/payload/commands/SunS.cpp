@@ -20,7 +20,7 @@ uint8_t SunSCommand::GetDataAddress() const
     return PayloadTelemetry::SunsRef::DeviceDataAddress;
 }
 
-OSResult SunSCommand::Save(gsl::span<uint8_t> buffer, PayloadTelemetry::SunsRef& output)
+OSResult SunSCommand::Save(gsl::span<uint8_t>& buffer, PayloadTelemetry::SunsRef& output)
 {
     Reader r(buffer);
 

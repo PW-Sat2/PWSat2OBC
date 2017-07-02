@@ -20,7 +20,7 @@ uint8_t PhotodiodesCommand::GetDataAddress() const
     return PayloadTelemetry::Photodiodes::DeviceDataAddress;
 }
 
-OSResult PhotodiodesCommand::Save(gsl::span<uint8_t> buffer, PayloadTelemetry::Photodiodes& output)
+OSResult PhotodiodesCommand::Save(gsl::span<uint8_t>& buffer, PayloadTelemetry::Photodiodes& output)
 {
     Reader r(buffer);
 

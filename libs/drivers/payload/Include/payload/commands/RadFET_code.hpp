@@ -25,7 +25,7 @@ template <std::uint8_t TCommandCode> uint8_t RadFETBaseCommand<TCommandCode>::Ge
 }
 
 template <std::uint8_t TCommandCode>
-OSResult RadFETBaseCommand<TCommandCode>::Save(gsl::span<uint8_t> buffer, PayloadTelemetry::Radfet& output)
+OSResult RadFETBaseCommand<TCommandCode>::Save(gsl::span<uint8_t>& buffer, PayloadTelemetry::Radfet& output)
 {
     Reader r(buffer);
 

@@ -37,7 +37,7 @@ bool WhoamiCommand::Validate(const PayloadTelemetry::Status& data)
     return data.who_am_i == ValidWhoAmIResponse;
 }
 
-OSResult WhoamiCommand::Save(gsl::span<uint8_t> buffer, PayloadTelemetry::Status& output)
+OSResult WhoamiCommand::Save(gsl::span<uint8_t>& buffer, PayloadTelemetry::Status& output)
 {
     Reader r(buffer);
     output.who_am_i = r.ReadByte();
