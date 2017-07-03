@@ -139,6 +139,7 @@ namespace obc
          * @param[in] commDriver Comm driver
          * @param[in] currentTime Current time
          * @param[in] idleStateController Idle state controller
+         * @param[in] disableAntennaDeployment Object responsible for disabling antenna deployment
          * @param[in] fs File system
          * @param[in] experiments Experiments
          * @param[in] bootTable Boot table
