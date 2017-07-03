@@ -47,13 +47,13 @@ namespace
         : _errorCounting(this->_errorCountingConfig), _errorCounter(this->_errorCounting),
           _eps(this->_errorCounting, this->_bus, this->_payload), _errorA(ErrorCode::NoError), _errorB(ErrorCode::NoError)
     {
-        ON_CALL(this->_bus, WriteRead(EPSDriver::ControllerA, ElementsAre(0), SpanOfSize(1)))
+        ON_CALL(this->_bus, WriteRead(EPSDriver::ControllerA, ElementsAre(0x4B), SpanOfSize(1)))
             .WillByDefault(Invoke([this](I2CAddress, gsl::span<const uint8_t>, gsl::span<uint8_t> response) {
                 response[0] = static_cast<uint8_t>(num(this->_errorA) & 0xFF);
                 return I2CResult::OK;
             }));
 
-        ON_CALL(this->_payload, WriteRead(EPSDriver::ControllerB, ElementsAre(0), SpanOfSize(1)))
+        ON_CALL(this->_payload, WriteRead(EPSDriver::ControllerB, ElementsAre(0x07), SpanOfSize(1)))
             .WillByDefault(Invoke([this](I2CAddress, gsl::span<const uint8_t>, gsl::span<uint8_t> response) {
                 response[0] = static_cast<uint8_t>(num(this->_errorB) & 0xFF);
                 return I2CResult::OK;
@@ -84,7 +84,6 @@ namespace
     {
         EXPECT_CALL(this->_bus, WriteRead(EPSDriver::ControllerA, ElementsAre(0), _))
             .WillOnce(Invoke([](I2CAddress /*address*/, span<const uint8_t> /*input*/, span<uint8_t> output) {
-                output[0] = 0;
                 output[1] = 12;
                 return I2CResult::OK;
             }));
@@ -99,7 +98,6 @@ namespace
     {
         EXPECT_CALL(this->_payload, WriteRead(EPSDriver::ControllerB, ElementsAre(0), _))
             .WillOnce(Invoke([](I2CAddress /*address*/, span<const uint8_t> /*input*/, span<uint8_t> output) {
-                output[0] = 0;
                 output[1] = 12;
                 return I2CResult::OK;
             }));
@@ -219,7 +217,7 @@ namespace
 
     TEST_F(EPSDriverTest, ShouldReturnCommFailureOnReadErrorCodeANack)
     {
-        EXPECT_CALL(this->_bus, WriteRead(EPSDriver::ControllerA, ElementsAre(0x0), SpanOfSize(1))).WillOnce(Return(I2CResult::Nack));
+        EXPECT_CALL(this->_bus, WriteRead(EPSDriver::ControllerA, ElementsAre(0x4B), SpanOfSize(1))).WillOnce(Return(I2CResult::Nack));
 
         this->_errorA = ErrorCode::OnFire;
         auto errorCode = this->_eps.GetErrorCode(EPSDriver::Controller::A);
@@ -230,7 +228,7 @@ namespace
 
     TEST_F(EPSDriverTest, ShouldReturnCommFailureOnReadErrorCodeBNack)
     {
-        EXPECT_CALL(this->_payload, WriteRead(EPSDriver::ControllerB, ElementsAre(0x0), SpanOfSize(1))).WillOnce(Return(I2CResult::Nack));
+        EXPECT_CALL(this->_payload, WriteRead(EPSDriver::ControllerB, ElementsAre(0x07), SpanOfSize(1))).WillOnce(Return(I2CResult::Nack));
 
         this->_errorA = ErrorCode::OnFire;
         auto errorCode = this->_eps.GetErrorCode(EPSDriver::Controller::B);

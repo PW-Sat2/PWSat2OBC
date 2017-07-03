@@ -256,10 +256,8 @@ namespace
 
     RC_GTEST_FIXTURE_PROP(EPSDriverTest, ReadHousekeepingA, (ControllerATelemetry input))
     {
-        std::array<std::uint8_t, 73> buffer;
+        std::array<std::uint8_t, 72> buffer;
         Writer w(buffer);
-
-        w.WriteByte(0);
 
         w.WriteByte(0x61);
         w.WriteWordLE(input.mpptX.SOL_CURR);
@@ -375,10 +373,9 @@ namespace
 
     RC_GTEST_FIXTURE_PROP(EPSDriverTest, ReadHousekeepingB, (ControllerBTelemetry input))
     {
-        std::array<std::uint8_t, 17> buffer;
+        std::array<std::uint8_t, 16> buffer;
         Writer w(buffer);
 
-        w.WriteByte(0);
         w.WriteByte(0x9D);
 
         w.WriteWordLE(input.bp.temperatureC);
