@@ -12,7 +12,7 @@ namespace drivers
 {
     namespace uart
     {
-        UART::UART()
+        UART::UART() : _lineEditing(false)
         {
             this->_lineIO.extra = this;
             this->_lineIO.PrintBuffer = PrintBuffer;
@@ -85,6 +85,7 @@ namespace drivers
 
             This->_event.Clear(Event::LineEndReceived);
 
+            This->_bufferBegin = buffer;
             This->_buffer = buffer;
             This->_bufferEnd = buffer + bufferLength;
 
@@ -145,6 +146,24 @@ namespace drivers
             if (b == '\n' || this->_buffer == this->_bufferEnd)
             {
                 NVIC_SetPendingIRQ(io_map::UART::WakeUpInterrupt);
+            }
+
+            if (this->_lineEditing)
+            {
+                switch (b)
+                {
+                    case '\b':
+                        if (this->_buffer - this->_bufferBegin > 2)
+                        {
+                            this->_buffer -= 2;
+                            *this->_buffer = '\0';
+                            break;
+                        }
+                        else
+                        {
+                            this->_buffer--;
+                        }
+                }
             }
         }
 
