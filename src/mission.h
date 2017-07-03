@@ -31,6 +31,7 @@ namespace mission
 
     typedef MissionLoop<SystemState, //
         TimeTask,
+        antenna::StopAntennaDeploymentTask,
         antenna::AntennaTask,
         CommTask,
         SailTask,

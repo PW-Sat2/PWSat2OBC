@@ -7,6 +7,7 @@ set(SOURCES
     experiments.cpp
     program_upload.cpp
     boot_settings.cpp
+    antenna.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -14,6 +15,7 @@ add_library(${NAME} STATIC ${SOURCES})
 target_link_libraries(${NAME} 
 	base
 	telecommunication
+	mission_antenna
 	mission_comm
 	fs
 	logger

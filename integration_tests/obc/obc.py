@@ -19,6 +19,8 @@ from .state import StateMixin
 from .error_counters import ErrorCountersMixin
 from .fram import FRAMMixin
 from .boot_settings import BootSettingsMixin
+from .runlevel import RunlevelMixin
+
 
 class OBC(OBCMixin,
           FileSystemMixin,
@@ -35,7 +37,8 @@ class OBC(OBCMixin,
           StateMixin,
           ErrorCountersMixin,
           FRAMMixin,
-          BootSettingsMixin
+          BootSettingsMixin,
+          RunlevelMixin
           ):
     def __init__(self, terminal):
         self.log = logging.getLogger("OBC")
@@ -45,7 +48,6 @@ class OBC(OBCMixin,
         self._formatter.register_conversion('n', lambda d: d.name)
 
         self._terminal = terminal
-        self._terminal.reset()
 
     def _command(self, cmd, *args, **kwargs):
         cmdline = self._formatter.vformat(cmd, args, kwargs)
@@ -68,8 +70,8 @@ class OBC(OBCMixin,
         duration = end - start
         self.log.info("OBC initialization done in %s", str(duration))
 
-    def reset(self):
-        self._terminal.reset()
+    def reset(self, boot_handler):
+        self._terminal.reset(boot_handler)
 
     def close(self):
         self._terminal.close()
@@ -77,8 +79,8 @@ class OBC(OBCMixin,
     def power_off(self):
         self._terminal.power_off()
 
-    def power_on(self):
-        self._terminal.power_on()
+    def power_on(self, boot_handler):
+        self._terminal.power_on(boot_handler)
 
     def ping(self):
         return self._command("ping")
