@@ -626,4 +626,9 @@ template <std::size_t Alignment> constexpr bool IsAligned(const void* ptr)
     return (reinterpret_cast<std::size_t>(ptr) & (Alignment - 1)) == 0;
 }
 
+/**
+    * @brief Generic single param void function pointer
+    */
+template <typename Param> using Action = void (*)(Param p);
+
 #endif

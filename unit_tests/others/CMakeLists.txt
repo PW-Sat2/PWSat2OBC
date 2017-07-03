@@ -19,7 +19,7 @@ set(SOURCES
   base/RedundancyTest.cpp
   base/CRCTest.cpp
   base/BitWriterTest.cpp
-  base/CounterTest.cpp
+  base/TimeCounterTest.cpp
   os/TimeoutTest.cpp
   os/EventGroupTest.cpp
   time/time.cpp
