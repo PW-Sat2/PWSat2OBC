@@ -6,16 +6,16 @@
 /**
  * @defgroup base_offset Offset calculator
  *
- * Utiltity for defining series of fields and assigning addressed to them
+ * Utility for defining series of fields and assigning addressed to them
  */
 
 /**
  * @brief Single element
  * @tparam Type used to determine size of this element
  */
-template <typename T> struct Element
+template <typename Type> struct Element
 {
-    using Underlying = T;
+    using Underlying = Type;
 };
 
 /**

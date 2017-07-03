@@ -22,6 +22,7 @@ target_link_libraries(${NAME}
     eps
     error_counter
     experiments
+    antenna
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
@@ -36,3 +37,4 @@ add_subdirectory(eps)
 add_subdirectory(experiments)
 add_subdirectory(serialization)
 add_subdirectory(temp)
+add_subdirectory(ant)

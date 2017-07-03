@@ -410,6 +410,15 @@ namespace
         CheckBuffer(writer.Capture(), gsl::make_span(expected));
     }
 
+    TEST(BitWriterTest, TestWritingFailureBufferSizeExceeded)
+    {
+        uint8_t array[3];
+        BitWriter writer(array);
+        ASSERT_TRUE(writer.WriteWord(0x12, 15));
+        ASSERT_FALSE(writer.WriteWord(0x12, 10));
+        ASSERT_FALSE(writer.Status());
+    }
+
     TEST(BitWriterTest, TestWritingPartialQuadBitWord)
     {
         uint8_t array[9];
@@ -421,6 +430,32 @@ namespace
         ASSERT_THAT(writer.GetBitFraction(), Eq(7u));
         ASSERT_THAT(writer.GetByteDataLength(), Eq(6u));
         ASSERT_TRUE(writer.Status());
+        CheckBuffer(writer.Capture(), gsl::make_span(expected));
+    }
+
+    TEST(BitWriterTest, TestWritingArrayAligned)
+    {
+        uint8_t array[] = {0x11, 0x99, 0xaa};
+        uint8_t buffer[3];
+        const uint8_t expected[] = {0x11, 0x99, 0xaa};
+        BitWriter writer(buffer);
+        writer.WriteSpan(gsl::make_span(array));
+        ASSERT_TRUE(writer.Status());
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(24u));
+        CheckBuffer(writer.Capture(), gsl::make_span(expected));
+    }
+
+    TEST(BitWriterTest, TestWritingArrayUnaligned)
+    {
+        uint8_t array[] = {0x11, 0x99, 0xaa};
+        uint8_t buffer[4];
+        const uint8_t expected[] = {0x23, 0x32, 0x55, 0x03};
+        BitWriter writer(buffer);
+        writer.Write(true);
+        writer.WriteSpan(gsl::make_span(array));
+        writer.Write(true);
+        ASSERT_TRUE(writer.Status());
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(26u));
         CheckBuffer(writer.Capture(), gsl::make_span(expected));
     }
 }

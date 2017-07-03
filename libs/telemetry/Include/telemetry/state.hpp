@@ -9,6 +9,7 @@
 #include "ProgramState.hpp"
 #include "SystemStartup.hpp"
 #include "Telemetry.hpp"
+#include "antenna/telemetry.hpp"
 #include "comm/CommTelemetry.hpp"
 #include "fwd.hpp"
 #include "gyro/telemetry.hpp"

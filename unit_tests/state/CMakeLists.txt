@@ -14,6 +14,7 @@ set(SOURCES
   telemetry/EpsTelemetryAcquisitionTest.cpp
   telemetry/ExperimentTelemetryTest.cpp
   telemetry/McuTemperatureTest.cpp
+  telemetry/AntennaTelemetryAcquisitionTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
@@ -26,6 +27,7 @@ target_link_libraries(${NAME}
     telemetry_comm
     telemetry_gyro
     telemetry_eps
+    telemetry_ant
 )
 
 

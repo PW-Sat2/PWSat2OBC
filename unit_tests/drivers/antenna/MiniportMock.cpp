@@ -74,7 +74,7 @@ static OSResult GetAntennaActivationCount(struct AntennaMiniportDriver* driver,
     II2CBus* /*communicationBus*/,
     AntennaChannel channel,
     AntennaId antennaId,
-    uint16_t* count //
+    uint8_t* count //
     )
 {
     auto mock = static_cast<AntennaMiniportMock*>(driver);
@@ -115,4 +115,8 @@ AntennaMiniportMock::AntennaMiniportMock()
     This->GetAntennaActivationCount = ::GetAntennaActivationCount;
     This->GetAntennaActivationTime = ::GetAntennaActivationTime;
     This->GetTemperature = ::GetTemperature;
+}
+
+AntennaMiniportMock::~AntennaMiniportMock()
+{
 }

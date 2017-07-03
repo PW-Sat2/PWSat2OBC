@@ -34,7 +34,7 @@ namespace telemetry
         if (!secondary.HasValue)
         {
             LOG(LOG_LEVEL_ERROR, "Unable to acquire secondary eps telemetry. ");
-            status = mission::UpdateResult::Failure;
+            status = mission::UpdateResult::Warning;
         }
         else
         {

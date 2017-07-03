@@ -9,6 +9,7 @@
 struct AntennaMiniportMock : AntennaMiniportDriver
 {
     AntennaMiniportMock();
+    ~AntennaMiniportMock();
 
     MOCK_METHOD1(Reset, OSResult(AntennaChannel channel));
 
@@ -35,7 +36,7 @@ struct AntennaMiniportMock : AntennaMiniportDriver
     MOCK_METHOD3(GetAntennaActivationCount,
         OSResult(AntennaChannel channel,
             AntennaId antennaId,
-            uint16_t* count //
+            uint8_t* count //
             ));
 
     MOCK_METHOD3(GetAntennaActivationTime,

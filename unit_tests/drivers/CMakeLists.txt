@@ -5,6 +5,7 @@ set(SOURCES
   antenna/MiniportMock.hpp
   antenna/miniport.cpp
   antenna/antenna.cpp
+  antenna/AntennaTelemetryTest.cpp
   Comm/CommTest.cpp
   Comm/CommFrameTest.cpp
   Comm/DownlinkFrameTest.cpp
