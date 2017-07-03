@@ -25,9 +25,8 @@ namespace devices
             writer.WriteSpan(gsl::make_span(this->counts));
         }
 
-        ActivationTimes::ActivationTimes()
+        ActivationTimes::ActivationTimes() : ActivationTimes(0s, 0s, 0s, 0s)
         {
-            this->times[0] = this->times[1] = this->times[2] = this->times[3] = 0s;
         }
 
         ActivationTimes::ActivationTimes(std::chrono::seconds antenna1, //

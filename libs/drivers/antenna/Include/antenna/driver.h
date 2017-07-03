@@ -142,7 +142,7 @@ struct AntennaDriver
     /**
      * @brief Pointer to the procedure that queries hardware for its current state.
      * @param[in] driver Current driver instance.
-     * @param[out] telemetry Reference to boject that should be filled with updated antenna telemetry.
+     * @param[out] telemetry Reference to object that should be filled with updated antenna telemetry.
      * @return Object that contains global antenna subsystem state as best at it could be determined in current state.
      *
      * This procedure can return partial response. To check what fields of the returned object are valid
