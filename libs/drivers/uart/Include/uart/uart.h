@@ -47,6 +47,12 @@ namespace drivers
              */
             void OnWakeUpInterrupt();
 
+            /**
+             * @brief Enable basic line editing for UART readline
+             * @param enable true if line editing is enabled, false otherwise
+             */
+            inline void LineEditing(bool enable);
+
           private:
             /**
              * @brief Procedure that outputs given string
@@ -96,10 +102,15 @@ namespace drivers
             LineIO _lineIO;
             /** @brief Synchronization group */
             EventGroup _event;
+            /** @brief Line receive buffer begin */
+            char* _bufferBegin;
             /** @brief Line receive buffer */
             char* _buffer;
             /** @brief Line receive buffer end */
             char* _bufferEnd;
+
+            /** @brief Line editing flag */
+            bool _lineEditing;
 
             /** @brief RX DMA channel */
             unsigned int _rxChannel;
@@ -117,6 +128,11 @@ namespace drivers
                 static constexpr OSEventBits TransferTXFinished = 1 << 2;
             };
         };
+
+        void UART::LineEditing(bool enable)
+        {
+            this->_lineEditing = enable;
+        }
     }
 }
 
