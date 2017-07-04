@@ -65,6 +65,7 @@ void OBCHardware::Initialize()
 
 #ifndef USE_LEUART
     this->UARTDriver.Initialize();
+    this->UARTDriver.LineEditing(true);
 #endif
     this->FlashDriver.Initialize();
 
