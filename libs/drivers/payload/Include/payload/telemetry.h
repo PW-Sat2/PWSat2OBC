@@ -24,31 +24,33 @@ namespace drivers
          */
         struct PayloadTelemetry
         {
+            template <const uint8_t TDeviceDataAddress, const uint8_t TDeviceDataLength> struct PayloadTelemetryBase
+            {
+                static constexpr uint8_t DeviceDataAddress = TDeviceDataAddress;
+                static constexpr uint8_t DeviceDataLength = TDeviceDataLength;
+            };
+
             /**
              * @brief Status registers.
              *
              */
-            struct Status
+            struct Status : PayloadTelemetryBase<0, 1>
             {
                 uint8_t who_am_i;
-                static constexpr uint8_t DeviceDataAddress = 0;
-                static constexpr uint8_t DeviceDataLength = 1;
             };
 
             /**
              * @brief SunS Reference Voltages telemetry structure.
              */
-            struct SunsRef
+            struct SunsRef : PayloadTelemetryBase<1, 10>
             {
                 std::array<std::uint16_t, 5> voltages;
-                static constexpr uint8_t DeviceDataAddress = 1;
-                static constexpr uint8_t DeviceDataLength = 10;
             };
 
             /**
              * @brief Temperetures telemetry structure.
              */
-            struct Temperatures
+            struct Temperatures : PayloadTelemetryBase<11, 18>
             {
                 std::uint16_t supply;
                 std::uint16_t Xp;
@@ -59,48 +61,38 @@ namespace drivers
                 std::uint16_t sail;
                 std::uint16_t cam_nadir;
                 std::uint16_t cam_wing;
-                static constexpr uint8_t DeviceDataAddress = 11;
-                static constexpr uint8_t DeviceDataLength = 18;
             };
 
             /**
              * @brief Photodiodes telemetry structure.
              */
-            struct Photodiodes
+            struct Photodiodes : PayloadTelemetryBase<29, 8>
             {
                 std::uint16_t Xp;
                 std::uint16_t Xn;
                 std::uint16_t Yp;
                 std::uint16_t Yn;
-                static constexpr uint8_t DeviceDataAddress = 29;
-                static constexpr uint8_t DeviceDataLength = 8;
             };
 
             /**
              * @brief Housekeeping data telemetry structure.
              */
-            struct Housekeeping
+            struct Housekeeping : PayloadTelemetryBase<37, 4>
             {
                 std::uint16_t int_3v3d;
                 std::uint16_t obc_3v3d;
-                static constexpr uint8_t DeviceDataAddress = 37;
-                static constexpr uint8_t DeviceDataLength = 4;
             };
 
             /**
              * @brief RadFET telemetry structure.
              */
-            struct Radfet
+            struct Radfet : PayloadTelemetryBase<41, 17>
             {
                 std::uint8_t status;
                 std::uint32_t temperature;
                 std::array<std::uint32_t, 3> vth;
-                static constexpr uint8_t DeviceDataAddress = 41;
-                static constexpr uint8_t DeviceDataLength = 17;
             };
         };
-
-        static_assert(std::is_pod<PayloadTelemetry>::value, "POD");
 
         /* @} */
     }

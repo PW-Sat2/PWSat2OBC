@@ -11,21 +11,10 @@ using namespace drivers::payload::commands;
 template <std::uint8_t TCommandCode>
 RadFETBaseCommand<TCommandCode>::RadFETBaseCommand(IPayloadDriver& driver) : RadFETBaseCommand<TCommandCode>::PayloadCommand(driver)
 {
-    _buffer.fill(0xFF);
-}
-
-template <std::uint8_t TCommandCode> gsl::span<std::uint8_t> RadFETBaseCommand<TCommandCode>::GetBuffer()
-{
-    return _buffer;
-}
-
-template <std::uint8_t TCommandCode> uint8_t RadFETBaseCommand<TCommandCode>::GetDataAddress() const
-{
-    return PayloadTelemetry::Radfet::DeviceDataAddress;
 }
 
 template <std::uint8_t TCommandCode>
-OSResult RadFETBaseCommand<TCommandCode>::Save(gsl::span<uint8_t>& buffer, PayloadTelemetry::Radfet& output)
+OSResult RadFETBaseCommand<TCommandCode>::Save(const gsl::span<uint8_t>& buffer, PayloadTelemetry::Radfet& output)
 {
     Reader r(buffer);
 
@@ -36,16 +25,9 @@ OSResult RadFETBaseCommand<TCommandCode>::Save(gsl::span<uint8_t>& buffer, Paylo
         voltage = r.ReadDoubleWordLE();
     }
 
-    LOGF(LOG_LEVEL_DEBUG, "RadFET status: %u (0x%x).", output.status, output.status);
-    LOGF(LOG_LEVEL_DEBUG, "RadFET temperature: %lu.", output.temperature);
-    for (uint8_t i = 0; i < output.vth.size(); ++i)
-    {
-        LOGF(LOG_LEVEL_DEBUG, "RadFet voltage %u: %lu", i + 1, output.vth[i]);
-    }
-
     if (!r.Status())
     {
-        LOG(LOG_LEVEL_ERROR, "Malformed request");
+        LOG(LOG_LEVEL_ERROR, "[Payload] Malformed request");
         return OSResult::InvalidMessage;
     }
 

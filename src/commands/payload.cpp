@@ -49,12 +49,11 @@ static void RadFET(IPayloadDeviceDriver& driver, uint16_t argc, char* argv[])
     }
     else
     {
-        Main.terminal.Printf("%d %ld %ld %ld %ld\n",
-            result.status,      //
-            result.temperature, //
-            result.vth[0],      //
-            result.vth[1],
-            result.vth[2]);
+        Main.terminal.Printf("Status: %d\n", result.status);
+        Main.terminal.Printf("Temperature: %ld\n", result.temperature);
+        Main.terminal.Printf("Vth0: %ld\n", result.vth[0]);
+        Main.terminal.Printf("Vth1: %ld\n", result.vth[1]);
+        Main.terminal.Printf("Vth2: %ld\n", result.vth[2]);
         Main.terminal.Printf("Success!");
     }
 }
@@ -76,16 +75,15 @@ static void Temperatures(IPayloadDeviceDriver& driver, uint16_t argc, char* argv
     }
     else
     {
-        Main.terminal.Printf("%d %d %d %d %d %d %d %d %d\n",
-            result.supply,
-            result.Xp,
-            result.Xn,
-            result.Yp,
-            result.Yn,
-            result.sads,
-            result.sail,
-            result.cam_nadir,
-            result.cam_wing);
+        Main.terminal.Printf("Supply: %d\n", result.supply);
+        Main.terminal.Printf("Xp: %d\n", result.Xp);
+        Main.terminal.Printf("Xn: %d\n", result.Xn);
+        Main.terminal.Printf("Yp: %d\n", result.Yp);
+        Main.terminal.Printf("Yn: %d\n", result.Yn);
+        Main.terminal.Printf("SADS: %d\n", result.sads);
+        Main.terminal.Printf("Sail: %d\n", result.sail);
+        Main.terminal.Printf("CAM Nadir: %d\n", result.cam_nadir);
+        Main.terminal.Printf("CAM Wing: %d\n", result.cam_wing);
         Main.terminal.Printf("Success!");
     }
 }
@@ -107,7 +105,10 @@ static void Photodiodes(IPayloadDeviceDriver& driver, uint16_t argc, char* argv[
     }
     else
     {
-        Main.terminal.Printf("%d %d %d %d\n", result.Xp, result.Xn, result.Yp, result.Yn);
+        Main.terminal.Printf("Xp: %d\n", result.Xp);
+        Main.terminal.Printf("Xn: %d\n", result.Xn);
+        Main.terminal.Printf("Yp: %d\n", result.Yp);
+        Main.terminal.Printf("Yn: %d\n", result.Yn);
         Main.terminal.Printf("Success!");
     }
 }
@@ -129,12 +130,11 @@ static void SunS(IPayloadDeviceDriver& driver, uint16_t argc, char* argv[])
     }
     else
     {
-        Main.terminal.Printf("%d %d %d %d %d\n",
-            result.voltages[0], //
-            result.voltages[1], //
-            result.voltages[2],
-            result.voltages[3],
-            result.voltages[4]);
+        Main.terminal.Printf("V1: %d\n", result.voltages[0]);
+        Main.terminal.Printf("V2: %d\n", result.voltages[1]);
+        Main.terminal.Printf("V3: %d\n", result.voltages[2]);
+        Main.terminal.Printf("V4: %d\n", result.voltages[3]);
+        Main.terminal.Printf("V5: %d\n", result.voltages[4]);
         Main.terminal.Printf("Success!");
     }
 }
@@ -156,7 +156,8 @@ static void Housekeeping(IPayloadDeviceDriver& driver, uint16_t argc, char* argv
     }
     else
     {
-        Main.terminal.Printf("%d %d\n", result.int_3v3d, result.obc_3v3d);
+        Main.terminal.Printf("INT 3V3D: %d\n", result.int_3v3d);
+        Main.terminal.Printf("OBC 3V3D: %d\n", result.obc_3v3d);
         Main.terminal.Printf("Success!");
     }
 }
@@ -178,7 +179,7 @@ static void Whoami(IPayloadDeviceDriver& driver, uint16_t argc, char* argv[])
     }
     else
     {
-        Main.terminal.Printf("%d (0x%x)\n", result.who_am_i, result.who_am_i);
+        Main.terminal.Printf("Who Am I: %d (0x%x)\n", result.who_am_i, result.who_am_i);
         Main.terminal.Printf("Success!");
     }
 }

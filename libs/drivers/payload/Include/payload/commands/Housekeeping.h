@@ -13,7 +13,10 @@ namespace drivers
             /**
              * @brief Command for executing Housekeeping measurements and data retrieval
              */
-            class HousekeepingCommand : public PayloadCommand<0x83, PayloadTelemetry::Housekeeping>
+            class HousekeepingCommand : public PayloadCommand<0x83,
+                                            PayloadTelemetry::Housekeeping,
+                                            PayloadTelemetry::Housekeeping::DeviceDataAddress,
+                                            PayloadTelemetry::Housekeeping::DeviceDataLength>
             {
               public:
                 /**
@@ -23,12 +26,7 @@ namespace drivers
                 HousekeepingCommand(IPayloadDriver& driver);
 
               protected:
-                virtual gsl::span<std::uint8_t> GetBuffer() override;
-                virtual uint8_t GetDataAddress() const override;
-                virtual OSResult Save(gsl::span<uint8_t>& buffer, PayloadTelemetry::Housekeeping& output) override;
-
-              private:
-                std::array<uint8_t, PayloadTelemetry::Housekeeping::DeviceDataLength> _buffer;
+                virtual OSResult Save(const gsl::span<uint8_t>& buffer, PayloadTelemetry::Housekeeping& output) override;
             };
         }
     }

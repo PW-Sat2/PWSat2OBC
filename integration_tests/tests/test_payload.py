@@ -1,20 +1,27 @@
 import struct
+import re
 from base import BaseTest
 from system import runlevel
 from utils import TestEvent
 
+
 class PayloadDriverTest(BaseTest):
+    def __init__(self, *args, **kwargs):
+        super(PayloadDriverTest, self).__init__(*args, **kwargs)
+        # Pattern: 'Label: <value> [optional uninteresting hexadecimal format]'. Output: value.
+        self.pattern = re.compile("[^:]+:\s+(\d+).*")
+
     def decode_result(self, result_string):
 
         if "failed" in result_string:
             return None
 
-        lines = result_string.split('\n')
-        data = lines[1].split(' ')
         result = []
-        for value in data:
-            if '0x' not in value:
-                result.append(int(value))
+        lines = result_string.split('\n')
+        for line in lines:
+            match = self.pattern.match(line);
+            if match:
+                result.append(int(match.group(1)))
 
         return result
 
@@ -79,12 +86,12 @@ class PayloadDriverTest(BaseTest):
 
     @runlevel(1)
     def test_payload_radfet_full_test(self):
-        self.system.payload.set_long_timeout(5)
 
         result = self.system.obc.payload_radfet_on()
         data = self.decode_result(result)
         self.assertEqual(data, self.system.payload.RadFET)
 
+        self.system.payload.set_timeout_callback(lambda: 5)
         result = self.system.obc.payload_radfet_read()
         data = self.decode_result(result)
         self.assertEqual(data, self.system.payload.RadFET)
@@ -93,6 +100,7 @@ class PayloadDriverTest(BaseTest):
         data = self.decode_result(result)
         self.assertEqual(data, self.system.payload.RadFET)
 
+        self.system.payload.set_timeout_callback()
         result = self.system.obc.payload_radfet_off()
         data = self.decode_result(result)
         self.assertEqual(data, self.system.payload.RadFET)

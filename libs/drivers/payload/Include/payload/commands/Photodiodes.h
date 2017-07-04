@@ -13,7 +13,10 @@ namespace drivers
             /**
              * @brief Command for executing Photodiodes measurements and data retrieval
              */
-            class PhotodiodesCommand : public PayloadCommand<0x82, PayloadTelemetry::Photodiodes>
+            class PhotodiodesCommand : public PayloadCommand<0x82,
+                                           PayloadTelemetry::Photodiodes,
+                                           PayloadTelemetry::Photodiodes::DeviceDataAddress,
+                                           PayloadTelemetry::Photodiodes::DeviceDataLength>
             {
               public:
                 /**
@@ -23,12 +26,7 @@ namespace drivers
                 PhotodiodesCommand(IPayloadDriver& driver);
 
               protected:
-                virtual gsl::span<std::uint8_t> GetBuffer() override;
-                virtual uint8_t GetDataAddress() const override;
-                virtual OSResult Save(gsl::span<uint8_t>& buffer, PayloadTelemetry::Photodiodes& output) override;
-
-              private:
-                std::array<uint8_t, PayloadTelemetry::Photodiodes::DeviceDataLength> _buffer;
+                virtual OSResult Save(const gsl::span<uint8_t>& buffer, PayloadTelemetry::Photodiodes& output) override;
             };
         }
     }

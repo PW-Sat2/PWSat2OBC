@@ -13,7 +13,11 @@ namespace drivers
             /**
              * @brief Command for executing RadFET measurements and data retrieval
              */
-            template <std::uint8_t TCommandCode> class RadFETBaseCommand : public PayloadCommand<TCommandCode, PayloadTelemetry::Radfet>
+            template <std::uint8_t TCommandCode>
+            class RadFETBaseCommand : public PayloadCommand<TCommandCode,
+                                          PayloadTelemetry::Radfet,
+                                          PayloadTelemetry::Radfet::DeviceDataAddress,
+                                          PayloadTelemetry::Radfet::DeviceDataLength>
             {
               public:
                 /**
@@ -23,12 +27,9 @@ namespace drivers
                 RadFETBaseCommand(IPayloadDriver& driver);
 
               protected:
-                virtual gsl::span<std::uint8_t> GetBuffer() override;
-                virtual uint8_t GetDataAddress() const override;
-                virtual OSResult Save(gsl::span<uint8_t>& buffer, PayloadTelemetry::Radfet& output) override;
+                virtual OSResult Save(const gsl::span<uint8_t>& buffer, PayloadTelemetry::Radfet& output) override;
 
               private:
-                std::array<uint8_t, PayloadTelemetry::Radfet::DeviceDataLength> _buffer;
             };
 
             class RadFETOnCommand : public RadFETBaseCommand<0x84>

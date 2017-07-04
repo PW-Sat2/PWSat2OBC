@@ -15,7 +15,8 @@ namespace drivers
              * Base class for all Commands for Payload manipulation.
              * The template argument is command code.
              */
-            template <std::uint8_t TCommandCode, class TOutputDataType> class PayloadCommand
+            template <std::uint8_t TCommandCode, class TOutputDataType, const uint8_t TDeviceDataAddress, const uint8_t TDeviceDataLength>
+            class PayloadCommand
             {
               public:
                 /**
@@ -35,24 +36,12 @@ namespace drivers
 
               protected:
                 /**
-                  * @brief Provides buffer for data retrieval.
-                  * @returns Buffer for data retrieval.
-                  */
-                virtual gsl::span<std::uint8_t> GetBuffer() = 0;
-
-                /**
-                  * @brief Returns address of telemetry data.
-                  * @returns Address of data that will be retrieved by this command.
-                  */
-                virtual uint8_t GetDataAddress() const = 0;
-
-                /**
                   * @brief The method saving retrieved data.
                   * @param buffer The buffer of data retrieved from device.
                   * @param output Data retrieved by command.
                   * @returns Result status.
                   */
-                virtual OSResult Save(gsl::span<uint8_t>& buffer, TOutputDataType& output) = 0;
+                virtual OSResult Save(const gsl::span<uint8_t>& buffer, TOutputDataType& output) = 0;
 
                 /**
                  * @brief The method performing full data request command - read, validate and save.
@@ -67,6 +56,10 @@ namespace drivers
                 IPayloadDriver& _driver;
 
               private:
+                static constexpr uint8_t DeviceDataAddress = TDeviceDataAddress;
+                static constexpr uint8_t DeviceDataLength = TDeviceDataLength;
+                std::array<uint8_t, DeviceDataLength> _buffer;
+
                 OSResult ExecuteCommand();
                 OSResult ExecuteDataRead(uint8_t address, gsl::span<uint8_t> buffer);
             };

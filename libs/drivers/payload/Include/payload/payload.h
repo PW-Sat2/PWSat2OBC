@@ -92,9 +92,9 @@ namespace drivers
 
           private:
             /*
-             * @brief DefaultTimeout Default timeout for Payload operations. 30 minutes.
+             * @brief DefaultTimeout Default timeout for Payload operations. 5 minutes.
              */
-            static constexpr std::chrono::milliseconds DefaultTimeout = std::chrono::milliseconds(1800000);
+            static constexpr std::chrono::milliseconds DefaultTimeout = std::chrono::milliseconds(5 * 60 * 1000);
 
             drivers::i2c::II2CBus& _i2c;
             drivers::gpio::IInterruptPinDriver& _interruptPinDriver;

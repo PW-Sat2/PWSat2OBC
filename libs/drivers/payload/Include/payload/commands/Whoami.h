@@ -16,7 +16,10 @@ namespace drivers
              * This command has overriden Execute method to exclude "measure" part of other commands.
              * Also the Command Code is ignored for this reason.
              */
-            class WhoamiCommand : public PayloadCommand<0x00, PayloadTelemetry::Status>
+            class WhoamiCommand : public PayloadCommand<0x00,
+                                      PayloadTelemetry::Status,
+                                      PayloadTelemetry::Status::DeviceDataAddress,
+                                      PayloadTelemetry::Status::DeviceDataLength>
             {
               public:
                 /**
@@ -34,12 +37,9 @@ namespace drivers
                 static bool Validate(const PayloadTelemetry::Status& data);
 
               protected:
-                virtual gsl::span<std::uint8_t> GetBuffer() override;
-                virtual uint8_t GetDataAddress() const override;
-                virtual OSResult Save(gsl::span<uint8_t>& buffer, PayloadTelemetry::Status& output) override;
+                virtual OSResult Save(const gsl::span<uint8_t>& buffer, PayloadTelemetry::Status& output) override;
 
               private:
-                std::array<uint8_t, PayloadTelemetry::Status::DeviceDataLength> _buffer;
                 static constexpr uint8_t ValidWhoAmIResponse = 0x53;
             };
         }
