@@ -10,6 +10,7 @@ namespace state
     class TimeState;
     class TimeCorrectionConfiguration;
     class BootState;
+    class SailState;
 
     struct NoTrackingStatePolicy;
     class StateTrackingPolicy;
@@ -19,7 +20,8 @@ namespace state
         AntennaConfiguration,                    //
         TimeState,                               //
         TimeCorrectionConfiguration,             //
-        BootState                                //
+        BootState,                               //
+        SailState                                //
         >
         SystemPersistentState;
 }

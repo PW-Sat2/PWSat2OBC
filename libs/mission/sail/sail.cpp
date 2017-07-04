@@ -5,47 +5,42 @@ using namespace std::chrono_literals;
 
 namespace mission
 {
-    SailTask::SailTask(std::tuple<bool, services::power::IPowerControl&> args) : state(std::get<0>(args)), _powerControl(&std::get<1>(args))
+    StepDescription OpenSailTask::Steps[] = {
+        {&EnableMainThermalKnife, 0s},                                     //
+        {&EnableMainBurnSwitch, 2min},                                     //
+        {&DisableMainThermalKnife, 0s},                                    //
+        {&EnableRedundantThermalKnife, 0s},                                //
+        {&EnableRedundantBurnSwitch, 2min},                                //
+        {&DisableRedundantThermalKnife, std::chrono::milliseconds::max()}, //
+    };
+
+    mission::ActionDescriptor<SystemState> OpenSailTask::BuildAction()
     {
+        mission::ActionDescriptor<SystemState> action;
+
+        action.name = "Sail: Open";
+        action.param = this;
+        action.actionProc = Action;
+        action.condition = Condition;
+
+        return action;
     }
 
-    ActionDescriptor<SystemState> SailTask::BuildAction()
+    bool OpenSailTask::Condition(const SystemState& state, void* param)
     {
-        ActionDescriptor<SystemState> descriptor;
-        descriptor.name = "Open Sail Action";
-        descriptor.param = this;
-        descriptor.condition = CanOpenSail;
-        descriptor.actionProc = OpenSail;
-        return descriptor;
-    }
+        auto This = static_cast<OpenSailTask*>(param);
 
-    UpdateDescriptor<SystemState> SailTask::BuildUpdate()
-    {
-        UpdateDescriptor<SystemState> descriptor;
-        descriptor.name = "Update Sail State";
-        descriptor.updateProc = UpdateProc;
-        descriptor.param = this;
-        return descriptor;
-    }
-
-    UpdateResult SailTask::UpdateProc(SystemState& state, void* param)
-    {
-        auto This = static_cast<SailTask*>(param);
-        state.SailOpened = This->state;
-        return UpdateResult::Ok;
-    }
-
-    bool SailTask::CanOpenSail(const SystemState& state, void* param)
-    {
-        UNREFERENCED_PARAMETER(param);
-
-        const auto t = 40h;
-        if (state.Time < t)
+        if (state.PersistentState.Get<state::SailState>().CurrentState() != state::SailOpeningState::Opening)
         {
             return false;
         }
 
-        if (state.SailOpened)
+        if (state.Time < This->_nextStepAfter)
+        {
+            return false;
+        }
+
+        if (This->_step >= StepsCount)
         {
             return false;
         }
@@ -53,11 +48,22 @@ namespace mission
         return true;
     }
 
-    void SailTask::OpenSail(SystemState& state, void* param)
+    void OpenSailTask::Action(SystemState& state, void* param)
     {
-        auto This = static_cast<SailTask*>(param);
-        UNREFERENCED_PARAMETER(state);
-        This->state = true;
-        This->_powerControl->OpenSail();
+        auto This = static_cast<OpenSailTask*>(param);
+
+        while (true)
+        {
+            This->_step++;
+            auto& step = Steps[This->_step - 1];
+
+            step.Action(This);
+
+            if (step.AfterStepDelay != decltype(step.AfterStepDelay)::zero())
+            {
+                This->_nextStepAfter = state.Time + step.AfterStepDelay;
+                break;
+            }
+        }
     }
 }

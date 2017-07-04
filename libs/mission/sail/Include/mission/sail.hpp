@@ -18,89 +18,64 @@ namespace mission
      * @{
      */
 
+    class OpenSailTask;
+
+    struct StepDescription
+    {
+        void (*Action)(OpenSailTask* This);
+        std::chrono::milliseconds AfterStepDelay;
+    };
+
     /**
      * @brief Task that is responsible for deploying the sail at the end of the primary satelite mission.
      * @mission_task
      */
-    class SailTask : public Action, public Update
+    class OpenSailTask : public mission::Action
     {
       public:
-        /**
-         * @brief ctor.
-         *
-         * To support default mission loop construction.
-         */
-        SailTask() = default;
+        OpenSailTask(services::power::IPowerControl& power) : _power(power), _step(0), _nextStepAfter(0)
+        {
+        }
 
-        /**
-         * @brief ctor.
-         *
-         * To support single argument construction.
-         * @param[in] args Tuple of: initial sail deployment state, power control interface
-         */
-        SailTask(std::tuple<bool, services::power::IPowerControl&> args);
+        mission::ActionDescriptor<SystemState> BuildAction();
 
-        /**
-         * @brief Prepares action descriptor for this task.
-         * @return Current action descriptor.
-         */
-        ActionDescriptor<SystemState> BuildAction();
+      public:
+        static bool Condition(const SystemState& state, void* param);
+        static void Action(SystemState& state, void* param);
 
-        /**
-         * @brief Prepares update descriptor for this task.
-         * @return Current update descriptor.
-         */
-        UpdateDescriptor<SystemState> BuildUpdate();
+        static void EnableMainThermalKnife(OpenSailTask* This)
+        {
+            This->_power.MainThermalKnife(true);
+        }
+        static void DisableMainThermalKnife(OpenSailTask* This)
+        {
+            This->_power.MainThermalKnife(false);
+        }
+        static void EnableRedundantThermalKnife(OpenSailTask* This)
+        {
+            This->_power.RedundantThermalKnife(true);
+        }
+        static void DisableRedundantThermalKnife(OpenSailTask* This)
+        {
+            This->_power.RedundantThermalKnife(false);
+        }
+        static void EnableMainBurnSwitch(OpenSailTask* This)
+        {
+            This->_power.EnableMainSailBurnSwitch();
+        }
+        static void EnableRedundantBurnSwitch(OpenSailTask* This)
+        {
+            This->_power.EnableRedundantSailBurnSwitch();
+        }
 
-        /**
-         * @brief Overrides the task state.
-         * @param[in] newState New sail deployment state.
-         */
-        void SetState(bool newState);
+        static StepDescription Steps[6];
+        static constexpr std::uint8_t StepsCount = count_of(Steps);
 
-        /**
-         * @brief Returns current sail deployment state.
-         * @return Current sail deployment state.
-         */
-        bool CurrentState() const noexcept;
-
-      private:
-        /**
-         * @brief Condition procedure for sail deployment.
-         * @param[in] state Current mission state.
-         * @param[in] param Execution context.
-         * @return True if the state should be opened at current stage, false otherwise.
-         */
-        static bool CanOpenSail(const SystemState& state, void* param);
-
-        /**
-         * @brief Initiates sail opening procedure.
-         * @param[in] state Current mission state.
-         * @param[in] param Execution context.
-         */
-        static void OpenSail(SystemState& state, void* param);
-
-        /**
-         * @brief Updates global mission state.
-         * @param[in] state Current mission state.
-         * @param[in] param Execution context.
-         * @return Operation status.
-         */
-        static UpdateResult UpdateProc(SystemState& state, void* param);
-
-        bool state;
-
-        services::power::IPowerControl* _powerControl;
+        services::power::IPowerControl& _power;
+        std::uint8_t _step;
+        std::chrono::milliseconds _nextStepAfter;
     };
 
-    inline void SailTask::SetState(bool newState)
-    {
-        this->state = newState;
-    }
-
-    inline bool SailTask::CurrentState() const noexcept
-    {
-        return this->state;
-    }
+    /** @} */
 }
 #endif /* LIBS_MISSION_INCLUDE_MISSION_SAIL_H_ */
