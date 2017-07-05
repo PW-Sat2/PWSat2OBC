@@ -4,8 +4,10 @@
 #include <chrono>
 #include "base/os.h"
 #include "base/time_counter.hpp"
+#include "boot/fwd.hpp"
 #include "obc/hardware_fwd.hpp"
 #include "program_flash/fwd.hpp"
+#include "scrubber/boot_settings.hpp"
 #include "scrubber/bootloader.hpp"
 #include "scrubber/program.hpp"
 
@@ -58,9 +60,13 @@ namespace obc
          * @brief Ctor
          * @param hardware OBC hardware
          * @param bootTable Boot table
+         * @param bootSettings Boot settings
          * @param primaryBootSlots Primary boot slots mask
          */
-        OBCScrubbing(obc::OBCHardware& hardware, program_flash::BootTable& bootTable, std::uint8_t primaryBootSlots);
+        OBCScrubbing(obc::OBCHardware& hardware,
+            program_flash::BootTable& bootTable,
+            boot::BootSettings& bootSettings,
+            std::uint8_t primaryBootSlots);
 
         /**
          * @brief Initialize run level 2
@@ -105,8 +111,14 @@ namespace obc
         /** @brief Bootloader scrubber */
         scrubber::BootloaderScrubber _bootloaderScrubber;
 
+        /** @brief Boot settings scrubber counter */
+        time_counter::TimeCounter<Action<OBCScrubbing*>, OBCScrubbing*, time_counter::min<30>, time_counter::min<15>>
+            _bootSettingsScrubberCounter;
+        /** @brief Boot settings scrubber */
+        scrubber::BootSettingsScrubber _bootSettingsScrubber;
+
         /** @brief Scrubber task */
-        Task<OBCScrubbing*, 2_KB, TaskPriority::P6> _scrubberTask;
+        Task<OBCScrubbing*, 4_KB, TaskPriority::P6> _scrubberTask;
         /** @brief Control flags */
         EventGroup _control;
 

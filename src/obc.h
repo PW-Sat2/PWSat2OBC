@@ -143,6 +143,8 @@ using Scrubber =
 
 static constexpr std::uint32_t PersistentStateBaseAddress = 16;
 
+static_assert(PersistentStateBaseAddress >= boot::BootSettingsSize, "Persistent state must be placed after boot settings");
+
 /** @brief External watchdog */
 using ExternalWatchdog = drivers::watchdog::PinWatchdog<io_map::Watchdog::ExternalWatchdogPin>;
 
