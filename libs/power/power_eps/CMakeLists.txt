@@ -1,7 +1,7 @@
 set(NAME power_eps)
 
 set(SOURCES
-    powerEps.cpp
+    power_eps.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
