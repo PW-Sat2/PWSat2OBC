@@ -8,9 +8,9 @@ namespace state
 {
     enum class SailOpeningState : std::uint8_t
     {
-        Waiting,
-        Opening,
-        OpenningStopped
+        Waiting = 0,
+        Opening = 1,
+        OpeningStopped = 2
     };
 
     class SailState

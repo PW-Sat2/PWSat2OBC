@@ -6,6 +6,7 @@ set(SOURCES
   state/AntennaConfigTest.cpp
   state/TelemetryTest.cpp
   state/BootStateTest.cpp
+  state/SailStateTest.cpp
   obc/ObcStateTest.cpp 
   telemetry/CommTelemetryAcquisitionTest.cpp
   telemetry/SystemStartupTest.cpp
