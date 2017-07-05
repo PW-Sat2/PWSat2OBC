@@ -1,7 +1,7 @@
 #ifndef LIBS_POWER_POWER_EPS_INCLUDE_EPS_POWER_EPSPOWER_C_
 #define LIBS_POWER_POWER_EPS_INCLUDE_EPS_POWER_EPSPOWER_C_
 
-#include "eps/eps.h"
+#include "eps/fwd.hpp"
 #include "power/power.h"
 
 namespace services
@@ -23,6 +23,11 @@ namespace services
 
             virtual void PowerCycle() override;
             virtual void OpenSail() override;
+
+            virtual bool MainThermalKnife(bool enabled) override;
+            virtual bool RedundantThermalKnife(bool enabled) override;
+            virtual bool EnableMainSailBurnSwitch() override;
+            virtual bool EnableRedundantSailBurnSwitch() override;
 
           private:
             /** @brief EPS driver */
