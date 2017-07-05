@@ -17,6 +17,7 @@
 #include "mission/time.hpp"
 #include "mission/watchdog.hpp"
 #include "state/struct.h"
+#include "telemetry/collect_ant.hpp"
 #include "telemetry/collect_comm.hpp"
 #include "telemetry/collect_eps.hpp"
 #include "telemetry/collect_exp.hpp"
@@ -31,6 +32,7 @@ namespace mission
 
     typedef MissionLoop<SystemState, //
         TimeTask,
+        antenna::StopAntennaDeploymentTask,
         antenna::AntennaTask,
         CommTask,
         SailTask,
@@ -54,6 +56,7 @@ namespace telemetry
         EpsTelemetryAcquisition,                 //
         ExperimentTelemetryAcquisition,          //
         McuTempTelemetryAcquisition,             //
+        AntennaTelemetryAcquisition,             //
         TelemetrySerialization                   //
         >
         ObcTelemetryAcquisition;

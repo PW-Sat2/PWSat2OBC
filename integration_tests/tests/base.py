@@ -5,7 +5,7 @@ from system import System
 from pins import Pins
 import extensions
 from build_config import config
-from obc.boot import BootToIndex, BootToUpper, BootHandlerChain
+from obc.boot import BootToIndex, BootToUpper, BootHandler
 
 
 class BaseTest(unittest.TestCase):
@@ -28,13 +28,10 @@ class BaseTest(unittest.TestCase):
 
         boot_wrappers = self._get_boot_wrappers(self._testMethodName)
 
-        boot_wrappers += [boot_handler]
+        self.system = System(obc_com, mock_com, self.gpio, boot_handler)
 
-        boot_handler_chain = BootHandlerChain(boot_wrappers)
-
-        self.system = System(obc_com, mock_com, self.gpio, boot_handler_chain, self.auto_power_on)
         if self.auto_power_on:
-            self.system.obc.wait_to_start()
+            self.system.restart(boot_wrappers)
 
         log.info("Test setup finished")
 
@@ -50,7 +47,7 @@ class BaseTest(unittest.TestCase):
         log.info("Test tear down finished")
 
     def power_on_obc(self):
-        self.system.obc.power_on()
+        self.system.restart(self._get_boot_wrappers(self._testMethodName))
         self.system.obc.wait_to_start()
 
     def _get_boot_wrappers(self, test):

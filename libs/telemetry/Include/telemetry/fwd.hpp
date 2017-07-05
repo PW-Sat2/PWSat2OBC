@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "antenna/antenna.h"
 #include "comm/comm.hpp"
 #include "eps/eps.h"
 #include "gyro/gyro.h"
@@ -24,6 +25,7 @@ namespace telemetry
         ProgramState,                           //
         state::TimeState,                       //
         ErrorCountingTelemetry,                 //
+        devices::antenna::AntennaTelemetry,     //
         McuTemperature,                         //
         ExperimentTelemetry,                    //
         devices::comm::CommTelemetry,           //

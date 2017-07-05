@@ -2,10 +2,12 @@
 #define LIBS_OBC_SCRUBBING_INCLUDE_OBC_SCRUBBING_HPP_
 
 #include <chrono>
-#include "base/counter.hpp"
 #include "base/os.h"
+#include "base/time_counter.hpp"
+#include "boot/fwd.hpp"
 #include "obc/hardware_fwd.hpp"
 #include "program_flash/fwd.hpp"
+#include "scrubber/boot_settings.hpp"
 #include "scrubber/bootloader.hpp"
 #include "scrubber/program.hpp"
 
@@ -58,9 +60,13 @@ namespace obc
          * @brief Ctor
          * @param hardware OBC hardware
          * @param bootTable Boot table
+         * @param bootSettings Boot settings
          * @param primaryBootSlots Primary boot slots mask
          */
-        OBCScrubbing(obc::OBCHardware& hardware, program_flash::BootTable& bootTable, std::uint8_t primaryBootSlots);
+        OBCScrubbing(obc::OBCHardware& hardware,
+            program_flash::BootTable& bootTable,
+            boot::BootSettings& bootSettings,
+            std::uint8_t primaryBootSlots);
 
         /**
          * @brief Initialize run level 2
@@ -88,22 +94,31 @@ namespace obc
         static void ScrubberTask(OBCScrubbing* This);
 
         /** @brief Primary slots scrubber counter */
-        counter::Counter<std::uint8_t, 0, 1, 1> _primarySlotsScrubberCounter;
+        time_counter::TimeCounter<Action<OBCScrubbing*>, OBCScrubbing*, time_counter::min<7>, time_counter::min<1>>
+            _primarySlotsScrubberCounter;
         /** @brief Primary slots scrubber */
         scrubber::ProgramScrubber _primarySlotsScrubber;
 
         /** @brief Secondary slots scrubber counter */
-        counter::Counter<std::uint8_t, 0, 1, 1> _secondarySlotsScrubberCounter;
+        time_counter::TimeCounter<Action<OBCScrubbing*>, OBCScrubbing*, time_counter::min<7>, time_counter::min<2>>
+            _secondarySlotsScrubberCounter;
         /** @brief Secondary slots scrubber */
         scrubber::ProgramScrubber _secondarySlotsScrubber;
 
         /** @brief Bootloader scrubber counter */
-        counter::Counter<std::uint8_t, 0, 7, 7> _bootloaderScrubberCounter;
+        time_counter::TimeCounter<Action<OBCScrubbing*>, OBCScrubbing*, time_counter::min<60>, time_counter::min<30>>
+            _bootloaderScrubberCounter;
         /** @brief Bootloader scrubber */
         scrubber::BootloaderScrubber _bootloaderScrubber;
 
+        /** @brief Boot settings scrubber counter */
+        time_counter::TimeCounter<Action<OBCScrubbing*>, OBCScrubbing*, time_counter::min<30>, time_counter::min<15>>
+            _bootSettingsScrubberCounter;
+        /** @brief Boot settings scrubber */
+        scrubber::BootSettingsScrubber _bootSettingsScrubber;
+
         /** @brief Scrubber task */
-        Task<OBCScrubbing*, 2_KB, TaskPriority::P6> _scrubberTask;
+        Task<OBCScrubbing*, 4_KB, TaskPriority::P6> _scrubberTask;
         /** @brief Control flags */
         EventGroup _control;
 

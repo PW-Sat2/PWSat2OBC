@@ -510,6 +510,9 @@ namespace devices
 
                 /** @brief DCDC: 5V*/
                 DCDC_HK dcdc5V;
+
+                /** @brief Error code offset */
+                static constexpr std::uint8_t ErrorCodeOffset = 0x4B;
             };
 
             constexpr std::uint32_t ControllerATelemetry::BitSize()
@@ -572,6 +575,9 @@ namespace devices
 
                 /** @brief Controller B status*/
                 ThisControllerState current;
+
+                /** @brief Error code offset */
+                static constexpr std::uint8_t ErrorCodeOffset = 0x07;
             };
 
             constexpr std::uint32_t ControllerBTelemetry::BitSize()

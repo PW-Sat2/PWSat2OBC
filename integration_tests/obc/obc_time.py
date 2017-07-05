@@ -7,6 +7,7 @@ class TimeMixin(OBCMixin):
 
     @command("jumpToTime {0}")
     def jump_to_time(self, time):
+        # type: (int) -> None
         pass
 
     @command("advance_time {0}")

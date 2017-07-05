@@ -36,6 +36,22 @@ namespace boot
     {
     }
 
+    void BootSettings::Initialize()
+    {
+        this->_sync = System::CreateBinarySemaphore(2);
+        System::GiveSemaphore(this->_sync);
+    }
+
+    bool BootSettings::Lock(std::chrono::milliseconds timeout)
+    {
+        return OS_RESULT_SUCCEEDED(System::TakeSemaphore(this->_sync, timeout));
+    }
+
+    void BootSettings::Unlock()
+    {
+        System::GiveSemaphore(this->_sync);
+    }
+
     bool BootSettings::CheckMagicNumber() const
     {
         alignas(4) array<std::uint8_t, 4> buf;

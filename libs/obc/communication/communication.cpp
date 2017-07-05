@@ -16,6 +16,7 @@ OBCCommunication::OBCCommunication(obc::FDIR& /*fdir*/,
     devices::comm::CommObject& commDriver,
     services::time::ICurrentTime& currentTime,
     mission::IIdleStateController& idleStateController,
+    mission::antenna::IDisableAntennaDeployment& disableAntennaDeployment,
     services::fs::IFileSystem& fs,
     obc::OBCExperiments& experiments,
     program_flash::BootTable& bootTable,
@@ -35,7 +36,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& /*fdir*/,
           WriteProgramPart(bootTable),                                 //
           FinalizeProgramEntry(bootTable),                             //
           SetBootSlotsTelecommand(bootSettings),                       //
-          SendBeaconTelecommand(telemetry)                             //
+          SendBeaconTelecommand(telemetry),                            //
+          StopAntennaDeployment(disableAntennaDeployment)              //
           ),                                                           //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {

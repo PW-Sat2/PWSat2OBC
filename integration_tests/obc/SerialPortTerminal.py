@@ -8,11 +8,10 @@ from .bootloader import OBCBootloader
 
 
 class SerialPortTerminal:
-    def __init__(self, comPort, gpio, boot_handler):
+    def __init__(self, comPort, gpio):
         self.log = logging.getLogger("OBCTerm")
 
         self._gpio = gpio
-        self._boot_handler = boot_handler
 
         self._serial = None
         while self._serial is None:
@@ -21,7 +20,6 @@ class SerialPortTerminal:
             except serial.SerialException as e:
                 if e.message.find('WindowsError(5,') == -1:
                     raise
-        self._gpio.high(self._gpio.RESET)
 
     def waitForPrompt(self, terminator='>'):
         self._serial.reset_input_buffer()
@@ -108,7 +106,7 @@ class SerialPortTerminal:
 
         return data
 
-    def reset(self):
+    def reset(self, boot_handler):
         self._serial.reset_input_buffer()
         self._serial.reset_output_buffer()
         self._serial.flushInput()
@@ -117,13 +115,13 @@ class SerialPortTerminal:
         self._gpio.low(self._gpio.RESET)
         self._gpio.high(self._gpio.RESET)
 
-        self._boot()
+        self._boot(boot_handler)
 
     def power_off(self):
         self.log.debug("power off")
         self._gpio.low(self._gpio.RESET)
 
-    def power_on(self):
+    def power_on(self, boot_handler):
         self.log.debug("Powering OBC on")
         self._serial.reset_input_buffer()
         self._serial.reset_output_buffer()
@@ -134,7 +132,7 @@ class SerialPortTerminal:
 
         self.log.debug("Waiting for OBC to come up")
 
-        self._boot()
+        self._boot(boot_handler)
 
         self.log.debug("OBC startup done")
 
@@ -151,7 +149,7 @@ class SerialPortTerminal:
         while c != 'O':
             c = self._serial.read(1)
 
-    def _boot(self, timeout=None):
+    def _boot(self, boot_handler, timeout=None):
         end = None if timeout is None else time.time() + timeout
         c = ''
         while c != '@':
@@ -159,7 +157,7 @@ class SerialPortTerminal:
 
             if c == '&':
                 self._stay_in_bootloader()
-                self._boot_handler.boot(OBCBootloader(self._serial))
+                boot_handler.boot(OBCBootloader(self._serial))
 
             if end is not None and time.time() > end:
                 return False

@@ -66,12 +66,13 @@ OBC::OBC()
           this->Hardware.CommDriver,
           this->timeProvider,
           Mission,
+          Mission,
           fs,
           Experiments,
           BootTable,
           BootSettings,
           TelemetryAcquisition),                               //
-      Scrubbing(this->Hardware, this->BootTable, boot::Index), //
+      Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index), //
       terminal(this->GetLineIO())                              //
 {
 }
@@ -89,6 +90,8 @@ OSResult OBC::InitializeRunlevel1()
     InitializeTerminal();
 
     this->BootTable.Initialize();
+
+    this->BootSettings.Initialize();
 
     this->fs.Initialize();
 
@@ -125,7 +128,6 @@ OSResult OBC::InitializeRunlevel1()
         LOG(LOG_LEVEL_ERROR, "Unable to initialize telemetry acquisition loop.");
     }
 
-    drivers::watchdog::InternalWatchdog::Enable();
     BootSettings.ConfirmBoot();
 
     LOG(LOG_LEVEL_INFO, "Initialized");
@@ -156,6 +158,8 @@ OSResult OBC::InitializeRunlevel2()
     {
         LOG(LOG_LEVEL_WARNING, "[obc] Not starting scrubbing as boot to upper detected");
     }
+
+    drivers::watchdog::InternalWatchdog::Enable();
 
     return OSResult::Success;
 }

@@ -75,4 +75,6 @@ void PayloadDriver(std::uint16_t argc, char* argv[]);
 
 void MemoryCommand(std::uint16_t argc, char* argv[]);
 
+void RunlevelCommand(std::uint16_t argc, char* argv[]);
+
 #endif

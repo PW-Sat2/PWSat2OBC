@@ -9,6 +9,7 @@ set(SOURCES
   Telecommands/UploadProgramTest.cpp
   Telecommands/ListFilesTelecommandTest.cpp
   Telecommands/SetBootSlotsTelecommandTest.cpp
+  Telecommands/StopAntennaDeploymentTelecommandTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})

@@ -1,5 +1,6 @@
 #include "base/BitWriter.hpp"
 #include <algorithm>
+#include <cstring>
 #include <limits>
 #include "system.h"
 
@@ -50,11 +51,11 @@ std::uint32_t BitWriter::GetByteDataLength() const
     return BitsToBytes(this->_bitPosition) + this->_bytePosition;
 }
 
-inline bool BitWriter::UpdateStatus(std::uint8_t length, std::uint8_t lengthLimit)
+inline bool BitWriter::UpdateStatus(std::uint32_t length, std::uint32_t lengthLimit)
 {
     return (this->_isValid = this->_isValid && //
             (length <= lengthLimit) &&         //
-            ((this->_bitPosition + length) <= this->_bitLimit));
+            ((GetBitDataLength() + length) <= this->_bitLimit));
 }
 
 bool BitWriter::Write(std::uint8_t value)
@@ -75,6 +76,30 @@ bool BitWriter::Write(std::uint32_t value)
 bool BitWriter::Write(std::uint64_t value)
 {
     return WriteQuadWord(value, BitsPerQWord);
+}
+
+bool BitWriter::WriteSpan(gsl::span<const std::uint8_t> buffer)
+{
+    const auto size = buffer.size() * BitsPerByte;
+    if (!UpdateStatus(size, size))
+    {
+        return false;
+    }
+
+    if (this->_bitPosition == 0)
+    {
+        std::memcpy(this->_buffer.data() + this->_bytePosition, buffer.data(), buffer.size());
+        this->_bytePosition += buffer.size();
+    }
+    else
+    {
+        for (auto byte : buffer)
+        {
+            WriteWord(byte, this->_buffer.data() + this->_bytePosition, BitsPerByte);
+        }
+    }
+
+    return true;
 }
 
 void BitWriter::WriteWord(std::uint16_t value, std::uint8_t* position, std::uint8_t length)

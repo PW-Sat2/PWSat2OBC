@@ -56,6 +56,7 @@ static const TerminalCommandDescription commands[] = {
     {"boot_settings", BootSettingsCommand},
     {"payload", PayloadDriver},
     {"memory", MemoryCommand},
+    {"runlevel", RunlevelCommand},
 };
 
 void InitializeTerminal(void)

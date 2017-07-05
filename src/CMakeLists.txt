@@ -32,6 +32,7 @@ set(SOURCES
     commands/boot_settings.cpp
     commands/payload.cpp
     commands/memory.cpp
+    commands/runlevel.cpp
     checks/error_counters.cpp
     obc.h
     obc.cpp
@@ -102,6 +103,7 @@ target_link_libraries(${NAME}
     telemetry_eps
     telemetry_exp
     telemetry_temp
+    telemetry_ant
     program_flash
     scrubber
     boot_settings

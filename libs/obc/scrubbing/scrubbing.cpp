@@ -18,12 +18,18 @@ namespace obc
     {
     }
 
-    OBCScrubbing::OBCScrubbing(OBCHardware& hardware, program_flash::BootTable& bootTable, std::uint8_t primaryBootSlots)
-        : //
-          _primarySlotsScrubber(ScrubbingBuffer, bootTable, hardware.FlashDriver, primaryBootSlots),
-          _secondarySlotsScrubber(ScrubbingBuffer, bootTable, hardware.FlashDriver, (~primaryBootSlots) & 0b111111),
-          _bootloaderScrubber(ScrubbingBuffer, bootTable, hardware.MCUFlash), //
-          _scrubberTask("Scrubber", this, ScrubberTask),                      //
+    OBCScrubbing::OBCScrubbing(
+        OBCHardware& hardware, program_flash::BootTable& bootTable, boot::BootSettings& bootSettings, std::uint8_t primaryBootSlots)
+        :                                                                                                               //
+          _primarySlotsScrubberCounter([](OBCScrubbing* This) { This->_primarySlotsScrubber.ScrubSlots(); }, this),     //
+          _primarySlotsScrubber(ScrubbingBuffer, bootTable, hardware.FlashDriver, primaryBootSlots),                    //
+          _secondarySlotsScrubberCounter([](OBCScrubbing* This) { This->_secondarySlotsScrubber.ScrubSlots(); }, this), //
+          _secondarySlotsScrubber(ScrubbingBuffer, bootTable, hardware.FlashDriver, (~primaryBootSlots) & 0b111111),    //
+          _bootloaderScrubberCounter([](OBCScrubbing* This) { This->_bootloaderScrubber.Scrub(); }, this),              //
+          _bootloaderScrubber(ScrubbingBuffer, bootTable, hardware.MCUFlash),                                           //
+          _bootSettingsScrubberCounter([](OBCScrubbing* This) { This->_bootSettingsScrubber.Scrub(); }, this),          //
+          _bootSettingsScrubber(hardware.PersistentStorage.GetRedundantDriver(), bootSettings),                         //
+          _scrubberTask("Scrubber", this, ScrubberTask),                                                                //
           _iterationsCount(0)
     {
     }
@@ -46,32 +52,39 @@ namespace obc
 
     void OBCScrubbing::ScrubberTask(OBCScrubbing* This)
     {
-        auto notifyRunOnce = false;
-
         while (1)
         {
-            This->_control.Set(Event::Running);
+            auto sleepTime = time_counter::SleepTime(This->_primarySlotsScrubberCounter,
+                This->_secondarySlotsScrubberCounter,
+                This->_bootloaderScrubberCounter,
+                This->_bootSettingsScrubberCounter);
 
-            This->_primarySlotsScrubberCounter.DoAndGoDown([This]() { This->_primarySlotsScrubber.ScrubSlots(); });
-            This->_secondarySlotsScrubberCounter.DoAndGoDown([This]() { This->_secondarySlotsScrubber.ScrubSlots(); });
-            This->_bootloaderScrubberCounter.DoAndGoDown([This]() { This->_bootloaderScrubber.Scrub(); });
+            LOGF(LOG_LEVEL_INFO, "[scrub] Sleeping for %ld", static_cast<std::uint32_t>(sleepTime.count()));
+
+            auto f = This->_control.WaitAny(Event::RunOnceRequested, true, sleepTime);
+
+            time_counter::Step(sleepTime,
+                This->_primarySlotsScrubberCounter,
+                This->_secondarySlotsScrubberCounter,
+                This->_bootloaderScrubberCounter,
+                This->_bootSettingsScrubberCounter);
+
+            time_counter::DoOnBottom(This->_primarySlotsScrubberCounter,
+                This->_secondarySlotsScrubberCounter,
+                This->_bootloaderScrubberCounter,
+                This->_bootSettingsScrubberCounter);
+
+            This->_control.Set(Event::Running);
 
             This->_control.Clear(Event::Running);
 
             This->_iterationsCount++;
 
+            bool notifyRunOnce = has_flag(f, Event::RunOnceRequested);
+
             if (notifyRunOnce)
             {
                 This->_control.Set(Event::RunOnceFinished);
-            }
-
-            auto f = This->_control.WaitAny(Event::RunOnceRequested, true, IterationInterval);
-
-            notifyRunOnce = has_flag(f, Event::RunOnceRequested);
-
-            if (notifyRunOnce)
-            {
-                LOG(LOG_LEVEL_INFO, "[scrub] Run once requested");
             }
         }
     }

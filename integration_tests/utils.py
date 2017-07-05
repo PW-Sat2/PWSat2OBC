@@ -128,3 +128,17 @@ def busy_wait(condition, projection=None, delay=None, timeout=None):
 class CompareAsDict:
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
+
+
+class Lazy:
+    def __init__(self, create_value):
+        self._create_value = create_value
+        self._created = False
+        self._value = None
+
+    def __call__(self):
+        if not self._created:
+            self._value = self._create_value()
+            self._created = True
+
+        return self._value

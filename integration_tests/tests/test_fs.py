@@ -27,9 +27,7 @@ class FileSystemTests(BaseTest):
         self.assertIn("test_file", files)
 
         log.info("Before power off")
-        self.system.obc.power_off()
-        self.system.obc.power_on()
-        self.system.obc.wait_to_start()
+        self.system.restart()
 
         log.info("After power off")
         files = self.system.obc.list_files("/a")
