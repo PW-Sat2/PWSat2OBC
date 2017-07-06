@@ -30,7 +30,7 @@ namespace mission
      * @brief Task that is responsible for deploying the sail at the end of the primary satelite mission.
      * @mission_task
      */
-    class OpenSailTask : public mission::Action
+    class OpenSailTask : public mission::Action, public mission::Update
     {
       public:
         OpenSailTask(services::power::IPowerControl& power) : _power(power), _step(0), _nextStepAfter(0)
@@ -38,8 +38,10 @@ namespace mission
         }
 
         mission::ActionDescriptor<SystemState> BuildAction();
+        mission::UpdateDescriptor<SystemState> BuildUpdate();
 
       public:
+        static UpdateResult Update(SystemState& state, void* param);
         static bool Condition(const SystemState& state, void* param);
         static void Action(SystemState& state, void* param);
 

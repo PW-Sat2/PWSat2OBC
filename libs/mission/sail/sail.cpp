@@ -14,9 +14,20 @@ namespace mission
         {&DisableRedundantThermalKnife, std::chrono::milliseconds::max()}, //
     };
 
-    mission::ActionDescriptor<SystemState> OpenSailTask::BuildAction()
+    UpdateDescriptor<SystemState> OpenSailTask::BuildUpdate()
     {
-        mission::ActionDescriptor<SystemState> action;
+        UpdateDescriptor<SystemState> update;
+
+        update.name = "Sail: Control";
+        update.param = this;
+        update.updateProc = Update;
+
+        return update;
+    }
+
+    ActionDescriptor<SystemState> OpenSailTask::BuildAction()
+    {
+        ActionDescriptor<SystemState> action;
 
         action.name = "Sail: Open";
         action.param = this;
@@ -24,6 +35,23 @@ namespace mission
         action.condition = Condition;
 
         return action;
+    }
+
+    UpdateResult OpenSailTask::Update(SystemState& state, void* /*param*/)
+    {
+        if (state.PersistentState.Get<state::SailState>().CurrentState() != state::SailOpeningState::Waiting)
+        {
+            return UpdateResult::Ok;
+        }
+
+        if (state.Time >= 40 * 24h)
+        {
+            state.PersistentState.Set(state::SailState(state::SailOpeningState::Opening));
+
+            return UpdateResult::Ok;
+        }
+
+        return UpdateResult::Ok;
     }
 
     bool OpenSailTask::Condition(const SystemState& state, void* param)
