@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <gsl/span>
 #include "base/os.h"
+#include "error_counter/error_counter.hpp"
 #include "gpio/InterruptPinDriver.h"
 #include "i2c/i2c.h"
 #include "utils.h"
@@ -36,10 +37,13 @@ namespace drivers
 
             /**
              * @brief Ctor
+             * @param errors Error counting mechanism
              * @param communicationBus I2C bus for communication
              * @param interruptPinDriver Interrupt/busy pin driver
              */
-            PayloadDriver(drivers::i2c::II2CBus& communicationBus, drivers::gpio::IInterruptPinDriver& interruptPinDriver);
+            PayloadDriver(error_counter::ErrorCounting& errors,
+                drivers::i2c::II2CBus& communicationBus,
+                drivers::gpio::IInterruptPinDriver& interruptPinDriver);
 
             /**
              * @brief Performs driver initialization
@@ -90,11 +94,18 @@ namespace drivers
              */
             virtual void SetDataTimeout(std::chrono::milliseconds newTimeout) override;
 
+            /** @brief Error counter type */
+            using ErrorCounter = error_counter::ErrorCounter<9>;
+
           private:
             /*
              * @brief DefaultTimeout Default timeout for Payload operations. 5 minutes.
              */
             static constexpr std::chrono::milliseconds DefaultTimeout = std::chrono::milliseconds(5 * 60 * 1000);
+
+            /** @brief Error reporter type */
+            using ErrorReporter = error_counter::AggregatedErrorReporter<ErrorCounter::DeviceId>;
+            ErrorCounter _error;
 
             drivers::i2c::II2CBus& _i2c;
             drivers::gpio::IInterruptPinDriver& _interruptPinDriver;
