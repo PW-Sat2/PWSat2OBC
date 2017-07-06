@@ -22,7 +22,6 @@ namespace services
             EPSPowerControl(devices::eps::EPSDriver& eps);
 
             virtual void PowerCycle() override;
-            virtual void OpenSail() override;
 
             virtual bool MainThermalKnife(bool enabled) override;
             virtual bool RedundantThermalKnife(bool enabled) override;

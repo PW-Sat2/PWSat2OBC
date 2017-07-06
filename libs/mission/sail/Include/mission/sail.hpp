@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <tuple>
 #include "mission/base.hpp"
 #include "power/power.h"
@@ -50,6 +51,24 @@ namespace mission
          * @return Action descriptor
          */
         mission::ActionDescriptor<SystemState> BuildAction();
+
+        /**
+         * @brief Start sail opening on next mission loop iteration
+         */
+        void Open();
+
+        /**
+         * @brief Returns number of current step of sail opening process
+         * @return Step number
+         * @remark This method is for debugging/information purposes only, do not relay on return value for critical decisions
+         */
+        std::uint8_t Step() const;
+
+        /**
+         * @brief Returns value indicating if sail opening process is in progress
+         * @return true if process is in progress
+         */
+        bool InProgress() const;
 
       private:
         /**
@@ -112,6 +131,8 @@ namespace mission
         std::uint8_t _step;
         /** @brief Mission time at which next step should be performed */
         std::chrono::milliseconds _nextStepAfter;
+        /** @brief Explicit open command */
+        std::atomic<bool> _openOnNextMissionLoop;
 
         /**
          * @brief Single step description
@@ -133,6 +154,15 @@ namespace mission
         static constexpr std::uint8_t StepsCount = count_of(Steps);
     };
 
+    inline uint8_t OpenSailTask::Step() const
+    {
+        return this->_step;
+    }
+
+    inline bool OpenSailTask::InProgress() const
+    {
+        return this->_step < StepsCount;
+    }
     /** @} */
 }
 #endif /* LIBS_MISSION_INCLUDE_MISSION_SAIL_H_ */

@@ -22,13 +22,6 @@ namespace services
             this->_eps.PowerCycle();
         }
 
-        void EPSPowerControl::OpenSail()
-        {
-            this->_eps.EnableLCL(LCL::TKMain);
-            this->_eps.EnableBurnSwitch(true, BurnSwitch::Sail);
-            // TODO: Correct implementation
-        }
-
         bool EPSPowerControl::MainThermalKnife(bool enabled)
         {
             if (enabled)

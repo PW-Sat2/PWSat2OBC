@@ -23,11 +23,6 @@ namespace services
             virtual void PowerCycle() = 0;
 
             /**
-             * @brief Performs sail opening sequence
-             */
-            virtual void OpenSail() = 0;
-
-            /**
              * @brief Sets state of main thermal knife LCL
              * @param enabled true to turn on LCL, false to turn off
              * @return Operation status
