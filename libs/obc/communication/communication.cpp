@@ -15,6 +15,7 @@ using namespace obc::telecommands;
 OBCCommunication::OBCCommunication(obc::FDIR& fdir,
     devices::comm::CommObject& commDriver,
     services::time::ICurrentTime& currentTime,
+    devices::rtc::IRTC& rtc,
     mission::IIdleStateController& idleStateController,
     mission::antenna::IDisableAntennaDeployment& disableAntennaDeployment,
     IHasState<SystemState>& stateContainer,
@@ -24,7 +25,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
     boot::BootSettings& bootSettings,
     IHasState<telemetry::TelemetryState>& telemetry,
     services::power::IPowerControl& powerControl,
-    mission::IOpenSail& openSail)
+    mission::IOpenSail& openSail,
+    mission::ITimeSynchronization& timeSynchronization)
     : Comm(commDriver),                                                                                                 //
       UplinkProtocolDecoder(settings::CommSecurityCode),                                                                //
       SupportedTelecommands(                                                                                            //
@@ -33,6 +35,7 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           EnterIdleStateTelecommand(currentTime, idleStateController),                                                  //
           RemoveFileTelecommand(fs),                                                                                    //
           SetTimeCorrectionConfigTelecommand(stateContainer),                                                           //
+          SetTimeTelecommand(stateContainer, currentTime, rtc, timeSynchronization), //
           PerformDetumblingExperiment(                                                                                  //
               experiments.ExperimentsController,                                                                        //
               experiments.Get<experiment::adcs::DetumblingExperiment>()                                                 //

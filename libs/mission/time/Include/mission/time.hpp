@@ -4,6 +4,7 @@
 #pragma once
 
 #include <tuple>
+#include "base/os.h"
 #include "mission/base.hpp"
 #include "rtc/rtc.hpp"
 #include "state/struct.h"
@@ -20,6 +21,18 @@ namespace mission
      * Module that contains all mission tasks that are related strictly to time.
      * @{
      */
+
+    /**
+     * @brief Interface for time synchronization.
+     */
+    struct ITimeSynchronization
+    {
+        /**
+         * @brief Gets time synchronization semaphore.
+         * @return Semaphore handle.
+         */
+        virtual OSSemaphoreHandle GetTimeSynchronizationSemaphore() = 0;
+    };
 
     /**
      * @brief Task that is responsible for updating current state in global mission state object
@@ -61,7 +74,7 @@ namespace mission
      * of random error or external interference then the actual time synchronization error.
      * In such case the time adjustment process is ignored and current mission/external time captured for future.
      */
-    class TimeTask : public Update, public Action
+    class TimeTask : public Update, public Action, public ITimeSynchronization
     {
       public:
         /**
@@ -99,6 +112,12 @@ namespace mission
          * @return Action descriptor - the time correction task.
          */
         ActionDescriptor<SystemState> BuildAction();
+
+        /**
+         * @brief Gets time synchronization semaphore.
+         * @return Semaphore handle.
+         */
+        virtual OSSemaphoreHandle GetTimeSynchronizationSemaphore() override;
 
         /**
          * @brief This procedure performs actual time correction/synchronization.
@@ -153,6 +172,11 @@ namespace mission
          * @brief External RTC reference.
          */
         devices::rtc::IRTC& rtc;
+
+        /**
+         * @brief Semaphore used for task synchronization.
+         */
+        OSSemaphoreHandle syncSemaphore;
     };
 
     /** @} */
