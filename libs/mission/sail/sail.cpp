@@ -5,7 +5,7 @@ using namespace std::chrono_literals;
 
 namespace mission
 {
-    StepDescription OpenSailTask::Steps[] = {
+    OpenSailTask::StepDescription OpenSailTask::Steps[] = {
         {&EnableMainThermalKnife, 0s},                                     //
         {&EnableMainBurnSwitch, 2min},                                     //
         {&DisableMainThermalKnife, 0s},                                    //
@@ -13,6 +13,10 @@ namespace mission
         {&EnableRedundantBurnSwitch, 2min},                                //
         {&DisableRedundantThermalKnife, std::chrono::milliseconds::max()}, //
     };
+
+    OpenSailTask::OpenSailTask(services::power::IPowerControl& power) : _power(power), _step(0), _nextStepAfter(0)
+    {
+    }
 
     UpdateDescriptor<SystemState> OpenSailTask::BuildUpdate()
     {
@@ -93,5 +97,35 @@ namespace mission
                 break;
             }
         }
+    }
+
+    void OpenSailTask::EnableMainThermalKnife(OpenSailTask* This)
+    {
+        This->_power.MainThermalKnife(true);
+    }
+
+    void OpenSailTask::DisableMainThermalKnife(OpenSailTask* This)
+    {
+        This->_power.MainThermalKnife(false);
+    }
+
+    void OpenSailTask::EnableRedundantThermalKnife(OpenSailTask* This)
+    {
+        This->_power.RedundantThermalKnife(true);
+    }
+
+    void OpenSailTask::DisableRedundantThermalKnife(OpenSailTask* This)
+    {
+        This->_power.RedundantThermalKnife(false);
+    }
+
+    void OpenSailTask::EnableMainBurnSwitch(OpenSailTask* This)
+    {
+        This->_power.EnableMainSailBurnSwitch();
+    }
+
+    void OpenSailTask::EnableRedundantBurnSwitch(OpenSailTask* This)
+    {
+        This->_power.EnableRedundantSailBurnSwitch();
     }
 }
