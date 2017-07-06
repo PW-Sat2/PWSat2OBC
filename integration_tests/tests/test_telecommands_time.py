@@ -37,4 +37,15 @@ class TimeTelecommandsTest(RestartPerTest):
         self.assertEqual(frame.seq(), 0)
         self.assertEqual(frame.payload(), [0x11, 0])
         self.assertEqual(map(int, time_config), [0x12, 0x34])
+
+    @runlevel(2)
+    def test_set_time(self):
+        self._start()
+
+        self.system.comm.put_frame(telecommand.SetTime(correlation_id=0x12, newTime=0x12345678))
+
+        frame = self.system.comm.get_frame(20)
+
+        time_text = self.system.obc.state_get_time_state()
+        time = time_text.split()
         

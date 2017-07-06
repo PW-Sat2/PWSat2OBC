@@ -8,6 +8,9 @@
 
 using telecommunication::downlink::DownlinkFrame;
 using telecommunication::downlink::DownlinkAPID;
+using services::time::ICurrentTime;
+using devices::rtc::IRTC;
+using devices::rtc::RTCTime;
 
 namespace obc
 {
@@ -49,6 +52,74 @@ namespace obc
             {
                 LOG(LOG_LEVEL_ERROR, "Cannot set time correction configuration state");
                 response.PayloadWriter().WriteByte(-2);
+                transmitter.SendFrame(response.Frame());
+                return;
+            }
+
+            response.PayloadWriter().WriteByte(0);
+            transmitter.SendFrame(response.Frame());
+        }
+
+        SetTimeTelecommand::SetTimeTelecommand(IHasState<SystemState>& stateContainer_,
+            ICurrentTime& timeProvider_,
+            IRTC& rtc_,
+            mission::ITimeSynchronization& timeSynchronization_)
+            : stateContainer(stateContainer_), timeProvider(timeProvider_), rtc(rtc_), timeSynchronization(timeSynchronization_)
+        {
+        }
+
+        void SetTimeTelecommand::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
+        {
+            using namespace devices::comm;
+
+            Reader r(parameters);
+
+            auto correlationId = r.ReadByte();
+            auto targetTime = std::chrono::seconds(r.ReadDoubleWordLE());
+
+            DownlinkFrame response(DownlinkAPID::Operation, 0);
+            response.PayloadWriter().WriteByte(correlationId);
+
+            UniqueLock<mission::ITimeSynchronization> lock(this->timeSynchronization, InfiniteTimeout);
+            if (!lock())
+            {
+                LOG(LOG_LEVEL_ERROR, "Unable to acquire time synchronization lock");
+                response.PayloadWriter().WriteByte(-4);
+                transmitter.SendFrame(response.Frame());
+                return;
+            }
+
+            devices::rtc::RTCTime rtcTime;
+            if (OS_RESULT_FAILED(rtc.ReadTime(rtcTime)))
+            {
+                LOG(LOG_LEVEL_ERROR, "Unable to retrieve time from external RTC");
+                response.PayloadWriter().WriteByte(-1);
+                transmitter.SendFrame(response.Frame());
+                return;
+            }
+
+            const auto externalTime = std::chrono::duration_cast<std::chrono::milliseconds>(rtcTime.ToDuration());
+
+            LOGF(LOG_LEVEL_INFO,
+                "Jumping to time 0x%x%xms 0x%x%xms\n",
+                static_cast<unsigned int>(targetTime.count() >> 32),
+                static_cast<unsigned int>(targetTime.count()),
+                static_cast<unsigned int>(externalTime.count() >> 32),
+                static_cast<unsigned int>(externalTime.count()));
+
+            if (!timeProvider.SetCurrentTime(targetTime))
+            {
+                LOG(LOG_LEVEL_ERROR, "Unable to set time");
+                response.PayloadWriter().WriteByte(-2);
+                transmitter.SendFrame(response.Frame());
+                return;
+            }
+
+            auto& persistentState = stateContainer.GetState().PersistentState;
+            if (!persistentState.Set(state::TimeState(targetTime, externalTime)))
+            {
+                LOG(LOG_LEVEL_ERROR, "Cannot set time state");
+                response.PayloadWriter().WriteByte(-3);
                 transmitter.SendFrame(response.Frame());
                 return;
             }
