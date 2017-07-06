@@ -255,4 +255,18 @@ namespace
         ASSERT_THAT(complex.Byte(), Eq(4u));
         ASSERT_THAT(telemetry.IsModified(), Eq(true));
     }
+
+    TEST_F(TelemetryTest, TestWriteNoChanges)
+    {
+        std::array<std::uint8_t, Telemetry::TotalSerializedSize> buffer;
+        std::uint8_t expected[] = {0xee, 0x77, 0xaa, 0x55, 0x0f, 0x00, 0x1a};
+        BitWriter writer(buffer);
+        telemetry.Set(ComplexObject(15, 26));
+        telemetry.Set(SimpleObject(0x55aa77ee));
+        telemetry.CommitCapture();
+        telemetry.Write(writer);
+        ASSERT_THAT(writer.Status(), Eq(true));
+        auto span = writer.Capture();
+        ASSERT_THAT(span, Eq(gsl::make_span(expected)));
+    }
 }

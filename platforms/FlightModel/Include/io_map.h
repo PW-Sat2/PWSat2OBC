@@ -26,6 +26,8 @@ namespace io_map
     using Led0 = PinLocation<gpioPortD, 1>;
     using Led1 = PinLocation<gpioPortD, 2>;
 
+    using SailDeployed = PinLocation<gpioPortD, 4>;
+
     struct Payload
     {
         static constexpr std::uint8_t InterruptPriority = 6;
@@ -40,16 +42,6 @@ namespace io_map
         using MOSI = PinLocation<gpioPortE, 7>;
         using MISO = PinLocation<gpioPortE, 6>;
         using CLK = PinLocation<gpioPortE, 5>;
-    };
-
-    struct LEUART : public LEUARTPins<LEUART>
-    {
-        static constexpr std::uint8_t Location = LEUART_ROUTE_LOCATION_LOC0;
-        static constexpr std::uint32_t Baudrate = 115200;
-        static constexpr std::uint8_t InterruptPriority = 6;
-
-        using TX = PinLocation<gpioPortD, 4>;
-        using RX = PinLocation<gpioPortD, 5>;
     };
 
     struct UART : public UARTPins<UART>
@@ -103,6 +95,7 @@ namespace io_map
     struct ProgramFlash
     {
         static constexpr std::uint8_t* FlashBase = reinterpret_cast<std::uint8_t*>(0x84000000);
+        static constexpr std::uint8_t* ApplicatonBase = reinterpret_cast<std::uint8_t*>(0x00080000);
     };
 
     struct RAMScrubbing

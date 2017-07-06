@@ -25,7 +25,7 @@ N25QStorage::N25QStorage(                     //
           {errors, N25QDriver2::ErrorCounter::DeviceId, _spiSlaves[1]},  //
           {errors, N25QDriver3::ErrorCounter::DeviceId, _spiSlaves[2]}}, //
       _driver{{&_n25qDrivers[0], &_n25qDrivers[1], &_n25qDrivers[2]}},   //
-      Device("/a", _driver)                                              //
+      Device("/", _driver)                                               //
 {
 }
 

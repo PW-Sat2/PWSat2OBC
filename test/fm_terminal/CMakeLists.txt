@@ -16,7 +16,6 @@ target_link_libraries(${NAME}
     base
     free_rtos_wrapper
     swo
-    leuart
     logger
     SwoEndpoint
     terminal

@@ -243,18 +243,17 @@ namespace devices
 
             constexpr std::uint32_t DISTR_HK::BitSize()
             {
-                return Aggregate<decltype(Temperature), //
-                    decltype(VOLT_3V3),                 //
-                    decltype(CURR_3V3),                 //
-                    decltype(VOLT_5V),                  //
-                    decltype(CURR_5V),                  //
-                    decltype(VOLT_VBAT),                //
-                    decltype(CURR_VBAT),                //
-                    decltype(LCL_STATE),                //
+                return Aggregate<decltype(VOLT_3V3), //
+                    decltype(CURR_3V3),              //
+                    decltype(VOLT_5V),               //
+                    decltype(CURR_5V),               //
+                    decltype(VOLT_VBAT),             //
+                    decltype(CURR_VBAT),             //
+                    decltype(LCL_STATE),             //
                     decltype(LCL_FLAGB)>;
             }
 
-            static_assert(DISTR_HK::BitSize() == 86, "Incorrect telemetry format");
+            static_assert(DISTR_HK::BitSize() == 76, "Incorrect telemetry format");
 
             /** @brief MPPT status */
             struct MPPT_HK
@@ -529,7 +528,7 @@ namespace devices
                     decltype(dcdc5V)::BitSize();
             }
 
-            static_assert(ControllerATelemetry::BitSize() == 416, "Incorrect telemetry format");
+            static_assert(ControllerATelemetry::BitSize() == 406, "Incorrect telemetry format");
 
             /**
              * @brief Housekeeping of controller B

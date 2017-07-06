@@ -14,7 +14,7 @@
 #include "experiment/fibo/fibo.h"
 #include "fs/fs.h"
 #include "fs/yaffs.h"
-#include "leuart/line_io.h"
+#include "line_io.h"
 #include "n25q/n25q.h"
 #include "n25q/yaffs.h"
 #include "obc/adcs.hpp"

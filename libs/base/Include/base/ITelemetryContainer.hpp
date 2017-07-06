@@ -18,8 +18,6 @@ template <typename Type> struct ITelemetryContainer
 {
     static_assert(Type::BitSize() > 0, "Telemetry type should report non zero size.");
 
-    static_assert(Type::Id != 0, "Telemetry type should have non zero identifier.");
-
     /**
      * @brief This procedure returns reference to current telemetry element object.
      * @return Reference to current telemetry element object.
