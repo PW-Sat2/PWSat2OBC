@@ -16,8 +16,8 @@
 #include "obc/telecommands/file_system.hpp"
 #include "obc/telecommands/ping.hpp"
 #include "obc/telecommands/program_upload.hpp"
-#include "program_flash/fwd.hpp"
 #include "obc/telecommands/time.hpp"
+#include "program_flash/fwd.hpp"
 #include "telecommunication/telecommand_handling.h"
 #include "telecommunication/uplink.h"
 #include "time/ICurrentTime.hpp"
@@ -119,6 +119,7 @@ namespace obc
         obc::telecommands::EnterIdleStateTelecommand,
         obc::telecommands::RemoveFileTelecommand,
         obc::telecommands::SetTimeCorrectionConfigTelecommand,
+        obc::telecommands::SetTimeTelecommand,
         obc::telecommands::PerformDetumblingExperiment,
         obc::telecommands::AbortExperiment,         //
         obc::telecommands::ListFilesTelecommand,    //
@@ -140,6 +141,7 @@ namespace obc
          * @param[in] fdir FDIR mechanisms
          * @param[in] commDriver Comm driver
          * @param[in] currentTime Current time
+         * @param[in] rtc RTC device
          * @param[in] idleStateController Idle state controller
          * @param[in] disableAntennaDeployment Object responsible for disabling antenna deployment
          * @param[in] stateContainer Container for OBC state
@@ -152,6 +154,7 @@ namespace obc
         OBCCommunication(obc::FDIR& fdir,
             devices::comm::CommObject& commDriver,
             services::time::ICurrentTime& currentTime,
+            devices::rtc::IRTC& rtc,
             mission::IIdleStateController& idleStateController,
             mission::antenna::IDisableAntennaDeployment& disableAntennaDeployment,
             IHasState<SystemState>& stateContainer,

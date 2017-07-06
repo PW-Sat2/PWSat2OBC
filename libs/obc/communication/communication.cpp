@@ -15,6 +15,7 @@ using namespace obc::telecommands;
 OBCCommunication::OBCCommunication(obc::FDIR& /*fdir*/,
     devices::comm::CommObject& commDriver,
     services::time::ICurrentTime& currentTime,
+    devices::rtc::IRTC& rtc,
     mission::IIdleStateController& idleStateController,
     mission::antenna::IDisableAntennaDeployment& disableAntennaDeployment,
     IHasState<SystemState>& stateContainer,
@@ -31,6 +32,7 @@ OBCCommunication::OBCCommunication(obc::FDIR& /*fdir*/,
           EnterIdleStateTelecommand(currentTime, idleStateController), //
           RemoveFileTelecommand(fs),                                   //
           SetTimeCorrectionConfigTelecommand(stateContainer),          //
+          SetTimeTelecommand(stateContainer, currentTime, rtc),        //
           PerformDetumblingExperiment(experiments),                    //
           AbortExperiment(experiments),                                //
           ListFilesTelecommand(fs),                                    //

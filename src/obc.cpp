@@ -78,6 +78,7 @@ OBC::OBC()
           this->Fdir,
           this->Hardware.CommDriver,
           this->timeProvider,
+          this->Hardware.rtc,
           Mission,
           Mission,
           Mission,

@@ -18,6 +18,7 @@ target_link_libraries(${NAME}
 	telecommunication
 	mission_antenna
 	mission_comm
+	rtc
 	fs
 	logger
 	obc_experiments
