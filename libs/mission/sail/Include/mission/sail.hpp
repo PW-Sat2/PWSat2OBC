@@ -18,64 +18,119 @@ namespace mission
      * @{
      */
 
-    class OpenSailTask;
-
-    struct StepDescription
-    {
-        void (*Action)(OpenSailTask* This);
-        std::chrono::milliseconds AfterStepDelay;
-    };
-
     /**
      * @brief Task that is responsible for deploying the sail at the end of the primary satelite mission.
      * @mission_task
+     *
+     * Sail opening procedure:
+     *  * T + 0min - Enable main thermal knife, enable main burn switch
+     *  * T + 2min - Disable main thermal knife, enable redundant thermal knife
+     *  * T + 4min - Disable redundant thermal knife
+     *
+     *  After sail opening conditions are met, this procedure should be performed after each restart
+     *  until overrided by telecommand
      */
     class OpenSailTask : public mission::Action, public mission::Update
     {
       public:
-        OpenSailTask(services::power::IPowerControl& power) : _power(power), _step(0), _nextStepAfter(0)
-        {
-        }
+        /**
+         * @brief Ctor
+         * @param power Power control interface
+         */
+        OpenSailTask(services::power::IPowerControl& power);
 
-        mission::ActionDescriptor<SystemState> BuildAction();
+        /**
+         * @brief Builds mission update description
+         * @return Update descriptor
+         */
         mission::UpdateDescriptor<SystemState> BuildUpdate();
 
-      public:
+        /**
+         * @brief Buils mission action description
+         * @return Action descriptor
+         */
+        mission::ActionDescriptor<SystemState> BuildAction();
+
+      private:
+        /**
+         * @brief Updates mission state
+         * @param state System state
+         * @param param Pointer to task object
+         * @return Update result
+         */
         static UpdateResult Update(SystemState& state, void* param);
+
+        /**
+         * @brief Checks if sail opening action should be performed
+         * @param state System state
+         * @param param Pointer to task object
+         * @return true if sail opening should be performed, false otherwise
+         */
         static bool Condition(const SystemState& state, void* param);
+
+        /**
+         * @brief Performs single step of sail opening procedure
+         * @param state System state
+         * @param param Pointer to task object
+         */
         static void Action(SystemState& state, void* param);
 
-        static void EnableMainThermalKnife(OpenSailTask* This)
-        {
-            This->_power.MainThermalKnife(true);
-        }
-        static void DisableMainThermalKnife(OpenSailTask* This)
-        {
-            This->_power.MainThermalKnife(false);
-        }
-        static void EnableRedundantThermalKnife(OpenSailTask* This)
-        {
-            This->_power.RedundantThermalKnife(true);
-        }
-        static void DisableRedundantThermalKnife(OpenSailTask* This)
-        {
-            This->_power.RedundantThermalKnife(false);
-        }
-        static void EnableMainBurnSwitch(OpenSailTask* This)
-        {
-            This->_power.EnableMainSailBurnSwitch();
-        }
-        static void EnableRedundantBurnSwitch(OpenSailTask* This)
-        {
-            This->_power.EnableRedundantSailBurnSwitch();
-        }
+        /**
+         * @brief Enables main thermal knife
+         * @param This Pointer to task object
+         */
+        static void EnableMainThermalKnife(OpenSailTask* This);
+        /**
+         * @brief Disables main thermal knife
+         * @param This Pointer to task object
+         */
+        static void DisableMainThermalKnife(OpenSailTask* This);
+        /**
+         * @brief Enables redundant thermal knife
+         * @param This Pointer to task object
+         */
+        static void EnableRedundantThermalKnife(OpenSailTask* This);
+        /**
+         * @brief Disables redundant thermal knife
+         * @param This Pointer to task object
+         */
+        static void DisableRedundantThermalKnife(OpenSailTask* This);
+        /**
+         * @brief Enables main SAIL burn switch
+         * @param This Pointer to task object
+         */
+        static void EnableMainBurnSwitch(OpenSailTask* This);
+        /**
+         * @brief Enables redundant SAIL burn switch
+         * @param This Pointer to task object
+         */
+        static void EnableRedundantBurnSwitch(OpenSailTask* This);
 
-        static StepDescription Steps[6];
-        static constexpr std::uint8_t StepsCount = count_of(Steps);
-
+        /** @brief Power control interface */
         services::power::IPowerControl& _power;
+        /** @brief Current step in sail opening process */
         std::uint8_t _step;
+        /** @brief Mission time at which next step should be performed */
         std::chrono::milliseconds _nextStepAfter;
+
+        /**
+         * @brief Single step description
+         */
+        struct StepDescription
+        {
+            /**
+             * @brief Pointer to step action
+             * @param This Pointer to task object
+             */
+            void (*Action)(OpenSailTask* This);
+            /** @brief Delay before next step after executing this tep */
+            std::chrono::milliseconds AfterStepDelay;
+        };
+
+        /** @brief Sail opening steps */
+        static StepDescription Steps[6];
+        /** @brief Steps count */
+        static constexpr std::uint8_t StepsCount = count_of(Steps);
     };
 
     /** @} */

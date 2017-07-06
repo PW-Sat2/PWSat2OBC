@@ -78,7 +78,6 @@ TEST_F(OpenSailTest, ShouldPerformSailOpeningProcedure)
     }
 
     // nothing to do after whole procedure is performed
-    ASSERT_THAT(this->_openSailTask._step, Eq(6));
     ASSERT_THAT(this->_openSailAction.EvaluateCondition(this->_state), Eq(false));
 }
 
