@@ -67,7 +67,6 @@ namespace devices
 
             void DISTR_HK::Write(BitWriter& writer) const
             {
-                writer.Write(this->Temperature);
                 writer.Write(this->VOLT_3V3);
                 writer.Write(this->CURR_3V3);
                 writer.Write(this->VOLT_5V);

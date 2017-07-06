@@ -25,7 +25,7 @@ namespace telemetry
     {
         decltype(TelemetryState::lastSerializedTelemetry) buffer;
         BitWriter writer(buffer);
-        state.telemetry.WriteModified(writer);
+        state.telemetry.Write(writer);
         assert(writer.Status());
         if (!writer.Status())
         {
@@ -43,7 +43,6 @@ namespace telemetry
         if (static_cast<bool>(lock))
         {
             std::memcpy(state.lastSerializedTelemetry.data(), buffer.data(), buffer.size());
-            state.telemetry.CommitCapture();
         }
 
         return mission::UpdateResult::Ok;

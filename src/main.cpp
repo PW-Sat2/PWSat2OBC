@@ -27,7 +27,11 @@
 #include "gpio/gpio.h"
 #include "i2c/i2c.h"
 #include "io_map.h"
+
+#ifdef USE_LEUART
 #include "leuart/leuart.h"
+#endif
+
 #include "logger/logger.h"
 #include "mission.h"
 #include "obc.h"
@@ -51,6 +55,11 @@ telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver
     Main.Experiments.ExperimentsController,
     Main.Hardware.MCUTemperature,
     Main.Hardware.antennaDriver,
+    0,
+    Main.fs,
+    Main.timeProvider,
+    Main.Hardware.rtc,
+    Main.BootTable,
     0);
 
 mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc),

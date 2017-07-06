@@ -38,7 +38,7 @@ namespace telemetry
 
       private:
         /**
-         * @brief Updates current comm telemetry in global state.
+         * @brief Updates current antenna telemetry in global state.
          * @param[in] state Reference to global state.
          * @param[in] param Current execution context.
          */

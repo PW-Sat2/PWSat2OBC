@@ -166,7 +166,7 @@ namespace devices
             /**
              * @brief Antenna telemetry unique identifier.
              */
-            static constexpr int Id = 9;
+            static constexpr int Id = 7;
 
             /** ctor. */
             AntennaTelemetry();

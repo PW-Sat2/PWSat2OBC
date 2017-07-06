@@ -48,7 +48,6 @@ target_link_libraries(${NAME}
     base
     free_rtos_wrapper
     comm
-    leuart
     uart
     swo
     logger
@@ -103,6 +102,10 @@ target_link_libraries(${NAME}
     telemetry_exp
     telemetry_temp
     telemetry_ant
+    telemetry_gpio
+    telemetry_fs
+    telemetry_time
+    telemetry_program
     program_flash
     scrubber
     boot_settings

@@ -173,7 +173,7 @@ using OSPulseHandle = void*;
 using OSTaskProcedure = void (*)(OSTaskHandle task);
 
 /**
- * Task priorites
+ * Task priorities
  */
 enum class TaskPriority
 {
