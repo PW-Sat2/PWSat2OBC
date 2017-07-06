@@ -19,8 +19,9 @@ namespace mission
     constexpr milliseconds TimeTask::MaximumTimeCorrection;
 
     TimeTask::TimeTask(std::tuple<TimeProvider&, devices::rtc::IRTC&> arguments)
-        : provider(std::get<0>(arguments)), //
-          rtc(std::get<1>(arguments))       //
+        : provider(std::get<0>(arguments)),              //
+          rtc(std::get<1>(arguments)),                   //
+          syncSemaphore(System::CreateBinarySemaphore()) //
     {
     }
 
@@ -62,12 +63,24 @@ namespace mission
 
     ActionDescriptor<SystemState> TimeTask::BuildAction()
     {
+        System::GiveSemaphore(syncSemaphore);
+
         ActionDescriptor<SystemState> descriptor;
         descriptor.name = "Correct current time using external RTC";
         descriptor.param = this;
         descriptor.condition = CorrectTimeCondition;
         descriptor.actionProc = CorrectTimeProxy;
         return descriptor;
+    }
+
+    bool TimeTask::AcquireTimeSynchronizationLock()
+    {
+        return OS_RESULT_SUCCEEDED(System::TakeSemaphore(this->syncSemaphore, InfiniteTimeout));
+    }
+
+    bool TimeTask::ReleaseTimeSynchronizationLock()
+    {
+        return OS_RESULT_SUCCEEDED(System::GiveSemaphore(this->syncSemaphore));
     }
 
     bool TimeTask::CorrectTimeCondition(const SystemState& state, void* /*param*/)
@@ -90,6 +103,13 @@ namespace mission
 
     void TimeTask::CorrectTime(SystemState& state)
     {
+        Lock lock(syncSemaphore, InfiniteTimeout);
+        if (!lock())
+        {
+            LOG(LOG_LEVEL_ERROR, "Can't acquire time synchronization semaphore");
+            return;
+        }
+
         auto time = this->provider.GetCurrentTime();
         if (!time.HasValue)
         {

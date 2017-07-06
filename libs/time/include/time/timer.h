@@ -191,7 +191,7 @@ namespace services
              *
              * @return Operation status. True on success, false otherwise.
              */
-            bool SetCurrentTime(TimePoint pointInTime);
+            virtual bool SetCurrentTime(TimePoint pointInTime) override;
 
             /**
              * @brief This procedure sets the current mission time to any arbitrary point in time.
@@ -201,7 +201,7 @@ namespace services
              *
              * @return Operation status. True on success, false otherwise.
              */
-            bool SetCurrentTime(std::chrono::milliseconds duration);
+            virtual bool SetCurrentTime(std::chrono::milliseconds duration) override;
 
             /**
              * @brief Waits until given timepoint. Wait is directed by timer notifications

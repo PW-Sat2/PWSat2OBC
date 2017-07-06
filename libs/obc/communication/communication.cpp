@@ -15,6 +15,7 @@ using namespace obc::telecommands;
 OBCCommunication::OBCCommunication(obc::FDIR& /*fdir*/,
     devices::comm::CommObject& commDriver,
     services::time::ICurrentTime& currentTime,
+    devices::rtc::IRTC& rtc,
     mission::IIdleStateController& idleStateController,
     mission::antenna::IDisableAntennaDeployment& disableAntennaDeployment,
     IHasState<SystemState>& stateContainer,
@@ -23,26 +24,28 @@ OBCCommunication::OBCCommunication(obc::FDIR& /*fdir*/,
     program_flash::BootTable& bootTable,
     boot::BootSettings& bootSettings,
     IHasState<telemetry::TelemetryState>& telemetry,
-    services::power::IPowerControl& powerControl)
-    : Comm(commDriver),                                                //
-      UplinkProtocolDecoder(settings::CommSecurityCode),               //
-      SupportedTelecommands(                                           //
-          PingTelecommand(),                                           //
-          DownloadFileTelecommand(fs),                                 //
-          EnterIdleStateTelecommand(currentTime, idleStateController), //
-          RemoveFileTelecommand(fs),                                   //
-          SetTimeCorrectionConfigTelecommand(stateContainer),          //
-          PerformDetumblingExperiment(experiments),                    //
-          AbortExperiment(experiments),                                //
-          ListFilesTelecommand(fs),                                    //
-          EraseBootTableEntry(bootTable),                              //
-          WriteProgramPart(bootTable),                                 //
-          FinalizeProgramEntry(bootTable),                             //
-          SetBootSlotsTelecommand(bootSettings),                       //
-          SendBeaconTelecommand(telemetry),                            //
-          StopAntennaDeployment(disableAntennaDeployment),             //
-          PowerCycle(powerControl)                                     //
-          ),                                                           //
+    services::power::IPowerControl& powerControl,
+    mission::ITimeSynchronization& timeSynchronization)
+    : Comm(commDriver),                                                              //
+      UplinkProtocolDecoder(settings::CommSecurityCode),                             //
+      SupportedTelecommands(                                                         //
+          PingTelecommand(),                                                         //
+          DownloadFileTelecommand(fs),                                               //
+          EnterIdleStateTelecommand(currentTime, idleStateController),               //
+          RemoveFileTelecommand(fs),                                                 //
+          SetTimeCorrectionConfigTelecommand(stateContainer),                        //
+          SetTimeTelecommand(stateContainer, currentTime, rtc, timeSynchronization), //
+          PerformDetumblingExperiment(experiments),                                  //
+          AbortExperiment(experiments),                                              //
+          ListFilesTelecommand(fs),                                                  //
+          EraseBootTableEntry(bootTable),                                            //
+          WriteProgramPart(bootTable),                                               //
+          FinalizeProgramEntry(bootTable),                                           //
+          SetBootSlotsTelecommand(bootSettings),                                     //
+          SendBeaconTelecommand(telemetry),                                          //
+          StopAntennaDeployment(disableAntennaDeployment),                           //
+          PowerCycle(powerControl)                                                   //
+          ),                                                                         //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {
 }

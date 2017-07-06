@@ -37,6 +37,7 @@ target_link_libraries(${NAME}
     obc_state
     antenna
     mission_comm
+    mission_time
     telecommunication
     program_flash
     power

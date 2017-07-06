@@ -7,6 +7,7 @@
 #include "comm/CommDriver.hpp"
 #include "i2c/i2c.h"
 #include "mission/comm.hpp"
+#include "mission/time.hpp"
 #include "obc/experiments.hpp"
 #include "obc/fdir.hpp"
 #include "obc/telecommands/antenna.hpp"
@@ -120,6 +121,7 @@ namespace obc
         obc::telecommands::EnterIdleStateTelecommand,
         obc::telecommands::RemoveFileTelecommand,
         obc::telecommands::SetTimeCorrectionConfigTelecommand,
+        obc::telecommands::SetTimeTelecommand,
         obc::telecommands::PerformDetumblingExperiment,
         obc::telecommands::AbortExperiment,         //
         obc::telecommands::ListFilesTelecommand,    //
@@ -142,6 +144,7 @@ namespace obc
          * @param[in] fdir FDIR mechanisms
          * @param[in] commDriver Comm driver
          * @param[in] currentTime Current time
+         * @param[in] rtc RTC device
          * @param[in] idleStateController Idle state controller
          * @param[in] disableAntennaDeployment Object responsible for disabling antenna deployment
          * @param[in] stateContainer Container for OBC state
@@ -150,10 +153,12 @@ namespace obc
          * @param[in] bootTable Boot table
          * @param[in] bootSettings Boot settings
          * @param[in] telemetry Reference to object that contains current telemetry state.
+         * @param[in] timeSynchronization Time synchronization object.
          */
         OBCCommunication(obc::FDIR& fdir,
             devices::comm::CommObject& commDriver,
             services::time::ICurrentTime& currentTime,
+            devices::rtc::IRTC& rtc,
             mission::IIdleStateController& idleStateController,
             mission::antenna::IDisableAntennaDeployment& disableAntennaDeployment,
             IHasState<SystemState>& stateContainer,
@@ -162,7 +167,8 @@ namespace obc
             program_flash::BootTable& bootTable,
             boot::BootSettings& bootSettings,
             IHasState<telemetry::TelemetryState>& telemetry,
-            services::power::IPowerControl& powerControl);
+            services::power::IPowerControl& powerControl,
+            mission::ITimeSynchronization& timeSynchronization);
 
         /**
          * @brief Initializes all communication at runlevel 1

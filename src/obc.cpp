@@ -78,6 +78,7 @@ OBC::OBC()
           this->Fdir,
           this->Hardware.CommDriver,
           this->timeProvider,
+          this->Hardware.rtc,
           Mission,
           Mission,
           Mission,
@@ -86,7 +87,8 @@ OBC::OBC()
           BootTable,
           BootSettings,
           TelemetryAcquisition,
-          PowerControlInterface),                                                  //
+          PowerControlInterface,                                                  //
+          Mission),                                                                //
       Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index), //
       terminal(this->GetLineIO())                                                  //
 {
