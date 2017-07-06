@@ -1,4 +1,5 @@
 #include "mission/sail.hpp"
+#include "logger/logger.h"
 #include "state/struct.h"
 
 using namespace std::chrono_literals;
@@ -14,8 +15,14 @@ namespace mission
         {&DisableRedundantThermalKnife, std::chrono::milliseconds::max()}, //
     };
 
-    OpenSailTask::OpenSailTask(services::power::IPowerControl& power) : _power(power), _step(0), _nextStepAfter(0)
+    OpenSailTask::OpenSailTask(services::power::IPowerControl& power)
+        : _power(power), _step(0), _nextStepAfter(0), _openOnNextMissionLoop(false)
     {
+    }
+
+    void OpenSailTask::Open()
+    {
+        this->_openOnNextMissionLoop = true;
     }
 
     UpdateDescriptor<SystemState> OpenSailTask::BuildUpdate()
@@ -41,18 +48,60 @@ namespace mission
         return action;
     }
 
-    UpdateResult OpenSailTask::Update(SystemState& state, void* /*param*/)
+    UpdateResult OpenSailTask::Update(SystemState& state, void* param)
     {
-        if (state.PersistentState.Get<state::SailState>().CurrentState() != state::SailOpeningState::Waiting)
-        {
-            return UpdateResult::Ok;
-        }
+        auto This = static_cast<OpenSailTask*>(param);
 
-        if (state.Time >= 40 * 24h)
-        {
+        auto currentState = state.PersistentState.Get<state::SailState>().CurrentState();
+
+        auto open = [&state, This]() {
             state.PersistentState.Set(state::SailState(state::SailOpeningState::Opening));
+            This->_step = 0;
+            This->_nextStepAfter = 0s;
+        };
 
-            return UpdateResult::Ok;
+        switch (currentState)
+        {
+            case state::SailOpeningState::Opening:
+            {
+                auto explicitOpen = This->_openOnNextMissionLoop.exchange(false);
+
+                if (explicitOpen && !This->InProgress())
+                {
+                    open();
+                    break;
+                }
+            }
+
+            case state::SailOpeningState::OpeningStopped:
+            {
+                auto explicitOpen = This->_openOnNextMissionLoop.exchange(false);
+
+                if (explicitOpen)
+                {
+                    open();
+                    break;
+                }
+            }
+            break;
+
+            case state::SailOpeningState::Waiting:
+            {
+                if (state.Time >= 40 * 24h)
+                {
+                    open();
+                    break;
+                }
+
+                auto explicitOpen = This->_openOnNextMissionLoop.exchange(false);
+
+                if (explicitOpen)
+                {
+                    open();
+                    break;
+                }
+            }
+            break;
         }
 
         return UpdateResult::Ok;
@@ -86,8 +135,10 @@ namespace mission
 
         while (true)
         {
+            LOGF(LOG_LEVEL_INFO, "[sail] Performing step %d", This->_step);
+
+            auto& step = Steps[This->_step];
             This->_step++;
-            auto& step = Steps[This->_step - 1];
 
             step.Action(This);
 

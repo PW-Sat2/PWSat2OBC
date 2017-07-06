@@ -32,6 +32,7 @@ set(SOURCES
     commands/boot_settings.cpp
     commands/memory.cpp
     commands/runlevel.cpp
+    commands/sail.cpp
     checks/error_counters.cpp
     obc.h
     obc.cpp

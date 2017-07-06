@@ -6,6 +6,7 @@
 #include "state/struct.h"
 
 using testing::Eq;
+using testing::Gt;
 using testing::Mock;
 using namespace std::chrono_literals;
 
@@ -116,4 +117,104 @@ TEST_F(OpenSailTest, ShouldNotStartOpeningIfAlreadyStoppedOpening)
     this->_openSailUpdate.Execute(this->_state);
 
     ASSERT_THAT(this->_state.PersistentState.Get<state::SailState>().CurrentState(), Eq(state::SailOpeningState::OpeningStopped));
+}
+
+TEST_F(OpenSailTest, ShouldStartOpeningOnExplicitCommandIfNotAlreadyOpening)
+{
+    this->_state.Time = std::chrono::hours(20 * 24);
+    this->_state.PersistentState.Set(state::SailState(state::SailOpeningState::Waiting));
+
+    this->_openSailTask.Open();
+
+    this->_openSailUpdate.Execute(this->_state);
+
+    ASSERT_THAT(this->_state.PersistentState.Get<state::SailState>().CurrentState(), Eq(state::SailOpeningState::Opening));
+}
+
+TEST_F(OpenSailTest, ShouldStartOpeningOnExplicitCommandIfAlreadyOpened)
+{
+    this->_state.Time = std::chrono::hours(20 * 24);
+
+    this->_openSailAction.Execute(this->_state);
+    this->_state.Time += 2min;
+    this->_openSailAction.Execute(this->_state);
+    this->_state.Time += 2min;
+    this->_openSailAction.Execute(this->_state);
+
+    this->_openSailTask.Open();
+
+    this->_openSailUpdate.Execute(this->_state);
+
+    ASSERT_THAT(this->_state.PersistentState.Get<state::SailState>().CurrentState(), Eq(state::SailOpeningState::Opening));
+    ASSERT_THAT(this->_openSailAction.EvaluateCondition(this->_state), Eq(true));
+}
+
+TEST_F(OpenSailTest, ExplicitOpenWhenOpenInProgressIsIgnored)
+{
+    this->_state.Time = std::chrono::hours(20 * 24);
+    this->_state.PersistentState.Set(state::SailState(state::SailOpeningState::Opening));
+
+    this->_openSailTask.Open();
+
+    this->_openSailUpdate.Execute(this->_state);
+
+    ASSERT_THAT(this->_state.PersistentState.Get<state::SailState>().CurrentState(), Eq(state::SailOpeningState::Opening));
+}
+
+TEST_F(OpenSailTest, ShouldStartOpeningAgainAfterRestart)
+{
+    this->_state.Time = std::chrono::hours(20 * 24);
+
+    this->_openSailAction.Execute(this->_state);
+    this->_state.Time += 2min;
+    this->_openSailAction.Execute(this->_state);
+    this->_state.Time += 2min;
+    this->_openSailAction.Execute(this->_state);
+
+    this->_openSailTask.Open();
+
+    this->_openSailUpdate.Execute(this->_state);
+
+    decltype(this->_openSailTask) afterRestart(this->_power);
+
+    afterRestart.BuildUpdate().Execute(this->_state);
+
+    ASSERT_THAT(afterRestart.BuildAction().EvaluateCondition(this->_state), Eq(true));
+}
+
+TEST_F(OpenSailTest, ExplicitOrderDuringProcessShouldNotRestartProcess)
+{
+    this->_state.Time = std::chrono::hours(40 * 24);
+
+    this->_openSailUpdate.Execute(this->_state);
+    this->_openSailAction.Execute(this->_state);
+
+    EXPECT_THAT(this->_openSailTask.Step(), Gt(0));
+
+    this->_openSailTask.Open();
+    this->_openSailUpdate.Execute(this->_state);
+
+    ASSERT_THAT(this->_openSailTask.Step(), Gt(0));
+}
+
+TEST_F(OpenSailTest, ExplicitOpenAfterSingleProcessRunFinishedShouldTriggerAnotherTry)
+{
+    this->_state.Time = std::chrono::hours(40 * 24);
+
+    this->_openSailUpdate.Execute(this->_state);
+    this->_openSailAction.Execute(this->_state);
+
+    EXPECT_THAT(this->_openSailTask.Step(), Gt(0));
+
+    this->_state.Time += 2min;
+    this->_openSailAction.Execute(this->_state);
+    this->_state.Time += 2min;
+    this->_openSailAction.Execute(this->_state);
+
+    EXPECT_THAT(this->_openSailTask.InProgress(), Eq(false));
+
+    this->_openSailTask.Open();
+    this->_openSailUpdate.Execute(this->_state);
+
+    ASSERT_THAT(this->_openSailTask.Step(), Eq(0));
 }
