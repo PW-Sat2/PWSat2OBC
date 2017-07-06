@@ -13,11 +13,7 @@ namespace drivers
             /**
              * @brief Command for executing RadFET measurements and data retrieval
              */
-            template <std::uint8_t TCommandCode>
-            class RadFETBaseCommand : public PayloadCommand<TCommandCode,
-                                          PayloadTelemetry::Radfet,
-                                          PayloadTelemetry::Radfet::DeviceDataAddress,
-                                          PayloadTelemetry::Radfet::DeviceDataLength>
+            template <std::uint8_t TCommandCode> class RadFETBaseCommand : public PayloadCommand<TCommandCode, PayloadTelemetry::Radfet>
             {
               public:
                 /**

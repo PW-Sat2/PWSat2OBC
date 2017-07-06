@@ -16,10 +16,7 @@ namespace drivers
              * This command has overriden Execute method to exclude "measure" part of other commands.
              * Also the Command Code is ignored for this reason.
              */
-            class WhoamiCommand : public PayloadCommand<0x00,
-                                      PayloadTelemetry::Status,
-                                      PayloadTelemetry::Status::DeviceDataAddress,
-                                      PayloadTelemetry::Status::DeviceDataLength>
+            class WhoamiCommand : public PayloadCommand<0x00, PayloadTelemetry::Status>
             {
               public:
                 /**

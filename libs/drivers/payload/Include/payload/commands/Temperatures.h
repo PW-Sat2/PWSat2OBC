@@ -13,10 +13,7 @@ namespace drivers
             /**
              * @brief Command for executing Temperatures measurements and data retrieval
              */
-            class TemperaturesCommand : public PayloadCommand<0x81,
-                                            PayloadTelemetry::Temperatures,
-                                            PayloadTelemetry::Temperatures::DeviceDataAddress,
-                                            PayloadTelemetry::Temperatures::DeviceDataLength>
+            class TemperaturesCommand : public PayloadCommand<0x81, PayloadTelemetry::Temperatures>
             {
               public:
                 /**

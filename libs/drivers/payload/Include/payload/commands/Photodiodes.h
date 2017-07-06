@@ -13,10 +13,7 @@ namespace drivers
             /**
              * @brief Command for executing Photodiodes measurements and data retrieval
              */
-            class PhotodiodesCommand : public PayloadCommand<0x82,
-                                           PayloadTelemetry::Photodiodes,
-                                           PayloadTelemetry::Photodiodes::DeviceDataAddress,
-                                           PayloadTelemetry::Photodiodes::DeviceDataLength>
+            class PhotodiodesCommand : public PayloadCommand<0x82, PayloadTelemetry::Photodiodes>
             {
               public:
                 /**

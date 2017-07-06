@@ -13,10 +13,7 @@ namespace drivers
             /**
              * @brief Command for executing SunS Reference Voltages measurements and data retrieval
              */
-            class SunSCommand : public PayloadCommand<0x80,
-                                    PayloadTelemetry::SunsRef,
-                                    PayloadTelemetry::SunsRef::DeviceDataAddress,
-                                    PayloadTelemetry::SunsRef::DeviceDataLength>
+            class SunSCommand : public PayloadCommand<0x80, PayloadTelemetry::SunsRef>
             {
               public:
                 /**

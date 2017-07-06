@@ -15,8 +15,7 @@ namespace drivers
              * Base class for all Commands for Payload manipulation.
              * The template argument is command code.
              */
-            template <std::uint8_t TCommandCode, class TOutputDataType, const uint8_t TDeviceDataAddress, const uint8_t TDeviceDataLength>
-            class PayloadCommand
+            template <std::uint8_t TCommandCode, class TOutputDataType> class PayloadCommand
             {
               public:
                 /**
@@ -56,9 +55,7 @@ namespace drivers
                 IPayloadDriver& _driver;
 
               private:
-                static constexpr uint8_t DeviceDataAddress = TDeviceDataAddress;
-                static constexpr uint8_t DeviceDataLength = TDeviceDataLength;
-                std::array<uint8_t, DeviceDataLength> _buffer;
+                std::array<uint8_t, TOutputDataType::DeviceDataLength> _buffer;
 
                 OSResult ExecuteCommand();
                 OSResult ExecuteDataRead(uint8_t address, gsl::span<uint8_t> buffer);

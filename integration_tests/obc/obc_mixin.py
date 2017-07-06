@@ -1,5 +1,6 @@
 from base64 import b64decode
 from functools import wraps
+import re
 
 from utils import b64pad
 
@@ -51,6 +52,25 @@ def decode_lines():
 def decode_bool():
     def p(s):
         return s == '1'
+
+    return decode_return(p)
+
+
+def decode_multiline_dictionary():
+    def p(s):
+        if "failed" in s:
+            return None
+
+        # Pattern: 'Label: <value> [optional uninteresting text]'. Output: (label,value).
+        pattern = re.compile("([^:]+):\s+(\d+).*")
+        result = []
+        lines = s.split('\n')
+        for line in lines:
+            match = pattern.match(line)
+            if match:
+                result.append((match.group(1), int(match.group(2))))
+
+        return dict(result)
 
     return decode_return(p)
 

@@ -6,15 +6,14 @@
 
 using namespace drivers::payload::commands;
 
-template <std::uint8_t TCommandCode, class TOutputDataType, const uint8_t TDeviceDataAddress, const uint8_t TDeviceDataLength>
-PayloadCommand<TCommandCode, TOutputDataType, TDeviceDataAddress, TDeviceDataLength>::PayloadCommand(IPayloadDriver& driver)
-    : _driver(driver)
+template <std::uint8_t TCommandCode, class TOutputDataType>
+PayloadCommand<TCommandCode, TOutputDataType>::PayloadCommand(IPayloadDriver& driver) : _driver(driver)
 {
     _buffer.fill(0xFF);
 }
 
-template <std::uint8_t TCommandCode, class TOutputDataType, const uint8_t TDeviceDataAddress, const uint8_t TDeviceDataLength>
-OSResult PayloadCommand<TCommandCode, TOutputDataType, TDeviceDataAddress, TDeviceDataLength>::Execute(TOutputDataType& output)
+template <std::uint8_t TCommandCode, class TOutputDataType>
+OSResult PayloadCommand<TCommandCode, TOutputDataType>::Execute(TOutputDataType& output)
 {
     if (_driver.IsBusy())
     {
@@ -37,10 +36,10 @@ OSResult PayloadCommand<TCommandCode, TOutputDataType, TDeviceDataAddress, TDevi
     return ExecuteDataCommand(output);
 }
 
-template <std::uint8_t TCommandCode, class TOutputDataType, const uint8_t TDeviceDataAddress, const uint8_t TDeviceDataLength>
-OSResult PayloadCommand<TCommandCode, TOutputDataType, TDeviceDataAddress, TDeviceDataLength>::ExecuteDataCommand(TOutputDataType& output)
+template <std::uint8_t TCommandCode, class TOutputDataType>
+OSResult PayloadCommand<TCommandCode, TOutputDataType>::ExecuteDataCommand(TOutputDataType& output)
 {
-    auto result = ExecuteDataRead(DeviceDataAddress, _buffer);
+    auto result = ExecuteDataRead(TOutputDataType::DeviceDataAddress, _buffer);
     if (result != OSResult::Success)
     {
         return result;
@@ -55,8 +54,7 @@ OSResult PayloadCommand<TCommandCode, TOutputDataType, TDeviceDataAddress, TDevi
     return OSResult::Success;
 }
 
-template <std::uint8_t TCommandCode, class TOutputDataType, const uint8_t TDeviceDataAddress, const uint8_t TDeviceDataLength>
-OSResult PayloadCommand<TCommandCode, TOutputDataType, TDeviceDataAddress, TDeviceDataLength>::ExecuteCommand()
+template <std::uint8_t TCommandCode, class TOutputDataType> OSResult PayloadCommand<TCommandCode, TOutputDataType>::ExecuteCommand()
 {
     std::array<std::uint8_t, 1> commandBuffer = {CommandCode};
 
@@ -70,9 +68,8 @@ OSResult PayloadCommand<TCommandCode, TOutputDataType, TDeviceDataAddress, TDevi
     return OSResult::Success;
 }
 
-template <std::uint8_t TCommandCode, class TOutputDataType, const uint8_t TDeviceDataAddress, const uint8_t TDeviceDataLength>
-OSResult PayloadCommand<TCommandCode, TOutputDataType, TDeviceDataAddress, TDeviceDataLength>::ExecuteDataRead(
-    uint8_t address, gsl::span<uint8_t> buffer)
+template <std::uint8_t TCommandCode, class TOutputDataType>
+OSResult PayloadCommand<TCommandCode, TOutputDataType>::ExecuteDataRead(uint8_t address, gsl::span<uint8_t> buffer)
 {
     std::array<std::uint8_t, 1> commandBuffer = {address};
 
