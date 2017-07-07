@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "io_map.h"
+#include "mcu/io_map.h"
 #include "mission/BeaconUpdate.hpp"
 #include "mission/PersistentStateSave.hpp"
 #include "mission/TelemetrySerialization.hpp"

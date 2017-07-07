@@ -1,7 +1,7 @@
 #include "internal.hpp"
 #include <em_cmu.h>
 #include <em_wdog.h>
-#include "io_map.h"
+#include "mcu/io_map.h"
 
 namespace drivers
 {

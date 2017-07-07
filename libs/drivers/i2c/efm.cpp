@@ -3,8 +3,8 @@
 #include <em_gpio.h>
 
 #include "base/os.h"
-#include "io_map.h"
 #include "logger/logger.h"
+#include "mcu/io_map.h"
 
 #include "efm.h"
 

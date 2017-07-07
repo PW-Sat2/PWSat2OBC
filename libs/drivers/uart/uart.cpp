@@ -4,8 +4,8 @@
 #include <em_cmu.h>
 #include <em_gpio.h>
 #include <em_usart.h>
-#include "io_map.h"
 #include "logger/logger.h"
+#include "mcu/io_map.h"
 #include "system.h"
 
 namespace drivers
