@@ -4,7 +4,7 @@ set(SOURCES
     leuart.cpp
 )
 
-add_library(${NAME} STATIC ${SOURCES})
+add_library(${NAME} STATIC EXCLUDE_FROM_ALL ${SOURCES})
 
 target_link_libraries(${NAME} 
     freeRTOS 
