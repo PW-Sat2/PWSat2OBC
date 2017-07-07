@@ -53,21 +53,6 @@ namespace obc
         }
     };
 
-    /** @brief Structure describing LEUART pins */
-    template <typename Location> struct LEUARTPins
-    {
-        /** @brief TX */
-        const drivers::gpio::OutputPin<typename Location::TX> TX;
-        /** @brief RX */
-        const drivers::gpio::InputPin<typename Location::RX> RX;
-        /** @brief Initializes LEUART pins */
-        void Initialize() const
-        {
-            this->TX.Initialize();
-            this->RX.Initialize();
-        }
-    };
-
     /** @brief Structure describing UART pins */
     template <typename Location> struct UARTPins
     {
@@ -98,11 +83,7 @@ namespace obc
         typename TTimeIndicator,
         typename TBootIndicator,
         typename TSPI,
-#ifdef USE_LEUART
-        typename TLEUART,
-#else
         typename TUART,
-#endif
         typename TI2C0,
         typename TI2C1,
         typename TExternalWatchdogPin,
@@ -131,14 +112,8 @@ namespace obc
         const drivers::gpio::OutputPin<TBootIndicator> BootIndicator;
         /** @brief SPI */
         const SPIPins<TSPI> SPI;
-#ifdef USE_LEUART
-        /** @brief LEUART */
-        const LEUARTPins<TLEUART> LEUART;
-#else
         /** @brief UART */
         const UARTPins<TUART> UART;
-#endif
-
         /** @brief I2C0 */
         const I2CPins<TI2C0> I2C_0;
         /** @brief I2C1 */
@@ -158,11 +133,7 @@ namespace obc
             this->TimeIndicator.Initialize();
             this->BootIndicator.Initialize();
             this->SPI.Initialize();
-#ifdef USE_LEUART
-            this->LEUART.Initialize();
-#else
             this->UART.Initialize();
-#endif
             this->I2C_0.Initialize();
             this->I2C_1.Initialize();
         }
@@ -179,11 +150,7 @@ namespace obc
         io_map::TimeIndicator,                              //
         io_map::BootIndicator,                              //
         io_map::SPI,                                        //
-#ifdef USE_LEUART
-        io_map::LEUART,
-#else
         io_map::UART,
-#endif
         io_map::I2C_0,
         io_map::I2C_1,
         io_map::Watchdog::ExternalWatchdogPin,

@@ -102,7 +102,6 @@ OSResult OBC::InitializeRunlevel1()
     if (OS_RESULT_FAILED(result))
     {
         LOGF(LOG_LEVEL_FATAL, "Storage initialization failed %d", num(result));
-        return result;
     }
 
     this->Experiments.InitializeRunlevel1();

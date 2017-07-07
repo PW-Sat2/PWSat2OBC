@@ -94,9 +94,6 @@ struct OBC
     /** @brief OBC hardware */
     obc::OBCHardware Hardware;
 
-    /** @brief Standard text based IO. */
-    LineIO IO;
-
     /** @brief Power control interface */
     services::power::EPSPowerControl PowerControlInterface;
 
@@ -127,11 +124,7 @@ struct OBC
 
 LineIO& OBC::GetLineIO()
 {
-#ifdef USE_LEUART
-    return this->IO;
-#else
     return this->Hardware.UARTDriver.GetLineIO();
-#endif
 }
 
 /** @brief Global OBC object. */
