@@ -27,6 +27,7 @@ set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${LOWER_LINKER_SCRIPT} -
 
 target_link_libraries(${NAME}
       platform
+      pld_platform
       emlib
       bspLib
       assert
