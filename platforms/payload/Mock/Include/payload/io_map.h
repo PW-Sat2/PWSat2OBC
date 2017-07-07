@@ -10,9 +10,6 @@
 
 namespace io_map
 {
-    // This is a bit tricky as pld dm does not have any leds reserved for this purpose
-    using TimeIndicator = PinLocation<gpioPortD, 1>;
-
     using PayloadInterrupt = PinLocation<gpioPortE, 0>;
 }
 
