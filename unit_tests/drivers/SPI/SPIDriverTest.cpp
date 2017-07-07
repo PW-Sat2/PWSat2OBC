@@ -5,7 +5,7 @@
 
 #include "efm_support/clock.h"
 #include "efm_support/dma.h"
-#include "io_map.h"
+#include "mcu/io_map.h"
 #include "mock/emlib.h"
 #include "spi/efm.h"
 

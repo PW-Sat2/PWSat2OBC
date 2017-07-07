@@ -26,7 +26,7 @@
 #include "fs/fs.h"
 #include "gpio/gpio.h"
 #include "i2c/i2c.h"
-#include "io_map.h"
+#include "mcu/io_map.h"
 
 #ifdef USE_LEUART
 #include "leuart/leuart.h"
@@ -139,7 +139,7 @@ static void BlinkLed0(void* param)
 
     while (1)
     {
-        Main.Hardware.Pins.Led0.Toggle();
+        Main.Hardware.Pins.TimeIndicator.Toggle();
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
@@ -274,15 +274,15 @@ int main(void)
 
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 
-    Main.Hardware.Pins.Led0.High();
-    Main.Hardware.Pins.Led1.High();
+    Main.Hardware.Pins.TimeIndicator.High();
+    Main.Hardware.Pins.BootIndicator.High();
 
     System::CreateTask(BlinkLed0, "Blink0", 512, NULL, TaskPriority::P1, NULL);
     System::CreateTask(ObcInitTask, "Init", 8_KB, &Main, TaskPriority::P14, &Main.initTask);
 
     System::RunScheduler();
 
-    Main.Hardware.Pins.Led0.Toggle();
+    Main.Hardware.Pins.BootIndicator.Toggle();
 
     return 0;
 }

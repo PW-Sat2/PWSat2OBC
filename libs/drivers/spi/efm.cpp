@@ -4,8 +4,8 @@
 #include "efm_support/api.h"
 #include "efm_support/clock.h"
 #include "efm_support/dma.h"
-#include "io_map.h"
 #include "logger/logger.h"
+#include "mcu/io_map.h"
 #include "system.h"
 #include "utils.h"
 
