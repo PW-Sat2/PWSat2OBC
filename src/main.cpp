@@ -26,13 +26,8 @@
 #include "fs/fs.h"
 #include "gpio/gpio.h"
 #include "i2c/i2c.h"
-#include "mcu/io_map.h"
-
-#ifdef USE_LEUART
-#include "leuart/leuart.h"
-#endif
-
 #include "logger/logger.h"
+#include "mcu/io_map.h"
 #include "mission.h"
 #include "obc.h"
 #include "obc/ObcState.hpp"
@@ -248,10 +243,6 @@ int main(void)
     InitSwoEndpoint();
 
     DMADRV_Init();
-
-#ifdef USE_LEUART
-    LeuartLineIOInit(&Main.IO);
-#endif
 
     if (!boot::IsBootInformationAvailable())
     {
