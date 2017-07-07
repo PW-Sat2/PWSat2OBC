@@ -164,6 +164,11 @@ static constexpr uint8_t RecursionLimit = 5;
  */
 static OSResult RemoveDirectoryContents(yaffs_obj* root, int depth = 0)
 {
+    if (root == nullptr)
+    {
+        return OSResult::DeviceNotFound;
+    }
+
     if (depth > RecursionLimit)
         return OSResult::PathTooLong;
 
