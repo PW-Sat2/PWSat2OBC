@@ -23,6 +23,7 @@ namespace io_map
     using SlaveSelectFram2 = PinLocation<gpioPortA, 10>;
     using SlaveSelectFram3 = PinLocation<gpioPortA, 9>;
 
+    using SystickIndicator = PinLocation<gpioPortD, 1>;
     using BootIndicator = PinLocation<gpioPortD, 2>;
 
     using SailDeployed = PinLocation<gpioPortD, 4>;

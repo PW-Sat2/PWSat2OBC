@@ -134,7 +134,7 @@ static void BlinkLed0(void* param)
 
     while (1)
     {
-        Main.Hardware.Pins.TimeIndicator.Toggle();
+        Main.Hardware.Pins.SystickIndicator.Toggle();
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }

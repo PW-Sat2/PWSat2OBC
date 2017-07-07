@@ -10,8 +10,6 @@
 
 namespace io_map
 {
-    using TimeIndicator = PinLocation<gpioPortE, 4>;
-
     using PayloadInterrupt = PinLocation<gpioPortD, 6>;
 }
 

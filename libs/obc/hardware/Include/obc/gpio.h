@@ -81,6 +81,7 @@ namespace obc
         typename TSlaveSelectFram2,
         typename TSlaveSelectFram3,
         typename TTimeIndicator,
+        typename TTickIndicator,
         typename TBootIndicator,
         typename TSPI,
         typename TUART,
@@ -108,6 +109,8 @@ namespace obc
         const drivers::gpio::OutputPin<TSlaveSelectFram3> Fram3ChipSelect;
         /** @brief Time indicator. Blinks with passage of time */
         const drivers::gpio::OutputPin<TTimeIndicator> TimeIndicator;
+        /** @brief Systick indicator. Blinks with passage of time */
+        const drivers::gpio::OutputPin<TTickIndicator> SystickIndicator;
         /** @brief Boot indicator. Enabled once the obc starts up */
         const drivers::gpio::OutputPin<TBootIndicator> BootIndicator;
         /** @brief SPI */
@@ -131,6 +134,7 @@ namespace obc
             this->Fram2ChipSelect.Initialize();
             this->Fram3ChipSelect.Initialize();
             this->TimeIndicator.Initialize();
+            this->SystickIndicator.Initialize();
             this->BootIndicator.Initialize();
             this->SPI.Initialize();
             this->UART.Initialize();
@@ -148,6 +152,7 @@ namespace obc
         io_map::SlaveSelectFram2,                           //
         io_map::SlaveSelectFram3,                           //
         io_map::TimeIndicator,                              //
+        io_map::SystickIndicator,                           //
         io_map::BootIndicator,                              //
         io_map::SPI,                                        //
         io_map::UART,
