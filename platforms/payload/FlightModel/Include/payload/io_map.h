@@ -10,6 +10,16 @@
 
 namespace io_map
 {
+    using SlaveSelectFlash1 = VirtualPA13;
+    using SlaveSelectFlash2 = PinLocation<gpioPortA, 11>;
+    using SlaveSelectFlash3 = PinLocation<gpioPortA, 8>;
+
+    using SlaveSelectFram1 = PinLocation<gpioPortA, 12>;
+    using SlaveSelectFram2 = PinLocation<gpioPortA, 10>;
+    using SlaveSelectFram3 = PinLocation<gpioPortA, 9>;
+
+    using TimeIndicator = PinLocation<gpioPortB, 11>;
+
     using PayloadInterrupt = PinLocation<gpioPortD, 6>;
 }
 

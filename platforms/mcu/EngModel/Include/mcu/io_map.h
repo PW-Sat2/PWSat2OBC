@@ -15,21 +15,15 @@
 
 namespace io_map
 {
-    using SlaveSelectFlash1 = PinLocation<gpioPortA, 8>;
-    using SlaveSelectFlash2 = PinLocation<gpioPortA, 9>;
-    using SlaveSelectFlash3 = PinLocation<gpioPortA, 10>;
-
-    using SlaveSelectFram1 = PinLocation<gpioPortA, 11>;
-    using SlaveSelectFram2 = PinLocation<gpioPortA, 12>;
-    using SlaveSelectFram3 = PinLocation<gpioPortA, 13>;
+    using VirtualPA13 = PinLocation<gpioPortA, 13>;
+    using VirtualPB12 = PinLocation<gpioPortB, 12>;
 
     using SystickIndicator = PinLocation<gpioPortD, 1>;
     using BootIndicator = PinLocation<gpioPortD, 2>;
-    using TimeIndicator = PinLocation<gpioPortE, 4>;
 
     using SailDeployed = PinLocation<gpioPortD, 4>;
 
-    using CamSelect = PinLocation<gpioPortB, 12>;
+    using CamSelect = VirtualPB12;
 
     using SunsInterrupt = PinLocation<gpioPortD, 5>;
 
