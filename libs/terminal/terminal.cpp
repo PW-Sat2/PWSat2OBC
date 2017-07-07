@@ -71,11 +71,17 @@ void Terminal::ExchangeBuffers(gsl::span<const std::uint8_t> outputBuffer, gsl::
 
 void Terminal::HandleCommand(char* buffer)
 {
-    char* commandName;
+    char* commandName = nullptr;
     uint16_t argc = 0;
     char* args[8] = {0};
 
     parseCommandLine(buffer, &commandName, args, &argc, COUNT_OF(args));
+
+    if (commandName == nullptr || strlen(commandName) == 0)
+    {
+        this->NewLine();
+        return;
+    }
 
     for (auto& command : this->_commandList)
     {
