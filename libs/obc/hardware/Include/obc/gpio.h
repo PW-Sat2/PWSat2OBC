@@ -6,7 +6,8 @@
 #include <em_gpio.h>
 #include "gpio-internal.h"
 #include "gpio/gpio.h"
-#include "io_map.h"
+#include "mcu/io_map.h"
+#include "payload/io_map.h"
 
 namespace obc
 {
@@ -94,8 +95,8 @@ namespace obc
         typename TSlaveSelectFram1,
         typename TSlaveSelectFram2,
         typename TSlaveSelectFram3,
-        typename TLed0,
-        typename TLed1,
+        typename TTimeIndicator,
+        typename TBootIndicator,
         typename TSPI,
 #ifdef USE_LEUART
         typename TLEUART,
@@ -107,7 +108,9 @@ namespace obc
         typename TExternalWatchdogPin,
         typename TBSP,
         typename TMemoryModules,
-        typename TSailState>
+        typename TSailState,
+        typename PayloadInterrupt,
+        typename SunsInterrupt>
     struct OBCGPIOBase
     {
         /** @brief Slave Select - Flash1 */
@@ -122,10 +125,10 @@ namespace obc
         const drivers::gpio::OutputPin<TSlaveSelectFram2> Fram2ChipSelect;
         /** @brief Slave Select - Fram3 */
         const drivers::gpio::OutputPin<TSlaveSelectFram3> Fram3ChipSelect;
-        /** @brief LED0 */
-        const drivers::gpio::OutputPin<TLed0> Led0;
-        /** @brief LED1 */
-        const drivers::gpio::OutputPin<TLed1> Led1;
+        /** @brief Time indicator. Blinks with passage of time */
+        const drivers::gpio::OutputPin<TTimeIndicator> TimeIndicator;
+        /** @brief Boot indicator. Enabled once the obc starts up */
+        const drivers::gpio::OutputPin<TBootIndicator> BootIndicator;
         /** @brief SPI */
         const SPIPins<TSPI> SPI;
 #ifdef USE_LEUART
@@ -152,8 +155,8 @@ namespace obc
             this->Fram1ChipSelect.Initialize();
             this->Fram2ChipSelect.Initialize();
             this->Fram3ChipSelect.Initialize();
-            this->Led0.Initialize();
-            this->Led1.Initialize();
+            this->TimeIndicator.Initialize();
+            this->BootIndicator.Initialize();
             this->SPI.Initialize();
 #ifdef USE_LEUART
             this->LEUART.Initialize();
@@ -173,8 +176,8 @@ namespace obc
         io_map::SlaveSelectFram1,                           //
         io_map::SlaveSelectFram2,                           //
         io_map::SlaveSelectFram3,                           //
-        io_map::Led0,                                       //
-        io_map::Led1,                                       //
+        io_map::TimeIndicator,                              //
+        io_map::BootIndicator,                              //
         io_map::SPI,                                        //
 #ifdef USE_LEUART
         io_map::LEUART,
@@ -186,7 +189,9 @@ namespace obc
         io_map::Watchdog::ExternalWatchdogPin,
         io_map::BSP,
         io_map::MemoryModules,
-        io_map::SailDeployed>;
+        io_map::SailDeployed,
+        io_map::PayloadInterrupt,
+        io_map::SunsInterrupt>;
 
     /** @} */
 }

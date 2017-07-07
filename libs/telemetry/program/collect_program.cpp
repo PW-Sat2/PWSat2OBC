@@ -3,8 +3,8 @@
 #include "antenna/telemetry.hpp"
 #include "base/crc.h"
 #include "boot/params.hpp"
-#include "io_map.h"
 #include "logger/logger.h"
+#include "mcu/io_map.h"
 
 namespace telemetry
 {
