@@ -5,10 +5,10 @@ from datetime import datetime, timedelta
 from nose.tools import nottest
 
 from system import runlevel
-from tests.base import BaseTest
+from tests.base import BaseTest, RestartPerTest
 
 
-class TestTime(BaseTest):
+class TestTime(RestartPerTest):
     def test_jump_to_time(self):
         wait_time_accuracy = timedelta(milliseconds=200)
         current_time = self.system.obc.current_time()

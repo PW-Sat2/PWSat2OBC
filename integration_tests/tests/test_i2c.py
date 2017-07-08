@@ -4,13 +4,13 @@ from nose.tools import nottest
 
 from devices import EchoDevice, TimeoutDevice
 from system import auto_comm_handling, runlevel
-from tests.base import BaseTest
+from tests.base import BaseTest, RestartPerTest
 from utils import TestEvent
 
 
-class I2CTest(BaseTest):
+class I2CTest(RestartPerTest):
     def setUp(self):
-        BaseTest.setUp(self)
+        RestartPerTest.setUp(self)
 
         self.echo = EchoDevice(0x12, "Echo")
         self.timeoutDevice = TimeoutDevice(0x14, "Timeout")

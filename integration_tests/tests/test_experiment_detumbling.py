@@ -4,11 +4,11 @@ from datetime import timedelta, datetime
 import telecommand
 from obc.experiments import ExperimentType
 from system import auto_power_on, runlevel
-from tests.base import BaseTest
+from tests.base import BaseTest, RestartPerTest
 from utils import TestEvent
 
 
-class TestExperimentDetumbling(BaseTest):
+class TestExperimentDetumbling(RestartPerTest):
     @auto_power_on(auto_power_on=False)
     def __init__(self, *args, **kwargs):
         super(TestExperimentDetumbling, self).__init__(*args, **kwargs)
