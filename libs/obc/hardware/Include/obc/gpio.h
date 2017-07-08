@@ -92,7 +92,6 @@ namespace obc
         typename TBSP,
         typename TMemoryModules,
         typename TSailState,
-        typename PayloadInterrupt,
         typename SunsInterrupt>
     struct OBCGPIOBase
     {
@@ -169,7 +168,6 @@ namespace obc
         io_map::BSP,
         io_map::MemoryModules,
         io_map::SailDeployed,
-        io_map::PayloadInterrupt,
         io_map::SunsInterrupt>;
 
     /** @} */

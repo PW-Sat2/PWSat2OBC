@@ -2,7 +2,8 @@
 
 #include <em_cmu.h>
 #include <em_gpio.h>
-#include "io_map.h"
+#include "mcu/io_map.h"
+#include "payload/io_map.h"
 
 using namespace drivers::gpio;
 
