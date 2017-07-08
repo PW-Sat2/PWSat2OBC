@@ -15,15 +15,15 @@
 
 namespace io_map
 {
-    using VirtualPA13 = PinLocation<gpioPortA, 13>;
-    using VirtualPB12 = PinLocation<gpioPortB, 12>;
+    using PiggyBack21 = PinLocation<gpioPortA, 13>;
+    using PiggyBack22 = PinLocation<gpioPortB, 12>;
 
     using SystickIndicator = PinLocation<gpioPortD, 1>;
     using BootIndicator = PinLocation<gpioPortD, 2>;
 
     using SailDeployed = PinLocation<gpioPortD, 4>;
 
-    using CamSelect = VirtualPB12;
+    using CamSelect = PiggyBack22;
 
     using SunsInterrupt = PinLocation<gpioPortD, 5>;
 
