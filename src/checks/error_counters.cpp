@@ -1,10 +1,10 @@
 #include "comm/CommDriver.hpp"
 #include "eps/eps.h"
-#include "n25q/n25q.h"
 #include "fm25w/fm25w.hpp"
+#include "imtq/imtq.h"
+#include "n25q/n25q.h"
 #include "obc/storage/n25q.h"
 #include "rtc/rtc.hpp"
-#include "imtq/imtq.h"
 #include "traits.hpp"
 
 namespace

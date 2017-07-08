@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import devices
 from tests.base import BaseTest
 from obc import *
@@ -11,7 +13,7 @@ class Test_Beacon(BaseTest):
         super(Test_Beacon, self).__init__(methodName)
 
     def begin_deployment(self):
-        self.system.obc.jump_to_time(43 * 60)
+        self.system.obc.jump_to_time(timedelta(minutes=43))
 
     def next_step(self):
         self.system.obc.run_mission()
