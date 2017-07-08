@@ -23,7 +23,7 @@ def _prepare_environment():
     gpio = Pins(gpio_com)
 
     s = System(obc_com, mock_com, gpio, boot_handler)
-    s.obc.wait_to_start()
+    # s.obc.wait_to_start()
     return s
 
 system = _prepare_environment()

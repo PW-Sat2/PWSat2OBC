@@ -6,4 +6,3 @@ saleae
 nose-parameterized
 bitarray
 pypiwin32; sys_platform == 'win32'
-wxpython

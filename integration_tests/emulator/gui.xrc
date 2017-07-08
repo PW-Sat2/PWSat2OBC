@@ -246,15 +246,6 @@
 				<option>0</option>
 				<flag>wxALL</flag>
 				<border>5</border>
-				<object class="wxStaticText" name="obc_mission_time">
-					<label>Mission time [ms]</label>
-					<wrap>-1</wrap>
-				</object>
-			</object>
-			<object class="sizeritem">
-				<option>0</option>
-				<flag>wxALL</flag>
-				<border>5</border>
 				<object class="wxStaticText" name="rtc_time">
 					<label>RTC Mock current time: 00 - 00 - 00</label>
 					<wrap>-1</wrap>

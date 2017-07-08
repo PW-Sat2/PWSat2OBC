@@ -27,7 +27,6 @@ class CommRTCModule(ModuleBase):
         self.bind_handlers()
 
         self._time = xrc.XRCCTRL(self._panel, 'rtc_time')
-        self._mission_time = xrc.XRCCTRL(self._panel, 'obc_mission_time')
         self._current_comm_queue_size = xrc.XRCCTRL(self._panel, 'current_comm_queue_size')
 
         self._current_beacon_timestamp = xrc.XRCCTRL(self._panel, 'current_beacon_timestamp')
@@ -77,8 +76,6 @@ class CommRTCModule(ModuleBase):
         self._current_comm_queue_size.SetLabel('Comm queue size: ' + str(self._system.transmitter.queue_size()))
 
         if time.mktime(time.localtime()) - self._last_mission_time_seen > 4:
-            mission_time = self._system.obc.current_time()
-            self._mission_time.SetLabel('Mission time: ' + str(mission_time))
             self._last_mission_time_seen = time.mktime(time.localtime())
 
         if self._system.transmitter.current_beacon_timestamp is not None:
