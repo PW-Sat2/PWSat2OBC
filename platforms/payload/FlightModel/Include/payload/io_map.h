@@ -10,7 +10,7 @@
 
 namespace io_map
 {
-    using SlaveSelectFlash1 = VirtualPA13;
+    using SlaveSelectFlash1 = PiggyBack21;
     using SlaveSelectFlash2 = PinLocation<gpioPortA, 11>;
     using SlaveSelectFlash3 = PinLocation<gpioPortA, 8>;
 

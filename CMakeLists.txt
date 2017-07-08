@@ -12,7 +12,7 @@ set(ENABLE_COVERAGE FALSE CACHE BOOL "Enable code coverage")
 set(MEM_MANAGMENT_TYPE 1)
 
 set(TARGET_MCU_PLATFORM "EngModel" CACHE STRING "Target mcu platform")
-set(TARGET_PLD_PLATFORM "Mock" CACHE STRING "Target payload platform")
+set(TARGET_PLD_PLATFORM "DM" CACHE STRING "Target payload platform")
 set(SEMIHOSTING false CACHE BOOL "Enable semihosting")
 set(JLINK_SN "" CACHE STRING "J-Link serial number")
 

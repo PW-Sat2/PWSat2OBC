@@ -16,7 +16,7 @@ namespace io_map
 
     using SlaveSelectFram1 = PinLocation<gpioPortA, 11>;
     using SlaveSelectFram2 = PinLocation<gpioPortA, 12>;
-    using SlaveSelectFram3 = VirtualPA13;
+    using SlaveSelectFram3 = PiggyBack21;
 
     using TimeIndicator = PinLocation<gpioPortE, 4>;
 

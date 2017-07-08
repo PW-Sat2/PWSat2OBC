@@ -1,5 +1,5 @@
 def build() {
-	bat "cmake -DJLINK_SN=${env.EFM_JLINK_FM} -DMOCK_COM=${env.MOCK_COM_FM} -DOBC_COM=${env.OBC_COM_FM} -DGPIO_COM=${env.GPIO_COM_FM} -DTARGET_MCU_PLATFORM=EngModel -DTARGET_PLD_PLATFORM=Mock -DCMAKE_BUILD_TYPE=Release -DENABLE_LTO=1 -G \"MinGW Makefiles\" ../source"
+	bat "cmake -DJLINK_SN=${env.EFM_JLINK_FM} -DMOCK_COM=${env.MOCK_COM_FM} -DOBC_COM=${env.OBC_COM_FM} -DGPIO_COM=${env.GPIO_COM_FM} -DTARGET_MCU_PLATFORM=EngModel -DTARGET_PLD_PLATFORM=DM -DCMAKE_BUILD_TYPE=Release -DENABLE_LTO=1 -G \"MinGW Makefiles\" ../source"
 	bat "make pwsat boot"
 	step([$class: 'ArtifactArchiver', artifacts: 'build/EngModel/**/*', fingerprint: true])
 }
