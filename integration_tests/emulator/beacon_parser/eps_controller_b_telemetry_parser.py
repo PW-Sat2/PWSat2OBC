@@ -1,7 +1,7 @@
 from parser import Parser
 
 
-class ControllerBTelemetryParser(Parser):
+class EPSControllerBTelemetryParser(Parser):
     def __init__(self, tree_control):
         Parser.__init__(self, tree_control, 'Controller B')
 

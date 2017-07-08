@@ -260,11 +260,11 @@ class TransmitterDevice(i2cMock.I2CDevice):
 
     @i2cMock.command([0x14])
     def _set_beacon(self, *data):
-        self.current_beacon = data[3:]
-        self.current_beacon_timestamp = time.localtime()
-
         self.log.info("set beacon: %s", data)
         if call(self.on_set_beacon, True):
+            self.current_beacon = data[3:]
+            self.current_beacon_timestamp = time.localtime()
+
             self.reset_queue()
             self.beacon_active = True
 
