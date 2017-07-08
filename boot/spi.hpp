@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <gsl/span>
 #include "gpio/gpio.h"
-#include "io_map.h"
+#include "mcu/io_map.h"
 #include "spi/spi.h"
 
 class SPIPeripheral

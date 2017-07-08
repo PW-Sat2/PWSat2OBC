@@ -6,7 +6,8 @@
 #include <em_gpio.h>
 #include "gpio-internal.h"
 #include "gpio/gpio.h"
-#include "io_map.h"
+#include "mcu/io_map.h"
+#include "payload/io_map.h"
 
 namespace obc
 {
@@ -52,21 +53,6 @@ namespace obc
         }
     };
 
-    /** @brief Structure describing LEUART pins */
-    template <typename Location> struct LEUARTPins
-    {
-        /** @brief TX */
-        const drivers::gpio::OutputPin<typename Location::TX> TX;
-        /** @brief RX */
-        const drivers::gpio::InputPin<typename Location::RX> RX;
-        /** @brief Initializes LEUART pins */
-        void Initialize() const
-        {
-            this->TX.Initialize();
-            this->RX.Initialize();
-        }
-    };
-
     /** @brief Structure describing UART pins */
     template <typename Location> struct UARTPins
     {
@@ -94,20 +80,19 @@ namespace obc
         typename TSlaveSelectFram1,
         typename TSlaveSelectFram2,
         typename TSlaveSelectFram3,
-        typename TLed0,
-        typename TLed1,
+        typename TTimeIndicator,
+        typename TTickIndicator,
+        typename TBootIndicator,
         typename TSPI,
-#ifdef USE_LEUART
-        typename TLEUART,
-#else
         typename TUART,
-#endif
         typename TI2C0,
         typename TI2C1,
         typename TExternalWatchdogPin,
         typename TBSP,
         typename TMemoryModules,
-        typename TSailState>
+        typename TSailState,
+        typename PayloadInterrupt,
+        typename SunsInterrupt>
     struct OBCGPIOBase
     {
         /** @brief Slave Select - Flash1 */
@@ -122,20 +107,16 @@ namespace obc
         const drivers::gpio::OutputPin<TSlaveSelectFram2> Fram2ChipSelect;
         /** @brief Slave Select - Fram3 */
         const drivers::gpio::OutputPin<TSlaveSelectFram3> Fram3ChipSelect;
-        /** @brief LED0 */
-        const drivers::gpio::OutputPin<TLed0> Led0;
-        /** @brief LED1 */
-        const drivers::gpio::OutputPin<TLed1> Led1;
+        /** @brief Time indicator. Blinks with passage of time */
+        const drivers::gpio::OutputPin<TTimeIndicator> TimeIndicator;
+        /** @brief Systick indicator. Blinks with passage of time */
+        const drivers::gpio::OutputPin<TTickIndicator> SystickIndicator;
+        /** @brief Boot indicator. Enabled once the obc starts up */
+        const drivers::gpio::OutputPin<TBootIndicator> BootIndicator;
         /** @brief SPI */
         const SPIPins<TSPI> SPI;
-#ifdef USE_LEUART
-        /** @brief LEUART */
-        const LEUARTPins<TLEUART> LEUART;
-#else
         /** @brief UART */
         const UARTPins<TUART> UART;
-#endif
-
         /** @brief I2C0 */
         const I2CPins<TI2C0> I2C_0;
         /** @brief I2C1 */
@@ -152,14 +133,11 @@ namespace obc
             this->Fram1ChipSelect.Initialize();
             this->Fram2ChipSelect.Initialize();
             this->Fram3ChipSelect.Initialize();
-            this->Led0.Initialize();
-            this->Led1.Initialize();
+            this->TimeIndicator.Initialize();
+            this->SystickIndicator.Initialize();
+            this->BootIndicator.Initialize();
             this->SPI.Initialize();
-#ifdef USE_LEUART
-            this->LEUART.Initialize();
-#else
             this->UART.Initialize();
-#endif
             this->I2C_0.Initialize();
             this->I2C_1.Initialize();
         }
@@ -173,20 +151,19 @@ namespace obc
         io_map::SlaveSelectFram1,                           //
         io_map::SlaveSelectFram2,                           //
         io_map::SlaveSelectFram3,                           //
-        io_map::Led0,                                       //
-        io_map::Led1,                                       //
+        io_map::TimeIndicator,                              //
+        io_map::SystickIndicator,                           //
+        io_map::BootIndicator,                              //
         io_map::SPI,                                        //
-#ifdef USE_LEUART
-        io_map::LEUART,
-#else
         io_map::UART,
-#endif
         io_map::I2C_0,
         io_map::I2C_1,
         io_map::Watchdog::ExternalWatchdogPin,
         io_map::BSP,
         io_map::MemoryModules,
-        io_map::SailDeployed>;
+        io_map::SailDeployed,
+        io_map::PayloadInterrupt,
+        io_map::SunsInterrupt>;
 
     /** @} */
 }

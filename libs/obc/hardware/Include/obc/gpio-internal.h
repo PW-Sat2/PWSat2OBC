@@ -2,7 +2,7 @@
 #define LIBS_OBC_HARDWARE_INCLUDE_OBC_GPIO_INTERNAL_H_
 
 #include <cstdint>
-#include "io_map.h"
+#include "base/io_map.h"
 
 namespace obc
 {

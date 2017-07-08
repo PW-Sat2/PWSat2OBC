@@ -15,18 +15,17 @@
 
 namespace io_map
 {
-    using SlaveSelectFlash1 = PinLocation<gpioPortA, 8>;
-    using SlaveSelectFlash2 = PinLocation<gpioPortA, 9>;
-    using SlaveSelectFlash3 = PinLocation<gpioPortA, 10>;
+    using PiggyBack21 = PinLocation<gpioPortB, 12>;
+    using PiggyBack22 = PinLocation<gpioPortA, 13>;
 
-    using SlaveSelectFram1 = PinLocation<gpioPortA, 11>;
-    using SlaveSelectFram2 = PinLocation<gpioPortA, 12>;
-    using SlaveSelectFram3 = PinLocation<gpioPortA, 13>;
-
-    using Led0 = PinLocation<gpioPortD, 1>;
-    using Led1 = PinLocation<gpioPortD, 2>;
+    using SystickIndicator = PinLocation<gpioPortD, 1>;
+    using BootIndicator = PinLocation<gpioPortD, 2>;
 
     using SailDeployed = PinLocation<gpioPortD, 4>;
+
+    using CamSelect = PiggyBack22;
+
+    using SunsInterrupt = PinLocation<gpioPortD, 5>;
 
     struct SPI : public SPIPins<SPI>
     {

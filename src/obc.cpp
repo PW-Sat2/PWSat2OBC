@@ -1,7 +1,6 @@
 #include "obc.h"
 #include "boot/params.hpp"
 #include "efm_support/api.h"
-#include "io_map.h"
 #include "logger/logger.h"
 #include "mission.h"
 #include "terminal.h"
@@ -71,9 +70,9 @@ OBC::OBC()
           Experiments,
           BootTable,
           BootSettings,
-          TelemetryAcquisition),                               //
+          TelemetryAcquisition),                                                   //
       Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index), //
-      terminal(this->GetLineIO())                              //
+      terminal(this->GetLineIO())                                                  //
 {
 }
 
@@ -103,7 +102,6 @@ OSResult OBC::InitializeRunlevel1()
     if (OS_RESULT_FAILED(result))
     {
         LOGF(LOG_LEVEL_FATAL, "Storage initialization failed %d", num(result));
-        return result;
     }
 
     this->Experiments.InitializeRunlevel1();
