@@ -1,10 +1,10 @@
 import logging
 
-from tests.base import BaseTest
+from tests.base import BaseTest, RestartPerTest
 import time
 from unittest import skip
 
-class TestTMR(BaseTest):
+class TestTMR(RestartPerTest):
     @skip('Manual test')
     def test_success_when_single_erase(self):
         log = logging.getLogger("test_tmr")

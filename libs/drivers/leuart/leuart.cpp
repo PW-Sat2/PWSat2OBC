@@ -14,9 +14,9 @@
 #include "base/os.h"
 
 #include "dmadrv.h"
-#include "io_map.h"
 #include "leuart.h"
 #include "line_io.h"
+#include "mcu/io_map.h"
 #include "system.h"
 
 static SemaphoreHandle_t transferFinished;

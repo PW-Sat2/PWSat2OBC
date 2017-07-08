@@ -2,11 +2,11 @@ import telecommand
 from response_frames.operation import OperationSuccessFrame
 from devices import BeaconFrame
 from system import auto_power_on, runlevel
-from tests.base import BaseTest
+from tests.base import BaseTest, RestartPerTest
 from utils import ensure_byte_list, TestEvent
 
 
-class CommTelecommandsTest(BaseTest):
+class CommTelecommandsTest(RestartPerTest):
     @auto_power_on(auto_power_on=False)
     def __init__(self, *args, **kwargs):
         super(CommTelecommandsTest, self).__init__(*args, **kwargs)

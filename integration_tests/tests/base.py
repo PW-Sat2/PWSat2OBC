@@ -1,11 +1,9 @@
 import logging
 import unittest
 
-from system import System
-from pins import Pins
 import extensions
 from build_config import config
-from obc.boot import BootToIndex, BootToUpper, BootHandler
+from system import System
 
 
 class BaseTest(unittest.TestCase):
@@ -13,22 +11,33 @@ class BaseTest(unittest.TestCase):
         super(BaseTest, self).__init__(*args, **kwargs)
         self.auto_power_on = True
 
+    def power_on_obc(self):
+        self.system.restart(self.__class__._get_class_boot_wrappers() + self._get_boot_wrappers(self._testMethodName))
+
+    def _get_boot_wrappers(self, test):
+        try:
+            return self.__getattribute__(self._testMethodName).boot_wrappers or []
+        except AttributeError:
+            return []
+
+    @classmethod
+    def _get_class_boot_wrappers(cls):
+        try:
+            return cls.boot_wrappers or []
+        except AttributeError:
+            return []
+
+
+class RestartPerTest(BaseTest):
     def setUp(self):
         log = logging.getLogger("BaseTest")
         log.info("Starting test setup")
 
-        obc_com = config['OBC_COM']
-        mock_com = config['MOCK_COM']
-        gpio_com = config['GPIO_COM']
-        boot_handler = BootToUpper() if config['BOOT_UPPER'] else BootToIndex(config['BOOT_INDEX'])
-
-        self.gpio = Pins(gpio_com)
-
         extensions.set_up(test_id=self.id())
 
-        boot_wrappers = self._get_boot_wrappers(self._testMethodName)
+        (self.gpio, self.system) = System.build_from_config(config)
 
-        self.system = System(obc_com, mock_com, self.gpio, boot_handler)
+        boot_wrappers = self._get_boot_wrappers(self._testMethodName)
 
         if self.auto_power_on:
             self.system.restart(boot_wrappers)
@@ -46,12 +55,38 @@ class BaseTest(unittest.TestCase):
 
         log.info("Test tear down finished")
 
-    def power_on_obc(self):
-        self.system.restart(self._get_boot_wrappers(self._testMethodName))
-        self.system.obc.wait_to_start()
 
-    def _get_boot_wrappers(self, test):
-        try:
-            return self.__getattribute__(self._testMethodName).boot_wrappers or []
-        except AttributeError:
-            return []
+class RestartPerSuite(BaseTest):
+    @classmethod
+    def setUpClass(cls):
+        log = logging.getLogger("BaseTest")
+        log.info("Starting test setup")
+
+        (cls.gpio, cls.system) = System.build_from_config(config)
+
+        boot_wrappers = cls._get_class_boot_wrappers()
+
+        cls.system.restart(boot_wrappers)
+
+        log.info("Test setup finished")
+
+    def setUp(self):
+        self.system = self.__class__.system
+        self.gpio = self.__class__.gpio
+
+        extensions.set_up(test_id=self.id())
+
+    def tearDown(self):
+        extensions.tear_down(test_id=self.id())
+
+    @classmethod
+    def tearDownClass(cls):
+        log = logging.getLogger("BaseTest")
+        log.info("Starting test tear down")
+        cls.system.obc.sync_fs()
+
+        cls.system.close()
+        cls.gpio.close()
+
+        log.info("Test tear down finished")
+

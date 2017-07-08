@@ -9,6 +9,7 @@
 ### Software
 * Toolchain (see [How to build](HowToBuild.md))
 * Python 2.7 with pip
+* (Windows only) Visual C++ for Python 2.7 (http://aka.ms/vcpython27)
 
 ## Connections
 * Starter Kit to PC (mini USB cable)

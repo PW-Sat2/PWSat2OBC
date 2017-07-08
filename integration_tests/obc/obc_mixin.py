@@ -1,4 +1,5 @@
 from base64 import b64decode
+from datetime import timedelta
 from functools import wraps
 import re
 
@@ -52,6 +53,14 @@ def decode_lines():
 def decode_bool():
     def p(s):
         return s == '1'
+
+    return decode_return(p)
+
+
+def decode_from_miliseconds():
+    def p(s):
+        i = int(s)
+        return timedelta(milliseconds=i)
 
     return decode_return(p)
 

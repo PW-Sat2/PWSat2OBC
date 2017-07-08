@@ -1,11 +1,11 @@
 from obc.experiments import ExperimentType
 from system import auto_power_on, runlevel
 from telecommand import AbortExperiment
-from tests.base import BaseTest
+from tests.base import BaseTest, RestartPerTest
 from utils import TestEvent
 
 
-class TestExperimentsTelecommands(BaseTest):
+class TestExperimentsTelecommands(RestartPerTest):
     @auto_power_on(auto_power_on=False)
     def __init__(self, *args, **kwargs):
         super(TestExperimentsTelecommands, self).__init__(*args, **kwargs)

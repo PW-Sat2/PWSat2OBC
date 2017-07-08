@@ -1,11 +1,10 @@
-from base import BaseTest
+from datetime import timedelta
+from base import RestartPerTest
 from system import runlevel
 from utils import TestEvent
 
-INFINITY_TIME = 999999
 
-
-class Test_SailTest(BaseTest):
+class Test_SailTest(RestartPerTest):
     @runlevel(1)
     def test_pingpong(self):
         l = self.system.obc.ping()
@@ -20,7 +19,7 @@ class Test_SailTest(BaseTest):
 
     @runlevel(2)
     def test_happy_path(self):
-        self.system.obc.jump_to_time(INFINITY_TIME)
+        self.system.obc.jump_to_time(timedelta(days=42))
 
         lcl_enabled = TestEvent()
         switch_enabled = TestEvent()

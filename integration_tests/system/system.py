@@ -4,7 +4,8 @@ from devices import *
 from i2cMock import I2CMock, MockPin
 from obc import OBC, SerialPortTerminal
 import response_frames
-from obc.boot import BootHandler
+from obc.boot import BootHandler, BootToUpper, BootToIndex
+from pins import Pins
 
 
 class System:
@@ -60,3 +61,16 @@ class System:
         self.i2c.unlatch()
         self.obc.reset(boot_handler=BootHandler(boot_chain + [self._final_boot_handler]))
         self.obc.wait_to_start()
+
+    @classmethod
+    def build_from_config(cls, config):
+        obc_com = config['OBC_COM']
+        mock_com = config['MOCK_COM']
+        gpio_com = config['GPIO_COM']
+        boot_handler = BootToUpper() if config['BOOT_UPPER'] else BootToIndex(config['BOOT_INDEX'])
+
+        gpio = Pins(gpio_com)
+
+        system = System(obc_com, mock_com, gpio, boot_handler)
+
+        return gpio, system

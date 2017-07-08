@@ -1,15 +1,17 @@
 from system import auto_power_on, runlevel, clear_state
-from tests.base import BaseTest
+from datetime import timedelta
+
+from tests.base import RestartPerTest
 from utils import TestEvent
 
 
-class Test_AntennaDeployment(BaseTest):
+class Test_AntennaDeployment(RestartPerTest):
     @auto_power_on(False)
     def __init__(self, methodName='runTest'):
         super(Test_AntennaDeployment, self).__init__(methodName)
 
     def begin_deployment(self):
-        self.system.obc.jump_to_time(42 * 60)
+        self.system.obc.jump_to_time(timedelta(minutes=42))
 
     def next_step(self):
         self.system.obc.run_mission()

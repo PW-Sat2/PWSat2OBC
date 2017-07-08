@@ -6,12 +6,12 @@ from crc import calc_crc, pad
 from response_frames.program_upload import EntryEraseSuccessFrame, EntryProgramPartWriteSuccess, EntryFinalizeSuccess
 from system import auto_power_on
 from telecommand import EraseBootTableEntry, WriteProgramPart, FinalizeProgramEntry
-from tests.base import BaseTest
+from tests.base import BaseTest, RestartPerTest
 from utils import TestEvent
 from build_config import config
 
 
-class UploadProgramTest(BaseTest):
+class UploadProgramTest(RestartPerTest):
     @auto_power_on(auto_power_on=False)
     def __init__(self, *args, **kwargs):
         super(UploadProgramTest, self).__init__(*args, **kwargs)

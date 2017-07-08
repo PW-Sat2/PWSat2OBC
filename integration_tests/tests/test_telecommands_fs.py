@@ -5,11 +5,11 @@ from nose.tools import nottest
 import telecommand
 from response_frames.operation import OperationErrorFrame
 from system import auto_power_on, runlevel
-from tests.base import BaseTest
+from tests.base import BaseTest, RestartPerTest
 from utils import ensure_byte_list, TestEvent
 
 
-class FileSystemTelecommandsTest(BaseTest):
+class FileSystemTelecommandsTest(RestartPerTest):
     @auto_power_on(auto_power_on=False)
     def __init__(self, *args, **kwargs):
         super(FileSystemTelecommandsTest, self).__init__(*args, **kwargs)

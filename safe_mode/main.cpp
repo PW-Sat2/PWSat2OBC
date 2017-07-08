@@ -6,7 +6,7 @@
 #include <em_usart.h>
 
 #include "boot/params.hpp"
-#include "io_map.h"
+#include "mcu/io_map.h"
 #include "system.h"
 
 extern "C" void __libc_init_array(void);

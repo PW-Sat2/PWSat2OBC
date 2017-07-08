@@ -6,7 +6,7 @@ import i2cMock
 from i2cMock import I2CDevice
 from threading import Event
 
-from utils import call, CompareAsDict
+from utils import call, CompareAsDict, bitlist_to_byte
 
 
 class MPPT(CompareAsDict):
@@ -214,9 +214,11 @@ class LCL:
 
 class BurnSwitch:
     def __init__(self):
+        self.enabled = False
         self.on_enable = None
 
     def enable(self):
+        self.enabled = True
         call(self.on_enable, True)
 
 
@@ -267,6 +269,8 @@ class EPSControllerA(I2CDevice):
 
     @i2cMock.command([0x0])
     def _housekeeping(self):
+        self.hk.DISTR.LCL_STATE = bitlist_to_byte(map(lambda lcl: 1 if lcl.is_on else 0, self._lcls))
+
         hk = call(self.on_get_housekeeping, default=self.hk)
         return [0x61] + hk.bytes()
 

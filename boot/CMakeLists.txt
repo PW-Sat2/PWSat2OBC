@@ -23,10 +23,11 @@ set(SOURCES
 
 add_executable(${NAME} ${SOURCES})
 
-set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${LOWER_LINKER_SCRIPT} -L ${PLATFORM_PATH} -Wl,--check-sections -specs=nano.specs -specs=nosys.specs")
+set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${LOWER_LINKER_SCRIPT} -L ${MCU_PLATFORM_PATH} -Wl,--check-sections -specs=nano.specs -specs=nosys.specs")
 
 target_link_libraries(${NAME}
       platform
+      pld_platform
       emlib
       bspLib
       assert

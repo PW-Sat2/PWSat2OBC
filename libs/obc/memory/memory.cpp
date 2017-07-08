@@ -2,8 +2,8 @@
 #include <cstdint>
 #include "base/os.h"
 #include "gpio/gpio.h"
-#include "io_map.h"
 #include "logger/logger.h"
+#include "mcu/io_map.h"
 
 using drivers::gpio::OutputPin;
 using namespace std::chrono_literals;

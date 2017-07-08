@@ -58,6 +58,21 @@ namespace
         CheckBuffer(writer.Capture(), gsl::make_span(expected));
     }
 
+    TEST(BitWriterTest, TestWritingNonAlignedData)
+    {
+        uint8_t array[3];
+        uint8_t expected[3] = {0x0B, 0xB0, 0x00}; // 0000 1011 1011 0000 0000 0000 - little endian
+        BitWriter writer(array);
+        ASSERT_TRUE(writer.WriteWord(0x0B, 12));
+        ASSERT_TRUE(writer.WriteWord(0x0B, 12));
+
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(24u));
+        ASSERT_THAT(writer.GetBitFraction(), Eq(0u));
+        ASSERT_THAT(writer.GetByteDataLength(), Eq(3u));
+        ASSERT_TRUE(writer.Status());
+        ASSERT_THAT(writer.Capture(), Eq(gsl::make_span(expected)));
+    }
+
     TEST(BitWriterTest, TestWritingSingleBit)
     {
         uint8_t array[1];

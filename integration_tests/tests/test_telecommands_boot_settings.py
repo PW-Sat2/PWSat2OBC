@@ -1,11 +1,11 @@
 from response_frames.operation import OperationSuccessFrame
 from system import runlevel, auto_power_on
 from telecommand import SetBootSlots
-from tests.base import BaseTest
+from tests.base import BaseTest, RestartPerTest
 from utils import TestEvent
 
 
-class BootSettingsTelecomandsTest(BaseTest):
+class BootSettingsTelecomandsTest(RestartPerTest):
     @auto_power_on(auto_power_on=False)
     def __init__(self, *args, **kwargs):
         super(BootSettingsTelecomandsTest, self).__init__(*args, **kwargs)
