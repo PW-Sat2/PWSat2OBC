@@ -7,7 +7,7 @@ def build() {
 def unitTests() {
 	bat "make unit_tests"
 	bat "make unit_tests.run -j1"
-	step([$class: 'JUnitResultArchiver', testResults: 'build/EngModel/Mock/unit_tests_*.xml'])
+	step([$class: 'JUnitResultArchiver', testResults: 'build/EngModel/DM/unit_tests_*.xml'])
 }
 
 def reports() {
@@ -17,7 +17,7 @@ def reports() {
 		allowMissing: false,
 		alwaysLinkToLastBuild: false,
 		keepAll: false,
-		reportDir: 'build/EngModel/Mock/reports/memory',
+		reportDir: 'build/EngModel/DM/reports/memory',
 		reportFiles: 'index.html',
 		reportName: 'Memory usage'
   ])
@@ -27,7 +27,7 @@ def integrationTests() {
 	lock('hardware') {
 		bat "make boot.flash"
 		bat "make integration_tests"
-		step([$class: 'JUnitResultArchiver', testResults: 'build/EngModel/Mock/integration-tests.xml'])
+		step([$class: 'JUnitResultArchiver', testResults: 'build/EngModel/DM/integration-tests.xml'])
 	}
 }
 
@@ -50,7 +50,7 @@ def coverage() {
 		allowMissing: false,
 		alwaysLinkToLastBuild: false,
 		keepAll: false,
-		reportDir: 'build/EngModel/Mock/reports/coverage',
+		reportDir: 'build/EngModel/DM/reports/coverage',
 		reportFiles: 'index.html',
 		reportName: 'Code Coverage'
     ])
