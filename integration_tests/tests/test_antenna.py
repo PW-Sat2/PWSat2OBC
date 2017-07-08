@@ -1,11 +1,11 @@
-from tests.base import BaseTest
+from tests.base import BaseTest, RestartPerTest
 from obc import *
 from devices import *
 from utils import TestEvent
 from system import auto_power_on, runlevel
 
 
-class Test_Antenna(BaseTest):
+class Test_Antenna(RestartPerTest):
     @auto_power_on(False)
     def __init__(self, methodName = 'runTest'):
         super(Test_Antenna, self).__init__(methodName)

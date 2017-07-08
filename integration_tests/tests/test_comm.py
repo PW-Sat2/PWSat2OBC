@@ -3,11 +3,11 @@ from nose.tools import nottest
 from devices import *
 from obc import *
 from response_frames.pong import PongFrame
-from tests.base import BaseTest
+from tests.base import BaseTest, RestartPerTest
 from system import auto_power_on, runlevel
 from utils import TestEvent, ensure_byte_list
 
-class Test_Comm(BaseTest):
+class Test_Comm(RestartPerTest):
     @auto_power_on(False)
     def __init__(self, methodName = 'runTest'):
         super(Test_Comm, self).__init__(methodName)

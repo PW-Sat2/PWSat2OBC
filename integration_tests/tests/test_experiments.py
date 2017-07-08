@@ -5,10 +5,10 @@ from nose.tools import nottest
 
 from obc.experiments import ExperimentType
 from system import auto_power_on, runlevel
-from tests.base import BaseTest
+from tests.base import BaseTest, RestartPerTest
 
 
-class ExperimentsTest(BaseTest):
+class ExperimentsTest(RestartPerTest):
     @auto_power_on(False)
     def __init__(self, methodName='runTest'):
         super(ExperimentsTest, self).__init__(methodName)

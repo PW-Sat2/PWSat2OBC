@@ -3,11 +3,11 @@ from datetime import timedelta
 from obc.boot import SelectRunlevel
 from system import runlevel, clear_state
 from telecommand.antenna import StopAntennaDeployment
-from tests.base import BaseTest
+from tests.base import BaseTest, RestartPerTest
 from utils import TestEvent
 
 
-class TestTelecommandsAntenna(BaseTest):
+class TestTelecommandsAntenna(RestartPerTest):
     @runlevel(1)
     @clear_state()
     def test_disable_antenna_deployment(self):

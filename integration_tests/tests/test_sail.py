@@ -1,11 +1,10 @@
 from datetime import timedelta
-
-from base import BaseTest
+from base import RestartPerTest
 from system import runlevel
 from utils import TestEvent
 
 
-class Test_SailTest(BaseTest):
+class Test_SailTest(RestartPerTest):
     @runlevel(1)
     def test_pingpong(self):
         l = self.system.obc.ping()

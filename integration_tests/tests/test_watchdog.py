@@ -1,11 +1,11 @@
 import logging
 from unittest import skip
 
-from tests.base import BaseTest
+from tests.base import BaseTest, RestartPerTest
 from utils import TestEvent
 
 
-class WatchdogTest(BaseTest):
+class WatchdogTest(RestartPerTest):
     @skip('Manual test')
     def test_should_restart_when_mcu_hangs(self):
         self.system.obc.hang()

@@ -3,14 +3,16 @@ from datetime import datetime
 from nose_parameterized import parameterized
 
 from system import runlevel
-from tests.base import BaseTest
+from tests.base import BaseTest, RestartPerTest
 import logging
 from utils import ensure_byte_list
 
-def safe(l):
-    return str(map(lambda x:ensure_byte_list(x), l))
 
-class FileSystemTests(BaseTest):
+def safe(l):
+    return str(map(lambda x: ensure_byte_list(x), l))
+
+
+class FileSystemTests(RestartPerTest):
     @runlevel(2)
     def test_write_read_file(self):
         log = logging.getLogger("test")

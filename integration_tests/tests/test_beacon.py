@@ -1,13 +1,13 @@
 from datetime import timedelta
 
 import devices
-from tests.base import BaseTest
+from tests.base import BaseTest, RestartPerTest
 from obc import *
 from utils import TestEvent
 from system import auto_power_on, runlevel
 
 
-class Test_Beacon(BaseTest):
+class Test_Beacon(RestartPerTest):
     @auto_power_on(False)
     def __init__(self, methodName='runTest'):
         super(Test_Beacon, self).__init__(methodName)
