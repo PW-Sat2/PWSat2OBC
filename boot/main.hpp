@@ -8,8 +8,8 @@
 #include "mcu/io_map.h"
 #include "payload/io_map.h"
 #include "program_flash/boot_table.hpp"
-#include "spi.hpp"
 #include "standalone/flash_driver/flash_driver.hpp"
+#include "standalone/spi/spi.hpp"
 
 class OBCBootloader
 {

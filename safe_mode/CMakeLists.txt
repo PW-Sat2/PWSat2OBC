@@ -4,8 +4,12 @@ generate_version_file(${CMAKE_CURRENT_BINARY_DIR}/gen/version.h)
 
 set(SOURCES
     steps/scrub_bootloader/step.cpp
+    steps/revert_boot_slots/step.cpp
+    
     main.cpp   
     safe_mode.cpp
+    error_counter.cpp
+    dummy_os.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -21,6 +25,7 @@ target_link_libraries(${NAME}
     logger
     program_flash
     standalone_flash_driver
+    standalone_spi
     scrubber
     msc
 )

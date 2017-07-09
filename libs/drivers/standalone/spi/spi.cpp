@@ -7,7 +7,7 @@ void SPIPeripheral::Initialize()
     CMU_ClockEnable(cmuClock_USART0, true);
     USART_InitSync_TypeDef init = USART_INITSYNC_DEFAULT;
     init.master = true;
-    init.baudrate = 1;
+    init.baudrate = 1_MHz;
     init.msbf = true;
     init.clockMode = usartClockMode0;
     init.databits = usartDatabits8;
