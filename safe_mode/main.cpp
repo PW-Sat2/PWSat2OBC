@@ -24,7 +24,7 @@ extern "C" void assertEFM(const char* /*file*/, int /*line*/)
 
 void SysTick_Handler()
 {
-    USART_Tx(io_map::UART::Peripheral, '!');
+    USART_Tx(io_map::UART::Peripheral, '*');
 }
 
 int main(void)
