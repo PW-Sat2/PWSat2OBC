@@ -5,6 +5,7 @@ generate_version_file(${CMAKE_CURRENT_BINARY_DIR}/gen/version.h)
 set(SOURCES
     steps/scrub_bootloader/step.cpp
     steps/revert_boot_slots/step.cpp
+    steps/scrub_program/step.cpp
     
     main.cpp   
     safe_mode.cpp

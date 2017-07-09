@@ -37,6 +37,8 @@ class OBCSafeMode
     devices::fm25w::RedundantFM25WDriver Fram;
 
     boot::BootSettings BootSettings;
+
+    std::array<std::uint8_t, 64_KB> Buffer;
 };
 
 extern OBCSafeMode SafeMode;

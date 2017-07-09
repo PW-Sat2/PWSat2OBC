@@ -14,6 +14,7 @@
 #include "steps/reboot/step.hpp"
 #include "steps/revert_boot_slots/step.hpp"
 #include "steps/scrub_bootloader/step.hpp"
+#include "steps/scrub_program/step.hpp"
 #include "steps/steps.hpp"
 
 OBCSafeMode SafeMode;
@@ -38,7 +39,7 @@ void SysTick_Handler()
 
 static void Recover()
 {
-    RecoverySteps<ScrubBootloader, RevertBootSlots, RebootStep> steps;
+    RecoverySteps<ScrubBootloader, RevertBootSlots, ScrubProgram, RebootStep> steps;
 
     steps.Perform();
 }
