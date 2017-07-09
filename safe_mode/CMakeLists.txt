@@ -3,6 +3,7 @@ set(NAME safe_mode)
 generate_version_file(${CMAKE_CURRENT_BINARY_DIR}/gen/version.h)
 
 set(SOURCES
+    steps/scrub_bootloader/step.cpp
     main.cpp   
 )
 
@@ -16,6 +17,7 @@ target_link_libraries(${NAME}
     gsl
     emlib
     boot_params
+    logger
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)
