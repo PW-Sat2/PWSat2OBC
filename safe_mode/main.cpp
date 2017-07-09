@@ -10,8 +10,11 @@
 #include "mcu/io_map.h"
 #include "system.h"
 
+#include "safe_mode.hpp"
 #include "steps/scrub_bootloader/step.hpp"
 #include "steps/steps.hpp"
+
+OBCSafeMode SafeMode;
 
 extern "C" void __libc_init_array(void);
 
@@ -57,6 +60,8 @@ static void LogToUart(void* context, bool /*withinIsr*/, const char* messageHead
         USART_Tx(uart, *c);
         c++;
     }
+
+    USART_Tx(uart, '\n');
 }
 
 int main(void)

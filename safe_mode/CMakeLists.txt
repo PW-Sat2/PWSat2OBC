@@ -5,6 +5,7 @@ generate_version_file(${CMAKE_CURRENT_BINARY_DIR}/gen/version.h)
 set(SOURCES
     steps/scrub_bootloader/step.cpp
     main.cpp   
+    safe_mode.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -18,6 +19,10 @@ target_link_libraries(${NAME}
     emlib
     boot_params
     logger
+    program_flash
+    standalone_flash_driver
+    scrubber
+    msc
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)
