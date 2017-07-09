@@ -11,6 +11,7 @@
 #include "system.h"
 
 #include "safe_mode.hpp"
+#include "steps/reboot/step.hpp"
 #include "steps/revert_boot_slots/step.hpp"
 #include "steps/scrub_bootloader/step.hpp"
 #include "steps/steps.hpp"
@@ -37,7 +38,7 @@ void SysTick_Handler()
 
 static void Recover()
 {
-    RecoverySteps<ScrubBootloader, RevertBootSlots> steps;
+    RecoverySteps<ScrubBootloader, RevertBootSlots, RebootStep> steps;
 
     steps.Perform();
 }
