@@ -5,6 +5,7 @@
 #include "mission/antenna_task.hpp"
 #include "mission/base.hpp"
 #include "mock/AntennaMock.hpp"
+#include "mock/power.hpp"
 #include "state/struct.h"
 #include "system.h"
 #include "time/TimeSpan.hpp"
@@ -25,6 +26,7 @@ namespace
       protected:
         DeployAntennasTest();
         AntennaMock mock;
+        PowerControlMock power;
 
         SystemState state;
         AntennaTask task;
@@ -33,8 +35,8 @@ namespace
     };
 
     DeployAntennasTest::DeployAntennasTest()
-        : task(mock),                      //
-          openAntenna(task.BuildAction()), //
+        : task(std::make_tuple(std::ref(mock), std::ref(power))), //
+          openAntenna(task.BuildAction()),                        //
           stateDescriptor(task.state)
     {
         state.Time = 41min;
@@ -111,6 +113,7 @@ namespace
       protected:
         DeployAntennasUpdateTest();
         testing::StrictMock<AntennaMock> mock;
+        PowerControlMock power;
 
         SystemState state;
         AntennaTask task;
@@ -119,8 +122,8 @@ namespace
     };
 
     DeployAntennasUpdateTest::DeployAntennasUpdateTest()
-        : task(mock),                 //
-          update(task.BuildUpdate()), //
+        : task(std::make_tuple(std::ref(mock), std::ref(power))), //
+          update(task.BuildUpdate()),                             //
           stateDescriptor(task.state)
     {
     }
@@ -262,6 +265,7 @@ namespace
         OSReset osReset;
 
         AntennaMock mock;
+        PowerControlMock power;
 
         SystemState state;
         AntennaTask task;
@@ -270,8 +274,8 @@ namespace
     };
 
     DeployAntennasActionTest::DeployAntennasActionTest()
-        : task(mock),                      //
-          openAntenna(task.BuildAction()), //
+        : task(std::make_tuple(std::ref(mock), std::ref(power))), //
+          openAntenna(task.BuildAction()),                        //
           stateDescriptor(task.state)
     {
         osReset = InstallProxy(&os);
@@ -286,6 +290,7 @@ namespace
 
     TEST_F(DeployAntennasActionTest, TestMinimalPath)
     {
+        EXPECT_CALL(power, PrimaryAntennaPower(true)).Times(1);
         EXPECT_CALL(mock, Reset(ANTENNA_PRIMARY_CHANNEL)).Times(1);
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, _, _)).Times(1);
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, _, _)).Times(1);
@@ -293,6 +298,9 @@ namespace
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, _, _)).Times(1);
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, _, _)).Times(1);
         EXPECT_CALL(mock, FinishDeployment(ANTENNA_PRIMARY_CHANNEL)).Times(6);
+        EXPECT_CALL(power, PrimaryAntennaPower(false)).Times(1);
+
+        EXPECT_CALL(power, BackupAntennaPower(true)).Times(1);
         EXPECT_CALL(mock, Reset(ANTENNA_BACKUP_CHANNEL)).Times(1);
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, _, _)).Times(1);
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, _, _)).Times(1);
@@ -300,8 +308,9 @@ namespace
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, _, _)).Times(1);
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, _, _)).Times(1);
         EXPECT_CALL(mock, FinishDeployment(ANTENNA_BACKUP_CHANNEL)).Times(6);
+        EXPECT_CALL(power, BackupAntennaPower(false)).Times(1);
 
-        for (int i = 0; i < 14; ++i)
+        for (int i = 0; i < 18; ++i)
         {
             Run();
         }

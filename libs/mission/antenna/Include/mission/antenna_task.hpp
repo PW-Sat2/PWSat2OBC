@@ -4,8 +4,10 @@
 #pragma once
 
 #include <atomic>
+#include <tuple>
 #include "antenna_state.h"
 #include "mission/base.hpp"
+#include "power/power.h"
 
 namespace mission
 {
@@ -32,7 +34,7 @@ namespace mission
              * @brief ctor.
              * @param[in] driver Reference to antenna driver interface.
              */
-            AntennaTask(AntennaDriver& driver);
+            AntennaTask(std::tuple<AntennaDriver&, services::power::IPowerControl&> args);
             /**
              * @brief Returns antenna deployment action descriptor.
              *

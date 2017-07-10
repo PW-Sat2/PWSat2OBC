@@ -2,6 +2,7 @@
 #include "gmock/gmock-matchers.h"
 #include "mission/antenna_state.h"
 #include "mock/AntennaMock.hpp"
+#include "mock/power.hpp"
 
 using testing::Eq;
 using testing::Lt;
@@ -12,10 +13,11 @@ namespace
     {
         AntennaMissionStateTest();
         AntennaMock driver;
+        PowerControlMock power;
         AntennaMissionState state;
     };
 
-    AntennaMissionStateTest::AntennaMissionStateTest() : state(driver)
+    AntennaMissionStateTest::AntennaMissionStateTest() : state(driver, power)
     {
     }
 

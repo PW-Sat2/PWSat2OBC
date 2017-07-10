@@ -46,6 +46,9 @@ namespace services
              * @return Operation status
              */
             virtual bool EnableRedundantSailBurnSwitch() = 0;
+
+            virtual void PrimaryAntennaPower(bool enable) = 0;
+            virtual void BackupAntennaPower(bool enable) = 0;
         };
 
         /** @} */
