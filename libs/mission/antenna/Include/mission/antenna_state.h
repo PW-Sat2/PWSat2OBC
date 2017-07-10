@@ -5,6 +5,7 @@
 #include "antenna/antenna.h"
 #include "base/os.h"
 #include "mission/base.hpp"
+#include "power/power.h"
 #include "state/struct.h"
 
 namespace mission
@@ -40,7 +41,7 @@ namespace mission
              * @param[in] antennaDriver Reference to the instance of the antenna driver that is supposed to
              * drive the required hardware.
              */
-            AntennaMissionState(AntennaDriver& antennaDriver);
+            AntennaMissionState(AntennaDriver& antennaDriver, services::power::IPowerControl& powerControl);
 
             /**
              * @brief Returns information whether the antenna deployment is currently being performed.
@@ -161,6 +162,8 @@ namespace mission
              * @return Total deployment step count.
              */
             static std::uint8_t StepCount();
+
+            services::power::IPowerControl& Power;
 
           private:
             /**

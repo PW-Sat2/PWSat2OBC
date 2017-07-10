@@ -55,5 +55,29 @@ namespace services
         {
             return this->_eps.EnableBurnSwitch(false, BurnSwitch::Sail) == ErrorCode::NoError;
         }
+
+        void EPSPowerControl::PrimaryAntennaPower(bool enable)
+        {
+            if (enable)
+            {
+                this->_eps.EnableLCL(LCL::AntennaMain);
+            }
+            else
+            {
+                this->_eps.DisableLCL(LCL::AntennaMain);
+            }
+        }
+
+        void EPSPowerControl::BackupAntennaPower(bool enable)
+        {
+            if (enable)
+            {
+                this->_eps.EnableLCL(LCL::AntennaRed);
+            }
+            else
+            {
+                this->_eps.DisableLCL(LCL::AntennaRed);
+            }
+        }
     }
 }

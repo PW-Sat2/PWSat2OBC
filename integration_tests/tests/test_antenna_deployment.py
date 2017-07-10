@@ -41,7 +41,7 @@ class Test_AntennaDeployment(RestartPerTest):
     def test_process_begins_automatically_by_controller_reset(self):
         event = TestEvent()
         self.system.primary_antenna.on_reset = event.set
-        self.begin(1)
+        self.begin(2)
         self.assertTrue(event.wait_for_change(1), "antenna controller was not reset")
 
     @runlevel(1)
@@ -49,7 +49,7 @@ class Test_AntennaDeployment(RestartPerTest):
     def test_process_begins_automatically(self):
         event = TestEvent()
         self.system.primary_antenna.on_begin_deployment = event.set
-        self.begin(2)
+        self.begin(3)
         self.assertTrue(event.wait_for_change(1), "antenna deployment process did not began when it should")
 
     @runlevel(1)
@@ -57,7 +57,7 @@ class Test_AntennaDeployment(RestartPerTest):
     def test_deployment_is_cancelled_on_retry(self):
         event = TestEvent()
         self.system.primary_antenna.on_deployment_cancel = event.set
-        self.begin(2)
+        self.begin(3)
         self.assertTrue(event.wait_for_change(1), "antenna deployment process was not cancelled")
 
     @runlevel(1)
@@ -111,7 +111,7 @@ class Test_AntennaDeployment(RestartPerTest):
 
         self.system.primary_antenna.on_begin_deployment = primaryHandler
         self.system.backup_antenna.on_begin_deployment = backupHandler
-        self.begin(14)
+        self.begin(18)
         self.assertSequenceEqual(list, expected)
 
     @runlevel(1)
