@@ -8,8 +8,6 @@ set(SOURCES
     xmodem.cpp
     fault_handlers.c
     boot.cpp
-    spi.cpp
-    flash_driver.cpp
     error_counter.cpp
     dummy_os.cpp
     
@@ -38,6 +36,9 @@ target_link_libraries(${NAME}
       boot_settings
       program_flash
       error_counter
+      
+      standalone_flash_driver
+      standalone_spi
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)
