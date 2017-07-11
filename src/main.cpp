@@ -48,7 +48,7 @@ telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver
     Main.Hardware.EPS,
     Main.Experiments.ExperimentsController,
     Main.Hardware.MCUTemperature,
-    Main.Hardware.antennaDriver,
+    Mission,
     0,
     Main.fs,
     Main.timeProvider,

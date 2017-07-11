@@ -27,8 +27,8 @@ namespace services
             virtual bool RedundantThermalKnife(bool enabled) override;
             virtual bool EnableMainSailBurnSwitch() override;
             virtual bool EnableRedundantSailBurnSwitch() override;
-            virtual void PrimaryAntennaPower(bool enable) override;
-            virtual void BackupAntennaPower(bool enable) override;
+            virtual bool PrimaryAntennaPower(bool enable) override;
+            virtual bool BackupAntennaPower(bool enable) override;
 
           private:
             /** @brief EPS driver */

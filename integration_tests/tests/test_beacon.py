@@ -42,5 +42,5 @@ class Test_Beacon(RestartPerTest):
         self.system.primary_antenna.on_reset = reset_handler
         self.system.backup_antenna.on_reset = reset_handler
         self.system.comm.transmitter.on_set_beacon = event.set
-        self.begin(18)
+        self.begin(19)
         self.assertTrue(event.wait_for_change(1), "beacon should be set once the antennas are deployed")

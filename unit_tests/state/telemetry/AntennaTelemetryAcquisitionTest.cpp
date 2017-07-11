@@ -15,12 +15,17 @@ namespace
 
     using namespace devices::antenna;
 
+    struct AntennaTelemetryProviderMock : mission::antenna::IAntennaTelemetryProvider
+    {
+        MOCK_CONST_METHOD1(GetTelemetry, bool(AntennaTelemetry&));
+    };
+
     class AntennaTelemetryAcquisitionTest : public testing::Test
     {
       protected:
         AntennaTelemetryAcquisitionTest();
         mission::UpdateResult Run();
-        AntennaMock mock;
+        AntennaTelemetryProviderMock mock;
         telemetry::TelemetryState state;
         telemetry::AntennaTelemetryAcquisition task;
         mission::UpdateDescriptor<telemetry::TelemetryState> descriptor;
@@ -37,7 +42,7 @@ namespace
 
     TEST_F(AntennaTelemetryAcquisitionTest, TestAcquisitionFailure)
     {
-        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Return(OSResult::IOError));
+        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Return(false));
         const auto result = Run();
         ASSERT_THAT(result, Eq(mission::UpdateResult::Warning));
         ASSERT_THAT(state.telemetry.IsModified(), Eq(false));
@@ -45,7 +50,7 @@ namespace
 
     TEST_F(AntennaTelemetryAcquisitionTest, TestAcquisition)
     {
-        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Return(OSResult::Success));
+        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Return(true));
         const auto result = Run();
         ASSERT_THAT(result, Eq(mission::UpdateResult::Ok));
     }
@@ -54,7 +59,7 @@ namespace
     {
         EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Invoke([](auto& telemetry) {
             telemetry.SetDeploymentStatus(1);
-            return OSResult::Success;
+            return true;
         }));
         Run();
         ASSERT_THAT(state.telemetry.IsModified(), Eq(true));

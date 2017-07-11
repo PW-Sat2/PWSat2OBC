@@ -5,7 +5,7 @@
 
 namespace telemetry
 {
-    AntennaTelemetryAcquisition::AntennaTelemetryAcquisition(AntennaDriver& antenna) : provider(&antenna)
+    AntennaTelemetryAcquisition::AntennaTelemetryAcquisition(mission::antenna::IAntennaTelemetryProvider& antenna) : provider(&antenna)
     {
     }
 
@@ -21,15 +21,15 @@ namespace telemetry
     mission::UpdateResult AntennaTelemetryAcquisition::UpdateTelemetry(telemetry::TelemetryState& state)
     {
         devices::antenna::AntennaTelemetry telemetry;
-        if (OS_RESULT_FAILED(this->provider->GetTelemetry(this->provider, telemetry)))
-        {
-            LOG(LOG_LEVEL_ERROR, "Unable to acquire antenna telemetry. ");
-            return mission::UpdateResult::Warning;
-        }
-        else
+        if (this->provider->GetTelemetry(telemetry))
         {
             state.telemetry.Set(telemetry);
             return mission::UpdateResult::Ok;
+        }
+        else
+        {
+            LOG(LOG_LEVEL_ERROR, "Unable to acquire antenna telemetry. ");
+            return mission::UpdateResult::Warning;
         }
     }
 

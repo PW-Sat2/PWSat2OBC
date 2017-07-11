@@ -30,6 +30,9 @@ namespace
 
         SystemState state;
         AntennaTask task;
+        OSMock os;
+        OSReset osReset;
+
         ActionDescriptor<SystemState> openAntenna;
         AntennaMissionState& stateDescriptor;
     };
@@ -40,6 +43,14 @@ namespace
           stateDescriptor(task.state)
     {
         state.Time = 41min;
+
+        osReset = InstallProxy(&os);
+
+        ON_CALL(os, CreateBinarySemaphore(_)).WillByDefault(Return(reinterpret_cast<OSSemaphoreHandle>(5)));
+        ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResult::Success));
+        ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
+
+        task.Initialize();
     }
 
     TEST_F(DeployAntennasTest, TestConditionTimeBeforeThreshold)
@@ -114,6 +125,8 @@ namespace
         DeployAntennasUpdateTest();
         testing::StrictMock<AntennaMock> mock;
         PowerControlMock power;
+        OSMock os;
+        OSReset osReset;
 
         SystemState state;
         AntennaTask task;
@@ -126,6 +139,13 @@ namespace
           update(task.BuildUpdate()),                             //
           stateDescriptor(task.state)
     {
+        osReset = InstallProxy(&os);
+
+        ON_CALL(os, CreateBinarySemaphore(_)).WillByDefault(Return(reinterpret_cast<OSSemaphoreHandle>(5)));
+        ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResult::Success));
+        ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
+
+        task.Initialize();
     }
 
     TEST_F(DeployAntennasUpdateTest, TestNothingToDo)
@@ -156,6 +176,9 @@ namespace
                     deploymentStatus->DeploymentStatus[3] = true;
                     return OSResult::Success;
                 }));
+
+        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Return(OSResult::Success));
+
         const auto result = update.updateProc(state, update.param);
         ASSERT_THAT(result, Eq(UpdateResult::Ok));
         ASSERT_THAT(state.AntennaState.IsDeployed(), Eq(false));
@@ -174,6 +197,9 @@ namespace
                     deploymentStatus->DeploymentStatus[3] = false;
                     return OSResult::Success;
                 }));
+
+        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Return(OSResult::Success));
+
         const auto result = update.updateProc(state, update.param);
         ASSERT_THAT(result, Eq(UpdateResult::Ok));
         ASSERT_THAT(state.AntennaState.IsDeployed(), Eq(false));
@@ -192,6 +218,9 @@ namespace
                     deploymentStatus->IsDeploymentActive[3] = false;
                     return OSResult::Success;
                 }));
+
+        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Return(OSResult::Success));
+
         update.updateProc(state, update.param);
         ASSERT_THAT(stateDescriptor.IsDeploymentInProgress(), Eq(false));
     }
@@ -208,6 +237,9 @@ namespace
                     deploymentStatus->IsDeploymentActive[3] = false;
                     return OSResult::Success;
                 }));
+
+        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Return(OSResult::Success));
+
         update.updateProc(state, update.param);
         ASSERT_THAT(stateDescriptor.IsDeploymentInProgress(), Eq(true));
     }
@@ -224,6 +256,9 @@ namespace
                     deploymentStatus->IsDeploymentActive[3] = true;
                     return OSResult::Success;
                 }));
+
+        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Return(OSResult::Success));
+
         update.updateProc(state, update.param);
         ASSERT_THAT(stateDescriptor.IsDeploymentInProgress(), Eq(true));
     }
@@ -242,6 +277,9 @@ namespace
                     deploymentStatus->DeploymentStatus[3] = true;
                     return OSResult::Success;
                 }));
+
+        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Return(OSResult::Success));
+
         update.updateProc(state, update.param);
         ASSERT_THAT(state.AntennaState.IsDeployed(), Eq(false));
     }
@@ -252,6 +290,24 @@ namespace
         state.AntennaState.SetDeployment(false);
         update.updateProc(state, update.param);
         ASSERT_THAT(state.AntennaState.IsDeployed(), Eq(true));
+    }
+
+    TEST_F(DeployAntennasUpdateTest, GatherTelemetryWithDoubleBuffering)
+    {
+        EXPECT_CALL(mock, GetDeploymentStatus(_, _))
+            .WillOnce(Invoke([](AntennaChannel /*channel*/, //
+                AntennaDeploymentStatus* deploymentStatus)  //
+                {
+                    deploymentStatus->DeploymentStatus[0] = true;
+                    deploymentStatus->DeploymentStatus[1] = true;
+                    deploymentStatus->DeploymentStatus[2] = true;
+                    deploymentStatus->DeploymentStatus[3] = true;
+                    return OSResult::Success;
+                }));
+
+        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Return(OSResult::Success));
+
+        update.Execute(this->state);
     }
 
     class DeployAntennasActionTest : public ::testing::Test

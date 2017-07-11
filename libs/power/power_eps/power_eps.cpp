@@ -60,11 +60,11 @@ namespace services
         {
             if (enable)
             {
-                return this->_eps.EnableLCL(LCL::AntennaMain);
+                return this->_eps.EnableLCL(LCL::AntennaMain) == ErrorCode::NoError;
             }
             else
             {
-                return this->_eps.DisableLCL(LCL::AntennaMain);
+                return this->_eps.DisableLCL(LCL::AntennaMain) == ErrorCode::NoError;
             }
         }
 
@@ -72,11 +72,11 @@ namespace services
         {
             if (enable)
             {
-                return this->_eps.EnableLCL(LCL::AntennaRed);
+                return this->_eps.EnableLCL(LCL::AntennaRed) == ErrorCode::NoError;
             }
             else
             {
-                return this->_eps.DisableLCL(LCL::AntennaRed);
+                return this->_eps.DisableLCL(LCL::AntennaRed) == ErrorCode::NoError;
             }
         }
     }
