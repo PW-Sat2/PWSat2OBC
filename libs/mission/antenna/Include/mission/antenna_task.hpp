@@ -14,9 +14,18 @@ namespace mission
 {
     namespace antenna
     {
+        /**
+         * @brief Antenna telemetry provider
+         * @ingroup mission_atenna
+         */
         struct IAntennaTelemetryProvider
         {
-            virtual bool GetTelemetry(devices::antenna::AntennaTelemetry& telementry) const = 0;
+            /**
+             * @brief Fetches current antenna telemetry
+             * @param telemetry Reference to object that will be filled with telemetry
+             * @return true if telemetry was fetched correctly, false otherwise
+             */
+            virtual bool GetTelemetry(devices::antenna::AntennaTelemetry& telemetry) const = 0;
         };
 
         /**
@@ -38,10 +47,13 @@ namespace mission
         {
             /**
              * @brief ctor.
-             * @param[in] driver Reference to antenna driver interface.
+             * @param[in] args Tuple of: reference to antenna driver interface and reference to power control interface
              */
             AntennaTask(std::tuple<AntennaDriver&, services::power::IPowerControl&> args);
 
+            /**
+             * @brief Initializes antenna mission state
+             */
             void Initialize();
 
             /**

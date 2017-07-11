@@ -150,6 +150,7 @@ namespace obc
          * @param[in] bootTable Boot table
          * @param[in] bootSettings Boot settings
          * @param[in] telemetry Reference to object that contains current telemetry state.
+         * @param[in] powerControl Power control interface
          */
         OBCCommunication(obc::FDIR& fdir,
             devices::comm::CommObject& commDriver,

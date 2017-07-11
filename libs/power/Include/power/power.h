@@ -47,8 +47,19 @@ namespace services
              */
             virtual bool EnableRedundantSailBurnSwitch() = 0;
 
-            virtual bool PrimaryAntennaPower(bool enable) = 0;
-            virtual bool BackupAntennaPower(bool enable) = 0;
+            /**
+            * @brief Sets state of primary antenna power LCL
+            * @param enabled true to turn on LCL, false to turn off
+            * @return Operation status
+            */
+            virtual bool PrimaryAntennaPower(bool enabled) = 0;
+
+            /**
+             * @brief Sets state of backup antenna power LCL
+             * @param enabled true to turn on LCL, false to turn off
+             * @return Operation status
+             */
+            virtual bool BackupAntennaPower(bool enabled) = 0;
         };
 
         /** @} */

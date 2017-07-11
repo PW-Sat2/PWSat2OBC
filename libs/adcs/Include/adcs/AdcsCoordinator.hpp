@@ -23,9 +23,10 @@ namespace adcs
       public:
         /**
          * @brief ctor.
-         * @param[in] builtinDetembling_ Reference to the primary detumbling algorithm controller module.
+         * @param[in] builtinDetumbling_ Reference to the primary detumbling algorithm controller module.
          * @param[in] experimentalDetumbling_ Reference to the backup detumbling algorithm controller module.
          * @param[in] sunpointAlgorithm_ Reference to the sun pointing algorithm controller module.
+         * @param[in] currentTime_ Reference to object providing current time
          */
         AdcsCoordinator(IAdcsProcessor& builtinDetumbling_, //
             IAdcsProcessor& experimentalDetumbling_,        //
