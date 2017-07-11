@@ -15,6 +15,7 @@
  */
 template <typename Type> struct Element
 {
+    /** @brief Type of this element */
     using Underlying = Type;
 };
 

@@ -41,9 +41,13 @@ namespace mission
              * @brief ctor.
              * @param[in] antennaDriver Reference to the instance of the antenna driver that is supposed to
              * drive the required hardware.
+             * @param[in] powerControl Power control
              */
             AntennaMissionState(AntennaDriver& antennaDriver, services::power::IPowerControl& powerControl);
 
+            /**
+             * @brief Initializes antenna mission state
+             */
             void Initialize();
 
             /**
@@ -166,13 +170,27 @@ namespace mission
              */
             static std::uint8_t StepCount();
 
+            /**
+             * @brief Fetches current antenna telemetry
+             * @param result Reference to object that will be filled with telemetry
+             * @return true if telemetry was fetched correctly, false otherwise
+             */
             bool CurrentTelemetry(devices::antenna::AntennaTelemetry& result) const;
 
+            /**
+             * @brief Updates stored antenna telementry
+             * @return true if telemetry was fetched correctly, false otherwise
+             */
             bool UpdateTelemetry();
+
+            /** @brief Power control  */
             services::power::IPowerControl& Power;
 
           private:
+            /** @brief Telemetry synchronization semaphore */
             OSSemaphoreHandle _telemetrySync;
+
+            /** @brief Current antenna telemetry */
             devices::antenna::AntennaTelemetry _currentTelemetry;
 
             /**
