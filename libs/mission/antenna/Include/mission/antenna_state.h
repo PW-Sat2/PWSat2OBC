@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include "antenna/antenna.h"
+#include "antenna/telemetry.hpp"
 #include "base/os.h"
 #include "mission/base.hpp"
 #include "power/power.h"
@@ -42,6 +43,8 @@ namespace mission
              * drive the required hardware.
              */
             AntennaMissionState(AntennaDriver& antennaDriver, services::power::IPowerControl& powerControl);
+
+            void Initialize();
 
             /**
              * @brief Returns information whether the antenna deployment is currently being performed.
@@ -163,9 +166,15 @@ namespace mission
              */
             static std::uint8_t StepCount();
 
+            bool CurrentTelemetry(devices::antenna::AntennaTelemetry& result) const;
+
+            bool UpdateTelemetry();
             services::power::IPowerControl& Power;
 
           private:
+            OSSemaphoreHandle _telemetrySync;
+            devices::antenna::AntennaTelemetry _currentTelemetry;
+
             /**
              * @brief Flag indicating whether antenna hardware status should be ignored.
              */

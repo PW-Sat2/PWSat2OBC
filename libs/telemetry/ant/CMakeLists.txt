@@ -14,6 +14,7 @@ target_link_libraries(${NAME}
     state
     antenna
     telemetry
+    mission_antenna
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

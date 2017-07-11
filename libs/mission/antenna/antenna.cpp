@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <cstring>
 #include "antenna/driver.h"
+#include "antenna/telemetry.hpp"
 #include "antenna_state.h"
 #include "antenna_task.hpp"
 #include "gsl/gsl_util"
@@ -213,6 +214,12 @@ namespace mission
         {
         }
 
+        void AntennaMissionState::Initialize()
+        {
+            this->_telemetrySync = System::CreateBinarySemaphore(5);
+            System::GiveSemaphore(this->_telemetrySync);
+        }
+
         void AntennaMissionState::Retry(std::uint8_t limit, std::int8_t timeout)
         {
             if ((this->_retryCount + 1) == limit)
@@ -242,6 +249,33 @@ namespace mission
         std::uint8_t AntennaMissionState::StepCount()
         {
             return DeploymentStepLimit;
+        }
+
+        bool AntennaMissionState::CurrentTelemetry(devices::antenna::AntennaTelemetry& result) const
+        {
+            Lock lock(this->_telemetrySync, 100ms);
+            if (!lock())
+            {
+                return false;
+            }
+
+            result = this->_currentTelemetry;
+            return true;
+        }
+
+        bool AntennaMissionState::UpdateTelemetry()
+        {
+            Lock lock(this->_telemetrySync, 200ms);
+
+            if (lock())
+            {
+                this->_driver.GetTelemetry(&this->_driver, this->_currentTelemetry);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         /**
@@ -429,11 +463,11 @@ namespace mission
 
             if (result)
             {
-                stateDescriptor.NextStep();
+                stateDescriptor.NextStep(GetTimeout(step));
             }
             else
             {
-                stateDescriptor.Retry(StepRetryLimit);
+                stateDescriptor.Retry(StepRetryLimit, GetTimeout(step));
             }
         }
 
@@ -454,11 +488,11 @@ namespace mission
 
             if (result)
             {
-                stateDescriptor.NextStep();
+                stateDescriptor.NextStep(GetTimeout(step));
             }
             else
             {
-                stateDescriptor.Retry(StepRetryLimit);
+                stateDescriptor.Retry(StepRetryLimit, GetTimeout(step));
             }
         }
 
@@ -547,6 +581,7 @@ namespace mission
             stateDescriptor->NextCycle();
             AntennaDeploymentStatus deploymentStatus;
             AntennaDriver& driver = stateDescriptor->Driver();
+
             const OSResult result = driver.GetDeploymentStatus(&driver,
                 deploymentSteps[stateDescriptor->StepNumber()].channel,
                 &deploymentStatus //
@@ -558,12 +593,25 @@ namespace mission
             }
 
             stateDescriptor->Update(deploymentStatus);
-            return UpdateResult::Ok;
+
+            if (stateDescriptor->UpdateTelemetry())
+            {
+                return UpdateResult::Ok;
+            }
+            else
+            {
+                return UpdateResult::Warning;
+            }
         }
 
         AntennaTask::AntennaTask(std::tuple<AntennaDriver&, services::power::IPowerControl&> args)
             : state(std::get<AntennaDriver&>(args), std::get<services::power::IPowerControl&>(args))
         {
+        }
+
+        void AntennaTask::Initialize()
+        {
+            this->state.Initialize();
         }
 
         ActionDescriptor<SystemState> AntennaTask::BuildAction()
@@ -585,9 +633,15 @@ namespace mission
             return descriptor;
         }
 
+        bool AntennaTask::GetTelemetry(devices::antenna::AntennaTelemetry& telemetry) const
+        {
+            return this->state.CurrentTelemetry(telemetry);
+        }
+
         StopAntennaDeploymentTask::StopAntennaDeploymentTask(std::uint8_t /*mark*/)
         {
         }
+
         mission::ActionDescriptor<SystemState> StopAntennaDeploymentTask::BuildAction()
         {
             mission::ActionDescriptor<SystemState> action;

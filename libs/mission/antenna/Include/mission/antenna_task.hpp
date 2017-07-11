@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <array>
 #include <atomic>
 #include <tuple>
 #include "antenna_state.h"
@@ -13,6 +14,11 @@ namespace mission
 {
     namespace antenna
     {
+        struct IAntennaTelemetryProvider
+        {
+            virtual bool GetTelemetry(devices::antenna::AntennaTelemetry& telementry) const = 0;
+        };
+
         /**
          * @brief Mission part related to antenna deployment.
          * @ingroup mission_atenna
@@ -28,13 +34,16 @@ namespace mission
          * - The initial silent mission period is over
          * - The antennas are not currently being deployed
          */
-        struct AntennaTask : public Update, public Action
+        struct AntennaTask : public Update, public Action, public IAntennaTelemetryProvider
         {
             /**
              * @brief ctor.
              * @param[in] driver Reference to antenna driver interface.
              */
             AntennaTask(std::tuple<AntennaDriver&, services::power::IPowerControl&> args);
+
+            void Initialize();
+
             /**
              * @brief Returns antenna deployment action descriptor.
              *
@@ -48,6 +57,8 @@ namespace mission
              * @returns Update descriptor that runs antenna deployment update process.
              */
             UpdateDescriptor<SystemState> BuildUpdate();
+
+            virtual bool GetTelemetry(devices::antenna::AntennaTelemetry& telemetry) const override;
 
             /**
              * @brief State of the antenna mission deployment task.
