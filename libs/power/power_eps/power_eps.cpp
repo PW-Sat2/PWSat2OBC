@@ -56,9 +56,9 @@ namespace services
             return this->_eps.EnableBurnSwitch(false, BurnSwitch::Sail) == ErrorCode::NoError;
         }
 
-        bool EPSPowerControl::PrimaryAntennaPower(bool enable)
+        bool EPSPowerControl::PrimaryAntennaPower(bool enabled)
         {
-            if (enable)
+            if (enabled)
             {
                 return this->_eps.EnableLCL(LCL::AntennaMain) == ErrorCode::NoError;
             }
@@ -68,9 +68,9 @@ namespace services
             }
         }
 
-        bool EPSPowerControl::BackupAntennaPower(bool enable)
+        bool EPSPowerControl::BackupAntennaPower(bool enabled)
         {
-            if (enable)
+            if (enabled)
             {
                 return this->_eps.EnableLCL(LCL::AntennaRed) == ErrorCode::NoError;
             }

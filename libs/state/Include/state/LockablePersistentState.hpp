@@ -7,6 +7,9 @@
 
 namespace state
 {
+    /**
+     * @brief Thread-safe access to persistent state
+     */
     template <typename StatePolicy, typename... Parts> class LockablePersistentState : NotCopyable
     {
       public:
@@ -81,6 +84,7 @@ namespace state
 
         /**
          * @brief Loads new State into internal persistent state.
+         * @param[in] newState Reference to new state
          * @return True if loading was successful.
          */
         bool Load(const InternalPersistentState& newState);

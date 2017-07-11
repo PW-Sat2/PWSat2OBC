@@ -106,6 +106,7 @@ namespace devices
             * @brief Reads data from memory starting from given address
             * @param[in] address Start address
             * @param[out] buffer Buffer
+            * @return Operation result
             */
             virtual OSResult ReadMemory(std::size_t address, gsl::span<uint8_t> buffer) = 0;
 
@@ -196,6 +197,7 @@ namespace devices
              * @brief Reads data from memory starting from given address
              * @param[in] address Start address
              * @param[out] buffer Buffer
+             * @return Operation result
              */
             virtual OSResult ReadMemory(std::size_t address, gsl::span<uint8_t> buffer) override;
 
@@ -410,6 +412,7 @@ namespace devices
              * @param[out] outputBuffer Output buffer
              * @param[out] redundantBuffer1 First buffer used for redundant read
              * @param[out] redundantBuffer2 Second buffer used for redundant read
+             * @return Operation result
              *
              * All buffers should have the same length. If not, the length of shortest buffer will be used as data size.
              *

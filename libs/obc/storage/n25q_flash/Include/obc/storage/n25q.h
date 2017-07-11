@@ -28,6 +28,7 @@ namespace obc
           public:
             /**
              * @brief Constructs @ref N25QStorage instance
+             * @param[in] errors Error counting service
              * @param[in] spi SPI interface used by external memories
              * @param deviceOperations YAFFS device operations
              * @param[in] pins GPIO pins (unused)

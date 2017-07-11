@@ -748,8 +748,8 @@ WARN_NO_PARAMDOC = YES
 # If the WARN_AS_ERROR tag is set to YES then doxygen will immediately stop when
 # a warning is encountered.
 # The default value is: NO.
-
-WARN_AS_ERROR = NO
+# I know, I'm bad man 
+WARN_AS_ERROR = YES
 
 # The WARN_FORMAT tag determines the format of the warning messages that doxygen
 # can produce. The string should contain the $file, $line, and $text tags, which
@@ -817,7 +817,16 @@ RECURSIVE = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE = unit_tests integration_tests libs\external src\commands\stress_fs.cpp sample boot tools\flash-structure.h
+EXCLUDE = unit_tests integration_tests \
+	libs\external \
+	src\commands\stress_fs.cpp \
+	sample \
+	boot \
+	tools\flash-structure.h \
+	libs\drivers\standalone \
+	safe_mode \
+	libs\base\Include\base\hertz.hpp \
+	test
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
