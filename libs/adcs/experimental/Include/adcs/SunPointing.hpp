@@ -6,8 +6,6 @@
 #include <cmath>
 #include "InterfaceTypes.hpp"
 
-namespace adcs
-{
 using std::uint8_t;
 using std::uint16_t;
 using std::uint32_t;
@@ -20,6 +18,10 @@ using Eigen::Matrix;
 using RowVector5f = Matrix<float, 1, 5>;
 using Vector5f = Matrix<float, 5, 1>;
 using Matrix55f = Matrix<float, 5, 5>;
+
+namespace adcs
+{
+
 
 /**
  * @defgroup adcs_sunpointing  implementaiton of sunpointing algorithm
@@ -252,7 +254,29 @@ final
                             bool mtmFlag, const SunsVec& ssMeas, bool ssFlag,
                             const GyroVec& gyrMeas, bool gyrFlag, State& state);
                 };
-                /** @} */
+/** @} */
                 }
+
+//vvv TO BE REMOVED/MOVED vvv
+
+Eigen::Matrix3f skew(const Eigen::Vector3f &vec);
+Matrix55f matInv(Matrix55f A);
+void EKFinitialization(Vector5f& xEkf, Matrix55f& pEkf, Vector5f& innov,
+        Matrix55f& innovCov, const Vector2f& ssMeas, const Vector3f& gyrMeas,
+        const adcs::SunPointing::State& state);
+Vector5f PropagateState(const Vector5f& x, const Vector3f& ctrlTorque,
+       const adcs::SunPointing::State& state);
+void ExtendedKalmanFilter(Vector5f& xEkf, Matrix55f& pEkf, Vector5f& innov,
+        Matrix55f& innovCov, const Vector2f& ssMeas, bool ssFlag,
+        const Vector3f& gyrMeas, bool gyrFlag, const adcs::SunPointing::State& state);
+void ExtractSunVandRate(Vector3f& s2s_bodyEst, Vector3f& angrateEst,
+        const Vector5f& xEkf, const adcs::SunPointing::State& state);
+void SpinController(Vector3f& commDipoleSP, const Vector3f& angrateEst,
+        const Vector3f& s2s_bodyEst, const Vector3f& mtmMeas,
+        const adcs::SunPointing::State& state);
+
+//^^^ TO BE REMOVED/MOVED ^^^
+
+
 
 #endif /* ADCS_SUNPOINTING_HPP_ */
