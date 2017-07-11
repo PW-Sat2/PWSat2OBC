@@ -47,8 +47,8 @@ namespace services
              */
             virtual bool EnableRedundantSailBurnSwitch() = 0;
 
-            virtual void PrimaryAntennaPower(bool enable) = 0;
-            virtual void BackupAntennaPower(bool enable) = 0;
+            virtual bool PrimaryAntennaPower(bool enable) = 0;
+            virtual bool BackupAntennaPower(bool enable) = 0;
         };
 
         /** @} */

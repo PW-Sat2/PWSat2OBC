@@ -416,31 +416,50 @@ namespace mission
         {
             const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
 
+            bool result;
+
             if (step.channel == ANTENNA_PRIMARY_CHANNEL)
             {
-                stateDescriptor.Power.PrimaryAntennaPower(true);
+                result = stateDescriptor.Power.PrimaryAntennaPower(true);
             }
             else
             {
-                stateDescriptor.Power.BackupAntennaPower(true);
+                result = stateDescriptor.Power.BackupAntennaPower(true);
             }
 
-            stateDescriptor.NextStep();
+            if (result)
+            {
+                stateDescriptor.NextStep();
+            }
+            else
+            {
+                stateDescriptor.Retry(StepRetryLimit);
+            }
         }
 
         void PowerOffDriver(const SystemState& /*state*/, AntennaMissionState& stateDescriptor, AntennaDriver& /*driver*/)
         {
             const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
 
+            bool result;
+
             if (step.channel == ANTENNA_PRIMARY_CHANNEL)
             {
-                stateDescriptor.Power.PrimaryAntennaPower(false);
+                result = stateDescriptor.Power.PrimaryAntennaPower(false);
             }
             else
             {
-                stateDescriptor.Power.BackupAntennaPower(false);
+                result = stateDescriptor.Power.BackupAntennaPower(false);
             }
-            stateDescriptor.NextStep();
+
+            if (result)
+            {
+                stateDescriptor.NextStep();
+            }
+            else
+            {
+                stateDescriptor.Retry(StepRetryLimit);
+            }
         }
 
         /**

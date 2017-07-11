@@ -290,7 +290,7 @@ namespace
 
     TEST_F(DeployAntennasActionTest, TestMinimalPath)
     {
-        EXPECT_CALL(power, PrimaryAntennaPower(true)).Times(1);
+        EXPECT_CALL(power, PrimaryAntennaPower(true)).Times(1).WillOnce(Return(true));
         EXPECT_CALL(mock, Reset(ANTENNA_PRIMARY_CHANNEL)).Times(1);
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, _, _)).Times(1);
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, _, _)).Times(1);
@@ -298,9 +298,9 @@ namespace
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, _, _)).Times(1);
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, _, _)).Times(1);
         EXPECT_CALL(mock, FinishDeployment(ANTENNA_PRIMARY_CHANNEL)).Times(6);
-        EXPECT_CALL(power, PrimaryAntennaPower(false)).Times(1);
+        EXPECT_CALL(power, PrimaryAntennaPower(false)).Times(1).WillOnce(Return(true));
 
-        EXPECT_CALL(power, BackupAntennaPower(true)).Times(1);
+        EXPECT_CALL(power, BackupAntennaPower(true)).Times(1).WillOnce(Return(true));
         EXPECT_CALL(mock, Reset(ANTENNA_BACKUP_CHANNEL)).Times(1);
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, _, _)).Times(1);
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, _, _)).Times(1);
@@ -308,7 +308,7 @@ namespace
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, _, _)).Times(1);
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, _, _)).Times(1);
         EXPECT_CALL(mock, FinishDeployment(ANTENNA_BACKUP_CHANNEL)).Times(6);
-        EXPECT_CALL(power, BackupAntennaPower(false)).Times(1);
+        EXPECT_CALL(power, BackupAntennaPower(false)).Times(1).WillOnce(Return(true));
 
         for (int i = 0; i < 18; ++i)
         {
