@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "OsMock.hpp"
 #include "mission/base.hpp"
 #include "mission/sail.hpp"
 #include "mock/power.hpp"
@@ -8,6 +9,7 @@
 using testing::Eq;
 using testing::Gt;
 using testing::Mock;
+using testing::InSequence;
 using namespace std::chrono_literals;
 
 class OpenSailTest : public testing::Test
@@ -17,6 +19,8 @@ class OpenSailTest : public testing::Test
 
     SystemState _state;
     PowerControlMock _power;
+    OSMock _os;
+    OSReset _osReset;
 
     mission::OpenSailTask _openSailTask;
     mission::ActionDescriptor<SystemState> _openSailAction;
@@ -25,7 +29,8 @@ class OpenSailTest : public testing::Test
 };
 
 OpenSailTest::OpenSailTest()
-    : _openSailTask(this->_power), _openSailAction(this->_openSailTask.BuildAction()), _openSailUpdate(this->_openSailTask.BuildUpdate())
+    : _osReset(InstallProxy(&this->_os)), _openSailTask(this->_power), _openSailAction(this->_openSailTask.BuildAction()),
+      _openSailUpdate(this->_openSailTask.BuildUpdate())
 {
 }
 
@@ -37,7 +42,15 @@ TEST_F(OpenSailTest, ShouldPerformSailOpeningProcedure)
     // set time to X = 4 days
     this->_state.Time = std::chrono::hours(4 * 24);
     {
+        InSequence s;
+
         EXPECT_CALL(this->_power, MainThermalKnife(true));
+        EXPECT_CALL(this->_os, Sleep(100ms));
+        EXPECT_CALL(this->_power, MainThermalKnife(true));
+        EXPECT_CALL(this->_os, Sleep(100ms));
+
+        EXPECT_CALL(this->_power, EnableMainSailBurnSwitch());
+        EXPECT_CALL(this->_os, Sleep(100ms));
         EXPECT_CALL(this->_power, EnableMainSailBurnSwitch());
 
         ASSERT_THAT(this->_openSailAction.EvaluateCondition(this->_state), Eq(true));
@@ -55,8 +68,20 @@ TEST_F(OpenSailTest, ShouldPerformSailOpeningProcedure)
     this->_state.Time += std::chrono::minutes(1);
 
     {
+        InSequence s;
+
         EXPECT_CALL(this->_power, MainThermalKnife(false));
+        EXPECT_CALL(this->_os, Sleep(100ms));
+        EXPECT_CALL(this->_power, MainThermalKnife(false));
+        EXPECT_CALL(this->_os, Sleep(100ms));
+
         EXPECT_CALL(this->_power, RedundantThermalKnife(true));
+        EXPECT_CALL(this->_os, Sleep(100ms));
+        EXPECT_CALL(this->_power, RedundantThermalKnife(true));
+        EXPECT_CALL(this->_os, Sleep(100ms));
+
+        EXPECT_CALL(this->_power, EnableRedundantSailBurnSwitch());
+        EXPECT_CALL(this->_os, Sleep(100ms));
         EXPECT_CALL(this->_power, EnableRedundantSailBurnSwitch());
 
         ASSERT_THAT(this->_openSailAction.EvaluateCondition(this->_state), Eq(true));
@@ -69,6 +94,10 @@ TEST_F(OpenSailTest, ShouldPerformSailOpeningProcedure)
     // set time to X + 4 min
     this->_state.Time += std::chrono::minutes(2);
     {
+        InSequence s;
+
+        EXPECT_CALL(this->_power, RedundantThermalKnife(false));
+        EXPECT_CALL(this->_os, Sleep(100ms));
         EXPECT_CALL(this->_power, RedundantThermalKnife(false));
 
         ASSERT_THAT(this->_openSailAction.EvaluateCondition(this->_state), Eq(true));

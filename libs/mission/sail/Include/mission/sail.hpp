@@ -95,35 +95,52 @@ namespace mission
         static void Action(SystemState& state, void* param);
 
         /**
+         * @brief Delay by 100ms
+         * @param This Unused
+         */
+        static void Delay100ms(OpenSailTask* This, SystemState& state);
+        /**
+         * @brief Waits for 2 minutes before performing next step
+         * @param This Pointer to task object
+         * @param state Current system state
+         */
+        static void WaitFor2mins(OpenSailTask* This, SystemState& state);
+        /**
          * @brief Enables main thermal knife
          * @param This Pointer to task object
+         * @param state Current system state
          */
-        static void EnableMainThermalKnife(OpenSailTask* This);
+        static void EnableMainThermalKnife(OpenSailTask* This, SystemState& state);
         /**
          * @brief Disables main thermal knife
          * @param This Pointer to task object
+         * @param state Current system state
          */
-        static void DisableMainThermalKnife(OpenSailTask* This);
+        static void DisableMainThermalKnife(OpenSailTask* This, SystemState& state);
         /**
          * @brief Enables redundant thermal knife
          * @param This Pointer to task object
+         * @param state Current system state
          */
-        static void EnableRedundantThermalKnife(OpenSailTask* This);
+        static void EnableRedundantThermalKnife(OpenSailTask* This, SystemState& state);
         /**
          * @brief Disables redundant thermal knife
          * @param This Pointer to task object
+         * @param state Current system state
          */
-        static void DisableRedundantThermalKnife(OpenSailTask* This);
+        static void DisableRedundantThermalKnife(OpenSailTask* This, SystemState& state);
         /**
          * @brief Enables main SAIL burn switch
          * @param This Pointer to task object
+         * @param state Current system state
          */
-        static void EnableMainBurnSwitch(OpenSailTask* This);
+        static void EnableMainBurnSwitch(OpenSailTask* This, SystemState& state);
         /**
          * @brief Enables redundant SAIL burn switch
          * @param This Pointer to task object
+         * @param state Current system state
          */
-        static void EnableRedundantBurnSwitch(OpenSailTask* This);
+        static void EnableRedundantBurnSwitch(OpenSailTask* This, SystemState& state);
 
         /** @brief Power control interface */
         services::power::IPowerControl& _power;
@@ -134,22 +151,10 @@ namespace mission
         /** @brief Explicit open command */
         std::atomic<bool> _openOnNextMissionLoop;
 
-        /**
-         * @brief Single step description
-         */
-        struct StepDescription
-        {
-            /**
-             * @brief Pointer to step action
-             * @param This Pointer to task object
-             */
-            void (*Action)(OpenSailTask* This);
-            /** @brief Delay before next step after executing this tep */
-            std::chrono::milliseconds AfterStepDelay;
-        };
+        using StepProc = void (*)(OpenSailTask* This, SystemState& state);
 
         /** @brief Sail opening steps */
-        static StepDescription Steps[6];
+        static StepProc Steps[23];
         /** @brief Steps count */
         static constexpr std::uint8_t StepsCount = count_of(Steps);
     };
