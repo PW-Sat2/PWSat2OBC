@@ -7,12 +7,12 @@ using namespace std::chrono_literals;
 namespace mission
 {
     OpenSailTask::StepDescription OpenSailTask::Steps[] = {
-        {&EnableMainThermalKnife, 0s},                                     //
-        {&EnableMainBurnSwitch, 2min},                                     //
-        {&DisableMainThermalKnife, 0s},                                    //
-        {&EnableRedundantThermalKnife, 0s},                                //
-        {&EnableRedundantBurnSwitch, 2min},                                //
-        {&DisableRedundantThermalKnife, std::chrono::milliseconds::max()}, //
+        {&EnableMainThermalKnife, 0s},       //
+        {&EnableMainBurnSwitch, 2min},       //
+        {&DisableMainThermalKnife, 0s},      //
+        {&EnableRedundantThermalKnife, 0s},  //
+        {&EnableRedundantBurnSwitch, 2min},  //
+        {&DisableRedundantThermalKnife, 0s}, //
     };
 
     OpenSailTask::OpenSailTask(services::power::IPowerControl& power)
@@ -133,7 +133,7 @@ namespace mission
     {
         auto This = static_cast<OpenSailTask*>(param);
 
-        while (true)
+        while (This->_step < StepsCount)
         {
             LOGF(LOG_LEVEL_INFO, "[sail] Performing step %d", This->_step);
 

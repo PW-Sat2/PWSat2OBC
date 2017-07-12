@@ -28,58 +28,52 @@ namespace state
         /**
          * @brief Ctor
          */
-        SailState() : _currentState(SailOpeningState::Waiting)
-        {
-        }
+        SailState();
 
         /**
          * @brief Ctor
          * @param currentState Current sail state
          */
-        SailState(SailOpeningState currentState) : _currentState(currentState)
-        {
-        }
+        SailState(SailOpeningState currentState);
 
         /**
          * @brief Returns current sail state
          * @return Current sail state
          */
-        SailOpeningState CurrentState() const
-        {
-            return this->_currentState;
-        }
+        SailOpeningState CurrentState() const;
 
         /**
          * @brief Returns size of this object in persistent state
          * @return Size in bytes
          */
-        static constexpr std::size_t Size()
-        {
-            return sizeof(_currentState);
-        }
+        static constexpr std::size_t Size();
 
         /**
          * @brief Reads object from external buffer
          * @param reader Reader to use with buffer
          */
-        void Read(Reader& reader)
-        {
-            this->_currentState = static_cast<SailOpeningState>(reader.ReadByte());
-        }
+        void Read(Reader& reader);
 
         /**
          * @brief Writes object to external buffer
          * @param writer Writer to use with buffer
          */
-        void Write(Writer& writer) const
-        {
-            writer.WriteByte(num(this->_currentState));
-        }
+        void Write(Writer& writer) const;
 
       private:
         /** @brief Current sail state */
         SailOpeningState _currentState;
     };
+
+    inline state::SailOpeningState SailState::CurrentState() const
+    {
+        return this->_currentState;
+    }
+
+    inline constexpr std::size_t SailState::Size()
+    {
+        return sizeof(_currentState);
+    }
 }
 
 #endif /* LIBS_STATE_INCLUDE_STATE_SAIL_SAILSTATE_HPP_ */
