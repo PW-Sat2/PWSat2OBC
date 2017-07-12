@@ -6,13 +6,34 @@ using namespace std::chrono_literals;
 
 namespace mission
 {
-    OpenSailTask::StepDescription OpenSailTask::Steps[] = {
-        {&EnableMainThermalKnife, 0s},       //
-        {&EnableMainBurnSwitch, 2min},       //
-        {&DisableMainThermalKnife, 0s},      //
-        {&EnableRedundantThermalKnife, 0s},  //
-        {&EnableRedundantBurnSwitch, 2min},  //
-        {&DisableRedundantThermalKnife, 0s}, //
+    OpenSailTask::StepProc OpenSailTask::Steps[] = {
+        &EnableMainThermalKnife,       //
+        &Delay100ms,                   //
+        &EnableMainThermalKnife,       //
+        &Delay100ms,                   //
+        &EnableMainBurnSwitch,         //
+        &Delay100ms,                   //
+        &EnableMainBurnSwitch,         //
+                                       //
+        &WaitFor2mins,                 //
+                                       //
+        &DisableMainThermalKnife,      //
+        &Delay100ms,                   //
+        &DisableMainThermalKnife,      //
+        &Delay100ms,                   //
+        &EnableRedundantThermalKnife,  //
+        &Delay100ms,                   //
+        &EnableRedundantThermalKnife,  //
+        &Delay100ms,                   //
+        &EnableRedundantBurnSwitch,    //
+        &Delay100ms,                   //
+        &EnableRedundantBurnSwitch,    //
+                                       //
+        &WaitFor2mins,                 //
+                                       //
+        &DisableRedundantThermalKnife, //
+        &Delay100ms,                   //
+        &DisableRedundantThermalKnife, //
     };
 
     OpenSailTask::OpenSailTask(services::power::IPowerControl& power)
@@ -140,42 +161,53 @@ namespace mission
             auto& step = Steps[This->_step];
             This->_step++;
 
-            step.Action(This);
+            This->_nextStepAfter = state.Time;
 
-            if (step.AfterStepDelay != decltype(step.AfterStepDelay)::zero())
+            step(This, state);
+
+            if (This->_nextStepAfter > state.Time)
             {
-                This->_nextStepAfter = state.Time + step.AfterStepDelay;
                 break;
             }
         }
     }
 
-    void OpenSailTask::EnableMainThermalKnife(OpenSailTask* This)
+    void OpenSailTask::Delay100ms(OpenSailTask* /*This*/, SystemState& /*state*/)
+    {
+        System::SleepTask(100ms);
+    }
+
+    void OpenSailTask::WaitFor2mins(OpenSailTask* This, SystemState& state)
+    {
+        This->_nextStepAfter = state.Time + 2min;
+    }
+
+    void OpenSailTask::EnableMainThermalKnife(OpenSailTask* This, SystemState& /*state*/)
     {
         This->_power.MainThermalKnife(true);
     }
 
-    void OpenSailTask::DisableMainThermalKnife(OpenSailTask* This)
+    void OpenSailTask::DisableMainThermalKnife(OpenSailTask* This, SystemState& /*state*/)
     {
         This->_power.MainThermalKnife(false);
     }
 
-    void OpenSailTask::EnableRedundantThermalKnife(OpenSailTask* This)
+    void OpenSailTask::EnableRedundantThermalKnife(OpenSailTask* This, SystemState& /*state*/)
     {
         This->_power.RedundantThermalKnife(true);
     }
 
-    void OpenSailTask::DisableRedundantThermalKnife(OpenSailTask* This)
+    void OpenSailTask::DisableRedundantThermalKnife(OpenSailTask* This, SystemState& /*state*/)
     {
         This->_power.RedundantThermalKnife(false);
     }
 
-    void OpenSailTask::EnableMainBurnSwitch(OpenSailTask* This)
+    void OpenSailTask::EnableMainBurnSwitch(OpenSailTask* This, SystemState& /*state*/)
     {
         This->_power.EnableMainSailBurnSwitch();
     }
 
-    void OpenSailTask::EnableRedundantBurnSwitch(OpenSailTask* This)
+    void OpenSailTask::EnableRedundantBurnSwitch(OpenSailTask* This, SystemState& /*state*/)
     {
         This->_power.EnableRedundantSailBurnSwitch();
     }
