@@ -434,7 +434,7 @@ namespace mission
 
             if (OS_RESULT_FAILED(result))
             {
-                return UpdateResult::Failure;
+                return UpdateResult::Warning;
             }
 
             stateDescriptor->Update(deploymentStatus);
