@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <tuple>
 #include "mission/base.hpp"
 #include "power/power.h"
@@ -21,86 +22,152 @@ namespace mission
     /**
      * @brief Task that is responsible for deploying the sail at the end of the primary satelite mission.
      * @mission_task
+     *
+     * Sail opening procedure:
+     *  * T + 0min - Enable main thermal knife, enable main burn switch
+     *  * T + 2min - Disable main thermal knife, enable redundant thermal knife
+     *  * T + 4min - Disable redundant thermal knife
+     *
+     *  After sail opening conditions are met, this procedure should be performed after each restart
+     *  until overrided by telecommand
      */
-    class SailTask : public Action, public Update
+    class OpenSailTask : public mission::Action, public mission::Update
     {
       public:
         /**
-         * @brief ctor.
-         *
-         * To support default mission loop construction.
+         * @brief Ctor
+         * @param power Power control interface
          */
-        SailTask() = default;
+        OpenSailTask(services::power::IPowerControl& power);
 
         /**
-         * @brief ctor.
-         *
-         * To support single argument construction.
-         * @param[in] args Tuple of: initial sail deployment state, power control interface
+         * @brief Builds mission update description
+         * @return Update descriptor
          */
-        SailTask(std::tuple<bool, services::power::IPowerControl&> args);
+        mission::UpdateDescriptor<SystemState> BuildUpdate();
 
         /**
-         * @brief Prepares action descriptor for this task.
-         * @return Current action descriptor.
+         * @brief Buils mission action description
+         * @return Action descriptor
          */
-        ActionDescriptor<SystemState> BuildAction();
+        mission::ActionDescriptor<SystemState> BuildAction();
 
         /**
-         * @brief Prepares update descriptor for this task.
-         * @return Current update descriptor.
+         * @brief Start sail opening on next mission loop iteration
          */
-        UpdateDescriptor<SystemState> BuildUpdate();
+        void Open();
 
         /**
-         * @brief Overrides the task state.
-         * @param[in] newState New sail deployment state.
+         * @brief Returns number of current step of sail opening process
+         * @return Step number
+         * @remark This method is for debugging/information purposes only, do not relay on return value for critical decisions
          */
-        void SetState(bool newState);
+        std::uint8_t Step() const;
 
         /**
-         * @brief Returns current sail deployment state.
-         * @return Current sail deployment state.
+         * @brief Returns value indicating if sail opening process is in progress
+         * @return true if process is in progress
          */
-        bool CurrentState() const noexcept;
+        bool InProgress() const;
 
       private:
         /**
-         * @brief Condition procedure for sail deployment.
-         * @param[in] state Current mission state.
-         * @param[in] param Execution context.
-         * @return True if the state should be opened at current stage, false otherwise.
+         * @brief Updates mission state
+         * @param state System state
+         * @param param Pointer to task object
+         * @return Update result
          */
-        static bool CanOpenSail(const SystemState& state, void* param);
+        static UpdateResult Update(SystemState& state, void* param);
 
         /**
-         * @brief Initiates sail opening procedure.
-         * @param[in] state Current mission state.
-         * @param[in] param Execution context.
+         * @brief Checks if sail opening action should be performed
+         * @param state System state
+         * @param param Pointer to task object
+         * @return true if sail opening should be performed, false otherwise
          */
-        static void OpenSail(SystemState& state, void* param);
+        static bool Condition(const SystemState& state, void* param);
 
         /**
-         * @brief Updates global mission state.
-         * @param[in] state Current mission state.
-         * @param[in] param Execution context.
-         * @return Operation status.
+         * @brief Performs single step of sail opening procedure
+         * @param state System state
+         * @param param Pointer to task object
          */
-        static UpdateResult UpdateProc(SystemState& state, void* param);
+        static void Action(SystemState& state, void* param);
 
-        bool state;
+        /**
+         * @brief Delay by 100ms
+         * @param This Unused
+         */
+        static void Delay100ms(OpenSailTask* This, SystemState& state);
+        /**
+         * @brief Waits for 2 minutes before performing next step
+         * @param This Pointer to task object
+         * @param state Current system state
+         */
+        static void WaitFor2mins(OpenSailTask* This, SystemState& state);
+        /**
+         * @brief Enables main thermal knife
+         * @param This Pointer to task object
+         * @param state Current system state
+         */
+        static void EnableMainThermalKnife(OpenSailTask* This, SystemState& state);
+        /**
+         * @brief Disables main thermal knife
+         * @param This Pointer to task object
+         * @param state Current system state
+         */
+        static void DisableMainThermalKnife(OpenSailTask* This, SystemState& state);
+        /**
+         * @brief Enables redundant thermal knife
+         * @param This Pointer to task object
+         * @param state Current system state
+         */
+        static void EnableRedundantThermalKnife(OpenSailTask* This, SystemState& state);
+        /**
+         * @brief Disables redundant thermal knife
+         * @param This Pointer to task object
+         * @param state Current system state
+         */
+        static void DisableRedundantThermalKnife(OpenSailTask* This, SystemState& state);
+        /**
+         * @brief Enables main SAIL burn switch
+         * @param This Pointer to task object
+         * @param state Current system state
+         */
+        static void EnableMainBurnSwitch(OpenSailTask* This, SystemState& state);
+        /**
+         * @brief Enables redundant SAIL burn switch
+         * @param This Pointer to task object
+         * @param state Current system state
+         */
+        static void EnableRedundantBurnSwitch(OpenSailTask* This, SystemState& state);
 
-        services::power::IPowerControl* _powerControl;
+        /** @brief Power control interface */
+        services::power::IPowerControl& _power;
+        /** @brief Current step in sail opening process */
+        std::uint8_t _step;
+        /** @brief Mission time at which next step should be performed */
+        std::chrono::milliseconds _nextStepAfter;
+        /** @brief Explicit open command */
+        std::atomic<bool> _openOnNextMissionLoop;
+
+        using StepProc = void (*)(OpenSailTask* This, SystemState& state);
+
+        /** @brief Sail opening steps */
+        static StepProc Steps[23];
+        /** @brief Steps count */
+        static constexpr std::uint8_t StepsCount = count_of(Steps);
     };
 
-    inline void SailTask::SetState(bool newState)
+    inline uint8_t OpenSailTask::Step() const
     {
-        this->state = newState;
+        return this->_step;
     }
 
-    inline bool SailTask::CurrentState() const noexcept
+    inline bool OpenSailTask::InProgress() const
     {
-        return this->state;
+        return this->_step < StepsCount;
     }
+    /** @} */
 }
 #endif /* LIBS_MISSION_INCLUDE_MISSION_SAIL_H_ */

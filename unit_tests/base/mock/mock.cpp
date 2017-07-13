@@ -4,6 +4,7 @@
 #include "eps.hpp"
 #include "mock/HasStateMock.hpp"
 #include "mock/fm25w.hpp"
+#include "mock/power.hpp"
 
 GyroscopeMock::GyroscopeMock()
 {
@@ -50,5 +51,12 @@ FM25WDriverMock::FM25WDriverMock()
 }
 
 FM25WDriverMock::~FM25WDriverMock()
+{
+}
+
+PowerControlMock::PowerControlMock()
+{
+}
+PowerControlMock::~PowerControlMock()
 {
 }

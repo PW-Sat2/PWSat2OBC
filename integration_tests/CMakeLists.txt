@@ -21,7 +21,7 @@ add_custom_target(${NAME}
 )
 
 add_custom_target(pyconsole
-    COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}" ${IPYTHON} --profile-dir=${CMAKE_CURRENT_SOURCE_DIR}/ipython_profile
+    COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}" ${IPYTHON} --profile-dir=${CMAKE_CURRENT_SOURCE_DIR}/ipython_profile --gui=wx
     DEPENDS ${NAME}.deps
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )

@@ -12,6 +12,7 @@ set(SOURCES
     Antenna.cpp
     time.cpp
     boot.cpp
+    sail.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

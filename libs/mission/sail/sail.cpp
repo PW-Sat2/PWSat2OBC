@@ -1,51 +1,148 @@
 #include "mission/sail.hpp"
+#include "logger/logger.h"
 #include "state/struct.h"
 
 using namespace std::chrono_literals;
 
 namespace mission
 {
-    SailTask::SailTask(std::tuple<bool, services::power::IPowerControl&> args) : state(std::get<0>(args)), _powerControl(&std::get<1>(args))
+    OpenSailTask::StepProc OpenSailTask::Steps[] = {
+        &EnableMainThermalKnife,       //
+        &Delay100ms,                   //
+        &EnableMainThermalKnife,       //
+        &Delay100ms,                   //
+        &EnableMainBurnSwitch,         //
+        &Delay100ms,                   //
+        &EnableMainBurnSwitch,         //
+                                       //
+        &WaitFor2mins,                 //
+                                       //
+        &DisableMainThermalKnife,      //
+        &Delay100ms,                   //
+        &DisableMainThermalKnife,      //
+        &Delay100ms,                   //
+        &EnableRedundantThermalKnife,  //
+        &Delay100ms,                   //
+        &EnableRedundantThermalKnife,  //
+        &Delay100ms,                   //
+        &EnableRedundantBurnSwitch,    //
+        &Delay100ms,                   //
+        &EnableRedundantBurnSwitch,    //
+                                       //
+        &WaitFor2mins,                 //
+                                       //
+        &DisableRedundantThermalKnife, //
+        &Delay100ms,                   //
+        &DisableRedundantThermalKnife, //
+    };
+
+    OpenSailTask::OpenSailTask(services::power::IPowerControl& power)
+        : _power(power), _step(0), _nextStepAfter(0), _openOnNextMissionLoop(false)
     {
     }
 
-    ActionDescriptor<SystemState> SailTask::BuildAction()
+    void OpenSailTask::Open()
     {
-        ActionDescriptor<SystemState> descriptor;
-        descriptor.name = "Open Sail Action";
-        descriptor.param = this;
-        descriptor.condition = CanOpenSail;
-        descriptor.actionProc = OpenSail;
-        return descriptor;
+        this->_openOnNextMissionLoop = true;
     }
 
-    UpdateDescriptor<SystemState> SailTask::BuildUpdate()
+    UpdateDescriptor<SystemState> OpenSailTask::BuildUpdate()
     {
-        UpdateDescriptor<SystemState> descriptor;
-        descriptor.name = "Update Sail State";
-        descriptor.updateProc = UpdateProc;
-        descriptor.param = this;
-        return descriptor;
+        UpdateDescriptor<SystemState> update;
+
+        update.name = "Sail: Control";
+        update.param = this;
+        update.updateProc = Update;
+
+        return update;
     }
 
-    UpdateResult SailTask::UpdateProc(SystemState& state, void* param)
+    ActionDescriptor<SystemState> OpenSailTask::BuildAction()
     {
-        auto This = static_cast<SailTask*>(param);
-        state.SailOpened = This->state;
+        ActionDescriptor<SystemState> action;
+
+        action.name = "Sail: Open";
+        action.param = this;
+        action.actionProc = Action;
+        action.condition = Condition;
+
+        return action;
+    }
+
+    UpdateResult OpenSailTask::Update(SystemState& state, void* param)
+    {
+        auto This = static_cast<OpenSailTask*>(param);
+
+        auto currentState = state.PersistentState.Get<state::SailState>().CurrentState();
+
+        auto open = [&state, This]() {
+            state.PersistentState.Set(state::SailState(state::SailOpeningState::Opening));
+            This->_step = 0;
+            This->_nextStepAfter = 0s;
+        };
+
+        switch (currentState)
+        {
+            case state::SailOpeningState::Opening:
+            {
+                auto explicitOpen = This->_openOnNextMissionLoop.exchange(false);
+
+                if (explicitOpen && !This->InProgress())
+                {
+                    open();
+                    break;
+                }
+            }
+
+            case state::SailOpeningState::OpeningStopped:
+            {
+                auto explicitOpen = This->_openOnNextMissionLoop.exchange(false);
+
+                if (explicitOpen)
+                {
+                    open();
+                    break;
+                }
+            }
+            break;
+
+            case state::SailOpeningState::Waiting:
+            {
+                if (state.Time >= 40 * 24h)
+                {
+                    open();
+                    break;
+                }
+
+                auto explicitOpen = This->_openOnNextMissionLoop.exchange(false);
+
+                if (explicitOpen)
+                {
+                    open();
+                    break;
+                }
+            }
+            break;
+        }
+
         return UpdateResult::Ok;
     }
 
-    bool SailTask::CanOpenSail(const SystemState& state, void* param)
+    bool OpenSailTask::Condition(const SystemState& state, void* param)
     {
-        UNREFERENCED_PARAMETER(param);
+        auto This = static_cast<OpenSailTask*>(param);
 
-        const auto t = 40h;
-        if (state.Time < t)
+        if (state.PersistentState.Get<state::SailState>().CurrentState() != state::SailOpeningState::Opening)
         {
             return false;
         }
 
-        if (state.SailOpened)
+        if (state.Time < This->_nextStepAfter)
+        {
+            return false;
+        }
+
+        if (This->_step >= StepsCount)
         {
             return false;
         }
@@ -53,11 +150,65 @@ namespace mission
         return true;
     }
 
-    void SailTask::OpenSail(SystemState& state, void* param)
+    void OpenSailTask::Action(SystemState& state, void* param)
     {
-        auto This = static_cast<SailTask*>(param);
-        UNREFERENCED_PARAMETER(state);
-        This->state = true;
-        This->_powerControl->OpenSail();
+        auto This = static_cast<OpenSailTask*>(param);
+
+        while (This->_step < StepsCount)
+        {
+            LOGF(LOG_LEVEL_INFO, "[sail] Performing step %d", This->_step);
+
+            auto& step = Steps[This->_step];
+            This->_step++;
+
+            This->_nextStepAfter = state.Time;
+
+            step(This, state);
+
+            if (This->_nextStepAfter > state.Time)
+            {
+                break;
+            }
+        }
+    }
+
+    void OpenSailTask::Delay100ms(OpenSailTask* /*This*/, SystemState& /*state*/)
+    {
+        System::SleepTask(100ms);
+    }
+
+    void OpenSailTask::WaitFor2mins(OpenSailTask* This, SystemState& state)
+    {
+        This->_nextStepAfter = state.Time + 2min;
+    }
+
+    void OpenSailTask::EnableMainThermalKnife(OpenSailTask* This, SystemState& /*state*/)
+    {
+        This->_power.MainThermalKnife(true);
+    }
+
+    void OpenSailTask::DisableMainThermalKnife(OpenSailTask* This, SystemState& /*state*/)
+    {
+        This->_power.MainThermalKnife(false);
+    }
+
+    void OpenSailTask::EnableRedundantThermalKnife(OpenSailTask* This, SystemState& /*state*/)
+    {
+        This->_power.RedundantThermalKnife(true);
+    }
+
+    void OpenSailTask::DisableRedundantThermalKnife(OpenSailTask* This, SystemState& /*state*/)
+    {
+        This->_power.RedundantThermalKnife(false);
+    }
+
+    void OpenSailTask::EnableMainBurnSwitch(OpenSailTask* This, SystemState& /*state*/)
+    {
+        This->_power.EnableMainSailBurnSwitch();
+    }
+
+    void OpenSailTask::EnableRedundantBurnSwitch(OpenSailTask* This, SystemState& /*state*/)
+    {
+        This->_power.EnableRedundantSailBurnSwitch();
     }
 }
