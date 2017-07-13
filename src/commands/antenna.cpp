@@ -1,16 +1,19 @@
 #include "antenna/antenna.h"
+#include <cstring>
+#include "antenna/driver.h"
 #include "antenna/telemetry.hpp"
 #include "logger/logger.h"
-#include "obc.h"
+#include "obc_access.hpp"
 #include "system.h"
 #include "terminal.h"
+#include "terminal/terminal.h"
 #include "utils.h"
 
 using namespace std::chrono_literals;
 
 static void SendResult(OSResult result)
 {
-    Main.terminal.Printf("%d", num(result));
+    GetTerminal().Printf("%d", num(result));
 }
 
 static bool GetChannel(const char* name, AntennaChannel* channel)
@@ -71,12 +74,12 @@ void AntennaDeploy(std::uint16_t argc, char* argv[])
         !GetAntenna(argv[1], &antenna)    //
         )
     {
-        Main.terminal.Puts("antenna_deploy [primary|backup] [auto|1|2|3|4] [override]\n");
+        GetTerminal().Puts("antenna_deploy [primary|backup] [auto|1|2|3|4] [override]\n");
         return;
     }
 
     const bool override = (argc > 2) && (strcmp(argv[2], "override") == 0);
-    const OSResult result = Main.Hardware.antennaDriver.DeployAntenna(&Main.Hardware.antennaDriver,
+    const OSResult result = GetAntennaDriver().DeployAntenna(&GetAntennaDriver(),
         channel,
         antenna,
         10s,
@@ -94,11 +97,11 @@ void AntennaCancelDeployment(std::uint16_t argc, char* argv[])
         !GetChannel(argv[0], &channel) //
         )
     {
-        Main.terminal.Puts("antenna_cancel [primary|backup]\n");
+        GetTerminal().Puts("antenna_cancel [primary|backup]\n");
         return;
     }
 
-    Main.Hardware.antennaDriver.FinishDeployment(&Main.Hardware.antennaDriver, channel);
+    GetAntennaDriver().FinishDeployment(&GetAntennaDriver(), channel);
 }
 
 void AntennaGetDeploymentStatus(std::uint16_t argc, char* argv[])
@@ -109,19 +112,19 @@ void AntennaGetDeploymentStatus(std::uint16_t argc, char* argv[])
         !GetChannel(argv[0], &channel) //
         )
     {
-        Main.terminal.Puts("antenna_get_status [primary|backup]\n");
+        GetTerminal().Puts("antenna_get_status [primary|backup]\n");
         return;
     }
 
     AntennaDeploymentStatus deploymentStatus;
-    const OSResult status = Main.Hardware.antennaDriver.GetDeploymentStatus(&Main.Hardware.antennaDriver, channel, &deploymentStatus);
+    const OSResult status = GetAntennaDriver().GetDeploymentStatus(&GetAntennaDriver(), channel, &deploymentStatus);
     if (OS_RESULT_FAILED(status))
     {
         SendResult(status);
     }
     else
     {
-        Main.terminal.Printf("%d %d %d %d %d %d %d %d %d %d %d\n",
+        GetTerminal().Printf("%d %d %d %d %d %d %d %d %d %d %d\n",
             num(status),
             ToInt(deploymentStatus.DeploymentStatus[0]),        //
             ToInt(deploymentStatus.DeploymentStatus[1]),        //
@@ -139,13 +142,13 @@ void AntennaGetDeploymentStatus(std::uint16_t argc, char* argv[])
 
 void PrintValue(int value, const char* name)
 {
-    Main.terminal.Printf("%s: '%d'\n", name, value);
+    GetTerminal().Printf("%s: '%d'\n", name, value);
 }
 
 void AntennaGetTelemetry(std::uint16_t /*argc*/, char* /*argv*/ [])
 {
     devices::antenna::AntennaTelemetry telemetry;
-    Main.Hardware.antennaDriver.GetTelemetry(&Main.Hardware.antennaDriver, telemetry);
+    GetAntennaDriver().GetTelemetry(&GetAntennaDriver(), telemetry);
     auto& counts1 = telemetry.GetActivationCounts(ANTENNA_PRIMARY_CHANNEL);
     auto& counts2 = telemetry.GetActivationCounts(ANTENNA_BACKUP_CHANNEL);
     auto& times1 = telemetry.GetActivationTimes(ANTENNA_PRIMARY_CHANNEL);
@@ -177,17 +180,17 @@ void AntennaReset(std::uint16_t argc, char* argv[])
     AntennaChannel channel;
     if (argc != 1 || !GetChannel(argv[0], &channel))
     {
-        Main.terminal.Puts("antenna_reset [primary|backup]\n");
+        GetTerminal().Puts("antenna_reset [primary|backup]\n");
         return;
     }
 
-    const OSResult result = Main.Hardware.antennaDriver.Reset(&Main.Hardware.antennaDriver, channel);
+    const OSResult result = GetAntennaDriver().Reset(&GetAntennaDriver(), channel);
     if (OS_RESULT_SUCCEEDED(result))
     {
-        Main.terminal.Puts("Done");
+        GetTerminal().Puts("Done");
     }
     else
     {
-        Main.terminal.Printf("Unable to reset antenna. Status: '%d'", num(result));
+        GetTerminal().Printf("Unable to reset antenna. Status: '%d'", num(result));
     }
 }

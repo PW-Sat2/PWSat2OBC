@@ -1,9 +1,11 @@
 #include "mission.h"
 #include "antenna/antenna.h"
 #include "logger/logger.h"
-#include "obc.h"
+#include "obc/experiments.hpp"
+#include "obc_access.hpp"
 #include "system.h"
 #include "terminal.h"
+#include "terminal/terminal.h"
 
 extern mission::ObcMission Mission;
 
@@ -35,59 +37,59 @@ void SetFiboIterations(std::uint16_t argc, char* argv[])
 {
     if (argc != 1)
     {
-        Main.terminal.Puts("set_fibo_iterations <iterations>");
+        GetTerminal().Puts("set_fibo_iterations <iterations>");
         return;
     }
 
     std::uint16_t iters = atoi(argv[0]);
 
-    Main.Experiments.Fibo.Iterations(iters);
+    GetExperiments().Fibo.Iterations(iters);
 }
 
 void RequestExperiment(std::uint16_t argc, char* argv[])
 {
     if (argc != 1)
     {
-        Main.terminal.Puts("request_experiment <experimentType>");
+        GetTerminal().Puts("request_experiment <experimentType>");
         return;
     }
 
     std::uint16_t expType = atoi(argv[0]);
 
-    Main.Experiments.ExperimentsController.RequestExperiment(gsl::narrow_cast<experiments::ExperimentCode>(expType));
+    GetExperiments().ExperimentsController.RequestExperiment(gsl::narrow_cast<experiments::ExperimentCode>(expType));
 }
 
 void AbortExperiment(std::uint16_t argc, char* argv[])
 {
     UNUSED(argc, argv);
 
-    Main.Experiments.ExperimentsController.AbortExperiment();
+    GetExperiments().ExperimentsController.AbortExperiment();
 }
 
 void ExperimentInfo(std::uint16_t argc, char* argv[])
 {
     UNUSED(argc, argv);
-    auto state = Main.Experiments.ExperimentsController.CurrentState();
+    auto state = GetExperiments().ExperimentsController.CurrentState();
 
     if (state.RequestedExperiment.HasValue)
-        Main.terminal.Printf("Requested\t%d\n", state.RequestedExperiment.Value);
+        GetTerminal().Printf("Requested\t%d\n", state.RequestedExperiment.Value);
     else
-        Main.terminal.Puts("Requested\tNone\n");
+        GetTerminal().Puts("Requested\tNone\n");
 
     if (state.CurrentExperiment.HasValue)
-        Main.terminal.Printf("Current\t%d\n", state.CurrentExperiment.Value);
+        GetTerminal().Printf("Current\t%d\n", state.CurrentExperiment.Value);
     else
-        Main.terminal.Puts("Current\tNone\n");
+        GetTerminal().Puts("Current\tNone\n");
 
     if (state.LastStartResult.HasValue)
-        Main.terminal.Printf("LastStartResult\t%d\n", num(state.LastStartResult.Value));
+        GetTerminal().Printf("LastStartResult\t%d\n", num(state.LastStartResult.Value));
     else
-        Main.terminal.Puts("LastStartResult\tNone\n");
+        GetTerminal().Puts("LastStartResult\tNone\n");
 
     if (state.LastIterationResult.HasValue)
-        Main.terminal.Printf("LastIterationResult\t%d\n", num(state.LastIterationResult.Value));
+        GetTerminal().Printf("LastIterationResult\t%d\n", num(state.LastIterationResult.Value));
     else
-        Main.terminal.Puts("LastIterationResult\tNone\n");
+        GetTerminal().Puts("LastIterationResult\tNone\n");
 
-    Main.terminal.Printf("IterationCounter\t%ld\n", state.IterationCounter);
+    GetTerminal().Printf("IterationCounter\t%ld\n", state.IterationCounter);
 }

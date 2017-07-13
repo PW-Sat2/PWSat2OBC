@@ -35,6 +35,8 @@ namespace io_map
         using MOSI = PinLocation<gpioPortE, 7>;
         using MISO = PinLocation<gpioPortE, 6>;
         using CLK = PinLocation<gpioPortE, 5>;
+
+        static constexpr auto DMATransferTimeout = std::chrono::seconds(1);
     };
 
     struct UART : public UARTPins<UART>

@@ -4,8 +4,9 @@
 #include <cstdint>
 #include <task.h>
 
-#include "obc.h"
+#include "obc_access.hpp"
 #include "system.h"
+#include "terminal/terminal.h"
 
 using std::uint16_t;
 using std::array;
@@ -23,13 +24,13 @@ void TaskListCommand(uint16_t argc, char* argv[])
 
     uxTaskGetSystemState(tasks.data(), tasksCount, nullptr);
 
-    Main.terminal.Puts("Status\tName      \tStack WM\n");
+    GetTerminal().Puts("Status\tName      \tStack WM\n");
 
     for (auto i = 0; i < tasksCount; i++)
     {
         auto& t = tasks[i];
 
-        Main.terminal.Printf(
+        GetTerminal().Printf(
             "%-6c\t%-10s\t%8d\n", TaskStatuses[t.eCurrentState], t.pcTaskName, t.usStackHighWaterMark * sizeof(StackType_t));
     }
 }

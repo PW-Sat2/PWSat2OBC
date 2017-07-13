@@ -1,7 +1,8 @@
 #include <FreeRTOS.h>
 #include <cstdint>
-#include "obc.h"
+#include "obc_access.hpp"
 #include "system.h"
+#include "terminal/terminal.h"
 #include "terminal/terminal.h"
 
 using std::size_t;
@@ -16,5 +17,5 @@ void HeapInfoCommand(uint16_t argc, char* argv[])
     auto heapFree = xPortGetFreeHeapSize();
     auto heapSize = configTOTAL_HEAP_SIZE;
 
-    Main.terminal.Printf("Total:\t%d\nFree:\t%d\n", heapSize, heapFree);
+    GetTerminal().Printf("Total:\t%d\nFree:\t%d\n", heapSize, heapFree);
 }

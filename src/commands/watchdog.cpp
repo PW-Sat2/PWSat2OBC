@@ -1,6 +1,9 @@
 #include <FreeRTOS.h>
 #include <cstdint>
+#include <cstring>
 #include "obc.h"
+#include "obc_access.hpp"
+#include "terminal/terminal.h"
 #include "watchdog/internal.hpp"
 
 using drivers::watchdog::InternalWatchdog;
@@ -21,7 +24,7 @@ template <typename Watchdog> static void Handle(const char* cmd)
     }
     else
     {
-        Main.terminal.Puts("Unknown command");
+        GetTerminal().Puts("Unknown command");
     }
 }
 
@@ -29,7 +32,7 @@ void WatchdogCommand(std::uint16_t argc, char* argv[])
 {
     if (argc != 2)
     {
-        Main.terminal.Puts("wdog <int|ext> <enable|disable|kick>");
+        GetTerminal().Puts("wdog <int|ext> <enable|disable|kick>");
         return;
     }
 
@@ -43,7 +46,7 @@ void WatchdogCommand(std::uint16_t argc, char* argv[])
     }
     else
     {
-        Main.terminal.Puts("Unknown watchdog");
+        GetTerminal().Puts("Unknown watchdog");
     }
 }
 
@@ -51,7 +54,7 @@ void Hang(std::uint16_t argc, char* argv[])
 {
     if (argc == 1 && strcmp(argv[0], "42") == 0)
     {
-        Main.terminal.Puts(">");
+        GetTerminal().Puts(">");
         portENTER_CRITICAL();
         while (1)
             ;

@@ -1,14 +1,10 @@
 #include <stdint.h>
 
-#include <FreeRTOS.h>
-#include <queue.h>
-#include <task.h>
 #include <em_system.h>
 #include <core_cm3.h>
 
 #include "boot/params.hpp"
-#include "commands.h"
-#include "obc.h"
+#include "obc_access.hpp"
 #include "system.h"
 #include "terminal/terminal.h"
 
@@ -17,21 +13,21 @@ void PingHandler(uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
 
-    Main.terminal.Puts("pong");
+    GetTerminal().Puts("pong");
 }
 
 void IdHandler(uint16_t /*argc*/, char* /*argv*/ [])
 {
-    Main.terminal.Puts("Program1");
+    GetTerminal().Puts("Program1");
 }
 
 void EchoHandler(uint16_t argc, char* argv[])
 {
-    Main.terminal.Puts("echo with args: \r\n");
+    GetTerminal().Puts("echo with args: \r\n");
 
     for (int i = 0; i < argc; i++)
     {
-        Main.terminal.Printf("%d. %s \r\n", i, argv[i]);
+        GetTerminal().Printf("%d. %s \r\n", i, argv[i]);
     }
 }
 
@@ -44,7 +40,7 @@ void ResetHandler(uint16_t argc, char* argv[])
 
 void BootParamsCommand(std::uint16_t /*argc*/, char* /*argv*/ [])
 {
-    Main.terminal.Printf("MagicNumber=%lX\nReason=%X\nIndex=%d\nRequested runlevel=%d\nClear state=%s\n",
+    GetTerminal().Printf("MagicNumber=%lX\nReason=%X\nIndex=%d\nRequested runlevel=%d\nClear state=%s\n",
         boot::MagicNumber,
         num(boot::BootReason),
         boot::Index,

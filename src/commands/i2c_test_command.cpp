@@ -2,9 +2,11 @@
 #include <string.h>
 #include <gsl/span>
 
-#include "obc.h"
+#include "i2c/i2c.h"
+#include "obc_access.hpp"
 #include "system.h"
 #include "terminal.h"
+#include "terminal/terminal.h"
 
 using gsl::span;
 using drivers::i2c::II2CBus;
@@ -16,7 +18,7 @@ void I2CTestCommandHandler(uint16_t argc, char* argv[])
 
     if (argc != 4)
     {
-        Main.terminal.Puts("i2c <r|w|wr> <system|payload> <device> <data>\n");
+        GetTerminal().Puts("i2c <r|w|wr> <system|payload> <device> <data>\n");
         return;
     }
 
@@ -24,15 +26,15 @@ void I2CTestCommandHandler(uint16_t argc, char* argv[])
 
     if (strcmp(argv[1], "system") == 0)
     {
-        bus = &Main.Hardware.I2C.Buses.Bus;
+        bus = &GetI2C().Bus;
     }
     else if (strcmp(argv[1], "payload") == 0)
     {
-        bus = &Main.Hardware.I2C.Buses.Payload;
+        bus = &GetI2C().Payload;
     }
     else
     {
-        Main.terminal.Puts("Unknown bus\n");
+        GetTerminal().Puts("Unknown bus\n");
         return;
     }
 
@@ -58,16 +60,16 @@ void I2CTestCommandHandler(uint16_t argc, char* argv[])
     }
     else
     {
-        Main.terminal.Puts("Unknown mode\n");
+        GetTerminal().Puts("Unknown mode\n");
         return;
     }
 
     if (result == I2CResult::OK)
     {
-        Main.terminal.Puts((char*)output);
+        GetTerminal().Puts((char*)output);
     }
     else
     {
-        Main.terminal.Printf("Error %d\n", num(result));
+        GetTerminal().Printf("Error %d\n", num(result));
     }
 }
