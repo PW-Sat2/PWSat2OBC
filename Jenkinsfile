@@ -30,7 +30,10 @@ def build() {
 	buildPlatform('EngModel', 'FlightModel')
 	buildPlatform('EngModel', 'DM')
 
+	bat("make flatsat_tools")
+
 	step([$class: 'ArtifactArchiver', artifacts: 'build/*/*/bin/*', fingerprint: true])
+	step([$class: 'ArtifactArchiver', artifacts: 'build/*/*/tools/*', fingerprint: true])
 }
 
 def unitTests() {
@@ -88,7 +91,7 @@ def coverage() {
     ])
 }
 
-node {
+node('pwsat-build') {
 	stage 'Checkout'
 
 	try {
@@ -122,7 +125,7 @@ node {
 					coverage()
 				}
 			}
-		}
+		}		
 	} catch(err) {
 		currentBuild.result = 'FAILURE'
 	} finally {
@@ -132,7 +135,7 @@ node {
 			if(currentBuild.result == 'UNSTABLE')
 				color = 'warning'
 
-			// slackSend color: color, message: "*Build ${env.JOB_NAME} #${env.BUILD_NUMBER}: ${currentBuild.result}*\n${currentBuild.absoluteUrl}", channel: 'obc-notify'
+			slackSend color: color, message: "*Build ${env.JOB_NAME} #${env.BUILD_NUMBER}: ${currentBuild.result}*\n${currentBuild.absoluteUrl}", channel: 'obc-notify'
 		}
 
 		step([
@@ -151,5 +154,13 @@ node {
 			unHealthy: '',
 			useStableBuildAsReference: true
 		])
+	}
+}
+
+node('flatsat && obc') {
+	stage('Copy to flatsat') {
+		dir(env.ARTIFACTS + '\\' + env.BRANCH_NAME) {
+			unarchive mapping: ['build/': '.']
+		}
 	}
 }
