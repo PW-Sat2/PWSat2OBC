@@ -72,7 +72,13 @@ namespace mission
 
     bool TimeTask::CorrectTimeCondition(const SystemState& state, void* /*param*/)
     {
-        const auto& timeState = state.PersistentState.Get<state::TimeState>();
+        state::TimeState timeState;
+        if (!state.PersistentState.Get(timeState))
+        {
+            LOG(LOG_LEVEL_ERROR, "Can't get time state");
+            return false;
+        }
+
         return (state.Time - timeState.LastMissionTime()) >= TimeCorrectionPeriod;
     }
 
@@ -105,17 +111,33 @@ namespace mission
         }
 
         const auto currentRtcTime = duration_cast<milliseconds>(rtcTime.ToDuration());
-        auto newTime = PerformTimeCorrection(time.Value,
-            currentRtcTime,
-            state.PersistentState.Get<state::TimeState>(),
-            state.PersistentState.Get<state::TimeCorrectionConfiguration>());
+
+        state::TimeState timeState;
+        state::TimeCorrectionConfiguration timeCorrectionConfiguration;
+        if (!state.PersistentState.Get(timeState))
+        {
+            LOG(LOG_LEVEL_ERROR, "Can't get time state");
+            return;
+        }
+
+        if (!state.PersistentState.Get(timeCorrectionConfiguration))
+        {
+            LOG(LOG_LEVEL_ERROR, "Can't get time correction configuration");
+            return;
+        }
+
+        auto newTime = PerformTimeCorrection(time.Value, currentRtcTime, timeState, timeCorrectionConfiguration);
+
         if (!provider.SetCurrentTime(newTime))
         {
             LOG(LOG_LEVEL_ERROR, "[Time] Unable to set corrected time");
             return;
         }
 
-        state.PersistentState.Set(state::TimeState(newTime, currentRtcTime));
+        if (!state.PersistentState.Set(state::TimeState(newTime, currentRtcTime)))
+        {
+            LOG(LOG_LEVEL_ERROR, "[Time] Unable to set time state");
+        }
     }
 
     milliseconds TimeTask::PerformTimeCorrection(milliseconds missionTime, //

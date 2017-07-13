@@ -8,6 +8,7 @@ set(SOURCES
   Telecommands/RemoveFileTelecommandTest.cpp
   Telecommands/UploadProgramTest.cpp
   Telecommands/ListFilesTelecommandTest.cpp
+  Telecommands/SetTimeCorrectionConfigTelecommandTest.cpp
   Telecommands/SetBootSlotsTelecommandTest.cpp
   Telecommands/StopAntennaDeploymentTelecommandTest.cpp
 )

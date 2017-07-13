@@ -369,7 +369,14 @@ namespace mission
 
             LOGF(LOG_LEVEL_DEBUG, "[ant] Executing antenna deployment step %d", stateDescriptor->StepNumber());
 
-            if (state.PersistentState.Get<state::AntennaConfiguration>().IsDeploymentDisabled())
+            state::AntennaConfiguration antennaConfiguration;
+            if (!state.PersistentState.Get(antennaConfiguration))
+            {
+                LOG(LOG_LEVEL_ERROR, "[ant] Can't get antenna configuration");
+                return;
+            }
+
+            if (antennaConfiguration.IsDeploymentDisabled())
             {
                 LOG(LOG_LEVEL_DEBUG, "[ant] Antenna deployment disabled");
                 stateDescriptor->Finish();
@@ -484,8 +491,15 @@ namespace mission
 
         bool StopAntennaDeploymentTask::Condition(const SystemState& state, void* param)
         {
+            state::AntennaConfiguration antennaConfiguration;
+            if (!state.PersistentState.Get(antennaConfiguration))
+            {
+                LOG(LOG_LEVEL_ERROR, "[ant] Can't get antenna configuration");
+                return false;
+            }
+
             auto This = reinterpret_cast<StopAntennaDeploymentTask*>(param);
-            auto alreadyDisabled = state.PersistentState.Get<state::AntennaConfiguration>().IsDeploymentDisabled();
+            auto alreadyDisabled = antennaConfiguration.IsDeploymentDisabled();
 
             return This->_shouldDisable && !alreadyDisabled && state.AntennaState.IsDeployed();
         }
@@ -494,7 +508,10 @@ namespace mission
         {
             LOG(LOG_LEVEL_INFO, "[ant] Disabling antenna deployment");
 
-            state.PersistentState.Set(state::AntennaConfiguration(true));
+            if (!state.PersistentState.Set(state::AntennaConfiguration(true)))
+            {
+                LOG(LOG_LEVEL_ERROR, "[ant] Can't set antenna configuration");
+            }
         }
 
         /** @}*/

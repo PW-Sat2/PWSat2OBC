@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <atomic>
 #include <chrono>
 #include <cstdint>
 #include <type_traits>

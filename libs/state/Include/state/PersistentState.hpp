@@ -7,6 +7,7 @@
 #include <tuple>
 #include <type_traits>
 #include "base/fwd.hpp"
+#include "base/os.h"
 #include "traits.hpp"
 
 /**

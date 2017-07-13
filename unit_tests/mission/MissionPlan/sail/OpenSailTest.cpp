@@ -6,10 +6,12 @@
 #include "mock/power.hpp"
 #include "state/struct.h"
 
+using testing::_;
 using testing::Eq;
 using testing::Gt;
 using testing::Mock;
 using testing::InSequence;
+using testing::Return;
 using namespace std::chrono_literals;
 
 class OpenSailTest : public testing::Test
@@ -32,6 +34,8 @@ OpenSailTest::OpenSailTest()
     : _osReset(InstallProxy(&this->_os)), _openSailTask(this->_power), _openSailAction(this->_openSailTask.BuildAction()),
       _openSailUpdate(this->_openSailTask.BuildUpdate())
 {
+    ON_CALL(this->_os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
+    ON_CALL(this->_os, GiveSemaphore(_)).WillByDefault(Return(OSResult::Success));
 }
 
 TEST_F(OpenSailTest, ShouldPerformSailOpeningProcedure)
@@ -125,7 +129,9 @@ TEST_F(OpenSailTest, ShouldStartSailOpening)
 
     this->_openSailUpdate.Execute(this->_state);
 
-    ASSERT_THAT(this->_state.PersistentState.Get<state::SailState>().CurrentState(), Eq(state::SailOpeningState::Opening));
+    state::SailState sailState;
+    this->_state.PersistentState.Get(sailState);
+    ASSERT_THAT(sailState.CurrentState(), Eq(state::SailOpeningState::Opening));
 }
 
 TEST_F(OpenSailTest, ShouldNotStartOpeningIfAlreadyOpening)
@@ -135,7 +141,9 @@ TEST_F(OpenSailTest, ShouldNotStartOpeningIfAlreadyOpening)
 
     this->_openSailUpdate.Execute(this->_state);
 
-    ASSERT_THAT(this->_state.PersistentState.Get<state::SailState>().CurrentState(), Eq(state::SailOpeningState::Opening));
+    state::SailState sailState;
+    this->_state.PersistentState.Get(sailState);
+    ASSERT_THAT(sailState.CurrentState(), Eq(state::SailOpeningState::Opening));
 }
 
 TEST_F(OpenSailTest, ShouldNotStartOpeningIfAlreadyStoppedOpening)
@@ -145,7 +153,9 @@ TEST_F(OpenSailTest, ShouldNotStartOpeningIfAlreadyStoppedOpening)
 
     this->_openSailUpdate.Execute(this->_state);
 
-    ASSERT_THAT(this->_state.PersistentState.Get<state::SailState>().CurrentState(), Eq(state::SailOpeningState::OpeningStopped));
+    state::SailState sailState;
+    this->_state.PersistentState.Get(sailState);
+    ASSERT_THAT(sailState.CurrentState(), Eq(state::SailOpeningState::OpeningStopped));
 }
 
 TEST_F(OpenSailTest, ShouldStartOpeningOnExplicitCommandIfNotAlreadyOpening)
@@ -157,7 +167,9 @@ TEST_F(OpenSailTest, ShouldStartOpeningOnExplicitCommandIfNotAlreadyOpening)
 
     this->_openSailUpdate.Execute(this->_state);
 
-    ASSERT_THAT(this->_state.PersistentState.Get<state::SailState>().CurrentState(), Eq(state::SailOpeningState::Opening));
+    state::SailState sailState;
+    this->_state.PersistentState.Get(sailState);
+    ASSERT_THAT(sailState.CurrentState(), Eq(state::SailOpeningState::Opening));
 }
 
 TEST_F(OpenSailTest, ShouldStartOpeningOnExplicitCommandIfAlreadyOpened)
@@ -174,7 +186,9 @@ TEST_F(OpenSailTest, ShouldStartOpeningOnExplicitCommandIfAlreadyOpened)
 
     this->_openSailUpdate.Execute(this->_state);
 
-    ASSERT_THAT(this->_state.PersistentState.Get<state::SailState>().CurrentState(), Eq(state::SailOpeningState::Opening));
+    state::SailState sailState;
+    this->_state.PersistentState.Get(sailState);
+    ASSERT_THAT(sailState.CurrentState(), Eq(state::SailOpeningState::Opening));
     ASSERT_THAT(this->_openSailAction.EvaluateCondition(this->_state), Eq(true));
 }
 
@@ -187,7 +201,9 @@ TEST_F(OpenSailTest, ExplicitOpenWhenOpenInProgressIsIgnored)
 
     this->_openSailUpdate.Execute(this->_state);
 
-    ASSERT_THAT(this->_state.PersistentState.Get<state::SailState>().CurrentState(), Eq(state::SailOpeningState::Opening));
+    state::SailState sailState;
+    this->_state.PersistentState.Get(sailState);
+    ASSERT_THAT(sailState.CurrentState(), Eq(state::SailOpeningState::Opening));
 }
 
 TEST_F(OpenSailTest, ShouldStartOpeningAgainAfterRestart)

@@ -130,7 +130,8 @@ namespace
         // Time provider should be updated
         auto expected = mission::TimeTask::TimeCorrectionPeriod + 4s;
         ASSERT_EQ(expected, provider.GetCurrentTime().Value);
-        const auto persistentTime = state.PersistentState.Get<state::TimeState>();
+        state::TimeState persistentTime;
+        state.PersistentState.Get(persistentTime);
         ASSERT_THAT(persistentTime.LastMissionTime(), Eq(expected));
         ASSERT_THAT(persistentTime.LastExternalTime(), Eq(rtc.GetTime()));
     }
@@ -157,7 +158,8 @@ namespace
         // Time provider should be updated
         auto expected = mission::TimeTask::TimeCorrectionPeriod + 2s;
         ASSERT_EQ(expected, provider.GetCurrentTime().Value);
-        const auto persistentTime = state.PersistentState.Get<state::TimeState>();
+        state::TimeState persistentTime;
+        state.PersistentState.Get(persistentTime);
         ASSERT_THAT(persistentTime.LastMissionTime(), Eq(expected));
         ASSERT_THAT(persistentTime.LastExternalTime(), Eq(rtc.GetTime()));
     }
@@ -182,7 +184,8 @@ namespace
         // Time provider should be updated
         auto expected = mission::TimeTask::TimeCorrectionPeriod + 4s;
         ASSERT_EQ(expected, provider.GetCurrentTime().Value);
-        const auto persistentTime = state.PersistentState.Get<state::TimeState>();
+        state::TimeState persistentTime;
+        state.PersistentState.Get(persistentTime);
         ASSERT_THAT(persistentTime.LastMissionTime(), Eq(expected));
         ASSERT_THAT(persistentTime.LastExternalTime(), Eq(rtc.GetTime()));
     }
@@ -334,7 +337,8 @@ namespace
         // then
         // Time provider should not be updated
         ASSERT_EQ(mission::TimeTask::TimeCorrectionPeriod, provider.GetCurrentTime().Value);
-        const auto persistentTime = state.PersistentState.Get<state::TimeState>();
+        state::TimeState persistentTime;
+        state.PersistentState.Get(persistentTime);
         ASSERT_THAT(persistentTime.LastMissionTime(), Eq(mission::TimeTask::TimeCorrectionPeriod));
         ASSERT_THAT(persistentTime.LastExternalTime(), Eq(rtc.GetTime()));
     }

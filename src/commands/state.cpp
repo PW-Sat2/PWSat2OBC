@@ -51,24 +51,44 @@ static bool StateGet(int argc, char* argv[])
     {
         case StateType::Antenna:
         {
-            const auto antennaState = Mission.GetState().PersistentState.Get<state::AntennaConfiguration>();
-            Main.terminal.Printf("%d\n", static_cast<int>(antennaState.IsDeploymentDisabled()));
+            state::AntennaConfiguration antennaConfiguration;
+            if (!Mission.GetState().PersistentState.Get(antennaConfiguration))
+            {
+                Main.terminal.Puts("Can't get state::AntennaConfiguration");
+                return false;
+            }
+
+            Main.terminal.Printf("%d\n", static_cast<int>(antennaConfiguration.IsDeploymentDisabled()));
             return true;
         }
 
         case StateType::TimeState:
         {
-            const auto object = Mission.GetState().PersistentState.Get<state::TimeState>();
+            state::TimeState timeState;
+            if (!Mission.GetState().PersistentState.Get(timeState))
+            {
+                Main.terminal.Puts("Can't get state::TimeState");
+                return false;
+            }
+
             Main.terminal.Printf("%u %u\n",
-                static_cast<unsigned int>(duration_cast<seconds>(object.LastMissionTime()).count()),
-                static_cast<unsigned int>(duration_cast<seconds>(object.LastExternalTime()).count()));
+                static_cast<unsigned int>(duration_cast<seconds>(timeState.LastMissionTime()).count()),
+                static_cast<unsigned int>(duration_cast<seconds>(timeState.LastExternalTime()).count()));
             return true;
         }
 
         case StateType::TimeConfig:
         {
-            const auto config = Mission.GetState().PersistentState.Get<state::TimeCorrectionConfiguration>();
-            Main.terminal.Printf("%d %d\n", static_cast<int>(config.MissionTimeFactor()), static_cast<int>(config.ExternalTimeFactor()));
+            state::TimeCorrectionConfiguration timeCorrectionConfiguration;
+            if (!Mission.GetState().PersistentState.Get(timeCorrectionConfiguration))
+            {
+                Main.terminal.Puts("Can't get state::TimeCorrectionConfiguration");
+                return false;
+            }
+
+            Main.terminal.Printf("%d %d\n",
+                static_cast<int>(timeCorrectionConfiguration.MissionTimeFactor()),
+                static_cast<int>(timeCorrectionConfiguration.ExternalTimeFactor()));
             return true;
         }
 
@@ -101,7 +121,12 @@ static bool StateSet(int argc, char* argv[])
 
             char* tail;
             bool value = strtol(argv[1], &tail, 10) != 0;
-            persistentState.Set(state::AntennaConfiguration(value));
+            if (!persistentState.Set(state::AntennaConfiguration(value)))
+            {
+                Main.terminal.Puts("Can't set state::AntennaConfiguration");
+                return false;
+            }
+
             return true;
         }
 
@@ -116,7 +141,12 @@ static bool StateSet(int argc, char* argv[])
             char* tail;
             std::uint32_t missionTime = strtol(argv[1], &tail, 10);
             std::uint32_t externalTime = strtol(argv[2], &tail, 10);
-            persistentState.Set(state::TimeState(seconds(missionTime), seconds(externalTime)));
+            if (!persistentState.Set(state::TimeState(seconds(missionTime), seconds(externalTime))))
+            {
+                Main.terminal.Puts("Can't set state::TimeState");
+                return false;
+            }
+
             return true;
         }
 
@@ -131,7 +161,12 @@ static bool StateSet(int argc, char* argv[])
             char* tail;
             auto internalFactor = static_cast<std::int16_t>(strtol(argv[1], &tail, 10));
             auto externalFactor = static_cast<std::int16_t>(strtol(argv[2], &tail, 10));
-            persistentState.Set(state::TimeCorrectionConfiguration(internalFactor, externalFactor));
+            if (!persistentState.Set(state::TimeCorrectionConfiguration(internalFactor, externalFactor)))
+            {
+                Main.terminal.Puts("Can't set state::TimeCorrectionConfiguration");
+                return false;
+            }
+
             return true;
         }
 

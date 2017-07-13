@@ -4,7 +4,7 @@
 #pragma once
 
 #include <chrono>
-#include "PersistentState.hpp"
+#include "LockablePersistentState.hpp"
 #include "StatePolicies.hpp"
 #include "adcs/adcs.hpp"
 #include "antenna/AntennaConfiguration.hpp"
