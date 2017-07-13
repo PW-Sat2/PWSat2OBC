@@ -1,12 +1,15 @@
 #include <string.h>
 #include <cstdint>
+#include <cstdlib>
 #include <gsl/span>
 #include "commands.h"
 #include "logger/logger.h"
-#include "obc.h"
+#include "obc_access.hpp"
 #include "system.h"
 #include "terminal.h"
+#include "terminal/terminal.h"
 
+#include "adcs/adcs.hpp"
 #include "imtq/imtq.h"
 
 using std::uint16_t;
@@ -23,33 +26,33 @@ namespace imtq_commands
     {
         UNREFERENCED_PARAMETER(argc);
         UNREFERENCED_PARAMETER(argv);
-        const bool status = Main.Hardware.Imtq.CancelOperation();
+        const bool status = GetIMTQ().CancelOperation();
         if (!status)
         {
-            Main.terminal.Printf("CancelOperation failed!\n");
+            GetTerminal().Printf("CancelOperation failed!\n");
             return;
         }
-        Main.terminal.Printf("CancelOperation OK!\n");
+        GetTerminal().Printf("CancelOperation OK!\n");
     }
 
     void StartMTMMeasurement(uint16_t argc, char* argv[])
     {
         UNREFERENCED_PARAMETER(argc);
         UNREFERENCED_PARAMETER(argv);
-        const bool status = Main.Hardware.Imtq.StartMTMMeasurement();
+        const bool status = GetIMTQ().StartMTMMeasurement();
         if (!status)
         {
-            Main.terminal.Printf("StartMTMMeasurement failed!\n");
+            GetTerminal().Printf("StartMTMMeasurement failed!\n");
             return;
         }
-        Main.terminal.Printf("StartMTMMeasurement OK!\n");
+        GetTerminal().Printf("StartMTMMeasurement OK!\n");
     }
 
     void StartActuationCurrent(uint16_t argc, char* argv[])
     {
         if (argc != 4)
         {
-            Main.terminal.Printf("imtq current $x $y $z [0.1mA] $t [ms]");
+            GetTerminal().Printf("imtq current $x $y $z [0.1mA] $t [ms]");
             return;
         }
         Vector3<Current> current;
@@ -58,20 +61,20 @@ namespace imtq_commands
         current[2] = atoi(argv[2]);
         std::chrono::milliseconds time{atoi(argv[3])};
 
-        const bool status = Main.Hardware.Imtq.StartActuationCurrent(current, time);
+        const bool status = GetIMTQ().StartActuationCurrent(current, time);
         if (!status)
         {
-            Main.terminal.Printf("StartActuationCurrent failed!\n");
+            GetTerminal().Printf("StartActuationCurrent failed!\n");
             return;
         }
-        Main.terminal.Printf("StartActuationCurrent OK!\n");
+        GetTerminal().Printf("StartActuationCurrent OK!\n");
     }
 
     void StartActuationDipole(uint16_t argc, char* argv[])
     {
         if (argc != 4)
         {
-            Main.terminal.Printf("imtq dipole $x $y $z [1e-4 Am^2] $t [ms]");
+            GetTerminal().Printf("imtq dipole $x $y $z [1e-4 Am^2] $t [ms]");
             return;
         }
         Vector3<Dipole> dipole;
@@ -80,44 +83,44 @@ namespace imtq_commands
         dipole[2] = atoi(argv[2]);
         std::chrono::milliseconds time{atoi(argv[3])};
 
-        const bool status = Main.Hardware.Imtq.StartActuationDipole(dipole, time);
+        const bool status = GetIMTQ().StartActuationDipole(dipole, time);
         if (!status)
         {
-            Main.terminal.Printf("StartActuationDipole failed!\n");
+            GetTerminal().Printf("StartActuationDipole failed!\n");
             return;
         }
-        Main.terminal.Printf("StartActuationDipole OK!\n");
+        GetTerminal().Printf("StartActuationDipole OK!\n");
     }
 
     void StartAllAxisSelfTest(uint16_t argc, char* argv[])
     {
         UNREFERENCED_PARAMETER(argc);
         UNREFERENCED_PARAMETER(argv);
-        const bool status = Main.Hardware.Imtq.StartAllAxisSelfTest();
+        const bool status = GetIMTQ().StartAllAxisSelfTest();
         if (!status)
         {
-            Main.terminal.Printf("StartAllAxisSelfTest failed!\n");
+            GetTerminal().Printf("StartAllAxisSelfTest failed!\n");
             return;
         }
-        Main.terminal.Printf("StartAllAxisSelfTest OK!\n");
+        GetTerminal().Printf("StartAllAxisSelfTest OK!\n");
     }
 
     void StartBDotDetumbling(uint16_t argc, char* argv[])
     {
         if (argc != 1)
         {
-            Main.terminal.Printf("imtq bdot $t [s]");
+            GetTerminal().Printf("imtq bdot $t [s]");
             return;
         }
         std::chrono::seconds time{atoi(argv[0])};
 
-        const bool status = Main.Hardware.Imtq.StartBDotDetumbling(time);
+        const bool status = GetIMTQ().StartBDotDetumbling(time);
         if (!status)
         {
-            Main.terminal.Printf("StartBDotDetumbling failed!\n");
+            GetTerminal().Printf("StartBDotDetumbling failed!\n");
             return;
         }
-        Main.terminal.Printf("StartBDotDetumbling OK!\n");
+        GetTerminal().Printf("StartBDotDetumbling OK!\n");
     }
 
     void GetCalibratedMagnetometerData(uint16_t argc, char* argv[])
@@ -126,14 +129,14 @@ namespace imtq_commands
         UNREFERENCED_PARAMETER(argv);
         MagnetometerMeasurementResult result;
 
-        const bool status = Main.Hardware.Imtq.GetCalibratedMagnetometerData(result);
+        const bool status = GetIMTQ().GetCalibratedMagnetometerData(result);
         if (!status)
         {
-            Main.terminal.Printf("GetCalibratedMagnetometerData failed!\n");
+            GetTerminal().Printf("GetCalibratedMagnetometerData failed!\n");
             return;
         }
 
-        Main.terminal.Printf("%ld %ld %ld %d\n",
+        GetTerminal().Printf("%ld %ld %ld %d\n",
             result.data[0], //
             result.data[1], //
             result.data[2], //
@@ -146,14 +149,14 @@ namespace imtq_commands
         UNREFERENCED_PARAMETER(argv);
         State state;
 
-        const bool status = Main.Hardware.Imtq.GetSystemState(state);
+        const bool status = GetIMTQ().GetSystemState(state);
         if (!status)
         {
-            Main.terminal.Printf("GetSystemState failed!\n");
+            GetTerminal().Printf("GetSystemState failed!\n");
             return;
         }
 
-        Main.terminal.Printf("%d %d %d %d\n",
+        GetTerminal().Printf("%d %d %d %d\n",
             (uint8_t)(state.mode),                        //
             state.error.GetValue(),                       //
             (int)(state.anyParameterUpdatedSinceStartup), //
@@ -165,22 +168,22 @@ namespace imtq_commands
         UNREFERENCED_PARAMETER(argc);
         UNREFERENCED_PARAMETER(argv);
         Vector3<Current> current;
-        bool status = Main.Hardware.Imtq.GetCoilCurrent(current);
+        bool status = GetIMTQ().GetCoilCurrent(current);
         if (!status)
         {
-            Main.terminal.Printf("GetCoilCurrent failed!\n");
+            GetTerminal().Printf("GetCoilCurrent failed!\n");
             return;
         }
 
         Vector3<TemperatureMeasurement> temp;
-        status = Main.Hardware.Imtq.GetCoilTemperature(temp);
+        status = GetIMTQ().GetCoilTemperature(temp);
         if (!status)
         {
-            Main.terminal.Printf("GetCoilTemperature failed!\n");
+            GetTerminal().Printf("GetCoilTemperature failed!\n");
             return;
         }
 
-        Main.terminal.Printf("%d %d %d %d %d %d\n",
+        GetTerminal().Printf("%d %d %d %d %d %d\n",
             current[0], //
             current[1], //
             current[2], //
@@ -194,15 +197,15 @@ namespace imtq_commands
         UNREFERENCED_PARAMETER(argc);
         UNREFERENCED_PARAMETER(argv);
         SelfTestResult result;
-        const bool status = Main.Hardware.Imtq.GetSelfTestResult(result);
+        const bool status = GetIMTQ().GetSelfTestResult(result);
         if (!status)
         {
-            Main.terminal.Printf("GetSelfTestResult failed!\n");
+            GetTerminal().Printf("GetSelfTestResult failed!\n");
             return;
         }
         for (auto step : result.stepResults)
         {
-            Main.terminal.Printf("%d %d %ld %ld %ld %ld %ld %ld %d %d %d %d %d %d\n",
+            GetTerminal().Printf("%d %d %ld %ld %ld %ld %ld %ld %d %d %d %d %d %d\n",
                 step.error.GetValue(),
                 (int)(step.actualStep),
                 step.RawMagnetometerMeasurement[0],
@@ -225,14 +228,14 @@ namespace imtq_commands
         UNREFERENCED_PARAMETER(argc);
         UNREFERENCED_PARAMETER(argv);
         DetumbleData detumbleData;
-        const bool status = Main.Hardware.Imtq.GetDetumbleData(detumbleData);
+        const bool status = GetIMTQ().GetDetumbleData(detumbleData);
         if (!status)
         {
-            Main.terminal.Printf("GetDetumbleData failed!\n");
+            GetTerminal().Printf("GetDetumbleData failed!\n");
             return;
         }
 
-        Main.terminal.Printf("%ld %ld %ld %ld %ld %ld %ld %ld %ld %d %d %d %d %d %d %d %d %d\n",
+        GetTerminal().Printf("%ld %ld %ld %ld %ld %ld %ld %ld %ld %d %d %d %d %d %d %d %d %d\n",
             detumbleData.calibratedMagnetometerMeasurement[0],
             detumbleData.calibratedMagnetometerMeasurement[1],
             detumbleData.calibratedMagnetometerMeasurement[2],
@@ -259,13 +262,13 @@ namespace imtq_commands
         UNREFERENCED_PARAMETER(argv);
         HouseKeepingEngineering result;
 
-        bool status = Main.Hardware.Imtq.GetHouseKeepingEngineering(result);
+        bool status = GetIMTQ().GetHouseKeepingEngineering(result);
         if (!status)
         {
-            Main.terminal.Printf("GetHouseKeepingEngineering failed!\n");
+            GetTerminal().Printf("GetHouseKeepingEngineering failed!\n");
             return;
         }
-        Main.terminal.Printf("%d %d %d %d %d %d %d %d %d %d %d\n",
+        GetTerminal().Printf("%d %d %d %d %d %d %d %d %d %d %d\n",
             result.digitalVoltage,     //
             result.analogVoltage,      //
             result.digitalCurrent,     //
@@ -283,7 +286,7 @@ namespace imtq_commands
     {
         if (argc != 2)
         {
-            Main.terminal.Printf("imtq get $id $n [bytes to read]");
+            GetTerminal().Printf("imtq get $id $n [bytes to read]");
             return;
         }
         ImtqDriver::Parameter id = atoi(argv[0]);
@@ -292,24 +295,24 @@ namespace imtq_commands
         std::array<uint8_t, 8> data;
         span<uint8_t> paramData{data.data(), length};
 
-        bool status = Main.Hardware.Imtq.GetParameter(id, paramData);
+        bool status = GetIMTQ().GetParameter(id, paramData);
         if (!status)
         {
-            Main.terminal.Printf("GetParameter failed!\n");
+            GetTerminal().Printf("GetParameter failed!\n");
             return;
         }
         for (int i = 0; i < length; ++i)
         {
-            Main.terminal.Printf("%d ", paramData[i]);
+            GetTerminal().Printf("%d ", paramData[i]);
         }
-        Main.terminal.Printf("\n");
+        GetTerminal().Printf("\n");
     }
 
     void ResetParameter(uint16_t argc, char* argv[])
     {
         if (argc != 1)
         {
-            Main.terminal.Printf("imtq get $id $n [bytes to read]");
+            GetTerminal().Printf("imtq get $id $n [bytes to read]");
             return;
         }
         ImtqDriver::Parameter id = atoi(argv[0]);
@@ -318,24 +321,24 @@ namespace imtq_commands
         std::array<uint8_t, 8> data;
         span<uint8_t> paramData{data.data(), length};
 
-        bool status = Main.Hardware.Imtq.ResetParameterAndGetDefault(id, paramData);
+        bool status = GetIMTQ().ResetParameterAndGetDefault(id, paramData);
         if (!status)
         {
-            Main.terminal.Printf("ResetParameter failed!\n");
+            GetTerminal().Printf("ResetParameter failed!\n");
             return;
         }
         for (int i = 0; i < length; ++i)
         {
-            Main.terminal.Printf("%d ", paramData[i]);
+            GetTerminal().Printf("%d ", paramData[i]);
         }
-        Main.terminal.Printf("\n");
+        GetTerminal().Printf("\n");
     }
 
     void SetParameter(uint16_t argc, char* argv[])
     {
         if (argc < 2 || argc > 9)
         {
-            Main.terminal.Printf("imtq set $id $b0 $b1 ... $bn");
+            GetTerminal().Printf("imtq set $id $b0 $b1 ... $bn");
             return;
         }
         ImtqDriver::Parameter id = atoi(argv[0]);
@@ -349,13 +352,13 @@ namespace imtq_commands
 
         span<uint8_t> paramData{data.data(), length};
 
-        bool status = Main.Hardware.Imtq.SetParameter(id, paramData);
+        bool status = GetIMTQ().SetParameter(id, paramData);
         if (!status)
         {
-            Main.terminal.Printf("SetParameter failed!\n");
+            GetTerminal().Printf("SetParameter failed!\n");
             return;
         }
-        Main.terminal.Printf("SetParameter OK!\n");
+        GetTerminal().Printf("SetParameter OK!\n");
     }
 
     void PerformSelfTest(uint16_t argc, char* argv[])
@@ -363,22 +366,22 @@ namespace imtq_commands
         UNREFERENCED_PARAMETER(argc);
         if (argc != 1)
         {
-            Main.terminal.Printf("imtq PerformSelfTest $fix");
+            GetTerminal().Printf("imtq PerformSelfTest $fix");
             return;
         }
 
         bool fix = (strcmp(argv[0], "t") == 0) || (strcmp(argv[0], "true") == 0) || (strcmp(argv[0], "1") == 0);
 
         SelfTestResult result;
-        const bool status = Main.Hardware.Imtq.PerformSelfTest(result, fix);
+        const bool status = GetIMTQ().PerformSelfTest(result, fix);
         if (!status)
         {
-            Main.terminal.Printf("PerformSelfTest failed!\n");
+            GetTerminal().Printf("PerformSelfTest failed!\n");
             return;
         }
         for (auto step : result.stepResults)
         {
-            Main.terminal.Printf("%d %d %ld %ld %ld %ld %ld %ld %d %d %d %d %d %d\n",
+            GetTerminal().Printf("%d %d %ld %ld %ld %ld %ld %ld %d %d %d %d %d %d\n",
                 step.error.GetValue(),
                 (int)(step.actualStep),
                 step.RawMagnetometerMeasurement[0],
@@ -401,14 +404,14 @@ namespace imtq_commands
         UNREFERENCED_PARAMETER(argc);
         UNREFERENCED_PARAMETER(argv);
         Vector3<MagnetometerMeasurement> result;
-        const bool status = Main.Hardware.Imtq.MeasureMagnetometer(result);
+        const bool status = GetIMTQ().MeasureMagnetometer(result);
         if (!status)
         {
-            Main.terminal.Printf("mtmRead failed!\n");
+            GetTerminal().Printf("mtmRead failed!\n");
             return;
         }
 
-        Main.terminal.Printf("%ld %ld %ld\n",
+        GetTerminal().Printf("%ld %ld %ld\n",
             result[0], //
             result[1], //
             result[2]);
@@ -489,7 +492,7 @@ namespace imtq_commands
 
     void ShowHelp()
     {
-        Main.terminal.Printf("imtq cancel|state|\n"
+        GetTerminal().Printf("imtq cancel|state|\n"
                              "     selfTestStart|selfTestGet|PerformSelfTest|\n"
                              "     mtmMeas|mtmGet|mtmRead\n"
                              "     current|dipole|bdot|detumbleGet\n"

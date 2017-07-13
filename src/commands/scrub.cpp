@@ -1,28 +1,31 @@
-#include "obc.h"
+#include <cstring>
+#include "obc/scrubbing.hpp"
+#include "obc_access.hpp"
+#include "terminal/terminal.h"
 
 static void Status()
 {
-    auto status = Main.Scrubbing.Status();
-    Main.terminal.Printf("Iterations count: %ld\n", status.IterationsCount);
+    auto status = GetScrubbing().Status();
+    GetTerminal().Printf("Iterations count: %ld\n", status.IterationsCount);
 
-    Main.terminal.Printf("PrimarySlots.Iterations count: %ld\n", status.PrimarySlots.IterationsCount);
-    Main.terminal.Printf("PrimarySlots.Offset: 0x%X\n", status.PrimarySlots.Offset);
-    Main.terminal.Printf("PrimarySlots.Slots corrected: %ld\n", status.PrimarySlots.SlotsCorrected);
+    GetTerminal().Printf("PrimarySlots.Iterations count: %ld\n", status.PrimarySlots.IterationsCount);
+    GetTerminal().Printf("PrimarySlots.Offset: 0x%X\n", status.PrimarySlots.Offset);
+    GetTerminal().Printf("PrimarySlots.Slots corrected: %ld\n", status.PrimarySlots.SlotsCorrected);
 
-    Main.terminal.Printf("SecondarySlots.Iterations count: %ld\n", status.SecondarySlots.IterationsCount);
-    Main.terminal.Printf("SecondarySlots.Offset: 0x%X\n", status.SecondarySlots.Offset);
-    Main.terminal.Printf("SecondarySlots.Slots corrected: %ld\n", status.SecondarySlots.SlotsCorrected);
+    GetTerminal().Printf("SecondarySlots.Iterations count: %ld\n", status.SecondarySlots.IterationsCount);
+    GetTerminal().Printf("SecondarySlots.Offset: 0x%X\n", status.SecondarySlots.Offset);
+    GetTerminal().Printf("SecondarySlots.Slots corrected: %ld\n", status.SecondarySlots.SlotsCorrected);
 
-    Main.terminal.Printf("Bootloader.IterationsCount: %ld\n", status.Bootloader.IterationsCount);
-    Main.terminal.Printf("Bootloader.Copies corrected: %ld\n", status.Bootloader.CopiesCorrected);
-    Main.terminal.Printf("Bootloader.MCU pages corrected: %ld\n", status.Bootloader.MUCPagesCorrected);
+    GetTerminal().Printf("Bootloader.IterationsCount: %ld\n", status.Bootloader.IterationsCount);
+    GetTerminal().Printf("Bootloader.Copies corrected: %ld\n", status.Bootloader.CopiesCorrected);
+    GetTerminal().Printf("Bootloader.MCU pages corrected: %ld\n", status.Bootloader.MUCPagesCorrected);
 }
 
 static void Kick()
 {
-    Main.terminal.Puts("Kicking scrubbing...");
-    Main.Scrubbing.RunOnce();
-    Main.terminal.Puts("Done\n");
+    GetTerminal().Puts("Kicking scrubbing...");
+    GetScrubbing().RunOnce();
+    GetTerminal().Puts("Done\n");
 }
 
 void Scrubbing(std::uint16_t argc, char* argv[])
@@ -37,6 +40,6 @@ void Scrubbing(std::uint16_t argc, char* argv[])
     }
     else
     {
-        Main.terminal.Puts("scrub <status|kick>");
+        GetTerminal().Puts("scrub <status|kick>");
     }
 }

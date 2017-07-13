@@ -1,15 +1,12 @@
-#include <chrono>
 #include <cstdint>
-#include <em_adc.h>
-#include <em_cmu.h>
-#include <em_prs.h>
-#include "obc.h"
-
-using namespace std::chrono_literals;
+#include <cstring>
+#include "obc_access.hpp"
+#include "temp/efm.hpp"
+#include "terminal/terminal.h"
 
 void Temp(std::uint16_t /*argc*/, char* /*argv*/ [])
 {
-    auto temp = Main.Hardware.MCUTemperature.ReadCelsius();
+    auto temp = GetMCUTemperature().ReadCelsius();
 
-    Main.terminal.Printf("Temp=%d\n", temp);
+    GetTerminal().Printf("Temp=%d\n", temp);
 }

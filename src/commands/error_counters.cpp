@@ -1,12 +1,14 @@
 #include <cstdint>
-#include "obc.h"
+#include "obc/fdir.hpp"
+#include "obc_access.hpp"
+#include "terminal/terminal.h"
 
 void ErrorCountersCommand(std::uint16_t /*argc*/, char* /*argv*/ [])
 {
-    auto max = Main.Fdir.ErrorCounting().MaxDevices;
+    auto max = GetFDIR().ErrorCounting().MaxDevices;
 
     for (decltype(max) i = 0; i < max; i++)
     {
-        Main.terminal.Printf("%d ", Main.Fdir.ErrorCounting().Current(i));
+        GetTerminal().Printf("%d ", GetFDIR().ErrorCounting().Current(i));
     }
 }

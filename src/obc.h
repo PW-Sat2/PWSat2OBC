@@ -144,6 +144,8 @@ static_assert(PersistentStateBaseAddress >= boot::BootSettingsSize, "Persistent 
 /** @brief External watchdog */
 using ExternalWatchdog = drivers::watchdog::PinWatchdog<io_map::Watchdog::ExternalWatchdogPin>;
 
+void X4();
+
 /** @} */
 
 #endif

@@ -1,10 +1,12 @@
+#include <cstdlib>
 #include <cstring>
 #include "mission.h"
-#include "obc.h"
+#include "obc_access.hpp"
 #include "state/antenna/AntennaConfiguration.hpp"
 #include "state/struct.h"
 #include "state/time/TimeCorrectionConfiguration.hpp"
 #include "state/time/TimeState.hpp"
+#include "terminal/terminal.h"
 
 using std::chrono::milliseconds;
 using std::chrono::seconds;
@@ -42,7 +44,7 @@ static bool StateGet(int argc, char* argv[])
 {
     if (argc < 1)
     {
-        Main.terminal.Puts("Usage: state get [antenna|time_state|time_config]");
+        GetTerminal().Puts("Usage: state get [antenna|time_state|time_config]");
         return false;
     }
 
@@ -52,14 +54,14 @@ static bool StateGet(int argc, char* argv[])
         case StateType::Antenna:
         {
             const auto antennaState = Mission.GetState().PersistentState.Get<state::AntennaConfiguration>();
-            Main.terminal.Printf("%d\n", static_cast<int>(antennaState.IsDeploymentDisabled()));
+            GetTerminal().Printf("%d\n", static_cast<int>(antennaState.IsDeploymentDisabled()));
             return true;
         }
 
         case StateType::TimeState:
         {
             const auto object = Mission.GetState().PersistentState.Get<state::TimeState>();
-            Main.terminal.Printf("%u %u\n",
+            GetTerminal().Printf("%u %u\n",
                 static_cast<unsigned int>(duration_cast<seconds>(object.LastMissionTime()).count()),
                 static_cast<unsigned int>(duration_cast<seconds>(object.LastExternalTime()).count()));
             return true;
@@ -68,13 +70,13 @@ static bool StateGet(int argc, char* argv[])
         case StateType::TimeConfig:
         {
             const auto config = Mission.GetState().PersistentState.Get<state::TimeCorrectionConfiguration>();
-            Main.terminal.Printf("%d %d\n", static_cast<int>(config.MissionTimeFactor()), static_cast<int>(config.ExternalTimeFactor()));
+            GetTerminal().Printf("%d %d\n", static_cast<int>(config.MissionTimeFactor()), static_cast<int>(config.ExternalTimeFactor()));
             return true;
         }
 
         case StateType::Invalid:
         default:
-            Main.terminal.Puts("Usage: state get [antenna|time_state|time_config]");
+            GetTerminal().Puts("Usage: state get [antenna|time_state|time_config]");
             return false;
     }
 }
@@ -83,7 +85,7 @@ static bool StateSet(int argc, char* argv[])
 {
     if (argc < 1)
     {
-        Main.terminal.Puts("Usage: state set [antenna|time_state|time_config]");
+        GetTerminal().Puts("Usage: state set [antenna|time_state|time_config]");
         return false;
     }
 
@@ -95,7 +97,7 @@ static bool StateSet(int argc, char* argv[])
         {
             if (argc < 2)
             {
-                Main.terminal.Puts("Usage: state set antenna <deployment_disabled>");
+                GetTerminal().Puts("Usage: state set antenna <deployment_disabled>");
                 return false;
             }
 
@@ -109,7 +111,7 @@ static bool StateSet(int argc, char* argv[])
         {
             if (argc < 3)
             {
-                Main.terminal.Puts("Usage: state set time_state <mission_time> <external_time>");
+                GetTerminal().Puts("Usage: state set time_state <mission_time> <external_time>");
                 return false;
             }
 
@@ -124,7 +126,7 @@ static bool StateSet(int argc, char* argv[])
         {
             if (argc < 3)
             {
-                Main.terminal.Puts("Usage: state set time_config <internal_factor> <external_factor>");
+                GetTerminal().Puts("Usage: state set time_config <internal_factor> <external_factor>");
                 return false;
             }
 
@@ -137,7 +139,7 @@ static bool StateSet(int argc, char* argv[])
 
         case StateType::Invalid:
         default:
-            Main.terminal.Puts("Usage: state set [antenna|time_state|time_config]");
+            GetTerminal().Puts("Usage: state set [antenna|time_state|time_config]");
             return false;
     }
 }
@@ -146,7 +148,7 @@ void StateCommandHandler(uint16_t argc, char* argv[])
 {
     if (argc < 1)
     {
-        Main.terminal.Puts("Usage: state [set|get]");
+        GetTerminal().Puts("Usage: state [set|get]");
         return;
     }
 
@@ -161,11 +163,11 @@ void StateCommandHandler(uint16_t argc, char* argv[])
     }
     else
     {
-        Main.terminal.Printf("Usage: state [set|get]");
+        GetTerminal().Printf("Usage: state [set|get]");
     }
 
     if (status)
     {
-        Main.terminal.Printf("OK");
+        GetTerminal().Printf("OK");
     }
 }
