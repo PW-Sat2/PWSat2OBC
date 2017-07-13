@@ -15,9 +15,10 @@
 #include "obc/telecommands/experiments.hpp"
 #include "obc/telecommands/file_system.hpp"
 #include "obc/telecommands/ping.hpp"
+#include "obc/telecommands/power.hpp"
 #include "obc/telecommands/program_upload.hpp"
-#include "program_flash/fwd.hpp"
 #include "obc/telecommands/time.hpp"
+#include "program_flash/fwd.hpp"
 #include "telecommunication/telecommand_handling.h"
 #include "telecommunication/uplink.h"
 #include "time/ICurrentTime.hpp"
@@ -127,7 +128,8 @@ namespace obc
         obc::telecommands::FinalizeProgramEntry,    //
         obc::telecommands::SetBootSlotsTelecommand, //
         obc::telecommands::SendBeaconTelecommand,   //
-        obc::telecommands::StopAntennaDeployment    //
+        obc::telecommands::StopAntennaDeployment,   //
+        obc::telecommands::PowerCycle               //
         >;
 
     /**
@@ -159,7 +161,8 @@ namespace obc
             obc::OBCExperiments& experiments,
             program_flash::BootTable& bootTable,
             boot::BootSettings& bootSettings,
-            IHasState<telemetry::TelemetryState>& telemetry);
+            IHasState<telemetry::TelemetryState>& telemetry,
+            services::power::IPowerControl& powerControl);
 
         /**
          * @brief Initializes all communication at runlevel 1

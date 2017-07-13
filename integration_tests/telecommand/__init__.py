@@ -4,6 +4,7 @@ from experiments import *
 from time import *
 from program_upload import *
 from boot_settings import *
+from power import *
 
 __all__ = [
     'DownloadFile',
@@ -16,6 +17,7 @@ __all__ = [
     'FinalizeProgramEntry',
     'ListFiles',
     'SetBootSlots',
-    'SendBeacon'
+    'SendBeacon',
+    'PowerCycleTelecommand'
 ]
 
