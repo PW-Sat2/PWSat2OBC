@@ -6,8 +6,18 @@
 #include <em_usart.h>
 
 #include "boot/params.hpp"
+#include "logger/logger.h"
 #include "mcu/io_map.h"
 #include "system.h"
+
+#include "safe_mode.hpp"
+#include "steps/reboot/step.hpp"
+#include "steps/revert_boot_slots/step.hpp"
+#include "steps/scrub_bootloader/step.hpp"
+#include "steps/scrub_program/step.hpp"
+#include "steps/steps.hpp"
+
+OBCSafeMode SafeMode;
 
 extern "C" void __libc_init_array(void);
 
@@ -24,7 +34,37 @@ extern "C" void assertEFM(const char* /*file*/, int /*line*/)
 
 void SysTick_Handler()
 {
-    USART_Tx(io_map::UART::Peripheral, '!');
+    USART_Tx(io_map::UART::Peripheral, '*');
+}
+
+static void Recover()
+{
+    RecoverySteps<ScrubBootloader, RevertBootSlots, ScrubProgram, RebootStep> steps;
+
+    steps.Perform();
+}
+
+static void LogToUart(void* context, bool /*withinIsr*/, const char* messageHeader, const char* messageFormat, va_list messageArguments)
+{
+    auto uart = static_cast<USART_TypeDef*>(context);
+
+    const char* c = messageHeader;
+    while (*c != '\0')
+    {
+        USART_Tx(uart, *c);
+        c++;
+    }
+
+    char buf[256];
+    vsprintf(buf, messageFormat, messageArguments);
+    c = buf;
+    while (*c != '\0')
+    {
+        USART_Tx(uart, *c);
+        c++;
+    }
+
+    USART_Tx(uart, '\n');
 }
 
 int main(void)
@@ -51,6 +91,9 @@ int main(void)
 
     USART_Tx(io_map::UART::Peripheral, '!');
 
+    LogInit(LOG_LEVEL_DEBUG);
+    LogAddEndpoint(LogToUart, io_map::UART::Peripheral, LOG_LEVEL_DEBUG);
+
     char msg[256] = {0};
 
     sprintf(msg, "Magic: 0x%lX\nReason=%d\nIndex=%d\n", boot::MagicNumber, num(boot::BootReason), boot::Index);
@@ -62,6 +105,8 @@ int main(void)
         USART_Tx(io_map::UART::Peripheral, *c);
         c++;
     }
+
+    Recover();
 
     SysTick_Config(SystemCoreClockGet());
     NVIC_EnableIRQ(IRQn_Type::SysTick_IRQn);

@@ -4,7 +4,6 @@ set(SOURCES
   EPS/EPSDriverTest.cpp  
   imtq/imtqTest.cpp
   MissionPlan/MissionTestHelpers.cpp
-  MissionPlan/SailSystemStateTest.cpp
   gyro/gyroTest.cpp
 )
 

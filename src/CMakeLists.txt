@@ -33,6 +33,7 @@ set(SOURCES
     commands/payload.cpp
     commands/memory.cpp
     commands/runlevel.cpp
+    commands/sail.cpp
     checks/error_counters.cpp
     obc.h
     obc.cpp

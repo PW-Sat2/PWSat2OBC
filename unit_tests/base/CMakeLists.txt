@@ -41,6 +41,7 @@ target_link_libraries(${NAME}
     telecommunication
     program_flash
     payload
+    power
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

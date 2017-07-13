@@ -201,7 +201,15 @@ static void ResolveFailedBoot()
         BSP_UART_Puts(BSP_UART_DEBUG, "\nLast 10 boots not confirmed - switch to failsafe slots");
 
         auto failsafe = Bootloader.Settings.FailsafeBootSlots();
-        Bootloader.Settings.BootSlots(failsafe);
+
+        if (failsafe != Bootloader.Settings.BootSlots())
+        {
+            Bootloader.Settings.BootSlots(failsafe);
+        }
+        else
+        {
+            Bootloader.Settings.BootSlots(boot::BootSettings::SafeModeBootSlot);
+        }
 
         boot::BootReason = boot::Reason::BootNotConfirmed;
     }

@@ -63,6 +63,7 @@ void UploadApplication()
 void UploadSafeMode()
 {
     XMODEM_upload(nullptr);
+    BSP_UART_Puts(BSP_UART_DEBUG, "...Done!");
 }
 
 void CopyBootloader()

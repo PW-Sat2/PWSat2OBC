@@ -1,13 +1,13 @@
-#include <iostream>
-#include <fstream>
-#include <gtest/gtest.h>
-#include <adcs/Detumbling.hpp>
-#include <system.h>
+#include <adcs/DetumblingComputations.hpp>
 #include <cstring>
+#include <fstream>
+#include <iostream>
+#include <system.h>
 #include <unistd.h>
+#include <gtest/gtest.h>
 #include "adcs/experimental/adcsDetumblingUtConfig.h"
 
-using adcs::Detumbling;
+using adcs::DetumblingComputations;
 using adcs::DipoleVec;
 using adcs::MagVec;
 
@@ -38,13 +38,12 @@ TEST(detumbling, cross_validation)
     }
     std::vector<float> record;
 
-    Detumbling::State state; //should be initialised by first measurement
-    Detumbling::Parameters params;
-    DipoleVec dipole, dipole_exp;
+    DetumblingComputations::Parameters params;
+    DipoleVec dipole_exp;
     MagVec mgmt;
 
-    Detumbling dtb;
-    dtb.initialize(state, params);
+    DetumblingComputations dtb;
+    auto state = dtb.initialize(params);
 
     // matlab sim is working with different units
     // input: Sim [T] --> OBC [1e-7 T]
@@ -52,7 +51,7 @@ TEST(detumbling, cross_validation)
     // output: Sim [Am2] --> OBC [1e-4 Am2]
     double output_scale = 1e4;
 
-    while(!file.eof())
+    while (!file.eof())
     {
         record = getRecord(file);
         mgmt[0] = input_scale * record[1];
@@ -64,15 +63,21 @@ TEST(detumbling, cross_validation)
 
 #ifdef ADCS_DETUMBLIG_DEBUG
         std::cout << "time: " << record[0] << std::endl;
-        std::cout << "in0: " << record[1] << " " << input_scale << " " << record[1] * input_scale << " " << (int) (record[1] * input_scale) << std::endl;
-        std::cout << "in1: " << record[2] << " " << input_scale << " " << record[2] * input_scale << " " << (int) (record[2] * input_scale) << std::endl;
-        std::cout << "in2: " << record[3] << " " << input_scale << " " << record[3] * input_scale << " " << (int) (record[3] * input_scale) << std::endl;
-        std::cout << "out0: " << record[4] << " " << output_scale << " " << record[4] * output_scale << " " << (int) (record[4] * output_scale) << std::endl;
-        std::cout << "out1: " << record[5] << " " << output_scale << " " << record[5] * output_scale << " " << (int) (record[5] * output_scale) << std::endl;
-        std::cout << "out2: " << record[6] << " " << output_scale << " " << record[6] * output_scale << " " << (int) (record[6] * output_scale) << std::endl;
+        std::cout << "in0: " << record[1] << " " << input_scale << " " << record[1] * input_scale << " " << (int)(record[1] * input_scale)
+                  << std::endl;
+        std::cout << "in1: " << record[2] << " " << input_scale << " " << record[2] * input_scale << " " << (int)(record[2] * input_scale)
+                  << std::endl;
+        std::cout << "in2: " << record[3] << " " << input_scale << " " << record[3] * input_scale << " " << (int)(record[3] * input_scale)
+                  << std::endl;
+        std::cout << "out0: " << record[4] << " " << output_scale << " " << record[4] * output_scale << " "
+                  << (int)(record[4] * output_scale) << std::endl;
+        std::cout << "out1: " << record[5] << " " << output_scale << " " << record[5] * output_scale << " "
+                  << (int)(record[5] * output_scale) << std::endl;
+        std::cout << "out2: " << record[6] << " " << output_scale << " " << record[6] * output_scale << " "
+                  << (int)(record[6] * output_scale) << std::endl;
 #endif
 
-        dtb.step(dipole, mgmt, state);
+        auto dipole = dtb.step(mgmt, state);
 
         EXPECT_NEAR(dipole[0], dipole_exp[0], 1.0);
         EXPECT_NEAR(dipole[1], dipole_exp[1], 1.0);

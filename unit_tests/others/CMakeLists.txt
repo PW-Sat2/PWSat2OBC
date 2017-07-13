@@ -4,7 +4,9 @@ add_subdirectory(adcs)
 
 set(SOURCES
   adcs/AdcsCoordinatorTest.cpp
-  adcs/experimental/detumblingTest.cpp  
+  adcs/builtin/BuiltinDetumblingTest.cpp  
+  adcs/experimental/DetumblingComputationsTest.cpp  
+  adcs/experimental/ExperimentalDetumblingTest.cpp  
   Logger/LoggerTest.cpp
   FileSystem/FileSystemTest.cpp
   FileSystem/YaffsOSGlue.cpp
@@ -19,6 +21,7 @@ set(SOURCES
   base/RedundancyTest.cpp
   base/CRCTest.cpp
   base/BitWriterTest.cpp
+  base/hertzTest.cpp
   base/TimeCounterTest.cpp
   os/TimeoutTest.cpp
   os/EventGroupTest.cpp
@@ -55,6 +58,7 @@ target_link_libraries(${NAME}
     exp_fibo
     adcs
     adcs_experimental
+    builtin_detumbling
     obc_telecommands    
     eps
     rtc

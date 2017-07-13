@@ -2,7 +2,6 @@ set(NAME unit_tests_mission)
 
 set(SOURCES
   MissionPlan/MissionPlanTest.cpp
-  MissionPlan/SailSystemStateTest.cpp
   MissionPlan/TimeTaskTest.cpp
   MissionPlan/MissionLoopTest.cpp
   MissionPlan/TelemetryTest.cpp
@@ -14,6 +13,7 @@ set(SOURCES
   MissionPlan/CompositeActionTest.cpp
   MissionPlan/adcs/AdcsPrimaryTaskTest.cpp
   MissionPlan/obc/ObcTest.cpp
+  MissionPlan/sail/OpenSailTest.cpp
   Experiments/Fibo/FiboCalculatorTest.cpp
   Experiments/ExperimentTest.cpp
   Experiments/ADCS/DetumblingExperimentTest.cpp

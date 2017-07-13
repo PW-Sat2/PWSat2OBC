@@ -4,12 +4,12 @@
 #include <array>
 #include "boot/settings.hpp"
 #include "error_counter.hpp"
-#include "flash_driver.hpp"
 #include "fm25w/fm25w.hpp"
 #include "mcu/io_map.h"
 #include "payload/io_map.h"
 #include "program_flash/boot_table.hpp"
-#include "spi.hpp"
+#include "standalone/flash_driver/flash_driver.hpp"
+#include "standalone/spi/spi.hpp"
 
 class OBCBootloader
 {
