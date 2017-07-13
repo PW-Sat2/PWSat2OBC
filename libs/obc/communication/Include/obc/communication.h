@@ -16,6 +16,7 @@
 #include "obc/telecommands/fdir.hpp"
 #include "obc/telecommands/file_system.hpp"
 #include "obc/telecommands/flash.hpp"
+#include "obc/telecommands/i2c.hpp"
 #include "obc/telecommands/periodic_message.hpp"
 #include "obc/telecommands/ping.hpp"
 #include "obc/telecommands/power.hpp"
@@ -139,7 +140,8 @@ namespace obc
         obc::telecommands::GetErrorCountersConfigTelecommand, //
         obc::telecommands::SetPeriodicMessageTelecommand,     //
         obc::telecommands::PerformSunSExperiment,             //
-        obc::telecommands::EraseFlashTelecommand              //
+        obc::telecommands::EraseFlashTelecommand,             //
+        obc::telecommands::RawI2CTelecommand                  //
         >;
 
     /**
@@ -162,6 +164,8 @@ namespace obc
          * @param[in] telemetry Reference to object that contains current telemetry state.
          * @param[in] powerControl Power control interface
          * @param[in] openSail Sail opening interface
+         * @param[in] systemBus I2C system bus.
+         * @param[in] payload Payload.
          */
         OBCCommunication(obc::FDIR& fdir,
             devices::comm::CommObject& commDriver,
@@ -175,7 +179,9 @@ namespace obc
             boot::BootSettings& bootSettings,
             IHasState<telemetry::TelemetryState>& telemetry,
             services::power::IPowerControl& powerControl,
-            mission::IOpenSail& openSail);
+            mission::IOpenSail& openSail,
+            drivers::i2c::II2CBus& systemBus,
+            drivers::i2c::II2CBus& payload);
 
         /**
          * @brief Initializes all communication at runlevel 1
