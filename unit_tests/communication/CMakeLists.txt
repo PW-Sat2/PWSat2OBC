@@ -5,6 +5,7 @@ set(SOURCES
   FrameContentsWriterTest.cpp
   Telecommands/DownloadFileTelecommandTest.cpp
   Telecommands/EnterIdleStateTelecommandTest.cpp
+  Telecommands/RawI2CTelecommandTest.cpp
   Telecommands/RemoveFileTelecommandTest.cpp
   Telecommands/UploadProgramTest.cpp
   Telecommands/ListFilesTelecommandTest.cpp
