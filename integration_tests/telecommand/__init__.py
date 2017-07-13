@@ -5,6 +5,7 @@ from time import *
 from program_upload import *
 from boot_settings import *
 from power import *
+from i2c import *
 
 __all__ = [
     'DownloadFile',
@@ -18,6 +19,7 @@ __all__ = [
     'ListFiles',
     'SetBootSlots',
     'SendBeacon',
-    'PowerCycleTelecommand'
+    'PowerCycleTelecommand',
+    'RawI2C'
 ]
 

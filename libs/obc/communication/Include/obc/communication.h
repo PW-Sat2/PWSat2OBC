@@ -14,6 +14,7 @@
 #include "obc/telecommands/comm.hpp"
 #include "obc/telecommands/experiments.hpp"
 #include "obc/telecommands/file_system.hpp"
+#include "obc/telecommands/i2c.hpp"
 #include "obc/telecommands/ping.hpp"
 #include "obc/telecommands/power.hpp"
 #include "obc/telecommands/program_upload.hpp"
@@ -129,7 +130,8 @@ namespace obc
         obc::telecommands::SetBootSlotsTelecommand, //
         obc::telecommands::SendBeaconTelecommand,   //
         obc::telecommands::StopAntennaDeployment,   //
-        obc::telecommands::PowerCycle               //
+        obc::telecommands::PowerCycle,              //
+        obc::telecommands::RawI2CTelecommand        //
         >;
 
     /**
@@ -150,6 +152,7 @@ namespace obc
          * @param[in] bootTable Boot table
          * @param[in] bootSettings Boot settings
          * @param[in] telemetry Reference to object that contains current telemetry state.
+         * @param[in] i2cBus I2C system bus.
          */
         OBCCommunication(obc::FDIR& fdir,
             devices::comm::CommObject& commDriver,
@@ -162,7 +165,8 @@ namespace obc
             program_flash::BootTable& bootTable,
             boot::BootSettings& bootSettings,
             IHasState<telemetry::TelemetryState>& telemetry,
-            services::power::IPowerControl& powerControl);
+            services::power::IPowerControl& powerControl,
+            drivers::i2c::II2CBus& i2cBus);
 
         /**
          * @brief Initializes all communication at runlevel 1

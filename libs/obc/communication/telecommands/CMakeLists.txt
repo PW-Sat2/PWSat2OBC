@@ -10,6 +10,7 @@ set(SOURCES
     boot_settings.cpp
     antenna.cpp
     power.cpp
+    i2c.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

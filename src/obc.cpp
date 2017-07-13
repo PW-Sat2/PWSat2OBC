@@ -86,7 +86,8 @@ OBC::OBC()
           BootTable,
           BootSettings,
           TelemetryAcquisition,
-          PowerControlInterface),                                                  //
+          PowerControlInterface,                                                   //
+          Hardware.I2C.Buses.Bus),                                                 //
       Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index), //
       terminal(this->GetLineIO())                                                  //
 {
