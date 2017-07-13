@@ -22,6 +22,21 @@ class Test_AntennaDeployment(RestartPerTest):
             count -= 1
 
     def begin(self, count=1):
+        self.system.i2c.enable_bus_devices([self.system.primary_antenna.address], False)
+        self.system.i2c.enable_pld_devices([self.system.backup_antenna.address], False)
+
+        def control_antenna_power(*args, **kwargs):
+            main = self.system.eps.ANTenna.is_on
+            red = self.system.eps.ANTennaRed.is_on
+            power = main or red
+            self.system.i2c.enable_bus_devices([self.system.primary_antenna.address], power)
+            self.system.i2c.enable_pld_devices([self.system.backup_antenna.address], power)
+
+        self.system.eps.ANTenna.on_enable = control_antenna_power
+        self.system.eps.ANTenna.on_disable = control_antenna_power
+        self.system.eps.ANTennaRed.on_enable = control_antenna_power
+        self.system.eps.ANTennaRed.on_disable = control_antenna_power
+
         self.power_on_obc()
         self.begin_deployment()
         self.run_steps(count)
@@ -136,7 +151,7 @@ class Test_AntennaDeployment(RestartPerTest):
 
         self.system.primary_antenna.on_begin_deployment = primaryHandler
         self.system.backup_antenna.on_begin_deployment = backupHandler
-        self.begin(40)
+        self.begin(44)
         self.assertSequenceEqual(list, expected)
 
     @runlevel(1)
@@ -153,7 +168,7 @@ class Test_AntennaDeployment(RestartPerTest):
 
         primaryHandler.index = 0
         self.system.backup_antenna.on_begin_deployment = primaryHandler
-        self.begin(40)
+        self.begin(44)
         self.assertSequenceEqual(list, expected)
 
     @runlevel(1)
@@ -170,7 +185,7 @@ class Test_AntennaDeployment(RestartPerTest):
 
         primaryHandler.index = 0
         self.system.primary_antenna.on_begin_deployment = primaryHandler
-        self.begin(40)
+        self.begin(44)
         self.assertSequenceEqual(list, expected)
 
     @runlevel(1)
@@ -187,5 +202,5 @@ class Test_AntennaDeployment(RestartPerTest):
         verifier.index = 0
         self.system.primary_antenna.on_begin_deployment = verifier
         self.system.backup_antenna.on_begin_deployment = verifier
-        self.begin(40)
+        self.begin(44)
         self.assertSequenceEqual(list, expected)
