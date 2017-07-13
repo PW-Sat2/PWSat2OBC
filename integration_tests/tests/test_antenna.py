@@ -7,7 +7,7 @@ from system import auto_power_on, runlevel
 
 class Test_Antenna(RestartPerTest):
     @auto_power_on(False)
-    def __init__(self, methodName = 'runTest'):
+    def __init__(self, methodName='runTest'):
         super(Test_Antenna, self).__init__(methodName)
 
     @runlevel(2)
@@ -27,6 +27,7 @@ class Test_Antenna(RestartPerTest):
     @runlevel(1)
     def test_auto_deployment(self):
         event = TestEvent()
+
         def handler(driver, antenna):
             if antenna == -1:
                 event.set()
@@ -39,6 +40,7 @@ class Test_Antenna(RestartPerTest):
     @runlevel(1)
     def test_manual_deployment(self):
         event = TestEvent()
+
         def handler(driver, antenna):
             if antenna == 2:
                 event.set()
@@ -51,6 +53,7 @@ class Test_Antenna(RestartPerTest):
     @runlevel(1)
     def test_manual_deployment_with_override(self):
         event = TestEvent()
+
         def handler(driver, antenna):
             if antenna == 2:
                 event.set()
@@ -103,14 +106,14 @@ class Test_Antenna(RestartPerTest):
             Antenna.build(False, 0xc0, 0x7654, True),
             Antenna.build(True, 0xd0, 0x6543, False),
             Antenna.build(False, 0xe0, 0x5432, False),
-            ]
+        ]
 
         self.system.backup_antenna.antenna_state = [
             Antenna.build(False, 0x10, 0x1234, True),
             Antenna.build(True, 0x20, 0x5678, True),
             Antenna.build(False, 0x30, 0x90ab, False),
             Antenna.build(True, 0x40, 0xcdef, False),
-            ]
+        ]
 
         self.power_on_obc()
         result = self.system.obc.antenna_get_telemetry()
@@ -133,5 +136,3 @@ class Test_Antenna(RestartPerTest):
         self.assertEqual(result.ActivationTime[5], 0x5678 / 20);
         self.assertEqual(result.ActivationTime[6], 0x90ab / 20);
         self.assertEqual(result.ActivationTime[7], 0xcdef / 20);
-
-
