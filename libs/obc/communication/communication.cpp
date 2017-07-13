@@ -24,35 +24,38 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
     boot::BootSettings& bootSettings,
     IHasState<telemetry::TelemetryState>& telemetry,
     services::power::IPowerControl& powerControl,
-    mission::IOpenSail& openSail)
-    : Comm(commDriver),                                                                                                              //
-      UplinkProtocolDecoder(settings::CommSecurityCode),                                                                             //
-      SupportedTelecommands(                                                                                                         //
-          PingTelecommand(),                                                                                                         //
-          DownloadFileTelecommand(fs),                                                                                               //
-          EnterIdleStateTelecommand(currentTime, idleStateController),                                                               //
-          RemoveFileTelecommand(fs),                                                                                                 //
-          SetTimeCorrectionConfigTelecommand(stateContainer),                                                                        //
-          PerformDetumblingExperiment(                                                                                               //
-              experiments.ExperimentsController,                                                                                     //
-              experiments.Get<experiment::adcs::DetumblingExperiment>()                                                              //
-              ),                                                                                                                     //
-          AbortExperiment(experiments.ExperimentsController),                                                                        //
-          ListFilesTelecommand(fs),                                                                                                  //
-          EraseBootTableEntry(bootTable),                                                                                            //
-          WriteProgramPart(bootTable),                                                                                               //
-          FinalizeProgramEntry(bootTable),                                                                                           //
-          SetBootSlotsTelecommand(bootSettings),                                                                                     //
-          SendBeaconTelecommand(telemetry),                                                                                          //
-          StopAntennaDeployment(disableAntennaDeployment),                                                                           //
-          PowerCycle(powerControl),                                                                                                  //
-          SetErrorCounterConfig(fdir),                                                                                               //
-          OpenSail(openSail),                                                                                                        //
-          GetErrorCountersConfigTelecommand(fdir.ErrorCounting(), fdir),                                                             //
-          SetPeriodicMessageTelecommand(stateContainer),                                                                             //
-          PerformSunSExperiment(experiments.ExperimentsController, experiments.Get<experiment::suns::SunSExperiment>()),             //
-          EraseFlashTelecommand(experiments.ExperimentsController, experiments.Get<experiment::erase_flash::EraseFlashExperiment>()) //
-          ),                                                                                                                         //
+    mission::IOpenSail& openSail,
+    drivers::i2c::II2CBus& systemBus,
+    drivers::i2c::II2CBus& payload)
+    : Comm(commDriver),                                                                                                               //
+      UplinkProtocolDecoder(settings::CommSecurityCode),                                                                              //
+      SupportedTelecommands(                                                                                                          //
+          PingTelecommand(),                                                                                                          //
+          DownloadFileTelecommand(fs),                                                                                                //
+          EnterIdleStateTelecommand(currentTime, idleStateController),                                                                //
+          RemoveFileTelecommand(fs),                                                                                                  //
+          SetTimeCorrectionConfigTelecommand(stateContainer),                                                                         //
+          PerformDetumblingExperiment(                                                                                                //
+              experiments.ExperimentsController,                                                                                      //
+              experiments.Get<experiment::adcs::DetumblingExperiment>()                                                               //
+              ),                                                                                                                      //
+          AbortExperiment(experiments.ExperimentsController),                                                                         //
+          ListFilesTelecommand(fs),                                                                                                   //
+          EraseBootTableEntry(bootTable),                                                                                             //
+          WriteProgramPart(bootTable),                                                                                                //
+          FinalizeProgramEntry(bootTable),                                                                                            //
+          SetBootSlotsTelecommand(bootSettings),                                                                                      //
+          SendBeaconTelecommand(telemetry),                                                                                           //
+          StopAntennaDeployment(disableAntennaDeployment),                                                                            //
+          PowerCycle(powerControl),                                                                                                   //
+          SetErrorCounterConfig(fdir),                                                                                                //
+          OpenSail(openSail),                                                                                                         //
+          GetErrorCountersConfigTelecommand(fdir.ErrorCounting(), fdir),                                                              //
+          SetPeriodicMessageTelecommand(stateContainer),                                                                              //
+          PerformSunSExperiment(experiments.ExperimentsController, experiments.Get<experiment::suns::SunSExperiment>()),              //
+          EraseFlashTelecommand(experiments.ExperimentsController, experiments.Get<experiment::erase_flash::EraseFlashExperiment>()), //
+          RawI2CTelecommand(systemBus, payload)                                                                                       //
+          ),                                                                                                                          //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {
 }
