@@ -83,4 +83,9 @@ OSResult PayloadCommand<TCommandCode, TOutputDataType>::ExecuteDataRead(uint8_t 
     return OSResult::Success;
 }
 
+template <std::uint8_t TCommandCode, class TOutputDataType> bool PayloadCommand<TCommandCode, TOutputDataType>::IsBusy() const
+{
+    return _driver.IsBusy();
+}
+
 #endif /* LIBS_DRIVERS_PAYLOAD_INCLUDE_PAYLOAD_COMMANDS_BASE_CODE_HPP_ */

@@ -50,15 +50,18 @@ namespace drivers
                 OSResult ExecuteDataCommand(TOutputDataType& output);
 
                 /**
-                 * @brief The hardware driver.
+                 * @brief The method returning if Payload Driver is busy and command should be ignored.
+                 * @returns True if Payload Driver is busy, false if it is ready.
                  */
-                IPayloadDriver& _driver;
+                bool IsBusy() const;
 
               private:
                 std::array<uint8_t, TOutputDataType::DeviceDataLength> _buffer;
 
                 OSResult ExecuteCommand();
                 OSResult ExecuteDataRead(uint8_t address, gsl::span<uint8_t> buffer);
+
+                IPayloadDriver& _driver;
             };
         }
     }

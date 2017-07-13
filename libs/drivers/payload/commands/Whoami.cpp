@@ -11,7 +11,7 @@ WhoamiCommand::WhoamiCommand(IPayloadDriver& driver) : PayloadCommand(driver)
 
 OSResult WhoamiCommand::Execute(PayloadTelemetry::Status& output)
 {
-    if (_driver.IsBusy())
+    if (IsBusy())
     {
         LOG(LOG_LEVEL_WARNING, "[Payload] Payload busy. Ignoring command");
         return OSResult::Busy;
