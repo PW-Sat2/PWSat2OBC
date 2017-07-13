@@ -11,6 +11,7 @@ target_link_libraries(${NAME}
 	base
 	builtin_detumbling
 	adcs_experimental
+	imtq
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

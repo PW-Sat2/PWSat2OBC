@@ -37,14 +37,6 @@ DetumblingMock::~DetumblingMock()
 {
 }
 
-SunPointingMock::SunPointingMock()
-{
-}
-
-SunPointingMock::~SunPointingMock()
-{
-}
-
 EpsTelemetryProviderMock::EpsTelemetryProviderMock()
 {
 }

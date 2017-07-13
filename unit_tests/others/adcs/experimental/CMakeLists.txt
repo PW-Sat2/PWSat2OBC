@@ -7,4 +7,4 @@ configure_file (
   "${CMAKE_CURRENT_BINARY_DIR}/adcsDetumblingUtConfig.h"
   )
   
-  include_directories("${CMAKE_CURRENT_BINARY_DIR}")
+include_directories("${CMAKE_CURRENT_BINARY_DIR}")
