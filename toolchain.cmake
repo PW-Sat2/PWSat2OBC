@@ -16,7 +16,6 @@ find_program(CMAKE_OBJCOPY NAMES arm-none-eabi-objcopy PATHS $ENV{ARM_TOOLCHAIN}
 find_program(CMAKE_OBJDUMP NAMES arm-none-eabi-objdump PATHS $ENV{ARM_TOOLCHAIN})
 find_program(CMAKE_GCC_SIZE NAMES arm-none-eabi-size PATHS $ENV{ARM_TOOLCHAIN})
 find_program(GDB NAMES arm-none-eabi-gdb-py PATHS $ENV{ARM_TOOLCHAIN})
-find_program(CMAKE_MAKE_PROGRAM NAMES make PATHS $ENV{ARM_TOOLCHAIN})
 
 CMAKE_FORCE_C_COMPILER(${CC} GNU)
 CMAKE_FORCE_CXX_COMPILER(${CXX} GNU)
@@ -34,3 +33,7 @@ FIND_PACKAGE(Doxygen)
 find_program(CLANG_FORMAT NAMES clang-format HINTS $ENV{CLANG_PATH})
 
 set(CMAKE_EXECUTABLE_FORMAT ELF)
+
+if(${CMAKE_GENERATOR} STREQUAL "MinGW Makefiles")
+    find_program(CMAKE_MAKE_PROGRAM NAMES make PATHS $ENV{ARM_TOOLCHAIN})
+endif()
