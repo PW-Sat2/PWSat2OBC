@@ -54,7 +54,7 @@ namespace
     {
         EXPECT_CALL(mock, GetFreeSpace(_)).WillOnce(Return(0x12345678u));
         Run();
-        ASSERT_THAT(state.telemetry.Get<telemetry::FileSystemTelemetry>().GetFreeSpace(), Eq(0x12345678u));
+        ASSERT_THAT(state.telemetry.Get<telemetry::FileSystemTelemetry>().GetValue(), Eq(0x12345678u));
         ASSERT_THAT(state.telemetry.IsModified(), Eq(true));
     }
 }

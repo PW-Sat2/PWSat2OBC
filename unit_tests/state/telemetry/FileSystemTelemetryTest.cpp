@@ -1,7 +1,8 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock-matchers.h"
 #include "base/BitWriter.hpp"
-#include "telemetry/FileSystem.hpp"
+#include "telemetry/BasicTelemetry.hpp"
+#include "telemetry/fwd.hpp"
 
 namespace
 {
@@ -10,13 +11,13 @@ namespace
     TEST(FileSystemTelemetryTest, TestDefaultConstruction)
     {
         telemetry::FileSystemTelemetry object;
-        ASSERT_THAT(object.GetFreeSpace(), Eq(0u));
+        ASSERT_THAT(object.GetValue(), Eq(0u));
     }
 
     TEST(FileSystemTelemetryTest, TestCustomConstruction)
     {
         telemetry::FileSystemTelemetry object(0x11223344);
-        ASSERT_THAT(object.GetFreeSpace(), Eq(0x11223344u));
+        ASSERT_THAT(object.GetValue(), Eq(0x11223344u));
     }
 
     TEST(FileSystemTelemetryTest, TestSerialization)
