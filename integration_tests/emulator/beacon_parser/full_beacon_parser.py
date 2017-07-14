@@ -11,7 +11,7 @@ from gpio_state_parser import GpioStateParser
 from mcu_temperature_parser import McuTemperatureParser
 from eps_controller_a_telemetry_parser import EPSControllerATelemetryParser
 from eps_controller_b_telemetry_parser import EPSControllerBTelemetryParser
-
+from scrubbing_telemetry_parser import ScrubbingTelemetryParser
 
 class FullBeaconParser:
     def GetParsers(self, file_tree):
@@ -19,6 +19,7 @@ class FullBeaconParser:
                 ProgramStateParser(file_tree),
                 TimeState(file_tree),
                 ErrorCountingTelementry(file_tree),
+                ScrubbingTelemetryParser(file_tree),
                 FileSystemTelemetryParser(file_tree),
                 AntennaTelemetryParser(file_tree),
                 ExperimentTelemetryParser(file_tree),
