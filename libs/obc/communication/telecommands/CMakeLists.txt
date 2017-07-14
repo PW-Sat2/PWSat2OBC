@@ -9,6 +9,7 @@ set(SOURCES
     time.cpp
     boot_settings.cpp
     antenna.cpp
+    power.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -23,6 +24,7 @@ target_link_libraries(${NAME}
 	obc_experiments
 	program_flash
 	boot_settings
+	power
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

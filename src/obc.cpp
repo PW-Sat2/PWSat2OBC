@@ -85,7 +85,8 @@ OBC::OBC()
           Experiments,
           BootTable,
           BootSettings,
-          TelemetryAcquisition),                                                   //
+          TelemetryAcquisition,
+          PowerControlInterface),                                                  //
       Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index), //
       terminal(this->GetLineIO())                                                  //
 {
