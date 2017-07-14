@@ -1,6 +1,9 @@
 #ifndef LIBS_RAM_SCRUBBER_INCLUDE_SCRUBBER_RAM_HPP_
 #define LIBS_RAM_SCRUBBER_INCLUDE_SCRUBBER_RAM_HPP_
 
+#pragma once
+
+#include <atomic>
 #include <cstdint>
 #include <em_int.h>
 #include <em_system.h>
@@ -56,7 +59,7 @@ namespace scrubber
         /** @brief Pointer increment in single cycle */
         static constexpr auto PointerIncrement = CycleSize / 4;
         /** @brief Pointer to next byte to be scrubbed */
-        static std::uint32_t* _current;
+        static std::atomic<std::uint32_t*> _current;
     };
 
     template <std::size_t Start, std::size_t Size, std::size_t CycleSize>

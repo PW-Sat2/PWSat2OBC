@@ -1,7 +1,10 @@
 #ifndef LIBS_SCRUBBER_INCLUDE_SCRUBBER_PROGRAM_HPP_
 #define LIBS_SCRUBBER_INCLUDE_SCRUBBER_PROGRAM_HPP_
 
+#pragma once
+
 #include <array>
+#include <atomic>
 #include "program_flash/boot_table.hpp"
 #include "program_flash/flash_driver.hpp"
 
@@ -76,7 +79,7 @@ namespace scrubber
         std::uint8_t _slotsMask;
 
         /** @brief Offset of area that will be scrubbed in next iteration */
-        std::size_t _offset;
+        std::atomic<std::size_t> _offset;
         /** @brief Iterations count */
         std::uint32_t _iterationsCount;
         /** @brief Number of slots corrected */
