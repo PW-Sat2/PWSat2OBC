@@ -60,7 +60,7 @@ void SetClearState()
             BSP_UART_Puts(BSP_UART_DEBUG, "Yes\n");
             break;
         case 'N':
-            boot::ClearStateOnStartup = true;
+            boot::ClearStateOnStartup = false;
             BSP_UART_Puts(BSP_UART_DEBUG, "No\n");
             break;
         default:

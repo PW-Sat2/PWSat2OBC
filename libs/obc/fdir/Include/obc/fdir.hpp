@@ -1,8 +1,8 @@
 #ifndef LIBS_OBC_FDIR_INCLUDE_OBC_FDIR_HPP_
 #define LIBS_OBC_FDIR_INCLUDE_OBC_FDIR_HPP_
 
-#include <type_traits>
 #include "error_counter/error_counter.hpp"
+#include "power/power.h"
 
 namespace obc
 {
@@ -19,8 +19,11 @@ namespace obc
     class FDIR final : private error_counter::IErrorCountingCallback, private error_counter::IErrorCountingConfigration
     {
       public:
-        /** @brief Ctor */
-        FDIR();
+        /**
+         * @brief Ctor
+         * @param powerControl Power control interface
+         */
+        FDIR(services::power::IPowerControl& powerControl);
 
         /** @brief Performs initialization */
         void Initalize();
@@ -39,6 +42,8 @@ namespace obc
 
         /** @brief Error counting mechanism */
         error_counter::ErrorCounting _errorCounting;
+
+        services::power::IPowerControl& _powerControl;
     };
 
     /**@} */

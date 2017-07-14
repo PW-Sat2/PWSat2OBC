@@ -251,6 +251,7 @@ class I2CMock(object):
         self._pld_devices[device.address] = device
 
     def enable_bus_devices(self, devices, enabled):
+        # type: (list[int], bool) -> None
         mask = enabled << 7
         args = map(lambda x: x | mask, devices)
 

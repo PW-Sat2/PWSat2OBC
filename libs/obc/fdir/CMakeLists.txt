@@ -9,6 +9,7 @@ add_library(${NAME} STATIC ${SOURCES})
 target_link_libraries(${NAME} 
 	error_counter
 	logger
+	power
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
