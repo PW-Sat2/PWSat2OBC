@@ -50,6 +50,9 @@ namespace telemetry
     static_assert(McuTemperature::BitSize() == 12, "Invalid serialized size");
     static_assert(FileSystemTelemetry::BitSize() == 32, "Invalid serialized size");
     static_assert(GpioState::BitSize() == 1, "Invalid serialized size");
+    static_assert(FlashPrimarySlotsScrubbing::BitSize() == 32, "Invalid serialized size");
+    static_assert(FlashSecondarySlotsScrubbing::BitSize() == 32, "Invalid serialized size");
+    static_assert(RAMScrubbing::BitSize() == 32, "Invalid serialized size");
 
     static_assert(ManagedTelemetry::TotalSerializedSize <= (devices::comm::MaxDownlinkFrameSize - 1), "Telemetry is too large");
 }

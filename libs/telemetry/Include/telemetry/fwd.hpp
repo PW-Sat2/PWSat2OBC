@@ -27,6 +27,9 @@ namespace telemetry
         struct GpioStateTag;
         struct McuTemperatureTag;
         struct ProgramStateTag;
+        struct FlashPrimarySlotsScrubbingTag;
+        struct FlashSecondarySlotsScrubbingTag;
+        struct RAMScrubbingTag;
     }
 
     /**
@@ -57,6 +60,27 @@ namespace telemetry
      */
     typedef SimpleTelemetryElement<std::uint16_t, ::telemetry::details::ProgramStateTag> ProgramState;
 
+    /**
+     * @brief This type represents telemetry element related to primary flash scrubber.
+     * @telemetry_element
+     * @ingroup telemetry
+     */
+    typedef SimpleTelemetryElement<std::uint32_t, ::telemetry::details::FlashPrimarySlotsScrubbingTag> FlashPrimarySlotsScrubbing;
+
+    /**
+     * @brief This type represents telemetry element related to secondary flash scrubber.
+     * @telemetry_element
+     * @ingroup telemetry
+     */
+    typedef SimpleTelemetryElement<std::uint32_t, ::telemetry::details::FlashSecondarySlotsScrubbingTag> FlashSecondarySlotsScrubbing;
+
+    /**
+     * @brief This type represents telemetry element related to RAM scrubber.
+     * @telemetry_element
+     * @ingroup telemetry
+     */
+    typedef SimpleTelemetryElement<std::uint32_t, ::telemetry::details::RAMScrubbingTag> RAMScrubbing;
+
     template <typename... Type> class Telemetry;
 
     typedef Telemetry<SystemStartup,            //
@@ -64,6 +88,9 @@ namespace telemetry
         InternalTimeTelemetry,                  //
         ExternalTimeTelemetry,                  //
         ErrorCountingTelemetry,                 //
+        FlashPrimarySlotsScrubbing,             //
+        FlashSecondarySlotsScrubbing,           //
+        RAMScrubbing,                           //
         FileSystemTelemetry,                    //
         devices::antenna::AntennaTelemetry,     //
         ExperimentTelemetry,                    //
