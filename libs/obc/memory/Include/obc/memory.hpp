@@ -26,7 +26,7 @@ namespace obc
     /**
      * @brief Memory module manager
      *
-     * Initialy all modules are marked as latched-up. This ensures proper recovery even if latch-up happen during starup and was not
+     * Initially all modules are marked as latched-up. This ensures proper recovery even if latch-up happen during starup and was not
      * detected.
      */
     class OBCMemory
