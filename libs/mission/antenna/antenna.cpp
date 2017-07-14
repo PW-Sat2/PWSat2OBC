@@ -307,7 +307,6 @@ namespace mission
             }
 
             stateDescriptor.Retry(StepRetryLimit, GetTimeout(step));
-            stateDescriptor.SetTimeout(GetTimeout(step));
         }
 
         void RegularDeploymentStep(const SystemState& state,
