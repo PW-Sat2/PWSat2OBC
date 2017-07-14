@@ -1,5 +1,5 @@
 #include "collect_temp.hpp"
-#include "telemetry/McuTemperature.hpp"
+#include "telemetry/BasicTelemetry.hpp"
 
 namespace telemetry
 {

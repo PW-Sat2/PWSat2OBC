@@ -1,7 +1,8 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock-matchers.h"
 #include "base/BitWriter.hpp"
-#include "telemetry/gpio.hpp"
+#include "telemetry/BasicTelemetry.hpp"
+#include "telemetry/fwd.hpp"
 
 using testing::Eq;
 
@@ -12,13 +13,13 @@ namespace
     TEST(GpioStateTest, TestDefaultState)
     {
         GpioState state;
-        ASSERT_THAT(state.IsSailDeployed(), Eq(false));
+        ASSERT_THAT(state.GetValue(), Eq(false));
     }
 
     TEST(GpioStateTest, TestCustomState)
     {
         GpioState state(true);
-        ASSERT_THAT(state.IsSailDeployed(), Eq(true));
+        ASSERT_THAT(state.GetValue(), Eq(true));
     }
 
     TEST(GpioStateTest, TestSerialization)

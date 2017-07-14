@@ -12,16 +12,50 @@
 namespace telemetry
 {
     class SystemStartup;
-    class ProgramState;
     class ErrorCountingTelemetry;
     class ExperimentTelemetry;
-    class McuTemperature;
-    class GpioState;
-    class FileSystemTelemetry;
     class InternalTimeTelemetry;
     class ExternalTimeTelemetry;
 
     struct TelemetryState;
+
+    template <typename T, typename Tag> class SimpleTelemetryElement;
+
+    namespace details
+    {
+        struct FileSystemTelemetryTag;
+        struct GpioStateTag;
+        struct McuTemperatureTag;
+        struct ProgramStateTag;
+    }
+
+    /**
+     * @brief This type represents telemetry element related file system state.
+     * @telemetry_element
+     * @ingroup telemetry
+     */
+    typedef SimpleTelemetryElement<std::uint32_t, ::telemetry::details::FileSystemTelemetryTag> FileSystemTelemetry;
+
+    /**
+     * @brief This class represents the state that is observed by the mcu via its gpios.
+     * @telemetry_element
+     */
+    typedef SimpleTelemetryElement<bool, ::telemetry::details::GpioStateTag> GpioState;
+
+    /**
+     * @brief This type represents telemetry element related mcu temperature.
+     * @telemetry_element
+     * @ingroup telemetry
+     */
+    typedef SimpleTelemetryElement<BitValue<std::uint16_t, 12>, ::telemetry::details::McuTemperatureTag> McuTemperature;
+
+    /**
+     * @brief This type represents telemetry element related to
+     * state of the currently executed program.
+     * @telemetry_element
+     * @ingroup telemetry
+     */
+    typedef SimpleTelemetryElement<std::uint16_t, ::telemetry::details::ProgramStateTag> ProgramState;
 
     template <typename... Type> class Telemetry;
 

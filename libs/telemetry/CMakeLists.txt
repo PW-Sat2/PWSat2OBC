@@ -3,13 +3,9 @@ set(NAME telemetry)
 set(SOURCES
     Include/telemetry/state.hpp
     SystemStartup.cpp
-    ProgramState.cpp
     ErrorCounters.cpp
     ExperimentTelemetry.cpp
     state.cpp
-    McuTemperature.cpp
-    GpioState.cpp
-    FileSystemTelemetry.cpp
     TimeTelemetry.cpp
 )
 
