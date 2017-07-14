@@ -37,6 +37,10 @@ namespace telemetry
         static mission::UpdateResult UpdateProc(telemetry::TelemetryState& state, void* param);
     };
 
+    template <typename Scrubber> RamScrubbingTelemetryAcquisition<Scrubber>::RamScrubbingTelemetryAcquisition(int /*param*/)
+    {
+    }
+
     template <typename Scrubber>
     mission::UpdateDescriptor<telemetry::TelemetryState> RamScrubbingTelemetryAcquisition<Scrubber>::BuildUpdate()
     {

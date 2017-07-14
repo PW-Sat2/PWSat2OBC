@@ -106,7 +106,7 @@ namespace scrubber
     template <std::size_t Start, std::size_t Size, std::size_t CycleSize>
     inline std::size_t scrubber::RAMScrubber<Start, Size, CycleSize>::Current()
     {
-        return reinterpret_cast<std::size_t>(_current) - Start;
+        return reinterpret_cast<std::size_t>(static_cast<std::uint32_t*>(_current)) - Start;
     }
 
     /** @} */
