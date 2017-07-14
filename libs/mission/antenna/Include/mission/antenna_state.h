@@ -73,8 +73,9 @@ namespace mission
 
             /**
              * @brief Requests advancing the deployment process to the next step.
+             * @param[in] timeout Current operation timeout in mission iterations.
              */
-            void NextStep();
+            void NextStep(std::int8_t timeout);
 
             /**
              * @brief Requests retral of the current deployment step.
@@ -82,8 +83,9 @@ namespace mission
              * If the current step retry count hits the limit the state of the process is updated with the same way
              * as if the NextStep method would be called.
              * @param[in] limit Step retry limit number.
+             * @param[in] timeout Current operation timeout in mission iterations.
              */
-            void Retry(std::uint8_t limit);
+            void Retry(std::uint8_t limit, std::int8_t timeout);
 
             /**
              * @brief Returns reference to current antenna driver.
@@ -195,9 +197,11 @@ namespace mission
             return this->_stepNumber;
         }
 
-        inline void AntennaMissionState::NextStep()
+        inline void AntennaMissionState::NextStep(std::int8_t timeout)
         {
             ++this->_stepNumber;
+            this->_retryCount = 0;
+            SetTimeout(timeout);
         }
 
         inline AntennaDriver& AntennaMissionState::Driver()

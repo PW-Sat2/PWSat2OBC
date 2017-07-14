@@ -183,6 +183,11 @@ namespace mission
          */
         static constexpr uint8_t DeploymentStepLimit = count_of(deploymentSteps);
 
+        static std::int8_t GetTimeout(const AntennaDeploymentStep& step)
+        {
+            return step.deploymentTimeout / 10 + 1;
+        }
+
         AntennaMissionState::AntennaMissionState(AntennaDriver& antennaDriver)
             : _overrideState(false), //
               _inProgress(false),    //
@@ -193,15 +198,16 @@ namespace mission
         {
         }
 
-        void AntennaMissionState::Retry(std::uint8_t limit)
+        void AntennaMissionState::Retry(std::uint8_t limit, std::int8_t timeout)
         {
             if ((this->_retryCount + 1) == limit)
             {
-                NextStep();
+                NextStep(timeout);
             }
             else
             {
                 ++this->_retryCount;
+                SetTimeout(timeout);
             }
         }
 
@@ -295,13 +301,13 @@ namespace mission
 
                 if (OS_RESULT_SUCCEEDED(result))
                 {
-                    stateDescriptor.NextStep();
+                    stateDescriptor.NextStep(GetTimeout(step));
                     return;
                 }
             }
 
-            stateDescriptor.Retry(StepRetryLimit);
-            stateDescriptor.SetTimeout(step.deploymentTimeout / 10 + 1);
+            stateDescriptor.Retry(StepRetryLimit, GetTimeout(step));
+            stateDescriptor.SetTimeout(GetTimeout(step));
         }
 
         void RegularDeploymentStep(const SystemState& state,
@@ -310,21 +316,25 @@ namespace mission
             )
         {
             const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
-
-            LOGF(LOG_LEVEL_INFO,
-                "[ant] [Step%d] Regular deployment (channel %d, antenna %d)",
-                static_cast<int>(stateDescriptor.StepNumber()),
-                static_cast<int>(step.channel),
-                static_cast<int>(step.antennaId));
-
             if (stateDescriptor.IsDeploymentInProgress())
             {
+                LOGF(LOG_LEVEL_INFO,
+                    "[ant] [Step %d] Resetting driver due to timeout (channel %d, antenna %d)",
+                    static_cast<int>(stateDescriptor.StepNumber()),
+                    static_cast<int>(step.channel),
+                    static_cast<int>(step.antennaId));
                 const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
                 ResetDriver(step.channel, driver);
-                stateDescriptor.Retry(StepRetryLimit);
+                stateDescriptor.Retry(StepRetryLimit, GetTimeout(step));
             }
             else
             {
+                LOGF(LOG_LEVEL_INFO,
+                    "[ant] [Step %d] Performing deployment (channel %d, antenna %d)",
+                    static_cast<int>(stateDescriptor.StepNumber()),
+                    static_cast<int>(step.channel),
+                    static_cast<int>(step.antennaId));
+
                 StopDeployment(state, stateDescriptor, driver);
                 BeginDeployment(state, stateDescriptor, driver);
             }
@@ -345,11 +355,11 @@ namespace mission
 
             if (ResetDriver(step.channel, driver))
             {
-                stateDescriptor.NextStep();
+                stateDescriptor.NextStep(GetTimeout(step));
             }
             else
             {
-                stateDescriptor.Retry(StepRetryLimit);
+                stateDescriptor.Retry(StepRetryLimit, GetTimeout(step));
             }
         }
 
@@ -379,11 +389,11 @@ namespace mission
 
             if (EndDeployment(driver, step.channel, RetryLimit))
             {
-                stateDescriptor.NextStep();
+                stateDescriptor.NextStep(GetTimeout(step));
             }
             else
             {
-                stateDescriptor.Retry(StepRetryLimit);
+                stateDescriptor.Retry(StepRetryLimit, GetTimeout(step));
             }
         }
 
