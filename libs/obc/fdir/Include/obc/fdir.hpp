@@ -16,7 +16,7 @@ namespace obc
     /**
      * @brief FDIR mechanims for OBC
      */
-    class FDIR final : private error_counter::IErrorCountingCallback, private error_counter::IErrorCountingConfigration
+    class FDIR final : private error_counter::IErrorCountingCallback, public error_counter::IErrorCountingConfigration
     {
       public:
         /**
@@ -34,12 +34,12 @@ namespace obc
          */
         error_counter::ErrorCounting& ErrorCounting();
 
-      private:
         virtual void LimitReached(error_counter::Device device, error_counter::CounterValue errorsCount) override;
         virtual error_counter::CounterValue Limit(error_counter::Device device) override;
         virtual error_counter::CounterValue Increment(error_counter::Device device) override;
         virtual error_counter::CounterValue Decrement(error_counter::Device device) override;
 
+      private:
         /** @brief Error counting mechanism */
         error_counter::ErrorCounting _errorCounting;
 

@@ -1,3 +1,5 @@
+import csv
+from StringIO import StringIO
 from base64 import b64decode
 from datetime import timedelta
 from functools import wraps
@@ -82,6 +84,14 @@ def decode_multiline_dictionary():
         return dict(result)
 
     return decode_return(p)
+
+
+def decode_csv(s):
+    dialect = csv.Sniffer().sniff(s)
+    buf = StringIO(s)
+    reader = csv.DictReader(buf, dialect=dialect)
+
+    return list(reader)
 
 
 def command(fmt):
