@@ -23,7 +23,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& /*fdir*/,
     program_flash::BootTable& bootTable,
     boot::BootSettings& bootSettings,
     IHasState<telemetry::TelemetryState>& telemetry,
-    services::power::IPowerControl& powerControl)
+    services::power::IPowerControl& powerControl,
+    ISetErrorCounterConfig& errorCounterConfig)
     : Comm(commDriver),                                                //
       UplinkProtocolDecoder(settings::CommSecurityCode),               //
       SupportedTelecommands(                                           //
@@ -41,7 +42,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& /*fdir*/,
           SetBootSlotsTelecommand(bootSettings),                       //
           SendBeaconTelecommand(telemetry),                            //
           StopAntennaDeployment(disableAntennaDeployment),             //
-          PowerCycle(powerControl)                                     //
+          PowerCycle(powerControl),                                    //
+          SetErrorCounterConfig(errorCounterConfig)                    //
           ),                                                           //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {

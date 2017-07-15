@@ -13,6 +13,7 @@
 #include "obc/telecommands/boot_settings.hpp"
 #include "obc/telecommands/comm.hpp"
 #include "obc/telecommands/experiments.hpp"
+#include "obc/telecommands/fdir.hpp"
 #include "obc/telecommands/file_system.hpp"
 #include "obc/telecommands/ping.hpp"
 #include "obc/telecommands/power.hpp"
@@ -129,7 +130,8 @@ namespace obc
         obc::telecommands::SetBootSlotsTelecommand, //
         obc::telecommands::SendBeaconTelecommand,   //
         obc::telecommands::StopAntennaDeployment,   //
-        obc::telecommands::PowerCycle               //
+        obc::telecommands::PowerCycle,              //
+        obc::telecommands::SetErrorCounterConfig    //
         >;
 
     /**
@@ -151,6 +153,7 @@ namespace obc
          * @param[in] bootSettings Boot settings
          * @param[in] telemetry Reference to object that contains current telemetry state.
          * @param[in] powerControl Power control interface
+         * @param[in] errorCounterConfig Reference to object that can set error counter config
          */
         OBCCommunication(obc::FDIR& fdir,
             devices::comm::CommObject& commDriver,
@@ -163,7 +166,8 @@ namespace obc
             program_flash::BootTable& bootTable,
             boot::BootSettings& bootSettings,
             IHasState<telemetry::TelemetryState>& telemetry,
-            services::power::IPowerControl& powerControl);
+            services::power::IPowerControl& powerControl,
+            ISetErrorCounterConfig& errorCounterConfig);
 
         /**
          * @brief Initializes all communication at runlevel 1

@@ -71,7 +71,7 @@ namespace obc
         return GetDecrement(this->_configuration[device]);
     }
 
-    void FDIR::ConfigureDevice(error_counter::Device device,
+    void FDIR::Set(error_counter::Device device,
         error_counter::CounterValue limit,
         error_counter::CounterValue increment,
         error_counter::CounterValue decrement)
