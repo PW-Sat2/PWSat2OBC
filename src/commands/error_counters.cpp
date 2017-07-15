@@ -33,7 +33,7 @@ static void SetCounterConfig(const char* deviceStr, const char* limitStr, const 
 
     GetTerminal().Printf("Setting:\nDevice %d\nLimit %d\nIncr %d\nDecr %d", device, limit, incr, decr);
 
-    GetFDIR().ConfigureDevice(device, limit, incr, decr);
+    GetFDIR().Set(device, limit, incr, decr);
 }
 
 void ErrorCountersCommand(std::uint16_t argc, char* argv[])

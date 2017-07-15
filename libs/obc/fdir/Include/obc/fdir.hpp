@@ -15,10 +15,20 @@ namespace obc
      * @{
      */
 
+    struct ISetErrorCounterConfig
+    {
+        virtual void Set(error_counter::Device device,
+            error_counter::CounterValue limit,
+            error_counter::CounterValue increment,
+            error_counter::CounterValue decrement) = 0;
+    };
+
     /**
      * @brief FDIR mechanims for OBC
      */
-    class FDIR final : private error_counter::IErrorCountingCallback, public error_counter::IErrorCountingConfigration
+    class FDIR final : private error_counter::IErrorCountingCallback,
+                       public error_counter::IErrorCountingConfigration,
+                       public ISetErrorCounterConfig
     {
       public:
         /**
@@ -36,10 +46,10 @@ namespace obc
          */
         error_counter::ErrorCounting& ErrorCounting();
 
-        void ConfigureDevice(error_counter::Device device,
+        virtual void Set(error_counter::Device device,
             error_counter::CounterValue limit,
             error_counter::CounterValue increment,
-            error_counter::CounterValue decrement);
+            error_counter::CounterValue decrement) override;
 
         virtual void LimitReached(error_counter::Device device, error_counter::CounterValue errorsCount) override;
         virtual error_counter::CounterValue Limit(error_counter::Device device) override;
