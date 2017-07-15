@@ -46,3 +46,11 @@ This tool allows downloading program flash content using J-Link debug interface
 	`<build>/tools/download_program_flash.cmd <file>`
 	
 `file` - Path to destination file
+
+## Just Mocks
+This tool stars subset of normal device mocks. Useful for treating OBC as EGSE.
+
+**Usage:**
+	`<python> <source>/integration_tests/tools/just_mocks.py <args>`
+	
+For usage details, see help output (`-h`)  
