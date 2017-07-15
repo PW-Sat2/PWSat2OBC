@@ -1,6 +1,8 @@
 #ifndef LIBS_OBC_FDIR_INCLUDE_OBC_FDIR_HPP_
 #define LIBS_OBC_FDIR_INCLUDE_OBC_FDIR_HPP_
 
+#include <array>
+#include <atomic>
 #include "error_counter/error_counter.hpp"
 #include "power/power.h"
 
@@ -34,6 +36,11 @@ namespace obc
          */
         error_counter::ErrorCounting& ErrorCounting();
 
+        void ConfigureDevice(error_counter::Device device,
+            error_counter::CounterValue limit,
+            error_counter::CounterValue increment,
+            error_counter::CounterValue decrement);
+
         virtual void LimitReached(error_counter::Device device, error_counter::CounterValue errorsCount) override;
         virtual error_counter::CounterValue Limit(error_counter::Device device) override;
         virtual error_counter::CounterValue Increment(error_counter::Device device) override;
@@ -44,6 +51,8 @@ namespace obc
         error_counter::ErrorCounting _errorCounting;
 
         services::power::IPowerControl& _powerControl;
+
+        std::array<std::atomic<std::uint32_t>, error_counter::ErrorCounting::MaxDevices> _configuration;
     };
 
     /**@} */

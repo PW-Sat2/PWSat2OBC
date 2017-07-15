@@ -11,6 +11,9 @@ class ErrorCounter:
         self.increment = int(row['Inc'])
         self.decrement = int(row['Dec'])
 
+    def __repr__(self):
+        return '#{f.device} Current: {f.current} Limit: {f.limit} +{f.increment} -{f.decrement}'.format(f=self)
+
 
 def _parse_error_counters(s):
     return map(ErrorCounter, s)
