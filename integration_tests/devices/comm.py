@@ -1,14 +1,13 @@
-import logging
-import struct
-
-import i2cMock
-import time
 import datetime
-from enum import Enum, unique
 from Queue import Queue, Empty
 from threading import Lock
-from utils import *
+
+from enum import Enum, unique
+
+import i2cMock
 from build_config import config
+from utils import *
+
 
 class BeaconFrame(object):
     def __init__(self, payload):
@@ -17,6 +16,7 @@ class BeaconFrame(object):
 
     def payload(self):
         return self._payload
+
 
 class DownlinkFrame(object):
     def __init__(self, apid, seq, payload):

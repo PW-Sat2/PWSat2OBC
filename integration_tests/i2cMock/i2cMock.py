@@ -223,7 +223,7 @@ class I2CMock(object):
 
         self._version = None
 
-    def start(self):
+    def start(self, enable_devices=True):
         if self._active:
             return
 
@@ -236,8 +236,9 @@ class I2CMock(object):
         self._log.debug('Waiting for mock to start')
         self._started.wait()
 
-        self.enable_bus_devices(self._bus_devices.keys(), True)
-        self.enable_pld_devices(self._pld_devices.keys(), True)
+        if enable_devices:
+            self.enable_bus_devices(self._bus_devices.keys(), True)
+            self.enable_pld_devices(self._pld_devices.keys(), True)
 
         self.enable_bus()
         self.enable_payload()
@@ -260,6 +261,13 @@ class I2CMock(object):
         args = map(lambda x: x | mask, devices)
 
         self._command(I2CMock.CMD_I2C_PLD_ENABLE_DEVICES, args)
+
+    def enable_devices(self, devices, enabled):
+        bus_devices = filter(lambda d: d in self._bus_devices.keys(), devices)
+        self.enable_bus_devices(bus_devices, enabled)
+
+        pld_devices = filter(lambda d: d in self._pld_devices.keys(), devices)
+        self.enable_pld_devices(pld_devices, enabled)
 
     def stop(self):
         self._log.debug('Requesting stop')
