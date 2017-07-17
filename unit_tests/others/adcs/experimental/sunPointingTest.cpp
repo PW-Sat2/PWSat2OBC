@@ -9,6 +9,8 @@
 #include "adcs/experimental/adcsUtConfig.h"
 #include "adcs/experimental/Include/adcs/dataFileTools.hpp"
 
+#define COMP_ACCUR 0.01
+
 using adcs::SunPointing;
 using adcs::DipoleVec;
 using adcs::MagVec;
@@ -77,12 +79,13 @@ TEST(sunpointing, cross_validation_skew)
         in << record[0], record[1], record[2];
         res = skew(in);
 
-        //EXPECT_NEAR(res[0], (Matrix3f << record[3],record[4],record[5],record[6],record[7],record[8],record[9],record[10],record[11]).finished(), 1.0);
+        //EXPECT_NEAR(res[0], (Matrix3f << record[3],record[4],record[5],record[6],record[7],record[8],record[9],record[10],record[11]).finished(), COMP_ACCUR);
         for (int j = 0; j < res.cols(); j++)
         {
             for (int i = 0; i < res.rows(); i++)
             {
-                EXPECT_NEAR(res(i, j), record[3 + i + j * res.cols()], 1.0);
+                EXPECT_NEAR(res(i, j), record[3 + i + j * res.cols()],
+                        COMP_ACCUR);
 #ifdef ADCS_SUNPOINTING_DEBUG
                 std::cout << "EXPECT_NEAR(" << res(i, j) << " == " << record[3 + i + j * res.cols()] << ")" << std::endl;
 #endif
@@ -125,14 +128,13 @@ TEST(sunpointing, cross_validation_vecNorm)
         in << record[0], record[1], record[2];
         res = in.norm();
 
-        EXPECT_NEAR(res, record[3], 1.0);
-//#ifdef ADCS_SUNPOINTING_DEBUG
+        EXPECT_NEAR(res, record[3], COMP_ACCUR);
+#ifdef ADCS_SUNPOINTING_DEBUG
         std::cout << "EXPECT_NEAR(" << res << " == " << record[3] << ")" << std::endl;
-//#endif
+#endif
     }
     file.close();
 }
-
 
 // cross-validation of matInv function against matlab implementation
 TEST(sunpointing, cross_validation_matInv)
@@ -164,25 +166,190 @@ TEST(sunpointing, cross_validation_matInv)
             }
         }
 
-        for (int j = 0; j < res.cols(); j++)
+        for (int j = 0; j < in.cols(); j++)
         {
-            for (int i = 0; i < res.rows(); i++)
+            for (int i = 0; i < in.rows(); i++)
             {
-                in(i, j) = record[i + j * res.cols()];
+                in(i, j) = record[i + j * in.cols()];
             }
         }
         //res = matInv(in);// accuracy problems
-        res = in.inverse();// perfect result
+        res = in.inverse();   // perfect result
 
-        //EXPECT_NEAR(res[0], (Matrix3f << record[3],record[4],record[5],record[6],record[7],record[8],record[9],record[10],record[11]).finished(), 1.0);
+        //EXPECT_NEAR(res[0], (Matrix3f << record[3],record[4],record[5],record[6],record[7],record[8],record[9],record[10],record[11]).finished(), COMP_ACCUR);
         for (int j = 0; j < res.cols(); j++)
         {
             for (int i = 0; i < res.rows(); i++)
             {
-                EXPECT_NEAR(res(i, j), record[25 + i + j * res.cols()], 1.0);
+                EXPECT_NEAR(res(i, j), record[25 + i + j * res.cols()],
+                        COMP_ACCUR);
 #ifdef ADCS_SUNPOINTING_DEBUG
                 std::cout << "EXPECT_NEAR(" << res(i, j) << " == " << record[25 + i + j * res.cols()] << ")" << std::endl;
 #endif
+            }
+        }
+    }
+    file.close();
+}
+
+// cross-validation of spinControler function against matlab implementation
+TEST(sunpointing, cross_validation_spinCtrl)
+{
+    const uint recordLen = 12; // 4x(3x1)
+    Vector3f inAngRateEst;
+    Vector3f inBodyEst;
+    Vector3f inMtmMeas;
+    Vector3f outDipole;
+    SunPointing::State state; //just parameterisation
+    std::ifstream file(
+    ADCS_UT_DATA_FILE_PATH "/sunpointing_crossvalidation_SpinController.csv");
+    if (!file)
+    {
+        FAIL()<< "Cannot find data  file!" << std::endl;
+    }
+    std::vector<float> record;
+
+    while (!file.eof())
+    //for(int i = 0; i< 2; i++)
+    {
+        record = dataFileTools::getRecord(file);
+        if (record.size() != recordLen)
+        {
+            if (file.eof())
+            {
+                break;
+            }
+            else
+            {
+                FAIL()<< "Data record has size different than expected (got: " << record.size() << " but expected: " << recordLen << ")" << std::endl;
+            }
+        }
+
+        for (int j = 0; j < inAngRateEst.cols(); j++)
+        {
+            for (int i = 0; i < inAngRateEst.rows(); i++) //TODO do sth about indexing
+            {
+                inAngRateEst(i, j) = record[0 + i + j * inAngRateEst.cols()];
+                inBodyEst(i, j) = record[3 + i + j * inAngRateEst.cols()];
+                inMtmMeas(i, j) = record[6 + i + j * inAngRateEst.cols()];
+            }
+        }
+
+        SpinController(outDipole, inAngRateEst, inBodyEst, inMtmMeas, state);
+
+        //EXPECT_NEAR(res[0], (Matrix3f << record[3],record[4],record[5],record[6],record[7],record[8],record[9],record[10],record[11]).finished(), COMP_ACCUR);
+        for (int j = 0; j < outDipole.cols(); j++)
+        {
+            for (int i = 0; i < outDipole.rows(); i++)
+            {
+                EXPECT_NEAR(outDipole(i, j),
+                        record[9 + i + j * outDipole.cols()], COMP_ACCUR);
+#ifdef ADCS_SUNPOINTING_DEBUG
+                std::cout << "EXPECT_NEAR(" << outDipole(i, j) << " == " << record[9 + i + j * outDipole.cols()] << ")" << std::endl;
+#endif
+            }
+        }
+    }
+    file.close();
+}
+
+// cross-validation of EKFInitialisation function against matlab implementation
+TEST(sunpointing, cross_validation_ekfInit)
+{
+    uint record_cntr = 0;
+    const uint recordLen = 5 + 25 + 5 + 25 + 2 + 3;
+    //inputs
+    Vector2f ssMeas;
+    Vector3f gyrMeas;
+    //outputs
+    Vector5f xEkf;
+    Matrix55f pEkf;
+    Vector5f innov;
+    Matrix55f innovCov;
+
+    SunPointing::State state; //just parameterisation
+
+    std::ifstream file(
+    ADCS_UT_DATA_FILE_PATH "/sunpointing_crossvalidation_init.csv");
+    if (!file)
+    {
+        FAIL()<< "Cannot find data  file!" << std::endl;
+    }
+    std::vector<float> record;
+
+    while (!file.eof())
+    //for(int i = 0; i< 2; i++)
+    {
+        record_cntr = 0;
+        record = dataFileTools::getRecord(file);
+        if (record.size() != recordLen)
+        {
+            if (file.eof())
+            {
+                break;
+            }
+            else
+            {
+                FAIL()<< "Data record has size different than expected (got: " << record.size() << " but expected: " << recordLen << ")" << std::endl;
+            }
+        }
+
+        ssMeas[0] = record[record_cntr++]; //TODO put this to function!!!
+        ssMeas[1] = record[record_cntr++];
+        gyrMeas[0] = record[record_cntr++];
+        gyrMeas[1] = record[record_cntr++];
+        gyrMeas[2] = record[record_cntr++];
+
+        EKFinitialization(xEkf, pEkf, innov, innovCov, ssMeas, gyrMeas, state);
+
+        //EXPECT_NEAR(res[0], (Matrix3f << record[3],record[4],record[5],record[6],record[7],record[8],record[9],record[10],record[11]).finished(), COMP_ACCUR);
+        for (int j = 0; j < xEkf.cols(); j++) //TODO put this test to function!!!
+        {
+            for (int i = 0; i < xEkf.rows(); i++)
+            {
+                EXPECT_NEAR(xEkf(i, j), record[record_cntr], COMP_ACCUR);
+#ifdef ADCS_SUNPOINTING_DEBUG
+                std::cout << "EXPECT_NEAR(" << xEkf(i, j) << " == "
+                << record[record_cntr] << ")" << std::endl;
+#endif
+                record_cntr++;
+            }
+        }
+
+        for (int j = 0; j < pEkf.cols(); j++)
+        {
+            for (int i = 0; i < pEkf.rows(); i++)
+            {
+                EXPECT_NEAR(pEkf(i, j), record[record_cntr], COMP_ACCUR);
+#ifdef ADCS_SUNPOINTING_DEBUG
+                std::cout << "EXPECT_NEAR(" << pEkf(i, j) << " == " << record[record_cntr] << ")" << std::endl;
+#endif
+                record_cntr++;
+            }
+        }
+
+        for (int j = 0; j < innov.cols(); j++)
+        {
+            for (int i = 0; i < innov.rows(); i++)
+            {
+                EXPECT_NEAR(innov(i, j), record[record_cntr], COMP_ACCUR);
+#ifdef ADCS_SUNPOINTING_DEBUG
+                std::cout << "EXPECT_NEAR(" << innov(i, j) << " == "
+                << record[record_cntr] << ")" << std::endl;
+#endif
+                record_cntr++;
+            }
+        }
+
+        for (int j = 0; j < innovCov.cols(); j++)
+        {
+            for (int i = 0; i < innovCov.rows(); i++)
+            {
+                EXPECT_NEAR(innovCov(i, j), record[record_cntr], COMP_ACCUR);
+#ifdef ADCS_SUNPOINTING_DEBUG
+                std::cout << "EXPECT_NEAR(" << innovCov(i, j) << " == " << record[record_cntr] << ")" << std::endl;
+#endif
+                record_cntr++;
             }
         }
     }
@@ -264,11 +431,11 @@ TEST(sunpointing, cross_validation)
                 state);
 
         EXPECT_NEAR(dipole[0], record[ESP_commDipoleSP + 0] * output_scale,
-                1.0);
+                COMP_ACCUR);
         EXPECT_NEAR(dipole[1], record[ESP_commDipoleSP + 1] * output_scale,
-                1.0);
+                COMP_ACCUR);
         EXPECT_NEAR(dipole[2], record[ESP_commDipoleSP + 2] * output_scale,
-                1.0);
+                COMP_ACCUR);
 
 #ifdef ADCS_SUNPOINTING_DEBUG
         std::cout << "EXPECT_NEAR(" << dipole[0] << " == " << record[ESP_commDipoleSP+0] * output_scale << ")" << std::endl;
