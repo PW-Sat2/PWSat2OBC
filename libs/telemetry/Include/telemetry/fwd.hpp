@@ -16,6 +16,11 @@ namespace telemetry
     class ExperimentTelemetry;
     class InternalTimeTelemetry;
     class ExternalTimeTelemetry;
+    class ImtqTelemetry;
+    class ImtqBDotTelemetry;
+    class ImtqHousekeeping;
+    class ImtqState;
+    class ImtqSelfTest;
 
     struct TelemetryState;
 
@@ -101,7 +106,12 @@ namespace telemetry
         GpioState,                              //
         McuTemperature,                         //
         devices::eps::hk::ControllerATelemetry, //
-        devices::eps::hk::ControllerBTelemetry  //
+        devices::eps::hk::ControllerBTelemetry, //
+        ImtqTelemetry,                          //
+        ImtqBDotTelemetry,                      //
+        ImtqHousekeeping,                       //
+        ImtqState,                              //
+        ImtqSelfTest                            //
         >
         ManagedTelemetry;
 }

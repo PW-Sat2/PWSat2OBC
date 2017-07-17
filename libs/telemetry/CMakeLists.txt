@@ -7,6 +7,7 @@ set(SOURCES
     ExperimentTelemetry.cpp
     state.cpp
     TimeTelemetry.cpp
+    ImtqTelemetry.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -23,6 +24,7 @@ target_link_libraries(${NAME}
     experiments
     fs
     antenna
+    imtq
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
