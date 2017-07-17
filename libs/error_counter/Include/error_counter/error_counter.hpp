@@ -100,7 +100,7 @@ namespace error_counter
     {
       public:
         /** @brief Maximum number of supported devices */
-        static constexpr std::uint8_t MaxDevices = 16;
+        static constexpr std::uint8_t MaxDevices = 12;
 
         /**
          * @brief Ctor
