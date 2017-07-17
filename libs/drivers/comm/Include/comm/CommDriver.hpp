@@ -236,7 +236,7 @@ class CommObject final : public ITransmitter,      //
     virtual bool GetTelemetry(CommTelemetry& telemetry) final override;
 
     /** @brief Error counter type */
-    using ErrorCounter = error_counter::ErrorCounter<1>;
+    using ErrorCounter = error_counter::ErrorCounter<0>;
 
   private:
     /** @brief Error reporter type */
@@ -377,7 +377,7 @@ class CommObject final : public ITransmitter,      //
 
 inline bool CommObject::SendFrame(gsl::span<const std::uint8_t> frame)
 {
-    error_counter::AggregatedErrorReporter<1> errorContext(_error);
+    error_counter::AggregatedErrorReporter<0> errorContext(_error);
     std::uint8_t remainingBufferSize;
     return ScheduleFrameTransmission(frame, remainingBufferSize, errorContext.Counter());
 }

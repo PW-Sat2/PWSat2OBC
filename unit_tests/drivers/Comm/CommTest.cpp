@@ -84,7 +84,7 @@ namespace
         std::uint8_t dataBuffer[devices::comm::PrefferedBufferSize];
         testing::NiceMock<ErrorCountingConfigrationMock> errorsConfig;
         error_counter::ErrorCounting errors;
-        error_counter::ErrorCounter<1> error_counter;
+        error_counter::ErrorCounter<0> error_counter;
 
         void MockFrameCount(std::uint16_t frameCount);
 
@@ -1102,7 +1102,7 @@ namespace
         }));
         const auto status = comm.GetReceiverTelemetry(telemetry);
         ASSERT_THAT(status, Eq(false));
-        ASSERT_THAT(errors.Current(1), Eq(expectedErrorCount));
+        ASSERT_THAT(errors.Current(0), Eq(expectedErrorCount));
     }
 
     INSTANTIATE_TEST_CASE_P(CommReceiverTelemetryValuesOutOfRange,
@@ -1151,7 +1151,7 @@ namespace
 
         const auto status = comm.GetTransmitterTelemetry(telemetry);
         ASSERT_THAT(status, Eq(false));
-        ASSERT_THAT(errors.Current(1), Eq(expectedErrorCount));
+        ASSERT_THAT(errors.Current(0), Eq(expectedErrorCount));
     }
 
     INSTANTIATE_TEST_CASE_P(CommTransmitterTelemetryValuesOutOfRange,

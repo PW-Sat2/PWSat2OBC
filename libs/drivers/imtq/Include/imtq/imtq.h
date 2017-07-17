@@ -750,7 +750,7 @@ namespace devices
             std::uint8_t LastStatus;
 
             /** @brief Error counter type */
-            using ErrorCounter = error_counter::ErrorCounter<6>;
+            using ErrorCounter = error_counter::ErrorCounter<3>;
 
           private:
             /**

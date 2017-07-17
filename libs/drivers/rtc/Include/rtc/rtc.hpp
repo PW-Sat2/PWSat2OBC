@@ -54,7 +54,7 @@ namespace devices
             static constexpr std::uint8_t I2CAddress = 0b1010001;
 
             /** @brief Error counter type */
-            using ErrorCounter = error_counter::ErrorCounter<7>;
+            using ErrorCounter = error_counter::ErrorCounter<2>;
 
           private:
             /** @brief Error reporter type */
