@@ -6,6 +6,7 @@
 #include "BasicTelemetry.hpp"
 #include "ErrorCounters.hpp"
 #include "Experiments.hpp"
+#include "ImtqTelemetry.hpp"
 #include "SystemStartup.hpp"
 #include "Telemetry.hpp"
 #include "TimeTelemetry.hpp"
@@ -54,6 +55,9 @@ namespace telemetry
     static_assert(FlashSecondarySlotsScrubbing::BitSize() == 3, "Invalid serialized size");
     static_assert(RAMScrubbing::BitSize() == 32, "Invalid serialized size");
 
+    template <size_t size> struct TD;
+    TD<ManagedTelemetry::TotalSerializedSize> a;
+    TD<ManagedTelemetry::PayloadSize> b;
     static_assert(ManagedTelemetry::TotalSerializedSize <= (devices::comm::MaxDownlinkFrameSize - 1), "Telemetry is too large");
 }
 

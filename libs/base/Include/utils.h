@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <array>
 #include <chrono>
 #include <cstdint>
 #include <limits>
@@ -553,7 +554,8 @@ namespace details
         /**
          * @brief This value contains queried type size in bits.
          */
-        static constexpr std::uint32_t Value = std::numeric_limits<T>::digits;
+        static constexpr std::uint32_t Value =
+            std::numeric_limits<T>::digits + static_cast<std::uint32_t>(std::numeric_limits<T>::is_signed);
     };
 
     /**
@@ -567,6 +569,23 @@ namespace details
          * @brief This value contains queried type size in bits.
          */
         static constexpr std::uint32_t Value = BitValue<T, BitCount>::Size;
+    };
+
+    /**
+     * @brief Type that extracts size in bits of the selected type.
+     * @tparam T Queried type.
+     * @remark Specialization for std::arrays
+     */
+    template <typename T, std::size_t size> struct BitSizeOf<std::array<T, size>, false>
+    {
+        /**
+         * @brief This value contains queried type size in bits.
+         */
+        static constexpr std::uint32_t Value = size * BitSizeOf<T, std::is_enum<T>::value>::Value;
+
+        static constexpr std::uint32_t ElementSize = BitSizeOf<T, std::is_enum<T>::value>::Value;
+
+        static constexpr std::uint32_t Size = size;
     };
 }
 
