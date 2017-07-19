@@ -48,17 +48,21 @@ namespace obc
             )
         {
             LOG(LOG_LEVEL_ERROR, "Unable to parse persistent state image.");
-            stateObject = state::SystemPersistentState();
             return false;
         }
 
-        if (!stateObject.Read(reader))
-        {
-            LOG(LOG_LEVEL_ERROR, "Unable read state object.");
-            return false;
-        }
+        auto newState = state::SystemPersistentState::InternalPersistentState();
+        newState.Read(reader);
 
         const auto footer = reader.ReadDoubleWordLE();
-        return footer == Signature && reader.Status();
+        const bool isValid = footer == Signature && reader.Status();
+
+        if (!isValid)
+        {
+            LOG(LOG_LEVEL_ERROR, "Unable to parse persistent state foorer.");
+            return false;
+        }
+
+        return stateObject.Load(newState);
     }
 }
