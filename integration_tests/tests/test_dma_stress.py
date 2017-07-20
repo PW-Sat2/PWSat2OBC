@@ -1,14 +1,13 @@
-from datetime import datetime
-
 import logging
-
-from nose.tools import nottest
+from datetime import datetime
+from unittest import skip
 
 from tests.base import RestartPerTest
 
-# @nottest
-class XTest(RestartPerTest):
-    def test_x(self):
+
+class DMAStressTest(RestartPerTest):
+    @skip('Unending test')
+    def test_infinite_write(self):
         log = logging.getLogger("test")
         logging.getLogger("I2C").propagate = False
 
@@ -25,9 +24,6 @@ class XTest(RestartPerTest):
             read_back = self.system.obc.read_file("/test")
             log.info("AFTER READ %d", counter)
 
-            # self.assertEqual(buffer, read_back)
-
-            # pong = self.system.obc.ping()
-            # self.assertEqual(pong, 'pong')
+            self.assertEqual(buffer, read_back)
 
             counter += 1
