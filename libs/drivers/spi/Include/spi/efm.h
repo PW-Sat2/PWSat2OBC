@@ -35,14 +35,16 @@ namespace drivers
             /**
             * @brief Writes buffer to device
             * @param[in] buffer Input buffer
+            * @return Operation result
             */
-            void Write(gsl::span<const std::uint8_t> buffer);
+            OSResult Write(gsl::span<const std::uint8_t> buffer);
 
             /**
              * @brief Reads from device
              * @param[in] buffer Output buffer
+             * @return Operation result
              */
-            void Read(gsl::span<std::uint8_t> buffer);
+            OSResult Read(gsl::span<std::uint8_t> buffer);
 
             /**
              * @brief Locks SPI peripheral
@@ -96,8 +98,8 @@ namespace drivers
 
             virtual void Select() override;
             virtual void Deselect() override;
-            virtual void Write(gsl::span<const std::uint8_t> buffer) override;
-            virtual void Read(gsl::span<std::uint8_t> buffer) override;
+            virtual OSResult Write(gsl::span<const std::uint8_t> buffer) override;
+            virtual OSResult Read(gsl::span<std::uint8_t> buffer) override;
 
           private:
             /** @brief SPI peripheral to use */

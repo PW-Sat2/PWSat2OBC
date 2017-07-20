@@ -81,7 +81,7 @@ Id N25QDriver::ReadId()
 
 Id N25QDriver::ReadIdWithoutErrorHandling()
 {
-    array<uint8_t, 4> response;
+    array<uint8_t, 3> response;
 
     {
         SPISelectSlave slave(this->_spi);
