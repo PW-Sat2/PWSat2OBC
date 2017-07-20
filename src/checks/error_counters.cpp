@@ -6,6 +6,7 @@
 #include "obc/storage/n25q.h"
 #include "payload/payload.h"
 #include "rtc/rtc.hpp"
+#include "suns/suns.hpp"
 #include "traits.hpp"
 
 namespace
@@ -20,17 +21,19 @@ namespace
     };
 
     /** @brief Typedef with all declared error counters */
-    using Everything = VerifyUniqueness<      //
-        devices::eps::EPSDriver,              //
-        devices::comm::CommObject,            //
-        devices::imtq::ImtqDriver,            //
-        devices::fm25w::RedundantFM25WDriver, //
-        devices::rtc::RTCObject,              //
-        drivers::payload::PayloadDriver,
+    using Everything = VerifyUniqueness<           //
+        devices::eps::EPSDriver,                   //
+        devices::comm::CommObject,                 //
+        devices::imtq::ImtqDriver,                 //
+        devices::fm25w::RedundantFM25WDriver,      //
+        devices::rtc::RTCObject,                   //
+        drivers::payload::PayloadDriver,           //
         obc::storage::error_counters::N25QDriver1, //
         obc::storage::error_counters::N25QDriver2, //
         obc::storage::error_counters::N25QDriver3, //
-        devices::n25q::RedundantN25QDriver>;
+        devices::n25q::RedundantN25QDriver,        //
+        devices::suns::SunSDriver                  //
+        >;
 
     static_assert(Everything::IsOk, "Device IDs for error counting must be unique");
 }
