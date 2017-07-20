@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <gsl/span>
+#include "base/os.h"
 #include "utils.h"
 
 #include "gpio/forward.h"
@@ -32,13 +33,15 @@ namespace drivers
             /**
              * @brief Writes buffer to device
              * @param[in] buffer Input buffer
+             * @return Operation result
              */
-            virtual void Write(gsl::span<const std::uint8_t> buffer) = 0;
+            virtual OSResult Write(gsl::span<const std::uint8_t> buffer) = 0;
             /**
              * @brief Reads from device
              * @param[in] buffer Output buffer
+             * @return Operation result
              */
-            virtual void Read(gsl::span<std::uint8_t> buffer) = 0;
+            virtual OSResult Read(gsl::span<std::uint8_t> buffer) = 0;
         };
 
         /**

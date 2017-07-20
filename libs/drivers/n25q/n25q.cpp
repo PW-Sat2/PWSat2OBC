@@ -5,6 +5,7 @@
 #include "base/os.h"
 #include "base/reader.h"
 #include "base/writer.h"
+#include "logger/logger.h"
 
 #include "n25q.h"
 
@@ -53,9 +54,30 @@ static inline void WriterWriteAddress(Writer& writer, size_t address)
     writer.WriteByte(static_cast<uint8_t>((address >> 0 * 8) & 0xFF));
 }
 
-N25QDriver::N25QDriver(                   //
-    error_counter::ErrorCounting& errors, //
-    error_counter::Device deviceId,       //
+template <typename Action> static OSResult Retry(std::uint8_t retries, Action action)
+{
+    auto remaining = retries;
+    OSResult lastResult = OSResult::InvalidOperation;
+
+    while (remaining > 0)
+    {
+        lastResult = action();
+
+        if (lastResult == OSResult::Success)
+        {
+            break;
+        }
+
+        remaining--;
+        LOG(LOG_LEVEL_WARNING, "[n25q] Retrying action");
+    }
+
+    return lastResult;
+}
+
+N25QDriver::N25QDriver(                    //
+    error_counter::IErrorCounting& errors, //
+    error_counter::Device deviceId,        //
     ISPIInterface& spi)
     : _spi(spi),          //
       _errors(errors),    //
@@ -83,11 +105,11 @@ Id N25QDriver::ReadIdWithoutErrorHandling()
 {
     array<uint8_t, 3> response;
 
-    {
+    Retry(RetryCount, [this, &response]() {
         SPISelectSlave slave(this->_spi);
 
-        this->Command(N25QCommand::ReadId, span<uint8_t>(response));
-    }
+        return this->Command(N25QCommand::ReadId, span<uint8_t>(response));
+    });
 
     Reader reader(response);
 
@@ -102,11 +124,11 @@ Status N25QDriver::ReadStatus()
 {
     uint8_t status;
 
-    {
+    Retry(RetryCount, [this, &status]() {
         SPISelectSlave slave(this->_spi);
 
-        this->Command(N25QCommand::ReadStatusRegister, span<uint8_t>(&status, 1));
-    }
+        return this->Command(N25QCommand::ReadStatusRegister, span<uint8_t>(&status, 1));
+    });
 
     return static_cast<Status>(status);
 }
@@ -115,26 +137,44 @@ FlagStatus N25QDriver::ReadFlagStatus()
 {
     uint8_t status;
 
-    {
+    Retry(RetryCount, [this, &status]() {
         SPISelectSlave slave(this->_spi);
 
-        this->Command(N25QCommand::ReadFlagStatusRegister, span<uint8_t>(&status, 1));
-    }
+        return this->Command(N25QCommand::ReadFlagStatusRegister, span<uint8_t>(&status, 1));
+    });
 
     return static_cast<FlagStatus>(status);
 }
 
-void N25QDriver::ReadMemory(std::size_t address, gsl::span<uint8_t> buffer)
+OSResult N25QDriver::ReadMemory(std::size_t address, gsl::span<uint8_t> buffer)
 {
-    array<uint8_t, 4> command;
-    Writer writer(command);
+    auto r = Retry(RetryCount, [this, address, &buffer]() {
+        array<uint8_t, 4> command;
+        Writer writer(command);
 
-    writer.WriteByte(N25QCommand::ReadMemory);
-    WriterWriteAddress(writer, address);
+        writer.WriteByte(N25QCommand::ReadMemory);
+        WriterWriteAddress(writer, address);
 
-    SPISelectSlave slave(this->_spi);
-    this->_spi.Write(command);
-    this->_spi.Read(buffer);
+        SPISelectSlave slave(this->_spi);
+        auto r = this->_spi.Write(command);
+
+        if (r != OSResult::Success)
+        {
+            return r;
+        }
+
+        return this->_spi.Read(buffer);
+    });
+
+    if (r == OSResult::Success)
+    {
+        this->_errors.Success(this->_deviceId);
+    }
+    else
+    {
+        this->_errors.Failure(this->_deviceId);
+    }
+    return r;
 }
 
 OperationWaiter::OperationWaiter(IN25QDriver* driver, std::chrono::milliseconds timeout, FlagStatus errorStatus)
@@ -217,10 +257,16 @@ OperationWaiter N25QDriver::BeginWritePage(size_t address, ptrdiff_t offset, spa
     return OperationWaiter(this, ProgramPageTimeout, FlagStatus::ProgramError);
 }
 
-void N25QDriver::Command(const std::uint8_t command, gsl::span<std::uint8_t> response)
+OSResult N25QDriver::Command(const std::uint8_t command, gsl::span<std::uint8_t> response)
 {
-    this->_spi.Write(span<const uint8_t>(&command, 1));
-    this->_spi.Read(response);
+    auto r = this->_spi.Write(span<const uint8_t>(&command, 1));
+
+    if (r != OSResult::Success)
+    {
+        return r;
+    }
+
+    return this->_spi.Read(response);
 }
 
 void N25QDriver::EnableWrite()
@@ -389,9 +435,9 @@ OperationResult N25QDriver::Reset()
     return OperationResult::Success;
 }
 
-void N25QDriver::Command(const std::uint8_t command)
+OSResult N25QDriver::Command(const std::uint8_t command)
 {
-    this->_spi.Write(span<const uint8_t>(&command, 1));
+    return this->_spi.Write(span<const uint8_t>(&command, 1));
 }
 
 void N25QDriver::WriteAddress(const std::size_t address)

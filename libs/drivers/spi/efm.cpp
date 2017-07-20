@@ -46,28 +46,20 @@ void EFMSPIInterface::Initialize()
     System::GiveSemaphore(this->_lock);
 }
 
-void EFMSPIInterface::Write(gsl::span<const std::uint8_t> buffer)
+OSResult EFMSPIInterface::Write(gsl::span<const std::uint8_t> buffer)
 {
+    efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_RXBLOCKEN);
+
     for (decltype(buffer.size()) offset = 0; offset < buffer.size(); offset += 1024)
     {
         auto part = buffer.subspan(offset, std::min(1024, buffer.size() - offset));
 
         this->_transferGroup.Clear(TransferFinished);
 
-        efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_CLEARRX | USART_CMD_CLEARTX);
+        efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_CLEARRX);
+        efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_CLEARTX);
 
         efm::usart::IntClear(io_map::SPI::Peripheral, efm::usart::IntGet(io_map::SPI::Peripheral));
-
-        uint32_t dummyRx = 0;
-        efm::dma::PeripheralMemory(this->_rxChannel,
-            efm::DMASignal<efm::DMASignalUSART::RXDATAV>(io_map::SPI::Peripheral),
-            &dummyRx,
-            RXPort,
-            false,
-            part.size(),
-            dmadrvDataSize1,
-            OnTransferFinished,
-            this);
 
         efm::dma::MemoryPeripheral(this->_txChannel,
             efm::DMASignal<efm::DMASignalUSART::TXBL>(io_map::SPI::Peripheral),
@@ -79,11 +71,23 @@ void EFMSPIInterface::Write(gsl::span<const std::uint8_t> buffer)
             OnTransferFinished,
             this);
 
-        this->_transferGroup.WaitAll(TransferFinished, true, InfiniteTimeout);
+        auto result = this->_transferGroup.WaitAll(TransferTXFinished, true, io_map::SPI::DMATransferTimeout);
+
+        if (!has_flag(result, TransferTXFinished))
+        {
+            efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_RXBLOCKDIS);
+            return OSResult::Timeout;
+        }
+
+        efm::usart::IntClear(io_map::SPI::Peripheral, efm::usart::IntGet(io_map::SPI::Peripheral));
     }
+
+    efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_RXBLOCKDIS);
+
+    return OSResult::Success;
 }
 
-void EFMSPIInterface::Read(gsl::span<std::uint8_t> buffer)
+OSResult EFMSPIInterface::Read(gsl::span<std::uint8_t> buffer)
 {
     for (decltype(buffer.size()) offset = 0; offset < buffer.size(); offset += 1024)
     {
@@ -91,7 +95,8 @@ void EFMSPIInterface::Read(gsl::span<std::uint8_t> buffer)
 
         this->_transferGroup.Clear(TransferFinished);
 
-        efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_CLEARRX | USART_CMD_CLEARTX);
+        efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_CLEARRX);
+        efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_CLEARTX);
 
         efm::usart::IntClear(io_map::SPI::Peripheral, efm::usart::IntGet(io_map::SPI::Peripheral));
 
@@ -105,19 +110,25 @@ void EFMSPIInterface::Read(gsl::span<std::uint8_t> buffer)
             OnTransferFinished,
             this);
 
-        uint32_t dummyTx = 0;
         efm::dma::MemoryPeripheral(this->_txChannel,
             efm::DMASignal<efm::DMASignalUSART::TXBL>(io_map::SPI::Peripheral),
             TXPort,
-            &dummyTx,
-            false,
+            part.data(),
+            true,
             part.size(),
             dmadrvDataSize1,
             OnTransferFinished,
             this);
 
-        this->_transferGroup.WaitAll(TransferFinished, true, InfiniteTimeout);
+        auto result = this->_transferGroup.WaitAll(TransferFinished, true, io_map::SPI::DMATransferTimeout);
+
+        if (!has_flag(result, TransferFinished))
+        {
+            return OSResult::Timeout;
+        }
     }
+
+    return OSResult::Success;
 }
 
 bool EFMSPIInterface::OnTransferFinished(unsigned int channel, unsigned int sequenceNo, void* param)
@@ -135,7 +146,6 @@ bool EFMSPIInterface::OnTransferFinished(unsigned int channel, unsigned int sequ
         This->_transferGroup.SetISR(TransferTXFinished);
     }
 
-    //    System::EndSwitchingISR();
     return true;
 }
 EFMSPISlaveInterface::EFMSPISlaveInterface(EFMSPIInterface& spi, const drivers::gpio::Pin& pin) : _spi(spi), _pin(pin)
@@ -154,14 +164,14 @@ void EFMSPISlaveInterface::Deselect()
     this->_spi.Unlock();
 }
 
-void EFMSPISlaveInterface::Write(gsl::span<const std::uint8_t> buffer)
+OSResult EFMSPISlaveInterface::Write(gsl::span<const std::uint8_t> buffer)
 {
-    this->_spi.Write(buffer);
+    return this->_spi.Write(buffer);
 }
 
-void EFMSPISlaveInterface::Read(gsl::span<std::uint8_t> buffer)
+OSResult EFMSPISlaveInterface::Read(gsl::span<std::uint8_t> buffer)
 {
-    this->_spi.Read(buffer);
+    return this->_spi.Read(buffer);
 }
 
 void drivers::spi::EFMSPIInterface::Lock()

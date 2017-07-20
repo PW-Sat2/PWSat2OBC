@@ -12,6 +12,8 @@ using testing::StrictMock;
 using testing::Eq;
 using testing::ElementsAre;
 using testing::ContainerEq;
+using testing::DoAll;
+using testing::Return;
 using std::uint16_t;
 using std::uint8_t;
 using testing::InSequence;
@@ -46,7 +48,7 @@ namespace
             auto s = this->_spi.ExpectSelected();
 
             EXPECT_CALL(this->_spi, Write(ElementsAre(0b00000101)));
-            EXPECT_CALL(this->_spi, Read(SpanOfSize(1))).WillOnce(FillBuffer<0>(num(expected)));
+            EXPECT_CALL(this->_spi, Read(SpanOfSize(1))).WillOnce(DoAll(FillBuffer<0>(num(expected)), Return(OSResult::Success)));
         }
 
         auto status = _driver.ReadStatus();
@@ -64,7 +66,7 @@ namespace
             auto s = this->_spi.ExpectSelected();
 
             EXPECT_CALL(this->_spi, Write(ElementsAre(num(Command::Read), 0x2B, 0xCD)));
-            EXPECT_CALL(this->_spi, Read(SpanOfSize(16))).WillOnce(FillBuffer<0>(data));
+            EXPECT_CALL(this->_spi, Read(SpanOfSize(16))).WillOnce(DoAll(FillBuffer<0>(data), Return(OSResult::Success)));
         }
 
         decltype(data) result{0};

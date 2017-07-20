@@ -14,9 +14,9 @@ class SPIPeripheral
 
     void Deinitialize();
 
-    void Write(gsl::span<const std::uint8_t> buffer);
+    OSResult Write(gsl::span<const std::uint8_t> buffer);
 
-    void Read(gsl::span<std::uint8_t> buffer);
+    OSResult Read(gsl::span<std::uint8_t> buffer);
 
   private:
     const drivers::gpio::OutputPin<io_map::SPI::MOSI> MOSI;
@@ -35,9 +35,9 @@ template <typename ChipSelect> class SPIDevice : public drivers::spi::ISPIInterf
 
     virtual void Deselect() override;
 
-    virtual void Write(gsl::span<const std::uint8_t> buffer) override;
+    virtual OSResult Write(gsl::span<const std::uint8_t> buffer) override;
 
-    virtual void Read(gsl::span<std::uint8_t> buffer) override;
+    virtual OSResult Read(gsl::span<std::uint8_t> buffer) override;
 
   private:
     SPIPeripheral& _spi;
@@ -63,14 +63,14 @@ template <typename ChipSelect> void SPIDevice<ChipSelect>::Deselect()
     this->_chipSelect.High();
 }
 
-template <typename ChipSelect> void SPIDevice<ChipSelect>::Write(gsl::span<const std::uint8_t> buffer)
+template <typename ChipSelect> OSResult SPIDevice<ChipSelect>::Write(gsl::span<const std::uint8_t> buffer)
 {
-    this->_spi.Write(buffer);
+    return this->_spi.Write(buffer);
 }
 
-template <typename ChipSelect> void SPIDevice<ChipSelect>::Read(gsl::span<std::uint8_t> buffer)
+template <typename ChipSelect> OSResult SPIDevice<ChipSelect>::Read(gsl::span<std::uint8_t> buffer)
 {
-    this->_spi.Read(buffer);
+    return this->_spi.Read(buffer);
 }
 
 #endif /* BOOT_SPI_HPP_ */

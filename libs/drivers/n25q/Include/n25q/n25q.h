@@ -107,7 +107,7 @@ namespace devices
             * @param[in] address Start address
             * @param[out] buffer Buffer
             */
-            virtual void ReadMemory(std::size_t address, gsl::span<uint8_t> buffer) = 0;
+            virtual OSResult ReadMemory(std::size_t address, gsl::span<uint8_t> buffer) = 0;
 
             /**
              * @brief Writes (sets 1 to 0) a page of data to memory
@@ -190,14 +190,14 @@ namespace devices
              * @param[in] deviceId Id associated with this N25Q chip, used for error counting.
              * @param[in] spi SPI interface to use
              */
-            N25QDriver(error_counter::ErrorCounting& errors, error_counter::Device deviceId, drivers::spi::ISPIInterface& spi);
+            N25QDriver(error_counter::IErrorCounting& errors, error_counter::Device deviceId, drivers::spi::ISPIInterface& spi);
 
             /**
              * @brief Reads data from memory starting from given address
              * @param[in] address Start address
              * @param[out] buffer Buffer
              */
-            virtual void ReadMemory(std::size_t address, gsl::span<uint8_t> buffer) override;
+            virtual OSResult ReadMemory(std::size_t address, gsl::span<uint8_t> buffer) override;
 
             /**
              * @brief Writes (sets 1 to 0) a page of data to memory
@@ -303,12 +303,12 @@ namespace devices
              * @param[in] command Command
              * @param[out] response Buffer for response
              */
-            void Command(const std::uint8_t command, gsl::span<std::uint8_t> response);
+            OSResult Command(const std::uint8_t command, gsl::span<std::uint8_t> response);
             /**
              * @brief Sends single-byte command
              * @param[in] command Command
              */
-            void Command(const std::uint8_t command);
+            OSResult Command(const std::uint8_t command);
 
             /**
              * @brief Reads Id without reporting errors
@@ -320,7 +320,7 @@ namespace devices
             drivers::spi::ISPIInterface& _spi;
 
             /** @brief Error counting mechanism */
-            error_counter::ErrorCounting& _errors;
+            error_counter::IErrorCounting& _errors;
             /** @brief Device ID assigned to this chip - used for error counting */
             error_counter::Device _deviceId;
 
@@ -339,6 +339,8 @@ namespace devices
             static constexpr std::chrono::milliseconds ResetTimeout = std::chrono::milliseconds(10);
             /** @brief Write status register timeout */
             static constexpr std::chrono::milliseconds WriteStatusRegisterTimeout = std::chrono::milliseconds(10);
+
+            static constexpr std::uint8_t RetryCount = 3;
         };
 
         /**
@@ -416,7 +418,7 @@ namespace devices
              * Reads are performed sequentially. If reads from 2 chips yield the same data, 3rd chip is not read.
              * This means that redundantBuffer2 will only be written if outputBuffer and redundantBuffer1 hold different data.
              */
-            void ReadMemory(std::size_t address,
+            OSResult ReadMemory(std::size_t address,
                 gsl::span<uint8_t> outputBuffer,
                 gsl::span<uint8_t> redundantBuffer1,
                 gsl::span<uint8_t> redundantBuffer2);

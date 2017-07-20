@@ -27,18 +27,22 @@ void SPIPeripheral::Deinitialize()
     USART_Enable(io_map::SPI::Peripheral, usartDisable);
 }
 
-void SPIPeripheral::Write(gsl::span<const std::uint8_t> buffer)
+OSResult SPIPeripheral::Write(gsl::span<const std::uint8_t> buffer)
 {
     for (const auto b : buffer)
     {
         USART_SpiTransfer(io_map::SPI::Peripheral, b);
     }
+
+    return OSResult::Success;
 }
 
-void SPIPeripheral::Read(gsl::span<std::uint8_t> buffer)
+OSResult SPIPeripheral::Read(gsl::span<std::uint8_t> buffer)
 {
     for (auto& b : buffer)
     {
         b = USART_SpiTransfer(io_map::SPI::Peripheral, 0);
     }
+
+    return OSResult::Success;
 }
