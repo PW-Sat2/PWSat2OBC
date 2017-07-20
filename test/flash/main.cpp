@@ -88,40 +88,40 @@ static void Test(void*)
     BootErrorCounter ec;
     N25QDriver flash(ec, 1, SlaveSPI);
 
-    auto r = flash.Reset();
-    LOGF(LOG_LEVEL_INFO, "Reset: %d", num(r));
+    //    auto r = flash.Reset();
+    //    LOGF(LOG_LEVEL_INFO, "Reset: %d", num(r));
 
-    while (true)
-    {
-        auto wait = flash.BeginEraseSector(0x0);
-        r = wait.Wait();
-        LOGF(LOG_LEVEL_INFO, "Erase result %d", num(r));
-
-        std::array<std::uint8_t, 256> writeBuffer;
-        std::array<std::uint8_t, 256> readBuffer;
-
-        for (int i = 0; i < 256; i++)
-        {
-            writeBuffer[i] = i;
-        }
-
-        readBuffer.fill(0);
-
-        wait = flash.BeginWritePage(0x0, 0x0, writeBuffer);
-        r = wait.Wait();
-        LOGF(LOG_LEVEL_INFO, "Write result %d", num(r));
-
-        flash.ReadMemory(0x0, readBuffer);
-
-        if (memcmp(writeBuffer.data(), readBuffer.data(), readBuffer.size()) == 0)
-        {
-            LOG(LOG_LEVEL_INFO, "CMP OK");
-        }
-        else
-        {
-            LOG(LOG_LEVEL_INFO, "CMP NOT OK");
-        }
-    }
+    //    while (true)
+    //    {
+    //        auto wait = flash.BeginEraseSector(0x0);
+    //        r = wait.Wait();
+    //        LOGF(LOG_LEVEL_INFO, "Erase result %d", num(r));
+    //
+    //        std::array<std::uint8_t, 256> writeBuffer;
+    //        std::array<std::uint8_t, 256> readBuffer;
+    //
+    //        for (int i = 0; i < 256; i++)
+    //        {
+    //            writeBuffer[i] = i;
+    //        }
+    //
+    //        readBuffer.fill(0);
+    //
+    //        wait = flash.BeginWritePage(0x0, 0x0, writeBuffer);
+    //        r = wait.Wait();
+    //        LOGF(LOG_LEVEL_INFO, "Write result %d", num(r));
+    //
+    //        flash.ReadMemory(0x0, readBuffer);
+    //
+    //        if (memcmp(writeBuffer.data(), readBuffer.data(), readBuffer.size()) == 0)
+    //        {
+    //            LOG(LOG_LEVEL_INFO, "CMP OK");
+    //        }
+    //        else
+    //        {
+    //            LOG(LOG_LEVEL_INFO, "CMP NOT OK");
+    //        }
+    //    }
 
     while (true)
     {
@@ -153,6 +153,9 @@ int main(void)
     CMU_OscillatorEnable(cmuOsc_HFXO, true, true);
     CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
     CMU_OscillatorEnable(cmuOsc_HFRCO, false, true);
+
+    GPIO_PinModeSet(gpioPortB, 0, gpioModePushPull, 1);
+    GPIO_PinModeSet(gpioPortB, 1, gpioModePushPull, 1);
 
     SwoEnable();
 

@@ -129,12 +129,11 @@ void EFMSPIInterface::Read(gsl::span<std::uint8_t> buffer)
             OnTransferFinished,
             this);
 
-        uint32_t dummyTx = 0;
         efm::dma::MemoryPeripheral(this->_txChannel,
             efm::DMASignal<efm::DMASignalUSART::TXBL>(io_map::SPI::Peripheral),
             TXPort,
-            &dummyTx,
-            false,
+            part.data(),
+            true,
             part.size(),
             dmadrvDataSize1,
             OnTransferFinished,
