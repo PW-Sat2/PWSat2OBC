@@ -10,6 +10,7 @@
 #include "gyro/fwd.hpp"
 #include "i2c/forward.h"
 #include "imtq/fwd.hpp"
+#include "suns/fwd.hpp"
 #include "obc/experiments_fwd.hpp"
 #include "obc/fdir_fwd.hpp"
 #include "obc/hardware_fwd.hpp"
@@ -31,6 +32,7 @@ devices::eps::EPSDriver& GetEPS();
 obc::OBCExperiments& GetExperiments();
 obc::OBCMemory& GetMemory();
 devices::imtq::ImtqDriver& GetIMTQ();
+devices::suns::SunSDriver& GetSUNS();
 drivers::i2c::I2CInterface& GetI2C();
 devices::gyro::GyroDriver& GetGyro();
 devices::rtc::RTCObject& GetRTC();
