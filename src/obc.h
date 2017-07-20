@@ -127,7 +127,7 @@ struct OBC
 
 LineIO& OBC::GetLineIO()
 {
-    return this->Hardware.UARTDriver.GetLineIO();
+    return this->Hardware.Terminal.GetLineIO();
 }
 
 /** @brief Global OBC object. */

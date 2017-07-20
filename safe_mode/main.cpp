@@ -34,7 +34,7 @@ extern "C" void assertEFM(const char* /*file*/, int /*line*/)
 
 void SysTick_Handler()
 {
-    USART_Tx(io_map::UART::Peripheral, '*');
+    USART_Tx(io_map::UART_1::Peripheral, '*');
 }
 
 static void Recover()
@@ -79,20 +79,20 @@ int main(void)
     CMU_ClockEnable(cmuClock_DMA, true);
 
     USART_InitAsync_TypeDef init = USART_INITASYNC_DEFAULT;
-    init.baudrate = io_map::UART::Baudrate;
+    init.baudrate = io_map::UART_1::Baudrate;
     init.enable = usartDisable;
 
     CMU_ClockEnable(cmuClock_UART1, true);
-    USART_InitAsync(io_map::UART::Peripheral, &init);
+    USART_InitAsync(io_map::UART_1::Peripheral, &init);
 
-    io_map::UART::Peripheral->ROUTE |= UART_ROUTE_TXPEN | UART_ROUTE_RXPEN | io_map::UART::Location;
+    io_map::UART_1::Peripheral->ROUTE |= UART_ROUTE_TXPEN | UART_ROUTE_RXPEN | io_map::UART_1::Location;
 
-    USART_Enable(io_map::UART::Peripheral, usartEnable);
+    USART_Enable(io_map::UART_1::Peripheral, usartEnable);
 
-    USART_Tx(io_map::UART::Peripheral, '!');
+    USART_Tx(io_map::UART_1::Peripheral, '!');
 
     LogInit(LOG_LEVEL_DEBUG);
-    LogAddEndpoint(LogToUart, io_map::UART::Peripheral, LOG_LEVEL_DEBUG);
+    LogAddEndpoint(LogToUart, io_map::UART_1::Peripheral, LOG_LEVEL_DEBUG);
 
     char msg[256] = {0};
 
@@ -102,7 +102,7 @@ int main(void)
 
     while (*c != '\0')
     {
-        USART_Tx(io_map::UART::Peripheral, *c);
+        USART_Tx(io_map::UART_1::Peripheral, *c);
         c++;
     }
 
@@ -113,7 +113,7 @@ int main(void)
 
     while (1)
     {
-        auto r = USART_Rx(io_map::UART::Peripheral);
+        auto r = USART_Rx(io_map::UART_1::Peripheral);
         if (r == 'r')
         {
             NVIC_SystemReset();

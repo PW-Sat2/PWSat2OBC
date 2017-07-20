@@ -61,7 +61,7 @@ void Terminal::Printf(const char* text, ...)
 
 void Terminal::PrintBuffer(gsl::span<const std::uint8_t> buffer)
 {
-    this->_stdio.PrintBuffer(buffer);
+    this->_stdio.PrintBuffer(&this->_stdio, buffer);
 }
 
 void Terminal::ExchangeBuffers(gsl::span<const std::uint8_t> outputBuffer, gsl::span<std::uint8_t> inputBuffer)

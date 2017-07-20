@@ -112,7 +112,7 @@ void GPIO_EVEN_IRQHandler(void)
 
 void LESENSE_IRQHandler()
 {
-    Main.Hardware.UARTDriver.OnWakeUpInterrupt();
+    Main.Hardware.Terminal.OnWakeUpInterrupt();
     System::EndSwitchingISR();
 }
 
@@ -139,7 +139,7 @@ void ACMP0_IRQHandler()
 
 __attribute__((optimize("O3"))) void UART1_RX_IRQHandler()
 {
-    Main.Hardware.UARTDriver.OnReceived();
+    Main.Hardware.Terminal.OnReceived();
 }
 
 static void BlinkLed0(void* param)
