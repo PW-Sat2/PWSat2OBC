@@ -3,10 +3,11 @@
 
 #include "PersistentState.hpp"
 #include "logger/logger.h"
+#include "utils.h"
 
 namespace state
 {
-    template <typename StatePolicy, typename... Parts> class LockablePersistentState
+    template <typename StatePolicy, typename... Parts> class LockablePersistentState : NotCopyable
     {
       public:
         /**
@@ -73,9 +74,20 @@ namespace state
          */
         static constexpr std::uint32_t Size();
 
+        /**
+         * @brief Describes the type of internal PersistentState.
+         */
+        using InternalPersistentState = PersistentState<StatePolicy, Parts...>;
+
+        /**
+         * @brief Loads new State into internal persistent state.
+         * @return True if loading was successful.
+         */
+        bool Load(const InternalPersistentState& newState);
+
       private:
         /** @brief Persistent state container. */
-        PersistentState<StatePolicy, Parts...> state;
+        InternalPersistentState state;
 
         /** @brief Semaphore used for task synchronization. */
         OSSemaphoreHandle synchronizationLock;
@@ -181,6 +193,21 @@ namespace state
     template <typename StatePolicy, typename... Parts> inline constexpr std::uint32_t LockablePersistentState<StatePolicy, Parts...>::Size()
     {
         return PersistentState<StatePolicy, Parts...>::Size();
+    }
+
+    template <typename StatePolicy, typename... Parts>
+    bool LockablePersistentState<StatePolicy, Parts...>::Load(const InternalPersistentState& newState)
+    {
+        Lock lock(this->synchronizationLock, InfiniteTimeout);
+        if (!lock())
+        {
+            LOG(LOG_LEVEL_ERROR, "Unable to acquire PersistentState lock.");
+            return false;
+        }
+
+        state = newState;
+
+        return true;
     }
 }
 
