@@ -17,14 +17,11 @@ PayloadDriver::PayloadDriver(
 
 void PayloadDriver::IRQHandler()
 {
-    _interruptPinDriver.ClearInterrupt();
     auto value = _interruptPinDriver.Value();
     if (!value)
     {
         RaiseDataReadyISR();
     }
-
-    System::EndSwitchingISR();
 }
 
 void PayloadDriver::Initialize()
