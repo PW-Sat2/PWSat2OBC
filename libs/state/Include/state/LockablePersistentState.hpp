@@ -205,12 +205,7 @@ namespace state
             return false;
         }
 
-        std::array<uint8_t, Size()> buffer;
-        Reader r(buffer);
-        Writer w(buffer);
-
-        newState.Write(w);
-        state.Read(r);
+        state = newState;
 
         return true;
     }
