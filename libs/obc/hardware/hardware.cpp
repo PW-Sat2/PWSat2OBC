@@ -77,6 +77,8 @@ void OBCHardware::Initialize()
     this->CommDriver.Initialize();
 
     this->rtc.Initialize();
+
+    this->Gyro.init();
 }
 
 OBCHardware::OBCHardware(

@@ -74,7 +74,7 @@ OBC::OBC()
       Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),                               //
       Imtq(this->Fdir.ErrorCounting(), Hardware.I2C.Buses.Bus),                                           //
       adcs(this->Imtq, this->timeProvider),                                                               //
-      Experiments(fs, this->adcs.GetAdcsCoordinator(), this->timeProvider),                               //
+      Experiments(fs, this->adcs.GetAdcsCoordinator(), this->timeProvider, Hardware.Gyro),                //
       Communication(                                                                                      //
           this->Fdir,
           this->Hardware.CommDriver,
