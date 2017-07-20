@@ -11,6 +11,7 @@ target_link_libraries(${NAME}
     experiments
     exp_fibo
     exp_adcs
+    exp_leop
 )
 
 

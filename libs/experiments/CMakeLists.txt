@@ -17,3 +17,5 @@ target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/$
 
 add_subdirectory(fibo)
 add_subdirectory(adcs)
+add_subdirectory(leop)
+add_subdirectory(fs)

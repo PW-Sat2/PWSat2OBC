@@ -73,6 +73,8 @@ void OBCHardware::Initialize()
     this->Burtc.Initialize();
 
     this->CommDriver.Initialize();
+
+    this->Gyro.init();
 }
 
 OBCHardware::OBCHardware(
