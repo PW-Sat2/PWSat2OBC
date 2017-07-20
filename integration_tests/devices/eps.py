@@ -337,7 +337,7 @@ class EPSControllerB(I2CDevice):
 
 
 class EPS:
-    ERROR_COUNTER = 5
+    ERROR_COUNTER = 1
 
     def __init__(self):
         self.TKmain = LCL()
