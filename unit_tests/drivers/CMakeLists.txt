@@ -27,6 +27,7 @@ set(SOURCES
   gyro/GyroTelemetryTest.cpp
   payload/PayloadDeviceDriverTest.cpp
   payload/PayloadHardwareDriverTest.cpp
+  suns/sunsTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
@@ -38,6 +39,7 @@ target_link_libraries(${NAME}
     fm25w
     n25q
     imtq
+    suns
     rtc
     unit_tests_base
     gyro

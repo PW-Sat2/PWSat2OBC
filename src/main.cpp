@@ -99,19 +99,32 @@ void BURTC_IRQHandler(void)
     Main.Hardware.Burtc.IRQHandler();
 }
 
-void GPIO_EVEN_IRQHandler(void)
+void GPIO_IRQHandler(void)
 {
     std::uint32_t irq = GPIO_IntGet();
+    GPIO_IntClear(irq);
+
     if (irq & Main.Hardware.PayloadInterruptDriver.IRQMask())
     {
         Main.Hardware.PayloadDriver.IRQHandler();
     }
-    else
+
+    if (irq & Main.Hardware.SunSInterruptDriver.IRQMask())
     {
-        LOG(LOG_LEVEL_WARNING, "Unknown GPIO interrupt occurred");
-        GPIO_IntClear(irq);
-        System::EndSwitchingISR();
+        Main.Hardware.SunS.IRQHandler();
     }
+
+    System::EndSwitchingISR();
+}
+
+void GPIO_EVEN_IRQHandler(void)
+{
+    GPIO_IRQHandler();
+}
+
+void GPIO_ODD_IRQHandler(void)
+{
+    GPIO_IRQHandler();
 }
 
 void LESENSE_IRQHandler()

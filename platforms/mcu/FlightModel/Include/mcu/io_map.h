@@ -26,7 +26,7 @@ namespace io_map
 
     using CamSelect = PiggyBack22;
 
-    using SunsInterrupt = PinLocation<gpioPortD, 7>;
+    using SunSInterrupt = PinLocation<gpioPortD, 7>;
 
     struct SPI : public SPIPins<SPI>
     {
