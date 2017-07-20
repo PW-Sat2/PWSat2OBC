@@ -24,7 +24,7 @@
 #include "rtc/rtc.hpp"
 #include "spi/efm.h"
 #include "temp/efm.hpp"
-#include "uart/uart.h"
+#include "uart/uart.hpp"
 
 namespace obc
 {
@@ -167,8 +167,8 @@ namespace obc
         /** @brief Imtq handling */
         devices::imtq::ImtqDriver Imtq;
 
-        /** @brief UART driver */
-        drivers::uart::UART UARTDriver;
+        /** @brief Termnial attached to UART */
+        drivers::uart::UART<io_map::UART_1> Terminal;
 
         /** @brief External Real Time Clock.  */
         devices::rtc::RTCObject rtc;

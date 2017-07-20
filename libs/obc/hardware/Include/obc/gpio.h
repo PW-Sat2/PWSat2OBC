@@ -84,7 +84,8 @@ namespace obc
         typename TTickIndicator,
         typename TBootIndicator,
         typename TSPI,
-        typename TUART,
+        typename TUART0,
+        typename TUART1,
         typename TI2C0,
         typename TI2C1,
         typename TExternalWatchdogPin,
@@ -115,8 +116,10 @@ namespace obc
         const drivers::gpio::OutputPin<TBootIndicator> BootIndicator;
         /** @brief SPI */
         const SPIPins<TSPI> SPI;
-        /** @brief UART */
-        const UARTPins<TUART> UART;
+        /** @brief UART0 */
+        const UARTPins<TUART0> UART_0;
+        /** @brief UART1 */
+        const UARTPins<TUART1> UART_1;
         /** @brief I2C0 */
         const I2CPins<TI2C0> I2C_0;
         /** @brief I2C1 */
@@ -137,7 +140,8 @@ namespace obc
             this->SystickIndicator.Initialize();
             this->BootIndicator.Initialize();
             this->SPI.Initialize();
-            this->UART.Initialize();
+            this->UART_0.Initialize();
+            this->UART_1.Initialize();
             this->I2C_0.Initialize();
             this->I2C_1.Initialize();
         }
@@ -155,7 +159,8 @@ namespace obc
         io_map::SystickIndicator,                           //
         io_map::BootIndicator,                              //
         io_map::SPI,                                        //
-        io_map::UART,
+        io_map::UART_0,
+        io_map::UART_1,
         io_map::I2C_0,
         io_map::I2C_1,
         io_map::Watchdog::ExternalWatchdogPin,

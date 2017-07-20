@@ -64,8 +64,8 @@ void OBCHardware::Initialize()
     this->SPI.Initialize();
 
 #ifndef USE_LEUART
-    this->UARTDriver.Initialize();
-    this->UARTDriver.LineEditing(true);
+    this->Terminal.Initialize();
+    this->Terminal.LineEditing(true);
 #endif
     this->FlashDriver.Initialize();
 
