@@ -190,7 +190,7 @@ namespace devices
              * @param[in] deviceId Id associated with this N25Q chip, used for error counting.
              * @param[in] spi SPI interface to use
              */
-            N25QDriver(error_counter::ErrorCounting& errors, error_counter::Device deviceId, drivers::spi::ISPIInterface& spi);
+            N25QDriver(error_counter::IErrorCounting& errors, error_counter::Device deviceId, drivers::spi::ISPIInterface& spi);
 
             /**
              * @brief Reads data from memory starting from given address
@@ -320,7 +320,7 @@ namespace devices
             drivers::spi::ISPIInterface& _spi;
 
             /** @brief Error counting mechanism */
-            error_counter::ErrorCounting& _errors;
+            error_counter::IErrorCounting& _errors;
             /** @brief Device ID assigned to this chip - used for error counting */
             error_counter::Device _deviceId;
 

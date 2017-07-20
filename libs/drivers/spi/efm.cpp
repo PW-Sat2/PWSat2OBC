@@ -33,6 +33,8 @@ void EFMSPIInterface::Initialize()
 
     efm::usart::InitSync(io_map::SPI::Peripheral, &init);
 
+    //    io_map::SPI::Peripheral->CTRL |= USART_CTRL_TXDELAY_TRIPLE;
+
     efm::dma::AllocateChannel(&this->_rxChannel, nullptr);
     efm::dma::AllocateChannel(&this->_txChannel, nullptr);
 
@@ -48,26 +50,34 @@ void EFMSPIInterface::Initialize()
 
 void EFMSPIInterface::Write(gsl::span<const std::uint8_t> buffer)
 {
+    efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_RXBLOCKEN);
+
     for (decltype(buffer.size()) offset = 0; offset < buffer.size(); offset += 1024)
     {
         auto part = buffer.subspan(offset, std::min(1024, buffer.size() - offset));
 
         this->_transferGroup.Clear(TransferFinished);
 
-        efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_CLEARRX | USART_CMD_CLEARTX);
+        while (has_flag(USART_StatusGet(io_map::SPI::Peripheral), USART_STATUS_RXFULL))
+        {
+            USART_RxDataGet(io_map::SPI::Peripheral);
+        }
+
+        efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_CLEARRX);
+        efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_CLEARTX);
 
         efm::usart::IntClear(io_map::SPI::Peripheral, efm::usart::IntGet(io_map::SPI::Peripheral));
 
-        uint32_t dummyRx = 0;
-        efm::dma::PeripheralMemory(this->_rxChannel,
-            efm::DMASignal<efm::DMASignalUSART::RXDATAV>(io_map::SPI::Peripheral),
-            &dummyRx,
-            RXPort,
-            false,
-            part.size(),
-            dmadrvDataSize1,
-            OnTransferFinished,
-            this);
+        //        uint32_t dummyRx = 0;
+        //        efm::dma::PeripheralMemory(this->_rxChannel,
+        //            efm::DMASignal<efm::DMASignalUSART::RXDATAV>(io_map::SPI::Peripheral),
+        //            &dummyRx,
+        //            RXPort,
+        //            false,
+        //            part.size(),
+        //            dmadrvDataSize1,
+        //            OnTransferFinished,
+        //            this);
 
         efm::dma::MemoryPeripheral(this->_txChannel,
             efm::DMASignal<efm::DMASignalUSART::TXBL>(io_map::SPI::Peripheral),
@@ -79,8 +89,11 @@ void EFMSPIInterface::Write(gsl::span<const std::uint8_t> buffer)
             OnTransferFinished,
             this);
 
-        this->_transferGroup.WaitAll(TransferFinished, true, InfiniteTimeout);
+        this->_transferGroup.WaitAll(TransferTXFinished, true, InfiniteTimeout);
+
+        efm::usart::IntClear(io_map::SPI::Peripheral, efm::usart::IntGet(io_map::SPI::Peripheral));
     }
+    efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_RXBLOCKDIS);
 }
 
 void EFMSPIInterface::Read(gsl::span<std::uint8_t> buffer)
@@ -91,7 +104,18 @@ void EFMSPIInterface::Read(gsl::span<std::uint8_t> buffer)
 
         this->_transferGroup.Clear(TransferFinished);
 
-        efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_CLEARRX | USART_CMD_CLEARTX);
+        while (has_flag(USART_StatusGet(io_map::SPI::Peripheral), USART_STATUS_RXFULL))
+        {
+            USART_RxDataGet(io_map::SPI::Peripheral);
+        }
+
+        efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_CLEARRX);
+        efm::usart::Command(io_map::SPI::Peripheral, USART_CMD_CLEARTX);
+
+        while (has_flag(USART_StatusGet(io_map::SPI::Peripheral), USART_STATUS_RXDATAV))
+        {
+            USART_RxDataGet(io_map::SPI::Peripheral);
+        }
 
         efm::usart::IntClear(io_map::SPI::Peripheral, efm::usart::IntGet(io_map::SPI::Peripheral));
 
@@ -116,7 +140,11 @@ void EFMSPIInterface::Read(gsl::span<std::uint8_t> buffer)
             OnTransferFinished,
             this);
 
+        //        io_map::SPI::Peripheral->CTRL |= USART_CTRL_AUTOTX;
+
         this->_transferGroup.WaitAll(TransferFinished, true, InfiniteTimeout);
+
+        //        io_map::SPI::Peripheral->CTRL &= ~USART_CTRL_AUTOTX;
     }
 }
 

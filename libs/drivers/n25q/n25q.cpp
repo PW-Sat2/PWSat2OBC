@@ -53,9 +53,9 @@ static inline void WriterWriteAddress(Writer& writer, size_t address)
     writer.WriteByte(static_cast<uint8_t>((address >> 0 * 8) & 0xFF));
 }
 
-N25QDriver::N25QDriver(                   //
-    error_counter::ErrorCounting& errors, //
-    error_counter::Device deviceId,       //
+N25QDriver::N25QDriver(                    //
+    error_counter::IErrorCounting& errors, //
+    error_counter::Device deviceId,        //
     ISPIInterface& spi)
     : _spi(spi),          //
       _errors(errors),    //
@@ -81,7 +81,7 @@ Id N25QDriver::ReadId()
 
 Id N25QDriver::ReadIdWithoutErrorHandling()
 {
-    array<uint8_t, 3> response;
+    array<uint8_t, 4> response;
 
     {
         SPISelectSlave slave(this->_spi);
