@@ -92,7 +92,7 @@ namespace obc
         typename TBSP,
         typename TMemoryModules,
         typename TSailState,
-        typename SunsInterrupt>
+        typename TSunSInterrupt>
     struct OBCGPIOBase
     {
         /** @brief Slave Select - Flash1 */
@@ -125,6 +125,9 @@ namespace obc
         /** @brief PayloadInterrupt */
         const drivers::gpio::InterruptPin<TPayloadInterrupt, false, false, true> PayloadInterrupt;
 
+        /** @brief SunSInterrupt */
+        const drivers::gpio::InterruptPin<TSunSInterrupt> SunSInterrupt;
+
         /** @brief Initializes GPIO pins */
         void Initialize() const
         {
@@ -143,6 +146,7 @@ namespace obc
             this->UART.Initialize();
             this->I2C_0.Initialize();
             this->I2C_1.Initialize();
+            this->SunSInterrupt.Initialize();
 
             this->PayloadInterrupt.Initialize();
         }
@@ -168,7 +172,7 @@ namespace obc
         io_map::BSP,
         io_map::MemoryModules,
         io_map::SailDeployed,
-        io_map::SunsInterrupt>;
+        io_map::SunSInterrupt>;
 
     /** @} */
 }

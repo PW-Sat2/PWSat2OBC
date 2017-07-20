@@ -18,6 +18,7 @@ set(SOURCES
     commands/mission.cpp
     commands/dma.cpp
     commands/imtq.cpp
+    commands/suns.cpp
     commands/rtc.cpp
     commands/fram.cpp
     commands/gyro.cpp
@@ -64,6 +65,7 @@ target_link_libraries(${NAME}
     mission
     eps
     imtq
+    suns
     power
     power_eps
     terminal

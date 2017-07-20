@@ -152,7 +152,7 @@ namespace
         EXPECT_EQ(error_counter, 5);
     }
 
-    TEST_F(PayloadHardwareDriverTest, SetingTimeout)
+    TEST_F(PayloadHardwareDriverTest, SettingTimeout)
     {
         auto timeout = std::chrono::milliseconds(1000);
         EXPECT_CALL(os, TakeSemaphore(_, Eq(timeout))).Times(1);
