@@ -27,8 +27,8 @@ namespace
         devices::rtc::RTCObject,                   //
         obc::storage::error_counters::N25QDriver1, //
         obc::storage::error_counters::N25QDriver2, //
-        obc::storage::error_counters::N25QDriver3  //
-        >;
+        obc::storage::error_counters::N25QDriver3, //
+        devices::n25q::RedundantN25QDriver>;
 
     static_assert(Everything::IsOk, "Device IDs for error counting must be unique");
 }

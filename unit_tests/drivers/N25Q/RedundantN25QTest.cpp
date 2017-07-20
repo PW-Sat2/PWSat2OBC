@@ -13,6 +13,7 @@
 #include "OsMock.hpp"
 #include "SPI/SPIMock.h"
 #include "base/os.h"
+#include "mock/error_counter.hpp"
 #include "os/os.hpp"
 
 using std::array;
@@ -60,7 +61,10 @@ struct N25QDriverMock : public IN25QDriver
 class RedundantN25QDriverTest : public Test
 {
   public:
-    RedundantN25QDriverTest() : _driver{{&_n25qDriver[0], &_n25qDriver[1], &_n25qDriver[2]}}
+    RedundantN25QDriverTest()
+        : _errors{_errorsConfig},                                               //
+          _error_counter{_errors},                                              //
+          _driver{_errors, {&_n25qDriver[0], &_n25qDriver[1], &_n25qDriver[2]}} //
     {
     }
 
@@ -77,6 +81,10 @@ class RedundantN25QDriverTest : public Test
         EXPECT_CALL(_n25qDriver[2], WaitForOperation(1ms, FlagStatus::EraseError));
     }
 
+    testing::NiceMock<ErrorCountingConfigrationMock> _errorsConfig;
+    error_counter::ErrorCounting _errors;
+    error_counter::ErrorCounter<RedundantN25QDriver::ErrorCounter::DeviceId> _error_counter;
+
     StrictMock<N25QDriverMock> _n25qDriver[3];
     RedundantN25QDriver _driver;
 };
@@ -92,6 +100,8 @@ TEST_F(RedundantN25QDriverTest, ShouldEraseChip)
     ExpectAllWaiters();
 
     _driver.EraseChip();
+
+    ASSERT_THAT(_error_counter, Eq(0));
 }
 
 TEST_F(RedundantN25QDriverTest, ShouldEraseSector)
@@ -107,6 +117,8 @@ TEST_F(RedundantN25QDriverTest, ShouldEraseSector)
     ExpectAllWaiters();
 
     _driver.EraseSector(sectorAddress);
+
+    ASSERT_THAT(_error_counter, Eq(0));
 }
 
 TEST_F(RedundantN25QDriverTest, ShouldEraseSubSector)
@@ -133,6 +145,8 @@ TEST_F(RedundantN25QDriverTest, ShouldReset)
     EXPECT_CALL(_n25qDriver[2], Reset()).WillOnce(Return(OperationResult::Success));
 
     _driver.Reset();
+
+    ASSERT_THAT(_error_counter, Eq(0));
 }
 
 TEST_F(RedundantN25QDriverTest, ShouldWriteSinglePageMemory)
@@ -154,6 +168,8 @@ TEST_F(RedundantN25QDriverTest, ShouldWriteSinglePageMemory)
     ExpectAllWaiters();
 
     _driver.WriteMemory(address, buffer);
+
+    ASSERT_THAT(_error_counter, Eq(0));
 }
 
 TEST_F(RedundantN25QDriverTest, ShouldReadConsistentMemory)
@@ -173,6 +189,8 @@ TEST_F(RedundantN25QDriverTest, ShouldReadConsistentMemory)
     EXPECT_CALL(_n25qDriver[2], ReadMemory(_, _)).Times(0);
 
     _driver.ReadMemory(address, buffer1, buffer2, buffer3);
+
+    ASSERT_THAT(_error_counter, Eq(0));
 }
 
 TEST_F(RedundantN25QDriverTest, ShouldReadAllChipsIfErrorDetectedMemory)
@@ -195,6 +213,8 @@ TEST_F(RedundantN25QDriverTest, ShouldReadAllChipsIfErrorDetectedMemory)
     _driver.ReadMemory(address, buffer1, buffer2, buffer3);
 
     ASSERT_THAT(buffer1, Eq(buffer2));
+
+    ASSERT_THAT(_error_counter, Eq(5));
 }
 
 TEST_F(RedundantN25QDriverTest, ShouldReadShortestLengthOfBuffer)
@@ -217,6 +237,8 @@ TEST_F(RedundantN25QDriverTest, ShouldReadShortestLengthOfBuffer)
     _driver.ReadMemory(address, buffer1, buffer2, buffer3);
 
     ASSERT_THAT(span<uint8_t>(buffer1), Eq(span<uint8_t>(buffer2).subspan(0, 128)));
+
+    ASSERT_THAT(_error_counter, Eq(5));
 }
 
 TEST_F(RedundantN25QDriverTest, ShouldWriteMultiPageMemory)
@@ -246,4 +268,6 @@ TEST_F(RedundantN25QDriverTest, ShouldWriteMultiPageMemory)
     }
 
     _driver.WriteMemory(address, buffer);
+
+    ASSERT_THAT(_error_counter, Eq(0));
 }

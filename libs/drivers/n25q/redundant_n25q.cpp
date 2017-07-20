@@ -15,7 +15,10 @@ using namespace devices::n25q;
 using redundancy::Vote;
 using redundancy::CorrectBuffer;
 
-RedundantN25QDriver::RedundantN25QDriver(std::array<IN25QDriver*, 3> n25qDrivers) : _n25qDrivers(n25qDrivers)
+RedundantN25QDriver::RedundantN25QDriver(        //
+    error_counter::ErrorCounting& errorCounting, //
+    std::array<IN25QDriver*, 3> n25qDrivers)
+    : _n25qDrivers(n25qDrivers), _error(errorCounting)
 {
 }
 
@@ -37,10 +40,12 @@ void RedundantN25QDriver::ReadMemory(    //
 
     if (compareResult)
     {
+        _error.Success();
         return;
     }
 
     {
+        _error.Failure();
         auto normalizedRedundantBuffer2 = redundantBuffer2.subspan(0, bufferLength);
 
         _n25qDrivers[2]->ReadMemory(address, normalizedRedundantBuffer2);
@@ -61,8 +66,12 @@ OperationResult RedundantN25QDriver::EraseChip()
     auto votedResult = Vote(d1Result, d2Result, d3Result);
 
     if (!votedResult.HasValue)
+    {
+        _error.Failure();
         return OperationResult::Failure;
+    }
 
+    _error.Success();
     return votedResult.Value;
 }
 
@@ -79,8 +88,12 @@ OperationResult RedundantN25QDriver::EraseSubSector(size_t address)
     auto votedResult = Vote(d1Result, d2Result, d3Result);
 
     if (!votedResult.HasValue)
+    {
+        _error.Failure();
         return OperationResult::Failure;
+    }
 
+    _error.Success();
     return votedResult.Value;
 }
 
@@ -97,8 +110,12 @@ OperationResult RedundantN25QDriver::EraseSector(size_t address)
     auto votedResult = Vote(d1Result, d2Result, d3Result);
 
     if (!votedResult.HasValue)
+    {
+        _error.Failure();
         return OperationResult::Failure;
+    }
 
+    _error.Success();
     return votedResult.Value;
 }
 
@@ -118,11 +135,19 @@ OperationResult RedundantN25QDriver::WriteMemory(size_t address, gsl::span<const
 
         auto votedResult = Vote(d1Result, d2Result, d3Result);
         if (!votedResult.HasValue)
+        {
+            _error.Failure();
             return OperationResult::Failure;
+        }
+
         if (votedResult.Value != OperationResult::Success)
+        {
+            _error.Failure();
             return votedResult.Value;
+        }
     }
 
+    _error.Success();
     return OperationResult::Success;
 }
 
@@ -134,9 +159,16 @@ OperationResult RedundantN25QDriver::Reset()
 
     auto votedResult = Vote(d1Result, d2Result, d3Result);
     if (!votedResult.HasValue)
+    {
+        _error.Failure();
         return OperationResult::Failure;
+    }
     if (votedResult.Value != OperationResult::Success)
+    {
+        _error.Failure();
         return votedResult.Value;
+    }
 
+    _error.Success();
     return OperationResult::Success;
 }
