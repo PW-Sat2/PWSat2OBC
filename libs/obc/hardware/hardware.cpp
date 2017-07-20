@@ -62,10 +62,8 @@ void OBCHardware::Initialize()
     this->Pins.Initialize();
     this->I2C.Initialize();
 
-#ifndef USE_LEUART
-    this->UARTDriver.Initialize();
-    this->UARTDriver.LineEditing(true);
-#endif
+    this->Terminal.Initialize();
+    this->Terminal.LineEditing(true);
 
     this->SPI.Initialize();
 

@@ -2,6 +2,7 @@
 #define SRC_IO_MAP_H_
 
 #include <cstdint>
+#include <em_cmu.h>
 #include <em_device.h>
 #include <em_gpio.h>
 #include <em_timer.h>
@@ -39,15 +40,38 @@ namespace io_map
         static constexpr auto DMATransferTimeout = std::chrono::seconds(1);
     };
 
-    struct UART : public UARTPins<UART>
+    struct UART_0 : public UARTPins<UART_0>
     {
-        static constexpr USART_TypeDef* Peripheral = UART1;
-        static constexpr std::uint32_t Location = UART_ROUTE_LOCATION_LOC2;
+        static constexpr std::uint8_t Id = 0;
+        static constexpr USART_TypeDef* Peripheral = UART0;
+
+        static constexpr CMU_Clock_TypeDef Clock = cmuClock_UART0;
         static constexpr std::uint32_t Baudrate = 115200;
-        static constexpr std::uint8_t InterruptPriority = 0;
         static constexpr IRQn WakeUpInterrupt = IRQn::LESENSE_IRQn;
         static constexpr std::uint8_t WakeUpInterruptPriority = 5;
 
+        static constexpr IRQn Interrupt = IRQn::UART0_RX_IRQn;
+        static constexpr std::uint8_t InterruptPriority = 0;
+
+        static constexpr std::uint32_t Location = UART_ROUTE_LOCATION_LOC0;
+        using TX = PinLocation<gpioPortF, 6>;
+        using RX = PinLocation<gpioPortF, 7>;
+    };
+
+    struct UART_1 : public UARTPins<UART_1>
+    {
+        static constexpr std::uint8_t Id = 1;
+        static constexpr USART_TypeDef* Peripheral = UART1;
+
+        static constexpr CMU_Clock_TypeDef Clock = cmuClock_UART1;
+        static constexpr std::uint32_t Baudrate = 115200;
+        static constexpr IRQn WakeUpInterrupt = IRQn::LESENSE_IRQn;
+        static constexpr std::uint8_t WakeUpInterruptPriority = 5;
+
+        static constexpr IRQn Interrupt = IRQn::UART1_RX_IRQn;
+        static constexpr std::uint8_t InterruptPriority = 0;
+
+        static constexpr std::uint32_t Location = UART_ROUTE_LOCATION_LOC2;
         using TX = PinLocation<gpioPortB, 9>;
         using RX = PinLocation<gpioPortB, 10>;
     };
