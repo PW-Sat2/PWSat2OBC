@@ -42,7 +42,7 @@ using namespace std::chrono_literals;
 
 struct N25QDriverMock : public IN25QDriver
 {
-    MOCK_METHOD2(ReadMemory, void(std::size_t address, gsl::span<uint8_t> buffer));
+    MOCK_METHOD2(ReadMemory, OSResult(std::size_t address, gsl::span<uint8_t> buffer));
 
     MOCK_METHOD3(BeginWritePage, OperationWaiter(size_t address, ptrdiff_t offset, gsl::span<const uint8_t> page));
 
@@ -246,4 +246,24 @@ TEST_F(RedundantN25QDriverTest, ShouldWriteMultiPageMemory)
     }
 
     _driver.WriteMemory(address, buffer);
+}
+
+TEST_F(RedundantN25QDriverTest, ShouldPropagateReadMemoryTimeout)
+{
+    array<uint8_t, 256> buffer1;
+    array<uint8_t, 256> buffer2;
+    array<uint8_t, 256> buffer3;
+    buffer1.fill(0xCC);
+    buffer2.fill(0xCC);
+
+    size_t address = 0x0F;
+
+    InSequence s;
+
+    EXPECT_CALL(_n25qDriver[0], ReadMemory(address, span<uint8_t>(buffer1))).WillOnce(Return(OSResult::Timeout));
+    EXPECT_CALL(_n25qDriver[1], ReadMemory(address, span<uint8_t>(buffer2))).Times(0);
+    EXPECT_CALL(_n25qDriver[2], ReadMemory(_, _)).Times(0);
+
+    auto r = _driver.ReadMemory(address, buffer1, buffer2, buffer3);
+    ASSERT_THAT(r, Eq(OSResult::Timeout));
 }
