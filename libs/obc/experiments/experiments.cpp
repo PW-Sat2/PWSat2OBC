@@ -2,11 +2,15 @@
 
 namespace obc
 {
-    OBCExperiments::OBCExperiments(services::fs::IFileSystem& fs, adcs::IAdcsCoordinator& adcs, services::time::TimeProvider& time)
-        :           //
-          Fibo(fs), //
-          Detumbling(adcs, time),
-          Experiments{&Fibo, &Detumbling}
+    OBCExperiments::OBCExperiments(services::fs::IFileSystem& fs,
+        adcs::IAdcsCoordinator& adcs,
+        services::time::TimeProvider& time,
+        devices::gyro::IGyroscopeDriver& gyro)
+        :                         //
+          Fibo(fs),               //
+          Detumbling(adcs, time), //
+          LEOP(gyro, time, fs),   //
+          Experiments{&Fibo, &Detumbling, &LEOP}
     {
     }
 

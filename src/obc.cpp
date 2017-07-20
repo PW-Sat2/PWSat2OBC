@@ -73,7 +73,7 @@ OBC::OBC()
       Fdir(this->PowerControlInterface, 1 << devices::n25q::RedundantN25QDriver::ErrorCounter::DeviceId), //
       Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),                               //
       adcs(this->Hardware.imtqTelemetryCollector, this->timeProvider),                                    //
-      Experiments(fs, this->adcs.GetAdcsCoordinator(), this->timeProvider),                               //
+      Experiments(fs, this->adcs.GetAdcsCoordinator(), this->timeProvider, Hardware.Gyro),                //
       Communication(                                                                                      //
           this->Fdir,
           this->Hardware.CommDriver,
