@@ -1,33 +1,34 @@
 #include "TransportStream.hpp"
 
 using namespace experiments::fs;
+using namespace services::fs;
 
-TransportStream::TransportStream(services::time::ICurrentTime* time) : _file(nullptr), _time(time), _writer(_buffer)
+TransportStream::TransportStream(services::time::ICurrentTime* time) : _time(time), _writer(_buffer)
 {
 }
 
-OSResult TransportStream::Open(services::fs::File* file)
+bool TransportStream::Open(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access)
 {
-    if (file == nullptr)
-        return OSResult::DeviceNotFound;
+    _file = File(fs, path, mode, access);
 
-    _file = file;
+    if (!_file)
+        return false;
+
     InitializePacket();
-    return OSResult::Success;
+    return true;
 }
 
 OSResult TransportStream::Write(PID pid, const gsl::span<uint8_t>& data)
 {
-    if (_file == nullptr)
-        return OSResult::DeviceNotFound;
-
     auto dataSize = data.size();
     if (dataSize + PIDSize > static_cast<uint32_t>(_writer.RemainingSize()))
     {
         FillBufferWithPadding();
         auto result = Flush();
         if (OS_RESULT_FAILED(result))
+        {
             return result;
+        }
     }
 
     _writer.WriteByte(num(pid));
@@ -38,13 +39,12 @@ OSResult TransportStream::Write(PID pid, const gsl::span<uint8_t>& data)
 
 OSResult TransportStream::Flush()
 {
-    if (_file == nullptr)
-        return OSResult::DeviceNotFound;
-
     FillBufferWithPadding();
-    auto result = _file->Write(_buffer);
+    auto result = _file.Write(_buffer);
     if (OS_RESULT_FAILED(result.Status))
+    {
         return result.Status;
+    }
 
     InitializePacket();
 
@@ -55,13 +55,17 @@ void TransportStream::FillBufferWithPadding()
 {
     auto freeSpace = _writer.RemainingSize();
     if (freeSpace < 1)
+    {
         return;
+    }
 
     _writer.WriteByte(num(PID::Padding));
 
     // starting from 1 as one byte has been written above
     for (int i = 1; i < freeSpace; ++i)
+    {
         _writer.WriteByte(0xFF);
+    }
 }
 
 void TransportStream::InitializePacket()
@@ -81,14 +85,13 @@ void TransportStream::InitializePacket()
 
 OSResult TransportStream::Close()
 {
-    if (_file == nullptr)
-        return OSResult::DeviceNotFound;
-
     FillBufferWithPadding();
-    auto result = _file->Write(_buffer);
+    auto result = _file.Write(_buffer);
 
     if (OS_RESULT_FAILED(result.Status))
+    {
         return result.Status;
+    }
 
-    return _file->Close();
+    return _file.Close();
 }

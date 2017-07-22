@@ -60,9 +60,14 @@ namespace experiments
             TransportStream(services::time::ICurrentTime* time = nullptr);
 
             /**
-             * @brief Opens new experiment file
+             * @brief Factory method that opens experiment file
+             * @param fs File system
+             * @param path File path
+             * @param mode Open mode
+             * @param access Access
+             * @return ExperimentFile instance
              */
-            OSResult Open(services::fs::File* file);
+            bool Open(services::fs::IFileSystem& fs, const char* path, services::fs::FileOpen mode, services::fs::FileAccess access);
 
             /**
              * @brief Writes data to file.
@@ -89,7 +94,7 @@ namespace experiments
             std::array<uint8_t, PacketLength> _buffer;
 
             /** @brief File that data will be saved to. */
-            services::fs::File* _file;
+            services::fs::File _file;
 
             /** @brief Time provider. */
             services::time::ICurrentTime* _time;
