@@ -2,7 +2,8 @@
 #include <cstdlib>
 #include "logger/logger.h"
 #include "mission.h"
-#include "obc.h"
+#include "obc_access.hpp"
+#include "terminal/terminal.h"
 #include "time/TimePoint.h"
 #include "time/timer.h"
 
@@ -14,14 +15,14 @@ void JumpToTimeHandler(uint16_t argc, char* argv[])
 {
     if (argc != 1)
     {
-        Main.terminal.Puts("jumpToTime <time>\n");
+        GetTerminal().Puts("jumpToTime <time>\n");
         return;
     }
 
     char* tail;
     const auto targetTime = milliseconds(strtoul(argv[0], &tail, 10));
     devices::rtc::RTCTime rtcTime;
-    if (OS_RESULT_FAILED(Main.Hardware.rtc.ReadTime(rtcTime)))
+    if (OS_RESULT_FAILED(GetRTC().ReadTime(rtcTime)))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to retrieve time from external RTC");
         return;
@@ -36,30 +37,30 @@ void JumpToTimeHandler(uint16_t argc, char* argv[])
         static_cast<unsigned int>(externalTime.count() >> 32),
         static_cast<unsigned int>(externalTime.count()));
 
-    Main.timeProvider.SetCurrentTime(targetTime);
+    GetTimeProvider().SetCurrentTime(targetTime);
     Mission.GetState().PersistentState.Set(state::TimeState(targetTime, externalTime));
-	Main.terminal.Puts("OK");
+    GetTerminal().Puts("OK");
 }
 
 void AdvanceTimeHandler(uint16_t argc, char* argv[])
 {
     if (argc != 1)
     {
-        Main.terminal.Puts("advance_time <time>\n");
+        GetTerminal().Puts("advance_time <time>\n");
         return;
     }
 
     char* tail;
     const auto targetTime = milliseconds(strtoul(argv[0], &tail, 10));
     LOGF(LOG_LEVEL_INFO, "Advancing time by '%lu' seconds\n", static_cast<std::uint32_t>(duration_cast<seconds>(targetTime).count()));
-    Main.timeProvider.AdvanceTime(targetTime);
-	Main.terminal.Puts("OK");
+    GetTimeProvider().AdvanceTime(targetTime);
+    GetTerminal().Puts("OK");
 }
 
 void CurrentTimeHandler(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
-    auto span = Main.timeProvider.GetCurrentTime().Value;
-    Main.terminal.Printf("%lu", static_cast<std::uint32_t>(duration_cast<milliseconds>(span).count()));
+    auto span = GetTimeProvider().GetCurrentTime().Value;
+    GetTerminal().Printf("%lu", static_cast<std::uint32_t>(duration_cast<milliseconds>(span).count()));
 }

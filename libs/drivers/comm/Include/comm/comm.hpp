@@ -51,6 +51,7 @@ COMM_BEGIN
 class Frame;
 class Beacon;
 class CommTelemetry;
+class CommObject;
 
 struct IHandleFrame;
 struct ITransmitter;

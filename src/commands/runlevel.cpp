@@ -1,19 +1,22 @@
 #include <cstdint>
+#include <cstring>
 #include "obc.h"
+#include "obc_access.hpp"
+#include "terminal/terminal.h"
 
 static void DoStart(const char* what)
 {
     if (strcmp(what, "comm") == 0)
     {
-        Main.terminal.Puts("COMM: initializing runlevel 2...");
+        GetTerminal().Puts("COMM: initializing runlevel 2...");
 
         Main.Communication.InitializeRunlevel2();
 
-        Main.terminal.Puts("Done");
+        GetTerminal().Puts("Done");
     }
     else
     {
-        Main.terminal.Puts("runlevel start <comm>");
+        GetTerminal().Puts("runlevel start <comm>");
     }
 }
 
@@ -25,6 +28,6 @@ void RunlevelCommand(std::uint16_t argc, char* argv[])
     }
     else
     {
-        Main.terminal.Puts("runlevel <start>");
+        GetTerminal().Puts("runlevel <start>");
     }
 }

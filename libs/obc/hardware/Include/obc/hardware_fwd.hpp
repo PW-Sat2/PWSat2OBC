@@ -4,6 +4,7 @@
 namespace obc
 {
     class OBCHardware;
+    class PersistentStorageAccess;
 }
 
 #endif /* LIBS_OBC_HARDWARE_INCLUDE_OBC_FWD_HPP_ */
