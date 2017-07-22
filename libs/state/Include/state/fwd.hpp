@@ -11,6 +11,7 @@ namespace state
     class TimeCorrectionConfiguration;
     class BootState;
     class SailState;
+    class ErrorCountersConfigState;
 
     struct NoTrackingStatePolicy;
     class StateTrackingPolicy;
@@ -21,7 +22,8 @@ namespace state
         TimeState,                                       //
         TimeCorrectionConfiguration,                     //
         BootState,                                       //
-        SailState                                        //
+        SailState,                                       //
+        ErrorCountersConfigState                         //
         >
         SystemPersistentState;
 }

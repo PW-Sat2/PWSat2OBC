@@ -13,6 +13,7 @@ set(SOURCES
     time.cpp
     boot.cpp
     sail.cpp
+    ErrorCountersState.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -23,6 +24,7 @@ target_link_libraries(${NAME}
     adcs
     gsl
     experiments
+    error_counter
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
