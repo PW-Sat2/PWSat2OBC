@@ -40,6 +40,8 @@ namespace obc
         /** @brief Performs initialization */
         void Initalize();
 
+        void LoadConfig(std::array<std::uint32_t, error_counter::ErrorCounting::MaxDevices>& config);
+
         /**
          * @brief Returns reference to error counting mechanism
          * @return Reference to errour counting mechanism

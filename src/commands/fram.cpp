@@ -35,7 +35,7 @@ static void Read(IFM25WDriver& fram, std::uint16_t address, gsl::span<uint8_t> v
 
 static void WriteSingleFRAM(devices::fm25w::IFM25WDriver& fram)
 {
-    std::uint16_t address = 5;
+    std::uint16_t address = 16_KB;
 
     {
         std::array<std::uint8_t, 16> writeBuffer;
@@ -53,7 +53,7 @@ static void WriteSingleFRAM(devices::fm25w::IFM25WDriver& fram)
 
 static bool ReadSingleFRAM(devices::fm25w::IFM25WDriver& fram)
 {
-    std::uint16_t address = 5;
+    std::uint16_t address = 16_KB;
 
     {
         alignas(4) std::array<std::uint8_t, 16> readBuffer;
@@ -189,7 +189,7 @@ void FRAM(std::uint16_t argc, char* argv[])
     {
         if (strcmp(argv[1], "f") != 0)
         {
-            GetTerminal().Printf("This operation writes to all flashes. Add \"f\" parameter to proceed.");
+            GetTerminal().Printf("This operation writes to all FRAMs. Add \"f\" parameter to proceed.");
             return;
         }
 

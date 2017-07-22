@@ -151,6 +151,16 @@ OSResult OBC::InitializeRunlevel1()
         }
     }
 
+    state::ErrorCountersConfigState errorCountersConfig;
+    if (!persistentState.Get(errorCountersConfig))
+    {
+        LOG(LOG_LEVEL_ERROR, "Can't get error counters config");
+    }
+    else
+    {
+        this->Fdir.LoadConfig(errorCountersConfig._config);
+    }
+
     if (!Mission.Initialize(10s))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize mission loop.");

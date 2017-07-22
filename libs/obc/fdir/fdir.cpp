@@ -37,12 +37,19 @@ namespace obc
         {
             *it = Config(128, 5, 2);
         }
-        //        this->_configuration.fill(Config(128, 5, 2));
     }
 
     void FDIR::Initalize()
     {
         this->_errorCounting.Handler(*this);
+    }
+
+    void FDIR::LoadConfig(std::array<std::uint32_t, error_counter::ErrorCounting::MaxDevices>& config)
+    {
+        for (std::size_t i = 0; i < error_counter::ErrorCounting::MaxDevices; i++)
+        {
+            this->_configuration[i] = config[i];
+        }
     }
 
     error_counter::ErrorCounting& FDIR::ErrorCounting()
