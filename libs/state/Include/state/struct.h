@@ -12,6 +12,7 @@
 #include "base/os.h"
 #include "boot/BootState.hpp"
 #include "experiments/experiments.h"
+#include "fdir/ErrorCountersState.hpp"
 #include "fwd.hpp"
 #include "sail/SailState.hpp"
 #include "time/TimeCorrectionConfiguration.hpp"
