@@ -38,6 +38,7 @@ void JumpToTimeHandler(uint16_t argc, char* argv[])
 
     Main.timeProvider.SetCurrentTime(targetTime);
     Mission.GetState().PersistentState.Set(state::TimeState(targetTime, externalTime));
+	Main.terminal.Puts("OK");
 }
 
 void AdvanceTimeHandler(uint16_t argc, char* argv[])
@@ -52,6 +53,7 @@ void AdvanceTimeHandler(uint16_t argc, char* argv[])
     const auto targetTime = milliseconds(strtoul(argv[0], &tail, 10));
     LOGF(LOG_LEVEL_INFO, "Advancing time by '%lu' seconds\n", static_cast<std::uint32_t>(duration_cast<seconds>(targetTime).count()));
     Main.timeProvider.AdvanceTime(targetTime);
+	Main.terminal.Puts("OK");
 }
 
 void CurrentTimeHandler(uint16_t argc, char* argv[])
