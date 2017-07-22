@@ -17,7 +17,7 @@ namespace experiment
     {
         LaunchAndEarlyOrbitPhaseExperiment::LaunchAndEarlyOrbitPhaseExperiment(
             devices::gyro::IGyroscopeDriver& gyro, services::time::ICurrentTime& time, services::fs::IFileSystem& fileSystem)
-            : _gyro(gyro), _time(time), _fileSystem(fileSystem), _transportStream(&_time)
+            : _gyro(gyro), _time(time), _fileSystem(fileSystem), _experimentFile(&_time)
         {
         }
 
@@ -34,14 +34,12 @@ namespace experiment
                 return experiments::StartResult::Failure;
             }
 
-            _file = services::fs::File(this->_fileSystem, FileName, FileOpen::CreateAlways, FileAccess::WriteOnly);
-            if (!_file)
+            auto result = _experimentFile.Open(this->_fileSystem, FileName, FileOpen::CreateAlways, FileAccess::WriteOnly);
+            if (!result)
             {
                 LOG(LOG_LEVEL_ERROR, "Opening experiment file failed");
                 return StartResult::Failure;
             }
-
-            _transportStream.Open(&_file);
 
             return StartResult::Success;
         }
@@ -76,12 +74,7 @@ namespace experiment
 
         void LaunchAndEarlyOrbitPhaseExperiment::Stop(IterationResult /*lastResult*/)
         {
-            _transportStream.Close();
-
-            if (_file)
-            {
-                _file.Close();
-            }
+            _experimentFile.Close();
         }
 
         IterationResult LaunchAndEarlyOrbitPhaseExperiment::PerformMeasurements()
@@ -96,7 +89,7 @@ namespace experiment
             w.WriteWordLE(data.Value.Z());
             w.WriteWordLE(data.Value.Temperature());
 
-            _transportStream.Write(TransportStream::PID::Gyro, buf);
+            _experimentFile.Write(TransportStream::PID::Gyro, buf);
 
             return IterationResult::WaitForNextCycle;
         }

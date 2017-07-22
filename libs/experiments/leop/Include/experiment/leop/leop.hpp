@@ -50,11 +50,8 @@ namespace experiment
             /** @brief File System provider */
             services::fs::IFileSystem& _fileSystem;
 
-            /** @brief File with results */
-            services::fs::File _file;
-
             /** @brief Experiment file with results */
-            experiments::fs::TransportStream _transportStream;
+            experiments::fs::TransportStream _experimentFile;
 
             experiments::IterationResult PerformMeasurements();
             experiments::IterationResult CheckExperimentTime();
