@@ -52,7 +52,7 @@ namespace mission
             /**
              * @brief Returns information whether the entire process is finished.
              *
-             * @return True is the entire deployemnt process is finished, false otherwise.
+             * @return True is the entire deployment process is finished, false otherwise.
              */
             bool IsFinished() const;
 
@@ -73,8 +73,9 @@ namespace mission
 
             /**
              * @brief Requests advancing the deployment process to the next step.
+             * @param[in] timeout Current operation timeout in mission iterations.
              */
-            void NextStep();
+            void NextStep(std::int8_t timeout);
 
             /**
              * @brief Requests retral of the current deployment step.
@@ -82,8 +83,15 @@ namespace mission
              * If the current step retry count hits the limit the state of the process is updated with the same way
              * as if the NextStep method would be called.
              * @param[in] limit Step retry limit number.
+             * @param[in] timeout Current operation timeout in mission iterations.
              */
-            void Retry(std::uint8_t limit);
+            void Retry(std::uint8_t limit, std::int8_t timeout);
+
+            /**
+             * @brief Returns current retry counter;
+             * @return Value of current retry counter.
+             */
+            std::int8_t RetryCount() const;
 
             /**
              * @brief Returns reference to current antenna driver.
@@ -126,6 +134,29 @@ namespace mission
             void Finish();
 
             /**
+             * @brief Sets current operation timeout in mission iterations.
+             * @param cycleCount Number of mission iterations before operation times out.
+             */
+            void SetTimeout(std::int8_t cycleCount);
+
+            /**
+             * @brief Returns current timeout length in mission iterations
+             * @return Current timeout length in mission iterations.
+             */
+            std::int8_t GetTimeout() const;
+
+            /**
+             * @brief Mission iteration notification procedure.
+             */
+            void NextCycle();
+
+            /**
+             * @brief Queries the state whether the current operation has timed out.
+             * @return True in case of timeout, false otherwise.
+             */
+            bool TimedOut() const;
+
+            /**
              * @brief Returns total count of the deployment steps.
              * @return Total deployment step count.
              */
@@ -138,7 +169,7 @@ namespace mission
             bool _overrideState;
 
             /**
-             * @brief Flag indicating whether the antennas are being curretnly deployed.
+             * @brief Flag indicating whether the antennas are being currently deployed.
              */
             bool _inProgress;
 
@@ -153,10 +184,20 @@ namespace mission
             std::uint8_t _retryCount;
 
             /**
+             * @brief Number of mission iteration cycles before current operation times out.
+             */
+            std::int8_t _cycleCount;
+
+            /**
              * @brief Current antenna driver instance.
              */
             AntennaDriver& _driver;
         };
+
+        inline std::int8_t AntennaMissionState::RetryCount() const
+        {
+            return this->_retryCount;
+        }
 
         inline bool AntennaMissionState::IsDeploymentInProgress() const
         {
@@ -173,9 +214,11 @@ namespace mission
             return this->_stepNumber;
         }
 
-        inline void AntennaMissionState::NextStep()
+        inline void AntennaMissionState::NextStep(std::int8_t timeout)
         {
             ++this->_stepNumber;
+            this->_retryCount = 0;
+            SetTimeout(timeout);
         }
 
         inline AntennaDriver& AntennaMissionState::Driver()
@@ -192,6 +235,7 @@ namespace mission
         {
             this->_stepNumber = stepNumber;
             this->_retryCount = 0;
+            SetTimeout(0);
         }
 
         inline void AntennaMissionState::Restart()
@@ -203,6 +247,27 @@ namespace mission
         {
             OverrideStep(StepCount());
         }
+
+        inline void AntennaMissionState::SetTimeout(std::int8_t cycleCount)
+        {
+            this->_cycleCount = cycleCount;
+        }
+
+        inline std::int8_t AntennaMissionState::GetTimeout() const
+        {
+            return this->_cycleCount;
+        }
+
+        inline void AntennaMissionState::NextCycle()
+        {
+            --this->_cycleCount;
+        }
+
+        inline bool AntennaMissionState::TimedOut() const
+        {
+            return this->_cycleCount <= 0;
+        }
+
         /** @}*/
     }
 }
