@@ -1,5 +1,8 @@
+#include <cstring>
+#include "gyro/driver.hpp"
 #include "gyro/telemetry.hpp"
-#include "obc.h"
+#include "obc_access.hpp"
+#include "terminal/terminal.h"
 
 using std::uint16_t;
 
@@ -12,10 +15,10 @@ static void init(uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
 
-    const bool status = Main.Hardware.Gyro.init();
+    const bool status = GetGyro().init();
     if (!status)
     {
-        Main.terminal.Printf("Gyro init failed!\n");
+        GetTerminal().Printf("Gyro init failed!\n");
         return;
     }
 }
@@ -25,14 +28,14 @@ static void read(uint16_t argc, char* argv[])
     UNREFERENCED_PARAMETER(argc);
     UNREFERENCED_PARAMETER(argv);
 
-    const auto result = Main.Hardware.Gyro.read();
+    const auto result = GetGyro().read();
     if (!result.HasValue)
     {
-        Main.terminal.Printf("Gyro read failed!\n");
+        GetTerminal().Printf("Gyro read failed!\n");
         return;
     }
 
-    Main.terminal.Printf("%d %d %d %d\n",              //
+    GetTerminal().Printf("%d %d %d %d\n",              //
         static_cast<int>(result.Value.X()),            //
         static_cast<int>(result.Value.Y()),            //
         static_cast<int>(result.Value.Z()),            //
@@ -54,7 +57,7 @@ static VoidFuncPtr GetDriverCommand(char* name)
 
 static void ShowHelp()
 {
-    Main.terminal.Printf("gyro init|read\n");
+    GetTerminal().Printf("gyro init|read\n");
 }
 
 void GyroDriver(uint16_t argc, char* argv[])

@@ -113,3 +113,79 @@ class Test_AntennaDeployment(RestartPerTest):
         self.system.backup_antenna.on_begin_deployment = backupHandler
         self.begin(14)
         self.assertSequenceEqual(list, expected)
+
+    @runlevel(1)
+    @clear_state()
+    def test_all_antennas_are_deployed_even_when_deployment_hangs(self):
+        list =     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        expected = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+
+        def primaryHandler(controller, antennaId):
+            if antennaId != -1:
+                list[antennaId] = 1
+            else:
+                list[0] = 1
+            return True
+
+        def backupHandler(controller, antennaId):
+            if antennaId != -1:
+                list[antennaId + 5] = 1
+            else:
+                list[5] = 1
+            return True
+
+        self.system.primary_antenna.on_begin_deployment = primaryHandler
+        self.system.backup_antenna.on_begin_deployment = backupHandler
+        self.begin(40)
+        self.assertSequenceEqual(list, expected)
+
+    @runlevel(1)
+    @clear_state()
+    def test_antennas_are_deployed_by_backup_controller_primary_unresponsive(self):
+        list =     [0, 0, 0, 0, 0]
+        expected = [1, 1, 1, 1, 1]
+        self.system.i2c.enable_bus_devices([self.system.primary_antenna.address], False)
+
+        def primaryHandler(controller, antennaId):
+            list[primaryHandler.index] = 1
+            primaryHandler.index += 1
+            return True
+
+        primaryHandler.index = 0
+        self.system.backup_antenna.on_begin_deployment = primaryHandler
+        self.begin(40)
+        self.assertSequenceEqual(list, expected)
+
+    @runlevel(1)
+    @clear_state()
+    def test_antennas_are_deployed_by_primary_controller_backup_unresponsive(self):
+        list =     [0, 0, 0, 0, 0]
+        expected = [1, 1, 1, 1, 1]
+        self.system.i2c.enable_pld_devices([self.system.backup_antenna.address], False)
+
+        def primaryHandler(controller, antennaId):
+            list[primaryHandler.index] = 1
+            primaryHandler.index += 1
+            return True
+
+        primaryHandler.index = 0
+        self.system.primary_antenna.on_begin_deployment = primaryHandler
+        self.begin(40)
+        self.assertSequenceEqual(list, expected)
+
+    @runlevel(1)
+    @clear_state()
+    def test_deployment_system_is_armed_during_deployment(self):
+        list = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        expected = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+
+        def verifier(controller, antennaId):
+            list[verifier.index] = controller.armed
+            verifier.index += 1
+            return False
+
+        verifier.index = 0
+        self.system.primary_antenna.on_begin_deployment = verifier
+        self.system.backup_antenna.on_begin_deployment = verifier
+        self.begin(40)
+        self.assertSequenceEqual(list, expected)

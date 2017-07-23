@@ -18,7 +18,12 @@ namespace obc
         std::uint8_t array[TotalImageSize];
         Writer writer(gsl::make_span(array));
         writer.WriteDoubleWordLE(Signature);
-        stateObject.Capture(writer);
+        if (!stateObject.Capture(writer))
+        {
+            LOG(LOG_LEVEL_ERROR, "Unable to capture persistent state.");
+            return false;
+        }
+
         writer.WriteDoubleWordLE(Signature);
         if (!writer.Status())
         {
@@ -43,12 +48,21 @@ namespace obc
             )
         {
             LOG(LOG_LEVEL_ERROR, "Unable to parse persistent state image.");
-            stateObject = state::SystemPersistentState();
             return false;
         }
 
-        stateObject.Read(reader);
+        auto newState = state::SystemPersistentState::InternalPersistentState();
+        newState.Read(reader);
+
         const auto footer = reader.ReadDoubleWordLE();
-        return footer == Signature && reader.Status();
+        const bool isValid = footer == Signature && reader.Status();
+
+        if (!isValid)
+        {
+            LOG(LOG_LEVEL_ERROR, "Unable to parse persistent state foorer.");
+            return false;
+        }
+
+        return stateObject.Load(newState);
     }
 }

@@ -1,21 +1,24 @@
 #include <array>
+#include <cstdlib>
+#include <cstring>
 #include "base/writer.h"
 #include "commands.h"
 #include "fm25w/fm25w.hpp"
-#include "obc.h"
+#include "obc/PersistentStorageAccess.hpp"
+#include "obc_access.hpp"
+#include "terminal/terminal.h"
 
 using std::uint8_t;
 using devices::fm25w::FM25WDriver;
 using devices::fm25w::IFM25WDriver;
 using devices::fm25w::RedundantFM25WDriver;
 using devices::fm25w::Status;
-using drivers::spi::EFMSPISlaveInterface;
 
 static void Status(IFM25WDriver& fram)
 {
     auto sr = fram.ReadStatus();
 
-    Main.terminal.Printf("Status register=%X\n", num(sr.Value));
+    GetTerminal().Printf("Status register=%X\n", num(sr.Value));
 }
 
 static void Write(IFM25WDriver& fram, std::uint16_t address, gsl::span<const std::uint8_t> value)
@@ -106,15 +109,15 @@ void FRAM(std::uint16_t argc, char* argv[])
 {
     if (argc == 0)
     {
-        Main.terminal.Puts("fram <status|write|read|testall|tmr>\n");
+        GetTerminal().Puts("fram <status|write|read|testall|tmr>\n");
         return;
     }
 
-    auto& fram1 = Main.Hardware.PersistentStorage.GetSingleDriver<0>();
-    auto& fram2 = Main.Hardware.PersistentStorage.GetSingleDriver<1>();
-    auto& fram3 = Main.Hardware.PersistentStorage.GetSingleDriver<2>();
+    auto& fram1 = GetPersistentStorageAccess().GetSingleDriver<0>();
+    auto& fram2 = GetPersistentStorageAccess().GetSingleDriver<1>();
+    auto& fram3 = GetPersistentStorageAccess().GetSingleDriver<2>();
 
-    auto& redundantDriver = Main.Hardware.PersistentStorage.GetRedundantDriver();
+    auto& redundantDriver = GetPersistentStorageAccess().GetRedundantDriver();
 
     std::array<devices::fm25w::IFM25WDriver*, 3> drivers{&fram1, &fram2, &fram3};
 
@@ -122,7 +125,7 @@ void FRAM(std::uint16_t argc, char* argv[])
     {
         if (!IsFRAMIndexValid(argv[1][0]))
         {
-            Main.terminal.Puts("Invalid fram\n");
+            GetTerminal().Puts("Invalid fram\n");
             return;
         }
 
@@ -134,7 +137,7 @@ void FRAM(std::uint16_t argc, char* argv[])
     {
         if (!IsFRAMIndexValid(argv[1][0]))
         {
-            Main.terminal.Puts("Invalid fram\n");
+            GetTerminal().Puts("Invalid fram\n");
             return;
         }
 
@@ -148,7 +151,7 @@ void FRAM(std::uint16_t argc, char* argv[])
 
         for (auto b : toRead)
         {
-            Main.terminal.Printf("%X ", b);
+            GetTerminal().Printf("%X ", b);
         }
     }
 
@@ -156,7 +159,7 @@ void FRAM(std::uint16_t argc, char* argv[])
     {
         if (!IsFRAMIndexValid(argv[1][0]))
         {
-            Main.terminal.Puts("Invalid fram\n");
+            GetTerminal().Puts("Invalid fram\n");
             return;
         }
 
@@ -172,10 +175,10 @@ void FRAM(std::uint16_t argc, char* argv[])
 
         for (auto b : toWrite)
         {
-            Main.terminal.Printf("%X ", b);
+            GetTerminal().Printf("%X ", b);
         }
 
-        Main.terminal.Puts("\n");
+        GetTerminal().Puts("\n");
 
         auto& fram = ParseFRAMIndex(argv[1][0], drivers, redundantDriver);
 
@@ -186,7 +189,7 @@ void FRAM(std::uint16_t argc, char* argv[])
     {
         if (strcmp(argv[1], "f") != 0)
         {
-            Main.terminal.Printf("This operation writes to all flashes. Add \"f\" parameter to proceed.");
+            GetTerminal().Printf("This operation writes to all flashes. Add \"f\" parameter to proceed.");
             return;
         }
 
@@ -194,13 +197,13 @@ void FRAM(std::uint16_t argc, char* argv[])
         auto isOk2 = TestSingleFRAM(fram2);
         auto isOk3 = TestSingleFRAM(fram3);
 
-        Main.terminal.Printf("Fram 1 read write ok: %d\r\n", isOk1);
-        Main.terminal.Printf("Fram 2 read write ok: %d\r\n", isOk2);
-        Main.terminal.Printf("Fram 3 read write ok: %d\r\n", isOk3);
+        GetTerminal().Printf("Fram 1 read write ok: %d\r\n", isOk1);
+        GetTerminal().Printf("Fram 2 read write ok: %d\r\n", isOk2);
+        GetTerminal().Printf("Fram 3 read write ok: %d\r\n", isOk3);
 
         if (!isOk1 || !isOk2 || !isOk3)
         {
-            Main.terminal.Printf("SOME FRAMS ARE INVALID!\r\n");
+            GetTerminal().Printf("SOME FRAMS ARE INVALID!\r\n");
         }
     }
 
@@ -208,11 +211,11 @@ void FRAM(std::uint16_t argc, char* argv[])
     {
         if (strcmp(argv[1], "f") != 0)
         {
-            Main.terminal.Printf("This operation writes to all flashes. Add \"f\" parameter to proceed.");
+            GetTerminal().Printf("This operation writes to all flashes. Add \"f\" parameter to proceed.");
             return;
         }
 
-        Main.terminal.Printf("Starting single FRAM failing test\r\n");
+        GetTerminal().Printf("Starting single FRAM failing test\r\n");
 
         for (uint8_t failingIndex = 0; failingIndex < 3; ++failingIndex)
         {
@@ -229,10 +232,10 @@ void FRAM(std::uint16_t argc, char* argv[])
             }
 
             auto isRedundantOk = ReadSingleFRAM(redundantDriver);
-            Main.terminal.Printf("Redundant read ok: %d\r\n", isRedundantOk);
+            GetTerminal().Printf("Redundant read ok: %d\r\n", isRedundantOk);
         }
 
-        Main.terminal.Printf("Starting double FRAM failing test\r\n");
+        GetTerminal().Printf("Starting double FRAM failing test\r\n");
 
         for (uint8_t failingIndex = 0; failingIndex < 3; ++failingIndex)
         {
@@ -249,7 +252,7 @@ void FRAM(std::uint16_t argc, char* argv[])
             }
 
             auto isRedundantOk = !ReadSingleFRAM(redundantDriver);
-            Main.terminal.Printf("Redundant read ok: %d\r\n", isRedundantOk);
+            GetTerminal().Printf("Redundant read ok: %d\r\n", isRedundantOk);
         }
     }
 }

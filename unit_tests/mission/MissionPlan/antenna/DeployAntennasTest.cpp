@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock-matchers.h"
+#include "OsMock.hpp"
 #include "mission/antenna_state.h"
 #include "mission/antenna_task.hpp"
 #include "mission/base.hpp"
@@ -62,12 +63,40 @@ namespace
         ASSERT_TRUE(openAntenna.condition(state, openAntenna.param));
     }
 
-    TEST_F(DeployAntennasTest, TestConditionDeploymentInProgress)
+    TEST_F(DeployAntennasTest, TestConditionDeploymentInProgressNoTimeout)
     {
         AntennaDeploymentStatus status = {};
         status.IsDeploymentActive[1] = true;
+        stateDescriptor.SetTimeout(1);
         stateDescriptor.Update(status);
         ASSERT_FALSE(openAntenna.condition(state, openAntenna.param));
+    }
+
+    TEST_F(DeployAntennasTest, TestConditionDeploymentInProgressWithTimeout)
+    {
+        AntennaDeploymentStatus status = {};
+        status.IsDeploymentActive[1] = true;
+        stateDescriptor.SetTimeout(0);
+        stateDescriptor.Update(status);
+        ASSERT_TRUE(openAntenna.condition(state, openAntenna.param));
+    }
+
+    TEST_F(DeployAntennasTest, TestTimeout)
+    {
+        stateDescriptor.SetTimeout(0);
+        ASSERT_THAT(stateDescriptor.TimedOut(), Eq(true));
+        stateDescriptor.SetTimeout(1);
+        ASSERT_THAT(stateDescriptor.TimedOut(), Eq(false));
+    }
+
+    TEST_F(DeployAntennasTest, TestCycleCount)
+    {
+        stateDescriptor.SetTimeout(2);
+        ASSERT_THAT(stateDescriptor.TimedOut(), Eq(false));
+        stateDescriptor.NextCycle();
+        ASSERT_THAT(stateDescriptor.TimedOut(), Eq(false));
+        stateDescriptor.NextCycle();
+        ASSERT_THAT(stateDescriptor.TimedOut(), Eq(true));
     }
 
     TEST_F(DeployAntennasTest, TestConditionOverrideDeploymentState)
@@ -229,6 +258,9 @@ namespace
 
         void Run();
 
+        testing::NiceMock<OSMock> os;
+        OSReset osReset;
+
         AntennaMock mock;
 
         SystemState state;
@@ -242,6 +274,9 @@ namespace
           openAntenna(task.BuildAction()), //
           stateDescriptor(task.state)
     {
+        osReset = InstallProxy(&os);
+        ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
+        ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResult::Success));
     }
 
     void DeployAntennasActionTest::Run()

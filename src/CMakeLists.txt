@@ -37,6 +37,7 @@ set(SOURCES
     checks/error_counters.cpp
     obc.h
     obc.cpp
+    obc_access.cpp
     fault_handlers.cpp
 )
 

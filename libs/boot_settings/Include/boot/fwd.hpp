@@ -1,6 +1,8 @@
 #ifndef LIBS_BOOT_SETTINGS_INCLUDE_BOOT_FWD_HPP_
 #define LIBS_BOOT_SETTINGS_INCLUDE_BOOT_FWD_HPP_
 
+#include <cstddef>
+
 namespace boot
 {
     /** @brief Size of boot settings */

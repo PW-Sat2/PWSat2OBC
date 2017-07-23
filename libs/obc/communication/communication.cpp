@@ -17,11 +17,13 @@ OBCCommunication::OBCCommunication(obc::FDIR& /*fdir*/,
     services::time::ICurrentTime& currentTime,
     mission::IIdleStateController& idleStateController,
     mission::antenna::IDisableAntennaDeployment& disableAntennaDeployment,
+    IHasState<SystemState>& stateContainer,
     services::fs::IFileSystem& fs,
     obc::OBCExperiments& experiments,
     program_flash::BootTable& bootTable,
     boot::BootSettings& bootSettings,
-    IHasState<telemetry::TelemetryState>& telemetry)
+    IHasState<telemetry::TelemetryState>& telemetry,
+    services::power::IPowerControl& powerControl)
     : Comm(commDriver),                                                //
       UplinkProtocolDecoder(settings::CommSecurityCode),               //
       SupportedTelecommands(                                           //
@@ -29,6 +31,7 @@ OBCCommunication::OBCCommunication(obc::FDIR& /*fdir*/,
           DownloadFileTelecommand(fs),                                 //
           EnterIdleStateTelecommand(currentTime, idleStateController), //
           RemoveFileTelecommand(fs),                                   //
+          SetTimeCorrectionConfigTelecommand(stateContainer),          //
           PerformDetumblingExperiment(experiments),                    //
           AbortExperiment(experiments),                                //
           ListFilesTelecommand(fs),                                    //
@@ -37,7 +40,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& /*fdir*/,
           FinalizeProgramEntry(bootTable),                             //
           SetBootSlotsTelecommand(bootSettings),                       //
           SendBeaconTelecommand(telemetry),                            //
-          StopAntennaDeployment(disableAntennaDeployment)              //
+          StopAntennaDeployment(disableAntennaDeployment),             //
+          PowerCycle(powerControl)                                     //
           ),                                                           //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {

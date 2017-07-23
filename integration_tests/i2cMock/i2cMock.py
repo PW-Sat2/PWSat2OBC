@@ -86,13 +86,13 @@ class I2CDevice(object):
 
 class MissingDevice(I2CDevice):
     def __init__(self, bus_name, address):
-        super(MissingDevice, self).__init__(address)
+        super(MissingDevice, self).__init__(address, 'Missing')
         self._log = logging.getLogger('MissingDevice: {}.0x{:2X}'.format(bus_name, address))
 
     @command([])
     def catch_all(self, *data):
         self._log.error('Missing handler for 0x{}'.format(binascii.hexlify(bytearray(data))))
-        return [0xCC]
+        return []
 
 
 class DeviceMockStopped(Exception):

@@ -39,6 +39,10 @@ class RestartPerTest(BaseTest):
 
         boot_wrappers = self._get_boot_wrappers(self._testMethodName)
 
+        self.system.power_off_obc()
+
+        self.system.start()
+
         if self.auto_power_on:
             self.system.restart(boot_wrappers)
 
@@ -63,6 +67,10 @@ class RestartPerSuite(BaseTest):
         log.info("Starting test setup")
 
         (cls.gpio, cls.system) = System.build_from_config(config)
+
+        cls.system.power_off_obc()
+
+        cls.system.start()
 
         boot_wrappers = cls._get_class_boot_wrappers()
 

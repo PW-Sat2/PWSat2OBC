@@ -1,13 +1,16 @@
 #include <string.h>
 #include <cstdint>
+#include <cstdlib>
 #include <gsl/span>
 #include "comm/Beacon.hpp"
+#include "comm/CommDriver.hpp"
 #include "comm/Frame.hpp"
 #include "commands.h"
 #include "logger/logger.h"
-#include "obc.h"
+#include "obc_access.hpp"
 #include "system.h"
 #include "terminal.h"
+#include "terminal/terminal.h"
 
 using std::uint16_t;
 using std::uint8_t;
@@ -27,20 +30,20 @@ static void CommSendFrame(uint16_t argc, char* argv[])
 {
     if (argc < 1)
     {
-        Main.terminal.Puts("Usage: comm send_frame <content>");
+        GetTerminal().Puts("Usage: comm send_frame <content>");
         return;
     }
 
     uint8_t len = strlen(argv[0]);
     LOGF(LOG_LEVEL_INFO, "Received request to send frame of length %d...", len);
-    const auto status = Main.Hardware.CommDriver.SendFrame(span<const uint8_t>(reinterpret_cast<const uint8_t*>(argv[0]), len));
+    const auto status = GetCommDriver().SendFrame(span<const uint8_t>(reinterpret_cast<const uint8_t*>(argv[0]), len));
     if (status)
     {
-        Main.terminal.Puts("Done");
+        GetTerminal().Puts("Done");
     }
     else
     {
-        Main.terminal.Puts("Failure");
+        GetTerminal().Puts("Failure");
     }
 }
 
@@ -49,28 +52,28 @@ static void CommReceiveFrame()
     LOG(LOG_LEVEL_INFO, "Received request to get the oldes frame from comm...");
     Frame frame;
     std::uint8_t buffer[PrefferedBufferSize];
-    if (!Main.Hardware.CommDriver.ReceiveFrame(buffer, frame))
+    if (!GetCommDriver().ReceiveFrame(buffer, frame))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to get frame from comm. ");
     }
     else
     {
-        Main.Hardware.CommDriver.RemoveFrame();
-        Main.terminal.PrintBuffer(frame.Payload());
+        GetCommDriver().RemoveFrame();
+        GetTerminal().PrintBuffer(frame.Payload());
     }
 }
 
 static void CommPause()
 {
     LOG(LOG_LEVEL_INFO, "Received request to pause comm...");
-    if (Main.Hardware.CommDriver.Pause())
+    if (GetCommDriver().Pause())
     {
-        Main.terminal.Puts("Done");
+        GetTerminal().Puts("Done");
         LOG(LOG_LEVEL_INFO, "Comm paused as requested...");
     }
     else
     {
-        Main.terminal.Puts("Failed");
+        GetTerminal().Puts("Failed");
         LOG(LOG_LEVEL_INFO, "Unable to paused comm");
     }
 }
@@ -109,30 +112,30 @@ static void CommReset(uint16_t argc, char* argv[])
     CommHardware channel;
     if (argc != 1 || !GetHardware(argv[0], channel))
     {
-        Main.terminal.Puts(usage);
+        GetTerminal().Puts(usage);
         return;
     }
 
     switch (channel)
     {
         case CommHardware::Hardware:
-            Main.Hardware.CommDriver.Reset();
+            GetCommDriver().Reset();
             break;
 
         case CommHardware::Transmitter:
-            Main.Hardware.CommDriver.ResetTransmitter();
+            GetCommDriver().ResetTransmitter();
             break;
 
         case CommHardware::Receiver:
-            Main.Hardware.CommDriver.ResetReceiver();
+            GetCommDriver().ResetReceiver();
             break;
 
         case CommHardware::Watchdog:
-            Main.Hardware.CommDriver.ResetWatchdogReceiver();
+            GetCommDriver().ResetWatchdogReceiver();
             break;
 
         default:
-            Main.terminal.Puts(usage);
+            GetTerminal().Puts(usage);
             break;
     }
 }
@@ -140,14 +143,14 @@ static void CommReset(uint16_t argc, char* argv[])
 static void CommGetFrameCount()
 {
     LOG(LOG_LEVEL_INFO, "Received request to get the number of received frames from comm...");
-    auto count = Main.Hardware.CommDriver.GetFrameCount();
+    auto count = GetCommDriver().GetFrameCount();
     if (count.status)
     {
-        Main.terminal.Printf("%d\n", count.frameCount);
+        GetTerminal().Printf("%d\n", count.frameCount);
     }
     else
     {
-        Main.terminal.Puts("Failed");
+        GetTerminal().Puts("Failed");
     }
 }
 
@@ -157,20 +160,20 @@ static void CommGetTelemetry(uint16_t argc, char* argv[])
     CommHardware channel;
     if (argc != 1 || !GetHardware(argv[0], channel))
     {
-        Main.terminal.Puts(usage);
+        GetTerminal().Puts(usage);
         return;
     }
 
     if (channel == CommHardware::Transmitter)
     {
         TransmitterTelemetry telemetry;
-        if (!Main.Hardware.CommDriver.GetTransmitterTelemetry(telemetry))
+        if (!GetCommDriver().GetTransmitterTelemetry(telemetry))
         {
-            Main.terminal.Puts("Unable to get transmitter telemetry");
+            GetTerminal().Puts("Unable to get transmitter telemetry");
             return;
         }
 
-        Main.terminal.Printf(
+        GetTerminal().Printf(
             "RFReflectedPower: '%d'\nAmplifierTemperature: '%d'\nRFForwardPower: '%d'\nTransmitterCurrentConsumption: '%d'",
             static_cast<int>(telemetry.RFReflectedPower),
             static_cast<int>(telemetry.AmplifierTemperature),
@@ -180,13 +183,13 @@ static void CommGetTelemetry(uint16_t argc, char* argv[])
     else if (channel == CommHardware::Receiver)
     {
         ReceiverTelemetry telemetry;
-        if (!Main.Hardware.CommDriver.GetReceiverTelemetry(telemetry))
+        if (!GetCommDriver().GetReceiverTelemetry(telemetry))
         {
-            Main.terminal.Puts("Unable to get receiver telemetry");
+            GetTerminal().Puts("Unable to get receiver telemetry");
             return;
         }
 
-        Main.terminal.Printf("TransmitterCurrentConsumption: '%d'\nReceiverCurrentConsumption: '%d'\nDopplerOffset: '%d'\nVcc: "
+        GetTerminal().Printf("TransmitterCurrentConsumption: '%d'\nReceiverCurrentConsumption: '%d'\nDopplerOffset: '%d'\nVcc: "
                              "'%d'\nOscilatorTemperature: '%d'\nAmplifierTemperature: '%d'\nSignalStrength: '%d'",
             static_cast<int>(telemetry.TransmitterCurrentConsumption),
             static_cast<int>(telemetry.ReceiverCurrentConsumption),
@@ -198,20 +201,20 @@ static void CommGetTelemetry(uint16_t argc, char* argv[])
     }
     else
     {
-        Main.terminal.Puts(usage);
+        GetTerminal().Puts(usage);
     }
 }
 
 static void CommGetTransmitterState()
 {
     TransmitterState state;
-    if (!Main.Hardware.CommDriver.GetTransmitterState(state))
+    if (!GetCommDriver().GetTransmitterState(state))
     {
-        Main.terminal.Puts("Unable to get transmitter state");
+        GetTerminal().Puts("Unable to get transmitter state");
         return;
     }
 
-    Main.terminal.Printf("\nStateWhenIdle: %d\nTransmitterBitRate: %d\nBeaconState: %d\n",
+    GetTerminal().Printf("\nStateWhenIdle: %d\nTransmitterBitRate: %d\nBeaconState: %d\n",
         static_cast<int>(state.StateWhenIdle),
         static_cast<int>(state.TransmitterBitRate),
         static_cast<int>(state.BeaconState));
@@ -248,17 +251,17 @@ static void CommSetBitrate(uint16_t argc, char* argv[])
     Bitrate bitRate;
     if (argc != 1 || !GetBitRate(argv[0], bitRate))
     {
-        Main.terminal.Puts("comm set bitrate [1200|2400|4800|9600]");
+        GetTerminal().Puts("comm set bitrate [1200|2400|4800|9600]");
         return;
     }
 
-    if (Main.Hardware.CommDriver.SetTransmitterBitRate(bitRate))
+    if (GetCommDriver().SetTransmitterBitRate(bitRate))
     {
-        Main.terminal.Puts("Done");
+        GetTerminal().Puts("Done");
     }
     else
     {
-        Main.terminal.Printf("Unable to set bit rate to: '%d'.", static_cast<int>(bitRate));
+        GetTerminal().Printf("Unable to set bit rate to: '%d'.", static_cast<int>(bitRate));
     }
 }
 
@@ -266,19 +269,19 @@ static void CommSetIdleState(std::uint16_t argc, char* argv[])
 {
     if (argc != 1)
     {
-        Main.terminal.Puts("comm set idle_state [0|1]");
+        GetTerminal().Puts("comm set idle_state [0|1]");
         return;
     }
 
     const bool enable = strcmp(argv[0], "1") == 0;
-    const auto status = Main.Hardware.CommDriver.SetTransmitterStateWhenIdle(enable ? IdleState::On : IdleState::Off);
+    const auto status = GetCommDriver().SetTransmitterStateWhenIdle(enable ? IdleState::On : IdleState::Off);
     if (status)
     {
-        Main.terminal.Puts("Done");
+        GetTerminal().Puts("Done");
     }
     else
     {
-        Main.terminal.Printf("Unable to set transmitter idle state to : '%d'.", static_cast<int>(enable));
+        GetTerminal().Printf("Unable to set transmitter idle state to : '%d'.", static_cast<int>(enable));
     }
 }
 
@@ -286,7 +289,7 @@ static void CommSetBeacon(std::uint16_t argc, char* argv[])
 {
     if (argc < 3)
     {
-        Main.terminal.Puts("comm set beacon <period> <content>");
+        GetTerminal().Puts("comm set beacon <period> <content>");
         return;
     }
 
@@ -294,18 +297,18 @@ static void CommSetBeacon(std::uint16_t argc, char* argv[])
     auto period = strtol(argv[0], &tail, 10);
     auto length = strlen(argv[1]);
     devices::comm::Beacon beacon(seconds(period), gsl::span<const uint8_t>(reinterpret_cast<const uint8_t*>(argv[1]), length));
-    auto result = Main.Hardware.CommDriver.SetBeacon(beacon);
+    auto result = GetCommDriver().SetBeacon(beacon);
     if (!result.HasValue)
     {
-        Main.terminal.Puts("Rejected");
+        GetTerminal().Puts("Rejected");
     }
     else if (!result.Value)
     {
-        Main.terminal.Puts("Failed");
+        GetTerminal().Puts("Failed");
     }
     else
     {
-        Main.terminal.Puts("Done");
+        GetTerminal().Puts("Done");
     }
 }
 
@@ -314,7 +317,7 @@ static void CommSet(std::uint16_t argc, char* argv[])
     static const char* const usage = "comm set [idle_state|bitrate|beacon]";
     if (argc < 1)
     {
-        Main.terminal.Puts(usage);
+        GetTerminal().Puts(usage);
         return;
     }
 
@@ -332,7 +335,7 @@ static void CommSet(std::uint16_t argc, char* argv[])
     }
     else
     {
-        Main.terminal.Puts(usage);
+        GetTerminal().Puts(usage);
     }
 }
 
@@ -341,7 +344,7 @@ static void CommGet(std::uint16_t argc, char* argv[])
     static const char* const usage = "comm get [transmitter_state|telemetry|frame_count]";
     if (argc < 1)
     {
-        Main.terminal.Puts(usage);
+        GetTerminal().Puts(usage);
         return;
     }
 
@@ -359,7 +362,7 @@ static void CommGet(std::uint16_t argc, char* argv[])
     }
     else
     {
-        Main.terminal.Puts(usage);
+        GetTerminal().Puts(usage);
     }
 }
 
@@ -368,7 +371,7 @@ void Comm(std::uint16_t argc, char* argv[])
     static const char* const usage = "comm [set|get|reset|pause|send_frame|receive_frame]";
     if (argc < 1)
     {
-        Main.terminal.Puts(usage);
+        GetTerminal().Puts(usage);
         return;
     }
 
@@ -398,6 +401,6 @@ void Comm(std::uint16_t argc, char* argv[])
     }
     else
     {
-        Main.terminal.Puts(usage);
+        GetTerminal().Puts(usage);
     }
 }

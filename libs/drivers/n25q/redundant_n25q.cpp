@@ -19,10 +19,10 @@ RedundantN25QDriver::RedundantN25QDriver(std::array<IN25QDriver*, 3> n25qDrivers
 {
 }
 
-void RedundantN25QDriver::ReadMemory(    //
-    std::size_t address,                 //
-    gsl::span<uint8_t> outputBuffer,     //
-    gsl::span<uint8_t> redundantBuffer1, //
+OSResult RedundantN25QDriver::ReadMemory( //
+    std::size_t address,                  //
+    gsl::span<uint8_t> outputBuffer,      //
+    gsl::span<uint8_t> redundantBuffer1,  //
     gsl::span<uint8_t> redundantBuffer2)
 {
     auto bufferLength = std::min(outputBuffer.length(), std::min(redundantBuffer1.length(), redundantBuffer2.length()));
@@ -30,22 +30,40 @@ void RedundantN25QDriver::ReadMemory(    //
     auto normalizedOutputBuffer = outputBuffer.subspan(0, bufferLength);
     auto normalizedRedundantBuffer1 = redundantBuffer1.subspan(0, bufferLength);
 
-    _n25qDrivers[0]->ReadMemory(address, normalizedOutputBuffer);
-    _n25qDrivers[1]->ReadMemory(address, normalizedRedundantBuffer1);
+    auto r = _n25qDrivers[0]->ReadMemory(address, normalizedOutputBuffer);
+
+    if (r != OSResult::Success)
+    {
+        return r;
+    }
+
+    r = _n25qDrivers[1]->ReadMemory(address, normalizedRedundantBuffer1);
+
+    if (r != OSResult::Success)
+    {
+        return r;
+    }
 
     auto compareResult = memcmp(normalizedOutputBuffer.data(), normalizedRedundantBuffer1.data(), normalizedOutputBuffer.size()) == 0;
 
     if (compareResult)
     {
-        return;
+        return OSResult::Success;
     }
 
     {
         auto normalizedRedundantBuffer2 = redundantBuffer2.subspan(0, bufferLength);
 
-        _n25qDrivers[2]->ReadMemory(address, normalizedRedundantBuffer2);
+        r = _n25qDrivers[2]->ReadMemory(address, normalizedRedundantBuffer2);
+        if (r != OSResult::Success)
+        {
+            return r;
+        }
+
         CorrectBuffer(normalizedOutputBuffer, normalizedRedundantBuffer1, normalizedRedundantBuffer2);
     }
+
+    return OSResult::Success;
 }
 
 OperationResult RedundantN25QDriver::EraseChip()

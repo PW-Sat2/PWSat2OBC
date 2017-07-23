@@ -1,7 +1,39 @@
+@NonCPS
+def cmake(path, generator=null, args) {
+	def strings = args.collect { k, v -> "-D${k}=${v}" }
+	def g = ""
+    if(generator != null) {
+        g = "-G \"${generator}\""
+    }
+
+    bat("cmake ${g} ${strings.join(" ")} ${path}")
+}
+
+def buildPlatform(mcu, pld) {
+	stage("Build MCU ${mcu} PLD ${pld}") {
+		cmake("../source", "MinGW Makefiles", [
+			JLINK_SN: env.EFM_JLINK_FM,
+			MOCK_COM: env.MOCK_COM_FM,
+			OBC_COM: env.OBC_COM_FM,
+			GPIO_COM: env.GPIO_COM_FM,
+			TARGET_MCU_PLATFORM: mcu,
+			TARGET_PLD_PLATFORM: pld,
+			CMAKE_BUILD_TYPE: 'Release',
+			ENABLE_LTO: 1
+		])
+		bat "make pwsat boot safe_mode pwsat.hex pwsat.bin boot.hex safe_mode.bin"
+	}
+}
+
 def build() {
-	bat "cmake -DJLINK_SN=${env.EFM_JLINK_FM} -DMOCK_COM=${env.MOCK_COM_FM} -DOBC_COM=${env.OBC_COM_FM} -DGPIO_COM=${env.GPIO_COM_FM} -DTARGET_MCU_PLATFORM=EngModel -DTARGET_PLD_PLATFORM=DM -DCMAKE_BUILD_TYPE=Release -DENABLE_LTO=1 -G \"MinGW Makefiles\" ../source"
-	bat "make pwsat boot"
-	step([$class: 'ArtifactArchiver', artifacts: 'build/EngModel/**/*', fingerprint: true])
+	buildPlatform('FlightModel', 'FlightModel')
+	buildPlatform('EngModel', 'FlightModel')
+	buildPlatform('EngModel', 'DM')
+
+	bat("make flatsat_tools")
+
+	step([$class: 'ArtifactArchiver', artifacts: 'build/*/*/bin/*', fingerprint: true])
+	step([$class: 'ArtifactArchiver', artifacts: 'build/*/*/tools/*', fingerprint: true])
 }
 
 def unitTests() {
@@ -44,7 +76,10 @@ def generateDoc() {
 }
 
 def coverage() {
-	bat "cmake -DENABLE_COVERAGE=1 -DCMAKE_BUILD_TYPE=Debug ."
+	cmake(".", [
+		ENABLE_COVERAGE: 1,
+		CMAKE_BUILD_TYPE: "Debug"
+	])
 	bat "make unit_tests.coverage"
 	publishHTML(target: [
 		allowMissing: false,
@@ -56,7 +91,7 @@ def coverage() {
     ])
 }
 
-node {
+node('pwsat-build') {
 	stage 'Checkout'
 
 	try {
@@ -72,7 +107,6 @@ node {
 				wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
 					deleteDir()
 
-					stage 'Build'
 					build()
 
 					stage 'Unit tests'
@@ -91,7 +125,7 @@ node {
 					coverage()
 				}
 			}
-		}
+		}		
 	} catch(err) {
 		currentBuild.result = 'FAILURE'
 	} finally {
@@ -120,5 +154,13 @@ node {
 			unHealthy: '',
 			useStableBuildAsReference: true
 		])
+	}
+}
+
+node('flatsat && obc') {
+	stage('Copy to flatsat') {
+		dir(env.ARTIFACTS + '\\' + env.BRANCH_NAME) {
+			unarchive mapping: ['build/': '.']
+		}
 	}
 }

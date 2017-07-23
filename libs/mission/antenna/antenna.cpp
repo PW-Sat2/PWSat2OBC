@@ -57,6 +57,14 @@ namespace mission
             );
 
         /**
+         * @brief This procedure tries to reset antenna driver with several retries in case of errors.
+         * @param[in] channel Identifier of antenna driver channel that has to be reset.
+         * @param[in] driver Reference to current antenna driver instance.
+         * @return True when the driver has been reset, false otherwise.
+         */
+        static bool ResetDriver(AntennaChannel channel, AntennaDriver& driver);
+
+        /**
          * @brief This deployment step finalizes antenna deployment process.
          *
          * @param[in] state Reference to global satellite state.
@@ -154,7 +162,7 @@ namespace mission
          */
         static const AntennaDeploymentStep deploymentSteps[] = {
             {ResetDriverStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 0, false},
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, DefaultTimeout, false},
+            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, MediumTimeout, false},
             {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, LongTimeout, true},
             {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, LongTimeout, true},
             {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, LongTimeout, true},
@@ -162,7 +170,7 @@ namespace mission
             {FinishDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 0, false},
 
             {ResetDriverStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 0, false},
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, DefaultTimeout, false},
+            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, MediumTimeout, false},
             {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, LongTimeout, true},
             {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, LongTimeout, true},
             {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, LongTimeout, true},
@@ -175,24 +183,31 @@ namespace mission
          */
         static constexpr uint8_t DeploymentStepLimit = count_of(deploymentSteps);
 
+        static std::int8_t GetTimeout(const AntennaDeploymentStep& step)
+        {
+            return step.deploymentTimeout / 10 + 1;
+        }
+
         AntennaMissionState::AntennaMissionState(AntennaDriver& antennaDriver)
             : _overrideState(false), //
               _inProgress(false),    //
               _stepNumber(0),        //
               _retryCount(0),        //
+              _cycleCount(0),        //
               _driver(antennaDriver)
         {
         }
 
-        void AntennaMissionState::Retry(std::uint8_t limit)
+        void AntennaMissionState::Retry(std::uint8_t limit, std::int8_t timeout)
         {
             if ((this->_retryCount + 1) == limit)
             {
-                NextStep();
+                NextStep(timeout);
             }
             else
             {
                 ++this->_retryCount;
+                SetTimeout(timeout);
             }
         }
 
@@ -286,12 +301,12 @@ namespace mission
 
                 if (OS_RESULT_SUCCEEDED(result))
                 {
-                    stateDescriptor.NextStep();
+                    stateDescriptor.NextStep(GetTimeout(step));
                     return;
                 }
             }
 
-            stateDescriptor.Retry(StepRetryLimit);
+            stateDescriptor.Retry(StepRetryLimit, GetTimeout(step));
         }
 
         void RegularDeploymentStep(const SystemState& state,
@@ -300,15 +315,28 @@ namespace mission
             )
         {
             const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
+            if (stateDescriptor.IsDeploymentInProgress())
+            {
+                LOGF(LOG_LEVEL_INFO,
+                    "[ant] [Step %d] Resetting driver due to timeout (channel %d, antenna %d)",
+                    static_cast<int>(stateDescriptor.StepNumber()),
+                    static_cast<int>(step.channel),
+                    static_cast<int>(step.antennaId));
+                const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
+                ResetDriver(step.channel, driver);
+                stateDescriptor.Retry(StepRetryLimit, GetTimeout(step));
+            }
+            else
+            {
+                LOGF(LOG_LEVEL_INFO,
+                    "[ant] [Step %d] Performing deployment (channel %d, antenna %d)",
+                    static_cast<int>(stateDescriptor.StepNumber()),
+                    static_cast<int>(step.channel),
+                    static_cast<int>(step.antennaId));
 
-            LOGF(LOG_LEVEL_INFO,
-                "[ant] [Step%d] Regular deployment (channel %d, antenna %d)",
-                stateDescriptor.StepNumber(),
-                step.channel,
-                step.antennaId);
-
-            StopDeployment(state, stateDescriptor, driver);
-            BeginDeployment(state, stateDescriptor, driver);
+                StopDeployment(state, stateDescriptor, driver);
+                BeginDeployment(state, stateDescriptor, driver);
+            }
         }
 
         void ResetDriverStep(const SystemState& state,
@@ -319,22 +347,35 @@ namespace mission
             UNREFERENCED_PARAMETER(state);
             const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
 
-            LOGF(LOG_LEVEL_INFO, "[ant] [Step%d] Reseting driver %d", stateDescriptor.StepNumber(), step.channel);
+            LOGF(LOG_LEVEL_INFO,
+                "[ant] [Step%d] Reseting driver %d",
+                static_cast<int>(stateDescriptor.StepNumber()),
+                static_cast<int>(step.channel));
 
+            if (ResetDriver(step.channel, driver))
+            {
+                stateDescriptor.NextStep(GetTimeout(step));
+            }
+            else
+            {
+                stateDescriptor.Retry(StepRetryLimit, GetTimeout(step));
+            }
+        }
+
+        bool ResetDriver(AntennaChannel channel, AntennaDriver& driver)
+        {
             std::uint8_t counter = RetryLimit;
             while (counter-- > 0)
             {
-                const OSResult result = driver.Reset(&driver, step.channel);
+                const OSResult result = driver.Reset(&driver, channel);
                 if (OS_RESULT_SUCCEEDED(result))
                 {
-                    stateDescriptor.NextStep();
-                    return;
+                    return true;
                 }
             }
 
-            stateDescriptor.Retry(StepRetryLimit);
+            return false;
         }
-
         void FinishDeploymentStep(const SystemState& state,
             AntennaMissionState& stateDescriptor,
             AntennaDriver& driver //
@@ -347,11 +388,11 @@ namespace mission
 
             if (EndDeployment(driver, step.channel, RetryLimit))
             {
-                stateDescriptor.NextStep();
+                stateDescriptor.NextStep(GetTimeout(step));
             }
             else
             {
-                stateDescriptor.Retry(StepRetryLimit);
+                stateDescriptor.Retry(StepRetryLimit, GetTimeout(step));
             }
         }
 
@@ -369,7 +410,14 @@ namespace mission
 
             LOGF(LOG_LEVEL_DEBUG, "[ant] Executing antenna deployment step %d", stateDescriptor->StepNumber());
 
-            if (state.PersistentState.Get<state::AntennaConfiguration>().IsDeploymentDisabled())
+            state::AntennaConfiguration antennaConfiguration;
+            if (!state.PersistentState.Get(antennaConfiguration))
+            {
+                LOG(LOG_LEVEL_ERROR, "[ant] Can't get antenna configuration");
+                return;
+            }
+
+            if (antennaConfiguration.IsDeploymentDisabled())
             {
                 LOG(LOG_LEVEL_DEBUG, "[ant] Antenna deployment disabled");
                 stateDescriptor->Finish();
@@ -398,18 +446,23 @@ namespace mission
                 return false;
             }
 
-            if (stateDescriptor->IsDeploymentInProgress())
+            if (stateDescriptor->IsFinished())
             {
                 return false;
             }
 
-            return !stateDescriptor->IsFinished();
+            if (stateDescriptor->TimedOut())
+            {
+                return true;
+            }
+
+            return !stateDescriptor->IsDeploymentInProgress();
         }
 
         /**
          * @brief This procedure is antenna deployment update descriptor entry point.
          *
-         * This procedure updates the global satellite state as well as deployemnt process private state.
+         * This procedure updates the global satellite state as well as deployment process private state.
          * @param[in] state Pointer to global satellite state.
          * @param[in] param Pointer to the deployment condition private context. This pointer should point
          * at the object of AntennaMissionState type.
@@ -425,6 +478,7 @@ namespace mission
                 return UpdateResult::Ok;
             }
 
+            stateDescriptor->NextCycle();
             AntennaDeploymentStatus deploymentStatus;
             AntennaDriver& driver = stateDescriptor->Driver();
             const OSResult result = driver.GetDeploymentStatus(&driver,
@@ -484,8 +538,15 @@ namespace mission
 
         bool StopAntennaDeploymentTask::Condition(const SystemState& state, void* param)
         {
+            state::AntennaConfiguration antennaConfiguration;
+            if (!state.PersistentState.Get(antennaConfiguration))
+            {
+                LOG(LOG_LEVEL_ERROR, "[ant] Can't get antenna configuration");
+                return false;
+            }
+
             auto This = reinterpret_cast<StopAntennaDeploymentTask*>(param);
-            auto alreadyDisabled = state.PersistentState.Get<state::AntennaConfiguration>().IsDeploymentDisabled();
+            auto alreadyDisabled = antennaConfiguration.IsDeploymentDisabled();
 
             return This->_shouldDisable && !alreadyDisabled && state.AntennaState.IsDeployed();
         }
@@ -494,7 +555,10 @@ namespace mission
         {
             LOG(LOG_LEVEL_INFO, "[ant] Disabling antenna deployment");
 
-            state.PersistentState.Set(state::AntennaConfiguration(true));
+            if (!state.PersistentState.Set(state::AntennaConfiguration(true)))
+            {
+                LOG(LOG_LEVEL_ERROR, "[ant] Can't set antenna configuration");
+            }
         }
 
         /** @}*/

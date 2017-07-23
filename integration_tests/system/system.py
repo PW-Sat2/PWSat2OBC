@@ -21,9 +21,10 @@ class System:
 
         self.obc = OBC(SerialPortTerminal(obc_com, gpio))
 
-        self.i2c.start()
-
         self._final_boot_handler = final_boot_handler
+
+    def start(self):
+        self.i2c.start()
 
     def _setup_devices(self):
         self.frame_decoder = response_frames.FrameDecoder(response_frames.frame_factories)
@@ -61,6 +62,9 @@ class System:
         self.i2c.unlatch()
         self.obc.reset(boot_handler=BootHandler(boot_chain + [self._final_boot_handler]))
         self.obc.wait_to_start()
+
+    def power_off_obc(self):
+        self.obc.power_off()
 
     @classmethod
     def build_from_config(cls, config):
