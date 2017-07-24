@@ -399,9 +399,10 @@ namespace devices
           public:
             /**
              * @brief Constructs @ref RedundantN25QDriver
+             * @param[in] errors Errors counting mechanism
              * @param[in] n25qDrivers N25Q drivers used for redundant operations.
              */
-            RedundantN25QDriver(std::array<IN25QDriver*, 3> n25qDrivers);
+            RedundantN25QDriver(error_counter::ErrorCounting& errorCounting, std::array<IN25QDriver*, 3> n25qDrivers);
 
             /**
              * @brief Reads data from memory starting from given address.
@@ -477,8 +478,16 @@ namespace devices
              */
             OperationResult Reset();
 
+            /** @brief Error counter type */
+            using ErrorCounter = error_counter::ErrorCounter<7>;
+
           private:
             std::array<IN25QDriver*, 3> _n25qDrivers;
+
+            /** @brief Error counter */
+            ErrorCounter _error;
+
+            using ErrorReporter = error_counter::AggregatedErrorReporter<ErrorCounter::DeviceId>;
         };
 
         /** @} */

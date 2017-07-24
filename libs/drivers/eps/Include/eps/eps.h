@@ -182,7 +182,7 @@ namespace devices
             inline void ResetWatchdog();
 
             /** @brief Error counter type */
-            using ErrorCounter = error_counter::ErrorCounter<5>;
+            using ErrorCounter = error_counter::ErrorCounter<1>;
 
           private:
             /** @brief Error counter */

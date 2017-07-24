@@ -82,21 +82,21 @@ namespace obc
             struct N25QDriver1
             {
                 /** @brief Error counter type */
-                using ErrorCounter = error_counter::ErrorCounter<8>;
+                using ErrorCounter = error_counter::ErrorCounter<4>;
             };
 
             /** @brief Defines error counter with embedded device id in second flash chip driver */
             struct N25QDriver2
             {
                 /** @brief Error counter type */
-                using ErrorCounter = error_counter::ErrorCounter<9>;
+                using ErrorCounter = error_counter::ErrorCounter<5>;
             };
 
             /** @brief Defines error counter with embedded device id in third flash chip driver */
             struct N25QDriver3
             {
                 /** @brief Error counter type */
-                using ErrorCounter = error_counter::ErrorCounter<10>;
+                using ErrorCounter = error_counter::ErrorCounter<6>;
             };
         }
 
