@@ -65,6 +65,7 @@ mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc),
     Main.adcs.GetAdcsCoordinator(),
     Main.Experiments.ExperimentsController,
     std::make_pair(std::ref(Main.Hardware.CommDriver), std::ref(TelemetryAcquisition)),
+    Main.Fdir,
     std::tie(Main.Hardware.PersistentStorage, PersistentStateBaseAddress),
     Main.fs,
     Main.Hardware.EPS);

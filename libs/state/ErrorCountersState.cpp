@@ -6,10 +6,11 @@ namespace state
 {
     ErrorCountersConfigState::ErrorCountersConfigState()
     {
-        this->_config.fill((125) | (7 << 8) | (2 << 16));
+        // Limit: 128, Increment: 5, Decrement: 2
+        this->_config.fill((128) | (5 << 8) | (2 << 16));
     }
 
-    ErrorCountersConfigState::ErrorCountersConfigState(ConfigBuffer& currentConfig) : _config(currentConfig)
+    ErrorCountersConfigState::ErrorCountersConfigState(const ConfigBuffer& currentConfig) : _config(currentConfig)
     {
     }
 
