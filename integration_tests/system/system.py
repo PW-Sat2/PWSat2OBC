@@ -1,7 +1,7 @@
 import logging
 
 from devices import *
-from i2cMock import I2CMock
+from i2cMock import I2CMock, MockPin
 from obc import OBC, SerialPortTerminal
 import response_frames
 from obc.boot import BootHandler, BootToUpper, BootToIndex
@@ -38,6 +38,7 @@ class System:
         self.imtq = Imtq()
         self.gyro = Gyro()
         self.rtc = RTCDevice()
+        self.payload = Payload(GPIODriver(self.i2c), MockPin.PA8)
 
         self.i2c.add_bus_device(self.eps.controller_a)
         self.i2c.add_pld_device(self.eps.controller_b)
@@ -48,6 +49,7 @@ class System:
         self.i2c.add_bus_device(self.imtq)
         self.i2c.add_pld_device(self.rtc)
         self.i2c.add_pld_device(self.gyro)
+        self.i2c.add_pld_device(self.payload)
 
     def close(self):
         self.i2c.stop()

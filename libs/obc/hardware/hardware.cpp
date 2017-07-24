@@ -70,6 +70,7 @@ void OBCHardware::Initialize()
     this->SPI.Initialize();
 
     this->FlashDriver.Initialize();
+    this->PayloadDriver.Initialize();
 
     this->Burtc.Initialize();
 
@@ -93,7 +94,9 @@ OBCHardware::OBCHardware(
       EPS(errorCounting, this->I2C.Buses.Bus, this->I2C.Buses.Payload), //
       Imtq(errorCounting, I2C.Buses.Bus),                               //
       rtc(errorCounting, I2C.Buses.Payload),                            //
-      CommDriver(errorCounting, I2C.Buses.Bus)                          //
+      CommDriver(errorCounting, I2C.Buses.Bus),                         //
+      PayloadInterruptDriver(this->Pins.PayloadInterrupt),              //
+      PayloadDriver(this->I2C.Buses.Payload, PayloadInterruptDriver)    //
 {
     AntennaMiniportInitialize(&antennaMiniport);
     AntennaDriverInitialize(&antennaDriver, &antennaMiniport, &I2C.Buses.Bus, &I2C.Buses.Payload);

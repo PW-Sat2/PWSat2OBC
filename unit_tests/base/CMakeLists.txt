@@ -17,6 +17,8 @@ set(SOURCES
     mock/mock.cpp
     mock/error_counter.cpp
     mock/flash_driver.cpp
+    mock/InterruptPinDriverMock.cpp
+    mock/PayloadHardwareDriverMock.cpp
     I2C/I2CMock.cpp
     SPI/SPIMock.cpp
     fault_handlers.c
@@ -39,6 +41,7 @@ target_link_libraries(${NAME}
     mission_comm
     telecommunication
     program_flash
+    payload
     power
 )
 

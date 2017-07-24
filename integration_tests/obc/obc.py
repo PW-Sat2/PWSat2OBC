@@ -19,6 +19,7 @@ from .state import StateMixin
 from .error_counters import ErrorCountersMixin
 from .fram import FRAMMixin
 from .boot_settings import BootSettingsMixin
+from .payload import PayloadMixin
 from .runlevel import RunlevelMixin
 
 
@@ -38,6 +39,7 @@ class OBC(OBCMixin,
           ErrorCountersMixin,
           FRAMMixin,
           BootSettingsMixin,
+          PayloadMixin,
           RunlevelMixin
           ):
     def __init__(self, terminal):

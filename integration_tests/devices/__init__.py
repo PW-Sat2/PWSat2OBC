@@ -5,6 +5,8 @@ from test_devices import EchoDevice, TimeoutDevice
 from imtq import *
 from gyro import *
 from rtc import RTCDevice
+from payload import Payload
+from gpio import GPIODriver
 
 __all__ = [
     'EPS',
@@ -24,5 +26,7 @@ __all__ = [
     'ReceiverTelemetry',
     'Antenna',
     "RTCDevice",
-    "Gyro"
+    "Gyro",
+    "Payload",
+    "GPIODriver"
 ]

@@ -75,6 +75,16 @@ OSResult System::GiveSemaphore(OSSemaphoreHandle semaphore)
     return OSResult::InvalidOperation;
 }
 
+OSResult System::GiveSemaphoreISR(OSSemaphoreHandle semaphore)
+{
+    if (OSProxy != nullptr)
+    {
+        return OSProxy->GiveSemaphoreISR(semaphore);
+    }
+
+    return OSResult::InvalidOperation;
+}
+
 OSResult System::TakeSemaphore(OSSemaphoreHandle semaphore, std::chrono::milliseconds timeout)
 {
     if (OSProxy != nullptr)

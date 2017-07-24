@@ -20,7 +20,11 @@ namespace io_map
 
     using TimeIndicator = PinLocation<gpioPortE, 4>;
 
-    using PayloadInterrupt = PinLocation<gpioPortE, 0>;
+    struct Payload
+    {
+        static constexpr std::uint8_t InterruptPriority = 6;
+        using PayloadInterrupt = PinLocation<gpioPortE, 0>;
+    };
 }
 
 /** @endcond */

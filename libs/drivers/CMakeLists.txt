@@ -18,5 +18,5 @@ add_subdirectory(program_flash)
 add_subdirectory(gyro)
 add_subdirectory(s29jl)
 add_subdirectory(msc)
-
+add_subdirectory(payload)
 add_subdirectory(standalone)

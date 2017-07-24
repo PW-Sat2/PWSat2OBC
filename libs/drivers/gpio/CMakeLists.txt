@@ -2,6 +2,7 @@ set(NAME gpio)
 
 set(SOURCES
     gpio.cpp
+    InterruptPinDriver.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -9,6 +10,7 @@ add_library(${NAME} STATIC ${SOURCES})
 target_link_libraries(${NAME} PUBLIC
 	emlib
 	base
+	platform
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

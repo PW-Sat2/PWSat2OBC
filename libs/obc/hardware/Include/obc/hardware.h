@@ -19,6 +19,7 @@
 #include "mcu/io_map.h"
 #include "msc/msc.hpp"
 #include "payload/io_map.h"
+#include "payload/payload.h"
 #include "power/power.h"
 #include "program_flash/flash_driver.hpp"
 #include "rtc/rtc.hpp"
@@ -175,6 +176,12 @@ namespace obc
 
         /** @brief Low-level comm driver */
         devices::comm::CommObject CommDriver;
+
+        /** @bries Payload Interrupt Driver */
+        drivers::gpio::InterruptPinDriver PayloadInterruptDriver;
+
+        /** @brief Payload driver*/
+        drivers::payload::PayloadDriver PayloadDriver;
     };
 }
 /** @} */

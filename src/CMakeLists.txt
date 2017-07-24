@@ -30,6 +30,7 @@ set(SOURCES
     commands/error_counters.cpp
     commands/scrub.cpp
     commands/boot_settings.cpp
+    commands/payload.cpp
     commands/memory.cpp
     commands/runlevel.cpp
     commands/sail.cpp
