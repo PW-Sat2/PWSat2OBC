@@ -1,7 +1,7 @@
 from parser import Parser
 
 
-class ErrorCountingTelementry(Parser):
+class ErrorCountingTelemetry(Parser):
     def __init__(self, tree_control):
         Parser.__init__(self, tree_control, 'Error Counters')
 

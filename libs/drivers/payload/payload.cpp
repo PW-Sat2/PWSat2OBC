@@ -6,8 +6,9 @@
 using namespace drivers::payload;
 using drivers::i2c::I2CResult;
 
-PayloadDriver::PayloadDriver(drivers::i2c::II2CBus& communicationBus, drivers::gpio::IInterruptPinDriver& interruptPinDriver)
-    : _i2c(communicationBus),                  //
+PayloadDriver::PayloadDriver(
+    error_counter::ErrorCounting& errors, drivers::i2c::II2CBus& communicationBus, drivers::gpio::IInterruptPinDriver& interruptPinDriver)
+    : _error(errors), _i2c(communicationBus),  //
       _interruptPinDriver(interruptPinDriver), //
       _sync(nullptr),                          //
       _dataWaitTimeout(DefaultTimeout)
@@ -39,10 +40,12 @@ bool PayloadDriver::IsBusy() const
 
 OSResult PayloadDriver::PayloadRead(gsl::span<std::uint8_t> outData, gsl::span<std::uint8_t> inData)
 {
+    ErrorReporter errorContext(_error);
     auto result = _i2c.WriteRead(I2CAddress, outData, inData);
     const bool status = (result == I2CResult::OK);
     if (!status)
     {
+        errorContext.Counter().Failure();
         LOGF(LOG_LEVEL_ERROR, "Unable to perform Payload I2C Write and Read. Reason: %d", num(result));
         return OSResult::InvalidOperation;
     }
@@ -52,10 +55,12 @@ OSResult PayloadDriver::PayloadRead(gsl::span<std::uint8_t> outData, gsl::span<s
 
 OSResult PayloadDriver::PayloadWrite(gsl::span<std::uint8_t> outData)
 {
+    ErrorReporter errorContext(_error);
     auto result = _i2c.Write(I2CAddress, outData);
     const bool status = (result == I2CResult::OK);
     if (!status)
     {
+        errorContext.Counter().Failure();
         LOGF(LOG_LEVEL_ERROR, "Unable to perform Payload I2C Write. Reason: %d", num(result));
         return OSResult::InvalidOperation;
     }
@@ -65,9 +70,11 @@ OSResult PayloadDriver::PayloadWrite(gsl::span<std::uint8_t> outData)
 
 OSResult PayloadDriver::WaitForData()
 {
+    ErrorReporter errorContext(_error);
     auto result = System::TakeSemaphore(_sync, _dataWaitTimeout);
     if (result != OSResult::Success)
     {
+        errorContext.Counter().Failure();
         LOGF(LOG_LEVEL_ERROR, "Take semaphore for Payload synchronisation failed. Reason: %d", num(result));
         return result;
     }
@@ -77,9 +84,11 @@ OSResult PayloadDriver::WaitForData()
 
 OSResult PayloadDriver::RaiseDataReadyISR()
 {
+    ErrorReporter errorContext(_error);
     auto result = System::GiveSemaphoreISR(_sync);
     if (result != OSResult::Success)
     {
+        errorContext.Counter().Failure();
         LOGF(LOG_LEVEL_ERROR, "Give semaphore for Paload synchronisation failed. Reason: %d", num(result));
         return result;
     }

@@ -148,7 +148,7 @@ namespace devices
             virtual void Write(Address address, gsl::span<const std::uint8_t> buffer) override;
 
             /** @brief Error counter type */
-            using ErrorCounter = error_counter::ErrorCounter<11>;
+            using ErrorCounter = error_counter::ErrorCounter<8>;
 
           private:
             /** @brief Error counter */

@@ -4,6 +4,7 @@
 #include "imtq/imtq.h"
 #include "n25q/n25q.h"
 #include "obc/storage/n25q.h"
+#include "payload/payload.h"
 #include "rtc/rtc.hpp"
 #include "traits.hpp"
 
@@ -19,12 +20,13 @@ namespace
     };
 
     /** @brief Typedef with all declared error counters */
-    using Everything = VerifyUniqueness<           //
-        devices::eps::EPSDriver,                   //
-        devices::comm::CommObject,                 //
-        devices::imtq::ImtqDriver,                 //
-        devices::fm25w::RedundantFM25WDriver,      //
-        devices::rtc::RTCObject,                   //
+    using Everything = VerifyUniqueness<      //
+        devices::eps::EPSDriver,              //
+        devices::comm::CommObject,            //
+        devices::imtq::ImtqDriver,            //
+        devices::fm25w::RedundantFM25WDriver, //
+        devices::rtc::RTCObject,              //
+        drivers::payload::PayloadDriver,
         obc::storage::error_counters::N25QDriver1, //
         obc::storage::error_counters::N25QDriver2, //
         obc::storage::error_counters::N25QDriver3, //

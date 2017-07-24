@@ -1,4 +1,4 @@
-from error_counting_telementry import  ErrorCountingTelementry
+from error_counting_telemetry import  ErrorCountingTelemetry
 from program_state import ProgramStateParser
 from startup_parser import StartupParser
 from time_state import TimeState
@@ -18,7 +18,7 @@ class FullBeaconParser:
         return [StartupParser(file_tree),
                 ProgramStateParser(file_tree),
                 TimeState(file_tree),
-                ErrorCountingTelementry(file_tree),
+                ErrorCountingTelemetry(file_tree),
                 FileSystemTelemetryParser(file_tree),
                 AntennaTelemetryParser(file_tree),
                 ExperimentTelemetryParser(file_tree),

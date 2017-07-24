@@ -2,6 +2,7 @@
 #include "I2C/I2CMock.hpp"
 #include "OsMock.hpp"
 #include "mock/InterruptPinDriverMock.hpp"
+#include "mock/error_counter.hpp"
 #include "payload/payload.h"
 
 using namespace drivers::payload;
@@ -23,15 +24,19 @@ namespace
       protected:
         PayloadHardwareDriverTest();
 
+        testing::NiceMock<ErrorCountingConfigrationMock> errorsConfig;
+        error_counter::ErrorCounting errors;
+
         I2CBusMock i2c;
         InterruptPinDriverMock pinDriver;
         PayloadDriver driver;
 
         OSMock os;
         OSReset reset;
+        PayloadDriver::ErrorCounter error_counter;
     };
 
-    PayloadHardwareDriverTest::PayloadHardwareDriverTest() : driver{i2c, pinDriver}
+    PayloadHardwareDriverTest::PayloadHardwareDriverTest() : errors{errorsConfig}, driver{errors, i2c, pinDriver}, error_counter{errors}
     {
         this->reset = InstallProxy(&os);
     }
@@ -50,6 +55,7 @@ namespace
 
         ASSERT_THAT(driver.PayloadRead(output, input), Eq(OSResult::Success));
         ASSERT_THAT(input, Eq(reference));
+        EXPECT_EQ(error_counter, 0);
     }
 
     TEST_F(PayloadHardwareDriverTest, WriteReadFailed)
@@ -64,6 +70,7 @@ namespace
         std::array<uint8_t, 4> input;
 
         ASSERT_THAT(driver.PayloadRead(output, input), Eq(OSResult::InvalidOperation));
+        EXPECT_EQ(error_counter, 5);
     }
 
     TEST_F(PayloadHardwareDriverTest, WriteSuccessful)
@@ -74,6 +81,7 @@ namespace
         std::array<uint8_t, 1> output = {2};
 
         ASSERT_THAT(driver.PayloadWrite(output), Eq(OSResult::Success));
+        EXPECT_EQ(error_counter, 0);
     }
 
     TEST_F(PayloadHardwareDriverTest, WriteFailed)
@@ -84,6 +92,7 @@ namespace
         std::array<uint8_t, 1> output = {2};
 
         ASSERT_THAT(driver.PayloadWrite(output), Eq(OSResult::InvalidOperation));
+        EXPECT_EQ(error_counter, 5);
     }
 
     TEST_F(PayloadHardwareDriverTest, IRQHandlerActiveTest)
@@ -95,6 +104,7 @@ namespace
 
         pinDriver.SetValue(false);
         driver.IRQHandler();
+        EXPECT_EQ(error_counter, 0);
     }
 
     TEST_F(PayloadHardwareDriverTest, IRQHandlerInactiveTest)
@@ -106,6 +116,7 @@ namespace
 
         pinDriver.SetValue(true);
         driver.IRQHandler();
+        EXPECT_EQ(error_counter, 0);
     }
 
     TEST_F(PayloadHardwareDriverTest, IsBusyLine)
@@ -114,9 +125,11 @@ namespace
 
         pinDriver.SetValue(true);
         ASSERT_THAT(driver.IsBusy(), Eq(true));
+        EXPECT_EQ(error_counter, 0);
 
         pinDriver.SetValue(false);
         ASSERT_THAT(driver.IsBusy(), Eq(false));
+        EXPECT_EQ(error_counter, 0);
     }
 
     TEST_F(PayloadHardwareDriverTest, WaitForDataSuccesful)
@@ -126,6 +139,7 @@ namespace
             .WillOnce(Invoke([=](OSSemaphoreHandle /*syncs*/, std::chrono::milliseconds /*timeout*/) { return OSResult::Success; }));
 
         ASSERT_THAT(driver.WaitForData(), Eq(OSResult::Success));
+        EXPECT_EQ(error_counter, 0);
     }
 
     TEST_F(PayloadHardwareDriverTest, WaitForDataTimeout)
@@ -135,6 +149,7 @@ namespace
             .WillOnce(Invoke([=](OSSemaphoreHandle /*syncs*/, std::chrono::milliseconds /*timeout*/) { return OSResult::Timeout; }));
 
         ASSERT_THAT(driver.WaitForData(), Eq(OSResult::Timeout));
+        EXPECT_EQ(error_counter, 5);
     }
 
     TEST_F(PayloadHardwareDriverTest, SetingTimeout)
@@ -143,5 +158,6 @@ namespace
         EXPECT_CALL(os, TakeSemaphore(_, Eq(timeout))).Times(1);
         driver.SetDataTimeout(timeout);
         driver.WaitForData();
+        EXPECT_EQ(error_counter, 0);
     }
 }
