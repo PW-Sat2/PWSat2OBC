@@ -65,14 +65,16 @@ namespace telemetry
      * @telemetry_element
      * @ingroup telemetry
      */
-    typedef SimpleTelemetryElement<std::uint32_t, ::telemetry::details::FlashPrimarySlotsScrubbingTag> FlashPrimarySlotsScrubbing;
+    typedef SimpleTelemetryElement<BitValue<std::uint8_t, 3>, ::telemetry::details::FlashPrimarySlotsScrubbingTag>
+        FlashPrimarySlotsScrubbing;
 
     /**
      * @brief This type represents telemetry element related to secondary flash scrubber.
      * @telemetry_element
      * @ingroup telemetry
      */
-    typedef SimpleTelemetryElement<std::uint32_t, ::telemetry::details::FlashSecondarySlotsScrubbingTag> FlashSecondarySlotsScrubbing;
+    typedef SimpleTelemetryElement<BitValue<std::uint8_t, 3>, ::telemetry::details::FlashSecondarySlotsScrubbingTag>
+        FlashSecondarySlotsScrubbing;
 
     /**
      * @brief This type represents telemetry element related to RAM scrubber.

@@ -16,11 +16,16 @@ namespace telemetry
         return descriptor;
     }
 
+    static BitValue<std::uint8_t, 3> OffsetToBlock(std::uint32_t offset)
+    {
+        return offset >> 16;
+    }
+
     mission::UpdateResult FlashScrubbingTelemetryAcquisition::UpdateTelemetry(telemetry::TelemetryState& state)
     {
         const auto result = this->provider->Status();
-        FlashPrimarySlotsScrubbing primary(result.PrimarySlots.Offset);
-        FlashSecondarySlotsScrubbing secondary(result.SecondarySlots.Offset);
+        FlashPrimarySlotsScrubbing primary(OffsetToBlock(result.PrimarySlots.Offset));
+        FlashSecondarySlotsScrubbing secondary(OffsetToBlock(result.SecondarySlots.Offset));
         state.telemetry.Set(primary);
         state.telemetry.Set(secondary);
         return mission::UpdateResult::Ok;
