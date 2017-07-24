@@ -3,6 +3,7 @@ import IPython.lib.guisupport
 from emulator.antenna import AntennaModule
 from emulator.eps import EPSModule
 from emulator.comm_rtc import CommRTCModule
+from emulator.payload import PayloadModule
 
 
 def _setup_emulator(system):
@@ -10,7 +11,8 @@ def _setup_emulator(system):
         AntennaModule('Primary', (0, 0), system.primary_antenna),
         AntennaModule('Backup', (0,1), system.backup_antenna),
         CommRTCModule(system),
-        EPSModule(system)
+        EPSModule(system),
+        PayloadModule(system)
     ]
 
     emulator = Emulator(emulator_modules)
