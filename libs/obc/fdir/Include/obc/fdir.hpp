@@ -4,6 +4,7 @@
 #include <array>
 #include <atomic>
 #include "error_counter/error_counter.hpp"
+#include "mission/fdir.hpp"
 #include "power/power.h"
 
 namespace obc
@@ -28,7 +29,8 @@ namespace obc
      */
     class FDIR final : private error_counter::IErrorCountingCallback,
                        public error_counter::IErrorCountingConfigration,
-                       public ISetErrorCounterConfig
+                       public ISetErrorCounterConfig,
+                       public mission::IGetErrorCounterConfig
     {
       public:
         /**
@@ -57,6 +59,8 @@ namespace obc
         virtual error_counter::CounterValue Limit(error_counter::Device device) override;
         virtual error_counter::CounterValue Increment(error_counter::Device device) override;
         virtual error_counter::CounterValue Decrement(error_counter::Device device) override;
+
+        virtual std::array<std::uint32_t, error_counter::ErrorCounting::MaxDevices> GetConfig() override;
 
       private:
         /** @brief Error counting mechanism */

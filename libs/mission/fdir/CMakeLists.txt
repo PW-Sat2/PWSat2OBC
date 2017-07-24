@@ -1,17 +1,16 @@
-set(NAME obc_fdir)
+set(NAME mission_fdir)
 
 set(SOURCES
-    fdir.cpp
+    SaveErrorCountersConfig.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
 
 target_link_libraries(${NAME} 
-	error_counter
-	logger
-	power
-	mission_fdir
+	base
+	mission
+	state
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
-target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/obc)
+target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/mission)

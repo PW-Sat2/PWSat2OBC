@@ -33,10 +33,7 @@ namespace obc
 
     FDIR::FDIR(services::power::IPowerControl& powerControl) : _errorCounting(*this), _powerControl(powerControl)
     {
-        for (auto it = this->_configuration.begin(); it != this->_configuration.end(); it++)
-        {
-            *it = Config(128, 5, 2);
-        }
+        std::fill(this->_configuration.begin(), this->_configuration.end(), Config(128, 5, 2));
     }
 
     void FDIR::Initalize()
@@ -84,5 +81,15 @@ namespace obc
         error_counter::CounterValue decrement)
     {
         this->_configuration[device] = Config(limit, increment, decrement);
+    }
+
+    std::array<std::uint32_t, error_counter::ErrorCounting::MaxDevices> FDIR::GetConfig()
+    {
+        std::array<std::uint32_t, error_counter::ErrorCounting::MaxDevices> buf;
+        for (std::size_t i = 0; i < error_counter::ErrorCounting::MaxDevices; i++)
+        {
+            buf[i] = this->_configuration[i];
+        }
+        return buf;
     }
 }
