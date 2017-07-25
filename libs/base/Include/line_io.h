@@ -3,6 +3,7 @@
 
 #include <stdarg.h>
 #include <stddef.h>
+#include <chrono>
 #include <cstdint>
 #include <gsl/span>
 
@@ -46,12 +47,26 @@ typedef struct _LineIO
     size_t (*Readline)(struct _LineIO* io, char* buffer, size_t bufferLength, char promptChar);
 
     /**
+     * @brief Procedure that reads specified buffer
+     * @param io @see LineIO structure
+     * @param buffer Buffer that will hold upcoming data
+     * @param timeout Timeout for read command
+     * @return True if read succeeded, false otherwise
+     */
+    bool (*Read)(struct _LineIO* io, gsl::span<std::uint8_t> buffer, std::chrono::milliseconds timeout);
+
+    /**
      * @brief Reads arbitrary number of bytes
      * @param io @see LineIO structure
      * @param outputBuffer Buffer that will be sent before reading inputBuffer
      * @param inputBuffer Buffer that will be filled
+     * @param timeout Timeout for read operation
+     * @return False if timeout occured, true otherwise
      */
-    void (*ExchangeBuffers)(struct _LineIO* io, gsl::span<const std::uint8_t> outputBuffer, gsl::span<std::uint8_t> inputBuffer);
+    bool (*ExchangeBuffers)(struct _LineIO* io,
+        gsl::span<const std::uint8_t> outputBuffer,
+        gsl::span<std::uint8_t> inputBuffer,
+        std::chrono::milliseconds timeout);
 } LineIO;
 
 #endif /* LIBS_DRIVERS_LEUART_INCLUDE_LEUART_LINE_IO_H_ */

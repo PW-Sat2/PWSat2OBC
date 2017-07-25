@@ -37,6 +37,7 @@ set(SOURCES
     commands/sail.cpp
     commands/leop.cpp
     commands/exp_suns.cpp
+    commands/camera.cpp
     checks/error_counters.cpp
     checks/checks.cpp
     obc.h
@@ -125,6 +126,7 @@ target_link_libraries(${NAME}
     scrubber
     boot_settings
     obc_memory
+    camera
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

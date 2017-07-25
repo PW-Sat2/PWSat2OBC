@@ -51,7 +51,7 @@ namespace io_map
         static constexpr USART_TypeDef* Peripheral = UART0;
 
         static constexpr CMU_Clock_TypeDef Clock = cmuClock_UART0;
-        static constexpr std::uint32_t Baudrate = 115200;
+        static constexpr std::uint32_t Baudrate = 57600;
         static constexpr IRQn WakeUpInterrupt = IRQn::LESENSE_IRQn;
         static constexpr std::uint8_t WakeUpInterruptPriority = 5;
 
