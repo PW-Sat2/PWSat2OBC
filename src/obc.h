@@ -10,6 +10,7 @@
 
 #include "base/os.h"
 #include "boot/settings.hpp"
+#include "camera/camera.h"
 #include "experiment/fibo/fibo.h"
 #include "fs/fs.h"
 #include "fs/yaffs.h"
@@ -126,6 +127,9 @@ struct OBC
 
     /** @brief Terminal object. */
     Terminal terminal;
+
+    /** @brief Camera object attached to UART */
+    devices::camera::Camera camera;
 };
 
 LineIO& OBC::GetLineIO()

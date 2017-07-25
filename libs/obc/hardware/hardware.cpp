@@ -65,6 +65,8 @@ void OBCHardware::Initialize()
     this->Terminal.Initialize();
     this->Terminal.LineEditing(true);
 
+    this->Camera.Initialize();
+
     this->SPI.Initialize();
 
     this->FlashDriver.Initialize();

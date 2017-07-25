@@ -3,10 +3,10 @@
 
 #include "antenna/fwd.hpp"
 #include "boot/fwd.hpp"
+#include "camera/camera.h"
 #include "comm/comm.hpp"
 #include "eps/fwd.hpp"
 #include "fs/fwd.hpp"
-#include "gyro/fwd.hpp"
 #include "gyro/fwd.hpp"
 #include "i2c/forward.h"
 #include "imtq/fwd.hpp"
@@ -39,5 +39,6 @@ devices::rtc::RTCObject& GetRTC();
 services::time::TimeProvider& GetTimeProvider();
 obc::OBCScrubbing& GetScrubbing();
 temp::ADCTemperatureReader& GetMCUTemperature();
+devices::camera::Camera& GetCamera();
 
 #endif /* SRC_OBC_ACCESS_HPP_ */

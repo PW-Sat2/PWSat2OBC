@@ -60,6 +60,7 @@ static const TerminalCommandDescription commands[] = {
     {"runlevel", RunlevelCommand},
     {"sail", SailCommand},
     {"leop", LeopCommand},
+    {"camera", CameraCommand},
 };
 
 void InitializeTerminal(void)
