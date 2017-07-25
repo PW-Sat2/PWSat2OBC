@@ -154,8 +154,6 @@ OSResult OBC::InitializeRunlevel1()
         LOG(LOG_LEVEL_ERROR, "Unable to initialize mission loop.");
     }
 
-    static_cast<mission::antenna::AntennaTask&>(Mission).Initialize();
-
     if (!TelemetryAcquisition.Initialize(30s))
     {
         LOG(LOG_LEVEL_ERROR, "Unable to initialize telemetry acquisition loop.");

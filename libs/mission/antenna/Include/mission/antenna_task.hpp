@@ -8,26 +8,12 @@
 #include <tuple>
 #include "antenna_state.h"
 #include "mission/base.hpp"
-#include "power/power.h"
+#include "power/fwd.hpp"
 
 namespace mission
 {
     namespace antenna
     {
-        /**
-         * @brief Antenna telemetry provider
-         * @ingroup mission_atenna
-         */
-        struct IAntennaTelemetryProvider
-        {
-            /**
-             * @brief Fetches current antenna telemetry
-             * @param telemetry Reference to object that will be filled with telemetry
-             * @return true if telemetry was fetched correctly, false otherwise
-             */
-            virtual bool GetTelemetry(devices::antenna::AntennaTelemetry& telemetry) const = 0;
-        };
-
         /**
          * @brief Mission part related to antenna deployment.
          * @ingroup mission_atenna
@@ -43,7 +29,7 @@ namespace mission
          * - The initial silent mission period is over
          * - The antennas are not currently being deployed
          */
-        struct AntennaTask : public Update, public Action, public IAntennaTelemetryProvider
+        struct AntennaTask : public Update, public Action, public devices::antenna::IAntennaTelemetryProvider
         {
             /**
              * @brief ctor.
@@ -53,8 +39,9 @@ namespace mission
 
             /**
              * @brief Initializes antenna mission state
+             * @return Operation result
              */
-            void Initialize();
+            bool Initialize();
 
             /**
              * @brief Returns antenna deployment action descriptor.

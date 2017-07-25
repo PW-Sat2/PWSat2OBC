@@ -8,6 +8,7 @@
 #include "logger/logger.h"
 #include "mission/base.hpp"
 #include "mission/obc.hpp"
+#include "power/power.h"
 #include "system.h"
 #include "time/TimePoint.h"
 
@@ -609,9 +610,11 @@ namespace mission
         {
         }
 
-        void AntennaTask::Initialize()
+        bool AntennaTask::Initialize()
         {
             this->state.Initialize();
+
+            return true;
         }
 
         ActionDescriptor<SystemState> AntennaTask::BuildAction()
