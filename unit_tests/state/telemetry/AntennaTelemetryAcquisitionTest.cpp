@@ -15,7 +15,7 @@ namespace
 
     using namespace devices::antenna;
 
-    struct AntennaTelemetryProviderMock : mission::antenna::IAntennaTelemetryProvider
+    struct AntennaTelemetryProviderMock : devices::antenna::IAntennaTelemetryProvider
     {
         MOCK_CONST_METHOD1(GetTelemetry, bool(AntennaTelemetry&));
     };

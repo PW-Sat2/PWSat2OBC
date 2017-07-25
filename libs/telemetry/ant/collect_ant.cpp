@@ -5,7 +5,7 @@
 
 namespace telemetry
 {
-    AntennaTelemetryAcquisition::AntennaTelemetryAcquisition(mission::antenna::IAntennaTelemetryProvider& antenna) : provider(&antenna)
+    AntennaTelemetryAcquisition::AntennaTelemetryAcquisition(devices::antenna::IAntennaTelemetryProvider& antenna) : provider(&antenna)
     {
     }
 

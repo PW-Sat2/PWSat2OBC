@@ -22,7 +22,7 @@ namespace telemetry
          * @brief ctor.
          * @param[in] antenna Reference to antenna driver that will provide this module with hardware telemetry
          */
-        AntennaTelemetryAcquisition(mission::antenna::IAntennaTelemetryProvider& antenna);
+        AntennaTelemetryAcquisition(devices::antenna::IAntennaTelemetryProvider& antenna);
 
         /**
          * @brief Builds update descriptor for this task.
@@ -48,7 +48,7 @@ namespace telemetry
         /**
          * @brief Reference to antenna driver.
          */
-        mission::antenna::IAntennaTelemetryProvider* provider;
+        devices::antenna::IAntennaTelemetryProvider* provider;
     };
 }
 

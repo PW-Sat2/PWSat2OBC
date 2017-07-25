@@ -235,6 +235,13 @@ namespace mission
 
         template <size_t i, template <typename Type> class Pred, typename Action, typename Collection> void Process(...);
 
+        template <size_t i, typename Task, typename... Rest> bool InitializeTasks();
+        template <size_t i> bool InitializeTasks();
+
+        template <typename Task> bool InitializeTask(std::true_type);
+
+        template <typename Task> bool InitializeTask(std::false_type);
+
         /**
          * @brief Main mission loop.
          */
@@ -280,7 +287,9 @@ namespace mission
     template <typename State, typename... T>
     template <typename... Args>
     MissionLoop<State, T...>::MissionLoop(Args&&... args) //
-        : T(std::forward<Args>(args))..., taskHandle(nullptr), eventGroup(nullptr)
+        : T(std::forward<Args>(args))...,
+          taskHandle(nullptr),
+          eventGroup(nullptr)
     {
         static_assert(sizeof...(Args) == sizeof...(T), "Number of arguments must be equal to number of mission components");
         Setup();
@@ -339,6 +348,12 @@ namespace mission
             return false;
         }
 
+        if (!InitializeTasks<0, T...>())
+        {
+            LOG(LOG_LEVEL_ERROR, "Failed to initialize mission tasks");
+            return false;
+        }
+
         if (OS_RESULT_FAILED(
                 System::CreateTask(MissionLoopControlTask, "MissionLoopControl", 4_KB, this, TaskPriority::P2, &this->taskHandle)))
         {
@@ -347,6 +362,34 @@ namespace mission
         }
 
         System::SuspendTask(this->taskHandle);
+        return true;
+    }
+
+    template <typename State, typename... T>
+    template <size_t i, typename Task, typename... Rest>
+    bool MissionLoop<State, T...>::InitializeTasks()
+    {
+        using type = typename HasInitialize<Task>::ValueType;
+        if (!InitializeTask<Task>(type()))
+        {
+            return false;
+        }
+
+        return InitializeTasks<i, Rest...>();
+    }
+
+    template <typename State, typename... T> template <size_t i> bool MissionLoop<State, T...>::InitializeTasks()
+    {
+        return true;
+    }
+
+    template <typename State, typename... T> template <typename Task> bool MissionLoop<State, T...>::InitializeTask(std::true_type)
+    {
+        return static_cast<Task*>(this)->Initialize();
+    }
+
+    template <typename State, typename... T> template <typename Task> bool MissionLoop<State, T...>::InitializeTask(std::false_type)
+    {
         return true;
     }
 

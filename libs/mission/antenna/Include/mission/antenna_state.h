@@ -6,7 +6,7 @@
 #include "antenna/telemetry.hpp"
 #include "base/os.h"
 #include "mission/base.hpp"
-#include "power/power.h"
+#include "power/fwd.hpp"
 #include "state/struct.h"
 
 namespace mission
