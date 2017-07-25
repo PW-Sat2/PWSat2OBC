@@ -56,6 +56,7 @@ FM25WDriverMock::~FM25WDriverMock()
 
 PowerControlMock::PowerControlMock()
 {
+    ON_CALL(*this, PrimaryAntennaPower()).WillByDefault(testing::Return(Some(true)));
 }
 PowerControlMock::~PowerControlMock()
 {

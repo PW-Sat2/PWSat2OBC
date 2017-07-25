@@ -270,6 +270,7 @@ class EPSControllerA(I2CDevice):
     @i2cMock.command([0x0])
     def _housekeeping(self):
         self.hk.DISTR.LCL_STATE = bitlist_to_byte(map(lambda lcl: 1 if lcl.is_on else 0, self._lcls))
+        self.hk.DISTR.LCL_FLAGB = bitlist_to_byte(map(lambda lcl: 1 if lcl.is_on else 0, self._lcls))
 
         hk = call(self.on_get_housekeeping, default=self.hk)
         return [0x61] + hk.bytes()

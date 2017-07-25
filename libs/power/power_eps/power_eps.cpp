@@ -1,11 +1,14 @@
 #include <stdlib.h>
 
 #include "eps/eps.h"
+#include "logger/logger.h"
 #include "power/power.h"
 #include "power_eps.h"
 #include "system.h"
 
 using devices::eps::LCL;
+using devices::eps::hk::DISTR_LCL_STATE;
+using devices::eps::hk::DISTR_LCL_FLAGB;
 using devices::eps::BurnSwitch;
 using devices::eps::ErrorCode;
 
@@ -78,6 +81,21 @@ namespace services
             {
                 return this->_eps.DisableLCL(LCL::AntennaRed) == ErrorCode::NoError;
             }
+        }
+
+        Option<bool> EPSPowerControl::PrimaryAntennaPower()
+        {
+            auto hk = this->_eps.ReadHousekeepingA();
+
+            if (!hk.HasValue)
+            {
+                return None<bool>();
+            }
+
+            auto state = has_flag(hk.Value.distr.LCL_STATE, DISTR_LCL_STATE::Antenna);
+            auto flagb = has_flag(hk.Value.distr.LCL_FLAGB, DISTR_LCL_FLAGB::Antenna);
+
+            return Some(state && flagb);
         }
     }
 }
