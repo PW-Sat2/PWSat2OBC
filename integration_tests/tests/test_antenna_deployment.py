@@ -1,3 +1,4 @@
+from devices.eps import HousekeepingA
 from system import auto_power_on, runlevel, clear_state
 from datetime import timedelta
 
@@ -203,4 +204,51 @@ class Test_AntennaDeployment(RestartPerTest):
         self.system.primary_antenna.on_begin_deployment = verifier
         self.system.backup_antenna.on_begin_deployment = verifier
         self.begin(44)
+        self.assertSequenceEqual(list, expected)
+
+    @runlevel(1)
+    @clear_state()
+    def test_procedure_is_restarted_on_lcl_fail(self):
+        self.system.i2c.enable_bus_devices([self.system.primary_antenna.address], False)
+        self.system.i2c.enable_pld_devices([self.system.backup_antenna.address], False)
+
+        def control_antenna_power(*args, **kwargs):
+            main = self.system.eps.ANTenna.is_on
+            red = self.system.eps.ANTennaRed.is_on
+            power = main or red
+            self.system.i2c.enable_bus_devices([self.system.primary_antenna.address], power)
+            self.system.i2c.enable_pld_devices([self.system.backup_antenna.address], power)
+
+        self.system.eps.ANTenna.on_enable = control_antenna_power
+        self.system.eps.ANTenna.on_disable = control_antenna_power
+        self.system.eps.ANTennaRed.on_enable = control_antenna_power
+        self.system.eps.ANTennaRed.on_disable = control_antenna_power
+
+        list = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+        expected = [0, 1, 1, 1, 1, 1, 1, 1, 1]
+
+        def primaryHandler(controller, antennaId):
+            if antennaId != -1:
+                list[antennaId] = 1
+            return False
+
+        def backupHandler(controller, antennaId):
+            if antennaId != -1:
+                list[antennaId + 4] = 1
+            return False
+
+        self.system.primary_antenna.on_begin_deployment = primaryHandler
+        self.system.backup_antenna.on_begin_deployment = backupHandler
+
+        self.power_on_obc()
+        self.begin_deployment()
+        self.run_steps(4)
+
+        self.system.eps.ANTenna.is_on = False
+        self.system.eps.ANTenna.was_on = False
+        control_antenna_power()
+
+        self.run_steps(18)
+
+        self.assertEqual(self.system.eps.ANTenna.was_on, True, "LCL was re-enabled")
         self.assertSequenceEqual(list, expected)

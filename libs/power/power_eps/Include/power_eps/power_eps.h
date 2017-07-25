@@ -29,6 +29,7 @@ namespace services
             virtual bool EnableRedundantSailBurnSwitch() override;
             virtual bool PrimaryAntennaPower(bool enabled) override;
             virtual bool BackupAntennaPower(bool enabled) override;
+            virtual Option<bool> PrimaryAntennaPower() override;
 
           private:
             /** @brief EPS driver */

@@ -310,6 +310,62 @@ namespace
         update.Execute(this->state);
     }
 
+    TEST_F(DeployAntennasUpdateTest, ShouldResetToStepZeroIfAntennaNotPoweredButShouldBe)
+    {
+        stateDescriptor.RequirePrimaryAntennaPower(true);
+
+        ON_CALL(power, PrimaryAntennaPower()).WillByDefault(Return(Some(false)));
+
+        update.Execute(state);
+        ASSERT_THAT(stateDescriptor.StepNumber(), Eq(0));
+    }
+
+    TEST_F(DeployAntennasUpdateTest, ShouldKeepGoingIfAntennaNotRequiredToBePowered)
+    {
+        EXPECT_CALL(mock, GetDeploymentStatus(_, _))
+            .WillOnce(Invoke([](AntennaChannel /*channel*/, //
+                AntennaDeploymentStatus* deploymentStatus)  //
+                {
+                    deploymentStatus->DeploymentStatus[0] = true;
+                    deploymentStatus->DeploymentStatus[1] = true;
+                    deploymentStatus->DeploymentStatus[2] = true;
+                    deploymentStatus->DeploymentStatus[3] = true;
+                    return OSResult::Success;
+                }));
+
+        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Return(OSResult::Success));
+
+        stateDescriptor.OverrideStep(12);
+        ON_CALL(power, PrimaryAntennaPower()).WillByDefault(Return(Some(false)));
+
+        update.Execute(state);
+        ASSERT_THAT(stateDescriptor.StepNumber(), Eq(12));
+    }
+
+    TEST_F(DeployAntennasUpdateTest, ShouldKeepGoingIfAntennaRequiredToBePoweredButPowerControlUnableToCheckStatus)
+    {
+        EXPECT_CALL(mock, GetDeploymentStatus(_, _))
+            .WillOnce(Invoke([](AntennaChannel /*channel*/, //
+                AntennaDeploymentStatus* deploymentStatus)  //
+                {
+                    deploymentStatus->DeploymentStatus[0] = true;
+                    deploymentStatus->DeploymentStatus[1] = true;
+                    deploymentStatus->DeploymentStatus[2] = true;
+                    deploymentStatus->DeploymentStatus[3] = true;
+                    return OSResult::Success;
+                }));
+
+        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Return(OSResult::Success));
+
+        stateDescriptor.RequirePrimaryAntennaPower(true);
+
+        stateDescriptor.OverrideStep(3);
+        ON_CALL(power, PrimaryAntennaPower()).WillByDefault(Return(None<bool>()));
+
+        update.Execute(state);
+        ASSERT_THAT(stateDescriptor.StepNumber(), Eq(3));
+    }
+
     class DeployAntennasActionTest : public ::testing::Test
     {
       protected:

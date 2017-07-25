@@ -205,13 +205,14 @@ namespace mission
         }
 
         AntennaMissionState::AntennaMissionState(AntennaDriver& antennaDriver, services::power::IPowerControl& powerControl)
-            : Power(powerControl),   //
-              _overrideState(false), //
-              _inProgress(false),    //
-              _stepNumber(0),        //
-              _retryCount(0),        //
-              _cycleCount(0),        //
-              _driver(antennaDriver)
+            : Power(powerControl),    //
+              _overrideState(false),  //
+              _inProgress(false),     //
+              _stepNumber(0),         //
+              _retryCount(0),         //
+              _cycleCount(0),         //
+              _driver(antennaDriver), //
+              _powerRequired(false)
         {
         }
 
@@ -456,6 +457,8 @@ namespace mission
             if (step.channel == ANTENNA_PRIMARY_CHANNEL)
             {
                 result = stateDescriptor.Power.PrimaryAntennaPower(true);
+
+                stateDescriptor.RequirePrimaryAntennaPower(result);
             }
             else
             {
@@ -481,6 +484,7 @@ namespace mission
             if (step.channel == ANTENNA_PRIMARY_CHANNEL)
             {
                 result = stateDescriptor.Power.PrimaryAntennaPower(false);
+                stateDescriptor.RequirePrimaryAntennaPower(false);
             }
             else
             {
@@ -577,6 +581,13 @@ namespace mission
             if (stateDescriptor->IsFinished())
             {
                 return UpdateResult::Ok;
+            }
+
+            if (stateDescriptor->RequirePrimaryAntennaPower() && stateDescriptor->Power.PrimaryAntennaPower() == false)
+            {
+                LOG(LOG_LEVEL_ERROR, "Primary antenna power disabled. Restarting procedure");
+                stateDescriptor->Restart();
+                return UpdateResult::Warning;
             }
 
             stateDescriptor->NextCycle();

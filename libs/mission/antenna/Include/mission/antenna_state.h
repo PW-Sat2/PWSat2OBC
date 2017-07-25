@@ -183,6 +183,18 @@ namespace mission
              */
             bool UpdateTelemetry();
 
+            /**
+             * @brief Sets flag indicating whether primary antenna must powered
+             * @param powerRequired true if antenna must be powered, false otherwise
+             */
+            inline void RequirePrimaryAntennaPower(bool powerRequired);
+
+            /**
+             * @brief Returns value indicating whether primary antenna must powered
+             * @return true if antenna must be powered, false otherwise
+             */
+            inline bool RequirePrimaryAntennaPower() const;
+
             /** @brief Power control  */
             services::power::IPowerControl& Power;
 
@@ -222,6 +234,9 @@ namespace mission
              * @brief Current antenna driver instance.
              */
             AntennaDriver& _driver;
+
+            /** @brief Is primary antenna power required? */
+            bool _powerRequired;
         };
 
         inline std::int8_t AntennaMissionState::RetryCount() const
@@ -296,6 +311,16 @@ namespace mission
         inline bool AntennaMissionState::TimedOut() const
         {
             return this->_cycleCount <= 0;
+        }
+
+        inline void AntennaMissionState::RequirePrimaryAntennaPower(bool powerRequired)
+        {
+            this->_powerRequired = powerRequired;
+        }
+
+        inline bool AntennaMissionState::RequirePrimaryAntennaPower() const
+        {
+            return this->_powerRequired;
         }
 
         /** @}*/
