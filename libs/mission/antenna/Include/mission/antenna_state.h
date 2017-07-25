@@ -3,8 +3,10 @@
 
 #include <cstdint>
 #include "antenna/antenna.h"
+#include "antenna/telemetry.hpp"
 #include "base/os.h"
 #include "mission/base.hpp"
+#include "power/fwd.hpp"
 #include "state/struct.h"
 
 namespace mission
@@ -39,8 +41,14 @@ namespace mission
              * @brief ctor.
              * @param[in] antennaDriver Reference to the instance of the antenna driver that is supposed to
              * drive the required hardware.
+             * @param[in] powerControl Power control
              */
-            AntennaMissionState(AntennaDriver& antennaDriver);
+            AntennaMissionState(AntennaDriver& antennaDriver, services::power::IPowerControl& powerControl);
+
+            /**
+             * @brief Initializes antenna mission state
+             */
+            void Initialize();
 
             /**
              * @brief Returns information whether the antenna deployment is currently being performed.
@@ -162,7 +170,41 @@ namespace mission
              */
             static std::uint8_t StepCount();
 
+            /**
+             * @brief Fetches current antenna telemetry
+             * @param result Reference to object that will be filled with telemetry
+             * @return true if telemetry was fetched correctly, false otherwise
+             */
+            bool CurrentTelemetry(devices::antenna::AntennaTelemetry& result) const;
+
+            /**
+             * @brief Updates stored antenna telementry
+             * @return true if telemetry was fetched correctly, false otherwise
+             */
+            bool UpdateTelemetry();
+
+            /**
+             * @brief Sets flag indicating whether primary antenna must powered
+             * @param powerRequired true if antenna must be powered, false otherwise
+             */
+            inline void RequirePrimaryAntennaPower(bool powerRequired);
+
+            /**
+             * @brief Returns value indicating whether primary antenna must powered
+             * @return true if antenna must be powered, false otherwise
+             */
+            inline bool RequirePrimaryAntennaPower() const;
+
+            /** @brief Power control  */
+            services::power::IPowerControl& Power;
+
           private:
+            /** @brief Telemetry synchronization semaphore */
+            OSSemaphoreHandle _telemetrySync;
+
+            /** @brief Current antenna telemetry */
+            devices::antenna::AntennaTelemetry _currentTelemetry;
+
             /**
              * @brief Flag indicating whether antenna hardware status should be ignored.
              */
@@ -192,6 +234,9 @@ namespace mission
              * @brief Current antenna driver instance.
              */
             AntennaDriver& _driver;
+
+            /** @brief Is primary antenna power required? */
+            bool _powerRequired;
         };
 
         inline std::int8_t AntennaMissionState::RetryCount() const
@@ -266,6 +311,16 @@ namespace mission
         inline bool AntennaMissionState::TimedOut() const
         {
             return this->_cycleCount <= 0;
+        }
+
+        inline void AntennaMissionState::RequirePrimaryAntennaPower(bool powerRequired)
+        {
+            this->_powerRequired = powerRequired;
+        }
+
+        inline bool AntennaMissionState::RequirePrimaryAntennaPower() const
+        {
+            return this->_powerRequired;
         }
 
         /** @}*/

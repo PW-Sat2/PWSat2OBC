@@ -5,6 +5,7 @@
 #include "mission/antenna_task.hpp"
 #include "mission/base.hpp"
 #include "mock/AntennaMock.hpp"
+#include "mock/power.hpp"
 #include "state/struct.h"
 #include "system.h"
 #include "time/TimeSpan.hpp"
@@ -25,19 +26,31 @@ namespace
       protected:
         DeployAntennasTest();
         AntennaMock mock;
+        PowerControlMock power;
 
         SystemState state;
         AntennaTask task;
+        OSMock os;
+        OSReset osReset;
+
         ActionDescriptor<SystemState> openAntenna;
         AntennaMissionState& stateDescriptor;
     };
 
     DeployAntennasTest::DeployAntennasTest()
-        : task(mock),                      //
-          openAntenna(task.BuildAction()), //
+        : task(std::make_tuple(std::ref(mock), std::ref(power))), //
+          openAntenna(task.BuildAction()),                        //
           stateDescriptor(task.state)
     {
         state.Time = 41min;
+
+        osReset = InstallProxy(&os);
+
+        ON_CALL(os, CreateBinarySemaphore(_)).WillByDefault(Return(reinterpret_cast<OSSemaphoreHandle>(5)));
+        ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResult::Success));
+        ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
+
+        task.Initialize();
     }
 
     TEST_F(DeployAntennasTest, TestConditionTimeBeforeThreshold)
@@ -111,6 +124,9 @@ namespace
       protected:
         DeployAntennasUpdateTest();
         testing::StrictMock<AntennaMock> mock;
+        PowerControlMock power;
+        OSMock os;
+        OSReset osReset;
 
         SystemState state;
         AntennaTask task;
@@ -119,10 +135,17 @@ namespace
     };
 
     DeployAntennasUpdateTest::DeployAntennasUpdateTest()
-        : task(mock),                 //
-          update(task.BuildUpdate()), //
+        : task(std::make_tuple(std::ref(mock), std::ref(power))), //
+          update(task.BuildUpdate()),                             //
           stateDescriptor(task.state)
     {
+        osReset = InstallProxy(&os);
+
+        ON_CALL(os, CreateBinarySemaphore(_)).WillByDefault(Return(reinterpret_cast<OSSemaphoreHandle>(5)));
+        ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResult::Success));
+        ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
+
+        task.Initialize();
     }
 
     TEST_F(DeployAntennasUpdateTest, TestNothingToDo)
@@ -153,6 +176,9 @@ namespace
                     deploymentStatus->DeploymentStatus[3] = true;
                     return OSResult::Success;
                 }));
+
+        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Return(OSResult::Success));
+
         const auto result = update.updateProc(state, update.param);
         ASSERT_THAT(result, Eq(UpdateResult::Ok));
         ASSERT_THAT(state.AntennaState.IsDeployed(), Eq(false));
@@ -171,6 +197,9 @@ namespace
                     deploymentStatus->DeploymentStatus[3] = false;
                     return OSResult::Success;
                 }));
+
+        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Return(OSResult::Success));
+
         const auto result = update.updateProc(state, update.param);
         ASSERT_THAT(result, Eq(UpdateResult::Ok));
         ASSERT_THAT(state.AntennaState.IsDeployed(), Eq(false));
@@ -189,6 +218,9 @@ namespace
                     deploymentStatus->IsDeploymentActive[3] = false;
                     return OSResult::Success;
                 }));
+
+        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Return(OSResult::Success));
+
         update.updateProc(state, update.param);
         ASSERT_THAT(stateDescriptor.IsDeploymentInProgress(), Eq(false));
     }
@@ -205,6 +237,9 @@ namespace
                     deploymentStatus->IsDeploymentActive[3] = false;
                     return OSResult::Success;
                 }));
+
+        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Return(OSResult::Success));
+
         update.updateProc(state, update.param);
         ASSERT_THAT(stateDescriptor.IsDeploymentInProgress(), Eq(true));
     }
@@ -221,6 +256,9 @@ namespace
                     deploymentStatus->IsDeploymentActive[3] = true;
                     return OSResult::Success;
                 }));
+
+        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Return(OSResult::Success));
+
         update.updateProc(state, update.param);
         ASSERT_THAT(stateDescriptor.IsDeploymentInProgress(), Eq(true));
     }
@@ -239,6 +277,9 @@ namespace
                     deploymentStatus->DeploymentStatus[3] = true;
                     return OSResult::Success;
                 }));
+
+        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Return(OSResult::Success));
+
         update.updateProc(state, update.param);
         ASSERT_THAT(state.AntennaState.IsDeployed(), Eq(false));
     }
@@ -249,6 +290,80 @@ namespace
         state.AntennaState.SetDeployment(false);
         update.updateProc(state, update.param);
         ASSERT_THAT(state.AntennaState.IsDeployed(), Eq(true));
+    }
+
+    TEST_F(DeployAntennasUpdateTest, GatherTelemetryWithDoubleBuffering)
+    {
+        EXPECT_CALL(mock, GetDeploymentStatus(_, _))
+            .WillOnce(Invoke([](AntennaChannel /*channel*/, //
+                AntennaDeploymentStatus* deploymentStatus)  //
+                {
+                    deploymentStatus->DeploymentStatus[0] = true;
+                    deploymentStatus->DeploymentStatus[1] = true;
+                    deploymentStatus->DeploymentStatus[2] = true;
+                    deploymentStatus->DeploymentStatus[3] = true;
+                    return OSResult::Success;
+                }));
+
+        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Return(OSResult::Success));
+
+        update.Execute(this->state);
+    }
+
+    TEST_F(DeployAntennasUpdateTest, ShouldResetToStepZeroIfAntennaNotPoweredButShouldBe)
+    {
+        stateDescriptor.RequirePrimaryAntennaPower(true);
+
+        ON_CALL(power, PrimaryAntennaPower()).WillByDefault(Return(Some(false)));
+
+        update.Execute(state);
+        ASSERT_THAT(stateDescriptor.StepNumber(), Eq(0));
+    }
+
+    TEST_F(DeployAntennasUpdateTest, ShouldKeepGoingIfAntennaNotRequiredToBePowered)
+    {
+        EXPECT_CALL(mock, GetDeploymentStatus(_, _))
+            .WillOnce(Invoke([](AntennaChannel /*channel*/, //
+                AntennaDeploymentStatus* deploymentStatus)  //
+                {
+                    deploymentStatus->DeploymentStatus[0] = true;
+                    deploymentStatus->DeploymentStatus[1] = true;
+                    deploymentStatus->DeploymentStatus[2] = true;
+                    deploymentStatus->DeploymentStatus[3] = true;
+                    return OSResult::Success;
+                }));
+
+        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Return(OSResult::Success));
+
+        stateDescriptor.OverrideStep(12);
+        ON_CALL(power, PrimaryAntennaPower()).WillByDefault(Return(Some(false)));
+
+        update.Execute(state);
+        ASSERT_THAT(stateDescriptor.StepNumber(), Eq(12));
+    }
+
+    TEST_F(DeployAntennasUpdateTest, ShouldKeepGoingIfAntennaRequiredToBePoweredButPowerControlUnableToCheckStatus)
+    {
+        EXPECT_CALL(mock, GetDeploymentStatus(_, _))
+            .WillOnce(Invoke([](AntennaChannel /*channel*/, //
+                AntennaDeploymentStatus* deploymentStatus)  //
+                {
+                    deploymentStatus->DeploymentStatus[0] = true;
+                    deploymentStatus->DeploymentStatus[1] = true;
+                    deploymentStatus->DeploymentStatus[2] = true;
+                    deploymentStatus->DeploymentStatus[3] = true;
+                    return OSResult::Success;
+                }));
+
+        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Return(OSResult::Success));
+
+        stateDescriptor.RequirePrimaryAntennaPower(true);
+
+        stateDescriptor.OverrideStep(3);
+        ON_CALL(power, PrimaryAntennaPower()).WillByDefault(Return(None<bool>()));
+
+        update.Execute(state);
+        ASSERT_THAT(stateDescriptor.StepNumber(), Eq(3));
     }
 
     class DeployAntennasActionTest : public ::testing::Test
@@ -262,6 +377,7 @@ namespace
         OSReset osReset;
 
         AntennaMock mock;
+        PowerControlMock power;
 
         SystemState state;
         AntennaTask task;
@@ -270,8 +386,8 @@ namespace
     };
 
     DeployAntennasActionTest::DeployAntennasActionTest()
-        : task(mock),                      //
-          openAntenna(task.BuildAction()), //
+        : task(std::make_tuple(std::ref(mock), std::ref(power))), //
+          openAntenna(task.BuildAction()),                        //
           stateDescriptor(task.state)
     {
         osReset = InstallProxy(&os);
@@ -286,6 +402,7 @@ namespace
 
     TEST_F(DeployAntennasActionTest, TestMinimalPath)
     {
+        EXPECT_CALL(power, PrimaryAntennaPower(true)).Times(1).WillOnce(Return(true));
         EXPECT_CALL(mock, Reset(ANTENNA_PRIMARY_CHANNEL)).Times(1);
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, _, _)).Times(1);
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, _, _)).Times(1);
@@ -293,6 +410,9 @@ namespace
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, _, _)).Times(1);
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, _, _)).Times(1);
         EXPECT_CALL(mock, FinishDeployment(ANTENNA_PRIMARY_CHANNEL)).Times(6);
+        EXPECT_CALL(power, PrimaryAntennaPower(false)).Times(1).WillOnce(Return(true));
+
+        EXPECT_CALL(power, BackupAntennaPower(true)).Times(1).WillOnce(Return(true));
         EXPECT_CALL(mock, Reset(ANTENNA_BACKUP_CHANNEL)).Times(1);
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, _, _)).Times(1);
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, _, _)).Times(1);
@@ -300,8 +420,9 @@ namespace
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, _, _)).Times(1);
         EXPECT_CALL(mock, DeployAntenna(ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, _, _)).Times(1);
         EXPECT_CALL(mock, FinishDeployment(ANTENNA_BACKUP_CHANNEL)).Times(6);
+        EXPECT_CALL(power, BackupAntennaPower(false)).Times(1).WillOnce(Return(true));
 
-        for (int i = 0; i < 14; ++i)
+        for (int i = 0; i < 18; ++i)
         {
             Run();
         }

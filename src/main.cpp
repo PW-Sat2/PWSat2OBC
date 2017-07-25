@@ -48,7 +48,7 @@ telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver
     Main.Hardware.EPS,
     Main.Experiments.ExperimentsController,
     Main.Hardware.MCUTemperature,
-    Main.Hardware.antennaDriver,
+    Mission,
     0,
     Main.fs,
     Main.timeProvider,
@@ -58,7 +58,7 @@ telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver
 
 mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc),
     0,
-    Main.Hardware.antennaDriver,
+    std::tie(Main.Hardware.antennaDriver, Main.PowerControlInterface),
     Main.Hardware.CommDriver,
     Main.PowerControlInterface,
     Main.adcs.GetAdcsCoordinator(),

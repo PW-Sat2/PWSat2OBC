@@ -283,6 +283,20 @@ namespace devices
         }
 
         static_assert(AntennaTelemetry::BitSize() == 168, "Invalid telemetry size");
+
+        /**
+                * @brief Antenna telemetry provider
+                * @ingroup mission_atenna
+                */
+        struct IAntennaTelemetryProvider
+        {
+            /**
+             * @brief Fetches current antenna telemetry
+             * @param telemetry Reference to object that will be filled with telemetry
+             * @return true if telemetry was fetched correctly, false otherwise
+             */
+            virtual bool GetTelemetry(AntennaTelemetry& telemetry) const = 0;
+        };
     }
 }
 #endif

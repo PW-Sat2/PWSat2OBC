@@ -29,6 +29,7 @@ namespace drivers
 
                 /**
                  * @brief Executes command.
+                 * @param output Command output
                  * @returns Result status.
                  */
                 virtual OSResult Execute(TOutputDataType& output);

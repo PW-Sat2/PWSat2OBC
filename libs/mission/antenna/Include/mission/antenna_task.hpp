@@ -3,9 +3,12 @@
 
 #pragma once
 
+#include <array>
 #include <atomic>
+#include <tuple>
 #include "antenna_state.h"
 #include "mission/base.hpp"
+#include "power/fwd.hpp"
 
 namespace mission
 {
@@ -26,13 +29,20 @@ namespace mission
          * - The initial silent mission period is over
          * - The antennas are not currently being deployed
          */
-        struct AntennaTask : public Update, public Action
+        struct AntennaTask : public Update, public Action, public devices::antenna::IAntennaTelemetryProvider
         {
             /**
              * @brief ctor.
-             * @param[in] driver Reference to antenna driver interface.
+             * @param[in] args Tuple of: reference to antenna driver interface and reference to power control interface
              */
-            AntennaTask(AntennaDriver& driver);
+            AntennaTask(std::tuple<AntennaDriver&, services::power::IPowerControl&> args);
+
+            /**
+             * @brief Initializes antenna mission state
+             * @return Operation result
+             */
+            bool Initialize();
+
             /**
              * @brief Returns antenna deployment action descriptor.
              *
@@ -46,6 +56,8 @@ namespace mission
              * @returns Update descriptor that runs antenna deployment update process.
              */
             UpdateDescriptor<SystemState> BuildUpdate();
+
+            virtual bool GetTelemetry(devices::antenna::AntennaTelemetry& telemetry) const override;
 
             /**
              * @brief State of the antenna mission deployment task.

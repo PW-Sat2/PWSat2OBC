@@ -15,6 +15,11 @@ struct PowerControlMock : services::power::IPowerControl
     MOCK_METHOD1(RedundantThermalKnife, bool(bool));
     MOCK_METHOD0(EnableMainSailBurnSwitch, bool());
     MOCK_METHOD0(EnableRedundantSailBurnSwitch, bool());
+
+    MOCK_METHOD1(PrimaryAntennaPower, bool(bool enable));
+    MOCK_METHOD1(BackupAntennaPower, bool(bool enable));
+
+    MOCK_METHOD0(PrimaryAntennaPower, Option<bool>());
 };
 
 #endif /* UNIT_TESTS_BASE_MOCK_POWER_HPP_ */

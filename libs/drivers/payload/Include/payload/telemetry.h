@@ -24,9 +24,14 @@ namespace drivers
          */
         struct PayloadTelemetry
         {
+            /**
+             * @brief Base class for payload telemetry types
+             */
             template <const uint8_t TDeviceDataAddress, const uint8_t TDeviceDataLength> struct PayloadTelemetryBase
             {
+                /** @brief Address from which data starts */
                 static constexpr uint8_t DeviceDataAddress = TDeviceDataAddress;
+                /** @brief Length of data in bytes */
                 static constexpr uint8_t DeviceDataLength = TDeviceDataLength;
             };
 
@@ -36,6 +41,7 @@ namespace drivers
              */
             struct Status : PayloadTelemetryBase<0, 1>
             {
+                /** @brief Who Am I */
                 uint8_t who_am_i;
             };
 
@@ -44,6 +50,7 @@ namespace drivers
              */
             struct SunsRef : PayloadTelemetryBase<1, 10>
             {
+                /** @brief SunS voltages */
                 std::array<std::uint16_t, 5> voltages;
             };
 
@@ -52,14 +59,23 @@ namespace drivers
              */
             struct Temperatures : PayloadTelemetryBase<11, 18>
             {
+                /** @brief Supply temperature*/
                 std::uint16_t supply;
+                /** @brief X+ temperature*/
                 std::uint16_t Xp;
+                /** @brief X- temperature*/
                 std::uint16_t Xn;
+                /** @brief Y+ temperature*/
                 std::uint16_t Yp;
+                /** @brief Y- temperature*/
                 std::uint16_t Yn;
+                /** @brief SADS temperature*/
                 std::uint16_t sads;
+                /** @brief SAIL temperature*/
                 std::uint16_t sail;
+                /** @brief CAMnadir temperature*/
                 std::uint16_t cam_nadir;
+                /** @brief CAMwing temperature*/
                 std::uint16_t cam_wing;
             };
 
@@ -68,9 +84,13 @@ namespace drivers
              */
             struct Photodiodes : PayloadTelemetryBase<29, 8>
             {
+                /** @brief X+ photodiode measurement */
                 std::uint16_t Xp;
+                /** @brief X- photodiode measurement */
                 std::uint16_t Xn;
+                /** @brief Y+ photodiode measurement */
                 std::uint16_t Yp;
+                /** @brief Y- photodiode measurement */
                 std::uint16_t Yn;
             };
 
@@ -79,7 +99,9 @@ namespace drivers
              */
             struct Housekeeping : PayloadTelemetryBase<37, 4>
             {
+                /** @brief INT 3V3 */
                 std::uint16_t int_3v3d;
+                /** @brief OBC 3V3 */
                 std::uint16_t obc_3v3d;
             };
 
@@ -88,8 +110,11 @@ namespace drivers
              */
             struct Radfet : PayloadTelemetryBase<41, 17>
             {
+                /** @brief Status */
                 std::uint8_t status;
+                /** @brief Temperature */
                 std::uint32_t temperature;
+                /** @brief VTH */
                 std::array<std::uint32_t, 3> vth;
             };
         };

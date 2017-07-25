@@ -23,11 +23,18 @@ namespace drivers
                 RadFETBaseCommand(IPayloadDriver& driver);
 
               protected:
+                /**
+                 * @brief Reads values from buffer into output object
+                 * @param buffer Buffer with serialized data
+                 * @param output Output object
+                 * @return Operation status
+                 */
                 virtual OSResult Save(const gsl::span<uint8_t>& buffer, PayloadTelemetry::Radfet& output) override;
-
-              private:
             };
 
+            /**
+             * @brief Command for enabling RadFET module
+             */
             class RadFETOnCommand : public RadFETBaseCommand<0x84>
             {
               public:
@@ -38,6 +45,9 @@ namespace drivers
                 RadFETOnCommand(IPayloadDriver& driver) : RadFETBaseCommand(driver){};
             };
 
+            /**
+             * @brief Command for execuring RadFET measurment
+             */
             class RadFETMeasureCommand : public RadFETBaseCommand<0x85>
             {
               public:
@@ -48,6 +58,9 @@ namespace drivers
                 RadFETMeasureCommand(IPayloadDriver& driver) : RadFETBaseCommand(driver){};
             };
 
+            /**
+             * @brief Command for disabling RadFET module
+             */
             class RadFETOffCommand : public RadFETBaseCommand<0x86>
             {
               public:

@@ -35,6 +35,7 @@ namespace obc
       public:
         /**
          * @brief Initializes @ref OBCStorageHandler instance
+         * @param errors Error counting service
          * @param spi SPI interface to use
          * @param deviceOperations YAFFS device operations
          * @param pins GPIO pins

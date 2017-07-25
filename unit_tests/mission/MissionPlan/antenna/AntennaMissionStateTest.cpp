@@ -1,10 +1,14 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock-matchers.h"
+#include "OsMock.hpp"
 #include "mission/antenna_state.h"
 #include "mock/AntennaMock.hpp"
+#include "mock/power.hpp"
 
+using testing::_;
 using testing::Eq;
 using testing::Lt;
+using testing::Return;
 using mission::antenna::AntennaMissionState;
 namespace
 {
@@ -12,11 +16,14 @@ namespace
     {
         AntennaMissionStateTest();
         AntennaMock driver;
+        PowerControlMock power;
+        OSMock os;
         AntennaMissionState state;
     };
 
-    AntennaMissionStateTest::AntennaMissionStateTest() : state(driver)
+    AntennaMissionStateTest::AntennaMissionStateTest() : state(driver, power)
     {
+        state.Initialize();
     }
 
     TEST_F(AntennaMissionStateTest, TestDefaultState)

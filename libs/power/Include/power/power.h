@@ -2,6 +2,7 @@
 #define POWER_H_
 
 #include "system.h"
+#include "utils.h"
 
 namespace services
 {
@@ -46,6 +47,26 @@ namespace services
              * @return Operation status
              */
             virtual bool EnableRedundantSailBurnSwitch() = 0;
+
+            /**
+            * @brief Sets state of primary antenna power LCL
+            * @param enabled true to turn on LCL, false to turn off
+            * @return Operation status
+            */
+            virtual bool PrimaryAntennaPower(bool enabled) = 0;
+
+            /**
+             * @brief Checks if primary antenna power is enabled
+             * @return true if module is powered on, false otherwise
+             */
+            virtual Option<bool> PrimaryAntennaPower() = 0;
+
+            /**
+             * @brief Sets state of backup antenna power LCL
+             * @param enabled true to turn on LCL, false to turn off
+             * @return Operation status
+             */
+            virtual bool BackupAntennaPower(bool enabled) = 0;
         };
 
         /** @} */

@@ -1,12 +1,14 @@
 #include <cstdint>
 #include <cstring>
 #include "antenna/driver.h"
+#include "antenna/telemetry.hpp"
 #include "antenna_state.h"
 #include "antenna_task.hpp"
 #include "gsl/gsl_util"
 #include "logger/logger.h"
 #include "mission/base.hpp"
 #include "mission/obc.hpp"
+#include "power/power.h"
 #include "system.h"
 #include "time/TimePoint.h"
 
@@ -72,6 +74,16 @@ namespace mission
          * @param[in] driver Reference to current antenna driver instance.
          */
         static void FinishDeploymentStep(const SystemState& state, //
+            AntennaMissionState& stateDescriptor,
+            AntennaDriver& driver //
+            );
+
+        static void PowerOnDriver(const SystemState& state, //
+            AntennaMissionState& stateDescriptor,
+            AntennaDriver& driver //
+            );
+
+        static void PowerOffDriver(const SystemState& state, //
             AntennaMissionState& stateDescriptor,
             AntennaDriver& driver //
             );
@@ -161,6 +173,7 @@ namespace mission
          * - Deployment finalization (backup hardware channel)
          */
         static const AntennaDeploymentStep deploymentSteps[] = {
+            {PowerOnDriver, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 0, false},
             {ResetDriverStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 0, false},
             {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, MediumTimeout, false},
             {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, LongTimeout, true},
@@ -168,7 +181,9 @@ namespace mission
             {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, LongTimeout, true},
             {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, LongTimeout, true},
             {FinishDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 0, false},
+            {PowerOffDriver, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 0, false},
 
+            {PowerOnDriver, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 0, false},
             {ResetDriverStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 0, false},
             {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, MediumTimeout, false},
             {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, LongTimeout, true},
@@ -176,6 +191,7 @@ namespace mission
             {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, LongTimeout, true},
             {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, LongTimeout, true},
             {FinishDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 0, false},
+            {PowerOffDriver, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 0, false},
         };
 
         /**
@@ -188,14 +204,22 @@ namespace mission
             return step.deploymentTimeout / 10 + 1;
         }
 
-        AntennaMissionState::AntennaMissionState(AntennaDriver& antennaDriver)
-            : _overrideState(false), //
-              _inProgress(false),    //
-              _stepNumber(0),        //
-              _retryCount(0),        //
-              _cycleCount(0),        //
-              _driver(antennaDriver)
+        AntennaMissionState::AntennaMissionState(AntennaDriver& antennaDriver, services::power::IPowerControl& powerControl)
+            : Power(powerControl),    //
+              _overrideState(false),  //
+              _inProgress(false),     //
+              _stepNumber(0),         //
+              _retryCount(0),         //
+              _cycleCount(0),         //
+              _driver(antennaDriver), //
+              _powerRequired(false)
         {
+        }
+
+        void AntennaMissionState::Initialize()
+        {
+            this->_telemetrySync = System::CreateBinarySemaphore(5);
+            System::GiveSemaphore(this->_telemetrySync);
         }
 
         void AntennaMissionState::Retry(std::uint8_t limit, std::int8_t timeout)
@@ -227,6 +251,33 @@ namespace mission
         std::uint8_t AntennaMissionState::StepCount()
         {
             return DeploymentStepLimit;
+        }
+
+        bool AntennaMissionState::CurrentTelemetry(devices::antenna::AntennaTelemetry& result) const
+        {
+            Lock lock(this->_telemetrySync, 100ms);
+            if (!lock())
+            {
+                return false;
+            }
+
+            result = this->_currentTelemetry;
+            return true;
+        }
+
+        bool AntennaMissionState::UpdateTelemetry()
+        {
+            Lock lock(this->_telemetrySync, 200ms);
+
+            if (lock())
+            {
+                this->_driver.GetTelemetry(&this->_driver, this->_currentTelemetry);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         /**
@@ -345,6 +396,7 @@ namespace mission
             )
         {
             UNREFERENCED_PARAMETER(state);
+
             const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
 
             LOGF(LOG_LEVEL_INFO,
@@ -387,6 +439,59 @@ namespace mission
             LOGF(LOG_LEVEL_INFO, "[ant] [Step%d] Finish deployment %d", stateDescriptor.StepNumber(), step.channel);
 
             if (EndDeployment(driver, step.channel, RetryLimit))
+            {
+                stateDescriptor.NextStep(GetTimeout(step));
+            }
+            else
+            {
+                stateDescriptor.Retry(StepRetryLimit, GetTimeout(step));
+            }
+        }
+
+        void PowerOnDriver(const SystemState& /*state*/, AntennaMissionState& stateDescriptor, AntennaDriver& /*driver*/)
+        {
+            const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
+
+            bool result;
+
+            if (step.channel == ANTENNA_PRIMARY_CHANNEL)
+            {
+                result = stateDescriptor.Power.PrimaryAntennaPower(true);
+
+                stateDescriptor.RequirePrimaryAntennaPower(result);
+            }
+            else
+            {
+                result = stateDescriptor.Power.BackupAntennaPower(true);
+            }
+
+            if (result)
+            {
+                stateDescriptor.NextStep(GetTimeout(step));
+            }
+            else
+            {
+                stateDescriptor.Retry(StepRetryLimit, GetTimeout(step));
+            }
+        }
+
+        void PowerOffDriver(const SystemState& /*state*/, AntennaMissionState& stateDescriptor, AntennaDriver& /*driver*/)
+        {
+            const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
+
+            bool result;
+
+            if (step.channel == ANTENNA_PRIMARY_CHANNEL)
+            {
+                result = stateDescriptor.Power.PrimaryAntennaPower(false);
+                stateDescriptor.RequirePrimaryAntennaPower(false);
+            }
+            else
+            {
+                result = stateDescriptor.Power.BackupAntennaPower(false);
+            }
+
+            if (result)
             {
                 stateDescriptor.NextStep(GetTimeout(step));
             }
@@ -478,9 +583,17 @@ namespace mission
                 return UpdateResult::Ok;
             }
 
+            if (stateDescriptor->RequirePrimaryAntennaPower() && stateDescriptor->Power.PrimaryAntennaPower() == false)
+            {
+                LOG(LOG_LEVEL_ERROR, "Primary antenna power disabled. Restarting procedure");
+                stateDescriptor->Restart();
+                return UpdateResult::Warning;
+            }
+
             stateDescriptor->NextCycle();
             AntennaDeploymentStatus deploymentStatus;
             AntennaDriver& driver = stateDescriptor->Driver();
+
             const OSResult result = driver.GetDeploymentStatus(&driver,
                 deploymentSteps[stateDescriptor->StepNumber()].channel,
                 &deploymentStatus //
@@ -492,11 +605,27 @@ namespace mission
             }
 
             stateDescriptor->Update(deploymentStatus);
-            return UpdateResult::Ok;
+
+            if (stateDescriptor->UpdateTelemetry())
+            {
+                return UpdateResult::Ok;
+            }
+            else
+            {
+                return UpdateResult::Warning;
+            }
         }
 
-        AntennaTask::AntennaTask(AntennaDriver& driver) : state(driver)
+        AntennaTask::AntennaTask(std::tuple<AntennaDriver&, services::power::IPowerControl&> args)
+            : state(std::get<AntennaDriver&>(args), std::get<services::power::IPowerControl&>(args))
         {
+        }
+
+        bool AntennaTask::Initialize()
+        {
+            this->state.Initialize();
+
+            return true;
         }
 
         ActionDescriptor<SystemState> AntennaTask::BuildAction()
@@ -518,9 +647,15 @@ namespace mission
             return descriptor;
         }
 
+        bool AntennaTask::GetTelemetry(devices::antenna::AntennaTelemetry& telemetry) const
+        {
+            return this->state.CurrentTelemetry(telemetry);
+        }
+
         StopAntennaDeploymentTask::StopAntennaDeploymentTask(std::uint8_t /*mark*/)
         {
         }
+
         mission::ActionDescriptor<SystemState> StopAntennaDeploymentTask::BuildAction()
         {
             mission::ActionDescriptor<SystemState> action;
