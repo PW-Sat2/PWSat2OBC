@@ -6,6 +6,7 @@ from program_upload import *
 from boot_settings import *
 from power import *
 from fdir import *
+from sail import *
 
 __all__ = [
     'DownloadFile',
@@ -21,5 +22,6 @@ __all__ = [
     'SendBeacon',
     'PowerCycleTelecommand',
     'SetErrorCounterConfig'
+    'OpenSailTelecommand'
 ]
 

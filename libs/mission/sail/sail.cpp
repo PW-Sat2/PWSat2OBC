@@ -41,7 +41,7 @@ namespace mission
     {
     }
 
-    void OpenSailTask::Open()
+    void OpenSailTask::OpenSail()
     {
         this->_openOnNextMissionLoop = true;
     }
