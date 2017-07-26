@@ -16,8 +16,18 @@ namespace obc
      * @{
      */
 
+    /**
+     * @brief Interface for object responsible for setting error counting configuration
+     */
     struct ISetErrorCounterConfig
     {
+        /**
+         * @brief Sets error counter config for single device
+         * @param device Device ID
+         * @param limit Error limit
+         * @param increment Increment value on error
+         * @param decrement Decrement value on success
+         */
         virtual void Set(error_counter::Device device,
             error_counter::CounterValue limit,
             error_counter::CounterValue increment,
@@ -36,12 +46,17 @@ namespace obc
         /**
          * @brief Ctor
          * @param powerControl Power control interface
+         * @param maskedDevices Bitset for devices that will ignored when reaching error limit
          */
-        FDIR(services::power::IPowerControl& powerControl);
+        FDIR(services::power::IPowerControl& powerControl, std::uint16_t maskedDevices);
 
         /** @brief Performs initialization */
         void Initalize();
 
+        /**
+         * @brief Loads config from packed form
+         * @param config Packed form of error counters config
+         */
         void LoadConfig(std::array<std::uint32_t, error_counter::ErrorCounting::MaxDevices>& config);
 
         /**
@@ -66,9 +81,14 @@ namespace obc
         /** @brief Error counting mechanism */
         error_counter::ErrorCounting _errorCounting;
 
+        /** @brief Power control */
         services::power::IPowerControl& _powerControl;
 
+        /** @brief Error counting configuration */
         std::array<std::atomic<std::uint32_t>, error_counter::ErrorCounting::MaxDevices> _configuration;
+
+        /** @brief Masked devices */
+        std::uint16_t _maskedDevices;
     };
 
     /**@} */

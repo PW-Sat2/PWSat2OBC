@@ -70,7 +70,7 @@ OBC::OBC()
       BootSettings(this->Hardware.PersistentStorage.GetRedundantDriver()),             //
       Hardware(this->Fdir.ErrorCounting(), this->PowerControlInterface, timeProvider), //
       PowerControlInterface(this->Hardware.EPS),                                       //
-      Fdir(this->PowerControlInterface),                                               //
+      Fdir(this->PowerControlInterface, 1 << devices::n25q::RedundantN25QDriver::ErrorCounter::DeviceId),                                               //
       Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),            //
       Imtq(this->Fdir.ErrorCounting(), Hardware.I2C.Buses.Bus),                        //
       adcs(this->Imtq, this->timeProvider),                                            //
