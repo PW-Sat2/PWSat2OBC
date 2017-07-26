@@ -31,7 +31,8 @@ namespace obc
         return (config & 0xFF0000) >> 16;
     }
 
-    FDIR::FDIR(services::power::IPowerControl& powerControl) : _errorCounting(*this), _powerControl(powerControl)
+    FDIR::FDIR(services::power::IPowerControl& powerControl, std::uint16_t maskedDevices)
+        : _errorCounting(*this), _powerControl(powerControl), _maskedDevices(maskedDevices)
     {
         std::fill(this->_configuration.begin(), this->_configuration.end(), Config(128, 5, 2));
     }
@@ -56,6 +57,11 @@ namespace obc
 
     void FDIR::LimitReached(error_counter::Device device, error_counter::CounterValue errorsCount)
     {
+        if (has_flag(this->_maskedDevices, 1 << device))
+        {
+            return;
+        }
+
         LOGF(LOG_LEVEL_FATAL, "Device %d reach error limit of %d", device, errorsCount);
         this->_powerControl.PowerCycle();
     }
