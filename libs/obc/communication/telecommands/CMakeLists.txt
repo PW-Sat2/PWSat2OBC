@@ -10,6 +10,7 @@ set(SOURCES
     boot_settings.cpp
     antenna.cpp
     power.cpp
+    sail.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -19,6 +20,7 @@ target_link_libraries(${NAME}
 	telecommunication
 	mission_antenna
 	mission_comm
+	mission_sail
 	fs
 	logger
 	obc_experiments

@@ -163,7 +163,7 @@ TEST_F(OpenSailTest, ShouldStartOpeningOnExplicitCommandIfNotAlreadyOpening)
     this->_state.Time = std::chrono::hours(20 * 24);
     this->_state.PersistentState.Set(state::SailState(state::SailOpeningState::Waiting));
 
-    this->_openSailTask.Open();
+    this->_openSailTask.OpenSail();
 
     this->_openSailUpdate.Execute(this->_state);
 
@@ -182,7 +182,7 @@ TEST_F(OpenSailTest, ShouldStartOpeningOnExplicitCommandIfAlreadyOpened)
     this->_state.Time += 2min;
     this->_openSailAction.Execute(this->_state);
 
-    this->_openSailTask.Open();
+    this->_openSailTask.OpenSail();
 
     this->_openSailUpdate.Execute(this->_state);
 
@@ -197,7 +197,7 @@ TEST_F(OpenSailTest, ExplicitOpenWhenOpenInProgressIsIgnored)
     this->_state.Time = std::chrono::hours(20 * 24);
     this->_state.PersistentState.Set(state::SailState(state::SailOpeningState::Opening));
 
-    this->_openSailTask.Open();
+    this->_openSailTask.OpenSail();
 
     this->_openSailUpdate.Execute(this->_state);
 
@@ -216,7 +216,7 @@ TEST_F(OpenSailTest, ShouldStartOpeningAgainAfterRestart)
     this->_state.Time += 2min;
     this->_openSailAction.Execute(this->_state);
 
-    this->_openSailTask.Open();
+    this->_openSailTask.OpenSail();
 
     this->_openSailUpdate.Execute(this->_state);
 
@@ -236,7 +236,7 @@ TEST_F(OpenSailTest, ExplicitOrderDuringProcessShouldNotRestartProcess)
 
     EXPECT_THAT(this->_openSailTask.Step(), Gt(0));
 
-    this->_openSailTask.Open();
+    this->_openSailTask.OpenSail();
     this->_openSailUpdate.Execute(this->_state);
 
     ASSERT_THAT(this->_openSailTask.Step(), Gt(0));
@@ -258,7 +258,7 @@ TEST_F(OpenSailTest, ExplicitOpenAfterSingleProcessRunFinishedShouldTriggerAnoth
 
     EXPECT_THAT(this->_openSailTask.InProgress(), Eq(false));
 
-    this->_openSailTask.Open();
+    this->_openSailTask.OpenSail();
     this->_openSailUpdate.Execute(this->_state);
 
     ASSERT_THAT(this->_openSailTask.Step(), Eq(0));

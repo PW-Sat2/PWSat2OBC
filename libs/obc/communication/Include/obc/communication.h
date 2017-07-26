@@ -17,6 +17,7 @@
 #include "obc/telecommands/ping.hpp"
 #include "obc/telecommands/power.hpp"
 #include "obc/telecommands/program_upload.hpp"
+#include "obc/telecommands/sail.hpp"
 #include "obc/telecommands/time.hpp"
 #include "program_flash/fwd.hpp"
 #include "telecommunication/telecommand_handling.h"
@@ -129,7 +130,8 @@ namespace obc
         obc::telecommands::SetBootSlotsTelecommand, //
         obc::telecommands::SendBeaconTelecommand,   //
         obc::telecommands::StopAntennaDeployment,   //
-        obc::telecommands::PowerCycle               //
+        obc::telecommands::PowerCycle,              //
+        obc::telecommands::OpenSail                 //
         >;
 
     /**
@@ -151,6 +153,7 @@ namespace obc
          * @param[in] bootSettings Boot settings
          * @param[in] telemetry Reference to object that contains current telemetry state.
          * @param[in] powerControl Power control interface
+         * @param[in] openSail Sail opening interface
          */
         OBCCommunication(obc::FDIR& fdir,
             devices::comm::CommObject& commDriver,
@@ -163,7 +166,8 @@ namespace obc
             program_flash::BootTable& bootTable,
             boot::BootSettings& bootSettings,
             IHasState<telemetry::TelemetryState>& telemetry,
-            services::power::IPowerControl& powerControl);
+            services::power::IPowerControl& powerControl,
+            mission::IOpenSail& openSail);
 
         /**
          * @brief Initializes all communication at runlevel 1
