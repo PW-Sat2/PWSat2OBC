@@ -24,7 +24,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& /*fdir*/,
     boot::BootSettings& bootSettings,
     IHasState<telemetry::TelemetryState>& telemetry,
     services::power::IPowerControl& powerControl,
-    ISetErrorCounterConfig& errorCounterConfig)
+    ISetErrorCounterConfig& errorCounterConfig,
+    mission::IOpenSail& openSail)
     : Comm(commDriver),                                                //
       UplinkProtocolDecoder(settings::CommSecurityCode),               //
       SupportedTelecommands(                                           //
@@ -43,7 +44,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& /*fdir*/,
           SendBeaconTelecommand(telemetry),                            //
           StopAntennaDeployment(disableAntennaDeployment),             //
           PowerCycle(powerControl),                                    //
-          SetErrorCounterConfig(errorCounterConfig)                    //
+          SetErrorCounterConfig(errorCounterConfig),                   //
+          OpenSail(openSail)                                           //
           ),                                                           //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {
