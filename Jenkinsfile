@@ -115,11 +115,11 @@ node('pwsat-build') {
 					stage 'Reports'
 					reports()
 
-					stage concurrency: 1, name: 'Integration Tests'
-					integrationTests()
-
 					stage 'Generate Documentation'
 					generateDoc()
+
+					stage concurrency: 1, name: 'Integration Tests'
+					integrationTests()
 
 					stage 'Code Coverage'
 					coverage()
@@ -157,10 +157,13 @@ node('pwsat-build') {
 	}
 }
 
-node('flatsat && obc') {
-	stage('Copy to flatsat') {
-		dir(env.ARTIFACTS + '\\' + env.BRANCH_NAME) {
-			unarchive mapping: ['build/': '.']
+if(currentBuild.result == null)
+{
+	node('flatsat && obc') {
+		stage('Copy to flatsat') {
+			dir(env.ARTIFACTS + '\\' + env.BRANCH_NAME) {
+				unarchive mapping: ['build/': '.']
+			}
 		}
 	}
 }
