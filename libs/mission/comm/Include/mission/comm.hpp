@@ -85,5 +85,21 @@ namespace mission
         /** @brief Whether transmitter state when idle is turned on. */
         bool _idleState;
     };
+
+    class SendMessageTask : public Action
+    {
+      public:
+        SendMessageTask(devices::comm::ITransmitter& transmitter);
+
+        mission::ActionDescriptor<SystemState> BuildAction();
+
+      private:
+        static bool Condition(const SystemState& state, void* param);
+
+        static void Action(SystemState& state, void* param);
+
+        devices::comm::ITransmitter& _transmitter;
+        Option<std::chrono::milliseconds> _lastSentAt;
+    };
 }
 #endif /* LIBS_MISSION_INCLUDE_MISSION_COMM_H_ */

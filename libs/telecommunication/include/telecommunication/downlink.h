@@ -23,12 +23,13 @@ namespace telecommunication
          */
         enum class DownlinkAPID : std::uint8_t
         {
-            Pong = 0x01,         //!< Pong
-            Operation = 0x2,     //!< Operation command
-            ProgramUpload = 0x4, //!< Program upload operation status
-            Telemetry = 0x3F,    //!< TelemetryLong
-            Forbidden = 0x2D,    //!< Reserved apid due to beacon collision
-            LastItem             //!< LastItem
+            Pong = 0x01,           //!< Pong
+            Operation = 0x2,       //!< Operation command
+            ProgramUpload = 0x4,   //!< Program upload operation status
+            PeriodicMessage = 0x5, //!< Periodic message
+            Telemetry = 0x3F,      //!< TelemetryLong
+            Forbidden = 0x2D,      //!< Reserved apid due to beacon collision
+            LastItem               //!< LastItem
         };
 
         /**
