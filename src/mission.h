@@ -52,6 +52,7 @@ namespace mission
         mission::SaveErrorCountersConfig,
         mission::PeristentStateSave, //
         FileSystemTask,              //
+        mission::SendMessageTask,    //
         EPSWatchdogTask              //
         >
         ObcMission;
