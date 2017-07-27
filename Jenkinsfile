@@ -115,11 +115,11 @@ node('pwsat-build') {
 					stage 'Reports'
 					reports()
 
-					stage concurrency: 1, name: 'Integration Tests'
-					integrationTests()
-
 					stage 'Generate Documentation'
 					generateDoc()
+
+					stage concurrency: 1, name: 'Integration Tests'
+					integrationTests()
 
 					stage 'Code Coverage'
 					coverage()
