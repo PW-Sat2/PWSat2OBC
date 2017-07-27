@@ -11,6 +11,7 @@
 #include "antenna/AntennaState.hpp"
 #include "base/os.h"
 #include "boot/BootState.hpp"
+#include "comm/MessageState.hpp"
 #include "experiments/experiments.h"
 #include "fdir/ErrorCountersState.hpp"
 #include "fwd.hpp"
