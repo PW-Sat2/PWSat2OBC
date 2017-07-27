@@ -16,11 +16,11 @@ using Eigen::RowVector3f;
 using Eigen::Vector3f;
 using Eigen::RowVector2f;
 using Eigen::Vector2f;
-using Eigen::Matrix3f;
 using Eigen::Matrix;
 using RowVector5f = Matrix<float, 1, 5>;
 using Vector5f = Matrix<float, 5, 1>;
-using Matrix55f = Matrix<float, 5, 5>;
+using Matrix3f = Matrix<float, 3, 3, Eigen::RowMajor>;
+using Matrix5f = Matrix<float, 5, 5, Eigen::RowMajor>;
 
 using adcs::SunPointing;
 //using adcs::SunPointing::State;
@@ -75,16 +75,16 @@ Eigen::Matrix3f skew(const Eigen::Vector3f &vec)
  *
  *   references    :
  */
-Matrix55f matInv(Matrix55f A)
+Matrix5f matInv(Matrix5f A)
 {
     const uint8_t n = 5;
 
     // LU DECOMPOSITION -------------------------------------------------------
     // initialize
-    Matrix55f L = Matrix55f::Identity();
-    Matrix55f U = Matrix55f::Zero();
-    Matrix55f Y = Matrix55f::Identity();
-    Matrix55f AInv = Matrix55f::Zero();
+    Matrix5f L = Matrix5f::Identity();
+    Matrix5f U = Matrix5f::Zero();
+    Matrix5f Y = Matrix5f::Identity();
+    Matrix5f AInv = Matrix5f::Zero();
     U(0, 0) = A(0, 0);
 
     // first row of U and first column of L
@@ -195,15 +195,15 @@ Matrix55f matInv(Matrix55f A)
  *                                     Determination and Control, Springer, 2014, pp. 239-245.
  *                                     doi: 10.1007/978-1-4939-0802-8
  */
-void EKFinitialization(Vector5f& xEkf, Matrix55f& pEkf, Vector5f& innov,
-        Matrix55f& innovCov, const Vector2f& ssMeas, const Vector3f& gyrMeas,
+void EKFinitialization(Vector5f& xEkf, Matrix5f& pEkf, Vector5f& innov,
+        Matrix5f& innovCov, const Vector2f& ssMeas, const Vector3f& gyrMeas,
         const SunPointing::State& state)
 {
     // create state vector and set covariance matrix to the initial value
     xEkf << ssMeas, gyrMeas;
     pEkf = Vector5f(state.params.kalmanCov.P0.data()).asDiagonal();
     innov = Vector5f::Zero();
-    innovCov = Matrix55f::Zero();
+    innovCov = Matrix5f::Zero();
 }
 
 /*
@@ -399,8 +399,8 @@ Vector5f PropagateState(const Vector5f& x, const Vector3f& ctrlTorque,
  *                                     Determination and Control, Springer, 2014, pp. 239-245.
  *                                     doi: 10.1007/978-1-4939-0802-8
  */
-void ExtendedKalmanFilter(Vector5f& xEkf, Matrix55f& pEkf, Vector5f& innov,
-        Matrix55f& innovCov, const Vector2f& ssMeas, bool ssFlag,
+void ExtendedKalmanFilter(Vector5f& xEkf, Matrix5f& pEkf, Vector5f& innov,
+        Matrix5f& innovCov, const Vector2f& ssMeas, bool ssFlag,
         const Vector3f& gyrMeas, bool gyrFlag, const SunPointing::State& state)
 {
     Matrix3f rotSS = Matrix3f(state.params.rotSS.data());
@@ -483,19 +483,19 @@ void ExtendedKalmanFilter(Vector5f& xEkf, Matrix55f& pEkf, Vector5f& innov,
                     - skew(angrate) * Matrix3f(state.params.inertia.data()));
 
     // Discrete Jacobian for state transition
-    Matrix55f jacobianF;
+    Matrix5f jacobianF;
     //XXX vectors transposed to fit it - investigate!!!
     jacobianF << dLatDot_dLat, dLatDot_dLong, RowVector3f(dLatDot_dOmega), dLongDot_dLat, dLongDot_dLong, RowVector3f(dLongDot_dOmega), Matrix<float, 3, 2>::Zero(), dOmegaDot_dOmega;
     //std::cout << jacobianF<<std::endl;
     //jacobianF.block(2, 0, 3, 2) = Matrix<float, 3, 2>::Zero();
     //jacobianF.block(2, 2, 3, 3) = dOmegaDot_dOmega;
 
-    Matrix55f stateTrans = Matrix55f::Identity() + state.params.dt * jacobianF;
+    Matrix5f stateTrans = Matrix5f::Identity() + state.params.dt * jacobianF;
     // Prediction of covariance matrix P
-    Matrix55f P_prio1 = stateTrans * state.pEkfPrev * stateTrans.transpose();
-    Matrix55f P_prio2 = (state.params.dt
+    Matrix5f P_prio1 = stateTrans * state.pEkfPrev * stateTrans.transpose();
+    Matrix5f P_prio2 = (state.params.dt
             * (Vector5f(state.params.kalmanCov.Q.data()).asDiagonal()));
-    Matrix55f P_prio = P_prio1 + P_prio2;
+    Matrix5f P_prio = P_prio1 + P_prio2;
 
     // UPDATE -----------------------------------------------------------------
     // Predict and get sun sensor and gyro measurements
@@ -522,8 +522,8 @@ void ExtendedKalmanFilter(Vector5f& xEkf, Matrix55f& pEkf, Vector5f& innov,
     zMeas << ssMeasTmp, gyroMeasTmp;
 
     // Kalman Gain
-    innovCov = P_prio + Matrix55f(state.params.kalmanCov.R.data());
-    Matrix55f K = P_prio * matInv(innovCov);
+    innovCov = P_prio + Matrix5f(state.params.kalmanCov.R.data());
+    Matrix5f K = P_prio * matInv(innovCov);
 
     if (!ssFlag)
     {
@@ -541,9 +541,9 @@ void ExtendedKalmanFilter(Vector5f& xEkf, Matrix55f& pEkf, Vector5f& innov,
 
     // Calculate outputs
     xEkf = xPrio + delta_x;
-    Matrix55f jf_m = Matrix55f::Identity() - K;
+    Matrix5f jf_m = Matrix5f::Identity() - K;
     pEkf = jf_m * P_prio * jf_m.transpose()
-            + K * Matrix55f(state.params.kalmanCov.R.data()) * K.transpose(); // Joseph form
+            + K * Matrix5f(state.params.kalmanCov.R.data()) * K.transpose(); // Joseph form
 }
 
 /*
@@ -698,7 +698,7 @@ void SunPointing::initialize(State& state, const Parameters& param)
     state = State(param);
 
     state.xEkfPrev = Vector5f::Zero();
-    state.pEkfPrev = Matrix55f::Zero();
+    state.pEkfPrev = Matrix5f::Zero();
     state.ctrlTorquePrev = Vector3f::Zero();
     state.ekfConvCountPrev = param.convCountMin;
 }
@@ -762,10 +762,10 @@ void SunPointing::step(DipoleVec& dipole, const MagVec& mtmMeas, bool mtmFlag,
 
 // EKF AND EKF INITIALIZATION LOGIC ---------------------------------------
     Vector5f xEkf; //state?
-    Matrix55f pEkf; //state?
+    Matrix5f pEkf; //state?
     Vector3f ctrlTorque; //state?
     Vector5f innov; //lookup
-    Matrix55f innovCov; //lookup
+    Matrix5f innovCov; //lookup
     Vector3f angrateEst; //local
     Vector3f s2s_bodyEst; //local
 
@@ -774,9 +774,9 @@ void SunPointing::step(DipoleVec& dipole, const MagVec& mtmMeas, bool mtmFlag,
         if (!ssFlag || !gyrFlag)
         {
             xEkf = Vector5f::Zero();
-            pEkf = Matrix55f::Zero();
+            pEkf = Matrix5f::Zero();
             innov = Vector5f::Zero();
-            innovCov = Matrix55f::Zero();
+            innovCov = Matrix5f::Zero();
             commDipoleSP = Vector3f::Zero();
             ctrlTorque = Vector3f::Zero();
             return;
@@ -820,4 +820,6 @@ void SunPointing::step(DipoleVec& dipole, const MagVec& mtmMeas, bool mtmFlag,
         dipole[i] = commDipoleSP[i] * 1e4;
     }
     std::cout<<"commDipoleSP[0]: " << commDipoleSP[0] <<std::endl;
+    std::cout<<"commDipoleSP[1]: " << commDipoleSP[1] <<std::endl;
+    std::cout<<"commDipoleSP[2]: " << commDipoleSP[2] <<std::endl;
 }

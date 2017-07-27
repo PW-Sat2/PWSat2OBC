@@ -13,11 +13,11 @@ using Eigen::RowVector3f;
 using Eigen::Vector3f;
 using Eigen::RowVector2f;
 using Eigen::Vector2f;
-using Eigen::Matrix3f;
 using Eigen::Matrix;
 using RowVector5f = Matrix<float, 1, 5>;
 using Vector5f = Matrix<float, 5, 1>;
-using Matrix55f = Matrix<float, 5, 5>;
+using Matrix3f = Matrix<float, 3, 3, Eigen::RowMajor>;
+using Matrix5f = Matrix<float, 5, 5, Eigen::RowMajor>;
 
 namespace adcs
 {
@@ -182,7 +182,7 @@ final
                     /** @brief innovation (difference between actual and predicted measurement)   */
                     RowVector5f innov;
                     /** @brief innovation covariance   */
-                    Matrix55f innovCov;
+                    Matrix5f innovCov;
                 };
 
                 /**
@@ -196,7 +196,7 @@ final
 
                         State(const Parameters& p) :
                                 xEkfPrev(Vector5f::Zero()),
-                                pEkfPrev(Matrix55f::Zero()),
+                                pEkfPrev(Matrix5f::Zero()),
                                 ctrlTorquePrev(Vector3f::Zero()),
                                 ekfConvCountPrev(0),
                                 params(Parameters(p))
@@ -207,7 +207,7 @@ final
                         Vector5f xEkfPrev;
 
                         /** @brief previous state covariance matrix   */
-                        Matrix55f pEkfPrev;
+                        Matrix5f pEkfPrev;
 
                         /** @brief previous control torque, [N m]   */
                         Vector3f ctrlTorquePrev;
@@ -260,14 +260,14 @@ final
 //vvv TO BE REMOVED/MOVED vvv
 
 Eigen::Matrix3f skew(const Eigen::Vector3f &vec);
-Matrix55f matInv(Matrix55f A);
-void EKFinitialization(Vector5f& xEkf, Matrix55f& pEkf, Vector5f& innov,
-        Matrix55f& innovCov, const Vector2f& ssMeas, const Vector3f& gyrMeas,
+Matrix5f matInv(Matrix5f A);
+void EKFinitialization(Vector5f& xEkf, Matrix5f& pEkf, Vector5f& innov,
+        Matrix5f& innovCov, const Vector2f& ssMeas, const Vector3f& gyrMeas,
         const adcs::SunPointing::State& state);
 Vector5f PropagateState(const Vector5f& x, const Vector3f& ctrlTorque,
        const adcs::SunPointing::State& state);
-void ExtendedKalmanFilter(Vector5f& xEkf, Matrix55f& pEkf, Vector5f& innov,
-        Matrix55f& innovCov, const Vector2f& ssMeas, bool ssFlag,
+void ExtendedKalmanFilter(Vector5f& xEkf, Matrix5f& pEkf, Vector5f& innov,
+        Matrix5f& innovCov, const Vector2f& ssMeas, bool ssFlag,
         const Vector3f& gyrMeas, bool gyrFlag, const adcs::SunPointing::State& state);
 void ExtractSunVandRate(Vector3f& s2s_bodyEst, Vector3f& angrateEst,
         const Vector5f& xEkf, const adcs::SunPointing::State& state);
