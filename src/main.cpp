@@ -18,6 +18,7 @@
 #include "SwoEndpoint/SwoEndpoint.h"
 #include "base/ecc.h"
 #include "base/os.h"
+#include "blink.hpp"
 #include "boot/params.hpp"
 #include "dmadrv.h"
 #include "efm_support/api.h"
@@ -140,17 +141,6 @@ void ACMP0_IRQHandler()
 __attribute__((optimize("O3"))) void UART1_RX_IRQHandler()
 {
     Main.Hardware.UARTDriver.OnReceived();
-}
-
-static void BlinkLed0(void* param)
-{
-    UNREFERENCED_PARAMETER(param);
-
-    while (1)
-    {
-        Main.Hardware.Pins.SystickIndicator.Toggle();
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
 }
 
 static void InitSwoEndpoint(void)
@@ -282,7 +272,7 @@ int main(void)
     Main.Hardware.Pins.TimeIndicator.High();
     Main.Hardware.Pins.BootIndicator.High();
 
-    System::CreateTask(BlinkLed0, "Blink0", 512, NULL, TaskPriority::P1, NULL);
+    InitializeBlink();
     System::CreateTask(ObcInitTask, "Init", 8_KB, &Main, TaskPriority::P14, &Main.initTask);
 
     System::RunScheduler();

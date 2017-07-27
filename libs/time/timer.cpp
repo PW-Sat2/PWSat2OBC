@@ -111,6 +111,11 @@ bool TimeProvider::SetCurrentTime(std::chrono::milliseconds duration)
 
 Option<milliseconds> TimeProvider::GetCurrentTime()
 {
+    if (this->timerLock == nullptr)
+    {
+        return None<milliseconds>();
+    }
+
     Lock lock(this->timerLock, InfiniteTimeout);
     if (!lock())
     {

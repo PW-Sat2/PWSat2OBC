@@ -25,6 +25,7 @@ namespace
         TimeTaskTest();
 
         testing::NiceMock<OSMock> mock;
+        OSReset osReset;
         SystemState state;
         TimeProvider provider;
         RtcMock rtc;
@@ -55,11 +56,15 @@ namespace
           updateDescriptor(timeTask.BuildUpdate()), //
           actionDescriptor(timeTask.BuildAction())
     {
+        osReset = InstallProxy(&mock);
+
+        ON_CALL(mock, CreateBinarySemaphore(_)).WillByDefault(Return(reinterpret_cast<OSSemaphoreHandle>(1)));
+
+        provider.Initialize(0s, nullptr, nullptr);
     }
 
     TEST_F(TimeTaskTest, TestTimeUpdate)
     {
-        auto proxy = InstallProxy(&mock);
         ASSERT_TRUE(provider.SetCurrentTime(12345678s));
 
         EXPECT_CALL(mock, TakeSemaphore(_, _)).WillOnce(Return(OSResult::Success));
@@ -70,7 +75,6 @@ namespace
 
     TEST_F(TimeTaskTest, TestTimeUpdateFailure)
     {
-        auto proxy = InstallProxy(&mock);
         ASSERT_TRUE(provider.SetCurrentTime(12345678s));
 
         EXPECT_CALL(mock, TakeSemaphore(_, _)).WillOnce(Return(OSResult::IOError));
@@ -81,8 +85,6 @@ namespace
 
     TEST_F(TimeTaskTest, TestCorrectConditionBeforeTimeCorrectionPeriod)
     {
-        auto proxy = InstallProxy(&mock);
-
         // given
         // The correction was less than TimeCorrectionPeriod ago
         SetCurrentTime(0ms);
@@ -96,8 +98,6 @@ namespace
 
     TEST_F(TimeTaskTest, TestCorrectConditionAfterTimeCorrectionPeriod)
     {
-        auto proxy = InstallProxy(&mock);
-
         // given
         // The correction was at least TimeCorrectionPeriod ago
         SetCurrentTime(0ms);
@@ -111,8 +111,6 @@ namespace
 
     TEST_F(TimeTaskTest, TestCorrectionWithTimeUpdate)
     {
-        auto proxy = InstallProxy(&mock);
-
         // given
         // The correct action was run initially
         SetCurrentTime(0ms);
@@ -138,8 +136,6 @@ namespace
 
     TEST_F(TimeTaskTest, TestCorrectionWithTimeUpdateCustomCorrectionWeights)
     {
-        auto proxy = InstallProxy(&mock);
-
         // given
         // The correct action was run initially
         SetCurrentTime(0ms);
@@ -166,8 +162,6 @@ namespace
 
     TEST_F(TimeTaskTest, TestCorrectionWithTimeUpdate_RTCFaster)
     {
-        auto proxy = InstallProxy(&mock);
-
         // given
         // The correct action was run initially
         SetCurrentTime(0ms);
@@ -192,8 +186,6 @@ namespace
 
     TEST_F(TimeTaskTest, TestTwoCorrectionsInRow)
     {
-        auto proxy = InstallProxy(&mock);
-
         // given
         // The correct action was run initially
         SetCurrentTime(0ms);
@@ -224,8 +216,6 @@ namespace
 
     TEST_F(TimeTaskTest, CorrectionDoesNotRunWhenRTCReadFails)
     {
-        auto proxy = InstallProxy(&mock);
-
         // given
         // The correct action was run initially
         SetCurrentTime(0ms);
@@ -249,8 +239,6 @@ namespace
 
     TEST_F(TimeTaskTest, CorrectionDoesNotRunWhenRTCReadsInvalidData)
     {
-        auto proxy = InstallProxy(&mock);
-
         // given
         // The correct action was run initially
         SetCurrentTime(0ms);
@@ -274,8 +262,6 @@ namespace
 
     TEST_F(TimeTaskTest, CorrectionDoesNotRunWhenTimeProviderReadFails)
     {
-        auto proxy = InstallProxy(&mock);
-
         // given
         // The correct action was run initially
         SetCurrentTime(0ms);
@@ -299,8 +285,6 @@ namespace
 
     TEST_F(TimeTaskTest, TestCorrectionWithMaximumTimeValue)
     {
-        auto proxy = InstallProxy(&mock);
-
         // given
         // The correct action was run initially with maximum time value
         SetCurrentTime(milliseconds::max());
@@ -321,8 +305,6 @@ namespace
 
     TEST_F(TimeTaskTest, CorrectionDoesNotRunWhenMaximumCorrectionThresholdReached)
     {
-        auto proxy = InstallProxy(&mock);
-
         // given
         // The correct action was run initially with maximum time value
         SetCurrentTime(0ms);
@@ -345,8 +327,6 @@ namespace
 
     TEST_F(TimeTaskTest, CorrectionRunsAsNormalAfterMaximumCorrectionThresholdReached)
     {
-        auto proxy = InstallProxy(&mock);
-
         // given
         // The correct action was run initially with maximum time value
         SetCurrentTime(0ms);
