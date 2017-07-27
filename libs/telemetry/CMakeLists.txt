@@ -3,13 +3,9 @@ set(NAME telemetry)
 set(SOURCES
     Include/telemetry/state.hpp
     SystemStartup.cpp
-    ProgramState.cpp
     ErrorCounters.cpp
     ExperimentTelemetry.cpp
     state.cpp
-    McuTemperature.cpp
-    GpioState.cpp
-    FileSystemTelemetry.cpp
     TimeTelemetry.cpp
 )
 
@@ -46,3 +42,5 @@ add_subdirectory(gpio)
 add_subdirectory(fs)
 add_subdirectory(time)
 add_subdirectory(program)
+add_subdirectory(flash_scrubbing)
+add_subdirectory(ram_scrubbing)

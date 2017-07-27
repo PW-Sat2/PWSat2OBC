@@ -1,6 +1,8 @@
 #ifndef LIBS_RAM_SCRUBBER_INCLUDE_SCRUBBER_RAM_HPP_
 #define LIBS_RAM_SCRUBBER_INCLUDE_SCRUBBER_RAM_HPP_
 
+#pragma once
+
 #include <cstdint>
 #include <em_int.h>
 #include <em_system.h>
@@ -60,7 +62,7 @@ namespace scrubber
     };
 
     template <std::size_t Start, std::size_t Size, std::size_t CycleSize>
-    std::uint32_t* RAMScrubber<Start, Size, CycleSize>::_current = MemoryStart;
+    std::uint32_t* RAMScrubber<Start, Size, CycleSize>::_current(MemoryStart);
 
     template <std::size_t Start, std::size_t Size, std::size_t CycleSize> inline void RAMScrubber<Start, Size, CycleSize>::Scrub()
     {
@@ -71,7 +73,7 @@ namespace scrubber
         BUS_RegBitWrite(&DMA->CHREQMASKS, 2, 1);
         BUS_RegBitWrite(&DMA->CHREQMASKS, 3, 1);
 
-        auto start = _current;
+        std::uint32_t* start = _current;
         auto end = start + PointerIncrement;
 
         asm volatile("ldr r0, %0\n"

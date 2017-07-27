@@ -1,8 +1,9 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock-matchers.h"
 #include "base/BitWriter.hpp"
-#include "telemetry/ProgramState.hpp"
+#include "telemetry/BasicTelemetry.hpp"
 #include "telemetry/SystemStartup.hpp"
+#include "telemetry/fwd.hpp"
 
 namespace
 {
@@ -41,13 +42,13 @@ namespace
     TEST(ProgramStateTest, TestDefaultConstruction)
     {
         telemetry::ProgramState object;
-        ASSERT_THAT(object.Crc(), Eq(0u));
+        ASSERT_THAT(object.GetValue(), Eq(0u));
     }
 
     TEST(ProgramStateTest, TestCustomConstruction)
     {
         telemetry::ProgramState object(0x8765);
-        ASSERT_THAT(object.Crc(), Eq(0x8765));
+        ASSERT_THAT(object.GetValue(), Eq(0x8765));
     }
 
     TEST(ProgramStateTest, TestSerialization)

@@ -1,7 +1,8 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock-matchers.h"
 #include "base/BitWriter.hpp"
-#include "telemetry/McuTemperature.hpp"
+#include "telemetry/BasicTelemetry.hpp"
+#include "telemetry/fwd.hpp"
 
 namespace
 {
@@ -11,13 +12,13 @@ namespace
     TEST(McuTemperatureTest, TestDefaultConstruction)
     {
         McuTemperature object;
-        ASSERT_THAT(object.Temperature(), Eq(0));
+        ASSERT_THAT(object.GetValue(), Eq(0));
     }
 
     TEST(McuTemperatureTest, TestCusomConstruction)
     {
         McuTemperature object(0x3ff);
-        ASSERT_THAT(object.Temperature(), Eq(0x3ff));
+        ASSERT_THAT(object.GetValue(), Eq(0x3ff));
     }
 
     TEST(McuTemperatureTest, TestSerialization)

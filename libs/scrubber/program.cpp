@@ -48,7 +48,10 @@ namespace scrubber
 
     void ProgramScrubber::ScrubSlots()
     {
-        LOGF(LOG_LEVEL_INFO, "[scrub] Running program scrubbing on slots 0x%X at offset 0x%X", this->_slotsMask, this->_offset);
+        LOGF(LOG_LEVEL_INFO,
+            "[scrub] Running program scrubbing on slots 0x%X at offset 0x%X",
+            this->_slotsMask,
+            static_cast<std::size_t>(this->_offset));
 
         std::array<uint8_t, 3> slots = DecodeSlotsMask(this->_slotsMask);
 

@@ -417,7 +417,7 @@ template <typename Action> void OnLeaveAction<Action>::Skip()
  * @tparam BitsCount Number of bits used by number
  * @ingroup utilities
  */
-template <typename Underlying, std::uint8_t BitsCount> class BitValue
+template <typename Underlying, std::uint8_t BitsCount> class BitValue final
 {
   public:
     /** @brief Mask used to trim value */
@@ -538,7 +538,7 @@ namespace details
     template <typename T> struct BitSizeOf<T, true>
     {
         /**
-         * @brief This value contanins queried type size in bits.
+         * @brief This value contains queried type size in bits.
          */
         static constexpr std::uint32_t Value = std::numeric_limits<std::underlying_type_t<T>>::digits;
     };
