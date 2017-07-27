@@ -20,6 +20,17 @@ namespace mission
      */
 
     /**
+     * @brief Interface for commanding sail opening
+     */
+    struct IOpenSail
+    {
+        /**
+         * @brief Start sail opening procedure at next mission loop
+         */
+        virtual void OpenSail() = 0;
+    };
+
+    /**
      * @brief Task that is responsible for deploying the sail at the end of the primary satelite mission.
      * @mission_task
      *
@@ -31,7 +42,7 @@ namespace mission
      *  After sail opening conditions are met, this procedure should be performed after each restart
      *  until overrided by telecommand
      */
-    class OpenSailTask : public mission::Action, public mission::Update
+    class OpenSailTask : public mission::Action, public mission::Update, public IOpenSail
     {
       public:
         /**
@@ -55,7 +66,7 @@ namespace mission
         /**
          * @brief Start sail opening on next mission loop iteration
          */
-        void Open();
+        virtual void OpenSail() override;
 
         /**
          * @brief Returns number of current step of sail opening process
