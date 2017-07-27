@@ -32,12 +32,16 @@ namespace
     {
         osGuard = InstallProxy(&osMock);
 
+        ON_CALL(osMock, CreateBinarySemaphore(1)).WillByDefault(Return(reinterpret_cast<OSSemaphoreHandle>(1)));
+        ON_CALL(osMock, CreateBinarySemaphore(2)).WillByDefault(Return(reinterpret_cast<OSSemaphoreHandle>(2)));
         EXPECT_CALL(osMock, TakeSemaphore(_, _)).WillRepeatedly(Return(OSResult::Success));
         EXPECT_CALL(osMock, GiveSemaphore(_)).WillRepeatedly(Return(OSResult::Success));
 
         ON_CALL(fs, Open(_, _, _)).WillByDefault(Return(MakeOpenedFile(1)));
         ON_CALL(fs, Write(_, _)).WillByDefault(Return(MakeFSIOResult(0)));
         ON_CALL(fs, Read(_, _)).WillByDefault(Return(MakeFSIOResult(0)));
+
+        timeProvider.Initialize(0s, nullptr, nullptr);
     }
 
     TEST_F(SmartWaitTest, ShouldReturnImmediatelyIfAlreadyAfterDesiredTime)

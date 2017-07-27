@@ -39,6 +39,7 @@ set(SOURCES
     obc.cpp
     obc_access.cpp
     fault_handlers.cpp
+    blink.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
