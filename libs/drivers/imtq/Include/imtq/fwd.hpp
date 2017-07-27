@@ -9,6 +9,7 @@ namespace devices
 {
     namespace imtq
     {
+        struct IImtqDriver;
         class ImtqDriver;
 
         /**
@@ -30,6 +31,11 @@ namespace devices
          * @brief BDot algorithm value: representation - 1e-9 T/s
          */
         using BDotType = std::int32_t;
+
+        /**
+         * @brief Temperature as returned by imtq. 1 LSB = 1 centigrade
+         */
+        using TemperatureMeasurement = std::int16_t;
 
         /**
          * @brief Imtq internal mode

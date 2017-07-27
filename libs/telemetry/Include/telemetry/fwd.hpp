@@ -7,6 +7,7 @@
 #include "comm/comm.hpp"
 #include "eps/eps.h"
 #include "gyro/gyro.h"
+#include "imtq/fwd.hpp"
 #include "state/fwd.hpp"
 
 namespace telemetry
@@ -16,11 +17,8 @@ namespace telemetry
     class ExperimentTelemetry;
     class InternalTimeTelemetry;
     class ExternalTimeTelemetry;
-    class ImtqTelemetry;
-    class ImtqBDotTelemetry;
     class ImtqHousekeeping;
     class ImtqState;
-    class ImtqSelfTest;
 
     struct TelemetryState;
 
@@ -35,6 +33,12 @@ namespace telemetry
         struct FlashPrimarySlotsScrubbingTag;
         struct FlashSecondarySlotsScrubbingTag;
         struct RAMScrubbingTag;
+        struct MagnetometerMeasurementsTag;
+        struct DipolesTag;
+        struct BDotTag;
+        struct CoilCurrentTag;
+        struct CoilTemperatureTag;
+        struct CoilsActiveTag;
     }
 
     /**
@@ -88,6 +92,32 @@ namespace telemetry
      */
     typedef SimpleTelemetryElement<std::uint32_t, ::telemetry::details::RAMScrubbingTag> RAMScrubbing;
 
+    typedef SimpleTelemetryElement<std::array<devices::imtq::MagnetometerMeasurement, 3>, ::telemetry::details::MagnetometerMeasurementsTag>
+        ImtqMagnetometerMeasurements;
+
+    typedef SimpleTelemetryElement<std::array<devices::imtq::Dipole, 3>, ::telemetry::details::DipolesTag> ImtqDipoles;
+
+    typedef SimpleTelemetryElement<std::array<devices::imtq::BDotType, 3>, ::telemetry::details::BDotTag> ImtqBDotTelemetry;
+
+    typedef SimpleTelemetryElement<std::array<std::uint8_t, 8>, ::telemetry::details::BDotTag> ImtqSelfTest;
+
+    typedef SimpleTelemetryElement<bool, ::telemetry::details::CoilsActiveTag> ImtqCoilsActive;
+
+#ifndef RAW_CURRENT
+    using ImtqTelemetryCurrent = std::uint16_t;
+#else
+    using ImtqTelemetryCurrent = devices::imtq::Current;
+#endif
+
+    typedef SimpleTelemetryElement<std::array<ImtqTelemetryCurrent, 3>, ::telemetry::details::CoilCurrentTag> ImtqCoilCurrent;
+
+#ifndef RAW_TEMPERATURE
+    using ImtqTelemetryTemperature = std::uint16_t;
+#else
+    using ImtqTelemetryTemperature = devices::imtq::TemperatureMeasurement;
+#endif
+    typedef SimpleTelemetryElement<std::array<ImtqTelemetryTemperature, 3>, ::telemetry::details::CoilTemperatureTag> ImtqCoilTemperature;
+
     template <typename... Type> class Telemetry;
 
     typedef Telemetry<SystemStartup,            //
@@ -107,9 +137,13 @@ namespace telemetry
         McuTemperature,                         //
         devices::eps::hk::ControllerATelemetry, //
         devices::eps::hk::ControllerBTelemetry, //
-        ImtqTelemetry,                          //
+        ImtqMagnetometerMeasurements,           //
+        ImtqCoilsActive,                        //
+        ImtqDipoles,                            //
         ImtqBDotTelemetry,                      //
         ImtqHousekeeping,                       //
+        ImtqCoilCurrent,                        //
+        ImtqCoilTemperature,                    //
         ImtqState,                              //
         ImtqSelfTest                            //
         >
