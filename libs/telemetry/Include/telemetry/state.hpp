@@ -54,10 +54,13 @@ namespace telemetry
     static_assert(FlashPrimarySlotsScrubbing::BitSize() == 3, "Invalid serialized size");
     static_assert(FlashSecondarySlotsScrubbing::BitSize() == 3, "Invalid serialized size");
     static_assert(RAMScrubbing::BitSize() == 32, "Invalid serialized size");
+    static_assert(ImtqMagnetometerMeasurements::BitSize() == 96, "Invalid serialized size");
+    static_assert(ImtqDipoles::BitSize() == 48, "Invalid serialized size");
+    static_assert(ImtqBDotTelemetry::BitSize() == 96, "Invalid serialized size");
+    static_assert(ImtqCoilCurrent::BitSize() == 48, "Invalid serialized size");
+    static_assert(ImtqCoilTemperature::BitSize() == 48, "Invalid serialized size");
+    static_assert(ImtqSelfTest::BitSize() == 64, "Invalid serialized size");
 
-    template <size_t size> struct TD;
-    TD<ManagedTelemetry::TotalSerializedSize> a;
-    TD<ManagedTelemetry::PayloadSize> b;
     static_assert(ManagedTelemetry::TotalSerializedSize <= (devices::comm::MaxDownlinkFrameSize - 1), "Telemetry is too large");
 }
 
