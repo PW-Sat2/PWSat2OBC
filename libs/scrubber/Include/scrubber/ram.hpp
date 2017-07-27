@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include <atomic>
 #include <cstdint>
 #include <em_int.h>
 #include <em_system.h>
@@ -59,11 +58,11 @@ namespace scrubber
         /** @brief Pointer increment in single cycle */
         static constexpr auto PointerIncrement = CycleSize / 4;
         /** @brief Pointer to next byte to be scrubbed */
-        static std::atomic<std::uint32_t*> _current;
+        static std::uint32_t* _current;
     };
 
     template <std::size_t Start, std::size_t Size, std::size_t CycleSize>
-    std::atomic<std::uint32_t*> RAMScrubber<Start, Size, CycleSize>::_current(MemoryStart);
+    std::uint32_t* RAMScrubber<Start, Size, CycleSize>::_current(MemoryStart);
 
     template <std::size_t Start, std::size_t Size, std::size_t CycleSize> inline void RAMScrubber<Start, Size, CycleSize>::Scrub()
     {
@@ -106,7 +105,7 @@ namespace scrubber
     template <std::size_t Start, std::size_t Size, std::size_t CycleSize>
     inline std::size_t scrubber::RAMScrubber<Start, Size, CycleSize>::Current()
     {
-        return reinterpret_cast<std::size_t>(static_cast<std::uint32_t*>(_current)) - Start;
+        return reinterpret_cast<std::size_t>(_current) - Start;
     }
 
     /** @} */
