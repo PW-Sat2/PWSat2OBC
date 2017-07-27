@@ -70,6 +70,7 @@ OBC::OBC()
       BootSettings(this->Hardware.PersistentStorage.GetRedundantDriver()),             //
       Hardware(this->Fdir.ErrorCounting(), this->PowerControlInterface, timeProvider), //
       PowerControlInterface(this->Hardware.EPS),                                       //
+      Fdir(this->PowerControlInterface, 1 << devices::n25q::RedundantN25QDriver::ErrorCounter::DeviceId),                                               //
       Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),            //
       Imtq(this->Fdir.ErrorCounting(), Hardware.I2C.Buses.Bus),                        //
       adcs(this->Imtq, this->timeProvider),                                            //
@@ -86,7 +87,8 @@ OBC::OBC()
           BootTable,
           BootSettings,
           TelemetryAcquisition,
-          PowerControlInterface),                                                  //
+          PowerControlInterface,
+          Fdir),                                                                   //
       Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index), //
       terminal(this->GetLineIO())                                                  //
 {
@@ -147,6 +149,16 @@ OSResult OBC::InitializeRunlevel1()
         {
             LOG(LOG_LEVEL_ERROR, "Unable to initialize persistent timer. ");
         }
+    }
+
+    state::ErrorCountersConfigState errorCountersConfig;
+    if (!persistentState.Get(errorCountersConfig))
+    {
+        LOG(LOG_LEVEL_ERROR, "Can't get error counters config");
+    }
+    else
+    {
+        this->Fdir.LoadConfig(errorCountersConfig._config);
     }
 
     if (!Mission.Initialize(10s))

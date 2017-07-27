@@ -12,6 +12,7 @@ set(SOURCES
   Telecommands/SetBootSlotsTelecommandTest.cpp
   Telecommands/StopAntennaDeploymentTelecommandTest.cpp
   Telecommands/PowerCycleTelecommandTest.cpp
+  Telecommands/SetErrorCounterConfigTelecommandTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})

@@ -157,7 +157,7 @@ class EPSTest(RestartPerSuite):
 
         counters = self.system.obc.error_counters()
 
-        self.assertEqual(counters[self.system.eps.ERROR_COUNTER], 5)
+        self.assertEqual(counters[self.system.eps.ERROR_COUNTER].current, 5)
         self.system.i2c.enable_bus_devices([self.system.eps.controller_a.address], True)
 
     def test_reset_watchdog_a(self):

@@ -11,6 +11,7 @@
 #include "mission/antenna_task.hpp"
 #include "mission/comm.hpp"
 #include "mission/experiments.hpp"
+#include "mission/fdir.hpp"
 #include "mission/fs.hpp"
 #include "mission/main.hpp"
 #include "mission/sail.hpp"
@@ -45,6 +46,7 @@ namespace mission
         adcs::AdcsPrimaryTask,
         mission::experiments::MissionExperimentComponent,
         mission::BeaconUpdate,
+        mission::SaveErrorCountersConfig,
         mission::PeristentStateSave, //
         FileSystemTask,              //
         EPSWatchdogTask              //

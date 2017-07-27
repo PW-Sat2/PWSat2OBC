@@ -10,6 +10,7 @@ set(SOURCES
     boot_settings.cpp
     antenna.cpp
     power.cpp
+    fdir.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -22,6 +23,7 @@ target_link_libraries(${NAME}
 	fs
 	logger
 	obc_experiments
+	obc_fdir
 	program_flash
 	boot_settings
 	power
