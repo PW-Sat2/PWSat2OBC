@@ -73,7 +73,6 @@ function(target_memory_report TARGET)
     get_property(binary TARGET ${TARGET} PROPERTY RUNTIME_OUTPUT_NAME)
 
     add_custom_target(${TARGET}.memory_report
-        COMMAND ${CMAKE_GCC_SIZE} -A -d $<TARGET_FILE:${TARGET}> > ${REPORT_PATH}/${TARGET}.size
         COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/utils/memory_report.py ${OUTPUT_PATH}/bin/${TARGET}.map ${REPORTS_PATH}/memory
         DEPENDS ${TARGET} utils.deps
         )

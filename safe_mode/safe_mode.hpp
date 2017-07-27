@@ -6,6 +6,7 @@
 #include "fm25w/fm25w.hpp"
 #include "mcu/io_map.h"
 #include "msc/msc.hpp"
+#include "n25q/n25q.h"
 #include "payload/io_map.h"
 #include "program_flash/boot_table.hpp"
 #include "standalone/flash_driver/flash_driver.hpp"
@@ -37,6 +38,14 @@ class OBCSafeMode
     devices::fm25w::RedundantFM25WDriver Fram;
 
     boot::BootSettings BootSettings;
+
+    SPIDevice<io_map::SlaveSelectFlash1> Flash1Spi;
+    SPIDevice<io_map::SlaveSelectFlash2> Flash2Spi;
+    SPIDevice<io_map::SlaveSelectFlash3> Flash3Spi;
+
+    devices::n25q::N25QDriver Flash1;
+    devices::n25q::N25QDriver Flash2;
+    devices::n25q::N25QDriver Flash3;
 
     std::array<std::uint8_t, 64_KB> Buffer;
 };

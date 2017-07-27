@@ -11,6 +11,7 @@
 #include "system.h"
 
 #include "safe_mode.hpp"
+#include "steps/erase_n25q/step.hpp"
 #include "steps/reboot/step.hpp"
 #include "steps/revert_boot_slots/step.hpp"
 #include "steps/scrub_bootloader/step.hpp"
@@ -32,6 +33,12 @@ extern "C" void assertEFM(const char* /*file*/, int /*line*/)
         ;
 }
 
+extern "C" void assertFailed(const char* /*source*/, const char* /*file*/, std::uint16_t /*line*/)
+{
+    while (1)
+        ;
+}
+
 void SysTick_Handler()
 {
     USART_Tx(io_map::UART::Peripheral, '*');
@@ -39,7 +46,7 @@ void SysTick_Handler()
 
 static void Recover()
 {
-    RecoverySteps<ScrubBootloader, RevertBootSlots, ScrubProgram, RebootStep> steps;
+    RecoverySteps<ScrubBootloader, RevertBootSlots, ScrubProgram, EraseN25QStep, RebootStep> steps;
 
     steps.Perform();
 }

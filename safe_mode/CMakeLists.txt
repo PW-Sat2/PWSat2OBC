@@ -6,6 +6,7 @@ set(SOURCES
     steps/scrub_bootloader/step.cpp
     steps/revert_boot_slots/step.cpp
     steps/scrub_program/step.cpp
+    steps/erase_n25q/step.cpp
     
     main.cpp   
     safe_mode.cpp
@@ -15,11 +16,12 @@ set(SOURCES
 
 add_executable(${NAME} ${SOURCES})
 
-set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${SAFE_MODE_LINKER_SCRIPT} -L ${MCU_PLATFORM_PATH} -specs=nano.specs -specs=nosys.specs")
+target_compile_options(${NAME} PRIVATE "-Os")
+
+set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${SAFE_MODE_LINKER_SCRIPT} -L ${MCU_PLATFORM_PATH} -specs=nano.specs -specs=nosys.specs -Wl,--gc-sections")
 
 target_link_libraries(${NAME}
     platform
-    base
     gsl
     emlib
     boot_params
@@ -29,6 +31,7 @@ target_link_libraries(${NAME}
     standalone_spi
     scrubber
     msc
+    n25q
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)
