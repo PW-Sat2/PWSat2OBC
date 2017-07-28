@@ -46,16 +46,16 @@ namespace
     {
         EXPECT_CALL(_os, GiveSemaphore(_)).WillRepeatedly(Return(OSResult::Success));
 
-        auto detumbleData = DetumbleData{};
         auto expectedDipole = Vector3<Dipole>{-22464, 20608, -1920};
 
-        detumbleData.calibratedMagnetometerMeasurement = Vector3<MagnetometerMeasurement>{1, 2, 3};
+        auto calibratedMagnetometerMeasurement = Vector3<MagnetometerMeasurement>{1, 2, 3};
 
         auto selfTestResult = CreateSuccessfulSelfTestResult();
 
         ON_CALL(_imtqDriver, PerformSelfTest(_, _)).WillByDefault(DoAll(SetArgReferee<0>(selfTestResult), Return(true)));
 
-        ON_CALL(_imtqDriver, GetDetumbleData(_)).WillByDefault(DoAll(SetArgReferee<0>(detumbleData), Return(true)));
+        ON_CALL(_imtqDriver, MeasureMagnetometer(_))
+            .WillByDefault(DoAll(SetArgReferee<0>(calibratedMagnetometerMeasurement), Return(true)));
         EXPECT_CALL(_imtqDriver, StartActuationDipole(Eq(expectedDipole), Eq(0ms)));
 
         _detumbling.Initialize();
