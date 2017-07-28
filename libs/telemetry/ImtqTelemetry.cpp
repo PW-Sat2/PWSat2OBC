@@ -10,11 +10,11 @@ namespace telemetry
     {
     }
 
-    ImtqHousekeeping::ImtqHousekeeping(std::uint16_t digitalVoltage_,
-        std::uint16_t analogVoltage_,
-        std::uint16_t digitalCurrent_,
-        std::uint16_t analogCurrent_,
-        std::uint16_t mcuTemperature_)
+    ImtqHousekeeping::ImtqHousekeeping(devices::imtq::VoltageInMiliVolt digitalVoltage_,
+        devices::imtq::VoltageInMiliVolt analogVoltage_,
+        devices::imtq::Current digitalCurrent_,
+        devices::imtq::Current analogCurrent_,
+        devices::imtq::TemperatureMeasurement mcuTemperature_)
         : digitalVoltage(digitalVoltage_), //
           analogVoltage(analogVoltage_),   //
           digitalCurrent(digitalCurrent_), //

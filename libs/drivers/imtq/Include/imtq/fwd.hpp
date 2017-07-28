@@ -13,6 +13,11 @@ namespace devices
         class ImtqDriver;
 
         /**
+         * @brief Voltage representation - 1 LSB = 1 mV
+         */
+        using VoltageInMiliVolt = std::uint16_t;
+
+        /**
          * @brief Current as returned by imtq. 1 LSB = 1e-4 A
          */
         using Current = std::int16_t;

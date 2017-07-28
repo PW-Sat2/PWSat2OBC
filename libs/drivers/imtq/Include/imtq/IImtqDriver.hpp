@@ -272,11 +272,6 @@ namespace devices
         struct HouseKeepingEngineering
         {
             /**
-             * @brief Voltage representation - 1 LSB = 1 mV
-             */
-            using VoltageInMiliVolt = std::uint16_t;
-
-            /**
              * @brief Digital and analog supply voltages.
              */
             VoltageInMiliVolt digitalVoltage, analogVoltage;
