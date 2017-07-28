@@ -75,6 +75,7 @@ Eigen::Matrix3f skew(const Eigen::Vector3f &vec)
  *
  *   references    :
  */
+/*
 Matrix5f matInv(Matrix5f A)
 {
     const uint8_t n = 5;
@@ -157,6 +158,11 @@ Matrix5f matInv(Matrix5f A)
     }
 
     return AInv;
+}
+*/
+Matrix5f matInv(Matrix5f A)
+{
+    return A.inverse();
 }
 
 /*
@@ -484,8 +490,17 @@ void ExtendedKalmanFilter(Vector5f& xEkf, Matrix5f& pEkf, Vector5f& innov,
 
     // Discrete Jacobian for state transition
     Matrix5f jacobianF;
+//Matlab org    jacobianF = [dLatDot_dLat, dLatDot_dLong, dLatDot_dOmega;
+//                 dLongDot_dLat, dLongDot_dLong, dLongDot_dOmega;
+//                 zeros(3,2), dOmegaDot_dOmega];
     //XXX vectors transposed to fit it - investigate!!!
-    jacobianF << dLatDot_dLat, dLatDot_dLong, RowVector3f(dLatDot_dOmega), dLongDot_dLat, dLongDot_dLong, RowVector3f(dLongDot_dOmega), Matrix<float, 3, 2>::Zero(), dOmegaDot_dOmega;
+    jacobianF << dLatDot_dLat,
+            dLatDot_dLong,
+            dLatDot_dOmega,
+            dLongDot_dLat, dLongDot_dLong,
+            dLongDot_dOmega,
+            Matrix<float, 3, 2>::Zero(),
+            dOmegaDot_dOmega;
     //std::cout << jacobianF<<std::endl;
     //jacobianF.block(2, 0, 3, 2) = Matrix<float, 3, 2>::Zero();
     //jacobianF.block(2, 2, 3, 3) = dOmegaDot_dOmega;
