@@ -17,22 +17,22 @@ namespace telemetry
       public:
         ImtqHousekeeping();
 
-        ImtqHousekeeping(std::uint16_t digitalVoltage,
-            std::uint16_t analogVoltage,
-            std::uint16_t digitalCurrent,
-            std::uint16_t analogCurrent,
-            std::uint16_t mcuTemperature);
+        ImtqHousekeeping(devices::imtq::VoltageInMiliVolt digitalVoltage,
+            devices::imtq::VoltageInMiliVolt analogVoltage,
+            devices::imtq::Current digitalCurrent,
+            devices::imtq::Current analogCurrent,
+            devices::imtq::TemperatureMeasurement mcuTemperature);
 
         void Write(BitWriter& writer) const;
 
         static constexpr std::uint32_t BitSize();
 
       private:
-        std::uint16_t digitalVoltage;
-        std::uint16_t analogVoltage;
-        std::uint16_t digitalCurrent;
-        std::uint16_t analogCurrent;
-        std::uint16_t mcuTemperature;
+        devices::imtq::VoltageInMiliVolt digitalVoltage;
+        devices::imtq::VoltageInMiliVolt analogVoltage;
+        devices::imtq::Current digitalCurrent;
+        devices::imtq::Current analogCurrent;
+        devices::imtq::TemperatureMeasurement mcuTemperature;
     };
 
     constexpr std::uint32_t ImtqHousekeeping::BitSize()

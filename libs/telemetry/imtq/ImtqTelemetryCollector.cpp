@@ -66,12 +66,7 @@ namespace devices
 
         bool ImtqTelemetryCollector::StartActuationCurrent(const Vector3<Current>& current, std::chrono::milliseconds duration)
         {
-            const auto status = this->next.StartActuationCurrent(current, duration);
-#ifndef RAW_CURRENT
-            return Update(status, telemetry::ImtqCoilCurrent{current}, this->coilCurrents);
-#else
-            return status;
-#endif
+            return this->next.StartActuationCurrent(current, duration);
         }
 
         bool ImtqTelemetryCollector::StartActuationDipole(Vector3<Dipole> dipole, std::chrono::milliseconds duration)
@@ -117,21 +112,13 @@ namespace devices
         bool ImtqTelemetryCollector::GetCoilCurrent(Vector3<Current>& result)
         {
             const auto status = this->next.GetCoilCurrent(result);
-#ifndef RAW_CURRENT
             return Update(status, telemetry::ImtqCoilCurrent{result}, this->coilCurrents);
-#else
-            return status;
-#endif
         }
 
         bool ImtqTelemetryCollector::GetCoilTemperature(Vector3<TemperatureMeasurement>& result)
         {
             const auto status = this->next.GetCoilTemperature(result);
-#ifndef RAW_TEMPERATURE
             return Update(status, telemetry::ImtqCoilTemperature{result}, this->coilTemperatures);
-#else
-            return status;
-#endif
         }
 
         bool ImtqTelemetryCollector::GetSelfTestResult(SelfTestResult& result)
@@ -160,7 +147,12 @@ namespace devices
 
         bool ImtqTelemetryCollector::GetHouseKeepingRAW(HouseKeepingRAW& result)
         {
-            const auto status = this->next.GetHouseKeepingRAW(result);
+            return this->next.GetHouseKeepingRAW(result);
+        }
+
+        bool ImtqTelemetryCollector::GetHouseKeepingEngineering(HouseKeepingEngineering& result)
+        {
+            const auto status = this->next.GetHouseKeepingEngineering(result);
             if (status)
             {
                 Lock lock(this->semaphore, 50ms);
@@ -172,36 +164,11 @@ namespace devices
                         result.analogCurrent,                                               //
                         result.MCUtemperature                                               //
                         );
-#ifdef RAW_CURRENT
+
                     this->coilCurrents = telemetry::ImtqCoilCurrent{result.coilCurrent};
-#endif
-#ifdef RAW_TEMPERATURE
                     this->coilTemperatures = telemetry::ImtqCoilTemperature{result.coilTemperature};
-#endif
                 }
             }
-
-            return status;
-        }
-
-        bool ImtqTelemetryCollector::GetHouseKeepingEngineering(HouseKeepingEngineering& result)
-        {
-            const auto status = this->next.GetHouseKeepingEngineering(result);
-#if !defined(RAW_CURRENT) && !defined(RAW_TEMPERATURE)
-            if (status)
-            {
-                Lock lock(this->semaphore, 50ms);
-                if (static_cast<bool>(lock))
-                {
-#ifndef RAW_CURRENT
-                    this->coilCurrents = telemetry::ImtqCoilCurrent{result.coilCurrent};
-#endif
-#ifndef RAW_TEMPERATURE
-                    this->coilTemperatures = telemetry::ImtqCoilTemperature{result.coilTemperature};
-#endif
-                }
-            }
-#endif
 
             return status;
         }

@@ -103,19 +103,12 @@ namespace telemetry
 
     typedef SimpleTelemetryElement<bool, ::telemetry::details::CoilsActiveTag> ImtqCoilsActive;
 
-#ifndef RAW_CURRENT
-    using ImtqTelemetryCurrent = std::uint16_t;
-#else
     using ImtqTelemetryCurrent = devices::imtq::Current;
-#endif
 
     typedef SimpleTelemetryElement<std::array<ImtqTelemetryCurrent, 3>, ::telemetry::details::CoilCurrentTag> ImtqCoilCurrent;
 
-#ifndef RAW_TEMPERATURE
-    using ImtqTelemetryTemperature = std::uint16_t;
-#else
     using ImtqTelemetryTemperature = devices::imtq::TemperatureMeasurement;
-#endif
+
     typedef SimpleTelemetryElement<std::array<ImtqTelemetryTemperature, 3>, ::telemetry::details::CoilTemperatureTag> ImtqCoilTemperature;
 
     template <typename... Type> class Telemetry;

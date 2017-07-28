@@ -72,8 +72,7 @@ OBC::OBC()
       PowerControlInterface(this->Hardware.EPS),                                                          //
       Fdir(this->PowerControlInterface, 1 << devices::n25q::RedundantN25QDriver::ErrorCounter::DeviceId), //
       Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),                               //
-      Imtq(this->Fdir.ErrorCounting(), Hardware.I2C.Buses.Bus),                                           //
-      adcs(this->Imtq, this->timeProvider),                                                               //
+      adcs(this->Hardware.imtqTelemetryCollector, this->timeProvider),                                    //
       Experiments(fs, this->adcs.GetAdcsCoordinator(), this->timeProvider),                               //
       Communication(                                                                                      //
           this->Fdir,

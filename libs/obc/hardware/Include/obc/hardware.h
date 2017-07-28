@@ -24,6 +24,7 @@
 #include "program_flash/flash_driver.hpp"
 #include "rtc/rtc.hpp"
 #include "spi/efm.h"
+#include "telemetry/ImtqTelemetryCollector.hpp"
 #include "temp/efm.hpp"
 #include "uart/uart.hpp"
 
@@ -167,6 +168,9 @@ namespace obc
 
         /** @brief Imtq handling */
         devices::imtq::ImtqDriver Imtq;
+
+        /** @brief This object captures imtq telemetry as the hardware state changes are requested. */
+        devices::imtq::ImtqTelemetryCollector imtqTelemetryCollector;
 
         /** @brief Termnial attached to UART */
         drivers::uart::UART<io_map::UART_1> Terminal;

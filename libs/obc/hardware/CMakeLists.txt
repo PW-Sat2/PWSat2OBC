@@ -28,6 +28,7 @@ target_link_libraries(${NAME}
 	flash_s29jl
 	msc
 	payload
+	telemetry_imtq
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
