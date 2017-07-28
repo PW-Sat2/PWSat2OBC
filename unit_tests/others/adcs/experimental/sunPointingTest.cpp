@@ -173,8 +173,8 @@ TEST(sunpointing, cross_validation_matInv)
                 in(i, j) = record[i + j * in.cols()];
             }
         }
-        //res = matInv(in);// accuracy problems
-        res = in.inverse();   // perfect result
+        res = matInv(in);// accuracy problems with original method
+        //res = in.inverse();   // perfect result
 
         //EXPECT_NEAR(res[0], (Matrix3f << record[3],record[4],record[5],record[6],record[7],record[8],record[9],record[10],record[11]).finished(), COMP_ACCUR);
         for (int j = 0; j < res.cols(); j++)
@@ -608,36 +608,34 @@ TEST(sunpointing, cross_validation_sunVandRate)
     file.close();
 }
 
-// cross-validation of sunpointing against matlab implementation
-TEST(sunpointing, cross_validation)
+// cross-validation of PropagateState function against matlab implementation
+TEST(sunpointing, cross_validation_propState)
 {
-    std::cout << "SUNPOINTING TEST... NOT REPRESENTATIVE!!!" << std::endl;
+    SunPointing::State state; //just parameterisation TODO const?? or const ref
+
+    uint record_cntr = 0;
+//inputs
+    Vector5f xEkfPrev;
+    Vector3f ctrlTorquePrev;
+//outputs
+    Vector5f k1;
+
+    const uint recordLen = 5 + 3 + 5; //TODO dep on size of above
 
     std::ifstream file(
-    ADCS_UT_DATA_FILE_PATH "/sunpointing_crossvalidation.csv");
+    ADCS_UT_DATA_FILE_PATH "/sunpointing_crossvalidation_PropagateState.csv");
     if (!file)
     {
         FAIL()<< "Cannot find data  file!" << std::endl;
     }
     std::vector<float> record;
 
-    SunPointing::State state; // should be initialised by first measurement
-    SunPointing::Parameters params;
-
-    SunPointing sp;
-    sp.initialize(state, params);
-
-// matlab sim is working with different units
-// input: Sim [T] --> OBC [1e-7 T]
-    float input_scale = 1.0f;    //1e7f;
-// output: Sim [Am2] --> OBC [1e-4 Am2]
-    float output_scale = 1e4f;
-
-//while (!file.eof())
-    for (int i = 0; i < 10; i++)
+    while (!file.eof())
+    //for (int i = 0; i < 10; i++)
     {
-        record = dataFileTools::getRecord(file); // TODO change to sunpointing data pool
-        if (record.size() != ESPDataIdx_size)
+        record_cntr = 0;
+        record = dataFileTools::getRecord(file);
+        if (record.size() != recordLen)
         {
             if (file.eof())
             {
@@ -645,55 +643,300 @@ TEST(sunpointing, cross_validation)
             }
             else
             {
-                FAIL()<< "Data record has size different than expected (got: " << record.size() << " but expected: " << ESPDataIdx_size << ")" << std::endl;
+                FAIL()<< "Data record has size different than expected (got: " << record.size() << " but expected: " << recordLen << ")" << std::endl;
             }
         }
-//#define ADCS_SUNPOINTING_DEBUG
+
+        for (int j = 0; j < xEkfPrev.cols(); j++) //TODO put this test to function!!!
+        {
+            for (int i = 0; i < xEkfPrev.rows(); i++)
+            {
+                xEkfPrev(i, j) = record[record_cntr++];
+            }
+        }
+
+        for (int j = 0; j < ctrlTorquePrev.cols(); j++) //TODO put this test to function!!!
+        {
+            for (int i = 0; i < ctrlTorquePrev.rows(); i++)
+            {
+                ctrlTorquePrev(i, j) = record[record_cntr++];
+            }
+        }
+
+        k1 = PropagateState(xEkfPrev, ctrlTorquePrev, state);
+
+        for (int j = 0; j < k1.cols(); j++)
+        {
+            for (int i = 0; i < k1.rows(); i++)
+            {
+                EXPECT_NEAR(k1(i, j), record[record_cntr], COMP_ACCUR);
 #ifdef ADCS_SUNPOINTING_DEBUG
-        std::cout << "time: " << record[ESP_t] << std::endl;
-        std::cout << "in0: " << record[ESP_mtmMeas] << " " << input_scale << " " << record[ESP_mtmMeas] * input_scale << " " << (int)(record[1] * input_scale)
-        << std::endl;
-        std::cout << "in1: " << record[ESP_ssMeas] << " " << input_scale << " " << record[ESP_ssMeas] * input_scale << " " << (int)(record[2] * input_scale)
-        << std::endl;
-        std::cout << "in2: " << record[ESP_gyroMeas] << " " << input_scale << " " << record[ESP_gyroMeas] * input_scale << " " << (int)(record[3] * input_scale)
-        << std::endl;
-        std::cout << "out0: " << record[ESP_commDipoleSP] << " " << output_scale << " " << record[ESP_commDipoleSP] * output_scale << " "
-        << (int)(record[ESP_commDipoleSP] * output_scale) << std::endl;
-        std::cout << "out1: " << record[ESP_commDipoleSP+1] << " " << output_scale << " " << record[ESP_commDipoleSP+1] * output_scale << " "
-        << (int)(record[ESP_commDipoleSP+1] * output_scale) << std::endl;
-        std::cout << "out2: " << record[ESP_commDipoleSP+2] << " " << output_scale << " " << record[ESP_commDipoleSP+2] * output_scale << " "
-        << (int)(record[ESP_commDipoleSP+2] * output_scale) << std::endl;
-#else
-        UNUSED1(input_scale);
+                std::cout << "EXPECT_NEAR(" << k1(i, j) << " == "
+                << record[record_cntr] << ")" << std::endl;
 #endif
-        DipoleVec dipole =
-        { 0, 0, 0 };
-        MagVec mtmMeas =
-        { int32_t(record[ESP_mtmMeas + 0]), int32_t(record[ESP_mtmMeas + 1]),
-                int32_t(record[ESP_mtmMeas + 2]) };
-        bool mtmFlag = (record[ESP_mtmFlag] != 0);
-        SunsVec ssMeas =
-        { record[ESP_ssMeas + 0], record[ESP_ssMeas + 1] };
-        bool ssFlag = (record[ESP_ssFlag] != 0);
-        GyroVec gyrMeas =
-        { record[ESP_gyroMeas + 0], record[ESP_gyroMeas + 1],
-                record[ESP_gyroMeas + 2] };
-        bool gyrFlag = (record[ESP_gyroFlag] != 0);
-        sp.step(dipole, mtmMeas, mtmFlag, ssMeas, ssFlag, gyrMeas, gyrFlag,
-                state);
-
-        EXPECT_NEAR(dipole[0], record[ESP_commDipoleSP + 0] * output_scale,
-                COMP_ACCUR);
-        EXPECT_NEAR(dipole[1], record[ESP_commDipoleSP + 1] * output_scale,
-                COMP_ACCUR);
-        EXPECT_NEAR(dipole[2], record[ESP_commDipoleSP + 2] * output_scale,
-                COMP_ACCUR);
-
-//#ifdef ADCS_SUNPOINTING_DEBUG
-        std::cout << "EXPECT_NEAR(" << dipole[0] << " == " << record[ESP_commDipoleSP+0] * output_scale << ")" << std::endl;
-        std::cout << "EXPECT_NEAR(" << dipole[1] << " == " << record[ESP_commDipoleSP+1] * output_scale << ")" << std::endl;
-        std::cout << "EXPECT_NEAR(" << dipole[2] << " == " << record[ESP_commDipoleSP+2] * output_scale << ")" << std::endl;
-//#endif
+                record_cntr++;
+            }
+        }
     }
     file.close();
 }
+
+// cross-validation of ExtendedKalmanFilter function against matlab implementation
+TEST(sunpointing, cross_validation_ekf)
+{
+    SunPointing::State state;
+
+    uint record_cntr = 0;
+    /*
+     reshape(ssMeas,1,[]),...
+     reshape(gyroMeas,1,[]),...
+     reshape(ssFlag,1,[]),...
+     reshape(gyroFlag,1,[]),...
+     reshape(X_EKF_Prev,1,[]),...
+     reshape(P_EKF_Prev,1,[]),...
+     reshape(ctrlTorquePrev,1,[]),...
+     reshape(X_EKF,1,[]),...
+     reshape(P_EKF,1,[]),...
+     reshape(innov,1,[]),...
+     reshape(innovCov,1,[]),...
+     */
+//inputs
+    Vector2f inSsMeas;
+    Vector3f inGyrMeas;
+    bool ssFlag;
+    bool gyrFlag;
+//state
+    //Vector5f xEkfPrev;
+    //Matrix5f pEkfPrev;
+    //Vector3f ctrlTorquePrev;
+//outputs
+    Vector5f xEkf;
+    Matrix5f pEkf;
+    Vector5f innov;
+    Matrix5f innovCov;
+
+    const uint recordLen = 2 + 3 + 1 + 1 + 5 + 25 + 3 + 5 + 25 + 5 + 25; //TODO dep on size of above
+
+    std::ifstream file(
+    ADCS_UT_DATA_FILE_PATH "/sunpointing_crossvalidation_ekf.csv");
+    if (!file)
+    {
+        FAIL()<< "Cannot find data  file!" << std::endl;
+    }
+    std::vector<float> record;
+
+    while (!file.eof())
+    //for (int i = 0; i < 10; i++)
+    {
+        record_cntr = 0;
+        record = dataFileTools::getRecord(file);
+        if (record.size() != recordLen)
+        {
+            if (file.eof())
+            {
+                break;
+            }
+            else
+            {
+                FAIL()<< "Data record has size different than expected (got: " << record.size() << " but expected: " << recordLen << ")" << std::endl;
+            }
+        }
+
+        for (int j = 0; j < inSsMeas.cols(); j++) //TODO put this test to function!!!
+        {
+            for (int i = 0; i < inSsMeas.rows(); i++)
+            {
+                inSsMeas(i, j) = record[record_cntr++];
+            }
+        }
+
+        for (int j = 0; j < inGyrMeas.cols(); j++) //TODO put this test to function!!!
+        {
+            for (int i = 0; i < inGyrMeas.rows(); i++)
+            {
+                inGyrMeas(i, j) = record[record_cntr++];
+            }
+        }
+
+        ssFlag = record[record_cntr++];
+        gyrFlag = record[record_cntr++];
+
+        for (int j = 0; j < state.xEkfPrev.cols(); j++) //TODO put this test to function!!!
+        {
+            for (int i = 0; i < state.xEkfPrev.rows(); i++)
+            {
+                state.xEkfPrev(i, j) = record[record_cntr++];
+            }
+        }
+
+        for (int j = 0; j < state.pEkfPrev.cols(); j++) //TODO put this test to function!!!
+        {
+            for (int i = 0; i < state.pEkfPrev.rows(); i++)
+            {
+                state.pEkfPrev(i, j) = record[record_cntr++];
+            }
+        }
+
+        for (int j = 0; j < state.ctrlTorquePrev.cols(); j++) //TODO put this test to function!!!
+        {
+            for (int i = 0; i < state.ctrlTorquePrev.rows(); i++)
+            {
+                state.ctrlTorquePrev(i, j) = record[record_cntr++];
+            }
+        }
+
+        ExtendedKalmanFilter(xEkf, pEkf, innov, innovCov, inSsMeas, ssFlag,
+                inGyrMeas, gyrFlag, state);
+
+        for (int j = 0; j < xEkf.cols(); j++)
+        {
+            for (int i = 0; i < xEkf.rows(); i++)
+            {
+                EXPECT_NEAR(xEkf(i, j), record[record_cntr], COMP_ACCUR);
+#ifdef ADCS_SUNPOINTING_DEBUG
+                std::cout << "EXPECT_NEAR(" << xEkf(i, j) << " == "
+                << record[record_cntr] << ")" << std::endl;
+#endif
+                record_cntr++;
+            }
+        }
+
+        for (int j = 0; j < pEkf.cols(); j++)
+        {
+            for (int i = 0; i < pEkf.rows(); i++)
+            {
+                EXPECT_NEAR(pEkf(i, j), record[record_cntr], COMP_ACCUR);
+#ifdef ADCS_SUNPOINTING_DEBUG
+                std::cout << "EXPECT_NEAR(" << pEkf(i, j) << " == "
+                << record[record_cntr] << ")" << std::endl;
+#endif
+                record_cntr++;
+            }
+        }
+
+        for (int j = 0; j < innov.cols(); j++)
+        {
+            for (int i = 0; i < innov.rows(); i++)
+            {
+                EXPECT_NEAR(innov(i, j), record[record_cntr], COMP_ACCUR);
+#ifdef ADCS_SUNPOINTING_DEBUG
+                std::cout << "EXPECT_NEAR(" << innov(i, j) << " == "
+                << record[record_cntr] << ")" << std::endl;
+#endif
+                record_cntr++;
+            }
+        }
+
+        for (int j = 0; j < innovCov.cols(); j++)
+        {
+            for (int i = 0; i < innovCov.rows(); i++)
+            {
+                EXPECT_NEAR(innovCov(i, j), record[record_cntr], COMP_ACCUR);
+#ifdef ADCS_SUNPOINTING_DEBUG
+                std::cout << "EXPECT_NEAR(" << innovCov(i, j) << " == "
+                << record[record_cntr] << ")" << std::endl;
+#endif
+                record_cntr++;
+            }
+        }
+    }
+    file.close();
+}
+
+/*
+ // cross-validation of sunpointing against matlab implementation
+ TEST(sunpointing, cross_validation)
+ {
+ std::cout << "SUNPOINTING TEST... NOT REPRESENTATIVE!!!" << std::endl;
+
+ std::ifstream file(
+ ADCS_UT_DATA_FILE_PATH "/sunpointing_crossvalidation.csv");
+ if (!file)
+ {
+ FAIL()<< "Cannot find data  file!" << std::endl;
+ }
+ std::vector<float> record;
+
+ SunPointing::State state; // should be initialised by first measurement
+ SunPointing::Parameters params;
+
+ SunPointing sp;
+ sp.initialize(state, params);
+
+ // matlab sim is working with different units
+ // input: Sim [T] --> OBC [1e-7 T]
+ float input_scale = 1.0f;    //1e7f;
+ // output: Sim [Am2] --> OBC [1e-4 Am2]
+ float output_scale = 1e4f;
+
+ //while (!file.eof())
+ for (int i = 0; i < 10; i++)
+ {
+ record = dataFileTools::getRecord(file); // TODO change to sunpointing data pool
+ if (record.size() != ESPDataIdx_size)
+ {
+ if (file.eof())
+ {
+ break;
+ }
+ else
+ {
+ FAIL()<< "Data record has size different than expected (got: " << record.size() << " but expected: " << ESPDataIdx_size << ")" << std::endl;
+ }
+ }
+ //#define ADCS_SUNPOINTING_DEBUG
+ #ifdef ADCS_SUNPOINTING_DEBUG
+ std::cout << "time: " << record[ESP_t] << std::endl;
+ std::cout << "in0: " << record[ESP_mtmMeas] << " " << input_scale << " " << record[ESP_mtmMeas] * input_scale << " " << (int)(record[1] * input_scale)
+ << std::endl;
+ std::cout << "in1: " << record[ESP_ssMeas] << " " << input_scale << " " << record[ESP_ssMeas] * input_scale << " " << (int)(record[2] * input_scale)
+ << std::endl;
+ std::cout << "in2: " << record[ESP_gyroMeas] << " " << input_scale << " " << record[ESP_gyroMeas] * input_scale << " " << (int)(record[3] * input_scale)
+ << std::endl;
+ std::cout << "out0: " << record[ESP_commDipoleSP] << " " << output_scale << " " << record[ESP_commDipoleSP] * output_scale << " "
+ << (int)(record[ESP_commDipoleSP] * output_scale) << std::endl;
+ std::cout << "out1: " << record[ESP_commDipoleSP+1] << " " << output_scale << " " << record[ESP_commDipoleSP+1] * output_scale << " "
+ << (int)(record[ESP_commDipoleSP+1] * output_scale) << std::endl;
+ std::cout << "out2: " << record[ESP_commDipoleSP+2] << " " << output_scale << " " << record[ESP_commDipoleSP+2] * output_scale << " "
+ << (int)(record[ESP_commDipoleSP+2] * output_scale) << std::endl;
+ #else
+ UNUSED1(input_scale);
+ #endif
+ DipoleVec dipole =
+ { 0, 0, 0 };
+ MagVec mtmMeas =
+ { int32_t(record[ESP_mtmMeas + 0]), int32_t(record[ESP_mtmMeas + 1]),
+ int32_t(record[ESP_mtmMeas + 2]) };
+ bool mtmFlag = (record[ESP_mtmFlag] != 0);
+ SunsVec ssMeas =
+ { record[ESP_ssMeas + 0], record[ESP_ssMeas + 1] };
+ bool ssFlag = (record[ESP_ssFlag] != 0);
+ GyroVec gyrMeas =
+ { record[ESP_gyroMeas + 0], record[ESP_gyroMeas + 1],
+ record[ESP_gyroMeas + 2] };
+ bool gyrFlag = (record[ESP_gyroFlag] != 0);
+ sp.step(dipole, mtmMeas, mtmFlag, ssMeas, ssFlag, gyrMeas, gyrFlag,
+ state);
+
+ EXPECT_NEAR(dipole[0], record[ESP_commDipoleSP + 0] * output_scale,
+ COMP_ACCUR);
+ EXPECT_NEAR(dipole[1], record[ESP_commDipoleSP + 1] * output_scale,
+ COMP_ACCUR);
+ EXPECT_NEAR(dipole[2], record[ESP_commDipoleSP + 2] * output_scale,
+ COMP_ACCUR);
+
+ //#ifdef ADCS_SUNPOINTING_DEBUG
+ std::cout << "EXPECT_NEAR(" << dipole[0] << " == "
+ << record[ESP_commDipoleSP + 0] * output_scale << ")"
+ << std::endl;
+ std::cout << "EXPECT_NEAR(" << dipole[1] << " == "
+ << record[ESP_commDipoleSP + 1] * output_scale << ")"
+ << std::endl;
+ std::cout << "EXPECT_NEAR(" << dipole[2] << " == "
+ << record[ESP_commDipoleSP + 2] * output_scale << ")"
+ << std::endl;
+ //#endif
+ }
+ file.close();
+ }
+ //*/
