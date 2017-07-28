@@ -2,6 +2,7 @@ from devices import DownlinkFrame
 from marker import BeaconMarker
 from exception import NoMatchingFrameType, MultipleMatchingFrameTypes
 
+
 class DownlinkFrameFactory(object):
     def __init__(self, frame_types):
         self._types = frame_types
@@ -27,12 +28,14 @@ class DownlinkFrameFactory(object):
 
         return matching_payload[0](frame.apid(), frame.seq(), frame.payload())
 
+
 def response_frame(apid):
     def wrapper(c):
         c.ReceivedAPID = apid
         return c
 
     return wrapper
+
 
 class ResponseFrame(DownlinkFrame):
     def __init__(self, apid, seq, payload):
