@@ -125,14 +125,14 @@ namespace adcs
 
     void ExperimentalDetumbling::Process()
     {
-        DetumbleData detumbleData;
-        if (!this->imtqDriver.GetDetumbleData(detumbleData))
+        Vector3<MagnetometerMeasurement> magnetometerMeasurement;
+        if (!this->imtqDriver.MeasureMagnetometer(magnetometerMeasurement))
         {
-            LOG(LOG_LEVEL_ERROR, "Cannot get detumble data");
+            LOG(LOG_LEVEL_ERROR, "Cannot get magnetometer measurement");
             return;
         }
 
-        auto dipoleVector = this->detumblingComputations.step(detumbleData.calibratedMagnetometerMeasurement, this->detumblingState);
+        auto dipoleVector = this->detumblingComputations.step(magnetometerMeasurement, this->detumblingState);
 
         auto actuationDipole = Vector3<Dipole>{dipoleVector[0], dipoleVector[1], dipoleVector[2]};
 
