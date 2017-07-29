@@ -18,6 +18,7 @@ set(SOURCES
   Experiments/Fibo/FiboCalculatorTest.cpp
   Experiments/ExperimentTest.cpp
   Experiments/ADCS/DetumblingExperimentTest.cpp
+  Experiments/LEOP/LEOPExperimentTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
@@ -35,6 +36,7 @@ target_link_libraries(${NAME}
     mission_fs
     exp_fibo
     exp_adcs
+    exp_leop
     unit_tests_base
 )
 

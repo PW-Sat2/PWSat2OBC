@@ -1,7 +1,7 @@
 set(NAME exp_fs)
 
 add_library(${NAME} STATIC        
-    TransportStream.cpp
+    ExperimentFile.cpp
 )
 
 target_link_libraries(${NAME} PUBLIC
