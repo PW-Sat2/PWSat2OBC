@@ -19,3 +19,14 @@ class SetErrorCounterConfig(Telecommand):
             result += list(c)
 
         return result
+
+
+class GetErrorCounterConfig(Telecommand):
+    def __init__(self):
+        Telecommand.__init__(self)
+        
+    def apid(self):
+        return 0x06
+
+    def payload(self):
+        return []

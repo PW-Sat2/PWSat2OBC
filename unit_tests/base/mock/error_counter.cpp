@@ -9,3 +9,7 @@ ErrorCountingConfigrationMock::ErrorCountingConfigrationMock()
     ON_CALL(*this, Decrement(_)).WillByDefault(Return(2));
     ON_CALL(*this, Limit(_)).WillByDefault(Return(50));
 }
+
+ErrorCountingMock::ErrorCountingMock()
+{
+}

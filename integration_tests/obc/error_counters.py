@@ -1,9 +1,10 @@
 import typing
 
+from utils import CompareAsDict
 from .obc_mixin import OBCMixin, command, decode_return, decode_csv
 
 
-class ErrorCounter:
+class ErrorCounter(CompareAsDict):
     def __init__(self, row):
         self.device = int(row['Device'])
         self.current = int(row['Current'])

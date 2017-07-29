@@ -24,29 +24,32 @@ OBCCommunication::OBCCommunication(obc::FDIR& /*fdir*/,
     boot::BootSettings& bootSettings,
     IHasState<telemetry::TelemetryState>& telemetry,
     services::power::IPowerControl& powerControl,
-    ISetErrorCounterConfig& errorCounterConfig,
-    mission::IOpenSail& openSail)
-    : Comm(commDriver),                                                //
-      UplinkProtocolDecoder(settings::CommSecurityCode),               //
-      SupportedTelecommands(                                           //
-          PingTelecommand(),                                           //
-          DownloadFileTelecommand(fs),                                 //
-          EnterIdleStateTelecommand(currentTime, idleStateController), //
-          RemoveFileTelecommand(fs),                                   //
-          SetTimeCorrectionConfigTelecommand(stateContainer),          //
-          PerformDetumblingExperiment(experiments),                    //
-          AbortExperiment(experiments),                                //
-          ListFilesTelecommand(fs),                                    //
-          EraseBootTableEntry(bootTable),                              //
-          WriteProgramPart(bootTable),                                 //
-          FinalizeProgramEntry(bootTable),                             //
-          SetBootSlotsTelecommand(bootSettings),                       //
-          SendBeaconTelecommand(telemetry),                            //
-          StopAntennaDeployment(disableAntennaDeployment),             //
-          PowerCycle(powerControl),                                    //
-          SetErrorCounterConfig(errorCounterConfig),                   //
-          OpenSail(openSail)                                           //
-          ),                                                           //
+    ISetErrorCounterConfig& setErrorCounterConfig,
+    mission::IOpenSail& openSail,
+    error_counter::IErrorCounting& errorCounting,
+    error_counter::IErrorCountingConfigration& errorCountingConfig)
+    : Comm(commDriver),                                                         //
+      UplinkProtocolDecoder(settings::CommSecurityCode),                        //
+      SupportedTelecommands(                                                    //
+          PingTelecommand(),                                                    //
+          DownloadFileTelecommand(fs),                                          //
+          EnterIdleStateTelecommand(currentTime, idleStateController),          //
+          RemoveFileTelecommand(fs),                                            //
+          SetTimeCorrectionConfigTelecommand(stateContainer),                   //
+          PerformDetumblingExperiment(experiments),                             //
+          AbortExperiment(experiments),                                         //
+          ListFilesTelecommand(fs),                                             //
+          EraseBootTableEntry(bootTable),                                       //
+          WriteProgramPart(bootTable),                                          //
+          FinalizeProgramEntry(bootTable),                                      //
+          SetBootSlotsTelecommand(bootSettings),                                //
+          SendBeaconTelecommand(telemetry),                                     //
+          StopAntennaDeployment(disableAntennaDeployment),                      //
+          PowerCycle(powerControl),                                             //
+          SetErrorCounterConfig(setErrorCounterConfig),                         //
+          OpenSail(openSail),                                                   //
+          GetErrorCountersConfigTelecommand(errorCounting, errorCountingConfig) //
+          ),                                                                    //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {
 }
