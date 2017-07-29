@@ -12,6 +12,7 @@ set(SOURCES
     power.cpp
     fdir.cpp
     sail.cpp
+    periodic_message.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
