@@ -15,6 +15,7 @@ set(SOURCES
   Telecommands/SetErrorCounterConfigTelecommandTest.cpp
   Telecommands/OpenSailTelecommandTest.cpp
   Telecommands/GetErrorCountersConfigTelecommandTest.cpp
+  Telecommands/SetPeriodicMessageTelecommandTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})

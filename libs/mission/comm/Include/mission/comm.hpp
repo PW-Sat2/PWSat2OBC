@@ -86,19 +86,44 @@ namespace mission
         bool _idleState;
     };
 
+    /**
+     * @brief Tasks that sends periodic message
+     * @mission_task
+     */
     class SendMessageTask : public Action
     {
       public:
+        /**
+         * @brief Ctor
+         * @param transmitter Frame transmitter
+         */
         SendMessageTask(devices::comm::ITransmitter& transmitter);
 
+        /**
+         * @brief Returns task's action description
+         * @return Action descriptor
+         */
         mission::ActionDescriptor<SystemState> BuildAction();
 
       private:
+        /**
+         * @brief Checks if conditions for sending periodic message are met
+         * @param state System state
+         * @param param Pointer to this task object
+         * @return true if conditions are met, false otherwise
+         */
         static bool Condition(const SystemState& state, void* param);
 
+        /**
+         * @brief Sends period messages
+         * @param state System state
+         * @param param true if conditions are met, false otherwise
+         */
         static void Action(SystemState& state, void* param);
 
+        /** @brief Frame transmitter */
         devices::comm::ITransmitter& _transmitter;
+        /** @brief Mission time at which message was previously sent */
         Option<std::chrono::milliseconds> _lastSentAt;
     };
 }

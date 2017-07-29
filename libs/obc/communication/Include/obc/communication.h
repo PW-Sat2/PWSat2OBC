@@ -15,6 +15,7 @@
 #include "obc/telecommands/experiments.hpp"
 #include "obc/telecommands/fdir.hpp"
 #include "obc/telecommands/file_system.hpp"
+#include "obc/telecommands/periodic_message.hpp"
 #include "obc/telecommands/ping.hpp"
 #include "obc/telecommands/power.hpp"
 #include "obc/telecommands/program_upload.hpp"
@@ -134,7 +135,8 @@ namespace obc
         obc::telecommands::PowerCycle,                       //
         obc::telecommands::SetErrorCounterConfig,            //
         obc::telecommands::OpenSail,                         //
-        obc::telecommands::GetErrorCountersConfigTelecommand //
+        obc::telecommands::GetErrorCountersConfigTelecommand,//
+        obc::telecommands::SetPeriodicMessageTelecommand     //
         >;
 
     /**

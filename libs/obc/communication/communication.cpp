@@ -45,7 +45,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           PowerCycle(powerControl),                                     //
           SetErrorCounterConfig(fdir),                                  //
           OpenSail(openSail),                                           //
-          GetErrorCountersConfigTelecommand(fdir.ErrorCounting(), fdir) //
+          GetErrorCountersConfigTelecommand(fdir.ErrorCounting(), fdir),//
+          SetPeriodicMessageTelecommand(stateContainer)                 //
           ),                                                            //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {
