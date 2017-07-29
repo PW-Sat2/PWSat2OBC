@@ -34,7 +34,7 @@ namespace experiments
          * near packet end - PID::Padding - 8b
          * until the end - padding data (0xFF)
          */
-        class TransportStream
+        class ExperimentFile
         {
           public:
             /** @brief Data packet length.  */
@@ -57,7 +57,7 @@ namespace experiments
              * @brief Default constrctor
              * @param time Optional time provider. If set, each packet automatically has timestamp.
              * */
-            TransportStream(services::time::ICurrentTime* time = nullptr);
+            ExperimentFile(services::time::ICurrentTime* time = nullptr);
 
             /**
              * @brief Factory method that opens experiment file
@@ -100,6 +100,7 @@ namespace experiments
             services::time::ICurrentTime* _time;
 
             Writer _writer;
+            bool _hasPayloadInFrame;
 
             void FillBufferWithPadding();
             void InitializePacket();
