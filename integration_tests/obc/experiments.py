@@ -9,6 +9,7 @@ from .obc_mixin import OBCMixin, command, decode_return
 class ExperimentType(IntEnum):
     Fibo = 1
     Detumbling = 2
+    LEOP = 3
 
 
 @unique
