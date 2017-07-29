@@ -156,10 +156,7 @@ namespace obc
          * @param[in] bootSettings Boot settings
          * @param[in] telemetry Reference to object that contains current telemetry state.
          * @param[in] powerControl Power control interface
-         * @param[in] setErrorCounterConfig Reference to object that can set error counter config
          * @param[in] openSail Sail opening interface
-         * @param[in] errorCounting Reference to error counting service
-         * @param[in] errorCountingConfig Reference to current error counting config
          */
         OBCCommunication(obc::FDIR& fdir,
             devices::comm::CommObject& commDriver,
@@ -173,10 +170,7 @@ namespace obc
             boot::BootSettings& bootSettings,
             IHasState<telemetry::TelemetryState>& telemetry,
             services::power::IPowerControl& powerControl,
-            ISetErrorCounterConfig& setErrorCounterConfig,
-            mission::IOpenSail& openSail,
-            error_counter::IErrorCounting& errorCounting,
-            error_counter::IErrorCountingConfigration& errorCountingConfig);
+            mission::IOpenSail& openSail);
 
         /**
          * @brief Initializes all communication at runlevel 1

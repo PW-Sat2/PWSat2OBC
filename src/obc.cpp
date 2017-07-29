@@ -88,10 +88,7 @@ OBC::OBC()
           BootSettings,
           TelemetryAcquisition,
           PowerControlInterface,
-          Fdir, //
-          Mission,
-          Fdir.ErrorCounting(),
-          Fdir),                                                                   //
+          Mission),                                                                //
       Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index), //
       terminal(this->GetLineIO())                                                  //
 {

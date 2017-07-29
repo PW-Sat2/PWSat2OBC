@@ -12,7 +12,7 @@ using telecommunication::uplink::IHandleTeleCommand;
 using namespace obc;
 using namespace obc::telecommands;
 
-OBCCommunication::OBCCommunication(obc::FDIR& /*fdir*/,
+OBCCommunication::OBCCommunication(obc::FDIR& fdir,
     devices::comm::CommObject& commDriver,
     services::time::ICurrentTime& currentTime,
     mission::IIdleStateController& idleStateController,
@@ -24,32 +24,29 @@ OBCCommunication::OBCCommunication(obc::FDIR& /*fdir*/,
     boot::BootSettings& bootSettings,
     IHasState<telemetry::TelemetryState>& telemetry,
     services::power::IPowerControl& powerControl,
-    ISetErrorCounterConfig& setErrorCounterConfig,
-    mission::IOpenSail& openSail,
-    error_counter::IErrorCounting& errorCounting,
-    error_counter::IErrorCountingConfigration& errorCountingConfig)
-    : Comm(commDriver),                                                         //
-      UplinkProtocolDecoder(settings::CommSecurityCode),                        //
-      SupportedTelecommands(                                                    //
-          PingTelecommand(),                                                    //
-          DownloadFileTelecommand(fs),                                          //
-          EnterIdleStateTelecommand(currentTime, idleStateController),          //
-          RemoveFileTelecommand(fs),                                            //
-          SetTimeCorrectionConfigTelecommand(stateContainer),                   //
-          PerformDetumblingExperiment(experiments),                             //
-          AbortExperiment(experiments),                                         //
-          ListFilesTelecommand(fs),                                             //
-          EraseBootTableEntry(bootTable),                                       //
-          WriteProgramPart(bootTable),                                          //
-          FinalizeProgramEntry(bootTable),                                      //
-          SetBootSlotsTelecommand(bootSettings),                                //
-          SendBeaconTelecommand(telemetry),                                     //
-          StopAntennaDeployment(disableAntennaDeployment),                      //
-          PowerCycle(powerControl),                                             //
-          SetErrorCounterConfig(setErrorCounterConfig),                         //
-          OpenSail(openSail),                                                   //
-          GetErrorCountersConfigTelecommand(errorCounting, errorCountingConfig) //
-          ),                                                                    //
+    mission::IOpenSail& openSail)
+    : Comm(commDriver),                                                 //
+      UplinkProtocolDecoder(settings::CommSecurityCode),                //
+      SupportedTelecommands(                                            //
+          PingTelecommand(),                                            //
+          DownloadFileTelecommand(fs),                                  //
+          EnterIdleStateTelecommand(currentTime, idleStateController),  //
+          RemoveFileTelecommand(fs),                                    //
+          SetTimeCorrectionConfigTelecommand(stateContainer),           //
+          PerformDetumblingExperiment(experiments),                     //
+          AbortExperiment(experiments),                                 //
+          ListFilesTelecommand(fs),                                     //
+          EraseBootTableEntry(bootTable),                               //
+          WriteProgramPart(bootTable),                                  //
+          FinalizeProgramEntry(bootTable),                              //
+          SetBootSlotsTelecommand(bootSettings),                        //
+          SendBeaconTelecommand(telemetry),                             //
+          StopAntennaDeployment(disableAntennaDeployment),              //
+          PowerCycle(powerControl),                                     //
+          SetErrorCounterConfig(fdir),                                  //
+          OpenSail(openSail),                                           //
+          GetErrorCountersConfigTelecommand(fdir.ErrorCounting(), fdir) //
+          ),                                                            //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {
 }
