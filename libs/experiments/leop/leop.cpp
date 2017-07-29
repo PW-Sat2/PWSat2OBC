@@ -6,7 +6,7 @@
 
 using experiments::IterationResult;
 using experiments::StartResult;
-using experiments::fs::TransportStream;
+using experiments::fs::ExperimentFile;
 using services::fs::File;
 using services::fs::FileOpen;
 using services::fs::FileAccess;
@@ -89,7 +89,7 @@ namespace experiment
             w.WriteWordLE(data.Value.Z());
             w.WriteWordLE(data.Value.Temperature());
 
-            _experimentFile.Write(TransportStream::PID::Gyro, buf);
+            _experimentFile.Write(ExperimentFile::PID::Gyro, buf);
 
             return IterationResult::WaitForNextCycle;
         }

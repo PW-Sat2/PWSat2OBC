@@ -3,7 +3,7 @@
 
 #include <chrono>
 #include "experiments/experiments.h"
-#include "fs/TransportStream.hpp"
+#include "fs/ExperimentFile.hpp"
 #include "fs/fs.h"
 #include "gyro/gyro.h"
 #include "time/timer.h"
@@ -51,7 +51,7 @@ namespace experiment
             services::fs::IFileSystem& _fileSystem;
 
             /** @brief Experiment file with results */
-            experiments::fs::TransportStream _experimentFile;
+            experiments::fs::ExperimentFile _experimentFile;
 
             experiments::IterationResult PerformMeasurements();
             experiments::IterationResult CheckExperimentTime();
