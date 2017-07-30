@@ -36,6 +36,7 @@ set(SOURCES
   Scrubbing/shared.cpp
   Scrubbing/ProgramScrubbingTest.cpp
   Scrubbing/BootloaderScrubbingTest.cpp
+  photos/PhotoServiceTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
@@ -69,6 +70,7 @@ target_link_libraries(${NAME}
     unit_tests_base
     boot_settings
     scrubber
+    photo
 )
 
 

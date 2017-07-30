@@ -81,6 +81,9 @@ namespace services
              * @return Operation status
              */
             virtual bool SunSPower(bool enabled) = 0;
+
+            virtual bool CameraWing(bool enabled) = 0;
+            virtual bool CameraNadir(bool enabled) = 0;
         };
 
         /** @} */
