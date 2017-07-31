@@ -11,5 +11,9 @@ namespace services
         EnableCamera::EnableCamera(Camera camera) : Which(camera)
         {
         }
+
+        TakePhoto::TakePhoto(Camera camera) : Which(camera)
+        {
+        }
     }
 }

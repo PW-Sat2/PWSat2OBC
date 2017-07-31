@@ -15,9 +15,16 @@ namespace services
             const int RetryCount;
         };
 
+        enum class TakePhotoResult
+        {
+            Success,
+            NotSynced
+        };
+
         struct ICamera
         {
             virtual SyncResult Sync() = 0;
+            virtual TakePhotoResult TakePhoto() = 0;
         };
     }
 }

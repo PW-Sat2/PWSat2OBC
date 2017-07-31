@@ -57,5 +57,25 @@ namespace services
 
             return OSResult::Success;
         }
+
+        OSResult PhotoService::Invoke(TakePhoto command)
+        {
+            this->_selector.Select(command.Which);
+
+            for (auto i = 0; i < 3; i++)
+            {
+                auto r = this->_camera.TakePhoto();
+
+                if (r == TakePhotoResult::Success)
+                {
+                    return OSResult::Success;
+                }
+
+                Invoke(DisableCamera(command.Which));
+                Invoke(EnableCamera(command.Which));
+            }
+
+            return OSResult::DeviceNotFound;
+        }
     }
 }
