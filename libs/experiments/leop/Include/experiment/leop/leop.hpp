@@ -32,7 +32,7 @@ namespace experiment
              * @brief Ctor
              * @param gyro Gyroscope driver
              * @param time Current time provider
-             * @param fileSstem File System provider
+             * @param fileSystem File System provider
              */
             LaunchAndEarlyOrbitPhaseExperiment(
                 devices::gyro::IGyroscopeDriver& gyro, services::time::ICurrentTime& time, services::fs::IFileSystem& fileSystem);
