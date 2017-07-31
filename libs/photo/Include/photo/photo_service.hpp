@@ -54,6 +54,10 @@ namespace services
             const std::uint8_t BufferId;
         };
 
+        class Reset final
+        {
+        };
+
         enum class BufferStatus
         {
             Empty,
@@ -101,6 +105,7 @@ namespace services
             OSResult Invoke(EnableCamera command);
             OSResult Invoke(TakePhoto command);
             OSResult Invoke(DownloadPhoto command);
+            OSResult Invoke(Reset command);
 
             BufferInfo GetBufferInfo(std::uint8_t bufferId) const;
 

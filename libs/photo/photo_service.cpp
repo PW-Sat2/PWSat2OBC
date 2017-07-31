@@ -108,6 +108,13 @@ namespace services
             return r.Error();
         }
 
+        OSResult PhotoService::Invoke(Reset /*command*/)
+        {
+            this->_freeSpace = PhotoBuffer.begin();
+            std::fill(this->_bufferInfos.begin(), this->_bufferInfos.end(), BufferInfo());
+            return OSResult::Success;
+        }
+
         BufferInfo PhotoService::GetBufferInfo(std::uint8_t bufferId) const
         {
             return this->_bufferInfos[bufferId];
