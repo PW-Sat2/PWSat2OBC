@@ -215,5 +215,31 @@ namespace
         ASSERT_THAT(b4.Buffer(), Each(Eq(0xCD)));
     }
 
+    TEST_F(PhotoServiceTest, ShouldFreeAllBuffersAfterResetCommand)
+    {
+        EXPECT_CALL(_camera, DownloadPhoto(_))
+            .WillOnce(Invoke([](auto buffer) {
+                std::fill(buffer.begin(), buffer.begin() + 1_KB, 0xAB);
+
+                return DownloadPhotoResult(buffer.subspan(0, 1_KB));
+            }))
+            .WillOnce(Invoke([](auto buffer) {
+                std::fill(buffer.begin(), buffer.begin() + 2_KB, 0xCD);
+
+                return DownloadPhotoResult(buffer.subspan(0, 1_KB));
+            }));
+
+        _service.Invoke(DownloadPhoto(Camera::Nadir, 1));
+        _service.Invoke(DownloadPhoto(Camera::Nadir, 4));
+        _service.Invoke(Reset());
+
+        for (auto i = 0; i < PhotoService::BuffersCount; i++)
+        {
+            auto buffer = _service.GetBufferInfo(i);
+            ASSERT_THAT(buffer.Status(), Eq(BufferStatus::Empty));
+            ASSERT_THAT(buffer.Size(), Eq(0U));
+        }
+    }
+
     INSTANTIATE_TEST_CASE_P(PhotoServiceTest, PhotoServiceTest, testing::Values(Camera::Nadir, Camera::Wing), );
 }
