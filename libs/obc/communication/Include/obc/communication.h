@@ -123,17 +123,18 @@ namespace obc
         obc::telecommands::RemoveFileTelecommand,
         obc::telecommands::SetTimeCorrectionConfigTelecommand,
         obc::telecommands::PerformDetumblingExperiment,
-        obc::telecommands::AbortExperiment,         //
-        obc::telecommands::ListFilesTelecommand,    //
-        obc::telecommands::EraseBootTableEntry,     //
-        obc::telecommands::WriteProgramPart,        //
-        obc::telecommands::FinalizeProgramEntry,    //
-        obc::telecommands::SetBootSlotsTelecommand, //
-        obc::telecommands::SendBeaconTelecommand,   //
-        obc::telecommands::StopAntennaDeployment,   //
-        obc::telecommands::PowerCycle,              //
-        obc::telecommands::SetErrorCounterConfig,   //
-        obc::telecommands::OpenSail                 //
+        obc::telecommands::AbortExperiment,                  //
+        obc::telecommands::ListFilesTelecommand,             //
+        obc::telecommands::EraseBootTableEntry,              //
+        obc::telecommands::WriteProgramPart,                 //
+        obc::telecommands::FinalizeProgramEntry,             //
+        obc::telecommands::SetBootSlotsTelecommand,          //
+        obc::telecommands::SendBeaconTelecommand,            //
+        obc::telecommands::StopAntennaDeployment,            //
+        obc::telecommands::PowerCycle,                       //
+        obc::telecommands::SetErrorCounterConfig,            //
+        obc::telecommands::OpenSail,                         //
+        obc::telecommands::GetErrorCountersConfigTelecommand //
         >;
 
     /**
@@ -155,7 +156,6 @@ namespace obc
          * @param[in] bootSettings Boot settings
          * @param[in] telemetry Reference to object that contains current telemetry state.
          * @param[in] powerControl Power control interface
-         * @param[in] errorCounterConfig Reference to object that can set error counter config
          * @param[in] openSail Sail opening interface
          */
         OBCCommunication(obc::FDIR& fdir,
@@ -170,7 +170,6 @@ namespace obc
             boot::BootSettings& bootSettings,
             IHasState<telemetry::TelemetryState>& telemetry,
             services::power::IPowerControl& powerControl,
-            ISetErrorCounterConfig& errorCounterConfig,
             mission::IOpenSail& openSail);
 
         /**

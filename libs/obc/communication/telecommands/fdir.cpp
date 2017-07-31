@@ -5,8 +5,8 @@
 #include "telecommunication/downlink.h"
 
 using telecommunication::downlink::DownlinkAPID;
-
 using telecommunication::downlink::CorrelatedDownlinkFrame;
+using telecommunication::downlink::DownlinkFrame;
 
 namespace obc
 {
@@ -60,6 +60,33 @@ namespace obc
             }
 
             transmitter.SendFrame(responseFrame.Frame());
+        }
+
+        static_assert(4 * sizeof(error_counter::CounterValue) * error_counter::ErrorCounting::MaxDevices < DownlinkFrame::MaxPayloadSize,
+            "Config to large to fit into single frame");
+
+        GetErrorCountersConfigTelecommand::GetErrorCountersConfigTelecommand(
+            error_counter::IErrorCounting& errorCounting, error_counter::IErrorCountingConfigration& config)
+            : _errorCounting(errorCounting), _config(config)
+        {
+        }
+
+        void GetErrorCountersConfigTelecommand::Handle(
+            devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> /*parameters*/)
+        {
+            DownlinkFrame response(DownlinkAPID::ErrorCounters, 0);
+
+            auto& writer = response.PayloadWriter();
+
+            for (auto i = 0; i < error_counter::ErrorCounting::MaxDevices; i++)
+            {
+                writer.WriteByte(_errorCounting.Current(i));
+                writer.WriteByte(_config.Limit(i));
+                writer.WriteByte(_config.Increment(i));
+                writer.WriteByte(_config.Decrement(i));
+            }
+
+            transmitter.SendFrame(response.Frame());
         }
     }
 }

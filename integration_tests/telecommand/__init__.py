@@ -22,6 +22,7 @@ __all__ = [
     'SendBeacon',
     'PowerCycleTelecommand',
     'SetErrorCounterConfig'
-    'OpenSailTelecommand'
+    'OpenSailTelecommand',
+    'GetErrorCounterConfig'
 ]
 

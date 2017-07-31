@@ -42,6 +42,33 @@ namespace obc
             /** @brief Error counter config */
             ISetErrorCounterConfig& _config;
         };
+
+        /**
+         * @brief Get error counter config telecommand
+         * @ingroup telecommands
+         * @telecommand
+         *
+         * Parameters: None
+         */
+        class GetErrorCountersConfigTelecommand : public telecommunication::uplink::Telecommand<0x06>
+        {
+          public:
+            /**
+             * @brief Ctor
+             * @param errorCounting Error counting service
+             * @param config Error counting configuration
+             */
+            GetErrorCountersConfigTelecommand(
+                error_counter::IErrorCounting& errorCounting, error_counter::IErrorCountingConfigration& config);
+
+            virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
+
+          private:
+            /** @brief Error counting service */
+            error_counter::IErrorCounting& _errorCounting;
+            /** @brief Error counting configuration */
+            error_counter::IErrorCountingConfigration& _config;
+        };
     }
 }
 

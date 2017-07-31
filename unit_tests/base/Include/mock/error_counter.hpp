@@ -13,6 +13,15 @@ struct ErrorCountingConfigrationMock : public error_counter::IErrorCountingConfi
     MOCK_METHOD1(Decrement, error_counter::CounterValue(error_counter::Device device));
 };
 
+struct ErrorCountingMock : public error_counter::IErrorCounting
+{
+    ErrorCountingMock();
+
+    MOCK_CONST_METHOD1(Current, error_counter::CounterValue(error_counter::Device device));
+    MOCK_METHOD1(Failure, void(error_counter::Device device));
+    MOCK_METHOD1(Success, void(error_counter::Device device));
+};
+
 namespace error_counter
 {
     template <Device Device> bool operator==(const ErrorCounter<Device> lhs, const int rhs)

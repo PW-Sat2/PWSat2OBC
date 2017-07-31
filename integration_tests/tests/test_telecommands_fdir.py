@@ -1,6 +1,7 @@
+from response_frames.fdir import ErrorCountersFrame
 from response_frames.operation import OperationSuccessFrame
 from system import auto_power_on, clear_state
-from telecommand import SetErrorCounterConfig
+from telecommand import SetErrorCounterConfig, GetErrorCounterConfig
 from tests.base import RestartPerTest
 from utils import TestEvent
 
@@ -56,3 +57,20 @@ class TestFDIRTelecommands(RestartPerTest):
         self.assertEqual(current_config[2].limit, 96)
         self.assertEqual(current_config[2].increment, 0)
         self.assertEqual(current_config[2].decrement, 4)
+
+    def test_should_get_error_counters_config(self):
+        self._start()
+
+        current_config = self.system.obc.error_counters()
+
+        self.system.comm.put_frame(GetErrorCounterConfig())
+
+        f = self.system.comm.get_frame(5)
+
+        self.assertIsInstance(f, ErrorCountersFrame)
+
+        for i in xrange(0, 12):
+            self.assertEqual(current_config[i].current, f.counters[i]['current'], "Device {}".format(i))
+            self.assertEqual(current_config[i].limit, f.counters[i]['limit'], "Device {}".format(i))
+            self.assertEqual(current_config[i].increment, f.counters[i]['increment'], "Device {}".format(i))
+            self.assertEqual(current_config[i].decrement, f.counters[i]['decrement'], "Device {}".format(i))

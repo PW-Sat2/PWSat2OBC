@@ -66,16 +66,16 @@ static void TimePassed(void* /*context*/, TimePoint /*currentTime*/)
 }
 
 OBC::OBC()
-    : BootTable(Hardware.FlashDriver),                                                 //
-      BootSettings(this->Hardware.PersistentStorage.GetRedundantDriver()),             //
-      Hardware(this->Fdir.ErrorCounting(), this->PowerControlInterface, timeProvider), //
-      PowerControlInterface(this->Hardware.EPS),                                       //
-      Fdir(this->PowerControlInterface, 1 << devices::n25q::RedundantN25QDriver::ErrorCounter::DeviceId),                                               //
-      Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),            //
-      Imtq(this->Fdir.ErrorCounting(), Hardware.I2C.Buses.Bus),                        //
-      adcs(this->Imtq, this->timeProvider),                                            //
-      Experiments(fs, this->adcs.GetAdcsCoordinator(), this->timeProvider),            //
-      Communication(                                                                   //
+    : BootTable(Hardware.FlashDriver),                                                                    //
+      BootSettings(this->Hardware.PersistentStorage.GetRedundantDriver()),                                //
+      Hardware(this->Fdir.ErrorCounting(), this->PowerControlInterface, timeProvider),                    //
+      PowerControlInterface(this->Hardware.EPS),                                                          //
+      Fdir(this->PowerControlInterface, 1 << devices::n25q::RedundantN25QDriver::ErrorCounter::DeviceId), //
+      Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),                               //
+      Imtq(this->Fdir.ErrorCounting(), Hardware.I2C.Buses.Bus),                                           //
+      adcs(this->Imtq, this->timeProvider),                                                               //
+      Experiments(fs, this->adcs.GetAdcsCoordinator(), this->timeProvider),                               //
+      Communication(                                                                                      //
           this->Fdir,
           this->Hardware.CommDriver,
           this->timeProvider,
@@ -88,7 +88,6 @@ OBC::OBC()
           BootSettings,
           TelemetryAcquisition,
           PowerControlInterface,
-          Fdir,                                                                    //
           Mission),                                                                //
       Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index), //
       terminal(this->GetLineIO())                                                  //
