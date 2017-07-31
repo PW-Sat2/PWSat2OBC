@@ -1,7 +1,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "experiment/leop/leop.hpp"
-#include "mock/AdcsMocks.hpp"
 #include "mock/FsMock.hpp"
 #include "mock/GyroMock.hpp"
 #include "mock/time.hpp"
@@ -13,7 +12,6 @@ using testing::Eq;
 using testing::_;
 
 using namespace experiment::leop;
-using namespace adcs;
 using experiments::IterationResult;
 using experiments::StartResult;
 using namespace std::chrono_literals;
