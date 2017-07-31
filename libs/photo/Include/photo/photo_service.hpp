@@ -36,6 +36,14 @@ namespace services
             const Camera Which;
         };
 
+        class TakePhoto final
+        {
+          public:
+            TakePhoto(Camera camera);
+
+            const Camera Which;
+        };
+
         class PhotoService
         {
           public:
@@ -43,6 +51,7 @@ namespace services
 
             OSResult Invoke(DisableCamera command);
             OSResult Invoke(EnableCamera command);
+            OSResult Invoke(TakePhoto command);
 
           private:
             services::power::IPowerControl& _power;

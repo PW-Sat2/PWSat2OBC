@@ -9,11 +9,13 @@ using testing::Eq;
 using testing::_;
 using testing::Return;
 using testing::Invoke;
+using testing::InSequence;
 using namespace services::photo;
 
 struct CameraMock : ICamera
 {
     MOCK_METHOD0(Sync, SyncResult());
+    MOCK_METHOD0(TakePhoto, TakePhotoResult());
 };
 
 struct CameraSelectorMock : ICameraSelector
@@ -43,9 +45,9 @@ namespace
 
         Camera Cam() const;
 
-        CameraPowerControlMock _power;
+        testing::NiceMock<CameraPowerControlMock> _power;
         CameraMock _camera;
-        CameraSelectorMock _selector;
+        testing::NiceMock<CameraSelectorMock> _selector;
 
         PhotoService _service{_power, _camera, _selector};
     };
@@ -96,6 +98,50 @@ namespace
         EXPECT_CALL(_camera, Sync()).WillOnce(Return(SyncResult(false, 60)));
 
         auto r = _service.Invoke(EnableCamera(Cam()));
+
+        ASSERT_THAT(r, Eq(OSResult::DeviceNotFound));
+    }
+
+    TEST_P(PhotoServiceTest, ShouldRequestTakingAPhoto)
+    {
+        EXPECT_CALL(_selector, Select(Cam()));
+        EXPECT_CALL(_camera, TakePhoto()).WillOnce(Return(TakePhotoResult::Success));
+
+        auto r = _service.Invoke(TakePhoto(Cam()));
+
+        ASSERT_THAT(r, Eq(OSResult::Success));
+    }
+
+    TEST_P(PhotoServiceTest, ShouldRestartCameraIfTakePhotoFailed)
+    {
+        {
+            InSequence s;
+
+            EXPECT_CALL(_camera, TakePhoto()).WillOnce(Return(TakePhotoResult::NotSynced));
+            EXPECT_CALL(_power, ControlCamera(Cam(), false)).WillOnce(Return(true));
+            EXPECT_CALL(_power, ControlCamera(Cam(), true)).WillOnce(Return(true));
+            EXPECT_CALL(_camera, Sync()).WillOnce(Return(SyncResult(true, 1)));
+
+            EXPECT_CALL(_camera, TakePhoto()).WillOnce(Return(TakePhotoResult::NotSynced));
+            EXPECT_CALL(_power, ControlCamera(Cam(), false)).WillOnce(Return(true));
+            EXPECT_CALL(_power, ControlCamera(Cam(), true)).WillOnce(Return(true));
+            EXPECT_CALL(_camera, Sync()).WillOnce(Return(SyncResult(true, 1)));
+
+            EXPECT_CALL(_camera, TakePhoto()).WillOnce(Return(TakePhotoResult::Success));
+        }
+
+        auto r = _service.Invoke(TakePhoto(Cam()));
+
+        ASSERT_THAT(r, Eq(OSResult::Success));
+    }
+
+    TEST_P(PhotoServiceTest, ShouldReturnErrorOfTakingPhotoFailsOnAllRetries)
+    {
+        ON_CALL(_power, ControlCamera(Cam(), _)).WillByDefault(Return(true));
+        ON_CALL(_camera, Sync()).WillByDefault(Return(SyncResult(true, 1)));
+        ON_CALL(_camera, TakePhoto()).WillByDefault(Return(TakePhotoResult::NotSynced));
+
+        auto r = _service.Invoke(TakePhoto(Cam()));
 
         ASSERT_THAT(r, Eq(OSResult::DeviceNotFound));
     }
