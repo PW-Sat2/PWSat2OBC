@@ -30,6 +30,7 @@
 #include "telemetry/collect_fs.hpp"
 #include "telemetry/collect_gpio.hpp"
 #include "telemetry/collect_gyro.hpp"
+#include "telemetry/collect_imtq.hpp"
 #include "telemetry/collect_internal_time.hpp"
 #include "telemetry/collect_program.hpp"
 #include "telemetry/collect_ram_scrubbing.hpp"
@@ -76,6 +77,7 @@ namespace telemetry
         ProgramCrcTelemetryAcquisition,             //
         FlashScrubbingTelemetryAcquisition,         //
         RamScrubbingTelemetryAcquisition<Scrubber>, //
+        ImtqTelemetryAcquisition,                   //
         TelemetrySerialization                      //
         >
         ObcTelemetryAcquisition;
