@@ -1,12 +1,23 @@
 #include "photo_service.hpp"
+#include <array>
 #include "power/power.h"
 
 namespace services
 {
     namespace photo
     {
+        static std::array<std::uint8_t, 300_KB> PhotoBuffer;
+
+        BufferInfo::BufferInfo() : _status(BufferStatus::Empty)
+        {
+        }
+
+        BufferInfo::BufferInfo(BufferStatus status, gsl::span<std::uint8_t> buffer) : _status(status), _buffer(buffer)
+        {
+        }
+
         PhotoService::PhotoService(services::power::IPowerControl& power, ICamera& camera, ICameraSelector& selector)
-            : _power(power), _camera(camera), _selector(selector)
+            : _power(power), _camera(camera), _selector(selector), _freeSpace(PhotoBuffer.begin())
         {
         }
 
@@ -76,6 +87,30 @@ namespace services
             }
 
             return OSResult::DeviceNotFound;
+        }
+
+        OSResult PhotoService::Invoke(DownloadPhoto command)
+        {
+            this->_selector.Select(command.Which);
+
+            this->_bufferInfos[command.BufferId] = BufferInfo(BufferStatus::Downloading, 0);
+
+            auto r = this->_camera.DownloadPhoto(gsl::make_span(this->_freeSpace, PhotoBuffer.end()));
+
+            if (r.IsSuccess())
+            {
+                this->_bufferInfos[command.BufferId] = BufferInfo(BufferStatus::Occupied, r.Success());
+                this->_freeSpace += r.Success().size();
+                return OSResult::Success;
+            }
+
+            this->_bufferInfos[command.BufferId] = BufferInfo(BufferStatus::Failed, 0);
+            return r.Error();
+        }
+
+        BufferInfo PhotoService::GetBufferInfo(std::uint8_t bufferId) const
+        {
+            return this->_bufferInfos[bufferId];
         }
     }
 }
