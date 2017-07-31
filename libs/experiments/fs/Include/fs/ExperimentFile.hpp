@@ -73,16 +73,19 @@ namespace experiments
              * @brief Writes data to file.
              * @param pid The Packet Identifier of provided data.
              * @param data The data to write.
+             * @returns Status of opreation.
              */
             OSResult Write(PID pid, const gsl::span<uint8_t>& data);
 
             /**
              * @brief Closes the file.
+             * @returns Status of opreation.
              */
             OSResult Close();
 
             /**
              * @brief Flushes current packet to file system and begins new packet.
+             * @returns Status of opreation.
              */
             OSResult Flush();
 
