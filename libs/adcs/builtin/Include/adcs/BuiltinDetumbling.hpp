@@ -33,10 +33,14 @@ namespace adcs
 
         virtual std::chrono::milliseconds GetWait() const override final;
 
-        /** @brief Algorithm refresh frequency. */
-        static constexpr chrono_extensions::hertz Frequency = chrono_extensions::hertz{0.03};
-
       private:
+        /** @brief Algorithm refresh frequency. */
+        static constexpr chrono_extensions::hertz Frequency = chrono_extensions::hertz{0.05};
+
+        static constexpr std::chrono::milliseconds GetWaitPeriod();
+
+        static constexpr std::chrono::seconds GetDetumblingPeriod();
+
         devices::imtq::IImtqDriver& imtqDriver;
     };
 }
