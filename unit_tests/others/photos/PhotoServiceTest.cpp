@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <gsl/span>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "base/os.h"
@@ -10,12 +12,14 @@ using testing::_;
 using testing::Return;
 using testing::Invoke;
 using testing::InSequence;
+using testing::Each;
 using namespace services::photo;
 
 struct CameraMock : ICamera
 {
     MOCK_METHOD0(Sync, SyncResult());
     MOCK_METHOD0(TakePhoto, TakePhotoResult());
+    MOCK_METHOD1(DownloadPhoto, DownloadPhotoResult(gsl::span<std::uint8_t> buffer));
 };
 
 struct CameraSelectorMock : ICameraSelector
@@ -59,6 +63,16 @@ namespace
     Camera PhotoServiceTest::Cam() const
     {
         return GetParam();
+    }
+
+    TEST_F(PhotoServiceTest, AllBuffersAreEmptyOnInitialize)
+    {
+        for (auto i = 0; i < PhotoService::BuffersCount; i++)
+        {
+            auto buffer = _service.GetBufferInfo(i);
+            ASSERT_THAT(buffer.Status(), Eq(BufferStatus::Empty));
+            ASSERT_THAT(buffer.Size(), Eq(0U));
+        }
     }
 
     TEST_P(PhotoServiceTest, ShouldDisableCamera)
@@ -144,6 +158,61 @@ namespace
         auto r = _service.Invoke(TakePhoto(Cam()));
 
         ASSERT_THAT(r, Eq(OSResult::DeviceNotFound));
+    }
+
+    TEST_P(PhotoServiceTest, ShouldDownloadPhotoToBuffer)
+    {
+        EXPECT_CALL(_selector, Select(Cam()));
+        EXPECT_CALL(_camera, DownloadPhoto(_)).WillOnce(Invoke([](auto buffer) {
+            std::fill(buffer.begin(), buffer.begin() + 1_KB, 0xAB);
+
+            return DownloadPhotoResult(buffer.subspan(0, 1_KB));
+        }));
+
+        auto r = _service.Invoke(DownloadPhoto(Cam(), 1));
+
+        ASSERT_THAT(r, Eq(OSResult::Success));
+
+        auto buf = _service.GetBufferInfo(1);
+
+        ASSERT_THAT(buf.Status(), Eq(BufferStatus::Occupied));
+        ASSERT_THAT(buf.Size(), Eq(1_KB));
+    }
+
+    TEST_P(PhotoServiceTest, ShouldReturnFailIfDownloadFails)
+    {
+        EXPECT_CALL(_selector, Select(Cam()));
+        EXPECT_CALL(_camera, DownloadPhoto(_)).WillOnce(Invoke([](auto /*buffer*/) {
+            return DownloadPhotoResult(OSResult::DeviceNotFound);
+        }));
+
+        auto r = _service.Invoke(DownloadPhoto(Cam(), 1));
+
+        ASSERT_THAT(r, Eq(OSResult::DeviceNotFound));
+    }
+
+    TEST_F(PhotoServiceTest, ShouldFillAdjacentPartsOfBuffer)
+    {
+        EXPECT_CALL(_camera, DownloadPhoto(_))
+            .WillOnce(Invoke([](auto buffer) {
+                std::fill(buffer.begin(), buffer.begin() + 1_KB, 0xAB);
+
+                return DownloadPhotoResult(buffer.subspan(0, 1_KB));
+            }))
+            .WillOnce(Invoke([](auto buffer) {
+                std::fill(buffer.begin(), buffer.begin() + 2_KB, 0xCD);
+
+                return DownloadPhotoResult(buffer.subspan(0, 1_KB));
+            }));
+
+        _service.Invoke(DownloadPhoto(Camera::Nadir, 1));
+        _service.Invoke(DownloadPhoto(Camera::Nadir, 4));
+
+        auto b1 = _service.GetBufferInfo(1);
+        auto b4 = _service.GetBufferInfo(4);
+
+        ASSERT_THAT(b1.Buffer(), Each(Eq(0xAB)));
+        ASSERT_THAT(b4.Buffer(), Each(Eq(0xCD)));
     }
 
     INSTANTIATE_TEST_CASE_P(PhotoServiceTest, PhotoServiceTest, testing::Values(Camera::Nadir, Camera::Wing), );

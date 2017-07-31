@@ -15,5 +15,9 @@ namespace services
         TakePhoto::TakePhoto(Camera camera) : Which(camera)
         {
         }
+
+        DownloadPhoto::DownloadPhoto(Camera camera, std::uint8_t bufferId) : Which(camera), BufferId(bufferId)
+        {
+        }
     }
 }
