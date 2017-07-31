@@ -3,15 +3,17 @@
 
 #pragma once
 
+#include "IImtqTelemetryCollector.hpp"
 #include "base/os.h"
 #include "imtq/IImtqDriver.hpp"
 #include "telemetry/ImtqTelemetry.hpp"
+#include "telemetry/fwd.hpp"
 
 namespace devices
 {
     namespace imtq
     {
-        class ImtqTelemetryCollector final : public IImtqDriver
+        class ImtqTelemetryCollector final : public IImtqDriver, public telemetry::IImtqTelemetryCollector
         {
           public:
             ImtqTelemetryCollector(IImtqDriver& driver);
@@ -60,10 +62,29 @@ namespace devices
 
             virtual bool ResetParameterAndGetDefault(Parameter id, gsl::span<std::uint8_t> result) final override;
 
+            virtual bool CaptureTelemetry(telemetry::ManagedTelemetry& target) final override;
+
           private:
-            template <typename T> bool Update(bool status, const T& source, T& target);
+            enum class ElementId
+            {
+                Magnetometer = 0,
+                Dipoles,
+                Bdot,
+                HouseKeeping,
+                CoilCurrents,
+                CoilTemperatures,
+                State,
+                SelfTest,
+                CoilsActive,
+                Last,
+            };
+
+            template <typename T> bool Update(bool status, ElementId element, const T& source, T& target);
+
+            template <typename T> void Save(const T& source, ElementId element, telemetry::ManagedTelemetry& target);
 
             bool ProcessSelfTestResult(bool stauts, const SelfTestResult& result);
+
             IImtqDriver& next;
             OSSemaphoreHandle semaphore;
             telemetry::ImtqMagnetometerMeasurements magnetometers;
@@ -75,6 +96,7 @@ namespace devices
             telemetry::ImtqState imtqState;
             telemetry::ImtqSelfTest selfTest;
             telemetry::ImtqCoilsActive coilsActive;
+            std::array<bool, num(ElementId::Last)> elementUpdated;
         };
     }
 }

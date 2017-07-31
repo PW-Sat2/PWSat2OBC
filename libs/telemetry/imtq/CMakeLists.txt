@@ -1,8 +1,11 @@
 set(NAME telemetry_imtq)
 
 set(SOURCES
+    Include/telemetry/IImtqTelemetryCollector.hpp
     Include/telemetry/ImtqTelemetryCollector.hpp
+    Include/telemetry/collect_imtq.hpp
     ImtqTelemetryCollector.cpp
+    collect_imtq.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

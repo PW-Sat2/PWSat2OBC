@@ -1,4 +1,5 @@
 #include "ImtqTelemetryCollector.hpp"
+#include "telemetry/state.hpp"
 
 namespace devices
 {
@@ -8,6 +9,7 @@ namespace devices
 
         ImtqTelemetryCollector::ImtqTelemetryCollector(IImtqDriver& driver) : next(driver), semaphore(nullptr)
         {
+            std::uninitialized_fill_n(elementUpdated.begin(), elementUpdated.end(), false);
         }
 
         void ImtqTelemetryCollector::Initialize()
@@ -16,7 +18,7 @@ namespace devices
             System::GiveSemaphore(this->semaphore);
         }
 
-        template <typename T> bool ImtqTelemetryCollector::Update(bool status, const T& source, T& target)
+        template <typename T> bool ImtqTelemetryCollector::Update(bool status, ElementId element, const T& source, T& target)
         {
             if (!status)
             {
@@ -27,9 +29,19 @@ namespace devices
             if (static_cast<bool>(lock))
             {
                 target = source;
+                this->elementUpdated[num(element)] = true;
             }
 
             return status;
+        }
+
+        template <typename T> void ImtqTelemetryCollector::Save(const T& source, ElementId element, telemetry::ManagedTelemetry& target)
+        {
+            if (this->elementUpdated[num(element)])
+            {
+                target.Set(source);
+                this->elementUpdated[num(element)] = false;
+            }
         }
 
         bool ImtqTelemetryCollector::PerformSelfTest(SelfTestResult& result, bool tryToFixIsisErrors)
@@ -41,7 +53,7 @@ namespace devices
         bool ImtqTelemetryCollector::MeasureMagnetometer(Vector3<MagnetometerMeasurement>& result)
         {
             const auto status = this->next.MeasureMagnetometer(result);
-            return Update(status, telemetry::ImtqMagnetometerMeasurements(result), this->magnetometers);
+            return Update(status, ElementId::Magnetometer, telemetry::ImtqMagnetometerMeasurements(result), this->magnetometers);
         }
 
         bool ImtqTelemetryCollector::SoftwareReset()
@@ -72,7 +84,7 @@ namespace devices
         bool ImtqTelemetryCollector::StartActuationDipole(Vector3<Dipole> dipole, std::chrono::milliseconds duration)
         {
             const auto status = this->next.StartActuationDipole(dipole, duration);
-            return Update(status, telemetry::ImtqDipoles{dipole}, this->dipoles);
+            return Update(status, ElementId::Dipoles, telemetry::ImtqDipoles{dipole}, this->dipoles);
         }
 
         bool ImtqTelemetryCollector::StartAllAxisSelfTest()
@@ -89,6 +101,7 @@ namespace devices
         {
             const auto status = this->next.GetSystemState(state);
             return Update(status,
+                ElementId::State,
                 telemetry::ImtqState{0, state.mode, state.error.GetValue(), state.anyParameterUpdatedSinceStartup, state.uptime},
                 this->imtqState);
         }
@@ -103,6 +116,8 @@ namespace devices
                 {
                     this->magnetometers = telemetry::ImtqMagnetometerMeasurements{result.data};
                     this->coilsActive = telemetry::ImtqCoilsActive{result.coilActuationDuringMeasurement};
+                    this->elementUpdated[num(ElementId::Magnetometer)] = true;
+                    this->elementUpdated[num(ElementId::CoilsActive)] = true;
                 }
             }
 
@@ -112,13 +127,13 @@ namespace devices
         bool ImtqTelemetryCollector::GetCoilCurrent(Vector3<Current>& result)
         {
             const auto status = this->next.GetCoilCurrent(result);
-            return Update(status, telemetry::ImtqCoilCurrent{result}, this->coilCurrents);
+            return Update(status, ElementId::CoilCurrents, telemetry::ImtqCoilCurrent{result}, this->coilCurrents);
         }
 
         bool ImtqTelemetryCollector::GetCoilTemperature(Vector3<TemperatureMeasurement>& result)
         {
             const auto status = this->next.GetCoilTemperature(result);
-            return Update(status, telemetry::ImtqCoilTemperature{result}, this->coilTemperatures);
+            return Update(status, ElementId::CoilTemperatures, telemetry::ImtqCoilTemperature{result}, this->coilTemperatures);
         }
 
         bool ImtqTelemetryCollector::GetSelfTestResult(SelfTestResult& result)
@@ -139,6 +154,10 @@ namespace devices
                     this->bdot = telemetry::ImtqBDotTelemetry{result.bDotData};
                     this->dipoles = telemetry::ImtqDipoles{result.commandedDipole};
                     this->coilCurrents = telemetry::ImtqCoilCurrent{result.measuredCurrent};
+                    this->elementUpdated[num(ElementId::Magnetometer)] = true;
+                    this->elementUpdated[num(ElementId::Bdot)] = true;
+                    this->elementUpdated[num(ElementId::Dipoles)] = true;
+                    this->elementUpdated[num(ElementId::CoilCurrents)] = true;
                 }
             }
 
@@ -167,6 +186,8 @@ namespace devices
 
                     this->coilCurrents = telemetry::ImtqCoilCurrent{result.coilCurrent};
                     this->coilTemperatures = telemetry::ImtqCoilTemperature{result.coilTemperature};
+                    this->elementUpdated[num(ElementId::CoilCurrents)] = true;
+                    this->elementUpdated[num(ElementId::CoilTemperatures)] = true;
                 }
             }
 
@@ -198,7 +219,27 @@ namespace devices
                     testResult[cx] = result.stepResults[cx].error.GetValue();
                 }
 
-                Update(status, telemetry::ImtqSelfTest(testResult), this->selfTest);
+                Update(status, ElementId::SelfTest, telemetry::ImtqSelfTest(testResult), this->selfTest);
+            }
+
+            return status;
+        }
+
+        bool ImtqTelemetryCollector::CaptureTelemetry(telemetry::ManagedTelemetry& target)
+        {
+            Lock lock(this->semaphore, 50ms);
+            const auto status = static_cast<bool>(lock);
+            if (status)
+            {
+                Save(this->magnetometers, ElementId::Magnetometer, target);
+                Save(this->dipoles, ElementId::Dipoles, target);
+                Save(this->bdot, ElementId::Bdot, target);
+                Save(this->houseKeeping, ElementId::HouseKeeping, target);
+                Save(this->coilCurrents, ElementId::CoilCurrents, target);
+                Save(this->coilTemperatures, ElementId::CoilTemperatures, target);
+                Save(this->imtqState, ElementId::State, target);
+                Save(this->selfTest, ElementId::SelfTest, target);
+                Save(this->coilsActive, ElementId::CoilsActive, target);
             }
 
             return status;
