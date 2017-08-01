@@ -600,7 +600,7 @@ inline Lock::operator bool()
  */
 template <typename Element, std::size_t Capacity> class Queue final
 {
-    static_assert(std::is_pod<Element>::value, "Queue works only for POD/integral types");
+    static_assert(std::is_standard_layout<Element>::value, "Queue works only for standard layout types");
 
   public:
     /**

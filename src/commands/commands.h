@@ -87,4 +87,6 @@ void SunSExpCommand(std::uint16_t argc, char* argv[]);
 
 void CameraCommand(std::uint16_t argc, char* argv[]);
 
+void TestPhoto(std::uint16_t argc, char* argv[]);
+
 #endif
