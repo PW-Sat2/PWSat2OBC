@@ -133,5 +133,29 @@ namespace services
                 return this->_eps.DisableLCL(LCL::SunS) == ErrorCode::NoError;
             }
         }
+
+        bool EPSPowerControl::CameraWing(bool enabled)
+        {
+            if (enabled)
+            {
+                return this->_eps.EnableLCL(LCL::CamWing) == ErrorCode::NoError;
+            }
+            else
+            {
+                return this->_eps.DisableLCL(LCL::CamWing) == ErrorCode::NoError;
+            }
+        }
+
+        bool EPSPowerControl::CameraNadir(bool enabled)
+        {
+            if (enabled)
+            {
+                return this->_eps.EnableLCL(LCL::CamNadir) == ErrorCode::NoError;
+            }
+            else
+            {
+                return this->_eps.DisableLCL(LCL::CamNadir) == ErrorCode::NoError;
+            }
+        }
     }
 }
