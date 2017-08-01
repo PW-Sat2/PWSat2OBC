@@ -22,42 +22,57 @@ namespace services
             virtual void Select(Camera camera) = 0;
         };
 
+        enum class Command
+        {
+            DisableCamera,
+            EnableCamera,
+            TakePhoto,
+            DownloadPhoto,
+            SavePhoto,
+            Reset
+        };
+
         class DisableCamera final
         {
           public:
+            DisableCamera() = default;
             DisableCamera(Camera camera);
 
-            const Camera Which;
+            Camera Which;
         };
 
         class EnableCamera final
         {
           public:
+            EnableCamera() = default;
             EnableCamera(Camera camera);
 
-            const Camera Which;
+            Camera Which;
         };
 
         class TakePhoto final
         {
           public:
+            TakePhoto() = default;
             TakePhoto(Camera camera);
 
-            const Camera Which;
+            Camera Which;
         };
 
         class DownloadPhoto final
         {
           public:
+            DownloadPhoto() = default;
             DownloadPhoto(Camera camera, std::uint8_t bufferId);
 
-            const Camera Which;
-            const std::uint8_t BufferId;
+            Camera Which;
+            std::uint8_t BufferId;
         };
 
         class SavePhoto final
         {
           public:
+            SavePhoto() = default;
             SavePhoto(std::uint8_t bufferId, const char* path);
 
             inline const char* Path() const;
@@ -120,11 +135,34 @@ namespace services
             return this->_buffer;
         }
 
+        struct PossibleCommand
+        {
+            Command Selected;
+            union {
+                DisableCamera DisableCameraCommand;
+                EnableCamera EnableCameraCommand;
+                TakePhoto TakePhotoCommand;
+                DownloadPhoto DownloadPhotoCommand;
+                SavePhoto SavePhotoCommand;
+                Reset ResetCommand;
+            };
+        };
+
         class PhotoService
         {
           public:
             PhotoService(
                 services::power::IPowerControl& power, ICamera& camera, ICameraSelector& selector, services::fs::IFileSystem& fileSystem);
+
+            void Initialize();
+            void Start();
+
+            void Schedule(DisableCamera command);
+            void Schedule(EnableCamera command);
+            void Schedule(TakePhoto command);
+            void Schedule(DownloadPhoto command);
+            void Schedule(Reset command);
+            void Schedule(SavePhoto command);
 
             OSResult Invoke(DisableCamera command);
             OSResult Invoke(EnableCamera command);
@@ -138,6 +176,8 @@ namespace services
             static constexpr std::uint8_t BuffersCount = 20;
 
           private:
+            static void TaskProc(PhotoService* This);
+
             services::power::IPowerControl& _power;
             ICamera& _camera;
             ICameraSelector& _selector;
@@ -146,6 +186,9 @@ namespace services
             std::array<BufferInfo, BuffersCount> _bufferInfos;
 
             std::array<std::uint8_t, 1>::iterator _freeSpace;
+
+            Task<PhotoService*, 4_KB, TaskPriority::P6> _task;
+            Queue<PossibleCommand, BuffersCount * 3> _commandQueue;
         };
     }
 }
