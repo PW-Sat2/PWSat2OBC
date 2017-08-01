@@ -818,14 +818,14 @@ RECURSIVE = YES
 # run.
 
 EXCLUDE = unit_tests integration_tests \
-	libs\external \
-	src\commands\stress_fs.cpp \
+	libs/external \
+	src/commands/stress_fs.cpp \
 	sample \
 	boot \
-	tools\flash-structure.h \
-	libs\drivers\standalone \
+	tools/flash-structure.h \
+	libs/drivers/standalone \
 	safe_mode \
-	libs\base\Include\base\hertz.hpp \
+	libs/base/Include/base/hertz.hpp \
 	test
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
