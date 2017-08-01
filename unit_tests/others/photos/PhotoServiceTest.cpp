@@ -3,6 +3,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "base/os.h"
+#include "mock/FsMock.hpp"
 #include "mock/power.hpp"
 #include "photo/photo_service.hpp"
 #include "power/power.h"
@@ -13,6 +14,8 @@ using testing::Return;
 using testing::Invoke;
 using testing::InSequence;
 using testing::Each;
+using testing::ElementsAre;
+using testing::StrEq;
 using namespace services::photo;
 
 struct CameraMock : ICamera
@@ -52,8 +55,9 @@ namespace
         testing::NiceMock<CameraPowerControlMock> _power;
         CameraMock _camera;
         testing::NiceMock<CameraSelectorMock> _selector;
+        testing::NiceMock<FsMock> _fs;
 
-        PhotoService _service{_power, _camera, _selector};
+        PhotoService _service{_power, _camera, _selector, _fs};
     };
 
     PhotoServiceTest::PhotoServiceTest()
@@ -189,6 +193,10 @@ namespace
         auto r = _service.Invoke(DownloadPhoto(Cam(), 1));
 
         ASSERT_THAT(r, Eq(OSResult::DeviceNotFound));
+
+        auto buf = _service.GetBufferInfo(1);
+
+        ASSERT_THAT(buf.Status(), Eq(BufferStatus::Failed));
     }
 
     TEST_F(PhotoServiceTest, ShouldFillAdjacentPartsOfBuffer)
@@ -239,6 +247,52 @@ namespace
             ASSERT_THAT(buffer.Status(), Eq(BufferStatus::Empty));
             ASSERT_THAT(buffer.Size(), Eq(0U));
         }
+    }
+
+    TEST_F(PhotoServiceTest, ShouldSavePhotoToFile)
+    {
+        EXPECT_CALL(_camera, DownloadPhoto(_)).WillOnce(Invoke([](auto buffer) {
+            std::fill(buffer.begin(), buffer.begin() + 1_KB, 0xAB);
+
+            return DownloadPhotoResult(buffer.subspan(0, 1_KB));
+        }));
+
+        std::array<std::uint8_t, 1_KB> photoBuffer;
+
+        _fs.AddFile("/photo", photoBuffer);
+
+        _service.Invoke(DownloadPhoto(Camera::Nadir, 1));
+        _service.Invoke(SavePhoto(1, "/photo"));
+
+        ASSERT_THAT(photoBuffer, Each(Eq(0xAB)));
+    }
+
+    TEST_F(PhotoServiceTest, ShouldSaveMarkerTextToFileIfBufferIsEmpty)
+    {
+        std::array<std::uint8_t, 1_KB> photoBuffer;
+
+        _fs.AddFile("/photo", photoBuffer);
+
+        _service.Invoke(SavePhoto(1, "/photo"));
+
+        auto s = reinterpret_cast<char*>(photoBuffer.data());
+
+        ASSERT_THAT(s, StrEq("Empty"));
+    }
+
+    TEST_F(PhotoServiceTest, ShouldSaveMarkerTextToFileIfBufferIsFailed)
+    {
+        EXPECT_CALL(_camera, DownloadPhoto(_)).WillOnce(Return(DownloadPhotoResult(OSResult::AccessDenied)));
+        std::array<std::uint8_t, 1_KB> photoBuffer;
+
+        _fs.AddFile("/photo", photoBuffer);
+
+        _service.Invoke(DownloadPhoto(Camera::Nadir, 1));
+        _service.Invoke(SavePhoto(1, "/photo"));
+
+        auto s = reinterpret_cast<char*>(photoBuffer.data());
+
+        ASSERT_THAT(s, StrEq("Failed"));
     }
 
     INSTANTIATE_TEST_CASE_P(PhotoServiceTest, PhotoServiceTest, testing::Values(Camera::Nadir, Camera::Wing), );
