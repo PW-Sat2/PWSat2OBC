@@ -2,6 +2,7 @@
 #include <gsl/span>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "OsMock.hpp"
 #include "base/os.h"
 #include "mock/FsMock.hpp"
 #include "mock/power.hpp"
@@ -17,6 +18,7 @@ using testing::Each;
 using testing::ElementsAre;
 using testing::StrEq;
 using namespace services::photo;
+using namespace std::chrono_literals;
 
 struct CameraMock : ICamera
 {
@@ -51,6 +53,9 @@ namespace
         PhotoServiceTest();
 
         Camera Cam() const;
+
+        testing::NiceMock<OSMock> _os;
+        OSReset _osReset{InstallProxy(&_os)};
 
         testing::NiceMock<CameraPowerControlMock> _power;
         CameraMock _camera;
@@ -293,6 +298,15 @@ namespace
         auto s = reinterpret_cast<char*>(photoBuffer.data());
 
         ASSERT_THAT(s, StrEq("Failed"));
+    }
+
+    TEST_F(PhotoServiceTest, ShouldSleep)
+    {
+        EXPECT_CALL(_os, Sleep(10000ms));
+
+        auto r = _service.Invoke(Sleep(10000ms));
+
+        ASSERT_THAT(r, Eq(OSResult::Success));
     }
 
     INSTANTIATE_TEST_CASE_P(PhotoServiceTest, PhotoServiceTest, testing::Values(Camera::Nadir, Camera::Wing), );

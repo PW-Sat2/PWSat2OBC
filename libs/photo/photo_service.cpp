@@ -150,6 +150,12 @@ namespace services
             return OSResult::Success;
         }
 
+        OSResult PhotoService::Invoke(Sleep command)
+        {
+            System::SleepTask(command.Duration());
+            return OSResult::Success;
+        }
+
         BufferInfo PhotoService::GetBufferInfo(std::uint8_t bufferId) const
         {
             return this->_bufferInfos[bufferId];
@@ -204,6 +210,14 @@ namespace services
             this->_commandQueue.Push(cmd, InfiniteTimeout);
         }
 
+        void PhotoService::Schedule(Sleep command)
+        {
+            PossibleCommand cmd;
+            cmd.SleepCommand = command;
+            cmd.Selected = Command::Sleep;
+            this->_commandQueue.Push(cmd, InfiniteTimeout);
+        }
+
         void PhotoService::TaskProc(PhotoService* This)
         {
             LOG(LOG_LEVEL_INFO, "[photo] Starting task");
@@ -237,6 +251,9 @@ namespace services
                         break;
                     case Command::Reset:
                         This->Invoke(command.ResetCommand);
+                        break;
+                    case Command::Sleep:
+                        This->Invoke(command.SleepCommand);
                         break;
                 }
             }

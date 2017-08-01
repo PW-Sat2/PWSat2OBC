@@ -25,5 +25,9 @@ namespace services
         {
             std::strcpy(this->_path, path);
         }
+
+        Sleep::Sleep(std::chrono::milliseconds duration) : _duration(duration)
+        {
+        }
     }
 }
