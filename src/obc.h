@@ -132,6 +132,7 @@ struct OBC
     /** @brief Camera object attached to UART */
     devices::camera::Camera camera;
 
+    /** @brief Camera */
     obc::OBCCamera Camera;
 };
 
