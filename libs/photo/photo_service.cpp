@@ -1,5 +1,6 @@
 #include "photo_service.hpp"
 #include <array>
+#include "fs/fs.h"
 #include "power/power.h"
 
 namespace services
@@ -16,8 +17,9 @@ namespace services
         {
         }
 
-        PhotoService::PhotoService(services::power::IPowerControl& power, ICamera& camera, ICameraSelector& selector)
-            : _power(power), _camera(camera), _selector(selector), _freeSpace(PhotoBuffer.begin())
+        PhotoService::PhotoService(
+            services::power::IPowerControl& power, ICamera& camera, ICameraSelector& selector, services::fs::IFileSystem& fileSystem)
+            : _power(power), _camera(camera), _selector(selector), _fileSystem(fileSystem), _freeSpace(PhotoBuffer.begin())
         {
         }
 
@@ -112,6 +114,37 @@ namespace services
         {
             this->_freeSpace = PhotoBuffer.begin();
             std::fill(this->_bufferInfos.begin(), this->_bufferInfos.end(), BufferInfo());
+            return OSResult::Success;
+        }
+
+        OSResult PhotoService::Invoke(SavePhoto command)
+        {
+            services::fs::File f(
+                this->_fileSystem, command.Path(), services::fs::FileOpen::CreateAlways, services::fs::FileAccess::WriteOnly);
+
+            if (!f)
+            {
+                return OSResult::IOError;
+            }
+
+            auto buffer = this->GetBufferInfo(command.BufferId());
+
+            if (buffer.Status() == BufferStatus::Empty)
+            {
+                const char* marker = "Empty";
+                f.Write(gsl::make_span(reinterpret_cast<const std::uint8_t*>(marker), 6));
+                return OSResult::BufferNotAvailable;
+            }
+
+            if (buffer.Status() == BufferStatus::Failed)
+            {
+                const char* marker = "Failed";
+                f.Write(gsl::make_span(reinterpret_cast<const std::uint8_t*>(marker), 7));
+                return OSResult::BufferNotAvailable;
+            }
+
+            f.Write(buffer.Buffer());
+
             return OSResult::Success;
         }
 
