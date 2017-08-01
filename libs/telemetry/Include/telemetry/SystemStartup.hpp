@@ -101,6 +101,8 @@ namespace telemetry
     {
         return 8 * (2 * sizeof(std::uint32_t) + sizeof(std::uint8_t));
     }
+
+    static_assert(SystemStartup::BitSize() == 72, "Invalid telemetry size");
 }
 
 #endif
