@@ -47,7 +47,8 @@ namespace services
             TakePhoto,     //!< TakePhoto
             DownloadPhoto, //!< DownloadPhoto
             SavePhoto,     //!< SavePhoto
-            Reset          //!< Reset
+            Reset,         //!< Reset
+            Sleep          //!< Sleep
         };
 
         /**
@@ -222,6 +223,30 @@ namespace services
         };
 
         /**
+         * @brief Sleep command
+         */
+        class Sleep final
+        {
+          public:
+            Sleep() = default;
+            /**
+             * @brief Ctor
+             * @param duration Sleep duration
+             */
+            Sleep(std::chrono::milliseconds duration);
+
+            inline std::chrono::milliseconds Duration() const;
+
+          private:
+            std::chrono::milliseconds _duration;
+        };
+
+        std::chrono::milliseconds Sleep::Duration() const
+        {
+            return this->_duration;
+        }
+
+        /**
          * @brief Possible buffer statuses
          */
         enum class BufferStatus
@@ -302,6 +327,7 @@ namespace services
                 DownloadPhoto DownloadPhotoCommand; //!< Download photo
                 SavePhoto SavePhotoCommand;         //!< Save photo
                 Reset ResetCommand;                 //!< Reset
+                Sleep SleepCommand;                 //!< Sleep
             };
         };
 
@@ -356,6 +382,11 @@ namespace services
              * @param command Command
              */
             void Schedule(SavePhoto command);
+            /**
+             * @brief Schedules sleep command
+             * @param command Command
+             */
+            void Schedule(Sleep command);
 
             /**
              * @brief (Internal use) Invokes disable camera command
@@ -393,6 +424,12 @@ namespace services
              * @return Operation result
              */
             OSResult Invoke(SavePhoto command);
+            /**
+             * @brief (Internal use) Invokes sleep command
+             * @param command Command
+             * @return Operation result
+             */
+            OSResult Invoke(Sleep command);
 
             /**
              * @brief Returns buffer metadata
