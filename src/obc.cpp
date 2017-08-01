@@ -102,7 +102,8 @@ OBC::OBC()
           Hardware.I2C.Buses.Payload),
       Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index), //
       terminal(this->GetLineIO()),                                                 //
-      camera(this->Hardware.Camera.GetLineIO())
+      camera(this->Hardware.Camera.GetLineIO()),                                   //
+      Camera(this->PowerControlInterface, this->fs)                                //
 {
 }
 
@@ -183,6 +184,8 @@ OSResult OBC::InitializeRunlevel1()
         LOG(LOG_LEVEL_ERROR, "Unable to initialize telemetry acquisition loop.");
     }
 
+    Camera.InitializeRunlevel1();
+
     BootSettings.ConfirmBoot();
 
     return OSResult::Success;
@@ -211,6 +214,8 @@ OSResult OBC::InitializeRunlevel2()
     {
         LOG(LOG_LEVEL_WARNING, "[obc] Not starting scrubbing as boot to upper detected");
     }
+
+    Camera.InitializeRunlevel2();
 
     drivers::watchdog::InternalWatchdog::Enable();
 
