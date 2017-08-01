@@ -4,6 +4,7 @@
 #include <array>
 #include "base/os.h"
 #include "camera_api.hpp"
+#include "fs/fwd.hpp"
 #include "power/fwd.hpp"
 
 namespace services
@@ -54,6 +55,29 @@ namespace services
             const std::uint8_t BufferId;
         };
 
+        class SavePhoto final
+        {
+          public:
+            SavePhoto(std::uint8_t bufferId, const char* path);
+
+            inline const char* Path() const;
+            inline std::uint8_t BufferId() const;
+
+          private:
+            std::uint8_t _bufferId;
+            char _path[40];
+        };
+
+        const char* SavePhoto::Path() const
+        {
+            return this->_path;
+        }
+
+        std::uint8_t SavePhoto::BufferId() const
+        {
+            return this->_bufferId;
+        }
+
         class Reset final
         {
         };
@@ -99,13 +123,15 @@ namespace services
         class PhotoService
         {
           public:
-            PhotoService(services::power::IPowerControl& power, ICamera& camera, ICameraSelector& selector);
+            PhotoService(
+                services::power::IPowerControl& power, ICamera& camera, ICameraSelector& selector, services::fs::IFileSystem& fileSystem);
 
             OSResult Invoke(DisableCamera command);
             OSResult Invoke(EnableCamera command);
             OSResult Invoke(TakePhoto command);
             OSResult Invoke(DownloadPhoto command);
             OSResult Invoke(Reset command);
+            OSResult Invoke(SavePhoto command);
 
             BufferInfo GetBufferInfo(std::uint8_t bufferId) const;
 
@@ -115,6 +141,8 @@ namespace services
             services::power::IPowerControl& _power;
             ICamera& _camera;
             ICameraSelector& _selector;
+            services::fs::IFileSystem& _fileSystem;
+
             std::array<BufferInfo, BuffersCount> _bufferInfos;
 
             std::array<std::uint8_t, 1>::iterator _freeSpace;
