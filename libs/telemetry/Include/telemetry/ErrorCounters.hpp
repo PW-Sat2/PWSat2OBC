@@ -62,6 +62,8 @@ namespace telemetry
     {
         return 8 * Container().size() * sizeof(Container::value_type);
     }
+
+    static_assert(ErrorCountingTelemetry::BitSize() == 96, "Invalid telemetry size");
 }
 
 #endif
