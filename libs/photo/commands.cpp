@@ -5,19 +5,19 @@ namespace services
 {
     namespace photo
     {
-        DisableCamera::DisableCamera(Camera camera) : Which(camera)
+        DisableCamera::DisableCamera(Camera camera) : _which(camera)
         {
         }
 
-        EnableCamera::EnableCamera(Camera camera) : Which(camera)
+        EnableCamera::EnableCamera(Camera camera) : _which(camera)
         {
         }
 
-        TakePhoto::TakePhoto(Camera camera) : Which(camera)
+        TakePhoto::TakePhoto(Camera camera) : _which(camera)
         {
         }
 
-        DownloadPhoto::DownloadPhoto(Camera camera, std::uint8_t bufferId) : Which(camera), BufferId(bufferId)
+        DownloadPhoto::DownloadPhoto(Camera camera, std::uint8_t bufferId) : _which(camera), _bufferId(bufferId)
         {
         }
 
