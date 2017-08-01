@@ -1,6 +1,7 @@
 #include "photo_service.hpp"
 #include <array>
 #include "fs/fs.h"
+#include "logger/logger.h"
 #include "power/power.h"
 
 namespace services
@@ -19,7 +20,8 @@ namespace services
 
         PhotoService::PhotoService(
             services::power::IPowerControl& power, ICamera& camera, ICameraSelector& selector, services::fs::IFileSystem& fileSystem)
-            : _power(power), _camera(camera), _selector(selector), _fileSystem(fileSystem), _freeSpace(PhotoBuffer.begin())
+            : _power(power), _camera(camera), _selector(selector), _fileSystem(fileSystem), _freeSpace(PhotoBuffer.begin()),
+              _task("Photos", this, TaskProc)
         {
         }
 
@@ -151,6 +153,97 @@ namespace services
         BufferInfo PhotoService::GetBufferInfo(std::uint8_t bufferId) const
         {
             return this->_bufferInfos[bufferId];
+        }
+
+        void PhotoService::Initialize()
+        {
+            this->_task.Create();
+            this->_commandQueue.Create();
+        }
+
+        void PhotoService::Start()
+        {
+        }
+
+        void PhotoService::Schedule(DisableCamera command)
+        {
+            PossibleCommand cmd;
+            cmd.DisableCameraCommand = command;
+            cmd.Selected = Command::DisableCamera;
+            this->_commandQueue.Push(cmd, InfiniteTimeout);
+        }
+        void PhotoService::Schedule(EnableCamera command)
+        {
+            PossibleCommand cmd;
+            cmd.EnableCameraCommand = command;
+            cmd.Selected = Command::EnableCamera;
+            this->_commandQueue.Push(cmd, InfiniteTimeout);
+        }
+        void PhotoService::Schedule(TakePhoto command)
+        {
+            PossibleCommand cmd;
+            cmd.TakePhotoCommand = command;
+            cmd.Selected = Command::TakePhoto;
+            this->_commandQueue.Push(cmd, InfiniteTimeout);
+        }
+        void PhotoService::Schedule(DownloadPhoto command)
+        {
+            PossibleCommand cmd;
+            cmd.DownloadPhotoCommand = command;
+            cmd.Selected = Command::DownloadPhoto;
+            this->_commandQueue.Push(cmd, InfiniteTimeout);
+        }
+        void PhotoService::Schedule(Reset command)
+        {
+            PossibleCommand cmd;
+            cmd.ResetCommand = command;
+            cmd.Selected = Command::Reset;
+            this->_commandQueue.Push(cmd, InfiniteTimeout);
+        }
+        void PhotoService::Schedule(SavePhoto command)
+        {
+            PossibleCommand cmd;
+            cmd.SavePhotoCommand = command;
+            cmd.Selected = Command::SavePhoto;
+            this->_commandQueue.Push(cmd, InfiniteTimeout);
+        }
+
+        void PhotoService::TaskProc(PhotoService* This)
+        {
+            LOG(LOG_LEVEL_INFO, "[photo] Starting task");
+
+            while (1)
+            {
+                PossibleCommand command;
+
+                LOG(LOG_LEVEL_DEBUG, "[photo] Waiting for command");
+
+                This->_commandQueue.Pop(command, InfiniteTimeout);
+
+                LOGF(LOG_LEVEL_INFO, "[photo] Received command %d", num(command.Selected));
+
+                switch (command.Selected)
+                {
+                    case Command::EnableCamera:
+                        This->Invoke(command.EnableCameraCommand);
+                        break;
+                    case Command::DisableCamera:
+                        This->Invoke(command.DisableCameraCommand);
+                        break;
+                    case Command::TakePhoto:
+                        This->Invoke(command.TakePhotoCommand);
+                        break;
+                    case Command::DownloadPhoto:
+                        This->Invoke(command.DownloadPhotoCommand);
+                        break;
+                    case Command::SavePhoto:
+                        This->Invoke(command.SavePhotoCommand);
+                        break;
+                    case Command::Reset:
+                        This->Invoke(command.ResetCommand);
+                        break;
+                }
+            }
         }
     }
 }
