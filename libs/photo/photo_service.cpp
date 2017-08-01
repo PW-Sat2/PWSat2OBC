@@ -29,7 +29,7 @@ namespace services
         {
             bool result = false;
 
-            switch (command.Which)
+            switch (command.Which())
             {
                 case Camera::Nadir:
                     result = this->_power.CameraNadir(false);
@@ -46,7 +46,7 @@ namespace services
         {
             bool result = false;
 
-            switch (command.Which)
+            switch (command.Which())
             {
                 case Camera::Nadir:
                     result = this->_power.CameraNadir(true);
@@ -61,7 +61,7 @@ namespace services
                 return OSResult::PowerFailure;
             }
 
-            this->_selector.Select(command.Which);
+            this->_selector.Select(command.Which());
 
             auto syncResult = this->_camera.Sync();
 
@@ -75,7 +75,7 @@ namespace services
 
         OSResult PhotoService::Invoke(TakePhoto command)
         {
-            this->_selector.Select(command.Which);
+            this->_selector.Select(command.Which());
 
             for (auto i = 0; i < 3; i++)
             {
@@ -86,8 +86,8 @@ namespace services
                     return OSResult::Success;
                 }
 
-                Invoke(DisableCamera(command.Which));
-                Invoke(EnableCamera(command.Which));
+                Invoke(DisableCamera(command.Which()));
+                Invoke(EnableCamera(command.Which()));
             }
 
             return OSResult::DeviceNotFound;
@@ -95,20 +95,20 @@ namespace services
 
         OSResult PhotoService::Invoke(DownloadPhoto command)
         {
-            this->_selector.Select(command.Which);
+            this->_selector.Select(command.Which());
 
-            this->_bufferInfos[command.BufferId] = BufferInfo(BufferStatus::Downloading, 0);
+            this->_bufferInfos[command.BufferId()] = BufferInfo(BufferStatus::Downloading, 0);
 
             auto r = this->_camera.DownloadPhoto(gsl::make_span(this->_freeSpace, PhotoBuffer.end()));
 
             if (r.IsSuccess())
             {
-                this->_bufferInfos[command.BufferId] = BufferInfo(BufferStatus::Occupied, r.Success());
+                this->_bufferInfos[command.BufferId()] = BufferInfo(BufferStatus::Occupied, r.Success());
                 this->_freeSpace += r.Success().size();
                 return OSResult::Success;
             }
 
-            this->_bufferInfos[command.BufferId] = BufferInfo(BufferStatus::Failed, 0);
+            this->_bufferInfos[command.BufferId()] = BufferInfo(BufferStatus::Failed, 0);
             return r.Error();
         }
 
@@ -159,10 +159,6 @@ namespace services
         {
             this->_task.Create();
             this->_commandQueue.Create();
-        }
-
-        void PhotoService::Start()
-        {
         }
 
         void PhotoService::Schedule(DisableCamera command)
