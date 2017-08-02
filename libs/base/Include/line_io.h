@@ -33,7 +33,7 @@ typedef struct _LineIO
      * @brief Procedure that print given buffer char-by-char. Useful for not null terminated strings
      * @param[in] buffer Buffer to print
      */
-    void (*PrintBuffer)(gsl::span<const std::uint8_t> buffer);
+    void (*PrintBuffer)(struct _LineIO* io, gsl::span<const std::uint8_t> buffer);
 
     /**
      * @brief Procedure that reads single line of text
