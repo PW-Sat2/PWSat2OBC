@@ -70,7 +70,8 @@ mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc),
     Main.Fdir,
     std::tie(Main.Hardware.PersistentStorage, PersistentStateBaseAddress),
     Main.fs,
-    Main.Hardware.EPS);
+    Main.Hardware.EPS,
+    Main.Experiments.ExperimentsController);
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 

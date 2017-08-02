@@ -13,6 +13,7 @@
 #include "mission/experiments.hpp"
 #include "mission/fdir.hpp"
 #include "mission/fs.hpp"
+#include "mission/leop_task.hpp"
 #include "mission/main.hpp"
 #include "mission/sail.hpp"
 #include "mission/telemetry.hpp"
@@ -52,8 +53,8 @@ namespace mission
         mission::SaveErrorCountersConfig,
         mission::PeristentStateSave, //
         FileSystemTask,              //
-        EPSWatchdogTask              //
-        >
+        EPSWatchdogTask,             //
+        leop::LEOPTask>
         ObcMission;
 }
 

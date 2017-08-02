@@ -50,7 +50,9 @@ namespace experiments
 
                 Synchronization = 0x47, // Synchronisation PID indicating start of packet. 0 bytes of data.
 
-                Padding = 0xFF // use last all-one binary number. Data is 0xFF till the end.
+                Continuation = 0xFE, // Indicates that following data are continuation of previous packet, not the new data.
+                                     // Used when data size is greater than packet size.
+                Padding = 0xFF       // use last all-one binary number. Data is 0xFF till the end.
             };
 
             /**
@@ -107,6 +109,8 @@ namespace experiments
 
             void FillBufferWithPadding();
             void InitializePacket();
+
+            OSResult WriteDataBiggerThanFrame(PID pid, const gsl::span<uint8_t>& data);
         };
     }
 }
