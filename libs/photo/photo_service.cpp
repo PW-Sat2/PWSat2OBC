@@ -4,6 +4,8 @@
 #include "logger/logger.h"
 #include "power/power.h"
 
+using namespace std::chrono_literals;
+
 namespace services
 {
     namespace photo
@@ -62,6 +64,8 @@ namespace services
             }
 
             this->_selector.Select(command.Which());
+
+            System::SleepTask(3s);
 
             auto syncResult = this->_camera.Sync();
 

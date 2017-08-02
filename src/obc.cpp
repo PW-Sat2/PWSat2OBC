@@ -93,11 +93,11 @@ OBC::OBC()
           BootSettings,
           TelemetryAcquisition,
           PowerControlInterface,
-          Mission),                                                                //
-      Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index), //
-      terminal(this->GetLineIO()),                                                 //
-      camera(this->Hardware.Camera.GetLineIO()),                                   //
-      Camera(this->PowerControlInterface, this->fs)                                //
+          Mission),                                                                        //
+      Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index),         //
+      terminal(this->GetLineIO()),                                                         //
+      camera(this->Hardware.Camera.GetLineIO()),                                           //
+      Camera(this->PowerControlInterface, this->fs, this->Hardware.Pins.CamSelect, camera) //
 {
 }
 
