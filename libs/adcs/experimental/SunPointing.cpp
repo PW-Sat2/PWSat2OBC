@@ -430,58 +430,71 @@ void ExtendedKalmanFilter(Vector5f& xEkf, Matrix5f& pEkf, Vector5f& innov,
     Vector3f angrate = state.xEkfPrev.block(2, 0, 3, 1);
 
     // Sun Vector in SS frame
-    float sx = sinf(ssLat) * cosf(ssLong);
-    float sy = sinf(ssLat) * sinf(ssLong);
-    float sz = cosf(ssLat);
+    float sinLat = sinf(ssLat);
+    float sinLong = sinf(ssLong);
+    float cosLat = cosf(ssLat);
+    float cosLong = cosf(ssLong);
+
+    float sx = sinLat * cosLong;
+    float sy = sinLat * sinLong;
+    float sz = cosLat;
     Vector3f sv_SS;
     sv_SS << sx, sy, sz;
 
     // Partial Derivatives
+    float szFactor = sqrtf(1.0f - powf(sz, 2.0f));
     RowVector3f dLat_dSS;
-    dLat_dSS << 0.0f, 0.0f, -1.0f / sqrtf(1.0f - powf(sz, 2.0f));
-    float htemp = sy / (sqrtf(1.0f - powf(sz, 2.0f)) + sx);
-    float hx = -sy / powf((sqrtf(1.0f - powf(sz, 2.0f)) + sx), 2.0f);
-    float hy = 1.0f / (sqrtf(1.0f - powf(sz, 2.0f)) + sx);
-    float hz = -hx * sz / sqrtf(1.0f - powf(sz, 2.0f));
+    dLat_dSS << 0.0f, 0.0f, -1.0f / szFactor;
+    float htemp = sy / (szFactor + sx);
+    float hx = -sy / powf(szFactor + sx, 2.0f);
+    float hy = 1.0f / (szFactor + sx);
+    float hz = -hx * sz / szFactor;
     RowVector3f dLong_dSS = 2.0f / (powf(htemp, 2.0f) + 1.0f)
-            * (Vector3f() << hx, hy, hz).finished();
+            * (RowVector3f() << hx, hy, hz).finished();
 
     // Angular rate in SS frame
     Matrix3f angrate_ss = rotSS * skew(angrate) * rotSSt;
 
     // Sun vector in SS partial derivatives
     Vector3f dss_dLat;
-    dss_dLat << cosf(ssLat) * cosf(ssLong), cosf(ssLat) * sinf(ssLong), -sinf(
-            ssLat);
+    dss_dLat << cosLat * cosLong,//
+            cosLat * sinLong,//
+            -sinLat;
     Vector3f dss_dLong;
-    dss_dLong << -sinf(ssLat) * sinf(ssLong), sinf(ssLat) * cosf(ssLong), 0.0f;
+    dss_dLong << -sinLat * sinLong,//
+            sinLat * cosLong,//
+            0.0f;
 
     // Second order partial derivatives (row vectors)
+    float sinLat2 = powf(sinLat, 2.0f);
+    float tanHalfLong = tanf(ssLong / 2.0f);
+    float tanHalfLong2 = powf(tanHalfLong, 2.0f);
     RowVector3f ddLat_dLat_dSS;
-    ddLat_dLat_dSS << 0, 0, cosf(ssLat) / powf(sinf(ssLat), 2); //XXX is this init the same as above?? Vector3f ddLat_dLat_dSS({ 0, 0, cosf(ssLat) / powf(sinf(ssLat), 2) });
+    ddLat_dLat_dSS << 0, 0, cosLat / sinLat2; //XXX is this init the same as above?? Vector3f ddLat_dLat_dSS({ 0, 0, cosf(ssLat) / powf(sinf(ssLat), 2) });
     RowVector3f ddLong_dLat_dSS = RowVector3f::Zero();
     RowVector3f ddLat_dLong_dSS;
     ddLat_dLong_dSS
-            << tanf(ssLong / 2.0f) * cosf(ssLat) / powf(sinf(ssLat), 2.0f), -cosf(
-            ssLat) / powf(sinf(ssLat), 2.0f), -tanf(ssLong / 2.0f) / sinf(ssLat)
-            * (2.0f / powf(sinf(ssLat), 2.0f) - 1.0f);
+            << tanHalfLong * cosLat / sinLat2,//
+            -cosLat / sinLat2,//
+            -tanHalfLong / sinLat * (2.0f / sinLat2 - 1.0f);
     RowVector3f ddLong_dLong_dSS;
     ddLong_dLong_dSS
-            << -0.5f / sinf(ssLat) * (1.0f + powf(tanf(ssLong / 2.0f), 2.0f)), 0.0f, 0.5f
-            * cosf(ssLat) / powf(sinf(ssLat), 2.0f)
-            * (1.0f + powf(tanf(ssLong / 2.0f), 2.0f));
+            << -0.5f / sinLat * (1.0f + tanHalfLong2),//
+            0.0f,//
+            0.5f * cosLat / sinLat2 * (1.0f + tanHalfLong2);
 
     // Derivatives of the Sun angles time derivatives wrt the state vector elements
+    Matrix3f skewRotSStSvSS = skew(rotSSt * sv_SS);
     float dLatDot_dLat = (-ddLat_dLat_dSS * angrate_ss * sv_SS
             - dLat_dSS * angrate_ss * dss_dLat).value();
     float dLatDot_dLong = (-ddLong_dLat_dSS * angrate_ss * sv_SS
             - dLat_dSS * angrate_ss * dss_dLong).value();
-    Vector3f dLatDot_dOmega = dLat_dSS * rotSS * skew(rotSSt * sv_SS);
+    Vector3f dLatDot_dOmega = dLat_dSS * rotSS * skewRotSStSvSS;
     float dLongDot_dLat = (-ddLat_dLong_dSS * angrate_ss * sv_SS
             - dLong_dSS * angrate_ss * dss_dLat).value();
     float dLongDot_dLong = (-ddLong_dLong_dSS * angrate_ss * sv_SS
             - dLong_dSS * angrate_ss * dss_dLong).value();
-    Vector3f dLongDot_dOmega = dLong_dSS * rotSS * skew(rotSSt * sv_SS);
+    Vector3f dLongDot_dOmega = dLong_dSS * rotSS * skewRotSStSvSS;
 
     // Derivative of the omega time derivative wrt omega
     Matrix3f dOmegaDot_dOmega = Matrix3f(state.params.inertiaInv.data())
@@ -490,14 +503,10 @@ void ExtendedKalmanFilter(Vector5f& xEkf, Matrix5f& pEkf, Vector5f& innov,
 
     // Discrete Jacobian for state transition
     Matrix5f jacobianF;
-//Matlab org    jacobianF = [dLatDot_dLat, dLatDot_dLong, dLatDot_dOmega;
-//                 dLongDot_dLat, dLongDot_dLong, dLongDot_dOmega;
-//                 zeros(3,2), dOmegaDot_dOmega];
-    //XXX vectors transposed to fit it - investigate!!!
     jacobianF << dLatDot_dLat,
             dLatDot_dLong,
             dLatDot_dOmega,
-            dLongDot_dLat, dLongDot_dLong,
+            dLongDot_dLat, dLongDot_dLong,//XXX !!!!!! investigate
             dLongDot_dOmega,
             Matrix<float, 3, 2>::Zero(),
             dOmegaDot_dOmega;
@@ -508,8 +517,8 @@ void ExtendedKalmanFilter(Vector5f& xEkf, Matrix5f& pEkf, Vector5f& innov,
     Matrix5f stateTrans = Matrix5f::Identity() + state.params.dt * jacobianF;
     // Prediction of covariance matrix P
     Matrix5f P_prio1 = stateTrans * state.pEkfPrev * stateTrans.transpose();
-    Matrix5f P_prio2 = (state.params.dt
-            * (Vector5f(state.params.kalmanCov.Q.data()).asDiagonal()));
+    Matrix5f P_prio2 = state.params.dt
+            * Vector5f(state.params.kalmanCov.Q.data()).asDiagonal();//XXX !!!!!! investigate
     Matrix5f P_prio = P_prio1 + P_prio2;
 
     // UPDATE -----------------------------------------------------------------
@@ -537,7 +546,7 @@ void ExtendedKalmanFilter(Vector5f& xEkf, Matrix5f& pEkf, Vector5f& innov,
     zMeas << ssMeasTmp, gyroMeasTmp;
 
     // Kalman Gain
-    innovCov = P_prio + Matrix5f(state.params.kalmanCov.R.data());
+    innovCov = P_prio + Matrix5f(Vector5f(state.params.kalmanCov.R.data()).asDiagonal());
     Matrix5f K = P_prio * matInv(innovCov);
 
     if (!ssFlag)
@@ -558,7 +567,7 @@ void ExtendedKalmanFilter(Vector5f& xEkf, Matrix5f& pEkf, Vector5f& innov,
     xEkf = xPrio + delta_x;
     Matrix5f jf_m = Matrix5f::Identity() - K;
     pEkf = jf_m * P_prio * jf_m.transpose()
-            + K * Matrix5f(state.params.kalmanCov.R.data()) * K.transpose(); // Joseph form
+            + K * Vector5f(state.params.kalmanCov.R.data()).asDiagonal() * K.transpose(); // Joseph form
 }
 
 /*
@@ -806,6 +815,8 @@ void SunPointing::step(DipoleVec& dipole, const MagVec& mtmMeas, bool mtmFlag,
     else
     {
         //XXX innov,innovCov - lookups
+        std::cout<<inSsMeas<<std::endl;
+        std::cout<<inGyrMeas<<std::endl;
         ExtendedKalmanFilter(xEkf, pEkf, innov, innovCov, inSsMeas, ssFlag,
                 inGyrMeas, gyrFlag, state);
     }
