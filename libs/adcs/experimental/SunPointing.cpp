@@ -744,7 +744,7 @@ void SunPointing::step(DipoleVec& dipole, const MagVec& mtmMeas, bool mtmFlag,
 // inputs to eigen
     for (unsigned int i = 0; i < mtmMeas.size(); i++)
     {
-        inMtmMeas[i] = mtmMeas[i];
+        inMtmMeas[i] = mtmMeas[i] / 1e7f;//TODO check conversion - this is high for initial testing purposes
     }
 
     for (unsigned int i = 0; i < ssMeas.size(); i++)
@@ -815,8 +815,10 @@ void SunPointing::step(DipoleVec& dipole, const MagVec& mtmMeas, bool mtmFlag,
     else
     {
         //XXX innov,innovCov - lookups
+        //XXX DEBUG
         std::cout<<inSsMeas<<std::endl;
         std::cout<<inGyrMeas<<std::endl;
+        std::cout<<inMtmMeas<<std::endl;
         ExtendedKalmanFilter(xEkf, pEkf, innov, innovCov, inSsMeas, ssFlag,
                 inGyrMeas, gyrFlag, state);
     }
