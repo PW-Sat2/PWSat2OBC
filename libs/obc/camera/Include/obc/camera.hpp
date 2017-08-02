@@ -1,7 +1,9 @@
 #ifndef LIBS_OBC_CAMERA_INCLUDE_OBC_CAMERA_HPP_
 #define LIBS_OBC_CAMERA_INCLUDE_OBC_CAMERA_HPP_
 
+#include "camera/camera.h"
 #include "fs/fwd.hpp"
+#include "gpio/forward.h"
 #include "photo/photo_service.hpp"
 #include "power/fwd.hpp"
 
@@ -18,31 +20,36 @@ namespace obc
      */
     class DummyCamera : public services::photo::ICamera
     {
+      public:
+        DummyCamera(devices::camera::Camera& camera) : _camera(camera)
+        {
+        }
+
         virtual services::photo::SyncResult Sync() override;
         virtual services::photo::TakePhotoResult TakePhoto() override;
         virtual services::photo::DownloadPhotoResult DownloadPhoto(gsl::span<std::uint8_t> buffer) override;
-    };
 
-    /**
-     * @brief Dummy camera selector
-     */
-    class DummyCameraSelector : public services::photo::ICameraSelector
-    {
-        virtual void Select(services::photo::Camera camera) override;
+      private:
+        devices::camera::Camera& _camera;
     };
 
     /**
      * @brief OBC Camera
      */
-    class OBCCamera
+    class OBCCamera : private services::photo::ICameraSelector
     {
       public:
         /**
          * @brief Ctor
          * @param powerControl Power control
          * @param fileSystem File system
+         * @param camSelect Camera select pin
+         * @param camera Camera driver
          */
-        OBCCamera(services::power::IPowerControl& powerControl, services::fs::IFileSystem& fileSystem);
+        OBCCamera(services::power::IPowerControl& powerControl,
+            services::fs::IFileSystem& fileSystem,
+            const drivers::gpio::Pin& camSelect,
+            devices::camera::Camera& camera);
 
         /**
          * @brief Initializes camera at runlevel 1
@@ -56,11 +63,15 @@ namespace obc
 
         /** @brief Camera driver */
         DummyCamera CameraDriver;
-        /** @brief Camera selector */
-        DummyCameraSelector CameraSelector;
 
         /** @brief Photo service */
         services::photo::PhotoService PhotoService;
+
+      private:
+        virtual void Select(services::photo::Camera camera) override;
+
+        /** @brief Camera select pin */
+        const drivers::gpio::Pin& _camSelect;
     };
 
     /** @} */

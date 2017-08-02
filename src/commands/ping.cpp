@@ -10,6 +10,8 @@
 
 #include "obc.h"
 
+using namespace std::chrono_literals;
+
 void PingHandler(uint16_t argc, char* argv[])
 {
     UNREFERENCED_PARAMETER(argc);
@@ -60,19 +62,31 @@ void TestPhoto(std::uint16_t /*argc*/, char* /*argv*/ [])
 
     ph.Schedule(Reset());
     ph.Schedule(EnableCamera(Camera::Nadir));
-    ph.Schedule(EnableCamera(Camera::Wing));
-
     ph.Schedule(TakePhoto(Camera::Nadir));
-    ph.Schedule(TakePhoto(Camera::Wing));
-
     ph.Schedule(DownloadPhoto(Camera::Nadir, 0));
-    ph.Schedule(DownloadPhoto(Camera::Wing, 1));
-
     ph.Schedule(DisableCamera(Camera::Nadir));
+
+    ph.Schedule(Sleep(10s));
+
+    ph.Schedule(EnableCamera(Camera::Wing));
+    ph.Schedule(TakePhoto(Camera::Wing));
+    ph.Schedule(DownloadPhoto(Camera::Wing, 1));
     ph.Schedule(DisableCamera(Camera::Wing));
 
     ph.Schedule(SavePhoto(0, "/nadir"));
     ph.Schedule(SavePhoto(1, "/wing"));
 
     GetTerminal().Puts("Scheduled");
+    //    ph.Schedule(EnableCamera(Camera::Wing));
+    //
+    //    ph.Schedule(TakePhoto(Camera::Nadir));
+    //    ph.Schedule(TakePhoto(Camera::Wing));
+    //
+    //    ph.Schedule(DownloadPhoto(Camera::Nadir, 0));
+    //    ph.Schedule(DownloadPhoto(Camera::Wing, 1));
+    //
+    //    ph.Schedule(DisableCamera(Camera::Nadir));
+    //
+    //    ph.Schedule(SavePhoto(0, "/nadir"));
+    //    ph.Schedule(SavePhoto(1, "/wing"));
 }

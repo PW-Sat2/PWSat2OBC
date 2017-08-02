@@ -93,7 +93,8 @@ namespace obc
         typename TBSP,
         typename TMemoryModules,
         typename TSailState,
-        typename TSunSInterrupt>
+        typename TSunSInterrupt,
+        typename TCamSelect>
     struct OBCGPIOBase
     {
         /** @brief Slave Select - Flash1 */
@@ -124,6 +125,7 @@ namespace obc
         const I2CPins<TI2C0> I2C_0;
         /** @brief I2C1 */
         const I2CPins<TI2C1> I2C_1;
+        const drivers::gpio::OutputPin<TCamSelect> CamSelect;
 
         /** @brief PayloadInterrupt */
         const drivers::gpio::InterruptPin<TPayloadInterrupt, false, false, true> PayloadInterrupt;
@@ -153,6 +155,7 @@ namespace obc
             this->SunSInterrupt.Initialize();
 
             this->PayloadInterrupt.Initialize();
+            this->CamSelect.Initialize();
         }
     };
 
@@ -177,7 +180,8 @@ namespace obc
         io_map::BSP,
         io_map::MemoryModules,
         io_map::SailDeployed,
-        io_map::SunSInterrupt>;
+        io_map::SunSInterrupt,
+        io_map::CamSelect>;
 
     /** @} */
 }
