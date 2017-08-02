@@ -1,5 +1,6 @@
 #include "camera.hpp"
 #include <algorithm>
+#include "gpio/gpio.h"
 #include "logger/logger.h"
 
 using namespace services::photo;
@@ -11,38 +12,49 @@ namespace obc
     {
         LOG(LOG_LEVEL_INFO, "Syncing camera");
 
-        System::SleepTask(2s);
+        auto b = this->_camera.Initialize();
 
-        return SyncResult(true, 5);
+        return SyncResult(b, 5);
     }
 
     TakePhotoResult DummyCamera::TakePhoto()
     {
         LOG(LOG_LEVEL_INFO, "Taking photo");
 
-        return TakePhotoResult::Success;
+        auto b = this->_camera.TakeJPEGPicture(devices::camera::CameraJPEGResolution::_640x480);
+
+        return b ? TakePhotoResult::Success : TakePhotoResult::NotSynced;
     }
 
     DownloadPhotoResult DummyCamera::DownloadPhoto(gsl::span<std::uint8_t> buffer)
     {
         LOG(LOG_LEVEL_INFO, "Downloading photo");
 
-        System::SleepTask(3s);
-
-        auto photo = buffer.subspan(0, 20_KB);
-
-        std::fill(photo.begin(), photo.end(), 65);
+        auto photo = this->_camera.CameraReceiveJPEGData(buffer);
 
         return DownloadPhotoResult(photo);
     }
 
-    void DummyCameraSelector::Select(Camera camera)
+    void OBCCamera::Select(Camera camera)
     {
         LOGF(LOG_LEVEL_INFO, "Selecting camera %s", camera == Camera::Nadir ? "Nadir" : "Wing");
+
+        switch (camera)
+        {
+            case Camera::Nadir:
+                this->_camSelect.Low();
+                break;
+            case Camera::Wing:
+                this->_camSelect.High();
+                break;
+        }
     }
 
-    OBCCamera::OBCCamera(services::power::IPowerControl& powerControl, services::fs::IFileSystem& fileSystem)
-        : PhotoService(powerControl, CameraDriver, CameraSelector, fileSystem)
+    OBCCamera::OBCCamera(services::power::IPowerControl& powerControl,
+        services::fs::IFileSystem& fileSystem,
+        const drivers::gpio::Pin& camSelect,
+        devices::camera::Camera& camera)
+        : CameraDriver(camera), PhotoService(powerControl, CameraDriver, *this, fileSystem), _camSelect(camSelect)
     {
     }
 
