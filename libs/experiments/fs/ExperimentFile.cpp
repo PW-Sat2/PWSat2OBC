@@ -5,6 +5,7 @@ using namespace services::fs;
 
 ExperimentFile::ExperimentFile(services::time::ICurrentTime* time) : _time(time), _writer(_buffer), _hasPayloadInFrame(false)
 {
+    _buffer.fill(0xAA);
 }
 
 bool ExperimentFile::Open(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access)
@@ -47,25 +48,41 @@ OSResult ExperimentFile::Write(PID pid, const gsl::span<uint8_t>& data)
         }
         else
         {
-            // data bigger than frame. Split data by several frames.
-            uint32_t offset = 0;
-            uint32_t length = _writer.RemainingSize() - PIDSize;
-            while (static_cast<uint32_t>(data.length()) > offset + length)
-            {
-                auto&& subpart = data.subspan(offset, length);
-                _writer.WriteByte(num(pid));
-                _writer.WriteArray(subpart);
-
-                FillBufferWithPadding();
-                auto result = Flush();
-                if (OS_RESULT_FAILED(result))
-                {
-                    return result;
-                }
-
-                offset += length;
-            }
+            WriteDataBiggerThanFrame(pid, data);
         }
+    }
+
+    return OSResult::Success;
+}
+
+OSResult ExperimentFile::WriteDataBiggerThanFrame(PID pid, const gsl::span<uint8_t>& data)
+{
+    uint32_t offset = 0;
+    uint32_t dataRemaining = data.size();
+    while (dataRemaining > 0)
+    {
+        uint32_t length = _writer.RemainingSize() - PIDSize;
+        if (length > dataRemaining)
+            length = dataRemaining;
+
+        auto&& subpart = data.subspan(offset, length);
+        _writer.WriteByte(num(pid));
+        _writer.WriteArray(subpart);
+
+        if (_writer.RemainingSize() == 0)
+        {
+            FillBufferWithPadding();
+            auto result = Flush();
+            if (OS_RESULT_FAILED(result))
+            {
+                return result;
+            }
+
+            _writer.WriteByte(num(PID::Continuation));
+        }
+
+        offset += length;
+        dataRemaining -= length;
     }
 
     return OSResult::Success;
