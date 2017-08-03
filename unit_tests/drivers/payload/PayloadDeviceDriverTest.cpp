@@ -3,7 +3,7 @@
 
 #include "payload/devices.h"
 
-using namespace drivers::payload;
+using namespace devices::payload;
 
 using testing::Return;
 using testing::_;

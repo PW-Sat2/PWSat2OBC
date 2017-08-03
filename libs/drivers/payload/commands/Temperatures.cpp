@@ -3,7 +3,7 @@
 #include "commands/base_code.hpp"
 #include "logger/logger.h"
 
-using namespace drivers::payload::commands;
+using namespace devices::payload::commands;
 
 TemperaturesCommand::TemperaturesCommand(IPayloadDriver& driver) : PayloadCommand(driver)
 {

@@ -6,7 +6,7 @@
 #include "gmock/gmock.h"
 #include "payload/payload.h"
 
-class PayloadHardwareDriverMock : public drivers::payload::IPayloadDriver
+class PayloadHardwareDriverMock : public devices::payload::IPayloadDriver
 {
   public:
     PayloadHardwareDriverMock();

@@ -192,7 +192,7 @@ namespace obc
         drivers::gpio::InterruptPinDriver PayloadInterruptDriver;
 
         /** @brief Payload driver*/
-        drivers::payload::PayloadDriver PayloadDriver;
+        devices::payload::PayloadDriver PayloadDriver;
     };
 }
 /** @} */

@@ -11,7 +11,7 @@
 
 #include "interfaces.h"
 
-namespace drivers
+namespace devices
 {
     namespace payload
     {

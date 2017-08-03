@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-namespace drivers
+namespace devices
 {
     namespace payload
     {

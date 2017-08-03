@@ -4,7 +4,7 @@
 #include "commands/base.h"
 #include "telemetry.h"
 
-namespace drivers
+namespace devices
 {
     namespace payload
     {

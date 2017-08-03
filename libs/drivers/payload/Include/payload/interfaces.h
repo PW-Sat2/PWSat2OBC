@@ -7,7 +7,7 @@
 
 #include "telemetry.h"
 
-namespace drivers
+namespace devices
 {
     namespace payload
     {

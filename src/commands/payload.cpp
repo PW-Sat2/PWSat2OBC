@@ -4,7 +4,7 @@
 
 using std::uint16_t;
 
-using namespace drivers::payload;
+using namespace devices::payload;
 
 typedef void (*VoidFuncPtr)(IPayloadDeviceDriver& driver, uint16_t argc, char* argv[]);
 
