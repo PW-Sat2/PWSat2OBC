@@ -82,9 +82,10 @@ namespace devices
         {
             ErrorReporter errorContext(this->errors);
 
-            std::array<uint8_t, 536> response;
+            std::array<uint8_t, 67> response;
+            std::uint8_t startAddress = 0;
 
-            auto i2cstatusRead = this->i2cbus.Read(I2CAddress, response);
+            auto i2cstatusRead = this->i2cbus.WriteRead(I2CAddress, gsl::make_span(&startAddress, 1), response);
             if (i2cstatusRead != I2CResult::OK)
             {
                 errorContext.Counter().Failure();
@@ -93,12 +94,6 @@ namespace devices
             }
 
             Reader reader{response};
-
-            auto opCode = reader.ReadByte();
-            if (opCode != 0x80)
-            {
-                return OperationStatus::WrongOpcodeInResponse;
-            }
 
             auto whoAmI = reader.ReadByte();
             if (whoAmI != 0x11)
@@ -157,18 +152,9 @@ namespace devices
             return OSResult::Success;
         }
 
-        OSResult SunSDriver::RaiseDataReadyISR()
+        void SunSDriver::RaiseDataReadyISR()
         {
-            ErrorReporter errorContext(this->errors);
-            auto result = System::GiveSemaphoreISR(this->sync);
-            if (result != OSResult::Success)
-            {
-                errorContext.Counter().Failure();
-                LOGF(LOG_LEVEL_ERROR, "Give semaphore for Sun Sensor synchronization failed. Reason: %d", num(result));
-                return result;
-            }
-
-            return OSResult::Success;
+            System::GiveSemaphoreISR(this->sync);
         }
 
         void SunSDriver::SetDataTimeout(std::chrono::milliseconds newTimeout)

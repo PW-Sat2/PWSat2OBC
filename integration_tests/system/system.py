@@ -48,7 +48,7 @@ class System:
         self.i2c.add_bus_device(self.primary_antenna)
         self.i2c.add_pld_device(self.backup_antenna)
         self.i2c.add_bus_device(self.imtq)
-        self.i2c.add_bus_device(self.suns)
+        self.i2c.add_pld_device(self.suns)
         self.i2c.add_pld_device(self.rtc)
         self.i2c.add_pld_device(self.gyro)
         self.i2c.add_pld_device(self.payload)

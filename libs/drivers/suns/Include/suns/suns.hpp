@@ -50,11 +50,6 @@ namespace devices
             I2CReadFailed,
 
             /**
-             * @brief SunS returned wrong opcode in response
-             */
-            WrongOpcodeInResponse,
-
-            /**
              * @brief SunS returned wrong Who-Am-I register value in response
              */
             WhoAmIMismatch,
@@ -183,9 +178,8 @@ namespace devices
 
             /**
              * @brief Method executed when data are ready to read. Should only be called from interrupt service routine.
-             * @return Result status.
              */
-            virtual OSResult RaiseDataReadyISR() = 0;
+            virtual void RaiseDataReadyISR() = 0;
 
             /**
              * @brief Method setting timeout for data wait.
@@ -223,7 +217,7 @@ namespace devices
 
             virtual OSResult WaitForData() override;
 
-            virtual OSResult RaiseDataReadyISR() override;
+            virtual void RaiseDataReadyISR() override;
 
             virtual void SetDataTimeout(std::chrono::milliseconds newTimeout) override;
 

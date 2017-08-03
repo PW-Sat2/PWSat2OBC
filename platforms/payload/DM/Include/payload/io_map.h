@@ -22,7 +22,6 @@ namespace io_map
 
     struct Payload
     {
-        static constexpr std::uint8_t InterruptPriority = 6;
         using PayloadInterrupt = PinLocation<gpioPortE, 0>;
     };
 }

@@ -19,7 +19,7 @@ class PayloadHardwareDriverMock : public drivers::payload::IPayloadDriver
 
     MOCK_METHOD0(WaitForData, OSResult());
 
-    MOCK_METHOD0(RaiseDataReadyISR, OSResult());
+    MOCK_METHOD0(RaiseDataReadyISR, void());
 
     MOCK_METHOD1(SetDataTimeout, void(std::chrono::milliseconds));
 };

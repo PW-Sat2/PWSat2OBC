@@ -96,7 +96,7 @@ OBCHardware::OBCHardware(
       EPS(errorCounting, this->I2C.Buses.Bus, this->I2C.Buses.Payload),             //
       Imtq(errorCounting, I2C.Buses.Bus),                                           //
       SunSInterruptDriver(this->Pins.SunSInterrupt),                                //
-      SunS(errorCounting, I2C.Buses.Bus, SunSInterruptDriver),                      //
+      SunS(errorCounting, I2C.Buses.Payload, SunSInterruptDriver),                  //
       rtc(errorCounting, I2C.Buses.Payload),                                        //
       CommDriver(errorCounting, I2C.Buses.Bus),                                     //
       PayloadInterruptDriver(this->Pins.PayloadInterrupt),                          //
