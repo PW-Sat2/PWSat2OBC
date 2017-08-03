@@ -13,6 +13,8 @@ target_link_libraries(${NAME}
 	time
 	suns
 	payload
+	gyro
+	exp_fs
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

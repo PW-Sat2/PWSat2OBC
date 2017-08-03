@@ -4,10 +4,12 @@
 #include <chrono>
 #include <cstdint>
 #include "experiments/experiments.h"
+#include "fs/ExperimentFile.hpp"
+#include "gyro/gyro.h"
+#include "gyro/telemetry.hpp"
 #include "payload/interfaces.h"
 #include "power/fwd.hpp"
 #include "suns/suns.hpp"
-
 #include "time/fwd.hpp"
 
 namespace experiments
@@ -78,6 +80,10 @@ namespace experiments
             std::chrono::milliseconds Timestamp;
             devices::suns::MeasurementData ExperimentalSunS;
             devices::payload::PayloadTelemetry::SunsRef ReferenceSunS;
+            devices::gyro::GyroscopeTelemetry Gyro;
+
+            void WritePrimaryDataSetTo(experiments::fs::ExperimentFile& file);
+            void WriteSecondaryDataSetTo(experiments::fs::ExperimentFile& file);
         };
 
         class SunSExperiment : public IExperiment
@@ -86,9 +92,10 @@ namespace experiments
             SunSExperiment(services::power::IPowerControl& powerControl,
                 services::time::ICurrentTime& currentTime,
                 devices::suns::ISunSDriver& experimentalSunS,
-                devices::payload::IPayloadDeviceDriver& payload)
+                devices::payload::IPayloadDeviceDriver& payload,
+                devices::gyro::IGyroscopeDriver& gyro)
                 : _powerControl(powerControl), _currentTime(currentTime), _experimentalSunS(experimentalSunS), _payload(payload),
-                  _nextSessionAt(0)
+                  _gyro(gyro), _nextSessionAt(0)
             {
             }
 
@@ -106,6 +113,7 @@ namespace experiments
             services::time::ICurrentTime& _currentTime;
             devices::suns::ISunSDriver& _experimentalSunS;
             devices::payload::IPayloadDeviceDriver& _payload;
+            devices::gyro::IGyroscopeDriver& _gyro;
 
             SunSExperimentParams _parameters;
 

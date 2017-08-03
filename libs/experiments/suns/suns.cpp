@@ -2,6 +2,8 @@
 #include "power/power.h"
 #include "time/ICurrentTime.hpp"
 
+using experiments::fs::ExperimentFile;
+
 namespace experiments
 {
     namespace suns
@@ -81,7 +83,94 @@ namespace experiments
 
             this->_experimentalSunS.GetMeasuredData(point.ExperimentalSunS);
 
+            point.Gyro = this->_gyro.read().Value;
+
             return point;
+        }
+
+        void DataPoint::WritePrimaryDataSetTo(experiments::fs::ExperimentFile& file)
+        {
+            {
+                std::array<std::uint8_t, 8> buffer;
+                Writer w(buffer);
+                w.WriteQuadWordLE(this->Timestamp.count());
+
+                file.Write(ExperimentFile::PID::Timestamp, buffer);
+            }
+
+            {
+                std::array<std::uint8_t, 67> buffer;
+                Writer w(buffer);
+                w.WriteByte(0x11);
+                w.WriteWordLE(this->ExperimentalSunS.status.ack);
+                w.WriteWordLE(this->ExperimentalSunS.status.presence);
+                w.WriteWordLE(this->ExperimentalSunS.status.adc_valid);
+
+                for (auto v : this->ExperimentalSunS.visible_light)
+                {
+                    for (auto y : v)
+                    {
+                        w.WriteWordLE(y);
+                    }
+                }
+
+                w.WriteWordLE(this->ExperimentalSunS.temperature.structure);
+                w.WriteWordLE(this->ExperimentalSunS.temperature.panels[0]);
+                w.WriteWordLE(this->ExperimentalSunS.temperature.panels[1]);
+                w.WriteWordLE(this->ExperimentalSunS.temperature.panels[2]);
+
+                file.Write(ExperimentFile::PID::ExperimentalSunSPrimary, w.Capture());
+            }
+
+            {
+                std::array<std::uint8_t, 10> buffer;
+                Writer w(buffer);
+                for (auto v : this->ReferenceSunS.voltages)
+                {
+                    w.WriteWordLE(v);
+                }
+
+                file.Write(ExperimentFile::PID::ReferenceSunS, w.Capture());
+            }
+
+            {
+                std::array<std::uint8_t, 8> buffer;
+                Writer w(buffer);
+                w.WriteWordLE(this->Gyro.X());
+                w.WriteWordLE(this->Gyro.Y());
+                w.WriteWordLE(this->Gyro.Z());
+                w.WriteWordLE(this->Gyro.Temperature());
+
+                file.Write(ExperimentFile::PID::Gyro, w.Capture());
+            }
+        }
+
+        void DataPoint::WriteSecondaryDataSetTo(experiments::fs::ExperimentFile& file)
+        {
+            {
+                std::array<std::uint8_t, 8> buffer;
+                Writer w(buffer);
+                w.WriteQuadWordLE(this->Timestamp.count());
+
+                file.Write(ExperimentFile::PID::Timestamp, buffer);
+            }
+
+            {
+                std::array<std::uint8_t, 26> buffer;
+                Writer w(buffer);
+
+                w.WriteByte(this->ExperimentalSunS.parameters.gain);
+                w.WriteByte(this->ExperimentalSunS.parameters.itime);
+                for (auto v : this->ExperimentalSunS.infrared)
+                {
+                    for (auto y : v)
+                    {
+                        w.WriteWordLE(y);
+                    }
+                }
+
+                file.Write(ExperimentFile::PID::ExperimentalSunSSecondary, w.Capture());
+            }
         }
     }
 }
