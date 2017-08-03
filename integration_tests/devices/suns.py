@@ -61,7 +61,11 @@ class SunS(i2cMock.I2CDevice):
     @i2cMock.command([0x80])
     def _measure_suns(self, *data):
         self.log.info("Measure SunS")
-        return [0x80, 0x11] + \
+        return []
+
+    @i2cMock.command([0x0])
+    def _read_registers(self, *data):
+        return [0x11] + \
                to_uint16(self.ack) + \
                to_uint16(self.presence) + \
                to_uint16(self.adc_valid) + \

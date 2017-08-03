@@ -28,6 +28,11 @@ namespace io_map
 
     using SunSInterrupt = PinLocation<gpioPortD, 5>;
 
+    struct Gpio
+    {
+        static constexpr std::uint8_t InterruptPriority = 6;
+    };
+
     struct SPI : public SPIPins<SPI>
     {
         static constexpr std::uint32_t Baudrate = 20_MHz;

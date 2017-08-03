@@ -51,36 +51,15 @@ namespace
         this->reset = InstallProxy(&os);
     }
 
-    TEST_F(SunSTest, BadOpcodeResponse)
-    {
-        ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
-        ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResult::Success));
-
-        EXPECT_CALL(i2c, Write(SunSAddress, ElementsAre(0x80, 0x01, 0x02))).WillOnce(Return(I2CResult::OK));
-        EXPECT_CALL(i2c, Read(SunSAddress, _)).WillOnce(Invoke([](uint8_t /*address*/, auto outData) {
-            EXPECT_EQ(outData.size(), 536);
-            outData[0] = 0x01;
-            outData[1] = 0x11;
-            return I2CResult::OK;
-        }));
-
-        MeasurementData data;
-        auto status = suns.MeasureSunS(data, 1, 2);
-
-        ASSERT_THAT(status, Eq(OperationStatus::WrongOpcodeInResponse));
-        ASSERT_THAT(error_counter, Eq(0));
-    }
-
     TEST_F(SunSTest, BadWhoAmIResponse)
     {
         ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
         ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResult::Success));
 
         EXPECT_CALL(i2c, Write(SunSAddress, ElementsAre(0x80, 0x01, 0x02))).WillOnce(Return(I2CResult::OK));
-        EXPECT_CALL(i2c, Read(SunSAddress, _)).WillOnce(Invoke([](uint8_t /*address*/, auto outData) {
-            EXPECT_EQ(outData.size(), 536);
-            outData[0] = 0x80;
-            outData[1] = 0x01;
+        EXPECT_CALL(i2c, WriteRead(SunSAddress, ElementsAre(0), _)).WillOnce(Invoke([](uint8_t /*address*/, auto /*inData*/, auto outData) {
+            EXPECT_EQ(outData.size(), 67);
+            outData[0] = 0x01;
             return I2CResult::OK;
         }));
 
@@ -111,10 +90,9 @@ namespace
         ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResult::Success));
 
         EXPECT_CALL(i2c, Write(SunSAddress, ElementsAre(0x80, 0x01, 0x02))).WillOnce(Return(I2CResult::OK));
-        EXPECT_CALL(i2c, Read(SunSAddress, _)).WillOnce(Invoke([](uint8_t /*address*/, auto outData) {
-            EXPECT_EQ(outData.size(), 536);
-            outData[0] = 0x80;
-            outData[1] = 0x11;
+        EXPECT_CALL(i2c, WriteRead(SunSAddress, ElementsAre(0), _)).WillOnce(Invoke([](uint8_t /*address*/, auto /*inData*/, auto outData) {
+            EXPECT_EQ(outData.size(), 67);
+            outData[0] = 0x11;
             return I2CResult::Failure;
         }));
 
@@ -143,10 +121,9 @@ namespace
         ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
         ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResult::Success));
 
-        EXPECT_CALL(i2c, Read(SunSAddress, _)).WillOnce(Invoke([](uint8_t /*address*/, auto outData) {
-            EXPECT_EQ(outData.size(), 536);
+        EXPECT_CALL(i2c, WriteRead(SunSAddress, ElementsAre(0), _)).WillOnce(Invoke([](uint8_t /*address*/, auto /*inData*/, auto outData) {
+            EXPECT_EQ(outData.size(), 67);
             Writer writer{outData};
-            writer.WriteByte(0x80);
             writer.WriteByte(0x11);
             writer.WriteWordLE(0x0102);
             writer.WriteWordLE(0x0304);

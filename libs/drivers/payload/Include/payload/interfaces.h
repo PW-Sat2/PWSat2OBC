@@ -55,9 +55,8 @@ namespace drivers
 
             /**
              * @brief Method executed when data from Payload are ready to read. Should only be called from interrupt service routine.
-             * @return Result status.
              */
-            virtual OSResult RaiseDataReadyISR() = 0;
+            virtual void RaiseDataReadyISR() = 0;
 
             /**
              * @brief Method setting timeout for data wait.
