@@ -70,6 +70,12 @@ namespace experiments
             return this->_longDelay;
         }
 
+        class DataPoint
+        {
+          public:
+            std::chrono::milliseconds Timestamp;
+        };
+
         class SunSExperiment : public IExperiment
         {
           public:
@@ -84,6 +90,8 @@ namespace experiments
             virtual StartResult Start() override;
             virtual IterationResult Iteration() override;
             virtual void Stop(IterationResult lastResult) override;
+
+            DataPoint GatherSingleMeasurement();
 
           private:
             services::power::IPowerControl& _powerControl;

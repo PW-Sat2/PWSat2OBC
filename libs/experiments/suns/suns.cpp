@@ -68,5 +68,14 @@ namespace experiments
             this->_powerControl.SensPower(false);
             this->_powerControl.SunSPower(false);
         }
+
+        DataPoint SunSExperiment::GatherSingleMeasurement()
+        {
+            DataPoint point;
+
+            point.Timestamp = this->_currentTime.GetCurrentTime().Value;
+
+            return point;
+        }
     }
 }

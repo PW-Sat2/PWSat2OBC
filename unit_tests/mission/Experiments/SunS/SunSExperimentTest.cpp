@@ -84,4 +84,13 @@ namespace
         r = _exp.Iteration();
         ASSERT_THAT(r, Eq(IterationResult::Finished));
     }
+
+    TEST_F(SunSExperimentTest, GatherSingleDataPoint)
+    {
+        this->_time = 10s;
+
+        auto dataPoint = _exp.GatherSingleMeasurement();
+
+        ASSERT_THAT(dataPoint.Timestamp, Eq(10s));
+    }
 }
