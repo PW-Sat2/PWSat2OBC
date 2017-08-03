@@ -5,6 +5,7 @@
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "mock/SunSDriverMock.hpp"
 #include "mock/power.hpp"
 #include "mock/time.hpp"
 
@@ -12,10 +13,13 @@ using testing::Eq;
 using testing::Return;
 using testing::_;
 using testing::Invoke;
+using testing::SetArgReferee;
+using testing::DoAll;
 using namespace experiments::suns;
 using experiments::IterationResult;
 using experiments::StartResult;
 using namespace std::chrono_literals;
+using namespace devices::suns;
 
 namespace
 {
@@ -26,8 +30,9 @@ namespace
 
         testing::NiceMock<PowerControlMock> _power;
         testing::NiceMock<CurrentTimeMock> _timeProvider;
+        testing::NiceMock<SunSDriverMock> _sunsExp;
 
-        SunSExperiment _exp{_power, _timeProvider};
+        SunSExperiment _exp{_power, _timeProvider, _sunsExp};
 
         std::chrono::milliseconds _time{0ms};
     };
@@ -88,6 +93,11 @@ namespace
     TEST_F(SunSExperimentTest, GatherSingleDataPoint)
     {
         this->_time = 10s;
+
+        MeasurementData expSunsData;
+
+        EXPECT_CALL(_sunsExp, StartMeasurement(_, _)).WillOnce(Return(OperationStatus::OK));
+        EXPECT_CALL(_sunsExp, GetMeasuredData(_)).WillOnce(DoAll(SetArgReferee<0>(expSunsData), Return(OperationStatus::OK)));
 
         auto dataPoint = _exp.GatherSingleMeasurement();
 

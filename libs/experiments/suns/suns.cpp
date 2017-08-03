@@ -75,6 +75,10 @@ namespace experiments
 
             point.Timestamp = this->_currentTime.GetCurrentTime().Value;
 
+            this->_experimentalSunS.StartMeasurement(this->_parameters.Gain(), this->_parameters.ITime());
+
+            this->_experimentalSunS.GetMeasuredData(point.ExperimentalSunS);
+
             return point;
         }
     }
