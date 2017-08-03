@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "I2C/I2CMock.hpp"
 #include "mock/error_counter.hpp"
+#include "utils.hpp"
 
 #include "rtc/rtc.hpp"
 
@@ -13,6 +14,7 @@ using testing::Ge;
 using testing::Ne;
 using testing::Invoke;
 using testing::ElementsAre;
+using testing::DoAll;
 using gsl::span;
 using drivers::i2c::I2CResult;
 
@@ -237,6 +239,50 @@ namespace
 
         RTCTime time;
         ASSERT_THAT(rtc.ReadTime(time), Eq(OSResult::InvalidOperation));
+        ASSERT_THAT(error_counter, Eq(5));
+    }
+
+    TEST_F(RTCObjectTest, CheckIntegrityFlagSet)
+    {
+        EXPECT_CALL(i2c, WriteRead(RTCObject::I2CAddress, ElementsAre(num(Registers::VL_seconds)), SpanOfSize(1)))
+            .WillOnce(DoAll(FillBuffer<2>(0b00000000), Return(I2CResult::OK)));
+        auto r = rtc.IsIntegrityGuaranteed();
+        ASSERT_THAT(r, Eq(true));
+    }
+
+    TEST_F(RTCObjectTest, CheckIntegrityFlagNotSet)
+    {
+        EXPECT_CALL(i2c, WriteRead(RTCObject::I2CAddress, ElementsAre(num(Registers::VL_seconds)), SpanOfSize(1)))
+            .WillOnce(DoAll(FillBuffer<2>(0b10000000), Return(I2CResult::OK)));
+        auto r = rtc.IsIntegrityGuaranteed();
+        ASSERT_THAT(r, Eq(false));
+    }
+
+    TEST_F(RTCObjectTest, SetTime)
+    {
+        RTCTime time;
+        time.years = 43;
+        time.months = 5;
+        time.days = 4;
+        time.hours = 14;
+        time.minutes = 47;
+        time.seconds = 4;
+
+        auto expected = ElementsAre(num(Registers::VL_seconds), 0x04, 0x47, 0x14, 0x04, 0x0, 0x05, 0x43);
+
+        EXPECT_CALL(i2c, Write(RTCObject::I2CAddress, expected)).WillOnce(Return(I2CResult::OK));
+
+        auto r = rtc.SetTime(time);
+        ASSERT_THAT(r, Eq(OSResult::Success));
+    }
+
+    TEST_F(RTCObjectTest, SetTimeFail)
+    {
+        RTCTime time;
+
+        EXPECT_CALL(i2c, Write(RTCObject::I2CAddress, _)).WillOnce(Return(I2CResult::Failure));
+        auto r = rtc.SetTime(time);
+        ASSERT_THAT(r, Eq(OSResult::DeviceNotFound));
         ASSERT_THAT(error_counter, Eq(5));
     }
 
