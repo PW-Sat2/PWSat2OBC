@@ -42,5 +42,6 @@ target_link_libraries(${NAME}
     exp_fs
     exp_suns
     unit_tests_base
+    payload
 )
 

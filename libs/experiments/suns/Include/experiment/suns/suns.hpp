@@ -4,6 +4,7 @@
 #include <chrono>
 #include <cstdint>
 #include "experiments/experiments.h"
+#include "payload/interfaces.h"
 #include "power/fwd.hpp"
 #include "suns/suns.hpp"
 
@@ -76,6 +77,7 @@ namespace experiments
           public:
             std::chrono::milliseconds Timestamp;
             devices::suns::MeasurementData ExperimentalSunS;
+            devices::payload::PayloadTelemetry::SunsRef ReferenceSunS;
         };
 
         class SunSExperiment : public IExperiment
@@ -83,8 +85,10 @@ namespace experiments
           public:
             SunSExperiment(services::power::IPowerControl& powerControl,
                 services::time::ICurrentTime& currentTime,
-                devices::suns::ISunSDriver& experimentalSunS)
-                : _powerControl(powerControl), _currentTime(currentTime), _experimentalSunS(experimentalSunS), _nextSessionAt(0)
+                devices::suns::ISunSDriver& experimentalSunS,
+                devices::payload::IPayloadDeviceDriver& payload)
+                : _powerControl(powerControl), _currentTime(currentTime), _experimentalSunS(experimentalSunS), _payload(payload),
+                  _nextSessionAt(0)
             {
             }
 
@@ -101,6 +105,7 @@ namespace experiments
             services::power::IPowerControl& _powerControl;
             services::time::ICurrentTime& _currentTime;
             devices::suns::ISunSDriver& _experimentalSunS;
+            devices::payload::IPayloadDeviceDriver& _payload;
 
             SunSExperimentParams _parameters;
 

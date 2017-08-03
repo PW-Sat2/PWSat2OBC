@@ -5,6 +5,7 @@
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "mock/PayloadDeviceMock.hpp"
 #include "mock/SunSDriverMock.hpp"
 #include "mock/power.hpp"
 #include "mock/time.hpp"
@@ -20,6 +21,7 @@ using experiments::IterationResult;
 using experiments::StartResult;
 using namespace std::chrono_literals;
 using namespace devices::suns;
+using devices::payload::PayloadTelemetry;
 
 namespace
 {
@@ -31,8 +33,9 @@ namespace
         testing::NiceMock<PowerControlMock> _power;
         testing::NiceMock<CurrentTimeMock> _timeProvider;
         testing::NiceMock<SunSDriverMock> _sunsExp;
+        testing::NiceMock<PayloadDeviceMock> _payload;
 
-        SunSExperiment _exp{_power, _timeProvider, _sunsExp};
+        SunSExperiment _exp{_power, _timeProvider, _sunsExp, _payload};
 
         std::chrono::milliseconds _time{0ms};
     };
@@ -95,8 +98,12 @@ namespace
         this->_time = 10s;
 
         MeasurementData expSunsData;
+        PayloadTelemetry::SunsRef refSunsData;
 
         EXPECT_CALL(_sunsExp, StartMeasurement(_, _)).WillOnce(Return(OperationStatus::OK));
+
+        EXPECT_CALL(_payload, MeasureSunSRef(_)).WillOnce(DoAll(SetArgReferee<0>(refSunsData), Return(OSResult::Success)));
+
         EXPECT_CALL(_sunsExp, GetMeasuredData(_)).WillOnce(DoAll(SetArgReferee<0>(expSunsData), Return(OperationStatus::OK)));
 
         auto dataPoint = _exp.GatherSingleMeasurement();

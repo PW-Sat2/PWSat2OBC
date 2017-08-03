@@ -77,6 +77,8 @@ namespace experiments
 
             this->_experimentalSunS.StartMeasurement(this->_parameters.Gain(), this->_parameters.ITime());
 
+            this->_payload.MeasureSunSRef(point.ReferenceSunS);
+
             this->_experimentalSunS.GetMeasuredData(point.ExperimentalSunS);
 
             return point;
