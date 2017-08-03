@@ -71,7 +71,7 @@ class TestExperimentLEOP(RestartPerTest):
 
         log.info('Setting time after experiment time slot')
         self.system.obc.jump_to_time(timedelta(minutes = 1))
-        self.system.obc.wait_for_experiment(ExperimentType.LEOP, 60)
+        self.system.obc.wait_for_experiment_started(ExperimentType.LEOP, 60)
         result = self.system.obc.experiment_info()
 
         self.assertEqual(result.LastStartResult, StartResult.Success)
