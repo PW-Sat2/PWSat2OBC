@@ -75,7 +75,7 @@ Eigen::Matrix3f skew(const Eigen::Vector3f &vec)
  *
  *   references    :
  */
-
+/*
 Matrix5f matInv(Matrix5f A)
 {
     const uint8_t n = 5;
@@ -159,13 +159,13 @@ Matrix5f matInv(Matrix5f A)
 
     return AInv;
 }
+*/
 
-/*
 Matrix5f matInv(Matrix5f A)
 {
     return A.inverse();
 }
-*/
+
 /*
  *                            sun-pointing procedure
  *                          (Attitude Determination)
