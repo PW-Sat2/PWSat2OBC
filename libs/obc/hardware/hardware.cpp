@@ -73,6 +73,8 @@ void OBCHardware::Initialize()
     this->Burtc.Initialize();
 
     this->CommDriver.Initialize();
+
+    this->rtc.Initialize();
 }
 
 OBCHardware::OBCHardware(

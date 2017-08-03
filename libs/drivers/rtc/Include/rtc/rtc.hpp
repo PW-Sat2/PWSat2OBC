@@ -61,6 +61,12 @@ namespace devices
              */
             RTCObject(error_counter::ErrorCounting& errors, drivers::i2c::II2CBus& bus);
 
+            /**
+             * @brief Initializes RTC device
+             * @return Operation result
+             */
+            OSResult Initialize();
+
             virtual OSResult ReadTime(RTCTime& rtcTime) final override;
 
             virtual bool IsIntegrityGuaranteed() final override;

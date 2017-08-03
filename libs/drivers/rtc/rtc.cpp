@@ -97,3 +97,24 @@ OSResult RTCObject::SetTime(const RTCTime& time)
 
     return OSResult::Success;
 }
+
+OSResult RTCObject::Initialize()
+{
+    auto isClockOk = this->IsIntegrityGuaranteed();
+
+    if (isClockOk)
+    {
+        return OSResult::Success;
+    }
+
+    RTCTime zero;
+    zero.years = 0;
+    zero.months = 1;
+    zero.days = 1;
+    zero.hours = 0;
+    zero.minutes = 0;
+    zero.seconds = 0;
+
+    LOG(LOG_LEVEL_WARNING, "[rtc] Integrity not guaranteed. Reseting RTC to 0");
+    return this->SetTime(zero);
+}
