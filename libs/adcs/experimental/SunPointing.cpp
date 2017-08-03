@@ -75,7 +75,7 @@ Eigen::Matrix3f skew(const Eigen::Vector3f &vec)
  *
  *   references    :
  */
-/*
+
 Matrix5f matInv(Matrix5f A)
 {
     const uint8_t n = 5;
@@ -101,7 +101,7 @@ Matrix5f matInv(Matrix5f A)
         for (uint8_t i = j; i < n; i++)
         {
             U(j, i) = A(j, i);
-            for (uint8_t k = 0; k <= j - 1; k++) //XXX <=???
+            for (uint8_t k = 0; k <= j - 1; k++)
             {
                 U(j, i) = U(j, i) - L(j, k) * U(k, i);
             }
@@ -109,7 +109,7 @@ Matrix5f matInv(Matrix5f A)
         for (uint8_t i = j + 1; i < n; i++)
         {
             L(i, j) = A(i, j);
-            for (uint8_t k = 0; k <= j - 1; k++) // XXX <=???
+            for (uint8_t k = 0; k <= j - 1; k++)
             {
                 L(i, j) = L(i, j) - L(i, k) * U(k, j);
             }
@@ -159,12 +159,13 @@ Matrix5f matInv(Matrix5f A)
 
     return AInv;
 }
-*/
+
+/*
 Matrix5f matInv(Matrix5f A)
 {
     return A.inverse();
 }
-
+*/
 /*
  *                            sun-pointing procedure
  *                          (Attitude Determination)
@@ -489,12 +490,12 @@ void ExtendedKalmanFilter(Vector5f& xEkf, Matrix5f& pEkf, Vector5f& innov,
             - dLat_dSS * angrate_ss * dss_dLat).value();
     float dLatDot_dLong = (-ddLong_dLat_dSS * angrate_ss * sv_SS
             - dLat_dSS * angrate_ss * dss_dLong).value();
-    Vector3f dLatDot_dOmega = dLat_dSS * rotSS * skewRotSStSvSS;
+    RowVector3f dLatDot_dOmega = dLat_dSS * rotSS * skewRotSStSvSS;
     float dLongDot_dLat = (-ddLat_dLong_dSS * angrate_ss * sv_SS
             - dLong_dSS * angrate_ss * dss_dLat).value();
     float dLongDot_dLong = (-ddLong_dLong_dSS * angrate_ss * sv_SS
             - dLong_dSS * angrate_ss * dss_dLong).value();
-    Vector3f dLongDot_dOmega = dLong_dSS * rotSS * skewRotSStSvSS;
+    RowVector3f dLongDot_dOmega = dLong_dSS * rotSS * skewRotSStSvSS;
 
     // Derivative of the omega time derivative wrt omega
     Matrix3f dOmegaDot_dOmega = Matrix3f(state.params.inertiaInv.data())
@@ -506,7 +507,7 @@ void ExtendedKalmanFilter(Vector5f& xEkf, Matrix5f& pEkf, Vector5f& innov,
     jacobianF << dLatDot_dLat,
             dLatDot_dLong,
             dLatDot_dOmega,
-            dLongDot_dLat, dLongDot_dLong,//XXX !!!!!! investigate
+            dLongDot_dLat, dLongDot_dLong,
             dLongDot_dOmega,
             Matrix<float, 3, 2>::Zero(),
             dOmegaDot_dOmega;
@@ -816,9 +817,9 @@ void SunPointing::step(DipoleVec& dipole, const MagVec& mtmMeas, bool mtmFlag,
     {
         //XXX innov,innovCov - lookups
         //XXX DEBUG
-        std::cout<<inSsMeas<<std::endl;
-        std::cout<<inGyrMeas<<std::endl;
-        std::cout<<inMtmMeas<<std::endl;
+//        std::cout<<inSsMeas<<std::endl;
+//        std::cout<<inGyrMeas<<std::endl;
+//        std::cout<<inMtmMeas<<std::endl;
         ExtendedKalmanFilter(xEkf, pEkf, innov, innovCov, inSsMeas, ssFlag,
                 inGyrMeas, gyrFlag, state);
     }
@@ -847,7 +848,7 @@ void SunPointing::step(DipoleVec& dipole, const MagVec& mtmMeas, bool mtmFlag,
     {
         dipole[i] = commDipoleSP[i] * 1e4;
     }
-    std::cout<<"commDipoleSP[0]: " << commDipoleSP[0] <<std::endl;
-    std::cout<<"commDipoleSP[1]: " << commDipoleSP[1] <<std::endl;
-    std::cout<<"commDipoleSP[2]: " << commDipoleSP[2] <<std::endl;
+//    std::cout<<"commDipoleSP[0]: " << commDipoleSP[0] <<std::endl;
+//    std::cout<<"commDipoleSP[1]: " << commDipoleSP[1] <<std::endl;
+//    std::cout<<"commDipoleSP[2]: " << commDipoleSP[2] <<std::endl;
 }
