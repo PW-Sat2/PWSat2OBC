@@ -165,3 +165,13 @@ bool Writer::WriteLowerBytesBE(std::uint32_t number, std::uint8_t bytesCount)
 
     return true;
 }
+
+bool Writer::WriteByteBCD(std::uint8_t value)
+{
+    auto a = value % 10;
+    auto b = value / 10;
+
+    auto encoded = (b << 4) | a;
+
+    return WriteByte(encoded);
+}

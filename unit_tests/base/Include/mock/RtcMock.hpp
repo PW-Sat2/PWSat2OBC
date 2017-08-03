@@ -56,6 +56,16 @@ class RtcMock : public devices::rtc::IRTC
         return this->fakeTime.ToDuration();
     }
 
+    bool IsIntegrityGuaranteed()
+    {
+        return true;
+    }
+
+    OSResult SetTime(const devices::rtc::RTCTime& /*time*/)
+    {
+        return OSResult::Success;
+    }
+
   private:
     devices::rtc::RTCTime fakeTime;
     OSResult readTimeResult;
