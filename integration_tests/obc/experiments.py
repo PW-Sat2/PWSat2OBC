@@ -88,6 +88,13 @@ class ExperimentsMixin(OBCMixin):
 
         busy_wait(condition, delay=1, timeout=timeout)
 
+    def wait_for_experiment_started(self, experiment, timeout):
+        def condition():
+            info = self.experiment_info()
+            return info.Current == experiment and info.LastStartResult is not None
+
+        busy_wait(condition, delay=1, timeout=timeout)
+
     def wait_for_experiment_iteration(self, iteration, timeout):
         def condition():
             info = self.experiment_info()
