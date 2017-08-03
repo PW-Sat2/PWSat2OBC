@@ -62,3 +62,16 @@ class TestExperimentLEOP(RestartPerTest):
         result = self.system.obc.experiment_info()
 
         self.assertEqual(result.LastStartResult, StartResult.Failure)
+
+    @runlevel(2)
+    def test_should_start_automatically(self):
+        self._start()
+
+        log = logging.getLogger("TEST")
+
+        log.info('Setting time after experiment time slot')
+        self.system.obc.jump_to_time(timedelta(minutes = 1))
+        self.system.obc.wait_for_experiment(ExperimentType.LEOP, 60)
+        result = self.system.obc.experiment_info()
+
+        self.assertEqual(result.LastStartResult, StartResult.Success)
