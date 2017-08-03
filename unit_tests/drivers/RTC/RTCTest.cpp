@@ -286,6 +286,29 @@ namespace
         ASSERT_THAT(error_counter, Eq(5));
     }
 
+    TEST_F(RTCObjectTest, ShouldDoNothingOnInitializeIfIntegrityIsOk)
+    {
+        ON_CALL(i2c, WriteRead(RTCObject::I2CAddress, ElementsAre(num(Registers::VL_seconds)), SpanOfSize(1)))
+            .WillByDefault(DoAll(FillBuffer<2>(0b00000000), Return(I2CResult::OK)));
+
+        auto r = rtc.Initialize();
+
+        ASSERT_THAT(r, Eq(OSResult::Success));
+    }
+
+    TEST_F(RTCObjectTest, ShouldSetTimeOnInitializeIfIntegrityNotOk)
+    {
+        ON_CALL(i2c, WriteRead(RTCObject::I2CAddress, ElementsAre(num(Registers::VL_seconds)), SpanOfSize(1)))
+            .WillByDefault(DoAll(FillBuffer<2>(0b10000000), Return(I2CResult::OK)));
+
+        EXPECT_CALL(i2c, Write(RTCObject::I2CAddress, ElementsAre(num(Registers::VL_seconds), 0, 0, 0, 1, 0, 1, 0)))
+            .WillOnce(Return(I2CResult::OK));
+
+        auto r = rtc.Initialize();
+
+        ASSERT_THAT(r, Eq(OSResult::Success));
+    }
+
     TEST(RTCTimeTest, DecodeRTCTimeProperly)
     {
         RTCTime rtcTime;

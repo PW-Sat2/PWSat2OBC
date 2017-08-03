@@ -134,6 +134,11 @@ class Writer final
      */
     bool WriteLowerBytesBE(std::uint32_t number, std::uint8_t bytesCount);
 
+    /**
+     * @brief Writes single byte as BCD value
+     * @param value Value to write
+     * @return Operation status
+     */
     bool WriteByteBCD(std::uint8_t value);
 
     /**
