@@ -20,6 +20,9 @@ struct PowerControlMock : services::power::IPowerControl
     MOCK_METHOD1(BackupAntennaPower, bool(bool enable));
 
     MOCK_METHOD0(PrimaryAntennaPower, Option<bool>());
+
+    MOCK_METHOD1(SensPower, bool(bool enable));
+    MOCK_METHOD1(SunSPower, bool(bool enable));
 };
 
 #endif /* UNIT_TESTS_BASE_MOCK_POWER_HPP_ */

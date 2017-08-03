@@ -67,6 +67,10 @@ namespace services
              * @return Operation status
              */
             virtual bool BackupAntennaPower(bool enabled) = 0;
+
+            virtual bool SensPower(bool enabled) = 0;
+
+            virtual bool SunSPower(bool enabled) = 0;
         };
 
         /** @} */

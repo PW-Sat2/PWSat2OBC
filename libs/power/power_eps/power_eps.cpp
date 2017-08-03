@@ -109,5 +109,29 @@ namespace services
 
             return Some(state && flagb);
         }
+
+        bool EPSPowerControl::SensPower(bool enabled)
+        {
+            if (enabled)
+            {
+                return this->_eps.EnableLCL(LCL::SENS) == ErrorCode::NoError;
+            }
+            else
+            {
+                return this->_eps.DisableLCL(LCL::SENS) == ErrorCode::NoError;
+            }
+        }
+
+        bool EPSPowerControl::SunSPower(bool enabled)
+        {
+            if (enabled)
+            {
+                return this->_eps.EnableLCL(LCL::SunS) == ErrorCode::NoError;
+            }
+            else
+            {
+                return this->_eps.DisableLCL(LCL::SunS) == ErrorCode::NoError;
+            }
+        }
     }
 }
