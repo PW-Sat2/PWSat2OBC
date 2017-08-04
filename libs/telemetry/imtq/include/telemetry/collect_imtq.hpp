@@ -20,7 +20,7 @@ namespace telemetry
       public:
         /**
          * @brief ctor.
-         * @param[in] antenna Reference to imtq driver proxy that will provide this module with hardware telemetry
+         * @param[in] collector Reference to imtq driver proxy that will provide this module with hardware telemetry
          */
         ImtqTelemetryAcquisition(IImtqTelemetryCollector& collector);
 

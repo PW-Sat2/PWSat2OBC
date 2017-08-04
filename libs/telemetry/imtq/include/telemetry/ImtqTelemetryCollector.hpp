@@ -13,11 +13,26 @@ namespace devices
 {
     namespace imtq
     {
+        /**
+         * @brief This class is responsible for capturing imtq telemetry as it is extracted from the imtq hardware.
+         *
+         * This class is a wrapper for imtq driver, that should be used as proxy for all imtq requests.
+         * All of the necessary telemetry elements are extracted as they are seen and saved in members
+         * of this class. They can be later extracted using dedicated method.
+         * @ingroup ImtqDriver
+         */
         class ImtqTelemetryCollector final : public IImtqDriver, public telemetry::IImtqTelemetryCollector
         {
           public:
+            /**
+             * @brief ctor.
+             * @param driver Reference to the actual imtq driver.
+             */
             ImtqTelemetryCollector(IImtqDriver& driver);
 
+            /**
+             * @brief Initializes this object & prepares it to work.
+             */
             void Initialize();
 
             virtual bool PerformSelfTest(SelfTestResult& result, bool tryToFixIsisErrors) final override;

@@ -241,14 +241,24 @@ namespace devices
         struct HouseKeepingRAW
         {
             /**
-             * @brief Digital and analog supply voltages
+             * @brief Digital supply voltage.
              */
-            std::uint16_t digitalVoltage, analogVoltage;
+            std::uint16_t digitalVoltage;
 
             /**
-             * @brief Digital and analog supply currents
+              * @brief Analog supply voltage.
+              */
+            std::uint16_t analogVoltage;
+
+            /**
+             * @brief Digital supply current.
              */
-            std::uint16_t digitalCurrent, analogCurrent;
+            std::uint16_t digitalCurrent;
+
+            /**
+             * @brief Analog supply current.
+             */
+            std::uint16_t analogCurrent;
 
             /**
              * @brief Three-axis coil current measurement
@@ -272,14 +282,24 @@ namespace devices
         struct HouseKeepingEngineering
         {
             /**
-             * @brief Digital and analog supply voltages.
+             * @brief Digital supply voltage.
              */
-            VoltageInMiliVolt digitalVoltage, analogVoltage;
+            VoltageInMiliVolt digitalVoltage;
 
             /**
-             * @brief Digital and analog supply currents
+             * @brief Analog supply voltage.
              */
-            Current digitalCurrent, analogCurrent;
+            VoltageInMiliVolt analogVoltage;
+
+            /**
+             * @brief Digital supply current.
+             */
+            Current digitalCurrent;
+
+            /**
+             * @brief Analog supply current.
+             */
+            Current analogCurrent;
 
             /**
              * @brief Three-axis coil current measurement
