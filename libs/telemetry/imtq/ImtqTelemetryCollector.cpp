@@ -100,10 +100,20 @@ namespace devices
         bool ImtqTelemetryCollector::GetSystemState(State& state)
         {
             const auto status = this->next.GetSystemState(state);
-            return Update(status,
-                ElementId::State,
-                telemetry::ImtqState{state.mode, state.error.GetValue(), state.anyParameterUpdatedSinceStartup, state.uptime},
-                this->imtqState);
+            if (status)
+            {
+                Lock lock(this->semaphore, 50ms);
+                if (static_cast<bool>(lock))
+                {
+                    this->imtqState =
+                        telemetry::ImtqState{state.mode, state.error.GetValue(), state.anyParameterUpdatedSinceStartup, state.uptime};
+                    this->imtqStatus = telemetry::ImtqStatus{state.status};
+                    this->elementUpdated[num(ElementId::State)] = true;
+                    this->elementUpdated[num(ElementId::Status)] = true;
+                }
+            }
+
+            return status;
         }
 
         bool ImtqTelemetryCollector::GetCalibratedMagnetometerData(MagnetometerMeasurementResult& result)
@@ -184,8 +194,10 @@ namespace devices
                         result.MCUtemperature                                               //
                         );
 
+                    this->imtqStatus = telemetry::ImtqStatus(result.status);
                     this->coilCurrents = telemetry::ImtqCoilCurrent{result.coilCurrent};
                     this->coilTemperatures = telemetry::ImtqCoilTemperature{result.coilTemperature};
+                    this->elementUpdated[num(ElementId::Status)] = true;
                     this->elementUpdated[num(ElementId::CoilCurrents)] = true;
                     this->elementUpdated[num(ElementId::CoilTemperatures)] = true;
                 }

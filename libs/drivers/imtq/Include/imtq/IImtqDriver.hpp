@@ -113,6 +113,11 @@ namespace devices
             constexpr State();
 
             /**
+             * @brief Current status;
+             */
+            std::uint8_t status;
+
+            /**
              * @brief Imtq mode
              */
             Mode mode;
@@ -133,7 +138,7 @@ namespace devices
             std::chrono::seconds uptime;
         };
 
-        constexpr State::State() : mode{Mode::Idle}, error{0}, anyParameterUpdatedSinceStartup{false}, uptime{0}
+        constexpr State::State() : status{0}, mode{Mode::Idle}, error{0}, anyParameterUpdatedSinceStartup{false}, uptime{0}
         {
         }
 
@@ -274,6 +279,11 @@ namespace devices
              * @brief Measured microcontroller temperature.
              */
             std::uint16_t MCUtemperature;
+
+            /**
+             * @brief Current status;
+             */
+            std::uint8_t status;
         };
 
         /**
@@ -315,6 +325,11 @@ namespace devices
              * @brief Measured microcontroller temperature.
              */
             TemperatureMeasurement MCUtemperature;
+
+            /**
+             * @brief Current status;
+             */
+            std::uint8_t status;
         };
 
         /**
