@@ -50,6 +50,12 @@ namespace adcs
         {
             LOG(LOG_LEVEL_ERROR, "Unable to acquire built-in detumble data");
         }
+
+        devices::imtq::HouseKeepingEngineering housekeeping;
+        if (!imtqDriver.GetHouseKeepingEngineering(housekeeping))
+        {
+            LOG(LOG_LEVEL_ERROR, "Unable to acquire imtq housekeeping");
+        }
     }
 
     std::chrono::milliseconds BuiltinDetumbling::GetWait() const
