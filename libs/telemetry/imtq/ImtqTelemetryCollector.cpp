@@ -9,7 +9,7 @@ namespace devices
 
         ImtqTelemetryCollector::ImtqTelemetryCollector(IImtqDriver& driver) : next(driver), semaphore(nullptr)
         {
-            std::uninitialized_fill_n(elementUpdated.begin(), elementUpdated.end(), false);
+            std::uninitialized_fill(elementUpdated.begin(), elementUpdated.end(), false);
         }
 
         void ImtqTelemetryCollector::Initialize()
