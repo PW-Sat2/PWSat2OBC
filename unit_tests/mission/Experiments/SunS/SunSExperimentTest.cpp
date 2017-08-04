@@ -1,6 +1,7 @@
 #include <chrono>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "OsMock.hpp"
 #include "base/writer.h"
 #include "experiment/suns/suns.hpp"
 #include "experiments/experiments.h"
@@ -20,6 +21,7 @@ using testing::Invoke;
 using testing::SetArgReferee;
 using testing::DoAll;
 using testing::ElementsAre;
+using testing::InSequence;
 using namespace experiments::suns;
 using experiments::IterationResult;
 using experiments::StartResult;
@@ -46,6 +48,8 @@ namespace
         testing::NiceMock<PayloadDeviceMock> _payload;
         testing::NiceMock<GyroscopeMock> _gyro;
         testing::NiceMock<FsMock> _fs;
+        testing::NiceMock<OSMock> _os;
+        OSReset _osReset{InstallProxy(&_os)};
 
         SunSExperiment _exp{_power, _timeProvider, _sunsExp, _payload, _gyro};
 
@@ -62,16 +66,10 @@ namespace
 
     TEST_F(SunSExperimentTest, TestExperimentStartStop)
     {
-        EXPECT_CALL(_power, SensPower(true)).WillOnce(Return(true));
-        EXPECT_CALL(_power, SunSPower(true)).WillOnce(Return(true));
-
         // initialize gyro (?)
         // create files
         auto r = _exp.Start();
         ASSERT_THAT(r, Eq(StartResult::Success));
-
-        EXPECT_CALL(_power, SensPower(false)).WillOnce(Return(true));
-        EXPECT_CALL(_power, SunSPower(false)).WillOnce(Return(true));
 
         _exp.Stop(IterationResult::Finished);
     }
@@ -102,6 +100,34 @@ namespace
         this->_time += 5min;
 
         r = _exp.Iteration();
+        ASSERT_THAT(r, Eq(IterationResult::Finished));
+    }
+
+    TEST_F(SunSExperimentTest, IterationFlow)
+    {
+        _exp.SetParameters(SunSExperimentParams(1, 2, 3, 2s, 1, 1min));
+
+        _exp.Start();
+
+        {
+            InSequence s;
+            EXPECT_CALL(_power, SensPower(true)).WillOnce(Return(true));
+            EXPECT_CALL(_power, SunSPower(true)).WillOnce(Return(true));
+
+            // todo: sleep
+
+            EXPECT_CALL(_sunsExp, StartMeasurement(1, 2));
+            EXPECT_CALL(_os, Sleep(duration_cast<milliseconds>(2s)));
+
+            EXPECT_CALL(_sunsExp, StartMeasurement(1, 2));
+            EXPECT_CALL(_os, Sleep(duration_cast<milliseconds>(2s)));
+
+            EXPECT_CALL(_sunsExp, StartMeasurement(1, 2));
+
+            EXPECT_CALL(_power, SensPower(false)).WillOnce(Return(true));
+            EXPECT_CALL(_power, SunSPower(false)).WillOnce(Return(true));
+        }
+        auto r = _exp.Iteration();
         ASSERT_THAT(r, Eq(IterationResult::Finished));
     }
 

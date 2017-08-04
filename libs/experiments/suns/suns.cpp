@@ -31,9 +31,6 @@ namespace experiments
 
         StartResult SunSExperiment::Start()
         {
-            this->_powerControl.SensPower(true);
-            this->_powerControl.SunSPower(true);
-
             this->_remainingSessions = this->_parameters.SamplingSessionsCount();
 
             return StartResult::Success;
@@ -55,6 +52,22 @@ namespace experiments
 
             this->_remainingSessions--;
 
+            this->_powerControl.SensPower(true);
+            this->_powerControl.SunSPower(true);
+
+            for (auto i = 0; i < this->_parameters.SamplesCount(); i++)
+            {
+                if (i > 0)
+                {
+                    System::SleepTask(this->_parameters.ShortDelay());
+                }
+
+                this->GatherSingleMeasurement();
+            }
+
+            this->_powerControl.SensPower(false);
+            this->_powerControl.SunSPower(false);
+
             if (this->_remainingSessions == 0)
             {
                 return IterationResult::Finished;
@@ -67,8 +80,6 @@ namespace experiments
 
         void SunSExperiment::Stop(IterationResult /*lastResult*/)
         {
-            this->_powerControl.SensPower(false);
-            this->_powerControl.SunSPower(false);
         }
 
         DataPoint SunSExperiment::GatherSingleMeasurement()
