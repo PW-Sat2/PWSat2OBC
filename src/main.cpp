@@ -173,7 +173,7 @@ static void ObcInitTask(void* param)
         }
         else
         {
-            LOG(LOG_LEVEL_ERROR, "Runlevel 1 initialized");
+            LOG(LOG_LEVEL_INFO, "Runlevel 1 initialized");
         }
     }
 
@@ -185,7 +185,7 @@ static void ObcInitTask(void* param)
         }
         else
         {
-            LOG(LOG_LEVEL_ERROR, "Runlevel 2 initialized");
+            LOG(LOG_LEVEL_INFO, "Runlevel 2 initialized");
         }
     }
 

@@ -2,6 +2,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock-generated-matchers.h"
 #include "gmock/gmock-matchers.h"
+#include "base/reader.h"
 #include "base/writer.h"
 
 using testing::Eq;
@@ -286,5 +287,20 @@ namespace
         writer.WriteByte(1);
 
         ASSERT_THAT(writer.Status(), Eq(false));
+    }
+
+    TEST(WriterTest, TestBCDRoundTrip)
+    {
+        for (std::uint16_t i = 0; i < 100; i++)
+        {
+            uint8_t buffer[1];
+            Writer w(buffer);
+            w.WriteByteBCD(i);
+
+            Reader r(buffer);
+            auto readBack = r.ReadByteBCD(0b11110000);
+
+            ASSERT_THAT(readBack, Eq(i)) << "BCD roundtrip " << i;
+        }
     }
 }

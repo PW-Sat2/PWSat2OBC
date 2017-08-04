@@ -33,6 +33,19 @@ namespace devices
               * @return Transfer result - I2CResult::OK when read was successful.
               */
             virtual OSResult ReadTime(RTCTime& rtcTime) = 0;
+
+            /**
+             * @brief Checks if RTC claims that clock values are valid
+             * @return true if clock values are claimed as valid
+             */
+            virtual bool IsIntegrityGuaranteed() = 0;
+
+            /**
+             * @brief Sets time in RTC
+             * @param time RTC time
+             * @return Operation result
+             */
+            virtual OSResult SetTime(const RTCTime& time) = 0;
         };
 
         /**
@@ -48,7 +61,17 @@ namespace devices
              */
             RTCObject(error_counter::ErrorCounting& errors, drivers::i2c::II2CBus& bus);
 
+            /**
+             * @brief Initializes RTC device
+             * @return Operation result
+             */
+            OSResult Initialize();
+
             virtual OSResult ReadTime(RTCTime& rtcTime) final override;
+
+            virtual bool IsIntegrityGuaranteed() final override;
+
+            virtual OSResult SetTime(const RTCTime& time) final override;
 
             /** @brief Address of RTC device */
             static constexpr std::uint8_t I2CAddress = 0b1010001;

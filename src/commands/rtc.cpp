@@ -45,6 +45,37 @@ static void PrintRTCUsage()
     GetTerminal().Puts("rtc [test|get|duration]");
 }
 
+static void TestRTCIntegrity()
+{
+    GetTerminal().Puts("Testing rtc integrity...");
+    auto b = GetRTC().IsIntegrityGuaranteed();
+
+    if (b)
+    {
+        GetTerminal().Puts("Guaranteed\n");
+    }
+    else
+    {
+        GetTerminal().Puts("Not guaranteed\n");
+    }
+}
+
+static void SetRTCTime()
+{
+    GetTerminal().Puts("Setting RTC time...");
+
+    RTCTime rtcTime;
+    memset(&rtcTime, 0, sizeof(rtcTime));
+    rtcTime.years = 17;
+    rtcTime.months = 3;
+    rtcTime.days = 31;
+    rtcTime.hours = 5;
+    rtcTime.minutes = 10;
+    rtcTime.seconds = 59;
+
+    GetRTC().SetTime(rtcTime);
+}
+
 void RTCTest(std::uint16_t argc, char* argv[])
 {
     if (argc != 1)
@@ -116,6 +147,14 @@ void RTCTest(std::uint16_t argc, char* argv[])
         GetRTC().ReadTime(time);
 
         GetTerminal().Printf("%li\r\n", static_cast<std::uint32_t>(time.ToDuration().count()));
+    }
+    else if (strcmp(argv[0], "int") == 0)
+    {
+        TestRTCIntegrity();
+    }
+    else if (strcmp(argv[0], "set") == 0)
+    {
+        SetRTCTime();
     }
     else
     {
