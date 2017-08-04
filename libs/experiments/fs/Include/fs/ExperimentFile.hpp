@@ -45,7 +45,8 @@ namespace experiments
             {
                 Reserved = 0,
                 Timestamp = 1, // 8 bytes of data
-                /* 2-16 reserved for control codes */
+                Error = 2,     // 8 bytes of data
+                /* 3-16 reserved for control codes */
                 Gyro = 0x10,                      // 8 bytes of data
                 ExperimentalSunSPrimary = 0x11,   // Experimental SunS primary data, 41 bytes of data
                 ExperimentalSunSSecondary = 0x12, // Experimental SunS primary data, 26 bytes of data
