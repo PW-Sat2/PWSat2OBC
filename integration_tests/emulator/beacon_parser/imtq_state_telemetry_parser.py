@@ -11,6 +11,6 @@ class ImtqStateTelemetryParser(Parser):
     def parse(self, address, bits):
         self.append_byte(address, bits, "Status")
         self.append_byte(address, bits, "Mode", 2)
-        self.append_byte(address, bits, "Error during previous iteration", 2)
+        self.append_byte(address, bits, "Error during previous iteration", 8)
         self.append_byte(address, bits, "Configuration changed", 1)
         self.append_dword(address, bits, "Uptime")
