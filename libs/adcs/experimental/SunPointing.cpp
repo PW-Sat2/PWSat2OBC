@@ -285,7 +285,7 @@ Vector5f PropagateState(const Vector5f& x, const Vector3f& ctrlTorque,
     sv_SS << sx, sy, sz;
 
     // Partial Derivatives
-    float szFactor = fabsf(sinLat); //sqrtf(1.0f - powf(sz, 2.0f));
+    float szFactor = sqrtf(1.0f - powf(sz, 2.0f));//fabsf(sinLat); //causing nans
 
     RowVector3f dLat_dSS;
     dLat_dSS << 0.0f, 0.0f, -1.0f / szFactor;
@@ -450,7 +450,7 @@ void ExtendedKalmanFilter(Vector5f& xEkf, Matrix5f& pEkf, Vector5f& innov,
     sv_SS << sx, sy, sz;
 
     // Partial Derivatives
-    float szFactor = fabsf(sinLat);    //sqrtf(1.0f - powf(sz, 2.0f));
+    float szFactor = sqrtf(1.0f - powf(sz, 2.0f));// fabsf(sinLat);    //causing nans
 
     RowVector3f dLat_dSS;
     dLat_dSS << 0.0f, 0.0f, -1.0f / szFactor;
