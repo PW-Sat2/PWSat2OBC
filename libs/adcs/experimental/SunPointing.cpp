@@ -76,90 +76,90 @@ Eigen::Matrix3f skew(const Eigen::Vector3f &vec)
  *   references    :
  */
 /*
-Matrix5f matInv(Matrix5f A)
-{
-    const uint8_t n = 5;
+ Matrix5f matInv(Matrix5f A)
+ {
+ const uint8_t n = 5;
 
-    // LU DECOMPOSITION -------------------------------------------------------
-    // initialize
-    Matrix5f L = Matrix5f::Identity();
-    Matrix5f U = Matrix5f::Zero();
-    Matrix5f Y = Matrix5f::Identity();
-    Matrix5f AInv = Matrix5f::Zero();
-    U(0, 0) = A(0, 0);
+ // LU DECOMPOSITION -------------------------------------------------------
+ // initialize
+ Matrix5f L = Matrix5f::Identity();
+ Matrix5f U = Matrix5f::Zero();
+ Matrix5f Y = Matrix5f::Identity();
+ Matrix5f AInv = Matrix5f::Zero();
+ U(0, 0) = A(0, 0);
 
-    // first row of U and first column of L
-    for (uint8_t j = 1; j < n; j++)
-    {
-        U(0, j) = A(0, j);
-        L(j, 0) = A(j, 0) / U(0, 0);
-    }
+ // first row of U and first column of L
+ for (uint8_t j = 1; j < n; j++)
+ {
+ U(0, j) = A(0, j);
+ L(j, 0) = A(j, 0) / U(0, 0);
+ }
 
-    // up to n-1'th row of U and column of L
-    for (uint8_t j = 1; j < n - 1; j++)
-    {
-        for (uint8_t i = j; i < n; i++)
-        {
-            U(j, i) = A(j, i);
-            for (uint8_t k = 0; k <= j - 1; k++)
-            {
-                U(j, i) = U(j, i) - L(j, k) * U(k, i);
-            }
-        }
-        for (uint8_t i = j + 1; i < n; i++)
-        {
-            L(i, j) = A(i, j);
-            for (uint8_t k = 0; k <= j - 1; k++)
-            {
-                L(i, j) = L(i, j) - L(i, k) * U(k, j);
-            }
-            L(i, j) = L(i, j) / U(j, j);
-        }
-    }
+ // up to n-1'th row of U and column of L
+ for (uint8_t j = 1; j < n - 1; j++)
+ {
+ for (uint8_t i = j; i < n; i++)
+ {
+ U(j, i) = A(j, i);
+ for (uint8_t k = 0; k <= j - 1; k++)
+ {
+ U(j, i) = U(j, i) - L(j, k) * U(k, i);
+ }
+ }
+ for (uint8_t i = j + 1; i < n; i++)
+ {
+ L(i, j) = A(i, j);
+ for (uint8_t k = 0; k <= j - 1; k++)
+ {
+ L(i, j) = L(i, j) - L(i, k) * U(k, j);
+ }
+ L(i, j) = L(i, j) / U(j, j);
+ }
+ }
 
-    // calculate U(n,n)
-    uint8_t last = n - 1;
-    U(last, last) = A(last, last);
-    for (uint8_t k = 0; k < n - 1; k++)
-    {
-        U(last, last) = U(last, last) - L(last, k) * U(k, last);
-    }
+ // calculate U(n,n)
+ uint8_t last = n - 1;
+ U(last, last) = A(last, last);
+ for (uint8_t k = 0; k < n - 1; k++)
+ {
+ U(last, last) = U(last, last) - L(last, k) * U(k, last);
+ }
 
-    // 1ST GAUSSIAN ELIMINATION -----------------------------------------------
-    //XXX?? %solve LY = eye(n) for Y
-    for (uint8_t j = 0; j < n - 1; j++)
-    {
-        Y(j + 1, j) = -L(j + 1, j);
-        for (uint8_t i = j + 2; i < n; i++)
-        {
-            Y(i, j) = -L(i, j);
-            for (uint8_t k = j + 1; k < i - 1; k++)
-            {
-                Y(i, j) = Y(i, j) - L(i, k) * Y(k, j);
-            }
-        }
-    }
+ // 1ST GAUSSIAN ELIMINATION -----------------------------------------------
+ //XXX?? %solve LY = eye(n) for Y
+ for (uint8_t j = 0; j < n - 1; j++)
+ {
+ Y(j + 1, j) = -L(j + 1, j);
+ for (uint8_t i = j + 2; i < n; i++)
+ {
+ Y(i, j) = -L(i, j);
+ for (uint8_t k = j + 1; k < i - 1; k++)
+ {
+ Y(i, j) = Y(i, j) - L(i, k) * Y(k, j);
+ }
+ }
+ }
 
-    // 2ND GAUSSIAN ELIMINATION -----------------------------------------------
-    //XXX?? %solve UX = Y for X. Note that X = A^(-1)
+ // 2ND GAUSSIAN ELIMINATION -----------------------------------------------
+ //XXX?? %solve UX = Y for X. Note that X = A^(-1)
 
-    for (uint8_t j = 0; j < n; j++)
-    {
-        AInv(last, j) = Y(last, j) / U(last, last);
-        for (int8_t i = last - 1; i >= 0; i--)
-        {
-            AInv(i, j) = Y(i, j);
-            for (uint8_t k = i + 1; k < n; k++)
-            {
-                AInv(i, j) = AInv(i, j) - U(i, k) * AInv(k, j);
-            }
-            AInv(i, j) = AInv(i, j) / U(i, i);
-        }
-    }
+ for (uint8_t j = 0; j < n; j++)
+ {
+ AInv(last, j) = Y(last, j) / U(last, last);
+ for (int8_t i = last - 1; i >= 0; i--)
+ {
+ AInv(i, j) = Y(i, j);
+ for (uint8_t k = i + 1; k < n; k++)
+ {
+ AInv(i, j) = AInv(i, j) - U(i, k) * AInv(k, j);
+ }
+ AInv(i, j) = AInv(i, j) / U(i, i);
+ }
+ }
 
-    return AInv;
-}
-*/
+ return AInv;
+ }
+ */
 
 Matrix5f matInv(Matrix5f A)
 {
@@ -273,22 +273,28 @@ Vector5f PropagateState(const Vector5f& x, const Vector3f& ctrlTorque,
     Vector3f angrate = x.block(2, 0, 3, 1);
 
     // Sun Vector in SS frame
-    float sx = sinf(ssLat) * cosf(ssLong);
-    float sy = sinf(ssLat) * sinf(ssLong);
-    float sz = cosf(ssLat);
+    float sinLat = sinf(ssLat);
+    float sinLong = sinf(ssLong);
+    float cosLat = cosf(ssLat);
+    float cosLong = cosf(ssLong);
+
+    float sx = sinLat * cosLong;
+    float sy = sinLat * sinLong;
+    float sz = cosLat;
     Vector3f sv_SS;
     sv_SS << sx, sy, sz;
 
     // Partial Derivatives
+    float szFactor = fabsf(sinLat); //sqrtf(1.0f - powf(sz, 2.0f));
+
     RowVector3f dLat_dSS;
-    dLat_dSS << 0.0f, 0.0f, -1.0f / sqrtf(1.0f - powf(sz, 2.0f));
-    float htemp = sy / (sqrtf(1.0f - powf(sz, 2.0f)) + sx);
-    float hx = -sy / powf(sqrtf(1.0f - powf(sz, 2.0f)) + sx, 2);
-    float hy = 1.0f / (sqrtf(1.0f - powf(sz, 2.0f)) + sx);
-    float hz = -hx * sz / sqrtf(1.0f - powf(sz, 2.0f));
-    RowVector3f h;
-    h << hx, hy, hz;
-    RowVector3f dLong_dSS = 2.0f / (powf(htemp, 2.0f) + 1) * h;
+    dLat_dSS << 0.0f, 0.0f, -1.0f / szFactor;
+    float htemp = sy / (szFactor + sx);
+    float hx = -sy / powf(szFactor + sx, 2.0f);
+    float hy = 1.0f / (szFactor + sx);
+    float hz = -hx * sz / szFactor;
+    RowVector3f dLong_dSS = 2.0f / (powf(htemp, 2.0f) + 1.0f)
+            * (RowVector3f() << hx, hy, hz).finished();
 
     // Angular rate in SS frame
     Matrix3f angrate_ss = Matrix3f(state.params.rotSS.data()) * skew(angrate)
@@ -303,7 +309,8 @@ Vector5f PropagateState(const Vector5f& x, const Vector3f& ctrlTorque,
             Matrix3f(state.params.inertiaInv.data())
                     * (ctrlTorque
                             - skew(angrate)
-                                    * (Matrix3f(state.params.inertia.data()) * angrate));
+                                    * (Matrix3f(state.params.inertia.data())
+                                            * angrate));
 
     Vector5f xDot;
     xDot << LatDot, LongDot, angrateDot;
@@ -443,7 +450,8 @@ void ExtendedKalmanFilter(Vector5f& xEkf, Matrix5f& pEkf, Vector5f& innov,
     sv_SS << sx, sy, sz;
 
     // Partial Derivatives
-    float szFactor = sqrtf(1.0f - powf(sz, 2.0f));
+    float szFactor = fabsf(sinLat);    //sqrtf(1.0f - powf(sz, 2.0f));
+
     RowVector3f dLat_dSS;
     dLat_dSS << 0.0f, 0.0f, -1.0f / szFactor;
     float htemp = sy / (szFactor + sx);
@@ -458,13 +466,13 @@ void ExtendedKalmanFilter(Vector5f& xEkf, Matrix5f& pEkf, Vector5f& innov,
 
     // Sun vector in SS partial derivatives
     Vector3f dss_dLat;
-    dss_dLat << cosLat * cosLong,//
-            cosLat * sinLong,//
-            -sinLat;
+    dss_dLat << cosLat * cosLong,    //
+    cosLat * sinLong,    //
+    -sinLat;
     Vector3f dss_dLong;
-    dss_dLong << -sinLat * sinLong,//
-            sinLat * cosLong,//
-            0.0f;
+    dss_dLong << -sinLat * sinLong,    //
+    sinLat * cosLong,    //
+    0.0f;
 
     // Second order partial derivatives (row vectors)
     float sinLat2 = powf(sinLat, 2.0f);
@@ -474,15 +482,13 @@ void ExtendedKalmanFilter(Vector5f& xEkf, Matrix5f& pEkf, Vector5f& innov,
     ddLat_dLat_dSS << 0, 0, cosLat / sinLat2; //XXX is this init the same as above?? Vector3f ddLat_dLat_dSS({ 0, 0, cosf(ssLat) / powf(sinf(ssLat), 2) });
     RowVector3f ddLong_dLat_dSS = RowVector3f::Zero();
     RowVector3f ddLat_dLong_dSS;
-    ddLat_dLong_dSS
-            << tanHalfLong * cosLat / sinLat2,//
-            -cosLat / sinLat2,//
-            -tanHalfLong / sinLat * (2.0f / sinLat2 - 1.0f);
+    ddLat_dLong_dSS << tanHalfLong * cosLat / sinLat2, //
+    -cosLat / sinLat2, //
+    -tanHalfLong / sinLat * (2.0f / sinLat2 - 1.0f);
     RowVector3f ddLong_dLong_dSS;
-    ddLong_dLong_dSS
-            << -0.5f / sinLat * (1.0f + tanHalfLong2),//
-            0.0f,//
-            0.5f * cosLat / sinLat2 * (1.0f + tanHalfLong2);
+    ddLong_dLong_dSS << -0.5f / sinLat * (1.0f + tanHalfLong2), //
+    0.0f, //
+    0.5f * cosLat / sinLat2 * (1.0f + tanHalfLong2);
 
     // Derivatives of the Sun angles time derivatives wrt the state vector elements
     Matrix3f skewRotSStSvSS = skew(rotSSt * sv_SS);
@@ -504,13 +510,8 @@ void ExtendedKalmanFilter(Vector5f& xEkf, Matrix5f& pEkf, Vector5f& innov,
 
     // Discrete Jacobian for state transition
     Matrix5f jacobianF;
-    jacobianF << dLatDot_dLat,
-            dLatDot_dLong,
-            dLatDot_dOmega,
-            dLongDot_dLat, dLongDot_dLong,
-            dLongDot_dOmega,
-            Matrix<float, 3, 2>::Zero(),
-            dOmegaDot_dOmega;
+    jacobianF << dLatDot_dLat, dLatDot_dLong, dLatDot_dOmega, dLongDot_dLat, dLongDot_dLong, dLongDot_dOmega, Matrix<
+            float, 3, 2>::Zero(), dOmegaDot_dOmega;
     //std::cout << jacobianF<<std::endl;
     //jacobianF.block(2, 0, 3, 2) = Matrix<float, 3, 2>::Zero();
     //jacobianF.block(2, 2, 3, 3) = dOmegaDot_dOmega;
@@ -519,7 +520,7 @@ void ExtendedKalmanFilter(Vector5f& xEkf, Matrix5f& pEkf, Vector5f& innov,
     // Prediction of covariance matrix P
     Matrix5f P_prio1 = stateTrans * state.pEkfPrev * stateTrans.transpose();
     Matrix5f P_prio2 = state.params.dt
-            * Vector5f(state.params.kalmanCov.Q.data()).asDiagonal();//XXX !!!!!! investigate
+            * Vector5f(state.params.kalmanCov.Q.data()).asDiagonal(); //XXX !!!!!! investigate
     Matrix5f P_prio = P_prio1 + P_prio2;
 
     // UPDATE -----------------------------------------------------------------
@@ -547,7 +548,8 @@ void ExtendedKalmanFilter(Vector5f& xEkf, Matrix5f& pEkf, Vector5f& innov,
     zMeas << ssMeasTmp, gyroMeasTmp;
 
     // Kalman Gain
-    innovCov = P_prio + Matrix5f(Vector5f(state.params.kalmanCov.R.data()).asDiagonal());
+    innovCov = P_prio
+            + Matrix5f(Vector5f(state.params.kalmanCov.R.data()).asDiagonal());
     Matrix5f K = P_prio * matInv(innovCov);
 
     if (!ssFlag)
@@ -568,7 +570,8 @@ void ExtendedKalmanFilter(Vector5f& xEkf, Matrix5f& pEkf, Vector5f& innov,
     xEkf = xPrio + delta_x;
     Matrix5f jf_m = Matrix5f::Identity() - K;
     pEkf = jf_m * P_prio * jf_m.transpose()
-            + K * Vector5f(state.params.kalmanCov.R.data()).asDiagonal() * K.transpose(); // Joseph form
+            + K * Vector5f(state.params.kalmanCov.R.data()).asDiagonal()
+                    * K.transpose(); // Joseph form
 }
 
 /*
@@ -745,7 +748,7 @@ void SunPointing::step(DipoleVec& dipole, const MagVec& mtmMeas, bool mtmFlag,
 // inputs to eigen
     for (unsigned int i = 0; i < mtmMeas.size(); i++)
     {
-        inMtmMeas[i] = mtmMeas[i] / 1e7f;//TODO check conversion - this is high for initial testing purposes
+        inMtmMeas[i] = mtmMeas[i] / 1e7f; //TODO check conversion - this is high for initial testing purposes
     }
 
     for (unsigned int i = 0; i < ssMeas.size(); i++)
@@ -844,7 +847,7 @@ void SunPointing::step(DipoleVec& dipole, const MagVec& mtmMeas, bool mtmFlag,
     state.ctrlTorquePrev = ctrlTorque;
     state.ekfConvCountPrev = ekfConvCount;
 
-    for(int i = 0; i < commDipoleSP.size(); i++)
+    for (int i = 0; i < commDipoleSP.size(); i++)
     {
         dipole[i] = commDipoleSP[i] * 1e4;
     }
