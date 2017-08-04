@@ -579,12 +579,18 @@ namespace details
     template <typename T, std::size_t size> struct BitSizeOf<std::array<T, size>, false>
     {
         /**
-         * @brief This value contains queried type size in bits.
+         * @brief This value contains full queried type size in bits.
          */
         static constexpr std::uint32_t Value = size * BitSizeOf<T, std::is_enum<T>::value>::Value;
 
+        /**
+         * @brief This value contains queried array element type size in bits.
+         */
         static constexpr std::uint32_t ElementSize = BitSizeOf<T, std::is_enum<T>::value>::Value;
 
+        /**
+         * @brief This value contains queried array size in elements.
+         */
         static constexpr std::uint32_t Size = size;
     };
 }

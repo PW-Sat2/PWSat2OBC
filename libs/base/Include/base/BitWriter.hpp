@@ -164,9 +164,16 @@ class BitWriter
      * @brief Appends generic value to the buffer and moves the current position to the next free bit.
      * @param[in] value Value that should be added to writer output.
      * @return Operation status.
+     * @remark Overload for enumerations
      */
     template <typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0> bool Write(T value);
 
+    /**
+     * @brief Appends generic value to the buffer and moves the current position to the next free bit.
+     * @param[in] value Value that should be added to writer output.
+     * @return Operation status.
+     * @remark Overload for fundamental types
+     */
     template <typename T, typename std::enable_if<std::is_fundamental<T>::value, int>::type = 0> bool Write(T value);
 
     /**

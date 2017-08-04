@@ -11,16 +11,38 @@
 
 namespace telemetry
 {
+    /**
+     * @brief Helper trait for SimpleTelemetryElement than is responsible for providing the default
+     * value for requested object
+     *
+     * Specialize this template for types that require custom initialization.
+     * @tparam T Requested type
+     * @ingroup telemetry
+     */
     template <typename T> struct Construct
     {
+        /**
+         * @brief Constructs default value for requested type.
+         * @return Default value.
+         */
         static constexpr T Default()
         {
             return T{};
         }
     };
 
+    /**
+     * @brief Specialization of helper trait SimpleTelemetryElement for arrays.
+     *
+     * @tparam T Type of array element.
+     * @ingroup telemetry
+     */
     template <typename T, size_t N> struct Construct<std::array<T, N>>
     {
+        /**
+         * @brief Constructs default value for requested type.
+         * @return Default value.
+         */
         static std::array<T, N> Default()
         {
             std::array<T, N> result;
