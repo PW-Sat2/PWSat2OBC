@@ -1,5 +1,5 @@
 import datetime
-from Queue import Queue, Empty
+from Queue import Queue, Empty, Full
 from threading import Lock
 
 from enum import Enum, unique
@@ -244,7 +244,10 @@ class TransmitterDevice(i2cMock.I2CDevice):
 
         call(self.on_send_frame, None, self, data)
         with self._lock:
-            self._buffer.put_nowait(data)
+            try:
+                self._buffer.put_nowait(data)
+            except Full:
+                self.log.error("Could not put new item - Queue is full")
             self.beacon_active = False
             return [TransmitterDevice.BUFFER_SIZE - self._buffer.qsize()]
 
