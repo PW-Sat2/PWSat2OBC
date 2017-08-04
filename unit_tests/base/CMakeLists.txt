@@ -43,6 +43,7 @@ target_link_libraries(${NAME}
     program_flash
     payload
     power
+    telemetry_imtq
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

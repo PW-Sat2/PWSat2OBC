@@ -32,17 +32,15 @@ namespace telemetry
         writer.Write(this->mcuTemperature);
     }
 
-    ImtqState::ImtqState() : status(0), mode(devices::imtq::Mode::Idle), errorCode(0), configurationUpdated(false), uptime(0s)
+    ImtqState::ImtqState() : mode(devices::imtq::Mode::Idle), errorCode(0), configurationUpdated(false), uptime(0s)
     {
     }
 
-    ImtqState::ImtqState(std::uint8_t status_, //
-        devices::imtq::Mode mode_,
+    ImtqState::ImtqState(devices::imtq::Mode mode_,
         std::uint8_t errorCode_,
         bool configurationUpdated_,
         std::chrono::seconds uptime_)
-        : status(status_),                             //
-          mode(mode_),                                 //
+        : mode(mode_),                                 //
           errorCode(errorCode_),                       //
           configurationUpdated(configurationUpdated_), //
           uptime(uptime_)
@@ -51,7 +49,6 @@ namespace telemetry
 
     void ImtqState::Write(BitWriter& writer) const
     {
-        writer.Write(this->status);
         writer.WriteWord(num(this->mode), 2);
         writer.Write(this->errorCode);
         writer.Write(this->configurationUpdated);

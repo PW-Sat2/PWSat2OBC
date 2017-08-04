@@ -88,6 +88,7 @@ namespace devices
                 HouseKeeping,
                 CoilCurrents,
                 CoilTemperatures,
+                Status,
                 State,
                 SelfTest,
                 CoilsActive,
@@ -108,6 +109,7 @@ namespace devices
             telemetry::ImtqHousekeeping houseKeeping;
             telemetry::ImtqCoilCurrent coilCurrents;
             telemetry::ImtqCoilTemperature coilTemperatures;
+            telemetry::ImtqStatus imtqStatus;
             telemetry::ImtqState imtqState;
             telemetry::ImtqSelfTest selfTest;
             telemetry::ImtqCoilsActive coilsActive;

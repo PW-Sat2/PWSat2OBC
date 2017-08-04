@@ -39,6 +39,7 @@ namespace telemetry
         struct CoilCurrentTag;
         struct CoilTemperatureTag;
         struct CoilsActiveTag;
+        struct ImtqStatusTag;
     }
 
     /**
@@ -146,6 +147,13 @@ namespace telemetry
      */
     typedef SimpleTelemetryElement<std::array<ImtqTelemetryTemperature, 3>, ::telemetry::details::CoilTemperatureTag> ImtqCoilTemperature;
 
+    /**
+     * @brief This type represents telemetry element related to imtq last status
+     * @telemetry_element
+     * @ingroup telemetry
+     */
+    typedef SimpleTelemetryElement<std::uint8_t, ::telemetry::details::ImtqStatusTag> ImtqStatus;
+
     template <typename... Type> class Telemetry;
 
     typedef Telemetry<SystemStartup,            //
@@ -172,6 +180,7 @@ namespace telemetry
         ImtqHousekeeping,                       //
         ImtqCoilCurrent,                        //
         ImtqCoilTemperature,                    //
+        ImtqStatus,                             //
         ImtqState,                              //
         ImtqSelfTest                            //
         >
