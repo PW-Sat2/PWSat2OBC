@@ -92,23 +92,58 @@ namespace telemetry
      */
     typedef SimpleTelemetryElement<std::uint32_t, ::telemetry::details::RAMScrubbingTag> RAMScrubbing;
 
+    /**
+     * @brief This type represents telemetry element related to imtq magnetometer measurements
+     * @telemetry_element
+     * @ingroup telemetry
+     */
     typedef SimpleTelemetryElement<std::array<devices::imtq::MagnetometerMeasurement, 3>, ::telemetry::details::MagnetometerMeasurementsTag>
         ImtqMagnetometerMeasurements;
 
+    /**
+     * @brief This type represents telemetry element related to imtq observed dipoles
+     * @telemetry_element
+     * @ingroup telemetry
+     */
     typedef SimpleTelemetryElement<std::array<devices::imtq::Dipole, 3>, ::telemetry::details::DipolesTag> ImtqDipoles;
 
+    /**
+     * @brief This type represents telemetry element related to imtq b-dot field
+     * @telemetry_element
+     * @ingroup telemetry
+     */
     typedef SimpleTelemetryElement<std::array<devices::imtq::BDotType, 3>, ::telemetry::details::BDotTag> ImtqBDotTelemetry;
 
+    /**
+     * @brief This type represents telemetry element related to imtq self test result
+     * @telemetry_element
+     * @ingroup telemetry
+     */
     typedef SimpleTelemetryElement<std::array<std::uint8_t, 8>, ::telemetry::details::BDotTag> ImtqSelfTest;
 
+    /**
+     * @brief This type represents telemetry element related to imtq coils state during magnetometer measurements
+     * @telemetry_element
+     * @ingroup telemetry
+     */
     typedef SimpleTelemetryElement<bool, ::telemetry::details::CoilsActiveTag> ImtqCoilsActive;
 
     using ImtqTelemetryCurrent = devices::imtq::Current;
 
+    /**
+     * @brief This type represents telemetry element related to imtq coils' currents
+     * @telemetry_element
+     * @ingroup telemetry
+     */
     typedef SimpleTelemetryElement<std::array<ImtqTelemetryCurrent, 3>, ::telemetry::details::CoilCurrentTag> ImtqCoilCurrent;
 
     using ImtqTelemetryTemperature = devices::imtq::TemperatureMeasurement;
 
+    /**
+     * @brief This type represents telemetry element related to imtq coils' temperatures
+     * @telemetry_element
+     * @ingroup telemetry
+     */
     typedef SimpleTelemetryElement<std::array<ImtqTelemetryTemperature, 3>, ::telemetry::details::CoilTemperatureTag> ImtqCoilTemperature;
 
     template <typename... Type> class Telemetry;
