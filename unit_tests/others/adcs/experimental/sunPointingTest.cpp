@@ -9,7 +9,7 @@
 #include "adcs/experimental/adcsUtConfig.h"
 #include "adcs/experimental/Include/adcs/dataFileTools.hpp"
 
-static const float COMP_ACCUR = 0.0001;
+static const float COMP_ACCUR = 1e-4;
 
 using adcs::SunPointing;
 using adcs::DipoleVec;
@@ -17,6 +17,7 @@ using adcs::MagVec;
 using adcs::SunsVec;
 using adcs::GyroVec;
 using Eigen::Matrix;
+using Eigen::MatrixBase;
 using Eigen::Vector3f;
 using Matrix3f = Matrix<float, 3, 3, Eigen::RowMajor>;
 using Matrix5f = Matrix<float, 5, 5, Eigen::RowMajor>;
@@ -45,6 +46,38 @@ enum ESPDataIdx
     ESP_EKFconvCount = 114,   // 1x1
     ESPDataIdx_size
 };
+
+template<typename Derived>
+void compare(const MatrixBase<Derived>& val, const MatrixBase<Derived>& val_exp,
+        bool verbose = false)
+{
+    ASSERT_TRUE(val.size() == val_exp.size());
+
+    for (int j = 0; j < val_exp.cols(); j++)
+    {
+        for (int i = 0; i < val_exp.rows(); i++)
+        {
+            EXPECT_NEAR(val_exp(i, j), val(i, j), COMP_ACCUR);
+            if (verbose)
+            {
+                std::cout << "EXPECT_NEAR(" << val_exp(i, j) << " == "
+                        << val(i, j) << ")" << std::endl;
+            }
+
+        }
+    }
+}
+
+void compare(float val, float val_exp, bool verbose = false)
+{
+    EXPECT_NEAR(val_exp, val, COMP_ACCUR);
+    if (verbose)
+    {
+        std::cout << "EXPECT_NEAR(" << val_exp << " == " << val << ")"
+                << std::endl;
+    }
+
+}
 
 // cross-validation of skew function against matlab implementation
 TEST(sunpointing, cross_validation_skew)
@@ -502,7 +535,7 @@ TEST(sunpointing, cross_validation_sunVandRateExtendedInDepth)
             {
                 EXPECT_NEAR(rotSSt(i, j), record[record_cntr], COMP_ACCUR); //XXX only one with changed indexing
 #ifdef ADCS_SUNPOINTING_DEBUG
-                std::cout << "EXPECT_NEAR(" << rotSSt(j, i) << " == "<< record[record_cntr] << ")" << std::endl;
+                        std::cout << "EXPECT_NEAR(" << rotSSt(j, i) << " == "<< record[record_cntr] << ")" << std::endl;
 #endif
                 record_cntr++;
             }
@@ -705,7 +738,7 @@ TEST(sunpointing, cross_validation_ekf)
 {
     //return;//XXX
 
-    const float COMP_ACCUR = 1.01;
+    const float COMP_ACCUR = 1.0;
 
     SunPointing::State state;
 
@@ -850,6 +883,207 @@ TEST(sunpointing, cross_validation_ekf)
 }
 //*/
 
+// cross-validation of sun vector partial derivative calculation against matlab implementation
+TEST(sunpointing, cross_validation_sunvec)
+{
+//return;//XXX
+
+    SunPointing::State state;
+
+    uint record_cntr = 0;
+
+    //state.xEkfPrev
+    float ssLat_exp;
+    float ssLong_exp;
+    Vector3f angrate_exp;
+    float sinLat_exp;
+    float sinLong_exp;
+    float cosLat_exp;
+    float cosLong_exp;
+    float sx_exp;
+    float sy_exp;
+    float sz_exp;
+    Vector3f sv_SS_exp;
+    float szFactor_exp;
+    RowVector3f dLat_dSS_exp;
+    float htemp_exp;
+    float hx_exp;
+    float hy_exp;
+    float hz_exp;
+    RowVector3f dLong_dSS_exp;
+
+    const uint recordLen = 5 + 26; //TODO dep on size of above
+
+    std::ifstream file(
+    ADCS_UT_DATA_FILE_PATH "/sunpointing_crossvalidation_sunvec.csv");
+    if (!file)
+    {
+        FAIL()<< "Cannot find data  file!" << std::endl;
+    }
+    std::vector<float> record;
+
+    int LoopCntr = -1;
+
+    while (!file.eof())
+    //for (int i = 0; i < 10; i++)
+    {
+        LoopCntr++;
+//        std::cout << "LoopCntr [" << LoopCntr << "]: " << std::endl
+//                << std::flush;
+
+        record_cntr = 0;
+        record = dataFileTools::getRecord(file);
+        if (record.size() != recordLen)
+        {
+            if (file.eof())
+            {
+                break;
+            }
+            else
+            {
+                FAIL()<< "Data record has size different than expected (got: " << record.size() << " but expected: " << recordLen << ")" << std::endl;
+            }
+        }
+
+        for (int j = 0; j < state.xEkfPrev.cols(); j++) //TODO put this test to function!!!
+        {
+            for (int i = 0; i < state.xEkfPrev.rows(); i++)
+            {
+                state.xEkfPrev(i, j) = record[record_cntr++];
+            }
+        }
+
+        ssLat_exp = record[record_cntr++];
+        ssLong_exp = record[record_cntr++];
+
+        for (int j = 0; j < angrate_exp.cols(); j++) //TODO put this test to function!!!
+        {
+            for (int i = 0; i < angrate_exp.rows(); i++)
+            {
+                angrate_exp(i, j) = record[record_cntr++];
+            }
+        }
+
+        sinLat_exp = record[record_cntr++];
+        sinLong_exp = record[record_cntr++];
+        cosLat_exp = record[record_cntr++];
+        cosLong_exp = record[record_cntr++];
+        sx_exp = record[record_cntr++];
+        sy_exp = record[record_cntr++];
+        sz_exp = record[record_cntr++];
+
+        for (int j = 0; j < sv_SS_exp.cols(); j++) //TODO put this test to function!!!
+        {
+            for (int i = 0; i < sv_SS_exp.rows(); i++)
+            {
+                sv_SS_exp(i, j) = record[record_cntr++];
+            }
+        }
+
+        szFactor_exp = record[record_cntr++];
+
+        for (int j = 0; j < dLat_dSS_exp.cols(); j++) //TODO put this test to function!!!
+        {
+            for (int i = 0; i < dLat_dSS_exp.rows(); i++)
+            {
+                dLat_dSS_exp(i, j) = record[record_cntr++];
+            }
+        }
+
+        htemp_exp = record[record_cntr++];
+        hx_exp = record[record_cntr++];
+        hy_exp = record[record_cntr++];
+        hz_exp = record[record_cntr++];
+
+        for (int j = 0; j < dLong_dSS_exp.cols(); j++) //TODO put this test to function!!!
+        {
+            for (int i = 0; i < dLong_dSS_exp.rows(); i++)
+            {
+                dLong_dSS_exp(i, j) = record[record_cntr++];
+            }
+        }
+
+        //---------vvv-----------ALGO--------------------vvv-------------------
+        // Extract previous states
+        float ssLat = state.xEkfPrev(0, 0);
+        float ssLong = state.xEkfPrev(1, 0);
+        Vector3f angrate = state.xEkfPrev.block(2, 0, 3, 1);
+
+        // Sun Vector in SS frame
+        float sinLat = sinf(ssLat);
+        float sinLong = sinf(ssLong);
+        float cosLat = cosf(ssLat);
+        float cosLong = cosf(ssLong);
+
+        float sx = sinLat * cosLong;
+        float sy = sinLat * sinLong;
+        float sz = cosLat;
+        Vector3f sv_SS;
+        sv_SS << sx, sy, sz;
+
+        // Partial Derivatives
+        float szFactor = fabsf(sinLat);//XXX<--causing nans in full algo but cant observe it in this test       //sqrtf(1.0f - powf(sz, 2.0f));
+
+        RowVector3f dLat_dSS;
+        dLat_dSS << 0.0f, 0.0f, -1.0f / szFactor;
+        float htemp = sy / (szFactor + sx);
+//        float htemp = 0;
+//        if(sinLat > 0.0000001)
+//        {
+//            htemp = sinLong/((std::signbit(sinLat) ?  -1 : 1) + cosLong);
+//        }
+        float hx = -sy / powf(szFactor + sx, 2.0f);
+        float hy = 1.0f / (szFactor + sx);
+        float hz = -hx * sz / szFactor;
+        RowVector3f dLong_dSS = 2.0f / (powf(htemp, 2.0f) + 1.0f)
+                * (RowVector3f() << hx, hy, hz).finished();
+
+        //---------^^^-----------ALGO--------------------^^^-------------------
+
+        compare(ssLat, ssLat_exp);
+        compare(ssLong, ssLong_exp);
+        compare(angrate, angrate_exp);
+        compare(sinLat, sinLat_exp);
+        compare(sinLong, sinLong_exp);
+        compare(cosLat, cosLat_exp);
+        compare(cosLong, cosLong_exp);
+        compare(sx, sx_exp);
+        compare(sy, sy_exp);
+        compare(sz, sz_exp);
+        compare(sv_SS, sv_SS_exp);
+        compare(szFactor, szFactor_exp, false);
+        compare(dLat_dSS, dLat_dSS_exp, false);
+        compare(htemp, htemp_exp);
+        compare(hx, hx_exp);
+        compare(hy, hy_exp);
+        compare(hz, hz_exp);
+        compare(dLong_dSS, dLong_dSS_exp);
+
+        UNUSED1(ssLat_exp);
+        UNUSED1(ssLong_exp);
+        UNUSED1(angrate_exp);
+        UNUSED1(sinLat_exp);
+        UNUSED1(sinLong_exp);
+        UNUSED1(cosLat_exp);
+        UNUSED1(cosLong_exp);
+        UNUSED1(sx_exp);
+        UNUSED1(sy_exp);
+        UNUSED1(sz_exp);
+        UNUSED1(sv_SS_exp);
+        UNUSED1(szFactor_exp);
+        UNUSED1(dLat_dSS_exp);
+        UNUSED1(htemp_exp);
+        UNUSED1(hx_exp);
+        UNUSED1(hy_exp);
+        UNUSED1(hz_exp);
+        UNUSED1(dLong_dSS_exp);
+        UNUSED1(dLong_dSS);
+        UNUSED1(angrate);
+
+    }
+    file.close();
+}
+
 // cross-validation of ExtendedKalmanFilter function against matlab implementation
 TEST(sunpointing, cross_validation_ekf_indepth)
 {
@@ -905,8 +1139,8 @@ TEST(sunpointing, cross_validation_ekf_indepth)
     //for (int i = 0; i < 10; i++)
     {
         LoopCntr++;
-        std::cout << "LoopCntr [" << LoopCntr << "]: " << std::endl
-                << std::flush;
+//        std::cout << "LoopCntr [" << LoopCntr << "]: " << std::endl
+//                << std::flush;
 
         record_cntr = 0;
         record = dataFileTools::getRecord(file);
@@ -1168,21 +1402,8 @@ TEST(sunpointing, cross_validation_ekf_indepth)
 
         // Discrete Jacobian for state transition
         Matrix5f jacobianF;
-        jacobianF << dLatDot_dLat, dLatDot_dLong, dLatDot_dOmega, dLongDot_dLat, dLongDot_dLong, //XXX !!!!!! investigate
-        dLongDot_dOmega, Matrix<float, 3, 2>::Zero(), dOmegaDot_dOmega;
-//
-//            Matrix5f jacobianFa;
-//            jacobianFa << 0.1, 0.2, (RowVector3f() << 0.3,0.4,0.5).finished(), 0.6,0.7,(RowVector3f() << 0.8,0.9,0.01).finished(), Matrix<float, 3, 2>::Zero(), (Matrix3f() << 0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19).finished();
-//            jacobianF.block(0, 0, 1, 1) = 0.1;
-//            jacobianF.block(0, 1, 1, 1) = 0.2;
-//            jacobianF.block(0, 2, 1, 3) = (Vector3f() << 0.3,0.4,0.5).finished();
-//            jacobianF.block(2, 2, 3, 3) = dOmegaDot_dOmega;
-
-//            std::cout<<jacobianF<<std::endl;
-//            std::cout<<"drugi"<<std::endl;
-//            std::cout<<jacobianF_exp<<std::endl;
-//
-        //std::cout << jacobianF<<std::endl;
+        jacobianF << dLatDot_dLat, dLatDot_dLong, dLatDot_dOmega, dLongDot_dLat, dLongDot_dLong, dLongDot_dOmega, Matrix<
+                float, 3, 2>::Zero(), dOmegaDot_dOmega;
 
         Matrix5f stateTrans = Matrix5f::Identity()
                 + state.params.dt * jacobianF;
@@ -1336,19 +1557,19 @@ TEST(sunpointing, cross_validation_ekf_indepth)
             }
         }
 
-//            for (int j = 0; j < innovCovInv_exp.cols(); j++)
-//            {
-//                for (int i = 0; i < innovCovInv_exp.rows(); i++)
-//                {
-//                    EXPECT_NEAR(innovCovInv_exp(i, j), innovCovInv(i, j),
-//                            COMP_ACCUR);
-//#ifdef ADCS_SUNPOINTING_DEBUG
-//                    std::cout << "EXPECT_NEAR(" << innovCovInv_exp(i, j) << " == "
-//                    << innovCovInv(i, j) << ")" << std::endl;
-//#endif
-//
-//                }
-//            }
+        //            for (int j = 0; j < innovCovInv_exp.cols(); j++)
+        //            {
+        //                for (int i = 0; i < innovCovInv_exp.rows(); i++)
+        //                {
+        //                    EXPECT_NEAR(innovCovInv_exp(i, j), innovCovInv(i, j),
+        //                            COMP_ACCUR);
+        //#ifdef ADCS_SUNPOINTING_DEBUG
+        //                    std::cout << "EXPECT_NEAR(" << innovCovInv_exp(i, j) << " == "
+        //                    << innovCovInv(i, j) << ")" << std::endl;
+        //#endif
+        //
+        //                }
+        //            }
 
         for (int j = 0; j < K_exp.cols(); j++)
         {
@@ -1414,7 +1635,6 @@ TEST(sunpointing, cross_validation_ekf_indepth)
 
             }
         }
-//*/
     }
     file.close();
 }
@@ -1453,8 +1673,8 @@ TEST(sunpointing, cross_validation)
     //for (int i = 0; i < 10; i++)
     {
         LoopCntr++;
-        std::cout << "LoopCntr [" << LoopCntr << "]: " << std::endl
-                << std::flush;
+//        std::cout << "LoopCntr [" << LoopCntr << "]: " << std::endl
+//                << std::flush;
 
         record = dataFileTools::getRecord(file); // TODO change to sunpointing data pool
         if (record.size() != ESPDataIdx_size)
