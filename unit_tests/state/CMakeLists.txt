@@ -22,6 +22,8 @@ set(SOURCES
   telemetry/FileSystemTelemetryAcquisitionTest.cpp
   telemetry/TimeTelemetryTest.cpp
   telemetry/TimeTelemetryAcquisitionTest.cpp
+  telemetry/ImtqTelemetryAcquisitionTest.cpp
+  telemetry/ImtqTelemetryTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
@@ -37,6 +39,7 @@ target_link_libraries(${NAME}
     telemetry_ant
     telemetry_fs
     telemetry_time
+    telemetry_imtq
 )
 
 

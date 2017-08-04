@@ -50,6 +50,36 @@ namespace telemetry
          */
         static constexpr std::uint32_t BitSize();
 
+        /**
+         * @brief Property accessor;
+         * @return Current value of digital voltage supply.
+         */
+        devices::imtq::VoltageInMiliVolt DigitalVoltage() const noexcept;
+
+        /**
+         * @brief Property accessor;
+         * @return Current value of analog voltage supply.
+         */
+        devices::imtq::VoltageInMiliVolt AnalogVoltage() const noexcept;
+
+        /**
+         * @brief Property accessor;
+         * @return Current value of digital current supply.
+         */
+        devices::imtq::Current DigitalCurrent() const noexcept;
+
+        /**
+         * @brief Property accessor;
+         * @return Current value of analog current supply.
+         */
+        devices::imtq::Current AnalogCurrent() const noexcept;
+
+        /**
+         * @brief Property accessor;
+         * @return Current value mcu temperature.
+         */
+        devices::imtq::TemperatureMeasurement McuTemperature() const noexcept;
+
       private:
         devices::imtq::VoltageInMiliVolt digitalVoltage;
         devices::imtq::VoltageInMiliVolt analogVoltage;
@@ -57,6 +87,31 @@ namespace telemetry
         devices::imtq::Current analogCurrent;
         devices::imtq::TemperatureMeasurement mcuTemperature;
     };
+
+    inline devices::imtq::VoltageInMiliVolt ImtqHousekeeping::DigitalVoltage() const noexcept
+    {
+        return this->digitalVoltage;
+    }
+
+    inline devices::imtq::VoltageInMiliVolt ImtqHousekeeping::AnalogVoltage() const noexcept
+    {
+        return this->analogVoltage;
+    }
+
+    inline devices::imtq::Current ImtqHousekeeping::DigitalCurrent() const noexcept
+    {
+        return this->digitalCurrent;
+    }
+
+    inline devices::imtq::Current ImtqHousekeeping::AnalogCurrent() const noexcept
+    {
+        return this->analogCurrent;
+    }
+
+    inline devices::imtq::TemperatureMeasurement ImtqHousekeeping::McuTemperature() const noexcept
+    {
+        return this->mcuTemperature;
+    }
 
     constexpr std::uint32_t ImtqHousekeeping::BitSize()
     {
@@ -83,17 +138,12 @@ namespace telemetry
 
         /**
          * @brief ctor.
-         * @param status Last seen imtq status
          * @param mode Current imtq mode
          * @param errorCode Last imtq error code
          * @param configurationUpdated Flag indicating whether imtq state has been recently updated
          * @param uptime Current imtq uptime
          */
-        ImtqState(std::uint8_t status, //
-            devices::imtq::Mode mode,
-            std::uint8_t errorCode,
-            bool configurationUpdated,
-            std::chrono::seconds uptime);
+        ImtqState(devices::imtq::Mode mode, std::uint8_t errorCode, bool configurationUpdated, std::chrono::seconds uptime);
 
         /**
          * @brief Write the imtq state element to passed buffer writer object.
@@ -107,24 +157,66 @@ namespace telemetry
          */
         static constexpr std::uint32_t BitSize();
 
+        /**
+         * @brief Property accessor;
+         * @return Current imtq mode.
+         */
+        devices::imtq::Mode Mode() const noexcept;
+
+        /**
+         * @brief Property accessor;
+         * @return Current last seen imtq error.
+         */
+        std::uint8_t ErrorCode() const noexcept;
+
+        /**
+         * @brief Property accessor;
+         * @return Current flag indicating whether the imtq configuration has been updated recently.
+         */
+        bool ConfigurationUpdated() const noexcept;
+
+        /**
+         * @brief Property accessor;
+         * @return Current imtq uptime.
+         */
+        std::chrono::seconds Uptime() const noexcept;
+
       private:
-        std::uint8_t status;
         devices::imtq::Mode mode;
         std::uint8_t errorCode;
         bool configurationUpdated;
         std::chrono::seconds uptime;
     };
 
+    inline devices::imtq::Mode ImtqState::Mode() const noexcept
+    {
+        return this->mode;
+    }
+
+    inline std::uint8_t ImtqState::ErrorCode() const noexcept
+    {
+        return this->errorCode;
+    }
+
+    inline bool ImtqState::ConfigurationUpdated() const noexcept
+    {
+        return this->configurationUpdated;
+    }
+
+    inline std::chrono::seconds ImtqState::Uptime() const noexcept
+    {
+        return this->uptime;
+    }
+
     constexpr std::uint32_t ImtqState::BitSize()
     {
-        return BitLength<decltype(status)> +            //
-            2 +                                         // BitLength<decltype(mode)>,
+        return 2 +                                      // BitLength<decltype(mode)>,
             BitLength<decltype(errorCode)> +            //
             BitLength<decltype(configurationUpdated)> + //
             BitLength<std::uint32_t>;
     }
 
-    static_assert(ImtqState::BitSize() == 51, "Invalid serialized size");
+    static_assert(ImtqState::BitSize() == 43, "Invalid serialized size");
 }
 
 #endif

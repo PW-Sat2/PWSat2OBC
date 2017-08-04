@@ -102,7 +102,7 @@ namespace devices
             const auto status = this->next.GetSystemState(state);
             return Update(status,
                 ElementId::State,
-                telemetry::ImtqState{0, state.mode, state.error.GetValue(), state.anyParameterUpdatedSinceStartup, state.uptime},
+                telemetry::ImtqState{state.mode, state.error.GetValue(), state.anyParameterUpdatedSinceStartup, state.uptime},
                 this->imtqState);
         }
 
@@ -237,6 +237,7 @@ namespace devices
                 Save(this->houseKeeping, ElementId::HouseKeeping, target);
                 Save(this->coilCurrents, ElementId::CoilCurrents, target);
                 Save(this->coilTemperatures, ElementId::CoilTemperatures, target);
+                Save(this->imtqStatus, ElementId::Status, target);
                 Save(this->imtqState, ElementId::State, target);
                 Save(this->selfTest, ElementId::SelfTest, target);
                 Save(this->coilsActive, ElementId::CoilsActive, target);
