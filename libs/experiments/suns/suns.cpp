@@ -1,8 +1,11 @@
 #include "suns.hpp"
+#include "fs/fs.h"
 #include "power/power.h"
 #include "time/ICurrentTime.hpp"
 
 using experiments::fs::ExperimentFile;
+using services::fs::FileOpen;
+using services::fs::FileAccess;
 
 namespace experiments
 {
@@ -33,6 +36,12 @@ namespace experiments
         {
             this->_remainingSessions = this->_parameters.SamplingSessionsCount();
 
+            //            this->_primaryDataSet = ExperimentFile();
+            //            this->_secondaryDataSet = ExperimentFile();
+
+            this->_primaryDataSet.Open(this->_fs, this->_primaryFileName, FileOpen::CreateAlways, FileAccess::WriteOnly);
+            this->_secondaryDataSet.Open(this->_fs, this->_secondaryFileName, FileOpen::CreateAlways, FileAccess::WriteOnly);
+
             return StartResult::Success;
         }
 
@@ -62,7 +71,10 @@ namespace experiments
                     System::SleepTask(this->_parameters.ShortDelay());
                 }
 
-                this->GatherSingleMeasurement();
+                auto dataPoint = this->GatherSingleMeasurement();
+
+                dataPoint.WriteSecondaryDataSetTo(this->_secondaryDataSet);
+                dataPoint.WritePrimaryDataSetTo(this->_primaryDataSet);
             }
 
             this->_powerControl.SensPower(false);
@@ -80,6 +92,8 @@ namespace experiments
 
         void SunSExperiment::Stop(IterationResult /*lastResult*/)
         {
+            this->_primaryDataSet.Close();
+            this->_secondaryDataSet.Close();
         }
 
         DataPoint SunSExperiment::GatherSingleMeasurement()
@@ -91,6 +105,8 @@ namespace experiments
             this->_experimentalSunS.StartMeasurement(this->_parameters.Gain(), this->_parameters.ITime());
 
             this->_payload.MeasureSunSRef(point.ReferenceSunS);
+
+            this->_experimentalSunS.WaitForData();
 
             this->_experimentalSunS.GetMeasuredData(point.ExperimentalSunS);
 
@@ -180,7 +196,7 @@ namespace experiments
                     }
                 }
 
-                file.Write(ExperimentFile::PID::ExperimentalSunSSecondary, w.Capture());
+                file.Write(ExperimentFile::PID::ExperimentalSunSSecondary, buffer);
             }
         }
     }

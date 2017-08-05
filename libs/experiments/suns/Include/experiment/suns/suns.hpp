@@ -3,8 +3,10 @@
 
 #include <chrono>
 #include <cstdint>
+#include <cstring>
 #include "experiments/experiments.h"
 #include "fs/ExperimentFile.hpp"
+#include "fs/fwd.hpp"
 #include "gyro/gyro.h"
 #include "gyro/telemetry.hpp"
 #include "payload/interfaces.h"
@@ -93,10 +95,13 @@ namespace experiments
                 services::time::ICurrentTime& currentTime,
                 devices::suns::ISunSDriver& experimentalSunS,
                 devices::payload::IPayloadDeviceDriver& payload,
-                devices::gyro::IGyroscopeDriver& gyro)
+                devices::gyro::IGyroscopeDriver& gyro,
+                services::fs::IFileSystem& fileSystem)
                 : _powerControl(powerControl), _currentTime(currentTime), _experimentalSunS(experimentalSunS), _payload(payload),
-                  _gyro(gyro), _nextSessionAt(0)
+                  _gyro(gyro), _fs(fileSystem), _nextSessionAt(0)
             {
+                std::strncpy(_primaryFileName, "/suns", 30);
+                std::strncpy(_secondaryFileName, "/suns.sec", 30);
             }
 
             void SetParameters(SunSExperimentParams parameters);
@@ -114,11 +119,18 @@ namespace experiments
             devices::suns::ISunSDriver& _experimentalSunS;
             devices::payload::IPayloadDeviceDriver& _payload;
             devices::gyro::IGyroscopeDriver& _gyro;
+            services::fs::IFileSystem& _fs;
 
             SunSExperimentParams _parameters;
 
             std::uint8_t _remainingSessions;
             std::chrono::milliseconds _nextSessionAt;
+
+            char _primaryFileName[30];
+            char _secondaryFileName[30];
+
+            fs::ExperimentFile _primaryDataSet;
+            fs::ExperimentFile _secondaryDataSet;
         };
     }
 }

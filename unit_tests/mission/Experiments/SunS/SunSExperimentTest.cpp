@@ -51,7 +51,7 @@ namespace
         testing::NiceMock<OSMock> _os;
         OSReset _osReset{InstallProxy(&_os)};
 
-        SunSExperiment _exp{_power, _timeProvider, _sunsExp, _payload, _gyro};
+        SunSExperiment _exp{_power, _timeProvider, _sunsExp, _payload, _gyro, _fs};
 
         std::chrono::milliseconds _time{0ms};
     };
@@ -66,8 +66,6 @@ namespace
 
     TEST_F(SunSExperimentTest, TestExperimentStartStop)
     {
-        // initialize gyro (?)
-        // create files
         auto r = _exp.Start();
         ASSERT_THAT(r, Eq(StartResult::Success));
 
@@ -76,7 +74,13 @@ namespace
 
     TEST_F(SunSExperimentTest, IterationsTiming)
     {
-        SunSExperimentParams params(1, 2, 10, 1s, 3, 5min);
+        std::array<std::uint8_t, 900> buf1;
+        std::array<std::uint8_t, 900> buf2;
+
+        _fs.AddFile("/suns", buf1);
+        _fs.AddFile("/suns.sec", buf2);
+
+        SunSExperimentParams params(1, 2, 2, 1s, 3, 5min);
 
         _exp.SetParameters(params);
 
@@ -142,6 +146,8 @@ namespace
         EXPECT_CALL(_sunsExp, StartMeasurement(_, _)).WillOnce(Return(OperationStatus::OK));
 
         EXPECT_CALL(_payload, MeasureSunSRef(_)).WillOnce(DoAll(SetArgReferee<0>(refSunsData), Return(OSResult::Success)));
+
+        EXPECT_CALL(_sunsExp, WaitForData()).WillOnce(Return(OSResult::Success));
 
         EXPECT_CALL(_sunsExp, GetMeasuredData(_)).WillOnce(DoAll(SetArgReferee<0>(expSunsData), Return(OperationStatus::OK)));
 
