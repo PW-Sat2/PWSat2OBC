@@ -77,12 +77,13 @@ namespace
         std::array<std::uint8_t, 900> buf1;
         std::array<std::uint8_t, 900> buf2;
 
-        _fs.AddFile("/suns", buf1);
-        _fs.AddFile("/suns.sec", buf2);
+        _fs.AddFile("/exp", buf1);
+        _fs.AddFile("/exp_sec", buf2);
 
         SunSExperimentParams params(1, 2, 2, 1s, 3, 5min);
 
         _exp.SetParameters(params);
+        _exp.SetOutputFiles("/exp");
 
         _exp.Start();
 
@@ -109,7 +110,14 @@ namespace
 
     TEST_F(SunSExperimentTest, IterationFlow)
     {
+        std::array<std::uint8_t, 900> buf1;
+        std::array<std::uint8_t, 900> buf2;
+
+        _fs.AddFile("/exp", buf1);
+        _fs.AddFile("/exp_sec", buf2);
+
         _exp.SetParameters(SunSExperimentParams(1, 2, 3, 2s, 1, 1min));
+        _exp.SetOutputFiles("/exp");
 
         _exp.Start();
 

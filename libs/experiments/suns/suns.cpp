@@ -1,4 +1,5 @@
 #include "suns.hpp"
+#include <cstring>
 #include "fs/fs.h"
 #include "power/power.h"
 #include "time/ICurrentTime.hpp"
@@ -27,6 +28,15 @@ namespace experiments
             this->_parameters = parameters;
         }
 
+        void SunSExperiment::SetOutputFiles(const char* baseName)
+        {
+            std::strncpy(this->_primaryFileName, baseName, sizeof(this->_primaryFileName));
+            *std::end(this->_primaryFileName) = '\0';
+
+            std::strncpy(this->_secondaryFileName, this->_primaryFileName, sizeof(this->_primaryFileName));
+            std::strncat(this->_secondaryFileName, "_sec", 4);
+        }
+
         ExperimentCode SunSExperiment::Type()
         {
             return 0x04;
@@ -35,9 +45,6 @@ namespace experiments
         StartResult SunSExperiment::Start()
         {
             this->_remainingSessions = this->_parameters.SamplingSessionsCount();
-
-            //            this->_primaryDataSet = ExperimentFile();
-            //            this->_secondaryDataSet = ExperimentFile();
 
             this->_primaryDataSet.Open(this->_fs, this->_primaryFileName, FileOpen::CreateAlways, FileAccess::WriteOnly);
             this->_secondaryDataSet.Open(this->_fs, this->_secondaryFileName, FileOpen::CreateAlways, FileAccess::WriteOnly);

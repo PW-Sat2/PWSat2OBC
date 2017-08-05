@@ -105,6 +105,7 @@ namespace experiments
             }
 
             void SetParameters(SunSExperimentParams parameters);
+            void SetOutputFiles(const char* baseName);
 
             virtual ExperimentCode Type() override;
             virtual StartResult Start() override;
@@ -127,7 +128,7 @@ namespace experiments
             std::chrono::milliseconds _nextSessionAt;
 
             char _primaryFileName[30];
-            char _secondaryFileName[30];
+            char _secondaryFileName[sizeof(_primaryFileName) + 4];
 
             fs::ExperimentFile _primaryDataSet;
             fs::ExperimentFile _secondaryDataSet;
