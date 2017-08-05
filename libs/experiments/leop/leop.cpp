@@ -1,4 +1,5 @@
 #include "leop.hpp"
+#include "base/os.h"
 #include "base/writer.h"
 #include "logger/logger.h"
 
@@ -10,6 +11,8 @@ using experiments::fs::ExperimentFile;
 using services::fs::File;
 using services::fs::FileOpen;
 using services::fs::FileAccess;
+
+using namespace std::chrono_literals;
 
 namespace experiment
 {
@@ -91,7 +94,8 @@ namespace experiment
 
             _experimentFile.Write(ExperimentFile::PID::Gyro, buf);
 
-            return IterationResult::WaitForNextCycle;
+            System::SleepTask(1s);
+            return IterationResult::LoopImmediately;
         }
     }
 }

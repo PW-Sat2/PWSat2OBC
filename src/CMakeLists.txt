@@ -35,6 +35,7 @@ set(SOURCES
     commands/runlevel.cpp
     commands/sail.cpp
     checks/error_counters.cpp
+    checks/checks.cpp
     obc.h
     obc.cpp
     obc_access.cpp

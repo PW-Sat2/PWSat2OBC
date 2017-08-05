@@ -142,6 +142,13 @@ class Writer final
     bool WriteByteBCD(std::uint8_t value);
 
     /**
+     * @brief Fills remaining buffer place with value.
+     * @param[in] value Number to write
+     * @return Operation status
+     */
+    bool Fill(const uint8_t value);
+
+    /**
      * @brief Reserves part of buffer for direct operation
      * @param count Number of bytes to reserve
      * @return Span with reserved area
