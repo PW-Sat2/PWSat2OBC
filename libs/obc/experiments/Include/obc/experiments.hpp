@@ -6,6 +6,7 @@
 #include "experiment/adcs/adcs.hpp"
 #include "experiment/fibo/fibo.h"
 #include "experiment/leop/leop.hpp"
+#include "experiment/suns/suns.hpp"
 #include "experiments/experiments.h"
 #include "fs/fs.h"
 #include "traits.hpp"
@@ -83,10 +84,11 @@ namespace obc
     };
 
     /** @brief All OBC experiments */
-    using AllExperiments = ExperimentsHolder<  //
-        experiment::fibo::FibonacciExperiment, //
-        experiment::adcs::DetumblingExperiment,
-        experiment::leop::LaunchAndEarlyOrbitPhaseExperiment //
+    using AllExperiments = ExperimentsHolder<                 //
+        experiment::fibo::FibonacciExperiment,                //
+        experiment::adcs::DetumblingExperiment,               //
+        experiment::leop::LaunchAndEarlyOrbitPhaseExperiment, //
+        experiments::suns::SunSExperiment                     //
         >;
 
     /**
@@ -101,11 +103,17 @@ namespace obc
          * @param adcs ADCS coordinator
          * @param time Time provider
          * @param gyro Gyroscope Provider
+         * @param powerControl Power control interface
+         * @param suns Experimental SunS driver
+         * @param payload Payload driver
          */
         OBCExperiments(services::fs::IFileSystem& fs,
             adcs::IAdcsCoordinator& adcs,
             services::time::TimeProvider& time,
-            devices::gyro::IGyroscopeDriver& gyro);
+            devices::gyro::IGyroscopeDriver& gyro,
+            services::power::IPowerControl& powerControl,
+            devices::suns::ISunSDriver& suns,
+            devices::payload::IPayloadDeviceDriver& payload);
 
         /**
          * @brief Performs initialization

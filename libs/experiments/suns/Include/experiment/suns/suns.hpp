@@ -114,6 +114,8 @@ namespace experiments
 
             DataPoint GatherSingleMeasurement();
 
+            static constexpr experiments::ExperimentCode Code = 0x04;
+
           private:
             services::power::IPowerControl& _powerControl;
             services::time::ICurrentTime& _currentTime;

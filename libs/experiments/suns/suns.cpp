@@ -39,7 +39,7 @@ namespace experiments
 
         ExperimentCode SunSExperiment::Type()
         {
-            return 0x04;
+            return Code;
         }
 
         StartResult SunSExperiment::Start()

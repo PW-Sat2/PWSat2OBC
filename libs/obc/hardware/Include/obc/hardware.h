@@ -20,6 +20,7 @@
 #include "msc/msc.hpp"
 #include "payload/io_map.h"
 #include "payload/payload.h"
+#include "payload/devices.h"
 #include "power/power.h"
 #include "program_flash/flash_driver.hpp"
 #include "rtc/rtc.hpp"
@@ -193,6 +194,9 @@ namespace obc
 
         /** @brief Payload driver*/
         devices::payload::PayloadDriver PayloadDriver;
+
+        /** @brief Payload device driver*/
+        devices::payload::PayloadDeviceDriver PayloadDeviceDriver;
     };
 }
 /** @} */

@@ -228,7 +228,5 @@ void PayloadDriver(uint16_t argc, char* argv[])
         return;
     }
 
-    PayloadDeviceDriver driver(Main.Hardware.PayloadDriver);
-
-    cmd(driver, argc - 1, &argv[1]);
+    cmd(Main.Hardware.PayloadDeviceDriver, argc - 1, &argv[1]);
 }
