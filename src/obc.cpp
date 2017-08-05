@@ -178,8 +178,6 @@ OSResult OBC::InitializeRunlevel1()
 
     BootSettings.ConfirmBoot();
 
-    LOG(LOG_LEVEL_INFO, "Initialized");
-    this->StateFlags.Set(OBC::InitializationFinishedFlag);
     return OSResult::Success;
 }
 

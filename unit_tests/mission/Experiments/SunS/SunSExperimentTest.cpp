@@ -126,7 +126,7 @@ namespace
             EXPECT_CALL(_power, SensPower(true)).WillOnce(Return(true));
             EXPECT_CALL(_power, SunSPower(true)).WillOnce(Return(true));
 
-            // todo: sleep
+            EXPECT_CALL(_os, Sleep(duration_cast<milliseconds>(3s)));
 
             EXPECT_CALL(_sunsExp, StartMeasurement(1, 2));
             EXPECT_CALL(_os, Sleep(duration_cast<milliseconds>(2s)));

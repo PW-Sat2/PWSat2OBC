@@ -217,6 +217,9 @@ static void ObcInitTask(void* param)
         }
     }
 
+    LOG(LOG_LEVEL_INFO, "Initialized");
+    obc->StateFlags.Set(OBC::InitializationFinishedFlag);
+
     System::SuspendTask(NULL);
 }
 

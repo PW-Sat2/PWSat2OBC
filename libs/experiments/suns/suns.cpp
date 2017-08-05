@@ -1,12 +1,14 @@
 #include "suns.hpp"
 #include <cstring>
 #include "fs/fs.h"
+#include "logger/logger.h"
 #include "power/power.h"
 #include "time/ICurrentTime.hpp"
 
 using experiments::fs::ExperimentFile;
 using services::fs::FileOpen;
 using services::fs::FileAccess;
+using namespace std::chrono_literals;
 
 namespace experiments
 {
@@ -71,12 +73,16 @@ namespace experiments
             this->_powerControl.SensPower(true);
             this->_powerControl.SunSPower(true);
 
+            System::SleepTask(3s);
+
             for (auto i = 0; i < this->_parameters.SamplesCount(); i++)
             {
                 if (i > 0)
                 {
                     System::SleepTask(this->_parameters.ShortDelay());
                 }
+
+                LOGF(LOG_LEVEL_INFO, "[suns] Sampling %d/%d", i, this->_parameters.SamplesCount());
 
                 auto dataPoint = this->GatherSingleMeasurement();
 
@@ -87,12 +93,16 @@ namespace experiments
             this->_powerControl.SensPower(false);
             this->_powerControl.SunSPower(false);
 
+            LOGF(LOG_LEVEL_INFO, "[suns] Sampling session finished. Remaining %d", this->_remainingSessions);
+
             if (this->_remainingSessions == 0)
             {
                 return IterationResult::Finished;
             }
 
-            this->_nextSessionAt = currentTime.Value + this->_parameters.LongDelay(); // TODO: use updated time value
+            currentTime = this->_currentTime.GetCurrentTime();
+
+            this->_nextSessionAt = currentTime.Value + this->_parameters.LongDelay();
 
             return IterationResult::WaitForNextCycle;
         }
