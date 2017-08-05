@@ -34,7 +34,7 @@ namespace experiments
          * near packet end - PID::Padding - 8b
          * until the end - padding data (0xFF)
          */
-        class ExperimentFile
+        class ExperimentFile final
         {
           public:
             /** @brief Data packet length.  */
@@ -56,10 +56,21 @@ namespace experiments
             };
 
             /**
+             * The data used in Padding block. It is not the same as Padding PID, as it may have length other than 8 bits.
+             * Padding data is always 0xFF.
+             */
+            static constexpr uint8_t PaddingData = 0xFF;
+
+            /**
              * @brief Default constrctor
              * @param time Optional time provider. If set, each packet automatically has timestamp.
              * */
             ExperimentFile(services::time::ICurrentTime* time = nullptr);
+
+            /**
+             * @brief Default destrctor
+             * */
+            ~ExperimentFile();
 
             /**
              * @brief Factory method that opens experiment file
@@ -95,6 +106,11 @@ namespace experiments
             /** @brief The byte size of PID type.  */
             static constexpr size_t PIDSize = sizeof(PID);
 
+            void FillBufferWithPadding();
+            void InitializePacket();
+
+            OSResult WriteDataBiggerThanFrame(PID pid, const gsl::span<uint8_t>& data);
+
             /** @brief Buffer for data.  */
             std::array<uint8_t, PacketLength> _buffer;
 
@@ -106,11 +122,6 @@ namespace experiments
 
             Writer _writer;
             bool _hasPayloadInFrame;
-
-            void FillBufferWithPadding();
-            void InitializePacket();
-
-            OSResult WriteDataBiggerThanFrame(PID pid, const gsl::span<uint8_t>& data);
         };
     }
 }

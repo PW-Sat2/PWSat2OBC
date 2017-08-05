@@ -51,7 +51,7 @@ namespace
 
     TEST_F(LEOPExperimentTest, ShouldRunIfStartedAtMissionStart)
     {
-        EXPECT_CALL(_time, GetCurrentTime()).Times(3);
+        EXPECT_CALL(_time, GetCurrentTime()).Times(2);
         EXPECT_CALL(_fs, Open(_, _, _)).Times(1);
 
         auto r = this->_exp.Start();
@@ -66,7 +66,7 @@ namespace
 
         auto r = this->_exp.Iteration();
 
-        ASSERT_THAT(r, Eq(IterationResult::WaitForNextCycle));
+        ASSERT_THAT(r, Eq(IterationResult::LoopImmediately));
     }
 
     TEST_F(LEOPExperimentTest, ShouldFinishExperimentIfAfterExperimentTime)
