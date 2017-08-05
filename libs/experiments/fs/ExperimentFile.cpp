@@ -8,6 +8,14 @@ ExperimentFile::ExperimentFile(services::time::ICurrentTime* time) : _time(time)
     _buffer.fill(0xAA);
 }
 
+ExperimentFile::~ExperimentFile()
+{
+    if (_hasPayloadInFrame)
+    {
+        Close();
+    }
+}
+
 bool ExperimentFile::Open(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access)
 {
     _file = File(fs, path, mode, access);
@@ -41,15 +49,9 @@ OSResult ExperimentFile::Write(PID pid, const gsl::span<uint8_t>& data)
             {
                 return result;
             }
+        }
 
-            _writer.WriteByte(num(pid));
-            _writer.WriteArray(data);
-            _hasPayloadInFrame = true;
-        }
-        else
-        {
-            WriteDataBiggerThanFrame(pid, data);
-        }
+        WriteDataBiggerThanFrame(pid, data);
     }
 
     return OSResult::Success;
@@ -61,13 +63,12 @@ OSResult ExperimentFile::WriteDataBiggerThanFrame(PID pid, const gsl::span<uint8
     uint32_t dataRemaining = data.size();
     while (dataRemaining > 0)
     {
-        uint32_t length = _writer.RemainingSize() - PIDSize;
-        if (length > dataRemaining)
-            length = dataRemaining;
+        const auto length = std::min(dataRemaining, static_cast<uint32_t>(_writer.RemainingSize()) - PIDSize);
 
-        auto&& subpart = data.subspan(offset, length);
+        auto subpart = data.subspan(offset, length);
         _writer.WriteByte(num(pid));
         _writer.WriteArray(subpart);
+        _hasPayloadInFrame = true;
 
         if (_writer.RemainingSize() == 0)
         {
@@ -104,20 +105,13 @@ OSResult ExperimentFile::Flush()
 
 void ExperimentFile::FillBufferWithPadding()
 {
-    auto freeSpace = _writer.RemainingSize();
-    if (freeSpace < 1)
+    if (_writer.RemainingSize() < 1)
     {
         return;
     }
 
     _writer.WriteByte(num(PID::Padding));
-
-    // starting from 1 as one byte has been written above
-    for (int i = 1; i < freeSpace; ++i)
-    {
-        _writer.WriteByte(0xFF);
-    }
-
+    _writer.Fill(PaddingData);
     _hasPayloadInFrame = true;
 }
 
@@ -127,11 +121,11 @@ void ExperimentFile::InitializePacket()
     _writer.WriteByte(num(PID::Synchronization));
     if (_time != nullptr)
     {
-        const auto& timestamp = _time->GetCurrentTime();
+        const auto timestamp = _time->GetCurrentTime();
         if (timestamp.HasValue)
         {
             _writer.WriteByte(num(PID::Timestamp));
-            _writer.WriteQuadWordLE(_time->GetCurrentTime().Value.count());
+            _writer.WriteQuadWordLE(timestamp.Value.count());
         }
     }
 
@@ -142,6 +136,7 @@ OSResult ExperimentFile::Close()
 {
     FillBufferWithPadding();
     auto result = _file.Write(_buffer);
+    _hasPayloadInFrame = false;
 
     if (OS_RESULT_FAILED(result.Status))
     {

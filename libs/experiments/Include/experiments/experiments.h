@@ -90,6 +90,14 @@ namespace experiments
     struct IExperimentController
     {
         /**
+         * @brief Requests experiment to be started in next mission loop
+         * @param experiment Experiment type
+         * @retval true Experiment request was accepted
+         * @retval false Experiment request was denied (other experiment is in progress)
+         */
+        virtual bool RequestExperiment(ExperimentCode experiment) = 0;
+
+        /**
          * @brief Dumps current experiment state.
          * @return Current experiment execution state.
          */
@@ -124,7 +132,7 @@ namespace experiments
          * @retval true Experiment request was accepted
          * @retval false Experiment request was denied (other experiment is in progress)
          */
-        bool RequestExperiment(ExperimentCode experiment);
+        virtual bool RequestExperiment(ExperimentCode experiment) final override;
 
         /**
          * @brief Aborts current experiment immediately
