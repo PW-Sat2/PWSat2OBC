@@ -131,13 +131,7 @@ namespace experiments
          */
         void Initialize();
 
-        /**
-         * @brief Requests experiment to be started in next mission loop
-         * @param experiment Experiment type
-         * @retval true Experiment request was accepted
-         * @retval false Experiment request was denied (other experiment is in progress)
-         */
-        virtual bool RequestExperiment(ExperimentCode experiment) final override;
+        virtual bool RequestExperiment(ExperimentCode experiment) override;
 
         virtual void AbortExperiment() override;
 

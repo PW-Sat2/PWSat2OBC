@@ -656,4 +656,6 @@ template <std::size_t Alignment> constexpr bool IsAligned(const void* ptr)
     */
 template <typename Param> using Action = void (*)(Param p);
 
+std::size_t strlen_n(const char* s, std::size_t maxSize);
+
 #endif

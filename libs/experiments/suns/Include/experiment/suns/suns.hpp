@@ -88,7 +88,13 @@ namespace experiments
             void WriteSecondaryDataSetTo(experiments::fs::ExperimentFile& file);
         };
 
-        class SunSExperiment : public IExperiment
+        struct ISetupSunSExperiment
+        {
+            virtual void SetParameters(SunSExperimentParams parameters) = 0;
+            virtual void SetOutputFiles(const char* baseName) = 0;
+        };
+
+        class SunSExperiment : public IExperiment, public ISetupSunSExperiment
         {
           public:
             SunSExperiment(services::power::IPowerControl& powerControl,
@@ -104,8 +110,8 @@ namespace experiments
                 std::strncpy(_secondaryFileName, "/suns.sec", 30);
             }
 
-            void SetParameters(SunSExperimentParams parameters);
-            void SetOutputFiles(const char* baseName);
+            virtual void SetParameters(SunSExperimentParams parameters) override;
+            virtual void SetOutputFiles(const char* baseName) override;
 
             virtual ExperimentCode Type() override;
             virtual StartResult Start() override;

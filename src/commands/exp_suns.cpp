@@ -9,6 +9,11 @@ using std::chrono::seconds;
 using std::chrono::minutes;
 using std::uint8_t;
 
+static inline experiments::suns::SunSExperiment& Exp()
+{
+    return GetExperiments().Get<experiments::suns::SunSExperiment>();
+}
+
 static void SetParams(std::uint16_t argc, char* argv[])
 {
     if (argc != 6)
@@ -33,7 +38,7 @@ static void SetParams(std::uint16_t argc, char* argv[])
     GetTerminal().Printf("Sessions count:\t%d\n", p.SamplingSessionsCount());
     GetTerminal().Printf("Long delay:\t%d minues\n", static_cast<uint8_t>(p.LongDelay().count()));
 
-    GetExperiments().SunS.SetParameters(p);
+    Exp().SetParameters(p);
 }
 
 static void SetFileName(std::uint16_t argc, char* argv[])
@@ -44,7 +49,7 @@ static void SetFileName(std::uint16_t argc, char* argv[])
         return;
     }
 
-    GetExperiments().SunS.SetOutputFiles(argv[0]);
+    Exp().SetOutputFiles(argv[0]);
 
     GetTerminal().Printf("Primary data set: %s\nSecondary data set: %s_sec\n", argv[0], argv[0]);
 }
@@ -61,7 +66,7 @@ void SunSExpCommand(std::uint16_t argc, char* argv[])
     }
     else if (argc == 1 && strcmp(argv[0], "start") == 0)
     {
-        GetExperiments().ExperimentsController.RequestExperiment(GetExperiments().SunS.Type());
+        GetExperiments().ExperimentsController.RequestExperiment(Exp().Type());
         GetTerminal().Puts("SunS experiment requested");
     }
     else

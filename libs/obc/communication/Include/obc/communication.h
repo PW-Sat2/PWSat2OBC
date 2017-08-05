@@ -136,7 +136,8 @@ namespace obc
         obc::telecommands::SetErrorCounterConfig,            //
         obc::telecommands::OpenSail,                         //
         obc::telecommands::GetErrorCountersConfigTelecommand,//
-        obc::telecommands::SetPeriodicMessageTelecommand     //
+        obc::telecommands::SetPeriodicMessageTelecommand,    //
+        obc::telecommands::PerformSunSExperiment             //
         >;
 
     /**

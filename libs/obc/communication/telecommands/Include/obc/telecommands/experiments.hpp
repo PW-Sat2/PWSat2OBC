@@ -66,6 +66,24 @@ namespace obc
             /** @brief Experiments controller */
             experiments::IExperimentController& _experiments;
         };
+
+        class PerformSunSExperiment final : public telecommunication::uplink::Telecommand<0x1D>
+        {
+          public:
+            /**
+             * @brief Ctor
+             * @param experiments OBC Experiments
+             */
+            PerformSunSExperiment(experiments::IExperimentController& controller, experiments::suns::ISetupSunSExperiment& setupSunS);
+
+            virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
+
+          private:
+            /** @brief Experiments controller */
+            experiments::IExperimentController& _controller;
+            /** @brief SunS experiments settings */
+            experiments::suns::ISetupSunSExperiment& _setupSunS;
+        };
     }
 }
 

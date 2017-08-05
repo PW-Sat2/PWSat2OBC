@@ -145,6 +145,8 @@ class Reader final
      */
     gsl::span<const uint8_t> ReadArray(uint16_t length);
 
+    const char* ReadString(std::size_t maxsize);
+
     /**
      * @brief Resets reader to the initial state.
      */

@@ -1,8 +1,11 @@
+from datetime import timedelta
 from threading import Timer
 from unittest import skip
 
 from obc.experiments import ExperimentType
+from response_frames.operation import OperationSuccessFrame
 from system import clear_state
+from telecommand import PerformSunSExperiment
 from tests.base import RestartPerTest
 
 
@@ -24,9 +27,21 @@ class SunSExperimentTest(RestartPerTest):
         self.system.obc.abort_experiment()
         self.system.obc.wait_for_experiment(None, timeout=5)
 
-        self.system.obc._command("exp_suns params 1 2 4 2 5 1")
-        self.system.obc._command("exp_suns file /exp")
-        self.system.obc._command("exp_suns start")
+        self.system.comm.put_frame(PerformSunSExperiment(
+            correlation_id=34,
+            gain=1,
+            itime=2,
+            samples_count=4,
+            short_delay=timedelta(seconds=2),
+            sessions_count=5,
+            long_delay=timedelta(minutes=1),
+            file_name='/exp'
+        ))
+
+        response = self.system.comm.get_frame(5)
+
+        self.assertIsInstance(response, OperationSuccessFrame)
+        self.assertEqual(response.correlation_id, 34)
 
         self.system.obc.wait_for_experiment(ExperimentType.SunS, timeout=20)
 
