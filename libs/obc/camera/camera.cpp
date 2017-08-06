@@ -17,11 +17,11 @@ namespace obc
         return SyncResult(b.IsSuccess, b.SyncCount);
     }
 
-    TakePhotoResult DummyCamera::TakePhoto()
+    TakePhotoResult DummyCamera::TakePhoto(PhotoResolution resolution)
     {
         LOG(LOG_LEVEL_INFO, "Taking photo");
 
-        auto b = this->_camera.TakeJPEGPicture(devices::camera::CameraJPEGResolution::_640x480);
+        auto b = this->_camera.TakeJPEGPicture(static_cast<devices::camera::CameraJPEGResolution>(resolution));
 
         return b ? TakePhotoResult::Success : TakePhotoResult::NotSynced;
     }

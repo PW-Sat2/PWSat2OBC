@@ -83,7 +83,7 @@ namespace services
 
             for (auto i = 0; i < 3; i++)
             {
-                auto r = this->_camera.TakePhoto();
+                auto r = this->_camera.TakePhoto(command.Resolution());
 
                 if (r == TakePhotoResult::Success)
                 {

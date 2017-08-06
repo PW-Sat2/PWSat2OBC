@@ -120,7 +120,7 @@ namespace services
              * @brief Ctor
              * @param camera Camera to use
              */
-            TakePhoto(Camera camera);
+            TakePhoto(Camera camera, PhotoResolution resolution);
 
             /**
              * @brief Returns camera that should be used
@@ -128,14 +128,23 @@ namespace services
              */
             inline Camera Which() const;
 
+            inline PhotoResolution Resolution() const;
+
           private:
             /** @brief Camera to used */
             Camera _which;
+            /** @brief Photo resolution */
+            PhotoResolution _resolution;
         };
 
         Camera TakePhoto::Which() const
         {
             return this->_which;
+        }
+
+        PhotoResolution TakePhoto::Resolution() const
+        {
+            return this->_resolution;
         }
 
         /**
