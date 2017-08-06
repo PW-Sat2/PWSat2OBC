@@ -447,6 +447,13 @@ namespace services
              */
             BufferInfo GetBufferInfo(std::uint8_t bufferId) const;
 
+            /**
+             * @brief Waits for idle state
+             * @param timeout Timeout
+             * @return true if photo service went idle, false on timeout
+             */
+            bool WaitForFinish(std::chrono::milliseconds timeout);
+
             /** @brief Number of buffers */
             static constexpr std::uint8_t BuffersCount = 20;
 
@@ -478,6 +485,12 @@ namespace services
 
             /** @brief Synchronization */
             OSSemaphoreHandle _sync;
+
+            /** @brief State flags */
+            EventGroup _flags;
+
+            /** @brief Idle flag */
+            static constexpr OSEventBits IdleFlag = 1 << 0;
         };
 
         /** @} */

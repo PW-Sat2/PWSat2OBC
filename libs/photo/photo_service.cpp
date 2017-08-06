@@ -181,10 +181,11 @@ namespace services
 
         void PhotoService::Initialize()
         {
-            this->_task.Create();
             this->_commandQueue.Create();
             this->_sync = System::CreateBinarySemaphore();
             System::GiveSemaphore(this->_sync);
+            this->_flags.Initialize();
+            this->_task.Create();
         }
 
         void PhotoService::Schedule(DisableCamera command)
@@ -193,6 +194,7 @@ namespace services
             cmd.DisableCameraCommand = command;
             cmd.Selected = Command::DisableCamera;
             this->_commandQueue.Push(cmd, InfiniteTimeout);
+            this->_flags.Clear(IdleFlag);
         }
         void PhotoService::Schedule(EnableCamera command)
         {
@@ -200,6 +202,7 @@ namespace services
             cmd.EnableCameraCommand = command;
             cmd.Selected = Command::EnableCamera;
             this->_commandQueue.Push(cmd, InfiniteTimeout);
+            this->_flags.Clear(IdleFlag);
         }
         void PhotoService::Schedule(TakePhoto command)
         {
@@ -207,6 +210,7 @@ namespace services
             cmd.TakePhotoCommand = command;
             cmd.Selected = Command::TakePhoto;
             this->_commandQueue.Push(cmd, InfiniteTimeout);
+            this->_flags.Clear(IdleFlag);
         }
         void PhotoService::Schedule(DownloadPhoto command)
         {
@@ -214,6 +218,7 @@ namespace services
             cmd.DownloadPhotoCommand = command;
             cmd.Selected = Command::DownloadPhoto;
             this->_commandQueue.Push(cmd, InfiniteTimeout);
+            this->_flags.Clear(IdleFlag);
         }
         void PhotoService::Schedule(Reset command)
         {
@@ -221,6 +226,7 @@ namespace services
             cmd.ResetCommand = command;
             cmd.Selected = Command::Reset;
             this->_commandQueue.Push(cmd, InfiniteTimeout);
+            this->_flags.Clear(IdleFlag);
         }
         void PhotoService::Schedule(SavePhoto command)
         {
@@ -228,6 +234,7 @@ namespace services
             cmd.SavePhotoCommand = command;
             cmd.Selected = Command::SavePhoto;
             this->_commandQueue.Push(cmd, InfiniteTimeout);
+            this->_flags.Clear(IdleFlag);
         }
 
         void PhotoService::Schedule(Sleep command)
@@ -236,6 +243,14 @@ namespace services
             cmd.SleepCommand = command;
             cmd.Selected = Command::Sleep;
             this->_commandQueue.Push(cmd, InfiniteTimeout);
+            this->_flags.Clear(IdleFlag);
+        }
+
+        bool PhotoService::WaitForFinish(std::chrono::milliseconds timeout)
+        {
+            auto r = this->_flags.WaitAny(IdleFlag, false, timeout);
+
+            return has_flag(r, IdleFlag);
         }
 
         void PhotoService::TaskProc(PhotoService* This)
@@ -248,7 +263,13 @@ namespace services
 
                 LOG(LOG_LEVEL_DEBUG, "[photo] Waiting for command");
 
-                This->_commandQueue.Pop(command, InfiniteTimeout);
+                if (OS_RESULT_FAILED(This->_commandQueue.Pop(command, 0s)))
+                {
+                    This->_flags.Set(IdleFlag);
+                    This->_commandQueue.Pop(command, InfiniteTimeout);
+                }
+
+                This->_flags.Clear(IdleFlag);
 
                 LOGF(LOG_LEVEL_INFO, "[photo] Received command %d", num(command.Selected));
 
