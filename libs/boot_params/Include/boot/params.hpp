@@ -21,7 +21,8 @@ namespace boot
     {
         Runlevel0 = 0,
         Runlevel1 = 1,
-        Runlevel2 = 2
+        Runlevel2 = 2,
+        Runlevel3 = 3
     };
 
     extern volatile std::uint32_t MagicNumber;

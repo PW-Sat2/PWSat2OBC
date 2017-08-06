@@ -76,6 +76,26 @@ namespace mission
     };
 
     /**
+     * @brief Tag type used for marking the type as task that is disabled from autostart
+     * state.
+     *
+     * Inherit from it to mark the type as disabled from autostart. Type that inherits from it should define following non static member:
+     * @code{.cpp}
+     * void AutostartEnable();
+     * @endcode
+     * The purpose of this function is to provide the mission loop runner unified interface to enable all disabled tasks.
+     *
+     * The purpose of the disabling is that automatic starting of several tasks interferes with tests.
+     * So Mission loop starts all of tasks, but those marked as that type should be in the disabled state until mission loop enables them
+     * at higher runlevel.
+     *
+     * The disabling is done at task's level, there is no generic mechanism to force that.
+     */
+    struct AutostartDisabled
+    {
+    };
+
+    /**
      * @brief Enumerator of mission state update statuses.
      */
     enum class UpdateResult
@@ -192,8 +212,7 @@ namespace mission
     }
 
     constexpr VerifyDescriptorResult::VerifyDescriptorResult(VerifyResult result, std::uint32_t reason) //
-        : result(result),
-          reason(reason)
+        : result(result), reason(reason)
     {
     }
 
