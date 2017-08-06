@@ -32,7 +32,14 @@ namespace obc
 
         auto photo = this->_camera.CameraReceiveJPEGData(buffer);
 
-        return DownloadPhotoResult(photo);
+        if (photo.size() != 0)
+        {
+            return DownloadPhotoResult(photo);
+        }
+        else
+        {
+            return DownloadPhotoResult(OSResult::DeviceNotFound);
+        }
     }
 
     void OBCCamera::Select(Camera camera)

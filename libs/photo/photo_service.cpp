@@ -106,8 +106,17 @@ namespace services
                 this->_bufferInfos[command.BufferId()] = BufferInfo(BufferStatus::Downloading, 0);
             }
 
-            auto r = this->_camera.DownloadPhoto(gsl::make_span(this->_freeSpace, PhotoBuffer.end()));
+            DownloadPhotoResult r(OSResult::DeviceNotFound);
 
+            for (auto i = 0; i < 3; i++)
+            {
+                r = this->_camera.DownloadPhoto(gsl::make_span(this->_freeSpace, PhotoBuffer.end()));
+
+                if (r.IsSuccess())
+                    break;
+
+                LOGF(LOG_LEVEL_WARNING, "[photo] Retrying (%d) download from %d", i, num(command.Which()));
+            }
             if (r.IsSuccess())
             {
                 Lock l(this->_sync, InfiniteTimeout);
@@ -143,6 +152,13 @@ namespace services
             }
 
             auto buffer = this->GetBufferInfo(command.BufferId());
+
+            LOGF(LOG_LEVEL_DEBUG,
+                "[photo] Saving photo from buffer %d to %s (status: %d, size: %d bytes))",
+                command.BufferId(),
+                command.Path(),
+                num(buffer.Status()),
+                buffer.Size());
 
             if (buffer.Status() == BufferStatus::Empty)
             {

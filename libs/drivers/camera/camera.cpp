@@ -73,8 +73,8 @@ gsl::span<uint8_t> Camera::CameraReceiveJPEGData(gsl::span<uint8_t> buffer)
     PictureData pictureData;
     if (!_cameraDriver.SendGetPictureJPEG(CameraPictureType::Enum::Snapshot, pictureData))
     {
-        LOG(LOG_LEVEL_ERROR, "Camera: SendGetPictureJPEG failed");
-        return buffer;
+        LOG(LOG_LEVEL_ERROR, "---------------- SendGetPictureJPEG failed ---------------\n");
+        return {};
     }
 
     uint32_t totalDataLength = std::min(pictureData.dataLength, static_cast<uint32_t>(buffer.size()));
