@@ -62,10 +62,16 @@ struct OBC
     OSResult InitializeRunlevel1();
 
     /**
-     * @brief Initialize OBC at runlevel 1
+     * @brief Initialize OBC at runlevel 2
      * @return Operation result
      */
     OSResult InitializeRunlevel2();
+
+    /**
+     * @brief Initialize OBC at runlevel 3
+     * @return Operation result
+     */
+    OSResult InitializeRunlevel3();
 
     /**
      * @brief Returns current LineIO implementation

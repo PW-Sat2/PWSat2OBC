@@ -2,9 +2,10 @@ import logging
 from datetime import timedelta
 
 from obc.experiments import ExperimentType, StartResult
-from system import auto_power_on, runlevel
+from system import auto_power_on, runlevel, clear_state
 from tests.base import RestartPerTest
 from utils import TestEvent
+from time import sleep
 
 
 class TestExperimentLEOP(RestartPerTest):
@@ -26,6 +27,7 @@ class TestExperimentLEOP(RestartPerTest):
         e.wait_for_change(1)
 
     @runlevel(2)
+    @clear_state()
     def test_should_perform_experiment(self):
         self._start()
 
@@ -49,6 +51,7 @@ class TestExperimentLEOP(RestartPerTest):
         self.assertIn('leop.pwts', files, 'Experiment file not created')
 
     @runlevel(2)
+    @clear_state()
     def test_should_not_perform_experiment_after_time(self):
         self._start()
 
@@ -63,14 +66,19 @@ class TestExperimentLEOP(RestartPerTest):
 
         self.assertEqual(result.LastStartResult, StartResult.Failure)
 
-    @runlevel(2)
+    @runlevel(3)
+    @clear_state()
     def test_should_start_automatically(self):
         self._start()
 
         log = logging.getLogger("TEST")
 
-        log.info('Setting time after experiment time slot')
-        self.system.obc.jump_to_time(timedelta(minutes = 1))
+        # wait until all mission descriptors will be processed
+        sleep(20)
+
+        #skip initial 60s idle period
+        self.system.obc.advance_time(65000)
+
         self.system.obc.wait_for_experiment_started(ExperimentType.LEOP, 60)
         result = self.system.obc.experiment_info()
 

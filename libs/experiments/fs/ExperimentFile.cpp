@@ -134,13 +134,16 @@ void ExperimentFile::InitializePacket()
 
 OSResult ExperimentFile::Close()
 {
-    FillBufferWithPadding();
-    auto result = _file.Write(_buffer);
-    _hasPayloadInFrame = false;
-
-    if (OS_RESULT_FAILED(result.Status))
+    if (_hasPayloadInFrame)
     {
-        return result.Status;
+        FillBufferWithPadding();
+        auto result = _file.Write(_buffer);
+        _hasPayloadInFrame = false;
+
+        if (OS_RESULT_FAILED(result.Status))
+        {
+            return result.Status;
+        }
     }
 
     return _file.Close();

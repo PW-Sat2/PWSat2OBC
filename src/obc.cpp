@@ -205,3 +205,10 @@ OSResult OBC::InitializeRunlevel2()
 
     return OSResult::Success;
 }
+
+OSResult OBC::InitializeRunlevel3()
+{
+    Mission.EnableAutostart();
+
+    return OSResult::Success;
+}
