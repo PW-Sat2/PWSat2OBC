@@ -101,24 +101,33 @@ namespace services
         {
             this->_selector.Select(command.Which());
 
-            this->_bufferInfos[command.BufferId()] = BufferInfo(BufferStatus::Downloading, 0);
+            {
+                Lock l(this->_sync, InfiniteTimeout);
+                this->_bufferInfos[command.BufferId()] = BufferInfo(BufferStatus::Downloading, 0);
+            }
 
             auto r = this->_camera.DownloadPhoto(gsl::make_span(this->_freeSpace, PhotoBuffer.end()));
 
             if (r.IsSuccess())
             {
+                Lock l(this->_sync, InfiniteTimeout);
                 this->_bufferInfos[command.BufferId()] = BufferInfo(BufferStatus::Occupied, r.Success());
                 this->_freeSpace += r.Success().size();
                 return OSResult::Success;
             }
 
-            this->_bufferInfos[command.BufferId()] = BufferInfo(BufferStatus::Failed, 0);
+            {
+                Lock l(this->_sync, InfiniteTimeout);
+                this->_bufferInfos[command.BufferId()] = BufferInfo(BufferStatus::Failed, 0);
+            }
+
             return r.Error();
         }
 
         OSResult PhotoService::Invoke(Reset /*command*/)
         {
             this->_freeSpace = PhotoBuffer.begin();
+            Lock l(this->_sync, InfiniteTimeout);
             std::fill(this->_bufferInfos.begin(), this->_bufferInfos.end(), BufferInfo());
             return OSResult::Success;
         }
@@ -162,13 +171,20 @@ namespace services
 
         BufferInfo PhotoService::GetBufferInfo(std::uint8_t bufferId) const
         {
-            return this->_bufferInfos[bufferId];
+            BufferInfo tmp;
+            {
+                Lock l(this->_sync, InfiniteTimeout);
+                tmp = this->_bufferInfos[bufferId];
+            }
+            return tmp;
         }
 
         void PhotoService::Initialize()
         {
             this->_task.Create();
             this->_commandQueue.Create();
+            this->_sync = System::CreateBinarySemaphore();
+            System::GiveSemaphore(this->_sync);
         }
 
         void PhotoService::Schedule(DisableCamera command)
