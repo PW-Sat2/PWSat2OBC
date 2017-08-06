@@ -88,7 +88,7 @@ namespace obc
         experiment::fibo::FibonacciExperiment,                //
         experiment::adcs::DetumblingExperiment,               //
         experiment::leop::LaunchAndEarlyOrbitPhaseExperiment, //
-        experiments::suns::SunSExperiment                     //
+        experiment::suns::SunSExperiment                     //
         >;
 
     /**

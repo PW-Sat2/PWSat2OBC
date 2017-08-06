@@ -14,15 +14,32 @@
 #include "suns/suns.hpp"
 #include "time/fwd.hpp"
 
-namespace experiments
+namespace experiment
 {
     namespace suns
     {
+        /**
+         * @ingroup experiments
+         * @{
+         */
+
+        /**
+         * @brief SunS experiment parameters
+         */
         class SunSExperimentParams
         {
           public:
             SunSExperimentParams() = default;
 
+            /**
+             * @brief Ctor
+             * @param gain Gain
+             * @param itime ITime
+             * @param samplesCount Samples count
+             * @param shortDelay Short delay
+             * @param samplingSessionsCount Sampling sessions count
+             * @param longDelay Long delay
+             */
             SunSExperimentParams(std::uint8_t gain,
                 std::uint8_t itime,
                 std::uint8_t samplesCount,
@@ -30,11 +47,35 @@ namespace experiments
                 std::uint8_t samplingSessionsCount,
                 std::chrono::minutes longDelay);
 
+            /**
+             * @brief Returns gain value
+             * @return Gain value
+             */
             inline std::uint8_t Gain() const;
+            /**
+             * @brief Returns itime value
+             * @return ITime value
+             */
             inline std::uint8_t ITime() const;
+            /**
+             * @brief Returns samples count
+             * @return Samples count
+             */
             inline std::uint8_t SamplesCount() const;
+            /**
+             * @brief Returns short delay duration
+             * @return Short delau duration
+             */
             inline std::chrono::seconds ShortDelay() const;
+            /**
+             * @brief Returns sampling sessions count
+             * @return Sampling sessions count
+             */
             inline std::uint8_t SamplingSessionsCount() const;
+            /**
+             * @brief Returns long delay duration
+             * @return Long delay durations
+             */
             inline std::chrono::minutes LongDelay() const;
 
           private:
@@ -76,51 +117,92 @@ namespace experiments
             return this->_longDelay;
         }
 
-        class DataPoint
+        /**
+         * @brief SunS experiment data point
+         */
+        class DataPoint final
         {
           public:
+            /** @brief Timestamp */
             std::chrono::milliseconds Timestamp;
+            /** @brief Data from experimental SunS */
             devices::suns::MeasurementData ExperimentalSunS;
+            /** @brief Data from reference SunS */
             devices::payload::PayloadTelemetry::SunsRef ReferenceSunS;
+            /** @brief Data from gyroscope */
             devices::gyro::GyroscopeTelemetry Gyro;
 
+            /**
+             * @brief Writes data point to primary data set file
+             * @param file File for primary data sets
+             */
             void WritePrimaryDataSetTo(experiments::fs::ExperimentFile& file);
+            /**
+             * @brief Writes data point to secondary data set file
+             * @param file File for secondary data sets
+             */
             void WriteSecondaryDataSetTo(experiments::fs::ExperimentFile& file);
         };
 
+        /**
+         * @brief Interface for setting-up SunS experiment parameters
+         */
         struct ISetupSunSExperiment
         {
+            /**
+             * @brief Sets experiment parameters
+             * @param parameters Parameters
+             */
             virtual void SetParameters(SunSExperimentParams parameters) = 0;
+
+            /**
+             * @brief Sets base name for output files
+             * @param baseName Base name for output files
+             *
+             * @remark String is copied to internal buffer
+             * @remark If string is longer than internal buffer size, it is trimmed to maximum size
+             */
             virtual void SetOutputFiles(const char* baseName) = 0;
         };
 
-        class SunSExperiment : public IExperiment, public ISetupSunSExperiment
+        /**
+         * @brief SunS experiment
+         */
+        class SunSExperiment : public experiments::IExperiment, public ISetupSunSExperiment
         {
           public:
+            /**
+             * @brief Ctor
+             * @param powerControl Power control interface
+             * @param currentTime Current time provider
+             * @param experimentalSunS Experimental SunS driver
+             * @param payload Payload (reference SunS) driver
+             * @param gyro Gyroscope driver
+             * @param fileSystem File system
+             */
             SunSExperiment(services::power::IPowerControl& powerControl,
                 services::time::ICurrentTime& currentTime,
                 devices::suns::ISunSDriver& experimentalSunS,
                 devices::payload::IPayloadDeviceDriver& payload,
                 devices::gyro::IGyroscopeDriver& gyro,
-                services::fs::IFileSystem& fileSystem)
-                : _powerControl(powerControl), _currentTime(currentTime), _experimentalSunS(experimentalSunS), _payload(payload),
-                  _gyro(gyro), _fs(fileSystem), _nextSessionAt(0)
-            {
-                std::strncpy(_primaryFileName, "/suns", 30);
-                std::strncpy(_secondaryFileName, "/suns.sec", 30);
-            }
+                services::fs::IFileSystem& fileSystem);
 
             virtual void SetParameters(SunSExperimentParams parameters) override;
             virtual void SetOutputFiles(const char* baseName) override;
 
-            virtual ExperimentCode Type() override;
-            virtual StartResult Start() override;
-            virtual IterationResult Iteration() override;
-            virtual void Stop(IterationResult lastResult) override;
+            virtual experiments::ExperimentCode Type() override;
+            virtual experiments::StartResult Start() override;
+            virtual experiments::IterationResult Iteration() override;
+            virtual void Stop(experiments::IterationResult lastResult) override;
 
+            /**
+             * @brief Gathers single data point from all sensors
+             * @return Data point
+             */
             DataPoint GatherSingleMeasurement();
 
-            static constexpr experiments::ExperimentCode Code = 0x04;
+            /** @brief Experiment code */
+            static constexpr experiments::ExperimentCode Code = 0x4;
 
           private:
             services::power::IPowerControl& _powerControl;
@@ -138,9 +220,11 @@ namespace experiments
             char _primaryFileName[30];
             char _secondaryFileName[sizeof(_primaryFileName) + 4];
 
-            fs::ExperimentFile _primaryDataSet;
-            fs::ExperimentFile _secondaryDataSet;
+            experiments::fs::ExperimentFile _primaryDataSet;
+            experiments::fs::ExperimentFile _secondaryDataSet;
         };
+
+        /** @} */
     }
 }
 

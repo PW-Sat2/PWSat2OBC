@@ -4,14 +4,14 @@
 #include "obc_access.hpp"
 #include "terminal/terminal.h"
 
-using experiments::suns::SunSExperimentParams;
+using experiment::suns::SunSExperimentParams;
 using std::chrono::seconds;
 using std::chrono::minutes;
 using std::uint8_t;
 
-static inline experiments::suns::SunSExperiment& Exp()
+static inline experiment::suns::SunSExperiment& Exp()
 {
-    return GetExperiments().Get<experiments::suns::SunSExperiment>();
+    return GetExperiments().Get<experiment::suns::SunSExperiment>();
 }
 
 static void SetParams(std::uint16_t argc, char* argv[])

@@ -82,7 +82,7 @@ namespace obc
         }
 
         PerformSunSExperiment::PerformSunSExperiment(
-            experiments::IExperimentController& controller, experiments::suns::ISetupSunSExperiment& setupSunS)
+            experiments::IExperimentController& controller, experiment::suns::ISetupSunSExperiment& setupSunS)
             : _controller(controller), _setupSunS(setupSunS)
         {
         }
@@ -109,7 +109,7 @@ namespace obc
                 return;
             }
 
-            experiments::suns::SunSExperimentParams params(gain, itime, samplesCount, shortDelay, sessionsCount, longDelay);
+            experiment::suns::SunSExperimentParams params(gain, itime, samplesCount, shortDelay, sessionsCount, longDelay);
 
             LOGF(LOG_LEVEL_INFO,
                 "Reguested SunS experiment: samples %d, sessions %d",
@@ -119,7 +119,7 @@ namespace obc
             this->_setupSunS.SetParameters(params);
             this->_setupSunS.SetOutputFiles(outputFile);
 
-            auto success = this->_controller.RequestExperiment(experiments::suns::SunSExperiment::Code);
+            auto success = this->_controller.RequestExperiment(experiment::suns::SunSExperiment::Code);
 
             CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
 

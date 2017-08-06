@@ -68,8 +68,18 @@ namespace services
              */
             virtual bool BackupAntennaPower(bool enabled) = 0;
 
+            /**
+             * @brief Sets state of SENS LCL
+             * @param  enabled true to turn on LCL, false to turn off
+             * @return Operation status
+             */
             virtual bool SensPower(bool enabled) = 0;
 
+            /**
+             * @brief Sets state of Experimental SunS LCL
+             * @param enabled true to turn on LCL, false to turn off
+             * @return Operation status
+             */
             virtual bool SunSPower(bool enabled) = 0;
         };
 

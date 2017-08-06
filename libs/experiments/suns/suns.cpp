@@ -9,8 +9,9 @@ using experiments::fs::ExperimentFile;
 using services::fs::FileOpen;
 using services::fs::FileAccess;
 using namespace std::chrono_literals;
+using namespace experiments;
 
-namespace experiments
+namespace experiment
 {
     namespace suns
     {
@@ -23,6 +24,19 @@ namespace experiments
             : _gain(gain), _itime(itime), _samplesCount(samplesCount), _shortDelay(shortDelay),
               _samplingSessionsCount(samplingSessionsCount), _longDelay(longDelay)
         {
+        }
+
+        SunSExperiment::SunSExperiment(services::power::IPowerControl& powerControl,
+            services::time::ICurrentTime& currentTime,
+            devices::suns::ISunSDriver& experimentalSunS,
+            devices::payload::IPayloadDeviceDriver& payload,
+            devices::gyro::IGyroscopeDriver& gyro,
+            services::fs::IFileSystem& fileSystem)
+            : _powerControl(powerControl), _currentTime(currentTime), _experimentalSunS(experimentalSunS), _payload(payload), _gyro(gyro),
+              _fs(fileSystem), _nextSessionAt(0)
+        {
+            std::strncpy(_primaryFileName, "/suns", 30);
+            std::strncpy(_secondaryFileName, "/suns.sec", 30);
         }
 
         void SunSExperiment::SetParameters(SunSExperimentParams parameters)

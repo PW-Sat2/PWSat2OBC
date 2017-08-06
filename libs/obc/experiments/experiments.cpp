@@ -9,11 +9,11 @@ namespace obc
         services::power::IPowerControl& powerControl,
         devices::suns::ISunSDriver& suns,
         devices::payload::IPayloadDeviceDriver& payload)
-        : Experiments(                                                                       //
-              experiment::fibo::FibonacciExperiment(fs),                                     //
-              experiment::adcs::DetumblingExperiment(adcs, time),                            //
-              experiment::leop::LaunchAndEarlyOrbitPhaseExperiment(gyro, time, fs),          //
-              experiments::suns::SunSExperiment(powerControl, time, suns, payload, gyro, fs) //
+        : Experiments(                                                                      //
+              experiment::fibo::FibonacciExperiment(fs),                                    //
+              experiment::adcs::DetumblingExperiment(adcs, time),                           //
+              experiment::leop::LaunchAndEarlyOrbitPhaseExperiment(gyro, time, fs),         //
+              experiment::suns::SunSExperiment(powerControl, time, suns, payload, gyro, fs) //
               )
     {
     }

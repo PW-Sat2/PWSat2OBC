@@ -7,7 +7,7 @@
 #include "rapidcheck.hpp"
 #include "rapidcheck/gtest.h"
 
-using namespace experiments::suns;
+using namespace experiment::suns;
 using namespace experiments::fs;
 using namespace services::fs;
 using std::hex;

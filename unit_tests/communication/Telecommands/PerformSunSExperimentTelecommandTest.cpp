@@ -5,9 +5,9 @@
 
 #include "obc/telecommands/experiments.hpp"
 
-struct SetupSunSExperimentMock : experiments::suns::ISetupSunSExperiment
+struct SetupSunSExperimentMock : experiment::suns::ISetupSunSExperiment
 {
-    MOCK_METHOD1(SetParameters, void(experiments::suns::SunSExperimentParams parameters));
+    MOCK_METHOD1(SetParameters, void(experiment::suns::SunSExperimentParams parameters));
     MOCK_METHOD1(SetOutputFiles, void(const char* baseName));
 };
 
@@ -21,7 +21,7 @@ using testing::Eq;
 using testing::StrEq;
 using namespace std::chrono_literals;
 
-using Params = experiments::suns::SunSExperimentParams;
+using Params = experiment::suns::SunSExperimentParams;
 
 namespace
 {
