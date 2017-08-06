@@ -13,7 +13,7 @@ namespace services
         {
         }
 
-        TakePhoto::TakePhoto(Camera camera) : _which(camera)
+        TakePhoto::TakePhoto(Camera camera, PhotoResolution resolution) : _which(camera), _resolution(resolution)
         {
         }
 
