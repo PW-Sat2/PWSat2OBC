@@ -475,6 +475,9 @@ namespace services
             Task<PhotoService*, 4_KB, TaskPriority::P6> _task;
             /** @brief Command queue */
             Queue<PossibleCommand, BuffersCount * 4> _commandQueue;
+
+            /** @brief Synchronization */
+            OSSemaphoreHandle _sync;
         };
 
         /** @} */
