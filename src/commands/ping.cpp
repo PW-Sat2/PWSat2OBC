@@ -66,7 +66,7 @@ void TestPhoto(std::uint16_t /*argc*/, char* /*argv*/ [])
     ph.Schedule(DownloadPhoto(Camera::Nadir, 0));
     ph.Schedule(DisableCamera(Camera::Nadir));
 
-    ph.Schedule(Sleep(10s));
+    ph.Schedule(Sleep(1s));
 
     ph.Schedule(EnableCamera(Camera::Wing));
     ph.Schedule(TakePhoto(Camera::Wing, PhotoResolution::p480));
@@ -76,5 +76,9 @@ void TestPhoto(std::uint16_t /*argc*/, char* /*argv*/ [])
     ph.Schedule(SavePhoto(0, "/nadir"));
     ph.Schedule(SavePhoto(1, "/wing"));
 
-    GetTerminal().Puts("Scheduled");
+    GetTerminal().Puts("Scheduled...");
+
+    ph.WaitForFinish(InfiniteTimeout);
+
+    GetTerminal().Puts("Finished");
 }
