@@ -5,6 +5,8 @@ import os
 import sys
 from time import sleep
 import colorlog
+from datetime import datetime
+import binascii
 
 try:
     from i2cMock import I2CMock
@@ -84,6 +86,8 @@ Arguments may also be stored in file and passed with '@file' syntax. Arguments i
     parser.add_argument('-c', '--config', required=True,
                         help="Config file (in CMake-generated integration tests format, only MOCK_COM required)",)
 
+    parser.add_argument('-f', '--frames', help="Save all transmitted frames to file", default=None)
+
     parser.add_argument('-d', '--debug', action='store_true', default=False, help="Enable I2C logs")
 
     device_selection_group = parser.add_mutually_exclusive_group(required=True)
@@ -152,12 +156,26 @@ class JustMocks(object):
     def stop(self):
         self.i2c.stop()
 
+    def save_transmitted_frames_to(self, file_path):
+        def log_frame(_, content):
+            stamp = datetime.now().isoformat()
+            frame_data = binascii.hexlify(bytearray(content)).upper()
+
+            with open(file_path, 'a') as f:
+                f.write('{}|{}\n'.format(stamp, frame_data))
+
+            print 'Logging frame {}'.format(len(content))
+        self.comm.transmitter.on_send_frame = log_frame
+
 
 _setup_log()
 
 args = parse_args()
 
-logging.getLogger("I2C").propagate = args.debug
+logging.getLogger("I2C").propagate = True
+
+if not args.debug:
+    logging.getLogger("I2C").setLevel(logging.WARN)
 
 config = imp.load_source('config', args.config)
 
@@ -166,6 +184,9 @@ devices_to_enable = {k: AVAILABLE_DEVICES[k] for k in args.enabled_devices}
 just_mocks = JustMocks(mock_com=config.config['MOCK_COM'])
 
 print 'Starting devices: {}'.format(', '.join(sorted(devices_to_enable.keys())))
+
+if args.frames is not None:
+    just_mocks.save_transmitted_frames_to(args.frames)
 
 just_mocks.start(devices_to_enable)
 
