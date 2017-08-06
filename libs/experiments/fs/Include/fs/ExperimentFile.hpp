@@ -63,7 +63,7 @@ namespace experiments
 
             /**
              * @brief Default constrctor
-             * @param time Optional time provider. If set, each packet automatically has timestamp.
+             * @param time Optional time provider. If set, each packet automatically have a timestamp.
              * */
             ExperimentFile(services::time::ICurrentTime* time = nullptr);
 
