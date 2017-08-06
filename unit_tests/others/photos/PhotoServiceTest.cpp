@@ -191,9 +191,7 @@ namespace
     TEST_P(PhotoServiceTest, ShouldReturnFailIfDownloadFails)
     {
         EXPECT_CALL(_selector, Select(Cam()));
-        EXPECT_CALL(_camera, DownloadPhoto(_)).WillOnce(Invoke([](auto /*buffer*/) {
-            return DownloadPhotoResult(OSResult::DeviceNotFound);
-        }));
+        EXPECT_CALL(_camera, DownloadPhoto(_)).Times(3).WillRepeatedly(Return(DownloadPhotoResult(OSResult::DeviceNotFound)));
 
         auto r = _service.Invoke(DownloadPhoto(Cam(), 1));
 
@@ -287,7 +285,7 @@ namespace
 
     TEST_F(PhotoServiceTest, ShouldSaveMarkerTextToFileIfBufferIsFailed)
     {
-        EXPECT_CALL(_camera, DownloadPhoto(_)).WillOnce(Return(DownloadPhotoResult(OSResult::AccessDenied)));
+        EXPECT_CALL(_camera, DownloadPhoto(_)).Times(3).WillRepeatedly(Return(DownloadPhotoResult(OSResult::AccessDenied)));
         std::array<std::uint8_t, 1_KB> photoBuffer;
 
         _fs.AddFile("/photo", photoBuffer);
@@ -307,6 +305,13 @@ namespace
         auto r = _service.Invoke(Sleep(10000ms));
 
         ASSERT_THAT(r, Eq(OSResult::Success));
+    }
+
+    TEST_F(PhotoServiceTest, SavePhotoAcceptsFormatedFileName)
+    {
+        SavePhoto cmd(1, "a%d%d", 1, 2);
+
+        ASSERT_THAT(cmd.Path(), StrEq("a12"));
     }
 
     INSTANTIATE_TEST_CASE_P(PhotoServiceTest, PhotoServiceTest, testing::Values(Camera::Nadir, Camera::Wing), );
