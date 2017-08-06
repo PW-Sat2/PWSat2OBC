@@ -197,13 +197,13 @@ namespace services
         {
           public:
             SavePhoto() = default;
+
             /**
              * @brief Ctor
              * @param bufferId Buffer ID
-             * @param path Path to file
+             * @param pathFmt Path format (printf-style)
              */
-            SavePhoto(std::uint8_t bufferId, const char* path);
-
+            SavePhoto(std::uint8_t bufferId, const char* pathFmt, ...) __attribute__((format(printf, 3, 4)));
             inline const char* Path() const;
             inline std::uint8_t BufferId() const;
 

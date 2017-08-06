@@ -1,3 +1,5 @@
+#include <cstdarg>
+#include <cstdio>
 #include <cstring>
 #include "photo_service.hpp"
 
@@ -21,9 +23,19 @@ namespace services
         {
         }
 
-        SavePhoto::SavePhoto(std::uint8_t bufferId, const char* path) : _bufferId(bufferId)
+        //        SavePhoto::SavePhoto(std::uint8_t bufferId, const char* path) : _bufferId(bufferId)
+        //        {
+        //            std::strcpy(this->_path, path);
+        //        }
+
+        SavePhoto::SavePhoto(std::uint8_t bufferId, const char* pathFmt, ...) : _bufferId(bufferId)
         {
-            std::strcpy(this->_path, path);
+            va_list va;
+            va_start(va, pathFmt);
+
+            vsnprintf(_path, sizeof(_path), pathFmt, va);
+
+            va_end(va);
         }
 
         Sleep::Sleep(std::chrono::milliseconds duration) : _duration(duration)
