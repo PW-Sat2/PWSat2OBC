@@ -81,4 +81,6 @@ void RunlevelCommand(std::uint16_t argc, char* argv[]);
 
 void SailCommand(std::uint16_t argc, char* argv[]);
 
+void LeopCommand(std::uint16_t argc, char* argv[]);
+
 #endif

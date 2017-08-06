@@ -26,7 +26,7 @@ void SetRunlevel()
 
     std::uint8_t runlevel = BSP_UART_rxByte(BSP_UART_DEBUG);
 
-    if (runlevel > 2)
+    if (runlevel > 3)
     {
         BSP_UART_Puts(BSP_UART_DEBUG, "Invalid runlevel\n");
         return;

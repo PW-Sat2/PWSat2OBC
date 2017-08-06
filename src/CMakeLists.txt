@@ -35,6 +35,7 @@ set(SOURCES
     commands/memory.cpp
     commands/runlevel.cpp
     commands/sail.cpp
+    commands/leop.cpp
     checks/error_counters.cpp
     checks/checks.cpp
     obc.h

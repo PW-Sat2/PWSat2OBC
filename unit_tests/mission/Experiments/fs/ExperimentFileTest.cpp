@@ -1,3 +1,4 @@
+#include <gsl/span>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "fs/ExperimentFile.hpp"
@@ -39,7 +40,9 @@ namespace
     TEST_F(ExperimentFileTest, EmptyFileWithTimestamp)
     {
         ExperimentFile file(&_time);
+        uint8_t data = 7;
         file.Open(_fs, TestFileName, FileOpen::CreateAlways, FileAccess::WriteOnly);
+        file.Write(ExperimentFile::PID::Reserved, gsl::make_span(&data, 1));
         file.Close();
 
         std::array<uint8_t, 2 * ExperimentFile::PacketLength> expected;
@@ -49,6 +52,8 @@ namespace
         w.WriteByte(num(ExperimentFile::PID::Synchronization));
         w.WriteByte(num(ExperimentFile::PID::Timestamp));
         w.WriteQuadWordLE(65536);
+        w.WriteByte(num(ExperimentFile::PID::Reserved));
+        w.WriteByte(7);
 
         ASSERT_THAT(_buffer, Eq(expected));
     }
@@ -56,12 +61,18 @@ namespace
     TEST_F(ExperimentFileTest, EmptyFileWithoutTimestamp)
     {
         ExperimentFile file;
+        uint8_t data = 7;
         file.Open(_fs, TestFileName, FileOpen::CreateAlways, FileAccess::WriteOnly);
+        file.Write(ExperimentFile::PID::Reserved, gsl::make_span(&data, 1));
         file.Close();
 
         std::array<uint8_t, 2 * ExperimentFile::PacketLength> expected;
         expected.fill(0xFF);
-        expected[0] = num(ExperimentFile::PID::Synchronization);
+        Writer w(expected);
+
+        w.WriteByte(num(ExperimentFile::PID::Synchronization));
+        w.WriteByte(num(ExperimentFile::PID::Reserved));
+        w.WriteByte(7);
 
         ASSERT_THAT(_buffer, Eq(expected));
     }
