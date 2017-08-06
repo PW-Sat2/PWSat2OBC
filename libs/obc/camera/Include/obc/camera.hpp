@@ -26,7 +26,7 @@ namespace obc
         }
 
         virtual services::photo::SyncResult Sync() override;
-        virtual services::photo::TakePhotoResult TakePhoto() override;
+        virtual services::photo::TakePhotoResult TakePhoto(services::photo::PhotoResolution resolution) override;
         virtual services::photo::DownloadPhotoResult DownloadPhoto(gsl::span<std::uint8_t> buffer) override;
 
       private:

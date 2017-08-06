@@ -49,6 +49,16 @@ namespace services
         using DownloadPhotoResult = Result<gsl::span<std::uint8_t>, OSResult>;
 
         /**
+         * @brief JPEG photo resolutions
+         */
+        enum class PhotoResolution
+        {
+            p128 = 0x03, //!< p128
+            p240 = 0x05, //!< p240
+            p480 = 0x07, //!< p480
+        };
+
+        /**
          * @brief Camera API
          */
         struct ICamera
@@ -63,7 +73,7 @@ namespace services
              * @brief Takes photo
              * @return Operation result
              */
-            virtual TakePhotoResult TakePhoto() = 0;
+            virtual TakePhotoResult TakePhoto(PhotoResolution resolution) = 0;
 
             /**
              * @brief Downloads photo into memory

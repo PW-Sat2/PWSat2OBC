@@ -23,7 +23,7 @@ using namespace std::chrono_literals;
 struct CameraMock : ICamera
 {
     MOCK_METHOD0(Sync, SyncResult());
-    MOCK_METHOD0(TakePhoto, TakePhotoResult());
+    MOCK_METHOD1(TakePhoto, TakePhotoResult(PhotoResolution));
     MOCK_METHOD1(DownloadPhoto, DownloadPhotoResult(gsl::span<std::uint8_t> buffer));
 };
 
@@ -128,9 +128,9 @@ namespace
     TEST_P(PhotoServiceTest, ShouldRequestTakingAPhoto)
     {
         EXPECT_CALL(_selector, Select(Cam()));
-        EXPECT_CALL(_camera, TakePhoto()).WillOnce(Return(TakePhotoResult::Success));
+        EXPECT_CALL(_camera, TakePhoto(PhotoResolution::p480)).WillOnce(Return(TakePhotoResult::Success));
 
-        auto r = _service.Invoke(TakePhoto(Cam()));
+        auto r = _service.Invoke(TakePhoto(Cam(), PhotoResolution::p480));
 
         ASSERT_THAT(r, Eq(OSResult::Success));
     }
@@ -140,20 +140,20 @@ namespace
         {
             InSequence s;
 
-            EXPECT_CALL(_camera, TakePhoto()).WillOnce(Return(TakePhotoResult::NotSynced));
+            EXPECT_CALL(_camera, TakePhoto(PhotoResolution::p480)).WillOnce(Return(TakePhotoResult::NotSynced));
             EXPECT_CALL(_power, ControlCamera(Cam(), false)).WillOnce(Return(true));
             EXPECT_CALL(_power, ControlCamera(Cam(), true)).WillOnce(Return(true));
             EXPECT_CALL(_camera, Sync()).WillOnce(Return(SyncResult(true, 1)));
 
-            EXPECT_CALL(_camera, TakePhoto()).WillOnce(Return(TakePhotoResult::NotSynced));
+            EXPECT_CALL(_camera, TakePhoto(PhotoResolution::p480)).WillOnce(Return(TakePhotoResult::NotSynced));
             EXPECT_CALL(_power, ControlCamera(Cam(), false)).WillOnce(Return(true));
             EXPECT_CALL(_power, ControlCamera(Cam(), true)).WillOnce(Return(true));
             EXPECT_CALL(_camera, Sync()).WillOnce(Return(SyncResult(true, 1)));
 
-            EXPECT_CALL(_camera, TakePhoto()).WillOnce(Return(TakePhotoResult::Success));
+            EXPECT_CALL(_camera, TakePhoto(PhotoResolution::p480)).WillOnce(Return(TakePhotoResult::Success));
         }
 
-        auto r = _service.Invoke(TakePhoto(Cam()));
+        auto r = _service.Invoke(TakePhoto(Cam(), PhotoResolution::p480));
 
         ASSERT_THAT(r, Eq(OSResult::Success));
     }
@@ -162,9 +162,9 @@ namespace
     {
         ON_CALL(_power, ControlCamera(Cam(), _)).WillByDefault(Return(true));
         ON_CALL(_camera, Sync()).WillByDefault(Return(SyncResult(true, 1)));
-        ON_CALL(_camera, TakePhoto()).WillByDefault(Return(TakePhotoResult::NotSynced));
+        ON_CALL(_camera, TakePhoto(PhotoResolution::p480)).WillByDefault(Return(TakePhotoResult::NotSynced));
 
-        auto r = _service.Invoke(TakePhoto(Cam()));
+        auto r = _service.Invoke(TakePhoto(Cam(), PhotoResolution::p480));
 
         ASSERT_THAT(r, Eq(OSResult::DeviceNotFound));
     }
