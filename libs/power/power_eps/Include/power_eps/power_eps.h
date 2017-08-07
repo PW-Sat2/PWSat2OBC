@@ -34,6 +34,9 @@ namespace services
           private:
             /** @brief EPS driver */
             devices::eps::EPSDriver& _eps;
+
+            /** @brief Controller last used for power cycle */
+            devices::eps::EPSDriver::Controller _lastPowerCycleOn;
         };
     }
 }
