@@ -3,6 +3,7 @@
 #include <cstring>
 #include <limits>
 #include "system.h"
+#include "utils.h"
 
 static constexpr std::uint8_t BitsPerByte = std::numeric_limits<std::uint8_t>::digits;
 static constexpr std::uint8_t BitsPerWord = std::numeric_limits<std::uint16_t>::digits;
@@ -186,4 +187,14 @@ bool BitWriter::WriteQuadWord(std::uint64_t value, std::uint8_t length)
     }
 
     return true;
+}
+
+std::enable_if<!std::is_same<unsigned int, std::uint8_t>::value && //
+        !std::is_same<unsigned int, std::uint16_t>::value &&       //
+        !std::is_same<unsigned int, std::uint32_t>::value &&       //
+        !std::is_same<unsigned int, std::uint64_t>::value,         //
+    bool>::type
+    BitWriter::Write(unsigned int value)
+{
+    return WriteQuadWord(value, BitLength<unsigned int>);
 }
