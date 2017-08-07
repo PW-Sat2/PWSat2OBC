@@ -36,6 +36,7 @@ static const TerminalCommandDescription commands[] = {
     {"experiment_info", ExperimentInfo},
     {"dma", DMAInfo},
     {"imtq", ImtqDriver},
+    {"suns", SunSDriver},
     {"comm", Comm},
     {"antenna_get_telemetry", AntennaGetTelemetry},
     {"antenna_reset", AntennaReset},

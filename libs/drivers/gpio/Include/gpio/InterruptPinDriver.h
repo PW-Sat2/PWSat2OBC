@@ -18,9 +18,6 @@ namespace drivers
             /** @brief Enables interrupt for pin  */
             virtual void EnableInterrupt() = 0;
 
-            /** @brief Clears interrupt active flag for pin low */
-            virtual void ClearInterrupt() = 0;
-
             /**
              * @brief Reads pin's input
              * @return true if pin is high
@@ -42,9 +39,6 @@ namespace drivers
 
             /** @brief Enables interrupt for pin */
             virtual void EnableInterrupt() override;
-
-            /** @brief Clears interrupt active flag for pin low */
-            virtual void ClearInterrupt() override;
 
             /**
              * @brief Reads pin's input

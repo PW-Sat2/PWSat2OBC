@@ -24,6 +24,7 @@
 #include "program_flash/flash_driver.hpp"
 #include "rtc/rtc.hpp"
 #include "spi/efm.h"
+#include "suns/suns.hpp"
 #include "temp/efm.hpp"
 #include "uart/uart.hpp"
 
@@ -167,6 +168,12 @@ namespace obc
 
         /** @brief Imtq handling */
         devices::imtq::ImtqDriver Imtq;
+
+        /** @brief Sun Sensor Interrupt Driver */
+        drivers::gpio::InterruptPinDriver SunSInterruptDriver;
+
+        /** @brief SunS handling */
+        devices::suns::SunSDriver SunS;
 
         /** @brief Termnial attached to UART */
         drivers::uart::UART<io_map::UART_1> Terminal;

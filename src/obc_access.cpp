@@ -45,6 +45,12 @@ devices::imtq::ImtqDriver& GetIMTQ()
 {
     return Main.Hardware.Imtq;
 }
+
+devices::suns::SunSDriver& GetSUNS()
+{
+    return Main.Hardware.SunS;
+}
+
 obc::OBCExperiments& GetExperiments()
 {
     return Main.Experiments;

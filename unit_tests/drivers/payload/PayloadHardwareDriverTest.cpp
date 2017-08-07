@@ -97,10 +97,8 @@ namespace
 
     TEST_F(PayloadHardwareDriverTest, IRQHandlerActiveTest)
     {
-        EXPECT_CALL(pinDriver, ClearInterrupt()).Times(1);
         EXPECT_CALL(pinDriver, Value()).Times(1);
         EXPECT_CALL(os, GiveSemaphoreISR(_)).Times(1);
-        EXPECT_CALL(os, EndSwitchingISR()).Times(1);
 
         pinDriver.SetValue(false);
         driver.IRQHandler();
@@ -109,10 +107,8 @@ namespace
 
     TEST_F(PayloadHardwareDriverTest, IRQHandlerInactiveTest)
     {
-        EXPECT_CALL(pinDriver, ClearInterrupt()).Times(1);
         EXPECT_CALL(pinDriver, Value()).Times(1);
         EXPECT_CALL(os, GiveSemaphoreISR(_)).Times(0);
-        EXPECT_CALL(os, EndSwitchingISR()).Times(1);
 
         pinDriver.SetValue(true);
         driver.IRQHandler();
@@ -152,7 +148,7 @@ namespace
         EXPECT_EQ(error_counter, 5);
     }
 
-    TEST_F(PayloadHardwareDriverTest, SetingTimeout)
+    TEST_F(PayloadHardwareDriverTest, SettingTimeout)
     {
         auto timeout = std::chrono::milliseconds(1000);
         EXPECT_CALL(os, TakeSemaphore(_, Eq(timeout))).Times(1);

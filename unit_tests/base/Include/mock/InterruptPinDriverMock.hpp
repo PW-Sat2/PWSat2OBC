@@ -13,8 +13,6 @@ class InterruptPinDriverMock : public drivers::gpio::IInterruptPinDriver
   public:
     MOCK_METHOD0(EnableInterrupt, void());
 
-    MOCK_METHOD0(ClearInterrupt, void());
-
     MOCK_CONST_METHOD0(Value, bool());
 
     inline void SetValue(bool newValue)

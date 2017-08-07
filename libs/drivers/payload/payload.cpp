@@ -17,14 +17,11 @@ PayloadDriver::PayloadDriver(
 
 void PayloadDriver::IRQHandler()
 {
-    _interruptPinDriver.ClearInterrupt();
     auto value = _interruptPinDriver.Value();
     if (!value)
     {
         RaiseDataReadyISR();
     }
-
-    System::EndSwitchingISR();
 }
 
 void PayloadDriver::Initialize()
@@ -82,18 +79,9 @@ OSResult PayloadDriver::WaitForData()
     return OSResult::Success;
 }
 
-OSResult PayloadDriver::RaiseDataReadyISR()
+void PayloadDriver::RaiseDataReadyISR()
 {
-    ErrorReporter errorContext(_error);
-    auto result = System::GiveSemaphoreISR(_sync);
-    if (result != OSResult::Success)
-    {
-        errorContext.Counter().Failure();
-        LOGF(LOG_LEVEL_ERROR, "Give semaphore for Paload synchronisation failed. Reason: %d", num(result));
-        return result;
-    }
-
-    return OSResult::Success;
+    System::GiveSemaphoreISR(_sync);
 }
 
 void PayloadDriver::SetDataTimeout(std::chrono::milliseconds newTimeout)

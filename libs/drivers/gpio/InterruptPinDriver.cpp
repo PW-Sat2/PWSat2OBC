@@ -19,12 +19,8 @@ uint32_t InterruptPinDriver::IRQMask()
 void InterruptPinDriver::EnableInterrupt()
 {
     auto interruptBank = _pin.PinNumber() % 2 ? GPIO_ODD_IRQn : GPIO_EVEN_IRQn;
-    NVIC_SetPriority(interruptBank, io_map::Payload::InterruptPriority);
+    NVIC_SetPriority(interruptBank, io_map::Gpio::InterruptPriority);
     NVIC_EnableIRQ(interruptBank);
-}
-void InterruptPinDriver::ClearInterrupt()
-{
-    GPIO_IntClear(IRQMask());
 }
 
 bool InterruptPinDriver::Value() const

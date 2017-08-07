@@ -22,6 +22,7 @@ target_link_libraries(${NAME}
 	program_flash
 	antenna
 	imtq
+	suns
 	rtc
 	uart
 	comm
