@@ -9,7 +9,7 @@ namespace devices
 
         ImtqTelemetryCollector::ImtqTelemetryCollector(IImtqDriver& driver) : next(driver), semaphore(nullptr)
         {
-            std::uninitialized_fill(elementUpdated.begin(), elementUpdated.end(), false);
+            this->elementUpdated.fill(false);
         }
 
         void ImtqTelemetryCollector::Initialize()
@@ -197,6 +197,7 @@ namespace devices
                     this->imtqStatus = telemetry::ImtqStatus(result.status);
                     this->coilCurrents = telemetry::ImtqCoilCurrent{result.coilCurrent};
                     this->coilTemperatures = telemetry::ImtqCoilTemperature{result.coilTemperature};
+                    this->elementUpdated[num(ElementId::HouseKeeping)] = true;
                     this->elementUpdated[num(ElementId::Status)] = true;
                     this->elementUpdated[num(ElementId::CoilCurrents)] = true;
                     this->elementUpdated[num(ElementId::CoilTemperatures)] = true;
