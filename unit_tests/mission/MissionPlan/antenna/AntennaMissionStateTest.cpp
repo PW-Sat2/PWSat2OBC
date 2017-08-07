@@ -32,6 +32,7 @@ namespace
         ASSERT_THAT(state.IsFinished(), Eq(false));
         ASSERT_THAT(state.OverrideState(), Eq(false));
         ASSERT_THAT(state.StepNumber(), Eq(0));
+        ASSERT_THAT(state.IsControllerPoweredOn(), Eq(false));
     }
 
     TEST_F(AntennaMissionStateTest, TestStepRetryNoStepChange)

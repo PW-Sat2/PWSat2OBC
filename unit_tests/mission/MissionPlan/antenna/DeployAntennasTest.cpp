@@ -145,11 +145,21 @@ namespace
         ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResult::Success));
         ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
 
+        stateDescriptor.IsControllerPoweredOn(true);
+
         task.Initialize();
     }
 
     TEST_F(DeployAntennasUpdateTest, TestNothingToDo)
     {
+        stateDescriptor.OverrideStep(AntennaMissionState::StepCount());
+        const auto result = update.updateProc(state, update.param);
+        ASSERT_THAT(result, Eq(UpdateResult::Ok));
+    }
+
+    TEST_F(DeployAntennasUpdateTest, TestControllerNotPoweredOn)
+    {
+        stateDescriptor.IsControllerPoweredOn(false);
         stateDescriptor.OverrideStep(AntennaMissionState::StepCount());
         const auto result = update.updateProc(state, update.param);
         ASSERT_THAT(result, Eq(UpdateResult::Ok));

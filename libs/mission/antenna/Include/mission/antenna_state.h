@@ -195,6 +195,18 @@ namespace mission
              */
             inline bool RequirePrimaryAntennaPower() const;
 
+            /**
+             * @brief Returns value indicating whether antenna controller is powered on
+             * @return true if antenna should be powered on, false otherwise
+             */
+            inline bool IsControllerPoweredOn() const;
+
+            /**
+             * @brief Sets value indicating whether antenna controller is powered on
+             * @param isOn true if antenna controller is powered on, false otherwise
+             */
+            inline void IsControllerPoweredOn(bool isOn);
+
             /** @brief Power control  */
             services::power::IPowerControl& Power;
 
@@ -237,6 +249,9 @@ namespace mission
 
             /** @brief Is primary antenna power required? */
             bool _powerRequired;
+
+            /** @brief Is primary antenna controller powered on? */
+            bool _isControllerPoweredOn;
         };
 
         inline std::int8_t AntennaMissionState::RetryCount() const
@@ -321,6 +336,16 @@ namespace mission
         inline bool AntennaMissionState::RequirePrimaryAntennaPower() const
         {
             return this->_powerRequired;
+        }
+
+        inline bool AntennaMissionState::IsControllerPoweredOn() const
+        {
+            return this->_isControllerPoweredOn;
+        }
+
+        inline void AntennaMissionState::IsControllerPoweredOn(bool isOn)
+        {
+            this->_isControllerPoweredOn = isOn;
         }
 
         /** @}*/
