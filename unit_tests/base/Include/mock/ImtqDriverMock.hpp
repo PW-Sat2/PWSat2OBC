@@ -1,13 +1,16 @@
 #ifndef MOCK_IMTQ_DRIVER_HPP
 #define MOCK_IMTQ_DRIVER_HPP
 
-#include <chrono>
+#pragma once
 
-class ImtqDriverMock : public devices::imtq::IImtqDriver
+#include <chrono>
+#include "gmock/gmock.h"
+#include "imtq/IImtqDriver.hpp"
+
+struct ImtqDriverMock : public devices::imtq::IImtqDriver
 {
-  public:
-    ImtqDriverMock() = default;
-    ~ImtqDriverMock() = default;
+    ImtqDriverMock();
+    ~ImtqDriverMock();
 
     MOCK_METHOD2(PerformSelfTest, bool(devices::imtq::SelfTestResult&, bool tryToFixIsisErrors));
     MOCK_METHOD1(MeasureMagnetometer, bool(devices::imtq::Vector3<devices::imtq::MagnetometerMeasurement>&));
