@@ -51,6 +51,12 @@ namespace adcs
             LOG(LOG_LEVEL_ERROR, "Unable to acquire built-in detumble data");
         }
 
+        devices::imtq::State state;
+        if (!imtqDriver.GetSystemState(state))
+        {
+            LOG(LOG_LEVEL_ERROR, "Unable to acquire imtq state");
+        }
+
         devices::imtq::HouseKeepingEngineering housekeeping;
         if (!imtqDriver.GetHouseKeepingEngineering(housekeeping))
         {
