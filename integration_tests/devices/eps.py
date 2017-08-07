@@ -23,7 +23,6 @@ class MPPT(CompareAsDict):
 
 class DISTR(CompareAsDict):
     def __init__(self):
-        self.TEMP = 0
         self.VOLT_3V3 = 0
         self.CURR_3V3 = 0
         self.VOLT_5V = 0
@@ -34,14 +33,13 @@ class DISTR(CompareAsDict):
         self.LCL_FLAGB = 0
 
     def bytes(self):
-        return list(struct.pack('<HHHHHHHBB',
+        return list(struct.pack('<HHHHHHBB',
                                 self.CURR_3V3,
                                 self.VOLT_3V3,
                                 self.CURR_5V,
                                 self.VOLT_5V,
                                 self.CURR_VBAT,
                                 self.VOLT_VBAT,
-                                self.TEMP,
                                 self.LCL_STATE,
                                 self.LCL_FLAGB
                                 ))
@@ -99,17 +97,19 @@ class OtherController(CompareAsDict):
 
 class ThisController(CompareAsDict):
     def __init__(self):
-        self.ERR = 0
+        self.SAFETY_CTR = 0
         self.PWR_CYCLES = 0
         self.UPTIME = 0
         self.TEMP = 0
+        self.SUPP_TEMP = 0
 
     def bytes(self):
-        return list(struct.pack('<BHIH',
-                                self.ERR,
+        return list(struct.pack('<BHIHH',
+                                self.SAFETY_CTR,
                                 self.PWR_CYCLES,
                                 self.UPTIME,
-                                self.TEMP))
+                                self.TEMP,
+                                self.SUPP_TEMP))
 
 
 class DCDC(CompareAsDict):

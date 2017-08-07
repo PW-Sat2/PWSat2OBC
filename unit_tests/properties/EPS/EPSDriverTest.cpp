@@ -105,16 +105,15 @@ namespace rc
         static auto arbitrary()
         {
             using T = DISTR_HK;
-            return gen::build<T>(          //
-                gen::set(&T::Temperature), //
-                gen::set(&T::VOLT_3V3),    //
-                gen::set(&T::CURR_3V3),    //
-                gen::set(&T::VOLT_5V),     //
-                gen::set(&T::CURR_5V),     //
-                gen::set(&T::VOLT_VBAT),   //
-                gen::set(&T::CURR_VBAT),   //
-                gen::set(&T::LCL_STATE),   //
-                gen::set(&T::LCL_FLAGB)    //
+            return gen::build<T>(        //
+                gen::set(&T::VOLT_3V3),  //
+                gen::set(&T::CURR_3V3),  //
+                gen::set(&T::VOLT_5V),   //
+                gen::set(&T::CURR_5V),   //
+                gen::set(&T::VOLT_VBAT), //
+                gen::set(&T::CURR_VBAT), //
+                gen::set(&T::LCL_STATE), //
+                gen::set(&T::LCL_FLAGB)  //
                 );
         }
     };
@@ -166,8 +165,9 @@ namespace rc
         {
             return gen::build<ThisControllerState>(gen::set(&ThisControllerState::powerCycleCount), //
                 gen::set(&ThisControllerState::temperature),                                        //
+                gen::set(&ThisControllerState::suppTemp),                                           //
                 gen::set(&ThisControllerState::uptime),                                             //
-                gen::set(&ThisControllerState::errorCode));
+                gen::set(&ThisControllerState::safetyCounter));
         }
     };
 
@@ -284,7 +284,6 @@ namespace
         w.WriteWordLE(input.distr.VOLT_5V);
         w.WriteWordLE(input.distr.CURR_VBAT);
         w.WriteWordLE(input.distr.VOLT_VBAT);
-        w.WriteWordLE(input.distr.Temperature);
         w.WriteByte(num(input.distr.LCL_STATE));
         w.WriteByte(num(input.distr.LCL_FLAGB));
 
@@ -299,10 +298,11 @@ namespace
 
         w.WriteWordLE(input.other.VOLT_3V3d);
 
-        w.WriteByte(input.current.errorCode);
+        w.WriteByte(input.current.safetyCounter);
         w.WriteWordLE(input.current.powerCycleCount);
         w.WriteDoubleWordLE(input.current.uptime);
         w.WriteWordLE(input.current.temperature);
+        w.WriteWordLE(input.current.suppTemp);
 
         w.WriteWordLE(input.dcdc3V3.temperature);
         w.WriteWordLE(input.dcdc5V.temperature);
@@ -340,7 +340,6 @@ namespace
         RC_ASSERT(hk.mpptYMinus.Temperature == input.mpptYMinus.Temperature);
         RC_ASSERT(hk.mpptYMinus.MpptState == input.mpptYMinus.MpptState);
 
-        RC_ASSERT(hk.distr.Temperature == input.distr.Temperature);
         RC_ASSERT(hk.distr.VOLT_3V3 == input.distr.VOLT_3V3);
         RC_ASSERT(hk.distr.CURR_3V3 == input.distr.CURR_3V3);
         RC_ASSERT(hk.distr.VOLT_5V == input.distr.VOLT_5V);
@@ -361,10 +360,11 @@ namespace
 
         RC_ASSERT(hk.other.VOLT_3V3d == input.other.VOLT_3V3d);
 
-        RC_ASSERT(hk.current.errorCode == input.current.errorCode);
+        RC_ASSERT(hk.current.safetyCounter == input.current.safetyCounter);
         RC_ASSERT(hk.current.powerCycleCount == input.current.powerCycleCount);
         RC_ASSERT(hk.current.uptime == input.current.uptime);
         RC_ASSERT(hk.current.temperature == input.current.temperature);
+        RC_ASSERT(hk.current.suppTemp == input.current.suppTemp);
 
         RC_ASSERT(hk.dcdc3V3.temperature == input.dcdc3V3.temperature);
 
@@ -381,10 +381,11 @@ namespace
         w.WriteWordLE(input.bp.temperatureC);
         w.WriteWordLE(input.batc.voltB);
         w.WriteWordLE(input.other.VOLT_3V3d);
-        w.WriteByte(input.current.errorCode);
+        w.WriteByte(input.current.safetyCounter);
         w.WriteWordLE(input.current.powerCycleCount);
         w.WriteDoubleWordLE(input.current.uptime);
         w.WriteWordLE(input.current.temperature);
+        w.WriteWordLE(input.current.suppTemp);
 
         RC_ASSERT(w.Status());
 
@@ -405,9 +406,10 @@ namespace
 
         RC_ASSERT(hk.other.VOLT_3V3d == input.other.VOLT_3V3d);
 
-        RC_ASSERT(hk.current.errorCode == input.current.errorCode);
+        RC_ASSERT(hk.current.safetyCounter == input.current.safetyCounter);
         RC_ASSERT(hk.current.powerCycleCount == input.current.powerCycleCount);
         RC_ASSERT(hk.current.uptime == input.current.uptime);
         RC_ASSERT(hk.current.temperature == input.current.temperature);
+        RC_ASSERT(hk.current.suppTemp == input.current.suppTemp);
     }
 }

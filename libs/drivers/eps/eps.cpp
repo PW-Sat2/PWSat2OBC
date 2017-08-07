@@ -83,7 +83,7 @@ namespace devices
         Option<hk::ControllerBTelemetry> EPSDriver::ReadHousekeepingB()
         {
             std::array<std::uint8_t, 1> command{0x0};
-            std::array<std::uint8_t, 16> response;
+            std::array<std::uint8_t, 18> response;
 
             auto result = this->WriteRead(Controller::B, command, response);
 
