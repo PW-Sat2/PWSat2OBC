@@ -3,6 +3,6 @@
 
 namespace
 {
-    static_assert(experiments::fs::ExperimentFile::PacketLength == telecommunication::downlink::DownlinkFrame::MaxPayloadSize,
+    static_assert(experiments::fs::ExperimentFile::PacketLength == telecommunication::downlink::CorrelatedDownlinkFrame::MaxPayloadSize,
         "Packet Length is not equal to downlink frame size");
 }

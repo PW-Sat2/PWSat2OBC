@@ -39,20 +39,14 @@ namespace mission
 
             bool isTimeForStart = false;
 
-            if (!This->_taskStartTime.HasValue)
+            auto currentTime = This->_timeProvider.GetCurrentTime();
+            if (!currentTime.HasValue)
             {
-                This->_taskStartTime = This->_timeProvider.GetCurrentTime();
+                return false;
             }
-            else
-            {
-                auto currentTime = This->_timeProvider.GetCurrentTime();
-                if (!currentTime.HasValue)
-                {
-                    return false;
-                }
 
-                isTimeForStart = currentTime.Value - This->_taskStartTime.Value > ExperimentStartDelay;
-            }
+            isTimeForStart = currentTime.Value >= ExperimentStartDelay &&
+                currentTime.Value < experiment::leop::LaunchAndEarlyOrbitPhaseExperiment::ExperimentTimeStop;
 
             return This->_isStartAllowed && isTimeForStart;
         }
