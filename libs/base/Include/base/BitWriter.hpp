@@ -133,6 +133,18 @@ class BitWriter
     bool Write(std::uint64_t value);
 
     /**
+     * @brief Appends integer value to the buffer and moves the current position to the next free bit.
+     * @param[in] value Value that should be added to writer output.
+     * @return Operation status.
+     */
+    std::enable_if<!std::is_same<unsigned int, std::uint8_t>::value && //
+            !std::is_same<unsigned int, std::uint16_t>::value &&       //
+            !std::is_same<unsigned int, std::uint32_t>::value &&       //
+            !std::is_same<unsigned int, std::uint64_t>::value,         //
+        bool>::type
+        Write(unsigned int value);
+
+    /**
      * @brief Appends boolean to the buffer and moves the current position to the next free bit.
      * @param[in] value Value that should be added to writer output.
      * @return Operation status.

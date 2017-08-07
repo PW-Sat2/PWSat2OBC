@@ -448,7 +448,7 @@ namespace
         CheckBuffer(writer.Capture(), gsl::make_span(expected));
     }
 
-    TEST(BitWriterTest, TestWritingArrayAligned)
+    TEST(BitWriterTest, TestWritingSpanAligned)
     {
         uint8_t array[] = {0x11, 0x99, 0xaa};
         uint8_t buffer[3];
@@ -460,7 +460,7 @@ namespace
         CheckBuffer(writer.Capture(), gsl::make_span(expected));
     }
 
-    TEST(BitWriterTest, TestWritingArrayUnaligned)
+    TEST(BitWriterTest, TestWritingSpanUnaligned)
     {
         uint8_t array[] = {0x11, 0x99, 0xaa};
         uint8_t buffer[4];
@@ -471,6 +471,215 @@ namespace
         writer.Write(true);
         ASSERT_TRUE(writer.Status());
         ASSERT_THAT(writer.GetBitDataLength(), Eq(26u));
+        CheckBuffer(writer.Capture(), gsl::make_span(expected));
+    }
+
+    TEST(BitWriterTest, TestWritingArrayAligned)
+    {
+        std::array<std::uint8_t, 3> array = {0x11, 0x99, 0xaa};
+        uint8_t buffer[3];
+        const uint8_t expected[] = {0x11, 0x99, 0xaa};
+        BitWriter writer(buffer);
+        writer.Write(array);
+        ASSERT_TRUE(writer.Status());
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(24u));
+        CheckBuffer(writer.Capture(), gsl::make_span(expected));
+    }
+
+    TEST(BitWriterTest, TestWritingArrayUnaligned)
+    {
+        std::array<std::uint8_t, 3> array = {0x11, 0x99, 0xaa};
+        uint8_t buffer[4];
+        const uint8_t expected[] = {0x23, 0x32, 0x55, 0x03};
+        BitWriter writer(buffer);
+        writer.Write(true);
+        writer.Write(array);
+        writer.Write(true);
+        ASSERT_TRUE(writer.Status());
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(26u));
+        CheckBuffer(writer.Capture(), gsl::make_span(expected));
+    }
+
+    TEST(BitWriterTest, TestWriteFundamentalTypeChar)
+    {
+        uint8_t buffer[4];
+        const uint8_t expected[] = {'c'};
+        BitWriter writer(buffer);
+        writer.Write('c');
+        ASSERT_TRUE(writer.Status());
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(8u));
+        CheckBuffer(writer.Capture(), gsl::make_span(expected));
+    }
+
+    TEST(BitWriterTest, TestWriteFundamentalTypeShort)
+    {
+        uint8_t buffer[4];
+        const uint8_t expected[] = {0xff, 0x7f};
+        BitWriter writer(buffer);
+        writer.Write(static_cast<short>(0x7fff));
+        ASSERT_TRUE(writer.Status());
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(16u));
+        CheckBuffer(writer.Capture(), gsl::make_span(expected));
+    }
+
+    TEST(BitWriterTest, TestWriteFundamentalTypeInt)
+    {
+        uint8_t buffer[4];
+        const uint8_t expected[] = {0xfd, 0xfe, 0xff, 0x7f};
+        BitWriter writer(buffer);
+        writer.Write(0x7ffffefd);
+        ASSERT_TRUE(writer.Status());
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(32u));
+        CheckBuffer(writer.Capture(), gsl::make_span(expected));
+    }
+
+    TEST(BitWriterTest, TestWriteFundamentalTypeLong)
+    {
+        uint8_t buffer[4];
+        const uint8_t expected[] = {0xfd, 0xfe, 0xff, 0x7f};
+        BitWriter writer(buffer);
+        writer.Write(0x7ffffefdl);
+        ASSERT_TRUE(writer.Status());
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(32u));
+        CheckBuffer(writer.Capture(), gsl::make_span(expected));
+    }
+
+    TEST(BitWriterTest, TestWriteFundamentalTypeLongLong)
+    {
+        uint8_t buffer[8];
+        const uint8_t expected[] = {0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff, 0x7f};
+        BitWriter writer(buffer);
+        writer.Write(0x7ffffefdfcfbfaf9l);
+        ASSERT_TRUE(writer.Status());
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(64u));
+        CheckBuffer(writer.Capture(), gsl::make_span(expected));
+    }
+
+    TEST(BitWriterTest, TestWriteUnsignedByteEnum)
+    {
+        enum ByteEnum : std::uint8_t
+        {
+            Value = 0xff
+        };
+
+        uint8_t buffer[4];
+        const uint8_t expected[] = {0xff};
+        BitWriter writer(buffer);
+        writer.Write(Value);
+        ASSERT_TRUE(writer.Status());
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(8u));
+        CheckBuffer(writer.Capture(), gsl::make_span(expected));
+    }
+
+    TEST(BitWriterTest, TestWriteSignedByteEnum)
+    {
+        enum SingedByteEnum : std::int8_t
+        {
+            Value = 0x7f
+        };
+
+        uint8_t buffer[4];
+        const uint8_t expected[] = {0x7f};
+        BitWriter writer(buffer);
+        writer.Write(Value);
+        ASSERT_TRUE(writer.Status());
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(8u));
+        CheckBuffer(writer.Capture(), gsl::make_span(expected));
+    }
+
+    TEST(BitWriterTest, TestWriteUnsignedShortEnum)
+    {
+        enum ShortEnum : std::uint16_t
+        {
+            Value = 0xfffe
+        };
+
+        uint8_t buffer[4];
+        const uint8_t expected[] = {0xfe, 0xff};
+        BitWriter writer(buffer);
+        writer.Write(Value);
+        ASSERT_TRUE(writer.Status());
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(16u));
+        CheckBuffer(writer.Capture(), gsl::make_span(expected));
+    }
+
+    TEST(BitWriterTest, TestWriteSignedShortEnum)
+    {
+        enum SingedShortEnum : std::int16_t
+        {
+            Value = 0x7ffe
+        };
+
+        uint8_t buffer[4];
+        const uint8_t expected[] = {0xfe, 0x7f};
+        BitWriter writer(buffer);
+        writer.Write(Value);
+        ASSERT_TRUE(writer.Status());
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(16u));
+        CheckBuffer(writer.Capture(), gsl::make_span(expected));
+    }
+
+    TEST(BitWriterTest, TestWriteUnsignedIntEnum)
+    {
+        enum IntEnum : std::uint32_t
+        {
+            Value = 0xfffefdfc
+        };
+
+        uint8_t buffer[4];
+        const uint8_t expected[] = {0xfc, 0xfd, 0xfe, 0xff};
+        BitWriter writer(buffer);
+        writer.Write(Value);
+        ASSERT_TRUE(writer.Status());
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(32u));
+        CheckBuffer(writer.Capture(), gsl::make_span(expected));
+    }
+
+    TEST(BitWriterTest, TestWriteSignedIntEnum)
+    {
+        enum SingedIntEnum : std::int32_t
+        {
+            Value = 0x7ffefdfc
+        };
+
+        uint8_t buffer[4];
+        const uint8_t expected[] = {0xfc, 0xfd, 0xfe, 0x7f};
+        BitWriter writer(buffer);
+        writer.Write(Value);
+        ASSERT_TRUE(writer.Status());
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(32u));
+        CheckBuffer(writer.Capture(), gsl::make_span(expected));
+    }
+
+    TEST(BitWriterTest, TestWriteEnum)
+    {
+        enum StandardEnum
+        {
+            Value = 0x7ffefdfc
+        };
+
+        uint8_t buffer[4];
+        const uint8_t expected[] = {0xfc, 0xfd, 0xfe, 0x7f};
+        BitWriter writer(buffer);
+        writer.Write(Value);
+        ASSERT_TRUE(writer.Status());
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(32u));
+        CheckBuffer(writer.Capture(), gsl::make_span(expected));
+    }
+
+    TEST(BitWriterTest, TestWriteEnumClass)
+    {
+        enum class EnumClass
+        {
+            Value = 0x7ffefdfc
+        };
+
+        uint8_t buffer[4];
+        const uint8_t expected[] = {0xfc, 0xfd, 0xfe, 0x7f};
+        BitWriter writer(buffer);
+        writer.Write(EnumClass::Value);
+        ASSERT_TRUE(writer.Status());
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(32u));
         CheckBuffer(writer.Capture(), gsl::make_span(expected));
     }
 }
