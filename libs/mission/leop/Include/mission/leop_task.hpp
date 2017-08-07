@@ -75,7 +75,7 @@ namespace mission
              */
             static void Action(SystemState& state, void* param);
 
-            /** @brief Delay after task start, after which the experiment will be started */
+            /** @brief Delay after mission start, after which the experiment will be started */
             static constexpr std::chrono::minutes ExperimentStartDelay = std::chrono::minutes(1);
 
             /** @brief Flag indicating whether start of experiment is allowed */
@@ -83,8 +83,6 @@ namespace mission
 
             ::experiments::IExperimentController& _experimentController;
             services::time::ICurrentTime& _timeProvider;
-
-            Option<std::chrono::milliseconds> _taskStartTime;
         };
     }
 }
