@@ -212,7 +212,8 @@ namespace mission
               _retryCount(0),         //
               _cycleCount(0),         //
               _driver(antennaDriver), //
-              _powerRequired(false)
+              _powerRequired(false),  //
+              _isControllerPoweredOn(false)
         {
         }
 
@@ -467,6 +468,7 @@ namespace mission
 
             if (result)
             {
+                stateDescriptor.IsControllerPoweredOn(true);
                 stateDescriptor.NextStep(GetTimeout(step));
             }
             else
@@ -493,6 +495,7 @@ namespace mission
 
             if (result)
             {
+                stateDescriptor.IsControllerPoweredOn(false);
                 stateDescriptor.NextStep(GetTimeout(step));
             }
             else
@@ -579,6 +582,11 @@ namespace mission
             AntennaMissionState* stateDescriptor = (AntennaMissionState*)param;
             state.AntennaState.SetDeployment(stateDescriptor->IsFinished());
             if (stateDescriptor->IsFinished())
+            {
+                return UpdateResult::Ok;
+            }
+
+            if (!stateDescriptor->IsControllerPoweredOn())
             {
                 return UpdateResult::Ok;
             }
