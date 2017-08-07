@@ -3,6 +3,7 @@
 #include "StorageAccessMock.hpp"
 #include "eps.hpp"
 #include "mock/HasStateMock.hpp"
+#include "mock/ImtqDriverMock.hpp"
 #include "mock/ImtqTelemetryCollectorMock.hpp"
 #include "mock/fm25w.hpp"
 #include "mock/power.hpp"
@@ -61,6 +62,14 @@ PowerControlMock::PowerControlMock()
 }
 
 PowerControlMock::~PowerControlMock()
+{
+}
+
+ImtqDriverMock::ImtqDriverMock()
+{
+}
+
+ImtqDriverMock::~ImtqDriverMock()
 {
 }
 

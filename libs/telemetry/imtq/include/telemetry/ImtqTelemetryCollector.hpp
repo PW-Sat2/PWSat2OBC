@@ -25,6 +25,24 @@ namespace devices
         {
           public:
             /**
+             * @brief Enumerator of all captured telemetry elements.
+             */
+            enum class ElementId
+            {
+                Magnetometer = 0, //!< Magnetometer
+                Dipoles,          //!< Dipoles
+                Bdot,             //!< Bdot
+                HouseKeeping,     //!< HouseKeeping
+                CoilCurrents,     //!< CoilCurrents
+                CoilTemperatures, //!< CoilTemperatures
+                Status,           //!< Status
+                State,            //!< State
+                SelfTest,         //!< SelfTest
+                CoilsActive,      //!< CoilsActive
+                Last,             //!< Last
+            };
+
+            /**
              * @brief ctor.
              * @param driver Reference to the actual imtq driver.
              */
@@ -79,22 +97,14 @@ namespace devices
 
             virtual bool CaptureTelemetry(telemetry::ManagedTelemetry& target) final override;
 
-          private:
-            enum class ElementId
-            {
-                Magnetometer = 0,
-                Dipoles,
-                Bdot,
-                HouseKeeping,
-                CoilCurrents,
-                CoilTemperatures,
-                Status,
-                State,
-                SelfTest,
-                CoilsActive,
-                Last,
-            };
+            /**
+             * @brief Verifies whether the requested telemetry element has been recently captured
+             * @param id Telemetry element id.
+             * @return True
+             */
+            bool IsNew(ElementId id) const;
 
+          private:
             template <typename T> bool Update(bool status, ElementId element, const T& source, T& target);
 
             template <typename T> void Save(const T& source, ElementId element, telemetry::ManagedTelemetry& target);
@@ -115,6 +125,17 @@ namespace devices
             telemetry::ImtqCoilsActive coilsActive;
             std::array<bool, num(ElementId::Last)> elementUpdated;
         };
+
+        inline bool ImtqTelemetryCollector::IsNew(ElementId id) const
+        {
+            const auto index = num(id);
+            if (index < 0 || index >= num(ElementId::Last))
+            {
+                return false;
+            }
+
+            return this->elementUpdated[index];
+        }
     }
 }
 

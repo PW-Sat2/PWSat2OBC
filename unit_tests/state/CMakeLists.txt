@@ -24,6 +24,7 @@ set(SOURCES
   telemetry/TimeTelemetryAcquisitionTest.cpp
   telemetry/ImtqTelemetryAcquisitionTest.cpp
   telemetry/ImtqTelemetryTest.cpp
+  telemetry/ImtqTelemetryCollectorTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
