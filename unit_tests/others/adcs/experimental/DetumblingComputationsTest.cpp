@@ -5,32 +5,17 @@
 #include <system.h>
 #include <unistd.h>
 #include <gtest/gtest.h>
-#include "adcs/experimental/adcsDetumblingUtConfig.h"
+#include "adcs/experimental/adcsUtConfig.h"
+#include "Include/adcs/dataFileTools.hpp"
 
 using adcs::DetumblingComputations;
 using adcs::DipoleVec;
 using adcs::MagVec;
 
-std::vector<float> getRecord(std::istream& str)
-{
-    std::vector<float> result;
-    std::string line, cell;
-    std::getline(str, line);
-    std::stringstream lineStream(line);
-    float cellf;
-    while (getline(lineStream, cell, ','))
-    {
-        std::stringstream cellStream(cell);
-        cellStream >> cellf;
-        result.push_back(cellf);
-    }
-    return result;
-}
-
 // cross-validation of detumbling against matlab implementation
 TEST(detumbling, cross_validation)
 {
-    std::ifstream file(DETUMBLIG_UT_DATA_FILE_PATH "/bdot_crossvalidation.csv");
+    std::ifstream file(ADCS_UT_DATA_FILE_PATH "/bdot_crossvalidation.csv");
     if (!file)
     {
         std::cerr << "Cannot find data  file!" << std::endl;
@@ -53,7 +38,7 @@ TEST(detumbling, cross_validation)
 
     while (!file.eof())
     {
-        record = getRecord(file);
+        record = dataFileTools::getRecord(file);
         mgmt[0] = input_scale * record[1];
         mgmt[1] = input_scale * record[2];
         mgmt[2] = input_scale * record[3];

@@ -1,11 +1,15 @@
 set(NAME adcs_experimental)
 
-set(SOURCES      
+set(SOURCES
     DetumblingComputations.cpp
     ExperimentalDetumbling.cpp
     ExperimentalSunPointing.cpp
+    SunPointing.cpp
+
     Include/adcs/DetumblingComputations.hpp
+    Include/adcs/ExperimentalDetumbling.hpp
     Include/adcs/InterfaceTypes.hpp
+    Include/adcs/SunPointing.hpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
