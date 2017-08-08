@@ -131,10 +131,8 @@ namespace
             w.WriteByte(num(ExperimentFile::PID::Reserved));
             w.WriteArray(data);
         }
-        for (int i = 0; i < 2; ++i)
-        {
-            w.WriteByte(0xFF);
-        }
+
+        w.WriteByte(0xFF);
 
         // second packet
         w.WriteByte(num(ExperimentFile::PID::Synchronization));
