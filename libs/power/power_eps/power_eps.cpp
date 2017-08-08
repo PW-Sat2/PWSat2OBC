@@ -11,18 +11,30 @@ using devices::eps::hk::DISTR_LCL_STATE;
 using devices::eps::hk::DISTR_LCL_FLAGB;
 using devices::eps::BurnSwitch;
 using devices::eps::ErrorCode;
+using EPS = devices::eps::EPSDriver::Controller;
 
 namespace services
 {
     namespace power
     {
-        EPSPowerControl::EPSPowerControl(devices::eps::EPSDriver& eps) : _eps(eps)
+        EPSPowerControl::EPSPowerControl(devices::eps::EPSDriver& eps) : _eps(eps), _lastPowerCycleOn(EPS::A)
         {
         }
 
         void EPSPowerControl::PowerCycle()
         {
-            this->_eps.PowerCycle();
+            if (this->_lastPowerCycleOn == EPS::A)
+            {
+                this->_lastPowerCycleOn = EPS::B;
+                this->_eps.PowerCycle(EPS::B);
+                this->_eps.PowerCycle(EPS::A);
+            }
+            else
+            {
+                this->_lastPowerCycleOn = EPS::A;
+                this->_eps.PowerCycle(EPS::A);
+                this->_eps.PowerCycle(EPS::B);
+            }
         }
 
         bool EPSPowerControl::MainThermalKnife(bool enabled)
