@@ -3,16 +3,16 @@
 namespace obc
 {
     OBCExperiments::OBCExperiments(services::fs::IFileSystem& fs, adcs::IAdcsCoordinator& adcs, services::time::TimeProvider& time)
-        :           //
-          Fibo(fs), //
-          Detumbling(adcs, time),
-          Experiments{&Fibo, &Detumbling}
+        : Experiments(                                           //
+              experiment::fibo::FibonacciExperiment(fs),         //
+              experiment::adcs::DetumblingExperiment(adcs, time) //
+              )
     {
     }
 
     void OBCExperiments::InitializeRunlevel1()
     {
-        this->ExperimentsController.SetExperiments(this->Experiments);
+        this->ExperimentsController.SetExperiments(this->Experiments.All());
         this->ExperimentsController.Initialize();
     }
 }

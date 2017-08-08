@@ -43,7 +43,7 @@ void SetFiboIterations(std::uint16_t argc, char* argv[])
 
     std::uint16_t iters = atoi(argv[0]);
 
-    GetExperiments().Fibo.Iterations(iters);
+    GetExperiments().Get<experiment::fibo::FibonacciExperiment>().Iterations(iters);
 }
 
 void RequestExperiment(std::uint16_t argc, char* argv[])
