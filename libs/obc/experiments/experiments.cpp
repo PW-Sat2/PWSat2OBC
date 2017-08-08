@@ -6,17 +6,18 @@ namespace obc
         adcs::IAdcsCoordinator& adcs,
         services::time::TimeProvider& time,
         devices::gyro::IGyroscopeDriver& gyro)
-        :                         //
-          Fibo(fs),               //
-          Detumbling(adcs, time), //
-          LEOP(gyro, time, fs),   //
-          Experiments{&Fibo, &Detumbling, &LEOP}
+        : Experiments(                                   //
+              experiment::fibo::FibonacciExperiment(fs), //
+              experiment::adcs::DetumblingExperiment(adcs, time),
+              experiment::leop::LaunchAndEarlyOrbitPhaseExperiment(gyro, time, fs) //
+              )
     {
+        ((void)gyro);
     }
 
     void OBCExperiments::InitializeRunlevel1()
     {
-        this->ExperimentsController.SetExperiments(this->Experiments);
+        this->ExperimentsController.SetExperiments(this->Experiments.All());
         this->ExperimentsController.Initialize();
     }
 }

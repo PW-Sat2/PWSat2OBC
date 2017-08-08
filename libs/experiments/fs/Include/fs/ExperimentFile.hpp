@@ -68,6 +68,19 @@ namespace experiments
             ExperimentFile(services::time::ICurrentTime* time = nullptr);
 
             /**
+             * @brief Move ctor
+             * @param other Other object
+             */
+            ExperimentFile(ExperimentFile&& other) = default;
+
+            /**
+             * @brief Move assignment operator
+             * @param other Other object
+             * @return Reference to this object
+             */
+            ExperimentFile& operator=(ExperimentFile&& other) = default;
+
+            /**
              * @brief Default destrctor
              * */
             ~ExperimentFile();
