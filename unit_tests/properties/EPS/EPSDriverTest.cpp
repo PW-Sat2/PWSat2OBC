@@ -373,7 +373,7 @@ namespace
 
     RC_GTEST_FIXTURE_PROP(EPSDriverTest, ReadHousekeepingB, (ControllerBTelemetry input))
     {
-        std::array<std::uint8_t, 16> buffer;
+        std::array<std::uint8_t, 18> buffer;
         Writer w(buffer);
 
         w.WriteByte(0x9D);
