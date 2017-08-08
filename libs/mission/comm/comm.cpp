@@ -1,6 +1,7 @@
 #include "mission/comm.hpp"
 #include "logger/logger.h"
 #include "state/struct.h"
+#include "telecommunication/downlink.h"
 
 using namespace std::chrono_literals;
 
@@ -77,5 +78,69 @@ namespace mission
 
         auto This = static_cast<CommTask*>(param);
         This->LeaveTransmitterStateWhenIdle();
+    }
+
+    SendMessageTask::SendMessageTask(devices::comm::ITransmitter& transmitter) : _transmitter(transmitter)
+    {
+    }
+
+    mission::ActionDescriptor<SystemState> SendMessageTask::BuildAction()
+    {
+        mission::ActionDescriptor<SystemState> action;
+
+        action.name = "Send message";
+        action.param = this;
+        action.condition = Condition;
+        action.actionProc = Action;
+
+        return action;
+    }
+
+    bool SendMessageTask::Condition(const SystemState& state, void* param)
+    {
+        auto This = static_cast<SendMessageTask*>(param);
+
+        if (!state.AntennaState.IsDeployed())
+        {
+            return false;
+        }
+
+        if (!This->_lastSentAt.HasValue)
+        {
+            return true;
+        }
+
+        state::MessageState settings;
+
+        if (!state.PersistentState.Get(settings))
+        {
+            LOG(LOG_LEVEL_WARNING, "[periodic msg] Unable to get message settings");
+            return false;
+        }
+
+        return This->_lastSentAt.Value + settings.Interval() <= state.Time;
+    }
+
+    void SendMessageTask::Action(SystemState& state, void* param)
+    {
+        auto This = static_cast<SendMessageTask*>(param);
+
+        state::MessageState settings;
+
+        if (!state.PersistentState.Get(settings))
+        {
+            LOG(LOG_LEVEL_WARNING, "[periodic msg] Unable to get message settings");
+            return;
+        }
+
+        telecommunication::downlink::DownlinkFrame frame(telecommunication::downlink::DownlinkAPID::PeriodicMessage, 0);
+        frame.PayloadWriter().WriteArray(settings.Message());
+
+        for (auto i = 0; i < settings.RepeatCount(); i++)
+        {
+            This->_transmitter.SendFrame(frame.Frame());
+        }
+
+        This->_lastSentAt = Some(state.Time);
     }
 }

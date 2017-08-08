@@ -13,6 +13,7 @@ target_link_libraries(${NAME}
     mission
     state
     comm
+    telecommunication
 )
 
 target_format_sources(${NAME} "${SOURCES}")

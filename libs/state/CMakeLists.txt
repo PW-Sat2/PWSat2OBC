@@ -14,6 +14,7 @@ set(SOURCES
     boot.cpp
     sail.cpp
     ErrorCountersState.cpp
+    comm.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
