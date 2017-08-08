@@ -3,6 +3,7 @@
 #include "StorageAccessMock.hpp"
 #include "eps.hpp"
 #include "mock/HasStateMock.hpp"
+#include "mock/experiment.hpp"
 #include "mock/fm25w.hpp"
 #include "mock/power.hpp"
 
@@ -59,5 +60,12 @@ PowerControlMock::PowerControlMock()
     ON_CALL(*this, PrimaryAntennaPower()).WillByDefault(testing::Return(Some(true)));
 }
 PowerControlMock::~PowerControlMock()
+{
+}
+
+ExperimentControllerMock::ExperimentControllerMock()
+{
+}
+ExperimentControllerMock::~ExperimentControllerMock()
 {
 }

@@ -15,8 +15,12 @@ class PerformDetumblingExperiment(Telecommand):
 
 
 class AbortExperiment(Telecommand):
+    def __init__(self, correlation_id):
+        super(AbortExperiment, self).__init__()
+        self.correlation_id = correlation_id
+
     def apid(self):
         return 0x0E
 
     def payload(self):
-        return []
+        return [self.correlation_id]

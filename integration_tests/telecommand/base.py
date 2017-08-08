@@ -1,7 +1,7 @@
 from devices import UplinkFrame, DownlinkFrame
 
 
-class Telecommand:
+class Telecommand(object):
     MAX_PAYLOAD_SIZE = UplinkFrame.MAX_PAYLOAD_SIZE
 
     def __init__(self):

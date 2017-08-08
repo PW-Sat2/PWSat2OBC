@@ -94,6 +94,11 @@ namespace experiments
          * @return Current experiment execution state.
          */
         virtual ExperimentState CurrentState() = 0;
+
+        /**
+         * @brief Aborts current experiment immediately
+         */
+        virtual void AbortExperiment() = 0;
     };
 
     /**
@@ -126,10 +131,7 @@ namespace experiments
          */
         bool RequestExperiment(ExperimentCode experiment);
 
-        /**
-         * @brief Aborts current experiment immediately
-         */
-        void AbortExperiment();
+        virtual void AbortExperiment() override;
 
         /**
          * @brief Background task procedure
