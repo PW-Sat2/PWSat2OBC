@@ -5,6 +5,7 @@
 #include "mock/HasStateMock.hpp"
 #include "mock/ImtqDriverMock.hpp"
 #include "mock/ImtqTelemetryCollectorMock.hpp"
+#include "mock/experiment.hpp"
 #include "mock/fm25w.hpp"
 #include "mock/power.hpp"
 
@@ -78,5 +79,12 @@ ImtqTelemetryCollectorMock::ImtqTelemetryCollectorMock()
 }
 
 ImtqTelemetryCollectorMock::~ImtqTelemetryCollectorMock()
+{
+}
+
+ExperimentControllerMock::ExperimentControllerMock()
+{
+}
+ExperimentControllerMock::~ExperimentControllerMock()
 {
 }
