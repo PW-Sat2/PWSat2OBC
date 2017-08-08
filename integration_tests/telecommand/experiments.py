@@ -8,9 +8,11 @@ class PerformDetumblingExperiment(Telecommand):
         return 0x0D
 
     def payload(self):
-        return struct.pack('<L', self._duration.total_seconds())
+        return struct.pack('<BL', self.correlation_id, self._duration.total_seconds())
 
-    def __init__(self, duration):
+    def __init__(self, correlation_id, duration):
+        super(PerformDetumblingExperiment, self).__init__()
+        self.correlation_id = correlation_id
         self._duration = duration
 
 

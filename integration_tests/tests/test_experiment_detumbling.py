@@ -3,6 +3,7 @@ from datetime import timedelta, datetime
 
 import telecommand
 from obc.experiments import ExperimentType
+from response_frames.operation import OperationSuccessFrame
 from system import auto_power_on, runlevel
 from tests.base import BaseTest, RestartPerTest
 from utils import TestEvent
@@ -36,7 +37,10 @@ class TestExperimentDetumbling(RestartPerTest):
         self.system.rtc.set_response_time(start_time)
 
         log.info('Sending telecommand')
-        self.system.comm.put_frame(telecommand.PerformDetumblingExperiment(duration=timedelta(hours=4)))
+        self.system.comm.put_frame(telecommand.PerformDetumblingExperiment(correlation_id=5, duration=timedelta(hours=4)))
+
+        response = self.system.comm.get_frame(5)
+        self.assertIsInstance(response, OperationSuccessFrame)
 
         log.info('Waiting for experiment')
         self.system.obc.wait_for_experiment(ExperimentType.Detumbling, 40)

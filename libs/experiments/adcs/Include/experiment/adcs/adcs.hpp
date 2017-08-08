@@ -11,10 +11,23 @@ namespace experiment
     namespace adcs
     {
         /**
+         * @brief Interface for setting up detumbling experiment
+         * @ingroup experiments
+         */
+        struct ISetupDetumblingExperiment
+        {
+            /**
+             * @brief Sets experiment duration
+             * @param duration Experiment duration
+             */
+            virtual void Duration(std::chrono::seconds duration) = 0;
+        };
+
+        /**
          * @brief Detumbling experiment
          * @ingroup experiments
          */
-        class DetumblingExperiment final : public experiments::IExperiment
+        class DetumblingExperiment final : public experiments::IExperiment, public ISetupDetumblingExperiment
         {
           public:
             /** @brief Experiment code */
@@ -31,7 +44,7 @@ namespace experiment
              * @brief Sets experiment duration
              * @param duration Experiment duration
              */
-            void Duration(std::chrono::seconds duration);
+            virtual void Duration(std::chrono::seconds duration) override;
 
             virtual experiments::ExperimentCode Type() override;
             virtual experiments::StartResult Start() override;
