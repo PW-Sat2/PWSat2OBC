@@ -1,6 +1,8 @@
 #include "sail.hpp"
+#include <algorithm>
 #include "base/writer.h"
 #include "logger/logger.h"
+#include "power/power.h"
 
 using services::fs::File;
 using services::fs::IFileSystem;
@@ -37,6 +39,18 @@ namespace experiment
 
         experiments::StartResult SailExperiment::Start()
         {
+            if (OS_RESULT_FAILED(this->_adcsCoordinator.Disable()))
+            {
+                LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to disable adcs");
+                return experiments::StartResult::Failure;
+            }
+
+            if (!this->_powerController.SensPower(true))
+            {
+                LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to enable SENS lcl");
+                return experiments::StartResult::Failure;
+            }
+
             return experiments::StartResult::Success;
         }
 
@@ -49,6 +63,15 @@ namespace experiment
         void SailExperiment::Stop(experiments::IterationResult lastResult)
         {
             UNREFERENCED_PARAMETER(lastResult);
+            if (OS_RESULT_FAILED(this->_adcsCoordinator.EnableBuiltinDetumbling()))
+            {
+                LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to restore adcs mode");
+            }
+
+            if (!this->_powerController.SensPower(false))
+            {
+                LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to disable SENS lcl");
+            }
         }
     }
 }

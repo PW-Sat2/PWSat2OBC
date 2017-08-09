@@ -37,6 +37,8 @@ namespace services
             virtual bool CameraNadir(bool enabled) override;
 
           private:
+            bool Switch(bool enabled, devices::eps::LCL lcl);
+
             /** @brief EPS driver */
             devices::eps::EPSDriver& _eps;
 
