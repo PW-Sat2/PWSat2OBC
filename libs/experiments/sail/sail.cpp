@@ -18,13 +18,15 @@ namespace experiment
             devices::gyro::IGyroscopeDriver& gyroDriver,
             devices::payload::IPayloadDeviceDriver& payloadDriver,
             services::power::IPowerControl& powerController,
-            services::photo::IPhotoService& photoService)
+            services::photo::IPhotoService& photoService,
+            const drivers::gpio::Pin& sailState)
             : _fileSystem(fileSystem),           //
               _adcsCoordinator(adcsCoordinator), //
               _gyroDriver(gyroDriver),           //
               _payloadDriver(payloadDriver),     //
               _powerController(powerController), //
-              _photoService(photoService)
+              _photoService(photoService),       //
+              _sailState(sailState)
         {
         }
 

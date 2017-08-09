@@ -83,7 +83,8 @@ OBC::OBC()
           Hardware.PayloadDeviceDriver,
           Storage.GetInternalStorage().GetTopDriver(),
           Hardware.CommDriver,
-          Camera.PhotoService), //
+          Camera.PhotoService,
+          this->Hardware.Pins.SailIndicator), //
       Communication(this->Fdir,
           this->Hardware.CommDriver,
           this->timeProvider,

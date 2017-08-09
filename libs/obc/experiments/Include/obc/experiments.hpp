@@ -11,6 +11,7 @@
 #include "experiment/suns/suns.hpp"
 #include "experiments/experiments.h"
 #include "fs/fs.h"
+#include "gpio/forward.h"
 #include "payload/interfaces.h"
 #include "photo/fwd.hpp"
 #include "power/fwd.hpp"
@@ -125,7 +126,8 @@ namespace obc
             devices::payload::IPayloadDeviceDriver& payload,
             devices::n25q::RedundantN25QDriver& n25q,
             devices::comm::ITransmitter& transmitter,
-            services::photo::IPhotoService& photoService);
+            services::photo::IPhotoService& photoService,
+            const drivers::gpio::Pin& sailState);
 
         /**
          * @brief Performs initialization
