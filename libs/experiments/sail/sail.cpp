@@ -11,6 +11,8 @@ namespace experiment
 {
     namespace sail
     {
+        using namespace std::chrono_literals;
+
         SailExperiment::SailExperiment(IFileSystem& fileSystem) : _fileSystem(fileSystem)
         {
         }
@@ -27,6 +29,7 @@ namespace experiment
 
         experiments::IterationResult SailExperiment::Iteration()
         {
+            System::SleepTask(60s);
             return experiments::IterationResult::Finished;
         }
 
