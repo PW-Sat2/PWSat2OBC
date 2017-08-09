@@ -49,6 +49,7 @@ target_link_libraries(${NAME}
     suns
     payload
     n25q
+    experiments
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
