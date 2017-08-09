@@ -11,6 +11,7 @@ class ExperimentType(IntEnum):
     Detumbling = 1
     EraseFlash = 2
     SunS = 3
+    Sail = 7
     Fibo = 8
 
 

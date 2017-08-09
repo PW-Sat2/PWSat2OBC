@@ -29,7 +29,6 @@ class AbortExperiment(Telecommand):
         return [self.correlation_id]
         return []
 
-
 class PerformSunSExperiment(Telecommand):
     def apid(self):
         return 0x1D
@@ -55,3 +54,14 @@ class PerformSunSExperiment(Telecommand):
         self.gain = gain
         self.correlation_id = correlation_id
         self.file_name = file_name
+
+class PerformSailExperiment(Telecommand):
+    def __init__(self, correlation_id):
+        Telecommand.__init__(self)
+        self._correlation_id = correlation_id
+
+    def apid(self):
+        return 0x10
+
+    def payload(self):
+        return [self._correlation_id]
