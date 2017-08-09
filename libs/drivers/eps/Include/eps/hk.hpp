@@ -144,19 +144,26 @@ namespace devices
                 /** @brief Temperature, Celsius */
                 uint10_t temperature;
 
+                /** @brief Supplementary temperature. */
+                uint10_t suppTemp;
+
                 /** @brief Internal timer, seconds*/
                 std::uint32_t uptime;
 
                 /** @brief Error code */
-                std::uint8_t errorCode;
+                std::uint8_t safetyCounter;
             };
 
             constexpr std::uint32_t ThisControllerState::BitSize()
             {
-                return Aggregate<decltype(powerCycleCount), decltype(temperature), decltype(uptime), decltype(errorCode)>;
+                return Aggregate<decltype(powerCycleCount),
+                    decltype(temperature),
+                    decltype(suppTemp),
+                    decltype(uptime),
+                    decltype(safetyCounter)>;
             }
 
-            static_assert(ThisControllerState::BitSize() == 66, "Incorrect telemetry format");
+            static_assert(ThisControllerState::BitSize() == 76, "Incorrect telemetry format");
 
             /** @brief DCDC status*/
             struct DCDC_HK
@@ -212,9 +219,6 @@ namespace devices
                  * @return Size of the serialized state in bits.
                  */
                 static constexpr std::uint32_t BitSize();
-
-                /** @brief DISTR: temperature, Celsius */
-                uint10_t Temperature;
 
                 /** @brief DISTR: VOLT_3V3, volts*/
                 uint10_t VOLT_3V3;
@@ -528,7 +532,7 @@ namespace devices
                     decltype(dcdc5V)::BitSize();
             }
 
-            static_assert(ControllerATelemetry::BitSize() == 406, "Incorrect telemetry format");
+            static_assert(ControllerATelemetry::BitSize() == 416, "Incorrect telemetry format");
 
             /**
              * @brief Housekeeping of controller B
@@ -587,7 +591,7 @@ namespace devices
                     decltype(current)::BitSize();
             }
 
-            static_assert(ControllerBTelemetry::BitSize() == 96, "Incorrect telemetry format");
+            static_assert(ControllerBTelemetry::BitSize() == 106, "Incorrect telemetry format");
 
             /** @} */
         }

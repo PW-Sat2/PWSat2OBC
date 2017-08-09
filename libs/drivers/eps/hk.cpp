@@ -18,24 +18,26 @@ namespace devices
                 writer.Write(this->VOLT_3V3d);
             }
 
-            ThisControllerState::ThisControllerState() : powerCycleCount(0), uptime(0), errorCode(0)
+            ThisControllerState::ThisControllerState() : powerCycleCount(0), uptime(0), safetyCounter(0)
             {
             }
 
             void ThisControllerState::ReadFrom(Reader& reader)
             {
-                this->errorCode = reader.ReadByte();
+                this->safetyCounter = reader.ReadByte();
                 this->powerCycleCount = reader.ReadWordLE();
                 this->uptime = reader.ReadDoubleWordLE();
                 this->temperature = reader.ReadWordLE();
+                this->suppTemp = reader.ReadWordLE();
             }
 
             void ThisControllerState::Write(BitWriter& writer) const
             {
-                writer.Write(this->errorCode);
+                writer.Write(this->safetyCounter);
                 writer.Write(this->powerCycleCount);
                 writer.Write(this->uptime);
                 writer.Write(this->temperature);
+                writer.Write(this->suppTemp);
             }
 
             void DCDC_HK::ReadFrom(Reader& reader)
@@ -60,7 +62,6 @@ namespace devices
                 this->VOLT_5V = reader.ReadWordLE();
                 this->CURR_VBAT = reader.ReadWordLE();
                 this->VOLT_VBAT = reader.ReadWordLE();
-                this->Temperature = reader.ReadWordLE();
                 this->LCL_STATE = static_cast<decltype(this->LCL_STATE)>(reader.ReadByte());
                 this->LCL_FLAGB = static_cast<decltype(this->LCL_FLAGB)>(reader.ReadByte());
             }

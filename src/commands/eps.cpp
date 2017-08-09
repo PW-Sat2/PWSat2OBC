@@ -30,7 +30,6 @@ static void Print(const char* prefix, const devices::eps::hk::DISTR_HK& hk)
     GetTerminal().Printf("%s.VOLT_5V\t%d\n", prefix, hk.VOLT_5V.Value());
     GetTerminal().Printf("%s.CURR_VBAT\t%d\n", prefix, hk.CURR_VBAT.Value());
     GetTerminal().Printf("%s.VOLT_VBAT\t%d\n", prefix, hk.VOLT_VBAT.Value());
-    GetTerminal().Printf("%s.TEMP\t%d\n", prefix, hk.Temperature.Value());
     GetTerminal().Printf("%s.LCL_STATE\t%d\n", prefix, num(hk.LCL_STATE));
     GetTerminal().Printf("%s.LCL_FLAGB\t%d\n", prefix, num(hk.LCL_FLAGB));
 }
@@ -67,10 +66,11 @@ static void Print(const char* prefix, const devices::eps::hk::OtherControllerSta
 
 static void Print(const char* prefix, const devices::eps::hk::ThisControllerState& hk)
 {
-    GetTerminal().Printf("%s.ERR\t%d\n", prefix, hk.errorCode);
+    GetTerminal().Printf("%s.SAFETY_CTR\t%d\n", prefix, hk.safetyCounter);
     GetTerminal().Printf("%s.PWR_CYCLES\t%d\n", prefix, hk.powerCycleCount);
     GetTerminal().Printf("%s.UPTIME\t%ld\n", prefix, hk.uptime);
     GetTerminal().Printf("%s.TEMP\t%d\n", prefix, hk.temperature.Value());
+    GetTerminal().Printf("%s.SUPP_TEMP\t%d\n", prefix, hk.suppTemp.Value());
 }
 
 static void Print(const char* prefix, devices::eps::hk::DCDC_HK& hk)

@@ -104,7 +104,6 @@ class EPSTest(RestartPerSuite):
         expected.DISTR.VOLT_5V = 19
         expected.DISTR.CURR_VBAT = 20
         expected.DISTR.VOLT_VBAT = 21
-        expected.DISTR.TEMP = 22
         expected.DISTR.LCL_STATE = 23
         expected.DISTR.LCL_FLAGB = 24
 
@@ -119,10 +118,11 @@ class EPSTest(RestartPerSuite):
 
         expected.CTRLB.VOLT_3V3d = 32
 
-        expected.CTRLA.ERR = 33
+        expected.CTRLA.SAFETY_CTR = 33
         expected.CTRLA.PWR_CYCLES = 34
         expected.CTRLA.UPTIME = 35
         expected.CTRLA.TEMP = 36
+        expected.CTRLA.SUPP_TEMP = 39
 
         expected.DCDC3V3.TEMP = 37
         expected.DCDC5V.TEMP = 38
@@ -138,10 +138,11 @@ class EPSTest(RestartPerSuite):
         expected.BP.TEMP_C = 1
         expected.BATC.VOLT_B = 2
         expected.CTRLA.VOLT_3V3d = 3
-        expected.CTRLB.ERR = 4
+        expected.CTRLB.SAFETY_CTR = 4
         expected.CTRLB.PWR_CYCLES = 5
         expected.CTRLB.UPTIME = 6
         expected.CTRLB.TEMP = 7
+        expected.CTRLB.SUPP_TEMP = 8
 
         self.system.eps.controller_b.on_get_housekeeping = lambda: expected
 

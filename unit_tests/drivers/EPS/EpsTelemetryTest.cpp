@@ -45,17 +45,18 @@ namespace
         ASSERT_THAT(state.powerCycleCount, Eq(0));
         ASSERT_THAT(state.temperature, Eq(0));
         ASSERT_THAT(state.uptime, Eq(0u));
-        ASSERT_THAT(state.errorCode, Eq(0));
+        ASSERT_THAT(state.safetyCounter, Eq(0));
     }
 
     TEST(ThisControllerStateTest, TestSerialization)
     {
-        std::uint8_t expected[] = {0x88, 0x22, 0x11, 0x77, 0x66, 0x55, 0x44, 0xff, 0x03};
+        std::uint8_t expected[] = {0x88, 0x22, 0x11, 0x77, 0x66, 0x55, 0x44, 0xff, 0xaf, 0x0a};
         ThisControllerState state;
         state.powerCycleCount = 0x1122;
         state.temperature = 0x3ff;
         state.uptime = 0x44556677;
-        state.errorCode = 0x88;
+        state.safetyCounter = 0x88;
+        state.suppTemp = 0x2ab;
         RunTest(state, gsl::make_span(expected));
     }
 
@@ -76,7 +77,6 @@ namespace
     TEST(DISTR_HKTest, TestDefaultConstruction)
     {
         DISTR_HK state;
-        ASSERT_THAT(state.Temperature, Eq(0));
         ASSERT_THAT(state.VOLT_3V3, Eq(0));
         ASSERT_THAT(state.CURR_3V3, Eq(0));
         ASSERT_THAT(state.VOLT_5V, Eq(0));
@@ -239,9 +239,10 @@ namespace
             0xff,
             0xff,
             0xff,
-            0x00,
-            0xfc,
-            0x0f,
+            0xff,
+            0x03,
+            0xf0,
+            0x3f,
             0x00};
         ControllerATelemetry state;
         state.mpptX.SOL_VOLT = 0xfff;
@@ -256,23 +257,25 @@ namespace
         state.batc.Temperature = 0x3ff;
         state.batc.ChargeCurrent = 0x3ff;
         state.batc.State = static_cast<BATC_STATE>(0xff);
-        state.current.errorCode = 0xff;
+        state.current.safetyCounter = 0xff;
         state.current.powerCycleCount = 0xffff;
         state.current.uptime = 0xffffffff;
         state.current.temperature = 0x3ff;
+        state.current.suppTemp = 0x3ff;
         state.dcdc3V3.temperature = 0x3ff;
         RunTest(state, gsl::make_span(expected));
     }
 
     TEST(ControllerBTelemetryTest, TestSerialization)
     {
-        std::uint8_t expected[] = {0xff, 0x03, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f, 0x00};
+        std::uint8_t expected[] = {0xff, 0x03, 0xf0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00};
         ControllerBTelemetry state;
         state.bp.temperatureC = 0x3ff;
-        state.current.errorCode = 0xff;
+        state.current.safetyCounter = 0xff;
         state.current.powerCycleCount = 0xffff;
         state.current.uptime = 0xffffffff;
         state.current.temperature = 0x3ff;
+        state.current.suppTemp = 0x3ff;
         RunTest(state, gsl::make_span(expected));
     }
 }
