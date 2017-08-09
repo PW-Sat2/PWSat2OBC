@@ -17,6 +17,7 @@ target_link_libraries(${NAME}
     exp_sail
     payload
     power
+    photo
 )
 
 

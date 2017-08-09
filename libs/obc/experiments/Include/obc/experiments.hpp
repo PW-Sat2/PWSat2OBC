@@ -12,6 +12,7 @@
 #include "experiments/experiments.h"
 #include "fs/fs.h"
 #include "payload/interfaces.h"
+#include "photo/fwd.hpp"
 #include "power/fwd.hpp"
 #include "traits.hpp"
 
@@ -123,7 +124,8 @@ namespace obc
             devices::suns::ISunSDriver& suns,
             devices::payload::IPayloadDeviceDriver& payload,
             devices::n25q::RedundantN25QDriver& n25q,
-            devices::comm::ITransmitter& transmitter);
+            devices::comm::ITransmitter& transmitter,
+            services::photo::IPhotoService& photoService);
 
         /**
          * @brief Performs initialization

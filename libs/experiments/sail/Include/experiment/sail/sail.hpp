@@ -7,6 +7,7 @@
 #include "fs/fs.h"
 #include "gyro/fwd.hpp"
 #include "payload/interfaces.h"
+#include "photo/fwd.hpp"
 #include "power/fwd.hpp"
 
 namespace experiment
@@ -27,7 +28,8 @@ namespace experiment
                 ::adcs::IAdcsCoordinator& adcsCoordinator,
                 devices::gyro::IGyroscopeDriver& gyroDriver,
                 devices::payload::IPayloadDeviceDriver& payloadDriver,
-                services::power::IPowerControl& powerController);
+                services::power::IPowerControl& powerController,
+                services::photo::IPhotoService& photoService);
 
             virtual experiments::ExperimentCode Type() override;
 
@@ -53,6 +55,8 @@ namespace experiment
             devices::payload::IPayloadDeviceDriver& _payloadDriver;
 
             services::power::IPowerControl& _powerController;
+
+            services::photo::IPhotoService& _photoService;
         };
     }
 }

@@ -332,6 +332,48 @@ namespace services
         }
 
         /**
+         * @brief Interface for service capable of taking asynchronous photos.
+         */
+        struct IPhotoService
+        {
+            /**
+             * @brief Schedules disable camera command
+             * @param command Command
+             */
+            virtual void Schedule(DisableCamera command) = 0;
+            /**
+             * @brief Schedules enable camera command
+             * @param command Command
+             */
+            virtual void Schedule(EnableCamera command) = 0;
+            /**
+             * @brief Schedules take photo command
+             * @param command Command
+             */
+            virtual void Schedule(TakePhoto command) = 0;
+            /**
+             * @brief Schedules download photo
+             * @param command Command
+             */
+            virtual void Schedule(DownloadPhoto command) = 0;
+            /**
+             * @brief Schedules reset command
+             * @param command Command
+             */
+            virtual void Schedule(Reset command) = 0;
+            /**
+             * @brief Schedules save photo command
+             * @param command Command
+             */
+            virtual void Schedule(SavePhoto command) = 0;
+            /**
+             * @brief Schedules sleep command
+             * @param command Command
+             */
+            virtual void Schedule(Sleep command) = 0;
+        };
+
+        /**
          * @brief Container for command queue element
          */
         struct PossibleCommand
@@ -353,7 +395,7 @@ namespace services
         /**
          * @brief Photo service
          */
-        class PhotoService
+        class PhotoService final : public IPhotoService
         {
           public:
             /**
@@ -375,37 +417,37 @@ namespace services
              * @brief Schedules disable camera command
              * @param command Command
              */
-            void Schedule(DisableCamera command);
+            virtual void Schedule(DisableCamera command) final override;
             /**
              * @brief Schedules enable camera command
              * @param command Command
              */
-            void Schedule(EnableCamera command);
+            virtual void Schedule(EnableCamera command) final override;
             /**
              * @brief Schedules take photo command
              * @param command Command
              */
-            void Schedule(TakePhoto command);
+            virtual void Schedule(TakePhoto command) final override;
             /**
              * @brief Schedules download photo
              * @param command Command
              */
-            void Schedule(DownloadPhoto command);
+            virtual void Schedule(DownloadPhoto command) final override;
             /**
              * @brief Schedules reset command
              * @param command Command
              */
-            void Schedule(Reset command);
+            virtual void Schedule(Reset command) final override;
             /**
              * @brief Schedules save photo command
              * @param command Command
              */
-            void Schedule(SavePhoto command);
+            virtual void Schedule(SavePhoto command) final override;
             /**
              * @brief Schedules sleep command
              * @param command Command
              */
-            void Schedule(Sleep command);
+            virtual void Schedule(Sleep command) final override;
 
             /**
              * @brief (Internal use) Invokes disable camera command
