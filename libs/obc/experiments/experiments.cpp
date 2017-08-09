@@ -16,7 +16,8 @@ namespace obc
               experiment::adcs::DetumblingExperiment(adcs, time),                            //
               experiment::leop::LaunchAndEarlyOrbitPhaseExperiment(gyro, time, fs),          //
               experiment::suns::SunSExperiment(powerControl, time, suns, payload, gyro, fs), //
-              experiment::erase_flash::EraseFlashExperiment(n25q, transmitter)               //
+              experiment::erase_flash::EraseFlashExperiment(n25q, transmitter),              //
+              experiment::sail::SailExperiment(fs)                                           //
               )
     {
     }
