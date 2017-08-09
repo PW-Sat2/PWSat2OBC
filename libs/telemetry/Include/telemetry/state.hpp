@@ -6,6 +6,7 @@
 #include "BasicTelemetry.hpp"
 #include "ErrorCounters.hpp"
 #include "Experiments.hpp"
+#include "ImtqTelemetry.hpp"
 #include "SystemStartup.hpp"
 #include "Telemetry.hpp"
 #include "TimeTelemetry.hpp"
@@ -47,14 +48,23 @@ namespace telemetry
     };
 
     static_assert(ProgramState::BitSize() == 16, "Invalid serialized size");
-    static_assert(McuTemperature::BitSize() == 12, "Invalid serialized size");
-    static_assert(FileSystemTelemetry::BitSize() == 32, "Invalid serialized size");
-    static_assert(GpioState::BitSize() == 1, "Invalid serialized size");
     static_assert(FlashPrimarySlotsScrubbing::BitSize() == 3, "Invalid serialized size");
     static_assert(FlashSecondarySlotsScrubbing::BitSize() == 3, "Invalid serialized size");
     static_assert(RAMScrubbing::BitSize() == 32, "Invalid serialized size");
+    static_assert(FileSystemTelemetry::BitSize() == 32, "Invalid serialized size");
+    static_assert(GpioState::BitSize() == 1, "Invalid serialized size");
+    static_assert(McuTemperature::BitSize() == 12, "Invalid serialized size");
+    static_assert(ImtqMagnetometerMeasurements::BitSize() == 96, "Invalid serialized size");
+    static_assert(ImtqCoilsActive::BitSize() == 1, "Invalid serialized size");
+    static_assert(ImtqDipoles::BitSize() == 48, "Invalid serialized size");
+    static_assert(ImtqBDotTelemetry::BitSize() == 96, "Invalid serialized size");
+    static_assert(ImtqCoilCurrent::BitSize() == 48, "Invalid serialized size");
+    static_assert(ImtqCoilTemperature::BitSize() == 48, "Invalid serialized size");
+    static_assert(ImtqStatus::BitSize() == 8, "Invalid serialized size");
+    static_assert(ImtqSelfTest::BitSize() == 64, "Invalid serialized size");
 
     static_assert(ManagedTelemetry::TotalSerializedSize <= (devices::comm::MaxDownlinkFrameSize - 1), "Telemetry is too large");
+    static_assert(ManagedTelemetry::PayloadSize == 1800, "Invalid Telemetry Size");
 }
 
 #endif

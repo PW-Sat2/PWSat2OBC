@@ -7,6 +7,7 @@
 #include "comm/comm.hpp"
 #include "eps/eps.h"
 #include "gyro/gyro.h"
+#include "imtq/fwd.hpp"
 #include "state/fwd.hpp"
 
 namespace telemetry
@@ -16,6 +17,8 @@ namespace telemetry
     class ExperimentTelemetry;
     class InternalTimeTelemetry;
     class ExternalTimeTelemetry;
+    class ImtqHousekeeping;
+    class ImtqState;
 
     struct TelemetryState;
 
@@ -30,6 +33,13 @@ namespace telemetry
         struct FlashPrimarySlotsScrubbingTag;
         struct FlashSecondarySlotsScrubbingTag;
         struct RAMScrubbingTag;
+        struct MagnetometerMeasurementsTag;
+        struct DipolesTag;
+        struct BDotTag;
+        struct CoilCurrentTag;
+        struct CoilTemperatureTag;
+        struct CoilsActiveTag;
+        struct ImtqStatusTag;
     }
 
     /**
@@ -83,6 +93,67 @@ namespace telemetry
      */
     typedef SimpleTelemetryElement<std::uint32_t, ::telemetry::details::RAMScrubbingTag> RAMScrubbing;
 
+    /**
+     * @brief This type represents telemetry element related to imtq magnetometer measurements
+     * @telemetry_element
+     * @ingroup telemetry
+     */
+    typedef SimpleTelemetryElement<std::array<devices::imtq::MagnetometerMeasurement, 3>, ::telemetry::details::MagnetometerMeasurementsTag>
+        ImtqMagnetometerMeasurements;
+
+    /**
+     * @brief This type represents telemetry element related to imtq observed dipoles
+     * @telemetry_element
+     * @ingroup telemetry
+     */
+    typedef SimpleTelemetryElement<std::array<devices::imtq::Dipole, 3>, ::telemetry::details::DipolesTag> ImtqDipoles;
+
+    /**
+     * @brief This type represents telemetry element related to imtq b-dot field
+     * @telemetry_element
+     * @ingroup telemetry
+     */
+    typedef SimpleTelemetryElement<std::array<devices::imtq::BDotType, 3>, ::telemetry::details::BDotTag> ImtqBDotTelemetry;
+
+    /**
+     * @brief This type represents telemetry element related to imtq self test result
+     * @telemetry_element
+     * @ingroup telemetry
+     */
+    typedef SimpleTelemetryElement<std::array<std::uint8_t, 8>, ::telemetry::details::BDotTag> ImtqSelfTest;
+
+    /**
+     * @brief This type represents telemetry element related to imtq coils state during magnetometer measurements
+     * @telemetry_element
+     * @ingroup telemetry
+     */
+    typedef SimpleTelemetryElement<bool, ::telemetry::details::CoilsActiveTag> ImtqCoilsActive;
+
+    using ImtqTelemetryCurrent = devices::imtq::Current;
+
+    /**
+     * @brief This type represents telemetry element related to imtq coils' currents
+     * @telemetry_element
+     * @ingroup telemetry
+     */
+    typedef SimpleTelemetryElement<std::array<ImtqTelemetryCurrent, 3>, ::telemetry::details::CoilCurrentTag> ImtqCoilCurrent;
+
+    using ImtqTelemetryTemperature = devices::imtq::TemperatureMeasurement;
+
+    /**
+     * @brief This type represents telemetry element related to imtq coils' temperatures
+     * @telemetry_element
+     * @ingroup telemetry
+     */
+    typedef SimpleTelemetryElement<std::array<ImtqTelemetryTemperature, 3>, ::telemetry::details::CoilTemperatureTag> ImtqCoilTemperature;
+
+    /**
+     * @brief This type represents telemetry element related to imtq last status
+     * @telemetry_element
+     * @ingroup telemetry
+     */
+    typedef SimpleTelemetryElement<std::uint8_t, ::telemetry::details::ImtqStatusTag> ImtqStatus;
+
     template <typename... Type> class Telemetry;
 
     typedef Telemetry<SystemStartup,            //
@@ -101,7 +172,17 @@ namespace telemetry
         GpioState,                              //
         McuTemperature,                         //
         devices::eps::hk::ControllerATelemetry, //
-        devices::eps::hk::ControllerBTelemetry  //
+        devices::eps::hk::ControllerBTelemetry, //
+        ImtqMagnetometerMeasurements,           //
+        ImtqCoilsActive,                        //
+        ImtqDipoles,                            //
+        ImtqBDotTelemetry,                      //
+        ImtqHousekeeping,                       //
+        ImtqCoilCurrent,                        //
+        ImtqCoilTemperature,                    //
+        ImtqStatus,                             //
+        ImtqState,                              //
+        ImtqSelfTest                            //
         >
         ManagedTelemetry;
 }

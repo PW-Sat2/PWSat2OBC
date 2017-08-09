@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <type_traits>
 #include "base/BitWriter.hpp"
@@ -10,6 +11,56 @@
 
 namespace telemetry
 {
+    /**
+     * @brief Helper trait for SimpleTelemetryElement than is responsible for providing the default
+     * behaviour for requested type.
+     *
+     * Specialize this template for types that require custom initialization.
+     * @tparam T Requested type
+     * @ingroup telemetry
+     */
+    template <typename T> struct TelemetryTrait
+    {
+        /**
+         * @brief Type returned whenever someone asks for telemetry element value.
+         */
+        typedef T ReturnType;
+
+        /**
+         * @brief Constructs default value for requested type.
+         * @return Default value.
+         */
+        static constexpr T Default()
+        {
+            return T{};
+        }
+    };
+
+    /**
+     * @brief Specialization of helper trait SimpleTelemetryElement for arrays.
+     *
+     * @tparam T Type of array element.
+     * @ingroup telemetry
+     */
+    template <typename T, size_t N> struct TelemetryTrait<std::array<T, N>>
+    {
+        /**
+         * @brief Type returned whenever someone asks for telemetry element value.
+         */
+        typedef const std::array<T, N>& ReturnType;
+
+        /**
+         * @brief Constructs default value for requested type.
+         * @return Default value.
+         */
+        static std::array<T, N> Default()
+        {
+            std::array<T, N> result;
+            std::uninitialized_fill(result.begin(), result.end(), TelemetryTrait<T>::Default());
+            return result;
+        }
+    };
+
     /**
      * @brief This type represents telemetry element that contains single simple type as its value.
      * @telemetry_element
@@ -30,6 +81,12 @@ namespace telemetry
         constexpr SimpleTelemetryElement(T value);
 
         /**
+         * @brief ctor
+         * @param args Construction arguments
+         */
+        template <typename... Args> SimpleTelemetryElement(Args&&... args);
+
+        /**
          * @brief Write the telemetry object to passed buffer writer object.
          * @param[in] writer Buffer writer object that should be used to write the serialized state.
          */
@@ -39,7 +96,7 @@ namespace telemetry
          * @brief Returns size of the currently held value.
          * @return Currently held value.
          */
-        T GetValue() const;
+        typename TelemetryTrait<T>::ReturnType GetValue() const;
 
         /**
          * @brief Returns size of the serialized state in bits.
@@ -51,7 +108,8 @@ namespace telemetry
         T value;
     };
 
-    template <typename T, typename Tag> constexpr SimpleTelemetryElement<T, Tag>::SimpleTelemetryElement() : value(T{})
+    template <typename T, typename Tag>
+    constexpr SimpleTelemetryElement<T, Tag>::SimpleTelemetryElement() : value(TelemetryTrait<T>::Default())
     {
     }
 
@@ -60,12 +118,18 @@ namespace telemetry
     {
     }
 
+    template <typename T, typename Tag>
+    template <typename... Args>
+    SimpleTelemetryElement<T, Tag>::SimpleTelemetryElement(Args&&... args) : value(std::forward<Args>(args)...)
+    {
+    }
+
     template <typename T, typename Tag> void SimpleTelemetryElement<T, Tag>::Write(BitWriter& writer) const
     {
         writer.Write(this->value);
     }
 
-    template <typename T, typename Tag> inline T SimpleTelemetryElement<T, Tag>::GetValue() const
+    template <typename T, typename Tag> inline typename TelemetryTrait<T>::ReturnType SimpleTelemetryElement<T, Tag>::GetValue() const
     {
         return this->value;
     }

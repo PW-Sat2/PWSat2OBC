@@ -335,7 +335,8 @@ namespace devices
             }
 
             Reader reader{value};
-            reader.Skip(2);
+            reader.Skip(1);
+            state.status = reader.ReadByte();
             state.mode = static_cast<Mode>(reader.ReadByte());
             state.error = Error{reader.ReadByte()};
             state.anyParameterUpdatedSinceStartup = (reader.ReadByte() == 1);
@@ -660,8 +661,9 @@ namespace devices
             bool i2cError = this->DataRequest(opcode, value, errorContext.Counter());
 
             Reader reader{value};
-            reader.Skip(2);
+            reader.Skip(1);
 
+            result.status = reader.ReadByte();
             result.digitalVoltage = reader.ReadWordLE();
             result.analogVoltage = reader.ReadWordLE();
             result.digitalCurrent = reader.ReadWordLE();

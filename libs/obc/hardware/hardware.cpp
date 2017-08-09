@@ -70,6 +70,8 @@ void OBCHardware::Initialize()
     this->FlashDriver.Initialize();
     this->PayloadDriver.Initialize();
 
+    this->imtqTelemetryCollector.Initialize();
+
     this->SunS.Initialize();
 
     this->Burtc.Initialize();
@@ -95,6 +97,7 @@ OBCHardware::OBCHardware(
       Gyro(I2C.Buses.Payload),                                                      //
       EPS(errorCounting, this->I2C.Buses.Bus, this->I2C.Buses.Payload),             //
       Imtq(errorCounting, I2C.Buses.Bus),                                           //
+      imtqTelemetryCollector(Imtq),                                                 //
       SunSInterruptDriver(this->Pins.SunSInterrupt),                                //
       SunS(errorCounting, I2C.Buses.Payload, SunSInterruptDriver),                  //
       rtc(errorCounting, I2C.Buses.Payload),                                        //

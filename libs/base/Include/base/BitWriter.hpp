@@ -4,6 +4,7 @@
 #pragma once
 
 #include <cstdint>
+#include <type_traits>
 #include "fwd.hpp"
 #include "gsl/span"
 #include "system.h"
@@ -132,6 +133,18 @@ class BitWriter
     bool Write(std::uint64_t value);
 
     /**
+     * @brief Appends integer value to the buffer and moves the current position to the next free bit.
+     * @param[in] value Value that should be added to writer output.
+     * @return Operation status.
+     */
+    std::enable_if<!std::is_same<unsigned int, std::uint8_t>::value && //
+            !std::is_same<unsigned int, std::uint16_t>::value &&       //
+            !std::is_same<unsigned int, std::uint32_t>::value &&       //
+            !std::is_same<unsigned int, std::uint64_t>::value,         //
+        bool>::type
+        Write(unsigned int value);
+
+    /**
      * @brief Appends boolean to the buffer and moves the current position to the next free bit.
      * @param[in] value Value that should be added to writer output.
      * @return Operation status.
@@ -146,11 +159,34 @@ class BitWriter
     template <typename Underlying, std::uint8_t BitsCount> bool Write(const BitValue<Underlying, BitsCount>& value);
 
     /**
+     * @brief Appends list values to the buffer and moves the current position to the next free bit.
+     * @param[in] list List of values that should be added to writer output.
+     * @return Operation status.
+     */
+    template <typename T> bool Write(gsl::span<T> list);
+
+    /**
+     * @brief Appends list values to the buffer and moves the current position to the next free bit.
+     * @param[in] list List of values that should be added to writer output.
+     * @return Operation status.
+     */
+    template <typename T, size_t N> bool Write(const std::array<T, N>& list);
+
+    /**
      * @brief Appends generic value to the buffer and moves the current position to the next free bit.
      * @param[in] value Value that should be added to writer output.
      * @return Operation status.
+     * @remark Overload for enumerations
      */
-    template <typename T> bool Write(T value);
+    template <typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0> bool Write(T value);
+
+    /**
+     * @brief Appends generic value to the buffer and moves the current position to the next free bit.
+     * @param[in] value Value that should be added to writer output.
+     * @return Operation status.
+     * @remark Overload for fundamental types
+     */
+    template <typename T, typename std::enable_if<std::is_fundamental<T>::value, int>::type = 0> bool Write(T value);
 
     /**
      * @brief Returns view for used part of buffer
@@ -250,9 +286,40 @@ template <typename Underlying, std::uint8_t BitsCount> inline bool BitWriter::Wr
     return Write(value.Value(), BitsCount);
 }
 
-template <typename T> inline bool BitWriter::Write(T value)
+template <typename T> bool BitWriter::Write(gsl::span<T> list)
+{
+    for (auto value : list)
+    {
+        if (!Write(value))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+template <typename T, size_t N> bool BitWriter::Write(const std::array<T, N>& list)
+{
+    for (auto value : list)
+    {
+        if (!Write(value))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+template <typename T, typename std::enable_if<std::is_enum<T>::value, int>::type> inline bool BitWriter::Write(T value)
 {
     return Write(num(value));
+}
+
+template <typename T, typename std::enable_if<std::is_fundamental<T>::value, int>::type> inline bool BitWriter::Write(T value)
+{
+    return Write(static_cast<std::make_unsigned_t<T>>(value));
 }
 
 inline void BitWriter::Initialize(gsl::span<std::uint8_t> view)

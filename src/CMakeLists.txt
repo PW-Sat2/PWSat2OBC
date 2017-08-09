@@ -116,6 +116,7 @@ target_link_libraries(${NAME}
     telemetry_program
     telemetry_flash_scrubbing
     telemetry_ram_scrubbing
+    telemetry_imtq
     program_flash
     scrubber
     boot_settings

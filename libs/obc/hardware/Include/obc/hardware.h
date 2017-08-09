@@ -25,6 +25,7 @@
 #include "rtc/rtc.hpp"
 #include "spi/efm.h"
 #include "suns/suns.hpp"
+#include "telemetry/ImtqTelemetryCollector.hpp"
 #include "temp/efm.hpp"
 #include "uart/uart.hpp"
 
@@ -168,6 +169,9 @@ namespace obc
 
         /** @brief Imtq handling */
         devices::imtq::ImtqDriver Imtq;
+
+        /** @brief This object captures imtq telemetry as the hardware state changes are requested. */
+        devices::imtq::ImtqTelemetryCollector imtqTelemetryCollector;
 
         /** @brief Sun Sensor Interrupt Driver */
         drivers::gpio::InterruptPinDriver SunSInterruptDriver;

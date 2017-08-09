@@ -103,9 +103,6 @@ struct OBC
     /** @brief OBC storage */
     obc::OBCStorage Storage;
 
-    /** @brief Imtq handling */
-    devices::imtq::ImtqDriver Imtq;
-
     /** @brief Adcs subsytem for obc. */
     obc::Adcs adcs;
 
