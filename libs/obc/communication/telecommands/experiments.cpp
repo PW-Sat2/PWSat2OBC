@@ -134,5 +134,14 @@ namespace obc
 
             transmitter.SendFrame(response.Frame());
         }
+
+        PerformSailExperiment::PerformSailExperiment(experiments::IExperimentController& controller) : experimentController(controller)
+        {
+        }
+
+        void PerformSailExperiment::Handle(devices::comm::ITransmitter& /*transmitter*/, gsl::span<const std::uint8_t> /*parameters*/)
+        {
+            this->experimentController.RequestExperiment(experiment::sail::SailExperiment::Code);
+        }
     }
 }

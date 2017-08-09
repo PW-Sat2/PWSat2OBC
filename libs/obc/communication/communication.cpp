@@ -57,7 +57,9 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           SetPeriodicMessageTelecommand(stateContainer),                                                                              //
           PerformSunSExperiment(experiments.ExperimentsController, experiments.Get<experiment::suns::SunSExperiment>()),              //
           EraseFlashTelecommand(experiments.ExperimentsController, experiments.Get<experiment::erase_flash::EraseFlashExperiment>()), //
-          RawI2CTelecommand(systemBus, payload)),                                                                                     //
+          RawI2CTelecommand(systemBus, payload),                                                                                      //
+          PerformSailExperiment(experiments.ExperimentsController)                                                                    //
+          ),                                                                                                                          //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {
 }

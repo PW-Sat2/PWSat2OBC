@@ -128,24 +128,23 @@ namespace obc
         obc::telecommands::SetTimeCorrectionConfigTelecommand,
         obc::telecommands::SetTimeTelecommand,
         obc::telecommands::PerformDetumblingExperiment,
-        obc::telecommands::AbortExperiment,                   //
-        obc::telecommands::ListFilesTelecommand,              //
-        obc::telecommands::EraseBootTableEntry,               //
-        obc::telecommands::WriteProgramPart,                  //
-        obc::telecommands::FinalizeProgramEntry,              //
-        obc::telecommands::SetBootSlotsTelecommand,           //
-        obc::telecommands::SendBeaconTelecommand,             //
-        obc::telecommands::StopAntennaDeployment,             //
-        obc::telecommands::PowerCycle,                        //
-        obc::telecommands::SetErrorCounterConfig,             //
-        obc::telecommands::OpenSail,                          //
-        obc::telecommands::GetErrorCountersConfigTelecommand, //
-        obc::telecommands::SetPeriodicMessageTelecommand,     //
-        obc::telecommands::PerformSunSExperiment,             //
-        obc::telecommands::EraseFlashTelecommand,             //
-        obc::telecommands::RawI2CTelecommand                  //
-        >;
-
+        obc::telecommands::AbortExperiment,
+        obc::telecommands::ListFilesTelecommand,
+        obc::telecommands::EraseBootTableEntry,
+        obc::telecommands::WriteProgramPart,
+        obc::telecommands::FinalizeProgramEntry,
+        obc::telecommands::SetBootSlotsTelecommand,
+        obc::telecommands::SendBeaconTelecommand,
+        obc::telecommands::StopAntennaDeployment,
+        obc::telecommands::PowerCycle,
+        obc::telecommands::SetErrorCounterConfig,
+        obc::telecommands::OpenSail,
+        obc::telecommands::GetErrorCountersConfigTelecommand,
+        obc::telecommands::SetPeriodicMessageTelecommand,
+        obc::telecommands::PerformSunSExperiment,
+        obc::telecommands::EraseFlashTelecommand,
+        obc::telecommands::RawI2CTelecommand,
+        obc::telecommands::PerformSailExperiment>;
     /**
      * @brief OBC <-> Earth communication
      */

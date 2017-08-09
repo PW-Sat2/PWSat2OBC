@@ -101,6 +101,32 @@ namespace obc
             /** @brief SunS experiments settings */
             experiment::suns::ISetupSunSExperiment& _setupSunS;
         };
+
+        /**
+         * @brief Performs sail experiment
+         * @ingroup telecommands
+         * @telecommand
+         *
+         * Code: 0x10
+         *
+         * Parameters:
+         *  None
+         */
+        class PerformSailExperiment final : public telecommunication::uplink::Telecommand<0x10>
+        {
+          public:
+            /**
+             * @brief Ctor
+             * @param experiments OBC Experiments
+             */
+            PerformSailExperiment(experiments::IExperimentController& controller);
+
+            virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
+
+          private:
+            /** @brief Experiments controller */
+            experiments::IExperimentController& experimentController;
+        };
     }
 }
 
