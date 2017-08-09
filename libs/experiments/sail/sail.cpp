@@ -17,12 +17,14 @@ namespace experiment
             ::adcs::IAdcsCoordinator& adcsCoordinator,
             devices::gyro::IGyroscopeDriver& gyroDriver,
             devices::payload::IPayloadDeviceDriver& payloadDriver,
-            services::power::IPowerControl& powerController)
+            services::power::IPowerControl& powerController,
+            services::photo::IPhotoService& photoService)
             : _fileSystem(fileSystem),           //
               _adcsCoordinator(adcsCoordinator), //
               _gyroDriver(gyroDriver),           //
               _payloadDriver(payloadDriver),     //
-              _powerController(powerController)
+              _powerController(powerController), //
+              _photoService(photoService)
         {
         }
 

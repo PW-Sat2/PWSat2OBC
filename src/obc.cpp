@@ -73,7 +73,7 @@ OBC::OBC()
       PowerControlInterface(this->Hardware.EPS),                                                          //
       Fdir(this->PowerControlInterface, 1 << devices::n25q::RedundantN25QDriver::ErrorCounter::DeviceId), //
       Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),                               //
-      adcs(this->Hardware.Imtq, this->timeProvider),                                                      //
+      adcs(this->Hardware.imtqTelemetryCollector, this->timeProvider),                                    //
       Experiments(fs,
           this->adcs.GetAdcsCoordinator(),
           this->timeProvider,
@@ -82,9 +82,9 @@ OBC::OBC()
           Hardware.SunS,
           Hardware.PayloadDeviceDriver,
           Storage.GetInternalStorage().GetTopDriver(),
-          Hardware.CommDriver), //
-      Communication(            //
-          this->Fdir,
+          Hardware.CommDriver,
+          Camera.PhotoService), //
+      Communication(this->Fdir,
           this->Hardware.CommDriver,
           this->timeProvider,
           this->Hardware.rtc,
