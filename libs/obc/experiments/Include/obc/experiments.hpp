@@ -93,7 +93,7 @@ namespace obc
         experiment::leop::LaunchAndEarlyOrbitPhaseExperiment, //
         experiment::suns::SunSExperiment,                     //
         experiment::erase_flash::EraseFlashExperiment,        //
-        experiment::radfet::RadFETExperiment                  //
+        experiment::radfet::RadFETExperiment,                 //
         experiment::sail::SailExperiment                      //
         >;
 

@@ -62,7 +62,9 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           EraseFlashTelecommand(experiments.ExperimentsController, experiments.Get<experiment::erase_flash::EraseFlashExperiment>()), //
           RawI2CTelecommand(systemBus, payload),                                                                                      //
           PerformRadFETExperiment(experiments.ExperimentsController, experiments.Get<experiment::radfet::RadFETExperiment>()),        //
-          GetSunSDataSetsTelecommand(powerControl, currentTime, experimentalSunS, payloadDriver, gyro)),                              //
+          GetSunSDataSetsTelecommand(powerControl, currentTime, experimentalSunS, payloadDriver, gyro),                               //
+          PerformSailExperiment(experiments.ExperimentsController)                                                                    //
+          ),                                                                                                                          //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {
 }
