@@ -57,6 +57,13 @@ namespace experiments
                 Temperature = 0x17,               // Temperature data, 4 bytes
                 Sail = 0x18,                      // 3 bytes of data
 
+                PayloadWhoami = 0x20,       // 1 byte of data
+                PayloadSunS = 0x21,         // 10 bytes of data
+                PayloadTemperatures = 0x22, // 18 bytes of data
+                PayloadPhotodiodes = 0x23,  // 8 bytes of data
+                PayloadHousekeeping = 0x24, // 4 bytes of data
+                PayloadRadFet = 0x25,       // 17 bytes of data
+
                 Synchronization = 0x47, // Synchronization PID indicating start of packet. 0 bytes of data.
 
                 Continuation = 0xFE, // Indicates that following data are continuation of previous packet, not the new data.
