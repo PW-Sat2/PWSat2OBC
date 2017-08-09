@@ -180,4 +180,91 @@ namespace
 
         this->_telecommand.Handle(this->_transmitter, args);
     }
+
+    TEST_F(ListFilesTelecommandTest, ShouldSendProperSizeForFilesInRootDirectory)
+    {
+        BufferArray<10> file;
+
+        this->_fs.AddFile("/file1", file);
+
+        ResultVector result;
+        ReceiveTo(result);
+
+        BufferArray<20> args{0x11, '/', 0};
+
+        this->_telecommand.Handle(this->_transmitter, args);
+
+        ASSERT_THAT(get<0>(result[0]), StrEq("file1"));
+        ASSERT_THAT(get<1>(result[0]), Eq(10U));
+    }
+
+    TEST_F(ListFilesTelecommandTest, ShouldHandleLostFile)
+    {
+        BufferArray<10> file;
+
+        auto longName = "/"s + std::string(100, 'a');
+
+        this->_fs.AddFile("/file1", file);
+        this->_fs.AddFile(longName.c_str(), file);
+        this->_fs.AddFile("/file3", file);
+
+        ResultVector result;
+        ReceiveTo(result);
+
+        BufferArray<20> args{0x11, '/', 0};
+
+        this->_telecommand.Handle(this->_transmitter, args);
+
+        ASSERT_THAT(result.size(), Eq(3U));
+
+        ASSERT_THAT(get<0>(result[0]), StrEq("[lost]"));
+        ASSERT_THAT(get<1>(result[0]), Eq(0U));
+
+        ASSERT_THAT(get<0>(result[1]), StrEq("file1"));
+        ASSERT_THAT(get<1>(result[1]), Eq(10U));
+
+        ASSERT_THAT(get<0>(result[2]), StrEq("file3"));
+        ASSERT_THAT(get<1>(result[2]), Eq(10U));
+    }
+
+    TEST_F(ListFilesTelecommandTest, ShouldHandleLostFileNotFittingIntoSingleFrame)
+    {
+        BufferArray<10> file;
+
+        auto fileA = "/"s + std::string(70, 'A');
+        auto fileB = "/"s + std::string(70, 'B');
+        auto fileC = "/"s + std::string(70, 'C');
+
+        auto longName = "/"s + std::string(100, 'D');
+
+        this->_fs.AddFile(fileA.c_str(), file);
+        this->_fs.AddFile(fileB.c_str(), file);
+        this->_fs.AddFile(fileC.c_str(), file);
+        this->_fs.AddFile(longName.c_str(), file);
+        this->_fs.AddFile("/EEEEE", file);
+
+        ResultVector result;
+        ReceiveTo(result);
+
+        BufferArray<20> args{0x11, '/', 0};
+
+        this->_telecommand.Handle(this->_transmitter, args);
+
+        ASSERT_THAT(result.size(), Eq(5U));
+
+        ASSERT_THAT(get<0>(result[0]), StrEq(fileA.c_str() + 1));
+        ASSERT_THAT(get<1>(result[0]), Eq(10U));
+
+        ASSERT_THAT(get<0>(result[1]), StrEq(fileB.c_str() + 1));
+        ASSERT_THAT(get<1>(result[1]), Eq(10U));
+
+        ASSERT_THAT(get<0>(result[2]), StrEq(fileC.c_str() + 1));
+        ASSERT_THAT(get<1>(result[2]), Eq(10U));
+
+        ASSERT_THAT(get<0>(result[3]), StrEq("[lost]"));
+        ASSERT_THAT(get<1>(result[3]), Eq(0U));
+
+        ASSERT_THAT(get<0>(result[4]), StrEq("EEEEE"));
+        ASSERT_THAT(get<1>(result[4]), Eq(10U));
+    }
 }
