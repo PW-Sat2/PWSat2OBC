@@ -44,7 +44,16 @@ void FSListFiles(uint16_t argc, char* argv[])
     DirectoryHandle dir = result.Result;
     while ((entry = GetFileSystem().ReadDirectory(dir)) != NULL)
     {
-        GetTerminal().Puts(entry);
+        auto l = strnlen(entry, 80);
+
+        if (entry[l + 1] != '\0')
+        {
+            GetTerminal().Puts("[lost file]");
+        }
+        else
+        {
+            GetTerminal().Puts(entry);
+        }
         GetTerminal().NewLine();
     }
 
