@@ -8,6 +8,7 @@
 #include "experiment/flash/flash.hpp"
 #include "experiment/leop/leop.hpp"
 #include "experiment/radfet/radfet.hpp"
+#include "experiment/sail/sail.hpp"
 #include "experiment/suns/suns.hpp"
 #include "experiments/experiments.h"
 #include "fs/fs.h"
@@ -93,6 +94,7 @@ namespace obc
         experiment::suns::SunSExperiment,                     //
         experiment::erase_flash::EraseFlashExperiment,        //
         experiment::radfet::RadFETExperiment                  //
+        experiment::sail::SailExperiment                      //
         >;
 
     /**
