@@ -12,6 +12,8 @@
 #include "experiment/suns/suns.hpp"
 #include "experiments/experiments.h"
 #include "fs/fs.h"
+#include "payload/interfaces.h"
+#include "power/fwd.hpp"
 #include "traits.hpp"
 
 namespace obc

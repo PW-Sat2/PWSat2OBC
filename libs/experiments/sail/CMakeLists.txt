@@ -10,6 +10,10 @@ target_link_libraries(${NAME}
 	base
 	experiments
 	fs
+	adcs
+	gyro
+	payload
+	power
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

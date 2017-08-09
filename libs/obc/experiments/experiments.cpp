@@ -18,7 +18,7 @@ namespace obc
               experiment::suns::SunSExperiment(powerControl, time, suns, payload, gyro, fs), //
               experiment::erase_flash::EraseFlashExperiment(n25q, transmitter),              //
               experiment::radfet::RadFETExperiment(fs, payload, powerControl, time),         //
-              experiment::sail::SailExperiment(fs)                                           //
+              experiment::sail::SailExperiment(fs, adcs, gyro, payload, powerControl)        //
               )
     {
     }
