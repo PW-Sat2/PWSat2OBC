@@ -1,5 +1,5 @@
-#ifndef LIBS_EXPERIMENTS_LEOP_INCLUDE_EXPERIMENT_LEOP_LEOP_HPP_
-#define LIBS_EXPERIMENTS_LEOP_INCLUDE_EXPERIMENT_LEOP_LEOP_HPP_
+#ifndef LIBS_EXPERIMENTS_LEOP_INCLUDE_EXPERIMENT_PAYLOAD_PAYLOAD_EXP_HPP_
+#define LIBS_EXPERIMENTS_LEOP_INCLUDE_EXPERIMENT_PAYLOAD_PAYLOAD_EXP_HPP_
 
 #include <chrono>
 #include "experiments/experiments.h"
@@ -7,10 +7,11 @@
 #include "fs/fs.h"
 #include "time/timer.h"
 
-#include "eps/eps.h"
 #include "payload/interfaces.h"
+#include "power/power.h"
+#include "suns/suns.hpp"
 
-using EPSErrorCode = devices::eps::ErrorCode;
+using PayloadTelemetry = drivers::payload::PayloadTelemetry;
 
 namespace experiment
 {
@@ -29,9 +30,6 @@ namespace experiment
             /** @brief Output file name. */
             static constexpr const char* FileName = "/payload.pwts";
 
-            /** @brief Mission time when experiment should stop: T+1h */
-            static constexpr std::chrono::milliseconds ExperimentTimeStop = std::chrono::milliseconds(60 * 60 * 1000);
-
             /**
              * @brief Ctor
              * @param gyro Gyroscope driver
@@ -40,8 +38,9 @@ namespace experiment
              */
             PayloadCommissioningExperiment(drivers::payload::IPayloadDeviceDriver& payload,
                 services::fs::IFileSystem& fileSystem,
-                devices::eps::EPSDriver& eps,
-                services::time::ICurrentTime& time);
+                services::power::IPowerControl& powerControl,
+                services::time::ICurrentTime& time,
+                devices::suns::ISunSDriver& experimentalSunS);
 
             virtual experiments::ExperimentCode Type() override;
             virtual experiments::StartResult Start() override;
@@ -49,31 +48,42 @@ namespace experiment
             virtual void Stop(experiments::IterationResult lastResult) override;
 
           private:
-            static constexpr int32_t SunSCurrentPassThreshold = 100;   // 100 mA
-            static constexpr int32_t RadFETCurrentPassThreshold = 100; // 100 mA
+            experiments::IterationResult StartupStep();
+            experiments::IterationResult SunSStep();
+            experiments::IterationResult RadFETStep();
+            experiments::IterationResult CamsStep();
+            experiments::IterationResult CamsFullStep();
+
+            void WriteTelemetry();
+            void WriteRadFetTelemetry(PayloadTelemetry::Radfet& telemetry);
+            void MeasureAndWritePayloadTemperaturesTelemetry();
+            void MeasureAndWritePayloadStatusTelemetry();
+            void MeasureAndWritePayloadHousekeepingTelemetry();
+            void MeasureAndWritePayloadSunsTelemetry();
+            void MeasureAndWritePayloadPhotodiodesTelemetry();
+            void MeasureAndWriteExperimentalSunsTelemetry(uint8_t gain, uint8_t itime);
 
             /** @brief Payload driver */
             drivers::payload::IPayloadDeviceDriver& _payload;
+
             /** @brief Time provider */
             services::time::ICurrentTime& _time;
 
             /** @brief File System provider */
             services::fs::IFileSystem& _fileSystem;
-            /** @brief EPS Driver             */
-            devices::eps::EPSDriver& _eps;
+
+            /** @brief Power Control Driver */
+            services::power::IPowerControl& _powerControl;
+
+            /** @brief SunS Driver */
+            devices::suns::ISunSDriver& _experimentalSunS;
 
             /** @brief Experiment file with results */
             experiments::fs::ExperimentFile _experimentFile;
 
-            experiments::IterationResult PerformMeasurements();
-            experiments::IterationResult CheckExperimentTime();
-
-            experiments::IterationResult SunSStep();
-            experiments::IterationResult RadFETStep();
-
-            void WriteEPSError(EPSErrorCode error);
+            uint8_t _currentStep;
         };
     }
 }
 
-#endif /* LIBS_EXPERIMENTS_LEOP_INCLUDE_EXPERIMENT_LEOP_LEOP_HPP_ */
+#endif /* LIBS_EXPERIMENTS_LEOP_INCLUDE_EXPERIMENT_PAYLOAD_PAYLOAD_EXP_HPP_ */

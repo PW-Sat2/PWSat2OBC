@@ -20,9 +20,11 @@ namespace experiment
     {
         PayloadCommissioningExperiment::PayloadCommissioningExperiment(drivers::payload::IPayloadDeviceDriver& payload,
             services::fs::IFileSystem& fileSystem,
-            devices::eps::EPSDriver& eps,
-            services::time::ICurrentTime& time)
-            : _payload(payload), _time(time), _fileSystem(fileSystem), _eps(eps), _experimentFile(&_time)
+            services::power::IPowerControl& powerControl,
+            services::time::ICurrentTime& time,
+            devices::suns::ISunSDriver& experimentalSunS)
+            : _payload(payload), _time(time), _fileSystem(fileSystem), _powerControl(powerControl), _experimentalSunS(experimentalSunS),
+              _experimentFile(&_time), _currentStep(0)
         {
         }
 
@@ -45,7 +47,25 @@ namespace experiment
 
         IterationResult PayloadCommissioningExperiment::Iteration()
         {
-            return SunSStep();
+            ++_currentStep;
+
+            switch (_currentStep)
+            {
+                default:
+                    return IterationResult::Failure;
+                case 1:
+                    return StartupStep();
+                case 2:
+                    return RadFETStep();
+                case 3:
+                    return CamsStep();
+                case 4:
+                    return CamsFullStep();
+                case 5:
+                    return SunSStep();
+            }
+
+            return IterationResult::Finished;
         }
 
         void PayloadCommissioningExperiment::Stop(IterationResult /*lastResult*/)
@@ -53,109 +73,286 @@ namespace experiment
             _experimentFile.Close();
         }
 
-        void PayloadCommissioningExperiment::WriteEPSError(EPSErrorCode error)
+        IterationResult PayloadCommissioningExperiment::StartupStep()
         {
-            std::array<uint8_t, 2> buffer;
-            Writer w(buffer);
-            w.WriteWordLE(num(error));
+            // Save Telemetry snapshot
+            WriteTelemetry();
 
-            _experimentFile.Write(ExperimentFile::PID::Error, buffer);
-        }
+            // Send a command to EPS: "Enable SENS LCL" to controller A
+            _powerControl.SensPower(true);
 
-        IterationResult PayloadCommissioningExperiment::SunSStep()
-        {
-            // Telemetry snapshot_1.
-            auto telemetry_begin = _eps.ReadHousekeepingA();
-
-            // Send a command to EPS: "Enable SENS LCL" to controller A.
-            auto epsResult = _eps.EnableLCL(devices::eps::LCL::SENS);
-            if (epsResult != EPSErrorCode::NoError)
-            {
-                WriteEPSError(epsResult);
-                return IterationResult::Failure;
-            }
-
-            // Wait 2 s
-            System::SleepTask(2s);
-
-            // Save whole PLD telemetry snapshot_1 into memory
-            ;
-
-            // Wait 10s.
+            // Wait 10s
             System::SleepTask(10s);
 
-            // Request SunS-ref measurement
-            PayloadTelemetry::SunsRef sunsTelemetry;
-            _payload.MeasureSunSRef(sunsTelemetry);
+            // Request, read and save PLD telemetry: payload who, temps, house, suns, photo
+            MeasureAndWritePayloadStatusTelemetry();
+            MeasureAndWritePayloadTemperaturesTelemetry();
+            MeasureAndWritePayloadHousekeepingTelemetry();
+            MeasureAndWritePayloadSunsTelemetry();
+            MeasureAndWritePayloadPhotodiodesTelemetry();
 
-            // Save whole PLD telemetry snapshot_2 into memory
-            ;
+            // Save Telemetry snapshotv
+            WriteTelemetry();
 
-            // Telemetry snapshot_2.
-            auto telemetry_end = _eps.ReadHousekeepingA();
+            // Send a command to EPS: "Disable SENS LCL" to controller A
+            _powerControl.SensPower(false);
 
-            // Send a command to EPS: "Disable SENS LCL" to controller A.
-            epsResult = _eps.DisableLCL(devices::eps::LCL::SENS);
-            if (epsResult != EPSErrorCode::NoError)
-            {
-                WriteEPSError(epsResult);
-                return IterationResult::Failure;
-            }
-
-            // Pass/fail criteria: is delta EPS Controller A->Eps Driver->DISTR.CURR_5V (snapshot_2-snapshot_1) lower than 0.1A
-            auto diff = static_cast<int32_t>(telemetry_end.Value.distr.CURR_5V) - static_cast<int32_t>(telemetry_begin.Value.distr.CURR_5V);
-            if (diff < 0)
-                diff = -diff;
-            return (diff < SunSCurrentPassThreshold) ? IterationResult::WaitForNextCycle : IterationResult::Failure;
+            return IterationResult::WaitForNextCycle;
         }
 
         IterationResult PayloadCommissioningExperiment::RadFETStep()
         {
-            // Telemetry snapshot_1.
-            auto telemetry_begin = _eps.ReadHousekeepingA();
+            PayloadTelemetry::Radfet radFetTelemetry;
 
-            // Send a command to EPS: "Enable SENS LCL" to controller A.
-            auto epsResult = _eps.EnableLCL(devices::eps::LCL::SENS);
-            if (epsResult != EPSErrorCode::NoError)
-            {
-                WriteEPSError(epsResult);
-                return IterationResult::Failure;
-            }
+            // Save Telemetry snapshot
+            WriteTelemetry();
 
-            // Save whole PLD telemetry snapshot_1 into memory
-            ;
+            // Send a command to EPS: "Enable SENS LCL" to controller A
+            _powerControl.SensPower(true);
 
-            // Send a command to PLD: "RadFET On".
-            PayloadTelemetry::Radfet radfetTelemetry;
-            _payload.RadFETOn(radfetTelemetry);
+            // Wait 2 s
+            System::SleepTask(2s);
 
-            // Save whole PLD telemetry snapshot_2 into memory
-            ;
+            // Request, read and save PLD telemetry: payload who, temps, house
+            MeasureAndWritePayloadStatusTelemetry();
+            MeasureAndWritePayloadTemperaturesTelemetry();
+            MeasureAndWritePayloadHousekeepingTelemetry();
+
+            // Request, read and save PLD telemetry: radfet on - output data are useless but should be saved
+            _payload.RadFETOn(radFetTelemetry);
+            WriteRadFetTelemetry(radFetTelemetry);
 
             // Wait 10 s
             System::SleepTask(10s);
 
-            // Telemetry snapshot_2.
-            auto telemetry_end = _eps.ReadHousekeepingA();
+            // Request, read and save PLD telemetry: payload radfet read - it takes tens of seconds
+            _payload.MeasureRadFET(radFetTelemetry);
+            WriteRadFetTelemetry(radFetTelemetry);
 
-            // Send a command to PLD: "RadFET Off".
-            _payload.RadFETOff(radfetTelemetry);
+            // Request, read and save PLD telemetry: payload who, temps, house
+            MeasureAndWritePayloadStatusTelemetry();
+            MeasureAndWritePayloadTemperaturesTelemetry();
+            MeasureAndWritePayloadHousekeepingTelemetry();
 
-            // Save whole PLD telemetry snapshot_3 into memory
+            // Request, read and save PLD telemetry: radfet off - just LCL state flag is useful but all output data should be saved
+            _payload.RadFETOff(radFetTelemetry);
+            WriteRadFetTelemetry(radFetTelemetry);
 
-            // Send a command to EPS: "Disable SENS LCL" to controller A.
-            epsResult = _eps.DisableLCL(devices::eps::LCL::SENS);
-            if (epsResult != EPSErrorCode::NoError)
+            // Wait 2s
+            System::SleepTask(2s);
+
+            // Request, read and save PLD telemetry: radfet read - just to be sure that LCL is off, save all output data
+            _payload.MeasureRadFET(radFetTelemetry);
+            WriteRadFetTelemetry(radFetTelemetry);
+
+            // Save Telemetry snapshot
+            WriteTelemetry();
+
+            // Send a command to EPS: "Disable SENS LCL" to controller A
+            _powerControl.SensPower(false);
+
+            return IterationResult::WaitForNextCycle;
+        }
+
+        IterationResult PayloadCommissioningExperiment::CamsStep()
+        {
+            // Save Telemetry snapshot
+            WriteTelemetry();
+
+            // Send a command to EPS: "Enable CAMnadir" to controller A
+            _powerControl.CamNadirPower(true);
+
+            // Wait 10s
+            System::SleepTask(10s);
+
+            // Save Telemetry snapshot
+            WriteTelemetry();
+
+            // Request, read and save PLD telemetry: payload temps
+            MeasureAndWritePayloadTemperaturesTelemetry();
+
+            // Send a command to EPS: "Disable CAMnadir" to controller A
+            _powerControl.CamNadirPower(false);
+
+            // Save Telemetry snapshot
+            WriteTelemetry();
+
+            // Send a command to EPS: "Enable CAMwing" to controller A
+            _powerControl.CamWingPower(true);
+
+            // Wait 10s
+            System::SleepTask(10s);
+
+            // Save Telemetry snapshot
+            WriteTelemetry();
+
+            // Request, read and save PLD telemetry: payload temps
+            MeasureAndWritePayloadTemperaturesTelemetry();
+
+            // Send a command to EPS: "Disable CAMwing" to controller A
+            _powerControl.CamWingPower(false);
+
+            return IterationResult::WaitForNextCycle;
+        }
+
+        IterationResult PayloadCommissioningExperiment::CamsFullStep()
+        {
+            // TODO: WRITE THAT
+
+            return IterationResult::WaitForNextCycle;
+        }
+
+        IterationResult PayloadCommissioningExperiment::SunSStep()
+        {
+            // Save Telemetry snapshot
+            WriteTelemetry();
+
+            // Send a command to EPS: "Enable SunS LCL" to controller A
+            _powerControl.SunSPower(true);
+
+            // Wait 2s
+            System::SleepTask(2s);
+
+            // Trigger SunS measurement with parameters gain: 0, itime: 10 and save data to file (from all SunS registers)
+            MeasureAndWriteExperimentalSunsTelemetry(0, 10);
+
+            // Save Telemetry snapshot
+            WriteTelemetry();
+
+            // Send a command to EPS: "Disable SunS LCL" to controller A
+            _powerControl.SunSPower(false);
+
+            return IterationResult::Finished;
+        }
+
+        void PayloadCommissioningExperiment::WriteTelemetry()
+        {
+            // TODO: WTIRE THAT
+        }
+
+        void PayloadCommissioningExperiment::WriteRadFetTelemetry(PayloadTelemetry::Radfet& telemetry)
+        {
+            std::array<uint8_t, PayloadTelemetry::Radfet::DeviceDataLength> buffer;
+            Writer w(buffer);
+            w.WriteByte(telemetry.status);
+            w.WriteDoubleWordLE(telemetry.temperature);
+            for (auto voltage : telemetry.vth)
             {
-                WriteEPSError(epsResult);
-                return IterationResult::Failure;
+                w.WriteDoubleWordLE(voltage);
             }
 
-            // Pass/fail criteria: is delta EPS Controller A->Eps Driver->DISTR.CURR_5V (snapshot_2-snapshot_1) lower than 0.1A
-            auto diff = static_cast<int32_t>(telemetry_end.Value.distr.CURR_5V) - static_cast<int32_t>(telemetry_begin.Value.distr.CURR_5V);
-            if (diff < 0)
-                diff = -diff;
-            return (diff < SunSCurrentPassThreshold) ? IterationResult::WaitForNextCycle : IterationResult::Failure;
+            _experimentFile.Write(ExperimentFile::PID::PayloadRadFet, buffer);
+        }
+
+        void PayloadCommissioningExperiment::MeasureAndWritePayloadTemperaturesTelemetry()
+        {
+            PayloadTelemetry::Temperatures telemetry;
+            _payload.MeasureTemperatures(telemetry);
+
+            std::array<uint8_t, PayloadTelemetry::Temperatures::DeviceDataLength> buffer;
+            Writer w(buffer);
+            w.WriteWordLE(telemetry.supply);
+            w.WriteWordLE(telemetry.Xp);
+            w.WriteWordLE(telemetry.Xn);
+            w.WriteWordLE(telemetry.Yp);
+            w.WriteWordLE(telemetry.Yn);
+            w.WriteWordLE(telemetry.sads);
+            w.WriteWordLE(telemetry.sail);
+            w.WriteWordLE(telemetry.cam_nadir);
+            w.WriteWordLE(telemetry.cam_wing);
+
+            _experimentFile.Write(ExperimentFile::PID::PayloadTemperatures, buffer);
+        }
+
+        void PayloadCommissioningExperiment::MeasureAndWritePayloadStatusTelemetry()
+        {
+            PayloadTelemetry::Status telemetry;
+            _payload.GetWhoami(telemetry);
+            _experimentFile.Write(ExperimentFile::PID::PayloadWhoami, gsl::make_span(&telemetry.who_am_i, 1));
+        }
+
+        void PayloadCommissioningExperiment::MeasureAndWritePayloadHousekeepingTelemetry()
+        {
+            PayloadTelemetry::Housekeeping telemetry;
+            _payload.MeasureHousekeeping(telemetry);
+
+            std::array<uint8_t, PayloadTelemetry::Housekeeping::DeviceDataLength> buffer;
+            Writer w(buffer);
+            w.WriteWordLE(telemetry.int_3v3d);
+            w.WriteWordLE(telemetry.obc_3v3d);
+
+            _experimentFile.Write(ExperimentFile::PID::PayloadHousekeeping, buffer);
+        }
+
+        void PayloadCommissioningExperiment::MeasureAndWritePayloadSunsTelemetry()
+        {
+            PayloadTelemetry::SunsRef telemetry;
+            _payload.MeasureSunSRef(telemetry);
+
+            std::array<uint8_t, PayloadTelemetry::SunsRef::DeviceDataLength> buffer;
+            Writer w(buffer);
+            for (auto voltage : telemetry.voltages)
+            {
+                w.WriteWordLE(voltage);
+            }
+
+            _experimentFile.Write(ExperimentFile::PID::PayloadSunS, buffer);
+        }
+
+        void PayloadCommissioningExperiment::MeasureAndWritePayloadPhotodiodesTelemetry()
+        {
+            PayloadTelemetry::Photodiodes telemetry;
+            _payload.MeasurePhotodiodes(telemetry);
+
+            std::array<uint8_t, PayloadTelemetry::Photodiodes::DeviceDataLength> buffer;
+            Writer w(buffer);
+            w.WriteWordLE(telemetry.Xp);
+            w.WriteWordLE(telemetry.Xn);
+            w.WriteWordLE(telemetry.Yp);
+            w.WriteWordLE(telemetry.Yn);
+
+            _experimentFile.Write(ExperimentFile::PID::PayloadPhotodiodes, buffer);
+        }
+
+        void PayloadCommissioningExperiment::MeasureAndWriteExperimentalSunsTelemetry(uint8_t gain, uint8_t itime)
+        {
+            devices::suns::MeasurementData telemetry;
+            _experimentalSunS.MeasureSunS(telemetry, gain, itime);
+
+            std::array<uint8_t, 67> buffer;
+
+            Writer w(buffer);
+
+            w.WriteWordLE(telemetry.status.ack);
+            w.WriteWordLE(telemetry.status.presence);
+            w.WriteWordLE(telemetry.status.adc_valid);
+
+            for (auto& als : telemetry.visible_light)
+            {
+                for (auto& panel : als)
+                {
+                    w.WriteWordLE(panel);
+                }
+            }
+
+            w.WriteWordLE(telemetry.temperature.structure);
+            for (auto& panel : telemetry.temperature.panels)
+            {
+                w.WriteWordLE(panel);
+            }
+
+            w.WriteByte(telemetry.parameters.gain);
+            w.WriteByte(telemetry.parameters.itime);
+
+            for (auto& als : telemetry.infrared)
+            {
+                for (auto& panel : als)
+                {
+                    w.WriteWordLE(panel);
+                }
+            }
+
+            _experimentFile.Write(ExperimentFile::PID::ExperimentalSunS, buffer);
         }
     }
 }
