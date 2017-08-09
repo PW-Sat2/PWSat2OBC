@@ -10,6 +10,7 @@
 #include "payload/interfaces.h"
 #include "photo/fwd.hpp"
 #include "power/fwd.hpp"
+#include "utils.h"
 
 namespace experiment
 {
