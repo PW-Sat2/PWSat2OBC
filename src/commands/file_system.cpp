@@ -191,7 +191,11 @@ void EraseFlash(uint16_t argc, char* argv[])
         GetTerminal().Puts("Erasing all flashes ...");
         GetTerminal().NewLine();
 
+        yaffsfs_Lock();
+
         auto r = Main.Storage.Erase();
+
+        yaffsfs_Unlock();
         GetTerminal().Printf("Erase result: %d", num(r));
     }
     else
