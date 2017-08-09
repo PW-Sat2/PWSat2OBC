@@ -88,6 +88,7 @@ ImtqTelemetryCollectorMock::~ImtqTelemetryCollectorMock()
 ExperimentControllerMock::ExperimentControllerMock()
 {
 }
+
 ExperimentControllerMock::~ExperimentControllerMock()
 {
 }
@@ -95,6 +96,7 @@ ExperimentControllerMock::~ExperimentControllerMock()
 PayloadDeviceMock::PayloadDeviceMock()
 {
 }
+
 PayloadDeviceMock::~PayloadDeviceMock()
 {
 }

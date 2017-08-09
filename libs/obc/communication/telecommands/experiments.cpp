@@ -11,6 +11,7 @@
 using std::uint8_t;
 using std::chrono::seconds;
 using std::chrono::minutes;
+
 using telecommunication::downlink::CorrelatedDownlinkFrame;
 using telecommunication::downlink::DownlinkAPID;
 
@@ -191,9 +192,26 @@ namespace obc
         {
         }
 
-        void PerformSailExperiment::Handle(devices::comm::ITransmitter& /*transmitter*/, gsl::span<const std::uint8_t> /*parameters*/)
+        void PerformSailExperiment::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
         {
-            this->experimentController.RequestExperiment(experiment::sail::SailExperiment::Code);
+            Reader reader(parameters);
+            const auto correlationId = reader.ReadByte();
+            CorrelatedDownlinkFrame response{DownlinkAPID::Operation, 0, correlationId};
+            auto& writer = response.PayloadWriter();
+            if (!reader.Status())
+            {
+                writer.WriteByte(0x1);
+            }
+            else if (this->experimentController.RequestExperiment(experiment::sail::SailExperiment::Code))
+            {
+                writer.WriteByte(0);
+            }
+            else
+            {
+                writer.WriteByte(2);
+            }
+
+            transmitter.SendFrame(response.Frame());
         }
     }
 }
