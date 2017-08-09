@@ -2,8 +2,12 @@
 #define LIBS_MISSION_EXPERIMENTS_SAIL_HPP
 
 #include <cstdint>
+#include "adcs/adcs.hpp"
 #include "experiments/experiments.h"
 #include "fs/fs.h"
+#include "gyro/fwd.hpp"
+#include "payload/interfaces.h"
+#include "power/fwd.hpp"
 
 namespace experiment
 {
@@ -19,7 +23,11 @@ namespace experiment
              * @brief Ctor
              * @param fileSystem File system
              */
-            SailExperiment(services::fs::IFileSystem& fileSystem);
+            SailExperiment(services::fs::IFileSystem& fileSystem,
+                ::adcs::IAdcsCoordinator& adcsCoordinator,
+                devices::gyro::IGyroscopeDriver& gyroDriver,
+                devices::payload::IPayloadDeviceDriver& payloadDriver,
+                services::power::IPowerControl& powerController);
 
             virtual experiments::ExperimentCode Type() override;
 
@@ -37,6 +45,14 @@ namespace experiment
           private:
             /** @brief File system */
             services::fs::IFileSystem& _fileSystem;
+
+            ::adcs::IAdcsCoordinator& _adcsCoordinator;
+
+            devices::gyro::IGyroscopeDriver& _gyroDriver;
+
+            devices::payload::IPayloadDeviceDriver& _payloadDriver;
+
+            services::power::IPowerControl& _powerController;
         };
     }
 }

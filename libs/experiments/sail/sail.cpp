@@ -13,7 +13,16 @@ namespace experiment
     {
         using namespace std::chrono_literals;
 
-        SailExperiment::SailExperiment(IFileSystem& fileSystem) : _fileSystem(fileSystem)
+        SailExperiment::SailExperiment(IFileSystem& fileSystem,
+            ::adcs::IAdcsCoordinator& adcsCoordinator,
+            devices::gyro::IGyroscopeDriver& gyroDriver,
+            devices::payload::IPayloadDeviceDriver& payloadDriver,
+            services::power::IPowerControl& powerController)
+            : _fileSystem(fileSystem),           //
+              _adcsCoordinator(adcsCoordinator), //
+              _gyroDriver(gyroDriver),           //
+              _payloadDriver(payloadDriver),     //
+              _powerController(powerController)
         {
         }
 
