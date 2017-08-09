@@ -5,6 +5,7 @@
 #include "adcs/adcs.hpp"
 #include "experiments/experiments.h"
 #include "fs/fs.h"
+#include "gpio/forward.h"
 #include "gyro/fwd.hpp"
 #include "payload/interfaces.h"
 #include "photo/fwd.hpp"
@@ -29,7 +30,8 @@ namespace experiment
                 devices::gyro::IGyroscopeDriver& gyroDriver,
                 devices::payload::IPayloadDeviceDriver& payloadDriver,
                 services::power::IPowerControl& powerController,
-                services::photo::IPhotoService& photoService);
+                services::photo::IPhotoService& photoService,
+                const drivers::gpio::Pin& sailState);
 
             virtual experiments::ExperimentCode Type() override;
 
@@ -57,6 +59,8 @@ namespace experiment
             services::power::IPowerControl& _powerController;
 
             services::photo::IPhotoService& _photoService;
+
+            const drivers::gpio::Pin& _sailState;
         };
     }
 }

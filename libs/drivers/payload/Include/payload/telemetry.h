@@ -14,7 +14,7 @@ namespace devices
          * @brief This module contains definition of Payload Telemetry data.
          *
          * This module contains definition of Payload Telemetry data.
-         * It is used for calculatin addresses of required data and conversion from I2C buffers to meaningful data.
+         * It is used for calculation addresses of required data and conversion from I2C buffers to meaningful data.
          *
          * @{
          */
