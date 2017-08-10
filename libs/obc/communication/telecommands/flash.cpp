@@ -1,6 +1,6 @@
 #include "flash.hpp"
+#include "experiment/flash/flash.hpp"
 
-using EraseStatus = experiment::erase_flash::Status;
 using telecommunication::downlink::CorrelatedDownlinkFrame;
 using telecommunication::downlink::DownlinkAPID;
 
@@ -8,7 +8,9 @@ namespace obc
 {
     namespace telecommands
     {
-        EraseFlashTelecommand::EraseFlashTelecommand(experiments::IExperimentController& experiments) : _experiments(experiments)
+        EraseFlashTelecommand::EraseFlashTelecommand(
+            experiments::IExperimentController& experiments, experiment::erase_flash::ISetCorrelationId& setId)
+            : _experiments(experiments), _setId(setId)
         {
         }
 
@@ -28,12 +30,14 @@ namespace obc
             correlationId = parameters[0];
             CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
 
-            auto requested = this->_experiments.RequestExperiment(7);
+            this->_setId.SetCorrelationId(correlationId);
+
+            auto requested = this->_experiments.RequestExperiment(experiment::erase_flash::EraseFlashExperiment::Code);
 
             if (requested)
             {
                 response.PayloadWriter().WriteByte(0);
-                response.PayloadWriter().WriteByte(num(EraseStatus::Requested));
+                response.PayloadWriter().WriteByte(0);
             }
             else
             {

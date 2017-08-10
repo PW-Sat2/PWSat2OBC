@@ -1,19 +1,8 @@
 #ifndef LIBS_OBC_COMMUNICATION_TELECOMMANDS_INCLUDE_OBC_TELECOMMANDS_FLASH_HPP_
 #define LIBS_OBC_COMMUNICATION_TELECOMMANDS_INCLUDE_OBC_TELECOMMANDS_FLASH_HPP_
 
-namespace experiment
-{
-    namespace erase_flash
-    {
-        /** @skip mock */
-        enum class Status
-        {
-            Requested = 0
-        };
-    }
-}
-
 #include "comm/ITransmitter.hpp"
+#include "experiment/flash/fwd.hpp"
 #include "experiments/experiments.h"
 #include "telecommunication/downlink.h"
 #include "telecommunication/telecommand_handling.h"
@@ -36,14 +25,18 @@ namespace obc
             /**
              * @brief Ctor
              * @param experiments Experiments controller
+             * @param setId Set experiment correlation ID
              */
-            EraseFlashTelecommand(experiments::IExperimentController& experiments);
+            EraseFlashTelecommand(experiments::IExperimentController& experiments, experiment::erase_flash::ISetCorrelationId& setId);
 
             virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
 
           private:
             /** @brief Experiments controller */
             experiments::IExperimentController& _experiments;
+
+            /** @brief Set correlation id */
+            experiment::erase_flash::ISetCorrelationId& _setId;
         };
     }
 }

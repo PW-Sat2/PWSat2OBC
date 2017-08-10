@@ -13,6 +13,7 @@ target_link_libraries(${NAME}
     exp_adcs
     exp_leop
     exp_suns
+    exp_flash
 )
 
 
