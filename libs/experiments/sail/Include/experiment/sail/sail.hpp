@@ -11,6 +11,7 @@
 #include "payload/interfaces.h"
 #include "photo/fwd.hpp"
 #include "power/fwd.hpp"
+#include "time/fwd.hpp"
 #include "utils.h"
 
 namespace experiment
@@ -33,7 +34,8 @@ namespace experiment
                 devices::payload::IPayloadDeviceDriver& payloadDriver,
                 services::power::IPowerControl& powerController,
                 services::photo::IPhotoService& photoService,
-                const drivers::gpio::Pin& sailState);
+                const drivers::gpio::Pin& sailState,
+                services::time::ICurrentTime& timeProvider);
 
             virtual experiments::ExperimentCode Type() override;
 
@@ -69,6 +71,8 @@ namespace experiment
             services::photo::IPhotoService& _photoService;
 
             mission::IOpenSail* _sailController;
+
+            services::time::ICurrentTime& _timeProvider;
 
             const drivers::gpio::Pin& _sailState;
         };
