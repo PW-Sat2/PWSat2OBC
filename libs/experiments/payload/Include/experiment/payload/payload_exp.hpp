@@ -11,7 +11,7 @@
 #include "power/power.h"
 #include "suns/suns.hpp"
 
-using PayloadTelemetry = drivers::payload::PayloadTelemetry;
+using PayloadTelemetry = devices::payload::PayloadTelemetry;
 
 namespace experiment
 {
@@ -36,7 +36,7 @@ namespace experiment
              * @param time Current time provider
              * @param fileSystem File System provider
              */
-            PayloadCommissioningExperiment(drivers::payload::IPayloadDeviceDriver& payload,
+            PayloadCommissioningExperiment(devices::payload::IPayloadDeviceDriver& payload,
                 services::fs::IFileSystem& fileSystem,
                 services::power::IPowerControl& powerControl,
                 services::time::ICurrentTime& time,
@@ -64,7 +64,7 @@ namespace experiment
             void MeasureAndWriteExperimentalSunsTelemetry(uint8_t gain, uint8_t itime);
 
             /** @brief Payload driver */
-            drivers::payload::IPayloadDeviceDriver& _payload;
+            devices::payload::IPayloadDeviceDriver& _payload;
 
             /** @brief Time provider */
             services::time::ICurrentTime& _time;

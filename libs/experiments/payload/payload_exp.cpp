@@ -11,14 +11,14 @@ using services::fs::File;
 using services::fs::FileOpen;
 using services::fs::FileAccess;
 
-using namespace drivers::payload;
+using namespace devices::payload;
 using namespace std::chrono_literals;
 
 namespace experiment
 {
     namespace payload
     {
-        PayloadCommissioningExperiment::PayloadCommissioningExperiment(drivers::payload::IPayloadDeviceDriver& payload,
+        PayloadCommissioningExperiment::PayloadCommissioningExperiment(IPayloadDeviceDriver& payload,
             services::fs::IFileSystem& fileSystem,
             services::power::IPowerControl& powerControl,
             services::time::ICurrentTime& time,
@@ -160,7 +160,7 @@ namespace experiment
             WriteTelemetry();
 
             // Send a command to EPS: "Enable CAMnadir" to controller A
-            _powerControl.CamNadirPower(true);
+            _powerControl.CameraNadir(true);
 
             // Wait 10s
             System::SleepTask(10s);
@@ -172,13 +172,13 @@ namespace experiment
             MeasureAndWritePayloadTemperaturesTelemetry();
 
             // Send a command to EPS: "Disable CAMnadir" to controller A
-            _powerControl.CamNadirPower(false);
+            _powerControl.CameraNadir(false);
 
             // Save Telemetry snapshot
             WriteTelemetry();
 
             // Send a command to EPS: "Enable CAMwing" to controller A
-            _powerControl.CamWingPower(true);
+            _powerControl.CameraWing(true);
 
             // Wait 10s
             System::SleepTask(10s);
@@ -190,7 +190,7 @@ namespace experiment
             MeasureAndWritePayloadTemperaturesTelemetry();
 
             // Send a command to EPS: "Disable CAMwing" to controller A
-            _powerControl.CamWingPower(false);
+            _powerControl.CameraWing(false);
 
             return IterationResult::WaitForNextCycle;
         }
@@ -341,6 +341,9 @@ namespace experiment
                 w.WriteWordLE(panel);
             }
 
+            _experimentFile.Write(ExperimentFile::PID::ExperimentalSunSPrimary, w.Capture());
+
+            w.Reset();
             w.WriteByte(telemetry.parameters.gain);
             w.WriteByte(telemetry.parameters.itime);
 
@@ -352,7 +355,7 @@ namespace experiment
                 }
             }
 
-            _experimentFile.Write(ExperimentFile::PID::ExperimentalSunS, buffer);
+            _experimentFile.Write(ExperimentFile::PID::ExperimentalSunSSecondary, w.Capture());
         }
     }
 }
