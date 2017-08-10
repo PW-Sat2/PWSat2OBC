@@ -84,19 +84,15 @@ namespace devices
             /**
              * @brief Sends ACK while expecting response.
              * @param ackedCommand Command to ackowledge
-             * @param packageIdLow Lower byte of package ID to ackowledge
-             * @param packageIdHigh Higher byte of package ID to ackowledge
+             * @param packageId Package ID to ackowledge
              * @param receiveBuffer Buffer where response will be written
-             * @param expectedBytes Number of bytes expected to be received
              * @param timeout Timeout when reading line
              * @return False if read timeouts or not all bytes were read, true if everything is ok
              */
             bool SendAckWithResponse(                                //
                 CameraCmd ackedCommand,                              //
-                uint8_t packageIdLow,                                //
-                uint8_t packageIdHigh,                               //
+                uint16_t packageId,                                  //
                 gsl::span<uint8_t> receiveBuffer,                    //
-                uint8_t expectedBytes,                               //
                 std::chrono::milliseconds timeout = DefaultTimeout); //
 
           private:

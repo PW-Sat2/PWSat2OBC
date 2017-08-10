@@ -149,6 +149,46 @@ namespace
         ASSERT_FALSE(reader.Status());
     }
 
+    TEST(ReaderTest, TestReadingWordAndHalfLE)
+    {
+        Reader reader;
+        uint8_t array[] = {0x55, 0xaa, 0x77};
+
+        reader.Initialize(array);
+        ASSERT_THAT(reader.ReadWordAndHalfLE(), Eq(0x77AA55U));
+        ASSERT_TRUE(reader.Status());
+    }
+
+    TEST(ReaderTest, TestReadingWordAndHalfLEBeoyendEnd)
+    {
+        Reader reader;
+        uint8_t array[] = {0x55, 0xaa};
+
+        reader.Initialize(array);
+        reader.ReadWordAndHalfLE();
+        ASSERT_FALSE(reader.Status());
+    }
+
+    TEST(ReaderTest, TestReadingWordAndHalfBE)
+    {
+        Reader reader;
+        uint8_t array[] = {0x55, 0xaa, 0x77};
+
+        reader.Initialize(array);
+        ASSERT_THAT(reader.ReadWordAndHalfBE(), Eq(0x55AA77U));
+        ASSERT_TRUE(reader.Status());
+    }
+
+    TEST(ReaderTest, TestReadingWordAndHalfBEBeoyendEnd)
+    {
+        Reader reader;
+        uint8_t array[] = {0xaa, 0x55};
+
+        reader.Initialize(array);
+        reader.ReadWordAndHalfBE();
+        ASSERT_FALSE(reader.Status());
+    }
+
     TEST(ReaderTest, TestReadingDWordLE)
     {
         Reader reader;
