@@ -28,8 +28,15 @@ namespace experiment
         {
           public:
             /**
-             * @brief Ctor
-             * @param fileSystem File system
+             * @brief ctor.
+             * @param[in] fileSystem Reference to object that provides access to filesystem services.
+             * @param[in] adcsCoordinator Reference to adcs subsystem coordinator
+             * @param[in] gyroDriver Reference to gyroscope driver
+             * @param[in] payloadDriver Reference to payload driver
+             * @param[in] powerController Reference to power controller
+             * @param[in] photoService Reference to service capable of taking photos
+             * @param[in] sailState Reference to pin connected to sail indicator.
+             * @param[in] timeProvider Reference to current time provider.
              */
             SailExperiment(services::fs::IFileSystem& fileSystem,
                 ::adcs::IAdcsCoordinator& adcsCoordinator,
