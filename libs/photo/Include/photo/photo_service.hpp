@@ -501,7 +501,7 @@ namespace services
             virtual bool IsEmpty(std::uint8_t bufferId) const override;
 
             /** @brief Number of buffers */
-            static constexpr std::uint8_t BuffersCount = 20;
+            static constexpr std::uint8_t BuffersCount = 100;
 
           private:
             /**

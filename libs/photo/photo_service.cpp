@@ -10,7 +10,7 @@ namespace services
 {
     namespace photo
     {
-        static std::array<std::uint8_t, 300_KB> PhotoBuffer;
+        static std::array<std::uint8_t, 512_KB> PhotoBuffer;
 
         BufferInfo::BufferInfo() : _status(BufferStatus::Empty)
         {
