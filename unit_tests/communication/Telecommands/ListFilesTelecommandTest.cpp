@@ -52,6 +52,7 @@ namespace
                 Reader r(frame);
                 r.Skip(DownlinkFrame::HeaderSize);
                 r.ReadByte();
+                r.ReadByte();
 
                 while (r.Status() && r.RemainingSize() > 0)
                 {
