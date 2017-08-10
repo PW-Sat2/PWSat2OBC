@@ -29,7 +29,7 @@ namespace experiment
         class SunSExperimentParams
         {
           public:
-            SunSExperimentParams() = default;
+            SunSExperimentParams();
 
             /**
              * @brief Ctor

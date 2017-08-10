@@ -22,6 +22,7 @@ using testing::SetArgReferee;
 using testing::DoAll;
 using testing::ElementsAre;
 using testing::InSequence;
+using testing::StrEq;
 using namespace experiment::suns;
 using namespace experiments;
 using experiments::IterationResult;
@@ -73,6 +74,7 @@ namespace
 
     TEST_F(SunSExperimentTest, TestExperimentStartStop)
     {
+        _exp.SetOutputFiles("/exp");
         auto r = _exp.Start();
         ASSERT_THAT(r, Eq(StartResult::Success));
 
@@ -159,5 +161,40 @@ namespace
         auto dataPoint = _exp.GatherSingleMeasurement();
 
         ASSERT_THAT(dataPoint.Timestamp, Eq(10s));
+    }
+
+    TEST_F(SunSExperimentTest, DefaultParameters)
+    {
+        SunSExperimentParams p;
+        ASSERT_THAT(p.Gain(), Eq(0));
+        ASSERT_THAT(p.ITime(), Eq(0));
+        ASSERT_THAT(p.SamplesCount(), Eq(0));
+        ASSERT_THAT(p.ShortDelay(), Eq(0s));
+        ASSERT_THAT(p.SamplingSessionsCount(), Eq(0));
+        ASSERT_THAT(p.LongDelay(), Eq(0s));
+    }
+
+    TEST_F(SunSExperimentTest, ShouldAbortExperimentIfPrimaryDataSetNotOpened)
+    {
+        _exp.SetOutputFiles("/exp");
+
+        EXPECT_CALL(this->_fs, Open(StrEq("/exp"), _, _)).WillOnce(Return(MakeOpenedFile(OSResult::AccessDenied)));
+
+        auto r = _exp.Start();
+
+        ASSERT_THAT(r, Eq(StartResult::Failure));
+    }
+
+    TEST_F(SunSExperimentTest, ShouldAbortExperimentIfSecondaryDataSetNotOpened)
+    {
+        _exp.SetOutputFiles("/exp");
+
+        EXPECT_CALL(this->_fs, Open(StrEq("/exp"), _, _)).WillOnce(Return(MakeOpenedFile(1)));
+        EXPECT_CALL(this->_fs, Open(StrEq("/exp_sec"), _, _)).WillOnce(Return(MakeOpenedFile(OSResult::AccessDenied)));
+        EXPECT_CALL(this->_fs, Close(1));
+
+        auto r = _exp.Start();
+
+        ASSERT_THAT(r, Eq(StartResult::Failure));
     }
 }

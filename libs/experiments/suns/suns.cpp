@@ -15,6 +15,11 @@ namespace experiment
 {
     namespace suns
     {
+        SunSExperimentParams::SunSExperimentParams()
+            : _gain(0), _itime(0), _samplesCount(0), _shortDelay(0s), _samplingSessionsCount(0), _longDelay(0min)
+        {
+        }
+
         SunSExperimentParams::SunSExperimentParams(std::uint8_t gain,
             std::uint8_t itime,
             std::uint8_t samplesCount,
@@ -62,8 +67,20 @@ namespace experiment
         {
             this->_remainingSessions = this->_parameters.SamplingSessionsCount();
 
-            this->_primaryDataSet.Open(this->_fs, this->_primaryFileName, FileOpen::CreateAlways, FileAccess::WriteOnly);
-            this->_secondaryDataSet.Open(this->_fs, this->_secondaryFileName, FileOpen::CreateAlways, FileAccess::WriteOnly);
+            auto r = this->_primaryDataSet.Open(this->_fs, this->_primaryFileName, FileOpen::CreateAlways, FileAccess::WriteOnly);
+
+            if (!r)
+            {
+                return StartResult::Failure;
+            }
+
+            r = this->_secondaryDataSet.Open(this->_fs, this->_secondaryFileName, FileOpen::CreateAlways, FileAccess::WriteOnly);
+
+            if (!r)
+            {
+                this->_primaryDataSet.Close();
+                return StartResult::Failure;
+            }
 
             return StartResult::Success;
         }
