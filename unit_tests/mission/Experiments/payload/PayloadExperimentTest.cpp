@@ -47,6 +47,8 @@ namespace
         void CamsFullStepTest();
         void SunSStepTest();
         void TelemetrySnapshotStepTest();
+
+        std::array<std::uint8_t, 696> buffer;
     };
 
     PayloadExperimentTest::PayloadExperimentTest() : _exp(_payload, _fs, _power, _time, _suns)
@@ -57,10 +59,14 @@ namespace
         ON_CALL(_power, CameraWing(_)).WillByDefault(Return(true));
 
         ON_CALL(this->_time, GetCurrentTime()).WillByDefault(Return(Some(10ms)));
+
+        _fs.AddFile(TestFileName, buffer);
     }
 
     TEST_F(PayloadExperimentTest, TestExperimentStartStop)
     {
+        _exp.SetOutputFile(TestFileName);
+
         auto r = _exp.Start();
         ASSERT_THAT(r, Eq(StartResult::Success));
 
@@ -158,7 +164,7 @@ namespace
             TelemetrySnapshotStepTest();
             EXPECT_CALL(_power, SunSPower(true)).WillOnce(Return(true));
             EXPECT_CALL(_os, Sleep(duration_cast<milliseconds>(2s)));
-            EXPECT_CALL(_suns, StartMeasurement(0, 10));
+            EXPECT_CALL(_suns, MeasureSunS(_, 0, 10));
             TelemetrySnapshotStepTest();
             EXPECT_CALL(_power, SunSPower(false)).WillOnce(Return(true));
         }
@@ -169,11 +175,7 @@ namespace
 
     TEST_F(PayloadExperimentTest, IterationFlow)
     {
-        std::array<std::uint8_t, 2320> buffer;
-
-        _fs.AddFile(TestFileName, buffer);
         _exp.SetOutputFile(TestFileName);
-
         _exp.Start();
 
         {
