@@ -5,6 +5,7 @@
 #include "base/os.h"
 #include "camera_api.hpp"
 #include "fs/fwd.hpp"
+#include "fwd.hpp"
 #include "power/fwd.hpp"
 
 namespace services
@@ -17,15 +18,6 @@ namespace services
          */
 
         /**
-         * @brief Available cameras
-         */
-        enum class Camera
-        {
-            Nadir, //!< Nadir
-            Wing   //!< Wing
-        };
-
-        /**
          * @brief Interface of camera selector
          */
         struct ICameraSelector
@@ -35,20 +27,6 @@ namespace services
              * @param camera Camera to use
              */
             virtual void Select(Camera camera) = 0;
-        };
-
-        /**
-         * @brief Available commands
-         */
-        enum class Command
-        {
-            DisableCamera, //!< DisableCamera
-            EnableCamera,  //!< EnableCamera
-            TakePhoto,     //!< TakePhoto
-            DownloadPhoto, //!< DownloadPhoto
-            SavePhoto,     //!< SavePhoto
-            Reset,         //!< Reset
-            Sleep          //!< Sleep
         };
 
         /**

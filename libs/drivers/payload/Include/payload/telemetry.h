@@ -55,7 +55,7 @@ namespace devices
             };
 
             /**
-             * @brief Temperetures telemetry structure.
+             * @brief Temperatures telemetry structure.
              */
             struct Temperatures : PayloadTelemetryBase<11, 18>
             {
