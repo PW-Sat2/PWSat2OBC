@@ -9,7 +9,7 @@ class OperationSuccessFrame(ResponseFrame):
 
     def decode(self):
         self.correlation_id = self.payload()[0]
-        self.response = self.payload()[1:]
+        self.response = self.payload()[2:]
 
 
 @response_frame(0x02)
