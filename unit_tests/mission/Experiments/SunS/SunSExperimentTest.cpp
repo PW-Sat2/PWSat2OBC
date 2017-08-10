@@ -55,6 +55,9 @@ namespace
         SunSExperiment _exp{_power, _timeProvider, _sunsExp, _payload, _gyro, _fs};
 
         std::chrono::milliseconds _time{0ms};
+
+        std::array<std::uint8_t, 900> _buf1;
+        std::array<std::uint8_t, 900> _buf2;
     };
 
     SunSExperimentTest::SunSExperimentTest()
@@ -63,6 +66,9 @@ namespace
         ON_CALL(_power, SunSPower(_)).WillByDefault(Return(true));
 
         ON_CALL(_timeProvider, GetCurrentTime()).WillByDefault(Invoke([this]() { return Some(this->_time); }));
+
+        _fs.AddFile("/exp", _buf1);
+        _fs.AddFile("/exp_sec", _buf2);
     }
 
     TEST_F(SunSExperimentTest, TestExperimentStartStop)
@@ -75,12 +81,6 @@ namespace
 
     TEST_F(SunSExperimentTest, IterationsTiming)
     {
-        std::array<std::uint8_t, 900> buf1;
-        std::array<std::uint8_t, 900> buf2;
-
-        _fs.AddFile("/exp", buf1);
-        _fs.AddFile("/exp_sec", buf2);
-
         SunSExperimentParams params(1, 2, 2, 1s, 3, 5min);
 
         _exp.SetParameters(params);
@@ -111,12 +111,6 @@ namespace
 
     TEST_F(SunSExperimentTest, IterationFlow)
     {
-        std::array<std::uint8_t, 900> buf1;
-        std::array<std::uint8_t, 900> buf2;
-
-        _fs.AddFile("/exp", buf1);
-        _fs.AddFile("/exp_sec", buf2);
-
         _exp.SetParameters(SunSExperimentParams(1, 2, 3, 2s, 1, 1min));
         _exp.SetOutputFiles("/exp");
 
