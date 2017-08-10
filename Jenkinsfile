@@ -157,13 +157,13 @@ node('pwsat-build') {
 	}
 }
 
-if(currentBuild.result == null)
-{
-	node('flatsat && obc') {
-		stage('Copy to flatsat') {
-			dir(env.ARTIFACTS + '\\' + env.BRANCH_NAME) {
-				unarchive mapping: ['build/': '.']
-			}
-		}
-	}
-}
+// if(currentBuild.result == null)
+// {
+// 	node('flatsat && obc') {
+// 		stage('Copy to flatsat') {
+// 			dir(env.ARTIFACTS + '\\' + env.BRANCH_NAME) {
+// 				unarchive mapping: ['build/': '.']
+// 			}
+// 		}
+// 	}
+// }
