@@ -3,6 +3,7 @@
 
 #include <gsl/span>
 #include "base/os.h"
+#include "fwd.hpp"
 #include "utils.h"
 
 namespace services
@@ -45,16 +46,6 @@ namespace services
          * @brief Result of downloading photo into memory
          */
         using DownloadPhotoResult = Result<gsl::span<std::uint8_t>, OSResult>;
-
-        /**
-         * @brief JPEG photo resolutions
-         */
-        enum class PhotoResolution
-        {
-            p128 = 0x03, //!< 128p
-            p240 = 0x05, //!< 240p
-            p480 = 0x07, //!< 480p
-        };
 
         /**
          * @brief Camera API
