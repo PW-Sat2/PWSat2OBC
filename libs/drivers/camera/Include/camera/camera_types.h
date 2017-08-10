@@ -195,27 +195,14 @@ namespace devices
             uint32_t dataLength;
 
             /** @brief Initializes the data structure */
-            PictureData() : type(CameraPictureType::Enum::Invalid), dataLength(0)
-            {
-            }
+            PictureData();
 
             /**
              * @brief Parses the received picture data and saves the result in this instance.
              * @param command Received command buffer
              * @return True if parsed correctly, false if not valid picture data response.
              */
-            bool Parse(gsl::span<const uint8_t> command)
-            {
-                if (command[0] != CommandPrefix || (CameraCmd)command[1] != CameraCmd::Data)
-                {
-                    return false;
-                }
-
-                dataLength = (((uint32_t)command[3]) | ((uint32_t)command[4] << 8) | ((uint32_t)command[5] << 16));
-                type = CameraPictureType::GetPictureType(command[2]);
-
-                return true;
-            }
+            bool Parse(gsl::span<const uint8_t> command);
         };
     }
 }

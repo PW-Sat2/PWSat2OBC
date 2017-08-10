@@ -4,6 +4,7 @@ set(SOURCES
     camera.cpp
     command_factory.cpp
     camera_low_level.cpp
+    camera_types.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

@@ -7,26 +7,33 @@
 using namespace devices::camera;
 using namespace std::chrono_literals;
 
+InitializationResult::InitializationResult() : IsSuccess(false), SyncCount(0)
+{
+}
+
 Camera::Camera(LineIO& lineIO) : _cameraDriver{lineIO}
 {
 }
 
-bool Camera::Initialize()
+InitializationResult Camera::Initialize()
 {
+    InitializationResult result;
     isInitialized = false;
 
     _cameraDriver.SendReset();
 
-    if (CameraSync() == MaxSyncRetries)
+    if (!CameraSync(result.SyncCount))
     {
-        LOG(LOG_LEVEL_ERROR, "Camera: Sync failed \n");
-        return false;
+        LOG(LOG_LEVEL_ERROR, "Camera: Sync failed");
+        return result;
     }
 
-    LOG(LOG_LEVEL_ERROR, "Camera:  Sync finished \n");
+    LOG(LOG_LEVEL_INFO, "Camera: Sync finished");
 
     isInitialized = true;
-    return true;
+    result.IsSuccess = true;
+
+    return result;
 }
 
 bool Camera::TakeJPEGPicture(CameraJPEGResolution resolution)
@@ -40,23 +47,23 @@ bool Camera::TakeJPEGPicture(CameraJPEGResolution resolution)
 
     if (!_cameraDriver.SendJPEGInitial(resolution))
     {
-        LOG(LOG_LEVEL_ERROR, "Camera: SendJPEGInitial failed \n");
+        LOG(LOG_LEVEL_ERROR, "Camera: SendJPEGInitial failed");
         return false;
     }
 
     if (!_cameraDriver.SendSetPackageSize(packageSize))
     {
-        LOG(LOG_LEVEL_ERROR, "Camera: SendSetPackageSize Package failed \n");
+        LOG(LOG_LEVEL_ERROR, "Camera: SendSetPackageSize Package failed");
         return false;
     }
 
     if (!_cameraDriver.SendSnapshot(CameraSnapshotType::Compressed))
     {
-        LOG(LOG_LEVEL_ERROR, "Camera: SendSnapshot failed \n");
+        LOG(LOG_LEVEL_ERROR, "Camera: SendSnapshot failed");
         return false;
     }
 
-    LOG(LOG_LEVEL_INFO, "Camera: Picture Ready To Download\n");
+    LOG(LOG_LEVEL_INFO, "Camera: Picture Ready To Download");
 
     return true;
 }
@@ -66,7 +73,7 @@ gsl::span<uint8_t> Camera::CameraReceiveJPEGData(gsl::span<uint8_t> buffer)
     PictureData pictureData;
     if (!_cameraDriver.SendGetPictureJPEG(CameraPictureType::Enum::Snapshot, pictureData))
     {
-        LOG(LOG_LEVEL_ERROR, "Camera: SendGetPictureJPEG failed \n");
+        LOG(LOG_LEVEL_ERROR, "Camera: SendGetPictureJPEG failed");
         return buffer;
     }
 
@@ -81,12 +88,10 @@ gsl::span<uint8_t> Camera::CameraReceiveJPEGData(gsl::span<uint8_t> buffer)
     {
         auto dataToTake = std::min(static_cast<uint32_t>(PackageSize - 6), totalDataLength - dataIndex);
 
-        auto result = _cameraDriver.SendAckWithResponse( //
-            CameraCmd::None,                             //
-            i & 0xff,                                    //
-            (uint8_t)(i >> 8),                           //
-            buffer.subspan(bufferIndex, dataToTake + 6), //
-            dataToTake + 6);
+        auto result = _cameraDriver.SendAckWithResponse(  //
+            CameraCmd::None,                              //
+            i,                                            //
+            buffer.subspan(bufferIndex, dataToTake + 6)); //
 
         if (!result)
         {
@@ -102,12 +107,14 @@ gsl::span<uint8_t> Camera::CameraReceiveJPEGData(gsl::span<uint8_t> buffer)
     return buffer.first(bufferIndex);
 }
 
-uint8_t Camera::CameraSync()
+bool Camera::CameraSync(uint8_t& syncCount)
 {
+    syncCount = 0;
     uint8_t i = 0;
 
     while (i < MaxSyncRetries)
     {
+        syncCount++;
         if (!_cameraDriver.SendSync(std::chrono::milliseconds(10 + i)))
         {
             i++;
@@ -115,10 +122,10 @@ uint8_t Camera::CameraSync()
         }
 
         _cameraDriver.SendAck(CameraCmd::Sync);
-        break;
+        return true;
     }
 
-    return i;
+    return false;
 }
 
 devices::camera::LowLevelCameraDriver& Camera::Driver()

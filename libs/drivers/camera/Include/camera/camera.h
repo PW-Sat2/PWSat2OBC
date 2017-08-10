@@ -23,6 +23,19 @@ namespace devices
          * @{
          */
 
+        /** @brief Describes result of camera initialization procedure */
+        struct InitializationResult
+        {
+            /** @brief Ctor */
+            InitializationResult();
+
+            /** @brief Indicates if the initialization was successful */
+            bool IsSuccess;
+
+            /** @brief Number of attempted syncs */
+            uint8_t SyncCount;
+        };
+
         /**
          * @brief uCam-II device class
          */
@@ -37,9 +50,9 @@ namespace devices
 
             /**
              * @brief Initializes the camera by performing the sync
-             * @return True if initialization succeeded, false otherwise
+             * @return @ref InitializationResult structure holding initialization result
              */
-            bool Initialize();
+            InitializationResult Initialize();
 
             /**
              * @brief Initiate picture taking
@@ -71,7 +84,7 @@ namespace devices
             static const uint8_t MaxSyncRetries = 60;
             static_assert(MaxSyncRetries > 0, "There must be at least one sync retry");
 
-            uint8_t CameraSync();
+            bool CameraSync(uint8_t& syncCount);
 
             bool isInitialized = false;
         };

@@ -21,7 +21,9 @@ void CameraCommand(std::uint16_t argc, char* argv[])
 
     if (strcmp(argv[0], "init") == 0)
     {
-        GetCamera().Initialize();
+        auto result = GetCamera().Initialize();
+
+        LOGF(LOG_LEVEL_INFO, "Sync count: %i", result.SyncCount);
     }
     if (strcmp(argv[0], "jpeg") == 0)
     {

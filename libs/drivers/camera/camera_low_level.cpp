@@ -64,15 +64,16 @@ bool LowLevelCameraDriver::SendCommand(gsl::span<uint8_t> command, std::chrono::
 
 bool LowLevelCameraDriver::SendAckWithResponse( //
     CameraCmd ackedCommand,                     //
-    uint8_t packageIdLow,                       //
-    uint8_t packageIdHigh,                      //
+    uint16_t packageId,                         //
     gsl::span<uint8_t> receiveBuffer,           //
-    uint8_t expectedBytes,                      //
     std::chrono::milliseconds timeout)
 {
     std::array<uint8_t, CommandFrameSize> commandBuffer;
 
-    _commandFactory.BuildAck(commandBuffer, ackedCommand, packageIdLow, packageIdHigh);
+    uint8_t lowerPackageIdByte = packageId & 0xff;
+    uint8_t higherPackageIdByte = (uint8_t)(packageId >> 8);
+
+    _commandFactory.BuildAck(commandBuffer, ackedCommand, lowerPackageIdByte, higherPackageIdByte);
     LogSendCommand(commandBuffer);
 
     auto readSucceeded = _lineIO.ExchangeBuffers(&_lineIO, gsl::span<uint8_t>(commandBuffer), receiveBuffer, timeout);
@@ -80,12 +81,6 @@ bool LowLevelCameraDriver::SendAckWithResponse( //
     if (!readSucceeded)
     {
         LOG(LOG_LEVEL_ERROR, "LineIO read timeout");
-    }
-
-    if (static_cast<uint32_t>(receiveBuffer.length()) < expectedBytes)
-    {
-        LOG(LOG_LEVEL_ERROR, "Not enough data received.");
-        return false;
     }
 
     return true;
