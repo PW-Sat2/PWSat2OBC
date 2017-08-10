@@ -22,6 +22,7 @@ set(SOURCES
   Experiments/fs/ExperimentFileTest.cpp
   Experiments/SunS/SunSExperimentTest.cpp 
   Experiments/EraseFlash/EraseFlashExperimentTest.cpp 
+  Experiments/payload/PayloadExperimentTest.cpp
   Experiments/RadFET/RadFETExperimentTest.cpp 
   Experiments/Sail/SailExperimentTest.cpp
 )
@@ -45,6 +46,7 @@ target_link_libraries(${NAME}
     exp_fs
     exp_suns
     exp_flash
+    exp_pld
     exp_radfet
     exp_sail
     unit_tests_base
