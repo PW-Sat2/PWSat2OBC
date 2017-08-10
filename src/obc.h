@@ -132,11 +132,6 @@ struct OBC
     devices::camera::Camera camera;
 };
 
-ILineIO& OBC::GetLineIO()
-{
-    return this->Hardware.Terminal;
-}
-
 /** @brief Global OBC object. */
 extern OBC Main;
 

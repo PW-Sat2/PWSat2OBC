@@ -70,14 +70,12 @@ namespace drivers
 
             /**
              * @brief Procedure that outputs given string
-             * @param io @see LineIO structure
              * @param s Text to output
              */
             virtual void Puts(const char* s) override;
 
             /**
              * @brief Procedure that outputs formatted string
-             * @param io @see LineIO structure
              * @param text Format string
              * @param args Format atrguments as @see a_list
              */
@@ -91,7 +89,6 @@ namespace drivers
 
             /**
              * @brief Procedure that reads single line of text
-             * @param io @see LineIO structure
              * @param buffer Buffer that will hold upcoming data
              * @param bufferLength Maximum length of buffer
              * @param promptChar Character to send as prompt before waiting for line read. Pass '\0' to not send any prompt.
@@ -101,7 +98,6 @@ namespace drivers
 
             /**
              * @brief Reads arbitrary number of bytes
-             * @param io @see LineIO structure
              * @param outputBuffer Buffer that will be sent before reading inputBuffer
              * @param inputBuffer Buffer that will be filled
              * @param timeout Timeout for read operation

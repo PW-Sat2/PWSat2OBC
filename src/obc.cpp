@@ -97,8 +97,8 @@ OBC::OBC()
           PowerControlInterface,
           Mission),                                                                //
       Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index), //
-      terminal(this->GetLineIO()),                                                 //
-      camera(this->Hardware.Camera)
+      terminal(this->Hardware.Terminal),                                           //
+      camera(this->Hardware.Camera)                                                //
 {
 }
 
