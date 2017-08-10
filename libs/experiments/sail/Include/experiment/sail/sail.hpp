@@ -79,7 +79,11 @@ namespace experiment
 
             services::photo::Camera GetNextCamera() const;
 
+            void FinalizeExperiment();
+
             void SavePhotos();
+
+            void TakePhoto(services::photo::Camera camera, services::photo::PhotoResolution resolution);
 
           private:
             bool Save(const devices::gyro::GyroscopeTelemetry& gyroTelemetry);
