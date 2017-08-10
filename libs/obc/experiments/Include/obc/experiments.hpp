@@ -5,6 +5,7 @@
 #include <tuple>
 #include "experiment/adcs/adcs.hpp"
 #include "experiment/fibo/fibo.h"
+#include "experiment/flash/flash.hpp"
 #include "experiment/leop/leop.hpp"
 #include "experiment/suns/suns.hpp"
 #include "experiments/experiments.h"
@@ -88,7 +89,8 @@ namespace obc
         experiment::fibo::FibonacciExperiment,                //
         experiment::adcs::DetumblingExperiment,               //
         experiment::leop::LaunchAndEarlyOrbitPhaseExperiment, //
-        experiment::suns::SunSExperiment                     //
+        experiment::suns::SunSExperiment,                     //
+        experiment::erase_flash::EraseFlashExperiment         //
         >;
 
     /**
@@ -106,6 +108,8 @@ namespace obc
          * @param powerControl Power control interface
          * @param suns Experimental SunS driver
          * @param payload Payload driver
+         * @param n25q Redundant N25Q driver
+         * @param transmitter Frame transmitter
          */
         OBCExperiments(services::fs::IFileSystem& fs,
             adcs::IAdcsCoordinator& adcs,
@@ -113,7 +117,9 @@ namespace obc
             devices::gyro::IGyroscopeDriver& gyro,
             services::power::IPowerControl& powerControl,
             devices::suns::ISunSDriver& suns,
-            devices::payload::IPayloadDeviceDriver& payload);
+            devices::payload::IPayloadDeviceDriver& payload,
+            devices::n25q::RedundantN25QDriver& n25q,
+            devices::comm::ITransmitter& transmitter);
 
         /**
          * @brief Performs initialization

@@ -79,8 +79,10 @@ OBC::OBC()
           Hardware.Gyro,
           PowerControlInterface,
           Hardware.SunS,
-          Hardware.PayloadDeviceDriver), //
-      Communication(                     //
+          Hardware.PayloadDeviceDriver,
+          Storage.GetInternalStorage().GetTopDriver(),
+          Hardware.CommDriver), //
+      Communication(            //
           this->Fdir,
           this->Hardware.CommDriver,
           this->timeProvider,

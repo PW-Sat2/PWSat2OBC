@@ -27,6 +27,7 @@ __all__ = [
     'OpenSailTelecommand',
     'GetErrorCounterConfig',
     'SetPeriodicMessageTelecommand',
-    'StopAntennaDeployment'
+    'StopAntennaDeployment',
+    'EraseFlash'
 ]
 

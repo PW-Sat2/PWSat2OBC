@@ -8,6 +8,7 @@
 #include "mock/ImtqTelemetryCollectorMock.hpp"
 #include "mock/experiment.hpp"
 #include "mock/fm25w.hpp"
+#include "mock/n25q.hpp"
 #include "mock/power.hpp"
 
 GyroscopeMock::GyroscopeMock()
@@ -94,5 +95,12 @@ PayloadDeviceMock::PayloadDeviceMock()
 {
 }
 PayloadDeviceMock::~PayloadDeviceMock()
+{
+}
+
+N25QDriverMock::N25QDriverMock()
+{
+}
+N25QDriverMock::~N25QDriverMock()
 {
 }
