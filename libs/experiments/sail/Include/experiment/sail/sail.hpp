@@ -7,6 +7,7 @@
 #include "fs/fs.h"
 #include "gpio/forward.h"
 #include "gyro/fwd.hpp"
+#include "mission/sail_fwd.hpp"
 #include "payload/interfaces.h"
 #include "photo/fwd.hpp"
 #include "power/fwd.hpp"
@@ -47,6 +48,12 @@ namespace experiment
              */
             static constexpr experiments::ExperimentCode Code = 0x07;
 
+            /**
+             * @brief Update the sail controller reference.
+             * @param sailController Reference to sail controller object.
+             */
+            void SetSailController(mission::IOpenSail& sailController);
+
           private:
             /** @brief File system */
             services::fs::IFileSystem& _fileSystem;
@@ -61,8 +68,15 @@ namespace experiment
 
             services::photo::IPhotoService& _photoService;
 
+            mission::IOpenSail* _sailController;
+
             const drivers::gpio::Pin& _sailState;
         };
+
+        inline void SailExperiment::SetSailController(mission::IOpenSail& sailController)
+        {
+            this->_sailController = &sailController;
+        }
     }
 }
 
