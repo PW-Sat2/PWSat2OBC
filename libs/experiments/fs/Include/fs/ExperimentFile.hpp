@@ -50,8 +50,9 @@ namespace experiments
                 ExperimentalSunSPrimary = 0x11,   // Experimental SunS primary data, 41 bytes of data
                 ExperimentalSunSSecondary = 0x12, // Experimental SunS primary data, 26 bytes of data
                 ReferenceSunS = 0x13,             // Reference SunS data, 10 bytes of data
+                Sail = 0x14,                      // 3 bytes of data
 
-                Synchronization = 0x47, // Synchronisation PID indicating start of packet. 0 bytes of data.
+                Synchronization = 0x47, // Synchronization PID indicating start of packet. 0 bytes of data.
 
                 Continuation = 0xFE, // Indicates that following data are continuation of previous packet, not the new data.
                                      // Used when data size is greater than packet size.
@@ -65,7 +66,7 @@ namespace experiments
             static constexpr uint8_t PaddingData = 0xFF;
 
             /**
-             * @brief Default constrctor
+             * @brief Default constructor
              * @param time Optional time provider. If set, each packet automatically have a timestamp.
              * */
             ExperimentFile(services::time::ICurrentTime* time = nullptr);
@@ -84,8 +85,8 @@ namespace experiments
             ExperimentFile& operator=(ExperimentFile&& other) = default;
 
             /**
-             * @brief Default destrctor
-             * */
+             * @brief Destructor
+             */
             ~ExperimentFile();
 
             /**
@@ -102,19 +103,19 @@ namespace experiments
              * @brief Writes data to file.
              * @param pid The Packet Identifier of provided data.
              * @param data The data to write.
-             * @returns Status of opreation.
+             * @returns Status of operation.
              */
             OSResult Write(PID pid, const gsl::span<uint8_t>& data);
 
             /**
              * @brief Closes the file.
-             * @returns Status of opreation.
+             * @returns Status of operation.
              */
             OSResult Close();
 
             /**
              * @brief Flushes current packet to file system and begins new packet.
-             * @returns Status of opreation.
+             * @returns Status of operation.
              */
             OSResult Flush();
 

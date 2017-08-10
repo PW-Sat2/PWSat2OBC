@@ -1,9 +1,12 @@
 #ifndef LIBS_MISSION_EXPERIMENTS_SAIL_HPP
 #define LIBS_MISSION_EXPERIMENTS_SAIL_HPP
 
+#pragma once
+
 #include <cstdint>
 #include "adcs/adcs.hpp"
 #include "experiments/experiments.h"
+#include "fs/ExperimentFile.hpp"
 #include "fs/fs.h"
 #include "gpio/forward.h"
 #include "gyro/fwd.hpp"
@@ -56,7 +59,41 @@ namespace experiment
              */
             void SetSailController(mission::IOpenSail& sailController);
 
+            std::chrono::milliseconds TimeToGetTelemetry(const Option<std::chrono::milliseconds>& time) const;
+
+            std::chrono::milliseconds TimeToTakePhoto(const Option<std::chrono::milliseconds>& time) const;
+
+            std::chrono::milliseconds TimeToEnd(const Option<std::chrono::milliseconds>& time) const;
+
+            bool NeedToGetTelemetry(const Option<std::chrono::milliseconds>& time) const;
+
+            bool NeedToTakePhoto(const Option<std::chrono::milliseconds>& time) const;
+
+            bool NeedToEnd(const Option<std::chrono::milliseconds>& time) const;
+
+            void GetTelemetry(const Option<std::chrono::milliseconds>& time);
+
+            void TakePhoto(const Option<std::chrono::milliseconds>& time);
+
+            std::chrono::milliseconds TimeToNextEvent(const Option<std::chrono::milliseconds>& time) const;
+
+            services::photo::Camera GetNextCamera() const;
+
           private:
+            bool Save(const devices::gyro::GyroscopeTelemetry& gyroTelemetry);
+
+            bool Save(bool sailIndicator, std::uint16_t sailTemperature);
+
+            experiments::fs::ExperimentFile _file;
+
+            Option<std::chrono::milliseconds> _experimentBegin;
+
+            Option<std::chrono::milliseconds> _lastTelemetryAcquisition;
+
+            Option<std::chrono::milliseconds> _lastPhotoTaken;
+
+            services::photo::Camera _lastCamera;
+
             /** @brief File system */
             services::fs::IFileSystem& _fileSystem;
 
@@ -80,6 +117,11 @@ namespace experiment
         inline void SailExperiment::SetSailController(mission::IOpenSail& sailController)
         {
             this->_sailController = &sailController;
+        }
+
+        inline services::photo::Camera SailExperiment::GetNextCamera() const
+        {
+            return (this->_lastCamera == services::photo::Camera::Wing) ? services::photo::Camera::Nadir : services::photo::Camera::Wing;
         }
     }
 }
