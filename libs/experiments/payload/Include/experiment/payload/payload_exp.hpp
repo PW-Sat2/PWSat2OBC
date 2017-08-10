@@ -5,11 +5,10 @@
 #include "experiments/experiments.h"
 #include "fs/ExperimentFile.hpp"
 #include "fs/fs.h"
-#include "time/timer.h"
-
 #include "payload/interfaces.h"
 #include "power/power.h"
 #include "suns/suns.hpp"
+#include "time/timer.h"
 
 using PayloadTelemetry = devices::payload::PayloadTelemetry;
 
@@ -25,10 +24,7 @@ namespace experiment
         {
           public:
             /** @brief Experiment code */
-            static constexpr experiments::ExperimentCode Code = 0x4;
-
-            /** @brief Output file name. */
-            static constexpr const char* FileName = "/payload.pwts";
+            static constexpr experiments::ExperimentCode Code = 0x6;
 
             /**
              * @brief Ctor
@@ -42,12 +38,17 @@ namespace experiment
                 services::time::ICurrentTime& time,
                 devices::suns::ISunSDriver& experimentalSunS);
 
+            void SetOutputFile(const char* fileName);
+
             virtual experiments::ExperimentCode Type() override;
             virtual experiments::StartResult Start() override;
             virtual experiments::IterationResult Iteration() override;
             virtual void Stop(experiments::IterationResult lastResult) override;
 
           private:
+            /** @brief Output file name. */
+            static constexpr const char* DefaultFileName = "/payload";
+
             experiments::IterationResult StartupStep();
             experiments::IterationResult SunSStep();
             experiments::IterationResult RadFETStep();
@@ -82,6 +83,8 @@ namespace experiment
             experiments::fs::ExperimentFile _experimentFile;
 
             uint8_t _currentStep;
+
+            char _fileName[30];
         };
     }
 }
