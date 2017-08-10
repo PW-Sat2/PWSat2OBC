@@ -24,15 +24,20 @@ namespace obc
           public:
             /**
              * @brief Ctor
-             * @param experiments OBC Experiments
+             * @param experiments Experiments controller
+             * @param setupExperiment Interface for setting up detumbling experiment
              */
-            PerformDetumblingExperiment(obc::OBCExperiments& experiments);
+            PerformDetumblingExperiment(
+                experiments::IExperimentController& experiments, experiment::adcs::ISetupDetumblingExperiment& setupExperiment);
 
             virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
 
           private:
             /** @brief Experiments controller */
-            obc::OBCExperiments& _experiments;
+            experiments::IExperimentController& _experiments;
+
+            /** @brief Setup detumbling experiment interface */
+            experiment::adcs::ISetupDetumblingExperiment& _setupExperiment;
         };
 
         /**
@@ -43,22 +48,23 @@ namespace obc
          * @remark If no experiment is running, the command is ignored
          *
          * Code: 0x0E
-         * Parameters: None
+         * Parameters:
+         * 	- Correlation ID (8-bit)
          */
         class AbortExperiment final : public telecommunication::uplink::Telecommand<0x0E>
         {
           public:
             /**
              * @brief Ctor
-             * @param experiments OBC Experiments
+             * @param experiments Experiment controller
              */
-            AbortExperiment(obc::OBCExperiments& experiments);
+            AbortExperiment(experiments::IExperimentController& experiments);
 
             virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
 
           private:
             /** @brief Experiments controller */
-            obc::OBCExperiments& _experiments;
+            experiments::IExperimentController& _experiments;
         };
     }
 }

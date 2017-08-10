@@ -1,4 +1,5 @@
 from obc.experiments import ExperimentType
+from response_frames.operation import OperationSuccessFrame
 from system import auto_power_on, runlevel
 from telecommand import AbortExperiment
 from tests.base import BaseTest, RestartPerTest
@@ -31,7 +32,9 @@ class TestExperimentsTelecommands(RestartPerTest):
         self.system.obc.request_experiment(ExperimentType.Fibo)
         self.system.obc.wait_for_experiment(ExperimentType.Fibo, 15)
 
-        self.system.comm.put_frame(AbortExperiment())
+        self.system.comm.put_frame(AbortExperiment(0x42))
+        response = self.system.comm.get_frame(5)
+        self.assertIsInstance(response, OperationSuccessFrame)
 
         self.system.obc.wait_for_experiment(None, 15)
 
@@ -43,7 +46,9 @@ class TestExperimentsTelecommands(RestartPerTest):
         self.system.obc.request_experiment(ExperimentType.Fibo)
         self.system.obc.wait_for_experiment(ExperimentType.Fibo, 15)
 
-        self.system.comm.put_frame(AbortExperiment())
+        self.system.comm.put_frame(AbortExperiment(0x42))
+        response = self.system.comm.get_frame(5)
+        self.assertIsInstance(response, OperationSuccessFrame)
 
         self.system.obc.wait_for_experiment(None, 15)
 
