@@ -109,6 +109,7 @@ namespace experiment
 
             if (NeedToEnd(time))
             {
+                FinalizeExperiment();
                 return experiments::IterationResult::Finished;
             }
             else
@@ -210,8 +211,7 @@ namespace experiment
         void SailExperiment::TakePhoto(const Option<std::chrono::milliseconds>& time)
         {
             this->_lastCamera = GetNextCamera();
-            this->_photoService.Schedule(services::photo::TakePhoto(this->_lastCamera, services::photo::PhotoResolution::p128));
-            this->_photoService.Schedule(services::photo::DownloadPhoto(this->_lastCamera, this->_photoNumber++));
+            TakePhoto(this->_lastCamera, services::photo::PhotoResolution::p128);
             this->_lastPhotoTaken = time;
         }
 
@@ -246,6 +246,18 @@ namespace experiment
             }
 
             return OS_RESULT_SUCCEEDED(this->_file.Write(experiments::fs::ExperimentFile::PID::Sail, writer.Capture()));
+        }
+
+        void SailExperiment::TakePhoto(services::photo::Camera camera, services::photo::PhotoResolution resolution)
+        {
+            this->_photoService.Schedule(services::photo::TakePhoto(camera, resolution));
+            this->_photoService.Schedule(services::photo::DownloadPhoto(camera, this->_photoNumber++));
+        }
+
+        void SailExperiment::FinalizeExperiment()
+        {
+            TakePhoto(services::photo::Camera::Wing, services::photo::PhotoResolution::p480);
+            TakePhoto(services::photo::Camera::Nadir, services::photo::PhotoResolution::p480);
         }
 
         void SailExperiment::SavePhotos()
