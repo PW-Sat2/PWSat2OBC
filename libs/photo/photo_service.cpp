@@ -195,6 +195,12 @@ namespace services
             return tmp;
         }
 
+        bool PhotoService::IsEmpty(std::uint8_t bufferId) const
+        {
+            Lock l(this->_sync, InfiniteTimeout);
+            return this->_bufferInfos[bufferId].Status() == BufferStatus::Empty;
+        }
+
         void PhotoService::Initialize()
         {
             this->_commandQueue.Create();

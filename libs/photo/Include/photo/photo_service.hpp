@@ -356,6 +356,13 @@ namespace services
              * @return true if photo service went idle, false on timeout
              */
             virtual bool WaitForFinish(std::chrono::milliseconds timeout) = 0;
+
+            /**
+             * @brief Returns information whether the requested buffer is empty.
+             * @param bufferId Queried buffer Id
+             * @return True if buffer is empty, false otherwise
+             */
+            virtual bool IsEmpty(std::uint8_t bufferId) const = 0;
         };
 
         /**
@@ -489,7 +496,9 @@ namespace services
              * @param timeout Timeout
              * @return true if photo service went idle, false on timeout
              */
-            bool WaitForFinish(std::chrono::milliseconds timeout);
+            virtual bool WaitForFinish(std::chrono::milliseconds timeout) override;
+
+            virtual bool IsEmpty(std::uint8_t bufferId) const override;
 
             /** @brief Number of buffers */
             static constexpr std::uint8_t BuffersCount = 20;

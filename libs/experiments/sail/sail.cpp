@@ -35,6 +35,7 @@ namespace experiment
             services::time::ICurrentTime& timeProvider)
             : _file(&timeProvider),                        //
               _lastCamera(services::photo::Camera::Nadir), //
+              _photoNumber(0),                             //
               _fileSystem(fileSystem),                     //
               _adcsCoordinator(adcsCoordinator),           //
               _gyroDriver(gyroDriver),                     //
@@ -126,9 +127,10 @@ namespace experiment
                 LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to disable SENS lcl");
             }
 
-            this->_photoService.Schedule(Reset());
             this->_photoService.Schedule(DisableCamera(Camera::Nadir));
             this->_photoService.Schedule(DisableCamera(Camera::Wing));
+            SavePhotos();
+            this->_photoService.Schedule(Reset());
             this->_photoService.WaitForFinish(InfiniteTimeout);
         }
 
@@ -204,6 +206,7 @@ namespace experiment
         {
             this->_lastCamera = GetNextCamera();
             this->_photoService.Schedule(services::photo::TakePhoto(this->_lastCamera, services::photo::PhotoResolution::p128));
+            this->_photoService.Schedule(services::photo::DownloadPhoto(this->_lastCamera, this->_photoNumber++));
             this->_lastPhotoTaken = time;
         }
 
@@ -238,6 +241,14 @@ namespace experiment
             }
 
             return OS_RESULT_SUCCEEDED(this->_file.Write(experiments::fs::ExperimentFile::PID::Sail, writer.Capture()));
+        }
+
+        void SailExperiment::SavePhotos()
+        {
+            for (std::uint8_t index = 0; !this->_photoService.IsEmpty(index); ++index)
+            {
+                this->_photoService.Schedule(services::photo::SavePhoto(index, "/sail.photo_%d", index));
+            }
         }
     }
 }
