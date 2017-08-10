@@ -35,6 +35,7 @@ bool LowLevelCameraDriver::SendCommand( //
     if (!readSucceeded)
     {
         LOG(LOG_LEVEL_ERROR, "LineIO read timeout");
+        return false;
     }
 
     LogReceivedCommand(receiveBuffer);

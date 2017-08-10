@@ -58,10 +58,18 @@ MATCHER_P(SpanOfSize, expected, std::string("Span has size " + testing::PrintToS
     return arg.size() == expected;
 }
 
-template <std::size_t Arg> auto FillBuffer(gsl::span<std::uint8_t> items)
+template <std::size_t Arg> auto FillBuffer(gsl::span<const std::uint8_t> items)
 {
     return testing::WithArg<Arg>(
         testing::Invoke([items](gsl::span<std::uint8_t> buffer) { std::copy(items.cbegin(), items.cend(), buffer.begin()); }));
+}
+
+template <std::size_t Arg> auto FillBuffer(gsl::span<const std::uint8_t> items1, gsl::span<const std::uint8_t> items2)
+{
+    return testing::WithArg<Arg>(testing::Invoke([items1, items2](gsl::span<std::uint8_t> buffer) {
+        std::copy(items1.cbegin(), items1.cend(), buffer.begin());
+        std::copy(items2.cbegin(), items2.cend(), buffer.begin() + items1.length());
+    }));
 }
 
 template <std::size_t Arg> auto FillBuffer(std::uint8_t value)

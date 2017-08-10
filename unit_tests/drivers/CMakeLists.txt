@@ -28,6 +28,7 @@ set(SOURCES
   payload/PayloadDeviceDriverTest.cpp
   payload/PayloadHardwareDriverTest.cpp
   suns/sunsTest.cpp
+  camera/CameraTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
@@ -44,5 +45,6 @@ target_link_libraries(${NAME}
     unit_tests_base
     gyro
     payload
+    camera
 )
 

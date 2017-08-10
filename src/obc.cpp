@@ -101,7 +101,7 @@ OBC::OBC()
           Hardware.I2C.Buses.Bus,
           Hardware.I2C.Buses.Payload),
       Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index),         //
-      terminal(this->GetLineIO()),                                                         //
+      terminal(this->Hardware.Terminal),                                                   //
       camera(this->Hardware.Camera),                                                       //
       Camera(this->PowerControlInterface, this->fs, this->Hardware.Pins.CamSelect, camera) //
 {
