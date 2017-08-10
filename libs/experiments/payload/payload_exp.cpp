@@ -1,4 +1,5 @@
 #include "payload_exp.hpp"
+#include <cstring>
 #include <gsl/span>
 #include "base/os.h"
 #include "base/writer.h"
@@ -26,6 +27,13 @@ namespace experiment
             : _payload(payload), _time(time), _fileSystem(fileSystem), _powerControl(powerControl), _experimentalSunS(experimentalSunS),
               _experimentFile(&_time), _currentStep(0)
         {
+            std::strncpy(_fileName, DefaultFileName, 30);
+        }
+
+        void PayloadCommissioningExperiment::SetOutputFile(const char* fileName)
+        {
+            std::strncpy(this->_fileName, fileName, sizeof(this->_fileName));
+            *std::end(this->_fileName) = '\0';
         }
 
         experiments::ExperimentCode PayloadCommissioningExperiment::Type()
@@ -35,7 +43,7 @@ namespace experiment
 
         StartResult PayloadCommissioningExperiment::Start()
         {
-            auto result = _experimentFile.Open(this->_fileSystem, FileName, FileOpen::CreateAlways, FileAccess::WriteOnly);
+            auto result = _experimentFile.Open(this->_fileSystem, _fileName, FileOpen::CreateAlways, FileAccess::WriteOnly);
             if (!result)
             {
                 LOG(LOG_LEVEL_ERROR, "Opening experiment file failed");
