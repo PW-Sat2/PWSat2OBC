@@ -11,6 +11,7 @@ class ExperimentType(IntEnum):
     Detumbling = 2
     LEOP = 3
     SunS = 4
+    EraseFlash = 7
 
 
 @unique

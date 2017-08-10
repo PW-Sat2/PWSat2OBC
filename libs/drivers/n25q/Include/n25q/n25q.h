@@ -404,7 +404,7 @@ namespace devices
              * @param[in] errorCounting Errors counting mechanism
              * @param[in] n25qDrivers N25Q drivers used for redundant operations.
              */
-            RedundantN25QDriver(error_counter::ErrorCounting& errorCounting, std::array<IN25QDriver*, 3> n25qDrivers);
+            RedundantN25QDriver(error_counter::IErrorCounting& errorCounting, std::array<IN25QDriver*, 3> n25qDrivers);
 
             /**
              * @brief Reads data from memory starting from given address.

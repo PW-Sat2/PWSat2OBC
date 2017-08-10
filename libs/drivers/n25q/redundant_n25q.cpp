@@ -15,8 +15,8 @@ using namespace devices::n25q;
 using redundancy::Vote;
 using redundancy::CorrectBuffer;
 
-RedundantN25QDriver::RedundantN25QDriver(        //
-    error_counter::ErrorCounting& errorCounting, //
+RedundantN25QDriver::RedundantN25QDriver(         //
+    error_counter::IErrorCounting& errorCounting, //
     std::array<IN25QDriver*, 3> n25qDrivers)
     : _n25qDrivers(n25qDrivers), _error(errorCounting)
 {

@@ -8,12 +8,15 @@ namespace obc
         devices::gyro::IGyroscopeDriver& gyro,
         services::power::IPowerControl& powerControl,
         devices::suns::ISunSDriver& suns,
-        devices::payload::IPayloadDeviceDriver& payload)
-        : Experiments(                                                                      //
-              experiment::fibo::FibonacciExperiment(fs),                                    //
-              experiment::adcs::DetumblingExperiment(adcs, time),                           //
-              experiment::leop::LaunchAndEarlyOrbitPhaseExperiment(gyro, time, fs),         //
-              experiment::suns::SunSExperiment(powerControl, time, suns, payload, gyro, fs) //
+        devices::payload::IPayloadDeviceDriver& payload,
+        devices::n25q::RedundantN25QDriver& n25q,
+        devices::comm::ITransmitter& transmitter)
+        : Experiments(                                                                       //
+              experiment::fibo::FibonacciExperiment(fs),                                     //
+              experiment::adcs::DetumblingExperiment(adcs, time),                            //
+              experiment::leop::LaunchAndEarlyOrbitPhaseExperiment(gyro, time, fs),          //
+              experiment::suns::SunSExperiment(powerControl, time, suns, payload, gyro, fs), //
+              experiment::erase_flash::EraseFlashExperiment(n25q, transmitter)               //
               )
     {
     }
