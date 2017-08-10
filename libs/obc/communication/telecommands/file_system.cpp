@@ -205,6 +205,7 @@ namespace obc
             {
                 CorrelatedDownlinkFrame response(DownlinkAPID::Operation, seq, correlationId);
                 auto& writer = response.PayloadWriter();
+                writer.WriteByte(0);
 
                 while (true)
                 {
