@@ -24,7 +24,6 @@ class TestExperimentSail(RestartPerTest):
 
         self.assertIsInstance(frame, OperationSuccessFrame)
         self.assertEqual(frame.correlation_id, 10);
-        self.assertEqual(frame.response, [0]);
 
     def test_experiment_is_started_up(self):
         self.startup()
