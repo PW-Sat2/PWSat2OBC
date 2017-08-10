@@ -39,7 +39,7 @@ class Terminal
      * @brief Initializes new @ref Terminal object
      * @param[in] stdio Reference to object responsible for text-based I/O
      */
-    Terminal(LineIO& stdio);
+    Terminal(ILineIO& stdio);
 
     /**
      * @brief Sets supported commands list
@@ -100,7 +100,7 @@ class Terminal
     /**
      * @brief Reference to object responsible for text-based I/O
      */
-    LineIO& _stdio;
+    ILineIO& _stdio;
 
     /**
      * @brief RTOS task with main loop

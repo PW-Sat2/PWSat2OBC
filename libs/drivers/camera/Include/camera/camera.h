@@ -46,7 +46,7 @@ namespace devices
              * @brief Constructs @ref camera driver instance
              * @param lineIO Line interface to use
              */
-            Camera(LineIO& lineIO);
+            Camera(ILineIO& lineIO);
 
             /**
              * @brief Initializes the camera by performing the sync

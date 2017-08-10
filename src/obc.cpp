@@ -97,12 +97,12 @@ OBC::OBC()
           TelemetryAcquisition,
           PowerControlInterface,
           Mission,
-          Mission,                                                                //
+          Mission, //
           Hardware.I2C.Buses.Bus,
           Hardware.I2C.Buses.Payload),
-      Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index), //
-      terminal(this->GetLineIO()),                                                 //
-      camera(this->Hardware.Camera.GetLineIO()),                                   //
+      Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index),         //
+      terminal(this->GetLineIO()),                                                         //
+      camera(this->Hardware.Camera),                                                       //
       Camera(this->PowerControlInterface, this->fs, this->Hardware.Pins.CamSelect, camera) //
 {
 }

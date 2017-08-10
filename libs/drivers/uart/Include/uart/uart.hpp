@@ -31,7 +31,7 @@ namespace drivers
          * @brief UART driver
          * @ingroup uart_driver
          */
-        template <typename UartPort> class UART
+        template <typename UartPort> class UART final : public ILineIO
         {
           public:
             /**
@@ -43,12 +43,6 @@ namespace drivers
              * @brief Initializes peripheral
              */
             void Initialize();
-
-            /**
-             * @brief Returns reference to LineIO implementation
-             * @return Line IO implementation
-             */
-            LineIO& GetLineIO();
 
             /**
              * @brief Call from UARTx_RX_IRQHandler
@@ -67,26 +61,19 @@ namespace drivers
             inline void LineEditing(bool enable);
 
             /**
-             * @brief Writes buffer to UART port using DMA tranfer
-             * @param buffer Buffer to write
-             */
-            void WriteBuffer(gsl::span<const std::uint8_t> buffer);
-
-            /**
              * @brief Reads date from UART port into buffer using DMA transfer
              * @param buffer Buffer that will hold upcoming data
              * @param timeout Timeout for read operation
              * @return False if timeout occured, true otherwise
              */
-            bool ReadBuffer(gsl::span<std::uint8_t> buffer, std::chrono::milliseconds timeout);
+            virtual bool Read(gsl::span<std::uint8_t> buffer, std::chrono::milliseconds timeout) override;
 
-          private:
             /**
              * @brief Procedure that outputs given string
              * @param io @see LineIO structure
              * @param s Text to output
              */
-            static void Puts(struct _LineIO* io, const char* s);
+            virtual void Puts(const char* s) override;
 
             /**
              * @brief Procedure that outputs formatted string
@@ -94,13 +81,13 @@ namespace drivers
              * @param text Format string
              * @param args Format atrguments as @see a_list
              */
-            static void VPrintf(struct _LineIO* io, const char* text, va_list args);
+            virtual void VPrintf(const char* text, va_list args) override;
 
             /**
              * @brief Procedure that print given buffer char-by-char. Useful for not null terminated strings
              * @param[in] buffer Buffer to print
              */
-            static void PrintBuffer(struct _LineIO* io, gsl::span<const std::uint8_t> buffer);
+            virtual void PrintBuffer(gsl::span<const std::uint8_t> buffer) override;
 
             /**
              * @brief Procedure that reads single line of text
@@ -110,16 +97,7 @@ namespace drivers
              * @param promptChar Character to send as prompt before waiting for line read. Pass '\0' to not send any prompt.
              * @return Count of read characters
              */
-            static size_t Readline(struct _LineIO* io, char* buffer, std::size_t bufferLength, char promptChar);
-
-            /**
-             * @brief Procedure that reads buffer
-             * @param io @see LineIO structure
-             * @param buffer Buffer that will hold upcoming data
-             * @param timeout Read operation timeout
-             * @return False if read timeout occurred, true otherwise
-             */
-            static bool ReadBufferIO(struct _LineIO* io, gsl::span<std::uint8_t> buffer, std::chrono::milliseconds timeout);
+            virtual size_t Readline(char* buffer, std::size_t bufferLength, char promptChar) override;
 
             /**
              * @brief Reads arbitrary number of bytes
@@ -129,12 +107,12 @@ namespace drivers
              * @param timeout Timeout for read operation
              * @return False if timeout occurred, true otherwise
              */
-            static bool ExchangeBuffers(                    //
-                LineIO* io,                                 //
+            virtual bool ExchangeBuffers(                   //
                 gsl::span<const std::uint8_t> outputBuffer, //
                 gsl::span<uint8_t> inputBuffer,             //
-                std::chrono::milliseconds timeout);
+                std::chrono::milliseconds timeout) override;
 
+          private:
             /**
              * @brief DMA callback
              * @param channel Channel that finished its transfer
@@ -144,8 +122,6 @@ namespace drivers
              */
             static bool OnDma(unsigned int channel, unsigned int sequenceNo, void* userParam);
 
-            /** @brief Line IO */
-            LineIO _lineIO;
             /** @brief Synchronization group */
             EventGroup _event;
             /** @brief Line receive buffer begin */
@@ -205,14 +181,6 @@ namespace drivers
         UART<UartPort>::UART()
             : _bufferBegin(nullptr), _buffer(nullptr), _bufferEnd(nullptr), _lineEditing(false), _rxChannel(0), _txChannel(0)
         {
-            this->_lineIO.extra = this;
-            this->_lineIO.PrintBuffer = PrintBuffer;
-            this->_lineIO.Puts = Puts;
-            this->_lineIO.ExchangeBuffers = ExchangeBuffers;
-            this->_lineIO.Readline = Readline;
-            this->_lineIO.VPrintf = VPrintf;
-            this->_lineIO.Read = ReadBufferIO;
-
             this->_event.Initialize();
         }
 
@@ -239,15 +207,8 @@ namespace drivers
             DMADRV_AllocateChannel(&this->_txChannel, nullptr);
         }
 
-        template <typename UartPort> LineIO& UART<UartPort>::GetLineIO()
+        template <typename UartPort> void UART<UartPort>::Puts(const char* s)
         {
-            return this->_lineIO;
-        }
-
-        template <typename UartPort> void UART<UartPort>::Puts(struct _LineIO* io, const char* s)
-        {
-            UNREFERENCED_PARAMETER(io);
-
             while (*s != '\0')
             {
                 USART_Tx(UartPort::Peripheral, *s);
@@ -255,16 +216,16 @@ namespace drivers
             }
         }
 
-        template <typename UartPort> void UART<UartPort>::VPrintf(struct _LineIO* io, const char* text, va_list args)
+        template <typename UartPort> void UART<UartPort>::VPrintf(const char* text, va_list args)
         {
             char buf[255] = {0};
 
             vsniprintf(buf, sizeof(buf), text, args);
 
-            UART::Puts(io, buf);
+            Puts(buf);
         }
 
-        template <typename UartPort> void UART<UartPort>::WriteBuffer(gsl::span<const std::uint8_t> buffer)
+        template <typename UartPort> void UART<UartPort>::PrintBuffer(gsl::span<const std::uint8_t> buffer)
         {
             USART_IntDisable(UartPort::Peripheral, UART_IEN_RXDATAV);
 
@@ -290,13 +251,7 @@ namespace drivers
             USART_IntEnable(UartPort::Peripheral, UART_IEN_RXDATAV);
         }
 
-        template <typename UartPort> void UART<UartPort>::PrintBuffer(struct _LineIO* io, gsl::span<const std::uint8_t> buffer)
-        {
-            auto This = reinterpret_cast<UART*>(io->extra);
-            This->WriteBuffer(buffer);
-        }
-
-        template <typename UartPort> bool UART<UartPort>::ReadBuffer(gsl::span<std::uint8_t> buffer, std::chrono::milliseconds timeout)
+        template <typename UartPort> bool UART<UartPort>::Read(gsl::span<std::uint8_t> buffer, std::chrono::milliseconds timeout)
         {
             USART_IntDisable(UartPort::Peripheral, UART_IEN_RXDATAV);
 
@@ -319,23 +274,13 @@ namespace drivers
             return result;
         }
 
-        template <typename UartPort>
-        bool UART<UartPort>::ReadBufferIO(struct _LineIO* io, gsl::span<std::uint8_t> buffer, std::chrono::milliseconds timeout)
+        template <typename UartPort> size_t UART<UartPort>::Readline(char* buffer, std::size_t bufferLength, char promptChar)
         {
-            auto This = reinterpret_cast<UART*>(io->extra);
-            return This->ReadBuffer(buffer, timeout);
-        }
+            _event.Clear(Event::LineEndReceived);
 
-        template <typename UartPort>
-        size_t UART<UartPort>::Readline(struct _LineIO* io, char* buffer, std::size_t bufferLength, char promptChar)
-        {
-            auto This = reinterpret_cast<UART*>(io->extra);
-
-            This->_event.Clear(Event::LineEndReceived);
-
-            This->_bufferBegin = buffer;
-            This->_buffer = buffer;
-            This->_bufferEnd = buffer + bufferLength;
+            _bufferBegin = buffer;
+            _buffer = buffer;
+            _bufferEnd = buffer + bufferLength;
 
             NVIC_EnableIRQ(UartPort::Interrupt);
 
@@ -344,28 +289,25 @@ namespace drivers
                 USART_Tx(UartPort::Peripheral, promptChar);
             }
 
-            This->_event.WaitAny(Event::LineEndReceived, true, InfiniteTimeout);
+            _event.WaitAny(Event::LineEndReceived, true, InfiniteTimeout);
 
             NVIC_DisableIRQ(UartPort::Interrupt);
 
-            *(This->_buffer - 1) = 0;
+            *(_buffer - 1) = 0;
 
-            return (This->_buffer - buffer);
+            return (_buffer - buffer);
         }
 
         template <typename UartPort>
-        bool UART<UartPort>::ExchangeBuffers(LineIO* io, //
-            gsl::span<const std::uint8_t> outputBuffer,  //
-            gsl::span<uint8_t> inputBuffer,              //
-            std::chrono::milliseconds timeout)
+        bool UART<UartPort>::ExchangeBuffers(gsl::span<const std::uint8_t> outputBuffer, //
+            gsl::span<uint8_t> inputBuffer,                                              //
+            std::chrono::milliseconds timeout)                                           //
         {
-            auto This = reinterpret_cast<UART*>(io->extra);
-
             USART_IntDisable(UartPort::Peripheral, UART_IEN_RXDATAV);
 
-            This->_event.Clear(Event::TransferTXFinished | Event::TransferRXFinished);
+            _event.Clear(Event::TransferTXFinished | Event::TransferRXFinished);
 
-            DMADRV_PeripheralMemory(This->_rxChannel,
+            DMADRV_PeripheralMemory(_rxChannel,
                 DMAConfig<UartPort::Id>::DmaRxSignal,
                 inputBuffer.data(),
                 reinterpret_cast<void*>(const_cast<std::uint32_t*>(&UartPort::Peripheral->RXDATA)),
@@ -373,9 +315,9 @@ namespace drivers
                 inputBuffer.size(),
                 dmadrvDataSize1,
                 OnDma,
-                This);
+                this);
 
-            DMADRV_MemoryPeripheral(This->_txChannel,
+            DMADRV_MemoryPeripheral(_txChannel,
                 DMAConfig<UartPort::Id>::DmaTxSignal,
                 reinterpret_cast<void*>(const_cast<std::uint32_t*>(&UartPort::Peripheral->TXDATA)),
                 const_cast<std::uint8_t*>(outputBuffer.data()),
@@ -383,10 +325,10 @@ namespace drivers
                 outputBuffer.size(),
                 dmadrvDataSize1,
                 OnDma,
-                This);
+                this);
 
-            auto result = (This->_event.WaitAll(Event::TransferTXFinished | Event::TransferRXFinished, true, timeout) &
-                              Event::TransferRXFinished) != 0;
+            auto result =
+                (_event.WaitAll(Event::TransferTXFinished | Event::TransferRXFinished, true, timeout) & Event::TransferRXFinished) != 0;
 
             USART_IntEnable(UartPort::Peripheral, UART_IEN_RXDATAV);
 

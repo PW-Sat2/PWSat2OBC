@@ -35,7 +35,7 @@ static void parseCommandLine(char line[],
     }
 }
 
-Terminal::Terminal(LineIO& stdio)
+Terminal::Terminal(ILineIO& stdio)
     : _stdio(stdio), //
       _task("Terminal", this, Terminal::Loop)
 {
@@ -43,7 +43,7 @@ Terminal::Terminal(LineIO& stdio)
 
 void Terminal::Puts(const char* text)
 {
-    this->_stdio.Puts(&this->_stdio, text);
+    this->_stdio.Puts(text);
 }
 
 void Terminal::NewLine()
@@ -56,19 +56,19 @@ void Terminal::Printf(const char* text, ...)
     va_list args;
     va_start(args, text);
 
-    this->_stdio.VPrintf(&this->_stdio, text, args);
+    this->_stdio.VPrintf(text, args);
 
     va_end(args);
 }
 
 void Terminal::PrintBuffer(gsl::span<const std::uint8_t> buffer)
 {
-    this->_stdio.PrintBuffer(&this->_stdio, buffer);
+    this->_stdio.PrintBuffer(buffer);
 }
 
 void Terminal::ExchangeBuffers(gsl::span<const std::uint8_t> outputBuffer, gsl::span<std::uint8_t> inputBuffer)
 {
-    this->_stdio.ExchangeBuffers(&this->_stdio, outputBuffer, inputBuffer, 5s);
+    this->_stdio.ExchangeBuffers(outputBuffer, inputBuffer, 5s);
 }
 
 void Terminal::HandleCommand(char* buffer)
@@ -108,7 +108,7 @@ void Terminal::Loop(Terminal* terminal)
     {
         char input_buffer[100] = {0};
 
-        terminal->_stdio.Readline(&terminal->_stdio, input_buffer, COUNT_OF(input_buffer), prompt);
+        terminal->_stdio.Readline(input_buffer, COUNT_OF(input_buffer), prompt);
 
         terminal->HandleCommand(input_buffer);
 
@@ -124,7 +124,7 @@ void Terminal::Initialize()
     }
     else
     {
-        this->_stdio.Puts(&_stdio, "@");
+        this->_stdio.Puts("@");
     }
 }
 
