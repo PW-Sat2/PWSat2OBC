@@ -19,6 +19,7 @@ set(SOURCES
     mock/flash_driver.cpp
     mock/InterruptPinDriverMock.cpp
     mock/PayloadHardwareDriverMock.cpp
+    mock/SunSDriverMock.cpp
     I2C/I2CMock.cpp
     SPI/SPIMock.cpp
     fault_handlers.c
@@ -44,6 +45,8 @@ target_link_libraries(${NAME}
     payload
     power
     telemetry_imtq
+    suns
+    payload
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

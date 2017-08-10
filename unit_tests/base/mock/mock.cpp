@@ -1,5 +1,6 @@
 #include "AdcsMocks.hpp"
 #include "GyroMock.hpp"
+#include "PayloadDeviceMock.hpp"
 #include "StorageAccessMock.hpp"
 #include "eps.hpp"
 #include "mock/HasStateMock.hpp"
@@ -86,5 +87,12 @@ ExperimentControllerMock::ExperimentControllerMock()
 {
 }
 ExperimentControllerMock::~ExperimentControllerMock()
+{
+}
+
+PayloadDeviceMock::PayloadDeviceMock()
+{
+}
+PayloadDeviceMock::~PayloadDeviceMock()
 {
 }

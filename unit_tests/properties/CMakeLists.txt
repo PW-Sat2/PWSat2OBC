@@ -5,6 +5,7 @@ set(SOURCES
   imtq/imtqTest.cpp
   MissionPlan/MissionTestHelpers.cpp
   gyro/gyroTest.cpp
+  Experiments/SunSDataPointTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
@@ -20,4 +21,5 @@ target_link_libraries(${NAME}
     rapidcheck_gmock
     unit_tests_base
     gyro
+    exp_suns
 )

@@ -3,7 +3,7 @@
 #include "gpio/InterruptPinDriver.h"
 #include "logger/logger.h"
 
-using namespace drivers::payload;
+using namespace devices::payload;
 using drivers::i2c::I2CResult;
 
 PayloadDriver::PayloadDriver(

@@ -66,6 +66,41 @@ namespace obc
             /** @brief Experiments controller */
             experiments::IExperimentController& _experiments;
         };
+
+        /**
+         * @brief Perform SunS experiment telecommand
+         * @ingroup obc_telecommands
+         * @telecommand
+         *
+         * Code: 0x1D
+         * Parameters:
+         *  - Correlation ID (8-bit)
+         *  - Gain (8-bit)
+         *  - ITime (8-bit)
+         *  - Samples count (8-bit)
+         *  - Short delay (8-bit)
+         *  - Sessions count (8-bit)
+         *  - Long delay (8-bit)
+         *  - Output file name (string, null-terminated, up to 30 charactes including terminator)s
+         */
+        class PerformSunSExperiment final : public telecommunication::uplink::Telecommand<0x1D>
+        {
+          public:
+            /**
+             * @brief Ctor
+             * @param controller Experiments controller
+             * @param setupSunS Interface for setting up SunS experiment
+             */
+            PerformSunSExperiment(experiments::IExperimentController& controller, experiment::suns::ISetupSunSExperiment& setupSunS);
+
+            virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
+
+          private:
+            /** @brief Experiments controller */
+            experiments::IExperimentController& _controller;
+            /** @brief SunS experiments settings */
+            experiment::suns::ISetupSunSExperiment& _setupSunS;
+        };
     }
 }
 

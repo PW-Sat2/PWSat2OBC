@@ -2,6 +2,7 @@ import logging
 import struct
 
 import i2cMock
+from utils import call, ensure_string
 
 
 def from_uint8(tab):
@@ -50,6 +51,8 @@ class SunS(i2cMock.I2CDevice):
             [ 30, 31, 32, 33 ]
         ]
 
+        self.on_measure = None
+
     def gpio_interrupt_low(self):
         self.gpioDriver.gpio_low(self.interrupt_pin)
 
@@ -61,6 +64,7 @@ class SunS(i2cMock.I2CDevice):
     @i2cMock.command([0x80])
     def _measure_suns(self, *data):
         self.log.info("Measure SunS")
+        call(self.on_measure, None)
         return []
 
     @i2cMock.command([0x0])

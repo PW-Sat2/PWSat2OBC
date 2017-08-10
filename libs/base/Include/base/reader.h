@@ -146,6 +146,15 @@ class Reader final
     gsl::span<const uint8_t> ReadArray(uint16_t length);
 
     /**
+     * @brief Reads null-terminated string from buffer
+     * @param maxsize Maximum size of string
+     * @return Pointer to first char
+     *
+     * @remark If null-terminator is not found before reaching maxsize, reader position is advanced by maxsize and pointer is returned
+     */
+    const char* ReadString(std::size_t maxsize);
+
+    /**
      * @brief Resets reader to the initial state.
      */
     void Reset();

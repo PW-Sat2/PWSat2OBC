@@ -10,6 +10,7 @@ class ExperimentType(IntEnum):
     Fibo = 1
     Detumbling = 2
     LEOP = 3
+    SunS = 4
 
 
 @unique

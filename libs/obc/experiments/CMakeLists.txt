@@ -12,6 +12,7 @@ target_link_libraries(${NAME}
     exp_fibo
     exp_adcs
     exp_leop
+    exp_suns
 )
 
 

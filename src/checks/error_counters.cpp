@@ -27,7 +27,7 @@ namespace
         devices::imtq::ImtqDriver,                 //
         devices::fm25w::RedundantFM25WDriver,      //
         devices::rtc::RTCObject,                   //
-        drivers::payload::PayloadDriver,           //
+        devices::payload::PayloadDriver,           //
         obc::storage::error_counters::N25QDriver1, //
         obc::storage::error_counters::N25QDriver2, //
         obc::storage::error_counters::N25QDriver3, //

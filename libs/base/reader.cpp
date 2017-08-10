@@ -1,5 +1,7 @@
 #include "reader.h"
+#include <algorithm>
 #include <utility>
+#include "utils.h"
 
 Reader::Reader() : position(0), isValid(false)
 {
@@ -180,4 +182,17 @@ int32_t Reader::RemainingSize()
 gsl::span<const uint8_t> Reader::ReadToEnd()
 {
     return this->ReadArray(this->RemainingSize());
+}
+
+const char* Reader::ReadString(std::size_t maxsize)
+{
+    maxsize = std::min<std::uint16_t>(maxsize, this->RemainingSize());
+
+    auto p = reinterpret_cast<const char*>(this->buffer.data() + this->position);
+
+    auto len = strlen_n(p, maxsize);
+
+    UpdateState(len);
+
+    return p;
 }

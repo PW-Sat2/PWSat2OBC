@@ -30,6 +30,8 @@ namespace services
             virtual bool PrimaryAntennaPower(bool enabled) override;
             virtual bool BackupAntennaPower(bool enabled) override;
             virtual Option<bool> PrimaryAntennaPower() override;
+            virtual bool SensPower(bool enabled) override;
+            virtual bool SunSPower(bool enabled) override;
 
           private:
             /** @brief EPS driver */

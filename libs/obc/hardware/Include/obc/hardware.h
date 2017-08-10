@@ -20,6 +20,7 @@
 #include "msc/msc.hpp"
 #include "payload/io_map.h"
 #include "payload/payload.h"
+#include "payload/devices.h"
 #include "power/power.h"
 #include "program_flash/flash_driver.hpp"
 #include "rtc/rtc.hpp"
@@ -192,7 +193,10 @@ namespace obc
         drivers::gpio::InterruptPinDriver PayloadInterruptDriver;
 
         /** @brief Payload driver*/
-        drivers::payload::PayloadDriver PayloadDriver;
+        devices::payload::PayloadDriver PayloadDriver;
+
+        /** @brief Payload device driver*/
+        devices::payload::PayloadDeviceDriver PayloadDeviceDriver;
     };
 }
 /** @} */

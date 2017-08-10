@@ -46,7 +46,10 @@ namespace experiments
                 Reserved = 0,
                 Timestamp = 1, // 8 bytes of data
                 /* 2-16 reserved for control codes */
-                Gyro = 0x10, // 8 bytes of data
+                Gyro = 0x10,                      // 8 bytes of data
+                ExperimentalSunSPrimary = 0x11,   // Experimental SunS primary data, 41 bytes of data
+                ExperimentalSunSSecondary = 0x12, // Experimental SunS primary data, 26 bytes of data
+                ReferenceSunS = 0x13,             // Reference SunS data, 10 bytes of data
 
                 Synchronization = 0x47, // Synchronisation PID indicating start of packet. 0 bytes of data.
 

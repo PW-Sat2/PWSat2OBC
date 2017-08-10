@@ -72,9 +72,15 @@ OBC::OBC()
       PowerControlInterface(this->Hardware.EPS),                                                          //
       Fdir(this->PowerControlInterface, 1 << devices::n25q::RedundantN25QDriver::ErrorCounter::DeviceId), //
       Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),                               //
-      adcs(this->Hardware.imtqTelemetryCollector, this->timeProvider),                                    //
-      Experiments(fs, this->adcs.GetAdcsCoordinator(), this->timeProvider, Hardware.Gyro),                //
-      Communication(                                                                                      //
+      adcs(this->Hardware.Imtq, this->timeProvider),                                                      //
+      Experiments(fs,
+          this->adcs.GetAdcsCoordinator(),
+          this->timeProvider,
+          Hardware.Gyro,
+          PowerControlInterface,
+          Hardware.SunS,
+          Hardware.PayloadDeviceDriver), //
+      Communication(                     //
           this->Fdir,
           this->Hardware.CommDriver,
           this->timeProvider,
@@ -172,8 +178,6 @@ OSResult OBC::InitializeRunlevel1()
 
     BootSettings.ConfirmBoot();
 
-    LOG(LOG_LEVEL_INFO, "Initialized");
-    this->StateFlags.Set(OBC::InitializationFinishedFlag);
     return OSResult::Success;
 }
 

@@ -4,7 +4,7 @@
 #include "commands/base.h"
 #include "logger/logger.h"
 
-using namespace drivers::payload::commands;
+using namespace devices::payload::commands;
 
 template <std::uint8_t TCommandCode, class TOutputDataType>
 PayloadCommand<TCommandCode, TOutputDataType>::PayloadCommand(IPayloadDriver& driver) : _driver(driver)

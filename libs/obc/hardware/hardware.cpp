@@ -105,7 +105,8 @@ OBCHardware::OBCHardware(
       rtc(errorCounting, I2C.Buses.Payload),                                        //
       CommDriver(errorCounting, I2C.Buses.Bus),                                     //
       PayloadInterruptDriver(this->Pins.PayloadInterrupt),                          //
-      PayloadDriver(errorCounting, this->I2C.Buses.Payload, PayloadInterruptDriver) //
+      PayloadDriver(errorCounting, this->I2C.Buses.Payload, PayloadInterruptDriver),//
+      PayloadDeviceDriver(PayloadDriver)                                            //
 {
     AntennaMiniportInitialize(&antennaMiniport);
     AntennaDriverInitialize(&antennaDriver, &antennaMiniport, &I2C.Buses.Bus, &I2C.Buses.Payload);

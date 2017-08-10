@@ -9,7 +9,7 @@
 #include "commands/Whoami.h"
 #include "commands/base_code.hpp"
 
-using namespace drivers::payload;
+using namespace devices::payload;
 
 PayloadDeviceDriver::PayloadDeviceDriver(IPayloadDriver& driver) : _driver(driver)
 {
