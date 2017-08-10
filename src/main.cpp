@@ -181,6 +181,9 @@ static void ObcInitTask(void* param)
 
     auto obc = static_cast<OBC*>(param);
 
+    // dumb workaround for cyclical reference
+    obc->Experiments.SailExperiment.SetSailController(Mission);
+
     if (boot::RequestedRunlevel >= boot::Runlevel::Runlevel1)
     {
         if (OS_RESULT_FAILED(obc->InitializeRunlevel1()))
