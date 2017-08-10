@@ -371,6 +371,13 @@ namespace services
              * @param command Command
              */
             virtual void Schedule(Sleep command) = 0;
+
+            /**
+             * @brief Waits for idle state
+             * @param timeout Timeout
+             * @return true if photo service went idle, false on timeout
+             */
+            virtual bool WaitForFinish(std::chrono::milliseconds timeout) = 0;
         };
 
         /**

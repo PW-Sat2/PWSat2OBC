@@ -2,6 +2,8 @@
 #include <algorithm>
 #include "base/writer.h"
 #include "logger/logger.h"
+#include "mission/sail.hpp"
+#include "photo/photo_service.hpp"
 #include "power/power.h"
 
 using services::fs::File;
@@ -14,6 +16,8 @@ namespace experiment
     namespace sail
     {
         using namespace std::chrono_literals;
+
+        using namespace services::photo;
 
         SailExperiment::SailExperiment(IFileSystem& fileSystem,
             ::adcs::IAdcsCoordinator& adcsCoordinator,
@@ -51,6 +55,12 @@ namespace experiment
                 return experiments::StartResult::Failure;
             }
 
+            this->_photoService.Schedule(Reset());
+            this->_photoService.Schedule(EnableCamera(Camera::Nadir));
+            this->_photoService.Schedule(EnableCamera(Camera::Wing));
+            this->_photoService.WaitForFinish(InfiniteTimeout);
+
+            this->_sailController->OpenSail();
             return experiments::StartResult::Success;
         }
 
@@ -72,6 +82,11 @@ namespace experiment
             {
                 LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to disable SENS lcl");
             }
+
+            this->_photoService.Schedule(Reset());
+            this->_photoService.Schedule(DisableCamera(Camera::Nadir));
+            this->_photoService.Schedule(DisableCamera(Camera::Wing));
+            this->_photoService.WaitForFinish(InfiniteTimeout);
         }
     }
 }
