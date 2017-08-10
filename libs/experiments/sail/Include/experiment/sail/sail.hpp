@@ -79,6 +79,8 @@ namespace experiment
 
             services::photo::Camera GetNextCamera() const;
 
+            void SavePhotos();
+
           private:
             bool Save(const devices::gyro::GyroscopeTelemetry& gyroTelemetry);
 
@@ -91,6 +93,8 @@ namespace experiment
             Option<std::chrono::milliseconds> _lastTelemetryAcquisition;
 
             Option<std::chrono::milliseconds> _lastPhotoTaken;
+
+            std::uint8_t _photoNumber;
 
             services::photo::Camera _lastCamera;
 
