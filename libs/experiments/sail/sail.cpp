@@ -34,8 +34,8 @@ namespace experiment
             const drivers::gpio::Pin& sailState,
             services::time::ICurrentTime& timeProvider)
             : _file(&timeProvider),                        //
-              _lastCamera(services::photo::Camera::Nadir), //
               _photoNumber(0),                             //
+              _lastCamera(services::photo::Camera::Nadir), //
               _fileSystem(fileSystem),                     //
               _adcsCoordinator(adcsCoordinator),           //
               _gyroDriver(gyroDriver),                     //
@@ -54,39 +54,44 @@ namespace experiment
 
         experiments::StartResult SailExperiment::Start()
         {
-            if (!this->_file.Open(this->_fileSystem, "/sail.exp", FileOpen::CreateAlways, FileAccess::WriteOnly))
+            do
             {
-                LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to open experiment file");
-                return experiments::StartResult::Failure;
-            }
+                if (!this->_file.Open(this->_fileSystem, "/sail.exp", FileOpen::CreateAlways, FileAccess::WriteOnly))
+                {
+                    LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to open experiment file");
+                    break;
+                }
 
-            if (OS_RESULT_FAILED(this->_adcsCoordinator.Disable()))
-            {
-                LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to disable adcs");
-                return experiments::StartResult::Failure;
-            }
+                if (OS_RESULT_FAILED(this->_adcsCoordinator.Disable()))
+                {
+                    LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to disable adcs");
+                    break;
+                }
 
-            if (!this->_powerController.SensPower(true))
-            {
-                LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to enable SENS lcl");
-                return experiments::StartResult::Failure;
-            }
+                if (!this->_powerController.SensPower(true))
+                {
+                    LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to enable SENS lcl");
+                    break;
+                }
 
-            this->_photoService.Schedule(Reset());
-            this->_photoService.Schedule(EnableCamera(Camera::Nadir));
-            this->_photoService.Schedule(EnableCamera(Camera::Wing));
-            this->_photoService.WaitForFinish(InfiniteTimeout);
+                this->_photoService.Schedule(Reset());
+                this->_photoService.Schedule(EnableCamera(Camera::Nadir));
+                this->_photoService.Schedule(EnableCamera(Camera::Wing));
+                this->_photoService.WaitForFinish(InfiniteTimeout);
 
-            this->_experimentBegin = this->_timeProvider.GetCurrentTime();
-            if (!this->_experimentBegin.HasValue)
-            {
-                LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to acquire current time");
-                Stop(experiments::IterationResult::Failure);
-                return experiments::StartResult::Failure;
-            }
+                this->_experimentBegin = this->_timeProvider.GetCurrentTime();
+                if (!this->_experimentBegin.HasValue)
+                {
+                    LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to acquire current time");
+                    break;
+                }
 
-            this->_sailController->OpenSail();
-            return experiments::StartResult::Success;
+                this->_sailController->OpenSail();
+                return experiments::StartResult::Success;
+            } while (false);
+
+            Stop(experiments::IterationResult::Failure);
+            return experiments::StartResult::Failure;
         }
 
         experiments::IterationResult SailExperiment::Iteration()
