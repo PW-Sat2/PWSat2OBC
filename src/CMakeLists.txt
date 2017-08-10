@@ -35,7 +35,9 @@ set(SOURCES
     commands/memory.cpp
     commands/runlevel.cpp
     commands/sail.cpp
+    commands/leop.cpp
     checks/error_counters.cpp
+    checks/checks.cpp
     obc.h
     obc.cpp
     obc_access.cpp
@@ -94,6 +96,7 @@ target_link_libraries(${NAME}
     mission_experiments
     mission_state
     mission_adcs
+    mission_leop
     mission_beacon
     mission_telemetry
     mission_comm

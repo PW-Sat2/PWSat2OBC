@@ -274,6 +274,38 @@ namespace
         ASSERT_THAT(array, testing::ElementsAre(1, 2, 3, 4, 5));
     }
 
+    TEST(WriterTest, TestFill)
+    {
+        uint8_t array[5];
+        Writer writer(array);
+
+        writer.WriteByte(1);
+        writer.Fill(4);
+
+        ASSERT_THAT(array, testing::ElementsAre(1, 4, 4, 4, 4));
+    }
+
+    TEST(WriterTest, TestFillOnEmptyBuffer)
+    {
+        uint8_t array[5];
+        Writer writer(array);
+
+        writer.Fill(4);
+
+        ASSERT_THAT(array, testing::ElementsAre(4, 4, 4, 4, 4));
+    }
+
+    TEST(WriterTest, TestFillOnFullBuffer)
+    {
+        uint8_t array[1];
+        Writer writer(array);
+
+        writer.WriteByte(1);
+        writer.Fill(4);
+
+        ASSERT_THAT(array, testing::ElementsAre(1));
+    }
+
     TEST(WriterTest, TestReserveBufferOverflowingBuffer)
     {
         uint8_t array[3];

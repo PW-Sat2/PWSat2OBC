@@ -73,6 +73,22 @@ FsMock::FsMock() : _nextHandle(100), _nextDirHandle(200)
         return MakeFSIOResult(gsl::span<std::uint8_t>(buffer.data(), (end - buffer.begin())));
     }));
 
+    ON_CALL(*this, Write(_, _)).WillByDefault(Invoke([this](FileHandle handle, gsl::span<const std::uint8_t> buffer) {
+        auto f = this->_opened.find(handle);
+
+        if (f == this->_opened.end())
+        {
+            return MakeFSIOResult(OSResult::InvalidFileHandle);
+        }
+
+        gsl::span<std::uint8_t>::iterator end = std::copy(buffer.begin(), buffer.end(), f->second.Position);
+
+        auto length = end - f->second.Position;
+        f->second.Position += length;
+
+        return MakeFSIOResult(gsl::span<const std::uint8_t>(buffer.data(), length));
+    }));
+
     ON_CALL(*this, Seek(_, _, _)).WillByDefault(Invoke([this](FileHandle handle, SeekOrigin origin, FileSize offset) {
         auto f = this->_opened.find(handle);
 

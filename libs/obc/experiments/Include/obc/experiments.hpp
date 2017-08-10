@@ -4,6 +4,7 @@
 #include <array>
 #include "experiment/adcs/adcs.hpp"
 #include "experiment/fibo/fibo.h"
+#include "experiment/leop/leop.hpp"
 #include "experiments/experiments.h"
 #include "fs/fs.h"
 
@@ -27,8 +28,12 @@ namespace obc
          * @param fs File system
          * @param adcs ADCS coordinator
          * @param time Time provider
+         * @param gyro Gyroscope Provider
          */
-        OBCExperiments(services::fs::IFileSystem& fs, adcs::IAdcsCoordinator& adcs, services::time::TimeProvider& time);
+        OBCExperiments(services::fs::IFileSystem& fs,
+            adcs::IAdcsCoordinator& adcs,
+            services::time::TimeProvider& time,
+            devices::gyro::IGyroscopeDriver& gyro);
 
         /**
          * @brief Performs initialization
@@ -41,8 +46,11 @@ namespace obc
         /** @brief Detumbling experiment */
         experiment::adcs::DetumblingExperiment Detumbling;
 
+        /** @brief LEOP experiment */
+        experiment::leop::LaunchAndEarlyOrbitPhaseExperiment LEOP;
+
         /** @brief List of all experiments */
-        std::array<experiments::IExperiment*, 2> Experiments;
+        std::array<experiments::IExperiment*, 3> Experiments;
 
         /** @brief Experiments controller */
         experiments::ExperimentController ExperimentsController;

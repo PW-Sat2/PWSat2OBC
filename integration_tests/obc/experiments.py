@@ -9,6 +9,7 @@ from .obc_mixin import OBCMixin, command, decode_return
 class ExperimentType(IntEnum):
     Fibo = 1
     Detumbling = 2
+    LEOP = 3
 
 
 @unique
@@ -84,6 +85,13 @@ class ExperimentsMixin(OBCMixin):
         def condition():
             info = self.experiment_info()
             return info.Current == experiment
+
+        busy_wait(condition, delay=1, timeout=timeout)
+
+    def wait_for_experiment_started(self, experiment, timeout):
+        def condition():
+            info = self.experiment_info()
+            return info.Current == experiment and info.LastStartResult is not None
 
         busy_wait(condition, delay=1, timeout=timeout)
 

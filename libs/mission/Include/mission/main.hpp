@@ -122,6 +122,11 @@ namespace mission
         template <typename Type> using IsVerify = std::is_base_of<Verify, Type>;
 
         /**
+         * @brief Predicate that checks whether passed type is a AutostartDisabled action.
+         */
+        template <typename Type> using IsAutostartDisabled = std::is_base_of<AutostartDisabled, Type>;
+
+        /**
          * @brief Constant that contains current number of Actions.
          */
         static constexpr std::uint32_t CountAction = CountHelper<IsAction, T...>::value;
@@ -210,6 +215,9 @@ namespace mission
          */
         virtual StateType& GetState() noexcept override final;
 
+        /** @brief Enables all tasks with AutostartDisabled configuration. */
+        bool EnableAutostart();
+
       private:
         /**
          * @brief Flag signaled when mission loop execution should be suspended.
@@ -241,6 +249,13 @@ namespace mission
         template <typename Task> bool InitializeTask(std::true_type);
 
         template <typename Task> bool InitializeTask(std::false_type);
+
+        template <size_t i, typename Task, typename... Rest> bool EnableAutostartDisabledTasks();
+        template <size_t i> bool EnableAutostartDisabledTasks();
+
+        template <typename Task> bool EnableAutostartDisabledTask(std::true_type);
+
+        template <typename Task> bool EnableAutostartDisabledTask(std::false_type);
 
         /**
          * @brief Main mission loop.
@@ -488,6 +503,50 @@ namespace mission
     inline typename MissionLoop<State, T...>::StateType& MissionLoop<State, T...>::GetState() noexcept
     {
         return this->state;
+    }
+
+    template <typename State, typename... T> bool MissionLoop<State, T...>::EnableAutostart()
+    {
+        if (!EnableAutostartDisabledTasks<0, T...>())
+        {
+            LOG(LOG_LEVEL_ERROR, "Failed to enable disabled autostart tasks");
+            return false;
+        }
+
+        return true;
+    }
+
+    template <typename State, typename... T>
+    template <size_t i, typename Task, typename... Rest>
+    bool MissionLoop<State, T...>::EnableAutostartDisabledTasks()
+    {
+        // using type = typename IsAutostartDisabled<Task>;
+        if (!EnableAutostartDisabledTask<Task>(IsAutostartDisabled<Task>()))
+        {
+            return false;
+        }
+
+        return EnableAutostartDisabledTasks<i, Rest...>();
+    }
+
+    template <typename State, typename... T> template <size_t i> bool MissionLoop<State, T...>::EnableAutostartDisabledTasks()
+    {
+        return true;
+    }
+
+    template <typename State, typename... T>
+    template <typename Task>
+    bool MissionLoop<State, T...>::EnableAutostartDisabledTask(std::true_type)
+    {
+        static_cast<Task*>(this)->AutostartEnable();
+        return true;
+    }
+
+    template <typename State, typename... T>
+    template <typename Task>
+    bool MissionLoop<State, T...>::EnableAutostartDisabledTask(std::false_type)
+    {
+        return true;
     }
 }
 

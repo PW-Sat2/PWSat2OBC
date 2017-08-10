@@ -59,6 +59,7 @@ static const TerminalCommandDescription commands[] = {
     {"memory", MemoryCommand},
     {"runlevel", RunlevelCommand},
     {"sail", SailCommand},
+    {"leop", LeopCommand},
 };
 
 void InitializeTerminal(void)

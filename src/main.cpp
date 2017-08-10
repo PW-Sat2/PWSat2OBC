@@ -72,7 +72,8 @@ mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc),
     std::tie(Main.Hardware.PersistentStorage, PersistentStateBaseAddress),
     Main.fs,
     Main.Hardware.CommDriver,
-    Main.Hardware.EPS);
+    Main.Hardware.EPS,
+    std::make_pair(std::ref(Main.Experiments.ExperimentsController), std::ref(Main.timeProvider)));
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
@@ -204,6 +205,18 @@ static void ObcInitTask(void* param)
         }
     }
 
+    if (boot::RequestedRunlevel >= boot::Runlevel::Runlevel3)
+    {
+        if (OS_RESULT_FAILED(obc->InitializeRunlevel3()))
+        {
+            LOG(LOG_LEVEL_ERROR, "Unable to initialize runlevel 3. ");
+        }
+        else
+        {
+            LOG(LOG_LEVEL_ERROR, "Runlevel 3 initialized");
+        }
+    }
+
     System::SuspendTask(NULL);
 }
 
@@ -273,7 +286,7 @@ int main(void)
             boot::BootloaderMagicNumber,
             boot::MagicNumber);
 
-        boot::RequestedRunlevel = boot::Runlevel::Runlevel2;
+        boot::RequestedRunlevel = boot::Runlevel::Runlevel3;
         boot::Index = 0;
         boot::BootReason = boot::Reason::BootToUpper;
         boot::ClearStateOnStartup = false;

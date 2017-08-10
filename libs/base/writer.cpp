@@ -133,6 +133,22 @@ bool Writer::WriteArray(gsl::span<const uint8_t> buffer)
     }
 }
 
+bool Writer::Fill(const uint8_t value)
+{
+    const auto remainingSize = RemainingSize();
+    if (!this->UpdateState(remainingSize))
+    {
+        return false;
+    }
+    else
+    {
+        std::fill(this->_buffer.begin() + this->_position, this->_buffer.begin() + this->_buffer.length(), value);
+
+        this->_position += remainingSize;
+        return true;
+    }
+}
+
 gsl::span<std::uint8_t> Writer::Reserve(std::size_t count)
 {
     count = std::min<std::size_t>(count, this->_buffer.size() - this->_position);

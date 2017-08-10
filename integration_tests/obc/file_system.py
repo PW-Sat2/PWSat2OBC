@@ -25,3 +25,7 @@ class FileSystemMixin(OBCMixin):
     @command("erase {0}")
     def erase(self, chip_index):
         pass
+
+    @command("rm {0}")
+    def remove_file(self, path):
+        pass
