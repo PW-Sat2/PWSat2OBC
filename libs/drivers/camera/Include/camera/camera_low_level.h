@@ -21,7 +21,7 @@ namespace devices
              * @brief Constructs Low Level Camera driver instance
              * @param lineIO Line interface to use
              */
-            LowLevelCameraDriver(LineIO& lineIO);
+            LowLevelCameraDriver(ILineIO& lineIO);
 
             /**
              * @brief Sends SNAPSHOT command
@@ -97,7 +97,7 @@ namespace devices
 
           private:
             devices::camera::CommandFactory _commandFactory;
-            LineIO& _lineIO;
+            ILineIO& _lineIO;
 
             void LogSendCommand(gsl::span<uint8_t> cmd);
 

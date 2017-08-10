@@ -98,7 +98,7 @@ OBC::OBC()
           Mission),                                                                //
       Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index), //
       terminal(this->GetLineIO()),                                                 //
-      camera(this->Hardware.Camera.GetLineIO())
+      camera(this->Hardware.Camera)
 {
 }
 
