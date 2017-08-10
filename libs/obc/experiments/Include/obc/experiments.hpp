@@ -116,6 +116,7 @@ namespace obc
          * @param payload Payload driver
          * @param n25q Redundant N25Q driver
          * @param transmitter Frame transmitter
+         * @param[in] sailState Pin connected to sail indicator
          */
         OBCExperiments(services::fs::IFileSystem& fs,
             adcs::IAdcsCoordinator& adcs,

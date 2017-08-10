@@ -6,7 +6,7 @@ namespace services
     namespace time
     {
         class TimeProvider;
-        class ICurrentTime;
+        struct ICurrentTime;
     }
 }
 

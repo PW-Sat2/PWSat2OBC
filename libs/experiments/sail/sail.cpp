@@ -25,13 +25,15 @@ namespace experiment
             devices::payload::IPayloadDeviceDriver& payloadDriver,
             services::power::IPowerControl& powerController,
             services::photo::IPhotoService& photoService,
-            const drivers::gpio::Pin& sailState)
+            const drivers::gpio::Pin& sailState,
+            services::time::ICurrentTime& timeProvider)
             : _fileSystem(fileSystem),           //
               _adcsCoordinator(adcsCoordinator), //
               _gyroDriver(gyroDriver),           //
               _payloadDriver(payloadDriver),     //
               _powerController(powerController), //
               _photoService(photoService),       //
+              _timeProvider(timeProvider),       //
               _sailState(sailState)
         {
         }
