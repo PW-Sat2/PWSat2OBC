@@ -24,6 +24,8 @@ target_link_libraries(${NAME}
 	mission_antenna
 	mission_comm
 	mission_sail
+	mission_time
+	rtc
 	fs
 	logger
 	obc_experiments
