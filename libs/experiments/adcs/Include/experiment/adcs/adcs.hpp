@@ -31,7 +31,7 @@ namespace experiment
         {
           public:
             /** @brief Experiment code */
-            static constexpr experiments::ExperimentCode Code = 0x2;
+            static constexpr experiments::ExperimentCode Code = 0x1;
 
             /**
              * @brief Ctor

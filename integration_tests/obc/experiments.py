@@ -7,11 +7,11 @@ from .obc_mixin import OBCMixin, command, decode_return
 
 @unique
 class ExperimentType(IntEnum):
-    Fibo = 1
-    Detumbling = 2
-    LEOP = 3
-    SunS = 4
-    EraseFlash = 7
+    LEOP = 0
+    Detumbling = 1
+    EraseFlash = 2
+    SunS = 3
+    Fibo = 8
 
 
 @unique

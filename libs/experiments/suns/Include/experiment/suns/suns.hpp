@@ -202,7 +202,7 @@ namespace experiment
             DataPoint GatherSingleMeasurement();
 
             /** @brief Experiment code */
-            static constexpr experiments::ExperimentCode Code = 0x4;
+            static constexpr experiments::ExperimentCode Code = 0x3;
 
           private:
             services::power::IPowerControl& _powerControl;

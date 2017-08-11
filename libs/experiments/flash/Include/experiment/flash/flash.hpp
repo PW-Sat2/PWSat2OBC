@@ -44,7 +44,7 @@ namespace experiment
             virtual void Stop(experiments::IterationResult lastResult) override;
 
             /** @brief Experiment code */
-            static constexpr experiments::ExperimentCode Code = 0x7;
+            static constexpr experiments::ExperimentCode Code = 0x2;
 
           private:
             devices::n25q::RedundantN25QDriver& _n25q;

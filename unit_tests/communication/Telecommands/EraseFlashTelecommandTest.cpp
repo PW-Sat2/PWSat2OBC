@@ -10,6 +10,7 @@ using testing::ElementsAre;
 using testing::_;
 using telecommunication::downlink::DownlinkAPID;
 using experiment::erase_flash::ISetCorrelationId;
+using experiment::erase_flash::EraseFlashExperiment;
 
 namespace
 {
@@ -40,7 +41,7 @@ namespace
     TEST_F(EraseFlashTelecommandTest, ShouldStartEraseFlashExperiment)
     {
         EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0x67, 0, 0))));
-        EXPECT_CALL(_experiments, RequestExperiment(7)).WillOnce(Return(true));
+        EXPECT_CALL(_experiments, RequestExperiment(EraseFlashExperiment::Code)).WillOnce(Return(true));
         Run(0x67);
     }
 
