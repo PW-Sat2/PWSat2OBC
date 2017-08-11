@@ -12,6 +12,7 @@ static const TerminalCommandDescription commands[] = {
     {"currentTime", CurrentTimeHandler},
     {"wait_for_init", WaitForOBCInitialization},
     {"listFiles", FSListFiles},
+    {"ls", FSListFiles},
     {"writeFile", FSWriteFile},
     {"readFile", FSReadFile},
     {"mountList", MountList},

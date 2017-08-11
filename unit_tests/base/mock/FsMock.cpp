@@ -147,7 +147,10 @@ FsMock::FsMock() : _nextHandle(100), _nextDirHandle(200)
         else
         {
             fullPath = dir;
-            fullPath += "/";
+            if (*(fullPath.end() - 1) != '/')
+            {
+                fullPath += "/";
+            }
             fullPath += path;
         }
 

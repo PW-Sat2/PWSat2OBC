@@ -23,10 +23,11 @@ __all__ = [
     'SetBootSlots',
     'SendBeacon',
     'PowerCycleTelecommand',
-    'SetErrorCounterConfig'
+    'SetErrorCounterConfig',
     'OpenSailTelecommand',
     'GetErrorCounterConfig',
     'SetPeriodicMessageTelecommand',
-    'StopAntennaDeployment'
+    'StopAntennaDeployment',
+    'EraseFlash'
 ]
 

@@ -74,7 +74,7 @@ class TestExperimentLEOP(RestartPerTest):
         log = logging.getLogger("TEST")
 
         #skip initial 60s idle period
-        self.system.obc.jump_to_time(timedelta(minutes = 2))
+        self.system.obc.jump_to_time(timedelta(minutes=2))
 
         self.system.obc.wait_for_experiment_started(ExperimentType.LEOP, 60)
         result = self.system.obc.experiment_info()

@@ -41,3 +41,14 @@ class ListFiles(Telecommand):
 
     def payload(self):
         return [self._correlation_id] + list(self._path) + [0x0]
+
+
+class EraseFlash(Telecommand):
+    def __init__(self, correlation_id):
+        self._correlation_id = correlation_id
+
+    def apid(self):
+        return 0x07
+
+    def payload(self):
+        return [self._correlation_id]

@@ -14,6 +14,7 @@
 #include "SPI/SPIMock.h"
 #include "base/os.h"
 #include "mock/error_counter.hpp"
+#include "mock/n25q.hpp"
 #include "os/os.hpp"
 
 using std::array;
@@ -40,23 +41,6 @@ using testing::AtLeast;
 using drivers::spi::ISPIInterface;
 using namespace devices::n25q;
 using namespace std::chrono_literals;
-
-struct N25QDriverMock : public IN25QDriver
-{
-    MOCK_METHOD2(ReadMemory, OSResult(std::size_t address, gsl::span<uint8_t> buffer));
-
-    MOCK_METHOD3(BeginWritePage, OperationWaiter(size_t address, ptrdiff_t offset, gsl::span<const uint8_t> page));
-
-    MOCK_METHOD1(BeginEraseSubSector, OperationWaiter(size_t address));
-
-    MOCK_METHOD1(BeginEraseSector, OperationWaiter(size_t address));
-
-    MOCK_METHOD0(BeginEraseChip, OperationWaiter());
-
-    MOCK_METHOD0(Reset, OperationResult());
-
-    MOCK_METHOD2(WaitForOperation, OperationResult(std::chrono::milliseconds timeout, FlagStatus status));
-};
 
 class RedundantN25QDriverTest : public Test
 {

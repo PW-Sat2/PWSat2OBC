@@ -118,8 +118,9 @@ class FileSystemTelecommandsTest(RestartPerTest):
         self.assertEqual(frame.apid(), 2)
         self.assertEqual(frame.seq(), 0)
         self.assertEqual(frame.payload()[0], 0x11)
+        self.assertEqual(frame.payload()[1], 0)
 
-        rest = frame.payload()[1:]
+        rest = frame.payload()[2:]
         files = []
         while len(rest) > 0:
             l = rest.index(0)

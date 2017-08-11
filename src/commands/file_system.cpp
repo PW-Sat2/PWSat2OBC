@@ -44,7 +44,16 @@ void FSListFiles(uint16_t argc, char* argv[])
     DirectoryHandle dir = result.Result;
     while ((entry = GetFileSystem().ReadDirectory(dir)) != NULL)
     {
-        GetTerminal().Puts(entry);
+        auto l = strnlen(entry, 80);
+
+        if (entry[l + 1] != '\0')
+        {
+            GetTerminal().Puts("[lost file]");
+        }
+        else
+        {
+            GetTerminal().Puts(entry);
+        }
         GetTerminal().NewLine();
     }
 
@@ -191,7 +200,11 @@ void EraseFlash(uint16_t argc, char* argv[])
         GetTerminal().Puts("Erasing all flashes ...");
         GetTerminal().NewLine();
 
+        yaffsfs_Lock();
+
         auto r = Main.Storage.Erase();
+
+        yaffsfs_Unlock();
         GetTerminal().Printf("Erase result: %d", num(r));
     }
     else

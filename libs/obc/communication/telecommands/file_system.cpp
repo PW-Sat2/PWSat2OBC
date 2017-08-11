@@ -1,5 +1,6 @@
 #include "file_system.hpp"
 #include <cmath>
+#include <cstring>
 #include "base/reader.h"
 #include "comm/ITransmitter.hpp"
 #include "fs/fs.h"
@@ -163,6 +164,8 @@ namespace obc
         {
         }
 
+        static const char* LostFileName = "[lost]";
+
         void ListFilesTelecommand::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
         {
             Reader r(parameters);
@@ -194,7 +197,7 @@ namespace obc
 
             bool moreFiles = true;
 
-            char* name = this->_fs.ReadDirectory(dir.Result);
+            const char* name = this->_fs.ReadDirectory(dir.Result);
 
             std::uint32_t seq = 0;
 
@@ -202,6 +205,7 @@ namespace obc
             {
                 CorrelatedDownlinkFrame response(DownlinkAPID::Operation, seq, correlationId);
                 auto& writer = response.PayloadWriter();
+                writer.WriteByte(0);
 
                 while (true)
                 {
@@ -211,13 +215,36 @@ namespace obc
                         break;
                     }
 
-                    auto nameLen = strlen(name);
+                    auto nameLen = strnlen(name, 90);
+
+                    if (name == LostFileName)
+                    {
+                        writer.WriteArray(gsl::make_span(reinterpret_cast<const uint8_t*>(name), nameLen));
+                        writer.WriteByte(0);
+                        writer.WriteDoubleWordLE(0);
+                        name = this->_fs.ReadDirectory(dir.Result);
+                        continue;
+                    }
+
+                    if (name[nameLen] != '\0')
+                    {
+                        name = LostFileName;
+                        nameLen = strlen(name);
+                    }
+
                     if (writer.RemainingSize() < static_cast<std::int32_t>(nameLen + 5))
                         break;
 
-                    writer.WriteArray(gsl::make_span(reinterpret_cast<uint8_t*>(name), nameLen));
+                    writer.WriteArray(gsl::make_span(reinterpret_cast<const uint8_t*>(name), nameLen));
                     writer.WriteByte(0);
-                    writer.WriteDoubleWordLE(this->_fs.GetFileSize(path, name));
+                    if (name == LostFileName)
+                    {
+                        writer.WriteDoubleWordLE(0);
+                    }
+                    else
+                    {
+                        writer.WriteDoubleWordLE(this->_fs.GetFileSize(path, name));
+                    }
 
                     name = this->_fs.ReadDirectory(dir.Result);
                 }

@@ -73,7 +73,7 @@ namespace experiment
             /**
              * @brief Experiment code
              */
-            static constexpr experiments::ExperimentCode Code = 0x01;
+            static constexpr experiments::ExperimentCode Code = 0x08;
 
           private:
             /** @brief File system */

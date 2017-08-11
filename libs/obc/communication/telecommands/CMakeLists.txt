@@ -13,6 +13,7 @@ set(SOURCES
     fdir.cpp
     sail.cpp
     periodic_message.cpp
+    flash.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

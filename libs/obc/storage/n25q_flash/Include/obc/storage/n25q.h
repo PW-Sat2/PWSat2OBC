@@ -65,6 +65,12 @@ namespace obc
              */
             devices::n25q::N25QDriver& GetDriver(uint8_t index);
 
+            /**
+             * @brief Returns top (redundant) driver
+             * @return Reference to driver
+             */
+            inline devices::n25q::RedundantN25QDriver& GetTopDriver();
+
           private:
             services::fs::IYaffsDeviceOperations& _deviceOperations;
 
@@ -99,6 +105,10 @@ namespace obc
                 /** @brief Error counter type */
                 using ErrorCounter = error_counter::ErrorCounter<6>;
             };
+        }
+        devices::n25q::RedundantN25QDriver& N25QStorage::GetTopDriver()
+        {
+            return this->_driver;
         }
 
         /** @} */

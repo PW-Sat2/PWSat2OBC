@@ -20,7 +20,7 @@ namespace experiment
         {
           public:
             /** @brief Experiment code */
-            static constexpr experiments::ExperimentCode Code = 0x3;
+            static constexpr experiments::ExperimentCode Code = 0x0;
 
             /** @brief Output file name. */
             static constexpr const char* FileName = "/leop.pwts";
