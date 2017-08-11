@@ -1,14 +1,9 @@
-import logging
-import struct
+from threading import Timer
+
+from enum import Enum
 
 import i2cMock
-from enum import Enum, unique
-import time
-from Queue import Queue, Empty
-from threading import Lock
 from utils import *
-from build_config import config
-from threading import Timer
 
 
 def from_int16(tab):
