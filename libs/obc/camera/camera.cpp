@@ -8,25 +8,25 @@ using namespace std::chrono_literals;
 
 namespace obc
 {
-    SyncResult DummyCamera::Sync()
+    SyncResult OBCCamera::Sync()
     {
         LOG(LOG_LEVEL_INFO, "Syncing camera");
 
-        auto b = this->_camera.Initialize();
+        auto syncResult = this->_camera.Initialize();
 
-        return SyncResult(b.IsSuccess, b.SyncCount);
+        return SyncResult(syncResult.IsSuccess, syncResult.SyncCount);
     }
 
-    TakePhotoResult DummyCamera::TakePhoto(PhotoResolution resolution)
+    TakePhotoResult OBCCamera::TakePhoto(PhotoResolution resolution)
     {
         LOG(LOG_LEVEL_INFO, "Taking photo");
 
-        auto b = this->_camera.TakeJPEGPicture(static_cast<devices::camera::CameraJPEGResolution>(resolution));
+        auto result = this->_camera.TakeJPEGPicture(static_cast<devices::camera::CameraJPEGResolution>(resolution));
 
-        return b ? TakePhotoResult::Success : TakePhotoResult::NotSynced;
+        return result ? TakePhotoResult::Success : TakePhotoResult::NotSynced;
     }
 
-    DownloadPhotoResult DummyCamera::DownloadPhoto(gsl::span<std::uint8_t> buffer)
+    DownloadPhotoResult OBCCamera::DownloadPhoto(gsl::span<std::uint8_t> buffer)
     {
         LOG(LOG_LEVEL_INFO, "Downloading photo");
 
@@ -61,7 +61,7 @@ namespace obc
         services::fs::IFileSystem& fileSystem,
         const drivers::gpio::Pin& camSelect,
         devices::camera::Camera& camera)
-        : CameraDriver(camera), PhotoService(powerControl, CameraDriver, *this, fileSystem), _camSelect(camSelect)
+        : PhotoService(powerControl, *this, *this, fileSystem), _camSelect(camSelect), _camera(camera)
     {
     }
 

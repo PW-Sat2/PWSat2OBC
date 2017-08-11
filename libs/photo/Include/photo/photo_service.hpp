@@ -119,6 +119,7 @@ namespace services
             /**
              * @brief Ctor
              * @param camera Camera to use
+             * @param resolution Photo resolution
              */
             TakePhoto(Camera camera, PhotoResolution resolution);
 
@@ -128,6 +129,10 @@ namespace services
              */
             inline Camera Which() const;
 
+            /**
+             * @brief Returns photo resolution
+             * @return Resolution
+             */
             inline PhotoResolution Resolution() const;
 
           private:
@@ -244,9 +249,14 @@ namespace services
              */
             Sleep(std::chrono::milliseconds duration);
 
+            /**
+             * @brief Returns sleep duration
+             * @return Sleep duration
+             */
             inline std::chrono::milliseconds Duration() const;
 
           private:
+            /** @brief Sleep duration */
             std::chrono::milliseconds _duration;
         };
 
