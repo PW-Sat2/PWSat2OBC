@@ -18,8 +18,8 @@ namespace commands
 
     template <CameraCmd CommandID> static constexpr Command Ack{0xAA, 0x0E, static_cast<uint8_t>(CommandID), 0x00, 0x00, 0x00};
 
-    template <CameraCmd CommandID, uint8_t PackageID>
-    static constexpr Command AckPackage{0xAA, 0x0E, static_cast<uint8_t>(CommandID), 0x00, 0x00, PackageID};
+    template <CameraCmd CommandID, uint8_t PackageIDByte0, uint8_t PackageIDByte1>
+    static constexpr Command AckPackage{0xAA, 0x0E, static_cast<uint8_t>(CommandID), 0x00, PackageIDByte0, PackageIDByte1};
 
     static constexpr Command Sync{0xAA, 0x0D, 0x00, 0x00, 0x00, 0x00};
     static constexpr Command Reset{0xAA, 0x08, 0x00, 0x00, 0x00, 0xFF};

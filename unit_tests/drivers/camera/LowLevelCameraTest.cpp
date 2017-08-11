@@ -68,7 +68,7 @@ class LowLevelCameraTest : public Test
 
 TEST_F(LowLevelCameraTest, ShouldSendAck)
 {
-    EXPECT_CALL(_lineIOMock, PrintBuffer(ElementsAreArray(commands::AckPackage<CameraCmd::Data, 0x01>))).Times(1);
+    EXPECT_CALL(_lineIOMock, PrintBuffer(ElementsAreArray(commands::AckPackage<CameraCmd::Data, 0x00, 0x01>))).Times(1);
 
     _driver.SendAck(CameraCmd::Data, 0x00, 0x01);
 }
@@ -182,4 +182,27 @@ TEST_F(LowLevelCameraTest, ShouldSendSetBaudRate)
         commands::Ack<CameraCmd::SetBaudRate>); //
 
     ASSERT_THAT(_driver.SendSetBaudRate(0x00, 0x02), Eq(true));
+}
+
+TEST_F(LowLevelCameraTest, ShouldSendAckWithResponse)
+{
+    std::array<uint8_t, 6> receiveBuffer;
+
+    ExpectRequestAndResponse(                              //
+        commands::AckPackage<CameraCmd::None, 0x01, 0x00>, //
+        commands::Ack<CameraCmd::None>);                   // not important to test
+
+    ASSERT_THAT(_driver.SendAckWithResponse(CameraCmd::None, 0x0001, receiveBuffer), Eq(true));
+}
+
+TEST_F(LowLevelCameraTest, TestSendAckWithResponseWhenLineFails)
+{
+    std::array<uint8_t, 6> receiveBuffer;
+
+    ExpectRequestAndResponse(                              //
+        commands::AckPackage<CameraCmd::None, 0x01, 0x00>, //
+        commands::Invalid,                                 //
+        false);                                            //
+
+    ASSERT_THAT(_driver.SendAckWithResponse(CameraCmd::None, 0x0001, receiveBuffer), Eq(false));
 }
