@@ -66,7 +66,8 @@ static void TimePassed(void* /*context*/, TimePoint /*currentTime*/)
 }
 
 OBC::OBC()
-    : BootTable(Hardware.FlashDriver),                                                                    //
+    : initTask(nullptr),
+      BootTable(Hardware.FlashDriver),                                                                    //
       BootSettings(this->Hardware.PersistentStorage.GetRedundantDriver()),                                //
       Hardware(this->Fdir.ErrorCounting(), this->PowerControlInterface, timeProvider),                    //
       PowerControlInterface(this->Hardware.EPS),                                                          //
@@ -97,12 +98,12 @@ OBC::OBC()
           TelemetryAcquisition,
           PowerControlInterface,
           Mission,
-          Mission,                                                                //
+          Mission, //
           Hardware.I2C.Buses.Bus,
           Hardware.I2C.Buses.Payload),
-      Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index), //
-      terminal(this->GetLineIO()),                                                 //
-      camera(this->Hardware.Camera.GetLineIO()),                                   //
+      Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index),         //
+      terminal(this->Hardware.Terminal),                                                   //
+      camera(this->Fdir.ErrorCounting(), this->Hardware.Camera),                           //
       Camera(this->PowerControlInterface, this->fs, this->Hardware.Pins.CamSelect, camera) //
 {
 }

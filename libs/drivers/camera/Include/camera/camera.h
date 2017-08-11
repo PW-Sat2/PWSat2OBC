@@ -44,9 +44,10 @@ namespace devices
           public:
             /**
              * @brief Constructs @ref camera driver instance
+             * @param errorCounting Error counting mechanism
              * @param lineIO Line interface to use
              */
-            Camera(LineIO& lineIO);
+            Camera(error_counter::ErrorCounting& errorCounting, ILineIO& lineIO);
 
             /**
              * @brief Initializes the camera by performing the sync
@@ -85,8 +86,6 @@ namespace devices
             static_assert(MaxSyncRetries > 0, "There must be at least one sync retry");
 
             bool CameraSync(uint8_t& syncCount);
-
-            bool isInitialized = false;
         };
     }
 }

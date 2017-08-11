@@ -17,7 +17,8 @@ gsl::span<uint8_t> SkipAck(gsl::span<uint8_t> buffer)
     return buffer.last(buffer.length() - CommandFrameSize);
 }
 
-LowLevelCameraDriver::LowLevelCameraDriver(LineIO& lineIO) : _lineIO(lineIO)
+LowLevelCameraDriver::LowLevelCameraDriver(error_counter::ErrorCounting& errorCounting, ILineIO& lineIO)
+    : _lineIO(lineIO), _error(errorCounting)
 {
 }
 
@@ -27,14 +28,17 @@ bool LowLevelCameraDriver::SendCommand( //
     uint8_t additionalBytes,            //
     std::chrono::milliseconds timeout)
 {
+    ErrorReporter errorContext(_error);
     uint8_t commandCode = commandBuffer[1];
 
     LogSendCommand(commandBuffer);
 
-    auto readSucceeded = _lineIO.ExchangeBuffers(&_lineIO, commandBuffer, receiveBuffer, timeout);
+    auto readSucceeded = _lineIO.ExchangeBuffers(commandBuffer, receiveBuffer, timeout);
     if (!readSucceeded)
     {
         LOG(LOG_LEVEL_ERROR, "LineIO read timeout");
+        errorContext.Counter().Failure();
+        return false;
     }
 
     LogReceivedCommand(receiveBuffer);
@@ -68,6 +72,7 @@ bool LowLevelCameraDriver::SendAckWithResponse( //
     gsl::span<uint8_t> receiveBuffer,           //
     std::chrono::milliseconds timeout)
 {
+    ErrorReporter errorContext(_error);
     std::array<uint8_t, CommandFrameSize> commandBuffer;
 
     uint8_t lowerPackageIdByte = packageId & 0xff;
@@ -76,11 +81,13 @@ bool LowLevelCameraDriver::SendAckWithResponse( //
     _commandFactory.BuildAck(commandBuffer, ackedCommand, lowerPackageIdByte, higherPackageIdByte);
     LogSendCommand(commandBuffer);
 
-    auto readSucceeded = _lineIO.ExchangeBuffers(&_lineIO, gsl::span<uint8_t>(commandBuffer), receiveBuffer, timeout);
+    auto readSucceeded = _lineIO.ExchangeBuffers(gsl::span<uint8_t>(commandBuffer), receiveBuffer, timeout);
 
     if (!readSucceeded)
     {
         LOG(LOG_LEVEL_ERROR, "LineIO read timeout");
+        errorContext.Counter().Failure();
+        return false;
     }
 
     return true;
@@ -93,7 +100,7 @@ void LowLevelCameraDriver::SendAck(CameraCmd ackedCommand, uint8_t packageIdLow,
     _commandFactory.BuildAck(commandBuffer, ackedCommand, packageIdLow, packageIdHigh);
 
     LogSendCommand(commandBuffer);
-    _lineIO.PrintBuffer(&_lineIO, gsl::span<uint8_t>(commandBuffer));
+    _lineIO.PrintBuffer(gsl::span<uint8_t>(commandBuffer));
 }
 
 bool LowLevelCameraDriver::SendSync(std::chrono::milliseconds timeout)

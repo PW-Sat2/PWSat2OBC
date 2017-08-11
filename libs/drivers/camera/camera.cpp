@@ -11,14 +11,13 @@ InitializationResult::InitializationResult() : IsSuccess(false), SyncCount(0)
 {
 }
 
-Camera::Camera(LineIO& lineIO) : _cameraDriver{lineIO}
+Camera::Camera(error_counter::ErrorCounting& errorCounting, ILineIO& lineIO) : _cameraDriver{errorCounting, lineIO}
 {
 }
 
 InitializationResult Camera::Initialize()
 {
     InitializationResult result;
-    isInitialized = false;
 
     _cameraDriver.SendReset();
 
@@ -30,7 +29,6 @@ InitializationResult Camera::Initialize()
 
     LOG(LOG_LEVEL_INFO, "Camera: Sync finished");
 
-    isInitialized = true;
     result.IsSuccess = true;
 
     return result;
@@ -39,11 +37,6 @@ InitializationResult Camera::Initialize()
 bool Camera::TakeJPEGPicture(CameraJPEGResolution resolution)
 {
     const uint16_t packageSize = 512;
-
-    if (!isInitialized)
-    {
-        return false;
-    }
 
     if (!_cameraDriver.SendJPEGInitial(resolution))
     {
@@ -73,12 +66,18 @@ gsl::span<uint8_t> Camera::CameraReceiveJPEGData(gsl::span<uint8_t> buffer)
     PictureData pictureData;
     if (!_cameraDriver.SendGetPictureJPEG(CameraPictureType::Enum::Snapshot, pictureData))
     {
-        LOG(LOG_LEVEL_ERROR, "---------------- SendGetPictureJPEG failed ---------------\n");
+        LOG(LOG_LEVEL_ERROR, "Camera: SendGetPictureJPEG failed");
         return {};
     }
 
     uint32_t totalDataLength = std::min(pictureData.dataLength, static_cast<uint32_t>(buffer.size()));
     uint8_t packageCnt = totalDataLength / (PackageSize - 6) + (totalDataLength % (PackageSize - 6) != 0 ? 1 : 0);
+
+    if (totalDataLength + (6u * packageCnt) > static_cast<uint32_t>(buffer.size()))
+    {
+        LOG(LOG_LEVEL_ERROR, "Camera: Buffer to small");
+        return gsl::span<uint8_t, 0>();
+    }
 
     uint32_t dataIndex = 0;
     uint32_t bufferIndex = 0;

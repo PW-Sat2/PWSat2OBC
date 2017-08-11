@@ -79,7 +79,7 @@ struct OBC
      * @brief Returns current LineIO implementation
      * @return Line IO implementation
      */
-    inline LineIO& GetLineIO();
+    inline ILineIO& GetLineIO();
 
     /** @brief File system object */
     services::fs::YaffsFileSystem fs;
@@ -135,11 +135,6 @@ struct OBC
     /** @brief Camera */
     obc::OBCCamera Camera;
 };
-
-LineIO& OBC::GetLineIO()
-{
-    return this->Hardware.Terminal.GetLineIO();
-}
 
 /** @brief Global OBC object. */
 extern OBC Main;
