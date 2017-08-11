@@ -11,7 +11,7 @@ InitializationResult::InitializationResult() : IsSuccess(false), SyncCount(0)
 {
 }
 
-Camera::Camera(ILineIO& lineIO) : _cameraDriver{lineIO}
+Camera::Camera(error_counter::ErrorCounting& errorCounting, ILineIO& lineIO) : _cameraDriver{errorCounting, lineIO}
 {
 }
 

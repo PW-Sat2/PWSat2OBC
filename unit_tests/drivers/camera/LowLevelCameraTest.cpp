@@ -5,6 +5,7 @@
 #include <gmock/gmock.h>
 
 #include "mock/LineIOMock.hpp"
+#include "mock/error_counter.hpp"
 #include "utils.hpp"
 
 #include "CameraTestCommands.hpp"
@@ -29,7 +30,7 @@ static constexpr std::chrono::milliseconds ResetTimeout = std::chrono::milliseco
 class LowLevelCameraTest : public Test
 {
   public:
-    LowLevelCameraTest() : _driver(_lineIOMock)
+    LowLevelCameraTest() : _errors(_errorsConfig), _error_counter(_errors), _driver(_errors, _lineIOMock)
     {
     }
 
@@ -62,6 +63,10 @@ class LowLevelCameraTest : public Test
             .WillOnce(DoAll(FillBuffer<1>(response1, response2), Return(expectedResult))); //
     }
 
+    testing::NiceMock<ErrorCountingConfigrationMock> _errorsConfig;
+    error_counter::ErrorCounting _errors;
+    error_counter::ErrorCounter<LowLevelCameraDriver::ErrorCounter::DeviceId> _error_counter;
+
     StrictMock<LineIOMock> _lineIOMock;
     LowLevelCameraDriver _driver;
 };
@@ -71,6 +76,8 @@ TEST_F(LowLevelCameraTest, ShouldSendAck)
     EXPECT_CALL(_lineIOMock, PrintBuffer(ElementsAreArray(commands::AckPackage<CameraCmd::Data, 0x00, 0x01>))).Times(1);
 
     _driver.SendAck(CameraCmd::Data, 0x00, 0x01);
+
+    ASSERT_THAT(_error_counter.Current(), Eq(0));
 }
 
 TEST_F(LowLevelCameraTest, ShouldSendSyncSuccessfully)
@@ -81,6 +88,7 @@ TEST_F(LowLevelCameraTest, ShouldSendSyncSuccessfully)
         commands::Sync);                //
 
     ASSERT_THAT(_driver.SendSync(DefaultTimeout), Eq(true));
+    ASSERT_THAT(_error_counter.Current(), Eq(0));
 }
 
 TEST_F(LowLevelCameraTest, SyncShouldReturnFalseIfSendFails)
@@ -92,6 +100,7 @@ TEST_F(LowLevelCameraTest, SyncShouldReturnFalseIfSendFails)
         false);                         //
 
     ASSERT_THAT(_driver.SendSync(DefaultTimeout), Eq(false));
+    ASSERT_THAT(_error_counter.Current(), Eq(5));
 }
 
 TEST_F(LowLevelCameraTest, SyncShouldReturnFalseIfAckInvalid)
@@ -102,6 +111,7 @@ TEST_F(LowLevelCameraTest, SyncShouldReturnFalseIfAckInvalid)
         commands::Sync);                   //
 
     ASSERT_THAT(_driver.SendSync(DefaultTimeout), Eq(false));
+    ASSERT_THAT(_error_counter.Current(), Eq(0));
 }
 
 TEST_F(LowLevelCameraTest, SyncShouldExpectSyncCommandBack)
@@ -112,6 +122,7 @@ TEST_F(LowLevelCameraTest, SyncShouldExpectSyncCommandBack)
         commands::Invalid);             //
 
     ASSERT_THAT(_driver.SendSync(DefaultTimeout), Eq(false));
+    ASSERT_THAT(_error_counter.Current(), Eq(0));
 }
 
 TEST_F(LowLevelCameraTest, ShouldSendReset)
@@ -119,6 +130,7 @@ TEST_F(LowLevelCameraTest, ShouldSendReset)
     ExpectRequestAndResponse(commands::Reset, commands::Ack<CameraCmd::Reset>, true, ResetTimeout);
 
     ASSERT_THAT(_driver.SendReset(), Eq(true));
+    ASSERT_THAT(_error_counter.Current(), Eq(0));
 }
 
 TEST_F(LowLevelCameraTest, ShouldSendJPEGInitial)
@@ -126,6 +138,7 @@ TEST_F(LowLevelCameraTest, ShouldSendJPEGInitial)
     ExpectRequestAndResponse(commands::Init<CameraJPEGResolution::_160x128>, commands::Ack<CameraCmd::Initial>);
 
     ASSERT_THAT(_driver.SendJPEGInitial(CameraJPEGResolution::_160x128), Eq(true));
+    ASSERT_THAT(_error_counter.Current(), Eq(0));
 }
 
 TEST_F(LowLevelCameraTest, ShouldSendGetPictureJPEG)
@@ -139,6 +152,7 @@ TEST_F(LowLevelCameraTest, ShouldSendGetPictureJPEG)
     ASSERT_THAT(_driver.SendGetPictureJPEG(CameraPictureType::Enum::Snapshot, pictureData), Eq(true));
     ASSERT_THAT(pictureData.type, Eq(CameraPictureType::Enum::Snapshot));
     ASSERT_THAT(pictureData.dataLength, Eq(0x030201U));
+    ASSERT_THAT(_error_counter.Current(), Eq(0));
 }
 
 TEST_F(LowLevelCameraTest, GetPictureShouldFailIfDataResponseIsInvalid)
@@ -150,6 +164,7 @@ TEST_F(LowLevelCameraTest, GetPictureShouldFailIfDataResponseIsInvalid)
 
     PictureData pictureData;
     ASSERT_THAT(_driver.SendGetPictureJPEG(CameraPictureType::Enum::Snapshot, pictureData), Eq(false));
+    ASSERT_THAT(_error_counter.Current(), Eq(0));
 }
 
 TEST_F(LowLevelCameraTest, ShouldSendSnapshot)
@@ -159,6 +174,7 @@ TEST_F(LowLevelCameraTest, ShouldSendSnapshot)
         commands::Ack<CameraCmd::Snapshot>);                //
 
     ASSERT_THAT(_driver.SendSnapshot(CameraSnapshotType::Compressed), Eq(true));
+    ASSERT_THAT(_error_counter.Current(), Eq(0));
 }
 
 TEST_F(LowLevelCameraTest, ShouldSendSetPackageSize)
@@ -168,11 +184,13 @@ TEST_F(LowLevelCameraTest, ShouldSendSetPackageSize)
         commands::Ack<CameraCmd::SetPackageSize>); //
 
     ASSERT_THAT(_driver.SendSetPackageSize(512), Eq(true));
+    ASSERT_THAT(_error_counter.Current(), Eq(0));
 }
 
 TEST_F(LowLevelCameraTest, SetPackageSizeShouldFailIfPackageSizeIsIncorrect)
 {
     ASSERT_THAT(_driver.SendSetPackageSize(1024), Eq(false));
+    ASSERT_THAT(_error_counter.Current(), Eq(0));
 }
 
 TEST_F(LowLevelCameraTest, ShouldSendSetBaudRate)
@@ -182,6 +200,7 @@ TEST_F(LowLevelCameraTest, ShouldSendSetBaudRate)
         commands::Ack<CameraCmd::SetBaudRate>); //
 
     ASSERT_THAT(_driver.SendSetBaudRate(0x00, 0x02), Eq(true));
+    ASSERT_THAT(_error_counter.Current(), Eq(0));
 }
 
 TEST_F(LowLevelCameraTest, ShouldSendAckWithResponse)
@@ -193,6 +212,7 @@ TEST_F(LowLevelCameraTest, ShouldSendAckWithResponse)
         commands::Ack<CameraCmd::None>);                   // not important to test
 
     ASSERT_THAT(_driver.SendAckWithResponse(CameraCmd::None, 0x0001, receiveBuffer), Eq(true));
+    ASSERT_THAT(_error_counter.Current(), Eq(0));
 }
 
 TEST_F(LowLevelCameraTest, TestSendAckWithResponseWhenLineFails)
@@ -205,4 +225,5 @@ TEST_F(LowLevelCameraTest, TestSendAckWithResponseWhenLineFails)
         false);                                            //
 
     ASSERT_THAT(_driver.SendAckWithResponse(CameraCmd::None, 0x0001, receiveBuffer), Eq(false));
+    ASSERT_THAT(_error_counter.Current(), Eq(5));
 }

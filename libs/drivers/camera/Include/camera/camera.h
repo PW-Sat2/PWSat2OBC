@@ -44,9 +44,10 @@ namespace devices
           public:
             /**
              * @brief Constructs @ref camera driver instance
+             * @param errorCounting Error counting mechanism
              * @param lineIO Line interface to use
              */
-            Camera(ILineIO& lineIO);
+            Camera(error_counter::ErrorCounting& errorCounting, ILineIO& lineIO);
 
             /**
              * @brief Initializes the camera by performing the sync

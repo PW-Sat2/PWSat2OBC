@@ -5,6 +5,7 @@
 #include <gmock/gmock.h>
 
 #include "mock/LineIOMock.hpp"
+#include "mock/error_counter.hpp"
 #include "utils.hpp"
 
 #include "CameraTestCommands.hpp"
@@ -28,7 +29,7 @@ using namespace std::chrono_literals;
 class CameraTest : public Test
 {
   public:
-    CameraTest() : _camera(_lineIOMock)
+    CameraTest() : _errors(_errorsConfig), _error_counter(_errors), _camera(_errors, _lineIOMock)
     {
     }
 
@@ -67,6 +68,10 @@ class CameraTest : public Test
     {
         EXPECT_CALL(_lineIOMock, PrintBuffer(ElementsAreArray(command))).Times(1);
     }
+
+    testing::NiceMock<ErrorCountingConfigrationMock> _errorsConfig;
+    error_counter::ErrorCounting _errors;
+    error_counter::ErrorCounter<LowLevelCameraDriver::ErrorCounter::DeviceId> _error_counter;
 
     StrictMock<LineIOMock> _lineIOMock;
     Camera _camera;
