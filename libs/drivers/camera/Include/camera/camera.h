@@ -85,8 +85,6 @@ namespace devices
             static_assert(MaxSyncRetries > 0, "There must be at least one sync retry");
 
             bool CameraSync(uint8_t& syncCount);
-
-            bool isInitialized = false;
         };
     }
 }
