@@ -24,9 +24,7 @@ namespace services
              * @param successful true if syncing was successful, false otherwise
              * @param retryCount Number of retires before syncing finished
              */
-            SyncResult(bool successful, int retryCount) : Successful(successful), RetryCount(retryCount)
-            {
-            }
+            SyncResult(bool successful, int retryCount);
 
             /** @brief true if syncing was successful, false otherwise */
             const bool Successful;
@@ -53,9 +51,9 @@ namespace services
          */
         enum class PhotoResolution
         {
-            p128 = 0x03, //!< p128
-            p240 = 0x05, //!< p240
-            p480 = 0x07, //!< p480
+            p128 = 0x03, //!< 128p
+            p240 = 0x05, //!< 240p
+            p480 = 0x07, //!< 480p
         };
 
         /**
@@ -71,6 +69,7 @@ namespace services
 
             /**
              * @brief Takes photo
+             * @param resolution Photo resolution
              * @return Operation result
              */
             virtual TakePhotoResult TakePhoto(PhotoResolution resolution) = 0;

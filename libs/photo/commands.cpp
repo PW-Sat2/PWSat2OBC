@@ -7,6 +7,10 @@ namespace services
 {
     namespace photo
     {
+        SyncResult::SyncResult(bool successful, int retryCount) : Successful(successful), RetryCount(retryCount)
+        {
+        }
+
         DisableCamera::DisableCamera(Camera camera) : _which(camera)
         {
         }
@@ -22,11 +26,6 @@ namespace services
         DownloadPhoto::DownloadPhoto(Camera camera, std::uint8_t bufferId) : _which(camera), _bufferId(bufferId)
         {
         }
-
-        //        SavePhoto::SavePhoto(std::uint8_t bufferId, const char* path) : _bufferId(bufferId)
-        //        {
-        //            std::strcpy(this->_path, path);
-        //        }
 
         SavePhoto::SavePhoto(std::uint8_t bufferId, const char* pathFmt, ...) : _bufferId(bufferId)
         {
