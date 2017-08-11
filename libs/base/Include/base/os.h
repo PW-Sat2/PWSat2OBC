@@ -129,6 +129,8 @@ enum class OSResult
     Overflow = EOVERFLOW,
     /** Operation canceled */
     Cancelled = ECANCELED,
+    /** Power failure */
+    PowerFailure = 201
 
 };
 

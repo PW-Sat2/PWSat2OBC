@@ -23,6 +23,9 @@ struct PowerControlMock : services::power::IPowerControl
 
     MOCK_METHOD1(SensPower, bool(bool enable));
     MOCK_METHOD1(SunSPower, bool(bool enable));
+
+    MOCK_METHOD1(CameraWing, bool(bool enable));
+    MOCK_METHOD1(CameraNadir, bool(bool enable));
 };
 
 #endif /* UNIT_TESTS_BASE_MOCK_POWER_HPP_ */

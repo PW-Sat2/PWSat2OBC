@@ -19,6 +19,7 @@
 #include "n25q/n25q.h"
 #include "n25q/yaffs.h"
 #include "obc/adcs.hpp"
+#include "obc/camera.hpp"
 #include "obc/communication.h"
 #include "obc/experiments.hpp"
 #include "obc/fdir.hpp"
@@ -130,6 +131,9 @@ struct OBC
 
     /** @brief Camera object attached to UART */
     devices::camera::Camera camera;
+
+    /** @brief Camera */
+    obc::OBCCamera Camera;
 };
 
 LineIO& OBC::GetLineIO()

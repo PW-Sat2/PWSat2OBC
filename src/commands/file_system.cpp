@@ -123,7 +123,7 @@ void FSReadFile(uint16_t argc, char* argv[])
     GetTerminal().Puts(buf);
     GetTerminal().NewLine();
 
-    std::array<uint8_t, 100> buffer;
+    std::array<uint8_t, 1000> buffer;
 
     while (true)
     {

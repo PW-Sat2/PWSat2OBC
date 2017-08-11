@@ -81,6 +81,20 @@ namespace services
              * @return Operation status
              */
             virtual bool SunSPower(bool enabled) = 0;
+
+            /**
+             * @brief Sets state of wing camera power LCL
+             * @param enabled true to turn on LCL, false to turn off
+             * @return Operation status
+             */
+            virtual bool CameraWing(bool enabled) = 0;
+
+            /**
+             * @brief Sets state of nadir camera power LCL
+             * @param enabled true to turn on LCL, false to turn off
+             * @return Operation status
+             */
+            virtual bool CameraNadir(bool enabled) = 0;
         };
 
         /** @} */

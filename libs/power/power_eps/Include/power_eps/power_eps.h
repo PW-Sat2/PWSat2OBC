@@ -33,6 +33,9 @@ namespace services
             virtual bool SensPower(bool enabled) override;
             virtual bool SunSPower(bool enabled) override;
 
+            virtual bool CameraWing(bool enabled) override;
+            virtual bool CameraNadir(bool enabled) override;
+
           private:
             /** @brief EPS driver */
             devices::eps::EPSDriver& _eps;
