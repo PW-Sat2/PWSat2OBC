@@ -1,7 +1,6 @@
+import imp
 import os
 import sys
-
-import imp
 
 try:
     from obc import OBC, SerialPortTerminal
@@ -15,8 +14,8 @@ from IPython.terminal.prompts import Prompts
 from pygments.token import Token
 from traitlets.config.loader import Config
 import socket
-from utils import ensure_string
-from devices import UplinkFrame
+from utils import ensure_string, ensure_byte_list
+import response_frames
 
 parser = argparse.ArgumentParser()
 
@@ -30,6 +29,9 @@ parser.add_argument('-p', '--port', required=True,
 args = parser.parse_args()
 
 imp.load_source('config', args.config)
+
+frame_decoder = response_frames.FrameDecoder(response_frames.frame_factories)
+
 
 def read_all(s, size):
     result = ""
@@ -52,9 +54,45 @@ def send(frame):
 
     data = read_all(sock, 3)
 
+    sock.shutdown(socket.SHUT_RDWR)
     sock.close()
 
     return data == 'ACK'
+
+
+def receive(decode=True):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect(('127.0.0.1', 1234))
+
+    sock.sendall('R')
+
+    data = read_all(sock, 3)
+
+    if data != 'ACK':
+        raise EnvironmentError('Server not responed with ACK')
+
+    count = ord(read_all(sock, 1))
+
+    frames = []
+    for i in xrange(count):
+        size = ord(read_all(sock, 1))
+        frame_bytes = read_all(sock, size)
+        frame_bytes = ensure_byte_list(frame_bytes)
+
+        if decode:
+            decoded = frame_decoder.decode(frame_bytes)
+            frames.append(decoded)
+        else:
+            frames.append(frame_bytes)
+
+    data = read_all(sock, 3)
+    if data != 'ACK':
+        raise EnvironmentError('Server not responed with ACK')
+
+    sock.shutdown(socket.SHUT_RDWR)
+    sock.close()
+
+    return frames
 
 
 class MyPrompt(Prompts):
@@ -64,8 +102,7 @@ class MyPrompt(Prompts):
 
 
 cfg = Config()
-cfg.InteractiveShellEmbed.exec_lines.append('print "Dupa"')
-shell = InteractiveShellEmbed(config=cfg, user_ns={'send': send, 'f': UplinkFrame(ord('P'), 'ABC')},
+shell = InteractiveShellEmbed(config=cfg, user_ns={'send': send, 'receive': receive},
                               banner2='COMM Terminal')
 shell.prompts = MyPrompt(shell)
 shell.run_code('from telecommand import *')

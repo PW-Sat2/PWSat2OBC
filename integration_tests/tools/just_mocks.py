@@ -1,8 +1,15 @@
+import os
+import sys
+try:
+    from i2cMock import I2CMock
+except ImportError:
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+    from i2cMock import I2CMock
+
 import argparse
 import imp
 import logging
-import os
-import sys
+from Queue import Empty
 from threading import Thread
 from time import sleep
 import colorlog
@@ -10,12 +17,7 @@ from datetime import datetime
 import binascii
 from SocketServer import ThreadingTCPServer, BaseRequestHandler
 
-try:
-    from i2cMock import I2CMock
-except ImportError:
-    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-    from i2cMock import I2CMock
-
+from utils import ensure_string
 
 def _setup_log():
     root_logger = logging.getLogger()
@@ -142,6 +144,20 @@ class CommHandler(BaseRequestHandler):
         self.request.sendall('ACK')
 
     def _receive_frame(self):
+        frames_in_buffer = []
+
+        while True:
+            try:
+                frame = self.server.comm.transmitter.get_message_from_buffer(0)
+                frames_in_buffer.append(frame)
+            except Empty:
+                break
+
+        self.request.sendall('ACK')
+        self.request.sendall(chr(len(frames_in_buffer)))
+        for f in frames_in_buffer:
+            self.request.sendall(chr(len(f)))
+            self.request.sendall(ensure_string(f))
         self.request.sendall('ACK')
 
     def handle(self):
