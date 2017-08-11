@@ -7,6 +7,7 @@
 #include "experiment/fibo/fibo.h"
 #include "experiment/flash/flash.hpp"
 #include "experiment/leop/leop.hpp"
+#include "experiment/radfet/radfet.hpp"
 #include "experiment/suns/suns.hpp"
 #include "experiments/experiments.h"
 #include "fs/fs.h"
@@ -90,7 +91,8 @@ namespace obc
         experiment::adcs::DetumblingExperiment,               //
         experiment::leop::LaunchAndEarlyOrbitPhaseExperiment, //
         experiment::suns::SunSExperiment,                     //
-        experiment::erase_flash::EraseFlashExperiment         //
+        experiment::erase_flash::EraseFlashExperiment,        //
+        experiment::radfet::RadFETExperiment                  //
         >;
 
     /**
