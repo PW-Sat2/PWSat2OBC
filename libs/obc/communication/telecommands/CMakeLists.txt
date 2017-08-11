@@ -14,6 +14,7 @@ set(SOURCES
     sail.cpp
     periodic_message.cpp
     flash.cpp
+    i2c.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

@@ -9,6 +9,7 @@ from fdir import *
 from sail import *
 from periodic_message import *
 from antenna import *
+from i2c import *
 
 __all__ = [
     'DownloadFile',
@@ -29,5 +30,6 @@ __all__ = [
     'SetPeriodicMessageTelecommand',
     'StopAntennaDeployment',
     'EraseFlash'
+    'RawI2C'
 ]
 
