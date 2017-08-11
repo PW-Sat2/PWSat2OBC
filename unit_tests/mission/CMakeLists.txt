@@ -22,6 +22,7 @@ set(SOURCES
   Experiments/fs/ExperimentFileTest.cpp
   Experiments/SunS/SunSExperimentTest.cpp 
   Experiments/EraseFlash/EraseFlashExperimentTest.cpp 
+  Experiments/Sail/SailExperimentTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
@@ -43,6 +44,7 @@ target_link_libraries(${NAME}
     exp_fs
     exp_suns
     exp_flash
+    exp_sail
     unit_tests_base
     payload
 )
