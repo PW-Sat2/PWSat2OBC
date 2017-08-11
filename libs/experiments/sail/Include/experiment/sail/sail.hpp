@@ -66,41 +66,122 @@ namespace experiment
              */
             void SetSailController(mission::IOpenSail& sailController);
 
+            /**
+             * @brief Returns time to next experiment telemetry acquisition.
+             * @param time Current mission time.
+             * @return Time to next experiment telemetry acquisition or default value if it is not available
+             */
             std::chrono::milliseconds TimeToGetTelemetry(const Option<std::chrono::milliseconds>& time) const;
 
+            /**
+             * @brief Returns time to next experiment photo.
+             * @param time Current mission time.
+             * @return Time to next experiment photo or default value if it is not available
+             */
             std::chrono::milliseconds TimeToTakePhoto(const Option<std::chrono::milliseconds>& time) const;
 
+            /**
+              * @brief Returns time to next experiment end.
+              * @param time Current mission time.
+              * @return Time to next experiment end or default value if it is not available
+              */
             std::chrono::milliseconds TimeToEnd(const Option<std::chrono::milliseconds>& time) const;
 
+            /**
+             * @brief Returns information whether the telemetry should be immediatelly acquired.
+             * @param time Current mission time.
+             * @return True when experiment telemetry should be immediatelly acquired false otherwise.
+             */
             bool NeedToGetTelemetry(const Option<std::chrono::milliseconds>& time) const;
 
+            /**
+             * @brief Returns information whether the photo should be immediatelly taken.
+             * @param time Current mission time.
+             * @return True when photo should be immediatelly taken false otherwise.
+             */
             bool NeedToTakePhoto(const Option<std::chrono::milliseconds>& time) const;
 
+            /**
+             * @brief Returns information whether the experiment should be immediatelly ended.
+             * @param time Current mission time.
+             * @return True when experiment should be immediatelly ended false otherwise.
+             */
             bool NeedToEnd(const Option<std::chrono::milliseconds>& time) const;
 
+            /**
+             * @brief Acquire experiment telemetry & save it to experiment file.
+             * @param time Current mission time.
+             */
             void GetTelemetry(const Option<std::chrono::milliseconds>& time);
 
+            /**
+             * @brief Take photo on current camera & switch to the next one.
+             * @param time Current mission time.
+             */
             void TakePhoto(const Option<std::chrono::milliseconds>& time);
 
+            /**
+             * @brief Returns time to the next important experiment event.
+             * @param time Current mission time.
+             * @return Time to the next important experiment event.
+             */
             std::chrono::milliseconds TimeToNextEvent(const Option<std::chrono::milliseconds>& time) const;
 
+            /**
+             * @brief Perform experiment last action.
+             */
             void FinalizeExperiment();
 
+            /**
+             * @brief Save all cached photos to experiment files.
+             */
             void SavePhotos();
 
-            void TakePhoto(services::photo::Camera camera, services::photo::PhotoResolution resolution);
+            /**
+             * @brief Set sail experiment end time.
+             * @param experimentEnd New experiment end time.
+             */
+            void SetExperimentEnd(std::chrono::milliseconds experimentEnd);
 
-            void SetExperimentEnd(std::chrono::milliseconds experimentBegin);
+            /**
+             * @brief Set next telemetry acquisition time.
+             * @param nextTelemetryAcquisition Next telemetry acquisition time.
+             */
+            void SetNextTelemetryAcquisition(std::chrono::milliseconds nextTelemetryAcquisition);
 
-            void SetNextTelemetryAcquisition(std::chrono::milliseconds lastTelemetryAcquisition);
-
-            void SetNextPhotoTaken(std::chrono::milliseconds lastPhotoTaken);
+            /**
+             * @brief Sets next photo time.
+             * @param nextPhotoTaken Next photo time.
+             */
+            void SetNextPhotoTaken(std::chrono::milliseconds nextPhotoTaken);
 
           private:
+            /**
+             * @brief Make a photo.
+             * @param camera Id of the camera to take photo
+             * @param resolution Requested photo resolution.
+             */
+            void TakePhoto(services::photo::Camera camera, services::photo::PhotoResolution resolution);
+
+            /**
+             * @brief Returns id of the camera that should be used next time.
+             * @return Id of the next camera.
+             */
             services::photo::Camera GetNextCamera() const;
 
+            /**
+             * @brief Save to file gyroscope telemetry.
+             * @param gyroTelemetry Reference to gyroscope telemetry to save.
+             * @return Operation status. True in case of success, false otherwise.
+             */
             bool Save(const devices::gyro::GyroscopeTelemetry& gyroTelemetry);
 
+            /**
+              * @brief Save to file sail telemetry.
+              * @param sailIndicator Sail opening indicator.
+              * @param sailTemperature Sail temperature.
+              * @return Operation status. True in case of success, false otherwise.
+              */
             bool Save(bool sailIndicator, std::uint16_t sailTemperature);
 
             experiments::fs::ExperimentFile _file;
@@ -145,19 +226,19 @@ namespace experiment
             return (this->_lastCamera == services::photo::Camera::Wing) ? services::photo::Camera::Nadir : services::photo::Camera::Wing;
         }
 
-        inline void SailExperiment::SetExperimentEnd(std::chrono::milliseconds experimentBegin)
+        inline void SailExperiment::SetExperimentEnd(std::chrono::milliseconds experimentEnd)
         {
-            this->_experimentEnd = experimentBegin;
+            this->_experimentEnd = experimentEnd;
         }
 
-        inline void SailExperiment::SetNextTelemetryAcquisition(std::chrono::milliseconds lastTelemetryAcquisition)
+        inline void SailExperiment::SetNextTelemetryAcquisition(std::chrono::milliseconds nextTelemetryAcquisition)
         {
-            this->_nextTelemetryAcquisition = lastTelemetryAcquisition;
+            this->_nextTelemetryAcquisition = nextTelemetryAcquisition;
         }
 
-        inline void SailExperiment::SetNextPhotoTaken(std::chrono::milliseconds lastPhotoTaken)
+        inline void SailExperiment::SetNextPhotoTaken(std::chrono::milliseconds nextPhotoTaken)
         {
-            this->_nextPhoto = lastPhotoTaken;
+            this->_nextPhoto = nextPhotoTaken;
         }
     }
 }
