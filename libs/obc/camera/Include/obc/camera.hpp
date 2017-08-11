@@ -16,27 +16,9 @@ namespace obc
      */
 
     /**
-     * @brief Dummy camera
-     */
-    class DummyCamera : public services::photo::ICamera
-    {
-      public:
-        DummyCamera(devices::camera::Camera& camera) : _camera(camera)
-        {
-        }
-
-        virtual services::photo::SyncResult Sync() override;
-        virtual services::photo::TakePhotoResult TakePhoto(services::photo::PhotoResolution resolution) override;
-        virtual services::photo::DownloadPhotoResult DownloadPhoto(gsl::span<std::uint8_t> buffer) override;
-
-      private:
-        devices::camera::Camera& _camera;
-    };
-
-    /**
      * @brief OBC Camera
      */
-    class OBCCamera : private services::photo::ICameraSelector
+    class OBCCamera : private services::photo::ICameraSelector, private services::photo::ICamera
     {
       public:
         /**
@@ -61,17 +43,21 @@ namespace obc
          */
         void InitializeRunlevel2();
 
-        /** @brief Camera driver */
-        DummyCamera CameraDriver;
-
         /** @brief Photo service */
         services::photo::PhotoService PhotoService;
 
       private:
         virtual void Select(services::photo::Camera camera) override;
 
+        virtual services::photo::SyncResult Sync() override;
+        virtual services::photo::TakePhotoResult TakePhoto(services::photo::PhotoResolution resolution) override;
+        virtual services::photo::DownloadPhotoResult DownloadPhoto(gsl::span<std::uint8_t> buffer) override;
+
         /** @brief Camera select pin */
         const drivers::gpio::Pin& _camSelect;
+
+        /** @brief Camera driver */
+        devices::camera::Camera& _camera;
     };
 
     /** @} */

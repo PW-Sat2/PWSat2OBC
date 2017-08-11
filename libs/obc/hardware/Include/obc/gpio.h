@@ -125,6 +125,7 @@ namespace obc
         const I2CPins<TI2C0> I2C_0;
         /** @brief I2C1 */
         const I2CPins<TI2C1> I2C_1;
+        /** @brief Camera selector */
         const drivers::gpio::OutputPin<TCamSelect> CamSelect;
 
         /** @brief PayloadInterrupt */
