@@ -116,6 +116,7 @@ namespace obc
          * @param payload Payload driver
          * @param n25q Redundant N25Q driver
          * @param transmitter Frame transmitter
+         * @param[in] photoService Reference to object capable of taking photos
          * @param[in] sailState Pin connected to sail indicator
          */
         OBCExperiments(services::fs::IFileSystem& fs,
