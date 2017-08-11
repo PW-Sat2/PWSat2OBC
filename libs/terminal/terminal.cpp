@@ -8,6 +8,8 @@
 #include "system.h"
 #include "terminal.h"
 
+using namespace std::literals;
+
 static void parseCommandLine(char line[],
     char** commandName,
     char** arguments,
@@ -66,7 +68,7 @@ void Terminal::PrintBuffer(gsl::span<const std::uint8_t> buffer)
 
 void Terminal::ExchangeBuffers(gsl::span<const std::uint8_t> outputBuffer, gsl::span<std::uint8_t> inputBuffer)
 {
-    this->_stdio.ExchangeBuffers(&this->_stdio, outputBuffer, inputBuffer);
+    this->_stdio.ExchangeBuffers(&this->_stdio, outputBuffer, inputBuffer, 5s);
 }
 
 void Terminal::HandleCommand(char* buffer)

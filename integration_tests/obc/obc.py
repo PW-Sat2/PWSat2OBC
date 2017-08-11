@@ -22,7 +22,7 @@ from .fram import FRAMMixin
 from .boot_settings import BootSettingsMixin
 from .payload import PayloadMixin
 from .runlevel import RunlevelMixin
-
+from .camera import CameraMixin
 
 class OBC(OBCMixin,
           FileSystemMixin,
@@ -42,7 +42,8 @@ class OBC(OBCMixin,
           FRAMMixin,
           BootSettingsMixin,
           PayloadMixin,
-          RunlevelMixin
+          RunlevelMixin,
+          CameraMixin
           ):
     def __init__(self, terminal):
         self.log = logging.getLogger("OBC")

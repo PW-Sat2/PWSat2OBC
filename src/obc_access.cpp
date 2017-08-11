@@ -89,3 +89,8 @@ temp::ADCTemperatureReader& GetMCUTemperature()
 {
     return Main.Hardware.MCUTemperature;
 }
+
+devices::camera::Camera& GetCamera()
+{
+    return Main.camera;
+}

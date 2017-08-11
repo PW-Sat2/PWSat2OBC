@@ -180,6 +180,9 @@ namespace obc
         /** @brief SunS handling */
         devices::suns::SunSDriver SunS;
 
+        /** @brief Camera attached to UART */
+        drivers::uart::UART<io_map::UART_0> Camera;
+
         /** @brief Termnial attached to UART */
         drivers::uart::UART<io_map::UART_1> Terminal;
 

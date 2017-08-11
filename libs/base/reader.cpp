@@ -92,6 +92,40 @@ int16_t Reader::ReadSignedWordBE()
     return static_cast<int16_t>(this->ReadWordBE());
 }
 
+uint32_t Reader::ReadWordAndHalfLE()
+{
+    if (!UpdateState(3))
+    {
+        return 0;
+    }
+    else
+    {
+        uint32_t value = this->buffer[this->position - 1];
+        value <<= 8;
+        value += this->buffer[this->position - 2];
+        value <<= 8;
+        value += this->buffer[this->position - 3];
+        return value;
+    }
+}
+
+uint32_t Reader::ReadWordAndHalfBE()
+{
+    if (!UpdateState(3))
+    {
+        return 0;
+    }
+    else
+    {
+        uint32_t value = this->buffer[this->position - 3];
+        value <<= 8;
+        value += this->buffer[this->position - 2];
+        value <<= 8;
+        value += this->buffer[this->position - 1];
+        return value;
+    }
+}
+
 uint32_t Reader::ReadDoubleWordLE()
 {
     if (!UpdateState(4))
