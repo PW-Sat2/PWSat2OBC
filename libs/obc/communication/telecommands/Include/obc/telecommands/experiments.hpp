@@ -150,7 +150,7 @@ namespace obc
           public:
             /**
              * @brief Ctor
-             * @param experiments OBC Experiments
+             * @param controller OBC experiments controller
              */
             PerformSailExperiment(experiments::IExperimentController& controller);
 
