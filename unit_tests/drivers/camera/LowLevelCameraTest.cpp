@@ -4,8 +4,10 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "mock/LineIOMock.hpp"
 #include "utils.hpp"
 
+#include "CameraTestCommands.hpp"
 #include "camera/camera_low_level.h"
 
 using std::array;
@@ -21,54 +23,8 @@ using testing::DoAll;
 using namespace devices::camera;
 using namespace std::chrono_literals;
 
-struct LineIOMock : public ILineIO
-{
-    MOCK_METHOD1(Puts, void(const char* s));
-
-    MOCK_METHOD2(VPrintf, void(const char* text, va_list args));
-
-    MOCK_METHOD1(PrintBuffer, void(gsl::span<const std::uint8_t> buffer));
-
-    MOCK_METHOD3(Readline, size_t(char* buffer, size_t bufferLength, char promptChar));
-
-    MOCK_METHOD2(Read, bool(gsl::span<std::uint8_t> buffer, std::chrono::milliseconds timeout));
-
-    MOCK_METHOD3(ExchangeBuffers,
-        bool(gsl::span<const std::uint8_t> outputBuffer, gsl::span<std::uint8_t> inputBuffer, std::chrono::milliseconds timeout));
-};
-
 static constexpr std::chrono::milliseconds DefaultTimeout = 5s;
 static constexpr std::chrono::milliseconds ResetTimeout = std::chrono::milliseconds(100);
-
-namespace commands
-{
-    using Command = std::array<uint8_t, 6>;
-
-    template <CameraCmd CommandID> static constexpr Command Ack{0xAA, 0x0E, static_cast<uint8_t>(CommandID), 0x00, 0x00, 0x00};
-
-    template <CameraCmd CommandID, uint8_t PackageID>
-    static constexpr Command AckPackage{0xAA, 0x0E, static_cast<uint8_t>(CommandID), 0x00, 0x00, PackageID};
-
-    static constexpr Command Sync{0xAA, 0x0D, 0x00, 0x00, 0x00, 0x00};
-    static constexpr Command Reset{0xAA, 0x08, 0x00, 0x00, 0x00, 0xFF};
-    static constexpr Command Invalid{0xAA, 0xFF, 0x00, 0x00, 0x00, 0x00};
-
-    template <CameraJPEGResolution resolution>
-    static constexpr Command Init{0xAA, 0x01, 0x00, 0x07, 0x07, static_cast<uint8_t>(resolution)};
-
-    template <CameraPictureType::Enum type> static constexpr Command GetPicture{0xAA, 0x04, static_cast<uint8_t>(type), 0x00, 0x00, 0x00};
-
-    template <CameraPictureType::Enum type, uint8_t lengthLow, uint8_t lengthMid, uint8_t lengthHigh>
-    static constexpr Command Data{0xAA, 0x0A, static_cast<uint8_t>(type), lengthLow, lengthMid, lengthHigh};
-
-    template <CameraSnapshotType type> static constexpr Command Snapshot{0xAA, 0x05, static_cast<uint8_t>(type), 0x00, 0x00, 0x00};
-
-    template <uint8_t packageSizeLow, uint8_t packageSizeHigh>
-    static constexpr Command SetPackageSize{0xAA, 0x06, 0x08, packageSizeLow, packageSizeHigh, 0x00};
-
-    template <uint8_t firstDivider, uint8_t secondDivider>
-    static constexpr Command SetBaudRate{0xAA, 0x07, firstDivider, secondDivider, 0x00, 0x00};
-}
 
 class LowLevelCameraTest : public Test
 {
