@@ -5,6 +5,7 @@
 #include <cstdint>
 #include "camera_types.h"
 #include "command_factory.h"
+#include "error_counter/error_counter.hpp"
 #include "gsl/span"
 #include "line_io.h"
 #include "uart/uart.hpp"
@@ -19,9 +20,10 @@ namespace devices
           public:
             /**
              * @brief Constructs Low Level Camera driver instance
+             * @param errorCounting Error counting mechanism
              * @param lineIO Line interface to use
              */
-            LowLevelCameraDriver(ILineIO& lineIO);
+            LowLevelCameraDriver(error_counter::ErrorCounting& errorCounting, ILineIO& lineIO);
 
             /**
              * @brief Sends SNAPSHOT command
@@ -95,9 +97,15 @@ namespace devices
                 gsl::span<uint8_t> receiveBuffer,                    //
                 std::chrono::milliseconds timeout = DefaultTimeout); //
 
+            /** @brief Error counter type. */
+            using ErrorCounter = error_counter::ErrorCounter<10>;
+
           private:
             devices::camera::CommandFactory _commandFactory;
             ILineIO& _lineIO;
+            ErrorCounter _error;
+
+            using ErrorReporter = error_counter::AggregatedErrorReporter<ErrorCounter::DeviceId>;
 
             void LogSendCommand(gsl::span<uint8_t> cmd);
 

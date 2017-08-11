@@ -17,7 +17,8 @@ gsl::span<uint8_t> SkipAck(gsl::span<uint8_t> buffer)
     return buffer.last(buffer.length() - CommandFrameSize);
 }
 
-LowLevelCameraDriver::LowLevelCameraDriver(ILineIO& lineIO) : _lineIO(lineIO)
+LowLevelCameraDriver::LowLevelCameraDriver(error_counter::ErrorCounting& errorCounting, ILineIO& lineIO)
+    : _lineIO(lineIO), _error(errorCounting)
 {
 }
 
@@ -27,6 +28,7 @@ bool LowLevelCameraDriver::SendCommand( //
     uint8_t additionalBytes,            //
     std::chrono::milliseconds timeout)
 {
+    ErrorReporter errorContext(_error);
     uint8_t commandCode = commandBuffer[1];
 
     LogSendCommand(commandBuffer);
@@ -35,6 +37,7 @@ bool LowLevelCameraDriver::SendCommand( //
     if (!readSucceeded)
     {
         LOG(LOG_LEVEL_ERROR, "LineIO read timeout");
+        errorContext.Counter().Failure();
         return false;
     }
 
@@ -69,6 +72,7 @@ bool LowLevelCameraDriver::SendAckWithResponse( //
     gsl::span<uint8_t> receiveBuffer,           //
     std::chrono::milliseconds timeout)
 {
+    ErrorReporter errorContext(_error);
     std::array<uint8_t, CommandFrameSize> commandBuffer;
 
     uint8_t lowerPackageIdByte = packageId & 0xff;
@@ -82,6 +86,7 @@ bool LowLevelCameraDriver::SendAckWithResponse( //
     if (!readSucceeded)
     {
         LOG(LOG_LEVEL_ERROR, "LineIO read timeout");
+        errorContext.Counter().Failure();
         return false;
     }
 
