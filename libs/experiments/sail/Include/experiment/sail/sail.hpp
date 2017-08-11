@@ -84,26 +84,32 @@ namespace experiment
 
             std::chrono::milliseconds TimeToNextEvent(const Option<std::chrono::milliseconds>& time) const;
 
-            services::photo::Camera GetNextCamera() const;
-
             void FinalizeExperiment();
 
             void SavePhotos();
 
             void TakePhoto(services::photo::Camera camera, services::photo::PhotoResolution resolution);
 
+            void SetExperimentEnd(std::chrono::milliseconds experimentBegin);
+
+            void SetNextTelemetryAcquisition(std::chrono::milliseconds lastTelemetryAcquisition);
+
+            void SetNextPhotoTaken(std::chrono::milliseconds lastPhotoTaken);
+
           private:
+            services::photo::Camera GetNextCamera() const;
+
             bool Save(const devices::gyro::GyroscopeTelemetry& gyroTelemetry);
 
             bool Save(bool sailIndicator, std::uint16_t sailTemperature);
 
             experiments::fs::ExperimentFile _file;
 
-            Option<std::chrono::milliseconds> _experimentBegin;
+            std::chrono::milliseconds _experimentEnd;
 
-            Option<std::chrono::milliseconds> _lastTelemetryAcquisition;
+            std::chrono::milliseconds _nextTelemetryAcquisition;
 
-            Option<std::chrono::milliseconds> _lastPhotoTaken;
+            std::chrono::milliseconds _nextPhoto;
 
             std::uint8_t _photoNumber;
 
@@ -137,6 +143,21 @@ namespace experiment
         inline services::photo::Camera SailExperiment::GetNextCamera() const
         {
             return (this->_lastCamera == services::photo::Camera::Wing) ? services::photo::Camera::Nadir : services::photo::Camera::Wing;
+        }
+
+        inline void SailExperiment::SetExperimentEnd(std::chrono::milliseconds experimentBegin)
+        {
+            this->_experimentEnd = experimentBegin;
+        }
+
+        inline void SailExperiment::SetNextTelemetryAcquisition(std::chrono::milliseconds lastTelemetryAcquisition)
+        {
+            this->_nextTelemetryAcquisition = lastTelemetryAcquisition;
+        }
+
+        inline void SailExperiment::SetNextPhotoTaken(std::chrono::milliseconds lastPhotoTaken)
+        {
+            this->_nextPhoto = lastPhotoTaken;
         }
     }
 }

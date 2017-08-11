@@ -25,6 +25,12 @@ namespace experiment
 
         using namespace services::photo;
 
+        static constexpr std::chrono::milliseconds ExperimentDuration = 4 * 60s;
+
+        static constexpr std::chrono::milliseconds TelemetryAcqusitionPeriod = 1000ms;
+
+        static constexpr std::chrono::milliseconds TakingPhotosPeriod = 2500ms;
+
         SailExperiment::SailExperiment(IFileSystem& fileSystem,
             ::adcs::IAdcsCoordinator& adcsCoordinator,
             devices::gyro::IGyroscopeDriver& gyroDriver,
@@ -34,6 +40,9 @@ namespace experiment
             const drivers::gpio::Pin& sailState,
             services::time::ICurrentTime& timeProvider)
             : _file(&timeProvider),                        //
+              _experimentEnd(0ms),                         //
+              _nextTelemetryAcquisition(0ms),              //
+              _nextPhoto(0ms),                             //
               _photoNumber(0),                             //
               _lastCamera(services::photo::Camera::Nadir), //
               _fileSystem(fileSystem),                     //
@@ -42,6 +51,7 @@ namespace experiment
               _payloadDriver(payloadDriver),               //
               _powerController(powerController),           //
               _photoService(photoService),                 //
+              _sailController(nullptr),                    //
               _timeProvider(timeProvider),                 //
               _sailState(sailState)
         {
@@ -56,6 +66,11 @@ namespace experiment
         {
             do
             {
+                if (this->_sailController == nullptr)
+                {
+                    return experiments::StartResult::Failure;
+                }
+
                 if (!this->_file.Open(this->_fileSystem, "/sail.exp", FileOpen::CreateAlways, FileAccess::WriteOnly))
                 {
                     LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to open experiment file");
@@ -79,13 +94,14 @@ namespace experiment
                 this->_photoService.Schedule(EnableCamera(Camera::Wing));
                 this->_photoService.WaitForFinish(InfiniteTimeout);
 
-                this->_experimentBegin = this->_timeProvider.GetCurrentTime();
-                if (!this->_experimentBegin.HasValue)
+                const auto time = this->_timeProvider.GetCurrentTime();
+                if (!time.HasValue)
                 {
                     LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to acquire current time");
                     break;
                 }
 
+                this->_experimentEnd = time.Value + ExperimentDuration;
                 this->_sailController->OpenSail();
                 return experiments::StartResult::Success;
             } while (false);
@@ -140,49 +156,54 @@ namespace experiment
             this->_photoService.WaitForFinish(InfiniteTimeout);
         }
 
-        std::chrono::milliseconds SailExperiment::TimeToGetTelemetry(const Option<std::chrono::milliseconds>& time) const
+        static std::chrono::milliseconds TimeToEvent(const Option<std::chrono::milliseconds>& time, const std::chrono::milliseconds& next)
         {
-            if (!time.HasValue || !this->_lastTelemetryAcquisition.HasValue)
+            if (!time.HasValue)
             {
                 return 1000ms;
             }
 
-            return (time.Value - this->_lastTelemetryAcquisition.Value);
+            return next - time.Value;
+        }
+
+        static bool TimeUp(const Option<std::chrono::milliseconds>& time, const std::chrono::milliseconds& next)
+        {
+            if (!time.HasValue)
+            {
+                return false;
+            }
+
+            return time.Value >= next;
+        }
+
+        std::chrono::milliseconds SailExperiment::TimeToGetTelemetry(const Option<std::chrono::milliseconds>& time) const
+        {
+            return TimeToEvent(time, this->_nextTelemetryAcquisition);
         }
 
         std::chrono::milliseconds SailExperiment::TimeToTakePhoto(const Option<std::chrono::milliseconds>& time) const
         {
-            if (!time.HasValue || !this->_lastPhotoTaken.HasValue)
-            {
-                return 1000ms;
-            }
-
-            return (time.Value - this->_lastPhotoTaken.Value);
+            return TimeToEvent(time, this->_nextPhoto);
         }
 
         std::chrono::milliseconds SailExperiment::TimeToEnd(const Option<std::chrono::milliseconds>& time) const
         {
-            if (!time.HasValue || !this->_experimentBegin.HasValue)
-            {
-                return 1000ms;
-            }
-
-            return (time.Value - this->_experimentBegin.Value);
+            return TimeToEvent(time, this->_experimentEnd);
         }
 
         bool SailExperiment::NeedToGetTelemetry(const Option<std::chrono::milliseconds>& time) const
         {
-            return TimeToGetTelemetry(time) > 1000ms;
+            return TimeUp(time, this->_nextTelemetryAcquisition);
         }
 
         bool SailExperiment::NeedToTakePhoto(const Option<std::chrono::milliseconds>& time) const
         {
-            return TimeToTakePhoto(time) >= 2500ms;
+            return TimeUp(time, this->_nextPhoto);
         }
 
         bool SailExperiment::NeedToEnd(const Option<std::chrono::milliseconds>& time) const
         {
-            return TimeToEnd(time) >= (4 * 60s + 1s);
+            return TimeUp(time, this->_experimentEnd);
         }
 
         void SailExperiment::GetTelemetry(const Option<std::chrono::milliseconds>& time)
@@ -205,20 +226,21 @@ namespace experiment
                 LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to save sail temperature");
             }
 
-            this->_lastTelemetryAcquisition = time;
+            this->_nextTelemetryAcquisition = time.Value + TelemetryAcqusitionPeriod;
         }
 
         void SailExperiment::TakePhoto(const Option<std::chrono::milliseconds>& time)
         {
             this->_lastCamera = GetNextCamera();
             TakePhoto(this->_lastCamera, services::photo::PhotoResolution::p128);
-            this->_lastPhotoTaken = time;
+            this->_nextPhoto = time.Value + TakingPhotosPeriod;
         }
 
         std::chrono::milliseconds SailExperiment::TimeToNextEvent(const Option<std::chrono::milliseconds>& time) const
         {
-            const auto timeLeft = std::min(TimeToGetTelemetry(time), TimeToTakePhoto(time));
-            return std::min(TimeToEnd(time), timeLeft);
+            auto timeLeft = std::min(TimeToGetTelemetry(time), TimeToTakePhoto(time));
+            timeLeft = std::min(TimeToEnd(time), timeLeft);
+            return std::max(0ms, timeLeft);
         }
 
         bool SailExperiment::Save(const devices::gyro::GyroscopeTelemetry& gyroTelemetry)

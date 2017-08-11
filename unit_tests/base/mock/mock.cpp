@@ -7,6 +7,8 @@
 #include "mock/ImtqDriverMock.hpp"
 #include "mock/ImtqTelemetryCollectorMock.hpp"
 #include "mock/LineIOMock.hpp"
+#include "mock/OpenSailMock.hpp"
+#include "mock/PhotoServiceMock.hpp"
 #include "mock/experiment.hpp"
 #include "mock/fm25w.hpp"
 #include "mock/n25q.hpp"
@@ -104,6 +106,7 @@ PayloadDeviceMock::~PayloadDeviceMock()
 N25QDriverMock::N25QDriverMock()
 {
 }
+
 N25QDriverMock::~N25QDriverMock()
 {
 }
@@ -113,5 +116,21 @@ LineIOMock::LineIOMock()
 }
 
 LineIOMock::~LineIOMock()
+{
+}
+
+PhotoServiceMock::PhotoServiceMock()
+{
+}
+
+PhotoServiceMock::~PhotoServiceMock()
+{
+}
+
+OpenSailMock::OpenSailMock()
+{
+}
+
+OpenSailMock::~OpenSailMock()
 {
 }

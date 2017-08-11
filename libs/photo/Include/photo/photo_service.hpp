@@ -46,16 +46,40 @@ namespace services
              * @brief Returns camera that should be disabled
              * @return Camera
              */
-            inline Camera Which() const;
+            Camera Which() const;
+
+            /**
+             * Equality operator.
+             * @param[in] arg Reference to object to compare to
+             * @return True when both objects are the same, false otherwise.
+             */
+            bool operator==(const DisableCamera& arg) const;
+
+            /**
+             * Equality operator.
+             * @param[in] arg Reference to object to compare to
+             * @return True when both objects are the same, false otherwise.
+             */
+            bool operator!=(const DisableCamera& arg) const;
 
           private:
             /** @brief Camera to disable */
             Camera _which;
         };
 
-        Camera DisableCamera::Which() const
+        inline Camera DisableCamera::Which() const
         {
             return this->_which;
+        }
+
+        inline bool DisableCamera::operator==(const DisableCamera& arg) const
+        {
+            return this->_which == arg._which;
+        }
+
+        inline bool DisableCamera::operator!=(const DisableCamera& arg) const
+        {
+            return !(*this == arg);
         }
 
         /**
@@ -75,16 +99,40 @@ namespace services
              * @brief Returns camera that should be enabled
              * @return Camera
              */
-            inline Camera Which() const;
+            Camera Which() const;
+
+            /**
+             * Equality operator.
+             * @param[in] arg Reference to object to compare to
+             * @return True when both objects are the same, false otherwise.
+             */
+            bool operator==(const EnableCamera& arg) const;
+
+            /**
+             * Equality operator.
+             * @param[in] arg Reference to object to compare to
+             * @return True when both objects are the same, false otherwise.
+             */
+            bool operator!=(const EnableCamera& arg) const;
 
           private:
             /** @brief Camera to enable */
             Camera _which;
         };
 
-        Camera EnableCamera::Which() const
+        inline Camera EnableCamera::Which() const
         {
             return this->_which;
+        }
+
+        inline bool EnableCamera::operator==(const EnableCamera& arg) const
+        {
+            return this->_which == arg._which;
+        }
+
+        inline bool EnableCamera::operator!=(const EnableCamera& arg) const
+        {
+            return !(*this == arg);
         }
 
         /**
@@ -105,13 +153,27 @@ namespace services
              * @brief Returns camera that should be used
              * @return Camera
              */
-            inline Camera Which() const;
+            Camera Which() const;
 
             /**
              * @brief Returns photo resolution
              * @return Resolution
              */
-            inline PhotoResolution Resolution() const;
+            PhotoResolution Resolution() const;
+
+            /**
+             * Equality operator.
+             * @param[in] arg Reference to object to compare to
+             * @return True when both objects are the same, false otherwise.
+             */
+            bool operator==(const TakePhoto& arg) const;
+
+            /**
+             * Equality operator.
+             * @param[in] arg Reference to object to compare to
+             * @return True when both objects are the same, false otherwise.
+             */
+            bool operator!=(const TakePhoto& arg) const;
 
           private:
             /** @brief Camera to used */
@@ -120,14 +182,24 @@ namespace services
             PhotoResolution _resolution;
         };
 
-        Camera TakePhoto::Which() const
+        inline Camera TakePhoto::Which() const
         {
             return this->_which;
         }
 
-        PhotoResolution TakePhoto::Resolution() const
+        inline PhotoResolution TakePhoto::Resolution() const
         {
             return this->_resolution;
+        }
+
+        inline bool TakePhoto::operator==(const TakePhoto& arg) const
+        {
+            return this->_which == arg._which && this->_resolution == arg._resolution;
+        }
+
+        inline bool TakePhoto::operator!=(const TakePhoto& arg) const
+        {
+            return !(*this == arg);
         }
 
         /**
@@ -148,13 +220,27 @@ namespace services
              * @brief Returns camera that should be used
              * @return Camera
              */
-            inline Camera Which() const;
+            Camera Which() const;
 
             /**
              * @brief Returns target buffer ID
              * @return Buffer ID
              */
-            inline std::uint8_t BufferId() const;
+            std::uint8_t BufferId() const;
+
+            /**
+             * Equality operator.
+             * @param[in] arg Reference to object to compare to
+             * @return True when both objects are the same, false otherwise.
+             */
+            bool operator==(const DownloadPhoto& arg) const;
+
+            /**
+             * Equality operator.
+             * @param[in] arg Reference to object to compare to
+             * @return True when both objects are the same, false otherwise.
+             */
+            bool operator!=(const DownloadPhoto& arg) const;
 
           private:
             /** @brief Camera to use */
@@ -163,7 +249,7 @@ namespace services
             std::uint8_t _bufferId;
         };
 
-        Camera DownloadPhoto::Which() const
+        inline Camera DownloadPhoto::Which() const
         {
             return this->_which;
         }
@@ -171,6 +257,16 @@ namespace services
         inline std::uint8_t DownloadPhoto::BufferId() const
         {
             return this->_bufferId;
+        }
+
+        inline bool DownloadPhoto::operator==(const DownloadPhoto& arg) const
+        {
+            return this->_which == arg._which && this->_bufferId == arg._bufferId;
+        }
+
+        inline bool DownloadPhoto::operator!=(const DownloadPhoto& arg) const
+        {
+            return !(*this == arg);
         }
 
         /**
@@ -231,16 +327,40 @@ namespace services
              * @brief Returns sleep duration
              * @return Sleep duration
              */
-            inline std::chrono::milliseconds Duration() const;
+            std::chrono::milliseconds Duration() const;
+
+            /**
+             * Equality operator.
+             * @param[in] arg Reference to object to compare to
+             * @return True when both objects are the same, false otherwise.
+             */
+            bool operator==(const Sleep& arg) const;
+
+            /**
+             * Equality operator.
+             * @param[in] arg Reference to object to compare to
+             * @return True when both objects are the same, false otherwise.
+             */
+            bool operator!=(const Sleep& arg) const;
 
           private:
             /** @brief Sleep duration */
             std::chrono::milliseconds _duration;
         };
 
-        std::chrono::milliseconds Sleep::Duration() const
+        inline std::chrono::milliseconds Sleep::Duration() const
         {
             return this->_duration;
+        }
+
+        inline bool Sleep::operator==(const Sleep& arg) const
+        {
+            return this->_duration == arg._duration;
+        }
+
+        inline bool Sleep::operator!=(const Sleep& arg) const
+        {
+            return !(*this == arg);
         }
 
         /**
