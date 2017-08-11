@@ -12,23 +12,28 @@ struct PhotoServiceMock : services::photo::IPhotoService
 
     ~PhotoServiceMock();
 
-    MOCK_METHOD1(Schedule, void(services::photo::DisableCamera command));
+    MOCK_METHOD1(DisableCamera, void(services::photo::Camera which));
 
-    MOCK_METHOD1(Schedule, void(services::photo::EnableCamera command));
+    MOCK_METHOD1(EnableCamera, void(services::photo::Camera which));
 
-    MOCK_METHOD1(Schedule, void(services::photo::TakePhoto command));
+    MOCK_METHOD2(TakePhoto, void(services::photo::Camera which, services::photo::PhotoResolution resolution));
 
-    MOCK_METHOD1(Schedule, void(services::photo::DownloadPhoto command));
+    MOCK_METHOD2(DownloadPhoto, void(services::photo::Camera which, std::uint8_t bufferId));
 
-    MOCK_METHOD1(Schedule, void(services::photo::Reset command));
+    MOCK_METHOD0(Reset, void());
 
-    MOCK_METHOD1(Schedule, void(services::photo::SavePhoto command));
+    MOCK_METHOD2(SavePhotoToFile, void(std::uint8_t bufferId, const char* pathFmt));
 
-    MOCK_METHOD1(Schedule, void(services::photo::Sleep command));
+    MOCK_METHOD1(Sleep, void(std::chrono::milliseconds duration));
 
     MOCK_METHOD1(WaitForFinish, bool(std::chrono::milliseconds timeout));
 
     MOCK_CONST_METHOD1(IsEmpty, bool(std::uint8_t bufferId));
+
+    virtual void SavePhoto(std::uint8_t bufferId, const char* pathFmt, ...) override
+    {
+        SavePhotoToFile(bufferId, pathFmt);
+    }
 };
 
 #endif

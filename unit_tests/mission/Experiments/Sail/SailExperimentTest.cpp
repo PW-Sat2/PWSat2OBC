@@ -21,7 +21,6 @@ namespace
     using namespace std::chrono_literals;
     using services::photo::Reset;
     using services::photo::EnableCamera;
-    using services::photo::EnableCamera;
     using services::photo::DisableCamera;
     using services::photo::TakePhoto;
     using services::photo::DownloadPhoto;
@@ -94,9 +93,9 @@ namespace
         EXPECT_CALL(power, SensPower(false));
         EXPECT_CALL(adcs, EnableBuiltinDetumbling());
 
-        EXPECT_CALL(photo, Schedule(An<Reset>())).Times(2);
-        EXPECT_CALL(photo, Schedule(DisableCamera(services::photo::Camera::Nadir)));
-        EXPECT_CALL(photo, Schedule(DisableCamera(services::photo::Camera::Wing)));
+        EXPECT_CALL(photo, Reset()).Times(2);
+        EXPECT_CALL(photo, DisableCamera(services::photo::Camera::Nadir));
+        EXPECT_CALL(photo, DisableCamera(services::photo::Camera::Wing));
         EXPECT_CALL(photo, WaitForFinish(_)).Times(2);
 
         const auto status = experiment.Start();
@@ -110,9 +109,9 @@ namespace
         EXPECT_CALL(power, SensPower(true)).WillOnce(Return(true));
         EXPECT_CALL(time, GetCurrentTime()).WillRepeatedly(Return(Some(10ms)));
 
-        EXPECT_CALL(photo, Schedule(An<Reset>()));
-        EXPECT_CALL(photo, Schedule(EnableCamera(services::photo::Camera::Nadir)));
-        EXPECT_CALL(photo, Schedule(EnableCamera(services::photo::Camera::Wing)));
+        EXPECT_CALL(photo, Reset());
+        EXPECT_CALL(photo, EnableCamera(services::photo::Camera::Nadir));
+        EXPECT_CALL(photo, EnableCamera(services::photo::Camera::Wing));
         EXPECT_CALL(photo, WaitForFinish(_));
         const auto status = experiment.Start();
         ASSERT_THAT(status, Eq(StartResult::Success));
@@ -124,9 +123,9 @@ namespace
         EXPECT_CALL(power, SensPower(false)).WillOnce(Return(true));
         EXPECT_CALL(time, GetCurrentTime()).WillRepeatedly(Return(Some(10ms)));
 
-        EXPECT_CALL(photo, Schedule(An<Reset>()));
-        EXPECT_CALL(photo, Schedule(DisableCamera(services::photo::Camera::Nadir)));
-        EXPECT_CALL(photo, Schedule(DisableCamera(services::photo::Camera::Wing)));
+        EXPECT_CALL(photo, Reset());
+        EXPECT_CALL(photo, DisableCamera(services::photo::Camera::Nadir));
+        EXPECT_CALL(photo, DisableCamera(services::photo::Camera::Wing));
         EXPECT_CALL(photo, WaitForFinish(_));
         experiment.Stop(experiments::IterationResult::Failure);
     }
@@ -220,12 +219,12 @@ namespace
 
     TEST_F(SailExperimentTest, TestTakePhotoSwitchesCameras)
     {
-        EXPECT_CALL(photo, Schedule(TakePhoto(services::photo::Camera::Wing, services::photo::PhotoResolution::p128))).Times(2);
-        EXPECT_CALL(photo, Schedule(DownloadPhoto(services::photo::Camera::Wing, 0)));
-        EXPECT_CALL(photo, Schedule(DownloadPhoto(services::photo::Camera::Wing, 2)));
+        EXPECT_CALL(photo, TakePhoto(services::photo::Camera::Wing, services::photo::PhotoResolution::p128)).Times(2);
+        EXPECT_CALL(photo, DownloadPhoto(services::photo::Camera::Wing, 0));
+        EXPECT_CALL(photo, DownloadPhoto(services::photo::Camera::Wing, 2));
 
-        EXPECT_CALL(photo, Schedule(TakePhoto(services::photo::Camera::Nadir, services::photo::PhotoResolution::p128)));
-        EXPECT_CALL(photo, Schedule(DownloadPhoto(services::photo::Camera::Nadir, 1)));
+        EXPECT_CALL(photo, TakePhoto(services::photo::Camera::Nadir, services::photo::PhotoResolution::p128));
+        EXPECT_CALL(photo, DownloadPhoto(services::photo::Camera::Nadir, 1));
 
         experiment.TakePhoto(Some(1ms));
         experiment.TakePhoto(Some(2ms));
@@ -241,11 +240,11 @@ namespace
 
     TEST_F(SailExperimentTest, TestExperimentFinalization)
     {
-        EXPECT_CALL(photo, Schedule(TakePhoto(services::photo::Camera::Wing, services::photo::PhotoResolution::p480)));
-        EXPECT_CALL(photo, Schedule(DownloadPhoto(services::photo::Camera::Wing, 0)));
+        EXPECT_CALL(photo, TakePhoto(services::photo::Camera::Wing, services::photo::PhotoResolution::p480));
+        EXPECT_CALL(photo, DownloadPhoto(services::photo::Camera::Wing, 0));
 
-        EXPECT_CALL(photo, Schedule(TakePhoto(services::photo::Camera::Nadir, services::photo::PhotoResolution::p480)));
-        EXPECT_CALL(photo, Schedule(DownloadPhoto(services::photo::Camera::Nadir, 1)));
+        EXPECT_CALL(photo, TakePhoto(services::photo::Camera::Nadir, services::photo::PhotoResolution::p480));
+        EXPECT_CALL(photo, DownloadPhoto(services::photo::Camera::Nadir, 1));
 
         experiment.FinalizeExperiment();
     }

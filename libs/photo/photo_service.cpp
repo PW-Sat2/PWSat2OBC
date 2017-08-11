@@ -1,5 +1,6 @@
 #include "photo_service.hpp"
 #include <array>
+#include <cstdarg>
 #include "fs/fs.h"
 #include "logger/logger.h"
 #include "power/power.h"
@@ -11,6 +12,10 @@ namespace services
     namespace photo
     {
         static std::array<std::uint8_t, 512_KB> PhotoBuffer;
+
+        SyncResult::SyncResult(bool successful, int retryCount) : Successful(successful), RetryCount(retryCount)
+        {
+        }
 
         BufferInfo::BufferInfo() : _status(BufferStatus::Empty)
         {
@@ -27,11 +32,11 @@ namespace services
         {
         }
 
-        OSResult PhotoService::Invoke(DisableCamera command)
+        OSResult PhotoService::Invoke(services::photo::DisableCamera command)
         {
             bool result = false;
 
-            switch (command.Which())
+            switch (command.Which)
             {
                 case Camera::Nadir:
                     result = this->_power.CameraNadir(false);
@@ -44,11 +49,11 @@ namespace services
             return result ? OSResult::Success : OSResult::IOError;
         }
 
-        OSResult PhotoService::Invoke(EnableCamera command)
+        OSResult PhotoService::Invoke(services::photo::EnableCamera command)
         {
             bool result = false;
 
-            switch (command.Which())
+            switch (command.Which)
             {
                 case Camera::Nadir:
                     result = this->_power.CameraNadir(true);
@@ -63,7 +68,7 @@ namespace services
                 return OSResult::PowerFailure;
             }
 
-            this->_selector.Select(command.Which());
+            this->_selector.Select(command.Which);
 
             System::SleepTask(3s);
 
@@ -77,38 +82,38 @@ namespace services
             return OSResult::Success;
         }
 
-        OSResult PhotoService::Invoke(TakePhoto command)
+        OSResult PhotoService::Invoke(services::photo::TakePhoto command)
         {
-            this->_selector.Select(command.Which());
+            this->_selector.Select(command.Which);
 
             for (auto i = 0; i < 3; i++)
             {
-                auto r = this->_camera.TakePhoto(command.Resolution());
+                auto r = this->_camera.TakePhoto(command.Resolution);
 
                 if (r == TakePhotoResult::Success)
                 {
                     return OSResult::Success;
                 }
 
-                Invoke(DisableCamera(command.Which()));
-                Invoke(EnableCamera(command.Which()));
+                Invoke(services::photo::DisableCamera{command.Which});
+                Invoke(services::photo::EnableCamera{command.Which});
             }
 
             return OSResult::DeviceNotFound;
         }
 
-        OSResult PhotoService::Invoke(DownloadPhoto command)
+        OSResult PhotoService::Invoke(services::photo::DownloadPhoto command)
         {
-            if (command.BufferId() >= BuffersCount)
+            if (command.BufferId >= BuffersCount)
             {
                 return OSResult::InvalidArgument;
             }
 
-            this->_selector.Select(command.Which());
+            this->_selector.Select(command.Which);
 
             {
                 Lock l(this->_sync, InfiniteTimeout);
-                this->_bufferInfos[command.BufferId()] = BufferInfo(BufferStatus::Downloading, 0);
+                this->_bufferInfos[command.BufferId] = BufferInfo(BufferStatus::Downloading, 0);
             }
 
             DownloadPhotoResult r(OSResult::DeviceNotFound);
@@ -120,25 +125,25 @@ namespace services
                 if (r.IsSuccess())
                     break;
 
-                LOGF(LOG_LEVEL_WARNING, "[photo] Retrying (%d) download from %d", i, num(command.Which()));
+                LOGF(LOG_LEVEL_WARNING, "[photo] Retrying (%d) download from %d", i, num(command.Which));
             }
             if (r.IsSuccess())
             {
                 Lock l(this->_sync, InfiniteTimeout);
-                this->_bufferInfos[command.BufferId()] = BufferInfo(BufferStatus::Occupied, r.Success());
+                this->_bufferInfos[command.BufferId] = BufferInfo(BufferStatus::Occupied, r.Success());
                 this->_freeSpace += r.Success().size();
                 return OSResult::Success;
             }
 
             {
                 Lock l(this->_sync, InfiniteTimeout);
-                this->_bufferInfos[command.BufferId()] = BufferInfo(BufferStatus::Failed, 0);
+                this->_bufferInfos[command.BufferId] = BufferInfo(BufferStatus::Failed, 0);
             }
 
             return r.Error();
         }
 
-        OSResult PhotoService::Invoke(Reset /*command*/)
+        OSResult PhotoService::Invoke(services::photo::Reset /*command*/)
         {
             this->_freeSpace = PhotoBuffer.begin();
             Lock l(this->_sync, InfiniteTimeout);
@@ -146,26 +151,26 @@ namespace services
             return OSResult::Success;
         }
 
-        OSResult PhotoService::Invoke(SavePhoto command)
+        OSResult PhotoService::Invoke(services::photo::SavePhoto command)
         {
             services::fs::File f(
-                this->_fileSystem, command.Path(), services::fs::FileOpen::CreateAlways, services::fs::FileAccess::WriteOnly);
+                this->_fileSystem, command.Path, services::fs::FileOpen::CreateAlways, services::fs::FileAccess::WriteOnly);
 
             if (!f)
             {
                 return OSResult::IOError;
             }
 
-            if (command.BufferId() >= BuffersCount)
+            if (command.BufferId >= BuffersCount)
             {
                 return OSResult::InvalidArgument;
             }
 
-            auto buffer = this->GetBufferInfo(command.BufferId());
+            auto buffer = this->GetBufferInfo(command.BufferId);
             LOGF(LOG_LEVEL_DEBUG,
                 "[photo] Saving photo from buffer %d to %s (status: %d, size: %d bytes))",
-                command.BufferId(),
-                command.Path(),
+                command.BufferId,
+                command.Path,
                 num(buffer.Status()),
                 buffer.Size());
 
@@ -188,9 +193,9 @@ namespace services
             return OSResult::Success;
         }
 
-        OSResult PhotoService::Invoke(Sleep command)
+        OSResult PhotoService::Invoke(services::photo::Sleep command)
         {
-            System::SleepTask(command.Duration());
+            System::SleepTask(command.Duration);
             return OSResult::Success;
         }
 
@@ -224,59 +229,65 @@ namespace services
             this->_task.Create();
         }
 
-        void PhotoService::Schedule(DisableCamera command)
+        void PhotoService::DisableCamera(Camera which)
         {
             PossibleCommand cmd;
-            cmd.DisableCameraCommand = command;
+            cmd.DisableCameraCommand = {which};
             cmd.Selected = Command::DisableCamera;
             this->_commandQueue.Push(cmd, InfiniteTimeout);
             this->_flags.Clear(IdleFlag);
         }
-        void PhotoService::Schedule(EnableCamera command)
+        void PhotoService::EnableCamera(Camera which)
         {
             PossibleCommand cmd;
-            cmd.EnableCameraCommand = command;
+            cmd.EnableCameraCommand = {which};
             cmd.Selected = Command::EnableCamera;
             this->_commandQueue.Push(cmd, InfiniteTimeout);
             this->_flags.Clear(IdleFlag);
         }
-        void PhotoService::Schedule(TakePhoto command)
+        void PhotoService::TakePhoto(Camera which, PhotoResolution resolution)
         {
             PossibleCommand cmd;
-            cmd.TakePhotoCommand = command;
+            cmd.TakePhotoCommand = {which, resolution};
             cmd.Selected = Command::TakePhoto;
             this->_commandQueue.Push(cmd, InfiniteTimeout);
             this->_flags.Clear(IdleFlag);
         }
-        void PhotoService::Schedule(DownloadPhoto command)
+        void PhotoService::DownloadPhoto(Camera which, std::uint8_t bufferId)
         {
             PossibleCommand cmd;
-            cmd.DownloadPhotoCommand = command;
+            cmd.DownloadPhotoCommand = {which, bufferId};
             cmd.Selected = Command::DownloadPhoto;
             this->_commandQueue.Push(cmd, InfiniteTimeout);
             this->_flags.Clear(IdleFlag);
         }
-        void PhotoService::Schedule(Reset command)
+        void PhotoService::Reset()
         {
             PossibleCommand cmd;
-            cmd.ResetCommand = command;
+            cmd.ResetCommand = {};
             cmd.Selected = Command::Reset;
             this->_commandQueue.Push(cmd, InfiniteTimeout);
             this->_flags.Clear(IdleFlag);
         }
-        void PhotoService::Schedule(SavePhoto command)
+        void PhotoService::SavePhoto(std::uint8_t bufferId, const char* pathFmt, ...)
         {
             PossibleCommand cmd;
-            cmd.SavePhotoCommand = command;
+            cmd.SavePhotoCommand.BufferId = bufferId;
+            va_list va;
+            va_start(va, pathFmt);
+
+            vsnprintf(cmd.SavePhotoCommand.Path, sizeof(cmd.SavePhotoCommand.Path), pathFmt, va);
+
+            va_end(va);
             cmd.Selected = Command::SavePhoto;
             this->_commandQueue.Push(cmd, InfiniteTimeout);
             this->_flags.Clear(IdleFlag);
         }
 
-        void PhotoService::Schedule(Sleep command)
+        void PhotoService::Sleep(std::chrono::milliseconds duration)
         {
             PossibleCommand cmd;
-            cmd.SleepCommand = command;
+            cmd.SleepCommand = {duration};
             cmd.Selected = Command::Sleep;
             this->_commandQueue.Push(cmd, InfiniteTimeout);
             this->_flags.Clear(IdleFlag);

@@ -99,7 +99,7 @@ namespace
     {
         EXPECT_CALL(_power, ControlCamera(Cam(), false)).WillOnce(Return(true));
 
-        auto r = _service.Invoke(DisableCamera(Cam()));
+        auto r = _service.Invoke(DisableCamera{Cam()});
 
         ASSERT_THAT(r, Eq(OSResult::Success));
     }
@@ -110,7 +110,7 @@ namespace
         EXPECT_CALL(_selector, Select(Cam()));
         EXPECT_CALL(_camera, Sync()).WillOnce(Return(SyncResult(true, 10)));
 
-        auto r = _service.Invoke(EnableCamera(Cam()));
+        auto r = _service.Invoke(EnableCamera{Cam()});
 
         ASSERT_THAT(r, Eq(OSResult::Success));
     }
@@ -120,7 +120,7 @@ namespace
         EXPECT_CALL(_power, ControlCamera(Cam(), true)).WillOnce(Return(false));
         EXPECT_CALL(_camera, Sync()).Times(0);
 
-        auto r = _service.Invoke(EnableCamera(Cam()));
+        auto r = _service.Invoke(EnableCamera{Cam()});
 
         ASSERT_THAT(r, Eq(OSResult::PowerFailure));
     }
@@ -131,7 +131,7 @@ namespace
         EXPECT_CALL(_selector, Select(Cam()));
         EXPECT_CALL(_camera, Sync()).WillOnce(Return(SyncResult(false, 60)));
 
-        auto r = _service.Invoke(EnableCamera(Cam()));
+        auto r = _service.Invoke(EnableCamera{Cam()});
 
         ASSERT_THAT(r, Eq(OSResult::DeviceNotFound));
     }
@@ -141,7 +141,7 @@ namespace
         EXPECT_CALL(_selector, Select(Cam()));
         EXPECT_CALL(_camera, TakePhoto(PhotoResolution::p480)).WillOnce(Return(TakePhotoResult::Success));
 
-        auto r = _service.Invoke(TakePhoto(Cam(), PhotoResolution::p480));
+        auto r = _service.Invoke(TakePhoto{Cam(), PhotoResolution::p480});
 
         ASSERT_THAT(r, Eq(OSResult::Success));
     }
@@ -164,7 +164,7 @@ namespace
             EXPECT_CALL(_camera, TakePhoto(PhotoResolution::p480)).WillOnce(Return(TakePhotoResult::Success));
         }
 
-        auto r = _service.Invoke(TakePhoto(Cam(), PhotoResolution::p480));
+        auto r = _service.Invoke(TakePhoto{Cam(), PhotoResolution::p480});
 
         ASSERT_THAT(r, Eq(OSResult::Success));
     }
@@ -175,7 +175,7 @@ namespace
         ON_CALL(_camera, Sync()).WillByDefault(Return(SyncResult(true, 1)));
         ON_CALL(_camera, TakePhoto(PhotoResolution::p480)).WillByDefault(Return(TakePhotoResult::NotSynced));
 
-        auto r = _service.Invoke(TakePhoto(Cam(), PhotoResolution::p480));
+        auto r = _service.Invoke(TakePhoto{Cam(), PhotoResolution::p480});
 
         ASSERT_THAT(r, Eq(OSResult::DeviceNotFound));
     }
@@ -189,7 +189,7 @@ namespace
             return DownloadPhotoResult(buffer.subspan(0, 1_KB));
         }));
 
-        auto r = _service.Invoke(DownloadPhoto(Cam(), 1));
+        auto r = _service.Invoke(DownloadPhoto{Cam(), 1});
 
         ASSERT_THAT(r, Eq(OSResult::Success));
 
@@ -203,7 +203,7 @@ namespace
     {
         EXPECT_CALL(_selector, Select(Cam())).Times(0);
         EXPECT_CALL(_camera, DownloadPhoto(_)).Times(0);
-        auto r = _service.Invoke(DownloadPhoto(Cam(), PhotoService::BuffersCount));
+        auto r = _service.Invoke(DownloadPhoto{Cam(), PhotoService::BuffersCount});
 
         ASSERT_THAT(r, Ne(OSResult::Success));
     }
@@ -213,7 +213,7 @@ namespace
         EXPECT_CALL(_selector, Select(Cam()));
         EXPECT_CALL(_camera, DownloadPhoto(_)).Times(3).WillRepeatedly(Return(DownloadPhotoResult(OSResult::DeviceNotFound)));
 
-        auto r = _service.Invoke(DownloadPhoto(Cam(), 1));
+        auto r = _service.Invoke(DownloadPhoto{Cam(), 1});
 
         ASSERT_THAT(r, Eq(OSResult::DeviceNotFound));
 
@@ -236,8 +236,8 @@ namespace
                 return DownloadPhotoResult(buffer.subspan(0, 1_KB));
             }));
 
-        _service.Invoke(DownloadPhoto(Camera::Nadir, 1));
-        _service.Invoke(DownloadPhoto(Camera::Nadir, 4));
+        _service.Invoke(DownloadPhoto{Camera::Nadir, 1});
+        _service.Invoke(DownloadPhoto{Camera::Nadir, 4});
 
         auto b1 = _service.GetBufferInfo(1);
         auto b4 = _service.GetBufferInfo(4);
@@ -260,8 +260,8 @@ namespace
                 return DownloadPhotoResult(buffer.subspan(0, 1_KB));
             }));
 
-        _service.Invoke(DownloadPhoto(Camera::Nadir, 1));
-        _service.Invoke(DownloadPhoto(Camera::Nadir, 4));
+        _service.Invoke(DownloadPhoto{Camera::Nadir, 1});
+        _service.Invoke(DownloadPhoto{Camera::Nadir, 4});
         _service.Invoke(Reset());
 
         for (auto i = 0; i < PhotoService::BuffersCount; i++)
@@ -284,8 +284,8 @@ namespace
 
         _fs.AddFile("/photo", photoBuffer);
 
-        _service.Invoke(DownloadPhoto(Camera::Nadir, 1));
-        _service.Invoke(SavePhoto(1, "/photo"));
+        _service.Invoke(DownloadPhoto{Camera::Nadir, 1});
+        _service.Invoke(SavePhoto{1, "/photo"});
 
         ASSERT_THAT(photoBuffer, Each(Eq(0xAB)));
     }
@@ -295,7 +295,7 @@ namespace
         std::array<std::uint8_t, 1_KB> photoBuffer;
 
         _fs.AddFile("/photo", photoBuffer);
-        const auto status = _service.Invoke(SavePhoto(PhotoService::BuffersCount, "/photo"));
+        const auto status = _service.Invoke(SavePhoto{PhotoService::BuffersCount, "/photo"});
         ASSERT_THAT(status, Ne(OSResult::Success));
     }
 
@@ -305,7 +305,7 @@ namespace
 
         _fs.AddFile("/photo", photoBuffer);
 
-        _service.Invoke(SavePhoto(1, "/photo"));
+        _service.Invoke(SavePhoto{1, "/photo"});
 
         auto s = reinterpret_cast<char*>(photoBuffer.data());
 
@@ -319,8 +319,8 @@ namespace
 
         _fs.AddFile("/photo", photoBuffer);
 
-        _service.Invoke(DownloadPhoto(Camera::Nadir, 1));
-        _service.Invoke(SavePhoto(1, "/photo"));
+        _service.Invoke(DownloadPhoto{Camera::Nadir, 1});
+        _service.Invoke(SavePhoto{1, "/photo"});
 
         auto s = reinterpret_cast<char*>(photoBuffer.data());
 
@@ -331,16 +331,9 @@ namespace
     {
         EXPECT_CALL(_os, Sleep(10000ms));
 
-        auto r = _service.Invoke(Sleep(10000ms));
+        auto r = _service.Invoke(Sleep{10000ms});
 
         ASSERT_THAT(r, Eq(OSResult::Success));
-    }
-
-    TEST_F(PhotoServiceTest, SavePhotoAcceptsFormatedFileName)
-    {
-        SavePhoto cmd(1, "a%d%d", 1, 2);
-
-        ASSERT_THAT(cmd.Path(), StrEq("a12"));
     }
 
     TEST_F(PhotoServiceTest, TestIsEmptyIndexOverflow)
