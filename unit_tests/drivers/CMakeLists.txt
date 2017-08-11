@@ -28,7 +28,7 @@ set(SOURCES
   payload/PayloadDeviceDriverTest.cpp
   payload/PayloadHardwareDriverTest.cpp
   suns/sunsTest.cpp
-  camera/CameraTest.cpp
+  camera/LowLevelCameraTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
