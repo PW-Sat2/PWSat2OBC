@@ -55,3 +55,18 @@ class PerformSunSExperiment(Telecommand):
         self.gain = gain
         self.correlation_id = correlation_id
         self.file_name = file_name
+
+
+class PerformRadFETExperiment(Telecommand):
+    def apid(self):
+        return 0x1E
+
+    def payload(self):
+        return struct.pack('<BBB', self.correlation_id, self.delay, self.samples_count) + self.output_file_name + '\0'
+
+    def __init__(self, correlation_id, delay, samples_count, output_file_name):
+        Telecommand.__init__(self)
+        self.correlation_id = correlation_id
+        self.delay = delay
+        self.samples_count = samples_count
+        self.output_file_name = output_file_name
