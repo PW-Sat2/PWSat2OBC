@@ -100,7 +100,10 @@ OBC::OBC()
           Mission,
           Mission, //
           Hardware.I2C.Buses.Bus,
-          Hardware.I2C.Buses.Payload),
+          Hardware.I2C.Buses.Payload,
+          Hardware.SunS,
+          Hardware.PayloadDeviceDriver,
+          Hardware.Gyro),                                                          //
       Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index),         //
       terminal(this->Hardware.Terminal),                                                   //
       camera(this->Fdir.ErrorCounting(), this->Hardware.Camera),                           //

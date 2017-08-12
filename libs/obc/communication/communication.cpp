@@ -28,7 +28,10 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
     mission::IOpenSail& openSail,
     mission::ITimeSynchronization& timeSynchronization,
     drivers::i2c::II2CBus& systemBus,
-    drivers::i2c::II2CBus& payload)
+    drivers::i2c::II2CBus& payload,
+    devices::suns::ISunSDriver& experimentalSunS,
+    devices::payload::IPayloadDeviceDriver& payloadDriver,
+    devices::gyro::IGyroscopeDriver& gyro)
     : Comm(commDriver),                                                                                                               //
       UplinkProtocolDecoder(settings::CommSecurityCode),                                                                              //
       SupportedTelecommands(                                                                                                          //
@@ -57,7 +60,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           SetPeriodicMessageTelecommand(stateContainer),                                                                              //
           PerformSunSExperiment(experiments.ExperimentsController, experiments.Get<experiment::suns::SunSExperiment>()),              //
           EraseFlashTelecommand(experiments.ExperimentsController, experiments.Get<experiment::erase_flash::EraseFlashExperiment>()), //
-          RawI2CTelecommand(systemBus, payload)),                                                                                     //
+          RawI2CTelecommand(systemBus, payload),                                                                                      //
+          GetSunSDataSetsTelecommand(powerControl, currentTime, experimentalSunS, payloadDriver, gyro)),                              //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {
 }
