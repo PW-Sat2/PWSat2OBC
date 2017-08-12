@@ -142,6 +142,36 @@ namespace experiment
              * @param file File for secondary data sets
              */
             void WriteSecondaryDataSetTo(experiments::fs::ExperimentFile& file);
+
+            /**
+             * @brief Writes time stamp to writer
+             * @param writer Writer to hold the written data
+             */
+            void WriteTimeStamp(Writer& writer);
+
+            /**
+             * @brief Writes primary experimental suns data to writer
+             * @param writer Writer to hold the written data
+             */
+            void WritePrimaryExperimentalSunS(Writer& writer);
+
+            /**
+             * @brief Writes secondary experimental suns data to writer
+             * @param writer Writer to hold the written data
+             */
+            void WriteSecondaryExperimentalSunS(Writer& writer);
+
+            /**
+             * @brief Writes reference suns data to writer
+             * @param writer Writer to hold the written data
+             */
+            void WriteReferenceSunS(Writer& writer);
+
+            /**
+             * @brief Writes gyro data to writer
+             * @param writer Writer to hold the written data
+             */
+            void WriteGyro(Writer& writer);
         };
 
         /**

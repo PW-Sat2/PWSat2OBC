@@ -21,7 +21,7 @@ namespace obc
          * Command code: 0x90
          *
          * Parameters:
-         *  - 8-bit - APID that will be used in response
+         *  - 8-bit - Correlation id that will be used in response
          *  - 16-bit LE - Weight assigned to internal clock
          *  - 16-bit LE - Weight assigned to external clock
          */
