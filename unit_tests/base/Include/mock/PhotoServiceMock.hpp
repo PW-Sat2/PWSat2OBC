@@ -29,6 +29,7 @@ struct PhotoServiceMock : services::photo::IPhotoService
     MOCK_METHOD1(WaitForFinish, bool(std::chrono::milliseconds timeout));
 
     MOCK_CONST_METHOD1(IsEmpty, bool(std::uint8_t bufferId));
+    MOCK_METHOD0(PurgePendingCommands, void());
 
     virtual void SavePhoto(std::uint8_t bufferId, const char* pathFmt, ...) override
     {

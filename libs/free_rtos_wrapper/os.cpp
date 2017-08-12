@@ -202,6 +202,11 @@ void System::QueueOverwrite(OSQueueHandle queue, const void* element)
     xQueueOverwrite(queue, element);
 }
 
+void System::QueueReset(OSQueueHandle queue)
+{
+    xQueueReset(queue);
+}
+
 void System::EndSwitchingISR()
 {
     portEND_SWITCHING_ISR(nullptr);

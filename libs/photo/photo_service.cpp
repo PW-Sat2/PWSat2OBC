@@ -300,6 +300,11 @@ namespace services
             return has_flag(r, IdleFlag);
         }
 
+        void PhotoService::PurgePendingCommands()
+        {
+            this->_commandQueue.Reset();
+        }
+
         void PhotoService::TaskProc(PhotoService* This)
         {
             LOG(LOG_LEVEL_INFO, "[photo] Starting task");

@@ -224,6 +224,11 @@ namespace services
              * @return True if buffer is empty, false otherwise
              */
             virtual bool IsEmpty(std::uint8_t bufferId) const = 0;
+
+            /**
+             * @brief Purges all pending commands
+             */
+            virtual void PurgePendingCommands() = 0;
         };
 
         /**
@@ -332,6 +337,8 @@ namespace services
             virtual bool WaitForFinish(std::chrono::milliseconds timeout) override;
 
             virtual bool IsEmpty(std::uint8_t bufferId) const override;
+
+            virtual void PurgePendingCommands() override;
 
             /** @brief Number of buffers */
             static constexpr std::uint8_t BuffersCount = 100;

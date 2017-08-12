@@ -60,7 +60,7 @@ struct OSMock : IOS
     MOCK_METHOD3(QueueSend, bool(OSQueueHandle queue, const void* element, std::chrono::milliseconds timeout));
     MOCK_METHOD2(QueueSendISR, bool(OSQueueHandle queue, const void* element));
     MOCK_METHOD2(QueueOverwrite, void(OSQueueHandle queue, const void* element));
-
+    MOCK_METHOD1(QueueReset, void(OSQueueHandle queue));
     MOCK_METHOD0(CreatePulseAll, OSPulseHandle());
 
     MOCK_METHOD2(PulseWait, OSResult(OSPulseHandle handle, std::chrono::milliseconds timeout));

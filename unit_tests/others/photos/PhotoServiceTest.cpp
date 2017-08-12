@@ -345,5 +345,11 @@ namespace
         ASSERT_THAT(_service.IsEmpty(0xff), Eq(false));
     }
 
+    TEST_F(PhotoServiceTest, ShouldResetQueue)
+    {
+        EXPECT_CALL(_os, QueueReset(_));
+        _service.PurgePendingCommands();
+    }
+
     INSTANTIATE_TEST_CASE_P(PhotoServiceTest, PhotoServiceTest, testing::Values(Camera::Nadir, Camera::Wing), );
 }
