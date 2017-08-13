@@ -1,17 +1,11 @@
 #include <array>
 #include <cstdio>
 #include <unistd.h>
+#include "base/os.h"
 #include "fs/fs.h"
 #include "utils.h"
 
 using namespace services::fs;
-
-void GenerateSunSData(IFileSystem& fs)
-{
-    File f(fs, "test.txt", FileOpen::CreateNew, FileAccess::ReadWrite);
-    std::array<std::uint8_t, 4> buf{65, 66, 67, 68};
-    f.Write(buf);
-}
 
 extern "C" {
 extern void initialise_monitor_handles(void);
@@ -134,6 +128,12 @@ class PosixFileSystem : public IFileSystem
         return 0;
     }
 };
+
+extern void GenerateSunSData(IFileSystem& fs);
+
+void System::SleepTask(std::chrono::milliseconds)
+{
+}
 
 int main()
 {
