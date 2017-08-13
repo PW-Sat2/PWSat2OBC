@@ -40,7 +40,8 @@ namespace obc
     class FDIR final : private error_counter::IErrorCountingCallback,
                        public error_counter::IErrorCountingConfigration,
                        public ISetErrorCounterConfig,
-                       public mission::IGetErrorCounterConfig
+                       public mission::IGetErrorCounterConfig,
+                       public error_counter::IErrorCountingTelemetryProvider
     {
       public:
         /**
@@ -63,7 +64,7 @@ namespace obc
          * @brief Returns reference to error counting mechanism
          * @return Reference to errour counting mechanism
          */
-        error_counter::ErrorCounting& ErrorCounting();
+        virtual error_counter::ErrorCounting& ErrorCounting() override;
 
         virtual void Set(error_counter::Device device,
             error_counter::CounterValue limit,

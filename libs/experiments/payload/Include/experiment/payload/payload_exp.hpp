@@ -2,6 +2,7 @@
 #define LIBS_EXPERIMENTS_LEOP_INCLUDE_EXPERIMENT_PAYLOAD_PAYLOAD_EXP_HPP_
 
 #include <chrono>
+#include "PayloadExperimentTelemetryProvider.hpp"
 #include "experiments/experiments.h"
 #include "fs/ExperimentFile.hpp"
 #include "fs/fs.h"
@@ -28,16 +29,30 @@ namespace experiment
 
             /**
              * @brief Ctor
-             * @param gyro Gyroscope driver
-             * @param time Current time provider
+             * @param payload Payload driver
              * @param fileSystem File System provider
+             * @param powerControl Power Control provider
+             * @param time Current time provider
+             * @param experimentalSunS Experimental SunS driver
+             * @param epsProvider EPS telemetry provider
+             * @param errorCounterProvider Error Counter telemetry provider
+             * @param temperatureProvider MCU telemetry provider
+             * @param experimentProvider Experiment telemetry provider
              */
             PayloadCommissioningExperiment(devices::payload::IPayloadDeviceDriver& payload,
                 services::fs::IFileSystem& fileSystem,
                 services::power::IPowerControl& powerControl,
                 services::time::ICurrentTime& time,
-                devices::suns::ISunSDriver& experimentalSunS);
+                devices::suns::ISunSDriver& experimentalSunS,
+                devices::eps::IEpsTelemetryProvider& epsProvider,
+                error_counter::IErrorCountingTelemetryProvider* errorCounterProvider,
+                temp::ITemperatureReader* temperatureProvider,
+                experiments::IExperimentController* experimentProvider);
 
+            /**
+             * @brief Method allowing to set name of file where data will be saved.
+             * @param fileName The name of file where data will be saved.
+             */
             void SetOutputFile(const char* fileName);
 
             virtual experiments::ExperimentCode Type() override;
@@ -81,6 +96,8 @@ namespace experiment
 
             /** @brief Experiment file with results */
             experiments::fs::ExperimentFile _experimentFile;
+
+            PayloadExperimentTelemetryProvider _telemetryProvider;
 
             uint8_t _currentStep;
 

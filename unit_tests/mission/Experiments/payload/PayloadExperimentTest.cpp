@@ -1,10 +1,16 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "OSMock.hpp"
+#include "eps/hk.hpp"
 #include "experiment/payload/payload_exp.hpp"
 #include "mock/FsMock.hpp"
 #include "mock/PayloadDeviceMock.hpp"
+#include "mock/PayloadExperimentTelemetryProviderMock.hpp"
 #include "mock/SunSDriverMock.hpp"
+#include "mock/TemperatureReaderMock.hpp"
+#include "mock/eps.hpp"
+#include "mock/error_counter.hpp"
+#include "mock/experiment.hpp"
 #include "mock/power.hpp"
 #include "mock/time.hpp"
 
@@ -35,9 +41,16 @@ namespace
         NiceMock<OSMock> _os;
         OSReset _osReset{InstallProxy(&_os)};
 
+        NiceMock<EpsTelemetryProviderMock> _eps;
+        NiceMock<ExperimentControllerMock> _experimentProvider;
+        NiceMock<TemperatureReaderMock> _temperatureProvider;
+
         PayloadCommissioningExperiment _exp;
 
         NiceMock<PowerControlMock> _power;
+        void* _fdir;
+        void* _experiments;
+        McuTemperature _temperature;
 
         static constexpr const char* TestFileName = "/test_payload";
 
@@ -48,10 +61,11 @@ namespace
         void SunSStepTest();
         void TelemetrySnapshotStepTest();
 
-        std::array<std::uint8_t, 696> buffer;
+        std::array<std::uint8_t, 2000> buffer;
     };
 
-    PayloadExperimentTest::PayloadExperimentTest() : _exp(_payload, _fs, _power, _time, _suns)
+    PayloadExperimentTest::PayloadExperimentTest()
+        : _exp(_payload, _fs, _power, _time, _suns, _eps, nullptr, &_temperatureProvider, &_experimentProvider)
     {
         ON_CALL(_power, SensPower(_)).WillByDefault(Return(true));
         ON_CALL(_power, SunSPower(_)).WillByDefault(Return(true));
@@ -75,7 +89,14 @@ namespace
 
     void PayloadExperimentTest::TelemetrySnapshotStepTest()
     {
-        // TODO Save Telemetry snapshot
+        devices::eps::hk::ControllerATelemetry controllerATelemetry;
+        devices::eps::hk::ControllerBTelemetry controllerBTelemetry;
+        experiments::ExperimentState experimentState;
+
+        EXPECT_CALL(_eps, ReadHousekeepingA()).WillOnce(Return(Some(controllerATelemetry)));
+        EXPECT_CALL(_eps, ReadHousekeepingB()).WillOnce(Return(Some(controllerBTelemetry)));
+        EXPECT_CALL(_temperatureProvider, ReadRaw()).WillOnce(Return(36));
+        EXPECT_CALL(_experimentProvider, CurrentState()).WillOnce(Return(experimentState));
     }
 
     void PayloadExperimentTest::StartupStepTest()

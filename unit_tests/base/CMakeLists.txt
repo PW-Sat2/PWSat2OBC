@@ -50,6 +50,7 @@ target_link_libraries(${NAME}
     telemetry_imtq
     suns
     payload
+    exp_pld
     n25q
     experiments
     photo
