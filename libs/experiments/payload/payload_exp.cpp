@@ -23,9 +23,14 @@ namespace experiment
             services::fs::IFileSystem& fileSystem,
             services::power::IPowerControl& powerControl,
             services::time::ICurrentTime& time,
-            devices::suns::ISunSDriver& experimentalSunS)
+            devices::suns::ISunSDriver& experimentalSunS,
+            devices::eps::IEpsTelemetryProvider& epsProvider,
+            error_counter::IErrorCountingTelemetryProvider* errorCounterProvider,
+            temp::ITemperatureReader* temperatureProvider,
+            experiments::IExperimentController* experimentProvider)
             : _payload(payload), _time(time), _fileSystem(fileSystem), _powerControl(powerControl), _experimentalSunS(experimentalSunS),
-              _experimentFile(&_time), _currentStep(0)
+              _experimentFile(&_time), _telemetryProvider(epsProvider, errorCounterProvider, temperatureProvider, experimentProvider),
+              _currentStep(0)
         {
             std::strncpy(_fileName, DefaultFileName, 30);
         }
@@ -235,7 +240,7 @@ namespace experiment
 
         void PayloadCommissioningExperiment::WriteTelemetry()
         {
-            // TODO: WTIRE THAT
+            _telemetryProvider.Save(_experimentFile);
         }
 
         void PayloadCommissioningExperiment::WriteRadFetTelemetry(PayloadTelemetry::Radfet& telemetry)
