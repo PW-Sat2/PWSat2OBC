@@ -1,4 +1,5 @@
 import struct
+from binascii import hexlify
 
 from parsec import *
 
@@ -23,7 +24,7 @@ def byte(text, index=0):
 
 
 def bytes_block(n):
-    return count(byte, n).parsecmap(lambda x: ''.join(x))
+    return count(byte, n).parsecmap(lambda x: ''.join(x)).parsecmap(hexlify)
 
 
 def packed(fmt):

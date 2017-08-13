@@ -193,6 +193,7 @@ namespace experiment
                 w.WriteWordLE(this->ExperimentalSunS.temperature.panels[0]);
                 w.WriteWordLE(this->ExperimentalSunS.temperature.panels[1]);
                 w.WriteWordLE(this->ExperimentalSunS.temperature.panels[2]);
+                w.WriteWordLE(this->ExperimentalSunS.temperature.panels[3]);
 
                 file.Write(ExperimentFile::PID::ExperimentalSunSPrimary, w.Capture());
             }

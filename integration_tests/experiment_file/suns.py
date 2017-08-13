@@ -1,6 +1,6 @@
 from base import pid, bytes_block, label_as
 
-ExperimentalSunSPrimary = pid(0x11) >> bytes_block(39)
+ExperimentalSunSPrimary = pid(0x11) >> bytes_block(41)
 ExperimentalSunSPrimary >>= label_as('ExpSunS.Primary')
 
 ExperimentalSunSSecondary = pid(0x12) >> bytes_block(26)

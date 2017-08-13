@@ -71,7 +71,7 @@ namespace devices
         using Panels = std::array<std::uint16_t, 4>;
 
         /**
-         * @brief Array containing four panel light readings.
+         * @brief Array containing three panel light readings.
          */
         using LightData = std::array<Als, 3>;
 
