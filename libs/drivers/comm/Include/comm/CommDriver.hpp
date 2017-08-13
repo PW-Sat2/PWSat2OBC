@@ -241,6 +241,12 @@ class CommObject final : public ITransmitter,      //
     /** @brief Error counter type */
     using ErrorCounter = error_counter::ErrorCounter<0>;
 
+    /** @brief Id of semaphore used for transmitter synchronization. */
+    static constexpr std::uint8_t transmitterSemaphoreId = 1;
+
+    /** @brief Id of semaphore used for receiver synchronization. */
+    static constexpr std::uint8_t receiverSemaphoreId = 2;
+
   private:
     /** @brief Error reporter type */
     using ErrorReporter = error_counter::AggregatedErrorReporter<ErrorCounter::DeviceId>;
@@ -376,6 +382,12 @@ class CommObject final : public ITransmitter,      //
 
     /** @brief Event group used to communicate with background task. */
     EventGroup _pollingTaskFlags;
+
+    /** @brief Semaphore used for transmitter synchronization. */
+    OSSemaphoreHandle transmitterSemaphore;
+
+    /** @brief Semaphore used for receiver synchronization. */
+    OSSemaphoreHandle receiverSemaphore;
 };
 
 inline bool CommObject::SendFrame(gsl::span<const std::uint8_t> frame)
