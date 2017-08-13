@@ -90,6 +90,7 @@ namespace obc
 
         void PerformSunSExperiment::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
         {
+            char filePath[30];
             Reader r(parameters);
 
             auto correlationId = r.ReadByte();
@@ -100,15 +101,18 @@ namespace obc
             seconds shortDelay = seconds(r.ReadByte());
             uint8_t sessionsCount = r.ReadByte();
             minutes longDelay = minutes(r.ReadByte());
-            const char* outputFile = r.ReadString(30);
+            const auto outputFile = r.ReadString(count_of(filePath));
 
-            if (!r.Status() || strlen_n(outputFile, 30) == 0)
+            if (!r.Status() || outputFile.empty())
             {
                 CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
                 response.PayloadWriter().WriteByte(0x1);
                 transmitter.SendFrame(response.Frame());
                 return;
             }
+
+            memcpy(filePath, outputFile.data(), outputFile.size());
+            filePath[count_of(filePath) - 1] = '\0';
 
             experiment::suns::SunSExperimentParams params(gain, itime, samplesCount, shortDelay, sessionsCount, longDelay);
 
@@ -118,7 +122,7 @@ namespace obc
                 static_cast<std::uint8_t>(params.SamplingSessionsCount()));
 
             this->_setupSunS.SetParameters(params);
-            this->_setupSunS.SetOutputFiles(outputFile);
+            this->_setupSunS.SetOutputFiles(filePath);
 
             auto success = this->_controller.RequestExperiment(experiment::suns::SunSExperiment::Code);
 

@@ -218,9 +218,9 @@ gsl::span<const uint8_t> Reader::ReadToEnd()
     return this->ReadArray(this->RemainingSize());
 }
 
-const char* Reader::ReadString(std::size_t maxsize)
+gsl::cstring_span<> Reader::ReadString(std::size_t maxsize)
 {
-    maxsize = std::min<std::uint16_t>(maxsize, this->RemainingSize());
+    maxsize = std::max<std::size_t>(0u, std::min<std::size_t>(maxsize, this->RemainingSize()));
 
     auto p = reinterpret_cast<const char*>(this->buffer.data() + this->position);
 
@@ -228,5 +228,5 @@ const char* Reader::ReadString(std::size_t maxsize)
 
     UpdateState(len);
 
-    return p;
+    return gsl::cstring_span<>(p, len);
 }

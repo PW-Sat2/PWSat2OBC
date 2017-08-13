@@ -416,4 +416,49 @@ namespace
         ASSERT_THAT(reader.ReadByteBCD(0b00110000), Eq(22));
         ASSERT_TRUE(reader.Status());
     }
+
+    TEST(ReaderTest, TestReadStringEmptyBuffer)
+    {
+        Reader reader;
+
+        const auto result = reader.ReadString(10);
+        ASSERT_THAT(result.empty(), Eq(true));
+        ASSERT_FALSE(reader.Status());
+    }
+
+    TEST(ReaderTest, TestReadStringBuffer)
+    {
+        std::uint8_t array[] = {'1', '2', '3'};
+        Reader reader(array);
+        const gsl::cstring_span<> expected = gsl::ensure_z("123");
+
+        const auto result = reader.ReadString(3);
+        ASSERT_THAT(result.empty(), Eq(false));
+        ASSERT_THAT(result, Eq(expected));
+        ASSERT_TRUE(reader.Status());
+    }
+
+    TEST(ReaderTest, TestReadStringLimit)
+    {
+        std::uint8_t array[] = {'1', '2', '3', '4', '5'};
+        Reader reader(array);
+        const gsl::cstring_span<> expected = gsl::ensure_z("123");
+
+        const auto result = reader.ReadString(3);
+        ASSERT_THAT(result.empty(), Eq(false));
+        ASSERT_THAT(result, Eq(expected));
+        ASSERT_TRUE(reader.Status());
+    }
+
+    TEST(ReaderTest, TestReadStringToTheEnd)
+    {
+        std::uint8_t array[] = {'1', '2', '3', '4', '5'};
+        Reader reader(array);
+        const gsl::cstring_span<> expected = gsl::ensure_z("12345");
+
+        const auto result = reader.ReadString(10);
+        ASSERT_THAT(result.empty(), Eq(false));
+        ASSERT_THAT(result, Eq(expected));
+        ASSERT_TRUE(reader.Status());
+    }
 }

@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include "gsl/span"
+#include "gsl/string_span"
 
 /**
  * @defgroup utilities General Purpose Utilities
@@ -168,7 +169,7 @@ class Reader final
      *
      * @remark If null-terminator is not found before reaching maxsize, reader position is advanced by maxsize and pointer is returned
      */
-    const char* ReadString(std::size_t maxsize);
+    gsl::cstring_span<> ReadString(std::size_t maxsize);
 
     /**
      * @brief Resets reader to the initial state.
