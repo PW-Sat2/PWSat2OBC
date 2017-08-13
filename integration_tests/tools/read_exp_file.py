@@ -2,6 +2,7 @@ import argparse
 import os
 import sys
 from binascii import hexlify
+import pprint
 
 try:
     from experiment_file import ExperimentFileParser
@@ -25,7 +26,7 @@ result = ExperimentFileParser.parse_partial(read_all(args.file))
 
 print 'Parsed data:'
 for p in result[0]:
-    print p
+    pprint.pprint(p)
 
 if len(result[1]) > 0:
     print 'Remaining data (first 10 bytes, total {} not parsed)'.format(len(result[1]))

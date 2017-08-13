@@ -1,5 +1,6 @@
 import struct
 from binascii import hexlify
+from datetime import timedelta
 
 from parsec import *
 
@@ -49,9 +50,22 @@ def label_as(name):
     return as_dict
 
 
+def to_dict(value):
+    # if len(value) > 1:
+    return Parser(lambda _, index: Value.success(index, dict(value)))
+    # else:
+
+
+
+def field(name, content_parser):
+    return content_parser.parsecmap(lambda v: (name, v))
+
+
+uint16 = packed('<H')
+
 Synchronization = pid(0x47).result('Synchronization')
 
-Timestamp = pid(1) >> packed('<Q')
+Timestamp = pid(1) >> packed('<Q').parsecmap(lambda x: timedelta(milliseconds=x))
 Timestamp >>= label_as('time')
 
 Padding = many1(pid(0xFF)).parsecmap(lambda x: len(x))
