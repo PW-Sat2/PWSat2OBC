@@ -21,7 +21,8 @@ namespace obc
          *  - Correlation ID (8-bit)
          *  - Camera identifier
          *  - Photo resolution
-         *  - Output file name (string, null-terminated, up to 40 charactes including terminator)s
+         *  - Number of photographs to take
+         *  - Output file name (string, null-terminated, up to 30 charactes including terminator)s
          */
         class TakePhoto final : public telecommunication::uplink::Telecommand<0x1E>
         {
