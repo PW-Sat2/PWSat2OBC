@@ -31,7 +31,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
     drivers::i2c::II2CBus& payload,
     devices::suns::ISunSDriver& experimentalSunS,
     devices::payload::IPayloadDeviceDriver& payloadDriver,
-    devices::gyro::IGyroscopeDriver& gyro)
+    devices::gyro::IGyroscopeDriver& gyro,
+    services::photo::IPhotoService& photo)
     : Comm(commDriver),                                                                                                               //
       UplinkProtocolDecoder(settings::CommSecurityCode),                                                                              //
       SupportedTelecommands(                                                                                                          //
@@ -63,7 +64,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           RawI2CTelecommand(systemBus, payload),                                                                                      //
           PerformRadFETExperiment(experiments.ExperimentsController, experiments.Get<experiment::radfet::RadFETExperiment>()),        //
           GetSunSDataSetsTelecommand(powerControl, currentTime, experimentalSunS, payloadDriver, gyro),                               //
-          PerformSailExperiment(experiments.ExperimentsController)                                                                    //
+          PerformSailExperiment(experiments.ExperimentsController),                                                                   //
+          TakePhoto(photo)                                                                                                            //
           ),                                                                                                                          //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {
