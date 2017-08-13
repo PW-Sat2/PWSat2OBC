@@ -134,7 +134,7 @@ namespace obc
         /** @brief SunSInterrupt */
         const drivers::gpio::InterruptPin<TSunSInterrupt, false, false, true> SunSInterrupt;
 
-        /** @brief Sail state indicator. *?
+        /** @brief Sail state indicator. */
         const drivers::gpio::InputPin<TSailState> SailIndicator;
 
         /** @brief Initializes GPIO pins */
