@@ -143,7 +143,8 @@ namespace obc
         obc::telecommands::SetPeriodicMessageTelecommand,     //
         obc::telecommands::PerformSunSExperiment,             //
         obc::telecommands::EraseFlashTelecommand,             //
-        obc::telecommands::RawI2CTelecommand                  //
+        obc::telecommands::RawI2CTelecommand,                 //
+        obc::telecommands::PerformRadFETExperiment            //
         >;
 
     /**

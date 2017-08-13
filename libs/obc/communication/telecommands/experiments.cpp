@@ -5,8 +5,8 @@
 #include "comm/ITransmitter.hpp"
 #include "experiment/adcs/adcs.hpp"
 #include "logger/logger.h"
-#include "utils.h"
 #include "telecommunication/downlink.h"
+#include "utils.h"
 
 using std::uint8_t;
 using std::chrono::seconds;
@@ -120,6 +120,58 @@ namespace obc
             this->_setupSunS.SetOutputFiles(outputFile);
 
             auto success = this->_controller.RequestExperiment(experiment::suns::SunSExperiment::Code);
+
+            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+
+            if (success)
+            {
+                response.PayloadWriter().WriteByte(0);
+            }
+            else
+            {
+                response.PayloadWriter().WriteByte(2);
+            }
+
+            transmitter.SendFrame(response.Frame());
+        }
+
+        PerformRadFETExperiment::PerformRadFETExperiment(
+            experiments::IExperimentController& controller, experiment::radfet::ISetupRadFETExperiment& setupRadFET)
+            : controller(controller),  //
+              setupRadFET(setupRadFET) //
+        {
+        }
+
+        void PerformRadFETExperiment::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
+        {
+            Reader r(parameters);
+
+            auto correlationId = r.ReadByte();
+
+            seconds delay = seconds(r.ReadByte() * 10);
+            uint8_t samplesCount = r.ReadByte();
+
+            char outputFileName[30];
+            strncpy(outputFileName, r.ReadString(30), sizeof(outputFileName));
+            outputFileName[29] = 0;
+
+            if (!r.Status() || strlen_n(outputFileName, 30) == 0)
+            {
+                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+                response.PayloadWriter().WriteByte(0x1);
+                transmitter.SendFrame(response.Frame());
+                return;
+            }
+
+            LOGF(LOG_LEVEL_INFO,
+                "Requested RadFET experiment: delay %ld seconds, samples %d, path %s",
+                static_cast<uint32_t>(delay.count()),
+                samplesCount,
+                outputFileName);
+
+            this->setupRadFET.Setup(delay, samplesCount, outputFileName);
+
+            auto success = this->controller.RequestExperiment(experiment::radfet::RadFETExperiment::Code);
 
             CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
 

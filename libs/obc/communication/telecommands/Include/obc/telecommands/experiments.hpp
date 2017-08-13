@@ -101,6 +101,39 @@ namespace obc
             /** @brief SunS experiments settings */
             experiment::suns::ISetupSunSExperiment& _setupSunS;
         };
+
+        /**
+         * @brief Perform RadFET experiment telecommand
+         * @ingroup obc_telecommands
+         * @telecommand
+         *
+         * Code: 0x1E
+         * Parameters:
+         *  - Correlation ID (8-bit)
+         *  - Delay (8-bit)
+         *  - Samples count (8-bit)
+         *  - Output file name (string, null-terminated, up to 30 charactes including terminator)
+         */
+        class PerformRadFETExperiment final : public telecommunication::uplink::Telecommand<0x1E>
+        {
+          public:
+            /**
+             * @brief Ctor
+             * @param controller Experiments controller
+             * @param setupRadFET Interface for setting up RadFET experiment
+             */
+            PerformRadFETExperiment(
+                experiments::IExperimentController& controller, experiment::radfet::ISetupRadFETExperiment& setupRadFET);
+
+            virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
+
+          private:
+            /** @brief Experiments controller */
+            experiments::IExperimentController& controller;
+
+            /** @brief RadFET experiments settings */
+            experiment::radfet::ISetupRadFETExperiment& setupRadFET;
+        };
     }
 }
 
