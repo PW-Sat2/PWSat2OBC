@@ -2,6 +2,7 @@ from devices import BeaconFrame
 from marker import BeaconMarker
 from utils import ensure_byte_list
 
+
 class BeaconFrameFactory(object):
     def matches(self, payload):
         return payload[0] == BeaconMarker()

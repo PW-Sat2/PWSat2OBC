@@ -1,19 +1,23 @@
-import argparse
-import imp
-import logging
 import os
 import sys
-from time import sleep
-import colorlog
-from datetime import datetime
-import binascii
-
 try:
     from i2cMock import I2CMock
 except ImportError:
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
     from i2cMock import I2CMock
 
+import argparse
+import imp
+import logging
+from Queue import Empty
+from threading import Thread
+from time import sleep
+import colorlog
+from datetime import datetime
+import binascii
+from SocketServer import ThreadingTCPServer, BaseRequestHandler
+
+from utils import ensure_string
 
 def _setup_log():
     root_logger = logging.getLogger()
@@ -88,6 +92,8 @@ Arguments may also be stored in file and passed with '@file' syntax. Arguments i
 
     parser.add_argument('-f', '--frames', help="Save all transmitted frames to file", default=None)
 
+    parser.add_argument("--comm-tcp", help="Start COMM TCP server on given port", dest='comm_tcp', type=int)
+
     parser.add_argument('-d', '--debug', action='store_true', default=False, help="Enable I2C logs")
 
     device_selection_group = parser.add_mutually_exclusive_group(required=True)
@@ -114,6 +120,55 @@ Arguments may also be stored in file and passed with '@file' syntax. Arguments i
                                         )
 
     return parser.parse_args()
+
+
+def read_all(s, size):
+    result = ""
+    while size > 0:
+        part = s.recv(size)
+        result += part
+        size -= len(part)
+
+    return result
+
+
+class CommHandler(BaseRequestHandler):
+    log = logging.getLogger("Comm.TCP")
+
+    def _send_frame(self):
+        size = ord(self.request.recv(1))
+        frame = read_all(self.request, size)
+
+        self.server.comm.receiver.put_frame(frame)
+
+        self.request.sendall('ACK')
+
+    def _receive_frame(self):
+        frames_in_buffer = []
+
+        while True:
+            try:
+                frame = self.server.comm.transmitter.get_message_from_buffer(0)
+                frames_in_buffer.append(frame)
+            except Empty:
+                break
+
+        self.request.sendall('ACK')
+        self.request.sendall(chr(len(frames_in_buffer)))
+        for f in frames_in_buffer:
+            self.request.sendall(chr(len(f)))
+            self.request.sendall(ensure_string(f))
+        self.request.sendall('ACK')
+
+    def handle(self):
+        command = self.request.recv(1)
+
+        if command == 'S':
+            self._send_frame()
+        elif command == 'R':
+            self._receive_frame()
+        else:
+            self.request.sendall('NAK')
 
 
 class JustMocks(object):
@@ -167,6 +222,14 @@ class JustMocks(object):
             print 'Logging frame {}'.format(len(content))
         self.comm.transmitter.on_send_frame = log_frame
 
+    def start_comm_server(self, port):
+        print 'Starting COMM TCP server'
+        server = ThreadingTCPServer(('0.0.0.0', port), CommHandler)
+        server.comm = self.comm
+        f = lambda: server.serve_forever()
+        t = Thread(target=f)
+        t.daemon = True
+        t.start()
 
 _setup_log()
 
@@ -190,8 +253,13 @@ if args.frames is not None:
 
 just_mocks.start(devices_to_enable)
 
+print '{} | {}'.format(type(args.comm_tcp), args.comm_tcp)
+if args.comm_tcp is not None:
+    just_mocks.start_comm_server(args.comm_tcp)
+
 print 'Press Ctrl+C to stop'
 try:
     sleep(-1)
 except KeyboardInterrupt:
+    print 'Stopping'
     just_mocks.stop()
