@@ -16,7 +16,6 @@ namespace obc
 
         void TakePhoto::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
         {
-            char filePath[40];
             if (parameters.size() == 0)
             {
                 CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, 0);
@@ -29,23 +28,26 @@ namespace obc
             const auto corelationId = reader.ReadByte();
             const auto cameraId = static_cast<services::photo::Camera>(reader.ReadByte());
             const auto resolution = static_cast<services::photo::PhotoResolution>(reader.ReadByte());
-            const auto path = reader.ReadString(count_of(filePath));
+            const auto count = reader.ReadByte();
+            const auto path = reader.ReadString(30);
 
             CorrelatedDownlinkFrame frame{DownlinkAPID::Operation, 0, corelationId};
             auto& writer = frame.PayloadWriter();
-            if (!reader.Status() || path.empty())
+            if (!reader.Status() || path.empty() || count >= 30)
             {
                 writer.WriteByte(0x2);
             }
             else
             {
-                memcpy(filePath, path.data(), path.size());
-                filePath[count_of(filePath) - 1] = '\0';
                 this->_photoService.Schedule(services::photo::Reset());
                 this->_photoService.Schedule(services::photo::EnableCamera(cameraId));
-                this->_photoService.Schedule(services::photo::TakePhoto(cameraId, resolution));
-                this->_photoService.Schedule(services::photo::DownloadPhoto(cameraId, 0));
-                this->_photoService.Schedule(services::photo::SavePhoto(0, "%.*s", path.size(), path.data()));
+                for (std::uint8_t cx = 0; cx < count; ++cx)
+                {
+                    this->_photoService.Schedule(services::photo::TakePhoto(cameraId, resolution));
+                    this->_photoService.Schedule(services::photo::DownloadPhoto(cameraId, 0));
+                    this->_photoService.Schedule(services::photo::SavePhoto(0, "%.*s_%d", path.size(), path.data(), 0));
+                }
+
                 this->_photoService.Schedule(services::photo::DisableCamera(cameraId));
                 this->_photoService.Schedule(services::photo::Reset());
                 writer.WriteByte(0);
