@@ -7,6 +7,8 @@
 #include "experiment/fibo/fibo.h"
 #include "experiment/flash/flash.hpp"
 #include "experiment/leop/leop.hpp"
+#include "experiment/payload/PayloadExperimentTelemetryProvider.hpp"
+#include "experiment/payload/payload_exp.hpp"
 #include "experiment/radfet/radfet.hpp"
 #include "experiment/sail/sail.hpp"
 #include "experiment/suns/suns.hpp"
@@ -98,7 +100,8 @@ namespace obc
         experiment::suns::SunSExperiment,                     //
         experiment::erase_flash::EraseFlashExperiment,        //
         experiment::radfet::RadFETExperiment,                 //
-        experiment::sail::SailExperiment                      //
+        experiment::sail::SailExperiment,                     //
+        experiment::payload::PayloadCommissioningExperiment   //
         >;
 
     /**
@@ -120,6 +123,9 @@ namespace obc
          * @param transmitter Frame transmitter
          * @param[in] photoService Reference to object capable of taking photos
          * @param[in] sailState Pin connected to sail indicator
+         * @param epsProvider Telemetry provider for Payload Experiment
+         * @param errorCounterProvider Error Counter telmetry provider
+         * @param temperatureProvider MCU telemetry provider
          */
         OBCExperiments(services::fs::IFileSystem& fs,
             adcs::IAdcsCoordinator& adcs,
@@ -131,7 +137,10 @@ namespace obc
             devices::n25q::RedundantN25QDriver& n25q,
             devices::comm::ITransmitter& transmitter,
             services::photo::IPhotoService& photoService,
-            const drivers::gpio::Pin& sailState);
+            const drivers::gpio::Pin& sailState,
+            devices::eps::IEpsTelemetryProvider& epsProvider,
+            error_counter::IErrorCountingTelemetryProvider* errorCounterProvider,
+            temp::ITemperatureReader* temperatureProvider);
 
         /**
          * @brief Performs initialization

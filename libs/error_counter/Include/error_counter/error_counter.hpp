@@ -312,6 +312,18 @@ namespace error_counter
         return flag;
     }
 
+    /**
+     * @brief Interface for object providing error counting telemetry
+     */
+    struct IErrorCountingTelemetryProvider
+    {
+        /**
+         * @brief Returns reference to error counting mechanism
+         * @return Reference to error counting mechanism
+         */
+        virtual error_counter::ErrorCounting& ErrorCounting() = 0;
+    };
+
     /** @} */
 }
 
