@@ -34,6 +34,36 @@ static constexpr std::uint8_t TransmitterBufferSize = 40;
 
 static constexpr std::uint8_t ReceiverBufferSize = 64;
 
+CommLock::CommLock(std::uint8_t semaphoreId) : semaphore(System::CreateBinarySemaphore(semaphoreId))
+{
+}
+
+OSResult CommLock::Initialize()
+{
+    return System::GiveSemaphore(this->semaphore);
+}
+
+bool CommLock::Lock(std::chrono::milliseconds timeout)
+{
+    auto result = System::TakeSemaphore(this->semaphore, timeout);
+    if (OS_RESULT_FAILED(result))
+    {
+        LOGF(LOG_LEVEL_ERROR, "[comm] Unable to acquire semaphore, Reason: %d", num(result));
+        return false;
+    }
+
+    return true;
+}
+
+void CommLock::Unlock()
+{
+    auto result = System::GiveSemaphore(this->semaphore);
+    if (OS_RESULT_FAILED(result))
+    {
+        LOGF(LOG_LEVEL_ERROR, "[comm] Unable to release semaphore, Reason: %d", num(result));
+    }
+}
+
 Beacon::Beacon() : period(0s)
 {
 }
@@ -45,10 +75,12 @@ Beacon::Beacon(std::chrono::seconds beaconPeriod, gsl::span<const std::uint8_t> 
 }
 
 CommObject::CommObject(error_counter::ErrorCounting& errors, II2CBus& low)
-    : _error(errors),             //
-      _low(low),                  //
-      _frameHandler(nullptr),     //
-      _pollingTaskHandle(nullptr) //
+    : _error(errors),                          //
+      _low(low),                               //
+      _frameHandler(nullptr),                  //
+      _pollingTaskHandle(nullptr),             //
+      transmitterLock(transmitterSemaphoreId), //
+      receiverLock(receiverSemaphoreId)        //
 {
 }
 
@@ -81,6 +113,15 @@ bool CommObject::SendBufferWithResponse(Address address, //
     AggregatedErrorCounter& resultAggregator             //
     )
 {
+    CommLock& commLock = (address == Address::Receiver) ? receiverLock : transmitterLock;
+    UniqueLock<CommLock> lock(commLock, InfiniteTimeout);
+    if (!lock())
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable to lock comm object");
+        resultAggregator.Failure();
+        return false;
+    }
+
     if (inputBuffer.empty())
     {
         return false;
@@ -126,7 +167,25 @@ OSResult CommObject::Initialize()
 {
     ErrorReporter errorContext(_error);
 
-    OSResult result = this->_pollingTaskFlags.Initialize();
+    OSResult result;
+
+    result = transmitterLock.Initialize();
+    if (OS_RESULT_FAILED(result))
+    {
+        LOGF(LOG_LEVEL_FATAL, "[comm] Unable to initialize transmitter lock object (%d)", num(result));
+        errorContext.Counter().Failure();
+        return result;
+    }
+
+    result = receiverLock.Initialize();
+    if (OS_RESULT_FAILED(result))
+    {
+        LOGF(LOG_LEVEL_FATAL, "[comm] Unable to initialize receiver lock object (%d)", num(result));
+        errorContext.Counter().Failure();
+        return result;
+    }
+
+    result = this->_pollingTaskFlags.Initialize();
     if (OS_RESULT_FAILED(result))
     {
         LOGF(LOG_LEVEL_FATAL, "[comm] Unable to create polling task flags (%d)", num(result));

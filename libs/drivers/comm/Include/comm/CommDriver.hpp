@@ -14,6 +14,42 @@
 COMM_BEGIN
 
 /**
+ * @brief Lock object for comm transmitter and receiver.
+ * @ingroup LowerCommDriver
+ */
+class CommLock
+{
+  public:
+    /**
+     * @brief Ctor.
+     * @param[in] semaphoreId Semaphore id passed to semaphore creation method.
+     */
+    CommLock(std::uint8_t semaphoreId);
+
+    /**
+     * @brief Initializes lock object.
+     * @return Operation status.
+     */
+    OSResult Initialize();
+
+    /**
+     * @brief Lock underlying semaphore.
+     * @param[in] timeout Timeout.
+     * @return True when operation completed successfully, false otherwise.
+     */
+    bool Lock(std::chrono::milliseconds timeout);
+
+    /**
+     * @brief Unlock underlying semaphore.
+     */
+    void Unlock();
+
+  private:
+    /** @brief Semaphore. */
+    OSSemaphoreHandle semaphore;
+};
+
+/**
  * @brief This type describe comm driver global state.
  * @ingroup LowerCommDriver
  * @remark Do not access directly the fields of this type, instead use the comm driver interface to
@@ -238,6 +274,12 @@ class CommObject final : public ITransmitter,      //
     /** @brief Error counter type */
     using ErrorCounter = error_counter::ErrorCounter<0>;
 
+    /** @brief Id of semaphore used for transmitter synchronization. */
+    static constexpr std::uint8_t transmitterSemaphoreId = 1;
+
+    /** @brief Id of semaphore used for receiver synchronization. */
+    static constexpr std::uint8_t receiverSemaphoreId = 2;
+
   private:
     /** @brief Error reporter type */
     using ErrorReporter = error_counter::AggregatedErrorReporter<ErrorCounter::DeviceId>;
@@ -373,6 +415,12 @@ class CommObject final : public ITransmitter,      //
 
     /** @brief Event group used to communicate with background task. */
     EventGroup _pollingTaskFlags;
+
+    /** @brief Lock object used for transmitter synchronization. */
+    CommLock transmitterLock;
+
+    /** @brief Lock object used for receiver synchronization. */
+    CommLock receiverLock;
 };
 
 inline bool CommObject::SendFrame(gsl::span<const std::uint8_t> frame)
