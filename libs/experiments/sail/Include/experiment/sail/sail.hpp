@@ -170,6 +170,13 @@ namespace experiment
             services::photo::Camera GetNextCamera() const;
 
             /**
+              * @brief Save to file sail telemetry.
+              * @param time Current mission time.
+              * @return Operation status. True in case of success, false otherwise.
+              */
+            bool Save(const Option<std::chrono::milliseconds>& time);
+
+            /**
              * @brief Save to file gyroscope telemetry.
              * @param gyroTelemetry Reference to gyroscope telemetry to save.
              * @return Operation status. True in case of success, false otherwise.

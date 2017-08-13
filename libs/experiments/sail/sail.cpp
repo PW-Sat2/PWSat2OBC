@@ -221,19 +221,30 @@ namespace experiment
                 LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to acquire/save gyro telemetry");
             }
 
+            if (!Save(time))
+            {
+                LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to time");
+            }
+
             if (!Save(sailIndicator, temperatures.sail))
             {
                 LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to save sail temperature");
             }
 
-            this->_nextTelemetryAcquisition = time.Value + TelemetryAcqusitionPeriod;
+            if (time.HasValue)
+            {
+                this->_nextTelemetryAcquisition = time.Value + TelemetryAcqusitionPeriod;
+            }
         }
 
         void SailExperiment::TakePhoto(const Option<std::chrono::milliseconds>& time)
         {
             this->_lastCamera = GetNextCamera();
             TakePhoto(this->_lastCamera, services::photo::PhotoResolution::p128);
-            this->_nextPhoto = time.Value + TakingPhotosPeriod;
+            if (time.HasValue)
+            {
+                this->_nextPhoto = time.Value + TakingPhotosPeriod;
+            }
         }
 
         std::chrono::milliseconds SailExperiment::TimeToNextEvent(const Option<std::chrono::milliseconds>& time) const
@@ -241,6 +252,24 @@ namespace experiment
             auto timeLeft = std::min(TimeToGetTelemetry(time), TimeToTakePhoto(time));
             timeLeft = std::min(TimeToEnd(time), timeLeft);
             return std::max(0ms, timeLeft);
+        }
+
+        bool SailExperiment::Save(const Option<std::chrono::milliseconds>& time)
+        {
+            if (!time.HasValue)
+            {
+                return true;
+            }
+
+            std::array<std::uint8_t, 8> buffer;
+            Writer writer{buffer};
+            writer.WriteQuadWordLE(time.Value.count());
+            if (!writer.Status())
+            {
+                return false;
+            }
+
+            return OS_RESULT_SUCCEEDED(this->_file.Write(experiments::fs::ExperimentFile::PID::Timestamp, writer.Capture()));
         }
 
         bool SailExperiment::Save(const devices::gyro::GyroscopeTelemetry& gyroTelemetry)
