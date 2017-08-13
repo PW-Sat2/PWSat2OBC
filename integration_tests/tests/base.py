@@ -5,7 +5,6 @@ import extensions
 from build_config import config
 from system import System
 
-
 class BaseTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(BaseTest, self).__init__(*args, **kwargs)
