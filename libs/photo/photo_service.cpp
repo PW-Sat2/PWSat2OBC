@@ -99,6 +99,11 @@ namespace services
 
         OSResult PhotoService::Invoke(DownloadPhoto command)
         {
+            if (command.BufferId() >= BuffersCount)
+            {
+                return OSResult::InvalidArgument;
+            }
+
             this->_selector.Select(command.Which());
 
             {
@@ -151,8 +156,12 @@ namespace services
                 return OSResult::IOError;
             }
 
-            auto buffer = this->GetBufferInfo(command.BufferId());
+            if (command.BufferId() >= BuffersCount)
+            {
+                return OSResult::InvalidArgument;
+            }
 
+            auto buffer = this->GetBufferInfo(command.BufferId());
             LOGF(LOG_LEVEL_DEBUG,
                 "[photo] Saving photo from buffer %d to %s (status: %d, size: %d bytes))",
                 command.BufferId(),
@@ -187,6 +196,11 @@ namespace services
 
         BufferInfo PhotoService::GetBufferInfo(std::uint8_t bufferId) const
         {
+            if (bufferId >= BuffersCount)
+            {
+                return BufferInfo{};
+            }
+
             BufferInfo tmp;
             {
                 Lock l(this->_sync, InfiniteTimeout);
@@ -198,7 +212,7 @@ namespace services
         bool PhotoService::IsEmpty(std::uint8_t bufferId) const
         {
             Lock l(this->_sync, InfiniteTimeout);
-            return this->_bufferInfos[bufferId].Status() == BufferStatus::Empty;
+            return bufferId < BuffersCount && this->_bufferInfos[bufferId].Status() == BufferStatus::Empty;
         }
 
         void PhotoService::Initialize()
