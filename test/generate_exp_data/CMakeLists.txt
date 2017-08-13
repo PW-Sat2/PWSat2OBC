@@ -10,6 +10,7 @@ target_link_libraries(${NAME}
 	base
 	platform
 	emlib
+	fs
 )
 
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_SOURCE_DIR}/unit_tests/base/linker.ld -u _printf_float -specs=rdimon.specs")
