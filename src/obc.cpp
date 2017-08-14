@@ -68,7 +68,10 @@ static void TimePassed(void* /*context*/, TimePoint /*currentTime*/)
 static std::uint16_t GetErrorCounterMask()
 {
     return 1 << devices::n25q::RedundantN25QDriver::ErrorCounter::DeviceId |
-        1 << devices::camera::LowLevelCameraDriver::ErrorCounter::DeviceId;
+        1 << devices::camera::LowLevelCameraDriver::ErrorCounter::DeviceId |
+        1 << obc::storage::error_counters::N25QDriver1::ErrorCounter::DeviceId |
+        1 << obc::storage::error_counters::N25QDriver2::ErrorCounter::DeviceId |
+        1 << obc::storage::error_counters::N25QDriver3::ErrorCounter::DeviceId;
 }
 
 OBC::OBC()
@@ -110,7 +113,7 @@ OBC::OBC()
           Hardware.I2C.Buses.Payload,
           Hardware.SunS,
           Hardware.PayloadDeviceDriver,
-          Hardware.Gyro),                                                          //
+          Hardware.Gyro),                                                                  //
       Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index),         //
       terminal(this->Hardware.Terminal),                                                   //
       camera(this->Fdir.ErrorCounting(), this->Hardware.Camera),                           //
