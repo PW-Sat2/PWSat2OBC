@@ -23,6 +23,7 @@
 #include "obc/telecommands/power.hpp"
 #include "obc/telecommands/program_upload.hpp"
 #include "obc/telecommands/sail.hpp"
+#include "obc/telecommands/suns.hpp"
 #include "obc/telecommands/time.hpp"
 #include "program_flash/fwd.hpp"
 #include "telecommunication/telecommand_handling.h"
@@ -144,7 +145,8 @@ namespace obc
         obc::telecommands::PerformSunSExperiment,             //
         obc::telecommands::EraseFlashTelecommand,             //
         obc::telecommands::RawI2CTelecommand,                 //
-        obc::telecommands::PerformRadFETExperiment            //
+        obc::telecommands::PerformRadFETExperiment,            //
+        obc::telecommands::GetSunSDataSetsTelecommand         //
         >;
 
     /**
@@ -171,6 +173,9 @@ namespace obc
          * @param[in] timeSynchronization Time synchronization object.
          * @param[in] systemBus I2C system bus.
          * @param[in] payload Payload.
+         * @param[in] experimentalSunS Experimental Sun Sensor interface
+         * @param[in] payloadDriver Payload driver interface
+         * @param[in] gyro Gyroscope interface
          */
         OBCCommunication(obc::FDIR& fdir,
             devices::comm::CommObject& commDriver,
@@ -188,7 +193,10 @@ namespace obc
             mission::IOpenSail& openSail,
             mission::ITimeSynchronization& timeSynchronization,
             drivers::i2c::II2CBus& systemBus,
-            drivers::i2c::II2CBus& payload);
+            drivers::i2c::II2CBus& payload,
+            devices::suns::ISunSDriver& experimentalSunS,
+            devices::payload::IPayloadDeviceDriver& payloadDriver,
+            devices::gyro::IGyroscopeDriver& gyro);
 
         /**
          * @brief Initializes all communication at runlevel 1

@@ -15,6 +15,7 @@ set(SOURCES
     periodic_message.cpp
     flash.cpp
     i2c.cpp
+    suns.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -29,11 +30,15 @@ target_link_libraries(${NAME}
 	rtc
 	fs
 	logger
+	exp_suns
 	obc_experiments
 	obc_fdir
 	program_flash
 	boot_settings
-	power
+	power	
+	suns
+	payload
+	gyro
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

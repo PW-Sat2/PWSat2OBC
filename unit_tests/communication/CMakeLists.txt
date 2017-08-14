@@ -21,6 +21,7 @@ set(SOURCES
   Telecommands/AbortExperimentTelecommandTest.cpp
   Telecommands/PerformDetumblingExperimentTelecommandTest.cpp
   Telecommands/EraseFlashTelecommandTest.cpp
+  Telecommands/GetSunSDataSetsTelecommandTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
