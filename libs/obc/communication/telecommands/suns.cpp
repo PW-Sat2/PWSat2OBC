@@ -4,6 +4,7 @@
 #include "base/reader.h"
 #include "comm/ITransmitter.hpp"
 #include "experiment/suns/suns.hpp"
+#include "logger/logger.h"
 #include "power/power.h"
 #include "telecommunication/downlink.h"
 #include "telecommunication/telecommand_handling.h"
@@ -35,6 +36,13 @@ namespace obc
             uint8_t correlationId = reader.ReadByte();
             uint8_t gain = reader.ReadByte();
             uint8_t itime = reader.ReadByte();
+
+            if (!reader.Status())
+            {
+                LOG(LOG_LEVEL_INFO, "[tc] Failed to command read parameters");
+                SendErrorFrame(transmitter, correlationId);
+                return;
+            }
 
             SetPowerState(true);
             System::SleepTask(3s);
@@ -78,6 +86,14 @@ namespace obc
         {
             this->_powerControl.SensPower(state);
             this->_powerControl.SunSPower(state);
+        }
+
+        void GetSunSDataSetsTelecommand::SendErrorFrame(devices::comm::ITransmitter& transmitter, uint8_t correlationId)
+        {
+            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+            response.PayloadWriter().WriteByte(0x01);
+
+            transmitter.SendFrame(response.Frame());
         }
     }
 }

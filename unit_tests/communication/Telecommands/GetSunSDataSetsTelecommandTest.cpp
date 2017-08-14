@@ -136,4 +136,16 @@ namespace
 
         _telecommand.Handle(_transmitter, _correctParameters);
     }
+
+    TEST_F(GetSunSDataSetsTelecommandTest, ShouldNotRunIfParametersAreIncorrect)
+    {
+        std::array<uint8_t, 1> incorrectParameters;
+        Writer w(incorrectParameters);
+        w.WriteByte(0xAB);
+
+        EXPECT_CALL(_power, SensPower(_)).Times(0);
+        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0xAB, 0x01))));
+
+        _telecommand.Handle(_transmitter, incorrectParameters);
+    }
 }

@@ -71,6 +71,7 @@ namespace obc
             void GatherSingleMeasurement(experiment::suns::DataPoint& point, uint8_t gain, uint8_t itime);
             void WriteMeasurements(experiment::suns::DataPoint& point, Writer& writer);
             void SetPowerState(bool state);
+            void SendErrorFrame(devices::comm::ITransmitter& transmitter, uint8_t correlationId);
         };
     }
 }
