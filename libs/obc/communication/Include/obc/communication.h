@@ -151,7 +151,8 @@ namespace obc
         obc::telecommands::GetSunSDataSetsTelecommand,
         obc::telecommands::PerformSailExperiment,
         obc::telecommands::TakePhoto,
-        obc::telecommands::DeploySolarArray>;
+        obc::telecommands::DeploySolarArray,
+        obc::telecommands::PerformPayloadCommisioningExperiment>;
 
     /**
      * @brief OBC <-> Earth communication
