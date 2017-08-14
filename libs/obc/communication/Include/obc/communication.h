@@ -149,7 +149,9 @@ namespace obc
         obc::telecommands::PerformRadFETExperiment,
         obc::telecommands::GetSunSDataSetsTelecommand,
         obc::telecommands::PerformSailExperiment,
-        obc::telecommands::TakePhoto>;
+        obc::telecommands::TakePhoto,
+        obc::telecommands::PerformPayloadCommisioningExperiment //
+        >;
 
     /**
      * @brief OBC <-> Earth communication

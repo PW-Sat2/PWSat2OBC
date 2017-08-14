@@ -160,6 +160,36 @@ namespace obc
             /** @brief Experiments controller */
             experiments::IExperimentController& experimentController;
         };
+
+        /**
+         * @brief Perform Payload Commisioning experiment telecommand
+         * @ingroup obc_telecommands
+         * @telecommand
+         *
+         * Code: 0x1F
+         * Parameters:
+         *  - Correlation ID (8-bit)
+         *  - Output file name (string, null-terminated, up to 30 charactes including terminator)
+         */
+        class PerformPayloadCommisioningExperiment final : public telecommunication::uplink::Telecommand<0x1F>
+        {
+          public:
+            /**
+             * @brief Ctor
+             * @param controller Experiments controller
+             * @param setupPayload Interface for setting up Payload experiment
+             */
+            PerformPayloadCommisioningExperiment(
+                experiments::IExperimentController& controller, experiment::payload::ISetupPayloadCommissioningExperiment& setupPayload);
+
+            virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
+
+          private:
+            /** @brief Experiments controller */
+            experiments::IExperimentController& _controller;
+            /** @brief payload experiments settings */
+            experiment::payload::ISetupPayloadCommissioningExperiment& _setupPayload;
+        };
     }
 }
 
