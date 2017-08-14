@@ -11,6 +11,7 @@ from periodic_message import *
 from antenna import *
 from i2c import *
 from suns import *
+from photo import *
 
 __all__ = [
     'DownloadFile',
@@ -32,6 +33,8 @@ __all__ = [
     'StopAntennaDeployment',
     'EraseFlash'
     'RawI2C',
-    'GetSunSDataSets'
+    'GetSunSDataSets',
+    'PerformSailExperiment',
+    'TakePhotoTelecommand'
 ]
 
