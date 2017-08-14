@@ -60,7 +60,8 @@ enum TaskFlag
 {
     TaskFlagPauseRequest = 1,
     TaskFlagAck = 2,
-    TaskFlagRunning = 4
+    TaskFlagRunning = 4,
+    TaskFlagPing = 8
 };
 
 bool CommObject::SendCommand(Address address, uint8_t command, AggregatedErrorCounter& resultAggregator)
@@ -695,6 +696,11 @@ void CommObject::ProcessSingleFrame()
     }
 }
 
+void CommObject::WaitForComLoop()
+{
+    this->_pollingTaskFlags.WaitAny(TaskFlagPing, true, InfiniteTimeout);
+}
+
 void CommObject::CommTask(void* param)
 {
     CommObject* comm = (CommObject*)param;
@@ -705,6 +711,7 @@ void CommObject::CommTask(void* param)
 
     for (;;)
     {
+        comm->_pollingTaskFlags.Set(TaskFlagPing);
         const OSEventBits result = comm->_pollingTaskFlags.WaitAny(TaskFlagPauseRequest, true, 1s);
         if (result == TaskFlagPauseRequest)
         {

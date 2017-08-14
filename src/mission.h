@@ -10,6 +10,7 @@
 #include "mission/adcs.hpp"
 #include "mission/antenna_task.hpp"
 #include "mission/comm.hpp"
+#include "mission/comm_wdog.hpp"
 #include "mission/experiments.hpp"
 #include "mission/fdir.hpp"
 #include "mission/fs.hpp"
@@ -52,11 +53,12 @@ namespace mission
         mission::experiments::MissionExperimentComponent,
         mission::BeaconUpdate,
         mission::SaveErrorCountersConfig,
-        mission::PeristentStateSave, //
-        FileSystemTask,              //
-        mission::SendMessageTask,    //
-        EPSWatchdogTask,             //
-        leop::LEOPTask>
+        mission::PeristentStateSave,
+        FileSystemTask,
+        mission::SendMessageTask,
+        EPSWatchdogTask,
+        leop::LEOPTask,
+        mission::CommWdogTask>
         ObcMission;
 }
 

@@ -23,3 +23,11 @@ CommTelemetryProviderMock::CommTelemetryProviderMock()
 CommTelemetryProviderMock::~CommTelemetryProviderMock()
 {
 }
+
+CommHardwareObserverMock::CommHardwareObserverMock()
+{
+}
+
+CommHardwareObserverMock::~CommHardwareObserverMock()
+{
+}

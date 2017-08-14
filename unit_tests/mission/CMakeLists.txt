@@ -14,6 +14,7 @@ set(SOURCES
   MissionPlan/adcs/AdcsPrimaryTaskTest.cpp
   MissionPlan/obc/ObcTest.cpp
   MissionPlan/sail/OpenSailTest.cpp
+  MissionPlan/comm/CommWdogTest.cpp
   MissionPlan/SendMessageTest.cpp
   Experiments/Fibo/FiboCalculatorTest.cpp
   Experiments/ExperimentTest.cpp
