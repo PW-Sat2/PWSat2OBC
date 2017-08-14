@@ -12,6 +12,11 @@ target_link_libraries(${NAME}
 	adcs
 	experiments
 	time
+	power
+	gyro
+	payload
+	telemetry
+	telemetry_imtq
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

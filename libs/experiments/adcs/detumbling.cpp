@@ -1,5 +1,8 @@
 #include "adcs.hpp"
+#include "data_point.hpp"
+#include "gyro/driver.hpp"
 #include "logger/logger.h"
+#include "power/power.h"
 
 using experiments::IterationResult;
 using experiments::StartResult;
@@ -8,8 +11,13 @@ namespace experiment
 {
     namespace adcs
     {
-        DetumblingExperiment::DetumblingExperiment(::adcs::IAdcsCoordinator& adcs, services::time::ICurrentTime& time)
-            : _adcs(adcs), _time(time)
+        DetumblingExperiment::DetumblingExperiment(::adcs::IAdcsCoordinator& adcs,
+            services::time::ICurrentTime& time,
+            services::power::IPowerControl& powerControl,
+            devices::gyro::IGyroscopeDriver& gyro,
+            devices::payload::IPayloadDeviceDriver& payload,
+            telemetry::IImtqDataProvider& imtq)
+            : _adcs(adcs), _time(time), _powerControl(powerControl), _gyro(gyro), _payload(payload), _imtq(imtq)
         {
         }
 
@@ -58,6 +66,11 @@ namespace experiment
                 return StartResult::Failure;
             }
 
+            if (!this->_powerControl.SensPower(true))
+            {
+                return StartResult::Failure;
+            }
+
             this->_endAt = start.Value + this->_duration;
 
             revert.Skip();
@@ -84,6 +97,8 @@ namespace experiment
 
         void DetumblingExperiment::Stop(IterationResult /*lastResult*/)
         {
+            this->_powerControl.SensPower(false);
+
             auto r = this->_adcs.Disable();
 
             if (OS_RESULT_FAILED(r))
@@ -93,6 +108,24 @@ namespace experiment
             }
 
             this->_adcs.EnableBuiltinDetumbling();
+        }
+
+        DetumblingDataPoint DetumblingExperiment::GatherSingleMeasurement()
+        {
+            DetumblingDataPoint point;
+
+            point.Timestamp = this->_time.GetCurrentTime().Value;
+            point.Gyro = this->_gyro.read().Value;
+
+            this->_payload.MeasureSunSRef(point.ReferenceSunS);
+            this->_payload.MeasurePhotodiodes(point.Photodiodes);
+            this->_payload.MeasureTemperatures(point.Temperatures);
+
+            this->_imtq.GetLastMagnetometerMeasurement(point.Magnetometer);
+
+            this->_imtq.GetLastDipoles(point.Dipoles);
+
+            return point;
         }
     }
 }

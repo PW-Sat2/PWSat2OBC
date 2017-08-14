@@ -4,6 +4,10 @@
 #include <chrono>
 #include "adcs/adcs.hpp"
 #include "experiments/experiments.h"
+#include "gyro/fwd.hpp"
+#include "payload/interfaces.h"
+#include "power/fwd.hpp"
+#include "telemetry/IImtqTelemetryCollector.hpp"
 #include "time/timer.h"
 
 namespace experiment
@@ -25,6 +29,8 @@ namespace experiment
             virtual void Duration(std::chrono::seconds duration) = 0;
         };
 
+        struct DetumblingDataPoint;
+
         /**
          * @brief Detumbling experiment
          * @ingroup experiments
@@ -39,8 +45,14 @@ namespace experiment
              * @brief Ctor
              * @param adcs ADCS coordinator
              * @param time Current time provider
+             * @param powerControl Power control
              */
-            DetumblingExperiment(::adcs::IAdcsCoordinator& adcs, services::time::ICurrentTime& time);
+            DetumblingExperiment(::adcs::IAdcsCoordinator& adcs,
+                services::time::ICurrentTime& time,
+                services::power::IPowerControl& powerControl,
+                devices::gyro::IGyroscopeDriver& gyro,
+                devices::payload::IPayloadDeviceDriver& payload,
+                telemetry::IImtqDataProvider& imtq);
 
             /**
              * @brief Sets experiment duration
@@ -53,6 +65,8 @@ namespace experiment
             virtual experiments::IterationResult Iteration() override;
             virtual void Stop(experiments::IterationResult lastResult) override;
 
+            DetumblingDataPoint GatherSingleMeasurement();
+
           private:
             /** @brief ADCS coordinator */
             ::adcs::IAdcsCoordinator& _adcs;
@@ -62,6 +76,13 @@ namespace experiment
             std::chrono::milliseconds _duration;
             /** @brief Point at time at which experiment should stop */
             std::chrono::milliseconds _endAt;
+            /** @brief Power control */
+            services::power::IPowerControl& _powerControl;
+            /** @brief Gyroscope */
+            devices::gyro::IGyroscopeDriver& _gyro;
+            /** @brief Payload driver */
+            devices::payload::IPayloadDeviceDriver& _payload;
+            telemetry::IImtqDataProvider& _imtq;
         };
     }
 }

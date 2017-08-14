@@ -258,5 +258,29 @@ namespace devices
 
             return status;
         }
+
+        bool ImtqTelemetryCollector::GetLastMagnetometerMeasurement(telemetry::ImtqMagnetometerMeasurements& measurements)
+        {
+            Lock lock(this->semaphore, 50ms);
+            const auto status = static_cast<bool>(lock);
+            if (status)
+            {
+                measurements = this->magnetometers;
+            }
+
+            return status;
+        }
+
+        bool ImtqTelemetryCollector::GetLastDipoles(telemetry::ImtqDipoles& dipoles)
+        {
+            Lock lock(this->semaphore, 50ms);
+            const auto status = static_cast<bool>(lock);
+            if (status)
+            {
+                dipoles = this->dipoles;
+            }
+
+            return status;
+        }
     }
 }

@@ -7,6 +7,12 @@
 
 namespace telemetry
 {
+    struct IImtqDataProvider
+    {
+        virtual bool GetLastMagnetometerMeasurement(telemetry::ImtqMagnetometerMeasurements& measurements) = 0;
+        virtual bool GetLastDipoles(telemetry::ImtqDipoles& dipoles) = 0;
+    };
+
     /**
      * @brief This is an interface for imtq telemetry collector.
      * @ingroup telemetry
