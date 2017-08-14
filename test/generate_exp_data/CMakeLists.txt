@@ -3,6 +3,7 @@ set(NAME generate_exp_data)
 set(SOURCES
     main.cpp
     suns_data.cpp
+    sail_data.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
