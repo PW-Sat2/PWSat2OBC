@@ -68,7 +68,7 @@ static void Print(const char* prefix, const devices::eps::hk::ThisControllerStat
 {
     GetTerminal().Printf("%s.SAFETY_CTR\t%d\n", prefix, hk.safetyCounter);
     GetTerminal().Printf("%s.PWR_CYCLES\t%d\n", prefix, hk.powerCycleCount);
-    GetTerminal().Printf("%s.UPTIME\t%ld\n", prefix, hk.uptime);
+    GetTerminal().Printf("%s.UPTIME\t%lu\n", prefix, hk.uptime);
     GetTerminal().Printf("%s.TEMP\t%d\n", prefix, hk.temperature.Value());
     GetTerminal().Printf("%s.SUPP_TEMP\t%d\n", prefix, hk.suppTemp.Value());
 }
