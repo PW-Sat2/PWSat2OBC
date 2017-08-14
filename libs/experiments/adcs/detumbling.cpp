@@ -115,6 +115,10 @@ namespace experiment
                 return IterationResult::Finished;
             }
 
+            auto point = GatherSingleMeasurement();
+
+            point.WriteTo(this->_dataSet);
+
             System::SleepTask(this->_sampleRate);
 
             return IterationResult::LoopImmediately;
