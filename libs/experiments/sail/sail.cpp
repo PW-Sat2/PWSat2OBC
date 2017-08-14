@@ -313,9 +313,12 @@ namespace experiment
 
         void SailExperiment::SavePhotos()
         {
-            for (std::uint8_t index = 0; !this->_photoService.IsEmpty(index); ++index)
+            for (std::uint8_t index = 0; index < this->_photoNumber; ++index)
             {
-                this->_photoService.Schedule(services::photo::SavePhoto(index, "/sail.photo_%d", index));
+                if (!this->_photoService.IsEmpty(index))
+                {
+                    this->_photoService.Schedule(services::photo::SavePhoto(index, "/sail.photo_%d", index));
+                }
             }
         }
     }

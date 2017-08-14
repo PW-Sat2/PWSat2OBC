@@ -17,20 +17,16 @@ class TestExperimentSail(RestartPerTest):
         self.system.obc.jump_to_time(timedelta(hours=41))
 
     @clear_state()
-    def test_experiment_start(self):
+    def test_experiment_startup(self):
         self.startup()
+        self.system.obc.jump_to_time(timedelta(hours=41))
+
         self.system.comm.put_frame(PerformSailExperiment(10))
 
         frame = self.system.comm.get_frame(20)
 
         self.assertIsInstance(frame, OperationSuccessFrame)
         self.assertEqual(frame.correlation_id, 10);
-
-    def test_experiment_startup(self):
-        self.startup()
-        self.system.obc.jump_to_time(timedelta(hours=41))
-
-        self.system.comm.put_frame(PerformSailExperiment(10))
 
         self.system.obc.wait_for_experiment_started(ExperimentType.Sail, 60)
         self.system.obc.wait_for_experiment_iteration(1, 3)

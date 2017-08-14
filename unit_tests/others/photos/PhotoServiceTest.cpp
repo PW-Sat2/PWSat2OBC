@@ -85,7 +85,7 @@ namespace
         }
     }
 
-    TEST_F(PhotoServiceTest, AllBuffersAreEmptBeyondLimit)
+    TEST_F(PhotoServiceTest, AllBuffersAreEmptyBeyondLimit)
     {
         for (int i = PhotoService::BuffersCount; i <= 0xff; i++)
         {
