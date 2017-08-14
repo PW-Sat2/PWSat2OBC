@@ -44,56 +44,61 @@ namespace experiment
 
         experiments::StartResult DetumblingExperiment::Start()
         {
-            if (!_dataSet.Open(this->_fileSystem, "/detum", FileOpen::CreateAlways, FileAccess::WriteOnly))
+            do
             {
-                return StartResult::Failure;
-            }
+                if (!_dataSet.Open(this->_fileSystem, "/detum", FileOpen::CreateAlways, FileAccess::WriteOnly))
+                {
+                    break;
+                }
 
-            auto r = this->_adcs.Disable();
+                auto start = this->_time.GetCurrentTime();
 
-            if (OS_RESULT_FAILED(r))
-            {
-                LOGF(LOG_LEVEL_ERROR, "Failed to disable current ADCS mode (%d)", num(r));
-                return StartResult::Failure;
-            }
+                if (!start.HasValue)
+                {
+                    LOG(LOG_LEVEL_ERROR, "[exp_dtb] Failed to retrieve current time");
+                    break;
+                }
 
-            auto revert = OnLeave([this]() {
-                auto r = this->_adcs.EnableBuiltinDetumbling();
+                if (!this->_powerControl.SensPower(true))
+                {
+                    LOG(LOG_LEVEL_ERROR, "[exp_dtb] Failed to enable SENS power");
+                    break;
+                }
+
+                auto r = this->_adcs.EnableExperimentalDetumbling();
 
                 if (OS_RESULT_FAILED(r))
                 {
-                    LOGF(LOG_LEVEL_FATAL, "Failed to reenable builtin detumbling (%d)", num(r));
+                    LOGF(LOG_LEVEL_ERROR, "[exp_dtb] Failed to enable experimental detumbling (%d)", num(r));
+
+                    break;
                 }
-            });
 
-            r = this->_adcs.EnableExperimentalDetumbling();
+                System::SleepTask(2s);
 
-            if (OS_RESULT_FAILED(r))
-            {
-                LOGF(LOG_LEVEL_ERROR, "Failed to enable experimental detumbling (%d)", num(r));
+                this->_endAt = start.Value + this->_duration;
 
-                return StartResult::Failure;
-            }
+                return StartResult::Success;
 
-            auto start = this->_time.GetCurrentTime();
+            } while (false);
 
-            if (!start.HasValue)
-            {
-                return StartResult::Failure;
-            }
+            CleanUp();
 
-            if (!this->_powerControl.SensPower(true))
-            {
-                return StartResult::Failure;
-            }
+            return StartResult::Failure;
+        }
 
-            System::SleepTask(2s);
+        void DetumblingExperiment::CleanUp()
+        {
+            this->_dataSet.Close();
 
-            this->_endAt = start.Value + this->_duration;
+            this->_powerControl.SensPower(false);
 
-            revert.Skip();
+            this->_adcs.EnableBuiltinDetumbling();
+        }
 
-            return StartResult::Success;
+        void DetumblingExperiment::Stop(IterationResult /*lastResult*/)
+        {
+            CleanUp();
         }
 
         IterationResult DetumblingExperiment::Iteration()
@@ -113,23 +118,6 @@ namespace experiment
             System::SleepTask(this->_sampleRate);
 
             return IterationResult::LoopImmediately;
-        }
-
-        void DetumblingExperiment::Stop(IterationResult /*lastResult*/)
-        {
-            this->_dataSet.Close();
-
-            this->_powerControl.SensPower(false);
-
-            auto r = this->_adcs.Disable();
-
-            if (OS_RESULT_FAILED(r))
-            {
-                LOGF(LOG_LEVEL_FATAL, "Failed to reenable builtin detumbling (%d)", num(r));
-                return;
-            }
-
-            this->_adcs.EnableBuiltinDetumbling();
         }
 
         DetumblingDataPoint DetumblingExperiment::GatherSingleMeasurement()

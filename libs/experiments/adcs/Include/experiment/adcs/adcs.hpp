@@ -68,6 +68,8 @@ namespace experiment
             DetumblingDataPoint GatherSingleMeasurement();
 
           private:
+            void CleanUp();
+
             /** @brief ADCS coordinator */
             ::adcs::IAdcsCoordinator& _adcs;
             /** @brief Current time provider */
