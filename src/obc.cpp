@@ -65,15 +65,21 @@ static void TimePassed(void* /*context*/, TimePoint /*currentTime*/)
     drivers::watchdog::InternalWatchdog::Kick();
 }
 
+static std::uint16_t GetErrorCounterMask()
+{
+    return 1 << devices::n25q::RedundantN25QDriver::ErrorCounter::DeviceId |
+        1 << devices::camera::LowLevelCameraDriver::ErrorCounter::DeviceId;
+}
+
 OBC::OBC()
-    : initTask(nullptr),
-      BootTable(Hardware.FlashDriver),                                                                    //
-      BootSettings(this->Hardware.PersistentStorage.GetRedundantDriver()),                                //
-      Hardware(this->Fdir.ErrorCounting(), this->PowerControlInterface, timeProvider),                    //
-      PowerControlInterface(this->Hardware.EPS),                                                          //
-      Fdir(this->PowerControlInterface, 1 << devices::n25q::RedundantN25QDriver::ErrorCounter::DeviceId), //
-      Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),                               //
-      adcs(this->Hardware.imtqTelemetryCollector, this->timeProvider),                                    //
+    : initTask(nullptr),                                                               //
+      BootTable(Hardware.FlashDriver),                                                 //
+      BootSettings(this->Hardware.PersistentStorage.GetRedundantDriver()),             //
+      Hardware(this->Fdir.ErrorCounting(), this->PowerControlInterface, timeProvider), //
+      PowerControlInterface(this->Hardware.EPS),                                       //
+      Fdir(this->PowerControlInterface, GetErrorCounterMask()),                        //
+      Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),            //
+      adcs(this->Hardware.imtqTelemetryCollector, this->timeProvider),                 //
       Experiments(fs,
           this->adcs.GetAdcsCoordinator(),
           this->timeProvider,
