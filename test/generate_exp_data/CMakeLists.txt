@@ -4,6 +4,7 @@ set(SOURCES
     main.cpp
     suns_data.cpp
     sail_data.cpp
+    detumbling_data.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -14,6 +15,7 @@ target_link_libraries(${NAME}
 	emlib
 	fs
 	exp_suns
+	exp_adcs
 )
 
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_SOURCE_DIR}/unit_tests/base/linker.ld -u _printf_float -specs=rdimon.specs")

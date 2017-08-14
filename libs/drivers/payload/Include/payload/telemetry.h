@@ -1,7 +1,9 @@
 #ifndef LIBS_DRIVERS_PAYLOAD_INCLUDE_TELEMETRY_H_
 #define LIBS_DRIVERS_PAYLOAD_INCLUDE_TELEMETRY_H_
 
+#include <array>
 #include <cstdint>
+#include "base/fwd.hpp"
 
 namespace devices
 {
@@ -52,6 +54,8 @@ namespace devices
             {
                 /** @brief SunS voltages */
                 std::array<std::uint16_t, 5> voltages;
+
+                void Write(Writer& writer);
             };
 
             /**
@@ -77,6 +81,8 @@ namespace devices
                 std::uint16_t cam_nadir;
                 /** @brief CAMwing temperature*/
                 std::uint16_t cam_wing;
+
+                void Write(Writer& writer);
             };
 
             /**
@@ -92,6 +98,8 @@ namespace devices
                 std::uint16_t Yp;
                 /** @brief Y- photodiode measurement */
                 std::uint16_t Yn;
+
+                void Write(Writer& writer);
             };
 
             /**

@@ -6,6 +6,7 @@
 
 using experiments::IterationResult;
 using experiments::StartResult;
+using PID = experiments::fs::ExperimentFile::PID;
 
 namespace experiment
 {
@@ -126,6 +127,71 @@ namespace experiment
             this->_imtq.GetLastDipoles(point.Dipoles);
 
             return point;
+        }
+
+        void DetumblingDataPoint::WriteTo(experiments::fs::ExperimentFile& file)
+        {
+            {
+                std::array<std::uint8_t, 8> buf;
+                Writer w(buf);
+                w.WriteQuadWordLE(this->Timestamp.count());
+
+                file.Write(PID::Timestamp, w.Capture());
+            }
+
+            {
+                std::array<std::uint8_t, (decltype(this->Gyro)::BitSize() + 7) / 8> buf;
+                BitWriter w(buf);
+
+                this->Gyro.Write(w);
+
+                file.Write(PID::Gyro, w.Capture());
+            }
+
+            {
+                std::array<std::uint8_t, decltype(this->ReferenceSunS)::DeviceDataLength> buf;
+                Writer w(buf);
+
+                this->ReferenceSunS.Write(w);
+
+                file.Write(PID::ReferenceSunS, w.Capture());
+            }
+
+            {
+                std::array<std::uint8_t, decltype(this->Temperatures)::DeviceDataLength> buf;
+                Writer w(buf);
+
+                this->Temperatures.Write(w);
+
+                file.Write(PID::AllTemperatures, w.Capture());
+            }
+
+            {
+                std::array<std::uint8_t, decltype(this->Photodiodes)::DeviceDataLength> buf;
+                Writer w(buf);
+
+                this->Photodiodes.Write(w);
+
+                file.Write(PID::Photodiodes, w.Capture());
+            }
+
+            {
+                std::array<std::uint8_t, (decltype(this->Magnetometer)::BitSize() + 7) / 8> buf;
+                BitWriter w(buf);
+
+                this->Magnetometer.Write(w);
+
+                file.Write(PID::Magnetometer, w.Capture());
+            }
+
+            {
+                std::array<std::uint8_t, (decltype(this->Dipoles)::BitSize() + 7) / 8> buf;
+                BitWriter w(buf);
+
+                this->Dipoles.Write(w);
+
+                file.Write(PID::Dipoles, w.Capture());
+            }
         }
     }
 }
