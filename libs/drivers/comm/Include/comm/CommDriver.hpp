@@ -22,7 +22,8 @@ COMM_BEGIN
 
 class CommObject final : public ITransmitter,      //
                          public IBeaconController, //
-                         public ICommTelemetryProvider
+                         public ICommTelemetryProvider,
+                         public ICommHardwareObserver
 {
   public:
     /**
@@ -234,6 +235,8 @@ class CommObject final : public ITransmitter,      //
     bool PollHardware();
 
     virtual bool GetTelemetry(CommTelemetry& telemetry) final override;
+
+    void WaitForComLoop() final override;
 
     /** @brief Error counter type */
     using ErrorCounter = error_counter::ErrorCounter<0>;

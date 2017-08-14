@@ -255,6 +255,18 @@ struct ICommTelemetryProvider
      */
     virtual bool GetTelemetry(CommTelemetry& telemetry) = 0;
 };
+
+/**
+ * @brief Interface of object that is periodically querying the comm hardware for incoming frames.
+ */
+struct ICommHardwareObserver
+{
+    /**
+     * @brief Wait for the next comm hardware polling iteration.
+     */
+    virtual void WaitForComLoop() = 0;
+};
+
 /** @}*/
 COMM_END
 
