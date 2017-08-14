@@ -130,8 +130,8 @@ class PosixFileSystem : public IFileSystem
 };
 
 void GenerateSunSData(IFileSystem& fs);
-
 void GenerateSailData(IFileSystem& fs);
+void GenerateDetumblingData(IFileSystem& fs);
 
 void System::SleepTask(std::chrono::milliseconds)
 {
@@ -147,6 +147,7 @@ int main()
 
     GenerateSunSData(fs);
     GenerateSailData(fs);
+    GenerateDetumblingData(fs);
 
     kill(-1, 0);
 

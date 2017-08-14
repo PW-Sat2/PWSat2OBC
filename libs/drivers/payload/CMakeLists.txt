@@ -9,6 +9,7 @@ set(SOURCES
     commands/Temperatures.cpp
     commands/Whoami.cpp
     devices.cpp
+    telemetry.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

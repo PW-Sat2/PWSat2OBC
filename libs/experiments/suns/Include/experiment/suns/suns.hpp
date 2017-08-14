@@ -162,12 +162,6 @@ namespace experiment
             void WriteSecondaryExperimentalSunS(Writer& writer);
 
             /**
-             * @brief Writes reference suns data to writer
-             * @param writer Writer to hold the written data
-             */
-            void WriteReferenceSunS(Writer& writer);
-
-            /**
              * @brief Writes gyro data to writer
              * @param writer Writer to hold the written data
              */

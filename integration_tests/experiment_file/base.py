@@ -51,10 +51,7 @@ def label_as(name):
 
 
 def to_dict(value):
-    # if len(value) > 1:
     return Parser(lambda _, index: Value.success(index, dict(value)))
-    # else:
-
 
 
 def field(name, content_parser):
@@ -64,6 +61,8 @@ def field(name, content_parser):
 boolean = packed('<?')
 
 uint16 = packed('<H')
+int16 = packed('<h')
+int32 = packed('<l')
 
 Synchronization = pid(0x47).result('Synchronization')
 

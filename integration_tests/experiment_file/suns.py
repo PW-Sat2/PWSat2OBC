@@ -43,5 +43,5 @@ ExperimentalSunSSecondary = pid(0x12) \
 ExperimentalSunSSecondary >>= label_as('ExpSunS.Secondary')
 
 ReferenceSunS = pid(0x13) \
-                >> joint(field('Volatages', count(uint16, 5))).bind(to_dict)
+                >> joint(field('Voltages', count(uint16, 5))).bind(to_dict)
 ReferenceSunS >>= label_as('RefSunS')

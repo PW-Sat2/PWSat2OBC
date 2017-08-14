@@ -57,6 +57,10 @@ namespace experiments
                 RadFET = 0x16,                    // RadFET data, 17 bytes
                 Temperature = 0x17,               // Temperature data, 4 bytes
                 Sail = 0x18,                      // 3 bytes of data
+                AllTemperatures = 0x19,
+                Photodiodes = 0x20,
+                Magnetometer = 0x21,
+                Dipoles = 0x22,
 
                 PayloadWhoami = 0x20,       // 1 byte of data
                 PayloadSunS = 0x21,         // 10 bytes of data
