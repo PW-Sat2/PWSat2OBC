@@ -1,3 +1,5 @@
+from enum import Enum, unique
+
 class CameraDriver(object):
     def __init__(self, i2cMock, mockpin_nadir, mockpin_wing):
         self.i2cMock = i2cMock
@@ -39,3 +41,30 @@ class CameraDriver(object):
     def disable_wing(self):
         self.i2cMock.gpio_high(self.mockpin_wing)
 
+@unique
+class CameraLocation(Enum):
+    Nadir = 0
+    Wing = 1
+
+    def __str__(self):
+        map = {
+            self.Nadir: "Nadir",
+            self.Wing: "Wing",
+        }
+
+        return map[self]
+
+@unique
+class PhotoResolution(Enum):
+    p128 = 0x03
+    p240 = 0x05
+    p480 = 0x07
+
+    def __str__(self):
+        map = {
+            self.p128: "128p",
+            self.p240: "240p",
+            self.p480: "480p",
+        }
+
+        return map[self]
