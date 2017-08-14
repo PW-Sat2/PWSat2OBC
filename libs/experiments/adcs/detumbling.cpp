@@ -7,6 +7,8 @@
 using experiments::IterationResult;
 using experiments::StartResult;
 using PID = experiments::fs::ExperimentFile::PID;
+using services::fs::FileOpen;
+using services::fs::FileAccess;
 
 using namespace std::chrono_literals;
 
@@ -19,14 +21,20 @@ namespace experiment
             services::power::IPowerControl& powerControl,
             devices::gyro::IGyroscopeDriver& gyro,
             devices::payload::IPayloadDeviceDriver& payload,
-            telemetry::IImtqDataProvider& imtq)
-            : _adcs(adcs), _time(time), _powerControl(powerControl), _gyro(gyro), _payload(payload), _imtq(imtq)
+            telemetry::IImtqDataProvider& imtq,
+            services::fs::IFileSystem& fileSystem)
+            : _adcs(adcs), _time(time), _powerControl(powerControl), _gyro(gyro), _payload(payload), _imtq(imtq), _fileSystem(fileSystem)
         {
         }
 
         void DetumblingExperiment::Duration(std::chrono::seconds duration)
         {
             this->_duration = duration;
+        }
+
+        void DetumblingExperiment::SampleRate(std::chrono::seconds interval)
+        {
+            this->_sampleRate = interval;
         }
 
         experiments::ExperimentCode DetumblingExperiment::Type()
@@ -36,6 +44,11 @@ namespace experiment
 
         experiments::StartResult DetumblingExperiment::Start()
         {
+            if (!_dataSet.Open(this->_fileSystem, "/detum", FileOpen::CreateAlways, FileAccess::WriteOnly))
+            {
+                return StartResult::Failure;
+            }
+
             auto r = this->_adcs.Disable();
 
             if (OS_RESULT_FAILED(r))
@@ -89,7 +102,7 @@ namespace experiment
 
             if (!now.HasValue)
             {
-                return experiments::IterationResult::Failure;
+                return experiments::IterationResult::WaitForNextCycle;
             }
 
             if (now.Value >= this->_endAt)
@@ -97,11 +110,15 @@ namespace experiment
                 return IterationResult::Finished;
             }
 
-            return IterationResult::WaitForNextCycle;
+            System::SleepTask(this->_sampleRate);
+
+            return IterationResult::LoopImmediately;
         }
 
         void DetumblingExperiment::Stop(IterationResult /*lastResult*/)
         {
+            this->_dataSet.Close();
+
             this->_powerControl.SensPower(false);
 
             auto r = this->_adcs.Disable();

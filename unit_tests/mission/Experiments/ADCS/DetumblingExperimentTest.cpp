@@ -4,6 +4,7 @@
 #include "experiment/adcs/adcs.hpp"
 #include "experiment/adcs/data_point.hpp"
 #include "mock/AdcsMocks.hpp"
+#include "mock/FsMock.hpp"
 #include "mock/GyroMock.hpp"
 #include "mock/ImtqTelemetryCollectorMock.hpp"
 #include "mock/PayloadDeviceMock.hpp"
@@ -50,17 +51,22 @@ namespace
         NiceMock<ImtqDataProviderMock> _imtq;
         NiceMock<OSMock> _os;
         OSReset _osReset;
+        NiceMock<FsMock> _fs;
 
         DetumblingExperiment _exp;
+
+        std::array<std::uint8_t, 1024> _dataBuffer;
     };
 
     DetumblingExperimentTest::DetumblingExperimentTest()
-        : _exp(this->_adcs, this->_time, this->_power, this->_gyro, this->_payload, this->_imtq)
+        : _exp(this->_adcs, this->_time, this->_power, this->_gyro, this->_payload, this->_imtq, this->_fs)
     {
         ON_CALL(this->_time, GetCurrentTime()).WillByDefault(Return(Some(10ms)));
         ON_CALL(this->_power, SensPower(_)).WillByDefault(Return(true));
 
         _osReset = InstallProxy(&_os);
+
+        this->_fs.AddFile("/detum", _dataBuffer);
     }
 
     TEST_F(DetumblingExperimentTest, ShouldSwitchToExperimentalDetumblingOnStart)
@@ -92,6 +98,7 @@ namespace
             InSequence s;
             EXPECT_CALL(this->_adcs, Disable()).WillOnce(Return(OSResult::InvalidOperation));
             EXPECT_CALL(this->_adcs, EnableExperimentalDetumbling()).Times(0);
+            EXPECT_CALL(this->_fs, Close(_));
         }
 
         auto r = this->_exp.Start();
@@ -106,6 +113,7 @@ namespace
             EXPECT_CALL(this->_adcs, Disable()).WillOnce(Return(OSResult::Success));
             EXPECT_CALL(this->_adcs, EnableExperimentalDetumbling()).WillOnce(Return(OSResult::InvalidOperation));
             EXPECT_CALL(this->_adcs, EnableBuiltinDetumbling()).WillOnce(Return(OSResult::Success));
+            EXPECT_CALL(this->_fs, Close(_));
         }
 
         auto r = this->_exp.Start();
@@ -131,9 +139,19 @@ namespace
             EXPECT_CALL(this->_adcs, EnableExperimentalDetumbling()).WillOnce(Return(OSResult::Success));
             EXPECT_CALL(_power, SensPower(true)).WillOnce(Return(false));
             EXPECT_CALL(this->_adcs, EnableBuiltinDetumbling());
+            EXPECT_CALL(this->_fs, Close(_));
         }
 
         auto r = this->_exp.Start();
+        ASSERT_THAT(r, Eq(StartResult::Failure));
+    }
+
+    TEST_F(DetumblingExperimentTest, AbortIfUnableToOpenFile)
+    {
+        ON_CALL(_fs, Open(_, _, _)).WillByDefault(Return(MakeOpenedFile(OSResult::Deadlock)));
+
+        auto r = this->_exp.Start();
+
         ASSERT_THAT(r, Eq(StartResult::Failure));
     }
 
@@ -216,5 +234,28 @@ namespace
         ASSERT_THAT(point.Temperatures.supply, Eq(9));
 
         ASSERT_THAT(point.Magnetometer.GetValue(), ElementsAre(1, 2, 3));
+    }
+
+    TEST_F(DetumblingExperimentTest, IterationTiming)
+    {
+        this->_exp.Duration(3600s);
+        this->_exp.SampleRate(11s);
+
+        this->_exp.Start();
+
+        EXPECT_CALL(_os, Sleep(Eq(11s)));
+
+        auto r = this->_exp.Iteration();
+
+        ASSERT_THAT(r, Eq(IterationResult::LoopImmediately));
+    }
+
+    TEST_F(DetumblingExperimentTest, FallbackToMissionLoopOnGetTimeFail)
+    {
+        ON_CALL(this->_time, GetCurrentTime()).WillByDefault(Return(None<std::chrono::milliseconds>()));
+
+        auto r = this->_exp.Iteration();
+
+        ASSERT_THAT(r, Eq(IterationResult::WaitForNextCycle));
     }
 }
