@@ -22,9 +22,9 @@ namespace obc
          *  - Camera identifier
          *  - Photo resolution
          *  - Number of photographs to take
-         *  - Output file name (string, null-terminated, up to 30 charactes including terminator)s
+         *  - Output file name (string, null-terminated, up to 30 characters including terminator)
          */
-        class TakePhoto final : public telecommunication::uplink::Telecommand<0x1E>
+        class TakePhoto final : public telecommunication::uplink::Telecommand<0x1F>
         {
           public:
             /**

@@ -12,7 +12,7 @@ class TakePhotoTelecommand(Telecommand):
         self._picture_path = path[:30]
 
     def apid(self):
-        return 0x1E
+        return 0x1F
 
     def payload(self):
         return struct.pack('<BBBB',

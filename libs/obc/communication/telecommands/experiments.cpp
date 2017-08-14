@@ -90,7 +90,6 @@ namespace obc
 
         void PerformSunSExperiment::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
         {
-            char filePath[30];
             Reader r(parameters);
 
             auto correlationId = r.ReadByte();
@@ -101,7 +100,7 @@ namespace obc
             seconds shortDelay = seconds(r.ReadByte());
             uint8_t sessionsCount = r.ReadByte();
             minutes longDelay = minutes(r.ReadByte());
-            const auto outputFile = r.ReadString(count_of(filePath));
+            const auto outputFile = r.ReadString(30);
 
             if (!r.Status() || outputFile.empty())
             {
@@ -111,9 +110,6 @@ namespace obc
                 return;
             }
 
-            memcpy(filePath, outputFile.data(), outputFile.size());
-            filePath[count_of(filePath) - 1] = '\0';
-
             experiment::suns::SunSExperimentParams params(gain, itime, samplesCount, shortDelay, sessionsCount, longDelay);
 
             LOGF(LOG_LEVEL_INFO,
@@ -122,7 +118,7 @@ namespace obc
                 static_cast<std::uint8_t>(params.SamplingSessionsCount()));
 
             this->_setupSunS.SetParameters(params);
-            this->_setupSunS.SetOutputFiles(filePath);
+            this->_setupSunS.SetOutputFiles(outputFile.data());
 
             auto success = this->_controller.RequestExperiment(experiment::suns::SunSExperiment::Code);
 
@@ -157,7 +153,8 @@ namespace obc
             uint8_t samplesCount = r.ReadByte();
 
             char outputFileName[30];
-            strncpy(outputFileName, r.ReadString(30), sizeof(outputFileName));
+            auto path = r.ReadString(30);
+            strncpy(outputFileName, path.data(), sizeof(outputFileName));
             outputFileName[29] = 0;
 
             if (!r.Status() || strlen_n(outputFileName, 30) == 0)

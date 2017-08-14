@@ -39,17 +39,17 @@ namespace obc
             }
             else
             {
-                this->_photoService.Schedule(services::photo::Reset());
-                this->_photoService.Schedule(services::photo::EnableCamera(cameraId));
+                this->_photoService.Reset();
+                this->_photoService.EnableCamera(cameraId);
                 for (std::uint8_t cx = 0; cx < count; ++cx)
                 {
-                    this->_photoService.Schedule(services::photo::TakePhoto(cameraId, resolution));
-                    this->_photoService.Schedule(services::photo::DownloadPhoto(cameraId, 0));
-                    this->_photoService.Schedule(services::photo::SavePhoto(0, "%.*s_%d", path.size(), path.data(), 0));
+                    this->_photoService.TakePhoto(cameraId, resolution);
+                    this->_photoService.DownloadPhoto(cameraId, 0);
+                    this->_photoService.SavePhoto(0, "%.*s_%d", path.size(), path.data(), 0);
                 }
 
-                this->_photoService.Schedule(services::photo::DisableCamera(cameraId));
-                this->_photoService.Schedule(services::photo::Reset());
+                this->_photoService.DisableCamera(cameraId);
+                this->_photoService.Reset();
                 writer.WriteByte(0);
             }
 

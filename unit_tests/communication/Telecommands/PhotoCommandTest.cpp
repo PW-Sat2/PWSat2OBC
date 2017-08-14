@@ -83,9 +83,9 @@ namespace
             return true;
         }));
 
-        EXPECT_CALL(photo, Schedule(An<services::photo::Reset>())).Times(2);
-        EXPECT_CALL(photo, Schedule(An<services::photo::EnableCamera>())).Times(1);
-        EXPECT_CALL(photo, Schedule(An<services::photo::DisableCamera>())).Times(1);
+        EXPECT_CALL(photo, Reset()).Times(2);
+        EXPECT_CALL(photo, EnableCamera(services::photo::Camera::Wing)).Times(1);
+        EXPECT_CALL(photo, DisableCamera(services::photo::Camera::Wing)).Times(1);
 
         const std::uint8_t array[] = {10, 1, 0, 0, 'a', 'b', 'c'};
         command.Handle(transmitter, gsl::make_span(array));
