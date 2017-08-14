@@ -21,7 +21,9 @@ namespace devices
          * of this class. They can be later extracted using dedicated method.
          * @ingroup ImtqDriver
          */
-        class ImtqTelemetryCollector final : public IImtqDriver, public telemetry::IImtqTelemetryCollector
+        class ImtqTelemetryCollector final : public IImtqDriver,
+                                             public telemetry::IImtqTelemetryCollector,
+                                             public telemetry::IImtqDataProvider
         {
           public:
             /**
@@ -96,6 +98,10 @@ namespace devices
             virtual bool ResetParameterAndGetDefault(Parameter id, gsl::span<std::uint8_t> result) final override;
 
             virtual bool CaptureTelemetry(telemetry::ManagedTelemetry& target) final override;
+
+            virtual bool GetLastMagnetometerMeasurement(telemetry::ImtqMagnetometerMeasurements& measurements) final override;
+
+            virtual bool GetLastDipoles(telemetry::ImtqDipoles& dipoles) final override;
 
             /**
              * @brief Verifies whether the requested telemetry element has been recently captured
