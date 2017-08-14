@@ -13,6 +13,7 @@ using namespace std::chrono_literals;
 struct SetupDetumblingExperimentMock : public experiment::adcs::ISetupDetumblingExperiment
 {
     MOCK_METHOD1(Duration, void(std::chrono::seconds duration));
+    MOCK_METHOD1(SampleRate, void(std::chrono::seconds interval));
 };
 
 namespace
@@ -58,9 +59,10 @@ namespace
     {
         EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0x94, 0))));
         EXPECT_CALL(this->_setup, Duration(0x04030201s));
+        EXPECT_CALL(this->_setup, SampleRate(10s));
         EXPECT_CALL(this->_experiments, RequestExperiment(experiment::adcs::DetumblingExperiment::Code)).WillOnce(Return(true));
 
-        Run(0x94, 0x01, 0x02, 0x03, 0x04);
+        Run(0x94, 0x01, 0x02, 0x03, 0x04, 0x0A);
     }
 
     TEST_F(PerformDetumblingExperimentTelecommandTest, ShouldRespondWithErrorIfRequestFails)
@@ -68,6 +70,6 @@ namespace
         EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0x94, 2))));
         EXPECT_CALL(this->_experiments, RequestExperiment(experiment::adcs::DetumblingExperiment::Code)).WillOnce(Return(false));
 
-        Run(0x94, 0x01, 0x02, 0x03, 0x04);
+        Run(0x94, 0x01, 0x02, 0x03, 0x04, 0x0A);
     }
 }

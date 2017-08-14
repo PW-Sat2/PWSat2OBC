@@ -18,6 +18,7 @@ namespace obc
          *
          * Parameters:
          *  * 32-bit LE - experiment duration in seconds
+         *  * 8-bit - sampling interval in seconds
          */
         class PerformDetumblingExperiment final : public telecommunication::uplink::Telecommand<0x0D>
         {

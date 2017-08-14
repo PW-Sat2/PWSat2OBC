@@ -94,6 +94,7 @@ OBC::OBC()
           Hardware.CommDriver,
           Camera.PhotoService,
           this->Hardware.Pins.SailIndicator, //
+          this->Hardware.imtqTelemetryCollector,
           this->Hardware.EPS,
           &this->Fdir,
           &this->Hardware.MCUTemperature), //
