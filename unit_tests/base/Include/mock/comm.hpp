@@ -38,6 +38,13 @@ struct CommTelemetryProviderMock : public devices::comm::ICommTelemetryProvider
     MOCK_METHOD1(GetTelemetry, bool(devices::comm::CommTelemetry& telemetry));
 };
 
+struct CommHardwareObserverMock : public devices::comm::ICommHardwareObserver
+{
+    CommHardwareObserverMock();
+    ~CommHardwareObserverMock();
+    MOCK_METHOD0(WaitForComLoop, void());
+};
+
 MATCHER_P3(IsDownlinkFrame, apidMatcher, seqMatcher, payloadMatcher, "")
 {
     auto num = arg[0] | (arg[1] << 8) | (arg[2] << 16);

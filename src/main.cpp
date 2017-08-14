@@ -42,6 +42,18 @@ using namespace std::chrono_literals;
 
 OBC Main;
 
+devices::comm::ICommHardwareObserver* GetCommHardwareObserver()
+{
+    if (boot::RequestedRunlevel == boot::Runlevel::Runlevel3)
+    {
+        return &Main.Hardware.CommDriver;
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
 telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver,
     std::make_tuple(std::ref(Main.fs), mission::TelemetryConfiguration{"/telemetry.current", "/telemetry.previous", 512_KB, 10}),
     Main.Hardware.Gyro,
@@ -73,7 +85,8 @@ mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc),
     Main.fs,
     Main.Hardware.CommDriver,
     Main.Hardware.EPS,
-    std::make_pair(std::ref(Main.Experiments.ExperimentsController), std::ref(Main.timeProvider)));
+    std::make_pair(std::ref(Main.Experiments.ExperimentsController), std::ref(Main.timeProvider)),
+    GetCommHardwareObserver());
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
