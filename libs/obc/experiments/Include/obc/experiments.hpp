@@ -138,6 +138,7 @@ namespace obc
             devices::comm::ITransmitter& transmitter,
             services::photo::IPhotoService& photoService,
             const drivers::gpio::Pin& sailState,
+            telemetry::IImtqDataProvider& imtq,
             devices::eps::IEpsTelemetryProvider& epsProvider,
             error_counter::IErrorCountingTelemetryProvider* errorCounterProvider,
             temp::ITemperatureReader* temperatureProvider);

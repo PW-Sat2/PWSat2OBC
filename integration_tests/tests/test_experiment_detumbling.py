@@ -37,7 +37,7 @@ class TestExperimentDetumbling(RestartPerTest):
         self.system.rtc.set_response_time(start_time)
 
         log.info('Sending telecommand')
-        self.system.comm.put_frame(telecommand.PerformDetumblingExperiment(correlation_id=5, duration=timedelta(hours=4)))
+        self.system.comm.put_frame(telecommand.PerformDetumblingExperiment(correlation_id=5, duration=timedelta(hours=4), sampling_interval=timedelta(seconds=2)))
 
         response = self.system.comm.get_frame(5)
         self.assertIsInstance(response, OperationSuccessFrame)
