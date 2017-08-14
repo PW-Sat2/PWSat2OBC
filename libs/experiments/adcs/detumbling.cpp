@@ -8,6 +8,8 @@ using experiments::IterationResult;
 using experiments::StartResult;
 using PID = experiments::fs::ExperimentFile::PID;
 
+using namespace std::chrono_literals;
+
 namespace experiment
 {
     namespace adcs
@@ -71,6 +73,8 @@ namespace experiment
             {
                 return StartResult::Failure;
             }
+
+            System::SleepTask(2s);
 
             this->_endAt = start.Value + this->_duration;
 
