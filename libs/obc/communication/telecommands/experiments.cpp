@@ -213,5 +213,47 @@ namespace obc
 
             transmitter.SendFrame(response.Frame());
         }
+
+        PerformPayloadCommisioningExperiment::PerformPayloadCommisioningExperiment(
+            experiments::IExperimentController& controller, experiment::payload::ISetupPayloadCommissioningExperiment& setupPayload)
+            : _controller(controller), _setupPayload(setupPayload)
+        {
+        }
+
+        void PerformPayloadCommisioningExperiment::Handle(
+            devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
+        {
+            Reader r(parameters);
+
+            auto correlationId = r.ReadByte();
+            const char* outputFile = r.ReadString(30);
+
+            if (!r.Status() || strlen_n(outputFile, 30) == 0)
+            {
+                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+                response.PayloadWriter().WriteByte(0x1);
+                transmitter.SendFrame(response.Frame());
+                return;
+            }
+
+            LOG(LOG_LEVEL_INFO, "Requested Payload Commisioning experiment");
+
+            this->_setupPayload.SetOutputFile(outputFile);
+
+            auto success = this->_controller.RequestExperiment(experiment::payload::PayloadCommissioningExperiment::Code);
+
+            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+
+            if (success)
+            {
+                response.PayloadWriter().WriteByte(0);
+            }
+            else
+            {
+                response.PayloadWriter().WriteByte(2);
+            }
+
+            transmitter.SendFrame(response.Frame());
+        }
     }
 }

@@ -147,7 +147,10 @@ namespace obc
         obc::telecommands::RawI2CTelecommand,
         obc::telecommands::PerformRadFETExperiment,
         obc::telecommands::GetSunSDataSetsTelecommand,
-        obc::telecommands::PerformSailExperiment>;
+        obc::telecommands::PerformSailExperiment,
+        obc::telecommands::PerformPayloadCommisioningExperiment //
+        >;
+
     /**
      * @brief OBC <-> Earth communication
      */

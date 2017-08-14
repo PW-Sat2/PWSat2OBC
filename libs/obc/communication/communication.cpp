@@ -63,8 +63,10 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           RawI2CTelecommand(systemBus, payload),                                                                                      //
           PerformRadFETExperiment(experiments.ExperimentsController, experiments.Get<experiment::radfet::RadFETExperiment>()),        //
           GetSunSDataSetsTelecommand(powerControl, currentTime, experimentalSunS, payloadDriver, gyro),                               //
-          PerformSailExperiment(experiments.ExperimentsController)                                                                    //
-          ),                                                                                                                          //
+          PerformSailExperiment(experiments.ExperimentsController),                                                                   //
+          PerformPayloadCommisioningExperiment(
+              experiments.ExperimentsController, experiments.Get<experiment::payload::PayloadCommissioningExperiment>()) //
+          ),                                                                                                             //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {
 }
