@@ -16,6 +16,28 @@ ExperimentFile::~ExperimentFile()
     }
 }
 
+ExperimentFile::ExperimentFile(ExperimentFile&& other) : _time(other._time), _hasPayloadInFrame(other._hasPayloadInFrame)
+{
+    other._time = nullptr;
+    other._hasPayloadInFrame = 0;
+    _file = std::move(other._file);
+    std::swap(_buffer, other._buffer);
+    _writer.InitializeAndTryRestore(_buffer, other._writer);
+}
+
+ExperimentFile& ExperimentFile::operator=(ExperimentFile&& other)
+{
+    if (this != &other)
+    {
+        this->_time = other._time;
+        this->_hasPayloadInFrame = other._hasPayloadInFrame;
+        std::swap(_buffer, other._buffer);
+        _writer.InitializeAndTryRestore(_buffer, other._writer);
+    }
+
+    return *this;
+}
+
 bool ExperimentFile::Open(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access)
 {
     _file = File(fs, path, mode, access);

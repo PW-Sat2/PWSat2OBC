@@ -8,7 +8,7 @@ from telecommand import PerformPayloadCommissioningExperiment
 from tests.base import RestartPerTest
 
 
-class SunSExperimentTest(RestartPerTest):
+class PayloadExperimentTest(RestartPerTest):
     @clear_state()
     @skip('Manual test')
     def test_perform_payload_experiment(self):
