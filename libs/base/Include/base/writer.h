@@ -167,6 +167,14 @@ class Writer final
      */
     void Reset();
 
+    /**
+     * @brief Initializes Writer by some buffer and restores internal state of original Writer.
+     * If restore is done on buffer of different size, it behaves like Initialize();
+     * @param[in] view Window into memory buffer to which the data is written.
+     * @param original Original writer object that internal state should be restored.
+     */
+    void InitializeAndTryRestore(gsl::span<std::uint8_t> view, const Writer& original);
+
   private:
     /**
      * @brief Updates internal writer status
@@ -201,6 +209,20 @@ inline void Writer::Initialize(gsl::span<std::uint8_t> view)
 {
     this->_buffer = view;
     this->Reset();
+}
+
+inline void Writer::InitializeAndTryRestore(gsl::span<std::uint8_t> view, const Writer& original)
+{
+    this->_buffer = view;
+    if (original._buffer.size() == view.size())
+    {
+        this->_position = original._position;
+        this->_isValid = original._isValid;
+    }
+    else
+    {
+        this->Reset();
+    }
 }
 
 inline bool Writer::Status() const

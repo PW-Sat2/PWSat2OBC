@@ -6,6 +6,7 @@
 #include "base/writer.h"
 #include "fs/fs.h"
 #include "time/ICurrentTime.hpp"
+#include "utils.h"
 
 namespace experiments
 {
@@ -34,7 +35,7 @@ namespace experiments
          * near packet end - PID::Padding - 8b
          * until the end - padding data (0xFF)
          */
-        class ExperimentFile final
+        class ExperimentFile final : NotCopyable
         {
           public:
             /** @brief Data packet length.  */
@@ -89,14 +90,14 @@ namespace experiments
              * @brief Move ctor
              * @param other Other object
              */
-            ExperimentFile(ExperimentFile&& other) = default;
+            ExperimentFile(ExperimentFile&& other);
 
             /**
              * @brief Move assignment operator
              * @param other Other object
              * @return Reference to this object
              */
-            ExperimentFile& operator=(ExperimentFile&& other) = default;
+            ExperimentFile& operator=(ExperimentFile&& other);
 
             /**
              * @brief Destructor
