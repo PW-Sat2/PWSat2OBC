@@ -41,6 +41,7 @@ target_link_libraries(${NAME}
     antenna
     mission_comm
     mission_time
+    mission_sail
     telecommunication
     program_flash
     payload
@@ -49,6 +50,8 @@ target_link_libraries(${NAME}
     suns
     payload
     n25q
+    experiments
+    photo
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

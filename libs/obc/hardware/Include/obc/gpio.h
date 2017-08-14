@@ -134,6 +134,9 @@ namespace obc
         /** @brief SunSInterrupt */
         const drivers::gpio::InterruptPin<TSunSInterrupt, false, false, true> SunSInterrupt;
 
+        /** @brief Sail state indicator. */
+        const drivers::gpio::InputPin<TSailState> SailIndicator;
+
         /** @brief Initializes GPIO pins */
         void Initialize() const
         {
@@ -154,7 +157,7 @@ namespace obc
             this->I2C_0.Initialize();
             this->I2C_1.Initialize();
             this->SunSInterrupt.Initialize();
-
+            this->SailIndicator.Initialize();
             this->PayloadInterrupt.Initialize();
             this->CamSelect.Initialize();
         }

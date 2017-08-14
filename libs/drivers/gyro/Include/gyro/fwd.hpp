@@ -6,6 +6,8 @@ namespace devices
     namespace gyro
     {
         class GyroDriver;
+        class IGyroscopeDriver;
+        class GyroscopeTelemetry;
     }
 }
 #endif /* LIBS_DRIVERS_GYRO_INCLUDE_GYRO_FWD_HPP_ */

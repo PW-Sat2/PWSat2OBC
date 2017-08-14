@@ -12,6 +12,7 @@ class ExperimentType(IntEnum):
     EraseFlash = 2
     SunS = 3
     RadFET = 5
+    Sail = 7
     Fibo = 8
 
 

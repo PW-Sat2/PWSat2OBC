@@ -15,6 +15,10 @@ target_link_libraries(${NAME}
     exp_suns
     exp_flash
     exp_radfet
+    exp_sail
+    payload
+    power
+    photo
 )
 
 

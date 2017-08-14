@@ -5,6 +5,7 @@
 #include <cstdint>
 #include "base/fwd.hpp"
 #include "error_counter/error_counter.hpp"
+#include "fwd.hpp"
 #include "gsl/span"
 #include "hk.hpp"
 #include "i2c/forward.h"
@@ -19,40 +20,6 @@ namespace devices
          *
          * @{
          */
-
-        /**
-         * @brief Available LCLs
-         */
-        enum class LCL : std::uint8_t
-        {
-            TKMain = 0x01,      //!< TKMain
-            SunS = 0x02,        //!< SunS
-            CamNadir = 0x03,    //!< CamNadir
-            CamWing = 0x04,     //!< CamWing
-            SENS = 0x05,        //!< SENS
-            AntennaMain = 0x06, //!< AntennaMain
-            TKRed = 0x11,       //!< TKRed
-            AntennaRed = 0x12   //!< AntennaRed
-        };
-
-        /**
-         * @brief Available BurnSwitches
-         */
-        enum class BurnSwitch : std::uint8_t
-        {
-            Sail = 0x1, //!< Sail
-            SADS = 0x2  //!< SADS
-        };
-
-        /**
-         * @brief Error codes
-         */
-        enum class ErrorCode : std::uint16_t
-        {
-            NoError = 0,                    //!< NoError
-            OnFire = 0xAF,                  //!< OnFire
-            CommunicationFailure = 0xFF + 1 //!< CommunicationFailure
-        };
 
         /**
          * @brief Interface of object capable providing complete eps telemetry.

@@ -11,6 +11,7 @@
 
 using testing::Eq;
 using testing::_;
+using testing::Ne;
 using testing::Return;
 using testing::Invoke;
 using testing::InSequence;
@@ -77,6 +78,16 @@ namespace
     TEST_F(PhotoServiceTest, AllBuffersAreEmptyOnInitialize)
     {
         for (auto i = 0; i < PhotoService::BuffersCount; i++)
+        {
+            auto buffer = _service.GetBufferInfo(i);
+            ASSERT_THAT(buffer.Status(), Eq(BufferStatus::Empty));
+            ASSERT_THAT(buffer.Size(), Eq(0U));
+        }
+    }
+
+    TEST_F(PhotoServiceTest, AllBuffersAreEmptyBeyondLimit)
+    {
+        for (int i = PhotoService::BuffersCount; i <= 0xff; i++)
         {
             auto buffer = _service.GetBufferInfo(i);
             ASSERT_THAT(buffer.Status(), Eq(BufferStatus::Empty));
@@ -188,6 +199,15 @@ namespace
         ASSERT_THAT(buf.Size(), Eq(1_KB));
     }
 
+    TEST_P(PhotoServiceTest, ShouldNotDownloadPhotoWithInvalidBufferId)
+    {
+        EXPECT_CALL(_selector, Select(Cam())).Times(0);
+        EXPECT_CALL(_camera, DownloadPhoto(_)).Times(0);
+        auto r = _service.Invoke(DownloadPhoto(Cam(), PhotoService::BuffersCount));
+
+        ASSERT_THAT(r, Ne(OSResult::Success));
+    }
+
     TEST_P(PhotoServiceTest, ShouldReturnFailIfDownloadFails)
     {
         EXPECT_CALL(_selector, Select(Cam()));
@@ -270,6 +290,15 @@ namespace
         ASSERT_THAT(photoBuffer, Each(Eq(0xAB)));
     }
 
+    TEST_F(PhotoServiceTest, ShouldNotSavePhotoToFileWithInvalidBufferId)
+    {
+        std::array<std::uint8_t, 1_KB> photoBuffer;
+
+        _fs.AddFile("/photo", photoBuffer);
+        const auto status = _service.Invoke(SavePhoto(PhotoService::BuffersCount, "/photo"));
+        ASSERT_THAT(status, Ne(OSResult::Success));
+    }
+
     TEST_F(PhotoServiceTest, ShouldSaveMarkerTextToFileIfBufferIsEmpty)
     {
         std::array<std::uint8_t, 1_KB> photoBuffer;
@@ -312,6 +341,15 @@ namespace
         SavePhoto cmd(1, "a%d%d", 1, 2);
 
         ASSERT_THAT(cmd.Path(), StrEq("a12"));
+    }
+
+    TEST_F(PhotoServiceTest, TestIsEmptyIndexOverflow)
+    {
+        ASSERT_THAT(_service.IsEmpty(PhotoService::BuffersCount), Eq(false));
+        ASSERT_THAT(_service.IsEmpty(PhotoService::BuffersCount + 1), Eq(false));
+        ASSERT_THAT(_service.IsEmpty(PhotoService::BuffersCount + 2), Eq(false));
+        ASSERT_THAT(_service.IsEmpty(PhotoService::BuffersCount + 3), Eq(false));
+        ASSERT_THAT(_service.IsEmpty(0xff), Eq(false));
     }
 
     INSTANTIATE_TEST_CASE_P(PhotoServiceTest, PhotoServiceTest, testing::Values(Camera::Nadir, Camera::Wing), );

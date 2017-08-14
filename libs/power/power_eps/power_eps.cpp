@@ -39,26 +39,12 @@ namespace services
 
         bool EPSPowerControl::MainThermalKnife(bool enabled)
         {
-            if (enabled)
-            {
-                return this->_eps.EnableLCL(LCL::TKMain) == ErrorCode::NoError;
-            }
-            else
-            {
-                return this->_eps.DisableLCL(LCL::TKMain) == ErrorCode::NoError;
-            }
+            return Switch(enabled, LCL::TKMain);
         }
 
         bool EPSPowerControl::RedundantThermalKnife(bool enabled)
         {
-            if (enabled)
-            {
-                return this->_eps.EnableLCL(LCL::TKRed) == ErrorCode::NoError;
-            }
-            else
-            {
-                return this->_eps.DisableLCL(LCL::TKRed) == ErrorCode::NoError;
-            }
+            return Switch(enabled, LCL::TKRed);
         }
 
         bool EPSPowerControl::EnableMainSailBurnSwitch()
@@ -73,26 +59,12 @@ namespace services
 
         bool EPSPowerControl::PrimaryAntennaPower(bool enabled)
         {
-            if (enabled)
-            {
-                return this->_eps.EnableLCL(LCL::AntennaMain) == ErrorCode::NoError;
-            }
-            else
-            {
-                return this->_eps.DisableLCL(LCL::AntennaMain) == ErrorCode::NoError;
-            }
+            return Switch(enabled, LCL::AntennaMain);
         }
 
         bool EPSPowerControl::BackupAntennaPower(bool enabled)
         {
-            if (enabled)
-            {
-                return this->_eps.EnableLCL(LCL::AntennaRed) == ErrorCode::NoError;
-            }
-            else
-            {
-                return this->_eps.DisableLCL(LCL::AntennaRed) == ErrorCode::NoError;
-            }
+            return Switch(enabled, LCL::AntennaRed);
         }
 
         Option<bool> EPSPowerControl::PrimaryAntennaPower()
@@ -112,49 +84,33 @@ namespace services
 
         bool EPSPowerControl::SensPower(bool enabled)
         {
-            if (enabled)
-            {
-                return this->_eps.EnableLCL(LCL::SENS) == ErrorCode::NoError;
-            }
-            else
-            {
-                return this->_eps.DisableLCL(LCL::SENS) == ErrorCode::NoError;
-            }
+            return Switch(enabled, LCL::SENS);
         }
 
         bool EPSPowerControl::SunSPower(bool enabled)
         {
-            if (enabled)
-            {
-                return this->_eps.EnableLCL(LCL::SunS) == ErrorCode::NoError;
-            }
-            else
-            {
-                return this->_eps.DisableLCL(LCL::SunS) == ErrorCode::NoError;
-            }
+            return Switch(enabled, LCL::SunS);
         }
 
         bool EPSPowerControl::CameraWing(bool enabled)
         {
-            if (enabled)
-            {
-                return this->_eps.EnableLCL(LCL::CamWing) == ErrorCode::NoError;
-            }
-            else
-            {
-                return this->_eps.DisableLCL(LCL::CamWing) == ErrorCode::NoError;
-            }
+            return Switch(enabled, LCL::CamWing);
         }
 
         bool EPSPowerControl::CameraNadir(bool enabled)
         {
+            return Switch(enabled, LCL::CamNadir);
+        }
+
+        bool EPSPowerControl::Switch(bool enabled, LCL lcl)
+        {
             if (enabled)
             {
-                return this->_eps.EnableLCL(LCL::CamNadir) == ErrorCode::NoError;
+                return this->_eps.EnableLCL(lcl) == ErrorCode::NoError;
             }
             else
             {
-                return this->_eps.DisableLCL(LCL::CamNadir) == ErrorCode::NoError;
+                return this->_eps.DisableLCL(lcl) == ErrorCode::NoError;
             }
         }
     }

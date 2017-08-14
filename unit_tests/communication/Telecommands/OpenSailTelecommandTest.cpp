@@ -2,16 +2,12 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "mission/sail.hpp"
+#include "mock/OpenSailMock.hpp"
 #include "mock/comm.hpp"
 #include "obc/telecommands/sail.hpp"
 
 using telecommunication::downlink::DownlinkAPID;
 using testing::ElementsAre;
-
-struct OpenSailMock : mission::IOpenSail
-{
-    MOCK_METHOD0(OpenSail, void());
-};
 
 namespace
 {

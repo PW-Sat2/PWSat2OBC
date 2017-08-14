@@ -5,6 +5,7 @@
 #include "base/os.h"
 #include "camera_api.hpp"
 #include "fs/fwd.hpp"
+#include "fwd.hpp"
 #include "power/fwd.hpp"
 
 namespace services
@@ -17,15 +18,6 @@ namespace services
          */
 
         /**
-         * @brief Available cameras
-         */
-        enum class Camera
-        {
-            Nadir, //!< Nadir
-            Wing   //!< Wing
-        };
-
-        /**
          * @brief Interface of camera selector
          */
         struct ICameraSelector
@@ -35,20 +27,6 @@ namespace services
              * @param camera Camera to use
              */
             virtual void Select(Camera camera) = 0;
-        };
-
-        /**
-         * @brief Available commands
-         */
-        enum class Command
-        {
-            DisableCamera, //!< DisableCamera
-            EnableCamera,  //!< EnableCamera
-            TakePhoto,     //!< TakePhoto
-            DownloadPhoto, //!< DownloadPhoto
-            SavePhoto,     //!< SavePhoto
-            Reset,         //!< Reset
-            Sleep          //!< Sleep
         };
 
         /**
@@ -68,16 +46,40 @@ namespace services
              * @brief Returns camera that should be disabled
              * @return Camera
              */
-            inline Camera Which() const;
+            Camera Which() const;
+
+            /**
+             * Equality operator.
+             * @param[in] arg Reference to object to compare to
+             * @return True when both objects are the same, false otherwise.
+             */
+            bool operator==(const DisableCamera& arg) const;
+
+            /**
+             * Equality operator.
+             * @param[in] arg Reference to object to compare to
+             * @return True when both objects are the same, false otherwise.
+             */
+            bool operator!=(const DisableCamera& arg) const;
 
           private:
             /** @brief Camera to disable */
             Camera _which;
         };
 
-        Camera DisableCamera::Which() const
+        inline Camera DisableCamera::Which() const
         {
             return this->_which;
+        }
+
+        inline bool DisableCamera::operator==(const DisableCamera& arg) const
+        {
+            return this->_which == arg._which;
+        }
+
+        inline bool DisableCamera::operator!=(const DisableCamera& arg) const
+        {
+            return !(*this == arg);
         }
 
         /**
@@ -97,16 +99,40 @@ namespace services
              * @brief Returns camera that should be enabled
              * @return Camera
              */
-            inline Camera Which() const;
+            Camera Which() const;
+
+            /**
+             * Equality operator.
+             * @param[in] arg Reference to object to compare to
+             * @return True when both objects are the same, false otherwise.
+             */
+            bool operator==(const EnableCamera& arg) const;
+
+            /**
+             * Equality operator.
+             * @param[in] arg Reference to object to compare to
+             * @return True when both objects are the same, false otherwise.
+             */
+            bool operator!=(const EnableCamera& arg) const;
 
           private:
             /** @brief Camera to enable */
             Camera _which;
         };
 
-        Camera EnableCamera::Which() const
+        inline Camera EnableCamera::Which() const
         {
             return this->_which;
+        }
+
+        inline bool EnableCamera::operator==(const EnableCamera& arg) const
+        {
+            return this->_which == arg._which;
+        }
+
+        inline bool EnableCamera::operator!=(const EnableCamera& arg) const
+        {
+            return !(*this == arg);
         }
 
         /**
@@ -127,13 +153,27 @@ namespace services
              * @brief Returns camera that should be used
              * @return Camera
              */
-            inline Camera Which() const;
+            Camera Which() const;
 
             /**
              * @brief Returns photo resolution
              * @return Resolution
              */
-            inline PhotoResolution Resolution() const;
+            PhotoResolution Resolution() const;
+
+            /**
+             * Equality operator.
+             * @param[in] arg Reference to object to compare to
+             * @return True when both objects are the same, false otherwise.
+             */
+            bool operator==(const TakePhoto& arg) const;
+
+            /**
+             * Equality operator.
+             * @param[in] arg Reference to object to compare to
+             * @return True when both objects are the same, false otherwise.
+             */
+            bool operator!=(const TakePhoto& arg) const;
 
           private:
             /** @brief Camera to used */
@@ -142,14 +182,24 @@ namespace services
             PhotoResolution _resolution;
         };
 
-        Camera TakePhoto::Which() const
+        inline Camera TakePhoto::Which() const
         {
             return this->_which;
         }
 
-        PhotoResolution TakePhoto::Resolution() const
+        inline PhotoResolution TakePhoto::Resolution() const
         {
             return this->_resolution;
+        }
+
+        inline bool TakePhoto::operator==(const TakePhoto& arg) const
+        {
+            return this->_which == arg._which && this->_resolution == arg._resolution;
+        }
+
+        inline bool TakePhoto::operator!=(const TakePhoto& arg) const
+        {
+            return !(*this == arg);
         }
 
         /**
@@ -170,13 +220,27 @@ namespace services
              * @brief Returns camera that should be used
              * @return Camera
              */
-            inline Camera Which() const;
+            Camera Which() const;
 
             /**
              * @brief Returns target buffer ID
              * @return Buffer ID
              */
-            inline std::uint8_t BufferId() const;
+            std::uint8_t BufferId() const;
+
+            /**
+             * Equality operator.
+             * @param[in] arg Reference to object to compare to
+             * @return True when both objects are the same, false otherwise.
+             */
+            bool operator==(const DownloadPhoto& arg) const;
+
+            /**
+             * Equality operator.
+             * @param[in] arg Reference to object to compare to
+             * @return True when both objects are the same, false otherwise.
+             */
+            bool operator!=(const DownloadPhoto& arg) const;
 
           private:
             /** @brief Camera to use */
@@ -185,7 +249,7 @@ namespace services
             std::uint8_t _bufferId;
         };
 
-        Camera DownloadPhoto::Which() const
+        inline Camera DownloadPhoto::Which() const
         {
             return this->_which;
         }
@@ -193,6 +257,16 @@ namespace services
         inline std::uint8_t DownloadPhoto::BufferId() const
         {
             return this->_bufferId;
+        }
+
+        inline bool DownloadPhoto::operator==(const DownloadPhoto& arg) const
+        {
+            return this->_which == arg._which && this->_bufferId == arg._bufferId;
+        }
+
+        inline bool DownloadPhoto::operator!=(const DownloadPhoto& arg) const
+        {
+            return !(*this == arg);
         }
 
         /**
@@ -253,16 +327,40 @@ namespace services
              * @brief Returns sleep duration
              * @return Sleep duration
              */
-            inline std::chrono::milliseconds Duration() const;
+            std::chrono::milliseconds Duration() const;
+
+            /**
+             * Equality operator.
+             * @param[in] arg Reference to object to compare to
+             * @return True when both objects are the same, false otherwise.
+             */
+            bool operator==(const Sleep& arg) const;
+
+            /**
+             * Equality operator.
+             * @param[in] arg Reference to object to compare to
+             * @return True when both objects are the same, false otherwise.
+             */
+            bool operator!=(const Sleep& arg) const;
 
           private:
             /** @brief Sleep duration */
             std::chrono::milliseconds _duration;
         };
 
-        std::chrono::milliseconds Sleep::Duration() const
+        inline std::chrono::milliseconds Sleep::Duration() const
         {
             return this->_duration;
+        }
+
+        inline bool Sleep::operator==(const Sleep& arg) const
+        {
+            return this->_duration == arg._duration;
+        }
+
+        inline bool Sleep::operator!=(const Sleep& arg) const
+        {
+            return !(*this == arg);
         }
 
         /**
@@ -332,6 +430,62 @@ namespace services
         }
 
         /**
+         * @brief Interface for service capable of taking asynchronous photos.
+         */
+        struct IPhotoService
+        {
+            /**
+             * @brief Schedules disable camera command
+             * @param command Command
+             */
+            virtual void Schedule(DisableCamera command) = 0;
+            /**
+             * @brief Schedules enable camera command
+             * @param command Command
+             */
+            virtual void Schedule(EnableCamera command) = 0;
+            /**
+             * @brief Schedules take photo command
+             * @param command Command
+             */
+            virtual void Schedule(TakePhoto command) = 0;
+            /**
+             * @brief Schedules download photo
+             * @param command Command
+             */
+            virtual void Schedule(DownloadPhoto command) = 0;
+            /**
+             * @brief Schedules reset command
+             * @param command Command
+             */
+            virtual void Schedule(Reset command) = 0;
+            /**
+             * @brief Schedules save photo command
+             * @param command Command
+             */
+            virtual void Schedule(SavePhoto command) = 0;
+            /**
+             * @brief Schedules sleep command
+             * @param command Command
+             */
+            virtual void Schedule(Sleep command) = 0;
+
+            /**
+             * @brief Waits for idle state
+             * @param timeout Timeout
+             * @return true if photo service went idle, false on timeout
+             */
+            virtual bool WaitForFinish(std::chrono::milliseconds timeout) = 0;
+
+            /**
+             * @brief Returns information whether the requested buffer is empty.
+             * @param bufferId Queried buffer Id
+             * @return True if buffer is empty, false otherwise
+             */
+            virtual bool IsEmpty(std::uint8_t bufferId) const = 0;
+        };
+
+        /**
          * @brief Container for command queue element
          */
         struct PossibleCommand
@@ -353,7 +507,7 @@ namespace services
         /**
          * @brief Photo service
          */
-        class PhotoService
+        class PhotoService final : public IPhotoService
         {
           public:
             /**
@@ -375,37 +529,37 @@ namespace services
              * @brief Schedules disable camera command
              * @param command Command
              */
-            void Schedule(DisableCamera command);
+            virtual void Schedule(DisableCamera command) final override;
             /**
              * @brief Schedules enable camera command
              * @param command Command
              */
-            void Schedule(EnableCamera command);
+            virtual void Schedule(EnableCamera command) final override;
             /**
              * @brief Schedules take photo command
              * @param command Command
              */
-            void Schedule(TakePhoto command);
+            virtual void Schedule(TakePhoto command) final override;
             /**
              * @brief Schedules download photo
              * @param command Command
              */
-            void Schedule(DownloadPhoto command);
+            virtual void Schedule(DownloadPhoto command) final override;
             /**
              * @brief Schedules reset command
              * @param command Command
              */
-            void Schedule(Reset command);
+            virtual void Schedule(Reset command) final override;
             /**
              * @brief Schedules save photo command
              * @param command Command
              */
-            void Schedule(SavePhoto command);
+            virtual void Schedule(SavePhoto command) final override;
             /**
              * @brief Schedules sleep command
              * @param command Command
              */
-            void Schedule(Sleep command);
+            virtual void Schedule(Sleep command) final override;
 
             /**
              * @brief (Internal use) Invokes disable camera command
@@ -462,10 +616,12 @@ namespace services
              * @param timeout Timeout
              * @return true if photo service went idle, false on timeout
              */
-            bool WaitForFinish(std::chrono::milliseconds timeout);
+            virtual bool WaitForFinish(std::chrono::milliseconds timeout) override;
+
+            virtual bool IsEmpty(std::uint8_t bufferId) const override;
 
             /** @brief Number of buffers */
-            static constexpr std::uint8_t BuffersCount = 20;
+            static constexpr std::uint8_t BuffersCount = 100;
 
           private:
             /**

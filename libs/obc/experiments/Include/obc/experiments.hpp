@@ -8,9 +8,14 @@
 #include "experiment/flash/flash.hpp"
 #include "experiment/leop/leop.hpp"
 #include "experiment/radfet/radfet.hpp"
+#include "experiment/sail/sail.hpp"
 #include "experiment/suns/suns.hpp"
 #include "experiments/experiments.h"
 #include "fs/fs.h"
+#include "gpio/forward.h"
+#include "payload/interfaces.h"
+#include "photo/fwd.hpp"
+#include "power/fwd.hpp"
 #include "traits.hpp"
 
 namespace obc
@@ -92,7 +97,8 @@ namespace obc
         experiment::leop::LaunchAndEarlyOrbitPhaseExperiment, //
         experiment::suns::SunSExperiment,                     //
         experiment::erase_flash::EraseFlashExperiment,        //
-        experiment::radfet::RadFETExperiment                  //
+        experiment::radfet::RadFETExperiment,                 //
+        experiment::sail::SailExperiment                      //
         >;
 
     /**
@@ -112,6 +118,8 @@ namespace obc
          * @param payload Payload driver
          * @param n25q Redundant N25Q driver
          * @param transmitter Frame transmitter
+         * @param[in] photoService Reference to object capable of taking photos
+         * @param[in] sailState Pin connected to sail indicator
          */
         OBCExperiments(services::fs::IFileSystem& fs,
             adcs::IAdcsCoordinator& adcs,
@@ -121,7 +129,9 @@ namespace obc
             devices::suns::ISunSDriver& suns,
             devices::payload::IPayloadDeviceDriver& payload,
             devices::n25q::RedundantN25QDriver& n25q,
-            devices::comm::ITransmitter& transmitter);
+            devices::comm::ITransmitter& transmitter,
+            services::photo::IPhotoService& photoService,
+            const drivers::gpio::Pin& sailState);
 
         /**
          * @brief Performs initialization

@@ -33,10 +33,12 @@ bool LowLevelCameraDriver::SendCommand( //
 
     LogSendCommand(commandBuffer);
 
-    auto readSucceeded = _lineIO.ExchangeBuffers(commandBuffer, receiveBuffer, timeout);
+    const auto readSucceeded = _lineIO.ExchangeBuffers(commandBuffer, receiveBuffer, timeout);
     if (!readSucceeded)
     {
-        LOG(LOG_LEVEL_ERROR, "LineIO read timeout");
+#ifdef CAMERA_DEBUG
+        LOG(LOG_LEVEL_ERROR, "[cam] LineIO read timeout");
+#endif
         errorContext.Counter().Failure();
         return false;
     }
@@ -45,17 +47,19 @@ bool LowLevelCameraDriver::SendCommand( //
 
     if (receiveBuffer.length() < CommandFrameSize + additionalBytes)
     {
-        LOG(LOG_LEVEL_ERROR, "Too less data received.");
+        LOG(LOG_LEVEL_ERROR, "[cam] Too less data received.");
         return false;
     }
 
-    if (receiveBuffer[2] != commandCode)
+    const auto status = receiveBuffer[2] == commandCode;
+#ifdef CAMERA_DEBUG
+    if (!status)
     {
-        LOGF(LOG_LEVEL_ERROR, "Invalid ack command received. Expected %02X was %02X", commandCode, receiveBuffer[2]);
-        return false;
+        LOGF(LOG_LEVEL_ERROR, "[cam] Invalid ack command received. Expected %02X was %02X", commandCode, receiveBuffer[2]);
     }
+#endif
 
-    return true;
+    return status;
 }
 
 bool LowLevelCameraDriver::SendCommand(gsl::span<uint8_t> command, std::chrono::milliseconds timeout)
@@ -81,11 +85,13 @@ bool LowLevelCameraDriver::SendAckWithResponse( //
     _commandFactory.BuildAck(commandBuffer, ackedCommand, lowerPackageIdByte, higherPackageIdByte);
     LogSendCommand(commandBuffer);
 
-    auto readSucceeded = _lineIO.ExchangeBuffers(gsl::span<uint8_t>(commandBuffer), receiveBuffer, timeout);
+    const auto readSucceeded = _lineIO.ExchangeBuffers(gsl::span<uint8_t>(commandBuffer), receiveBuffer, timeout);
 
     if (!readSucceeded)
     {
-        LOG(LOG_LEVEL_ERROR, "LineIO read timeout");
+#ifdef CAMERA_DEBUG
+        LOG(LOG_LEVEL_ERROR, "[cam] LineIO read timeout");
+#endif
         errorContext.Counter().Failure();
         return false;
     }
@@ -105,7 +111,9 @@ void LowLevelCameraDriver::SendAck(CameraCmd ackedCommand, uint8_t packageIdLow,
 
 bool LowLevelCameraDriver::SendSync(std::chrono::milliseconds timeout)
 {
-    LOG(LOG_LEVEL_INFO, "Sending Sync command.");
+#ifdef CAMERA_DEBUG
+    LOG(LOG_LEVEL_INFO, "[cam] Sending Sync command.");
+#endif
     std::array<uint8_t, CommandFrameSize> commandBuffer;
     std::array<uint8_t, 2 * CommandFrameSize> receiveBuffer;
     receiveBuffer.fill(0);
@@ -119,7 +127,7 @@ bool LowLevelCameraDriver::SendSync(std::chrono::milliseconds timeout)
 
     if (!IsValidSyncResponse(SkipAck(receiveBuffer)))
     {
-        LOG(LOG_LEVEL_INFO, "Expected Sync response.");
+        LOG(LOG_LEVEL_INFO, "[cam] Expected Sync response.");
         return false;
     }
 
@@ -128,7 +136,7 @@ bool LowLevelCameraDriver::SendSync(std::chrono::milliseconds timeout)
 
 bool LowLevelCameraDriver::SendReset()
 {
-    LOG(LOG_LEVEL_INFO, "Sending Reset command.");
+    LOG(LOG_LEVEL_INFO, "[cam] Sending Reset command.");
     std::array<uint8_t, CommandFrameSize> commandBuffer;
 
     _commandFactory.BuildReset(commandBuffer, CameraResetType::Reboot);
@@ -137,7 +145,7 @@ bool LowLevelCameraDriver::SendReset()
 
 bool LowLevelCameraDriver::SendJPEGInitial(CameraJPEGResolution jpegResolution)
 {
-    LOG(LOG_LEVEL_INFO, "Sending Inital command.");
+    LOG(LOG_LEVEL_INFO, "[cam] Sending Initial command.");
     std::array<uint8_t, CommandFrameSize> commandBuffer;
 
     _commandFactory.BuildInitJPEG(commandBuffer, jpegResolution);
@@ -146,7 +154,7 @@ bool LowLevelCameraDriver::SendJPEGInitial(CameraJPEGResolution jpegResolution)
 
 bool LowLevelCameraDriver::SendGetPictureJPEG(CameraPictureType::Enum type, PictureData& pictureData)
 {
-    LOG(LOG_LEVEL_INFO, "Sending GetPicture command.");
+    LOG(LOG_LEVEL_INFO, "[cam] Sending GetPicture command.");
     std::array<uint8_t, CommandFrameSize> commandBuffer;
     std::array<uint8_t, 2 * CommandFrameSize> receiveBuffer;
     receiveBuffer.fill(0);
@@ -159,7 +167,7 @@ bool LowLevelCameraDriver::SendGetPictureJPEG(CameraPictureType::Enum type, Pict
 
     if (!pictureData.Parse(SkipAck(receiveBuffer)))
     {
-        LOG(LOG_LEVEL_ERROR, "Failed to parse response.");
+        LOG(LOG_LEVEL_ERROR, "[cam] Failed to parse response.");
         return false;
     }
 
@@ -168,7 +176,7 @@ bool LowLevelCameraDriver::SendGetPictureJPEG(CameraPictureType::Enum type, Pict
 
 bool LowLevelCameraDriver::SendSnapshot(CameraSnapshotType type)
 {
-    LOG(LOG_LEVEL_INFO, "Sending Snapshot command.");
+    LOG(LOG_LEVEL_INFO, "[cam] Sending Snapshot command.");
     std::array<uint8_t, CommandFrameSize> commandBuffer;
 
     _commandFactory.BuildSnapshot(commandBuffer, type);
@@ -177,7 +185,7 @@ bool LowLevelCameraDriver::SendSnapshot(CameraSnapshotType type)
 
 bool LowLevelCameraDriver::SendSetPackageSize(uint16_t packageSize)
 {
-    LOG(LOG_LEVEL_INFO, "Sending SetPackageSize command.");
+    LOG(LOG_LEVEL_INFO, "[cam] Sending SetPackageSize command.");
     std::array<uint8_t, CommandFrameSize> commandBuffer;
 
     if (!_commandFactory.BuildSetPackageSize(commandBuffer, packageSize))
@@ -190,7 +198,7 @@ bool LowLevelCameraDriver::SendSetPackageSize(uint16_t packageSize)
 
 bool LowLevelCameraDriver::SendSetBaudRate(uint8_t firstDivider, uint8_t secondDivider)
 {
-    LOG(LOG_LEVEL_INFO, "Sending SendSetBaudRate command.");
+    LOG(LOG_LEVEL_INFO, "[cam] Sending SendSetBaudRate command.");
     std::array<uint8_t, CommandFrameSize> commandBuffer;
 
     _commandFactory.BuildSetBaudRate(commandBuffer, firstDivider, secondDivider);
@@ -205,10 +213,18 @@ bool LowLevelCameraDriver::IsValidSyncResponse(gsl::span<const uint8_t> command)
 
 void LowLevelCameraDriver::LogSendCommand(gsl::span<uint8_t> cmd)
 {
-    LOGF(LOG_LEVEL_INFO, "Camera send:%02X %02X %02X %02X %02X %02X", cmd[0], cmd[1], cmd[2], cmd[3], cmd[4], cmd[5]);
+#ifdef CAMERA_DEBUG
+    LOGF(LOG_LEVEL_INFO, "[cam] send:%02X %02X %02X %02X %02X %02X", cmd[0], cmd[1], cmd[2], cmd[3], cmd[4], cmd[5]);
+#else
+    UNREFERENCED_PARAMETER(cmd);
+#endif
 }
 
 void LowLevelCameraDriver::LogReceivedCommand(gsl::span<const uint8_t> cmd)
 {
-    LOGF(LOG_LEVEL_INFO, "Camera received:%02X %02X %02X %02X %02X %02X", cmd[0], cmd[1], cmd[2], cmd[3], cmd[4], cmd[5]);
+#ifdef CAMERA_DEBUG
+    LOGF(LOG_LEVEL_INFO, "[cam] received:%02X %02X %02X %02X %02X %02X", cmd[0], cmd[1], cmd[2], cmd[3], cmd[4], cmd[5]);
+#else
+    UNREFERENCED_PARAMETER(cmd);
+#endif
 }
