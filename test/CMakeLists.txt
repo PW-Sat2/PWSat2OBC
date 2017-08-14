@@ -1,3 +1,4 @@
 add_subdirectory(pulse_all)
 add_subdirectory(flash)
 add_subdirectory(fm_terminal)
+add_subdirectory(generate_exp_data)
