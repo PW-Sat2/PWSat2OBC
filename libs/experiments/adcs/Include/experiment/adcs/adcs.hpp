@@ -4,6 +4,7 @@
 #include <chrono>
 #include "adcs/adcs.hpp"
 #include "experiments/experiments.h"
+#include "fs/ExperimentFile.hpp"
 #include "gyro/fwd.hpp"
 #include "payload/interfaces.h"
 #include "power/fwd.hpp"
@@ -27,6 +28,7 @@ namespace experiment
              * @param duration Experiment duration
              */
             virtual void Duration(std::chrono::seconds duration) = 0;
+            virtual void SampleRate(std::chrono::seconds interval) = 0;
         };
 
         struct DetumblingDataPoint;
@@ -52,13 +54,11 @@ namespace experiment
                 services::power::IPowerControl& powerControl,
                 devices::gyro::IGyroscopeDriver& gyro,
                 devices::payload::IPayloadDeviceDriver& payload,
-                telemetry::IImtqDataProvider& imtq);
+                telemetry::IImtqDataProvider& imtq,
+                services::fs::IFileSystem& fileSystem);
 
-            /**
-             * @brief Sets experiment duration
-             * @param duration Experiment duration
-             */
             virtual void Duration(std::chrono::seconds duration) override;
+            virtual void SampleRate(std::chrono::seconds interval) override;
 
             virtual experiments::ExperimentCode Type() override;
             virtual experiments::StartResult Start() override;
@@ -74,6 +74,7 @@ namespace experiment
             services::time::ICurrentTime& _time;
             /** @brief Experiment duration */
             std::chrono::milliseconds _duration;
+            std::chrono::seconds _sampleRate;
             /** @brief Point at time at which experiment should stop */
             std::chrono::milliseconds _endAt;
             /** @brief Power control */
@@ -83,6 +84,9 @@ namespace experiment
             /** @brief Payload driver */
             devices::payload::IPayloadDeviceDriver& _payload;
             telemetry::IImtqDataProvider& _imtq;
+            services::fs::IFileSystem& _fileSystem;
+
+            experiments::fs::ExperimentFile _dataSet;
         };
     }
 }
