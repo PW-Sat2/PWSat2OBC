@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "OsMock.hpp"
 #include "experiment/adcs/adcs.hpp"
 #include "experiment/adcs/data_point.hpp"
 #include "mock/AdcsMocks.hpp"
@@ -25,6 +26,7 @@ using experiments::StartResult;
 using namespace std::chrono_literals;
 using devices::gyro::GyroscopeTelemetry;
 using devices::payload::PayloadTelemetry;
+using namespace std::chrono_literals;
 
 struct ImtqDataProviderMock : telemetry::IImtqDataProvider
 {
@@ -46,6 +48,8 @@ namespace
         NiceMock<GyroscopeMock> _gyro;
         NiceMock<PayloadDeviceMock> _payload;
         NiceMock<ImtqDataProviderMock> _imtq;
+        NiceMock<OSMock> _os;
+        OSReset _osReset;
 
         DetumblingExperiment _exp;
     };
@@ -55,6 +59,8 @@ namespace
     {
         ON_CALL(this->_time, GetCurrentTime()).WillByDefault(Return(Some(10ms)));
         ON_CALL(this->_power, SensPower(_)).WillByDefault(Return(true));
+
+        _osReset = InstallProxy(&_os);
     }
 
     TEST_F(DetumblingExperimentTest, ShouldSwitchToExperimentalDetumblingOnStart)
@@ -109,7 +115,11 @@ namespace
 
     TEST_F(DetumblingExperimentTest, ShouldEnableSENSOnStart)
     {
-        EXPECT_CALL(_power, SensPower(true)).WillOnce(Return(true));
+        {
+            InSequence s;
+            EXPECT_CALL(_power, SensPower(true)).WillOnce(Return(true));
+            EXPECT_CALL(_os, Sleep(Eq(2s)));
+        }
 
         this->_exp.Start();
     }
