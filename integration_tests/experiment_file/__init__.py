@@ -3,6 +3,7 @@ from parsec import many
 from base import Synchronization, Timestamp, Padding
 from suns import ExperimentalSunSPrimary, ExperimentalSunSSecondary, ReferenceSunS
 from gyro import Gyro
+from sail import Sail
 
 pids = Synchronization \
        ^ Timestamp \
@@ -10,7 +11,8 @@ pids = Synchronization \
        ^ ExperimentalSunSPrimary \
        ^ ExperimentalSunSSecondary \
        ^ ReferenceSunS \
-       ^ Gyro
+       ^ Gyro \
+       ^ Sail
 
 ExperimentFileParser = many(pids)
 

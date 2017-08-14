@@ -61,6 +61,8 @@ def field(name, content_parser):
     return content_parser.parsecmap(lambda v: (name, v))
 
 
+boolean = packed('<?')
+
 uint16 = packed('<H')
 
 Synchronization = pid(0x47).result('Synchronization')
