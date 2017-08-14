@@ -8,6 +8,7 @@ from gyro import *
 from rtc import RTCDevice
 from payload import Payload
 from gpio import GPIODriver
+from camera import CameraDriver
 
 __all__ = [
     'EPS',
@@ -30,5 +31,6 @@ __all__ = [
     "RTCDevice",
     "Gyro",
     "Payload",
-    "GPIODriver"
+    "GPIODriver",
+    "CameraDriver"
 ]

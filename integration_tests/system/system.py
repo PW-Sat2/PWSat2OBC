@@ -40,6 +40,7 @@ class System:
         self.gyro = Gyro()
         self.rtc = RTCDevice()
         self.payload = Payload(GPIODriver(self.i2c), MockPin.PA8)
+        self.camera = CameraDriver(self.i2c, MockPin.PC10, MockPin.PC12)
 
         self.i2c.add_bus_device(self.eps.controller_a)
         self.i2c.add_pld_device(self.eps.controller_b)
