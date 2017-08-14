@@ -71,11 +71,7 @@ namespace
 
     TEST_F(DetumblingExperimentTest, ShouldSwitchToExperimentalDetumblingOnStart)
     {
-        {
-            InSequence s;
-            EXPECT_CALL(this->_adcs, Disable()).WillOnce(Return(OSResult::Success));
-            EXPECT_CALL(this->_adcs, EnableExperimentalDetumbling()).WillOnce(Return(OSResult::Success));
-        }
+        EXPECT_CALL(this->_adcs, EnableExperimentalDetumbling()).WillOnce(Return(OSResult::Success));
 
         auto r = this->_exp.Start();
 
@@ -86,34 +82,18 @@ namespace
     {
         {
             InSequence s;
-            EXPECT_CALL(this->_adcs, Disable()).WillOnce(Return(OSResult::Success));
             EXPECT_CALL(this->_adcs, EnableBuiltinDetumbling()).WillOnce(Return(OSResult::Success));
         }
         this->_exp.Stop(IterationResult::Finished);
-    }
-
-    TEST_F(DetumblingExperimentTest, FailOnDisablingADCSModeWillAbortExperiment)
-    {
-        {
-            InSequence s;
-            EXPECT_CALL(this->_adcs, Disable()).WillOnce(Return(OSResult::InvalidOperation));
-            EXPECT_CALL(this->_adcs, EnableExperimentalDetumbling()).Times(0);
-            EXPECT_CALL(this->_fs, Close(_));
-        }
-
-        auto r = this->_exp.Start();
-
-        ASSERT_THAT(r, Eq(StartResult::Failure));
     }
 
     TEST_F(DetumblingExperimentTest, FailOnEnablingExperimentalDetumblingWillAbortExperimentAndBringBackBuiltin)
     {
         {
             InSequence s;
-            EXPECT_CALL(this->_adcs, Disable()).WillOnce(Return(OSResult::Success));
             EXPECT_CALL(this->_adcs, EnableExperimentalDetumbling()).WillOnce(Return(OSResult::InvalidOperation));
-            EXPECT_CALL(this->_adcs, EnableBuiltinDetumbling()).WillOnce(Return(OSResult::Success));
             EXPECT_CALL(this->_fs, Close(_));
+            EXPECT_CALL(this->_adcs, EnableBuiltinDetumbling()).WillOnce(Return(OSResult::Success));
         }
 
         auto r = this->_exp.Start();
@@ -136,10 +116,11 @@ namespace
     {
         {
             InSequence s;
-            EXPECT_CALL(this->_adcs, EnableExperimentalDetumbling()).WillOnce(Return(OSResult::Success));
             EXPECT_CALL(_power, SensPower(true)).WillOnce(Return(false));
-            EXPECT_CALL(this->_adcs, EnableBuiltinDetumbling());
+
             EXPECT_CALL(this->_fs, Close(_));
+            EXPECT_CALL(_power, SensPower(false));
+            EXPECT_CALL(this->_adcs, EnableBuiltinDetumbling());
         }
 
         auto r = this->_exp.Start();
@@ -153,16 +134,6 @@ namespace
         auto r = this->_exp.Start();
 
         ASSERT_THAT(r, Eq(StartResult::Failure));
-    }
-
-    TEST_F(DetumblingExperimentTest, ShouldNotReenableBuiltinDetumblingOnStopIfDisablingFailed)
-    {
-        {
-            InSequence s;
-            EXPECT_CALL(this->_adcs, Disable()).WillOnce(Return(OSResult::InvalidOperation));
-            EXPECT_CALL(this->_adcs, EnableBuiltinDetumbling()).Times(0);
-        }
-        this->_exp.Stop(IterationResult::Finished);
     }
 
     TEST_F(DetumblingExperimentTest, ShouldDisableSENSPowerOnStop)
