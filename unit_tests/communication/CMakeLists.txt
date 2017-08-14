@@ -36,7 +36,6 @@ target_link_libraries(${NAME}
     telecommunication
     obc_telecommands
     boot_settings
-    experiments
     -Wl,--end-group 
 )
 
