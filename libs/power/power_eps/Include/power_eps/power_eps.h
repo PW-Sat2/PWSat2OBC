@@ -25,8 +25,12 @@ namespace services
 
             virtual bool MainThermalKnife(bool enabled) override;
             virtual bool RedundantThermalKnife(bool enabled) override;
+
             virtual bool EnableMainSailBurnSwitch() override;
             virtual bool EnableRedundantSailBurnSwitch() override;
+            virtual bool EnableMainSADSBurnSwitch() override;
+            virtual bool EnableRedundantSADSBurnSwitch() override;
+
             virtual bool PrimaryAntennaPower(bool enabled) override;
             virtual bool BackupAntennaPower(bool enabled) override;
             virtual Option<bool> PrimaryAntennaPower() override;

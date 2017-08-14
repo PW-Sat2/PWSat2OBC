@@ -23,6 +23,7 @@
 #include "obc/telecommands/ping.hpp"
 #include "obc/telecommands/power.hpp"
 #include "obc/telecommands/program_upload.hpp"
+#include "obc/telecommands/sads.hpp"
 #include "obc/telecommands/sail.hpp"
 #include "obc/telecommands/suns.hpp"
 #include "obc/telecommands/time.hpp"
@@ -149,7 +150,8 @@ namespace obc
         obc::telecommands::PerformRadFETExperiment,
         obc::telecommands::GetSunSDataSetsTelecommand,
         obc::telecommands::PerformSailExperiment,
-        obc::telecommands::TakePhoto>;
+        obc::telecommands::TakePhoto,
+        obc::telecommands::DeploySolarArray>;
 
     /**
      * @brief OBC <-> Earth communication
@@ -194,6 +196,7 @@ namespace obc
             IHasState<telemetry::TelemetryState>& telemetry,
             services::power::IPowerControl& powerControl,
             mission::IOpenSail& openSail,
+            mission::IDeploySolarArray& deploySolarArray,
             mission::ITimeSynchronization& timeSynchronization,
             drivers::i2c::II2CBus& systemBus,
             drivers::i2c::II2CBus& payload,

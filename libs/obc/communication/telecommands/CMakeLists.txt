@@ -17,6 +17,7 @@ set(SOURCES
     i2c.cpp
     suns.cpp
     photo.cpp
+    sads.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -28,6 +29,7 @@ target_link_libraries(${NAME}
 	mission_comm
 	mission_sail
 	mission_time
+	mission_sads
 	rtc
 	fs
 	logger

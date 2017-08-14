@@ -49,6 +49,18 @@ namespace services
             virtual bool EnableRedundantSailBurnSwitch() = 0;
 
             /**
+             * @brief Enables main SADS burn switch
+             * @return Operation status
+             */
+            virtual bool EnableMainSADSBurnSwitch() = 0;
+
+            /**
+             * @brief Enables redundant SADS burn switch
+             * @return Operation status
+             */
+            virtual bool EnableRedundantSADSBurnSwitch() = 0;
+
+            /**
             * @brief Sets state of primary antenna power LCL
             * @param enabled true to turn on LCL, false to turn off
             * @return Operation status
