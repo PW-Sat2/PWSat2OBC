@@ -29,3 +29,19 @@ class FileSystemMixin(OBCMixin):
     @command("rm {0}")
     def remove_file(self, path):
         pass
+
+    def save_all_files(self, obc_path="/", filename_prefix="", local_path=""):
+        downloaded_files = []
+
+        files = self.list_files(obc_path)
+        for file in files:
+            if len(filename_prefix) == 0 or file.startswith(filename_prefix):
+                print "Downloading \"" + file + "\""
+                content = self.read_file(obc_path + file)
+                with open(local_path + file, 'wb') as f:
+                    f.write(''.join(content))
+
+                downloaded_files.append(file)
+
+        return downloaded_files
+
