@@ -62,40 +62,40 @@ void TestPhoto(std::uint16_t /*argc*/, char* /*argv*/ [])
 
     GetTerminal().Puts("Scheduling....");
 
-    ph.Schedule(Reset());
-    ph.Schedule(EnableCamera(Camera::Nadir));
-    ph.Schedule(EnableCamera(Camera::Wing));
+    ph.Reset();
+    ph.EnableCamera(Camera::Nadir);
+    ph.EnableCamera(Camera::Wing);
 
-    ph.Schedule(TakePhoto(Camera::Nadir, PhotoResolution::p480));
-    ph.Schedule(TakePhoto(Camera::Wing, PhotoResolution::p480));
-    ph.Schedule(DownloadPhoto(Camera::Nadir, 0));
-    ph.Schedule(DownloadPhoto(Camera::Wing, 1));
+    ph.TakePhoto(Camera::Nadir, PhotoResolution::p480);
+    ph.TakePhoto(Camera::Wing, PhotoResolution::p480);
+    ph.DownloadPhoto(Camera::Nadir, 0);
+    ph.DownloadPhoto(Camera::Wing, 1);
 
-    ph.Schedule(Sleep(1s));
+    ph.Sleep(1s);
 
-    ph.Schedule(TakePhoto(Camera::Nadir, PhotoResolution::p240));
-    ph.Schedule(TakePhoto(Camera::Wing, PhotoResolution::p240));
-    ph.Schedule(DownloadPhoto(Camera::Nadir, 2));
-    ph.Schedule(DownloadPhoto(Camera::Wing, 3));
+    ph.TakePhoto(Camera::Nadir, PhotoResolution::p240);
+    ph.TakePhoto(Camera::Wing, PhotoResolution::p240);
+    ph.DownloadPhoto(Camera::Nadir, 2);
+    ph.DownloadPhoto(Camera::Wing, 3);
 
-    ph.Schedule(Sleep(1s));
+    ph.Sleep(1s);
 
-    ph.Schedule(TakePhoto(Camera::Nadir, PhotoResolution::p128));
-    ph.Schedule(TakePhoto(Camera::Wing, PhotoResolution::p128));
-    ph.Schedule(DownloadPhoto(Camera::Nadir, 4));
-    ph.Schedule(DownloadPhoto(Camera::Wing, 5));
+    ph.TakePhoto(Camera::Nadir, PhotoResolution::p128);
+    ph.TakePhoto(Camera::Wing, PhotoResolution::p128);
+    ph.DownloadPhoto(Camera::Nadir, 4);
+    ph.DownloadPhoto(Camera::Wing, 5);
 
-    ph.Schedule(DisableCamera(Camera::Nadir));
-    ph.Schedule(DisableCamera(Camera::Wing));
+    ph.DisableCamera(Camera::Nadir);
+    ph.DisableCamera(Camera::Wing);
 
-    ph.Schedule(SavePhoto(0, "/p_nadir480"));
-    ph.Schedule(SavePhoto(1, "/p_wing480"));
+    ph.SavePhoto(0, "/p_nadir480");
+    ph.SavePhoto(1, "/p_wing480");
 
-    ph.Schedule(SavePhoto(2, "/p_nadir240"));
-    ph.Schedule(SavePhoto(3, "/p_wing240"));
+    ph.SavePhoto(2, "/p_nadir240");
+    ph.SavePhoto(3, "/p_wing240");
 
-    ph.Schedule(SavePhoto(4, "/p_nadir128"));
-    ph.Schedule(SavePhoto(5, "/p_wing128"));
+    ph.SavePhoto(4, "/p_nadir128");
+    ph.SavePhoto(5, "/p_wing128");
 
     GetTerminal().Puts("Scheduled...");
 

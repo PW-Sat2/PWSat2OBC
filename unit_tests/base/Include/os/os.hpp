@@ -56,6 +56,7 @@ struct IOS
     virtual bool QueueSend(OSQueueHandle queue, const void* element, std::chrono::milliseconds timeout) = 0;
     virtual bool QueueSendISR(OSQueueHandle queue, const void* element) = 0;
     virtual void QueueOverwrite(OSQueueHandle queue, const void* element) = 0;
+    virtual void QueueReset(OSQueueHandle queue) = 0;
 
     virtual OSPulseHandle CreatePulseAll() = 0;
 

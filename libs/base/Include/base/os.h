@@ -427,6 +427,12 @@ class System final : public PureStatic
     static void QueueOverwrite(OSQueueHandle queue, const void* element);
 
     /**
+     * @brief Resets queue to empty state
+     * @param queue Queue handle
+     */
+    static void QueueReset(OSQueueHandle queue);
+
+    /**
      * @brief Procedure that should be called at the end of interrupt handler
      *
      */
@@ -638,6 +644,11 @@ template <typename Element, std::size_t Capacity> class Queue final
      */
     void Overwrite(const Element& element);
 
+    /**
+     * @brief Resets queue to empty state
+     */
+    void Reset();
+
   private:
     /** @brief Queue handle */
     OSQueueHandle _handle;
@@ -687,6 +698,11 @@ OSResult Queue<Element, Capacity>::Pop(Element& element, std::chrono::millisecon
 template <typename Element, std::size_t Capacity> inline void Queue<Element, Capacity>::Overwrite(const Element& element)
 {
     System::QueueOverwrite(this->_handle, &element);
+}
+
+template <typename Element, std::size_t Capacity> void Queue<Element, Capacity>::Reset()
+{
+    System::QueueReset(this->_handle);
 }
 
 /**

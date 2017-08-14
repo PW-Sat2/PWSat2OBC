@@ -2,7 +2,6 @@ set(NAME photo)
 
 set(SOURCES
     photo_service.cpp
-    commands.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

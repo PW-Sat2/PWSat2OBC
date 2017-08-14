@@ -89,9 +89,9 @@ namespace experiment
                     break;
                 }
 
-                this->_photoService.Schedule(Reset());
-                this->_photoService.Schedule(EnableCamera(Camera::Nadir));
-                this->_photoService.Schedule(EnableCamera(Camera::Wing));
+                this->_photoService.Reset();
+                this->_photoService.EnableCamera(Camera::Nadir);
+                this->_photoService.EnableCamera(Camera::Wing);
                 this->_photoService.WaitForFinish(InfiniteTimeout);
 
                 const auto time = this->_timeProvider.GetCurrentTime();
@@ -149,10 +149,10 @@ namespace experiment
                 LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to disable SENS lcl");
             }
 
-            this->_photoService.Schedule(DisableCamera(Camera::Nadir));
-            this->_photoService.Schedule(DisableCamera(Camera::Wing));
+            this->_photoService.DisableCamera(Camera::Nadir);
+            this->_photoService.DisableCamera(Camera::Wing);
             SavePhotos();
-            this->_photoService.Schedule(Reset());
+            this->_photoService.Reset();
             this->_photoService.WaitForFinish(InfiniteTimeout);
         }
 
@@ -301,8 +301,8 @@ namespace experiment
 
         void SailExperiment::TakePhoto(services::photo::Camera camera, services::photo::PhotoResolution resolution)
         {
-            this->_photoService.Schedule(services::photo::TakePhoto(camera, resolution));
-            this->_photoService.Schedule(services::photo::DownloadPhoto(camera, this->_photoNumber++));
+            this->_photoService.TakePhoto(camera, resolution);
+            this->_photoService.DownloadPhoto(camera, this->_photoNumber++);
         }
 
         void SailExperiment::FinalizeExperiment()
@@ -317,7 +317,7 @@ namespace experiment
             {
                 if (!this->_photoService.IsEmpty(index))
                 {
-                    this->_photoService.Schedule(services::photo::SavePhoto(index, "/sail.photo_%d", index));
+                    this->_photoService.SavePhoto(index, "/sail.photo_%d", index);
                 }
             }
         }

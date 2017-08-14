@@ -232,6 +232,14 @@ void System::QueueOverwrite(OSQueueHandle queue, const void* element)
     }
 }
 
+void System::QueueReset(OSQueueHandle queue)
+{
+    if (OSProxy != nullptr)
+    {
+        OSProxy->QueueReset(queue);
+    }
+}
+
 OSPulseHandle System::CreatePulseAll(void)
 {
     if (OSProxy != nullptr)
