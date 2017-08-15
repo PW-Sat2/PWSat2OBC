@@ -76,7 +76,7 @@ namespace telemetry
         static constexpr std::uint32_t BitSize();
 
       private:
-        experiments::ExperimentCode currentExperiment;
+        BitValue<experiments::ExperimentCode, 4> currentExperiment;
         experiments::StartResult experimentStartResult;
         experiments::IterationResult experimentIterationResult;
     };
@@ -101,7 +101,7 @@ namespace telemetry
         return Aggregate<decltype(currentExperiment), decltype(experimentStartResult), decltype(experimentIterationResult)>;
     }
 
-    static_assert(ExperimentTelemetry::BitSize() == 24, "Invalid ExperimentTelemetry size");
+    static_assert(ExperimentTelemetry::BitSize() == 20, "Invalid ExperimentTelemetry size");
 }
 
 #endif /* LIBS_TELEMETRY_INCLUDE_TELEMETRY_EXPERIMENTS_HPP_ */

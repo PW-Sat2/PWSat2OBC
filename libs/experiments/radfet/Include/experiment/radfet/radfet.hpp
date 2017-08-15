@@ -16,6 +16,8 @@ namespace experiment
         /**
          * @brief Interface for setting up RadFET experiment
          * @ingroup experiments
+         *
+         * Experiment code: 0x05
          */
         struct ISetupRadFETExperiment
         {
