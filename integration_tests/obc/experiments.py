@@ -7,9 +7,9 @@ from .obc_mixin import OBCMixin, command, decode_return
 
 @unique
 class ExperimentType(IntEnum):
-    LEOP = 0
     Detumbling = 1
     EraseFlash = 2
+    LEOP = 4
     SunS = 3
     RadFET = 5
     Sail = 7
