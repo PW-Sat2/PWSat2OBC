@@ -22,11 +22,6 @@ void PingHandler(uint16_t argc, char* argv[])
     GetTerminal().Puts("pong");
 }
 
-void IdHandler(uint16_t /*argc*/, char* /*argv*/ [])
-{
-    GetTerminal().Puts("Program1");
-}
-
 void EchoHandler(uint16_t argc, char* argv[])
 {
     GetTerminal().Puts("echo with args: \r\n");
