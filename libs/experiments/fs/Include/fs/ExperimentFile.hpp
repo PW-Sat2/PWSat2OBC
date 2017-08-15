@@ -90,14 +90,14 @@ namespace experiments
              * @brief Move ctor
              * @param other Other object
              */
-            ExperimentFile(ExperimentFile&& other);
+            ExperimentFile(ExperimentFile&& other) noexcept;
 
             /**
              * @brief Move assignment operator
              * @param other Other object
              * @return Reference to this object
              */
-            ExperimentFile& operator=(ExperimentFile&& other);
+            ExperimentFile& operator=(ExperimentFile&& other) noexcept;
 
             /**
              * @brief Destructor
