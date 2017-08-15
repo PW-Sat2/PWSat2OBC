@@ -13,6 +13,8 @@ namespace experiment
         /**
          * @brief Interface for setting up detumbling experiment
          * @ingroup experiments
+         *
+         * Experiment code: 0x01
          */
         struct ISetupDetumblingExperiment
         {
