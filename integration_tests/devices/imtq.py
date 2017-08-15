@@ -110,8 +110,11 @@ class Imtq(i2cMock.I2CDevice):
         self.analog_current = 30
         self.mcu_temperature = 31
 
+        # Type: () -> [int,int,int]
+        self.on_mtm_measurement = None
+
     def update_mtm(self, value):
-        self.mtm_measurement = value
+        self.mtm_measurement = call(self.on_mtm_measurement, default=[value])
         self.status = (1 << 7)
 
     def update_actuation(self, value):
@@ -150,7 +153,7 @@ class Imtq(i2cMock.I2CDevice):
     @i2cMock.command([0x04])
     def _start_mtm_measurement(self):
         self.log.info("Start MTM measurement")
-        mtm_timer = Timer(0.05, self.update_mtm, [self.mtm_measurement])
+        mtm_timer = Timer(0.01, self.update_mtm, [self.mtm_measurement])
         mtm_timer.start()
         return [0x04, self.status]
 
