@@ -38,6 +38,7 @@ set(SOURCES
     commands/leop.cpp
     commands/exp_suns.cpp
     commands/camera.cpp
+    commands/adcs.cpp
     checks/error_counters.cpp
     checks/checks.cpp
     obc.h

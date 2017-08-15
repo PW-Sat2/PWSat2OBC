@@ -25,3 +25,4 @@ class ImtqMixin(OBCMixin):
     @command("imtq detumbleGet 0")
     def get_detumble_data(self):
         pass
+

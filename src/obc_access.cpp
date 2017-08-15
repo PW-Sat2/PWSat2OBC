@@ -94,3 +94,8 @@ devices::camera::Camera& GetCamera()
 {
     return Main.camera;
 }
+
+obc::Adcs& GetAdcs()
+{
+    return Main.adcs;
+}
