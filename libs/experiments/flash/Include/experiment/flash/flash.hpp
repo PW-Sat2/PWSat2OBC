@@ -12,6 +12,8 @@ namespace experiment
         /**
          * @brief Interface for setting up erase flash experiment
          * @ingroup experiments
+         *
+         * Experiment code: 0x02
          */
         struct ISetCorrelationId
         {

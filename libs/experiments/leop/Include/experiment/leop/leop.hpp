@@ -15,12 +15,14 @@ namespace experiment
         /**
          * @brief Launch and Early Orbit Phase (LEOP) experiment
          * @ingroup experiments
+         *
+         * Experiment code: 0x04
          */
         class LaunchAndEarlyOrbitPhaseExperiment final : public experiments::IExperiment
         {
           public:
             /** @brief Experiment code */
-            static constexpr experiments::ExperimentCode Code = 0x0;
+            static constexpr experiments::ExperimentCode Code = 0x04;
 
             /** @brief Output file name. */
             static constexpr const char* FileName = "/leop.pwts";

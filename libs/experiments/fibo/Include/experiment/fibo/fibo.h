@@ -13,6 +13,8 @@ namespace experiment
          * @defgroup experiment_fibo Fibonacci experiment
          * @ingroup experiments
          *
+         * Experiment code: 0x08
+         *
          * Simple experiment to test experiment infrastructure
          *
          * @{
