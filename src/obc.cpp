@@ -95,9 +95,9 @@ OBC::OBC()
           Camera.PhotoService,
           this->Hardware.Pins.SailIndicator, //
           this->Hardware.EPS,
-          &(this->Fdir),
-          &(this->Hardware.MCUTemperature)), //
-      Communication(                         //
+          &this->Fdir,
+          &this->Hardware.MCUTemperature), //
+      Communication(                       //
           this->Fdir,
           this->Hardware.CommDriver,
           this->timeProvider,
