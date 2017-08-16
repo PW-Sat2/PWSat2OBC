@@ -171,7 +171,7 @@ namespace obc
          *  - Correlation ID (8-bit)
          *  - Output file name (string, null-terminated, up to 30 charactes including terminator)
          */
-        class PerformPayloadCommisioningExperiment final : public telecommunication::uplink::Telecommand<0x1F>
+        class PerformPayloadCommisioningExperiment final : public telecommunication::uplink::Telecommand<0x20>
         {
           public:
             /**

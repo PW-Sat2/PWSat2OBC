@@ -224,12 +224,13 @@ namespace obc
         void PerformPayloadCommisioningExperiment::Handle(
             devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
         {
+            char filePath[30];
             Reader r(parameters);
 
             auto correlationId = r.ReadByte();
-            const char* outputFile = r.ReadString(30);
+            const auto outputFile = r.ReadString(count_of(filePath));
 
-            if (!r.Status() || strlen_n(outputFile, 30) == 0)
+            if (!r.Status() || outputFile.empty())
             {
                 CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
                 response.PayloadWriter().WriteByte(0x1);
@@ -239,7 +240,10 @@ namespace obc
 
             LOG(LOG_LEVEL_INFO, "Requested Payload Commisioning experiment");
 
-            this->_setupPayload.SetOutputFile(outputFile);
+            memcpy(filePath, outputFile.data(), outputFile.size());
+            filePath[count_of(filePath) - 1] = '\0';
+
+            this->_setupPayload.SetOutputFile(filePath);
 
             auto success = this->_controller.RequestExperiment(experiment::payload::PayloadCommissioningExperiment::Code);
 

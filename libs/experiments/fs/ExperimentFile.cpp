@@ -1,4 +1,5 @@
 #include "ExperimentFile.hpp"
+#include <utility>
 
 using namespace experiments::fs;
 using namespace services::fs;
@@ -28,7 +29,13 @@ ExperimentFile::ExperimentFile(ExperimentFile&& other)
 ExperimentFile& ExperimentFile::operator=(ExperimentFile&& other)
 {
     ExperimentFile tmp(std::move(other));
-    std::swap(tmp, *this);
+
+    std::swap(_buffer, tmp._buffer);
+    std::swap(_file, tmp._file);
+    std::swap(_time, tmp._time);
+    std::swap(_writer, tmp._writer);
+    std::swap(_hasPayloadInFrame, tmp._hasPayloadInFrame);
+
     return *this;
 }
 
