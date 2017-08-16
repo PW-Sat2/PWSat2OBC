@@ -155,26 +155,12 @@ namespace adcs
 
         LOGF(LOG_LEVEL_TRACE, "[ADCS] Running ADCS loop. Mode: %d", static_cast<int>(this->currentMode));
 
-        auto now = this->currentTime.GetCurrentTime();
-        if (!now.HasValue)
-        {
-            LOG(LOG_LEVEL_ERROR, "[ADCS] Current time not available");
-            return;
-        }
-
-        auto beforeTime = now.Value;
+        auto beforeTime = System::GetUptime(); // now.Value;
 
         auto adcsProcessor = this->adcsProcessors[static_cast<int>(this->currentMode)];
         adcsProcessor->Process();
 
-        now = this->currentTime.GetCurrentTime();
-        if (!now.HasValue)
-        {
-            LOG(LOG_LEVEL_ERROR, "[ADCS] Current time not available");
-            return;
-        }
-
-        auto elapsed = now.Value - beforeTime;
+        auto elapsed = System::GetUptime() - beforeTime;
         auto waitDuration = adcsProcessor->GetWait() - elapsed;
         if (waitDuration.count() > 0)
         {
