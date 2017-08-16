@@ -116,7 +116,7 @@ class Imtq(i2cMock.I2CDevice):
         self.on_actuation_dipole = None
 
     def update_mtm(self, value):
-        self.mtm_measurement = call(self.on_mtm_measurement, default=[value])
+        self.mtm_measurement = call(self.on_mtm_measurement, default=value)
         self.status = (1 << 7)
 
     def update_actuation(self, value):
@@ -174,7 +174,7 @@ class Imtq(i2cMock.I2CDevice):
         dipole = [from_int16(data[i:i+2]) for i in [0, 2, 4]]
         time = from_uint16(data[6:])
         self.update_actuation(dipole)
-        call(self.on_actuation_dipole, None, [dipole])
+        call(self.on_actuation_dipole, None, dipole)
         t = Timer(time / 1000.0, self.clear_actuation)
         t.start()
         self.log.info("Start actuation (dipole): " + str(dipole) + " for: " + str(time))
