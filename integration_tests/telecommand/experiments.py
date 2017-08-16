@@ -84,7 +84,7 @@ class PerformSailExperiment(Telecommand):
 
 class PerformPayloadCommissioningExperiment(Telecommand):
     def apid(self):
-        return 0x1F
+        return 0x20
 
     def payload(self):
         return struct.pack('<B', self.correlation_id) + self.file_name + '\0'
