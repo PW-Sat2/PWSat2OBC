@@ -6,28 +6,6 @@ using namespace std::chrono_literals;
 
 namespace mission
 {
-    /*
-     *  Send a command sequence to EPS to switch main thermal knives on for 2min:
-     *  "enable TKmain LCL",
-     *  wait 100ms and
-     *  "enable TKmain LCL" to controller A,
-     *  wait 100ms,
-     *  "enable SADSmain BURN switch",
-     *  wait 100ms and
-     *  "enable SADSmain BURN switch" to controller A.
-     *
-     *  for 2min:
-     *  "enable TKmain LCL",
-     *  wait 100ms and
-     *  "enable TKmain LCL" to controller B, wait 100ms,
-     *  "enable SADSmain BURN switch",
-     *  wait 100ms and
-     *  "enable SADSmain BURN switch" to controller B.
-     *
-     *  T+4min - Send a command sequence to EPS to switch all thermal knife's LCLs off: "disable TKmain LCL" to controller A and "disable
-     * TKred LCL" to controller B.
-     */
-
     DeploySolarArrayTask::StepProc DeploySolarArrayTask::Steps[] = {
         &EnableMainThermalKnife,       //
         &Delay100ms,                   //
@@ -39,6 +17,10 @@ namespace mission
                                        //
         &WaitFor2mins,                 //
                                        //
+        &DisableMainThermalKnife,      //
+        &Delay100ms,                   //
+        &DisableMainThermalKnife,      //
+        &Delay100ms,                   //
         &EnableRedundantThermalKnife,  //
         &Delay100ms,                   //
         &EnableRedundantThermalKnife,  //
@@ -50,7 +32,8 @@ namespace mission
         &WaitFor2mins,                 //
                                        //
         &DisableRedundantThermalKnife, //
-        &DisableMainThermalKnife,      //
+        &Delay100ms,                   //
+        &DisableRedundantThermalKnife, //
     };
 
     DeploySolarArrayTask::DeploySolarArrayTask(services::power::IPowerControl& power)
@@ -67,7 +50,7 @@ namespace mission
     {
         UpdateDescriptor<SystemState> update;
 
-        update.name = "Sail: Control";
+        update.name = "SADS: Control";
         update.param = this;
         update.updateProc = Update;
 
@@ -78,7 +61,7 @@ namespace mission
     {
         ActionDescriptor<SystemState> action;
 
-        action.name = "Sail: Open";
+        action.name = "SADS: Deploy";
         action.param = this;
         action.actionProc = Action;
         action.condition = Condition;

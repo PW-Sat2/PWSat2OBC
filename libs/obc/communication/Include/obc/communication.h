@@ -174,6 +174,7 @@ namespace obc
          * @param[in] telemetry Reference to object that contains current telemetry state.
          * @param[in] powerControl Power control interface
          * @param[in] openSail Sail opening interface
+         * @param[in] deploySolarArray Solar array deployment interface.
          * @param[in] timeSynchronization Time synchronization object.
          * @param[in] systemBus I2C system bus.
          * @param[in] payload Payload.

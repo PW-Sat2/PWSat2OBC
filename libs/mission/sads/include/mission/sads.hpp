@@ -12,9 +12,9 @@
 namespace mission
 {
     /**
-     * @defgroup mission_sail Sail Deployment
+     * @defgroup mission_sads Solar Array Deployment
      * @ingroup mission
-     * @brief Module that contains logic related to sail deployment once the designed time has passed.
+     * @brief Module that contains logic related to solar array deployment on request.
      *
      * @{
      */
@@ -62,19 +62,19 @@ namespace mission
         mission::ActionDescriptor<SystemState> BuildAction();
 
         /**
-         * @brief Start sail opening on next mission loop iteration
+         * @brief Start solar array deployment on next mission loop iteration
          */
         virtual void DeploySolarArray() override;
 
         /**
-         * @brief Returns number of current step of sail opening process
+         * @brief Returns number of current step of solar array deployment process
          * @return Step number
          * @remark This method is for debugging/information purposes only, do not relay on return value for critical decisions
          */
         std::uint8_t Step() const;
 
         /**
-         * @brief Returns value indicating if sail opening process is in progress
+         * @brief Returns value indicating if solar array deployment process is in progress
          * @return true if process is in progress
          */
         bool InProgress() const;
@@ -89,15 +89,15 @@ namespace mission
         static UpdateResult Update(SystemState& state, void* param);
 
         /**
-         * @brief Checks if sail opening action should be performed
+         * @brief Checks if solar array deployment action should be performed
          * @param state System state
          * @param param Pointer to task object
-         * @return true if sail opening should be performed, false otherwise
+         * @return true if solar array deployment should be performed, false otherwise
          */
         static bool Condition(const SystemState& state, void* param);
 
         /**
-         * @brief Performs single step of sail opening procedure
+         * @brief Performs single step of solar array deployment procedure
          * @param state System state
          * @param param Pointer to task object
          */
@@ -139,13 +139,13 @@ namespace mission
          */
         static void DisableRedundantThermalKnife(DeploySolarArrayTask* This, SystemState& state);
         /**
-         * @brief Enables main SAIL burn switch
+         * @brief Enables main SADS burn switch
          * @param This Pointer to task object
          * @param state Current system state
          */
         static void EnableMainBurnSwitch(DeploySolarArrayTask* This, SystemState& state);
         /**
-         * @brief Enables redundant SAIL burn switch
+         * @brief Enables redundant SADS burn switch
          * @param This Pointer to task object
          * @param state Current system state
          */
@@ -153,7 +153,7 @@ namespace mission
 
         /** @brief Power control interface */
         services::power::IPowerControl& _power;
-        /** @brief Current step in sail opening process */
+        /** @brief Current step in solar array deployment process */
         std::uint8_t _step;
         /** @brief Mission time at which next step should be performed */
         std::chrono::milliseconds _nextStepAfter;
@@ -165,7 +165,7 @@ namespace mission
 
         using StepProc = void (*)(DeploySolarArrayTask* This, SystemState& state);
 
-        /** @brief Sail opening steps */
+        /** @brief Solar array deployment steps */
         static StepProc Steps[23];
         /** @brief Steps count */
         static constexpr std::uint8_t StepsCount = count_of(Steps);

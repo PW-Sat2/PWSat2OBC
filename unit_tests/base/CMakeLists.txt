@@ -42,6 +42,7 @@ target_link_libraries(${NAME}
     mission_comm
     mission_time
     mission_sail
+    mission_sads
     telecommunication
     program_flash
     payload

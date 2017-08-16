@@ -3,6 +3,7 @@
 #include "PayloadDeviceMock.hpp"
 #include "StorageAccessMock.hpp"
 #include "eps.hpp"
+#include "mock/DeploySolarArrayMock.hpp"
 #include "mock/HasStateMock.hpp"
 #include "mock/ImtqDriverMock.hpp"
 #include "mock/ImtqTelemetryCollectorMock.hpp"
@@ -132,5 +133,13 @@ OpenSailMock::OpenSailMock()
 }
 
 OpenSailMock::~OpenSailMock()
+{
+}
+
+DeploySolarArrayMock::DeploySolarArrayMock()
+{
+}
+
+DeploySolarArrayMock::~DeploySolarArrayMock()
 {
 }
