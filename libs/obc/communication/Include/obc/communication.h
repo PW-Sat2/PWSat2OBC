@@ -19,6 +19,7 @@
 #include "obc/telecommands/flash.hpp"
 #include "obc/telecommands/i2c.hpp"
 #include "obc/telecommands/periodic_message.hpp"
+#include "obc/telecommands/photo.hpp"
 #include "obc/telecommands/ping.hpp"
 #include "obc/telecommands/power.hpp"
 #include "obc/telecommands/program_upload.hpp"
@@ -147,7 +148,9 @@ namespace obc
         obc::telecommands::RawI2CTelecommand,
         obc::telecommands::PerformRadFETExperiment,
         obc::telecommands::GetSunSDataSetsTelecommand,
-        obc::telecommands::PerformSailExperiment>;
+        obc::telecommands::PerformSailExperiment,
+        obc::telecommands::TakePhoto>;
+
     /**
      * @brief OBC <-> Earth communication
      */
@@ -175,6 +178,7 @@ namespace obc
          * @param[in] experimentalSunS Experimental Sun Sensor interface
          * @param[in] payloadDriver Payload driver interface
          * @param[in] gyro Gyroscope interface
+         * @param[in] photo Reference to service capable of taking photos
          */
         OBCCommunication(obc::FDIR& fdir,
             devices::comm::CommObject& commDriver,
@@ -195,7 +199,8 @@ namespace obc
             drivers::i2c::II2CBus& payload,
             devices::suns::ISunSDriver& experimentalSunS,
             devices::payload::IPayloadDeviceDriver& payloadDriver,
-            devices::gyro::IGyroscopeDriver& gyro);
+            devices::gyro::IGyroscopeDriver& gyro,
+            services::photo::IPhotoService& photo);
 
         /**
          * @brief Initializes all communication at runlevel 1

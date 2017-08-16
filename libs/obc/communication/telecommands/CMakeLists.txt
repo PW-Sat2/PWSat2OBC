@@ -16,6 +16,7 @@ set(SOURCES
     flash.cpp
     i2c.cpp
     suns.cpp
+    photo.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -39,6 +40,7 @@ target_link_libraries(${NAME}
 	suns
 	payload
 	gyro
+	photo
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

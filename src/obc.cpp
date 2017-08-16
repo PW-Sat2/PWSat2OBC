@@ -113,7 +113,8 @@ OBC::OBC()
           Hardware.I2C.Buses.Payload,
           Hardware.SunS,
           Hardware.PayloadDeviceDriver,
-          Hardware.Gyro),                                                                  //
+          Hardware.Gyro,
+          Camera.PhotoService),
       Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index),         //
       terminal(this->Hardware.Terminal),                                                   //
       camera(this->Fdir.ErrorCounting(), this->Hardware.Camera),                           //

@@ -100,9 +100,9 @@ namespace obc
             seconds shortDelay = seconds(r.ReadByte());
             uint8_t sessionsCount = r.ReadByte();
             minutes longDelay = minutes(r.ReadByte());
-            const char* outputFile = r.ReadString(30);
+            const auto outputFile = r.ReadString(30);
 
-            if (!r.Status() || strlen_n(outputFile, 30) == 0)
+            if (!r.Status() || outputFile.empty())
             {
                 CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
                 response.PayloadWriter().WriteByte(0x1);
@@ -118,7 +118,7 @@ namespace obc
                 static_cast<std::uint8_t>(params.SamplingSessionsCount()));
 
             this->_setupSunS.SetParameters(params);
-            this->_setupSunS.SetOutputFiles(outputFile);
+            this->_setupSunS.SetOutputFiles(outputFile.data());
 
             auto success = this->_controller.RequestExperiment(experiment::suns::SunSExperiment::Code);
 
@@ -153,7 +153,8 @@ namespace obc
             uint8_t samplesCount = r.ReadByte();
 
             char outputFileName[30];
-            strncpy(outputFileName, r.ReadString(30), sizeof(outputFileName));
+            auto path = r.ReadString(30);
+            strncpy(outputFileName, path.data(), sizeof(outputFileName));
             outputFileName[29] = 0;
 
             if (!r.Status() || strlen_n(outputFileName, 30) == 0)
