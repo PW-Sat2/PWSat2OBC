@@ -164,7 +164,8 @@ namespace experiment
         {
             this->delay = delay;
             this->samplesCount = samplesCount;
-            this->outputFileName = outputFileName;
+            strncpy(this->outputFileName, outputFileName, sizeof(this->outputFileName));
+            *(std::end(this->outputFileName) - 1) = '\0';
         }
 
         bool RadFETExperiment::SaveTimestamp(experiments::fs::ExperimentFile& file, std::chrono::milliseconds timestamp)
