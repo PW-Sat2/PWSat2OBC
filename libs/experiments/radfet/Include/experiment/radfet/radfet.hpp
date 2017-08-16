@@ -171,7 +171,7 @@ namespace experiment
             uint8_t samplesCount;
 
             /** @brief File name for storing measurements */
-            const char* outputFileName;
+            char outputFileName[40];
         };
     }
 }

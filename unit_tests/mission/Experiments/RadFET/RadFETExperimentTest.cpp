@@ -110,4 +110,18 @@ namespace
 
         this->exp.Stop(IterationResult::Finished);
     }
+
+    TEST_F(RadFETExperimentTest, ShouldMaintainOwnCopyOfFileName)
+    {
+        EXPECT_CALL(this->fs, Open(StrEq("/file1"), _, _)).Times(1);
+        EXPECT_CALL(this->fs, Open(StrEq("/file2"), _, _)).Times(0);
+
+        char name[] = "/file1";
+
+        this->exp.Setup(30s, 5, name);
+
+        strcpy(name, "/file2");
+
+        this->exp.Start();
+    }
 }
