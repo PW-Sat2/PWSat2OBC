@@ -45,10 +45,12 @@ Beacon::Beacon(std::chrono::seconds beaconPeriod, gsl::span<const std::uint8_t> 
 }
 
 CommObject::CommObject(error_counter::ErrorCounting& errors, II2CBus& low)
-    : _error(errors),             //
-      _low(low),                  //
-      _frameHandler(nullptr),     //
-      _pollingTaskHandle(nullptr) //
+    : _error(errors),                                                              //
+      _low(low),                                                                   //
+      _frameHandler(nullptr),                                                      //
+      _pollingTaskHandle(nullptr),                                                 //
+      transmitterSemaphore(System::CreateBinarySemaphore(transmitterSemaphoreId)), //
+      receiverSemaphore(System::CreateBinarySemaphore(receiverSemaphoreId))        //
 {
 }
 
@@ -82,6 +84,15 @@ bool CommObject::SendBufferWithResponse(Address address, //
     AggregatedErrorCounter& resultAggregator             //
     )
 {
+    auto semaphore = (address == Address::Receiver) ? receiverSemaphore : transmitterSemaphore;
+    Lock lock(semaphore, InfiniteTimeout);
+    if (!lock())
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire synchronization semaphore");
+        resultAggregator.Failure();
+        return false;
+    }
+
     if (inputBuffer.empty())
     {
         return false;
@@ -127,7 +138,25 @@ OSResult CommObject::Initialize()
 {
     ErrorReporter errorContext(_error);
 
-    OSResult result = this->_pollingTaskFlags.Initialize();
+    OSResult result;
+
+    result = System::GiveSemaphore(transmitterSemaphore);
+    if (OS_RESULT_FAILED(result))
+    {
+        LOGF(LOG_LEVEL_FATAL, "[comm] Unable to release transmitter semaphore (%d)", num(result));
+        errorContext.Counter().Failure();
+        return result;
+    }
+
+    result = System::GiveSemaphore(receiverSemaphore);
+    if (OS_RESULT_FAILED(result))
+    {
+        LOGF(LOG_LEVEL_FATAL, "[comm] Unable to release receiver semaphore (%d)", num(result));
+        errorContext.Counter().Failure();
+        return result;
+    }
+
+    result = this->_pollingTaskFlags.Initialize();
     if (OS_RESULT_FAILED(result))
     {
         LOGF(LOG_LEVEL_FATAL, "[comm] Unable to create polling task flags (%d)", num(result));

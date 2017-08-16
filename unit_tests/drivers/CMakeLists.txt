@@ -11,6 +11,7 @@ set(SOURCES
   Comm/DownlinkFrameTest.cpp
   Comm/CommTelemetryTest.cpp
   Comm/UplinkFrameDecoderTest.cpp
+  Comm/CommThreadsafeTest.cpp
   EPS/EPSDriverTest.cpp
   EPS/EpsTelemetryTest.cpp
   SPI/SPIDriverTest.cpp
