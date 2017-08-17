@@ -2,6 +2,7 @@
 #define LIBS_FS_INCLUDE_FS_TRANSPORTSTREAM_HPP_
 
 #include <gsl/span>
+#include "base/delegate.hpp"
 #include "base/os.h"
 #include "base/writer.h"
 #include "fs/fs.h"
@@ -137,6 +138,17 @@ namespace experiments
              */
             OSResult Flush();
 
+            /**
+             * @brief Definition of delegate called on flush action.
+             */
+            using OnFlushDelegate = Delegate<void, const gsl::span<uint8_t>&>;
+
+            /**
+             * @brief Sets delegate to be called on flush operation.
+             * @param[in] onFlush Delegate.
+             */
+            void SetOnFlush(OnFlushDelegate onFlush);
+
           private:
             /** @brief The byte size of PID type.  */
             static constexpr size_t PIDSize = sizeof(PID);
@@ -145,6 +157,10 @@ namespace experiments
             void InitializePacket();
 
             OSResult WriteDataBiggerThanFrame(PID pid, const gsl::span<uint8_t>& data);
+
+            OSResult FlushInternal(bool initialize);
+
+            void DoNothing(const gsl::span<uint8_t>&);
 
             /** @brief Buffer for data.  */
             std::array<uint8_t, PacketLength> _buffer;
@@ -157,6 +173,8 @@ namespace experiments
 
             Writer _writer;
             bool _hasPayloadInFrame;
+
+            OnFlushDelegate onFlush;
         };
     }
 }

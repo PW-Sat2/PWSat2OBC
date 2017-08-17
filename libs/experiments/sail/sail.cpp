@@ -10,12 +10,16 @@
 #include "mission/sail.hpp"
 #include "photo/photo_service.hpp"
 #include "power/power.h"
+#include "telecommunication/downlink.h"
 #include "time/ICurrentTime.hpp"
 
 using services::fs::File;
 using services::fs::IFileSystem;
 using services::fs::FileOpen;
 using services::fs::FileAccess;
+using telecommunication::downlink::CorrelatedDownlinkFrame;
+using telecommunication::downlink::DownlinkAPID;
+using experiments::fs::ExperimentFile;
 
 namespace experiment
 {
@@ -38,7 +42,8 @@ namespace experiment
             services::power::IPowerControl& powerController,
             services::photo::IPhotoService& photoService,
             const drivers::gpio::Pin& sailState,
-            services::time::ICurrentTime& timeProvider)
+            services::time::ICurrentTime& timeProvider,
+            devices::comm::ITransmitter& transmitter)
             : _file(&timeProvider),                        //
               _experimentEnd(0ms),                         //
               _nextTelemetryAcquisition(0ms),              //
@@ -53,7 +58,8 @@ namespace experiment
               _photoService(photoService),                 //
               _sailController(nullptr),                    //
               _timeProvider(timeProvider),                 //
-              _sailState(sailState)
+              _sailState(sailState),                       //
+              transmitter(transmitter)                     //
         {
         }
 
@@ -76,6 +82,9 @@ namespace experiment
                     LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to open experiment file");
                     break;
                 }
+
+                telemetrySequence = 0;
+                _file.SetOnFlush(ExperimentFile::OnFlushDelegate::make_delegate<SailExperiment, &SailExperiment::SendTelemetry>(this));
 
                 if (OS_RESULT_FAILED(this->_adcsCoordinator.Disable()))
                 {
@@ -213,7 +222,7 @@ namespace experiment
             devices::payload::PayloadTelemetry::Temperatures temperatures;
             if (OS_RESULT_FAILED(this->_payloadDriver.MeasureTemperatures(temperatures)))
             {
-                LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to sail temperature");
+                LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to measure sail temperature");
             }
 
             if (!gyroTelemetry.HasValue || !Save(gyroTelemetry.Value))
@@ -223,7 +232,7 @@ namespace experiment
 
             if (!Save(time))
             {
-                LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to time");
+                LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to save time");
             }
 
             if (!Save(sailIndicator, temperatures.sail))
@@ -321,6 +330,17 @@ namespace experiment
                     this->_photoService.SavePhoto(index, "/sail.photo_%d", index);
                 }
             }
+        }
+
+        void SailExperiment::SendTelemetry(const gsl::span<uint8_t>& data)
+        {
+            LOGF(LOG_LEVEL_INFO, "[exp_sail] Sending telemetry, sequence %lu", telemetrySequence);
+
+            CorrelatedDownlinkFrame message(DownlinkAPID::Operation, telemetrySequence++, correlationId);
+
+            message.PayloadWriter().WriteArray(data);
+
+            transmitter.SendFrame(message.Frame());
         }
     }
 }

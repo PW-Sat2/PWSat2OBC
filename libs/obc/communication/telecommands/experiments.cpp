@@ -190,7 +190,9 @@ namespace obc
             transmitter.SendFrame(response.Frame());
         }
 
-        PerformSailExperiment::PerformSailExperiment(experiments::IExperimentController& controller) : experimentController(controller)
+        PerformSailExperiment::PerformSailExperiment(
+            experiments::IExperimentController& controller, experiment::sail::ISetupSailExperiment& setupSail)
+            : experimentController(controller), setupSail(setupSail)
         {
         }
 
@@ -203,8 +205,13 @@ namespace obc
             if (!reader.Status())
             {
                 writer.WriteByte(0x1);
+                transmitter.SendFrame(response.Frame());
+                return;
             }
-            else if (this->experimentController.RequestExperiment(experiment::sail::SailExperiment::Code))
+
+            this->setupSail.SetCorrelationId(correlationId);
+
+            if (this->experimentController.RequestExperiment(experiment::sail::SailExperiment::Code))
             {
                 writer.WriteByte(0);
             }

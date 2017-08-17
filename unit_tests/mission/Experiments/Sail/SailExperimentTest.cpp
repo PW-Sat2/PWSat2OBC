@@ -8,6 +8,7 @@
 #include "mock/OpenSailMock.hpp"
 #include "mock/PayloadDeviceMock.hpp"
 #include "mock/PhotoServiceMock.hpp"
+#include "mock/comm.hpp"
 #include "mock/power.hpp"
 #include "mock/time.hpp"
 
@@ -40,10 +41,11 @@ namespace
         drivers::gpio::Pin pin;
         testing::NiceMock<CurrentTimeMock> time;
         testing::NiceMock<OpenSailMock> sail;
+        testing::NiceMock<TransmitterMock> transmitter;
         experiment::sail::SailExperiment experiment;
     };
 
-    SailExperimentTest::SailExperimentTest() : pin(gpioPortA, 1), experiment(fs, adcs, gyro, payload, power, photo, pin, time)
+    SailExperimentTest::SailExperimentTest() : pin(gpioPortA, 1), experiment(fs, adcs, gyro, payload, power, photo, pin, time, transmitter)
     {
         fs.AddFile("/sail.exp", fileBuffer);
         ON_CALL(adcs, Disable()).WillByDefault(Return(OSResult::Success));
@@ -56,7 +58,7 @@ namespace
 
     TEST_F(SailExperimentTest, TestStartupNoSailController)
     {
-        experiment::sail::SailExperiment experiment(fs, adcs, gyro, payload, power, photo, pin, time);
+        experiment::sail::SailExperiment experiment(fs, adcs, gyro, payload, power, photo, pin, time, transmitter);
         const auto status = experiment.Start();
         ASSERT_THAT(status, Eq(StartResult::Failure));
     }
