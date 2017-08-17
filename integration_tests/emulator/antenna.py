@@ -5,11 +5,12 @@ from .base import ModuleBase, bind
 
 
 class AntennaModule(ModuleBase):
-    def __init__(self, name, pos,  antenna_controller):
+    def __init__(self, name, pos, antenna_controller):
         self._antenna_controller = antenna_controller
         self._panel = None
         self.title = 'Antenna ({})'.format(name)
         self.grid_pos = pos
+        self.grid_span = (1, 1)
 
     def load(self, res, parent):
         self._panel = res.LoadPanel(parent, 'AntennaModule')
@@ -63,14 +64,15 @@ class AntennasModule(ModuleBase):
     def __init__(self, system):
         self.title = 'Antennas'
         self.grid_pos = (0, 0)
+        self.grid_span = (1, 2)
 
         self._primary = AntennaModule('Primary', (0, 0), system.primary_antenna)
         self._backup = AntennaModule('Backup', (0, 1), system.backup_antenna)
 
     def load(self, res, parent):
-        self._panel = res.LoadPanel(parent, 'AntennasModule') # type: wx.Panel
+        self._panel = res.LoadPanel(parent, 'AntennasModule')  # type: wx.Panel
 
-        sizer = self._panel.GetSizer() # type: wx.Sizer
+        sizer = self._panel.GetSizer()  # type: wx.Sizer
 
         self._primary.load(res, self._panel)
         self._backup.load(res, self._panel)

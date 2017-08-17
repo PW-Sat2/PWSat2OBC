@@ -9,7 +9,8 @@ class PayloadModule(ModuleBase):
         self._system = system
 
         self.title = 'Payload'
-        self.grid_pos = (0, 1)
+        self.grid_pos = (0, 2)
+        self.grid_span = (1, 1)
 
     def load(self, res, parent):
         self._panel = res.LoadPanel(parent, 'PayloadModule')
