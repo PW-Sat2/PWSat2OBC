@@ -57,6 +57,16 @@ namespace services
             return this->_eps.EnableBurnSwitch(false, BurnSwitch::Sail) == ErrorCode::NoError;
         }
 
+        bool EPSPowerControl::EnableMainSADSBurnSwitch()
+        {
+            return this->_eps.EnableBurnSwitch(true, BurnSwitch::SADS) == ErrorCode::NoError;
+        }
+
+        bool EPSPowerControl::EnableRedundantSADSBurnSwitch()
+        {
+            return this->_eps.EnableBurnSwitch(false, BurnSwitch::SADS) == ErrorCode::NoError;
+        }
+
         bool EPSPowerControl::PrimaryAntennaPower(bool enabled)
         {
             return Switch(enabled, LCL::AntennaMain);

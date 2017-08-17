@@ -26,6 +26,7 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
     IHasState<telemetry::TelemetryState>& telemetry,
     services::power::IPowerControl& powerControl,
     mission::IOpenSail& openSail,
+    mission::IDeploySolarArray& deploySolarArray,
     mission::ITimeSynchronization& timeSynchronization,
     drivers::i2c::II2CBus& systemBus,
     drivers::i2c::II2CBus& payload,
@@ -65,7 +66,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           PerformRadFETExperiment(experiments.ExperimentsController, experiments.Get<experiment::radfet::RadFETExperiment>()),        //
           GetSunSDataSetsTelecommand(powerControl, currentTime, experimentalSunS, payloadDriver, gyro),                               //
           PerformSailExperiment(experiments.ExperimentsController),                                                                   //
-          TakePhoto(photo)                                                                                                            //
+          TakePhoto(photo),                                                                                                           //
+          DeploySolarArray(deploySolarArray)                                                                                          //
           ),                                                                                                                          //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {

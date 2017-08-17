@@ -12,6 +12,7 @@ from antenna import *
 from i2c import *
 from suns import *
 from photo import *
+from sads import *
 
 __all__ = [
     'DownloadFile',
@@ -35,6 +36,7 @@ __all__ = [
     'RawI2C',
     'GetSunSDataSets',
     'PerformSailExperiment',
-    'TakePhotoTelecommand'
+    'TakePhotoTelecommand',
+    "DeploySolarArrayTelecommand"
 ]
 
