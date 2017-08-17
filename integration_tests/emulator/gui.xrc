@@ -426,8 +426,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxALIGN_LEFT|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="eps_tkmain_label">
 									<label>TKMain</label>
@@ -435,8 +435,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxALIGN_LEFT|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="eps_tkmain_value">
 									<label>TKMain__value</label>
@@ -444,8 +444,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_LEFT|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxButton" name="eps_tkmain_disable">
 									<label>Disable</label>
@@ -453,8 +453,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="eps_tkred_label">
 									<label>TKRed</label>
@@ -462,8 +462,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxBOTTOM|wxLEFT|wxTOP</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="eps_tkred_value">
 									<label>TKred__value</label>
@@ -480,8 +480,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="m_staticText17">
 									<label>SunS</label>
@@ -489,8 +489,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="eps_suns_value">
 									<label>SunS__value</label>
@@ -507,8 +507,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="m_staticText19">
 									<label>CamNadir</label>
@@ -516,8 +516,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxLEFT|wxALIGN_CENTER_VERTICAL</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="eps_camnadir_value">
 									<label>CamNadri__value</label>
@@ -534,8 +534,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="m_staticText21">
 									<label>CamWing</label>
@@ -543,8 +543,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="eps_camwing_value">
 									<label>CamWing__value</label>
@@ -561,8 +561,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="m_staticText23">
 									<label>SENS</label>
@@ -570,8 +570,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="eps_sens_value">
 									<label>SENS__value</label>
@@ -588,8 +588,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="m_staticText25">
 									<label>ANTenna</label>
@@ -597,8 +597,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="eps_antenna_value">
 									<label>ANTenna__value</label>
@@ -615,8 +615,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="m_staticText27">
 									<label>ANTennaRed</label>
@@ -624,8 +624,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="eps_antennared_value">
 									<label>ANTennaRed__value</label>
