@@ -10,24 +10,22 @@ from struct import pack
 
 from beacon_parser.full_beacon_parser import FullBeaconParser
 
-class CommRTCModule(ModuleBase):
+class CommModule(ModuleBase):
     GridPos = (1, 0)
 
     def __init__(self, system):
         self._system = system
-        self._rtc = system.rtc  # type: RTCDevice
-        self.title = 'RTC && Comm'
-        self.grid_pos = (1, 1)
+        self.title = 'Comm'
+        self.grid_pos = (1, 2)
         self.grid_span = (1, 1)
         self._last_beacon_seen = None
         self._last_mission_time_seen = 0
 
     def load(self, res, parent):
-        self._panel = res.LoadPanel(parent, 'RTCModule')
+        self._panel = res.LoadPanel(parent, 'COMMModule')
 
         self.bind_handlers()
 
-        self._time = xrc.XRCCTRL(self._panel, 'rtc_time')
         self._current_comm_queue_size = xrc.XRCCTRL(self._panel, 'current_comm_queue_size')
 
         self._current_beacon_timestamp = xrc.XRCCTRL(self._panel, 'current_beacon_timestamp')
@@ -35,9 +33,6 @@ class CommRTCModule(ModuleBase):
         self._beaconFrame = res.LoadFrame(None, 'BeaconFrame')  # type: wx.Frame
         self._beaconFrame.SetDoubleBuffered(True)
         self._beaconFrame.Bind(wx.EVT_CLOSE, self._onFrameClose)
-
-        # self._beaconFrame.Show()
-        # self._beaconFrame.Icon = wx.Icon(os.path.join(os.path.dirname(__file__), 'icon.ico'), wx.BITMAP_TYPE_ICO)
 
         self._fileTree = xrc.XRCCTRL(self._beaconFrame, 'beacon_tree')  # type: wx.TreeCtrl
         self._root = self._fileTree.AddRoot('Beacon')
@@ -72,8 +67,6 @@ class CommRTCModule(ModuleBase):
         self._beaconFrame.Iconize(True)
 
     def update(self):
-        t = self._rtc.response_time()
-        self._time.SetLabel('RTC time: ' + t.strftime('%Y-%m-%d %H:%M:%S'))
         self._current_comm_queue_size.SetLabel('Comm queue size: ' + str(self._system.transmitter.queue_size()))
 
         if time.mktime(time.localtime()) - self._last_mission_time_seen > 4:
@@ -81,7 +74,7 @@ class CommRTCModule(ModuleBase):
 
         if self._system.transmitter.current_beacon_timestamp is not None:
             self._current_beacon_timestamp.SetLabel(
-                'Current beacon: ' + time.strftime('%Y-%m-%d %H:%M:%S', self._system.transmitter.current_beacon_timestamp)
+                'Current beacon: \n' + time.strftime('%Y-%m-%d %H:%M:%S', self._system.transmitter.current_beacon_timestamp)
                 + ' (' + str(len(self._system.transmitter.current_beacon)) + ' bytes)')
 
         if self._last_beacon_seen != self._system.transmitter.current_beacon_timestamp:
@@ -108,17 +101,5 @@ class CommRTCModule(ModuleBase):
 
             self._fileTree.ExpandAllChildren(self._root)
             self._last_beacon_seen = self._system.transmitter.current_beacon_timestamp
-
-    @bind('rtc_start', wx.EVT_BUTTON)
-    def _on_start(self, evt):
-        self._rtc.start_running()
-
-    @bind('rtc_stop', wx.EVT_BUTTON)
-    def _on_stop(self, evt):
-        self._rtc.stop_running()
-
-    @bind('rtc_advance_5min', wx.EVT_BUTTON, args=(timedelta(minutes=5),))
-    def _on_advance(self, evt, interval):
-        self._rtc.advance_by(interval)
 
 

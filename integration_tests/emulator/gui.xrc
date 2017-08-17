@@ -237,131 +237,63 @@
 			</object>
 		</object>
 	</object>
-	<object class="wxPanel" name="RTCModule">
+	<object class="wxPanel" name="COMMModule">
 		<style>wxTAB_TRAVERSAL</style>
-		<size>500,300</size>
+		<size>210,290</size>
 		<object class="wxBoxSizer">
 			<orient>wxVERTICAL</orient>
 			<object class="sizeritem">
 				<option>0</option>
 				<flag>wxALL</flag>
 				<border>5</border>
-				<object class="wxStaticText" name="rtc_time">
-					<label>RTC Mock current time: 00 - 00 - 00</label>
+				<object class="wxStaticText" name="current_comm_queue_size">
+					<label>Comm queue size: 0</label>
 					<wrap>-1</wrap>
 				</object>
 			</object>
 			<object class="sizeritem">
-				<option>1</option>
-				<flag></flag>
+				<option>0</option>
+				<flag>wxALL</flag>
 				<border>5</border>
-				<object class="wxBoxSizer">
-					<orient>wxHORIZONTAL</orient>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxButton" name="rtc_stop">
-							<label>Stop</label>
-							<default>0</default>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxButton" name="rtc_start">
-							<label>Start</label>
-							<default>0</default>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxButton" name="rtc_advance_5min">
-							<label>Advance 5 minutes</label>
-							<default>0</default>
-						</object>
-					</object>
+				<object class="wxButton" name="comm_reset_queue">
+					<label>Reset queue</label>
+					<default>0</default>
 				</object>
 			</object>
 			<object class="sizeritem">
-				<option>1</option>
-				<flag>wxEXPAND</flag>
+				<option>0</option>
+				<flag>wxALL</flag>
 				<border>5</border>
-				<object class="wxBoxSizer">
-					<orient>wxVERTICAL</orient>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxStaticText" name="current_comm_queue_size">
-							<label>Comm queue size: 0</label>
-							<wrap>-1</wrap>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<option>1</option>
-						<flag>wxEXPAND</flag>
-						<border>5</border>
-						<object class="wxBoxSizer">
-							<orient>wxHORIZONTAL</orient>
-							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
-								<border>5</border>
-								<object class="wxButton" name="comm_reset_queue">
-									<label>Reset queue</label>
-									<default>0</default>
-								</object>
-							</object>
-							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
-								<border>5</border>
-								<object class="wxButton" name="comm_get_frame">
-									<label>Get Frame</label>
-									<default>0</default>
-								</object>
-							</object>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxStaticText" name="current_beacon_timestamp">
-							<label>No last beacon information</label>
-							<wrap>-1</wrap>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<option>1</option>
-						<flag>wxEXPAND</flag>
-						<border>5</border>
-						<object class="wxBoxSizer">
-							<orient>wxHORIZONTAL</orient>
-							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
-								<border>5</border>
-								<object class="wxButton" name="show_beacon_frame">
-									<label>Show Beacon</label>
-									<default>0</default>
-								</object>
-							</object>
-							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
-								<border>5</border>
-								<object class="wxButton" name="send_beacon">
-									<label>[TC] Send Beacon</label>
-									<default>0</default>
-								</object>
-							</object>
-						</object>
-					</object>
+				<object class="wxButton" name="comm_get_frame">
+					<label>Get Frame</label>
+					<default>0</default>
+				</object>
+			</object>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxALL</flag>
+				<border>5</border>
+				<object class="wxStaticText" name="current_beacon_timestamp">
+					<label>No last beacon information\n</label>
+					<wrap>-1</wrap>
+				</object>
+			</object>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxALL</flag>
+				<border>5</border>
+				<object class="wxButton" name="show_beacon_frame">
+					<label>Show Beacon</label>
+					<default>0</default>
+				</object>
+			</object>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxALL</flag>
+				<border>5</border>
+				<object class="wxButton" name="send_beacon">
+					<label>[TC] Send Beacon</label>
+					<default>0</default>
 				</object>
 			</object>
 		</object>
@@ -1670,6 +1602,57 @@
 									<wrap>-1</wrap>
 								</object>
 							</object>
+						</object>
+					</object>
+				</object>
+			</object>
+		</object>
+	</object>
+	<object class="wxPanel" name="RTCModule">
+		<style>wxTAB_TRAVERSAL</style>
+		<size>200,290</size>
+		<object class="wxBoxSizer">
+			<orient>wxVERTICAL</orient>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxALL</flag>
+				<border>5</border>
+				<object class="wxStaticText" name="rtc_time">
+					<label>RTC Mock current time: \n00 - 00 - 00</label>
+					<wrap>-1</wrap>
+				</object>
+			</object>
+			<object class="sizeritem">
+				<option>1</option>
+				<flag></flag>
+				<border>5</border>
+				<object class="wxBoxSizer">
+					<orient>wxVERTICAL</orient>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="rtc_stop">
+							<label>Stop</label>
+							<default>0</default>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="rtc_start">
+							<label>Start</label>
+							<default>0</default>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="rtc_advance_5min">
+							<label>Advance 5 minutes</label>
+							<default>0</default>
 						</object>
 					</object>
 				</object>

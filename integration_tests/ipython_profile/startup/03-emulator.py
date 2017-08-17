@@ -1,17 +1,20 @@
-from emulator import Emulator
 import IPython.lib.guisupport
-from emulator.antenna import AntennaModule, AntennasModule
+
+from emulator import Emulator
+from emulator.antenna import AntennasModule
 from emulator.eps import EPSModule
-from emulator.comm_rtc import CommRTCModule
 from emulator.payload import PayloadModule
+from emulator.rtc import RTCModule
+from emulator.comm import CommModule
 
 
 def _setup_emulator(system):
     emulator_modules = [
         AntennasModule(system),
-        CommRTCModule(system),
+        RTCModule(system),
         EPSModule(system),
-        PayloadModule(system)
+        PayloadModule(system),
+        CommModule(system)
     ]
 
     emulator = Emulator(emulator_modules)
