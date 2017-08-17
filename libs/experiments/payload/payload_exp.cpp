@@ -38,7 +38,7 @@ namespace experiment
         void PayloadCommissioningExperiment::SetOutputFile(const char* fileName)
         {
             std::strncpy(this->_fileName, fileName, sizeof(this->_fileName));
-            *std::end(this->_fileName) = '\0';
+            *(std::end(this->_fileName) - 1) = '\0';
         }
 
         experiments::ExperimentCode PayloadCommissioningExperiment::Type()
