@@ -27,10 +27,14 @@ namespace services
              */
             SyncResult(bool successful, int retryCount);
 
+            bool GetIsSuccessful();
+            int GetRetryCount();
+
+          private:
             /** @brief true if syncing was successful, false otherwise */
-            const bool Successful;
+            bool _successful;
             /** @brief Number of retires before syncing finished */
-            const int RetryCount;
+            int _retryCount;
         };
 
         /**

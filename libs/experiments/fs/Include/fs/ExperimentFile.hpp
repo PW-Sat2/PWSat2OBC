@@ -56,6 +56,7 @@ namespace experiments
                 RadFET = 0x16,                    // RadFET data, 17 bytes
                 SupplySADSTemperature = 0x17,     // Temperature data, 4 bytes
                 Sail = 0x18,                      // 3 bytes of data
+                CameraSyncCount = 0x19,           // 1 byte of data
 
                 Magnetometer = 0x19, // Magnetometer, 3 x int32
                 Dipoles = 0x20,      // Dipoles, 3 x int16
