@@ -34,6 +34,7 @@ namespace telecommunication
             ProgramUpload = 0x4,               //!< Program upload operation status
             PeriodicMessage = 0x5,             //!< Periodic message
             PersistentState = 0x6,             //!< Persistent state content
+            SailExperiment = 0x7,              //!< Automatically sent sail experiment data
             CompileInfo = 0x8,                 //!< Software Build information
             Forbidden = (BeaconMarker & 0x3f), //!< Reserved apid due to beacon collision
             Telemetry = 0x3F,                  //!< TelemetryLong

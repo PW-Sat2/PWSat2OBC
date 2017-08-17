@@ -203,8 +203,11 @@ namespace obc
             if (!reader.Status())
             {
                 writer.WriteByte(0x1);
+                transmitter.SendFrame(response.Frame());
+                return;
             }
-            else if (this->experimentController.RequestExperiment(experiment::sail::SailExperiment::Code))
+
+            if (this->experimentController.RequestExperiment(experiment::sail::SailExperiment::Code))
             {
                 writer.WriteByte(0);
             }
