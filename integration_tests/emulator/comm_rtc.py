@@ -17,7 +17,7 @@ class CommRTCModule(ModuleBase):
         self._system = system
         self._rtc = system.rtc  # type: RTCDevice
         self.title = 'RTC && Comm'
-        self.grid_pos = (1, 0)
+        self.grid_pos = (1, 1)
         self._last_beacon_seen = None
         self._last_mission_time_seen = 0
 
