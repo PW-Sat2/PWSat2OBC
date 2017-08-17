@@ -288,7 +288,7 @@
             <property name="minimum_size"></property>
             <property name="name">AntennaModule</property>
             <property name="pos"></property>
-            <property name="size">570,150</property>
+            <property name="size">570,180</property>
             <property name="subclass"></property>
             <property name="tooltip"></property>
             <property name="window_extra_style"></property>
@@ -12010,6 +12010,65 @@
                         </object>
                     </object>
                 </object>
+            </object>
+        </object>
+        <object class="Panel" expanded="1">
+            <property name="aui_managed">0</property>
+            <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
+            <property name="bg"></property>
+            <property name="context_help"></property>
+            <property name="context_menu">1</property>
+            <property name="enabled">1</property>
+            <property name="event_handler">impl_virtual</property>
+            <property name="fg"></property>
+            <property name="font"></property>
+            <property name="hidden">0</property>
+            <property name="id">wxID_ANY</property>
+            <property name="maximum_size"></property>
+            <property name="minimum_size"></property>
+            <property name="name">AntennasModule</property>
+            <property name="pos"></property>
+            <property name="size">570,390</property>
+            <property name="subclass"></property>
+            <property name="tooltip"></property>
+            <property name="window_extra_style"></property>
+            <property name="window_name"></property>
+            <property name="window_style">wxTAB_TRAVERSAL</property>
+            <event name="OnAuiFindManager"></event>
+            <event name="OnAuiPaneButton"></event>
+            <event name="OnAuiPaneClose"></event>
+            <event name="OnAuiPaneMaximize"></event>
+            <event name="OnAuiPaneRestore"></event>
+            <event name="OnAuiRender"></event>
+            <event name="OnChar"></event>
+            <event name="OnEnterWindow"></event>
+            <event name="OnEraseBackground"></event>
+            <event name="OnInitDialog"></event>
+            <event name="OnKeyDown"></event>
+            <event name="OnKeyUp"></event>
+            <event name="OnKillFocus"></event>
+            <event name="OnLeaveWindow"></event>
+            <event name="OnLeftDClick"></event>
+            <event name="OnLeftDown"></event>
+            <event name="OnLeftUp"></event>
+            <event name="OnMiddleDClick"></event>
+            <event name="OnMiddleDown"></event>
+            <event name="OnMiddleUp"></event>
+            <event name="OnMotion"></event>
+            <event name="OnMouseEvents"></event>
+            <event name="OnMouseWheel"></event>
+            <event name="OnPaint"></event>
+            <event name="OnRightDClick"></event>
+            <event name="OnRightDown"></event>
+            <event name="OnRightUp"></event>
+            <event name="OnSetFocus"></event>
+            <event name="OnSize"></event>
+            <event name="OnUpdateUI"></event>
+            <object class="wxBoxSizer" expanded="1">
+                <property name="minimum_size"></property>
+                <property name="name">root</property>
+                <property name="orient">wxVERTICAL</property>
+                <property name="permission">none</property>
             </object>
         </object>
     </object>
