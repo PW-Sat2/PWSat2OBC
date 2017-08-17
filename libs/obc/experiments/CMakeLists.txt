@@ -17,6 +17,7 @@ target_link_libraries(${NAME}
     exp_pld
     exp_radfet
     exp_sail
+    exp_sads
     payload
     power
     photo

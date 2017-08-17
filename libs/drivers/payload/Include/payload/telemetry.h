@@ -108,10 +108,11 @@ namespace devices
                 std::uint16_t Yn;
 
                 /**
-                 * @brief Writes telemetry to buffeer
-                 * @param writer Writer to write to
+                 * @brief Writes the Photodiodes telemetry to writer
+                 * @param writer Writer to store the telemetry data
+                 * @return True if write succeded, false otherwise
                  */
-                void Write(Writer& writer);
+                bool Write(Writer& writer);
             };
 
             /**

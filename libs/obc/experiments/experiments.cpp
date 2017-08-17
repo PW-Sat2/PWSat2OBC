@@ -26,7 +26,8 @@ namespace obc
               experiment::radfet::RadFETExperiment(fs, payload, powerControl, time),                                  //
               experiment::sail::SailExperiment(fs, adcs, gyro, payload, powerControl, photoService, sailState, time), //
               experiment::payload::PayloadCommissioningExperiment(
-                  payload, fs, powerControl, time, suns, epsProvider, errorCounterProvider, temperatureProvider, &ExperimentsController))
+                  payload, fs, powerControl, time, suns, epsProvider, errorCounterProvider, temperatureProvider, &ExperimentsController),
+              experiment::sads::SADSExperiment(fs, adcs, gyro, payload, powerControl, photoService, time))
     {
     }
 

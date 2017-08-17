@@ -197,6 +197,7 @@ static void ObcInitTask(void* param)
 
     // dumb workaround for cyclical reference
     obc->Experiments.Get<experiment::sail::SailExperiment>().SetSailController(Mission);
+    obc->Experiments.Get<experiment::sads::SADSExperiment>().SetSADSController(Mission);
 
     if (boot::RequestedRunlevel >= boot::Runlevel::Runlevel1)
     {

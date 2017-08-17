@@ -17,7 +17,6 @@ set(SOURCES
     i2c.cpp
     suns.cpp
     photo.cpp
-    sads.cpp
     state.cpp
 )
 
@@ -30,7 +29,6 @@ target_link_libraries(${NAME}
 	mission_comm
 	mission_sail
 	mission_time
-	mission_sads
 	rtc
 	fs
 	logger

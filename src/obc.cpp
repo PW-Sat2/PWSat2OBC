@@ -114,7 +114,6 @@ OBC::OBC()
           PowerControlInterface,
           Mission,
           Mission, //
-          Mission, //
           Hardware.I2C.Buses.Bus,
           Hardware.I2C.Buses.Payload,
           Hardware.SunS,

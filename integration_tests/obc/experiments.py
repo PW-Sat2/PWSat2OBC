@@ -14,7 +14,8 @@ class ExperimentType(IntEnum):
     RadFET = 5
     Sail = 7
     Fibo = 8
-    Payload = 9
+    Payload = 9,
+    SADS=10
 
 
 @unique
