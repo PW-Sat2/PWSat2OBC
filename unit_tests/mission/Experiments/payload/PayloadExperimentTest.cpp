@@ -115,7 +115,7 @@ namespace
             EXPECT_CALL(_power, SensPower(false)).WillOnce(Return(true));
         }
         auto r = _exp.Iteration();
-        ASSERT_THAT(r, Eq(IterationResult::WaitForNextCycle));
+        ASSERT_THAT(r, Eq(IterationResult::LoopImmediately));
     }
 
     void PayloadExperimentTest::RadFETStepTest()
@@ -144,7 +144,7 @@ namespace
         }
 
         auto r = _exp.Iteration();
-        ASSERT_THAT(r, Eq(IterationResult::WaitForNextCycle));
+        ASSERT_THAT(r, Eq(IterationResult::LoopImmediately));
     }
 
     void PayloadExperimentTest::CamsStepTest()
@@ -167,7 +167,7 @@ namespace
         }
 
         auto r = _exp.Iteration();
-        ASSERT_THAT(r, Eq(IterationResult::WaitForNextCycle));
+        ASSERT_THAT(r, Eq(IterationResult::LoopImmediately));
     }
 
     void PayloadExperimentTest::CamsFullStepTest()
@@ -175,7 +175,7 @@ namespace
         // TODO: WRITE THAT
 
         auto r = _exp.Iteration();
-        ASSERT_THAT(r, Eq(IterationResult::WaitForNextCycle));
+        ASSERT_THAT(r, Eq(IterationResult::LoopImmediately));
     }
 
     void PayloadExperimentTest::SunSStepTest()
