@@ -166,7 +166,7 @@ namespace obc
          * @ingroup obc_telecommands
          * @telecommand
          *
-         * Code: 0x1F
+         * Code: 0x20
          * Parameters:
          *  - Correlation ID (8-bit)
          *  - Output file name (string, null-terminated, up to 30 charactes including terminator)

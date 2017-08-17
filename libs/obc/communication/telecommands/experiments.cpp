@@ -240,7 +240,7 @@ namespace obc
 
             LOG(LOG_LEVEL_INFO, "Requested Payload Commisioning experiment");
 
-            memcpy(filePath, outputFile.data(), outputFile.size());
+            strncpy(filePath, outputFile.data(), count_of(filePath));
             filePath[count_of(filePath) - 1] = '\0';
 
             this->_setupPayload.SetOutputFile(filePath);
