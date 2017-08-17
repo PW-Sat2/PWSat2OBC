@@ -7,33 +7,33 @@ using namespace std::chrono_literals;
 namespace mission
 {
     DeploySolarArrayTask::StepProc DeploySolarArrayTask::Steps[] = {
-        &EnableMainThermalKnife,       //
-        &Delay100ms,                   //
-        &EnableMainThermalKnife,       //
-        &Delay100ms,                   //
-        &EnableMainBurnSwitch,         //
-        &Delay100ms,                   //
-        &EnableMainBurnSwitch,         //
+        &EnableMainThermalKnife,       // 1
+        &Delay100ms,                   // 2
+        &EnableMainThermalKnife,       // 3
+        &Delay100ms,                   // 4
+        &EnableMainBurnSwitch,         // 5
+        &Delay100ms,                   // 6
+        &EnableMainBurnSwitch,         // 7
                                        //
-        &WaitFor2mins,                 //
+        &WaitFor2mins,                 // 8
                                        //
-        &DisableMainThermalKnife,      //
-        &Delay100ms,                   //
-        &DisableMainThermalKnife,      //
-        &Delay100ms,                   //
-        &EnableRedundantThermalKnife,  //
-        &Delay100ms,                   //
-        &EnableRedundantThermalKnife,  //
-        &Delay100ms,                   //
-        &EnableRedundantBurnSwitch,    //
-        &Delay100ms,                   //
-        &EnableRedundantBurnSwitch,    //
+        &DisableMainThermalKnife,      // 9
+        &Delay100ms,                   // 10
+        &DisableMainThermalKnife,      // 11
+        &Delay100ms,                   // 12
+        &EnableRedundantThermalKnife,  // 13
+        &Delay100ms,                   // 14
+        &EnableRedundantThermalKnife,  // 15
+        &Delay100ms,                   // 16
+        &EnableRedundantBurnSwitch,    // 17
+        &Delay100ms,                   // 18
+        &EnableRedundantBurnSwitch,    // 19
                                        //
-        &WaitFor2mins,                 //
+        &WaitFor2mins,                 // 20
                                        //
-        &DisableRedundantThermalKnife, //
-        &Delay100ms,                   //
-        &DisableRedundantThermalKnife, //
+        &DisableRedundantThermalKnife, // 21
+        &Delay100ms,                   // 22
+        &DisableRedundantThermalKnife, // 23
     };
 
     DeploySolarArrayTask::DeploySolarArrayTask(services::power::IPowerControl& power)
@@ -74,13 +74,17 @@ namespace mission
         auto This = static_cast<DeploySolarArrayTask*>(param);
         auto explicitDeploy = This->_deployOnNextMissionLoop.exchange(false);
 
-        if (This->_step >= StepsCount)
+        if (This->_step >= StepsCount && This->_isDeploying)
         {
+            LOG(LOG_LEVEL_INFO, "[sads] Finished all steps");
+
             This->_isDeploying = false;
         }
 
         if (explicitDeploy && !This->_isDeploying)
         {
+            LOG(LOG_LEVEL_INFO, "[sads] Requested deployment");
+
             This->_step = 0;
             This->_nextStepAfter = 0s;
             This->_isDeploying = true;

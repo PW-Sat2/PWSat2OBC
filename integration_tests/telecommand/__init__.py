@@ -12,7 +12,6 @@ from antenna import *
 from i2c import *
 from suns import *
 from photo import *
-from sads import *
 from state import *
 
 __all__ = [
@@ -40,6 +39,7 @@ __all__ = [
     'TakePhotoTelecommand',
     'DeploySolarArrayTelecommand',
     'GetPersistentState',
-    'PurgePhotoTelecommand'
+    'PurgePhotoTelecommand',
+    'PerformSADSExperiment'
 ]
 

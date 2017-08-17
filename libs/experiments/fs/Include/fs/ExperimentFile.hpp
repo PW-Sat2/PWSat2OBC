@@ -68,6 +68,8 @@ namespace experiments
                 PayloadRadFet = 0x35,       // 17 bytes of data
                 PayloadExperimentMainTelemetry = 0x36,
 
+                SADSTemperature = 0x41, // 2 bytes of data
+
                 Synchronization = 0x47, // Synchronization PID indicating start of packet. 0 bytes of data.
 
                 Continuation = 0xFE, // Indicates that following data are continuation of previous packet, not the new data.

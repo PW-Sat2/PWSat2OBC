@@ -26,7 +26,6 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
     IHasState<telemetry::TelemetryState>& telemetry,
     services::power::IPowerControl& powerControl,
     mission::IOpenSail& openSail,
-    mission::IDeploySolarArray& deploySolarArray,
     mission::ITimeSynchronization& timeSynchronization,
     drivers::i2c::II2CBus& systemBus,
     drivers::i2c::II2CBus& payload,
@@ -67,7 +66,7 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           GetSunSDataSetsTelecommand(powerControl, currentTime, experimentalSunS, payloadDriver, gyro),                               //
           PerformSailExperiment(experiments.ExperimentsController),                                                                   //
           TakePhoto(photo),                                                                                                           //
-          DeploySolarArray(deploySolarArray),                                                                                         //
+          PerformSADSExperiment(experiments.ExperimentsController),                                                                   //
           PerformPayloadCommisioningExperiment(
               experiments.ExperimentsController, experiments.Get<experiment::payload::PayloadCommissioningExperiment>()), //
           GetPersistentStateTelecommand(stateContainer),                                                                  //
