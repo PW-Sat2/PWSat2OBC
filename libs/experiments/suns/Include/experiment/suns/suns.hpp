@@ -197,6 +197,7 @@ namespace experiment
 
         /**
          * @brief SunS experiment
+         * Experiment code: 0x03
          */
         class SunSExperiment : public experiments::IExperiment, public ISetupSunSExperiment
         {

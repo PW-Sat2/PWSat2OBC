@@ -48,7 +48,7 @@ namespace
 
     TEST(ExperimentTelemetryTest, TestSerialization)
     {
-        std::uint8_t expected[] = {12, num(experiments::StartResult::Failure), num(experiments::IterationResult::LoopImmediately)};
+        std::uint8_t expected[] = {0x1C, 0x20, 0};
         std::array<std::uint8_t, (telemetry::ExperimentTelemetry::BitSize() + 7) / 8> buffer;
         telemetry::ExperimentTelemetry object(12, experiments::StartResult::Failure, experiments::IterationResult::LoopImmediately);
         BitWriter writer(buffer);
