@@ -318,10 +318,7 @@ namespace experiment
 
             std::array<uint8_t, PayloadTelemetry::Photodiodes::DeviceDataLength> buffer;
             Writer w(buffer);
-            w.WriteWordLE(telemetry.Xp);
-            w.WriteWordLE(telemetry.Xn);
-            w.WriteWordLE(telemetry.Yp);
-            w.WriteWordLE(telemetry.Yn);
+            telemetry.Write(w);
 
             _experimentFile.Write(ExperimentFile::PID::PayloadPhotodiodes, buffer);
         }

@@ -26,12 +26,14 @@ namespace devices
             writer.WriteWordLE(this->cam_wing);
         }
 
-        void PayloadTelemetry::Photodiodes::Write(Writer& writer)
+        bool PayloadTelemetry::Photodiodes::Write(Writer& writer)
         {
             writer.WriteWordLE(this->Xp);
             writer.WriteWordLE(this->Xn);
             writer.WriteWordLE(this->Yp);
             writer.WriteWordLE(this->Yn);
+
+            return writer.Status();
         }
     }
 }

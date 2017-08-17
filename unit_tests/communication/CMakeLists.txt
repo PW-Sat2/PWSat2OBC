@@ -24,7 +24,7 @@ set(SOURCES
   Telecommands/GetSunSDataSetsTelecommandTest.cpp
   Telecommands/PerformSailExperimentTest.cpp
   Telecommands/PhotoCommandTest.cpp
-  Telecommands/DeploySolarArrayTelecommandTest.cpp
+  Telecommands/PerformSADSExperimentTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
