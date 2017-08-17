@@ -10,6 +10,7 @@
 #include "experiment/payload/PayloadExperimentTelemetryProvider.hpp"
 #include "experiment/payload/payload_exp.hpp"
 #include "experiment/radfet/radfet.hpp"
+#include "experiment/sads/sads.hpp"
 #include "experiment/sail/sail.hpp"
 #include "experiment/suns/suns.hpp"
 #include "experiments/experiments.h"
@@ -101,7 +102,8 @@ namespace obc
         experiment::erase_flash::EraseFlashExperiment,        //
         experiment::radfet::RadFETExperiment,                 //
         experiment::sail::SailExperiment,                     //
-        experiment::payload::PayloadCommissioningExperiment   //
+        experiment::payload::PayloadCommissioningExperiment,  //
+        experiment::sads::SADSExperiment                      //
         >;
 
     /**

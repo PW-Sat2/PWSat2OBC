@@ -2,6 +2,7 @@
 #define LIBS_DRIVERS_PAYLOAD_INCLUDE_TELEMETRY_H_
 
 #include <cstdint>
+#include "base/writer.h"
 
 namespace devices
 {
@@ -92,6 +93,13 @@ namespace devices
                 std::uint16_t Yp;
                 /** @brief Y- photodiode measurement */
                 std::uint16_t Yn;
+
+                /**
+                 * @brief Writes the Photodiodes telemetry to writer
+                 * @param writer Writer to store the telemetry data
+                 * @return True if write succeded, false otherwise
+                 */
+                bool Write(Writer& writer);
             };
 
             /**

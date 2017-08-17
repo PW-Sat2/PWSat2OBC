@@ -260,5 +260,31 @@ namespace obc
 
             transmitter.SendFrame(response.Frame());
         }
+
+        PerformSADSExperiment::PerformSADSExperiment(experiments::IExperimentController& controller) : experimentController(controller)
+        {
+        }
+
+        void PerformSADSExperiment::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
+        {
+            Reader reader(parameters);
+            const auto correlationId = reader.ReadByte();
+            CorrelatedDownlinkFrame response{DownlinkAPID::Operation, 0, correlationId};
+            auto& writer = response.PayloadWriter();
+            if (!reader.Status())
+            {
+                writer.WriteByte(0x1);
+            }
+            else if (this->experimentController.RequestExperiment(experiment::sads::SADSExperiment::Code))
+            {
+                writer.WriteByte(0);
+            }
+            else
+            {
+                writer.WriteByte(2);
+            }
+
+            transmitter.SendFrame(response.Frame());
+        }
     }
 }

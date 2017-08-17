@@ -93,3 +93,15 @@ class PerformPayloadCommissioningExperiment(Telecommand):
         Telecommand.__init__(self)
         self.correlation_id = correlation_id
         self.file_name = file_name
+
+
+class PerformSADSExperiment(Telecommand):
+    def __init__(self, correlation_id):
+        Telecommand.__init__(self)
+        self._correlation_id = correlation_id
+
+    def apid(self):
+        return 0xD4
+
+    def payload(self):
+        return [self._correlation_id]
