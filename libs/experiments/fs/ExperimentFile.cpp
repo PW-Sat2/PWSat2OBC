@@ -4,7 +4,9 @@
 using namespace experiments::fs;
 using namespace services::fs;
 
-ExperimentFile::ExperimentFile(services::time::ICurrentTime* time) : _time(time), _writer(_buffer), _hasPayloadInFrame(false)
+ExperimentFile::ExperimentFile(services::time::ICurrentTime* time)
+    : _time(time), _writer(_buffer), _hasPayloadInFrame(false),
+      onFlush(OnFlushDelegate::make_delegate<ExperimentFile, &ExperimentFile::DoNothing>(this))
 {
     _buffer.fill(0xAA);
 }
@@ -18,7 +20,8 @@ ExperimentFile::~ExperimentFile()
 }
 
 ExperimentFile::ExperimentFile(ExperimentFile&& other)
-    : _buffer(other._buffer), _time(other._time), _writer(_buffer), _hasPayloadInFrame(other._hasPayloadInFrame)
+    : _buffer(other._buffer), _time(other._time), _writer(_buffer), _hasPayloadInFrame(other._hasPayloadInFrame),
+      onFlush(OnFlushDelegate::make_delegate<ExperimentFile, &ExperimentFile::DoNothing>(this))
 {
     other._time = nullptr;
     other._hasPayloadInFrame = 0;
@@ -95,7 +98,6 @@ OSResult ExperimentFile::WriteDataBiggerThanFrame(PID pid, const gsl::span<uint8
 
         if (_writer.RemainingSize() == 0)
         {
-            FillBufferWithPadding();
             auto result = Flush();
             if (OS_RESULT_FAILED(result))
             {
@@ -114,6 +116,11 @@ OSResult ExperimentFile::WriteDataBiggerThanFrame(PID pid, const gsl::span<uint8
 
 OSResult ExperimentFile::Flush()
 {
+    return FlushInternal(true);
+}
+
+OSResult ExperimentFile::FlushInternal(bool initialize)
+{
     FillBufferWithPadding();
     auto result = _file.Write(_buffer);
     if (OS_RESULT_FAILED(result.Status))
@@ -121,9 +128,23 @@ OSResult ExperimentFile::Flush()
         return result.Status;
     }
 
-    InitializePacket();
+    onFlush(gsl::make_span(_buffer));
+
+    if (initialize)
+    {
+        InitializePacket();
+    }
 
     return OSResult::Success;
+}
+
+void ExperimentFile::SetOnFlush(OnFlushDelegate onFlush)
+{
+    this->onFlush = onFlush;
+}
+
+void ExperimentFile::DoNothing(const gsl::span<uint8_t>&)
+{
 }
 
 void ExperimentFile::FillBufferWithPadding()
@@ -159,13 +180,10 @@ OSResult ExperimentFile::Close()
 {
     if (_hasPayloadInFrame)
     {
-        FillBufferWithPadding();
-        auto result = _file.Write(_buffer);
-        _hasPayloadInFrame = false;
-
-        if (OS_RESULT_FAILED(result.Status))
+        auto result = FlushInternal(false);
+        if (OS_RESULT_FAILED(result))
         {
-            return result.Status;
+            return result;
         }
     }
 

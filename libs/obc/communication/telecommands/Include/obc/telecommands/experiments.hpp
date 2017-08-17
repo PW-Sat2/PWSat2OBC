@@ -152,14 +152,17 @@ namespace obc
             /**
              * @brief Ctor
              * @param controller OBC experiments controller
+             * @param[in] setupSail Interface for setting up sail experiment
              */
-            PerformSailExperiment(experiments::IExperimentController& controller);
+            PerformSailExperiment(experiments::IExperimentController& controller, experiment::sail::ISetupSailExperiment& setupSail);
 
             virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
 
           private:
             /** @brief Experiments controller */
             experiments::IExperimentController& experimentController;
+
+            experiment::sail::ISetupSailExperiment& setupSail;
         };
 
         /**

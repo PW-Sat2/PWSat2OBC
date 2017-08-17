@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include "adcs/adcs.hpp"
+#include "comm/ITransmitter.hpp"
 #include "experiments/experiments.h"
 #include "fs/ExperimentFile.hpp"
 #include "fs/fs.h"
@@ -22,9 +23,42 @@ namespace experiment
     namespace sail
     {
         /**
+         * @brief Interface for setting up sail experiment.
+         * @ingroup experiments
+         *
+         * Experiment code: 0x07.
+         */
+        struct ISetupSailExperiment
+        {
+            /**
+             * @brief Set sail experiment end time.
+             * @param experimentEnd New experiment end time.
+             */
+            virtual void SetExperimentEnd(std::chrono::milliseconds experimentEnd) = 0;
+
+            /**
+             * @brief Set next telemetry acquisition time.
+             * @param nextTelemetryAcquisition Next telemetry acquisition time.
+             */
+            virtual void SetNextTelemetryAcquisition(std::chrono::milliseconds nextTelemetryAcquisition) = 0;
+
+            /**
+             * @brief Sets next photo time.
+             * @param nextPhotoTaken Next photo time.
+             */
+            virtual void SetNextPhotoTaken(std::chrono::milliseconds nextPhotoTaken) = 0;
+
+            /**
+             * @brief Sets correlation id.
+             * @param correlationId Correlation id.
+             */
+            virtual void SetCorrelationId(uint8_t correlationId) = 0;
+        };
+
+        /**
          * @brief Sail experiment
          */
-        class SailExperiment final : public experiments::IExperiment
+        class SailExperiment final : public experiments::IExperiment, public ISetupSailExperiment
         {
           public:
             /**
@@ -37,6 +71,7 @@ namespace experiment
              * @param[in] photoService Reference to service capable of taking photos
              * @param[in] sailState Reference to pin connected to sail indicator.
              * @param[in] timeProvider Reference to current time provider.
+             * @param[in] transmitter Reference to transmitter.
              */
             SailExperiment(services::fs::IFileSystem& fileSystem,
                 ::adcs::IAdcsCoordinator& adcsCoordinator,
@@ -45,7 +80,8 @@ namespace experiment
                 services::power::IPowerControl& powerController,
                 services::photo::IPhotoService& photoService,
                 const drivers::gpio::Pin& sailState,
-                services::time::ICurrentTime& timeProvider);
+                services::time::ICurrentTime& timeProvider,
+                devices::comm::ITransmitter& transmitter);
 
             virtual experiments::ExperimentCode Type() override;
 
@@ -54,6 +90,8 @@ namespace experiment
             virtual experiments::IterationResult Iteration() override;
 
             virtual void Stop(experiments::IterationResult lastResult) override;
+
+            virtual void SetCorrelationId(uint8_t correlationId) override;
 
             /**
              * @brief Experiment code
@@ -141,19 +179,19 @@ namespace experiment
              * @brief Set sail experiment end time.
              * @param experimentEnd New experiment end time.
              */
-            void SetExperimentEnd(std::chrono::milliseconds experimentEnd);
+            virtual void SetExperimentEnd(std::chrono::milliseconds experimentEnd) override;
 
             /**
              * @brief Set next telemetry acquisition time.
              * @param nextTelemetryAcquisition Next telemetry acquisition time.
              */
-            void SetNextTelemetryAcquisition(std::chrono::milliseconds nextTelemetryAcquisition);
+            virtual void SetNextTelemetryAcquisition(std::chrono::milliseconds nextTelemetryAcquisition) override;
 
             /**
              * @brief Sets next photo time.
              * @param nextPhotoTaken Next photo time.
              */
-            void SetNextPhotoTaken(std::chrono::milliseconds nextPhotoTaken);
+            virtual void SetNextPhotoTaken(std::chrono::milliseconds nextPhotoTaken) override;
 
           private:
             /**
@@ -191,6 +229,12 @@ namespace experiment
               */
             bool Save(bool sailIndicator, std::uint16_t sailTemperature);
 
+            /**
+             * @brief Sends experiment data to downlink.
+             * @param[in] data Raw experiment data.
+             */
+            void SendExperimentData(const gsl::span<uint8_t>& data);
+
             experiments::fs::ExperimentFile _file;
 
             std::chrono::milliseconds _experimentEnd;
@@ -221,6 +265,12 @@ namespace experiment
             services::time::ICurrentTime& _timeProvider;
 
             const drivers::gpio::Pin& _sailState;
+
+            devices::comm::ITransmitter& transmitter;
+
+            uint32_t telemetrySequence;
+
+            uint8_t correlationId;
         };
 
         inline void SailExperiment::SetSailController(mission::IOpenSail& sailController)
@@ -246,6 +296,11 @@ namespace experiment
         inline void SailExperiment::SetNextPhotoTaken(std::chrono::milliseconds nextPhotoTaken)
         {
             this->_nextPhoto = nextPhotoTaken;
+        }
+
+        inline void SailExperiment::SetCorrelationId(uint8_t correlationId)
+        {
+            this->correlationId = correlationId;
         }
     }
 }

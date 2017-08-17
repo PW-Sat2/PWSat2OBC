@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock-matchers.h"
+#include "mock/SetupSailExperimentMock.hpp"
 #include "mock/comm.hpp"
 #include "mock/experiment.hpp"
 #include "obc/telecommands/experiments.hpp"
@@ -23,9 +24,10 @@ namespace
         TransmitterMock transmitter;
         ExperimentControllerMock controller;
         PerformSailExperiment command;
+        SetupSailExperimentMock sailSetup;
     };
 
-    PerformSailExperimentTest::PerformSailExperimentTest() : command(controller)
+    PerformSailExperimentTest::PerformSailExperimentTest() : command(controller, sailSetup)
     {
     }
 
@@ -47,6 +49,7 @@ namespace
 
     TEST_F(PerformSailExperimentTest, TestExperimentRefused)
     {
+        EXPECT_CALL(sailSetup, SetCorrelationId(_));
         EXPECT_CALL(controller, RequestExperiment(7)).WillOnce(Return(false));
         EXPECT_CALL(transmitter, SendFrame(_)).WillOnce(Invoke([](gsl::span<const std::uint8_t> frame) {
             EXPECT_THAT(frame.size_bytes(), Eq(5));
@@ -64,6 +67,7 @@ namespace
 
     TEST_F(PerformSailExperimentTest, TestExperimentStarted)
     {
+        EXPECT_CALL(sailSetup, SetCorrelationId(_));
         EXPECT_CALL(controller, RequestExperiment(7)).WillOnce(Return(true));
         EXPECT_CALL(transmitter, SendFrame(_)).WillOnce(Invoke([](gsl::span<const std::uint8_t> frame) {
             EXPECT_THAT(frame.size_bytes(), Eq(5));
