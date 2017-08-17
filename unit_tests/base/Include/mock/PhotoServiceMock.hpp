@@ -28,6 +28,8 @@ struct PhotoServiceMock : services::photo::IPhotoService
 
     MOCK_METHOD1(WaitForFinish, bool(std::chrono::milliseconds timeout));
 
+    MOCK_METHOD1(GetLastSyncResult, const services::photo::SyncResult(services::photo::Camera which));
+
     MOCK_CONST_METHOD1(IsEmpty, bool(std::uint8_t bufferId));
     MOCK_METHOD0(PurgePendingCommands, void());
 
