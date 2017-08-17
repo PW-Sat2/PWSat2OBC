@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include "adcs/adcs.hpp"
+#include "comm/ITransmitter.hpp"
 #include "experiments/experiments.h"
 #include "fs/ExperimentFile.hpp"
 #include "fs/fs.h"
@@ -37,6 +38,7 @@ namespace experiment
              * @param[in] photoService Reference to service capable of taking photos
              * @param[in] sailState Reference to pin connected to sail indicator.
              * @param[in] timeProvider Reference to current time provider.
+             * @param[in] transmitter Reference to transmitter.
              */
             SailExperiment(services::fs::IFileSystem& fileSystem,
                 ::adcs::IAdcsCoordinator& adcsCoordinator,
@@ -45,7 +47,8 @@ namespace experiment
                 services::power::IPowerControl& powerController,
                 services::photo::IPhotoService& photoService,
                 const drivers::gpio::Pin& sailState,
-                services::time::ICurrentTime& timeProvider);
+                services::time::ICurrentTime& timeProvider,
+                devices::comm::ITransmitter& transmitter);
 
             virtual experiments::ExperimentCode Type() override;
 
@@ -191,6 +194,12 @@ namespace experiment
               */
             bool Save(bool sailIndicator, std::uint16_t sailTemperature);
 
+            /**
+             * @brief Sends experiment data to downlink.
+             * @param[in] data Raw experiment data.
+             */
+            void SendExperimentData(const gsl::span<uint8_t>& data);
+
             experiments::fs::ExperimentFile _file;
 
             std::chrono::milliseconds _experimentEnd;
@@ -221,6 +230,10 @@ namespace experiment
             services::time::ICurrentTime& _timeProvider;
 
             const drivers::gpio::Pin& _sailState;
+
+            devices::comm::ITransmitter& transmitter;
+
+            uint32_t telemetrySequence;
         };
 
         inline void SailExperiment::SetSailController(mission::IOpenSail& sailController)
