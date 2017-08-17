@@ -25,7 +25,7 @@
 	</object>
 	<object class="wxPanel" name="AntennaModule">
 		<style>wxTAB_TRAVERSAL</style>
-		<size>573,320</size>
+		<size>570,150</size>
 		<object class="wxBoxSizer">
 			<orient>wxVERTICAL</orient>
 			<object class="sizeritem">
