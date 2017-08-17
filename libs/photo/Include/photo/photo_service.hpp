@@ -251,6 +251,13 @@ namespace services
              * @brief Purges all pending commands
              */
             virtual void PurgePendingCommands() = 0;
+
+            /**
+             * @brief Get last sync result of camera.
+             * @param which Camera which sync result
+             * @returns Last sync result of selected camera
+             */
+            virtual const SyncResult GetLastSyncResult(Camera which) = 0;
         };
 
         /**
@@ -301,6 +308,7 @@ namespace services
             virtual void Reset() final override;
             virtual void SavePhoto(std::uint8_t bufferId, const char* pathFmt, ...) final override;
             virtual void Sleep(std::chrono::milliseconds duration) final override;
+            virtual const SyncResult GetLastSyncResult(Camera which) final override;
 
             /**
              * @brief (Internal use) Invokes disable camera command
@@ -403,6 +411,12 @@ namespace services
 
             /** @brief State flags */
             EventGroup _flags;
+
+            /** @brief Last sync Result of Camera Nadir */
+            SyncResult _lastCameraNadirSyncResult;
+
+            /** @brief Last sync Result of Camera Wing */
+            SyncResult _lastCameraWingSyncResult;
         };
 
         /** @} */
