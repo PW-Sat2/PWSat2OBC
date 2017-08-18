@@ -1,13 +1,18 @@
 import struct
 from threading import Thread
-
+import sys
+import os
 import serial
 import logging
-
 import time
 from enum import IntEnum
+import argparse
 
-from devices import PhotoResolution
+try:
+    from devices import PhotoResolution
+except ImportError:
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+    from devices import PhotoResolution
 from utils import ensure_byte_list, call
 
 logging.basicConfig(level=logging.DEBUG)
@@ -123,15 +128,36 @@ class CameraMock(object):
         self._command(CommandCode.Snapshot, CommandCode.Snapshot)
 
 
+parser = argparse.ArgumentParser(
+    fromfile_prefix_chars='@',
+    epilog="In file path you can use {camera} as camera name (wing/nadir) and {res} as resolution (128, 240, 480)")
+parser.add_argument("--nadir-port", help="Nadir COM port", required=True)
+parser.add_argument("--wing-port", help="Wing COM port", required=True)
+parser.add_argument("--photo-path", help="Photo path", required=True)
+
+
+def convert_arg_line_to_args(arg_line):
+    for arg in arg_line.split():
+        if not arg.strip():
+            continue
+        yield arg
+
+
+parser.convert_arg_line_to_args = convert_arg_line_to_args
+
+args = parser.parse_args()
+print args
+
+
 def read_file(p):
     with open(p, 'rb') as f:
         return list(f.read())
 
-wing = CameraMock('COM15')
-wing.on_get_photo = lambda r: read_file('D:\\tmp\\photos\\mock\\wing_{}_small.jpg'.format(str(r)[:-1]))
+wing = CameraMock(args.wing_port)
+wing.on_get_photo = lambda r: read_file(args.photo_path.format(camera='wing', res=str(r)[:-1]))
 
-nadir = CameraMock('COM14')
-nadir.on_get_photo = lambda r: read_file('D:\\tmp\\photos\\mock\\nadir_{}_small.jpg'.format(str(r)[:-1]))
+nadir = CameraMock(args.nadir_port)
+nadir.on_get_photo = lambda r: read_file(args.photo_path.format(camera='nadir', res=str(r)[:-1]))
 
 wing_thread = Thread(target=lambda: wing.handle())
 nadir_thread = Thread(target=lambda: nadir.handle())
@@ -140,5 +166,6 @@ wing_thread.start()
 nadir_thread.start()
 
 time.sleep(-1)
+
 
 
