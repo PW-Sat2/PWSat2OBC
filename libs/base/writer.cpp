@@ -126,8 +126,7 @@ bool Writer::WriteArray(gsl::span<const uint8_t> buffer)
     }
     else
     {
-        std::copy(buffer.begin(), buffer.end(), this->_buffer.begin() + this->_position);
-
+        memcpy(this->_buffer.data() + this->_position, buffer.data(), buffer.length());
         this->_position += buffer.length();
         return true;
     }
@@ -142,8 +141,7 @@ bool Writer::Fill(const uint8_t value)
     }
     else
     {
-        std::fill(this->_buffer.begin() + this->_position, this->_buffer.begin() + this->_buffer.length(), value);
-
+        memset(this->_buffer.data() + this->_position, value, remainingSize);
         this->_position += remainingSize;
         return true;
     }
