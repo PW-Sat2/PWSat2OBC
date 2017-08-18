@@ -155,10 +155,10 @@ namespace
 
     TEST(BatteryPackPrimaryStateTest, TestSerialization)
     {
-        std::uint8_t expected[] = {0x23, 0x61, 0x45};
+        std::uint8_t expected[] = {0x23, 0xd1, 0x8a, 0x02};
         BatteryPackPrimaryState state;
-        state.temperatureA = 0x123;
-        state.temperatureB = 0x456;
+        state.temperatureA = 0x1123;
+        state.temperatureB = 0x1456;
         RunTest(state, gsl::make_span(expected));
     }
 
@@ -230,19 +230,20 @@ namespace
             0x3f,
             0x00,
             0x00,
+            0x00,
+            0xff,
+            0xff,
+            0xff,
+            0xff,
+            0xff,
+            0xff,
+            0xff,
+            0xff,
+            0xff,
+            0x0f,
             0xc0,
             0xff,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-            0x03,
-            0xf0,
-            0x3f,
+            0x00,
             0x00};
         ControllerATelemetry state;
         state.mpptX.SOL_VOLT = 0xfff;
