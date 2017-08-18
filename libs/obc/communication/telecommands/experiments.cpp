@@ -118,7 +118,7 @@ namespace obc
                 static_cast<std::uint8_t>(params.SamplingSessionsCount()));
 
             this->_setupSunS.SetParameters(params);
-            this->_setupSunS.SetOutputFiles(outputFile.data());
+            this->_setupSunS.SetOutputFiles(outputFile);
 
             auto success = this->_controller.RequestExperiment(experiment::suns::SunSExperiment::Code);
 
@@ -154,8 +154,6 @@ namespace obc
 
             char outputFileName[30];
             auto path = r.ReadString(30);
-            strncpy(outputFileName, path.data(), sizeof(outputFileName));
-            outputFileName[29] = 0;
 
             if (!r.Status() || strlen_n(outputFileName, 30) == 0)
             {
@@ -171,7 +169,7 @@ namespace obc
                 samplesCount,
                 outputFileName);
 
-            this->setupRadFET.Setup(delay, samplesCount, outputFileName);
+            this->setupRadFET.Setup(delay, samplesCount, path);
 
             auto success = this->controller.RequestExperiment(experiment::radfet::RadFETExperiment::Code);
 
@@ -240,10 +238,7 @@ namespace obc
 
             LOG(LOG_LEVEL_INFO, "Requested Payload Commisioning experiment");
 
-            strncpy(filePath, outputFile.data(), count_of(filePath));
-            filePath[count_of(filePath) - 1] = '\0';
-
-            this->_setupPayload.SetOutputFile(filePath);
+            this->_setupPayload.SetOutputFile(outputFile);
 
             auto success = this->_controller.RequestExperiment(experiment::payload::PayloadCommissioningExperiment::Code);
 

@@ -6,9 +6,11 @@
 #include <array>
 #include <chrono>
 #include <cstdint>
+#include <cstdio>
 #include <limits>
 #include <type_traits>
 #include <utility>
+#include "gsl/string_span"
 
 /**
  * @brief Converts boolean value to 1 or 0
@@ -657,5 +659,15 @@ template <std::size_t Alignment> constexpr bool IsAligned(const void* ptr)
 template <typename Param> using Action = void (*)(Param p);
 
 std::size_t strlen_n(const char* s, std::size_t maxSize);
+
+template <std::size_t N> std::size_t strsafecpy(char (&destination)[N], gsl::cstring_span<> source)
+{
+    return sniprintf(destination, N, "%.*s", source.size(), source.data());
+}
+
+template <std::size_t N> std::size_t strsafecpy(char (&destination)[N], const char* source, size_t sourceMaxLength)
+{
+    return sniprintf(destination, N, "%.*s", sourceMaxLength, source);
+}
 
 #endif

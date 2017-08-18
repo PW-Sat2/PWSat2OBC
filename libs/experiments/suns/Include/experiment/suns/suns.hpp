@@ -192,7 +192,7 @@ namespace experiment
              * @remark String is copied to internal buffer
              * @remark If string is longer than internal buffer size, it is trimmed to maximum size
              */
-            virtual void SetOutputFiles(const char* baseName) = 0;
+            virtual void SetOutputFiles(gsl::cstring_span<> baseName) = 0;
         };
 
         /**
@@ -219,7 +219,7 @@ namespace experiment
                 services::fs::IFileSystem& fileSystem);
 
             virtual void SetParameters(SunSExperimentParams parameters) override;
-            virtual void SetOutputFiles(const char* baseName) override;
+            virtual void SetOutputFiles(gsl::cstring_span<> baseName) override;
 
             virtual experiments::ExperimentCode Type() override;
             virtual experiments::StartResult Start() override;

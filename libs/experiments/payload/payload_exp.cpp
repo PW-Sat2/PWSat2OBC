@@ -35,10 +35,9 @@ namespace experiment
             std::strncpy(_fileName, DefaultFileName, 30);
         }
 
-        void PayloadCommissioningExperiment::SetOutputFile(const char* fileName)
+        void PayloadCommissioningExperiment::SetOutputFile(gsl::cstring_span<> fileName)
         {
-            std::strncpy(this->_fileName, fileName, sizeof(this->_fileName));
-            *(std::end(this->_fileName) - 1) = '\0';
+            strsafecpy(this->_fileName, fileName);
         }
 
         experiments::ExperimentCode PayloadCommissioningExperiment::Type()

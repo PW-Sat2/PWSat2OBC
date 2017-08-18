@@ -79,7 +79,7 @@ namespace
 
     TEST_F(PayloadExperimentTest, TestExperimentStartStop)
     {
-        _exp.SetOutputFile(TestFileName);
+        _exp.SetOutputFile(gsl::ensure_z(TestFileName));
 
         auto r = _exp.Start();
         ASSERT_THAT(r, Eq(StartResult::Success));
@@ -196,7 +196,7 @@ namespace
 
     TEST_F(PayloadExperimentTest, IterationFlow)
     {
-        _exp.SetOutputFile(TestFileName);
+        _exp.SetOutputFile(gsl::ensure_z(TestFileName));
         _exp.Start();
 
         {

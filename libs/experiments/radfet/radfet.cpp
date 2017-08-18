@@ -3,6 +3,7 @@
 #include "logger/logger.h"
 #include "power/power.h"
 #include "time/ICurrentTime.hpp"
+#include "utils.h"
 
 using experiments::IterationResult;
 using experiments::StartResult;
@@ -160,12 +161,11 @@ namespace experiment
             }
         }
 
-        void RadFETExperiment::Setup(std::chrono::seconds delay, uint8_t samplesCount, const char* outputFileName)
+        void RadFETExperiment::Setup(std::chrono::seconds delay, uint8_t samplesCount, gsl::cstring_span<> outputFileName)
         {
             this->delay = delay;
             this->samplesCount = samplesCount;
-            strncpy(this->outputFileName, outputFileName, sizeof(this->outputFileName));
-            *(std::end(this->outputFileName) - 1) = '\0';
+            strsafecpy(this->outputFileName, outputFileName);
         }
 
         bool RadFETExperiment::SaveTimestamp(experiments::fs::ExperimentFile& file, std::chrono::milliseconds timestamp)

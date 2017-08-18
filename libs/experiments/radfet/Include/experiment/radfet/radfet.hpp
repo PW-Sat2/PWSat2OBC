@@ -27,7 +27,7 @@ namespace experiment
              * @param[in] samplesCount Quantity of samples
              * @param[in] outputFile File name for storing measurements
              */
-            virtual void Setup(std::chrono::seconds delay, uint8_t samplesCount, const char* outputFile) = 0;
+            virtual void Setup(std::chrono::seconds delay, uint8_t samplesCount, gsl::cstring_span<> outputFile) = 0;
         };
 
         /**
@@ -56,7 +56,7 @@ namespace experiment
             virtual experiments::StartResult Start() override;
             virtual experiments::IterationResult Iteration() override;
             virtual void Stop(experiments::IterationResult lastResult) override;
-            virtual void Setup(std::chrono::seconds delay, uint8_t samplesCount, const char* outputFile) override;
+            virtual void Setup(std::chrono::seconds delay, uint8_t samplesCount, gsl::cstring_span<> outputFile) override;
 
           private:
             /**
