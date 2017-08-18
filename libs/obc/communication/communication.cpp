@@ -67,7 +67,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           GetSunSDataSetsTelecommand(powerControl, currentTime, experimentalSunS, payloadDriver, gyro),                               //
           PerformSailExperiment(experiments.ExperimentsController),                                                                   //
           TakePhoto(photo),                                                                                                           //
-          DeploySolarArray(deploySolarArray)                                                                                          //
+          DeploySolarArray(deploySolarArray),                                                                                         //
+          GetPersistentStateTelecommand(stateContainer)                                                                               //
           ),                                                                                                                          //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {

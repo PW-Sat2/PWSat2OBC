@@ -25,6 +25,7 @@
 #include "obc/telecommands/program_upload.hpp"
 #include "obc/telecommands/sads.hpp"
 #include "obc/telecommands/sail.hpp"
+#include "obc/telecommands/state.hpp"
 #include "obc/telecommands/suns.hpp"
 #include "obc/telecommands/time.hpp"
 #include "program_flash/fwd.hpp"
@@ -151,7 +152,8 @@ namespace obc
         obc::telecommands::GetSunSDataSetsTelecommand,
         obc::telecommands::PerformSailExperiment,
         obc::telecommands::TakePhoto,
-        obc::telecommands::DeploySolarArray>;
+        obc::telecommands::DeploySolarArray,
+        obc::telecommands::GetPersistentStateTelecommand>;
 
     /**
      * @brief OBC <-> Earth communication
