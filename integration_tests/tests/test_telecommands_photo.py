@@ -28,7 +28,7 @@ class TestPhotoTelecommand(RestartPerTest):
 
         sail_opening = TestEvent()
 
-        self.system.comm.put_frame(TakePhotoTelecommand(10, CameraLocation.Wing, PhotoResolution.p128, 30, "photo.jpg"))
+        self.system.comm.put_frame(TakePhotoTelecommand(10, CameraLocation.Wing, PhotoResolution.p128, 30, 0, "photo.jpg"))
 
         ack = self.system.comm.get_frame(5)
         self.assertIsInstance(ack, OperationErrorFrame)
@@ -38,7 +38,7 @@ class TestPhotoTelecommand(RestartPerTest):
 
         sail_opening = TestEvent()
 
-        self.system.comm.put_frame(TakePhotoTelecommand(10, CameraLocation.Wing, PhotoResolution.p128, 10, "photo.jpg"))
+        self.system.comm.put_frame(TakePhotoTelecommand(10, CameraLocation.Wing, PhotoResolution.p128, 10, 5, "photo.jpg"))
 
         ack = self.system.comm.get_frame(5)
         self.assertIsInstance(ack, OperationSuccessFrame)
