@@ -27,8 +27,17 @@ namespace services
              */
             SyncResult(bool successful, int retryCount);
 
-            bool GetIsSuccessful();
-            int GetRetryCount();
+            /**
+             * @brief Returns if sync was successful
+             * @returns True if sync was successful, false otherwise.
+             */
+            bool GetIsSuccessful() const;
+
+            /**
+             * @brief Returns number of retry counts during sync process.
+             * @returns Number of retries during sync
+             */
+            int GetRetryCount() const;
 
           private:
             /** @brief true if syncing was successful, false otherwise */
