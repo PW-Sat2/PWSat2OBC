@@ -31,4 +31,4 @@ def _prepare_environment():
 system = _prepare_environment()
 
 import logging
-logging.getLogger("I2C").propagate = False
+logging.getLogger("I2C").setLevel(logging.WARN)

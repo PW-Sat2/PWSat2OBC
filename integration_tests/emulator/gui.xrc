@@ -1659,4 +1659,20 @@
 			</object>
 		</object>
 	</object>
+	<object class="wxPanel" name="LastFramesModule">
+		<style>wxTAB_TRAVERSAL</style>
+		<size>500,290</size>
+		<object class="wxBoxSizer">
+			<orient>wxVERTICAL</orient>
+			<object class="sizeritem">
+				<option>1</option>
+				<flag>wxALL|wxBOTTOM|wxEXPAND</flag>
+				<border>5</border>
+				<object class="wxListBox" name="last_frames">
+					<style>wxHSCROLL|wxVSCROLL</style>
+					<content />
+				</object>
+			</object>
+		</object>
+	</object>
 </resource>
