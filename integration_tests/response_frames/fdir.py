@@ -23,3 +23,6 @@ class ErrorCountersFrame(ResponseFrame):
                 'decrement': part[3]
             }
 
+    def __str__(self):
+        return 'Error Counters'
+
