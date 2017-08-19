@@ -2,6 +2,7 @@ set(NAME exp_camera)
 
 set(SOURCES
     camera_exp.cpp
+    CameraExperimentController.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
