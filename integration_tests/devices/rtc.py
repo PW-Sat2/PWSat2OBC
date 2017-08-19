@@ -12,6 +12,7 @@ class RTCDevice(I2CDevice):
         super(RTCDevice, self).__init__(0b1010001, "RTC")
 
         self._current_time = datetime.datetime.now()
+        self._offset = datetime.timedelta()
         self._raw_response = None
         self._timer = RepeatedTimer(1, self._tick_time)
         self._lock = Lock()
@@ -26,7 +27,7 @@ class RTCDevice(I2CDevice):
 
     def response_time(self):
         with self._lock:
-            return self._current_time
+            return self._current_time + self._offset
 
     def start_running(self):
         self._timer.start()
@@ -36,7 +37,7 @@ class RTCDevice(I2CDevice):
 
     def advance_by(self, interval):
         with self._lock:
-            self._current_time += interval
+            self._offset += interval
 
     def _time_to_bcd(self, dt):
         time = dt.time()
@@ -60,6 +61,6 @@ class RTCDevice(I2CDevice):
     def read_time(self):
         self.log.debug("Read Time")
         with self._lock:
-            return self._raw_response or self._time_to_bcd(self._current_time)
+            return self._raw_response or self._time_to_bcd(self._current_time + self._offset)
 
 
