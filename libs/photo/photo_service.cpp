@@ -23,12 +23,12 @@ namespace services
         {
         }
 
-        inline bool SyncResult::GetIsSuccessful()
+        bool SyncResult::GetIsSuccessful() const
         {
             return _successful;
         }
 
-        inline int SyncResult::GetRetryCount()
+        int SyncResult::GetRetryCount() const
         {
             return _retryCount;
         }
