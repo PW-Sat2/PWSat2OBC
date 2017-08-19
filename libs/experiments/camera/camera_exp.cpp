@@ -23,6 +23,7 @@ namespace experiment
         void CameraCommissioningExperiment::SetOutputFilesBaseName(gsl::cstring_span<> fileName)
         {
             strsafecpy(this->_fileName, fileName);
+            _controller.SetPhotoFilesBaseName(this->_fileName);
         }
 
         experiments::ExperimentCode CameraCommissioningExperiment::Type()
@@ -39,6 +40,7 @@ namespace experiment
                 return StartResult::Failure;
             }
 
+            _currentStep = 0;
             return StartResult::Success;
         }
 

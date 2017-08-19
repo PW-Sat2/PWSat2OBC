@@ -258,5 +258,47 @@ namespace obc
 
             transmitter.SendFrame(response.Frame());
         }
+
+        PerformCameraCommisioningExperiment::PerformCameraCommisioningExperiment(
+            experiments::IExperimentController& controller, experiment::camera::ISetupCameraCommissioningExperiment& setupCamera)
+            : _controller(controller), _setupCamera(setupCamera)
+        {
+        }
+
+        void PerformCameraCommisioningExperiment::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
+        {
+            char filePath[30];
+            Reader r(parameters);
+
+            auto correlationId = r.ReadByte();
+            const auto outputFile = r.ReadString(count_of(filePath));
+
+            if (!r.Status() || outputFile.empty())
+            {
+                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+                response.PayloadWriter().WriteByte(0x1);
+                transmitter.SendFrame(response.Frame());
+                return;
+            }
+
+            LOG(LOG_LEVEL_INFO, "Requested Camera Commisioning experiment");
+
+            this->_setupCamera.SetOutputFilesBaseName(outputFile);
+
+            auto success = this->_controller.RequestExperiment(experiment::camera::CameraCommissioningExperiment::Code);
+
+            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+
+            if (success)
+            {
+                response.PayloadWriter().WriteByte(0);
+            }
+            else
+            {
+                response.PayloadWriter().WriteByte(2);
+            }
+
+            transmitter.SendFrame(response.Frame());
+        }
     }
 }

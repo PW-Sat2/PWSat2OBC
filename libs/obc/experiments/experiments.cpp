@@ -34,7 +34,8 @@ namespace obc
                   epsProvider,
                   errorCounterProvider,
                   temperatureProvider,
-                  &ExperimentsController))
+                  &ExperimentsController),
+              experiment::camera::CameraCommissioningExperiment(fs, time, photoService))
     {
     }
 

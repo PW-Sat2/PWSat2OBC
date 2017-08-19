@@ -82,10 +82,22 @@ class PerformSailExperiment(Telecommand):
         return [self._correlation_id]
 
 
-
 class PerformPayloadCommissioningExperiment(Telecommand):
     def apid(self):
         return 0x20
+
+    def payload(self):
+        return struct.pack('<B', self.correlation_id) + self.file_name + '\0'
+
+    def __init__(self, correlation_id, file_name):
+        Telecommand.__init__(self)
+        self.correlation_id = correlation_id
+        self.file_name = file_name
+
+
+class PerformCameraCommissioningExperiment(Telecommand):
+    def apid(self):
+        return 0x23
 
     def payload(self):
         return struct.pack('<B', self.correlation_id) + self.file_name + '\0'

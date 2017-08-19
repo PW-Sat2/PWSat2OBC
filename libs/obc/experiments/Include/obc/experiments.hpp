@@ -4,6 +4,7 @@
 #include <array>
 #include <tuple>
 #include "experiment/adcs/adcs.hpp"
+#include "experiment/camera/camera_exp.hpp"
 #include "experiment/fibo/fibo.h"
 #include "experiment/flash/flash.hpp"
 #include "experiment/leop/leop.hpp"
@@ -101,8 +102,8 @@ namespace obc
         experiment::erase_flash::EraseFlashExperiment,        //
         experiment::radfet::RadFETExperiment,                 //
         experiment::sail::SailExperiment,                     //
-        experiment::payload::PayloadCommissioningExperiment   //
-        >;
+        experiment::payload::PayloadCommissioningExperiment,  //
+        experiment::camera::CameraCommissioningExperiment>;
 
     /**
      * @brief OBC experiments
