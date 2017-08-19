@@ -123,6 +123,7 @@ namespace obc
          * @param transmitter Frame transmitter
          * @param[in] photoService Reference to object capable of taking photos
          * @param[in] sailState Pin connected to sail indicator
+         * @param imtq IMTQ data provider
          * @param epsProvider Telemetry provider for Payload Experiment
          * @param errorCounterProvider Error Counter telmetry provider
          * @param temperatureProvider MCU telemetry provider
