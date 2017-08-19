@@ -4,6 +4,7 @@
 #include "logger/logger.h"
 #include "power/power.h"
 #include "time/ICurrentTime.hpp"
+#include "utils.h"
 
 using experiments::fs::ExperimentFile;
 using services::fs::FileOpen;
@@ -40,8 +41,8 @@ namespace experiment
             : _powerControl(powerControl), _currentTime(currentTime), _experimentalSunS(experimentalSunS), _payload(payload), _gyro(gyro),
               _fs(fileSystem), _nextSessionAt(0)
         {
-            std::strncpy(_primaryFileName, "/suns", 30);
-            std::strncpy(_secondaryFileName, "/suns.sec", 30);
+            strsafecpy(_primaryFileName, "/suns", 30);
+            strsafecpy(_secondaryFileName, "/suns.sec", 30);
         }
 
         void SunSExperiment::SetParameters(SunSExperimentParams parameters)
@@ -49,12 +50,11 @@ namespace experiment
             this->_parameters = parameters;
         }
 
-        void SunSExperiment::SetOutputFiles(const char* baseName)
+        void SunSExperiment::SetOutputFiles(gsl::cstring_span<> baseName)
         {
-            std::strncpy(this->_primaryFileName, baseName, sizeof(this->_primaryFileName));
-            *std::end(this->_primaryFileName) = '\0';
+            strsafecpy(this->_primaryFileName, baseName);
 
-            std::strncpy(this->_secondaryFileName, this->_primaryFileName, sizeof(this->_primaryFileName));
+            strsafecpy(this->_secondaryFileName, this->_primaryFileName, sizeof(this->_primaryFileName));
             std::strncat(this->_secondaryFileName, "_sec", 4);
         }
 

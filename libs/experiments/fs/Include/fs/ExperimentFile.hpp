@@ -6,6 +6,7 @@
 #include "base/writer.h"
 #include "fs/fs.h"
 #include "time/ICurrentTime.hpp"
+#include "utils.h"
 
 namespace experiments
 {
@@ -34,7 +35,7 @@ namespace experiments
          * near packet end - PID::Padding - 8b
          * until the end - padding data (0xFF)
          */
-        class ExperimentFile final
+        class ExperimentFile final : NotCopyable
         {
           public:
             /** @brief Data packet length.  */
@@ -45,7 +46,8 @@ namespace experiments
             {
                 Reserved = 0,
                 Timestamp = 1, // 8 bytes of data
-                /* 2-16 reserved for control codes */
+                Error = 2,     // 8 bytes of data
+                /* 3-16 reserved for control codes */
                 Gyro = 0x10,                      // 8 bytes of data
                 ExperimentalSunSPrimary = 0x11,   // Experimental SunS primary data, 41 bytes of data
                 ExperimentalSunSSecondary = 0x12, // Experimental SunS primary data, 26 bytes of data
@@ -55,6 +57,15 @@ namespace experiments
                 RadFET = 0x16,                    // RadFET data, 17 bytes
                 Temperature = 0x17,               // Temperature data, 4 bytes
                 Sail = 0x18,                      // 3 bytes of data
+
+                PayloadWhoami = 0x20,       // 1 byte of data
+                PayloadSunS = 0x21,         // 10 bytes of data
+                PayloadTemperatures = 0x22, // 18 bytes of data
+                PayloadPhotodiodes = 0x23,  // 8 bytes of data
+                PayloadHousekeeping = 0x24, // 4 bytes of data
+                PayloadRadFet = 0x25,       // 17 bytes of data
+
+                PayloadExperimentMainTelemetry = 0x30,
 
                 Synchronization = 0x47, // Synchronization PID indicating start of packet. 0 bytes of data.
 
@@ -79,14 +90,14 @@ namespace experiments
              * @brief Move ctor
              * @param other Other object
              */
-            ExperimentFile(ExperimentFile&& other) = default;
+            ExperimentFile(ExperimentFile&& other) noexcept;
 
             /**
              * @brief Move assignment operator
              * @param other Other object
              * @return Reference to this object
              */
-            ExperimentFile& operator=(ExperimentFile&& other) = default;
+            ExperimentFile& operator=(ExperimentFile&& other) noexcept;
 
             /**
              * @brief Destructor

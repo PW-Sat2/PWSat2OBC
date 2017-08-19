@@ -49,7 +49,7 @@ static void SetFileName(std::uint16_t argc, char* argv[])
         return;
     }
 
-    Exp().SetOutputFiles(argv[0]);
+    Exp().SetOutputFiles(gsl::ensure_z(argv[0]));
 
     GetTerminal().Printf("Primary data set: %s\nSecondary data set: %s_sec\n", argv[0], argv[0]);
 }

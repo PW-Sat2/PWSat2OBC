@@ -1,4 +1,5 @@
 #include "ExperimentFile.hpp"
+#include <utility>
 
 using namespace experiments::fs;
 using namespace services::fs;
@@ -14,6 +15,28 @@ ExperimentFile::~ExperimentFile()
     {
         Close();
     }
+}
+
+ExperimentFile::ExperimentFile(ExperimentFile&& other)
+    : _buffer(other._buffer), _time(other._time), _writer(_buffer), _hasPayloadInFrame(other._hasPayloadInFrame)
+{
+    other._time = nullptr;
+    other._hasPayloadInFrame = 0;
+    _file = std::move(other._file);
+    _writer.Reserve(other._writer.GetDataLength());
+}
+
+ExperimentFile& ExperimentFile::operator=(ExperimentFile&& other)
+{
+    ExperimentFile tmp(std::move(other));
+
+    std::swap(_buffer, tmp._buffer);
+    std::swap(_file, tmp._file);
+    std::swap(_time, tmp._time);
+    std::swap(_writer, tmp._writer);
+    std::swap(_hasPayloadInFrame, tmp._hasPayloadInFrame);
+
+    return *this;
 }
 
 bool ExperimentFile::Open(IFileSystem& fs, const char* path, FileOpen mode, FileAccess access)

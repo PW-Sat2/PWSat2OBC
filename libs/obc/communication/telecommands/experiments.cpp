@@ -118,7 +118,7 @@ namespace obc
                 static_cast<std::uint8_t>(params.SamplingSessionsCount()));
 
             this->_setupSunS.SetParameters(params);
-            this->_setupSunS.SetOutputFiles(outputFile.data());
+            this->_setupSunS.SetOutputFiles(outputFile);
 
             auto success = this->_controller.RequestExperiment(experiment::suns::SunSExperiment::Code);
 
@@ -154,8 +154,6 @@ namespace obc
 
             char outputFileName[30];
             auto path = r.ReadString(30);
-            strncpy(outputFileName, path.data(), sizeof(outputFileName));
-            outputFileName[29] = 0;
 
             if (!r.Status() || strlen_n(outputFileName, 30) == 0)
             {
@@ -171,7 +169,7 @@ namespace obc
                 samplesCount,
                 outputFileName);
 
-            this->setupRadFET.Setup(delay, samplesCount, outputFileName);
+            this->setupRadFET.Setup(delay, samplesCount, path);
 
             auto success = this->controller.RequestExperiment(experiment::radfet::RadFETExperiment::Code);
 
@@ -210,6 +208,49 @@ namespace obc
             else
             {
                 writer.WriteByte(2);
+            }
+
+            transmitter.SendFrame(response.Frame());
+        }
+
+        PerformPayloadCommisioningExperiment::PerformPayloadCommisioningExperiment(
+            experiments::IExperimentController& controller, experiment::payload::ISetupPayloadCommissioningExperiment& setupPayload)
+            : _controller(controller), _setupPayload(setupPayload)
+        {
+        }
+
+        void PerformPayloadCommisioningExperiment::Handle(
+            devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
+        {
+            char filePath[30];
+            Reader r(parameters);
+
+            auto correlationId = r.ReadByte();
+            const auto outputFile = r.ReadString(count_of(filePath));
+
+            if (!r.Status() || outputFile.empty())
+            {
+                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+                response.PayloadWriter().WriteByte(0x1);
+                transmitter.SendFrame(response.Frame());
+                return;
+            }
+
+            LOG(LOG_LEVEL_INFO, "Requested Payload Commisioning experiment");
+
+            this->_setupPayload.SetOutputFile(outputFile);
+
+            auto success = this->_controller.RequestExperiment(experiment::payload::PayloadCommissioningExperiment::Code);
+
+            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+
+            if (success)
+            {
+                response.PayloadWriter().WriteByte(0);
+            }
+            else
+            {
+                response.PayloadWriter().WriteByte(2);
             }
 
             transmitter.SendFrame(response.Frame());

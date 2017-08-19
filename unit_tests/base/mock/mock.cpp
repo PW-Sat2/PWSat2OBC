@@ -10,6 +10,8 @@
 #include "mock/LineIOMock.hpp"
 #include "mock/OpenSailMock.hpp"
 #include "mock/PhotoServiceMock.hpp"
+#include "mock/PayloadExperimentTelemetryProviderMock.hpp"
+#include "mock/TemperatureReaderMock.hpp"
 #include "mock/experiment.hpp"
 #include "mock/fm25w.hpp"
 #include "mock/n25q.hpp"
@@ -141,5 +143,19 @@ DeploySolarArrayMock::DeploySolarArrayMock()
 }
 
 DeploySolarArrayMock::~DeploySolarArrayMock()
+{
+}
+
+PayloadExperimentTelemetryProviderMock::PayloadExperimentTelemetryProviderMock()
+{
+}
+PayloadExperimentTelemetryProviderMock::~PayloadExperimentTelemetryProviderMock()
+{
+}
+
+TemperatureReaderMock::TemperatureReaderMock()
+{
+}
+TemperatureReaderMock::~TemperatureReaderMock()
 {
 }
