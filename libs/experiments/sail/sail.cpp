@@ -307,6 +307,7 @@ namespace experiment
 
         void SailExperiment::FinalizeExperiment()
         {
+            this->_photoService.PurgePendingCommands();
             TakePhoto(services::photo::Camera::Wing, services::photo::PhotoResolution::p480);
             TakePhoto(services::photo::Camera::Nadir, services::photo::PhotoResolution::p480);
         }
