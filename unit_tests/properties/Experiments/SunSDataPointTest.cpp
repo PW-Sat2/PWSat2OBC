@@ -153,7 +153,7 @@ namespace
         w.WriteWordLE(point.ExperimentalSunS.temperature.panels[2]);
         w.WriteWordLE(point.ExperimentalSunS.temperature.panels[3]);
 
-        w.WriteByte(num(ExperimentFile::PID::ReferenceSunS));
+        w.WriteByte(num(ExperimentFile::PID::PayloadSunS));
         for (auto v : point.ReferenceSunS.voltages)
         {
             w.WriteWordLE(v);

@@ -237,7 +237,7 @@ namespace experiment
 
                 this->ReferenceSunS.Write(w);
 
-                file.Write(ExperimentFile::PID::ReferenceSunS, w.Capture());
+                file.Write(ExperimentFile::PID::PayloadSunS, w.Capture());
             }
 
             {

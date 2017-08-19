@@ -167,7 +167,7 @@ namespace experiment
 
                 this->ReferenceSunS.Write(w);
 
-                file.Write(PID::ReferenceSunS, w.Capture());
+                file.Write(PID::PayloadSunS, w.Capture());
             }
 
             {
@@ -176,7 +176,7 @@ namespace experiment
 
                 this->Temperatures.Write(w);
 
-                file.Write(PID::AllTemperatures, w.Capture());
+                file.Write(PID::PayloadTemperatures, w.Capture());
             }
 
             {
@@ -185,7 +185,7 @@ namespace experiment
 
                 this->Photodiodes.Write(w);
 
-                file.Write(PID::Photodiodes, w.Capture());
+                file.Write(PID::PayloadPhotodiodes, w.Capture());
             }
 
             {
