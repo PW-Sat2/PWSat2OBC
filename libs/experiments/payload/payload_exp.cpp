@@ -24,13 +24,14 @@ namespace experiment
             services::power::IPowerControl& powerControl,
             services::time::ICurrentTime& time,
             devices::suns::ISunSDriver& experimentalSunS,
+            services::photo::IPhotoService& photoService,
             devices::eps::IEpsTelemetryProvider& epsProvider,
             error_counter::IErrorCountingTelemetryProvider* errorCounterProvider,
             temp::ITemperatureReader* temperatureProvider,
             experiments::IExperimentController* experimentProvider)
             : _payload(payload), _time(time), _fileSystem(fileSystem), _powerControl(powerControl), _experimentalSunS(experimentalSunS),
               _experimentFile(&_time), _telemetryProvider(epsProvider, errorCounterProvider, temperatureProvider, experimentProvider),
-              _currentStep(0)
+              _cameraCommisioningController(_experimentFile, photoService), _currentStep(0)
         {
             std::strncpy(_fileName, DefaultFileName, 30);
         }
@@ -38,6 +39,7 @@ namespace experiment
         void PayloadCommissioningExperiment::SetOutputFile(gsl::cstring_span<> fileName)
         {
             strsafecpy(this->_fileName, fileName);
+            _cameraCommisioningController.SetPhotoFilesBaseName(this->_fileName);
         }
 
         experiments::ExperimentCode PayloadCommissioningExperiment::Type()
@@ -209,7 +211,8 @@ namespace experiment
 
         IterationResult PayloadCommissioningExperiment::CamsFullStep()
         {
-            // TODO: WRITE THAT
+            _cameraCommisioningController.PerformQuickCheck();
+            _cameraCommisioningController.PerformPhotoTest();
 
             return IterationResult::LoopImmediately;
         }

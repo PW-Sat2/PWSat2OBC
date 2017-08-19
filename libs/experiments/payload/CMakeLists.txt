@@ -14,11 +14,13 @@ target_link_libraries(${NAME}
 	payload
 	time
 	exp_fs
+	exp_camera
 	power
 	suns
 	telemetry
 	mcu_temp
 	obc_fdir
+	photo
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

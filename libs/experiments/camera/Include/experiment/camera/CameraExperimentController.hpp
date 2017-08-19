@@ -3,23 +3,42 @@
 
 #include "experiments/experiments.h"
 #include "fs/ExperimentFile.hpp"
-#include "photo/camera_api.hpp"
-#include "photo/photo_service.hpp"
-#include "power/power.h"
+#include "photo/fwd.hpp"
 
 namespace experiment
 {
     namespace camera
     {
+        /**
+         * @brief Class that does Camera Commisioning Experiment logic.
+         * It is created to two allow two experiments (Payload and Camera) could execute the same code.
+         */
         class CameraExperimentController
         {
           public:
-            CameraExperimentController(experiments::fs::ExperimentFile& file,
-                services::power::IPowerControl& powerControl,
-                services::photo::IPhotoService& photoService);
+            /**
+             * @brief Constructor
+             * @param file The experiment file used by parent experiment
+             * @param photoService The Photo Service.
+             */
+            CameraExperimentController(experiments::fs::ExperimentFile& file, services::photo::IPhotoService& photoService);
 
+            /**
+             * @brief Performs quick check
+             * @returns Iteration result.
+             *  */
             experiments::IterationResult PerformQuickCheck();
+
+            /**
+             * @brief Performs photo test
+             * @returns Iteration result.
+             *  */
             experiments::IterationResult PerformPhotoTest();
+
+            /**
+             * @brief Sets base filename for photos generated in Photo Test
+             * @param fileName The base file name.
+             *  */
             void SetPhotoFilesBaseName(const char* fileName);
 
           private:
@@ -28,9 +47,6 @@ namespace experiment
 
             void TakePhoto(services::photo::Camera camera, services::photo::PhotoResolution resolution, uint8_t buffer_number);
             void CameraQuickCheckStep(services::photo::Camera camera);
-
-            /** @brief Power Control Driver */
-            services::power::IPowerControl& _powerControl;
 
             /** @brief Photo service */
             services::photo::IPhotoService& _photoService;
