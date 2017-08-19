@@ -56,6 +56,7 @@ namespace experiment
                 return StartResult::Failure;
             }
 
+            _currentStep = 0;
             return StartResult::Success;
         }
 
