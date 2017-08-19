@@ -7,9 +7,23 @@
 
 namespace telemetry
 {
+    /**
+     * @brief This is an interface for imtq data provider.
+     * @ingroup telemetry
+     */
     struct IImtqDataProvider
     {
+        /**
+         * @brief Gets last measured magnetometer
+         * @param measurements Object for measurements
+         * @return Operation result
+         */
         virtual bool GetLastMagnetometerMeasurement(telemetry::ImtqMagnetometerMeasurements& measurements) = 0;
+        /**
+         * @brief Gets last set dipoles
+         * @param dipoles Object for dipoles
+         * @return Operation result
+         */
         virtual bool GetLastDipoles(telemetry::ImtqDipoles& dipoles) = 0;
     };
 

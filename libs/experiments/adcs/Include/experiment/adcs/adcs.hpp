@@ -28,6 +28,10 @@ namespace experiment
              * @param duration Experiment duration
              */
             virtual void Duration(std::chrono::seconds duration) = 0;
+            /**
+             * @brief Sets sampling rate
+             * @param interval Interval between samples
+             */
             virtual void SampleRate(std::chrono::seconds interval) = 0;
         };
 
@@ -48,6 +52,10 @@ namespace experiment
              * @param adcs ADCS coordinator
              * @param time Current time provider
              * @param powerControl Power control
+             * @param gyro Gyroscope driver
+             * @param payload Payload driver
+             * @param imtq IMTQ data provider
+             * @param fileSystem File system
              */
             DetumblingExperiment(::adcs::IAdcsCoordinator& adcs,
                 services::time::ICurrentTime& time,
@@ -65,9 +73,16 @@ namespace experiment
             virtual experiments::IterationResult Iteration() override;
             virtual void Stop(experiments::IterationResult lastResult) override;
 
+            /**
+             * @brief Gathers measurements from sensors and builds single data point
+             * @return Data point
+             */
             DetumblingDataPoint GatherSingleMeasurement();
 
           private:
+            /**
+             * @brief Reverts system to original state
+             */
             void CleanUp();
 
             /** @brief ADCS coordinator */
@@ -85,9 +100,11 @@ namespace experiment
             devices::gyro::IGyroscopeDriver& _gyro;
             /** @brief Payload driver */
             devices::payload::IPayloadDeviceDriver& _payload;
+            /** @brief IMTQ data provider */
             telemetry::IImtqDataProvider& _imtq;
+            /** @brief File syste, */
             services::fs::IFileSystem& _fileSystem;
-
+            /** @brief Experiment data file */
             experiments::fs::ExperimentFile _dataSet;
         };
     }

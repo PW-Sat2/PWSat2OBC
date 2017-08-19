@@ -55,6 +55,10 @@ namespace devices
                 /** @brief SunS voltages */
                 std::array<std::uint16_t, 5> voltages;
 
+                /**
+                 * @brief Writes payload telemetry to buffeer
+                 * @param writer Writer to write to
+                 */
                 void Write(Writer& writer);
             };
 
@@ -82,6 +86,10 @@ namespace devices
                 /** @brief CAMwing temperature*/
                 std::uint16_t cam_wing;
 
+                /**
+                 * @brief Writes telemetry to buffeer
+                 * @param writer Writer to write to
+                 */
                 void Write(Writer& writer);
             };
 
@@ -99,6 +107,10 @@ namespace devices
                 /** @brief Y- photodiode measurement */
                 std::uint16_t Yn;
 
+                /**
+                 * @brief Writes telemetry to buffeer
+                 * @param writer Writer to write to
+                 */
                 void Write(Writer& writer);
             };
 
