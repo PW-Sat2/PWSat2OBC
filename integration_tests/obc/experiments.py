@@ -16,7 +16,7 @@ class ExperimentType(IntEnum):
     Sail = 7
     Fibo = 8
     Payload = 9
-    
+    Camera = 10
 
 @unique
 class StartResult(IntEnum):

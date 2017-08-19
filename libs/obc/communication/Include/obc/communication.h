@@ -155,6 +155,7 @@ namespace obc
         obc::telecommands::PerformPayloadCommisioningExperiment,
         obc::telecommands::GetPersistentStateTelecommand,
         obc::telecommands::PurgePhoto,
+        obc::telecommands::PerformCameraCommisioningExperiment,
         obc::telecommands::SendPeriodicMessageTelecommand>;
 
     /**
