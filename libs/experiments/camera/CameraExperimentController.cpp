@@ -55,8 +55,8 @@ namespace experiment
 
         IterationResult CameraExperimentController::PerformPhotoTest()
         {
-            _photoService.EnableCamera(Camera::Nadir);
-            _photoService.EnableCamera(Camera::Wing);
+            this->_photoService.EnableCamera(Camera::Nadir);
+            this->_photoService.EnableCamera(Camera::Wing);
 
             TakePhoto(Camera::Nadir, PhotoResolution::p128, 0);
             TakePhoto(Camera::Nadir, PhotoResolution::p240, 1);
@@ -66,13 +66,20 @@ namespace experiment
             TakePhoto(Camera::Wing, PhotoResolution::p240, 4);
             TakePhoto(Camera::Wing, PhotoResolution::p480, 5);
 
+            this->_photoService.DisableCamera(Camera::Nadir);
+            this->_photoService.DisableCamera(Camera::Wing);
+            this->_photoService.WaitForFinish(InfiniteTimeout);
+
             for (int i = 0; i < 6; ++i)
             {
-                _photoService.SavePhoto(i, "%s_%d.jpg", _fileName, i);
+                if (!this->_photoService.IsEmpty(i))
+                {
+                    this->_photoService.SavePhoto(i, "%s_%d.jpg", _fileName, i);
+                }
             }
 
-            _photoService.DisableCamera(Camera::Nadir);
-            _photoService.DisableCamera(Camera::Wing);
+            this->_photoService.Reset();
+            this->_photoService.WaitForFinish(InfiniteTimeout);
 
             return IterationResult::LoopImmediately;
         }

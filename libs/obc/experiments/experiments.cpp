@@ -35,7 +35,8 @@ namespace obc
                   errorCounterProvider,
                   temperatureProvider,
                   &ExperimentsController),
-              experiment::sads::SADSExperiment(fs, adcs, gyro, payload, powerControl, photoService, time))
+              experiment::sads::SADSExperiment(fs, adcs, gyro, payload, powerControl, photoService, time),
+              experiment::camera::CameraCommissioningExperiment(fs, time, photoService))
     {
     }
 
