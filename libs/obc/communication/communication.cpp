@@ -71,8 +71,10 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           PerformPayloadCommisioningExperiment(
               experiments.ExperimentsController, experiments.Get<experiment::payload::PayloadCommissioningExperiment>()), //
           GetPersistentStateTelecommand(stateContainer),                                                                  //
-          PurgePhoto(photo)                                                                                               //
-          ),                                                                                                              //
+          PurgePhoto(photo),                                                                                              //
+          PerformCameraCommisioningExperiment(
+              experiments.ExperimentsController, experiments.Get<experiment::camera::CameraCommissioningExperiment>()) //
+          ),                                                                                                           //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {
 }

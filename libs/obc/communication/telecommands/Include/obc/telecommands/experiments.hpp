@@ -191,6 +191,36 @@ namespace obc
             /** @brief payload experiments settings */
             experiment::payload::ISetupPayloadCommissioningExperiment& _setupPayload;
         };
+
+        /**
+         * @brief Perform Camera Commisioning experiment telecommand
+         * @ingroup obc_telecommands
+         * @telecommand
+         *
+         * Code: 0x23
+         * Parameters:
+         *  - Correlation ID (8-bit)
+         *  - Output file name (string, null-terminated, up to 30 charactes including terminator)
+         */
+        class PerformCameraCommisioningExperiment final : public telecommunication::uplink::Telecommand<0x23>
+        {
+          public:
+            /**
+             * @brief Ctor
+             * @param controller Experiments controller
+             * @param setupCamera Interface for setting up Camera experiment
+             */
+            PerformCameraCommisioningExperiment(
+                experiments::IExperimentController& controller, experiment::camera::ISetupCameraCommissioningExperiment& setupCamera);
+
+            virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
+
+          private:
+            /** @brief Experiments controller */
+            experiments::IExperimentController& _controller;
+            /** @brief camera experiments settings */
+            experiment::camera::ISetupCameraCommissioningExperiment& _setupCamera;
+        };
     }
 }
 

@@ -52,6 +52,7 @@ namespace
     CameraExperimentTest::CameraExperimentTest() : _exp(_fs, _time, _photo), comctl(hhh, _photo)
     {
         ON_CALL(_photo, GetLastSyncResult(_)).WillByDefault(Return(services::photo::SyncResult(true, 1)));
+        ON_CALL(_photo, IsEmpty(_)).WillByDefault(Return(false));
 
         ON_CALL(this->_time, GetCurrentTime()).WillByDefault(Return(Some(10ms)));
 
@@ -109,9 +110,9 @@ namespace
         EXPECT_CALL(_photo, TakePhoto(Camera::Wing, services::photo::PhotoResolution::p480)).Times(1);
         EXPECT_CALL(_photo, DownloadPhoto(_, _));
 
-        EXPECT_CALL(_photo, SavePhotoToFile(_, _)).Times(6);
-
         EXPECT_CALL(_photo, DisableCamera(_)).Times(2);
+
+        EXPECT_CALL(_photo, SavePhotoToFile(_, _)).Times(6);
 
         auto r = _exp.Iteration();
         ASSERT_THAT(r, Eq(IterationResult::LoopImmediately));

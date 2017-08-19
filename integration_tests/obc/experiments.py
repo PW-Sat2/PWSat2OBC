@@ -12,6 +12,7 @@ class ExperimentType(IntEnum):
     LEOP = 4
     SunS = 3
     RadFET = 5
+    Camera = 6
     Sail = 7
     Fibo = 8
     Payload = 9
