@@ -272,7 +272,7 @@ namespace experiment
                 return false;
             }
 
-            auto writeResult = file.Write(ExperimentFile::PID::Temperature, writer.Capture());
+            auto writeResult = file.Write(ExperimentFile::PID::SupplySADSTemperature, writer.Capture());
             if (OS_RESULT_FAILED(writeResult))
             {
                 LOGF(LOG_LEVEL_ERROR, "Can't write to file (reason: %d)", static_cast<int>(writeResult));
