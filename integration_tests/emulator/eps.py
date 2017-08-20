@@ -2,27 +2,30 @@ import wx
 from wx import xrc
 
 from .base import ModuleBase, bind
+from devices.eps import LCL
+
 
 class EPSModule(ModuleBase):
     def __init__(self, system):
         self._system = system
 
         self.title = 'EPS'
-        self.grid_pos = (1, 1)
+        self.grid_pos = (1, 0)
+        self.grid_span = (1, 1)
 
     def load(self, res, parent):
         self._panel = res.LoadPanel(parent, 'EPSModule')
         self.bind_handlers()
 
-        self._tkmain_value = xrc.XRCCTRL(self._panel, 'eps_tkmain_value')
-        self._tkred_value = xrc.XRCCTRL(self._panel, 'eps_tkred_value')
+        self._tkmain = xrc.XRCCTRL(self._panel, 'tkmain')
+        self._tkred = xrc.XRCCTRL(self._panel, 'tkred')
 
-        self._eps_suns_value = xrc.XRCCTRL(self._panel, 'eps_suns_value')
-        self._eps_camnadir_value = xrc.XRCCTRL(self._panel, 'eps_camnadir_value')
-        self._eps_camwing_value = xrc.XRCCTRL(self._panel, 'eps_camwing_value')
-        self._eps_sens_value = xrc.XRCCTRL(self._panel, 'eps_sens_value')
-        self._eps_antenna_value = xrc.XRCCTRL(self._panel, 'eps_antenna_value')
-        self._eps_antennared_value = xrc.XRCCTRL(self._panel, 'eps_antennared_value')
+        self._eps_suns = xrc.XRCCTRL(self._panel, 'suns')
+        self._eps_camnadir = xrc.XRCCTRL(self._panel, 'cam_nadir')
+        self._eps_camwing = xrc.XRCCTRL(self._panel, 'cam_wing')
+        self._eps_sens = xrc.XRCCTRL(self._panel, 'sens')
+        self._eps_antenna = xrc.XRCCTRL(self._panel, 'antenna')
+        self._eps_antennared = xrc.XRCCTRL(self._panel, 'antenna_red')
 
         self._eps_sailmain_value = xrc.XRCCTRL(self._panel, 'eps_sailmain_value')
         self._eps_sailred_value = xrc.XRCCTRL(self._panel, 'eps_sailred_value')
@@ -33,30 +36,19 @@ class EPSModule(ModuleBase):
         return '#009400' if value else 'red'
 
     def update(self):
-        self._tkmain_value.SetLabel(str(self._system.eps.TKmain.is_on))
-        self._tkred_value.SetLabel(str(self._system.eps.TKred.is_on))
-
-        self._eps_suns_value.SetLabel(str(self._system.eps.SunS.is_on))
-        self._eps_camnadir_value.SetLabel(str(self._system.eps.CamNadir.is_on))
-        self._eps_camwing_value.SetLabel(str(self._system.eps.CamWing.is_on))
-        self._eps_sens_value.SetLabel(str(self._system.eps.SENS.is_on))
-        self._eps_antenna_value.SetLabel(str(self._system.eps.ANTenna.is_on))
-        self._eps_antennared_value.SetLabel(str(self._system.eps.ANTennaRed.is_on))
+        self._tkmain.SetValue(self._system.eps.TKmain.is_on)
+        self._tkred.SetValue(self._system.eps.TKred.is_on)
+        self._eps_suns.SetValue(self._system.eps.SunS.is_on)
+        self._eps_camnadir.SetValue(self._system.eps.CamNadir.is_on)
+        self._eps_camwing.SetValue(self._system.eps.CamWing.is_on)
+        self._eps_sens.SetValue(self._system.eps.SENS.is_on)
+        self._eps_antenna.SetValue(self._system.eps.ANTenna.is_on)
+        self._eps_antennared.SetValue(self._system.eps.ANTennaRed.is_on)
 
         self._eps_sailmain_value.SetLabel(str(self._system.eps.SAILmain.enabled))
         self._eps_sailred_value.SetLabel(str(self._system.eps.SAILred.enabled))
         self._eps_sadsmain_value.SetLabel(str(self._system.eps.SADSmain.enabled))
         self._eps_sadsred_value.SetLabel(str(self._system.eps.SADSred.enabled))
-
-        self._tkmain_value.SetForegroundColour(self.get_color(self._system.eps.TKmain.is_on))
-        self._tkred_value.SetForegroundColour(self.get_color(self._system.eps.TKred.is_on))
-
-        self._eps_suns_value.SetForegroundColour(self.get_color(self._system.eps.SunS.is_on))
-        self._eps_camnadir_value.SetForegroundColour(self.get_color(self._system.eps.CamNadir.is_on))
-        self._eps_camwing_value.SetForegroundColour(self.get_color(self._system.eps.CamWing.is_on))
-        self._eps_sens_value.SetForegroundColour(self.get_color(self._system.eps.SENS.is_on))
-        self._eps_antenna_value.SetForegroundColour(self.get_color(self._system.eps.ANTenna.is_on))
-        self._eps_antennared_value.SetForegroundColour(self.get_color(self._system.eps.ANTennaRed.is_on))
 
         self._eps_sailmain_value.SetForegroundColour(self.get_color(self._system.eps.SAILmain.enabled))
         self._eps_sailred_value.SetForegroundColour(self.get_color(self._system.eps.SAILred.enabled))
@@ -66,13 +58,20 @@ class EPSModule(ModuleBase):
     def root(self):
         return self._panel
 
-    @bind('eps_tkmain_disable', wx.EVT_BUTTON, args=('TKmain',))
-    @bind('eps_tkred_disable', wx.EVT_BUTTON, args=('TKred',))
-    @bind('eps_suns_disable', wx.EVT_BUTTON, args=('SunS',))
-    @bind('eps_camnadir_disable', wx.EVT_BUTTON, args=('CamNadir',))
-    @bind('eps_camwing_disable', wx.EVT_BUTTON, args=('CamWing',))
-    @bind('eps_sens_disable', wx.EVT_BUTTON, args=('SENS',))
-    @bind('eps_antenna_disable', wx.EVT_BUTTON, args=('ANTenna',))
-    @bind('eps_antennared_disable', wx.EVT_BUTTON, args=('ANTennaRed',))
-    def _disable_lcl(self, evt, lcl_name):
-        getattr(self._system.eps, lcl_name).off()
+    @bind('tkmain', wx.EVT_TOGGLEBUTTON, args=('TKmain',))
+    @bind('tkred', wx.EVT_TOGGLEBUTTON, args=('TKred',))
+    @bind('suns', wx.EVT_TOGGLEBUTTON, args=('SunS',))
+    @bind('cam_nadir', wx.EVT_TOGGLEBUTTON, args=('CamNadir',))
+    @bind('cam_wing', wx.EVT_TOGGLEBUTTON, args=('CamWing',))
+    @bind('sens', wx.EVT_TOGGLEBUTTON, args=('SENS',))
+    @bind('antenna', wx.EVT_TOGGLEBUTTON, args=('ANTenna',))
+    @bind('antenna_red', wx.EVT_TOGGLEBUTTON, args=('ANTennaRed',))
+    def toggle(self, evt, lcl_name):
+        lcl = getattr(self._system.eps, lcl_name)  # type: LCL
+
+        v = evt.EventObject.GetValue()
+
+        if lcl.is_on and not v:
+            lcl.off()
+        elif not lcl.is_on and v:
+            lcl.on()

@@ -10,6 +10,7 @@ class PayloadModule(ModuleBase):
 
         self.title = 'Payload'
         self.grid_pos = (0, 2)
+        self.grid_span = (1, 2)
 
     def load(self, res, parent):
         self._panel = res.LoadPanel(parent, 'PayloadModule')

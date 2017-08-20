@@ -3,12 +3,14 @@ from wx import xrc
 
 from .base import ModuleBase, bind
 
+
 class AntennaModule(ModuleBase):
-    def __init__(self, name, pos,  antenna_controller):
+    def __init__(self, name, pos, antenna_controller):
         self._antenna_controller = antenna_controller
         self._panel = None
         self.title = 'Antenna ({})'.format(name)
         self.grid_pos = pos
+        self.grid_span = (1, 1)
 
     def load(self, res, parent):
         self._panel = res.LoadPanel(parent, 'AntennaModule')
@@ -56,3 +58,34 @@ class AntennaModule(ModuleBase):
     @bind('antenna4_deploy_cancel', wx.EVT_BUTTON, args=(3,))
     def _on_antenna_deploy_cancel(self, evt, antenna_id):
         self._antenna_controller.antenna_state[antenna_id].is_being_deployed = False
+
+
+class AntennasModule(ModuleBase):
+    def __init__(self, system):
+        self.title = 'Antennas'
+        self.grid_pos = (0, 0)
+        self.grid_span = (1, 2)
+
+        self._primary = AntennaModule('Primary', (0, 0), system.primary_antenna)
+        self._backup = AntennaModule('Backup', (0, 1), system.backup_antenna)
+
+    def load(self, res, parent):
+        self._panel = res.LoadPanel(parent, 'AntennasModule')  # type: wx.Panel
+
+        sizer = self._panel.GetSizer()  # type: wx.Sizer
+
+        self._primary.load(res, self._panel)
+        self._backup.load(res, self._panel)
+
+        sizer.Add(self._primary.root())
+        sizer.Add(self._backup.root())
+
+        self._primary.root().Layout()
+        self._backup.root().Layout()
+
+    def root(self):
+        return self._panel
+
+    def update(self):
+        self._primary.update()
+        self._backup.update()

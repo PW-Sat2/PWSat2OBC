@@ -18,7 +18,7 @@ class Emulator:
 
         for module in self._modules:
             module_sizer = wx.StaticBoxSizer(wx.StaticBox(self._frame, label=module.title))
-            modules_sizer.Add(module_sizer, module.grid_pos)
+            modules_sizer.Add(module_sizer, module.grid_pos, span=module.grid_span)
             module_panel = wx.Panel(self._frame)
             module_sizer.Add(module_panel)
             module.load(res, module_panel)

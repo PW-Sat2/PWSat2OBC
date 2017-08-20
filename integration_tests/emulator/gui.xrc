@@ -25,7 +25,7 @@
 	</object>
 	<object class="wxPanel" name="AntennaModule">
 		<style>wxTAB_TRAVERSAL</style>
-		<size>573,320</size>
+		<size>570,180</size>
 		<object class="wxBoxSizer">
 			<orient>wxVERTICAL</orient>
 			<object class="sizeritem">
@@ -237,136 +237,68 @@
 			</object>
 		</object>
 	</object>
-	<object class="wxPanel" name="RTCModule">
+	<object class="wxPanel" name="COMMModule">
 		<style>wxTAB_TRAVERSAL</style>
-		<size>500,300</size>
+		<size>210,290</size>
 		<object class="wxBoxSizer">
 			<orient>wxVERTICAL</orient>
 			<object class="sizeritem">
 				<option>0</option>
 				<flag>wxALL</flag>
 				<border>5</border>
-				<object class="wxStaticText" name="rtc_time">
-					<label>RTC Mock current time: 00 - 00 - 00</label>
+				<object class="wxStaticText" name="current_comm_queue_size">
+					<label>Comm queue size: 0</label>
 					<wrap>-1</wrap>
 				</object>
 			</object>
 			<object class="sizeritem">
-				<option>1</option>
-				<flag></flag>
+				<option>0</option>
+				<flag>wxALL</flag>
 				<border>5</border>
-				<object class="wxBoxSizer">
-					<orient>wxHORIZONTAL</orient>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxButton" name="rtc_stop">
-							<label>Stop</label>
-							<default>0</default>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxButton" name="rtc_start">
-							<label>Start</label>
-							<default>0</default>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxButton" name="rtc_advance_5min">
-							<label>Advance 5 minutes</label>
-							<default>0</default>
-						</object>
-					</object>
+				<object class="wxButton" name="comm_reset_queue">
+					<label>Reset queue</label>
+					<default>0</default>
 				</object>
 			</object>
 			<object class="sizeritem">
-				<option>1</option>
-				<flag>wxEXPAND</flag>
+				<option>0</option>
+				<flag>wxALL</flag>
 				<border>5</border>
-				<object class="wxBoxSizer">
-					<orient>wxVERTICAL</orient>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxStaticText" name="current_comm_queue_size">
-							<label>Comm queue size: 0</label>
-							<wrap>-1</wrap>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<option>1</option>
-						<flag>wxEXPAND</flag>
-						<border>5</border>
-						<object class="wxBoxSizer">
-							<orient>wxHORIZONTAL</orient>
-							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
-								<border>5</border>
-								<object class="wxButton" name="comm_reset_queue">
-									<label>Reset queue</label>
-									<default>0</default>
-								</object>
-							</object>
-							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
-								<border>5</border>
-								<object class="wxButton" name="comm_get_frame">
-									<label>Get Frame</label>
-									<default>0</default>
-								</object>
-							</object>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxStaticText" name="current_beacon_timestamp">
-							<label>No last beacon information</label>
-							<wrap>-1</wrap>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<option>1</option>
-						<flag>wxEXPAND</flag>
-						<border>5</border>
-						<object class="wxBoxSizer">
-							<orient>wxHORIZONTAL</orient>
-							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
-								<border>5</border>
-								<object class="wxButton" name="show_beacon_frame">
-									<label>Show Beacon</label>
-									<default>0</default>
-								</object>
-							</object>
-							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
-								<border>5</border>
-								<object class="wxButton" name="send_beacon">
-									<label>[TC] Send Beacon</label>
-									<default>0</default>
-								</object>
-							</object>
-						</object>
-					</object>
+				<object class="wxButton" name="comm_get_frame">
+					<label>Get Frame</label>
+					<default>0</default>
+				</object>
+			</object>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxALL</flag>
+				<border>5</border>
+				<object class="wxStaticText" name="current_beacon_timestamp">
+					<label>No last beacon information\n</label>
+					<wrap>-1</wrap>
+				</object>
+			</object>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxALL</flag>
+				<border>5</border>
+				<object class="wxButton" name="show_beacon_frame">
+					<label>Show Beacon</label>
+					<default>0</default>
+				</object>
+			</object>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxALL</flag>
+				<border>5</border>
+				<object class="wxButton" name="send_beacon">
+					<label>[TC] Send Beacon</label>
+					<default>0</default>
 				</object>
 			</object>
 		</object>
 	</object>
-	<object class="wxPanel" name="EPSModule">
+	<object class="wxPanel" name="EPSModule2">
 		<style>wxTAB_TRAVERSAL</style>
 		<size>550,350</size>
 		<object class="wxBoxSizer">
@@ -426,8 +358,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxALIGN_LEFT|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="eps_tkmain_label">
 									<label>TKMain</label>
@@ -435,8 +367,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxALIGN_LEFT|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="eps_tkmain_value">
 									<label>TKMain__value</label>
@@ -444,8 +376,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_LEFT|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxButton" name="eps_tkmain_disable">
 									<label>Disable</label>
@@ -453,8 +385,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="eps_tkred_label">
 									<label>TKRed</label>
@@ -462,8 +394,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxBOTTOM|wxLEFT|wxTOP</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="eps_tkred_value">
 									<label>TKred__value</label>
@@ -480,8 +412,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="m_staticText17">
 									<label>SunS</label>
@@ -489,8 +421,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="eps_suns_value">
 									<label>SunS__value</label>
@@ -507,8 +439,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="m_staticText19">
 									<label>CamNadir</label>
@@ -516,8 +448,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxLEFT|wxALIGN_CENTER_VERTICAL</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="eps_camnadir_value">
 									<label>CamNadri__value</label>
@@ -534,8 +466,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="m_staticText21">
 									<label>CamWing</label>
@@ -543,8 +475,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="eps_camwing_value">
 									<label>CamWing__value</label>
@@ -561,8 +493,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="m_staticText23">
 									<label>SENS</label>
@@ -570,8 +502,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="eps_sens_value">
 									<label>SENS__value</label>
@@ -588,8 +520,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="m_staticText25">
 									<label>ANTenna</label>
@@ -597,8 +529,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="eps_antenna_value">
 									<label>ANTenna__value</label>
@@ -615,8 +547,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="m_staticText27">
 									<label>ANTennaRed</label>
@@ -624,8 +556,8 @@
 								</object>
 							</object>
 							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALL</flag>
+								<option>1</option>
+								<flag>wxALIGN_CENTER_VERTICAL|wxLEFT</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="eps_antennared_value">
 									<label>ANTennaRed__value</label>
@@ -747,6 +679,15 @@
 								<object class="wxStaticText" name="eps_sadsred_value">
 									<label>SADSred__value</label>
 									<wrap>-1</wrap>
+								</object>
+							</object>
+							<object class="sizeritem">
+								<option>0</option>
+								<flag>wxALL</flag>
+								<border>5</border>
+								<object class="wxToggleButton" name="m_toggleBtn1">
+									<label>Toggle me!</label>
+									<checked>1</checked>
 								</object>
 							</object>
 						</object>
@@ -1434,6 +1375,302 @@
 							</object>
 						</object>
 					</object>
+				</object>
+			</object>
+		</object>
+	</object>
+	<object class="wxPanel" name="AntennasModule">
+		<style>wxTAB_TRAVERSAL</style>
+		<size>570,390</size>
+		<object class="wxBoxSizer">
+			<orient>wxVERTICAL</orient>
+		</object>
+	</object>
+	<object class="wxPanel" name="EPSModule">
+		<style>wxTAB_TRAVERSAL</style>
+		<size>320,290</size>
+		<object class="wxBoxSizer">
+			<orient>wxVERTICAL</orient>
+			<object class="sizeritem">
+				<option>1</option>
+				<flag>wxEXPAND</flag>
+				<border>5</border>
+				<object class="wxFlexGridSizer">
+					<rows>2</rows>
+					<cols>1</cols>
+					<vgap>0</vgap>
+					<hgap>0</hgap>
+					<growablecols></growablecols>
+					<growablerows></growablerows>
+					<object class="sizeritem">
+						<option>1</option>
+						<flag>wxEXPAND</flag>
+						<border>5</border>
+						<object class="wxStaticBoxSizer">
+							<orient>wxVERTICAL</orient>
+							<label>LCL</label>
+							<object class="sizeritem">
+								<option>1</option>
+								<flag>wxEXPAND</flag>
+								<border>5</border>
+								<object class="wxFlexGridSizer">
+									<rows>0</rows>
+									<cols>3</cols>
+									<vgap>0</vgap>
+									<hgap>0</hgap>
+									<growablecols></growablecols>
+									<growablerows></growablerows>
+									<object class="sizeritem">
+										<option>0</option>
+										<flag>wxALL</flag>
+										<border>5</border>
+										<object class="wxToggleButton" name="tkmain">
+											<label>TKmain</label>
+											<checked>0</checked>
+										</object>
+									</object>
+									<object class="sizeritem">
+										<option>0</option>
+										<flag>wxALL</flag>
+										<border>5</border>
+										<object class="wxToggleButton" name="tkred">
+											<label>TKred</label>
+											<checked>0</checked>
+										</object>
+									</object>
+									<object class="sizeritem">
+										<option>0</option>
+										<flag>wxALL</flag>
+										<border>5</border>
+										<object class="wxToggleButton" name="suns">
+											<label>SunS</label>
+											<checked>0</checked>
+										</object>
+									</object>
+									<object class="sizeritem">
+										<option>0</option>
+										<flag>wxALL</flag>
+										<border>5</border>
+										<object class="wxToggleButton" name="cam_nadir">
+											<label>CamNadir</label>
+											<checked>0</checked>
+										</object>
+									</object>
+									<object class="sizeritem">
+										<option>0</option>
+										<flag>wxALL</flag>
+										<border>5</border>
+										<object class="wxToggleButton" name="cam_wing">
+											<label>CamWing</label>
+											<checked>0</checked>
+										</object>
+									</object>
+									<object class="sizeritem">
+										<option>0</option>
+										<flag>wxALL</flag>
+										<border>5</border>
+										<object class="wxToggleButton" name="sens">
+											<label>SENS</label>
+											<checked>0</checked>
+										</object>
+									</object>
+									<object class="sizeritem">
+										<option>0</option>
+										<flag>wxALL</flag>
+										<border>5</border>
+										<object class="wxToggleButton" name="antenna">
+											<label>ANTenna</label>
+											<checked>0</checked>
+										</object>
+									</object>
+									<object class="sizeritem">
+										<option>0</option>
+										<flag>wxALL</flag>
+										<border>5</border>
+										<object class="wxToggleButton" name="antenna_red">
+											<label>ANTennaRed</label>
+											<checked>0</checked>
+										</object>
+									</object>
+								</object>
+							</object>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>1</option>
+						<flag>wxEXPAND</flag>
+						<border>5</border>
+						<object class="wxFlexGridSizer">
+							<rows>0</rows>
+							<cols>2</cols>
+							<vgap>0</vgap>
+							<hgap>0</hgap>
+							<growablecols></growablecols>
+							<growablerows></growablerows>
+							<object class="sizeritem">
+								<option>0</option>
+								<flag>wxALL</flag>
+								<border>5</border>
+								<object class="wxStaticText" name="m_staticText30">
+									<font>
+										<style>normal</style>
+										<weight>bold</weight>
+										<underlined>0</underlined>
+									</font>
+									<label>Burn Switches</label>
+									<wrap>-1</wrap>
+								</object>
+							</object>
+							<object class="sizeritem">
+								<option>0</option>
+								<flag>wxALL</flag>
+								<border>5</border>
+								<object class="wxStaticText" name="m_staticText31">
+									<label></label>
+									<wrap>-1</wrap>
+								</object>
+							</object>
+							<object class="sizeritem">
+								<option>0</option>
+								<flag>wxALL</flag>
+								<border>5</border>
+								<object class="wxStaticText" name="m_staticText32">
+									<label>SAILmain</label>
+									<wrap>-1</wrap>
+								</object>
+							</object>
+							<object class="sizeritem">
+								<option>0</option>
+								<flag>wxALL</flag>
+								<border>5</border>
+								<object class="wxStaticText" name="eps_sailmain_value">
+									<label>SAILmain__value</label>
+									<wrap>-1</wrap>
+								</object>
+							</object>
+							<object class="sizeritem">
+								<option>0</option>
+								<flag>wxALL</flag>
+								<border>5</border>
+								<object class="wxStaticText" name="m_staticText34">
+									<label>SAILred</label>
+									<wrap>-1</wrap>
+								</object>
+							</object>
+							<object class="sizeritem">
+								<option>0</option>
+								<flag>wxALL</flag>
+								<border>5</border>
+								<object class="wxStaticText" name="eps_sailred_value">
+									<label>SAILred__value</label>
+									<wrap>-1</wrap>
+								</object>
+							</object>
+							<object class="sizeritem">
+								<option>0</option>
+								<flag>wxALL</flag>
+								<border>5</border>
+								<object class="wxStaticText" name="m_staticText36">
+									<label>SADSmain</label>
+									<wrap>-1</wrap>
+								</object>
+							</object>
+							<object class="sizeritem">
+								<option>0</option>
+								<flag>wxALL</flag>
+								<border>5</border>
+								<object class="wxStaticText" name="eps_sadsmain_value">
+									<label>SADSmain__value</label>
+									<wrap>-1</wrap>
+								</object>
+							</object>
+							<object class="sizeritem">
+								<option>0</option>
+								<flag>wxALL</flag>
+								<border>5</border>
+								<object class="wxStaticText" name="m_staticText38">
+									<label>SADSred</label>
+									<wrap>-1</wrap>
+								</object>
+							</object>
+							<object class="sizeritem">
+								<option>0</option>
+								<flag>wxALL</flag>
+								<border>5</border>
+								<object class="wxStaticText" name="eps_sadsred_value">
+									<label>SADSred__value</label>
+									<wrap>-1</wrap>
+								</object>
+							</object>
+						</object>
+					</object>
+				</object>
+			</object>
+		</object>
+	</object>
+	<object class="wxPanel" name="RTCModule">
+		<style>wxTAB_TRAVERSAL</style>
+		<size>200,290</size>
+		<object class="wxBoxSizer">
+			<orient>wxVERTICAL</orient>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxALL</flag>
+				<border>5</border>
+				<object class="wxStaticText" name="rtc_time">
+					<label>RTC Mock current time: \n00 - 00 - 00</label>
+					<wrap>-1</wrap>
+				</object>
+			</object>
+			<object class="sizeritem">
+				<option>1</option>
+				<flag></flag>
+				<border>5</border>
+				<object class="wxBoxSizer">
+					<orient>wxVERTICAL</orient>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="rtc_stop">
+							<label>Stop</label>
+							<default>0</default>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="rtc_start">
+							<label>Start</label>
+							<default>0</default>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="rtc_advance_5min">
+							<label>Advance 5 minutes</label>
+							<default>0</default>
+						</object>
+					</object>
+				</object>
+			</object>
+		</object>
+	</object>
+	<object class="wxPanel" name="LastFramesModule">
+		<style>wxTAB_TRAVERSAL</style>
+		<size>500,290</size>
+		<object class="wxBoxSizer">
+			<orient>wxVERTICAL</orient>
+			<object class="sizeritem">
+				<option>1</option>
+				<flag>wxALL|wxBOTTOM|wxEXPAND</flag>
+				<border>5</border>
+				<object class="wxListBox" name="last_frames">
+					<style>wxHSCROLL|wxVSCROLL</style>
+					<content />
 				</object>
 			</object>
 		</object>
