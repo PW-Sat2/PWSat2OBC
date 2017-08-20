@@ -1,6 +1,5 @@
-from base import *
+from parsec import joint
+from parsing import *
 
-AntennaConfiguration = joint(
-        field('Deployment Disabled', boolean)
-    ).bind(to_dict)
+AntennaConfiguration = field('Deployment Disabled', boolean)
 AntennaConfiguration >>= label_as('Antenna Configuration')

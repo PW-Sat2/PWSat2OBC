@@ -1,6 +1,6 @@
 from parsec import joint
-
-from base import pid, bytes_block, label_as, field, to_dict, byte, uint16, count
+from base import pid, count
+from parsing import *
 
 ExperimentalSunSStatus = joint(
     field('ALS_ACK', uint16),
@@ -23,7 +23,7 @@ Temperatures = joint(
 
 ExperimentalSunSPrimary = pid(0x11) \
                           >> joint(
-                            field('WhoAmI ', byte.parsecmap(ord)),
+                            field('WhoAmI ', byte),
                             field('Status', ExperimentalSunSStatus),
                             field('VisibleLight', ALSs),
                             field('Temperatures', Temperatures),
@@ -34,8 +34,8 @@ ExperimentalSunSSecondary = pid(0x12) \
                             >> joint(
                                 field('Parameters',
                                       joint(
-                                          field('gain', byte.parsecmap(ord)),
-                                          field('itime', byte.parsecmap(ord))
+                                          field('gain', byte),
+                                          field('itime', byte)
                                       ).bind(to_dict)
                                 ),
                                 field('Infrared', ALSs)

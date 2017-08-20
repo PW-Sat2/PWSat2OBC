@@ -1,4 +1,5 @@
-from base import *
+from parsec import joint
+from parsing import *
 
 CounterConfig = joint(
     field('Limit', byte),

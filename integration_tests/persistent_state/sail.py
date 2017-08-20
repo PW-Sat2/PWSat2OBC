@@ -1,4 +1,5 @@
-from base import *
+from parsec import joint
+from parsing import *
 from enum import Enum, unique
 
 @unique
@@ -9,7 +10,5 @@ class SailOpeningState(Enum):
 
 sailState = packed('<B').parsecmap(lambda x: SailOpeningState(x))
 
-SailState = joint(
-        field('Deployed', sailState)
-    ).bind(to_dict)
+SailState = field('Deployed', sailState)
 SailState >>= label_as('Sail State')
