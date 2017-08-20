@@ -13,6 +13,7 @@ from i2c import *
 from suns import *
 from photo import *
 from sads import *
+from state import *
 
 __all__ = [
     'DownloadFile',
@@ -37,6 +38,7 @@ __all__ = [
     'GetSunSDataSets',
     'PerformSailExperiment',
     'TakePhotoTelecommand',
-    "DeploySolarArrayTelecommand"
+    'DeploySolarArrayTelecommand',
+    'GetPersistentState'
 ]
 

@@ -69,8 +69,9 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           TakePhoto(photo),                                                                                                           //
           DeploySolarArray(deploySolarArray),                                                                                         //
           PerformPayloadCommisioningExperiment(
-              experiments.ExperimentsController, experiments.Get<experiment::payload::PayloadCommissioningExperiment>()) //
-          ),                                                                                                             //
+              experiments.ExperimentsController, experiments.Get<experiment::payload::PayloadCommissioningExperiment>()), //
+          GetPersistentStateTelecommand(stateContainer)                                                                   //
+          ),                                                                                                              //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {
 }
