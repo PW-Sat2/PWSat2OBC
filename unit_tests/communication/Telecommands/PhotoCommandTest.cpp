@@ -11,6 +11,8 @@ namespace
     using testing::Eq;
     using testing::An;
 
+    using namespace std::chrono_literals;
+
     class PhotoCommandTest : public testing::Test
     {
       protected:
@@ -51,7 +53,7 @@ namespace
             return true;
         }));
 
-        const std::uint8_t array[] = {10, 1, 0, 2};
+        const std::uint8_t array[] = {10, 1, 0, 2, 0x10, 0x00};
         command.Handle(transmitter, gsl::make_span(array));
     }
 
@@ -67,7 +69,7 @@ namespace
             return true;
         }));
 
-        const std::uint8_t array[] = {10, 1, 0, 30, 'a', 'b', 'c'};
+        const std::uint8_t array[] = {10, 1, 0, 30, 0x10, 0x00, 'a', 'b', 'c'};
         command.Handle(transmitter, gsl::make_span(array));
     }
 
@@ -84,10 +86,11 @@ namespace
         }));
 
         EXPECT_CALL(photo, Reset()).Times(2);
+        EXPECT_CALL(photo, Sleep(16000ms)).Times(1);
         EXPECT_CALL(photo, EnableCamera(services::photo::Camera::Wing)).Times(1);
         EXPECT_CALL(photo, DisableCamera(services::photo::Camera::Wing)).Times(1);
 
-        const std::uint8_t array[] = {10, 1, 0, 0, 'a', 'b', 'c'};
+        const std::uint8_t array[] = {10, 1, 0, 0, 0x10, 0x00, 'a', 'b', 'c'};
         command.Handle(transmitter, gsl::make_span(array));
     }
 }

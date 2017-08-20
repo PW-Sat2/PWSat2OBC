@@ -29,6 +29,7 @@ namespace obc
             const auto cameraId = static_cast<services::photo::Camera>(reader.ReadByte());
             const auto resolution = static_cast<services::photo::PhotoResolution>(reader.ReadByte());
             const auto count = reader.ReadByte();
+            const auto delay = std::chrono::seconds(reader.ReadWordLE());
             const auto path = reader.ReadString(30);
 
             CorrelatedDownlinkFrame frame{DownlinkAPID::Operation, 0, corelationId};
@@ -40,6 +41,7 @@ namespace obc
             else
             {
                 this->_photoService.Reset();
+                this->_photoService.Sleep(delay);
                 this->_photoService.EnableCamera(cameraId);
                 for (std::uint8_t cx = 0; cx < count; ++cx)
                 {

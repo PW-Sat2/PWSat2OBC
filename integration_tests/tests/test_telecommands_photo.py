@@ -4,6 +4,7 @@ from telecommand import TakePhotoTelecommand
 from tests.base import RestartPerTest
 from utils import TestEvent
 from devices import CameraLocation, PhotoResolution
+from datetime import timedelta
 
 
 class TestPhotoTelecommand(RestartPerTest):
@@ -28,7 +29,7 @@ class TestPhotoTelecommand(RestartPerTest):
 
         sail_opening = TestEvent()
 
-        self.system.comm.put_frame(TakePhotoTelecommand(10, CameraLocation.Wing, PhotoResolution.p128, 30, "photo.jpg"))
+        self.system.comm.put_frame(TakePhotoTelecommand(10, CameraLocation.Wing, PhotoResolution.p128, 30, timedelta(seconds = 0), "photo.jpg"))
 
         ack = self.system.comm.get_frame(5)
         self.assertIsInstance(ack, OperationErrorFrame)
@@ -38,7 +39,7 @@ class TestPhotoTelecommand(RestartPerTest):
 
         sail_opening = TestEvent()
 
-        self.system.comm.put_frame(TakePhotoTelecommand(10, CameraLocation.Wing, PhotoResolution.p128, 10, "photo.jpg"))
+        self.system.comm.put_frame(TakePhotoTelecommand(10, CameraLocation.Wing, PhotoResolution.p128, 10, timedelta(seconds = 5), "photo.jpg"))
 
         ack = self.system.comm.get_frame(5)
         self.assertIsInstance(ack, OperationSuccessFrame)
