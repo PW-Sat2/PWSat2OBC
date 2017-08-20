@@ -1,6 +1,5 @@
-from base import *
+from parsec import joint
+from parsing import *
 
-BootState = joint(
-        field('Boot Counter', uint32)
-    ).bind(to_dict)
+BootState = field('Boot Counter', uint32)
 BootState >>= label_as('Boot State')

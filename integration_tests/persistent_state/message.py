@@ -1,4 +1,5 @@
-from base import *
+from parsec import joint
+from parsing import *
 
 minutes = packed('<B').parsecmap(lambda x: timedelta(minutes=x))
 array200 = packed('<200s')

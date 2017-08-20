@@ -1,4 +1,5 @@
-from base import *
+from parsec import joint
+from parsing import *
 
 time = packed('<Q').parsecmap(lambda x: timedelta(milliseconds=x))
 

@@ -2,7 +2,7 @@ import struct
 from binascii import hexlify
 from datetime import timedelta
 
-from parsec import *
+from parsec import Parser, Value
 
 def packed(fmt):
     size = struct.calcsize(fmt)
@@ -39,4 +39,3 @@ uint16 = packed('<H')
 int16 = packed('<h')
 
 uint32 = packed('<L')
-
