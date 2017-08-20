@@ -123,6 +123,7 @@ namespace obc
          * @param transmitter Frame transmitter
          * @param[in] photoService Reference to object capable of taking photos
          * @param[in] sailState Pin connected to sail indicator
+         * @param imtq IMTQ data provider
          * @param epsProvider Telemetry provider for Payload Experiment
          * @param errorCounterProvider Error Counter telmetry provider
          * @param temperatureProvider MCU telemetry provider
@@ -138,6 +139,7 @@ namespace obc
             devices::comm::ITransmitter& transmitter,
             services::photo::IPhotoService& photoService,
             const drivers::gpio::Pin& sailState,
+            telemetry::IImtqDataProvider& imtq,
             devices::eps::IEpsTelemetryProvider& epsProvider,
             error_counter::IErrorCountingTelemetryProvider* errorCounterProvider,
             temp::ITemperatureReader* temperatureProvider);

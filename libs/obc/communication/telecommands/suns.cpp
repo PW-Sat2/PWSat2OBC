@@ -26,7 +26,11 @@ namespace obc
             devices::suns::ISunSDriver& experimentalSunS,       //
             devices::payload::IPayloadDeviceDriver& payload,    //
             devices::gyro::IGyroscopeDriver& gyro)              //
-            : _powerControl(powerControl), _currentTime(currentTime), _experimentalSunS(experimentalSunS), _payload(payload), _gyro(gyro)
+            : _powerControl(powerControl),
+              _currentTime(currentTime),
+              _experimentalSunS(experimentalSunS),
+              _payload(payload),
+              _gyro(gyro)
         {
         }
 
@@ -77,7 +81,7 @@ namespace obc
         {
             point.WriteTimeStamp(writer);
             point.WritePrimaryExperimentalSunS(writer);
-            point.WriteReferenceSunS(writer);
+            point.ReferenceSunS.Write(writer);
             point.WriteGyro(writer);
             point.WriteSecondaryExperimentalSunS(writer);
         }

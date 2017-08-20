@@ -13,12 +13,13 @@ namespace obc
         devices::comm::ITransmitter& transmitter,
         services::photo::IPhotoService& photoService,
         const drivers::gpio::Pin& sailState,
+        telemetry::IImtqDataProvider& imtq,
         devices::eps::IEpsTelemetryProvider& epsProvider,
         error_counter::IErrorCountingTelemetryProvider* errorCounterProvider,
         temp::ITemperatureReader* temperatureProvider)
         : Experiments(                                                                                                //
               experiment::fibo::FibonacciExperiment(fs),                                                              //
-              experiment::adcs::DetumblingExperiment(adcs, time),                                                     //
+              experiment::adcs::DetumblingExperiment(adcs, time, powerControl, gyro, payload, imtq, fs),              //
               experiment::leop::LaunchAndEarlyOrbitPhaseExperiment(gyro, time, fs),                                   //
               experiment::suns::SunSExperiment(powerControl, time, suns, payload, gyro, fs),                          //
               experiment::erase_flash::EraseFlashExperiment(n25q, transmitter),                                       //

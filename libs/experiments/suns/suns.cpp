@@ -201,14 +201,6 @@ namespace experiment
             }
         }
 
-        void DataPoint::WriteReferenceSunS(Writer& writer)
-        {
-            for (auto v : this->ReferenceSunS.voltages)
-            {
-                writer.WriteWordLE(v);
-            }
-        }
-
         void DataPoint::WriteGyro(Writer& writer)
         {
             writer.WriteWordLE(this->Gyro.X());
@@ -243,9 +235,9 @@ namespace experiment
                 std::array<std::uint8_t, 10> buffer;
                 Writer w(buffer);
 
-                this->WriteReferenceSunS(w);
+                this->ReferenceSunS.Write(w);
 
-                file.Write(ExperimentFile::PID::ReferenceSunS, w.Capture());
+                file.Write(ExperimentFile::PID::PayloadSunS, w.Capture());
             }
 
             {

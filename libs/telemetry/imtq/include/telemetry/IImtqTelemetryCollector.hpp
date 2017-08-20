@@ -8,6 +8,21 @@
 namespace telemetry
 {
     /**
+     * @brief This is an interface for imtq data provider.
+     * @ingroup telemetry
+     */
+    struct IImtqDataProvider
+    {
+        /**
+         * @brief Gets last ADCS state
+         * @param measurements Object for magnetometer measurements
+         * @param dipoles Object for dipoles
+         * @return Operation result
+         */
+        virtual bool GetLastAdcsState(telemetry::ImtqMagnetometerMeasurements& measurements, telemetry::ImtqDipoles& dipoles) = 0;
+    };
+
+    /**
      * @brief This is an interface for imtq telemetry collector.
      * @ingroup telemetry
      */

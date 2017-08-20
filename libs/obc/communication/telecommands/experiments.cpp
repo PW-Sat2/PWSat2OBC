@@ -33,6 +33,8 @@ namespace obc
 
             auto duration = std::chrono::seconds(r.ReadDoubleWordLE());
 
+            auto samplingInterval = std::chrono::seconds(r.ReadByte());
+
             if (!r.Status())
             {
                 CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
@@ -44,6 +46,7 @@ namespace obc
             LOGF(LOG_LEVEL_INFO, "[tc] Performing Detumbling experiment for %ld seconds", static_cast<std::uint32_t>(duration.count()));
 
             this->_setupExperiment.Duration(duration);
+            this->_setupExperiment.SampleRate(samplingInterval);
 
             auto status = this->_experiments.RequestExperiment(experiment::adcs::DetumblingExperiment::Code);
             CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);

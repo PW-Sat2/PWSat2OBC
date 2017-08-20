@@ -1,9 +1,12 @@
 from parsec import many
 
 from base import Synchronization, Timestamp, Padding
+from photodiodes import Photodiodes
 from suns import ExperimentalSunSPrimary, ExperimentalSunSSecondary, ReferenceSunS
 from gyro import Gyro
 from sail import Sail
+from temps import AllTemperatures
+from imtq import Magnetometer, Dipoles
 
 pids = Synchronization \
        ^ Timestamp \
@@ -12,7 +15,11 @@ pids = Synchronization \
        ^ ExperimentalSunSSecondary \
        ^ ReferenceSunS \
        ^ Gyro \
-       ^ Sail
+       ^ Sail \
+       ^ AllTemperatures \
+       ^ Photodiodes \
+       ^ Magnetometer \
+       ^ Dipoles
 
 ExperimentFileParser = many(pids)
 

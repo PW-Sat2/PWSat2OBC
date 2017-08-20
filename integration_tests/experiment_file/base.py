@@ -1,8 +1,7 @@
-import struct
-from binascii import hexlify
-from datetime import timedelta
-from parsing import *
 from parsec import *
+
+from parsing import *
+
 
 def pid(n):
     @Parser
