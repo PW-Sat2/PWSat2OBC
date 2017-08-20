@@ -99,9 +99,8 @@ namespace devices
 
             virtual bool CaptureTelemetry(telemetry::ManagedTelemetry& target) final override;
 
-            virtual bool GetLastMagnetometerMeasurement(telemetry::ImtqMagnetometerMeasurements& measurements) final override;
-
-            virtual bool GetLastDipoles(telemetry::ImtqDipoles& dipoles) final override;
+            virtual bool GetLastAdcsState(
+                telemetry::ImtqMagnetometerMeasurements& measurements, telemetry::ImtqDipoles& dipoles) final override;
 
             /**
              * @brief Verifies whether the requested telemetry element has been recently captured

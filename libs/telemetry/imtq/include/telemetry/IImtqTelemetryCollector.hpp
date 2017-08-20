@@ -14,17 +14,12 @@ namespace telemetry
     struct IImtqDataProvider
     {
         /**
-         * @brief Gets last measured magnetometer
-         * @param measurements Object for measurements
-         * @return Operation result
-         */
-        virtual bool GetLastMagnetometerMeasurement(telemetry::ImtqMagnetometerMeasurements& measurements) = 0;
-        /**
-         * @brief Gets last set dipoles
+         * @brief Gets last ADCS state
+         * @param measurements Object for magnetometer measurements
          * @param dipoles Object for dipoles
          * @return Operation result
          */
-        virtual bool GetLastDipoles(telemetry::ImtqDipoles& dipoles) = 0;
+        virtual bool GetLastAdcsState(telemetry::ImtqMagnetometerMeasurements& measurements, telemetry::ImtqDipoles& dipoles) = 0;
     };
 
     /**

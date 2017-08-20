@@ -31,8 +31,7 @@ using namespace std::chrono_literals;
 
 struct ImtqDataProviderMock : telemetry::IImtqDataProvider
 {
-    MOCK_METHOD1(GetLastMagnetometerMeasurement, bool(telemetry::ImtqMagnetometerMeasurements&));
-    MOCK_METHOD1(GetLastDipoles, bool(telemetry::ImtqDipoles&));
+    MOCK_METHOD2(GetLastAdcsState, bool(telemetry::ImtqMagnetometerMeasurements&, telemetry::ImtqDipoles&));
 };
 
 namespace
@@ -174,9 +173,7 @@ namespace
         EXPECT_CALL(_payload, MeasurePhotodiodes(_)).WillOnce(DoAll(SetArgReferee<0>(photodiodes), Return(OSResult::Success)));
         EXPECT_CALL(_payload, MeasureTemperatures(_)).WillOnce(DoAll(SetArgReferee<0>(temperatures), Return(OSResult::Success)));
 
-        EXPECT_CALL(_imtq, GetLastMagnetometerMeasurement(_)).WillOnce(DoAll(SetArgReferee<0>(mtm), Return(true)));
-
-        EXPECT_CALL(_imtq, GetLastDipoles(_)).WillOnce(DoAll(SetArgReferee<0>(dipoles), Return(true)));
+        EXPECT_CALL(_imtq, GetLastAdcsState(_, _)).WillOnce(DoAll(SetArgReferee<0>(mtm), SetArgReferee<1>(dipoles), Return(true)));
 
         auto point = this->_exp.GatherSingleMeasurement();
 

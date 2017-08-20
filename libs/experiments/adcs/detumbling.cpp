@@ -135,9 +135,7 @@ namespace experiment
             this->_payload.MeasurePhotodiodes(point.Photodiodes);
             this->_payload.MeasureTemperatures(point.Temperatures);
 
-            this->_imtq.GetLastMagnetometerMeasurement(point.Magnetometer);
-
-            this->_imtq.GetLastDipoles(point.Dipoles);
+            this->_imtq.GetLastAdcsState(point.Magnetometer, point.Dipoles);
 
             return point;
         }
