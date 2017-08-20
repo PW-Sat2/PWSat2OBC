@@ -21,5 +21,5 @@ class TakePhotoTelecommand(Telecommand):
                            self._camera_id.value,
                            self._resolution.value,
                            self._picture_count,
-                           self._delay,
+                           self._delay.total_seconds(),
                            ) + self._picture_path + '\0'
