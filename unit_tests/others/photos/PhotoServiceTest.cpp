@@ -329,11 +329,27 @@ namespace
 
     TEST_F(PhotoServiceTest, ShouldSleep)
     {
-        EXPECT_CALL(_os, Sleep(10000ms));
+        EXPECT_CALL(_os, EventGroupWaitForBits(_, 1 << 1, false, true, 10000ms));
 
         auto r = _service.Invoke(Sleep{10000ms});
 
         ASSERT_THAT(r, Eq(OSResult::Success));
+    }
+
+    TEST_F(PhotoServiceTest, PurgePedningCommands)
+    {
+        testing::InSequence sequence;
+        EXPECT_CALL(_os, QueueReset(_));
+        EXPECT_CALL(_os, QueueSend(_, _, _)).WillOnce(Invoke([](OSQueueHandle /*handle*/, const void* elementPtr, auto /*timeout*/) {
+            auto ptr = static_cast<const PossibleCommand*>(elementPtr);
+            EXPECT_THAT(ptr->Selected, Eq(Command::Break));
+            return true;
+        }));
+
+        EXPECT_CALL(_os, EventGroupSetBits(_, 1 << 1));
+        EXPECT_CALL(_os, EventGroupClearBits(_, 1 << 0));
+
+        _service.PurgePendingCommands();
     }
 
     TEST_F(PhotoServiceTest, TestIsEmptyIndexOverflow)

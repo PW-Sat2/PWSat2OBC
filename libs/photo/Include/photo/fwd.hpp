@@ -18,21 +18,6 @@ namespace services
         };
 
         /**
-         * @brief Available commands
-         * @ingroup photo
-         */
-        enum class Command
-        {
-            DisableCamera, //!< DisableCamera
-            EnableCamera,  //!< EnableCamera
-            TakePhoto,     //!< TakePhoto
-            DownloadPhoto, //!< DownloadPhoto
-            SavePhoto,     //!< SavePhoto
-            Reset,         //!< Reset
-            Sleep          //!< Sleep
-        };
-
-        /**
          * @brief JPEG photo resolutions
          */
         enum class PhotoResolution

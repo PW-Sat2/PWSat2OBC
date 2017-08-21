@@ -11,6 +11,12 @@ namespace services
 {
     namespace photo
     {
+        /** @brief Idle flag */
+        static constexpr OSEventBits IdleFlag = 1 << 0;
+
+        /** @brief Break sleep */
+        static constexpr OSEventBits BreakSleepFlag = 1 << 1;
+
         static std::array<std::uint8_t, 512_KB> PhotoBuffer;
 
         SyncResult::SyncResult(bool successful, int retryCount) : Successful(successful), RetryCount(retryCount)
@@ -195,7 +201,13 @@ namespace services
 
         OSResult PhotoService::Invoke(services::photo::Sleep command)
         {
-            System::SleepTask(command.Duration);
+            this->_flags.WaitAny(BreakSleepFlag, true, command.Duration);
+            return OSResult::Success;
+        }
+
+        OSResult PhotoService::Invoke(services::photo::Break /*command*/)
+        {
+            this->_flags.Clear(BreakSleepFlag);
             return OSResult::Success;
         }
 
@@ -295,14 +307,19 @@ namespace services
 
         bool PhotoService::WaitForFinish(std::chrono::milliseconds timeout)
         {
-            auto r = this->_flags.WaitAny(IdleFlag, false, timeout);
+            const auto r = this->_flags.WaitAny(IdleFlag, false, timeout);
 
             return has_flag(r, IdleFlag);
         }
 
         void PhotoService::PurgePendingCommands()
         {
+            PossibleCommand cmd;
+            cmd.Selected = Command::Break;
             this->_commandQueue.Reset();
+            this->_commandQueue.Push(cmd, InfiniteTimeout);
+            this->_flags.Set(BreakSleepFlag);
+            this->_flags.Clear(IdleFlag);
         }
 
         void PhotoService::TaskProc(PhotoService* This)
@@ -347,6 +364,9 @@ namespace services
                         break;
                     case Command::Sleep:
                         This->Invoke(command.SleepCommand);
+                        break;
+                    case Command::Break:
+                        This->Invoke(command.BreakCommand);
                         break;
                 }
             }
