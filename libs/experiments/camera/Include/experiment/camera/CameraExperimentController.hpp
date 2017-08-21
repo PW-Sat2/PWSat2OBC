@@ -4,6 +4,7 @@
 #include "experiments/experiments.h"
 #include "fs/ExperimentFile.hpp"
 #include "photo/fwd.hpp"
+#include "utils.h"
 
 namespace experiment
 {
@@ -13,7 +14,7 @@ namespace experiment
          * @brief Class that does Camera Commisioning Experiment logic.
          * It is created to two allow two experiments (Payload and Camera) could execute the same code.
          */
-        class CameraExperimentController
+        class CameraExperimentController : private NotCopyable, private NotMoveable
         {
           public:
             /**
