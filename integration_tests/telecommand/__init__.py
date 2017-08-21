@@ -39,6 +39,7 @@ __all__ = [
     'PerformSailExperiment',
     'TakePhotoTelecommand',
     'DeploySolarArrayTelecommand',
-    'GetPersistentState'
+    'GetPersistentState',
+    'PurgePhotoTelecommand'
 ]
 

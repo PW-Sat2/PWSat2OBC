@@ -1,6 +1,6 @@
 from response_frames.operation import OperationSuccessFrame, OperationErrorFrame
 from system import auto_power_on, clear_state
-from telecommand import TakePhotoTelecommand
+from telecommand import TakePhotoTelecommand, PurgePhotoTelecommand
 from tests.base import RestartPerTest
 from utils import TestEvent
 from devices import CameraLocation, PhotoResolution
@@ -27,8 +27,6 @@ class TestPhotoTelecommand(RestartPerTest):
     def test_photo_telecommand_invalid_picture_count(self):
         self._start()
 
-        sail_opening = TestEvent()
-
         self.system.comm.put_frame(TakePhotoTelecommand(10, CameraLocation.Wing, PhotoResolution.p128, 30, timedelta(seconds = 0), "photo.jpg"))
 
         ack = self.system.comm.get_frame(5)
@@ -37,9 +35,15 @@ class TestPhotoTelecommand(RestartPerTest):
     def test_photo_telecommand(self):
         self._start()
 
-        sail_opening = TestEvent()
-
         self.system.comm.put_frame(TakePhotoTelecommand(10, CameraLocation.Wing, PhotoResolution.p128, 10, timedelta(seconds = 5), "photo.jpg"))
 
         ack = self.system.comm.get_frame(5)
+        self.assertIsInstance(ack, OperationSuccessFrame)
+
+    def test_purge_photo_telecommand(self):
+        self._start()
+
+        self.system.comm.put_frame(PurgePhotoTelecommand(10))
+
+        ack = self.system.comm.get_frame(10)
         self.assertIsInstance(ack, OperationSuccessFrame)

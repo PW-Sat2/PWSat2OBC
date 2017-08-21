@@ -1,7 +1,6 @@
 from telecommand import Telecommand
 import struct
 
-
 class TakePhotoTelecommand(Telecommand):
     def __init__(self, correlation_id, camera, resolution, count, delay, path):
         Telecommand.__init__(self)
@@ -23,3 +22,14 @@ class TakePhotoTelecommand(Telecommand):
                            self._picture_count,
                            self._delay.total_seconds(),
                            ) + self._picture_path + '\0'
+
+class PurgePhotoTelecommand(Telecommand):
+    def __init__(self, correlation_id):
+        Telecommand.__init__(self)
+        self._correlation_id = correlation_id
+
+    def apid(self):
+        return 0x22
+
+    def payload(self):
+        return struct.pack('<B', self._correlation_id)
