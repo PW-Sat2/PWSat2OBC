@@ -69,6 +69,14 @@ namespace experiment
                 experiments::IExperimentController* experimentProvider);
 
             /**
+             * @brief Move Constructor
+             * @param other The object to move
+             */
+            PayloadCommissioningExperiment(PayloadCommissioningExperiment&& other) noexcept;
+
+            PayloadCommissioningExperiment& operator=(PayloadCommissioningExperiment&& other) = delete;
+
+            /**
              * @brief Method allowing to set name of file where data will be saved.
              * @param fileName The name of file where data will be saved.
              */
@@ -112,6 +120,9 @@ namespace experiment
 
             /** @brief SunS Driver */
             devices::suns::ISunSDriver& _experimentalSunS;
+
+            /** @brief Photo Service */
+            services::photo::IPhotoService& _photoService;
 
             /** @brief Experiment file with results */
             experiments::fs::ExperimentFile _experimentFile;

@@ -47,6 +47,14 @@ namespace experiment
                 services::fs::IFileSystem& fileSystem, services::time::ICurrentTime& time, services::photo::IPhotoService& photoService);
 
             /**
+             * @brief Move Constructor
+             * @param other The object to move
+             */
+            CameraCommissioningExperiment(CameraCommissioningExperiment&& other) noexcept;
+
+            CameraCommissioningExperiment& operator=(CameraCommissioningExperiment&& other) = delete;
+
+            /**
              * @brief Method allowing to set base name of files genrated by experiment.
              * @param fileName The name of file where data will be saved.
              */
@@ -74,6 +82,9 @@ namespace experiment
 
             /** @brief Experiment file with results */
             experiments::fs::ExperimentFile _experimentFile;
+
+            /** @brief Photo Service */
+            services::photo::IPhotoService& _photoService;
 
             /** @brief Controller that does the camera experiment logic. */
             CameraExperimentController _controller;

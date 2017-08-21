@@ -1,5 +1,6 @@
 #include "camera_exp.hpp"
 #include "logger/logger.h"
+#include "photo/photo_service.hpp"
 #include "utils.h"
 
 using experiments::IterationResult;
@@ -15,9 +16,17 @@ namespace experiment
     {
         CameraCommissioningExperiment::CameraCommissioningExperiment(
             services::fs::IFileSystem& fileSystem, services::time::ICurrentTime& time, services::photo::IPhotoService& photoService)
-            : _time(time), _fileSystem(fileSystem), _experimentFile(&_time), _controller(_experimentFile, photoService), _currentStep(0)
+            : _time(time), _fileSystem(fileSystem), _experimentFile(&_time), _photoService(photoService),
+              _controller(_experimentFile, photoService), _currentStep(0)
         {
             strsafecpy(_fileName, DefaultFileName, 30);
+        }
+
+        CameraCommissioningExperiment::CameraCommissioningExperiment(CameraCommissioningExperiment&& other)
+            : _time(other._time), _fileSystem(other._fileSystem), _experimentFile(std::move(other._experimentFile)),
+              _photoService(other._photoService), _controller(_experimentFile, _photoService), _currentStep(other._currentStep)
+        {
+            strsafecpy(_fileName, other._fileName, count_of(other._fileName));
         }
 
         void CameraCommissioningExperiment::SetOutputFilesBaseName(gsl::cstring_span<> fileName)
