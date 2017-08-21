@@ -1675,4 +1675,11 @@
 			</object>
 		</object>
 	</object>
+	<object class="wxPanel" name="BeaconModule">
+		<style>wxTAB_TRAVERSAL</style>
+		<size>200,500</size>
+		<object class="wxBoxSizer">
+			<orient>wxVERTICAL</orient>
+		</object>
+	</object>
 </resource>

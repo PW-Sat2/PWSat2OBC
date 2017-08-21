@@ -2,6 +2,7 @@ import IPython.lib.guisupport
 
 from emulator import Emulator
 from emulator.antenna import AntennasModule
+from emulator.beacon import BeaconModule
 from emulator.eps import EPSModule
 from emulator.last_frames import LastFramesModule
 from emulator.payload import PayloadModule
@@ -10,8 +11,11 @@ from emulator.comm import CommModule
 
 last_frames = []
 
+last_beacon = {}
+
 def _setup_emulator(system):
     emulator_modules = [
+        BeaconModule(last_beacon),
         AntennasModule(system),
         RTCModule(system),
         EPSModule(system),

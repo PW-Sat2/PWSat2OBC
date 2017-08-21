@@ -16,7 +16,7 @@ class CommModule(ModuleBase):
     def __init__(self, system):
         self._system = system
         self.title = 'Comm'
-        self.grid_pos = (1, 2)
+        self.grid_pos = (1, 3)
         self.grid_span = (1, 1)
         self._last_beacon_seen = None
         self._last_mission_time_seen = 0
