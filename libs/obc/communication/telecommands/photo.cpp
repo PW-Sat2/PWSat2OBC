@@ -57,5 +57,38 @@ namespace obc
 
             transmitter.SendFrame(frame.Frame());
         }
+
+        PurgePhoto::PurgePhoto(services::photo::IPhotoService& photoService) : _photoService(photoService)
+        {
+        }
+
+        void PurgePhoto::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
+        {
+            if (parameters.size() == 0)
+            {
+                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, 0);
+                response.PayloadWriter().WriteByte(0x1);
+                transmitter.SendFrame(response.Frame());
+                return;
+            }
+
+            Reader reader(parameters);
+            const auto corelationId = reader.ReadByte();
+
+            CorrelatedDownlinkFrame frame{DownlinkAPID::Operation, 0, corelationId};
+            auto& writer = frame.PayloadWriter();
+            if (!reader.Status())
+            {
+                writer.WriteByte(0x2);
+            }
+            else
+            {
+                this->_photoService.PurgePendingCommands();
+                this->_photoService.Reset();
+                writer.WriteByte(0);
+            }
+
+            transmitter.SendFrame(frame.Frame());
+        }
     }
 }

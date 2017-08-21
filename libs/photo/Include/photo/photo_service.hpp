@@ -18,6 +18,21 @@ namespace services
          */
 
         /**
+         * @brief Available commands
+         */
+        enum class Command
+        {
+            DisableCamera, //!< DisableCamera
+            EnableCamera,  //!< EnableCamera
+            TakePhoto,     //!< TakePhoto
+            DownloadPhoto, //!< DownloadPhoto
+            SavePhoto,     //!< SavePhoto
+            Reset,         //!< Reset
+            Sleep,         //!< Sleep
+            Break          //!< Break
+        };
+
+        /**
          * @brief Interface of camera selector
          */
         struct ICameraSelector
@@ -100,6 +115,13 @@ namespace services
           public:
             /** @brief Sleep duration */
             std::chrono::milliseconds Duration;
+        };
+
+        /**
+         * @brief Break sleep command
+         */
+        class Break final
+        {
         };
 
         /**
@@ -247,6 +269,7 @@ namespace services
                 SavePhoto SavePhotoCommand;         //!< Save photo
                 Reset ResetCommand;                 //!< Reset
                 Sleep SleepCommand;                 //!< Sleep
+                Break BreakCommand;                 //!< Break
             };
         };
 
@@ -321,6 +344,12 @@ namespace services
              * @return Operation result
              */
             OSResult Invoke(services::photo::Sleep command);
+            /**
+             * @brief (Internal use) Invokes break command
+             * @param command Command
+             * @return Operation result
+             */
+            OSResult Invoke(services::photo::Break command);
 
             /**
              * @brief Returns buffer metadata
@@ -374,9 +403,6 @@ namespace services
 
             /** @brief State flags */
             EventGroup _flags;
-
-            /** @brief Idle flag */
-            static constexpr OSEventBits IdleFlag = 1 << 0;
         };
 
         /** @} */

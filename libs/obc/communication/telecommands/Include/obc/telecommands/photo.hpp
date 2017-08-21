@@ -16,7 +16,7 @@ namespace obc
          * @ingroup obc_telecommands
          * @telecommand
          *
-         * Code: 0x1D
+         * Code: 0x1F
          * Parameters:
          *  - Correlation ID (8-bit)
          *  - Camera identifier
@@ -32,6 +32,33 @@ namespace obc
              * @param[in] photoService Reference to service capable of taking photos
              */
             TakePhoto(services::photo::IPhotoService& photoService);
+
+            virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
+
+          private:
+            services::photo::IPhotoService& _photoService;
+        };
+
+        /**
+         * @brief Purge photo service state.
+         * @ingroup obc_telecommands
+         * @telecommand
+         * 
+         * This command is responsible for resetting photo service state and removing any enqueued commands that have 
+         * not yet been executed.
+         *
+         * Code: 0x22
+         * Parameters:
+         *  - Correlation ID (8-bit)
+         */
+        class PurgePhoto final : public telecommunication::uplink::Telecommand<0x22>
+        {
+          public:
+            /**
+             * @brief ctor
+             * @param[in] photoService Reference to service capable of taking photos
+             */
+            PurgePhoto(services::photo::IPhotoService& photoService);
 
             virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
 
