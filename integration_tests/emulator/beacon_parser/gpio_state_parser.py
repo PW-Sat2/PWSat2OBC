@@ -1,13 +1,13 @@
-from parser import Parser
+from parser import CategoryParser
 
 
-class GpioStateParser(Parser):
-    def __init__(self, tree_control):
-        Parser.__init__(self, tree_control, 'GPIO')
+class GpioStateParser(CategoryParser):
+    def __init__(self, reader, store):
+        CategoryParser.__init__(self, 'GPIO', reader, store)
 
     def get_bit_count(self):
         return 1
 
-    def parse(self, address, bits):
-        self.append_byte(address, bits, "Sail Deployed", 1)
+    def parse(self):
+        self.append("Sail Deployed", 1)
 

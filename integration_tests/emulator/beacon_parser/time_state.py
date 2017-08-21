@@ -1,13 +1,13 @@
-from parser import Parser
+from parser import CategoryParser
 
 
-class TimeState(Parser):
-    def __init__(self, tree_control):
-        Parser.__init__(self, tree_control, 'Time Telemetry')
+class TimeState(CategoryParser):
+    def __init__(self, reader, store):
+        CategoryParser.__init__(self, 'Time Telemetry', reader, store)
 
     def get_bit_count(self):
         return 64 + 32
 
-    def parse(self, address, bits):
-        self.append_qword(address, bits, "Mission time")
-        self.append_dword(address, bits, "External time")
+    def parse(self):
+        self.append_qword("Mission time")
+        self.append_dword("External time")

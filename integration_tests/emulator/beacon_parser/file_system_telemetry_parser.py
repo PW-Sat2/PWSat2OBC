@@ -1,13 +1,13 @@
-from parser import Parser
+from parser import CategoryParser
 
 
-class FileSystemTelemetryParser(Parser):
-    def __init__(self, tree_control):
-        Parser.__init__(self, tree_control, 'File System')
+class FileSystemTelemetryParser(CategoryParser):
+    def __init__(self, reader, store):
+        CategoryParser.__init__(self, 'File System', reader, store)
 
     def get_bit_count(self):
         return 32
 
-    def parse(self, address, bits):
-        self.append_dword(address, bits, "Free Space")
+    def parse(self):
+        self.append_dword("Free Space")
 

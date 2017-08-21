@@ -1,12 +1,12 @@
-from parser import Parser
+from parser import CategoryParser
 
 
-class ImtqCoilActiveTelemetryParser(Parser):
-    def __init__(self, tree_control):
-        Parser.__init__(self, tree_control, 'Imtq Coils Active')
+class ImtqCoilActiveTelemetryParser(CategoryParser):
+    def __init__(self, reader, store):
+        CategoryParser.__init__(self, 'Imtq Coils Active', reader, store)
 
     def get_bit_count(self):
         return 1
 
-    def parse(self, address, bits):
-        self.append_byte(address, bits, "Coils active during measurement", 1)
+    def parse(self):
+        self.append("Coils active during measurement", 1)

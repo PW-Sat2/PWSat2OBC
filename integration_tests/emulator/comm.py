@@ -7,6 +7,7 @@ from devices import RTCDevice
 from .base import ModuleBase, bind
 from bitarray import bitarray
 from struct import pack
+from beacon_parser.parser import BitReader, BeaconStorage
 
 from beacon_parser.full_beacon_parser import FullBeaconParser
 
@@ -80,24 +81,22 @@ class CommModule(ModuleBase):
         if self._last_beacon_seen != self._system.transmitter.current_beacon_timestamp:
 
             self._fileTree.DeleteChildren(self._root)
-            parsers = FullBeaconParser().GetParsers(self._fileTree)
 
             # load the becon
             all_bits = bitarray(endian='little')
             all_bits.frombytes( ''.join(map(lambda x: pack('B', x), self._system.transmitter.current_beacon)))
 
+            reader = BitReader(all_bits)
+            store = BeaconStorage()
+
+            parsers = FullBeaconParser().GetParsers(reader, store)
             parsers.reverse()
-            start_index = 0
 
             while len(parsers) > 0:
                 parser = parsers.pop()
-                to_take = parser.get_bit_count()
-                end_index = to_take + start_index
+                parser.parse()
 
-                to_parse = all_bits[start_index:end_index]
-
-                parser.parse(start_index, to_parse)
-                start_index += to_take
+            # load the store into tree
 
             self._fileTree.ExpandAllChildren(self._root)
             self._last_beacon_seen = self._system.transmitter.current_beacon_timestamp

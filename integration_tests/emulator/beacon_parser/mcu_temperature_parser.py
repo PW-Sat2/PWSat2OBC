@@ -1,13 +1,13 @@
-from parser import Parser
+from parser import CategoryParser
 
 
-class McuTemperatureParser(Parser):
-    def __init__(self, tree_control):
-        Parser.__init__(self, tree_control, 'MCU')
+class McuTemperatureParser(CategoryParser):
+    def __init__(self, reader, store):
+        CategoryParser.__init__(self, 'MCU', reader, store)
 
     def get_bit_count(self):
         return 12
 
-    def parse(self, address, bits):
-        self.append_word(address, bits, "Temperature", 12)
+    def parse(self):
+        self.append("Temperature", 12)
 
