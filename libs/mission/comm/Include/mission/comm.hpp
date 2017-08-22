@@ -5,6 +5,7 @@
 #include "comm/ITransmitter.hpp"
 #include "idle_state_controller.hpp"
 #include "mission/base.hpp"
+#include "periodic_message.hpp"
 #include "state/struct.h"
 
 namespace mission
@@ -90,7 +91,7 @@ namespace mission
      * @brief Tasks that sends periodic message
      * @mission_task
      */
-    class SendMessageTask : public Action
+    class SendMessageTask : public Action, public ITriggerPeriodicMessage
     {
       public:
         /**
@@ -104,6 +105,8 @@ namespace mission
          * @return Action descriptor
          */
         mission::ActionDescriptor<SystemState> BuildAction();
+
+        virtual void Trigger() override;
 
       private:
         /**
@@ -125,6 +128,8 @@ namespace mission
         devices::comm::ITransmitter& _transmitter;
         /** @brief Mission time at which message was previously sent */
         Option<std::chrono::milliseconds> _lastSentAt;
+        /** @brief Manual trigger */
+        bool _triggered;
     };
 }
 #endif /* LIBS_MISSION_INCLUDE_MISSION_COMM_H_ */

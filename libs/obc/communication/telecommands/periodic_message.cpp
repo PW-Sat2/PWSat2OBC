@@ -43,5 +43,15 @@ namespace obc
 
             transmitter.SendFrame(response.Frame());
         }
+
+        SendPeriodicMessageTelecommand::SendPeriodicMessageTelecommand(mission::ITriggerPeriodicMessage& trigger) : _trigger(trigger)
+        {
+        }
+
+        void SendPeriodicMessageTelecommand::Handle(
+            devices::comm::ITransmitter& /*transmitter*/, gsl::span<const std::uint8_t> /*parameters*/)
+        {
+            this->_trigger.Trigger();
+        }
     }
 }

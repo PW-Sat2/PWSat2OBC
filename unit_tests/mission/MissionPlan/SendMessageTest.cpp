@@ -79,4 +79,22 @@ namespace
 
         ASSERT_THAT(_action.EvaluateCondition(_state), Eq(true));
     }
+
+    TEST_F(SendMessageTest, ShouldTriggerMessageManually)
+    {
+        EXPECT_CALL(_transmitter, SendFrame(_)).Times(2 * 3);
+
+        _state.Time = 45min;
+        _state.AntennaState.SetDeployment(true);
+        _action.Execute(_state);
+
+        _task.Trigger();
+
+        ASSERT_THAT(_action.EvaluateCondition(_state), Eq(true));
+        ASSERT_THAT(_action.EvaluateCondition(_state), Eq(true));
+
+        _action.Execute(_state);
+
+        ASSERT_THAT(_action.EvaluateCondition(_state), Eq(false));
+    }
 }

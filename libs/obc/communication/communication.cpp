@@ -33,7 +33,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
     devices::suns::ISunSDriver& experimentalSunS,
     devices::payload::IPayloadDeviceDriver& payloadDriver,
     devices::gyro::IGyroscopeDriver& gyro,
-    services::photo::IPhotoService& photo)
+    services::photo::IPhotoService& photo,
+    mission::ITriggerPeriodicMessage& triggerPeriodicMessage)
     : Comm(commDriver),                                                                                                               //
       UplinkProtocolDecoder(settings::CommSecurityCode),                                                                              //
       SupportedTelecommands(                                                                                                          //
@@ -71,7 +72,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           PerformPayloadCommisioningExperiment(
               experiments.ExperimentsController, experiments.Get<experiment::payload::PayloadCommissioningExperiment>()), //
           GetPersistentStateTelecommand(stateContainer),                                                                  //
-          PurgePhoto(photo)                                                                                               //
+          PurgePhoto(photo),                                                                                              //
+          SendPeriodicMessageTelecommand(triggerPeriodicMessage)                                                          //
           ),                                                                                                              //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {

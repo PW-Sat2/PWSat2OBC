@@ -15,3 +15,11 @@ class SetPeriodicMessageTelecommand(Telecommand):
 
     def payload(self):
         return [self._correlation_id, self._interval_minutes, self._repeat_count] + ensure_byte_list(self._message)
+
+
+class SendPeriodicMessageTelecommand(Telecommand):
+    def apid(self):
+        return 0x23
+
+    def payload(self):
+        return []

@@ -155,7 +155,8 @@ namespace obc
         obc::telecommands::DeploySolarArray,
         obc::telecommands::PerformPayloadCommisioningExperiment,
         obc::telecommands::GetPersistentStateTelecommand,
-        obc::telecommands::PurgePhoto>;
+        obc::telecommands::PurgePhoto,
+        obc::telecommands::SendPeriodicMessageTelecommand>;
 
     /**
      * @brief OBC <-> Earth communication
@@ -186,6 +187,7 @@ namespace obc
          * @param[in] payloadDriver Payload driver interface
          * @param[in] gyro Gyroscope interface
          * @param[in] photo Reference to service capable of taking photos
+         * @param[in] triggerPeriodicMessage Trigger periodic message
          */
         OBCCommunication(obc::FDIR& fdir,
             devices::comm::CommObject& commDriver,
@@ -208,7 +210,8 @@ namespace obc
             devices::suns::ISunSDriver& experimentalSunS,
             devices::payload::IPayloadDeviceDriver& payloadDriver,
             devices::gyro::IGyroscopeDriver& gyro,
-            services::photo::IPhotoService& photo);
+            services::photo::IPhotoService& photo,
+            mission::ITriggerPeriodicMessage& triggerPeriodicMessage);
 
         /**
          * @brief Initializes all communication at runlevel 1

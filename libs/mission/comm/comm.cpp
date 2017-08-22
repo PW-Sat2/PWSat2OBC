@@ -80,7 +80,7 @@ namespace mission
         This->LeaveTransmitterStateWhenIdle();
     }
 
-    SendMessageTask::SendMessageTask(devices::comm::ITransmitter& transmitter) : _transmitter(transmitter)
+    SendMessageTask::SendMessageTask(devices::comm::ITransmitter& transmitter) : _transmitter(transmitter), _triggered(false)
     {
     }
 
@@ -106,6 +106,11 @@ namespace mission
         }
 
         if (!This->_lastSentAt.HasValue)
+        {
+            return true;
+        }
+
+        if (This->_triggered)
         {
             return true;
         }
@@ -142,5 +147,11 @@ namespace mission
         }
 
         This->_lastSentAt = Some(state.Time);
+        This->_triggered = false;
+    }
+
+    void SendMessageTask::Trigger()
+    {
+        this->_triggered = true;
     }
 }
