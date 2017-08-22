@@ -76,7 +76,7 @@ namespace experiment
                 return StartResult::Failure;
             }
 
-            if (!SaveStartTelemetry(this->dataSet, telemetry, currentTime.Value))
+            if (!SaveRadFETTelemetry(this->dataSet, telemetry, currentTime.Value))
             {
                 LOG(LOG_LEVEL_ERROR, "Can't save start telemetry");
                 pld.RadFETOff(telemetry);
@@ -149,7 +149,7 @@ namespace experiment
                 LOG(LOG_LEVEL_ERROR, "Current time is unavailable");
             }
 
-            if (!SaveStopTelemetry(this->dataSet, telemetry, currentTime.Value))
+            if (!SaveRadFETTelemetry(this->dataSet, telemetry, currentTime.Value))
             {
                 LOG(LOG_LEVEL_ERROR, "Can't save end telemetry");
             }
@@ -189,24 +189,12 @@ namespace experiment
             return true;
         }
 
-        bool RadFETExperiment::SaveStartTelemetry(
-            ExperimentFile& file, PayloadTelemetry::Radfet& telemetry, std::chrono::milliseconds timestamp)
-        {
-            return SaveRadFETTelemetry(file, telemetry, ExperimentFile::PID::RadFETStart, timestamp);
-        }
-
-        bool RadFETExperiment::SaveStopTelemetry(
-            ExperimentFile& file, PayloadTelemetry::Radfet& telemetry, std::chrono::milliseconds timestamp)
-        {
-            return SaveRadFETTelemetry(file, telemetry, ExperimentFile::PID::RadFETEnd, timestamp);
-        }
-
         bool RadFETExperiment::SaveLoopTelemetry(ExperimentFile& file,
             PayloadTelemetry::Radfet& radfetTelemetry,
             PayloadTelemetry::Temperatures& temeraturesTelemetry,
             std::chrono::milliseconds timestamp)
         {
-            if (!SaveRadFETTelemetry(file, radfetTelemetry, ExperimentFile::PID::RadFET, timestamp))
+            if (!SaveRadFETTelemetry(file, radfetTelemetry, timestamp))
             {
                 return false;
             }
@@ -221,7 +209,7 @@ namespace experiment
         }
 
         bool RadFETExperiment::SaveRadFETTelemetry(
-            ExperimentFile& file, PayloadTelemetry::Radfet& telemetry, ExperimentFile::PID pid, std::chrono::milliseconds timestamp)
+            ExperimentFile& file, PayloadTelemetry::Radfet& telemetry, std::chrono::milliseconds timestamp)
         {
             if (!SaveTimestamp(file, timestamp))
             {
@@ -229,7 +217,7 @@ namespace experiment
                 return false;
             }
 
-            if (!SaveRadFETRegisters(file, telemetry, pid))
+            if (!SaveRadFETRegisters(file, telemetry, ExperimentFile::PID::PayloadRadFet))
             {
                 LOG(LOG_LEVEL_ERROR, "Can't save RadFET registers");
                 return false;
@@ -284,11 +272,7 @@ namespace experiment
 
         void RadFETExperiment::WriteRadFETRegisters(Writer& writer, PayloadTelemetry::Radfet& telemetry)
         {
-            writer.WriteByte(telemetry.status);
-            writer.WriteDoubleWordLE(telemetry.temperature);
-            writer.WriteDoubleWordLE(telemetry.vth[0]);
-            writer.WriteDoubleWordLE(telemetry.vth[1]);
-            writer.WriteDoubleWordLE(telemetry.vth[2]);
+            telemetry.Write(writer);
         }
 
         void RadFETExperiment::WriteTemperatures(Writer& writer, PayloadTelemetry::Temperatures& telemetry)

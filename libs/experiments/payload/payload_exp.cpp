@@ -262,12 +262,7 @@ namespace experiment
         {
             std::array<uint8_t, PayloadTelemetry::Radfet::DeviceDataLength> buffer;
             Writer w(buffer);
-            w.WriteByte(telemetry.status);
-            w.WriteDoubleWordLE(telemetry.temperature);
-            for (auto voltage : telemetry.vth)
-            {
-                w.WriteDoubleWordLE(voltage);
-            }
+            telemetry.Write(w);
 
             _experimentFile.Write(ExperimentFile::PID::PayloadRadFet, buffer);
         }
@@ -279,15 +274,7 @@ namespace experiment
 
             std::array<uint8_t, PayloadTelemetry::Temperatures::DeviceDataLength> buffer;
             Writer w(buffer);
-            w.WriteWordLE(telemetry.supply);
-            w.WriteWordLE(telemetry.Xp);
-            w.WriteWordLE(telemetry.Xn);
-            w.WriteWordLE(telemetry.Yp);
-            w.WriteWordLE(telemetry.Yn);
-            w.WriteWordLE(telemetry.sads);
-            w.WriteWordLE(telemetry.sail);
-            w.WriteWordLE(telemetry.cam_nadir);
-            w.WriteWordLE(telemetry.cam_wing);
+            telemetry.Write(w);
 
             _experimentFile.Write(ExperimentFile::PID::PayloadTemperatures, buffer);
         }
@@ -306,8 +293,7 @@ namespace experiment
 
             std::array<uint8_t, PayloadTelemetry::Housekeeping::DeviceDataLength> buffer;
             Writer w(buffer);
-            w.WriteWordLE(telemetry.int_3v3d);
-            w.WriteWordLE(telemetry.obc_3v3d);
+            telemetry.Write(w);
 
             _experimentFile.Write(ExperimentFile::PID::PayloadHousekeeping, buffer);
         }
@@ -319,10 +305,7 @@ namespace experiment
 
             std::array<uint8_t, PayloadTelemetry::SunsRef::DeviceDataLength> buffer;
             Writer w(buffer);
-            for (auto voltage : telemetry.voltages)
-            {
-                w.WriteWordLE(voltage);
-            }
+            telemetry.Write(w);
 
             _experimentFile.Write(ExperimentFile::PID::PayloadSunS, buffer);
         }
@@ -347,39 +330,11 @@ namespace experiment
             std::array<uint8_t, 67> buffer;
 
             Writer w(buffer);
-
-            w.WriteWordLE(telemetry.status.ack);
-            w.WriteWordLE(telemetry.status.presence);
-            w.WriteWordLE(telemetry.status.adc_valid);
-
-            for (auto& als : telemetry.visible_light)
-            {
-                for (auto& panel : als)
-                {
-                    w.WriteWordLE(panel);
-                }
-            }
-
-            w.WriteWordLE(telemetry.temperature.structure);
-            for (auto& panel : telemetry.temperature.panels)
-            {
-                w.WriteWordLE(panel);
-            }
-
+            telemetry.WritePrimaryData(w);
             _experimentFile.Write(ExperimentFile::PID::ExperimentalSunSPrimary, w.Capture());
 
             w.Reset();
-            w.WriteByte(telemetry.parameters.gain);
-            w.WriteByte(telemetry.parameters.itime);
-
-            for (auto& als : telemetry.infrared)
-            {
-                for (auto& panel : als)
-                {
-                    w.WriteWordLE(panel);
-                }
-            }
-
+            telemetry.WriteSecondaryData(w);
             _experimentFile.Write(ExperimentFile::PID::ExperimentalSunSSecondary, w.Capture());
         }
     }

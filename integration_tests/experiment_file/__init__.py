@@ -7,6 +7,9 @@ from gyro import Gyro
 from sail import Sail
 from temps import AllTemperatures
 from imtq import Magnetometer, Dipoles
+from camera import CameraSyncCount
+from payload import PayloadWhoAmI, PayloadObcTelemetry, PayloadHousekeeping
+from radfet import RadFET
 
 pids = Synchronization \
        ^ Timestamp \
@@ -19,7 +22,13 @@ pids = Synchronization \
        ^ AllTemperatures \
        ^ Photodiodes \
        ^ Magnetometer \
-       ^ Dipoles
+       ^ Dipoles \
+       ^ CameraSyncCount \
+       ^ PayloadWhoAmI \
+       ^ PayloadObcTelemetry \
+       ^ PayloadHousekeeping \
+       ^ RadFET
+
 
 ExperimentFileParser = many(pids)
 

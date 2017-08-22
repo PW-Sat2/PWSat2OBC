@@ -51,9 +51,6 @@ namespace experiments
                 Gyro = 0x10,                      // 8 bytes of data
                 ExperimentalSunSPrimary = 0x11,   // Experimental SunS primary data, 41 bytes of data
                 ExperimentalSunSSecondary = 0x12, // Experimental SunS primary data, 26 bytes of data
-                RadFETStart = 0x14,               // RadFET data, 17 bytes
-                RadFETEnd = 0x15,                 // RadFET data, 17 bytes
-                RadFET = 0x16,                    // RadFET data, 17 bytes
                 SupplySADSTemperature = 0x17,     // Temperature data, 4 bytes
                 Sail = 0x18,                      // 3 bytes of data
 

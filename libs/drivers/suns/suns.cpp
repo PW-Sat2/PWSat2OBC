@@ -103,6 +103,7 @@ namespace devices
                 return OperationStatus::WhoAmIMismatch;
             }
 
+            data.whoami = whoAmI;
             data.status.ack = reader.ReadWordLE();
             data.status.presence = reader.ReadWordLE();
             data.status.adc_valid = reader.ReadWordLE();
@@ -171,6 +172,57 @@ namespace devices
             {
                 RaiseDataReadyISR();
             }
+        }
+
+        bool MeasurementData::WritePrimaryData(Writer& writer) const
+        {
+            writer.WriteByte(this->whoami);
+            writer.WriteWordLE(this->status.ack);
+            writer.WriteWordLE(this->status.presence);
+            writer.WriteWordLE(this->status.adc_valid);
+
+            for (auto& als : this->visible_light)
+            {
+                for (auto& panel : als)
+                {
+                    writer.WriteWordLE(panel);
+                }
+            }
+
+            writer.WriteWordLE(this->temperature.structure);
+
+            for (auto& panel : this->temperature.panels)
+            {
+                writer.WriteWordLE(panel);
+            }
+
+            return writer.Status();
+        }
+
+        bool MeasurementData::WriteSecondaryData(Writer& writer) const
+        {
+            writer.WriteByte(this->parameters.gain);
+            writer.WriteByte(this->parameters.itime);
+
+            for (auto& als : this->infrared)
+            {
+                for (auto& panel : als)
+                {
+                    writer.WriteWordLE(panel);
+                }
+            }
+
+            return writer.Status();
+        }
+
+        bool MeasurementData::Write(Writer& writer) const
+        {
+            if (!WritePrimaryData(writer))
+            {
+                return false;
+            }
+
+            return WriteSecondaryData(writer);
         }
     }
 }

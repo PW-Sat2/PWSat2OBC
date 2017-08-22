@@ -72,6 +72,12 @@ namespace devices
             void Write(BitWriter& writer) const;
 
             /**
+             * @brief Write the telemetry element to passed buffer writer object.
+             * @param[in] writer Buffer writer object that should be used to write the serialized state.
+             */
+            void Write(Writer& writer) const;
+
+            /**
              * @brief Returns size of the serialized state in bytes.
              * @return Size of the serialized state in bytes.
              */
