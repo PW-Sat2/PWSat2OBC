@@ -10,7 +10,7 @@ class EPSModule(ModuleBase):
         self._system = system
 
         self.title = 'EPS'
-        self.grid_pos = (1, 0)
+        self.grid_pos = (1, 1)
         self.grid_span = (1, 1)
 
     def load(self, res, parent):

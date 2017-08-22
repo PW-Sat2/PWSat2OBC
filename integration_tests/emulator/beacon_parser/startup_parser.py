@@ -1,13 +1,14 @@
-from parser import Parser
+from parser import CategoryParser
 
-class StartupParser(Parser):
-    def __init__(self, tree_control):
-        Parser.__init__(self, tree_control, 'Startup')
+
+class StartupParser(CategoryParser):
+    def __init__(self, reader, store):
+        CategoryParser.__init__(self, 'Startup', reader, store)
 
     def get_bit_count(self):
         return 9*8
 
-    def parse(self,  address, bits):
-        self.append_dword(address, bits, "Boot Counter")
-        self.append_byte(address, bits, "Boot Index")
-        self.append_dword(address, bits, "Boot Reason")
+    def parse(self):
+        self.append_dword("Boot Counter")
+        self.append_byte("Boot Index")
+        self.append_dword("Boot Reason")

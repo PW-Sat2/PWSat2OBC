@@ -1,16 +1,16 @@
-from parser import Parser
+from parser import CategoryParser
 
 
-class GyroscopeTelemetryParser(Parser):
-    def __init__(self, tree_control):
-        Parser.__init__(self, tree_control, 'Gyroscope')
+class GyroscopeTelemetryParser(CategoryParser):
+    def __init__(self, reader, store):
+        CategoryParser.__init__(self, 'Gyroscope', reader, store)
 
     def get_bit_count(self):
         return 4 * 16
 
-    def parse(self, address, bits):
-        self.append_word(address, bits, "X measurement")
-        self.append_word(address, bits, "Y measurement")
-        self.append_word(address, bits, "Z measurement")
-        self.append_word(address, bits, "Temperature")
+    def parse(self):
+        self.append_word("X measurement")
+        self.append_word("Y measurement")
+        self.append_word("Z measurement")
+        self.append_word("Temperature")
 

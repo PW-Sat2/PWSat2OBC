@@ -10,7 +10,7 @@ class LastFramesModule(ModuleBase):
         self._current_items = []
         self.title = 'Last frames'
         self.grid_span = (1, 1)
-        self.grid_pos = (1, 3)
+        self.grid_pos = (1, 4)
 
     def load(self, res, parent):
         self._panel = res.LoadPanel(parent, 'LastFramesModule')

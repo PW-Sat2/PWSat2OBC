@@ -17,7 +17,7 @@ class RTCModule(ModuleBase):
         self._system = system
         self._rtc = system.rtc  # type: RTCDevice
         self.title = 'RTC'
-        self.grid_pos = (1, 1)
+        self.grid_pos = (1, 2)
         self.grid_span = (1, 1)
 
     def load(self, res, parent):

@@ -63,7 +63,7 @@ class AntennaModule(ModuleBase):
 class AntennasModule(ModuleBase):
     def __init__(self, system):
         self.title = 'Antennas'
-        self.grid_pos = (0, 0)
+        self.grid_pos = (0, 1)
         self.grid_span = (1, 2)
 
         self._primary = AntennaModule('Primary', (0, 0), system.primary_antenna)

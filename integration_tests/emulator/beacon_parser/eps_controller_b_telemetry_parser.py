@@ -1,19 +1,19 @@
-from parser import Parser
+from parser import CategoryParser
 
 
-class EPSControllerBTelemetryParser(Parser):
-    def __init__(self, tree_control):
-        Parser.__init__(self, tree_control, 'Controller B')
+class EPSControllerBTelemetryParser(CategoryParser):
+    def __init__(self, reader, store):
+        CategoryParser.__init__(self, 'Controller B', reader, store)
 
     def get_bit_count(self):
         return 10 + 10 + 8 + 16 + 32 + 10 + 10 + 10
 
-    def parse(self, address, bits):
-        self.append_word(address, bits, "BP.Temperature", 10)
-        self.append_word(address, bits, "BATC.VOLT_B", 10)
-        self.append_byte(address, bits, "Safety Counter", 8)
-        self.append_word(address, bits, "Power Cycle Count", 16)
-        self.append_dword(address, bits, "Uptime", 32)
-        self.append_word(address, bits, "Temperature", 10)
-        self.append_word(address, bits, 'SUPP_TEMP', 10)
-        self.append_word(address, bits, "Other.Temperature", 10)
+    def parse(self):
+        self.append("BP.Temperature", 10)
+        self.append("BATC.VOLT_B", 10)
+        self.append("Safety Counter", 8)
+        self.append("Power Cycle Count", 16)
+        self.append("Uptime", 32)
+        self.append("Temperature", 10)
+        self.append('SUPP_TEMP', 10)
+        self.append("Other.Temperature", 10)
