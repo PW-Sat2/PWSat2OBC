@@ -31,17 +31,6 @@ class CommModule(ModuleBase):
 
         self._current_beacon_timestamp = xrc.XRCCTRL(self._panel, 'current_beacon_timestamp')
 
-        self._beaconFrame = res.LoadFrame(None, 'BeaconFrame')  # type: wx.Frame
-        self._beaconFrame.SetDoubleBuffered(True)
-        self._beaconFrame.Bind(wx.EVT_CLOSE, self._onFrameClose)
-
-        self._fileTree = xrc.XRCCTRL(self._beaconFrame, 'beacon_tree')  # type: wx.TreeCtrl
-        self._root = self._fileTree.AddRoot('Beacon')
-
-        self._fileTree.AppendItem(self._root, '0: No data laoded')
-
-        self._fileTree.ExpandAllChildren(self._root)
-
     def root(self):
         return self._panel
 
@@ -60,13 +49,6 @@ class CommModule(ModuleBase):
     def _get_frame(self, evt):
         self._system.comm.get_frame(20)
 
-    @bind('show_beacon_frame', wx.EVT_BUTTON)
-    def _showFrame(self, evt):
-        self._beaconFrame.Show()
-
-    def _onFrameClose(self, evt):
-        self._beaconFrame.Iconize(True)
-
     def update(self):
         self._current_comm_queue_size.SetLabel('Comm queue size: ' + str(self._system.transmitter.queue_size()))
 
@@ -77,28 +59,3 @@ class CommModule(ModuleBase):
             self._current_beacon_timestamp.SetLabel(
                 'Current beacon: \n' + time.strftime('%Y-%m-%d %H:%M:%S', self._system.transmitter.current_beacon_timestamp)
                 + ' (' + str(len(self._system.transmitter.current_beacon)) + ' bytes)')
-
-        if self._last_beacon_seen != self._system.transmitter.current_beacon_timestamp:
-
-            self._fileTree.DeleteChildren(self._root)
-
-            # load the becon
-            all_bits = bitarray(endian='little')
-            all_bits.frombytes( ''.join(map(lambda x: pack('B', x), self._system.transmitter.current_beacon)))
-
-            reader = BitReader(all_bits)
-            store = BeaconStorage()
-
-            parsers = FullBeaconParser().GetParsers(reader, store)
-            parsers.reverse()
-
-            while len(parsers) > 0:
-                parser = parsers.pop()
-                parser.parse()
-
-            # load the store into tree
-
-            self._fileTree.ExpandAllChildren(self._root)
-            self._last_beacon_seen = self._system.transmitter.current_beacon_timestamp
-
-

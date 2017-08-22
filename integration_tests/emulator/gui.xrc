@@ -13,16 +13,6 @@
 			<growablerows></growablerows>
 		</object>
 	</object>
-	<object class="wxFrame" name="BeaconFrame">
-		<style>wxDEFAULT_FRAME_STYLE|wxSTAY_ON_TOP|wxTAB_TRAVERSAL</style>
-		<size>837,492</size>
-		<title>PW-Sat2 Emulator</title>
-		<centered>1</centered>
-		<aui_managed>0</aui_managed>
-		<object class="wxTreeCtrl" name="beacon_tree">
-			<style>wxTR_DEFAULT_STYLE</style>
-		</object>
-	</object>
 	<object class="wxPanel" name="AntennaModule">
 		<style>wxTAB_TRAVERSAL</style>
 		<size>500,180</size>
@@ -290,15 +280,6 @@
 				<object class="wxStaticText" name="current_beacon_timestamp">
 					<label>No last beacon information\n</label>
 					<wrap>-1</wrap>
-				</object>
-			</object>
-			<object class="sizeritem">
-				<option>0</option>
-				<flag>wxALL</flag>
-				<border>5</border>
-				<object class="wxButton" name="show_beacon_frame">
-					<label>Show Beacon</label>
-					<default>0</default>
 				</object>
 			</object>
 			<object class="sizeritem">
