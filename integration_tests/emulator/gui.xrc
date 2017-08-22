@@ -25,7 +25,7 @@
 	</object>
 	<object class="wxPanel" name="AntennaModule">
 		<style>wxTAB_TRAVERSAL</style>
-		<size>535,180</size>
+		<size>500,180</size>
 		<object class="wxBoxSizer">
 			<orient>wxVERTICAL</orient>
 			<object class="sizeritem">
@@ -63,18 +63,17 @@
 				</object>
 			</object>
 			<object class="sizeritem">
-				<option>3</option>
+				<option>1</option>
 				<flag>wxEXPAND</flag>
 				<border>5</border>
-				<object class="wxFlexGridSizer">
-					<rows>0</rows>
-					<cols>4</cols>
+				<object class="wxGridBagSizer">
 					<vgap>0</vgap>
 					<hgap>0</hgap>
 					<growablecols></growablecols>
 					<growablerows></growablerows>
 					<object class="sizeritem">
-						<option>1</option>
+						<cellpos>0,0</cellpos>
+						<cellspan>1,1</cellspan>
 						<flag>wxALL</flag>
 						<border>5</border>
 						<object class="wxStaticText" name="m_staticText1">
@@ -84,19 +83,21 @@
 						</object>
 					</object>
 					<object class="sizeritem">
-						<option>1</option>
-						<flag>wxALL</flag>
+						<cellpos>0,1</cellpos>
+						<cellspan>1,1</cellspan>
+						<flag>wxTOP</flag>
 						<border>5</border>
 						<object class="wxStaticText" name="antenna1_status">
-							<size>200,-1</size>
+							<size>225,-1</size>
 							<label>Status</label>
 							<wrap>-1</wrap>
 						</object>
 					</object>
 					<object class="sizeritem">
-						<option>0</option>
-						<flag></flag>
-						<border>5</border>
+						<cellpos>0,2</cellpos>
+						<cellspan>1,1</cellspan>
+						<flag>wxALIGN_RIGHT|wxALL</flag>
+						<border>1</border>
 						<object class="wxButton" name="antenna1_deploy">
 							<size>80,28</size>
 							<label>Deploy</label>
@@ -104,9 +105,10 @@
 						</object>
 					</object>
 					<object class="sizeritem">
-						<option>0</option>
-						<flag></flag>
-						<border>5</border>
+						<cellpos>0,3</cellpos>
+						<cellspan>1,1</cellspan>
+						<flag>wxALL</flag>
+						<border>1</border>
 						<object class="wxButton" name="antenna1_deploy_cancel">
 							<size>-1,28</size>
 							<label>Cancel deploy</label>
@@ -114,7 +116,8 @@
 						</object>
 					</object>
 					<object class="sizeritem">
-						<option>0</option>
+						<cellpos>1,0</cellpos>
+						<cellspan>1,1</cellspan>
 						<flag>wxALL</flag>
 						<border>5</border>
 						<object class="wxStaticText" name="m_staticText11">
@@ -124,19 +127,21 @@
 						</object>
 					</object>
 					<object class="sizeritem">
-						<option>3</option>
-						<flag>wxALL</flag>
+						<cellpos>1,1</cellpos>
+						<cellspan>1,1</cellspan>
+						<flag>wxTOP</flag>
 						<border>5</border>
 						<object class="wxStaticText" name="antenna2_status">
-							<size>200,-1</size>
+							<size>225,-1</size>
 							<label>Status</label>
 							<wrap>-1</wrap>
 						</object>
 					</object>
 					<object class="sizeritem">
-						<option>0</option>
-						<flag></flag>
-						<border>5</border>
+						<cellpos>1,2</cellpos>
+						<cellspan>1,1</cellspan>
+						<flag>wxALIGN_RIGHT|wxALL</flag>
+						<border>1</border>
 						<object class="wxButton" name="antenna2_deploy">
 							<size>80,28</size>
 							<label>Deploy</label>
@@ -144,9 +149,10 @@
 						</object>
 					</object>
 					<object class="sizeritem">
-						<option>0</option>
-						<flag></flag>
-						<border>5</border>
+						<cellpos>1,3</cellpos>
+						<cellspan>1,1</cellspan>
+						<flag>wxALL</flag>
+						<border>1</border>
 						<object class="wxButton" name="antenna2_deploy_cancel">
 							<size>-1,28</size>
 							<label>Cancel deploy</label>
@@ -154,7 +160,8 @@
 						</object>
 					</object>
 					<object class="sizeritem">
-						<option>0</option>
+						<cellpos>2,0</cellpos>
+						<cellspan>1,1</cellspan>
 						<flag>wxALL</flag>
 						<border>5</border>
 						<object class="wxStaticText" name="m_staticText111">
@@ -164,19 +171,21 @@
 						</object>
 					</object>
 					<object class="sizeritem">
-						<option>3</option>
-						<flag>wxALL</flag>
+						<cellpos>2,1</cellpos>
+						<cellspan>1,1</cellspan>
+						<flag>wxTOP</flag>
 						<border>5</border>
 						<object class="wxStaticText" name="antenna3_status">
-							<size>200,-1</size>
+							<size>225,-1</size>
 							<label>Status</label>
 							<wrap>-1</wrap>
 						</object>
 					</object>
 					<object class="sizeritem">
-						<option>0</option>
-						<flag></flag>
-						<border>5</border>
+						<cellpos>2,2</cellpos>
+						<cellspan>1,1</cellspan>
+						<flag>wxALIGN_RIGHT|wxALL</flag>
+						<border>1</border>
 						<object class="wxButton" name="antenna3_deploy">
 							<size>80,28</size>
 							<label>Deploy</label>
@@ -184,9 +193,10 @@
 						</object>
 					</object>
 					<object class="sizeritem">
-						<option>0</option>
-						<flag></flag>
-						<border>5</border>
+						<cellpos>2,3</cellpos>
+						<cellspan>1,1</cellspan>
+						<flag>wxALL</flag>
+						<border>1</border>
 						<object class="wxButton" name="antenna3_deploy_cancel">
 							<size>-1,28</size>
 							<label>Cancel deploy</label>
@@ -194,7 +204,8 @@
 						</object>
 					</object>
 					<object class="sizeritem">
-						<option>1</option>
+						<cellpos>3,0</cellpos>
+						<cellspan>1,1</cellspan>
 						<flag>wxALL</flag>
 						<border>5</border>
 						<object class="wxStaticText" name="m_staticText1111">
@@ -204,19 +215,21 @@
 						</object>
 					</object>
 					<object class="sizeritem">
-						<option>3</option>
-						<flag>wxALL</flag>
+						<cellpos>3,1</cellpos>
+						<cellspan>1,1</cellspan>
+						<flag>wxTOP</flag>
 						<border>5</border>
 						<object class="wxStaticText" name="antenna4_status">
-							<size>300,-1</size>
+							<size>225,-1</size>
 							<label>Status</label>
 							<wrap>-1</wrap>
 						</object>
 					</object>
 					<object class="sizeritem">
-						<option>1</option>
-						<flag></flag>
-						<border>5</border>
+						<cellpos>3,2</cellpos>
+						<cellspan>1,1</cellspan>
+						<flag>wxALIGN_RIGHT|wxALL</flag>
+						<border>1</border>
 						<object class="wxButton" name="antenna4_deploy">
 							<size>80,28</size>
 							<label>Deploy</label>
@@ -224,9 +237,10 @@
 						</object>
 					</object>
 					<object class="sizeritem">
-						<option>0</option>
-						<flag></flag>
-						<border>5</border>
+						<cellpos>3,3</cellpos>
+						<cellspan>1,1</cellspan>
+						<flag>wxALL</flag>
+						<border>1</border>
 						<object class="wxButton" name="antenna4_deploy_cancel">
 							<size>-1,28</size>
 							<label>Cancel deploy</label>
@@ -1381,7 +1395,7 @@
 	</object>
 	<object class="wxPanel" name="AntennasModule">
 		<style>wxTAB_TRAVERSAL</style>
-		<size>535,390</size>
+		<size>500,390</size>
 		<object class="wxBoxSizer">
 			<orient>wxVERTICAL</orient>
 		</object>
@@ -1610,7 +1624,7 @@
 	</object>
 	<object class="wxPanel" name="RTCModule">
 		<style>wxTAB_TRAVERSAL</style>
-		<size>200,290</size>
+		<size>165,290</size>
 		<object class="wxBoxSizer">
 			<orient>wxVERTICAL</orient>
 			<object class="sizeritem">
