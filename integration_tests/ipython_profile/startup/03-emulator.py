@@ -15,7 +15,7 @@ last_beacon = {}
 
 def _setup_emulator(system):
     emulator_modules = [
-        BeaconModule(last_beacon),
+        BeaconModule(last_beacon, system),
         AntennasModule(system),
         RTCModule(system),
         EPSModule(system),

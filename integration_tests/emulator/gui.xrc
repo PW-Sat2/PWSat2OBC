@@ -25,7 +25,7 @@
 	</object>
 	<object class="wxPanel" name="AntennaModule">
 		<style>wxTAB_TRAVERSAL</style>
-		<size>570,180</size>
+		<size>535,180</size>
 		<object class="wxBoxSizer">
 			<orient>wxVERTICAL</orient>
 			<object class="sizeritem">
@@ -1381,7 +1381,7 @@
 	</object>
 	<object class="wxPanel" name="AntennasModule">
 		<style>wxTAB_TRAVERSAL</style>
-		<size>570,390</size>
+		<size>535,390</size>
 		<object class="wxBoxSizer">
 			<orient>wxVERTICAL</orient>
 		</object>
@@ -1661,7 +1661,7 @@
 	</object>
 	<object class="wxPanel" name="LastFramesModule">
 		<style>wxTAB_TRAVERSAL</style>
-		<size>500,290</size>
+		<size>420,290</size>
 		<object class="wxBoxSizer">
 			<orient>wxVERTICAL</orient>
 			<object class="sizeritem">
@@ -1677,7 +1677,7 @@
 	</object>
 	<object class="wxPanel" name="BeaconModule">
 		<style>wxTAB_TRAVERSAL</style>
-		<size>200,500</size>
+		<size>300,705</size>
 		<object class="wxBoxSizer">
 			<orient>wxVERTICAL</orient>
 		</object>

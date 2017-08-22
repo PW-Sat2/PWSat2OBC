@@ -272,7 +272,7 @@
                 </object>
             </object>
         </object>
-        <object class="Panel" expanded="0">
+        <object class="Panel" expanded="1">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
             <property name="bg"></property>
@@ -288,7 +288,7 @@
             <property name="minimum_size"></property>
             <property name="name">AntennaModule</property>
             <property name="pos"></property>
-            <property name="size">570,180</property>
+            <property name="size">535,180</property>
             <property name="subclass"></property>
             <property name="tooltip"></property>
             <property name="window_extra_style"></property>
@@ -324,7 +324,7 @@
             <event name="OnSetFocus"></event>
             <event name="OnSize"></event>
             <event name="OnUpdateUI"></event>
-            <object class="wxBoxSizer" expanded="0">
+            <object class="wxBoxSizer" expanded="1">
                 <property name="minimum_size"></property>
                 <property name="name">bSizer15</property>
                 <property name="orient">wxVERTICAL</property>
@@ -691,7 +691,7 @@
                         <object class="sizeritem" expanded="0">
                             <property name="border">5</property>
                             <property name="flag"></property>
-                            <property name="proportion">0</property>
+                            <property name="proportion">1</property>
                             <object class="wxButton" expanded="0">
                                 <property name="BottomDockable">1</property>
                                 <property name="LeftDockable">1</property>
@@ -779,7 +779,7 @@
                         <object class="sizeritem" expanded="0">
                             <property name="border">5</property>
                             <property name="flag"></property>
-                            <property name="proportion">0</property>
+                            <property name="proportion">1</property>
                             <object class="wxButton" expanded="0">
                                 <property name="BottomDockable">1</property>
                                 <property name="LeftDockable">1</property>
@@ -11724,7 +11724,7 @@
             <property name="minimum_size"></property>
             <property name="name">AntennasModule</property>
             <property name="pos"></property>
-            <property name="size">570,390</property>
+            <property name="size">535,390</property>
             <property name="subclass"></property>
             <property name="tooltip"></property>
             <property name="window_extra_style"></property>
@@ -13837,7 +13837,7 @@
                 </object>
             </object>
         </object>
-        <object class="Panel" expanded="0">
+        <object class="Panel" expanded="1">
             <property name="aui_managed">0</property>
             <property name="aui_manager_style">wxAUI_MGR_DEFAULT</property>
             <property name="bg"></property>
@@ -13853,7 +13853,7 @@
             <property name="minimum_size"></property>
             <property name="name">LastFramesModule</property>
             <property name="pos"></property>
-            <property name="size">500,290</property>
+            <property name="size">420,290</property>
             <property name="subclass"></property>
             <property name="tooltip"></property>
             <property name="window_extra_style"></property>
@@ -14000,7 +14000,7 @@
             <property name="minimum_size"></property>
             <property name="name">BeaconModule</property>
             <property name="pos"></property>
-            <property name="size">200,500</property>
+            <property name="size">300,705</property>
             <property name="subclass"></property>
             <property name="tooltip"></property>
             <property name="window_extra_style"></property>
