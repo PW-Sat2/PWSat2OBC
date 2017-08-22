@@ -3,6 +3,7 @@
 #include "state/struct.h"
 
 using telecommunication::downlink::DownlinkAPID;
+using telecommunication::downlink::DownlinkFrame;
 using telecommunication::downlink::CorrelatedDownlinkFrame;
 
 namespace obc
@@ -42,6 +43,36 @@ namespace obc
             response.PayloadWriter().WriteByte(0);
 
             transmitter.SendFrame(response.Frame());
+        }
+
+        SendPeriodicMessageTelecommand::SendPeriodicMessageTelecommand(IHasState<SystemState>& stateContainer)
+            : _stateContainer(stateContainer)
+        {
+        }
+
+        void SendPeriodicMessageTelecommand::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
+        {
+            state::MessageState msg;
+
+            if (!this->_stateContainer.GetState().PersistentState.Get(msg))
+            {
+                msg = state::MessageState();
+            }
+
+            DownlinkFrame frame(DownlinkAPID::PeriodicMessage, 0);
+            frame.PayloadWriter().WriteArray(msg.Message());
+
+            std::uint8_t count = 40;
+
+            if (parameters.size() == 1)
+            {
+                count = parameters[0];
+            }
+
+            for (std::uint8_t i = 0; i < count; i++)
+            {
+                transmitter.SendFrame(frame.Frame());
+            }
         }
     }
 }

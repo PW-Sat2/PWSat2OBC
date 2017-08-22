@@ -10,6 +10,7 @@ namespace obc
     {
         /**
          * @brief Set periodic message telecommand
+         * @ingroup obc_telecommands
          * @telecommand
          *
          * Parameters:
@@ -29,6 +30,27 @@ namespace obc
 
           private:
             /** @brief System state accessor */
+            IHasState<SystemState>& _stateContainer;
+        };
+
+        /**
+         * @brief Sends periodic message immediately
+         * @ingroup obc_telecommands
+         * @telecommand
+         *
+         * Parameters: None
+         */
+        class SendPeriodicMessageTelecommand : public telecommunication::uplink::Telecommand<0x23>
+        {
+          public:
+            /**
+             * @brief Ctor
+             * @param stateContainer System state accessor
+             */
+            SendPeriodicMessageTelecommand(IHasState<SystemState>& stateContainer);
+            virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
+
+          private:
             IHasState<SystemState>& _stateContainer;
         };
     }
