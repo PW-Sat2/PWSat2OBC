@@ -1,12 +1,11 @@
 from parser import CategoryParser
 
-
 class EPSControllerATelemetryParser(CategoryParser):
     def __init__(self, reader, store):
         CategoryParser.__init__(self, 'Controller A', reader, store)
 
     def get_bit_count(self):
-        return 3*(4*12+6) + 6*10 + 2*8 + 4*10 + 8 + 2*12 + 8 + 16 + 32 + 4*10 + 10
+        return 3*(4*12+6) + 6*10 + 2*8 + 4*10 + 8 + 2*13 + 8 + 16 + 32 + 4*10 + 10
 
     def parse(self):
         self.append('MPPT_X.SOL_VOLT', 12)
@@ -37,8 +36,8 @@ class EPSControllerATelemetryParser(CategoryParser):
         self.append('BATC.DCHRG_CURR', 10)
         self.append('BATC.Temperature', 10)
         self.append('BATC.State', 8)
-        self.append('BP.Temperature A', 12)
-        self.append('BP.Temperature B', 12)
+        self.append('BP.Temperature A', 13)
+        self.append('BP.Temperature B', 13)
         self.append('Safety Counter', 8)
         self.append('Power Cycle Count', 16)
         self.append('Uptime', 32)

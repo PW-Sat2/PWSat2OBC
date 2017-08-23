@@ -374,10 +374,10 @@ namespace devices
                 static constexpr std::uint32_t BitSize();
 
                 /** @brief Temp A, Celsius*/
-                uint12_t temperatureA;
+                uint13_t temperatureA;
 
                 /** @brief Temp B, Celsius*/
-                uint12_t temperatureB;
+                uint13_t temperatureB;
             };
 
             constexpr std::uint32_t BatteryPackPrimaryState::BitSize()
@@ -385,7 +385,7 @@ namespace devices
                 return Aggregate<decltype(temperatureA), decltype(temperatureB)>;
             }
 
-            static_assert(BatteryPackPrimaryState::BitSize() == 24, "Incorrect telemetry format");
+            static_assert(BatteryPackPrimaryState::BitSize() == 26, "Incorrect telemetry format");
 
             /** @brief Battery Pack status*/
             struct BatteryPackSecondaryState
@@ -532,7 +532,7 @@ namespace devices
                     decltype(dcdc5V)::BitSize();
             }
 
-            static_assert(ControllerATelemetry::BitSize() == 416, "Incorrect telemetry format");
+            static_assert(ControllerATelemetry::BitSize() == 418, "Incorrect telemetry format");
 
             /**
              * @brief Housekeeping of controller B

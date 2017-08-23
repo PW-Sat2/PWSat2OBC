@@ -521,6 +521,9 @@ inline bool operator!=(BitValue<Underlying, BitsCount>& lhs, BitValue<Underlying
 /** @brief 12-bit unsigned integer */
 using uint12_t = BitValue<std::uint16_t, 12>;
 
+/** @brief 13-bit unsigned integer */
+using uint13_t = BitValue<std::uint16_t, 13>;
+
 /** @brief 10-bit unsigned integer */
 using uint10_t = BitValue<std::uint16_t, 10>;
 
