@@ -1,5 +1,6 @@
 import binascii
 import logging
+import struct
 import traceback
 from threading import Thread, Event, Lock
 
@@ -308,7 +309,7 @@ class I2CMock(object):
 
     def _command(self, cmd, data=[]):
         raw = ['S', cmd]
-        size = [len(data)]
+        size = struct.pack('<H', len(data))
         raw.extend(self._escape(size))
         raw.extend(self._escape(data))
 
@@ -365,7 +366,7 @@ class I2CMock(object):
         self._log.info('Device mock version %d', self._version)
         self._started.set()
 
-        if self._version != 4:
+        if self._version != 5:
             raise UnsupportedMockVersion(self._version)
 
     def _device_command_stopped(self):

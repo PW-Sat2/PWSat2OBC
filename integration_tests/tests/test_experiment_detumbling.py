@@ -29,7 +29,7 @@ class TestExperimentDetumbling(RestartPerTest):
         e.wait_for_change(1)
 
     @runlevel(2)
-    @skip('Mock is unable to pass self-test')
+    # @skip('Mock is unable to pass self-test')
     def test_should_perform_experiment(self):
         self._start()
 

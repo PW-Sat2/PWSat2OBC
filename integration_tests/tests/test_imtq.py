@@ -15,7 +15,6 @@ class Test_Imtq(RestartPerSuite):
         res = self.system.obc.read_magnetometer()
         self.assertEqual(res, [100, 200, -300])
 
-    @runlevel(1)
     def test_get_detumble_data(self):
         self.system.imtq.bdot_data = [11, 22, 33]
         self.system.imtq.mtm_measurement = [100, 200, -300]
@@ -23,4 +22,6 @@ class Test_Imtq(RestartPerSuite):
         self.system.imtq.commanded_dipole = [0, 1, 2]
         res = self.system.obc.get_detumble_data()
         self.assertEqual(res, [100, 200, -300, 100, 200, -300, 11, 22, 33, 0, 1, 2, 10, -20, 30, 10, -20, 30])
- 
+
+    def test_self_test(self):
+        self.system.obc._command('imtq PerformSelfTest true')
