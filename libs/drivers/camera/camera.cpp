@@ -87,10 +87,22 @@ gsl::span<uint8_t> Camera::CameraReceiveJPEGData(gsl::span<uint8_t> buffer)
     {
         auto dataToTake = std::min(static_cast<uint32_t>(PackageSize - 6), totalDataLength - dataIndex);
 
-        auto result = _cameraDriver.SendAckWithResponse(  //
-            CameraCmd::None,                              //
-            i,                                            //
-            buffer.subspan(bufferIndex, dataToTake + 6)); //
+        bool result = false;
+
+        for (auto j = 0; j < 3; j++)
+        {
+            result = _cameraDriver.SendAckWithResponse(       //
+                CameraCmd::None,                              //
+                i,                                            //
+                buffer.subspan(bufferIndex, dataToTake + 6)); //
+
+            if (result)
+            {
+                break;
+            }
+
+            LOGF(LOG_LEVEL_INFO, "[cam] Retrying package download %d", j);
+        }
 
         if (!result)
         {
