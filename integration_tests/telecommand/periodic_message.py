@@ -1,3 +1,5 @@
+import struct
+
 from telecommand import Telecommand
 from utils import ensure_byte_list
 
@@ -18,8 +20,11 @@ class SetPeriodicMessageTelecommand(Telecommand):
 
 
 class SendPeriodicMessageTelecommand(Telecommand):
+    def __init__(self, count):
+        self.count = count
+
     def apid(self):
         return 0x23
 
     def payload(self):
-        return []
+        return struct.pack('<B', self.count)
