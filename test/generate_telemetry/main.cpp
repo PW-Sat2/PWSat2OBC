@@ -90,51 +90,52 @@ ControllerATelemetry GetControllerA()
 {
     ControllerATelemetry hk;
 
-    hk.batc.ChargeCurrent = 301;
-    hk.batc.DischargeCurrent = 302;
-    hk.batc.State = BATC_STATE::C;
-    hk.batc.Temperature = 303;
-    hk.batc.VOLT_A = 304;
-
-    hk.bp.temperatureA = 305;
-    hk.bp.temperatureB = 306;
-
-    hk.dcdc3V3.temperature = 307;
-    hk.dcdc5V.temperature = 308;
-
-    hk.distr.CURR_3V3 = 309;
-    hk.distr.CURR_5V = 310;
-    hk.distr.CURR_VBAT = 311;
-    hk.distr.LCL_FLAGB = static_cast<DISTR_LCL_FLAGB>(num(DISTR_LCL_FLAGB::CamNadir) | num(DISTR_LCL_FLAGB::SENS));
-    hk.distr.LCL_STATE = static_cast<DISTR_LCL_STATE>(num(DISTR_LCL_STATE::CamNadir) | num(DISTR_LCL_STATE::SENS));
-    hk.distr.VOLT_3V3 = 312;
-    hk.distr.VOLT_5V = 313;
-    hk.distr.VOLT_VBAT = 314;
-
-    hk.mpptX.SOL_CURR = 315;
-    hk.mpptX.SOL_OUT_VOLT = 316;
-    hk.mpptX.SOL_VOLT = 317;
+    hk.mpptX.SOL_VOLT = 301;
+    hk.mpptX.SOL_CURR = 302;
+    hk.mpptX.SOL_OUT_VOLT = 303;
+    hk.mpptX.Temperature = 304;
     hk.mpptX.MpptState = MPPT_STATE::FixedPointConversion;
-    hk.mpptX.Temperature = 318;
 
-    hk.mpptYPlus.SOL_CURR = 319;
-    hk.mpptYPlus.SOL_OUT_VOLT = 320;
-    hk.mpptYPlus.SOL_VOLT = 321;
+    hk.mpptYPlus.SOL_VOLT = 305;
+    hk.mpptYPlus.SOL_CURR = 306;
+    hk.mpptYPlus.SOL_OUT_VOLT = 307;
+    hk.mpptYPlus.Temperature = 308;
     hk.mpptYPlus.MpptState = MPPT_STATE::NoSolarPanel;
-    hk.mpptYPlus.Temperature = 322;
 
-    hk.mpptYMinus.SOL_CURR = 323;
-    hk.mpptYMinus.SOL_OUT_VOLT = 324;
-    hk.mpptYMinus.SOL_VOLT = 325;
+    hk.mpptYMinus.SOL_VOLT = 309;
+    hk.mpptYMinus.SOL_CURR = 310;
+    hk.mpptYMinus.SOL_OUT_VOLT = 311;
+    hk.mpptYMinus.Temperature = 312;
     hk.mpptYMinus.MpptState = MPPT_STATE::MPPTBatteryCharge;
-    hk.mpptYMinus.Temperature = 326;
 
-    // TODO: HK other
-    hk.current.powerCycleCount = 327;
-    hk.current.suppTemp = 328;
-    hk.current.safetyCounter = 229;
-    hk.current.temperature = 330;
-    hk.current.uptime = 331;
+    hk.distr.VOLT_3V3 = 313;
+    hk.distr.CURR_3V3 = 314;
+    hk.distr.VOLT_5V = 315;
+    hk.distr.CURR_5V = 316;
+    hk.distr.VOLT_VBAT = 317;
+    hk.distr.CURR_VBAT = 318;
+    hk.distr.LCL_STATE = static_cast<DISTR_LCL_STATE>(num(DISTR_LCL_STATE::CamNadir) | num(DISTR_LCL_STATE::SENS));
+    hk.distr.LCL_FLAGB = static_cast<DISTR_LCL_FLAGB>(num(DISTR_LCL_FLAGB::CamNadir) | num(DISTR_LCL_FLAGB::SENS));
+
+    hk.batc.VOLT_A = 319;
+    hk.batc.ChargeCurrent = 320;
+    hk.batc.DischargeCurrent = 321;
+    hk.batc.Temperature = 322;
+    hk.batc.State = BATC_STATE::C;
+
+    hk.bp.temperatureA = 323;
+    hk.bp.temperatureB = 324;
+
+    hk.current.safetyCounter = 225;
+    hk.current.powerCycleCount = 326;
+    hk.current.uptime = 327;
+    hk.current.temperature = 328;
+    hk.current.suppTemp = 329;
+
+    hk.other.VOLT_3V3d = 330;
+
+    hk.dcdc3V3.temperature = 331;
+    hk.dcdc5V.temperature = 332;
 
     return hk;
 }
@@ -143,17 +144,17 @@ ControllerBTelemetry GetControllerB()
 {
     ControllerBTelemetry hk;
 
-    hk.batc.voltB = 332;
-
     hk.bp.temperatureC = 333;
 
-    // TODO: HK other
+    hk.batc.voltB = 334;
 
-    hk.current.powerCycleCount = 334;
-    hk.current.suppTemp = 335;
-    hk.current.safetyCounter = 236;
-    hk.current.temperature = 337;
-    hk.current.uptime = 338;
+    hk.current.safetyCounter = 235;
+    hk.current.powerCycleCount = 336;
+    hk.current.uptime = 337;
+    hk.current.temperature = 338;
+    hk.current.suppTemp = 339;
+
+    hk.other.VOLT_3V3d = 340;
 
     return hk;
 }
