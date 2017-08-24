@@ -10,13 +10,14 @@
 #include "gyro/fwd.hpp"
 #include "i2c/forward.h"
 #include "imtq/fwd.hpp"
-#include "suns/fwd.hpp"
+#include "obc/adcs_fwd.hpp"
 #include "obc/experiments_fwd.hpp"
 #include "obc/fdir_fwd.hpp"
 #include "obc/hardware_fwd.hpp"
 #include "obc/memory_fwd.hpp"
 #include "obc/scrubbing_fwd.hpp"
 #include "rtc/fwd.hpp"
+#include "suns/fwd.hpp"
 #include "temp/fwd.hpp"
 #include "terminal/fwd.hpp"
 #include "time/fwd.hpp"
@@ -40,5 +41,6 @@ services::time::TimeProvider& GetTimeProvider();
 obc::OBCScrubbing& GetScrubbing();
 temp::ADCTemperatureReader& GetMCUTemperature();
 devices::camera::Camera& GetCamera();
+obc::Adcs& GetAdcs();
 
 #endif /* SRC_OBC_ACCESS_HPP_ */
