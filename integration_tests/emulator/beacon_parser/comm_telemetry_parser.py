@@ -3,7 +3,7 @@ from parser import CategoryParser
 
 class CommTelemetryParser(CategoryParser):
     def __init__(self, reader, store):
-        CategoryParser.__init__(self, 'Comm', reader, store)
+        CategoryParser.__init__(self, '10: Comm', reader, store)
 
     def get_bit_count(self):
         return 10*12 + 2*6 + 5 + 8 + 2*1

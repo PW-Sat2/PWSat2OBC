@@ -39,58 +39,8 @@ class BitReader:
     def read_qword(self):
         return self.read(64)
 
-
-
-class Parser:
-    def __init__(self, tree_control, name):
-        self._offset = 0
-        self._name = name
-        self._tree_control = tree_control
-        self._root = tree_control.AppendItem(tree_control.GetRootItem(), name)
-
-    def append_dword(self, address, bits, name, length=32):
-        if len(bits[self._offset:self._offset + length]) < length:
-            self._tree_control.AppendItem(self._root, str(address + self._offset) + ': '
-                                          + name + ' = Empty Data')
-        else:
-            self._tree_control.AppendItem(self._root, str(address + self._offset) + ': '
-                               + name + ' = '
-                               + str(bits_to_dword(bits[self._offset:self._offset + length])))
-
-        self._offset += length
-
-    def append_byte(self, address, bits, name, length=8):
-        if len(bits[self._offset:self._offset + length]) < length:
-            self._tree_control.AppendItem(self._root, str(address + self._offset) + ': '
-                                          + name + ' = Empty Data')
-        else:
-            self._tree_control.AppendItem(self._root, str(address + self._offset) + ': '
-                               + name + ' = '
-                               + str(bits_to_byte(bits[self._offset:self._offset + length])))
-
-        self._offset += length
-
-    def append_word(self, address, bits, name, length=16):
-        if len(bits[self._offset:self._offset + length]) < length:
-            self._tree_control.AppendItem(self._root, str(address + self._offset) + ': '
-                                          + name + ' = Empty Data')
-        else:
-            self._tree_control.AppendItem(self._root, str(address + self._offset) + ': '
-                                   + name + ' = '
-                                   + str(bits_to_word(bits[self._offset:self._offset + length])))
-
-        self._offset += length
-
-    def append_qword(self, address, bits, name, length=64):
-        if len(bits[self._offset:self._offset + length]) < length:
-            self._tree_control.AppendItem(self._root, str(address + self._offset) + ': '
-                                          + name + ' = Empty Data')
-        else:
-            self._tree_control.AppendItem(self._root, str(address + self._offset) + ': '
-                               + name + ' = '
-                               + str(bits_to_qword(bits[self._offset:self._offset + length])))
-
-        self._offset += length
+    def offset(self):
+        return self._offset
 
 
 class BeaconStorage:
@@ -112,7 +62,7 @@ class CategoryParser:
 
     def append(self, name, length):
         value = self._reader.read(length)
-        self._store.write(self._category, name, value)
+        self._store.write(self._category, self._format_name(name, length), value)
 
     def append_byte(self, name):
         self.append(name, 8)
@@ -125,3 +75,6 @@ class CategoryParser:
 
     def append_qword(self, name):
         self.append(name, 64)
+
+    def _format_name(self, name, length):
+        return str(self._reader.offset() - length).rjust(4, '0') + ": " + name

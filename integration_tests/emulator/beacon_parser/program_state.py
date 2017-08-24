@@ -3,7 +3,7 @@ from parser import CategoryParser
 
 class ProgramStateParser(CategoryParser):
     def __init__(self, reader, store):
-        CategoryParser.__init__(self, 'Program State', reader, store)
+        CategoryParser.__init__(self, '02: Program State', reader, store)
 
     def get_bit_count(self):
         return 2*8

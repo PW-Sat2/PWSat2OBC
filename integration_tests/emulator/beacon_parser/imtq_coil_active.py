@@ -3,7 +3,7 @@ from parser import CategoryParser
 
 class ImtqCoilActiveTelemetryParser(CategoryParser):
     def __init__(self, reader, store):
-        CategoryParser.__init__(self, 'Imtq Coils Active', reader, store)
+        CategoryParser.__init__(self, '16: Imtq Coils Active', reader, store)
 
     def get_bit_count(self):
         return 1

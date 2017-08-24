@@ -3,7 +3,7 @@ from parser import CategoryParser
 
 class TimeState(CategoryParser):
     def __init__(self, reader, store):
-        CategoryParser.__init__(self, 'Time Telemetry', reader, store)
+        CategoryParser.__init__(self, '03: Time Telemetry', reader, store)
 
     def get_bit_count(self):
         return 64 + 32
