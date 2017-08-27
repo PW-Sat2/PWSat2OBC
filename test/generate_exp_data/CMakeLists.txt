@@ -8,6 +8,8 @@ set(SOURCES
     detumbling_data.cpp
     camera_data.cpp
     payload_data.cpp
+    leop_data.cpp
+    radfet_data.cpp
 )
 
 add_executable(${NAME} ${SOURCES})

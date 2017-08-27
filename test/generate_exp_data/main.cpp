@@ -138,6 +138,8 @@ void GenerateSailData(IFileSystem& fs);
 void GenerateDetumblingData(IFileSystem& fs);
 void GenerateCameraCommissioningData(IFileSystem& fs);
 void GeneratePayloadCommissioningData(IFileSystem& fs);
+void GenerateLeopData(IFileSystem& fs);
+void GenerateRadfetData(IFileSystem& fs);
 
 int main()
 {
@@ -152,7 +154,8 @@ int main()
     GenerateDetumblingData(fs);
     GenerateCameraCommissioningData(fs);
     GeneratePayloadCommissioningData(fs);
-    // GenerateRadFetData(fs);
+    GenerateLeopData(fs);
+    GenerateRadfetData(fs);
 
     kill(-1, 0);
 
