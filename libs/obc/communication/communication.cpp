@@ -70,7 +70,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           PerformPayloadCommisioningExperiment(
               experiments.ExperimentsController, experiments.Get<experiment::payload::PayloadCommissioningExperiment>()), //
           GetPersistentStateTelecommand(stateContainer),                                                                  //
-          PurgePhoto(photo)                                                                                               //
+          PurgePhoto(photo),                                                                                              //
+          SendPeriodicMessageTelecommand(stateContainer)                                                                  //
           ),                                                                                                              //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {

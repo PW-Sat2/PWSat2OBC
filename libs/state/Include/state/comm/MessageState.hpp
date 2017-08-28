@@ -64,13 +64,16 @@ namespace state
          */
         static constexpr std::uint32_t Size();
 
+        /** @brief Message length */
+        static constexpr std::size_t MessageLength = 200;
+
       private:
         /** @brief Interval between sending messages */
         std::chrono::minutes _interval;
         /** @brief Number of message to send at once */
         std::uint8_t _repeatCount;
         /** @brief Message payload */
-        std::array<std::uint8_t, 200> _message;
+        std::array<std::uint8_t, MessageLength> _message;
     };
 
     constexpr std::uint32_t MessageState::Size()
