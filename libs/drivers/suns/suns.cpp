@@ -30,13 +30,13 @@ namespace devices
             : errors(errors),                         //
               i2cbus(i2cbus),                         //
               interruptPinDriver(interruptPinDriver), //
-              sync(System::CreateBinarySemaphore()),  //
               dataWaitTimeout(DefaultTimeout)         //
         {
         }
 
         void SunSDriver::Initialize()
         {
+            this->event.Initialize();
             this->interruptPinDriver.EnableInterrupt();
         }
 
@@ -141,12 +141,14 @@ namespace devices
         OSResult SunSDriver::WaitForData()
         {
             ErrorReporter errorContext(this->errors);
-            auto result = System::TakeSemaphore(this->sync, this->dataWaitTimeout);
-            if (result != OSResult::Success)
+
+            this->event.Clear(InterruptFlagFinished);
+            auto result = this->event.WaitAll(InterruptFlagFinished, true, this->dataWaitTimeout);
+            if (!has_flag(result, InterruptFlagFinished))
             {
                 errorContext.Counter().Failure();
-                LOGF(LOG_LEVEL_ERROR, "Take semaphore for Sun Sensor synchronization failed. Reason: %d", num(result));
-                return result;
+                LOG(LOG_LEVEL_ERROR, "Take semaphore for Sun Sensor synchronization failed. Timeout");
+                return OSResult::Timeout;
             }
 
             return OSResult::Success;
@@ -154,7 +156,7 @@ namespace devices
 
         void SunSDriver::RaiseDataReadyISR()
         {
-            System::GiveSemaphoreISR(this->sync);
+            this->event.SetISR(InterruptFlagFinished);
         }
 
         void SunSDriver::SetDataTimeout(std::chrono::milliseconds newTimeout)

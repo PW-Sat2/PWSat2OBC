@@ -76,7 +76,7 @@ OSResult PayloadCommand<TCommandCode, TOutputDataType>::ExecuteDataRead(uint8_t 
     auto result = _driver.PayloadRead(commandBuffer, buffer);
     if (result != OSResult::Success)
     {
-        LOGF(LOG_LEVEL_ERROR, "[Payload] Unable to perform RadFET refresh. Reason: %d", num(result));
+        LOGF(LOG_LEVEL_ERROR, "[Payload] Unable to perform data read. Reason: %d", num(result));
         return result;
     }
 

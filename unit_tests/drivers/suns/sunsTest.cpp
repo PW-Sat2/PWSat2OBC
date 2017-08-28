@@ -49,13 +49,17 @@ namespace
     SunSTest::SunSTest() : errors{errorsConfig}, suns{errors, i2c, pinDriver}, error_counter{errors}
     {
         this->reset = InstallProxy(&os);
+
+        ON_CALL(os, EventGroupWaitForBits(_, _, _, _, _))
+            .WillByDefault(Invoke([=](OSEventGroupHandle /*eventGroup*/, //
+                const OSEventBits bitsToWaitFor,                         //
+                bool /*waitAll*/,                                        //
+                bool /*autoReset*/,                                      //
+                const std::chrono::milliseconds /*timeout*/) { return bitsToWaitFor; }));
     }
 
     TEST_F(SunSTest, BadWhoAmIResponse)
     {
-        ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
-        ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResult::Success));
-
         EXPECT_CALL(i2c, Write(SunSAddress, ElementsAre(0x80, 0x01, 0x02))).WillOnce(Return(I2CResult::OK));
         EXPECT_CALL(i2c, WriteRead(SunSAddress, ElementsAre(0), _)).WillOnce(Invoke([](uint8_t /*address*/, auto /*inData*/, auto outData) {
             EXPECT_EQ(outData.size(), 67);
@@ -72,9 +76,6 @@ namespace
 
     TEST_F(SunSTest, I2CWriteFail)
     {
-        ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
-        ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResult::Success));
-
         EXPECT_CALL(i2c, Write(SunSAddress, ElementsAre(0x80, 0x01, 0x02))).WillOnce(Return(I2CResult::Failure));
 
         MeasurementData data;
@@ -86,9 +87,6 @@ namespace
 
     TEST_F(SunSTest, I2CReadFail)
     {
-        ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
-        ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResult::Success));
-
         EXPECT_CALL(i2c, Write(SunSAddress, ElementsAre(0x80, 0x01, 0x02))).WillOnce(Return(I2CResult::OK));
         EXPECT_CALL(i2c, WriteRead(SunSAddress, ElementsAre(0), _)).WillOnce(Invoke([](uint8_t /*address*/, auto /*inData*/, auto outData) {
             EXPECT_EQ(outData.size(), 67);
@@ -105,9 +103,6 @@ namespace
 
     TEST_F(SunSTest, StartMeasurement)
     {
-        ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
-        ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResult::Success));
-
         EXPECT_CALL(i2c, Write(SunSAddress, ElementsAre(0x80, 0x01, 0x02))).WillOnce(Return(I2CResult::OK));
 
         auto status = suns.StartMeasurement(1, 2);
@@ -118,9 +113,6 @@ namespace
 
     TEST_F(SunSTest, GetMeasuredData)
     {
-        ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
-        ON_CALL(os, GiveSemaphore(_)).WillByDefault(Return(OSResult::Success));
-
         EXPECT_CALL(i2c, WriteRead(SunSAddress, ElementsAre(0), _)).WillOnce(Invoke([](uint8_t /*address*/, auto /*inData*/, auto outData) {
             EXPECT_EQ(outData.size(), 67);
             Writer writer{outData};
@@ -196,7 +188,7 @@ namespace
     TEST_F(SunSTest, IRQHandlerActiveTest)
     {
         EXPECT_CALL(pinDriver, Value()).Times(1);
-        EXPECT_CALL(os, GiveSemaphoreISR(_)).Times(1);
+        EXPECT_CALL(os, EventGroupSetBitsISR(_, _)).Times(1);
 
         pinDriver.SetValue(false);
         suns.IRQHandler();
@@ -206,7 +198,7 @@ namespace
     TEST_F(SunSTest, IRQHandlerInactiveTest)
     {
         EXPECT_CALL(pinDriver, Value()).Times(1);
-        EXPECT_CALL(os, GiveSemaphoreISR(_)).Times(0);
+        EXPECT_CALL(os, EventGroupSetBitsISR(_, _)).Times(0);
 
         pinDriver.SetValue(true);
         suns.IRQHandler();
@@ -228,9 +220,14 @@ namespace
 
     TEST_F(SunSTest, WaitForDataSuccesful)
     {
-        EXPECT_CALL(os, TakeSemaphore(_, _))
+        EXPECT_CALL(os, EventGroupClearBits(_, 1)).Times(1);
+        EXPECT_CALL(os, EventGroupWaitForBits(_, _, _, _, _))
             .Times(1)
-            .WillOnce(Invoke([=](OSSemaphoreHandle /*syncs*/, std::chrono::milliseconds /*timeout*/) { return OSResult::Success; }));
+            .WillOnce(Invoke([=](OSEventGroupHandle /*eventGroup*/, //
+                const OSEventBits bitsToWaitFor,                    //
+                bool /*waitAll*/,                                   //
+                bool /*autoReset*/,                                 //
+                const std::chrono::milliseconds /*timeout*/) { return bitsToWaitFor; }));
 
         ASSERT_THAT(suns.WaitForData(), Eq(OSResult::Success));
         EXPECT_EQ(error_counter, 0);
@@ -238,9 +235,14 @@ namespace
 
     TEST_F(SunSTest, WaitForDataTimeout)
     {
-        EXPECT_CALL(os, TakeSemaphore(_, _))
+        EXPECT_CALL(os, EventGroupClearBits(_, 1)).Times(1);
+        EXPECT_CALL(os, EventGroupWaitForBits(_, _, _, _, _))
             .Times(1)
-            .WillOnce(Invoke([=](OSSemaphoreHandle /*syncs*/, std::chrono::milliseconds /*timeout*/) { return OSResult::Timeout; }));
+            .WillOnce(Invoke([=](OSEventGroupHandle /*eventGroup*/, //
+                const OSEventBits /*bitsToWaitFor*/,                //
+                bool /*waitAll*/,                                   //
+                bool /*autoReset*/,                                 //
+                const std::chrono::milliseconds /*timeout*/) { return 0; }));
 
         ASSERT_THAT(suns.WaitForData(), Eq(OSResult::Timeout));
         EXPECT_EQ(error_counter, 5);
@@ -249,7 +251,7 @@ namespace
     TEST_F(SunSTest, SettingTimeout)
     {
         auto timeout = std::chrono::milliseconds(1000);
-        EXPECT_CALL(os, TakeSemaphore(_, Eq(timeout))).Times(1);
+        EXPECT_CALL(os, EventGroupWaitForBits(_, _, _, _, Eq(timeout))).Times(1);
         suns.SetDataTimeout(timeout);
         suns.WaitForData();
         EXPECT_EQ(error_counter, 0);
