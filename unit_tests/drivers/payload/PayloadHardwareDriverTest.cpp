@@ -82,6 +82,7 @@ namespace
 
     TEST_F(PayloadHardwareDriverTest, WriteSuccessful)
     {
+        EXPECT_CALL(os, EventGroupClearBits(_, 1)).Times(1);
         EXPECT_CALL(i2c, Write(PayloadDriver::I2CAddress, ElementsAre(2)))
             .WillOnce(Invoke([=](uint8_t /*address*/, span<const uint8_t> /*inData*/) { return I2CResult::OK; }));
 
@@ -93,6 +94,7 @@ namespace
 
     TEST_F(PayloadHardwareDriverTest, WriteFailed)
     {
+        EXPECT_CALL(os, EventGroupClearBits(_, 1)).Times(1);
         EXPECT_CALL(i2c, Write(PayloadDriver::I2CAddress, ElementsAre(2)))
             .WillOnce(Invoke([=](uint8_t /*address*/, span<const uint8_t> /*inData*/) { return I2CResult::Timeout; }));
 
@@ -137,7 +139,6 @@ namespace
 
     TEST_F(PayloadHardwareDriverTest, WaitForDataSuccesful)
     {
-        EXPECT_CALL(os, EventGroupClearBits(_, 1)).Times(1);
         EXPECT_CALL(os, EventGroupWaitForBits(_, _, _, _, _))
             .Times(1)
             .WillOnce(Invoke([=](OSEventGroupHandle /*eventGroup*/, //
@@ -152,7 +153,6 @@ namespace
 
     TEST_F(PayloadHardwareDriverTest, WaitForDataTimeout)
     {
-        EXPECT_CALL(os, EventGroupClearBits(_, 1)).Times(1);
         EXPECT_CALL(os, EventGroupWaitForBits(_, _, _, _, _))
             .Times(1)
             .WillOnce(Invoke([=](OSEventGroupHandle /*eventGroup*/, //

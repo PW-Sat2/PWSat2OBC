@@ -53,6 +53,7 @@ OSResult PayloadDriver::PayloadRead(gsl::span<std::uint8_t> outData, gsl::span<s
 OSResult PayloadDriver::PayloadWrite(gsl::span<std::uint8_t> outData)
 {
     ErrorReporter errorContext(_error);
+    _event.Clear(InterruptFlagFinished);
     auto result = _i2c.Write(I2CAddress, outData);
     const bool status = (result == I2CResult::OK);
     if (!status)
@@ -68,7 +69,6 @@ OSResult PayloadDriver::PayloadWrite(gsl::span<std::uint8_t> outData)
 OSResult PayloadDriver::WaitForData()
 {
     ErrorReporter errorContext(_error);
-    _event.Clear(InterruptFlagFinished);
     auto result = _event.WaitAll(InterruptFlagFinished, true, _dataWaitTimeout);
     if (!has_flag(result, InterruptFlagFinished))
     {

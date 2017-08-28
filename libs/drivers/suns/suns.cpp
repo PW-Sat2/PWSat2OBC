@@ -66,6 +66,8 @@ namespace devices
             outputWriter.WriteByte(gain);
             outputWriter.WriteByte(itime);
 
+            this->event.Clear(InterruptFlagFinished);
+
             span<uint8_t> request = outputWriter.Capture();
             auto i2cstatusWrite = this->i2cbus.Write(I2CAddress, request);
             if (i2cstatusWrite != I2CResult::OK)
@@ -141,8 +143,6 @@ namespace devices
         OSResult SunSDriver::WaitForData()
         {
             ErrorReporter errorContext(this->errors);
-
-            this->event.Clear(InterruptFlagFinished);
             auto result = this->event.WaitAll(InterruptFlagFinished, true, this->dataWaitTimeout);
             if (!has_flag(result, InterruptFlagFinished))
             {

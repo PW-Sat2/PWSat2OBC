@@ -60,6 +60,7 @@ namespace
 
     TEST_F(SunSTest, BadWhoAmIResponse)
     {
+        EXPECT_CALL(os, EventGroupClearBits(_, 1)).Times(1);
         EXPECT_CALL(i2c, Write(SunSAddress, ElementsAre(0x80, 0x01, 0x02))).WillOnce(Return(I2CResult::OK));
         EXPECT_CALL(i2c, WriteRead(SunSAddress, ElementsAre(0), _)).WillOnce(Invoke([](uint8_t /*address*/, auto /*inData*/, auto outData) {
             EXPECT_EQ(outData.size(), 67);
@@ -76,6 +77,7 @@ namespace
 
     TEST_F(SunSTest, I2CWriteFail)
     {
+        EXPECT_CALL(os, EventGroupClearBits(_, 1)).Times(1);
         EXPECT_CALL(i2c, Write(SunSAddress, ElementsAre(0x80, 0x01, 0x02))).WillOnce(Return(I2CResult::Failure));
 
         MeasurementData data;
@@ -87,6 +89,7 @@ namespace
 
     TEST_F(SunSTest, I2CReadFail)
     {
+        EXPECT_CALL(os, EventGroupClearBits(_, 1)).Times(1);
         EXPECT_CALL(i2c, Write(SunSAddress, ElementsAre(0x80, 0x01, 0x02))).WillOnce(Return(I2CResult::OK));
         EXPECT_CALL(i2c, WriteRead(SunSAddress, ElementsAre(0), _)).WillOnce(Invoke([](uint8_t /*address*/, auto /*inData*/, auto outData) {
             EXPECT_EQ(outData.size(), 67);
@@ -103,6 +106,7 @@ namespace
 
     TEST_F(SunSTest, StartMeasurement)
     {
+        EXPECT_CALL(os, EventGroupClearBits(_, 1)).Times(1);
         EXPECT_CALL(i2c, Write(SunSAddress, ElementsAre(0x80, 0x01, 0x02))).WillOnce(Return(I2CResult::OK));
 
         auto status = suns.StartMeasurement(1, 2);
@@ -220,7 +224,6 @@ namespace
 
     TEST_F(SunSTest, WaitForDataSuccesful)
     {
-        EXPECT_CALL(os, EventGroupClearBits(_, 1)).Times(1);
         EXPECT_CALL(os, EventGroupWaitForBits(_, _, _, _, _))
             .Times(1)
             .WillOnce(Invoke([=](OSEventGroupHandle /*eventGroup*/, //
@@ -235,7 +238,6 @@ namespace
 
     TEST_F(SunSTest, WaitForDataTimeout)
     {
-        EXPECT_CALL(os, EventGroupClearBits(_, 1)).Times(1);
         EXPECT_CALL(os, EventGroupWaitForBits(_, _, _, _, _))
             .Times(1)
             .WillOnce(Invoke([=](OSEventGroupHandle /*eventGroup*/, //
