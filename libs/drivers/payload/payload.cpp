@@ -13,6 +13,7 @@ PayloadDriver::PayloadDriver(
       _interruptPinDriver(interruptPinDriver), //
       _dataWaitTimeout(DefaultTimeout)
 {
+    _event.Initialize();
 }
 
 void PayloadDriver::IRQHandler()
@@ -26,7 +27,6 @@ void PayloadDriver::IRQHandler()
 
 void PayloadDriver::Initialize()
 {
-    _event.Initialize();
     _interruptPinDriver.EnableInterrupt();
 }
 

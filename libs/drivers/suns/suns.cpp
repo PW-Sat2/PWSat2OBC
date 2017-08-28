@@ -32,11 +32,11 @@ namespace devices
               interruptPinDriver(interruptPinDriver), //
               dataWaitTimeout(DefaultTimeout)         //
         {
+            event.Initialize();
         }
 
         void SunSDriver::Initialize()
         {
-            this->event.Initialize();
             this->interruptPinDriver.EnableInterrupt();
         }
 
