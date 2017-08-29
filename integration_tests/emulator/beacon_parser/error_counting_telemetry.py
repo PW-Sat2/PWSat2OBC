@@ -3,7 +3,7 @@ from parser import CategoryParser
 
 class ErrorCountingTelemetry(CategoryParser):
     def __init__(self, reader, store):
-        CategoryParser.__init__(self, 'Error Counters', reader, store)
+        CategoryParser.__init__(self, '04: Error Counters', reader, store)
 
     def get_bit_count(self):
         return 12*8

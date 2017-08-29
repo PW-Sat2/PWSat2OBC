@@ -2,7 +2,7 @@ from parser import CategoryParser
 
 class EPSControllerATelemetryParser(CategoryParser):
     def __init__(self, reader, store):
-        CategoryParser.__init__(self, 'Controller A', reader, store)
+        CategoryParser.__init__(self, '13: Controller A', reader, store)
 
     def get_bit_count(self):
         return 3*(4*12+6) + 6*10 + 2*8 + 4*10 + 8 + 2*13 + 8 + 16 + 32 + 4*10 + 10

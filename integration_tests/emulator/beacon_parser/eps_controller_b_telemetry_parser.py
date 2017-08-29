@@ -3,7 +3,7 @@ from parser import CategoryParser
 
 class EPSControllerBTelemetryParser(CategoryParser):
     def __init__(self, reader, store):
-        CategoryParser.__init__(self, 'Controller B', reader, store)
+        CategoryParser.__init__(self, '14: Controller B', reader, store)
 
     def get_bit_count(self):
         return 10 + 10 + 8 + 16 + 32 + 10 + 10 + 10
