@@ -5,14 +5,15 @@
 
 using namespace devices::payload;
 using drivers::i2c::I2CResult;
+using namespace std::chrono_literals;
 
 PayloadDriver::PayloadDriver(
     error_counter::ErrorCounting& errors, drivers::i2c::II2CBus& communicationBus, drivers::gpio::IInterruptPinDriver& interruptPinDriver)
     : _error(errors), _i2c(communicationBus),  //
       _interruptPinDriver(interruptPinDriver), //
-      _sync(nullptr),                          //
       _dataWaitTimeout(DefaultTimeout)
 {
+    _event.Initialize();
 }
 
 void PayloadDriver::IRQHandler()
@@ -26,7 +27,6 @@ void PayloadDriver::IRQHandler()
 
 void PayloadDriver::Initialize()
 {
-    _sync = System::CreateBinarySemaphore();
     _interruptPinDriver.EnableInterrupt();
 }
 
@@ -53,6 +53,7 @@ OSResult PayloadDriver::PayloadRead(gsl::span<std::uint8_t> outData, gsl::span<s
 OSResult PayloadDriver::PayloadWrite(gsl::span<std::uint8_t> outData)
 {
     ErrorReporter errorContext(_error);
+    _event.Clear(InterruptFlagFinished);
     auto result = _i2c.Write(I2CAddress, outData);
     const bool status = (result == I2CResult::OK);
     if (!status)
@@ -68,12 +69,12 @@ OSResult PayloadDriver::PayloadWrite(gsl::span<std::uint8_t> outData)
 OSResult PayloadDriver::WaitForData()
 {
     ErrorReporter errorContext(_error);
-    auto result = System::TakeSemaphore(_sync, _dataWaitTimeout);
-    if (result != OSResult::Success)
+    auto result = _event.WaitAll(InterruptFlagFinished, true, _dataWaitTimeout);
+    if (!has_flag(result, InterruptFlagFinished))
     {
         errorContext.Counter().Failure();
-        LOGF(LOG_LEVEL_ERROR, "Take semaphore for Payload synchronisation failed. Reason: %d", num(result));
-        return result;
+        LOG(LOG_LEVEL_ERROR, "Take semaphore for Payload synchronisation failed. Timeout");
+        return OSResult::Timeout;
     }
 
     return OSResult::Success;
@@ -81,7 +82,7 @@ OSResult PayloadDriver::WaitForData()
 
 void PayloadDriver::RaiseDataReadyISR()
 {
-    System::GiveSemaphoreISR(_sync);
+    _event.SetISR(InterruptFlagFinished);
 }
 
 void PayloadDriver::SetDataTimeout(std::chrono::milliseconds newTimeout)

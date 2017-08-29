@@ -240,6 +240,11 @@ namespace devices
              */
             static constexpr std::chrono::milliseconds DefaultTimeout = std::chrono::seconds(8);
 
+            enum InterruptFlag
+            {
+                InterruptFlagFinished = 1
+            };
+
             /** @brief Error counter. */
             ErrorCounter errors;
 
@@ -250,7 +255,7 @@ namespace devices
             drivers::gpio::IInterruptPinDriver& interruptPinDriver;
 
             /** @brief Synchronization semaphore. */
-            OSSemaphoreHandle sync;
+            EventGroup event;
 
             /** @brief Measurement timeout. */
             std::chrono::milliseconds dataWaitTimeout;

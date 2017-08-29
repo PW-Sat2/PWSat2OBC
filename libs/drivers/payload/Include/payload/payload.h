@@ -104,13 +104,19 @@ namespace devices
 
             /** @brief Error reporter type */
             using ErrorReporter = error_counter::AggregatedErrorReporter<ErrorCounter::DeviceId>;
+
+            enum InterruptFlag
+            {
+                InterruptFlagFinished = 1
+            };
+
             ErrorCounter _error;
 
             drivers::i2c::II2CBus& _i2c;
             drivers::gpio::IInterruptPinDriver& _interruptPinDriver;
 
             /** @brief Synchronization */
-            OSSemaphoreHandle _sync;
+            EventGroup _event;
 
             std::chrono::milliseconds _dataWaitTimeout;
         };
