@@ -20,6 +20,7 @@ namespace experiment
               _controller(_experimentFile, photoService), _currentStep(0)
         {
             strsafecpy(_fileName, DefaultFileName, 30);
+            _controller.SetPhotoFilesBaseName(this->_fileName);
         }
 
         CameraCommissioningExperiment::CameraCommissioningExperiment(CameraCommissioningExperiment&& other)
@@ -27,6 +28,7 @@ namespace experiment
               _photoService(other._photoService), _controller(_experimentFile, _photoService), _currentStep(other._currentStep)
         {
             strsafecpy(_fileName, other._fileName, count_of(other._fileName));
+            _controller.SetPhotoFilesBaseName(this->_fileName);
         }
 
         void CameraCommissioningExperiment::SetOutputFilesBaseName(gsl::cstring_span<> fileName)

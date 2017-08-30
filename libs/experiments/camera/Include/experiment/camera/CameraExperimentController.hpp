@@ -11,7 +11,7 @@ namespace experiment
     namespace camera
     {
         /**
-         * @brief Class that does Camera Commisioning Experiment logic.
+         * @brief Class that does Camera Commissioning Experiment logic.
          * It is created to two allow two experiments (Payload and Camera) could execute the same code.
          */
         class CameraExperimentController : private NotCopyable, private NotMoveable

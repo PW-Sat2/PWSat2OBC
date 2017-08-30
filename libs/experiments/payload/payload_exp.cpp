@@ -35,6 +35,7 @@ namespace experiment
               _cameraCommisioningController(_experimentFile, photoService), _currentStep(0)
         {
             std::strncpy(_fileName, DefaultFileName, 30);
+            _cameraCommisioningController.SetPhotoFilesBaseName(this->_fileName);
         }
 
         PayloadCommissioningExperiment::PayloadCommissioningExperiment(PayloadCommissioningExperiment&& other)
@@ -44,6 +45,7 @@ namespace experiment
               _cameraCommisioningController(_experimentFile, _photoService), _currentStep(other._currentStep)
         {
             strsafecpy(_fileName, other._fileName, count_of(other._fileName));
+            _cameraCommisioningController.SetPhotoFilesBaseName(this->_fileName);
         }
 
         void PayloadCommissioningExperiment::SetOutputFile(gsl::cstring_span<> fileName)
