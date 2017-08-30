@@ -2,6 +2,7 @@ set(NAME generate_exp_data)
 
 set(SOURCES
     main.cpp
+    os_stubs.cpp
     suns_data.cpp
     sail_data.cpp
     detumbling_data.cpp

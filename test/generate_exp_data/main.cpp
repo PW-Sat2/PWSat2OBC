@@ -133,25 +133,6 @@ void GenerateSunSData(IFileSystem& fs);
 void GenerateSailData(IFileSystem& fs);
 void GenerateDetumblingData(IFileSystem& fs);
 
-void System::SleepTask(std::chrono::milliseconds)
-{
-}
-
-OSResult System::GiveSemaphoreISR(void*)
-{
-    return OSResult::Success;
-}
-
-OSSemaphoreHandle System::CreateBinarySemaphore(uint8_t)
-{
-    return nullptr;
-}
-
-OSResult System::TakeSemaphore(OSSemaphoreHandle, std::chrono::milliseconds)
-{
-    return OSResult::Success;
-}
-
 int main()
 {
     __libc_init_array();
