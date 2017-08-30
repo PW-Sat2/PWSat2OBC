@@ -2,6 +2,8 @@ import struct
 from Queue import Queue, Empty
 import logging
 
+from datetime import datetime
+
 import i2cMock
 from i2cMock import I2CDevice
 from threading import Event
@@ -237,6 +239,8 @@ class EPSControllerA(I2CDevice):
 
         self.hk = HousekeepingA()
 
+        self.last_watchdog_kick = None
+
     @i2cMock.command([0xE0])
     def _power_cycle(self):
         self.log.info("Triggered power cycle")
@@ -265,6 +269,7 @@ class EPSControllerA(I2CDevice):
     @i2cMock.command([0xE5])
     def _reset_watchdog(self):
         self.log.info("Resetting watchdog")
+        self.last_watchdog_kick = datetime.now()
         call(self.on_reset_watchdog, None)
 
     @i2cMock.command([0x0])
@@ -296,6 +301,8 @@ class EPSControllerB(I2CDevice):
 
         self.hk = HousekeepingB()
 
+        self.last_watchdog_kick = None
+
     @i2cMock.command([0xE0])
     def _power_cycle(self):
         self.log.info("Triggered power cycle")
@@ -324,6 +331,7 @@ class EPSControllerB(I2CDevice):
     @i2cMock.command([0xE5])
     def _reset_watchdog(self):
         self.log.info("Resetting watchdog")
+        self.last_watchdog_kick = datetime.now()
         call(self.on_reset_watchdog, None)
 
     @i2cMock.command([0x0])

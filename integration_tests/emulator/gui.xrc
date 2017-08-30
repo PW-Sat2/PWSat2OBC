@@ -1011,7 +1011,7 @@
 				<flag>wxEXPAND</flag>
 				<border>5</border>
 				<object class="wxFlexGridSizer">
-					<rows>2</rows>
+					<rows>4</rows>
 					<cols>1</cols>
 					<vgap>0</vgap>
 					<hgap>0</hgap>
@@ -1117,7 +1117,7 @@
 						<border>5</border>
 						<object class="wxFlexGridSizer">
 							<rows>0</rows>
-							<cols>2</cols>
+							<cols>4</cols>
 							<vgap>0</vgap>
 							<hgap>0</hgap>
 							<growablecols></growablecols>
@@ -1141,6 +1141,24 @@
 								<flag>wxALL</flag>
 								<border>5</border>
 								<object class="wxStaticText" name="m_staticText31">
+									<label></label>
+									<wrap>-1</wrap>
+								</object>
+							</object>
+							<object class="sizeritem">
+								<option>0</option>
+								<flag>wxALL</flag>
+								<border>5</border>
+								<object class="wxStaticText" name="m_staticText311">
+									<label></label>
+									<wrap>-1</wrap>
+								</object>
+							</object>
+							<object class="sizeritem">
+								<option>0</option>
+								<flag>wxALL</flag>
+								<border>5</border>
+								<object class="wxStaticText" name="m_staticText312">
 									<label></label>
 									<wrap>-1</wrap>
 								</object>
@@ -1217,6 +1235,24 @@
 									<wrap>-1</wrap>
 								</object>
 							</object>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>1</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxStaticText" name="last_watchdog_a">
+							<label>Last watchdog kick (A): </label>
+							<wrap>-1</wrap>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxStaticText" name="last_watchdog_b">
+							<label>Last watchdog kick (B): </label>
+							<wrap>-1</wrap>
 						</object>
 					</object>
 				</object>
