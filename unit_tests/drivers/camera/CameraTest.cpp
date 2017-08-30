@@ -341,10 +341,40 @@ TEST_F(CameraTest, TestRetrievingPartialPicture)
 
         ExpectRequestAndResponse(commands::AckPackage<CameraCmd::None, 0x00, 0x00>, cameraImageBuffer);
         ExpectRequestAndResponse(commands::AckPackage<CameraCmd::None, 0x01, 0x00>, cameraImageBuffer, false);
+        ExpectRequestAndResponse(commands::AckPackage<CameraCmd::None, 0x01, 0x00>, cameraImageBuffer, false);
+        ExpectRequestAndResponse(commands::AckPackage<CameraCmd::None, 0x01, 0x00>, cameraImageBuffer, false);
 
         ExpectRequest(commands::AckPackage<CameraCmd::None, 0xF0, 0xF0>);
     }
 
     auto result = _camera.CameraReceiveJPEGData(receiveBuffer);
     ASSERT_THAT(result.size(), Eq(512));
+}
+
+TEST_F(CameraTest, RetryDownloadingFailedPackage)
+{
+    std::array<uint8_t, 512> cameraImageBuffer;
+    cameraImageBuffer.fill(0xD0);
+
+    std::array<uint8_t, 2048> receiveBuffer;
+
+    {
+        InSequence s;
+
+        ExpectRequestAndResponse(                                                 //
+            commands::GetPicture<CameraPictureType::Enum::Snapshot>,              //
+            commands::Ack<CameraCmd::GetPicture>,                                 //
+            commands::Data<CameraPictureType::Enum::Snapshot, 0xEE, 0x05, 0x00>); // 506*1.5
+
+        ExpectRequestAndResponse(commands::AckPackage<CameraCmd::None, 0x00, 0x00>, cameraImageBuffer);
+        ExpectRequestAndResponse(commands::AckPackage<CameraCmd::None, 0x01, 0x00>, cameraImageBuffer, false);
+        ExpectRequestAndResponse(commands::AckPackage<CameraCmd::None, 0x01, 0x00>, cameraImageBuffer, false);
+        ExpectRequestAndResponse(commands::AckPackage<CameraCmd::None, 0x01, 0x00>, cameraImageBuffer, true);
+        ExpectRequestAndResponse(commands::AckPackage<CameraCmd::None, 0x02, 0x00>, cameraImageBuffer);
+
+        ExpectRequest(commands::AckPackage<CameraCmd::None, 0xF0, 0xF0>);
+    }
+
+    auto result = _camera.CameraReceiveJPEGData(receiveBuffer);
+    ASSERT_THAT(result.size(), Eq(1536));
 }
