@@ -37,7 +37,7 @@ namespace experiment
                 return experiments::StartResult::Failure;
             }
 
-            auto result = _experimentFile.Open(this->_fileSystem, FileName, FileOpen::CreateAlways, FileAccess::WriteOnly);
+            auto result = _experimentFile.Open(this->_fileSystem, FileName, FileOpen::AppendAlways, FileAccess::WriteOnly);
             if (!result)
             {
                 LOG(LOG_LEVEL_ERROR, "Opening experiment file failed");

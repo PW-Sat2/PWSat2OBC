@@ -25,7 +25,7 @@ namespace experiment
             static constexpr experiments::ExperimentCode Code = 0x04;
 
             /** @brief Output file name. */
-            static constexpr const char* FileName = "/leop.pwts";
+            static constexpr const char* FileName = "/leop";
 
             /** @brief Mission time when experiment should stop: T+1h */
             static constexpr std::chrono::milliseconds ExperimentTimeStop = std::chrono::milliseconds(60 * 60 * 1000);

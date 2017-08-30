@@ -92,8 +92,13 @@ namespace services
             /** Creates a new file, only if it does not already exist, fail if it exists. */
             CreateNew = O_CREAT | O_EXCL,
 
-            /** If set, the file offset shall be set to the end of the file prior to each write. */
-            Append = O_APPEND,
+            /** If set, the file offset shall be set to the end of the file prior to each write.
+             * Fail if file does not exist */
+            AppendExisting = O_APPEND,
+
+            /** If set, the file offset shall be set to the end of the file prior to each write.
+             * Create a new file if it does not exist. */
+            AppendAlways = O_APPEND | O_CREAT,
         };
 
         /**
