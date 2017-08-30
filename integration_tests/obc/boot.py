@@ -34,6 +34,15 @@ class BootToUpper:
         bootloader.write('u')
 
 
+class NormalBoot:
+    def __init__(self):
+        pass
+
+    def boot(self, bootloader):
+        bootloader.wait_for_prompt()
+        bootloader.write('b')
+
+
 class SelectRunlevel:
     def __init__(self, runlevel):
         self._runlevel = runlevel
@@ -48,7 +57,7 @@ class SelectRunlevel:
 
 
 class ClearState:
-    def __init__(self,):
+    def __init__(self, ):
         pass
 
     def boot(self, bootloader):

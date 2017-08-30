@@ -24,7 +24,7 @@ class LastFramesModule(ModuleBase):
         for idx in xrange(len(self._current_items) - 1, -1, -1):
             to_remove = self._current_items[idx]
 
-            if to_remove not in self._last_frames:
+            if to_remove not in self._last_frames and idx < self._list.GetCount():
                 self._list.Delete(idx)
 
         for idx in xrange(len(self._last_frames) - 1, -1, -1):
