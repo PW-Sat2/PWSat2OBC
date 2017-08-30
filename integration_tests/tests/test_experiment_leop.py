@@ -32,7 +32,7 @@ class TestExperimentLEOP(RestartPerTest):
         self._start()
 
         log = logging.getLogger("TEST")
-        files = self.system.obc.remove_file('/leop.pwts')
+        files = self.system.obc.remove_file('/leop')
         self.assertNotIn('leop.pwts', files, 'Experiment file not deleted')
 
         log.info('Setting time inside experiment time slot')
@@ -48,7 +48,7 @@ class TestExperimentLEOP(RestartPerTest):
         self.system.obc.wait_for_experiment(None, 40)
 
         files = self.system.obc.list_files('/')
-        self.assertIn('leop.pwts', files, 'Experiment file not created')
+        self.assertIn('leop', files, 'Experiment file not created')
 
     @runlevel(2)
     @clear_state()
