@@ -226,6 +226,8 @@ class TransmitterDevice(i2cMock.I2CDevice):
 
         self.current_beacon = None
         self.current_beacon_timestamp = None
+
+        self.last_watchdog_kick = None
     
     @i2cMock.command([0xAA])
     def _reset(self):
@@ -238,6 +240,7 @@ class TransmitterDevice(i2cMock.I2CDevice):
 
     @i2cMock.command([0xCC])
     def _watchdog_reset(self):
+        self.last_watchdog_kick = datetime.datetime.now()
         call(self.on_watchdog_reset, None)
 
     @i2cMock.command([0x10])
@@ -359,6 +362,9 @@ class ReceiverDevice(i2cMock.I2CDevice):
         # This callback can override the telemetry retuned by this device by returning the desired response.
         # Returning None will indicate that default telemetry should be reported.
         self.on_get_telemetry = None
+
+        self.last_watchdog_kick = None
+
         self._buffer = Queue()
         self._lock = Lock()
 
@@ -373,6 +379,7 @@ class ReceiverDevice(i2cMock.I2CDevice):
 
     @i2cMock.command([0xCC])
     def _watchdog_reset(self):
+        self.last_watchdog_kick = datetime.datetime.now()
         call(self.on_watchdog_reset, None)
 
     @i2cMock.command([0x21])
