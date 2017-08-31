@@ -82,5 +82,36 @@ namespace obc
                 transmitter.SendFrame(frame.Frame());
             }
         }
+
+        void SetBitrateTelecommand::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
+        {
+            Reader r(parameters);
+
+            auto correlationId = r.ReadByte();
+            auto bitrate = static_cast<devices::comm::Bitrate>(r.ReadByte());
+
+            CorrelatedDownlinkFrame response(DownlinkAPID::SetBitrate, 0, correlationId);
+
+            if (!r.Status())
+            {
+                LOG(LOG_LEVEL_ERROR, "Malformed request");
+                response.PayloadWriter().WriteByte(-1);
+                transmitter.SendFrame(response.Frame());
+                return;
+            }
+
+            LOGF(LOG_LEVEL_INFO, "Setting %d bitrate", static_cast<int>(bitrate));
+
+            if (!transmitter.SetTransmitterBitRate(bitrate))
+            {
+                LOG(LOG_LEVEL_ERROR, "Can't set requested bitrate");
+                response.PayloadWriter().WriteByte(-2);
+                transmitter.SendFrame(response.Frame());
+                return;
+            }
+
+            response.PayloadWriter().WriteByte(0);
+            transmitter.SendFrame(response.Frame());
+        }
     }
 }

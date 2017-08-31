@@ -156,7 +156,8 @@ namespace obc
         obc::telecommands::GetPersistentStateTelecommand,
         obc::telecommands::PurgePhoto,
         obc::telecommands::PerformCameraCommisioningExperiment,
-        obc::telecommands::SendPeriodicMessageTelecommand>;
+        obc::telecommands::SendPeriodicMessageTelecommand,
+        obc::telecommands::SetBitrateTelecommand>;
 
     /**
      * @brief OBC <-> Earth communication
