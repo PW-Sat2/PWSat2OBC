@@ -22,17 +22,6 @@ class SunsTelecommandsTest(RestartPerTest):
 
         e.wait_for_change(1)
 
-        def on_suns_measure():
-            self.system.suns.gpio_interrupt_high()
-
-            def finish():
-                self.system.suns.gpio_interrupt_low()
-
-            t = Timer(0.1, finish)
-            t.start()
-
-        self.system.suns.on_measure = on_suns_measure
-
     @runlevel(2)
     def test_get_suns_data_sets(self):
 
@@ -44,4 +33,4 @@ class SunsTelecommandsTest(RestartPerTest):
 
         self.assertEqual(frame.apid(), 2)
         self.assertEqual(frame.seq(), 0)
-        self.assertEqual(len(frame.payload()), 91)
+        self.assertEqual(len(frame.payload()), 94)

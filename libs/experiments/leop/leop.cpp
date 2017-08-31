@@ -87,12 +87,8 @@ namespace experiment
             std::array<std::uint8_t, 8> buf;
             Writer w(buf);
 
-            w.WriteWordLE(data.Value.X());
-            w.WriteWordLE(data.Value.Y());
-            w.WriteWordLE(data.Value.Z());
-            w.WriteWordLE(data.Value.Temperature());
-
-            _experimentFile.Write(ExperimentFile::PID::Gyro, buf);
+            data.Value.Write(w);
+            _experimentFile.Write(ExperimentFile::PID::Gyro, w.Capture());
 
             System::SleepTask(1s);
             return IterationResult::LoopImmediately;

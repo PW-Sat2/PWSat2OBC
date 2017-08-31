@@ -4,6 +4,7 @@
 #include <array>
 #include <chrono>
 #include <cstdint>
+#include "base/fwd.hpp"
 #include "error_counter/error_counter.hpp"
 #include "gpio/InterruptPinDriver.h"
 #include "i2c/i2c.h"
@@ -119,6 +120,9 @@ namespace devices
          */
         struct MeasurementData
         {
+            /** @brief The Who Am I Status register */
+            uint8_t whoami;
+
             /** @brief Status registers. */
             Status status;
 
@@ -133,6 +137,27 @@ namespace devices
 
             /** @brief Infrared registers. */
             LightData infrared;
+
+            /**
+             * @brief Writes telemetry to buffeer
+             * @param writer Writer to write to
+             * @returns Writer status
+             */
+            bool Write(Writer& writer) const;
+
+            /**
+             * @brief Writes primary data telemetry to buffeer
+             * @param writer Writer to write to
+             * @returns Writer status
+             */
+            bool WritePrimaryData(Writer& writer) const;
+
+            /**
+             * @brief Writes secondary data telemetry to buffeer
+             * @param writer Writer to write to
+             * @returns Writer status
+             */
+            bool WriteSecondaryData(Writer& writer) const;
         };
 
         /**

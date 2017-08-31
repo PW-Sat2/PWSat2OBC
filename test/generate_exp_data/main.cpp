@@ -133,10 +133,6 @@ void GenerateSunSData(IFileSystem& fs);
 void GenerateSailData(IFileSystem& fs);
 void GenerateDetumblingData(IFileSystem& fs);
 
-void System::SleepTask(std::chrono::milliseconds)
-{
-}
-
 int main()
 {
     __libc_init_array();

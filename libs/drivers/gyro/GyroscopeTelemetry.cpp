@@ -1,4 +1,5 @@
 #include "base/BitWriter.hpp"
+#include "base/writer.h"
 #include "gyro/telemetry.hpp"
 
 namespace devices
@@ -20,6 +21,14 @@ namespace devices
             writer.Write(static_cast<std::uint16_t>(this->y));
             writer.Write(static_cast<std::uint16_t>(this->z));
             writer.Write(static_cast<std::uint16_t>(this->temperature));
+        }
+
+        void GyroscopeTelemetry::Write(Writer& writer) const
+        {
+            writer.WriteSignedWordLE(this->x);
+            writer.WriteSignedWordLE(this->y);
+            writer.WriteSignedWordLE(this->z);
+            writer.WriteSignedWordLE(this->temperature);
         }
     }
 }

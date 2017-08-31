@@ -170,43 +170,17 @@ namespace experiment
 
         void DataPoint::WritePrimaryExperimentalSunS(Writer& writer)
         {
-            writer.WriteWordLE(this->ExperimentalSunS.status.ack);
-            writer.WriteWordLE(this->ExperimentalSunS.status.presence);
-            writer.WriteWordLE(this->ExperimentalSunS.status.adc_valid);
-
-            for (auto v : this->ExperimentalSunS.visible_light)
-            {
-                for (auto y : v)
-                {
-                    writer.WriteWordLE(y);
-                }
-            }
-
-            writer.WriteWordLE(this->ExperimentalSunS.temperature.structure);
-            writer.WriteWordLE(this->ExperimentalSunS.temperature.panels[0]);
-            writer.WriteWordLE(this->ExperimentalSunS.temperature.panels[1]);
-            writer.WriteWordLE(this->ExperimentalSunS.temperature.panels[2]);
+            this->ExperimentalSunS.WritePrimaryData(writer);
         }
 
         void DataPoint::WriteSecondaryExperimentalSunS(Writer& writer)
         {
-            writer.WriteByte(this->ExperimentalSunS.parameters.gain);
-            writer.WriteByte(this->ExperimentalSunS.parameters.itime);
-            for (auto v : this->ExperimentalSunS.infrared)
-            {
-                for (auto y : v)
-                {
-                    writer.WriteWordLE(y);
-                }
-            }
+            this->ExperimentalSunS.WriteSecondaryData(writer);
         }
 
         void DataPoint::WriteGyro(Writer& writer)
         {
-            writer.WriteWordLE(this->Gyro.X());
-            writer.WriteWordLE(this->Gyro.Y());
-            writer.WriteWordLE(this->Gyro.Z());
-            writer.WriteWordLE(this->Gyro.Temperature());
+            this->Gyro.Write(writer);
         }
 
         void DataPoint::WritePrimaryDataSetTo(experiments::fs::ExperimentFile& file)
@@ -223,10 +197,8 @@ namespace experiment
             {
                 std::array<std::uint8_t, 67> buffer;
                 Writer w(buffer);
-                w.WriteByte(0x11);
 
                 this->WritePrimaryExperimentalSunS(w);
-                w.WriteWordLE(this->ExperimentalSunS.temperature.panels[3]);
 
                 file.Write(ExperimentFile::PID::ExperimentalSunSPrimary, w.Capture());
             }

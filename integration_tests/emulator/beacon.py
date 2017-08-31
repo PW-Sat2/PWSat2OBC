@@ -1,12 +1,10 @@
-from bitarray import bitarray
 from struct import pack
 
 from .beacon_parser.full_beacon_parser import FullBeaconParser
-from .beacon_parser.parser import BitReader, BeaconStorage
+from .beacon_parser.parser import BitReader, BeaconStorage, BitArrayParser
 from .base import ModuleBase
 import wx
 from wx import propgrid
-from wx import xrc
 
 
 class BeaconModule(ModuleBase):
@@ -61,18 +59,11 @@ class BeaconModule(ModuleBase):
 
     def update(self):
         if self._system.transmitter.current_beacon_timestamp is not None:
-            all_bits = bitarray(endian='little')
-            all_bits.frombytes(''.join(map(lambda x: pack('B', x), self._system.transmitter.current_beacon)))
-
-            reader = BitReader(all_bits)
             store = BeaconStorage()
-
-            parsers = FullBeaconParser().GetParsers(reader, store)
-            parsers.reverse()
-
-            while len(parsers) > 0:
-                parser = parsers.pop()
-                parser.parse()
+            parser = BitArrayParser(FullBeaconParser(),
+                                    ''.join(map(lambda x: pack('B', x), self._system.transmitter.current_beacon)),
+                                    store)
+            parser.parse()
 
             self._update_node(self._props.GetGrid().GetRoot(), store.storage)
 

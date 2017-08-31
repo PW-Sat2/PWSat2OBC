@@ -68,28 +68,6 @@ namespace experiment
             static bool SaveTimestamp(experiments::fs::ExperimentFile& file, std::chrono::milliseconds timestamp);
 
             /**
-             * @brief Saves RadFET telemetry to file during experiment start
-             * @param[in] file Experiment file to write to
-             * @param[in] telemetry RadFET registers
-             * @param[in] timestamp Timestamp of the measurement
-             * @return True when save was successful, false otherwise
-             */
-            static bool SaveStartTelemetry(experiments::fs::ExperimentFile& file,
-                devices::payload::PayloadTelemetry::Radfet& telemetry,
-                std::chrono::milliseconds timestamp);
-
-            /**
-             * @brief Saves RadFET telemetry to file during experiment stop
-             * @param[in] file Experiment file to write to
-             * @param[in] telemetry RadFET registers
-             * @param[in] timestamp Timestamp of the measurement
-             * @return True when save was successful, false otherwise
-             */
-            static bool SaveStopTelemetry(experiments::fs::ExperimentFile& file,
-                devices::payload::PayloadTelemetry::Radfet& telemetry,
-                std::chrono::milliseconds timestamp);
-
-            /**
              * @brief Saves current iteration's RadFET telemetry to file
              * @param[in] file Experiment file to write to
              * @param[in] radfetTelemetry RadFET registers
@@ -106,13 +84,11 @@ namespace experiment
              * @brief Saves RadFET telemetry to file
              * @param[in] file Experiment file to write to
              * @param[in] telemetry RadFET registers
-             * @param[in] pid PID of RadFET telemetry
              * @param[in] timestamp Timestamp of the measurement
              * @return True when save was successful, false otherwise
              */
             static bool SaveRadFETTelemetry(experiments::fs::ExperimentFile& file,
                 devices::payload::PayloadTelemetry::Radfet& telemetry,
-                experiments::fs::ExperimentFile::PID pid,
                 std::chrono::milliseconds timestamp);
 
             /**

@@ -1,5 +1,6 @@
 import logging
 import struct
+from threading import Timer
 
 import i2cMock
 from utils import call, ensure_string
@@ -51,13 +52,23 @@ class SunS(i2cMock.I2CDevice):
             [ 30, 31, 32, 33 ]
         ]
 
-        self.on_measure = None
+        self.on_measure = self.default_on_suns_measure
+        self.timeout_callback = None
 
     def gpio_interrupt_low(self):
         self.gpioDriver.gpio_low(self.interrupt_pin)
 
     def gpio_interrupt_high(self):
         self.gpioDriver.gpio_high(self.interrupt_pin)
+
+    def default_on_suns_measure(self):
+        self.gpio_interrupt_high()
+
+        def finish():
+            self.gpio_interrupt_low()
+
+        t = Timer(call(self.timeout_callback, 0.1), finish)
+        t.start()
 
     # --- Commands ---
 

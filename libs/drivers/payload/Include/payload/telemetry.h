@@ -45,6 +45,13 @@ namespace devices
             {
                 /** @brief Who Am I */
                 uint8_t who_am_i;
+
+                /**
+                 * @brief Writes telemetry to buffeer
+                 * @param writer Writer to write to
+                 * @returns Writer status.
+                 */
+                bool Write(Writer& writer) const;
             };
 
             /**
@@ -58,8 +65,9 @@ namespace devices
                 /**
                  * @brief Writes payload telemetry to buffeer
                  * @param writer Writer to write to
+                 * @returns Writer status.
                  */
-                void Write(Writer& writer);
+                bool Write(Writer& writer) const;
             };
 
             /**
@@ -89,8 +97,9 @@ namespace devices
                 /**
                  * @brief Writes telemetry to buffeer
                  * @param writer Writer to write to
+                 * @returns Writer status.
                  */
-                void Write(Writer& writer);
+                bool Write(Writer& writer) const;
             };
 
             /**
@@ -112,7 +121,7 @@ namespace devices
                  * @param writer Writer to store the telemetry data
                  * @return True if write succeded, false otherwise
                  */
-                bool Write(Writer& writer);
+                bool Write(Writer& writer) const;
             };
 
             /**
@@ -124,6 +133,13 @@ namespace devices
                 std::uint16_t int_3v3d;
                 /** @brief OBC 3V3 */
                 std::uint16_t obc_3v3d;
+
+                /**
+                 * @brief Writes telemetry to buffeer
+                 * @param writer Writer to write to
+                 * @returns Writer status.
+                 */
+                bool Write(Writer& writer) const;
             };
 
             /**
@@ -137,6 +153,13 @@ namespace devices
                 std::uint32_t temperature;
                 /** @brief VTH */
                 std::array<std::uint32_t, 3> vth;
+
+                /**
+                 * @brief Writes telemetry to buffeer
+                 * @param writer Writer to write to
+                 * @returns Writer status.
+                 */
+                bool Write(Writer& writer) const;
             };
         };
 
