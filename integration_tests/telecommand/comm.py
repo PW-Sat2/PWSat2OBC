@@ -22,3 +22,14 @@ class SendBeacon(Telecommand):
 
     def payload(self):
         return []
+
+class SetBitrate(Telecommand):
+    def __init__(self, correlation_id, bitrate):
+        self._correlation_id = correlation_id
+        self._bitrate = bitrate
+    
+    def apid(self):
+        return 0x18
+    
+    def payload(self):
+        return [self._correlation_id, self._bitrate]

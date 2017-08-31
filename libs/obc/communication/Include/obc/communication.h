@@ -160,7 +160,8 @@ namespace obc
         obc::telecommands::PerformCameraCommisioningExperiment,
         obc::telecommands::SendPeriodicMessageTelecommand,
         obc::telecommands::CompileInfoTelecommand,
-        obc::telecommands::DisableOverheatSubmodeTelecommand
+        obc::telecommands::DisableOverheatSubmodeTelecommand,
+        obc::telecommands::SetBitrateTelecommand
         >;
 
     /**
