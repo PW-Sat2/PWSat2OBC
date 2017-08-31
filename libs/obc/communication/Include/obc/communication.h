@@ -158,7 +158,8 @@ namespace obc
         obc::telecommands::PurgePhoto,
         obc::telecommands::PerformCameraCommisioningExperiment,
         obc::telecommands::SendPeriodicMessageTelecommand,
-        obc::telecommands::CompileInfoTelecommand
+        obc::telecommands::CompileInfoTelecommand,
+        obc::telecommands::SetBitrateTelecommand
         >;
 
     /**

@@ -77,6 +77,29 @@ namespace obc
             /** @brief Reference to object that contains current telemetry state */
             IHasState<telemetry::TelemetryState>& telemetryState;
         };
+
+        /**
+         * @brief Set transmitter bit-rate
+         * @ingroup telecommands
+         * @telecommand
+         *
+         * Command code: 0x18
+         *
+         * Parameters:
+         *  - 8-bit - Correlation id that will be used in response
+         *  - 8-bit - New bit-rate.
+         *  @see devices::comm::Bitrate
+         */
+        class SetBitrateTelecommand final : public telecommunication::uplink::Telecommand<0x18>
+        {
+          public:
+            /**
+             * @brief Method called when telecommand is received.
+             * @param[in] transmitter Reference to object that can be used to send response back
+             * @param[in] parameters Parameters contained in telecommand frame
+             */
+            virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
+        };
     }
 }
 

@@ -74,7 +74,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           PerformCameraCommisioningExperiment(
               experiments.ExperimentsController, experiments.Get<experiment::camera::CameraCommissioningExperiment>()), //
           SendPeriodicMessageTelecommand(stateContainer),                                                               //
-          CompileInfoTelecommand()                                                                                      //
+          CompileInfoTelecommand(),                                                                                     //
+          SetBitrateTelecommand()                                                                                       //
           ),                                                                                                            //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {

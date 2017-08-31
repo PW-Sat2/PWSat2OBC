@@ -35,6 +35,7 @@ namespace telecommunication
             PeriodicMessage = 0x5,             //!< Periodic message
             PersistentState = 0x6,             //!< Persistent state content
             CompileInfo = 0x8,                 //!< Software Build information
+            SetBitrate = 0x18,                 //!< SetBitrate command
             Forbidden = (BeaconMarker & 0x3f), //!< Reserved apid due to beacon collision
             Telemetry = 0x3F,                  //!< TelemetryLong
             LastItem                           //!< LastItem
