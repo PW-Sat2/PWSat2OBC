@@ -17,6 +17,7 @@ set(SOURCES
   MissionPlan/sads/DeploySolarArrayTest.cpp
   MissionPlan/comm/CommWdogTest.cpp
   MissionPlan/SendMessageTest.cpp
+  MissionPlan/PeriodicPowerCycleTest.cpp
   Experiments/Fibo/FiboCalculatorTest.cpp
   Experiments/ExperimentTest.cpp
   Experiments/ADCS/DetumblingExperimentTest.cpp
@@ -44,6 +45,7 @@ target_link_libraries(${NAME}
     mission_beacon
     mission_telemetry
     mission_fs
+    mission_power
     exp_fibo
     exp_adcs
     exp_leop
