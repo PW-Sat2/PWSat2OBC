@@ -32,7 +32,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
     devices::suns::ISunSDriver& experimentalSunS,
     devices::payload::IPayloadDeviceDriver& payloadDriver,
     devices::gyro::IGyroscopeDriver& gyro,
-    services::photo::IPhotoService& photo)
+    services::photo::IPhotoService& photo,
+    devices::eps::IEPSDriver& epsDriver)
     : Comm(commDriver),                                                                                                               //
       UplinkProtocolDecoder(settings::CommSecurityCode),                                                                              //
       SupportedTelecommands(                                                                                                          //
@@ -72,9 +73,10 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           GetPersistentStateTelecommand(stateContainer),                                                                  //
           PurgePhoto(photo),                                                                                              //
           PerformCameraCommisioningExperiment(
-              experiments.ExperimentsController, experiments.Get<experiment::camera::CameraCommissioningExperiment>()),   //
-          SendPeriodicMessageTelecommand(stateContainer)                                                                  //
-          ),                                                                                                              //
+              experiments.ExperimentsController, experiments.Get<experiment::camera::CameraCommissioningExperiment>()), //
+          SendPeriodicMessageTelecommand(stateContainer),                                                               //
+          DisableOverheatSubmodeTelecommand(epsDriver)                                                                  //
+          ),                                                                                                            //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {
 }

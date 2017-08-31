@@ -13,6 +13,7 @@ from i2c import *
 from suns import *
 from photo import *
 from state import *
+from eps import *
 
 __all__ = [
     'DownloadFile',
@@ -40,6 +41,7 @@ __all__ = [
     'TakePhotoTelecommand',
     'GetPersistentState',
     'PurgePhotoTelecommand',
-    'PerformSADSExperiment'
+    'PerformSADSExperiment',
+    'DisableOverheatSubmode'
 ]
 

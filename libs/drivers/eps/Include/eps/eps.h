@@ -40,11 +40,10 @@ namespace devices
         };
 
         /**
-         * @brief EPS driver
+         * @brief EPS driver interface
          */
-        class EPSDriver final : public IEpsTelemetryProvider
+        struct IEPSDriver : public IEpsTelemetryProvider
         {
-          public:
             /**
              * @brief Available controller
              */
@@ -54,6 +53,20 @@ namespace devices
                 B  //!< B
             };
 
+            /**
+             * @brief Disables overheat submode on selected controller
+             * @param controller Controller to use
+             * @return Operation result
+             */
+            virtual bool DisableOverheatSubmode(Controller controller) = 0;
+        };
+
+        /**
+         * @brief EPS driver
+         */
+        class EPSDriver final : public IEPSDriver
+        {
+          public:
             /** @brief Controller A address */
             static constexpr drivers::i2c::I2CAddress ControllerA = 0b0110101;
             /** @brief Controller A Id */
@@ -87,7 +100,7 @@ namespace devices
             virtual Option<hk::ControllerBTelemetry> ReadHousekeepingB() final override;
 
             /**
-             * @brief Performs power cycle using specified constroller.
+             * @brief Performs power cycle using specified controller.
              * @param controller Controller to use
              * @return This function will return only on failure
              */
@@ -119,7 +132,7 @@ namespace devices
              * @param controller Controller to use
              * @return Operation result
              */
-            bool DisableOverheatSubmode(Controller controller);
+            virtual bool DisableOverheatSubmode(Controller controller) override;
 
             /**
              * @brief Enables burn switch

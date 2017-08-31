@@ -10,6 +10,7 @@ import program_upload
 import fdir
 import period_message
 import persistent_state
+import disable_overheat_submode
 
 frame_types = []
 frame_types += map(lambda t: t[1], inspect.getmembers(pong, predicate=inspect.isclass))
@@ -18,7 +19,9 @@ frame_types += map(lambda t: t[1], inspect.getmembers(program_upload, predicate=
 frame_types += map(lambda t: t[1], inspect.getmembers(fdir, predicate=inspect.isclass))
 frame_types += map(lambda t: t[1], inspect.getmembers(period_message, predicate=inspect.isclass))
 frame_types += map(lambda t: t[1], inspect.getmembers(persistent_state, predicate=inspect.isclass))
+frame_types += map(lambda t: t[1], inspect.getmembers(disable_overheat_submode, predicate=inspect.isclass))
 frame_types = filter(lambda t: issubclass(t, ResponseFrame) and t != ResponseFrame, frame_types)
+frame_types = reduce(lambda t, x: t + [x] if x not in t else t, frame_types, [])
 
 frame_factories = [BeaconFrameFactory(), DownlinkFrameFactory(frame_types)]
     
