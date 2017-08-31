@@ -2,6 +2,7 @@
 #define LIBS_MISSION_POWER_INCLUDE_MISSION_POWER_POWER_CYCLE_HPP_
 
 #include <tuple>
+#include "experiments/experiments.h"
 #include "mission/base.hpp"
 #include "power/fwd.hpp"
 #include "state/struct.h"
@@ -20,13 +21,15 @@ namespace mission
         class PeriodicPowerCycleTask : public Action
         {
           public:
-            PeriodicPowerCycleTask(std::tuple<services::power::IPowerControl&, IScrubbingStatus&> args);
+            PeriodicPowerCycleTask(
+                std::tuple<services::power::IPowerControl&, IScrubbingStatus&, ::experiments::IExperimentController&> args);
 
             ActionDescriptor<SystemState> BuildAction();
 
           private:
             services::power::IPowerControl& _power;
             IScrubbingStatus& _scrubbingStatus;
+            ::experiments::IExperimentController& _experiments;
 
             Option<std::chrono::milliseconds> _bootTime;
 

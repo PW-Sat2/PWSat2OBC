@@ -4,6 +4,7 @@
 #include "gmock/gmock.h"
 #include "OsMock.hpp"
 #include "mission/power/power_cycle.hpp"
+#include "mock/experiment.hpp"
 #include "mock/power.hpp"
 
 using namespace mission;
@@ -32,9 +33,10 @@ namespace
         SystemState _state;
 
         testing::NiceMock<ScrubbingStatusMock> _scrubbingStatus;
+        testing::NiceMock<ExperimentControllerMock> _experimentController;
         testing::StrictMock<PowerControlMock> _power;
 
-        PeriodicPowerCycleTask _task{_power, _scrubbingStatus};
+        PeriodicPowerCycleTask _task{std::make_tuple(std::ref(_power), std::ref(_scrubbingStatus), std::ref(_experimentController))};
         ActionDescriptor<SystemState> _action{_task.BuildAction()};
     };
 
@@ -73,6 +75,48 @@ namespace
         ASSERT_THAT(_action.EvaluateCondition(_state), Eq(false));
 
         _state.Time += 23h;
+        ASSERT_THAT(_action.EvaluateCondition(_state), Eq(true));
+    }
+
+    TEST_F(PeriodicPowerCycleTest, ShouldNotTriggerPowerCycleIfExperimentIsInProgress)
+    {
+        _state.Time = 50h;
+        ASSERT_THAT(_action.EvaluateCondition(_state), Eq(false));
+
+        _state.Time += 23h;
+        ON_CALL(_scrubbingStatus, BootloaderInProgress()).WillByDefault(Return(false));
+        ON_CALL(_scrubbingStatus, PrimarySlotsInProgress()).WillByDefault(Return(false));
+        ON_CALL(_scrubbingStatus, FailsafeSlotsInProgress()).WillByDefault(Return(false));
+
+        experiments::ExperimentState exp = {Some(static_cast<experiments::ExperimentCode>(1)),
+            Some(static_cast<experiments::ExperimentCode>(1)),
+            Some(experiments::StartResult::Success),
+            Some(experiments::IterationResult::WaitForNextCycle),
+            2};
+
+        ON_CALL(_experimentController, CurrentState()).WillByDefault(Return(exp));
+
+        ASSERT_THAT(_action.EvaluateCondition(_state), Eq(false));
+    }
+
+    TEST_F(PeriodicPowerCycleTest, ShouldTriggerPowerCycleIfExperimentIsNotInProgress)
+    {
+        _state.Time = 50h;
+        ASSERT_THAT(_action.EvaluateCondition(_state), Eq(false));
+
+        _state.Time += 23h;
+        ON_CALL(_scrubbingStatus, BootloaderInProgress()).WillByDefault(Return(false));
+        ON_CALL(_scrubbingStatus, PrimarySlotsInProgress()).WillByDefault(Return(false));
+        ON_CALL(_scrubbingStatus, FailsafeSlotsInProgress()).WillByDefault(Return(false));
+
+        experiments::ExperimentState exp = {None<experiments::ExperimentCode>(),
+            None<experiments::ExperimentCode>(),
+            Some(experiments::StartResult::Success),
+            Some(experiments::IterationResult::WaitForNextCycle),
+            2};
+
+        ON_CALL(_experimentController, CurrentState()).WillByDefault(Return(exp));
+
         ASSERT_THAT(_action.EvaluateCondition(_state), Eq(true));
     }
 
