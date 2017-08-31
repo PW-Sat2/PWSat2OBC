@@ -6,8 +6,7 @@ from parsec import Parser, Value
 
 from emulator.beacon_parser import eps_controller_a_telemetry_parser, eps_controller_b_telemetry_parser, \
     error_counting_telemetry, experiment_telemetry_parser, mcu_temperature_parser
-from emulator.beacon_parser.parser import BitReader
-from bitarray import bitarray
+from emulator.beacon_parser.parser import BitArrayParser
 
 from math import ceil
 
@@ -33,15 +32,15 @@ class PayloadOBCTelemetryParser:
 
         self.storage[category][name] = value
 
-    def GetParsers(self, reader):
-        return [error_counting_telemetry.ErrorCountingTelemetry(reader, self),
-                experiment_telemetry_parser.ExperimentTelemetryParser(reader, self),
-                mcu_temperature_parser.McuTemperatureParser(reader, self),
-                eps_controller_a_telemetry_parser.EPSControllerATelemetryParser(reader, self),
-                eps_controller_b_telemetry_parser.EPSControllerBTelemetryParser(reader, self)]
+    def GetParsers(self, reader, store):
+        return [error_counting_telemetry.ErrorCountingTelemetry(reader, store),
+                experiment_telemetry_parser.ExperimentTelemetryParser(reader, store),
+                mcu_temperature_parser.McuTemperatureParser(reader, store),
+                eps_controller_a_telemetry_parser.EPSControllerATelemetryParser(reader, store),
+                eps_controller_b_telemetry_parser.EPSControllerBTelemetryParser(reader, store)]
 
     def GetSize(self):
-        parsers = self.GetParsers(None)
+        parsers = self.GetParsers(None, self)
         size = 0
         for parser in parsers:
             size = size + parser.get_bit_count()
@@ -54,20 +53,11 @@ def PayloadParser(text, index):
 
     if index + size <= len(text):
         part = text[index: index + size]
-
-        all_bits = bitarray(endian='little')
-        all_bits.frombytes(part)
-        reader = BitReader(all_bits)
-        parsers = telemetry_parser.GetParsers(reader)
-        parsers.reverse()
-
-        while len(parsers) > 0:
-            parser = parsers.pop()
-            parser.parse()
-
+        parser = BitArrayParser(telemetry_parser, part, telemetry_parser)
+        parser.parse()
         return Value.success(index + size, telemetry_parser.storage)
     else:
         return Value.failure(index, 'Decode failed')
 
-PayloadObcTelemetry = pid(0x36) >> count(PayloadParser, 1)
+PayloadObcTelemetry = pid(0x36) >> PayloadParser
 PayloadObcTelemetry >>= label_as('Payload Obc Telemetry')

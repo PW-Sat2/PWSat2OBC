@@ -58,7 +58,6 @@ namespace rc
             using T = devices::suns::MeasurementData;
 
             return gen::build<T>(            //
-                gen::set(&T::whoami),        //
                 gen::set(&T::status),        //
                 gen::set(&T::parameters),    //
                 gen::set(&T::temperature),   //
@@ -136,7 +135,7 @@ namespace
         w.WriteQuadWordLE(point.Timestamp.count());
 
         w.WriteByte(num(ExperimentFile::PID::ExperimentalSunSPrimary));
-        w.WriteByte(point.ExperimentalSunS.whoami);
+        w.WriteByte(0x11);
         w.WriteWordLE(point.ExperimentalSunS.status.ack);
         w.WriteWordLE(point.ExperimentalSunS.status.presence);
         w.WriteWordLE(point.ExperimentalSunS.status.adc_valid);

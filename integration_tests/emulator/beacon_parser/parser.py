@@ -1,4 +1,5 @@
 from utils import bits_to_dword, bits_to_byte, bits_to_word, bits_to_qword
+from bitarray import bitarray
 
 
 class BitReader:
@@ -78,3 +79,22 @@ class CategoryParser:
 
     def _format_name(self, name, length):
         return str(self._reader.offset() - length).rjust(4, '0') + ": " + name
+
+
+class BitArrayParser:
+    def __init__(self, parsers_container, data_buffer, store):
+        self._parsersContainer = parsers_container
+        self._buffer = data_buffer
+        self._store = store
+
+    def parse(self):
+        all_bits = bitarray(endian='little')
+        all_bits.frombytes(self._buffer)
+        reader = BitReader(all_bits)
+
+        parsers = self._parsersContainer.GetParsers(reader, self._store)
+        parsers.reverse()
+
+        while len(parsers) > 0:
+            parser = parsers.pop()
+            parser.parse()

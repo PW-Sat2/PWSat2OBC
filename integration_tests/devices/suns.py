@@ -53,6 +53,7 @@ class SunS(i2cMock.I2CDevice):
         ]
 
         self.on_measure = self.default_on_suns_measure
+        self.timeout_callback = None
 
     def gpio_interrupt_low(self):
         self.gpioDriver.gpio_low(self.interrupt_pin)
@@ -66,7 +67,10 @@ class SunS(i2cMock.I2CDevice):
         def finish():
             self.gpio_interrupt_low()
 
-        t = Timer(0.1, finish)
+        timeout = 0.1
+        if self.timeout_callback is not None:
+            timeout = self.timeout_callback()
+        t = Timer(timeout, finish)
         t.start()
 
     # --- Commands ---
