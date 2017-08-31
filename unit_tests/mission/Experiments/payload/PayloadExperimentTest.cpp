@@ -6,6 +6,7 @@
 #include "mock/FsMock.hpp"
 #include "mock/PayloadDeviceMock.hpp"
 #include "mock/PayloadExperimentTelemetryProviderMock.hpp"
+#include "mock/PhotoServiceMock.hpp"
 #include "mock/SunSDriverMock.hpp"
 #include "mock/TemperatureReaderMock.hpp"
 #include "mock/eps.hpp"
@@ -25,7 +26,9 @@ using experiments::IterationResult;
 using experiments::StartResult;
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
+using services::photo::Camera;
 using namespace std::chrono_literals;
+
 namespace
 {
     class PayloadExperimentTest : public testing::Test
@@ -38,6 +41,7 @@ namespace
         NiceMock<CurrentTimeMock> _time;
         NiceMock<PayloadDeviceMock> _payload;
         NiceMock<SunSDriverMock> _suns;
+        NiceMock<PhotoServiceMock> _photo;
         NiceMock<OSMock> _os;
         OSReset _osReset{InstallProxy(&_os)};
 
@@ -61,16 +65,21 @@ namespace
         void SunSStepTest();
         void TelemetrySnapshotStepTest();
 
+        void OneQuickCheckStepForCamera(Camera which);
+
         std::array<std::uint8_t, 2000> buffer;
     };
 
     PayloadExperimentTest::PayloadExperimentTest()
-        : _exp(_payload, _fs, _power, _time, _suns, _eps, nullptr, &_temperatureProvider, &_experimentProvider)
+        : _exp(_payload, _fs, _power, _time, _suns, _photo, _eps, nullptr, &_temperatureProvider, &_experimentProvider)
     {
         ON_CALL(_power, SensPower(_)).WillByDefault(Return(true));
         ON_CALL(_power, SunSPower(_)).WillByDefault(Return(true));
         ON_CALL(_power, CameraNadir(_)).WillByDefault(Return(true));
         ON_CALL(_power, CameraWing(_)).WillByDefault(Return(true));
+
+        ON_CALL(_photo, GetLastSyncResult(_)).WillByDefault(Return(services::photo::SyncResult(true, 1)));
+        ON_CALL(_photo, IsEmpty(_)).WillByDefault(Return(false));
 
         ON_CALL(this->_time, GetCurrentTime()).WillByDefault(Return(Some(10ms)));
 
@@ -170,9 +179,43 @@ namespace
         ASSERT_THAT(r, Eq(IterationResult::LoopImmediately));
     }
 
+    void PayloadExperimentTest::OneQuickCheckStepForCamera(Camera which)
+    {
+        EXPECT_CALL(_photo, EnableCamera(which)).Times(1);
+        EXPECT_CALL(_photo, DisableCamera(which)).Times(1);
+        EXPECT_CALL(_photo, GetLastSyncResult(which)).Times(1);
+    }
+
     void PayloadExperimentTest::CamsFullStepTest()
     {
-        // TODO: WRITE THAT
+        // InSequence from main test can't (?) be switched off
+        for (int i = 0; i < 10; ++i)
+        {
+            OneQuickCheckStepForCamera(Camera::Nadir);
+        }
+
+        for (int i = 0; i < 10; ++i)
+        {
+            OneQuickCheckStepForCamera(Camera::Wing);
+        }
+
+        EXPECT_CALL(_photo, EnableCamera(_)).Times(2);
+
+        EXPECT_CALL(_photo, TakePhoto(Camera::Nadir, services::photo::PhotoResolution::p128)).Times(1);
+        EXPECT_CALL(_photo, DownloadPhoto(_, _));
+        EXPECT_CALL(_photo, TakePhoto(Camera::Nadir, services::photo::PhotoResolution::p240)).Times(1);
+        EXPECT_CALL(_photo, DownloadPhoto(_, _));
+        EXPECT_CALL(_photo, TakePhoto(Camera::Nadir, services::photo::PhotoResolution::p480)).Times(1);
+        EXPECT_CALL(_photo, DownloadPhoto(_, _));
+        EXPECT_CALL(_photo, TakePhoto(Camera::Wing, services::photo::PhotoResolution::p128)).Times(1);
+        EXPECT_CALL(_photo, DownloadPhoto(_, _));
+        EXPECT_CALL(_photo, TakePhoto(Camera::Wing, services::photo::PhotoResolution::p240)).Times(1);
+        EXPECT_CALL(_photo, DownloadPhoto(_, _));
+        EXPECT_CALL(_photo, TakePhoto(Camera::Wing, services::photo::PhotoResolution::p480)).Times(1);
+        EXPECT_CALL(_photo, DownloadPhoto(_, _));
+
+        EXPECT_CALL(_photo, DisableCamera(_)).Times(2);
+        EXPECT_CALL(_photo, SavePhotoToFile(_, _)).Times(6);
 
         auto r = _exp.Iteration();
         ASSERT_THAT(r, Eq(IterationResult::LoopImmediately));

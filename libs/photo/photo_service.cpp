@@ -19,8 +19,18 @@ namespace services
 
         static std::array<std::uint8_t, 512_KB> PhotoBuffer;
 
-        SyncResult::SyncResult(bool successful, int retryCount) : Successful(successful), RetryCount(retryCount)
+        SyncResult::SyncResult(bool successful, int retryCount) : _successful(successful), _retryCount(retryCount)
         {
+        }
+
+        bool SyncResult::GetIsSuccessful() const
+        {
+            return _successful;
+        }
+
+        int SyncResult::GetRetryCount() const
+        {
+            return _retryCount;
         }
 
         BufferInfo::BufferInfo() : _status(BufferStatus::Empty)
@@ -34,7 +44,7 @@ namespace services
         PhotoService::PhotoService(
             services::power::IPowerControl& power, ICamera& camera, ICameraSelector& selector, services::fs::IFileSystem& fileSystem)
             : _power(power), _camera(camera), _selector(selector), _fileSystem(fileSystem), _freeSpace(PhotoBuffer.begin()),
-              _task("Photos", this, TaskProc)
+              _task("Photos", this, TaskProc), _lastCameraNadirSyncResult(false, 0), _lastCameraWingSyncResult(false, 0)
         {
         }
 
@@ -80,7 +90,17 @@ namespace services
 
             auto syncResult = this->_camera.Sync();
 
-            if (!syncResult.Successful)
+            switch (command.Which)
+            {
+                case Camera::Nadir:
+                    this->_lastCameraNadirSyncResult = syncResult;
+                    break;
+                case Camera::Wing:
+                    this->_lastCameraWingSyncResult = syncResult;
+                    break;
+            }
+
+            if (!syncResult.GetIsSuccessful())
             {
                 return OSResult::DeviceNotFound;
             }
@@ -370,6 +390,19 @@ namespace services
                         break;
                 }
             }
+        }
+
+        const SyncResult PhotoService::GetLastSyncResult(Camera which)
+        {
+            switch (which)
+            {
+                case Camera::Nadir:
+                    return this->_lastCameraNadirSyncResult;
+                case Camera::Wing:
+                    return this->_lastCameraWingSyncResult;
+            }
+
+            return SyncResult(false, 0);
         }
     }
 }

@@ -24,20 +24,34 @@ namespace experiment
             services::power::IPowerControl& powerControl,
             services::time::ICurrentTime& time,
             devices::suns::ISunSDriver& experimentalSunS,
+            services::photo::IPhotoService& photoService,
             devices::eps::IEpsTelemetryProvider& epsProvider,
             error_counter::IErrorCountingTelemetryProvider* errorCounterProvider,
             temp::ITemperatureReader* temperatureProvider,
             experiments::IExperimentController* experimentProvider)
             : _payload(payload), _time(time), _fileSystem(fileSystem), _powerControl(powerControl), _experimentalSunS(experimentalSunS),
-              _experimentFile(&_time), _telemetryProvider(epsProvider, errorCounterProvider, temperatureProvider, experimentProvider),
-              _currentStep(0)
+              _photoService(photoService), _experimentFile(&_time),
+              _telemetryProvider(epsProvider, errorCounterProvider, temperatureProvider, experimentProvider),
+              _cameraCommisioningController(_experimentFile, photoService), _currentStep(0)
         {
             std::strncpy(_fileName, DefaultFileName, 30);
+            _cameraCommisioningController.SetPhotoFilesBaseName(this->_fileName);
+        }
+
+        PayloadCommissioningExperiment::PayloadCommissioningExperiment(PayloadCommissioningExperiment&& other)
+            : _payload(other._payload), _time(other._time), _fileSystem(other._fileSystem), _powerControl(other._powerControl),
+              _experimentalSunS(other._experimentalSunS), _photoService(other._photoService),
+              _experimentFile(std::move(other._experimentFile)), _telemetryProvider(other._telemetryProvider),
+              _cameraCommisioningController(_experimentFile, _photoService), _currentStep(other._currentStep)
+        {
+            strsafecpy(_fileName, other._fileName, count_of(other._fileName));
+            _cameraCommisioningController.SetPhotoFilesBaseName(this->_fileName);
         }
 
         void PayloadCommissioningExperiment::SetOutputFile(gsl::cstring_span<> fileName)
         {
             strsafecpy(this->_fileName, fileName);
+            _cameraCommisioningController.SetPhotoFilesBaseName(this->_fileName);
         }
 
         experiments::ExperimentCode PayloadCommissioningExperiment::Type()
@@ -54,6 +68,7 @@ namespace experiment
                 return StartResult::Failure;
             }
 
+            _currentStep = 0;
             return StartResult::Success;
         }
 
@@ -209,7 +224,8 @@ namespace experiment
 
         IterationResult PayloadCommissioningExperiment::CamsFullStep()
         {
-            // TODO: WRITE THAT
+            _cameraCommisioningController.PerformQuickCheck();
+            _cameraCommisioningController.PerformPhotoTest();
 
             return IterationResult::LoopImmediately;
         }

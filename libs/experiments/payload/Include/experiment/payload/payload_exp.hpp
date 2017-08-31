@@ -3,10 +3,12 @@
 
 #include <chrono>
 #include "PayloadExperimentTelemetryProvider.hpp"
+#include "experiment/camera/CameraExperimentController.hpp"
 #include "experiments/experiments.h"
 #include "fs/ExperimentFile.hpp"
 #include "fs/fs.h"
 #include "payload/interfaces.h"
+#include "photo/fwd.hpp"
 #include "power/power.h"
 #include "suns/suns.hpp"
 #include "time/timer.h"
@@ -49,6 +51,7 @@ namespace experiment
              * @param powerControl Power Control provider
              * @param time Current time provider
              * @param experimentalSunS Experimental SunS driver
+             * @param photoService Photo Service
              * @param epsProvider EPS telemetry provider
              * @param errorCounterProvider Error Counter telemetry provider
              * @param temperatureProvider MCU telemetry provider
@@ -59,10 +62,19 @@ namespace experiment
                 services::power::IPowerControl& powerControl,
                 services::time::ICurrentTime& time,
                 devices::suns::ISunSDriver& experimentalSunS,
+                services::photo::IPhotoService& photoService,
                 devices::eps::IEpsTelemetryProvider& epsProvider,
                 error_counter::IErrorCountingTelemetryProvider* errorCounterProvider,
                 temp::ITemperatureReader* temperatureProvider,
                 experiments::IExperimentController* experimentProvider);
+
+            /**
+             * @brief Move Constructor
+             * @param other The object to move
+             */
+            PayloadCommissioningExperiment(PayloadCommissioningExperiment&& other) noexcept;
+
+            PayloadCommissioningExperiment& operator=(PayloadCommissioningExperiment&& other) = delete;
 
             /**
              * @brief Method allowing to set name of file where data will be saved.
@@ -109,10 +121,15 @@ namespace experiment
             /** @brief SunS Driver */
             devices::suns::ISunSDriver& _experimentalSunS;
 
+            /** @brief Photo Service */
+            services::photo::IPhotoService& _photoService;
+
             /** @brief Experiment file with results */
             experiments::fs::ExperimentFile _experimentFile;
 
             PayloadExperimentTelemetryProvider _telemetryProvider;
+
+            experiment::camera::CameraExperimentController _cameraCommisioningController;
 
             uint8_t _currentStep;
 

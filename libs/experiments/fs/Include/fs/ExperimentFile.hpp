@@ -67,6 +67,7 @@ namespace experiments
                 PayloadHousekeeping = 0x34, // 4 bytes of data
                 PayloadRadFet = 0x35,       // 17 bytes of data
                 PayloadExperimentMainTelemetry = 0x36,
+                CameraSyncCount = 0x37, // 1 byte of data
 
                 SADSTemperature = 0x41, // 2 bytes of data
 

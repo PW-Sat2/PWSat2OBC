@@ -155,10 +155,9 @@ namespace obc
             seconds delay = seconds(r.ReadByte() * 10);
             uint8_t samplesCount = r.ReadByte();
 
-            char outputFileName[30];
             auto path = r.ReadString(30);
 
-            if (!r.Status() || strlen_n(outputFileName, 30) == 0)
+            if (!r.Status() || path.length() == 0)
             {
                 CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
                 response.PayloadWriter().WriteByte(0x1);
@@ -167,10 +166,11 @@ namespace obc
             }
 
             LOGF(LOG_LEVEL_INFO,
-                "Requested RadFET experiment: delay %ld seconds, samples %d, path %s",
+                "Requested RadFET experiment: delay %ld seconds, samples %d, path %.*s",
                 static_cast<uint32_t>(delay.count()),
                 samplesCount,
-                outputFileName);
+                path.length(),
+                path.data());
 
             this->setupRadFET.Setup(delay, samplesCount, path);
 
@@ -225,11 +225,10 @@ namespace obc
         void PerformPayloadCommisioningExperiment::Handle(
             devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
         {
-            char filePath[30];
             Reader r(parameters);
 
             auto correlationId = r.ReadByte();
-            const auto outputFile = r.ReadString(count_of(filePath));
+            const auto outputFile = r.ReadString(30);
 
             if (!r.Status() || outputFile.empty())
             {
@@ -280,6 +279,47 @@ namespace obc
             else
             {
                 writer.WriteByte(2);
+            }
+
+            transmitter.SendFrame(response.Frame());
+        }
+
+        PerformCameraCommisioningExperiment::PerformCameraCommisioningExperiment(
+            experiments::IExperimentController& controller, experiment::camera::ISetupCameraCommissioningExperiment& setupCamera)
+            : _controller(controller), _setupCamera(setupCamera)
+        {
+        }
+
+        void PerformCameraCommisioningExperiment::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
+        {
+            Reader r(parameters);
+
+            auto correlationId = r.ReadByte();
+            const auto outputFile = r.ReadString(30);
+
+            if (!r.Status() || outputFile.empty())
+            {
+                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+                response.PayloadWriter().WriteByte(0x1);
+                transmitter.SendFrame(response.Frame());
+                return;
+            }
+
+            LOG(LOG_LEVEL_INFO, "Requested Camera Commisioning experiment");
+
+            this->_setupCamera.SetOutputFilesBaseName(outputFile);
+
+            auto success = this->_controller.RequestExperiment(experiment::camera::CameraCommissioningExperiment::Code);
+
+            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+
+            if (success)
+            {
+                response.PayloadWriter().WriteByte(0);
+            }
+            else
+            {
+                response.PayloadWriter().WriteByte(2);
             }
 
             transmitter.SendFrame(response.Frame());

@@ -25,9 +25,18 @@ namespace obc
               experiment::erase_flash::EraseFlashExperiment(n25q, transmitter),                                       //
               experiment::radfet::RadFETExperiment(fs, payload, powerControl, time),                                  //
               experiment::sail::SailExperiment(fs, adcs, gyro, payload, powerControl, photoService, sailState, time), //
-              experiment::payload::PayloadCommissioningExperiment(
-                  payload, fs, powerControl, time, suns, epsProvider, errorCounterProvider, temperatureProvider, &ExperimentsController),
-              experiment::sads::SADSExperiment(fs, adcs, gyro, payload, powerControl, photoService, time))
+              experiment::payload::PayloadCommissioningExperiment(payload,
+                  fs,
+                  powerControl,
+                  time,
+                  suns,
+                  photoService,
+                  epsProvider,
+                  errorCounterProvider,
+                  temperatureProvider,
+                  &ExperimentsController),
+              experiment::sads::SADSExperiment(fs, adcs, gyro, payload, powerControl, photoService, time),
+              experiment::camera::CameraCommissioningExperiment(fs, time, photoService))
     {
     }
 
