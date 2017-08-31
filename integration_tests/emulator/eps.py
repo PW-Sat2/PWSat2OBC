@@ -32,6 +32,9 @@ class EPSModule(ModuleBase):
         self._eps_sadsmain_value = xrc.XRCCTRL(self._panel, 'eps_sadsmain_value')
         self._eps_sadsred_value = xrc.XRCCTRL(self._panel, 'eps_sadsred_value')
 
+        self._watchdog_a = xrc.XRCCTRL(self._panel, 'last_watchdog_a')
+        self._watchdog_b = xrc.XRCCTRL(self._panel, 'last_watchdog_b')
+
     def get_color(self, value):
         return '#009400' if value else 'red'
 
@@ -54,6 +57,18 @@ class EPSModule(ModuleBase):
         self._eps_sailred_value.SetForegroundColour(self.get_color(self._system.eps.SAILred.enabled))
         self._eps_sadsmain_value.SetForegroundColour(self.get_color(self._system.eps.SADSmain.enabled))
         self._eps_sadsred_value.SetForegroundColour(self.get_color(self._system.eps.SADSred.enabled))
+
+        if self._system.eps.controller_a.last_watchdog_kick is None:
+            self._watchdog_a.SetLabel('Last watchdog kick (A): None')
+        else:
+            self._watchdog_a.SetLabel('Last watchdog kick (A) {:%Y-%m-%d %H:%M:%S}'
+                                      .format(self._system.eps.controller_a.last_watchdog_kick))
+
+        if self._system.eps.controller_b.last_watchdog_kick is None:
+            self._watchdog_b.SetLabel('Last watchdog kick (B): None')
+        else:
+            self._watchdog_b.SetLabel('Last watchdog kick (B) {:%Y-%m-%d %H:%M:%S}'
+                                      .format(self._system.eps.controller_b.last_watchdog_kick))
 
     def root(self):
         return self._panel

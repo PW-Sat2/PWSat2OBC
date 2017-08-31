@@ -4,6 +4,7 @@ import time
 import wx
 from wx import xrc
 from devices import RTCDevice
+from system import System
 from .base import ModuleBase, bind
 from bitarray import bitarray
 from struct import pack
@@ -15,7 +16,7 @@ class CommModule(ModuleBase):
     GridPos = (1, 0)
 
     def __init__(self, system):
-        self._system = system
+        self._system = system # type: System
         self.title = 'Comm'
         self.grid_pos = (1, 3)
         self.grid_span = (1, 1)
@@ -28,8 +29,10 @@ class CommModule(ModuleBase):
         self.bind_handlers()
 
         self._current_comm_queue_size = xrc.XRCCTRL(self._panel, 'current_comm_queue_size')
-
         self._current_beacon_timestamp = xrc.XRCCTRL(self._panel, 'current_beacon_timestamp')
+
+        self._transmitter_last_watchdog = xrc.XRCCTRL(self._panel, 'last_watchdog_transmitter')
+        self._receiver_last_watchdog = xrc.XRCCTRL(self._panel, 'last_watchdog_receiver')
 
     def root(self):
         return self._panel
@@ -59,3 +62,15 @@ class CommModule(ModuleBase):
             self._current_beacon_timestamp.SetLabel(
                 'Current beacon: \n' + time.strftime('%Y-%m-%d %H:%M:%S', self._system.transmitter.current_beacon_timestamp)
                 + ' (' + str(len(self._system.transmitter.current_beacon)) + ' bytes)')
+
+        if self._system.comm.receiver.last_watchdog_kick is None:
+            self._receiver_last_watchdog.SetLabel('Receiver: last watchdog kick\nNone')
+        else:
+            self._receiver_last_watchdog.SetLabel('Receiver: last watchdog kick\n{:%Y-%m-%d %H:%M:%S}'
+                                                  .format(self._system.comm.receiver.last_watchdog_kick))
+
+        if self._system.comm.transmitter.last_watchdog_kick is None:
+            self._transmitter_last_watchdog.SetLabel('Transmitter: last watchdog kick\nNone')
+        else:
+            self._transmitter_last_watchdog.SetLabel('Transmitter: last watchdog kick\n{:%Y-%m-%d %H:%M:%S}'
+                                                  .format(self._system.comm.transmitter.last_watchdog_kick))

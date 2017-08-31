@@ -58,12 +58,14 @@ class System:
         self.i2c.stop()
         self.obc.close()
 
-    def restart(self, boot_chain=None):
+    def restart(self, boot_chain=None, override_final=None):
         if boot_chain is None:
             boot_chain = []
 
+        final_boot_handler = override_final or self._final_boot_handler
+
         self.i2c.unlatch()
-        self.obc.reset(boot_handler=BootHandler(boot_chain + [self._final_boot_handler]))
+        self.obc.reset(boot_handler=BootHandler(boot_chain + [final_boot_handler]))
         self.obc.wait_to_start()
 
     def power_off_obc(self):

@@ -38,7 +38,6 @@ __all__ = [
     'GetSunSDataSets',
     'PerformSailExperiment',
     'TakePhotoTelecommand',
-    'DeploySolarArrayTelecommand',
     'GetPersistentState',
     'PurgePhotoTelecommand',
     'PerformSADSExperiment'
