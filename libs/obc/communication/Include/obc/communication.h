@@ -13,6 +13,7 @@
 #include "obc/telecommands/antenna.hpp"
 #include "obc/telecommands/boot_settings.hpp"
 #include "obc/telecommands/comm.hpp"
+#include "obc/telecommands/eps.hpp"
 #include "obc/telecommands/experiments.hpp"
 #include "obc/telecommands/fdir.hpp"
 #include "obc/telecommands/file_system.hpp"
@@ -158,7 +159,8 @@ namespace obc
         obc::telecommands::PurgePhoto,
         obc::telecommands::PerformCameraCommisioningExperiment,
         obc::telecommands::SendPeriodicMessageTelecommand,
-        obc::telecommands::CompileInfoTelecommand
+        obc::telecommands::CompileInfoTelecommand,
+        obc::telecommands::DisableOverheatSubmodeTelecommand
         >;
 
     /**
@@ -189,6 +191,7 @@ namespace obc
          * @param[in] payloadDriver Payload driver interface
          * @param[in] gyro Gyroscope interface
          * @param[in] photo Reference to service capable of taking photos
+         * @param[in] epsDriver Reference to EPS driver object
          */
         OBCCommunication(obc::FDIR& fdir,
             devices::comm::CommObject& commDriver,
@@ -210,7 +213,8 @@ namespace obc
             devices::suns::ISunSDriver& experimentalSunS,
             devices::payload::IPayloadDeviceDriver& payloadDriver,
             devices::gyro::IGyroscopeDriver& gyro,
-            services::photo::IPhotoService& photo);
+            services::photo::IPhotoService& photo,
+            devices::eps::IEPSDriver& epsDriver);
 
         /**
          * @brief Initializes all communication at runlevel 1

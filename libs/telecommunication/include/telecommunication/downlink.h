@@ -35,6 +35,7 @@ namespace telecommunication
             PeriodicMessage = 0x5,             //!< Periodic message
             PersistentState = 0x6,             //!< Persistent state content
             CompileInfo = 0x8,                 //!< Software Build information
+            DisableOverheatSubmode = 0x19,     //!< DisableOverheatSubmode command
             Forbidden = (BeaconMarker & 0x3f), //!< Reserved apid due to beacon collision
             Telemetry = 0x3F,                  //!< TelemetryLong
             LastItem                           //!< LastItem
