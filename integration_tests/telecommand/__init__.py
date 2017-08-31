@@ -14,6 +14,7 @@ from suns import *
 from photo import *
 from state import *
 from compile_info import *
+from eps import *
 
 __all__ = [
     'DownloadFile',
@@ -42,6 +43,7 @@ __all__ = [
     'GetPersistentState',
     'PurgePhotoTelecommand',
     'PerformSADSExperiment',
-    'GetCompileInfoTelecommand'
+    'GetCompileInfoTelecommand',
+    'DisableOverheatSubmode'
 ]
 

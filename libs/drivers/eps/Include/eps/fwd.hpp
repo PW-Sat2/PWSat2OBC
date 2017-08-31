@@ -5,6 +5,7 @@ namespace devices
 {
     namespace eps
     {
+        struct IEPSDriver;
         class EPSDriver;
 
         /**

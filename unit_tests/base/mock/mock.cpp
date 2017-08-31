@@ -9,8 +9,8 @@
 #include "mock/ImtqTelemetryCollectorMock.hpp"
 #include "mock/LineIOMock.hpp"
 #include "mock/OpenSailMock.hpp"
-#include "mock/PhotoServiceMock.hpp"
 #include "mock/PayloadExperimentTelemetryProviderMock.hpp"
+#include "mock/PhotoServiceMock.hpp"
 #include "mock/TemperatureReaderMock.hpp"
 #include "mock/experiment.hpp"
 #include "mock/fm25w.hpp"
@@ -157,5 +157,13 @@ TemperatureReaderMock::TemperatureReaderMock()
 {
 }
 TemperatureReaderMock::~TemperatureReaderMock()
+{
+}
+
+EPSDriverMock::EPSDriverMock()
+{
+}
+
+EPSDriverMock::~EPSDriverMock()
 {
 }
