@@ -2,6 +2,7 @@ import struct
 import i2cMock
 from i2cMock import I2CDevice
 from threading import Timer
+from utils import call
 
 
 class Payload(I2CDevice):
@@ -168,11 +169,7 @@ class Payload(I2CDevice):
     def mock_processing_start(self):
         self.gpio_interrupt_high()
         self.log.info("Start PLD measurement")
-
-        timeout = 0
-        if self.timeout_callback is not None:
-            timeout = self.timeout_callback()
-        t = Timer(timeout, self.mock_processing_stop)
+        t = Timer(call(self.timeout_callback, 0), self.mock_processing_stop)
         t.start()
 
     def mock_processing_stop(self):
