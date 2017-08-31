@@ -1,5 +1,6 @@
 #include <array>
 #include <cstdio>
+#include <fcntl.h>
 #include <unistd.h>
 #include "base/os.h"
 #include "fs/fs.h"
@@ -18,7 +19,7 @@ class PosixFileSystem : public IFileSystem
   public:
     virtual FileOpenResult Open(const char* path, FileOpen openFlag, FileAccess accessMode) override
     {
-        auto f = open(path, num(openFlag), num(accessMode));
+        auto f = open(path, num(openFlag) | O_BINARY, num(accessMode));
 
         if (f == -1)
         {
@@ -132,6 +133,10 @@ class PosixFileSystem : public IFileSystem
 void GenerateSunSData(IFileSystem& fs);
 void GenerateSailData(IFileSystem& fs);
 void GenerateDetumblingData(IFileSystem& fs);
+void GenerateCameraCommissioningData(IFileSystem& fs);
+void GeneratePayloadCommissioningData(IFileSystem& fs);
+void GenerateLeopData(IFileSystem& fs);
+void GenerateRadfetData(IFileSystem& fs);
 
 int main()
 {
@@ -144,6 +149,10 @@ int main()
     GenerateSunSData(fs);
     GenerateSailData(fs);
     GenerateDetumblingData(fs);
+    GenerateCameraCommissioningData(fs);
+    GeneratePayloadCommissioningData(fs);
+    GenerateLeopData(fs);
+    GenerateRadfetData(fs);
 
     kill(-1, 0);
 
