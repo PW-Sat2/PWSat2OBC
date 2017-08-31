@@ -1,13 +1,10 @@
 #include <array>
 #include <cstdio>
+#include <fcntl.h>
 #include <unistd.h>
 #include "base/os.h"
 #include "fs/fs.h"
 #include "utils.h"
-
-#ifndef O_BINARY
-#define O_BINARY 0x0004
-#endif
 
 using namespace services::fs;
 
