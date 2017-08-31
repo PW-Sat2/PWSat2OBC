@@ -35,6 +35,8 @@ namespace scrubber
             return;
         }
 
+        this->_inProgress = true;
+
         BootloaderCopy copies[] = {
             _bootTable.GetBootloaderCopy(0),
             _bootTable.GetBootloaderCopy(1),
@@ -91,6 +93,8 @@ namespace scrubber
             this->_mcuFlash.Program(offset, validPart);
             this->_mcuPagesCorrected++;
         }
+
+        this->_inProgress = false;
 
         LOG(LOG_LEVEL_INFO, "[scrub] Finished scrubbing bootloader");
     }

@@ -2,7 +2,6 @@
 #include <chrono>
 #include "logger/logger.h"
 #include "obc/hardware.h"
-#include "program_flash/fwd.hpp"
 
 using namespace std::chrono_literals;
 
@@ -94,5 +93,20 @@ namespace obc
         this->_control.Clear(Event::RunOnceFinished);
         this->_control.Set(Event::RunOnceRequested);
         this->_control.WaitAny(Event::RunOnceFinished, false, InfiniteTimeout);
+    }
+
+    bool OBCScrubbing::BootloaderInProgress()
+    {
+        return this->_bootloaderScrubber.InProgress();
+    }
+
+    bool OBCScrubbing::PrimarySlotsInProgress()
+    {
+        return this->_primarySlotsScrubber.InProgress();
+    }
+
+    bool OBCScrubbing::FailsafeSlotsInProgress()
+    {
+        return this->_secondarySlotsScrubber.InProgress();
     }
 }

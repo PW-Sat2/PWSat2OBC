@@ -68,6 +68,8 @@ namespace scrubber
          */
         ProgramScrubbingStatus Status();
 
+        inline bool InProgress() const;
+
       private:
         /** @brief Scrubbing buffer */
         ScrubBuffer& _buffer;
@@ -84,7 +86,14 @@ namespace scrubber
         std::uint32_t _iterationsCount;
         /** @brief Number of slots corrected */
         std::uint32_t _slotsCorrected;
+
+        std::atomic<bool> _inProgress;
     };
+
+    bool ProgramScrubber::InProgress() const
+    {
+        return this->_inProgress;
+    }
 }
 
 #endif /* LIBS_SCRUBBER_INCLUDE_SCRUBBER_PROGRAM_HPP_ */

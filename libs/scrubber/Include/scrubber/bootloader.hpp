@@ -2,6 +2,7 @@
 #define LIBS_SCRUBBER_INCLUDE_SCRUBBER_BOOTLOADER_COPIES_HPP_
 
 #include <array>
+#include <atomic>
 #include <cstdint>
 #include "msc/fwd.hpp"
 #include "program_flash/boot_table.hpp"
@@ -62,6 +63,8 @@ namespace scrubber
          */
         BootloaderScrubbingStatus Status();
 
+        inline bool InProgress() const;
+
       private:
         /** @brief Reference to scrubbing buffer */
         ScrubBuffer& _scrubBuffer;
@@ -75,7 +78,14 @@ namespace scrubber
         std::uint32_t _copiesCorrected;
         /** @brief Number of corrected MCU pages */
         std::uint32_t _mcuPagesCorrected;
+
+        std::atomic<bool> _inProgress;
     };
+
+    bool BootloaderScrubber::InProgress() const
+    {
+        return this->_inProgress;
+    }
 }
 
 #endif /* LIBS_SCRUBBER_INCLUDE_SCRUBBER_BOOTLOADER_COPIES_HPP_ */
