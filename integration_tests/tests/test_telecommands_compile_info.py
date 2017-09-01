@@ -1,4 +1,4 @@
-from response_frames.operation import OperationSuccessFrame
+from response_frames.compile_info import CompileInfoFrame
 from system import auto_power_on
 from telecommand import GetCompileInfoTelecommand
 from tests.base import RestartPerTest
@@ -24,10 +24,9 @@ class TestGetCompileInfoTelecommand(RestartPerTest):
     def test_get_compile_info(self):
         self._start()
 
-        self.system.comm.put_frame(GetCompileInfoTelecommand(12))
+        self.system.comm.put_frame(GetCompileInfoTelecommand())
 
         response = self.system.comm.get_frame(5)
-        self.assertIsInstance(response, OperationSuccessFrame)
-        self.assertEqual(response.correlation_id, 12)
+        self.assertIsInstance(response, CompileInfoFrame)
         self.assertEqual(response.seq(), 0);
 

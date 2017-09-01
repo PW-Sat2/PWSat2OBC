@@ -18,8 +18,7 @@ namespace obc
          *
          * Command code: 0x27
          *
-         * Parameters:
-         *  - Correlation ID (8-bit)
+         * Parameters: None
          */
         class CompileInfoTelecommand final : public telecommunication::uplink::Telecommand<0x27>
         {
