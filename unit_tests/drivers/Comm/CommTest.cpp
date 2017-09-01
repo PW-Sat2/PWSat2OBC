@@ -611,7 +611,7 @@ namespace
         ExpectSendFrame(0xff);
         const auto status = comm.SendFrame(span<const uint8_t>(buffer));
         ASSERT_THAT(status, Eq(false));
-        ASSERT_THAT(error_counter, Eq(0));
+        ASSERT_THAT(error_counter, Eq(5));
     }
 
     TEST_F(CommTest, TestReceiveFrameRequestFailure)
@@ -844,7 +844,7 @@ namespace
         Beacon beacon(1s, buffer);
         const auto status = comm.SetBeacon(beacon);
         ASSERT_THAT(status, Eq(false));
-        ASSERT_THAT(error_counter, Eq(0));
+        ASSERT_THAT(error_counter, Eq(5));
     }
 
     TEST_F(CommTest, TestSetBeaconTransmitterBufferNotEmpty)

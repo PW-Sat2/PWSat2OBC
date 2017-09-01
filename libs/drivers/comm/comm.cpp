@@ -261,6 +261,7 @@ ReceiverFrameCount CommObject::GetFrameCount()
         LOGF(LOG_LEVEL_INFO, "Detected invalid number of incoming frames: '%d'.", static_cast<int>(result.frameCount));
         result.frameCount = 0;
         result.status = false;
+        errorContext.Counter().Failure();
     }
 
     return result;
@@ -503,6 +504,7 @@ bool CommObject::ScheduleFrameTransmission(
     if (remainingBufferSize == 0xff)
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Frame was not accepted by the transmitter.");
+        resultAggregator.Failure();
     }
 
     return status && remainingBufferSize != 0xff;
