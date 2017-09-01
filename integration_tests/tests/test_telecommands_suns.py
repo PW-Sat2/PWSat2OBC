@@ -1,5 +1,5 @@
 import telecommand
-from threading import Timer
+from response_frames.common import DownlinkApid
 
 from system import auto_power_on, runlevel
 from tests.base import RestartPerTest
@@ -27,10 +27,10 @@ class SunsTelecommandsTest(RestartPerTest):
 
         self._start()
 
-        self.system.comm.put_frame(telecommand.GetSunSDataSets(correlation_id=0x11, gain=0x01, itime=0x02))
+        self.system.comm.put_frame(telecommand.GetSunSDataSets(correlation_id=0x19, gain=0x01, itime=0x02))
 
         frame = self.system.comm.get_frame(20)
 
-        self.assertEqual(frame.apid(), 2)
+        self.assertEqual(frame.apid(), DownlinkApid.SunS)
         self.assertEqual(frame.seq(), 0)
         self.assertEqual(len(frame.payload()), 94)

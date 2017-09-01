@@ -11,6 +11,7 @@ namespace
     using testing::Eq;
     using testing::An;
 
+    using telecommunication::downlink::DownlinkAPID;
     using namespace std::chrono_literals;
 
     class PhotoCommandTest : public testing::Test
@@ -31,7 +32,7 @@ namespace
     {
         EXPECT_CALL(transmitter, SendFrame(_)).WillOnce(Invoke([](gsl::span<const std::uint8_t> frame) {
             EXPECT_THAT(frame.size(), Eq(5));
-            EXPECT_THAT(frame[0], Eq(2));
+            EXPECT_THAT(frame[0], Eq(num(DownlinkAPID::Photo)));
             EXPECT_THAT(frame[1], Eq(0));
             EXPECT_THAT(frame[2], Eq(0));
             EXPECT_THAT(frame[3], Eq(0));
@@ -45,7 +46,7 @@ namespace
     {
         EXPECT_CALL(transmitter, SendFrame(_)).WillOnce(Invoke([](gsl::span<const std::uint8_t> frame) {
             EXPECT_THAT(frame.size(), Eq(5));
-            EXPECT_THAT(frame[0], Eq(2));
+            EXPECT_THAT(frame[0], Eq(num(DownlinkAPID::Photo)));
             EXPECT_THAT(frame[1], Eq(0));
             EXPECT_THAT(frame[2], Eq(0));
             EXPECT_THAT(frame[3], Eq(10));
@@ -61,7 +62,7 @@ namespace
     {
         EXPECT_CALL(transmitter, SendFrame(_)).WillOnce(Invoke([](gsl::span<const std::uint8_t> frame) {
             EXPECT_THAT(frame.size(), Eq(5));
-            EXPECT_THAT(frame[0], Eq(2));
+            EXPECT_THAT(frame[0], Eq(num(DownlinkAPID::Photo)));
             EXPECT_THAT(frame[1], Eq(0));
             EXPECT_THAT(frame[2], Eq(0));
             EXPECT_THAT(frame[3], Eq(10));
@@ -77,7 +78,7 @@ namespace
     {
         EXPECT_CALL(transmitter, SendFrame(_)).WillOnce(Invoke([](gsl::span<const std::uint8_t> frame) {
             EXPECT_THAT(frame.size(), Eq(5));
-            EXPECT_THAT(frame[0], Eq(2));
+            EXPECT_THAT(frame[0], Eq(num(DownlinkAPID::Photo)));
             EXPECT_THAT(frame[1], Eq(0));
             EXPECT_THAT(frame[2], Eq(0));
             EXPECT_THAT(frame[3], Eq(10));

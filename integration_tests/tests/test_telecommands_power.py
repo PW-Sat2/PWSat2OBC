@@ -2,7 +2,7 @@ from system import auto_power_on
 from telecommand import PowerCycleTelecommand
 from tests.base import RestartPerTest
 from utils import TestEvent
-from response_frames.operation import OperationSuccessFrame
+from response_frames.common import PowerSuccessFrame
 
 
 class TestPowerTelecommands(RestartPerTest):
@@ -32,7 +32,7 @@ class TestPowerTelecommands(RestartPerTest):
         self.system.comm.put_frame(PowerCycleTelecommand(0x21))
 
         ack = self.system.comm.get_frame(5)
-        self.assertIsInstance(ack, OperationSuccessFrame)
+        self.assertIsInstance(ack, PowerSuccessFrame)
 
         power_cycle_requested.wait_for_change(1)
 
