@@ -72,9 +72,10 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           GetPersistentStateTelecommand(stateContainer),                                                                  //
           PurgePhoto(photo),                                                                                              //
           PerformCameraCommisioningExperiment(
-              experiments.ExperimentsController, experiments.Get<experiment::camera::CameraCommissioningExperiment>()),   //
-          SendPeriodicMessageTelecommand(stateContainer)                                                                  //
-          ),                                                                                                              //
+              experiments.ExperimentsController, experiments.Get<experiment::camera::CameraCommissioningExperiment>()), //
+          SendPeriodicMessageTelecommand(stateContainer),                                                               //
+          CompileInfoTelecommand()                                                                                      //
+          ),                                                                                                            //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {
 }

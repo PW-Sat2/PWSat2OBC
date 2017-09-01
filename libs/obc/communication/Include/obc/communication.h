@@ -27,6 +27,7 @@
 #include "obc/telecommands/state.hpp"
 #include "obc/telecommands/suns.hpp"
 #include "obc/telecommands/time.hpp"
+#include "obc/telecommands/compile_info.hpp"
 #include "program_flash/fwd.hpp"
 #include "telecommunication/telecommand_handling.h"
 #include "telecommunication/uplink.h"
@@ -156,7 +157,9 @@ namespace obc
         obc::telecommands::GetPersistentStateTelecommand,
         obc::telecommands::PurgePhoto,
         obc::telecommands::PerformCameraCommisioningExperiment,
-        obc::telecommands::SendPeriodicMessageTelecommand>;
+        obc::telecommands::SendPeriodicMessageTelecommand,
+        obc::telecommands::CompileInfoTelecommand
+        >;
 
     /**
      * @brief OBC <-> Earth communication

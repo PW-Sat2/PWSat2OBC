@@ -18,6 +18,7 @@ set(SOURCES
     suns.cpp
     photo.cpp
     state.cpp
+    compile_info.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
@@ -43,6 +44,7 @@ target_link_libraries(${NAME}
 	gyro
 	photo
 	state
+	version
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

@@ -1,7 +1,5 @@
 set(NAME pwsat)
 
-generate_version_file(${CMAKE_CURRENT_BINARY_DIR}/gen/version.h)
-
 set(SOURCES
     main.cpp
     terminal.cpp
@@ -130,9 +128,8 @@ target_link_libraries(${NAME}
     boot_settings
     obc_memory
     camera
+    version
 )
-
-target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)
 
 target_generate_hex(${NAME})
 target_generate_bin(${NAME})
