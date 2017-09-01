@@ -31,7 +31,7 @@ namespace obc
             auto missionTimeWeight = r.ReadWordLE();
             auto externalTimeWeight = r.ReadWordLE();
 
-            DownlinkFrame response(DownlinkAPID::Operation, 0);
+            DownlinkFrame response(DownlinkAPID::TimeCorrection, 0);
             response.PayloadWriter().WriteByte(correlationId);
 
             if (missionTimeWeight == 0 && externalTimeWeight == 0)
@@ -77,7 +77,7 @@ namespace obc
             auto correlationId = r.ReadByte();
             auto targetTime = std::chrono::seconds(r.ReadDoubleWordLE());
 
-            DownlinkFrame response(DownlinkAPID::Operation, 0);
+            DownlinkFrame response(DownlinkAPID::TimeSet, 0);
             response.PayloadWriter().WriteByte(correlationId);
 
             UniqueLock<mission::ITimeSynchronization> lock(this->timeSynchronization, InfiniteTimeout);

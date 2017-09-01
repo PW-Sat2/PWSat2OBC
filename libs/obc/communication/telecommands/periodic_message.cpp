@@ -21,7 +21,7 @@ namespace obc
 
             auto correlationId = r.ReadByte();
 
-            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+            CorrelatedDownlinkFrame response(DownlinkAPID::PeriodicSet, 0, correlationId);
 
             auto interval = std::chrono::minutes(r.ReadByte());
             auto repeatCount = r.ReadByte();

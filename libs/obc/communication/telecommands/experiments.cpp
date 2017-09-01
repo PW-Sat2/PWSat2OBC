@@ -14,11 +14,19 @@ using std::chrono::minutes;
 
 using telecommunication::downlink::CorrelatedDownlinkFrame;
 using telecommunication::downlink::DownlinkAPID;
+using telecommunication::downlink::DownlinkGenericResponse;
 
 namespace obc
 {
     namespace telecommands
     {
+        static bool SendStandardResponse(devices::comm::ITransmitter& transmitter, int correlationId, DownlinkGenericResponse responseId)
+        {
+            CorrelatedDownlinkFrame response(DownlinkAPID::Experiment, 0, correlationId);
+            response.PayloadWriter().WriteByte(num(responseId));
+            return transmitter.SendFrame(response.Frame());
+        }
+
         PerformDetumblingExperiment::PerformDetumblingExperiment(
             experiments::IExperimentController& experiments, experiment::adcs::ISetupDetumblingExperiment& setupExperiment)
             : _experiments(experiments), _setupExperiment(setupExperiment)
@@ -37,9 +45,7 @@ namespace obc
 
             if (!r.Status())
             {
-                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
-                response.PayloadWriter().WriteByte(0x1);
-                transmitter.SendFrame(response.Frame());
+                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::MalformedRequest);
                 return;
             }
 
@@ -49,18 +55,15 @@ namespace obc
             this->_setupExperiment.SampleRate(samplingInterval);
 
             auto status = this->_experiments.RequestExperiment(experiment::adcs::DetumblingExperiment::Code);
-            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
 
             if (status)
             {
-                response.PayloadWriter().WriteByte(0x0);
+                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::Success);
             }
             else
             {
-                response.PayloadWriter().WriteByte(0x2);
+                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::ExperimentError);
             }
-
-            transmitter.SendFrame(response.Frame());
         }
 
         AbortExperiment::AbortExperiment(experiments::IExperimentController& experiments) : _experiments(experiments)
@@ -71,18 +74,14 @@ namespace obc
         {
             if (parameters.size() == 0)
             {
-                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, 0);
-                response.PayloadWriter().WriteByte(0x1);
-                transmitter.SendFrame(response.Frame());
+                SendStandardResponse(transmitter, 0, DownlinkGenericResponse::MalformedRequest);
                 return;
             }
 
             LOG(LOG_LEVEL_INFO, "[tc] Aborting experiment");
             this->_experiments.AbortExperiment();
 
-            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, parameters[0]);
-            response.PayloadWriter().WriteByte(0x0);
-            transmitter.SendFrame(response.Frame());
+            SendStandardResponse(transmitter, parameters[0], DownlinkGenericResponse::Success);
         }
 
         PerformSunSExperiment::PerformSunSExperiment(
@@ -107,9 +106,7 @@ namespace obc
 
             if (!r.Status() || outputFile.empty())
             {
-                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
-                response.PayloadWriter().WriteByte(0x1);
-                transmitter.SendFrame(response.Frame());
+                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::MalformedRequest);
                 return;
             }
 
@@ -124,19 +121,14 @@ namespace obc
             this->_setupSunS.SetOutputFiles(outputFile);
 
             auto success = this->_controller.RequestExperiment(experiment::suns::SunSExperiment::Code);
-
-            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
-
             if (success)
             {
-                response.PayloadWriter().WriteByte(0);
+                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::Success);
             }
             else
             {
-                response.PayloadWriter().WriteByte(2);
+                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::ExperimentError);
             }
-
-            transmitter.SendFrame(response.Frame());
         }
 
         PerformRadFETExperiment::PerformRadFETExperiment(
@@ -159,9 +151,7 @@ namespace obc
 
             if (!r.Status() || path.length() == 0)
             {
-                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
-                response.PayloadWriter().WriteByte(0x1);
-                transmitter.SendFrame(response.Frame());
+                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::MalformedRequest);
                 return;
             }
 
@@ -175,19 +165,14 @@ namespace obc
             this->setupRadFET.Setup(delay, samplesCount, path);
 
             auto success = this->controller.RequestExperiment(experiment::radfet::RadFETExperiment::Code);
-
-            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
-
             if (success)
             {
-                response.PayloadWriter().WriteByte(0);
+                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::Success);
             }
             else
             {
-                response.PayloadWriter().WriteByte(2);
+                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::ExperimentError);
             }
-
-            transmitter.SendFrame(response.Frame());
         }
 
         PerformSailExperiment::PerformSailExperiment(experiments::IExperimentController& controller) : experimentController(controller)
@@ -198,22 +183,18 @@ namespace obc
         {
             Reader reader(parameters);
             const auto correlationId = reader.ReadByte();
-            CorrelatedDownlinkFrame response{DownlinkAPID::Operation, 0, correlationId};
-            auto& writer = response.PayloadWriter();
             if (!reader.Status())
             {
-                writer.WriteByte(0x1);
+                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::MalformedRequest);
             }
             else if (this->experimentController.RequestExperiment(experiment::sail::SailExperiment::Code))
             {
-                writer.WriteByte(0);
+                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::Success);
             }
             else
             {
-                writer.WriteByte(2);
+                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::ExperimentError);
             }
-
-            transmitter.SendFrame(response.Frame());
         }
 
         PerformPayloadCommisioningExperiment::PerformPayloadCommisioningExperiment(
@@ -232,9 +213,7 @@ namespace obc
 
             if (!r.Status() || outputFile.empty())
             {
-                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
-                response.PayloadWriter().WriteByte(0x1);
-                transmitter.SendFrame(response.Frame());
+                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::MalformedRequest);
                 return;
             }
 
@@ -243,19 +222,14 @@ namespace obc
             this->_setupPayload.SetOutputFile(outputFile);
 
             auto success = this->_controller.RequestExperiment(experiment::payload::PayloadCommissioningExperiment::Code);
-
-            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
-
             if (success)
             {
-                response.PayloadWriter().WriteByte(0);
+                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::Success);
             }
             else
             {
-                response.PayloadWriter().WriteByte(2);
+                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::ExperimentError);
             }
-
-            transmitter.SendFrame(response.Frame());
         }
 
         PerformSADSExperiment::PerformSADSExperiment(experiments::IExperimentController& controller) : experimentController(controller)
@@ -266,22 +240,18 @@ namespace obc
         {
             Reader reader(parameters);
             const auto correlationId = reader.ReadByte();
-            CorrelatedDownlinkFrame response{DownlinkAPID::Operation, 0, correlationId};
-            auto& writer = response.PayloadWriter();
             if (!reader.Status())
             {
-                writer.WriteByte(0x1);
+                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::MalformedRequest);
             }
             else if (this->experimentController.RequestExperiment(experiment::sads::SADSExperiment::Code))
             {
-                writer.WriteByte(0);
+                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::Success);
             }
             else
             {
-                writer.WriteByte(2);
+                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::ExperimentError);
             }
-
-            transmitter.SendFrame(response.Frame());
         }
 
         PerformCameraCommisioningExperiment::PerformCameraCommisioningExperiment(
@@ -299,9 +269,7 @@ namespace obc
 
             if (!r.Status() || outputFile.empty())
             {
-                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
-                response.PayloadWriter().WriteByte(0x1);
-                transmitter.SendFrame(response.Frame());
+                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::MalformedRequest);
                 return;
             }
 
@@ -310,19 +278,14 @@ namespace obc
             this->_setupCamera.SetOutputFilesBaseName(outputFile);
 
             auto success = this->_controller.RequestExperiment(experiment::camera::CameraCommissioningExperiment::Code);
-
-            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
-
             if (success)
             {
-                response.PayloadWriter().WriteByte(0);
+                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::Success);
             }
             else
             {
-                response.PayloadWriter().WriteByte(2);
+                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::ExperimentError);
             }
-
-            transmitter.SendFrame(response.Frame());
         }
     }
 }

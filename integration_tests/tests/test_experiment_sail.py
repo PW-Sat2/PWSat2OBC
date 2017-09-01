@@ -1,12 +1,10 @@
 from datetime import timedelta
 
-from obc.boot import SelectRunlevel
 from obc.experiments import ExperimentType
 from system import runlevel, clear_state
-from response_frames.operation import OperationSuccessFrame
+from response_frames.common import ExperimentSuccessFrame
 from telecommand.experiments import PerformSailExperiment
 from tests.base import RestartPerTest
-from utils import TestEvent
 from nose.tools import nottest
 
 @runlevel(1)
@@ -25,7 +23,7 @@ class TestExperimentSail(RestartPerTest):
 
         frame = self.system.comm.get_frame(20)
 
-        self.assertIsInstance(frame, OperationSuccessFrame)
+        self.assertIsInstance(frame, ExperimentSuccessFrame)
         self.assertEqual(frame.correlation_id, 10);
 
         self.system.obc.wait_for_experiment_started(ExperimentType.Sail, 60)

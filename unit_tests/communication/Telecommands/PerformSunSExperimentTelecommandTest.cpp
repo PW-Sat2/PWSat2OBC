@@ -46,19 +46,19 @@ namespace
 
     TEST_F(PerformSunSExperimentTelecommandTest, RespondWithErrorOnTooShortFrame)
     {
-        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(43, 1))));
+        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Experiment, 0, ElementsAre(43, 1))));
         Run(43, 1, 2, 3, 4);
     }
 
     TEST_F(PerformSunSExperimentTelecommandTest, RespondWithErrorOnNoFileName)
     {
-        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(43, 1))));
+        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Experiment, 0, ElementsAre(43, 1))));
         Run(43, 1, 2, 3, 4, 5, 6, 0);
     }
 
     TEST_F(PerformSunSExperimentTelecommandTest, RespondWithErrorWhenControllerBusy)
     {
-        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(43, 2))));
+        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Experiment, 0, ElementsAre(43, 2))));
 
         ON_CALL(this->_controller, RequestExperiment(_)).WillByDefault(Return(false));
 
@@ -67,7 +67,7 @@ namespace
 
     TEST_F(PerformSunSExperimentTelecommandTest, ShouldSetExperimentParameters)
     {
-        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(43, 0))));
+        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Experiment, 0, ElementsAre(43, 0))));
 
         EXPECT_CALL(this->_suns,
             SetParameters(AllOf(                                 //

@@ -1,12 +1,11 @@
 import logging
 from datetime import timedelta, datetime
-from unittest import skip
 
 import telecommand
 from obc.experiments import ExperimentType
-from response_frames.operation import OperationSuccessFrame
+from response_frames.common import ExperimentSuccessFrame
 from system import auto_power_on, runlevel
-from tests.base import BaseTest, RestartPerTest
+from tests.base import RestartPerTest
 from utils import TestEvent
 
 
@@ -42,7 +41,7 @@ class TestExperimentDetumbling(RestartPerTest):
         self.system.comm.put_frame(telecommand.PerformDetumblingExperiment(correlation_id=5, duration=timedelta(hours=4), sampling_interval=timedelta(seconds=2)))
 
         response = self.system.comm.get_frame(5)
-        self.assertIsInstance(response, OperationSuccessFrame)
+        self.assertIsInstance(response, ExperimentSuccessFrame)
 
         log.info('Waiting for experiment')
         self.system.obc.wait_for_experiment(ExperimentType.Detumbling, 40)

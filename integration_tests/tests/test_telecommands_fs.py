@@ -1,11 +1,10 @@
 import struct
 
-from nose.tools import nottest
-
 import telecommand
-from response_frames.operation import OperationErrorFrame
+from response_frames.common import FileRemoveErrorFrame, FileSendErrorFrame
+from response_frames.common import DownlinkApid
 from system import auto_power_on, runlevel
-from tests.base import BaseTest, RestartPerTest
+from tests.base import RestartPerTest
 from utils import ensure_byte_list, TestEvent
 
 
@@ -63,7 +62,7 @@ class FileSystemTelecommandsTest(RestartPerTest):
 
         frame = self.system.comm.get_frame(20)
 
-        self.assertIsInstance(frame, OperationErrorFrame)
+        self.assertIsInstance(frame, FileSendErrorFrame)
         self.assertEqual(frame.seq(), 0)
         self.assertEqual(frame.correlation_id, 0x11)
         self.assertEqual(frame.error_code, 1)
@@ -82,7 +81,7 @@ class FileSystemTelecommandsTest(RestartPerTest):
 
         frame = self.system.comm.get_frame(20)
 
-        self.assertEqual(frame.apid(), 2)
+        self.assertEqual(frame.apid(), DownlinkApid.FileRemove)
         self.assertEqual(frame.seq(), 0)
         self.assertEqual(frame.response, ensure_byte_list(p))
 
@@ -96,7 +95,7 @@ class FileSystemTelecommandsTest(RestartPerTest):
 
         frame = self.system.comm.get_frame(20)
 
-        self.assertIsInstance(frame, OperationErrorFrame)
+        self.assertIsInstance(frame, FileRemoveErrorFrame)
         self.assertEqual(frame.seq(), 0)
         self.assertEqual(frame.correlation_id, 0x11)
         self.assertEqual(frame.error_code, 0xFE)
@@ -115,7 +114,7 @@ class FileSystemTelecommandsTest(RestartPerTest):
 
         frame = self.system.comm.get_frame(20)
 
-        self.assertEqual(frame.apid(), 2)
+        self.assertEqual(frame.apid(), DownlinkApid.FileList)
         self.assertEqual(frame.seq(), 0)
         self.assertEqual(frame.payload()[0], 0x11)
         self.assertEqual(frame.payload()[1], 0)

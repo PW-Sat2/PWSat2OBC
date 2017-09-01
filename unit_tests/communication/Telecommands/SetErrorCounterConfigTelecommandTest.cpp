@@ -42,14 +42,14 @@ namespace
         EXPECT_CALL(this->_config, Set(5, 137, 7, 2));
         EXPECT_CALL(this->_config, Set(9, 250, 0, 0));
 
-        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0x11, 0, 5, 9))));
+        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ErrorCounterConfiguration, 0, ElementsAre(0x11, 0, 5, 9))));
 
         Run(0x11, 5, 137, 7, 2, 9, 250, 0, 0);
     }
 
     TEST_F(SetErrorCounterConfigTelecommandTest, ShouldRespondWithErrorFrameOnNoCorrelationId)
     {
-        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(_, 1))));
+        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ErrorCounterConfiguration, 0, ElementsAre(_, 1))));
 
         Run();
     }
@@ -58,7 +58,7 @@ namespace
     {
         EXPECT_CALL(this->_config, Set(5, 137, 7, 2));
 
-        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0x11, 0, 5))));
+        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ErrorCounterConfiguration, 0, ElementsAre(0x11, 0, 5))));
 
         Run(0x11, 5, 137, 7, 2, 9, 250, 0);
     }
@@ -67,7 +67,7 @@ namespace
     {
         EXPECT_CALL(this->_config, Set(5, 137, 7, 2));
 
-        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0x11, 0, 5))));
+        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ErrorCounterConfiguration, 0, ElementsAre(0x11, 0, 5))));
 
         Run(0x11, 5, 137, 7, 2, 90, 250, 0, 0, 7, 137, 7, 2);
     }

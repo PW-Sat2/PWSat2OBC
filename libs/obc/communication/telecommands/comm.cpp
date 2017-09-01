@@ -31,7 +31,7 @@ namespace obc
             auto correlationId = r.ReadByte();
             auto duration = r.ReadByte();
 
-            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+            CorrelatedDownlinkFrame response(DownlinkAPID::Comm, 0, correlationId);
 
             if (!r.Status())
             {

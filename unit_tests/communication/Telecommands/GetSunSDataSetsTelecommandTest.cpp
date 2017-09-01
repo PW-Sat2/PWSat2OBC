@@ -89,14 +89,14 @@ namespace
         EXPECT_CALL(_sunsExp, GetMeasuredData(_)).WillOnce(DoAll(SetArgReferee<0>(expSunsData), Return(OperationStatus::OK)));
         EXPECT_CALL(_gyro, read()).WillOnce(Return(Some(gyroData)));
 
-        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, _)));
+        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::SunS, 0, _)));
 
         _telecommand.Handle(_transmitter, _correctParameters);
     }
 
     TEST_F(GetSunSDataSetsTelecommandTest, ShouldTransmitDownlinkOperationFrame)
     {
-        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, _)));
+        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::SunS, 0, _)));
 
         _telecommand.Handle(_transmitter, _correctParameters);
     }
@@ -144,7 +144,7 @@ namespace
         w.WriteByte(0xAB);
 
         EXPECT_CALL(_power, SensPower(_)).Times(0);
-        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0xAB, 0x01))));
+        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::SunS, 0, ElementsAre(0xAB, 0x01))));
 
         _telecommand.Handle(_transmitter, incorrectParameters);
     }

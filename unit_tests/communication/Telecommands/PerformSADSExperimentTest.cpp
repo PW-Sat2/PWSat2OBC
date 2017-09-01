@@ -34,7 +34,7 @@ namespace
         EXPECT_CALL(controller, RequestExperiment(_)).Times(0);
         EXPECT_CALL(transmitter, SendFrame(_)).WillOnce(Invoke([](gsl::span<const std::uint8_t> frame) {
             EXPECT_THAT(frame.size_bytes(), Eq(5));
-            EXPECT_THAT(frame[0], Eq(2));
+            EXPECT_THAT(frame[0], Eq(num(DownlinkAPID::Experiment)));
             EXPECT_THAT(frame[1], Eq(0));
             EXPECT_THAT(frame[2], Eq(0));
             EXPECT_THAT(frame[3], Eq(0));
@@ -50,7 +50,7 @@ namespace
         EXPECT_CALL(controller, RequestExperiment(6)).WillOnce(Return(false));
         EXPECT_CALL(transmitter, SendFrame(_)).WillOnce(Invoke([](gsl::span<const std::uint8_t> frame) {
             EXPECT_THAT(frame.size_bytes(), Eq(5));
-            EXPECT_THAT(frame[0], Eq(2));
+            EXPECT_THAT(frame[0], Eq(num(DownlinkAPID::Experiment)));
             EXPECT_THAT(frame[1], Eq(0));
             EXPECT_THAT(frame[2], Eq(0));
             EXPECT_THAT(frame[3], Eq(1));
@@ -67,7 +67,7 @@ namespace
         EXPECT_CALL(controller, RequestExperiment(6)).WillOnce(Return(true));
         EXPECT_CALL(transmitter, SendFrame(_)).WillOnce(Invoke([](gsl::span<const std::uint8_t> frame) {
             EXPECT_THAT(frame.size_bytes(), Eq(5));
-            EXPECT_THAT(frame[0], Eq(2));
+            EXPECT_THAT(frame[0], Eq(num(DownlinkAPID::Experiment)));
             EXPECT_THAT(frame[1], Eq(0));
             EXPECT_THAT(frame[2], Eq(0));
             EXPECT_THAT(frame[3], Eq(1));

@@ -39,7 +39,7 @@ namespace
 
     TEST_F(PerformDetumblingExperimentTelecommandTest, ShouldRespondWithErrorOnEmptyFrame)
     {
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0, 1))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Experiment, 0, ElementsAre(0, 1))));
         EXPECT_CALL(this->_setup, Duration(_)).Times(0);
         EXPECT_CALL(this->_experiments, RequestExperiment(_)).Times(0);
 
@@ -48,7 +48,7 @@ namespace
 
     TEST_F(PerformDetumblingExperimentTelecommandTest, ShouldRespondWithErrorOnTooShortFrame)
     {
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0xDE, 1))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Experiment, 0, ElementsAre(0xDE, 1))));
         EXPECT_CALL(this->_setup, Duration(_)).Times(0);
         EXPECT_CALL(this->_experiments, RequestExperiment(_)).Times(0);
 
@@ -57,7 +57,7 @@ namespace
 
     TEST_F(PerformDetumblingExperimentTelecommandTest, ShouldSetDetumblingParametersAndRequestExperiment)
     {
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0x94, 0))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Experiment, 0, ElementsAre(0x94, 0))));
         EXPECT_CALL(this->_setup, Duration(0x04030201s));
         EXPECT_CALL(this->_setup, SampleRate(10s));
         EXPECT_CALL(this->_experiments, RequestExperiment(experiment::adcs::DetumblingExperiment::Code)).WillOnce(Return(true));
@@ -67,7 +67,7 @@ namespace
 
     TEST_F(PerformDetumblingExperimentTelecommandTest, ShouldRespondWithErrorIfRequestFails)
     {
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0x94, 2))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Experiment, 0, ElementsAre(0x94, 2))));
         EXPECT_CALL(this->_experiments, RequestExperiment(experiment::adcs::DetumblingExperiment::Code)).WillOnce(Return(false));
 
         Run(0x94, 0x01, 0x02, 0x03, 0x04, 0x0A);

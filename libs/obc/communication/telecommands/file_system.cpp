@@ -43,7 +43,7 @@ namespace obc
                 return false;
             }
 
-            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, seq, _correlationId);
+            CorrelatedDownlinkFrame response(DownlinkAPID::FileSend, seq, _correlationId);
 
             if (OS_RESULT_FAILED(this->_file.Seek(SeekOrigin::Begin, seq * MaxFileDataSize)))
             {
@@ -78,7 +78,7 @@ namespace obc
             if (!r.Status() || terminationByte != 0)
             {
                 LOG(LOG_LEVEL_ERROR, "Malformed request");
-                CorrelatedDownlinkFrame errorResponse(DownlinkAPID::Operation, 0, correlationId);
+                CorrelatedDownlinkFrame errorResponse(DownlinkAPID::FileSend, 0, correlationId);
                 errorResponse.PayloadWriter().WriteByte(static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::MalformedRequest));
                 errorResponse.PayloadWriter().WriteByte(0);
 
@@ -94,7 +94,7 @@ namespace obc
             if (!sender.IsValid())
             {
                 LOG(LOG_LEVEL_ERROR, "Unable to open requested file");
-                CorrelatedDownlinkFrame errorResponse(DownlinkAPID::Operation, 0, correlationId);
+                CorrelatedDownlinkFrame errorResponse(DownlinkAPID::FileSend, 0, correlationId);
                 errorResponse.PayloadWriter().WriteByte(static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::FileNotFound));
                 errorResponse.PayloadWriter().WriteArray(pathSpan);
 
@@ -130,7 +130,7 @@ namespace obc
             auto path = reinterpret_cast<const char*>(pathSpan.data());
             auto terminationByte = r.ReadByte();
 
-            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+            CorrelatedDownlinkFrame response(DownlinkAPID::FileRemove, 0, correlationId);
 
             if (!r.Status() || terminationByte != 0)
             {
@@ -175,7 +175,7 @@ namespace obc
 
             if (!r.Status() || parameters[parameters.size() - 1] != 0)
             {
-                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+                CorrelatedDownlinkFrame response(DownlinkAPID::FileList, 0, correlationId);
                 LOG(LOG_LEVEL_ERROR, "List files: malformed request");
                 response.PayloadWriter().WriteByte(static_cast<uint8_t>(OSResult::InvalidArgument));
 
@@ -187,7 +187,7 @@ namespace obc
 
             if (!dir)
             {
-                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+                CorrelatedDownlinkFrame response(DownlinkAPID::FileList, 0, correlationId);
 
                 auto& writer = response.PayloadWriter();
                 writer.WriteByte(num(dir.Status));
@@ -203,7 +203,7 @@ namespace obc
 
             while (moreFiles)
             {
-                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, seq, correlationId);
+                CorrelatedDownlinkFrame response(DownlinkAPID::FileList, seq, correlationId);
                 auto& writer = response.PayloadWriter();
                 writer.WriteByte(0);
 

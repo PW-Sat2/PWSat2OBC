@@ -28,16 +28,43 @@ namespace telecommunication
          */
         enum class DownlinkAPID : std::uint8_t
         {
-            Pong = 0x01,                       //!< Pong
-            Operation = 0x2,                   //!< Operation command
-            ErrorCounters = 0x3,               //!< Error counters list
-            ProgramUpload = 0x4,               //!< Program upload operation status
-            PeriodicMessage = 0x5,             //!< Periodic message
-            PersistentState = 0x6,             //!< Persistent state content
-            CompileInfo = 0x8,                 //!< Software Build information
-            Forbidden = (BeaconMarker & 0x3f), //!< Reserved apid due to beacon collision
-            Telemetry = 0x3F,                  //!< TelemetryLong
-            LastItem                           //!< LastItem
+            Pong = 0x01,                        //!< Pong
+            Operation = 0x2,                    //!< Operation command
+            ErrorCounters = 0x3,                //!< Error counters list
+            ProgramUpload = 0x4,                //!< Program upload operation status
+            PeriodicMessage = 0x5,              //!< Periodic message
+            PersistentState = 0x6,              //!< Persistent state content
+            BootSlotsInfo = 0x7,                //!< Boot slots info
+            CompileInfo = 0x8,                  //!< Software Build information
+            EraseFlash = 0x9,                   //!< Erase flash
+            FileRemove = 0xA,                   //!< Removing file
+            FileSend = 0xB,                     //!< Sending file
+            FileList = 0xC,                     //!< List files operation
+            PeriodicSet = 0xD,                  //!< Set periodic message
+            Photo = 0xE,                        //!< Take Photo
+            SunS = 0xF,                         //!< SunS telemetry
+            Experiment = 0x10,                  //!< Experiment commands results
+            ErrorCounterConfiguration = 0x11,   //!< Generic acknowledge frame
+            PurgePhoto = 0x12,                  //!< Purge Photo command
+            Powercycle = 0x13,                  //!< Power Cycle
+            Sail = 0x14,                        //!< Sail
+            TimeCorrection = 0x15,              //!< Time Correction
+            TimeSet = 0x16,                     //!< Time setting
+            Comm = 0x17,                        //!< Commands for Comm subsystem
+            I2C = 0x1A,                         //!< I2C Raw
+            Forbidden = (BeaconMarker & 0x3ff), //!< Reserved apid due to beacon collision
+            Telemetry = 0x3F,                   //!< TelemetryLong
+            LastItem                            //!< LastItem
+        };
+
+        /**
+         * @brief Standard responses definition
+         */
+        enum class DownlinkGenericResponse : std::uint8_t
+        {
+            Success = 0,          //!< Success
+            MalformedRequest = 1, //!< Malformed request
+            ExperimentError = 2,  //!< Error in experiment execution
         };
 
         /**

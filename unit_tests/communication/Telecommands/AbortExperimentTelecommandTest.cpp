@@ -31,7 +31,7 @@ namespace
     {
         EXPECT_CALL(_experiments, AbortExperiment());
 
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0x24, 0))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Experiment, 0, ElementsAre(0x24, 0))));
 
         Run(0x24);
     }
@@ -40,7 +40,7 @@ namespace
     {
         EXPECT_CALL(_experiments, AbortExperiment()).Times(0);
 
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0, 1))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Experiment, 0, ElementsAre(0, 1))));
 
         Run();
     }
