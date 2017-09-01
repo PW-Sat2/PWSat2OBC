@@ -79,8 +79,8 @@ namespace
         expectedPayload2[0] = 0xFF;
         expectedPayload2[1] = static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::Success);
 
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray(expectedPayload1))));
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(1U), ElementsAreArray(expectedPayload2))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::FileSend), Eq(0U), ElementsAreArray(expectedPayload1))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::FileSend), Eq(1U), ElementsAreArray(expectedPayload2))));
 
         constexpr uint8_t maxFileDataSize = DownlinkFrame::MaxPayloadSize - 2;
         Buffer<3 * maxFileDataSize> file;
@@ -156,7 +156,7 @@ namespace
         expectedPayload[1] = static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::FileNotFound);
         std::copy(path.begin(), path.end(), expectedPayload.begin() + 2);
 
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray(expectedPayload))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::FileSend), Eq(0U), ElementsAreArray(expectedPayload))));
 
         this->SendRequest(0xFF, path, std::array<uint16_t, 1>{0x3});
     }
@@ -167,7 +167,7 @@ namespace
 
         std::array<uint8_t, 3> expectedPayload{0xFF, static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::MalformedRequest), 0x00};
 
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray(expectedPayload))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::FileSend), Eq(0U), ElementsAreArray(expectedPayload))));
 
         Buffer<200> buffer;
         Writer w(buffer);
@@ -185,7 +185,7 @@ namespace
 
         std::array<uint8_t, 3> expectedPayload{0xFF, static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::MalformedRequest), 0x00};
 
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray(expectedPayload))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::FileSend), Eq(0U), ElementsAreArray(expectedPayload))));
 
         Buffer<200> buffer;
         Writer w(buffer);

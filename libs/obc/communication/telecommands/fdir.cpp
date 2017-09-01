@@ -25,7 +25,7 @@ namespace obc
 
             auto correlationId = r.ReadByte();
 
-            CorrelatedDownlinkFrame responseFrame(DownlinkAPID::Operation, 0, correlationId);
+            CorrelatedDownlinkFrame responseFrame(DownlinkAPID::ErrorCounterConfiguration, 0, correlationId);
             auto& response = responseFrame.PayloadWriter();
 
             if (!r.Status())

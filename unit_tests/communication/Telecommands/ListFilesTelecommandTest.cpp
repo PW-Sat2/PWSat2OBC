@@ -47,7 +47,7 @@ namespace
 
     void ListFilesTelecommandTest::ReceiveTo(ResultVector& container)
     {
-        ON_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, _, _)))
+        ON_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::FileList, _, _)))
             .WillByDefault(Invoke([&container](gsl::span<const std::uint8_t> frame) {
                 Reader r(frame);
                 r.Skip(DownlinkFrame::HeaderSize);
@@ -153,7 +153,7 @@ namespace
     {
         ON_CALL(this->_fs, OpenDirectory(_)).WillByDefault(Return(services::fs::DirectoryOpenResult(OSResult::DeviceNotFound, nullptr)));
 
-        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0x11, 19))));
+        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::FileList, 0, ElementsAre(0x11, 19))));
 
         BufferArray<20> args{0x11, '/', 'a', 0};
 
@@ -164,7 +164,7 @@ namespace
     {
         ON_CALL(this->_fs, OpenDirectory(_)).WillByDefault(Return(services::fs::DirectoryOpenResult(OSResult::DeviceNotFound, nullptr)));
 
-        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0, 22))));
+        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::FileList, 0, ElementsAre(0, 22))));
 
         BufferArray<0> args{};
 
@@ -175,7 +175,7 @@ namespace
     {
         ON_CALL(this->_fs, OpenDirectory(_)).WillByDefault(Return(services::fs::DirectoryOpenResult(OSResult::DeviceNotFound, nullptr)));
 
-        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0x11, 22))));
+        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::FileList, 0, ElementsAre(0x11, 22))));
 
         BufferArray<3> args{0x11, '/', 'a'};
 

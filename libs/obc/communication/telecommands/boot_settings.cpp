@@ -23,7 +23,7 @@ namespace obc
 
             if (!r.Status())
             {
-                telecommunication::downlink::CorrelatedDownlinkFrame frame(DownlinkAPID::Operation, 0x0, correlationId);
+                telecommunication::downlink::CorrelatedDownlinkFrame frame(DownlinkAPID::BootSlotsInfo, 0x0, correlationId);
                 frame.PayloadWriter().WriteByte(0xE0);
 
                 transmitter.SendFrame(frame.Frame());
@@ -32,7 +32,7 @@ namespace obc
 
             if (!boot::BootSettings::IsValidBootSlot(bootSlots))
             {
-                telecommunication::downlink::CorrelatedDownlinkFrame frame(DownlinkAPID::Operation, 0x0, correlationId);
+                telecommunication::downlink::CorrelatedDownlinkFrame frame(DownlinkAPID::BootSlotsInfo, 0x0, correlationId);
                 frame.PayloadWriter().WriteByte(0xE1);
 
                 transmitter.SendFrame(frame.Frame());
@@ -41,7 +41,7 @@ namespace obc
 
             if (!boot::BootSettings::IsValidBootSlot(failsafeBootSlots))
             {
-                telecommunication::downlink::CorrelatedDownlinkFrame frame(DownlinkAPID::Operation, 0x0, correlationId);
+                telecommunication::downlink::CorrelatedDownlinkFrame frame(DownlinkAPID::BootSlotsInfo, 0x0, correlationId);
                 frame.PayloadWriter().WriteByte(0xE2);
 
                 transmitter.SendFrame(frame.Frame());
@@ -54,7 +54,7 @@ namespace obc
             this->_settings.FailsafeBootSlots(failsafeBootSlots);
             this->_settings.MarkAsValid();
 
-            telecommunication::downlink::CorrelatedDownlinkFrame frame(DownlinkAPID::Operation, 0x0, correlationId);
+            telecommunication::downlink::CorrelatedDownlinkFrame frame(DownlinkAPID::BootSlotsInfo, 0x0, correlationId);
             frame.PayloadWriter().WriteByte(0);
             frame.PayloadWriter().WriteByte(this->_settings.BootSlots());
             frame.PayloadWriter().WriteByte(this->_settings.FailsafeBootSlots());
