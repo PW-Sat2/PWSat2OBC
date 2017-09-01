@@ -68,6 +68,10 @@ namespace scrubber
          */
         ProgramScrubbingStatus Status();
 
+        /**
+         * @brief Returns flag indicating wheter scrubbing is in progress
+         * @return true if scrubbing is in progress, false otherwise
+         */
         inline bool InProgress() const;
 
       private:

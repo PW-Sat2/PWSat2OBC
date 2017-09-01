@@ -38,7 +38,7 @@ namespace mission
 
             auto timeSinceBoot = state.Time - This->_bootTime.Value;
 
-            if (timeSinceBoot < 23h)
+            if (timeSinceBoot < PowerCycleTime)
             {
                 return false;
             }
