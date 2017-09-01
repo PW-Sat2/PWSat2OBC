@@ -28,15 +28,16 @@ namespace telecommunication
          */
         enum class DownlinkAPID : std::uint8_t
         {
-            Pong = 0x01,                        //!< Pong
-            Operation = 0x2,                    //!< Operation command
-            ErrorCounters = 0x3,                //!< Error counters list
-            ProgramUpload = 0x4,                //!< Program upload operation status
-            PeriodicMessage = 0x5,              //!< Periodic message
-            PersistentState = 0x6,              //!< Persistent state content
-            Forbidden = (BeaconMarker & 0x3ff), //!< Reserved apid due to beacon collision
-            Telemetry = 0x3F,                   //!< TelemetryLong
-            LastItem                            //!< LastItem
+            Pong = 0x01,                       //!< Pong
+            Operation = 0x2,                   //!< Operation command
+            ErrorCounters = 0x3,               //!< Error counters list
+            ProgramUpload = 0x4,               //!< Program upload operation status
+            PeriodicMessage = 0x5,             //!< Periodic message
+            PersistentState = 0x6,             //!< Persistent state content
+            CompileInfo = 0x8,                 //!< Software Build information
+            Forbidden = (BeaconMarker & 0x3f), //!< Reserved apid due to beacon collision
+            Telemetry = 0x3F,                  //!< TelemetryLong
+            LastItem                           //!< LastItem
         };
 
         /**

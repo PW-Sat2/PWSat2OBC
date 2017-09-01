@@ -1,1 +1,1 @@
-#define VERSION "${CMAKE_BUILD_TYPE} Build from '${GIT_COMMIT_HASH}' on branch: ${GIT_BRANCH}\nTarget MCU: ${TARGET_MCU_PLATFORM}\nTarget Payload: ${TARGET_PLD_PLATFORM}\nMachine: ${HOST_NAME}\nBuilt in ${CMAKE_BINARY_DIR}\nGCC:" __VERSION__ " "
+#define VERSION "${CMAKE_BUILD_TYPE} Build from '${GIT_COMMIT_HASH}' branch: ${GIT_BRANCH}\nMCU: ${TARGET_MCU_PLATFORM}\nPayload: ${TARGET_PLD_PLATFORM}\nMachine: ${HOST_NAME}\nBuilt in ${CMAKE_BINARY_DIR}\nGCC:" __VERSION__ " "
