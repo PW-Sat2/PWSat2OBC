@@ -40,21 +40,21 @@ namespace
 
     TEST_F(EraseFlashTelecommandTest, ShouldStartEraseFlashExperiment)
     {
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0x67, 0, 0))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::EraseFlash, 0, ElementsAre(0x67, 0, 0))));
         EXPECT_CALL(_experiments, RequestExperiment(EraseFlashExperiment::Code)).WillOnce(Return(true));
         Run(0x67);
     }
 
     TEST_F(EraseFlashTelecommandTest, ShouldRespondWithErrorOnEmptyFrame)
     {
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0, 1))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::EraseFlash, 0, ElementsAre(0, 1))));
         EXPECT_CALL(_experiments, RequestExperiment(_)).Times(0);
         Run();
     }
 
     TEST_F(EraseFlashTelecommandTest, ShouldRespondWithErrorOnWhenRequestDenied)
     {
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0x67, 2))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::EraseFlash, 0, ElementsAre(0x67, 2))));
         EXPECT_CALL(_experiments, RequestExperiment(_)).WillOnce(Return(false));
         Run(0x67);
     }

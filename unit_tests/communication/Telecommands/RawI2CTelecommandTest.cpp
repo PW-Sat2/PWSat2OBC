@@ -65,7 +65,7 @@ namespace
         dataSent[1] = 0x02;
         dataSent[2] = 0x03;
 
-        EXPECT_CALL(transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray(expectedPayload))));
+        EXPECT_CALL(transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::I2C), Eq(0U), ElementsAreArray(expectedPayload))));
         EXPECT_CALL(systemBus, Write(0x01, ElementsAreArray(dataSent))).WillOnce(Return(I2CResult::OK));
         EXPECT_CALL(systemBus, Read(0x01, _)).WillOnce(Invoke([=](uint8_t, span<uint8_t> outData) {
             std::copy(data.begin(), data.end(), outData.begin());
@@ -103,7 +103,7 @@ namespace
         dataSent[3] = 0x04;
         dataSent[4] = 0x05;
 
-        EXPECT_CALL(transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray(expectedPayload))));
+        EXPECT_CALL(transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::I2C), Eq(0U), ElementsAreArray(expectedPayload))));
         EXPECT_CALL(payload, Write(0x33, ElementsAreArray(dataSent))).WillOnce(Return(I2CResult::OK));
         EXPECT_CALL(payload, Read(0x33, _)).WillOnce(Invoke([=](uint8_t, span<uint8_t> outData) {
             std::copy(data.begin(), data.end(), outData.begin());
@@ -140,7 +140,7 @@ namespace
         dataSent[2] = 0x0A;
         dataSent[3] = 0x0D;
 
-        EXPECT_CALL(transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray(expectedPayload))));
+        EXPECT_CALL(transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::I2C), Eq(0U), ElementsAreArray(expectedPayload))));
         EXPECT_CALL(systemBus, WriteRead(0x10, ElementsAreArray(dataSent), _))
             .WillOnce(Invoke([=](uint8_t, span<const uint8_t>, span<uint8_t> outData) {
                 std::copy(data.begin(), data.end(), outData.begin());

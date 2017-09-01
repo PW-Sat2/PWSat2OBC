@@ -52,7 +52,7 @@ namespace
 
         ON_CALL(_stateContainer, MockGetState()).WillByDefault(ReturnRef(state));
 
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0x13, 0x0))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::PeriodicSet, 0, ElementsAre(0x13, 0x0))));
 
         Run(0x13, 3, 4, 'T', 'e', 's', 't');
 
@@ -66,14 +66,14 @@ namespace
 
     TEST_F(SetPeriodicMessageTelecommandTest, ShouldRespondWithErrorOnEmptyFrame)
     {
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0x0, 0x1))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::PeriodicSet, 0, ElementsAre(0x0, 0x1))));
 
         Run();
     }
 
     TEST_F(SetPeriodicMessageTelecommandTest, ShouldRespondWithErrorOnTooShortFrame)
     {
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0x13, 0x1))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::PeriodicSet, 0, ElementsAre(0x13, 0x1))));
 
         Run(0x13, 0x1, 0x2);
     }

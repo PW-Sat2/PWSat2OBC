@@ -26,11 +26,7 @@ namespace obc
             devices::suns::ISunSDriver& experimentalSunS,       //
             devices::payload::IPayloadDeviceDriver& payload,    //
             devices::gyro::IGyroscopeDriver& gyro)              //
-            : _powerControl(powerControl),
-              _currentTime(currentTime),
-              _experimentalSunS(experimentalSunS),
-              _payload(payload),
-              _gyro(gyro)
+            : _powerControl(powerControl), _currentTime(currentTime), _experimentalSunS(experimentalSunS), _payload(payload), _gyro(gyro)
         {
         }
 
@@ -56,7 +52,7 @@ namespace obc
 
             SetPowerState(false);
 
-            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+            CorrelatedDownlinkFrame response(DownlinkAPID::SunS, 0, correlationId);
             WriteMeasurements(point, response.PayloadWriter());
 
             transmitter.SendFrame(response.Frame());
@@ -94,7 +90,7 @@ namespace obc
 
         void GetSunSDataSetsTelecommand::SendErrorFrame(devices::comm::ITransmitter& transmitter, uint8_t correlationId)
         {
-            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+            CorrelatedDownlinkFrame response(DownlinkAPID::SunS, 0, correlationId);
             response.PayloadWriter().WriteByte(0x01);
 
             transmitter.SendFrame(response.Frame());

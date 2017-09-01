@@ -1,8 +1,7 @@
-from threading import Timer
 from unittest import skip
 
 from obc.experiments import ExperimentType
-from response_frames.operation import OperationSuccessFrame
+from response_frames.common import ExperimentSuccessFrame
 from system import clear_state
 from telecommand import PerformCameraCommissioningExperiment
 from tests.base import RestartPerTest
@@ -23,7 +22,7 @@ class CameraExperimentTest(RestartPerTest):
 
         response = self.system.comm.get_frame(5)
 
-        self.assertIsInstance(response, OperationSuccessFrame)
+        self.assertIsInstance(response, ExperimentSuccessFrame)
         self.assertEqual(response.correlation_id, 32)
 
         self.system.obc.wait_for_experiment(ExperimentType.Camera, timeout=20)

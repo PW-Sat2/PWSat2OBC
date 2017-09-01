@@ -65,7 +65,7 @@ namespace
         ON_CALL(_idleStateController, EnterTransmitterStateWhenIdle(_)).WillByDefault(Return(true));
         ON_CALL(_currentTime, GetCurrentTime())
             .WillByDefault(Return(Option<std::chrono::milliseconds>::Some(std::chrono::milliseconds{0})));
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray({0xFF, 0x00}))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Comm), Eq(0U), ElementsAreArray({0xFF, 0x00}))));
 
         Buffer<200> buffer;
         Writer w(buffer);
@@ -80,7 +80,7 @@ namespace
         ON_CALL(_idleStateController, EnterTransmitterStateWhenIdle(_)).WillByDefault(Return(false));
         ON_CALL(_currentTime, GetCurrentTime())
             .WillByDefault(Return(Option<std::chrono::milliseconds>::Some(std::chrono::milliseconds{0})));
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAreArray({0xFF, 0xFF}))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Comm), Eq(0U), ElementsAreArray({0xFF, 0xFF}))));
 
         Buffer<200> buffer;
         Writer w(buffer);

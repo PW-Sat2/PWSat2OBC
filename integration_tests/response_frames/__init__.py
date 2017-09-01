@@ -11,16 +11,20 @@ import fdir
 import period_message
 import persistent_state
 import compile_info
+import common
+import suns
 import sail_experiment
 
 frame_types = []
 frame_types += map(lambda t: t[1], inspect.getmembers(pong, predicate=inspect.isclass))
 frame_types += map(lambda t: t[1], inspect.getmembers(operation, predicate=inspect.isclass))
+frame_types += map(lambda t: t[1], inspect.getmembers(common, predicate=inspect.isclass))
 frame_types += map(lambda t: t[1], inspect.getmembers(program_upload, predicate=inspect.isclass))
 frame_types += map(lambda t: t[1], inspect.getmembers(fdir, predicate=inspect.isclass))
 frame_types += map(lambda t: t[1], inspect.getmembers(period_message, predicate=inspect.isclass))
 frame_types += map(lambda t: t[1], inspect.getmembers(persistent_state, predicate=inspect.isclass))
 frame_types += map(lambda t: t[1], inspect.getmembers(compile_info, predicate=inspect.isclass))
+frame_types += map(lambda t: t[1], inspect.getmembers(suns, predicate=inspect.isclass))
 frame_types += map(lambda t: t[1], inspect.getmembers(sail_experiment, predicate=inspect.isclass))
 frame_types = filter(lambda t: issubclass(t, ResponseFrame) and t != ResponseFrame, frame_types)
 

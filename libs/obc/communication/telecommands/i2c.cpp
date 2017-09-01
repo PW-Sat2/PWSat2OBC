@@ -30,7 +30,7 @@ namespace obc
             auto delay = r.ReadWordLE();
             auto data = r.ReadToEnd();
 
-            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+            CorrelatedDownlinkFrame response(DownlinkAPID::I2C, 0, correlationId);
 
             if (!r.Status())
             {

@@ -20,7 +20,7 @@ namespace obc
 
             if (parameters.size() == 0)
             {
-                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+                CorrelatedDownlinkFrame response(DownlinkAPID::EraseFlash, 0, correlationId);
                 response.PayloadWriter().WriteByte(1);
                 transmitter.SendFrame(response.Frame());
 
@@ -28,7 +28,7 @@ namespace obc
             }
 
             correlationId = parameters[0];
-            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+            CorrelatedDownlinkFrame response(DownlinkAPID::EraseFlash, 0, correlationId);
 
             this->_setId.SetCorrelationId(correlationId);
 

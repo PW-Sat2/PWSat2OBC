@@ -2,7 +2,7 @@ from datetime import timedelta, datetime
 
 from obc.experiments import ExperimentType
 from system import runlevel, clear_state
-from response_frames.operation import OperationSuccessFrame
+from response_frames.common import ExperimentSuccessFrame
 from telecommand.experiments import PerformSADSExperiment
 from tests.base import RestartPerTest
 from utils import TestEvent
@@ -23,7 +23,7 @@ class TestExperimentSADS(RestartPerTest):
 
         frame = self.system.comm.get_frame(20)
 
-        self.assertIsInstance(frame, OperationSuccessFrame)
+        self.assertIsInstance(frame, ExperimentSuccessFrame)
         self.assertEqual(frame.correlation_id, 10);
 
         self.system.obc.wait_for_experiment_started(ExperimentType.SADS, 60)

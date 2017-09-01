@@ -24,7 +24,7 @@ namespace obc
 
             if (!r.Status())
             {
-                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+                CorrelatedDownlinkFrame response(DownlinkAPID::Powercycle, 0, correlationId);
                 response.PayloadWriter().WriteByte(0x1);
 
                 transmitter.SendFrame(response.Frame());
@@ -33,7 +33,7 @@ namespace obc
             }
 
             {
-                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+                CorrelatedDownlinkFrame response(DownlinkAPID::Powercycle, 0, correlationId);
                 response.PayloadWriter().WriteByte(0x0);
 
                 transmitter.SendFrame(response.Frame());
@@ -42,7 +42,7 @@ namespace obc
             this->_powerControl.PowerCycle();
 
             {
-                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+                CorrelatedDownlinkFrame response(DownlinkAPID::Powercycle, 0, correlationId);
                 response.PayloadWriter().WriteByte(0x2);
 
                 transmitter.SendFrame(response.Frame());

@@ -1,8 +1,8 @@
 from obc.experiments import ExperimentType
-from response_frames.operation import OperationSuccessFrame
+from response_frames.common import ExperimentSuccessFrame
 from system import auto_power_on, runlevel
 from telecommand import AbortExperiment
-from tests.base import BaseTest, RestartPerTest
+from tests.base import RestartPerTest
 from utils import TestEvent
 
 
@@ -34,7 +34,7 @@ class TestExperimentsTelecommands(RestartPerTest):
 
         self.system.comm.put_frame(AbortExperiment(0x42))
         response = self.system.comm.get_frame(5)
-        self.assertIsInstance(response, OperationSuccessFrame)
+        self.assertIsInstance(response, ExperimentSuccessFrame)
 
         self.system.obc.wait_for_experiment(None, 15)
 
@@ -48,7 +48,7 @@ class TestExperimentsTelecommands(RestartPerTest):
 
         self.system.comm.put_frame(AbortExperiment(0x42))
         response = self.system.comm.get_frame(5)
-        self.assertIsInstance(response, OperationSuccessFrame)
+        self.assertIsInstance(response, ExperimentSuccessFrame)
 
         self.system.obc.wait_for_experiment(None, 15)
 

@@ -1,5 +1,5 @@
 from response_frames.fdir import ErrorCountersFrame
-from response_frames.operation import OperationSuccessFrame
+from response_frames.common import ErrorCounterConfigurationSuccessFrame
 from system import auto_power_on, clear_state
 from telecommand import SetErrorCounterConfig, GetErrorCounterConfig
 from tests.base import RestartPerTest
@@ -44,7 +44,7 @@ class TestFDIRTelecommands(RestartPerTest):
 
         response = self.system.comm.get_frame(5)
 
-        self.assertIsInstance(response, OperationSuccessFrame)
+        self.assertIsInstance(response, ErrorCounterConfigurationSuccessFrame)
         self.assertEqual(response.correlation_id, 0x21)
         self.assertEqual(response.response, [0, 2])
 

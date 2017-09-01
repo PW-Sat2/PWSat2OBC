@@ -34,11 +34,38 @@ namespace telecommunication
             ProgramUpload = 0x4,               //!< Program upload operation status
             PeriodicMessage = 0x5,             //!< Periodic message
             PersistentState = 0x6,             //!< Persistent state content
-            SailExperiment = 0x7,              //!< Automatically sent sail experiment data
+            BootSlotsInfo = 0x7,               //!< Boot slots info
             CompileInfo = 0x8,                 //!< Software Build information
-            Forbidden = (BeaconMarker & 0x3f), //!< Reserved apid due to beacon collision
+            EraseFlash = 0x9,                  //!< Erase flash
+            FileRemove = 0xA,                  //!< Removing file
+            FileSend = 0xB,                    //!< Sending file
+            FileList = 0xC,                    //!< List files operation
+            Forbidden = (BeaconMarker & 0x3f), //!< Reserved apid due to beacon collision (0xCD & 0x3f = 0x0D)
+            Photo = 0xE,                       //!< Take Photo
+            SunS = 0xF,                        //!< SunS telemetry
+            Experiment = 0x10,                 //!< Experiment commands results
+            ErrorCounterConfiguration = 0x11,  //!< Generic acknowledge frame
+            PurgePhoto = 0x12,                 //!< Purge Photo command
+            Powercycle = 0x13,                 //!< Power Cycle
+            Sail = 0x14,                       //!< Sail
+            TimeCorrection = 0x15,             //!< Time Correction
+            TimeSet = 0x16,                    //!< Time setting
+            Comm = 0x17,                       //!< Commands for Comm subsystem
+            I2C = 0x1A,                        //!< I2C Raw
+            PeriodicSet = 0x1B,                //!< Set periodic message
+            SailExperiment = 0x1C,             //!< Automatically sent sail experiment data
             Telemetry = 0x3F,                  //!< TelemetryLong
             LastItem                           //!< LastItem
+        };
+
+        /**
+         * @brief Standard responses definition
+         */
+        enum class DownlinkGenericResponse : std::uint8_t
+        {
+            Success = 0,          //!< Success
+            MalformedRequest = 1, //!< Malformed request
+            ExperimentError = 2,  //!< Error in experiment execution
         };
 
         /**
