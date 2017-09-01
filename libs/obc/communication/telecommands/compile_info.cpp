@@ -27,7 +27,8 @@ namespace obc
             }
             else
             {
-                const std::uint8_t array[] = VERSION;
+                constexpr std::uint8_t array[] = VERSION;
+                static_assert(count_of(array) <= CorrelatedDownlinkFrame::MaxPayloadSize, "Version information is too long");
                 writer.WriteByte(0);
                 writer.WriteArray(array);
             }
