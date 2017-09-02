@@ -57,6 +57,22 @@ class Bootloader:
 
         print 'Transfered: {:.3} KB ({} errors)'.format(success_count * packet_size / 1024.0, error_count)
 
+
+def verify_correct_format(file):
+    header = file.read(4)
+    if header[0] == ':':
+        print "Selected HEX file, you have to select BIN file"
+        return False
+    elif 'ELF' in header:
+        print "Selected ELF file, you have to select BIN file"
+        return False
+    file.seek(0)
+    return True
+
+with file(args.file, 'rb') as f:
+    if not verify_correct_format(f):
+        exit(1)
+
 port = serial.Serial(port=args.port, baudrate=115200)
 print args
 bootloader = Bootloader(port)
