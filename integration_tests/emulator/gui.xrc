@@ -309,6 +309,15 @@
 					<wrap>-1</wrap>
 				</object>
 			</object>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxALL</flag>
+				<border>5</border>
+				<object class="wxCheckBox" name="is_transmitter_simulated">
+					<label>Automatic transmitter simulation</label>
+					<checked>0</checked>
+				</object>
+			</object>
 		</object>
 	</object>
 	<object class="wxPanel" name="PayloadModule">
