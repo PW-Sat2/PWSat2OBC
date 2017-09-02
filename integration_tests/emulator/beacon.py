@@ -9,7 +9,8 @@ from wx import propgrid
 
 class BeaconModule(ModuleBase):
     type_to_property = {
-        int: propgrid.IntProperty
+        int: propgrid.IntProperty,
+        str: propgrid.StringProperty
     }
 
     def __init__(self, last_beacon, system):

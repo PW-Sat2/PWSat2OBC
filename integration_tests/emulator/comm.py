@@ -1,16 +1,10 @@
 import telecommand
-from datetime import timedelta
 import time
 import wx
 from wx import xrc
-from devices import RTCDevice
 from system import System
 from .base import ModuleBase, bind
-from bitarray import bitarray
-from struct import pack
-from beacon_parser.parser import BitReader, BeaconStorage
 
-from beacon_parser.full_beacon_parser import FullBeaconParser
 
 class CommModule(ModuleBase):
     GridPos = (1, 0)
@@ -22,6 +16,7 @@ class CommModule(ModuleBase):
         self.grid_span = (1, 1)
         self._last_beacon_seen = None
         self._last_mission_time_seen = 0
+        self._last_message_processing_start = None
 
     def load(self, res, parent):
         self._panel = res.LoadPanel(parent, 'COMMModule')
@@ -33,6 +28,7 @@ class CommModule(ModuleBase):
 
         self._transmitter_last_watchdog = xrc.XRCCTRL(self._panel, 'last_watchdog_transmitter')
         self._receiver_last_watchdog = xrc.XRCCTRL(self._panel, 'last_watchdog_receiver')
+        self._is_transmitter_simulated_checkbox = xrc.XRCCTRL(self._panel, 'is_transmitter_simulated')
 
     def root(self):
         return self._panel
@@ -74,3 +70,24 @@ class CommModule(ModuleBase):
         else:
             self._transmitter_last_watchdog.SetLabel('Transmitter: last watchdog kick\n{:%Y-%m-%d %H:%M:%S}'
                                                   .format(self._system.comm.transmitter.last_watchdog_kick))
+
+        self.transmitter_simulator_loop()
+
+    def transmitter_simulator_loop(self):
+        if (not self._is_transmitter_simulated_checkbox.GetValue()) \
+                  or (self._system.transmitter.queue_size() < 1 and not self._last_message_processing_start):
+            return
+
+        # simulate period of processing
+        if not self._last_message_processing_start:
+            self._last_message_processing_start = time.time()
+            self._system.comm.get_frame(0.01)
+        else:
+            # rough estimate of sending time.
+            # Frame length in bits divided by baud rate plus one second for simulate delays
+            message_sending_time = 8.0 * 235.0 / float(str(self._system.transmitter.baud_rate)) + 1.0
+            if time.time() - self._last_message_processing_start < message_sending_time:
+                return
+
+            # finish processing
+            self._last_message_processing_start = None
