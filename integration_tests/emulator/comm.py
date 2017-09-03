@@ -4,6 +4,7 @@ import wx
 from wx import xrc
 from system import System
 from .base import ModuleBase, bind
+import Queue
 
 
 class CommModule(ModuleBase):
@@ -74,16 +75,22 @@ class CommModule(ModuleBase):
         self.transmitter_simulator_loop()
 
     def transmitter_simulator_loop(self):
-        if (not self._is_transmitter_simulated_checkbox.GetValue()) \
-                  or (self._system.transmitter.queue_size() < 1 and not self._last_message_processing_start):
+        if not self._is_transmitter_simulated_checkbox.GetValue():
             return
 
-        # simulate period of processing
+        # if there is no frame in queue and no frame is "still processed" -> Skip
+        if self._system.transmitter.queue_size() < 1 and not self._last_message_processing_start:
+            return
+
         if not self._last_message_processing_start:
+            # Start processing of new frame
             self._last_message_processing_start = time.time()
-            self._system.comm.get_frame(0.01)
+            try:
+                self._system.comm.get_frame(0.01)
+            except Queue.Empty:
+                pass
         else:
-            # rough estimate of sending time.
+            # Simulate period of processing with rough estimate of sending time.
             # Frame length in bits divided by baud rate plus one second for simulate delays
             message_sending_time = 8.0 * 235.0 / float(str(self._system.transmitter.baud_rate)) + 1.0
             if time.time() - self._last_message_processing_start < message_sending_time:

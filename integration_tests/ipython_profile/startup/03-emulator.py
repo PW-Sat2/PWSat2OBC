@@ -8,10 +8,18 @@ from emulator.last_frames import LastFramesModule
 from emulator.payload import PayloadModule
 from emulator.rtc import RTCModule
 from emulator.comm import CommModule
+from devices.comm import BeaconFrame
+from time import time
 
 last_frames = []
 
-last_beacon = {}
+
+class LastBeacon:
+    def __init__(self):
+        self.time = None
+        self.payload = None
+
+last_beacon = LastBeacon()
 
 def _setup_emulator(system):
     emulator_modules = [
@@ -29,6 +37,9 @@ def _setup_emulator(system):
 
     def store_last_frame(comm, frame):
         decoded = system.frame_decoder.decode(frame)
+        if isinstance(decoded, BeaconFrame):
+            last_beacon.time = time()
+            last_beacon.payload = decoded.payload()
         last_frames.insert(0, decoded)
 
         if len(last_frames) > 90:
