@@ -16,6 +16,7 @@
 #include "mission/fs.hpp"
 #include "mission/leop_task.hpp"
 #include "mission/main.hpp"
+#include "mission/power/power_cycle.hpp"
 #include "mission/sads.hpp"
 #include "mission/sail.hpp"
 #include "mission/telemetry.hpp"
@@ -60,6 +61,7 @@ namespace mission
         EPSWatchdogTask,
         leop::LEOPTask,
         mission::CommWdogTask,
+        mission::power::PeriodicPowerCycleTask,
         mission::DeploySolarArrayTask>
         ObcMission;
 }

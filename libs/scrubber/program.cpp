@@ -63,6 +63,8 @@ namespace scrubber
             return;
         }
 
+        this->_inProgress = true;
+
         program_flash::ProgramEntry entries[] = {
             this->_bootTable.Entry(slots[0]), this->_bootTable.Entry(slots[1]), this->_bootTable.Entry(slots[2]),
         };
@@ -108,6 +110,8 @@ namespace scrubber
         }
 
         this->_iterationsCount++;
+
+        this->_inProgress = false;
 
         LOG(LOG_LEVEL_MIN, "[scrub] Done");
     }

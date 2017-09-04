@@ -87,6 +87,7 @@ mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc),
     Main.Hardware.EPS,
     std::make_pair(std::ref(Main.Experiments.ExperimentsController), std::ref(Main.timeProvider)),
     GetCommHardwareObserver(),
+    std::make_tuple(std::ref(Main.PowerControlInterface), std::ref(Main.Scrubbing), std::ref(Main.Experiments.ExperimentsController)),
     Main.PowerControlInterface);
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;

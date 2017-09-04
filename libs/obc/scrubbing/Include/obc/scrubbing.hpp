@@ -5,7 +5,9 @@
 #include "base/os.h"
 #include "base/time_counter.hpp"
 #include "boot/fwd.hpp"
+#include "mission/power/power_cycle.hpp"
 #include "obc/hardware_fwd.hpp"
+#include "program_flash/fwd.hpp"
 #include "program_flash/fwd.hpp"
 #include "scrubber/boot_settings.hpp"
 #include "scrubber/bootloader.hpp"
@@ -53,7 +55,7 @@ namespace obc
     /**
      * @brief OBC Scrubbing
      */
-    class OBCScrubbing
+    class OBCScrubbing : public mission::power::IScrubbingStatus
     {
       public:
         /**
@@ -85,6 +87,10 @@ namespace obc
          * @remark This method is not synchronized, so it may return inconsistent data
          */
         ScrubbingStatus Status();
+
+        virtual bool BootloaderInProgress() override;
+        virtual bool PrimarySlotsInProgress() override;
+        virtual bool FailsafeSlotsInProgress() override;
 
       private:
         /**
