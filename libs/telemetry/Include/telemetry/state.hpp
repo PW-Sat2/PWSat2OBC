@@ -52,6 +52,7 @@ namespace telemetry
     static_assert(FlashSecondarySlotsScrubbing::BitSize() == 3, "Invalid serialized size");
     static_assert(RAMScrubbing::BitSize() == 32, "Invalid serialized size");
     static_assert(FileSystemTelemetry::BitSize() == 32, "Invalid serialized size");
+    static_assert(OSState::BitSize() == 22, "Invalid serialized size");
     static_assert(GpioState::BitSize() == 1, "Invalid serialized size");
     static_assert(McuTemperature::BitSize() == 12, "Invalid serialized size");
     static_assert(ImtqMagnetometerMeasurements::BitSize() == 96, "Invalid serialized size");
@@ -64,7 +65,7 @@ namespace telemetry
     static_assert(ImtqSelfTest::BitSize() == 64, "Invalid serialized size");
 
     static_assert(ManagedTelemetry::TotalSerializedSize <= (devices::comm::MaxDownlinkFrameSize - 1), "Telemetry is too large");
-    static_assert(ManagedTelemetry::PayloadSize == 1818, "Invalid Telemetry Size");
+    static_assert(ManagedTelemetry::PayloadSize == 1840, "Invalid Telemetry Size");
 }
 
 #endif
