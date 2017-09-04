@@ -17,6 +17,8 @@ target_link_libraries(${NAME}
 	photo
 	time
 	exp_fs
+	comm
+	telecommunication
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
