@@ -15,7 +15,7 @@ class DownlinkApid(IntEnum):
     FileRemove = 0xA,
     FileSend = 0xB,
     FileList = 0xC,
-    PeriodicSet = 0xD,
+    Forbidden = 0xD,
     Photo = 0xE,
     SunS = 0xF,
     Experiment = 0x10,
@@ -27,6 +27,7 @@ class DownlinkApid(IntEnum):
     TimeSet = 0x16,
     Comm = 0x17,
     I2C = 0x1A,
+    PeriodicSet = 0x1B,
 
 @response_frame(0)
 class GenericSuccessResponseFrame(ResponseFrame):
