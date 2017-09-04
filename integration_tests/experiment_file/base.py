@@ -19,7 +19,7 @@ def bytes_block(n):
 
 Synchronization = pid(0x47).result('Synchronization')
 
-Timestamp = pid(1) >> packed('<Q').parsecmap(lambda x: timedelta(milliseconds=x))
+Timestamp = pid(1) >> packed('<Q').parsecmap(lambda x: str(timedelta(milliseconds=x)))
 Timestamp >>= label_as('time')
 
 Padding = many1(pid(0xFF)).parsecmap(lambda x: len(x))

@@ -9,7 +9,8 @@ from wx import propgrid
 
 class BeaconModule(ModuleBase):
     type_to_property = {
-        int: propgrid.IntProperty
+        int: propgrid.IntProperty,
+        str: propgrid.StringProperty
     }
 
     def __init__(self, last_beacon, system):
@@ -58,10 +59,10 @@ class BeaconModule(ModuleBase):
                     existing_property.SetValue(value)
 
     def update(self):
-        if self._system.transmitter.current_beacon_timestamp is not None:
+        if self._last_beacon.payload is not None:
             store = BeaconStorage()
             parser = BitArrayParser(FullBeaconParser(),
-                                    ''.join(map(lambda x: pack('B', x), self._system.transmitter.current_beacon)),
+                                    ''.join(map(lambda x: pack('B', x), self._last_beacon.payload)),
                                     store)
             parser.parse()
 

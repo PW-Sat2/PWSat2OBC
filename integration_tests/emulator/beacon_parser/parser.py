@@ -1,4 +1,4 @@
-from utils import bits_to_dword, bits_to_byte, bits_to_word, bits_to_qword
+from utils import bits_to_dword, bits_to_byte, bits_to_word, bits_to_qword, call
 from bitarray import bitarray
 
 
@@ -61,21 +61,22 @@ class CategoryParser:
         self._reader = reader
         self._store = store
 
-    def append(self, name, length):
+    def append(self, name, length, type_converter = None):
         value = self._reader.read(length)
-        self._store.write(self._category, self._format_name(name, length), value)
+        converted_value = call(type_converter, value, value)
+        self._store.write(self._category, self._format_name(name, length), converted_value)
 
-    def append_byte(self, name):
-        self.append(name, 8)
+    def append_byte(self, name, type_converter = None):
+        self.append(name, 8, type_converter)
 
-    def append_word(self, name):
-        self.append(name, 16)
+    def append_word(self, name, type_converter = None):
+        self.append(name, 16, type_converter)
 
-    def append_dword(self, name):
-        self.append(name, 32)
+    def append_dword(self, name, type_converter = None):
+        self.append(name, 32, type_converter)
 
-    def append_qword(self, name):
-        self.append(name, 64)
+    def append_qword(self, name, type_converter = None):
+        self.append(name, 64, type_converter)
 
     def _format_name(self, name, length):
         return str(self._reader.offset() - length).rjust(4, '0') + ": " + name
