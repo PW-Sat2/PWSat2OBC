@@ -38,32 +38,32 @@ def bitlist_to_byte(bitlist):
 
     return out
 
-def pad_bits(bits):
-    #while len(bits) % 8 != 0:
-    #        bits.insert(0, 0)
+def pad_bits(bits, expected_length):
+    while bits.length() < expected_length:
+        bits.append(False)
 
     return bits
 
 def bits_to_byte(bits):
-    return struct.unpack('<B', bytearray(pad_bits(bits).tobytes()))[0]
+    return struct.unpack('<B', bytearray(pad_bits(bits, 8).tobytes()))[0]
 
 def bytes_to_qword(bytes):
     return struct.unpack("<Q", bytearray(bytes))[0]
 
 def bits_to_qword(bits):
-    return bytes_to_qword(pad_bits(bits).tobytes())
+    return bytes_to_qword(pad_bits(bits, 64).tobytes())
 
 def bytes_to_dword(bytes):
     return struct.unpack("<I", bytearray(bytes))[0]
 
 def bits_to_dword(bits):
-    return bytes_to_dword(pad_bits(bits).tobytes())
+    return bytes_to_dword(pad_bits(bits, 32).tobytes())
 
 def bytes_to_word(bytes):
     return struct.unpack("<H", bytearray(bytes))[0]
 
 def bits_to_word(bits):
-    return bytes_to_word(pad_bits(bits).tobytes())
+    return bytes_to_word(pad_bits(bits, 16).tobytes())
 
 class ExtendableFormatter(Formatter):
     _converters = {}

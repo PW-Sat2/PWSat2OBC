@@ -1,9 +1,12 @@
 import telecommand
+from struct import pack
 from response_frames.operation import OperationSuccessFrame
 from devices import BeaconFrame
 from system import auto_power_on, runlevel
 from tests.base import BaseTest, RestartPerTest
 from utils import ensure_byte_list, TestEvent
+from emulator.beacon_parser.full_beacon_parser import FullBeaconParser
+from emulator.beacon_parser.parser import BitReader, BeaconStorage, BitArrayParser
 
 
 class CommTelecommandsTest(RestartPerTest):
@@ -74,3 +77,18 @@ class CommTelecommandsTest(RestartPerTest):
         frame = self.system.comm.get_frame(20)
 
         self.assertIsInstance(frame, BeaconFrame)
+
+    @runlevel(2)
+    def test_beacon_parsing(self):
+        self._start()
+
+        self.system.comm.put_frame(telecommand.SendBeacon())
+
+        frame = self.system.comm.get_frame(20)
+
+        self.assertIsInstance(frame, BeaconFrame)
+        store = BeaconStorage()
+        parser = BitArrayParser(FullBeaconParser(),
+                                ''.join(map(lambda x: pack('B', x), frame._payload)),
+                                store)
+        parser.parse()

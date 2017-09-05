@@ -3,7 +3,7 @@ from parser import CategoryParser
 
 class AntennaTelemetryParser(CategoryParser):
     def __init__(self, reader, store):
-        CategoryParser.__init__(self, '07: Antenna', reader, store)
+        CategoryParser.__init__(self, '08: Antenna', reader, store)
 
     def get_bit_count(self):
         return 8 + 8*8 + 8*12
