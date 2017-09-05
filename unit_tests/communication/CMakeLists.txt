@@ -26,6 +26,7 @@ set(SOURCES
   Telecommands/PhotoCommandTest.cpp
   Telecommands/PerformSADSExperimentTest.cpp
   Telecommands/SendPeriodicMessageTelecommandTest.cpp
+  Telecommands/ResetTransmitterTelecommandTest.cpp
   Telecommands/DisableOverheatSubmodeTelecommandTest.cpp
   Telecommands/SetBitrateTelecommandTest.cpp
 )
