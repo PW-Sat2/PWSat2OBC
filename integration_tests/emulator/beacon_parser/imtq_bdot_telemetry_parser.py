@@ -3,7 +3,7 @@ from parser import CategoryParser
 
 class ImtqBDotTelemetryParser(CategoryParser):
     def __init__(self, reader, store):
-        CategoryParser.__init__(self, '18: Imtq BDot', reader, store)
+        CategoryParser.__init__(self, '19: Imtq BDot', reader, store)
 
     def get_bit_count(self):
         return 3 * 32
