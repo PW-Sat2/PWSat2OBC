@@ -21,6 +21,8 @@ from imtq_magnetometers_telemetry_parser import ImtqMagnetometersTelemetryParser
 from imtq_self_test_telemetry_parser import ImtqSelfTestTelemetryParser
 from imtq_state_telemetry_parser import ImtqStateTelemetryParser
 from imtq_temperature_telemetry_parser import ImtqTemperatureTelemetryParser
+from system_parser import SystemParser
+
 
 class FullBeaconParser:
     def GetParsers(self, reader, store):
@@ -29,6 +31,7 @@ class FullBeaconParser:
                 TimeState(reader, store),
                 ErrorCountingTelemetry(reader, store),
                 ScrubbingTelemetryParser(reader, store),
+                SystemParser(reader, store),
                 FileSystemTelemetryParser(reader, store),
                 AntennaTelemetryParser(reader, store),
                 ExperimentTelemetryParser(reader, store),

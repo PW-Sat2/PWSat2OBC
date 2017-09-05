@@ -31,6 +31,7 @@ namespace telemetry
         * @brief Updates current operating system telemetry in global state.
         * @param[in] state Reference to global state.
         * @param[in] param Current execution context.
+        * @return Telemetry acquisition result.
         */
         static mission::UpdateResult UpdateProc(telemetry::TelemetryState& state, void* param);
     };
