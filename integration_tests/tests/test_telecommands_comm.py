@@ -86,6 +86,7 @@ class CommTelecommandsTest(RestartPerTest):
         self.system.transmitter.on_reset = on_reset
 
         self._start()
+        event.reset()
         self.system.comm.put_frame(telecommand.ResetTransmitterTelecommand())
         self.assertTrue(event.wait_for_change(30))
 
