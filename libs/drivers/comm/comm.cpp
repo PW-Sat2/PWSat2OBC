@@ -68,6 +68,15 @@ enum TaskFlag
 
 bool CommObject::SendCommand(Address address, uint8_t command, AggregatedErrorCounter& resultAggregator)
 {
+    auto semaphore = (address == Address::Receiver) ? receiverSemaphore : transmitterSemaphore;
+    Lock lock(semaphore, InfiniteTimeout);
+    if (!lock())
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire synchronization semaphore");
+        resultAggregator.Failure();
+        return false;
+    }
+
     const I2CResult result = this->_low.Write(num(address), span<const uint8_t>(&command, 1));
     const bool status = (result == I2CResult::OK);
     if (!status)
@@ -536,6 +545,14 @@ bool CommObject::UpdateBeacon(const Beacon& beaconData)
 
 bool CommObject::UpdateBeaconInternal(const Beacon& beaconData, AggregatedErrorCounter& resultAggregator)
 {
+    Lock lock(transmitterSemaphore, InfiniteTimeout);
+    if (!lock())
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire synchronization semaphore");
+        _error.Failure();
+        return false;
+    }
+
     std::array<std::uint8_t, MaxDownlinkFrameSize + 2> buffer;
     Writer writer(buffer);
     writer.WriteByte(num(TransmitterCommand::SetBeacon));
@@ -557,6 +574,14 @@ bool CommObject::ClearBeacon()
 
 bool CommObject::SetTransmitterStateWhenIdle(IdleState requestedState)
 {
+    Lock lock(transmitterSemaphore, InfiniteTimeout);
+    if (!lock())
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire synchronization semaphore");
+        _error.Failure();
+        return false;
+    }
+
     uint8_t buffer[2];
     buffer[0] = num(TransmitterCommand::SetIdleState);
     buffer[1] = num(requestedState);
@@ -565,6 +590,14 @@ bool CommObject::SetTransmitterStateWhenIdle(IdleState requestedState)
 
 bool CommObject::SetTransmitterBitRate(Bitrate bitrate)
 {
+    Lock lock(transmitterSemaphore, InfiniteTimeout);
+    if (!lock())
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire synchronization semaphore");
+        _error.Failure();
+        return false;
+    }
+
     uint8_t buffer[2];
     buffer[0] = num(TransmitterCommand::SetBitRate);
     buffer[1] = num(bitrate);
