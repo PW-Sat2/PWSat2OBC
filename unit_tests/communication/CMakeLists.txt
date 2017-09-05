@@ -26,6 +26,7 @@ set(SOURCES
   Telecommands/PhotoCommandTest.cpp
   Telecommands/PerformSADSExperimentTest.cpp
   Telecommands/SendPeriodicMessageTelecommandTest.cpp
+  Telecommands/DisableOverheatSubmodeTelecommandTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
