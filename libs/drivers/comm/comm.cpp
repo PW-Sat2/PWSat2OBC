@@ -516,6 +516,29 @@ bool CommObject::ScheduleFrameTransmission(
         resultAggregator.Failure();
     }
 
+    if (this->_lastSend.HasValue)
+    {
+        LastSendTimestamp current = {System::GetUptime(), remainingBufferSize};
+
+        auto timeDelta = current.Timestamp - this->_lastSend.Value.Timestamp;
+
+        auto freeSlotsDelta = static_cast<std::int8_t>(current.FreeSlots) - this->_lastSend.Value.FreeSlots;
+
+        if (timeDelta >= 5s && freeSlotsDelta < 0)
+        {
+            LOGF(LOG_LEVEL_WARNING,
+                "[comm] Restarting transmitter after queue stalled (free slots %d -> %d, time %lds -> %lds)",
+                this->_lastSend.Value.FreeSlots,
+                current.FreeSlots,
+                static_cast<std::uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(this->_lastSend.Value.Timestamp).count()),
+                static_cast<std::uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(current.Timestamp).count()));
+            ResetTransmitter();
+            this->_lastSend = None<LastSendTimestamp>();
+            return false;
+        }
+    }
+
+    this->_lastSend = Some<LastSendTimestamp>({System::GetUptime(), remainingBufferSize});
     return status && remainingBufferSize != 0xff;
 }
 

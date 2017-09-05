@@ -28,6 +28,10 @@ using testing::Invoke;
 using testing::Pointee;
 using testing::ElementsAre;
 using testing::Matches;
+using testing::InSequence;
+using testing::ReturnPointee;
+using testing::DoAll;
+using testing::Assign;
 using gsl::span;
 using drivers::i2c::I2CResult;
 using namespace devices::comm;
@@ -91,6 +95,7 @@ namespace
         void ExpectSendFrame(gsl::span<const std::uint8_t> expected, std::uint8_t freeSlotCount);
 
         void ExpectSendFrame(std::uint8_t freeSlotCount);
+        void ExpectSendFrame(std::uint8_t freeSlotCount, std::function<void()> after);
 
         void MockFrame(gsl::span<const std::uint8_t> span, std::uint16_t rssi = 0, std::uint16_t doppler = 0);
 
@@ -159,6 +164,21 @@ namespace
             .WillOnce(Invoke([=](uint8_t /*address*/, span<const uint8_t> /*inData*/) {
                 EXPECT_CALL(i2c, Read(TransmitterAddress, _)).WillOnce(Invoke([=](uint8_t /*address*/, span<uint8_t> outData) {
                     outData[0] = freeSlotCount;
+                    return I2CResult::OK;
+                }));
+                return I2CResult::OK;
+            }));
+    }
+
+    void CommTest::ExpectSendFrame(std::uint8_t freeSlotCount, std::function<void()> after)
+    {
+        EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSendFrame)))
+            .WillOnce(Invoke([=](uint8_t /*address*/, span<const uint8_t> /*inData*/) {
+                EXPECT_CALL(i2c, Read(TransmitterAddress, _)).WillOnce(Invoke([=](uint8_t /*address*/, span<uint8_t> outData) {
+                    outData[0] = freeSlotCount;
+
+                    after();
+
                     return I2CResult::OK;
                 }));
                 return I2CResult::OK;
@@ -1065,6 +1085,45 @@ namespace
         ASSERT_THAT(comm.Restart(), Eq(false));
 
         ASSERT_THAT(error_counter, Eq(0));
+    }
+
+    TEST_F(CommTest, DoNotTriggerTransmitterResetIfQueueIsServedOnTime)
+    {
+        std::chrono::milliseconds uptime = 30s;
+
+        ON_CALL(system, GetUptime()).WillByDefault(ReturnPointee(&uptime));
+        {
+            InSequence s;
+            ExpectSendFrame(12, [&uptime]() { uptime = 30s; });
+            ExpectSendFrame(12, [&uptime]() { uptime += 10s; });
+            i2c.ExpectWriteCommand(TransmitterAddress, TransmitterReset).Times(0);
+        }
+
+        const std::uint8_t frame[] = {1, 2, 3};
+
+        comm.SendFrame(frame);
+        comm.SendFrame(frame);
+    }
+
+    TEST_F(CommTest, TriggerTransmitterResetIfQueueIsStalled)
+    {
+        std::chrono::milliseconds uptime = 30s;
+
+        ON_CALL(system, GetUptime()).WillByDefault(ReturnPointee(&uptime));
+        {
+            InSequence s;
+            ExpectSendFrame(12, [&uptime]() { uptime = 30s; });
+            ExpectSendFrame(11, [&uptime]() { uptime += 10s; });
+            i2c.ExpectWriteCommand(TransmitterAddress, TransmitterReset);
+            ExpectSendFrame(11, [&uptime]() { uptime += 10s; });
+            i2c.ExpectWriteCommand(TransmitterAddress, TransmitterReset).Times(0);
+        }
+
+        const std::uint8_t frame[] = {1, 2, 3};
+
+        comm.SendFrame(frame);
+        comm.SendFrame(frame);
+        comm.SendFrame(frame);
     }
 
     struct CommReceiverTelemetryTest : public testing::TestWithParam<std::tuple<int, uint8_t, I2CResult, uint8_t>>
