@@ -22,3 +22,14 @@ class SendBeacon(Telecommand):
 
     def payload(self):
         return []
+
+
+class ResetTransmitterTelecommand(Telecommand):
+    def __init__(self):
+        pass
+
+    def apid(self):
+        return 0xAF
+
+    def payload(self):
+        return []

@@ -74,3 +74,16 @@ class CommTelecommandsTest(RestartPerTest):
         frame = self.system.comm.get_frame(20)
 
         self.assertIsInstance(frame, BeaconFrame)
+
+    @runlevel(2)
+    def test_reset_transmitter(self):
+        event = TestEvent()
+
+        def on_reset():
+            event.set()
+
+        self.system.transmitter.on_reset = on_reset
+
+        self._start()
+        self.system.comm.put_frame(telecommand.ResetTransmitterTelecommand())
+        self.assertTrue(event.wait_for_change(30))

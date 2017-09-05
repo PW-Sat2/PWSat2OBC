@@ -77,6 +77,34 @@ namespace obc
             /** @brief Reference to object that contains current telemetry state */
             IHasState<telemetry::TelemetryState>& telemetryState;
         };
+
+        /**
+         * @brief Immediately reset transmitter.
+         *
+         * This telecommand doesn't send response.
+         *
+         * @ingroup telecommands
+         * @telecommand
+         *
+         * Command code: 0xAF
+         *
+         * Parameters: None
+         */
+        class ResetTransmitterTelecommand final : public telecommunication::uplink::Telecommand<0xAF>
+        {
+          public:
+            /**
+             * @brief ctor.
+             */
+            ResetTransmitterTelecommand();
+
+            /**
+             * @brief Method called when telecommand is received.
+             * @param[in] transmitter Reference to object that can be used to send response back
+             * @param[in] parameters Parameters contained in telecommand frame
+             */
+            virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
+        };
     }
 }
 
