@@ -76,6 +76,7 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
               experiments.ExperimentsController, experiments.Get<experiment::camera::CameraCommissioningExperiment>()), //
           SendPeriodicMessageTelecommand(stateContainer),                                                               //
           CompileInfoTelecommand(),                                                                                     //
+          ResetTransmitterTelecommand(),                                                                                //
           DisableOverheatSubmodeTelecommand(epsDriver),                                                                 //
           SetBitrateTelecommand()                                                                                       //
           ),                                                                                                            //

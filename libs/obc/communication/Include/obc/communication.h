@@ -13,6 +13,7 @@
 #include "obc/telecommands/antenna.hpp"
 #include "obc/telecommands/boot_settings.hpp"
 #include "obc/telecommands/comm.hpp"
+#include "obc/telecommands/compile_info.hpp"
 #include "obc/telecommands/eps.hpp"
 #include "obc/telecommands/experiments.hpp"
 #include "obc/telecommands/fdir.hpp"
@@ -28,7 +29,6 @@
 #include "obc/telecommands/state.hpp"
 #include "obc/telecommands/suns.hpp"
 #include "obc/telecommands/time.hpp"
-#include "obc/telecommands/compile_info.hpp"
 #include "program_flash/fwd.hpp"
 #include "telecommunication/telecommand_handling.h"
 #include "telecommunication/uplink.h"
@@ -160,6 +160,7 @@ namespace obc
         obc::telecommands::PerformCameraCommisioningExperiment,
         obc::telecommands::SendPeriodicMessageTelecommand,
         obc::telecommands::CompileInfoTelecommand,
+        obc::telecommands::ResetTransmitterTelecommand,
         obc::telecommands::DisableOverheatSubmodeTelecommand,
         obc::telecommands::SetBitrateTelecommand
         >;

@@ -83,6 +83,23 @@ namespace obc
             }
         }
 
+        ResetTransmitterTelecommand::ResetTransmitterTelecommand()
+        {
+        }
+
+        void ResetTransmitterTelecommand::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> /*parameters*/)
+        {
+            const auto result = transmitter.ResetTransmitter();
+            if (result)
+            {
+                LOG(LOG_LEVEL_INFO, "Resetting transmitter");
+            }
+            else
+            {
+                LOG(LOG_LEVEL_ERROR, "Unable to reset transmitter");
+            }
+        }
+
         void SetBitrateTelecommand::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
         {
             Reader r(parameters);
