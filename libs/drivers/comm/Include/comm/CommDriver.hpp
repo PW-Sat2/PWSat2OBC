@@ -388,6 +388,14 @@ class CommObject final : public ITransmitter,      //
 
     /** @brief Semaphore used for receiver synchronization. */
     OSSemaphoreHandle receiverSemaphore;
+
+    struct LastSendTimestamp
+    {
+        std::chrono::milliseconds Timestamp;
+        std::uint8_t FreeSlots;
+    };
+
+    Option<LastSendTimestamp> _lastSend;
 };
 
 inline bool CommObject::SendFrame(gsl::span<const std::uint8_t> frame)
