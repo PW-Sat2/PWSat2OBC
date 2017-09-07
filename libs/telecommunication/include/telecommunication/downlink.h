@@ -57,6 +57,7 @@ namespace telecommunication
             PeriodicSet = 0x1B,                //!< Set periodic message
             SailExperiment = 0x1C,             //!< Automatically sent sail experiment data
             CopyBootTable = 0x1D,              //!< Automatically sent during copy boot slots experiment
+            DisableSailDeployment = 0x1E,      //!< Disable automatic sail deployment
             Telemetry = 0x3F,                  //!< TelemetryLong
             LastItem                           //!< LastItem
         };

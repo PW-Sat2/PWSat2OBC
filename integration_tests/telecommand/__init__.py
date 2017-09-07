@@ -45,6 +45,7 @@ __all__ = [
     'PerformSADSExperiment',
     'GetCompileInfoTelecommand',
     'DisableOverheatSubmode',
-    'CopyBootSlots'
+    'CopyBootSlots',
+    'StopSailDeployment'
 ]
 

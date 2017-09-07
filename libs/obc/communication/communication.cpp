@@ -4,9 +4,9 @@
 #include "settings.h"
 #include "telecommunication/downlink.h"
 
-using std::uint8_t;
-using gsl::span;
 using drivers::i2c::II2CBus;
+using gsl::span;
+using std::uint8_t;
 using telecommunication::uplink::IHandleTeleCommand;
 
 using namespace obc;
@@ -80,8 +80,9 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           DisableOverheatSubmodeTelecommand(epsDriver),                                                                 //
           SetBitrateTelecommand(),                                                                                      //
           PerformCopyBootSlotsExperiment(
-              experiments.ExperimentsController, experiments.Get<experiment::program::CopyBootSlotsExperiment>()) //
-          ),                                                                                                      //
+              experiments.ExperimentsController, experiments.Get<experiment::program::CopyBootSlotsExperiment>()), //
+          StopSailDeployment(stateContainer)                                                                       //
+          ),                                                                                                       //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {
 }
