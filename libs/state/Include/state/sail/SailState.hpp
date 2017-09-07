@@ -12,9 +12,10 @@ namespace state
      */
     enum class SailOpeningState : std::uint8_t
     {
-        Waiting = 0,       //!< Waiting
-        Opening = 1,       //!< Opening
-        OpeningStopped = 2 //!< OpeningStopped
+        Waiting = 0,        //!< Waiting
+        Opening = 1,        //!< Opening
+        OpeningStopped = 2, //!< OpeningStopped
+        Disabled = 3        //!< Disabled
     };
 
     /**
