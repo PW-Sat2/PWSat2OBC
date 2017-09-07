@@ -82,7 +82,6 @@ class Bootloader:
 
             bar.update(transferred_size)
 
-            # print 'Transfered: {:.3} KB ({} errors)'.format(success_count * packet_size / 1024.0, error_count)
         return report
 
 
