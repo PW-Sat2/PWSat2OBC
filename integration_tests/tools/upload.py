@@ -1,7 +1,10 @@
 import argparse
+import os
 
+import math
 import serial
 import xmodem
+import progressbar
 
 parser = argparse.ArgumentParser()
 
@@ -25,32 +28,37 @@ class Bootloader:
         self._wait_for('#')
 
     def upload_binary(self, index, description, stream):
+        # type: (int, str, file) -> bool
+
         self._port.write('x')
 
         self._wait_for('Boot Index: ')
         self._port.write(str(index))
 
-        print 'Boot index selected'
-
         self._wait_for('Upload Binary: ')
 
-        print 'Uploading binary'
-        modem = xmodem.XMODEM(getc=self._xmodem_getc, putc=self._xmodem_putc)
-        r = modem.send(stream, quiet=True, callback=self._xmodem_report_progress)
+        widgets = [
+            'Uploading to slot %d ' % index, progressbar.Percentage(),
+            ' ', progressbar.Bar(marker='#', left='[', right=']'),
+            ' ', progressbar.ETA(),
+            ' ', progressbar.FileTransferSpeed(),
+        ]
+
+        file_size = os.fstat(f.fileno()).st_size
+
+        with progressbar.ProgressBar(widgets=widgets, max_value=file_size) as bar:
+            modem = xmodem.XMODEM(getc=self._xmodem_getc, putc=self._xmodem_putc)
+            r = modem.send(stream, quiet=True, callback=self._xmodem_report_progress(bar, file_size))
 
         if not r:
             print 'Upload failed!'
             return False
-
-        print 'Binary uploaded'
 
         self._wait_for('Boot Description: ')
         self._port.write(description)
         self._port.write('\0\n')
 
         self._wait_for('Done!')
-
-        print 'Upload finished'
 
     def _wait_for(self, marker):
         s = ''
@@ -65,10 +73,16 @@ class Bootloader:
         l = self._port.write(data)
         return l
 
-    def _xmodem_report_progress(self, _, success_count, error_count):
-        packet_size = 128
+    def _xmodem_report_progress(self, bar, file_size):
+        # type: (progressbar.ProgressBar, int) -> function
+        def report(_, success_count, error_count):
+            packet_size = 128
 
-        print 'Transfered: {:.3} KB ({} errors)'.format(success_count * packet_size / 1024.0, error_count)
+            transferred_size = min([file_size, packet_size * success_count])
+
+            bar.update(transferred_size)
+
+        return report
 
 
 def verify_correct_format(file):
@@ -98,5 +112,4 @@ print 'Bootloader ready'
 
 for slot in args.index:
     with file(args.file, 'rb') as f:
-        print 'Uploading to slot {}'.format(slot)
         bootloader.upload_binary(int(slot), args.description, f)
