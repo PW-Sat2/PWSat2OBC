@@ -34,5 +34,33 @@ namespace obc
 
             transmitter.SendFrame(response.Frame());
         }
+
+        StopSailDeployment::StopSailDeployment(mission::IDisableSailDeployment& disableSailDeployment)
+            : disableSailDeployment(disableSailDeployment)
+        {
+        }
+
+        void StopSailDeployment::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
+        {
+            Reader r(parameters);
+
+            auto correlationId = r.ReadByte();
+
+            CorrelatedDownlinkFrame response(DownlinkAPID::DisableSailDeployment, 0, correlationId);
+
+            if (!r.Status())
+            {
+                response.PayloadWriter().WriteByte(-1);
+
+                transmitter.SendFrame(response.Frame());
+                return;
+            }
+
+            this->disableSailDeployment.DisableDeployment();
+
+            response.PayloadWriter().WriteByte(0);
+
+            transmitter.SendFrame(response.Frame());
+        }
     }
 }

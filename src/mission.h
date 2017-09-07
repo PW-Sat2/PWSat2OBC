@@ -51,6 +51,7 @@ namespace mission
         antenna::StopAntennaDeploymentTask,
         antenna::AntennaTask,
         CommTask,
+        mission::StopSailDeploymentTask,
         mission::OpenSailTask,
         adcs::AdcsPrimaryTask,
         mission::experiments::MissionExperimentComponent,

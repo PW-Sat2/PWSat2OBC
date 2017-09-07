@@ -32,6 +32,30 @@ namespace obc
             /** @brief Open sail interface */
             mission::IOpenSail& _openSail;
         };
+
+        /**
+         * @brief Stop sail deployment telecommand
+         * @telecommand
+         *
+         * Code: 0x2D
+         * Parameters:
+         *  - 1-byte - correlation ID
+         */
+        class StopSailDeployment : public telecommunication::uplink::Telecommand<0x2D>
+        {
+          public:
+            /**
+             * @brief Ctor
+             * @param disableSailDeployment Object responsible for disabling sail deployment
+             */
+            StopSailDeployment(mission::IDisableSailDeployment& disableSailDeployment);
+
+            virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
+
+          private:
+            /** @brief Object responsible for disabling sail deployment */
+            mission::IDisableSailDeployment& disableSailDeployment;
+        };
     }
 }
 
