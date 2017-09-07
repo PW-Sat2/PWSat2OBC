@@ -23,6 +23,7 @@ __all__ = [
     'RemoveFile',
     'PerformDetumblingExperiment',
     'SetTimeCorrectionConfig',
+    'SetTime',
     'EraseBootTableEntry',
     'WriteProgramPart',
     'FinalizeProgramEntry',
@@ -48,6 +49,13 @@ __all__ = [
     'DisableOverheatSubmode',
     'CopyBootSlots',
     'SetBuiltinDetumblingBlockMaskTelecommand',
-    'SetAdcsModeTelecommand'
+    'SetAdcsModeTelecommand',
+    'ResetTransmitterTelecommand',
+    'SetBitrate',
+    'AbortExperiment',
+    'PerformSunSExperiment',
+    'PerformRadFETExperiment',
+    'PerformPayloadCommissioningExperiment',
+    'PerformCameraCommissioningExperiment'
 ]
 
