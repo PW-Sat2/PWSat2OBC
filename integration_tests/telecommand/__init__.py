@@ -44,6 +44,7 @@ __all__ = [
     'PurgePhotoTelecommand',
     'PerformSADSExperiment',
     'GetCompileInfoTelecommand',
-    'DisableOverheatSubmode'
+    'DisableOverheatSubmode',
+    'StopSailDeployment'
 ]
 
