@@ -62,11 +62,11 @@ class TestExperimentSail(RestartPerTest):
         self.system.obc.wait_for_experiment_started(ExperimentType.Sail, 60)
         self.system.obc.wait_for_experiment_iteration(23, 5 * 20)
 
-        frame = self.system.comm.get_frame(5)
+        frame = self.system.comm.get_frame(20)
         self.assertIsInstance(frame, SailExperimentFrame)
         self.assertEqual(frame.seq(), 0)
 
-        frame = self.system.comm.get_frame(5)
+        frame = self.system.comm.get_frame(20)
         self.assertIsInstance(frame, SailExperimentFrame)
         self.assertEqual(frame.seq(), 1)
         
