@@ -4,6 +4,7 @@ from telecommand import GetCompileInfoTelecommand
 from tests.base import RestartPerTest
 from utils import TestEvent
 
+
 class TestGetCompileInfoTelecommand(RestartPerTest):
     @auto_power_on(auto_power_on=False)
     def __init__(self, *args, **kwargs):
@@ -29,4 +30,5 @@ class TestGetCompileInfoTelecommand(RestartPerTest):
         response = self.system.comm.get_frame(5)
         self.assertIsInstance(response, CompileInfoFrame)
         self.assertEqual(response.seq(), 0)
+
 

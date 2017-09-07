@@ -40,6 +40,7 @@ namespace telemetry
         struct CoilTemperatureTag;
         struct CoilsActiveTag;
         struct ImtqStatusTag;
+        struct OSStateTag;
     }
 
     /**
@@ -61,6 +62,13 @@ namespace telemetry
      * @ingroup telemetry
      */
     typedef SimpleTelemetryElement<BitValue<std::uint16_t, 12>, ::telemetry::details::McuTemperatureTag> McuTemperature;
+
+    /**
+     * @brief This type represents telemetry element related operating system state.
+     * @telemetry_element
+     * @ingroup telemetry
+     */
+    typedef SimpleTelemetryElement<BitValue<std::uint32_t, 22>, ::telemetry::details::OSStateTag> OSState;
 
     /**
      * @brief This type represents telemetry element related to
@@ -164,6 +172,7 @@ namespace telemetry
         FlashPrimarySlotsScrubbing,             //
         FlashSecondarySlotsScrubbing,           //
         RAMScrubbing,                           //
+        OSState,                                //
         FileSystemTelemetry,                    //
         devices::antenna::AntennaTelemetry,     //
         ExperimentTelemetry,                    //

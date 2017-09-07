@@ -3,7 +3,7 @@ from parser import CategoryParser
 
 class GyroscopeTelemetryParser(CategoryParser):
     def __init__(self, reader, store):
-        CategoryParser.__init__(self, '09: Gyroscope', reader, store)
+        CategoryParser.__init__(self, '10: Gyroscope', reader, store)
 
     def get_bit_count(self):
         return 4 * 16

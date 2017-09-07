@@ -70,6 +70,7 @@ telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver
     Main.Scrubbing,
     0,
     Main.Hardware.imtqTelemetryCollector,
+    0,
     0);
 
 mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc),
