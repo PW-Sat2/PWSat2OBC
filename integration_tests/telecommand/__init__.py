@@ -56,6 +56,7 @@ __all__ = [
     'PerformSunSExperiment',
     'PerformRadFETExperiment',
     'PerformPayloadCommissioningExperiment',
-    'PerformCameraCommissioningExperiment'
+    'PerformCameraCommissioningExperiment',
+    'StopSailDeployment'
 ]
 

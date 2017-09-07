@@ -17,6 +17,7 @@ import disable_overheat_submode
 import sail_experiment
 import set_bitrate
 import adcs
+import stop_sail_deployment
 
 frame_types = []
 frame_types += map(lambda t: t[1], inspect.getmembers(pong, predicate=inspect.isclass))
@@ -32,6 +33,7 @@ frame_types += map(lambda t: t[1], inspect.getmembers(suns, predicate=inspect.is
 frame_types += map(lambda t: t[1], inspect.getmembers(sail_experiment, predicate=inspect.isclass))
 frame_types += map(lambda t: t[1], inspect.getmembers(set_bitrate, predicate=inspect.isclass))
 frame_types += map(lambda t: t[1], inspect.getmembers(adcs, predicate=inspect.isclass))
+frame_types += map(lambda t: t[1], inspect.getmembers(stop_sail_deployment, predicate=inspect.isclass))
 frame_types = filter(lambda t: issubclass(t, ResponseFrame) and t != ResponseFrame, frame_types)
 frame_types = reduce(lambda t, x: t + [x] if x not in t else t, frame_types, [])
 
