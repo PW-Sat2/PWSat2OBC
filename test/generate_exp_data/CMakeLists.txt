@@ -25,9 +25,12 @@ target_link_libraries(${NAME}
 
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_SOURCE_DIR}/unit_tests/base/linker.ld -u _printf_float -specs=rdimon.specs")
 
-set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
-add_custom_target(${NAME}.run
-  COMMAND ${QEMU} -board generic -mcu ${QEMU_MCU} -nographic -monitor null -image ${EXEC_OBJ} -semihosting-config "arg=tests"
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/experiments)
 
+set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME})
+add_custom_target(${NAME}.run  
+  COMMAND ${QEMU} -board generic -mcu ${QEMU_MCU} -nographic -monitor null -image ${EXEC_OBJ} -semihosting-config "arg=tests"
+  WORKING_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/experiments
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/experiments ${REPORTS_PATH}/experiments/
   DEPENDS ${NAME}
 )    
