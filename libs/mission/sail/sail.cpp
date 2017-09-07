@@ -100,6 +100,7 @@ namespace mission
                     break;
                 }
             }
+            break;
 
             case state::SailOpeningState::OpeningStopped:
             {
