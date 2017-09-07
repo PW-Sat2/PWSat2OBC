@@ -41,7 +41,7 @@ OpenSailTest::OpenSailTest()
 TEST_F(OpenSailTest, ShouldPerformSailOpeningProcedure)
 {
     // enable opening
-    this->_state.PersistentState.Set(state::SailState(state::SailOpeningState::Opening));
+    this->_state.PersistentState.Set(state::SailState(state::SailOpeningState::Opening, false));
 
     // set time to X = 4 days
     this->_state.Time = std::chrono::hours(4 * 24);
@@ -117,7 +117,7 @@ TEST_F(OpenSailTest, ShouldPerformSailOpeningProcedure)
 
 TEST_F(OpenSailTest, DontStartSailOpeningIfNotOrderedTo)
 {
-    this->_state.PersistentState.Set(state::SailState(state::SailOpeningState::Waiting));
+    this->_state.PersistentState.Set(state::SailState(state::SailOpeningState::Waiting, false));
     this->_state.Time = std::chrono::hours(4 * 24);
 
     ASSERT_THAT(this->_openSailAction.EvaluateCondition(this->_state), Eq(false));
@@ -137,7 +137,7 @@ TEST_F(OpenSailTest, ShouldStartSailOpening)
 TEST_F(OpenSailTest, ShouldNotStartOpeningIfAlreadyOpening)
 {
     this->_state.Time = std::chrono::hours(40 * 24);
-    this->_state.PersistentState.Set(state::SailState(state::SailOpeningState::Opening));
+    this->_state.PersistentState.Set(state::SailState(state::SailOpeningState::Opening, false));
 
     this->_openSailUpdate.Execute(this->_state);
 
@@ -149,7 +149,7 @@ TEST_F(OpenSailTest, ShouldNotStartOpeningIfAlreadyOpening)
 TEST_F(OpenSailTest, ShouldNotStartOpeningIfAlreadyStoppedOpening)
 {
     this->_state.Time = std::chrono::hours(40 * 24);
-    this->_state.PersistentState.Set(state::SailState(state::SailOpeningState::OpeningStopped));
+    this->_state.PersistentState.Set(state::SailState(state::SailOpeningState::OpeningStopped, false));
 
     this->_openSailUpdate.Execute(this->_state);
 
@@ -161,7 +161,7 @@ TEST_F(OpenSailTest, ShouldNotStartOpeningIfAlreadyStoppedOpening)
 TEST_F(OpenSailTest, ShouldStartOpeningOnExplicitCommandIfNotAlreadyOpening)
 {
     this->_state.Time = std::chrono::hours(20 * 24);
-    this->_state.PersistentState.Set(state::SailState(state::SailOpeningState::Waiting));
+    this->_state.PersistentState.Set(state::SailState(state::SailOpeningState::Waiting, false));
 
     this->_openSailTask.OpenSail();
 
@@ -195,7 +195,7 @@ TEST_F(OpenSailTest, ShouldStartOpeningOnExplicitCommandIfAlreadyOpened)
 TEST_F(OpenSailTest, ExplicitOpenWhenOpenInProgressIsIgnored)
 {
     this->_state.Time = std::chrono::hours(20 * 24);
-    this->_state.PersistentState.Set(state::SailState(state::SailOpeningState::Opening));
+    this->_state.PersistentState.Set(state::SailState(state::SailOpeningState::Opening, false));
 
     this->_openSailTask.OpenSail();
 

@@ -1,7 +1,9 @@
 from response_frames.common import SailSuccessFrame
 from system import auto_power_on, clear_state
-from telecommand import OpenSailTelecommand
+from telecommand import OpenSailTelecommand, StopSailDeployment
+from response_frames.stop_sail_deployment import StopSailDeploymentSuccessFrame
 from tests.base import RestartPerTest
+from datetime import timedelta
 from utils import TestEvent
 
 
@@ -36,3 +38,37 @@ class TestSailTelecommands(RestartPerTest):
         self.assertIsInstance(ack, SailSuccessFrame)
 
         self.assertTrue(sail_opening.wait_for_change(20), "Sail opening procedure should start")
+
+    @clear_state()
+    def test_disable_sail_deployment_should_disable_experiment(self):
+        self._start()
+        self.system.obc.run_mission()
+
+        sail_opening = TestEvent()
+        self.system.eps.TKmain.on_enable = sail_opening.set
+
+        self.system.comm.put_frame(StopSailDeployment(11))
+        frame = self.system.comm.get_frame(20)
+        self.assertIsInstance(frame, StopSailDeploymentSuccessFrame)
+
+        self.system.comm.put_frame(OpenSailTelecommand(0x31))
+        frame = self.system.comm.get_frame(20)
+        self.assertIsInstance(frame, SailSuccessFrame)
+
+        self.assertFalse(sail_opening.wait_for_change(5), "Sail deployment should not be performed")
+
+    @clear_state()
+    def test_disable_sail_deployment_should_disable_automatic_deploy(self):
+        self._start()
+        self.system.obc.run_mission()
+
+        sail_opening = TestEvent()
+        self.system.eps.TKmain.on_enable = sail_opening.set
+
+        self.system.comm.put_frame(StopSailDeployment(11))
+        frame = self.system.comm.get_frame(20)
+        self.assertIsInstance(frame, StopSailDeploymentSuccessFrame)
+
+        self.system.obc.jump_to_time(timedelta(days=41))
+
+        self.assertFalse(sail_opening.wait_for_change(5), "Sail deployment should not be performed")

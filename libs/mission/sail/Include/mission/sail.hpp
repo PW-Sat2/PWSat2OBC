@@ -179,6 +179,67 @@ namespace mission
     {
         return this->_step < StepsCount;
     }
+
+    /**
+     * @brief Interface for object responsible for disabling sail deployment
+     * @ingroup mission
+     */
+    struct IDisableSailDeployment
+    {
+        /**
+         * @brief Schedules sail deployment to be disabled as soon as possible
+         */
+        virtual void DisableDeployment() = 0;
+    };
+
+    /**
+     * @brief Stop sail deployment task
+     * @ingroup mission
+     * @mission_task
+     *
+     * This component is responsible for disabling sail deployment. This is achieved by setting flag in persistent state.
+     * Sail deployment will be disabled if all following conditions are met:
+     * * Command to stop sail deployment has been received
+     * * Sail deployment is not already disabled
+     * * Sail deployment process has not started yet
+     */
+    class StopSailDeploymentTask : public mission::Action, public IDisableSailDeployment
+    {
+      public:
+        /**
+         * @brief Ctor
+         * @param[in] dummy Not used
+         */
+        StopSailDeploymentTask(uint8_t dummy);
+
+        /**
+         * @brief Return mission action
+         * @return Mission action
+         */
+        mission::ActionDescriptor<SystemState> BuildAction();
+
+        virtual void DisableDeployment() override;
+
+      private:
+        /**
+         * @brief Mission action's condition
+         * @param state System state
+         * @param param Pointer to @ref StopSailDeploymentTask
+         * @return true if all conditions for action are met
+         */
+        static bool Condition(const SystemState& state, void* param);
+
+        /**
+         * @brief Mission's action
+         * @param state System state
+         * @param param Pointer to @ref StopSailDeploymentTask
+         */
+        static void Action(SystemState& state, void* param);
+
+        /** @brief Flag indicating whether sail deployment should be disabled */
+        std::atomic<bool> shouldDisable{false};
+    };
+
     /** @} */
 }
 #endif /* LIBS_MISSION_INCLUDE_MISSION_SAIL_H_ */

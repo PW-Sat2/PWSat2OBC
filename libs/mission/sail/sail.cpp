@@ -82,8 +82,14 @@ namespace mission
 
         auto currentState = sailState.CurrentState();
 
+        if (sailState.IsDeploymentDisabled())
+        {
+            LOG(LOG_LEVEL_DEBUG, "[sail] Sail deployment disabled");
+            return UpdateResult::Warning;
+        }
+
         auto open = [&state, This]() {
-            state.PersistentState.Set(state::SailState(state::SailOpeningState::Opening));
+            state.PersistentState.Set(state::SailState(state::SailOpeningState::Opening, false));
             This->_step = 0;
             This->_nextStepAfter = 0s;
         };
@@ -225,5 +231,55 @@ namespace mission
     void OpenSailTask::EnableRedundantBurnSwitch(OpenSailTask* This, SystemState& /*state*/)
     {
         This->_power.EnableRedundantSailBurnSwitch();
+    }
+
+    StopSailDeploymentTask::StopSailDeploymentTask(uint8_t)
+    {
+    }
+
+    mission::ActionDescriptor<SystemState> StopSailDeploymentTask::BuildAction()
+    {
+        mission::ActionDescriptor<SystemState> action;
+        action.name = "Stop sail deployment";
+        action.param = this;
+        action.condition = Condition;
+        action.actionProc = Action;
+        return action;
+    }
+
+    void StopSailDeploymentTask::DisableDeployment()
+    {
+        this->shouldDisable = true;
+    }
+
+    bool StopSailDeploymentTask::Condition(const SystemState& state, void* param)
+    {
+        state::SailState sailState;
+        if (!state.PersistentState.Get(sailState))
+        {
+            LOG(LOG_LEVEL_ERROR, "[sail] Can't get sail state");
+            return false;
+        }
+
+        auto This = reinterpret_cast<StopSailDeploymentTask*>(param);
+        auto alreadyDisabled = sailState.IsDeploymentDisabled();
+        auto currentState = sailState.CurrentState();
+
+        return This->shouldDisable && !alreadyDisabled && !state.SailOpened && currentState != state::SailOpeningState::Opening;
+    }
+
+    void StopSailDeploymentTask::Action(SystemState& state, void*)
+    {
+        state::SailState sailState;
+        if (!state.PersistentState.Get(sailState))
+        {
+            LOG(LOG_LEVEL_ERROR, "[sail] Can't get sail state");
+            return;
+        }
+
+        if (!state.PersistentState.Set(state::SailState(sailState.CurrentState(), true)))
+        {
+            LOG(LOG_LEVEL_ERROR, "[sail] Can't set sail state");
+        }
     }
 }

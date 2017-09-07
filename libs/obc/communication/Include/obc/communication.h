@@ -162,8 +162,8 @@ namespace obc
         obc::telecommands::CompileInfoTelecommand,
         obc::telecommands::ResetTransmitterTelecommand,
         obc::telecommands::DisableOverheatSubmodeTelecommand,
-        obc::telecommands::SetBitrateTelecommand
-        >;
+        obc::telecommands::SetBitrateTelecommand,
+        obc::telecommands::StopSailDeployment>;
 
     /**
      * @brief OBC <-> Earth communication
@@ -194,6 +194,7 @@ namespace obc
          * @param[in] gyro Gyroscope interface
          * @param[in] photo Reference to service capable of taking photos
          * @param[in] epsDriver Reference to EPS driver object
+         * @param[in] disableSailDeployment Reference to object responsible for disabling sail deployment
          */
         OBCCommunication(obc::FDIR& fdir,
             devices::comm::CommObject& commDriver,
@@ -216,7 +217,8 @@ namespace obc
             devices::payload::IPayloadDeviceDriver& payloadDriver,
             devices::gyro::IGyroscopeDriver& gyro,
             services::photo::IPhotoService& photo,
-            devices::eps::IEPSDriver& epsDriver);
+            devices::eps::IEPSDriver& epsDriver,
+            mission::IDisableSailDeployment& disableSailDeployment);
 
         /**
          * @brief Initializes all communication at runlevel 1

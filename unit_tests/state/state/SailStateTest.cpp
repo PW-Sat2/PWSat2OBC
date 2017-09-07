@@ -13,33 +13,36 @@ TEST(SailStateTest, DefaultState)
     state::SailState state;
 
     ASSERT_THAT(state.CurrentState(), Eq(state::SailOpeningState::Waiting));
+    ASSERT_THAT(state.IsDeploymentDisabled(), Eq(false));
 }
 
 TEST(SailStateTest, CustomState)
 {
-    state::SailState state(state::SailOpeningState::OpeningStopped);
+    state::SailState state(state::SailOpeningState::OpeningStopped, true);
 
     ASSERT_THAT(state.CurrentState(), Eq(state::SailOpeningState::OpeningStopped));
+    ASSERT_THAT(state.IsDeploymentDisabled(), Eq(true));
 }
 
 TEST(SailStateTest, ReadFromBuffer)
 {
     state::SailState state;
 
-    std::uint8_t buf[] = {1};
+    std::uint8_t buf[] = {1, 1};
     Reader r(buf);
     state.Read(r);
 
     ASSERT_THAT(state.CurrentState(), Eq(state::SailOpeningState::Opening));
+    ASSERT_THAT(state.IsDeploymentDisabled(), Eq(true));
 }
 
 TEST(SailStateTest, WriteToBuffer)
 {
-    state::SailState state(state::SailOpeningState::OpeningStopped);
+    state::SailState state(state::SailOpeningState::OpeningStopped, true);
 
-    std::uint8_t buf[] = {14};
+    std::uint8_t buf[] = {14, 18};
     Writer w(buf);
     state.Write(w);
 
-    ASSERT_THAT(buf, ElementsAre(2));
+    ASSERT_THAT(buf, ElementsAre(2, 1));
 }

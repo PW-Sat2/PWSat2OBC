@@ -33,14 +33,21 @@ namespace state
         /**
          * @brief Ctor
          * @param currentState Current sail state
+         * @param[in] deploymentDisabled Flag indicating whether the deployment process is disabled.
          */
-        SailState(SailOpeningState currentState);
+        SailState(SailOpeningState currentState, bool deploymentDisabled);
 
         /**
          * @brief Returns current sail state
          * @return Current sail state
          */
         SailOpeningState CurrentState() const;
+
+        /**
+         * @brief Returns Information whether the sail deployment process is disabled.
+         * @return True if sail deployment process is disabled, false otherwise.
+         */
+        bool IsDeploymentDisabled() const;
 
         /**
          * @brief Returns size of this object in persistent state
@@ -63,6 +70,13 @@ namespace state
       private:
         /** @brief Current sail state */
         SailOpeningState _currentState;
+
+        /**
+         * Flag indicating whether the deployment process is disabled.
+         *
+         * True if sail deployment process is disabled, false otherwise.
+         */
+        bool isDeploymentDisabled;
     };
 
     inline state::SailOpeningState SailState::CurrentState() const
@@ -70,9 +84,14 @@ namespace state
         return this->_currentState;
     }
 
+    inline bool SailState::IsDeploymentDisabled() const
+    {
+        return this->isDeploymentDisabled;
+    }
+
     inline constexpr std::size_t SailState::Size()
     {
-        return sizeof(_currentState);
+        return sizeof(_currentState) + sizeof(isDeploymentDisabled);
     }
 }
 

@@ -33,7 +33,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
     devices::payload::IPayloadDeviceDriver& payloadDriver,
     devices::gyro::IGyroscopeDriver& gyro,
     services::photo::IPhotoService& photo,
-    devices::eps::IEPSDriver& epsDriver)
+    devices::eps::IEPSDriver& epsDriver,
+    mission::IDisableSailDeployment& disableSailDeployment)
     : Comm(commDriver),                                                                                                               //
       UplinkProtocolDecoder(settings::CommSecurityCode),                                                                              //
       SupportedTelecommands(                                                                                                          //
@@ -78,7 +79,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           CompileInfoTelecommand(),                                                                                     //
           ResetTransmitterTelecommand(),                                                                                //
           DisableOverheatSubmodeTelecommand(epsDriver),                                                                 //
-          SetBitrateTelecommand()                                                                                       //
+          SetBitrateTelecommand(),                                                                                      //
+          StopSailDeployment(disableSailDeployment)                                                                     //
           ),                                                                                                            //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {

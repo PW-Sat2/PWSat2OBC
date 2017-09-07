@@ -120,7 +120,8 @@ OBC::OBC()
           Hardware.PayloadDeviceDriver,
           Hardware.Gyro,
           Camera.PhotoService,
-          Hardware.EPS),
+          Hardware.EPS,
+          Mission),
       Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index),         //
       terminal(this->Hardware.Terminal),                                                   //
       camera(this->Fdir.ErrorCounting(), this->Hardware.Camera),                           //
