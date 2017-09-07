@@ -18,7 +18,7 @@ namespace obc
         {
             if (parameters.size() == 0)
             {
-                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, 0);
+                CorrelatedDownlinkFrame response(DownlinkAPID::Photo, 0, 0);
                 response.PayloadWriter().WriteByte(0x1);
                 transmitter.SendFrame(response.Frame());
                 return;
@@ -32,7 +32,7 @@ namespace obc
             const auto delay = std::chrono::seconds(reader.ReadWordLE());
             const auto path = reader.ReadString(30);
 
-            CorrelatedDownlinkFrame frame{DownlinkAPID::Operation, 0, corelationId};
+            CorrelatedDownlinkFrame frame{DownlinkAPID::Photo, 0, corelationId};
             auto& writer = frame.PayloadWriter();
             if (!reader.Status() || path.empty() || count >= 30)
             {
@@ -66,7 +66,7 @@ namespace obc
         {
             if (parameters.size() == 0)
             {
-                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, 0);
+                CorrelatedDownlinkFrame response(DownlinkAPID::PurgePhoto, 0, 0);
                 response.PayloadWriter().WriteByte(0x1);
                 transmitter.SendFrame(response.Frame());
                 return;
@@ -75,7 +75,7 @@ namespace obc
             Reader reader(parameters);
             const auto corelationId = reader.ReadByte();
 
-            CorrelatedDownlinkFrame frame{DownlinkAPID::Operation, 0, corelationId};
+            CorrelatedDownlinkFrame frame{DownlinkAPID::PurgePhoto, 0, corelationId};
             auto& writer = frame.PayloadWriter();
             if (!reader.Status())
             {

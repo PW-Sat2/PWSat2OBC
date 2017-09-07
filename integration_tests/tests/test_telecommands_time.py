@@ -1,8 +1,9 @@
 import telecommand
 
+from response_frames.common import DownlinkApid
 from system import auto_power_on, runlevel
-from tests.base import BaseTest, RestartPerTest
-from utils import ensure_byte_list, TestEvent
+from tests.base import  RestartPerTest
+from utils import TestEvent
 
 
 class TimeTelecommandsTest(RestartPerTest):
@@ -33,7 +34,7 @@ class TimeTelecommandsTest(RestartPerTest):
         time_config = time_config_text.split()
         del time_config[-1]
         
-        self.assertEqual(frame.apid(), 2)
+        self.assertEqual(frame.apid(), DownlinkApid.TimeCorrection)
         self.assertEqual(frame.seq(), 0)
         self.assertEqual(frame.payload(), [0x11, 0])
         self.assertEqual(map(int, time_config), [0x12, 0x34])

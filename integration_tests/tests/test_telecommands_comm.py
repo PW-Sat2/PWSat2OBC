@@ -1,10 +1,10 @@
 import telecommand
-from response_frames.operation import OperationSuccessFrame
+from response_frames.common import CommSuccessFrame
 from response_frames.set_bitrate import SetBitrateSuccessFrame
 from devices import BeaconFrame, BaudRate
 from system import auto_power_on, runlevel
-from tests.base import BaseTest, RestartPerTest
-from utils import ensure_byte_list, TestEvent
+from tests.base import RestartPerTest
+from utils import TestEvent
 
 
 class CommTelecommandsTest(RestartPerTest):
@@ -39,7 +39,7 @@ class CommTelecommandsTest(RestartPerTest):
 
         frame = self.system.comm.get_frame(20)
 
-        self.assertIsInstance(frame, OperationSuccessFrame)
+        self.assertIsInstance(frame, CommSuccessFrame)
         self.assertEqual(frame.seq(), 0)
         self.assertEqual(frame.correlation_id, 0x11)
 
@@ -60,7 +60,7 @@ class CommTelecommandsTest(RestartPerTest):
         self.system.comm.put_frame(telecommand.EnterIdleState(correlation_id=0x11, duration=1))
 
         frame = self.system.comm.get_frame(20)
-        self.assertIsInstance(frame, OperationSuccessFrame)
+        self.assertIsInstance(frame, CommSuccessFrame)
         self.assertEqual(frame.seq(), 0)
         self.assertEqual(frame.correlation_id, 0x11)
 

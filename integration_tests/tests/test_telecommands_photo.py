@@ -1,5 +1,5 @@
-from response_frames.operation import OperationSuccessFrame, OperationErrorFrame
-from system import auto_power_on, clear_state
+from response_frames.common import PhotoSuccessFrame, PhotoErrorFrame, PurgePhotoSuccessFrame
+from system import auto_power_on
 from telecommand import TakePhotoTelecommand, PurgePhotoTelecommand
 from tests.base import RestartPerTest
 from utils import TestEvent
@@ -30,7 +30,7 @@ class TestPhotoTelecommand(RestartPerTest):
         self.system.comm.put_frame(TakePhotoTelecommand(10, CameraLocation.Wing, PhotoResolution.p128, 30, timedelta(seconds = 0), "photo.jpg"))
 
         ack = self.system.comm.get_frame(5)
-        self.assertIsInstance(ack, OperationErrorFrame)
+        self.assertIsInstance(ack, PhotoErrorFrame)
 
     def test_photo_telecommand(self):
         self._start()
@@ -38,7 +38,7 @@ class TestPhotoTelecommand(RestartPerTest):
         self.system.comm.put_frame(TakePhotoTelecommand(10, CameraLocation.Wing, PhotoResolution.p128, 10, timedelta(seconds = 5), "photo.jpg"))
 
         ack = self.system.comm.get_frame(5)
-        self.assertIsInstance(ack, OperationSuccessFrame)
+        self.assertIsInstance(ack, PhotoSuccessFrame)
 
     def test_purge_photo_telecommand(self):
         self._start()
@@ -46,4 +46,4 @@ class TestPhotoTelecommand(RestartPerTest):
         self.system.comm.put_frame(PurgePhotoTelecommand(10))
 
         ack = self.system.comm.get_frame(10)
-        self.assertIsInstance(ack, OperationSuccessFrame)
+        self.assertIsInstance(ack, PurgePhotoSuccessFrame)

@@ -31,7 +31,7 @@ namespace
 
     TEST_F(OpenSailTelecommandTest, ShouldOpenSail)
     {
-        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0x11, 0x0))));
+        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Sail, 0, ElementsAre(0x11, 0x0))));
 
         EXPECT_CALL(this->_openSail, OpenSail());
 
@@ -40,7 +40,7 @@ namespace
 
     TEST_F(OpenSailTelecommandTest, ShouldRespondWithErrorFrameOnNoCorrelationId)
     {
-        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(0x0, 0x1))));
+        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Sail, 0, ElementsAre(0x0, 0x1))));
 
         EXPECT_CALL(this->_openSail, OpenSail()).Times(0);
 

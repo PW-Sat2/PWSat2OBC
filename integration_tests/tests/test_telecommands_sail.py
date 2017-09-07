@@ -1,4 +1,4 @@
-from response_frames.operation import OperationSuccessFrame
+from response_frames.common import SailSuccessFrame
 from system import auto_power_on, clear_state
 from telecommand import OpenSailTelecommand
 from tests.base import RestartPerTest
@@ -33,6 +33,6 @@ class TestSailTelecommands(RestartPerTest):
         self.system.comm.put_frame(OpenSailTelecommand(0x31))
 
         ack = self.system.comm.get_frame(5)
-        self.assertIsInstance(ack, OperationSuccessFrame)
+        self.assertIsInstance(ack, SailSuccessFrame)
 
         self.assertTrue(sail_opening.wait_for_change(20), "Sail opening procedure should start")

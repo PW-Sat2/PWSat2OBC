@@ -56,7 +56,7 @@ template <typename... T> void SetBootSlotsTelecommandTest::Run(T... params)
 TEST_F(SetBootSlotsTelecommandTest, ShouldSetBootSlots)
 {
     this->_memory[0] = 0xAA;
-    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0x0, ElementsAre(0x11, 0x0, 0x15, 0x31))));
+    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::BootSlotsInfo, 0x0, ElementsAre(0x11, 0x0, 0x15, 0x31))));
 
     Run(0x11, 0x15, 0x31);
     ASSERT_THAT(_settings.BootSlots(), Eq(0x15));
@@ -65,14 +65,14 @@ TEST_F(SetBootSlotsTelecommandTest, ShouldSetBootSlots)
 
 TEST_F(SetBootSlotsTelecommandTest, ShouldSendErrorFrameForInvalidRequest)
 {
-    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0x0, ElementsAre(0x00, 0xE0))));
+    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::BootSlotsInfo, 0x0, ElementsAre(0x00, 0xE0))));
 
     Run(0x0, 0x02);
 }
 
 TEST_F(SetBootSlotsTelecommandTest, ShouldSendErrorFrameForInvalidBootSlot)
 {
-    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0x0, ElementsAre(0x11, 0xE1))));
+    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::BootSlotsInfo, 0x0, ElementsAre(0x11, 0xE1))));
 
     _settings.BootSlots(0x15);
     _settings.FailsafeBootSlots(0x13);
@@ -85,7 +85,7 @@ TEST_F(SetBootSlotsTelecommandTest, ShouldSendErrorFrameForInvalidBootSlot)
 
 TEST_F(SetBootSlotsTelecommandTest, ShouldSendErrorFrameForInvalidFailsafeBootSlot)
 {
-    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0x0, ElementsAre(0x11, 0xE2))));
+    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::BootSlotsInfo, 0x0, ElementsAre(0x11, 0xE2))));
 
     _settings.BootSlots(0x15);
     _settings.FailsafeBootSlots(0x13);

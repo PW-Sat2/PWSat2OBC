@@ -20,7 +20,7 @@ namespace obc
             Reader r(parameters);
             auto correlationId = r.ReadByte();
 
-            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+            CorrelatedDownlinkFrame response(DownlinkAPID::Sail, 0, correlationId);
 
             if (!r.Status())
             {
