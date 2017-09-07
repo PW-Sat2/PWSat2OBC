@@ -169,6 +169,7 @@ void FillTelemetry(ManagedTelemetry& telemetry)
     telemetry.Set(FlashPrimarySlotsScrubbing(0b101));
     telemetry.Set(FlashSecondarySlotsScrubbing(0b010));
     telemetry.Set(RAMScrubbing(11223344));
+    telemetry.Set(OSState(123456));
     telemetry.Set(FileSystemTelemetry(44332211));
     telemetry.Set(GetAntennaTelemetry());
     telemetry.Set(ExperimentTelemetry(12, StartResult::Failure, IterationResult::LoopImmediately));
