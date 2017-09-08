@@ -21,7 +21,7 @@ def buildPlatform(mcu, pld) {
 			CMAKE_BUILD_TYPE: 'Release',
 			ENABLE_LTO: 1
 		])
-		bat "make pwsat boot safe_mode pwsat.hex pwsat.bin boot.hex safe_mode.bin"
+		bat "make pwsat boot safe_mode pwsat.hex pwsat.bin boot.hex safe_mode.bin generate_telemetry generate_exp_data"
 	}
 }
 
@@ -53,6 +53,11 @@ def reports() {
 		reportFiles: 'index.html',
 		reportName: 'Memory usage'
   ])
+  
+  bat "make generate_telemetry.run"
+  bat "make generate_exp_data.run"
+  
+  step([$class: 'ArtifactArchiver', artifacts: 'build/*/*/reports/*', fingerprint: true])
 }
 
 def integrationTests() {

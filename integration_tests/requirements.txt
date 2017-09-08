@@ -3,9 +3,9 @@ pyserial==3.2.1
 rednose
 colorlog
 saleae
-nose-parameterized
 bitarray
 pypiwin32; sys_platform == 'win32'
 typing
 parsec
 progressbar2
+parameterized
