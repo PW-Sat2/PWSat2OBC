@@ -231,8 +231,8 @@ class TransmitterDevice(i2cMock.I2CDevice):
     
     @i2cMock.command([0xAA])
     def _reset(self):
-        call(self.on_reset, None)
-        self.reset()
+        if call(self.on_reset, None) is None:
+            self.reset()
 
     @i2cMock.command([0xAB])
     def _hwreset(self):

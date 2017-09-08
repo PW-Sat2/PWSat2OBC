@@ -104,7 +104,7 @@ class ExperimentsMixin(OBCMixin):
     def wait_for_experiment_iteration(self, iteration, timeout):
         def condition():
             info = self.experiment_info()
-            return info.IterationCounter == iteration
+            return info.IterationCounter >= iteration
 
         busy_wait(condition, delay=0.1, timeout=timeout)
 

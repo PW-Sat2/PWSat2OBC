@@ -50,6 +50,11 @@ class TestExperimentSail(RestartPerTest):
     @clear_state()
     @runlevel(2)
     def test_auto_send(self):
+        def suppress_comm_soft_reset():
+            return False
+
+        self.system.transmitter.on_reset = suppress_comm_soft_reset
+
         self.startup()
         self.system.obc.jump_to_time(timedelta(hours=41))
 
@@ -61,7 +66,7 @@ class TestExperimentSail(RestartPerTest):
         self.assertEqual(frame.correlation_id, 10)
 
         self.system.obc.wait_for_experiment_started(ExperimentType.Sail, 60)
-        self.system.obc.wait_for_experiment_iteration(23, 5 * 20)
+        self.system.obc.wait_for_experiment_iteration(25, 5 * 20)
 
         frame = self.system.comm.get_frame(20)
         self.assertIsInstance(frame, SailExperimentFrame)
