@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from nose_parameterized import parameterized
+from parameterized import parameterized
 
 from system import runlevel
 from tests.base import BaseTest, RestartPerTest
