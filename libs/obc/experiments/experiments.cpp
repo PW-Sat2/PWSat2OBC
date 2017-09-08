@@ -16,7 +16,8 @@ namespace obc
         telemetry::IImtqDataProvider& imtq,
         devices::eps::IEpsTelemetryProvider& epsProvider,
         error_counter::IErrorCountingTelemetryProvider* errorCounterProvider,
-        temp::ITemperatureReader* temperatureProvider)
+        temp::ITemperatureReader* temperatureProvider,
+        program_flash::BootTable& bootTable)
         : Experiments(                                                                                                             //
               experiment::fibo::FibonacciExperiment(fs),                                                                           //
               experiment::adcs::DetumblingExperiment(adcs, time, powerControl, gyro, payload, imtq, fs),                           //
@@ -36,7 +37,8 @@ namespace obc
                   temperatureProvider,
                   &ExperimentsController),
               experiment::sads::SADSExperiment(fs, adcs, gyro, payload, powerControl, photoService, time),
-              experiment::camera::CameraCommissioningExperiment(fs, time, photoService))
+              experiment::camera::CameraCommissioningExperiment(fs, time, photoService),
+              experiment::program::CopyBootSlotsExperiment(bootTable, transmitter))
     {
     }
 
