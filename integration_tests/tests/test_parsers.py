@@ -1,10 +1,12 @@
-import unittest
-
 import os
-
+import unittest
 from os import path
+
 from parameterized import parameterized
+
 from build_config import config
+from emulator.beacon_parser.full_beacon_parser import FullBeaconParser
+from emulator.beacon_parser.parser import BeaconStorage, BitArrayParser
 from experiment_file import ExperimentFileParser
 
 
@@ -18,3 +20,12 @@ class TestParser(unittest.TestCase):
 
             (_, unparsed) = ExperimentFileParser.parse_partial(data)
             self.assertEqual(unparsed, '', 'Whole file has been parsed')
+
+    def test_parse_beacon(self):
+        beacon_path = path.join(config['REPORTS_DIR'], 'telemetry')
+        with open(beacon_path, 'rb') as f:
+            data = f.read()
+
+            store = BeaconStorage()
+            parser = BitArrayParser(FullBeaconParser(), data, store)
+            parser.parse()
