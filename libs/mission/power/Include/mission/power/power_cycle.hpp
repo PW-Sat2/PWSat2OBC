@@ -42,7 +42,7 @@ namespace mission
          *  * No scrubbing in progress
          *  * No experiment in progress
          */
-        class PeriodicPowerCycleTask : public Action
+        class PeriodicPowerCycleTask : public Action, public RequireNotifyWhenTimeChanges
         {
           public:
             /**
@@ -57,6 +57,12 @@ namespace mission
              * @return Action descriptor
              */
             ActionDescriptor<SystemState> BuildAction();
+
+            /**
+             * @brief Event raised by main Mission Loop when mission time changes.
+             * @param timeCorrection The time correction value. Positive - time has been advanced. Negative - time has been taken back.
+             */
+            void TimeChanged(std::chrono::milliseconds timeCorrection);
 
           private:
             /**

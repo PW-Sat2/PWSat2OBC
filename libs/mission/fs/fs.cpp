@@ -42,4 +42,12 @@ namespace mission
 
         return currentTime - that->_lastUpdate.Value >= SyncPeriod;
     }
+
+    void FileSystemTask::TimeChanged(std::chrono::milliseconds timeCorrection)
+    {
+        if (this->_lastUpdate.HasValue)
+        {
+            this->_lastUpdate.Value += timeCorrection;
+        }
+    }
 }

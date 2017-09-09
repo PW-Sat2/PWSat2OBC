@@ -73,7 +73,7 @@ telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver
     0,
     0);
 
-mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc),
+mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc, Mission),
     0,
     std::tie(Main.Hardware.antennaDriver, Main.PowerControlInterface),
     Main.Hardware.CommDriver,

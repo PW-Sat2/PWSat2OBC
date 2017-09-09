@@ -80,6 +80,11 @@ namespace mission
         This->LeaveTransmitterStateWhenIdle();
     }
 
+    void CommTask::TimeChanged(std::chrono::milliseconds timeCorrection)
+    {
+        this->_idleStateTurnOffTime += timeCorrection;
+    }
+
     SendMessageTask::SendMessageTask(devices::comm::ITransmitter& transmitter) : _transmitter(transmitter)
     {
     }
@@ -142,5 +147,13 @@ namespace mission
         }
 
         This->_lastSentAt = Some(state.Time);
+    }
+
+    void SendMessageTask::TimeChanged(std::chrono::milliseconds timeCorrection)
+    {
+        if (this->_lastSentAt.HasValue)
+        {
+            this->_lastSentAt.Value += timeCorrection;
+        }
     }
 }

@@ -42,7 +42,7 @@ namespace mission
      *  After sail opening conditions are met, this procedure should be performed after each restart
      *  until overrided by telecommand
      */
-    class OpenSailTask : public mission::Action, public mission::Update, public IOpenSail
+    class OpenSailTask : public mission::Action, public mission::Update, public IOpenSail, public RequireNotifyWhenTimeChanges
     {
       public:
         /**
@@ -80,6 +80,12 @@ namespace mission
          * @return true if process is in progress
          */
         bool InProgress() const;
+
+        /**
+         * @brief Event raised by main Mission Loop when mission time changes.
+         * @param timeCorrection The time correction value. Positive - time has been advanced. Negative - time has been taken back.
+         */
+        void TimeChanged(std::chrono::milliseconds timeCorrection);
 
       private:
         /**
