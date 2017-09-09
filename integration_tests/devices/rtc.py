@@ -16,6 +16,7 @@ class RTCDevice(I2CDevice):
         self._raw_response = None
         self._timer = RepeatedTimer(1, self._tick_time)
         self._lock = Lock()
+        self._advance_time_interval = datetime.timedelta(seconds=1)
 
     def set_response_array(self, response_array):
         self._raw_response = response_array
@@ -52,7 +53,7 @@ class RTCDevice(I2CDevice):
 
     def _tick_time(self):
         with self._lock:
-            self._current_time = datetime.datetime.now()
+            self._current_time += self._advance_time_interval
 
     def to_bcd(self, byte):
         return ((byte / 10) << 4) | (byte % 10)

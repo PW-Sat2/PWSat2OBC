@@ -45,8 +45,9 @@ namespace mission
     bool BeaconUpdate::ShouldUpdateBeacon(const SystemState& state, void* param)
     {
         auto This = static_cast<BeaconUpdate*>(param);
+        auto&& timeDifference = state.Time - This->lastBeaconUpdate;
         return state.AntennaState.IsDeployed() && //
-            ((state.Time - This->lastBeaconUpdate) >= BeaconUpdateInterval);
+            (timeDifference >= BeaconUpdateInterval || timeDifference < std::chrono::milliseconds::zero());
     }
 
     void BeaconUpdate::Run(SystemState& state, void* param)

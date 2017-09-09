@@ -1,14 +1,9 @@
-import telecommand
-from datetime import timedelta
-import time
+from datetime import timedelta, datetime
 import wx
 from wx import xrc
 from devices import RTCDevice
 from .base import ModuleBase, bind
-from bitarray import bitarray
-from struct import pack
 
-from beacon_parser.full_beacon_parser import FullBeaconParser
 
 class RTCModule(ModuleBase):
     GridPos = (1, 0)
@@ -46,4 +41,16 @@ class RTCModule(ModuleBase):
     def _on_advance(self, evt, interval):
         self._rtc.advance_by(interval)
 
+    @bind('rtc_system_time', wx.EVT_BUTTON,)
+    def _on_use_system_time(self, evt):
+        self._rtc._current_time = datetime.now()
 
+    @bind('rtc_advance_value', wx.EVT_TEXT)
+    def _on_advance_time_value_changed(self, evt):
+        new_text = evt.EventObject.GetValue()
+        new_value = 1000
+        try:
+            new_value = int(new_text)
+        except:
+            pass
+        self._rtc._advance_time_interval = timedelta(milliseconds=new_value)
