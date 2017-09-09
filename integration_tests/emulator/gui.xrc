@@ -1292,6 +1292,23 @@
 						<option>0</option>
 						<flag>wxALL</flag>
 						<border>5</border>
+						<object class="wxStaticText" name="rtc_advance">
+							<label>Advance time by (ms):</label>
+							<wrap>-1</wrap>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxTextCtrl" name="rtc_advance_value">
+							<value>1000</value>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
 						<object class="wxButton" name="rtc_stop">
 							<label>Stop</label>
 							<default>0</default>
@@ -1312,6 +1329,15 @@
 						<border>5</border>
 						<object class="wxButton" name="rtc_advance_5min">
 							<label>Advance 5 minutes</label>
+							<default>0</default>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="rtc_system_time">
+							<label>Load system time</label>
 							<default>0</default>
 						</object>
 					</object>
