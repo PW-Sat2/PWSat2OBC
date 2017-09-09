@@ -20,6 +20,15 @@ using namespace mission;
 using namespace std::chrono_literals;
 namespace
 {
+    struct DummyMissionLoop : INotifyTimeChanged
+    {
+        void NotifyTimeChanged(milliseconds);
+    };
+
+    void DummyMissionLoop::NotifyTimeChanged(milliseconds)
+    {
+    }
+
     struct TimeTaskTest : public testing::Test
     {
         TimeTaskTest();
@@ -32,6 +41,7 @@ namespace
         mission::TimeTask timeTask;
         mission::UpdateDescriptor<SystemState> updateDescriptor;
         mission::ActionDescriptor<SystemState> actionDescriptor;
+        DummyMissionLoop dummyMissionLoop;
 
         void SetCurrentTime(milliseconds time)
         {
@@ -52,8 +62,8 @@ namespace
     };
 
     TimeTaskTest::TimeTaskTest()
-        : timeTask(std::tie(provider, rtc)),        //
-          updateDescriptor(timeTask.BuildUpdate()), //
+        : timeTask(std::tie(provider, rtc, dummyMissionLoop)), //
+          updateDescriptor(timeTask.BuildUpdate()),            //
           actionDescriptor(timeTask.BuildAction())
     {
         osReset = InstallProxy(&mock);

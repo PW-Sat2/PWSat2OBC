@@ -40,7 +40,10 @@ namespace mission
      *  * T + 4min - Disable redundant thermal knife
      *
      */
-    class DeploySolarArrayTask : public mission::Action, public mission::Update, public IDeploySolarArray
+    class DeploySolarArrayTask : public mission::Action,
+                                 public mission::Update,
+                                 public IDeploySolarArray,
+                                 public RequireNotifyWhenTimeChanges
     {
       public:
         /**
@@ -78,6 +81,12 @@ namespace mission
          * @return true if process is in progress
          */
         bool InProgress() const;
+
+        /**
+         * @brief Event raised by main Mission Loop when mission time changes.
+         * @param timeCorrection The time correction value. Positive - time has been advanced. Negative - time has been taken back.
+         */
+        void TimeChanged(std::chrono::milliseconds timeCorrection);
 
       private:
         /**

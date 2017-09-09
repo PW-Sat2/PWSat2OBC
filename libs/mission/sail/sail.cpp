@@ -225,4 +225,9 @@ namespace mission
     {
         This->_power.EnableRedundantSailBurnSwitch();
     }
+
+    void OpenSailTask::TimeChanged(std::chrono::milliseconds timeCorrection)
+    {
+        this->_nextStepAfter += timeCorrection;
+    }
 }

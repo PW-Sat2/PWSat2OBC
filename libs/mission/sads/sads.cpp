@@ -176,4 +176,9 @@ namespace mission
     {
         This->_power.EnableRedundantSADSBurnSwitch();
     }
+
+    void DeploySolarArrayTask::TimeChanged(std::chrono::milliseconds timeCorrection)
+    {
+        this->_nextStepAfter += timeCorrection;
+    }
 }

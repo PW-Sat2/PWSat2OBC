@@ -91,4 +91,9 @@ namespace mission
 
         return Option<devices::comm::Beacon>::Some(BeaconInterval, frame.Frame());
     }
+
+    void BeaconUpdate::TimeChanged(std::chrono::milliseconds timeCorrection)
+    {
+        lastBeaconUpdate += timeCorrection;
+    }
 }

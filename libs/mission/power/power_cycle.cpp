@@ -75,5 +75,13 @@ namespace mission
             LOG(LOG_LEVEL_WARNING, "[power_cycle] Triggering periodic power cycle");
             This->_power.PowerCycle();
         }
+
+        void PeriodicPowerCycleTask::TimeChanged(std::chrono::milliseconds timeCorrection)
+        {
+            if (this->_bootTime.HasValue)
+            {
+                this->_bootTime.Value += timeCorrection;
+            }
+        }
     }
 }
