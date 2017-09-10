@@ -1,3 +1,4 @@
+from emulator.beacon_parser.units import TimeFromSeconds
 from parser import CategoryParser
 
 
@@ -9,5 +10,5 @@ class SystemParser(CategoryParser):
         return 22
 
     def parse(self):
-        self.append("Uptime", 22)
+        self.append("Uptime", 22, value_type=TimeFromSeconds)
 

@@ -1,5 +1,5 @@
+from emulator.beacon_parser.units import TimeFromMilliseconds, TimeFromSeconds
 from parser import CategoryParser
-from datetime import timedelta
 
 
 class TimeState(CategoryParser):
@@ -10,5 +10,5 @@ class TimeState(CategoryParser):
         return 64 + 32
 
     def parse(self):
-        self.append_qword("Mission time", lambda x: str(timedelta(milliseconds=x)) if x else '')
-        self.append_dword("External time", lambda x: str(timedelta(seconds=x)) if x else '')
+        self.append_qword("Mission time", value_type=TimeFromMilliseconds)
+        self.append_dword("External time", value_type=TimeFromSeconds)
