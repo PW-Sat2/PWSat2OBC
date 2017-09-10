@@ -1,5 +1,7 @@
 import os
 import sys
+import json
+from datetime import timedelta
 
 try:
     from i2cMock import I2CMock
@@ -34,4 +36,19 @@ while len(parsers) > 0:
     parser = parsers.pop()
     parser.parse()
 
-pprint(store.storage)
+
+def convert_values(o):
+    if isinstance(o, timedelta):
+        return o.total_seconds()
+
+    try:
+        return {
+            'raw': o.raw,
+            'converted': o.converted,
+            'readable': str(o)
+        }
+    except AttributeError:
+        return None
+
+
+print json.dumps(store.storage, default=convert_values, sort_keys=True, indent=4)

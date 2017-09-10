@@ -23,6 +23,7 @@ class BeaconModule(ModuleBase):
     def load(self, res, parent):
         self._panel = res.LoadPanel(parent, 'BeaconModule')  # type: wx.Panel
         self._props = propgrid.PropertyGrid(parent=self._panel,style=propgrid.PG_TOOLTIPS | propgrid.PG_AUTO_SORT)
+        self._props.SetExtraStyle(propgrid.PG_EX_HELP_AS_TOOLTIPS)
         self._panel.GetSizer().Add(self._props, 1, wx.EXPAND)
 
     def root(self):
@@ -48,15 +49,17 @@ class BeaconModule(ModuleBase):
                     self._update_node(n, value)
                     self._props.Collapse(n)
                 else:
-                    factory = BeaconModule.type_to_property[type(value)]
-                    n = factory(label=key, name=name, value=value)
+                    n = propgrid.StringProperty(label=key, name=name, value=str(value))
+                    n.SetHelpString(key + ': ' + repr(value))
+
                     node.AppendChild(n)
                     self._props.SetPropertyReadOnly(n)
             else:
                 if type(value) is dict:
                     self._update_node(existing_property, value)
                 else:
-                    existing_property.SetValue(value)
+                    existing_property.SetValue(str(value))
+                    existing_property.SetHelpString(key + ': ' + repr(value))
 
     def update(self):
         if self._last_beacon.payload is not None:
