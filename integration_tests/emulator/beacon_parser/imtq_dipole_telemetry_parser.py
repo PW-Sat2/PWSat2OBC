@@ -16,6 +16,6 @@ class ImtqDipoleTelemetryParser(CategoryParser):
         return 3 * 16
 
     def parse(self):
-        self.append_word("Dipole 1", value_type=IMTQDipole)
-        self.append_word("Dipole 2", value_type=IMTQDipole)
-        self.append_word("Dipole 3", value_type=IMTQDipole)
+        self.append("Dipole 1", 16, two_complement=True, value_type=IMTQDipole)
+        self.append("Dipole 2", 16, two_complement=True, value_type=IMTQDipole)
+        self.append("Dipole 3", 16, two_complement=True, value_type=IMTQDipole)

@@ -1,4 +1,4 @@
-from utils import bits_to_dword, bits_to_byte, bits_to_word, bits_to_qword, call
+from utils import bits_to_dword, bits_to_byte, bits_to_word, bits_to_qword, call, decode_two_complement
 from bitarray import bitarray
 
 
@@ -61,8 +61,11 @@ class CategoryParser(object):
         self._reader = reader
         self._store = store
 
-    def append(self, name, length, value_type=None):
+    def append(self, name, length, value_type=None, two_complement=False):
         value = self._reader.read(length)
+
+        if two_complement:
+            value = decode_two_complement(value, length)
 
         if value_type is not None:
             converted_value = value_type(value)

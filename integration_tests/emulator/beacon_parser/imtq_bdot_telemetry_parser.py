@@ -16,6 +16,6 @@ class ImtqBDotTelemetryParser(CategoryParser):
         return 3 * 32
 
     def parse(self):
-        self.append_dword("BDot 1", value_type=IMTQBDot)
-        self.append_dword("BDot 2", value_type=IMTQBDot)
-        self.append_dword("BDot 3", value_type=IMTQBDot)
+        self.append("BDot 1", 32, two_complement=True, value_type=IMTQBDot)
+        self.append("BDot 2", 32, two_complement=True, value_type=IMTQBDot)
+        self.append("BDot 3", 32, two_complement=True, value_type=IMTQBDot)

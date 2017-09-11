@@ -16,6 +16,6 @@ class ImtqMagnetometersTelemetryParser(CategoryParser):
         return 3 * 32
 
     def parse(self):
-        self.append_dword("Magnetometer Measurement 1", value_type=MagnetometerReadout)
-        self.append_dword("Magnetometer Measurement 2", value_type=MagnetometerReadout)
-        self.append_dword("Magnetometer Measurement 3", value_type=MagnetometerReadout)
+        self.append("Magnetometer Measurement 1", 32, two_complement=True, value_type=MagnetometerReadout)
+        self.append("Magnetometer Measurement 2", 32, two_complement=True, value_type=MagnetometerReadout)
+        self.append("Magnetometer Measurement 3", 32, two_complement=True, value_type=MagnetometerReadout)
