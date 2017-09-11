@@ -1,6 +1,6 @@
+import json
 import os
 import sys
-import json
 from datetime import timedelta
 
 try:
@@ -9,7 +9,6 @@ except ImportError:
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
     from i2cMock import I2CMock
 
-from pprint import pprint
 from bitarray import bitarray
 from struct import pack
 from emulator.beacon_parser.full_beacon_parser import FullBeaconParser
@@ -45,7 +44,7 @@ def convert_values(o):
         return {
             'raw': o.raw,
             'converted': o.converted,
-            'readable': str(o)
+            'unit': getattr(o, 'unit') if hasattr(o, 'unit') else None
         }
     except AttributeError:
         return None

@@ -1,3 +1,4 @@
+from emulator.beacon_parser.units import BoolType, TimeFromSeconds
 from parser import CategoryParser
 
 
@@ -9,15 +10,15 @@ class AntennaTelemetryParser(CategoryParser):
         return 8 + 8*8 + 8*12
 
     def parse(self):
-        self.append("Antenna 3 Deployed Ch A", 1)
-        self.append("Antenna 4 Deployed Ch A", 1)
-        self.append("Antenna 2 Deployed Ch A", 1)
+        self.append("Antenna 3 Deployed Ch A", 1, value_type=BoolType)
+        self.append("Antenna 4 Deployed Ch A", 1, value_type=BoolType)
+        self.append("Antenna 2 Deployed Ch A", 1, value_type=BoolType)
 
-        self.append("Antenna 1 Deployed Ch B", 1)
-        self.append("Antenna 2 Deployed Ch B", 1)
-        self.append("Antenna 1 Deployed Ch A", 1)
-        self.append("Antenna 3 Deployed Ch B", 1)
-        self.append("Antenna 4 Deployed Ch B", 1)
+        self.append("Antenna 1 Deployed Ch B", 1, value_type=BoolType)
+        self.append("Antenna 2 Deployed Ch B", 1, value_type=BoolType)
+        self.append("Antenna 1 Deployed Ch A", 1, value_type=BoolType)
+        self.append("Antenna 3 Deployed Ch B", 1, value_type=BoolType)
+        self.append("Antenna 4 Deployed Ch B", 1, value_type=BoolType)
 
         self.append_byte("Antenna 1 Activation Count Ch A")
         self.append_byte("Antenna 2 Activation Count Ch A")
@@ -29,12 +30,12 @@ class AntennaTelemetryParser(CategoryParser):
         self.append_byte("Antenna 3 Activation Count Ch B")
         self.append_byte("Antenna 4 Activation Count Ch B")
 
-        self.append("Antenna 1 Activation Time Ch A", 12)
-        self.append("Antenna 2 Activation Time Ch A", 12)
-        self.append("Antenna 3 Activation Time Ch A", 12)
-        self.append("Antenna 4 Activation Time Ch A", 12)
+        self.append("Antenna 1 Activation Time Ch A", 12, value_type=TimeFromSeconds)
+        self.append("Antenna 2 Activation Time Ch A", 12, value_type=TimeFromSeconds)
+        self.append("Antenna 3 Activation Time Ch A", 12, value_type=TimeFromSeconds)
+        self.append("Antenna 4 Activation Time Ch A", 12, value_type=TimeFromSeconds)
 
-        self.append("Antenna 1 Activation Time Ch B", 12)
-        self.append("Antenna 2 Activation Time Ch B", 12)
-        self.append("Antenna 3 Activation Time Ch B", 12)
-        self.append("Antenna 4 Activation Time Ch B", 12)
+        self.append("Antenna 1 Activation Time Ch B", 12, value_type=TimeFromSeconds)
+        self.append("Antenna 2 Activation Time Ch B", 12, value_type=TimeFromSeconds)
+        self.append("Antenna 3 Activation Time Ch B", 12, value_type=TimeFromSeconds)
+        self.append("Antenna 4 Activation Time Ch B", 12, value_type=TimeFromSeconds)

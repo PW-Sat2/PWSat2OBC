@@ -1,3 +1,5 @@
+from emulator.beacon_parser.units import enum
+from obc.experiments import ExperimentType, StartResult, IterationResult
 from parser import CategoryParser
 
 
@@ -9,6 +11,6 @@ class ExperimentTelemetryParser(CategoryParser):
         return 8+8+8
 
     def parse(self):
-        self.append('Current experiment code', 4)
-        self.append('Experiment Startup Result', 8)
-        self.append('Last Experiment Iteration Status', 8)
+        self.append('Current experiment code', 4, value_type=enum(ExperimentType))
+        self.append('Experiment Startup Result', 8, value_type=enum(StartResult))
+        self.append('Last Experiment Iteration Status', 8, value_type=enum(IterationResult))
