@@ -172,7 +172,7 @@ void FillTelemetry(ManagedTelemetry& telemetry)
     telemetry.Set(OSState(123456));
     telemetry.Set(FileSystemTelemetry(44332211));
     telemetry.Set(GetAntennaTelemetry());
-    telemetry.Set(ExperimentTelemetry(12, StartResult::Failure, IterationResult::LoopImmediately));
+    telemetry.Set(ExperimentTelemetry(10, StartResult::Failure, IterationResult::LoopImmediately));
     telemetry.Set(GyroscopeTelemetry(350, 351, 352, 353));
     telemetry.Set(GetCommTelemetry());
     telemetry.Set(GpioState(true));
