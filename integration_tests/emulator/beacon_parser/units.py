@@ -61,14 +61,17 @@ class PlainNumber(TelemetryUnit):
 
 class EnumValue(TelemetryUnit):
     def __init__(self, enum_type, raw):
-        super(EnumValue, self).__init__(raw, raw)
+        try:
+            converted = enum_type(raw).name
+        except ValueError:
+            converted = 'None'
+
+        super(EnumValue, self).__init__(raw, converted)
         self.enum_type = enum_type
+        self.unit = enum_type.__name__
 
     def __str__(self):
-        try:
-            return str(self.enum_type(self.converted))
-        except ValueError:
-            return 'None'
+        return self.converted
 
 
 def enum(enum_type):
