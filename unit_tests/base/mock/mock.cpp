@@ -8,6 +8,7 @@
 #include "mock/ImtqDriverMock.hpp"
 #include "mock/ImtqTelemetryCollectorMock.hpp"
 #include "mock/LineIOMock.hpp"
+#include "mock/NotifyTimeChangedMock.hpp"
 #include "mock/OpenSailMock.hpp"
 #include "mock/PayloadExperimentTelemetryProviderMock.hpp"
 #include "mock/PhotoServiceMock.hpp"
@@ -165,5 +166,13 @@ EPSDriverMock::EPSDriverMock()
 }
 
 EPSDriverMock::~EPSDriverMock()
+{
+}
+
+NotifyTimeChangedMock::NotifyTimeChangedMock()
+{
+}
+
+NotifyTimeChangedMock::~NotifyTimeChangedMock()
 {
 }
