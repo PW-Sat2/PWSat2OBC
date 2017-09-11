@@ -1,4 +1,5 @@
 from parser import CategoryParser
+from imtq_housekeeping_telemetry_parser import IMTQCurrent
 
 
 class ImtqCoilsTelemetryParser(CategoryParser):
@@ -9,6 +10,6 @@ class ImtqCoilsTelemetryParser(CategoryParser):
         return 3 * 16
 
     def parse(self):
-        self.append_word("Coil Current 1")
-        self.append_word("Coil Current 2")
-        self.append_word("Coil Current 3")
+        self.append_word("Coil Current 1", value_type=IMTQCurrent)
+        self.append_word("Coil Current 2", value_type=IMTQCurrent)
+        self.append_word("Coil Current 3", value_type=IMTQCurrent)

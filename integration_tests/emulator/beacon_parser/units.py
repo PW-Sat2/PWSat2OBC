@@ -24,7 +24,7 @@ class Hex16(TelemetryUnit):
         super(Hex16, self).__init__(raw, raw)
 
     def __str__(self):
-        return '{:04X}'.format(self.raw)
+        return '0x{:04X}'.format(self.raw)
 
 
 class TimeFromMilliseconds(TelemetryUnit):
@@ -40,7 +40,7 @@ class TimeFromSeconds(TelemetryUnit):
         super(TimeFromSeconds, self).__init__(raw, timedelta(seconds=raw))
 
     def __str__(self):
-        return '0x{}'.format(self.converted)
+        return '{}'.format(self.converted)
 
 
 class BoolType(TelemetryUnit):
@@ -65,7 +65,10 @@ class EnumValue(TelemetryUnit):
         self.enum_type = enum_type
 
     def __str__(self):
-        return str(self.enum_type(self.converted))
+        try:
+            return str(self.enum_type(self.converted))
+        except ValueError:
+            return 'None'
 
 
 def enum(enum_type):

@@ -1,4 +1,5 @@
 from parser import CategoryParser
+from imtq_housekeeping_telemetry_parser import Temperature
 
 
 class ImtqTemperatureTelemetryParser(CategoryParser):
@@ -9,6 +10,6 @@ class ImtqTemperatureTelemetryParser(CategoryParser):
         return 3 * 16
 
     def parse(self):
-        self.append_word("Coil Temperature 1")
-        self.append_word("Coil Temperature 2")
-        self.append_word("Coil Temperature 3")
+        self.append_word("Coil Temperature 1", value_type=Temperature)
+        self.append_word("Coil Temperature 2", value_type=Temperature)
+        self.append_word("Coil Temperature 3", value_type=Temperature)

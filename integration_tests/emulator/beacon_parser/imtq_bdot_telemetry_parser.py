@@ -1,4 +1,11 @@
+from emulator.beacon_parser.units import TelemetryUnit, unit
 from parser import CategoryParser
+
+
+@unit('T/s')
+class IMTQBDot(TelemetryUnit):
+    def __init__(self, raw):
+        super(IMTQBDot, self).__init__(raw, raw * 1e-9)
 
 
 class ImtqBDotTelemetryParser(CategoryParser):
@@ -9,6 +16,6 @@ class ImtqBDotTelemetryParser(CategoryParser):
         return 3 * 32
 
     def parse(self):
-        self.append_dword("BDot 1")
-        self.append_dword("BDot 2")
-        self.append_dword("BDot 3")
+        self.append_dword("BDot 1", value_type=IMTQBDot)
+        self.append_dword("BDot 2", value_type=IMTQBDot)
+        self.append_dword("BDot 3", value_type=IMTQBDot)
