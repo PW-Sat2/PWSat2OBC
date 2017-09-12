@@ -32,3 +32,10 @@ class EntryFinalizeSuccess(ResponseFrame):
 
     def decode(self):
         (_, _, self.entries, self.crc) = struct.unpack('<BBBH', ensure_string(self.payload()))
+
+
+@response_frame(0x1D)
+class CopyBootSlots(ResponseFrame):
+    @classmethod
+    def matches(cls, payload):
+        return True

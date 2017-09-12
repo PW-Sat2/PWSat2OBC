@@ -132,6 +132,8 @@ namespace obc
          * @param epsProvider Telemetry provider for Payload Experiment
          * @param errorCounterProvider Error Counter telmetry provider
          * @param temperatureProvider MCU telemetry provider
+         * @param bootTable Boot table
+         * @param programFlashDriver Program flash driver
          */
         OBCExperiments(services::fs::IFileSystem& fs,
             adcs::IAdcsCoordinator& adcs,
@@ -148,7 +150,8 @@ namespace obc
             devices::eps::IEpsTelemetryProvider& epsProvider,
             error_counter::IErrorCountingTelemetryProvider* errorCounterProvider,
             temp::ITemperatureReader* temperatureProvider,
-            program_flash::BootTable& bootTable);
+            program_flash::BootTable& bootTable,
+            program_flash::IFlashDriver& programFlashDriver);
 
         /**
          * @brief Performs initialization

@@ -105,7 +105,6 @@ class PerformSADSExperiment(Telecommand):
 
     def payload(self):
         return [self._correlation_id]
-        self.file_name = file_name
 
 
 class PerformCameraCommissioningExperiment(Telecommand):
@@ -119,3 +118,16 @@ class PerformCameraCommissioningExperiment(Telecommand):
         Telecommand.__init__(self)
         self.correlation_id = correlation_id
         self.file_name = file_name
+
+
+class CopyBootSlots(Telecommand):
+    def apid(self):
+        return 0x28
+
+    def payload(self):
+        return [self.correlation_id, self.source_mask, self.target_mask]
+
+    def __init__(self, correlation_id, source_mask, target_mask):
+        self.target_mask = target_mask
+        self.source_mask = source_mask
+        self.correlation_id = correlation_id

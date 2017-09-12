@@ -1,10 +1,13 @@
 #include "program_exp.hpp"
+#include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <gsl/span>
 #include "base/os.h"
 #include "base/writer.h"
 #include "comm/ITransmitter.hpp"
 #include "logger/logger.h"
+#include "redundancy.hpp"
 #include "telecommunication/downlink.h"
 
 using experiments::IterationResult;
@@ -67,8 +70,9 @@ namespace experiment
             return response;
         }
 
-        CopyBootSlotsExperiment::CopyBootSlotsExperiment(program_flash::BootTable& bootTable, devices::comm::ITransmitter& transmitter)
-            : _bootTable(bootTable), _transmitter(transmitter)
+        CopyBootSlotsExperiment::CopyBootSlotsExperiment(
+            program_flash::BootTable& bootTable, program_flash::IFlashDriver& flashDriver, devices::comm::ITransmitter& transmitter)
+            : _bootTable(bootTable), _flashDriver(flashDriver), _transmitter(transmitter)
         {
         }
 
@@ -96,12 +100,32 @@ namespace experiment
             return a;
         }
 
+        static std::array<std::uint8_t, 3> ToSlotNumbers(BootEntriesSelector mask)
+        {
+            std::array<std::uint8_t, 3> slots{0, 0, 0};
+
+            for (auto i = 0, j = 0; i < 6; i++)
+            {
+                if (mask[i])
+                {
+                    slots[j] = i;
+                    j++;
+                }
+
+                if (j == 3)
+                    break;
+            }
+
+            return slots;
+        }
+
         IterationResult CopyBootSlotsExperiment::Iteration()
         {
-            // TODO: Get source boot slot based on majority voting of 3 source entries. Code below based on program_upload telecommands.
-            int _selectedBootSlot = 0;
-            auto&& source = this->_bootTable.Entry(_selectedBootSlot);
-            uint16_t expectedCrc = source.CalculateCrc();
+            auto slots = ToSlotNumbers(_sourceEntries);
+
+            std::array<gsl::span<const std::uint8_t>, 3> entryBases;
+            std::transform(
+                slots.begin(), slots.end(), entryBases.begin(), [this](auto& e) { return this->_bootTable.Entry(e).WholeEntry(); });
 
             UniqueLock<program_flash::BootTable> lock(this->_bootTable, InfiniteTimeout);
 
@@ -109,47 +133,44 @@ namespace experiment
             {
                 if (_targetEntries[i])
                 {
-                    auto result = this->_bootTable.Entry(i).Erase();
+                    auto target = this->_bootTable.Entry(i);
+                    auto result = target.Erase();
 
                     if (!result)
                     {
-                        // TODO: Are those messages needed as this is long running experiment and we can have no chance to recieve them?
                         _transmitter.SendFrame(EraseEntryError(num(std::get<0>(result.Error())), i, std::get<1>(result.Error())).Frame());
-                        return IterationResult::Failure;
-                    }
-
-                    auto r = this->_bootTable.Entry(i).WriteContent(0, source.WholeEntry());
-
-                    if (r != FlashStatus::NotBusy)
-                    {
-                        _transmitter.SendFrame(WriteProgramError(num(r), i, 0).Frame());
-                        return IterationResult::Failure;
-                    }
-
-                    auto e = this->_bootTable.Entry(i);
-
-                    r = FlashStatus::NotBusy;
-
-                    r = Worst(r, e.Crc(expectedCrc));
-                    // r = Worst(r, e.Length(length));
-                    // r = Worst(r, e.Description(description.data()));
-                    r = Worst(r, e.MarkAsValid());
-
-                    if (r != program_flash::FlashStatus::NotBusy)
-                    {
-                        _transmitter.SendFrame(FinalizeEntryWriteError(num(r), i).Frame());
-                        return IterationResult::Failure;
-                    }
-
-                    auto actualCrc = e.CalculateCrc();
-
-                    if (actualCrc != expectedCrc)
-                    {
-                        _transmitter.SendFrame(FinalizeEntryCRCError(i, actualCrc).Frame());
                         return IterationResult::Failure;
                     }
                 }
             }
+
+            std::array<std::uint8_t, 1_KB> copyBuffer;
+
+            for (std::size_t offset = 0; offset < program_flash::ProgramEntry::Size; offset += copyBuffer.size())
+            {
+                auto partSize = std::min(copyBuffer.size(), program_flash::ProgramEntry::Size - offset);
+
+                std::array<gsl::span<const std::uint8_t>, 3> parts;
+                std::transform(entryBases.begin(), entryBases.end(), parts.begin(), [offset, partSize](auto& p) {
+                    return p.subspan(offset, partSize);
+                });
+
+                redundancy::CorrectBuffer(copyBuffer, parts[0], parts[1], parts[2]);
+
+                for (auto i = 0; i < program_flash::BootTable::EntriesCount; i++)
+                {
+                    if (_targetEntries[i])
+                    {
+                        auto target = this->_bootTable.Entry(i);
+                        this->_flashDriver.Program(target.InFlashOffset() + offset, copyBuffer);
+                    }
+                }
+            }
+
+            DownlinkFrame response(DownlinkAPID::CopyBootTable, 0);
+            response.PayloadWriter().WriteByte(0);
+
+            _transmitter.SendFrame(response.Frame());
 
             return IterationResult::Finished;
         }
