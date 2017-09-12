@@ -56,7 +56,7 @@ class BoolType(TelemetryUnit):
 
 class BoolTypeNegated(TelemetryUnit):
     def __init__(self, raw):
-        super(BoolTypeNegated, self).__init__(raw, raw != 0)
+        super(BoolTypeNegated, self).__init__(raw, raw == 0)
 
     def __str__(self):
         if self.converted:
