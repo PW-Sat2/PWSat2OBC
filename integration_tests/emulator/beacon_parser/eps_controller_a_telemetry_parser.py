@@ -77,9 +77,7 @@ class LMT87Temperature(TelemetryUnit):
 @unit('C')
 class TMP121Temperature(TelemetryUnit):
     def __init__(self, raw):
-        sign = (-1) ** (raw >> 12)
-        converted = sign * (raw & 0b111111111111) * 2 * 0.0625
-
+        converted = raw * 0.0625
         super(TMP121Temperature, self).__init__(raw, converted)
 
 
@@ -141,8 +139,8 @@ class EPSControllerATelemetryParser(CategoryParser):
         self.append('BATC.DCHRG_CURR', 10, value_type=DistributionVoltage)
         self.append('BATC.Temperature', 10, value_type=LMT87Temperature)
         self.append('BATC.State', 8)
-        self.append('BP.Temperature A', 13, value_type=TMP121Temperature)
-        self.append('BP.Temperature B', 13, value_type=TMP121Temperature)
+        self.append('BP.Temperature A', 13, two_complement=True, value_type=TMP121Temperature)
+        self.append('BP.Temperature B', 13, two_complement=True, value_type=TMP121Temperature)
         self.append('Safety Counter', 8)
         self.append('Power Cycle Count', 16)
         self.append('Uptime', 32, value_type=TimeFromSeconds)
