@@ -19,7 +19,7 @@ class ReceiverCurrent(TelemetryUnit):
 @unit('C')
 class CommTemperature(TelemetryUnit):
     def __init__(self, raw):
-        super(CommTemperature, self).__init__(raw, (raw * -0.546) + 189.5522)
+        super(CommTemperature, self).__init__(raw, (raw * -0.0546) + 189.5522)
 
 
 @unit('Hz')
