@@ -24,13 +24,17 @@ void TaskListCommand(uint16_t argc, char* argv[])
 
     uxTaskGetSystemState(tasks.data(), tasksCount, nullptr);
 
-    GetTerminal().Puts("Status\tName      \tStack WM\n");
+    GetTerminal().Puts("Status\tName      \tStack WM\tCur. Pri\tBase Pri\n");
 
     for (auto i = 0; i < tasksCount; i++)
     {
         auto& t = tasks[i];
 
-        GetTerminal().Printf(
-            "%-6c\t%-10s\t%8d\n", TaskStatuses[t.eCurrentState], t.pcTaskName, t.usStackHighWaterMark * sizeof(StackType_t));
+        GetTerminal().Printf("%-6c\t%-10s\t%8d\t%8ld\t%8ld\n",
+            TaskStatuses[t.eCurrentState],
+            t.pcTaskName,
+            t.usStackHighWaterMark * sizeof(StackType_t),
+            t.uxCurrentPriority,
+            t.uxBasePriority);
     }
 }

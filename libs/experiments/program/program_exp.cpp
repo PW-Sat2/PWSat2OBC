@@ -46,30 +46,6 @@ namespace experiment
             return response;
         }
 
-        static inline DownlinkFrame FinalizeEntryWriteError(std::uint8_t errorCode, std::uint8_t entry)
-        {
-            DownlinkFrame response(DownlinkAPID::CopyBootTable, 0);
-            auto& writer = response.PayloadWriter();
-            writer.WriteByte(2);
-            writer.WriteByte(1);
-            writer.WriteByte(errorCode);
-            writer.WriteByte(1 << entry);
-
-            return response;
-        }
-
-        static inline DownlinkFrame FinalizeEntryCRCError(std::uint8_t entry, std::uint16_t actualCrc)
-        {
-            DownlinkFrame response(DownlinkAPID::CopyBootTable, 0);
-            auto& writer = response.PayloadWriter();
-            writer.WriteByte(2);
-            writer.WriteByte(20);
-            writer.WriteByte(1 << entry);
-            writer.WriteWordLE(actualCrc);
-
-            return response;
-        }
-
         CopyBootSlotsExperiment::CopyBootSlotsExperiment(
             program_flash::BootTable& bootTable, program_flash::IFlashDriver& flashDriver, devices::comm::ITransmitter& transmitter)
             : _bootTable(bootTable), _flashDriver(flashDriver), _transmitter(transmitter)
@@ -162,7 +138,12 @@ namespace experiment
                     if (_targetEntries[i])
                     {
                         auto target = this->_bootTable.Entry(i);
-                        this->_flashDriver.Program(target.InFlashOffset() + offset, copyBuffer);
+                        auto result = this->_flashDriver.Program(target.InFlashOffset() + offset, copyBuffer);
+
+                        if (result != FlashStatus::NotBusy)
+                        {
+                            _transmitter.SendFrame(WriteProgramError(num(result), i, offset).Frame());
+                        }
                     }
                 }
             }
