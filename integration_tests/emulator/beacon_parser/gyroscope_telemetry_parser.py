@@ -25,4 +25,4 @@ class GyroscopeTelemetryParser(CategoryParser):
         self.append("X measurement", 16, two_complement=True, value_type=AngularRate)
         self.append("Y measurement", 16, two_complement=True, value_type=AngularRate)
         self.append("Z measurement", 16, two_complement=True, value_type=AngularRate)
-        self.append_word("Temperature", value_type=GyroTemperature)
+        self.append("Temperature", 16, two_complement=True, value_type=GyroTemperature)
