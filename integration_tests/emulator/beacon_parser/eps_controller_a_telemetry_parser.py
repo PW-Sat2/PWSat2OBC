@@ -7,13 +7,10 @@ from parser import CategoryParser
 @unit('V')
 class MPPTVoltage(TelemetryUnit):
     def __init__(self, raw):
-        if raw > 1023 or raw < 0:
-            raw = 1023
-        calculated_mv_adc = ((raw / 1024.0) * 3.0) * 1000.0
-        converted = round(((
-                               13.582 - math.sqrt(
-                                   (-13.582 * (-13.582)) + 4 * 0.00433 * (2230.8 - calculated_mv_adc))) / (
-                               2 * (-0.00433))) + 30.0, 1)
+        if raw > 4095 or raw < 0:
+            raw = 4095
+        calculated_v_adc = (raw / 4096.0) * 3.3
+        converted = round(calculated_v_adc*((4.7 + 1.0)/(1.0)), 2)
 
         super(MPPTVoltage, self).__init__(raw, converted)
 
