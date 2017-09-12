@@ -98,8 +98,9 @@ OBC::OBC()
           this->Hardware.EPS,
           &this->Fdir,
           &this->Hardware.MCUTemperature,
-          BootTable), //
-      Communication(  //
+          BootTable,
+          this->Hardware.FlashDriver), //
+      Communication(                   //
           this->Fdir,
           this->Hardware.CommDriver,
           this->timeProvider,

@@ -258,13 +258,13 @@ namespace obc
          *  - Source boot entries  (8-bit as bitset)
          *  - Target boot entries  (8-bit as bitset)
          */
-        class PerformCopyBootSlotsExperiment final : public telecommunication::uplink::Telecommand<0x27>
+        class PerformCopyBootSlotsExperiment final : public telecommunication::uplink::Telecommand<0x28>
         {
           public:
             /**
              * @brief Ctor
              * @param controller Experiments controller
-             * @param setupCamera Interface for setting up Camera experiment
+             * @param setupCopy Interface for setting up Copy Boot slots experiment
              */
             PerformCopyBootSlotsExperiment(
                 experiments::IExperimentController& controller, experiment::program::ISetupCopyBootSlotsExperiment& setupCopy);

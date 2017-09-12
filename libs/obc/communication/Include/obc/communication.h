@@ -162,8 +162,8 @@ namespace obc
         obc::telecommands::CompileInfoTelecommand,
         obc::telecommands::ResetTransmitterTelecommand,
         obc::telecommands::DisableOverheatSubmodeTelecommand,
-        obc::telecommands::SetBitrateTelecommand
-        >;
+        obc::telecommands::SetBitrateTelecommand,
+        obc::telecommands::PerformCopyBootSlotsExperiment>;
 
     /**
      * @brief OBC <-> Earth communication

@@ -78,8 +78,10 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           CompileInfoTelecommand(),                                                                                     //
           ResetTransmitterTelecommand(),                                                                                //
           DisableOverheatSubmodeTelecommand(epsDriver),                                                                 //
-          SetBitrateTelecommand()                                                                                       //
-          ),                                                                                                            //
+          SetBitrateTelecommand(),                                                                                      //
+          PerformCopyBootSlotsExperiment(
+              experiments.ExperimentsController, experiments.Get<experiment::program::CopyBootSlotsExperiment>()) //
+          ),                                                                                                      //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {
 }

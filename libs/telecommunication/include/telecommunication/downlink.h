@@ -56,7 +56,7 @@ namespace telecommunication
             I2C = 0x1A,                        //!< I2C Raw
             PeriodicSet = 0x1B,                //!< Set periodic message
             SailExperiment = 0x1C,             //!< Automatically sent sail experiment data
-            CopyBootTable = 0x1D,              //!< Automatically sent sail experiment data
+            CopyBootTable = 0x1D,              //!< Automatically sent during copy boot slots experiment
             Telemetry = 0x3F,                  //!< TelemetryLong
             LastItem                           //!< LastItem
         };

@@ -20,10 +20,8 @@ namespace experiment
         {
             /**
              * @brief Sets file name for output file
-             * @param fileName File name for output file
-             *
-             * @remark String is copied to internal buffer
-             * @remark If string is longer than internal buffer size, it is trimmed to maximum size
+             * @param source Bit mask for three source slots
+             * @param target Bit mask target slots
              */
             virtual void SetupEntries(BootEntriesSelector& source, BootEntriesSelector& target) = 0;
         };
@@ -41,8 +39,11 @@ namespace experiment
             /**
              * @brief Ctor
              * @param bootTable The boot table
+             * @param flashDriver Program flash driver
+             * @param transmitter Transmitter
              */
-            CopyBootSlotsExperiment(program_flash::BootTable& bootTable, devices::comm::ITransmitter& transmitter);
+            CopyBootSlotsExperiment(
+                program_flash::BootTable& bootTable, program_flash::IFlashDriver& flashDriver, devices::comm::ITransmitter& transmitter);
 
             virtual experiments::ExperimentCode Type() override;
             virtual experiments::StartResult Start() override;
@@ -54,6 +55,7 @@ namespace experiment
           private:
             /** @brief Boot Table */
             program_flash::BootTable& _bootTable;
+            program_flash::IFlashDriver& _flashDriver;
 
             devices::comm::ITransmitter& _transmitter;
 
