@@ -1,4 +1,4 @@
-from utils import bits_to_dword, bits_to_byte, bits_to_word, bits_to_qword, call
+from utils import bits_to_dword, bits_to_byte, bits_to_word, bits_to_qword, call, decode_two_complement
 from bitarray import bitarray
 
 
@@ -55,28 +55,36 @@ class BeaconStorage:
         self.storage[category][name] = value
 
 
-class CategoryParser:
+class CategoryParser(object):
     def __init__(self, category, reader, store):
         self._category = category
         self._reader = reader
         self._store = store
 
-    def append(self, name, length, type_converter = None):
+    def append(self, name, length, value_type=None, two_complement=False):
         value = self._reader.read(length)
-        converted_value = call(type_converter, value, value)
+
+        if two_complement:
+            value = decode_two_complement(value, length)
+
+        if value_type is not None:
+            converted_value = value_type(value)
+        else:
+            converted_value = value
+
         self._store.write(self._category, self._format_name(name, length), converted_value)
 
-    def append_byte(self, name, type_converter = None):
-        self.append(name, 8, type_converter)
+    def append_byte(self, name, value_type=int):
+        self.append(name, 8, value_type)
 
-    def append_word(self, name, type_converter = None):
-        self.append(name, 16, type_converter)
+    def append_word(self, name, value_type=int):
+        self.append(name, 16, value_type)
 
-    def append_dword(self, name, type_converter = None):
-        self.append(name, 32, type_converter)
+    def append_dword(self, name, value_type=int):
+        self.append(name, 32, value_type)
 
-    def append_qword(self, name, type_converter = None):
-        self.append(name, 64, type_converter)
+    def append_qword(self, name, value_type=int):
+        self.append(name, 64, value_type)
 
     def _format_name(self, name, length):
         return str(self._reader.offset() - length).rjust(4, '0') + ": " + name

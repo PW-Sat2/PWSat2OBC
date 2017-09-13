@@ -1,3 +1,4 @@
+from emulator.beacon_parser.units import TimeFromSeconds, BoolType
 from parser import CategoryParser
 
 
@@ -11,6 +12,6 @@ class ImtqStateTelemetryParser(CategoryParser):
     def parse(self):
         self.append("Status", 8)
         self.append("Mode", 2)
-        self.append("Error during previous iteration", 8)
+        self.append("Error during previous iteration", 8, value_type=BoolType)
         self.append("Configuration changed", 1)
-        self.append("Uptime", 32)
+        self.append("Uptime", 32, value_type=TimeFromSeconds)

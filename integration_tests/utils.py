@@ -14,6 +14,7 @@ def hex_data(data):
 
     return str(['0x%X' % b for b in data])
 
+
 def pad_to_multiply(s, base, char):
     l = base - len(s) % base
     if l < base:
@@ -22,14 +23,18 @@ def pad_to_multiply(s, base, char):
         padding = ''
     return s + padding
 
+
 def b64pad(s):
     return pad_to_multiply(s, 3, '=')
+
 
 def lower_byte(value):
     return value & 0xff
 
+
 def higher_byte(value):
     return (value >> 8) & 0xff
+
 
 def bitlist_to_byte(bitlist):
     out = 0
@@ -38,32 +43,41 @@ def bitlist_to_byte(bitlist):
 
     return out
 
+
 def pad_bits(bits, expected_length):
     while bits.length() < expected_length:
         bits.append(False)
 
     return bits
 
+
 def bits_to_byte(bits):
     return struct.unpack('<B', bytearray(pad_bits(bits, 8).tobytes()))[0]
+
 
 def bytes_to_qword(bytes):
     return struct.unpack("<Q", bytearray(bytes))[0]
 
+
 def bits_to_qword(bits):
     return bytes_to_qword(pad_bits(bits, 64).tobytes())
+
 
 def bytes_to_dword(bytes):
     return struct.unpack("<I", bytearray(bytes))[0]
 
+
 def bits_to_dword(bits):
     return bytes_to_dword(pad_bits(bits, 32).tobytes())
+
 
 def bytes_to_word(bytes):
     return struct.unpack("<H", bytearray(bytes))[0]
 
+
 def bits_to_word(bits):
     return bytes_to_word(pad_bits(bits, 16).tobytes())
+
 
 class ExtendableFormatter(Formatter):
     _converters = {}
@@ -77,6 +91,7 @@ class ExtendableFormatter(Formatter):
     def register_conversion(self, name, func):
         self._converters[name] = func
 
+
 def call(method, default, *args):
     if method:
         result = method(*args)
@@ -84,6 +99,7 @@ def call(method, default, *args):
             return result
 
     return default
+
 
 class TestEvent():
     def __init__(self):
@@ -95,7 +111,7 @@ class TestEvent():
     def reset(self, *args):
         self.flag.clear();
 
-    def wait_for_change(self, timeout = None):
+    def wait_for_change(self, timeout=None):
         return self.flag.wait(timeout)
 
 
@@ -177,6 +193,7 @@ class Lazy:
 
         return self._value
 
+
 class RepeatedTimer:
     def __init__(self, interval, callback):
         self._interval = interval
@@ -224,3 +241,9 @@ class RepeatedTimer:
 
             self._stopped.set()
 
+
+def decode_two_complement(val, bits):
+    """compute the 2's complement of int value val"""
+    if (val & (1 << (bits - 1))) != 0:  # if sign bit is set e.g., 8bit: 128-255
+        val = val - (1 << bits)  # compute negative value
+    return val  # return positive value as is

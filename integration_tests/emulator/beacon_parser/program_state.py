@@ -1,3 +1,4 @@
+from emulator.beacon_parser.units import Hex16
 from parser import CategoryParser
 
 
@@ -9,4 +10,4 @@ class ProgramStateParser(CategoryParser):
         return 2*8
 
     def parse(self):
-        self.append_word("Program CRC")
+        self.append_word("Program CRC", value_type=Hex16)

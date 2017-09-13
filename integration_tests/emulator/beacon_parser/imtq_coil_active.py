@@ -1,3 +1,4 @@
+from emulator.beacon_parser.units import BoolType
 from parser import CategoryParser
 
 
@@ -9,4 +10,4 @@ class ImtqCoilActiveTelemetryParser(CategoryParser):
         return 1
 
     def parse(self):
-        self.append("Coils active during measurement", 1)
+        self.append("Coils active during measurement", 1, value_type=BoolType)
