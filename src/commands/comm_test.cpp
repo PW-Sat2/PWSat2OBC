@@ -39,6 +39,36 @@ static void Cont(char* argv[])
 
     while (true)
     {
+        System::SleepTask(delay);
+
+        for (auto i = 0; i < countInIteration; i++)
+        {
+            GetCommDriver().SendFrame(frame);
+        }
+    }
+}
+
+static void Burst(char* argv[])
+{
+    std::array<std::uint8_t, 200> buf;
+
+    for (auto i = 0U; i < buf.size(); i++)
+    {
+        buf[i] = 65 + (i % 25);
+    }
+
+    auto countInIteration = atoi(argv[0]);
+    auto delay = milliseconds(atoi(argv[1]));
+    auto frameLength = atoi(argv[2]);
+
+    LOGF(LOG_LEVEL_INFO, "[comm test] burst (%d, %d ms, %d)", countInIteration, static_cast<int>(delay.count()), frameLength);
+
+    GetTerminal().Puts("\n>");
+
+    auto frame = gsl::make_span(buf).subspan(0, frameLength);
+
+    while (true)
+    {
         for (auto i = 0; i < countInIteration; i++)
         {
             GetCommDriver().SendFrame(frame);
@@ -54,8 +84,13 @@ void CommTest(std::uint16_t argc, char* argv[])
     {
         Cont(argv + 1);
     }
+    else if (argc == 4 && strcmp(argv[0], "burst") == 0)
+    {
+        Burst(argv + 1);
+    }
     else
     {
         GetTerminal().Puts("comm_test cont <initial frame count> <count in each iteration> <delay in ms> <length>\n");
+        GetTerminal().Puts("comm_test burst <count in each iteration> <delay in ms> <length>\n");
     }
 }
