@@ -161,6 +161,7 @@ namespace mission
             LOG(LOG_LEVEL_ERROR, "[Time] Unable to set time state");
         }
 
+        state.Time = newTime;
         _missionLoop.NotifyTimeChanged(difference);
     }
 
