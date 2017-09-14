@@ -11,14 +11,12 @@ class Test_Gyro(RestartPerSuite):
         self.system.obc.gyro_init()
         self.assertTrue(self.system.gyro.initialised)
 
-    def test_read_fail_before_init(self):
+    def test_read_before_init_casues_init(self):
         self.system.gyro.reset()
 
-        try:
-            self.system.obc.gyro_read()
-            self.fail("Gyro read didn't fail despite not initialised device!")
-        except ValueError:
-            pass
+        self.assertFalse(self.system.gyro.initialised)
+        self.system.obc.gyro_read()
+        self.assertTrue(self.system.gyro.initialised)
 
     def test_init_and_read(self):
         self.system.gyro.reset()
