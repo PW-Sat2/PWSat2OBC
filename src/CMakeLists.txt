@@ -37,6 +37,7 @@ set(SOURCES
     commands/exp_suns.cpp
     commands/camera.cpp
     commands/adcs.cpp
+    commands/comm_test.cpp
     checks/error_counters.cpp
     checks/checks.cpp
     obc.h

@@ -64,6 +64,7 @@ static const TerminalCommandDescription commands[] = {
     {"camera", CameraCommand},
     {"photo", TestPhoto},
     {"adcs", AdcsCommand},
+    {"comm_test", CommTest},
 };
 
 void InitializeTerminal(void)
