@@ -32,7 +32,7 @@ class GyroTest : public testing::Test
 
   protected:
     devices::gyro::GyroDriver gyro;
-    I2CBusMock i2c;
+    testing::NiceMock<I2CBusMock> i2c;
     OSMock os;
     OSReset _reset;
 };
@@ -242,9 +242,53 @@ TEST_F(GyroTest, read_happyCase)
 
 TEST_F(GyroTest, read_I2CFailed)
 {
-    for (int i2cresult = -9; i2cresult < 0; i2cresult++)
+    ON_CALL(i2c, WriteRead(_addr, ElementsAre(0x1A), _)).WillByDefault(Return(I2CResult::Failure));
+    ON_CALL(i2c, WriteRead(_addr, ElementsAre(0x3E), _)).WillByDefault(Return(I2CResult::OK));
+    ON_CALL(i2c, WriteRead(_addr, ElementsAre(0x15), _)).WillByDefault(Return(I2CResult::OK));
+
+    EXPECT_FALSE(gyro.read().HasValue);
+}
+
+TEST_F(GyroTest, read_I2CFailedThanComeBackToLive)
+{
     {
-        EXPECT_CALL(i2c, WriteRead(_addr, ElementsAre(0x1A), _)).WillOnce(Invoke([=](uint8_t, auto, auto read) {
+        testing::InSequence s;
+
+        EXPECT_CALL(i2c, WriteRead(_addr, ElementsAre(0x1A), _)).WillOnce(Return(I2CResult::Failure));
+        EXPECT_CALL(i2c, Write(_addr, ElementsAre(0x3E, (1 << 7)))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, WriteRead(_addr, ElementsAre(0), _)).WillOnce(Invoke([](uint8_t, auto, auto read) {
+            EXPECT_EQ(read.size(), 1);
+
+            read[0] = 0b1101000;
+            return I2CResult::OK;
+        }));
+        EXPECT_CALL(i2c, Write(_addr, ElementsAre(0x3E, 1))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, Write(_addr, ElementsAre(0x15, 1, 0b11110, 0b1000101))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, WriteRead(_addr, ElementsAre(0x1A), _)).WillOnce(Invoke([](uint8_t, auto, auto read) {
+            EXPECT_EQ(read.size(), 1);
+
+            read[0] = 0b101;
+            return I2CResult::OK;
+        }));
+
+        EXPECT_CALL(i2c, WriteRead(_addr, ElementsAre(0x1A), _)).WillOnce(Return(I2CResult::Failure));
+        EXPECT_CALL(i2c, Write(_addr, ElementsAre(0x3E, (1 << 7)))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, WriteRead(_addr, ElementsAre(0), _)).WillOnce(Invoke([](uint8_t, auto, auto read) {
+            EXPECT_EQ(read.size(), 1);
+
+            read[0] = 0b1101000;
+            return I2CResult::OK;
+        }));
+        EXPECT_CALL(i2c, Write(_addr, ElementsAre(0x3E, 1))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, Write(_addr, ElementsAre(0x15, 1, 0b11110, 0b1000101))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, WriteRead(_addr, ElementsAre(0x1A), _)).WillOnce(Invoke([](uint8_t, auto, auto read) {
+            EXPECT_EQ(read.size(), 1);
+
+            read[0] = 0b101;
+            return I2CResult::OK;
+        }));
+
+        EXPECT_CALL(i2c, WriteRead(_addr, ElementsAre(0x1A), _)).WillOnce(Invoke([&](uint8_t, auto, auto read) {
             EXPECT_EQ(read.size(), 9);
 
             read[0] = 0b1;
@@ -256,21 +300,18 @@ TEST_F(GyroTest, read_I2CFailed)
             read[6] = 6;
             read[7] = 7;
             read[8] = 8;
-
-            return static_cast<I2CResult>(i2cresult);
+            return I2CResult::OK;
         }));
-
-        EXPECT_FALSE(gyro.read().HasValue);
     }
+
+    EXPECT_TRUE(gyro.read().HasValue);
 }
 
 TEST_F(GyroTest, read_dataNotReady)
 {
     for (int status = 0; status <= 0xFF; ++status)
     {
-        EXPECT_CALL(i2c, WriteRead(_addr, ElementsAre(0x1A), _)).WillOnce(Invoke([=](uint8_t, auto, auto read) {
-            EXPECT_EQ(read.size(), 9);
-
+        ON_CALL(i2c, WriteRead(_addr, ElementsAre(0x1A), SpanOfSize(9))).WillByDefault(Invoke([=](uint8_t, auto, auto read) {
             read[0] = status;
 
             return I2CResult::OK;

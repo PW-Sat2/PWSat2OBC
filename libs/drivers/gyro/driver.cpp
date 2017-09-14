@@ -282,7 +282,20 @@ namespace devices
         Option<GyroscopeTelemetry> GyroDriver::read()
         {
             DetailedDriver driver{i2cbus};
-            return driver.get_raw();
+            decltype(driver.get_raw()) result;
+            for (auto i = 0; i < 3; i++)
+            {
+                result = driver.get_raw();
+
+                if (result.HasValue)
+                {
+                    return result;
+                }
+
+                this->init();
+            }
+
+            return result;
         }
     }
 }
