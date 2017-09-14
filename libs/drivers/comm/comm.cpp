@@ -118,7 +118,7 @@ bool CommObject::SendBufferWithResponse(Address address, //
         return false >> resultAggregator;
     }
 
-    System::SleepTask(2ms);
+    System::SleepTask(20ms);
     result = this->_low.Read(num(address), outBuffer);
     const auto status = (result == I2CResult::OK);
     if (!status)
@@ -524,7 +524,7 @@ bool CommObject::ScheduleFrameTransmission(
 
         auto freeSlotsDelta = static_cast<std::int8_t>(current.FreeSlots) - this->_lastSend.Value.FreeSlots;
 
-        if (timeDelta >= 5s && freeSlotsDelta < 0)
+        if (timeDelta >= 600s && freeSlotsDelta < -5)
         {
             LOGF(LOG_LEVEL_WARNING,
                 "[comm] Restarting transmitter after queue stalled (free slots %d -> %d, time %lds -> %lds)",
@@ -533,6 +533,7 @@ bool CommObject::ScheduleFrameTransmission(
                 static_cast<std::uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(this->_lastSend.Value.Timestamp).count()),
                 static_cast<std::uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(current.Timestamp).count()));
             ResetTransmitter();
+            System::SleepTask(3s);
             this->_lastSend = None<LastSendTimestamp>();
             return false;
         }
@@ -557,7 +558,7 @@ Option<bool> CommObject::SetBeacon(const Beacon& beaconData)
         return Option<bool>::None();
     }
 
-    return Option<bool>::Some(UpdateBeaconInternal(beaconData, errorContext.Counter()));
+    return Option<bool>::Some(true);
 }
 
 bool CommObject::UpdateBeacon(const Beacon& beaconData)
