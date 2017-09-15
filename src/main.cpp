@@ -55,7 +55,7 @@ devices::comm::ICommHardwareObserver* GetCommHardwareObserver()
 }
 
 telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver,
-    std::make_tuple(std::ref(Main.fs), mission::TelemetryConfiguration{"/telemetry.current", "/telemetry.previous", 512_KB, 10}),
+    std::make_tuple(std::ref(Main.fs), mission::TelemetryConfiguration{"/telemetry.current", "/telemetry.previous", 512_KB, 3}),
     Main.Hardware.Gyro,
     Main.Fdir,
     Main.Hardware.EPS,

@@ -86,8 +86,8 @@ namespace telemetry
         FlashScrubbingTelemetryAcquisition,         //
         RamScrubbingTelemetryAcquisition<Scrubber>, //
         ImtqTelemetryAcquisition,                   //
-        TelemetrySerialization,                     //
-        SystemTelemetryAcquisition                  //
+        SystemTelemetryAcquisition,                 //
+        TelemetrySerialization                      //
         >
         ObcTelemetryAcquisition;
 }
