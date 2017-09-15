@@ -90,7 +90,7 @@ struct AntennaMiniportDriver
      * @param[in] miniport Pointer to the current driver instance.
      * @param[in] communicationBus Bus that should be used to communicate with hardware.
      * @param[in] channel Current hardware channel.
-     * @param[in] timeout Deployment operation timeout.
+     * @param[in] timeout Total deployment operation timeout.
      * @return Operation status.
      */
     OSResult (*InitializeAutomaticDeployment)(struct AntennaMiniportDriver* miniport,

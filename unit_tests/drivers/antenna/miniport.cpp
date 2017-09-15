@@ -101,7 +101,7 @@ namespace
 
     TEST_F(AntennaMiniportTest, TestAutomaticDeployment)
     {
-        EXPECT_CALL(i2c, Write(ANTENNA_PRIMARY_CHANNEL, BeginsWith(StartDeployment))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, Write(ANTENNA_PRIMARY_CHANNEL, testing::ElementsAre(StartDeployment, 50))).WillOnce(Return(I2CResult::OK));
         const auto status = miniport.InitializeAutomaticDeployment(&miniport, &i2c, ANTENNA_PRIMARY_CHANNEL, 200s);
         ASSERT_THAT(status, Eq(OSResult::Success));
     }

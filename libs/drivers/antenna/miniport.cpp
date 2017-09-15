@@ -165,8 +165,8 @@ static OSResult InitializeAutomaticDeployment(AntennaMiniportDriver* miniport,
 {
     UNREFERENCED_PARAMETER(miniport);
     uint8_t buffer[2];
-    buffer[0] = (uint8_t)(START_AUTOMATIC_DEPLOYMENT);
-    buffer[1] = (uint8_t)duration_cast<seconds>(timeout).count();
+    buffer[0] = static_cast<uint8_t>(START_AUTOMATIC_DEPLOYMENT);
+    buffer[1] = static_cast<uint8_t>(duration_cast<seconds>(timeout).count() >> 2);
     return MapStatus(communicationBus->Write(channel, buffer));
 }
 
