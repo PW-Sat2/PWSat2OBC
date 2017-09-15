@@ -268,10 +268,10 @@ namespace mission
 
         template <typename Task> bool EnableAutostartDisabledTask(std::false_type);
 
-        template <size_t i, typename Task, typename... Rest> bool NotifyTimeChanged(std::chrono::milliseconds timeCorrection);
-        template <size_t i> bool NotifyTimeChanged(std::chrono::milliseconds timeCorrection);
-        template <typename Task> bool SendTimeChangedNotification(std::chrono::milliseconds timeCorrection, std::true_type);
-        template <typename Task> bool SendTimeChangedNotification(std::chrono::milliseconds timeCorrection, std::false_type);
+        template <size_t i, typename Task, typename... Rest> void NotifyTimeChanged(std::chrono::milliseconds timeCorrection);
+        template <size_t i> void NotifyTimeChanged(std::chrono::milliseconds timeCorrection);
+        template <typename Task> void SendTimeChangedNotification(std::chrono::milliseconds timeCorrection, std::true_type);
+        template <typename Task> void SendTimeChangedNotification(std::chrono::milliseconds timeCorrection, std::false_type);
 
         /**
          * @brief Main mission loop.
@@ -569,34 +569,27 @@ namespace mission
 
     template <typename State, typename... T>
     template <size_t i, typename Task, typename... Rest>
-    bool MissionLoop<State, T...>::NotifyTimeChanged(std::chrono::milliseconds timeCorrection)
+    void MissionLoop<State, T...>::NotifyTimeChanged(std::chrono::milliseconds timeCorrection)
     {
-        if (!SendTimeChangedNotification<Task>(timeCorrection, IsRequireNotifyWhenTimeChanges<Task>()))
-        {
-            return false;
-        }
-
-        return NotifyTimeChanged<i, Rest...>(timeCorrection);
+        SendTimeChangedNotification<Task>(timeCorrection, IsRequireNotifyWhenTimeChanges<Task>());
+        NotifyTimeChanged<i, Rest...>(timeCorrection);
     }
 
-    template <typename State, typename... T> template <size_t i> bool MissionLoop<State, T...>::NotifyTimeChanged(std::chrono::milliseconds)
+    template <typename State, typename... T> template <size_t i> void MissionLoop<State, T...>::NotifyTimeChanged(std::chrono::milliseconds)
     {
-        return true;
     }
 
     template <typename State, typename... T>
     template <typename Task>
-    bool MissionLoop<State, T...>::SendTimeChangedNotification(std::chrono::milliseconds timeCorrection, std::true_type)
+    void MissionLoop<State, T...>::SendTimeChangedNotification(std::chrono::milliseconds timeCorrection, std::true_type)
     {
         static_cast<Task*>(this)->TimeChanged(timeCorrection);
-        return true;
     }
 
     template <typename State, typename... T>
     template <typename Task>
-    bool MissionLoop<State, T...>::SendTimeChangedNotification(std::chrono::milliseconds, std::false_type)
+    void MissionLoop<State, T...>::SendTimeChangedNotification(std::chrono::milliseconds, std::false_type)
     {
-        return true;
     }
 }
 

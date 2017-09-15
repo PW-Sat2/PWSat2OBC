@@ -50,12 +50,9 @@ class Test_Beacon_Restarting(RestartPerTest):
     def test_beacon_on_backward_time_correction(self):
         event = TestEvent()
 
-
         self.system.comm.transmitter.on_set_beacon = event.set
 
         log = logging.getLogger("test_beacon")
-
-
 
         # Set initial state: deployed antennas, T=+60m, and run mission for save everyting into persistent state
         self.system.obc.state_set_antenna(1)
