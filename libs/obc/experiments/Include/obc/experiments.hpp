@@ -10,6 +10,7 @@
 #include "experiment/leop/leop.hpp"
 #include "experiment/payload/PayloadExperimentTelemetryProvider.hpp"
 #include "experiment/payload/payload_exp.hpp"
+#include "experiment/program/program_exp.hpp"
 #include "experiment/radfet/radfet.hpp"
 #include "experiment/sads/sads.hpp"
 #include "experiment/sail/sail.hpp"
@@ -105,7 +106,8 @@ namespace obc
         experiment::sail::SailExperiment,                     //
         experiment::payload::PayloadCommissioningExperiment,  //
         experiment::sads::SADSExperiment,                     //
-        experiment::camera::CameraCommissioningExperiment>;
+        experiment::camera::CameraCommissioningExperiment,
+        experiment::program::CopyBootSlotsExperiment>;
 
     /**
      * @brief OBC experiments
@@ -130,6 +132,8 @@ namespace obc
          * @param epsProvider Telemetry provider for Payload Experiment
          * @param errorCounterProvider Error Counter telmetry provider
          * @param temperatureProvider MCU telemetry provider
+         * @param bootTable Boot table
+         * @param programFlashDriver Program flash driver
          */
         OBCExperiments(services::fs::IFileSystem& fs,
             adcs::IAdcsCoordinator& adcs,
@@ -145,7 +149,9 @@ namespace obc
             telemetry::IImtqDataProvider& imtq,
             devices::eps::IEpsTelemetryProvider& epsProvider,
             error_counter::IErrorCountingTelemetryProvider* errorCounterProvider,
-            temp::ITemperatureReader* temperatureProvider);
+            temp::ITemperatureReader* temperatureProvider,
+            program_flash::BootTable& bootTable,
+            program_flash::IFlashDriver& programFlashDriver);
 
         /**
          * @brief Performs initialization

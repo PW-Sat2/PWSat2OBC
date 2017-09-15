@@ -246,6 +246,37 @@ namespace obc
             /** @brief camera experiments settings */
             experiment::camera::ISetupCameraCommissioningExperiment& _setupCamera;
         };
+
+        /**
+         * @brief Perform Copy Boot Slots experiment telecommand
+         * @ingroup obc_telecommands
+         * @telecommand
+         *
+         * Code: 0x26
+         * Parameters:
+         *  - Correlation ID (8-bit)
+         *  - Source boot entries  (8-bit as bitset)
+         *  - Target boot entries  (8-bit as bitset)
+         */
+        class PerformCopyBootSlotsExperiment final : public telecommunication::uplink::Telecommand<0x28>
+        {
+          public:
+            /**
+             * @brief Ctor
+             * @param controller Experiments controller
+             * @param setupCopy Interface for setting up Copy Boot slots experiment
+             */
+            PerformCopyBootSlotsExperiment(
+                experiments::IExperimentController& controller, experiment::program::ISetupCopyBootSlotsExperiment& setupCopy);
+
+            virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
+
+          private:
+            /** @brief Experiments controller */
+            experiments::IExperimentController& _controller;
+            /** @brief camera experiments settings */
+            experiment::program::ISetupCopyBootSlotsExperiment& _setupCopy;
+        };
     }
 }
 

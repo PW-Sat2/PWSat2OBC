@@ -289,5 +289,54 @@ namespace obc
                 SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::ExperimentError);
             }
         }
+
+        PerformCopyBootSlotsExperiment::PerformCopyBootSlotsExperiment(
+            experiments::IExperimentController& controller, experiment::program::ISetupCopyBootSlotsExperiment& setupCopy)
+            : _controller(controller), _setupCopy(setupCopy)
+        {
+        }
+
+        void PerformCopyBootSlotsExperiment::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
+        {
+            Reader r(parameters);
+
+            auto correlationId = r.ReadByte();
+            auto sourceBitMask = r.ReadByte();
+            auto targetBitMask = r.ReadByte();
+
+            auto sourceCount = __builtin_popcount(sourceBitMask);
+            auto targetCount = __builtin_popcount(targetBitMask);
+
+            const auto areOvelapping = sourceBitMask & targetBitMask & ((1 << program_flash::BootTable::EntriesCount) - 1);
+
+            if (!r.Status() || areOvelapping || sourceCount != 3 || targetCount <= 0 || targetCount > 3)
+            {
+                CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+                response.PayloadWriter().WriteByte(0x1);
+                transmitter.SendFrame(response.Frame());
+                return;
+            }
+
+            LOG(LOG_LEVEL_INFO, "Requested Copy Boot Slots experiment");
+            experiment::program::BootEntriesSelector sourceEntries(sourceBitMask);
+            experiment::program::BootEntriesSelector targetEntries(targetBitMask);
+
+            this->_setupCopy.SetupEntries(sourceEntries, targetEntries);
+
+            auto success = this->_controller.RequestExperiment(experiment::program::CopyBootSlotsExperiment::Code);
+
+            CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
+
+            if (success)
+            {
+                response.PayloadWriter().WriteByte(0);
+            }
+            else
+            {
+                response.PayloadWriter().WriteByte(2);
+            }
+
+            transmitter.SendFrame(response.Frame());
+        }
     }
 }

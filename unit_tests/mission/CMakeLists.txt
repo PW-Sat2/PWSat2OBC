@@ -29,6 +29,7 @@ set(SOURCES
   Experiments/RadFET/RadFETExperimentTest.cpp 
   Experiments/Sail/SailExperimentTest.cpp
   Experiments/Camera/CameraExperimentTest.cpp
+  Experiments/CopyBootSlots/CopyBootSlotsExperimentTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
@@ -56,6 +57,7 @@ target_link_libraries(${NAME}
     exp_radfet
     exp_sail
     exp_camera
+    exp_program
     unit_tests_base
     payload
 )
