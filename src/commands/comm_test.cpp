@@ -9,7 +9,7 @@ using namespace std::chrono;
 
 static void Cont(char* argv[])
 {
-    std::array<std::uint8_t, 200> buf;
+    std::array<std::uint8_t, 240> buf;
 
     for (auto i = 0U; i < buf.size(); i++)
     {
@@ -50,7 +50,7 @@ static void Cont(char* argv[])
 
 static void Burst(char* argv[])
 {
-    std::array<std::uint8_t, 200> buf;
+    std::array<std::uint8_t, 240> buf;
 
     for (auto i = 0U; i < buf.size(); i++)
     {
@@ -66,9 +66,12 @@ static void Burst(char* argv[])
     GetTerminal().Puts("\n>");
 
     auto frame = gsl::make_span(buf).subspan(0, frameLength);
+    uint16_t iteration_count = 0;
 
     while (true)
     {
+        iteration_count++;
+        LOGF(LOG_LEVEL_INFO, "[comm test] burst (%d, %d ms, %d) - iteration %u", countInIteration, static_cast<int>(delay.count()), frameLength, iteration_count);
         for (auto i = 0; i < countInIteration; i++)
         {
             GetCommDriver().SendFrame(frame);
