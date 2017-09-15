@@ -14,8 +14,6 @@ function(add_unit_tests NAME)
     
     set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_SOURCE_DIR}/unit_tests/base/linker.ld -u _printf_float -specs=rdimon.specs ${LD_COVERAGE}")
     
-    target_memory_report(${NAME})
-
     target_asm_listing(${NAME})
     
     target_compile_options(${NAME} PRIVATE "-fexceptions")

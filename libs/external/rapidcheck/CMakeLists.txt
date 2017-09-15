@@ -13,6 +13,7 @@ set(RC_ENABLE_GTEST ON CACHE BOOL "" FORCE)
 add_compile_options(-fexceptions)
 add_compile_options(-funwind-tables)
 add_compile_options(-Wno-unused-parameter)
+#add_compile_options(-frtti)
 
 # Add rapidcheck directly to our build. This adds
 # the following targets: rapidcheck rapidcheck_gtest rapidcheck_gmock

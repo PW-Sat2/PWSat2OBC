@@ -15,6 +15,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 add_definitions(-DGTEST_HAS_POSIX_RE=0)
 add_definitions(-DGTEST_HAS_STREAM_REDIRECTION=0)
 add_definitions(-DGTEST_MOCK_FS=1)
+#add_compile_options(-frtti)
 
 # Add googletest directly to our build. This adds
 # the following targets: gtest, gtest_main, gmock
