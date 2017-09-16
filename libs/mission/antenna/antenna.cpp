@@ -150,7 +150,7 @@ namespace mission
         /**
          * @brief Long timeouts for heating problems.
          */
-        constexpr std::uint8_t LongTimeout = 39;
+        constexpr std::uint8_t LongTimeout = 35;
 
         /**
          * @brief Last resort timeout in case everything else fails.
@@ -175,7 +175,7 @@ namespace mission
         static const AntennaDeploymentStep deploymentSteps[] = {
             {PowerOnDriver, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 0, false},
             {ResetDriverStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 0, false},
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, MediumTimeout, false},
+            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, MediumTimeout * 4, false},
             {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, LongTimeout, true},
             {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, LongTimeout, true},
             {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, LongTimeout, true},
@@ -185,7 +185,7 @@ namespace mission
 
             {PowerOnDriver, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 0, false},
             {ResetDriverStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 0, false},
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, MediumTimeout, false},
+            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, MediumTimeout * 4, false},
             {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, LongTimeout, true},
             {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, LongTimeout, true},
             {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, LongTimeout, true},
