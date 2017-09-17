@@ -558,7 +558,7 @@ Option<bool> CommObject::SetBeacon(const Beacon& beaconData)
         return Option<bool>::None();
     }
 
-    return Option<bool>::Some(UpdateBeaconInternal(beaconData, errorContext.Counter()));
+    return Option<bool>::Some(true);
 }
 
 bool CommObject::UpdateBeacon(const Beacon& beaconData)
