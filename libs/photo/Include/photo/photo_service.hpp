@@ -402,7 +402,7 @@ namespace services
             std::array<std::uint8_t, 1>::iterator _freeSpace;
 
             /** @brief Background task */
-            Task<PhotoService*, 4_KB, TaskPriority::P6> _task;
+            Task<PhotoService*, 4_KB, TaskPriority::P5> _task;
             /** @brief Command queue */
             Queue<PossibleCommand, BuffersCount * 4> _commandQueue;
 

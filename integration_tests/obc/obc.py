@@ -24,6 +24,7 @@ from .payload import PayloadMixin
 from .runlevel import RunlevelMixin
 from .camera import CameraMixin
 from .adcs import ADCSMixin
+from .obc_rtos import RTOSMixin
 
 
 class OBC(OBCMixin,
@@ -46,7 +47,8 @@ class OBC(OBCMixin,
           PayloadMixin,
           RunlevelMixin,
           CameraMixin,
-          ADCSMixin
+          ADCSMixin,
+          RTOSMixin
           ):
     def __init__(self, terminal):
         self.log = logging.getLogger("OBC")
