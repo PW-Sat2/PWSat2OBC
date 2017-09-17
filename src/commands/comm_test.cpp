@@ -37,13 +37,18 @@ static void Cont(char* argv[])
         GetCommDriver().SendFrame(frame);
     }
 
+    uint16_t iteration_count = 0;
+
     while (true)
     {
         System::SleepTask(delay);
 
         for (auto i = 0; i < countInIteration; i++)
         {
+            iteration_count++;
             GetCommDriver().SendFrame(frame);
+            LOGF(LOG_LEVEL_INFO, "[comm test] send frame %u", iteration_count);
+
         }
     }
 }
