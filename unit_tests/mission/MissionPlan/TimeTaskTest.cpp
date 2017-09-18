@@ -4,6 +4,7 @@
 #include "OsMock.hpp"
 #include "mission/time.hpp"
 #include "mock/FsMock.hpp"
+#include "mock/NotifyTimeChangedMock.hpp"
 #include "mock/RtcMock.hpp"
 #include "os/os.hpp"
 #include "time/TimeSpan.hpp"
@@ -32,6 +33,7 @@ namespace
         mission::TimeTask timeTask;
         mission::UpdateDescriptor<SystemState> updateDescriptor;
         mission::ActionDescriptor<SystemState> actionDescriptor;
+        NotifyTimeChangedMock dummyMissionLoop;
 
         void SetCurrentTime(milliseconds time)
         {
@@ -52,8 +54,8 @@ namespace
     };
 
     TimeTaskTest::TimeTaskTest()
-        : timeTask(std::tie(provider, rtc)),        //
-          updateDescriptor(timeTask.BuildUpdate()), //
+        : timeTask(std::tie(provider, rtc, dummyMissionLoop)), //
+          updateDescriptor(timeTask.BuildUpdate()),            //
           actionDescriptor(timeTask.BuildAction())
     {
         osReset = InstallProxy(&mock);
@@ -115,6 +117,7 @@ namespace
         // The correct action was run initially
         SetCurrentTime(0ms);
         SetPersistentState(0ms, rtc.GetTime());
+        EXPECT_CALL(dummyMissionLoop, NotifyTimeChanged(Eq(-4s))).Times(1);
 
         // when
         // MCU runs much faster than RTC
@@ -141,6 +144,7 @@ namespace
         SetCurrentTime(0ms);
         SetPersistentState(0ms, rtc.GetTime());
         state.PersistentState.Set(state::TimeCorrectionConfiguration(1, 3));
+        EXPECT_CALL(dummyMissionLoop, NotifyTimeChanged(Eq(-6000ms))).Times(1);
 
         // when
         // MCU runs much faster than RTC
@@ -166,6 +170,7 @@ namespace
         // The correct action was run initially
         SetCurrentTime(0ms);
         SetPersistentState(0ms, rtc.GetTime());
+        EXPECT_CALL(dummyMissionLoop, NotifyTimeChanged(Eq(4s))).Times(1);
 
         // when
         // MCU runs much slower than RTC
@@ -190,6 +195,7 @@ namespace
         // The correct action was run initially
         SetCurrentTime(0ms);
         SetPersistentState(0ms, rtc.GetTime());
+        EXPECT_CALL(dummyMissionLoop, NotifyTimeChanged(_)).Times(2);
 
         // when
         // MCU runs much slower than RTC
@@ -220,6 +226,7 @@ namespace
         // The correct action was run initially
         SetCurrentTime(0ms);
         SetPersistentState(0ms, rtc.GetTime());
+        EXPECT_CALL(dummyMissionLoop, NotifyTimeChanged(_)).Times(0);
 
         // when
         // MCU runs much faster than RTC
@@ -243,6 +250,7 @@ namespace
         // The correct action was run initially
         SetCurrentTime(0ms);
         SetPersistentState(0ms, rtc.GetTime());
+        EXPECT_CALL(dummyMissionLoop, NotifyTimeChanged(_)).Times(0);
 
         // when
         // RTC reads invalid data
@@ -260,12 +268,35 @@ namespace
         ASSERT_EQ(mission::TimeTask::TimeCorrectionPeriod, provider.GetCurrentTime().Value);
     }
 
+    TEST_F(TimeTaskTest, CorrectionDoesNotRunWhenDeltaRTCIsZero)
+    {
+        // given
+        // The correct action was run initially
+        SetCurrentTime(0ms);
+        SetPersistentState(0ms, rtc.GetTime());
+        EXPECT_CALL(dummyMissionLoop, NotifyTimeChanged(Eq(std::chrono::milliseconds::zero()))).Times(1);
+
+        // when
+        // RTC time doesn't changed
+        rtc.SetTime(rtc.GetTime());
+
+        // And the correct action is run after at least TimeCorrectionPeriod
+        AdvanceTime(mission::TimeTask::TimeCorrectionPeriod);
+
+        actionDescriptor.Execute(state);
+
+        // then
+        // Time provider should not be updated
+        ASSERT_EQ(mission::TimeTask::TimeCorrectionPeriod, provider.GetCurrentTime().Value);
+    }
+
     TEST_F(TimeTaskTest, CorrectionDoesNotRunWhenTimeProviderReadFails)
     {
         // given
         // The correct action was run initially
         SetCurrentTime(0ms);
         SetPersistentState(0ms, rtc.GetTime());
+        EXPECT_CALL(dummyMissionLoop, NotifyTimeChanged(_)).Times(0);
 
         // when
         // MCU runs much faster than RTC
@@ -289,6 +320,7 @@ namespace
         // The correct action was run initially with maximum time value
         SetCurrentTime(milliseconds::max());
         SetPersistentState(milliseconds::max(), rtc.GetTime());
+        EXPECT_CALL(dummyMissionLoop, NotifyTimeChanged(_)).Times(1);
 
         // when
         // MCU runs much slower than RTC
@@ -309,6 +341,7 @@ namespace
         // The correct action was run initially with maximum time value
         SetCurrentTime(0ms);
         SetPersistentState(0ms, rtc.GetTime());
+        EXPECT_CALL(dummyMissionLoop, NotifyTimeChanged(Eq(0ms))).Times(1);
 
         // when
         // RTC reports very big time difference
@@ -327,6 +360,12 @@ namespace
 
     TEST_F(TimeTaskTest, CorrectionRunsAsNormalAfterMaximumCorrectionThresholdReached)
     {
+        {
+            testing::InSequence s;
+            EXPECT_CALL(dummyMissionLoop, NotifyTimeChanged(Eq(0ms))).Times(2);
+            EXPECT_CALL(dummyMissionLoop, NotifyTimeChanged(Eq(4000ms))).Times(1);
+        }
+
         // given
         // The correct action was run initially with maximum time value
         SetCurrentTime(0ms);
@@ -336,16 +375,19 @@ namespace
         // RTC reports very big time difference.
         AdvanceTime(mission::TimeTask::TimeCorrectionPeriod);
         rtc.AdvanceTime(duration_cast<seconds>(mission::TimeTask::TimeCorrectionPeriod + 2 * mission::TimeTask::MaximumTimeCorrection));
+
         actionDescriptor.Execute(state);
 
         // Another time correction is run with normal rtc operation.
         AdvanceTime(mission::TimeTask::TimeCorrectionPeriod);
         rtc.AdvanceTime(duration_cast<seconds>(mission::TimeTask::TimeCorrectionPeriod + 8s));
+
         actionDescriptor.Execute(state);
 
         // then
         // Time provider should be updated second time.
         auto expected = 2 * mission::TimeTask::TimeCorrectionPeriod + 4s;
+
         ASSERT_EQ(expected, provider.GetCurrentTime().Value);
     }
 }

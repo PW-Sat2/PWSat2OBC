@@ -21,7 +21,7 @@ namespace mission
      * @brief Task that is responsible for control of the communication.
      * @mission_task
      */
-    class CommTask : public Action, public IIdleStateController
+    class CommTask : public Action, public IIdleStateController, public RequireNotifyWhenTimeChanges
     {
       public:
         /**
@@ -52,6 +52,12 @@ namespace mission
          * @return Operation status, true in case of success, false otherwise.
          */
         bool LeaveTransmitterStateWhenIdle();
+
+        /**
+         * @brief Event raised by main Mission Loop when mission time changes.
+         * @param timeCorrection The time correction value. Positive - time has been advanced. Negative - time has been taken back.
+         */
+        void TimeChanged(std::chrono::milliseconds timeCorrection);
 
       private:
         /**
@@ -90,7 +96,7 @@ namespace mission
      * @brief Tasks that sends periodic message
      * @mission_task
      */
-    class SendMessageTask : public Action
+    class SendMessageTask : public Action, public RequireNotifyWhenTimeChanges
     {
       public:
         /**
@@ -104,6 +110,12 @@ namespace mission
          * @return Action descriptor
          */
         mission::ActionDescriptor<SystemState> BuildAction();
+
+        /**
+         * @brief Event raised by main Mission Loop when mission time changes.
+         * @param timeCorrection The time correction value. Positive - time has been advanced. Negative - time has been taken back.
+         */
+        void TimeChanged(std::chrono::milliseconds timeCorrection);
 
       private:
         /**

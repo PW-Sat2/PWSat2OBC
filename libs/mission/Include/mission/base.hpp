@@ -4,6 +4,7 @@
 #pragma once
 
 #include <array>
+#include <chrono>
 #include <cstdint>
 #include "system.h"
 
@@ -416,6 +417,35 @@ namespace mission
 
         return n;
     }
+
+    /**
+     * @brief Tag type used for marking the type as requiring notifying when mission time changes.
+     *
+     * Inherit from it to mark the type as capable of updating time. Type that inherits from it should define following non static member:
+     * @code{.cpp}
+     * void TimeChanged(std::chrono::milliseconds);
+     * @endcode
+     * The purpose of this function is to provide the mission loop runner unified interface to notifying when mission time changes.
+     *
+     * Tasks that internally store time desynchronise when main mission time changes.
+     * They start waiting too long or executes some action too early.
+     * All tasks marked with this tag recieves notification from main loop when time has been changed.
+     */
+    struct RequireNotifyWhenTimeChanges
+    {
+    };
+
+    /**
+     * @brief Interface that is used for notifying when mission time changes without exposing other internal members.
+     */
+    struct INotifyTimeChanged
+    {
+        /**
+         * @brief Notify all listeners that main missio time changes.
+         * @param timeCorrection The time correction value. Positive - time has been advanced. Negative - time has been taken back.
+         */
+        virtual void NotifyTimeChanged(std::chrono::milliseconds timeCorrection) = 0;
+    };
 }
 
 #endif

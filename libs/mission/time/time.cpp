@@ -18,10 +18,11 @@ namespace mission
 
     constexpr milliseconds TimeTask::MaximumTimeCorrection;
 
-    TimeTask::TimeTask(std::tuple<TimeProvider&, devices::rtc::IRTC&> arguments)
-        : provider(std::get<0>(arguments)),              //
-          rtc(std::get<1>(arguments)),                   //
-          syncSemaphore(System::CreateBinarySemaphore()) //
+    TimeTask::TimeTask(std::tuple<TimeProvider&, devices::rtc::IRTC&, INotifyTimeChanged&> arguments)
+        : provider(std::get<0>(arguments)),               //
+          rtc(std::get<1>(arguments)),                    //
+          syncSemaphore(System::CreateBinarySemaphore()), //
+          _missionLoop(std::get<2>(arguments))
     {
     }
 
@@ -147,6 +148,7 @@ namespace mission
         }
 
         auto newTime = PerformTimeCorrection(time.Value, currentRtcTime, timeState, timeCorrectionConfiguration);
+        auto difference = newTime - time.Value;
 
         if (!provider.SetCurrentTime(newTime))
         {
@@ -158,6 +160,9 @@ namespace mission
         {
             LOG(LOG_LEVEL_ERROR, "[Time] Unable to set time state");
         }
+
+        state.Time = newTime;
+        _missionLoop.NotifyTimeChanged(difference);
     }
 
     milliseconds TimeTask::PerformTimeCorrection(milliseconds missionTime, //
@@ -170,6 +175,12 @@ namespace mission
 
         deltaMcu = deltaMcu < 0ms ? 0ms : deltaMcu;
         deltaRtc = deltaRtc < 0s ? 0s : deltaRtc;
+
+        if (deltaRtc == milliseconds::zero())
+        {
+            LOG(LOG_LEVEL_ERROR, "[Time] RTC reports 0 delta time. Ignored in correction.");
+            return missionTime;
+        }
 
         auto correctedMissionTime = synchronizationState.LastMissionTime() +
             (deltaMcu * correctionConfiguation.MissionTimeFactor() + deltaRtc * correctionConfiguation.ExternalTimeFactor()) /

@@ -1,8 +1,7 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 
-import devices
-from tests.base import BaseTest, RestartPerTest
-from obc import *
+import logging
+from tests.base import RestartPerTest
 from utils import TestEvent
 from system import auto_power_on, runlevel
 
@@ -44,3 +43,47 @@ class Test_Beacon(RestartPerTest):
         self.system.comm.transmitter.on_set_beacon = event.set
         self.begin(19)
         self.assertTrue(event.wait_for_change(1), "beacon should be set once the antennas are deployed")
+
+
+class Test_Beacon_Restarting(RestartPerTest):
+    @runlevel(1)
+    def test_beacon_on_backward_time_correction(self):
+        event = TestEvent()
+
+        self.system.comm.transmitter.on_set_beacon = event.set
+
+        log = logging.getLogger("test_beacon")
+
+        # Set initial state: deployed antennas, T=+60m, and run mission for save everyting into persistent state
+        self.system.obc.state_set_antenna(1)
+        start_time = datetime.now()
+        self.system.rtc.set_response_time(start_time)
+        self.system.obc.jump_to_time(timedelta(minutes=60))
+        obc_start = self.system.obc.current_time()
+        self.system.obc.run_mission()
+
+        # Advance time just before time correction and expect beacon here
+        self.system.obc.advance_time(timedelta(minutes=14,seconds=45))
+        event.reset()
+        self.system.comm.transmitter.reset()
+        self.system.obc.run_mission()
+        self.assertTrue(event.wait_for_change(1), "Beacon should be sent")
+
+        # Perform negative time correction and ensure no beacon is set during that mission loop
+        time_before_correction = self.system.obc.current_time()
+        self.system.obc.advance_time(timedelta(seconds=16))
+        self.system.rtc.set_response_time(start_time + timedelta(minutes=1))
+        event.reset()
+        self.system.comm.transmitter.reset()
+        self.system.obc.run_mission()
+        self.assertFalse(event.wait_for_change(0), "Beacon should not be sent")
+        time_after_correction = self.system.obc.current_time()
+        self.assertGreater(time_before_correction, time_after_correction, "Time should been corrected")
+
+        # 3 subsequent beacons should be set
+        for i in range(0,3):
+            self.system.obc.advance_time(timedelta(seconds=32))
+            event.reset()
+            self.system.comm.transmitter.reset()
+            self.system.obc.run_mission()
+            self.assertTrue(event.wait_for_change(1), "Beacon should be sent %d" % i)

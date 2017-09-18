@@ -14,7 +14,7 @@ namespace mission
      * @brief Task that is responsible for periodical file system synchronization.
      * @mission_task
      */
-    class FileSystemTask : public Action
+    class FileSystemTask : public Action, public RequireNotifyWhenTimeChanges
     {
       public:
         /**
@@ -27,6 +27,12 @@ namespace mission
          * @return Action descriptor
          */
         ActionDescriptor<SystemState> BuildAction();
+
+        /**
+         * @brief Event raised by main Mission Loop when mission time changes.
+         * @param timeCorrection The time correction value. Positive - time has been advanced. Negative - time has been taken back.
+         */
+        void TimeChanged(std::chrono::milliseconds timeCorrection);
 
         /**
          * @brief Period of file system sync.

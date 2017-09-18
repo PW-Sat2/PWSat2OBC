@@ -105,7 +105,7 @@ namespace mission
          * @brief ctor.
          * @param[in] arguments Reference to time providier argument list.
          */
-        TimeTask(std::tuple<TimeProvider&, devices::rtc::IRTC&> arguments);
+        TimeTask(std::tuple<TimeProvider&, devices::rtc::IRTC&, INotifyTimeChanged&> arguments);
 
         /**
          * @brief Builds update descriptor for this task.
@@ -189,6 +189,8 @@ namespace mission
          * @brief Semaphore used for task synchronization.
          */
         OSSemaphoreHandle syncSemaphore;
+
+        INotifyTimeChanged& _missionLoop;
     };
 
     /** @} */

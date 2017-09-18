@@ -27,7 +27,7 @@ namespace mission
      *
      * This task is responsible for setting & updating the beacon that is being constantly send via the communication module.
      */
-    class BeaconUpdate : public Action
+    class BeaconUpdate : public Action, public RequireNotifyWhenTimeChanges
     {
       public:
         /**
@@ -41,6 +41,12 @@ namespace mission
          * @returns Action descriptor that runs beacon update task.
          */
         ActionDescriptor<SystemState> BuildAction();
+
+        /**
+         * @brief Event raised by main Mission Loop when mission time changes.
+         * @param timeCorrection The time correction value. Positive - time has been advanced. Negative - time has been taken back.
+         */
+        void TimeChanged(std::chrono::milliseconds timeCorrection);
 
       private:
         /**
