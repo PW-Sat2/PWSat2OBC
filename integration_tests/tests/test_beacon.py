@@ -1,6 +1,8 @@
 from datetime import timedelta, datetime
 
 import logging
+
+from response_frames.marker import BeaconMarker
 from tests.base import RestartPerTest
 from utils import TestEvent
 from system import auto_power_on, runlevel
@@ -34,14 +36,20 @@ class Test_Beacon(RestartPerTest):
         def reset_handler(*args):
             return False
 
+        def catch_beacon(_, frame):
+            if frame[0] == BeaconMarker():
+                event.set()
+
         self.system.primary_antenna.begin_deployment()
         self.system.primary_antenna.finish_deployment()
         self.system.backup_antenna.begin_deployment()
         self.system.backup_antenna.finish_deployment()
         self.system.primary_antenna.on_reset = reset_handler
         self.system.backup_antenna.on_reset = reset_handler
-        self.system.comm.transmitter.on_set_beacon = event.set
+        self.system.comm.transmitter.on_send_frame = catch_beacon
+
         self.begin(19)
+
         self.assertTrue(event.wait_for_change(1), "beacon should be set once the antennas are deployed")
 
 
@@ -50,7 +58,11 @@ class Test_Beacon_Restarting(RestartPerTest):
     def test_beacon_on_backward_time_correction(self):
         event = TestEvent()
 
-        self.system.comm.transmitter.on_set_beacon = event.set
+        def catch_beacon(_, frame):
+            if frame[0] == BeaconMarker():
+                event.set()
+
+        self.system.comm.transmitter.on_send_frame = catch_beacon
 
         log = logging.getLogger("test_beacon")
 
