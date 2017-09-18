@@ -5,12 +5,8 @@
 
 #include <chrono>
 #include "base/fwd.hpp"
-#include "comm/Beacon.hpp"
-#include "comm/comm.hpp"
 #include "mission/base.hpp"
 #include "state/struct.h"
-#include "telecommunication/downlink.h"
-#include "telemetry/fwd.hpp"
 
 namespace mission
 {
@@ -27,14 +23,14 @@ namespace mission
      *
      * This task is responsible for setting & updating the beacon that is being constantly send via the communication module.
      */
-    class BeaconUpdate : public Action, public RequireNotifyWhenTimeChanges
+    class BeaconUpdate : public Action
     {
       public:
         /**
          * @brief ctor.
-         * @param[in] arguments Beacon update task dependencies.
+         * @param unused Unused argument
          */
-        BeaconUpdate(std::pair<devices::comm::IBeaconController&, IHasState<telemetry::TelemetryState>&> arguments);
+        BeaconUpdate(std::uint8_t unused);
 
         /**
          * @brief Returns action descriptor for this task.
@@ -43,10 +39,10 @@ namespace mission
         ActionDescriptor<SystemState> BuildAction();
 
         /**
-         * @brief Event raised by main Mission Loop when mission time changes.
-         * @param timeCorrection The time correction value. Positive - time has been advanced. Negative - time has been taken back.
+         * @brief Sets handle to beacon task
+         * @param handle Beacon task handle
          */
-        void TimeChanged(std::chrono::milliseconds timeCorrection);
+        void BeaconTaskHandle(OSTaskHandle handle);
 
       private:
         /**
@@ -66,34 +62,11 @@ namespace mission
          */
         static void Run(SystemState& state, void* param);
 
-        /**
-         * @brief Updates current beacons.
-         * @param[in] state Reference to global mission state.
-         */
-        void UpdateBeacon(const SystemState& state);
+        /** @brief Beacon task handle */
+        OSTaskHandle beaconTaskHandle;
 
-        /**
-         * @brief This procedure is responsible for generation beacon from current system state.
-         * @return Object that contains new beacon definition or empty object in case of failures.
-         */
-        Option<devices::comm::Beacon> GenerateBeacon();
-
-        /**
-         * @brief Beacon hardware controller.
-         */
-        devices::comm::IBeaconController* controller;
-
-        IHasState<telemetry::TelemetryState>* telemetryState;
-
-        /**
-         * @brief Time of last successful beacon update.
-         */
-        std::chrono::milliseconds lastBeaconUpdate;
-
-        /**
-         * @brief Beacon frame builder.
-         */
-        telecommunication::downlink::RawFrame frame;
+        /** @brief Flag indicating whether beacon is already enabled */
+        bool isBeaconEnabled;
     };
 }
 

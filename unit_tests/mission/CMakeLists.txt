@@ -30,6 +30,7 @@ set(SOURCES
   Experiments/Sail/SailExperimentTest.cpp
   Experiments/Camera/CameraExperimentTest.cpp
   Experiments/CopyBootSlots/CopyBootSlotsExperimentTest.cpp
+  BeaconSenderTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
@@ -60,5 +61,6 @@ target_link_libraries(${NAME}
     exp_program
     unit_tests_base
     payload
+    beacon
 )
 
