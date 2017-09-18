@@ -48,6 +48,8 @@ namespace mission
          */
         void TimeChanged(std::chrono::milliseconds timeCorrection);
 
+        void BeaconTaskHandle(OSTaskHandle handle);
+
       private:
         /**
          * @brief Procedure that verifies whether the beacon should be set/updated.
@@ -94,6 +96,8 @@ namespace mission
          * @brief Beacon frame builder.
          */
         telecommunication::downlink::RawFrame frame;
+
+        OSTaskHandle _beaconTaskHandle;
     };
 }
 

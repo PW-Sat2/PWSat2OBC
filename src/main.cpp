@@ -34,6 +34,7 @@
 #include "power_eps/power_eps.h"
 #include "swo/swo.h"
 #include "system.h"
+#include "telecommunication/beacon.hpp"
 #include "terminal.h"
 #include "watchdog/internal.hpp"
 
@@ -201,6 +202,8 @@ static void ObcInitTask(void* param)
     obc->Experiments.Get<experiment::sail::SailExperiment>().SetSailController(Mission);
     obc->Experiments.Get<experiment::sads::SADSExperiment>().SetSADSController(Mission);
 
+    Mission.BeaconTaskHandle(obc->initTask);
+
     if (boot::RequestedRunlevel >= boot::Runlevel::Runlevel1)
     {
         if (OS_RESULT_FAILED(obc->InitializeRunlevel1()))
@@ -241,6 +244,30 @@ static void ObcInitTask(void* param)
     obc->StateFlags.Set(OBC::InitializationFinishedFlag);
 
     System::SuspendTask(NULL);
+
+    telecommunication::downlink::RawFrame frame;
+
+    auto beaconDelay = 30s;
+
+    while (1)
+    {
+        LOG(LOG_LEVEL_INFO, "Send beacon!");
+
+        auto telemetry = TelemetryAcquisition.GetState();
+
+        if (!WriteBeaconPayload(telemetry, frame.PayloadWriter()))
+        {
+            beaconDelay = 5s;
+        }
+        else
+        {
+            beaconDelay = 30s;
+        }
+
+        Main.Hardware.CommDriver.SendFrame(frame.Frame());
+
+        System::SleepTask(beaconDelay);
+    }
 }
 
 static void SetupRAMScrubbing()

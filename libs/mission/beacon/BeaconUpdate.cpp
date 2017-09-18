@@ -28,7 +28,8 @@ namespace mission
     BeaconUpdate::BeaconUpdate(std::pair<devices::comm::IBeaconController&, IHasState<telemetry::TelemetryState>&> arguments)
         : controller(&arguments.first),      //
           telemetryState(&arguments.second), //
-          lastBeaconUpdate(0s)
+          lastBeaconUpdate(0s),              //
+          _beaconTaskHandle(nullptr)
     {
     }
 
@@ -42,12 +43,17 @@ namespace mission
         return descriptor;
     }
 
+    void BeaconUpdate::BeaconTaskHandle(OSTaskHandle handle)
+    {
+        this->_beaconTaskHandle = handle;
+    }
+
     bool BeaconUpdate::ShouldUpdateBeacon(const SystemState& state, void* param)
     {
         auto This = static_cast<BeaconUpdate*>(param);
-        auto&& timeDifference = state.Time - This->lastBeaconUpdate;
-        return state.AntennaState.IsDeployed() && //
-            (timeDifference >= BeaconUpdateInterval || timeDifference < std::chrono::milliseconds::zero());
+        //        auto&& timeDifference = state.Time - This->lastBeaconUpdate;
+        return state.AntennaState.IsDeployed() && This->_beaconTaskHandle != nullptr; // && //
+        //            (timeDifference >= BeaconUpdateInterval || timeDifference < std::chrono::milliseconds::zero());
     }
 
     void BeaconUpdate::Run(SystemState& state, void* param)
@@ -56,29 +62,32 @@ namespace mission
         This->UpdateBeacon(state);
     }
 
-    void BeaconUpdate::UpdateBeacon(const SystemState& state)
+    void BeaconUpdate::UpdateBeacon(const SystemState& /*state*/)
     {
-        const auto beacon = GenerateBeacon();
-        if (!beacon.HasValue)
-        {
-            return;
-        }
+        //        const auto beacon = GenerateBeacon();
+        //        if (!beacon.HasValue)
+        //        {
+        //            return;
+        //        }
+        //
+        //        const auto result = this->controller->SetBeacon(beacon.Value);
+        //        const auto time = static_cast<std::uint32_t>(duration_cast<seconds>(state.Time).count());
+        //        if (!result.HasValue)
+        //        {
+        //            LOGF(LOG_LEVEL_INFO, "Beacon update rejected at %lu", time);
+        //        }
+        //        else if (result.Value)
+        //        {
+        //            this->lastBeaconUpdate = state.Time;
+        //            LOGF(LOG_LEVEL_INFO, "Beacon set at %lu", time);
+        //        }
+        //        else
+        //        {
+        //            LOGF(LOG_LEVEL_ERROR, "Unable to set beacon at %lu", time);
+        //        }
 
-        const auto result = this->controller->SetBeacon(beacon.Value);
-        const auto time = static_cast<std::uint32_t>(duration_cast<seconds>(state.Time).count());
-        if (!result.HasValue)
-        {
-            LOGF(LOG_LEVEL_INFO, "Beacon update rejected at %lu", time);
-        }
-        else if (result.Value)
-        {
-            this->lastBeaconUpdate = state.Time;
-            LOGF(LOG_LEVEL_INFO, "Beacon set at %lu", time);
-        }
-        else
-        {
-            LOGF(LOG_LEVEL_ERROR, "Unable to set beacon at %lu", time);
-        }
+        System::ResumeTask(this->_beaconTaskHandle);
+        this->_beaconTaskHandle = nullptr;
     }
 
     Option<devices::comm::Beacon> BeaconUpdate::GenerateBeacon()
