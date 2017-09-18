@@ -13,12 +13,7 @@ target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/m
 target_link_libraries(${NAME}
     mission 
     state
-    comm
-    mission_obc
-    time
     base
-    telecommunication
-    telemetry
 )
 
 target_format_sources(${NAME} "${SOURCES}")

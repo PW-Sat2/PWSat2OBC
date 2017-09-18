@@ -18,6 +18,7 @@
 #include "SwoEndpoint/SwoEndpoint.h"
 #include "base/ecc.h"
 #include "base/os.h"
+#include "beacon/sender.hpp"
 #include "blink.hpp"
 #include "boot/params.hpp"
 #include "dmadrv.h"
@@ -80,7 +81,7 @@ mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc, Missi
     Main.PowerControlInterface,
     Main.adcs.GetAdcsCoordinator(),
     Main.Experiments.ExperimentsController,
-    std::make_pair(std::ref(Main.Hardware.CommDriver), std::ref(TelemetryAcquisition)),
+    0,
     Main.Fdir,
     std::tie(Main.Hardware.PersistentStorage, PersistentStateBaseAddress),
     Main.fs,
@@ -201,6 +202,8 @@ static void ObcInitTask(void* param)
     obc->Experiments.Get<experiment::sail::SailExperiment>().SetSailController(Mission);
     obc->Experiments.Get<experiment::sads::SADSExperiment>().SetSADSController(Mission);
 
+    Mission.BeaconTaskHandle(obc->initTask);
+
     if (boot::RequestedRunlevel >= boot::Runlevel::Runlevel1)
     {
         if (OS_RESULT_FAILED(obc->InitializeRunlevel1()))
@@ -241,6 +244,13 @@ static void ObcInitTask(void* param)
     obc->StateFlags.Set(OBC::InitializationFinishedFlag);
 
     System::SuspendTask(NULL);
+
+    beacon::BeaconSender sender(Main.Hardware.CommDriver, TelemetryAcquisition);
+
+    while (1)
+    {
+        sender.RunOnce();
+    }
 }
 
 static void SetupRAMScrubbing()
