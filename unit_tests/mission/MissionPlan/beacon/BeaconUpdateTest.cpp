@@ -15,105 +15,68 @@ using testing::Eq;
 using namespace std::chrono_literals;
 namespace
 {
-    class BeaconUpdateConditionTest //
-        : public testing::TestWithParam<std::tuple<bool, std::chrono::milliseconds, bool>>
-    {
-      protected:
-        BeaconUpdateConditionTest();
-        SystemState state;
-        HasStateMock<telemetry::TelemetryState> stateMock;
-        BeaconControllerMock controller;
-        mission::BeaconUpdate beacon;
-    };
-
-    BeaconUpdateConditionTest::BeaconUpdateConditionTest() : beacon(std::make_pair(std::ref(controller), std::ref(stateMock)))
-    {
-    }
-
-    TEST_P(BeaconUpdateConditionTest, TestBeaconUpdateCondition)
-    {
-        const auto& param = GetParam();
-        state.AntennaState.SetDeployment(std::get<0>(param));
-        state.Time = std::get<1>(param);
-        auto action = beacon.BuildAction();
-        const auto expected = std::get<2>(param);
-        EXPECT_THAT(action.condition(state, action.param), Eq(expected));
-    }
-
-    INSTANTIATE_TEST_CASE_P(MissionBeaconCondition,
-        BeaconUpdateConditionTest,
-        testing::Values(std::make_tuple(false, 0min, false),
-            std::make_tuple(true, 0min, false),
-            std::make_tuple(false, 29s, false),
-            std::make_tuple(true, 29s, false),
-            std::make_tuple(true, 30s, true),
-            std::make_tuple(false, 30s, false)), );
-
     class BeaconUpdateTest : public testing::Test
     {
       protected:
         BeaconUpdateTest();
+
         SystemState state;
         testing::NiceMock<OSMock> os;
-        testing::NiceMock<HasStateMock<telemetry::TelemetryState>> stateMock;
-        BeaconControllerMock controller;
-        mission::BeaconUpdate beacon;
-        telemetry::TelemetryState telemetry;
+        OSReset osReset{InstallProxy(&os)};
+        mission::BeaconUpdate beacon{0};
+        mission::ActionDescriptor<SystemState> action{beacon.BuildAction()};
+
+        static constexpr OSTaskHandle Task = reinterpret_cast<OSTaskHandle>(1);
     };
 
-    BeaconUpdateTest::BeaconUpdateTest() : beacon(std::make_pair(std::ref(controller), std::ref(stateMock)))
+    BeaconUpdateTest::BeaconUpdateTest()
     {
-        ON_CALL(stateMock, MockGetState()).WillByDefault(ReturnRef(telemetry));
         ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
-        state.AntennaState.SetDeployment(true);
+
         state.Time = 30s;
+
+        beacon.BeaconTaskHandle(Task);
     }
 
-    TEST_F(BeaconUpdateTest, TestBeaconUpdate)
+    TEST_F(BeaconUpdateTest, ShouldNotRunActionWhenAntennasAreNotDeployed)
     {
-        auto guard = InstallProxy(&os);
-        EXPECT_CALL(stateMock, MockGetState()).WillOnce(ReturnRef(telemetry));
-        EXPECT_CALL(controller, SetBeacon(_)).Times(1);
-        auto action = beacon.BuildAction();
-        action.actionProc(state, action.param);
+        state.AntennaState.SetDeployment(false);
+
+        auto r = action.EvaluateCondition(state);
+
+        ASSERT_THAT(r, Eq(false));
     }
 
-    TEST_F(BeaconUpdateTest, TestBeaconUpdateAccessTimeout)
+    TEST_F(BeaconUpdateTest, ShouldNotRunActionWhenItsAlreadyExecuted)
     {
-        auto guard = InstallProxy(&os);
-        EXPECT_CALL(os, TakeSemaphore(_, _)).WillOnce(Return(OSResult::Timeout));
-        EXPECT_CALL(controller, SetBeacon(_)).Times(0);
-        auto action = beacon.BuildAction();
-        action.actionProc(state, action.param);
+        state.AntennaState.SetDeployment(true);
+
+        auto r = action.EvaluateCondition(state);
+        ASSERT_THAT(r, Eq(true));
+
+        action.Execute(state);
+
+        r = action.EvaluateCondition(state);
+
+        ASSERT_THAT(r, Eq(false));
     }
 
-    TEST_F(BeaconUpdateTest, TestBeaconUpdatePeriodAfterSuccessfulUpdate)
+    TEST_F(BeaconUpdateTest, ShouldNotRunActionWhenTaskHandleIsNotValid)
     {
-        auto guard = InstallProxy(&os);
-        EXPECT_CALL(controller, SetBeacon(_)).WillOnce(Return(Option<bool>::Some(true)));
-        auto action = beacon.BuildAction();
-        action.actionProc(state, action.param);
-        state.Time = 59s;
-        EXPECT_THAT(action.condition(state, action.param), Eq(false));
-        state.Time = 61s;
-        EXPECT_THAT(action.condition(state, action.param), Eq(true));
+        state.AntennaState.SetDeployment(true);
+        beacon.BeaconTaskHandle(nullptr);
+
+        auto r = action.EvaluateCondition(state);
+
+        ASSERT_THAT(r, Eq(false));
     }
 
-    TEST_F(BeaconUpdateTest, TestBeaconUpdatePeriodAfterFailedUpdate)
+    TEST_F(BeaconUpdateTest, RunningActionShouldResumeBeaconTask)
     {
-        auto guard = InstallProxy(&os);
-        EXPECT_CALL(controller, SetBeacon(_)).WillOnce(Return(Option<bool>::Some(false)));
-        auto action = beacon.BuildAction();
-        action.actionProc(state, action.param);
-        EXPECT_THAT(action.condition(state, action.param), Eq(true));
-    }
+        EXPECT_CALL(os, ResumeTask(Task));
 
-    TEST_F(BeaconUpdateTest, TestBeaconUpdatePeriodAfterRejectedUpdate)
-    {
-        auto guard = InstallProxy(&os);
-        EXPECT_CALL(controller, SetBeacon(_)).WillOnce(Return(Option<bool>::None()));
-        auto action = beacon.BuildAction();
-        action.actionProc(state, action.param);
-        EXPECT_THAT(action.condition(state, action.param), Eq(true));
+        state.AntennaState.SetDeployment(true);
+
+        action.Execute(state);
     }
 }

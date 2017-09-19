@@ -132,6 +132,7 @@ target_link_libraries(${NAME}
     obc_memory
     camera
     version
+    beacon
 )
 
 target_generate_hex(${NAME})

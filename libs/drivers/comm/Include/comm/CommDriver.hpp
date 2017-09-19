@@ -145,13 +145,14 @@ class CommObject final : public ITransmitter,      //
     /**
      * @brief This procedure sets the beacon frame for the passed comm object.
      *
-     * This procedure will ensure that setting beacon will not erase any frames from
-     * transmitter's output buffer by first sending beacon as a regular frame and setting
-     * the beacon itself only if there are no frames that are waiting to te send by the transmitter.
+     * This procedure will send beacon as single frame.
      * @param[in] beacon Reference to object describing new beacon.
      * See the definition of the CommBeacon for details.
      * @return Operation status, true in case of success, false otherwise, None in case there were frames in
      * transmitter queue.
+     *
+     * Unfortunately ISIS COMM module is not working as expected and set beacon function can cause module to hang while transmitting
+     * which is very dangerous.
      */
     virtual Option<bool> SetBeacon(const Beacon& beacon) override final;
 

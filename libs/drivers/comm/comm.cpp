@@ -551,13 +551,10 @@ Option<bool> CommObject::SetBeacon(const Beacon& beaconData)
     {
         return Option<bool>::Some(false);
     }
-
-    if (remainingBufferSize < (TransmitterBufferSize - 1))
+    else
     {
-        return Option<bool>::None();
+        return Option<bool>::Some(true);
     }
-
-    return Option<bool>::Some(UpdateBeaconInternal(beaconData, errorContext.Counter()));
 }
 
 bool CommObject::UpdateBeacon(const Beacon& beaconData)

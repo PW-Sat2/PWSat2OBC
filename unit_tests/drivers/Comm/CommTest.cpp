@@ -869,36 +869,26 @@ namespace
 
     TEST_F(CommTest, TestSetBeaconTransmitterBufferNotEmpty)
     {
+        EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon))).Times(0);
         ExpectSendFrame(38);
 
         std::uint8_t buffer[1];
         Beacon beacon(1s, buffer);
         const auto status = comm.SetBeacon(beacon);
-        ASSERT_THAT(status.HasValue, Eq(false));
+        ASSERT_THAT(status.HasValue, Eq(true));
         ASSERT_THAT(error_counter, Eq(0));
     }
 
     TEST_F(CommTest, TestSetBeaconTransmitterBufferFull)
     {
+        EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon))).Times(0);
         ExpectSendFrame(0);
 
         std::uint8_t buffer[1];
         Beacon beacon(1s, buffer);
         const auto status = comm.SetBeacon(beacon);
-        ASSERT_THAT(status.HasValue, Eq(false));
+        ASSERT_THAT(status.HasValue, Eq(true));
         ASSERT_THAT(error_counter, Eq(0));
-    }
-
-    TEST_F(CommTest, TestSetBeaconFailure)
-    {
-        ExpectSendFrame(39);
-        EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon))).WillOnce(Return(I2CResult::Nack));
-
-        std::uint8_t buffer[1];
-        Beacon beacon(1s, buffer);
-        const auto status = comm.SetBeacon(beacon);
-        ASSERT_THAT(status, Eq(false));
-        ASSERT_THAT(error_counter, Eq(5));
     }
 
     TEST_F(CommTest, TestSetBeaconSizeOutOfRange)
@@ -915,16 +905,12 @@ namespace
 
     TEST_F(CommTest, TestSetBeacon)
     {
+        EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon))).Times(0);
+
         const uint8_t data[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
-        const uint8_t expectedBeacon[] = {TransmitterSetBeacon, 0x0b, 0x0a, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
         const uint8_t expectedFrame[] = {TransmitterSendFrame, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
         Beacon beacon(0x0a0bs, data);
         ExpectSendFrame(expectedFrame, 39);
-        EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon)))
-            .WillOnce(Invoke([=](uint8_t /*address*/, span<const uint8_t> inData) {
-                EXPECT_THAT(inData, Eq(span<const uint8_t>(expectedBeacon)));
-                return I2CResult::OK;
-            }));
         const auto status = comm.SetBeacon(beacon);
         ASSERT_THAT(status, Eq(true));
         ASSERT_THAT(error_counter, Eq(0));
@@ -932,16 +918,12 @@ namespace
 
     TEST_F(CommTest, TestSetBeaconBufferEmpty)
     {
+        EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon))).Times(0);
+
         const uint8_t data[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
-        const uint8_t expectedBeacon[] = {TransmitterSetBeacon, 0x0b, 0x0a, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
         const uint8_t expectedFrame[] = {TransmitterSendFrame, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
         Beacon beacon(0x0a0bs, data);
         ExpectSendFrame(expectedFrame, 40);
-        EXPECT_CALL(i2c, Write(TransmitterAddress, BeginsWith(TransmitterSetBeacon)))
-            .WillOnce(Invoke([=](uint8_t /*address*/, span<const uint8_t> inData) {
-                EXPECT_THAT(inData, Eq(span<const uint8_t>(expectedBeacon)));
-                return I2CResult::OK;
-            }));
         const auto status = comm.SetBeacon(beacon);
         ASSERT_THAT(status, Eq(true));
         ASSERT_THAT(error_counter, Eq(0));
