@@ -10,8 +10,9 @@ import Queue
 class CommModule(ModuleBase):
     GridPos = (1, 0)
 
-    def __init__(self, system):
+    def __init__(self, system, last_beacon):
         self._system = system # type: System
+        self._last_beacon = last_beacon
         self.title = 'Comm'
         self.grid_pos = (1, 3)
         self.grid_span = (1, 1)
@@ -55,10 +56,10 @@ class CommModule(ModuleBase):
         if time.mktime(time.localtime()) - self._last_mission_time_seen > 4:
             self._last_mission_time_seen = time.mktime(time.localtime())
 
-        if self._system.transmitter.current_beacon_timestamp is not None:
+        if self._last_beacon.time is not None:
             self._current_beacon_timestamp.SetLabel(
-                'Current beacon: \n' + time.strftime('%Y-%m-%d %H:%M:%S', self._system.transmitter.current_beacon_timestamp)
-                + ' (' + str(len(self._system.transmitter.current_beacon)) + ' bytes)')
+                'Current beacon: \n' + self._last_beacon.time.strftime('%Y-%m-%d %H:%M:%S')
+                + ' (' + str(len(self._last_beacon.payload)) + ' bytes)')
 
         if self._system.comm.receiver.last_watchdog_kick is None:
             self._receiver_last_watchdog.SetLabel('Receiver: last watchdog kick\nNone')

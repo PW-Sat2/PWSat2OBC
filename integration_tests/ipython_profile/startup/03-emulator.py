@@ -1,4 +1,5 @@
 import IPython.lib.guisupport
+from datetime import datetime
 
 from emulator import Emulator
 from emulator.antenna import AntennasModule
@@ -28,7 +29,7 @@ def _setup_emulator(system):
         RTCModule(system),
         EPSModule(system),
         PayloadModule(system),
-        CommModule(system),
+        CommModule(system, last_beacon),
         LastFramesModule(last_frames)
     ]
 
@@ -38,7 +39,7 @@ def _setup_emulator(system):
     def store_last_frame(comm, frame):
         decoded = system.frame_decoder.decode(frame)
         if isinstance(decoded, BeaconFrame):
-            last_beacon.time = time()
+            last_beacon.time = datetime.now()
             last_beacon.payload = decoded.payload()
         last_frames.insert(0, decoded)
 
