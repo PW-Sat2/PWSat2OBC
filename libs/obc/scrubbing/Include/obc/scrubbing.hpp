@@ -37,11 +37,13 @@ namespace obc
          * @param primarySlots Status of primary slots scrubbing
          * @param secondarySlots Status of secondary slots scrubbing
          * @param bootloader Status of bootloader scrubbing
+         * @param safeMode Status of safe mode scrubbing
          */
         ScrubbingStatus(std::uint32_t iterationsCount,
             const scrubber::ProgramScrubbingStatus primarySlots,
             const scrubber::ProgramScrubbingStatus secondarySlots,
-            const scrubber::BootloaderScrubbingStatus bootloader);
+            const scrubber::BootloaderScrubbingStatus bootloader,
+            const scrubber::SafeModeScrubbingStatus safeMode);
 
         /** @brief Iterations count */
         const std::uint32_t IterationsCount;
@@ -51,6 +53,8 @@ namespace obc
         const scrubber::ProgramScrubbingStatus SecondarySlots;
         /** @brief Status of bootloader scrubbing */
         const scrubber::BootloaderScrubbingStatus Bootloader;
+        /** @brief Status of safe mode scrubbing */
+        const scrubber::SafeModeScrubbingStatus SafeMode;
     };
 
     /**
@@ -92,6 +96,7 @@ namespace obc
         virtual bool BootloaderInProgress() override;
         virtual bool PrimarySlotsInProgress() override;
         virtual bool FailsafeSlotsInProgress() override;
+        virtual bool SafeModeInProgress() override;
 
       private:
         /**

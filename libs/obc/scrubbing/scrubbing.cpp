@@ -12,8 +12,10 @@ namespace obc
     ScrubbingStatus::ScrubbingStatus(std::uint32_t iterationsCount,
         const scrubber::ProgramScrubbingStatus primarySlots,
         const scrubber::ProgramScrubbingStatus secondarySlots,
-        const scrubber::BootloaderScrubbingStatus bootloader)
-        : IterationsCount(iterationsCount), PrimarySlots(primarySlots), SecondarySlots(secondarySlots), Bootloader(bootloader)
+        const scrubber::BootloaderScrubbingStatus bootloader,
+        const scrubber::SafeModeScrubbingStatus safeMode)
+        : IterationsCount(iterationsCount), PrimarySlots(primarySlots), SecondarySlots(secondarySlots), Bootloader(bootloader),
+          SafeMode(safeMode)
     {
     }
 
@@ -27,7 +29,7 @@ namespace obc
           _bootloaderScrubberCounter([](OBCScrubbing* This) { This->_bootloaderScrubber.Scrub(); }, this),              //
           _bootloaderScrubber(ScrubbingBuffer, bootTable, hardware.MCUFlash),                                           //
           _safeModeScrubberCounter([](OBCScrubbing* This) { This->_safeModeScrubber.Scrub(); }, this),                  //
-          _safeModeScrubber(ScrubbingBuffer, bootTable, hardware.MCUFlash),                                             //
+          _safeModeScrubber(ScrubbingBuffer, bootTable),                                                                //
           _bootSettingsScrubberCounter([](OBCScrubbing* This) { This->_bootSettingsScrubber.Scrub(); }, this),          //
           _bootSettingsScrubber(hardware.PersistentStorage.GetRedundantDriver(), bootSettings),                         //
           _scrubberTask("Scrubber", this, ScrubberTask),                                                                //
@@ -47,7 +49,8 @@ namespace obc
             this->_iterationsCount,                 //
             this->_primarySlotsScrubber.Status(),   //
             this->_secondarySlotsScrubber.Status(), //
-            this->_bootloaderScrubber.Status()      //
+            this->_bootloaderScrubber.Status(),     //
+            this->_safeModeScrubber.Status()        //
             );
     }
 
@@ -110,6 +113,11 @@ namespace obc
     }
 
     bool OBCScrubbing::FailsafeSlotsInProgress()
+    {
+        return this->_secondarySlotsScrubber.InProgress();
+    }
+
+    bool OBCScrubbing::SafeModeInProgress()
     {
         return this->_secondarySlotsScrubber.InProgress();
     }

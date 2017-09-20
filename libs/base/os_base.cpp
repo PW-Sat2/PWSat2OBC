@@ -69,3 +69,13 @@ bool EventGroup::IsSet(OSEventBits bit)
 
     return has_flag(f, bit);
 }
+
+CriticalSection::CriticalSection()
+{
+    System::EnterCritical();
+}
+
+CriticalSection::~CriticalSection()
+{
+    System::LeaveCritical();
+}

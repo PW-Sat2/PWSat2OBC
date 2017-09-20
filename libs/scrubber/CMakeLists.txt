@@ -15,7 +15,6 @@ target_link_libraries(${NAME} PUBLIC
 	msc
 	fm25w
 	boot_settings
-	freeRTOS
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

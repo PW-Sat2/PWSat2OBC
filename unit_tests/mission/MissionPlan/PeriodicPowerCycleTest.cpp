@@ -21,6 +21,7 @@ struct ScrubbingStatusMock : IScrubbingStatus
     MOCK_METHOD0(BootloaderInProgress, bool());
     MOCK_METHOD0(PrimarySlotsInProgress, bool());
     MOCK_METHOD0(FailsafeSlotsInProgress, bool());
+    MOCK_METHOD0(SafeModeInProgress, bool());
 };
 
 namespace
@@ -87,6 +88,7 @@ namespace
         ON_CALL(_scrubbingStatus, BootloaderInProgress()).WillByDefault(Return(false));
         ON_CALL(_scrubbingStatus, PrimarySlotsInProgress()).WillByDefault(Return(false));
         ON_CALL(_scrubbingStatus, FailsafeSlotsInProgress()).WillByDefault(Return(false));
+        ON_CALL(_scrubbingStatus, SafeModeInProgress()).WillByDefault(Return(false));
 
         experiments::ExperimentState exp = {Some(static_cast<experiments::ExperimentCode>(1)),
             Some(static_cast<experiments::ExperimentCode>(1)),
@@ -108,6 +110,7 @@ namespace
         ON_CALL(_scrubbingStatus, BootloaderInProgress()).WillByDefault(Return(false));
         ON_CALL(_scrubbingStatus, PrimarySlotsInProgress()).WillByDefault(Return(false));
         ON_CALL(_scrubbingStatus, FailsafeSlotsInProgress()).WillByDefault(Return(false));
+        ON_CALL(_scrubbingStatus, SafeModeInProgress()).WillByDefault(Return(false));
 
         experiments::ExperimentState exp = {None<experiments::ExperimentCode>(),
             None<experiments::ExperimentCode>(),
@@ -121,7 +124,7 @@ namespace
     }
 
     class PeriodicPowerCycleTest_ScrubbingStatus : public PeriodicPowerCycleTest,
-                                                   public testing::WithParamInterface<std::tuple<bool, bool, bool>>
+                                                   public testing::WithParamInterface<std::tuple<bool, bool, bool, bool>>
     {
     };
 
@@ -129,8 +132,8 @@ namespace
     {
         using std::get;
 
-        bool a, b, c;
-        std::tie(a, b, c) = GetParam();
+        bool a, b, c, d;
+        std::tie(a, b, c, d) = GetParam();
 
         _state.Time = 50h;
         ASSERT_THAT(_action.EvaluateCondition(_state), Eq(false));
@@ -138,14 +141,15 @@ namespace
         ON_CALL(_scrubbingStatus, BootloaderInProgress()).WillByDefault(Return(a));
         ON_CALL(_scrubbingStatus, PrimarySlotsInProgress()).WillByDefault(Return(b));
         ON_CALL(_scrubbingStatus, FailsafeSlotsInProgress()).WillByDefault(Return(c));
+        ON_CALL(_scrubbingStatus, SafeModeInProgress()).WillByDefault(Return(d));
 
         _state.Time += 23h;
 
-        auto expected = !a && !b && !c;
+        auto expected = !a && !b && !c && !d;
 
         ASSERT_THAT(_action.EvaluateCondition(_state), Eq(expected));
     }
 
     INSTANTIATE_TEST_CASE_P(
-        PeriodicPowerCycleTest_ScrubbingStatus, PeriodicPowerCycleTest_ScrubbingStatus, Combine(Bool(), Bool(), Bool()), );
+        PeriodicPowerCycleTest_ScrubbingStatus, PeriodicPowerCycleTest_ScrubbingStatus, Combine(Bool(), Bool(), Bool(), Bool()), );
 }

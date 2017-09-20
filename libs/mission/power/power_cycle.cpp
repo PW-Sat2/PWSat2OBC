@@ -58,6 +58,11 @@ namespace mission
                 return false;
             }
 
+            if (This->_scrubbingStatus.SafeModeInProgress())
+            {
+                return false;
+            }
+
             auto experimentState = This->_experiments.CurrentState();
 
             if (experimentState.CurrentExperiment.HasValue)

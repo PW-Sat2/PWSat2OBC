@@ -294,6 +294,13 @@ void System::Yield()
     }
 }
 
+void System::EnterCritical()
+{
+}
+void System::LeaveCritical()
+{
+}
+
 OSReset::OSReset() : released(false)
 {
 }

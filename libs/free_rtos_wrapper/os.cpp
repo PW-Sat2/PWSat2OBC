@@ -248,3 +248,13 @@ void System::Yield()
 {
     portYIELD();
 }
+
+void System::EnterCritical()
+{
+    vPortEnterCritical();
+}
+
+void System::LeaveCritical()
+{
+    vPortExitCritical();
+}

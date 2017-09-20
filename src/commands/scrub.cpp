@@ -19,6 +19,10 @@ static void Status()
     GetTerminal().Printf("Bootloader.IterationsCount: %ld\n", status.Bootloader.IterationsCount);
     GetTerminal().Printf("Bootloader.Copies corrected: %ld\n", status.Bootloader.CopiesCorrected);
     GetTerminal().Printf("Bootloader.MCU pages corrected: %ld\n", status.Bootloader.MUCPagesCorrected);
+
+    GetTerminal().Printf("SafeMode.IterationsCount: %ld\n", status.SafeMode.IterationsCount);
+    GetTerminal().Printf("SafeMode.Copies corrected: %ld\n", status.SafeMode.CopiesCorrected);
+    GetTerminal().Printf("SafeMode.EEPROM pages corrected: %ld\n", status.SafeMode.EEPROMPagesCorrected);
 }
 
 static void Kick()

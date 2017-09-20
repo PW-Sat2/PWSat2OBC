@@ -28,8 +28,8 @@ namespace scrubber
         const std::uint32_t IterationsCount;
         /** @brief Number of corrected copies */
         const std::uint32_t CopiesCorrected;
-        /** @brief Number of corrected MCU pages */
-        const std::uint32_t MUCPagesCorrected;
+        /** @brief Number of corrected EEPROM pages */
+        const std::uint32_t EEPROMPagesCorrected;
     };
 
     /**
@@ -48,9 +48,8 @@ namespace scrubber
          * @brief Ctor
          * @param scrubBuffer Scrubbing buffer
          * @param bootTable Boot table
-         * @param mcuFlash MCU flash memory driver
          */
-        SafeModeScrubber(ScrubBuffer& scrubBuffer, program_flash::BootTable& bootTable, drivers::msc::IMCUFlash& mcuFlash);
+        SafeModeScrubber(ScrubBuffer& scrubBuffer, program_flash::BootTable& bootTable);
 
         /**
          * @brief Perfoms scrubbing
@@ -70,18 +69,16 @@ namespace scrubber
         inline bool InProgress() const;
 
       private:
-        /** @brief Reference to scrubbing buffer */
+        /** @brief Span with scrubbing buffer */
         gsl::span<std::uint8_t> _scrubBuffer;
         /** @brief Boot table */
         program_flash::BootTable& _bootTable;
-        /** @brief MCU flash memory driver */
-        drivers::msc::IMCUFlash& _mcuFlash;
         /** @brief Iterations count */
         std::uint32_t _iterationsCount;
         /** @brief Number of corrected safe mode copies */
         std::uint32_t _copiesCorrected;
         /** @brief Number of corrected MCU pages */
-        std::uint32_t _mcuPagesCorrected;
+        std::uint32_t _eepromPagesCorrected;
 
         std::atomic<bool> _inProgress;
     };
