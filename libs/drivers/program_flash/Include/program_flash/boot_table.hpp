@@ -228,6 +228,73 @@ namespace program_flash
         FlashSpan _copy;
     };
 
+    /** @brief Safe mode copy*/
+    class SafeModeCopy
+    {
+      public:
+        /**
+         * @brief Ctor
+         * @param flash Flash driver
+         * @param index Safe mode copy index
+         */
+        SafeModeCopy(IFlashDriver& flash, std::uint8_t index) : _copy(flash, 3_MB + 5 * 64_KB + 64_KB * index)
+        {
+        }
+
+        /**
+         * @brief Erases this safe mode copy
+         * @return Operation status
+         */
+        inline FlashStatus Erase()
+        {
+            return this->_copy.Erase(0);
+        }
+
+        /**
+         * @brief Writes content
+         * @param offset Offset to first byte being written
+         * @param contents Bytes to write
+         * @return Operation status
+         */
+        inline FlashStatus Write(std::size_t offset, gsl::span<std::uint8_t> contents)
+        {
+            return this->_copy.Program(offset, contents);
+        }
+
+        /**
+         * @brief Writes single byte
+         * @param offset Offset to byte being written
+         * @param byte Byte to write
+         * @return Operation status
+         */
+        inline FlashStatus Write(std::size_t offset, std::uint8_t byte)
+        {
+            return this->_copy.Program(offset, byte);
+        }
+
+        /**
+         * @brief Returns span containing whole safe mode copy
+         * @return Span for this safe mode copy
+         */
+        inline gsl::span<const std::uint8_t> Content() const
+        {
+            return {this->_copy.Data(), Size};
+        }
+
+        /**
+         * @brief Calculates CRC of whole safe mode copy
+         * @return CRC of safe mode copy
+         */
+        std::uint16_t CalculateCrc() const;
+
+        /** @brief Size of safe mode copy */
+        static constexpr std::size_t Size = 64_KB;
+
+      private:
+        /** @brief Flash span containing bootloader copy */
+        FlashSpan _copy;
+    };
+
     /**
      * @brief Boot table
      */
@@ -285,6 +352,16 @@ namespace program_flash
         }
 
         /**
+         * @brief Returns safe mode copy from boot table
+         * @param index Safe mode copy index
+         * @return Safe mode copy
+         */
+        inline SafeModeCopy GetSafeModeCopy(std::uint8_t index)
+        {
+            return SafeModeCopy(this->_flash, index);
+        }
+
+        /**
          * @brief Locks entire boot table
          * @param timeout Take lock timeout
          * @return true if lock was taken, false otherwise
@@ -301,6 +378,9 @@ namespace program_flash
 
         /** @brief Number of bootloader copies */
         static constexpr std::uint8_t BootloaderCopies = 5;
+
+        /** @brief Number of safe mode copies */
+        static constexpr std::uint8_t SafeModeCopies = 5;
 
       private:
         /** @brief Flash driver */

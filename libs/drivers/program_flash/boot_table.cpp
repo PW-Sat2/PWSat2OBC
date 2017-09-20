@@ -117,4 +117,9 @@ namespace program_flash
     {
         return CRC_calc(this->Content());
     }
+
+    std::uint16_t SafeModeCopy::CalculateCrc() const
+    {
+        return CRC_calc(this->Content());
+    }
 }
