@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <bitset>
 #include "base/crc.h"
+#include "bsp/bsp_boot.h"
 #include "bsp/bsp_uart.h"
 #include "main.hpp"
 #include "program_flash/boot_table.hpp"
@@ -190,6 +191,49 @@ static void CheckBootloader()
     }
 }
 
+static void CheckSafeMode()
+{
+    std::array<std::uint16_t, program_flash::BootTable::SafeModeCopies> crc;
+
+    for (auto i = 0; i < program_flash::BootTable::SafeModeCopies; i++)
+    {
+        auto copy = Bootloader.BootTable.GetSafeModeCopy(i);
+        crc[i] = copy.CalculateCrc();
+    }
+
+    auto r = std::minmax_element(crc.begin(), crc.end());
+
+    if (*r.first == *r.second)
+    {
+        BSP_UART_Printf<50>(BSP_UART_DEBUG, "[OK  ] Safe mode copies all the same (0x%X)\n", *r.first);
+    }
+    else
+    {
+        BSP_UART_Puts(BSP_UART_DEBUG, "[FAIL] Safe mode copies not the same (CRCs:");
+
+        for (auto i = 0U; i < crc.size(); i++)
+        {
+            BSP_UART_Printf<10>(BSP_UART_DEBUG, " 0x%X", crc[i]);
+        }
+
+        BSP_UART_Puts(BSP_UART_DEBUG, ")\n");
+    }
+
+    auto eepromStart = reinterpret_cast<std::uint8_t*>(0x12000000);
+
+    auto eepromCrc = CRC_calc(eepromStart, eepromStart + program_flash::SafeModeCopy::Size);
+
+    if (eepromCrc == *r.first)
+    {
+        BSP_UART_Puts(BSP_UART_DEBUG, "[OK  ] Safe mode in EEPROM matches copies\n");
+    }
+    else
+    {
+        BSP_UART_Printf<80>(
+            BSP_UART_DEBUG, "[FAIL] Safe mode in EEPROM does not match copies (MCU: 0x%X Copy: 0x%X)\n", eepromCrc, *r.first);
+    }
+}
+
 void Check()
 {
     BSP_UART_Puts(BSP_UART_DEBUG, "\nChecking OBC:\n");
@@ -199,4 +243,6 @@ void Check()
     CheckBootSlots();
 
     CheckBootloader();
+
+    CheckSafeMode();
 }

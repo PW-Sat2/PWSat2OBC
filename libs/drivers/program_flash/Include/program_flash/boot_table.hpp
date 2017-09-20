@@ -288,7 +288,7 @@ namespace program_flash
         std::uint16_t CalculateCrc() const;
 
         /** @brief Size of safe mode copy */
-        static constexpr std::size_t Size = 64_KB;
+        static constexpr std::size_t Size = 32_KB;
 
       private:
         /** @brief Flash span containing bootloader copy */
