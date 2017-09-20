@@ -1,4 +1,5 @@
 #include "safe_mode.hpp"
+#include <FreeRTOS.h>
 #include <algorithm>
 #include <cstring>
 #include "logger/logger.h"
@@ -74,26 +75,43 @@ namespace scrubber
 
         LOG(LOG_LEVEL_INFO, "[scrub] Scrubbing safe mode in EEPROM");
 
-        //        auto bootloaderStart = this->_mcuFlash.Begin();
-        //
-        //        for (std::size_t offset = 0; offset < program_flash::SafeModeCopy::Size; offset += MCUMemoryController::SectorSize)
-        //        {
-        //            auto isOk = memcmp(bootloaderStart + offset, this->_scrubBuffer.data() + offset, MCUMemoryController::SectorSize) ==
-        //            0;
-        //
-        //            if (isOk)
-        //            {
-        //                continue;
-        //            }
-        //
-        //            LOGF(LOG_LEVEL_WARNING, "[scrub] Rewriting MCU bootloader at offset 0x%X", offset);
-        //            this->_mcuFlash.Erase(offset);
-        //
-        //            auto validPart = gsl::make_span(this->_scrubBuffer).subspan(offset, MCUMemoryController::SectorSize);
-        //
-        //            this->_mcuFlash.Program(offset, validPart);
-        //            this->_mcuPagesCorrected++;
-        //        }
+        auto eepromStart = reinterpret_cast<std::uint8_t*>(0x80000000);
+
+        auto eeprom = gsl::make_span(eepromStart, eepromStart + program_flash::SafeModeCopy::Size);
+
+        for (std::size_t offset = 0; offset < program_flash::SafeModeCopy::Size; offset += 64)
+        {
+            auto isOk = memcmp(eeprom.data() + offset, this->_scrubBuffer.data() + offset, 64) == 0;
+
+            if (isOk)
+            {
+                continue;
+            }
+
+            LOGF(LOG_LEVEL_WARNING, "[scrub] Rewriting safe mode in EEPROM at 0x%X", offset);
+
+            auto correctPart = this->_scrubBuffer.subspan(offset, 64);
+
+            portENTER_CRITICAL();
+
+            *((volatile uint8_t*)(0x80000000 + 0x5555)) = 0xAA;
+            *((volatile uint8_t*)(0x80000000 + 0x2AAA)) = 0x55;
+            *((volatile uint8_t*)(0x80000000 + 0x5555)) = 0xA0;
+
+            auto area = reinterpret_cast<volatile std::uint8_t*>(0x80000000 + offset);
+
+            for (auto i = 0; i < 64; i++)
+            {
+                area[i] = correctPart[i];
+            }
+
+            portEXIT_CRITICAL();
+
+            while ((area[63] & 0x80) != (correctPart[63] & 0x80))
+            {
+                System::SleepTask(1ms);
+            }
+        }
 
         this->_inProgress = false;
 
