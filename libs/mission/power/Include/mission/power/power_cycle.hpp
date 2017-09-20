@@ -31,6 +31,11 @@ namespace mission
              * @return true if scrubbing is in progress, false otherwise
              */
             virtual bool FailsafeSlotsInProgress() = 0;
+            /**
+             * @brief Returns flag indicating whether safe mode scrubbing is in progress
+             * @return true if scrubbing is in progress, false otherwise
+             */
+            virtual bool SafeModeInProgress() = 0;
         };
 
         /**

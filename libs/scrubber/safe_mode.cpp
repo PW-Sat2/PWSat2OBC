@@ -1,5 +1,4 @@
 #include "safe_mode.hpp"
-#include <FreeRTOS.h>
 #include <algorithm>
 #include <cstring>
 #include "logger/logger.h"
@@ -13,14 +12,14 @@ using namespace std::chrono_literals;
 namespace scrubber
 {
     SafeModeScrubbingStatus::SafeModeScrubbingStatus(
-        std::uint32_t iterationsCount, std::uint32_t copiesCorrected, std::uint32_t mcuPagesCorrected)
-        : IterationsCount(iterationsCount), CopiesCorrected(copiesCorrected), MUCPagesCorrected(mcuPagesCorrected)
+        std::uint32_t iterationsCount, std::uint32_t copiesCorrected, std::uint32_t eepromPagesCorrected)
+        : IterationsCount(iterationsCount), CopiesCorrected(copiesCorrected), EEPROMPagesCorrected(eepromPagesCorrected)
     {
     }
 
-    SafeModeScrubber::SafeModeScrubber(ScrubBuffer& scrubBuffer, program_flash::BootTable& bootTable, drivers::msc::IMCUFlash& mcuFlash)
+    SafeModeScrubber::SafeModeScrubber(ScrubBuffer& scrubBuffer, program_flash::BootTable& bootTable)
         : _scrubBuffer(gsl::make_span(scrubBuffer).subspan(0, program_flash::SafeModeCopy::Size)), _bootTable(bootTable),
-          _mcuFlash(mcuFlash), _iterationsCount(0), _copiesCorrected(0), _mcuPagesCorrected(0)
+          _iterationsCount(0), _copiesCorrected(0), _eepromPagesCorrected(0)
     {
     }
 
@@ -92,25 +91,26 @@ namespace scrubber
 
             auto correctPart = this->_scrubBuffer.subspan(offset, 64);
 
-            portENTER_CRITICAL();
-
-            *((volatile uint8_t*)(0x80000000 + 0x5555)) = 0xAA;
-            *((volatile uint8_t*)(0x80000000 + 0x2AAA)) = 0x55;
-            *((volatile uint8_t*)(0x80000000 + 0x5555)) = 0xA0;
-
             auto area = reinterpret_cast<volatile std::uint8_t*>(0x80000000 + offset);
-
-            for (auto i = 0; i < 64; i++)
             {
-                area[i] = correctPart[i];
-            }
+                CriticalSection cs;
 
-            portEXIT_CRITICAL();
+                *((volatile uint8_t*)(0x80000000 + 0x5555)) = 0xAA;
+                *((volatile uint8_t*)(0x80000000 + 0x2AAA)) = 0x55;
+                *((volatile uint8_t*)(0x80000000 + 0x5555)) = 0xA0;
+
+                for (auto i = 0; i < 64; i++)
+                {
+                    area[i] = correctPart[i];
+                }
+            }
 
             while ((area[63] & 0x80) != (correctPart[63] & 0x80))
             {
                 System::SleepTask(1ms);
             }
+
+            this->_eepromPagesCorrected++;
         }
 
         this->_inProgress = false;
@@ -119,6 +119,6 @@ namespace scrubber
     }
     SafeModeScrubbingStatus SafeModeScrubber::Status()
     {
-        return SafeModeScrubbingStatus(this->_iterationsCount, this->_copiesCorrected, this->_mcuPagesCorrected);
+        return SafeModeScrubbingStatus(this->_iterationsCount, this->_copiesCorrected, this->_eepromPagesCorrected);
     }
 }
