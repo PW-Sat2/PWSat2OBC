@@ -106,3 +106,38 @@ void CopyBootloader()
 
     BSP_UART_Puts(BSP_UART_DEBUG, "Copy done\n");
 }
+
+void CopySafeMode()
+{
+    BSP_UART_Puts(BSP_UART_DEBUG, "\nCopying current safe mode to external flash....\n");
+
+    gsl::span<std::uint8_t> sourceSpan(reinterpret_cast<std::uint8_t*>(BOOT_SAFEMODE_BASE_CODE), program_flash::SafeModeCopy::Size);
+
+    for (std::uint8_t i = 0; i < program_flash::BootTable::SafeModeCopies; i++)
+    {
+        BSP_UART_Printf<10>(BSP_UART_DEBUG, "\tCopy %d:\t", i);
+
+        auto copy = Bootloader.BootTable.GetSafeModeCopy(i);
+
+        BSP_UART_Puts(BSP_UART_DEBUG, "Erasing\t");
+        auto r = copy.Erase();
+        if (r != FlashStatus::NotBusy)
+        {
+            BSP_UART_Printf<10>(BSP_UART_DEBUG, "Failed %d\n", num(r));
+            return;
+        }
+
+        BSP_UART_Puts(BSP_UART_DEBUG, "Programing\t");
+
+        r = copy.Write(0, sourceSpan);
+        if (r != FlashStatus::NotBusy)
+        {
+            BSP_UART_Printf<10>(BSP_UART_DEBUG, "Failed %d\n", num(r));
+            return;
+        }
+
+        BSP_UART_Puts(BSP_UART_DEBUG, "\n");
+    }
+
+    BSP_UART_Puts(BSP_UART_DEBUG, "Copy done\n");
+}
