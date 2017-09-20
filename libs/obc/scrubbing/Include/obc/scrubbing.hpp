@@ -118,13 +118,13 @@ namespace obc
         scrubber::ProgramScrubber _secondarySlotsScrubber;
 
         /** @brief Bootloader scrubber counter */
-        time_counter::TimeCounter<Action<OBCScrubbing*>, OBCScrubbing*, time_counter::min<60>, time_counter::min<30>>
+        time_counter::TimeCounter<Action<OBCScrubbing*>, OBCScrubbing*, time_counter::min<8>, time_counter::min<1>>
             _bootloaderScrubberCounter;
         /** @brief Bootloader scrubber */
         scrubber::BootloaderScrubber _bootloaderScrubber;
 
         /** @brief Safe mode scrubber counter */
-        time_counter::TimeCounter<Action<OBCScrubbing*>, OBCScrubbing*, time_counter::min<5>, time_counter::min<1>>
+        time_counter::TimeCounter<Action<OBCScrubbing*>, OBCScrubbing*, time_counter::min<8>, time_counter::min<2>>
             _safeModeScrubberCounter;
         /** @brief Safe mode scrubber */
         scrubber::SafeModeScrubber _safeModeScrubber;
