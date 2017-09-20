@@ -12,6 +12,7 @@
 #include "scrubber/boot_settings.hpp"
 #include "scrubber/bootloader.hpp"
 #include "scrubber/program.hpp"
+#include "scrubber/safe_mode.hpp"
 
 namespace obc
 {
@@ -116,6 +117,12 @@ namespace obc
             _bootloaderScrubberCounter;
         /** @brief Bootloader scrubber */
         scrubber::BootloaderScrubber _bootloaderScrubber;
+
+        /** @brief Safe mode scrubber counter */
+        time_counter::TimeCounter<Action<OBCScrubbing*>, OBCScrubbing*, time_counter::min<5>, time_counter::min<1>>
+            _safeModeScrubberCounter;
+        /** @brief Safe mode scrubber */
+        scrubber::SafeModeScrubber _safeModeScrubber;
 
         /** @brief Boot settings scrubber counter */
         time_counter::TimeCounter<Action<OBCScrubbing*>, OBCScrubbing*, time_counter::min<30>, time_counter::min<15>>

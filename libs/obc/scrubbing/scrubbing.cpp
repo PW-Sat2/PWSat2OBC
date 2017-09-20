@@ -26,6 +26,8 @@ namespace obc
           _secondarySlotsScrubber(ScrubbingBuffer, bootTable, hardware.FlashDriver, (~primaryBootSlots) & 0b111111),    //
           _bootloaderScrubberCounter([](OBCScrubbing* This) { This->_bootloaderScrubber.Scrub(); }, this),              //
           _bootloaderScrubber(ScrubbingBuffer, bootTable, hardware.MCUFlash),                                           //
+          _safeModeScrubberCounter([](OBCScrubbing* This) { This->_safeModeScrubber.Scrub(); }, this),                  //
+          _safeModeScrubber(ScrubbingBuffer, bootTable, hardware.MCUFlash),                                             //
           _bootSettingsScrubberCounter([](OBCScrubbing* This) { This->_bootSettingsScrubber.Scrub(); }, this),          //
           _bootSettingsScrubber(hardware.PersistentStorage.GetRedundantDriver(), bootSettings),                         //
           _scrubberTask("Scrubber", this, ScrubberTask),                                                                //
@@ -66,11 +68,13 @@ namespace obc
                 This->_primarySlotsScrubberCounter,
                 This->_secondarySlotsScrubberCounter,
                 This->_bootloaderScrubberCounter,
+                This->_safeModeScrubberCounter,
                 This->_bootSettingsScrubberCounter);
 
             time_counter::DoOnBottom(This->_primarySlotsScrubberCounter,
                 This->_secondarySlotsScrubberCounter,
                 This->_bootloaderScrubberCounter,
+                This->_safeModeScrubberCounter,
                 This->_bootSettingsScrubberCounter);
 
             This->_control.Set(Event::Running);
