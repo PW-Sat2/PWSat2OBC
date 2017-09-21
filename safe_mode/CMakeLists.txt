@@ -12,6 +12,7 @@ set(SOURCES
     safe_mode.cpp
     error_counter.cpp
     dummy_os.cpp
+    fault_handler.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
