@@ -108,7 +108,7 @@ static void CheckBootSlots()
 
         if (expectedCrc != actualCrc)
         {
-            BSP_UART_Printf<40>(
+            BSP_UART_Printf<80>(
                 BSP_UART_DEBUG, "[FAIL] Boot slot %d: CRC mismatch (expected: 0x%X, actual: 0x%X)\n", i, expectedCrc, actualCrc);
             continue;
         }
