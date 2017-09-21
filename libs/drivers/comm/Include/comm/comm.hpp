@@ -117,6 +117,8 @@ struct ReceiverTelemetry
     std::uint16_t NowAmplifierTemperature;
     std::uint16_t NowRSSI;
 
+    void Write(BitWriter& writer) const;
+
     static constexpr std::size_t BitSize();
 };
 
@@ -148,6 +150,8 @@ struct TransmitterTelemetry
     IdleState StateWhenIdle;
 
     bool BeaconState;
+
+    void Write(BitWriter& writer) const;
 
     static constexpr std::size_t BitSize();
 };

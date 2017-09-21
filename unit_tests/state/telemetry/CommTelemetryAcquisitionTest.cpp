@@ -53,7 +53,7 @@ namespace
     TEST_F(CommTelemetryAcquisitionTest, TestAcquisitionStateUpdate)
     {
         EXPECT_CALL(comm, GetTelemetry(_)).WillOnce(Invoke([](auto& telemetry) {
-            telemetry = CommTelemetry({}, {}, {IdleState::On, Bitrate::Comm2400bps, true}, {});
+            telemetry = CommTelemetry({}, {});
             return true;
         }));
         Run();

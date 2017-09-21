@@ -204,7 +204,20 @@ namespace
     {
         std::uint8_t buffer[21];
         std::uint8_t expected[] = {
-            0x5a, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x0a, 0x40, 0x01, 0x1e, 0x80, 0x02, 0x32, 0xc0, 0x03, 0x46, 0x00, 0x05};
+            //
+            0x5A,
+            0b11010001,
+            0b01011000,
+            0b11111111,
+            5,
+            10,
+            15,
+            20,
+            25,
+            30,
+            35,
+            40,
+        };
         AntennaTelemetry telemetry;
 
         telemetry.SetActivationCounts(ANTENNA_PRIMARY_CHANNEL, ActivationCounts(1, 2, 3, 4));
@@ -217,7 +230,7 @@ namespace
         BitWriter writer(buffer);
         telemetry.Write(writer);
         ASSERT_THAT(writer.Status(), Eq(true));
-        ASSERT_THAT(writer.GetBitDataLength(), Eq(168u));
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(96u));
         ASSERT_THAT(writer.Capture(), Eq(gsl::make_span(expected)));
     }
 
