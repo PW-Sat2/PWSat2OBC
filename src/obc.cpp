@@ -171,8 +171,6 @@ OSResult OBC::InitializeRunlevel1()
     ProcessState(this);
     AuditSystemStartup();
 
-    this->fs.MakeDirectory("/a");
-
     state::TimeState timeState;
     if (!persistentState.Get(timeState))
     {
