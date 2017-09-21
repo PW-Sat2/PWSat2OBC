@@ -1,4 +1,4 @@
-from emulator.beacon_parser.units import BoolType, TimeFromSeconds
+from emulator.beacon_parser.units import BoolType, TimeFromSeconds, TimeFromTwoSeconds
 from parser import CategoryParser
 
 
@@ -30,12 +30,12 @@ class AntennaTelemetryParser(CategoryParser):
         self.append("Antenna 3 Activation Count Ch B", 3)
         self.append("Antenna 4 Activation Count Ch B", 3)
 
-        self.append("Antenna 1 Activation Time Ch A", 12, value_type=TimeFromSeconds)
-        self.append("Antenna 2 Activation Time Ch A", 12, value_type=TimeFromSeconds)
-        self.append("Antenna 3 Activation Time Ch A", 12, value_type=TimeFromSeconds)
-        self.append("Antenna 4 Activation Time Ch A", 12, value_type=TimeFromSeconds)
+        self.append("Antenna 1 Activation Time Ch A", 8, value_type=TimeFromTwoSeconds)
+        self.append("Antenna 2 Activation Time Ch A", 8, value_type=TimeFromTwoSeconds)
+        self.append("Antenna 3 Activation Time Ch A", 8, value_type=TimeFromTwoSeconds)
+        self.append("Antenna 4 Activation Time Ch A", 8, value_type=TimeFromTwoSeconds)
 
-        self.append("Antenna 1 Activation Time Ch B", 12, value_type=TimeFromSeconds)
-        self.append("Antenna 2 Activation Time Ch B", 12, value_type=TimeFromSeconds)
-        self.append("Antenna 3 Activation Time Ch B", 12, value_type=TimeFromSeconds)
-        self.append("Antenna 4 Activation Time Ch B", 12, value_type=TimeFromSeconds)
+        self.append("Antenna 1 Activation Time Ch B", 8, value_type=TimeFromTwoSeconds)
+        self.append("Antenna 2 Activation Time Ch B", 8, value_type=TimeFromTwoSeconds)
+        self.append("Antenna 3 Activation Time Ch B", 8, value_type=TimeFromTwoSeconds)
+        self.append("Antenna 4 Activation Time Ch B", 8, value_type=TimeFromTwoSeconds)

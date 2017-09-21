@@ -46,10 +46,10 @@ namespace devices
 
         void ActivationTimes::Write(BitWriter& writer) const
         {
-            writer.WriteWord(this->times[0].count(), TimeLength);
-            writer.WriteWord(this->times[1].count(), TimeLength);
-            writer.WriteWord(this->times[2].count(), TimeLength);
-            writer.WriteWord(this->times[3].count(), TimeLength);
+            writer.WriteWord(std::min<std::uint16_t>(255, this->times[0].count() / 2), TimeLength);
+            writer.WriteWord(std::min<std::uint16_t>(255, this->times[1].count() / 2), TimeLength);
+            writer.WriteWord(std::min<std::uint16_t>(255, this->times[2].count() / 2), TimeLength);
+            writer.WriteWord(std::min<std::uint16_t>(255, this->times[3].count() / 2), TimeLength);
         }
 
         AntennaTelemetry::AntennaTelemetry() : deploymentStatus(0)

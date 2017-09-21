@@ -103,20 +103,37 @@ namespace
         ASSERT_THAT(times.GetActivationTime(ANTENNA4_ID), Eq(1023s));
     }
 
-    TEST(ActivationTimes, Serialization)
+    TEST(ActivationTimes, SerializationInRange)
     {
-        std::uint8_t buffer[6];
-        std::uint8_t expected[] = {0x12, 0xc0, 0xab, 0xed, 0xaf, 0xcb};
+        std::uint8_t buffer[4];
+        std::uint8_t expected[] = {0b11111111, 0b01111111, 0b00111111, 0b00100000};
         ActivationTimes times;
-        times.SetActivationTime(ANTENNA1_ID, 0x012s);
-        times.SetActivationTime(ANTENNA2_ID, 0xabcs);
-        times.SetActivationTime(ANTENNA3_ID, 0xfeds);
-        times.SetActivationTime(ANTENNA4_ID, 0xcbas);
+        times.SetActivationTime(ANTENNA1_ID, 511s);
+        times.SetActivationTime(ANTENNA2_ID, 255s);
+        times.SetActivationTime(ANTENNA3_ID, 127s);
+        times.SetActivationTime(ANTENNA4_ID, 64s);
 
         BitWriter writer(buffer);
         times.Write(writer);
         ASSERT_THAT(writer.Status(), Eq(true));
-        ASSERT_THAT(writer.GetBitDataLength(), Eq(48u));
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(32u));
+        ASSERT_THAT(writer.Capture(), Eq(gsl::make_span(expected)));
+    }
+
+    TEST(ActivationTimes, SerializationOverflow)
+    {
+        std::uint8_t buffer[4];
+        std::uint8_t expected[] = {43, 0xFF, 0xFF, 0xFF};
+        ActivationTimes times;
+        times.SetActivationTime(ANTENNA1_ID, 87s);
+        times.SetActivationTime(ANTENNA2_ID, 512s);
+        times.SetActivationTime(ANTENNA3_ID, 678s);
+        times.SetActivationTime(ANTENNA4_ID, 897s);
+
+        BitWriter writer(buffer);
+        times.Write(writer);
+        ASSERT_THAT(writer.Status(), Eq(true));
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(32u));
         ASSERT_THAT(writer.Capture(), Eq(gsl::make_span(expected)));
     }
 
