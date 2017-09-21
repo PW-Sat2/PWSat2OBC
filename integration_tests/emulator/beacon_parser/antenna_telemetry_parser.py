@@ -7,7 +7,7 @@ class AntennaTelemetryParser(CategoryParser):
         CategoryParser.__init__(self, '08: Antenna', reader, store)
 
     def get_bit_count(self):
-        return 8 + 8*8 + 8*12
+        return 8 + 8*3 + 8*8
 
     def parse(self):
         self.append("Antenna 3 Deployed Ch A", 1, value_type=BoolType)
