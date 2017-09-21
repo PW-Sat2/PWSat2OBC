@@ -55,7 +55,8 @@ namespace
     static constexpr uint8_t TransmitterSetBeacon = 0x14;
     static constexpr uint8_t TransmitterClearBeacon = 0x1f;
     static constexpr uint8_t TransmitterSetIdleState = 0x24;
-    static constexpr uint8_t TransmitterGetTelemetry = 0x26;
+    static constexpr uint8_t TransmitterGetTelemetryLastTransmission = 0x26;
+    static constexpr uint8_t TransmitterGetTelemetryInstant = 0x25;
     static constexpr uint8_t TransmitterSetBitrate = 0x28;
     static constexpr uint8_t TransmitterGetState = 0x41;
     static constexpr uint8_t TransmitterGetUptime = 0x40;
@@ -630,15 +631,32 @@ namespace
     TEST_F(CommTest, TestTransmitterTelemetry)
     {
         TransmitterTelemetry telemetry;
-        const uint8_t expected[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8};
-        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetTelemetry)));
-        EXPECT_CALL(i2c, Read(TransmitterAddress, _)).WillOnce(Invoke([&](uint8_t /*address*/, span<uint8_t> outData) {
+
+        uint8_t uptimeRaw[] = {5, 20, 3, 1};
+        uint8_t stateRaw[] = {0b00001011};
+        uint8_t lastTransmissionRaw[] = {0x21, 0x04, 0xB0, 0x04, 0x41, 0x05, 0x82, 0x05};
+        uint8_t nowRaw[] = {0x00, 0x00, 0x11, 0x11, 0x49, 0x0C, 0xAA, 0x0F};
+
+        gsl::span<std::uint8_t> i2cResponse;
+
+        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetUptime)))
+            .WillOnce(DoAll(Assign(&i2cResponse, gsl::make_span(uptimeRaw)), Return(I2CResult::OK)));
+
+        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetState)))
+            .WillOnce(DoAll(Assign(&i2cResponse, gsl::make_span(stateRaw)), Return(I2CResult::OK)));
+
+        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetTelemetryLastTransmission)))
+            .WillOnce(DoAll(Assign(&i2cResponse, gsl::make_span(lastTransmissionRaw)), Return(I2CResult::OK)));
+
+        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetTelemetryInstant)))
+            .WillOnce(DoAll(Assign(&i2cResponse, gsl::make_span(nowRaw)), Return(I2CResult::OK)));
+
+        ON_CALL(i2c, Read(TransmitterAddress, _)).WillByDefault(Invoke([&](uint8_t /*address*/, span<uint8_t> outData) {
             std::fill(outData.begin(), outData.end(), 0);
-            std::copy(std::begin(expected), std::end(expected), outData.begin());
+            std::copy(std::begin(i2cResponse), std::end(i2cResponse), outData.begin());
             return I2CResult::OK;
         }));
         const auto status = comm.GetTransmitterTelemetry(telemetry);
-        ASSERT_THAT(status, Eq(true));
         ASSERT_THAT(telemetry.Uptime, Eq(27h + 20min + 5s));
         ASSERT_THAT(telemetry.TransmitterBitRate, Eq(Bitrate::Comm4800bps));
 
@@ -653,13 +671,14 @@ namespace
         ASSERT_THAT(telemetry.StateWhenIdle, Eq(IdleState::On));
         ASSERT_THAT(telemetry.BeaconState, Eq(true));
 
+        ASSERT_THAT(status, Eq(true));
         ASSERT_THAT(error_counter, Eq(0));
     }
 
     TEST_F(CommTest, TestGetTelemetryTransmitterFailure)
     {
         CommTelemetry telemetry;
-        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetTelemetry))).WillOnce(Return(I2CResult::Nack));
+        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetTelemetryLastTransmission))).WillOnce(Return(I2CResult::Nack));
         const auto status = comm.GetTelemetry(telemetry);
         ASSERT_THAT(status, Eq(false));
         ASSERT_THAT(error_counter, Eq(5));
@@ -668,7 +687,7 @@ namespace
     TEST_F(CommTest, TestGetTelemetryReceiverFailure)
     {
         CommTelemetry telemetry;
-        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetTelemetry))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetTelemetryLastTransmission))).WillOnce(Return(I2CResult::OK));
         EXPECT_CALL(i2c, Write(ReceiverAddress, ElementsAre(ReceverGetTelemetry))).WillOnce(Return(I2CResult::Nack));
         const auto status = comm.GetTelemetry(telemetry);
         ASSERT_THAT(status, Eq(false));
@@ -678,7 +697,7 @@ namespace
     TEST_F(CommTest, TestGetTelemetryTransmitterStateFailure)
     {
         CommTelemetry telemetry;
-        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetTelemetry))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetTelemetryLastTransmission))).WillOnce(Return(I2CResult::OK));
         EXPECT_CALL(i2c, Write(ReceiverAddress, ElementsAre(ReceverGetTelemetry))).WillOnce(Return(I2CResult::OK));
         EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetState))).WillOnce(Return(I2CResult::Nack));
         const auto status = comm.GetTelemetry(telemetry);
@@ -689,7 +708,7 @@ namespace
     TEST_F(CommTest, TestGetTelemetryTransmitterUptimeFailure)
     {
         CommTelemetry telemetry;
-        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetTelemetry))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetTelemetryLastTransmission))).WillOnce(Return(I2CResult::OK));
         EXPECT_CALL(i2c, Write(ReceiverAddress, ElementsAre(ReceverGetTelemetry))).WillOnce(Return(I2CResult::OK));
         EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetState))).WillOnce(Return(I2CResult::OK));
         EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetUptime))).WillOnce(Return(I2CResult::Nack));
@@ -701,7 +720,7 @@ namespace
     TEST_F(CommTest, TestGetTelemetry)
     {
         CommTelemetry telemetry;
-        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetTelemetry))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetTelemetryLastTransmission))).WillOnce(Return(I2CResult::OK));
         EXPECT_CALL(i2c, Write(ReceiverAddress, ElementsAre(ReceverGetTelemetry))).WillOnce(Return(I2CResult::OK));
         EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetState))).WillOnce(Return(I2CResult::OK));
         EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetUptime))).WillOnce(Return(I2CResult::OK));
@@ -1046,7 +1065,7 @@ namespace
         const auto expectedErrorCount = std::get<3>(GetParam());
 
         UNUSED(index, value, operationStatus);
-        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetTelemetry))).WillOnce(Return(I2CResult::OK));
+        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetTelemetryLastTransmission))).WillOnce(Return(I2CResult::OK));
         EXPECT_CALL(i2c, Read(TransmitterAddress, _)).WillOnce(Invoke([=](uint8_t /*address*/, span<uint8_t> outData) {
             std::fill(outData.begin(), outData.end(), 0);
             outData[index] = value;

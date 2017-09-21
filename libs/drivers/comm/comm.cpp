@@ -344,38 +344,90 @@ bool CommObject::GetReceiverTelemetry(ReceiverTelemetry& telemetry)
 
 bool CommObject::GetTransmitterTelemetryInternal(TransmitterTelemetry& telemetry, AggregatedErrorCounter& resultAggregator)
 {
-    (void)telemetry;
-    (void)resultAggregator;
-    //    uint8_t buffer[sizeof(TransmitterTelemetry)] = {0};
-    //    const bool status = this->SendCommandWithResponse( //
-    //        Address::Transmitter,                          //
-    //        num(TransmitterCommand::GetTelemetry),         //
-    //        span<uint8_t>(buffer),                         //
-    //        resultAggregator);
-    //
-    //    if (!status)
-    //    {
-    //        return status;
-    //    }
-    //
-    //    Reader reader(buffer);
-    //    telemetry.RFReflectedPower = reader.ReadWordLE();
-    //    telemetry.AmplifierTemperature = reader.ReadWordLE();
-    //    telemetry.RFForwardPower = reader.ReadWordLE();
-    //    telemetry.TransmitterCurrentConsumption = reader.ReadWordLE();
-    //
-    //    if ((telemetry.RFReflectedPower & 0xf000) != 0 ||     //
-    //        (telemetry.AmplifierTemperature & 0xf000) != 0 || //
-    //        (telemetry.RFForwardPower & 0xf000) != 0 ||       //
-    //        (telemetry.TransmitterCurrentConsumption & 0xf000) != 0)
-    //    {
-    //        LOG(LOG_LEVEL_ERROR, "[comm] Received invalid transmitter telemetry. ");
-    //        return false;
-    //    }
-    //
-    //    return reader.Status();
+    {
+        std::array<uint8_t, 4> buffer;
 
-    return false;
+        const bool status = this->SendCommandWithResponse(Address::Transmitter, //
+            num(TransmitterCommand::GetUptime),                                 //
+            span<uint8_t>(buffer),                                              //
+            resultAggregator);
+
+        if (!status)
+        {
+            return status;
+        }
+
+        Reader r(buffer);
+
+        telemetry.Uptime = std::chrono::seconds(r.ReadByte());
+        telemetry.Uptime += std::chrono::minutes(r.ReadByte());
+        telemetry.Uptime += std::chrono::hours(r.ReadByte());
+        telemetry.Uptime += std::chrono::hours(r.ReadByte() * 24);
+    }
+
+    {
+        uint8_t buffer;
+
+        const bool status = this->SendCommandWithResponse(Address::Transmitter, //
+            num(TransmitterCommand::GetState),                                  //
+            span<uint8_t>(&buffer, 1),                                          //
+            resultAggregator);
+
+        if (!status)
+        {
+            return status;
+        }
+
+        telemetry.BeaconState = (buffer & 2) != 0;
+        telemetry.StateWhenIdle = static_cast<IdleState>(buffer & 1);
+        static const Bitrate conversionArray[] = {
+            Bitrate::Comm1200bps, Bitrate::Comm2400bps, Bitrate::Comm4800bps, Bitrate::Comm9600bps,
+        };
+
+        telemetry.TransmitterBitRate = conversionArray[(buffer & 0x0c) >> 2];
+    }
+
+    {
+        uint8_t buffer[8] = {0};
+        const bool status = this->SendCommandWithResponse(         //
+            Address::Transmitter,                                  //
+            num(TransmitterCommand::GetTelemetryLastTransmission), //
+            span<uint8_t>(buffer),                                 //
+            resultAggregator);
+
+        if (!status)
+        {
+            return status;
+        }
+
+        Reader reader(buffer);
+        telemetry.LastTransmittedRFReflectedPower = reader.ReadWordLE();
+        telemetry.LastTransmittedAmplifierTemperature = reader.ReadWordLE();
+        telemetry.LastTransmittedRFForwardPower = reader.ReadWordLE();
+        telemetry.LastTransmittedTransmitterCurrentConsumption = reader.ReadWordLE();
+    }
+
+    {
+        uint8_t buffer[8] = {0};
+        const bool status = this->SendCommandWithResponse( //
+            Address::Transmitter,                          //
+            num(TransmitterCommand::GetTelemetryInstant),  //
+            span<uint8_t>(buffer),                         //
+            resultAggregator);
+
+        if (!status)
+        {
+            return status;
+        }
+
+        Reader reader(buffer);
+        reader.ReadWordLE(); // RF Reflected power
+        reader.ReadWordLE(); // Power Amp Temperature
+        telemetry.NowRFForwardPower = reader.ReadWordLE();
+        telemetry.NowTransmitterCurrentConsumption = reader.ReadWordLE();
+    }
+
+    return true;
 }
 
 bool CommObject::GetTransmitterTelemetry(TransmitterTelemetry& telemetry)
