@@ -174,8 +174,8 @@ static void CommGetTelemetry(uint16_t argc, char* argv[])
             return;
         }
 
-        GetTerminal().Printf("Uptime: '%lds'\n", static_cast<std::uint32_t>(telemetry.Uptime.count()));
-        GetTerminal().Printf("Bitrate: '%ds'\n", num(telemetry.TransmitterBitRate));
+        GetTerminal().Printf("Uptime: '%ld'\n", static_cast<std::uint32_t>(telemetry.Uptime.count()));
+        GetTerminal().Printf("Bitrate: '%d'\n", num(telemetry.TransmitterBitRate));
         GetTerminal().Printf("LastTransmitted RF Reflected power: '%d'\n", telemetry.LastTransmittedRFReflectedPower);
         GetTerminal().Printf("LastTransmitted Power Amp Temperature: '%d'\n", telemetry.LastTransmittedAmplifierTemperature);
         GetTerminal().Printf("LastTransmitted RF Forward power: '%d'\n", telemetry.LastTransmittedRFForwardPower);
@@ -184,8 +184,8 @@ static void CommGetTelemetry(uint16_t argc, char* argv[])
         GetTerminal().Printf("Now RF Forward power: '%d'\n", telemetry.NowRFForwardPower);
         GetTerminal().Printf("Now TX Current: '%d'\n", telemetry.NowTransmitterCurrentConsumption);
 
-        GetTerminal().Printf("Idle state: '%s'\n", telemetry.StateWhenIdle == IdleState::On ? "Yes" : "No");
-        GetTerminal().Printf("Beacon: '%s'\n", telemetry.BeaconState ? "Yes" : "No");
+        GetTerminal().Printf("Idle state: '%d'\n", telemetry.StateWhenIdle == IdleState::On ? 1 : 0);
+        GetTerminal().Printf("Beacon: '%d'\n", telemetry.BeaconState ? 1 : 0);
     }
     else if (channel == CommHardware::Receiver)
     {

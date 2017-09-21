@@ -59,10 +59,11 @@ class CommMixin(OBCMixin):
         setattr(object, tupple[0], tupple[1])
 
     def _parse_transmitter_telemetry(result):
-        telemetry = TransmitterTelemetry()
+        telemetry = {}
         parts = result.split("\n")
         for part in parts:
-            CommMixin.set_attribute(telemetry, CommMixin.extract_value(part))
+            (key, value) = CommMixin.extract_value(part)
+            telemetry[key] = value
 
         return telemetry
 

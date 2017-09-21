@@ -7,10 +7,13 @@ from tests.base import BaseTest, RestartPerTest
 from system import auto_power_on, runlevel
 from utils import TestEvent, ensure_byte_list
 
+
 class Test_Comm(RestartPerTest):
     @auto_power_on(False)
-    def __init__(self, methodName = 'runTest'):
+    def __init__(self, methodName='runTest'):
         super(Test_Comm, self).__init__(methodName)
+
+        self.longMessage = True
 
     def module_reset(self, module, event):
         self.power_on_obc()
@@ -89,7 +92,7 @@ class Test_Comm(RestartPerTest):
     def test_auto_pingpong(self):
         def reset_handler(*args):
             return False
-        
+
         self.system.comm.on_hardware_reset = reset_handler
         self.system.comm.receiver.on_reset = reset_handler
         self.power_on_obc()
@@ -122,12 +125,32 @@ class Test_Comm(RestartPerTest):
             return TransmitterTelemetry.build(0x123, 0x456, 0x789, 0xabc)
 
         self.system.transmitter.on_get_telemetry = get_telemetry_handler
+
+        self.system.transmitter.on_report_uptime = lambda *args: [1, 2, 3, 4]
+        self.system.transmitter.on_report_state = lambda *args: [0b00001001]
+        self.system.transmitter.on_get_telemetry_last_transmission = \
+            lambda *args: TransmitterTelemetry.build(1444, 1666, 1222, 1555)
+
+        self.system.transmitter.on_get_telemetry_instant = \
+            lambda *args: TransmitterTelemetry.build(1234, 1234, 1111, 1333)
+
         self.power_on_obc()
         telemetry = self.system.obc.comm_get_transmitter_telemetry()
-        self.assertEqual(telemetry.RFReflectedPower, 0x123)
-        self.assertEqual(telemetry.AmplifierTemperature, 0x456)
-        self.assertEqual(telemetry.RFForwardPower, 0x789)
-        self.assertEqual(telemetry.TransmitterCurrentConsumption, 0xabc)
+        expected = {
+            'Uptime': 356521,
+            'Now RF Forward power': 1111,
+            'LastTransmitted RF Forward power': 1222,
+            'Now TX Current': 1333,
+            'LastTransmitted RF Reflected power': 1444,
+            'Beacon': 0,
+            'Idle state': 1,
+            'LastTransmitted TX Current': 1555,
+            'Bitrate': 4,
+            'LastTransmitted Power Amp Temperature': 1666
+        }
+
+        for k in expected.keys():
+            self.assertEqual(expected[k], telemetry[k], "Key: %s" % k)
 
     @runlevel(1)
     def test_get_receiver_telemetry(self):

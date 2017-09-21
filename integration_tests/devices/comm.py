@@ -189,12 +189,19 @@ class TransmitterDevice(i2cMock.I2CDevice):
         # Returning none indicates that requested baud rate should be used.
         self.on_set_baudrate = None
 
-        # callback called when transmitter telemetry is being requested
+        # callback called when transmitter telemetry during last transmission is being requested
         # expected prototype:
         # None -> TransmitterTelemetry|None
         # This callback can override the telemetry retuned by this device by returning the desired response.
         # Returning None will indicate that default telemetry should be reported.
-        self.on_get_telemetry = None
+        self.on_get_telemetry_last_transmission = None
+
+        # callback called when transmitter instant telemetry is being requested
+        # expected prototype:
+        # None -> TransmitterTelemetry|None
+        # This callback can override the telemetry retuned by this device by returning the desired response.
+        # Returning None will indicate that default telemetry should be reported.
+        self.on_get_telemetry_instant = None
 
         # callback called when beacon is being set
         # expected prototype:
@@ -262,8 +269,13 @@ class TransmitterDevice(i2cMock.I2CDevice):
         self.baud_rate = call(self.on_set_baudrate, baudrate, baudrate)
 
     @i2cMock.command([0x26])
-    def _get_telemetry(self):
-        telemetry = call(self.on_get_telemetry, TransmitterTelemetry())
+    def _get_telemetry_last_transmission(self):
+        telemetry = call(self.on_get_telemetry_last_transmission, TransmitterTelemetry())
+        return telemetry.toArray()
+
+    @i2cMock.command([0x25])
+    def _get_telemetry_instant(self):
+        telemetry = call(self.on_get_telemetry_instant, TransmitterTelemetry())
         return telemetry.toArray()
 
     @i2cMock.command([0x14])
