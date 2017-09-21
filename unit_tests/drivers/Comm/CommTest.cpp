@@ -437,157 +437,6 @@ namespace
         ASSERT_THAT(error_counter, Eq(0));
     }
 
-    TEST_F(CommTest, TestGetTransmitterStateRequestFailure)
-    {
-        TransmitterState state;
-        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetState))).WillOnce(Return(I2CResult::Nack));
-        const auto status = comm.GetTransmitterState(state);
-        ASSERT_THAT(status, Eq(false));
-        ASSERT_THAT(error_counter, Eq(5));
-    }
-
-    TEST_F(CommTest, TestGetTransmitterStateResponseFailure)
-    {
-        TransmitterState state;
-        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetState))).WillOnce(Return(I2CResult::OK));
-        EXPECT_CALL(i2c, Read(TransmitterAddress, _)).WillOnce(Return(I2CResult::Nack));
-        const auto status = comm.GetTransmitterState(state);
-        ASSERT_THAT(status, Eq(false));
-        ASSERT_THAT(error_counter, Eq(5));
-    }
-
-    TEST_F(CommTest, TestGetTransmitterInvalidResponse)
-    {
-        TransmitterState state;
-        EXPECT_CALL(i2c, Read(TransmitterAddress, _)).WillOnce(Invoke([](uint8_t /*address*/, auto outData) {
-            outData[0] = 0xff;
-            return I2CResult::OK;
-        }));
-        const auto status = comm.GetTransmitterState(state);
-        ASSERT_THAT(status, Eq(false));
-        ASSERT_THAT(error_counter, Eq(0));
-    }
-
-    TEST_F(CommTest, TestGetTransmitterResponse)
-    {
-        TransmitterState state;
-        EXPECT_CALL(i2c, Read(TransmitterAddress, _)).WillOnce(Invoke([](uint8_t /*address*/, auto outData) {
-            outData[0] = 0x7f;
-            return I2CResult::OK;
-        }));
-        const auto status = comm.GetTransmitterState(state);
-        ASSERT_THAT(status, Eq(true));
-        ASSERT_THAT(state.BeaconState, Eq(true));
-        ASSERT_THAT(state.StateWhenIdle, Eq(IdleState::On));
-        ASSERT_THAT(state.TransmitterBitRate, Eq(Bitrate::Comm9600bps));
-        ASSERT_THAT(error_counter, Eq(0));
-    }
-
-    TEST_F(CommTest, TestGetBaseLineTransmitterResponse)
-    {
-        TransmitterState state;
-        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetState)));
-        EXPECT_CALL(i2c, Read(TransmitterAddress, _)).WillOnce(Invoke([](uint8_t /*address*/, auto outData) {
-            outData[0] = 0x0;
-            return I2CResult::OK;
-        }));
-        const auto status = comm.GetTransmitterState(state);
-        ASSERT_THAT(status, Eq(true));
-        ASSERT_THAT(state.BeaconState, Eq(false));
-        ASSERT_THAT(state.StateWhenIdle, Eq(IdleState::Off));
-        ASSERT_THAT(state.TransmitterBitRate, Eq(Bitrate::Comm1200bps));
-        ASSERT_THAT(error_counter, Eq(0));
-    }
-
-    TEST_F(CommTest, TestGetMixedLineTransmitterResponse)
-    {
-        TransmitterState state;
-        EXPECT_CALL(i2c, Read(TransmitterAddress, _)).WillOnce(Invoke([](uint8_t /*address*/, auto outData) {
-            outData[0] = 0x0a;
-            return I2CResult::OK;
-        }));
-        const auto status = comm.GetTransmitterState(state);
-        ASSERT_THAT(status, Eq(true));
-        ASSERT_THAT(state.BeaconState, Eq(true));
-        ASSERT_THAT(state.StateWhenIdle, Eq(IdleState::Off));
-        ASSERT_THAT(state.TransmitterBitRate, Eq(Bitrate::Comm4800bps));
-        ASSERT_THAT(error_counter, Eq(0));
-    }
-
-    TEST_F(CommTest, TestGetTransmitterUptimeRequestFailure)
-    {
-        Uptime state;
-        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetUptime))).WillOnce(Return(I2CResult::Nack));
-        const auto status = comm.GetTransmitterUptime(state);
-        ASSERT_THAT(status, Eq(false));
-        ASSERT_THAT(error_counter, Eq(5));
-    }
-
-    TEST_F(CommTest, TestGetTransmitterUptimeResponseFailure)
-    {
-        Uptime state;
-        EXPECT_CALL(i2c, Write(TransmitterAddress, ElementsAre(TransmitterGetUptime))).WillOnce(Return(I2CResult::OK));
-        EXPECT_CALL(i2c, Read(TransmitterAddress, _)).WillOnce(Return(I2CResult::Nack));
-        const auto status = comm.GetTransmitterUptime(state);
-        ASSERT_THAT(status, Eq(false));
-        ASSERT_THAT(error_counter, Eq(5));
-    }
-
-    TEST_F(CommTest, TestGetTransmitterUptimeInvalidResponseSeconds)
-    {
-        Uptime state;
-        EXPECT_CALL(i2c, Read(TransmitterAddress, _)).WillOnce(Invoke([](uint8_t /*address*/, auto outData) {
-            outData[0] = 0xff;
-            return I2CResult::OK;
-        }));
-        const auto status = comm.GetTransmitterUptime(state);
-        ASSERT_THAT(status, Eq(false));
-        ASSERT_THAT(error_counter, Eq(0));
-    }
-
-    TEST_F(CommTest, TestGetTransmitterUptimeInvalidResponseMinutes)
-    {
-        Uptime state;
-        EXPECT_CALL(i2c, Read(TransmitterAddress, _)).WillOnce(Invoke([](uint8_t /*address*/, auto outData) {
-            outData[1] = 0xff;
-            return I2CResult::OK;
-        }));
-        const auto status = comm.GetTransmitterUptime(state);
-        ASSERT_THAT(status, Eq(false));
-        ASSERT_THAT(error_counter, Eq(0));
-    }
-
-    TEST_F(CommTest, TestGetTransmitterUptimeInvalidResponseHours)
-    {
-        Uptime state;
-        EXPECT_CALL(i2c, Read(TransmitterAddress, _)).WillOnce(Invoke([](uint8_t /*address*/, auto outData) {
-            outData[2] = 0xff;
-            return I2CResult::OK;
-        }));
-        const auto status = comm.GetTransmitterUptime(state);
-        ASSERT_THAT(status, Eq(false));
-        ASSERT_THAT(error_counter, Eq(0));
-    }
-
-    TEST_F(CommTest, TestGetTransmitterUptime)
-    {
-        Uptime state;
-        EXPECT_CALL(i2c, Read(TransmitterAddress, _)).WillOnce(Invoke([](uint8_t /*address*/, auto outData) {
-            outData[0] = 0x3f;
-            outData[1] = 0x0f;
-            outData[2] = 0x19;
-            outData[3] = 0x85;
-            return I2CResult::OK;
-        }));
-        const auto status = comm.GetTransmitterUptime(state);
-        ASSERT_THAT(status, Eq(true));
-        ASSERT_THAT(state.seconds, Eq(0x3f));
-        ASSERT_THAT(state.minutes, Eq(0x0f));
-        ASSERT_THAT(state.hours, Eq(0x19));
-        ASSERT_THAT(state.days, Eq(0x85));
-        ASSERT_THAT(error_counter, Eq(0));
-    }
-
     TEST_F(CommTest, TestSendTooLongFrame)
     {
         uint8_t buffer[devices::comm::MaxDownlinkFrameSize + 1] = {0};
@@ -764,13 +613,17 @@ namespace
         }));
         const auto status = comm.GetReceiverTelemetry(telemetry);
         ASSERT_THAT(status, Eq(true));
-        ASSERT_THAT(telemetry.TransmitterCurrentConsumption, Eq(0x0201));
-        ASSERT_THAT(telemetry.DopplerOffset, Eq(0x0403));
-        ASSERT_THAT(telemetry.ReceiverCurrentConsumption, Eq(0x0605));
-        ASSERT_THAT(telemetry.Vcc, Eq(0x0807));
-        ASSERT_THAT(telemetry.OscilatorTemperature, Eq(0x0a09));
-        ASSERT_THAT(telemetry.AmplifierTemperature, Eq(0x0c0b));
-        ASSERT_THAT(telemetry.SignalStrength, Eq(0x0e0d));
+
+        ASSERT_THAT(telemetry.Uptime, Eq(27h + 20min + 5s));
+        ASSERT_THAT(telemetry.LastReceivedDopplerOffset, Eq(0x0403));
+        ASSERT_THAT(telemetry.LastReceivedRSSI, Eq(0x0605));
+        ASSERT_THAT(telemetry.NowDopplerOffset, Eq(0x0807));
+        ASSERT_THAT(telemetry.NowReceiverCurrentConsumption, Eq(0x0a09));
+        ASSERT_THAT(telemetry.NowVoltage, Eq(0x0c0b));
+        ASSERT_THAT(telemetry.NowOscilatorTemperature, Eq(0x0e0d));
+        ASSERT_THAT(telemetry.NowAmplifierTemperature, Eq(0x0d0e));
+        ASSERT_THAT(telemetry.NowRSSI, Eq(0x0ece));
+
         ASSERT_THAT(error_counter, Eq(0));
     }
 
@@ -786,10 +639,20 @@ namespace
         }));
         const auto status = comm.GetTransmitterTelemetry(telemetry);
         ASSERT_THAT(status, Eq(true));
-        ASSERT_THAT(telemetry.RFReflectedPower, Eq(0x0201));
-        ASSERT_THAT(telemetry.AmplifierTemperature, Eq(0x0403));
-        ASSERT_THAT(telemetry.RFForwardPower, Eq(0x0605));
-        ASSERT_THAT(telemetry.TransmitterCurrentConsumption, Eq(0x0807));
+        ASSERT_THAT(telemetry.Uptime, Eq(27h + 20min + 5s));
+        ASSERT_THAT(telemetry.TransmitterBitRate, Eq(Bitrate::Comm4800bps));
+
+        ASSERT_THAT(telemetry.LastTransmittedRFReflectedPower, Eq(1057));
+        ASSERT_THAT(telemetry.LastTransmittedAmplifierTemperature, Eq(1200));
+        ASSERT_THAT(telemetry.LastTransmittedRFForwardPower, Eq(1345));
+        ASSERT_THAT(telemetry.LastTransmittedTransmitterCurrentConsumption, Eq(1410));
+
+        ASSERT_THAT(telemetry.NowRFForwardPower, Eq(3145));
+        ASSERT_THAT(telemetry.NowTransmitterCurrentConsumption, Eq(4010));
+
+        ASSERT_THAT(telemetry.StateWhenIdle, Eq(IdleState::On));
+        ASSERT_THAT(telemetry.BeaconState, Eq(true));
+
         ASSERT_THAT(error_counter, Eq(0));
     }
 

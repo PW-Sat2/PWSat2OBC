@@ -295,40 +295,44 @@ bool CommObject::RemoveFrameInternal(AggregatedErrorCounter& resultAggregator)
 
 bool CommObject::GetReceiverTelemetryInternal(ReceiverTelemetry& telemetry, AggregatedErrorCounter& resultAggregator)
 {
-    uint8_t buffer[sizeof(ReceiverTelemetry)] = {0};
-    const bool status = this->SendCommandWithResponse( //
-        Address::Receiver,                             //
-        num(ReceiverCommand::GetTelemetry),            //
-        span<uint8_t>(buffer),                         //
-        resultAggregator);
+    (void)telemetry;
+    (void)resultAggregator;
 
-    if (!status)
-    {
-        return status;
-    }
-
-    Reader reader(buffer);
-    telemetry.TransmitterCurrentConsumption = reader.ReadWordLE();
-    telemetry.DopplerOffset = reader.ReadWordLE();
-    telemetry.ReceiverCurrentConsumption = reader.ReadWordLE();
-    telemetry.Vcc = reader.ReadWordLE();
-    telemetry.OscilatorTemperature = reader.ReadWordLE();
-    telemetry.AmplifierTemperature = reader.ReadWordLE();
-    telemetry.SignalStrength = reader.ReadWordLE();
-
-    if ((telemetry.TransmitterCurrentConsumption & 0xf000) != 0 || //
-        (telemetry.DopplerOffset & 0xf000) != 0 ||                 //
-        (telemetry.ReceiverCurrentConsumption & 0xf000) != 0 ||    //
-        (telemetry.Vcc & 0xf000) != 0 ||                           //
-        (telemetry.OscilatorTemperature & 0xf000) != 0 ||          //
-        (telemetry.AmplifierTemperature & 0xf000) != 0 ||          //
-        (telemetry.SignalStrength & 0xf000) != 0)
-    {
-        LOG(LOG_LEVEL_ERROR, "[comm] Received invalid receiver telemetry. ");
-        return false;
-    }
-
-    return reader.Status();
+    //    uint8_t buffer[sizeof(ReceiverTelemetry)] = {0};
+    //    const bool status = this->SendCommandWithResponse( //
+    //        Address::Receiver,                             //
+    //        num(ReceiverCommand::GetTelemetry),            //
+    //        span<uint8_t>(buffer),                         //
+    //        resultAggregator);
+    //
+    //    if (!status)
+    //    {
+    //        return status;
+    //    }
+    //
+    //    Reader reader(buffer);
+    //    telemetry.TransmitterCurrentConsumption = reader.ReadWordLE();
+    //    telemetry.DopplerOffset = reader.ReadWordLE();
+    //    telemetry.ReceiverCurrentConsumption = reader.ReadWordLE();
+    //    telemetry.Vcc = reader.ReadWordLE();
+    //    telemetry.OscilatorTemperature = reader.ReadWordLE();
+    //    telemetry.AmplifierTemperature = reader.ReadWordLE();
+    //    telemetry.SignalStrength = reader.ReadWordLE();
+    //
+    //    if ((telemetry.TransmitterCurrentConsumption & 0xf000) != 0 || //
+    //        (telemetry.DopplerOffset & 0xf000) != 0 ||                 //
+    //        (telemetry.ReceiverCurrentConsumption & 0xf000) != 0 ||    //
+    //        (telemetry.Vcc & 0xf000) != 0 ||                           //
+    //        (telemetry.OscilatorTemperature & 0xf000) != 0 ||          //
+    //        (telemetry.AmplifierTemperature & 0xf000) != 0 ||          //
+    //        (telemetry.SignalStrength & 0xf000) != 0)
+    //    {
+    //        LOG(LOG_LEVEL_ERROR, "[comm] Received invalid receiver telemetry. ");
+    //        return false;
+    //    }
+    //
+    //    return reader.Status();
+    return false;
 }
 
 bool CommObject::GetReceiverTelemetry(ReceiverTelemetry& telemetry)
@@ -340,80 +344,44 @@ bool CommObject::GetReceiverTelemetry(ReceiverTelemetry& telemetry)
 
 bool CommObject::GetTransmitterTelemetryInternal(TransmitterTelemetry& telemetry, AggregatedErrorCounter& resultAggregator)
 {
-    uint8_t buffer[sizeof(TransmitterTelemetry)] = {0};
-    const bool status = this->SendCommandWithResponse( //
-        Address::Transmitter,                          //
-        num(TransmitterCommand::GetTelemetry),         //
-        span<uint8_t>(buffer),                         //
-        resultAggregator);
+    (void)telemetry;
+    (void)resultAggregator;
+    //    uint8_t buffer[sizeof(TransmitterTelemetry)] = {0};
+    //    const bool status = this->SendCommandWithResponse( //
+    //        Address::Transmitter,                          //
+    //        num(TransmitterCommand::GetTelemetry),         //
+    //        span<uint8_t>(buffer),                         //
+    //        resultAggregator);
+    //
+    //    if (!status)
+    //    {
+    //        return status;
+    //    }
+    //
+    //    Reader reader(buffer);
+    //    telemetry.RFReflectedPower = reader.ReadWordLE();
+    //    telemetry.AmplifierTemperature = reader.ReadWordLE();
+    //    telemetry.RFForwardPower = reader.ReadWordLE();
+    //    telemetry.TransmitterCurrentConsumption = reader.ReadWordLE();
+    //
+    //    if ((telemetry.RFReflectedPower & 0xf000) != 0 ||     //
+    //        (telemetry.AmplifierTemperature & 0xf000) != 0 || //
+    //        (telemetry.RFForwardPower & 0xf000) != 0 ||       //
+    //        (telemetry.TransmitterCurrentConsumption & 0xf000) != 0)
+    //    {
+    //        LOG(LOG_LEVEL_ERROR, "[comm] Received invalid transmitter telemetry. ");
+    //        return false;
+    //    }
+    //
+    //    return reader.Status();
 
-    if (!status)
-    {
-        return status;
-    }
-
-    Reader reader(buffer);
-    telemetry.RFReflectedPower = reader.ReadWordLE();
-    telemetry.AmplifierTemperature = reader.ReadWordLE();
-    telemetry.RFForwardPower = reader.ReadWordLE();
-    telemetry.TransmitterCurrentConsumption = reader.ReadWordLE();
-
-    if ((telemetry.RFReflectedPower & 0xf000) != 0 ||     //
-        (telemetry.AmplifierTemperature & 0xf000) != 0 || //
-        (telemetry.RFForwardPower & 0xf000) != 0 ||       //
-        (telemetry.TransmitterCurrentConsumption & 0xf000) != 0)
-    {
-        LOG(LOG_LEVEL_ERROR, "[comm] Received invalid transmitter telemetry. ");
-        return false;
-    }
-
-    return reader.Status();
+    return false;
 }
 
 bool CommObject::GetTransmitterTelemetry(TransmitterTelemetry& telemetry)
 {
     ErrorReporter errorContext(_error);
     return GetTransmitterTelemetryInternal(telemetry, errorContext.Counter());
-}
-
-bool CommObject::GetTransmitterUptime(Uptime& uptime)
-{
-    ErrorReporter errorContext(_error);
-    return GetTransmitterUptimeInternal(uptime, errorContext.Counter());
-}
-
-bool CommObject::GetTransmitterUptimeInternal(Uptime& uptime, AggregatedErrorCounter& resultAggregator)
-{
-    std::uint8_t buffer[4] = {0};
-    const bool status = this->SendCommandWithResponse( //
-        Address::Transmitter,                          //
-        num(TransmitterCommand::GetUptime),            //
-        span<uint8_t>(buffer),                         //
-        resultAggregator);                             //
-
-    if (!status)
-    {
-        return status;
-    }
-
-    Reader reader(buffer);
-    const std::uint8_t seconds = reader.ReadByte();
-    const std::uint8_t minutes = reader.ReadByte();
-    const std::uint8_t hours = reader.ReadByte();
-    uptime.days = reader.ReadByte();
-
-    if ((seconds & 0xc0) != 0 || //
-        (minutes & 0xc0) != 0 || //
-        (hours & 0xe0) != 0)
-    {
-        LOG(LOG_LEVEL_ERROR, "[comm] Received invalid transmitter uptime. ");
-        return false;
-    }
-
-    uptime.seconds = seconds;
-    uptime.minutes = minutes;
-    uptime.hours = hours;
-    return reader.Status();
 }
 
 /**
@@ -624,48 +592,12 @@ bool CommObject::SetTransmitterBitRate(Bitrate bitrate)
     return (this->_low.Write(num(Address::Transmitter), buffer) == I2CResult::OK) >> _error;
 }
 
-bool CommObject::GetTransmitterStateInternal(TransmitterState& state, AggregatedErrorCounter& resultAggregator)
-{
-    std::uint8_t response = 0;
-    const bool status = SendCommandWithResponse(Address::Transmitter, //
-        num(TransmitterCommand::GetState),                            //
-        gsl::span<std::uint8_t>(&response, 1),                        //
-        resultAggregator                                              //
-        );
-    if (!status)
-    {
-        return false;
-    }
-
-    if ((response & 0x80) != 0)
-    {
-        LOG(LOG_LEVEL_ERROR, "Received invalid transmitter status. ");
-        return false;
-    }
-
-    state.BeaconState = (response & 2) != 0;
-    state.StateWhenIdle = static_cast<IdleState>(response & 1);
-    static const Bitrate conversionArray[] = {
-        Bitrate::Comm1200bps, Bitrate::Comm2400bps, Bitrate::Comm4800bps, Bitrate::Comm9600bps,
-    };
-
-    state.TransmitterBitRate = conversionArray[(response & 0x0c) >> 2];
-    return true;
-}
-
-bool CommObject::GetTransmitterState(TransmitterState& state)
-{
-    ErrorReporter errorContext(_error);
-    return GetTransmitterStateInternal(state, errorContext.Counter());
-}
-
 bool CommObject::GetTelemetry(CommTelemetry& telemetry)
 {
     ErrorReporter errorContext(_error);
     TransmitterTelemetry transmitter;
     ReceiverTelemetry receiver;
-    TransmitterState state;
-    Uptime uptime;
+
     if (!GetTransmitterTelemetryInternal(transmitter, errorContext.Counter()))
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire transmitter telemetry. ");
@@ -678,19 +610,7 @@ bool CommObject::GetTelemetry(CommTelemetry& telemetry)
         return false;
     }
 
-    if (!GetTransmitterStateInternal(state, errorContext.Counter()))
-    {
-        LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire transmitter state. ");
-        return false;
-    }
-
-    if (!GetTransmitterUptimeInternal(uptime, errorContext.Counter()))
-    {
-        LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire transmitter uptime. ");
-        return false;
-    }
-
-    telemetry = CommTelemetry(receiver, transmitter, state, uptime);
+    telemetry = CommTelemetry(transmitter, receiver);
     return true;
 }
 

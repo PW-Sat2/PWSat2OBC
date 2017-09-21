@@ -179,6 +179,11 @@ static void CommGetTelemetry(uint16_t argc, char* argv[])
             static_cast<int>(telemetry.AmplifierTemperature),
             static_cast<int>(telemetry.RFForwardPower),
             static_cast<int>(telemetry.TransmitterCurrentConsumption));
+
+        GetTerminal().Printf("\nStateWhenIdle: %d\nTransmitterBitRate: %d\nBeaconState: %d\n",
+            static_cast<int>(telemetry.StateWhenIdle),
+            static_cast<int>(telemetry.TransmitterBitRate),
+            static_cast<int>(telemetry.BeaconState));
     }
     else if (channel == CommHardware::Receiver)
     {
@@ -203,21 +208,6 @@ static void CommGetTelemetry(uint16_t argc, char* argv[])
     {
         GetTerminal().Puts(usage);
     }
-}
-
-static void CommGetTransmitterState()
-{
-    TransmitterState state;
-    if (!GetCommDriver().GetTransmitterState(state))
-    {
-        GetTerminal().Puts("Unable to get transmitter state");
-        return;
-    }
-
-    GetTerminal().Printf("\nStateWhenIdle: %d\nTransmitterBitRate: %d\nBeaconState: %d\n",
-        static_cast<int>(state.StateWhenIdle),
-        static_cast<int>(state.TransmitterBitRate),
-        static_cast<int>(state.BeaconState));
 }
 
 static bool GetBitRate(const char* name, Bitrate& bitRate)
@@ -348,11 +338,7 @@ static void CommGet(std::uint16_t argc, char* argv[])
         return;
     }
 
-    if (strcmp(argv[0], "transmitter_state") == 0)
-    {
-        CommGetTransmitterState();
-    }
-    else if (strcmp(argv[0], "telemetry") == 0)
+    if (strcmp(argv[0], "telemetry") == 0)
     {
         CommGetTelemetry(--argc, ++argv);
     }

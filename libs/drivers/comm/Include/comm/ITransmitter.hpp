@@ -48,17 +48,6 @@ struct ITransmitter
     virtual bool SetTransmitterBitRate(Bitrate bitrate) = 0;
 
     /**
-     * @brief Queries the comm driver object for current transmitter state.
-     *
-     * @param[out] state Reference to object that should be filled with the data describing
-     * the current transmitter state.
-     * @return Operation status, true in case of success, false otherwise.
-     *
-     * The contents of the state object is undefined in case of the failure.
-     */
-    virtual bool GetTransmitterState(TransmitterState& state) = 0;
-
-    /**
      * @brief Resets the transmitter hardware associated with the requested comm object.
      *
      * @return Operation status, true in case of success, false otherwise.
