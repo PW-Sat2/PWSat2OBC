@@ -33,7 +33,7 @@ void SetRunlevel()
     }
 
     boot::RequestedRunlevel = static_cast<boot::Runlevel>(runlevel);
-    BSP_UART_Printf<20>(BSP_UART_DEBUG, "\nRunlevel set to %d\n", runlevel);
+    BSP_UART_Printf<40>(BSP_UART_DEBUG, "\nRunlevel set to %d\n", runlevel);
 }
 
 void SetClearState()

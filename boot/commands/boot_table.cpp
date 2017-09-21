@@ -8,7 +8,7 @@ void PrintBootTable()
 
     for (auto entry = 0; entry < program_flash::BootTable::EntriesCount; entry++)
     {
-        BSP_UART_Printf<5>(BSP_UART_DEBUG, "\n%d. ", entry);
+        BSP_UART_Printf<50>(BSP_UART_DEBUG, "\n%d. ", entry);
 
         auto e = Bootloader.BootTable.Entry(entry);
 
@@ -31,5 +31,5 @@ void EraseBootTable()
 {
     BSP_UART_Puts(BSP_UART_DEBUG, "\nErasing program flash....");
     auto result = lld_ChipEraseOp(reinterpret_cast<FLASHDATA*>(BOOT_TABLE_BASE));
-    BSP_UART_Printf<40>(BSP_UART_DEBUG, "\nDone (%d)", result);
+    BSP_UART_Printf<50>(BSP_UART_DEBUG, "\nDone (%d)", result);
 }

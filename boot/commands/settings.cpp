@@ -93,7 +93,7 @@ static void PrintBootSlots(std::uint8_t slots)
     {
         if (bits[i])
         {
-            BSP_UART_Printf<2>(BSP_UART_DEBUG, "%d ", i);
+            BSP_UART_Printf<20>(BSP_UART_DEBUG, "%d ", i);
         }
     }
 }
@@ -113,8 +113,8 @@ void ShowBootSettings()
     BSP_UART_Puts(BSP_UART_DEBUG, "\nFailsafe boot slots: ");
     PrintBootSlots(failsafeBootSlots);
 
-    BSP_UART_Printf<40>(BSP_UART_DEBUG, "\nBoot counter: %ld", counter);
-    BSP_UART_Printf<40>(BSP_UART_DEBUG, "\nLast confirmed boot counter: %ld", counterLastConfirmed);
+    BSP_UART_Printf<50>(BSP_UART_DEBUG, "\nBoot counter: %ld", counter);
+    BSP_UART_Printf<50>(BSP_UART_DEBUG, "\nLast confirmed boot counter: %ld", counterLastConfirmed);
 
     BSP_UART_Puts(BSP_UART_DEBUG, "\n");
 }
