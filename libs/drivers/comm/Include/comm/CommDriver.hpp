@@ -375,6 +375,14 @@ class CommObject final : public ITransmitter,      //
     };
 
     Option<LastSendTimestamp> _lastSend;
+
+    struct LastFrameStatus
+    {
+        std::uint16_t DopplerOffset;
+        std::uint16_t RSSI;
+    };
+
+    std::atomic<LastFrameStatus> _lastFrameStatus;
 };
 
 inline bool CommObject::SendFrame(gsl::span<const std::uint8_t> frame)

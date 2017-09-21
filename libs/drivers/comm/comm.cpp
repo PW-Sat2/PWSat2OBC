@@ -50,7 +50,8 @@ CommObject::CommObject(error_counter::ErrorCounting& errors, II2CBus& low)
       _frameHandler(nullptr),                                                      //
       _pollingTaskHandle(nullptr),                                                 //
       transmitterSemaphore(System::CreateBinarySemaphore(transmitterSemaphoreId)), //
-      receiverSemaphore(System::CreateBinarySemaphore(receiverSemaphoreId))        //
+      receiverSemaphore(System::CreateBinarySemaphore(receiverSemaphoreId)),       //
+      _lastFrameStatus{{0, 0}}
 {
 }
 
@@ -295,44 +296,58 @@ bool CommObject::RemoveFrameInternal(AggregatedErrorCounter& resultAggregator)
 
 bool CommObject::GetReceiverTelemetryInternal(ReceiverTelemetry& telemetry, AggregatedErrorCounter& resultAggregator)
 {
-    (void)telemetry;
-    (void)resultAggregator;
+    {
+        std::array<uint8_t, 4> buffer;
 
-    //    uint8_t buffer[sizeof(ReceiverTelemetry)] = {0};
-    //    const bool status = this->SendCommandWithResponse( //
-    //        Address::Receiver,                             //
-    //        num(ReceiverCommand::GetTelemetry),            //
-    //        span<uint8_t>(buffer),                         //
-    //        resultAggregator);
-    //
-    //    if (!status)
-    //    {
-    //        return status;
-    //    }
-    //
-    //    Reader reader(buffer);
-    //    telemetry.TransmitterCurrentConsumption = reader.ReadWordLE();
-    //    telemetry.DopplerOffset = reader.ReadWordLE();
-    //    telemetry.ReceiverCurrentConsumption = reader.ReadWordLE();
-    //    telemetry.Vcc = reader.ReadWordLE();
-    //    telemetry.OscilatorTemperature = reader.ReadWordLE();
-    //    telemetry.AmplifierTemperature = reader.ReadWordLE();
-    //    telemetry.SignalStrength = reader.ReadWordLE();
-    //
-    //    if ((telemetry.TransmitterCurrentConsumption & 0xf000) != 0 || //
-    //        (telemetry.DopplerOffset & 0xf000) != 0 ||                 //
-    //        (telemetry.ReceiverCurrentConsumption & 0xf000) != 0 ||    //
-    //        (telemetry.Vcc & 0xf000) != 0 ||                           //
-    //        (telemetry.OscilatorTemperature & 0xf000) != 0 ||          //
-    //        (telemetry.AmplifierTemperature & 0xf000) != 0 ||          //
-    //        (telemetry.SignalStrength & 0xf000) != 0)
-    //    {
-    //        LOG(LOG_LEVEL_ERROR, "[comm] Received invalid receiver telemetry. ");
-    //        return false;
-    //    }
-    //
-    //    return reader.Status();
-    return false;
+        const bool status = this->SendCommandWithResponse(Address::Receiver, //
+            num(ReceiverCommand::GetUptime),                                 //
+            span<uint8_t>(buffer),                                           //
+            resultAggregator);
+
+        if (!status)
+        {
+            return status;
+        }
+
+        Reader r(buffer);
+
+        telemetry.Uptime = std::chrono::seconds(r.ReadByte());
+        telemetry.Uptime += std::chrono::minutes(r.ReadByte());
+        telemetry.Uptime += std::chrono::hours(r.ReadByte());
+        telemetry.Uptime += std::chrono::hours(r.ReadByte() * 24);
+    }
+
+    {
+        LastFrameStatus lastFrame = this->_lastFrameStatus;
+
+        telemetry.LastReceivedDopplerOffset = lastFrame.DopplerOffset;
+        telemetry.LastReceivedRSSI = lastFrame.RSSI;
+    }
+
+    {
+        uint8_t buffer[14] = {0};
+        const bool status = this->SendCommandWithResponse( //
+            Address::Receiver,                             //
+            num(ReceiverCommand::GetTelemetry),            //
+            span<uint8_t>(buffer),                         //
+            resultAggregator);
+
+        if (!status)
+        {
+            return status;
+        }
+
+        Reader reader(buffer);
+        reader.ReadWordLE(); // TX Supply Current
+        telemetry.NowDopplerOffset = reader.ReadWordLE();
+        telemetry.NowReceiverCurrentConsumption = reader.ReadWordLE();
+        telemetry.NowVoltage = reader.ReadWordLE();
+        telemetry.NowOscilatorTemperature = reader.ReadWordLE();
+        telemetry.NowAmplifierTemperature = reader.ReadWordLE();
+        telemetry.NowRSSI = reader.ReadWordLE();
+    }
+
+    return true;
 }
 
 bool CommObject::GetReceiverTelemetry(ReceiverTelemetry& telemetry)
@@ -501,6 +516,7 @@ bool CommObject::ReceiveFrameInternal(gsl::span<std::uint8_t> buffer, Frame& fra
         LOGF(LOG_LEVEL_DEBUG, "[comm] Received frame %d bytes", static_cast<int>(fullSize));
         auto span = reader.ReadArray(reader.RemainingSize());
         frameContent = gsl::span<std::uint8_t>(const_cast<std::uint8_t*>(span.data()), span.size());
+        this->_lastFrameStatus = {doppler, rssi};
     }
 
     frame = Frame(doppler, rssi, fullSize, std::move(frameContent));
