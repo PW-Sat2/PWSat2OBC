@@ -20,15 +20,15 @@ class AntennaTelemetryParser(CategoryParser):
         self.append("Antenna 3 Deployed Ch B", 1, value_type=BoolType)
         self.append("Antenna 4 Deployed Ch B", 1, value_type=BoolType)
 
-        self.append_byte("Antenna 1 Activation Count Ch A")
-        self.append_byte("Antenna 2 Activation Count Ch A")
-        self.append_byte("Antenna 3 Activation Count Ch A")
-        self.append_byte("Antenna 4 Activation Count Ch A")
+        self.append("Antenna 1 Activation Count Ch A", 3)
+        self.append("Antenna 2 Activation Count Ch A", 3)
+        self.append("Antenna 3 Activation Count Ch A", 3)
+        self.append("Antenna 4 Activation Count Ch A", 3)
 
-        self.append_byte("Antenna 1 Activation Count Ch B")
-        self.append_byte("Antenna 2 Activation Count Ch B")
-        self.append_byte("Antenna 3 Activation Count Ch B")
-        self.append_byte("Antenna 4 Activation Count Ch B")
+        self.append("Antenna 1 Activation Count Ch B", 3)
+        self.append("Antenna 2 Activation Count Ch B", 3)
+        self.append("Antenna 3 Activation Count Ch B", 3)
+        self.append("Antenna 4 Activation Count Ch B", 3)
 
         self.append("Antenna 1 Activation Time Ch A", 12, value_type=TimeFromSeconds)
         self.append("Antenna 2 Activation Time Ch A", 12, value_type=TimeFromSeconds)

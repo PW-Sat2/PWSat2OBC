@@ -22,7 +22,10 @@ namespace devices
 
         void ActivationCounts::Write(BitWriter& writer) const
         {
-            writer.WriteSpan(gsl::make_span(this->counts));
+            writer.WriteWord(std::min<std::uint8_t>(this->counts[0], 0b111), 3);
+            writer.WriteWord(std::min<std::uint8_t>(this->counts[1], 0b111), 3);
+            writer.WriteWord(std::min<std::uint8_t>(this->counts[2], 0b111), 3);
+            writer.WriteWord(std::min<std::uint8_t>(this->counts[3], 0b111), 3);
         }
 
         ActivationTimes::ActivationTimes() : ActivationTimes(0s, 0s, 0s, 0s)

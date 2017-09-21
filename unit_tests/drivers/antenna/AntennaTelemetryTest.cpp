@@ -40,10 +40,26 @@ namespace
         ASSERT_THAT(counts.GetActivationCount(ANTENNA4_ID), Eq(0x55));
     }
 
-    TEST(ActivationCounts, Serialization)
+    TEST(ActivationCounts, SerializationInRange)
     {
-        std::uint8_t buffer[4];
-        std::uint8_t expected[] = {0xff, 0xf0, 0x0f, 0x55};
+        std::uint8_t buffer[2] = {0};
+        std::uint8_t expected[] = {0b01011010, 0b00001111};
+        ActivationCounts counts;
+        counts.SetActivationCount(ANTENNA1_ID, 2);
+        counts.SetActivationCount(ANTENNA2_ID, 3);
+        counts.SetActivationCount(ANTENNA3_ID, 5);
+        counts.SetActivationCount(ANTENNA4_ID, 7);
+        BitWriter writer(buffer);
+        counts.Write(writer);
+        ASSERT_THAT(writer.Status(), Eq(true));
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(12u));
+        ASSERT_THAT(writer.Capture(), Eq(gsl::make_span(expected)));
+    }
+
+    TEST(ActivationCounts, SerializationOverflow)
+    {
+        std::uint8_t buffer[2] = {0};
+        std::uint8_t expected[] = {0xff, 0x0f};
         ActivationCounts counts;
         counts.SetActivationCount(ANTENNA1_ID, 0xff);
         counts.SetActivationCount(ANTENNA2_ID, 0xf0);
@@ -52,7 +68,7 @@ namespace
         BitWriter writer(buffer);
         counts.Write(writer);
         ASSERT_THAT(writer.Status(), Eq(true));
-        ASSERT_THAT(writer.GetBitDataLength(), Eq(32u));
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(12u));
         ASSERT_THAT(writer.Capture(), Eq(gsl::make_span(expected)));
     }
 
