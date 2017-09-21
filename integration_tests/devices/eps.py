@@ -229,7 +229,7 @@ class EPSControllerA(I2CDevice):
         super(EPSControllerA, self).__init__(0x35, "EPS.A")
         self._eps = eps
 
-        self._lcls = [eps.TKmain, eps.SunS, eps.CamNadir, eps.CamWing, eps.SENS, eps.ANTenna]
+        self._lcls = [eps.TKmain, eps.TKred, eps.SunS, eps.CamNadir, eps.CamWing, eps.SENS, eps.ANTenna]
         self._burn_switches = [eps.SAILmain, eps.SADSmain]
 
         self.on_power_cycle = None
