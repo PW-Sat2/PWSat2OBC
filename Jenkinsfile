@@ -19,7 +19,8 @@ def buildPlatform(mcu, pld) {
 			TARGET_MCU_PLATFORM: mcu,
 			TARGET_PLD_PLATFORM: pld,
 			CMAKE_BUILD_TYPE: 'Release',
-			ENABLE_LTO: 1
+			ENABLE_LTO: 1,
+			COMM_SECURITY_CODE: env.SECURITY_CODE
 		])
 		bat "make pwsat boot safe_mode pwsat.hex pwsat.bin boot.hex safe_mode.bin generate_telemetry generate_exp_data"
 	}
