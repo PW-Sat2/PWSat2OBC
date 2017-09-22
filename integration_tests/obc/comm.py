@@ -54,10 +54,6 @@ class CommMixin(OBCMixin):
         m = re.search('(.+):\ *\'(\d+)\'', string)
         return (m.group(1), int(m.group(2)))
 
-    @staticmethod
-    def set_attribute(object, tupple):
-        setattr(object, tupple[0], tupple[1])
-
     def _parse_transmitter_telemetry(result):
         telemetry = {}
         parts = result.split("\n")
@@ -68,10 +64,11 @@ class CommMixin(OBCMixin):
         return telemetry
 
     def _parse_receiver_telemetry(result):
-        telemetry = ReceiverTelemetry()
+        telemetry = {}
         parts = result.split("\n")
         for part in parts:
-            CommMixin.set_attribute(telemetry, CommMixin.extract_value(part))
+            (key, value) = CommMixin.extract_value(part)
+            telemetry[key] = value
 
         return telemetry
 

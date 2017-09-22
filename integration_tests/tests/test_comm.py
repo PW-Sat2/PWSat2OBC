@@ -121,11 +121,6 @@ class Test_Comm(RestartPerTest):
 
     @runlevel(1)
     def test_get_transmitter_telemetry(self):
-        def get_telemetry_handler(*args):
-            return TransmitterTelemetry.build(0x123, 0x456, 0x789, 0xabc)
-
-        self.system.transmitter.on_get_telemetry = get_telemetry_handler
-
         self.system.transmitter.on_report_uptime = lambda *args: [1, 2, 3, 4]
         self.system.transmitter.on_report_state = lambda *args: [0b00001001]
         self.system.transmitter.on_get_telemetry_last_transmission = \
@@ -153,20 +148,57 @@ class Test_Comm(RestartPerTest):
             self.assertEqual(expected[k], telemetry[k], "Key: %s" % k)
 
     @runlevel(1)
-    def test_get_receiver_telemetry(self):
-        def get_telemetry_handler(*args):
-            return ReceiverTelemetry.build(0x123, 0x456, 0x789, 0xabc, 0xdef, 0x234, 0x567)
+    def test_get_receiver_telemetry_no_frame_received(self):
+        self.system.receiver.on_report_uptime = lambda *args: [4, 3, 2, 1]
+        self.system.receiver.on_get_telemetry = \
+            lambda *args: ReceiverTelemetry.build(12, 1110, 1929, 2748, 3567, 564, 1383)
 
-        self.system.receiver.on_get_telemetry = get_telemetry_handler
         self.power_on_obc()
         telemetry = self.system.obc.comm_get_receiver_telemetry()
-        self.assertEqual(telemetry.TransmitterCurrentConsumption, 0x123)
-        self.assertEqual(telemetry.ReceiverCurrentConsumption, 0x456)
-        self.assertEqual(telemetry.DopplerOffset, 0x789)
-        self.assertEqual(telemetry.Vcc, 0xabc)
-        self.assertEqual(telemetry.OscilatorTemperature, 0xdef)
-        self.assertEqual(telemetry.AmplifierTemperature, 0x234)
-        self.assertEqual(telemetry.SignalStrength, 0x567)
+
+        expected = {
+            'Uptime': 93784,
+            'Now Oscillator Temperature': 3567,
+            'Now Power Amp Temperature': 564,
+            'Now RX current': 1110,
+            'LastReceived RSSI': 0,
+            'Now Power Supply Voltage': 2748,
+            'LastReceived Doppler': 0,
+            'Now Doppler': 1929,
+            'Now RSSI': 1383
+        }
+
+        for k in expected.keys():
+            self.assertEqual(expected[k], telemetry[k], "Key: %s" % k)
+
+    @runlevel(1)
+    def test_get_receiver_telemetry_frame_received(self):
+        self.system.receiver.on_report_uptime = lambda *args: [4, 3, 2, 1]
+        self.system.receiver.on_get_telemetry = \
+            lambda *args: ReceiverTelemetry.build(12, 1110, 1929, 2748, 3567, 564, 1383)
+
+        self.power_on_obc()
+
+        self.system.comm.receiver.put_frame('ABCD')
+
+        self.system.obc.receive_frame()
+
+        telemetry = self.system.obc.comm_get_receiver_telemetry()
+
+        expected = {
+            'Uptime': 93784,
+            'Now Oscillator Temperature': 3567,
+            'Now Power Amp Temperature': 564,
+            'Now RX current': 1110,
+            'LastReceived RSSI': 300,
+            'Now Power Supply Voltage': 2748,
+            'LastReceived Doppler': 257,
+            'Now Doppler': 1929,
+            'Now RSSI': 1383
+        }
+
+        for k in expected.keys():
+            self.assertEqual(expected[k], telemetry[k], "Key: %s" % k)
 
     @runlevel(1)
     def test_set_idle_state(self):

@@ -196,7 +196,7 @@ static void CommGetTelemetry(uint16_t argc, char* argv[])
             return;
         }
 
-        GetTerminal().Printf("Uptime: '%lds'\n", static_cast<std::uint32_t>(telemetry.Uptime.count()));
+        GetTerminal().Printf("Uptime: '%ld'\n", static_cast<std::uint32_t>(telemetry.Uptime.count()));
         GetTerminal().Printf("LastReceived Doppler: '%d'\n", telemetry.LastReceivedDopplerOffset);
         GetTerminal().Printf("LastReceived RSSI: '%d'\n", telemetry.LastReceivedRSSI);
 

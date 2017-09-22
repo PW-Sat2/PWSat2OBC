@@ -10,7 +10,6 @@ from emulator.payload import PayloadModule
 from emulator.rtc import RTCModule
 from emulator.comm import CommModule
 from devices.comm import BeaconFrame
-from time import time
 
 last_frames = []
 
@@ -39,6 +38,7 @@ def _setup_emulator(system):
     def store_last_frame(comm, frame):
         decoded = system.frame_decoder.decode(frame)
         if isinstance(decoded, BeaconFrame):
+            from datetime import datetime
             last_beacon.time = datetime.now()
             last_beacon.payload = decoded.payload()
         last_frames.insert(0, decoded)

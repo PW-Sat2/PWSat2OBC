@@ -375,6 +375,11 @@ class ReceiverDevice(i2cMock.I2CDevice):
         # Returning None will indicate that default telemetry should be reported.
         self.on_get_telemetry = None
 
+        # callback called when uptime is being requested
+        # callback prototype:
+        # None -> byte[]
+        self.on_report_uptime = None
+
         self.last_watchdog_kick = None
 
         self._buffer = Queue()
@@ -425,6 +430,15 @@ class ReceiverDevice(i2cMock.I2CDevice):
     def _get_telemetry(self):
         telemetry = call(self.on_get_telemetry, ReceiverTelemetry())
         return telemetry.toArray()
+
+    @i2cMock.command([0x40])
+    def _report_uptime(self):
+        response = call(self.on_report_uptime, None)
+        if response is not None:
+            return response
+
+        now = datetime.datetime.now()
+        return [now.second, now.minute, now.hour, now.day]
 
     def reset(self):
         with self._lock:
