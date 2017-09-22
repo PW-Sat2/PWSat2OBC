@@ -26,7 +26,7 @@ static void CheckBootSettings()
     }
     else
     {
-        BSP_UART_Printf<40>(BSP_UART_DEBUG, "[FAIL] Primary boot slots set to 0,1,2 (actual: 0x%X)\n", primaryBootSlots);
+        BSP_UART_Printf<80>(BSP_UART_DEBUG, "[FAIL] Primary boot slots set to 0,1,2 (actual: 0x%X)\n", primaryBootSlots);
     }
 
     auto failsafeBootSlots = Bootloader.Settings.FailsafeBootSlots();
@@ -37,7 +37,7 @@ static void CheckBootSettings()
     }
     else
     {
-        BSP_UART_Printf<40>(BSP_UART_DEBUG, "[FAIL] Failsafe boot slots set to 3,4,5 (actual: 0x%X)\n", failsafeBootSlots);
+        BSP_UART_Printf<80>(BSP_UART_DEBUG, "[FAIL] Failsafe boot slots set to 3,4,5 (actual: 0x%X)\n", failsafeBootSlots);
     }
 
     auto bootCounter = Bootloader.Settings.BootCounter();
@@ -48,7 +48,7 @@ static void CheckBootSettings()
     }
     else
     {
-        BSP_UART_Printf<40>(BSP_UART_DEBUG, "[FAIL] Boot counter set to 0 (actual: %ld)\n", bootCounter);
+        BSP_UART_Printf<80>(BSP_UART_DEBUG, "[FAIL] Boot counter set to 0 (actual: %ld)\n", bootCounter);
     }
 
     auto lastConfirmedBootCounter = Bootloader.Settings.LastConfirmedBootCounter();
@@ -59,7 +59,7 @@ static void CheckBootSettings()
     }
     else
     {
-        BSP_UART_Printf<40>(BSP_UART_DEBUG, "[FAIL] Last confirmed boot counter set to 0 (actual: %ld)\n", lastConfirmedBootCounter);
+        BSP_UART_Printf<80>(BSP_UART_DEBUG, "[FAIL] Last confirmed boot counter set to 0 (actual: %ld)\n", lastConfirmedBootCounter);
     }
 }
 
@@ -95,12 +95,12 @@ static void CheckBootSlots()
 
         if (!entry.IsValid())
         {
-            BSP_UART_Printf<40>(BSP_UART_DEBUG, "[FAIL] Boot slot %d: Not valid\n", i);
+            BSP_UART_Printf<80>(BSP_UART_DEBUG, "[FAIL] Boot slot %d: Not valid\n", i);
             continue;
         }
         else
         {
-            BSP_UART_Printf<40>(BSP_UART_DEBUG, "[OK  ] Boot slot %d: Valid\n", i);
+            BSP_UART_Printf<80>(BSP_UART_DEBUG, "[OK  ] Boot slot %d: Valid\n", i);
         }
 
         auto expectedCrc = entry.Crc();
@@ -108,13 +108,13 @@ static void CheckBootSlots()
 
         if (expectedCrc != actualCrc)
         {
-            BSP_UART_Printf<40>(
+            BSP_UART_Printf<80>(
                 BSP_UART_DEBUG, "[FAIL] Boot slot %d: CRC mismatch (expected: 0x%X, actual: 0x%X)\n", i, expectedCrc, actualCrc);
             continue;
         }
         else
         {
-            BSP_UART_Printf<40>(BSP_UART_DEBUG, "[OK  ] Boot slot %d: CRC match (0x%X)\n", i, expectedCrc);
+            BSP_UART_Printf<80>(BSP_UART_DEBUG, "[OK  ] Boot slot %d: CRC match (0x%X)\n", i, expectedCrc);
         }
 
         crc[i] = actualCrc;
@@ -164,7 +164,7 @@ static void CheckBootloader()
 
     if (*r.first == *r.second)
     {
-        BSP_UART_Printf<50>(BSP_UART_DEBUG, "[OK  ] Bootloader copies all the same (0x%X)\n", *r.first);
+        BSP_UART_Printf<80>(BSP_UART_DEBUG, "[OK  ] Bootloader copies all the same (0x%X)\n", *r.first);
     }
     else
     {
@@ -172,7 +172,7 @@ static void CheckBootloader()
 
         for (auto i = 0U; i < crc.size(); i++)
         {
-            BSP_UART_Printf<10>(BSP_UART_DEBUG, " 0x%X", crc[i]);
+            BSP_UART_Printf<80>(BSP_UART_DEBUG, " 0x%X", crc[i]);
         }
 
         BSP_UART_Puts(BSP_UART_DEBUG, ")\n");
