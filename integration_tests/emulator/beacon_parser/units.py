@@ -98,3 +98,24 @@ def enum(enum_type):
         return EnumValue(enum_type, raw)
 
     return build
+
+
+class MappedValue(TelemetryUnit):
+    def __init__(self, map, raw):
+        try:
+            converted = map[raw]
+        except KeyError:
+            converted = 'None'
+
+        super(MappedValue, self).__init__(raw, converted)
+        self.unit = None
+
+    def __str__(self):
+        return str(self.converted)
+
+    @classmethod
+    def with_values(cls, map):
+        def convert(raw):
+            return MappedValue(map, raw)
+
+        return convert
