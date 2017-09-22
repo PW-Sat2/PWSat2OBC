@@ -22,11 +22,11 @@ namespace io_map
     using SystickIndicator = PinLocation<gpioPortD, 1>;
     using BootIndicator = PinLocation<gpioPortD, 2>;
 
-    using SailDeployed = PinLocation<gpioPortD, 5>;
+    using SailDeployed = PinLocation<gpioPortD, 7>;
 
     using CamSelect = PiggyBack22;
 
-    using SunSInterrupt = PinLocation<gpioPortD, 7>;
+    using SunSInterrupt = PinLocation<gpioPortD, 5>;
 
     struct Gpio
     {
