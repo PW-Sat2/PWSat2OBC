@@ -61,6 +61,7 @@ namespace obc
             auto sleepTime = time_counter::SleepTime(This->_primarySlotsScrubberCounter,
                 This->_secondarySlotsScrubberCounter,
                 This->_bootloaderScrubberCounter,
+                This->_safeModeScrubberCounter,
                 This->_bootSettingsScrubberCounter);
 
             LOGF(LOG_LEVEL_INFO, "[scrub] Sleeping for %ld", static_cast<std::uint32_t>(sleepTime.count()));

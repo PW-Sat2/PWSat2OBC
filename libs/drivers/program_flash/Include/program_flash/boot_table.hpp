@@ -237,7 +237,7 @@ namespace program_flash
          * @param flash Flash driver
          * @param index Safe mode copy index
          */
-        SafeModeCopy(IFlashDriver& flash, std::uint8_t index) : _copy(flash, 3_MB + 5 * 64_KB + 64_KB * index)
+        SafeModeCopy(IFlashDriver& flash, std::uint8_t index) : _copy(flash, 3_MB + 5 * BootloaderCopy::Size + 64_KB * index)
         {
         }
 
