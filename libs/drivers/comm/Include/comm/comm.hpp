@@ -105,20 +105,37 @@ enum class Bitrate
  */
 struct ReceiverTelemetry
 {
+    /** @brief Receiver uptime */
     std::chrono::seconds Uptime;
 
+    /** @brief Doppler offset of last received frame */
     std::uint16_t LastReceivedDopplerOffset;
+    /** @brief RSSI of last received frame */
     std::uint16_t LastReceivedRSSI;
 
+    /** @brief Instantaneous doppler offset */
     std::uint16_t NowDopplerOffset;
+    /** @brief Instantaneous receiver current consumption */
     std::uint16_t NowReceiverCurrentConsumption;
+    /** @brief Instantaneous power supply voltage*/
     std::uint16_t NowVoltage;
+    /** @brief Instantaneous oscilator temperature */
     std::uint16_t NowOscilatorTemperature;
+    /** @brief Instantaneous amplifier temperature*/
     std::uint16_t NowAmplifierTemperature;
+    /** @brief Instantaneous RSSI*/
     std::uint16_t NowRSSI;
 
+    /**
+     * @brief Serializes receiver telemetry into buffer
+     * @param writer Writer to use to write serialized telemetry
+     */
     void Write(BitWriter& writer) const;
 
+    /**
+     * @brief Returns size of serialized telemetry
+     * @return Size in bits
+     */
     static constexpr std::size_t BitSize();
 };
 
@@ -135,24 +152,42 @@ constexpr std::size_t ReceiverTelemetry::BitSize()
  */
 struct TransmitterTelemetry
 {
+    /** @brief Transmitter uptime */
     std::chrono::seconds Uptime;
 
+    /** @brief Transmitter bitrate*/
     Bitrate TransmitterBitRate;
 
+    /** @brief RF reflected power of last transmitted frame*/
     std::uint16_t LastTransmittedRFReflectedPower;
+    /** @brief Amplifer temperature of last transmitted frame*/
     std::uint16_t LastTransmittedAmplifierTemperature;
+    /** @brief RF forward power of last transmitted frame*/
     std::uint16_t LastTransmittedRFForwardPower;
+    /** @brief Transmitter current consumption of last transmitted frame*/
     std::uint16_t LastTransmittedTransmitterCurrentConsumption;
 
+    /** @brief Instantaneous RF forward power*/
     std::uint16_t NowRFForwardPower;
+    /** @brief Instantaneous transmitter current consumption */
     std::uint16_t NowTransmitterCurrentConsumption;
 
+    /** @brief Transmitter state when idle*/
     IdleState StateWhenIdle;
 
+    /** @brief Beacon state*/
     bool BeaconState;
 
+    /**
+     * @brief Serializes transmitter telemetry into buffer
+     * @param writer Writer to use to write serialized telemetry
+     */
     void Write(BitWriter& writer) const;
 
+    /**
+     * @brief Returns size of serialized telemetry
+     * @return Size in bits
+     */
     static constexpr std::size_t BitSize();
 };
 

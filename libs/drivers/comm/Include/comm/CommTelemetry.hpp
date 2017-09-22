@@ -31,8 +31,6 @@ class CommTelemetry
      * @brief ctor.
      * @param[in] receiver Current receiver telemetry
      * @param[in] transmitter Current transmitter telemetry
-     * @param[in] state Current transmitter configuration
-     * @param[in] uptime Current transmitter uptime
      */
     CommTelemetry(const TransmitterTelemetry& transmitter, const ReceiverTelemetry& receiver);
 
