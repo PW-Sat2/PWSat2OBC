@@ -983,7 +983,7 @@ namespace
         {
             InSequence s;
             ExpectSendFrame(12, [&uptime]() { uptime = 30s; });
-            ExpectSendFrame(11, [&uptime]() { uptime += 10s; });
+            ExpectSendFrame(11, [&uptime]() { uptime += 15s; });
             i2c.ExpectWriteCommand(TransmitterAddress, TransmitterReset);
             ExpectSendFrame(11, [&uptime]() { uptime += 10s; });
             i2c.ExpectWriteCommand(TransmitterAddress, TransmitterReset).Times(0);

@@ -560,7 +560,7 @@ bool CommObject::ScheduleFrameTransmission(
 
         auto freeSlotsDelta = static_cast<std::int8_t>(current.FreeSlots) - this->_lastSend.Value.FreeSlots;
 
-        if (timeDelta >= 5s && freeSlotsDelta < 0)
+        if (timeDelta >= 15s && freeSlotsDelta < 0)
         {
             LOGF(LOG_LEVEL_WARNING,
                 "[comm] Restarting transmitter after queue stalled (free slots %d -> %d, time %lds -> %lds)",
