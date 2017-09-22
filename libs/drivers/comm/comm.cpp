@@ -296,6 +296,10 @@ bool CommObject::RemoveFrameInternal(AggregatedErrorCounter& resultAggregator)
 
 bool CommObject::GetReceiverTelemetryInternal(ReceiverTelemetry& telemetry, AggregatedErrorCounter& resultAggregator)
 {
+    memset(&telemetry, 0, sizeof(ReceiverTelemetry));
+
+    bool result = true;
+
     {
         std::array<uint8_t, 4> buffer;
 
@@ -306,15 +310,17 @@ bool CommObject::GetReceiverTelemetryInternal(ReceiverTelemetry& telemetry, Aggr
 
         if (!status)
         {
-            return status;
+            result = false;
         }
+        else
+        {
+            Reader r(buffer);
 
-        Reader r(buffer);
-
-        telemetry.Uptime = std::chrono::seconds(r.ReadByte());
-        telemetry.Uptime += std::chrono::minutes(r.ReadByte());
-        telemetry.Uptime += std::chrono::hours(r.ReadByte());
-        telemetry.Uptime += std::chrono::hours(r.ReadByte() * 24);
+            telemetry.Uptime = std::chrono::seconds(r.ReadByte());
+            telemetry.Uptime += std::chrono::minutes(r.ReadByte());
+            telemetry.Uptime += std::chrono::hours(r.ReadByte());
+            telemetry.Uptime += std::chrono::hours(r.ReadByte() * 24);
+        }
     }
 
     {
@@ -334,20 +340,22 @@ bool CommObject::GetReceiverTelemetryInternal(ReceiverTelemetry& telemetry, Aggr
 
         if (!status)
         {
-            return status;
+            result = false;
         }
-
-        Reader reader(buffer);
-        reader.ReadWordLE(); // TX Supply Current
-        telemetry.NowDopplerOffset = reader.ReadWordLE();
-        telemetry.NowReceiverCurrentConsumption = reader.ReadWordLE();
-        telemetry.NowVoltage = reader.ReadWordLE();
-        telemetry.NowOscilatorTemperature = reader.ReadWordLE();
-        telemetry.NowAmplifierTemperature = reader.ReadWordLE();
-        telemetry.NowRSSI = reader.ReadWordLE();
+        else
+        {
+            Reader reader(buffer);
+            reader.ReadWordLE(); // TX Supply Current
+            telemetry.NowDopplerOffset = reader.ReadWordLE();
+            telemetry.NowReceiverCurrentConsumption = reader.ReadWordLE();
+            telemetry.NowVoltage = reader.ReadWordLE();
+            telemetry.NowOscilatorTemperature = reader.ReadWordLE();
+            telemetry.NowAmplifierTemperature = reader.ReadWordLE();
+            telemetry.NowRSSI = reader.ReadWordLE();
+        }
     }
 
-    return true;
+    return result;
 }
 
 bool CommObject::GetReceiverTelemetry(ReceiverTelemetry& telemetry)
@@ -359,6 +367,10 @@ bool CommObject::GetReceiverTelemetry(ReceiverTelemetry& telemetry)
 
 bool CommObject::GetTransmitterTelemetryInternal(TransmitterTelemetry& telemetry, AggregatedErrorCounter& resultAggregator)
 {
+    memset(&telemetry, 0, sizeof(TransmitterTelemetry));
+
+    bool result = true;
+
     {
         std::array<uint8_t, 4> buffer;
 
@@ -369,15 +381,17 @@ bool CommObject::GetTransmitterTelemetryInternal(TransmitterTelemetry& telemetry
 
         if (!status)
         {
-            return status;
+            result = false;
         }
+        else
+        {
+            Reader r(buffer);
 
-        Reader r(buffer);
-
-        telemetry.Uptime = std::chrono::seconds(r.ReadByte());
-        telemetry.Uptime += std::chrono::minutes(r.ReadByte());
-        telemetry.Uptime += std::chrono::hours(r.ReadByte());
-        telemetry.Uptime += std::chrono::hours(r.ReadByte() * 24);
+            telemetry.Uptime = std::chrono::seconds(r.ReadByte());
+            telemetry.Uptime += std::chrono::minutes(r.ReadByte());
+            telemetry.Uptime += std::chrono::hours(r.ReadByte());
+            telemetry.Uptime += std::chrono::hours(r.ReadByte() * 24);
+        }
     }
 
     {
@@ -390,16 +404,18 @@ bool CommObject::GetTransmitterTelemetryInternal(TransmitterTelemetry& telemetry
 
         if (!status)
         {
-            return status;
+            result = false;
         }
+        else
+        {
+            telemetry.BeaconState = (buffer & 2) != 0;
+            telemetry.StateWhenIdle = static_cast<IdleState>(buffer & 1);
+            static const Bitrate conversionArray[] = {
+                Bitrate::Comm1200bps, Bitrate::Comm2400bps, Bitrate::Comm4800bps, Bitrate::Comm9600bps,
+            };
 
-        telemetry.BeaconState = (buffer & 2) != 0;
-        telemetry.StateWhenIdle = static_cast<IdleState>(buffer & 1);
-        static const Bitrate conversionArray[] = {
-            Bitrate::Comm1200bps, Bitrate::Comm2400bps, Bitrate::Comm4800bps, Bitrate::Comm9600bps,
-        };
-
-        telemetry.TransmitterBitRate = conversionArray[(buffer & 0x0c) >> 2];
+            telemetry.TransmitterBitRate = conversionArray[(buffer & 0x0c) >> 2];
+        }
     }
 
     {
@@ -412,14 +428,16 @@ bool CommObject::GetTransmitterTelemetryInternal(TransmitterTelemetry& telemetry
 
         if (!status)
         {
-            return status;
+            result = false;
         }
-
-        Reader reader(buffer);
-        telemetry.LastTransmittedRFReflectedPower = reader.ReadWordLE();
-        telemetry.LastTransmittedAmplifierTemperature = reader.ReadWordLE();
-        telemetry.LastTransmittedRFForwardPower = reader.ReadWordLE();
-        telemetry.LastTransmittedTransmitterCurrentConsumption = reader.ReadWordLE();
+        else
+        {
+            Reader reader(buffer);
+            telemetry.LastTransmittedRFReflectedPower = reader.ReadWordLE();
+            telemetry.LastTransmittedAmplifierTemperature = reader.ReadWordLE();
+            telemetry.LastTransmittedRFForwardPower = reader.ReadWordLE();
+            telemetry.LastTransmittedTransmitterCurrentConsumption = reader.ReadWordLE();
+        }
     }
 
     {
@@ -432,17 +450,20 @@ bool CommObject::GetTransmitterTelemetryInternal(TransmitterTelemetry& telemetry
 
         if (!status)
         {
-            return status;
+            result = false;
         }
 
-        Reader reader(buffer);
-        reader.ReadWordLE(); // RF Reflected power
-        reader.ReadWordLE(); // Power Amp Temperature
-        telemetry.NowRFForwardPower = reader.ReadWordLE();
-        telemetry.NowTransmitterCurrentConsumption = reader.ReadWordLE();
+        else
+        {
+            Reader reader(buffer);
+            reader.ReadWordLE(); // RF Reflected power
+            reader.ReadWordLE(); // Power Amp Temperature
+            telemetry.NowRFForwardPower = reader.ReadWordLE();
+            telemetry.NowTransmitterCurrentConsumption = reader.ReadWordLE();
+        }
     }
 
-    return true;
+    return result;
 }
 
 bool CommObject::GetTransmitterTelemetry(TransmitterTelemetry& telemetry)

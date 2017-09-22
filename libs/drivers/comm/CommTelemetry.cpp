@@ -36,6 +36,9 @@ void TransmitterTelemetry::Write(BitWriter& writer) const
         case Bitrate::Comm9600bps:
             writer.WriteWord(0b11, 2);
             break;
+        default:
+            writer.WriteWord(0b00, 2);
+            break;
     }
 
     writer.WriteWord(LastTransmittedRFReflectedPower, 12);
