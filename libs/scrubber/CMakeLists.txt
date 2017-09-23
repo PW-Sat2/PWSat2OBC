@@ -4,6 +4,7 @@ set(SOURCES
     program.cpp
     bootloader.cpp
     boot_settings.cpp
+    safe_mode.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

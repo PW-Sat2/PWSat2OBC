@@ -56,6 +56,7 @@ static Command Commands[] = {
     Command{'e', "Erase program flash", EraseBootTable},
     Command{'H', "Check OBC settings", Check},
     Command{'m', "Recovery", Recovery},
+    Command{'Z', "Copy safe mode", CopySafeMode},
 };
 
 #define UPLOADBLOCKSIZE 256

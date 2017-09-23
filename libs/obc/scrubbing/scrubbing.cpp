@@ -12,8 +12,10 @@ namespace obc
     ScrubbingStatus::ScrubbingStatus(std::uint32_t iterationsCount,
         const scrubber::ProgramScrubbingStatus primarySlots,
         const scrubber::ProgramScrubbingStatus secondarySlots,
-        const scrubber::BootloaderScrubbingStatus bootloader)
-        : IterationsCount(iterationsCount), PrimarySlots(primarySlots), SecondarySlots(secondarySlots), Bootloader(bootloader)
+        const scrubber::BootloaderScrubbingStatus bootloader,
+        const scrubber::SafeModeScrubbingStatus safeMode)
+        : IterationsCount(iterationsCount), PrimarySlots(primarySlots), SecondarySlots(secondarySlots), Bootloader(bootloader),
+          SafeMode(safeMode)
     {
     }
 
@@ -26,6 +28,8 @@ namespace obc
           _secondarySlotsScrubber(ScrubbingBuffer, bootTable, hardware.FlashDriver, (~primaryBootSlots) & 0b111111),    //
           _bootloaderScrubberCounter([](OBCScrubbing* This) { This->_bootloaderScrubber.Scrub(); }, this),              //
           _bootloaderScrubber(ScrubbingBuffer, bootTable, hardware.MCUFlash),                                           //
+          _safeModeScrubberCounter([](OBCScrubbing* This) { This->_safeModeScrubber.Scrub(); }, this),                  //
+          _safeModeScrubber(ScrubbingBuffer, bootTable),                                                                //
           _bootSettingsScrubberCounter([](OBCScrubbing* This) { This->_bootSettingsScrubber.Scrub(); }, this),          //
           _bootSettingsScrubber(hardware.PersistentStorage.GetRedundantDriver(), bootSettings),                         //
           _scrubberTask("Scrubber", this, ScrubberTask),                                                                //
@@ -45,7 +49,8 @@ namespace obc
             this->_iterationsCount,                 //
             this->_primarySlotsScrubber.Status(),   //
             this->_secondarySlotsScrubber.Status(), //
-            this->_bootloaderScrubber.Status()      //
+            this->_bootloaderScrubber.Status(),     //
+            this->_safeModeScrubber.Status()        //
             );
     }
 
@@ -56,6 +61,7 @@ namespace obc
             auto sleepTime = time_counter::SleepTime(This->_primarySlotsScrubberCounter,
                 This->_secondarySlotsScrubberCounter,
                 This->_bootloaderScrubberCounter,
+                This->_safeModeScrubberCounter,
                 This->_bootSettingsScrubberCounter);
 
             LOGF(LOG_LEVEL_INFO, "[scrub] Sleeping for %ld", static_cast<std::uint32_t>(sleepTime.count()));
@@ -66,11 +72,13 @@ namespace obc
                 This->_primarySlotsScrubberCounter,
                 This->_secondarySlotsScrubberCounter,
                 This->_bootloaderScrubberCounter,
+                This->_safeModeScrubberCounter,
                 This->_bootSettingsScrubberCounter);
 
             time_counter::DoOnBottom(This->_primarySlotsScrubberCounter,
                 This->_secondarySlotsScrubberCounter,
                 This->_bootloaderScrubberCounter,
+                This->_safeModeScrubberCounter,
                 This->_bootSettingsScrubberCounter);
 
             This->_control.Set(Event::Running);
@@ -106,6 +114,11 @@ namespace obc
     }
 
     bool OBCScrubbing::FailsafeSlotsInProgress()
+    {
+        return this->_secondarySlotsScrubber.InProgress();
+    }
+
+    bool OBCScrubbing::SafeModeInProgress()
     {
         return this->_secondarySlotsScrubber.InProgress();
     }

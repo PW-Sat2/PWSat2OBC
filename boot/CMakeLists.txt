@@ -6,7 +6,7 @@ set(SOURCES
     flash.cpp
     main.cpp
     xmodem.cpp
-    fault_handlers.c
+    fault_handlers.cpp
     boot.cpp
     error_counter.cpp
     dummy_os.cpp

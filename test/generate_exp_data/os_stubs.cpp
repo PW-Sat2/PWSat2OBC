@@ -48,3 +48,10 @@ OSEventBits System::EventGroupWaitForBits(OSEventGroupHandle, const OSEventBits,
 {
     return 0;
 }
+
+void System::EnterCritical()
+{
+}
+void System::LeaveCritical()
+{
+}
