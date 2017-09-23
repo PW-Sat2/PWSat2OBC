@@ -35,10 +35,8 @@ namespace mission
 
         /**
          * @brief This value determines how often the telemetry should be saved.
-         *
-         * Counts mission iterations.
          */
-        std::uint8_t delay;
+        std::chrono::milliseconds delay;
     };
 
     /**
@@ -60,7 +58,7 @@ namespace mission
      * The telemetry archivization process is done by removing \a previous \a telemetry \a file and
      * changing \a current \a telemetry \a file name to \a previous \a telemetry \a file name.
      */
-    class TelemetryTask : public Action, public Update
+    class TelemetryTask : public Action
     {
       public:
         /**
@@ -68,12 +66,6 @@ namespace mission
          * @param[in] arguments Reference to file system provider & current task configuration.
          */
         TelemetryTask(std::tuple<services::fs::IFileSystem&, TelemetryConfiguration> arguments);
-
-        /**
-         * @brief Builds update descriptor for this task.
-         * @return Update descriptor for the telemetry save task.
-         */
-        UpdateDescriptor<telemetry::TelemetryState> BuildUpdate();
 
         /**
          * @brief Builds action descriptor for this task.
@@ -130,14 +122,12 @@ namespace mission
         TelemetryConfiguration configuration;
 
         /**
-         * @brief This value determines how often the telemetry should be saved.
-         */
-        std::uint8_t frequency;
-
-        /**
          * Counts mission iterations.
          */
-        std::uint8_t delay;
+        std::chrono::milliseconds delay;
+
+        /** @brief Timestamp of last saved telemetry */
+        std::chrono::milliseconds lastTelemetrySave;
     };
 }
 

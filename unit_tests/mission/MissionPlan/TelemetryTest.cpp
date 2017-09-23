@@ -28,20 +28,20 @@ namespace
 
         IOResult WriteSuccessful();
         testing::NiceMock<OSMock> os;
+        OSReset osReset;
         telemetry::TelemetryState state;
         testing::NiceMock<FsMock> fs;
         mission::TelemetryConfiguration config;
         mission::TelemetryTask task;
         mission::ActionDescriptor<telemetry::TelemetryState> descriptor;
-        mission::UpdateDescriptor<telemetry::TelemetryState> update;
     };
 
     TelemetryTest::TelemetryTest()
-        : config{"/current", "/previous", 1024, 3}, //
+        : osReset(InstallProxy(&os)),                 //
+          config{"/current", "/previous", 1024, 30s}, //
           task(std::tie(fs, config))
     {
         this->descriptor = task.BuildAction();
-        this->update = task.BuildUpdate();
     }
 
     inline FileOpenResult TelemetryTest::OpenSuccessful(int handle)
@@ -54,60 +54,42 @@ namespace
         return IOResult(OSResult::Success, gsl::span<const std::uint8_t>());
     }
 
-    TEST_F(TelemetryTest, TestConditionNoChanges)
+    TEST_F(TelemetryTest, TestConditionTimeZero)
     {
+        this->state.telemetry.Set(telemetry::InternalTimeTelemetry(0s));
         ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
     }
 
-    TEST_F(TelemetryTest, TestConditionWithChanges)
+    TEST_F(TelemetryTest, TestConditionTimeNotZeroNotSavedBefore)
     {
         state.telemetry.Set(telemetry::InternalTimeTelemetry(10min));
-        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
+        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
     }
 
-    TEST_F(TelemetryTest, TestSkipConditionWithChanges)
+    TEST_F(TelemetryTest, TestConditionDelayNotPassed)
     {
+        std::array<std::uint8_t, 1_KB> buffer;
+        this->fs.AddFile("/current", buffer);
+
         state.telemetry.Set(telemetry::InternalTimeTelemetry(10min));
-        this->update.Execute(this->state);
         ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
-        this->update.Execute(this->state);
-        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
-        this->update.Execute(this->state);
-        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
-        this->update.Execute(this->state);
-        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
-    }
-
-    TEST_F(TelemetryTest, TestSkipConditionWithChangesArrivingVeryLate)
-    {
-        this->update.Execute(this->state);
-        this->update.Execute(this->state);
-        this->update.Execute(this->state);
-        state.telemetry.Set(telemetry::InternalTimeTelemetry(10min));
-        this->update.Execute(this->state);
-        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
-    }
-
-    TEST_F(TelemetryTest, TestConditionStability)
-    {
-        state.telemetry.Set(telemetry::InternalTimeTelemetry(10min));
-        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
-        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
-        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
-        this->update.Execute(this->state);
-        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
-        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
-        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
-        this->update.Execute(this->state);
-        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
-        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
-        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
-    }
-
-    TEST_F(TelemetryTest, TestActionNoStateChanges)
-    {
-        EXPECT_CALL(fs, Open(_, _, _)).Times(0);
         this->descriptor.Execute(this->state);
+
+        state.telemetry.Set(telemetry::InternalTimeTelemetry(10min + 5s));
+        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(false));
+    }
+
+    TEST_F(TelemetryTest, TestConditionDelayPassed)
+    {
+        std::array<std::uint8_t, 1_KB> buffer;
+        this->fs.AddFile("/current", buffer);
+
+        state.telemetry.Set(telemetry::InternalTimeTelemetry(10min));
+        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
+        this->descriptor.Execute(this->state);
+
+        state.telemetry.Set(telemetry::InternalTimeTelemetry(10min + 35s));
+        ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
     }
 
     TEST_F(TelemetryTest, TestSaveChange)
@@ -125,30 +107,27 @@ namespace
 
     TEST_F(TelemetryTest, TestConditionAfterFailedSave)
     {
-        auto guard = InstallProxy(&os);
-        this->update.Execute(this->state);
+        state.telemetry.Set(telemetry::InternalTimeTelemetry(10min));
         ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
-        EXPECT_CALL(os, TakeSemaphore(_, _)).WillOnce(Return(OSResult::Success));
-        EXPECT_CALL(fs, Open(_, _, _)).WillOnce(Return(FileOpenResult(OSResult::IOError, 0)));
         this->descriptor.Execute(this->state);
-        this->update.Execute(this->state);
+
+        state.telemetry.Set(telemetry::InternalTimeTelemetry(10min + 5s));
         ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
     }
 
     TEST_F(TelemetryTest, TestConditionAfterFailedTelemetryAccessAcquisition)
     {
-        auto guard = InstallProxy(&os);
-        this->update.Execute(this->state);
+        state.telemetry.Set(telemetry::InternalTimeTelemetry(10min));
+
         ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
         EXPECT_CALL(os, TakeSemaphore(_, _)).WillOnce(Return(OSResult::Deadlock));
         this->descriptor.Execute(this->state);
-        this->update.Execute(this->state);
+
         ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
     }
 
     TEST_F(TelemetryTest, TestSaveChangeSlightlyBelowLimit)
     {
-        auto guard = InstallProxy(&os);
         EXPECT_CALL(fs, Open(_, _, _)).WillOnce(Return(OpenSuccessful(10)));
         EXPECT_CALL(os, TakeSemaphore(_, _)).WillOnce(Return(OSResult::Success));
         EXPECT_CALL(fs, Write(10, _)).WillOnce(Return(WriteSuccessful()));
@@ -159,7 +138,6 @@ namespace
 
     TEST_F(TelemetryTest, TestSaveChangeFileOpenFailure)
     {
-        auto guard = InstallProxy(&os);
         EXPECT_CALL(fs, Open(_, _, _)).WillOnce(Return(FileOpenResult(OSResult::IOError, 0)));
         EXPECT_CALL(os, TakeSemaphore(_, _)).WillOnce(Return(OSResult::Success));
         state.telemetry.Set(telemetry::InternalTimeTelemetry(10min));
@@ -169,7 +147,6 @@ namespace
 
     TEST_F(TelemetryTest, TestSaveWriteFailure)
     {
-        auto guard = InstallProxy(&os);
         EXPECT_CALL(os, TakeSemaphore(_, _)).WillOnce(Return(OSResult::Success));
         EXPECT_CALL(fs, Open(_, _, _)).WillOnce(Return(OpenSuccessful(10)));
         EXPECT_CALL(fs, Write(10, _)).WillOnce(Return(IOResult(OSResult::IOError, gsl::span<const std::uint8_t>())));
@@ -179,7 +156,6 @@ namespace
 
     TEST_F(TelemetryTest, TestSaveChangeOverLimitSuccess)
     {
-        auto guard = InstallProxy(&os);
         EXPECT_CALL(os, TakeSemaphore(_, _)).WillOnce(Return(OSResult::Success));
         EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(OpenSuccessful(10)));
         EXPECT_CALL(fs, Write(10, _)).WillOnce(Return(WriteSuccessful()));
@@ -192,7 +168,6 @@ namespace
 
     TEST_F(TelemetryTest, TestSaveChangeOverLimitArchivizerFailure)
     {
-        auto guard = InstallProxy(&os);
         EXPECT_CALL(os, TakeSemaphore(_, _)).WillOnce(Return(OSResult::Success));
         EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(OpenSuccessful(10)));
         EXPECT_CALL(fs, Write(10, _)).Times(0);
@@ -204,7 +179,6 @@ namespace
 
     TEST_F(TelemetryTest, TestSaveChangeOverLimitFileReopenFailure)
     {
-        auto guard = InstallProxy(&os);
         EXPECT_CALL(os, TakeSemaphore(_, _)).WillOnce(Return(OSResult::Success));
         EXPECT_CALL(fs, Open(_, _, _)).WillOnce(Return(OpenSuccessful(10))).WillOnce(Return(FileOpenResult(OSResult::IOError, 0)));
         EXPECT_CALL(fs, Write(10, _)).Times(0);
