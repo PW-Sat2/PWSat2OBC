@@ -293,15 +293,6 @@ namespace
             EXPECT_CALL(experiment, Iteration()).WillOnce(Return(IterationResult::Finished));
 
             EXPECT_CALL(this->_os, EventGroupClearBits(this->_event, ExperimentController::Event::InProgress));
-            //
-            //        EXPECT_CALL(this->_os,
-            //            EventGroupWaitForBits(this->_event,
-            //                ExperimentController::Event::MissionLoopIterationStarted | ExperimentController::Event::AbortRequest,
-            //                false,
-            //                false,
-            //                InfiniteTimeout));
-            //
-            //        EXPECT_CALL(experiment, Iteration()).WillOnce(Return(IterationResult::Finished));
 
             EXPECT_CALL(this->_os, QueueReceive(this->_queue, _, _)).WillOnce(Return(false));
         }

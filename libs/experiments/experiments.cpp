@@ -149,11 +149,6 @@ namespace experiments
                 this->_event.Set(Event::MissionLoopNotificationReqested);
 
                 this->_event.WaitAny(Event::MissionLoopIterationStarted | Event::AbortRequest, false, InfiniteTimeout);
-
-                //                if (has_flag(flags, Event::MissionLoopIterationStarted))
-                //                {
-                //                    this->_event.Clear(Event::MissionLoopIterationStarted);
-                //                }
             }
         } while (true);
 
