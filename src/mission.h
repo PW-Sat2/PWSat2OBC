@@ -71,7 +71,6 @@ namespace telemetry
 {
     typedef mission::MissionLoop<TelemetryState, //
         CommTelemetryAcquisition,                //
-        mission::TelemetryTask,                  //
         GyroTelemetryAcquisition,                //
         ErrorCounterTelemetryAcquisition,        //
         EpsTelemetryAcquisition,                 //
@@ -87,6 +86,7 @@ namespace telemetry
         RamScrubbingTelemetryAcquisition<Scrubber>, //
         ImtqTelemetryAcquisition,                   //
         SystemTelemetryAcquisition,                 //
+        mission::TelemetryTask,                     //
         TelemetrySerialization                      //
         >
         ObcTelemetryAcquisition;
