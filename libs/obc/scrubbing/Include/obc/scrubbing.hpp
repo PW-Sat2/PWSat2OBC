@@ -12,6 +12,7 @@
 #include "scrubber/boot_settings.hpp"
 #include "scrubber/bootloader.hpp"
 #include "scrubber/program.hpp"
+#include "scrubber/safe_mode.hpp"
 
 namespace obc
 {
@@ -36,11 +37,13 @@ namespace obc
          * @param primarySlots Status of primary slots scrubbing
          * @param secondarySlots Status of secondary slots scrubbing
          * @param bootloader Status of bootloader scrubbing
+         * @param safeMode Status of safe mode scrubbing
          */
         ScrubbingStatus(std::uint32_t iterationsCount,
             const scrubber::ProgramScrubbingStatus primarySlots,
             const scrubber::ProgramScrubbingStatus secondarySlots,
-            const scrubber::BootloaderScrubbingStatus bootloader);
+            const scrubber::BootloaderScrubbingStatus bootloader,
+            const scrubber::SafeModeScrubbingStatus safeMode);
 
         /** @brief Iterations count */
         const std::uint32_t IterationsCount;
@@ -50,6 +53,8 @@ namespace obc
         const scrubber::ProgramScrubbingStatus SecondarySlots;
         /** @brief Status of bootloader scrubbing */
         const scrubber::BootloaderScrubbingStatus Bootloader;
+        /** @brief Status of safe mode scrubbing */
+        const scrubber::SafeModeScrubbingStatus SafeMode;
     };
 
     /**
@@ -91,6 +96,7 @@ namespace obc
         virtual bool BootloaderInProgress() override;
         virtual bool PrimarySlotsInProgress() override;
         virtual bool FailsafeSlotsInProgress() override;
+        virtual bool SafeModeInProgress() override;
 
       private:
         /**
@@ -112,10 +118,16 @@ namespace obc
         scrubber::ProgramScrubber _secondarySlotsScrubber;
 
         /** @brief Bootloader scrubber counter */
-        time_counter::TimeCounter<Action<OBCScrubbing*>, OBCScrubbing*, time_counter::min<60>, time_counter::min<30>>
+        time_counter::TimeCounter<Action<OBCScrubbing*>, OBCScrubbing*, time_counter::min<8>, time_counter::min<1>>
             _bootloaderScrubberCounter;
         /** @brief Bootloader scrubber */
         scrubber::BootloaderScrubber _bootloaderScrubber;
+
+        /** @brief Safe mode scrubber counter */
+        time_counter::TimeCounter<Action<OBCScrubbing*>, OBCScrubbing*, time_counter::min<8>, time_counter::min<2>>
+            _safeModeScrubberCounter;
+        /** @brief Safe mode scrubber */
+        scrubber::SafeModeScrubber _safeModeScrubber;
 
         /** @brief Boot settings scrubber counter */
         time_counter::TimeCounter<Action<OBCScrubbing*>, OBCScrubbing*, time_counter::min<30>, time_counter::min<15>>

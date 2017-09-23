@@ -468,6 +468,16 @@ class System final : public PureStatic
      * @return Number of miliseconds since system start
      */
     static std::chrono::milliseconds GetUptime();
+
+    /**
+     * @brief Enters critical section
+     */
+    static void EnterCritical();
+
+    /**
+     * @brief Leaves critical section
+     */
+    static void LeaveCritical();
 };
 
 /**
@@ -857,6 +867,22 @@ template <typename T> bool UniqueLock<T>::operator()()
 {
     return this->_taken;
 }
+
+/**
+ * @brief RAII critical section
+ */
+class CriticalSection final
+{
+  public:
+    /**
+     * @brief Ctor
+     */
+    CriticalSection();
+    /**
+     * @brief Dtor
+     */
+    ~CriticalSection();
+};
 
 /** @}*/
 

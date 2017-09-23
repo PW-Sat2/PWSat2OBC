@@ -1,0 +1,53 @@
+#include <em_system.h>
+#include "core_cm3.h"
+
+extern "C" void CustomDefaultHandler()
+{
+    NVIC_SystemReset();
+}
+
+#define HANDLER(name) void name() __attribute__((alias("CustomDefaultHandler")));
+
+HANDLER(NMI_Handler)
+HANDLER(HardFault_Handler)
+HANDLER(MemManage_Handler)
+HANDLER(BusFault_Handler)
+HANDLER(UsageFault_Handler)
+HANDLER(SVC_Handler)
+HANDLER(DebugMon_Handler)
+HANDLER(PendSV_Handler)
+HANDLER(TIMER0_IRQHandler)
+HANDLER(USART0_RX_IRQHandler)
+HANDLER(USART0_TX_IRQHandler)
+HANDLER(USB_IRQHandler)
+HANDLER(ADC0_IRQHandler)
+HANDLER(DAC0_IRQHandler)
+HANDLER(I2C0_IRQHandler)
+HANDLER(I2C1_IRQHandler)
+HANDLER(GPIO_ODD_IRQHandler)
+HANDLER(TIMER1_IRQHandler)
+HANDLER(TIMER2_IRQHandler)
+HANDLER(TIMER3_IRQHandler)
+HANDLER(USART1_RX_IRQHandler)
+HANDLER(USART1_TX_IRQHandler)
+HANDLER(LESENSE_IRQHandler)
+HANDLER(USART2_RX_IRQHandler)
+HANDLER(USART2_TX_IRQHandler)
+HANDLER(UART0_RX_IRQHandler)
+HANDLER(UART0_TX_IRQHandler)
+HANDLER(UART1_TX_IRQHandler)
+HANDLER(LEUART0_IRQHandler)
+HANDLER(LEUART1_IRQHandler)
+HANDLER(LETIMER0_IRQHandler)
+HANDLER(PCNT0_IRQHandler)
+HANDLER(PCNT1_IRQHandler)
+HANDLER(PCNT2_IRQHandler)
+HANDLER(RTC_IRQHandler)
+HANDLER(BURTC_IRQHandler)
+HANDLER(CMU_IRQHandler)
+HANDLER(VCMP_IRQHandler)
+HANDLER(LCD_IRQHandler)
+HANDLER(MSC_IRQHandler)
+HANDLER(AES_IRQHandler)
+HANDLER(EBI_IRQHandler)
+HANDLER(EMU_IRQHandler)
