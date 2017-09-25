@@ -11,18 +11,9 @@ namespace mission
     TelemetryTask::TelemetryTask(std::tuple<services::fs::IFileSystem&, TelemetryConfiguration> arguments)
         : provider(std::get<0>(arguments)),      //
           configuration(std::get<1>(arguments)), //
-          frequency(configuration.delay),        //
-          delay(configuration.delay)
+          delay(configuration.delay),            //
+          lastTelemetrySave(0ms)
     {
-    }
-
-    UpdateDescriptor<telemetry::TelemetryState> TelemetryTask::BuildUpdate()
-    {
-        UpdateDescriptor<telemetry::TelemetryState> descriptor;
-        descriptor.name = "Save telemetry to file update";
-        descriptor.param = this;
-        descriptor.updateProc = UpdateState;
-        return descriptor;
     }
 
     ActionDescriptor<telemetry::TelemetryState> TelemetryTask::BuildAction()
@@ -35,21 +26,14 @@ namespace mission
         return descriptor;
     }
 
-    UpdateResult TelemetryTask::UpdateState(telemetry::TelemetryState& /*state*/, void* param)
+    bool TelemetryTask::SaveCondition(const telemetry::TelemetryState& state, void* param)
     {
         auto This = static_cast<TelemetryTask*>(param);
-        if (++This->delay >= This->frequency)
-        {
-            This->delay = 0;
-        }
+        auto time = state.telemetry.Get<telemetry::InternalTimeTelemetry>();
 
-        return UpdateResult::Ok;
-    }
+        auto delta = time.Time() - This->lastTelemetrySave;
 
-    bool TelemetryTask::SaveCondition(const telemetry::TelemetryState& /*state*/, void* param)
-    {
-        auto This = static_cast<TelemetryTask*>(param);
-        return This->delay == 0;
+        return (delta < 0ms) || (delta >= This->delay);
     }
 
     void TelemetryTask::SaveProxy(telemetry::TelemetryState& state, void* param)
@@ -71,14 +55,14 @@ namespace mission
             else
             {
                 LOG(LOG_LEVEL_WARNING, "Unable to acquire access to serialized telemetry. ");
-                this->delay = frequency;
                 return;
             }
         }
 
-        if (!SaveToFile(content))
+        if (SaveToFile(content))
         {
-            this->delay = frequency;
+            auto time = stateObject.telemetry.Get<telemetry::InternalTimeTelemetry>();
+            this->lastTelemetrySave = time.Time();
         }
     }
 
@@ -86,7 +70,7 @@ namespace mission
     {
         services::fs::File file(this->provider, //
             this->configuration.currentFileName,
-            services::fs::FileOpen::OpenAlways,
+            services::fs::FileOpen::AppendAlways,
             services::fs::FileAccess::WriteOnly);
         if (!file)
         {
@@ -111,7 +95,7 @@ namespace mission
 
             file = services::fs::File(this->provider,
                 this->configuration.currentFileName,
-                services::fs::FileOpen::OpenAlways,
+                services::fs::FileOpen::CreateAlways,
                 services::fs::FileAccess::WriteOnly);
             if (!file)
             {
