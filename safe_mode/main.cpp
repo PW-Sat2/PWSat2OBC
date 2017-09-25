@@ -46,7 +46,7 @@ void SysTick_Handler()
 
 static void Recover()
 {
-    RecoverySteps<ScrubBootloader, RevertBootSlots, ScrubProgram, EraseN25QStep, RebootStep> steps;
+    RecoverySteps<ScrubBootloader, ScrubProgram, EraseN25QStep, RevertBootSlots, RebootStep> steps;
 
     steps.Perform();
 }
