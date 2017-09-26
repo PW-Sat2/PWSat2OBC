@@ -31,7 +31,7 @@ class FileSystemTelecommandsTest(RestartPerTest):
 
         data = ''.join(map(lambda x: x * 300, ['A', 'B', 'C']))
 
-        p = "/a/test"
+        p = "/test"
 
         self.system.obc.write_file(p, data)
 
@@ -56,7 +56,7 @@ class FileSystemTelecommandsTest(RestartPerTest):
     def test_should_respond_with_error_frame_for_non_existent_file_when_downloading(self):
         self._start()
 
-        p = "/a/non_exist"
+        p = "/non_exist"
 
         self.system.comm.put_frame(telecommand.DownloadFile(correlation_id=0x11, path=p, seqs=[0, 3, 1, 2]))
 
@@ -73,7 +73,7 @@ class FileSystemTelecommandsTest(RestartPerTest):
 
         data = "content"
 
-        p = "/a/test"
+        p = "/test"
 
         self.system.obc.write_file(p, data)
 
@@ -89,7 +89,7 @@ class FileSystemTelecommandsTest(RestartPerTest):
     def test_should_report_error_when_removing_non_existent_file(self):
         self._start()
 
-        p = "/a/non_exist"
+        p = "/non_exist"
 
         self.system.comm.put_frame(telecommand.RemoveFile(correlation_id=0x11, path=p))
 
@@ -106,11 +106,11 @@ class FileSystemTelecommandsTest(RestartPerTest):
     def test_should_list_files(self):
         self._start()
 
-        self.system.obc.write_file('/a/file1', 'ABC')
-        self.system.obc.write_file('/a/file2', 'DEFG')
-        self.system.obc.write_file('/a/file3', 'HI')
+        self.system.obc.write_file('/file1', 'ABC')
+        self.system.obc.write_file('/file2', 'DEFG')
+        self.system.obc.write_file('/file3', 'HI')
 
-        self.system.comm.put_frame(telecommand.ListFiles(correlation_id=0x11, path='/a'))
+        self.system.comm.put_frame(telecommand.ListFiles(correlation_id=0x11, path='/'))
 
         frame = self.system.comm.get_frame(20)
 

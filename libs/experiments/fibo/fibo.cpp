@@ -54,7 +54,7 @@ namespace experiment
 
         experiments::StartResult FibonacciExperiment::Start()
         {
-            this->_file = services::fs::File(this->_fileSystem, "/a/fibo.dat", FileOpen::CreateAlways, FileAccess::WriteOnly);
+            this->_file = services::fs::File(this->_fileSystem, "/fibo.dat", FileOpen::CreateAlways, FileAccess::WriteOnly);
             if (!this->_file)
             {
                 LOG(LOG_LEVEL_ERROR, "Opening experiment file failed");
