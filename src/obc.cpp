@@ -67,11 +67,16 @@ static void TimePassed(void* /*context*/, TimePoint /*currentTime*/)
 
 static std::uint16_t GetErrorCounterMask()
 {
-    return 1 << devices::n25q::RedundantN25QDriver::ErrorCounter::DeviceId |
-        1 << devices::camera::LowLevelCameraDriver::ErrorCounter::DeviceId |
-        1 << obc::storage::error_counters::N25QDriver1::ErrorCounter::DeviceId |
-        1 << obc::storage::error_counters::N25QDriver2::ErrorCounter::DeviceId |
-        1 << obc::storage::error_counters::N25QDriver3::ErrorCounter::DeviceId;
+    return 1 << devices::rtc::RTCObject::ErrorCounter::DeviceId |                //
+        1 << devices::imtq::ImtqDriver::ErrorCounter::DeviceId |                 //
+        1 << obc::storage::error_counters::N25QDriver1::ErrorCounter::DeviceId | //
+        1 << obc::storage::error_counters::N25QDriver2::ErrorCounter::DeviceId | //
+        1 << obc::storage::error_counters::N25QDriver3::ErrorCounter::DeviceId | //
+        1 << devices::n25q::RedundantN25QDriver::ErrorCounter::DeviceId |        //
+        1 << devices::fm25w::RedundantFM25WDriver::ErrorCounter::DeviceId |      //
+        1 << devices::payload::PayloadDriver::ErrorCounter::DeviceId |           //
+        1 << devices::camera::LowLevelCameraDriver::ErrorCounter::DeviceId |     //
+        1 << devices::suns::SunSDriver::ErrorCounter::DeviceId;
 }
 
 OBC::OBC()
