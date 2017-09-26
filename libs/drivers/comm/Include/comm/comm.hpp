@@ -109,22 +109,22 @@ struct ReceiverTelemetry
     std::chrono::seconds Uptime;
 
     /** @brief Doppler offset of last received frame */
-    std::uint16_t LastReceivedDopplerOffset;
+    uint12_t LastReceivedDopplerOffset;
     /** @brief RSSI of last received frame */
-    std::uint16_t LastReceivedRSSI;
+    uint12_t LastReceivedRSSI;
 
     /** @brief Instantaneous doppler offset */
-    std::uint16_t NowDopplerOffset;
+    uint12_t NowDopplerOffset;
     /** @brief Instantaneous receiver current consumption */
-    std::uint16_t NowReceiverCurrentConsumption;
+    uint12_t NowReceiverCurrentConsumption;
     /** @brief Instantaneous power supply voltage*/
-    std::uint16_t NowVoltage;
+    uint12_t NowVoltage;
     /** @brief Instantaneous oscilator temperature */
-    std::uint16_t NowOscilatorTemperature;
+    uint12_t NowOscilatorTemperature;
     /** @brief Instantaneous amplifier temperature*/
-    std::uint16_t NowAmplifierTemperature;
+    uint12_t NowAmplifierTemperature;
     /** @brief Instantaneous RSSI*/
-    std::uint16_t NowRSSI;
+    uint12_t NowRSSI;
 
     /**
      * @brief Serializes receiver telemetry into buffer
@@ -141,7 +141,7 @@ struct ReceiverTelemetry
 
 constexpr std::size_t ReceiverTelemetry::BitSize()
 {
-    return 113;
+    return 17 + 8 * BitLength<uint12_t>;
 }
 
 /**
@@ -159,18 +159,18 @@ struct TransmitterTelemetry
     Bitrate TransmitterBitRate;
 
     /** @brief RF reflected power of last transmitted frame*/
-    std::uint16_t LastTransmittedRFReflectedPower;
+    uint12_t LastTransmittedRFReflectedPower;
     /** @brief Amplifer temperature of last transmitted frame*/
-    std::uint16_t LastTransmittedAmplifierTemperature;
+    uint12_t LastTransmittedAmplifierTemperature;
     /** @brief RF forward power of last transmitted frame*/
-    std::uint16_t LastTransmittedRFForwardPower;
+    uint12_t LastTransmittedRFForwardPower;
     /** @brief Transmitter current consumption of last transmitted frame*/
-    std::uint16_t LastTransmittedTransmitterCurrentConsumption;
+    uint12_t LastTransmittedTransmitterCurrentConsumption;
 
     /** @brief Instantaneous RF forward power*/
-    std::uint16_t NowRFForwardPower;
+    uint12_t NowRFForwardPower;
     /** @brief Instantaneous transmitter current consumption */
-    std::uint16_t NowTransmitterCurrentConsumption;
+    uint12_t NowTransmitterCurrentConsumption;
 
     /** @brief Transmitter state when idle*/
     IdleState StateWhenIdle;
@@ -193,7 +193,7 @@ struct TransmitterTelemetry
 
 constexpr std::size_t TransmitterTelemetry::BitSize()
 {
-    return 93;
+    return 17 + 2 + 6 * BitLength<uint12_t> + 1 + 1;
 }
 
 /** Type that contains status of the frame count query. */

@@ -176,13 +176,13 @@ static void CommGetTelemetry(uint16_t argc, char* argv[])
 
         GetTerminal().Printf("Uptime: '%ld'\n", static_cast<std::uint32_t>(telemetry.Uptime.count()));
         GetTerminal().Printf("Bitrate: '%d'\n", num(telemetry.TransmitterBitRate));
-        GetTerminal().Printf("LastTransmitted RF Reflected power: '%d'\n", telemetry.LastTransmittedRFReflectedPower);
-        GetTerminal().Printf("LastTransmitted Power Amp Temperature: '%d'\n", telemetry.LastTransmittedAmplifierTemperature);
-        GetTerminal().Printf("LastTransmitted RF Forward power: '%d'\n", telemetry.LastTransmittedRFForwardPower);
-        GetTerminal().Printf("LastTransmitted TX Current: '%d'\n", telemetry.LastTransmittedTransmitterCurrentConsumption);
+        GetTerminal().Printf("LastTransmitted RF Reflected power: '%d'\n", telemetry.LastTransmittedRFReflectedPower.Value());
+        GetTerminal().Printf("LastTransmitted Power Amp Temperature: '%d'\n", telemetry.LastTransmittedAmplifierTemperature.Value());
+        GetTerminal().Printf("LastTransmitted RF Forward power: '%d'\n", telemetry.LastTransmittedRFForwardPower.Value());
+        GetTerminal().Printf("LastTransmitted TX Current: '%d'\n", telemetry.LastTransmittedTransmitterCurrentConsumption.Value());
 
-        GetTerminal().Printf("Now RF Forward power: '%d'\n", telemetry.NowRFForwardPower);
-        GetTerminal().Printf("Now TX Current: '%d'\n", telemetry.NowTransmitterCurrentConsumption);
+        GetTerminal().Printf("Now RF Forward power: '%d'\n", telemetry.NowRFForwardPower.Value());
+        GetTerminal().Printf("Now TX Current: '%d'\n", telemetry.NowTransmitterCurrentConsumption.Value());
 
         GetTerminal().Printf("Idle state: '%d'\n", telemetry.StateWhenIdle == IdleState::On ? 1 : 0);
         GetTerminal().Printf("Beacon: '%d'\n", telemetry.BeaconState ? 1 : 0);
@@ -197,15 +197,15 @@ static void CommGetTelemetry(uint16_t argc, char* argv[])
         }
 
         GetTerminal().Printf("Uptime: '%ld'\n", static_cast<std::uint32_t>(telemetry.Uptime.count()));
-        GetTerminal().Printf("LastReceived Doppler: '%d'\n", telemetry.LastReceivedDopplerOffset);
-        GetTerminal().Printf("LastReceived RSSI: '%d'\n", telemetry.LastReceivedRSSI);
+        GetTerminal().Printf("LastReceived Doppler: '%d'\n", telemetry.LastReceivedDopplerOffset.Value());
+        GetTerminal().Printf("LastReceived RSSI: '%d'\n", telemetry.LastReceivedRSSI.Value());
 
-        GetTerminal().Printf("Now Doppler: '%d'\n", telemetry.NowDopplerOffset);
-        GetTerminal().Printf("Now RX current: '%d'\n", telemetry.NowReceiverCurrentConsumption);
-        GetTerminal().Printf("Now Power Supply Voltage: '%d'\n", telemetry.NowVoltage);
-        GetTerminal().Printf("Now Oscillator Temperature: '%d'\n", telemetry.NowOscilatorTemperature);
-        GetTerminal().Printf("Now Power Amp Temperature: '%d'\n", telemetry.NowAmplifierTemperature);
-        GetTerminal().Printf("Now RSSI: '%d'\n", telemetry.NowRSSI);
+        GetTerminal().Printf("Now Doppler: '%d'\n", telemetry.NowDopplerOffset.Value());
+        GetTerminal().Printf("Now RX current: '%d'\n", telemetry.NowReceiverCurrentConsumption.Value());
+        GetTerminal().Printf("Now Power Supply Voltage: '%d'\n", telemetry.NowVoltage.Value());
+        GetTerminal().Printf("Now Oscillator Temperature: '%d'\n", telemetry.NowOscilatorTemperature.Value());
+        GetTerminal().Printf("Now Power Amp Temperature: '%d'\n", telemetry.NowAmplifierTemperature.Value());
+        GetTerminal().Printf("Now RSSI: '%d'\n", telemetry.NowRSSI.Value());
     }
     else
     {
