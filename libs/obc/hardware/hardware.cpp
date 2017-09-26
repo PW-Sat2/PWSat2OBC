@@ -62,6 +62,8 @@ void OBCHardware::Initialize()
     this->Pins.Initialize();
     this->I2C.Initialize();
 
+    ResetEps();
+
     this->Terminal.Initialize();
     this->Terminal.LineEditing(true);
 
@@ -83,6 +85,16 @@ void OBCHardware::Initialize()
     this->rtc.Initialize();
 
     this->Gyro.init();
+}
+
+void OBCHardware::ResetEps()
+{
+    this->EPS.DisableLCL(devices::eps::LCL::SunS);
+    this->EPS.DisableLCL(devices::eps::LCL::CamNadir);
+    this->EPS.DisableLCL(devices::eps::LCL::CamWing);
+    this->EPS.DisableLCL(devices::eps::LCL::SENS);
+    this->EPS.DisableLCL(devices::eps::LCL::AntennaMain);
+    this->EPS.DisableLCL(devices::eps::LCL::AntennaRed);
 }
 
 OBCHardware::OBCHardware(
