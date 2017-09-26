@@ -44,10 +44,10 @@ class ExperimentsTest(RestartPerTest):
         self.assertIsNone(state.Requested)
         self.assertIsNone(state.Current)
 
-        files = self.system.obc.list_files('/a')
+        files = self.system.obc.list_files('/')
         self.assertIn('fibo.dat', files, 'Experiment result file is not present')
 
-        result = self.system.obc.read_file('/a/fibo.dat')
+        result = self.system.obc.read_file('/fibo.dat')
 
         self.assertEqual(len(result), 7 * 4)
 
@@ -84,12 +84,12 @@ class ExperimentsTest(RestartPerTest):
 
         log.info("5")
 
-        files = self.system.obc.list_files('/a')
+        files = self.system.obc.list_files('/')
         self.assertIn('fibo.dat', files, 'Experiment result file is not present')
 
         log.info("6")
 
-        result = self.system.obc.read_file('/a/fibo.dat')
+        result = self.system.obc.read_file('/fibo.dat')
         self.assertEqual(len(result), 2 * 4)
 
         unpacked = struct.unpack('<' + 'L' * 2, result)

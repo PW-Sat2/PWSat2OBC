@@ -8,18 +8,18 @@ class TestTMR(RestartPerTest):
     @skip('Manual test')
     def test_success_when_single_erase(self):
         log = logging.getLogger("test_tmr")
-        self.system.obc.write_file("/a/tmr.test", "PW-SAT2")
+        self.system.obc.write_file("/tmr.test", "PW-SAT2")
 
         log.info("Erasing 1 ...")
         self.system.obc.erase(1)
-        test_file_content = self.system.obc.read_file("/a/tmr.test")
+        test_file_content = self.system.obc.read_file("/tmr.test")
 
         self.assertEquals("PW-SAT2", test_file_content)
 
     def test_failure_when_double_erase(self):
         log = logging.getLogger("test_tmr")
 
-        self.system.obc.write_file("/a/tmr.test", "Should not be PW-SAT2")
+        self.system.obc.write_file("/tmr.test", "Should not be PW-SAT2")
 
         log.info("Erasing 1 ...")
         self.system.obc.erase(1)
@@ -27,7 +27,7 @@ class TestTMR(RestartPerTest):
         self.system.obc.erase(2)
         log.info("Erased")
 
-        test_file_content = self.system.obc.read_file("/a/tmr.test")
+        test_file_content = self.system.obc.read_file("/tmr.test")
 
         self.assertNotEqual("Should not be PW-SAT2", test_file_content)
 
