@@ -125,6 +125,11 @@ namespace obc
         /** @brief Initializes OBC hardware */
         void Initialize();
 
+        /**
+         * @brief Resets EPS state.
+         */
+        void ResetEps();
+
         /** @brief GPIO Pins */
         OBCGPIO Pins;
 
