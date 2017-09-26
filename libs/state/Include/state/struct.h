@@ -6,6 +6,7 @@
 #include <chrono>
 #include "LockablePersistentState.hpp"
 #include "StatePolicies.hpp"
+#include "adcs/AdcsState.hpp"
 #include "adcs/adcs.hpp"
 #include "antenna/AntennaConfiguration.hpp"
 #include "antenna/AntennaState.hpp"
