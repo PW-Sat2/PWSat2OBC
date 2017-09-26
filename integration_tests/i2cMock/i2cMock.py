@@ -62,7 +62,7 @@ class I2CDevice(object):
         self.response = handler(self, *args) or []
 
     def get_response(self):
-        return self.response
+        return self.response or []
 
     def latch(self):
         raise LatchBusError()

@@ -71,71 +71,6 @@ constexpr std::uint16_t MaxUplinkFrameSize = 200u;
  */
 constexpr std::uint16_t PrefferedBufferSize = MaxDownlinkFrameSize + 20;
 
-/**
- * @brief This type contains comm receiver telemetry.
- *
- * The values stored in this structure are provided in their raw form
- * as they are received directly from the hardware.
- */
-struct ReceiverTelemetry
-{
-    /** @brief Raw measurement value of the transmitter current consumption. */
-    std::uint16_t TransmitterCurrentConsumption;
-
-    /** @brief Raw measurement value of the receiver current consumption. */
-    std::uint16_t ReceiverCurrentConsumption;
-
-    /** @brief Raw measurement value of the instantaneous Doppler offset of the signal at the receiver port. */
-    std::uint16_t DopplerOffset;
-
-    /** @brief Raw measurement value of the power bus voltage.*/
-    std::uint16_t Vcc;
-
-    /** @brief Raw measurement value of the local oscillator temperature. */
-    std::uint16_t OscilatorTemperature;
-
-    /** @brief Raw measurement value of the power amplifier temperature. */
-    std::uint16_t AmplifierTemperature;
-
-    /** @brief Raw measurement value of the instantaneous signal strength of the signal at the receiver. */
-    std::uint16_t SignalStrength;
-};
-
-/**
- * @brief This type contains comm transmitter telemetry.
- *
- * The values stored in this structure are provided in their raw form
- * as they are received directly from the hardware.
- */
-struct TransmitterTelemetry
-{
-    /** @brief Raw measurement value of the instantaneous RF reflected power at the transmitter port. */
-    std::uint16_t RFReflectedPower;
-
-    /** @brief Raw measurement value of the power amplifier temperature. */
-    std::uint16_t AmplifierTemperature;
-
-    /** @brief Raw measurement value of the instantaneous RF forward power at the transmitter port. */
-    std::uint16_t RFForwardPower;
-
-    /** @brief Raw measurement value of the transmitter current consumption. */
-    std::uint16_t TransmitterCurrentConsumption;
-};
-
-/** Type that contains status of the frame count query. */
-struct ReceiverFrameCount
-{
-    /** @brief Frame count query status. */
-    bool status;
-
-    /**
-     * @brief Number of the available frames in the frame buffer.
-     *
-     * The contents of this field is undefined when the status is set to false.
-     */
-    std::uint16_t frameCount;
-};
-
 /** Transmitter state enumerator. */
 enum class IdleState
 {
@@ -162,43 +97,117 @@ enum class Bitrate
     Comm9600bps = 8,
 };
 
-/** This type describes configured transmitter state. */
-struct TransmitterState
+/**
+ * @brief This type contains comm receiver telemetry.
+ *
+ * The values stored in this structure are provided in their raw form
+ * as they are received directly from the hardware.
+ */
+struct ReceiverTelemetry
 {
-    /** The transmitter state when there are no frames to send. */
-    IdleState StateWhenIdle;
+    /** @brief Receiver uptime */
+    std::chrono::seconds Uptime;
 
-    /** Transmission speed. */
-    Bitrate TransmitterBitRate;
+    /** @brief Doppler offset of last received frame */
+    uint12_t LastReceivedDopplerOffset;
+    /** @brief RSSI of last received frame */
+    uint12_t LastReceivedRSSI;
 
-    /** Flag indicating whether beacon is active. */
-    bool BeaconState;
+    /** @brief Instantaneous doppler offset */
+    uint12_t NowDopplerOffset;
+    /** @brief Instantaneous receiver current consumption */
+    uint12_t NowReceiverCurrentConsumption;
+    /** @brief Instantaneous power supply voltage*/
+    uint12_t NowVoltage;
+    /** @brief Instantaneous oscilator temperature */
+    uint12_t NowOscilatorTemperature;
+    /** @brief Instantaneous amplifier temperature*/
+    uint12_t NowAmplifierTemperature;
+    /** @brief Instantaneous RSSI*/
+    uint12_t NowRSSI;
+
+    /**
+     * @brief Serializes receiver telemetry into buffer
+     * @param writer Writer to use to write serialized telemetry
+     */
+    void Write(BitWriter& writer) const;
+
+    /**
+     * @brief Returns size of serialized telemetry
+     * @return Size in bits
+     */
+    static constexpr std::size_t BitSize();
 };
 
-/**
- * @brief This type represents amount of time that comm hardware has been active.
- */
-struct Uptime
+constexpr std::size_t ReceiverTelemetry::BitSize()
 {
-    /**
-     * @brief Second part of the uptime value.
-     */
-    BitValue<std::uint8_t, 6> seconds;
+    return 17 + 8 * BitLength<uint12_t>;
+}
+
+/**
+ * @brief This type contains comm transmitter telemetry.
+ *
+ * The values stored in this structure are provided in their raw form
+ * as they are received directly from the hardware.
+ */
+struct TransmitterTelemetry
+{
+    /** @brief Transmitter uptime */
+    std::chrono::seconds Uptime;
+
+    /** @brief Transmitter bitrate*/
+    Bitrate TransmitterBitRate;
+
+    /** @brief RF reflected power of last transmitted frame*/
+    uint12_t LastTransmittedRFReflectedPower;
+    /** @brief Amplifer temperature of last transmitted frame*/
+    uint12_t LastTransmittedAmplifierTemperature;
+    /** @brief RF forward power of last transmitted frame*/
+    uint12_t LastTransmittedRFForwardPower;
+    /** @brief Transmitter current consumption of last transmitted frame*/
+    uint12_t LastTransmittedTransmitterCurrentConsumption;
+
+    /** @brief Instantaneous RF forward power*/
+    uint12_t NowRFForwardPower;
+    /** @brief Instantaneous transmitter current consumption */
+    uint12_t NowTransmitterCurrentConsumption;
+
+    /** @brief Transmitter state when idle*/
+    IdleState StateWhenIdle;
+
+    /** @brief Beacon state*/
+    bool BeaconState;
 
     /**
-     * @brief Minute part of the uptime value.
+     * @brief Serializes transmitter telemetry into buffer
+     * @param writer Writer to use to write serialized telemetry
      */
-    BitValue<std::uint8_t, 6> minutes;
+    void Write(BitWriter& writer) const;
 
     /**
-     * @brief Hour part of the uptime value.
+     * @brief Returns size of serialized telemetry
+     * @return Size in bits
      */
-    BitValue<std::uint8_t, 5> hours;
+    static constexpr std::size_t BitSize();
+};
+
+constexpr std::size_t TransmitterTelemetry::BitSize()
+{
+    return 17 + 2 + 6 * BitLength<uint12_t> + 1 + 1;
+}
+
+/** Type that contains status of the frame count query. */
+struct ReceiverFrameCount
+{
+    /** @brief Frame count query status. */
+    bool status;
 
     /**
-     * @brief Day part of the uptime value.
+     * @brief Number of the available frames in the frame buffer.
+     *
+     * The contents of this field is undefined when the status is set to false.
      */
-    BitValue<std::uint8_t, 8> days;
+    std::uint16_t frameCount;
 };
 
 /**
@@ -225,7 +234,8 @@ enum class TransmitterCommand
     HardReset = 0xAB,
     ResetWatchdog = 0xCC,
     SendFrame = 0x10,
-    GetTelemetry = 0x26,
+    GetTelemetryLastTransmission = 0x26,
+    GetTelemetryInstant = 0x25,
     SetBeacon = 0x14,
     ClearBeacon = 0x1f,
     SetIdleState = 0x24,

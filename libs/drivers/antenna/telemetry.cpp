@@ -22,7 +22,10 @@ namespace devices
 
         void ActivationCounts::Write(BitWriter& writer) const
         {
-            writer.WriteSpan(gsl::make_span(this->counts));
+            writer.WriteWord(std::min<std::uint8_t>(this->counts[0], 0b111), 3);
+            writer.WriteWord(std::min<std::uint8_t>(this->counts[1], 0b111), 3);
+            writer.WriteWord(std::min<std::uint8_t>(this->counts[2], 0b111), 3);
+            writer.WriteWord(std::min<std::uint8_t>(this->counts[3], 0b111), 3);
         }
 
         ActivationTimes::ActivationTimes() : ActivationTimes(0s, 0s, 0s, 0s)
@@ -43,10 +46,10 @@ namespace devices
 
         void ActivationTimes::Write(BitWriter& writer) const
         {
-            writer.WriteWord(this->times[0].count(), TimeLength);
-            writer.WriteWord(this->times[1].count(), TimeLength);
-            writer.WriteWord(this->times[2].count(), TimeLength);
-            writer.WriteWord(this->times[3].count(), TimeLength);
+            writer.WriteWord(std::min<std::uint16_t>(255, this->times[0].count() / 2), TimeLength);
+            writer.WriteWord(std::min<std::uint16_t>(255, this->times[1].count() / 2), TimeLength);
+            writer.WriteWord(std::min<std::uint16_t>(255, this->times[2].count() / 2), TimeLength);
+            writer.WriteWord(std::min<std::uint16_t>(255, this->times[3].count() / 2), TimeLength);
         }
 
         AntennaTelemetry::AntennaTelemetry() : deploymentStatus(0)

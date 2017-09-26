@@ -1,6 +1,6 @@
 import math
 
-from emulator.beacon_parser.units import TelemetryUnit, unit, BoolType
+from emulator.beacon_parser.units import TelemetryUnit, unit, BoolType, TimeFromSeconds, MappedValue
 from parser import CategoryParser
 
 
@@ -51,22 +51,31 @@ class CommTelemetryParser(CategoryParser):
         CategoryParser.__init__(self, '11: Comm', reader, store)
 
     def get_bit_count(self):
-        return 10 * 12 + 2 * 6 + 5 + 8 + 2 * 1
+        return 206
 
     def parse(self):
-        self.append("Transmitter Current", 12, value_type=TransmitterCurrent)
-        self.append("Receiver Current", 12, value_type=ReceiverCurrent)
-        self.append("Doppler Offset", 12, value_type=DopplerOffset)
-        self.append("Vcc", 12, value_type=Voltage)
-        self.append("Oscillator Temperature", 12, value_type=CommTemperature)
-        self.append("Receiver Amplifier Temperature", 12, value_type=CommTemperature)
-        self.append("Signal Strength", 12, value_type=SignalStrength)
-        self.append("RF Reflected Power", 12, value_type=RFPower)
-        self.append("RF Forward Power", 12, value_type=RFPower)
-        self.append("Transmitter Amplifier Temperature", 12, value_type=CommTemperature)
-        self.append("Transmitter Uptime Seconds", 6)
-        self.append("Transmitter Uptime Minutes", 6)
-        self.append("Transmitter Uptime Hours", 5)
-        self.append("Transmitter Uptime Days", 8)
+        self.append("Transmitter Uptime", 17, value_type=TimeFromSeconds)
+        self.append("Transmitter Bitrate", 2, value_type=MappedValue.with_values({0: 1200, 1: 2400, 2: 4800, 3: 9600}))
+
+        self.append("[Last transmission] RF Reflected Power", 12, value_type=RFPower)
+        self.append("[Last transmission] Power Amplifier Temperature", 12, value_type=CommTemperature)
+        self.append("[Last transmission] RF Forward Power", 12, value_type=RFPower)
+        self.append("[Last transmission] Transmitter Current", 12, value_type=TransmitterCurrent)
+
+        self.append("[Now] RF Forward Power", 12, value_type=RFPower)
+        self.append("[Now] Transmitter Current", 12, value_type=TransmitterCurrent)
+
         self.append("Transmitter Idle State", 1, value_type=BoolType)
         self.append("Beacon State", 1, value_type=BoolType)
+
+        self.append("Receiver Uptime", 17, value_type=TimeFromSeconds)
+
+        self.append("[Last received] Doppler Offset", 12, value_type=DopplerOffset)
+        self.append("[Last received] RSSI", 12, value_type=SignalStrength)
+
+        self.append("[Now] Doppler Offset", 12, value_type=DopplerOffset)
+        self.append("[Now] Receiver Current", 12, value_type=ReceiverCurrent)
+        self.append("[Now] Power Supply Voltage", 12, value_type=Voltage)
+        self.append("[Now] Oscillator Temperature", 12, value_type=CommTemperature)
+        self.append("[Now] Power Amplifier Temperature ", 12, value_type=CommTemperature)
+        self.append("[Now] RSSI", 12, value_type=SignalStrength)

@@ -4,49 +4,64 @@
 COMM_BEGIN
 
 CommTelemetry::CommTelemetry()
-    : transmitterIdleState(false), //
-      beaconState(false)
 {
 }
 
-CommTelemetry::CommTelemetry(const ReceiverTelemetry& receiver, //
-    const TransmitterTelemetry& transmitter,
-    const TransmitterState& state,
-    const Uptime& uptime)
-    : transmitterCurrentConsumption(transmitter.TransmitterCurrentConsumption), //
-      receiverCurrentConsumption(receiver.ReceiverCurrentConsumption),          //
-      dopplerOffset(receiver.DopplerOffset),                                    //
-      vcc(receiver.Vcc),                                                        //
-      oscilatorTemperature(receiver.OscilatorTemperature),                      //
-      receiverAmplifierTemperature(receiver.AmplifierTemperature),              //
-      signalStrength(receiver.SignalStrength),                                  //
-      rFReflectedPower(transmitter.RFReflectedPower),                           //
-      transmitterAmplifierTemperature(transmitter.AmplifierTemperature),        //
-      rFForwardPower(transmitter.RFForwardPower),                               //
-      transmitterUptime(uptime),                                                //
-      transmitterIdleState(state.StateWhenIdle == IdleState::On),               //
-      beaconState(state.BeaconState)                                            //
+CommTelemetry::CommTelemetry(const TransmitterTelemetry& transmitter, const ReceiverTelemetry& receiver)
+    : _transmitter(transmitter), _receiver(receiver)
 {
 }
 
 void CommTelemetry::Write(BitWriter& writer) const
 {
-    writer.Write(this->transmitterCurrentConsumption);
-    writer.Write(this->receiverCurrentConsumption);
-    writer.Write(this->dopplerOffset);
-    writer.Write(this->vcc);
-    writer.Write(this->oscilatorTemperature);
-    writer.Write(this->receiverAmplifierTemperature);
-    writer.Write(this->signalStrength);
-    writer.Write(this->rFReflectedPower);
-    writer.Write(this->rFForwardPower);
-    writer.Write(this->transmitterAmplifierTemperature);
-    writer.Write(this->transmitterUptime.seconds);
-    writer.Write(this->transmitterUptime.minutes);
-    writer.Write(this->transmitterUptime.hours);
-    writer.Write(this->transmitterUptime.days);
-    writer.Write(this->transmitterIdleState);
-    writer.Write(this->beaconState);
+    this->_transmitter.Write(writer);
+    this->_receiver.Write(writer);
+}
+
+void TransmitterTelemetry::Write(BitWriter& writer) const
+{
+    writer.WriteQuadWord(Uptime.count(), 17);
+
+    switch (TransmitterBitRate)
+    {
+        case Bitrate::Comm1200bps:
+            writer.WriteWord(0b00, 2);
+            break;
+        case Bitrate::Comm2400bps:
+            writer.WriteWord(0b01, 2);
+            break;
+        case Bitrate::Comm4800bps:
+            writer.WriteWord(0b10, 2);
+            break;
+        case Bitrate::Comm9600bps:
+            writer.WriteWord(0b11, 2);
+            break;
+        default:
+            writer.WriteWord(0b00, 2);
+            break;
+    }
+
+    writer.WriteWord(LastTransmittedRFReflectedPower, 12);
+    writer.WriteWord(LastTransmittedAmplifierTemperature, 12);
+    writer.WriteWord(LastTransmittedRFForwardPower, 12);
+    writer.WriteWord(LastTransmittedTransmitterCurrentConsumption, 12);
+    writer.WriteWord(NowRFForwardPower, 12);
+    writer.WriteWord(NowTransmitterCurrentConsumption, 12);
+    writer.Write(StateWhenIdle == IdleState::On);
+    writer.Write(BeaconState);
+}
+
+void ReceiverTelemetry::Write(BitWriter& writer) const
+{
+    writer.WriteQuadWord(Uptime.count(), 17);
+    writer.WriteWord(LastReceivedDopplerOffset, 12);
+    writer.WriteWord(LastReceivedRSSI, 12);
+    writer.WriteWord(NowDopplerOffset, 12);
+    writer.WriteWord(NowReceiverCurrentConsumption, 12);
+    writer.WriteWord(NowVoltage, 12);
+    writer.WriteWord(NowOscilatorTemperature, 12);
+    writer.WriteWord(NowAmplifierTemperature, 12);
+    writer.WriteWord(NowRSSI, 12);
 }
 
 COMM_END

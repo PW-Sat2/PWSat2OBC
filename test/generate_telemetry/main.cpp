@@ -57,33 +57,33 @@ AntennaTelemetry GetAntennaTelemetry()
 
 CommTelemetry GetCommTelemetry()
 {
-    ReceiverTelemetry receiver;
-    receiver.TransmitterCurrentConsumption = 401;
-    receiver.ReceiverCurrentConsumption = 402;
-    receiver.DopplerOffset = 403;
-    receiver.Vcc = 404;
-    receiver.OscilatorTemperature = 405;
-    receiver.AmplifierTemperature = 406;
-    receiver.SignalStrength = 407;
-
     TransmitterTelemetry transmitter;
-    transmitter.RFReflectedPower = 410;
-    transmitter.AmplifierTemperature = 411;
-    transmitter.RFForwardPower = 412;
-    transmitter.TransmitterCurrentConsumption = 413;
+    transmitter.Uptime = 28h + 24min + 45s;
+    transmitter.TransmitterBitRate = Bitrate::Comm2400bps;
 
-    TransmitterState state;
-    state.StateWhenIdle = IdleState::On;
-    state.TransmitterBitRate = Bitrate::Comm9600bps;
-    state.BeaconState = true;
+    transmitter.LastTransmittedRFReflectedPower = 1111;
+    transmitter.LastTransmittedAmplifierTemperature = 1222;
+    transmitter.LastTransmittedRFForwardPower = 1333;
+    transmitter.LastTransmittedTransmitterCurrentConsumption = 1444;
 
-    Uptime uptime;
-    uptime.seconds = 45;
-    uptime.minutes = 46;
-    uptime.hours = 27;
-    uptime.days = 48;
+    transmitter.NowRFForwardPower = 1555;
+    transmitter.NowTransmitterCurrentConsumption = 1666;
 
-    return CommTelemetry(receiver, transmitter, state, uptime);
+    transmitter.StateWhenIdle = IdleState::On;
+    transmitter.BeaconState = false;
+
+    ReceiverTelemetry receiver;
+    receiver.Uptime = 28h + 45min + 25s;
+    receiver.LastReceivedDopplerOffset = 1777;
+    receiver.LastReceivedRSSI = 1888;
+    receiver.NowDopplerOffset = 1999;
+    receiver.NowReceiverCurrentConsumption = 2000;
+    receiver.NowVoltage = 2111;
+    receiver.NowOscilatorTemperature = 2222;
+    receiver.NowAmplifierTemperature = 2333;
+    receiver.NowRSSI = 2444;
+
+    return CommTelemetry(transmitter, receiver);
 }
 
 ControllerATelemetry GetControllerA()

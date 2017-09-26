@@ -43,6 +43,12 @@ class BitReader:
     def offset(self):
         return self._offset
 
+    def remaining(self):
+        return len(self._bits) - self._offset
+
+    def at_end(self):
+        return self._offset == len(self._bits)
+
 
 class BeaconStorage:
     def __init__(self):

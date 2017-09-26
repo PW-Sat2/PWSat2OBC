@@ -70,7 +70,7 @@ namespace devices
 
         constexpr std::uint32_t ActivationCounts::BitSize()
         {
-            return Collection().size() * BitLength<Collection::value_type>;
+            return Collection().size() * 3;
         }
 
         inline std::uint8_t ActivationCounts::GetActivationCount(AntennaId antenna) const
@@ -94,7 +94,7 @@ namespace devices
             /**
              * @brief Size in bits of single serialized field that contains antenna deployment activation time.
              */
-            static constexpr std::uint32_t TimeLength = 12;
+            static constexpr std::uint32_t TimeLength = 8;
 
             /** ctor. */
             ActivationTimes();
@@ -282,7 +282,7 @@ namespace devices
             this->deploymentStatus = value;
         }
 
-        static_assert(AntennaTelemetry::BitSize() == 168, "Invalid telemetry size");
+        static_assert(AntennaTelemetry::BitSize() == 96, "Invalid telemetry size");
 
         /**
                 * @brief Antenna telemetry provider

@@ -43,6 +43,14 @@ class TimeFromSeconds(TelemetryUnit):
         return '{}'.format(self.converted)
 
 
+class TimeFromTwoSeconds(TelemetryUnit):
+    def __init__(self, raw):
+        super(TimeFromTwoSeconds, self).__init__(raw, timedelta(seconds=raw * 2))
+
+    def __str__(self):
+        return '{}'.format(self.converted)
+
+
 class BoolType(TelemetryUnit):
     def __init__(self, raw):
         super(BoolType, self).__init__(raw, raw != 0)
@@ -90,3 +98,24 @@ def enum(enum_type):
         return EnumValue(enum_type, raw)
 
     return build
+
+
+class MappedValue(TelemetryUnit):
+    def __init__(self, map, raw):
+        try:
+            converted = map[raw]
+        except KeyError:
+            converted = 'None'
+
+        super(MappedValue, self).__init__(raw, converted)
+        self.unit = None
+
+    def __str__(self):
+        return str(self.converted)
+
+    @classmethod
+    def with_values(cls, map):
+        def convert(raw):
+            return MappedValue(map, raw)
+
+        return convert

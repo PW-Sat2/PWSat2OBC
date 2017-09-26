@@ -112,15 +112,6 @@ class CommObject final : public ITransmitter,      //
     bool GetTransmitterTelemetry(TransmitterTelemetry& telemetry);
 
     /**
-     * @brief Queries the comm driver for the transmitter uptime.
-     *
-     * @param[out] uptime Reference to object that should be filled with current transmitter uptime.
-     * @return Operation status, true in case of success, false otherwise.
-     *
-     * The contents of the telemetry object is undefined in case of the failure.
-     */
-    bool GetTransmitterUptime(Uptime& uptime);
-    /**
      * @brief Adds the requested frame to the send queue.
      *
      * @param[in] frame Buffer containing frame contents.
@@ -179,17 +170,6 @@ class CommObject final : public ITransmitter,      //
      * @return Operation status, true in case of success, false otherwise.
      */
     virtual bool SetTransmitterBitRate(Bitrate bitrate) override final;
-
-    /**
-     * @brief Queries the comm driver object for current transmitter state.
-     *
-     * @param[out] state Reference to object that should be filled with the data describing
-     * the current transmitter state.
-     * @return Operation status, true in case of success, false otherwise.
-     *
-     * The contents of the state object is undefined in case of the failure.
-     */
-    virtual bool GetTransmitterState(TransmitterState& state) override final;
 
     /**
      * @brief Resets the hardware associated with the requested comm object.
@@ -353,9 +333,7 @@ class CommObject final : public ITransmitter,      //
     bool ResetInternal(error_counter::AggregatedErrorCounter& resultAggregator);
     bool GetTransmitterTelemetryInternal(TransmitterTelemetry& telemetry, error_counter::AggregatedErrorCounter& resultAggregator);
     bool GetReceiverTelemetryInternal(ReceiverTelemetry& telemetry, error_counter::AggregatedErrorCounter& resultAggregator);
-    bool GetTransmitterStateInternal(TransmitterState& state, error_counter::AggregatedErrorCounter& resultAggregator);
     bool UpdateBeaconInternal(const Beacon& beaconData, error_counter::AggregatedErrorCounter& resultAggregator);
-    bool GetTransmitterUptimeInternal(Uptime& uptime, error_counter::AggregatedErrorCounter& resultAggregator);
 
     /**
      * @brief Internal communication module task entry point.
@@ -397,6 +375,14 @@ class CommObject final : public ITransmitter,      //
     };
 
     Option<LastSendTimestamp> _lastSend;
+
+    struct LastFrameStatus
+    {
+        std::uint16_t DopplerOffset;
+        std::uint16_t RSSI;
+    };
+
+    std::atomic<LastFrameStatus> _lastFrameStatus;
 };
 
 inline bool CommObject::SendFrame(gsl::span<const std::uint8_t> frame)

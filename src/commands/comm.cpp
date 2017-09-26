@@ -17,6 +17,7 @@ using std::uint8_t;
 using gsl::span;
 using namespace devices::comm;
 using std::chrono::seconds;
+using devices::comm::IdleState;
 
 enum class CommHardware
 {
@@ -173,12 +174,18 @@ static void CommGetTelemetry(uint16_t argc, char* argv[])
             return;
         }
 
-        GetTerminal().Printf(
-            "RFReflectedPower: '%d'\nAmplifierTemperature: '%d'\nRFForwardPower: '%d'\nTransmitterCurrentConsumption: '%d'",
-            static_cast<int>(telemetry.RFReflectedPower),
-            static_cast<int>(telemetry.AmplifierTemperature),
-            static_cast<int>(telemetry.RFForwardPower),
-            static_cast<int>(telemetry.TransmitterCurrentConsumption));
+        GetTerminal().Printf("Uptime: '%ld'\n", static_cast<std::uint32_t>(telemetry.Uptime.count()));
+        GetTerminal().Printf("Bitrate: '%d'\n", num(telemetry.TransmitterBitRate));
+        GetTerminal().Printf("LastTransmitted RF Reflected power: '%d'\n", telemetry.LastTransmittedRFReflectedPower.Value());
+        GetTerminal().Printf("LastTransmitted Power Amp Temperature: '%d'\n", telemetry.LastTransmittedAmplifierTemperature.Value());
+        GetTerminal().Printf("LastTransmitted RF Forward power: '%d'\n", telemetry.LastTransmittedRFForwardPower.Value());
+        GetTerminal().Printf("LastTransmitted TX Current: '%d'\n", telemetry.LastTransmittedTransmitterCurrentConsumption.Value());
+
+        GetTerminal().Printf("Now RF Forward power: '%d'\n", telemetry.NowRFForwardPower.Value());
+        GetTerminal().Printf("Now TX Current: '%d'\n", telemetry.NowTransmitterCurrentConsumption.Value());
+
+        GetTerminal().Printf("Idle state: '%d'\n", telemetry.StateWhenIdle == IdleState::On ? 1 : 0);
+        GetTerminal().Printf("Beacon: '%d'\n", telemetry.BeaconState ? 1 : 0);
     }
     else if (channel == CommHardware::Receiver)
     {
@@ -189,35 +196,21 @@ static void CommGetTelemetry(uint16_t argc, char* argv[])
             return;
         }
 
-        GetTerminal().Printf("TransmitterCurrentConsumption: '%d'\nReceiverCurrentConsumption: '%d'\nDopplerOffset: '%d'\nVcc: "
-                             "'%d'\nOscilatorTemperature: '%d'\nAmplifierTemperature: '%d'\nSignalStrength: '%d'",
-            static_cast<int>(telemetry.TransmitterCurrentConsumption),
-            static_cast<int>(telemetry.ReceiverCurrentConsumption),
-            static_cast<int>(telemetry.DopplerOffset),
-            static_cast<int>(telemetry.Vcc),
-            static_cast<int>(telemetry.OscilatorTemperature),
-            static_cast<int>(telemetry.AmplifierTemperature),
-            static_cast<int>(telemetry.SignalStrength));
+        GetTerminal().Printf("Uptime: '%ld'\n", static_cast<std::uint32_t>(telemetry.Uptime.count()));
+        GetTerminal().Printf("LastReceived Doppler: '%d'\n", telemetry.LastReceivedDopplerOffset.Value());
+        GetTerminal().Printf("LastReceived RSSI: '%d'\n", telemetry.LastReceivedRSSI.Value());
+
+        GetTerminal().Printf("Now Doppler: '%d'\n", telemetry.NowDopplerOffset.Value());
+        GetTerminal().Printf("Now RX current: '%d'\n", telemetry.NowReceiverCurrentConsumption.Value());
+        GetTerminal().Printf("Now Power Supply Voltage: '%d'\n", telemetry.NowVoltage.Value());
+        GetTerminal().Printf("Now Oscillator Temperature: '%d'\n", telemetry.NowOscilatorTemperature.Value());
+        GetTerminal().Printf("Now Power Amp Temperature: '%d'\n", telemetry.NowAmplifierTemperature.Value());
+        GetTerminal().Printf("Now RSSI: '%d'\n", telemetry.NowRSSI.Value());
     }
     else
     {
         GetTerminal().Puts(usage);
     }
-}
-
-static void CommGetTransmitterState()
-{
-    TransmitterState state;
-    if (!GetCommDriver().GetTransmitterState(state))
-    {
-        GetTerminal().Puts("Unable to get transmitter state");
-        return;
-    }
-
-    GetTerminal().Printf("\nStateWhenIdle: %d\nTransmitterBitRate: %d\nBeaconState: %d\n",
-        static_cast<int>(state.StateWhenIdle),
-        static_cast<int>(state.TransmitterBitRate),
-        static_cast<int>(state.BeaconState));
 }
 
 static bool GetBitRate(const char* name, Bitrate& bitRate)
@@ -348,11 +341,7 @@ static void CommGet(std::uint16_t argc, char* argv[])
         return;
     }
 
-    if (strcmp(argv[0], "transmitter_state") == 0)
-    {
-        CommGetTransmitterState();
-    }
-    else if (strcmp(argv[0], "telemetry") == 0)
+    if (strcmp(argv[0], "telemetry") == 0)
     {
         CommGetTelemetry(--argc, ++argv);
     }
