@@ -35,7 +35,7 @@
 #include "time/timer.h"
 #include "utils.h"
 #include "watchdog/pin.hpp"
-
+#include "state/fwd.hpp"
 /**
  * @defgroup obc OBC structure
  *
@@ -80,6 +80,8 @@ struct OBC
      * @return Line IO implementation
      */
     inline ILineIO& GetLineIO();
+
+    void InitializeAdcs(const state::SystemPersistentState& persistentState);
 
     /** @brief File system object */
     services::fs::YaffsFileSystem fs;

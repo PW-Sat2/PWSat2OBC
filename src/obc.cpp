@@ -146,7 +146,7 @@ OSResult OBC::InitializeRunlevel1()
     auto result = persistentState.Initialize();
     if (OS_RESULT_FAILED(result))
     {
-        LOGF(LOG_LEVEL_FATAL, "Persistent state initialization failed %d", num(result));
+        LOGF(LOG_LEVEL_FATAL, "[obc] Persistent state initialization failed %d", num(result));
         return result;
     }
 
@@ -163,12 +163,12 @@ OSResult OBC::InitializeRunlevel1()
 
     this->Communication.InitializeRunlevel1();
 
-    this->adcs.Initialize();
+    InitializeAdcs(persistentState);
 
     result = this->Storage.Initialize();
     if (OS_RESULT_FAILED(result))
     {
-        LOGF(LOG_LEVEL_FATAL, "Storage initialization failed %d", num(result));
+        LOGF(LOG_LEVEL_FATAL, "[obc] Storage initialization failed %d", num(result));
     }
 
     this->Experiments.InitializeRunlevel1();
@@ -179,21 +179,21 @@ OSResult OBC::InitializeRunlevel1()
     state::TimeState timeState;
     if (!persistentState.Get(timeState))
     {
-        LOG(LOG_LEVEL_ERROR, "Can't get time state");
+        LOG(LOG_LEVEL_ERROR, "[obc] Can't get time state");
     }
     else
     {
         const auto missionTime = timeState.LastMissionTime();
         if (!this->timeProvider.Initialize(missionTime, TimePassed, nullptr))
         {
-            LOG(LOG_LEVEL_ERROR, "Unable to initialize persistent timer. ");
+            LOG(LOG_LEVEL_ERROR, "[obc] Unable to initialize persistent timer. ");
         }
     }
 
     state::ErrorCountersConfigState errorCountersConfig;
     if (!persistentState.Get(errorCountersConfig))
     {
-        LOG(LOG_LEVEL_ERROR, "Can't get error counters config");
+        LOG(LOG_LEVEL_ERROR, "[obc] Can't get error counters config");
     }
     else
     {
@@ -202,12 +202,12 @@ OSResult OBC::InitializeRunlevel1()
 
     if (!Mission.Initialize(10s))
     {
-        LOG(LOG_LEVEL_ERROR, "Unable to initialize mission loop.");
+        LOG(LOG_LEVEL_ERROR, "[obc] Unable to initialize mission loop.");
     }
 
     if (!TelemetryAcquisition.Initialize(30s))
     {
-        LOG(LOG_LEVEL_ERROR, "Unable to initialize telemetry acquisition loop.");
+        LOG(LOG_LEVEL_ERROR, "[obc] Unable to initialize telemetry acquisition loop.");
     }
 
     Camera.InitializeRunlevel1();
@@ -223,7 +223,7 @@ OSResult OBC::InitializeRunlevel2()
 
     if (OS_RESULT_FAILED(this->Hardware.antennaDriver.HardReset()))
     {
-        LOG(LOG_LEVEL_ERROR, "Unable to reset both antenna controllers. ");
+        LOG(LOG_LEVEL_ERROR, "[obc] Unable to reset both antenna controllers. ");
     }
 
     Mission.Resume();
@@ -253,4 +253,18 @@ OSResult OBC::InitializeRunlevel3()
     Mission.EnableAutostart();
 
     return OSResult::Success;
+}
+
+void OBC::InitializeAdcs(const state::SystemPersistentState& persistentState)
+{
+    state::AdcsState adcsState;
+    this->adcs.Initialize();
+    if (!persistentState.Get(adcsState))
+    {
+        LOG(LOG_LEVEL_ERROR, "[obc] Can't get adcs state");
+    }
+    else
+    {
+        this->adcs.GetAdcsCoordinator().SetBlockMode(adcs::AdcsMode::BuiltinDetumbling, adcsState.IsInternalDetumblingDisabled());
+    }
 }

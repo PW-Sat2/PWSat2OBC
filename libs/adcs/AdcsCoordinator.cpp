@@ -17,6 +17,7 @@ namespace adcs
           sync(System::CreateBinarySemaphore()),                         //
           currentMode(AdcsMode::Disabled)                                //
     {
+        std::uninitialized_fill(this->adcsMasks.begin(), this->adcsMasks.end(), false);
         adcsProcessors[static_cast<int>(AdcsMode::BuiltinDetumbling)] = &builtinDetumbling_;
         adcsProcessors[static_cast<int>(AdcsMode::ExperimentalDetumbling)] = &experimentalDetumbling_;
         adcsProcessors[static_cast<int>(AdcsMode::ExperimentalSunpointing)] = &sunpointAlgorithm_;
@@ -102,6 +103,11 @@ namespace adcs
             return OSResult::Success;
         }
 
+        if (IsModeBlocked(mode))
+        {
+            return OSResult::Cancelled;
+        }
+
         auto disableResult = Disable(false);
         if (OS_RESULT_FAILED(disableResult))
         {
@@ -175,5 +181,27 @@ namespace adcs
         {
             context->Loop();
         }
+    }
+
+    void AdcsCoordinator::SetBlockMode(AdcsMode adcsMode, bool isBlocked)
+    {
+        const auto index = num(adcsMode);
+        if (index < 0 || static_cast<size_t>(index) >= this->adcsMasks.size())
+        {
+            return;
+        }
+
+        this->adcsMasks[index] = isBlocked;
+    }
+
+    bool AdcsCoordinator::IsModeBlocked(AdcsMode mode) const
+    {
+        const auto index = num(mode);
+        if (index < 0 || static_cast<size_t>(index) >= this->adcsMasks.size())
+        {
+            return true;
+        }
+
+        return this->adcsMasks[index];
     }
 }
