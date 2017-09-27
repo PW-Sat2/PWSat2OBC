@@ -176,6 +176,17 @@ namespace mission
         void CorrectTime(SystemState& state);
 
         /**
+         * @brief Determines new time state based on current time
+         * @param state System state
+         * @param time Current time
+         * @param timeState Last saved time state
+         * @param newTimeState Reference to object that will contain new time state (valid only if method returns true)
+         * @return Returns true if new time state has been determined, false otherwise
+         */
+        bool DetermineNewTimeState(
+            SystemState& state, std::chrono::milliseconds time, state::TimeState timeState, state::TimeState& newTimeState);
+
+        /**
          * @brief Time provider reference.
          */
         TimeProvider& provider;
