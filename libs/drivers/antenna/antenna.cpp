@@ -44,7 +44,7 @@ AntennaChannelInfo* AntennaDriver::GetChannel(AntennaChannel channel)
 OSResult AntennaDriver::Reset(AntennaChannel channel)
 {
     AntennaChannelInfo* hardwareChannel = GetChannel(channel);
-    const OSResult status = this->miniport->Reset(this->miniport, hardwareChannel->communicationBus, channel);
+    const OSResult status = this->miniport->Reset(hardwareChannel->communicationBus, channel);
     const bool result = OS_RESULT_SUCCEEDED(status);
     hardwareChannel->status = result ? ANTENNA_PORT_OPERATIONAL : ANTENNA_PORT_FAILURE;
     return status;
@@ -75,9 +75,9 @@ OSResult AntennaDriver::DeployAntenna(AntennaChannel channel,
     )
 {
     AntennaChannelInfo* hardwareChannel = GetChannel(channel);
-    const OSResult status = this->miniport->ArmDeploymentSystem(this->miniport,
-        hardwareChannel->communicationBus,
-        channel //
+    const OSResult status = this->miniport->ArmDeploymentSystem( //
+        hardwareChannel->communicationBus,                       //
+        channel                                                  //
         );
     if (OS_RESULT_FAILED(status))
     {
@@ -86,20 +86,20 @@ OSResult AntennaDriver::DeployAntenna(AntennaChannel channel,
 
     if (antennaId == ANTENNA_AUTO_ID)
     {
-        return this->miniport->InitializeAutomaticDeployment(this->miniport,
-            hardwareChannel->communicationBus,
-            channel,
-            timeout //
+        return this->miniport->InitializeAutomaticDeployment( //
+            hardwareChannel->communicationBus,                //
+            channel,                                          //
+            timeout                                           //
             );
     }
     else
     {
-        return this->miniport->DeployAntenna(this->miniport,
-            hardwareChannel->communicationBus,
-            channel,
-            antennaId,
-            timeout,
-            overrideSwitches //
+        return this->miniport->DeployAntenna(  //
+            hardwareChannel->communicationBus, //
+            channel,                           //
+            antennaId,                         //
+            timeout,                           //
+            overrideSwitches                   //
             );
     }
 }
@@ -107,18 +107,18 @@ OSResult AntennaDriver::DeployAntenna(AntennaChannel channel,
 OSResult AntennaDriver::FinishDeployment(AntennaChannel channel)
 {
     AntennaChannelInfo* hardwareChannel = GetChannel(channel);
-    const OSResult result = this->miniport->CancelAntennaDeployment(this->miniport,
-        hardwareChannel->communicationBus,
-        channel //
+    const OSResult result = this->miniport->CancelAntennaDeployment( //
+        hardwareChannel->communicationBus,                           //
+        channel                                                      //
         );
     if (OS_RESULT_FAILED(result))
     {
         return result;
     }
 
-    return this->miniport->DisarmDeploymentSystem(this->miniport,
-        hardwareChannel->communicationBus,
-        channel //
+    return this->miniport->DisarmDeploymentSystem( //
+        hardwareChannel->communicationBus,         //
+        channel                                    //
         );
 }
 
@@ -128,10 +128,10 @@ OSResult AntennaDriver::GetTemperature( //
     )
 {
     AntennaChannelInfo* hardwareChannel = GetChannel(channel);
-    return this->miniport->GetTemperature(this->miniport,
-        hardwareChannel->communicationBus,
-        channel,
-        temperature //
+    return this->miniport->GetTemperature( //
+        hardwareChannel->communicationBus, //
+        channel,                           //
+        temperature                        //
         );
 }
 
@@ -141,10 +141,10 @@ OSResult AntennaDriver::GetDeploymentStatus( //
     )
 {
     AntennaChannelInfo* hardwareChannel = GetChannel(channel);
-    return this->miniport->GetDeploymentStatus(this->miniport,
-        hardwareChannel->communicationBus,
-        channel,
-        telemetry //
+    return this->miniport->GetDeploymentStatus( //
+        hardwareChannel->communicationBus,      //
+        channel,                                //
+        telemetry                               //
         );
 }
 
@@ -186,11 +186,11 @@ OSResult AntennaDriver::UpdateActivationCount(AntennaTelemetry& telemetry)
     for (auto i = 0u; i < count_of(ids); ++i)
     {
         uint8_t primaryValue = 0, secondaryValue = 0;
-        const OSResult primary = this->miniport->GetAntennaActivationCount(this->miniport,
-            primaryChannel->communicationBus,
-            ANTENNA_PRIMARY_CHANNEL,
-            ids[i],
-            &primaryValue //
+        const OSResult primary = this->miniport->GetAntennaActivationCount( //
+            primaryChannel->communicationBus,                               //
+            ANTENNA_PRIMARY_CHANNEL,                                        //
+            ids[i],                                                         //
+            &primaryValue                                                   //
             );
 
         if (OS_RESULT_SUCCEEDED(primary))
@@ -202,11 +202,11 @@ OSResult AntennaDriver::UpdateActivationCount(AntennaTelemetry& telemetry)
             status = primary;
         }
 
-        const OSResult secondary = this->miniport->GetAntennaActivationCount(this->miniport,
-            backupChannel->communicationBus,
-            ANTENNA_BACKUP_CHANNEL,
-            ids[i],
-            &secondaryValue //
+        const OSResult secondary = this->miniport->GetAntennaActivationCount( //
+            backupChannel->communicationBus,                                  //
+            ANTENNA_BACKUP_CHANNEL,                                           //
+            ids[i],                                                           //
+            &secondaryValue                                                   //
             );
 
         if (OS_RESULT_SUCCEEDED(secondary))
@@ -240,11 +240,11 @@ OSResult AntennaDriver::UpdateActivationTime(AntennaTelemetry& telemetry)
         std::chrono::milliseconds primaryValue(0);
         std::chrono::milliseconds secondaryValue(0);
 
-        const OSResult primary = this->miniport->GetAntennaActivationTime(this->miniport,
-            primaryChannel->communicationBus,
-            ANTENNA_PRIMARY_CHANNEL,
-            ids[i],
-            &primaryValue //
+        const OSResult primary = this->miniport->GetAntennaActivationTime( //
+            primaryChannel->communicationBus,                              //
+            ANTENNA_PRIMARY_CHANNEL,                                       //
+            ids[i],                                                        //
+            &primaryValue                                                  //
             );
 
         if (OS_RESULT_SUCCEEDED(primary))
@@ -256,11 +256,11 @@ OSResult AntennaDriver::UpdateActivationTime(AntennaTelemetry& telemetry)
             status = primary;
         }
 
-        const OSResult secondary = this->miniport->GetAntennaActivationTime(this->miniport,
-            backupChannel->communicationBus,
-            ANTENNA_BACKUP_CHANNEL,
-            ids[i],
-            &secondaryValue //
+        const OSResult secondary = this->miniport->GetAntennaActivationTime( //
+            backupChannel->communicationBus,                                 //
+            ANTENNA_BACKUP_CHANNEL,                                          //
+            ids[i],                                                          //
+            &secondaryValue                                                  //
             );
 
         if (OS_RESULT_SUCCEEDED(secondary))

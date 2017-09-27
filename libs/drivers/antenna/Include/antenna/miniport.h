@@ -31,44 +31,40 @@
 struct AntennaMiniportDriver
 {
     /**
-     * @brief Pointer to procedure responsible for resetting the hardware controller.
-     * @param[in] miniport Pointer to the current driver instance.
+     * @brief Procedure responsible for resetting the hardware controller.
      * @param[in] communicationBus Bus that should be used to communicate with hardware.
      * @param[in] channel Current hardware channel.
      * @return Operation status.
      */
-    OSResult (*Reset)(struct AntennaMiniportDriver* miniport,
-        drivers::i2c::II2CBus* communicationBus,
-        AntennaChannel channel //
+    OSResult Reset(                              //
+        drivers::i2c::II2CBus* communicationBus, //
+        AntennaChannel channel                   //
         );
 
     /**
-     * @brief Pointer to procedure responsible for activating the antenna deployment module.
-     * @param[in] miniport Pointer to the current driver instance.
+     * @brief Procedure responsible for activating the antenna deployment module.
      * @param[in] communicationBus Bus that should be used to communicate with hardware.
      * @param[in] channel Current hardware channel.
      * @return Operation status.
      */
-    OSResult (*ArmDeploymentSystem)(struct AntennaMiniportDriver* miniport,
-        drivers::i2c::II2CBus* communicationBus,
-        AntennaChannel channel //
+    OSResult ArmDeploymentSystem(                //
+        drivers::i2c::II2CBus* communicationBus, //
+        AntennaChannel channel                   //
         );
 
     /**
-     * @brief Pointer to procedure responsible for deactivating the antenna deployment module.
-     * @param[in] miniport Pointer to the current driver instance.
+     * @brief Procedure responsible for deactivating the antenna deployment module.
      * @param[in] communicationBus Bus that should be used to communicate with hardware.
      * @param[in] channel Current hardware channel.
      * @return Operation status.
      */
-    OSResult (*DisarmDeploymentSystem)(struct AntennaMiniportDriver* miniport,
-        drivers::i2c::II2CBus* communicationBus,
-        AntennaChannel channel //
+    OSResult DisarmDeploymentSystem(             //
+        drivers::i2c::II2CBus* communicationBus, //
+        AntennaChannel channel                   //
         );
 
     /**
-     * @brief Pointer to procedure responsible for initialization of manual deployment of specified antenna.
-     * @param[in] miniport Pointer to the current driver instance.
+     * @brief Procedure responsible for initialization of manual deployment of specified antenna.
      * @param[in] communicationBus Bus that should be used to communicate with hardware.
      * @param[in] channel Current hardware channel.
      * @param[in] antennaId Identifier of antenna that should be deployed.
@@ -77,119 +73,103 @@ struct AntennaMiniportDriver
      * ignored during the process (true), false otherwise.
      * @return Operation status.
      */
-    OSResult (*DeployAntenna)(struct AntennaMiniportDriver* miniport,
-        drivers::i2c::II2CBus* communicationBus,
-        AntennaChannel channel,
-        AntennaId antennaId,
-        std::chrono::milliseconds timeout,
-        bool override //
+    OSResult DeployAntenna(                      //
+        drivers::i2c::II2CBus* communicationBus, //
+        AntennaChannel channel,                  //
+        AntennaId antennaId,                     //
+        std::chrono::milliseconds timeout,       //
+        bool override                            //
         );
 
     /**
-     * @brief Pointer to procedure responsible for initialization of automatic deployment of all antennas.
-     * @param[in] miniport Pointer to the current driver instance.
+     * @brief Procedure responsible for initialization of automatic deployment of all antennas.
      * @param[in] communicationBus Bus that should be used to communicate with hardware.
      * @param[in] channel Current hardware channel.
      * @param[in] timeout Total deployment operation timeout.
      * @return Operation status.
      */
-    OSResult (*InitializeAutomaticDeployment)(struct AntennaMiniportDriver* miniport,
-        drivers::i2c::II2CBus* communicationBus,
-        AntennaChannel channel,
-        std::chrono::milliseconds timeout //
+    OSResult InitializeAutomaticDeployment(      //
+        drivers::i2c::II2CBus* communicationBus, //
+        AntennaChannel channel,                  //
+        std::chrono::milliseconds timeout        //
         );
 
     /**
-     * @brief Pointer to procedure responsible for cancellation of all antenna deployment.
-     * @param[in] driver Pointer to the current driver instance.
+     * @brief Procedure responsible for cancellation of all antenna deployment.
      * @param[in] communicationBus Bus that should be used to communicate with hardware.
      * @param[in] channel Current hardware channel.
      * @return Operation status.
      */
-    OSResult (*CancelAntennaDeployment)(struct AntennaMiniportDriver* miniport,
-        drivers::i2c::II2CBus* communicationBus,
-        AntennaChannel channel //
+    OSResult CancelAntennaDeployment(            //
+        drivers::i2c::II2CBus* communicationBus, //
+        AntennaChannel channel                   //
         );
 
     /**
      * @brief Pointer to procedure responsible for querying the hardware for current antenna deployment status.
-     * @param[in] miniport Pointer to the current driver instance.
      * @param[in] communicationBus Bus that should be used to communicate with hardware.
      * @param[in] channel Current hardware channel.
      * @param[out] telemetry Pointer to object that on success will be filled with antenna deployment status.
      * @return Operation status.
      */
-    OSResult (*GetDeploymentStatus)(struct AntennaMiniportDriver* miniport,
-        drivers::i2c::II2CBus* communicationBus,
-        AntennaChannel channel,
-        AntennaDeploymentStatus* telemetry //
+    OSResult GetDeploymentStatus(                //
+        drivers::i2c::II2CBus* communicationBus, //
+        AntennaChannel channel,                  //
+        AntennaDeploymentStatus* telemetry       //
         );
 
     /**
-     * @brief Pointer to procedure that is responsible for querying the hardware for specific antenna
+     * @brief Procedure that is responsible for querying the hardware for specific antenna
      * deployment activation count.
      *
      * The value returned by this function comes from non persistent counter of antenna deployment requests.
      *
-     * @param[in] miniport Pointer to the current driver instance.
      * @param[in] communicationBus Bus that should be used to communicate with hardware.
      * @param[in] channel Current hardware channel.
      * @param[in] antennaId Identifier of antenna whose activation count should be obtained.
      * @param[out] count Pointer to value that on success should be updated with antenna deployment count.
      * @return Operation status.
      */
-    OSResult (*GetAntennaActivationCount)(struct AntennaMiniportDriver* miniport,
-        drivers::i2c::II2CBus* communicationBus,
-        AntennaChannel channel,
-        AntennaId antennaId,
-        uint8_t* count //
+    OSResult GetAntennaActivationCount(          //
+        drivers::i2c::II2CBus* communicationBus, //
+        AntennaChannel channel,                  //
+        AntennaId antennaId,                     //
+        uint8_t* count                           //
         );
 
     /**
-     * @brief Pointer to procedure that is responsible for querying the hardware for specific antenna
+     * @brief Procedure that is responsible for querying the hardware for specific antenna
      * deployment activation system activation time.
      *
      * The value returned by this function comes from non persistent counter of antenna deployment time.
      *
-     * @param[in] miniport Pointer to the current driver instance.
      * @param[in] communicationBus Bus that should be used to communicate with hardware.
      * @param[in] channel Current hardware channel.
      * @param[in] antennaId Identifier of antenna whose activation count should be obtained.
      * @param[out] count Pointer to value that on success should be updated with antenna deployment count.
      * @return Operation status.
      */
-    OSResult (*GetAntennaActivationTime)(struct AntennaMiniportDriver* miniport,
-        drivers::i2c::II2CBus* communicationBus,
-        AntennaChannel channel,
-        AntennaId antennaId,
-        std::chrono::milliseconds* count //
+    OSResult GetAntennaActivationTime(           //
+        drivers::i2c::II2CBus* communicationBus, //
+        AntennaChannel channel,                  //
+        AntennaId antennaId,                     //
+        std::chrono::milliseconds* count         //
         );
 
     /**
-     * @brief Pointer to procedure that is responsible for querying the hardware for its current temperature.
+     * @brief Procedure that is responsible for querying the hardware for its current temperature.
      *
-     * @param[in] miniport Pointer to the current driver instance.
      * @param[in] communicationBus Bus that should be used to communicate with hardware.
      * @param[in] channel Current hardware channel.
      * @param[out] temperature Pointer to value that on success should be updated with current temperature.
      * @return Operation status.
      */
-    OSResult (*GetTemperature)(struct AntennaMiniportDriver* miniport,
-        drivers::i2c::II2CBus* communicationBus,
-        AntennaChannel channel,
-        uint16_t* temperature //
+    OSResult GetTemperature(                     //
+        drivers::i2c::II2CBus* communicationBus, //
+        AntennaChannel channel,                  //
+        uint16_t* temperature                    //
         );
 };
-
-/**
- * @brief Initializes low level antenna driver.
- *
- * This procedure does not communicate with hardware all it does is fill the driver object
- * with basic default state.
- *
- * @param[out] driver Driver object that should be initialized.
- */
-void AntennaMiniportInitialize(AntennaMiniportDriver* driver);
 
 /** @}*/
 

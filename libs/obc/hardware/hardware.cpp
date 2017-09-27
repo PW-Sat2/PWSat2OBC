@@ -123,5 +123,4 @@ OBCHardware::OBCHardware(
       PayloadDriver(errorCounting, this->I2C.Buses.Payload, PayloadInterruptDriver), //
       PayloadDeviceDriver(PayloadDriver)
 {
-    AntennaMiniportInitialize(&antennaMiniport);
 }
