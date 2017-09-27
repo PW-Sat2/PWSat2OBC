@@ -272,7 +272,7 @@ namespace mission
 
             if (lock())
             {
-                this->_driver.GetTelemetry(&this->_driver, this->_currentTelemetry);
+                this->_driver.GetTelemetry(this->_currentTelemetry);
                 return true;
             }
             else
@@ -294,7 +294,7 @@ namespace mission
         {
             while (retryCount-- > 0)
             {
-                const OSResult status = driver.FinishDeployment(&driver, channel);
+                const OSResult status = driver.FinishDeployment(channel);
                 if (OS_RESULT_SUCCEEDED(status))
                 {
                     return true;
@@ -344,8 +344,7 @@ namespace mission
             std::uint8_t counter = RetryLimit;
             while (counter-- > 0)
             {
-                const OSResult result = driver.DeployAntenna(&driver,
-                    step.channel,
+                const OSResult result = driver.DeployAntenna(step.channel,
                     step.antennaId,
                     std::chrono::seconds(step.deploymentTimeout),
                     step.overrideSwitches //
@@ -420,7 +419,7 @@ namespace mission
             std::uint8_t counter = RetryLimit;
             while (counter-- > 0)
             {
-                const OSResult result = driver.Reset(&driver, channel);
+                const OSResult result = driver.Reset(channel);
                 if (OS_RESULT_SUCCEEDED(result))
                 {
                     return true;
@@ -602,9 +601,9 @@ namespace mission
             AntennaDeploymentStatus deploymentStatus;
             AntennaDriver& driver = stateDescriptor->Driver();
 
-            const OSResult result = driver.GetDeploymentStatus(&driver,
-                deploymentSteps[stateDescriptor->StepNumber()].channel,
-                &deploymentStatus //
+            const OSResult result = driver.GetDeploymentStatus(         //
+                deploymentSteps[stateDescriptor->StepNumber()].channel, //
+                &deploymentStatus                                       //
                 );
 
             if (OS_RESULT_FAILED(result))

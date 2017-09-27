@@ -112,6 +112,7 @@ OBCHardware::OBCHardware(
               &FramSpi[2]}},                                                         //
       Gyro(I2C.Buses.Payload),                                                       //
       EPS(errorCounting, this->I2C.Buses.Bus, this->I2C.Buses.Payload),              //
+      antennaDriver(&antennaMiniport, &I2C.Buses.Bus, &I2C.Buses.Payload),           //
       Imtq(errorCounting, I2C.Buses.Bus),                                            //
       imtqTelemetryCollector(Imtq),                                                  //
       SunSInterruptDriver(this->Pins.SunSInterrupt),                                 //
@@ -123,5 +124,4 @@ OBCHardware::OBCHardware(
       PayloadDeviceDriver(PayloadDriver)
 {
     AntennaMiniportInitialize(&antennaMiniport);
-    AntennaDriverInitialize(&antennaDriver, &antennaMiniport, &I2C.Buses.Bus, &I2C.Buses.Payload);
 }
