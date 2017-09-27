@@ -87,6 +87,8 @@ namespace mission
              */
             static void AdcsEnableBuiltinDetumbling(SystemState& state, void* param);
 
+            static bool IsDetumblingDisabled(const SystemState& state);
+
             static constexpr std::uint8_t RetryCount = 3;
 
             /**
