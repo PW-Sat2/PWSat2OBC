@@ -88,6 +88,7 @@ struct AntennaDeploymentStatus
 
 struct AntennaMiniportDriver;
 struct AntennaDriver;
+struct IAntennaDriver;
 
 /** @}*/
 

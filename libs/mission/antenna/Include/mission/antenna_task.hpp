@@ -35,7 +35,7 @@ namespace mission
              * @brief ctor.
              * @param[in] args Tuple of: reference to antenna driver interface and reference to power control interface
              */
-            AntennaTask(std::tuple<AntennaDriver&, services::power::IPowerControl&> args);
+            AntennaTask(std::tuple<IAntennaDriver&, services::power::IPowerControl&> args);
 
             /**
              * @brief Initializes antenna mission state

@@ -36,7 +36,7 @@ struct AntennaMiniportDriver
      * @param[in] channel Current hardware channel.
      * @return Operation status.
      */
-    OSResult Reset(                              //
+    virtual OSResult Reset(                      //
         drivers::i2c::II2CBus* communicationBus, //
         AntennaChannel channel                   //
         );
@@ -47,7 +47,7 @@ struct AntennaMiniportDriver
      * @param[in] channel Current hardware channel.
      * @return Operation status.
      */
-    OSResult ArmDeploymentSystem(                //
+    virtual OSResult ArmDeploymentSystem(        //
         drivers::i2c::II2CBus* communicationBus, //
         AntennaChannel channel                   //
         );
@@ -58,7 +58,7 @@ struct AntennaMiniportDriver
      * @param[in] channel Current hardware channel.
      * @return Operation status.
      */
-    OSResult DisarmDeploymentSystem(             //
+    virtual OSResult DisarmDeploymentSystem(     //
         drivers::i2c::II2CBus* communicationBus, //
         AntennaChannel channel                   //
         );
@@ -73,7 +73,7 @@ struct AntennaMiniportDriver
      * ignored during the process (true), false otherwise.
      * @return Operation status.
      */
-    OSResult DeployAntenna(                      //
+    virtual OSResult DeployAntenna(              //
         drivers::i2c::II2CBus* communicationBus, //
         AntennaChannel channel,                  //
         AntennaId antennaId,                     //
@@ -88,10 +88,10 @@ struct AntennaMiniportDriver
      * @param[in] timeout Total deployment operation timeout.
      * @return Operation status.
      */
-    OSResult InitializeAutomaticDeployment(      //
-        drivers::i2c::II2CBus* communicationBus, //
-        AntennaChannel channel,                  //
-        std::chrono::milliseconds timeout        //
+    virtual OSResult InitializeAutomaticDeployment( //
+        drivers::i2c::II2CBus* communicationBus,    //
+        AntennaChannel channel,                     //
+        std::chrono::milliseconds timeout           //
         );
 
     /**
@@ -100,7 +100,7 @@ struct AntennaMiniportDriver
      * @param[in] channel Current hardware channel.
      * @return Operation status.
      */
-    OSResult CancelAntennaDeployment(            //
+    virtual OSResult CancelAntennaDeployment(    //
         drivers::i2c::II2CBus* communicationBus, //
         AntennaChannel channel                   //
         );
@@ -112,7 +112,7 @@ struct AntennaMiniportDriver
      * @param[out] telemetry Pointer to object that on success will be filled with antenna deployment status.
      * @return Operation status.
      */
-    OSResult GetDeploymentStatus(                //
+    virtual OSResult GetDeploymentStatus(        //
         drivers::i2c::II2CBus* communicationBus, //
         AntennaChannel channel,                  //
         AntennaDeploymentStatus* telemetry       //
@@ -130,7 +130,7 @@ struct AntennaMiniportDriver
      * @param[out] count Pointer to value that on success should be updated with antenna deployment count.
      * @return Operation status.
      */
-    OSResult GetAntennaActivationCount(          //
+    virtual OSResult GetAntennaActivationCount(  //
         drivers::i2c::II2CBus* communicationBus, //
         AntennaChannel channel,                  //
         AntennaId antennaId,                     //
@@ -149,7 +149,7 @@ struct AntennaMiniportDriver
      * @param[out] count Pointer to value that on success should be updated with antenna deployment count.
      * @return Operation status.
      */
-    OSResult GetAntennaActivationTime(           //
+    virtual OSResult GetAntennaActivationTime(   //
         drivers::i2c::II2CBus* communicationBus, //
         AntennaChannel channel,                  //
         AntennaId antennaId,                     //
@@ -164,7 +164,7 @@ struct AntennaMiniportDriver
      * @param[out] temperature Pointer to value that on success should be updated with current temperature.
      * @return Operation status.
      */
-    OSResult GetTemperature(                     //
+    virtual OSResult GetTemperature(             //
         drivers::i2c::II2CBus* communicationBus, //
         AntennaChannel channel,                  //
         uint16_t* temperature                    //
