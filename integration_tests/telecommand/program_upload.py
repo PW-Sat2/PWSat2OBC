@@ -19,7 +19,7 @@ class EraseBootTableEntry(Telecommand):
 
 
 class WriteProgramPart(Telecommand):
-    MAX_PART_SIZE = Telecommand.MAX_PAYLOAD_SIZE - 3
+    MAX_PART_SIZE = Telecommand.MAX_PAYLOAD_SIZE - 5
 
     def apid(self):
         return 0xB1
