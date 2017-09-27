@@ -4,6 +4,7 @@
 #pragma once
 
 #include <chrono>
+#include <cstdint>
 #include "base/os.h"
 
 namespace adcs
@@ -18,7 +19,7 @@ namespace adcs
     /**
      * @brief Enumerator for current adcs operating mode.
      */
-    enum class AdcsMode
+    enum class AdcsMode : std::uint8_t
     {
         /**
          * @brief Adcs is currently disabled.
