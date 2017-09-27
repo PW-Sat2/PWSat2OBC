@@ -59,10 +59,10 @@ namespace drivers
             I2CResult ExecuteTransfer(I2C_TransferSeq_TypeDef* seq);
 
             /**
-             * @brief Checks if SCL line is latched at low level
-             * @return true if SCL line is latched
+             * @brief Checks if SCL or SDA line is latched at low level
+             * @return true if SCL or SDA line is latched
              */
-            bool IsSclLatched();
+            bool IsSclOrSdaLatched();
 
             /** @brief Pointer to hardware registers */
             void* HWInterface;

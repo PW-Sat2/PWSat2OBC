@@ -791,7 +791,7 @@ void CommObject::ProcessSingleFrame()
 
 void CommObject::WaitForComLoop()
 {
-    this->_pollingTaskFlags.WaitAny(TaskFlagPing, true, InfiniteTimeout);
+    this->_pollingTaskFlags.WaitAny(TaskFlagPing, true, 1min);
 }
 
 void CommObject::CommTask(void* param)
