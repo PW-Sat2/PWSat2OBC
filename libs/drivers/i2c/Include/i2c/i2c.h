@@ -58,13 +58,13 @@ namespace drivers
             Timeout = -6, //!< Timeout
 
             /** @brief SCL or SDA line is latched low at the end of transfer */
-            LineLatched = -7, //!< ClockLatched
+            LineLatched = -7, //!< LineLatched
 
             /** @brief General I2C error */
             Failure = -8, //!< Failure
 
             /** @brief SCL or SDA line is latched low before transfer */
-            LineAlreadyLatched = -9 //!< ClockAlreadyLatched
+            LineAlreadyLatched = -9 //!< LineAlreadyLatched
         };
 
         /**
