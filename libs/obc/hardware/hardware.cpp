@@ -30,9 +30,9 @@ I2CResult I2CSingleBus::I2CErrorHandler(II2CBus& bus, I2CResult result, I2CAddre
 
     auto power = reinterpret_cast<services::power::IPowerControl*>(context);
 
-    if (result == I2CResult::ClockLatched)
+    if (result == I2CResult::LineLatched)
     {
-        LOG(LOG_LEVEL_FATAL, "SCL latched. Triggering power cycle");
+        LOG(LOG_LEVEL_FATAL, "SCL/SDA latched. Triggering power cycle");
         power->PowerCycle();
         return result;
     }

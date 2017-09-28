@@ -50,13 +50,13 @@ static inline OSResult MapStatus(I2CResult status)
         case I2CResult::ArbLost:
         case I2CResult::UsageFault:
         case I2CResult::SwFault:
-        case I2CResult::ClockLatched:
+        case I2CResult::LineLatched:
         case I2CResult::Failure:
             return OSResult::IOError;
         case I2CResult::Timeout:
             return OSResult::Timeout;
         default:
-        case I2CResult::ClockAlreadyLatched:
+        case I2CResult::LineAlreadyLatched:
             return OSResult::ProtocolError;
     }
 }

@@ -70,7 +70,7 @@ namespace
         EXPECT_CALL(i2c, WriteRead(PayloadDriver::I2CAddress, ElementsAre(2), _))
             .WillOnce(Invoke([=](uint8_t /*address*/, span<const uint8_t> /*inData*/, span<uint8_t> outData) {
                 std::fill(outData.begin(), outData.end(), 0x20);
-                return I2CResult::ClockAlreadyLatched;
+                return I2CResult::LineAlreadyLatched;
             }));
 
         std::array<uint8_t, 1> output = {2};
