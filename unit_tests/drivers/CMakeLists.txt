@@ -1,8 +1,6 @@
 set(NAME unit_tests_drivers)
 
 set(SOURCES
-  antenna/MiniportMock.cpp
-  antenna/MiniportMock.hpp
   antenna/miniport.cpp
   antenna/antenna.cpp
   antenna/AntennaTelemetryTest.cpp

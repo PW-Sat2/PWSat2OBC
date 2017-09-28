@@ -76,7 +76,7 @@ telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver
 
 mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc, Mission),
     0,
-    std::tie(Main.Hardware.antennaDriver, Main.PowerControlInterface),
+    std::tie<IAntennaDriver, services::power::IPowerControl>(Main.Hardware.antennaDriver, Main.PowerControlInterface),
     Main.Hardware.CommDriver,
     Main.PowerControlInterface,
     Main.adcs.GetAdcsCoordinator(),

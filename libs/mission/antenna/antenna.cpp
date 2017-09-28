@@ -31,7 +31,7 @@ namespace mission
          */
         typedef void DeploymentProcedure(const SystemState& state, //
             AntennaMissionState& stateDescriptor,
-            AntennaDriver& driver //
+            IAntennaDriver& driver //
             );
 
         /**
@@ -43,7 +43,7 @@ namespace mission
          */
         static void RegularDeploymentStep(const SystemState& state, //
             AntennaMissionState& stateDescriptor,
-            AntennaDriver& driver //
+            IAntennaDriver& driver //
             );
 
         /**
@@ -55,7 +55,7 @@ namespace mission
          */
         static void ResetDriverStep(const SystemState& state, //
             AntennaMissionState& stateDescriptor,
-            AntennaDriver& driver //
+            IAntennaDriver& driver //
             );
 
         /**
@@ -64,7 +64,7 @@ namespace mission
          * @param[in] driver Reference to current antenna driver instance.
          * @return True when the driver has been reset, false otherwise.
          */
-        static bool ResetDriver(AntennaChannel channel, AntennaDriver& driver);
+        static bool ResetDriver(AntennaChannel channel, IAntennaDriver& driver);
 
         /**
          * @brief This deployment step finalizes antenna deployment process.
@@ -75,17 +75,17 @@ namespace mission
          */
         static void FinishDeploymentStep(const SystemState& state, //
             AntennaMissionState& stateDescriptor,
-            AntennaDriver& driver //
+            IAntennaDriver& driver //
             );
 
         static void PowerOnDriver(const SystemState& state, //
             AntennaMissionState& stateDescriptor,
-            AntennaDriver& driver //
+            IAntennaDriver& driver //
             );
 
         static void PowerOffDriver(const SystemState& state, //
             AntennaMissionState& stateDescriptor,
-            AntennaDriver& driver //
+            IAntennaDriver& driver //
             );
 
         /**
@@ -204,7 +204,7 @@ namespace mission
             return step.deploymentTimeout / 10 + 1;
         }
 
-        AntennaMissionState::AntennaMissionState(AntennaDriver& antennaDriver, services::power::IPowerControl& powerControl)
+        AntennaMissionState::AntennaMissionState(IAntennaDriver& antennaDriver, services::power::IPowerControl& powerControl)
             : Power(powerControl),    //
               _overrideState(false),  //
               _inProgress(false),     //
@@ -272,7 +272,7 @@ namespace mission
 
             if (lock())
             {
-                this->_driver.GetTelemetry(&this->_driver, this->_currentTelemetry);
+                this->_driver.GetTelemetry(this->_currentTelemetry);
                 return true;
             }
             else
@@ -290,11 +290,11 @@ namespace mission
          * @param[in] retryCount Number of step retry attempts in case of errors.
          * @return True if operation has been successfully completed, false otherwise.
          */
-        static bool EndDeployment(AntennaDriver& driver, AntennaChannel channel, std::uint8_t retryCount)
+        static bool EndDeployment(IAntennaDriver& driver, AntennaChannel channel, std::uint8_t retryCount)
         {
             while (retryCount-- > 0)
             {
-                const OSResult status = driver.FinishDeployment(&driver, channel);
+                const OSResult status = driver.FinishDeployment(channel);
                 if (OS_RESULT_SUCCEEDED(status))
                 {
                     return true;
@@ -314,7 +314,7 @@ namespace mission
          */
         static void StopDeployment(const SystemState& state,
             AntennaMissionState& stateDescriptor,
-            AntennaDriver& driver //
+            IAntennaDriver& driver //
             )
         {
             UNREFERENCED_PARAMETER(state);
@@ -336,7 +336,7 @@ namespace mission
          */
         static void BeginDeployment(const SystemState& state,
             AntennaMissionState& stateDescriptor,
-            AntennaDriver& driver //
+            IAntennaDriver& driver //
             )
         {
             UNREFERENCED_PARAMETER(state);
@@ -344,8 +344,7 @@ namespace mission
             std::uint8_t counter = RetryLimit;
             while (counter-- > 0)
             {
-                const OSResult result = driver.DeployAntenna(&driver,
-                    step.channel,
+                const OSResult result = driver.DeployAntenna(step.channel,
                     step.antennaId,
                     std::chrono::seconds(step.deploymentTimeout),
                     step.overrideSwitches //
@@ -363,7 +362,7 @@ namespace mission
 
         void RegularDeploymentStep(const SystemState& state,
             AntennaMissionState& stateDescriptor,
-            AntennaDriver& driver //
+            IAntennaDriver& driver //
             )
         {
             const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
@@ -393,7 +392,7 @@ namespace mission
 
         void ResetDriverStep(const SystemState& state,
             AntennaMissionState& stateDescriptor,
-            AntennaDriver& driver //
+            IAntennaDriver& driver //
             )
         {
             UNREFERENCED_PARAMETER(state);
@@ -415,12 +414,12 @@ namespace mission
             }
         }
 
-        bool ResetDriver(AntennaChannel channel, AntennaDriver& driver)
+        bool ResetDriver(AntennaChannel channel, IAntennaDriver& driver)
         {
             std::uint8_t counter = RetryLimit;
             while (counter-- > 0)
             {
-                const OSResult result = driver.Reset(&driver, channel);
+                const OSResult result = driver.Reset(channel);
                 if (OS_RESULT_SUCCEEDED(result))
                 {
                     return true;
@@ -431,7 +430,7 @@ namespace mission
         }
         void FinishDeploymentStep(const SystemState& state,
             AntennaMissionState& stateDescriptor,
-            AntennaDriver& driver //
+            IAntennaDriver& driver //
             )
         {
             UNREFERENCED_PARAMETER(state);
@@ -449,7 +448,7 @@ namespace mission
             }
         }
 
-        void PowerOnDriver(const SystemState& /*state*/, AntennaMissionState& stateDescriptor, AntennaDriver& /*driver*/)
+        void PowerOnDriver(const SystemState& /*state*/, AntennaMissionState& stateDescriptor, IAntennaDriver& /*driver*/)
         {
             const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
 
@@ -477,7 +476,7 @@ namespace mission
             }
         }
 
-        void PowerOffDriver(const SystemState& /*state*/, AntennaMissionState& stateDescriptor, AntennaDriver& /*driver*/)
+        void PowerOffDriver(const SystemState& /*state*/, AntennaMissionState& stateDescriptor, IAntennaDriver& /*driver*/)
         {
             const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
 
@@ -600,11 +599,11 @@ namespace mission
 
             stateDescriptor->NextCycle();
             AntennaDeploymentStatus deploymentStatus;
-            AntennaDriver& driver = stateDescriptor->Driver();
+            IAntennaDriver& driver = stateDescriptor->Driver();
 
-            const OSResult result = driver.GetDeploymentStatus(&driver,
-                deploymentSteps[stateDescriptor->StepNumber()].channel,
-                &deploymentStatus //
+            const OSResult result = driver.GetDeploymentStatus(         //
+                deploymentSteps[stateDescriptor->StepNumber()].channel, //
+                &deploymentStatus                                       //
                 );
 
             if (OS_RESULT_FAILED(result))
@@ -624,8 +623,8 @@ namespace mission
             }
         }
 
-        AntennaTask::AntennaTask(std::tuple<AntennaDriver&, services::power::IPowerControl&> args)
-            : state(std::get<AntennaDriver&>(args), std::get<services::power::IPowerControl&>(args))
+        AntennaTask::AntennaTask(std::tuple<IAntennaDriver&, services::power::IPowerControl&> args)
+            : state(std::get<IAntennaDriver&>(args), std::get<services::power::IPowerControl&>(args))
         {
         }
 

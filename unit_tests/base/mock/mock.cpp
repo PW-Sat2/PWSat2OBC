@@ -3,11 +3,13 @@
 #include "PayloadDeviceMock.hpp"
 #include "StorageAccessMock.hpp"
 #include "eps.hpp"
+#include "mock/AntennaMock.hpp"
 #include "mock/DeploySolarArrayMock.hpp"
 #include "mock/HasStateMock.hpp"
 #include "mock/ImtqDriverMock.hpp"
 #include "mock/ImtqTelemetryCollectorMock.hpp"
 #include "mock/LineIOMock.hpp"
+#include "mock/MiniportMock.hpp"
 #include "mock/NotifyTimeChangedMock.hpp"
 #include "mock/OpenSailMock.hpp"
 #include "mock/PayloadExperimentTelemetryProviderMock.hpp"
@@ -174,5 +176,21 @@ NotifyTimeChangedMock::NotifyTimeChangedMock()
 }
 
 NotifyTimeChangedMock::~NotifyTimeChangedMock()
+{
+}
+
+AntennaMock::AntennaMock()
+{
+}
+
+AntennaMock::~AntennaMock()
+{
+}
+
+AntennaMiniportMock::AntennaMiniportMock()
+{
+}
+
+AntennaMiniportMock::~AntennaMiniportMock()
 {
 }
