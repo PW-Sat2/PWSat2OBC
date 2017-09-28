@@ -390,4 +390,18 @@ namespace
 
         ASSERT_EQ(expected, provider.GetCurrentTime().Value);
     }
+
+    TEST_F(TimeTaskTest, TimeShouldBeSavedWhenRTCIsDead)
+    {
+        SetCurrentTime(1h);
+        SetPersistentState(45min, 67min);
+        rtc.SetReadResult(OSResult::Busy);
+
+        actionDescriptor.Execute(state);
+
+        state::TimeState persistentTime;
+        state.PersistentState.Get(persistentTime);
+        ASSERT_THAT(persistentTime.LastMissionTime(), Eq(1h));
+        ASSERT_THAT(persistentTime.LastExternalTime(), Eq(67min));
+    }
 }
