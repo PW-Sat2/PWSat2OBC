@@ -115,6 +115,11 @@ class Imtq(i2cMock.I2CDevice):
         # Type: ([x,y,z]) -> None
         self.on_actuation_dipole = None
 
+        # Type: () -> None
+        self.on_start_bdot = None
+        # Type: () -> None
+        self.on_start_self_test = None
+
     def update_mtm(self, value):
         self.mtm_measurement = call(self.on_mtm_measurement, default=value)
         self.status = (1 << 7)
@@ -184,6 +189,7 @@ class Imtq(i2cMock.I2CDevice):
     def _start_self_test(self, *data):
         self.log.info("Start self-test with param %d", data[0])
         self.mode.start_selftest()
+        call(self.on_start_self_test, None)
         return [0x08, self.status]
 
     @i2cMock.command([0x09])
@@ -191,6 +197,7 @@ class Imtq(i2cMock.I2CDevice):
         time = from_uint16(data[0:])
         self.log.info("Start BDot for %d", time)
         self.mode.start_detumble(time)
+        call(self.on_start_bdot, None)
         return [0x09, self.status]
 
     # --- Data retrieval ---
@@ -231,7 +238,7 @@ class Imtq(i2cMock.I2CDevice):
     def _get_self_test_result(self):
         self.log.info("Get self test result")
         stepval = [0x47, self.status, self.error] + 37 * [0]
-        return 320*[0] #8 * stepval
+        return 8 * stepval
 
     @i2cMock.command([0x48])
     def _get_detumble_data(self):

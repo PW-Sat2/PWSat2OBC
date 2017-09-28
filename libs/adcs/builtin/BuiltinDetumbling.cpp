@@ -27,6 +27,9 @@ namespace adcs
 
     OSResult BuiltinDetumbling::Enable()
     {
+        devices::imtq::SelfTestResult selfTestResult;
+        imtqDriver.PerformSelfTest(selfTestResult, false);
+
         return OSResult::Success;
     }
 

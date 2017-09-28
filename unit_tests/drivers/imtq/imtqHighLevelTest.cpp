@@ -88,7 +88,7 @@ namespace
                 return I2CResult::OK;
             }));
 
-        EXPECT_CALL(os, Sleep(15000ms)).WillOnce(Return());
+        EXPECT_CALL(os, Sleep(2000ms)).WillOnce(Return());
         EXPECT_CALL(os, Sleep(10ms)).WillRepeatedly(Return());
 
         SelfTestResult result;
@@ -156,7 +156,7 @@ namespace
                 return I2CResult::OK;
             }));
 
-        EXPECT_CALL(os, Sleep(15000ms)).WillOnce(Return());
+        EXPECT_CALL(os, Sleep(2000ms)).WillOnce(Return());
         EXPECT_CALL(os, Sleep(10ms)).WillRepeatedly(Return());
 
         SelfTestResult result;
