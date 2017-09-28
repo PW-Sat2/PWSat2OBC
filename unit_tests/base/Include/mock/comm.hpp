@@ -58,4 +58,20 @@ MATCHER_P3(IsDownlinkFrame, apidMatcher, seqMatcher, payloadMatcher, "")
     ;
 }
 
+MATCHER_P4(IsDownlinkFrame, apidMatcher, seqMatcher, correlationIdMatcher, payloadMatcher, "")
+{
+    auto num = arg[0] | (arg[1] << 8) | (arg[2] << 16);
+
+    auto apid = static_cast<telecommunication::downlink::DownlinkAPID>(num & 0x3F);
+    std::uint32_t seq = (num >> 6) & 0x3FFFF;
+    auto correlationId = arg[3];
+    auto payload = arg.subspan(4);
+
+    return testing::Matches(apidMatcher)(apid)                   //
+        && testing::Matches(seqMatcher)(seq)                     //
+        && testing::Matches(correlationIdMatcher)(correlationId) //
+        && testing::Matches(payloadMatcher)(payload);
+    ;
+}
+
 #endif /* UNIT_TESTS_MOCK_COMM_HPP_ */

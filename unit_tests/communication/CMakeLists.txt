@@ -29,6 +29,7 @@ set(SOURCES
   Telecommands/ResetTransmitterTelecommandTest.cpp
   Telecommands/DisableOverheatSubmodeTelecommandTest.cpp
   Telecommands/SetBitrateTelecommandTest.cpp
+  Telecommands/ReadMemoryTelecommandTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})

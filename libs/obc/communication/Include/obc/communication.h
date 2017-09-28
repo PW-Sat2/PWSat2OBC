@@ -20,6 +20,7 @@
 #include "obc/telecommands/file_system.hpp"
 #include "obc/telecommands/flash.hpp"
 #include "obc/telecommands/i2c.hpp"
+#include "obc/telecommands/memory.hpp"
 #include "obc/telecommands/periodic_message.hpp"
 #include "obc/telecommands/photo.hpp"
 #include "obc/telecommands/ping.hpp"
@@ -163,7 +164,8 @@ namespace obc
         obc::telecommands::ResetTransmitterTelecommand,
         obc::telecommands::DisableOverheatSubmodeTelecommand,
         obc::telecommands::SetBitrateTelecommand,
-        obc::telecommands::PerformCopyBootSlotsExperiment>;
+        obc::telecommands::PerformCopyBootSlotsExperiment,
+        obc::telecommands::ReadMemoryTelecommand>;
 
     /**
      * @brief OBC <-> Earth communication
