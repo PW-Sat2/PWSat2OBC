@@ -5,7 +5,6 @@ from obc.experiments import ExperimentType, StartResult
 from system import auto_power_on, runlevel, clear_state
 from tests.base import RestartPerTest
 from utils import TestEvent
-from time import sleep
 
 
 class TestExperimentLEOP(RestartPerTest):
@@ -19,6 +18,7 @@ class TestExperimentLEOP(RestartPerTest):
         def on_reset(_):
             e.set()
             return False
+
         self.system.comm.on_hardware_reset = on_reset
 
         self.power_on_obc()
@@ -33,16 +33,16 @@ class TestExperimentLEOP(RestartPerTest):
 
         log = logging.getLogger("TEST")
         files = self.system.obc.remove_file('/leop')
-        self.assertNotIn('leop.pwts', files, 'Experiment file not deleted')
+        self.assertNotIn('leop', files, 'Experiment file not deleted')
 
         log.info('Setting time inside experiment time slot')
-        self.system.obc.jump_to_time(timedelta(minutes = 5))
+        self.system.obc.jump_to_time(timedelta(minutes=5))
 
-        self.system.obc.request_experiment(ExperimentType.LEOP);
+        self.system.obc.request_experiment(ExperimentType.LEOP)
         self.system.obc.wait_for_experiment(ExperimentType.LEOP, 40)
 
         log.info('Advancing time')
-        self.system.obc.jump_to_time(timedelta(hours=1, minutes=5))
+        self.system.obc.jump_to_time(timedelta(hours=4, minutes=5))
 
         log.info('Waiting for experiment finish')
         self.system.obc.wait_for_experiment(None, 40)
@@ -58,9 +58,9 @@ class TestExperimentLEOP(RestartPerTest):
         log = logging.getLogger("TEST")
 
         log.info('Setting time after experiment time slot')
-        self.system.obc.jump_to_time(timedelta(hours=1, minutes = 5))
+        self.system.obc.jump_to_time(timedelta(hours=4, minutes=5))
 
-        self.system.obc.request_experiment(ExperimentType.LEOP);
+        self.system.obc.request_experiment(ExperimentType.LEOP)
         self.system.obc.run_mission()
         result = self.system.obc.experiment_info()
 
@@ -73,7 +73,7 @@ class TestExperimentLEOP(RestartPerTest):
 
         log = logging.getLogger("TEST")
 
-        #skip initial 60s idle period
+        # skip initial 60s idle period
         self.system.obc.jump_to_time(timedelta(minutes=2))
 
         self.system.obc.wait_for_experiment_started(ExperimentType.LEOP, 60)
