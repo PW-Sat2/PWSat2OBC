@@ -31,11 +31,11 @@
 #include "program_flash/boot_table.hpp"
 #include "scrubber/ram.hpp"
 #include "spi/efm.h"
+#include "state/fwd.hpp"
 #include "terminal/terminal.h"
 #include "time/timer.h"
 #include "utils.h"
 #include "watchdog/pin.hpp"
-#include "state/fwd.hpp"
 /**
  * @defgroup obc OBC structure
  *
@@ -81,6 +81,10 @@ struct OBC
      */
     inline ILineIO& GetLineIO();
 
+    /**
+     * @brief Initialize adcs subsystem.
+     * @param persistentState Reference to obc global persistent state.
+     */
     void InitializeAdcs(const state::SystemPersistentState& persistentState);
 
     /** @brief File system object */

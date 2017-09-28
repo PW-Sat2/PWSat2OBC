@@ -22,7 +22,7 @@ namespace state
 
         /**
          * @brief ctor.
-         * @param[in] value New value of the internal detumbling state.
+         * @param[in] isInternalDetumblingDisabled New value of the internal detumbling mask.
          */
         AdcsState(bool isInternalDetumblingDisabled);
 
