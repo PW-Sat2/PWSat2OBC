@@ -4,12 +4,14 @@
 #include <array>
 #include <gsl/span>
 #include <tuple>
+#include "adcs/adcs.hpp"
 #include "comm/CommDriver.hpp"
 #include "i2c/i2c.h"
 #include "mission/comm.hpp"
 #include "mission/time.hpp"
 #include "obc/experiments.hpp"
 #include "obc/fdir.hpp"
+#include "obc/telecommands/adcs.hpp"
 #include "obc/telecommands/antenna.hpp"
 #include "obc/telecommands/boot_settings.hpp"
 #include "obc/telecommands/comm.hpp"
@@ -163,7 +165,9 @@ namespace obc
         obc::telecommands::ResetTransmitterTelecommand,
         obc::telecommands::DisableOverheatSubmodeTelecommand,
         obc::telecommands::SetBitrateTelecommand,
-        obc::telecommands::PerformCopyBootSlotsExperiment>;
+        obc::telecommands::PerformCopyBootSlotsExperiment,
+        obc::telecommands::SetBuiltinDetumblingBlockMaskTelecommand,
+        obc::telecommands::SetAdcsModeTelecommand>;
 
     /**
      * @brief OBC <-> Earth communication
@@ -194,6 +198,7 @@ namespace obc
          * @param[in] gyro Gyroscope interface
          * @param[in] photo Reference to service capable of taking photos
          * @param[in] epsDriver Reference to EPS driver object
+         * @param[in] adcsCoordinator Reference to Adcs subsystem controller
          */
         OBCCommunication(obc::FDIR& fdir,
             devices::comm::CommObject& commDriver,
@@ -216,7 +221,8 @@ namespace obc
             devices::payload::IPayloadDeviceDriver& payloadDriver,
             devices::gyro::IGyroscopeDriver& gyro,
             services::photo::IPhotoService& photo,
-            devices::eps::IEPSDriver& epsDriver);
+            devices::eps::IEPSDriver& epsDriver,
+            adcs::IAdcsCoordinator& adcsCoordinator);
 
         /**
          * @brief Initializes all communication at runlevel 1

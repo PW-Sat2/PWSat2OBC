@@ -4,6 +4,7 @@
 #pragma once
 
 #include <array>
+#include <atomic>
 #include <chrono>
 #include "adcs.hpp"
 #include "base/os.h"
@@ -45,6 +46,15 @@ namespace adcs
         virtual OSResult EnableSunPointing() final override;
 
         virtual OSResult Disable() final override;
+
+        virtual void SetBlockMode(AdcsMode adcsMode, bool isBlocked) final override;
+
+        /**
+         * @brief Returns information whether the queried adcs mode is currently blocked.
+         * @param mode Queried mode
+         * @return True when requested mode is blocked, false otherwise.
+         */
+        bool IsModeBlocked(AdcsMode mode) const;
 
       private:
         /**
@@ -103,6 +113,8 @@ namespace adcs
          * @brief Adcs processors.
          */
         std::array<IAdcsProcessor*, 3> adcsProcessors;
+
+        std::array<std::atomic_bool, 3> adcsMasks;
     };
 }
 #endif

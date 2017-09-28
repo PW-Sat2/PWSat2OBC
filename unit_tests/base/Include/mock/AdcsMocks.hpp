@@ -22,6 +22,8 @@ struct AdcsCoordinatorMock : adcs::IAdcsCoordinator
     MOCK_METHOD0(EnableSunPointing, OSResult());
 
     MOCK_METHOD0(Disable, OSResult());
+
+    MOCK_METHOD2(SetBlockMode, void(adcs::AdcsMode adcsMode, bool isBlocked));
 };
 
 struct DetumblingMock : adcs::IAdcsProcessor

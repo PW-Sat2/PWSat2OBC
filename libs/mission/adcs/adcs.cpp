@@ -9,8 +9,7 @@ namespace mission
     namespace adcs
     {
         AdcsPrimaryTask::AdcsPrimaryTask(::adcs::IAdcsCoordinator& adcsCoordinator) //
-            : retryCount(RetryCount),
-              coordinator(adcsCoordinator)
+            : retryCount(RetryCount), coordinator(adcsCoordinator)
         {
         }
         /**
@@ -52,7 +51,7 @@ namespace mission
                 return false;
             }
 
-            return true;
+            return !IsDetumblingDisabled(state);
         }
 
         void AdcsPrimaryTask::AdcsEnableBuiltinDetumbling(SystemState& /*state*/, void* param)
@@ -61,12 +60,23 @@ namespace mission
             const auto result = context->coordinator.EnableBuiltinDetumbling();
             if (OS_RESULT_SUCCEEDED(result))
             {
-                context->retryCount = 3;
+                context->retryCount = RetryCount;
             }
             else
             {
                 context->retryCount = std::max(context->retryCount - 1, 0);
             }
+        }
+
+        bool AdcsPrimaryTask::IsDetumblingDisabled(const SystemState& state)
+        {
+            state::AdcsState adcsState;
+            if (!state.PersistentState.Get(adcsState))
+            {
+                return true;
+            }
+
+            return adcsState.IsInternalDetumblingDisabled();
         }
 
         ActionDescriptor<SystemState> AdcsPrimaryTask::BuildAction()

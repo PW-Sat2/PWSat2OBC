@@ -4,6 +4,7 @@
 #pragma once
 
 #include <chrono>
+#include <cstdint>
 #include "base/os.h"
 
 namespace adcs
@@ -18,7 +19,7 @@ namespace adcs
     /**
      * @brief Enumerator for current adcs operating mode.
      */
-    enum class AdcsMode
+    enum class AdcsMode : std::int8_t
     {
         /**
          * @brief Adcs is currently disabled.
@@ -126,6 +127,13 @@ namespace adcs
          * @returns Operation status.
          */
         virtual OSResult Disable() = 0;
+
+        /**
+         * @brief This function can be used to temporarily block one of the ADCS modes.
+         * @param adcsMode Requested mode identifier.
+         * @param isBlocked True when selected mode should be disabled, false otherwise.
+         */
+        virtual void SetBlockMode(AdcsMode adcsMode, bool isBlocked) = 0;
     };
 
     /** @} */
