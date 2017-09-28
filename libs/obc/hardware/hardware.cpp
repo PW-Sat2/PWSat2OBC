@@ -30,9 +30,9 @@ I2CResult I2CSingleBus::I2CErrorHandler(II2CBus& bus, I2CResult result, I2CAddre
 
     auto power = reinterpret_cast<services::power::IPowerControl*>(context);
 
-    if (result == I2CResult::ClockLatched)
+    if (result == I2CResult::LineLatched)
     {
-        LOG(LOG_LEVEL_FATAL, "SCL latched. Triggering power cycle");
+        LOG(LOG_LEVEL_FATAL, "SCL/SDA latched. Triggering power cycle");
         power->PowerCycle();
         return result;
     }
@@ -112,6 +112,7 @@ OBCHardware::OBCHardware(
               &FramSpi[2]}},                                                         //
       Gyro(I2C.Buses.Payload),                                                       //
       EPS(errorCounting, this->I2C.Buses.Bus, this->I2C.Buses.Payload),              //
+      antennaDriver(&antennaMiniport, &I2C.Buses.Bus, &I2C.Buses.Payload),           //
       Imtq(errorCounting, I2C.Buses.Bus),                                            //
       imtqTelemetryCollector(Imtq),                                                  //
       SunSInterruptDriver(this->Pins.SunSInterrupt),                                 //
@@ -122,6 +123,4 @@ OBCHardware::OBCHardware(
       PayloadDriver(errorCounting, this->I2C.Buses.Payload, PayloadInterruptDriver), //
       PayloadDeviceDriver(PayloadDriver)
 {
-    AntennaMiniportInitialize(&antennaMiniport);
-    AntennaDriverInitialize(&antennaDriver, &antennaMiniport, &I2C.Buses.Bus, &I2C.Buses.Payload);
 }

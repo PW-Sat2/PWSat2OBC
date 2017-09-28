@@ -10,9 +10,9 @@
 
 using namespace drivers::i2c;
 
-bool I2CLowLevelBus::IsSclLatched()
+bool I2CLowLevelBus::IsSclOrSdaLatched()
 {
-    return GPIO_PinInGet(this->_io.Port, this->_io.SCL) == 0;
+    return GPIO_PinInGet(this->_io.Port, this->_io.SCL) == 0 || GPIO_PinInGet(this->_io.Port, this->_io.SDA) == 0;
 }
 
 I2CResult I2CLowLevelBus::ExecuteTransfer(I2C_TransferSeq_TypeDef* seq)
@@ -25,10 +25,10 @@ I2CResult I2CLowLevelBus::ExecuteTransfer(I2C_TransferSeq_TypeDef* seq)
         return I2CResult::Failure;
     }
 
-    if (this->IsSclLatched())
+    if (this->IsSclOrSdaLatched())
     {
-        LOG(LOG_LEVEL_FATAL, "[I2C] SCL already latched");
-        return I2CResult::ClockAlreadyLatched;
+        LOG(LOG_LEVEL_FATAL, "[I2C] SCL or SDA already latched");
+        return I2CResult::LineAlreadyLatched;
     }
 
     auto hw = reinterpret_cast<I2C_TypeDef*>(this->HWInterface);
@@ -52,11 +52,11 @@ I2CResult I2CLowLevelBus::ExecuteTransfer(I2C_TransferSeq_TypeDef* seq)
         {
         }
 
-        if (this->IsSclLatched())
+        if (this->IsSclOrSdaLatched())
         {
-            LOG(LOG_LEVEL_ERROR, "SCL latched at low level");
+            LOG(LOG_LEVEL_ERROR, "SCL or SDA latched at low level");
 
-            ret = I2CResult::ClockLatched;
+            ret = I2CResult::LineLatched;
         }
 
         return ret;

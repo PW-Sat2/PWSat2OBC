@@ -43,7 +43,7 @@ namespace mission
              * drive the required hardware.
              * @param[in] powerControl Power control
              */
-            AntennaMissionState(AntennaDriver& antennaDriver, services::power::IPowerControl& powerControl);
+            AntennaMissionState(IAntennaDriver& antennaDriver, services::power::IPowerControl& powerControl);
 
             /**
              * @brief Initializes antenna mission state
@@ -105,7 +105,7 @@ namespace mission
              * @brief Returns reference to current antenna driver.
              * @return Reference to instance of antenna driver being used.
              */
-            AntennaDriver& Driver();
+            IAntennaDriver& Driver();
 
             /**
              * @brief Requests overriding the antenna deployment state reported by the hardware.
@@ -245,7 +245,7 @@ namespace mission
             /**
              * @brief Current antenna driver instance.
              */
-            AntennaDriver& _driver;
+            IAntennaDriver& _driver;
 
             /** @brief Is primary antenna power required? */
             bool _powerRequired;
@@ -281,7 +281,7 @@ namespace mission
             SetTimeout(timeout);
         }
 
-        inline AntennaDriver& AntennaMissionState::Driver()
+        inline IAntennaDriver& AntennaMissionState::Driver()
         {
             return this->_driver;
         }

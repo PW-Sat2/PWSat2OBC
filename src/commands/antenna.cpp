@@ -79,8 +79,7 @@ void AntennaDeploy(std::uint16_t argc, char* argv[])
     }
 
     const bool override = (argc > 2) && (strcmp(argv[2], "override") == 0);
-    const OSResult result = GetAntennaDriver().DeployAntenna(&GetAntennaDriver(),
-        channel,
+    const OSResult result = GetAntennaDriver().DeployAntenna(channel,
         antenna,
         10s,
         override //
@@ -101,7 +100,7 @@ void AntennaCancelDeployment(std::uint16_t argc, char* argv[])
         return;
     }
 
-    GetAntennaDriver().FinishDeployment(&GetAntennaDriver(), channel);
+    GetAntennaDriver().FinishDeployment(channel);
 }
 
 void AntennaGetDeploymentStatus(std::uint16_t argc, char* argv[])
@@ -117,7 +116,7 @@ void AntennaGetDeploymentStatus(std::uint16_t argc, char* argv[])
     }
 
     AntennaDeploymentStatus deploymentStatus;
-    const OSResult status = GetAntennaDriver().GetDeploymentStatus(&GetAntennaDriver(), channel, &deploymentStatus);
+    const OSResult status = GetAntennaDriver().GetDeploymentStatus(channel, &deploymentStatus);
     if (OS_RESULT_FAILED(status))
     {
         SendResult(status);
@@ -148,7 +147,7 @@ void PrintValue(int value, const char* name)
 void AntennaGetTelemetry(std::uint16_t /*argc*/, char* /*argv*/ [])
 {
     devices::antenna::AntennaTelemetry telemetry;
-    GetAntennaDriver().GetTelemetry(&GetAntennaDriver(), telemetry);
+    GetAntennaDriver().GetTelemetry(telemetry);
     auto& counts1 = telemetry.GetActivationCounts(ANTENNA_PRIMARY_CHANNEL);
     auto& counts2 = telemetry.GetActivationCounts(ANTENNA_BACKUP_CHANNEL);
     auto& times1 = telemetry.GetActivationTimes(ANTENNA_PRIMARY_CHANNEL);
@@ -184,7 +183,7 @@ void AntennaReset(std::uint16_t argc, char* argv[])
         return;
     }
 
-    const OSResult result = GetAntennaDriver().Reset(&GetAntennaDriver(), channel);
+    const OSResult result = GetAntennaDriver().Reset(channel);
     if (OS_RESULT_SUCCEEDED(result))
     {
         GetTerminal().Puts("Done");

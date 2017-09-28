@@ -9,7 +9,6 @@ set(SOURCES
     test.cpp
     os/os.cpp
     utils.cpp
-    mock/AntennaMock.cpp
     mock/comm.cpp
     mock/emlib.cpp
     mock/error_counter.cpp

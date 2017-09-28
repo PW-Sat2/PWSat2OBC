@@ -7,7 +7,7 @@
 #include "antenna/driver.h"
 #include "antenna/telemetry.hpp"
 
-struct AntennaMock : public AntennaDriver
+struct AntennaMock : public IAntennaDriver
 {
     AntennaMock();
     ~AntennaMock();
