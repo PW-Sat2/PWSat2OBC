@@ -32,7 +32,7 @@ namespace
     TEST_F(GetErrorCountersConfigTelecommandTest, ShouldRespondWithErrorCountersConfig)
     {
         // clang-format off
-        std::array<std::uint8_t, 48> expectedPayload = {
+        std::array<std::uint8_t, 56> expectedPayload = {
 				10, 101, 1, 4,
 				11, 102, 2, 3,
 				12, 103, 3, 2,
@@ -44,11 +44,13 @@ namespace
 				18, 109, 1, 4,
 				19, 110, 2, 3,
 				20, 111, 3, 2,
-				21, 112, 4, 1
+				21, 112, 4, 1,
+				22, 113, 1, 4,
+				23, 114, 2, 3
         };
         // clang-format on
 
-        for (auto i = 0; i < 12; i++)
+        for (auto i = 0; i < 14; i++)
         {
             ON_CALL(_errors, Current(i)).WillByDefault(Return(10 + i));
             ON_CALL(_config, Limit(i)).WillByDefault(Return(101 + i));

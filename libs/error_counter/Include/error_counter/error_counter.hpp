@@ -101,7 +101,7 @@ namespace error_counter
     {
       public:
         /** @brief Maximum number of supported devices */
-        static constexpr std::uint8_t MaxDevices = 12;
+        static constexpr std::uint8_t MaxDevices = 14;
 
         /**
          * @brief Ctor
@@ -370,7 +370,7 @@ namespace error_counter
      */
     inline OSResult operator>>(OSResult result, AggregatedErrorCounter& counter)
     {
-        if (!OS_RESULT_FAILED(result))
+        if (OS_RESULT_FAILED(result))
         {
             counter.Failure();
         }

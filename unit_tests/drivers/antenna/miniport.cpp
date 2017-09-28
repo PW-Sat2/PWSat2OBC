@@ -5,6 +5,7 @@
 #include "gtest/gtest.h"
 #include "I2C/I2CMock.hpp"
 #include "antenna/antenna.h"
+#include "error_counter/error_counter.hpp"
 #include "time/TimeSpan.hpp"
 #include "utils.hpp"
 
@@ -50,6 +51,7 @@ namespace
         AntennaMiniportTest();
         I2CBusMock i2c;
         AntennaMiniportDriver miniport;
+        error_counter::AggregatedErrorCounter error;
     };
 
     AntennaMiniportTest::AntennaMiniportTest()
@@ -59,99 +61,113 @@ namespace
     TEST_F(AntennaMiniportTest, TestHardwareReset)
     {
         i2c.ExpectWriteCommand(ANTENNA_PRIMARY_CHANNEL, Reset).WillOnce(Return(I2CResult::OK));
-        const auto status = miniport.Reset(&i2c, ANTENNA_PRIMARY_CHANNEL);
+        const auto status = miniport.Reset(error, &i2c, ANTENNA_PRIMARY_CHANNEL);
         ASSERT_THAT(status, Eq(OSResult::Success));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(true));
     }
 
     TEST_F(AntennaMiniportTest, TestHardwareResetFailure)
     {
         i2c.ExpectWriteCommand(ANTENNA_PRIMARY_CHANNEL, Reset).WillOnce(Return(I2CResult::Nack));
-        const auto status = miniport.Reset(&i2c, ANTENNA_PRIMARY_CHANNEL);
+        const auto status = miniport.Reset(error, &i2c, ANTENNA_PRIMARY_CHANNEL);
         ASSERT_THAT(status, Ne(OSResult::Success));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(false));
     }
 
     TEST_F(AntennaMiniportTest, TestArmingDeployment)
     {
         i2c.ExpectWriteCommand(ANTENNA_PRIMARY_CHANNEL, Arm).WillOnce(Return(I2CResult::OK));
-        const auto status = miniport.ArmDeploymentSystem(&i2c, ANTENNA_PRIMARY_CHANNEL);
+        const auto status = miniport.ArmDeploymentSystem(error, &i2c, ANTENNA_PRIMARY_CHANNEL);
         ASSERT_THAT(status, Eq(OSResult::Success));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(true));
     }
 
     TEST_F(AntennaMiniportTest, TestArmingDeploymentFailure)
     {
         i2c.ExpectWriteCommand(ANTENNA_PRIMARY_CHANNEL, Arm).WillOnce(Return(I2CResult::Nack));
-        const auto status = miniport.ArmDeploymentSystem(&i2c, ANTENNA_PRIMARY_CHANNEL);
+        const auto status = miniport.ArmDeploymentSystem(error, &i2c, ANTENNA_PRIMARY_CHANNEL);
         ASSERT_THAT(status, Ne(OSResult::Success));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(false));
     }
 
     TEST_F(AntennaMiniportTest, TestDisarmingDeployment)
     {
         i2c.ExpectWriteCommand(ANTENNA_PRIMARY_CHANNEL, Disarm).WillOnce(Return(I2CResult::OK));
-        const auto status = miniport.DisarmDeploymentSystem(&i2c, ANTENNA_PRIMARY_CHANNEL);
+        const auto status = miniport.DisarmDeploymentSystem(error, &i2c, ANTENNA_PRIMARY_CHANNEL);
         ASSERT_THAT(status, Eq(OSResult::Success));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(true));
     }
 
     TEST_F(AntennaMiniportTest, TestDisarmingDeploymentFailure)
     {
         i2c.ExpectWriteCommand(ANTENNA_PRIMARY_CHANNEL, Disarm).WillOnce(Return(I2CResult::Nack));
-        const auto status = miniport.DisarmDeploymentSystem(&i2c, ANTENNA_PRIMARY_CHANNEL);
+        const auto status = miniport.DisarmDeploymentSystem(error, &i2c, ANTENNA_PRIMARY_CHANNEL);
         ASSERT_THAT(status, Ne(OSResult::Success));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(false));
     }
 
     TEST_F(AntennaMiniportTest, TestAutomaticDeployment)
     {
         EXPECT_CALL(i2c, Write(ANTENNA_PRIMARY_CHANNEL, testing::ElementsAre(StartDeployment, 50))).WillOnce(Return(I2CResult::OK));
-        const auto status = miniport.InitializeAutomaticDeployment(&i2c, ANTENNA_PRIMARY_CHANNEL, 200s);
+        const auto status = miniport.InitializeAutomaticDeployment(error, &i2c, ANTENNA_PRIMARY_CHANNEL, 200s);
         ASSERT_THAT(status, Eq(OSResult::Success));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(true));
     }
 
     TEST_F(AntennaMiniportTest, TestAutomaticDeploymentFailure)
     {
         EXPECT_CALL(i2c, Write(ANTENNA_PRIMARY_CHANNEL, BeginsWith(StartDeployment))).WillOnce(Return(I2CResult::Nack));
-        const auto status = miniport.InitializeAutomaticDeployment(&i2c, ANTENNA_PRIMARY_CHANNEL, 200s);
+        const auto status = miniport.InitializeAutomaticDeployment(error, &i2c, ANTENNA_PRIMARY_CHANNEL, 200s);
         ASSERT_THAT(status, Ne(OSResult::Success));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(false));
     }
 
     TEST_F(AntennaMiniportTest, TestCancelAutomaticDeployment)
     {
         i2c.ExpectWriteCommand(ANTENNA_PRIMARY_CHANNEL, CancelDeployment).WillOnce(Return(I2CResult::OK));
-        const auto status = miniport.CancelAntennaDeployment(&i2c, ANTENNA_PRIMARY_CHANNEL);
+        const auto status = miniport.CancelAntennaDeployment(error, &i2c, ANTENNA_PRIMARY_CHANNEL);
         ASSERT_THAT(status, Eq(OSResult::Success));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(true));
     }
 
     TEST_F(AntennaMiniportTest, TestCancelAutomaticDeploymentFailure)
     {
         i2c.ExpectWriteCommand(ANTENNA_PRIMARY_CHANNEL, CancelDeployment).WillOnce(Return(I2CResult::Nack));
-        const auto status = miniport.CancelAntennaDeployment(&i2c, ANTENNA_PRIMARY_CHANNEL);
+        const auto status = miniport.CancelAntennaDeployment(error, &i2c, ANTENNA_PRIMARY_CHANNEL);
         ASSERT_THAT(status, Ne(OSResult::Success));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(false));
     }
 
     TEST_F(AntennaMiniportTest, TestManualAntennaDeployment)
     {
         EXPECT_CALL(i2c, Write(ANTENNA_PRIMARY_CHANNEL, ElementsAre(DeployAntenna1, 200u))).WillOnce(Return(I2CResult::OK));
-        const auto status = miniport.DeployAntenna(&i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, 200s, false);
+        const auto status = miniport.DeployAntenna(error, &i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, 200s, false);
         ASSERT_THAT(status, Eq(OSResult::Success));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(true));
     }
 
     TEST_F(AntennaMiniportTest, TestManualAntennaDeploymentFailure)
     {
         EXPECT_CALL(i2c, Write(ANTENNA_PRIMARY_CHANNEL, ElementsAre(DeployAntenna2, 200u))).WillOnce(Return(I2CResult::Nack));
-        const auto status = miniport.DeployAntenna(&i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, 200s, false);
+        const auto status = miniport.DeployAntenna(error, &i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, 200s, false);
         ASSERT_THAT(status, Ne(OSResult::Success));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(false));
     }
 
     TEST_F(AntennaMiniportTest, TestManualAntennaDeploymentWithOverride)
     {
         EXPECT_CALL(i2c, Write(ANTENNA_PRIMARY_CHANNEL, ElementsAre(DeployAntenna1Override, 200u))).WillOnce(Return(I2CResult::OK));
-        const auto status = miniport.DeployAntenna(&i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, 200s, true);
+        const auto status = miniport.DeployAntenna(error, &i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, 200s, true);
         ASSERT_THAT(status, Eq(OSResult::Success));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(true));
     }
 
     TEST_F(AntennaMiniportTest, TestManualAntennaDeploymentWithOverrideFailure)
     {
         EXPECT_CALL(i2c, Write(ANTENNA_BACKUP_CHANNEL, ElementsAre(DeployAntenna3Override, 200u))).WillOnce(Return(I2CResult::Nack));
-        const auto status = miniport.DeployAntenna(&i2c, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, 200s, true);
+        const auto status = miniport.DeployAntenna(error, &i2c, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, 200s, true);
         ASSERT_THAT(status, Ne(OSResult::Success));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(false));
     }
 
     TEST_F(AntennaMiniportTest, TestAntennaActivationCount)
@@ -163,18 +179,20 @@ namespace
                 return I2CResult::OK;
             }));
         uint8_t response;
-        const auto status = miniport.GetAntennaActivationCount(&i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, &response);
+        const auto status = miniport.GetAntennaActivationCount(error, &i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, &response);
         ASSERT_THAT(status, Eq(OSResult::Success));
         ASSERT_THAT(response, Eq(10u));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(true));
     }
 
     TEST_F(AntennaMiniportTest, TestAntennaActivationCountFailure)
     {
         EXPECT_CALL(i2c, WriteRead(ANTENNA_BACKUP_CHANNEL, ElementsAre(QueryActivationCount2), _)).WillOnce(Return(I2CResult::Nack));
         uint8_t response;
-        const auto status = miniport.GetAntennaActivationCount(&i2c, ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, &response);
+        const auto status = miniport.GetAntennaActivationCount(error, &i2c, ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, &response);
         ASSERT_THAT(status, Ne(OSResult::Success));
         ASSERT_THAT(response, Eq(0u));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(false));
     }
 
     TEST_F(AntennaMiniportTest, TestAntennaTemperature)
@@ -187,9 +205,10 @@ namespace
                 return I2CResult::OK;
             }));
         uint16_t response = 0;
-        const auto status = miniport.GetTemperature(&i2c, ANTENNA_PRIMARY_CHANNEL, &response);
+        const auto status = miniport.GetTemperature(error, &i2c, ANTENNA_PRIMARY_CHANNEL, &response);
         ASSERT_THAT(status, Eq(OSResult::Success));
         ASSERT_THAT(response, Eq(0x11));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(true));
     }
 
     TEST_F(AntennaMiniportTest, TestAntennaTemperatureOutOfRange)
@@ -202,18 +221,20 @@ namespace
                 return I2CResult::OK;
             }));
         uint16_t response;
-        const auto status = miniport.GetTemperature(&i2c, ANTENNA_PRIMARY_CHANNEL, &response);
+        const auto status = miniport.GetTemperature(error, &i2c, ANTENNA_PRIMARY_CHANNEL, &response);
         ASSERT_THAT(status, Eq(OSResult::OutOfRange));
         ASSERT_THAT(response, Eq(0));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(false));
     }
 
     TEST_F(AntennaMiniportTest, TestAntennaTemperatureFailure)
     {
         EXPECT_CALL(i2c, WriteRead(ANTENNA_PRIMARY_CHANNEL, ElementsAre(QueryTemperature), _)).WillOnce(Return(I2CResult::Nack));
         uint16_t response;
-        const auto status = miniport.GetTemperature(&i2c, ANTENNA_PRIMARY_CHANNEL, &response);
+        const auto status = miniport.GetTemperature(error, &i2c, ANTENNA_PRIMARY_CHANNEL, &response);
         ASSERT_THAT(status, Ne(OSResult::Success));
         ASSERT_THAT(response, Eq(0u));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(false));
     }
 
     TEST_F(AntennaMiniportTest, TestAntennaActivationTime)
@@ -225,22 +246,24 @@ namespace
                 return I2CResult::OK;
             }));
         std::chrono::milliseconds response;
-        const auto status = miniport.GetAntennaActivationTime(&i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, &response);
+        const auto status = miniport.GetAntennaActivationTime(error, &i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, &response);
         ASSERT_THAT(status, Eq(OSResult::Success));
         ASSERT_THAT(response, Eq(128000ms));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(true));
     }
 
     TEST_F(AntennaMiniportTest, TestAntennaActivationTimeFailure)
     {
         EXPECT_CALL(i2c, WriteRead(ANTENNA_PRIMARY_CHANNEL, ElementsAre(QueryActivationTime2), _)).WillOnce(Return(I2CResult::Nack));
         std::chrono::milliseconds response;
-        const auto status = miniport.GetAntennaActivationTime(&i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, &response);
+        const auto status = miniport.GetAntennaActivationTime(error, &i2c, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, &response);
         ASSERT_THAT(status, Ne(OSResult::Success));
         ASSERT_THAT(response, Eq(0ms));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(false));
     }
 
     class AntennaDeploymentStatusTest
-        : public testing::TestWithParam<std::tuple<uint8_t, uint8_t, I2CResult, OSResult, uint32_t, uint32_t, bool, bool>>
+        : public testing::TestWithParam<std::tuple<uint8_t, uint8_t, I2CResult, OSResult, uint32_t, uint32_t, bool, bool, bool>>
     {
       public:
         AntennaDeploymentStatusTest();
@@ -249,6 +272,7 @@ namespace
       protected:
         I2CBusMock i2c;
         AntennaMiniportDriver miniport;
+        error_counter::AggregatedErrorCounter error;
     };
 
     AntennaDeploymentStatusTest::AntennaDeploymentStatusTest()
@@ -277,7 +301,7 @@ namespace
         AntennaDeploymentStatus response;
         const auto expectedResult = std::get<3>(GetParam());
 
-        const auto result = miniport.GetDeploymentStatus(&i2c, ANTENNA_PRIMARY_CHANNEL, &response);
+        const auto result = miniport.GetDeploymentStatus(error, &i2c, ANTENNA_PRIMARY_CHANNEL, &response);
         ASSERT_THAT(result, Eq(expectedResult));
     }
 
@@ -289,7 +313,8 @@ namespace
         const auto deplomentActive = std::get<5>(GetParam());
         const auto overrideActive = std::get<6>(GetParam());
         const auto systemArmed = std::get<7>(GetParam());
-        miniport.GetDeploymentStatus(&i2c, ANTENNA_PRIMARY_CHANNEL, &response);
+        const auto expectedErrorResult = std::get<8>(GetParam());
+        miniport.GetDeploymentStatus(error, &i2c, ANTENNA_PRIMARY_CHANNEL, &response);
 
         ASSERT_THAT(response.DeploymentStatus[0], Eq((deploymentStatuses & 0xff) != 0));
         ASSERT_THAT(response.DeploymentStatus[1], Eq((deploymentStatuses & 0xff00) != 0));
@@ -303,25 +328,27 @@ namespace
 
         ASSERT_THAT(response.IgnoringDeploymentSwitches, Eq(overrideActive));
         ASSERT_THAT(response.DeploymentSystemArmed, Eq(systemArmed));
+
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(expectedErrorResult));
     }
 
     INSTANTIATE_TEST_CASE_P(AntennaDeploymentStatusTestSet,
         AntennaDeploymentStatusTest,
-        testing::Values(std::make_tuple(0, 0, I2CResult::Nack, OSResult::IOError, 0u, 0u, false, false),
-            std::make_tuple(0, 0, I2CResult::OK, OSResult::Success, 0x01010101u, 0u, false, false),
-            std::make_tuple(1, 0, I2CResult::OK, OSResult::Success, 0x01010101u, 0u, false, true),
-            std::make_tuple(0, 1, I2CResult::OK, OSResult::Success, 0x01010101u, 0u, true, false),
-            std::make_tuple(2, 0, I2CResult::OK, OSResult::Success, 0x01010101u, 0x1000000, false, false),
-            std::make_tuple(8, 0, I2CResult::OK, OSResult::Success, 0x00010101u, 0u, false, false),
-            std::make_tuple(0x0a, 0, I2CResult::OK, OSResult::Success, 0x00010101u, 0x1000000, false, false),
-            std::make_tuple(0x20, 0, I2CResult::OK, OSResult::Success, 0x01010101u, 0x10000, false, false),
-            std::make_tuple(0x80, 0, I2CResult::OK, OSResult::Success, 0x01000101u, 0u, false, false),
-            std::make_tuple(0xa0, 0, I2CResult::OK, OSResult::Success, 0x01000101u, 0x10000, false, false),
-            std::make_tuple(0, 2, I2CResult::OK, OSResult::Success, 0x01010101u, 0x100, false, false),
-            std::make_tuple(0, 8, I2CResult::OK, OSResult::Success, 0x01010001u, 0u, false, false),
-            std::make_tuple(0, 0x0a, I2CResult::OK, OSResult::Success, 0x01010001u, 0x100, false, false),
-            std::make_tuple(0, 0x20, I2CResult::OK, OSResult::Success, 0x01010101u, 0x1, false, false),
-            std::make_tuple(0, 0x80, I2CResult::OK, OSResult::Success, 0x01010100u, 0u, false, false),
-            std::make_tuple(0, 0xa0, I2CResult::OK, OSResult::Success, 0x01010100u, 0x1, false, false),
-            std::make_tuple(0, 0x10, I2CResult::OK, OSResult::OutOfRange, 0x0, 0u, false, false)), );
+        testing::Values(std::make_tuple(0, 0, I2CResult::Nack, OSResult::IOError, 0u, 0u, false, false, false),
+            std::make_tuple(0, 0, I2CResult::OK, OSResult::Success, 0x01010101u, 0u, false, false, true),
+            std::make_tuple(1, 0, I2CResult::OK, OSResult::Success, 0x01010101u, 0u, false, true, true),
+            std::make_tuple(0, 1, I2CResult::OK, OSResult::Success, 0x01010101u, 0u, true, false, true),
+            std::make_tuple(2, 0, I2CResult::OK, OSResult::Success, 0x01010101u, 0x1000000, false, false, true),
+            std::make_tuple(8, 0, I2CResult::OK, OSResult::Success, 0x00010101u, 0u, false, false, true),
+            std::make_tuple(0x0a, 0, I2CResult::OK, OSResult::Success, 0x00010101u, 0x1000000, false, false, true),
+            std::make_tuple(0x20, 0, I2CResult::OK, OSResult::Success, 0x01010101u, 0x10000, false, false, true),
+            std::make_tuple(0x80, 0, I2CResult::OK, OSResult::Success, 0x01000101u, 0u, false, false, true),
+            std::make_tuple(0xa0, 0, I2CResult::OK, OSResult::Success, 0x01000101u, 0x10000, false, false, true),
+            std::make_tuple(0, 2, I2CResult::OK, OSResult::Success, 0x01010101u, 0x100, false, false, true),
+            std::make_tuple(0, 8, I2CResult::OK, OSResult::Success, 0x01010001u, 0u, false, false, true),
+            std::make_tuple(0, 0x0a, I2CResult::OK, OSResult::Success, 0x01010001u, 0x100, false, false, true),
+            std::make_tuple(0, 0x20, I2CResult::OK, OSResult::Success, 0x01010101u, 0x1, false, false, true),
+            std::make_tuple(0, 0x80, I2CResult::OK, OSResult::Success, 0x01010100u, 0u, false, false, true),
+            std::make_tuple(0, 0xa0, I2CResult::OK, OSResult::Success, 0x01010100u, 0x1, false, false, true),
+            std::make_tuple(0, 0x10, I2CResult::OK, OSResult::OutOfRange, 0x0, 0u, false, false, false)), );
 }
