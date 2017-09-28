@@ -22,7 +22,7 @@ namespace obc
          * Parameters:
          *  - 1-byte - new built-in detumbling mask value, true for disabled, false for enabled
          */
-        class DisableBuiltinDetumblingTelecommand : public telecommunication::uplink::Telecommand<0x24>
+        class SetBuiltinDetumblingBlockMaskTelecommand : public telecommunication::uplink::Telecommand<0x24>
         {
           public:
             /**
@@ -30,7 +30,7 @@ namespace obc
              * @param stateContainer_ Reference to current obc state container
              * @param adcsCoordinator_ Reference to adcs subsystem controller
              */
-            DisableBuiltinDetumblingTelecommand(IHasState<SystemState>& stateContainer_, adcs::IAdcsCoordinator& adcsCoordinator_);
+            SetBuiltinDetumblingBlockMaskTelecommand(IHasState<SystemState>& stateContainer_, adcs::IAdcsCoordinator& adcsCoordinator_);
 
             virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
 

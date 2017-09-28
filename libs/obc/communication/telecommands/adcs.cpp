@@ -11,14 +11,15 @@ namespace obc
 {
     namespace telecommands
     {
-        DisableBuiltinDetumblingTelecommand::DisableBuiltinDetumblingTelecommand(IHasState<SystemState>& stateContainer_, //
+        SetBuiltinDetumblingBlockMaskTelecommand::SetBuiltinDetumblingBlockMaskTelecommand(IHasState<SystemState>& stateContainer_, //
             adcs::IAdcsCoordinator& adcsCoordinator_)
             : stateContainer(stateContainer_), //
               adcsCoordinator(adcsCoordinator_)
         {
         }
 
-        void DisableBuiltinDetumblingTelecommand::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
+        void SetBuiltinDetumblingBlockMaskTelecommand::Handle(devices::comm::ITransmitter& transmitter, //
+            gsl::span<const std::uint8_t> parameters)
         {
             DownlinkFrame response(DownlinkAPID::DisableBuiltinDetumbling, 0);
             auto& writer = response.PayloadWriter();

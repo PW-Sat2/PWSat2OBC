@@ -166,7 +166,7 @@ namespace obc
         obc::telecommands::DisableOverheatSubmodeTelecommand,
         obc::telecommands::SetBitrateTelecommand,
         obc::telecommands::PerformCopyBootSlotsExperiment,
-        obc::telecommands::DisableBuiltinDetumblingTelecommand,
+        obc::telecommands::SetBuiltinDetumblingBlockMaskTelecommand,
         obc::telecommands::SetAdcsModeTelecommand>;
 
     /**

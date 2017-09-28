@@ -19,7 +19,7 @@ namespace adcs
     /**
      * @brief Enumerator for current adcs operating mode.
      */
-    enum class AdcsMode : std::uint8_t
+    enum class AdcsMode : std::int8_t
     {
         /**
          * @brief Adcs is currently disabled.
