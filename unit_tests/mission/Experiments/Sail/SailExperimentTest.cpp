@@ -83,7 +83,7 @@ namespace
     {
         EXPECT_CALL(power, SensPower(true)).WillOnce(Return(false));
         EXPECT_CALL(power, SensPower(false));
-        EXPECT_CALL(adcs, EnableBuiltinDetumbling());
+        EXPECT_CALL(adcs, Stop());
         const auto status = experiment.Start();
         ASSERT_THAT(status, Eq(StartResult::Failure));
     }
@@ -93,7 +93,7 @@ namespace
         EXPECT_CALL(time, GetCurrentTime()).WillOnce(Return(Some(10ms))).WillOnce(Return(Option<std::chrono::milliseconds>()));
         EXPECT_CALL(power, SensPower(true)).WillOnce(Return(true));
         EXPECT_CALL(power, SensPower(false));
-        EXPECT_CALL(adcs, EnableBuiltinDetumbling());
+        EXPECT_CALL(adcs, Stop());
 
         EXPECT_CALL(photo, Reset()).Times(2);
         EXPECT_CALL(photo, DisableCamera(services::photo::Camera::Nadir));
@@ -121,7 +121,7 @@ namespace
 
     TEST_F(SailExperimentTest, TestStop)
     {
-        EXPECT_CALL(adcs, EnableBuiltinDetumbling()).WillOnce(Return(OSResult::Success));
+        EXPECT_CALL(adcs, Stop()).WillOnce(Return(OSResult::Success));
         EXPECT_CALL(power, SensPower(false)).WillOnce(Return(true));
         EXPECT_CALL(time, GetCurrentTime()).WillRepeatedly(Return(Some(10ms)));
 

@@ -24,7 +24,12 @@ namespace adcs
         /**
          * @brief Adcs is currently disabled.
          */
-        Disabled = -1,
+        Disabled = -2,
+
+        /**
+         * @brief Adcs is currently idle.
+         */
+        Stopped = -1,
 
         /**
          * @brief Currently the primary detumbling algorithm is active.
@@ -121,6 +126,12 @@ namespace adcs
          * @returns Operation status.
          */
         virtual OSResult EnableSunPointing() = 0;
+
+        /**
+         * @brief Stopps current adcs subsystem operation.
+         * @returns Operation status.
+         */
+        virtual OSResult Stop() = 0;
 
         /**
          * @brief Disables adcs subsystem altogether.
