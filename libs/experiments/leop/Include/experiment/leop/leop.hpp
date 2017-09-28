@@ -27,8 +27,8 @@ namespace experiment
             /** @brief Output file name. */
             static constexpr const char* FileName = "/leop";
 
-            /** @brief Mission time when experiment should stop: T+1h */
-            static constexpr std::chrono::milliseconds ExperimentTimeStop = std::chrono::milliseconds(60 * 60 * 1000);
+            /** @brief Mission time when experiment should stop: T+4h */
+            static constexpr auto ExperimentTimeStop = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::hours(4));
 
             /**
              * @brief Ctor
