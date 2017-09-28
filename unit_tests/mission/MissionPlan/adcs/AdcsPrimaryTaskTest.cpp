@@ -87,7 +87,7 @@ namespace
     TEST_F(AdcsPrimaryTaskTest, TestPrimaryDetumblingConditionSuccess)
     {
         auto guard = InstallProxy(&os);
-        EXPECT_CALL(coordinator, CurrentMode()).WillOnce(Return(adcs::AdcsMode::Disabled));
+        EXPECT_CALL(coordinator, CurrentMode()).WillOnce(Return(adcs::AdcsMode::Stopped));
         ASSERT_THAT(this->primaryAction.condition(this->state, this->primaryAction.param), Eq(true));
     }
 
@@ -95,7 +95,7 @@ namespace
     {
         auto guard = InstallProxy(&os);
         state.PersistentState.Set(state::AdcsState(true));
-        EXPECT_CALL(coordinator, CurrentMode()).WillOnce(Return(adcs::AdcsMode::Disabled));
+        EXPECT_CALL(coordinator, CurrentMode()).WillOnce(Return(adcs::AdcsMode::Stopped));
         ASSERT_THAT(this->primaryAction.condition(this->state, this->primaryAction.param), Eq(false));
     }
 
