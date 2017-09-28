@@ -47,14 +47,14 @@ struct AntennaChannelInfo
 
 namespace antenna_error_counters
 {
-    /** @brief Defines error counter with embedded device id in first flash chip driver */
+    /** @brief Defines error counter for primary channel antenna */
     struct PrimaryChannel
     {
         /** @brief Error counter type */
         using ErrorCounter = error_counter::ErrorCounter<12>;
     };
 
-    /** @brief Defines error counter with embedded device id in second flash chip driver */
+    /** @brief Defines error counter for secondary channel antenna */
     struct SecondaryChannel
     {
         /** @brief Error counter type */

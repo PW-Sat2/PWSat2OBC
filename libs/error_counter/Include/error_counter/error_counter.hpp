@@ -150,10 +150,17 @@ namespace error_counter
         IErrorCountingCallback* _callback;
     };
 
+    /**
+     * @brief Helper class for accessing error counter of single device
+     */
     class DeviceErrorCounter
     {
       public:
-        /** @brief Error counting mechanism */
+        /**
+         * @brief Error counting mechanism
+         * @param counting Error counting mechanism
+         * @param deviceId Device ID
+         */
         DeviceErrorCounter(IErrorCounting& counting, Device deviceId);
 
         /** @brief Records single failure */
@@ -218,6 +225,11 @@ namespace error_counter
          */
         template <error_counter::Device Device> bool ReportResult(ErrorCounter<Device>& errorCounter);
 
+        /**
+          * @brief Report the aggregated state to real actual counter
+          * @param[in] errorCounter Error counter to report result to
+          * @return Aggregated result value
+          */
         bool ReportResult(DeviceErrorCounter& errorCounter);
 
       private:
@@ -364,9 +376,9 @@ namespace error_counter
 
     /**
      * @brief Operator that can be used to easily kick error counter depending on operation result
-     * @param flag Flag determining whether operation was successful
+     * @param result Operation result
      * @param counter Error counter
-     * @return Flag passed as input
+     * @return Result passed as input
      */
     inline OSResult operator>>(OSResult result, AggregatedErrorCounter& counter)
     {
