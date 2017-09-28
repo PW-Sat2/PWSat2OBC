@@ -60,6 +60,7 @@ namespace telecommunication
             SetInternalDetumblingMode = 0x1E,  //!< Disabling imtq built-in detumbling command
             SetAdcsMode = 0x1F,                //!< Set Adcs Mode telecommand
             DisableSailDeployment = 0x20,      //!< Disable automatic sail deployment
+            MemoryContent = 0x21,              //!< Memory contents
             Telemetry = 0x3F,                  //!< TelemetryLong
             LastItem                           //!< LastItem
         };

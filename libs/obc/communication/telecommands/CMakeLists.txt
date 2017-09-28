@@ -21,6 +21,7 @@ set(SOURCES
     compile_info.cpp
     eps.cpp
     adcs.cpp
+    memory.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

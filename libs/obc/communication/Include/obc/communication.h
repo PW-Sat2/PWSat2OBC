@@ -22,6 +22,7 @@
 #include "obc/telecommands/file_system.hpp"
 #include "obc/telecommands/flash.hpp"
 #include "obc/telecommands/i2c.hpp"
+#include "obc/telecommands/memory.hpp"
 #include "obc/telecommands/periodic_message.hpp"
 #include "obc/telecommands/photo.hpp"
 #include "obc/telecommands/ping.hpp"
@@ -168,7 +169,8 @@ namespace obc
         obc::telecommands::PerformCopyBootSlotsExperiment,
         obc::telecommands::SetBuiltinDetumblingBlockMaskTelecommand,
         obc::telecommands::SetAdcsModeTelecommand,
-        obc::telecommands::StopSailDeployment>;
+        obc::telecommands::StopSailDeployment,
+        obc::telecommands::ReadMemoryTelecommand>;
 
     /**
      * @brief OBC <-> Earth communication
