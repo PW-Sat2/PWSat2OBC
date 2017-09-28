@@ -23,6 +23,8 @@ struct AdcsCoordinatorMock : adcs::IAdcsCoordinator
 
     MOCK_METHOD0(Disable, OSResult());
 
+    MOCK_METHOD0(Stop, OSResult());
+
     MOCK_METHOD2(SetBlockMode, void(adcs::AdcsMode adcsMode, bool isBlocked));
 };
 

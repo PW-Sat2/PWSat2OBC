@@ -10,12 +10,9 @@ namespace adcs
 
     AdcsCoordinator::AdcsCoordinator(IAdcsProcessor& builtinDetumbling_, //
         IAdcsProcessor& experimentalDetumbling_,                         //
-        IAdcsProcessor& sunpointAlgorithm_,                              //
-        ICurrentTime& currentTime_)                                      //
-        : taskHandle(nullptr),                                           //
-          currentTime(currentTime_),                                     //
-          sync(System::CreateBinarySemaphore()),                         //
-          currentMode(AdcsMode::Disabled)                                //
+        IAdcsProcessor& sunpointAlgorithm_)                              //
+        : currentMode(AdcsMode::Stopped),                                //
+          _task("Adcs coordinator", this, TaskEntry)
     {
         std::uninitialized_fill(this->adcsMasks.begin(), this->adcsMasks.end(), false);
         adcsProcessors[static_cast<int>(AdcsMode::BuiltinDetumbling)] = &builtinDetumbling_;
@@ -25,15 +22,13 @@ namespace adcs
 
     OSResult AdcsCoordinator::Initialize()
     {
-        OSResult result;
-
-        result = System::GiveSemaphore(this->sync);
+        auto result = this->_queue.Create();
         if (OS_RESULT_FAILED(result))
         {
             return result;
         }
 
-        result = System::CreateTask(TaskEntry, "ADCSTask", 2_KB, this, TaskPriority::P4, &this->taskHandle);
+        result = this->_task.Create();
         if (OS_RESULT_FAILED(result))
         {
             return result;
@@ -53,120 +48,127 @@ namespace adcs
 
     AdcsMode AdcsCoordinator::CurrentMode() const
     {
-        Lock lock(this->sync, InfiniteTimeout);
-
-        if (!lock())
-        {
-            LOG(LOG_LEVEL_TRACE, "[ADCS] Unable to lock synchronization semaphore");
-        }
-
         return this->currentMode;
-    }
-
-    OSResult AdcsCoordinator::SetState(AdcsMode newMode, OSResult operationStatus)
-    {
-        if (OS_RESULT_SUCCEEDED(operationStatus))
-        {
-            this->currentMode = newMode;
-        }
-
-        return operationStatus;
     }
 
     OSResult AdcsCoordinator::EnableBuiltinDetumbling()
     {
-        return Enable(AdcsMode::BuiltinDetumbling);
+        return RequestMode(AdcsMode::BuiltinDetumbling);
     }
 
     OSResult AdcsCoordinator::EnableExperimentalDetumbling()
     {
-        return Enable(AdcsMode::ExperimentalDetumbling);
+        return RequestMode(AdcsMode::ExperimentalDetumbling);
     }
 
     OSResult AdcsCoordinator::EnableSunPointing()
     {
-        return Enable(AdcsMode::ExperimentalSunpointing);
+        return RequestMode(AdcsMode::ExperimentalSunpointing);
     }
 
-    OSResult AdcsCoordinator::Enable(AdcsMode mode)
+    OSResult AdcsCoordinator::Stop()
     {
-        Lock lock(this->sync, InfiniteTimeout);
-
-        if (!lock())
-        {
-            LOG(LOG_LEVEL_TRACE, "[ADCS] Unable to lock synchronization semaphore");
-            return OSResult::InvalidOperation;
-        }
-
-        if (this->currentMode == mode)
-        {
-            return OSResult::Success;
-        }
-
-        if (IsModeBlocked(mode))
-        {
-            return OSResult::Cancelled;
-        }
-
-        auto disableResult = Disable(false);
-        if (OS_RESULT_FAILED(disableResult))
-        {
-            return disableResult;
-        }
-
-        auto enableResult = SetState(mode, this->adcsProcessors[static_cast<int>(mode)]->Enable());
-
-        System::ResumeTask(taskHandle);
-
-        return enableResult;
+        return RequestMode(AdcsMode::Stopped);
     }
 
     OSResult AdcsCoordinator::Disable()
     {
-        Lock lock(this->sync, InfiniteTimeout);
-
-        if (!lock())
-        {
-            LOG(LOG_LEVEL_TRACE, "[ADCS] Unable to lock synchronization semaphore");
-            return OSResult::InvalidOperation;
-        }
-
-        return Disable(true);
+        return RequestMode(AdcsMode::Disabled);
     }
 
-    OSResult AdcsCoordinator::Disable(bool suspend)
+    OSResult AdcsCoordinator::RequestMode(AdcsMode mode)
     {
-        if (this->currentMode == AdcsMode::Disabled)
-        {
-            return OSResult::Success;
-        }
-
-        auto result = SetState(AdcsMode::Disabled, this->adcsProcessors[static_cast<int>(this->currentMode)]->Disable());
-
-        if (suspend)
-        {
-            System::SuspendTask(taskHandle);
-        }
-
-        return result;
+        return this->_queue.Push(mode, 5s);
     }
 
-    void AdcsCoordinator::Loop()
+    bool AdcsCoordinator::Disable(AdcsMode mode)
     {
-        if (this->currentMode == AdcsMode::Disabled)
+        if (num(mode) < 0)
         {
-            System::SuspendTask(nullptr);
-            return;
+            return true;
         }
 
-        LOGF(LOG_LEVEL_TRACE, "[ADCS] Running ADCS loop. Mode: %d", static_cast<int>(this->currentMode));
+        return OS_RESULT_SUCCEEDED(this->adcsProcessors[num(mode)]->Disable());
+    }
 
-        auto beforeTime = System::GetUptime(); // now.Value;
+    std::pair<AdcsMode, bool> AdcsCoordinator::SwitchMode(AdcsMode mode)
+    {
+        const auto previousMode = this->currentMode.load();
+        if (previousMode == mode)
+        {
+            return std::make_pair(mode, false);
+        }
 
-        auto adcsProcessor = this->adcsProcessors[static_cast<int>(this->currentMode)];
+        switch (previousMode)
+        {
+            case AdcsMode::BuiltinDetumbling:
+            case AdcsMode::ExperimentalDetumbling:
+            case AdcsMode::ExperimentalSunpointing:
+                this->currentMode = AdcsMode::Stopped;
+                if (OS_RESULT_FAILED(this->adcsProcessors[num(previousMode)]->Disable()))
+                {
+                    LOGF(LOG_LEVEL_ERROR, "Unable to stop %d adcs mode.", static_cast<int>(previousMode));
+                    return std::make_pair(AdcsMode::Stopped, true);
+                }
+
+                break;
+
+            case AdcsMode::Stopped:
+                break;
+
+            case AdcsMode::Disabled:
+            default:
+                if (mode != AdcsMode::Stopped)
+                {
+                    return std::make_pair(previousMode, false);
+                }
+
+                break;
+        }
+
+        switch (mode)
+        {
+            case AdcsMode::BuiltinDetumbling:
+            case AdcsMode::ExperimentalDetumbling:
+            case AdcsMode::ExperimentalSunpointing:
+            {
+                if (IsModeBlocked(mode))
+                {
+                    LOGF(LOG_LEVEL_ERROR, "%d adcs mode is blocked.", static_cast<int>(mode));
+                    return std::make_pair(this->currentMode.load(), previousMode != this->currentMode.load());
+                }
+
+                const auto status = this->adcsProcessors[static_cast<int>(mode)]->Enable();
+                if (OS_RESULT_SUCCEEDED(status))
+                {
+                    this->currentMode = mode;
+                }
+                else
+                {
+                    LOGF(LOG_LEVEL_ERROR, "Unable to start %d adcs mode.", static_cast<int>(mode));
+                }
+
+                return std::make_pair(this->currentMode.load(), previousMode != this->currentMode.load());
+            }
+
+            case AdcsMode::Disabled:
+            case AdcsMode::Stopped:
+                this->currentMode = mode;
+                return std::make_pair(mode, true);
+
+            default:
+                return std::make_pair(this->currentMode.load(), previousMode != this->currentMode.load());
+        }
+    }
+
+    void AdcsCoordinator::Run(AdcsMode mode, std::chrono::milliseconds time)
+    {
+        LOGF(LOG_LEVEL_TRACE, "[ADCS] Running ADCS loop. Mode: %d", static_cast<int>(mode));
+
+        auto adcsProcessor = this->adcsProcessors[static_cast<int>(mode)];
         adcsProcessor->Process();
 
-        auto elapsed = System::GetUptime() - beforeTime;
+        const auto elapsed = System::GetUptime() - time;
         auto waitDuration = adcsProcessor->GetWait() - elapsed;
         if (waitDuration.count() > 0)
         {
@@ -174,13 +176,48 @@ namespace adcs
         }
     }
 
-    void AdcsCoordinator::TaskEntry(void* arg)
+    void AdcsCoordinator::Loop()
     {
-        auto context = static_cast<AdcsCoordinator*>(arg);
+        AdcsMode mode = AdcsMode::Stopped;
+        auto timeout = 0ms;
+
+        auto time = System::GetUptime();
         for (;;)
         {
-            context->Loop();
+            AdcsMode newMode;
+            if (OS_RESULT_SUCCEEDED(this->_queue.Pop(newMode, timeout)))
+            {
+                const auto result = SwitchMode(newMode);
+                mode = result.first;
+                if (result.second)
+                {
+                    time = System::GetUptime();
+                }
+            }
+
+            switch (mode)
+            {
+                case AdcsMode::Stopped:
+                case AdcsMode::Disabled:
+                default:
+                    timeout = InfiniteTimeout;
+                    break;
+
+                case AdcsMode::BuiltinDetumbling:
+                case AdcsMode::ExperimentalDetumbling:
+                case AdcsMode::ExperimentalSunpointing:
+                    timeout = 0ms;
+                    Run(mode, time);
+                    break;
+            }
+
+            time = System::GetUptime();
         }
+    }
+
+    void AdcsCoordinator::TaskEntry(AdcsCoordinator* context)
+    {
+        context->Loop();
     }
 
     void AdcsCoordinator::SetBlockMode(AdcsMode adcsMode, bool isBlocked)

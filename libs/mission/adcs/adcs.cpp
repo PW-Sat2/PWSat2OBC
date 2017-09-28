@@ -36,7 +36,7 @@ namespace mission
                 return false;
             }
 
-            if (context->coordinator.CurrentMode() != ::adcs::AdcsMode::Disabled)
+            if (context->coordinator.CurrentMode() != ::adcs::AdcsMode::Stopped)
             {
                 return false;
             }
