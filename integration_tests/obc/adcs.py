@@ -1,7 +1,12 @@
-from obc_mixin import OBCMixin, command
-
+from obc_mixin import OBCMixin, command, decode_return
+from devices import AdcsMode
 
 class ADCSMixin(OBCMixin):
+
+    def _parse_adcs_mode(result):
+        return AdcsMode(int(result.split(': ')[1]))
+
+    @decode_return(_parse_adcs_mode)
     @command("adcs current")
     def adcs_current(self):
         pass

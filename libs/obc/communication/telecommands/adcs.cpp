@@ -1,6 +1,7 @@
 #include "adcs.hpp"
 #include "base/reader.h"
 #include "comm/ITransmitter.hpp"
+#include "logger/logger.h"
 #include "state/struct.h"
 #include "telecommunication/downlink.h"
 
@@ -21,19 +22,20 @@ namespace obc
         void SetBuiltinDetumblingBlockMaskTelecommand::Handle(devices::comm::ITransmitter& transmitter, //
             gsl::span<const std::uint8_t> parameters)
         {
-            DownlinkFrame response(DownlinkAPID::DisableBuiltinDetumbling, 0);
+            DownlinkFrame response(DownlinkAPID::SetInternalDetumblingMode, 0);
             auto& writer = response.PayloadWriter();
             auto& state = this->stateContainer.GetState().PersistentState;
 
             Reader r(parameters);
+            writer.WriteByte(r.ReadByte());
             auto newState = r.ReadByte() != 0;
             if (!r.Status())
             {
-                writer.WriteByte(-1);
+                writer.WriteByte(1);
             }
             else if (!state.Set(state::AdcsState(newState)))
             {
-                writer.WriteByte(-2);
+                writer.WriteByte(2);
             }
             else
             {
@@ -50,10 +52,12 @@ namespace obc
 
         void SetAdcsModeTelecommand::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
         {
+            LOG(LOG_LEVEL_ERROR, __FUNCTION__);
             DownlinkFrame response(DownlinkAPID::SetAdcsMode, 0);
             auto& writer = response.PayloadWriter();
 
             Reader r(parameters);
+            writer.WriteByte(r.ReadByte());
             auto newState = static_cast<adcs::AdcsMode>(r.ReadByte());
             if (!r.Status())
             {
@@ -90,7 +94,7 @@ namespace obc
 
         void SetAdcsModeTelecommand::Finish(OSResult result, Writer& writer)
         {
-            writer.WriteDoubleWordLE(num(result));
+            writer.WriteByte(OS_RESULT_SUCCEEDED(result) ? 0 : 1);
         }
     }
 }

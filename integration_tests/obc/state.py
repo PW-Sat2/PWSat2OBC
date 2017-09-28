@@ -16,6 +16,10 @@ class StateMixin(OBCMixin):
     def state_get_time_config(self):
         pass
 
+    @command("state get adcs")
+    def state_get_adcs_config(self):
+        pass
+
     @command("state set antenna {0}")
     def state_set_antenna(self, deployment_disabled):
         pass
@@ -26,4 +30,8 @@ class StateMixin(OBCMixin):
 
     @command("state set time_config {0} {1}")
     def state_set_time_config(self, internal_factor, external_factor):
+        pass
+
+    @command("state set adcs {0}")
+    def state_set_adcs_config(self, detumbling_disabled):
         pass

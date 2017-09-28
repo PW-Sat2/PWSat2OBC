@@ -4,11 +4,13 @@ import unittest
 import extensions
 from build_config import config
 from system import System
+from tests import _setup_log
 
 class BaseTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(BaseTest, self).__init__(*args, **kwargs)
         self.auto_power_on = True
+        _setup_log()
 
     def power_on_obc(self):
         self.system.restart(self.__class__._get_class_boot_wrappers() + self._get_boot_wrappers(self._testMethodName))

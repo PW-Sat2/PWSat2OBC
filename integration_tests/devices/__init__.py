@@ -9,6 +9,7 @@ from rtc import RTCDevice
 from payload import Payload
 from gpio import GPIODriver
 from camera import *
+from adcs import *
 
 __all__ = [
     'EPS',
@@ -34,5 +35,6 @@ __all__ = [
     "GPIODriver",
     "CameraDriver",
     'CameraLocation',
-    'PhotoResolution'
+    'PhotoResolution',
+    'AdcsMode'
 ]

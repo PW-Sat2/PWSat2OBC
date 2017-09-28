@@ -20,6 +20,7 @@ namespace obc
          *
          * Code: 0x24
          * Parameters:
+         *  - 8-bit - APID that will be used in response
          *  - 1-byte - new built-in detumbling mask value, true for disabled, false for enabled
          */
         class SetBuiltinDetumblingBlockMaskTelecommand : public telecommunication::uplink::Telecommand<0x24>
@@ -44,7 +45,8 @@ namespace obc
          * @telecommand
          *
          * Code: 0x25
-         * Parameters:
+         * Parameters
+         *  - 8-bit - APID that will be used in response:
          *  - 1-byte - new adcs subsystem mode
          */
         class SetAdcsModeTelecommand : public telecommunication::uplink::Telecommand<0x25>

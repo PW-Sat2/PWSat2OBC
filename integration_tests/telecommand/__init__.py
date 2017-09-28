@@ -15,6 +15,7 @@ from photo import *
 from state import *
 from compile_info import *
 from eps import *
+from adcs import *
 
 __all__ = [
     'DownloadFile',
@@ -45,6 +46,8 @@ __all__ = [
     'PerformSADSExperiment',
     'GetCompileInfoTelecommand',
     'DisableOverheatSubmode',
-    'CopyBootSlots'
+    'CopyBootSlots',
+    'SetBuiltinDetumblingBlockMaskTelecommand',
+    'SetAdcsModeTelecommand'
 ]
 

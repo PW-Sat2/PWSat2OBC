@@ -57,7 +57,7 @@ namespace telecommunication
             PeriodicSet = 0x1B,                //!< Set periodic message
             SailExperiment = 0x1C,             //!< Automatically sent sail experiment data
             CopyBootTable = 0x1D,              //!< Automatically sent during copy boot slots experiment
-            DisableBuiltinDetumbling = 0x1E,   //!< Disabling imtq built-in detumbling command
+            SetInternalDetumblingMode = 0x1E,  //!< Disabling imtq built-in detumbling command
             SetAdcsMode = 0x1F,                //!< Set Adcs Mode telecommand
             Telemetry = 0x3F,                  //!< TelemetryLong
             LastItem                           //!< LastItem
