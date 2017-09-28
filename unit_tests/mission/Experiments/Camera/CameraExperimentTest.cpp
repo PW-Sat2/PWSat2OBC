@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include "OSMock.hpp"
+#include "OsMock.hpp"
 #include "experiment/camera/camera_exp.hpp"
 #include "mock/FsMock.hpp"
 #include "mock/PhotoServiceMock.hpp"

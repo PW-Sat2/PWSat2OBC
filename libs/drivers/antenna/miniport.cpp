@@ -268,7 +268,7 @@ OSResult AntennaMiniportDriver::GetAntennaActivationTime( //
     }
 
     Reader reader(output);
-    const uint16_t value = reader.ReadWordBE();
+    const uint16_t value = reader.ReadWordLE();
     *span = milliseconds(value * 50);
     return OSResult::Success;
 }
