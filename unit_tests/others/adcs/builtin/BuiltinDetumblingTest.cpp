@@ -4,6 +4,10 @@
 #include "mock/ImtqDriverMock.hpp"
 
 using testing::_;
+using testing::Return;
+using testing::Eq;
+using testing::Ne;
+using testing::Invoke;
 
 namespace
 {
@@ -31,5 +35,38 @@ namespace
         _detumbling.Initialize();
         _detumbling.Enable();
         _detumbling.Disable();
+    }
+
+    TEST_F(BuiltinDetumblingTest, ShouldPerformSelfTestWhenEnabling)
+    {
+        EXPECT_CALL(_imtqDriver, PerformSelfTest(_, _)).WillOnce(Return(true));
+
+        _detumbling.Initialize();
+        auto r = _detumbling.Enable();
+        ASSERT_THAT(r, Eq(OSResult::Success));
+    }
+
+    TEST_F(BuiltinDetumblingTest, ShouldFailToEnableIfSelfTestFails)
+    {
+        EXPECT_CALL(_imtqDriver, PerformSelfTest(_, _)).WillOnce(Return(false));
+
+        _detumbling.Initialize();
+        auto r = _detumbling.Enable();
+        ASSERT_THAT(r, Eq(OSResult::Success));
+    }
+
+    TEST_F(BuiltinDetumblingTest, ShouldFailToEnableIfErrorsInSelfTest)
+    {
+        EXPECT_CALL(_imtqDriver, PerformSelfTest(_, _)).WillOnce(Invoke([](devices::imtq::SelfTestResult& result, bool) {
+            for (auto& s : result.stepResults)
+            {
+                s.error = devices::imtq::Error(5);
+            }
+            return true;
+        }));
+
+        _detumbling.Initialize();
+        auto r = _detumbling.Enable();
+        ASSERT_THAT(r, Eq(OSResult::Success));
     }
 }

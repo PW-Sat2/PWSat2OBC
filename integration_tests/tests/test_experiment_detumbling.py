@@ -45,6 +45,7 @@ class TestExperimentDetumbling(RestartPerTest):
 
         log.info('Waiting for experiment')
         self.system.obc.wait_for_experiment(ExperimentType.Detumbling, 40)
+        self.system.obc.wait_for_experiment_iteration(1, 30)
 
         log.info('Advancing time')
         self.system.obc.advance_time(timedelta(hours=4, minutes=1))

@@ -150,7 +150,7 @@ namespace devices
                 return false;
             }
             // 4s per axis + 1s for initialization + margin
-            System::SleepTask(15s);
+            System::SleepTask(2s);
             if (!GetSelfTestResultInternal(result, errorContext.Counter()))
             {
                 return false;
