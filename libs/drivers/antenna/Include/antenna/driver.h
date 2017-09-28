@@ -5,6 +5,7 @@
 
 #include "antenna.h"
 #include "base/os.h"
+#include "error_counter/error_counter.hpp"
 #include "i2c/forward.h"
 #include "time/TimePoint.h"
 
@@ -43,6 +44,23 @@ struct AntennaChannelInfo
      */
     drivers::i2c::II2CBus* communicationBus;
 };
+
+namespace antenna_error_counters
+{
+    /** @brief Defines error counter with embedded device id in first flash chip driver */
+    struct PrimaryChannel
+    {
+        /** @brief Error counter type */
+        using ErrorCounter = error_counter::ErrorCounter<12>;
+    };
+
+    /** @brief Defines error counter with embedded device id in second flash chip driver */
+    struct SecondaryChannel
+    {
+        /** @brief Error counter type */
+        using ErrorCounter = error_counter::ErrorCounter<13>;
+    };
+}
 
 /**
  * @brief Interface for antenna driver.
@@ -140,16 +158,18 @@ class AntennaDriver : public IAntennaDriver
      *
      * This procedure does not initiate any hardware communication, its whole purpose is to
      * initialize driver object with its default state.
+     * @param[in] errors Error counting mechanism
      * @param[in] miniport Pointer to the low level driver responsible for managing hardware controller communication.
      * @param[in] primaryBus Pointer to the low level communication driver responsible providing means of exchanging
      * packets with primary hardware controller.
      * @param[in] secondaryBus Pointer to the low level communication driver responsible providing means of exchanging
      * packets with backup hardware controller.
      */
-    AntennaDriver(                          //
-        AntennaMiniportDriver* miniport,    //
-        drivers::i2c::II2CBus* primaryBus,  //
-        drivers::i2c::II2CBus* secondaryBus //
+    AntennaDriver(                            //
+        error_counter::ErrorCounting& errors, //
+        AntennaMiniportDriver* miniport,      //
+        drivers::i2c::II2CBus* primaryBus,    //
+        drivers::i2c::II2CBus* secondaryBus   //
         );
 
     /**
@@ -241,6 +261,9 @@ class AntennaDriver : public IAntennaDriver
        * @brief Driver instance that coordinates communication with hardware.
        */
     AntennaMiniportDriver* miniport;
+
+    error_counter::DeviceErrorCounter primaryErrorCounter;
+    error_counter::DeviceErrorCounter secondaryErrorCounter;
 };
 
 /** @}*/

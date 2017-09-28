@@ -52,4 +52,18 @@ namespace error_counter
     AggregatedErrorCounter::AggregatedErrorCounter() : _errorCount(0)
     {
     }
+
+    DeviceErrorCounter::DeviceErrorCounter(IErrorCounting& counting, Device deviceId) : _counting(counting), _deviceId(deviceId)
+    {
+    }
+
+    void DeviceErrorCounter::Failure()
+    {
+        _counting.Failure(_deviceId);
+    }
+
+    void DeviceErrorCounter::Success()
+    {
+        _counting.Success(_deviceId);
+    }
 }

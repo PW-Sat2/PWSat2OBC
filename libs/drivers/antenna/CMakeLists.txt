@@ -18,6 +18,7 @@ target_link_libraries(${NAME}
 	logger
 	time
     i2c
+    error_counter
 	)
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)

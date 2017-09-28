@@ -285,11 +285,14 @@ OSResult AntennaDriver::GetTelemetry(AntennaTelemetry& telemetry)
         );
 }
 
-AntennaDriver::AntennaDriver(           //
-    AntennaMiniportDriver* miniport,    //
-    drivers::i2c::II2CBus* primaryBus,  //
-    drivers::i2c::II2CBus* secondaryBus //
+AntennaDriver::AntennaDriver(             //
+    error_counter::ErrorCounting& errors, //
+    AntennaMiniportDriver* miniport,      //
+    drivers::i2c::II2CBus* primaryBus,    //
+    drivers::i2c::II2CBus* secondaryBus   //
     )
+    : primaryErrorCounter(errors, antenna_error_counters::PrimaryChannel::ErrorCounter::DeviceId),    //
+      secondaryErrorCounter(errors, antenna_error_counters::SecondaryChannel::ErrorCounter::DeviceId) //
 {
     this->miniport = miniport;
     this->primaryChannel.status = ANTENNA_PORT_OPERATIONAL;

@@ -149,6 +149,25 @@ namespace error_counter
         IErrorCountingCallback* _callback;
     };
 
+    class DeviceErrorCounter
+    {
+      public:
+        /** @brief Error counting mechanism */
+        DeviceErrorCounter(IErrorCounting& counting, Device deviceId);
+
+        /** @brief Records single failure */
+        inline void Failure();
+        /** @brief Records single success */
+        inline void Success();
+
+      private:
+        /** @brief Error counting */
+        IErrorCounting& _counting;
+
+        /** @brief Device Id */
+        Device _deviceId;
+    };
+
     /**
      * @brief Helper class for accessing error counter of single device
      * @tparam Device Device ID
