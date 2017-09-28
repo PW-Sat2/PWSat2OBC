@@ -63,13 +63,14 @@ static inline OSResult MapStatus(I2CResult status)
 
 /**
  * @brief Sends requested command via the passed miniport driver.
+ * @param[in] error Aggregator for error counter.
  * @param[in] bus Bus that should be used to communicate with hardware.
  * @param[in] channel Current hardware channel.
  * @param[in] command Command to be sent.
  * @return Operation status. True on success, false otherwise.
  * @ingroup AntennaMiniport
  */
-static OSResult SendCommand(II2CBus* bus, AntennaChannel channel, Command command)
+static OSResult SendCommand(error_counter::AggregatedErrorCounter& error, II2CBus* bus, AntennaChannel channel, Command command)
 {
     uint8_t data = (uint8_t)command;
     const I2CResult result = bus->Write(channel, span<const uint8_t>(&data, 1));
@@ -79,11 +80,12 @@ static OSResult SendCommand(II2CBus* bus, AntennaChannel channel, Command comman
         LOGF(LOG_LEVEL_ERROR, "[ant] Unable to send command %d to %d, Reason: %d", command, channel, num(result));
     }
 
-    return MapStatus(result);
+    return MapStatus(result) >> error;
 }
 
 /**
  * @brief Sends requested command via the passed miniport driver and reads hardware response
+ * @param[in] error Aggregator for error counter.
  * @param[in] bus Bus that should be used to communicate with hardware.
  * @param[in] channel Current hardware channel.
  * @param[in] command Command to be sent.
@@ -92,7 +94,8 @@ static OSResult SendCommand(II2CBus* bus, AntennaChannel channel, Command comman
  * @return Operation status. True on success, false otherwise.
  * @ingroup AntennaMiniport
  */
-static OSResult SendCommandWithResponse(II2CBus* bus,
+static OSResult SendCommandWithResponse(error_counter::AggregatedErrorCounter& error,
+    II2CBus* bus,
     AntennaChannel channel,
     Command command,
     uint8_t* outBuffer,
@@ -107,31 +110,34 @@ static OSResult SendCommandWithResponse(II2CBus* bus,
         LOGF(LOG_LEVEL_ERROR, "[ant] Unable to send command %d to %d, Reason: %d", command, channel, num(result));
     }
 
-    return MapStatus(result);
+    return MapStatus(result) >> error;
 }
 
-OSResult AntennaMiniportDriver::Reset( //
-    II2CBus* communicationBus,         //
-    AntennaChannel channel             //
+OSResult AntennaMiniportDriver::Reset(            //
+    error_counter::AggregatedErrorCounter& error, //
+    II2CBus* communicationBus,                    //
+    AntennaChannel channel                        //
     )
 {
-    return SendCommand(communicationBus, channel, RESET);
+    return SendCommand(error, communicationBus, channel, RESET);
 }
 
 OSResult AntennaMiniportDriver::ArmDeploymentSystem( //
+    error_counter::AggregatedErrorCounter& error,    //
     II2CBus* communicationBus,                       //
     AntennaChannel channel                           //
     )
 {
-    return SendCommand(communicationBus, channel, ARM);
+    return SendCommand(error, communicationBus, channel, ARM);
 }
 
 OSResult AntennaMiniportDriver::DisarmDeploymentSystem( //
+    error_counter::AggregatedErrorCounter& error,       //
     II2CBus* communicationBus,                          //
     AntennaChannel channel                              //
     )
 {
-    return SendCommand(communicationBus, channel, DISARM);
+    return SendCommand(error, communicationBus, channel, DISARM);
 }
 
 static inline uint8_t GetOverrideFlag(bool override)
@@ -139,21 +145,23 @@ static inline uint8_t GetOverrideFlag(bool override)
     return override ? (DEPLOY_ANTENNA_OVERRIDE - DEPLOY_ANTENNA) : 0;
 }
 
-OSResult AntennaMiniportDriver::DeployAntenna( //
-    II2CBus* communicationBus,                 //
-    AntennaChannel channel,                    //
-    AntennaId antennaId,                       //
-    milliseconds timeout,                      //
-    bool override                              //
+OSResult AntennaMiniportDriver::DeployAntenna(    //
+    error_counter::AggregatedErrorCounter& error, //
+    II2CBus* communicationBus,                    //
+    AntennaChannel channel,                       //
+    AntennaId antennaId,                          //
+    milliseconds timeout,                         //
+    bool override                                 //
     )
 {
     uint8_t buffer[2];
     buffer[0] = (uint8_t)(DEPLOY_ANTENNA + antennaId + GetOverrideFlag(override));
     buffer[1] = (uint8_t)duration_cast<seconds>(timeout).count();
-    return MapStatus(communicationBus->Write(channel, buffer));
+    return MapStatus(communicationBus->Write(channel, buffer)) >> error;
 }
 
 OSResult AntennaMiniportDriver::InitializeAutomaticDeployment( //
+    error_counter::AggregatedErrorCounter& error,              //
     II2CBus* communicationBus,                                 //
     AntennaChannel channel,                                    //
     milliseconds timeout                                       //
@@ -162,18 +170,20 @@ OSResult AntennaMiniportDriver::InitializeAutomaticDeployment( //
     uint8_t buffer[2];
     buffer[0] = static_cast<uint8_t>(START_AUTOMATIC_DEPLOYMENT);
     buffer[1] = static_cast<uint8_t>(duration_cast<seconds>(timeout).count() >> 2);
-    return MapStatus(communicationBus->Write(channel, buffer));
+    return MapStatus(communicationBus->Write(channel, buffer)) >> error;
 }
 
 OSResult AntennaMiniportDriver::CancelAntennaDeployment( //
+    error_counter::AggregatedErrorCounter& error,        //
     II2CBus* communicationBus,                           //
     AntennaChannel channel                               //
     )
 {
-    return SendCommand(communicationBus, channel, CANCEL_ANTENNA_DEPLOYMENT);
+    return SendCommand(error, communicationBus, channel, CANCEL_ANTENNA_DEPLOYMENT);
 }
 
 OSResult AntennaMiniportDriver::GetDeploymentStatus( //
+    error_counter::AggregatedErrorCounter& error,    //
     II2CBus* communicationBus,                       //
     AntennaChannel channel,                          //
     AntennaDeploymentStatus* telemetry               //
@@ -181,7 +191,8 @@ OSResult AntennaMiniportDriver::GetDeploymentStatus( //
 {
     uint8_t output[2];
     memset(telemetry, 0, sizeof(*telemetry));
-    const OSResult result = SendCommandWithResponse(communicationBus,
+    const OSResult result = SendCommandWithResponse(error,
+        communicationBus,
         channel,
         QUERY_DEPLOYMENT_STATUS,
         output,
@@ -190,7 +201,7 @@ OSResult AntennaMiniportDriver::GetDeploymentStatus( //
 
     if (OS_RESULT_FAILED(result))
     {
-        return result;
+        return result >> error;
     }
 
     Reader reader(output);
@@ -203,7 +214,7 @@ OSResult AntennaMiniportDriver::GetDeploymentStatus( //
             value //
             );
 
-        return OSResult::OutOfRange;
+        return OSResult::OutOfRange >> error;
     }
 
     telemetry->DeploymentStatus[0] = IS_BIT_CLEAR(value, 15); // (value & 0x8000) == 0;
@@ -217,10 +228,11 @@ OSResult AntennaMiniportDriver::GetDeploymentStatus( //
     telemetry->IsDeploymentActive[3] = IS_BIT_SET(value, 1);      //(value & 0x0002) != 0;
     telemetry->IgnoringDeploymentSwitches = IS_BIT_SET(value, 8); //(value & 0x0100) != 0;
     telemetry->DeploymentSystemArmed = IS_BIT_SET(value, 0);      //(value & 0x0001) != 0;
-    return OSResult::Success;
+    return OSResult::Success >> error;
 }
 
 OSResult AntennaMiniportDriver::GetAntennaActivationCount( //
+    error_counter::AggregatedErrorCounter& error,          //
     II2CBus* communicationBus,                             //
     AntennaChannel channel,                                //
     AntennaId antennaId,                                   //
@@ -228,7 +240,8 @@ OSResult AntennaMiniportDriver::GetAntennaActivationCount( //
     )
 {
     uint8_t output;
-    const OSResult result = SendCommandWithResponse(communicationBus,
+    const OSResult result = SendCommandWithResponse(error,
+        communicationBus,
         channel,
         (Command)(QUERY_ANTENNA_ACTIVATION_COUNT + antennaId),
         &output,
@@ -238,14 +251,15 @@ OSResult AntennaMiniportDriver::GetAntennaActivationCount( //
     if (OS_RESULT_FAILED(result))
     {
         *count = 0;
-        return result;
+        return result >> error;
     }
 
     *count = output;
-    return OSResult::Success;
+    return OSResult::Success >> error;
 }
 
 OSResult AntennaMiniportDriver::GetAntennaActivationTime( //
+    error_counter::AggregatedErrorCounter& error,         //
     II2CBus* communicationBus,                            //
     AntennaChannel channel,                               //
     AntennaId antennaId,                                  //
@@ -254,7 +268,8 @@ OSResult AntennaMiniportDriver::GetAntennaActivationTime( //
 {
     uint8_t output[2];
 
-    const OSResult result = SendCommandWithResponse(communicationBus,
+    const OSResult result = SendCommandWithResponse(error,
+        communicationBus,
         channel,
         (Command)(QUERY_ANTENNA_ACTIVATION_TIME + antennaId),
         output,
@@ -264,24 +279,26 @@ OSResult AntennaMiniportDriver::GetAntennaActivationTime( //
     if (OS_RESULT_FAILED(result))
     {
         *span = 0ms;
-        return OSResult::IOError;
+        return OSResult::IOError >> error;
     }
 
     Reader reader(output);
     const uint16_t value = reader.ReadWordLE();
     *span = milliseconds(value * 50);
-    return OSResult::Success;
+    return OSResult::Success >> error;
 }
 
-OSResult AntennaMiniportDriver::GetTemperature( //
-    II2CBus* communicationBus,                  //
-    AntennaChannel channel,                     //
-    uint16_t* temperature                       //
+OSResult AntennaMiniportDriver::GetTemperature(   //
+    error_counter::AggregatedErrorCounter& error, //
+    II2CBus* communicationBus,                    //
+    AntennaChannel channel,                       //
+    uint16_t* temperature                         //
     )
 {
     uint8_t output[2];
     *temperature = 0;
-    const OSResult result = SendCommandWithResponse(communicationBus,
+    const OSResult result = SendCommandWithResponse(error,
+        communicationBus,
         channel,
         QUERY_TEMPERATURE,
         output,
@@ -290,7 +307,7 @@ OSResult AntennaMiniportDriver::GetTemperature( //
 
     if (OS_RESULT_FAILED(result))
     {
-        return OSResult::IOError;
+        return OSResult::IOError >> error;
     }
 
     Reader reader(output);
@@ -303,9 +320,9 @@ OSResult AntennaMiniportDriver::GetTemperature( //
             value //
             );
 
-        return OSResult::OutOfRange;
+        return OSResult::OutOfRange >> error;
     }
 
     *temperature = value & 0x3ff;
-    return OSResult::Success;
+    return OSResult::Success >> error;
 }

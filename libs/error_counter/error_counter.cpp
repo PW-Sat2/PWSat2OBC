@@ -66,4 +66,28 @@ namespace error_counter
     {
         _counting.Success(_deviceId);
     }
+
+    bool AggregatedErrorCounter::ReportResult(DeviceErrorCounter& errorCounter)
+    {
+        auto result = GetAggregatedResult();
+        if (result)
+        {
+            errorCounter.Success();
+        }
+        else
+        {
+            errorCounter.Failure();
+        }
+
+        return result;
+    }
+
+    AggregatedDeviceErrorReporter::AggregatedDeviceErrorReporter(DeviceErrorCounter& errorCounter) : _errorCounter(errorCounter)
+    {
+    }
+
+    AggregatedDeviceErrorReporter::~AggregatedDeviceErrorReporter()
+    {
+        _counter.ReportResult(_errorCounter);
+    }
 }

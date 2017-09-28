@@ -252,10 +252,21 @@ class AntennaDriver : public IAntennaDriver
     AntennaChannelInfo secondaryChannel;
 
   private:
-    OSResult UpdateDeploymentStatus(devices::antenna::AntennaTelemetry& telemetry);
-    OSResult UpdateActivationCount(devices::antenna::AntennaTelemetry& telemetry);
-    OSResult UpdateActivationTime(devices::antenna::AntennaTelemetry& telemetry);
+    OSResult UpdateDeploymentStatus(std::array<error_counter::AggregatedErrorCounter*, 2>& errorCounters, //
+        devices::antenna::AntennaTelemetry& telemetry);
+    OSResult UpdateActivationCount(std::array<error_counter::AggregatedErrorCounter*, 2>& errorCounters, //
+        devices::antenna::AntennaTelemetry& telemetry);
+    OSResult UpdateActivationTime(std::array<error_counter::AggregatedErrorCounter*, 2>& errorCounters, //
+        devices::antenna::AntennaTelemetry& telemetry);
+
     AntennaChannelInfo* GetChannel(AntennaChannel channel);
+    error_counter::DeviceErrorCounter& GetChannelErrorCounter(AntennaChannel channel);
+
+    OSResult GetDeploymentStatusWithError(            //
+        error_counter::AggregatedErrorCounter& error, //
+        AntennaChannel channel,                       //
+        AntennaDeploymentStatus* telemetry            //
+        );
 
     /**
        * @brief Driver instance that coordinates communication with hardware.

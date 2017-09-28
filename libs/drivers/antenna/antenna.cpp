@@ -41,10 +41,24 @@ AntennaChannelInfo* AntennaDriver::GetChannel(AntennaChannel channel)
     }
 }
 
+error_counter::DeviceErrorCounter& AntennaDriver::GetChannelErrorCounter(AntennaChannel channel)
+{
+    if (channel == ANTENNA_PRIMARY_CHANNEL)
+    {
+        return this->primaryErrorCounter;
+    }
+    else
+    {
+        return this->secondaryErrorCounter;
+    }
+}
+
 OSResult AntennaDriver::Reset(AntennaChannel channel)
 {
+    error_counter::AggregatedDeviceErrorReporter errorReporter(GetChannelErrorCounter(channel));
+
     AntennaChannelInfo* hardwareChannel = GetChannel(channel);
-    const OSResult status = this->miniport->Reset(hardwareChannel->communicationBus, channel);
+    const OSResult status = this->miniport->Reset(errorReporter.Counter(), hardwareChannel->communicationBus, channel);
     const bool result = OS_RESULT_SUCCEEDED(status);
     hardwareChannel->status = result ? ANTENNA_PORT_OPERATIONAL : ANTENNA_PORT_FAILURE;
     return status;
@@ -74,8 +88,11 @@ OSResult AntennaDriver::DeployAntenna(AntennaChannel channel,
     bool overrideSwitches //
     )
 {
+    error_counter::AggregatedDeviceErrorReporter errorReporter(GetChannelErrorCounter(channel));
+
     AntennaChannelInfo* hardwareChannel = GetChannel(channel);
     const OSResult status = this->miniport->ArmDeploymentSystem( //
+        errorReporter.Counter(),                                 //
         hardwareChannel->communicationBus,                       //
         channel                                                  //
         );
@@ -87,6 +104,7 @@ OSResult AntennaDriver::DeployAntenna(AntennaChannel channel,
     if (antennaId == ANTENNA_AUTO_ID)
     {
         return this->miniport->InitializeAutomaticDeployment( //
+            errorReporter.Counter(),                          //
             hardwareChannel->communicationBus,                //
             channel,                                          //
             timeout                                           //
@@ -95,6 +113,7 @@ OSResult AntennaDriver::DeployAntenna(AntennaChannel channel,
     else
     {
         return this->miniport->DeployAntenna(  //
+            errorReporter.Counter(),           //
             hardwareChannel->communicationBus, //
             channel,                           //
             antennaId,                         //
@@ -106,8 +125,11 @@ OSResult AntennaDriver::DeployAntenna(AntennaChannel channel,
 
 OSResult AntennaDriver::FinishDeployment(AntennaChannel channel)
 {
+    error_counter::AggregatedDeviceErrorReporter errorReporter(GetChannelErrorCounter(channel));
+
     AntennaChannelInfo* hardwareChannel = GetChannel(channel);
     const OSResult result = this->miniport->CancelAntennaDeployment( //
+        errorReporter.Counter(),                                     //
         hardwareChannel->communicationBus,                           //
         channel                                                      //
         );
@@ -117,6 +139,7 @@ OSResult AntennaDriver::FinishDeployment(AntennaChannel channel)
     }
 
     return this->miniport->DisarmDeploymentSystem( //
+        errorReporter.Counter(),                   //
         hardwareChannel->communicationBus,         //
         channel                                    //
         );
@@ -127,8 +150,11 @@ OSResult AntennaDriver::GetTemperature( //
     uint16_t* temperature               //
     )
 {
+    error_counter::AggregatedDeviceErrorReporter errorReporter(GetChannelErrorCounter(channel));
+
     AntennaChannelInfo* hardwareChannel = GetChannel(channel);
     return this->miniport->GetTemperature( //
+        errorReporter.Counter(),           //
         hardwareChannel->communicationBus, //
         channel,                           //
         temperature                        //
@@ -140,22 +166,42 @@ OSResult AntennaDriver::GetDeploymentStatus( //
     AntennaDeploymentStatus* telemetry       //
     )
 {
+    error_counter::AggregatedDeviceErrorReporter errorReporter(GetChannelErrorCounter(channel));
     AntennaChannelInfo* hardwareChannel = GetChannel(channel);
     return this->miniport->GetDeploymentStatus( //
+        errorReporter.Counter(),                //
         hardwareChannel->communicationBus,      //
         channel,                                //
         telemetry                               //
         );
 }
 
-OSResult AntennaDriver::UpdateDeploymentStatus(AntennaTelemetry& telemetry)
+OSResult AntennaDriver::GetDeploymentStatusWithError( //
+    error_counter::AggregatedErrorCounter& error,     //
+    AntennaChannel channel,                           //
+    AntennaDeploymentStatus* telemetry                //
+    )
+{
+    AntennaChannelInfo* hardwareChannel = GetChannel(channel);
+    return this->miniport->GetDeploymentStatus( //
+        error,                                  //
+        hardwareChannel->communicationBus,      //
+        channel,                                //
+        telemetry                               //
+        );
+}
+
+OSResult AntennaDriver::UpdateDeploymentStatus(                           //
+    std::array<error_counter::AggregatedErrorCounter*, 2>& errorCounters, //
+    AntennaTelemetry& telemetry                                           //
+    )
 {
     const AntennaChannel channels[] = {ANTENNA_FIRST_CHANNEL, ANTENNA_BACKUP_CHANNEL};
     OSResult status = OSResult::Success;
     for (auto i = 0u; i < count_of(channels); ++i)
     {
         AntennaDeploymentStatus deploymentStatus;
-        const auto result = GetDeploymentStatus(channels[i], &deploymentStatus);
+        const auto result = GetDeploymentStatusWithError(*errorCounters[i], channels[i], &deploymentStatus);
         if (OS_RESULT_FAILED(result))
         {
             status = result;
@@ -172,7 +218,10 @@ OSResult AntennaDriver::UpdateDeploymentStatus(AntennaTelemetry& telemetry)
     return status;
 }
 
-OSResult AntennaDriver::UpdateActivationCount(AntennaTelemetry& telemetry)
+OSResult AntennaDriver::UpdateActivationCount(                            //
+    std::array<error_counter::AggregatedErrorCounter*, 2>& errorCounters, //
+    AntennaTelemetry& telemetry                                           //
+    )
 {
     const AntennaId ids[] = {
         ANTENNA1_ID, ANTENNA2_ID, ANTENNA3_ID, ANTENNA4_ID,
@@ -187,6 +236,7 @@ OSResult AntennaDriver::UpdateActivationCount(AntennaTelemetry& telemetry)
     {
         uint8_t primaryValue = 0, secondaryValue = 0;
         const OSResult primary = this->miniport->GetAntennaActivationCount( //
+            *errorCounters[0],                                              //
             primaryChannel->communicationBus,                               //
             ANTENNA_PRIMARY_CHANNEL,                                        //
             ids[i],                                                         //
@@ -203,6 +253,7 @@ OSResult AntennaDriver::UpdateActivationCount(AntennaTelemetry& telemetry)
         }
 
         const OSResult secondary = this->miniport->GetAntennaActivationCount( //
+            *errorCounters[1],                                                //
             backupChannel->communicationBus,                                  //
             ANTENNA_BACKUP_CHANNEL,                                           //
             ids[i],                                                           //
@@ -224,7 +275,10 @@ OSResult AntennaDriver::UpdateActivationCount(AntennaTelemetry& telemetry)
     return status;
 }
 
-OSResult AntennaDriver::UpdateActivationTime(AntennaTelemetry& telemetry)
+OSResult AntennaDriver::UpdateActivationTime(                             //
+    std::array<error_counter::AggregatedErrorCounter*, 2>& errorCounters, //
+    AntennaTelemetry& telemetry                                           //
+    )
 {
     const AntennaId ids[] = {
         ANTENNA1_ID, ANTENNA2_ID, ANTENNA3_ID, ANTENNA4_ID,
@@ -241,6 +295,7 @@ OSResult AntennaDriver::UpdateActivationTime(AntennaTelemetry& telemetry)
         std::chrono::milliseconds secondaryValue(0);
 
         const OSResult primary = this->miniport->GetAntennaActivationTime( //
+            *errorCounters[0],                                             //
             primaryChannel->communicationBus,                              //
             ANTENNA_PRIMARY_CHANNEL,                                       //
             ids[i],                                                        //
@@ -257,6 +312,7 @@ OSResult AntennaDriver::UpdateActivationTime(AntennaTelemetry& telemetry)
         }
 
         const OSResult secondary = this->miniport->GetAntennaActivationTime( //
+            *errorCounters[1],                                               //
             backupChannel->communicationBus,                                 //
             ANTENNA_BACKUP_CHANNEL,                                          //
             ids[i],                                                          //
@@ -280,8 +336,13 @@ OSResult AntennaDriver::UpdateActivationTime(AntennaTelemetry& telemetry)
 
 OSResult AntennaDriver::GetTelemetry(AntennaTelemetry& telemetry)
 {
-    return Merge(UpdateDeploymentStatus(telemetry),                              //
-        Merge(UpdateActivationCount(telemetry), UpdateActivationTime(telemetry)) //
+    error_counter::AggregatedDeviceErrorReporter primaryErrorReporter(GetChannelErrorCounter(ANTENNA_PRIMARY_CHANNEL));
+    error_counter::AggregatedDeviceErrorReporter secondaryErrorReporter(GetChannelErrorCounter(ANTENNA_BACKUP_CHANNEL));
+    std::array<error_counter::AggregatedErrorCounter*, 2> errorCounters = {
+        &primaryErrorReporter.Counter(), &secondaryErrorReporter.Counter()};
+
+    return Merge(UpdateDeploymentStatus(errorCounters, telemetry),                                             //
+        Merge(UpdateActivationCount(errorCounters, telemetry), UpdateActivationTime(errorCounters, telemetry)) //
         );
 }
 

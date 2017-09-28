@@ -5,6 +5,7 @@
 #include <atomic>
 #include <cstdint>
 #include <type_traits>
+#include "base/os.h"
 #include "traits.hpp"
 #include "utils.h"
 
@@ -217,8 +218,38 @@ namespace error_counter
          */
         template <error_counter::Device Device> bool ReportResult(ErrorCounter<Device>& errorCounter);
 
+        bool ReportResult(DeviceErrorCounter& errorCounter);
+
       private:
         uint32_t _errorCount;
+    };
+
+    /**
+     * @brief Create instance of this class to guarantee error counter updating in current scope
+     */
+    class AggregatedDeviceErrorReporter : public NotMoveable, NotCopyable
+    {
+      public:
+        /** @brief Ctor */
+        AggregatedDeviceErrorReporter(DeviceErrorCounter& errorCounter);
+
+        /**
+         * @brief Destructor reports Failure or Success to error counter
+         */
+        ~AggregatedDeviceErrorReporter();
+
+        /**
+         * @brief Gives access to actual error counter
+         * @return Reference to error counter used to report errors
+         */
+        inline AggregatedErrorCounter& Counter()
+        {
+            return _counter;
+        }
+
+      private:
+        AggregatedErrorCounter _counter;
+        DeviceErrorCounter& _errorCounter;
     };
 
     /**
@@ -329,6 +360,22 @@ namespace error_counter
         }
 
         return flag;
+    }
+
+    /**
+     * @brief Operator that can be used to easily kick error counter depending on operation result
+     * @param flag Flag determining whether operation was successful
+     * @param counter Error counter
+     * @return Flag passed as input
+     */
+    inline OSResult operator>>(OSResult result, AggregatedErrorCounter& counter)
+    {
+        if (!OS_RESULT_FAILED(result))
+        {
+            counter.Failure();
+        }
+
+        return result;
     }
 
     /**
