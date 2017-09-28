@@ -15,6 +15,7 @@ from photo import *
 from state import *
 from compile_info import *
 from eps import *
+from adcs import *
 
 __all__ = [
     'DownloadFile',
@@ -22,6 +23,7 @@ __all__ = [
     'RemoveFile',
     'PerformDetumblingExperiment',
     'SetTimeCorrectionConfig',
+    'SetTime',
     'EraseBootTableEntry',
     'WriteProgramPart',
     'FinalizeProgramEntry',
@@ -45,6 +47,15 @@ __all__ = [
     'PerformSADSExperiment',
     'GetCompileInfoTelecommand',
     'DisableOverheatSubmode',
-    'CopyBootSlots'
+    'CopyBootSlots',
+    'SetBuiltinDetumblingBlockMaskTelecommand',
+    'SetAdcsModeTelecommand',
+    'ResetTransmitterTelecommand',
+    'SetBitrate',
+    'AbortExperiment',
+    'PerformSunSExperiment',
+    'PerformRadFETExperiment',
+    'PerformPayloadCommissioningExperiment',
+    'PerformCameraCommissioningExperiment'
 ]
 

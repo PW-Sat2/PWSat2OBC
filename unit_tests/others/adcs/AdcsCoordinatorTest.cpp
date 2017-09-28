@@ -314,4 +314,51 @@ namespace
         ASSERT_THAT(result, Ne(OSResult::Success));
         ASSERT_THAT(coordinator.CurrentMode(), Eq(AdcsMode::ExperimentalSunpointing));
     }
+
+    TEST_F(AdcsCoordinatorTest, TestModeBlockDefaultState)
+    {
+        ASSERT_THAT(coordinator.IsModeBlocked(AdcsMode::BuiltinDetumbling), Eq(false));
+        ASSERT_THAT(coordinator.IsModeBlocked(AdcsMode::ExperimentalDetumbling), Eq(false));
+        ASSERT_THAT(coordinator.IsModeBlocked(AdcsMode::ExperimentalSunpointing), Eq(false));
+    }
+
+    TEST_F(AdcsCoordinatorTest, TestModeBlockOutOfRange)
+    {
+        ASSERT_THAT(coordinator.IsModeBlocked(AdcsMode::Disabled), Eq(true));
+        ASSERT_THAT(coordinator.IsModeBlocked(static_cast<AdcsMode>(0xff)), Eq(true));
+    }
+
+    TEST_F(AdcsCoordinatorTest, TestBlockingMode)
+    {
+        coordinator.SetBlockMode(AdcsMode::BuiltinDetumbling, true);
+        ASSERT_THAT(coordinator.IsModeBlocked(AdcsMode::BuiltinDetumbling), Eq(true));
+        ASSERT_THAT(coordinator.IsModeBlocked(AdcsMode::ExperimentalDetumbling), Eq(false));
+        ASSERT_THAT(coordinator.IsModeBlocked(AdcsMode::ExperimentalSunpointing), Eq(false));
+    }
+
+    TEST_F(AdcsCoordinatorTest, TestUnblockingMode)
+    {
+        coordinator.SetBlockMode(AdcsMode::BuiltinDetumbling, true);
+        coordinator.SetBlockMode(AdcsMode::BuiltinDetumbling, false);
+        ASSERT_THAT(coordinator.IsModeBlocked(AdcsMode::BuiltinDetumbling), Eq(false));
+        ASSERT_THAT(coordinator.IsModeBlocked(AdcsMode::ExperimentalDetumbling), Eq(false));
+        ASSERT_THAT(coordinator.IsModeBlocked(AdcsMode::ExperimentalSunpointing), Eq(false));
+    }
+
+    TEST_F(AdcsCoordinatorTest, TestUnblockingDisabledMode)
+    {
+        coordinator.SetBlockMode(AdcsMode::Disabled, false);
+        ASSERT_THAT(coordinator.IsModeBlocked(AdcsMode::Disabled), Eq(true));
+    }
+
+    TEST_F(AdcsCoordinatorTest, TestEnablingBlockedMode)
+    {
+        coordinator.SetBlockMode(AdcsMode::BuiltinDetumbling, true);
+        EXPECT_CALL(primaryDetumbling, Enable()).Times(0);
+        EXPECT_CALL(os, TakeSemaphore(_, _)).WillRepeatedly(Return(OSResult::Success));
+        EXPECT_CALL(os, GiveSemaphore(_)).WillRepeatedly(Return(OSResult::Success));
+        const auto result = coordinator.EnableBuiltinDetumbling();
+        ASSERT_THAT(result, Ne(OSResult::Success));
+        ASSERT_THAT(coordinator.CurrentMode(), Eq(AdcsMode::Disabled));
+    }
 }

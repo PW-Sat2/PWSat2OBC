@@ -39,9 +39,10 @@ enum class OSResult
 {
     /** Success */
     Success = 0,
-
     /** @brief Requested operation is invalid. */
     InvalidOperation = ELAST,
+    /** Power failure */
+    PowerFailure = ELAST + 1,
 
     /** Requested element was not found. */
     NotFound = ENOENT,
@@ -129,9 +130,6 @@ enum class OSResult
     Overflow = EOVERFLOW,
     /** Operation canceled */
     Cancelled = ECANCELED,
-    /** Power failure */
-    PowerFailure = 201
-
 };
 
 /**

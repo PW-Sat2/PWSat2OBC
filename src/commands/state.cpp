@@ -18,6 +18,7 @@ enum class StateType
     Antenna,
     TimeState,
     TimeConfig,
+    AdcsConfig,
 };
 
 static StateType Parse(const char* name)
@@ -33,6 +34,10 @@ static StateType Parse(const char* name)
     else if (strcmp(name, "time_config") == 0)
     {
         return StateType::TimeConfig;
+    }
+    else if (strcmp(name, "adcs") == 0)
+    {
+        return StateType::AdcsConfig;
     }
     else
     {
@@ -94,9 +99,22 @@ static bool StateGet(int argc, char* argv[])
             return true;
         }
 
+        case StateType::AdcsConfig:
+        {
+            state::AdcsState adcsConfig;
+            if (!Mission.GetState().PersistentState.Get(adcsConfig))
+            {
+                GetTerminal().Puts("Can't get state::AdcsState");
+                return false;
+            }
+
+            GetTerminal().Printf("%d\n", static_cast<int>(adcsConfig.IsInternalDetumblingDisabled()));
+            return true;
+        }
+
         case StateType::Invalid:
         default:
-            GetTerminal().Puts("Usage: state get [antenna|time_state|time_config]");
+            GetTerminal().Puts("Usage: state get [antenna|time_state|time_config|adcs]");
             return false;
     }
 }
@@ -172,9 +190,28 @@ static bool StateSet(int argc, char* argv[])
             return true;
         }
 
+        case StateType::AdcsConfig:
+        {
+            if (argc < 2)
+            {
+                GetTerminal().Puts("Usage: state set adcs <internal_detumbling_mask>");
+                return false;
+            }
+
+            char* tail;
+            auto detumblingMask = strtol(argv[1], &tail, 10) != 0;
+            if (!persistentState.Set(state::AdcsState(detumblingMask)))
+            {
+                GetTerminal().Puts("Can't set state::AdcsConfig");
+                return false;
+            }
+
+            return true;
+        }
+
         case StateType::Invalid:
         default:
-            GetTerminal().Puts("Usage: state set [antenna|time_state|time_config]");
+            GetTerminal().Puts("Usage: state set [antenna|time_state|time_config|adcs]");
             return false;
     }
 }

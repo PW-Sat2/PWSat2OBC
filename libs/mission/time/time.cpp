@@ -102,6 +102,43 @@ namespace mission
         This->CorrectTime(state);
     }
 
+    bool TimeTask::DetermineNewTimeState(SystemState& state, milliseconds time, state::TimeState timeState, state::TimeState& newTimeState)
+    {
+        devices::rtc::RTCTime rtcTime;
+        if (OS_RESULT_FAILED(rtc.ReadTime(rtcTime)))
+        {
+            LOG(LOG_LEVEL_ERROR, "Failed to retrieve delta time from external RTC");
+            return false;
+        }
+
+        if (!rtcTime.IsValid())
+        {
+            LOG(LOG_LEVEL_ERROR, "RTC Time is invalid");
+            return false;
+        }
+
+        const auto currentRtcTime = duration_cast<milliseconds>(rtcTime.ToDuration());
+
+        state::TimeCorrectionConfiguration timeCorrectionConfiguration;
+        if (!state.PersistentState.Get(timeCorrectionConfiguration))
+        {
+            LOG(LOG_LEVEL_ERROR, "Can't get time correction configuration");
+            return false;
+        }
+
+        auto newTime = PerformTimeCorrection(time, currentRtcTime, timeState, timeCorrectionConfiguration);
+
+        if (!provider.SetCurrentTime(newTime))
+        {
+            LOG(LOG_LEVEL_ERROR, "[Time] Unable to set corrected time");
+            return false;
+        }
+
+        newTimeState = state::TimeState(newTime, currentRtcTime);
+
+        return true;
+    }
+
     void TimeTask::CorrectTime(SystemState& state)
     {
         ::Lock lock(this->syncSemaphore, InfiniteTimeout);
@@ -118,51 +155,29 @@ namespace mission
             return;
         }
 
-        devices::rtc::RTCTime rtcTime;
-        if (OS_RESULT_FAILED(rtc.ReadTime(rtcTime)))
-        {
-            LOG(LOG_LEVEL_ERROR, "Failed to retrieve delta time from external RTC");
-            return;
-        }
-
-        if (!rtcTime.IsValid())
-        {
-            LOG(LOG_LEVEL_ERROR, "RTC Time is invalid");
-            return;
-        }
-
-        const auto currentRtcTime = duration_cast<milliseconds>(rtcTime.ToDuration());
-
         state::TimeState timeState;
-        state::TimeCorrectionConfiguration timeCorrectionConfiguration;
         if (!state.PersistentState.Get(timeState))
         {
             LOG(LOG_LEVEL_ERROR, "Can't get time state");
             return;
         }
 
-        if (!state.PersistentState.Get(timeCorrectionConfiguration))
+        state::TimeState newTimeState;
+        auto success = DetermineNewTimeState(state, time.Value, timeState, newTimeState);
+        if (success)
         {
-            LOG(LOG_LEVEL_ERROR, "Can't get time correction configuration");
-            return;
+            if (!state.PersistentState.Set(newTimeState))
+            {
+                LOG(LOG_LEVEL_ERROR, "[Time] Unable to set time state");
+            }
+
+            state.Time = newTimeState.LastMissionTime();
+            _missionLoop.NotifyTimeChanged(newTimeState.LastMissionTime() - time.Value);
         }
-
-        auto newTime = PerformTimeCorrection(time.Value, currentRtcTime, timeState, timeCorrectionConfiguration);
-        auto difference = newTime - time.Value;
-
-        if (!provider.SetCurrentTime(newTime))
+        else
         {
-            LOG(LOG_LEVEL_ERROR, "[Time] Unable to set corrected time");
-            return;
+            state.PersistentState.Set(state::TimeState(time.Value, timeState.LastExternalTime()));
         }
-
-        if (!state.PersistentState.Set(state::TimeState(newTime, currentRtcTime)))
-        {
-            LOG(LOG_LEVEL_ERROR, "[Time] Unable to set time state");
-        }
-
-        state.Time = newTime;
-        _missionLoop.NotifyTimeChanged(difference);
     }
 
     milliseconds TimeTask::PerformTimeCorrection(milliseconds missionTime, //

@@ -1,5 +1,6 @@
 from parsec import joint, count
 
+from adcs import *
 from antenna import *
 from boot import *
 from error_counters import *
@@ -14,6 +15,7 @@ PersistentStateParser = joint(
     BootState, 
     SailState,
     ErrorCounters,
+    AdcsConfiguration,
     Message
     )
 

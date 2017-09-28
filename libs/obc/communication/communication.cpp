@@ -33,7 +33,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
     devices::payload::IPayloadDeviceDriver& payloadDriver,
     devices::gyro::IGyroscopeDriver& gyro,
     services::photo::IPhotoService& photo,
-    devices::eps::IEPSDriver& epsDriver)
+    devices::eps::IEPSDriver& epsDriver,
+    adcs::IAdcsCoordinator& adcsCoordinator)
     : Comm(commDriver),                                                                                                               //
       UplinkProtocolDecoder(settings::CommSecurityCode),                                                                              //
       SupportedTelecommands(                                                                                                          //
@@ -80,8 +81,10 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           DisableOverheatSubmodeTelecommand(epsDriver),                                                                 //
           SetBitrateTelecommand(),                                                                                      //
           PerformCopyBootSlotsExperiment(
-              experiments.ExperimentsController, experiments.Get<experiment::program::CopyBootSlotsExperiment>()) //
-          ),                                                                                                      //
+              experiments.ExperimentsController, experiments.Get<experiment::program::CopyBootSlotsExperiment>()), //
+          SetBuiltinDetumblingBlockMaskTelecommand(stateContainer, adcsCoordinator),                               //
+          SetAdcsModeTelecommand(adcsCoordinator)                                                                  //
+          ),                                                                                                       //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {
 }

@@ -13,6 +13,7 @@ namespace state
     class SailState;
     class ErrorCountersConfigState;
     class MessageState;
+    class AdcsState;
 
     struct NoTrackingStatePolicy;
     class StateTrackingPolicy;
@@ -25,6 +26,7 @@ namespace state
         BootState,                                       //
         SailState,                                       //
         ErrorCountersConfigState,                        //
+        AdcsState,                                       //
         MessageState                                     //
         >
         SystemPersistentState;
