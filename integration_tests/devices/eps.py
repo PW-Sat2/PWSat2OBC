@@ -280,12 +280,6 @@ class EPSControllerA(I2CDevice):
         hk = call(self.on_get_housekeeping, default=self.hk)
         return [0x61] + hk.bytes()
 
-    @i2cMock.command([0x4B])
-    def _error_code(self):
-        hk = call(self.on_get_housekeeping, default=self.hk)
-        return hk.bytes()[0x4B - 1:]
-
-
 class EPSControllerB(I2CDevice):
     def __init__(self, eps):
         super(EPSControllerB, self).__init__(0x36, "EPS.B")
@@ -338,12 +332,6 @@ class EPSControllerB(I2CDevice):
     def _housekeeping(self):
         hk = call(self.on_get_housekeeping, default=self.hk)
         return [0x9D] + hk.bytes()
-
-    @i2cMock.command([0x07])
-    def _error_code(self):
-        hk = call(self.on_get_housekeeping, default=self.hk)
-        return hk.bytes()[0x07 - 1:]
-
 
 class EPS:
     ERROR_COUNTER = 1
