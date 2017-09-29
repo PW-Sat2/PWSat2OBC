@@ -222,7 +222,7 @@ class AntennaController(i2cMock.I2CDevice):
 
     def _get_activation_time(self, antennaId):
         time = self.antenna_state[antennaId].activation_time
-        return [higher_byte(time), lower_byte(time)]
+        return [lower_byte(time), higher_byte(time)]
 
     # antenna icd section 6.2.20
     @i2cMock.command([0xB4])

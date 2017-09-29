@@ -221,7 +221,7 @@ namespace
         EXPECT_CALL(i2c, WriteRead(ANTENNA_PRIMARY_CHANNEL, ElementsAre(QueryActivationTime1), _))
             .WillOnce(Invoke([=](uint8_t /*address*/, span<const uint8_t> /*inData*/, span<uint8_t> outData) {
                 std::fill(outData.begin(), outData.end(), 0);
-                outData[0] = 10;
+                outData[1] = 10;
                 return I2CResult::OK;
             }));
         std::chrono::milliseconds response;
