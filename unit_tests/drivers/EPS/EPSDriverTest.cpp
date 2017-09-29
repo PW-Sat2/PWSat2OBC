@@ -193,50 +193,6 @@ namespace
         ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
     }
 
-    TEST_F(EPSDriverTest, ShouldReadErrorCodeA)
-    {
-        this->_errorCounter.Failure();
-
-        this->_errorA = ErrorCode::OnFire;
-        auto errorCode = this->_eps.GetErrorCode(EPSDriver::Controller::A);
-
-        ASSERT_THAT(errorCode, Eq(ErrorCode::OnFire));
-        ASSERT_THAT(this->_errorCounter.Current(), Eq(3));
-    }
-
-    TEST_F(EPSDriverTest, ShouldReadErrorCodeB)
-    {
-        this->_errorCounter.Failure();
-
-        this->_errorB = ErrorCode::OnFire;
-        auto errorCode = this->_eps.GetErrorCode(EPSDriver::Controller::B);
-
-        ASSERT_THAT(errorCode, Eq(ErrorCode::OnFire));
-        ASSERT_THAT(this->_errorCounter.Current(), Eq(3));
-    }
-
-    TEST_F(EPSDriverTest, ShouldReturnCommFailureOnReadErrorCodeANack)
-    {
-        EXPECT_CALL(this->_bus, WriteRead(EPSDriver::ControllerA, ElementsAre(0x4B), SpanOfSize(1))).WillOnce(Return(I2CResult::Nack));
-
-        this->_errorA = ErrorCode::OnFire;
-        auto errorCode = this->_eps.GetErrorCode(EPSDriver::Controller::A);
-
-        ASSERT_THAT(errorCode, Eq(ErrorCode::CommunicationFailure));
-        ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
-    }
-
-    TEST_F(EPSDriverTest, ShouldReturnCommFailureOnReadErrorCodeBNack)
-    {
-        EXPECT_CALL(this->_payload, WriteRead(EPSDriver::ControllerB, ElementsAre(0x07), SpanOfSize(1))).WillOnce(Return(I2CResult::Nack));
-
-        this->_errorA = ErrorCode::OnFire;
-        auto errorCode = this->_eps.GetErrorCode(EPSDriver::Controller::B);
-
-        ASSERT_THAT(errorCode, Eq(ErrorCode::CommunicationFailure));
-        ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
-    }
-
     TEST_F(EPSDriverTest, ShouldResetWatchdogInControllerA)
     {
         EXPECT_CALL(this->_bus, Write(EPSDriver::ControllerA, ElementsAre(0xE5))).WillOnce(Return(I2CResult::OK));
@@ -246,7 +202,7 @@ namespace
         auto errorCode = this->_eps.ResetWatchdog(EPSDriver::Controller::A);
 
         ASSERT_THAT(errorCode, Eq(ErrorCode::NoError));
-        ASSERT_THAT(this->_errorCounter.Current(), Eq(1));
+        ASSERT_THAT(this->_errorCounter.Current(), Eq(3));
     }
 
     TEST_F(EPSDriverTest, ShouldResetWatchdogInControllerB)
@@ -258,7 +214,7 @@ namespace
         auto errorCode = this->_eps.ResetWatchdog(EPSDriver::Controller::B);
 
         ASSERT_THAT(errorCode, Eq(ErrorCode::NoError));
-        ASSERT_THAT(this->_errorCounter.Current(), Eq(1));
+        ASSERT_THAT(this->_errorCounter.Current(), Eq(3));
     }
 
     TEST_F(EPSDriverTest, ShouldReturnErrorWhenReceivedNackOnResetingWatchdogOnControllerA)
@@ -278,28 +234,6 @@ namespace
         auto errorCode = this->_eps.ResetWatchdog(EPSDriver::Controller::B);
 
         ASSERT_THAT(errorCode, Eq(ErrorCode::CommunicationFailure));
-        ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
-    }
-
-    TEST_F(EPSDriverTest, ShouldReturnErrorWhenReceivedErroOnResetingWatchdogOnControllerA)
-    {
-        EXPECT_CALL(this->_bus, Write(EPSDriver::ControllerA, ElementsAre(0xE5))).WillOnce(Return(I2CResult::OK));
-
-        this->_errorA = ErrorCode::OnFire;
-        auto errorCode = this->_eps.ResetWatchdog(EPSDriver::Controller::A);
-
-        ASSERT_THAT(errorCode, Eq(ErrorCode::OnFire));
-        ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
-    }
-
-    TEST_F(EPSDriverTest, ShouldReturnErrorWhenReceivedErroOnResetingWatchdogOnControllerB)
-    {
-        EXPECT_CALL(this->_payload, Write(EPSDriver::ControllerB, ElementsAre(0xE5))).WillOnce(Return(I2CResult::OK));
-
-        this->_errorB = ErrorCode::OnFire;
-        auto errorCode = this->_eps.ResetWatchdog(EPSDriver::Controller::B);
-
-        ASSERT_THAT(errorCode, Eq(ErrorCode::OnFire));
         ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
     }
 
@@ -367,7 +301,7 @@ namespace
 
         auto r = this->_eps.EnableLCL(LCLToUse());
         ASSERT_THAT(r, Eq(ErrorCode::NoError));
-        ASSERT_THAT(this->_errorCounter.Current(), Eq(1));
+        ASSERT_THAT(this->_errorCounter.Current(), Eq(3));
     }
 
     TEST_P(EPSDriverLCLOperationsTest, ShouldReturnErrorOnEnableLCLCommunictionFail)
@@ -379,16 +313,6 @@ namespace
         ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
     }
 
-    TEST_P(EPSDriverLCLOperationsTest, ShouldReturnErrorOnEnableLCLWhenErrorIsReportedAfterAction)
-    {
-        EXPECT_CALL(Bus(), Write(Address(), ElementsAre(0xE1, _)))
-            .WillOnce(DoAll(Assign(Error(), ErrorCode::OnFire), Return(I2CResult::OK)));
-
-        auto r = this->_eps.EnableLCL(LCLToUse());
-        ASSERT_THAT(r, Eq(ErrorCode::OnFire));
-        ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
-    }
-
     TEST_P(EPSDriverLCLOperationsTest, ShouldDisableLCL)
     {
         EXPECT_CALL(Bus(), Write(Address(), ElementsAre(0xE2, _))).WillOnce(Return(I2CResult::OK));
@@ -397,7 +321,7 @@ namespace
 
         auto r = this->_eps.DisableLCL(LCLToUse());
         ASSERT_THAT(r, Eq(ErrorCode::NoError));
-        ASSERT_THAT(this->_errorCounter.Current(), Eq(1));
+        ASSERT_THAT(this->_errorCounter.Current(), Eq(3));
     }
 
     TEST_P(EPSDriverLCLOperationsTest, ShouldReturnErrorOnDisableLCLCommunictionFail)
@@ -406,16 +330,6 @@ namespace
 
         auto r = this->_eps.DisableLCL(LCLToUse());
         ASSERT_THAT(r, Eq(ErrorCode::CommunicationFailure));
-        ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
-    }
-
-    TEST_P(EPSDriverLCLOperationsTest, ShouldReturnErrorOnDisableLCLWhenErrorIsReportedAfterAction)
-    {
-        EXPECT_CALL(Bus(), Write(Address(), ElementsAre(0xE2, _)))
-            .WillOnce(DoAll(Assign(Error(), ErrorCode::OnFire), Return(I2CResult::OK)));
-
-        auto r = this->_eps.DisableLCL(LCLToUse());
-        ASSERT_THAT(r, Eq(ErrorCode::OnFire));
         ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
     }
 
@@ -496,7 +410,7 @@ namespace
 
         auto r = this->_eps.EnableBurnSwitch(UseMain(), Switch());
         ASSERT_THAT(r, Eq(ErrorCode::NoError));
-        ASSERT_THAT(this->_errorCounter.Current(), Eq(1));
+        ASSERT_THAT(this->_errorCounter.Current(), Eq(3));
     }
 
     TEST_P(EPSDriverEnableBurnSwitchTest, ShouldReturnCommunicationErrorWhenCommunicationFails)
@@ -505,16 +419,6 @@ namespace
 
         auto r = this->_eps.EnableBurnSwitch(UseMain(), Switch());
         ASSERT_THAT(r, Eq(ErrorCode::CommunicationFailure));
-        ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
-    }
-
-    TEST_P(EPSDriverEnableBurnSwitchTest, ShouldReturnErrorCodeSetAfterEnableBurnSwitch)
-    {
-        EXPECT_CALL(Bus(), Write(Address(), ElementsAre(0xE3, ID())))
-            .WillOnce(DoAll(Assign(Error(), ErrorCode::OnFire), Return(I2CResult::OK)));
-
-        auto r = this->_eps.EnableBurnSwitch(UseMain(), Switch());
-        ASSERT_THAT(r, Eq(ErrorCode::OnFire));
         ASSERT_THAT(this->_errorCounter.Current(), Eq(5));
     }
 

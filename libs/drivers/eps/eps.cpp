@@ -152,7 +152,7 @@ namespace devices
                 return ErrorCode::CommunicationFailure;
             }
 
-            return GetErrorCode(controller) >> this->_error;
+            return ErrorCode::NoError >> this->_error;
         }
 
         ErrorCode EPSDriver::DisableLCL(LCL lcl)
@@ -168,7 +168,7 @@ namespace devices
                 return ErrorCode::CommunicationFailure;
             }
 
-            return GetErrorCode(controller) >> this->_error;
+            return ErrorCode::NoError >> this->_error;
         }
 
         bool EPSDriver::DisableOverheatSubmode(Controller controller)
@@ -189,32 +189,7 @@ namespace devices
                 return ErrorCode::CommunicationFailure;
             }
 
-            return GetErrorCode(controller) >> this->_error;
-        }
-
-        ErrorCode EPSDriver::GetErrorCode(Controller controller)
-        {
-            std::array<std::uint8_t, 1> command;
-
-            if (controller == Controller::A)
-            {
-                command[0] = hk::ControllerATelemetry::ErrorCodeOffset;
-            }
-            else
-            {
-                command[0] = hk::ControllerBTelemetry::ErrorCodeOffset;
-            }
-
-            std::array<std::uint8_t, 1> response;
-
-            auto r = this->WriteRead(controller, command, response) >> this->_error;
-
-            if (r != I2CResult::OK)
-            {
-                return ErrorCode::CommunicationFailure;
-            }
-
-            return static_cast<ErrorCode>(response[0]);
+            return ErrorCode::NoError >> this->_error;
         }
 
         ErrorCode EPSDriver::ResetWatchdog(Controller controller)
@@ -227,7 +202,7 @@ namespace devices
                 return ErrorCode::CommunicationFailure;
             }
 
-            return GetErrorCode(controller) >> this->_error;
+            return ErrorCode::NoError >> this->_error;
         }
 
         I2CResult EPSDriver::Write(Controller controller, const gsl::span<std::uint8_t> inData)
