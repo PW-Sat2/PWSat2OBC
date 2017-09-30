@@ -1,3 +1,4 @@
+#include "antenna/driver.h"
 #include "camera/camera_low_level.h"
 #include "comm/CommDriver.hpp"
 #include "eps/eps.h"
@@ -34,7 +35,9 @@ namespace
         devices::fm25w::RedundantFM25WDriver,      // 8
         devices::payload::PayloadDriver,           // 9
         devices::camera::LowLevelCameraDriver,     // 10
-        devices::suns::SunSDriver                  // 11
+        devices::suns::SunSDriver,                 // 11
+        antenna_error_counters::PrimaryChannel,    // 12
+        antenna_error_counters::SecondaryChannel   // 13
         >;
 
     static_assert(Everything::IsOk, "Device IDs for error counting must be unique");

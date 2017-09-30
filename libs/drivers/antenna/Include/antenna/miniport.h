@@ -5,6 +5,7 @@
 
 #include "antenna.h"
 #include "base/os.h"
+#include "error_counter/error_counter.hpp"
 #include "i2c/forward.h"
 #include "time/TimePoint.h"
 
@@ -32,39 +33,46 @@ struct AntennaMiniportDriver
 {
     /**
      * @brief Procedure responsible for resetting the hardware controller.
+     * @param[in] error Aggregator for error counter.
      * @param[in] communicationBus Bus that should be used to communicate with hardware.
      * @param[in] channel Current hardware channel.
      * @return Operation status.
      */
-    virtual OSResult Reset(                      //
-        drivers::i2c::II2CBus* communicationBus, //
-        AntennaChannel channel                   //
+    virtual OSResult Reset(                           //
+        error_counter::AggregatedErrorCounter& error, //
+        drivers::i2c::II2CBus* communicationBus,      //
+        AntennaChannel channel                        //
         );
 
     /**
      * @brief Procedure responsible for activating the antenna deployment module.
+     * @param[in] error Aggregator for error counter.
      * @param[in] communicationBus Bus that should be used to communicate with hardware.
      * @param[in] channel Current hardware channel.
      * @return Operation status.
      */
-    virtual OSResult ArmDeploymentSystem(        //
-        drivers::i2c::II2CBus* communicationBus, //
-        AntennaChannel channel                   //
+    virtual OSResult ArmDeploymentSystem(             //
+        error_counter::AggregatedErrorCounter& error, //
+        drivers::i2c::II2CBus* communicationBus,      //
+        AntennaChannel channel                        //
         );
 
     /**
      * @brief Procedure responsible for deactivating the antenna deployment module.
+     * @param[in] error Aggregator for error counter.
      * @param[in] communicationBus Bus that should be used to communicate with hardware.
      * @param[in] channel Current hardware channel.
      * @return Operation status.
      */
-    virtual OSResult DisarmDeploymentSystem(     //
-        drivers::i2c::II2CBus* communicationBus, //
-        AntennaChannel channel                   //
+    virtual OSResult DisarmDeploymentSystem(          //
+        error_counter::AggregatedErrorCounter& error, //
+        drivers::i2c::II2CBus* communicationBus,      //
+        AntennaChannel channel                        //
         );
 
     /**
      * @brief Procedure responsible for initialization of manual deployment of specified antenna.
+     * @param[in] error Aggregator for error counter.
      * @param[in] communicationBus Bus that should be used to communicate with hardware.
      * @param[in] channel Current hardware channel.
      * @param[in] antennaId Identifier of antenna that should be deployed.
@@ -73,49 +81,56 @@ struct AntennaMiniportDriver
      * ignored during the process (true), false otherwise.
      * @return Operation status.
      */
-    virtual OSResult DeployAntenna(              //
-        drivers::i2c::II2CBus* communicationBus, //
-        AntennaChannel channel,                  //
-        AntennaId antennaId,                     //
-        std::chrono::milliseconds timeout,       //
-        bool override                            //
+    virtual OSResult DeployAntenna(                   //
+        error_counter::AggregatedErrorCounter& error, //
+        drivers::i2c::II2CBus* communicationBus,      //
+        AntennaChannel channel,                       //
+        AntennaId antennaId,                          //
+        std::chrono::milliseconds timeout,            //
+        bool override                                 //
         );
 
     /**
      * @brief Procedure responsible for initialization of automatic deployment of all antennas.
+     * @param[in] error Aggregator for error counter.
      * @param[in] communicationBus Bus that should be used to communicate with hardware.
      * @param[in] channel Current hardware channel.
      * @param[in] timeout Total deployment operation timeout.
      * @return Operation status.
      */
-    virtual OSResult InitializeAutomaticDeployment( //
-        drivers::i2c::II2CBus* communicationBus,    //
-        AntennaChannel channel,                     //
-        std::chrono::milliseconds timeout           //
+    virtual OSResult InitializeAutomaticDeployment(   //
+        error_counter::AggregatedErrorCounter& error, //
+        drivers::i2c::II2CBus* communicationBus,      //
+        AntennaChannel channel,                       //
+        std::chrono::milliseconds timeout             //
         );
 
     /**
      * @brief Procedure responsible for cancellation of all antenna deployment.
+     * @param[in] error Aggregator for error counter.
      * @param[in] communicationBus Bus that should be used to communicate with hardware.
      * @param[in] channel Current hardware channel.
      * @return Operation status.
      */
-    virtual OSResult CancelAntennaDeployment(    //
-        drivers::i2c::II2CBus* communicationBus, //
-        AntennaChannel channel                   //
+    virtual OSResult CancelAntennaDeployment(         //
+        error_counter::AggregatedErrorCounter& error, //
+        drivers::i2c::II2CBus* communicationBus,      //
+        AntennaChannel channel                        //
         );
 
     /**
-     * @brief Pointer to procedure responsible for querying the hardware for current antenna deployment status.
+     * @brief Procedure responsible for querying the hardware for current antenna deployment status.
+     * @param[in] error Aggregator for error counter.
      * @param[in] communicationBus Bus that should be used to communicate with hardware.
      * @param[in] channel Current hardware channel.
      * @param[out] telemetry Pointer to object that on success will be filled with antenna deployment status.
      * @return Operation status.
      */
-    virtual OSResult GetDeploymentStatus(        //
-        drivers::i2c::II2CBus* communicationBus, //
-        AntennaChannel channel,                  //
-        AntennaDeploymentStatus* telemetry       //
+    virtual OSResult GetDeploymentStatus(             //
+        error_counter::AggregatedErrorCounter& error, //
+        drivers::i2c::II2CBus* communicationBus,      //
+        AntennaChannel channel,                       //
+        AntennaDeploymentStatus* telemetry            //
         );
 
     /**
@@ -124,17 +139,19 @@ struct AntennaMiniportDriver
      *
      * The value returned by this function comes from non persistent counter of antenna deployment requests.
      *
+     * @param[in] error Aggregator for error counter.
      * @param[in] communicationBus Bus that should be used to communicate with hardware.
      * @param[in] channel Current hardware channel.
      * @param[in] antennaId Identifier of antenna whose activation count should be obtained.
      * @param[out] count Pointer to value that on success should be updated with antenna deployment count.
      * @return Operation status.
      */
-    virtual OSResult GetAntennaActivationCount(  //
-        drivers::i2c::II2CBus* communicationBus, //
-        AntennaChannel channel,                  //
-        AntennaId antennaId,                     //
-        uint8_t* count                           //
+    virtual OSResult GetAntennaActivationCount(       //
+        error_counter::AggregatedErrorCounter& error, //
+        drivers::i2c::II2CBus* communicationBus,      //
+        AntennaChannel channel,                       //
+        AntennaId antennaId,                          //
+        uint8_t* count                                //
         );
 
     /**
@@ -143,31 +160,35 @@ struct AntennaMiniportDriver
      *
      * The value returned by this function comes from non persistent counter of antenna deployment time.
      *
+     * @param[in] error Aggregator for error counter.
      * @param[in] communicationBus Bus that should be used to communicate with hardware.
      * @param[in] channel Current hardware channel.
      * @param[in] antennaId Identifier of antenna whose activation count should be obtained.
      * @param[out] count Pointer to value that on success should be updated with antenna deployment count.
      * @return Operation status.
      */
-    virtual OSResult GetAntennaActivationTime(   //
-        drivers::i2c::II2CBus* communicationBus, //
-        AntennaChannel channel,                  //
-        AntennaId antennaId,                     //
-        std::chrono::milliseconds* count         //
+    virtual OSResult GetAntennaActivationTime(        //
+        error_counter::AggregatedErrorCounter& error, //
+        drivers::i2c::II2CBus* communicationBus,      //
+        AntennaChannel channel,                       //
+        AntennaId antennaId,                          //
+        std::chrono::milliseconds* count              //
         );
 
     /**
      * @brief Procedure that is responsible for querying the hardware for its current temperature.
      *
+     * @param[in] error Aggregator for error counter.
      * @param[in] communicationBus Bus that should be used to communicate with hardware.
      * @param[in] channel Current hardware channel.
      * @param[out] temperature Pointer to value that on success should be updated with current temperature.
      * @return Operation status.
      */
-    virtual OSResult GetTemperature(             //
-        drivers::i2c::II2CBus* communicationBus, //
-        AntennaChannel channel,                  //
-        uint16_t* temperature                    //
+    virtual OSResult GetTemperature(                  //
+        error_counter::AggregatedErrorCounter& error, //
+        drivers::i2c::II2CBus* communicationBus,      //
+        AntennaChannel channel,                       //
+        uint16_t* temperature                         //
         );
 };
 

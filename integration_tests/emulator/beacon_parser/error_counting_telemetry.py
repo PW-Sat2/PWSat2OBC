@@ -6,7 +6,7 @@ class ErrorCountingTelemetry(CategoryParser):
         CategoryParser.__init__(self, '04: Error Counters', reader, store)
 
     def get_bit_count(self):
-        return 12*8
+        return 14*8
 
     def parse(self):
         self.append_byte("Comm")
@@ -21,3 +21,5 @@ class ErrorCountingTelemetry(CategoryParser):
         self.append_byte("Payload")
         self.append_byte("Camera")
         self.append_byte("ExpSuns")
+        self.append_byte("ANT Primary")
+        self.append_byte("ANT Backup")

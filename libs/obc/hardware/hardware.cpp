@@ -99,28 +99,28 @@ void OBCHardware::ResetEps()
 
 OBCHardware::OBCHardware(
     error_counter::ErrorCounting& errorCounting, services::power::IPowerControl& powerControl, TimeAction& burtcTickHandler)
-    : I2C(powerControl),                                                             //
-      FlashDriver(io_map::ProgramFlash::FlashBase),                                  //
-      Burtc(burtcTickHandler),                                                       //
-      FramSpi{                                                                       //
-          {SPI, Pins.Fram1ChipSelect},                                               //
-          {SPI, Pins.Fram2ChipSelect},                                               //
-          {SPI, Pins.Fram3ChipSelect}},                                              //
-      PersistentStorage{errorCounting,                                               //
-          {&FramSpi[0],                                                              //
-              &FramSpi[1],                                                           //
-              &FramSpi[2]}},                                                         //
-      Gyro(I2C.Buses.Payload),                                                       //
-      EPS(errorCounting, this->I2C.Buses.Bus, this->I2C.Buses.Payload),              //
-      antennaDriver(&antennaMiniport, &I2C.Buses.Bus, &I2C.Buses.Payload),           //
-      Imtq(errorCounting, I2C.Buses.Bus),                                            //
-      imtqTelemetryCollector(Imtq),                                                  //
-      SunSInterruptDriver(this->Pins.SunSInterrupt),                                 //
-      SunS(errorCounting, I2C.Buses.Payload, SunSInterruptDriver),                   //
-      rtc(errorCounting, I2C.Buses.Payload),                                         //
-      CommDriver(errorCounting, I2C.Buses.Bus),                                      //
-      PayloadInterruptDriver(this->Pins.PayloadInterrupt),                           //
-      PayloadDriver(errorCounting, this->I2C.Buses.Payload, PayloadInterruptDriver), //
+    : I2C(powerControl),                                                                  //
+      FlashDriver(io_map::ProgramFlash::FlashBase),                                       //
+      Burtc(burtcTickHandler),                                                            //
+      FramSpi{                                                                            //
+          {SPI, Pins.Fram1ChipSelect},                                                    //
+          {SPI, Pins.Fram2ChipSelect},                                                    //
+          {SPI, Pins.Fram3ChipSelect}},                                                   //
+      PersistentStorage{errorCounting,                                                    //
+          {&FramSpi[0],                                                                   //
+              &FramSpi[1],                                                                //
+              &FramSpi[2]}},                                                              //
+      Gyro(I2C.Buses.Payload),                                                            //
+      EPS(errorCounting, this->I2C.Buses.Bus, this->I2C.Buses.Payload),                   //
+      antennaDriver(errorCounting, &antennaMiniport, &I2C.Buses.Bus, &I2C.Buses.Payload), //
+      Imtq(errorCounting, I2C.Buses.Bus),                                                 //
+      imtqTelemetryCollector(Imtq),                                                       //
+      SunSInterruptDriver(this->Pins.SunSInterrupt),                                      //
+      SunS(errorCounting, I2C.Buses.Payload, SunSInterruptDriver),                        //
+      rtc(errorCounting, I2C.Buses.Payload),                                              //
+      CommDriver(errorCounting, I2C.Buses.Bus),                                           //
+      PayloadInterruptDriver(this->Pins.PayloadInterrupt),                                //
+      PayloadDriver(errorCounting, this->I2C.Buses.Payload, PayloadInterruptDriver),      //
       PayloadDeviceDriver(PayloadDriver)
 {
 }

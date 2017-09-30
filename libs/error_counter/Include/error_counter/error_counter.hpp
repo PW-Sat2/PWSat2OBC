@@ -5,6 +5,7 @@
 #include <atomic>
 #include <cstdint>
 #include <type_traits>
+#include "base/os.h"
 #include "traits.hpp"
 #include "utils.h"
 
@@ -100,7 +101,7 @@ namespace error_counter
     {
       public:
         /** @brief Maximum number of supported devices */
-        static constexpr std::uint8_t MaxDevices = 12;
+        static constexpr std::uint8_t MaxDevices = 14;
 
         /**
          * @brief Ctor
@@ -147,6 +148,32 @@ namespace error_counter
 
         /** @brief Callback */
         IErrorCountingCallback* _callback;
+    };
+
+    /**
+     * @brief Helper class for accessing error counter of single device
+     */
+    class DeviceErrorCounter
+    {
+      public:
+        /**
+         * @brief Error counting mechanism
+         * @param counting Error counting mechanism
+         * @param deviceId Device ID
+         */
+        DeviceErrorCounter(IErrorCounting& counting, Device deviceId);
+
+        /** @brief Records single failure */
+        inline void Failure();
+        /** @brief Records single success */
+        inline void Success();
+
+      private:
+        /** @brief Error counting */
+        IErrorCounting& _counting;
+
+        /** @brief Device Id */
+        Device _deviceId;
     };
 
     /**
@@ -198,8 +225,43 @@ namespace error_counter
          */
         template <error_counter::Device Device> bool ReportResult(ErrorCounter<Device>& errorCounter);
 
+        /**
+          * @brief Report the aggregated state to real actual counter
+          * @param[in] errorCounter Error counter to report result to
+          * @return Aggregated result value
+          */
+        bool ReportResult(DeviceErrorCounter& errorCounter);
+
       private:
         uint32_t _errorCount;
+    };
+
+    /**
+     * @brief Create instance of this class to guarantee error counter updating in current scope
+     */
+    class AggregatedDeviceErrorReporter : public NotMoveable, NotCopyable
+    {
+      public:
+        /** @brief Ctor */
+        AggregatedDeviceErrorReporter(DeviceErrorCounter& errorCounter);
+
+        /**
+         * @brief Destructor reports Failure or Success to error counter
+         */
+        ~AggregatedDeviceErrorReporter();
+
+        /**
+         * @brief Gives access to actual error counter
+         * @return Reference to error counter used to report errors
+         */
+        inline AggregatedErrorCounter& Counter()
+        {
+            return _counter;
+        }
+
+      private:
+        AggregatedErrorCounter _counter;
+        DeviceErrorCounter& _errorCounter;
     };
 
     /**
@@ -310,6 +372,22 @@ namespace error_counter
         }
 
         return flag;
+    }
+
+    /**
+     * @brief Operator that can be used to easily kick error counter depending on operation result
+     * @param result Operation result
+     * @param counter Error counter
+     * @return Result passed as input
+     */
+    inline OSResult operator>>(OSResult result, AggregatedErrorCounter& counter)
+    {
+        if (OS_RESULT_FAILED(result))
+        {
+            counter.Failure();
+        }
+
+        return result;
     }
 
     /**
