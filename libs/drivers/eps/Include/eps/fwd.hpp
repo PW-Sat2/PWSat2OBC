@@ -41,7 +41,6 @@ namespace devices
         enum class ErrorCode : std::uint16_t
         {
             NoError = 0,                    //!< NoError
-            OnFire = 0xAF,                  //!< OnFire
             CommunicationFailure = 0xFF + 1 //!< CommunicationFailure
         };
     }
