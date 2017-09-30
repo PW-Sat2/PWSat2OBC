@@ -59,11 +59,11 @@ namespace adcs
 
         /**
          * @brief Switches current adcs coordinator mode
-         * @param mode Requested mode
+         * @param requestedMode Requested mode
          * @return Operation status
          * @remark This procedure is not thread safe.
          */
-        std::pair<AdcsMode, bool> SwitchMode(AdcsMode mode);
+        std::pair<AdcsMode, bool> SwitchMode(AdcsMode requestedMode);
 
       private:
         /**
@@ -81,7 +81,7 @@ namespace adcs
 
         bool Disable(AdcsMode mode);
 
-        void Run(AdcsMode mode, std::chrono::milliseconds previousIterationTime);
+        std::chrono::milliseconds Run(AdcsMode mode);
 
         /** @brief Queue holding requested experiment */
         Queue<AdcsMode, 5> _queue;
@@ -99,7 +99,7 @@ namespace adcs
         std::array<std::atomic_bool, 3> adcsMasks;
 
         /** @brief Background task */
-        Task<AdcsCoordinator*, 2_KB, TaskPriority::P4> _task;
+        Task<AdcsCoordinator*, 3_KB, TaskPriority::P4> _task;
     };
 }
 #endif

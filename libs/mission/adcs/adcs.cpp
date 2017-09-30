@@ -9,7 +9,8 @@ namespace mission
     namespace adcs
     {
         AdcsPrimaryTask::AdcsPrimaryTask(::adcs::IAdcsCoordinator& adcsCoordinator) //
-            : retryCount(RetryCount), coordinator(adcsCoordinator)
+            : retryCount(RetryCount),
+              coordinator(adcsCoordinator)
         {
         }
         /**
