@@ -5,6 +5,7 @@
 #include "mission.h"
 #include "terminal.h"
 #include "watchdog/internal.hpp"
+#include "antenna/driver.h"
 
 static void ProcessState(OBC* obc)
 {
@@ -76,7 +77,9 @@ static std::uint16_t GetErrorCounterMask()
         1 << devices::fm25w::RedundantFM25WDriver::ErrorCounter::DeviceId |      //
         1 << devices::payload::PayloadDriver::ErrorCounter::DeviceId |           //
         1 << devices::camera::LowLevelCameraDriver::ErrorCounter::DeviceId |     //
-        1 << devices::suns::SunSDriver::ErrorCounter::DeviceId;
+        1 << devices::suns::SunSDriver::ErrorCounter::DeviceId |                 //
+        1 << antenna_error_counters::PrimaryChannel::ErrorCounter::DeviceId |    //
+        1 << antenna_error_counters::SecondaryChannel::ErrorCounter::DeviceId;   //
 }
 
 OBC::OBC()
