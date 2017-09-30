@@ -22,3 +22,7 @@ class ADCSMixin(OBCMixin):
     @command("adcs exp_dtb")
     def adcs_enable_experimental_detumbling(self):
         pass
+
+    @command("adcs stop")
+    def adcs_stop(self):
+        pass

@@ -91,12 +91,12 @@ namespace adcs
         return OS_RESULT_SUCCEEDED(this->adcsProcessors[num(mode)]->Disable());
     }
 
-    std::pair<AdcsMode, bool> AdcsCoordinator::SwitchMode(AdcsMode mode)
+    std::pair<AdcsMode, bool> AdcsCoordinator::SwitchMode(AdcsMode requestedMode)
     {
         const auto previousMode = this->currentMode.load();
-        if (previousMode == mode)
+        if (previousMode == requestedMode)
         {
-            return std::make_pair(mode, false);
+            return std::make_pair(requestedMode, false);
         }
 
         switch (previousMode)
@@ -118,7 +118,7 @@ namespace adcs
 
             case AdcsMode::Disabled:
             default:
-                if (mode != AdcsMode::Stopped)
+                if (requestedMode != AdcsMode::Stopped)
                 {
                     return std::make_pair(previousMode, false);
                 }
@@ -126,26 +126,26 @@ namespace adcs
                 break;
         }
 
-        switch (mode)
+        switch (requestedMode)
         {
             case AdcsMode::BuiltinDetumbling:
             case AdcsMode::ExperimentalDetumbling:
             case AdcsMode::ExperimentalSunpointing:
             {
-                if (IsModeBlocked(mode))
+                if (IsModeBlocked(requestedMode))
                 {
-                    LOGF(LOG_LEVEL_ERROR, "%d adcs mode is blocked.", static_cast<int>(mode));
+                    LOGF(LOG_LEVEL_ERROR, "%d adcs mode is blocked.", static_cast<int>(requestedMode));
                     return std::make_pair(this->currentMode.load(), previousMode != this->currentMode.load());
                 }
 
-                const auto status = this->adcsProcessors[static_cast<int>(mode)]->Enable();
+                const auto status = this->adcsProcessors[static_cast<int>(requestedMode)]->Enable();
                 if (OS_RESULT_SUCCEEDED(status))
                 {
-                    this->currentMode = mode;
+                    this->currentMode = requestedMode;
                 }
                 else
                 {
-                    LOGF(LOG_LEVEL_ERROR, "Unable to start %d adcs mode.", static_cast<int>(mode));
+                    LOGF(LOG_LEVEL_ERROR, "Unable to start %d adcs mode.", static_cast<int>(requestedMode));
                 }
 
                 return std::make_pair(this->currentMode.load(), previousMode != this->currentMode.load());
@@ -153,27 +153,27 @@ namespace adcs
 
             case AdcsMode::Disabled:
             case AdcsMode::Stopped:
-                this->currentMode = mode;
-                return std::make_pair(mode, true);
+                this->currentMode = requestedMode;
+                return std::make_pair(requestedMode, true);
 
             default:
                 return std::make_pair(this->currentMode.load(), previousMode != this->currentMode.load());
         }
     }
 
-    void AdcsCoordinator::Run(AdcsMode mode, std::chrono::milliseconds time)
+    std::chrono::milliseconds AdcsCoordinator::Run(AdcsMode mode)
     {
         LOGF(LOG_LEVEL_TRACE, "[ADCS] Running ADCS loop. Mode: %d", static_cast<int>(mode));
+
+        auto startTime = System::GetUptime();
 
         auto adcsProcessor = this->adcsProcessors[static_cast<int>(mode)];
         adcsProcessor->Process();
 
-        const auto elapsed = System::GetUptime() - time;
+        const auto elapsed = System::GetUptime() - startTime;
         auto waitDuration = adcsProcessor->GetWait() - elapsed;
-        if (waitDuration.count() > 0)
-        {
-            System::SleepTask(waitDuration);
-        }
+
+        return std::max(0ms, waitDuration);
     }
 
     void AdcsCoordinator::Loop()
@@ -181,7 +181,8 @@ namespace adcs
         AdcsMode mode = AdcsMode::Stopped;
         auto timeout = 0ms;
 
-        auto time = System::GetUptime();
+        auto lastIterationTime = System::GetUptime();
+        auto nextIterationAt = lastIterationTime;
         for (;;)
         {
             AdcsMode newMode;
@@ -191,7 +192,7 @@ namespace adcs
                 mode = result.first;
                 if (result.second)
                 {
-                    time = System::GetUptime();
+                    lastIterationTime = nextIterationAt = System::GetUptime();
                 }
             }
 
@@ -206,12 +207,17 @@ namespace adcs
                 case AdcsMode::BuiltinDetumbling:
                 case AdcsMode::ExperimentalDetumbling:
                 case AdcsMode::ExperimentalSunpointing:
-                    timeout = 0ms;
-                    Run(mode, time);
+                    auto currentTime = System::GetUptime();
+                    if (currentTime >= nextIterationAt)
+                    {
+                        auto delay = Run(mode);
+                        lastIterationTime = System::GetUptime();
+                        nextIterationAt = lastIterationTime + delay;
+                    }
+                    timeout = std::max(0ms, nextIterationAt - System::GetUptime());
+
                     break;
             }
-
-            time = System::GetUptime();
         }
     }
 

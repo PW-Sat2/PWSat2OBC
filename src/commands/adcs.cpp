@@ -32,8 +32,14 @@ void AdcsCommand(std::uint16_t argc, char* argv[])
 
         GetTerminal().Printf("Switching to experimental detumbling...Result: %d", num(r));
     }
+    else if (argc == 1 && strcmp(argv[0], "stop") == 0)
+    {
+        auto r = adcs.Stop();
+
+        GetTerminal().Printf("Stopping...Result: %d", num(r));
+    }
     else
     {
-        GetTerminal().Puts("adcs <current|disable|builtin|exp_dtb>");
+        GetTerminal().Puts("adcs <current|disable|builtin|exp_dtb|stop>");
     }
 }
