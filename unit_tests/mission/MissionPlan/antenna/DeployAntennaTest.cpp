@@ -96,6 +96,7 @@ namespace
             };
 
             expectDeployment(AntennaChannel::ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA_AUTO_ID, 120000ms, 180s);
+
             expectDeployment(AntennaChannel::ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA_AUTO_ID, 120000ms, 180s);
         }
 
