@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "OsMock.hpp"
 #include "mission/antenna_task.hpp"
 #include "mission/base.hpp"
 #include "mock/AntennaMock.hpp"
@@ -21,17 +22,28 @@ namespace
     class DeployAntennaTest : public testing::Test
     {
       protected:
+        DeployAntennaTest();
+
         std::chrono::milliseconds _nextTime;
         SystemState _state;
 
         testing::StrictMock<PowerControlMock> _power;
         testing::StrictMock<AntennaMock> _antenna;
 
+        testing::NiceMock<OSMock> _os;
+        OSReset _osReset{InstallProxy(&_os)};
+
         AntennaTask _task{std::make_tuple(std::ref(_antenna), std::ref(_power))};
         ActionDescriptor<SystemState> _action{_task.BuildAction()};
 
         void Run(std::uint32_t maxIterations);
     };
+
+    DeployAntennaTest::DeployAntennaTest()
+    {
+        ON_CALL(_os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
+        ON_CALL(_os, GiveSemaphore(_)).WillByDefault(Return(OSResult::Success));
+    }
 
     void DeployAntennaTest::Run(std::uint32_t maxIterations)
     {
@@ -109,5 +121,23 @@ namespace
         }
 
         Run(100);
+
+        ASSERT_THAT(_state.AntennaState.IsDeployed(), Eq(true));
+    }
+
+    TEST_F(DeployAntennaTest, ShouldNotOpenAntennaBeforeSilentPeriodIsOver)
+    {
+        _state.Time = 25min;
+
+        ASSERT_THAT(_action.EvaluateCondition(_state), Eq(false));
+    }
+
+    TEST_F(DeployAntennaTest, ShouldNotOpenAntennaIfOpeningIsDisabled)
+    {
+        _state.Time = 2h;
+
+        _state.PersistentState.Set(state::AntennaConfiguration(true));
+
+        ASSERT_THAT(_action.EvaluateCondition(_state), Eq(false));
     }
 }

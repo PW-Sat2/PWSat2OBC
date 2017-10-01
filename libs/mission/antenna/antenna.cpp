@@ -72,7 +72,8 @@ namespace mission
             Step<AntennaChannel::ANTENNA_BACKUP_CHANNEL>::FullSequenceManual<AntennaId::ANTENNA4_ID>);
 
         AntennaTask::AntennaTask(std::tuple<IAntennaDriver&, services::power::IPowerControl&> args)
-            : _powerControl(std::get<services::power::IPowerControl&>(args)), _antenna(std::get<IAntennaDriver&>(args))
+            : _powerControl(std::get<services::power::IPowerControl&>(args)), _antenna(std::get<IAntennaDriver&>(args)), _step(0),
+              _nextStepAt(0)
         {
         }
 
@@ -98,6 +99,16 @@ namespace mission
             if (state.Time < This->_nextStepAt)
             {
                 return false;
+            }
+
+            state::AntennaConfiguration cfg;
+
+            if (state.PersistentState.Get(cfg))
+            {
+                if (cfg.IsDeploymentDisabled())
+                {
+                    return false;
+                }
             }
 
             return true;
