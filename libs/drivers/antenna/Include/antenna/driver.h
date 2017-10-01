@@ -244,6 +244,9 @@ class AntennaDriver : public IAntennaDriver
      */
     OSResult GetTelemetry(devices::antenna::AntennaTelemetry& telemetry) override;
 
+    virtual OSResult Arm(AntennaChannel channel) override;
+    virtual OSResult Disarm(AntennaChannel channel) override;
+
     /**
      * @brief Primary antenna controller channel.
      */
