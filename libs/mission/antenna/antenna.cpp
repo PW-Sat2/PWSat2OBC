@@ -125,6 +125,11 @@ namespace mission
             stepDescriptor.Action(This, stepDescriptor.Channel, stepDescriptor.Antenna, stepDescriptor.burnTime);
             This->_step++;
             This->_nextStepAt = state.Time + stepDescriptor.waitTime;
+
+            if (This->_step >= Steps.size())
+            {
+                state.AntennaState.SetDeployment(true);
+            }
         }
 
         ActionDescriptor<SystemState> AntennaTask::BuildAction()
