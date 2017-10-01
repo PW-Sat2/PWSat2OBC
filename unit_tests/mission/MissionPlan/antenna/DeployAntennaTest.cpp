@@ -140,4 +140,48 @@ namespace
 
         ASSERT_THAT(_action.EvaluateCondition(_state), Eq(false));
     }
+
+    TEST_F(DeployAntennaTest, ShouldRetryFailedStep)
+    {
+        _state.Time = 40min;
+
+        EXPECT_CALL(_power, PrimaryAntennaPower(true)).WillOnce(Return(false));
+
+        ASSERT_THAT(_action.EvaluateCondition(_state), Eq(true));
+        _action.Execute(_state);
+
+        EXPECT_CALL(_power, PrimaryAntennaPower(true)).WillOnce(Return(false));
+
+        ASSERT_THAT(_action.EvaluateCondition(_state), Eq(true));
+        _action.Execute(_state);
+    }
+
+    TEST_F(DeployAntennaTest, ShouldRetryFailedStepAndMoveForwardAfterThreeRetries)
+    {
+        _state.Time = 40min;
+
+        EXPECT_CALL(_power, PrimaryAntennaPower(true)).WillOnce(Return(false));
+
+        ASSERT_THAT(_action.EvaluateCondition(_state), Eq(true));
+        _action.Execute(_state);
+
+        EXPECT_CALL(_power, PrimaryAntennaPower(true)).WillOnce(Return(false));
+
+        ASSERT_THAT(_action.EvaluateCondition(_state), Eq(true));
+        _action.Execute(_state);
+
+        EXPECT_CALL(_power, PrimaryAntennaPower(true)).WillOnce(Return(false));
+
+        ASSERT_THAT(_action.EvaluateCondition(_state), Eq(true));
+        _action.Execute(_state);
+
+        ASSERT_THAT(_action.EvaluateCondition(_state), Eq(false));
+
+        _state.Time += 10s;
+
+        ASSERT_THAT(_action.EvaluateCondition(_state), Eq(true));
+
+        EXPECT_CALL(_antenna, Reset(_)).WillOnce(Return(OSResult::Success));
+        _action.Execute(_state);
+    }
 }

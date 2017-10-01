@@ -73,7 +73,7 @@ namespace mission
 
         AntennaTask::AntennaTask(std::tuple<IAntennaDriver&, services::power::IPowerControl&> args)
             : _powerControl(std::get<services::power::IPowerControl&>(args)), _antenna(std::get<IAntennaDriver&>(args)), _step(0),
-              _nextStepAt(0)
+              _nextStepAt(0), _retryCounter(StepRetries)
         {
         }
 
@@ -120,11 +120,22 @@ namespace mission
 
             (void)state;
 
+            LOGF(LOG_LEVEL_INFO, "[ant] Performing step %d", This->_step);
+
             auto stepDescriptor = Steps[This->_step];
 
-            stepDescriptor.Action(This, stepDescriptor.Channel, stepDescriptor.Antenna, stepDescriptor.burnTime);
+            auto result = stepDescriptor.Action(This, stepDescriptor.Channel, stepDescriptor.Antenna, stepDescriptor.burnTime);
+
+            if (OS_RESULT_FAILED(result) && This->_retryCounter > 1)
+            {
+                LOGF(LOG_LEVEL_WARNING, "[ant] Step %d failed. Will retry %d times more", This->_step, This->_retryCounter);
+                This->_retryCounter--;
+                return;
+            }
+
             This->_step++;
             This->_nextStepAt = state.Time + stepDescriptor.waitTime;
+            This->_retryCounter = StepRetries;
 
             if (This->_step >= Steps.size())
             {
