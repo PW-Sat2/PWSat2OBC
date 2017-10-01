@@ -67,7 +67,14 @@ namespace
             auto expectDeployment = [&](
                 AntennaChannel channel, AntennaId antenna, std::chrono::milliseconds burnTime, std::chrono::milliseconds waitTime) {
 
-                EXPECT_CALL(_power, PrimaryAntennaPower(true)).WillOnce(DoAll(Assign(&_nextTime, t += 10s), Return(true)));
+                if (channel == AntennaChannel::ANTENNA_PRIMARY_CHANNEL)
+                {
+                    EXPECT_CALL(_power, PrimaryAntennaPower(true)).WillOnce(DoAll(Assign(&_nextTime, t += 10s), Return(true)));
+                }
+                else
+                {
+                    EXPECT_CALL(_power, BackupAntennaPower(true)).WillOnce(DoAll(Assign(&_nextTime, t += 10s), Return(true)));
+                }
 
                 EXPECT_CALL(_antenna, Reset(channel)).WillOnce(DoAll(Assign(&_nextTime, t += 60s), Return(OSResult::Success)));
 
@@ -78,12 +85,20 @@ namespace
 
                 EXPECT_CALL(_antenna, Disarm(channel)).WillOnce(DoAll(Assign(&_nextTime, t += 0s), Return(OSResult::Success)));
 
-                EXPECT_CALL(_power, PrimaryAntennaPower(false)).WillOnce(DoAll(Assign(&_nextTime, t += 120s), Return(true)));
+                if (channel == AntennaChannel::ANTENNA_PRIMARY_CHANNEL)
+                {
+                    EXPECT_CALL(_power, PrimaryAntennaPower(false)).WillOnce(DoAll(Assign(&_nextTime, t += 120s), Return(true)));
+                }
+                else
+                {
+                    EXPECT_CALL(_power, BackupAntennaPower(false)).WillOnce(DoAll(Assign(&_nextTime, t += 120s), Return(true)));
+                }
             };
 
             expectDeployment(AntennaChannel::ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA_AUTO_ID, 120000ms, 180s);
+            expectDeployment(AntennaChannel::ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA_AUTO_ID, 120000ms, 180s);
         }
 
-        Run(10);
+        Run(100);
     }
 }

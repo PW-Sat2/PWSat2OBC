@@ -18,13 +18,20 @@ namespace mission
 {
     namespace antenna
     {
-        std::array<AntennaTask::StepDescriptor, 6> AntennaTask::Steps = {{
+        std::array<AntennaTask::StepDescriptor, 12> AntennaTask::Steps = {{
             {PowerOn, AntennaChannel::ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA_AUTO_ID, 0s, 10s},
             {Reset, AntennaChannel::ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA_AUTO_ID, 0s, 60s},
             {Arm, AntennaChannel::ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA_AUTO_ID, 0s, 60s},
             {Deploy, AntennaChannel::ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA_AUTO_ID, 4 * 30s, 180s},
             {Disarm, AntennaChannel::ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA_AUTO_ID, 0s, 0s},
             {PowerOff, AntennaChannel::ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA_AUTO_ID, 0s, 120s},
+            //
+            {PowerOn, AntennaChannel::ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA_AUTO_ID, 0s, 10s},
+            {Reset, AntennaChannel::ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA_AUTO_ID, 0s, 60s},
+            {Arm, AntennaChannel::ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA_AUTO_ID, 0s, 60s},
+            {Deploy, AntennaChannel::ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA_AUTO_ID, 4 * 30s, 180s},
+            {Disarm, AntennaChannel::ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA_AUTO_ID, 0s, 0s},
+            {PowerOff, AntennaChannel::ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA_AUTO_ID, 0s, 120s},
         }};
 
         AntennaTask::AntennaTask(std::tuple<IAntennaDriver&, services::power::IPowerControl&> args)
@@ -144,8 +151,17 @@ namespace mission
         OSResult AntennaTask::PowerOn(
             AntennaTask* task, AntennaChannel channel, AntennaId /*antenna*/, std::chrono::milliseconds /*burnTime*/)
         {
-            (void)channel;
-            return task->_powerControl.PrimaryAntennaPower(true) ? OSResult::Success : OSResult::DeviceNotFound;
+            bool r;
+            if (channel == AntennaChannel::ANTENNA_PRIMARY_CHANNEL)
+            {
+                r = task->_powerControl.PrimaryAntennaPower(true);
+            }
+            else
+            {
+                r = task->_powerControl.BackupAntennaPower(true);
+            }
+
+            return r ? OSResult::Success : OSResult::DeviceNotFound;
         }
 
         OSResult AntennaTask::Reset(
@@ -173,8 +189,17 @@ namespace mission
         OSResult AntennaTask::PowerOff(
             AntennaTask* task, AntennaChannel channel, AntennaId /*antenna*/, std::chrono::milliseconds /*burnTime*/)
         {
-            (void)channel;
-            return task->_powerControl.PrimaryAntennaPower(false) ? OSResult::Success : OSResult::DeviceNotFound;
+            bool r;
+            if (channel == AntennaChannel::ANTENNA_PRIMARY_CHANNEL)
+            {
+                r = task->_powerControl.PrimaryAntennaPower(false);
+            }
+            else
+            {
+                r = task->_powerControl.BackupAntennaPower(false);
+            }
+
+            return r ? OSResult::Success : OSResult::DeviceNotFound;
         }
         /** @}*/
     }
