@@ -61,15 +61,7 @@ namespace mission
 
             static bool Condition(const SystemState& state, void* param);
             static void Action(SystemState& state, void* param);
-
-            static constexpr std::int8_t StepRetries = 3;
-
-            services::power::IPowerControl& _powerControl;
-            IAntennaDriver& _antenna;
-
-            std::uint16_t _step;
-            std::chrono::milliseconds _nextStepAt;
-            std::int8_t _retryCounter;
+            static UpdateResult Update(SystemState& state, void* param);
 
             static OSResult PowerOn(AntennaTask* task, AntennaChannel channel, AntennaId antenna, std::chrono::milliseconds burnTime);
             static OSResult Reset(AntennaTask* task, AntennaChannel channel, AntennaId antenna, std::chrono::milliseconds burnTime);
@@ -91,6 +83,21 @@ namespace mission
             };
 
             static std::array<StepDescriptor, 60> Steps;
+
+            static constexpr std::int8_t StepRetries = 3;
+
+            services::power::IPowerControl& _powerControl;
+            IAntennaDriver& _antenna;
+
+            std::uint16_t _step;
+            std::chrono::milliseconds _nextStepAt;
+            std::int8_t _retryCounter;
+
+            devices::antenna::AntennaTelemetry _currentTelemetry;
+
+            OSSemaphoreHandle _sync;
+
+            bool _controllerPoweredOn;
         };
 
         /**

@@ -73,12 +73,13 @@ namespace mission
 
         AntennaTask::AntennaTask(std::tuple<IAntennaDriver&, services::power::IPowerControl&> args)
             : _powerControl(std::get<services::power::IPowerControl&>(args)), _antenna(std::get<IAntennaDriver&>(args)), _step(0),
-              _nextStepAt(0), _retryCounter(StepRetries)
+              _nextStepAt(0), _retryCounter(StepRetries), _controllerPoweredOn(false)
         {
         }
 
         bool AntennaTask::Initialize()
         {
+            this->_sync = System::CreateBinarySemaphore(1);
             return true;
         }
 
@@ -153,19 +154,48 @@ namespace mission
             return descriptor;
         }
 
+        UpdateResult AntennaTask::Update(SystemState& /*state*/, void* param)
+        {
+            auto This = reinterpret_cast<AntennaTask*>(param);
+
+            if (!This->_controllerPoweredOn)
+            {
+                return UpdateResult::Ok;
+            }
+
+            Lock l(This->_sync, 200ms);
+
+            if (!l())
+            {
+                return UpdateResult::Warning;
+            }
+
+            This->_antenna.GetTelemetry(This->_currentTelemetry);
+
+            return UpdateResult::Ok;
+        }
+
         UpdateDescriptor<SystemState> AntennaTask::BuildUpdate()
         {
             UpdateDescriptor<SystemState> descriptor;
             descriptor.name = "Deploy Antenna Update";
             descriptor.param = this;
-            //            descriptor.updateProc = AntennaDeploymentUpdate;
+            descriptor.updateProc = Update;
             return descriptor;
         }
 
-        bool AntennaTask::GetTelemetry(devices::antenna::AntennaTelemetry& /*telemetry*/) const
+        bool AntennaTask::GetTelemetry(devices::antenna::AntennaTelemetry& telemetry) const
         {
-            //            return this->state.CurrentTelemetry(telemetry);
-            return false;
+            Lock l(this->_sync, 100ms);
+
+            if (!l())
+            {
+                return false;
+            }
+
+            telemetry = this->_currentTelemetry;
+
+            return true;
         }
 
         StopAntennaDeploymentTask::StopAntennaDeploymentTask(std::uint8_t /*mark*/)
@@ -225,6 +255,11 @@ namespace mission
                 r = task->_powerControl.BackupAntennaPower(true);
             }
 
+            if (r)
+            {
+                task->_controllerPoweredOn = true;
+            }
+
             return r ? OSResult::Success : OSResult::DeviceNotFound;
         }
 
@@ -261,6 +296,11 @@ namespace mission
             else
             {
                 r = task->_powerControl.BackupAntennaPower(false);
+            }
+
+            if (r)
+            {
+                task->_controllerPoweredOn = false;
             }
 
             return r ? OSResult::Success : OSResult::DeviceNotFound;

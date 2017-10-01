@@ -35,6 +35,7 @@ namespace
 
         AntennaTask _task{std::make_tuple(std::ref(_antenna), std::ref(_power))};
         ActionDescriptor<SystemState> _action{_task.BuildAction()};
+        UpdateDescriptor<SystemState> _update{_task.BuildUpdate()};
 
         void Run(std::uint32_t maxIterations);
     };
@@ -183,5 +184,24 @@ namespace
 
         EXPECT_CALL(_antenna, Reset(_)).WillOnce(Return(OSResult::Success));
         _action.Execute(_state);
+    }
+
+    TEST_F(DeployAntennaTest, ShouldCollectTelemetryWhenControllerIsPoweredOn)
+    {
+        _state.Time = 40min;
+        EXPECT_CALL(_antenna, GetTelemetry(_)).WillOnce(Return(OSResult::Success));
+
+        EXPECT_CALL(_power, PrimaryAntennaPower(true)).WillOnce(Return(true));
+
+        ASSERT_THAT(_action.EvaluateCondition(_state), Eq(true));
+        _action.Execute(_state);
+        _update.Execute(_state);
+    }
+
+    TEST_F(DeployAntennaTest, ShouldNotCollectTelemetryWhenControllerIsNotPoweredOn)
+    {
+        EXPECT_CALL(_antenna, GetTelemetry(_)).Times(0);
+
+        _update.Execute(_state);
     }
 }
