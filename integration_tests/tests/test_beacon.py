@@ -24,10 +24,16 @@ class Test_Beacon(RestartPerTest):
             self.next_step()
             count -= 1
 
-    def begin(self, count=1):
+    def begin(self):
         self.power_on_obc()
         self.begin_deployment()
-        self.run_steps(count)
+        t = timedelta(minutes=41)
+
+        for i in xrange(0, 100):
+            t += timedelta(seconds=60)
+
+            self.system.obc.jump_to_time(t)
+            self.system.obc.run_mission()
 
     @runlevel(1)
     def test_beacon_auto_activation(self):
@@ -48,7 +54,7 @@ class Test_Beacon(RestartPerTest):
         self.system.backup_antenna.on_reset = reset_handler
         self.system.comm.transmitter.on_send_frame = catch_beacon
 
-        self.begin(19)
+        self.begin()
 
         self.assertTrue(event.wait_for_change(1), "beacon should be set once the antennas are deployed")
 

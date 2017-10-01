@@ -65,6 +65,7 @@ class UplinkFrame:
     def build(self):
         return self._bytes
 
+
 @unique
 class BaudRate(Enum):
     BaudRate0 = 0
@@ -80,7 +81,7 @@ class BaudRate(Enum):
             self.BaudRate2400: "2400",
             self.BaudRate4800: "4800",
             self.BaudRate9600: "9600",
-            }
+        }
         return map[self]
 
     def get_code(self):
@@ -90,9 +91,10 @@ class BaudRate(Enum):
             self.BaudRate2400: 1,
             self.BaudRate4800: 2,
             self.BaudRate9600: 3,
-            }
+        }
 
         return map[self]
+
 
 class TransmitterTelemetry(object):
     def __init__(self):
@@ -116,7 +118,8 @@ class TransmitterTelemetry(object):
             lower_byte(self.AmplifierTemperature), higher_byte(self.AmplifierTemperature),
             lower_byte(self.RFForwardPower), higher_byte(self.RFForwardPower),
             lower_byte(self.TransmitterCurrentConsumption), higher_byte(self.TransmitterCurrentConsumption)
-            ]
+        ]
+
 
 class ReceiverTelemetry(object):
     def __init__(self):
@@ -129,7 +132,8 @@ class ReceiverTelemetry(object):
         self.SignalStrength = 0
 
     @staticmethod
-    def build(TransmitterCurrentConsumption, ReceiverCurrentConsumption, DopplerOffset, Vcc, OscilatorTemperature, AmplifierTemperature, SignalStrength):
+    def build(TransmitterCurrentConsumption, ReceiverCurrentConsumption, DopplerOffset, Vcc, OscilatorTemperature,
+              AmplifierTemperature, SignalStrength):
         telemetry = ReceiverTelemetry()
         telemetry.TransmitterCurrentConsumption = TransmitterCurrentConsumption
         telemetry.ReceiverCurrentConsumption = ReceiverCurrentConsumption
@@ -149,7 +153,7 @@ class ReceiverTelemetry(object):
             lower_byte(self.OscilatorTemperature), higher_byte(self.OscilatorTemperature),
             lower_byte(self.AmplifierTemperature), higher_byte(self.AmplifierTemperature),
             lower_byte(self.SignalStrength), higher_byte(self.SignalStrength),
-            ]
+        ]
 
 
 class TransmitterDevice(i2cMock.I2CDevice):
@@ -235,7 +239,7 @@ class TransmitterDevice(i2cMock.I2CDevice):
         self.current_beacon_timestamp = None
 
         self.last_watchdog_kick = None
-    
+
     @i2cMock.command([0xAA])
     def _reset(self):
         if call(self.on_reset, None) is None:
@@ -297,7 +301,7 @@ class TransmitterDevice(i2cMock.I2CDevice):
         response = call(self.on_report_uptime, None)
         if response is not None:
             return response
-        
+
         now = datetime.datetime.now()
         return [now.second, now.minute, now.hour, now.day]
 
@@ -502,7 +506,19 @@ class Comm(object):
     def put_frame(self, frame):
         self.receiver.put_frame(frame.build())
 
-    def get_frame(self, timeout=None):
-        f = self.transmitter.get_message_from_buffer(timeout)
+    def get_frame(self, timeout=None, filter_type=None):
+        start = time.time()
+        while timeout is None or (time.time() - start < timeout):
+            f = None
+            try:
+                f = self.transmitter.get_message_from_buffer(None if timeout is None else time.time() - start)
+            except Empty:
+                continue
 
-        return self._frame_decoder.decode(f)
+            frame = self._frame_decoder.decode(f)
+
+            if filter_type is not None:
+                if not isinstance(frame, filter_type):
+                    continue
+
+            return frame
