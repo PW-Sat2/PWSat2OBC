@@ -87,7 +87,7 @@ namespace mission
                 std::chrono::milliseconds waitTime;
             };
 
-            static std::array<StepDescriptor, 12> Steps;
+            static std::array<StepDescriptor, 60> Steps;
         };
 
         /**

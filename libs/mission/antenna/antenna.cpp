@@ -46,32 +46,30 @@ namespace mission
             static constexpr AntennaTask::StepDescriptor AutoDeploy = {
                 AntennaTask::Deploy, Channel, AntennaId::ANTENNA_AUTO_ID, 4 * 30s, 180s};
 
+            template <AntennaId Antenna>
+            static constexpr AntennaTask::StepDescriptor ManualDeploy = {AntennaTask::Deploy, Channel, Antenna, 30s, 90s};
+
             static constexpr AntennaTask::StepDescriptor Disarm = {AntennaTask::Disarm, Channel, AntennaId::ANTENNA_AUTO_ID, 0s, 0s};
 
             static constexpr AntennaTask::StepDescriptor PowerOff = {AntennaTask::PowerOff, Channel, AntennaId::ANTENNA_AUTO_ID, 0s, 120s};
 
             static constexpr auto FullSequenceAuto = std::make_tuple(PowerOn, Reset, Arm, AutoDeploy, Disarm, PowerOff);
+
+            template <AntennaId Antenna>
+            static constexpr auto FullSequenceManual = std::make_tuple(PowerOn, Reset, Arm, ManualDeploy<Antenna>, Disarm, PowerOff);
         };
 
-        //        std::array<AntennaTask::StepDescriptor, 12> AntennaTask::Steps = {{
-        //            Step<AntennaChannel::ANTENNA_PRIMARY_CHANNEL>::PowerOn,
-        //            Step<AntennaChannel::ANTENNA_PRIMARY_CHANNEL>::Reset,
-        //            Step<AntennaChannel::ANTENNA_PRIMARY_CHANNEL>::Arm,
-        //            Step<AntennaChannel::ANTENNA_PRIMARY_CHANNEL>::AutoDeploy,
-        //            Step<AntennaChannel::ANTENNA_PRIMARY_CHANNEL>::Disarm,
-        //            Step<AntennaChannel::ANTENNA_PRIMARY_CHANNEL>::PowerOff,
-        //            //
-        //            Step<AntennaChannel::ANTENNA_BACKUP_CHANNEL>::PowerOn,
-        //            Step<AntennaChannel::ANTENNA_BACKUP_CHANNEL>::Reset,
-        //            Step<AntennaChannel::ANTENNA_BACKUP_CHANNEL>::Arm,
-        //            Step<AntennaChannel::ANTENNA_BACKUP_CHANNEL>::AutoDeploy,
-        //            Step<AntennaChannel::ANTENNA_BACKUP_CHANNEL>::Disarm,
-        //            Step<AntennaChannel::ANTENNA_BACKUP_CHANNEL>::PowerOff,
-        //        }};
-
-        std::array<AntennaTask::StepDescriptor, 12> AntennaTask::Steps = Join( //
+        decltype(AntennaTask::Steps) AntennaTask::Steps = Join( //
             Step<AntennaChannel::ANTENNA_PRIMARY_CHANNEL>::FullSequenceAuto,
-            Step<AntennaChannel::ANTENNA_BACKUP_CHANNEL>::FullSequenceAuto);
+            Step<AntennaChannel::ANTENNA_PRIMARY_CHANNEL>::FullSequenceManual<AntennaId::ANTENNA1_ID>,
+            Step<AntennaChannel::ANTENNA_PRIMARY_CHANNEL>::FullSequenceManual<AntennaId::ANTENNA2_ID>,
+            Step<AntennaChannel::ANTENNA_PRIMARY_CHANNEL>::FullSequenceManual<AntennaId::ANTENNA3_ID>,
+            Step<AntennaChannel::ANTENNA_PRIMARY_CHANNEL>::FullSequenceManual<AntennaId::ANTENNA4_ID>,
+            Step<AntennaChannel::ANTENNA_BACKUP_CHANNEL>::FullSequenceAuto,
+            Step<AntennaChannel::ANTENNA_BACKUP_CHANNEL>::FullSequenceManual<AntennaId::ANTENNA1_ID>,
+            Step<AntennaChannel::ANTENNA_BACKUP_CHANNEL>::FullSequenceManual<AntennaId::ANTENNA2_ID>,
+            Step<AntennaChannel::ANTENNA_BACKUP_CHANNEL>::FullSequenceManual<AntennaId::ANTENNA3_ID>,
+            Step<AntennaChannel::ANTENNA_BACKUP_CHANNEL>::FullSequenceManual<AntennaId::ANTENNA4_ID>);
 
         AntennaTask::AntennaTask(std::tuple<IAntennaDriver&, services::power::IPowerControl&> args)
             : _powerControl(std::get<services::power::IPowerControl&>(args)), _antenna(std::get<IAntennaDriver&>(args))

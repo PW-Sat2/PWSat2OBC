@@ -96,8 +96,16 @@ namespace
             };
 
             expectDeployment(AntennaChannel::ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA_AUTO_ID, 120000ms, 180s);
+            expectDeployment(AntennaChannel::ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA1_ID, 30000ms, 90s);
+            expectDeployment(AntennaChannel::ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA2_ID, 30000ms, 90s);
+            expectDeployment(AntennaChannel::ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA3_ID, 30000ms, 90s);
+            expectDeployment(AntennaChannel::ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA4_ID, 30000ms, 90s);
 
             expectDeployment(AntennaChannel::ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA_AUTO_ID, 120000ms, 180s);
+            expectDeployment(AntennaChannel::ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA1_ID, 30000ms, 90s);
+            expectDeployment(AntennaChannel::ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA2_ID, 30000ms, 90s);
+            expectDeployment(AntennaChannel::ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA3_ID, 30000ms, 90s);
+            expectDeployment(AntennaChannel::ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA4_ID, 30000ms, 90s);
         }
 
         Run(100);
