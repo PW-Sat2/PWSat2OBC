@@ -18,6 +18,9 @@ struct AntennaMock : public IAntennaDriver
 
     MOCK_METHOD1(FinishDeployment, OSResult(AntennaChannel channel));
 
+    MOCK_METHOD1(Arm, OSResult(AntennaChannel channel));
+    MOCK_METHOD1(Disarm, OSResult(AntennaChannel channel));
+
     MOCK_METHOD4(DeployAntenna,
         OSResult(AntennaChannel channel,
             AntennaId antennaId,

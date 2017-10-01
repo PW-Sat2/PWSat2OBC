@@ -135,6 +135,9 @@ struct IAntennaDriver
      * inspect the content of the flags field. @see AntennaTelemetry type definition for details.
      */
     virtual OSResult GetTelemetry(devices::antenna::AntennaTelemetry& telemetry) = 0;
+
+    virtual OSResult Arm(AntennaChannel channel) = 0;
+    virtual OSResult Disarm(AntennaChannel channel) = 0;
 };
 
 /**

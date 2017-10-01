@@ -59,10 +59,35 @@ namespace mission
 
             virtual bool GetTelemetry(devices::antenna::AntennaTelemetry& telemetry) const override;
 
-            /**
-             * @brief State of the antenna mission deployment task.
-             */
-            AntennaMissionState state;
+            static bool Condition(const SystemState& state, void* param);
+            static void Action(SystemState& state, void* param);
+
+            services::power::IPowerControl& _powerControl;
+            IAntennaDriver& _antenna;
+
+            std::uint16_t _step;
+            std::chrono::milliseconds _nextStepAt;
+
+            static OSResult PowerOn(AntennaTask* task, AntennaChannel channel, AntennaId antenna, std::chrono::milliseconds burnTime);
+            static OSResult Reset(AntennaTask* task, AntennaChannel channel, AntennaId antenna, std::chrono::milliseconds burnTime);
+            static OSResult Arm(AntennaTask* task, AntennaChannel channel, AntennaId antenna, std::chrono::milliseconds burnTime);
+            static OSResult Deploy(AntennaTask* task, AntennaChannel channel, AntennaId antenna, std::chrono::milliseconds burnTime);
+            static OSResult Disarm(AntennaTask* task, AntennaChannel channel, AntennaId antenna, std::chrono::milliseconds burnTime);
+            static OSResult PowerOff(AntennaTask* task, AntennaChannel channel, AntennaId antenna, std::chrono::milliseconds burnTime);
+
+            using StepAction = OSResult (*)(
+                AntennaTask* task, AntennaChannel channel, AntennaId antenna, std::chrono::milliseconds burnTime);
+
+            struct StepDescriptor
+            {
+                StepAction Action;
+                AntennaChannel Channel;
+                AntennaId Antenna;
+                std::chrono::milliseconds burnTime;
+                std::chrono::milliseconds waitTime;
+            };
+
+            static std::array<StepDescriptor, 6> Steps;
         };
 
         /**
