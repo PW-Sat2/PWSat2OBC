@@ -161,19 +161,15 @@ namespace adcs
         }
     }
 
-    std::chrono::milliseconds AdcsCoordinator::Run(AdcsMode mode)
+    std::chrono::milliseconds AdcsCoordinator::Run(AdcsMode mode, const std::chrono::milliseconds& startTime)
     {
         LOGF(LOG_LEVEL_TRACE, "[ADCS] Running ADCS loop. Mode: %d", static_cast<int>(mode));
-
-        auto startTime = System::GetUptime();
 
         auto adcsProcessor = this->adcsProcessors[static_cast<int>(mode)];
         adcsProcessor->Process();
 
         const auto elapsed = System::GetUptime() - startTime;
-        auto waitDuration = adcsProcessor->GetWait() - elapsed;
-
-        return std::max(0ms, waitDuration);
+        return std::max(0ms, adcsProcessor->GetWait() - elapsed);
     }
 
     void AdcsCoordinator::Loop()
@@ -181,8 +177,7 @@ namespace adcs
         AdcsMode mode = AdcsMode::Stopped;
         auto timeout = 0ms;
 
-        auto lastIterationTime = System::GetUptime();
-        auto nextIterationAt = lastIterationTime;
+        auto nextIterationAt = System::GetUptime();
         for (;;)
         {
             AdcsMode newMode;
@@ -192,7 +187,7 @@ namespace adcs
                 mode = result.first;
                 if (result.second)
                 {
-                    lastIterationTime = nextIterationAt = System::GetUptime();
+                    nextIterationAt = System::GetUptime();
                 }
             }
 
@@ -207,14 +202,15 @@ namespace adcs
                 case AdcsMode::BuiltinDetumbling:
                 case AdcsMode::ExperimentalDetumbling:
                 case AdcsMode::ExperimentalSunpointing:
-                    auto currentTime = System::GetUptime();
-                    if (currentTime >= nextIterationAt)
+                    if (System::GetUptime() >= nextIterationAt)
                     {
-                        auto delay = Run(mode);
-                        lastIterationTime = System::GetUptime();
-                        nextIterationAt = lastIterationTime + delay;
+                        timeout = Run(mode, nextIterationAt);
+                        nextIterationAt = System::GetUptime() + timeout;
                     }
-                    timeout = std::max(0ms, nextIterationAt - System::GetUptime());
+                    else
+                    {
+                        timeout = std::max(0ms, nextIterationAt - System::GetUptime());
+                    }
 
                     break;
             }

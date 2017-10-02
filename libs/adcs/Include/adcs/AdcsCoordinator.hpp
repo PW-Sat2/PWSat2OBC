@@ -81,7 +81,7 @@ namespace adcs
 
         bool Disable(AdcsMode mode);
 
-        std::chrono::milliseconds Run(AdcsMode mode);
+        std::chrono::milliseconds Run(AdcsMode mode, const std::chrono::milliseconds& startTime);
 
         /** @brief Queue holding requested experiment */
         Queue<AdcsMode, 5> _queue;
