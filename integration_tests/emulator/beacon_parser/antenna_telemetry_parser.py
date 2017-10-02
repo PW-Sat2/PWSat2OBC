@@ -10,13 +10,13 @@ class AntennaTelemetryParser(CategoryParser):
         return 8 + 8*3 + 8*8
 
     def parse(self):
+        self.append("Antenna 1 Deployed Ch A", 1, value_type=BoolType)
+        self.append("Antenna 2 Deployed Ch A", 1, value_type=BoolType)
         self.append("Antenna 3 Deployed Ch A", 1, value_type=BoolType)
         self.append("Antenna 4 Deployed Ch A", 1, value_type=BoolType)
-        self.append("Antenna 2 Deployed Ch A", 1, value_type=BoolType)
 
         self.append("Antenna 1 Deployed Ch B", 1, value_type=BoolType)
         self.append("Antenna 2 Deployed Ch B", 1, value_type=BoolType)
-        self.append("Antenna 1 Deployed Ch A", 1, value_type=BoolType)
         self.append("Antenna 3 Deployed Ch B", 1, value_type=BoolType)
         self.append("Antenna 4 Deployed Ch B", 1, value_type=BoolType)
 
