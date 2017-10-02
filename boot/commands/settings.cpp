@@ -3,6 +3,7 @@
 #include "bsp/bsp_uart.h"
 #include "main.hpp"
 #include "utils.h"
+#include "version.h"
 
 static Option<std::uint8_t> ReadBootSlots()
 {
@@ -131,4 +132,9 @@ void SetBootSlotToUpper()
     Bootloader.Settings.BootSlots(boot::BootSettings::UpperBootSlot);
     Bootloader.Settings.MarkAsValid();
     BSP_UART_Puts(BSP_UART_DEBUG, "\nPrimary boot slot set to upper\n");
+}
+
+void ShowBuildInformation()
+{
+    BSP_UART_Puts(BSP_UART_DEBUG, "\nBoot Loader " VERSION "\n");
 }

@@ -36,7 +36,7 @@ target_link_libraries(${NAME}
       boot_settings
       program_flash
       error_counter
-      
+      version
       standalone_flash_driver
       standalone_spi
 )

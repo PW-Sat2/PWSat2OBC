@@ -24,4 +24,6 @@ void EraseBootTable();
 
 void Check();
 void Recovery();
+
+void ShowBuildInformation();
 #endif /* BOOT_COMMANDS_COMMANDS_HPP_ */
