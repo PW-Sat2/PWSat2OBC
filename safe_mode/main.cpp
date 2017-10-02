@@ -18,6 +18,8 @@
 #include "steps/scrub_program/step.hpp"
 #include "steps/steps.hpp"
 
+#include "version.h"
+
 OBCSafeMode SafeMode;
 
 extern "C" void __libc_init_array(void);
@@ -51,26 +53,28 @@ static void Recover()
     steps.Perform();
 }
 
+static void SendToUart(USART_TypeDef* uart, const char* message)
+{
+    while (*message != '\0')
+    {
+        USART_Tx(uart, *message);
+        message++;
+    }
+}
+
 static void LogToUart(void* context, bool /*withinIsr*/, const char* messageHeader, const char* messageFormat, va_list messageArguments)
 {
-    auto uart = static_cast<USART_TypeDef*>(context);
-
-    const char* c = messageHeader;
-    while (*c != '\0')
-    {
-        USART_Tx(uart, *c);
-        c++;
-    }
-
     char buf[256];
+    auto uart = static_cast<USART_TypeDef*>(context);
+    SendToUart(uart, messageHeader);
     vsprintf(buf, messageFormat, messageArguments);
-    c = buf;
-    while (*c != '\0')
-    {
-        USART_Tx(uart, *c);
-        c++;
-    }
+    SendToUart(uart, buf);
+    USART_Tx(uart, '\n');
+}
 
+void LogVersion(USART_TypeDef* uart)
+{
+    SendToUart(uart, "Safe Mode " VERSION);
     USART_Tx(uart, '\n');
 }
 
@@ -105,14 +109,8 @@ int main(void)
 
     sprintf(msg, "Magic: 0x%lX\nReason=%d\nIndex=%d\n", boot::MagicNumber, num(boot::BootReason), boot::Index);
 
-    char* c = msg;
-
-    while (*c != '\0')
-    {
-        USART_Tx(io_map::UART_1::Peripheral, *c);
-        c++;
-    }
-
+    SendToUart(io_map::UART_1::Peripheral, msg);
+    LogVersion(io_map::UART_1::Peripheral);
     Recover();
 
     SysTick_Config(SystemCoreClockGet());
