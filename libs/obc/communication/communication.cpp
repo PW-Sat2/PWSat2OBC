@@ -83,7 +83,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           PerformCopyBootSlotsExperiment(
               experiments.ExperimentsController, experiments.Get<experiment::program::CopyBootSlotsExperiment>()), //
           SetBuiltinDetumblingBlockMaskTelecommand(stateContainer, adcsCoordinator),                               //
-          SetAdcsModeTelecommand(adcsCoordinator)                                                                  //
+          SetAdcsModeTelecommand(adcsCoordinator),                                                                 //
+          StopSailDeployment(stateContainer)                                                                       //
           ),                                                                                                       //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {

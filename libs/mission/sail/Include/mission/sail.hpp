@@ -185,6 +185,7 @@ namespace mission
     {
         return this->_step < StepsCount;
     }
+
     /** @} */
 }
 #endif /* LIBS_MISSION_INCLUDE_MISSION_SAIL_H_ */

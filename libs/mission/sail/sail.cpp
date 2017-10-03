@@ -88,28 +88,29 @@ namespace mission
             This->_nextStepAfter = 0s;
         };
 
+        auto explicitOpen = This->_openOnNextMissionLoop.exchange(false);
+
         switch (currentState)
         {
             case state::SailOpeningState::Opening:
             {
-                auto explicitOpen = This->_openOnNextMissionLoop.exchange(false);
-
                 if (explicitOpen && !This->InProgress())
                 {
                     open();
                     break;
                 }
             }
+            break;
 
             case state::SailOpeningState::OpeningStopped:
             {
-                auto explicitOpen = This->_openOnNextMissionLoop.exchange(false);
-
                 if (explicitOpen)
                 {
                     open();
                     break;
                 }
+
+                LOG(LOG_LEVEL_WARNING, "[sail] Sail deployment disabled");
             }
             break;
 
@@ -120,8 +121,6 @@ namespace mission
                     open();
                     break;
                 }
-
-                auto explicitOpen = This->_openOnNextMissionLoop.exchange(false);
 
                 if (explicitOpen)
                 {
