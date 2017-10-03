@@ -24,10 +24,10 @@ raw = ensure_byte_list(raw)
 
 entries = []
 
-while len(raw) >= 229:
+while len(raw) >= 231:
     print len(raw)
-    part = raw[0:229]
-    raw = raw[229:]
+    part = raw[0:231]
+    raw = raw[231:]
     all_bits = bitarray(endian='little')
     all_bits.frombytes(''.join(map(lambda x: pack('B', x), part)))
 
