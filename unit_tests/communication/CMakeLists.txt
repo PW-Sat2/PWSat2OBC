@@ -30,6 +30,7 @@ set(SOURCES
   Telecommands/DisableOverheatSubmodeTelecommandTest.cpp
   Telecommands/SetBitrateTelecommandTest.cpp
   Telecommands/StopSailDeploymentTelecommandTest.cpp
+  Telecommands/ReadMemoryTelecommandTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})

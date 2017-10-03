@@ -35,8 +35,8 @@ namespace
     TEST_F(PowerCycleTelecommandTest, ShouldPerformPowerCycle)
     {
         EXPECT_CALL(this->_power, PowerCycle());
-        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Powercycle, 0, ElementsAre(0x11, 0x0))));
-        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Powercycle, 0, ElementsAre(0x11, 0x2))));
+        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Powercycle, 0, 0x11, ElementsAre(0x0))));
+        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Powercycle, 0, 0x11, ElementsAre(0x2))));
 
         Run(0x11);
     }

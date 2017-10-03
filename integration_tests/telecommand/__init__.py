@@ -16,6 +16,7 @@ from state import *
 from compile_info import *
 from eps import *
 from adcs import *
+from memory import *
 
 __all__ = [
     'DownloadFile',
@@ -57,6 +58,7 @@ __all__ = [
     'PerformRadFETExperiment',
     'PerformPayloadCommissioningExperiment',
     'PerformCameraCommissioningExperiment',
-    'StopSailDeployment'
+    'StopSailDeployment',
+    'ReadMemory'
 ]
 
