@@ -167,7 +167,8 @@ namespace obc
         obc::telecommands::SetBitrateTelecommand,
         obc::telecommands::PerformCopyBootSlotsExperiment,
         obc::telecommands::SetBuiltinDetumblingBlockMaskTelecommand,
-        obc::telecommands::SetAdcsModeTelecommand>;
+        obc::telecommands::SetAdcsModeTelecommand,
+        obc::telecommands::StopSailDeployment>;
 
     /**
      * @brief OBC <-> Earth communication
