@@ -9,7 +9,8 @@ namespace mission
     namespace adcs
     {
         AdcsPrimaryTask::AdcsPrimaryTask(::adcs::IAdcsCoordinator& adcsCoordinator) //
-            : retryCount(RetryCount), coordinator(adcsCoordinator)
+            : retryCount(RetryCount),
+              coordinator(adcsCoordinator)
         {
         }
         /**
@@ -36,7 +37,7 @@ namespace mission
                 return false;
             }
 
-            if (context->coordinator.CurrentMode() != ::adcs::AdcsMode::Disabled)
+            if (context->coordinator.CurrentMode() != ::adcs::AdcsMode::Stopped)
             {
                 return false;
             }

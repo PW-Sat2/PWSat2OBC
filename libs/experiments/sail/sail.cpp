@@ -149,7 +149,7 @@ namespace experiment
         {
             UNREFERENCED_PARAMETER(lastResult);
             this->_file.Close();
-            if (OS_RESULT_FAILED(this->_adcsCoordinator.EnableBuiltinDetumbling()))
+            if (OS_RESULT_FAILED(this->_adcsCoordinator.Stop()))
             {
                 LOG(LOG_LEVEL_ERROR, "[exp_sail] Unable to restore adcs mode");
             }

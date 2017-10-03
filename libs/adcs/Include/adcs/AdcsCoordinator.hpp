@@ -6,6 +6,7 @@
 #include <array>
 #include <atomic>
 #include <chrono>
+#include <utility>
 #include "adcs.hpp"
 #include "base/os.h"
 #include "time/ICurrentTime.hpp"
@@ -27,12 +28,10 @@ namespace adcs
          * @param[in] builtinDetumbling_ Reference to the primary detumbling algorithm controller module.
          * @param[in] experimentalDetumbling_ Reference to the backup detumbling algorithm controller module.
          * @param[in] sunpointAlgorithm_ Reference to the sun pointing algorithm controller module.
-         * @param[in] currentTime_ Reference to object providing current time
          */
         AdcsCoordinator(IAdcsProcessor& builtinDetumbling_, //
             IAdcsProcessor& experimentalDetumbling_,        //
-            IAdcsProcessor& sunpointAlgorithm_,             //
-            services::time::ICurrentTime& currentTime_      //
+            IAdcsProcessor& sunpointAlgorithm_              //
             );
 
         virtual OSResult Initialize() final override;
@@ -45,6 +44,8 @@ namespace adcs
 
         virtual OSResult EnableSunPointing() final override;
 
+        virtual OSResult Stop() final override;
+
         virtual OSResult Disable() final override;
 
         virtual void SetBlockMode(AdcsMode adcsMode, bool isBlocked) final override;
@@ -56,58 +57,39 @@ namespace adcs
          */
         bool IsModeBlocked(AdcsMode mode) const;
 
+        /**
+         * @brief Switches current adcs coordinator mode
+         * @param requestedMode Requested mode
+         * @return Operation status
+         * @remark This procedure is not thread safe.
+         */
+        std::pair<AdcsMode, bool> SwitchMode(AdcsMode requestedMode);
+
       private:
         /**
          * @brief Adcs task entry point.
          * @param[in] arg Execution context. This pointer should point to the AdcsExperiment object type.
          */
-        static void TaskEntry(void* arg);
-
-        /**
-         * @brief Update the state based on the pased operation status.
-         *
-         * @param[in] newMode Proposed new adcs operating mode.
-         * @param[in] operationStatus Status of attempt to switch adcs to the new operational mode.
-         * @returns Value passed as operationStatus.
-         */
-        OSResult SetState(AdcsMode newMode, OSResult operationStatus);
-
-        /**
-         * @brief Enables given algorithm.
-         *
-         * Any algorithm that may already be active will be disabled prior to enabling
-         * the given algorithm.
-         * @param[in] mode New adcs operating mode.
-         * @returns Operation status.
-         */
-        OSResult Enable(AdcsMode mode);
-
-        /**
-         * @brief Disables adcs subsystem.
-         *
-         * @param[in] suspend Whether to suspend adcs task.
-         * @returns Operation status.
-         */
-        OSResult Disable(bool suspend);
+        static void TaskEntry(AdcsCoordinator* arg);
 
         /**
          * @brief Iteration loop.
          */
         void Loop();
 
-        /** @brief Task handle. */
-        OSTaskHandle taskHandle;
+        OSResult RequestMode(AdcsMode mode);
 
-        /** @brief Current time. */
-        services::time::ICurrentTime& currentTime;
+        bool Disable(AdcsMode mode);
 
-        /** @brief Semaphore used for task synchronization. */
-        OSSemaphoreHandle sync;
+        std::chrono::milliseconds Run(AdcsMode mode, const std::chrono::milliseconds& startTime);
+
+        /** @brief Queue holding requested experiment */
+        Queue<AdcsMode, 5> _queue;
 
         /**
          * @brief Current adcs operational mode.
          */
-        AdcsMode currentMode;
+        std::atomic<AdcsMode> currentMode;
 
         /**
          * @brief Adcs processors.
@@ -115,6 +97,9 @@ namespace adcs
         std::array<IAdcsProcessor*, 3> adcsProcessors;
 
         std::array<std::atomic_bool, 3> adcsMasks;
+
+        /** @brief Background task */
+        Task<AdcsCoordinator*, 3_KB, TaskPriority::P4> _task;
     };
 }
 #endif
