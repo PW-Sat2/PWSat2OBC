@@ -2,10 +2,10 @@ from emulator.beacon_parser.units import TelemetryUnit, unit
 from parser import CategoryParser
 
 
-@unit('Am^2')
+@unit('mA*m^2')
 class IMTQDipole(TelemetryUnit):
     def __init__(self, raw):
-        super(IMTQDipole, self).__init__(raw, raw * 1e-4)
+        super(IMTQDipole, self).__init__(raw, raw * 1e-1)
 
 
 class ImtqDipoleTelemetryParser(CategoryParser):

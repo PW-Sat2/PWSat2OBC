@@ -2,10 +2,10 @@ from emulator.beacon_parser.units import unit, TelemetryUnit
 from parser import CategoryParser
 
 
-@unit('T')
+@unit('uT')
 class MagnetometerReadout(TelemetryUnit):
     def __init__(self, raw):
-        super(MagnetometerReadout, self).__init__(raw, raw * 1e-9)
+        super(MagnetometerReadout, self).__init__(raw, raw * 1e-3)
 
 
 class ImtqMagnetometersTelemetryParser(CategoryParser):
