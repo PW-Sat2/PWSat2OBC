@@ -31,6 +31,7 @@ set(SOURCES
   Telecommands/SetBitrateTelecommandTest.cpp
   Telecommands/StopSailDeploymentTelecommandTest.cpp
   Telecommands/ReadMemoryTelecommandTest.cpp
+  Telecommands/AdcsTelecommandsTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
