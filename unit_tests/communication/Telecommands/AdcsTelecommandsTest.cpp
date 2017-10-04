@@ -1,12 +1,18 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "OsMock.hpp"
 #include "mock/AdcsMocks.hpp"
+#include "mock/HasStateMock.hpp"
 #include "mock/comm.hpp"
 #include "obc/telecommands/adcs.hpp"
+#include "state/struct.h"
 
 using telecommunication::downlink::DownlinkAPID;
 using testing::ElementsAre;
 using testing::Return;
+using testing::ReturnRef;
+using testing::_;
+using testing::Eq;
 
 namespace
 {
@@ -18,7 +24,7 @@ namespace
         void ExpectFrame(std::uint8_t correlationId, std::uint8_t errorCode);
 
         testing::NiceMock<TransmitterMock> _transmitter;
-        testing::NiceMock<AdcsCoordinatorMock> _coordinator;
+        testing::StrictMock<AdcsCoordinatorMock> _coordinator;
 
         obc::telecommands::SetAdcsModeTelecommand _telecommand{_coordinator};
     };
@@ -123,5 +129,91 @@ namespace
         ExpectFrame(13, 1);
 
         Run(13, adcs::AdcsMode::ExperimentalSunpointing);
+    }
+
+    TEST_F(SetAdcsModeExperimentTelecommandTest, TestIncomplete)
+    {
+        ExpectFrame(13, 1);
+
+        Run(13);
+    }
+
+    TEST_F(SetAdcsModeExperimentTelecommandTest, TestEmpty)
+    {
+        ExpectFrame(0, 1);
+
+        Run();
+    }
+
+    class SetBuiltinDetumblingBlockMaskTelecommandTest : public testing::Test
+    {
+      protected:
+        SetBuiltinDetumblingBlockMaskTelecommandTest();
+
+        template <typename... T> void Run(T... params);
+
+        void ExpectFrame(std::uint8_t correlationId, std::uint8_t errorCode);
+
+        testing::NiceMock<TransmitterMock> _transmitter;
+        testing::NiceMock<AdcsCoordinatorMock> _coordinator;
+        testing::NiceMock<OSMock> _os;
+        SystemState _stateObject;
+        HasStateMock<SystemState> _hasState;
+        OSReset _reset;
+        obc::telecommands::SetBuiltinDetumblingBlockMaskTelecommand _telecommand;
+    };
+
+    SetBuiltinDetumblingBlockMaskTelecommandTest::SetBuiltinDetumblingBlockMaskTelecommandTest() : _telecommand{_hasState, _coordinator}
+    {
+        ON_CALL(_hasState, MockGetState()).WillByDefault(ReturnRef(_stateObject));
+        _reset = InstallProxy(&_os);
+    }
+
+    template <typename... T> void SetBuiltinDetumblingBlockMaskTelecommandTest::Run(T... params)
+    {
+        std::array<std::uint8_t, sizeof...(T)> buffer{static_cast<std::uint8_t>(params)...};
+
+        _telecommand.Handle(_transmitter, buffer);
+    }
+
+    void SetBuiltinDetumblingBlockMaskTelecommandTest::ExpectFrame(std::uint8_t correlationId, std::uint8_t errorCode)
+    {
+        EXPECT_CALL(
+            _transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::SetInternalDetumblingMode, 0, ElementsAre(correlationId, errorCode))));
+    }
+
+    TEST_F(SetBuiltinDetumblingBlockMaskTelecommandTest, TestEmpty)
+    {
+        ExpectFrame(0, 1);
+
+        Run(0);
+    }
+
+    TEST_F(SetBuiltinDetumblingBlockMaskTelecommandTest, TestIncomplete)
+    {
+        ExpectFrame(10, 1);
+
+        Run(10);
+    }
+
+    TEST_F(SetBuiltinDetumblingBlockMaskTelecommandTest, TestPersistentSateFail)
+    {
+        EXPECT_CALL(_os, TakeSemaphore(_, _)).WillOnce(Return(OSResult::IOError));
+        ExpectFrame(10, 2);
+
+        Run(10, 0);
+    }
+
+    TEST_F(SetBuiltinDetumblingBlockMaskTelecommandTest, TestSuccess)
+    {
+        EXPECT_CALL(_coordinator, SetBlockMode(adcs::AdcsMode::BuiltinDetumbling, true));
+
+        ExpectFrame(11, 0);
+
+        Run(11, 12);
+
+        state::AdcsState adcs;
+        _stateObject.PersistentState.Get(adcs);
+        ASSERT_THAT(adcs.IsInternalDetumblingDisabled(), Eq(true));
     }
 }
