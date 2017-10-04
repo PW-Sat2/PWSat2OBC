@@ -40,10 +40,10 @@ class SignalStrength(TelemetryUnit):
         super(SignalStrength, self).__init__(raw, raw * 0.03 - 152)
 
 
-@unit('mW')
+@unit('dBm')
 class RFPower(TelemetryUnit):
     def __init__(self, raw):
-        super(RFPower, self).__init__(raw, raw * raw * 5.887 * 10e-5)
+        super(RFPower, self).__init__(raw, 20.0*math.log10((raw+1e-99) * 0.00767)) # very small value added to do not brake parsing of empty telemetry
 
 
 class CommTelemetryParser(CategoryParser):
