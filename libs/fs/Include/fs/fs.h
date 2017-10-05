@@ -157,6 +157,17 @@ namespace services
             virtual OSResult Move(const char* from, const char* to) = 0;
 
             /**
+             * @brief Copies specified file to target location.
+             *
+             * If copied file does not exist this function will return failure. If the target file exists
+             * it will be overwritten be the copied file.
+             * @param[in] from Path to file to be copied.
+             * @param[in] to Path to copy file location.
+             * @return Operation status. @see FSFileOpenResult for details.
+             */
+            virtual OSResult Copy(const char* from, const char* to) = 0;
+
+            /**
              * @brief Truncates file to given size
              * @param[in] file File handle
              * @param[in] length Desired length
