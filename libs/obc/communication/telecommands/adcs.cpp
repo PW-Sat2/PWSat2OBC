@@ -52,7 +52,6 @@ namespace obc
 
         void SetAdcsModeTelecommand::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
         {
-            LOG(LOG_LEVEL_ERROR, __FUNCTION__);
             DownlinkFrame response(DownlinkAPID::SetAdcsMode, 0);
             auto& writer = response.PayloadWriter();
 
@@ -81,6 +80,10 @@ namespace obc
 
                     case adcs::AdcsMode::Disabled:
                         Finish(this->adcsCoordinator.Disable(), writer);
+                        break;
+
+                    case adcs::AdcsMode::Stopped:
+                        Finish(this->adcsCoordinator.Stop(), writer);
                         break;
 
                     default:
