@@ -55,6 +55,7 @@ namespace services
             virtual FileOpenResult Open(const char* path, FileOpen openFlag, FileAccess accessMode) override;
             virtual OSResult Unlink(const char* path) override;
             virtual OSResult Move(const char* from, const char* to) override;
+            virtual OSResult Copy(const char* from, const char* to) override;
             virtual OSResult TruncateFile(FileHandle file, FileSize length) override;
             virtual IOResult Write(FileHandle file, gsl::span<const std::uint8_t> buffer) override;
             virtual IOResult Read(FileHandle file, gsl::span<std::uint8_t> buffer) override;
@@ -80,6 +81,6 @@ namespace services
     }
 }
 
-/** @} */
+    /** @} */
 
 #endif /* LIBS_FS_INCLUDE_FS_YAFFS_H_ */

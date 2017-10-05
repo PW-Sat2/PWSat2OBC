@@ -51,6 +51,59 @@ OSResult YaffsFileSystem::Move(const char* from, const char* to)
     return YaffsTranslateError(status);
 }
 
+OSResult YaffsFileSystem::Copy(const char* from, const char* to)
+{
+    const int srcFile = yaffs_open(from, O_RDONLY, S_IRWXU);
+    if (srcFile == -1)
+    {
+        return YaffsTranslateError(srcFile);
+    }
+
+    const int destFile = yaffs_open(to, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU);
+    if (destFile == -1)
+    {
+        yaffs_close(srcFile);
+        return YaffsTranslateError(destFile);
+    }
+
+    const int bufferSize = 1024;
+    std::uint8_t buffer[bufferSize];
+
+    while (true)
+    {
+        const int bytesRead = yaffs_read(srcFile, buffer, bufferSize);
+        if (bytesRead == -1)
+        {
+            yaffs_close(destFile);
+            yaffs_close(srcFile);
+            return YaffsTranslateError(destFile);
+        }
+
+        const int bytesWritten = yaffs_write(destFile, buffer, bytesRead);
+        if (bytesWritten == -1)
+        {
+            yaffs_close(destFile);
+            yaffs_close(srcFile);
+            return YaffsTranslateError(destFile);
+        }
+
+        if (bytesRead < bufferSize)
+        {
+            break;
+        }
+    }
+
+    const int destCloseStatus = yaffs_close(destFile);
+    const int srcCloseStatus = yaffs_close(srcFile);
+
+    if (destCloseStatus == -1)
+    {
+        return YaffsTranslateError(destCloseStatus);
+    }
+
+    return YaffsTranslateError(srcCloseStatus);
+}
+
 OSResult YaffsFileSystem::TruncateFile(FileHandle file, FileSize length)
 {
     return YaffsTranslateError(yaffs_ftruncate(file, length));
