@@ -318,7 +318,9 @@ namespace mission
     template <typename State, typename... T>
     template <typename... Args>
     MissionLoop<State, T...>::MissionLoop(Args&&... args) //
-        : T(std::forward<Args>(args))..., taskHandle(nullptr), eventGroup(nullptr)
+        : T(std::forward<Args>(args))...,
+          taskHandle(nullptr),
+          eventGroup(nullptr)
     {
         static_assert(sizeof...(Args) == sizeof...(T), "Number of arguments must be equal to number of mission components");
         Setup();
@@ -467,9 +469,17 @@ namespace mission
     template <typename State, typename... T> void MissionLoop<State, T...>::RequestSingleIteration()
     {
         System::EventGroupSetBits(this->eventGroup, RunOnceRequestFlag | PauseRequestFlag);
-        Resume();
 
-        System::EventGroupWaitForBits(this->eventGroup, RunOnceFinishedFlag | PauseAckFlag, true, true, InfiniteTimeout);
+        while (true)
+        {
+            Resume();
+            auto f = System::EventGroupWaitForBits(this->eventGroup, RunOnceFinishedFlag | PauseAckFlag, true, true, 1s);
+
+            if (f == (RunOnceFinishedFlag | PauseAckFlag))
+            {
+                return;
+            }
+        }
     }
 
     template <typename State, typename... T> void MissionLoop<State, T...>::MissionLoopControlTask(void* param)
@@ -481,10 +491,12 @@ namespace mission
     template <typename State, typename... T> void MissionLoop<State, T...>::TaskLoop()
     {
         LOG(LOG_LEVEL_DEBUG, "Starting mission control task");
+
         for (;;)
         {
             const OSEventBits result =
                 System::EventGroupWaitForBits(this->eventGroup, RunOnceRequestFlag | PauseRequestFlag, false, false, this->iterationPeriod);
+
             if (has_flag(result, RunOnceRequestFlag))
             {
                 LOG(LOG_LEVEL_DEBUG, "Running mission loop task once");
@@ -493,14 +505,16 @@ namespace mission
                 System::EventGroupClearBits(this->eventGroup, RunOnceRequestFlag);
                 System::EventGroupSetBits(this->eventGroup, RunOnceFinishedFlag);
             }
-            else if (has_flag(result, PauseRequestFlag))
+
+            if (has_flag(result, PauseRequestFlag))
             {
                 LOG(LOG_LEVEL_WARNING, "MissionLoop task paused");
                 System::EventGroupClearBits(this->eventGroup, PauseRequestFlag);
                 System::EventGroupSetBits(this->eventGroup, PauseAckFlag);
                 System::SuspendTask(nullptr);
             }
-            else
+
+            if (result == 0)
             {
                 RunOnce();
             }

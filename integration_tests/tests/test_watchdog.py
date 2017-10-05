@@ -1,6 +1,7 @@
 import logging
 from unittest import skip
 
+from system import runlevel
 from tests.base import BaseTest, RestartPerTest
 from utils import TestEvent
 
@@ -16,9 +17,8 @@ class WatchdogTest(RestartPerTest):
 
         self.assertTrue(rebooted, "MCU should be rebooted")
 
+    @runlevel(1)
     def test_should_kick_watchdog_in_mission_loop(self):
-        self.system.obc.suspend_mission()
-
         ev_a = TestEvent()
         ev_b = TestEvent()
 
