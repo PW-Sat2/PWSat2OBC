@@ -89,6 +89,7 @@ namespace mission
         bool AntennaTask::Initialize()
         {
             this->_sync = System::CreateBinarySemaphore(1);
+            System::GiveSemaphore(this->_sync);
             return true;
         }
 
