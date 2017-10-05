@@ -136,7 +136,17 @@ struct IAntennaDriver
      */
     virtual OSResult GetTelemetry(devices::antenna::AntennaTelemetry& telemetry) = 0;
 
+    /**
+     * @brief Arms selected antenna controller
+     * @param channel Controller to use
+     * @return Operation result
+     */
     virtual OSResult Arm(AntennaChannel channel) = 0;
+    /**
+     * @brief Disarms selected antenna controller
+     * @param channel Controller to use
+     * @return Operation result
+     */
     virtual OSResult Disarm(AntennaChannel channel) = 0;
 };
 

@@ -3,7 +3,6 @@
 #include <tuple>
 #include "antenna/driver.h"
 #include "antenna/telemetry.hpp"
-#include "antenna_state.h"
 #include "antenna_task.hpp"
 #include "gsl/gsl_util"
 #include "logger/logger.h"
@@ -35,31 +34,41 @@ namespace mission
             return ToArray(joined, std::make_index_sequence<TupleSize>());
         }
 
+        /** @brief Helper class for building deployment steps */
         template <AntennaChannel Channel> struct Step
         {
+            /** @brief Power on controller */
             static constexpr AntennaTask::StepDescriptor PowerOn = {AntennaTask::PowerOn, Channel, AntennaId::ANTENNA_AUTO_ID, 0s, 10s};
 
+            /** @brief Reset controller */
             static constexpr AntennaTask::StepDescriptor Reset = {AntennaTask::Reset, Channel, AntennaId::ANTENNA_AUTO_ID, 0s, 60s};
 
+            /** @brief Arm controller */
             static constexpr AntennaTask::StepDescriptor Arm = {AntennaTask::Arm, Channel, AntennaId::ANTENNA_AUTO_ID, 0s, 60s};
 
+            /** @brief Perform auto deployment */
             static constexpr AntennaTask::StepDescriptor AutoDeploy = {
                 AntennaTask::Deploy, Channel, AntennaId::ANTENNA_AUTO_ID, 4 * 30s, 180s};
 
+            /** @brief Perform manual deployment */
             template <AntennaId Antenna>
             static constexpr AntennaTask::StepDescriptor ManualDeploy = {AntennaTask::Deploy, Channel, Antenna, 30s, 90s};
 
+            /** @brief Disarm controller */
             static constexpr AntennaTask::StepDescriptor Disarm = {AntennaTask::Disarm, Channel, AntennaId::ANTENNA_AUTO_ID, 0s, 0s};
 
+            /** @brief Power off controller */
             static constexpr AntennaTask::StepDescriptor PowerOff = {AntennaTask::PowerOff, Channel, AntennaId::ANTENNA_AUTO_ID, 0s, 120s};
 
+            /** @brief Perform full sequence of auto deployment */
             static constexpr auto FullSequenceAuto = std::make_tuple(PowerOn, Reset, Arm, AutoDeploy, Disarm, PowerOff);
 
+            /** @brief Perform full sequence of manual deployment on single antenna */
             template <AntennaId Antenna>
             static constexpr auto FullSequenceManual = std::make_tuple(PowerOn, Reset, Arm, ManualDeploy<Antenna>, Disarm, PowerOff);
         };
 
-        decltype(AntennaTask::Steps) AntennaTask::Steps = Join( //
+        std::array<AntennaTask::StepDescriptor, 60> AntennaTask::Steps = Join( //
             Step<AntennaChannel::ANTENNA_PRIMARY_CHANNEL>::FullSequenceAuto,
             Step<AntennaChannel::ANTENNA_PRIMARY_CHANNEL>::FullSequenceManual<AntennaId::ANTENNA1_ID>,
             Step<AntennaChannel::ANTENNA_PRIMARY_CHANNEL>::FullSequenceManual<AntennaId::ANTENNA2_ID>,
