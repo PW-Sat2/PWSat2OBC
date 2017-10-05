@@ -41,6 +41,11 @@ class PosixFileSystem : public IFileSystem
         return OSResult::NotSupported;
     }
 
+    virtual OSResult Copy(const char* /*from*/, const char* /*to*/) override
+    {
+        return OSResult::NotSupported;
+    }
+
     virtual OSResult TruncateFile(FileHandle /*file*/, FileSize /*length*/) override
     {
         return OSResult::NotSupported;

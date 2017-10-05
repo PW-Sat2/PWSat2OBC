@@ -31,6 +31,7 @@ class FsMock : public services::fs::IFileSystem
         Open, services::fs::FileOpenResult(const char* path, services::fs::FileOpen openFlag, services::fs::FileAccess accessMode));
     MOCK_METHOD1(Unlink, OSResult(const char* path));
     MOCK_METHOD2(Move, OSResult(const char* from, const char* to));
+    MOCK_METHOD2(Copy, OSResult(const char* from, const char* to));
     MOCK_METHOD2(TruncateFile, OSResult(services::fs::FileHandle file, services::fs::FileSize length));
     MOCK_METHOD2(Write, services::fs::IOResult(services::fs::FileHandle file, gsl::span<const std::uint8_t> buffer));
     MOCK_METHOD2(Read, services::fs::IOResult(services::fs::FileHandle file, gsl::span<std::uint8_t> buffer));

@@ -5,10 +5,11 @@
 #include "mock/GyroMock.hpp"
 #include "mock/time.hpp"
 
+using testing::Eq;
+using testing::InSequence;
 using testing::NiceMock;
 using testing::Return;
-using testing::InSequence;
-using testing::Eq;
+using testing::StrEq;
 using testing::_;
 
 using namespace experiment::leop;
@@ -78,5 +79,12 @@ namespace
         auto r = this->_exp.Iteration();
 
         ASSERT_THAT(r, Eq(IterationResult::Finished));
+    }
+
+    TEST_F(LEOPExperimentTest, ShouldCopyTelemetryFile)
+    {
+        EXPECT_CALL(_fs, Copy(StrEq("/telemetry.current"), StrEq("/telemetry.leop"))).WillOnce(Return(OSResult::Success));
+
+        this->_exp.Stop(IterationResult::Finished);
     }
 }

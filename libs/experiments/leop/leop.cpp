@@ -9,8 +9,8 @@ using experiments::IterationResult;
 using experiments::StartResult;
 using experiments::fs::ExperimentFile;
 using services::fs::File;
-using services::fs::FileOpen;
 using services::fs::FileAccess;
+using services::fs::FileOpen;
 
 using namespace std::chrono_literals;
 
@@ -78,6 +78,11 @@ namespace experiment
         void LaunchAndEarlyOrbitPhaseExperiment::Stop(IterationResult /*lastResult*/)
         {
             _experimentFile.Close();
+            auto copyResult = _fileSystem.Copy("/telemetry.current", "/telemetry.leop");
+            if (OS_RESULT_FAILED(copyResult))
+            {
+                LOGF(LOG_LEVEL_ERROR, "Cannot copy telemetry file (reason %d)", num(copyResult));
+            }
         }
 
         IterationResult LaunchAndEarlyOrbitPhaseExperiment::PerformMeasurements()

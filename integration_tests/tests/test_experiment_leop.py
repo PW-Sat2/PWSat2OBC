@@ -31,9 +31,15 @@ class TestExperimentLEOP(RestartPerTest):
     def test_should_perform_experiment(self):
         self._start()
 
+        self.system.obc.write_file('/telemetry.current', 'ABC')
+        files = self.system.obc.list_files('/')
+        self.assertIn('telemetry.current', files, 'Telemetry file not created')
+
         log = logging.getLogger("TEST")
         files = self.system.obc.remove_file('/leop')
         self.assertNotIn('leop', files, 'Experiment file not deleted')
+        files = self.system.obc.remove_file('/telemetry.leop')
+        self.assertNotIn('telemetry.leop', files, 'Telemetry file not deleted')
 
         log.info('Setting time inside experiment time slot')
         self.system.obc.jump_to_time(timedelta(minutes=5))
@@ -49,6 +55,7 @@ class TestExperimentLEOP(RestartPerTest):
 
         files = self.system.obc.list_files('/')
         self.assertIn('leop', files, 'Experiment file not created')
+        self.assertIn('telemetry.leop', files, 'Telemetry file not copied')
 
     @runlevel(2)
     @clear_state()
