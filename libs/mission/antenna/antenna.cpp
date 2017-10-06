@@ -38,27 +38,27 @@ namespace mission
         template <AntennaChannel Channel> struct Step
         {
             /** @brief Power on controller */
-            static constexpr AntennaTask::StepDescriptor PowerOn = {AntennaTask::PowerOn, Channel, AntennaId::ANTENNA_AUTO_ID, 0s, 10s};
+            static constexpr AntennaTask::StepDescriptor PowerOn = {AntennaTask::PowerOn, Channel, AntennaId::ANTENNA_AUTO_ID, 0s, 9s};
 
             /** @brief Reset controller */
-            static constexpr AntennaTask::StepDescriptor Reset = {AntennaTask::Reset, Channel, AntennaId::ANTENNA_AUTO_ID, 0s, 60s};
+            static constexpr AntennaTask::StepDescriptor Reset = {AntennaTask::Reset, Channel, AntennaId::ANTENNA_AUTO_ID, 0s, 59s};
 
             /** @brief Arm controller */
-            static constexpr AntennaTask::StepDescriptor Arm = {AntennaTask::Arm, Channel, AntennaId::ANTENNA_AUTO_ID, 0s, 60s};
+            static constexpr AntennaTask::StepDescriptor Arm = {AntennaTask::Arm, Channel, AntennaId::ANTENNA_AUTO_ID, 0s, 59s};
 
             /** @brief Perform auto deployment */
             static constexpr AntennaTask::StepDescriptor AutoDeploy = {
-                AntennaTask::Deploy, Channel, AntennaId::ANTENNA_AUTO_ID, 4 * 30s, 180s};
+                AntennaTask::Deploy, Channel, AntennaId::ANTENNA_AUTO_ID, 4 * 30s, 179s};
 
             /** @brief Perform manual deployment */
             template <AntennaId Antenna>
-            static constexpr AntennaTask::StepDescriptor ManualDeploy = {AntennaTask::Deploy, Channel, Antenna, 30s, 90s};
+            static constexpr AntennaTask::StepDescriptor ManualDeploy = {AntennaTask::Deploy, Channel, Antenna, 30s, 89s};
 
             /** @brief Disarm controller */
             static constexpr AntennaTask::StepDescriptor Disarm = {AntennaTask::Disarm, Channel, AntennaId::ANTENNA_AUTO_ID, 0s, 0s};
 
             /** @brief Power off controller */
-            static constexpr AntennaTask::StepDescriptor PowerOff = {AntennaTask::PowerOff, Channel, AntennaId::ANTENNA_AUTO_ID, 0s, 120s};
+            static constexpr AntennaTask::StepDescriptor PowerOff = {AntennaTask::PowerOff, Channel, AntennaId::ANTENNA_AUTO_ID, 0s, 119s};
 
             /** @brief Perform full sequence of auto deployment */
             static constexpr auto FullSequenceAuto = std::make_tuple(PowerOn, Reset, Arm, AutoDeploy, Disarm, PowerOff);
@@ -82,7 +82,7 @@ namespace mission
 
         AntennaTask::AntennaTask(std::tuple<IAntennaDriver&, services::power::IPowerControl&> args)
             : _powerControl(std::get<services::power::IPowerControl&>(args)), _antenna(std::get<IAntennaDriver&>(args)), _step(0),
-              _nextStepAt(0), _retryCounter(StepRetries), _controllerPoweredOn(false)
+              _nextStepAt(0), _retryCounter(StepRetries), _sync(nullptr), _controllerPoweredOn(false)
         {
         }
 
@@ -97,7 +97,8 @@ namespace mission
         {
             auto This = reinterpret_cast<AntennaTask*>(param);
 
-            if (state.Time < 40min)
+            if (!mission::IsInitialSilentPeriodFinished(state.Time))
+            //            if (state.Time < 40min)
             {
                 return false;
             }

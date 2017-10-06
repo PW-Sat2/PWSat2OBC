@@ -70,7 +70,7 @@ namespace
 
     TEST_F(DeployAntennaTest, HappyPath)
     {
-        _state.Time = 40min;
+        _state.Time = 41min;
 
         {
             InSequence s;
@@ -144,7 +144,7 @@ namespace
 
     TEST_F(DeployAntennaTest, ShouldRetryFailedStep)
     {
-        _state.Time = 40min;
+        _state.Time = 41min;
 
         EXPECT_CALL(_power, PrimaryAntennaPower(true)).WillOnce(Return(false));
 
@@ -159,7 +159,7 @@ namespace
 
     TEST_F(DeployAntennaTest, ShouldRetryFailedStepAndMoveForwardAfterThreeRetries)
     {
-        _state.Time = 40min;
+        _state.Time = 41min;
 
         EXPECT_CALL(_power, PrimaryAntennaPower(true)).WillOnce(Return(false));
 
@@ -188,7 +188,7 @@ namespace
 
     TEST_F(DeployAntennaTest, ShouldCollectTelemetryWhenControllerIsPoweredOn)
     {
-        _state.Time = 40min;
+        _state.Time = 41min;
         EXPECT_CALL(_antenna, GetTelemetry(_)).WillOnce(Return(OSResult::Success));
 
         EXPECT_CALL(_power, PrimaryAntennaPower(true)).WillOnce(Return(true));
