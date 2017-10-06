@@ -166,10 +166,10 @@ static std::uint32_t LoadApplication(std::uint8_t slotsMask)
     {
         return BOOT_SAFEMODE_BASE_CODE;
     }
-
-    auto slots = ToSlotNumbers(slotsMask);
-
-    LoadApplicationTMR(slots);
+    else if (slotsMask != boot::BootSettings::UpperBootSlot)
+    {
+        LoadApplicationTMR(ToSlotNumbers(slotsMask));
+    }
 
     return BOOT_APPLICATION_BASE;
 }
@@ -239,10 +239,14 @@ bool IsBootSlotsValid(std::uint8_t mask)
     return true;
 }
 
+void CountBootAttempts()
+{
+    auto counter = Bootloader.Settings.BootCounter();
+    Bootloader.Settings.BootCounter(counter + 1);
+}
+
 void ProceedWithBooting()
 {
-    BSP_UART_Puts(BSP_UART_DEBUG, "\nTimeout exceeded - booting");
-
     boot::BootReason = boot::Reason::PrimaryBootSlots;
 
     ResolveFailedBoot();
@@ -251,13 +255,13 @@ void ProceedWithBooting()
 
     if (slotsMask == boot::BootSettings::SafeModeBootSlot)
     {
-        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nSafe Mode boot slot... Booting safe mode!");
+        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nSafe Mode boot slot... Booting safe mode!\n");
     }
     else if (slotsMask == boot::BootSettings::UpperBootSlot)
     {
         boot::BootReason = boot::Reason::BootToUpper;
-        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nUpper boot slot... Booting to upper");
-        BootToAddress(BOOT_APPLICATION_BASE);
+        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nUpper boot slot... Booting to upper\n");
+        CountBootAttempts();
     }
     else if (!IsBootSlotsValid(slotsMask))
     {
@@ -272,7 +276,7 @@ void ProceedWithBooting()
         }
         else
         {
-            BSP_UART_Puts(BSP_UART_DEBUG, "\n\nFailsafe boot slots invalid...Falling back to safe mode");
+            BSP_UART_Puts(BSP_UART_DEBUG, "\n\nFailsafe boot slots invalid...Falling back to safe mode\n");
 
             boot::BootReason = boot::Reason::InvalidFailsafeBootSlots;
             slotsMask = boot::BootSettings::SafeModeBootSlot;
@@ -286,12 +290,11 @@ void ProceedWithBooting()
 
         boot::BootReason = boot::Reason::CounterExpired;
 
-        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nBoot counter expired... Booting safe mode!");
+        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nBoot counter expired... Booting safe mode!\n");
     }
     else
     {
-        auto counter = Bootloader.Settings.BootCounter();
-        Bootloader.Settings.BootCounter(counter + 1);
+        CountBootAttempts();
     }
 
     boot::Index = slotsMask;

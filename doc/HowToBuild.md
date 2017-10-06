@@ -10,7 +10,7 @@ Build process requires following tools:
 * Doxygen
 * Python 2.7
 * Clang (for `clang-format`)
-* IronPython & WxWidgets (for interactive python console) 
+* IPython & WxWidgets (for interactive python console) 
 
 ### Ready-made pack for Windows
 For Windows people ready-made pack with all necessary tools is located here: https://www.dropbox.com/s/zrf3c5uy9ujo687/PWSat-Toolchain.zip?dl=0

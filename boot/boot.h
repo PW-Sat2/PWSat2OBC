@@ -7,4 +7,6 @@ void BootToAddress(uint32_t baseAddress);
 
 void ProceedWithBooting();
 
+void CountBootAttempts();
+
 #endif /* BOOT_BOOT_H_ */
