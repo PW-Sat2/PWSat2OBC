@@ -5,7 +5,6 @@ set(SOURCES
   state/PersistentTimeStateTest.cpp
   state/AntennaConfigTest.cpp
   state/TelemetryTest.cpp
-  state/BootStateTest.cpp
   state/SailStateTest.cpp
   state/MessageStateTest.cpp
   obc/ObcStateTest.cpp 
