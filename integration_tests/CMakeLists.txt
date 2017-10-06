@@ -16,7 +16,7 @@ add_custom_target(${NAME}.deps
 
 add_custom_target(${NAME}
     COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}" ${PYTHON_EXECUTABLE} -m nose -x -s --nologcapture --rednose -v --with-xunit "--xunit-file=${TEST_RESULTS}"
-    DEPENDS pwsat.flash ${NAME}.deps
+    DEPENDS pwsat.flash ${NAME}.deps generate_telemetry.run generate_exp_data.run
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
