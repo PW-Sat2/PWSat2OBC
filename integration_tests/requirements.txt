@@ -11,4 +11,3 @@ parsec
 progressbar2
 parameterized
 xmodem
-matplotlib
