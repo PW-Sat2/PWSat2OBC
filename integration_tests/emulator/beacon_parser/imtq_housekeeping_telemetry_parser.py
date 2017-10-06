@@ -5,13 +5,13 @@ from parser import CategoryParser
 @unit('V')
 class Voltage(TelemetryUnit):
     def __init__(self, raw):
-        super(Voltage, self).__init__(raw, raw / 1000)
+        super(Voltage, self).__init__(raw, raw / 1000.0)
 
 
-@unit('A')
+@unit('mA')
 class IMTQCurrent(TelemetryUnit):
     def __init__(self, raw):
-        super(IMTQCurrent, self).__init__(raw, raw * 1e-4)
+        super(IMTQCurrent, self).__init__(raw, raw * 1e-1)
 
 
 @unit('C')
