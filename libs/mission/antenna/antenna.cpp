@@ -1,8 +1,8 @@
 #include <cstdint>
 #include <cstring>
+#include <tuple>
 #include "antenna/driver.h"
 #include "antenna/telemetry.hpp"
-#include "antenna_state.h"
 #include "antenna_task.hpp"
 #include "gsl/gsl_util"
 #include "logger/logger.h"
@@ -18,645 +18,195 @@ namespace mission
 {
     namespace antenna
     {
-        /**
-         * @addtogroup mission_atenna
-         * @{
-         */
-        /**
-         * @brief Type definition of the specific deployment step handler.
-         *
-         * @param[in] state Reference to global satellite state.
-         * @param[in] stateDescriptor Reference to deployment process state.
-         * @param[in] driver Reference to current antenna driver instance
-         */
-        typedef void DeploymentProcedure(const SystemState& state, //
-            AntennaMissionState& stateDescriptor,
-            IAntennaDriver& driver //
-            );
-
-        /**
-         * @brief This deployment step performs regular deployment operation.
-         *
-         * @param[in] state Reference to global satellite state.
-         * @param[in] stateDescriptor Reference to the deployment process state object.
-         * @param[in] driver Reference to current antenna driver instance.
-         */
-        static void RegularDeploymentStep(const SystemState& state, //
-            AntennaMissionState& stateDescriptor,
-            IAntennaDriver& driver //
-            );
-
-        /**
-         * @brief This deployment step resets current hardware channel.
-         *
-         * @param[in] state Reference to global satellite state.
-         * @param[in] stateDescriptor Reference to the deployment process state object.
-         * @param[in] driver Reference to current antenna driver instance.
-         */
-        static void ResetDriverStep(const SystemState& state, //
-            AntennaMissionState& stateDescriptor,
-            IAntennaDriver& driver //
-            );
-
-        /**
-         * @brief This procedure tries to reset antenna driver with several retries in case of errors.
-         * @param[in] channel Identifier of antenna driver channel that has to be reset.
-         * @param[in] driver Reference to current antenna driver instance.
-         * @return True when the driver has been reset, false otherwise.
-         */
-        static bool ResetDriver(AntennaChannel channel, IAntennaDriver& driver);
-
-        /**
-         * @brief This deployment step finalizes antenna deployment process.
-         *
-         * @param[in] state Reference to global satellite state.
-         * @param[in] stateDescriptor Reference to the deployment process state object.
-         * @param[in] driver Reference to current antenna driver instance.
-         */
-        static void FinishDeploymentStep(const SystemState& state, //
-            AntennaMissionState& stateDescriptor,
-            IAntennaDriver& driver //
-            );
-
-        static void PowerOnDriver(const SystemState& state, //
-            AntennaMissionState& stateDescriptor,
-            IAntennaDriver& driver //
-            );
-
-        static void PowerOffDriver(const SystemState& state, //
-            AntennaMissionState& stateDescriptor,
-            IAntennaDriver& driver //
-            );
-
-        /**
-         * @brief Deployment step retry limit.
-         *
-         * This value controls how many times each deployment step will be repeated
-         * in case of errors before process can advance further.
-         */
-        static constexpr std::uint8_t StepRetryLimit = 3;
-
-        /**
-         * @brief Hardware operation retry limit.
-         *
-         * This value controls how many times each hardware operation will be issued
-         * in case of errors before declaring it as a failure.
-         */
-        static constexpr std::uint8_t RetryLimit = 3;
-
-        /**
-         * @brief Class that describes single deployment step.
-         *
-         * The entire process is driven by the array of steps, each described by the object of this type.
-         */
-        struct AntennaDeploymentStep final
+        template <typename... Elements, std::size_t... Indexes, typename Element = std::tuple_element_t<0, std::tuple<Elements...>>>
+        static constexpr std::array<Element, sizeof...(Elements)> ToArray(
+            std::tuple<Elements...> t, std::integer_sequence<std::size_t, Indexes...> /*i*/)
         {
-            /**
-             * @brief Pointer to the procedure the performs current step.
-             */
-            DeploymentProcedure* procedure;
+            return {std::get<Indexes>(t)...};
+        }
 
-            /**
-             * @brief Hardware channel that should be used to perform this step.
-             */
-            AntennaChannel channel;
+        template <typename... Tuples> static decltype(auto) Join(const Tuples... tuples)
+        {
+            auto joined = std::tuple_cat(tuples...);
 
-            /**
-             * @brief Identifier of the antenna that should be used/affected by this step.
-             */
-            AntennaId antennaId;
+            constexpr auto TupleSize = std::tuple_size<decltype(joined)>::value;
 
-            /**
-             * @brief Antenna deployment process timeout in seconds.
-             */
-            uint8_t deploymentTimeout;
+            return ToArray(joined, std::make_index_sequence<TupleSize>());
+        }
 
-            /**
-             * @brief Flag indicating whether hardware deployment switches should be overriden.
-             */
-            bool overrideSwitches;
+        /** @brief Helper class for building deployment steps */
+        template <AntennaChannel Channel> struct Step
+        {
+            /** @brief Power on controller */
+            static constexpr AntennaTask::StepDescriptor PowerOn = {AntennaTask::PowerOn, Channel, AntennaId::ANTENNA_AUTO_ID, 0s, 9s};
+
+            /** @brief Reset controller */
+            static constexpr AntennaTask::StepDescriptor Reset = {AntennaTask::Reset, Channel, AntennaId::ANTENNA_AUTO_ID, 0s, 59s};
+
+            /** @brief Arm controller */
+            static constexpr AntennaTask::StepDescriptor Arm = {AntennaTask::Arm, Channel, AntennaId::ANTENNA_AUTO_ID, 0s, 59s};
+
+            /** @brief Perform auto deployment */
+            static constexpr AntennaTask::StepDescriptor AutoDeploy = {
+                AntennaTask::Deploy, Channel, AntennaId::ANTENNA_AUTO_ID, 4 * 30s, 179s};
+
+            /** @brief Perform manual deployment */
+            template <AntennaId Antenna>
+            static constexpr AntennaTask::StepDescriptor ManualDeploy = {AntennaTask::Deploy, Channel, Antenna, 30s, 89s};
+
+            /** @brief Disarm controller */
+            static constexpr AntennaTask::StepDescriptor Disarm = {AntennaTask::Disarm, Channel, AntennaId::ANTENNA_AUTO_ID, 0s, 0s};
+
+            /** @brief Power off controller */
+            static constexpr AntennaTask::StepDescriptor PowerOff = {AntennaTask::PowerOff, Channel, AntennaId::ANTENNA_AUTO_ID, 0s, 119s};
+
+            /** @brief Perform full sequence of auto deployment */
+            static constexpr auto FullSequenceAuto = std::make_tuple(PowerOn, Reset, Arm, AutoDeploy, Disarm, PowerOff);
+
+            /** @brief Perform full sequence of manual deployment on single antenna */
+            template <AntennaId Antenna>
+            static constexpr auto FullSequenceManual = std::make_tuple(PowerOn, Reset, Arm, ManualDeploy<Antenna>, Disarm, PowerOff);
         };
 
-        /**
-         * @brief Default timeout value that should be enough in case there are no problems.
-         */
-        constexpr std::uint8_t DefaultTimeout = 9;
-
-        /**
-         * @brief Extended timeout that should take care of the most of the problems.
-         */
-        constexpr std::uint8_t MediumTimeout = 19;
-
-        /**
-         * @brief Long timeouts for heating problems.
-         */
-        constexpr std::uint8_t LongTimeout = 35;
-
-        /**
-         * @brief Last resort timeout in case everything else fails.
-         */
-        constexpr std::uint8_t EmergencyTimeout = 59;
-
-        /**
-         * @brief Array of antenna deployment steps.
-         *
-         * The entire process is composed of steps that are run in sequence from the beginning. Steps themselves are
-         * grouped into series that together form logical variant of the antenna deployment process.
-         *
-         * Following is the list of the deployment stages that are defined in this array:
-         * - Automatic deployment (primary hardware channel)
-         * - Manual deployment with overridden deployment switches (primary hardware channel)
-         * - Deployment finalization (primary hardware channel)
-         *
-         * - Automatic deployment (backup hardware channel)
-         * - Manual deployment with overridden deployment switches (backup hardware channel)
-         * - Deployment finalization (backup hardware channel)
-         */
-        static const AntennaDeploymentStep deploymentSteps[] = {
-            {PowerOnDriver, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 0, false},
-            {ResetDriverStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 0, false},
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, MediumTimeout * 4, false},
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA1_ID, LongTimeout, true},
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA2_ID, LongTimeout, true},
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA3_ID, LongTimeout, true},
-            {RegularDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA4_ID, LongTimeout, true},
-            {FinishDeploymentStep, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 0, false},
-            {PowerOffDriver, ANTENNA_PRIMARY_CHANNEL, ANTENNA_AUTO_ID, 0, false},
-
-            {PowerOnDriver, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 0, false},
-            {ResetDriverStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 0, false},
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, MediumTimeout * 4, false},
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA1_ID, LongTimeout, true},
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA2_ID, LongTimeout, true},
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA3_ID, LongTimeout, true},
-            {RegularDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA4_ID, LongTimeout, true},
-            {FinishDeploymentStep, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 0, false},
-            {PowerOffDriver, ANTENNA_BACKUP_CHANNEL, ANTENNA_AUTO_ID, 0, false},
-        };
-
-        /**
-         * @brief Number of steps in the antenna deployment process.
-         */
-        static constexpr uint8_t DeploymentStepLimit = count_of(deploymentSteps);
-
-        static std::int8_t GetTimeout(const AntennaDeploymentStep& step)
-        {
-            return step.deploymentTimeout / 10 + 1;
-        }
-
-        AntennaMissionState::AntennaMissionState(IAntennaDriver& antennaDriver, services::power::IPowerControl& powerControl)
-            : Power(powerControl),    //
-              _overrideState(false),  //
-              _inProgress(false),     //
-              _stepNumber(0),         //
-              _retryCount(0),         //
-              _cycleCount(0),         //
-              _driver(antennaDriver), //
-              _powerRequired(false),  //
-              _isControllerPoweredOn(false)
-        {
-        }
-
-        void AntennaMissionState::Initialize()
-        {
-            this->_telemetrySync = System::CreateBinarySemaphore(5);
-            System::GiveSemaphore(this->_telemetrySync);
-        }
-
-        void AntennaMissionState::Retry(std::uint8_t limit, std::int8_t timeout)
-        {
-            if ((this->_retryCount + 1) == limit)
-            {
-                NextStep(timeout);
-            }
-            else
-            {
-                ++this->_retryCount;
-                SetTimeout(timeout);
-            }
-        }
-
-        bool AntennaMissionState::IsFinished() const
-        {
-            return this->_stepNumber >= DeploymentStepLimit;
-        }
-
-        void AntennaMissionState::Update(const AntennaDeploymentStatus& status)
-        {
-            this->_inProgress = status.IsDeploymentActive[0] | //
-                status.IsDeploymentActive[1] |                 //
-                status.IsDeploymentActive[2] |                 //
-                status.IsDeploymentActive[3];
-        }
-
-        std::uint8_t AntennaMissionState::StepCount()
-        {
-            return DeploymentStepLimit;
-        }
-
-        bool AntennaMissionState::CurrentTelemetry(devices::antenna::AntennaTelemetry& result) const
-        {
-            Lock lock(this->_telemetrySync, 100ms);
-            if (!lock())
-            {
-                return false;
-            }
-
-            result = this->_currentTelemetry;
-            return true;
-        }
-
-        bool AntennaMissionState::UpdateTelemetry()
-        {
-            Lock lock(this->_telemetrySync, 200ms);
-
-            if (lock())
-            {
-                this->_driver.GetTelemetry(this->_currentTelemetry);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        /**
-         * @brief This procedure is supposed to stop any deployment process that may currently be active on the
-         * passed hardware channel.
-         *
-         * @param[in] driver Reference to current antenna driver instance.
-         * @param[in] channel Hardware channel that should be used for current operation.
-         * @param[in] retryCount Number of step retry attempts in case of errors.
-         * @return True if operation has been successfully completed, false otherwise.
-         */
-        static bool EndDeployment(IAntennaDriver& driver, AntennaChannel channel, std::uint8_t retryCount)
-        {
-            while (retryCount-- > 0)
-            {
-                const OSResult status = driver.FinishDeployment(channel);
-                if (OS_RESULT_SUCCEEDED(status))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        /**
-         * @brief This procedure is supposed to stop any deployment process that may currently be active on the
-         * hardware channel used in the previous step.
-         *
-         * @param[in] state Reference to global satellite state.
-         * @param[in] stateDescriptor Reference to the deployment process state object.
-         * @param[in] driver Reference to current antenna driver instance.
-         */
-        static void StopDeployment(const SystemState& state,
-            AntennaMissionState& stateDescriptor,
-            IAntennaDriver& driver //
-            )
-        {
-            UNREFERENCED_PARAMETER(state);
-            if (stateDescriptor.StepNumber() == 0)
-            {
-                return;
-            }
-
-            const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber() - 1];
-            EndDeployment(driver, step.channel, RetryLimit);
-        }
-
-        /**
-         * @brief This procedure is supposed to start deployment process described by the current step.
-         *
-         * @param[in] state Reference to global satellite state.
-         * @param[in] stateDescriptor Reference to the deployment process state object.
-         * @param[in] driver Reference to current antenna driver instance.
-         */
-        static void BeginDeployment(const SystemState& state,
-            AntennaMissionState& stateDescriptor,
-            IAntennaDriver& driver //
-            )
-        {
-            UNREFERENCED_PARAMETER(state);
-            const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
-            std::uint8_t counter = RetryLimit;
-            while (counter-- > 0)
-            {
-                const OSResult result = driver.DeployAntenna(step.channel,
-                    step.antennaId,
-                    std::chrono::seconds(step.deploymentTimeout),
-                    step.overrideSwitches //
-                    );
-
-                if (OS_RESULT_SUCCEEDED(result))
-                {
-                    stateDescriptor.NextStep(GetTimeout(step));
-                    return;
-                }
-            }
-
-            stateDescriptor.Retry(StepRetryLimit, GetTimeout(step));
-        }
-
-        void RegularDeploymentStep(const SystemState& state,
-            AntennaMissionState& stateDescriptor,
-            IAntennaDriver& driver //
-            )
-        {
-            const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
-            if (stateDescriptor.IsDeploymentInProgress())
-            {
-                LOGF(LOG_LEVEL_INFO,
-                    "[ant] [Step %d] Resetting driver due to timeout (channel %d, antenna %d)",
-                    static_cast<int>(stateDescriptor.StepNumber()),
-                    static_cast<int>(step.channel),
-                    static_cast<int>(step.antennaId));
-                const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
-                ResetDriver(step.channel, driver);
-                stateDescriptor.Retry(StepRetryLimit, GetTimeout(step));
-            }
-            else
-            {
-                LOGF(LOG_LEVEL_INFO,
-                    "[ant] [Step %d] Performing deployment (channel %d, antenna %d)",
-                    static_cast<int>(stateDescriptor.StepNumber()),
-                    static_cast<int>(step.channel),
-                    static_cast<int>(step.antennaId));
-
-                StopDeployment(state, stateDescriptor, driver);
-                BeginDeployment(state, stateDescriptor, driver);
-            }
-        }
-
-        void ResetDriverStep(const SystemState& state,
-            AntennaMissionState& stateDescriptor,
-            IAntennaDriver& driver //
-            )
-        {
-            UNREFERENCED_PARAMETER(state);
-
-            const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
-
-            LOGF(LOG_LEVEL_INFO,
-                "[ant] [Step%d] Reseting driver %d",
-                static_cast<int>(stateDescriptor.StepNumber()),
-                static_cast<int>(step.channel));
-
-            if (ResetDriver(step.channel, driver))
-            {
-                stateDescriptor.NextStep(GetTimeout(step));
-            }
-            else
-            {
-                stateDescriptor.Retry(StepRetryLimit, GetTimeout(step));
-            }
-        }
-
-        bool ResetDriver(AntennaChannel channel, IAntennaDriver& driver)
-        {
-            std::uint8_t counter = RetryLimit;
-            while (counter-- > 0)
-            {
-                const OSResult result = driver.Reset(channel);
-                if (OS_RESULT_SUCCEEDED(result))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-        void FinishDeploymentStep(const SystemState& state,
-            AntennaMissionState& stateDescriptor,
-            IAntennaDriver& driver //
-            )
-        {
-            UNREFERENCED_PARAMETER(state);
-            const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
-
-            LOGF(LOG_LEVEL_INFO, "[ant] [Step%d] Finish deployment %d", stateDescriptor.StepNumber(), step.channel);
-
-            if (EndDeployment(driver, step.channel, RetryLimit))
-            {
-                stateDescriptor.NextStep(GetTimeout(step));
-            }
-            else
-            {
-                stateDescriptor.Retry(StepRetryLimit, GetTimeout(step));
-            }
-        }
-
-        void PowerOnDriver(const SystemState& /*state*/, AntennaMissionState& stateDescriptor, IAntennaDriver& /*driver*/)
-        {
-            const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
-
-            bool result;
-
-            if (step.channel == ANTENNA_PRIMARY_CHANNEL)
-            {
-                result = stateDescriptor.Power.PrimaryAntennaPower(true);
-
-                stateDescriptor.RequirePrimaryAntennaPower(result);
-            }
-            else
-            {
-                result = stateDescriptor.Power.BackupAntennaPower(true);
-            }
-
-            if (result)
-            {
-                stateDescriptor.IsControllerPoweredOn(true);
-                stateDescriptor.NextStep(GetTimeout(step));
-            }
-            else
-            {
-                stateDescriptor.Retry(StepRetryLimit, GetTimeout(step));
-            }
-        }
-
-        void PowerOffDriver(const SystemState& /*state*/, AntennaMissionState& stateDescriptor, IAntennaDriver& /*driver*/)
-        {
-            const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor.StepNumber()];
-
-            bool result;
-
-            if (step.channel == ANTENNA_PRIMARY_CHANNEL)
-            {
-                result = stateDescriptor.Power.PrimaryAntennaPower(false);
-                stateDescriptor.RequirePrimaryAntennaPower(false);
-            }
-            else
-            {
-                result = stateDescriptor.Power.BackupAntennaPower(false);
-            }
-
-            if (result)
-            {
-                stateDescriptor.IsControllerPoweredOn(false);
-                stateDescriptor.NextStep(GetTimeout(step));
-            }
-            else
-            {
-                stateDescriptor.Retry(StepRetryLimit, GetTimeout(step));
-            }
-        }
-
-        /**
-         * @brief This procedure is deployment action entry point.
-         *
-         * This procedure runs the antenna deployment process.
-         * @param[in] state Pointer to global satellite state.
-         * @param[in] param Pointer to the deployment condition private context. This pointer should point
-         * at the object of AntennaMissionState type.
-         */
-        static void AntennaDeploymentAction(SystemState& state, void* param)
-        {
-            auto stateDescriptor = static_cast<AntennaMissionState*>(param);
-
-            LOGF(LOG_LEVEL_DEBUG, "[ant] Executing antenna deployment step %d", stateDescriptor->StepNumber());
-
-            state::AntennaConfiguration antennaConfiguration;
-            if (!state.PersistentState.Get(antennaConfiguration))
-            {
-                LOG(LOG_LEVEL_ERROR, "[ant] Can't get antenna configuration");
-                return;
-            }
-
-            if (antennaConfiguration.IsDeploymentDisabled())
-            {
-                LOG(LOG_LEVEL_DEBUG, "[ant] Antenna deployment disabled");
-                stateDescriptor->Finish();
-            }
-            else
-            {
-                const AntennaDeploymentStep& step = deploymentSteps[stateDescriptor->StepNumber()];
-                DeploymentProcedure* procedure = step.procedure;
-                procedure(state, *stateDescriptor, stateDescriptor->Driver());
-            }
-        }
-
-        /**
-         * @brief Procedure that verifies whether the antenna deployment process should be executed.
-         * @param[in] state Pointer to global satellite state.
-         * @param[in] param Pointer to the deployment condition private context. This pointer should point
-         * at the object of AntennaMissionState type.
-         *
-         * @return True if the deployment action should be performed, false otherwise.
-         */
-        static bool AntennaDeploymentCondition(const SystemState& state, void* param)
-        {
-            AntennaMissionState* stateDescriptor = (AntennaMissionState*)param;
-            if (!IsInitialSilentPeriodFinished(state.Time))
-            {
-                return false;
-            }
-
-            if (stateDescriptor->IsFinished())
-            {
-                return false;
-            }
-
-            if (stateDescriptor->TimedOut())
-            {
-                return true;
-            }
-
-            return !stateDescriptor->IsDeploymentInProgress();
-        }
-
-        /**
-         * @brief This procedure is antenna deployment update descriptor entry point.
-         *
-         * This procedure updates the global satellite state as well as deployment process private state.
-         * @param[in] state Pointer to global satellite state.
-         * @param[in] param Pointer to the deployment condition private context. This pointer should point
-         * at the object of AntennaMissionState type.
-         * @return Operation status.
-         */
-        static UpdateResult AntennaDeploymentUpdate(SystemState& state, void* param)
-        {
-            UNREFERENCED_PARAMETER(state);
-            AntennaMissionState* stateDescriptor = (AntennaMissionState*)param;
-            state.AntennaState.SetDeployment(stateDescriptor->IsFinished());
-            if (stateDescriptor->IsFinished())
-            {
-                return UpdateResult::Ok;
-            }
-
-            if (!stateDescriptor->IsControllerPoweredOn())
-            {
-                return UpdateResult::Ok;
-            }
-
-            if (stateDescriptor->RequirePrimaryAntennaPower() && stateDescriptor->Power.PrimaryAntennaPower() == false)
-            {
-                LOG(LOG_LEVEL_ERROR, "Primary antenna power disabled. Restarting procedure");
-                stateDescriptor->Restart();
-                return UpdateResult::Warning;
-            }
-
-            stateDescriptor->NextCycle();
-            AntennaDeploymentStatus deploymentStatus;
-            IAntennaDriver& driver = stateDescriptor->Driver();
-
-            const OSResult result = driver.GetDeploymentStatus(         //
-                deploymentSteps[stateDescriptor->StepNumber()].channel, //
-                &deploymentStatus                                       //
-                );
-
-            if (OS_RESULT_FAILED(result))
-            {
-                return UpdateResult::Warning;
-            }
-
-            stateDescriptor->Update(deploymentStatus);
-
-            if (stateDescriptor->UpdateTelemetry())
-            {
-                return UpdateResult::Ok;
-            }
-            else
-            {
-                return UpdateResult::Warning;
-            }
-        }
+        std::array<AntennaTask::StepDescriptor, 60> AntennaTask::Steps = Join( //
+            Step<AntennaChannel::ANTENNA_PRIMARY_CHANNEL>::FullSequenceAuto,
+            Step<AntennaChannel::ANTENNA_PRIMARY_CHANNEL>::FullSequenceManual<AntennaId::ANTENNA1_ID>,
+            Step<AntennaChannel::ANTENNA_PRIMARY_CHANNEL>::FullSequenceManual<AntennaId::ANTENNA2_ID>,
+            Step<AntennaChannel::ANTENNA_PRIMARY_CHANNEL>::FullSequenceManual<AntennaId::ANTENNA3_ID>,
+            Step<AntennaChannel::ANTENNA_PRIMARY_CHANNEL>::FullSequenceManual<AntennaId::ANTENNA4_ID>,
+            Step<AntennaChannel::ANTENNA_BACKUP_CHANNEL>::FullSequenceAuto,
+            Step<AntennaChannel::ANTENNA_BACKUP_CHANNEL>::FullSequenceManual<AntennaId::ANTENNA1_ID>,
+            Step<AntennaChannel::ANTENNA_BACKUP_CHANNEL>::FullSequenceManual<AntennaId::ANTENNA2_ID>,
+            Step<AntennaChannel::ANTENNA_BACKUP_CHANNEL>::FullSequenceManual<AntennaId::ANTENNA3_ID>,
+            Step<AntennaChannel::ANTENNA_BACKUP_CHANNEL>::FullSequenceManual<AntennaId::ANTENNA4_ID>);
 
         AntennaTask::AntennaTask(std::tuple<IAntennaDriver&, services::power::IPowerControl&> args)
-            : state(std::get<IAntennaDriver&>(args), std::get<services::power::IPowerControl&>(args))
+            : _powerControl(std::get<services::power::IPowerControl&>(args)), _antenna(std::get<IAntennaDriver&>(args)), _step(0),
+              _nextStepAt(0), _retryCounter(StepRetries), _sync(nullptr), _controllerPoweredOn(false)
         {
         }
 
         bool AntennaTask::Initialize()
         {
-            this->state.Initialize();
+            this->_sync = System::CreateBinarySemaphore(1);
+            System::GiveSemaphore(this->_sync);
+            return true;
+        }
+
+        bool AntennaTask::Condition(const SystemState& state, void* param)
+        {
+            auto This = reinterpret_cast<AntennaTask*>(param);
+
+            if (!mission::IsInitialSilentPeriodFinished(state.Time))
+            //            if (state.Time < 40min)
+            {
+                return false;
+            }
+
+            if (This->_step >= Steps.size())
+            {
+                return false;
+            }
+
+            if (state.Time < This->_nextStepAt)
+            {
+                return false;
+            }
+
+            state::AntennaConfiguration cfg;
+
+            if (state.PersistentState.Get(cfg))
+            {
+                if (cfg.IsDeploymentDisabled())
+                {
+                    return false;
+                }
+            }
 
             return true;
+        }
+
+        void AntennaTask::Action(SystemState& state, void* param)
+        {
+            auto This = reinterpret_cast<AntennaTask*>(param);
+
+            (void)state;
+
+            LOGF(LOG_LEVEL_INFO, "[ant] Performing step %d", This->_step);
+
+            auto stepDescriptor = Steps[This->_step];
+
+            auto result = stepDescriptor.Action(This, stepDescriptor.Channel, stepDescriptor.Antenna, stepDescriptor.burnTime);
+
+            if (OS_RESULT_FAILED(result) && This->_retryCounter > 1)
+            {
+                LOGF(LOG_LEVEL_WARNING, "[ant] Step %d failed. Will retry %d times more", This->_step, This->_retryCounter);
+                This->_retryCounter--;
+                return;
+            }
+
+            This->_step++;
+            This->_nextStepAt = state.Time + stepDescriptor.waitTime;
+            This->_retryCounter = StepRetries;
+
+            if (This->_step >= Steps.size())
+            {
+                state.AntennaState.SetDeployment(true);
+            }
         }
 
         ActionDescriptor<SystemState> AntennaTask::BuildAction()
         {
             ActionDescriptor<SystemState> descriptor;
             descriptor.name = "Deploy Antenna Action";
-            descriptor.param = &this->state;
-            descriptor.condition = AntennaDeploymentCondition;
-            descriptor.actionProc = AntennaDeploymentAction;
+            descriptor.param = this;
+            descriptor.condition = Condition;
+            descriptor.actionProc = Action;
             return descriptor;
+        }
+
+        UpdateResult AntennaTask::Update(SystemState& /*state*/, void* param)
+        {
+            auto This = reinterpret_cast<AntennaTask*>(param);
+
+            if (!This->_controllerPoweredOn)
+            {
+                return UpdateResult::Ok;
+            }
+
+            Lock l(This->_sync, 200ms);
+
+            if (!l())
+            {
+                return UpdateResult::Warning;
+            }
+
+            This->_antenna.GetTelemetry(This->_currentTelemetry);
+
+            return UpdateResult::Ok;
         }
 
         UpdateDescriptor<SystemState> AntennaTask::BuildUpdate()
         {
             UpdateDescriptor<SystemState> descriptor;
             descriptor.name = "Deploy Antenna Update";
-            descriptor.param = &this->state;
-            descriptor.updateProc = AntennaDeploymentUpdate;
+            descriptor.param = this;
+            descriptor.updateProc = Update;
             return descriptor;
         }
 
         bool AntennaTask::GetTelemetry(devices::antenna::AntennaTelemetry& telemetry) const
         {
-            return this->state.CurrentTelemetry(telemetry);
+            Lock l(this->_sync, 100ms);
+
+            if (!l())
+            {
+                return false;
+            }
+
+            telemetry = this->_currentTelemetry;
+
+            return true;
         }
 
         StopAntennaDeploymentTask::StopAntennaDeploymentTask(std::uint8_t /*mark*/)
@@ -703,6 +253,69 @@ namespace mission
             }
         }
 
+        OSResult AntennaTask::PowerOn(
+            AntennaTask* task, AntennaChannel channel, AntennaId /*antenna*/, std::chrono::milliseconds /*burnTime*/)
+        {
+            bool r;
+            if (channel == AntennaChannel::ANTENNA_PRIMARY_CHANNEL)
+            {
+                r = task->_powerControl.PrimaryAntennaPower(true);
+            }
+            else
+            {
+                r = task->_powerControl.BackupAntennaPower(true);
+            }
+
+            if (r)
+            {
+                task->_controllerPoweredOn = true;
+            }
+
+            return r ? OSResult::Success : OSResult::DeviceNotFound;
+        }
+
+        OSResult AntennaTask::Reset(
+            AntennaTask* task, AntennaChannel channel, AntennaId /*antenna*/, std::chrono::milliseconds /*burnTime*/)
+        {
+            return task->_antenna.Reset(channel);
+        }
+
+        OSResult AntennaTask::Arm(AntennaTask* task, AntennaChannel channel, AntennaId /*antenna*/, std::chrono::milliseconds /*burnTime*/)
+        {
+            return task->_antenna.Arm(channel);
+        }
+
+        OSResult AntennaTask::Deploy(AntennaTask* task, AntennaChannel channel, AntennaId antenna, std::chrono::milliseconds burnTime)
+        {
+            return task->_antenna.DeployAntenna(channel, antenna, burnTime, true);
+        }
+
+        OSResult AntennaTask::Disarm(
+            AntennaTask* task, AntennaChannel channel, AntennaId /*antenna*/, std::chrono::milliseconds /*burnTime*/)
+        {
+            return task->_antenna.Disarm(channel);
+        }
+
+        OSResult AntennaTask::PowerOff(
+            AntennaTask* task, AntennaChannel channel, AntennaId /*antenna*/, std::chrono::milliseconds /*burnTime*/)
+        {
+            bool r;
+            if (channel == AntennaChannel::ANTENNA_PRIMARY_CHANNEL)
+            {
+                r = task->_powerControl.PrimaryAntennaPower(false);
+            }
+            else
+            {
+                r = task->_powerControl.BackupAntennaPower(false);
+            }
+
+            if (r)
+            {
+                task->_controllerPoweredOn = false;
+            }
+
+            return r ? OSResult::Success : OSResult::DeviceNotFound;
+        }
         /** @}*/
     }
 }

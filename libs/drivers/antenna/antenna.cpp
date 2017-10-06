@@ -91,15 +91,6 @@ OSResult AntennaDriver::DeployAntenna(AntennaChannel channel,
     error_counter::AggregatedDeviceErrorReporter errorReporter(GetChannelErrorCounter(channel));
 
     AntennaChannelInfo* hardwareChannel = GetChannel(channel);
-    const OSResult status = this->miniport->ArmDeploymentSystem( //
-        errorReporter.Counter(),                                 //
-        hardwareChannel->communicationBus,                       //
-        channel                                                  //
-        );
-    if (OS_RESULT_FAILED(status))
-    {
-        return status;
-    }
 
     if (antennaId == ANTENNA_AUTO_ID)
     {
@@ -343,6 +334,30 @@ OSResult AntennaDriver::GetTelemetry(AntennaTelemetry& telemetry)
 
     return Merge(UpdateDeploymentStatus(errorCounters, telemetry),                                             //
         Merge(UpdateActivationCount(errorCounters, telemetry), UpdateActivationTime(errorCounters, telemetry)) //
+        );
+}
+
+OSResult AntennaDriver::Arm(AntennaChannel channel)
+{
+    error_counter::AggregatedDeviceErrorReporter errorReporter(GetChannelErrorCounter(channel));
+
+    AntennaChannelInfo* hardwareChannel = GetChannel(channel);
+    return this->miniport->ArmDeploymentSystem( //
+        errorReporter.Counter(),                //
+        hardwareChannel->communicationBus,      //
+        channel                                 //
+        );
+}
+
+OSResult AntennaDriver::Disarm(AntennaChannel channel)
+{
+    error_counter::AggregatedDeviceErrorReporter errorReporter(GetChannelErrorCounter(channel));
+
+    AntennaChannelInfo* hardwareChannel = GetChannel(channel);
+    return this->miniport->DisarmDeploymentSystem( //
+        errorReporter.Counter(),                   //
+        hardwareChannel->communicationBus,         //
+        channel                                    //
         );
 }
 

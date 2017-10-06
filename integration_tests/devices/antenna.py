@@ -255,7 +255,7 @@ class AntennaController(i2cMock.I2CDevice):
         if condition:
             return value | flag
         else:
-            return value;
+            return value
 
     # antenna icd section 6.2.15
     @i2cMock.command([0xC3])

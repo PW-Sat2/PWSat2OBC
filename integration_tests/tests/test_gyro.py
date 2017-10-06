@@ -27,7 +27,7 @@ class Test_Gyro(RestartPerSuite):
         self.system.gyro.reset()
         self.system.obc.gyro_init()
         for i in xrange(10):
-            rand = lambda: random.randint(-2**15, 2**15)
+            rand = lambda: random.randint(-2**15, 2**15 - 1)
             x = rand()
             y = rand()
             z = rand()

@@ -135,6 +135,19 @@ struct IAntennaDriver
      * inspect the content of the flags field. @see AntennaTelemetry type definition for details.
      */
     virtual OSResult GetTelemetry(devices::antenna::AntennaTelemetry& telemetry) = 0;
+
+    /**
+     * @brief Arms selected antenna controller
+     * @param channel Controller to use
+     * @return Operation result
+     */
+    virtual OSResult Arm(AntennaChannel channel) = 0;
+    /**
+     * @brief Disarms selected antenna controller
+     * @param channel Controller to use
+     * @return Operation result
+     */
+    virtual OSResult Disarm(AntennaChannel channel) = 0;
 };
 
 /**
@@ -240,6 +253,9 @@ class AntennaDriver : public IAntennaDriver
      * inspect the content of the flags field. @see AntennaTelemetry type definition for details.
      */
     OSResult GetTelemetry(devices::antenna::AntennaTelemetry& telemetry) override;
+
+    virtual OSResult Arm(AntennaChannel channel) override;
+    virtual OSResult Disarm(AntennaChannel channel) override;
 
     /**
      * @brief Primary antenna controller channel.

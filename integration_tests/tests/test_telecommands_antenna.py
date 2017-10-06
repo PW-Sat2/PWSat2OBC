@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from obc.boot import SelectRunlevel
+from response_frames.operation import OperationSuccessFrame
 from system import runlevel, clear_state
 from telecommand.antenna import StopAntennaDeployment
 from tests.base import BaseTest, RestartPerTest
@@ -12,24 +13,29 @@ class TestTelecommandsAntenna(RestartPerTest):
     @clear_state()
     def test_disable_antenna_deployment(self):
         self.system.obc.runlevel_start_comm()
-        self.system.obc.jump_to_time(timedelta(minutes=41))
-
         being_deployed = TestEvent()
 
         self.system.primary_antenna.on_begin_deployment = being_deployed.set
 
-        for _ in xrange(0, 15):
+        t = timedelta(minutes=41)
+
+        for i in xrange(0, 110):
+            t += timedelta(seconds=60)
+
+            self.system.obc.jump_to_time(t)
             self.system.obc.run_mission()
-            self.system.primary_antenna.finish_deployment()
-            self.system.backup_antenna.finish_deployment()
 
         self.assertTrue(being_deployed.wait_for_change(1), "Antenna deployment should be performed")
 
         self.system.obc.run_mission()
 
+        self.system.obc._command('PUTTING FRAME')
+
         self.system.comm.put_frame(StopAntennaDeployment(0x22))
 
-        self.system.comm.transmitter.get_message_from_buffer(10)
+        ack = self.system.comm.get_frame(10, filter_type=OperationSuccessFrame)
+
+        self.assertIsNotNone(ack, "Should receive confirmation")
 
         self.system.obc.run_mission()
 
@@ -45,7 +51,12 @@ class TestTelecommandsAntenna(RestartPerTest):
 
         self.system.primary_antenna.on_begin_deployment = deploy_started_again.set
 
-        self.system.obc.run_mission()
-        self.system.obc.run_mission()
+        t = since_start
+
+        for i in xrange(0, 20):
+            t += timedelta(seconds=60)
+
+            self.system.obc.jump_to_time(t)
+            self.system.obc.run_mission()
 
         self.assertFalse(deploy_started_again.wait_for_change(1), "Antenna deployment should not be performed")

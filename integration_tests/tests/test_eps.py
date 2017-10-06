@@ -14,7 +14,7 @@ class EPSTest(RestartPerSuite):
 
         self.system.obc.enable_lcl(0x01)
 
-        self.assertTrue(ev.wait_for_change(0), "Should enable TKmain LCL (controller A)")
+        self.assertTrue(ev.wait_for_change(1), "Should enable TKmain LCL (controller A)")
 
         ev = TestEvent()
 
@@ -22,7 +22,7 @@ class EPSTest(RestartPerSuite):
 
         self.system.obc.enable_lcl(0x11)
 
-        self.assertTrue(ev.wait_for_change(0), "Should enable TKred LCL (controller B)")
+        self.assertTrue(ev.wait_for_change(1), "Should enable TKred LCL (controller B)")
 
     def test_disable_lcl(self):
         ev = TestEvent()
@@ -32,7 +32,7 @@ class EPSTest(RestartPerSuite):
 
         self.system.obc.disable_lcl(0x01)
 
-        self.assertTrue(ev.wait_for_change(0), "Should disable TKmain LCL (controller A)")
+        self.assertTrue(ev.wait_for_change(1), "Should disable TKmain LCL (controller A)")
 
         ev = TestEvent()
 
@@ -41,7 +41,7 @@ class EPSTest(RestartPerSuite):
 
         self.system.obc.disable_lcl(0x11)
 
-        self.assertTrue(ev.wait_for_change(0), "Should disable TKred LCL (controller B)")
+        self.assertTrue(ev.wait_for_change(1), "Should disable TKred LCL (controller B)")
 
     def test_disable_overheat_mode(self):
         ev = TestEvent()
