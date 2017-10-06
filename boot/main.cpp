@@ -101,6 +101,7 @@ int main(void)
         waitForComms(COMMS_TIMEOUT);
     }
 
+    BSP_UART_Puts(BSP_UART_DEBUG, "\nTimeout exceeded - booting");
     ProceedWithBooting();
 }
 
