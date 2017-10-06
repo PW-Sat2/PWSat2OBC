@@ -33,6 +33,7 @@ target_link_libraries(${NAME}
     scrubber
     msc
     n25q
+    version
 )
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)

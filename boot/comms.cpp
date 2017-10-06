@@ -53,6 +53,7 @@ static Command Commands[] = {
     Command{'R', "Runlevel", SetRunlevel},
     Command{'N', "Set clear state flag", SetClearState},
     Command{'C', "Current boot settings", ShowBootSettings},
+    Command{'c', "Build Information", ShowBuildInformation},
     Command{'e', "Erase program flash", EraseBootTable},
     Command{'H', "Check OBC settings", Check},
     Command{'m', "Recovery", Recovery},
