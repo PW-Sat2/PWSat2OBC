@@ -17,6 +17,7 @@ void BootUpper()
     boot::BootReason = boot::Reason::BootToUpper;
     boot::Index = boot::BootSettings::UpperBootSlot;
 
+    CountBootAttempts();
     BootToAddress(BOOT_APPLICATION_BASE);
 }
 
