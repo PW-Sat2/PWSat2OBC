@@ -9,7 +9,6 @@ namespace state
     class AntennaState;
     class TimeState;
     class TimeCorrectionConfiguration;
-    class BootState;
     class SailState;
     class ErrorCountersConfigState;
     class MessageState;
@@ -23,7 +22,6 @@ namespace state
         AntennaConfiguration,                            //
         TimeState,                                       //
         TimeCorrectionConfiguration,                     //
-        BootState,                                       //
         SailState,                                       //
         ErrorCountersConfigState,                        //
         AdcsState,                                       //

@@ -1,14 +1,15 @@
 #include "obc.h"
+#include "antenna/driver.h"
 #include "boot/params.hpp"
 #include "efm_support/api.h"
 #include "logger/logger.h"
 #include "mission.h"
 #include "terminal.h"
 #include "watchdog/internal.hpp"
-#include "antenna/driver.h"
 
 static void ProcessState(OBC* obc)
 {
+    auto& persistentState = Mission.GetState().PersistentState;
     if (boot::ClearStateOnStartup)
     {
         LOG(LOG_LEVEL_WARNING, "Resetting system state");
@@ -18,7 +19,7 @@ static void ProcessState(OBC* obc)
             LOG(LOG_LEVEL_ERROR, "Storage reset failure");
         }
 
-        if (!obc::WritePersistentState(Mission.GetState().PersistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage))
+        if (!obc::WritePersistentState(persistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage))
         {
             LOG(LOG_LEVEL_ERROR, "Persistent state reset failure");
         }
@@ -27,27 +28,13 @@ static void ProcessState(OBC* obc)
     }
     else
     {
-        obc::ReadPersistentState(Mission.GetState().PersistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage);
+        obc::ReadPersistentState(persistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage);
     }
 }
 
-static void AuditSystemStartup()
+static void AuditSystemStartup(uint32_t bootCounter)
 {
-    const auto& persistentState = Mission.GetState().PersistentState;
     const auto bootReason = efm::mcu::GetBootReason();
-
-    uint32_t bootCounter;
-    state::BootState bootState;
-    if (!persistentState.Get(bootState))
-    {
-        LOG(LOG_LEVEL_ERROR, "Can't get boot state");
-        bootCounter = 0;
-    }
-    else
-    {
-        bootCounter = bootState.BootCounter();
-    }
-
     auto& telemetry = TelemetryAcquisition.GetState().telemetry;
     if (boot::IsBootInformationAvailable())
     {
@@ -178,7 +165,7 @@ OSResult OBC::InitializeRunlevel1()
     this->Experiments.InitializeRunlevel1();
 
     ProcessState(this);
-    AuditSystemStartup();
+    AuditSystemStartup(this->BootSettings.BootCounter());
 
     state::TimeState timeState;
     if (!persistentState.Get(timeState))

@@ -11,7 +11,6 @@ set(SOURCES
     state.cpp
     Antenna.cpp
     time.cpp
-    boot.cpp
     sail.cpp
     ErrorCountersState.cpp
     comm.cpp
