@@ -74,8 +74,8 @@ namespace devices
                 writer.Write(this->CURR_5V);
                 writer.Write(this->VOLT_VBAT);
                 writer.Write(this->CURR_VBAT);
-                writer.Write(this->LCL_STATE);
-                writer.Write(this->LCL_FLAGB);
+                writer.WriteWord(num(this->LCL_STATE), 6);
+                writer.WriteWord(num(this->LCL_FLAGB), 6);
             }
 
             MPPT_HK::MPPT_HK() : MpptState(MPPT_STATE::None)
@@ -119,7 +119,7 @@ namespace devices
                 writer.Write(this->ChargeCurrent);
                 writer.Write(this->DischargeCurrent);
                 writer.Write(this->Temperature);
-                writer.Write(this->State);
+                writer.WriteWord(num(this->State), 3);
             }
 
             void BatteryPackPrimaryState::ReadFrom(Reader& reader)
