@@ -25,9 +25,9 @@ class StartupParser(CategoryParser):
         CategoryParser.__init__(self, '01: Startup', reader, store)
 
     def get_bit_count(self):
-        return 9 * 8
+        return 7 * 8
 
     def parse(self):
         self.append_dword("Boot Counter")
         self.append_byte("Boot Index", value_type=BootIndex)
-        self.append_dword("Boot Reason")
+        self.append_word("Boot Reason")
