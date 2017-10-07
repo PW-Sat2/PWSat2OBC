@@ -222,10 +222,16 @@ OSResult AntennaMiniportDriver::GetDeploymentStatus( //
     telemetry->DeploymentStatus[2] = IS_BIT_CLEAR(value, 7);  // (value & 0x0080) == 0;
     telemetry->DeploymentStatus[3] = IS_BIT_CLEAR(value, 3);  // (value & 0x0008) == 0;
 
-    telemetry->IsDeploymentActive[0] = IS_BIT_SET(value, 13);     //(value & 0x2000) != 0;
-    telemetry->IsDeploymentActive[1] = IS_BIT_SET(value, 9);      //(value & 0x0200) != 0;
-    telemetry->IsDeploymentActive[2] = IS_BIT_SET(value, 5);      //(value & 0x0020) != 0;
-    telemetry->IsDeploymentActive[3] = IS_BIT_SET(value, 1);      //(value & 0x0002) != 0;
+    telemetry->IsDeploymentActive[0] = IS_BIT_SET(value, 13); //(value & 0x2000) != 0;
+    telemetry->IsDeploymentActive[1] = IS_BIT_SET(value, 9);  //(value & 0x0200) != 0;
+    telemetry->IsDeploymentActive[2] = IS_BIT_SET(value, 5);  //(value & 0x0020) != 0;
+    telemetry->IsDeploymentActive[3] = IS_BIT_SET(value, 1);  //(value & 0x0002) != 0;
+
+    telemetry->DeploymentTimeReached[0] = IS_BIT_SET(value, 14);
+    telemetry->DeploymentTimeReached[1] = IS_BIT_SET(value, 10);
+    telemetry->DeploymentTimeReached[2] = IS_BIT_SET(value, 6);
+    telemetry->DeploymentTimeReached[3] = IS_BIT_SET(value, 2);
+
     telemetry->IgnoringDeploymentSwitches = IS_BIT_SET(value, 8); //(value & 0x0100) != 0;
     telemetry->DeploymentSystemArmed = IS_BIT_SET(value, 0);      //(value & 0x0001) != 0;
     return OSResult::Success >> error;
