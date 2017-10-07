@@ -76,6 +76,11 @@ struct AntennaDeploymentStatus
     bool IsDeploymentActive[4];
 
     /**
+     * @brief This array contains information whether time limit for deploymend for specific antenna has beed reached
+     */
+    bool DeploymentTimeReached[4];
+
+    /**
      * @brief Value specifying whether the deployment switches are being currently ignored.
      */
     bool IgnoringDeploymentSwitches;
