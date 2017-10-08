@@ -234,6 +234,8 @@ OSResult AntennaMiniportDriver::GetDeploymentStatus( //
 
     telemetry->IgnoringDeploymentSwitches = IS_BIT_SET(value, 8); //(value & 0x0100) != 0;
     telemetry->DeploymentSystemArmed = IS_BIT_SET(value, 0);      //(value & 0x0001) != 0;
+    telemetry->IsIndependentBurnActive = IS_BIT_SET(value, 4);
+
     return OSResult::Success >> error;
 }
 

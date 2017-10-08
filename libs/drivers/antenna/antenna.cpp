@@ -332,6 +332,8 @@ OSResult AntennaDriver::GetTelemetry(AntennaTelemetry& telemetry)
     std::array<error_counter::AggregatedErrorCounter*, 2> errorCounters = {
         &primaryErrorReporter.Counter(), &secondaryErrorReporter.Counter()};
 
+    // TODO: rozdłubac AntennaTelemetry do uzwzglednienia flag
+
     return Merge(UpdateDeploymentStatus(errorCounters, telemetry),                                             //
         Merge(UpdateActivationCount(errorCounters, telemetry), UpdateActivationTime(errorCounters, telemetry)) //
         );
