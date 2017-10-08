@@ -123,19 +123,28 @@ void AntennaGetDeploymentStatus(std::uint16_t argc, char* argv[])
     }
     else
     {
-        GetTerminal().Printf("%d %d %d %d %d %d %d %d %d %d %d\n",
-            num(status),
-            ToInt(deploymentStatus.DeploymentStatus[0]),        //
-            ToInt(deploymentStatus.DeploymentStatus[1]),        //
-            ToInt(deploymentStatus.DeploymentStatus[2]),        //
-            ToInt(deploymentStatus.DeploymentStatus[3]),        //
-            ToInt(deploymentStatus.IsDeploymentActive[0]),      //
-            ToInt(deploymentStatus.IsDeploymentActive[1]),      //
-            ToInt(deploymentStatus.IsDeploymentActive[2]),      //
-            ToInt(deploymentStatus.IsDeploymentActive[3]),      //
-            ToInt(deploymentStatus.IgnoringDeploymentSwitches), //
-            ToInt(deploymentStatus.DeploymentSystemArmed)       //
-            );
+        GetTerminal().Printf("Status: %d\n", num(status));
+        GetTerminal().Printf("Deployment status: %d %d %d %d\n",
+            ToInt(deploymentStatus.DeploymentStatus[0]), //
+            ToInt(deploymentStatus.DeploymentStatus[1]), //
+            ToInt(deploymentStatus.DeploymentStatus[2]), //
+            ToInt(deploymentStatus.DeploymentStatus[3]));
+
+        GetTerminal().Printf("Deployment active: %d %d %d %d\n",
+            ToInt(deploymentStatus.IsDeploymentActive[0]), //
+            ToInt(deploymentStatus.IsDeploymentActive[1]), //
+            ToInt(deploymentStatus.IsDeploymentActive[2]), //
+            ToInt(deploymentStatus.IsDeploymentActive[3]));
+
+        GetTerminal().Printf("Deployment time reached: %d %d %d %d\n",
+            ToInt(deploymentStatus.DeploymentTimeReached[0]), //
+            ToInt(deploymentStatus.DeploymentTimeReached[1]), //
+            ToInt(deploymentStatus.DeploymentTimeReached[2]), //
+            ToInt(deploymentStatus.DeploymentTimeReached[3]));
+
+        GetTerminal().Printf("Ignoring switches: %d\n", ToInt(deploymentStatus.IgnoringDeploymentSwitches));
+        GetTerminal().Printf("Independent burn: %d\n", ToInt(deploymentStatus.IsIndependentBurnActive));
+        GetTerminal().Printf("Armed: %d\n", ToInt(deploymentStatus.DeploymentSystemArmed));
     }
 }
 
