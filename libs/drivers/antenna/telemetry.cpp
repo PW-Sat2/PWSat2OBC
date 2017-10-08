@@ -52,7 +52,7 @@ namespace devices
             writer.WriteWord(std::min<std::uint16_t>(255, this->times[3].count() / 2), TimeLength);
         }
 
-        AntennaTelemetry::AntennaTelemetry()
+        AntennaTelemetry::AntennaTelemetry() : channelStatuses{ChannelStatus::None, ChannelStatus::None}
         {
         }
 

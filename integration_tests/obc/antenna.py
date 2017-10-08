@@ -2,6 +2,7 @@ import re
 from enum import Enum, unique
 from .obc_mixin import OBCMixin, command, decode_return
 
+
 @unique
 class AntennaId(Enum):
     Auto = 0
@@ -21,6 +22,7 @@ class AntennaId(Enum):
 
         return map[self]
 
+
 @unique
 class AntennaChannel(Enum):
     Primary = 0
@@ -33,6 +35,7 @@ class AntennaChannel(Enum):
         }
 
         return map[self]
+
 
 @unique
 class OverrideSwitches(Enum):
@@ -47,18 +50,23 @@ class OverrideSwitches(Enum):
 
         return map[self]
 
+
 class AntennaStatus:
     def __init__(self, status):
         self.Status = status
         self.DeploymentState = [False, False, False, False]
         self.DeploymentInProgress = [False, False, False, False]
+        self.DeploymentTimeReached = [False, False, False, False]
         self.SystemArmed = False
         self.IgnoringSwitches = False
+        self.IndependentBurn = False
+
 
 class AntennaTelemetry(object):
     def __init__(self):
         self.ActivationCount = [0, 0, 0, 0, 0, 0, 0, 0]
         self.ActivationTime = [0, 0, 0, 0, 0, 0, 0, 0]
+
 
 class AntennaMixin(OBCMixin):
     def __init__(self):
@@ -66,29 +74,36 @@ class AntennaMixin(OBCMixin):
 
     @command("antenna_deploy {0} {1} {2}")
     def antenna_deploy(self, channel, antennaId, override):
-         pass
+        pass
 
     @command("antenna_cancel {0}")
     def antenna_cancel_deployment(self, channel):
         pass
 
     def _parse_deployment_state(result):
-        parts = map(int, result.split(" "))
+        lines = result.split("\n")
+        lines = map(lambda x: x.split(":"), lines)
+        lines = map(lambda (k, v): (k, v.strip().split(' ')), lines)
+        lines = map(lambda (k,v): (k, map(int, v)), lines)
+        parts = dict(lines)
 
-        operationStatus = parts[0]
-        if(operationStatus != 0):
+        operation_status = parts['Status'][0]
+        if operation_status != 0:
             return AntennaStatus(False)
 
-        parsedResult = AntennaStatus(True)
-        parsedResult.DeploymentState = parts[1:5]
-        parsedResult.DeploymentInProgress = parts[5:9]
-        parsedResult.IgnoringSwitches = parts[9]
-        parsedResult.SystemArmed = parts[10]
-        return parsedResult
+        parsed_result = AntennaStatus(True)
+        parsed_result.DeploymentState = parts['Deployment status']
+        parsed_result.DeploymentInProgress = parts['Deployment active']
+        parsed_result.DeploymentTimeReached = parts['Deployment time reached']
+        parsed_result.IgnoringSwitches = parts['Ignoring switches'][0]
+        parsed_result.IndependentBurn = parts['Independent burn'][0]
+        parsed_result.SystemArmed = parts['Armed'][0]
+        return parsed_result
 
     @decode_return(_parse_deployment_state)
     @command("antenna_get_status {0}")
     def antenna_get_status(self, channel):
+        # type: (int) -> AntennaStatus
         pass
 
     @staticmethod
