@@ -157,6 +157,24 @@ namespace devices
             this->times[antenna - ANTENNA1_ID] = time;
         }
 
+        enum class ChannelStatus
+        {
+            None = 0,
+            IndependentBurn = 1 << 0,
+            IgnoringSwitches = 1 << 1,
+            Armed = 1 << 2
+        };
+
+        inline constexpr ChannelStatus operator|(const ChannelStatus a, const ChannelStatus b)
+        {
+            return static_cast<ChannelStatus>(num(a) | num(b));
+        }
+
+        inline constexpr ChannelStatus& operator|=(ChannelStatus& a, const ChannelStatus b)
+        {
+            return a = static_cast<ChannelStatus>(num(a) | num(b));
+        }
+
         /**
          * @brief This type represents telemetry of the antenna deployment subsystem.
          */
@@ -213,9 +231,13 @@ namespace devices
              */
             void SetActivationTimes(AntennaChannel channel, const ActivationTimes& times);
 
+            void SetChannelStatus(AntennaChannel channel, ChannelStatus status);
+            ChannelStatus GetChannelStatus(AntennaChannel channel) const;
+
           private:
             ActivationCounts activationCounts[2];
             ActivationTimes activationTimes[2];
+            ChannelStatus channelStatuses[2];
         };
 
         constexpr std::uint32_t AntennaTelemetry::BitSize()
@@ -241,6 +263,16 @@ namespace devices
         inline void AntennaTelemetry::SetActivationTimes(AntennaChannel channel, const ActivationTimes& times)
         {
             this->activationTimes[channel - ANTENNA_FIRST_CHANNEL] = times;
+        }
+
+        inline void AntennaTelemetry::SetChannelStatus(AntennaChannel channel, ChannelStatus status)
+        {
+            this->channelStatuses[channel - ANTENNA_FIRST_CHANNEL] = status;
+        }
+
+        inline ChannelStatus AntennaTelemetry::GetChannelStatus(AntennaChannel channel) const
+        {
+            return this->channelStatuses[channel - ANTENNA_FIRST_CHANNEL];
         }
 
         static_assert(AntennaTelemetry::BitSize() == 88, "Invalid telemetry size");

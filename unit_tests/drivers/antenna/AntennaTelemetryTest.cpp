@@ -161,6 +161,9 @@ namespace
         ASSERT_THAT(times2.GetActivationTime(ANTENNA2_ID), Eq(0s));
         ASSERT_THAT(times2.GetActivationTime(ANTENNA3_ID), Eq(0s));
         ASSERT_THAT(times2.GetActivationTime(ANTENNA4_ID), Eq(0s));
+
+        ASSERT_THAT(telemetry.GetChannelStatus(ANTENNA_PRIMARY_CHANNEL), Eq(ChannelStatus::None));
+        ASSERT_THAT(telemetry.GetChannelStatus(ANTENNA_BACKUP_CHANNEL), Eq(ChannelStatus::None));
     }
 
     TEST(AntennaTelemetry, CustomState)
@@ -172,6 +175,9 @@ namespace
 
         telemetry.SetActivationTimes(ANTENNA_PRIMARY_CHANNEL, ActivationTimes(10s, 20s, 30s, 40s));
         telemetry.SetActivationTimes(ANTENNA_BACKUP_CHANNEL, ActivationTimes(50s, 60s, 70s, 80s));
+
+        telemetry.SetChannelStatus(ANTENNA_PRIMARY_CHANNEL, ChannelStatus::Armed | ChannelStatus::IndependentBurn | ChannelStatus::Armed);
+        telemetry.SetChannelStatus(ANTENNA_BACKUP_CHANNEL, ChannelStatus::IndependentBurn);
 
         auto& counts1 = telemetry.GetActivationCounts(ANTENNA_PRIMARY_CHANNEL);
         auto& counts2 = telemetry.GetActivationCounts(ANTENNA_BACKUP_CHANNEL);
@@ -195,6 +201,10 @@ namespace
         ASSERT_THAT(times2.GetActivationTime(ANTENNA2_ID), Eq(60s));
         ASSERT_THAT(times2.GetActivationTime(ANTENNA3_ID), Eq(70s));
         ASSERT_THAT(times2.GetActivationTime(ANTENNA4_ID), Eq(80s));
+
+        ASSERT_THAT(telemetry.GetChannelStatus(ANTENNA_PRIMARY_CHANNEL),
+            Eq(ChannelStatus::Armed | ChannelStatus::IndependentBurn | ChannelStatus::Armed));
+        ASSERT_THAT(telemetry.GetChannelStatus(ANTENNA_BACKUP_CHANNEL), Eq(ChannelStatus::IndependentBurn));
     }
 
     TEST(AntennaTelemetry, Serialization)

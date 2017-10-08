@@ -11,6 +11,7 @@ using drivers::i2c::I2CResult;
 using devices::antenna::ActivationCounts;
 using devices::antenna::ActivationTimes;
 using devices::antenna::AntennaTelemetry;
+using devices::antenna::ChannelStatus;
 
 static OSResult Merge(OSResult left, OSResult right)
 {
@@ -199,8 +200,24 @@ OSResult AntennaDriver::UpdateDeploymentStatus(                           //
         }
         else
         {
-            (void)telemetry;
-            // TODO: fill
+            auto channelStatus = ChannelStatus::None;
+
+            if (deploymentStatus.IsIndependentBurnActive)
+            {
+                channelStatus |= ChannelStatus::IndependentBurn;
+            }
+
+            if (deploymentStatus.IgnoringDeploymentSwitches)
+            {
+                channelStatus |= ChannelStatus::IgnoringSwitches;
+            }
+
+            if (deploymentStatus.DeploymentSystemArmed)
+            {
+                channelStatus |= ChannelStatus::Armed;
+            }
+
+            telemetry.SetChannelStatus(channels[i], channelStatus);
         }
     }
 
