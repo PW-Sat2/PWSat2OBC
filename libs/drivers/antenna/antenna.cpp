@@ -218,6 +218,23 @@ OSResult AntennaDriver::UpdateDeploymentStatus(                           //
             }
 
             telemetry.SetChannelStatus(channels[i], channelStatus);
+            telemetry.SetBurningStatus(channels[i],
+                deploymentStatus.IsDeploymentActive[0],
+                deploymentStatus.IsDeploymentActive[1],
+                deploymentStatus.IsDeploymentActive[2],
+                deploymentStatus.IsDeploymentActive[3]);
+
+            telemetry.SetDeployedStatus(channels[i],
+                deploymentStatus.DeploymentStatus[0],
+                deploymentStatus.DeploymentStatus[1],
+                deploymentStatus.DeploymentStatus[2],
+                deploymentStatus.DeploymentStatus[3]);
+
+            telemetry.SetTimeReached(channels[i],
+                deploymentStatus.DeploymentTimeReached[0],
+                deploymentStatus.DeploymentTimeReached[1],
+                deploymentStatus.DeploymentTimeReached[2],
+                deploymentStatus.DeploymentTimeReached[3]);
         }
     }
 

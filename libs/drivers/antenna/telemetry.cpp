@@ -56,8 +56,43 @@ namespace devices
         {
         }
 
+        void AntennaTelemetry::SetBurningStatus(AntennaChannel channel, bool antenna1, bool antenna2, bool antenna3, bool antenna4)
+        {
+            this->burnStatus[4 * (channel - ANTENNA_FIRST_CHANNEL) + 0] = antenna1;
+            this->burnStatus[4 * (channel - ANTENNA_FIRST_CHANNEL) + 1] = antenna2;
+            this->burnStatus[4 * (channel - ANTENNA_FIRST_CHANNEL) + 2] = antenna3;
+            this->burnStatus[4 * (channel - ANTENNA_FIRST_CHANNEL) + 3] = antenna4;
+        }
+
+        void AntennaTelemetry::SetDeployedStatus(AntennaChannel channel, bool antenna1, bool antenna2, bool antenna3, bool antenna4)
+        {
+            this->deployedStatus[4 * (channel - ANTENNA_FIRST_CHANNEL) + 0] = antenna1;
+            this->deployedStatus[4 * (channel - ANTENNA_FIRST_CHANNEL) + 1] = antenna2;
+            this->deployedStatus[4 * (channel - ANTENNA_FIRST_CHANNEL) + 2] = antenna3;
+            this->deployedStatus[4 * (channel - ANTENNA_FIRST_CHANNEL) + 3] = antenna4;
+        }
+
+        void AntennaTelemetry::SetTimeReached(AntennaChannel channel, bool antenna1, bool antenna2, bool antenna3, bool antenna4)
+        {
+            this->timeReached[4 * (channel - ANTENNA_FIRST_CHANNEL) + 0] = antenna1;
+            this->timeReached[4 * (channel - ANTENNA_FIRST_CHANNEL) + 1] = antenna2;
+            this->timeReached[4 * (channel - ANTENNA_FIRST_CHANNEL) + 2] = antenna3;
+            this->timeReached[4 * (channel - ANTENNA_FIRST_CHANNEL) + 3] = antenna4;
+        }
+
         void AntennaTelemetry::Write(BitWriter& writer) const
         {
+            writer.Write(this->deployedStatus);
+            writer.Write(this->timeReached);
+            writer.Write(this->burnStatus);
+
+            writer.Write(has_flag(this->channelStatuses[0], ChannelStatus::IndependentBurn));
+            writer.Write(has_flag(this->channelStatuses[1], ChannelStatus::IndependentBurn));
+            writer.Write(has_flag(this->channelStatuses[0], ChannelStatus::IgnoringSwitches));
+            writer.Write(has_flag(this->channelStatuses[1], ChannelStatus::IgnoringSwitches));
+            writer.Write(has_flag(this->channelStatuses[0], ChannelStatus::Armed));
+            writer.Write(has_flag(this->channelStatuses[1], ChannelStatus::Armed));
+
             this->activationCounts[0].Write(writer);
             this->activationCounts[1].Write(writer);
             this->activationTimes[0].Write(writer);

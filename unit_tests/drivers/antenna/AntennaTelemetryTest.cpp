@@ -176,8 +176,18 @@ namespace
         telemetry.SetActivationTimes(ANTENNA_PRIMARY_CHANNEL, ActivationTimes(10s, 20s, 30s, 40s));
         telemetry.SetActivationTimes(ANTENNA_BACKUP_CHANNEL, ActivationTimes(50s, 60s, 70s, 80s));
 
-        telemetry.SetChannelStatus(ANTENNA_PRIMARY_CHANNEL, ChannelStatus::Armed | ChannelStatus::IndependentBurn | ChannelStatus::Armed);
+        telemetry.SetChannelStatus(
+            ANTENNA_PRIMARY_CHANNEL, ChannelStatus::Armed | ChannelStatus::IndependentBurn | ChannelStatus::IgnoringSwitches);
         telemetry.SetChannelStatus(ANTENNA_BACKUP_CHANNEL, ChannelStatus::IndependentBurn);
+
+        telemetry.SetBurningStatus(ANTENNA_PRIMARY_CHANNEL, false, true, true, false);
+        telemetry.SetBurningStatus(ANTENNA_BACKUP_CHANNEL, true, false, false, true);
+
+        telemetry.SetTimeReached(ANTENNA_PRIMARY_CHANNEL, true, false, true, false);
+        telemetry.SetTimeReached(ANTENNA_BACKUP_CHANNEL, false, true, false, true);
+
+        telemetry.SetDeployedStatus(ANTENNA_PRIMARY_CHANNEL, false, true, false, true);
+        telemetry.SetDeployedStatus(ANTENNA_BACKUP_CHANNEL, true, false, true, false);
 
         auto& counts1 = telemetry.GetActivationCounts(ANTENNA_PRIMARY_CHANNEL);
         auto& counts2 = telemetry.GetActivationCounts(ANTENNA_BACKUP_CHANNEL);
@@ -203,27 +213,44 @@ namespace
         ASSERT_THAT(times2.GetActivationTime(ANTENNA4_ID), Eq(80s));
 
         ASSERT_THAT(telemetry.GetChannelStatus(ANTENNA_PRIMARY_CHANNEL),
-            Eq(ChannelStatus::Armed | ChannelStatus::IndependentBurn | ChannelStatus::Armed));
+            Eq(ChannelStatus::Armed | ChannelStatus::IndependentBurn | ChannelStatus::IgnoringSwitches));
         ASSERT_THAT(telemetry.GetChannelStatus(ANTENNA_BACKUP_CHANNEL), Eq(ChannelStatus::IndependentBurn));
+
+        ASSERT_THAT(telemetry.GetBurningStatus(ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA1_ID), Eq(false));
+        ASSERT_THAT(telemetry.GetBurningStatus(ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA2_ID), Eq(true));
+        ASSERT_THAT(telemetry.GetBurningStatus(ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA3_ID), Eq(true));
+        ASSERT_THAT(telemetry.GetBurningStatus(ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA4_ID), Eq(false));
+
+        ASSERT_THAT(telemetry.GetBurningStatus(ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA1_ID), Eq(true));
+        ASSERT_THAT(telemetry.GetBurningStatus(ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA2_ID), Eq(false));
+        ASSERT_THAT(telemetry.GetBurningStatus(ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA3_ID), Eq(false));
+        ASSERT_THAT(telemetry.GetBurningStatus(ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA4_ID), Eq(true));
+
+        ASSERT_THAT(telemetry.GetDeployedStatus(ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA1_ID), Eq(false));
+        ASSERT_THAT(telemetry.GetDeployedStatus(ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA2_ID), Eq(true));
+        ASSERT_THAT(telemetry.GetDeployedStatus(ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA3_ID), Eq(false));
+        ASSERT_THAT(telemetry.GetDeployedStatus(ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA4_ID), Eq(true));
+
+        ASSERT_THAT(telemetry.GetDeployedStatus(ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA1_ID), Eq(true));
+        ASSERT_THAT(telemetry.GetDeployedStatus(ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA2_ID), Eq(false));
+        ASSERT_THAT(telemetry.GetDeployedStatus(ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA3_ID), Eq(true));
+        ASSERT_THAT(telemetry.GetDeployedStatus(ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA4_ID), Eq(false));
+
+        ASSERT_THAT(telemetry.GetTimeReached(ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA1_ID), Eq(true));
+        ASSERT_THAT(telemetry.GetTimeReached(ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA2_ID), Eq(false));
+        ASSERT_THAT(telemetry.GetTimeReached(ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA3_ID), Eq(true));
+        ASSERT_THAT(telemetry.GetTimeReached(ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA4_ID), Eq(false));
+
+        ASSERT_THAT(telemetry.GetTimeReached(ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA1_ID), Eq(false));
+        ASSERT_THAT(telemetry.GetTimeReached(ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA2_ID), Eq(true));
+        ASSERT_THAT(telemetry.GetTimeReached(ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA3_ID), Eq(false));
+        ASSERT_THAT(telemetry.GetTimeReached(ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA4_ID), Eq(true));
     }
 
     TEST(AntennaTelemetry, Serialization)
     {
         std::uint8_t buffer[20];
-        std::uint8_t expected[] = {
-            //
-            0b11010001,
-            0b01011000,
-            0b11111111,
-            5,
-            10,
-            15,
-            20,
-            25,
-            30,
-            35,
-            40,
-        };
+        std::uint8_t expected[] = {0x5A, 0xA5, 0x96, 0x57, 0x34, 0xD6, 0x7F, 0x81, 0xC2, 0x03, 0x45, 0x86, 0xC7, 0x08, 0x0A};
         AntennaTelemetry telemetry;
 
         telemetry.SetActivationCounts(ANTENNA_PRIMARY_CHANNEL, ActivationCounts(1, 2, 3, 4));
@@ -232,11 +259,24 @@ namespace
         telemetry.SetActivationTimes(ANTENNA_PRIMARY_CHANNEL, ActivationTimes(10s, 20s, 30s, 40s));
         telemetry.SetActivationTimes(ANTENNA_BACKUP_CHANNEL, ActivationTimes(50s, 60s, 70s, 80s));
 
+        telemetry.SetChannelStatus(
+            ANTENNA_PRIMARY_CHANNEL, ChannelStatus::Armed | ChannelStatus::IndependentBurn | ChannelStatus::IgnoringSwitches);
+        telemetry.SetChannelStatus(ANTENNA_BACKUP_CHANNEL, ChannelStatus::IndependentBurn);
+
+        telemetry.SetBurningStatus(ANTENNA_PRIMARY_CHANNEL, false, true, true, false);
+        telemetry.SetBurningStatus(ANTENNA_BACKUP_CHANNEL, true, false, false, true);
+
+        telemetry.SetTimeReached(ANTENNA_PRIMARY_CHANNEL, true, false, true, false);
+        telemetry.SetTimeReached(ANTENNA_BACKUP_CHANNEL, false, true, false, true);
+
+        telemetry.SetDeployedStatus(ANTENNA_PRIMARY_CHANNEL, false, true, false, true);
+        telemetry.SetDeployedStatus(ANTENNA_BACKUP_CHANNEL, true, false, true, false);
+
         BitWriter writer(buffer);
         telemetry.Write(writer);
-        ASSERT_THAT(writer.Status(), Eq(true));
-        ASSERT_THAT(writer.GetBitDataLength(), Eq(88u));
         ASSERT_THAT(writer.Capture(), Eq(gsl::make_span(expected)));
+        ASSERT_THAT(writer.Status(), Eq(true));
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(118u));
     }
 
     struct AntennaTelemetryTest : public testing::TestWithParam<std::tuple<AntennaChannel, AntennaId, uint8_t, uint8_t>>
