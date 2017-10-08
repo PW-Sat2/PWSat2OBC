@@ -89,6 +89,9 @@ struct AntennaDeploymentStatus
      * @brief Value indicating whether the deployment system is currently active.
      */
     bool DeploymentSystemArmed;
+
+    /** @brief Value indicating whether the independent burn is currently active. */
+    bool IsIndependentBurnActive;
 };
 
 struct AntennaMiniportDriver;
