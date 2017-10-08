@@ -199,10 +199,8 @@ OSResult AntennaDriver::UpdateDeploymentStatus(                           //
         }
         else
         {
-            telemetry.SetDeploymentStatus(channels[i], ANTENNA1_ID, deploymentStatus.DeploymentStatus[0]);
-            telemetry.SetDeploymentStatus(channels[i], ANTENNA2_ID, deploymentStatus.DeploymentStatus[1]);
-            telemetry.SetDeploymentStatus(channels[i], ANTENNA3_ID, deploymentStatus.DeploymentStatus[2]);
-            telemetry.SetDeploymentStatus(channels[i], ANTENNA4_ID, deploymentStatus.DeploymentStatus[3]);
+            (void)telemetry;
+            // TODO: fill
         }
     }
 
@@ -331,8 +329,6 @@ OSResult AntennaDriver::GetTelemetry(AntennaTelemetry& telemetry)
     error_counter::AggregatedDeviceErrorReporter secondaryErrorReporter(GetChannelErrorCounter(ANTENNA_BACKUP_CHANNEL));
     std::array<error_counter::AggregatedErrorCounter*, 2> errorCounters = {
         &primaryErrorReporter.Counter(), &secondaryErrorReporter.Counter()};
-
-    // TODO: rozdłubac AntennaTelemetry do uzwzglednienia flag
 
     return Merge(UpdateDeploymentStatus(errorCounters, telemetry),                                             //
         Merge(UpdateActivationCount(errorCounters, telemetry), UpdateActivationTime(errorCounters, telemetry)) //

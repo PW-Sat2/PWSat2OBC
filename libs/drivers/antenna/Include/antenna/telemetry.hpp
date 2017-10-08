@@ -213,43 +213,14 @@ namespace devices
              */
             void SetActivationTimes(AntennaChannel channel, const ActivationTimes& times);
 
-            /**
-             * Updates deployment status of specific antenna as seen on the specified channel.
-             * @param channel Channel that reported this status.
-             * @param antenna Identifier of the antenna whose deployment status should be updated
-             * @param status New deployment status.
-             */
-            void SetDeploymentStatus(AntennaChannel channel, AntennaId antenna, bool status);
-
-            /**
-             * @brief Queries requested antenna deployment status as seen on the specified channel.
-             * @param channel Queried channel.
-             * @param antenna Queried antenna identifier.
-             * @return Requested antenna deployment status. True for being deployed false otherwise.
-             */
-            bool GetDeploymentStatus(AntennaChannel channel, AntennaId antenna) const;
-
-            /**
-             * @brief Requests combined antenna deployment status.
-             * @return Combined antenna deployment status.
-             */
-            std::uint8_t GetDeploymentStatus() const;
-
-            /**
-             * @brief Updates combined antenna deployment status.
-             * @param value New combined antenna deployment status.
-             */
-            void SetDeploymentStatus(std::uint8_t value);
-
           private:
-            std::uint8_t deploymentStatus;
             ActivationCounts activationCounts[2];
             ActivationTimes activationTimes[2];
         };
 
         constexpr std::uint32_t AntennaTelemetry::BitSize()
         {
-            return BitLength<std::uint8_t> + 2 * ActivationCounts::BitSize() + 2 * ActivationTimes::BitSize();
+            return +2 * ActivationCounts::BitSize() + 2 * ActivationTimes::BitSize();
         }
 
         inline const ActivationCounts& AntennaTelemetry::GetActivationCounts(AntennaChannel channel) const
@@ -272,17 +243,7 @@ namespace devices
             this->activationTimes[channel - ANTENNA_FIRST_CHANNEL] = times;
         }
 
-        inline std::uint8_t AntennaTelemetry::GetDeploymentStatus() const
-        {
-            return this->deploymentStatus;
-        }
-
-        inline void AntennaTelemetry::SetDeploymentStatus(std::uint8_t value)
-        {
-            this->deploymentStatus = value;
-        }
-
-        static_assert(AntennaTelemetry::BitSize() == 96, "Invalid telemetry size");
+        static_assert(AntennaTelemetry::BitSize() == 88, "Invalid telemetry size");
 
         /**
                 * @brief Antenna telemetry provider
