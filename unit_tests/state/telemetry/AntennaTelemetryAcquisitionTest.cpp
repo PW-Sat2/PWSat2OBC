@@ -57,10 +57,7 @@ namespace
 
     TEST_F(AntennaTelemetryAcquisitionTest, TestAcquisitionStateUpdate)
     {
-        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Invoke([](auto& telemetry) {
-            telemetry.SetDeploymentStatus(1);
-            return true;
-        }));
+        EXPECT_CALL(mock, GetTelemetry(_)).WillOnce(Invoke([](auto& /*telemetry*/) { return true; }));
         Run();
         ASSERT_THAT(state.telemetry.IsModified(), Eq(true));
     }

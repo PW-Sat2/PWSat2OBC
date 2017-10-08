@@ -144,7 +144,6 @@ namespace
         auto& counts2 = telemetry.GetActivationCounts(ANTENNA_BACKUP_CHANNEL);
         auto& times1 = telemetry.GetActivationTimes(ANTENNA_PRIMARY_CHANNEL);
         auto& times2 = telemetry.GetActivationTimes(ANTENNA_BACKUP_CHANNEL);
-        ASSERT_THAT(telemetry.GetDeploymentStatus(), Eq(0));
         ASSERT_THAT(counts1.GetActivationCount(ANTENNA1_ID), Eq(0));
         ASSERT_THAT(counts1.GetActivationCount(ANTENNA2_ID), Eq(0));
         ASSERT_THAT(counts1.GetActivationCount(ANTENNA3_ID), Eq(0));
@@ -173,14 +172,12 @@ namespace
 
         telemetry.SetActivationTimes(ANTENNA_PRIMARY_CHANNEL, ActivationTimes(10s, 20s, 30s, 40s));
         telemetry.SetActivationTimes(ANTENNA_BACKUP_CHANNEL, ActivationTimes(50s, 60s, 70s, 80s));
-        telemetry.SetDeploymentStatus(0xa5);
 
         auto& counts1 = telemetry.GetActivationCounts(ANTENNA_PRIMARY_CHANNEL);
         auto& counts2 = telemetry.GetActivationCounts(ANTENNA_BACKUP_CHANNEL);
         auto& times1 = telemetry.GetActivationTimes(ANTENNA_PRIMARY_CHANNEL);
         auto& times2 = telemetry.GetActivationTimes(ANTENNA_BACKUP_CHANNEL);
 
-        ASSERT_THAT(telemetry.GetDeploymentStatus(), Eq(0xa5));
         ASSERT_THAT(counts1.GetActivationCount(ANTENNA1_ID), Eq(1));
         ASSERT_THAT(counts1.GetActivationCount(ANTENNA2_ID), Eq(2));
         ASSERT_THAT(counts1.GetActivationCount(ANTENNA3_ID), Eq(3));
@@ -202,10 +199,9 @@ namespace
 
     TEST(AntennaTelemetry, Serialization)
     {
-        std::uint8_t buffer[21];
+        std::uint8_t buffer[20];
         std::uint8_t expected[] = {
             //
-            0x5A,
             0b11010001,
             0b01011000,
             0b11111111,
@@ -225,12 +221,11 @@ namespace
 
         telemetry.SetActivationTimes(ANTENNA_PRIMARY_CHANNEL, ActivationTimes(10s, 20s, 30s, 40s));
         telemetry.SetActivationTimes(ANTENNA_BACKUP_CHANNEL, ActivationTimes(50s, 60s, 70s, 80s));
-        telemetry.SetDeploymentStatus(0x5a);
 
         BitWriter writer(buffer);
         telemetry.Write(writer);
         ASSERT_THAT(writer.Status(), Eq(true));
-        ASSERT_THAT(writer.GetBitDataLength(), Eq(96u));
+        ASSERT_THAT(writer.GetBitDataLength(), Eq(88u));
         ASSERT_THAT(writer.Capture(), Eq(gsl::make_span(expected)));
     }
 
@@ -238,30 +233,23 @@ namespace
     {
     };
 
-    TEST_P(AntennaTelemetryTest, GetDeploymentStatusPositive)
-    {
-        const auto channel = std::get<0>(GetParam());
-        const auto antenna = std::get<1>(GetParam());
-        const auto baseValue = std::get<2>(GetParam());
-
-        AntennaTelemetry telemetry;
-        telemetry.SetDeploymentStatus(baseValue);
-        telemetry.SetDeploymentStatus(channel, antenna, true);
-        ASSERT_THAT(telemetry.GetDeploymentStatus(channel, antenna), Eq(true));
-    }
-
-    TEST_P(AntennaTelemetryTest, GetDeploymentStatusNegative)
-    {
-        const auto channel = std::get<0>(GetParam());
-        const auto antenna = std::get<1>(GetParam());
-        const auto baseValue = std::get<2>(GetParam());
-
-        AntennaTelemetry telemetry;
-        telemetry.SetDeploymentStatus(baseValue);
-        telemetry.SetDeploymentStatus(channel, antenna, false);
-        ASSERT_THAT(telemetry.GetDeploymentStatus(channel, antenna), Eq(false));
-        ASSERT_THAT(telemetry.GetDeploymentStatus(), Eq(baseValue));
-    }
+    //    TEST_P(AntennaTelemetryTest, GetDeploymentStatusPositive)
+    //    {
+    //        const auto channel = std::get<0>(GetParam());
+    //        const auto antenna = std::get<1>(GetParam());
+    //        const auto baseValue = std::get<2>(GetParam());
+    //
+    //        AntennaTelemetry telemetry;
+    //    }
+    //
+    //    TEST_P(AntennaTelemetryTest, GetDeploymentStatusNegative)
+    //    {
+    //        const auto channel = std::get<0>(GetParam());
+    //        const auto antenna = std::get<1>(GetParam());
+    //        const auto baseValue = std::get<2>(GetParam());
+    //
+    //        AntennaTelemetry telemetry;
+    //    }
 
     INSTANTIATE_TEST_CASE_P(AntennaTelemetryDeploymentStatus,
         AntennaTelemetryTest,

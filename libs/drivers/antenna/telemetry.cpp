@@ -52,38 +52,16 @@ namespace devices
             writer.WriteWord(std::min<std::uint16_t>(255, this->times[3].count() / 2), TimeLength);
         }
 
-        AntennaTelemetry::AntennaTelemetry() : deploymentStatus(0)
+        AntennaTelemetry::AntennaTelemetry()
         {
         }
 
         void AntennaTelemetry::Write(BitWriter& writer) const
         {
-            writer.Write(this->deploymentStatus);
             this->activationCounts[0].Write(writer);
             this->activationCounts[1].Write(writer);
             this->activationTimes[0].Write(writer);
             this->activationTimes[1].Write(writer);
-        }
-
-        void AntennaTelemetry::SetDeploymentStatus(AntennaChannel channel, AntennaId antenna, bool status)
-        {
-            const std::uint8_t shift = (channel - ANTENNA_FIRST_CHANNEL) * 4;
-            const std::uint8_t value = (1 << (antenna - ANTENNA1_ID)) << shift;
-            if (status)
-            {
-                this->deploymentStatus |= value;
-            }
-            else
-            {
-                this->deploymentStatus &= ~value;
-            }
-        }
-
-        bool AntennaTelemetry::GetDeploymentStatus(AntennaChannel channel, AntennaId antenna) const
-        {
-            const std::uint8_t shift = (channel - ANTENNA_FIRST_CHANNEL) * 4;
-            const std::uint8_t value = (1 << (antenna - ANTENNA1_ID)) << shift;
-            return (this->deploymentStatus & value) != 0;
         }
     }
 }
