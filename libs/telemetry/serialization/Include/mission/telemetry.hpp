@@ -91,6 +91,8 @@ namespace mission
          */
         bool SaveToFile(gsl::span<const std::uint8_t> buffer);
 
+        static constexpr std::uint8_t AlignFileEntriesTo = 230;
+
       private:
         /**
          * @brief Condition for telemetry saving action.

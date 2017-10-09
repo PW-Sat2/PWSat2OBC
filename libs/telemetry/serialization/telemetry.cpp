@@ -7,6 +7,7 @@
 namespace mission
 {
     using namespace std::chrono_literals;
+    using services::fs::SeekOrigin;
 
     TelemetryTask::TelemetryTask(std::tuple<services::fs::IFileSystem&, TelemetryConfiguration> arguments)
         : provider(std::get<0>(arguments)),      //
@@ -66,11 +67,23 @@ namespace mission
         }
     }
 
+    static inline std::size_t CalculateBestOffset(std::size_t currentSize)
+    {
+        auto rem = currentSize % TelemetryTask::AlignFileEntriesTo;
+
+        if (rem == 0)
+        {
+            return currentSize;
+        }
+
+        return currentSize + (TelemetryTask::AlignFileEntriesTo - rem);
+    }
+
     bool TelemetryTask::SaveToFile(gsl::span<const std::uint8_t> buffer)
     {
         services::fs::File file(this->provider, //
             this->configuration.currentFileName,
-            services::fs::FileOpen::AppendAlways,
+            services::fs::FileOpen::OpenAlways,
             services::fs::FileAccess::WriteOnly);
         if (!file)
         {
@@ -102,7 +115,11 @@ namespace mission
                 LOGF(LOG_LEVEL_ERROR, "Unable to open telemetry file: '%s'.", this->configuration.currentFileName);
                 return false;
             }
+
+            size = file.Size();
         }
+
+        file.Seek(SeekOrigin::Begin, CalculateBestOffset(size));
 
         return static_cast<bool>(file.Write(buffer));
     }

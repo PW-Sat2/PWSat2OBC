@@ -71,6 +71,8 @@ namespace
         std::array<std::uint8_t, 1_KB> buffer;
         this->fs.AddFile("/current", buffer);
 
+        ON_CALL(this->fs, GetFileSize(_)).WillByDefault(Return(0));
+
         state.telemetry.Set(telemetry::InternalTimeTelemetry(10min));
         ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
         this->descriptor.Execute(this->state);
@@ -83,6 +85,8 @@ namespace
     {
         std::array<std::uint8_t, 1_KB> buffer;
         this->fs.AddFile("/current", buffer);
+
+        ON_CALL(this->fs, GetFileSize(_)).WillByDefault(Return(0));
 
         state.telemetry.Set(telemetry::InternalTimeTelemetry(10min));
         ASSERT_THAT(this->descriptor.EvaluateCondition(this->state), Eq(true));
@@ -159,7 +163,7 @@ namespace
         EXPECT_CALL(os, TakeSemaphore(_, _)).WillOnce(Return(OSResult::Success));
         EXPECT_CALL(fs, Open(_, _, _)).WillRepeatedly(Return(OpenSuccessful(10)));
         EXPECT_CALL(fs, Write(10, _)).WillOnce(Return(WriteSuccessful()));
-        EXPECT_CALL(fs, GetFileSize(10)).WillOnce(Return(1024));
+        EXPECT_CALL(fs, GetFileSize(10)).Times(2).WillOnce(Return(1024));
         EXPECT_CALL(fs, Move(this->config.currentFileName, this->config.previousFileName)).WillOnce(Return(OSResult::Success));
         EXPECT_CALL(fs, Close(10)).Times(2);
         state.telemetry.Set(telemetry::InternalTimeTelemetry(10min));
