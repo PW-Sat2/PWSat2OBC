@@ -1,15 +1,27 @@
 import struct
 
-from .obc_mixin import OBCMixin, command, decode_lines
+from .obc_mixin import OBCMixin, command, decode_lines, decode_return
 
 
 class FileSystemMixin(OBCMixin):
     def __init__(self):
         pass
 
-    @decode_lines()
+    def _decode_file_list_strip_sizes(result):
+        return map(lambda x: x.split("\t")[0], result.split("\n"))
+
+    def _decode_file_list_with_sizes(result):
+        r = map(lambda x: x.split("\t"), result.split("\n"))
+        return map(lambda (name, size): (name, int(size)), r)
+
+    @decode_return(_decode_file_list_strip_sizes)
     @command("listFiles {0}")
     def list_files(self, path):
+        pass
+
+    @decode_return(_decode_file_list_with_sizes)
+    @command("listFiles {0}")
+    def list_files_with_sizes(self, path):
         pass
 
     def write_file(self, path, content):

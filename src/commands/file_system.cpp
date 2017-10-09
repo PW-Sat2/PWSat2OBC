@@ -53,6 +53,8 @@ void FSListFiles(uint16_t argc, char* argv[])
         else
         {
             GetTerminal().Puts(entry);
+            GetTerminal().Puts("\t");
+            GetTerminal().Printf("%ld", GetFileSystem().GetFileSize(argv[0], entry));
         }
         GetTerminal().NewLine();
     }
