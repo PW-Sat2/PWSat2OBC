@@ -205,7 +205,9 @@ namespace mission
         struct IDisableAntennaDeployment
         {
             /**
-             * @brief Schedules antenna deployment to be disabled as soon as possible
+             * @brief Schedules update antenna deployment configuration update as soon as possible
+             * @param[in] disabled Flag indicating whether antenna deployment should be disabled. Set to
+             * True to disable deployment, False otherwise.
              */
             virtual void SetDeploymentState(bool disabled) = 0;
         };
