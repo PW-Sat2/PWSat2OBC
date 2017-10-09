@@ -145,6 +145,8 @@ namespace mission
              */
             static UpdateResult Update(SystemState& state, void* param);
 
+            bool IsDeploymentDisabled(const SystemState& state);
+
             /**
              * @brief Type of function performing single deployment step
              */
@@ -205,7 +207,7 @@ namespace mission
             /**
              * @brief Schedules antenna deployment to be disabled as soon as possible
              */
-            virtual void DisableDeployment() = 0;
+            virtual void SetDeploymentState(bool disabled) = 0;
         };
 
         /**
@@ -234,9 +236,18 @@ namespace mission
              */
             mission::ActionDescriptor<SystemState> BuildAction();
 
-            virtual void DisableDeployment() override;
+            virtual void SetDeploymentState(bool disabled) override;
 
           private:
+            enum class CurrentOperation
+            {
+                None = 0,
+                Enable = 1,
+                Disable = 2
+            };
+
+            static CurrentOperation FromBool(bool disable);
+
             /**
              * @brief Mission action's condition
              * @param state System state
@@ -253,7 +264,7 @@ namespace mission
             static void Action(SystemState& state, void* param);
 
             /** @brief Flag indicating whether antenna deployment should be disabled */
-            std::atomic<bool> _shouldDisable{false};
+            std::atomic<CurrentOperation> _needsUpdate{CurrentOperation::None};
         };
     }
 }

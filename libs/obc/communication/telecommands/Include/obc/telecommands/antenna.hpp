@@ -10,21 +10,24 @@ namespace obc
     namespace telecommands
     {
         /**
-         * @brief Stop antenna deployment telecommand
+         * @brief Sets antenna deployment mask.
+         *
+         * This telecommand is capable of enabling/disabling antenna deployment process.
          * @telecommand
          *
          * Code: 0xA3
          * Parameters:
          *  - 1-byte - correlation ID
+         *  - 1-byte - antenna deployment configuration flag (zero - disabled, non-zero enabled)
          */
-        class StopAntennaDeployment : public telecommunication::uplink::Telecommand<0xA3>
+        class SetAntennaDeploymentMaskTelecommand : public telecommunication::uplink::Telecommand<0xA3>
         {
           public:
             /**
              * @brief Ctor
              * @param disableAntennaDeployment Object responsible for disabling antenna deployment
              */
-            StopAntennaDeployment(mission::antenna::IDisableAntennaDeployment& disableAntennaDeployment);
+            SetAntennaDeploymentMaskTelecommand(mission::antenna::IDisableAntennaDeployment& disableAntennaDeployment);
 
             virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
 

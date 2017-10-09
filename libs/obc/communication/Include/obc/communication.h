@@ -143,7 +143,7 @@ namespace obc
         obc::telecommands::FinalizeProgramEntry,
         obc::telecommands::SetBootSlotsTelecommand,
         obc::telecommands::SendBeaconTelecommand,
-        obc::telecommands::StopAntennaDeployment,
+        obc::telecommands::SetAntennaDeploymentMaskTelecommand,
         obc::telecommands::PowerCycle,
         obc::telecommands::SetErrorCounterConfig,
         obc::telecommands::OpenSail,

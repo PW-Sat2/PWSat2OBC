@@ -3,7 +3,7 @@ from datetime import timedelta
 from obc.boot import SelectRunlevel
 from response_frames.operation import OperationSuccessFrame
 from system import runlevel, clear_state
-from telecommand.antenna import StopAntennaDeployment
+from telecommand.antenna import SetAntennaDeployment
 from tests.base import BaseTest, RestartPerTest
 from utils import TestEvent
 
@@ -31,7 +31,7 @@ class TestTelecommandsAntenna(RestartPerTest):
 
         self.system.obc._command('PUTTING FRAME')
 
-        self.system.comm.put_frame(StopAntennaDeployment(0x22))
+        self.system.comm.put_frame(SetAntennaDeployment(0x22, True))
 
         ack = self.system.comm.get_frame(10, filter_type=OperationSuccessFrame)
 
