@@ -232,16 +232,72 @@ namespace devices
              */
             void SetActivationTimes(AntennaChannel channel, const ActivationTimes& times);
 
+            /**
+             * @brief Sets burn status for each antenna as reported by selected controller
+             * @param channel Controller reporting status
+             * @param antenna1 Antenna 1 status
+             * @param antenna2 Antenna 2 status
+             * @param antenna3 Antenna 3 status
+             * @param antenna4 Antenna 4 status
+             */
             void SetBurningStatus(AntennaChannel channel, bool antenna1, bool antenna2, bool antenna3, bool antenna4);
+
+            /**
+             * @brief Gets burning status for given controller and antenna
+             * @param channel Controller reporting status
+             * @param antenna Antenna to get status for
+             * @return true if antenna is currently burning, false otherwise
+             */
             bool GetBurningStatus(AntennaChannel channel, AntennaId antenna);
 
+            /**
+             * @brief Sets deployed status for each antenna as reported by selected controller
+             * @param channel Controller reporting status
+             * @param antenna1 Antenna 1 status
+             * @param antenna2 Antenna 2 status
+             * @param antenna3 Antenna 3 status
+             * @param antenna4 Antenna 4 status
+             */
             void SetDeployedStatus(AntennaChannel channel, bool antenna1, bool antenna2, bool antenna3, bool antenna4);
+
+            /**
+             * @brief Gets deployed status for given controller and antenna
+             * @param channel Controller reporting status
+             * @param antenna Antenna to get status for
+             * @return true if antenna is currently deployed, false otherwise
+             */
             bool GetDeployedStatus(AntennaChannel channel, AntennaId antenna);
 
+            /**
+             * @brief Sets time limit reached status for each antenna as reported by selected controller
+             * @param channel Controller reporting status
+             * @param antenna1 Antenna 1 status
+             * @param antenna2 Antenna 2 status
+             * @param antenna3 Antenna 3 status
+             * @param antenna4 Antenna 4 status
+             */
+
             void SetTimeReached(AntennaChannel channel, bool antenna1, bool antenna2, bool antenna3, bool antenna4);
+            /**
+             * @brief Gets time limit reached status for given controller and antenna
+             * @param channel Controller reporting status
+             * @param antenna Antenna to get status for
+             * @return true if antenna is time limit has been reached, false otherwise
+             */
             bool GetTimeReached(AntennaChannel channel, AntennaId antenna);
 
+            /**
+             * @brief Sets controller status
+             * @param channel Controller reporting its status
+             * @param status Status
+             */
             void SetChannelStatus(AntennaChannel channel, ChannelStatus status);
+
+            /**
+             * @brief Gets status reported by given controller
+             * @param channel Controller to get status for
+             * @return Controller status
+             */
             ChannelStatus GetChannelStatus(AntennaChannel channel) const;
 
           private:
