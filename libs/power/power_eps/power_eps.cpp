@@ -116,7 +116,10 @@ namespace services
         {
             if (enabled)
             {
-                return this->_eps.EnableLCL(lcl) == ErrorCode::NoError;
+                using namespace std::chrono_literals;
+                auto status = this->_eps.EnableLCL(lcl) == ErrorCode::NoError;
+                System::SleepTask(500ms);
+                return status;
             }
             else
             {
