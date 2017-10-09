@@ -163,9 +163,14 @@ namespace mission
             return descriptor;
         }
 
-        UpdateResult AntennaTask::Update(SystemState& /*state*/, void* param)
+        UpdateResult AntennaTask::Update(SystemState& state, void* param)
         {
             auto This = reinterpret_cast<AntennaTask*>(param);
+
+            if (!state.AntennaState.IsDeployed() && This->IsDeploymentDisabled(state))
+            {
+                state.AntennaState.SetDeployment(true);
+            }
 
             if (!This->_controllerPoweredOn)
             {

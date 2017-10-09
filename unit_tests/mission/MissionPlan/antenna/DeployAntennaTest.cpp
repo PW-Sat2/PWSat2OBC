@@ -59,8 +59,8 @@ namespace
 
             if (_nextTime > _state.Time)
             {
-                ASSERT_THAT(_action.EvaluateCondition(_state), Eq(false)) << "Iteration " << i << ": should wait for time "
-                                                                          << _nextTime.count() << "ms";
+                ASSERT_THAT(_action.EvaluateCondition(_state), Eq(false))
+                    << "Iteration " << i << ": should wait for time " << _nextTime.count() << "ms";
                 _state.Time = _nextTime;
             }
         }
@@ -203,5 +203,12 @@ namespace
         EXPECT_CALL(_antenna, GetTelemetry(_)).Times(0);
 
         _update.Execute(_state);
+    }
+
+    TEST_F(DeployAntennaTest, ShouldReportDeploymentComplatedWhenItIsDisabled)
+    {
+        _state.PersistentState.Set(state::AntennaConfiguration(true));
+        _update.Execute(_state);
+        ASSERT_THAT(_state.AntennaState.IsDeployed(), Eq(true));
     }
 }
