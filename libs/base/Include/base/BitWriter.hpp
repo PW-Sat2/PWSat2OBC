@@ -189,6 +189,11 @@ class BitWriter
      */
     template <typename T, typename std::enable_if<std::is_fundamental<T>::value, int>::type = 0> bool Write(T value);
 
+    /**
+     * @brief Appends all bits from bitset to buffer
+     * @param value Bitset to append
+     * @return Operation status
+     */
     template <std::size_t Size> bool Write(const std::bitset<Size>& value);
 
     /**
