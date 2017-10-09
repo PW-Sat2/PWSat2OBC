@@ -55,7 +55,7 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           FinalizeProgramEntry(bootTable),                                                                                            //
           SetBootSlotsTelecommand(bootSettings),                                                                                      //
           SendBeaconTelecommand(telemetry),                                                                                           //
-          StopAntennaDeployment(disableAntennaDeployment),                                                                            //
+          SetAntennaDeploymentMaskTelecommand(disableAntennaDeployment),                                                              //
           PowerCycle(powerControl),                                                                                                   //
           SetErrorCounterConfig(fdir),                                                                                                //
           OpenSail(openSail),                                                                                                         //
@@ -84,7 +84,7 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
               experiments.ExperimentsController, experiments.Get<experiment::program::CopyBootSlotsExperiment>()), //
           SetBuiltinDetumblingBlockMaskTelecommand(stateContainer, adcsCoordinator),                               //
           SetAdcsModeTelecommand(adcsCoordinator),                                                                 //
-          StopSailDeployment(stateContainer), 
+          StopSailDeployment(stateContainer),
           obc::telecommands::ReadMemoryTelecommand() //
           ),                                         //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())

@@ -81,8 +81,12 @@ namespace mission
             Step<AntennaChannel::ANTENNA_BACKUP_CHANNEL>::FullSequenceManual<AntennaId::ANTENNA4_ID>);
 
         AntennaTask::AntennaTask(std::tuple<IAntennaDriver&, services::power::IPowerControl&> args)
-            : _powerControl(std::get<services::power::IPowerControl&>(args)), _antenna(std::get<IAntennaDriver&>(args)), _step(0),
-              _nextStepAt(0), _retryCounter(StepRetries), _sync(nullptr), _controllerPoweredOn(false)
+            : _powerControl(std::get<services::power::IPowerControl&>(args)), //
+              _antenna(std::get<IAntennaDriver&>(args)),                      //
+              _step(0),                                                       //
+              _nextStepAt(0),                                                 //
+              _retryCounter(StepRetries),                                     //
+              _sync(nullptr), _controllerPoweredOn(false)
         {
         }
 
@@ -93,12 +97,17 @@ namespace mission
             return true;
         }
 
+        bool AntennaTask::IsDeploymentDisabled(const SystemState& state)
+        {
+            state::AntennaConfiguration cfg;
+            return state.PersistentState.Get(cfg) && cfg.IsDeploymentDisabled();
+        }
+
         bool AntennaTask::Condition(const SystemState& state, void* param)
         {
             auto This = reinterpret_cast<AntennaTask*>(param);
 
             if (!mission::IsInitialSilentPeriodFinished(state.Time))
-            //            if (state.Time < 40min)
             {
                 return false;
             }
@@ -113,24 +122,13 @@ namespace mission
                 return false;
             }
 
-            state::AntennaConfiguration cfg;
-
-            if (state.PersistentState.Get(cfg))
-            {
-                if (cfg.IsDeploymentDisabled())
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            return !This->IsDeploymentDisabled(state);
         }
 
         void AntennaTask::Action(SystemState& state, void* param)
         {
+            UNREFERENCED_PARAMETER(state);
             auto This = reinterpret_cast<AntennaTask*>(param);
-
-            (void)state;
 
             LOGF(LOG_LEVEL_INFO, "[ant] Performing step %d", This->_step);
 
@@ -223,33 +221,39 @@ namespace mission
             return action;
         }
 
-        void StopAntennaDeploymentTask::DisableDeployment()
+        StopAntennaDeploymentTask::CurrentOperation StopAntennaDeploymentTask::FromBool(bool disable)
         {
-            this->_shouldDisable = true;
+            return disable ? CurrentOperation::Disable : CurrentOperation::Enable;
+        }
+
+        void StopAntennaDeploymentTask::SetDeploymentState(bool disabled)
+        {
+            const auto newValue = FromBool(disabled);
+            auto expected = CurrentOperation::None;
+            while (!this->_needsUpdate.compare_exchange_strong(expected, newValue))
+            {
+            }
         }
 
         bool StopAntennaDeploymentTask::Condition(const SystemState& state, void* param)
         {
-            state::AntennaConfiguration antennaConfiguration;
-            if (!state.PersistentState.Get(antennaConfiguration))
-            {
-                LOG(LOG_LEVEL_ERROR, "[ant] Can't get antenna configuration");
-                return false;
-            }
-
             auto This = reinterpret_cast<StopAntennaDeploymentTask*>(param);
-            auto alreadyDisabled = antennaConfiguration.IsDeploymentDisabled();
-
-            return This->_shouldDisable && !alreadyDisabled && state.AntennaState.IsDeployed();
+            return state.AntennaState.IsDeployed() && This->_needsUpdate.load() != CurrentOperation::None;
         }
 
-        void StopAntennaDeploymentTask::Action(SystemState& state, void*)
+        void StopAntennaDeploymentTask::Action(SystemState& state, void* param)
         {
-            LOG(LOG_LEVEL_INFO, "[ant] Disabling antenna deployment");
-
-            if (!state.PersistentState.Set(state::AntennaConfiguration(true)))
+            auto This = reinterpret_cast<StopAntennaDeploymentTask*>(param);
+            CurrentOperation newValue;
+            while ((newValue = This->_needsUpdate.exchange(CurrentOperation::None)) != CurrentOperation::None)
             {
-                LOG(LOG_LEVEL_ERROR, "[ant] Can't set antenna configuration");
+                bool disabled = newValue == CurrentOperation::Disable;
+                LOGF(LOG_LEVEL_INFO, "[ant] Updating antenna deployment to %d", disabled ? 0 : 1);
+
+                if (!state.PersistentState.Set(state::AntennaConfiguration(disabled)))
+                {
+                    LOG(LOG_LEVEL_ERROR, "[ant] Can't set antenna configuration");
+                }
             }
         }
 

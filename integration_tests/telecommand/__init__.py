@@ -37,7 +37,7 @@ __all__ = [
     'GetErrorCounterConfig',
     'SetPeriodicMessageTelecommand',
     'SendPeriodicMessageTelecommand',
-    'StopAntennaDeployment',
+    'SetAntennaDeployment',
     'EraseFlash',
     'RawI2C',
     'GetSunSDataSets',

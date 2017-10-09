@@ -37,39 +37,22 @@ namespace
         ASSERT_THAT(shouldExecute, Eq(false));
     }
 
-    TEST_F(StopAntennaDeploymentTest, ShouldNotExecuteIfOrderedToStopButDeployingAlreadyDisabled)
-    {
-        this->_task.DisableDeployment();
-
-        _state.PersistentState.Set<state::AntennaConfiguration>(state::AntennaConfiguration(true));
-
-        auto shouldExecute = _action.EvaluateCondition(this->_state);
-
-        ASSERT_THAT(shouldExecute, Eq(false));
-    }
-
-    TEST_F(StopAntennaDeploymentTest, ShouldExecuteIfOrderToStopDeployingAndNotDisabledYet)
+    TEST_F(StopAntennaDeploymentTest, ShouldExecuteIfOrderToStopDeployingAndDeploymentProcessIsFinished)
     {
         this->_state.AntennaState.SetDeployment(true);
 
-        this->_task.DisableDeployment();
+        this->_task.SetDeploymentState(true);
 
         auto shouldExecute = _action.EvaluateCondition(this->_state);
 
         ASSERT_THAT(shouldExecute, Eq(true));
-
-        _action.Execute(this->_state);
-
-        state::AntennaConfiguration antennaConfiguration;
-        _state.PersistentState.Get(antennaConfiguration);
-        ASSERT_THAT(antennaConfiguration.IsDeploymentDisabled(), Eq(true));
     }
 
     TEST_F(StopAntennaDeploymentTest, ShouldDoNothingIfOrderToStopDeploymentButItIsStillInProgress)
     {
         this->_state.AntennaState.SetDeployment(false);
 
-        this->_task.DisableDeployment();
+        this->_task.SetDeploymentState(false);
 
         auto shouldExecute = _action.EvaluateCondition(this->_state);
 
@@ -80,7 +63,7 @@ namespace
     {
         this->_state.AntennaState.SetDeployment(false);
 
-        this->_task.DisableDeployment();
+        this->_task.SetDeploymentState(true);
 
         auto shouldExecute = _action.EvaluateCondition(this->_state);
 
@@ -91,5 +74,37 @@ namespace
         shouldExecute = _action.EvaluateCondition(this->_state);
 
         ASSERT_THAT(shouldExecute, Eq(true));
+    }
+
+    TEST_F(StopAntennaDeploymentTest, ShouldExecuteOnlyOnce)
+    {
+        this->_state.AntennaState.SetDeployment(true);
+        this->_task.SetDeploymentState(true);
+        auto shouldExecute = _action.EvaluateCondition(this->_state);
+
+        ASSERT_THAT(shouldExecute, Eq(true));
+        _action.Execute(this->_state);
+
+        shouldExecute = _action.EvaluateCondition(this->_state);
+
+        ASSERT_THAT(shouldExecute, Eq(false));
+    }
+
+    TEST_F(StopAntennaDeploymentTest, ShouldUpdatePersistentStateToDisabled)
+    {
+        this->_task.SetDeploymentState(true);
+        _action.Execute(this->_state);
+        state::AntennaConfiguration antennaConfiguration;
+        _state.PersistentState.Get(antennaConfiguration);
+        ASSERT_THAT(antennaConfiguration.IsDeploymentDisabled(), Eq(true));
+    }
+
+    TEST_F(StopAntennaDeploymentTest, ShouldUpdatePersistentStateToEnabled)
+    {
+        this->_task.SetDeploymentState(false);
+        _action.Execute(this->_state);
+        state::AntennaConfiguration antennaConfiguration;
+        _state.PersistentState.Get(antennaConfiguration);
+        ASSERT_THAT(antennaConfiguration.IsDeploymentDisabled(), Eq(false));
     }
 }
