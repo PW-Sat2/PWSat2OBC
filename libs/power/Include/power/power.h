@@ -107,6 +107,12 @@ namespace services
              * @return Operation status
              */
             virtual bool CameraNadir(bool enabled) = 0;
+
+            /**
+             * @brief Disables overheat detection
+             * @return Operation status
+             */
+            virtual bool IgnoreOverheat() = 0;
         };
 
         /** @} */
