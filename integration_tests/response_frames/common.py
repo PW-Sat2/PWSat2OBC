@@ -140,6 +140,11 @@ class TimeSetSuccessFrame(GenericSuccessResponseFrame):
     pass
 
 
+@response_frame(DownlinkApid.TimeSet)
+class TimeSetErrorFrame(GenericErrorResponseFrame):
+    pass
+
+
 @response_frame(DownlinkApid.ErrorCounterConfiguration)
 class ErrorCounterConfigurationSuccessFrame(GenericSuccessResponseFrame):
     pass

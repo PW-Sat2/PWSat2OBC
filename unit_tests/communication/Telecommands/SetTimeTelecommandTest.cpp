@@ -65,6 +65,10 @@ namespace
         EXPECT_CALL(timeSynchronization, Lock(_)).WillOnce(Return(true));
         rtc.SetReadResult(OSResult::Success);
 
+        auto rtcTime = rtc.GetTime() + std::chrono::seconds{12};
+
+        rtc.SetTime(rtcTime);
+
         Buffer<200> buffer;
         Writer w(buffer);
         w.WriteByte(0xFF);
@@ -75,5 +79,30 @@ namespace
         state::TimeState timeState;
         persistentState.Get(timeState);
         ASSERT_THAT(timeState.LastMissionTime(), Eq(std::chrono::seconds{0x87654321}));
+        ASSERT_THAT(timeState.LastExternalTime(), Eq(rtcTime));
+    }
+
+    TEST_F(SetTimeTelecommandTest, ShouldSetStateWithRTCDown)
+    {
+        SystemState state;
+        auto& persistentState = state.PersistentState;
+        persistentState.Set(state::TimeState(std::chrono::seconds{0x11111111}, std::chrono::seconds{0x22222222}));
+        ON_CALL(stateContainer, MockGetState()).WillByDefault(ReturnRef(state));
+        EXPECT_CALL(currentTime, SetCurrentTime(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::seconds{0x87654321})))
+            .WillOnce(Return(true));
+        EXPECT_CALL(timeSynchronization, Lock(_)).WillOnce(Return(true));
+        rtc.SetReadResult(OSResult::BufferNotAvailable);
+
+        Buffer<200> buffer;
+        Writer w(buffer);
+        w.WriteByte(0xFF);
+        w.WriteDoubleWordLE(0x87654321);
+
+        telecommand.Handle(transmitter, w.Capture());
+
+        state::TimeState timeState;
+        persistentState.Get(timeState);
+        ASSERT_THAT(timeState.LastMissionTime(), Eq(std::chrono::seconds{0x87654321}));
+        ASSERT_THAT(timeState.LastExternalTime(), Eq(std::chrono::seconds{0x22222222}));
     }
 }

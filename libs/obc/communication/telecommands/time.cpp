@@ -89,16 +89,33 @@ namespace obc
                 return;
             }
 
+            std::uint8_t status = 0;
+
+            auto& persistentState = stateContainer.GetState().PersistentState;
+            std::chrono::milliseconds externalTime;
+
             devices::rtc::RTCTime rtcTime;
             if (OS_RESULT_FAILED(rtc.ReadTime(rtcTime)))
             {
                 LOG(LOG_LEVEL_ERROR, "Unable to retrieve time from external RTC");
-                response.PayloadWriter().WriteByte(-1);
-                transmitter.SendFrame(response.Frame());
-                return;
-            }
+                status = 1;
 
-            const auto externalTime = std::chrono::duration_cast<std::chrono::milliseconds>(rtcTime.ToDuration());
+                state::TimeState currentTimeState;
+
+                if (!persistentState.Get(currentTimeState))
+                {
+                    LOG(LOG_LEVEL_ERROR, "Cannot set time state");
+                    response.PayloadWriter().WriteByte(-5);
+                    transmitter.SendFrame(response.Frame());
+                    return;
+                }
+
+                externalTime = currentTimeState.LastExternalTime();
+            }
+            else
+            {
+                externalTime = std::chrono::duration_cast<std::chrono::milliseconds>(rtcTime.ToDuration());
+            }
 
             LOGF(LOG_LEVEL_INFO,
                 "Jumping to time 0x%x%xms 0x%x%xms\n",
@@ -115,7 +132,6 @@ namespace obc
                 return;
             }
 
-            auto& persistentState = stateContainer.GetState().PersistentState;
             if (!persistentState.Set(state::TimeState(targetTime, externalTime)))
             {
                 LOG(LOG_LEVEL_ERROR, "Cannot set time state");
@@ -124,7 +140,7 @@ namespace obc
                 return;
             }
 
-            response.PayloadWriter().WriteByte(0);
+            response.PayloadWriter().WriteByte(status);
             transmitter.SendFrame(response.Frame());
         }
     }
