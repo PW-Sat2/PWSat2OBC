@@ -112,6 +112,13 @@ namespace mission
         static void Action(SystemState& state, void* param);
 
         /**
+         * @brief Disables overheat detection
+         * @param This Pointer to this task
+         * @param state Unused
+         */
+        static void IgnoreOverheat(OpenSailTask* This, SystemState& state);
+
+        /**
          * @brief Delay by 100ms
          * @param This Unused
          */
@@ -171,7 +178,7 @@ namespace mission
         using StepProc = void (*)(OpenSailTask* This, SystemState& state);
 
         /** @brief Sail opening steps */
-        static StepProc Steps[23];
+        static StepProc Steps[24];
         /** @brief Steps count */
         static constexpr std::uint8_t StepsCount = count_of(Steps);
     };
