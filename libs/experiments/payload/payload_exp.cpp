@@ -76,6 +76,9 @@ namespace experiment
         {
             ++_currentStep;
 
+            // sleep after turning off LCL before turning it on again
+            System::SleepTask(6s);
+
             switch (_currentStep)
             {
                 default:
