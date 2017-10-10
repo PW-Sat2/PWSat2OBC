@@ -212,11 +212,6 @@ OSResult OBC::InitializeRunlevel2()
 {
     this->Communication.InitializeRunlevel2();
 
-    if (OS_RESULT_FAILED(this->Hardware.antennaDriver.HardReset()))
-    {
-        LOG(LOG_LEVEL_ERROR, "[obc] Unable to reset both antenna controllers. ");
-    }
-
     Mission.Resume();
 
     TelemetryAcquisition.Resume();

@@ -10,20 +10,6 @@ class Test_Antenna(RestartPerTest):
     def __init__(self, methodName='runTest'):
         super(Test_Antenna, self).__init__(methodName)
 
-    @runlevel(2)
-    def test_primary_antenna_is_reset_at_startup(self):
-        event = TestEvent()
-        self.system.primary_antenna.on_reset = event.set
-        self.power_on_obc()
-        self.assertTrue(event.wait_for_change(1))
-
-    @runlevel(2)
-    def test_backup_antenna_is_reset_at_startup(self):
-        event = TestEvent()
-        self.system.backup_antenna.on_reset = event.set
-        self.power_on_obc()
-        self.assertTrue(event.wait_for_change(1))
-
     @runlevel(1)
     def test_auto_deployment(self):
         event = TestEvent()
