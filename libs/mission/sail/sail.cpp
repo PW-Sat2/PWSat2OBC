@@ -7,6 +7,8 @@ using namespace std::chrono_literals;
 namespace mission
 {
     OpenSailTask::StepProc OpenSailTask::Steps[] = {
+        &IgnoreOverheat,               //
+                                       //
         &EnableMainThermalKnife,       //
         &Delay100ms,                   //
         &EnableMainThermalKnife,       //
@@ -183,6 +185,11 @@ namespace mission
                 break;
             }
         }
+    }
+
+    void OpenSailTask::IgnoreOverheat(OpenSailTask* This, SystemState& /*state*/)
+    {
+        This->_power.IgnoreOverheat();
     }
 
     void OpenSailTask::Delay100ms(OpenSailTask* /*This*/, SystemState& /*state*/)

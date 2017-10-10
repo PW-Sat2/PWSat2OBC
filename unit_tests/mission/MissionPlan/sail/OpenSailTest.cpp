@@ -48,6 +48,8 @@ TEST_F(OpenSailTest, ShouldPerformSailOpeningProcedure)
     {
         InSequence s;
 
+        EXPECT_CALL(this->_power, IgnoreOverheat());
+
         EXPECT_CALL(this->_power, MainThermalKnife(true));
         EXPECT_CALL(this->_os, Sleep(100ms));
         EXPECT_CALL(this->_power, MainThermalKnife(true));

@@ -40,6 +40,8 @@ namespace services
             virtual bool CameraWing(bool enabled) override;
             virtual bool CameraNadir(bool enabled) override;
 
+            virtual bool IgnoreOverheat() override;
+
           private:
             bool Switch(bool enabled, devices::eps::LCL lcl);
 

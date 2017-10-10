@@ -28,6 +28,9 @@ class Test_SailTest(RestartPerTest):
         self.system.rtc.set_response_time(now)
         self.system.obc.jump_to_time(days_40)
 
+        overheat_disabled_a = TestEvent()
+        overheat_disabled_b = TestEvent()
+
         tk_main_lcl_enabled = TestEvent()
         tk_main_lcl_disabled = TestEvent()
 
@@ -36,6 +39,9 @@ class Test_SailTest(RestartPerTest):
 
         main_burn_switch = TestEvent()
         red_burn_switch = TestEvent()
+
+        self.system.eps.controller_a.on_disable_overheat_submode = overheat_disabled_a.set
+        self.system.eps.controller_b.on_disable_overheat_submode = overheat_disabled_b.set
 
         self.system.eps.TKmain.on_enable = tk_main_lcl_enabled.set
         self.system.eps.TKmain.on_disable = tk_main_lcl_disabled.set
@@ -46,6 +52,8 @@ class Test_SailTest(RestartPerTest):
         self.system.eps.SAILmain.on_enable = main_burn_switch.set
         self.system.eps.SAILred.on_enable = red_burn_switch.set
 
+        self.assertTrue(overheat_disabled_a.wait_for_change(16))
+        self.assertTrue(overheat_disabled_b.wait_for_change(16))
         self.assertTrue(tk_main_lcl_enabled.wait_for_change(16))
         self.assertTrue(main_burn_switch.wait_for_change(10))
 
