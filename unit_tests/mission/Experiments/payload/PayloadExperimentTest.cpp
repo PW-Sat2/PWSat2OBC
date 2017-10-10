@@ -112,6 +112,7 @@ namespace
     {
         {
             InSequence s;
+            EXPECT_CALL(_os, Sleep(duration_cast<milliseconds>(6s)));
             TelemetrySnapshotStepTest();
             EXPECT_CALL(_power, SensPower(true)).WillOnce(Return(true));
             EXPECT_CALL(_os, Sleep(duration_cast<milliseconds>(10s)));
@@ -131,6 +132,7 @@ namespace
     {
         {
             InSequence s;
+            EXPECT_CALL(_os, Sleep(duration_cast<milliseconds>(6s)));
             TelemetrySnapshotStepTest();
             EXPECT_CALL(_power, SensPower(true)).WillOnce(Return(true));
             EXPECT_CALL(_os, Sleep(duration_cast<milliseconds>(2s)));
@@ -160,6 +162,7 @@ namespace
     {
         {
             InSequence s;
+            EXPECT_CALL(_os, Sleep(duration_cast<milliseconds>(6s)));
             TelemetrySnapshotStepTest();
             EXPECT_CALL(_power, CameraNadir(true)).WillOnce(Return(true));
             EXPECT_CALL(_os, Sleep(duration_cast<milliseconds>(10s)));
@@ -188,6 +191,8 @@ namespace
 
     void PayloadExperimentTest::CamsFullStepTest()
     {
+        EXPECT_CALL(_os, Sleep(duration_cast<milliseconds>(6s)));
+
         // InSequence from main test can't (?) be switched off
         for (int i = 0; i < 10; ++i)
         {
@@ -225,6 +230,7 @@ namespace
     {
         {
             InSequence s;
+            EXPECT_CALL(_os, Sleep(duration_cast<milliseconds>(6s)));
             TelemetrySnapshotStepTest();
             EXPECT_CALL(_power, SunSPower(true)).WillOnce(Return(true));
             EXPECT_CALL(_os, Sleep(duration_cast<milliseconds>(2s)));
