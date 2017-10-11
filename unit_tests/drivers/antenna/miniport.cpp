@@ -222,9 +222,9 @@ namespace
             }));
         uint16_t response;
         const auto status = miniport.GetTemperature(error, &i2c, ANTENNA_PRIMARY_CHANNEL, &response);
-        ASSERT_THAT(status, Eq(OSResult::OutOfRange));
+        ASSERT_THAT(status, Eq(OSResult::Success));
         ASSERT_THAT(response, Eq(0));
-        ASSERT_THAT(error.GetAggregatedResult(), Eq(false));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(true));
     }
 
     TEST_F(AntennaMiniportTest, TestAntennaTemperatureFailure)
@@ -359,5 +359,5 @@ namespace
             std::make_tuple(0x44, 0x64, I2CResult::OK, OSResult::Success, 0x01010101u, 0x1, 0x01010101u, false, false, false, true),
             std::make_tuple(0x44, 0xC4, I2CResult::OK, OSResult::Success, 0x01010100u, 0u, 0x01010101u, false, false, false, true),
             std::make_tuple(0x44, 0xE4, I2CResult::OK, OSResult::Success, 0x01010100u, 0x1, 0x01010101u, false, false, false, true),
-            std::make_tuple(0x00, 0x10, I2CResult::OK, OSResult::OutOfRange, 0x0, 0u, 0x0u, false, false, false, false)), );
+            std::make_tuple(0x00, 0x10, I2CResult::OK, OSResult::Success, 0x01010101u, 0u, 0x0u, false, false, false, true)), );
 }

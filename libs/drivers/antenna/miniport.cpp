@@ -206,16 +206,6 @@ OSResult AntennaMiniportDriver::GetDeploymentStatus( //
 
     Reader reader(output);
     const uint16_t value = reader.ReadWordLE();
-    if ((value & 0x1000) != 0)
-    {
-        LOGF(LOG_LEVEL_WARNING,
-            "[ant] Antenna %d deployment status out of range: 0x%x.",
-            channel,
-            value //
-            );
-
-        return OSResult::OutOfRange >> error;
-    }
 
     telemetry->DeploymentStatus[0] = IS_BIT_CLEAR(value, 15); // (value & 0x8000) == 0;
     telemetry->DeploymentStatus[1] = IS_BIT_CLEAR(value, 11); // (value & 0x0800) == 0;
@@ -320,17 +310,6 @@ OSResult AntennaMiniportDriver::GetTemperature(   //
 
     Reader reader(output);
     const uint16_t value = reader.ReadWordBE();
-    if ((value & 0xfc00) != 0)
-    {
-        LOGF(LOG_LEVEL_WARNING,
-            "[ant] Antenna %d temperature is out of range: 0x%x.",
-            channel,
-            value //
-            );
-
-        return OSResult::OutOfRange >> error;
-    }
-
     *temperature = value & 0x3ff;
     return OSResult::Success >> error;
 }
