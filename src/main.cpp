@@ -74,7 +74,10 @@ telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver
     0,
     std::make_tuple(std::ref(Main.fs), mission::TelemetryConfiguration{"/telemetry.current", "/telemetry.previous", 512_KB, 30s}));
 
-mission::ObcMission Mission(std::tie(Main.timeProvider, Main.Hardware.rtc, Mission),
+static void PerformMemoryRecovery();
+
+mission::ObcMission Mission(&PerformMemoryRecovery, //
+    std::tie(Main.timeProvider, Main.Hardware.rtc, Mission),
     0,
     std::tie<IAntennaDriver, services::power::IPowerControl>(Main.Hardware.antennaDriver, Main.PowerControlInterface),
     Main.Hardware.CommDriver,
@@ -177,6 +180,11 @@ void ACMP0_IRQHandler()
 __attribute__((optimize("O3"))) void UART1_RX_IRQHandler()
 {
     Main.Hardware.Terminal.OnReceived();
+}
+
+void PerformMemoryRecovery()
+{
+    Main.Memory.Recover();
 }
 
 static void InitSwoEndpoint(void)
