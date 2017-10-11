@@ -62,6 +62,8 @@ namespace services
                     break;
             }
 
+            System::SleepTask(6s);
+
             return result ? OSResult::Success : OSResult::IOError;
         }
 
