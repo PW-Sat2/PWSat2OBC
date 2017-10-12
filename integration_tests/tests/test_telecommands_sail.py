@@ -29,15 +29,18 @@ class TestSailTelecommands(RestartPerTest):
         self._start()
 
         sail_opening = TestEvent()
+        overheat_disabled = TestEvent()
 
         self.system.eps.TKmain.on_enable = sail_opening.set
+        self.system.eps.controller_a.on_disable_overheat_submode = overheat_disabled.set
 
-        self.system.comm.put_frame(OpenSailTelecommand(0x31))
+        self.system.comm.put_frame(OpenSailTelecommand(0x31, False))
 
         ack = self.system.comm.get_frame(5)
         self.assertIsInstance(ack, SailSuccessFrame)
 
         self.assertTrue(sail_opening.wait_for_change(20), "Sail opening procedure should start")
+        self.assertFalse(overheat_disabled.wait_for_change(0), "Overheat should not be disabled")
 
     @clear_state()
     def test_disable_sail_deployment_should_not_disable_deployment_on_command(self):
@@ -45,7 +48,10 @@ class TestSailTelecommands(RestartPerTest):
         self.system.obc.run_mission()
 
         sail_opening = TestEvent()
+        overheat_disabled = TestEvent()
+
         self.system.eps.TKmain.on_enable = sail_opening.set
+        self.system.eps.controller_a.on_disable_overheat_submode = overheat_disabled.set
 
         self.system.comm.put_frame(StopSailDeployment(11))
         frame = self.system.comm.get_frame(20)
@@ -53,13 +59,14 @@ class TestSailTelecommands(RestartPerTest):
 
         self.system.obc.run_mission()
 
-        self.system.comm.put_frame(OpenSailTelecommand(0x31))
+        self.system.comm.put_frame(OpenSailTelecommand(0x31, True))
         frame = self.system.comm.get_frame(20)
         self.assertIsInstance(frame, SailSuccessFrame)
 
         self.system.obc.run_mission()
 
         self.assertTrue(sail_opening.wait_for_change(5), "Sail deployment should be performed")
+        self.assertTrue(overheat_disabled.wait_for_change(1), "Overheat should be disabled")
 
     @clear_state()
     def test_disable_sail_deployment_should_disable_automatic_deploy(self):
