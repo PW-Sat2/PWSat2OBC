@@ -18,6 +18,7 @@ namespace obc
          * Code: 0x02
          * Parameters:
          *  - Correlation ID (8-bit)
+         *  - Ignore overheat (8-bit, 0x1 - yes, 0x0 - no)
          */
         class OpenSail : public telecommunication::uplink::Telecommand<0x04>
         {
