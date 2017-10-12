@@ -21,6 +21,8 @@ ErrorCounters = joint(
     field('FRAM TMR', CounterConfig),
     field('Payload', CounterConfig),
     field('Camera', CounterConfig),
-    field('Suns', CounterConfig)
+    field('Suns', CounterConfig),
+    field('Antenna Primary', CounterConfig),
+    field('Antenna Backup', CounterConfig)
     ).bind(to_dict)
 ErrorCounters >>= label_as('Error Counters')

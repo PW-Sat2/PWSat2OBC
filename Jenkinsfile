@@ -22,7 +22,7 @@ def buildPlatform(mcu, pld) {
 			ENABLE_LTO: 1,
 			COMM_SECURITY_CODE: env.SECURITY_CODE
 		])
-		bat "make pwsat boot safe_mode pwsat.hex pwsat.bin boot.hex safe_mode.bin generate_telemetry generate_exp_data"
+		bat "make pwsat boot safe_mode pwsat.hex pwsat.bin boot.hex safe_mode.bin generate_telemetry generate_exp_data generate_persistent_state"
 	}
 }
 
@@ -57,6 +57,7 @@ def reports() {
   
   bat "make generate_telemetry.run"
   bat "make generate_exp_data.run"
+  bat "make generate_persistent_state.run"
   
   step([$class: 'ArtifactArchiver', artifacts: 'build/*/*/reports/*', fingerprint: true])
 }
