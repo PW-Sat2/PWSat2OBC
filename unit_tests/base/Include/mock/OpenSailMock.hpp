@@ -12,7 +12,7 @@ struct OpenSailMock : mission::IOpenSail
 
     ~OpenSailMock();
 
-    MOCK_METHOD0(OpenSail, void());
+    MOCK_METHOD1(OpenSail, void(bool ignoreOverheat));
 };
 
 #endif

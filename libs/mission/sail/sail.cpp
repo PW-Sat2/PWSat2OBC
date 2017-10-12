@@ -39,13 +39,14 @@ namespace mission
     };
 
     OpenSailTask::OpenSailTask(services::power::IPowerControl& power)
-        : _power(power), _step(0), _nextStepAfter(0), _openOnNextMissionLoop(false)
+        : _power(power), _step(0), _nextStepAfter(0), _openOnNextMissionLoop(false), _ignoreOverheat(true)
     {
     }
 
-    void OpenSailTask::OpenSail()
+    void OpenSailTask::OpenSail(bool ignoreOverheat)
     {
         this->_openOnNextMissionLoop = true;
+        this->_ignoreOverheat = ignoreOverheat;
     }
 
     UpdateDescriptor<SystemState> OpenSailTask::BuildUpdate()
@@ -189,7 +190,10 @@ namespace mission
 
     void OpenSailTask::IgnoreOverheat(OpenSailTask* This, SystemState& /*state*/)
     {
-        This->_power.IgnoreOverheat();
+        if (This->_ignoreOverheat)
+        {
+            This->_power.IgnoreOverheat();
+        }
     }
 
     void OpenSailTask::Delay100ms(OpenSailTask* /*This*/, SystemState& /*state*/)
