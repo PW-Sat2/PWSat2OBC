@@ -5,7 +5,7 @@ from photodiodes import Photodiodes
 from suns import ExperimentalSunSPrimary, ExperimentalSunSSecondary, ReferenceSunS
 from gyro import Gyro
 from sail import Sail
-from temps import AllTemperatures, SupplySADSTemperatures
+from temps import AllTemperatures, SupplySADSTemperatures, SADSTemperature
 from imtq import Magnetometer, Dipoles
 from camera import CameraSyncCount
 from payload import PayloadWhoAmI, PayloadObcTelemetry, PayloadHousekeeping
@@ -21,6 +21,7 @@ pids = Synchronization \
        ^ Sail \
        ^ AllTemperatures \
        ^ SupplySADSTemperatures \
+       ^ SADSTemperature \
        ^ Photodiodes \
        ^ Magnetometer \
        ^ Dipoles \

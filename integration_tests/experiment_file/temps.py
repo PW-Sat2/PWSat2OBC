@@ -18,3 +18,6 @@ SupplySADSTemperatures = pid(0x17) >> joint(
     field('SADS', uint16)
 ).bind(to_dict)
 SupplySADSTemperatures >>= label_as('Temperatures Supply & SADS')
+
+SADSTemperature = pid(0x41) >> uint16
+SADSTemperature >>= label_as('SADS Temperature')
