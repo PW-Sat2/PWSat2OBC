@@ -165,7 +165,7 @@ TEST_F(OpenSailTest, ShouldStartOpeningOnExplicitCommandIfNotAlreadyOpening)
     this->_state.Time = std::chrono::hours(20 * 24);
     this->_state.PersistentState.Set(state::SailState(state::SailOpeningState::Waiting));
 
-    this->_openSailTask.OpenSail();
+    this->_openSailTask.OpenSail(false);
 
     this->_openSailUpdate.Execute(this->_state);
 
@@ -184,7 +184,7 @@ TEST_F(OpenSailTest, ShouldStartOpeningOnExplicitCommandIfAlreadyOpened)
     this->_state.Time += 2min;
     this->_openSailAction.Execute(this->_state);
 
-    this->_openSailTask.OpenSail();
+    this->_openSailTask.OpenSail(false);
 
     this->_openSailUpdate.Execute(this->_state);
 
@@ -199,7 +199,7 @@ TEST_F(OpenSailTest, ExplicitOpenWhenOpenInProgressIsIgnored)
     this->_state.Time = std::chrono::hours(20 * 24);
     this->_state.PersistentState.Set(state::SailState(state::SailOpeningState::Opening));
 
-    this->_openSailTask.OpenSail();
+    this->_openSailTask.OpenSail(false);
 
     this->_openSailUpdate.Execute(this->_state);
 
@@ -218,7 +218,7 @@ TEST_F(OpenSailTest, ShouldStartOpeningAgainAfterRestart)
     this->_state.Time += 2min;
     this->_openSailAction.Execute(this->_state);
 
-    this->_openSailTask.OpenSail();
+    this->_openSailTask.OpenSail(false);
 
     this->_openSailUpdate.Execute(this->_state);
 
@@ -238,7 +238,7 @@ TEST_F(OpenSailTest, ExplicitOrderDuringProcessShouldNotRestartProcess)
 
     EXPECT_THAT(this->_openSailTask.Step(), Gt(0));
 
-    this->_openSailTask.OpenSail();
+    this->_openSailTask.OpenSail(false);
     this->_openSailUpdate.Execute(this->_state);
 
     ASSERT_THAT(this->_openSailTask.Step(), Gt(0));
@@ -260,8 +260,24 @@ TEST_F(OpenSailTest, ExplicitOpenAfterSingleProcessRunFinishedShouldTriggerAnoth
 
     EXPECT_THAT(this->_openSailTask.InProgress(), Eq(false));
 
-    this->_openSailTask.OpenSail();
+    this->_openSailTask.OpenSail(false);
     this->_openSailUpdate.Execute(this->_state);
 
     ASSERT_THAT(this->_openSailTask.Step(), Eq(0));
+}
+
+TEST_F(OpenSailTest, ShouldNotIgnoreOverheatIfOrderedTo)
+{
+    this->_state.PersistentState.Set(state::SailState(state::SailOpeningState::Opening));
+
+    // set time to X = 4 days
+    this->_state.Time = std::chrono::hours(4 * 24);
+
+    this->_openSailTask.OpenSail(false);
+
+    EXPECT_CALL(this->_power, IgnoreOverheat()).Times(0);
+
+    ASSERT_THAT(this->_openSailAction.EvaluateCondition(this->_state), Eq(true));
+
+    this->_openSailAction.Execute(this->_state);
 }

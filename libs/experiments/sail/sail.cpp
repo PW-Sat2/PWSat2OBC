@@ -112,7 +112,7 @@ namespace experiment
                 }
 
                 this->_experimentEnd = time.Value + ExperimentDuration;
-                this->_sailController->OpenSail();
+                this->_sailController->OpenSail(false);
                 return experiments::StartResult::Success;
             } while (false);
 

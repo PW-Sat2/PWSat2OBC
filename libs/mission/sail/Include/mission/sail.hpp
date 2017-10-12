@@ -27,7 +27,7 @@ namespace mission
         /**
          * @brief Start sail opening procedure at next mission loop
          */
-        virtual void OpenSail() = 0;
+        virtual void OpenSail(bool ignoreOverheat) = 0;
     };
 
     /**
@@ -66,7 +66,7 @@ namespace mission
         /**
          * @brief Start sail opening on next mission loop iteration
          */
-        virtual void OpenSail() override;
+        virtual void OpenSail(bool ignoreOverheat) override;
 
         /**
          * @brief Returns number of current step of sail opening process
@@ -174,6 +174,7 @@ namespace mission
         std::chrono::milliseconds _nextStepAfter;
         /** @brief Explicit open command */
         std::atomic<bool> _openOnNextMissionLoop;
+        std::atomic<bool> _ignoreOverheat;
 
         using StepProc = void (*)(OpenSailTask* This, SystemState& state);
 

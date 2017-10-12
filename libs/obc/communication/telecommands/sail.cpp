@@ -30,7 +30,7 @@ namespace obc
             }
 
             response.PayloadWriter().WriteByte(0);
-            this->_openSail.OpenSail();
+            this->_openSail.OpenSail(true);
 
             transmitter.SendFrame(response.Frame());
         }
