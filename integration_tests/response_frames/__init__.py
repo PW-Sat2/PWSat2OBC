@@ -19,6 +19,7 @@ import set_bitrate
 import adcs
 import stop_sail_deployment
 import memory
+import file_system
 
 frame_types = []
 frame_types += map(lambda t: t[1], inspect.getmembers(pong, predicate=inspect.isclass))
@@ -36,6 +37,7 @@ frame_types += map(lambda t: t[1], inspect.getmembers(set_bitrate, predicate=ins
 frame_types += map(lambda t: t[1], inspect.getmembers(adcs, predicate=inspect.isclass))
 frame_types += map(lambda t: t[1], inspect.getmembers(stop_sail_deployment, predicate=inspect.isclass))
 frame_types += map(lambda t: t[1], inspect.getmembers(memory, predicate=inspect.isclass))
+frame_types += map(lambda t: t[1], inspect.getmembers(file_system, predicate=inspect.isclass))
 frame_types = filter(lambda t: issubclass(t, ResponseFrame) and t != ResponseFrame, frame_types)
 frame_types = reduce(lambda t, x: t + [x] if x not in t else t, frame_types, [])
 
