@@ -74,13 +74,13 @@ namespace
     {
         ExpectFrame(0x22, 0);
         ExpectUpdate(true);
-        Run(0x22, 0);
+        Run(0x22, 1);
     }
 
     TEST_F(StopAntennaDeploymentTelecommandTest, TestEnablingDeploymentFrame)
     {
         ExpectFrame(0x22, 0);
         ExpectUpdate(false);
-        Run(0x22, 1);
+        Run(0x22, 0);
     }
 }

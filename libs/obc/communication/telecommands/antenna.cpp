@@ -21,7 +21,7 @@ namespace obc
             Reader r(parameters);
 
             auto correlationId = r.ReadByte();
-            auto disabled = r.ReadByte() == 0;
+            auto disabled = r.ReadByte() != 0;
             CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
             if (!r.Status())
             {
