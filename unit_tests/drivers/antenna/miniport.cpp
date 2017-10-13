@@ -222,9 +222,9 @@ namespace
             }));
         uint16_t response;
         const auto status = miniport.GetTemperature(error, &i2c, ANTENNA_PRIMARY_CHANNEL, &response);
-        ASSERT_THAT(status, Eq(OSResult::OutOfRange));
+        ASSERT_THAT(status, Eq(OSResult::Success));
         ASSERT_THAT(response, Eq(0));
-        ASSERT_THAT(error.GetAggregatedResult(), Eq(false));
+        ASSERT_THAT(error.GetAggregatedResult(), Eq(true));
     }
 
     TEST_F(AntennaMiniportTest, TestAntennaTemperatureFailure)
@@ -263,7 +263,8 @@ namespace
     }
 
     class AntennaDeploymentStatusTest
-        : public testing::TestWithParam<std::tuple<uint8_t, uint8_t, I2CResult, OSResult, uint32_t, uint32_t, bool, bool, bool>>
+        : public testing::TestWithParam<
+              std::tuple<uint8_t, uint8_t, I2CResult, OSResult, uint32_t, uint32_t, uint32_t, bool, bool, bool, bool>>
     {
       public:
         AntennaDeploymentStatusTest();
@@ -311,9 +312,11 @@ namespace
         AntennaDeploymentStatus response;
         const auto deploymentStatuses = std::get<4>(GetParam());
         const auto deplomentActive = std::get<5>(GetParam());
-        const auto overrideActive = std::get<6>(GetParam());
-        const auto systemArmed = std::get<7>(GetParam());
-        const auto expectedErrorResult = std::get<8>(GetParam());
+        const auto timeLimitReached = std::get<6>(GetParam());
+        const auto overrideActive = std::get<7>(GetParam());
+        const auto systemArmed = std::get<8>(GetParam());
+        const auto independentBurn = std::get<9>(GetParam());
+        const auto expectedErrorResult = std::get<10>(GetParam());
         miniport.GetDeploymentStatus(error, &i2c, ANTENNA_PRIMARY_CHANNEL, &response);
 
         ASSERT_THAT(response.DeploymentStatus[0], Eq((deploymentStatuses & 0xff) != 0));
@@ -326,29 +329,35 @@ namespace
         ASSERT_THAT(response.IsDeploymentActive[2], Eq((deplomentActive & 0xff0000) != 0));
         ASSERT_THAT(response.IsDeploymentActive[3], Eq((deplomentActive & 0xff000000) != 0));
 
+        ASSERT_THAT(response.DeploymentTimeReached[0], Eq((timeLimitReached & 0xff) != 0));
+        ASSERT_THAT(response.DeploymentTimeReached[1], Eq((timeLimitReached & 0xff00) != 0));
+        ASSERT_THAT(response.DeploymentTimeReached[2], Eq((timeLimitReached & 0xff0000) != 0));
+        ASSERT_THAT(response.DeploymentTimeReached[3], Eq((timeLimitReached & 0xff000000) != 0));
+
         ASSERT_THAT(response.IgnoringDeploymentSwitches, Eq(overrideActive));
         ASSERT_THAT(response.DeploymentSystemArmed, Eq(systemArmed));
+        ASSERT_THAT(response.IsIndependentBurnActive, Eq(independentBurn));
 
         ASSERT_THAT(error.GetAggregatedResult(), Eq(expectedErrorResult));
     }
 
     INSTANTIATE_TEST_CASE_P(AntennaDeploymentStatusTestSet,
         AntennaDeploymentStatusTest,
-        testing::Values(std::make_tuple(0, 0, I2CResult::Nack, OSResult::IOError, 0u, 0u, false, false, false),
-            std::make_tuple(0, 0, I2CResult::OK, OSResult::Success, 0x01010101u, 0u, false, false, true),
-            std::make_tuple(1, 0, I2CResult::OK, OSResult::Success, 0x01010101u, 0u, false, true, true),
-            std::make_tuple(0, 1, I2CResult::OK, OSResult::Success, 0x01010101u, 0u, true, false, true),
-            std::make_tuple(2, 0, I2CResult::OK, OSResult::Success, 0x01010101u, 0x1000000, false, false, true),
-            std::make_tuple(8, 0, I2CResult::OK, OSResult::Success, 0x00010101u, 0u, false, false, true),
-            std::make_tuple(0x0a, 0, I2CResult::OK, OSResult::Success, 0x00010101u, 0x1000000, false, false, true),
-            std::make_tuple(0x20, 0, I2CResult::OK, OSResult::Success, 0x01010101u, 0x10000, false, false, true),
-            std::make_tuple(0x80, 0, I2CResult::OK, OSResult::Success, 0x01000101u, 0u, false, false, true),
-            std::make_tuple(0xa0, 0, I2CResult::OK, OSResult::Success, 0x01000101u, 0x10000, false, false, true),
-            std::make_tuple(0, 2, I2CResult::OK, OSResult::Success, 0x01010101u, 0x100, false, false, true),
-            std::make_tuple(0, 8, I2CResult::OK, OSResult::Success, 0x01010001u, 0u, false, false, true),
-            std::make_tuple(0, 0x0a, I2CResult::OK, OSResult::Success, 0x01010001u, 0x100, false, false, true),
-            std::make_tuple(0, 0x20, I2CResult::OK, OSResult::Success, 0x01010101u, 0x1, false, false, true),
-            std::make_tuple(0, 0x80, I2CResult::OK, OSResult::Success, 0x01010100u, 0u, false, false, true),
-            std::make_tuple(0, 0xa0, I2CResult::OK, OSResult::Success, 0x01010100u, 0x1, false, false, true),
-            std::make_tuple(0, 0x10, I2CResult::OK, OSResult::OutOfRange, 0x0, 0u, false, false, false)), );
+        testing::Values(std::make_tuple(0, 0, I2CResult::Nack, OSResult::IOError, 0u, 0u, 0u, false, false, false, false),
+            std::make_tuple(0x44, 0x44, I2CResult::OK, OSResult::Success, 0x01010101u, 0u, 0x01010101u, false, false, false, true),
+            std::make_tuple(0x41, 0x44, I2CResult::OK, OSResult::Success, 0x01010101u, 0u, 0x00010101u, false, true, false, true),
+            std::make_tuple(0x04, 0x45, I2CResult::OK, OSResult::Success, 0x01010101u, 0u, 0x01000101u, true, false, false, true),
+            std::make_tuple(0x46, 0x40, I2CResult::OK, OSResult::Success, 0x01010101u, 0x1000000, 0x01010001u, false, false, false, true),
+            std::make_tuple(0x5C, 0x04, I2CResult::OK, OSResult::Success, 0x00010101u, 0u, 0x01010100u, false, false, true, true),
+            std::make_tuple(0x4A, 0x44, I2CResult::OK, OSResult::Success, 0x00010101u, 0x1000000, 0x00010101u, false, false, false, true),
+            std::make_tuple(0x20, 0x44, I2CResult::OK, OSResult::Success, 0x01010101u, 0x10000, 0x00000101u, false, false, false, true),
+            std::make_tuple(0x80, 0x40, I2CResult::OK, OSResult::Success, 0x01000101u, 0u, 0x00000001u, false, false, false, true),
+            std::make_tuple(0xF4, 0x44, I2CResult::OK, OSResult::Success, 0x01000101u, 0x10000, 0x01010101u, false, false, true, true),
+            std::make_tuple(0x44, 0x46, I2CResult::OK, OSResult::Success, 0x01010101u, 0x100, 0x01010101u, false, false, false, true),
+            std::make_tuple(0x44, 0x4C, I2CResult::OK, OSResult::Success, 0x01010001u, 0u, 0x01010101u, false, false, false, true),
+            std::make_tuple(0x44, 0x4E, I2CResult::OK, OSResult::Success, 0x01010001u, 0x100, 0x01010101u, false, false, false, true),
+            std::make_tuple(0x44, 0x64, I2CResult::OK, OSResult::Success, 0x01010101u, 0x1, 0x01010101u, false, false, false, true),
+            std::make_tuple(0x44, 0xC4, I2CResult::OK, OSResult::Success, 0x01010100u, 0u, 0x01010101u, false, false, false, true),
+            std::make_tuple(0x44, 0xE4, I2CResult::OK, OSResult::Success, 0x01010100u, 0x1, 0x01010101u, false, false, false, true),
+            std::make_tuple(0x00, 0x10, I2CResult::OK, OSResult::Success, 0x01010101u, 0u, 0x0u, false, false, false, true)), );
 }

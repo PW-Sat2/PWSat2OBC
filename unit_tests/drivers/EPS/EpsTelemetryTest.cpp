@@ -17,12 +17,15 @@ namespace
 
     template <typename T> void RunTest(const T& object, gsl::span<std::uint8_t> expected)
     {
-        std::uint8_t buffer[BitsToBytes(T::BitSize())];
+        std::uint8_t buffer[BitsToBytes(T::BitSize())] = {0};
         BitWriter writer(buffer);
         object.Write(writer);
+        for (auto i = 0; i < expected.size(); i++)
+        {
+            ASSERT_THAT(buffer[i], Eq(expected[i])) << "Mismatch at position " << i;
+        }
         ASSERT_THAT(writer.Status(), Eq(true));
         ASSERT_THAT(writer.GetBitDataLength(), Eq(T::BitSize()));
-        ASSERT_THAT(writer.Capture(), Eq(expected));
     }
 
     TEST(OtherControllerStateTest, TestDefaultConstruction)
@@ -89,7 +92,7 @@ namespace
 
     TEST(DISTR_HKTest, TestSerialization)
     {
-        std::uint8_t expected[] = {0xf1, 0x82, 0x27, 0xfd, 0xb0, 0xb2, 0x81, 0x4e, 0x40, 0x00};
+        std::uint8_t expected[] = {0xf1, 0x82, 0x27, 0xfd, 0xb0, 0xb2, 0x81, 0x4e, 0x10};
         DISTR_HK state;
         state.VOLT_3V3 = 0x2f1;
         state.CURR_3V3 = 0x1e0;
@@ -136,13 +139,13 @@ namespace
 
     TEST(BATCPrimaryStateTest, TestSerialization)
     {
-        std::uint8_t expected[] = {0x23, 0x59, 0x99, 0x38, 0x2f, 0x20};
+        std::uint8_t expected[] = {0x23, 0x59, 0x99, 0x38, 0x2f, 0x01};
         BATCPrimaryState state;
         state.VOLT_A = 0x123;
         state.ChargeCurrent = 0x256;
         state.DischargeCurrent = 0x389;
         state.Temperature = 0x0bc;
-        state.State = BATC_STATE::F;
+        state.State = BATC_STATE::A;
         RunTest(state, gsl::make_span(expected));
     }
 
@@ -192,78 +195,87 @@ namespace
 
     TEST(ControllerATelemetryTest, TestSerialization)
     {
-        std::uint8_t expected[] = {0xff,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-            0x3f,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0xf0,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-            0x03,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0xc0,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-            0x3f,
-            0x00,
-            0x00,
-            0x00,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-            0x0f,
-            0xc0,
-            0xff,
-            0x00,
-            0x00};
+        std::uint8_t expected[] = {0x11,
+            0x21,
+            0x22,
+            0x33,
+            0x43,
+            0x44,
+            0x8F,
+            0x08,
+            0x11,
+            0x99,
+            0x19,
+            0x22,
+            0x7A,
+            0x44,
+            0x88,
+            0xC8,
+            0xCC,
+            0x10,
+            0xD1,
+            0x55,
+            0xFF,
+            0x7F,
+            0x77,
+            0xF7,
+            0x99,
+            0xEF,
+            0xBE,
+            0xBF,
+            0xFE,
+            0xFF,
+            0xFF,
+            0xFF,
+            0xFF,
+            0xCF,
+            0xAB,
+            0xDE,
+            0xDB,
+            0xFF,
+            0xFF,
+            0xFF,
+            0xFF,
+            0xFF,
+            0xFF,
+            0xFF,
+            0xFF,
+            0xFF,
+            0x6F,
+            0xFF,
+            0xBF,
+            0xF7};
         ControllerATelemetry state;
-        state.mpptX.SOL_VOLT = 0xfff;
-        state.mpptX.SOL_CURR = 0xfff;
-        state.mpptX.SOL_OUT_VOLT = 0xfff;
-        state.mpptX.Temperature = 0xfff;
-        state.mpptX.MpptState = static_cast<MPPT_STATE>(0xfff);
+        state.mpptX.SOL_VOLT = 0x111;
+        state.mpptX.SOL_CURR = 0x222;
+        state.mpptX.SOL_OUT_VOLT = 0x333;
+        state.mpptX.Temperature = 0x444;
+        state.mpptX.MpptState = static_cast<MPPT_STATE>(0x7);
+        state.mpptYPlus = state.mpptX;
         state.mpptYMinus = state.mpptX;
+        state.distr.VOLT_3V3 = 0x3AA;
+        state.distr.CURR_3V3 = 0x3FF;
+        state.distr.VOLT_5V = 0x3BB;
+        state.distr.CURR_5V = 0x3EE;
+        state.distr.VOLT_VBAT = 0x3CC;
+        state.distr.CURR_VBAT = 0x3DD;
+        state.distr.LCL_STATE = static_cast<DISTR_LCL_STATE>(0b111101);
+        state.distr.LCL_FLAGB = static_cast<DISTR_LCL_FLAGB>(0b010111);
         state.batc.VOLT_A = 0x3ff;
         state.batc.ChargeCurrent = 0x3ff;
         state.batc.DischargeCurrent = 0x3ff;
         state.batc.Temperature = 0x3ff;
-        state.batc.ChargeCurrent = 0x3ff;
         state.batc.State = static_cast<BATC_STATE>(0xff);
+        state.bp.temperatureA = 0xABC;
+        state.bp.temperatureB = 0xDEF;
         state.current.safetyCounter = 0xff;
         state.current.powerCycleCount = 0xffff;
         state.current.uptime = 0xffffffff;
         state.current.temperature = 0x3ff;
         state.current.suppTemp = 0x3ff;
+        state.other.VOLT_3V3d = 987;
         state.dcdc3V3.temperature = 0x3ff;
+        state.dcdc5V.temperature = 0x3de;
         RunTest(state, gsl::make_span(expected));
     }
 

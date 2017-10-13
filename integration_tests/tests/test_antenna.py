@@ -61,7 +61,7 @@ class Test_Antenna(RestartPerTest):
     @runlevel(1)
     def test_telemetry(self):
         def return_state():
-            return [0x0f, 0xe0]
+            return [0x1f, 0xe0]
 
         self.system.backup_antenna.on_get_deployment_status = return_state
         self.power_on_obc()
@@ -69,6 +69,7 @@ class Test_Antenna(RestartPerTest):
         self.assertTrue(result.Status)
         self.assertTrue(result.SystemArmed)
         self.assertFalse(result.IgnoringSwitches)
+        self.assertTrue(result.IndependentBurn)
 
         self.assertFalse(result.DeploymentState[0], "Antenna 1 should not be deployed")
         self.assertTrue(result.DeploymentState[1], "Antenna 2 should be deployed")
@@ -79,6 +80,11 @@ class Test_Antenna(RestartPerTest):
         self.assertFalse(result.DeploymentInProgress[1], "Antenna 2 deployment process should not be still be running")
         self.assertFalse(result.DeploymentInProgress[2], "Antenna 3 deployment process should not be still be running")
         self.assertTrue(result.DeploymentInProgress[3], "Antenna 4 deployment process should be still be running")
+
+        self.assertTrue(result.DeploymentTimeReached[0], "Antenna 1 should reach deployment time limit")
+        self.assertFalse(result.DeploymentTimeReached[1], "Antenna 2 should reach deployment time limit")
+        self.assertFalse(result.DeploymentTimeReached[2], "Antenna 3 should reach deployment time limit")
+        self.assertTrue(result.DeploymentTimeReached[3], "Antenna 4 should reach deployment time limit")
 
     @runlevel(1)
     def test_get_telemetry(self):
@@ -103,22 +109,22 @@ class Test_Antenna(RestartPerTest):
 
         self.power_on_obc()
         result = self.system.obc.antenna_get_telemetry()
-        self.assertEqual(result.ActivationCount[0], 0xb0);
-        self.assertEqual(result.ActivationCount[1], 0xc0);
-        self.assertEqual(result.ActivationCount[2], 0xd0);
-        self.assertEqual(result.ActivationCount[3], 0xe0);
+        self.assertEqual(result.ActivationCount[0], 0xb0)
+        self.assertEqual(result.ActivationCount[1], 0xc0)
+        self.assertEqual(result.ActivationCount[2], 0xd0)
+        self.assertEqual(result.ActivationCount[3], 0xe0)
 
-        self.assertEqual(result.ActivationCount[4], 0x10);
-        self.assertEqual(result.ActivationCount[5], 0x20);
-        self.assertEqual(result.ActivationCount[6], 0x30);
-        self.assertEqual(result.ActivationCount[7], 0x40);
+        self.assertEqual(result.ActivationCount[4], 0x10)
+        self.assertEqual(result.ActivationCount[5], 0x20)
+        self.assertEqual(result.ActivationCount[6], 0x30)
+        self.assertEqual(result.ActivationCount[7], 0x40)
 
-        self.assertEqual(result.ActivationTime[0], 0x8765 / 20);
-        self.assertEqual(result.ActivationTime[1], 0x7654 / 20);
-        self.assertEqual(result.ActivationTime[2], 0x6543 / 20);
-        self.assertEqual(result.ActivationTime[3], 0x5432 / 20);
+        self.assertEqual(result.ActivationTime[0], 0x8765 / 20)
+        self.assertEqual(result.ActivationTime[1], 0x7654 / 20)
+        self.assertEqual(result.ActivationTime[2], 0x6543 / 20)
+        self.assertEqual(result.ActivationTime[3], 0x5432 / 20)
 
-        self.assertEqual(result.ActivationTime[4], 0x1234 / 20);
-        self.assertEqual(result.ActivationTime[5], 0x5678 / 20);
-        self.assertEqual(result.ActivationTime[6], 0x90ab / 20);
-        self.assertEqual(result.ActivationTime[7], 0xcdef / 20);
+        self.assertEqual(result.ActivationTime[4], 0x1234 / 20)
+        self.assertEqual(result.ActivationTime[5], 0x5678 / 20)
+        self.assertEqual(result.ActivationTime[6], 0x90ab / 20)
+        self.assertEqual(result.ActivationTime[7], 0xcdef / 20)

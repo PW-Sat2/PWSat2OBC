@@ -11,6 +11,7 @@ using drivers::i2c::I2CResult;
 using devices::antenna::ActivationCounts;
 using devices::antenna::ActivationTimes;
 using devices::antenna::AntennaTelemetry;
+using devices::antenna::ChannelStatus;
 
 static OSResult Merge(OSResult left, OSResult right)
 {
@@ -199,10 +200,41 @@ OSResult AntennaDriver::UpdateDeploymentStatus(                           //
         }
         else
         {
-            telemetry.SetDeploymentStatus(channels[i], ANTENNA1_ID, deploymentStatus.DeploymentStatus[0]);
-            telemetry.SetDeploymentStatus(channels[i], ANTENNA2_ID, deploymentStatus.DeploymentStatus[1]);
-            telemetry.SetDeploymentStatus(channels[i], ANTENNA3_ID, deploymentStatus.DeploymentStatus[2]);
-            telemetry.SetDeploymentStatus(channels[i], ANTENNA4_ID, deploymentStatus.DeploymentStatus[3]);
+            auto channelStatus = ChannelStatus::None;
+
+            if (deploymentStatus.IsIndependentBurnActive)
+            {
+                channelStatus |= ChannelStatus::IndependentBurn;
+            }
+
+            if (deploymentStatus.IgnoringDeploymentSwitches)
+            {
+                channelStatus |= ChannelStatus::IgnoringSwitches;
+            }
+
+            if (deploymentStatus.DeploymentSystemArmed)
+            {
+                channelStatus |= ChannelStatus::Armed;
+            }
+
+            telemetry.SetChannelStatus(channels[i], channelStatus);
+            telemetry.SetBurningStatus(channels[i],
+                deploymentStatus.IsDeploymentActive[0],
+                deploymentStatus.IsDeploymentActive[1],
+                deploymentStatus.IsDeploymentActive[2],
+                deploymentStatus.IsDeploymentActive[3]);
+
+            telemetry.SetDeployedStatus(channels[i],
+                deploymentStatus.DeploymentStatus[0],
+                deploymentStatus.DeploymentStatus[1],
+                deploymentStatus.DeploymentStatus[2],
+                deploymentStatus.DeploymentStatus[3]);
+
+            telemetry.SetTimeReached(channels[i],
+                deploymentStatus.DeploymentTimeReached[0],
+                deploymentStatus.DeploymentTimeReached[1],
+                deploymentStatus.DeploymentTimeReached[2],
+                deploymentStatus.DeploymentTimeReached[3]);
         }
     }
 

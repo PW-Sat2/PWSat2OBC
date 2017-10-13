@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <bitset>
 #include <cstdint>
 #include <type_traits>
 #include "fwd.hpp"
@@ -189,6 +190,13 @@ class BitWriter
     template <typename T, typename std::enable_if<std::is_fundamental<T>::value, int>::type = 0> bool Write(T value);
 
     /**
+     * @brief Appends all bits from bitset to buffer
+     * @param value Bitset to append
+     * @return Operation status
+     */
+    template <std::size_t Size> bool Write(const std::bitset<Size>& value);
+
+    /**
      * @brief Returns view for used part of buffer
      * @return Span covering used part of buffer including last partially used byte.
      */
@@ -320,6 +328,19 @@ template <typename T, typename std::enable_if<std::is_enum<T>::value, int>::type
 template <typename T, typename std::enable_if<std::is_fundamental<T>::value, int>::type> inline bool BitWriter::Write(T value)
 {
     return Write(static_cast<std::make_unsigned_t<T>>(value));
+}
+
+template <std::size_t Size> bool BitWriter::Write(const std::bitset<Size>& value)
+{
+    for (auto i = 0U; i < Size; i++)
+    {
+        if (!Write(value[i]))
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 inline void BitWriter::Initialize(gsl::span<std::uint8_t> view)

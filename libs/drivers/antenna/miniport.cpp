@@ -206,28 +206,26 @@ OSResult AntennaMiniportDriver::GetDeploymentStatus( //
 
     Reader reader(output);
     const uint16_t value = reader.ReadWordLE();
-    if ((value & 0x1000) != 0)
-    {
-        LOGF(LOG_LEVEL_WARNING,
-            "[ant] Antenna %d deployment status out of range: 0x%x.",
-            channel,
-            value //
-            );
-
-        return OSResult::OutOfRange >> error;
-    }
 
     telemetry->DeploymentStatus[0] = IS_BIT_CLEAR(value, 15); // (value & 0x8000) == 0;
     telemetry->DeploymentStatus[1] = IS_BIT_CLEAR(value, 11); // (value & 0x0800) == 0;
     telemetry->DeploymentStatus[2] = IS_BIT_CLEAR(value, 7);  // (value & 0x0080) == 0;
     telemetry->DeploymentStatus[3] = IS_BIT_CLEAR(value, 3);  // (value & 0x0008) == 0;
 
-    telemetry->IsDeploymentActive[0] = IS_BIT_SET(value, 13);     //(value & 0x2000) != 0;
-    telemetry->IsDeploymentActive[1] = IS_BIT_SET(value, 9);      //(value & 0x0200) != 0;
-    telemetry->IsDeploymentActive[2] = IS_BIT_SET(value, 5);      //(value & 0x0020) != 0;
-    telemetry->IsDeploymentActive[3] = IS_BIT_SET(value, 1);      //(value & 0x0002) != 0;
+    telemetry->IsDeploymentActive[0] = IS_BIT_SET(value, 13); //(value & 0x2000) != 0;
+    telemetry->IsDeploymentActive[1] = IS_BIT_SET(value, 9);  //(value & 0x0200) != 0;
+    telemetry->IsDeploymentActive[2] = IS_BIT_SET(value, 5);  //(value & 0x0020) != 0;
+    telemetry->IsDeploymentActive[3] = IS_BIT_SET(value, 1);  //(value & 0x0002) != 0;
+
+    telemetry->DeploymentTimeReached[0] = IS_BIT_SET(value, 14);
+    telemetry->DeploymentTimeReached[1] = IS_BIT_SET(value, 10);
+    telemetry->DeploymentTimeReached[2] = IS_BIT_SET(value, 6);
+    telemetry->DeploymentTimeReached[3] = IS_BIT_SET(value, 2);
+
     telemetry->IgnoringDeploymentSwitches = IS_BIT_SET(value, 8); //(value & 0x0100) != 0;
     telemetry->DeploymentSystemArmed = IS_BIT_SET(value, 0);      //(value & 0x0001) != 0;
+    telemetry->IsIndependentBurnActive = IS_BIT_SET(value, 4);
+
     return OSResult::Success >> error;
 }
 
@@ -312,17 +310,6 @@ OSResult AntennaMiniportDriver::GetTemperature(   //
 
     Reader reader(output);
     const uint16_t value = reader.ReadWordBE();
-    if ((value & 0xfc00) != 0)
-    {
-        LOGF(LOG_LEVEL_WARNING,
-            "[ant] Antenna %d temperature is out of range: 0x%x.",
-            channel,
-            value //
-            );
-
-        return OSResult::OutOfRange >> error;
-    }
-
     *temperature = value & 0x3ff;
     return OSResult::Success >> error;
 }

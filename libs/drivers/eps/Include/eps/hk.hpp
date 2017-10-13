@@ -27,12 +27,7 @@ namespace devices
                 NoSolarPanel = 0b00 << 1,          //!< NoSolarPanel
                 BatteryIsFull = 0b01 << 1,         //!< BatteryIsFull
                 MPPTBatteryCharge = 0b10 << 1,     //!< MPPTBatteryCharge
-                FixedPointConversion = 0b11 << 1,  //!< FixedPointConversion
-                A = 1 << 3,                        //!< F
-                B = 1 << 4,                        //!< F
-                C = 1 << 5,                        //!< F
-                D = 1 << 6,                        //!< F
-                E = 1 << 7,                        //!< F
+                FixedPointConversion = 0b11 << 1   //!< FixedPointConversion
             };
 
             /**
@@ -71,12 +66,7 @@ namespace devices
                 None = 0, //!< None
                 A = 1,    //!< A
                 B = 2,    //!< B
-                C = 4,    //!< C
-                D = 8,    //!< D
-                E = 16,   //!< E
-                F = 32,   //!< F
-                G = 64,   //!< G
-                H = 128   //!< H
+                C = 4     //!< C
             };
 
             /**
@@ -253,11 +243,11 @@ namespace devices
                     decltype(CURR_5V),               //
                     decltype(VOLT_VBAT),             //
                     decltype(CURR_VBAT),             //
-                    decltype(LCL_STATE),             //
-                    decltype(LCL_FLAGB)>;
+                    BitValue<std::uint8_t, 6>,       // DIRST_LCL_STATE
+                    BitValue<std::uint8_t, 6>>;      // DISTR_LCL_FLAGB
             }
 
-            static_assert(DISTR_HK::BitSize() == 76, "Incorrect telemetry format");
+            static_assert(DISTR_HK::BitSize() == 72, "Incorrect telemetry size");
 
             /** @brief MPPT status */
             struct MPPT_HK
@@ -265,7 +255,7 @@ namespace devices
                 /**
                  * @brief Size of the Mppt state field in bits.
                  */
-                static constexpr std::uint8_t StateBitSize = 6;
+                static constexpr std::uint8_t StateBitSize = 3;
 
                 MPPT_HK();
 
@@ -295,7 +285,7 @@ namespace devices
                 uint12_t SOL_OUT_VOLT;
                 /** @brief MPPT: temperature, Celsius */
                 uint12_t Temperature;
-                /** @brief MPPT: algorithm state s*/
+                /** @brief MPPT: algorithm state */
                 MPPT_STATE MpptState;
             };
 
@@ -304,7 +294,7 @@ namespace devices
                 return Aggregate<decltype(SOL_VOLT), decltype(SOL_CURR), decltype(SOL_OUT_VOLT), decltype(Temperature)> + StateBitSize;
             }
 
-            static_assert(MPPT_HK::BitSize() == 54, "Incorrect telemetry format");
+            static_assert(MPPT_HK::BitSize() == 51, "Incorrect telemetry size");
 
             /** @brief BATC status*/
             struct BATCPrimaryState
@@ -347,10 +337,10 @@ namespace devices
                     decltype(ChargeCurrent),       //
                     decltype(DischargeCurrent),    //
                     decltype(Temperature),         //
-                    decltype(State)>;
+                    BitValue<std::uint8_t, 3>>;    // State
             }
 
-            static_assert(BATCPrimaryState::BitSize() == 48, "Incorrect telemetry format");
+            static_assert(BATCPrimaryState::BitSize() == 43, "Incorrect telemetry size");
 
             /** @brief Battery Pack status*/
             struct BatteryPackPrimaryState
@@ -532,7 +522,7 @@ namespace devices
                     decltype(dcdc5V)::BitSize();
             }
 
-            static_assert(ControllerATelemetry::BitSize() == 418, "Incorrect telemetry format");
+            static_assert(ControllerATelemetry::BitSize() == 400, "Incorrect telemetry size");
 
             /**
              * @brief Housekeeping of controller B

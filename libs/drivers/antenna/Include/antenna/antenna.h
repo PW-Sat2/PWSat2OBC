@@ -76,6 +76,11 @@ struct AntennaDeploymentStatus
     bool IsDeploymentActive[4];
 
     /**
+     * @brief This array contains information whether time limit for deploymend for specific antenna has beed reached
+     */
+    bool DeploymentTimeReached[4];
+
+    /**
      * @brief Value specifying whether the deployment switches are being currently ignored.
      */
     bool IgnoringDeploymentSwitches;
@@ -84,6 +89,9 @@ struct AntennaDeploymentStatus
      * @brief Value indicating whether the deployment system is currently active.
      */
     bool DeploymentSystemArmed;
+
+    /** @brief Value indicating whether the independent burn is currently active. */
+    bool IsIndependentBurnActive;
 };
 
 struct AntennaMiniportDriver;

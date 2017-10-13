@@ -33,7 +33,7 @@ namespace telemetry
          * @param[in] index Currently used boot index.
          * @param[in] reason Reason of last mcu reset.
          */
-        SystemStartup(std::uint32_t counter, std::uint8_t index, std::uint32_t reason);
+        SystemStartup(std::uint32_t counter, std::uint8_t index, std::uint16_t reason);
 
         /**
          * @brief Returns current boot counter.
@@ -51,7 +51,7 @@ namespace telemetry
          * @brief Returns reason of the last mcu reset.
          * @return reason of the last mcu reset.
          */
-        std::uint32_t BootReason() const noexcept;
+        std::uint16_t BootReason() const noexcept;
 
         /**
          * @brief Write the system startup telemetry element to passed buffer writer object.
@@ -74,7 +74,7 @@ namespace telemetry
         /**
          * @brief Reason of the last mcu reset
          */
-        std::uint32_t bootReason;
+        std::uint16_t bootReason;
 
         /**
          * @brief Current boot index.
@@ -92,17 +92,17 @@ namespace telemetry
         return this->bootIndex;
     }
 
-    inline std::uint32_t SystemStartup::BootReason() const noexcept
+    inline std::uint16_t SystemStartup::BootReason() const noexcept
     {
         return this->bootReason;
     }
 
     constexpr std::uint32_t SystemStartup::BitSize()
     {
-        return 8 * (2 * sizeof(std::uint32_t) + sizeof(std::uint8_t));
+        return 8 * (1 * sizeof(std::uint32_t) + sizeof(std::uint8_t) + sizeof(std::uint16_t));
     }
 
-    static_assert(SystemStartup::BitSize() == 72, "Invalid telemetry size");
+    static_assert(SystemStartup::BitSize() == 56, "Invalid telemetry size");
 }
 
 #endif

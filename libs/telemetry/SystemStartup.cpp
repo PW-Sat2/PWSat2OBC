@@ -7,7 +7,7 @@ namespace telemetry
     {
     }
 
-    SystemStartup::SystemStartup(std::uint32_t counter, std::uint8_t index, std::uint32_t reason) //
+    SystemStartup::SystemStartup(std::uint32_t counter, std::uint8_t index, std::uint16_t reason) //
         : bootCounter(counter),
           bootReason(reason),
           bootIndex(index)

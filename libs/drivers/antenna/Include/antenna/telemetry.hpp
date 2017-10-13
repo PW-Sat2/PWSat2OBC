@@ -4,6 +4,7 @@
 #pragma once
 
 #include <array>
+#include <bitset>
 #include <chrono>
 #include <cstdint>
 #include "antenna.h"
@@ -157,6 +158,24 @@ namespace devices
             this->times[antenna - ANTENNA1_ID] = time;
         }
 
+        enum class ChannelStatus
+        {
+            None = 0,
+            IndependentBurn = 1 << 0,
+            IgnoringSwitches = 1 << 1,
+            Armed = 1 << 2
+        };
+
+        inline constexpr ChannelStatus operator|(const ChannelStatus a, const ChannelStatus b)
+        {
+            return static_cast<ChannelStatus>(num(a) | num(b));
+        }
+
+        inline constexpr ChannelStatus& operator|=(ChannelStatus& a, const ChannelStatus b)
+        {
+            return a = static_cast<ChannelStatus>(num(a) | num(b));
+        }
+
         /**
          * @brief This type represents telemetry of the antenna deployment subsystem.
          */
@@ -214,42 +233,89 @@ namespace devices
             void SetActivationTimes(AntennaChannel channel, const ActivationTimes& times);
 
             /**
-             * Updates deployment status of specific antenna as seen on the specified channel.
-             * @param channel Channel that reported this status.
-             * @param antenna Identifier of the antenna whose deployment status should be updated
-             * @param status New deployment status.
+             * @brief Sets burn status for each antenna as reported by selected controller
+             * @param channel Controller reporting status
+             * @param antenna1 Antenna 1 status
+             * @param antenna2 Antenna 2 status
+             * @param antenna3 Antenna 3 status
+             * @param antenna4 Antenna 4 status
              */
-            void SetDeploymentStatus(AntennaChannel channel, AntennaId antenna, bool status);
+            void SetBurningStatus(AntennaChannel channel, bool antenna1, bool antenna2, bool antenna3, bool antenna4);
 
             /**
-             * @brief Queries requested antenna deployment status as seen on the specified channel.
-             * @param channel Queried channel.
-             * @param antenna Queried antenna identifier.
-             * @return Requested antenna deployment status. True for being deployed false otherwise.
+             * @brief Gets burning status for given controller and antenna
+             * @param channel Controller reporting status
+             * @param antenna Antenna to get status for
+             * @return true if antenna is currently burning, false otherwise
              */
-            bool GetDeploymentStatus(AntennaChannel channel, AntennaId antenna) const;
+            bool GetBurningStatus(AntennaChannel channel, AntennaId antenna);
 
             /**
-             * @brief Requests combined antenna deployment status.
-             * @return Combined antenna deployment status.
+             * @brief Sets deployed status for each antenna as reported by selected controller
+             * @param channel Controller reporting status
+             * @param antenna1 Antenna 1 status
+             * @param antenna2 Antenna 2 status
+             * @param antenna3 Antenna 3 status
+             * @param antenna4 Antenna 4 status
              */
-            std::uint8_t GetDeploymentStatus() const;
+            void SetDeployedStatus(AntennaChannel channel, bool antenna1, bool antenna2, bool antenna3, bool antenna4);
 
             /**
-             * @brief Updates combined antenna deployment status.
-             * @param value New combined antenna deployment status.
+             * @brief Gets deployed status for given controller and antenna
+             * @param channel Controller reporting status
+             * @param antenna Antenna to get status for
+             * @return true if antenna is currently deployed, false otherwise
              */
-            void SetDeploymentStatus(std::uint8_t value);
+            bool GetDeployedStatus(AntennaChannel channel, AntennaId antenna);
+
+            /**
+             * @brief Sets time limit reached status for each antenna as reported by selected controller
+             * @param channel Controller reporting status
+             * @param antenna1 Antenna 1 status
+             * @param antenna2 Antenna 2 status
+             * @param antenna3 Antenna 3 status
+             * @param antenna4 Antenna 4 status
+             */
+
+            void SetTimeReached(AntennaChannel channel, bool antenna1, bool antenna2, bool antenna3, bool antenna4);
+            /**
+             * @brief Gets time limit reached status for given controller and antenna
+             * @param channel Controller reporting status
+             * @param antenna Antenna to get status for
+             * @return true if antenna is time limit has been reached, false otherwise
+             */
+            bool GetTimeReached(AntennaChannel channel, AntennaId antenna);
+
+            /**
+             * @brief Sets controller status
+             * @param channel Controller reporting its status
+             * @param status Status
+             */
+            void SetChannelStatus(AntennaChannel channel, ChannelStatus status);
+
+            /**
+             * @brief Gets status reported by given controller
+             * @param channel Controller to get status for
+             * @return Controller status
+             */
+            ChannelStatus GetChannelStatus(AntennaChannel channel) const;
 
           private:
-            std::uint8_t deploymentStatus;
+            inline static bool GetAntennaStatus(std::bitset<8>& status, AntennaChannel channel, AntennaId antenna);
+
             ActivationCounts activationCounts[2];
             ActivationTimes activationTimes[2];
+
+            std::bitset<8> burnStatus;
+            std::bitset<8> deployedStatus;
+            std::bitset<8> timeReached;
+
+            ChannelStatus channelStatuses[2];
         };
 
         constexpr std::uint32_t AntennaTelemetry::BitSize()
         {
-            return BitLength<std::uint8_t> + 2 * ActivationCounts::BitSize() + 2 * ActivationTimes::BitSize();
+            return 2 * (ActivationCounts::BitSize() + ActivationTimes::BitSize() + 4 + 4 + 4 + 3);
         }
 
         inline const ActivationCounts& AntennaTelemetry::GetActivationCounts(AntennaChannel channel) const
@@ -269,20 +335,53 @@ namespace devices
 
         inline void AntennaTelemetry::SetActivationTimes(AntennaChannel channel, const ActivationTimes& times)
         {
-            this->activationTimes[channel - ANTENNA_FIRST_CHANNEL] = times;
+            if (channel <= ANTENNA_BACKUP_CHANNEL && channel >= ANTENNA_FIRST_CHANNEL)
+            {
+                this->activationTimes[channel - ANTENNA_FIRST_CHANNEL] = times;
+            }
         }
 
-        inline std::uint8_t AntennaTelemetry::GetDeploymentStatus() const
+        inline bool AntennaTelemetry::GetBurningStatus(AntennaChannel channel, AntennaId antenna)
         {
-            return this->deploymentStatus;
+            return GetAntennaStatus(this->burnStatus, channel, antenna);
         }
 
-        inline void AntennaTelemetry::SetDeploymentStatus(std::uint8_t value)
+        inline bool AntennaTelemetry::GetDeployedStatus(AntennaChannel channel, AntennaId antenna)
         {
-            this->deploymentStatus = value;
+            return GetAntennaStatus(this->deployedStatus, channel, antenna);
         }
 
-        static_assert(AntennaTelemetry::BitSize() == 96, "Invalid telemetry size");
+        inline bool AntennaTelemetry::GetTimeReached(AntennaChannel channel, AntennaId antenna)
+        {
+            return GetAntennaStatus(this->timeReached, channel, antenna);
+        }
+
+        inline void AntennaTelemetry::SetChannelStatus(AntennaChannel channel, ChannelStatus status)
+        {
+            if (channel <= ANTENNA_BACKUP_CHANNEL && channel >= ANTENNA_FIRST_CHANNEL)
+            {
+                this->channelStatuses[channel - ANTENNA_FIRST_CHANNEL] = status;
+            }
+        }
+
+        inline ChannelStatus AntennaTelemetry::GetChannelStatus(AntennaChannel channel) const
+        {
+            if (channel <= ANTENNA_BACKUP_CHANNEL && channel >= ANTENNA_FIRST_CHANNEL)
+            {
+                return this->channelStatuses[channel - ANTENNA_FIRST_CHANNEL];
+            }
+
+            return ChannelStatus::None;
+        }
+
+        bool AntennaTelemetry::GetAntennaStatus(std::bitset<8>& status, AntennaChannel channel, AntennaId antenna)
+        {
+            auto idx = 4 * (channel - ANTENNA_FIRST_CHANNEL) + (antenna - AntennaId::ANTENNA1_ID);
+            return (idx < 8) && status[idx];
+        }
+
+        static_assert(AntennaTelemetry::BitSize() == 118, "Invalid telemetry size");
+        static_assert(ANTENNA_FIRST_CHANNEL < ANTENNA_BACKUP_CHANNEL, "Antenna channel numbers are valid");
 
         /**
                 * @brief Antenna telemetry provider

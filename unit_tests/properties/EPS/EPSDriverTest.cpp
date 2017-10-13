@@ -42,12 +42,7 @@ namespace rc
                                        MPPT_STATE::NoSolarPanel,
                                        MPPT_STATE::BatteryIsFull,
                                        MPPT_STATE::MPPTBatteryCharge,
-                                       MPPT_STATE::FixedPointConversion,
-                                       MPPT_STATE::A,
-                                       MPPT_STATE::B,
-                                       MPPT_STATE::C,
-                                       MPPT_STATE::D,
-                                       MPPT_STATE::E>
+                                       MPPT_STATE::FixedPointConversion>
     {
     };
 
@@ -73,16 +68,7 @@ namespace rc
     {
     };
 
-    template <>
-    struct Arbitrary<BATC_STATE> : public ArbitraryBitmask<BATC_STATE,
-                                       BATC_STATE::A,
-                                       BATC_STATE::B,
-                                       BATC_STATE::C,
-                                       BATC_STATE::D,
-                                       BATC_STATE::E,
-                                       BATC_STATE::F,
-                                       BATC_STATE::G,
-                                       BATC_STATE::H>
+    template <> struct Arbitrary<BATC_STATE> : public ArbitraryBitmask<BATC_STATE, BATC_STATE::A, BATC_STATE::B, BATC_STATE::C>
     {
     };
 

@@ -42,15 +42,17 @@ AntennaTelemetry GetAntennaTelemetry()
     t.SetActivationTimes(AntennaChannel::ANTENNA_PRIMARY_CHANNEL, ActivationTimes(30s, 31s, 32s, 33s));
     t.SetActivationTimes(AntennaChannel::ANTENNA_BACKUP_CHANNEL, ActivationTimes(40s, 41s, 42s, 43s));
 
-    t.SetDeploymentStatus(AntennaChannel::ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA1_ID, true);
-    t.SetDeploymentStatus(AntennaChannel::ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA2_ID, false);
-    t.SetDeploymentStatus(AntennaChannel::ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA3_ID, true);
-    t.SetDeploymentStatus(AntennaChannel::ANTENNA_PRIMARY_CHANNEL, AntennaId::ANTENNA4_ID, false);
+    t.SetChannelStatus(ANTENNA_PRIMARY_CHANNEL, ChannelStatus::Armed | ChannelStatus::IndependentBurn | ChannelStatus::IgnoringSwitches);
+    t.SetChannelStatus(ANTENNA_BACKUP_CHANNEL, ChannelStatus::IndependentBurn);
 
-    t.SetDeploymentStatus(AntennaChannel::ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA1_ID, false);
-    t.SetDeploymentStatus(AntennaChannel::ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA2_ID, true);
-    t.SetDeploymentStatus(AntennaChannel::ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA3_ID, false);
-    t.SetDeploymentStatus(AntennaChannel::ANTENNA_BACKUP_CHANNEL, AntennaId::ANTENNA4_ID, true);
+    t.SetBurningStatus(ANTENNA_PRIMARY_CHANNEL, false, true, true, false);
+    t.SetBurningStatus(ANTENNA_BACKUP_CHANNEL, true, false, false, true);
+
+    t.SetTimeReached(ANTENNA_PRIMARY_CHANNEL, true, false, true, false);
+    t.SetTimeReached(ANTENNA_BACKUP_CHANNEL, false, true, false, true);
+
+    t.SetDeployedStatus(ANTENNA_PRIMARY_CHANNEL, false, true, false, true);
+    t.SetDeployedStatus(ANTENNA_BACKUP_CHANNEL, true, false, true, false);
 
     return t;
 }
