@@ -19,6 +19,7 @@ namespace obc
         {
             Reader r(parameters);
             auto correlationId = r.ReadByte();
+            auto ignoreOverheat = r.ReadByte() != 0;
 
             CorrelatedDownlinkFrame response(DownlinkAPID::Sail, 0, correlationId);
 
@@ -30,7 +31,7 @@ namespace obc
             }
 
             response.PayloadWriter().WriteByte(0);
-            this->_openSail.OpenSail();
+            this->_openSail.OpenSail(ignoreOverheat);
 
             transmitter.SendFrame(response.Frame());
         }

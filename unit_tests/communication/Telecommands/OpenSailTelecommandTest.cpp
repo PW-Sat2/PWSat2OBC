@@ -8,6 +8,7 @@
 
 using telecommunication::downlink::DownlinkAPID;
 using testing::ElementsAre;
+using testing::_;
 
 namespace
 {
@@ -29,20 +30,29 @@ namespace
         this->_telecommand.Handle(_transmitter, buffer);
     }
 
-    TEST_F(OpenSailTelecommandTest, ShouldOpenSail)
+    TEST_F(OpenSailTelecommandTest, ShouldOpenSailWithOverheatIgnore)
     {
         EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Sail, 0, ElementsAre(0x11, 0x0))));
 
-        EXPECT_CALL(this->_openSail, OpenSail());
+        EXPECT_CALL(this->_openSail, OpenSail(true));
 
-        Run(0x11);
+        Run(0x11, 0x01);
+    }
+
+    TEST_F(OpenSailTelecommandTest, ShouldOpenSailWithoutOverheatIgnore)
+    {
+        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Sail, 0, ElementsAre(0x11, 0x0))));
+
+        EXPECT_CALL(this->_openSail, OpenSail(false));
+
+        Run(0x11, 0x00);
     }
 
     TEST_F(OpenSailTelecommandTest, ShouldRespondWithErrorFrameOnNoCorrelationId)
     {
         EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Sail, 0, ElementsAre(0x0, 0x1))));
 
-        EXPECT_CALL(this->_openSail, OpenSail()).Times(0);
+        EXPECT_CALL(this->_openSail, OpenSail(_)).Times(0);
 
         Run();
     }

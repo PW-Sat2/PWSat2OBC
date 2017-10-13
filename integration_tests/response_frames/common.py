@@ -96,11 +96,6 @@ class FileSendErrorFrame(GenericErrorResponseFrame):
 
 
 @response_frame(DownlinkApid.FileList)
-class FileListSuccessFrame(GenericSuccessResponseFrame):
-    pass
-
-
-@response_frame(DownlinkApid.FileList)
 class FileListErrorFrame(GenericErrorResponseFrame):
     pass
 

@@ -48,6 +48,7 @@ namespace obc
                     this->_photoService.TakePhoto(cameraId, resolution);
                     this->_photoService.DownloadPhoto(cameraId, 0);
                     this->_photoService.SavePhoto(0, "%.*s_%d", path.size(), path.data(), cx);
+                    this->_photoService.Reset();
                 }
 
                 this->_photoService.DisableCamera(cameraId);

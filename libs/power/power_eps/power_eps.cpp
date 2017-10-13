@@ -123,5 +123,13 @@ namespace services
                 return this->_eps.DisableLCL(lcl) == ErrorCode::NoError;
             }
         }
+
+        bool EPSPowerControl::IgnoreOverheat()
+        {
+            auto a = this->_eps.DisableOverheatSubmode(EPS::A);
+            auto b = this->_eps.DisableOverheatSubmode(EPS::B);
+
+            return a && b;
+        }
     }
 }

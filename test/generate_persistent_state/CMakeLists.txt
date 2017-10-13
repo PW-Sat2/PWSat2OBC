@@ -2,6 +2,7 @@ set(NAME generate_persistent_state)
 
 set(SOURCES
     main.cpp
+    os_stubs.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
