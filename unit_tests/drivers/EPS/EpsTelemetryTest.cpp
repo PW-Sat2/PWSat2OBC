@@ -24,7 +24,7 @@ namespace
         {
             ASSERT_THAT(buffer[i], Eq(expected[i])) << "Mismatch at position " << i;
         }
-        //        ASSERT_THAT(writer.Status(), Eq(true));
+        ASSERT_THAT(writer.Status(), Eq(true));
         ASSERT_THAT(writer.GetBitDataLength(), Eq(T::BitSize()));
     }
 
