@@ -18,13 +18,13 @@ namespace obc
          * Code: 0xA3
          * Parameters:
          *  - 1-byte - correlation ID
-         *  - 1-byte - antenna deployment configuration flag (zero - disabled, non-zero enabled)
+         *  - 1-byte - antenna deployment configuration flag (zero - enabled, non-zero disabled)
          */
         class SetAntennaDeploymentMaskTelecommand : public telecommunication::uplink::Telecommand<0xA3>
         {
           public:
             /**
-             * @brief Ctor
+             * @brief ctor
              * @param disableAntennaDeployment Object responsible for disabling antenna deployment
              */
             SetAntennaDeploymentMaskTelecommand(mission::antenna::IDisableAntennaDeployment& disableAntennaDeployment);
