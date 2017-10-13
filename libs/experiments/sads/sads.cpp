@@ -85,6 +85,8 @@ namespace experiment
                     break;
                 }
 
+                System::SleepTask(1000ms);
+
                 const auto time = this->_timeProvider.GetCurrentTime();
                 if (!time.HasValue)
                 {
@@ -292,11 +294,10 @@ namespace experiment
         {
             this->_photoService.Reset();
             this->_photoService.EnableCamera(Camera::Wing);
-            this->_photoService.WaitForFinish(InfiniteTimeout);
-
             this->_photoService.TakePhoto(Camera::Wing, services::photo::PhotoResolution::p480);
             this->_photoService.DownloadPhoto(Camera::Wing, 0);
             this->_photoService.SavePhoto(0, "/sads.photo_wing");
+            this->_photoService.WaitForFinish(InfiniteTimeout);
         }
     }
 }
