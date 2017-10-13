@@ -56,28 +56,35 @@ namespace devices
         {
         }
 
+        static inline void SetAntennaStatus(
+            std::bitset<8>& status, AntennaChannel channel, bool antenna1, bool antenna2, bool antenna3, bool antenna4)
+        {
+            auto idx = 4 * (channel - ANTENNA_FIRST_CHANNEL);
+
+            if (idx > 4 || idx < 0)
+            {
+                return;
+            }
+
+            status[idx + 0] = antenna1;
+            status[idx + 1] = antenna2;
+            status[idx + 2] = antenna3;
+            status[idx + 3] = antenna4;
+        }
+
         void AntennaTelemetry::SetBurningStatus(AntennaChannel channel, bool antenna1, bool antenna2, bool antenna3, bool antenna4)
         {
-            this->burnStatus[4 * (channel - ANTENNA_FIRST_CHANNEL) + 0] = antenna1;
-            this->burnStatus[4 * (channel - ANTENNA_FIRST_CHANNEL) + 1] = antenna2;
-            this->burnStatus[4 * (channel - ANTENNA_FIRST_CHANNEL) + 2] = antenna3;
-            this->burnStatus[4 * (channel - ANTENNA_FIRST_CHANNEL) + 3] = antenna4;
+            SetAntennaStatus(this->burnStatus, channel, antenna1, antenna2, antenna3, antenna4);
         }
 
         void AntennaTelemetry::SetDeployedStatus(AntennaChannel channel, bool antenna1, bool antenna2, bool antenna3, bool antenna4)
         {
-            this->deployedStatus[4 * (channel - ANTENNA_FIRST_CHANNEL) + 0] = antenna1;
-            this->deployedStatus[4 * (channel - ANTENNA_FIRST_CHANNEL) + 1] = antenna2;
-            this->deployedStatus[4 * (channel - ANTENNA_FIRST_CHANNEL) + 2] = antenna3;
-            this->deployedStatus[4 * (channel - ANTENNA_FIRST_CHANNEL) + 3] = antenna4;
+            SetAntennaStatus(this->deployedStatus, channel, antenna1, antenna2, antenna3, antenna4);
         }
 
         void AntennaTelemetry::SetTimeReached(AntennaChannel channel, bool antenna1, bool antenna2, bool antenna3, bool antenna4)
         {
-            this->timeReached[4 * (channel - ANTENNA_FIRST_CHANNEL) + 0] = antenna1;
-            this->timeReached[4 * (channel - ANTENNA_FIRST_CHANNEL) + 1] = antenna2;
-            this->timeReached[4 * (channel - ANTENNA_FIRST_CHANNEL) + 2] = antenna3;
-            this->timeReached[4 * (channel - ANTENNA_FIRST_CHANNEL) + 3] = antenna4;
+            SetAntennaStatus(this->timeReached, channel, antenna1, antenna2, antenna3, antenna4);
         }
 
         void AntennaTelemetry::Write(BitWriter& writer) const

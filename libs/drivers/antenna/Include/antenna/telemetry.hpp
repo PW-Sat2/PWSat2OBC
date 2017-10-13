@@ -301,6 +301,8 @@ namespace devices
             ChannelStatus GetChannelStatus(AntennaChannel channel) const;
 
           private:
+            inline static bool GetAntennaStatus(std::bitset<8>& status, AntennaChannel channel, AntennaId antenna);
+
             ActivationCounts activationCounts[2];
             ActivationTimes activationTimes[2];
 
@@ -333,35 +335,53 @@ namespace devices
 
         inline void AntennaTelemetry::SetActivationTimes(AntennaChannel channel, const ActivationTimes& times)
         {
-            this->activationTimes[channel - ANTENNA_FIRST_CHANNEL] = times;
+            if (channel <= ANTENNA_BACKUP_CHANNEL && channel >= ANTENNA_FIRST_CHANNEL)
+            {
+                this->activationTimes[channel - ANTENNA_FIRST_CHANNEL] = times;
+            }
         }
 
         inline bool AntennaTelemetry::GetBurningStatus(AntennaChannel channel, AntennaId antenna)
         {
-            return this->burnStatus[4 * (channel - ANTENNA_FIRST_CHANNEL) + (antenna - AntennaId::ANTENNA1_ID)];
+            return GetAntennaStatus(this->burnStatus, channel, antenna);
         }
 
         inline bool AntennaTelemetry::GetDeployedStatus(AntennaChannel channel, AntennaId antenna)
         {
-            return this->deployedStatus[4 * (channel - ANTENNA_FIRST_CHANNEL) + (antenna - AntennaId::ANTENNA1_ID)];
+            return GetAntennaStatus(this->deployedStatus, channel, antenna);
         }
 
         inline bool AntennaTelemetry::GetTimeReached(AntennaChannel channel, AntennaId antenna)
         {
-            return this->timeReached[4 * (channel - ANTENNA_FIRST_CHANNEL) + (antenna - AntennaId::ANTENNA1_ID)];
+            return GetAntennaStatus(this->timeReached, channel, antenna);
         }
 
         inline void AntennaTelemetry::SetChannelStatus(AntennaChannel channel, ChannelStatus status)
         {
-            this->channelStatuses[channel - ANTENNA_FIRST_CHANNEL] = status;
+            if (channel <= ANTENNA_BACKUP_CHANNEL && channel >= ANTENNA_FIRST_CHANNEL)
+            {
+                this->channelStatuses[channel - ANTENNA_FIRST_CHANNEL] = status;
+            }
         }
 
         inline ChannelStatus AntennaTelemetry::GetChannelStatus(AntennaChannel channel) const
         {
-            return this->channelStatuses[channel - ANTENNA_FIRST_CHANNEL];
+            if (channel <= ANTENNA_BACKUP_CHANNEL && channel >= ANTENNA_FIRST_CHANNEL)
+            {
+                return this->channelStatuses[channel - ANTENNA_FIRST_CHANNEL];
+            }
+
+            return ChannelStatus::None;
+        }
+
+        bool AntennaTelemetry::GetAntennaStatus(std::bitset<8>& status, AntennaChannel channel, AntennaId antenna)
+        {
+            auto idx = 4 * (channel - ANTENNA_FIRST_CHANNEL) + (antenna - AntennaId::ANTENNA1_ID);
+            return (idx < 8) && status[idx];
         }
 
         static_assert(AntennaTelemetry::BitSize() == 118, "Invalid telemetry size");
+        static_assert(ANTENNA_FIRST_CHANNEL < ANTENNA_BACKUP_CHANNEL, "Antenna channel numbers are valid");
 
         /**
                 * @brief Antenna telemetry provider
