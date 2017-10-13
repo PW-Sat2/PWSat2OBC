@@ -16,6 +16,7 @@
 #include "mission/fs.hpp"
 #include "mission/leop_task.hpp"
 #include "mission/main.hpp"
+#include "mission/memory_recovery.hpp"
 #include "mission/power/power_cycle.hpp"
 #include "mission/sads.hpp"
 #include "mission/sail.hpp"
@@ -47,6 +48,7 @@ namespace mission
     using EPSWatchdogTask = WatchdogTask<devices::eps::EPSDriver>;
 
     typedef MissionLoop<SystemState, //
+        MemoryRecoveryTask,          //
         TimeTask,
         antenna::StopAntennaDeploymentTask,
         antenna::AntennaTask,
