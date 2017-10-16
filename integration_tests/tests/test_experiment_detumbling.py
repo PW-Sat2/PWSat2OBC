@@ -32,6 +32,12 @@ class TestExperimentDetumbling(RestartPerTest):
     def test_should_perform_experiment(self):
         self._start()
 
+        power_on = TestEvent()
+        power_off = TestEvent()
+
+        self.system.eps.IMTQ.on_enable = power_on.set
+        self.system.eps.IMTQ.on_disable = power_off.set
+
         log = logging.getLogger("TEST")
 
         start_time = datetime.now()
@@ -46,6 +52,7 @@ class TestExperimentDetumbling(RestartPerTest):
         log.info('Waiting for experiment')
         self.system.obc.wait_for_experiment(ExperimentType.Detumbling, 40)
         self.system.obc.wait_for_experiment_iteration(1, 30)
+        self.assertTrue(power_on.wait_for_change(5), "IMTQ should be powered on")
 
         log.info('Advancing time')
         self.system.obc.advance_time(timedelta(hours=4, minutes=1))
@@ -53,3 +60,4 @@ class TestExperimentDetumbling(RestartPerTest):
 
         log.info('Waiting for experiment finish')
         self.system.obc.wait_for_experiment(None, 25)
+        self.assertTrue(power_off.wait_for_change(5), "IMTQ should be powered off")
