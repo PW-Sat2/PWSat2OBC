@@ -244,11 +244,11 @@ namespace devices
                     decltype(CURR_5V),               //
                     decltype(VOLT_VBAT),             //
                     decltype(CURR_VBAT),             //
-                    BitValue<std::uint8_t, 6>,       // DIRST_LCL_STATE
+                    BitValue<std::uint8_t, 7>,       // DIRST_LCL_STATE
                     BitValue<std::uint8_t, 6>>;      // DISTR_LCL_FLAGB
             }
 
-            static_assert(DISTR_HK::BitSize() == 72, "Incorrect telemetry size");
+            static_assert(DISTR_HK::BitSize() == 73, "Incorrect telemetry size");
 
             /** @brief MPPT status */
             struct MPPT_HK
@@ -523,7 +523,7 @@ namespace devices
                     decltype(dcdc5V)::BitSize();
             }
 
-            static_assert(ControllerATelemetry::BitSize() == 400, "Incorrect telemetry size");
+            static_assert(ControllerATelemetry::BitSize() == 401, "Incorrect telemetry size");
 
             /**
              * @brief Housekeeping of controller B

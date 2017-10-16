@@ -74,7 +74,7 @@ namespace devices
                 writer.Write(this->CURR_5V);
                 writer.Write(this->VOLT_VBAT);
                 writer.Write(this->CURR_VBAT);
-                writer.WriteWord(num(this->LCL_STATE), 6);
+                writer.WriteWord(num(this->LCL_STATE), 7);
                 writer.WriteWord(num(this->LCL_FLAGB), 6);
             }
 
