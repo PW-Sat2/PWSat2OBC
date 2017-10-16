@@ -116,7 +116,8 @@ ControllerATelemetry GetControllerA()
     hk.distr.CURR_5V = 316;
     hk.distr.VOLT_VBAT = 317;
     hk.distr.CURR_VBAT = 318;
-    hk.distr.LCL_STATE = static_cast<DISTR_LCL_STATE>(num(DISTR_LCL_STATE::CamNadir) | num(DISTR_LCL_STATE::SENS));
+    hk.distr.LCL_STATE =
+        static_cast<DISTR_LCL_STATE>(num(DISTR_LCL_STATE::CamNadir) | num(DISTR_LCL_STATE::SENS) | num(DISTR_LCL_STATE::IMTQ));
     hk.distr.LCL_FLAGB = static_cast<DISTR_LCL_FLAGB>(num(DISTR_LCL_FLAGB::CamNadir) | num(DISTR_LCL_FLAGB::SENS));
 
     hk.batc.VOLT_A = 319;

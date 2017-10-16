@@ -65,7 +65,7 @@ namespace telemetry
     static_assert(ImtqSelfTest::BitSize() == 64, "Invalid serialized size");
 
     static_assert(ManagedTelemetry::TotalSerializedSize <= 230, "Telemetry is too large");
-    static_assert(ManagedTelemetry::PayloadSize == 1831, "Invalid Telemetry Size");
+    static_assert(ManagedTelemetry::PayloadSize == 1832, "Invalid Telemetry Size");
 }
 
 #endif
