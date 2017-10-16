@@ -6,6 +6,7 @@
 #include "adcs/adcs.hpp"
 #include "base/hertz.hpp"
 #include "imtq/imtq.h"
+#include "power/fwd.hpp"
 
 namespace adcs
 {
@@ -20,8 +21,9 @@ namespace adcs
          * @brief Ctor.
          *
          * @param[in] imtqDriver_ Low level imtq module driver.
+         * @param[in] powerControl_ Power control interface
          */
-        BuiltinDetumbling(devices::imtq::IImtqDriver& imtqDriver_);
+        BuiltinDetumbling(devices::imtq::IImtqDriver& imtqDriver_, services::power::IPowerControl& powerControl_);
 
         virtual OSResult Initialize() final override;
 
@@ -42,6 +44,7 @@ namespace adcs
         static constexpr std::chrono::seconds GetDetumblingPeriod();
 
         devices::imtq::IImtqDriver& imtqDriver;
+        services::power::IPowerControl& powerControl;
     };
 }
 

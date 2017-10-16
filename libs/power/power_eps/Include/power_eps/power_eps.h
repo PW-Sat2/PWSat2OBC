@@ -42,6 +42,8 @@ namespace services
 
             virtual bool IgnoreOverheat() override;
 
+            virtual bool ImtqPower(bool enabled) override;
+
           private:
             bool Switch(bool enabled, devices::eps::LCL lcl);
 

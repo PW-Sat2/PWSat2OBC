@@ -77,7 +77,7 @@ OBC::OBC()
       PowerControlInterface(this->Hardware.EPS),                                       //
       Fdir(this->PowerControlInterface, GetErrorCounterMask()),                        //
       Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),            //
-      adcs(this->Hardware.imtqTelemetryCollector),                                     //
+      adcs(this->Hardware.imtqTelemetryCollector, this->PowerControlInterface),        //
       Experiments(fs,
           this->adcs.GetAdcsCoordinator(),
           this->timeProvider,

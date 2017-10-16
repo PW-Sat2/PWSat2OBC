@@ -5,11 +5,11 @@
 using adcs::BuiltinDetumbling;
 using obc::Adcs;
 
-Adcs::Adcs(devices::imtq::IImtqDriver& imtqDriver_)                                   //
-    : builtinDetumbling(imtqDriver_),                                                 //
-      experimentalDetumbling(imtqDriver_),                                            //
-      experimentalSunpointing(imtqDriver_),                                           //
-      coordinator(builtinDetumbling, experimentalDetumbling, experimentalSunpointing) //
+Adcs::Adcs(devices::imtq::IImtqDriver& imtqDriver_, services::power::IPowerControl& power) //
+    : builtinDetumbling(imtqDriver_, power),                                               //
+      experimentalDetumbling(imtqDriver_),                                                 //
+      experimentalSunpointing(imtqDriver_),                                                //
+      coordinator(builtinDetumbling, experimentalDetumbling, experimentalSunpointing)      //
 {
 }
 
