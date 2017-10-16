@@ -1111,6 +1111,15 @@
 										<option>0</option>
 										<flag>wxALL</flag>
 										<border>5</border>
+										<object class="wxToggleButton" name="imtq">
+											<label>IMTQ</label>
+											<checked>0</checked>
+										</object>
+									</object>
+									<object class="sizeritem">
+										<option>0</option>
+										<flag>wxALL</flag>
+										<border>5</border>
 										<object class="wxToggleButton" name="antenna_red">
 											<label>ANTennaRed</label>
 											<checked>0</checked>

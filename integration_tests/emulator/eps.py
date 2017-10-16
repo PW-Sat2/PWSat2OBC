@@ -25,6 +25,7 @@ class EPSModule(ModuleBase):
         self._eps_camwing = xrc.XRCCTRL(self._panel, 'cam_wing')
         self._eps_sens = xrc.XRCCTRL(self._panel, 'sens')
         self._eps_antenna = xrc.XRCCTRL(self._panel, 'antenna')
+        self._eps_imtq = xrc.XRCCTRL(self._panel, 'imtq')
         self._eps_antennared = xrc.XRCCTRL(self._panel, 'antenna_red')
 
         self._eps_sailmain_value = xrc.XRCCTRL(self._panel, 'eps_sailmain_value')
@@ -46,6 +47,7 @@ class EPSModule(ModuleBase):
         self._eps_camwing.SetValue(self._system.eps.CamWing.is_on)
         self._eps_sens.SetValue(self._system.eps.SENS.is_on)
         self._eps_antenna.SetValue(self._system.eps.ANTenna.is_on)
+        self._eps_imtq.SetValue(self._system.eps.IMTQ.is_on)
         self._eps_antennared.SetValue(self._system.eps.ANTennaRed.is_on)
 
         self._eps_sailmain_value.SetLabel(str(self._system.eps.SAILmain.enabled))

@@ -41,7 +41,8 @@ namespace devices
                 CamNadir = 1 << 2, //!< CamNadir
                 CamWing = 1 << 3,  //!< CamWing
                 SENS = 1 << 4,     //!< SENS
-                Antenna = 1 << 5   //!< Antenna
+                Antenna = 1 << 5,  //!< Antenna
+                IMTQ = 1 << 6,     //!< IMTQ
             };
 
             /**
