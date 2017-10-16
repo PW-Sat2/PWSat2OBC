@@ -5,6 +5,7 @@
 #include "adcs/adcs.hpp"
 #include "base/hertz.hpp"
 #include "imtq/imtq.h"
+#include "power/fwd.hpp"
 
 namespace adcs
 {
@@ -18,8 +19,9 @@ namespace adcs
          * @brief Ctor.
          *
          * @param[in] imtqDriver_ Low level imtq module driver.
+         * @param[in] powerControl_ Power control interface
          */
-        ExperimentalDetumbling(devices::imtq::IImtqDriver& imtqDriver_);
+        ExperimentalDetumbling(devices::imtq::IImtqDriver& imtqDriver_, services::power::IPowerControl& powerControl_);
 
         /**
          * @brief Sets built-in or alternative self-test algorithm.
@@ -42,6 +44,8 @@ namespace adcs
         static constexpr chrono_extensions::hertz Frequency = chrono_extensions::hertz{1.0 / DetumblingComputations::Parameters::dt};
 
       private:
+        OSResult PerformSelfTest();
+
         /** @brief Detumbling computations algorithm. */
         DetumblingComputations detumblingComputations;
 
@@ -50,6 +54,7 @@ namespace adcs
 
         /** @brief Low level imtq module driver. */
         devices::imtq::IImtqDriver& imtqDriver;
+        services::power::IPowerControl& powerControl;
 
         /** @brief Semaphore for tasks synchronization.*/
         OSSemaphoreHandle syncSemaphore;
