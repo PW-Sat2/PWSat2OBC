@@ -29,6 +29,8 @@ struct PowerControlMock : services::power::IPowerControl
     MOCK_METHOD1(CameraWing, bool(bool enable));
     MOCK_METHOD1(CameraNadir, bool(bool enable));
 
+    MOCK_METHOD1(ImtqPower, bool(bool enable));
+
     MOCK_METHOD0(IgnoreOverheat, bool());
 };
 

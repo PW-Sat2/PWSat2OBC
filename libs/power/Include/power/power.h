@@ -113,6 +113,13 @@ namespace services
              * @return Operation status
              */
             virtual bool IgnoreOverheat() = 0;
+
+            /**
+             * @brief Sets state of IMTQ LCL
+             * @param enabled true to turn on LCL, false to turn off
+             * @return Operation status
+             */
+            virtual bool ImtqPower(bool enabled) = 0;
         };
 
         /** @} */

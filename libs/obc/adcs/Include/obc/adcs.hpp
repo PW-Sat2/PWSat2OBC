@@ -29,8 +29,9 @@ namespace obc
          * @brief Ctor.
          *
          * @param[in] imtqDriver_ Low level imtq module driver.
+         * @param[in] power Power control interface
          */
-        Adcs(devices::imtq::IImtqDriver& imtqDriver_);
+        Adcs(devices::imtq::IImtqDriver& imtqDriver_, services::power::IPowerControl& power);
 
         /**
          * @brief Initializes adcs subsystem.
