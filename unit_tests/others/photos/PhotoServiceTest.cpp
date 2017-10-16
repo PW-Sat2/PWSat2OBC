@@ -349,6 +349,22 @@ namespace
         EXPECT_CALL(_os, EventGroupSetBits(_, 1 << 1));
         EXPECT_CALL(_os, EventGroupClearBits(_, 1 << 0));
 
+        EXPECT_CALL(_os, QueueSend(_, _, _)).WillOnce(Invoke([](OSQueueHandle /*handle*/, const void* elementPtr, auto /*timeout*/) {
+            auto ptr = static_cast<const PossibleCommand*>(elementPtr);
+            EXPECT_THAT(ptr->Selected, Eq(Command::DisableCamera));
+            EXPECT_THAT(ptr->DisableCameraCommand.Which, Eq(Camera::Nadir));
+            return true;
+        }));
+        EXPECT_CALL(_os, EventGroupClearBits(_, 1 << 0));
+
+        EXPECT_CALL(_os, QueueSend(_, _, _)).WillOnce(Invoke([](OSQueueHandle /*handle*/, const void* elementPtr, auto /*timeout*/) {
+            auto ptr = static_cast<const PossibleCommand*>(elementPtr);
+            EXPECT_THAT(ptr->Selected, Eq(Command::DisableCamera));
+            EXPECT_THAT(ptr->DisableCameraCommand.Which, Eq(Camera::Wing));
+            return true;
+        }));
+        EXPECT_CALL(_os, EventGroupClearBits(_, 1 << 0));
+
         _service.PurgePendingCommands();
     }
 
