@@ -20,6 +20,7 @@ namespace devices
             CamWing = 0x04,     //!< CamWing
             SENS = 0x05,        //!< SENS
             AntennaMain = 0x06, //!< AntennaMain
+            IMTQ = 0x07,        //!< IMTQ
             TKRed = 0x11,       //!< TKRed
             AntennaRed = 0x12   //!< AntennaRed
         };

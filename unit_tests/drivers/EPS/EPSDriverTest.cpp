@@ -342,6 +342,7 @@ namespace
             std::make_tuple(LCL::CamWing, Controller::A, 0x04),     //
             std::make_tuple(LCL::SENS, Controller::A, 0x05),        //
             std::make_tuple(LCL::AntennaMain, Controller::A, 0x06), //
+            std::make_tuple(LCL::IMTQ, Controller::A, 0x07),        //
             std::make_tuple(LCL::TKRed, Controller::B, 0x01),       //
             std::make_tuple(LCL::AntennaRed, Controller::B, 0x02)   //
             ), );
