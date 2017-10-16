@@ -25,7 +25,6 @@ class TestExperimentsTelecommands(RestartPerTest):
         e.wait_for_change(1)
 
     @runlevel(2)
-    @clear_state()
     def test_should_abort_experiment(self):
         self._start()
 
@@ -34,13 +33,12 @@ class TestExperimentsTelecommands(RestartPerTest):
         self.system.obc.wait_for_experiment(ExperimentType.Fibo, 15)
 
         self.system.comm.put_frame(AbortExperiment(0x42))
-        response = self.system.comm.get_frame(5)
-        self.assertIsInstance(response, ExperimentSuccessFrame)
+        response = self.system.comm.get_frame(5, filter_type=ExperimentSuccessFrame)
+        self.assertIsNotNone(response, "Should receive confirmation")
 
         self.system.obc.wait_for_experiment(None, 15)
 
     @runlevel(2)
-    @clear_state()
     def test_should_be_able_to_run_next_experiment_after_previous_aborted(self):
         self._start()
 
@@ -49,8 +47,8 @@ class TestExperimentsTelecommands(RestartPerTest):
         self.system.obc.wait_for_experiment(ExperimentType.Fibo, 15)
 
         self.system.comm.put_frame(AbortExperiment(0x42))
-        response = self.system.comm.get_frame(5)
-        self.assertIsInstance(response, ExperimentSuccessFrame)
+        response = self.system.comm.get_frame(5, filter_type=ExperimentSuccessFrame)
+        self.assertIsNotNone(response, "Should receive confirmation")
 
         self.system.obc.wait_for_experiment(None, 15)
 
