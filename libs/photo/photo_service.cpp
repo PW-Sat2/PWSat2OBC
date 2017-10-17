@@ -342,6 +342,9 @@ namespace services
             this->_commandQueue.Push(cmd, InfiniteTimeout);
             this->_flags.Set(BreakSleepFlag);
             this->_flags.Clear(IdleFlag);
+
+            this->DisableCamera(Camera::Nadir);
+            this->DisableCamera(Camera::Wing);
         }
 
         void PhotoService::TaskProc(PhotoService* This)
