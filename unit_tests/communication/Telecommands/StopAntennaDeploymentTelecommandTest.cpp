@@ -4,7 +4,10 @@
 #include "mock/comm.hpp"
 #include "obc/telecommands/antenna.hpp"
 
+using testing::_;
 using testing::Eq;
+using testing::Return;
+using testing::ReturnRef;
 using testing::ElementsAre;
 using telecommunication::downlink::DownlinkAPID;
 
@@ -13,7 +16,7 @@ namespace
     class DisableAntennaDeploymentMock : public mission::antenna::IDisableAntennaDeployment
     {
       public:
-        MOCK_METHOD0(DisableDeployment, void());
+        MOCK_METHOD1(SetDeploymentState, void(bool disabled));
     };
 
     class StopAntennaDeploymentTelecommandTest : public testing::Test
@@ -21,33 +24,63 @@ namespace
       protected:
         StopAntennaDeploymentTelecommandTest();
 
-        testing::NiceMock<DisableAntennaDeploymentMock> _disableDeployment;
-        testing::NiceMock<TransmitterMock> _transmitter;
+        template <typename... T> void Run(T... params);
 
-        obc::telecommands::StopAntennaDeployment _telecommand;
+        void ExpectFrame(std::uint8_t correlationId, std::uint8_t errorCode);
+
+        void ExpectUpdate(bool disabled);
+
+        testing::StrictMock<TransmitterMock> _transmitter;
+        testing::StrictMock<DisableAntennaDeploymentMock> _controller;
+
+        SystemState _state;
+        obc::telecommands::SetAntennaDeploymentMaskTelecommand _telecommand;
     };
 
-    StopAntennaDeploymentTelecommandTest::StopAntennaDeploymentTelecommandTest() : _telecommand(_disableDeployment)
+    StopAntennaDeploymentTelecommandTest::StopAntennaDeploymentTelecommandTest() : _telecommand(_controller)
     {
     }
 
-    TEST_F(StopAntennaDeploymentTelecommandTest, ShouldDisableDeployment)
+    template <typename... T> void StopAntennaDeploymentTelecommandTest::Run(T... params)
     {
-        EXPECT_CALL(this->_disableDeployment, DisableDeployment());
+        std::array<std::uint8_t, sizeof...(T)> buffer{static_cast<std::uint8_t>(params)...};
 
-        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAre(0x22, 0))));
-
-        std::array<std::uint8_t, 1> frame{0x22};
-
-        _telecommand.Handle(this->_transmitter, frame);
+        _telecommand.Handle(_transmitter, buffer);
     }
 
-    TEST_F(StopAntennaDeploymentTelecommandTest, ShouldRespondWithErrorOnInvalidFrame)
+    void StopAntennaDeploymentTelecommandTest::ExpectFrame(std::uint8_t correlationId, std::uint8_t errorCode)
     {
-        EXPECT_CALL(this->_disableDeployment, DisableDeployment()).Times(0);
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::Operation, 0, ElementsAre(correlationId, errorCode))));
+    }
 
-        EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::Operation), Eq(0U), ElementsAre(0, 255))));
+    void StopAntennaDeploymentTelecommandTest::ExpectUpdate(bool disabled)
+    {
+        EXPECT_CALL(_controller, SetDeploymentState(disabled)).Times(1);
+    }
 
-        _telecommand.Handle(this->_transmitter, gsl::span<const uint8_t>());
+    TEST_F(StopAntennaDeploymentTelecommandTest, TestEmptyFrame)
+    {
+        ExpectFrame(0, -1);
+        Run();
+    }
+
+    TEST_F(StopAntennaDeploymentTelecommandTest, TestPartialFrame)
+    {
+        ExpectFrame(0x22, -1);
+        Run(0x22);
+    }
+
+    TEST_F(StopAntennaDeploymentTelecommandTest, TestDisablingDeploymentFrame)
+    {
+        ExpectFrame(0x22, 0);
+        ExpectUpdate(true);
+        Run(0x22, 1);
+    }
+
+    TEST_F(StopAntennaDeploymentTelecommandTest, TestEnablingDeploymentFrame)
+    {
+        ExpectFrame(0x22, 0);
+        ExpectUpdate(false);
+        Run(0x22, 0);
     }
 }

@@ -285,8 +285,8 @@ class AntennaDriver : public IAntennaDriver
         );
 
     /**
-       * @brief Driver instance that coordinates communication with hardware.
-       */
+     * @brief Driver instance that coordinates communication with hardware.
+     */
     AntennaMiniportDriver* miniport;
 
     error_counter::DeviceErrorCounter primaryErrorCounter;

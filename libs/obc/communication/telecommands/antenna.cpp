@@ -10,30 +10,28 @@ namespace obc
 {
     namespace telecommands
     {
-        StopAntennaDeployment::StopAntennaDeployment(mission::antenna::IDisableAntennaDeployment& disableAntennaDeployment)
+        SetAntennaDeploymentMaskTelecommand::SetAntennaDeploymentMaskTelecommand(
+            mission::antenna::IDisableAntennaDeployment& disableAntennaDeployment)
             : _disableAntennaDeployment(disableAntennaDeployment)
         {
         }
 
-        void StopAntennaDeployment::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
+        void SetAntennaDeploymentMaskTelecommand::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
         {
             Reader r(parameters);
 
             auto correlationId = r.ReadByte();
-
+            auto disabled = r.ReadByte() != 0;
             CorrelatedDownlinkFrame response(DownlinkAPID::Operation, 0, correlationId);
-
             if (!r.Status())
             {
                 response.PayloadWriter().WriteByte(-1);
-
-                transmitter.SendFrame(response.Frame());
-                return;
             }
-
-            this->_disableAntennaDeployment.DisableDeployment();
-
-            response.PayloadWriter().WriteByte(0);
+            else
+            {
+                this->_disableAntennaDeployment.SetDeploymentState(disabled);
+                response.PayloadWriter().WriteByte(0);
+            }
 
             transmitter.SendFrame(response.Frame());
         }

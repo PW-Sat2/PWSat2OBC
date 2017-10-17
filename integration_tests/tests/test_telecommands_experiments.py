@@ -1,6 +1,6 @@
 from obc.experiments import ExperimentType
 from response_frames.common import ExperimentSuccessFrame
-from system import auto_power_on, runlevel
+from system import auto_power_on, runlevel, clear_state
 from telecommand import AbortExperiment
 from tests.base import RestartPerTest
 from utils import TestEvent
@@ -33,8 +33,8 @@ class TestExperimentsTelecommands(RestartPerTest):
         self.system.obc.wait_for_experiment(ExperimentType.Fibo, 15)
 
         self.system.comm.put_frame(AbortExperiment(0x42))
-        response = self.system.comm.get_frame(5)
-        self.assertIsInstance(response, ExperimentSuccessFrame)
+        response = self.system.comm.get_frame(5, filter_type=ExperimentSuccessFrame)
+        self.assertIsNotNone(response, "Should receive confirmation")
 
         self.system.obc.wait_for_experiment(None, 15)
 
@@ -47,8 +47,8 @@ class TestExperimentsTelecommands(RestartPerTest):
         self.system.obc.wait_for_experiment(ExperimentType.Fibo, 15)
 
         self.system.comm.put_frame(AbortExperiment(0x42))
-        response = self.system.comm.get_frame(5)
-        self.assertIsInstance(response, ExperimentSuccessFrame)
+        response = self.system.comm.get_frame(5, filter_type=ExperimentSuccessFrame)
+        self.assertIsNotNone(response, "Should receive confirmation")
 
         self.system.obc.wait_for_experiment(None, 15)
 
