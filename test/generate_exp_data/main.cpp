@@ -99,6 +99,11 @@ class PosixFileSystem : public IFileSystem
         return OSResult::NotSupported;
     }
 
+    virtual bool IsDirectory(const char* /*dirname*/) override
+    {
+        return false;
+    }
+
     virtual OSResult Format(const char* /*mountPoint*/) override
     {
         return OSResult::NotSupported;

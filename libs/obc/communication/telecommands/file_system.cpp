@@ -87,6 +87,18 @@ namespace obc
                 return;
             }
 
+            if (_fs.IsDirectory(path))
+            {
+                LOGF(LOG_LEVEL_ERROR, "Trying to retrieve directory %s", path);
+                CorrelatedDownlinkFrame errorResponse(DownlinkAPID::FileSend, 0, correlationId);
+                errorResponse.PayloadWriter().WriteByte(static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::MalformedRequest));
+                errorResponse.PayloadWriter().WriteByte(0);
+
+                transmitter.SendFrame(errorResponse.Frame());
+
+                return;
+            }
+
             LOGF(LOG_LEVEL_INFO, "Sending file %s", path);
 
             FileSender sender(path, correlationId, transmitter, this->_fs);

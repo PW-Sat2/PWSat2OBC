@@ -40,6 +40,7 @@ class FsMock : public services::fs::IFileSystem
     MOCK_METHOD1(OpenDirectory, services::fs::DirectoryOpenResult(const char*));
     MOCK_METHOD1(ReadDirectory, char*(services::fs::DirectoryHandle));
     MOCK_METHOD1(CloseDirectory, OSResult(services::fs::DirectoryHandle));
+    MOCK_METHOD1(IsDirectory, bool(const char*));
     MOCK_METHOD1(Format, OSResult(const char*));
     MOCK_METHOD1(MakeDirectory, OSResult(const char*));
     MOCK_METHOD1(Exists, bool(const char*));

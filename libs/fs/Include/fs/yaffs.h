@@ -63,6 +63,7 @@ namespace services
             virtual DirectoryOpenResult OpenDirectory(const char* dirname) override;
             virtual char* ReadDirectory(DirectoryHandle directory) override;
             virtual OSResult CloseDirectory(DirectoryHandle directory) override;
+            virtual bool IsDirectory(const char* path) override;
             virtual OSResult Format(const char* mountPoint) override;
             virtual OSResult MakeDirectory(const char* path) override;
             virtual bool Exists(const char* path) override;

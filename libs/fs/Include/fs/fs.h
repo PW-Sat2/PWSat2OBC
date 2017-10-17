@@ -220,6 +220,13 @@ namespace services
             virtual OSResult CloseDirectory(DirectoryHandle directory) = 0;
 
             /**
+             * @brief Checks if path is directory
+             * @param[in] path Path
+             * @return True if path is directory, false otherwise.
+             */
+            virtual bool IsDirectory(const char* path) = 0;
+
+            /**
              * @brief Formats partition at given mount point. Partition is
              * unmounted before format and mounted again afterwards.
              * @param[in] mountPoint Partition mount point

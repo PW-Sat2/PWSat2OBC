@@ -409,4 +409,32 @@ namespace
 
         yaffs_unmount("/");
     }
+
+    TEST_F(FileSystemTest, ShouldDetectDirectory)
+    {
+        const char path[] = "/a";
+
+        yaffs_mount("/");
+
+        yaffs_mkdir("/a", 0777);
+
+        api.MakeDirectory(path);
+
+        ASSERT_THAT(api.IsDirectory(path), Eq(true));
+
+        yaffs_unmount("/");
+    }
+
+    TEST_F(FileSystemTest, ShouldNotDetectDirectoryOnFile)
+    {
+        const char path[] = "/file";
+
+        yaffs_mount("/");
+
+        yaffs_open(path, O_CREAT | O_WRONLY, S_IRWXU);
+
+        ASSERT_THAT(api.IsDirectory(path), Eq(false));
+
+        yaffs_unmount("/");
+    }
 }
