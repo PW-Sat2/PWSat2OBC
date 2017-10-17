@@ -44,6 +44,11 @@ AdcsCoordinatorMock::~AdcsCoordinatorMock()
 {
 }
 
+void AdcsCoordinatorMock::SetCurrentMode(adcs::AdcsMode mode)
+{
+    ON_CALL(*this, CurrentMode()).WillByDefault(testing::Return(mode));
+}
+
 DetumblingMock::DetumblingMock()
 {
 }
