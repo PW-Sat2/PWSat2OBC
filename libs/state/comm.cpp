@@ -11,7 +11,7 @@ namespace state
         "We are the Borg. Lower your shields and surrender your ships. We will add your biological and "
         "technological distinctiveness to our own. Your culture will adapt to service us. Resistance is futile.";
 
-    MessageState::MessageState() : _interval(5min), _repeatCount(3)
+    MessageState::MessageState() : _interval(10min), _repeatCount(0)
     {
         this->_message.fill(0);
         strcpy(reinterpret_cast<char*>(this->_message.data()), DefaultMessage);
