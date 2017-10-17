@@ -91,7 +91,7 @@ namespace obc
             {
                 LOGF(LOG_LEVEL_ERROR, "Trying to retrieve directory %s", path);
                 CorrelatedDownlinkFrame errorResponse(DownlinkAPID::FileSend, 0, correlationId);
-                errorResponse.PayloadWriter().WriteByte(static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::MalformedRequest));
+                errorResponse.PayloadWriter().WriteByte(static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::InvalidPath));
                 errorResponse.PayloadWriter().WriteByte(0);
 
                 transmitter.SendFrame(errorResponse.Frame());
