@@ -29,7 +29,7 @@ namespace beacon
         }
         else
         {
-            beaconDelay = 30s;
+            beaconDelay = 60s;
         }
 
         auto frame = this->_frame.Frame();
