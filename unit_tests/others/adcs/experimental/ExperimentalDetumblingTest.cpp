@@ -46,9 +46,9 @@ namespace
     {
         EXPECT_CALL(_os, GiveSemaphore(_)).WillRepeatedly(Return(OSResult::Success));
 
-        auto expectedDipole = Vector3<Dipole>{-22464, 20608, -1920};
+        auto expectedDipole = Vector3<Dipole>{-32768, 32767, -32768};
 
-        auto calibratedMagnetometerMeasurement = Vector3<MagnetometerMeasurement>{1, 2, 3};
+        auto calibratedMagnetometerMeasurement = Vector3<MagnetometerMeasurement>{1, -2, 3};
 
         auto selfTestResult = CreateSuccessfulSelfTestResult();
 

@@ -65,8 +65,15 @@ DipoleVec DetumblingComputations::step(const MagVec& mgmt_meas, State& state)
     DipoleVec dipole;
     for (unsigned int i = 0; i < dipole.size(); i++)
     {
-        dipole[i] = commDipoleBdot[i];
+        dipole[i] = CastWithSaturation<Dipole>(commDipoleBdot[i]);
     }
 
     return dipole;
+}
+
+template <typename T, typename U> T DetumblingComputations::CastWithSaturation(const U& input)
+{
+    U upper = static_cast<U>(std::numeric_limits<T>::max());
+    U lower = static_cast<U>(std::numeric_limits<T>::min());
+    return static_cast<T>(std::max(lower, std::min(input, upper)));
 }
