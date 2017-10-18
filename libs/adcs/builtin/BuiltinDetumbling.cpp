@@ -29,7 +29,11 @@ namespace adcs
 
     OSResult BuiltinDetumbling::Enable()
     {
-        powerControl.ImtqPower(true);
+        if (!powerControl.ImtqPower(true))
+        {
+            return OSResult::IOError;
+        }
+
         System::SleepTask(1s);
 
         devices::imtq::SelfTestResult selfTestResult;

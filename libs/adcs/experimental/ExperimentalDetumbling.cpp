@@ -121,7 +121,11 @@ namespace adcs
             return OSResult::IOError;
         }
 
-        this->powerControl.ImtqPower(true);
+        if (!this->powerControl.ImtqPower(true))
+        {
+            return OSResult::IOError;
+        }
+
         System::SleepTask(1s);
 
         if (OS_RESULT_FAILED(this->PerformSelfTest()))
