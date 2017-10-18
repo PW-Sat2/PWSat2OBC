@@ -26,9 +26,20 @@ namespace obc
             {
                 this->_fileSize = this->_file.Size();
 
-                this->_lastSeq =
-                    static_cast<std::uint32_t>(std::ceil(this->_fileSize / static_cast<float>(CorrelatedDownlinkFrame::MaxPayloadSize)));
+                this->_lastSeq = MaxChunkNumber(this->_fileSize);
             }
+        }
+
+        std::uint32_t FileSender::MaxChunkNumber(std::uint32_t fileSize)
+        {
+            auto n = fileSize / MaxFileDataSize;
+
+            if (n * MaxFileDataSize < fileSize)
+            {
+                n++;
+            }
+
+            return n;
         }
 
         bool FileSender::IsValid()
@@ -123,6 +134,7 @@ namespace obc
                 {
                     break;
                 }
+                LOGF(LOG_LEVEL_DEBUG, "Sending seq %ld", seq);
 
                 sender.SendPart(seq);
             }

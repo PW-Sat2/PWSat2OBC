@@ -6,6 +6,7 @@ set(SOURCES
   MissionPlan/MissionTestHelpers.cpp
   gyro/gyroTest.cpp
   Experiments/SunSDataPointTest.cpp
+  Telecommands/SendFileTest.cpp
 )
 
 add_unit_tests(${NAME} ${SOURCES})
@@ -22,4 +23,5 @@ target_link_libraries(${NAME}
     unit_tests_base
     gyro
     exp_suns
+    obc_telecommands
 )
