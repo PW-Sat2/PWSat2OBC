@@ -77,7 +77,8 @@ namespace obc
             {
                 Success = 0x00,
                 FileNotFound = 0x01,
-                MalformedRequest = 0x02
+                MalformedRequest = 0x02,
+                InvalidPath = 0x03
             };
 
             /**

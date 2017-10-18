@@ -207,6 +207,14 @@ bool YaffsFileSystem::Exists(const char* path)
     return status != -1;
 }
 
+bool YaffsFileSystem::IsDirectory(const char* path)
+{
+    struct yaffs_stat stat;
+    int16_t status = yaffs_stat(path, &stat);
+
+    return status != -1 && S_ISDIR(stat.st_mode);
+}
+
 static constexpr uint8_t RecursionLimit = 5;
 
 /**
