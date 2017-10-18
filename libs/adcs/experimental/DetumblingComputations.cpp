@@ -65,7 +65,7 @@ DipoleVec DetumblingComputations::step(const MagVec& mgmt_meas, State& state)
     DipoleVec dipole;
     for (unsigned int i = 0; i < dipole.size(); i++)
     {
-        dipole[i] = commDipoleBdot[i];
+        dipole[i] = CastWithSaturation<Dipole>(commDipoleBdot[i]);
     }
 
     return dipole;

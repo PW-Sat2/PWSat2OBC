@@ -5,8 +5,9 @@
 #include <system.h>
 #include <unistd.h>
 #include <gtest/gtest.h>
-#include "adcs/experimental/adcsUtConfig.h"
+#include <gmock/gmock.h>
 #include "Include/adcs/dataFileTools.hpp"
+#include "adcs/experimental/adcsUtConfig.h"
 
 using adcs::DetumblingComputations;
 using adcs::DipoleVec;
@@ -69,4 +70,16 @@ TEST(detumbling, cross_validation)
         EXPECT_NEAR(dipole[2], dipole_exp[2], 1.0);
     }
     file.close();
+}
+
+TEST(detumbling, ValueConversions)
+{
+    DetumblingComputations dtb;
+
+    ASSERT_THAT(dtb.CastWithSaturation<int16_t>(65536.0f), testing::Eq(32767));
+    ASSERT_THAT(dtb.CastWithSaturation<int16_t>(-65536.0f), testing::Eq(-32768));
+    ASSERT_THAT(dtb.CastWithSaturation<int16_t>(32768.0f), testing::Eq(32767));
+    ASSERT_THAT(dtb.CastWithSaturation<int16_t>(-32768.0f), testing::Eq(-32768));
+    ASSERT_THAT(dtb.CastWithSaturation<int16_t>(30000.0f), testing::Eq(30000));
+    ASSERT_THAT(dtb.CastWithSaturation<int16_t>(-30000.0f), testing::Eq(-30000));
 }

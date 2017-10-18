@@ -105,10 +105,24 @@ namespace adcs
          */
         DipoleVec step(const MagVec& magnetometer, State& state);
 
+        /**
+         * @brief Cast one numeric value to other with saturation
+         * @param input The input value
+         * @returns Input value casted to output type with saturation
+         */
+        template <typename T, typename U> T CastWithSaturation(const U& input);
+
       private:
         /** field to store exp value calculated once on initialization */
         float mtmDotExp;
     };
+
+    template <typename T, typename U> T DetumblingComputations::CastWithSaturation(const U& input)
+    {
+        U upper = static_cast<U>(std::numeric_limits<T>::max());
+        U lower = static_cast<U>(std::numeric_limits<T>::min());
+        return static_cast<T>(std::max(lower, std::min(input, upper)));
+    }
     /** @} */
 }
 
