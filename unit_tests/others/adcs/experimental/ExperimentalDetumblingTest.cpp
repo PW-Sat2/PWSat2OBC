@@ -68,11 +68,15 @@ namespace
         EXPECT_CALL(_os, TakeSemaphore(_, _)).WillRepeatedly(Return(OSResult::Success));
         EXPECT_CALL(_os, GiveSemaphore(_)).WillRepeatedly(Return(OSResult::Success));
 
+        auto calibratedMagnetometerMeasurement = Vector3<MagnetometerMeasurement>{1, -2, 3};
+
         auto selfTestResult = CreateSuccessfulSelfTestResult();
 
         selfTestResult.stepResults[1].error = Error(1);
 
         ON_CALL(_imtqDriver, PerformSelfTest(_, _)).WillByDefault(DoAll(SetArgReferee<0>(selfTestResult), Return(true)));
+        ON_CALL(_imtqDriver, MeasureMagnetometer(_))
+                    .WillByDefault(DoAll(SetArgReferee<0>(calibratedMagnetometerMeasurement), Return(true)));
 
         _detumbling.Initialize();
         ASSERT_THAT(_detumbling.Enable(), Eq(OSResult::Success));

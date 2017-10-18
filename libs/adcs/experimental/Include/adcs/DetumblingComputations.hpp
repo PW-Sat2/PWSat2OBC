@@ -91,7 +91,7 @@ namespace adcs
          * @param[in] parameters set
          * @return state container
          */
-        State initialize(const Parameters& parameters);
+        State initialize(const Parameters& parameters, const MagVec& mgmt_meas);
 
         /**
          * @brief Detumbling step function
