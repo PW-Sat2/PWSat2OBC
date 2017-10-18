@@ -179,7 +179,7 @@ namespace mission
         using StepProc = void (*)(OpenSailTask* This, SystemState& state);
 
         /** @brief Sail opening steps */
-        static StepProc Steps[24];
+        static StepProc Steps[25];
         /** @brief Steps count */
         static constexpr std::uint8_t StepsCount = count_of(Steps);
     };

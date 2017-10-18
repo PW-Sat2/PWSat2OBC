@@ -8,6 +8,7 @@ namespace mission
 {
     OpenSailTask::StepProc OpenSailTask::Steps[] = {
         &IgnoreOverheat,               //
+        &Delay100ms,                   //
                                        //
         &EnableMainThermalKnife,       //
         &Delay100ms,                   //
