@@ -22,6 +22,7 @@ TEST(detumbling, cross_validation)
         std::cerr << "Cannot find data  file!" << std::endl;
         FAIL();
     }
+    bool first_record = true;
     std::vector<float> record;
 
     DetumblingComputations::Parameters params;
@@ -29,7 +30,8 @@ TEST(detumbling, cross_validation)
     MagVec mgmt;
 
     DetumblingComputations dtb;
-    auto state = dtb.initialize(params);
+    DetumblingComputations::State state;
+
 
     // matlab sim is working with different units
     // input: Sim [T] --> OBC [1e-7 T]
@@ -62,6 +64,12 @@ TEST(detumbling, cross_validation)
         std::cout << "out2: " << record[6] << " " << output_scale << " " << record[6] * output_scale << " "
                   << (int)(record[6] * output_scale) << std::endl;
 #endif
+
+        if(first_record)
+        {
+            state = dtb.initialize(params, mgmt);
+            first_record = false;
+        }
 
         auto dipole = dtb.step(mgmt, state);
 

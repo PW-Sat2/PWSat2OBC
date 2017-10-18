@@ -88,10 +88,11 @@ namespace adcs
          * This function should be called before first step of algorithm
          * and  every time user intend to change parameters
          *
-         * @param[in] parameters set
+         * @param[in] parameters parameters set
+         * @param[in] mgmt_meas initial mtm measurement
          * @return state container
          */
-        State initialize(const Parameters& parameters);
+        State initialize(const Parameters& parameters, const MagVec& mgmt_meas);
 
         /**
          * @brief Detumbling step function

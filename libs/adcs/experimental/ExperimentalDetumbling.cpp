@@ -107,7 +107,14 @@ namespace adcs
             }
         }
 
-        this->detumblingState = this->detumblingComputations.initialize(parameters);
+        Vector3<MagnetometerMeasurement> magnetometerMeasurement;
+        if (!this->imtqDriver.MeasureMagnetometer(magnetometerMeasurement))
+        {
+            LOG(LOG_LEVEL_ERROR, "Cannot get magnetometer measurement");
+            return OSResult::IOError;
+        }
+
+        this->detumblingState = this->detumblingComputations.initialize(parameters, magnetometerMeasurement);
 
         return OSResult::Success;
     }
