@@ -1,7 +1,7 @@
 #include <array>
 #include <cstdio>
 #include <unistd.h>
-#include "base/Writer.h"
+#include "base/writer.h"
 #include "state/LockablePersistentState.hpp"
 #include "state/StatePolicies.hpp"
 #include "state/adcs/AdcsState.hpp"
