@@ -32,14 +32,7 @@ namespace obc
 
         std::uint32_t FileSender::MaxChunkNumber(std::uint32_t fileSize)
         {
-            auto n = fileSize / MaxFileDataSize;
-
-            if (n * MaxFileDataSize < fileSize)
-            {
-                n++;
-            }
-
-            return n;
+            return (fileSize + MaxFileDataSize - 1) / MaxFileDataSize;
         }
 
         bool FileSender::IsValid()

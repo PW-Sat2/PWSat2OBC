@@ -301,4 +301,43 @@ namespace
             Mock::VerifyAndClear(&coordinator);
         }
     }
+
+    TEST_F(AdcsPrimaryTaskTest, ShouldNotReenableAfterDetumblingStoppedByOtherMeans)
+    {
+        {
+            state.Time = 2h;
+            state.AntennaState.SetDeployment(true);
+            coordinator.SetCurrentMode(AdcsMode::Stopped);
+
+            EXPECT_CALL(coordinator, EnableBuiltinDetumbling()).Times(1).WillOnce(Return(OSResult::Success));
+            EXPECT_CALL(coordinator, Stop()).Times(0);
+
+            Run();
+            Mock::VerifyAndClear(&coordinator);
+        }
+
+        {
+            state.Time = 2h;
+            state.AntennaState.SetDeployment(true);
+            coordinator.SetCurrentMode(AdcsMode::BuiltinDetumbling);
+
+            EXPECT_CALL(coordinator, EnableBuiltinDetumbling()).Times(0);
+            EXPECT_CALL(coordinator, Stop()).Times(0);
+
+            Run();
+            Mock::VerifyAndClear(&coordinator);
+        }
+
+        {
+            state.Time = 2h + 10min;
+            state.AntennaState.SetDeployment(true);
+            coordinator.SetCurrentMode(AdcsMode::Stopped);
+
+            EXPECT_CALL(coordinator, EnableBuiltinDetumbling()).Times(0);
+            EXPECT_CALL(coordinator, Stop()).Times(0);
+
+            Run();
+            Mock::VerifyAndClear(&coordinator);
+        }
+    }
 }

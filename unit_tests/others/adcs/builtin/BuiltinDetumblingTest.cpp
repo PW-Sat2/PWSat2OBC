@@ -27,7 +27,7 @@ namespace
 
     TEST_F(BuiltinDetumblingTest, ShouldStartDetumblingDuringProcess)
     {
-        EXPECT_CALL(_power, ImtqPower(true));
+        EXPECT_CALL(_power, ImtqPower(true)).WillOnce(Return(true));
         EXPECT_CALL(_os, Sleep(1000ms));
         EXPECT_CALL(_imtqDriver, StartBDotDetumbling(_));
 
@@ -36,10 +36,19 @@ namespace
         _detumbling.Process();
     }
 
+    TEST_F(BuiltinDetumblingTest, ShouldFailWhenFailedToPowerUpImtq)
+    {
+        EXPECT_CALL(_power, ImtqPower(true)).WillOnce(Return(false));
+
+        auto r = _detumbling.Enable();
+
+        ASSERT_THAT(r, Eq(OSResult::IOError));
+    }
+
     TEST_F(BuiltinDetumblingTest, ShouldPowerDownOnDisable)
     {
-        EXPECT_CALL(_power, ImtqPower(true));
-        EXPECT_CALL(_power, ImtqPower(false));
+        EXPECT_CALL(_power, ImtqPower(true)).WillOnce(Return(true));
+        EXPECT_CALL(_power, ImtqPower(false)).WillOnce(Return(true));
 
         _detumbling.Initialize();
         _detumbling.Enable();
@@ -48,6 +57,7 @@ namespace
 
     TEST_F(BuiltinDetumblingTest, ShouldPerformSelfTestWhenEnabling)
     {
+        EXPECT_CALL(_power, ImtqPower(true)).WillOnce(Return(true));
         EXPECT_CALL(_imtqDriver, PerformSelfTest(_, _)).WillOnce(Return(true));
 
         _detumbling.Initialize();
@@ -57,6 +67,7 @@ namespace
 
     TEST_F(BuiltinDetumblingTest, ShouldEnableIfSelfTestFails)
     {
+        EXPECT_CALL(_power, ImtqPower(true)).WillOnce(Return(true));
         EXPECT_CALL(_imtqDriver, PerformSelfTest(_, _)).WillOnce(Return(false));
 
         _detumbling.Initialize();
@@ -66,6 +77,7 @@ namespace
 
     TEST_F(BuiltinDetumblingTest, ShouldEnableIfErrorsInSelfTest)
     {
+        EXPECT_CALL(_power, ImtqPower(true)).WillOnce(Return(true));
         EXPECT_CALL(_imtqDriver, PerformSelfTest(_, _)).WillOnce(Invoke([](devices::imtq::SelfTestResult& result, bool) {
             for (auto& s : result.stepResults)
             {

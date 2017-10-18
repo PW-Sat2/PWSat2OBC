@@ -41,6 +41,11 @@ namespace mission
                 return false;
             }
 
+            if (context->state != State::WaitingForStart)
+            {
+                return false;
+            }
+
             if (state.Time > 4h)
             {
                 return false;
@@ -61,7 +66,7 @@ namespace mission
                 return false;
             }
 
-            return true; // !IsDetumblingDisabled(state);
+            return true;
         }
 
         void AdcsPrimaryTask::Start(SystemState& /*state*/, void* param)
@@ -84,11 +89,6 @@ namespace mission
             }
 
             if (context->state != State::Detumbling)
-            {
-                return false;
-            }
-
-            if (context->coordinator.CurrentMode() == ::adcs::AdcsMode::Stopped)
             {
                 return false;
             }

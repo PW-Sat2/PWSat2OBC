@@ -46,6 +46,7 @@ namespace
 
     TEST_F(ExperimentalDetumblingTest, ShouldStartDipoleActuation)
     {
+        EXPECT_CALL(_power, ImtqPower(true)).WillOnce(Return(true));
         EXPECT_CALL(_os, GiveSemaphore(_)).WillRepeatedly(Return(OSResult::Success));
 
         auto expectedDipole = Vector3<Dipole>{-22464, 20608, -1920};
@@ -60,8 +61,6 @@ namespace
             .WillByDefault(DoAll(SetArgReferee<0>(calibratedMagnetometerMeasurement), Return(true)));
         EXPECT_CALL(_imtqDriver, StartActuationDipole(Eq(expectedDipole), Eq(0ms)));
 
-        EXPECT_CALL(_power, ImtqPower(true));
-
         _detumbling.Initialize();
         _detumbling.Enable();
         _detumbling.Process();
@@ -71,7 +70,7 @@ namespace
     {
         EXPECT_CALL(_os, TakeSemaphore(_, _)).WillRepeatedly(Return(OSResult::Success));
         EXPECT_CALL(_os, GiveSemaphore(_)).WillRepeatedly(Return(OSResult::Success));
-        EXPECT_CALL(_power, ImtqPower(true));
+        EXPECT_CALL(_power, ImtqPower(true)).WillOnce(Return(true));
 
         auto selfTestResult = CreateSuccessfulSelfTestResult();
 
@@ -85,8 +84,8 @@ namespace
 
     TEST_F(ExperimentalDetumblingTest, ShouldReportErrorWhenMoreThanOneMagnetometerFails)
     {
-        EXPECT_CALL(_power, ImtqPower(true));
-        EXPECT_CALL(_power, ImtqPower(false));
+        EXPECT_CALL(_power, ImtqPower(true)).WillOnce(Return(true));
+        EXPECT_CALL(_power, ImtqPower(false)).WillOnce(Return(true));
         EXPECT_CALL(_os, TakeSemaphore(_, _)).WillRepeatedly(Return(OSResult::Success));
         EXPECT_CALL(_os, GiveSemaphore(_)).WillRepeatedly(Return(OSResult::Success));
 
