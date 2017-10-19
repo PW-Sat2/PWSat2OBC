@@ -17,6 +17,14 @@ decltype(Bootloader) Bootloader;
 
 void waitForComms(uint32_t timeoutTicks_ms);
 
+static void InitializeAllPins(GPIO_Port_TypeDef port, std::uint8_t pinCount)
+{
+    for (std::uint8_t pin = 0; pin < pinCount; pin++)
+    {
+        GPIO_PinModeSet(port, pin, gpioModeDisabled, 1);
+    }
+}
+
 static void Initialize()
 {
     CHIP_Init();
@@ -32,6 +40,15 @@ static void Initialize()
         while (1)
             ;
     }
+
+    CMU_ClockEnable(cmuClock_GPIO, true);
+
+    InitializeAllPins(gpioPortA, _GPIO_PORT_A_PIN_COUNT);
+    InitializeAllPins(gpioPortB, _GPIO_PORT_B_PIN_COUNT);
+    InitializeAllPins(gpioPortC, _GPIO_PORT_C_PIN_COUNT);
+    InitializeAllPins(gpioPortD, _GPIO_PORT_D_PIN_COUNT);
+    InitializeAllPins(gpioPortE, _GPIO_PORT_E_PIN_COUNT);
+    InitializeAllPins(gpioPortF, _GPIO_PORT_F_PIN_COUNT);
 
     BSP_DMA_Init();
     COMMS_Init();
