@@ -65,7 +65,7 @@ namespace obc
 
         void PurgePhoto::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
         {
-            if (parameters.size() == 0)
+            if (parameters.empty())
             {
                 CorrelatedDownlinkFrame response(DownlinkAPID::PurgePhoto, 0, 0);
                 response.PayloadWriter().WriteByte(0x1);
@@ -85,6 +85,8 @@ namespace obc
             else
             {
                 this->_photoService.PurgePendingCommands();
+                this->_photoService.DisableCamera(services::photo::Camera::Nadir);
+                this->_photoService.DisableCamera(services::photo::Camera::Wing);
                 this->_photoService.Reset();
                 writer.WriteByte(0);
             }
