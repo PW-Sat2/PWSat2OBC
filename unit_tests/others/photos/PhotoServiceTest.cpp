@@ -9,15 +9,15 @@
 #include "photo/photo_service.hpp"
 #include "power/power.h"
 
-using testing::Eq;
-using testing::_;
-using testing::Ne;
-using testing::Return;
-using testing::Invoke;
-using testing::InSequence;
 using testing::Each;
 using testing::ElementsAre;
+using testing::Eq;
+using testing::InSequence;
+using testing::Invoke;
+using testing::Ne;
+using testing::Return;
 using testing::StrEq;
+using testing::_;
 using namespace services::photo;
 using namespace std::chrono_literals;
 
@@ -347,22 +347,6 @@ namespace
         }));
 
         EXPECT_CALL(_os, EventGroupSetBits(_, 1 << 1));
-        EXPECT_CALL(_os, EventGroupClearBits(_, 1 << 0));
-
-        EXPECT_CALL(_os, QueueSend(_, _, _)).WillOnce(Invoke([](OSQueueHandle /*handle*/, const void* elementPtr, auto /*timeout*/) {
-            auto ptr = static_cast<const PossibleCommand*>(elementPtr);
-            EXPECT_THAT(ptr->Selected, Eq(Command::DisableCamera));
-            EXPECT_THAT(ptr->DisableCameraCommand.Which, Eq(Camera::Nadir));
-            return true;
-        }));
-        EXPECT_CALL(_os, EventGroupClearBits(_, 1 << 0));
-
-        EXPECT_CALL(_os, QueueSend(_, _, _)).WillOnce(Invoke([](OSQueueHandle /*handle*/, const void* elementPtr, auto /*timeout*/) {
-            auto ptr = static_cast<const PossibleCommand*>(elementPtr);
-            EXPECT_THAT(ptr->Selected, Eq(Command::DisableCamera));
-            EXPECT_THAT(ptr->DisableCameraCommand.Which, Eq(Camera::Wing));
-            return true;
-        }));
         EXPECT_CALL(_os, EventGroupClearBits(_, 1 << 0));
 
         _service.PurgePendingCommands();
