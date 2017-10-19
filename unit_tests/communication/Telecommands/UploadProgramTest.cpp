@@ -177,6 +177,13 @@ TEST_F(UploadProgramTest, ResponseWithEraseError)
     this->HandleFrame(this->_eraseTelecommand, 1);
 }
 
+TEST_F(UploadProgramTest, ErrorFrameOnMalformedEraseTelecommand)
+{
+    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(0, 1, 10)))).Times(1);
+
+    this->HandleFrame(this->_eraseTelecommand);
+}
+
 TEST_F(UploadProgramTest, ResponseWithProgramErrorOnWritePart)
 {
     ON_CALL(this->_flashMock, Program(0x00000400 + 256_KB, A<gsl::span<const std::uint8_t>>()))

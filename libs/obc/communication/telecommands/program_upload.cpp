@@ -29,6 +29,17 @@ namespace obc
             return frame;
         }
 
+        static inline DownlinkFrame EraseEntryMalformedError()
+        {
+            DownlinkFrame frame(DownlinkAPID::ProgramUpload, 0);
+            auto& writer = frame.PayloadWriter();
+            writer.WriteByte(0);
+            writer.WriteByte(1);
+            writer.WriteByte(10);
+
+            return frame;
+        }
+
         static inline DownlinkFrame EraseEntrySuccess(std::uint8_t entries)
         {
             DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
@@ -108,6 +119,8 @@ namespace obc
         {
             if (parameters.size() != 1)
             {
+                transmitter.SendFrame(EraseEntryMalformedError().Frame());
+
                 return;
             }
 
