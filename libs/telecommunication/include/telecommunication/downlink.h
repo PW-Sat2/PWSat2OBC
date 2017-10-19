@@ -61,6 +61,7 @@ namespace telecommunication
             SetAdcsMode = 0x1F,                //!< Set Adcs Mode telecommand
             DisableSailDeployment = 0x20,      //!< Disable automatic sail deployment
             MemoryContent = 0x21,              //!< Memory contents
+            BeaconError = 0x22,                //!< Beacon Error
             Telemetry = 0x3F,                  //!< TelemetryLong
             LastItem                           //!< LastItem
         };

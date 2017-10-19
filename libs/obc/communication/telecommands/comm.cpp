@@ -81,6 +81,12 @@ namespace obc
             {
                 transmitter.SendFrame(frame.Frame());
             }
+            else
+            {
+                telecommunication::downlink::DownlinkFrame response(DownlinkAPID::BeaconError, 0);
+
+                transmitter.SendFrame(response.Frame());
+            }
         }
 
         ResetTransmitterTelecommand::ResetTransmitterTelecommand()
