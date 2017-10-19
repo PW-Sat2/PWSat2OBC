@@ -62,6 +62,17 @@ namespace obc
             return response;
         }
 
+        static inline DownlinkFrame WriteProgramMalformedError()
+        {
+            DownlinkFrame frame(DownlinkAPID::ProgramUpload, 0);
+            auto& writer = frame.PayloadWriter();
+            writer.WriteByte(1);
+            writer.WriteByte(1);
+            writer.WriteByte(10);
+
+            return frame;
+        }
+
         static inline DownlinkFrame WriteProgramSuccess(std::uint8_t entries, std::uint32_t offset, std::uint8_t size)
         {
             DownlinkFrame response(DownlinkAPID::ProgramUpload, 0);
@@ -159,6 +170,7 @@ namespace obc
 
             if (!r.Status())
             {
+                transmitter.SendFrame(WriteProgramMalformedError().Frame());
                 return;
             }
 

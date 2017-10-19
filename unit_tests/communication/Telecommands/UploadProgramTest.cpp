@@ -195,6 +195,12 @@ TEST_F(UploadProgramTest, ResponseWithProgramErrorOnWritePart)
 
     this->HandleFrame(this->_writePartTelecommand, 1, 0x00, 0x00, 0x04, 0x00, 'P', 'a', 'r', 't', 0);
 }
+TEST_F(UploadProgramTest, ErrorFrameOnMalformedWriteTelecommand)
+{
+    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(1, 1, 10)))).Times(1);
+
+    this->HandleFrame(this->_writePartTelecommand);
+}
 
 TEST_F(UploadProgramTest, ResponseWithProgramErrorOnFinalize)
 {
