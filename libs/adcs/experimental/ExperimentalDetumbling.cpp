@@ -139,9 +139,17 @@ namespace adcs
             return;
         }
 
+        LOGF(LOG_LEVEL_DEBUG,
+            "[ADCS] Magnetometer values: %5ld, %5ld, %5ld",
+            magnetometerMeasurement[0],
+            magnetometerMeasurement[1],
+            magnetometerMeasurement[2]);
+
         auto dipoleVector = this->detumblingComputations.step(magnetometerMeasurement, this->detumblingState);
 
         auto actuationDipole = Vector3<Dipole>{dipoleVector[0], dipoleVector[1], dipoleVector[2]};
+
+        LOGF(LOG_LEVEL_DEBUG, "[ADCS] Actuation values: %5d, %5d, %5d", actuationDipole[0], actuationDipole[1], actuationDipole[2]);
 
         if (!this->imtqDriver.StartActuationDipole(actuationDipole, 0ms))
         {
