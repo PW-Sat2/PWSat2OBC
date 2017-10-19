@@ -112,6 +112,11 @@ namespace services
             return Switch(enabled, LCL::CamNadir);
         }
 
+        bool EPSPowerControl::ImtqPower(bool enabled)
+        {
+            return Switch(enabled, LCL::IMTQ);
+        }
+
         bool EPSPowerControl::Switch(bool enabled, LCL lcl)
         {
             if (enabled)

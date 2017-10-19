@@ -38,6 +38,13 @@ namespace obc
              */
             bool SendPart(std::uint32_t seq);
 
+            /**
+             * @brief Calculates max chunk number for file of given size
+             * @param fileSize File size
+             * @return Max chunk number (0-based index)
+             */
+            static std::uint32_t MaxChunkNumber(std::uint32_t fileSize);
+
           private:
             /** @brief Maximum size of file data in a payload */
             static constexpr uint8_t MaxFileDataSize = telecommunication::downlink::DownlinkFrame::MaxPayloadSize - 2;

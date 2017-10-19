@@ -92,7 +92,7 @@ namespace
 
     TEST(DISTR_HKTest, TestSerialization)
     {
-        std::uint8_t expected[] = {0xf1, 0x82, 0x27, 0xfd, 0xb0, 0xb2, 0x81, 0x4e, 0x10};
+        std::uint8_t expected[] = {0xf1, 0x82, 0x27, 0xfd, 0xb0, 0xb2, 0x81, 0x4e, 0x24};
         DISTR_HK state;
         state.VOLT_3V3 = 0x2f1;
         state.CURR_3V3 = 0x1e0;
@@ -100,7 +100,7 @@ namespace
         state.CURR_5V = 0x2c3;
         state.VOLT_VBAT = 0x1b2;
         state.CURR_VBAT = 0x3a0;
-        state.LCL_STATE = DISTR_LCL_STATE::CamNadir;
+        state.LCL_STATE = static_cast<DISTR_LCL_STATE>(num(DISTR_LCL_STATE::CamNadir) | num(DISTR_LCL_STATE::IMTQ));
         state.LCL_FLAGB = DISTR_LCL_FLAGB::CamNadir;
         RunTest(state, gsl::make_span(expected));
     }
@@ -222,29 +222,30 @@ namespace
             0x99,
             0xEF,
             0xBE,
-            0xBF,
+            0x7F,
+            0xFD,
+            0xFF,
+            0xFF,
+            0xFF,
+            0xFF,
+            0x9F,
+            0x57,
+            0xBD,
+            0xB7,
+            0xFF,
+            0xFF,
+            0xFF,
+            0xFF,
+            0xFF,
+            0xFF,
+            0xFF,
+            0xFF,
+            0xFF,
+            0xDF,
             0xFE,
-            0xFF,
-            0xFF,
-            0xFF,
-            0xFF,
-            0xCF,
-            0xAB,
-            0xDE,
-            0xDB,
-            0xFF,
-            0xFF,
-            0xFF,
-            0xFF,
-            0xFF,
-            0xFF,
-            0xFF,
-            0xFF,
-            0xFF,
-            0x6F,
-            0xFF,
-            0xBF,
-            0xF7};
+            0x7F,
+            0xEF,
+            0x01};
         ControllerATelemetry state;
         state.mpptX.SOL_VOLT = 0x111;
         state.mpptX.SOL_CURR = 0x222;
@@ -259,7 +260,7 @@ namespace
         state.distr.CURR_5V = 0x3EE;
         state.distr.VOLT_VBAT = 0x3CC;
         state.distr.CURR_VBAT = 0x3DD;
-        state.distr.LCL_STATE = static_cast<DISTR_LCL_STATE>(0b111101);
+        state.distr.LCL_STATE = static_cast<DISTR_LCL_STATE>(0b1111101);
         state.distr.LCL_FLAGB = static_cast<DISTR_LCL_FLAGB>(0b010111);
         state.batc.VOLT_A = 0x3ff;
         state.batc.ChargeCurrent = 0x3ff;

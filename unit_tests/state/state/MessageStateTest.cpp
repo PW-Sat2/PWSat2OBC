@@ -17,8 +17,8 @@ namespace
     {
         MessageState state;
 
-        ASSERT_THAT(state.Interval(), Eq(5min));
-        ASSERT_THAT(state.RepeatCount(), Eq(3));
+        ASSERT_THAT(state.Interval(), Eq(10min));
+        ASSERT_THAT(state.RepeatCount(), Eq(0));
 
         auto msg = reinterpret_cast<const char*>(state.Message().data());
 

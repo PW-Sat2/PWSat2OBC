@@ -1,4 +1,4 @@
-def encode(data):
+﻿def encode(data):
     result = []
 
     for field in data:
@@ -27,66 +27,56 @@ def encode(data):
     print ', '.join(map(lambda x: '0x{:02X}'.format(x), result))
 
 
-true = 1
-false = 0
-
-deployment_switch_a = map(lambda x: (1, x), [
-    false, true, false, true
-])
-
-deployment_switch_b = map(lambda x: (1, x), [
-    true, false, true, false
-])
-
-last_stop_a = map(lambda x: (1, x), [
-    true, false, true, false
-])
-
-last_stop_b = map(lambda x: (1, x), [
-    false, true, false, true
-])
-
-burn_active_a = map(lambda x: (1, x), [
-    false, true, true, false
-])
-
-burn_active_b = map(lambda x: (1, x), [
-    true, false, false, true
-])
-
-indep_burn = [
-    (1, 1),
-    (1, 1)
+mppt = [
+    (12, 0x111),
+    (12, 0x222),
+    (12, 0x333),
+    (12, 0x444),
+    (3, 0b111)
 ]
 
-ignore_switch = [
-    (1, 1),
-    (1, 0)
+distr = [
+    (10, 0x3AA),
+    (10, 0x3FF),
+    (10, 0x3BB),
+    (10, 0x3EE),
+    (10, 0x3CC),
+    (10, 0x3DD),
+    (7, 0b1111101),
+    (6, 0b010111),
 ]
 
-armed = [
-    (1, 1),
-    (1, 0)
+batc = [
+    (10, 0x3FF),
+    (10, 0x3FF),
+    (10, 0x3FF),
+    (10, 0x3FF),
+    (3, 0b111)
 ]
 
-counts_a = map(lambda x: (3, x), [
-    1, 2, 3, 4
-])
+bp = [
+    (13, 0xABC),
+    (13, 0xDEF)
+]
 
-counts_b = map(lambda x: (3, x), [
-    5, 6, 7, 7
-])
+current = [
+    (8, 0xFF),
+    (16, 0xffff),
+    (32, 0xffffffff),
+    (10, 0x3ff),
+    (10, 0x3ff)
+]
 
-times_a = map(lambda x: (8, x), [
-    5, 10, 15, 20
-])
+other = [
+    (10, 987)
+]
 
-times_b = map(lambda x: (8, x), [
-    25, 30, 35, 40
-])
+dcdc3v3 = [
+    (10, 0x3ff)
+]
 
-encode(deployment_switch_a + deployment_switch_b + last_stop_a + last_stop_b + burn_active_a + burn_active_b
-       + indep_burn + ignore_switch + armed
-       + counts_a + counts_b
-       + times_a + times_b
-       )
+dcdc5v = [
+    (10, 0x3de)
+]
+
+encode(mppt * 3 + distr + batc + bp + current + other + dcdc3v3 + dcdc5v)

@@ -1,6 +1,7 @@
 #include "BuiltinDetumbling.hpp"
 #include <chrono>
 #include "logger/logger.h"
+#include "power/power.h"
 
 using namespace std::chrono_literals;
 
@@ -16,7 +17,8 @@ namespace adcs
         return chrono_extensions::period_cast<std::chrono::seconds>(BuiltinDetumbling::Frequency) * 2;
     }
 
-    BuiltinDetumbling::BuiltinDetumbling(devices::imtq::IImtqDriver& imtqDriver_) : imtqDriver(imtqDriver_)
+    BuiltinDetumbling::BuiltinDetumbling(devices::imtq::IImtqDriver& imtqDriver_, services::power::IPowerControl& powerControl_)
+        : imtqDriver(imtqDriver_), powerControl(powerControl_)
     {
     }
 
@@ -27,6 +29,13 @@ namespace adcs
 
     OSResult BuiltinDetumbling::Enable()
     {
+        if (!powerControl.ImtqPower(true))
+        {
+            return OSResult::IOError;
+        }
+
+        System::SleepTask(1s);
+
         devices::imtq::SelfTestResult selfTestResult;
         imtqDriver.PerformSelfTest(selfTestResult, false);
 
@@ -35,7 +44,7 @@ namespace adcs
 
     OSResult BuiltinDetumbling::Disable()
     {
-        return imtqDriver.CancelOperation() ? OSResult::Success : OSResult::IOError;
+        return powerControl.ImtqPower(false) ? OSResult::Success : OSResult::IOError;
     }
 
     void BuiltinDetumbling::Process()

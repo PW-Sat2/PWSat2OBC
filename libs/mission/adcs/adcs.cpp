@@ -4,13 +4,17 @@
 #include "mission/obc.hpp"
 #include "state/struct.h"
 
+using namespace std::chrono_literals;
+
 namespace mission
 {
     namespace adcs
     {
         AdcsPrimaryTask::AdcsPrimaryTask(::adcs::IAdcsCoordinator& adcsCoordinator) //
-            : retryCount(RetryCount),
-              coordinator(adcsCoordinator)
+            : CompositeAction("ADCS Task", BuildStartAction(), BuildStopAction()),  //
+              retryCount(RetryCount),
+              coordinator(adcsCoordinator),
+              state(State::WaitingForStart)
         {
         }
         /**
@@ -29,10 +33,20 @@ namespace mission
             return UpdateResult::Ok;
         }
 
-        bool AdcsPrimaryTask::AdcsEnableBuiltinDetumblingCondition(const SystemState& state, void* param)
+        bool AdcsPrimaryTask::StartCondition(const SystemState& state, void* param)
         {
             const auto context = static_cast<AdcsPrimaryTask*>(param);
             if (!IsInitialSilentPeriodFinished(state.Time))
+            {
+                return false;
+            }
+
+            if (context->state != State::WaitingForStart)
+            {
+                return false;
+            }
+
+            if (state.Time > 4h)
             {
                 return false;
             }
@@ -47,25 +61,50 @@ namespace mission
                 return false;
             }
 
-            if (context->retryCount == 0)
+            if (IsDetumblingDisabled(state))
             {
                 return false;
             }
 
-            return !IsDetumblingDisabled(state);
+            return true;
         }
 
-        void AdcsPrimaryTask::AdcsEnableBuiltinDetumbling(SystemState& /*state*/, void* param)
+        void AdcsPrimaryTask::Start(SystemState& /*state*/, void* param)
         {
             const auto context = static_cast<AdcsPrimaryTask*>(param);
             const auto result = context->coordinator.EnableBuiltinDetumbling();
             if (OS_RESULT_SUCCEEDED(result))
             {
-                context->retryCount = RetryCount;
+                context->state = State::Detumbling;
             }
-            else
+        }
+
+        bool AdcsPrimaryTask::StopCondition(const SystemState& state, void* param)
+        {
+            const auto context = static_cast<AdcsPrimaryTask*>(param);
+
+            if (state.Time <= 4h)
             {
-                context->retryCount = std::max(context->retryCount - 1, 0);
+                return false;
+            }
+
+            if (context->state != State::Detumbling)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        void AdcsPrimaryTask::Stop(SystemState& state, void* param)
+        {
+            (void)state;
+
+            const auto context = static_cast<AdcsPrimaryTask*>(param);
+
+            if (OS_RESULT_SUCCEEDED(context->coordinator.Stop()))
+            {
+                context->state = State::Stopped;
             }
         }
 
@@ -74,19 +113,29 @@ namespace mission
             state::AdcsState adcsState;
             if (!state.PersistentState.Get(adcsState))
             {
-                return true;
+                return false;
             }
 
             return adcsState.IsInternalDetumblingDisabled();
         }
 
-        ActionDescriptor<SystemState> AdcsPrimaryTask::BuildAction()
+        ActionDescriptor<SystemState> AdcsPrimaryTask::BuildStartAction()
         {
             ActionDescriptor<SystemState> descriptor;
-            descriptor.name = "Enable Primary Adcs Detumbling";
+            descriptor.name = "Start Detumbling";
             descriptor.param = this;
-            descriptor.condition = AdcsEnableBuiltinDetumblingCondition;
-            descriptor.actionProc = AdcsEnableBuiltinDetumbling;
+            descriptor.condition = StartCondition;
+            descriptor.actionProc = Start;
+            return descriptor;
+        }
+
+        ActionDescriptor<SystemState> AdcsPrimaryTask::BuildStopAction()
+        {
+            ActionDescriptor<SystemState> descriptor;
+            descriptor.name = "Stop Detumbling";
+            descriptor.param = this;
+            descriptor.condition = StopCondition;
+            descriptor.actionProc = Stop;
             return descriptor;
         }
 

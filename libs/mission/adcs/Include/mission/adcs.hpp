@@ -25,7 +25,7 @@ namespace mission
          * global system state, plus it is also responsible for enabling built-in detumbling algorithm once the
          * initial silent period has passed.
          */
-        class AdcsPrimaryTask : public Update, Action
+        class AdcsPrimaryTask : public Update, public CompositeAction<SystemState, 2>
         {
           public:
             /**
@@ -37,27 +37,18 @@ namespace mission
             AdcsPrimaryTask(::adcs::IAdcsCoordinator& adcsCoordinator);
 
             /**
-             * @brief Disables the primary detumbling algorithm.
-             */
-            void Disable();
-
-            /**
-             * @brief Enables the primary detumbling algorithm.
-             */
-            void RunDetumbling();
-
-            /**
-             * @brief Retruns information whether the primary detumbling algorithm is disabled.
-             * @returns True when the algorightm is disabled, false othwerwise.
-             */
-            bool IsDisabled() const;
-
-            /**
-             * @brief Returns adcs primary detumbling action descriptor.
+             * @brief Returns action descriptor for starting detumbling.
              *
-             * @returns Action descriptor that runs primary adcs detumbling algorithm.
+             * @returns Action descriptor that runs adcs detumbling algorithm.
              */
-            ActionDescriptor<SystemState> BuildAction();
+            ActionDescriptor<SystemState> BuildStartAction();
+
+            /**
+              * @brief Returns action descriptor for stop detumbling.
+              *
+              * @returns Action descriptor that stops adcs detumbling algorithm.
+              */
+            ActionDescriptor<SystemState> BuildStopAction();
 
             /**
              * @brief Returns adcs status update descriptor.
@@ -75,7 +66,7 @@ namespace mission
              *
              * @return True if the deployment action should be performed, false otherwise.
              */
-            static bool AdcsEnableBuiltinDetumblingCondition(const SystemState& state, void* param);
+            static bool StartCondition(const SystemState& state, void* param);
 
             /**
              * @brief This procedure is deployment action entry point.
@@ -85,7 +76,10 @@ namespace mission
              * @param[in] param Pointer to the deployment condition private context. This pointer should point
              * at the object of AdcsPrimaryTask type.
              */
-            static void AdcsEnableBuiltinDetumbling(SystemState& state, void* param);
+            static void Start(SystemState& state, void* param);
+
+            static bool StopCondition(const SystemState& state, void* param);
+            static void Stop(SystemState& state, void* param);
 
             static bool IsDetumblingDisabled(const SystemState& state);
 
@@ -100,22 +94,16 @@ namespace mission
              * @brief Access to the adcs subsystem coordinator.
              */
             ::adcs::IAdcsCoordinator& coordinator;
+
+            enum class State
+            {
+                WaitingForStart,
+                Detumbling,
+                Stopped
+            };
+
+            State state;
         };
-
-        inline void AdcsPrimaryTask::Disable()
-        {
-            this->retryCount = 0;
-        }
-
-        inline void AdcsPrimaryTask::RunDetumbling()
-        {
-            this->retryCount = RetryCount;
-        }
-
-        inline bool AdcsPrimaryTask::IsDisabled() const
-        {
-            return this->retryCount == 0;
-        }
 
         /** @} */
     }

@@ -132,7 +132,7 @@ class EPSControllerATelemetryParser(CategoryParser):
         self.append('DISTR.CURR_5V', 10, value_type=DistributionCurrent)
         self.append('DISTR.VOLT_VBAT', 10, value_type=DistributionVoltage)
         self.append('DISTR.CURR_VBAT', 10, value_type=DistributionCurrent)
-        self.append('DISTR.LCL_STATE', 6)
+        self.append('DISTR.LCL_STATE', 7)
         self.append('DISTR.LCL_FLAGS', 6)
         self.append('BATC.VOLT_A', 10, value_type=BATCVoltage)
         self.append('BATC.CHRG_CURR', 10, value_type=DistributionVoltage)

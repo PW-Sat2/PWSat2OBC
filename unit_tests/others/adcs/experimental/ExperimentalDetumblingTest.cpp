@@ -3,6 +3,7 @@
 #include "OsMock.hpp"
 #include "adcs/ExperimentalDetumbling.hpp"
 #include "mock/ImtqDriverMock.hpp"
+#include "mock/power.hpp"
 
 using namespace std::chrono_literals;
 
@@ -29,10 +30,11 @@ namespace
         ExperimentalDetumblingTest();
 
         testing::NiceMock<ImtqDriverMock> _imtqDriver;
+        testing::NiceMock<PowerControlMock> _power;
         testing::NiceMock<OSMock> _os;
         OSReset _osReset;
 
-        adcs::ExperimentalDetumbling _detumbling{_imtqDriver};
+        adcs::ExperimentalDetumbling _detumbling{_imtqDriver, _power};
 
         SelfTestResult CreateSuccessfulSelfTestResult() const;
     };
@@ -44,6 +46,7 @@ namespace
 
     TEST_F(ExperimentalDetumblingTest, ShouldStartDipoleActuation)
     {
+        EXPECT_CALL(_power, ImtqPower(true)).WillOnce(Return(true));
         EXPECT_CALL(_os, GiveSemaphore(_)).WillRepeatedly(Return(OSResult::Success));
 
         auto expectedDipole = Vector3<Dipole>{-22464, 20608, -1920};
@@ -67,6 +70,7 @@ namespace
     {
         EXPECT_CALL(_os, TakeSemaphore(_, _)).WillRepeatedly(Return(OSResult::Success));
         EXPECT_CALL(_os, GiveSemaphore(_)).WillRepeatedly(Return(OSResult::Success));
+        EXPECT_CALL(_power, ImtqPower(true)).WillOnce(Return(true));
 
         auto selfTestResult = CreateSuccessfulSelfTestResult();
 
@@ -80,6 +84,8 @@ namespace
 
     TEST_F(ExperimentalDetumblingTest, ShouldReportErrorWhenMoreThanOneMagnetometerFails)
     {
+        EXPECT_CALL(_power, ImtqPower(true)).WillOnce(Return(true));
+        EXPECT_CALL(_power, ImtqPower(false)).WillOnce(Return(true));
         EXPECT_CALL(_os, TakeSemaphore(_, _)).WillRepeatedly(Return(OSResult::Success));
         EXPECT_CALL(_os, GiveSemaphore(_)).WillRepeatedly(Return(OSResult::Success));
 
@@ -94,6 +100,13 @@ namespace
         _detumbling.SetTryFixIsisErrors(true);
 
         ASSERT_THAT(_detumbling.Enable(), Eq(OSResult::IOError));
+    }
+
+    TEST_F(ExperimentalDetumblingTest, ShouldPowerDownImtqOnDisable)
+    {
+        EXPECT_CALL(_power, ImtqPower(false));
+
+        _detumbling.Disable();
     }
 
     SelfTestResult ExperimentalDetumblingTest::CreateSuccessfulSelfTestResult() const

@@ -35,7 +35,7 @@ namespace
 
     TEST_F(BeaconSenderTest, ShouldSendBeaconAndWaitLongDelayOnSuccess)
     {
-        EXPECT_CALL(_os, Sleep(30000ms));
+        EXPECT_CALL(_os, Sleep(60000ms));
         EXPECT_CALL(_transmitter, SendFrame(_)).WillOnce(Return(true));
 
         _sender.RunOnce();
@@ -43,7 +43,7 @@ namespace
 
     TEST_F(BeaconSenderTest, ShouldSendPreviousBeaconAndWaitShortDelayOnFailureToGetTelemetry)
     {
-        EXPECT_CALL(_os, Sleep(30000ms));
+        EXPECT_CALL(_os, Sleep(60000ms));
         EXPECT_CALL(_transmitter, SendFrame(_)).WillOnce(Return(true));
         _sender.RunOnce();
 

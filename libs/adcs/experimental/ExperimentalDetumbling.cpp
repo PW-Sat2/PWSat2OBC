@@ -2,6 +2,7 @@
 #include <chrono>
 #include "base/os.h"
 #include "logger/logger.h"
+#include "power/power.h"
 
 namespace adcs
 {
@@ -11,8 +12,8 @@ namespace adcs
     using devices::imtq::SelfTestResult;
     using devices::imtq::Vector3;
 
-    ExperimentalDetumbling::ExperimentalDetumbling(devices::imtq::IImtqDriver& imtqDriver_)
-        : imtqDriver(imtqDriver_), syncSemaphore(System::CreateBinarySemaphore()), tryToFixIsisErrors(false)
+    ExperimentalDetumbling::ExperimentalDetumbling(devices::imtq::IImtqDriver& imtqDriver_, services::power::IPowerControl& powerControl_)
+        : imtqDriver(imtqDriver_), powerControl(powerControl_), syncSemaphore(System::CreateBinarySemaphore()), tryToFixIsisErrors(false)
     {
     }
 
@@ -33,15 +34,8 @@ namespace adcs
         return System::GiveSemaphore(this->syncSemaphore);
     }
 
-    OSResult ExperimentalDetumbling::Enable()
+    OSResult ExperimentalDetumbling::PerformSelfTest()
     {
-        Lock lock(this->syncSemaphore, InfiniteTimeout);
-        if (!lock())
-        {
-            LOG(LOG_LEVEL_ERROR, "Semaphore lock failed");
-            return OSResult::IOError;
-        }
-
         SelfTestResult selfTestResult;
         if (!this->imtqDriver.PerformSelfTest(selfTestResult, tryToFixIsisErrors))
         {
@@ -118,9 +112,34 @@ namespace adcs
         return OSResult::Success;
     }
 
+    OSResult ExperimentalDetumbling::Enable()
+    {
+        Lock lock(this->syncSemaphore, InfiniteTimeout);
+        if (!lock())
+        {
+            LOG(LOG_LEVEL_ERROR, "Semaphore lock failed");
+            return OSResult::IOError;
+        }
+
+        if (!this->powerControl.ImtqPower(true))
+        {
+            return OSResult::IOError;
+        }
+
+        System::SleepTask(1s);
+
+        if (OS_RESULT_FAILED(this->PerformSelfTest()))
+        {
+            this->powerControl.ImtqPower(false);
+            return OSResult::IOError;
+        }
+
+        return OSResult::Success;
+    }
+
     OSResult ExperimentalDetumbling::Disable()
     {
-        return OSResult::Success;
+        return this->powerControl.ImtqPower(false) ? OSResult::Success : OSResult::IOError;
     }
 
     void ExperimentalDetumbling::Process()
