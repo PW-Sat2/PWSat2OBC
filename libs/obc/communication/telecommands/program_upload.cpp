@@ -121,6 +121,16 @@ namespace obc
 
             return response;
         }
+        static inline DownlinkFrame FinalizeEntryMalformedError()
+        {
+            DownlinkFrame frame(DownlinkAPID::ProgramUpload, 0);
+            auto& writer = frame.PayloadWriter();
+            writer.WriteByte(2);
+            writer.WriteByte(1);
+            writer.WriteByte(10);
+
+            return frame;
+        }
 
         EraseBootTableEntry::EraseBootTableEntry(program_flash::BootTable& bootTable) : _bootTable(bootTable)
         {
@@ -221,6 +231,7 @@ namespace obc
 
             if (!r.Status())
             {
+                transmitter.SendFrame(FinalizeEntryMalformedError().Frame());
                 return;
             }
 
