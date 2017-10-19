@@ -6,10 +6,10 @@
 
 namespace
 {
+    using testing::An;
+    using testing::Eq;
     using testing::Invoke;
     using testing::_;
-    using testing::Eq;
-    using testing::An;
 
     using telecommunication::downlink::DownlinkAPID;
     using namespace std::chrono_literals;
@@ -93,5 +93,44 @@ namespace
 
         const std::uint8_t array[] = {10, 1, 0, 0, 0x10, 0x00, 'a', 'b', 'c'};
         command.Handle(transmitter, gsl::make_span(array));
+    }
+
+    class PurgePhotoCommandTest : public testing::Test
+    {
+      protected:
+        PurgePhotoCommandTest();
+
+        template <typename... T> void Run(T... params);
+
+        TransmitterMock transmitter;
+        PhotoServiceMock photo;
+        obc::telecommands::PurgePhoto command;
+    };
+
+    PurgePhotoCommandTest::PurgePhotoCommandTest() : command(photo)
+    {
+    }
+
+    template <typename... T> void PurgePhotoCommandTest::Run(T... params)
+    {
+        std::array<std::uint8_t, sizeof...(T)> buffer{static_cast<std::uint8_t>(params)...};
+        command.Handle(transmitter, buffer);
+    }
+
+    TEST_F(PurgePhotoCommandTest, TestNoPayload)
+    {
+        transmitter.ExpectDownlinkFrame(DownlinkAPID::PurgePhoto, 0, 1);
+        Run();
+    }
+
+    TEST_F(PurgePhotoCommandTest, TestCommand)
+    {
+        transmitter.ExpectDownlinkFrame(DownlinkAPID::PurgePhoto, 12, 0);
+        testing::InSequence s;
+        EXPECT_CALL(photo, PurgePendingCommands());
+        EXPECT_CALL(photo, DisableCamera(services::photo::Camera::Nadir));
+        EXPECT_CALL(photo, DisableCamera(services::photo::Camera::Wing));
+        EXPECT_CALL(photo, Reset());
+        Run(12);
     }
 }

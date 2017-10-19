@@ -20,6 +20,8 @@ struct TransmitterMock : public devices::comm::ITransmitter
     MOCK_METHOD1(SetTransmitterStateWhenIdle, bool(devices::comm::IdleState));
     MOCK_METHOD1(SetTransmitterBitRate, bool(devices::comm::Bitrate));
     MOCK_METHOD0(ResetTransmitter, bool());
+
+    void ExpectDownlinkFrame(telecommunication::downlink::DownlinkAPID apid, std::uint8_t correlationId, std::uint8_t errorCode);
 };
 
 struct BeaconControllerMock : public devices::comm::IBeaconController
@@ -46,6 +48,11 @@ struct CommHardwareObserverMock : public devices::comm::ICommHardwareObserver
 
 MATCHER_P3(IsDownlinkFrame, apidMatcher, seqMatcher, payloadMatcher, "")
 {
+    if (arg.size() < 3)
+    {
+        return false;
+    }
+
     auto num = arg[0] | (arg[1] << 8) | (arg[2] << 16);
 
     auto apid = static_cast<telecommunication::downlink::DownlinkAPID>(num & 0x3F);
@@ -60,6 +67,11 @@ MATCHER_P3(IsDownlinkFrame, apidMatcher, seqMatcher, payloadMatcher, "")
 
 MATCHER_P4(IsDownlinkFrame, apidMatcher, seqMatcher, correlationIdMatcher, payloadMatcher, "")
 {
+    if (arg.size() < 3)
+    {
+        return false;
+    }
+
     auto num = arg[0] | (arg[1] << 8) | (arg[2] << 16);
 
     auto apid = static_cast<telecommunication::downlink::DownlinkAPID>(num & 0x3F);

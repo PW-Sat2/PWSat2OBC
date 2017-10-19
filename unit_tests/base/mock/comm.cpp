@@ -1,4 +1,7 @@
 #include "comm.hpp"
+#include "telecommunication/downlink.h"
+
+using telecommunication::downlink::DownlinkAPID;
 
 TransmitterMock::TransmitterMock()
 {
@@ -6,6 +9,12 @@ TransmitterMock::TransmitterMock()
 
 TransmitterMock::~TransmitterMock()
 {
+}
+
+void TransmitterMock::ExpectDownlinkFrame(DownlinkAPID apid, std::uint8_t correlationId, std::uint8_t errorCode)
+{
+    using telecommunication::downlink::DownlinkAPID;
+    EXPECT_CALL(*this, SendFrame(IsDownlinkFrame(apid, 0, testing::ElementsAre(correlationId, errorCode))));
 }
 
 BeaconControllerMock::BeaconControllerMock()
