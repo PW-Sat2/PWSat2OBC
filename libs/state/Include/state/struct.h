@@ -33,9 +33,6 @@ struct SystemState
     /** @brief Current antenna deployment state. */
     state::AntennaState AntennaState;
 
-    /** @brief Flag indicating that sail has been opened */
-    bool SailOpened;
-
     /** @brief Current adcs operational mode. */
     adcs::AdcsMode AdcsMode;
 

@@ -6,12 +6,12 @@
 #include "mock/power.hpp"
 #include "state/struct.h"
 
-using testing::_;
 using testing::Eq;
 using testing::Gt;
-using testing::Mock;
 using testing::InSequence;
+using testing::Mock;
 using testing::Return;
+using testing::_;
 using namespace std::chrono_literals;
 
 class OpenSailTest : public testing::Test
@@ -21,7 +21,7 @@ class OpenSailTest : public testing::Test
 
     SystemState _state;
     PowerControlMock _power;
-    OSMock _os;
+    testing::NiceMock<OSMock> _os;
     OSReset _osReset;
 
     mission::OpenSailTask _openSailTask;

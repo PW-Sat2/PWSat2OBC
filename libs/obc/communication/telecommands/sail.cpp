@@ -71,7 +71,7 @@ namespace obc
             }
 
             auto currentState = sailState.CurrentState();
-            if (currentState == state::SailOpeningState::Opening || state.SailOpened)
+            if (currentState == state::SailOpeningState::Opening)
             {
                 LOG(LOG_LEVEL_ERROR, "Can't get sail state");
                 response.PayloadWriter().WriteByte(-3);
