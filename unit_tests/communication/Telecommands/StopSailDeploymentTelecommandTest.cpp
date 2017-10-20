@@ -74,6 +74,8 @@ namespace
 
     TEST_F(StopSailDeploymentTelecommandTest, ShouldRespondWithErrorOnInvalidFrame)
     {
+        SystemState state;
+        ON_CALL(stateContainer, MockGetState()).WillByDefault(ReturnRef(state));
         EXPECT_CALL(this->transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::DisableSailDeployment), Eq(0U), ElementsAre(0, 255))));
 
         telecommand.Handle(this->transmitter, gsl::span<const uint8_t>());
