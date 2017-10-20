@@ -129,7 +129,14 @@ namespace obc
                 }
                 LOGF(LOG_LEVEL_DEBUG, "Sending seq %ld", seq);
 
-                sender.SendPart(seq);
+                if (!sender.SendPart(seq))
+                {
+                    CorrelatedDownlinkFrame errorResponse(DownlinkAPID::FileSend, seq, correlationId);
+                    errorResponse.PayloadWriter().WriteByte(static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::TooBigSeq));
+                    errorResponse.PayloadWriter().WriteArray(pathSpan);
+
+                    transmitter.SendFrame(errorResponse.Frame());
+                }
             }
         }
 

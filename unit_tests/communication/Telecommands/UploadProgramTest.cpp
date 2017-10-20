@@ -177,6 +177,13 @@ TEST_F(UploadProgramTest, ResponseWithEraseError)
     this->HandleFrame(this->_eraseTelecommand, 1);
 }
 
+TEST_F(UploadProgramTest, ErrorFrameOnMalformedEraseTelecommand)
+{
+    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(0, 1, 10)))).Times(1);
+
+    this->HandleFrame(this->_eraseTelecommand);
+}
+
 TEST_F(UploadProgramTest, ResponseWithProgramErrorOnWritePart)
 {
     ON_CALL(this->_flashMock, Program(0x00000400 + 256_KB, A<gsl::span<const std::uint8_t>>()))
@@ -187,6 +194,13 @@ TEST_F(UploadProgramTest, ResponseWithProgramErrorOnWritePart)
         .Times(1);
 
     this->HandleFrame(this->_writePartTelecommand, 1, 0x00, 0x00, 0x04, 0x00, 'P', 'a', 'r', 't', 0);
+}
+
+TEST_F(UploadProgramTest, ErrorFrameOnMalformedWriteTelecommand)
+{
+    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(1, 1, 10)))).Times(1);
+
+    this->HandleFrame(this->_writePartTelecommand);
 }
 
 TEST_F(UploadProgramTest, ResponseWithProgramErrorOnFinalize)
@@ -204,4 +218,11 @@ TEST_F(UploadProgramTest, ResponseWithErrorOnFinalizeWithIncorrectCRC)
         .Times(1);
 
     this->HandleFrame(this->_finalizeTelecommand, 1, 0x12, 0x13, 0x00, 0x00, 0xAB, 0xCD, 'T', 'e', 's', 't');
+}
+
+TEST_F(UploadProgramTest, ErrorFrameOnMalformedFinalizeTelecommand)
+{
+    EXPECT_CALL(this->_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::ProgramUpload, 0U, ElementsAre(2, 1, 10)))).Times(1);
+
+    this->HandleFrame(this->_finalizeTelecommand);
 }
