@@ -1,5 +1,7 @@
+import struct
 from telecommand import Telecommand
 from devices.adcs import AdcsMode
+
 
 class SetBuiltinDetumblingBlockMaskTelecommand(Telecommand):
     def __init__(self, corelation_id, mask):
@@ -23,4 +25,4 @@ class SetAdcsModeTelecommand(Telecommand):
         return 0x25
 
     def payload(self):
-        return [self._corelation_id, self._mode]
+        return [self._corelation_id, struct.pack('<b', self._mode.value) if type(self._mode) == AdcsMode else self._mode]
