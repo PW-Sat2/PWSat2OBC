@@ -9,9 +9,9 @@
 #include "time/TimeSpan.hpp"
 
 using testing::Eq;
-using testing::_;
 using testing::Invoke;
 using testing::Return;
+using testing::_;
 using namespace mission;
 using namespace std::chrono_literals;
 namespace
@@ -23,16 +23,16 @@ namespace
 
     TEST_F(MissionPlanTest, EmptyStateShouldHaveEmptyValues)
     {
-        ASSERT_THAT(state.SailOpened, Eq(false));
         ASSERT_THAT(state.Time.count(), Eq(0ul));
         ASSERT_THAT(state.AntennaState.IsDeployed(), Eq(false));
     }
 
     TEST_F(MissionPlanTest, ShouldUpdateStateAccordingToDescriptors)
     {
+        bool status = false;
         UpdateDescriptorMock<SystemState, int> update1, update2;
-        EXPECT_CALL(update1, UpdateProc(_)).WillOnce(Invoke([](SystemState& state) {
-            state.SailOpened = true;
+        EXPECT_CALL(update1, UpdateProc(_)).WillOnce(Invoke([&](SystemState& /*state*/) {
+            status = true;
             return UpdateResult::Ok;
         }));
 
@@ -45,7 +45,7 @@ namespace
 
         const auto result = SystemStateUpdate(state, gsl::make_span(stateDescriptors));
 
-        ASSERT_THAT(state.SailOpened, Eq(true));
+        ASSERT_THAT(status, Eq(true));
         ASSERT_THAT(state.Time, Eq(100ms));
         ASSERT_THAT(result, Eq(UpdateResult::Ok));
     }
