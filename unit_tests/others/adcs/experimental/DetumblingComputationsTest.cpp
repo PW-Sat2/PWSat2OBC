@@ -32,10 +32,9 @@ TEST(detumbling, cross_validation)
     DetumblingComputations dtb;
     DetumblingComputations::State state;
 
-
     // matlab sim is working with different units
-    // input: Sim [T] --> OBC [1e-7 T]
-    double input_scale = 1e7;
+    // input: Sim [Gauss == 1e-4 T] --> OBC [1e-9 T]
+    double input_scale = 1e5;
     // output: Sim [Am2] --> OBC [1e-4 Am2]
     double output_scale = 1e4;
 
@@ -65,7 +64,7 @@ TEST(detumbling, cross_validation)
                   << (int)(record[6] * output_scale) << std::endl;
 #endif
 
-        if(first_record)
+        if (first_record)
         {
             state = dtb.initialize(params, mgmt);
             first_record = false;

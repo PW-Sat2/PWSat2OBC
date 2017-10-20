@@ -45,9 +45,9 @@ namespace adcs
 
             /** @brief B-dot gain
              * @unit [kg m^2 / s]
-             * @default 2.879285e-5 * 1e15 -- unit conv - original gain * conversion
+             * @default 2.879285e-5 * 1e13 -- unit conv - original gain * conversion
              */
-            float bDotGain = 2.879285e-5 * 1e15; // unit conv - original gain * conversion
+            float bDotGain = 2.879285e-5 * 1e13; // unit conv - original gain * conversion
 
             /** @brief state of flags enabling coils
              * @unit [-]
