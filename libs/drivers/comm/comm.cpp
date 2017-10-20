@@ -229,7 +229,9 @@ bool CommObject::Reset()
 
 bool CommObject::ResetInternal(AggregatedErrorCounter& resultAggregator)
 {
-    return this->SendCommand(Address::Receiver, num(ReceiverCommand::HardReset), resultAggregator);
+    auto result = this->SendCommand(Address::Receiver, num(ReceiverCommand::HardReset), resultAggregator);
+    System::SleepTask(2000ms);
+    return result;
 }
 
 bool CommObject::ResetTransmitter()
