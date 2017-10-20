@@ -85,7 +85,8 @@ namespace obc
                 Success = 0x00,
                 FileNotFound = 0x01,
                 MalformedRequest = 0x02,
-                InvalidPath = 0x03
+                InvalidPath = 0x03,
+                TooBigSeq = 0x04
             };
 
             /**

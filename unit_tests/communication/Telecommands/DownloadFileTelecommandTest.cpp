@@ -21,6 +21,7 @@ using testing::Invoke;
 using testing::Eq;
 using testing::Each;
 using testing::ElementsAreArray;
+using testing::ElementsAre;
 using testing::StrEq;
 using testing::Return;
 using testing::Matches;
@@ -79,8 +80,10 @@ namespace
         expectedPayload2[0] = 0xFF;
         expectedPayload2[1] = static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::Success);
 
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::FileSend), Eq(0U), ElementsAreArray(expectedPayload1))));
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::FileSend), Eq(1U), ElementsAreArray(expectedPayload2))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::FileSend), Eq(0U), ElementsAreArray(expectedPayload1))))
+            .WillOnce(Return(true));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::FileSend), Eq(1U), ElementsAreArray(expectedPayload2))))
+            .WillOnce(Return(true));
 
         constexpr uint8_t maxFileDataSize = DownlinkFrame::MaxPayloadSize - 2;
         Buffer<3 * maxFileDataSize> file;
@@ -97,7 +100,7 @@ namespace
     {
         const std::string path{"/a/file"};
 
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(_, _, SpanOfSize(22))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(_, _, SpanOfSize(22)))).WillOnce(Return(true));
 
         Buffer<20> file;
         std::fill(file.begin(), file.end(), 1);
@@ -107,11 +110,17 @@ namespace
         this->SendRequest(0xFF, path, std::array<uint16_t, 1>{0x0});
     }
 
-    TEST_F(DownloadFileTelecommandTest, ShouldNotSendFrameForSequenceNumberBeyondFile)
+    TEST_F(DownloadFileTelecommandTest, ShouldSendErrorFrameForSequenceNumberBeyondFile)
     {
         const std::string path{"/a/file"};
 
-        EXPECT_CALL(_transmitter, SendFrame(_)).Times(0);
+        std::array<uint8_t, 8> expectedPayload;
+
+        expectedPayload[0] = static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::TooBigSeq);
+        std::copy(path.begin(), path.end(), expectedPayload.begin() + 1);
+
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(DownlinkAPID::FileSend, 0x20, 0xFF, ElementsAreArray(expectedPayload))))
+            .WillOnce(Return(true));
 
         Buffer<20> file;
         std::fill(file.begin(), file.end(), 1);
@@ -132,7 +141,7 @@ namespace
         expectedPayload[0] = 0xFF;
         expectedPayload[1] = static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::Success);
 
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(_, _, ElementsAreArray(expectedPayload))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(_, _, ElementsAreArray(expectedPayload)))).WillOnce(Return(true));
 
         constexpr uint8_t maxFileDataSize = DownlinkFrame::MaxPayloadSize - 2;
         Buffer<maxFileDataSize * 3 + 20> file;
@@ -156,7 +165,8 @@ namespace
         expectedPayload[1] = static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::FileNotFound);
         std::copy(path.begin(), path.end(), expectedPayload.begin() + 2);
 
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::FileSend), Eq(0U), ElementsAreArray(expectedPayload))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::FileSend), Eq(0U), ElementsAreArray(expectedPayload))))
+            .WillOnce(Return(true));
 
         this->SendRequest(0xFF, path, std::array<uint16_t, 1>{0x3});
     }
@@ -167,7 +177,8 @@ namespace
 
         std::array<uint8_t, 3> expectedPayload{0xFF, static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::MalformedRequest), 0x00};
 
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::FileSend), Eq(0U), ElementsAreArray(expectedPayload))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::FileSend), Eq(0U), ElementsAreArray(expectedPayload))))
+            .WillOnce(Return(true));
 
         Buffer<200> buffer;
         Writer w(buffer);
@@ -185,7 +196,8 @@ namespace
 
         std::array<uint8_t, 3> expectedPayload{0xFF, static_cast<uint8_t>(DownloadFileTelecommand::ErrorCode::MalformedRequest), 0x00};
 
-        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::FileSend), Eq(0U), ElementsAreArray(expectedPayload))));
+        EXPECT_CALL(_transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::FileSend), Eq(0U), ElementsAreArray(expectedPayload))))
+            .WillOnce(Return(true));
 
         Buffer<200> buffer;
         Writer w(buffer);
