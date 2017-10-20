@@ -36,7 +36,7 @@ namespace
         ON_CALL(os, TakeSemaphore(_, _)).WillByDefault(Return(OSResult::Success));
     }
 
-    TEST_F(StopSailDeploymentTelecommandTest, ShouldDisableDeployment)
+    TEST_F(StopSailDeploymentTelecommandTest, ShouldDisableDeploymentBeforeItBegins)
     {
         SystemState state;
         auto& persistentState = state.PersistentState;
@@ -54,14 +54,14 @@ namespace
         ASSERT_THAT(sailState.CurrentState(), Eq(state::SailOpeningState::OpeningStopped));
     }
 
-    TEST_F(StopSailDeploymentTelecommandTest, ShouldNotStopOpening)
+    TEST_F(StopSailDeploymentTelecommandTest, ShouldStopOpening)
     {
         SystemState state;
         auto& persistentState = state.PersistentState;
         persistentState.Set(state::SailState(state::SailOpeningState::Opening));
         EXPECT_CALL(stateContainer, MockGetState()).WillOnce(ReturnRef(state));
 
-        EXPECT_CALL(this->transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::DisableSailDeployment), Eq(0U), ElementsAre(0x22, _))));
+        EXPECT_CALL(this->transmitter, SendFrame(IsDownlinkFrame(Eq(DownlinkAPID::DisableSailDeployment), Eq(0U), ElementsAre(0x22, 0))));
 
         std::array<std::uint8_t, 1> frame{0x22};
 
@@ -69,7 +69,7 @@ namespace
 
         state::SailState sailState;
         persistentState.Get(sailState);
-        ASSERT_THAT(sailState.CurrentState(), Eq(state::SailOpeningState::Opening));
+        ASSERT_THAT(sailState.CurrentState(), Eq(state::SailOpeningState::OpeningStopped));
     }
 
     TEST_F(StopSailDeploymentTelecommandTest, ShouldRespondWithErrorOnInvalidFrame)
