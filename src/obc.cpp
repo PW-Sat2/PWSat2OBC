@@ -210,8 +210,6 @@ OSResult OBC::InitializeRunlevel1()
 
 OSResult OBC::InitializeRunlevel2()
 {
-    this->Communication.InitializeRunlevel2();
-
     Mission.Resume();
 
     TelemetryAcquisition.Resume();

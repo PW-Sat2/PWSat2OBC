@@ -232,11 +232,6 @@ namespace obc
          */
         void InitializeRunlevel1();
 
-        /**
-         * @brief Initializes all communication at runlevel 2
-         */
-        void InitializeRunlevel2();
-
         /** @brief Comm driver */
         devices::comm::CommObject& Comm;
 
