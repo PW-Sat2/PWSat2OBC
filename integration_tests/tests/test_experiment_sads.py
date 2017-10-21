@@ -12,7 +12,6 @@ from utils import TestEvent
 class TestExperimentSADS(RestartPerTest):
 
     def startup(self):
-        self.system.obc.runlevel_start_comm()
         self.system.obc.jump_to_time(timedelta(hours=41))
 
     def test_experiment_startup(self):

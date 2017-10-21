@@ -21,7 +21,6 @@ from .error_counters import ErrorCountersMixin
 from .fram import FRAMMixin
 from .boot_settings import BootSettingsMixin
 from .payload import PayloadMixin
-from .runlevel import RunlevelMixin
 from .camera import CameraMixin
 from .adcs import ADCSMixin
 from .obc_rtos import RTOSMixin
@@ -45,7 +44,6 @@ class OBC(OBCMixin,
           FRAMMixin,
           BootSettingsMixin,
           PayloadMixin,
-          RunlevelMixin,
           CameraMixin,
           ADCSMixin,
           RTOSMixin

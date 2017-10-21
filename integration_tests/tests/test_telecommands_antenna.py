@@ -12,7 +12,6 @@ class TestTelecommandsAntenna(RestartPerTest):
     @runlevel(1)
     @clear_state()
     def test_disable_antenna_deployment(self):
-        self.system.obc.runlevel_start_comm()
         being_deployed = TestEvent()
 
         self.system.primary_antenna.on_begin_deployment = being_deployed.set

@@ -57,7 +57,6 @@ static const TerminalCommandDescription commands[] = {
     {"boot_settings", BootSettingsCommand},
     {"payload", PayloadDriver},
     {"memory", MemoryCommand},
-    {"runlevel", RunlevelCommand},
     {"sail", SailCommand},
     {"leop", LeopCommand},
     {"exp_suns", SunSExpCommand},
