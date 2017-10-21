@@ -59,7 +59,7 @@ namespace
 
         ON_CALL(_imtqDriver, MeasureMagnetometer(_))
             .WillByDefault(DoAll(SetArgReferee<0>(calibratedMagnetometerMeasurement), Return(true)));
-        EXPECT_CALL(_imtqDriver, StartActuationDipole(Eq(expectedDipole), Eq(0ms)));
+        EXPECT_CALL(_imtqDriver, StartActuationDipole(Eq(expectedDipole), Eq(500ms)));
 
         _detumbling.Initialize();
         _detumbling.Enable();
@@ -80,7 +80,7 @@ namespace
 
         ON_CALL(_imtqDriver, PerformSelfTest(_, _)).WillByDefault(DoAll(SetArgReferee<0>(selfTestResult), Return(true)));
         ON_CALL(_imtqDriver, MeasureMagnetometer(_))
-                    .WillByDefault(DoAll(SetArgReferee<0>(calibratedMagnetometerMeasurement), Return(true)));
+            .WillByDefault(DoAll(SetArgReferee<0>(calibratedMagnetometerMeasurement), Return(true)));
 
         _detumbling.Initialize();
         ASSERT_THAT(_detumbling.Enable(), Eq(OSResult::Success));

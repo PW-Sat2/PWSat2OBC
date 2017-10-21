@@ -12,6 +12,8 @@ namespace adcs
     using devices::imtq::SelfTestResult;
     using devices::imtq::Vector3;
 
+    constexpr std::chrono::milliseconds ExperimentalDetumbling::ActuationTimeout;
+
     ExperimentalDetumbling::ExperimentalDetumbling(devices::imtq::IImtqDriver& imtqDriver_, services::power::IPowerControl& powerControl_)
         : imtqDriver(imtqDriver_), powerControl(powerControl_), syncSemaphore(System::CreateBinarySemaphore()), tryToFixIsisErrors(false)
     {
@@ -162,7 +164,7 @@ namespace adcs
 
         auto actuationDipole = Vector3<Dipole>{dipoleVector[0], dipoleVector[1], dipoleVector[2]};
 
-        if (!this->imtqDriver.StartActuationDipole(actuationDipole, 0ms))
+        if (!this->imtqDriver.StartActuationDipole(actuationDipole, ExperimentalDetumbling::ActuationTimeout))
         {
             LOG(LOG_LEVEL_ERROR, "Cannot start actuation dipole");
             return;
