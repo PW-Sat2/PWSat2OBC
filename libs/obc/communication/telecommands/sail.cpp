@@ -54,7 +54,7 @@ namespace obc
             }
             else if (!persistentState.Set(state::SailState(state::SailOpeningState::OpeningStopped)))
             {
-                LOG(LOG_LEVEL_ERROR, "[sail] Can't set sail state");
+                LOG(LOG_LEVEL_ERROR, "[sail][tc] Unable to disable sail deployment");
                 response.PayloadWriter().WriteByte(-2);
             }
             else
