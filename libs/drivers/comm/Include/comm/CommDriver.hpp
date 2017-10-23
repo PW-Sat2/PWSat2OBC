@@ -57,16 +57,24 @@ class CommObject final : public ITransmitter,      //
     bool Pause();
 
     /**
-     * @brief Restarts the comm driver.
+     * @brief Starts the comm driver.
      *
      * @return Operation status, true in case of success, false otherwise.
      *
-     * During the driver restart process entire hardware is being reseted, and all of the background
-     * tasks are being started.
+     * During the driver all the background tasks are started.
      *
      * Calling this method twice without intermediate call to the CommPause procedure leads to undefined behavior.
      */
-    bool Restart();
+    bool StartTask();
+
+    /**
+     * @brief Restarts the TRxVU COMM board.
+     *
+     * @return Operation status, true in case of success, false otherwise.
+     *
+     * Power-cycles COMM board.
+     */
+    bool RestartHardware();
 
     /**
      * @brief Sets handler that will be called for every received frame
