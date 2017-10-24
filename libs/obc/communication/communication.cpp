@@ -94,12 +94,16 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
 void OBCCommunication::InitializeRunlevel1()
 {
     this->Comm.SetFrameHandler(this->TelecommandHandler);
+    if (!this->Comm.RestartHardware())
+    {
+        LOG(LOG_LEVEL_ERROR, "Unable to restart COMM hardware");
+    }
 }
 
 void OBCCommunication::InitializeRunlevel2()
 {
-    if (!this->Comm.Restart())
+    if (!this->Comm.StartTask())
     {
-        LOG(LOG_LEVEL_ERROR, "Unable to restart comm");
+        LOG(LOG_LEVEL_ERROR, "Unable to start comm task");
     }
 }

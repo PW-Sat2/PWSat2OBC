@@ -187,14 +187,19 @@ OSResult CommObject::Initialize()
     return OSResult::Success;
 }
 
-bool CommObject::Restart()
+bool CommObject::StartTask()
 {
-    ErrorReporter errorContext(_error);
-
     if (this->_pollingTaskFlags.IsSet(TaskFlagRunning))
     {
         return false;
     }
+
+    return this->Resume();
+}
+
+bool CommObject::RestartHardware()
+{
+    ErrorReporter errorContext(_error);
 
     if (!ResetInternal(errorContext.Counter()))
     {
@@ -202,7 +207,7 @@ bool CommObject::Restart()
         return false >> errorContext.Counter();
     }
 
-    return this->Resume();
+    return true;
 }
 
 bool CommObject::Pause()

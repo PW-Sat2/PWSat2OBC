@@ -1191,32 +1191,31 @@ namespace
         ASSERT_THAT(error_counter, Eq(8));
     }
 
-    TEST_F(CommTest, TestRestartResetFailure)
+    TEST_F(CommTest, TestRestartHardwareFailure)
     {
         i2c.ExpectWriteCommand(ReceiverAddress, HardwareReset).WillOnce(Return(I2CResult::Nack));
-
-        EXPECT_CALL(system, ResumeTask(_)).Times(0);
-
-        ASSERT_THAT(comm.Restart(), Eq(false));
+        ASSERT_THAT(comm.RestartHardware(), Eq(false));
         ASSERT_THAT(error_counter, Eq(5));
     }
 
-    TEST_F(CommTest, TestRestart)
+    TEST_F(CommTest, TestRestartHardware)
+    {
+        i2c.ExpectWriteCommand(ReceiverAddress, HardwareReset).WillOnce(Return(I2CResult::OK));
+        ASSERT_THAT(comm.RestartHardware(), Eq(true));
+        ASSERT_THAT(error_counter, Eq(0));
+    }
+
+    TEST_F(CommTest, TestStartTask)
     {
         EXPECT_CALL(system, ResumeTask(_));
-        i2c.ExpectWriteCommand(ReceiverAddress, HardwareReset).WillOnce(Return(I2CResult::OK));
-        ASSERT_THAT(comm.Restart(), Eq(true));
-        ASSERT_THAT(error_counter, Eq(0));
+        ASSERT_THAT(comm.StartTask(), Eq(true));
     }
 
     TEST_F(CommTest, TestRestartFailIfAlreadyRunning)
     {
         ON_CALL(system, EventGroupGetBits(_)).WillByDefault(Return(4));
         EXPECT_CALL(system, ResumeTask(_)).Times(0);
-        i2c.ExpectWriteCommand(ReceiverAddress, HardwareReset).Times(0);
-        ASSERT_THAT(comm.Restart(), Eq(false));
-
-        ASSERT_THAT(error_counter, Eq(0));
+        ASSERT_THAT(comm.StartTask(), Eq(false));
     }
 
     TEST_F(CommTest, DoNotTriggerTransmitterResetIfQueueIsServedOnTime)
