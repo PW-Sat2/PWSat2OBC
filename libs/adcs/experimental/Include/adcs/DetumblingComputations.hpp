@@ -45,9 +45,9 @@ namespace adcs
 
             /** @brief B-dot gain
              * @unit [kg m^2 / s]
-             * @default 2.879285e-5 * 1e15 -- unit conv - original gain * conversion
+             * @default 2.879285e-5 * 1e13 -- unit conv - original gain * conversion
              */
-            float bDotGain = 2.879285e-5 * 1e15; // unit conv - original gain * conversion
+            float bDotGain = 2.879285e-5 * 1e13; // unit conv - original gain * conversion
 
             /** @brief state of flags enabling coils
              * @unit [-]
@@ -88,10 +88,11 @@ namespace adcs
          * This function should be called before first step of algorithm
          * and  every time user intend to change parameters
          *
-         * @param[in] parameters set
+         * @param[in] parameters parameters set
+         * @param[in] mgmt_meas initial mtm measurement
          * @return state container
          */
-        State initialize(const Parameters& parameters);
+        State initialize(const Parameters& parameters, const MagVec& mgmt_meas);
 
         /**
          * @brief Detumbling step function
@@ -105,10 +106,24 @@ namespace adcs
          */
         DipoleVec step(const MagVec& magnetometer, State& state);
 
+        /**
+         * @brief Cast one numeric value to other with saturation
+         * @param input The input value
+         * @returns Input value casted to output type with saturation
+         */
+        template <typename T, typename U> T CastWithSaturation(const U& input);
+
       private:
         /** field to store exp value calculated once on initialization */
         float mtmDotExp;
     };
+
+    template <typename T, typename U> T DetumblingComputations::CastWithSaturation(const U& input)
+    {
+        U upper = static_cast<U>(std::numeric_limits<T>::max());
+        U lower = static_cast<U>(std::numeric_limits<T>::min());
+        return static_cast<T>(std::max(lower, std::min(input, upper)));
+    }
     /** @} */
 }
 
