@@ -46,7 +46,7 @@ class TestExperimentDetumbling(RestartPerTest):
         log.info('Sending telecommand')
         self.system.comm.put_frame(telecommand.PerformDetumblingExperiment(correlation_id=5, duration=timedelta(hours=4), sampling_interval=timedelta(seconds=2)))
 
-        response = self.system.comm.get_frame(5)
+        response = self.system.comm.get_frame(5, filter_type=ExperimentSuccessFrame)
         self.assertIsInstance(response, ExperimentSuccessFrame)
 
         log.info('Waiting for experiment')

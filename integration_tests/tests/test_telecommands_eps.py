@@ -33,7 +33,7 @@ class EpsTelecommandsTest(RestartPerTest):
 
         self.system.comm.put_frame(telecommand.DisableOverheatSubmode(correlation_id=0x28, controller=1))
 
-        frame = self.system.comm.get_frame(20)
+        frame = self.system.comm.get_frame(20, filter_type=DisableOverheatSubmodeSuccessFrame)
         
         self.assertIsInstance(frame, DisableOverheatSubmodeSuccessFrame)
         self.assertEqual(frame.seq(), 0)

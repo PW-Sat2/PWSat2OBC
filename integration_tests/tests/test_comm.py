@@ -99,7 +99,7 @@ class Test_Comm(RestartPerTest):
 
         self.system.comm.put_frame(UplinkFrame(ord('P'), 'ABC'))
 
-        msg = self.system.comm.get_frame(20)
+        msg = self.system.comm.get_frame(20, filter_type=PongFrame)
         self.assertIsInstance(msg, PongFrame)
         self.assertEqual(msg.payload(), ensure_byte_list("PONG"))
 

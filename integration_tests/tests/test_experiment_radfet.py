@@ -18,7 +18,7 @@ class RadFETExperimentTest(RestartPerTest):
             output_file_name='/exp'
         ))
 
-        response = self.system.comm.get_frame(5)
+        response = self.system.comm.get_frame(5, filter_type=ExperimentSuccessFrame)
 
         self.assertIsInstance(response, ExperimentSuccessFrame)
         self.assertEqual(response.correlation_id, 12)
