@@ -208,7 +208,6 @@ namespace obc
             services::time::ICurrentTime& currentTime,
             devices::rtc::IRTC& rtc,
             mission::IIdleStateController& idleStateController,
-            mission::antenna::IDisableAntennaDeployment& disableAntennaDeployment,
             IHasState<SystemState>& stateContainer,
             services::fs::IFileSystem& fs,
             obc::OBCExperiments& experiments,
