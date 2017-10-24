@@ -39,7 +39,8 @@ namespace obc
             {
                 DownlinkFrame frame{DownlinkAPID::PersistentState, seq};
                 auto& writer = frame.PayloadWriter();
-                writer.WriteArray(reader.ReadArray(gsl::narrow_cast<std::uint16_t>(writer.RemainingSize())));
+                auto len = std::min(writer.RemainingSize(), reader.RemainingSize());
+                writer.WriteArray(reader.ReadArray(gsl::narrow_cast<std::uint16_t>(len)));
                 transmitter.SendFrame(frame.Frame());
                 ++seq;
             }
