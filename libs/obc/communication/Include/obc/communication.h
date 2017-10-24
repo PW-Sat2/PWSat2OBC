@@ -184,7 +184,6 @@ namespace obc
          * @param[in] currentTime Current time
          * @param[in] rtc RTC device
          * @param[in] idleStateController Idle state controller
-         * @param[in] disableAntennaDeployment Object responsible for disabling antenna deployment
          * @param[in] stateContainer Container for OBC state
          * @param[in] fs File system
          * @param[in] experiments Experiments
