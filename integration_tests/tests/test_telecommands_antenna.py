@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from obc.boot import SelectRunlevel
-from response_frames.operation import OperationSuccessFrame
+from response_frames.stop_antenna_deployment import StopAntennaDeploymentSuccessFrame
 from system import runlevel, clear_state
 from telecommand.antenna import SetAntennaDeployment
 from tests.base import BaseTest, RestartPerTest
@@ -27,17 +27,11 @@ class TestTelecommandsAntenna(RestartPerTest):
 
         self.assertTrue(being_deployed.wait_for_change(1), "Antenna deployment should be performed")
 
-        self.system.obc.run_mission()
-
-        self.system.obc._command('PUTTING FRAME')
-
         self.system.comm.put_frame(SetAntennaDeployment(0x22, True))
 
-        ack = self.system.comm.get_frame(10, filter_type=OperationSuccessFrame)
+        ack = self.system.comm.get_frame(10, filter_type=StopAntennaDeploymentSuccessFrame)
 
         self.assertIsNotNone(ack, "Should receive confirmation")
-
-        self.system.obc.run_mission()
 
         self.system.obc.run_mission()
 
@@ -53,6 +47,9 @@ class TestTelecommandsAntenna(RestartPerTest):
 
         t = since_start
 
+        response = self.system.obc.state_get_antenna()
+        self.assertEqual(response, "1\nOK")
+        
         for i in xrange(0, 20):
             t += timedelta(seconds=60)
 
