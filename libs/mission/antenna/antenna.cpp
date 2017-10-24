@@ -212,56 +212,6 @@ namespace mission
             return true;
         }
 
-        StopAntennaDeploymentTask::StopAntennaDeploymentTask(std::uint8_t /*mark*/)
-        {
-        }
-
-        mission::ActionDescriptor<SystemState> StopAntennaDeploymentTask::BuildAction()
-        {
-            mission::ActionDescriptor<SystemState> action;
-            action.name = "Stop antenna deployment";
-            action.param = this;
-            action.condition = Condition;
-            action.actionProc = Action;
-            return action;
-        }
-
-        StopAntennaDeploymentTask::CurrentOperation StopAntennaDeploymentTask::FromBool(bool disable)
-        {
-            return disable ? CurrentOperation::Disable : CurrentOperation::Enable;
-        }
-
-        void StopAntennaDeploymentTask::SetDeploymentState(bool disabled)
-        {
-            const auto newValue = FromBool(disabled);
-            auto expected = CurrentOperation::None;
-            while (!this->_needsUpdate.compare_exchange_strong(expected, newValue))
-            {
-            }
-        }
-
-        bool StopAntennaDeploymentTask::Condition(const SystemState& state, void* param)
-        {
-            auto This = reinterpret_cast<StopAntennaDeploymentTask*>(param);
-            return state.AntennaState.IsDeployed() && This->_needsUpdate.load() != CurrentOperation::None;
-        }
-
-        void StopAntennaDeploymentTask::Action(SystemState& state, void* param)
-        {
-            auto This = reinterpret_cast<StopAntennaDeploymentTask*>(param);
-            CurrentOperation newValue;
-            while ((newValue = This->_needsUpdate.exchange(CurrentOperation::None)) != CurrentOperation::None)
-            {
-                bool disabled = newValue == CurrentOperation::Disable;
-                LOGF(LOG_LEVEL_INFO, "[ant] Updating antenna deployment to %d", disabled ? 0 : 1);
-
-                if (!state.PersistentState.Set(state::AntennaConfiguration(disabled)))
-                {
-                    LOG(LOG_LEVEL_ERROR, "[ant] Can't set antenna configuration");
-                }
-            }
-        }
-
         OSResult AntennaTask::PowerOn(
             AntennaTask* task, AntennaChannel channel, AntennaId /*antenna*/, std::chrono::milliseconds /*burnTime*/)
         {
