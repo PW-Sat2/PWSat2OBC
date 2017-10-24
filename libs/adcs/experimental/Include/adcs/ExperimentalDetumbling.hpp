@@ -43,6 +43,9 @@ namespace adcs
         /** @brief Algorithm refresh frequency. */
         static constexpr chrono_extensions::hertz Frequency = chrono_extensions::hertz{1.0 / DetumblingComputations::Parameters::dt};
 
+        /** @brief Coil actuation timeout. */
+        static constexpr std::chrono::milliseconds ActuationTimeout = std::chrono::milliseconds(500);
+
       private:
         OSResult PerformSelfTest();
 

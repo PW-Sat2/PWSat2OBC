@@ -49,9 +49,9 @@ namespace
         EXPECT_CALL(_power, ImtqPower(true)).WillOnce(Return(true));
         EXPECT_CALL(_os, GiveSemaphore(_)).WillRepeatedly(Return(OSResult::Success));
 
-        auto expectedDipole = Vector3<Dipole>{-22464, 20608, -1920};
+        auto expectedDipole = Vector3<Dipole>{-32768, 32767, -32768};
 
-        auto calibratedMagnetometerMeasurement = Vector3<MagnetometerMeasurement>{1, 2, 3};
+        auto calibratedMagnetometerMeasurement = Vector3<MagnetometerMeasurement>{1, -2, 3};
 
         auto selfTestResult = CreateSuccessfulSelfTestResult();
 
@@ -59,7 +59,7 @@ namespace
 
         ON_CALL(_imtqDriver, MeasureMagnetometer(_))
             .WillByDefault(DoAll(SetArgReferee<0>(calibratedMagnetometerMeasurement), Return(true)));
-        EXPECT_CALL(_imtqDriver, StartActuationDipole(Eq(expectedDipole), Eq(0ms)));
+        EXPECT_CALL(_imtqDriver, StartActuationDipole(Eq(expectedDipole), Eq(500ms)));
 
         _detumbling.Initialize();
         _detumbling.Enable();
@@ -72,11 +72,15 @@ namespace
         EXPECT_CALL(_os, GiveSemaphore(_)).WillRepeatedly(Return(OSResult::Success));
         EXPECT_CALL(_power, ImtqPower(true)).WillOnce(Return(true));
 
+        auto calibratedMagnetometerMeasurement = Vector3<MagnetometerMeasurement>{1, -2, 3};
+
         auto selfTestResult = CreateSuccessfulSelfTestResult();
 
         selfTestResult.stepResults[1].error = Error(1);
 
         ON_CALL(_imtqDriver, PerformSelfTest(_, _)).WillByDefault(DoAll(SetArgReferee<0>(selfTestResult), Return(true)));
+        ON_CALL(_imtqDriver, MeasureMagnetometer(_))
+            .WillByDefault(DoAll(SetArgReferee<0>(calibratedMagnetometerMeasurement), Return(true)));
 
         _detumbling.Initialize();
         ASSERT_THAT(_detumbling.Enable(), Eq(OSResult::Success));

@@ -20,9 +20,14 @@ DetumblingComputations::DetumblingComputations() : mtmDotExp(0.0f)
 {
 }
 
-DetumblingComputations::State DetumblingComputations::initialize(const Parameters& param)
+DetumblingComputations::State DetumblingComputations::initialize(const Parameters& param, const MagVec& mgmt_meas)
 {
     mtmDotExp = exp(-param.wCutOff * param.dt);
+    DetumblingComputations::State state(param);
+    for (unsigned int i = 0; i < mgmt_meas.size(); i++)
+    {
+        state.mtmMeasPrev[i] = mgmt_meas[i];
+    }
     return State(param);
 }
 
@@ -65,7 +70,7 @@ DipoleVec DetumblingComputations::step(const MagVec& mgmt_meas, State& state)
     DipoleVec dipole;
     for (unsigned int i = 0; i < dipole.size(); i++)
     {
-        dipole[i] = commDipoleBdot[i];
+        dipole[i] = CastWithSaturation<Dipole>(commDipoleBdot[i]);
     }
 
     return dipole;

@@ -21,7 +21,7 @@ namespace adcs
     using DipoleVec = std::array<Dipole, 3>;
 
     /** @brief Magnetometer Measurement representation
-     *          1 LSB = 1e-7 T
+     *          1 LSB = 1e-9 T
      */
     using MagnetometerMeasurement = std::int32_t;
 
