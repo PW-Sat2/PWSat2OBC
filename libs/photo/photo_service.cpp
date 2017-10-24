@@ -64,7 +64,15 @@ namespace services
 
             System::SleepTask(6s);
 
-            return result ? OSResult::Success : OSResult::IOError;
+            if (result)
+            {
+                return OSResult::Success;
+            }
+            else
+            {
+                LOGF(LOG_LEVEL_ERROR, "[photo] Unable to disable camera: %d", static_cast<int>(command.Which));
+                return OSResult::IOError;
+            }
         }
 
         OSResult PhotoService::Invoke(services::photo::EnableCamera command)
@@ -83,6 +91,7 @@ namespace services
 
             if (!result)
             {
+                LOGF(LOG_LEVEL_ERROR, "[photo] Unable to enable camera: %d", static_cast<int>(command.Which));
                 return OSResult::PowerFailure;
             }
 
@@ -104,6 +113,7 @@ namespace services
 
             if (!syncResult.GetIsSuccessful())
             {
+                LOGF(LOG_LEVEL_ERROR, "[photo] camera: %d did not respond in time", static_cast<int>(command.Which));
                 return OSResult::DeviceNotFound;
             }
 
@@ -123,10 +133,12 @@ namespace services
                     return OSResult::Success;
                 }
 
+                LOGF(LOG_LEVEL_ERROR, "[photo] Unable to take photo on camera: %d retrying...", static_cast<int>(command.Which));
                 Invoke(services::photo::DisableCamera{command.Which});
                 Invoke(services::photo::EnableCamera{command.Which});
             }
 
+            LOGF(LOG_LEVEL_ERROR, "[photo] Unable to take photo on camera: %d", static_cast<int>(command.Which));
             return OSResult::DeviceNotFound;
         }
 
@@ -155,6 +167,7 @@ namespace services
 
                 LOGF(LOG_LEVEL_WARNING, "[photo] Retrying (%d) download from %d", i, num(command.Which));
             }
+
             if (r.IsSuccess())
             {
                 Lock l(this->_sync, InfiniteTimeout);
@@ -162,6 +175,8 @@ namespace services
                 this->_freeSpace += r.Success().size();
                 return OSResult::Success;
             }
+
+            LOGF(LOG_LEVEL_ERROR, "[photo] Unable to download photo from camera: %d", static_cast<int>(command.Which));
 
             {
                 Lock l(this->_sync, InfiniteTimeout);
@@ -186,11 +201,17 @@ namespace services
 
             if (!f)
             {
+                LOGF(LOG_LEVEL_ERROR, "[photo] Unable to open file '%s' for a photo %d.", command.Path, command.BufferId);
                 return OSResult::IOError;
             }
 
             if (command.BufferId >= BuffersCount)
             {
+                LOGF(LOG_LEVEL_ERROR,
+                    "[photo] Unable to save photo %d to file '%s' as it is out of range.", //
+                    command.BufferId,
+                    command.Path);
+
                 return OSResult::InvalidArgument;
             }
 
@@ -206,6 +227,10 @@ namespace services
             {
                 const char* marker = "Empty";
                 f.Write(gsl::make_span(reinterpret_cast<const std::uint8_t*>(marker), 6));
+                LOGF(LOG_LEVEL_ERROR,
+                    "[photo] Unable to save photo %d to file '%s' as it is empty.", //
+                    command.BufferId,
+                    command.Path);
                 return OSResult::BufferNotAvailable;
             }
 
@@ -213,6 +238,10 @@ namespace services
             {
                 const char* marker = "Failed";
                 f.Write(gsl::make_span(reinterpret_cast<const std::uint8_t*>(marker), 7));
+                LOGF(LOG_LEVEL_ERROR,
+                    "[photo] Unable to save photo %d to file '%s' as it is marked as failed.", //
+                    command.BufferId,
+                    command.Path);
                 return OSResult::BufferNotAvailable;
             }
 
@@ -336,6 +365,8 @@ namespace services
 
         void PhotoService::PurgePendingCommands()
         {
+            LOG(LOG_LEVEL_INFO, "[photo] Purging command queue");
+
             PossibleCommand cmd;
             cmd.Selected = Command::Break;
             this->_commandQueue.Reset();
