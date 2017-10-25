@@ -78,7 +78,6 @@ static void PerformMemoryRecovery();
 
 mission::ObcMission Mission(&PerformMemoryRecovery, //
     std::tie(Main.timeProvider, Main.Hardware.rtc, Mission),
-    0,
     std::tie<IAntennaDriver, services::power::IPowerControl>(Main.Hardware.antennaDriver, Main.PowerControlInterface),
     Main.Hardware.CommDriver,
     Main.PowerControlInterface,

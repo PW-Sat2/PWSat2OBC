@@ -102,7 +102,6 @@ OBC::OBC()
           this->Hardware.rtc,
           Mission,
           Mission,
-          Mission,
           fs,
           Experiments,
           BootTable,

@@ -4,9 +4,9 @@
 #include "settings.h"
 #include "telecommunication/downlink.h"
 
-using std::uint8_t;
-using gsl::span;
 using drivers::i2c::II2CBus;
+using gsl::span;
+using std::uint8_t;
 using telecommunication::uplink::IHandleTeleCommand;
 
 using namespace obc;
@@ -17,7 +17,6 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
     services::time::ICurrentTime& currentTime,
     devices::rtc::IRTC& rtc,
     mission::IIdleStateController& idleStateController,
-    mission::antenna::IDisableAntennaDeployment& disableAntennaDeployment,
     IHasState<SystemState>& stateContainer,
     services::fs::IFileSystem& fs,
     obc::OBCExperiments& experiments,
@@ -55,7 +54,7 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           FinalizeProgramEntry(bootTable),                                                                                            //
           SetBootSlotsTelecommand(bootSettings),                                                                                      //
           SendBeaconTelecommand(telemetry),                                                                                           //
-          SetAntennaDeploymentMaskTelecommand(disableAntennaDeployment),                                                              //
+          SetAntennaDeploymentMaskTelecommand(stateContainer),                                                                        //
           PowerCycle(powerControl),                                                                                                   //
           SetErrorCounterConfig(fdir),                                                                                                //
           OpenSail(openSail),                                                                                                         //

@@ -25,15 +25,15 @@ namespace obc
           public:
             /**
              * @brief ctor
-             * @param disableAntennaDeployment Object responsible for disabling antenna deployment
+             * @param stateContainer System state container
              */
-            SetAntennaDeploymentMaskTelecommand(mission::antenna::IDisableAntennaDeployment& disableAntennaDeployment);
+            SetAntennaDeploymentMaskTelecommand(IHasState<SystemState>& stateContainer);
 
             virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
 
           private:
-            /** @brief Object responsible for disabling antenna deployment */
-            mission::antenna::IDisableAntennaDeployment& _disableAntennaDeployment;
+            /** @brief System state container */
+            IHasState<SystemState>& stateContainer;
         };
     }
 }

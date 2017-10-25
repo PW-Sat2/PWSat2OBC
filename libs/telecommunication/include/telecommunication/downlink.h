@@ -62,6 +62,7 @@ namespace telecommunication
             DisableSailDeployment = 0x20,      //!< Disable automatic sail deployment
             MemoryContent = 0x21,              //!< Memory contents
             BeaconError = 0x22,                //!< Beacon Error
+            DisableAntennaDeployment = 0x23,   //!< Disable automatic antenna deployment
             Telemetry = 0x3F,                  //!< TelemetryLong
             LastItem                           //!< LastItem
         };

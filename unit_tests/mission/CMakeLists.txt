@@ -7,7 +7,6 @@ set(SOURCES
   MissionPlan/TelemetryTest.cpp
   MissionPlan/FileSystemTaskTest.cpp
   MissionPlan/antenna/DeployAntennaTest.cpp
-  MissionPlan/antenna/StopAntennaDeploymentTest.cpp
   MissionPlan/beacon/BeaconUpdateTest.cpp
   MissionPlan/CompositeActionTest.cpp
   MissionPlan/adcs/AdcsPrimaryTaskTest.cpp

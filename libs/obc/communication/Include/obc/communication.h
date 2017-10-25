@@ -184,7 +184,6 @@ namespace obc
          * @param[in] currentTime Current time
          * @param[in] rtc RTC device
          * @param[in] idleStateController Idle state controller
-         * @param[in] disableAntennaDeployment Object responsible for disabling antenna deployment
          * @param[in] stateContainer Container for OBC state
          * @param[in] fs File system
          * @param[in] experiments Experiments
@@ -208,7 +207,6 @@ namespace obc
             services::time::ICurrentTime& currentTime,
             devices::rtc::IRTC& rtc,
             mission::IIdleStateController& idleStateController,
-            mission::antenna::IDisableAntennaDeployment& disableAntennaDeployment,
             IHasState<SystemState>& stateContainer,
             services::fs::IFileSystem& fs,
             obc::OBCExperiments& experiments,
