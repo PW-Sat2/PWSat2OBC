@@ -59,4 +59,4 @@ __all__ = [
     'SetAdcsModeSuccessFrame',
     'SetAdcsModeErrorFrame',
     'frame_factories'
-]
+] + map(lambda t: t.__name__, frame_types)
