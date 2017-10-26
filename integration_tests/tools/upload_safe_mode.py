@@ -10,6 +10,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("port", help="Serial port used to communicate with OBC")
 parser.add_argument("file", help="Binary file to upload")
+parser.add_argument("--nowait", required=False, help="No wait for bootloader", action='store_true')
 
 args = parser.parse_args()
 
@@ -95,11 +96,14 @@ port = serial.Serial(port=args.port, baudrate=115200)
 print args
 bootloader = Bootloader(port)
 
-print 'Waiting for bootloader'
+if args.nowait == False:
+    print 'Waiting for bootloader'
 
-bootloader.wait()
-
-print 'Bootloader ready'
+    bootloader.wait()
+    
+    print 'Bootloader ready'
+else:
+    print 'User claims that bootloader is ready'
 
 logging.basicConfig()
 
