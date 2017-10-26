@@ -13,13 +13,13 @@
 #include "telecommunication/downlink.h"
 #include "time/ICurrentTime.hpp"
 
-using services::fs::File;
-using services::fs::IFileSystem;
-using services::fs::FileOpen;
-using services::fs::FileAccess;
-using telecommunication::downlink::DownlinkFrame;
-using telecommunication::downlink::DownlinkAPID;
 using experiments::fs::ExperimentFile;
+using services::fs::File;
+using services::fs::FileAccess;
+using services::fs::FileOpen;
+using services::fs::IFileSystem;
+using telecommunication::downlink::DownlinkAPID;
+using telecommunication::downlink::DownlinkFrame;
 
 namespace experiment
 {
@@ -320,6 +320,8 @@ namespace experiment
             this->_photoService.PurgePendingCommands();
             TakePhoto(services::photo::Camera::Wing, services::photo::PhotoResolution::p480);
             TakePhoto(services::photo::Camera::Nadir, services::photo::PhotoResolution::p480);
+            // wait until cameras finish up their tasks.
+            this->_photoService.WaitForFinish(InfiniteTimeout);
         }
 
         void SailExperiment::SavePhotos()
