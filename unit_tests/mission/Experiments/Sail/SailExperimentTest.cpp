@@ -14,18 +14,18 @@
 
 namespace
 {
-    using testing::_;
+    using experiments::StartResult;
     using testing::An;
     using testing::Eq;
     using testing::Return;
-    using experiments::StartResult;
+    using testing::_;
     using namespace std::chrono_literals;
-    using services::photo::Reset;
-    using services::photo::EnableCamera;
     using services::photo::DisableCamera;
-    using services::photo::TakePhoto;
     using services::photo::DownloadPhoto;
+    using services::photo::EnableCamera;
+    using services::photo::Reset;
     using services::photo::SavePhoto;
+    using services::photo::TakePhoto;
 
     class SailExperimentTest : public testing::Test
     {
@@ -98,7 +98,7 @@ namespace
         EXPECT_CALL(photo, Reset()).Times(2);
         EXPECT_CALL(photo, DisableCamera(services::photo::Camera::Nadir));
         EXPECT_CALL(photo, DisableCamera(services::photo::Camera::Wing));
-        EXPECT_CALL(photo, WaitForFinish(_)).Times(2);
+        EXPECT_CALL(photo, WaitForFinish(_)).Times(testing::AtLeast(2));
 
         const auto status = experiment.Start();
         ASSERT_THAT(status, Eq(StartResult::Failure));
@@ -125,11 +125,14 @@ namespace
         EXPECT_CALL(power, SensPower(false)).WillOnce(Return(true));
         EXPECT_CALL(time, GetCurrentTime()).WillRepeatedly(Return(Some(10ms)));
 
-        EXPECT_CALL(photo, Reset());
-        EXPECT_CALL(photo, DisableCamera(services::photo::Camera::Nadir));
-        EXPECT_CALL(photo, DisableCamera(services::photo::Camera::Wing));
-        EXPECT_CALL(photo, WaitForFinish(_));
-        experiment.Stop(experiments::IterationResult::Failure);
+        {
+            testing::InSequence seq;
+            EXPECT_CALL(photo, DisableCamera(services::photo::Camera::Nadir));
+            EXPECT_CALL(photo, DisableCamera(services::photo::Camera::Wing));
+            EXPECT_CALL(photo, Reset());
+            EXPECT_CALL(photo, WaitForFinish(_));
+            experiment.Stop(experiments::IterationResult::Failure);
+        }
     }
 
     TEST_F(SailExperimentTest, TestTimeToGetTelemetryNoAcquisition)
