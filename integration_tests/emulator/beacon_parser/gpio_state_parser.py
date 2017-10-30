@@ -1,4 +1,4 @@
-from emulator.beacon_parser.units import BoolTypeNegated
+from emulator.beacon_parser.units import BoolType
 from parser import CategoryParser
 
 
