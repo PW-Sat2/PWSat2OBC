@@ -10,5 +10,5 @@ class GpioStateParser(CategoryParser):
         return 1
 
     def parse(self):
-        self.append("Sail Deployed", 1, value_type=BoolTypeNegated)
+        self.append("Sail Deployed", 1, value_type=BoolType)
 
