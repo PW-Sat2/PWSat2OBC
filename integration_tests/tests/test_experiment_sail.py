@@ -23,10 +23,10 @@ class TestExperimentSail(RestartPerTest):
 
         self.system.comm.put_frame(PerformSailExperiment(10))
 
-        frame = self.system.comm.get_frame(20)
+        frame = self.system.comm.get_frame(20, filter_type=ExperimentSuccessFrame)
 
         self.assertIsInstance(frame, ExperimentSuccessFrame)
-        self.assertEqual(frame.correlation_id, 10);
+        self.assertEqual(frame.correlation_id, 10)
 
         self.system.obc.wait_for_experiment_started(ExperimentType.Sail, 60)
         self.system.obc.wait_for_experiment_iteration(1, 3)
@@ -60,7 +60,7 @@ class TestExperimentSail(RestartPerTest):
 
         self.system.comm.put_frame(PerformSailExperiment(10))
 
-        frame = self.system.comm.get_frame(20)
+        frame = self.system.comm.get_frame(20, filter_type=ExperimentSuccessFrame)
 
         self.assertIsInstance(frame, ExperimentSuccessFrame)
         self.assertEqual(frame.correlation_id, 10)
@@ -68,11 +68,11 @@ class TestExperimentSail(RestartPerTest):
         self.system.obc.wait_for_experiment_started(ExperimentType.Sail, 60)
         self.system.obc.wait_for_experiment_iteration(25, 5 * 20)
 
-        frame = self.system.comm.get_frame(20)
+        frame = self.system.comm.get_frame(20, filter_type=SailExperimentFrame)
         self.assertIsInstance(frame, SailExperimentFrame)
         self.assertEqual(frame.seq(), 0)
 
-        frame = self.system.comm.get_frame(20)
+        frame = self.system.comm.get_frame(20, filter_type=SailExperimentFrame)
         self.assertIsInstance(frame, SailExperimentFrame)
         self.assertEqual(frame.seq(), 1)
         

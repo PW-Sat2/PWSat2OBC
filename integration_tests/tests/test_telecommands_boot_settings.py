@@ -26,7 +26,7 @@ class BootSettingsTelecomandsTest(RestartPerTest):
         self._start()
         self.system.comm.put_frame(SetBootSlots(correlation_id=0x14, primary=0b111, failsafe=0b111000))
 
-        f = self.system.comm.get_frame(10)
+        f = self.system.comm.get_frame(10, filter_type=BootSlotsInfoSuccessFrame)
         self.assertIsInstance(f, BootSlotsInfoSuccessFrame)
         self.assertEqual(f.response, [0b111, 0b111000])
 

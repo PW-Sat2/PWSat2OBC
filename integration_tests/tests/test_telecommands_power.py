@@ -31,7 +31,7 @@ class TestPowerTelecommands(RestartPerTest):
 
         self.system.comm.put_frame(PowerCycleTelecommand(0x21))
 
-        ack = self.system.comm.get_frame(5)
+        ack = self.system.comm.get_frame(5, filter_type=PowerSuccessFrame)
         self.assertIsInstance(ack, PowerSuccessFrame)
 
         power_cycle_requested.wait_for_change(1)

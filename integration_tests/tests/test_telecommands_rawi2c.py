@@ -1,5 +1,5 @@
 import telecommand
-from response_frames.operation import OperationSuccessFrame
+from response_frames.common import I2CSuccessFrame
 from devices import EchoDevice, BeaconFrame
 from system import auto_power_on, runlevel
 from tests.base import BaseTest, RestartPerTest
@@ -36,8 +36,9 @@ class RawI2CTelecommandsTest(RestartPerTest):
 
         self.system.comm.put_frame(telecommand.RawI2C(correlation_id=0x11, busSelect=0, address=self.systemEcho.address, delay=100, data=[32, 64, 50, 104]))
 
-        frame = self.system.comm.get_frame(20)
+        frame = self.system.comm.get_frame(20, filter_type=I2CSuccessFrame)
 
+        self.assertIsInstance(frame, I2CSuccessFrame)
         self.assertEqual(frame.seq(), 0)
         self.assertEqual(frame.correlation_id, 0x11)
         self.assertEqual(frame.payload(), [17, 0, 33, 65, 51, 105] + [0]*226)
@@ -49,8 +50,9 @@ class RawI2CTelecommandsTest(RestartPerTest):
 
         self.system.comm.put_frame(telecommand.RawI2C(correlation_id=0x11, busSelect=1, address=self.payloadEcho.address, delay=100, data=[1, 2, 3, 4, 5]))
 
-        frame = self.system.comm.get_frame(20)
+        frame = self.system.comm.get_frame(20, filter_type=I2CSuccessFrame)
 
+        self.assertIsInstance(frame, I2CSuccessFrame)
         self.assertEqual(frame.seq(), 0)
         self.assertEqual(frame.correlation_id, 0x11)
         self.assertEqual(frame.payload(), [17, 0, 2, 3, 4, 5, 6] + [0]*225)
@@ -62,8 +64,9 @@ class RawI2CTelecommandsTest(RestartPerTest):
 
         self.system.comm.put_frame(telecommand.RawI2C(correlation_id=0x11, busSelect=0, address=self.systemEcho.address, delay=0, data=[6, 66, 6]))
 
-        frame = self.system.comm.get_frame(20)
+        frame = self.system.comm.get_frame(20, filter_type=I2CSuccessFrame)
 
+        self.assertIsInstance(frame, I2CSuccessFrame)
         self.assertEqual(frame.seq(), 0)
         self.assertEqual(frame.correlation_id, 0x11)
         self.assertEqual(frame.payload(), [17, 0, 7, 67, 7] + [0]*227)

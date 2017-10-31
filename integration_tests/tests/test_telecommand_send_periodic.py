@@ -29,6 +29,6 @@ class SendPeriodicMessageTelecommandTest(RestartPerTest):
         self.system.comm.put_frame(SendPeriodicMessageTelecommand(5))
 
         for i in xrange(0, 5):
-            f = self.system.comm.get_frame(10)
+            f = self.system.comm.get_frame(10, filter_type=PeriodicMessageFrame)
 
             self.assertIsInstance(f, PeriodicMessageFrame)

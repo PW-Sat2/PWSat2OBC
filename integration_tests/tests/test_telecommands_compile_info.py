@@ -27,7 +27,7 @@ class TestGetCompileInfoTelecommand(RestartPerTest):
 
         self.system.comm.put_frame(GetCompileInfoTelecommand())
 
-        response = self.system.comm.get_frame(5)
+        response = self.system.comm.get_frame(5, filter_type=CompileInfoFrame)
         self.assertIsInstance(response, CompileInfoFrame)
         self.assertEqual(response.seq(), 0)
 

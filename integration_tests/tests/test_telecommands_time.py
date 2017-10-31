@@ -3,6 +3,7 @@ from datetime import timedelta
 import telecommand
 
 from response_frames.common import DownlinkApid
+from response_frames.time import TimeCorrectionSuccessFrame, TimeSetSuccessFrame
 from system import auto_power_on, runlevel
 from tests.base import  RestartPerTest
 from utils import TestEvent
@@ -30,7 +31,7 @@ class TimeTelecommandsTest(RestartPerTest):
 
         self.system.comm.put_frame(telecommand.SetTimeCorrectionConfig(correlation_id=0x11, missionTimeWeight=0x12, externalTimeWeight=0x34))
 
-        frame = self.system.comm.get_frame(20)
+        frame = self.system.comm.get_frame(20, filter_type=TimeCorrectionSuccessFrame)
 
         time_config_text = self.system.obc.state_get_time_config()
         time_config = time_config_text.split()
@@ -49,7 +50,7 @@ class TimeTelecommandsTest(RestartPerTest):
 
         self.system.comm.put_frame(telecommand.SetTime(correlation_id=0x12, newTime=0x1234))
 
-        frame = self.system.comm.get_frame(20)
+        frame = self.system.comm.get_frame(20, filter_type=TimeSetSuccessFrame)
 
         time_text = self.system.obc.state_get_time_state()
         time = time_text.split()
@@ -68,7 +69,7 @@ class TimeTelecommandsTest(RestartPerTest):
 
         self.system.comm.put_frame(telecommand.SetTime(correlation_id=0x12, newTime=0x1234))
 
-        frame = self.system.comm.get_frame(20)
+        frame = self.system.comm.get_frame(20, filter_type=TimeSetSuccessFrame)
 
         time_text = self.system.obc.state_get_time_state()
         time = time_text.split()

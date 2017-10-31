@@ -29,7 +29,7 @@ class TestPhotoTelecommand(RestartPerTest):
 
         self.system.comm.put_frame(TakePhotoTelecommand(10, CameraLocation.Wing, PhotoResolution.p128, 30, timedelta(seconds = 0), "photo.jpg"))
 
-        ack = self.system.comm.get_frame(5)
+        ack = self.system.comm.get_frame(5, filter_type=PhotoErrorFrame)
         self.assertIsInstance(ack, PhotoErrorFrame)
 
     def test_photo_telecommand(self):
@@ -37,7 +37,7 @@ class TestPhotoTelecommand(RestartPerTest):
 
         self.system.comm.put_frame(TakePhotoTelecommand(10, CameraLocation.Wing, PhotoResolution.p128, 10, timedelta(seconds = 5), "photo.jpg"))
 
-        ack = self.system.comm.get_frame(5)
+        ack = self.system.comm.get_frame(5, filter_type=PhotoSuccessFrame)
         self.assertIsInstance(ack, PhotoSuccessFrame)
 
     def test_purge_photo_telecommand(self):
@@ -45,5 +45,5 @@ class TestPhotoTelecommand(RestartPerTest):
 
         self.system.comm.put_frame(PurgePhotoTelecommand(10))
 
-        ack = self.system.comm.get_frame(10)
+        ack = self.system.comm.get_frame(10, filter_type=PurgePhotoSuccessFrame)
         self.assertIsInstance(ack, PurgePhotoSuccessFrame)

@@ -21,10 +21,10 @@ class TestExperimentSADS(RestartPerTest):
 
         self.system.comm.put_frame(PerformSADSExperiment(10))
 
-        frame = self.system.comm.get_frame(20)
+        frame = self.system.comm.get_frame(20, filter_type=ExperimentSuccessFrame)
 
         self.assertIsInstance(frame, ExperimentSuccessFrame)
-        self.assertEqual(frame.correlation_id, 10);
+        self.assertEqual(frame.correlation_id, 10)
 
         self.system.obc.wait_for_experiment_started(ExperimentType.SADS, 60)
         self.system.obc.wait_for_experiment_iteration(1, 3)
