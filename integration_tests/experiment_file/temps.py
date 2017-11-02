@@ -2,10 +2,10 @@ from base import uint16, count, label_as, pid, to_dict, field, joint
 
 AllTemperatures = pid(0x32) >> joint(
     field('Supply', uint16),
-    field('Xp', uint16),
     field('Xn', uint16),
-    field('Yp', uint16),
+    field('Xp', uint16),
     field('Yn', uint16),
+    field('Yp', uint16),
     field('SADS', uint16),
     field('Sail', uint16),
     field('Camera Nadir', uint16),
