@@ -29,7 +29,7 @@ with open(local_file, 'wb') as local:
         chunks = range(*r)
 
         print 'Requesting...'
-        system.comm.put_frame(DownloadFile(obc_path, 0x45, chunks))
+        system.comm.put_frame(DownloadFile(0x45, obc_path, chunks))
 
         while len(chunks) > 0:
             print '\tWaiting for chunks {}:'.format(chunks)
