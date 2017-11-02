@@ -42,7 +42,7 @@ class TestFDIRTelecommands(RestartPerTest):
 
         self.system.comm.put_frame(SetErrorCounterConfig(0x21, [device_0, device_1]))
 
-        response = self.system.comm.get_frame(5)
+        response = self.system.comm.get_frame(5, filter_type=ErrorCounterConfigurationSuccessFrame)
 
         self.assertIsInstance(response, ErrorCounterConfigurationSuccessFrame)
         self.assertEqual(response.correlation_id, 0x21)
@@ -65,7 +65,7 @@ class TestFDIRTelecommands(RestartPerTest):
 
         self.system.comm.put_frame(GetErrorCounterConfig())
 
-        f = self.system.comm.get_frame(5)
+        f = self.system.comm.get_frame(5, filter_type=ErrorCountersFrame)
 
         self.assertIsInstance(f, ErrorCountersFrame)
 

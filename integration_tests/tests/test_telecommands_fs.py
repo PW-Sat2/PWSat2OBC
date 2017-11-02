@@ -1,7 +1,8 @@
 import struct
 
 import telecommand
-from response_frames.common import FileRemoveErrorFrame, FileSendErrorFrame
+from response_frames.common import FileRemoveErrorFrame, FileSendErrorFrame, FileRemoveSuccessFrame
+from response_frames.file_system import FileListSuccessFrame
 from response_frames.common import DownlinkApid
 from system import auto_power_on, runlevel
 from tests.base import RestartPerTest
@@ -60,7 +61,7 @@ class FileSystemTelecommandsTest(RestartPerTest):
 
         self.system.comm.put_frame(telecommand.DownloadFile(correlation_id=0x11, path=p, seqs=[0, 3, 1, 2]))
 
-        frame = self.system.comm.get_frame(20)
+        frame = self.system.comm.get_frame(20, filter_type=FileSendErrorFrame)
 
         self.assertIsInstance(frame, FileSendErrorFrame)
         self.assertEqual(frame.seq(), 0)
@@ -79,7 +80,7 @@ class FileSystemTelecommandsTest(RestartPerTest):
 
         self.system.comm.put_frame(telecommand.RemoveFile(correlation_id=0x11, path=p))
 
-        frame = self.system.comm.get_frame(20)
+        frame = self.system.comm.get_frame(20, filter_type=FileRemoveSuccessFrame)
 
         self.assertEqual(frame.apid(), DownlinkApid.FileRemove)
         self.assertEqual(frame.seq(), 0)
@@ -93,7 +94,7 @@ class FileSystemTelecommandsTest(RestartPerTest):
 
         self.system.comm.put_frame(telecommand.RemoveFile(correlation_id=0x11, path=p))
 
-        frame = self.system.comm.get_frame(20)
+        frame = self.system.comm.get_frame(20, filter_type=FileRemoveErrorFrame)
 
         self.assertIsInstance(frame, FileRemoveErrorFrame)
         self.assertEqual(frame.seq(), 0)
@@ -112,8 +113,9 @@ class FileSystemTelecommandsTest(RestartPerTest):
 
         self.system.comm.put_frame(telecommand.ListFiles(correlation_id=0x11, path='/'))
 
-        frame = self.system.comm.get_frame(20)
+        frame = self.system.comm.get_frame(20, filter_type=FileListSuccessFrame)
 
+        self.assertIsInstance(frame, FileListSuccessFrame)
         self.assertEqual(frame.apid(), DownlinkApid.FileList)
         self.assertEqual(frame.seq(), 0)
         self.assertEqual(frame.payload()[0], 0x11)

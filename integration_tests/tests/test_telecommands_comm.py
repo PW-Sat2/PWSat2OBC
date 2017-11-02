@@ -40,7 +40,7 @@ class CommTelecommandsTest(RestartPerTest):
 
         self.system.comm.put_frame(telecommand.EnterIdleState(correlation_id=0x11, duration=5))
 
-        frame = self.system.comm.get_frame(20)
+        frame = self.system.comm.get_frame(20, filter_type=CommSuccessFrame)
 
         self.assertIsInstance(frame, CommSuccessFrame)
         self.assertEqual(frame.seq(), 0)
@@ -62,7 +62,7 @@ class CommTelecommandsTest(RestartPerTest):
 
         self.system.comm.put_frame(telecommand.EnterIdleState(correlation_id=0x11, duration=1))
 
-        frame = self.system.comm.get_frame(20)
+        frame = self.system.comm.get_frame(20, filter_type=CommSuccessFrame)
         self.assertIsInstance(frame, CommSuccessFrame)
         self.assertEqual(frame.seq(), 0)
         self.assertEqual(frame.correlation_id, 0x11)
@@ -75,7 +75,7 @@ class CommTelecommandsTest(RestartPerTest):
 
         self.system.comm.put_frame(telecommand.SendBeacon())
 
-        frame = self.system.comm.get_frame(20)
+        frame = self.system.comm.get_frame(20, filter_type=BeaconFrame)
 
         self.assertIsInstance(frame, BeaconFrame)
 
@@ -104,7 +104,7 @@ class CommTelecommandsTest(RestartPerTest):
         
         self.system.comm.put_frame(telecommand.SetBitrate(0x12, 2))
         
-        frame = self.system.comm.get_frame(20)
+        frame = self.system.comm.get_frame(20, filter_type=SetBitrateSuccessFrame)
         
         self.assertIsInstance(frame, SetBitrateSuccessFrame)
         self.assertEqual(frame.seq(), 0)
@@ -117,7 +117,7 @@ class CommTelecommandsTest(RestartPerTest):
 
         self.system.comm.put_frame(telecommand.SendBeacon())
 
-        frame = self.system.comm.get_frame(20)
+        frame = self.system.comm.get_frame(20, filter_type=BeaconFrame)
 
         self.assertIsInstance(frame, BeaconFrame)
         store = BeaconStorage()

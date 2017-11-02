@@ -70,6 +70,11 @@ class CommSuccessFrame(GenericSuccessResponseFrame):
     pass
 
 
+@response_frame(DownlinkApid.Comm)
+class CommErrorFrame(GenericErrorResponseFrame):
+    pass
+
+
 @response_frame(DownlinkApid.Photo)
 class PhotoSuccessFrame(GenericSuccessResponseFrame):
     pass
@@ -82,6 +87,11 @@ class PhotoErrorFrame(GenericErrorResponseFrame):
 
 @response_frame(DownlinkApid.I2C)
 class I2CSuccessFrame(GenericSuccessResponseFrame):
+    pass
+
+
+@response_frame(DownlinkApid.I2C)
+class I2CErrorFrame(GenericErrorResponseFrame):
     pass
 
 
@@ -115,8 +125,18 @@ class PurgePhotoSuccessFrame(GenericSuccessResponseFrame):
     pass
 
 
+@response_frame(DownlinkApid.PurgePhoto)
+class PurgePhotoErrorFrame(GenericErrorResponseFrame):
+    pass
+
+
 @response_frame(DownlinkApid.Powercycle)
 class PowerSuccessFrame(GenericSuccessResponseFrame):
+    pass
+
+
+@response_frame(DownlinkApid.Powercycle)
+class PowerErrorFrame(GenericErrorResponseFrame):
     pass
 
 
@@ -125,18 +145,8 @@ class SailSuccessFrame(GenericSuccessResponseFrame):
     pass
 
 
-@response_frame(DownlinkApid.TimeCorrection)
-class TimeCorrectionSuccessFrame(GenericSuccessResponseFrame):
-    pass
-
-
-@response_frame(DownlinkApid.TimeSet)
-class TimeSetSuccessFrame(GenericSuccessResponseFrame):
-    pass
-
-
-@response_frame(DownlinkApid.TimeSet)
-class TimeSetErrorFrame(GenericErrorResponseFrame):
+@response_frame(DownlinkApid.Sail)
+class SailErrorFrame(GenericErrorResponseFrame):
     pass
 
 
@@ -145,6 +155,16 @@ class ErrorCounterConfigurationSuccessFrame(GenericSuccessResponseFrame):
     pass
 
 
+@response_frame(DownlinkApid.ErrorCounterConfiguration)
+class ErrorCounterConfigurationErrorFrame(GenericErrorResponseFrame):
+    pass
+
+
 @response_frame(DownlinkApid.BootSlotsInfo)
 class BootSlotsInfoSuccessFrame(GenericSuccessResponseFrame):
+    pass
+
+
+@response_frame(DownlinkApid.BootSlotsInfo)
+class BootSlotsInfoErrorFrame(GenericErrorResponseFrame):
     pass

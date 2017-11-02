@@ -13,7 +13,7 @@ class TestAdcsTelecommands(RestartPerTest):
 
         self.system.comm.put_frame(SetAdcsModeTelecommand(10, AdcsMode.ExperimentalSunpointing))
 
-        response = self.system.comm.get_frame(5)
+        response = self.system.comm.get_frame(5, filter_type=SetAdcsModeSuccessFrame)
         self.assertIsInstance(response, SetAdcsModeSuccessFrame)
         self.assertEqual(response.seq(), 0)
         self.assertEqual(response.correlation_id, 10)
@@ -23,7 +23,7 @@ class TestAdcsTelecommands(RestartPerTest):
 
         self.system.comm.put_frame(SetAdcsModeTelecommand(11, 23))
 
-        response = self.system.comm.get_frame(5)
+        response = self.system.comm.get_frame(5, filter_type=SetAdcsModeErrorFrame)
         self.assertIsInstance(response, SetAdcsModeErrorFrame)
         self.assertEqual(response.seq(), 0)
         self.assertEqual(response.correlation_id, 11)
@@ -32,7 +32,7 @@ class TestAdcsTelecommands(RestartPerTest):
 
         self.system.comm.put_frame(SetBuiltinDetumblingBlockMaskTelecommand(10, True))
 
-        response = self.system.comm.get_frame(5)
+        response = self.system.comm.get_frame(5, filter_type=SetInternalDetumblingModeSuccessFrame)
         self.assertIsInstance(response, SetInternalDetumblingModeSuccessFrame)
         self.assertEqual(response.seq(), 0)
         self.assertEqual(response.correlation_id, 10)

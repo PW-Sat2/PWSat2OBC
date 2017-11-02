@@ -27,10 +27,10 @@ class TestGetPersistentStateTelecommand(RestartPerTest):
 
         self.system.comm.put_frame(GetPersistentState())
 
-        response = self.system.comm.get_frame(5)
+        response = self.system.comm.get_frame(5, filter_type=PersistentStateFrame)
         self.assertIsInstance(response, PersistentStateFrame)
-        self.assertEqual(response.seq(), 0);
+        self.assertEqual(response.seq(), 0)
 
-        response = self.system.comm.get_frame(1)
+        response = self.system.comm.get_frame(1, filter_type=PersistentStateFrame)
         self.assertIsInstance(response, PersistentStateFrame)
-        self.assertEqual(response.seq(), 1);
+        self.assertEqual(response.seq(), 1)
