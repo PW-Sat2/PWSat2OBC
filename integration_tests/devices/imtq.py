@@ -92,7 +92,7 @@ class Imtq(i2cMock.I2CDevice):
         self.mtm_measurement = [1, 2, 3]
         self.coil_actuation = 0
         self.coil_current = [4, 5, 6]
-        self.coil_temperature = [7, 8, 9]
+        self.coil_temperature = [7, 8, -9]
         self.commanded_dipole = [10, 11, 12]
         self.bdot_data = [13, 14, 15]
 
@@ -101,7 +101,7 @@ class Imtq(i2cMock.I2CDevice):
         self.digital_current_raw = 18
         self.analog_current_raw = 19
         self.coil_current_raw = [20, 21, 22]
-        self.coil_temperature_raw = [23, 24, 25]
+        self.coil_temperature_raw = [23, 24, -25]
         self.mcu_temperature_raw = 26
 
         self.digital_voltage = 27

@@ -10,6 +10,6 @@ class ImtqTemperatureTelemetryParser(CategoryParser):
         return 3 * 16
 
     def parse(self):
-        self.append_word("Coil Temperature 1", value_type=Temperature)
-        self.append_word("Coil Temperature 2", value_type=Temperature)
-        self.append_word("Coil Temperature 3", value_type=Temperature)
+        self.append("Coil Temperature 1", 16, two_complement=True, value_type=Temperature)
+        self.append("Coil Temperature 2", 16, two_complement=True, value_type=Temperature)
+        self.append("Coil Temperature 3", 16, two_complement=True, value_type=Temperature)

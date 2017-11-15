@@ -31,6 +31,24 @@ namespace temp
          * @return Raw temperature value.
          */
         virtual BitValue<std::uint16_t, 12> ReadRaw() = 0;
+
+        /**
+         * @brief Reads calibration temperature. This value is hardcoded in MCU.
+         * @return Calibration temperature in Celsius.
+         *
+         * @remark Calibration Temperature and ADC Result at Calibration Temperature values are used for converting raw ADC data to Celsius
+         * degree.
+         */
+        virtual std::int16_t GetCalibrationTemperature() = 0;
+
+        /**
+         * @brief Reads ADC result at calibration temperature. This value is hardcoded in MCU.
+         * @return ADC result at calibration temperature.
+         *
+         * @remark Calibration Temperature and ADC Result at Calibration Temperature values are used for converting raw ADC data to Celsius
+         * degree.
+         */
+        virtual std::int16_t GetADCResultAtCalibrationTemperature() = 0;
     };
 
     /**@} */

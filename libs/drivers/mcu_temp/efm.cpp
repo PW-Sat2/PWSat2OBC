@@ -39,14 +39,24 @@ namespace temp
         return BitValue<std::uint16_t, 12>(ReadRawInternal());
     }
 
+    std::int16_t ADCTemperatureReader::GetCalibrationTemperature()
+    {
+        return ((DEVINFO->CAL & _DEVINFO_CAL_TEMP_MASK) >> _DEVINFO_CAL_TEMP_SHIFT);
+    }
+
+    std::int16_t ADCTemperatureReader::GetADCResultAtCalibrationTemperature()
+    {
+        return ((DEVINFO->ADC0CAL2 & _DEVINFO_ADC0CAL2_TEMP1V25_MASK) >> _DEVINFO_ADC0CAL2_TEMP1V25_SHIFT);
+    }
+
     std::int16_t ADCTemperatureReader::ReadCelsius()
     {
         auto adcSample = this->ReadRawInternal();
 
         /* Factory calibration temperature from device information page. */
-        std::int16_t cal_temp_0 = ((DEVINFO->CAL & _DEVINFO_CAL_TEMP_MASK) >> _DEVINFO_CAL_TEMP_SHIFT);
+        std::int16_t cal_temp_0 = GetCalibrationTemperature();
 
-        std::int16_t cal_value_0 = ((DEVINFO->ADC0CAL2 & _DEVINFO_ADC0CAL2_TEMP1V25_MASK) >> _DEVINFO_ADC0CAL2_TEMP1V25_SHIFT);
+        std::int16_t cal_value_0 = GetADCResultAtCalibrationTemperature();
 
         /* Temperature gradient (from datasheet) */
         constexpr std::int8_t t_grad = -6.3 * 10;
