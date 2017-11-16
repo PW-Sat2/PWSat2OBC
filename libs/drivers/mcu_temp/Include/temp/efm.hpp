@@ -16,6 +16,10 @@ namespace temp
 
         virtual BitValue<std::uint16_t, 12> ReadRaw() override;
 
+        virtual std::int16_t GetCalibrationTemperature() override;
+
+        virtual std::int16_t GetADCResultAtCalibrationTemperature() override;
+
       private:
         /**
          * @brief Reads raw value of temperature sensor

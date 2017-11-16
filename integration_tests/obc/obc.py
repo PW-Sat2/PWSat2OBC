@@ -25,6 +25,7 @@ from .runlevel import RunlevelMixin
 from .camera import CameraMixin
 from .adcs import ADCSMixin
 from .obc_rtos import RTOSMixin
+from .mcu_temp import MCUTemperatureMixin
 
 
 class OBC(OBCMixin,
@@ -48,7 +49,8 @@ class OBC(OBCMixin,
           RunlevelMixin,
           CameraMixin,
           ADCSMixin,
-          RTOSMixin
+          RTOSMixin,
+          MCUTemperatureMixin
           ):
     def __init__(self, terminal):
         self.log = logging.getLogger("OBC")

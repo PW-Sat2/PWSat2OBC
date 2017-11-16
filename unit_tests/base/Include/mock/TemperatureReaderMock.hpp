@@ -12,6 +12,8 @@ class TemperatureReaderMock : public temp::ITemperatureReader
 
     MOCK_METHOD0(ReadCelsius, std::int16_t());
     MOCK_METHOD0(ReadRaw, BitValue<std::uint16_t, 12>());
+    MOCK_METHOD0(GetCalibrationTemperature, std::int16_t());
+    MOCK_METHOD0(GetADCResultAtCalibrationTemperature, std::int16_t());
 };
 
 #endif /* UNIT_TESTS_BASE_INCLUDE_MOCK_TEMPERATUREREADERMOCK_HPP_ */
