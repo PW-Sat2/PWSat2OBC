@@ -211,6 +211,18 @@ namespace io_map
             using Pins = PinContainer<MemoryModule<1>, MemoryModule<2>>;
         };
     };
+
+    struct DontTouchPins : public PinGroupTag
+    {
+        struct Group
+        {
+            using Pins = PinContainer< //
+                BSP::Latchup::Group,
+                BSP::EDAC::Group,
+                MemoryModules,
+                Watchdog::ExternalWatchdogPin>;
+        };
+    };
 }
 
 /** @endcond */

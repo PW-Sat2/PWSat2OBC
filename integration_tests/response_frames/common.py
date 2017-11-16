@@ -168,3 +168,13 @@ class BootSlotsInfoSuccessFrame(GenericSuccessResponseFrame):
 @response_frame(DownlinkApid.BootSlotsInfo)
 class BootSlotsInfoErrorFrame(GenericErrorResponseFrame):
     pass
+
+
+@response_frame(DownlinkApid.EraseFlash)
+class EraseFlashFrame(ResponseFrame):
+    @classmethod
+    def matches(cls, payload):
+        return True
+
+    def decode(self):
+        pass
