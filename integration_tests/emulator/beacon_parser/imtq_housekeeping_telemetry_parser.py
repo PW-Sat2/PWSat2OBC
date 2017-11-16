@@ -32,4 +32,4 @@ class ImtqHousekeepingTelemetryParser(CategoryParser):
         self.append_word("Analog Voltage", value_type=Voltage)
         self.append_word("Digital Current", value_type=IMTQCurrent)
         self.append_word("Analog Current", value_type=IMTQCurrent)
-        self.append_word("MCU Temperature", value_type=Temperature)
+        self.append("MCU Temperature", 16, two_complement=True, value_type=Temperature)
