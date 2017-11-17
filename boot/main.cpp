@@ -38,7 +38,6 @@ template <typename... LeavePins> void InitializeAllPins(GPIO_Port_TypeDef port, 
 
     for (std::uint8_t pin = 0; pin < pinCount; pin++)
     {
-        //        if (port == io_map::Watchdog::ExternalWatchdogPin::Port && pin == io_map::Watchdog::ExternalWatchdogPin::PinNumber)
         if (!CanTouch<0, LeavePins...>(port, pin))
         {
             /*

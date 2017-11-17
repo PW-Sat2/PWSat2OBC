@@ -287,12 +287,12 @@ void SetupHardware(void)
     CMU_ClockEnable(cmuClock_DMA, true);
 
     // LFXTAL
-    GPIO_PinModeSet(gpioPortB, 7, gpioModeDisabled, 0);
-    GPIO_PinModeSet(gpioPortB, 8, gpioModeDisabled, 0);
+    GPIO_PinModeSet(io_map::XTAL::LF::Pin1::Port, io_map::XTAL::LF::Pin1::PinNumber, gpioModeDisabled, 0);
+    GPIO_PinModeSet(io_map::XTAL::LF::Pin2::Port, io_map::XTAL::LF::Pin2::PinNumber, gpioModeDisabled, 0);
 
     // HFXTAL
-    GPIO_PinModeSet(gpioPortB, 13, gpioModeDisabled, 0);
-    GPIO_PinModeSet(gpioPortB, 14, gpioModeDisabled, 0);
+    GPIO_PinModeSet(io_map::XTAL::HF::Pin1::Port, io_map::XTAL::HF::Pin1::PinNumber, gpioModeDisabled, 0);
+    GPIO_PinModeSet(io_map::XTAL::HF::Pin2::Port, io_map::XTAL::HF::Pin2::PinNumber, gpioModeDisabled, 0);
 
     CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_HFCLKLE);
     CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_HFCLKLE);
