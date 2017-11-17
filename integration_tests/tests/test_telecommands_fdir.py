@@ -1,7 +1,7 @@
 from response_frames.fdir import ErrorCountersFrame
 from response_frames.common import ErrorCounterConfigurationSuccessFrame
 from system import auto_power_on, clear_state
-from telecommand import SetErrorCounterConfig, GetErrorCounterConfig
+from telecommand import SetErrorCounterConfig, GetErrorCounterConfig, ErrorCounterConfiguration
 from tests.base import RestartPerTest
 from utils import TestEvent
 
@@ -37,8 +37,8 @@ class TestFDIRTelecommands(RestartPerTest):
         self.assertEqual(current_config[2].increment, 5)
         self.assertEqual(current_config[2].decrement, 2)
 
-        device_0 = (0, 137, 7, 3)
-        device_1 = (2, 96, 0, 4)
+        device_0 = ErrorCounterConfiguration(0, 137, 7, 3)
+        device_1 = ErrorCounterConfiguration(2, 96, 0, 4)
 
         self.system.comm.put_frame(SetErrorCounterConfig(0x21, [device_0, device_1]))
 
