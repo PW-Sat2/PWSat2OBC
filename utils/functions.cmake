@@ -115,12 +115,16 @@ function(generate_version_file FILENAME)
       OUTPUT_STRIP_TRAILING_WHITESPACE
     )
     
-    execute_process(
-      COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-      OUTPUT_VARIABLE GIT_BRANCH
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
+    set(GIT_BRANCH $ENV{BRANCH_NAME})
+    
+    if("${GIT_BRANCH}" STREQUAL "")
+        execute_process(
+          COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
+          WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+          OUTPUT_VARIABLE GIT_BRANCH
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    endif()
     
     cmake_host_system_information(RESULT HOST_NAME QUERY HOSTNAME)
     
