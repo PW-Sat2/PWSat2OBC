@@ -117,6 +117,15 @@ void ShowBootSettings()
     BSP_UART_Printf<50>(BSP_UART_DEBUG, "\nBoot counter: %ld", counter);
     BSP_UART_Printf<50>(BSP_UART_DEBUG, "\nLast confirmed boot counter: %ld", counterLastConfirmed);
 
+    if (Bootloader.Settings.CheckMagicNumber())
+    {
+        BSP_UART_Puts(BSP_UART_DEBUG, "\nBoot settings magic number: OK");
+    }
+    else
+    {
+        BSP_UART_Puts(BSP_UART_DEBUG, "\nBoot settings magic number: NOT MATCH");
+    }
+
     BSP_UART_Puts(BSP_UART_DEBUG, "\n");
 }
 

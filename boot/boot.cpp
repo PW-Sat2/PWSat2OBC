@@ -249,9 +249,19 @@ void ProceedWithBooting()
 {
     boot::BootReason = boot::Reason::PrimaryBootSlots;
 
-    ResolveFailedBoot();
+    std::uint8_t slotsMask;
 
-    auto slotsMask = Bootloader.Settings.BootSlots();
+    if (Bootloader.Settings.CheckMagicNumber())
+    {
+        ResolveFailedBoot();
+
+        slotsMask = Bootloader.Settings.BootSlots();
+    }
+    else
+    {
+        BSP_UART_Puts(BSP_UART_DEBUG, "\n\nInvalid magic number detected... Booting safe mode!\n");
+        slotsMask = boot::BootSettings::SafeModeBootSlot;
+    }
 
     if (slotsMask == boot::BootSettings::SafeModeBootSlot)
     {
