@@ -17,10 +17,65 @@ decltype(Bootloader) Bootloader;
 
 void waitForComms(uint32_t timeoutTicks_ms);
 
-static void InitializeAllPins(GPIO_Port_TypeDef port, std::uint8_t pinCount)
+template <int Tag, typename Head, typename... Pins> static bool CanTouch(GPIO_Port_TypeDef port, std::uint8_t pin)
 {
+    if (port == Head::Port && pin == Head::PinNumber)
+    {
+        return false;
+    }
+
+    return CanTouch<Tag, Pins...>(port, pin);
+}
+
+template <int Tag> static bool CanTouch(GPIO_Port_TypeDef port, std::uint8_t pin)
+{
+    return true;
+}
+
+template <typename... LeavePins> void InitializeAllPins(GPIO_Port_TypeDef port, std::uint8_t pinCount, io_map::PinContainer<LeavePins...>)
+{
+    static_assert(sizeof...(LeavePins) == 11, "Invalid number of leave pins");
+
     for (std::uint8_t pin = 0; pin < pinCount; pin++)
     {
+        if (!CanTouch<0, LeavePins...>(port, pin))
+        {
+            /*
+             * Let me tell you the story...
+             *
+             * # Chapter 1
+             *
+             * On dark, rainy evening in Brite room three developers and one electronics guy
+             * were sitting in lab in CBK peacefully testing various scenarios for OBC. Suddenly,
+             * when no one expected, the Dragon in bootloader appeared. Health check was passing
+             * regardless of serious mismatch of CRCs (developers expected fails). Developers rushed
+             * to computers to debug the issue like there is no tomorrow. But no one of them expected
+             * what was comming for them
+             *
+             * # Chapter 2
+             * Developers started by flashing new version of bootloader to FlightModel and Stanger Things
+             * happened. The Great Dragon, much greater than previous one appear surrounded by flames and
+             * eternal screams of mortals. Bootloader kept resetting, every second the Blue LED of Live was
+             * blinking with dim light predicting inevitable...
+             *
+             * # Chapter 3
+             * The brave electronic had that legendary moment of brightness. Together with Mister Piotr they
+             * started checking the obvious things - voltage, over-current protection and RESET signal. They saw
+             * what they predicted - repeating every 1 second of RESET signal. In the meantime Tomek The Developer
+             * started looking at the changes between bootloader on FM and newest. There were only one significant
+             * change - initialization of all pins at the very begining of boot process.
+             *
+             * # Chapter 4
+             * It was the moment when everything started to match - external watchdog was activated by pin being disabled
+             * and kept resetting OBC after a second.
+             *
+             * # Epilogue
+             * DON"T MESS WITH PINS THAT ARE CONNECTED TO SOMETHING YOU DON'T CONTROL
+             *
+             */
+            continue;
+        }
+
         GPIO_PinModeSet(port, pin, gpioModeDisabled, 1);
     }
 }
@@ -43,12 +98,14 @@ static void Initialize()
 
     CMU_ClockEnable(cmuClock_GPIO, true);
 
-    InitializeAllPins(gpioPortA, _GPIO_PORT_A_PIN_COUNT);
-    InitializeAllPins(gpioPortB, _GPIO_PORT_B_PIN_COUNT);
-    InitializeAllPins(gpioPortC, _GPIO_PORT_C_PIN_COUNT);
-    InitializeAllPins(gpioPortD, _GPIO_PORT_D_PIN_COUNT);
-    InitializeAllPins(gpioPortE, _GPIO_PORT_E_PIN_COUNT);
-    InitializeAllPins(gpioPortF, _GPIO_PORT_F_PIN_COUNT);
+    using LeavePins = io_map::Flatten<io_map::DontTouchPins>::Result;
+
+    InitializeAllPins(gpioPortA, _GPIO_PORT_A_PIN_COUNT, LeavePins());
+    InitializeAllPins(gpioPortB, _GPIO_PORT_B_PIN_COUNT, LeavePins());
+    InitializeAllPins(gpioPortC, _GPIO_PORT_C_PIN_COUNT, LeavePins());
+    InitializeAllPins(gpioPortD, _GPIO_PORT_D_PIN_COUNT, LeavePins());
+    InitializeAllPins(gpioPortE, _GPIO_PORT_E_PIN_COUNT, LeavePins());
+    InitializeAllPins(gpioPortF, _GPIO_PORT_F_PIN_COUNT, LeavePins());
 
     BSP_DMA_Init();
     COMMS_Init();

@@ -3,7 +3,7 @@ from Queue import Empty
 
 from math import ceil
 
-from response_frames.operation import OperationSuccessFrame
+from response_frames.common import FileSendSuccessFrame
 from telecommand import DownloadFile
 from utils import ensure_string
 
@@ -38,7 +38,7 @@ with open(local_file, 'wb') as local:
             except Empty:
                 print '\t\tTimeout waiting for frame'
 
-            if type(part) is not OperationSuccessFrame:
+            if type(part) is not FileSendSuccessFrame:
                 print '\t\tIgnoring {} (not success)'.format(part)
                 continue
 

@@ -133,6 +133,26 @@ namespace io_map
         static constexpr std::size_t CycleSize = 8;
     };
 
+    struct XTAL : public PinGroupTag
+    {
+        struct HF
+        {
+            using Pin1 = PinLocation<gpioPortB, 13>;
+            using Pin2 = PinLocation<gpioPortB, 14>;
+        };
+
+        struct LF
+        {
+            using Pin1 = PinLocation<gpioPortB, 7>;
+            using Pin2 = PinLocation<gpioPortB, 8>;
+        };
+
+        struct Group
+        {
+            using Pins = PinContainer<HF::Pin1, HF::Pin2, LF::Pin1, LF::Pin2>;
+        };
+    };
+
     struct BSP : public PinGroupTag
     {
         struct EDAC : public PinGroupTag
@@ -209,6 +229,18 @@ namespace io_map
         struct Group
         {
             using Pins = PinContainer<MemoryModule<1>, MemoryModule<2>>;
+        };
+    };
+
+    struct DontTouchPins : public PinGroupTag
+    {
+        struct Group
+        {
+            using Pins = PinContainer< //
+                BSP::Latchup::Group,
+                BSP::EDAC::Group,
+                MemoryModules,
+                Watchdog::ExternalWatchdogPin>;
         };
     };
 }

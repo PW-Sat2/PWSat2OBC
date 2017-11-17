@@ -1,7 +1,8 @@
 def on_power_cycle(*args):
     def p():
         print 'Power cycling!'
-        system.restart()
+        from obc.boot import NormalBoot
+        system.restart(override_final=NormalBoot())
         print 'power cycle done!'
 
     from threading import Timer
