@@ -26,6 +26,20 @@ function(target_generate_bin TARGET)
   add_custom_target (${TARGET}.bin DEPENDS ${BIN_OBJ})
 endfunction(target_generate_bin)
 
+function(target_generate_padded_bin TARGET SIZE PADDING) 
+  set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET})
+  set (BIN_OBJ ${EXEC_OBJ}.bin)
+
+  set_target_properties(${TARGET} PROPERTIES BIN_FILE ${BIN_OBJ})
+
+  add_custom_command(OUTPUT ${BIN_OBJ}
+      COMMAND ${CMAKE_OBJCOPY} -R .boot_params -O binary ${EXEC_OBJ} ${BIN_OBJ}
+      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/integration_tests/tools/pad_file.py ${BIN_OBJ} ${SIZE} ${PADDING}
+      DEPENDS ${TARGET}
+  )
+
+  add_custom_target (${TARGET}.bin DEPENDS ${BIN_OBJ})
+endfunction(target_generate_padded_bin)
 
 function(target_jlink_flash TARGET BASE_ADDRESS)
   set(COMMAND_FILE ${CMAKE_BINARY_DIR}/jlink/${TARGET}.flash.jlink)

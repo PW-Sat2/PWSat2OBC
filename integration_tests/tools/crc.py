@@ -55,6 +55,9 @@ def read_content(path):
 
 
 def pad(content, multiply_of, pad_with):
+    if len(content) % multiply_of == 0:
+        return content
+
     pad_length = multiply_of - len(content) % multiply_of
 
     return content + bytearray([pad_with] * pad_length)
