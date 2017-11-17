@@ -269,8 +269,11 @@ class TransmitterDevice(i2cMock.I2CDevice):
 
     @i2cMock.command([0x28])
     def _set_baudrate(self, baudrate):
-        baudrate = BaudRate(baudrate)
-        self.baud_rate = call(self.on_set_baudrate, baudrate, baudrate)
+        try:
+            baudrate = BaudRate(baudrate)
+            self.baud_rate = call(self.on_set_baudrate, baudrate, baudrate)
+        except ValueError:
+            pass
 
     @i2cMock.command([0x26])
     def _get_telemetry_last_transmission(self):
