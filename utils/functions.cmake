@@ -44,11 +44,15 @@ endfunction(target_generate_padded_bin)
 function(target_jlink_flash TARGET BASE_ADDRESS)
   set(COMMAND_FILE ${CMAKE_BINARY_DIR}/jlink/${TARGET}.flash.jlink)
 
-  get_property(HEX_FILE TARGET ${TARGET} PROPERTY HEX_FILE)
+  get_property(FLASH_FILE TARGET ${TARGET} PROPERTY HEX_FILE)
 
+  if("${FLASH_FILE}" STREQUAL "")
+      get_property(FLASH_FILE TARGET ${TARGET} PROPERTY BIN_FILE)
+  endif()
+  
   configure_file(${CMAKE_SOURCE_DIR}/jlink/flash.jlink.template ${COMMAND_FILE})
 
-  unset(HEX_FILE)
+  unset(FLASH_FILE)
 
   set(JLINK_ARGS 
       "-device" ${DEVICE}
@@ -62,7 +66,7 @@ function(target_jlink_flash TARGET BASE_ADDRESS)
   
   add_custom_target(${TARGET}.flash    
     COMMAND ${JLINK} ${JLINK_ARGS}
-    DEPENDS ${TARGET}.hex
+    DEPENDS ${FLASH_FILE}
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   )
 
