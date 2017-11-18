@@ -1,4 +1,6 @@
 #include "power.hpp"
+#include <chrono>
+#include "base/os.h"
 #include "base/reader.h"
 #include "comm/ITransmitter.hpp"
 #include "power/power.h"
@@ -7,6 +9,7 @@
 
 using telecommunication::downlink::CorrelatedDownlinkFrame;
 using telecommunication::downlink::DownlinkAPID;
+using namespace std::chrono_literals;
 
 namespace obc
 {
@@ -39,6 +42,7 @@ namespace obc
                 transmitter.SendFrame(response.Frame());
             }
 
+            System::SleepTask(5s);
             this->_powerControl.PowerCycle();
 
             {

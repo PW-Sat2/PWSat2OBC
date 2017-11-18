@@ -5,7 +5,7 @@ from utils import ensure_byte_list
 
 
 class DownloadFile(Telecommand):
-    def __init__(self, path, correlation_id, seqs):
+    def __init__(self, correlation_id, path, seqs):
         self._path = path
         self._correlation_id = correlation_id
         self._seqs = seqs

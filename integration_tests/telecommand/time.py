@@ -1,5 +1,5 @@
 import struct
-import ctypes
+from datetime import timedelta
 
 from telecommand.base import Telecommand
 from utils import ensure_byte_list
@@ -18,9 +18,10 @@ class SetTimeCorrectionConfig(Telecommand):
         return [self._correlation_id] + self._missionTimeWeight + self._externalTimeWeight
 
 class SetTime(Telecommand):
-    def __init__(self, correlation_id, newTime):
+    def __init__(self, correlation_id, new_time):
+        # type: (int, timedelta) -> None
         self._correlation_id = correlation_id
-        self._newTime = ensure_byte_list(struct.pack('<I', newTime))
+        self._newTime = ensure_byte_list(struct.pack('<I', new_time.seconds))
 
     def apid(self):
         return 0x91

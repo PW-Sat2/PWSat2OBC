@@ -8,7 +8,7 @@ class MCUTemperature(TelemetryUnit):
         super(MCUTemperature, self).__init__(raw, self.mcu_temperature_converter(raw))
 
     def mcu_temperature_converter(self, raw):
-        return 23.0 - (2314.0 - raw) / -6.3
+        return 25.0 - (2297.0 - raw) / -6.3
 
 
 class McuTemperatureParser(CategoryParser):
