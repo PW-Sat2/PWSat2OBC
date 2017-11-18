@@ -48,7 +48,7 @@ class TimeTelecommandsTest(RestartPerTest):
 
         self.system.obc.jump_to_time(timedelta(minutes=2))
 
-        self.system.comm.put_frame(telecommand.SetTime(correlation_id=0x12, newTime=0x1234))
+        self.system.comm.put_frame(telecommand.SetTime(correlation_id=0x12, new_time=timedelta(seconds=0x1234)))
 
         frame = self.system.comm.get_frame(20, filter_type=TimeSetSuccessFrame)
 
@@ -67,7 +67,7 @@ class TimeTelecommandsTest(RestartPerTest):
 
         self.system.i2c.enable_pld_devices([self.system.rtc.address], False)
 
-        self.system.comm.put_frame(telecommand.SetTime(correlation_id=0x12, newTime=0x1234))
+        self.system.comm.put_frame(telecommand.SetTime(correlation_id=0x12, new_time=timedelta(seconds=0x1234)))
 
         frame = self.system.comm.get_frame(20, filter_type=TimeSetSuccessFrame)
 
