@@ -17,6 +17,7 @@ from compile_info import *
 from eps import *
 from adcs import *
 from memory import *
+from ping import *
 
 __all__ = [
     'DownloadFile',
@@ -59,6 +60,7 @@ __all__ = [
     'PerformPayloadCommissioningExperiment',
     'PerformCameraCommissioningExperiment',
     'StopSailDeployment',
-    'ReadMemory'
+    'ReadMemory',
+    'PingTelecommand'
 ]
 

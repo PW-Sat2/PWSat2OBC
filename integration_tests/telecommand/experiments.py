@@ -28,7 +28,7 @@ class AbortExperiment(Telecommand):
 
     def payload(self):
         return [self.correlation_id]
-        return []
+
 
 class PerformSunSExperiment(Telecommand):
     def apid(self):
