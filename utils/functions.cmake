@@ -26,15 +26,33 @@ function(target_generate_bin TARGET)
   add_custom_target (${TARGET}.bin DEPENDS ${BIN_OBJ})
 endfunction(target_generate_bin)
 
+function(target_generate_padded_bin TARGET SIZE PADDING) 
+  set (EXEC_OBJ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TARGET})
+  set (BIN_OBJ ${EXEC_OBJ}.bin)
+
+  set_target_properties(${TARGET} PROPERTIES BIN_FILE ${BIN_OBJ})
+
+  add_custom_command(OUTPUT ${BIN_OBJ}
+      COMMAND ${CMAKE_OBJCOPY} -R .boot_params -O binary ${EXEC_OBJ} ${BIN_OBJ}
+      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/integration_tests/tools/pad_file.py ${BIN_OBJ} ${SIZE} ${PADDING}
+      DEPENDS ${TARGET}
+  )
+
+  add_custom_target (${TARGET}.bin DEPENDS ${BIN_OBJ})
+endfunction(target_generate_padded_bin)
 
 function(target_jlink_flash TARGET BASE_ADDRESS)
   set(COMMAND_FILE ${CMAKE_BINARY_DIR}/jlink/${TARGET}.flash.jlink)
 
-  get_property(HEX_FILE TARGET ${TARGET} PROPERTY HEX_FILE)
+  get_property(FLASH_FILE TARGET ${TARGET} PROPERTY HEX_FILE)
 
+  if("${FLASH_FILE}" STREQUAL "")
+      get_property(FLASH_FILE TARGET ${TARGET} PROPERTY BIN_FILE)
+  endif()
+  
   configure_file(${CMAKE_SOURCE_DIR}/jlink/flash.jlink.template ${COMMAND_FILE})
 
-  unset(HEX_FILE)
+  unset(FLASH_FILE)
 
   set(JLINK_ARGS 
       "-device" ${DEVICE}
@@ -48,7 +66,7 @@ function(target_jlink_flash TARGET BASE_ADDRESS)
   
   add_custom_target(${TARGET}.flash    
     COMMAND ${JLINK} ${JLINK_ARGS}
-    DEPENDS ${TARGET}.hex
+    DEPENDS ${FLASH_FILE}
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   )
 
@@ -97,12 +115,16 @@ function(generate_version_file FILENAME)
       OUTPUT_STRIP_TRAILING_WHITESPACE
     )
     
-    execute_process(
-      COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-      OUTPUT_VARIABLE GIT_BRANCH
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
+    set(GIT_BRANCH $ENV{BRANCH_NAME})
+    
+    if("${GIT_BRANCH}" STREQUAL "")
+        execute_process(
+          COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
+          WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+          OUTPUT_VARIABLE GIT_BRANCH
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    endif()
     
     cmake_host_system_information(RESULT HOST_NAME QUERY HOSTNAME)
     

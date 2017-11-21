@@ -38,7 +38,7 @@ target_link_libraries(${NAME}
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)
 
-target_generate_bin(${NAME})
+target_generate_padded_bin(${NAME} 32768 0x00)
 
 target_memory_report(${NAME})
 
