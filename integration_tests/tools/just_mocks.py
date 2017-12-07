@@ -139,7 +139,7 @@ class ZeroMQAdapter(object):
 
         self._comm.transmitter.on_send_frame = self._on_downlink_frame
 
-        self._context = zmq.Context()
+        self._context = zmq.Context.instance()
         self._socket_uplink = self._context.socket(zmq.SUB)
 
         self._downlink_new_msg = self._context.socket(zmq.PUSH)
