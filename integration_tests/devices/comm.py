@@ -16,6 +16,9 @@ class BeaconFrame(object):
     def payload(self):
         return self._payload
 
+    def __repr__(self):
+        return '{}: v    {}'.format(hex(id(self)), self.__class__.__name__)
+
 
 class DownlinkFrame(object):
     def __init__(self, apid, seq, payload):
@@ -49,6 +52,9 @@ class DownlinkFrame(object):
 
     def __str__(self):
         return 'APID: {} Seq: {} Payload: {}'.format(self._apid, self._seq, self._payload)
+
+    def __repr__(self):
+        return '{}: v{:03d}-{} Seq={:02d}'.format(hex(id(self)), self.apid(), self.__class__.__name__, self._seq)
 
 
 class UplinkFrame:

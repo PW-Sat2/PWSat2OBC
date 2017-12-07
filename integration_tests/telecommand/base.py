@@ -19,6 +19,19 @@ class Telecommand(object):
     def build(self):
         return self.frame().build()
 
+    def __repr__(self):
+        return '{}: ^{:03d}-{}'.format(hex(id(self)), self.apid(), self.__class__.__name__)
+
+
+class CorrelatedTelecommand(Telecommand):
+    def __init__(self, correlation_id):
+        self._correlation_id = correlation_id
+
+    def __repr__(self):
+        return "{}, cid={:02d}".format(
+            super(CorrelatedTelecommand, self).__repr__(),
+            self._correlation_id)
+
 
 class TelecommandResponse(DownlinkFrame):
     def __init__(self, apid, seq, payload):
