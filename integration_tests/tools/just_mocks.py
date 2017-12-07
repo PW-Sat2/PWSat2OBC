@@ -1,5 +1,9 @@
 import os
 import sys
+
+import pmt
+import zmq
+
 try:
     from i2cMock import I2CMock
 except ImportError:
@@ -18,6 +22,8 @@ import binascii
 from SocketServer import ThreadingTCPServer, BaseRequestHandler
 
 from utils import ensure_string
+import devices
+
 
 def _setup_log():
     root_logger = logging.getLogger()
@@ -171,6 +177,49 @@ class CommHandler(BaseRequestHandler):
             self.request.sendall('NAK')
 
 
+class ZeroMQAdapter(object):
+    def __init__(self, comm):
+        self._comm = comm  # type: devices.Comm
+
+        self._comm.transmitter.on_send_frame = self._on_downlink_frame
+
+        self._context = zmq.Context()
+        self._socket_uplink = self._context.socket(zmq.SUB)
+        self._socket_downlink = self._context.socket(zmq.PUB)
+
+        self._socket_uplink.bind("tcp://*:%s" % 7000)
+        self._socket_downlink.bind("tcp://*:%s" % 7001)
+
+    @staticmethod
+    def _encode_callsign(call):
+        return ''.join([chr(ord(i) << 1) for i in call])
+
+    @staticmethod
+    def _build_kiss_header():
+        return ''.join([
+            ZeroMQAdapter._encode_callsign('PWSAT2'),
+            chr(96),
+            ZeroMQAdapter._encode_callsign('PWSAT2'),
+            chr(97),
+            chr(3),
+            chr(0xF0)
+        ])
+
+    @staticmethod
+    def _build_kiss(text):
+        return ''.join([
+            ZeroMQAdapter._build_kiss_header(),
+            ensure_string(text),
+            '\x00\x00'
+        ])
+
+    def _on_downlink_frame(self, comm, frame):
+        print 'MSG!'
+        table = map(ord, ZeroMQAdapter._build_kiss(frame))
+        msg = pmt.serialize_str(pmt.cons(pmt.PMT_NIL, pmt.init_u8vector(len(table), table)))
+        self._socket_downlink.send(msg)
+
+
 class JustMocks(object):
     def __init__(self, mock_com):
         self._mock_com = mock_com
@@ -202,6 +251,8 @@ class JustMocks(object):
         self.i2c.add_bus_device(self.imtq)
         self.i2c.add_pld_device(self.rtc)
         self.i2c.add_pld_device(self.gyro)
+
+        self.zmq_adapter = ZeroMQAdapter(self.comm)
 
     def start(self, devices_to_enable):
         self.i2c.start(enable_devices=False)
