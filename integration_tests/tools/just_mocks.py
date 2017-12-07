@@ -13,7 +13,7 @@ except ImportError:
 import argparse
 import imp
 import logging
-from threading import Thread
+from threading import Thread, Timer
 from time import sleep
 import colorlog
 from datetime import datetime
@@ -142,16 +142,27 @@ class ZeroMQAdapter(object):
 
         self._context = zmq.Context()
         self._socket_uplink = self._context.socket(zmq.SUB)
-        self._socket_downlink = self._context.socket(zmq.PUB)
+
+        self._downlink_new_msg = self._context.socket(zmq.PUSH)
+        self._downlink_delay_msg = self._context.socket(zmq.PULL)
+        self._downlink_pub = self._context.socket(zmq.PUB)
 
         self._socket_uplink.bind("tcp://*:%s" % 7000)
-        self._socket_downlink.bind("tcp://*:%s" % 7001)
+
+        self._downlink_new_msg.bind("inproc://downlink/new_msg")
+        self._downlink_delay_msg.connect("inproc://downlink/new_msg")
+
+        self._downlink_pub.bind("tcp://*:%s" % 7001)
 
         self._socket_uplink.setsockopt(zmq.SUBSCRIBE, '')
 
         self._uplink_listener = Thread(target=self._uplink_worker)
         self._uplink_listener.daemon = True
         self._uplink_listener.start()
+
+        self._downlink_handler = Thread(target=self._downlink_worker)
+        self._downlink_handler.daemon = True
+        self._downlink_handler.start()
 
     @staticmethod
     def _encode_callsign(call):
@@ -172,15 +183,18 @@ class ZeroMQAdapter(object):
     def _build_kiss(text):
         return ''.join([
             ZeroMQAdapter._build_kiss_header(),
-            ensure_string(text),
+            text,
             '\x00\x00'
         ])
 
     def _on_downlink_frame(self, comm, frame):
-        print 'MSG!'
-        table = map(ord, ZeroMQAdapter._build_kiss(frame))
-        msg = pmt.serialize_str(pmt.cons(pmt.PMT_NIL, pmt.init_u8vector(len(table), table)))
-        self._socket_downlink.send(msg)
+        self._downlink_new_msg.send(ensure_string(frame))
+
+    def _delay_uplink_frame(self, frame):
+        pass
+
+    def _delay_downlink_frame(self, frame):
+        pass
 
     def _uplink_worker(self):
         while True:
@@ -188,7 +202,21 @@ class ZeroMQAdapter(object):
             frame = pmt.u8vector_elements(pmt.cdr(pmt.deserialize_str(pmt_frame)))
             just_content = frame[16:]
 
+            self._delay_uplink_frame(just_content)
+
             self._comm.receiver.put_frame(just_content)
+
+    def _downlink_worker(self):
+        while True:
+            frame = self._downlink_delay_msg.recv()
+
+            self._delay_downlink_frame(frame)
+
+            table = map(ord, ZeroMQAdapter._build_kiss(frame))
+            msg = pmt.serialize_str(pmt.cons(pmt.PMT_NIL, pmt.init_u8vector(len(table), table)))
+
+            self._downlink_pub.send(msg)
+            self._comm.transmitter.get_message_from_buffer(0)
 
 
 class JustMocks(object):
