@@ -1,7 +1,6 @@
 import os
 import sys
 
-import pmt
 import zmq
 
 try:
@@ -13,7 +12,7 @@ except ImportError:
 import argparse
 import imp
 import logging
-from threading import Thread, Timer
+from threading import Thread
 from time import sleep
 import colorlog
 from datetime import datetime
@@ -198,8 +197,7 @@ class ZeroMQAdapter(object):
 
     def _uplink_worker(self):
         while True:
-            pmt_frame = self._socket_uplink.recv()
-            frame = pmt.u8vector_elements(pmt.cdr(pmt.deserialize_str(pmt_frame)))
+            frame = self._socket_uplink.recv()
             just_content = frame[16:]
 
             self._delay_uplink_frame(just_content)
@@ -212,10 +210,9 @@ class ZeroMQAdapter(object):
 
             self._delay_downlink_frame(frame)
 
-            table = map(ord, ZeroMQAdapter._build_kiss(frame))
-            msg = pmt.serialize_str(pmt.cons(pmt.PMT_NIL, pmt.init_u8vector(len(table), table)))
+            kiss_frame = ZeroMQAdapter._build_kiss(frame)
 
-            self._downlink_pub.send(msg)
+            self._downlink_pub.send(kiss_frame)
             self._comm.transmitter.get_message_from_buffer(0)
 
 
