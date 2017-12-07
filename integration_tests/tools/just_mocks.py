@@ -1,8 +1,6 @@
 import os
 import sys
 
-import zmq
-
 try:
     from i2cMock import I2CMock
 except ImportError:
@@ -12,14 +10,11 @@ except ImportError:
 import argparse
 import imp
 import logging
-from threading import Thread
 from time import sleep
 import colorlog
 from datetime import datetime
 import binascii
-
-from utils import ensure_string
-import devices
+from emulator.comm_zmq_adapter import ZeroMQAdapter
 
 
 def _setup_log():
@@ -91,7 +86,7 @@ Arguments may also be stored in file and passed with '@file' syntax. Arguments i
     parser.convert_arg_line_to_args = convert_arg_line_to_args
 
     parser.add_argument('-c', '--config', required=True,
-                        help="Config file (in CMake-generated integration tests format, only MOCK_COM required)",)
+                        help="Config file (in CMake-generated integration tests format, only MOCK_COM required)", )
 
     parser.add_argument('-f', '--frames', help="Save all transmitted frames to file", default=None)
 
@@ -121,99 +116,6 @@ Arguments may also be stored in file and passed with '@file' syntax. Arguments i
                                         )
 
     return parser.parse_args()
-
-
-def read_all(s, size):
-    result = ""
-    while size > 0:
-        part = s.recv(size)
-        result += part
-        size -= len(part)
-
-    return result
-
-
-class ZeroMQAdapter(object):
-    def __init__(self, comm):
-        self._comm = comm  # type: devices.Comm
-
-        self._comm.transmitter.on_send_frame = self._on_downlink_frame
-
-        self._context = zmq.Context.instance()
-        self._socket_uplink = self._context.socket(zmq.SUB)
-
-        self._downlink_new_msg = self._context.socket(zmq.PUSH)
-        self._downlink_delay_msg = self._context.socket(zmq.PULL)
-        self._downlink_pub = self._context.socket(zmq.PUB)
-
-        self._socket_uplink.bind("tcp://*:%s" % 7000)
-
-        self._downlink_new_msg.bind("inproc://downlink/new_msg")
-        self._downlink_delay_msg.connect("inproc://downlink/new_msg")
-
-        self._downlink_pub.bind("tcp://*:%s" % 7001)
-
-        self._socket_uplink.setsockopt(zmq.SUBSCRIBE, '')
-
-        self._uplink_listener = Thread(target=self._uplink_worker)
-        self._uplink_listener.daemon = True
-        self._uplink_listener.start()
-
-        self._downlink_handler = Thread(target=self._downlink_worker)
-        self._downlink_handler.daemon = True
-        self._downlink_handler.start()
-
-    @staticmethod
-    def _encode_callsign(call):
-        return ''.join([chr(ord(i) << 1) for i in call])
-
-    @staticmethod
-    def _build_kiss_header():
-        return ''.join([
-            ZeroMQAdapter._encode_callsign('PWSAT2'),
-            chr(96),
-            ZeroMQAdapter._encode_callsign('PWSAT2'),
-            chr(97),
-            chr(3),
-            chr(0xF0)
-        ])
-
-    @staticmethod
-    def _build_kiss(text):
-        return ''.join([
-            ZeroMQAdapter._build_kiss_header(),
-            text,
-            '\x00\x00'
-        ])
-
-    def _on_downlink_frame(self, comm, frame):
-        self._downlink_new_msg.send(ensure_string(frame))
-
-    def _delay_uplink_frame(self, frame):
-        pass
-
-    def _delay_downlink_frame(self, frame):
-        pass
-
-    def _uplink_worker(self):
-        while True:
-            frame = self._socket_uplink.recv()
-            just_content = frame[16:]
-
-            self._delay_uplink_frame(just_content)
-
-            self._comm.receiver.put_frame(just_content)
-
-    def _downlink_worker(self):
-        while True:
-            frame = self._downlink_delay_msg.recv()
-
-            self._delay_downlink_frame(frame)
-
-            kiss_frame = ZeroMQAdapter._build_kiss(frame)
-
-            self._downlink_pub.send(kiss_frame)
-            self._comm.transmitter.get_message_from_buffer(0)
 
 
 class JustMocks(object):
@@ -267,6 +169,7 @@ class JustMocks(object):
                 f.write('{}|{}\n'.format(stamp, frame_data))
 
             print 'Logging frame {}'.format(len(content))
+
         self.comm.transmitter.on_send_frame = log_frame
 
 
