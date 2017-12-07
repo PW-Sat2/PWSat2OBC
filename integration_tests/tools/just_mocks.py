@@ -190,6 +190,12 @@ class ZeroMQAdapter(object):
         self._socket_uplink.bind("tcp://*:%s" % 7000)
         self._socket_downlink.bind("tcp://*:%s" % 7001)
 
+        self._socket_uplink.setsockopt(zmq.SUBSCRIBE, '')
+
+        self._uplink_listener = Thread(target=self._uplink_worker)
+        self._uplink_listener.daemon = True
+        self._uplink_listener.start()
+
     @staticmethod
     def _encode_callsign(call):
         return ''.join([chr(ord(i) << 1) for i in call])
@@ -218,6 +224,14 @@ class ZeroMQAdapter(object):
         table = map(ord, ZeroMQAdapter._build_kiss(frame))
         msg = pmt.serialize_str(pmt.cons(pmt.PMT_NIL, pmt.init_u8vector(len(table), table)))
         self._socket_downlink.send(msg)
+
+    def _uplink_worker(self):
+        while True:
+            pmt_frame = self._socket_uplink.recv()
+            frame = pmt.u8vector_elements(pmt.cdr(pmt.deserialize_str(pmt_frame)))
+            just_content = frame[16:]
+
+            self._comm.receiver.put_frame(just_content)
 
 
 class JustMocks(object):
