@@ -1,4 +1,7 @@
+from Queue import Empty
 from threading import Thread
+from time import sleep
+
 import zmq
 import devices
 from utils import ensure_string
@@ -61,10 +64,10 @@ class ZeroMQAdapter(object):
         self._downlink_new_msg.send(ensure_string(frame))
 
     def _delay_uplink_frame(self, frame):
-        pass
+        sleep(1)
 
     def _delay_downlink_frame(self, frame):
-        pass
+        sleep(10)
 
     def _uplink_worker(self):
         while True:
@@ -84,4 +87,8 @@ class ZeroMQAdapter(object):
             kiss_frame = ZeroMQAdapter._build_kiss(frame)
 
             self._downlink_pub.send(kiss_frame)
-            self._comm.transmitter.get_message_from_buffer(0)
+
+            try:
+                self._comm.transmitter.get_message_from_buffer(0)
+            except Empty:
+                pass

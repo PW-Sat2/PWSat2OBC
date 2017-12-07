@@ -59,7 +59,7 @@ class CommModule(ModuleBase):
         if self._last_beacon.time is not None:
             self._current_beacon_timestamp.SetLabel(
                 'Current beacon: \n' + self._last_beacon.time.strftime('%Y-%m-%d %H:%M:%S')
-                + ' (' + str(len(self._last_beacon.payload)) + ' bytes)')
+                + ' (' + str(len(self._last_beacon.payload.payload())) + ' bytes)')
 
         if self._system.comm.receiver.last_watchdog_kick is None:
             self._receiver_last_watchdog.SetLabel('Receiver: last watchdog kick\nNone')
