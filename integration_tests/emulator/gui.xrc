@@ -1356,6 +1356,14 @@
 				<border>5</border>
 				<object class="wxListBox" name="last_frames">
 					<style>wxHSCROLL|wxVSCROLL</style>
+					<font>
+						<size>8</size>
+						<family>teletype</family>
+						<style>normal</style>
+						<weight>normal</weight>
+						<underlined>0</underlined>
+						<face>Consolas</face>
+					</font>
 					<content />
 				</object>
 			</object>
