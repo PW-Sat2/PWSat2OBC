@@ -64,11 +64,11 @@ class ZeroMQAdapter(object):
         self._downlink_new_msg.send(ensure_string(frame))
 
     def _delay_uplink_frame(self, frame):
-        sleep(1)
+        sleep(0)
 
     def _delay_downlink_frame(self, frame):
         #  message_sending_time = 8.0 * 235.0 / float(str(self._system.transmitter.baud_rate)) + 1.0
-        sleep(10)
+        sleep(0)
 
     def _uplink_worker(self):
         while True:

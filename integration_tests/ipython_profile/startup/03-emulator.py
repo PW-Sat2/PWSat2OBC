@@ -36,6 +36,7 @@ class CaptureLastBeacon(object):
 
         self._frame_decoder = frame_decoder
         self._catch_beacon_thread = Thread(target=self._catch_beacon)
+        self._catch_beacon_thread.daemon = True
         self._incoming_frames = zmq.Context.instance().socket(zmq.SUB)
 
     def start(self):
@@ -47,12 +48,17 @@ class CaptureLastBeacon(object):
     def _catch_beacon(self):
         while True:
             frame = ensure_byte_list(self._incoming_frames.recv())
-            
+
             decoded = self._frame_decoder.decode(frame[16:-2])
 
             if isinstance(decoded, BeaconFrame):
                 self.last_beacon.time = datetime.now()
                 self.last_beacon.payload = decoded
+
+            last_frames.insert(0, decoded)
+
+            if len(last_frames) > 90:
+                last_frames.remove(last_frames[-1])
 
 
 def _setup_emulator(system):
