@@ -45,3 +45,8 @@ class SetBitrate(Telecommand):
     
     def payload(self):
         return [self._correlation_id, self._bitrate]
+
+    def __repr__(self):
+        return "{}, bitrate={}".format(
+            super(SetBitrate, self).__repr__(),
+            self._bitrate)

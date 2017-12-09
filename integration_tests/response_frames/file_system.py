@@ -24,3 +24,8 @@ class FileListSuccessFrame(GenericSuccessResponseFrame):
             raw = raw[4:]
 
             self.file_list.append((name, size))
+
+    def __repr__(self):
+        return "{}, #files: {}".format(
+            super(FileListSuccessFrame, self).__repr__(),
+            len(self.file_list))

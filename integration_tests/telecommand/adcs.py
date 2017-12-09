@@ -1,28 +1,32 @@
 import struct
-from telecommand import Telecommand
+from telecommand import CorrelatedTelecommand
 from devices.adcs import AdcsMode
 
 
-class SetBuiltinDetumblingBlockMaskTelecommand(Telecommand):
-    def __init__(self, corelation_id, mask):
-        Telecommand.__init__(self)
+class SetBuiltinDetumblingBlockMaskTelecommand(CorrelatedTelecommand):
+    def __init__(self, correlation_id, mask):
+        CorrelatedTelecommand.__init__(self, correlation_id)
         self._mask = mask
-        self._corelation_id = corelation_id
 
     def apid(self):
         return 0x24
 
     def payload(self):
-        return [self._corelation_id, self._mask]
+        return [self._correlation_id, self._mask]
 
-class SetAdcsModeTelecommand(Telecommand):
-    def __init__(self, corelation_id, mode):
-        Telecommand.__init__(self)
+
+class SetAdcsModeTelecommand(CorrelatedTelecommand):
+    def __init__(self, correlation_id, mode):
+        CorrelatedTelecommand.__init__(self, correlation_id)
         self._mode = mode
-        self._corelation_id = corelation_id
 
     def apid(self):
         return 0x25
 
     def payload(self):
-        return [self._corelation_id, struct.pack('<b', self._mode.value) if type(self._mode) == AdcsMode else self._mode]
+        return [self._correlation_id, struct.pack('<b', self._mode.value) if type(self._mode) == AdcsMode else self._mode]
+
+    def __repr__(self):
+        return "{}, mode={}".format(
+            super(SetAdcsModeTelecommand, self).__repr__(),
+            self._mode)
