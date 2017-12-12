@@ -259,7 +259,8 @@ if args.comm_tcp is not None:
 
 print 'Press Ctrl+C to stop'
 try:
-    sleep(-1)
+ while True:
+    sleep(1)
 except KeyboardInterrupt:
     print 'Stopping'
     just_mocks.stop()
