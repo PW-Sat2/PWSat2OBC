@@ -1,10 +1,17 @@
+from threading import Thread, Lock
+
+import wx
+import zmq
 from struct import pack
 
-from .beacon_parser.full_beacon_parser import FullBeaconParser
-from .beacon_parser.parser import BitReader, BeaconStorage, BitArrayParser
-from .base import ModuleBase
-import wx
+from datetime import datetime
 from wx import propgrid
+
+from devices import BeaconFrame
+from .beacon_parser.full_beacon_parser import FullBeaconParser
+from .beacon_parser.parser import BeaconStorage, BitArrayParser
+from utils import ensure_byte_list
+from .base import ModuleBase
 
 
 class BeaconModule(ModuleBase):
@@ -13,7 +20,7 @@ class BeaconModule(ModuleBase):
         str: propgrid.StringProperty
     }
 
-    def __init__(self, last_beacon, system):
+    def __init__(self, system, last_beacon):
         self._last_beacon = last_beacon
         self._system = system
         self.title = 'Beacon'
@@ -22,7 +29,7 @@ class BeaconModule(ModuleBase):
 
     def load(self, res, parent):
         self._panel = res.LoadPanel(parent, 'BeaconModule')  # type: wx.Panel
-        self._props = propgrid.PropertyGrid(parent=self._panel,style=propgrid.PG_TOOLTIPS | propgrid.PG_AUTO_SORT)
+        self._props = propgrid.PropertyGrid(parent=self._panel, style=propgrid.PG_TOOLTIPS | propgrid.PG_AUTO_SORT)
         self._props.SetExtraStyle(propgrid.PG_EX_HELP_AS_TOOLTIPS)
         self._panel.GetSizer().Add(self._props, 1, wx.EXPAND)
 
@@ -63,9 +70,10 @@ class BeaconModule(ModuleBase):
 
     def update(self):
         if self._last_beacon.payload is not None:
+            b = self._last_beacon.payload
             store = BeaconStorage()
             parser = BitArrayParser(FullBeaconParser(),
-                                    ''.join(map(lambda x: pack('B', x), self._last_beacon.payload)),
+                                    ''.join(map(lambda x: pack('B', x), b.payload())),
                                     store)
             parser.parse()
 
