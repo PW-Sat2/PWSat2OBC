@@ -1,4 +1,5 @@
 #include <gsl/span>
+#include <iostream>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "fs/ExperimentFile.hpp"
@@ -112,10 +113,14 @@ namespace
         file.Open(_fs, TestFileName, FileOpen::CreateAlways, FileAccess::WriteOnly);
 
         std::array<uint8_t, 9> data = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-        for (int i = 0; i < 23; ++i)
+        for (int i = 0; i < 21; ++i)
         {
             file.Write(ExperimentFile::PID::Reserved, data);
         }
+
+        file.Write(ExperimentFile::PID::Reserved, gsl::make_span(data).subspan(0, 8));
+
+        file.Write(ExperimentFile::PID::Reserved, data);
 
         file.Close();
 
@@ -126,11 +131,14 @@ namespace
         w.WriteByte(num(ExperimentFile::PID::Synchronization));
         w.WriteByte(num(ExperimentFile::PID::Timestamp));
         w.WriteQuadWordLE(65536);
-        for (int i = 0; i < 22; ++i)
+        for (int i = 0; i < 21; ++i)
         {
             w.WriteByte(num(ExperimentFile::PID::Reserved));
             w.WriteArray(data);
         }
+
+        w.WriteByte(num(ExperimentFile::PID::Reserved));
+        w.WriteArray(gsl::make_span(data).subspan(0, 8));
 
         w.WriteByte(0xFF);
 
@@ -140,6 +148,13 @@ namespace
         w.WriteQuadWordLE(65536);
         w.WriteByte(num(ExperimentFile::PID::Reserved));
         w.WriteArray(data);
+
+        for (auto i = 0U; i < expected.size(); i++)
+        {
+            std::cout << i << "\t"
+                      << "A = " << (int)_buffer[i] << "\t"
+                      << "E = " << (int)expected[i] << std::endl;
+        }
 
         ASSERT_THAT(_buffer, Eq(expected));
     }

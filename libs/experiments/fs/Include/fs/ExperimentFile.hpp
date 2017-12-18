@@ -40,7 +40,7 @@ namespace experiments
         {
           public:
             /** @brief Data packet length.  */
-            static constexpr uint16_t PacketLength = 231;
+            static constexpr uint16_t PacketLength = 230;
 
             /** @brief Packet Id. */
             enum class PID : std::uint8_t
