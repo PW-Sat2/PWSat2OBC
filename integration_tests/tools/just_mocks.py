@@ -92,6 +92,8 @@ Arguments may also be stored in file and passed with '@file' syntax. Arguments i
 
     parser.add_argument('-d', '--debug', action='store_true', default=False, help="Enable I2C logs")
 
+    parser.add_argument('-z', '--disable-zmq', action='store_true', default=False, help="Disable ZeroMQ COMM adapter")
+
     device_selection_group = parser.add_mutually_exclusive_group(required=True)
     device_selection_group.add_argument('--except',
                                         help="Enable all devices except selected",
@@ -119,7 +121,7 @@ Arguments may also be stored in file and passed with '@file' syntax. Arguments i
 
 
 class JustMocks(object):
-    def __init__(self, mock_com):
+    def __init__(self, mock_com, enable_zmq):
         self._mock_com = mock_com
 
         self.i2c = I2CMock(mock_com)
@@ -150,7 +152,8 @@ class JustMocks(object):
         self.i2c.add_pld_device(self.rtc)
         self.i2c.add_pld_device(self.gyro)
 
-        self.zmq_adapter = ZeroMQAdapter(self.comm)
+        if enable_zmq:
+            self.zmq_adapter = ZeroMQAdapter(self.comm)
 
     def start(self, devices_to_enable):
         self.i2c.start(enable_devices=False)
@@ -176,6 +179,7 @@ class JustMocks(object):
 _setup_log()
 
 args = parse_args()
+print args
 
 logging.getLogger("I2C").propagate = True
 
@@ -186,7 +190,7 @@ config = imp.load_source('config', args.config)
 
 devices_to_enable = {k: AVAILABLE_DEVICES[k] for k in args.enabled_devices}
 
-just_mocks = JustMocks(mock_com=config.config['MOCK_COM'])
+just_mocks = JustMocks(mock_com=config.config['MOCK_COM'], enable_zmq=not args.disable_zmq)
 
 print 'Starting devices: {}'.format(', '.join(sorted(devices_to_enable.keys())))
 
