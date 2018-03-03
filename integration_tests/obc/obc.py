@@ -26,6 +26,7 @@ from .camera import CameraMixin
 from .adcs import ADCSMixin
 from .obc_rtos import RTOSMixin
 from .mcu_temp import MCUTemperatureMixin
+from .flash import FLASHMixin
 
 
 class OBC(OBCMixin,
@@ -50,7 +51,8 @@ class OBC(OBCMixin,
           CameraMixin,
           ADCSMixin,
           RTOSMixin,
-          MCUTemperatureMixin
+          MCUTemperatureMixin,
+          FLASHMixin
           ):
     def __init__(self, terminal):
         self.log = logging.getLogger("OBC")
@@ -106,6 +108,9 @@ class OBC(OBCMixin,
 
     def ping(self):
         return self._command("ping")
+
+    def compile_info(self):
+        return self._command("compile_info")
 
     def wait_for_boot(self, timeout=None):
         return self._terminal.wait_for_boot(timeout)

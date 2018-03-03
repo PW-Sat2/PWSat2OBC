@@ -30,3 +30,7 @@ class TimeMixin(OBCMixin):
     @command("rtc duration")
     def rtc_duration(self):
         pass
+
+    @command("rtc test")
+    def rtc_test(self):
+        pass

@@ -12,6 +12,9 @@ class ImtqMixin(OBCMixin):
     def _parse_to_array(result):
         return map(int, result.split(' '))
 
+    def _parse_lines_to_array(result):
+        return [map(int, line.split(' ')) for line in result.splitlines()]
+
     @decode_return(_parse_mgtm)
     @command("imtq mtmRead")
     def read_magnetometer(self):
@@ -26,3 +29,7 @@ class ImtqMixin(OBCMixin):
     def get_detumble_data(self):
         pass
 
+    @decode_return(_parse_lines_to_array)
+    @command("imtq PerformSelfTest 0")
+    def perform_self_test(self):
+        pass
