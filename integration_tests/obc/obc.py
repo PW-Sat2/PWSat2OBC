@@ -26,7 +26,7 @@ from .camera import CameraMixin
 from .adcs import ADCSMixin
 from .obc_rtos import RTOSMixin
 from .mcu_temp import MCUTemperatureMixin
-from .flash import FLASHMixin
+from .flash import FlashMixin
 
 
 class OBC(OBCMixin,
@@ -52,7 +52,7 @@ class OBC(OBCMixin,
           ADCSMixin,
           RTOSMixin,
           MCUTemperatureMixin,
-          FLASHMixin
+          FlashMixin
           ):
     def __init__(self, terminal):
         self.log = logging.getLogger("OBC")

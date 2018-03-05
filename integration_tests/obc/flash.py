@@ -1,7 +1,7 @@
 from .obc_mixin import OBCMixin, command, decode_words, decode_return
 import re
 
-class FLASHMixin(OBCMixin):
+class FlashMixin(OBCMixin):
     def __init__(self):
         pass
 
@@ -16,5 +16,5 @@ class FLASHMixin(OBCMixin):
 
     @decode_return(_parse_testflash)
     @command("testflash")
-    def test_flash(self, index):
+    def test_flash(self):
         pass
