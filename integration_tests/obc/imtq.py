@@ -25,11 +25,11 @@ class ImtqMixin(OBCMixin):
         pass
 
     @decode_return(_parse_to_array)
-    @command("imtq detumbleGet {0}")
-    def get_detumble_data(self, fix=0):
+    @command("imtq detumbleGet 0")
+    def get_detumble_data(self):
         pass
 
     @decode_return(_parse_lines_to_array)
-    @command("imtq PerformSelfTest {0}")
-    def perform_self_test(self, fix=0):
+    @command("imtq PerformSelfTest 0")
+    def perform_self_test(self):
         pass
