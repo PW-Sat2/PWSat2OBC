@@ -19,3 +19,6 @@ class CameraMixin(OBCMixin):
         pass
 
 
+    @command("photo")
+    def photo(self):
+        pass
