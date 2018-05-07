@@ -2,27 +2,28 @@ from frame_decoder import FrameDecoder
 from beacon_factory import BeaconFrameFactory
 from downlink_frame_factory import DownlinkFrameFactory, ResponseFrame, response_frame
 from exception import MultipleMatchingFrameTypes, NoMatchingFrameType
+from devices import BeaconFrame
 import inspect
 
-import pong
-import operation
-import program_upload
-import fdir
-import period_message
-import persistent_state
-import compile_info
-import common
-import suns
-import disable_overheat_submode
-import sail_experiment
-import set_bitrate
-import adcs
-import stop_sail_deployment
-import stop_antenna_deployment
-import memory
-import file_system
-import comm
-import time
+from pong import *
+from operation import *
+from program_upload import *
+from fdir import *
+from period_message import *
+from persistent_state import *
+from compile_info import *
+from common import *
+from suns import *
+from disable_overheat_submode import *
+from sail_experiment import *
+from set_bitrate import *
+from adcs import *
+from stop_sail_deployment import *
+from stop_antenna_deployment import *
+from memory import *
+from file_system import *
+from comm import *
+from time import *
 
 frame_types = []
 frame_types += map(lambda t: t[1], inspect.getmembers(pong, predicate=inspect.isclass))
@@ -54,13 +55,7 @@ __all__ = [
     'response_frame',
     'FrameDecoder',
     'BeaconFrame',
-    'PersistentStateFrame',
     'MultipleMatchingFrameTypes',
     'NoMatchingFrameType',
-    'CompileInfoFrame',
-    'SetInternalDetumblingModeSuccessFrame',
-    'SetInternalDetumblingModeErrorFrame',
-    'SetAdcsModeSuccessFrame',
-    'SetAdcsModeErrorFrame',
     'frame_factories'
 ] + map(lambda t: t.__name__, frame_types)
