@@ -2,7 +2,7 @@ include(ExternalProject)
 
 #clone EIGEN library form git mirror
 ExternalProject_Add(eigen_src
-    GIT_REPOSITORY https://github.com/RLovelett/eigen.git
+    GIT_REPOSITORY https://github.com/PW-Sat2/eigen-git-mirror.git
     GIT_TAG 3.3.2
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/eigen
     UPDATE_DISCONNECTED 1
