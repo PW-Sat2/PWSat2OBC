@@ -74,7 +74,7 @@ class ZeroMQAdapter(object):
         return ''.join([
             ZeroMQAdapter._build_kiss_header(),
             text
-        ]
+        ])
 
     def _on_downlink_frame(self, comm, frame):
         self._downlink_new_msg.send(ensure_string(frame))
@@ -108,8 +108,6 @@ class ZeroMQAdapter(object):
 
             gnuradio_frame = ZeroMQAdapter._build_gnuradio_frame(frame)
             self._downlink_gnuradio_pub.send(gnuradio_frame)
-
-            self._delay_downlink_frame(frame)
 
             kiss_frame = ZeroMQAdapter._build_kiss(frame)
 
