@@ -1,17 +1,36 @@
 import datetime
 from Queue import Queue, Empty, Full
+from struct import pack
 from threading import Lock
 
 from enum import Enum, unique
 
 import i2cMock
+from emulator.beacon_parser.full_beacon_parser import FullBeaconParser
+from emulator.beacon_parser.parser import BitReader, BeaconStorage
 from utils import *
 
 
 class BeaconFrame(object):
     def __init__(self, payload):
         self._payload = payload
-        pass
+        try:
+            all_bits = bitarray(endian='little')
+            all_bits.frombytes(''.join(map(lambda x: pack('B', x), payload)))
+
+            reader = BitReader(all_bits)
+            store = BeaconStorage()
+
+            parsers = FullBeaconParser().GetParsers(reader, store)
+            parsers.reverse()
+
+            while len(parsers) > 0:
+                parser = parsers.pop()
+                parser.parse()
+
+            self._parsed = store.storage
+        except:
+            self._parsed = None
 
     def payload(self):
         return self._payload

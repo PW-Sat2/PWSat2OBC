@@ -1,8 +1,8 @@
-import time
 from enum import unique, IntEnum
 
 from utils import busy_wait
 from .obc_mixin import OBCMixin, command, decode_return
+from experiment_type import ExperimentType, StartResult, IterationResult
 
 
 @unique
@@ -17,19 +17,6 @@ class ExperimentType(IntEnum):
     Fibo = 8
     Payload = 9
     Camera = 10
-
-@unique
-class StartResult(IntEnum):
-    Success = 0
-    Failure = 1
-
-
-@unique
-class IterationResult(IntEnum):
-    Finished = 0
-    LoopImmediately = 1
-    WaitForNextCycle = 2,
-    Failure = 3
 
 
 class ExperimentState:
