@@ -36,7 +36,45 @@ class BeaconFrame(object):
         return self._payload
 
     def __repr__(self):
-        return '{}: v    {}'.format(hex(id(self)), self.__class__.__name__)
+        if self._parsed is None:
+            return '{}: v    {} (parse failed)'.format(hex(id(self)), self.__class__.__name__)
+
+        v = lambda group, key: str(self._parsed[group][key])
+
+        crc_ok = "\t"
+        if v('02: Program State', '0056: Program CRC') != "0x8BCE":
+            crc_ok = "!!!!!\t"
+
+        lines = [
+            '{}: v    {}'.format(hex(id(self)), self.__class__.__name__),
+            '\tBP VOLT {}, {}'.format(
+                v('14: Controller A', '1019: BATC.VOLT_A'),
+                v('15: Controller B', '1204: BATC.VOLT_B')
+            ),
+            '\tBP TEMP {}, {}, {}'.format(
+                v('14: Controller A', '1062: BP.Temperature A'),
+                v('14: Controller A', '1075: BP.Temperature B'),
+                v('15: Controller B', '1194: BP.Temperature'),
+            ),
+            '\tCOMM PA TEMP NOW {} LAST {}'.format(
+                v('11: Comm', '0756: [Now] Power Amplifier Temperature '),
+                v('11: Comm', '0605: [Last transmission] Power Amplifier Temperature')
+            ),
+            '{}OBC CRC {}'.format(
+                crc_ok,
+                v('02: Program State', '0056: Program CRC')
+            ),
+            '\tGYRO UNCAL {}, {}, {}'.format(
+                v('10: Gyroscope', '0510: X measurement'),
+                v('10: Gyroscope', '0526: Y measurement'),
+                v('10: Gyroscope', '0542: Z measurement')
+            )
+        ]
+
+        return '\n'.join(lines)
+
+    def _ipython_display_(self):
+        print('a')
 
 
 class DownlinkFrame(object):
