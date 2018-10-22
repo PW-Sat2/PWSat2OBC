@@ -2,7 +2,8 @@ import telecommand
 from struct import pack
 from response_frames.common import CommSuccessFrame
 from response_frames.set_bitrate import SetBitrateSuccessFrame
-from devices import BeaconFrame, BaudRate
+from devices import BaudRate
+from devices.comm_beacon import BeaconFrame
 from system import auto_power_on, runlevel
 from tests.base import RestartPerTest
 from utils import ensure_byte_list, TestEvent

@@ -5,20 +5,6 @@ from .obc_mixin import OBCMixin, command, decode_return
 from experiment_type import ExperimentType, StartResult, IterationResult
 
 
-@unique
-class ExperimentType(IntEnum):
-    Detumbling = 1
-    EraseFlash = 2
-    LEOP = 4
-    SunS = 3
-    RadFET = 5
-    SADS = 6
-    Sail = 7
-    Fibo = 8
-    Payload = 9
-    Camera = 10
-
-
 class ExperimentState:
     def __init__(self):
         self.Requested = None

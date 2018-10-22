@@ -17,7 +17,6 @@ class FileListSuccessFrame(GenericSuccessResponseFrame):
 
         while len(raw) > 0:
             (name, raw) = raw.split('\0', 1)
-            print name
 
             size_bytes = raw[0:4]
             (size,) = struct.unpack('<L', ensure_string(size_bytes))

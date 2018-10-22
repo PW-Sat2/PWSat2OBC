@@ -5,8 +5,8 @@ from enum import unique, IntEnum
 class ExperimentType(IntEnum):
     Detumbling = 1
     EraseFlash = 2
-    LEOP = 4
     SunS = 3
+    LEOP = 4
     RadFET = 5
     SADS = 6
     Sail = 7

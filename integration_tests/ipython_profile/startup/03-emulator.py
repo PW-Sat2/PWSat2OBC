@@ -14,7 +14,7 @@ from emulator.last_frames import LastFramesModule
 from emulator.payload import PayloadModule
 from emulator.rtc import RTCModule
 from emulator.comm import CommModule
-from devices.comm import BeaconFrame
+from devices.comm_beacon import BeaconFrame
 from utils import ensure_byte_list
 
 last_frames = []

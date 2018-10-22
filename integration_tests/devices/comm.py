@@ -11,34 +11,6 @@ from emulator.beacon_parser.parser import BitReader, BeaconStorage
 from utils import *
 
 
-class BeaconFrame(object):
-    def __init__(self, payload):
-        self._payload = payload
-        try:
-            all_bits = bitarray(endian='little')
-            all_bits.frombytes(''.join(map(lambda x: pack('B', x), payload)))
-
-            reader = BitReader(all_bits)
-            store = BeaconStorage()
-
-            parsers = FullBeaconParser().GetParsers(reader, store)
-            parsers.reverse()
-
-            while len(parsers) > 0:
-                parser = parsers.pop()
-                parser.parse()
-
-            self._parsed = store.storage
-        except:
-            self._parsed = None
-
-    def payload(self):
-        return self._payload
-
-    def __repr__(self):
-        return '{}: v    {}'.format(hex(id(self)), self.__class__.__name__)
-
-
 class DownlinkFrame(object):
     def __init__(self, apid, seq, payload):
         self._apid = apid

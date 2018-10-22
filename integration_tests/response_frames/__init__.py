@@ -2,7 +2,7 @@ from frame_decoder import FrameDecoder
 from beacon_factory import BeaconFrameFactory
 from downlink_frame_factory import DownlinkFrameFactory, ResponseFrame, response_frame
 from exception import MultipleMatchingFrameTypes, NoMatchingFrameType
-from devices import BeaconFrame
+from devices.comm_beacon import BeaconFrame
 import inspect
 
 from pong import *
