@@ -1,26 +1,24 @@
-from telecommand import Telecommand
+from telecommand.base import Telecommand, CorrelatedTelecommand
 
 
-class OpenSailTelecommand(Telecommand):
+class OpenSailTelecommand(CorrelatedTelecommand):
     def __init__(self, correlation_id, ignore_overheat):
-        Telecommand.__init__(self)
-        self.correlation_id = correlation_id
+        super(OpenSailTelecommand, self).__init__(correlation_id)
         self.ignore_overheat = ignore_overheat
 
     def apid(self):
         return 0x04
 
     def payload(self):
-        return [self.correlation_id, int(self.ignore_overheat)]
+        return [self._correlation_id, int(self.ignore_overheat)]
 
 
-class StopSailDeployment(Telecommand):
+class StopSailDeployment(CorrelatedTelecommand):
     def __init__(self, correlation_id):
-        Telecommand.__init__(self)
-        self.correlation_id = correlation_id
+        super(StopSailDeployment, self).__init__(correlation_id)
 
     def apid(self):
         return 0x2D
 
     def payload(self):
-        return [self.correlation_id]
+        return [self._correlation_id]

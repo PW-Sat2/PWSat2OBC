@@ -1,9 +1,9 @@
-from telecommand.base import Telecommand
+from telecommand.base import Telecommand, CorrelatedTelecommand
 
 
-class EnterIdleState(Telecommand):
+class EnterIdleState(CorrelatedTelecommand):
     def __init__(self, correlation_id, duration):
-        self._correlation_id = correlation_id
+        super(EnterIdleState, self).__init__(correlation_id)
         self._duration = duration
 
     def apid(self):
@@ -35,9 +35,9 @@ class ResetTransmitterTelecommand(Telecommand):
         return []
 
 
-class SetBitrate(Telecommand):
+class SetBitrate(CorrelatedTelecommand):
     def __init__(self, correlation_id, bitrate):
-        self._correlation_id = correlation_id
+        super(SetBitrate, self).__init__(correlation_id)
         self._bitrate = bitrate
     
     def apid(self):

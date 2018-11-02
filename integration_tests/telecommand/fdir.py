@@ -1,4 +1,4 @@
-from telecommand import Telecommand
+from telecommand.base import Telecommand, CorrelatedTelecommand
 from typing import List, Tuple
 import struct
 
@@ -18,13 +18,10 @@ class ErrorCounterConfiguration:
                            self.decrement)
 
 
-class SetErrorCounterConfig(Telecommand):
+class SetErrorCounterConfig(CorrelatedTelecommand):
     def __init__(self, correlation_id, configs):
-        # type: (int, List[ErrorCounterConfiguration]) -> Any
-        Telecommand.__init__(self)
-
+        super(SetErrorCounterConfig, self).__init__(correlation_id)
         self._configs = configs
-        self._correlation_id = correlation_id
 
     def apid(self):
         return 0x02

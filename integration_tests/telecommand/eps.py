@@ -1,9 +1,9 @@
-from telecommand.base import Telecommand
+from telecommand.base import Telecommand, CorrelatedTelecommand
 
 
-class DisableOverheatSubmode(Telecommand):
+class DisableOverheatSubmode(CorrelatedTelecommand):
     def __init__(self, correlation_id, controller):
-        self._correlation_id = correlation_id
+        super(DisableOverheatSubmode, self).__init__(correlation_id)
         self._controller = controller
 
     def apid(self):

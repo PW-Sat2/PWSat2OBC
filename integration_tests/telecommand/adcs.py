@@ -5,7 +5,7 @@ from devices.adcs import AdcsMode
 
 class SetBuiltinDetumblingBlockMaskTelecommand(CorrelatedTelecommand):
     def __init__(self, correlation_id, mask):
-        CorrelatedTelecommand.__init__(self, correlation_id)
+        super(SetBuiltinDetumblingBlockMaskTelecommand, self).__init__(correlation_id)
         self._mask = mask
 
     def apid(self):
@@ -17,7 +17,7 @@ class SetBuiltinDetumblingBlockMaskTelecommand(CorrelatedTelecommand):
 
 class SetAdcsModeTelecommand(CorrelatedTelecommand):
     def __init__(self, correlation_id, mode):
-        CorrelatedTelecommand.__init__(self, correlation_id)
+        super(SetAdcsModeTelecommand, self).__init__(correlation_id)
         self._mode = mode
 
     def apid(self):

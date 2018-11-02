@@ -1,9 +1,9 @@
-from telecommand import Telecommand
+from telecommand.base import Telecommand, CorrelatedTelecommand
 
 
-class PowerCycleTelecommand(Telecommand):
+class PowerCycleTelecommand(CorrelatedTelecommand):
     def __init__(self, correlation_id):
-        Telecommand.__init__(self)
+        super(PowerCycleTelecommand, self).__init__(correlation_id)
         self._correlation_id = correlation_id
 
     def apid(self):

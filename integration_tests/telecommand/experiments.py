@@ -1,7 +1,7 @@
 import struct
 
 from utils import ensure_byte_list
-from .base import CorrelatedTelecommand
+from telecommand.base import CorrelatedTelecommand
 
 
 class PerformDetumblingExperiment(CorrelatedTelecommand):

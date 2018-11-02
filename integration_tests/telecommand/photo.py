@@ -4,7 +4,7 @@ import struct
 
 class TakePhotoTelecommand(CorrelatedTelecommand):
     def __init__(self, correlation_id, camera, resolution, count, delay, path):
-        CorrelatedTelecommand.__init__(self, correlation_id)
+        super(TakePhotoTelecommand, self).__init__(correlation_id)
         self._camera_id = camera
         self._resolution = resolution
         self._picture_count = count
@@ -32,7 +32,7 @@ class TakePhotoTelecommand(CorrelatedTelecommand):
 
 class PurgePhotoTelecommand(CorrelatedTelecommand):
     def __init__(self, correlation_id):
-        CorrelatedTelecommand.__init__(self, correlation_id)
+        super(PurgePhotoTelecommand, self).__init__(correlation_id)
 
     def apid(self):
         return 0x22
