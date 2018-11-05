@@ -1,5 +1,5 @@
 from emulator.beacon_parser.units import enum
-from obc.experiments import ExperimentType, StartResult, IterationResult
+from experiment_type import ExperimentType, StartResult, IterationResult
 from parser import CategoryParser
 
 

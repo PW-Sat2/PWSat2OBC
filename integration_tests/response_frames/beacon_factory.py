@@ -1,4 +1,4 @@
-from devices import BeaconFrame
+from devices.comm_beacon import BeaconFrame
 from marker import BeaconMarker
 from utils import ensure_byte_list
 

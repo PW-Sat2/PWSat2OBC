@@ -7,7 +7,7 @@ from struct import pack
 from datetime import datetime
 from wx import propgrid
 
-from devices import BeaconFrame
+from devices.comm_beacon import BeaconFrame
 from .beacon_parser.full_beacon_parser import FullBeaconParser
 from .beacon_parser.parser import BeaconStorage, BitArrayParser
 from utils import ensure_byte_list

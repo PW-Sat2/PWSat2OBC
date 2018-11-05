@@ -1,23 +1,14 @@
 import datetime
 from Queue import Queue, Empty, Full
+from struct import pack
 from threading import Lock
 
 from enum import Enum, unique
 
 import i2cMock
+from emulator.beacon_parser.full_beacon_parser import FullBeaconParser
+from emulator.beacon_parser.parser import BitReader, BeaconStorage
 from utils import *
-
-
-class BeaconFrame(object):
-    def __init__(self, payload):
-        self._payload = payload
-        pass
-
-    def payload(self):
-        return self._payload
-
-    def __repr__(self):
-        return '{}: v    {}'.format(hex(id(self)), self.__class__.__name__)
 
 
 class DownlinkFrame(object):

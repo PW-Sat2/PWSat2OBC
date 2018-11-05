@@ -1,6 +1,7 @@
 import telecommand
 from response_frames.common import I2CSuccessFrame
-from devices import EchoDevice, BeaconFrame
+from devices import EchoDevice
+from devices.comm_beacon import BeaconFrame
 from system import auto_power_on, runlevel
 from tests.base import BaseTest, RestartPerTest
 from utils import ensure_byte_list, TestEvent
