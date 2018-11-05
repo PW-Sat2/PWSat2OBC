@@ -31,12 +31,14 @@ class CorrelatedTelecommand(Telecommand):
         return "{}, cid={:02d}".format(
             super(CorrelatedTelecommand, self).__repr__(),
             self._correlation_id)
-
+    
+    def correlation_id(self):
+        return self._correlation_id
 
 class TelecommandResponse(DownlinkFrame):
     def __init__(self, apid, seq, payload):
         super(TelecommandResponse, self).__init__(apid, seq, payload)
 
     def decode(self):
-        raise NotImplemented()
+        raise NotImplementedError()
 

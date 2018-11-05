@@ -4,10 +4,10 @@ from telecommand.base import Telecommand, CorrelatedTelecommand
 from utils import ensure_byte_list
 
 
-class DownloadFile(Telecommand):
+class DownloadFile(CorrelatedTelecommand):
     def __init__(self, correlation_id, path, seqs):
+        super(DownloadFile, self).__init__(correlation_id)
         self._path = path
-        self._correlation_id = correlation_id
         self._seqs = seqs
 
     def apid(self):

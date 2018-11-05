@@ -1,3 +1,4 @@
+from base import *
 from fs import *
 from comm import *
 from experiments import *
@@ -61,6 +62,7 @@ __all__ = [
     'PerformCameraCommissioningExperiment',
     'StopSailDeployment',
     'ReadMemory',
-    'PingTelecommand'
+    'PingTelecommand',
+    'CorrelatedTelecommand'
 ]
 
