@@ -10,6 +10,7 @@ from payload import Payload
 from gpio import GPIODriver
 from camera import *
 from adcs import *
+from comm_beacon import BeaconFrame
 
 __all__ = [
     'EPS',
@@ -36,5 +37,6 @@ __all__ = [
     "CameraDriver",
     'CameraLocation',
     'PhotoResolution',
-    'AdcsMode'
+    'AdcsMode',
+    'BeaconFrame'
 ]
