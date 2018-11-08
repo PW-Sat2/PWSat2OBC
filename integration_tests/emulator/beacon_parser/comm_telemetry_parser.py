@@ -77,5 +77,5 @@ class CommTelemetryParser(CategoryParser):
         self.append("[Now] Receiver Current", 12, value_type=ReceiverCurrent)
         self.append("[Now] Power Supply Voltage", 12, value_type=Voltage)
         self.append("[Now] Oscillator Temperature", 12, value_type=CommTemperature)
-        self.append("[Now] Power Amplifier Temperature ", 12, value_type=CommTemperature)
+        self.append("[Now] Power Amplifier Temperature", 12, value_type=CommTemperature)
         self.append("[Now] RSSI", 12, value_type=SignalStrength)

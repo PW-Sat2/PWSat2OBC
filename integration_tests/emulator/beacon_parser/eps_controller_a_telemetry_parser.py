@@ -146,6 +146,6 @@ class EPSControllerATelemetryParser(CategoryParser):
         self.append('Uptime', 32, value_type=TimeFromSeconds)
         self.append('Temperature', 10, value_type=LMT87Temperature)
         self.append('SUPP_TEMP', 10, value_type=LMT87Temperature)
-        self.append('ControllerB.3V3d`', 10, value_type=Local3V3dVoltage)
+        self.append('ControllerB.3V3d', 10, value_type=Local3V3dVoltage)
         self.append('DCDC3V3.Temperature', 10, value_type=LMT87Temperature)
         self.append('DCDC5V.Temperature', 10, value_type=LMT87Temperature)
