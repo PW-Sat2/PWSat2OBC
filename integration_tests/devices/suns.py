@@ -25,7 +25,7 @@ def to_uint16_xyzw(tab):
 class SunS(i2cMock.I2CDevice):
 
     def __init__(self, gpio_driver, pin):
-        super(SunS, self).__init__(0x44, "Imtq")
+        super(SunS, self).__init__(0x44, "Suns")
 
         self.interrupt_pin = pin
         self.gpioDriver = gpio_driver

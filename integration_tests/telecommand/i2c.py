@@ -1,11 +1,12 @@
 import struct
 
-from telecommand.base import Telecommand
+from telecommand.base import CorrelatedTelecommand
 from utils import ensure_byte_list
 
 
-class RawI2C(Telecommand):
+class RawI2C(CorrelatedTelecommand):
     def __init__(self, correlation_id, busSelect, address, delay, data):
+        super(RawI2C, self).__init__(correlation_id)
         self._correlation_id = ensure_byte_list(struct.pack('B', correlation_id))
         self._busSelect = ensure_byte_list(struct.pack('B', busSelect))
         self._address = ensure_byte_list(struct.pack('B', address))
