@@ -93,7 +93,7 @@ class PerformPayloadCommissioningExperiment(CorrelatedTelecommand):
 
 class PerformSADSExperiment(CorrelatedTelecommand):
     def __init__(self, correlation_id):
-        CorrelatedTelecommand.__init__(self, correlation_id)
+        super(PerformSADSExperiment, self).__init__(correlation_id)
 
     def apid(self):
         return 0xD4
@@ -110,7 +110,7 @@ class PerformCameraCommissioningExperiment(CorrelatedTelecommand):
         return struct.pack('<B', self._correlation_id) + self.file_name + '\0'
 
     def __init__(self, correlation_id, file_name):
-        CorrelatedTelecommand.__init__(self, correlation_id)
+        super(PerformCameraCommissioningExperiment, self).__init__(correlation_id)
         self.file_name = file_name
 
 
@@ -122,6 +122,6 @@ class CopyBootSlots(CorrelatedTelecommand):
         return [self._correlation_id, self.source_mask, self.target_mask]
 
     def __init__(self, correlation_id, source_mask, target_mask):
-        CorrelatedTelecommand.__init__(self, correlation_id)
+        super(CopyBootSlots, self).__init__(correlation_id)
         self.target_mask = target_mask
         self.source_mask = source_mask

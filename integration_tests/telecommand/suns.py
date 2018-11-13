@@ -1,9 +1,9 @@
-from telecommand.base import Telecommand
+from telecommand.base import CorrelatedTelecommand
 
 
-class GetSunSDataSets(Telecommand):
+class GetSunSDataSets(CorrelatedTelecommand):
     def __init__(self, correlation_id, gain, itime):
-        self._correlation_id = correlation_id
+        super(GetSunSDataSets, self).__init__(correlation_id)
         self._gain = gain
         self._itime = itime
 
