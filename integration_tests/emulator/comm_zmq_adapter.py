@@ -111,14 +111,15 @@ class ZeroMQAdapter(object):
             just_content = frame[16:]
             count_all_frames+=1
 
-            if np.random.choice(['reject', 'accept'], 1, p=[self._uplink_per, 1 - self._uplink_per])[0] == 'accept':
+            if self._uplink_per == 0 or np.random.choice(['reject', 'accept'], 1, p=[self._uplink_per, 1 - self._uplink_per])[0] == 'accept':
                 log.info("Uplink frame accepted")
                 self._comm.receiver.put_frame(just_content)
             else:
                 log.info("Uplink frame dropped because of PER setting")
                 count_rejected+=1
-            
-            log.info("Current uplink PER = {0}".format(count_rejected/count_all_frames))
+
+            if self._uplink_per != 0:
+                log.info("Current uplink PER = {0}".format(count_rejected/count_all_frames))
 
 
 
@@ -132,7 +133,7 @@ class ZeroMQAdapter(object):
 
             count_all_frames+=1
 
-            if np.random.choice(['reject', 'accept'], 1, p=[self._downlink_per, 1 - self._downlink_per])[0] == 'accept':
+            if self._downlink_per == 0 or np.random.choice(['reject', 'accept'], 1, p=[self._downlink_per, 1 - self._downlink_per])[0] == 'accept':
                 log.info("Downlink frame accepted")
                 gnuradio_frame = ZeroMQAdapter._build_gnuradio_frame(frame)
                 self._downlink_gnuradio_pub.send(gnuradio_frame)
@@ -149,5 +150,6 @@ class ZeroMQAdapter(object):
                 log.info("Downlink frame dropped because of PER setting")
                 count_rejected+=1
             
-            log.info("Current downlink PER = {0}".format(count_rejected/count_all_frames))
+            if self._downlink_per != 0:
+                log.info("Current downlink PER = {0}".format(count_rejected/count_all_frames))
 
