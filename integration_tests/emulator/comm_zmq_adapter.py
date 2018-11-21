@@ -8,7 +8,7 @@ from utils import ensure_string
 
 
 class ZeroMQAdapter(object):
-    def __init__(self, comm):
+    def __init__(self, comm, grc_uplink_ip="localhost", grc_uplink_port=7002, grc_downlink_ip="localhost", grc_downlink_port=7003):
         self._comm = comm  # type: devices.Comm
 
         self._comm.transmitter.on_send_frame = self._on_downlink_frame
@@ -23,13 +23,13 @@ class ZeroMQAdapter(object):
         self._downlink_gnuradio_pub = self._context.socket(zmq.PUB)
 
         self._socket_uplink.bind("tcp://*:%s" % 7000)
-        self._socket_uplink_gnuradio.connect("tcp://localhost:%s" % 7002)
+        self._socket_uplink_gnuradio.connect("tcp://{0}:{1}".format(grc_uplink_ip, grc_uplink_port))
 
         self._downlink_new_msg.bind("inproc://downlink/new_msg")
         self._downlink_delay_msg.connect("inproc://downlink/new_msg")
 
         self._downlink_pub.bind("tcp://*:%s" % 7001)
-        self._downlink_gnuradio_pub.connect("tcp://localhost:%s" % 7003)
+        self._downlink_gnuradio_pub.connect("tcp://{0}:{1}".format(grc_downlink_ip, grc_downlink_port))
 
         self._socket_uplink.setsockopt(zmq.SUBSCRIBE, '')
         self._socket_uplink_gnuradio.setsockopt(zmq.SUBSCRIBE, '')
