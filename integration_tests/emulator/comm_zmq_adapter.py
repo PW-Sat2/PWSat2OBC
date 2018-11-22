@@ -149,7 +149,7 @@ class ZeroMQAdapter(object):
             else:
                 log.info("Downlink frame dropped because of PER setting")
                 count_rejected+=1
-            
+
             if self._downlink_per != 0:
                 log.debug("Current downlink PER = {0}".format(count_rejected/count_all_frames))
 
