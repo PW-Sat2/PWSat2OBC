@@ -1,6 +1,8 @@
 from Queue import Empty
 from threading import Thread
 from time import sleep
+import numpy as np
+import logging
 
 import zmq
 import devices
@@ -8,7 +10,8 @@ from utils import ensure_string
 
 
 class ZeroMQAdapter(object):
-    def __init__(self, comm, grc_uplink_address="tcp://localhost:7002", grc_downlink_address="tcp://localhost:7003"):
+    def __init__(self, comm, grc_uplink_address="tcp://localhost:7002", grc_downlink_address="tcp://localhost:7003",
+                 uplink_per=0, downlink_per=0):
         self._comm = comm  # type: devices.Comm
 
         self._comm.transmitter.on_send_frame = self._on_downlink_frame
@@ -45,6 +48,8 @@ class ZeroMQAdapter(object):
         self._downlink_handler = Thread(target=self._downlink_worker)
         self._downlink_handler.daemon = True
         self._downlink_handler.start()
+        self._uplink_per = uplink_per
+        self._downlink_per = downlink_per
 
     @staticmethod
     def _encode_callsign(call):
@@ -97,23 +102,54 @@ class ZeroMQAdapter(object):
             self._comm.receiver.put_frame(just_content)
 
     def _uplink_gnuradio_worker(self):
+        log = logging.getLogger("GNURADIO UPLINK")
+        count_all_frames = 0.0
+        count_rejected = 0.0
+
         while True:
             frame = self._socket_uplink_gnuradio.recv()
             just_content = frame[16:]
-            self._comm.receiver.put_frame(just_content)
+            count_all_frames+=1
+
+            if self._uplink_per == 0 or np.random.choice(['reject', 'accept'], 1, p=[self._uplink_per, 1 - self._uplink_per])[0] == 'accept':
+                log.debug("Uplink frame accepted")
+                self._comm.receiver.put_frame(just_content)
+            else:
+                log.info("Uplink frame dropped because of PER setting")
+                count_rejected+=1
+
+            if self._uplink_per != 0:
+                log.debug("Current uplink PER = {0}".format(count_rejected/count_all_frames))
+
+
 
     def _downlink_worker(self):
+        log = logging.getLogger("GNURADIO DOWNLINK")
+        count_all_frames = 0.0
+        count_rejected = 0.0
+
         while True:
             frame = self._downlink_delay_msg.recv()
 
-            gnuradio_frame = ZeroMQAdapter._build_gnuradio_frame(frame)
-            self._downlink_gnuradio_pub.send(gnuradio_frame)
+            count_all_frames+=1
 
-            kiss_frame = ZeroMQAdapter._build_kiss(frame)
+            if self._downlink_per == 0 or np.random.choice(['reject', 'accept'], 1, p=[self._downlink_per, 1 - self._downlink_per])[0] == 'accept':
+                log.debug("Downlink frame accepted")
+                gnuradio_frame = ZeroMQAdapter._build_gnuradio_frame(frame)
+                self._downlink_gnuradio_pub.send(gnuradio_frame)
 
-            self._downlink_pub.send(kiss_frame)
+                kiss_frame = ZeroMQAdapter._build_kiss(frame)
 
-            try:
-                self._comm.transmitter.get_message_from_buffer(0)
-            except Empty:
-                pass
+                self._downlink_pub.send(kiss_frame)
+
+                try:
+                    self._comm.transmitter.get_message_from_buffer(0)
+                except Empty:
+                    pass
+            else:
+                log.info("Downlink frame dropped because of PER setting")
+                count_rejected+=1
+
+            if self._downlink_per != 0:
+                log.debug("Current downlink PER = {0}".format(count_rejected/count_all_frames))
+
