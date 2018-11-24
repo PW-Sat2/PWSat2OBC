@@ -89,7 +89,7 @@ class BeaconFrame(object):
                 crc_ok,
                 v('02: Program State', '0056: Program CRC')
             ),
-            '\tGYRO UNCAL {}, {}, {}'.format(
+            '\tGYRO UNCAL {}, {}, {}\n'.format(
                 v('10: Gyroscope', '0510: X measurement'),
                 v('10: Gyroscope', '0526: Y measurement'),
                 v('10: Gyroscope', '0542: Z measurement')
