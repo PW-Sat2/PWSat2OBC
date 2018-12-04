@@ -1,5 +1,5 @@
 from telecommand.base import Telecommand, CorrelatedTelecommand
-
+import struct
 
 class EnterIdleState(CorrelatedTelecommand):
     def __init__(self, correlation_id, duration):
@@ -44,7 +44,7 @@ class SetBitrate(CorrelatedTelecommand):
         return 0x18
     
     def payload(self):
-        return [self._correlation_id, self._bitrate]
+        return struct.pack('<BB', self._correlation_id, int(self._bitrate))
 
     def __repr__(self):
         return "{}, bitrate={}".format(
