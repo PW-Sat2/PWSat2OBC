@@ -43,7 +43,7 @@ class GenericSuccessResponseFrame(ResponseFrame):
         self.response = self.payload()[2:]
     
     def __repr__(self):
-        return '{}: v{:03d}-{} CID={:03d} Seq={:02d}'.format(hex(id(self)), self.apid(), self.__class__.__name__, self.correlation_id,  self._seq)
+        return '{}: CID={:03d} Seq={:02d}'.format(self.__class__.__name__, self.correlation_id,  self._seq)
 
 
 @response_frame(0)

@@ -20,7 +20,7 @@ class Telecommand(object):
         return self.frame().build()
 
     def __repr__(self):
-        return '{}: ^{:03d}-{}'.format(hex(id(self)), self.apid(), self.__class__.__name__)
+        return '{}'.format(self.__class__.__name__)
 
 
 class CorrelatedTelecommand(Telecommand):

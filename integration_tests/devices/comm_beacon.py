@@ -39,7 +39,7 @@ class BeaconFrame(object):
 
     def __repr__(self):
         if self._parsed is None:
-            return '{}: v    {} (parse failed)'.format(hex(id(self)), self.__class__.__name__)
+            return '{} (parse failed)'.format(self.__class__.__name__)
 
         proper_ctc = self._get_proper_crc()
 
@@ -68,7 +68,7 @@ class BeaconFrame(object):
             pa_temp_ok = "!!!!!\t"
 
         lines = [
-            '{}: v    {}'.format(hex(id(self)), self.__class__.__name__),
+            '{}'.format(self.__class__.__name__),
             '{}BP VOLT {}, {}'.format(
                 bp_volt_ok,
                 v('14: Controller A', '1019: BATC.VOLT_A'),

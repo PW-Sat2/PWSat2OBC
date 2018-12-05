@@ -45,7 +45,7 @@ class DownlinkFrame(object):
         return 'APID: {} Seq: {} Payload: {}'.format(self._apid, self._seq, self._payload)
 
     def __repr__(self):
-        return '{}: v{:03d}-{} Seq={:02d}'.format(hex(id(self)), self.apid(), self.__class__.__name__, self._seq)
+        return '{}: Seq={:02d}'.format(self.__class__.__name__, self._seq)
 
 
 class UplinkFrame:
