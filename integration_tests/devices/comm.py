@@ -92,6 +92,9 @@ class BaudRate(Enum):
 
         return map[self]
 
+    def __int__(self):
+        return self.value
+
 
 class TransmitterTelemetry(object):
     def __init__(self):
