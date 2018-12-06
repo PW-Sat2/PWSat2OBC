@@ -23,7 +23,8 @@ class StartResult(IntEnum):
 
 @unique
 class IterationResult(IntEnum):
-    Finished = 0
-    LoopImmediately = 1
-    WaitForNextCycle = 2,
-    Failure = 3
+    NoResult = 0
+    Finished = 1
+    LoopImmediately = 2
+    WaitForNextCycle = 3
+    Failure = 4
