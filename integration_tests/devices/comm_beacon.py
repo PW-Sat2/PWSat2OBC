@@ -5,6 +5,7 @@ from bitarray import bitarray
 from emulator.beacon_parser.full_beacon_parser import FullBeaconParser
 from emulator.beacon_parser.parser import BitReader, BeaconStorage
 
+import experiment_type
 
 class BeaconFrame(object):
     def __init__(self, payload):
@@ -89,10 +90,13 @@ class BeaconFrame(object):
                 crc_ok,
                 v('02: Program State', '0056: Program CRC')
             ),
-            '\tGYRO UNCAL {}, {}, {}\n'.format(
+            '\tGYRO UNCAL {}, {}, {}'.format(
                 v('10: Gyroscope', '0510: X measurement'),
                 v('10: Gyroscope', '0526: Y measurement'),
                 v('10: Gyroscope', '0542: Z measurement')
+            ),
+            '\tEXPERIMENT {}\n'.format(
+                v('09: Experiments', '0490: Current experiment code')
             )
         ]
 
