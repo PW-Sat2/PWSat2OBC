@@ -68,6 +68,19 @@ class BeaconFrame(object):
                 or not check_range('11: Comm', '0605: [Last transmission] Power Amplifier Temperature', 0, 56):
             pa_temp_ok = "!!!!!\t"
 
+        experiment_status = ''
+        experiment_startup_status = ''
+        experiment_status_ok = '\t'
+        if v('09: Experiments', '0490: Current experiment code').strip() != 'None':
+            experiment_status = ' {}'.format(v('09: Experiments', '0502: Last Experiment Iteration Status'))
+            if experiment_status.strip() == 'Failure':
+                experiment_status_ok = "!!!!!\t"
+
+            if v('09: Experiments', '0494: Experiment Startup Result').strip() == 'Failure':
+                experiment_startup_status = ' START Failure'
+                if experiment_status_ok == '\t':
+                    experiment_status_ok = "!!!!!\t"
+
         lines = [
             '{}'.format(self.__class__.__name__),
             '{}BP VOLT {}, {}'.format(
@@ -95,8 +108,11 @@ class BeaconFrame(object):
                 v('10: Gyroscope', '0526: Y measurement'),
                 v('10: Gyroscope', '0542: Z measurement')
             ),
-            '\tEXPERIMENT {}\n'.format(
-                v('09: Experiments', '0490: Current experiment code')
+            '{}EXPERIMENT {}{}{}\n'.format(
+                experiment_status_ok,
+                v('09: Experiments', '0490: Current experiment code'),
+                experiment_status,
+                experiment_startup_status
             )
         ]
 
