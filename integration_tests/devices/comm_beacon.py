@@ -48,29 +48,29 @@ class BeaconFrame(object):
 
         check_range = lambda group, key, low, high: low <= self._parsed[group][key].converted and self._parsed[group][key].converted <= high
 
-        crc_ok = "\t"
+        crc_ok = '      '
         if v('02: Program State', '0056: Program CRC') != proper_ctc:
-            crc_ok = "!!!!!\t"
+            crc_ok = "!!!!! "
 
-        bp_volt_ok = "\t"
+        bp_volt_ok = '      '
         if not check_range('14: Controller A', '1019: BATC.VOLT_A', 7.0, 7.8) \
                 or not check_range('15: Controller B', '1204: BATC.VOLT_B', 7.0, 7.8):
-            bp_volt_ok = "!!!!!\t"
+            bp_volt_ok = "!!!!! "
 
-        bp_temp_ok = "\t"
+        bp_temp_ok = '      '
         if not check_range('14: Controller A', '1062: BP.Temperature A', 0, 45) \
                 or not check_range('14: Controller A', '1075: BP.Temperature B', 0, 45)\
                 or not check_range('15: Controller B', '1194: BP.Temperature', 0, 45):
-            bp_temp_ok = "!!!!!\t"
+            bp_temp_ok = "!!!!! "
 
-        pa_temp_ok = "\t"
+        pa_temp_ok = '      '
         if not check_range('11: Comm', '0756: [Now] Power Amplifier Temperature', 0, 45) \
                 or not check_range('11: Comm', '0605: [Last transmission] Power Amplifier Temperature', 0, 56):
-            pa_temp_ok = "!!!!!\t"
+            pa_temp_ok = "!!!!! "
 
         experiment_status = ''
         experiment_startup_status = ''
-        experiment_status_ok = '\t'
+        experiment_status_ok = '      '
         if v('09: Experiments', '0490: Current experiment code').strip() != 'None':
             experiment_status = ' {}'.format(v('09: Experiments', '0502: Last Experiment Iteration Status'))
             if experiment_status.strip() == 'Failure':
@@ -78,8 +78,20 @@ class BeaconFrame(object):
 
             if v('09: Experiments', '0494: Experiment Startup Result').strip() == 'Failure':
                 experiment_startup_status = ' START Failure'
-                if experiment_status_ok == '\t':
-                    experiment_status_ok = "!!!!!\t"
+                if experiment_status_ok == '      ':
+                    experiment_status_ok = '!!!!! '
+
+        mcu_temperature_ok = '      '
+        mcu_temperature = self._parsed['13: MCU']['0781: Temperature']
+        gyro_temperature = self._parsed['10: Gyroscope']['0558: Temperature']
+
+        if mcu_temperature.converted > gyro_temperature.converted + 10:
+            mcu_temperature_ok = "!!!!! "
+
+        current_3v3_ok = '      '
+        current_3v3 = self._parsed['14: Controller A']['0956: DISTR.CURR_3V3']
+        if current_3v3.converted > 0.1:
+            current_3v3_ok = "!!!!! "
 
         lines = [
             '{}'.format(self.__class__.__name__),
@@ -108,11 +120,19 @@ class BeaconFrame(object):
                 v('10: Gyroscope', '0526: Y measurement'),
                 v('10: Gyroscope', '0542: Z measurement')
             ),
-            '{}EXPERIMENT {}{}{}\n'.format(
+            '{}EXPERIMENT {}{}{}'.format(
                 experiment_status_ok,
                 v('09: Experiments', '0490: Current experiment code'),
                 experiment_status,
                 experiment_startup_status
+            ),
+            '{}MCU TEMP {}'.format(
+                mcu_temperature_ok,
+                mcu_temperature,
+            ),
+            '{}3V3 DISTR CURRENT {:.0f} mA\n'.format(
+                current_3v3_ok,
+                1000.*current_3v3.converted,
             )
         ]
 
