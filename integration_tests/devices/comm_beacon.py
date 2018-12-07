@@ -81,6 +81,18 @@ class BeaconFrame(object):
                 if experiment_status_ok == '\t':
                     experiment_status_ok = "!!!!!\t"
 
+        mcu_temperature_ok = '\t'
+        mcu_temperature = self._parsed['13: MCU']['0781: Temperature']
+        comm_oscillator_temperature = self._parsed['11: Comm']['0744: [Now] Oscillator Temperature']
+
+        if mcu_temperature.converted > comm_oscillator_temperature.converted:
+            mcu_temperature_ok = "!!!!!\t"
+
+        current_3v3_ok = '\t'
+        current_3v3 = self._parsed['14: Controller A']['0956: DISTR.CURR_3V3']
+        if current_3v3.converted > 0.1:
+            current_3v3_ok = "!!!!!\t"
+
         lines = [
             '{}'.format(self.__class__.__name__),
             '{}BP VOLT {}, {}'.format(
@@ -108,11 +120,19 @@ class BeaconFrame(object):
                 v('10: Gyroscope', '0526: Y measurement'),
                 v('10: Gyroscope', '0542: Z measurement')
             ),
-            '{}EXPERIMENT {}{}{}\n'.format(
+            '{}EXPERIMENT {}{}{}'.format(
                 experiment_status_ok,
                 v('09: Experiments', '0490: Current experiment code'),
                 experiment_status,
                 experiment_startup_status
+            ),
+            '{}MCU TEMP {}'.format(
+                mcu_temperature_ok,
+                mcu_temperature,
+            ),
+            '{}3V3 DISTR CURRENT {:.0f} mA\n'.format(
+                current_3v3_ok,
+                1000.*current_3v3.converted,
             )
         ]
 
