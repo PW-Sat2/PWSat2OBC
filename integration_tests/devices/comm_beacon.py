@@ -42,15 +42,13 @@ class BeaconFrame(object):
         if self._parsed is None:
             return '{} (parse failed)'.format(self.__class__.__name__)
 
-        proper_ctc = self._get_proper_crc()
+        proper_crc = self._get_proper_crc()
 
         v = lambda group, key: str(self._parsed[group][key])
 
         check_range = lambda group, key, low, high: low <= self._parsed[group][key].converted and self._parsed[group][key].converted <= high
 
-        crc_ok = '      '
-        if v('02: Program State', '0056: Program CRC') != proper_ctc:
-            crc_ok = "!!!!! "
+        crc_ok = v('02: Program State', '0056: Program CRC') == proper_crc
 
         bp_volt_ok = '      '
         if not check_range('14: Controller A', '1019: BATC.VOLT_A', 7.0, 7.8) \
@@ -74,7 +72,7 @@ class BeaconFrame(object):
         if v('09: Experiments', '0490: Current experiment code').strip() != 'None':
             experiment_status = ' {}'.format(v('09: Experiments', '0502: Last Experiment Iteration Status'))
             if experiment_status.strip() == 'Failure':
-                experiment_status_ok = "!!!!!\t"
+                experiment_status_ok = "!!!!! "
 
             if v('09: Experiments', '0494: Experiment Startup Result').strip() == 'Failure':
                 experiment_startup_status = ' START Failure'
@@ -110,12 +108,15 @@ class BeaconFrame(object):
                 pa_temp_ok,
                 v('11: Comm', '0756: [Now] Power Amplifier Temperature'),
                 v('11: Comm', '0605: [Last transmission] Power Amplifier Temperature')
-            ),
-            '{}OBC CRC {}'.format(
+            )]
+        if not crc_ok:
+            lines.append(
+            '!!!!! OBC CRC {}'.format(
                 crc_ok,
                 v('02: Program State', '0056: Program CRC')
-            ),
-            '\tGYRO UNCAL {}, {}, {}'.format(
+            ))
+        lines.extend([
+            '      GYRO UNCAL {}, {}, {}'.format(
                 v('10: Gyroscope', '0510: X measurement'),
                 v('10: Gyroscope', '0526: Y measurement'),
                 v('10: Gyroscope', '0542: Z measurement')
@@ -134,6 +135,6 @@ class BeaconFrame(object):
                 current_3v3_ok,
                 1000.*current_3v3.converted,
             )
-        ]
+        ])
 
         return '\n'.join(lines)
