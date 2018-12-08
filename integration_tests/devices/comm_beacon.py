@@ -112,7 +112,6 @@ class BeaconFrame(object):
         if not crc_ok:
             lines.append(
             '!!!!! OBC CRC {}'.format(
-                crc_ok,
                 v('02: Program State', '0056: Program CRC')
             ))
         lines.extend([
