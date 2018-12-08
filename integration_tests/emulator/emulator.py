@@ -1,14 +1,14 @@
 import os
 
-import wx
-from wx import xrc
-
 
 class Emulator:
     def __init__(self, modules):
         self._modules = modules
 
     def start(self, wx_app):
+        import wx
+        from wx import xrc
+
         res = xrc.XmlResource(os.path.join(os.path.dirname(__file__), 'gui.xrc'))
 
         self._frame = res.LoadFrame(None, 'EmptyFrame')  # type: wx.Frame
