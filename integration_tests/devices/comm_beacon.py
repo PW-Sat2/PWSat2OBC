@@ -66,6 +66,10 @@ class BeaconFrame(object):
                 or not check_range('11: Comm', '0605: [Last transmission] Power Amplifier Temperature', 0, 56):
             pa_temp_ok = "!!!!! "
 
+        rx_current_ok = '      '
+        if check_range('11: Comm', '0720: [Now] Receiver Current', 68, 75):
+            rx_current_ok = "!!!!! "
+
         experiment_status = ''
         experiment_startup_status = ''
         experiment_status_ok = '      '
@@ -108,6 +112,10 @@ class BeaconFrame(object):
                 pa_temp_ok,
                 v('11: Comm', '0756: [Now] Power Amplifier Temperature'),
                 v('11: Comm', '0605: [Last transmission] Power Amplifier Temperature')
+            ),
+            '{}COMM RX Current {}'.format(
+                rx_current_ok,
+                v('11: Comm', '0720: [Now] Receiver Current'),
             )]
         if not crc_ok:
             lines.append(
