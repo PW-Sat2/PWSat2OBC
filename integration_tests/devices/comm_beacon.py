@@ -70,6 +70,8 @@ class BeaconFrame(object):
         if check_range('11: Comm', '0720: [Now] Receiver Current', 68, 75):
             rx_current_ok = "!!!!! "
 
+        transmitter_bitrate = v('11: Comm', '0591: Transmitter Bitrate')
+
         experiment_status = ''
         experiment_startup_status = ''
         experiment_status_ok = '      '
@@ -96,7 +98,7 @@ class BeaconFrame(object):
             current_3v3_ok = "!!!!! "
 
         lines = [
-            '{}'.format(self.__class__.__name__),
+            '{} @ {} bps'.format(self.__class__.__name__, transmitter_bitrate),
             '{}BP VOLT {}, {}'.format(
                 bp_volt_ok,
                 v('14: Controller A', '1019: BATC.VOLT_A'),
