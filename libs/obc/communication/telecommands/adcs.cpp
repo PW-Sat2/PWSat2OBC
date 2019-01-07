@@ -70,14 +70,6 @@ namespace obc
                         Finish(this->adcsCoordinator.EnableBuiltinDetumbling(), writer);
                         break;
 
-                    case adcs::AdcsMode::ExperimentalDetumbling:
-                        Finish(this->adcsCoordinator.EnableExperimentalDetumbling(), writer);
-                        break;
-
-                    case adcs::AdcsMode::ExperimentalSunpointing:
-                        Finish(this->adcsCoordinator.EnableSunPointing(), writer);
-                        break;
-
                     case adcs::AdcsMode::Disabled:
                         Finish(this->adcsCoordinator.Disable(), writer);
                         break;

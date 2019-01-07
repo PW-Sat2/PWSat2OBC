@@ -42,10 +42,6 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           RemoveFileTelecommand(fs),                                                 //
           SetTimeCorrectionConfigTelecommand(stateContainer),                        //
           SetTimeTelecommand(stateContainer, currentTime, rtc, timeSynchronization), //
-          PerformDetumblingExperiment(                                               //
-              experiments.ExperimentsController,                                     //
-              experiments.Get<experiment::adcs::DetumblingExperiment>()              //
-              ),                                                                     //
           AbortExperiment(experiments.ExperimentsController),                        //
           ListFilesTelecommand(fs),                                                  //
           EraseBootTableEntry(bootTable),                                            //

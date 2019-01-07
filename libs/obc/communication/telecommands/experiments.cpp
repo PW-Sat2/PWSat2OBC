@@ -3,7 +3,6 @@
 #include <cstring>
 #include "base/reader.h"
 #include "comm/ITransmitter.hpp"
-#include "experiment/adcs/adcs.hpp"
 #include "logger/logger.h"
 #include "telecommunication/downlink.h"
 #include "utils.h"
@@ -25,45 +24,6 @@ namespace obc
             CorrelatedDownlinkFrame response(DownlinkAPID::Experiment, 0, correlationId);
             response.PayloadWriter().WriteByte(num(responseId));
             return transmitter.SendFrame(response.Frame());
-        }
-
-        PerformDetumblingExperiment::PerformDetumblingExperiment(
-            experiments::IExperimentController& experiments, experiment::adcs::ISetupDetumblingExperiment& setupExperiment)
-            : _experiments(experiments), _setupExperiment(setupExperiment)
-        {
-        }
-
-        void PerformDetumblingExperiment::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
-        {
-            Reader r(parameters);
-
-            auto correlationId = r.ReadByte();
-
-            auto duration = std::chrono::seconds(r.ReadDoubleWordLE());
-
-            auto samplingInterval = std::chrono::seconds(r.ReadByte());
-
-            if (!r.Status())
-            {
-                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::MalformedRequest);
-                return;
-            }
-
-            LOGF(LOG_LEVEL_INFO, "[tc] Performing Detumbling experiment for %ld seconds", static_cast<std::uint32_t>(duration.count()));
-
-            this->_setupExperiment.Duration(duration);
-            this->_setupExperiment.SampleRate(samplingInterval);
-
-            auto status = this->_experiments.RequestExperiment(experiment::adcs::DetumblingExperiment::Code);
-
-            if (status)
-            {
-                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::Success);
-            }
-            else
-            {
-                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::ExperimentError);
-            }
         }
 
         AbortExperiment::AbortExperiment(experiments::IExperimentController& experiments) : _experiments(experiments)

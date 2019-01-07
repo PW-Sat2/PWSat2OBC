@@ -3,7 +3,6 @@
 
 #include <array>
 #include <tuple>
-#include "experiment/adcs/adcs.hpp"
 #include "experiment/camera/camera_exp.hpp"
 #include "experiment/fibo/fibo.h"
 #include "experiment/flash/flash.hpp"
@@ -96,7 +95,6 @@ namespace obc
     /** @brief All OBC experiments */
     using AllExperiments = ExperimentsHolder<                 //
         experiment::fibo::FibonacciExperiment,                //
-        experiment::adcs::DetumblingExperiment,               //
         experiment::leop::LaunchAndEarlyOrbitPhaseExperiment, //
         experiment::suns::SunSExperiment,                     //
         experiment::erase_flash::EraseFlashExperiment,        //
@@ -132,7 +130,6 @@ namespace obc
          * @param programFlashDriver Program flash driver
          */
         OBCExperiments(services::fs::IFileSystem& fs,
-            adcs::IAdcsCoordinator& adcs,
             services::time::TimeProvider& time,
             devices::gyro::IGyroscopeDriver& gyro,
             services::power::IPowerControl& powerControl,
@@ -141,7 +138,6 @@ namespace obc
             devices::n25q::RedundantN25QDriver& n25q,
             devices::comm::ITransmitter& transmitter,
             services::photo::IPhotoService& photoService,
-            telemetry::IImtqDataProvider& imtq,
             devices::eps::IEpsTelemetryProvider& epsProvider,
             error_counter::IErrorCountingTelemetryProvider* errorCounterProvider,
             temp::ITemperatureReader* temperatureProvider,

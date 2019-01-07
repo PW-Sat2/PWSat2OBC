@@ -79,7 +79,6 @@ OBC::OBC()
       Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),            //
       adcs(this->Hardware.imtqTelemetryCollector, this->PowerControlInterface),        //
       Experiments(fs,
-          this->adcs.GetAdcsCoordinator(),
           this->timeProvider,
           Hardware.Gyro,
           PowerControlInterface,
@@ -88,7 +87,6 @@ OBC::OBC()
           Storage.GetInternalStorage().GetTopDriver(),
           Hardware.CommDriver,
           Camera.PhotoService,
-          this->Hardware.imtqTelemetryCollector,
           this->Hardware.EPS,
           &this->Fdir,
           &this->Hardware.MCUTemperature,

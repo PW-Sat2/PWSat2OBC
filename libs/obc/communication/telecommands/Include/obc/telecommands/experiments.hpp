@@ -10,38 +10,6 @@ namespace obc
     namespace telecommands
     {
         /**
-         * @brief Performs detumbling experiment
-         * @ingroup telecommands
-         * @telecommand
-         *
-         * Code: 0x0D
-         *
-         * Parameters:
-         *  * 32-bit LE - experiment duration in seconds
-         *  * 8-bit - sampling interval in seconds
-         */
-        class PerformDetumblingExperiment final : public telecommunication::uplink::Telecommand<0x0D>
-        {
-          public:
-            /**
-             * @brief Ctor
-             * @param experiments Experiments controller
-             * @param setupExperiment Interface for setting up detumbling experiment
-             */
-            PerformDetumblingExperiment(
-                experiments::IExperimentController& experiments, experiment::adcs::ISetupDetumblingExperiment& setupExperiment);
-
-            virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
-
-          private:
-            /** @brief Experiments controller */
-            experiments::IExperimentController& _experiments;
-
-            /** @brief Setup detumbling experiment interface */
-            experiment::adcs::ISetupDetumblingExperiment& _setupExperiment;
-        };
-
-        /**
          * @brief Aborts currently running experiment
          * @ingroup experiments
          * @telecommand

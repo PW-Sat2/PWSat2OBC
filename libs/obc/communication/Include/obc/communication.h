@@ -134,7 +134,6 @@ namespace obc
         obc::telecommands::RemoveFileTelecommand,
         obc::telecommands::SetTimeCorrectionConfigTelecommand,
         obc::telecommands::SetTimeTelecommand,
-        obc::telecommands::PerformDetumblingExperiment,
         obc::telecommands::AbortExperiment,
         obc::telecommands::ListFilesTelecommand,
         obc::telecommands::EraseBootTableEntry,

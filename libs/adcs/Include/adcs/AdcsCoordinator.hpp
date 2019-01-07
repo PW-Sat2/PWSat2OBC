@@ -29,20 +29,13 @@ namespace adcs
          * @param[in] experimentalDetumbling_ Reference to the backup detumbling algorithm controller module.
          * @param[in] sunpointAlgorithm_ Reference to the sun pointing algorithm controller module.
          */
-        AdcsCoordinator(IAdcsProcessor& builtinDetumbling_, //
-            IAdcsProcessor& experimentalDetumbling_,        //
-            IAdcsProcessor& sunpointAlgorithm_              //
-            );
+        AdcsCoordinator(IAdcsProcessor& builtinDetumbling_);
 
         virtual OSResult Initialize() final override;
 
         virtual AdcsMode CurrentMode() const final override;
 
         virtual OSResult EnableBuiltinDetumbling() final override;
-
-        virtual OSResult EnableExperimentalDetumbling() final override;
-
-        virtual OSResult EnableSunPointing() final override;
 
         virtual OSResult Stop() final override;
 
@@ -94,7 +87,7 @@ namespace adcs
         /**
          * @brief Adcs processors.
          */
-        std::array<IAdcsProcessor*, 3> adcsProcessors;
+        std::array<IAdcsProcessor*, 1> adcsProcessors;
 
         std::array<std::atomic_bool, 3> adcsMasks;
 

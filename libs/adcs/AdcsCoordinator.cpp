@@ -8,16 +8,12 @@ namespace adcs
     using namespace std::chrono_literals;
     using services::time::ICurrentTime;
 
-    AdcsCoordinator::AdcsCoordinator(IAdcsProcessor& builtinDetumbling_, //
-        IAdcsProcessor& experimentalDetumbling_,                         //
-        IAdcsProcessor& sunpointAlgorithm_)                              //
+    AdcsCoordinator::AdcsCoordinator(IAdcsProcessor& builtinDetumbling_) //
         : currentMode(AdcsMode::Stopped),                                //
           _task("Adcs coordinator", this, TaskEntry)
     {
         std::uninitialized_fill(this->adcsMasks.begin(), this->adcsMasks.end(), false);
         adcsProcessors[static_cast<int>(AdcsMode::BuiltinDetumbling)] = &builtinDetumbling_;
-        adcsProcessors[static_cast<int>(AdcsMode::ExperimentalDetumbling)] = &experimentalDetumbling_;
-        adcsProcessors[static_cast<int>(AdcsMode::ExperimentalSunpointing)] = &sunpointAlgorithm_;
     }
 
     OSResult AdcsCoordinator::Initialize()
@@ -56,16 +52,6 @@ namespace adcs
         return RequestMode(AdcsMode::BuiltinDetumbling);
     }
 
-    OSResult AdcsCoordinator::EnableExperimentalDetumbling()
-    {
-        return RequestMode(AdcsMode::ExperimentalDetumbling);
-    }
-
-    OSResult AdcsCoordinator::EnableSunPointing()
-    {
-        return RequestMode(AdcsMode::ExperimentalSunpointing);
-    }
-
     OSResult AdcsCoordinator::Stop()
     {
         return RequestMode(AdcsMode::Stopped);
@@ -102,8 +88,6 @@ namespace adcs
         switch (previousMode)
         {
             case AdcsMode::BuiltinDetumbling:
-            case AdcsMode::ExperimentalDetumbling:
-            case AdcsMode::ExperimentalSunpointing:
                 this->currentMode = AdcsMode::Stopped;
                 if (OS_RESULT_FAILED(this->adcsProcessors[num(previousMode)]->Disable()))
                 {
@@ -129,8 +113,6 @@ namespace adcs
         switch (requestedMode)
         {
             case AdcsMode::BuiltinDetumbling:
-            case AdcsMode::ExperimentalDetumbling:
-            case AdcsMode::ExperimentalSunpointing:
             {
                 if (IsModeBlocked(requestedMode))
                 {
@@ -200,8 +182,6 @@ namespace adcs
                     break;
 
                 case AdcsMode::BuiltinDetumbling:
-                case AdcsMode::ExperimentalDetumbling:
-                case AdcsMode::ExperimentalSunpointing:
                     if (System::GetUptime() >= nextIterationAt)
                     {
                         timeout = Run(mode, nextIterationAt);

@@ -31,10 +31,7 @@ namespace
     };
 
     AdcsPrimaryTaskTest::AdcsPrimaryTaskTest() //
-        : osReset(InstallProxy(&os)),
-          task(coordinator),
-          primaryAction(task.BuildAction()),
-          updateStep(task.BuildUpdate())
+        : osReset(InstallProxy(&os)), task(coordinator), primaryAction(task.BuildAction()), updateStep(task.BuildUpdate())
     {
         this->state.AntennaState.SetDeployment(true);
         this->state.Time = 42min;
@@ -55,9 +52,9 @@ namespace
     TEST_F(AdcsPrimaryTaskTest, TestAdcsUpdateTask)
     {
         auto guard = InstallProxy(&os);
-        EXPECT_CALL(coordinator, CurrentMode()).WillOnce(Return(adcs::AdcsMode::ExperimentalSunpointing));
+        EXPECT_CALL(coordinator, CurrentMode()).WillOnce(Return(adcs::AdcsMode::BuiltinDetumbling));
         this->updateStep.updateProc(this->state, this->updateStep.param);
-        ASSERT_THAT(this->state.AdcsMode, Eq(adcs::AdcsMode::ExperimentalSunpointing));
+        ASSERT_THAT(this->state.AdcsMode, Eq(adcs::AdcsMode::BuiltinDetumbling));
     }
 
     TEST_F(AdcsPrimaryTaskTest, FullFlow)
@@ -111,18 +108,6 @@ namespace
             state.Time = 5h;
             state.AntennaState.SetDeployment(true);
             coordinator.SetCurrentMode(AdcsMode::Stopped);
-
-            EXPECT_CALL(coordinator, EnableBuiltinDetumbling()).Times(0);
-            EXPECT_CALL(coordinator, Stop()).Times(0);
-
-            Run();
-            Mock::VerifyAndClear(&coordinator);
-        }
-
-        {
-            state.Time = 11h;
-            state.AntennaState.SetDeployment(true);
-            coordinator.SetCurrentMode(AdcsMode::ExperimentalDetumbling);
 
             EXPECT_CALL(coordinator, EnableBuiltinDetumbling()).Times(0);
             EXPECT_CALL(coordinator, Stop()).Times(0);

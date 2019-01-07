@@ -68,24 +68,6 @@ namespace
         Run(11, adcs::AdcsMode::BuiltinDetumbling);
     }
 
-    TEST_F(SetAdcsModeExperimentTelecommandTest, TestExperimentalDetumbling)
-    {
-        EXPECT_CALL(_coordinator, EnableExperimentalDetumbling());
-
-        ExpectFrame(12, 0);
-
-        Run(12, adcs::AdcsMode::ExperimentalDetumbling);
-    }
-
-    TEST_F(SetAdcsModeExperimentTelecommandTest, TestSunpointing)
-    {
-        EXPECT_CALL(_coordinator, EnableSunPointing());
-
-        ExpectFrame(13, 0);
-
-        Run(13, adcs::AdcsMode::ExperimentalSunpointing);
-    }
-
     TEST_F(SetAdcsModeExperimentTelecommandTest, TestStoppingAdcsFailure)
     {
         EXPECT_CALL(_coordinator, Stop()).WillOnce(Return(OSResult::IOError));
@@ -111,24 +93,6 @@ namespace
         ExpectFrame(11, 1);
 
         Run(11, adcs::AdcsMode::BuiltinDetumbling);
-    }
-
-    TEST_F(SetAdcsModeExperimentTelecommandTest, TestExperimentalDetumblingFailure)
-    {
-        EXPECT_CALL(_coordinator, EnableExperimentalDetumbling()).WillOnce(Return(OSResult::IOError));
-
-        ExpectFrame(12, 1);
-
-        Run(12, adcs::AdcsMode::ExperimentalDetumbling);
-    }
-
-    TEST_F(SetAdcsModeExperimentTelecommandTest, TestSunpointingFailure)
-    {
-        EXPECT_CALL(_coordinator, EnableSunPointing()).WillOnce(Return(OSResult::IOError));
-
-        ExpectFrame(13, 1);
-
-        Run(13, adcs::AdcsMode::ExperimentalSunpointing);
     }
 
     TEST_F(SetAdcsModeExperimentTelecommandTest, TestIncomplete)

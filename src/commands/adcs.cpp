@@ -26,12 +26,6 @@ void AdcsCommand(std::uint16_t argc, char* argv[])
 
         GetTerminal().Printf("Switching to builtin detumbling...Result: %d", num(r));
     }
-    else if (argc == 1 && strcmp(argv[0], "exp_dtb") == 0)
-    {
-        auto r = adcs.EnableExperimentalDetumbling();
-
-        GetTerminal().Printf("Switching to experimental detumbling...Result: %d", num(r));
-    }
     else if (argc == 1 && strcmp(argv[0], "stop") == 0)
     {
         auto r = adcs.Stop();

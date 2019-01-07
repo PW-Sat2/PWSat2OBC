@@ -1,2 +1,0 @@
-// path to unit test data file
-#define ADCS_UT_DATA_FILE_PATH "@ADCS_UT_DATA_FILE_PATH@"

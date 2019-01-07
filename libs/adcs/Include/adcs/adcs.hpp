@@ -35,16 +35,6 @@ namespace adcs
          * @brief Currently the primary detumbling algorithm is active.
          */
         BuiltinDetumbling = 0,
-
-        /**
-         * @brief Currently the experimental detumbling algorithm is active.
-         */
-        ExperimentalDetumbling = 1,
-
-        /**
-         * @brief Currently the sun pointing algorithm is active.
-         */
-        ExperimentalSunpointing = 2,
     };
 
     /**
@@ -108,24 +98,6 @@ namespace adcs
          * @returns Operation status.
          */
         virtual OSResult EnableBuiltinDetumbling() = 0;
-
-        /**
-         * @brief Enables experimental detumbling algorithm.
-         *
-         * Any algorithm that may already be active will be disabled prior to enabling
-         * the backup detumbling algorithm.
-         * @returns Operation status.
-         */
-        virtual OSResult EnableExperimentalDetumbling() = 0;
-
-        /**
-         * @brief Enables sun pointing algorithm.
-         *
-         * Any algorithm that may already be active will be disabled prior to enabling
-         * the sun pointing algorithm.
-         * @returns Operation status.
-         */
-        virtual OSResult EnableSunPointing() = 0;
 
         /**
          * @brief Stopps current adcs subsystem operation.

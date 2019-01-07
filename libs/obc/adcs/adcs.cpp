@@ -7,9 +7,7 @@ using obc::Adcs;
 
 Adcs::Adcs(devices::imtq::IImtqDriver& imtqDriver_, services::power::IPowerControl& power) //
     : builtinDetumbling(imtqDriver_, power),                                               //
-      experimentalDetumbling(imtqDriver_, power),                                          //
-      experimentalSunpointing(imtqDriver_),                                                //
-      coordinator(builtinDetumbling, experimentalDetumbling, experimentalSunpointing)      //
+      coordinator(builtinDetumbling)                                                       //
 {
 }
 

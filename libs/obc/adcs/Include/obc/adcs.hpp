@@ -5,8 +5,6 @@
 
 #include "adcs/AdcsCoordinator.hpp"
 #include "adcs/BuiltinDetumbling.hpp"
-#include "adcs/ExperimentalDetumbling.hpp"
-#include "adcs/ExperimentalSunPointing.hpp"
 #include "imtq/imtq.h"
 #include "time/ICurrentTime.hpp"
 
@@ -47,8 +45,6 @@ namespace obc
 
       private:
         adcs::BuiltinDetumbling builtinDetumbling;
-        adcs::ExperimentalDetumbling experimentalDetumbling;
-        adcs::ExperimentalSunPointing experimentalSunpointing;
 
         /**
          * @brief Adcs subsystem controller.

@@ -5,7 +5,6 @@ set(SOURCES
     os_stubs.cpp
     suns_data.cpp
     sail_data.cpp
-    detumbling_data.cpp
     camera_data.cpp
     payload_data.cpp
     leop_data.cpp
@@ -20,7 +19,7 @@ target_link_libraries(${NAME}
 	emlib
 	fs
 	exp_suns
-	exp_adcs
+	telemetry
 )
 
 set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${CMAKE_SOURCE_DIR}/unit_tests/base/linker.ld -u _printf_float -specs=rdimon.specs")

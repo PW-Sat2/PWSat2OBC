@@ -18,7 +18,6 @@ set(SOURCES
   Telecommands/GetErrorCountersConfigTelecommandTest.cpp
   Telecommands/SetPeriodicMessageTelecommandTest.cpp
   Telecommands/AbortExperimentTelecommandTest.cpp
-  Telecommands/PerformDetumblingExperimentTelecommandTest.cpp
   Telecommands/EraseFlashTelecommandTest.cpp
   Telecommands/GetSunSDataSetsTelecommandTest.cpp
   Telecommands/PhotoCommandTest.cpp

@@ -142,7 +142,6 @@ class PosixFileSystem : public IFileSystem
 
 void GenerateSunSData(IFileSystem& fs);
 void GenerateSailData(IFileSystem& fs);
-void GenerateDetumblingData(IFileSystem& fs);
 void GenerateCameraCommissioningData(IFileSystem& fs);
 void GeneratePayloadCommissioningData(IFileSystem& fs);
 void GenerateLeopData(IFileSystem& fs);
@@ -158,7 +157,6 @@ int main()
 
     GenerateSunSData(fs);
     GenerateSailData(fs);
-    GenerateDetumblingData(fs);
     GenerateCameraCommissioningData(fs);
     GeneratePayloadCommissioningData(fs);
     GenerateLeopData(fs);
