@@ -175,30 +175,6 @@ namespace obc
             }
         }
 
-        PerformSailExperiment::PerformSailExperiment(experiments::IExperimentController& controller) : experimentController(controller)
-        {
-        }
-
-        void PerformSailExperiment::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
-        {
-            Reader reader(parameters);
-            const auto correlationId = reader.ReadByte();
-            if (!reader.Status())
-            {
-                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::MalformedRequest);
-                return;
-            }
-
-            if (this->experimentController.RequestExperiment(experiment::sail::SailExperiment::Code))
-            {
-                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::Success);
-            }
-            else
-            {
-                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::ExperimentError);
-            }
-        }
-
         PerformPayloadCommisioningExperiment::PerformPayloadCommisioningExperiment(
             experiments::IExperimentController& controller, experiment::payload::ISetupPayloadCommissioningExperiment& setupPayload)
             : _controller(controller), _setupPayload(setupPayload)

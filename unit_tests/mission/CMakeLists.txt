@@ -25,7 +25,6 @@ set(SOURCES
   Experiments/EraseFlash/EraseFlashExperimentTest.cpp 
   Experiments/payload/PayloadExperimentTest.cpp
   Experiments/RadFET/RadFETExperimentTest.cpp 
-  Experiments/Sail/SailExperimentTest.cpp
   Experiments/Camera/CameraExperimentTest.cpp
   Experiments/CopyBootSlots/CopyBootSlotsExperimentTest.cpp
   BeaconSenderTest.cpp
@@ -54,7 +53,6 @@ target_link_libraries(${NAME}
     exp_flash
     exp_pld
     exp_radfet
-    exp_sail
     exp_camera
     exp_program
     unit_tests_base

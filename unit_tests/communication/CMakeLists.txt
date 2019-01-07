@@ -22,7 +22,6 @@ set(SOURCES
   Telecommands/PerformDetumblingExperimentTelecommandTest.cpp
   Telecommands/EraseFlashTelecommandTest.cpp
   Telecommands/GetSunSDataSetsTelecommandTest.cpp
-  Telecommands/PerformSailExperimentTest.cpp
   Telecommands/PhotoCommandTest.cpp
   Telecommands/PerformSADSExperimentTest.cpp
   Telecommands/SendPeriodicMessageTelecommandTest.cpp
@@ -39,7 +38,6 @@ add_unit_tests(${NAME} ${SOURCES})
 
 target_link_libraries(${NAME}
     experiments
-    exp_sail
     -Wl,--start-group
     base
     unit_tests_base

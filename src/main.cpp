@@ -206,7 +206,6 @@ static void ObcInitTask(void* param)
     auto obc = static_cast<OBC*>(param);
 
     // dumb workaround for cyclical reference
-    obc->Experiments.Get<experiment::sail::SailExperiment>().SetSailController(Mission);
     obc->Experiments.Get<experiment::sads::SADSExperiment>().SetSADSController(Mission);
 
     Mission.BeaconTaskHandle(obc->initTask);

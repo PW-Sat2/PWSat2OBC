@@ -16,7 +16,6 @@ target_link_libraries(${NAME}
     exp_flash
     exp_pld
     exp_radfet
-    exp_sail
     exp_sads
     exp_program
     payload

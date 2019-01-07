@@ -12,21 +12,19 @@ namespace obc
         devices::n25q::RedundantN25QDriver& n25q,
         devices::comm::ITransmitter& transmitter,
         services::photo::IPhotoService& photoService,
-        const drivers::gpio::Pin& sailState,
         telemetry::IImtqDataProvider& imtq,
         devices::eps::IEpsTelemetryProvider& epsProvider,
         error_counter::IErrorCountingTelemetryProvider* errorCounterProvider,
         temp::ITemperatureReader* temperatureProvider,
         program_flash::BootTable& bootTable,
         program_flash::IFlashDriver& programFlashDriver)
-        : Experiments(                                                                                                             //
-              experiment::fibo::FibonacciExperiment(fs),                                                                           //
-              experiment::adcs::DetumblingExperiment(adcs, time, powerControl, gyro, payload, imtq, fs),                           //
-              experiment::leop::LaunchAndEarlyOrbitPhaseExperiment(gyro, time, fs),                                                //
-              experiment::suns::SunSExperiment(powerControl, time, suns, payload, gyro, fs),                                       //
-              experiment::erase_flash::EraseFlashExperiment(n25q, transmitter),                                                    //
-              experiment::radfet::RadFETExperiment(fs, payload, powerControl, time),                                               //
-              experiment::sail::SailExperiment(fs, adcs, gyro, payload, powerControl, photoService, sailState, time, transmitter), //
+        : Experiments(                                                                                   //
+              experiment::fibo::FibonacciExperiment(fs),                                                 //
+              experiment::adcs::DetumblingExperiment(adcs, time, powerControl, gyro, payload, imtq, fs), //
+              experiment::leop::LaunchAndEarlyOrbitPhaseExperiment(gyro, time, fs),                      //
+              experiment::suns::SunSExperiment(powerControl, time, suns, payload, gyro, fs),             //
+              experiment::erase_flash::EraseFlashExperiment(n25q, transmitter),                          //
+              experiment::radfet::RadFETExperiment(fs, payload, powerControl, time),                     //
               experiment::payload::PayloadCommissioningExperiment(payload,
                   fs,
                   powerControl,

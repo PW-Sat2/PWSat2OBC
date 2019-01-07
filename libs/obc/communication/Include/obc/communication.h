@@ -154,7 +154,6 @@ namespace obc
         obc::telecommands::RawI2CTelecommand,
         obc::telecommands::PerformRadFETExperiment,
         obc::telecommands::GetSunSDataSetsTelecommand,
-        obc::telecommands::PerformSailExperiment,
         obc::telecommands::TakePhoto,
         obc::telecommands::PerformSADSExperiment,
         obc::telecommands::PerformPayloadCommisioningExperiment,

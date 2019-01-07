@@ -88,7 +88,6 @@ OBC::OBC()
           Storage.GetInternalStorage().GetTopDriver(),
           Hardware.CommDriver,
           Camera.PhotoService,
-          this->Hardware.Pins.SailIndicator, //
           this->Hardware.imtqTelemetryCollector,
           this->Hardware.EPS,
           &this->Fdir,

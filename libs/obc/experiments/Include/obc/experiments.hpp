@@ -13,7 +13,6 @@
 #include "experiment/program/program_exp.hpp"
 #include "experiment/radfet/radfet.hpp"
 #include "experiment/sads/sads.hpp"
-#include "experiment/sail/sail.hpp"
 #include "experiment/suns/suns.hpp"
 #include "experiments/experiments.h"
 #include "fs/fs.h"
@@ -103,7 +102,6 @@ namespace obc
         experiment::suns::SunSExperiment,                     //
         experiment::erase_flash::EraseFlashExperiment,        //
         experiment::radfet::RadFETExperiment,                 //
-        experiment::sail::SailExperiment,                     //
         experiment::payload::PayloadCommissioningExperiment,  //
         experiment::sads::SADSExperiment,                     //
         experiment::camera::CameraCommissioningExperiment,
@@ -145,7 +143,6 @@ namespace obc
             devices::n25q::RedundantN25QDriver& n25q,
             devices::comm::ITransmitter& transmitter,
             services::photo::IPhotoService& photoService,
-            const drivers::gpio::Pin& sailState,
             telemetry::IImtqDataProvider& imtq,
             devices::eps::IEpsTelemetryProvider& epsProvider,
             error_counter::IErrorCountingTelemetryProvider* errorCounterProvider,
