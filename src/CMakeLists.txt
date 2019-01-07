@@ -32,7 +32,6 @@ set(SOURCES
     commands/payload.cpp
     commands/memory.cpp
     commands/runlevel.cpp
-    commands/leop.cpp
     commands/exp_suns.cpp
     commands/camera.cpp
     commands/adcs.cpp
@@ -97,7 +96,6 @@ target_link_libraries(${NAME}
     mission_experiments
     mission_state
     mission_adcs
-    mission_leop
     mission_beacon
     mission_telemetry
     mission_comm

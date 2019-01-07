@@ -18,7 +18,6 @@ namespace obc
         program_flash::IFlashDriver& programFlashDriver)
         : Experiments(                                                                       //
               experiment::fibo::FibonacciExperiment(fs),                                     //
-              experiment::leop::LaunchAndEarlyOrbitPhaseExperiment(gyro, time, fs),          //
               experiment::suns::SunSExperiment(powerControl, time, suns, payload, gyro, fs), //
               experiment::erase_flash::EraseFlashExperiment(n25q, transmitter),              //
               experiment::radfet::RadFETExperiment(fs, payload, powerControl, time),         //

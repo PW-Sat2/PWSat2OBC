@@ -16,7 +16,6 @@ set(SOURCES
   MissionPlan/PeriodicPowerCycleTest.cpp
   Experiments/Fibo/FiboCalculatorTest.cpp
   Experiments/ExperimentTest.cpp
-  Experiments/LEOP/LEOPExperimentTest.cpp
   Experiments/fs/ExperimentFileTest.cpp
   Experiments/SunS/SunSExperimentTest.cpp 
   Experiments/EraseFlash/EraseFlashExperimentTest.cpp 
@@ -41,7 +40,6 @@ target_link_libraries(${NAME}
     mission_fs
     mission_power
     exp_fibo
-    exp_leop
     exp_fs
     exp_suns
     exp_flash

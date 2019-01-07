@@ -88,7 +88,6 @@ mission::ObcMission Mission(&PerformMemoryRecovery, //
     Main.fs,
     Main.Hardware.CommDriver,
     Main.Hardware.EPS,
-    std::make_pair(std::ref(Main.Experiments.ExperimentsController), std::ref(Main.timeProvider)),
     GetCommHardwareObserver(),
     std::make_tuple(std::ref(Main.PowerControlInterface), std::ref(Main.Scrubbing), std::ref(Main.Experiments.ExperimentsController)));
 

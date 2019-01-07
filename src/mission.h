@@ -14,7 +14,6 @@
 #include "mission/experiments.hpp"
 #include "mission/fdir.hpp"
 #include "mission/fs.hpp"
-#include "mission/leop_task.hpp"
 #include "mission/main.hpp"
 #include "mission/memory_recovery.hpp"
 #include "mission/power/power_cycle.hpp"
@@ -58,7 +57,6 @@ namespace mission
         FileSystemTask,
         mission::SendMessageTask,
         EPSWatchdogTask,
-        leop::LEOPTask,
         mission::CommWdogTask,
         mission::power::PeriodicPowerCycleTask>
         ObcMission;
