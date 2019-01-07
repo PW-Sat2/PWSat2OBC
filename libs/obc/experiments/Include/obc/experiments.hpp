@@ -12,7 +12,6 @@
 #include "experiment/payload/payload_exp.hpp"
 #include "experiment/program/program_exp.hpp"
 #include "experiment/radfet/radfet.hpp"
-#include "experiment/sads/sads.hpp"
 #include "experiment/suns/suns.hpp"
 #include "experiments/experiments.h"
 #include "fs/fs.h"
@@ -103,7 +102,6 @@ namespace obc
         experiment::erase_flash::EraseFlashExperiment,        //
         experiment::radfet::RadFETExperiment,                 //
         experiment::payload::PayloadCommissioningExperiment,  //
-        experiment::sads::SADSExperiment,                     //
         experiment::camera::CameraCommissioningExperiment,
         experiment::program::CopyBootSlotsExperiment>;
 

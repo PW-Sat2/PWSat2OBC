@@ -167,31 +167,6 @@ namespace obc
         };
 
         /**
-         * @brief Perform SADS experiment telecommand
-         * @ingroup obc_telecommands
-         * @telecommand
-         *
-         * Code: 0xD4
-         * Parameters:
-         *  - Correlation ID (8-bit)
-         */
-        class PerformSADSExperiment : public telecommunication::uplink::Telecommand<0xD4>
-        {
-          public:
-            /**
-             * @brief Ctor
-             * @param controller OBC experiments controller
-             */
-            PerformSADSExperiment(experiments::IExperimentController& controller);
-
-            virtual void Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters) override;
-
-          private:
-            /** @brief Experiments controller */
-            experiments::IExperimentController& experimentController;
-        };
-
-        /**
          * @brief Perform Camera Commisioning experiment telecommand
          * @ingroup obc_telecommands
          * @telecommand

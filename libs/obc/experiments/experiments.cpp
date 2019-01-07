@@ -35,7 +35,6 @@ namespace obc
                   errorCounterProvider,
                   temperatureProvider,
                   &ExperimentsController),
-              experiment::sads::SADSExperiment(fs, adcs, gyro, payload, powerControl, photoService, time),
               experiment::camera::CameraCommissioningExperiment(fs, time, photoService),
               experiment::program::CopyBootSlotsExperiment(bootTable, programFlashDriver, transmitter))
     {

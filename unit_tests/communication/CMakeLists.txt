@@ -22,7 +22,6 @@ set(SOURCES
   Telecommands/EraseFlashTelecommandTest.cpp
   Telecommands/GetSunSDataSetsTelecommandTest.cpp
   Telecommands/PhotoCommandTest.cpp
-  Telecommands/PerformSADSExperimentTest.cpp
   Telecommands/SendPeriodicMessageTelecommandTest.cpp
   Telecommands/ResetTransmitterTelecommandTest.cpp
   Telecommands/DisableOverheatSubmodeTelecommandTest.cpp

@@ -18,7 +18,6 @@
 #include "mission/main.hpp"
 #include "mission/memory_recovery.hpp"
 #include "mission/power/power_cycle.hpp"
-#include "mission/sads.hpp"
 #include "mission/telemetry.hpp"
 #include "mission/time.hpp"
 #include "mission/watchdog.hpp"
@@ -61,8 +60,7 @@ namespace mission
         EPSWatchdogTask,
         leop::LEOPTask,
         mission::CommWdogTask,
-        mission::power::PeriodicPowerCycleTask,
-        mission::DeploySolarArrayTask>
+        mission::power::PeriodicPowerCycleTask>
         ObcMission;
 }
 

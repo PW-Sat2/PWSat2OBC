@@ -4,7 +4,6 @@
 #include "StorageAccessMock.hpp"
 #include "eps.hpp"
 #include "mock/AntennaMock.hpp"
-#include "mock/DeploySolarArrayMock.hpp"
 #include "mock/HasStateMock.hpp"
 #include "mock/ImtqDriverMock.hpp"
 #include "mock/ImtqTelemetryCollectorMock.hpp"
@@ -134,14 +133,6 @@ PhotoServiceMock::PhotoServiceMock()
 }
 
 PhotoServiceMock::~PhotoServiceMock()
-{
-}
-
-DeploySolarArrayMock::DeploySolarArrayMock()
-{
-}
-
-DeploySolarArrayMock::~DeploySolarArrayMock()
 {
 }
 

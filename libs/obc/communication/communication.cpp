@@ -65,7 +65,6 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           PerformRadFETExperiment(experiments.ExperimentsController, experiments.Get<experiment::radfet::RadFETExperiment>()),        //
           GetSunSDataSetsTelecommand(powerControl, currentTime, experimentalSunS, payloadDriver, gyro),                               //
           TakePhoto(photo),                                                                                                           //
-          PerformSADSExperiment(experiments.ExperimentsController),                                                                   //
           PerformPayloadCommisioningExperiment(
               experiments.ExperimentsController, experiments.Get<experiment::payload::PayloadCommissioningExperiment>()), //
           GetPersistentStateTelecommand(stateContainer),                                                                  //

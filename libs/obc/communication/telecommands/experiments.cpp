@@ -210,28 +210,6 @@ namespace obc
             }
         }
 
-        PerformSADSExperiment::PerformSADSExperiment(experiments::IExperimentController& controller) : experimentController(controller)
-        {
-        }
-
-        void PerformSADSExperiment::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
-        {
-            Reader reader(parameters);
-            const auto correlationId = reader.ReadByte();
-            if (!reader.Status())
-            {
-                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::MalformedRequest);
-            }
-            else if (this->experimentController.RequestExperiment(experiment::sads::SADSExperiment::Code))
-            {
-                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::Success);
-            }
-            else
-            {
-                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::ExperimentError);
-            }
-        }
-
         PerformCameraCommisioningExperiment::PerformCameraCommisioningExperiment(
             experiments::IExperimentController& controller, experiment::camera::ISetupCameraCommissioningExperiment& setupCamera)
             : _controller(controller), _setupCamera(setupCamera)

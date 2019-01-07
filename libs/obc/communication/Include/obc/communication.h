@@ -153,7 +153,6 @@ namespace obc
         obc::telecommands::PerformRadFETExperiment,
         obc::telecommands::GetSunSDataSetsTelecommand,
         obc::telecommands::TakePhoto,
-        obc::telecommands::PerformSADSExperiment,
         obc::telecommands::PerformPayloadCommisioningExperiment,
         obc::telecommands::GetPersistentStateTelecommand,
         obc::telecommands::PurgePhoto,

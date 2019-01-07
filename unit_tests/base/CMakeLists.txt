@@ -40,7 +40,6 @@ target_link_libraries(${NAME}
     antenna
     mission_comm
     mission_time
-    mission_sads
     telecommunication
     program_flash
     payload

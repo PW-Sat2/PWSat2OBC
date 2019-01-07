@@ -104,7 +104,6 @@ target_link_libraries(${NAME}
     mission_fs
     mission_watchdog
     mission_fdir
-    mission_sads
     mission_power
     mission_memory
     watchdog

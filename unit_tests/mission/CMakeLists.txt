@@ -11,7 +11,6 @@ set(SOURCES
   MissionPlan/CompositeActionTest.cpp
   MissionPlan/adcs/AdcsPrimaryTaskTest.cpp
   MissionPlan/obc/ObcTest.cpp
-  MissionPlan/sads/DeploySolarArrayTest.cpp
   MissionPlan/comm/CommWdogTest.cpp
   MissionPlan/SendMessageTest.cpp
   MissionPlan/PeriodicPowerCycleTest.cpp
@@ -35,7 +34,6 @@ target_link_libraries(${NAME}
     mission
     mission_antenna
     mission_comm
-    mission_sads
     mission_time
     mission_experiments
     mission_adcs
