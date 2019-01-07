@@ -58,7 +58,6 @@ static const TerminalCommandDescription commands[] = {
     {"payload", PayloadDriver},
     {"memory", MemoryCommand},
     {"runlevel", RunlevelCommand},
-    {"sail", SailCommand},
     {"leop", LeopCommand},
     {"exp_suns", SunSExpCommand},
     {"camera", CameraCommand},

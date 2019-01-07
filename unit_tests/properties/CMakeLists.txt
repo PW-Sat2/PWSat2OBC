@@ -16,7 +16,6 @@ target_link_libraries(${NAME}
     fm25w
     imtq
     mission
-    mission_sail
     rapidcheck
     rapidcheck_gtest
     rapidcheck_gmock

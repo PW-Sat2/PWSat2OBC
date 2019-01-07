@@ -11,7 +11,6 @@ set(SOURCES
     antenna.cpp
     power.cpp
     fdir.cpp
-    sail.cpp
     periodic_message.cpp
     flash.cpp
     i2c.cpp
@@ -31,7 +30,6 @@ target_link_libraries(${NAME}
 	telecommunication
 	mission_antenna
 	mission_comm
-	mission_sail
 	mission_time
 	rtc
 	fs

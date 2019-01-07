@@ -15,7 +15,6 @@ set(SOURCES
   Telecommands/StopAntennaDeploymentTelecommandTest.cpp
   Telecommands/PowerCycleTelecommandTest.cpp
   Telecommands/SetErrorCounterConfigTelecommandTest.cpp
-  Telecommands/OpenSailTelecommandTest.cpp
   Telecommands/GetErrorCountersConfigTelecommandTest.cpp
   Telecommands/SetPeriodicMessageTelecommandTest.cpp
   Telecommands/AbortExperimentTelecommandTest.cpp
@@ -28,7 +27,6 @@ set(SOURCES
   Telecommands/ResetTransmitterTelecommandTest.cpp
   Telecommands/DisableOverheatSubmodeTelecommandTest.cpp
   Telecommands/SetBitrateTelecommandTest.cpp
-  Telecommands/StopSailDeploymentTelecommandTest.cpp
   Telecommands/ReadMemoryTelecommandTest.cpp
   Telecommands/AdcsTelecommandsTest.cpp
   Telecommands/SendBeaconTelecommandTest.cpp

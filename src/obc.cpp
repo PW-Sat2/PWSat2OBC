@@ -107,7 +107,6 @@ OBC::OBC()
           BootSettings,
           TelemetryAcquisition,
           PowerControlInterface,
-          Mission,
           Mission, //
           Hardware.I2C.Buses.Bus,
           Hardware.I2C.Buses.Payload,

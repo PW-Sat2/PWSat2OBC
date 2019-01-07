@@ -10,7 +10,6 @@ target_link_libraries(${NAME}
     base
     gsl
     logger
-    mission_sail
     mission_sads
 )
 

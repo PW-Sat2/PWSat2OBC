@@ -24,7 +24,6 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
     boot::BootSettings& bootSettings,
     IHasState<telemetry::TelemetryState>& telemetry,
     services::power::IPowerControl& powerControl,
-    mission::IOpenSail& openSail,
     mission::ITimeSynchronization& timeSynchronization,
     drivers::i2c::II2CBus& systemBus,
     drivers::i2c::II2CBus& payload,
@@ -34,30 +33,30 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
     services::photo::IPhotoService& photo,
     devices::eps::IEPSDriver& epsDriver,
     adcs::IAdcsCoordinator& adcsCoordinator)
-    : Comm(commDriver),                                                                                                               //
-      UplinkProtocolDecoder(settings::CommSecurityCode),                                                                              //
-      SupportedTelecommands(                                                                                                          //
-          PingTelecommand(),                                                                                                          //
-          DownloadFileTelecommand(fs),                                                                                                //
-          EnterIdleStateTelecommand(currentTime, idleStateController),                                                                //
-          RemoveFileTelecommand(fs),                                                                                                  //
-          SetTimeCorrectionConfigTelecommand(stateContainer),                                                                         //
-          SetTimeTelecommand(stateContainer, currentTime, rtc, timeSynchronization),                                                  //
-          PerformDetumblingExperiment(                                                                                                //
-              experiments.ExperimentsController,                                                                                      //
-              experiments.Get<experiment::adcs::DetumblingExperiment>()                                                               //
-              ),                                                                                                                      //
-          AbortExperiment(experiments.ExperimentsController),                                                                         //
-          ListFilesTelecommand(fs),                                                                                                   //
-          EraseBootTableEntry(bootTable),                                                                                             //
-          WriteProgramPart(bootTable),                                                                                                //
-          FinalizeProgramEntry(bootTable),                                                                                            //
-          SetBootSlotsTelecommand(bootSettings),                                                                                      //
-          SendBeaconTelecommand(telemetry),                                                                                           //
-          SetAntennaDeploymentMaskTelecommand(stateContainer),                                                                        //
-          PowerCycle(powerControl),                                                                                                   //
-          SetErrorCounterConfig(fdir),                                                                                                //
-          OpenSail(openSail),                                                                                                         //
+    : Comm(commDriver),                                                              //
+      UplinkProtocolDecoder(settings::CommSecurityCode),                             //
+      SupportedTelecommands(                                                         //
+          PingTelecommand(),                                                         //
+          DownloadFileTelecommand(fs),                                               //
+          EnterIdleStateTelecommand(currentTime, idleStateController),               //
+          RemoveFileTelecommand(fs),                                                 //
+          SetTimeCorrectionConfigTelecommand(stateContainer),                        //
+          SetTimeTelecommand(stateContainer, currentTime, rtc, timeSynchronization), //
+          PerformDetumblingExperiment(                                               //
+              experiments.ExperimentsController,                                     //
+              experiments.Get<experiment::adcs::DetumblingExperiment>()              //
+              ),                                                                     //
+          AbortExperiment(experiments.ExperimentsController),                        //
+          ListFilesTelecommand(fs),                                                  //
+          EraseBootTableEntry(bootTable),                                            //
+          WriteProgramPart(bootTable),                                               //
+          FinalizeProgramEntry(bootTable),                                           //
+          SetBootSlotsTelecommand(bootSettings),                                     //
+          SendBeaconTelecommand(telemetry),                                          //
+          SetAntennaDeploymentMaskTelecommand(stateContainer),                       //
+          PowerCycle(powerControl),                                                  //
+          SetErrorCounterConfig(
+              fdir), //                                                                                                    //
           GetErrorCountersConfigTelecommand(fdir.ErrorCounting(), fdir),                                                              //
           SetPeriodicMessageTelecommand(stateContainer),                                                                              //
           PerformSunSExperiment(experiments.ExperimentsController, experiments.Get<experiment::suns::SunSExperiment>()),              //
@@ -82,9 +81,8 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
               experiments.ExperimentsController, experiments.Get<experiment::program::CopyBootSlotsExperiment>()), //
           SetBuiltinDetumblingBlockMaskTelecommand(stateContainer, adcsCoordinator),                               //
           SetAdcsModeTelecommand(adcsCoordinator),                                                                 //
-          StopSailDeployment(stateContainer),
-          obc::telecommands::ReadMemoryTelecommand() //
-          ),                                         //
+          obc::telecommands::ReadMemoryTelecommand()                                                               //
+          ),                                                                                                       //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())
 {
 }

@@ -11,7 +11,6 @@
 #include "mock/LineIOMock.hpp"
 #include "mock/MiniportMock.hpp"
 #include "mock/NotifyTimeChangedMock.hpp"
-#include "mock/OpenSailMock.hpp"
 #include "mock/PayloadExperimentTelemetryProviderMock.hpp"
 #include "mock/PhotoServiceMock.hpp"
 #include "mock/TemperatureReaderMock.hpp"
@@ -135,14 +134,6 @@ PhotoServiceMock::PhotoServiceMock()
 }
 
 PhotoServiceMock::~PhotoServiceMock()
-{
-}
-
-OpenSailMock::OpenSailMock()
-{
-}
-
-OpenSailMock::~OpenSailMock()
 {
 }
 

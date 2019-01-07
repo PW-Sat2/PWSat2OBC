@@ -28,7 +28,6 @@
 #include "obc/telecommands/ping.hpp"
 #include "obc/telecommands/power.hpp"
 #include "obc/telecommands/program_upload.hpp"
-#include "obc/telecommands/sail.hpp"
 #include "obc/telecommands/state.hpp"
 #include "obc/telecommands/suns.hpp"
 #include "obc/telecommands/time.hpp"
@@ -146,7 +145,6 @@ namespace obc
         obc::telecommands::SetAntennaDeploymentMaskTelecommand,
         obc::telecommands::PowerCycle,
         obc::telecommands::SetErrorCounterConfig,
-        obc::telecommands::OpenSail,
         obc::telecommands::GetErrorCountersConfigTelecommand,
         obc::telecommands::SetPeriodicMessageTelecommand,
         obc::telecommands::PerformSunSExperiment,
@@ -168,7 +166,6 @@ namespace obc
         obc::telecommands::PerformCopyBootSlotsExperiment,
         obc::telecommands::SetBuiltinDetumblingBlockMaskTelecommand,
         obc::telecommands::SetAdcsModeTelecommand,
-        obc::telecommands::StopSailDeployment,
         obc::telecommands::ReadMemoryTelecommand>;
 
     /**
@@ -213,7 +210,6 @@ namespace obc
             boot::BootSettings& bootSettings,
             IHasState<telemetry::TelemetryState>& telemetry,
             services::power::IPowerControl& powerControl,
-            mission::IOpenSail& openSail,
             mission::ITimeSynchronization& timeSynchronization,
             drivers::i2c::II2CBus& systemBus,
             drivers::i2c::II2CBus& payload,

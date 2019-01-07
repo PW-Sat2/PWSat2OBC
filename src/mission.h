@@ -19,7 +19,6 @@
 #include "mission/memory_recovery.hpp"
 #include "mission/power/power_cycle.hpp"
 #include "mission/sads.hpp"
-#include "mission/sail.hpp"
 #include "mission/telemetry.hpp"
 #include "mission/time.hpp"
 #include "mission/watchdog.hpp"
@@ -52,7 +51,6 @@ namespace mission
         TimeTask,
         antenna::AntennaTask,
         CommTask,
-        mission::OpenSailTask,
         adcs::AdcsPrimaryTask,
         mission::experiments::MissionExperimentComponent,
         mission::BeaconUpdate,

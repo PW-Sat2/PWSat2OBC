@@ -80,7 +80,6 @@ mission::ObcMission Mission(&PerformMemoryRecovery, //
     std::tie(Main.timeProvider, Main.Hardware.rtc, Mission),
     std::tie<IAntennaDriver, services::power::IPowerControl>(Main.Hardware.antennaDriver, Main.PowerControlInterface),
     Main.Hardware.CommDriver,
-    Main.PowerControlInterface,
     Main.adcs.GetAdcsCoordinator(),
     Main.Experiments.ExperimentsController,
     0,

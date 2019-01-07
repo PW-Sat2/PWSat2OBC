@@ -32,7 +32,6 @@ set(SOURCES
     commands/payload.cpp
     commands/memory.cpp
     commands/runlevel.cpp
-    commands/sail.cpp
     commands/leop.cpp
     commands/exp_suns.cpp
     commands/camera.cpp
@@ -94,7 +93,6 @@ target_link_libraries(${NAME}
     obc_adcs
     rtc
     mission_antenna
-    mission_sail
     mission_time
     mission_experiments
     mission_state
