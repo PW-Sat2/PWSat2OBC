@@ -64,13 +64,11 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
               experiments.ExperimentsController, experiments.Get<experiment::payload::PayloadCommissioningExperiment>()), //
           GetPersistentStateTelecommand(stateContainer),                                                                  //
           PurgePhoto(photo),                                                                                              //
-          PerformCameraCommisioningExperiment(
-              experiments.ExperimentsController, experiments.Get<experiment::camera::CameraCommissioningExperiment>()), //
-          SendPeriodicMessageTelecommand(stateContainer),                                                               //
-          CompileInfoTelecommand(),                                                                                     //
-          ResetTransmitterTelecommand(),                                                                                //
-          DisableOverheatSubmodeTelecommand(epsDriver),                                                                 //
-          SetBitrateTelecommand(),                                                                                      //
+          SendPeriodicMessageTelecommand(stateContainer),                                                                 //
+          CompileInfoTelecommand(),                                                                                       //
+          ResetTransmitterTelecommand(),                                                                                  //
+          DisableOverheatSubmodeTelecommand(epsDriver),                                                                   //
+          SetBitrateTelecommand(),                                                                                        //
           PerformCopyBootSlotsExperiment(
               experiments.ExperimentsController, experiments.Get<experiment::program::CopyBootSlotsExperiment>()), //
           SetBuiltinDetumblingBlockMaskTelecommand(stateContainer, adcsCoordinator),                               //

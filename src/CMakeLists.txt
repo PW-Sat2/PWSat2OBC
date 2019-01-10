@@ -76,7 +76,6 @@ target_link_libraries(${NAME}
     fm25w
     n25q
     antenna
-    exp_fibo
     yaffs
     obc_fdir
     obc_storage

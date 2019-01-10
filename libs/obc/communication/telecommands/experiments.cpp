@@ -170,40 +170,6 @@ namespace obc
             }
         }
 
-        PerformCameraCommisioningExperiment::PerformCameraCommisioningExperiment(
-            experiments::IExperimentController& controller, experiment::camera::ISetupCameraCommissioningExperiment& setupCamera)
-            : _controller(controller), _setupCamera(setupCamera)
-        {
-        }
-
-        void PerformCameraCommisioningExperiment::Handle(devices::comm::ITransmitter& transmitter, gsl::span<const std::uint8_t> parameters)
-        {
-            Reader r(parameters);
-
-            auto correlationId = r.ReadByte();
-            const auto outputFile = r.ReadString(30);
-
-            if (!r.Status() || outputFile.empty())
-            {
-                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::MalformedRequest);
-                return;
-            }
-
-            LOG(LOG_LEVEL_INFO, "Requested Camera Commisioning experiment");
-
-            this->_setupCamera.SetOutputFilesBaseName(outputFile);
-
-            auto success = this->_controller.RequestExperiment(experiment::camera::CameraCommissioningExperiment::Code);
-            if (success)
-            {
-                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::Success);
-            }
-            else
-            {
-                SendStandardResponse(transmitter, correlationId, DownlinkGenericResponse::ExperimentError);
-            }
-        }
-
         PerformCopyBootSlotsExperiment::PerformCopyBootSlotsExperiment(
             experiments::IExperimentController& controller, experiment::program::ISetupCopyBootSlotsExperiment& setupCopy)
             : _controller(controller), _setupCopy(setupCopy)

@@ -15,11 +15,9 @@ target_link_libraries(${NAME}
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Include/${NAME})
 
-add_subdirectory(fibo)
 add_subdirectory(fs)
 add_subdirectory(suns)
 add_subdirectory(flash)
 add_subdirectory(payload)
 add_subdirectory(radfet)
-add_subdirectory(camera)
 add_subdirectory(program)

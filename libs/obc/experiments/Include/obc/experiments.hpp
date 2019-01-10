@@ -3,8 +3,6 @@
 
 #include <array>
 #include <tuple>
-#include "experiment/camera/camera_exp.hpp"
-#include "experiment/fibo/fibo.h"
 #include "experiment/flash/flash.hpp"
 #include "experiment/payload/PayloadExperimentTelemetryProvider.hpp"
 #include "experiment/payload/payload_exp.hpp"
@@ -93,12 +91,10 @@ namespace obc
 
     /** @brief All OBC experiments */
     using AllExperiments = ExperimentsHolder<                //
-        experiment::fibo::FibonacciExperiment,               //
         experiment::suns::SunSExperiment,                    //
         experiment::erase_flash::EraseFlashExperiment,       //
         experiment::radfet::RadFETExperiment,                //
         experiment::payload::PayloadCommissioningExperiment, //
-        experiment::camera::CameraCommissioningExperiment,
         experiment::program::CopyBootSlotsExperiment>;
 
     /**

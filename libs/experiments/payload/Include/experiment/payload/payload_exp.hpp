@@ -3,7 +3,6 @@
 
 #include <chrono>
 #include "PayloadExperimentTelemetryProvider.hpp"
-#include "experiment/camera/CameraExperimentController.hpp"
 #include "experiments/experiments.h"
 #include "fs/ExperimentFile.hpp"
 #include "fs/fs.h"
@@ -94,8 +93,6 @@ namespace experiment
             experiments::IterationResult StartupStep();
             experiments::IterationResult SunSStep();
             experiments::IterationResult RadFETStep();
-            experiments::IterationResult CamsStep();
-            experiments::IterationResult CamsFullStep();
 
             void WriteTelemetry();
             void WriteRadFetTelemetry(PayloadTelemetry::Radfet& telemetry);
@@ -128,8 +125,6 @@ namespace experiment
             experiments::fs::ExperimentFile _experimentFile;
 
             PayloadExperimentTelemetryProvider _telemetryProvider;
-
-            experiment::camera::CameraExperimentController _cameraCommisioningController;
 
             uint8_t _currentStep;
 

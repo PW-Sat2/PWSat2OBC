@@ -17,7 +17,6 @@ namespace obc
         program_flash::BootTable& bootTable,
         program_flash::IFlashDriver& programFlashDriver)
         : Experiments(                                                                       //
-              experiment::fibo::FibonacciExperiment(fs),                                     //
               experiment::suns::SunSExperiment(powerControl, time, suns, payload, gyro, fs), //
               experiment::erase_flash::EraseFlashExperiment(n25q, transmitter),              //
               experiment::radfet::RadFETExperiment(fs, payload, powerControl, time),         //
@@ -31,7 +30,6 @@ namespace obc
                   errorCounterProvider,
                   temperatureProvider,
                   &ExperimentsController),
-              experiment::camera::CameraCommissioningExperiment(fs, time, photoService),
               experiment::program::CopyBootSlotsExperiment(bootTable, programFlashDriver, transmitter))
     {
     }

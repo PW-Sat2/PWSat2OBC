@@ -14,7 +14,6 @@ target_link_libraries(${NAME}
 	payload
 	time
 	exp_fs
-	exp_camera
 	power
 	suns
 	telemetry

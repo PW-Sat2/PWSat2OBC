@@ -13,14 +13,12 @@ set(SOURCES
   MissionPlan/comm/CommWdogTest.cpp
   MissionPlan/SendMessageTest.cpp
   MissionPlan/PeriodicPowerCycleTest.cpp
-  Experiments/Fibo/FiboCalculatorTest.cpp
   Experiments/ExperimentTest.cpp
   Experiments/fs/ExperimentFileTest.cpp
   Experiments/SunS/SunSExperimentTest.cpp 
   Experiments/EraseFlash/EraseFlashExperimentTest.cpp 
   Experiments/payload/PayloadExperimentTest.cpp
   Experiments/RadFET/RadFETExperimentTest.cpp 
-  Experiments/Camera/CameraExperimentTest.cpp
   Experiments/CopyBootSlots/CopyBootSlotsExperimentTest.cpp
   BeaconSenderTest.cpp
 )
@@ -37,13 +35,11 @@ target_link_libraries(${NAME}
     mission_telemetry
     mission_fs
     mission_power
-    exp_fibo
     exp_fs
     exp_suns
     exp_flash
     exp_pld
     exp_radfet
-    exp_camera
     exp_program
     unit_tests_base
     payload

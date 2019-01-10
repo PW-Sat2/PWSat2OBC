@@ -9,7 +9,6 @@ set(SOURCES
 target_link_libraries(${NAME} 
     fs
     experiments
-    exp_fibo
     exp_suns
     exp_flash
     exp_pld

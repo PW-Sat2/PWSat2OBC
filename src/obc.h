@@ -11,7 +11,6 @@
 #include "base/os.h"
 #include "boot/settings.hpp"
 #include "camera/camera.h"
-#include "experiment/fibo/fibo.h"
 #include "fs/fs.h"
 #include "fs/yaffs.h"
 #include "imtq/imtq.h"

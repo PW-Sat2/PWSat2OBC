@@ -54,7 +54,6 @@ target_link_libraries(${NAME}
     gsl
     antenna    
     eigen
-    exp_fibo
     adcs
     builtin_detumbling
     obc_telecommands    
