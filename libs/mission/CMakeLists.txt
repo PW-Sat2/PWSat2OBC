@@ -22,7 +22,6 @@ target_format_sources(${NAME} "${SOURCES}")
 
 add_subdirectory(obc)
 add_subdirectory(adcs)
-add_subdirectory(antenna)
 add_subdirectory(comm)
 add_subdirectory(time)
 add_subdirectory(experiments)

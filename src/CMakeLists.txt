@@ -91,7 +91,6 @@ target_link_libraries(${NAME}
     burtc
     obc_adcs
     rtc
-    mission_antenna
     mission_time
     mission_experiments
     mission_state

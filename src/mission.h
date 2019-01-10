@@ -8,7 +8,6 @@
 #include "mission/PersistentStateSave.hpp"
 #include "mission/TelemetrySerialization.hpp"
 #include "mission/adcs.hpp"
-#include "mission/antenna_task.hpp"
 #include "mission/comm.hpp"
 #include "mission/comm_wdog.hpp"
 #include "mission/experiments.hpp"
@@ -47,7 +46,6 @@ namespace mission
     typedef MissionLoop<SystemState, //
         MemoryRecoveryTask,          //
         TimeTask,
-        antenna::AntennaTask,
         CommTask,
         adcs::AdcsPrimaryTask,
         mission::experiments::MissionExperimentComponent,

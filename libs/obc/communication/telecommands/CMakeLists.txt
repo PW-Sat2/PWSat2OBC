@@ -8,7 +8,6 @@ set(SOURCES
     program_upload.cpp
     time.cpp
     boot_settings.cpp
-    antenna.cpp
     power.cpp
     fdir.cpp
     periodic_message.cpp
@@ -28,7 +27,6 @@ add_library(${NAME} STATIC ${SOURCES})
 target_link_libraries(${NAME} 
 	base
 	telecommunication
-	mission_antenna
 	mission_comm
 	mission_time
 	rtc

@@ -12,7 +12,6 @@ set(SOURCES
   Telecommands/SetTimeCorrectionConfigTelecommandTest.cpp
   Telecommands/SetTimeTelecommandTest.cpp
   Telecommands/SetBootSlotsTelecommandTest.cpp
-  Telecommands/StopAntennaDeploymentTelecommandTest.cpp
   Telecommands/PowerCycleTelecommandTest.cpp
   Telecommands/SetErrorCounterConfigTelecommandTest.cpp
   Telecommands/GetErrorCountersConfigTelecommandTest.cpp

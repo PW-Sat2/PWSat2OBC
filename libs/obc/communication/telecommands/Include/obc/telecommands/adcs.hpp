@@ -6,7 +6,6 @@
 #include "adcs/adcs.hpp"
 #include "base/IHasState.hpp"
 #include "base/fwd.hpp"
-#include "mission/antenna_task.hpp"
 #include "state/fwd.hpp"
 #include "telecommunication/telecommand_handling.h"
 

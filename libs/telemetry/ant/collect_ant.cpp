@@ -5,7 +5,7 @@
 
 namespace telemetry
 {
-    AntennaTelemetryAcquisition::AntennaTelemetryAcquisition(devices::antenna::IAntennaTelemetryProvider& antenna) : provider(&antenna)
+    AntennaTelemetryAcquisition::AntennaTelemetryAcquisition(devices::antenna::IAntennaTelemetryProvider*)
     {
     }
 
@@ -21,16 +21,8 @@ namespace telemetry
     mission::UpdateResult AntennaTelemetryAcquisition::UpdateTelemetry(telemetry::TelemetryState& state)
     {
         devices::antenna::AntennaTelemetry telemetry;
-        if (this->provider->GetTelemetry(telemetry))
-        {
-            state.telemetry.Set(telemetry);
-            return mission::UpdateResult::Ok;
-        }
-        else
-        {
-            LOG(LOG_LEVEL_ERROR, "Unable to acquire antenna telemetry. ");
-            return mission::UpdateResult::Warning;
-        }
+        state.telemetry.Set(telemetry);
+        return mission::UpdateResult::Ok;
     }
 
     mission::UpdateResult AntennaTelemetryAcquisition::UpdateProc(telemetry::TelemetryState& state, void* param)

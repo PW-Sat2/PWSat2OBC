@@ -49,7 +49,6 @@ OBCCommunication::OBCCommunication(obc::FDIR& fdir,
           FinalizeProgramEntry(bootTable),                                           //
           SetBootSlotsTelecommand(bootSettings),                                     //
           SendBeaconTelecommand(telemetry),                                          //
-          SetAntennaDeploymentMaskTelecommand(stateContainer),                       //
           PowerCycle(powerControl),                                                  //
           SetErrorCounterConfig(
               fdir), //                                                                                                    //

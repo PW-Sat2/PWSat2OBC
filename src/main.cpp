@@ -61,7 +61,7 @@ telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver
     Main.Hardware.EPS,
     Main.Experiments.ExperimentsController,
     Main.Hardware.MCUTemperature,
-    Mission,
+    nullptr,
     0,
     Main.fs,
     Main.timeProvider,
@@ -78,7 +78,6 @@ static void PerformMemoryRecovery();
 
 mission::ObcMission Mission(&PerformMemoryRecovery, //
     std::tie(Main.timeProvider, Main.Hardware.rtc, Mission),
-    std::tie<IAntennaDriver, services::power::IPowerControl>(Main.Hardware.antennaDriver, Main.PowerControlInterface),
     Main.Hardware.CommDriver,
     Main.adcs.GetAdcsCoordinator(),
     Main.Experiments.ExperimentsController,

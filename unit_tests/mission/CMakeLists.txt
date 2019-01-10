@@ -6,7 +6,6 @@ set(SOURCES
   MissionPlan/MissionLoopTest.cpp
   MissionPlan/TelemetryTest.cpp
   MissionPlan/FileSystemTaskTest.cpp
-  MissionPlan/antenna/DeployAntennaTest.cpp
   MissionPlan/beacon/BeaconUpdateTest.cpp
   MissionPlan/CompositeActionTest.cpp
   MissionPlan/adcs/AdcsPrimaryTaskTest.cpp
@@ -30,7 +29,6 @@ add_unit_tests(${NAME} ${SOURCES})
 
 target_link_libraries(${NAME} 
     mission
-    mission_antenna
     mission_comm
     mission_time
     mission_experiments

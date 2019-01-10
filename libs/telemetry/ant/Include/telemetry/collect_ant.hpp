@@ -4,7 +4,6 @@
 #pragma once
 
 #include "antenna/antenna.h"
-#include "mission/antenna_task.hpp"
 #include "mission/base.hpp"
 #include "telemetry/state.hpp"
 
@@ -22,7 +21,7 @@ namespace telemetry
          * @brief ctor.
          * @param[in] antenna Reference to antenna driver that will provide this module with hardware telemetry
          */
-        AntennaTelemetryAcquisition(devices::antenna::IAntennaTelemetryProvider& antenna);
+        AntennaTelemetryAcquisition(devices::antenna::IAntennaTelemetryProvider* antenna);
 
         /**
          * @brief Builds update descriptor for this task.
@@ -44,11 +43,6 @@ namespace telemetry
          * @param[in] param Current execution context.
          */
         static mission::UpdateResult UpdateProc(telemetry::TelemetryState& state, void* param);
-
-        /**
-         * @brief Reference to antenna driver.
-         */
-        devices::antenna::IAntennaTelemetryProvider* provider;
     };
 }
 

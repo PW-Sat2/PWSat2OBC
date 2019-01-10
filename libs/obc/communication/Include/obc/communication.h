@@ -12,7 +12,6 @@
 #include "obc/experiments.hpp"
 #include "obc/fdir.hpp"
 #include "obc/telecommands/adcs.hpp"
-#include "obc/telecommands/antenna.hpp"
 #include "obc/telecommands/boot_settings.hpp"
 #include "obc/telecommands/comm.hpp"
 #include "obc/telecommands/compile_info.hpp"
@@ -141,7 +140,6 @@ namespace obc
         obc::telecommands::FinalizeProgramEntry,
         obc::telecommands::SetBootSlotsTelecommand,
         obc::telecommands::SendBeaconTelecommand,
-        obc::telecommands::SetAntennaDeploymentMaskTelecommand,
         obc::telecommands::PowerCycle,
         obc::telecommands::SetErrorCounterConfig,
         obc::telecommands::GetErrorCountersConfigTelecommand,
