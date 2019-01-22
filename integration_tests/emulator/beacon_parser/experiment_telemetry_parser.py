@@ -8,7 +8,7 @@ class ExperimentTelemetryParser(CategoryParser):
         CategoryParser.__init__(self, '09: Experiments', reader, store)
 
     def get_bit_count(self):
-        return 8+8+8
+        return 4+8+8
 
     def parse(self):
         self.append('Current experiment code', 4, value_type=enum(ExperimentType))
