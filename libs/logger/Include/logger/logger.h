@@ -63,7 +63,8 @@ typedef void (*LoggerProcedure)(
  * @param[in] message Message that should be logged.
  * @remark Do not use this macro from within interrupt service routines.
  */
-#define LOG(level, message) LogMessage(false, level, message)
+#define LOG(level, message) ((void)(message))
+//LogMessage(false, level, message)
 
 /**
  * @brief Macro used for logging parameterized entries.
@@ -72,7 +73,8 @@ typedef void (*LoggerProcedure)(
  * @param[in] message Message that should be logged.
  * @remark Do not use this macro from within interrupt service routines.
  */
-#define LOGF(level, message, ...) LogMessage(false, level, message, __VA_ARGS__)
+#define LOGF(level, message, ...) ((void)(message))
+//LogMessage(false, level, message, __VA_ARGS__)
 
 /**
  * @brief Macro used for logging non parameterized entries.

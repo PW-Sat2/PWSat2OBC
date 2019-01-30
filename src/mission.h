@@ -67,7 +67,7 @@ namespace telemetry
         EpsTelemetryAcquisition,                 //
         ExperimentTelemetryAcquisition,          //
         McuTempTelemetryAcquisition,             //
-        AntennaTelemetryAcquisition,             //
+        //AntennaTelemetryAcquisition,             //
         GpioTelemetryAcquisition<io_map::SailDeployed>,
         FileSystemTelemetryAcquisition,             //
         InternalTimeTelemetryAcquisition,           //

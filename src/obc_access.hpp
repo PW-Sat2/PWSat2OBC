@@ -23,7 +23,7 @@
 #include "time/fwd.hpp"
 
 Terminal& GetTerminal();
-AntennaDriver& GetAntennaDriver();
+// AntennaDriver& GetAntennaDriver();
 boot::BootSettings& GetBootSettings();
 devices::comm::CommObject& GetCommDriver();
 obc::PersistentStorageAccess& GetPersistentStorageAccess();

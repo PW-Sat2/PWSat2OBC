@@ -6,10 +6,10 @@ Terminal& GetTerminal()
     return Main.terminal;
 }
 
-AntennaDriver& GetAntennaDriver()
-{
-    return Main.Hardware.antennaDriver;
-}
+// AntennaDriver& GetAntennaDriver()
+// {
+//     return Main.Hardware.antennaDriver;
+// }
 
 boot::BootSettings& GetBootSettings()
 {

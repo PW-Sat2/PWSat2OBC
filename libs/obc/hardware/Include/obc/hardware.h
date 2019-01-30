@@ -167,11 +167,11 @@ namespace obc
         /** @brief EPS driver*/
         devices::eps::EPSDriver EPS;
 
-        /** @brief Low level driver for antenna controller. */
-        AntennaMiniportDriver antennaMiniport;
+        // /** @brief Low level driver for antenna controller. */
+        // AntennaMiniportDriver antennaMiniport;
 
-        /** @brief High level driver for antenna subsystem. */
-        AntennaDriver antennaDriver;
+        // /** @brief High level driver for antenna subsystem. */
+        // AntennaDriver antennaDriver;
 
         /** @brief Imtq handling */
         devices::imtq::ImtqDriver Imtq;

@@ -19,12 +19,17 @@ namespace obc
     {
     }
 
+    static void ScrubSlots(scrubber::ProgramScrubber* target)
+    {
+        target->ScrubSlots();
+    }
+
     OBCScrubbing::OBCScrubbing(
         OBCHardware& hardware, program_flash::BootTable& bootTable, boot::BootSettings& bootSettings, std::uint8_t primaryBootSlots)
         :                                                                                                               //
-          _primarySlotsScrubberCounter([](OBCScrubbing* This) { This->_primarySlotsScrubber.ScrubSlots(); }, this),     //
+          _primarySlotsScrubberCounter(ScrubSlots, &this->_primarySlotsScrubber),     //
           _primarySlotsScrubber(ScrubbingBuffer, bootTable, hardware.FlashDriver, primaryBootSlots),                    //
-          _secondarySlotsScrubberCounter([](OBCScrubbing* This) { This->_secondarySlotsScrubber.ScrubSlots(); }, this), //
+          _secondarySlotsScrubberCounter(ScrubSlots, &this->_secondarySlotsScrubber), //
           _secondarySlotsScrubber(ScrubbingBuffer, bootTable, hardware.FlashDriver, (~primaryBootSlots) & 0b111111),    //
           _bootloaderScrubberCounter([](OBCScrubbing* This) { This->_bootloaderScrubber.Scrub(); }, this),              //
           _bootloaderScrubber(ScrubbingBuffer, bootTable, hardware.MCUFlash),                                           //

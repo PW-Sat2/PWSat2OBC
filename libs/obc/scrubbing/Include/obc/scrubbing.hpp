@@ -106,13 +106,13 @@ namespace obc
         static void ScrubberTask(OBCScrubbing* This);
 
         /** @brief Primary slots scrubber counter */
-        time_counter::TimeCounter<Action<OBCScrubbing*>, OBCScrubbing*, time_counter::min<7>, time_counter::min<1>>
+        time_counter::TimeCounter<Action<scrubber::ProgramScrubber*>, scrubber::ProgramScrubber*, time_counter::min<7>, time_counter::min<1>>
             _primarySlotsScrubberCounter;
         /** @brief Primary slots scrubber */
         scrubber::ProgramScrubber _primarySlotsScrubber;
 
         /** @brief Secondary slots scrubber counter */
-        time_counter::TimeCounter<Action<OBCScrubbing*>, OBCScrubbing*, time_counter::min<7>, time_counter::min<2>>
+        time_counter::TimeCounter<Action<scrubber::ProgramScrubber*>, scrubber::ProgramScrubber*, time_counter::min<7>, time_counter::min<2>>
             _secondarySlotsScrubberCounter;
         /** @brief Secondary slots scrubber */
         scrubber::ProgramScrubber _secondarySlotsScrubber;

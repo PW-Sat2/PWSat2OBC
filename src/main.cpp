@@ -61,7 +61,6 @@ telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver
     Main.Hardware.EPS,
     Main.Experiments.ExperimentsController,
     Main.Hardware.MCUTemperature,
-    nullptr,
     0,
     Main.fs,
     Main.timeProvider,
@@ -202,7 +201,7 @@ static void ObcInitTask(void* param)
 
     Mission.BeaconTaskHandle(obc->initTask);
 
-    if (boot::RequestedRunlevel >= boot::Runlevel::Runlevel1)
+    //if (boot::RequestedRunlevel >= boot::Runlevel::Runlevel1)
     {
         if (OS_RESULT_FAILED(obc->InitializeRunlevel1()))
         {
@@ -214,7 +213,7 @@ static void ObcInitTask(void* param)
         }
     }
 
-    if (boot::RequestedRunlevel >= boot::Runlevel::Runlevel2)
+    //if (boot::RequestedRunlevel >= boot::Runlevel::Runlevel2)
     {
         if (OS_RESULT_FAILED(obc->InitializeRunlevel2()))
         {
@@ -226,7 +225,7 @@ static void ObcInitTask(void* param)
         }
     }
 
-    if (boot::RequestedRunlevel >= boot::Runlevel::Runlevel3)
+    //if (boot::RequestedRunlevel >= boot::Runlevel::Runlevel3)
     {
         if (OS_RESULT_FAILED(obc->InitializeRunlevel3()))
         {

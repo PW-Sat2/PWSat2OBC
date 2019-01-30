@@ -8,7 +8,7 @@ endif()
 
 
 set(USE_EXTERNAL_FLASH BOOL TRUE)
-add_definitions(-DUSE_EXTERNAL_FLASH)
+add_definitions(-DUSE_EXTERNAL_FLASH -DNDEBUG)
 
 
 set (ARCH cortex-m3)
@@ -26,16 +26,16 @@ if(ENABLE_LTO)
     set(LTO_SWITCH "-flto")
 endif()
 
-set (CWARN "-Wall -Wstrict-prototypes -Wextra -Werror")
-set (CXXWARN "-Wall -Wextra -Werror")
-set (CTUNING "-ggdb -pedantic -fomit-frame-pointer -ffunction-sections -fdata-sections")
+set (CWARN "-Wall -Wstrict-prototypes -Wextra -Werror -Wno-unused-value -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable")
+set (CXXWARN "-Wall -Wextra -Werror  -Wno-unused-value -Wno-unused-parameter -Wno-unused-variable -Wno-unused-variable -Wno-unused-but-set-variable")
+set (CTUNING "-pedantic -fomit-frame-pointer -ffunction-sections -fdata-sections")
 set (CMCU "-mtune=cortex-m3 -MMD -MP -mcpu=cortex-m3 -mthumb -march=armv7-m -mlittle-endian -mfix-cortex-m3-ldrd -mno-thumb-interwork")
 set (CMAKE_C_FLAGS "-std=gnu11 ${CWARN} ${CTUNING} ${CMCU} ${CCOVERAGE}")
 set (CMAKE_CXX_FLAGS "-std=gnu++1y -fno-exceptions -fno-rtti ${CXXWARN} ${CTUNING} ${CMCU} ${CCOVERAGE}")
 set (CMAKE_CXX_STANDARD 14)
 
-set(DEBUG_COMP_OPTIONS "-DDEBUG -Og -g")
-set(RELEASE_COMP_OPTIONS "-DNDEBUG -O2 ${LTO_SWITCH}")
+set(DEBUG_COMP_OPTIONS "-DDEBUG -Og -g -ggdb")
+set(RELEASE_COMP_OPTIONS "-DNDEBUG -O2 -Os ${LTO_SWITCH}")
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${LTO_SWITCH}")
 
