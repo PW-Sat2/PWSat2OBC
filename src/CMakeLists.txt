@@ -93,7 +93,6 @@ target_link_libraries(${NAME}
     mission_time
     mission_experiments
     mission_state
-    mission_adcs
     mission_beacon
     mission_telemetry
     mission_comm

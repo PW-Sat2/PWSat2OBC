@@ -7,7 +7,6 @@
 #include "mission/BeaconUpdate.hpp"
 #include "mission/PersistentStateSave.hpp"
 #include "mission/TelemetrySerialization.hpp"
-#include "mission/adcs.hpp"
 #include "mission/comm.hpp"
 #include "mission/comm_wdog.hpp"
 #include "mission/experiments.hpp"
@@ -47,7 +46,6 @@ namespace mission
         MemoryRecoveryTask,          //
         TimeTask,
         CommTask,
-        adcs::AdcsPrimaryTask,
         mission::experiments::MissionExperimentComponent,
         mission::BeaconUpdate,
         mission::SaveErrorCountersConfig,

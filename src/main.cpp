@@ -79,7 +79,6 @@ static void PerformMemoryRecovery();
 mission::ObcMission Mission(&PerformMemoryRecovery, //
     std::tie(Main.timeProvider, Main.Hardware.rtc, Mission),
     Main.Hardware.CommDriver,
-    Main.adcs.GetAdcsCoordinator(),
     Main.Experiments.ExperimentsController,
     0,
     Main.Fdir,

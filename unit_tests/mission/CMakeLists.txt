@@ -8,8 +8,6 @@ set(SOURCES
   MissionPlan/FileSystemTaskTest.cpp
   MissionPlan/beacon/BeaconUpdateTest.cpp
   MissionPlan/CompositeActionTest.cpp
-  MissionPlan/adcs/AdcsPrimaryTaskTest.cpp
-  MissionPlan/obc/ObcTest.cpp
   MissionPlan/comm/CommWdogTest.cpp
   MissionPlan/SendMessageTest.cpp
   MissionPlan/PeriodicPowerCycleTest.cpp
@@ -30,7 +28,6 @@ target_link_libraries(${NAME}
     mission_comm
     mission_time
     mission_experiments
-    mission_adcs
     mission_beacon
     mission_telemetry
     mission_fs
