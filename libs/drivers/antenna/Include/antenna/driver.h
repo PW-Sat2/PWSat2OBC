@@ -84,39 +84,6 @@ struct IAntennaDriver
     virtual OSResult HardReset() = 0;
 
     /**
-     * @brief Procedure responsible for deactivating the underlying hardware channel.
-     * @param[in] channel Identifier of channel that should be deactivated.
-     * @return Operation status.
-     * This procedure will automatically cancel any antenna deployment currently in progress and
-     * disarm deployment system.
-     */
-    virtual OSResult FinishDeployment(AntennaChannel channel) = 0;
-
-    /**
-     * @brief Procedure responsible for initiation of the either manual or automatic antenna deployment.
-     * @param[in] channel Hardware channel that should be used for antenna deployment.
-     * @param[in] antennaId Identifier of the antenna that should be deployed.
-     * @param[in] timeout Deployment operation timeout.
-     * @param[in] overrideSwitches Flag indicating whether the antenna deployment switches should be
-     * ignored during the process (true), false otherwise.
-     * @return Operation status.
-     */
-    virtual OSResult DeployAntenna(        //
-        AntennaChannel channel,            //
-        AntennaId antennaId,               //
-        std::chrono::milliseconds timeout, //
-        bool overrideSwitches              //
-        ) = 0;
-
-    /**
-     * @brief This procedure returns current global antenna deployment status as seen by the queried hardware channel.
-     * @param[in] channel Queried hardware channel.
-     * @param[out] telemetry On success this value will be filled with current deployment status.
-     * @return Operation status.
-     */
-    virtual OSResult GetDeploymentStatus(AntennaChannel channel, AntennaDeploymentStatus* telemetry) = 0;
-
-    /**
      * @brief Procedure that queries hardware for current temperature.
      * @param[in] channel Queried hardware channel.
      * @param[out] temperature Pointer to variable that on success will be filled with currently
@@ -135,19 +102,6 @@ struct IAntennaDriver
      * inspect the content of the flags field. @see AntennaTelemetry type definition for details.
      */
     virtual OSResult GetTelemetry(devices::antenna::AntennaTelemetry& telemetry) = 0;
-
-    /**
-     * @brief Arms selected antenna controller
-     * @param channel Controller to use
-     * @return Operation result
-     */
-    virtual OSResult Arm(AntennaChannel channel) = 0;
-    /**
-     * @brief Disarms selected antenna controller
-     * @param channel Controller to use
-     * @return Operation result
-     */
-    virtual OSResult Disarm(AntennaChannel channel) = 0;
 };
 
 /**
@@ -202,39 +156,6 @@ class AntennaDriver : public IAntennaDriver
     OSResult HardReset() override;
 
     /**
-     * @brief Procedure responsible for deactivating the underlying hardware channel.
-     * @param[in] channel Identifier of channel that should be deactivated.
-     * @return Operation status.
-     * This procedure will automatically cancel any antenna deployment currently in progress and
-     * disarm deployment system.
-     */
-    OSResult FinishDeployment(AntennaChannel channel) override;
-
-    /**
-     * @brief Procedure responsible for initiation of the either manual or automatic antenna deployment.
-     * @param[in] channel Hardware channel that should be used for antenna deployment.
-     * @param[in] antennaId Identifier of the antenna that should be deployed.
-     * @param[in] timeout Deployment operation timeout.
-     * @param[in] overrideSwitches Flag indicating whether the antenna deployment switches should be
-     * ignored during the process (true), false otherwise.
-     * @return Operation status.
-     */
-    OSResult DeployAntenna(                //
-        AntennaChannel channel,            //
-        AntennaId antennaId,               //
-        std::chrono::milliseconds timeout, //
-        bool overrideSwitches              //
-        ) override;
-
-    /**
-     * @brief This procedure returns current global antenna deployment status as seen by the queried hardware channel.
-     * @param[in] channel Queried hardware channel.
-     * @param[out] telemetry On success this value will be filled with current deployment status.
-     * @return Operation status.
-     */
-    OSResult GetDeploymentStatus(AntennaChannel channel, AntennaDeploymentStatus* telemetry) override;
-
-    /**
      * @brief Procedure that queries hardware for current temperature.
      * @param[in] channel Queried hardware channel.
      * @param[out] temperature Pointer to variable that on success will be filled with currently
@@ -254,9 +175,6 @@ class AntennaDriver : public IAntennaDriver
      */
     OSResult GetTelemetry(devices::antenna::AntennaTelemetry& telemetry) override;
 
-    virtual OSResult Arm(AntennaChannel channel) override;
-    virtual OSResult Disarm(AntennaChannel channel) override;
-
     /**
      * @brief Primary antenna controller channel.
      */
@@ -268,21 +186,8 @@ class AntennaDriver : public IAntennaDriver
     AntennaChannelInfo secondaryChannel;
 
   private:
-    OSResult UpdateDeploymentStatus(std::array<error_counter::AggregatedErrorCounter*, 2>& errorCounters, //
-        devices::antenna::AntennaTelemetry& telemetry);
-    OSResult UpdateActivationCount(std::array<error_counter::AggregatedErrorCounter*, 2>& errorCounters, //
-        devices::antenna::AntennaTelemetry& telemetry);
-    OSResult UpdateActivationTime(std::array<error_counter::AggregatedErrorCounter*, 2>& errorCounters, //
-        devices::antenna::AntennaTelemetry& telemetry);
-
     AntennaChannelInfo* GetChannel(AntennaChannel channel);
     error_counter::DeviceErrorCounter& GetChannelErrorCounter(AntennaChannel channel);
-
-    OSResult GetDeploymentStatusWithError(            //
-        error_counter::AggregatedErrorCounter& error, //
-        AntennaChannel channel,                       //
-        AntennaDeploymentStatus* telemetry            //
-        );
 
     /**
      * @brief Driver instance that coordinates communication with hardware.

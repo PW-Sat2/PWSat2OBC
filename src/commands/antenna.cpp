@@ -11,11 +11,6 @@
 
 using namespace std::chrono_literals;
 
-static void SendResult(OSResult result)
-{
-    GetTerminal().Printf("%d", num(result));
-}
-
 static bool GetChannel(const char* name, AntennaChannel* channel)
 {
     if (strcmp(name, "primary") == 0)
@@ -32,120 +27,6 @@ static bool GetChannel(const char* name, AntennaChannel* channel)
     }
 
     return true;
-}
-
-static bool GetAntenna(const char* name, AntennaId* antenna)
-{
-    if (strcmp(name, "auto") == 0)
-    {
-        *antenna = ANTENNA_AUTO_ID;
-    }
-    else if (strcmp(name, "1") == 0)
-    {
-        *antenna = ANTENNA1_ID;
-    }
-    else if (strcmp(name, "2") == 0)
-    {
-        *antenna = ANTENNA2_ID;
-    }
-    else if (strcmp(name, "3") == 0)
-    {
-        *antenna = ANTENNA3_ID;
-    }
-    else if (strcmp(name, "4") == 0)
-    {
-        *antenna = ANTENNA4_ID;
-    }
-    else
-    {
-        return false;
-    }
-
-    return true;
-}
-
-void AntennaDeploy(std::uint16_t argc, char* argv[])
-{
-    AntennaChannel channel;
-    AntennaId antenna;
-    if (                                  //
-        (argc != 2 && argc != 3) ||       //
-        !GetChannel(argv[0], &channel) || //
-        !GetAntenna(argv[1], &antenna)    //
-        )
-    {
-        GetTerminal().Puts("antenna_deploy [primary|backup] [auto|1|2|3|4] [override]\n");
-        return;
-    }
-
-    const bool override = (argc > 2) && (strcmp(argv[2], "override") == 0);
-    const OSResult result = GetAntennaDriver().DeployAntenna(channel,
-        antenna,
-        10s,
-        override //
-        );
-    SendResult(result);
-    return;
-}
-
-void AntennaCancelDeployment(std::uint16_t argc, char* argv[])
-{
-    AntennaChannel channel;
-    if (                               //
-        argc < 1 ||                    //
-        !GetChannel(argv[0], &channel) //
-        )
-    {
-        GetTerminal().Puts("antenna_cancel [primary|backup]\n");
-        return;
-    }
-
-    GetAntennaDriver().FinishDeployment(channel);
-}
-
-void AntennaGetDeploymentStatus(std::uint16_t argc, char* argv[])
-{
-    AntennaChannel channel;
-    if (                               //
-        argc < 1 ||                    //
-        !GetChannel(argv[0], &channel) //
-        )
-    {
-        GetTerminal().Puts("antenna_get_status [primary|backup]\n");
-        return;
-    }
-
-    AntennaDeploymentStatus deploymentStatus;
-    const OSResult status = GetAntennaDriver().GetDeploymentStatus(channel, &deploymentStatus);
-    if (OS_RESULT_FAILED(status))
-    {
-        SendResult(status);
-    }
-    else
-    {
-        GetTerminal().Printf("Status: %d\n", num(status));
-        GetTerminal().Printf("Deployment status: %d %d %d %d\n",
-            ToInt(deploymentStatus.DeploymentStatus[0]), //
-            ToInt(deploymentStatus.DeploymentStatus[1]), //
-            ToInt(deploymentStatus.DeploymentStatus[2]), //
-            ToInt(deploymentStatus.DeploymentStatus[3]));
-
-        GetTerminal().Printf("Deployment active: %d %d %d %d\n",
-            ToInt(deploymentStatus.IsDeploymentActive[0]), //
-            ToInt(deploymentStatus.IsDeploymentActive[1]), //
-            ToInt(deploymentStatus.IsDeploymentActive[2]), //
-            ToInt(deploymentStatus.IsDeploymentActive[3]));
-
-        GetTerminal().Printf("Deployment time reached: %d %d %d %d\n",
-            ToInt(deploymentStatus.DeploymentTimeReached[0]), //
-            ToInt(deploymentStatus.DeploymentTimeReached[1]), //
-            ToInt(deploymentStatus.DeploymentTimeReached[2]), //
-            ToInt(deploymentStatus.DeploymentTimeReached[3]));
-
-        GetTerminal().Printf("Ignoring switches: %d\n", ToInt(deploymentStatus.IgnoringDeploymentSwitches));
-        GetTerminal().Printf("Independent burn: %d\n", ToInt(deploymentStatus.IsIndependentBurnActive));
-        GetTerminal().Printf("Armed: %d\n", ToInt(deploymentStatus.DeploymentSystemArmed));
-    }
 }
 
 void PrintValue(int value, const char* name)
