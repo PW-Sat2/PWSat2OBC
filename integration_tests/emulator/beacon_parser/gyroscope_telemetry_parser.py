@@ -11,7 +11,7 @@ class AngularRate(TelemetryUnit):
 @unit('C')
 class GyroTemperature(TelemetryUnit):
     def __init__(self, raw):
-        super(GyroTemperature, self).__init__(raw, (raw + 23000) / 280)
+        super(GyroTemperature, self).__init__(raw, (raw + 23000) / 280.0)
 
 
 class GyroscopeTelemetryParser(CategoryParser):
