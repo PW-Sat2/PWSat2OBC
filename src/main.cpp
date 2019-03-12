@@ -81,18 +81,13 @@ mission::ObcMission Mission(&PerformMemoryRecovery, //
     std::tie<IAntennaDriver, services::power::IPowerControl>(Main.Hardware.antennaDriver, Main.PowerControlInterface),
     Main.Hardware.CommDriver,
     Main.PowerControlInterface,
-    Main.adcs.GetAdcsCoordinator(),
     Main.Experiments.ExperimentsController,
     0,
-    Main.Fdir,
-    std::tie(Main.Hardware.PersistentStorage, PersistentStateBaseAddress),
-    Main.fs,
     Main.Hardware.CommDriver,
     Main.Hardware.EPS,
-    std::make_pair(std::ref(Main.Experiments.ExperimentsController), std::ref(Main.timeProvider)),
     GetCommHardwareObserver(),
-    std::make_tuple(std::ref(Main.PowerControlInterface), std::ref(Main.Scrubbing), std::ref(Main.Experiments.ExperimentsController)),
-    Main.PowerControlInterface);
+    std::make_tuple(std::ref(Main.PowerControlInterface), std::ref(Main.Scrubbing), std::ref(Main.Experiments.ExperimentsController))
+    );
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;
 
@@ -204,10 +199,6 @@ static void ObcInitTask(void* param)
     LOGF(LOG_LEVEL_INFO, "Requested runlevel %d", num(boot::RequestedRunlevel));
 
     auto obc = static_cast<OBC*>(param);
-
-    // dumb workaround for cyclical reference
-    obc->Experiments.Get<experiment::sail::SailExperiment>().SetSailController(Mission);
-    obc->Experiments.Get<experiment::sads::SADSExperiment>().SetSADSController(Mission);
 
     Mission.BeaconTaskHandle(obc->initTask);
 

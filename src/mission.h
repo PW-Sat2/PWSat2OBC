@@ -53,18 +53,13 @@ namespace mission
         antenna::AntennaTask,
         CommTask,
         mission::OpenSailTask,
-        adcs::AdcsPrimaryTask,
         mission::experiments::MissionExperimentComponent,
         mission::BeaconUpdate,
-        mission::SaveErrorCountersConfig,
-        mission::PeristentStateSave,
-        FileSystemTask,
         mission::SendMessageTask,
         EPSWatchdogTask,
-        leop::LEOPTask,
         mission::CommWdogTask,
-        mission::power::PeriodicPowerCycleTask,
-        mission::DeploySolarArrayTask>
+        mission::power::PeriodicPowerCycleTask
+        >
         ObcMission;
 }
 

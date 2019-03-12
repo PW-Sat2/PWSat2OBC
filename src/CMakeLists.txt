@@ -3,40 +3,6 @@ set(NAME pwsat)
 set(SOURCES
     main.cpp
     terminal.cpp
-    commands/ping.cpp
-    commands/time.cpp
-    commands/comm.cpp
-    commands/antenna.cpp
-    commands/file_system.cpp
-    commands/i2c_test_command.cpp
-    commands/heap_info.cpp
-    commands/rtos_status.cpp
-    commands/heap.cpp
-    commands/compile_info.cpp
-    commands/mission.cpp
-    commands/dma.cpp
-    commands/imtq.cpp
-    commands/suns.cpp
-    commands/rtc.cpp
-    commands/fram.cpp
-    commands/gyro.cpp
-    commands/external_flash.cpp
-    commands/obc_state.cpp
-    commands/temp.cpp
-    commands/eps.cpp
-    commands/watchdog.cpp
-    commands/state.cpp
-    commands/error_counters.cpp
-    commands/scrub.cpp
-    commands/boot_settings.cpp
-    commands/payload.cpp
-    commands/memory.cpp
-    commands/runlevel.cpp
-    commands/sail.cpp
-    commands/leop.cpp
-    commands/exp_suns.cpp
-    commands/camera.cpp
-    commands/adcs.cpp
     checks/error_counters.cpp
     checks/checks.cpp
     obc.h
