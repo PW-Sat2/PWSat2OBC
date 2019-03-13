@@ -17,7 +17,6 @@
 
 #include "base/ecc.h"
 #include "base/os.h"
-#include "dmadrv.h"
 #include "efm_support/api.h"
 #include "efm_support/clock.h"
 #include "gpio/gpio.h"
@@ -26,7 +25,6 @@
 #include "mcu/io_map.h"
 #include "mission.h"
 #include "obc.h"
-#include "swo/swo.h"
 #include "system.h"
 #include "watchdog/internal.hpp"
 

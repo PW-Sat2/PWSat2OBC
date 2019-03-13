@@ -17,5 +17,4 @@ target_include_directories(${NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR}/Include ${PO
 
 target_link_libraries(${NAME} 
 	platform 
-	assert
 	)

@@ -18,7 +18,6 @@ target_link_libraries(${NAME}
     base
     free_rtos_wrapper
     comm
-    swo
     logger
 #    SwoEndpoint
     i2c
@@ -27,7 +26,6 @@ target_link_libraries(${NAME}
     eps
     power
     power_eps
-    assert
     gsl
     fm25w
     obc_communication

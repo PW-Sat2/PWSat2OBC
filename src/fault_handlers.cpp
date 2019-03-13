@@ -6,7 +6,6 @@
 #include <FreeRTOSConfig.h>
 #include <task.h>
 
-#include "swo/swo.h"
 #include "system.h"
 
 static void Hang()
@@ -53,9 +52,6 @@ extern "C" __attribute__((used)) void prvGetRegistersFromStack(uint32_t* pulFaul
 
     /* When the following line is hit, the variables contain the register values. */
 
-    SwoPrintfOnChannel(
-        3, "CFSR: 0x%X\nHFSR: 0x%X\nMMFAR: 0x%X\nBFAR: 0x%X\nLR: 0x%X\nPC: 0x%X\nPSR: 0x%X", cfsr, hfsr, mmfar, bfar, lr, pc, psr);
-
     Hang();
 }
 
@@ -73,9 +69,8 @@ __attribute__((naked)) void HardFault_Handler(void)
                    " handler2_address_constHF: .word prvGetRegistersFromStack  \n");
 }
 
-extern "C" void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char* pcTaskName)
+extern "C" void vApplicationStackOverflowHook(xTaskHandle* pxTask, signed char*)
 {
     UNREFERENCED_PARAMETER(pxTask);
-    SwoPrintfOnChannel(3, "Stack overflow inside task: %s", pcTaskName);
     Hang();
 }
