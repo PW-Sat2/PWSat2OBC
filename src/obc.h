@@ -81,9 +81,6 @@ struct OBC
      */
     inline ILineIO& GetLineIO();
 
-    /** @brief File system object */
-    services::fs::YaffsFileSystem fs;
-
     /** @brief Handle to OBC initialization task. */
     OSTaskHandle initTask;
 
@@ -107,9 +104,6 @@ struct OBC
 
     /** @brief FDIR mechanisms */
     obc::FDIR Fdir;
-
-    /** @brief OBC storage */
-    obc::OBCStorage Storage;
 
     /** @brief Overall satellite <-> Earth communication */
     obc::OBCCommunication Communication;

@@ -14,11 +14,6 @@ static void ProcessState(OBC* obc)
     {
         LOG(LOG_LEVEL_WARNING, "Resetting system state");
 
-        if (OS_RESULT_FAILED(obc->Storage.ClearStorage()))
-        {
-            LOG(LOG_LEVEL_ERROR, "Storage reset failure");
-        }
-
         if (!obc::WritePersistentState(persistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage))
         {
             LOG(LOG_LEVEL_ERROR, "Persistent state reset failure");
@@ -32,19 +27,8 @@ static void ProcessState(OBC* obc)
     }
 }
 
-static void AuditSystemStartup(uint32_t bootCounter)
+static void AuditSystemStartup(uint32_t)
 {
-    const auto bootReason = efm::mcu::GetBootReason();
-    auto& telemetry = TelemetryAcquisition.GetState().telemetry;
-    if (boot::IsBootInformationAvailable())
-    {
-        telemetry.Set(telemetry::SystemStartup(bootCounter, boot::Index, bootReason));
-    }
-    else
-    {
-        telemetry.Set(telemetry::SystemStartup(bootCounter, 0xff, bootReason));
-    }
-
     efm::mcu::ResetBootReason();
 }
 
@@ -76,7 +60,6 @@ OBC::OBC()
       Hardware(this->Fdir.ErrorCounting(), this->PowerControlInterface, timeProvider), //
       PowerControlInterface(this->Hardware.EPS),                                       //
       Fdir(this->PowerControlInterface, GetErrorCounterMask()),                        //
-      Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),            //
       Communication(                   //
           this->Hardware.CommDriver,
           Mission,
@@ -112,15 +95,7 @@ OSResult OBC::InitializeRunlevel1()
 
     this->BootSettings.Initialize();
 
-    this->fs.Initialize();
-
     this->Communication.InitializeRunlevel1();
-
-    result = this->Storage.Initialize();
-    if (OS_RESULT_FAILED(result))
-    {
-        LOGF(LOG_LEVEL_FATAL, "[obc] Storage initialization failed %d", num(result));
-    }
 
     ProcessState(this);
     AuditSystemStartup(this->BootSettings.BootCounter());
@@ -154,11 +129,6 @@ OSResult OBC::InitializeRunlevel1()
         LOG(LOG_LEVEL_ERROR, "[obc] Unable to initialize mission loop.");
     }
 
-    if (!TelemetryAcquisition.Initialize(30s))
-    {
-        LOG(LOG_LEVEL_ERROR, "[obc] Unable to initialize telemetry acquisition loop.");
-    }
-
     BootSettings.ConfirmBoot();
 
     return OSResult::Success;
@@ -169,8 +139,6 @@ OSResult OBC::InitializeRunlevel2()
     this->Communication.InitializeRunlevel2();
 
     Mission.Resume();
-
-    TelemetryAcquisition.Resume();
 
     this->Hardware.Burtc.Start();
 

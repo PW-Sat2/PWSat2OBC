@@ -55,29 +55,10 @@ devices::comm::ICommHardwareObserver* GetCommHardwareObserver()
     }
 }
 
-telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver,
-    Main.Hardware.Gyro,
-    Main.Fdir,
-    Main.Hardware.EPS,
-    Main.Hardware.MCUTemperature,
-    Mission,
-    0,
-    Main.fs,
-    Main.timeProvider,
-    Main.Hardware.rtc,
-    Main.BootTable,
-    Main.Scrubbing,
-    0,
-    Main.Hardware.imtqTelemetryCollector,
-    0,
-    0,
-    std::make_tuple(std::ref(Main.fs), mission::TelemetryConfiguration{"/telemetry.current", "/telemetry.previous", 512_KB, 30s}));
-
 static void PerformMemoryRecovery();
 
 mission::ObcMission Mission(&PerformMemoryRecovery, //
     std::tie(Main.timeProvider, Main.Hardware.rtc, Mission),
-    std::tie<IAntennaDriver, services::power::IPowerControl>(Main.Hardware.antennaDriver, Main.PowerControlInterface),
     Main.Hardware.CommDriver,
     Main.PowerControlInterface,
     0,
@@ -119,16 +100,6 @@ void GPIO_IRQHandler(void)
     std::uint32_t irq = GPIO_IntGet();
     GPIO_IntClear(irq);
 
-    if (irq & Main.Hardware.PayloadInterruptDriver.IRQMask())
-    {
-        Main.Hardware.PayloadDriver.IRQHandler();
-    }
-
-    if (irq & Main.Hardware.SunSInterruptDriver.IRQMask())
-    {
-        Main.Hardware.SunS.IRQHandler();
-    }
-
     System::EndSwitchingISR();
 }
 
@@ -144,7 +115,6 @@ void GPIO_ODD_IRQHandler(void)
 
 void LESENSE_IRQHandler()
 {
-    Main.Hardware.Terminal.OnWakeUpInterrupt();
     System::EndSwitchingISR();
 }
 
@@ -171,7 +141,6 @@ void ACMP0_IRQHandler()
 
 __attribute__((optimize("O3"))) void UART1_RX_IRQHandler()
 {
-    Main.Hardware.Terminal.OnReceived();
 }
 
 void PerformMemoryRecovery()
@@ -241,11 +210,9 @@ static void ObcInitTask(void* param)
 
     System::SuspendTask(NULL);
 
-    beacon::BeaconSender sender(Main.Hardware.CommDriver, TelemetryAcquisition);
-
     while (1)
     {
-        sender.RunOnce();
+        System::SuspendTask(NULL);
     }
 }
 

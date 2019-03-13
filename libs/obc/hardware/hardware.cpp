@@ -64,19 +64,9 @@ void OBCHardware::Initialize()
 
     ResetEps();
 
-    this->Terminal.Initialize();
-    this->Terminal.LineEditing(true);
-
-    this->Camera.Initialize();
-
     this->SPI.Initialize();
 
     this->FlashDriver.Initialize();
-    this->PayloadDriver.Initialize();
-
-    this->imtqTelemetryCollector.Initialize();
-
-    this->SunS.Initialize();
 
     this->Burtc.Initialize();
 
@@ -112,15 +102,7 @@ OBCHardware::OBCHardware(
               &FramSpi[2]}},                                                              //
       Gyro(I2C.Buses.Payload),                                                            //
       EPS(errorCounting, this->I2C.Buses.Bus, this->I2C.Buses.Payload),                   //
-      antennaDriver(errorCounting, &antennaMiniport, &I2C.Buses.Bus, &I2C.Buses.Payload), //
-      Imtq(errorCounting, I2C.Buses.Bus),                                                 //
-      imtqTelemetryCollector(Imtq),                                                       //
-      SunSInterruptDriver(this->Pins.SunSInterrupt),                                      //
-      SunS(errorCounting, I2C.Buses.Payload, SunSInterruptDriver),                        //
       rtc(errorCounting, I2C.Buses.Payload),                                              //
-      CommDriver(errorCounting, I2C.Buses.Bus),                                           //
-      PayloadInterruptDriver(this->Pins.PayloadInterrupt),                                //
-      PayloadDriver(errorCounting, this->I2C.Buses.Payload, PayloadInterruptDriver),      //
-      PayloadDeviceDriver(PayloadDriver)
+      CommDriver(errorCounting, I2C.Buses.Bus)                                            //
 {
 }

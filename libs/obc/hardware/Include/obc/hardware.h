@@ -145,9 +145,6 @@ namespace obc
         /** @brief BURTC object. */
         devices::burtc::Burtc Burtc;
 
-        /** @brief Self-temperature sensor */
-        temp::ADCTemperatureReader MCUTemperature;
-
         /**
          * @brief Fram's spi access
          */
@@ -167,44 +164,11 @@ namespace obc
         /** @brief EPS driver*/
         devices::eps::EPSDriver EPS;
 
-        /** @brief Low level driver for antenna controller. */
-        AntennaMiniportDriver antennaMiniport;
-
-        /** @brief High level driver for antenna subsystem. */
-        AntennaDriver antennaDriver;
-
-        /** @brief Imtq handling */
-        devices::imtq::ImtqDriver Imtq;
-
-        /** @brief This object captures imtq telemetry as the hardware state changes are requested. */
-        devices::imtq::ImtqTelemetryCollector imtqTelemetryCollector;
-
-        /** @brief Sun Sensor Interrupt Driver */
-        drivers::gpio::InterruptPinDriver SunSInterruptDriver;
-
-        /** @brief SunS handling */
-        devices::suns::SunSDriver SunS;
-
-        /** @brief Camera attached to UART */
-        drivers::uart::UART<io_map::UART_0> Camera;
-
-        /** @brief Termnial attached to UART */
-        drivers::uart::UART<io_map::UART_1> Terminal;
-
         /** @brief External Real Time Clock.  */
         devices::rtc::RTCObject rtc;
 
         /** @brief Low-level comm driver */
         devices::comm::CommObject CommDriver;
-
-        /** @brief Payload Interrupt Driver */
-        drivers::gpio::InterruptPinDriver PayloadInterruptDriver;
-
-        /** @brief Payload driver*/
-        devices::payload::PayloadDriver PayloadDriver;
-
-        /** @brief Payload device driver*/
-        devices::payload::PayloadDeviceDriver PayloadDeviceDriver;
     };
 }
 /** @} */
