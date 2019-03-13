@@ -158,9 +158,6 @@ namespace obc
         /** @brief EPS driver*/
         devices::eps::EPSDriver EPS;
 
-        /** @brief External Real Time Clock.  */
-        devices::rtc::RTCObject rtc;
-
         /** @brief Low-level comm driver */
         devices::comm::CommObject CommDriver;
     };

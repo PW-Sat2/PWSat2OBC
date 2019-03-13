@@ -72,8 +72,6 @@ void OBCHardware::Initialize()
 
     this->CommDriver.Initialize();
 
-    this->rtc.Initialize();
-
     this->Gyro.init();
 }
 
@@ -102,7 +100,6 @@ OBCHardware::OBCHardware(
               &FramSpi[2]}},                                                              //
       Gyro(I2C.Buses.Payload),                                                            //
       EPS(this->I2C.Buses.Bus, this->I2C.Buses.Payload),                   //
-      rtc(I2C.Buses.Payload),                                              //
       CommDriver(I2C.Buses.Bus)                                            //
 {
 }
