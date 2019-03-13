@@ -32,7 +32,6 @@
 #include "scrubber/ram.hpp"
 #include "spi/efm.h"
 #include "state/fwd.hpp"
-#include "terminal/terminal.h"
 #include "time/timer.h"
 #include "utils.h"
 #include "watchdog/pin.hpp"
@@ -83,9 +82,6 @@ struct OBC
 
     /** @brief Handle to OBC initialization task. */
     OSTaskHandle initTask;
-
-    /** @brief Flag indicating that OBC software has finished initialization process. */
-    EventGroup StateFlags;
 
     /** @brief Boot Table */
     program_flash::BootTable BootTable;

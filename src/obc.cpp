@@ -73,7 +73,6 @@ OBC::OBC()
 
 void OBC::InitializeRunlevel0()
 {
-    this->StateFlags.Initialize();
 }
 
 OSResult OBC::InitializeRunlevel1()

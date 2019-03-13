@@ -8,8 +8,7 @@ set(SOURCES
     obc.h
     obc.cpp
         fault_handlers.cpp
-    blink.cpp
-)
+        )
 
 add_executable(${NAME} ${SOURCES})
 

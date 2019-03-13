@@ -36,6 +36,7 @@ namespace obc
         return true;
     }
 
+
     bool ReadPersistentState(state::SystemPersistentState& stateObject, std::uint32_t baseAddress, IStorageAccess& storage)
     {
         alignas(4) std::uint8_t array[TotalImageSize];

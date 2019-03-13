@@ -19,7 +19,6 @@
 #include "base/ecc.h"
 #include "base/os.h"
 #include "beacon/sender.hpp"
-#include "blink.hpp"
 #include "boot/params.hpp"
 #include "dmadrv.h"
 #include "efm_support/api.h"
@@ -201,9 +200,6 @@ static void ObcInitTask(void* param)
         }
     }
 
-    LOG(LOG_LEVEL_INFO, "Initialized");
-    obc->StateFlags.Set(OBC::InitializationFinishedFlag);
-
     // commented because BeaconUpdate is not necessary now
     // [TODO] this needs to be replaced by dummy frame sending
     //System::SuspendTask(NULL);
@@ -283,22 +279,10 @@ int main(void)
 
     DMADRV_Init();
 
-    if (!boot::IsBootInformationAvailable())
-    {
-        LOGF(LOG_LEVEL_WARNING,
-            "No boot information from bootloader (expected: 0x%lX, got: 0x%lX)",
-            boot::BootloaderMagicNumber,
-            boot::MagicNumber);
-
-        boot::RequestedRunlevel = boot::Runlevel::Runlevel3;
-        boot::Index = 0;
-        boot::BootReason = boot::Reason::BootToUpper;
-        boot::ClearStateOnStartup = false;
-    }
-    else
-    {
-        LOG(LOG_LEVEL_DEBUG, "Received boot information from bootloader");
-    }
+    boot::RequestedRunlevel = boot::Runlevel::Runlevel3;
+    boot::Index = 0;
+    boot::BootReason = boot::Reason::BootToUpper;
+    boot::ClearStateOnStartup = false;
 
     Main.InitializeRunlevel0();
 
@@ -307,7 +291,6 @@ int main(void)
     Main.Hardware.Pins.TimeIndicator.High();
     Main.Hardware.Pins.BootIndicator.High();
 
-    InitializeBlink();
     System::CreateTask(ObcInitTask, "Init", 8_KB, &Main, TaskPriority::P14, &Main.initTask);
 
     System::RunScheduler();

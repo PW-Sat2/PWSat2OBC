@@ -50,66 +50,12 @@ namespace devices
 
         Option<hk::ControllerATelemetry> EPSDriver::ReadHousekeepingA()
         {
-            std::array<std::uint8_t, 1> command{0x0};
-            std::array<std::uint8_t, 72> response;
-
-            auto result = this->WriteRead(Controller::A, command, response);
-
-            if (result != I2CResult::OK)
-            {
-                this->_error.Failure();
-                return None<hk::ControllerATelemetry>();
-            }
-
-            hk::ControllerATelemetry housekeeping;
-            Reader r(response);
-
-            if (!housekeeping.ReadFrom(r))
-            {
-                this->_error.Failure();
-                return None<hk::ControllerATelemetry>();
-            }
-
-            if (housekeeping.WhoAmI != ControllerAId)
-            {
-                this->_error.Failure();
-                return None<hk::ControllerATelemetry>();
-            }
-
-            this->_error.Success();
-            return Some(housekeeping);
+            return None<hk::ControllerATelemetry>();
         }
 
         Option<hk::ControllerBTelemetry> EPSDriver::ReadHousekeepingB()
         {
-            std::array<std::uint8_t, 1> command{0x0};
-            std::array<std::uint8_t, 18> response;
-
-            auto result = this->WriteRead(Controller::B, command, response);
-
-            if (result != I2CResult::OK)
-            {
-                this->_error.Failure();
-                return None<hk::ControllerBTelemetry>();
-            }
-
-            hk::ControllerBTelemetry housekeeping;
-            Reader r(response);
-
-            if (!housekeeping.ReadFrom(r))
-            {
-                this->_error.Failure();
-                return None<hk::ControllerBTelemetry>();
-            }
-
-            if (housekeeping.WhoAmI != ControllerBId)
-            {
-                this->_error.Failure();
-                return None<hk::ControllerBTelemetry>();
-            }
-
-            this->_error.Success();
-            return Some(housekeeping);
+            return None<hk::ControllerBTelemetry>();
         }
 
         bool EPSDriver::PowerCycle(Controller controller)
