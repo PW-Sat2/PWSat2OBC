@@ -18,7 +18,6 @@
 #include "SwoEndpoint/SwoEndpoint.h"
 #include "base/ecc.h"
 #include "base/os.h"
-#include "boot/params.hpp"
 #include "dmadrv.h"
 #include "efm_support/api.h"
 #include "efm_support/clock.h"
@@ -125,44 +124,35 @@ static void ObcInitTask(void* param)
     ExternalWatchdog::Enable();
 
     LOG(LOG_LEVEL_INFO, "Starting initialization task...");
-    LOGF(LOG_LEVEL_INFO, "Requested runlevel %d", num(boot::RequestedRunlevel));
+    LOG(LOG_LEVEL_INFO, "Requested runlevel 3");
 
     auto obc = static_cast<OBC*>(param);
 
-    if (boot::RequestedRunlevel >= boot::Runlevel::Runlevel1)
+    if (OS_RESULT_FAILED(obc->InitializeRunlevel1()))
     {
-        if (OS_RESULT_FAILED(obc->InitializeRunlevel1()))
-        {
-            LOG(LOG_LEVEL_ERROR, "Unable to initialize runlevel 1. ");
-        }
-        else
-        {
-            LOG(LOG_LEVEL_INFO, "Runlevel 1 initialized");
-        }
+        LOG(LOG_LEVEL_ERROR, "Unable to initialize runlevel 1. ");
+    }
+    else
+    {
+        LOG(LOG_LEVEL_INFO, "Runlevel 1 initialized");
     }
 
-    if (boot::RequestedRunlevel >= boot::Runlevel::Runlevel2)
+    if (OS_RESULT_FAILED(obc->InitializeRunlevel2()))
     {
-        if (OS_RESULT_FAILED(obc->InitializeRunlevel2()))
-        {
-            LOG(LOG_LEVEL_ERROR, "Unable to initialize runlevel 2. ");
-        }
-        else
-        {
-            LOG(LOG_LEVEL_INFO, "Runlevel 2 initialized");
-        }
+        LOG(LOG_LEVEL_ERROR, "Unable to initialize runlevel 2. ");
+    }
+    else
+    {
+        LOG(LOG_LEVEL_INFO, "Runlevel 2 initialized");
     }
 
-    if (boot::RequestedRunlevel >= boot::Runlevel::Runlevel3)
+    if (OS_RESULT_FAILED(obc->InitializeRunlevel3()))
     {
-        if (OS_RESULT_FAILED(obc->InitializeRunlevel3()))
-        {
-            LOG(LOG_LEVEL_ERROR, "Unable to initialize runlevel 3. ");
-        }
-        else
-        {
-            LOG(LOG_LEVEL_ERROR, "Runlevel 3 initialized");
-        }
+        LOG(LOG_LEVEL_ERROR, "Unable to initialize runlevel 3. ");
+    }
+    else
+    {
+        LOG(LOG_LEVEL_ERROR, "Runlevel 3 initialized");
     }
 
     // commented because BeaconUpdate is not necessary now
@@ -243,11 +233,6 @@ int main(void)
     InitSwoEndpoint();
 
     DMADRV_Init();
-
-    boot::RequestedRunlevel = boot::Runlevel::Runlevel3;
-    boot::Index = 0;
-    boot::BootReason = boot::Reason::BootToUpper;
-    boot::ClearStateOnStartup = false;
 
     Main.InitializeRunlevel0();
 

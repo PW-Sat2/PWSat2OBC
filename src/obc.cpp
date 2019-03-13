@@ -1,5 +1,4 @@
 #include "obc.h"
-#include "boot/params.hpp"
 #include "efm_support/api.h"
 #include "logger/logger.h"
 #include "mission.h"
@@ -28,7 +27,7 @@ OBC::OBC()
           PowerControlInterface,
           Hardware.I2C.Buses.Bus,
           Hardware.I2C.Buses.Payload),
-      Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index)
+      Scrubbing(this->Hardware, this->BootTable, this->BootSettings, 0b000111) // [TODO] czy to dobrze?
 {
 }
 
@@ -72,14 +71,7 @@ OSResult OBC::InitializeRunlevel2()
 
     this->Hardware.Burtc.Start();
 
-    if (boot::BootReason != boot::Reason::BootToUpper)
-    {
-        this->Scrubbing.InitializeRunlevel2();
-    }
-    else
-    {
-        LOG(LOG_LEVEL_WARNING, "[obc] Not starting scrubbing as boot to upper detected");
-    }
+    this->Scrubbing.InitializeRunlevel2();
 
     drivers::watchdog::InternalWatchdog::Enable();
 

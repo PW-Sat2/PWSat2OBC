@@ -42,7 +42,6 @@ target_link_libraries(${NAME}
     mission_power
     mission_memory
     watchdog
-    boot_params
     program_flash
     scrubber
     boot_settings
