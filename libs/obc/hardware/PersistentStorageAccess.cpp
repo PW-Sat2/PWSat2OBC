@@ -4,13 +4,13 @@
 namespace obc
 {
     PersistentStorageAccess::PersistentStorageAccess(
-        error_counter::IErrorCounting& errors, std::array<drivers::spi::ISPIInterface*, 3> spis)
+        std::array<drivers::spi::ISPIInterface*, 3> spis)
         :                             //
           _fm25wDrivers{              //
               {*spis[0]},             //
               {*spis[1]},             //
               {*spis[2]}},            //
-          _driver{errors,             //
+          _driver{
               {&_fm25wDrivers[0],     //
                   &_fm25wDrivers[1],  //
                   &_fm25wDrivers[2]}} //

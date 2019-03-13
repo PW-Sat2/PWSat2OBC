@@ -14,14 +14,12 @@ using namespace devices::rtc;
 using drivers::i2c::II2CBus;
 using drivers::i2c::I2CResult;
 
-RTCObject::RTCObject(error_counter::ErrorCounting& errors, drivers::i2c::II2CBus& bus) : _error(errors), _bus(bus)
+RTCObject::RTCObject(drivers::i2c::II2CBus& bus) : _bus(bus)
 {
 }
 
 OSResult RTCObject::ReadTime(RTCTime& rtcTime)
 {
-    ErrorReporter errorContext(_error);
-
     std::array<std::uint8_t, 1> inBuffer;
     std::array<std::uint8_t, 7> outBuffer;
 
@@ -32,7 +30,6 @@ OSResult RTCObject::ReadTime(RTCTime& rtcTime)
     if (!status)
     {
         LOGF(LOG_LEVEL_ERROR, "Unable read time from RTC. Reason: %d", num(result));
-        errorContext.Counter().Failure();
         return OSResult::InvalidOperation;
     }
 
@@ -50,8 +47,6 @@ OSResult RTCObject::ReadTime(RTCTime& rtcTime)
 
 bool RTCObject::IsIntegrityGuaranteed()
 {
-    ErrorReporter errorContext(_error);
-
     std::array<std::uint8_t, 1> inBuffer;
     std::array<std::uint8_t, 1> outBuffer;
 
@@ -62,7 +57,6 @@ bool RTCObject::IsIntegrityGuaranteed()
     if (!status)
     {
         LOGF(LOG_LEVEL_ERROR, "Unable read integrity flag from RTC. Reason: %d", num(result));
-        errorContext.Counter().Failure();
         return false;
     }
 
@@ -73,8 +67,6 @@ bool RTCObject::IsIntegrityGuaranteed()
 
 OSResult RTCObject::SetTime(const RTCTime& time)
 {
-    ErrorReporter errorContext(_error);
-
     std::array<std::uint8_t, 8> inBuffer;
     Writer w(inBuffer);
     w.WriteByte(num(Registers::VL_seconds));
@@ -91,7 +83,6 @@ OSResult RTCObject::SetTime(const RTCTime& time)
     if (!status)
     {
         LOGF(LOG_LEVEL_ERROR, "Unable read integrity flag from RTC. Reason: %d", num(result));
-        errorContext.Counter().Failure();
         return OSResult::DeviceNotFound;
     }
 

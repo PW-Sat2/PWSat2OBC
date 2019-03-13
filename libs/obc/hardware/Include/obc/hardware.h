@@ -114,7 +114,7 @@ namespace obc
          * @param[in] powerControl Power control interface
          * @param[in] burtcTickHandler Tick handler for internal (BURTC) clock
          */
-        OBCHardware(error_counter::ErrorCounting& errorCounting, services::power::IPowerControl&, TimeAction& burtcTickHandler);
+        OBCHardware(services::power::IPowerControl&, TimeAction& burtcTickHandler);
 
         /** @brief Initializes OBC hardware */
         void Initialize();

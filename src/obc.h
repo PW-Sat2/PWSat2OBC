@@ -94,9 +94,6 @@ struct OBC
     /** @brief Power control interface */
     services::power::EPSPowerControl PowerControlInterface;
 
-    /** @brief FDIR mechanisms */
-    obc::FDIR Fdir;
-
     /** @brief Overall satellite <-> Earth communication */
     obc::OBCCommunication Communication;
 

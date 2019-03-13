@@ -83,7 +83,7 @@ namespace devices
              * @param controllerABus I2C interface for controller A
              * @param controllerBBus I2C interface for controller B
              */
-            EPSDriver(error_counter::ErrorCounting& errorCounting, //
+            EPSDriver(
                 drivers::i2c::II2CBus& controllerABus,             //
                 drivers::i2c::II2CBus& controllerBBus);
 
@@ -161,12 +161,7 @@ namespace devices
              */
             inline void ResetWatchdog();
 
-            /** @brief Error counter type */
-            using ErrorCounter = error_counter::ErrorCounter<1>;
-
           private:
-            /** @brief Error counter */
-            ErrorCounter _error;
 
             /** @brief I2C interface for controller A */
             drivers::i2c::II2CBus& _controllerABus;

@@ -54,10 +54,10 @@ namespace obc
         {
             state::MessageState msg;
 
-            if (!this->_stateContainer.GetState().PersistentState.Get(msg))
-            {
-                msg = state::MessageState();
-            }
+//            if (!this->_stateContainer.GetState().PersistentState.Get(msg))
+//            {
+//                msg = state::MessageState();
+//            }
 
             DownlinkFrame frame(DownlinkAPID::PeriodicMessage, 0);
             frame.PayloadWriter().WriteArray(msg.Message());

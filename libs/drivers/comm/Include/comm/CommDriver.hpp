@@ -31,7 +31,7 @@ class CommObject final : public ITransmitter,      //
      * @param[in] errors Error counting mechanism
      * @param[in] low I2C bus used to communicate with device
      */
-    CommObject(error_counter::ErrorCounting& errors, drivers::i2c::II2CBus& low);
+    CommObject(drivers::i2c::II2CBus& low);
 
     /**
      * @brief This procedure initializes the comm driver object and sets it 'Paused' state.
@@ -227,9 +227,6 @@ class CommObject final : public ITransmitter,      //
 
     void WaitForComLoop() final override;
 
-    /** @brief Error counter type */
-    using ErrorCounter = error_counter::ErrorCounter<0>;
-
     /** @brief Id of semaphore used for transmitter synchronization. */
     static constexpr std::uint8_t transmitterSemaphoreId = 1;
 
@@ -237,8 +234,6 @@ class CommObject final : public ITransmitter,      //
     static constexpr std::uint8_t receiverSemaphoreId = 2;
 
   private:
-    /** @brief Error reporter type */
-    using ErrorReporter = error_counter::AggregatedErrorReporter<ErrorCounter::DeviceId>;
 
     /**
      * @brief Sends passed no argument command to the device with requested address.
@@ -247,7 +242,7 @@ class CommObject final : public ITransmitter,      //
      * @param[in] resultAggregator Aggregator for error counter
      * @return Operation status, true in case of success, false otherwise.
      */
-    bool SendCommand(Address address, std::uint8_t command, error_counter::AggregatedErrorCounter& resultAggregator);
+    bool SendCommand(Address address, std::uint8_t command);
 
     /**
      * @brief Sends passed no argument command to the device with requested address.
@@ -263,8 +258,7 @@ class CommObject final : public ITransmitter,      //
      */
     bool SendCommandWithResponse(Address address,               //
         std::uint8_t command,                                   //
-        gsl::span<std::uint8_t> outBuffer,                      //
-        error_counter::AggregatedErrorCounter& resultAggregator //
+        gsl::span<std::uint8_t> outBuffer                       //
         );
 
     /**
@@ -284,8 +278,7 @@ class CommObject final : public ITransmitter,      //
      */
     bool SendBufferWithResponse(Address address,                //
         gsl::span<const std::uint8_t> inputBuffer,              //
-        gsl::span<uint8_t> outBuffer,                           //
-        error_counter::AggregatedErrorCounter& resultAggregator //
+        gsl::span<uint8_t> outBuffer                            //
         );
     /**
      * @brief This procedure will try to download the oldest not yet processed frame from the hardware.
@@ -304,7 +297,7 @@ class CommObject final : public ITransmitter,      //
      * @param[in] resultAggregator Aggregator for error counter
      * @return Operation status, true in case of success, false otherwise.
      */
-    bool GetFrame(gsl::span<std::uint8_t> buffer, int retryCount, Frame& frame, error_counter::AggregatedErrorCounter& resultAggregator);
+    bool GetFrame(gsl::span<std::uint8_t> buffer, int retryCount, Frame& frame);
 
     /**
      * @brief This procedure is responsible for downloading single frame from the hardware
@@ -332,16 +325,15 @@ class CommObject final : public ITransmitter,      //
      * @return Operation status, true in case of success, false otherwise.
      */
     bool ScheduleFrameTransmission(gsl::span<const std::uint8_t> frame, //
-        std::uint8_t& remainingSlots,                                   //
-        error_counter::AggregatedErrorCounter& resultAggregator         //
+        std::uint8_t& remainingSlots                                    //
         );
 
-    bool ReceiveFrameInternal(gsl::span<std::uint8_t> buffer, Frame& frame, error_counter::AggregatedErrorCounter& resultAggregator);
-    bool RemoveFrameInternal(error_counter::AggregatedErrorCounter& resultAggregator);
-    bool ResetInternal(error_counter::AggregatedErrorCounter& resultAggregator);
-    bool GetTransmitterTelemetryInternal(TransmitterTelemetry& telemetry, error_counter::AggregatedErrorCounter& resultAggregator);
-    bool GetReceiverTelemetryInternal(ReceiverTelemetry& telemetry, error_counter::AggregatedErrorCounter& resultAggregator);
-    bool UpdateBeaconInternal(const Beacon& beaconData, error_counter::AggregatedErrorCounter& resultAggregator);
+    bool ReceiveFrameInternal(gsl::span<std::uint8_t> buffer, Frame& frame);
+    bool RemoveFrameInternal();
+    bool ResetInternal();
+    bool GetTransmitterTelemetryInternal(TransmitterTelemetry& telemetry);
+    bool GetReceiverTelemetryInternal(ReceiverTelemetry& telemetry);
+    bool UpdateBeaconInternal(const Beacon& beaconData);
 
     /**
      * @brief Internal communication module task entry point.
@@ -354,9 +346,6 @@ class CommObject final : public ITransmitter,      //
      * @return Operation result
      */
     bool Resume();
-
-    /** @brief Error counter */
-    ErrorCounter _error;
 
     /** @brief Comm driver lower interface. */
     drivers::i2c::II2CBus& _low;
@@ -395,9 +384,8 @@ class CommObject final : public ITransmitter,      //
 
 inline bool CommObject::SendFrame(gsl::span<const std::uint8_t> frame)
 {
-    error_counter::AggregatedErrorReporter<0> errorContext(_error);
     std::uint8_t remainingBufferSize;
-    return ScheduleFrameTransmission(frame, remainingBufferSize, errorContext.Counter());
+    return ScheduleFrameTransmission(frame, remainingBufferSize);
 }
 
 inline void CommObject::SetFrameHandler(IHandleFrame& handler)

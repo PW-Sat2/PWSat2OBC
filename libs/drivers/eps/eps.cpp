@@ -43,8 +43,8 @@ namespace devices
         };
 
         EPSDriver::EPSDriver(
-            error_counter::ErrorCounting& errorCounting, drivers::i2c::II2CBus& controllerABus, drivers::i2c::II2CBus& controllerBBus)
-            : _error(errorCounting), _controllerABus(controllerABus), _controllerBBus(controllerBBus)
+            drivers::i2c::II2CBus& controllerABus, drivers::i2c::II2CBus& controllerBBus)
+            : _controllerABus(controllerABus), _controllerBBus(controllerBBus)
         {
         }
 
@@ -65,13 +65,10 @@ namespace devices
 
             if (this->Write(controller, command) != I2CResult::OK)
             {
-                this->_error.Failure();
                 return false;
             }
 
             System::SleepTask(PowerCycleTimeout);
-
-            this->_error.Failure();
 
             LOGF(LOG_LEVEL_ERROR, "Power cycle failed (%s)", controller == Controller::A ? "A" : "B");
 
@@ -94,11 +91,10 @@ namespace devices
 
             if (this->Write(controller, command) != I2CResult::OK)
             {
-                this->_error.Failure();
                 return ErrorCode::CommunicationFailure;
             }
 
-            return ErrorCode::NoError >> this->_error;
+            return ErrorCode::NoError;
         }
 
         ErrorCode EPSDriver::DisableLCL(LCL lcl)
@@ -110,17 +106,16 @@ namespace devices
 
             if (this->Write(controller, command) != I2CResult::OK)
             {
-                this->_error.Failure();
                 return ErrorCode::CommunicationFailure;
             }
 
-            return ErrorCode::NoError >> this->_error;
+            return ErrorCode::NoError;
         }
 
         bool EPSDriver::DisableOverheatSubmode(Controller controller)
         {
             std::array<std::uint8_t, 1> command{num(Command::DisableOverheatSubmode)};
-            return (this->Write(controller, command) == I2CResult::OK) >> this->_error;
+            return (this->Write(controller, command) == I2CResult::OK);
         }
 
         ErrorCode EPSDriver::EnableBurnSwitch(bool main, BurnSwitch burnSwitch)
@@ -131,11 +126,10 @@ namespace devices
 
             if (this->Write(controller, command) != I2CResult::OK)
             {
-                this->_error.Failure();
                 return ErrorCode::CommunicationFailure;
             }
 
-            return ErrorCode::NoError >> this->_error;
+            return ErrorCode::NoError;
         }
 
         ErrorCode EPSDriver::ResetWatchdog(Controller controller)
@@ -144,11 +138,10 @@ namespace devices
 
             if (this->Write(controller, command) != I2CResult::OK)
             {
-                this->_error.Failure();
                 return ErrorCode::CommunicationFailure;
             }
 
-            return ErrorCode::NoError >> this->_error;
+            return ErrorCode::NoError;
         }
 
         I2CResult EPSDriver::Write(Controller controller, const gsl::span<std::uint8_t> inData)

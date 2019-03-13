@@ -36,29 +36,13 @@ static void TimePassed(void* /*context*/, TimePoint /*currentTime*/)
     drivers::watchdog::InternalWatchdog::Kick();
 }
 
-static std::uint16_t GetErrorCounterMask()
-{
-    return 1 << devices::rtc::RTCObject::ErrorCounter::DeviceId |                //
-        1 << devices::imtq::ImtqDriver::ErrorCounter::DeviceId |                 //
-//        1 << obc::storage::error_counters::N25QDriver1::ErrorCounter::DeviceId | //
-//        1 << obc::storage::error_counters::N25QDriver2::ErrorCounter::DeviceId | //
-//        1 << obc::storage::error_counters::N25QDriver3::ErrorCounter::DeviceId | //
-//        1 << devices::n25q::RedundantN25QDriver::ErrorCounter::DeviceId |        //
-        1 << devices::fm25w::RedundantFM25WDriver::ErrorCounter::DeviceId |      //
-        1 << devices::payload::PayloadDriver::ErrorCounter::DeviceId |           //
-//        1 << devices::camera::LowLevelCameraDriver::ErrorCounter::DeviceId |     //
-        1 << devices::suns::SunSDriver::ErrorCounter::DeviceId |                 //
-        1 << antenna_error_counters::PrimaryChannel::ErrorCounter::DeviceId |    //
-        1 << antenna_error_counters::SecondaryChannel::ErrorCounter::DeviceId;   //
-}
 
 OBC::OBC()
     : initTask(nullptr),                                                               //
       BootTable(Hardware.FlashDriver),                                                 //
       BootSettings(this->Hardware.PersistentStorage.GetRedundantDriver()),             //
-      Hardware(this->Fdir.ErrorCounting(), this->PowerControlInterface, timeProvider), //
+      Hardware(this->PowerControlInterface, timeProvider), //
       PowerControlInterface(this->Hardware.EPS),                                       //
-      Fdir(this->PowerControlInterface, GetErrorCounterMask()),                        //
       Communication(                   //
           this->Hardware.CommDriver,
           Mission,
@@ -84,8 +68,6 @@ OSResult OBC::InitializeRunlevel1()
         return result;
     }
 
-    this->Fdir.Initalize();
-
     this->Hardware.Initialize();
 
     this->BootTable.Initialize();
@@ -109,16 +91,6 @@ OSResult OBC::InitializeRunlevel1()
         {
             LOG(LOG_LEVEL_ERROR, "[obc] Unable to initialize persistent timer. ");
         }
-    }
-
-    state::ErrorCountersConfigState errorCountersConfig;
-    if (!persistentState.Get(errorCountersConfig))
-    {
-        LOG(LOG_LEVEL_ERROR, "[obc] Can't get error counters config");
-    }
-    else
-    {
-        this->Fdir.LoadConfig(errorCountersConfig._config);
     }
 
     if (!Mission.Initialize(10s))

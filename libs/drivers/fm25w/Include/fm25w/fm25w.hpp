@@ -120,7 +120,7 @@ namespace devices
              * @param errors Error counting mechanism
              * @param fm25wDrivers Driver used for redundancy
              */
-            RedundantFM25WDriver(error_counter::IErrorCounting& errors, std::array<IFM25WDriver*, 3> fm25wDrivers);
+            RedundantFM25WDriver(std::array<IFM25WDriver*, 3> fm25wDrivers);
 
             /**
              * @brief Reads status register
@@ -151,9 +151,6 @@ namespace devices
             using ErrorCounter = error_counter::ErrorCounter<8>;
 
           private:
-            /** @brief Error counter */
-            ErrorCounter _error;
-
             std::array<IFM25WDriver*, 3> _fm25wDrivers;
 
             void Read(Address address,

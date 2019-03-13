@@ -25,7 +25,7 @@ namespace obc
          * @param[in] errors Error counting mechanism
          * @param[in] spis Array of pointers to spi bus controllers that will be used to access 3 memory chips.
          */
-        PersistentStorageAccess(error_counter::IErrorCounting& errors, std::array<drivers::spi::ISPIInterface*, 3> spis);
+        PersistentStorageAccess(std::array<drivers::spi::ISPIInterface*, 3> spis);
 
         virtual void Read(std::uint32_t address, gsl::span<std::uint8_t> span) final override;
 

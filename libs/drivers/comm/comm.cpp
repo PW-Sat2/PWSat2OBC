@@ -44,9 +44,8 @@ Beacon::Beacon(std::chrono::seconds beaconPeriod, gsl::span<const std::uint8_t> 
 {
 }
 
-CommObject::CommObject(error_counter::ErrorCounting& errors, II2CBus& low)
-    : _error(errors),                                                              //
-      _low(low),                                                                   //
+CommObject::CommObject(II2CBus& low)
+    : _low(low),                                                                   //
       _frameHandler(nullptr),                                                      //
       _pollingTaskHandle(nullptr),                                                 //
       transmitterSemaphore(System::CreateBinarySemaphore(transmitterSemaphoreId)), //
@@ -67,14 +66,13 @@ enum TaskFlag
     TaskFlagPing = 8
 };
 
-bool CommObject::SendCommand(Address address, uint8_t command, AggregatedErrorCounter& resultAggregator)
+bool CommObject::SendCommand(Address address, uint8_t command)
 {
     auto semaphore = (address == Address::Receiver) ? receiverSemaphore : transmitterSemaphore;
     Lock lock(semaphore, InfiniteTimeout);
     if (!lock())
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire synchronization semaphore");
-        resultAggregator.Failure();
         return false;
     }
 
@@ -85,13 +83,12 @@ bool CommObject::SendCommand(Address address, uint8_t command, AggregatedErrorCo
         LOGF(LOG_LEVEL_ERROR, "[comm] Unable to send command %d to %d, Reason: %d", command, num(address), num(result));
     }
 
-    return status >> resultAggregator;
+    return status;
 }
 
 bool CommObject::SendBufferWithResponse(Address address, //
     gsl::span<const std::uint8_t> inputBuffer,           //
-    gsl::span<uint8_t> outBuffer,                        //
-    AggregatedErrorCounter& resultAggregator             //
+    gsl::span<uint8_t> outBuffer                         //
     )
 {
     auto semaphore = (address == Address::Receiver) ? receiverSemaphore : transmitterSemaphore;
@@ -99,7 +96,6 @@ bool CommObject::SendBufferWithResponse(Address address, //
     if (!lock())
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire synchronization semaphore");
-        resultAggregator.Failure();
         return false;
     }
 
@@ -116,7 +112,7 @@ bool CommObject::SendBufferWithResponse(Address address, //
             static_cast<int>(inputBuffer[0]),
             num(address),
             num(result));
-        return false >> resultAggregator;
+        return false;
     }
 
     System::SleepTask(2ms);
@@ -129,7 +125,7 @@ bool CommObject::SendBufferWithResponse(Address address, //
             static_cast<int>(inputBuffer[0]),
             num(address),
             num(result));
-        return false >> resultAggregator;
+        return false;
     }
 
     return status;
@@ -137,24 +133,20 @@ bool CommObject::SendBufferWithResponse(Address address, //
 
 bool CommObject::SendCommandWithResponse(Address address, //
     uint8_t command,                                      //
-    span<uint8_t> outBuffer,                              //
-    AggregatedErrorCounter& resultAggregator              //
+    span<uint8_t> outBuffer                               //
     )
 {
-    return SendBufferWithResponse(address, gsl::span<const uint8_t>(&command, 1), outBuffer, resultAggregator);
+    return SendBufferWithResponse(address, gsl::span<const uint8_t>(&command, 1), outBuffer);
 }
 
 OSResult CommObject::Initialize()
 {
-    ErrorReporter errorContext(_error);
-
     OSResult result;
 
     result = System::GiveSemaphore(transmitterSemaphore);
     if (OS_RESULT_FAILED(result))
     {
         LOGF(LOG_LEVEL_FATAL, "[comm] Unable to release transmitter semaphore (%d)", num(result));
-        errorContext.Counter().Failure();
         return result;
     }
 
@@ -162,7 +154,6 @@ OSResult CommObject::Initialize()
     if (OS_RESULT_FAILED(result))
     {
         LOGF(LOG_LEVEL_FATAL, "[comm] Unable to release receiver semaphore (%d)", num(result));
-        errorContext.Counter().Failure();
         return result;
     }
 
@@ -170,7 +161,6 @@ OSResult CommObject::Initialize()
     if (OS_RESULT_FAILED(result))
     {
         LOGF(LOG_LEVEL_FATAL, "[comm] Unable to create polling task flags (%d)", num(result));
-        errorContext.Counter().Failure();
         return result;
     }
 
@@ -178,7 +168,6 @@ OSResult CommObject::Initialize()
     if (OS_RESULT_FAILED(result))
     {
         LOGF(LOG_LEVEL_ERROR, "[comm] Unable to create background task (%d)", num(result));
-        errorContext.Counter().Failure();
         return result;
     }
 
@@ -199,12 +188,10 @@ bool CommObject::StartTask()
 
 bool CommObject::RestartHardware()
 {
-    ErrorReporter errorContext(_error);
-
-    if (!ResetInternal(errorContext.Counter()))
+    if (!ResetInternal())
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Unable reset comm hardware. ");
-        return false >> errorContext.Counter();
+        return false;
     }
 
     return true;
@@ -228,34 +215,29 @@ bool CommObject::Resume()
 
 bool CommObject::Reset()
 {
-    ErrorReporter errorContext(_error);
-    return ResetInternal(errorContext.Counter());
+    return ResetInternal();
 }
 
-bool CommObject::ResetInternal(AggregatedErrorCounter& resultAggregator)
+bool CommObject::ResetInternal()
 {
-    return this->SendCommand(Address::Receiver, num(ReceiverCommand::HardReset), resultAggregator);
+    return this->SendCommand(Address::Receiver, num(ReceiverCommand::HardReset));
 }
 
 bool CommObject::ResetTransmitter()
 {
-    ErrorReporter errorContext(_error);
-    return this->SendCommand(Address::Transmitter, num(TransmitterCommand::SoftReset), errorContext.Counter());
+    return this->SendCommand(Address::Transmitter, num(TransmitterCommand::SoftReset));
 }
 
 bool CommObject::ResetReceiver()
 {
-    ErrorReporter errorContext(_error);
-    return this->SendCommand(Address::Receiver, num(ReceiverCommand::SoftReset), errorContext.Counter());
+    return this->SendCommand(Address::Receiver, num(ReceiverCommand::SoftReset));
 }
 
 ReceiverFrameCount CommObject::GetFrameCount()
 {
-    ErrorReporter errorContext(_error);
-
     ReceiverFrameCount result;
     uint8_t buffer[2];
-    result.status = this->SendCommandWithResponse(Address::Receiver, num(ReceiverCommand::GetFrameCount), buffer, errorContext.Counter());
+    result.status = this->SendCommandWithResponse(Address::Receiver, num(ReceiverCommand::GetFrameCount), buffer);
     if (!result.status)
     {
         LOG(LOG_LEVEL_ERROR, "Unable to get frame count");
@@ -276,7 +258,6 @@ ReceiverFrameCount CommObject::GetFrameCount()
         LOGF(LOG_LEVEL_INFO, "Detected invalid number of incoming frames: '%d'.", static_cast<int>(result.frameCount));
         result.frameCount = 0;
         result.status = false;
-        errorContext.Counter().Failure();
     }
 
     return result;
@@ -284,13 +265,12 @@ ReceiverFrameCount CommObject::GetFrameCount()
 
 bool CommObject::RemoveFrame()
 {
-    ErrorReporter errorContext(_error);
-    return RemoveFrameInternal(errorContext.Counter());
+    return RemoveFrameInternal();
 }
 
-bool CommObject::RemoveFrameInternal(AggregatedErrorCounter& resultAggregator)
+bool CommObject::RemoveFrameInternal()
 {
-    const bool status = this->SendCommand(Address::Receiver, num(ReceiverCommand::RemoveFrame), resultAggregator);
+    const bool status = this->SendCommand(Address::Receiver, num(ReceiverCommand::RemoveFrame));
     if (!status)
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Failed to remove frame from buffer");
@@ -299,7 +279,7 @@ bool CommObject::RemoveFrameInternal(AggregatedErrorCounter& resultAggregator)
     return status;
 }
 
-bool CommObject::GetReceiverTelemetryInternal(ReceiverTelemetry& telemetry, AggregatedErrorCounter& resultAggregator)
+bool CommObject::GetReceiverTelemetryInternal(ReceiverTelemetry& telemetry)
 {
     memset(&telemetry, 0, sizeof(ReceiverTelemetry));
 
@@ -310,8 +290,7 @@ bool CommObject::GetReceiverTelemetryInternal(ReceiverTelemetry& telemetry, Aggr
 
         const bool status = this->SendCommandWithResponse(Address::Receiver, //
             num(ReceiverCommand::GetUptime),                                 //
-            span<uint8_t>(buffer),                                           //
-            resultAggregator);
+            span<uint8_t>(buffer));
 
         if (!status)
         {
@@ -340,8 +319,7 @@ bool CommObject::GetReceiverTelemetryInternal(ReceiverTelemetry& telemetry, Aggr
         const bool status = this->SendCommandWithResponse( //
             Address::Receiver,                             //
             num(ReceiverCommand::GetTelemetry),            //
-            span<uint8_t>(buffer),                         //
-            resultAggregator);
+            span<uint8_t>(buffer));
 
         if (!status)
         {
@@ -365,12 +343,10 @@ bool CommObject::GetReceiverTelemetryInternal(ReceiverTelemetry& telemetry, Aggr
 
 bool CommObject::GetReceiverTelemetry(ReceiverTelemetry& telemetry)
 {
-    ErrorReporter errorContext(_error);
-
-    return GetReceiverTelemetryInternal(telemetry, errorContext.Counter());
+    return GetReceiverTelemetryInternal(telemetry);
 }
 
-bool CommObject::GetTransmitterTelemetryInternal(TransmitterTelemetry& telemetry, AggregatedErrorCounter& resultAggregator)
+bool CommObject::GetTransmitterTelemetryInternal(TransmitterTelemetry& telemetry)
 {
     memset(&telemetry, 0, sizeof(TransmitterTelemetry));
 
@@ -381,8 +357,7 @@ bool CommObject::GetTransmitterTelemetryInternal(TransmitterTelemetry& telemetry
 
         const bool status = this->SendCommandWithResponse(Address::Transmitter, //
             num(TransmitterCommand::GetUptime),                                 //
-            span<uint8_t>(buffer),                                              //
-            resultAggregator);
+            span<uint8_t>(buffer));
 
         if (!status)
         {
@@ -404,8 +379,7 @@ bool CommObject::GetTransmitterTelemetryInternal(TransmitterTelemetry& telemetry
 
         const bool status = this->SendCommandWithResponse(Address::Transmitter, //
             num(TransmitterCommand::GetState),                                  //
-            span<uint8_t>(&buffer, 1),                                          //
-            resultAggregator);
+            span<uint8_t>(&buffer, 1));
 
         if (!status)
         {
@@ -428,8 +402,7 @@ bool CommObject::GetTransmitterTelemetryInternal(TransmitterTelemetry& telemetry
         const bool status = this->SendCommandWithResponse(         //
             Address::Transmitter,                                  //
             num(TransmitterCommand::GetTelemetryLastTransmission), //
-            span<uint8_t>(buffer),                                 //
-            resultAggregator);
+            span<uint8_t>(buffer));
 
         if (!status)
         {
@@ -450,8 +423,7 @@ bool CommObject::GetTransmitterTelemetryInternal(TransmitterTelemetry& telemetry
         const bool status = this->SendCommandWithResponse( //
             Address::Transmitter,                          //
             num(TransmitterCommand::GetTelemetryInstant),  //
-            span<uint8_t>(buffer),                         //
-            resultAggregator);
+            span<uint8_t>(buffer));
 
         if (!status)
         {
@@ -473,8 +445,7 @@ bool CommObject::GetTransmitterTelemetryInternal(TransmitterTelemetry& telemetry
 
 bool CommObject::GetTransmitterTelemetry(TransmitterTelemetry& telemetry)
 {
-    ErrorReporter errorContext(_error);
-    return GetTransmitterTelemetryInternal(telemetry, errorContext.Counter());
+    return GetTransmitterTelemetryInternal(telemetry);
 }
 
 /**
@@ -501,18 +472,17 @@ static gsl::span<std::uint8_t> ReceiveSpan(std::uint16_t frameSize, gsl::span<st
 
 bool CommObject::ReceiveFrame(gsl::span<std::uint8_t> buffer, Frame& frame)
 {
-    ErrorReporter errorContext(_error);
-    return ReceiveFrameInternal(buffer, frame, errorContext.Counter());
+    return ReceiveFrameInternal(buffer, frame);
 }
 
-bool CommObject::ReceiveFrameInternal(gsl::span<std::uint8_t> buffer, Frame& frame, AggregatedErrorCounter& resultAggregator)
+bool CommObject::ReceiveFrameInternal(gsl::span<std::uint8_t> buffer, Frame& frame)
 {
     if (buffer.size() < 2)
     {
         return false;
     }
 
-    bool status = this->SendCommandWithResponse(Address::Receiver, num(ReceiverCommand::GetFrame), buffer.subspan(0, 2), resultAggregator);
+    bool status = this->SendCommandWithResponse(Address::Receiver, num(ReceiverCommand::GetFrame), buffer.subspan(0, 2));
     if (!status)
     {
         return status;
@@ -521,7 +491,7 @@ bool CommObject::ReceiveFrameInternal(gsl::span<std::uint8_t> buffer, Frame& fra
     Reader reader(buffer.subspan(0, 2));
     auto size = reader.ReadWordLE();
     buffer = ReceiveSpan(size, buffer);
-    status = this->SendCommandWithResponse(Address::Receiver, num(ReceiverCommand::GetFrame), buffer, resultAggregator);
+    status = this->SendCommandWithResponse(Address::Receiver, num(ReceiverCommand::GetFrame), buffer);
     if (!status)
     {
         return status;
@@ -550,7 +520,7 @@ bool CommObject::ReceiveFrameInternal(gsl::span<std::uint8_t> buffer, Frame& fra
 }
 
 bool CommObject::ScheduleFrameTransmission(
-    gsl::span<const std::uint8_t> frame, std::uint8_t& remainingBufferSize, AggregatedErrorCounter& resultAggregator)
+    gsl::span<const std::uint8_t> frame, std::uint8_t& remainingBufferSize)
 {
     if (frame.size() > MaxDownlinkFrameSize)
     {
@@ -564,9 +534,7 @@ bool CommObject::ScheduleFrameTransmission(
 
     const bool status = SendBufferWithResponse(Address::Transmitter, //
         gsl::span<const std::uint8_t>(cmd, 1 + frame.size()),        //
-        gsl::span<std::uint8_t>(&remainingBufferSize, 1),            //
-        resultAggregator                                             //
-        );
+        gsl::span<std::uint8_t>(&remainingBufferSize, 1));
     if (!status)
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Failed to send frame");
@@ -575,7 +543,6 @@ bool CommObject::ScheduleFrameTransmission(
     if (remainingBufferSize == 0xff)
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Frame was not accepted by the transmitter.");
-        resultAggregator.Failure();
     }
 
     if (this->_lastSend.HasValue)
@@ -606,9 +573,8 @@ bool CommObject::ScheduleFrameTransmission(
 
 Option<bool> CommObject::SetBeacon(const Beacon& beaconData)
 {
-    ErrorReporter errorContext(_error);
     std::uint8_t remainingBufferSize = 0;
-    const auto result = ScheduleFrameTransmission(beaconData.Contents(), remainingBufferSize, errorContext.Counter());
+    const auto result = ScheduleFrameTransmission(beaconData.Contents(), remainingBufferSize);
     if (!result)
     {
         return Option<bool>::Some(false);
@@ -621,17 +587,15 @@ Option<bool> CommObject::SetBeacon(const Beacon& beaconData)
 
 bool CommObject::UpdateBeacon(const Beacon& beaconData)
 {
-    ErrorReporter errorContext(_error);
-    return UpdateBeaconInternal(beaconData, errorContext.Counter());
+    return UpdateBeaconInternal(beaconData);
 }
 
-bool CommObject::UpdateBeaconInternal(const Beacon& beaconData, AggregatedErrorCounter& resultAggregator)
+bool CommObject::UpdateBeaconInternal(const Beacon& beaconData)
 {
     Lock lock(transmitterSemaphore, InfiniteTimeout);
     if (!lock())
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire synchronization semaphore");
-        _error.Failure();
         return false;
     }
 
@@ -645,13 +609,12 @@ bool CommObject::UpdateBeaconInternal(const Beacon& beaconData, AggregatedErrorC
         return false;
     }
 
-    return (this->_low.Write(num(Address::Transmitter), writer.Capture()) == I2CResult::OK) >> resultAggregator;
+    return (this->_low.Write(num(Address::Transmitter), writer.Capture()) == I2CResult::OK);
 }
 
 bool CommObject::ClearBeacon()
 {
-    ErrorReporter errorContext(_error);
-    return this->SendCommand(Address::Transmitter, num(TransmitterCommand::ClearBeacon), errorContext.Counter());
+    return this->SendCommand(Address::Transmitter, num(TransmitterCommand::ClearBeacon));
 }
 
 bool CommObject::SetTransmitterStateWhenIdle(IdleState requestedState)
@@ -660,14 +623,13 @@ bool CommObject::SetTransmitterStateWhenIdle(IdleState requestedState)
     if (!lock())
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire synchronization semaphore");
-        _error.Failure();
         return false;
     }
 
     uint8_t buffer[2];
     buffer[0] = num(TransmitterCommand::SetIdleState);
     buffer[1] = num(requestedState);
-    return (this->_low.Write(num(Address::Transmitter), buffer) == I2CResult::OK) >> _error;
+    return (this->_low.Write(num(Address::Transmitter), buffer) == I2CResult::OK);
 }
 
 bool CommObject::SetTransmitterBitRate(Bitrate bitrate)
@@ -676,29 +638,27 @@ bool CommObject::SetTransmitterBitRate(Bitrate bitrate)
     if (!lock())
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire synchronization semaphore");
-        _error.Failure();
         return false;
     }
 
     uint8_t buffer[2];
     buffer[0] = num(TransmitterCommand::SetBitRate);
     buffer[1] = num(bitrate);
-    return (this->_low.Write(num(Address::Transmitter), buffer) == I2CResult::OK) >> _error;
+    return (this->_low.Write(num(Address::Transmitter), buffer) == I2CResult::OK);
 }
 
 bool CommObject::GetTelemetry(CommTelemetry& telemetry)
 {
-    ErrorReporter errorContext(_error);
     TransmitterTelemetry transmitter;
     ReceiverTelemetry receiver;
 
-    if (!GetTransmitterTelemetryInternal(transmitter, errorContext.Counter()))
+    if (!GetTransmitterTelemetryInternal(transmitter))
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire transmitter telemetry. ");
         return false;
     }
 
-    if (!GetReceiverTelemetryInternal(receiver, errorContext.Counter()))
+    if (!GetReceiverTelemetryInternal(receiver))
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire receiver telemetry. ");
         return false;
@@ -710,14 +670,12 @@ bool CommObject::GetTelemetry(CommTelemetry& telemetry)
 
 bool CommObject::ResetWatchdogReceiver()
 {
-    ErrorReporter errorContext(_error);
-    return this->SendCommand(Address::Receiver, num(ReceiverCommand::ResetWatchdog), errorContext.Counter());
+    return this->SendCommand(Address::Receiver, num(ReceiverCommand::ResetWatchdog));
 }
 
 bool CommObject::ResetWatchdogTransmitter()
 {
-    ErrorReporter errorContext(_error);
-    return this->SendCommand(Address::Transmitter, num(TransmitterCommand::ResetWatchdog), errorContext.Counter());
+    return this->SendCommand(Address::Transmitter, num(TransmitterCommand::ResetWatchdog));
 }
 
 bool CommObject::PollHardware()
@@ -747,11 +705,11 @@ bool CommObject::PollHardware()
     return anyFrame;
 }
 
-bool CommObject::GetFrame(gsl::span<std::uint8_t> buffer, int retryCount, Frame& frame, AggregatedErrorCounter& resultAggregator)
+bool CommObject::GetFrame(gsl::span<std::uint8_t> buffer, int retryCount, Frame& frame)
 {
     for (int i = 0; i < retryCount; ++i)
     {
-        const bool status = ReceiveFrameInternal(buffer, frame, resultAggregator);
+        const bool status = ReceiveFrameInternal(buffer, frame);
         if (!status)
         {
             LOG(LOG_LEVEL_ERROR, "[comm] Unable to receive frame. ");
@@ -775,11 +733,9 @@ bool CommObject::GetFrame(gsl::span<std::uint8_t> buffer, int retryCount, Frame&
 
 void CommObject::ProcessSingleFrame()
 {
-    ErrorReporter errorContext(_error);
-
     Frame frame;
     std::uint8_t buffer[PrefferedBufferSize];
-    const bool status = GetFrame(buffer, 3, frame, errorContext.Counter());
+    const bool status = GetFrame(buffer, 3, frame);
     if (status && frame.Verify())
     {
         LOGF(LOG_LEVEL_INFO, "[comm] Received frame %d bytes. ", static_cast<int>(frame.Size()));
@@ -788,7 +744,7 @@ void CommObject::ProcessSingleFrame()
             handler->HandleFrame(*this, frame);
     }
 
-    if (!this->RemoveFrameInternal(errorContext.Counter()))
+    if (!this->RemoveFrameInternal())
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Unable to remove frame from receiver. ");
     }

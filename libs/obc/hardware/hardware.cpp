@@ -88,7 +88,7 @@ void OBCHardware::ResetEps()
 }
 
 OBCHardware::OBCHardware(
-    error_counter::ErrorCounting& errorCounting, services::power::IPowerControl& powerControl, TimeAction& burtcTickHandler)
+    services::power::IPowerControl& powerControl, TimeAction& burtcTickHandler)
     : I2C(powerControl),                                                                  //
       FlashDriver(io_map::ProgramFlash::FlashBase),                                       //
       Burtc(burtcTickHandler),                                                            //
@@ -96,13 +96,13 @@ OBCHardware::OBCHardware(
           {SPI, Pins.Fram1ChipSelect},                                                    //
           {SPI, Pins.Fram2ChipSelect},                                                    //
           {SPI, Pins.Fram3ChipSelect}},                                                   //
-      PersistentStorage{errorCounting,                                                    //
+      PersistentStorage{                                                                  //
           {&FramSpi[0],                                                                   //
               &FramSpi[1],                                                                //
               &FramSpi[2]}},                                                              //
       Gyro(I2C.Buses.Payload),                                                            //
-      EPS(errorCounting, this->I2C.Buses.Bus, this->I2C.Buses.Payload),                   //
-      rtc(errorCounting, I2C.Buses.Payload),                                              //
-      CommDriver(errorCounting, I2C.Buses.Bus)                                            //
+      EPS(this->I2C.Buses.Bus, this->I2C.Buses.Payload),                   //
+      rtc(I2C.Buses.Payload),                                              //
+      CommDriver(I2C.Buses.Bus)                                            //
 {
 }
