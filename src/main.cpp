@@ -40,18 +40,6 @@ using namespace std::chrono_literals;
 
 OBC Main;
 
-devices::comm::ICommHardwareObserver* GetCommHardwareObserver()
-{
-    if (boot::RequestedRunlevel == boot::Runlevel::Runlevel3)
-    {
-        return &Main.Hardware.CommDriver;
-    }
-    else
-    {
-        return nullptr;
-    }
-}
-
 static void PerformMemoryRecovery();
 
 mission::ObcMission Mission(&PerformMemoryRecovery, //
@@ -59,7 +47,7 @@ mission::ObcMission Mission(&PerformMemoryRecovery, //
     Main.Hardware.CommDriver,
     Main.Hardware.CommDriver,
     Main.Hardware.EPS,
-    GetCommHardwareObserver(),
+    &Main.Hardware.CommDriver,
     std::make_tuple(std::ref(Main.PowerControlInterface), std::ref(Main.Scrubbing))
     );
 
