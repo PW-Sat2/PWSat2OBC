@@ -48,16 +48,6 @@ namespace devices
         {
         }
 
-        Option<hk::ControllerATelemetry> EPSDriver::ReadHousekeepingA()
-        {
-            return None<hk::ControllerATelemetry>();
-        }
-
-        Option<hk::ControllerBTelemetry> EPSDriver::ReadHousekeepingB()
-        {
-            return None<hk::ControllerBTelemetry>();
-        }
-
         bool EPSDriver::PowerCycle(Controller controller)
         {
             LOGF(LOG_LEVEL_WARNING, "Triggering power cycle (%s)", controller == Controller::A ? "A" : "B");

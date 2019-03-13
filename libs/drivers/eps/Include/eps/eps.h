@@ -7,7 +7,6 @@
 #include "error_counter/error_counter.hpp"
 #include "fwd.hpp"
 #include "gsl/span"
-#include "hk.hpp"
 #include "i2c/forward.h"
 
 namespace devices
@@ -21,28 +20,7 @@ namespace devices
          * @{
          */
 
-        /**
-         * @brief Interface of object capable providing complete eps telemetry.
-         */
-        struct IEpsTelemetryProvider
-        {
-            /**
-             * @brief Reads housekeeping of controller A
-             * @return Housekeeping of controller A
-             */
-            virtual Option<hk::ControllerATelemetry> ReadHousekeepingA() = 0;
-
-            /**
-             * @brief Reads housekeeping of controller B
-             * @return Housekeeping of controller B
-             */
-            virtual Option<hk::ControllerBTelemetry> ReadHousekeepingB() = 0;
-        };
-
-        /**
-         * @brief EPS driver interface
-         */
-        struct IEPSDriver : public IEpsTelemetryProvider
+        struct IEPSDriver
         {
             /**
              * @brief Available controller
@@ -86,18 +64,6 @@ namespace devices
             EPSDriver(
                 drivers::i2c::II2CBus& controllerABus,             //
                 drivers::i2c::II2CBus& controllerBBus);
-
-            /**
-             * @brief Reads housekeeping of controller A
-             * @return Housekeeping of controller A
-             */
-            virtual Option<hk::ControllerATelemetry> ReadHousekeepingA() final override;
-
-            /**
-             * @brief Reads housekeeping of controller B
-             * @return Housekeeping of controller B
-             */
-            virtual Option<hk::ControllerBTelemetry> ReadHousekeepingB() final override;
 
             /**
              * @brief Performs power cycle using specified controller.

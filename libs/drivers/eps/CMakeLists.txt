@@ -2,7 +2,7 @@ set(NAME eps)
 
 set(SOURCES
     eps.cpp
-    hk.cpp
+#    hk.cpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})
