@@ -31,10 +31,6 @@ OBC::OBC()
 {
 }
 
-void OBC::InitializeRunlevel0()
-{
-}
-
 OSResult OBC::InitializeRunlevel1()
 {
     this->Hardware.Initialize();

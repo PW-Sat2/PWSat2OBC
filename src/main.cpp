@@ -36,8 +36,6 @@ using namespace std::chrono_literals;
 
 OBC Main;
 
-static void PerformMemoryRecovery();
-
 mission::ObcMission Mission(
     Main.Hardware.EPS,
     &Main.Hardware.CommDriver,
@@ -231,10 +229,6 @@ int main(void)
 
     LogInit(LOG_LEVEL_DEBUG);
     InitSwoEndpoint();
-
-    DMADRV_Init();
-
-    Main.InitializeRunlevel0();
 
     SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 

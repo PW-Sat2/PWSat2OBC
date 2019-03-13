@@ -38,9 +38,6 @@ struct OBC
     /** @brief Constructs @ref OBC object  */
     OBC();
 
-    /** @brief Performs OBC initialization at very early stage of boot process */
-    void InitializeRunlevel0();
-
     /**
      * @brief Initialize OBC at runlevel 1
      * @return Operation result
