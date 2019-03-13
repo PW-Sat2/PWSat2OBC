@@ -60,8 +60,6 @@ static void PerformMemoryRecovery();
 mission::ObcMission Mission(&PerformMemoryRecovery, //
     std::tie(Main.timeProvider, Main.Hardware.rtc, Mission),
     Main.Hardware.CommDriver,
-    Main.PowerControlInterface,
-    0,
     Main.Hardware.CommDriver,
     Main.Hardware.EPS,
     GetCommHardwareObserver(),
@@ -167,8 +165,6 @@ static void ObcInitTask(void* param)
 
     auto obc = static_cast<OBC*>(param);
 
-    Mission.BeaconTaskHandle(obc->initTask);
-
     if (boot::RequestedRunlevel >= boot::Runlevel::Runlevel1)
     {
         if (OS_RESULT_FAILED(obc->InitializeRunlevel1()))
@@ -208,11 +204,15 @@ static void ObcInitTask(void* param)
     LOG(LOG_LEVEL_INFO, "Initialized");
     obc->StateFlags.Set(OBC::InitializationFinishedFlag);
 
-    System::SuspendTask(NULL);
+    // commented because BeaconUpdate is not necessary now
+    // [TODO] this needs to be replaced by dummy frame sending
+    //System::SuspendTask(NULL);
+
+//    beacon::BeaconSender sender(Main.Hardware.CommDriver, TelemetryAcquisition);
 
     while (1)
     {
-        System::SuspendTask(NULL);
+//        sender.RunOnce();
     }
 }
 

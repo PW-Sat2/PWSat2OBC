@@ -51,8 +51,6 @@ namespace mission
         MemoryRecoveryTask,          //
         TimeTask,
         CommTask,
-        mission::OpenSailTask,
-        mission::BeaconUpdate,
         mission::SendMessageTask,
         EPSWatchdogTask,
         mission::CommWdogTask,
