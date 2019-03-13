@@ -96,28 +96,12 @@ OBC::OBC()
           BootTable,
           this->Hardware.FlashDriver), //
       Communication(                   //
-          this->Fdir,
           this->Hardware.CommDriver,
-          this->timeProvider,
-          this->Hardware.rtc,
           Mission,
-          Mission,
-          fs,
-          Experiments,
-          BootTable,
           BootSettings,
-          TelemetryAcquisition,
           PowerControlInterface,
-          Mission,
-          Mission, //
           Hardware.I2C.Buses.Bus,
-          Hardware.I2C.Buses.Payload,
-          Hardware.SunS,
-          Hardware.PayloadDeviceDriver,
-          Hardware.Gyro,
-          Camera.PhotoService,
-          Hardware.EPS,
-          adcs.GetAdcsCoordinator()),
+          Hardware.I2C.Buses.Payload),
       Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index),         //
       camera(this->Fdir.ErrorCounting(), this->Hardware.Camera),                           //
       Camera(this->PowerControlInterface, this->fs, this->Hardware.Pins.CamSelect, camera) //

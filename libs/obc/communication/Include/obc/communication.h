@@ -130,46 +130,11 @@ namespace obc
     /** @brief Typedef with all supported telecommands */
     using Telecommands = TelecommandsHolder< //
         obc::telecommands::PingTelecommand,
-        obc::telecommands::DownloadFileTelecommand,
-        obc::telecommands::EnterIdleStateTelecommand,
-        obc::telecommands::RemoveFileTelecommand,
-        obc::telecommands::SetTimeCorrectionConfigTelecommand,
-        obc::telecommands::SetTimeTelecommand,
-        obc::telecommands::PerformDetumblingExperiment,
-        obc::telecommands::AbortExperiment,
-        obc::telecommands::ListFilesTelecommand,
-        obc::telecommands::EraseBootTableEntry,
-        obc::telecommands::WriteProgramPart,
-        obc::telecommands::FinalizeProgramEntry,
         obc::telecommands::SetBootSlotsTelecommand,
-        obc::telecommands::SendBeaconTelecommand,
-        obc::telecommands::SetAntennaDeploymentMaskTelecommand,
         obc::telecommands::PowerCycle,
-        obc::telecommands::SetErrorCounterConfig,
-        obc::telecommands::OpenSail,
-        obc::telecommands::GetErrorCountersConfigTelecommand,
-        obc::telecommands::SetPeriodicMessageTelecommand,
-        obc::telecommands::PerformSunSExperiment,
-        obc::telecommands::EraseFlashTelecommand,
         obc::telecommands::RawI2CTelecommand,
-        obc::telecommands::PerformRadFETExperiment,
-        obc::telecommands::GetSunSDataSetsTelecommand,
-        obc::telecommands::PerformSailExperiment,
-        obc::telecommands::TakePhoto,
-        obc::telecommands::PerformSADSExperiment,
-        obc::telecommands::PerformPayloadCommisioningExperiment,
-        obc::telecommands::GetPersistentStateTelecommand,
-        obc::telecommands::PurgePhoto,
-        obc::telecommands::PerformCameraCommisioningExperiment,
         obc::telecommands::SendPeriodicMessageTelecommand,
-        obc::telecommands::CompileInfoTelecommand,
-        obc::telecommands::ResetTransmitterTelecommand,
-        obc::telecommands::DisableOverheatSubmodeTelecommand,
         obc::telecommands::SetBitrateTelecommand,
-        obc::telecommands::PerformCopyBootSlotsExperiment,
-        obc::telecommands::SetBuiltinDetumblingBlockMaskTelecommand,
-        obc::telecommands::SetAdcsModeTelecommand,
-        obc::telecommands::StopSailDeployment,
         obc::telecommands::ReadMemoryTelecommand>;
 
     /**
@@ -202,28 +167,13 @@ namespace obc
          * @param[in] epsDriver Reference to EPS driver object
          * @param[in] adcsCoordinator Reference to Adcs subsystem controller
          */
-        OBCCommunication(obc::FDIR& fdir,
+        OBCCommunication(
             devices::comm::CommObject& commDriver,
-            services::time::ICurrentTime& currentTime,
-            devices::rtc::IRTC& rtc,
-            mission::IIdleStateController& idleStateController,
             IHasState<SystemState>& stateContainer,
-            services::fs::IFileSystem& fs,
-            obc::OBCExperiments& experiments,
-            program_flash::BootTable& bootTable,
             boot::BootSettings& bootSettings,
-            IHasState<telemetry::TelemetryState>& telemetry,
             services::power::IPowerControl& powerControl,
-            mission::IOpenSail& openSail,
-            mission::ITimeSynchronization& timeSynchronization,
             drivers::i2c::II2CBus& systemBus,
-            drivers::i2c::II2CBus& payload,
-            devices::suns::ISunSDriver& experimentalSunS,
-            devices::payload::IPayloadDeviceDriver& payloadDriver,
-            devices::gyro::IGyroscopeDriver& gyro,
-            services::photo::IPhotoService& photo,
-            devices::eps::IEPSDriver& epsDriver,
-            adcs::IAdcsCoordinator& adcsCoordinator);
+            drivers::i2c::II2CBus& payload);
 
         /**
          * @brief Initializes all communication at runlevel 1
