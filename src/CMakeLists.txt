@@ -2,8 +2,6 @@ set(NAME pwsat)
 
 set(SOURCES
     main.cpp
-    terminal.cpp
-    checks/error_counters.cpp
     checks/checks.cpp
     obc.h
     obc.cpp
@@ -22,82 +20,40 @@ target_link_libraries(${NAME}
     base
     free_rtos_wrapper
     comm
-    uart
     swo
     logger
     SwoEndpoint
     i2c
-    fs
-    yaffs_glue
     time
     mission
     eps
-    imtq
-    suns
     power
     power_eps
-    terminal
     assert
     gsl
     fm25w
-    n25q
-    antenna
-    exp_fibo
-    yaffs
     obc_fdir
-    obc_storage
     obc_communication
     obc_hardware
-    obc_experiments
     obc_state
     obc_scrubbing
-    obc_camera
     spi
     efm_emlib
     burtc
-    obc_adcs
     rtc
-    mission_antenna
-    mission_sail
     mission_time
-    mission_experiments
     mission_state
-    mission_adcs
-    mission_leop
-    mission_beacon
-    mission_telemetry
     mission_comm
-    mission_fs
     mission_watchdog
     mission_fdir
-    mission_sads
     mission_power
     mission_memory
     watchdog
     boot_params
-    telemetry
-    telemetry_comm
-    telemetry_gyro
-    telemetry_fdir
-    telemetry_eps
-    telemetry_exp
-    telemetry_temp
-    telemetry_ant
-    telemetry_gpio
-    telemetry_fs
-    telemetry_time
-    telemetry_program
-    telemetry_flash_scrubbing
-    telemetry_ram_scrubbing
-    telemetry_imtq
-    telemetry_os
     program_flash
     scrubber
     boot_settings
     obc_memory
-    camera
-    version
-    beacon
 )
 
 target_generate_hex(${NAME})

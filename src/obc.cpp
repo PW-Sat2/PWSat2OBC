@@ -4,7 +4,6 @@
 #include "efm_support/api.h"
 #include "logger/logger.h"
 #include "mission.h"
-#include "terminal.h"
 #include "watchdog/internal.hpp"
 
 static void ProcessState(OBC* obc)
@@ -41,13 +40,13 @@ static std::uint16_t GetErrorCounterMask()
 {
     return 1 << devices::rtc::RTCObject::ErrorCounter::DeviceId |                //
         1 << devices::imtq::ImtqDriver::ErrorCounter::DeviceId |                 //
-        1 << obc::storage::error_counters::N25QDriver1::ErrorCounter::DeviceId | //
-        1 << obc::storage::error_counters::N25QDriver2::ErrorCounter::DeviceId | //
-        1 << obc::storage::error_counters::N25QDriver3::ErrorCounter::DeviceId | //
-        1 << devices::n25q::RedundantN25QDriver::ErrorCounter::DeviceId |        //
+//        1 << obc::storage::error_counters::N25QDriver1::ErrorCounter::DeviceId | //
+//        1 << obc::storage::error_counters::N25QDriver2::ErrorCounter::DeviceId | //
+//        1 << obc::storage::error_counters::N25QDriver3::ErrorCounter::DeviceId | //
+//        1 << devices::n25q::RedundantN25QDriver::ErrorCounter::DeviceId |        //
         1 << devices::fm25w::RedundantFM25WDriver::ErrorCounter::DeviceId |      //
         1 << devices::payload::PayloadDriver::ErrorCounter::DeviceId |           //
-        1 << devices::camera::LowLevelCameraDriver::ErrorCounter::DeviceId |     //
+//        1 << devices::camera::LowLevelCameraDriver::ErrorCounter::DeviceId |     //
         1 << devices::suns::SunSDriver::ErrorCounter::DeviceId |                 //
         1 << antenna_error_counters::PrimaryChannel::ErrorCounter::DeviceId |    //
         1 << antenna_error_counters::SecondaryChannel::ErrorCounter::DeviceId;   //
@@ -88,7 +87,6 @@ OSResult OBC::InitializeRunlevel1()
     this->Fdir.Initalize();
 
     this->Hardware.Initialize();
-    InitializeTerminal();
 
     this->BootTable.Initialize();
 

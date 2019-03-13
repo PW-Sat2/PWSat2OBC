@@ -2,8 +2,6 @@
 #define SRC_HARDWARE_H_
 
 #include "PersistentStorageAccess.hpp"
-#include "antenna/driver.h"
-#include "antenna/miniport.h"
 #include "burtc/burtc.hpp"
 #include "comm/CommDriver.hpp"
 #include "eps/eps.h"
@@ -14,7 +12,6 @@
 #include "i2c/efm.h"
 #include "i2c/i2c.h"
 #include "i2c/wrappers.h"
-#include "imtq/imtq.h"
 #include "logger/logger.h"
 #include "mcu/io_map.h"
 #include "msc/msc.hpp"
@@ -25,10 +22,7 @@
 #include "program_flash/flash_driver.hpp"
 #include "rtc/rtc.hpp"
 #include "spi/efm.h"
-#include "suns/suns.hpp"
-#include "telemetry/ImtqTelemetryCollector.hpp"
 #include "temp/efm.hpp"
-#include "uart/uart.hpp"
 
 namespace obc
 {

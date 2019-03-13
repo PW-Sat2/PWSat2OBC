@@ -18,7 +18,6 @@
 #include "SwoEndpoint/SwoEndpoint.h"
 #include "base/ecc.h"
 #include "base/os.h"
-#include "beacon/sender.hpp"
 #include "boot/params.hpp"
 #include "dmadrv.h"
 #include "efm_support/api.h"
@@ -34,7 +33,6 @@
 #include "power_eps/power_eps.h"
 #include "swo/swo.h"
 #include "system.h"
-#include "terminal.h"
 #include "watchdog/internal.hpp"
 
 using services::time::TimeProvider;

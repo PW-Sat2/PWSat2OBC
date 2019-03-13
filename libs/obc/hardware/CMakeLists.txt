@@ -20,16 +20,11 @@ target_link_libraries(${NAME}
 	gyro
 	eps
 	program_flash
-	antenna
-	imtq
-	suns
 	rtc
-	uart
 	comm
 	flash_s29jl
 	msc
 	payload
-	telemetry_imtq
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
