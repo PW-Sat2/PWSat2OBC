@@ -59,7 +59,6 @@ telemetry::ObcTelemetryAcquisition TelemetryAcquisition(Main.Hardware.CommDriver
     Main.Hardware.Gyro,
     Main.Fdir,
     Main.Hardware.EPS,
-    Main.Experiments.ExperimentsController,
     Main.Hardware.MCUTemperature,
     Mission,
     0,
@@ -81,12 +80,11 @@ mission::ObcMission Mission(&PerformMemoryRecovery, //
     std::tie<IAntennaDriver, services::power::IPowerControl>(Main.Hardware.antennaDriver, Main.PowerControlInterface),
     Main.Hardware.CommDriver,
     Main.PowerControlInterface,
-    Main.Experiments.ExperimentsController,
     0,
     Main.Hardware.CommDriver,
     Main.Hardware.EPS,
     GetCommHardwareObserver(),
-    std::make_tuple(std::ref(Main.PowerControlInterface), std::ref(Main.Scrubbing), std::ref(Main.Experiments.ExperimentsController))
+    std::make_tuple(std::ref(Main.PowerControlInterface), std::ref(Main.Scrubbing))
     );
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;

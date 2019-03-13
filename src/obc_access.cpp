@@ -1,11 +1,6 @@
 #include "obc_access.hpp"
 #include "obc.h"
 
-Terminal& GetTerminal()
-{
-    return Main.terminal;
-}
-
 AntennaDriver& GetAntennaDriver()
 {
     return Main.Hardware.antennaDriver;

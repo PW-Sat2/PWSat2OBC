@@ -132,9 +132,6 @@ struct OBC
     /** @brief Memory management */
     obc::OBCMemory Memory;
 
-    /** @brief Terminal object. */
-    Terminal terminal;
-
     /** @brief Camera object attached to UART */
     devices::camera::Camera camera;
 

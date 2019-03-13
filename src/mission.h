@@ -53,7 +53,6 @@ namespace mission
         antenna::AntennaTask,
         CommTask,
         mission::OpenSailTask,
-        mission::experiments::MissionExperimentComponent,
         mission::BeaconUpdate,
         mission::SendMessageTask,
         EPSWatchdogTask,
@@ -70,7 +69,6 @@ namespace telemetry
         GyroTelemetryAcquisition,                //
         ErrorCounterTelemetryAcquisition,        //
         EpsTelemetryAcquisition,                 //
-        ExperimentTelemetryAcquisition,          //
         McuTempTelemetryAcquisition,             //
         AntennaTelemetryAcquisition,             //
         GpioTelemetryAcquisition<io_map::SailDeployed>,

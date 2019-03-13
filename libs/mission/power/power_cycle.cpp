@@ -8,8 +8,8 @@ namespace mission
     namespace power
     {
         PeriodicPowerCycleTask::PeriodicPowerCycleTask(
-            std::tuple<services::power::IPowerControl&, IScrubbingStatus&, experiments::IExperimentController&> args)
-            : _power(std::get<0>(args)), _scrubbingStatus(std::get<1>(args)), _experiments(std::get<2>(args))
+            std::tuple<services::power::IPowerControl&, IScrubbingStatus&> args)
+            : _power(std::get<0>(args)), _scrubbingStatus(std::get<1>(args))
         {
         }
 
@@ -59,13 +59,6 @@ namespace mission
             }
 
             if (This->_scrubbingStatus.SafeModeInProgress())
-            {
-                return false;
-            }
-
-            auto experimentState = This->_experiments.CurrentState();
-
-            if (experimentState.CurrentExperiment.HasValue)
             {
                 return false;
             }

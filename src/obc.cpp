@@ -119,7 +119,6 @@ OBC::OBC()
           Hardware.EPS,
           adcs.GetAdcsCoordinator()),
       Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index),         //
-      terminal(this->Hardware.Terminal),                                                   //
       camera(this->Fdir.ErrorCounting(), this->Hardware.Camera),                           //
       Camera(this->PowerControlInterface, this->fs, this->Hardware.Pins.CamSelect, camera) //
 {
