@@ -133,7 +133,6 @@ namespace obc
         obc::telecommands::SetBootSlotsTelecommand,
         obc::telecommands::PowerCycle,
         obc::telecommands::RawI2CTelecommand,
-        obc::telecommands::SendPeriodicMessageTelecommand,
         obc::telecommands::SetBitrateTelecommand,
         obc::telecommands::ReadMemoryTelecommand>;
 
@@ -169,7 +168,6 @@ namespace obc
          */
         OBCCommunication(
             devices::comm::CommObject& commDriver,
-            IHasState<SystemState>& stateContainer,
             boot::BootSettings& bootSettings,
             services::power::IPowerControl& powerControl,
             drivers::i2c::II2CBus& systemBus,

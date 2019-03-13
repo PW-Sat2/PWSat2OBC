@@ -45,7 +45,6 @@ OBC::OBC()
       PowerControlInterface(this->Hardware.EPS),                                       //
       Communication(                   //
           this->Hardware.CommDriver,
-          Mission,
           BootSettings,
           PowerControlInterface,
           Hardware.I2C.Buses.Bus,

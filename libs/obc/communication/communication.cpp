@@ -14,7 +14,6 @@ using namespace obc::telecommands;
 
 OBCCommunication::OBCCommunication(
     devices::comm::CommObject& commDriver,
-    IHasState<SystemState>& stateContainer,
     boot::BootSettings& bootSettings,
     services::power::IPowerControl& powerControl,
     drivers::i2c::II2CBus& systemBus,
@@ -26,7 +25,6 @@ OBCCommunication::OBCCommunication(
           SetBootSlotsTelecommand(bootSettings),                                                                                      //
           PowerCycle(powerControl),                                                                                                   //
           RawI2CTelecommand(systemBus, payload),                                                                                      //
-          SendPeriodicMessageTelecommand(stateContainer),                                                               //
           SetBitrateTelecommand(),                                                                                      //
           obc::telecommands::ReadMemoryTelecommand() //
           ),                                         //
