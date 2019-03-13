@@ -9,21 +9,7 @@
 static void ProcessState(OBC* obc)
 {
     auto& persistentState = Mission.GetState().PersistentState;
-    if (boot::ClearStateOnStartup)
-    {
-        LOG(LOG_LEVEL_WARNING, "Resetting system state");
-
-        if (!obc::WritePersistentState(persistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage))
-        {
-            LOG(LOG_LEVEL_ERROR, "Persistent state reset failure");
-        }
-
-        LOG(LOG_LEVEL_INFO, "Completed system state reset");
-    }
-    else
-    {
-        obc::ReadPersistentState(persistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage);
-    }
+    obc::ReadPersistentState(persistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage);
 }
 
 static void AuditSystemStartup(uint32_t)
