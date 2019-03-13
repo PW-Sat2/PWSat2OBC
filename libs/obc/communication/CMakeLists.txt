@@ -11,7 +11,6 @@ target_link_libraries(${NAME}
 	comm
 	telecommunication
 	settings
-	obc_fdir
 	obc_telecommands
 )
 

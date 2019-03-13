@@ -25,7 +25,6 @@ OBCCommunication::OBCCommunication(
           SetBootSlotsTelecommand(bootSettings),                                                                                      //
           PowerCycle(powerControl),                                                                                                   //
           RawI2CTelecommand(systemBus, payload),                                                                                      //
-          SetBitrateTelecommand(),                                                                                      //
           obc::telecommands::ReadMemoryTelecommand() //
           ),                                         //
       TelecommandHandler(UplinkProtocolDecoder, SupportedTelecommands.Get())

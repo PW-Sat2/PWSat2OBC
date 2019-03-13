@@ -2,11 +2,10 @@ set(NAME pwsat)
 
 set(SOURCES
     main.cpp
-    checks/checks.cpp
     obc.h
     obc.cpp
-        fault_handlers.cpp
-        )
+    fault_handlers.cpp
+)
 
 add_executable(${NAME} ${SOURCES})
 
@@ -15,7 +14,6 @@ set_target_properties(${NAME} PROPERTIES LINK_FLAGS "-T ${UPPER_LINKER_SCRIPT} -
 
 target_link_libraries(${NAME}
     platform
-    pld_platform
     freeRTOS
     base
     free_rtos_wrapper
@@ -32,20 +30,15 @@ target_link_libraries(${NAME}
     assert
     gsl
     fm25w
-    obc_fdir
     obc_communication
     obc_hardware
-    obc_state
     obc_scrubbing
     spi
     efm_emlib
     burtc
     rtc
-    mission_time
-    mission_state
     mission_comm
     mission_watchdog
-    mission_fdir
     mission_power
     mission_memory
     watchdog

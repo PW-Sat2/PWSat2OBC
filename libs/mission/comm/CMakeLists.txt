@@ -1,9 +1,7 @@
 set(NAME mission_comm)
 
 set(SOURCES
-    Include/mission/comm.hpp
     Include/mission/comm_wdog.hpp
-    comm.cpp
     comm_wdog.cpp
 )
 

@@ -4,34 +4,13 @@
 #include <array>
 #include <gsl/span>
 #include <tuple>
-#include "adcs/adcs.hpp"
 #include "comm/CommDriver.hpp"
 #include "i2c/i2c.h"
-#include "mission/comm.hpp"
-#include "mission/time.hpp"
-#include "obc/experiments.hpp"
-#include "obc/fdir.hpp"
-#include "obc/telecommands/adcs.hpp"
-#include "obc/telecommands/antenna.hpp"
 #include "obc/telecommands/boot_settings.hpp"
-#include "obc/telecommands/comm.hpp"
-#include "obc/telecommands/compile_info.hpp"
-#include "obc/telecommands/eps.hpp"
-#include "obc/telecommands/experiments.hpp"
-#include "obc/telecommands/fdir.hpp"
-#include "obc/telecommands/file_system.hpp"
-#include "obc/telecommands/flash.hpp"
 #include "obc/telecommands/i2c.hpp"
 #include "obc/telecommands/memory.hpp"
-#include "obc/telecommands/periodic_message.hpp"
-#include "obc/telecommands/photo.hpp"
 #include "obc/telecommands/ping.hpp"
 #include "obc/telecommands/power.hpp"
-#include "obc/telecommands/program_upload.hpp"
-#include "obc/telecommands/sail.hpp"
-#include "obc/telecommands/state.hpp"
-#include "obc/telecommands/suns.hpp"
-#include "obc/telecommands/time.hpp"
 #include "program_flash/fwd.hpp"
 #include "telecommunication/telecommand_handling.h"
 #include "telecommunication/uplink.h"
@@ -133,7 +112,6 @@ namespace obc
         obc::telecommands::SetBootSlotsTelecommand,
         obc::telecommands::PowerCycle,
         obc::telecommands::RawI2CTelecommand,
-        obc::telecommands::SetBitrateTelecommand,
         obc::telecommands::ReadMemoryTelecommand>;
 
     /**

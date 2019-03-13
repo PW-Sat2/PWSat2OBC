@@ -1,5 +1,6 @@
 #include "power_cycle.hpp"
 #include "power/power.h"
+#include "logger/logger.h"
 
 using namespace std::chrono_literals;
 

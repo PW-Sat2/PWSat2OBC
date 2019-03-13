@@ -4,8 +4,6 @@
 #pragma once
 
 #include "mcu/io_map.h"
-#include "mission/PersistentStateSave.hpp"
-#include "mission/comm.hpp"
 #include "mission/comm_wdog.hpp"
 #include "mission/main.hpp"
 #include "mission/memory_recovery.hpp"
@@ -20,8 +18,6 @@ namespace mission
 
     typedef MissionLoop<SystemState, //
         MemoryRecoveryTask,          //
-        CommTask,
-        mission::SendMessageTask,
         EPSWatchdogTask,
         mission::CommWdogTask,
         mission::power::PeriodicPowerCycleTask

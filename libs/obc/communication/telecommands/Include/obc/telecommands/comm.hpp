@@ -6,7 +6,6 @@
 #include "mission/idle_state_controller.hpp"
 #include "telecommunication/downlink.h"
 #include "telecommunication/telecommand_handling.h"
-#include "telemetry/fwd.hpp"
 #include "time/ICurrentTime.hpp"
 
 namespace obc

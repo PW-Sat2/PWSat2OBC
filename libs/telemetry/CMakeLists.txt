@@ -21,7 +21,6 @@ target_link_libraries(${NAME}
     gyro
     eps
     error_counter
-    experiments
     fs
     antenna
     imtq

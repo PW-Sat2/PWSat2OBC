@@ -15,12 +15,9 @@
 #include "logger/logger.h"
 #include "mcu/io_map.h"
 #include "msc/msc.hpp"
-#include "payload/devices.h"
 #include "payload/io_map.h"
-#include "payload/payload.h"
 #include "power/power.h"
 #include "program_flash/flash_driver.hpp"
-#include "rtc/rtc.hpp"
 #include "spi/efm.h"
 #include "temp/efm.hpp"
 

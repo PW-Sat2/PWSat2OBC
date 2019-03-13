@@ -6,20 +6,10 @@
 #include <cstdint>
 #include <gsl/span>
 
-#include "adcs/AdcsCoordinator.hpp"
-
 #include "base/os.h"
 #include "boot/settings.hpp"
-#include "experiment/fibo/fibo.h"
-#include "fs/fs.h"
-#include "fs/yaffs.h"
-#include "imtq/imtq.h"
 #include "line_io.h"
-#include "n25q/n25q.h"
-#include "n25q/yaffs.h"
 #include "obc/communication.h"
-#include "obc/experiments.hpp"
-#include "obc/fdir.hpp"
 #include "obc/hardware.h"
 #include "obc/memory.hpp"
 #include "obc/scrubbing.hpp"

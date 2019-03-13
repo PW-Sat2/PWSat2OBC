@@ -22,15 +22,12 @@
 #include "dmadrv.h"
 #include "efm_support/api.h"
 #include "efm_support/clock.h"
-#include "fs/fs.h"
 #include "gpio/gpio.h"
 #include "i2c/i2c.h"
 #include "logger/logger.h"
 #include "mcu/io_map.h"
 #include "mission.h"
 #include "obc.h"
-#include "obc/ObcState.hpp"
-#include "power_eps/power_eps.h"
 #include "swo/swo.h"
 #include "system.h"
 #include "watchdog/internal.hpp"
@@ -43,8 +40,6 @@ OBC Main;
 static void PerformMemoryRecovery();
 
 mission::ObcMission Mission(&PerformMemoryRecovery, //
-    Main.Hardware.CommDriver,
-    Main.Hardware.CommDriver,
     Main.Hardware.EPS,
     &Main.Hardware.CommDriver,
     std::make_tuple(std::ref(Main.PowerControlInterface), std::ref(Main.Scrubbing))

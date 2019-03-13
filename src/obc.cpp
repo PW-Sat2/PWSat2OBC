@@ -1,16 +1,9 @@
 #include "obc.h"
-#include "antenna/driver.h"
 #include "boot/params.hpp"
 #include "efm_support/api.h"
 #include "logger/logger.h"
 #include "mission.h"
 #include "watchdog/internal.hpp"
-
-static void ProcessState(OBC* obc)
-{
-    auto& persistentState = Mission.GetState().PersistentState;
-    obc::ReadPersistentState(persistentState, PersistentStateBaseAddress, obc->Hardware.PersistentStorage);
-}
 
 static void AuditSystemStartup(uint32_t)
 {
@@ -45,14 +38,6 @@ void OBC::InitializeRunlevel0()
 
 OSResult OBC::InitializeRunlevel1()
 {
-    auto& persistentState = Mission.GetState().PersistentState;
-    auto result = persistentState.Initialize();
-    if (OS_RESULT_FAILED(result))
-    {
-        LOGF(LOG_LEVEL_FATAL, "[obc] Persistent state initialization failed %d", num(result));
-        return result;
-    }
-
     this->Hardware.Initialize();
 
     this->BootTable.Initialize();
@@ -61,21 +46,12 @@ OSResult OBC::InitializeRunlevel1()
 
     this->Communication.InitializeRunlevel1();
 
-    ProcessState(this);
     AuditSystemStartup(this->BootSettings.BootCounter());
 
-    state::TimeState timeState;
-    if (!persistentState.Get(timeState))
+    // [TODO] 100 days start time?
+    if (!this->timeProvider.Initialize(std::chrono::hours(24*100), TimePassed, nullptr))
     {
-        LOG(LOG_LEVEL_ERROR, "[obc] Can't get time state");
-    }
-    else
-    {
-        const auto missionTime = timeState.LastMissionTime();
-        if (!this->timeProvider.Initialize(missionTime, TimePassed, nullptr))
-        {
-            LOG(LOG_LEVEL_ERROR, "[obc] Unable to initialize persistent timer. ");
-        }
+        LOG(LOG_LEVEL_ERROR, "[obc] Unable to initialize persistent timer. ");
     }
 
     if (!Mission.Initialize(10s))

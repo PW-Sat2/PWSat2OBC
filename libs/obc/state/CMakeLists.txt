@@ -14,7 +14,6 @@ target_link_libraries(${NAME}
 	state
 	logger
 	spi
-	mission_state
 )
 
 target_include_directories(${NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Include)
