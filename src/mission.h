@@ -25,23 +25,6 @@
 #include "mission/watchdog.hpp"
 #include "obc.h"
 #include "state/struct.h"
-#include "telemetry/collect_ant.hpp"
-#include "telemetry/collect_comm.hpp"
-#include "telemetry/collect_eps.hpp"
-#include "telemetry/collect_exp.hpp"
-#include "telemetry/collect_external_time.hpp"
-#include "telemetry/collect_fdir.hpp"
-#include "telemetry/collect_flash_scrubbing.hpp"
-#include "telemetry/collect_fs.hpp"
-#include "telemetry/collect_gpio.hpp"
-#include "telemetry/collect_gyro.hpp"
-#include "telemetry/collect_imtq.hpp"
-#include "telemetry/collect_internal_time.hpp"
-#include "telemetry/collect_os.hpp"
-#include "telemetry/collect_program.hpp"
-#include "telemetry/collect_ram_scrubbing.hpp"
-#include "telemetry/collect_temp.hpp"
-#include "telemetry/state.hpp"
 
 namespace mission
 {
@@ -59,32 +42,7 @@ namespace mission
         ObcMission;
 }
 
-namespace telemetry
-{
-    typedef mission::MissionLoop<TelemetryState, //
-        CommTelemetryAcquisition,                //
-        GyroTelemetryAcquisition,                //
-        ErrorCounterTelemetryAcquisition,        //
-        EpsTelemetryAcquisition,                 //
-        McuTempTelemetryAcquisition,             //
-        AntennaTelemetryAcquisition,             //
-        GpioTelemetryAcquisition<io_map::SailDeployed>,
-        FileSystemTelemetryAcquisition,             //
-        InternalTimeTelemetryAcquisition,           //
-        ExternalTimeTelemetryAcquisition,           //
-        ProgramCrcTelemetryAcquisition,             //
-        FlashScrubbingTelemetryAcquisition,         //
-        RamScrubbingTelemetryAcquisition<Scrubber>, //
-        ImtqTelemetryAcquisition,                   //
-        SystemTelemetryAcquisition,                 //
-        TelemetrySerialization,                     //
-        mission::TelemetryTask                      //
-        >
-        ObcTelemetryAcquisition;
-}
-
 extern mission::ObcMission Mission;
 
-extern telemetry::ObcTelemetryAcquisition TelemetryAcquisition;
 
 #endif /* SRC_MISSION_H_ */
