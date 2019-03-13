@@ -11,7 +11,6 @@
 #include "line_io.h"
 #include "obc/communication.h"
 #include "obc/hardware.h"
-#include "obc/memory.hpp"
 #include "obc/scrubbing.hpp"
 #include "power_eps/power_eps.h"
 #include "program_flash/boot_table.hpp"
@@ -89,9 +88,6 @@ struct OBC
 
     /** @brief Scrubbing mechanism */
     obc::OBCScrubbing Scrubbing;
-
-    /** @brief Memory management */
-    obc::OBCMemory Memory;
 };
 
 /** @brief Global OBC object. */

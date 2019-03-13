@@ -17,7 +17,6 @@ namespace mission
     using EPSWatchdogTask = WatchdogTask<devices::eps::EPSDriver>;
 
     typedef MissionLoop<SystemState, //
-        MemoryRecoveryTask,          //
         EPSWatchdogTask,
         mission::CommWdogTask,
         mission::power::PeriodicPowerCycleTask

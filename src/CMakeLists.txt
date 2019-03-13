@@ -46,7 +46,6 @@ target_link_libraries(${NAME}
     program_flash
     scrubber
     boot_settings
-    obc_memory
 )
 
 target_generate_hex(${NAME})

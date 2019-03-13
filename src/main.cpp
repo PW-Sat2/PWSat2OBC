@@ -39,7 +39,7 @@ OBC Main;
 
 static void PerformMemoryRecovery();
 
-mission::ObcMission Mission(&PerformMemoryRecovery, //
+mission::ObcMission Mission(
     Main.Hardware.EPS,
     &Main.Hardware.CommDriver,
     std::make_tuple(std::ref(Main.PowerControlInterface), std::ref(Main.Scrubbing))
@@ -103,26 +103,11 @@ void TIMER0_IRQHandler()
 
 void ACMP0_IRQHandler()
 {
-    if (has_flag(ACMP_IntGet(ACMP0), ACMP_IF_EDGE))
-    {
-        Main.Memory.HandleLatchup(obc::MemoryModule::SRAM1);
-        ACMP_IntClear(ACMP0, ACMP_IFC_EDGE);
-    }
-
-    if (has_flag(ACMP_IntGet(ACMP1), ACMP_IF_EDGE))
-    {
-        Main.Memory.HandleLatchup(obc::MemoryModule::SRAM2);
-        ACMP_IntClear(ACMP1, ACMP_IFC_EDGE);
-    }
+    // [TODO] reboot
 }
 
 __attribute__((optimize("O3"))) void UART1_RX_IRQHandler()
 {
-}
-
-void PerformMemoryRecovery()
-{
-    Main.Memory.Recover();
 }
 
 static void InitSwoEndpoint(void)
