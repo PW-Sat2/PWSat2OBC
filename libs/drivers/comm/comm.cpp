@@ -645,27 +645,6 @@ bool CommObject::SetTransmitterBitRate(Bitrate bitrate)
     return (this->_low.Write(num(Address::Transmitter), buffer) == I2CResult::OK);
 }
 
-bool CommObject::GetTelemetry(CommTelemetry& telemetry)
-{
-    TransmitterTelemetry transmitter;
-    ReceiverTelemetry receiver;
-
-    if (!GetTransmitterTelemetryInternal(transmitter))
-    {
-        LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire transmitter telemetry. ");
-        return false;
-    }
-
-    if (!GetReceiverTelemetryInternal(receiver))
-    {
-        LOG(LOG_LEVEL_ERROR, "[comm] Unable to acquire receiver telemetry. ");
-        return false;
-    }
-
-    telemetry = CommTelemetry(transmitter, receiver);
-    return true;
-}
-
 bool CommObject::ResetWatchdogReceiver()
 {
     return this->SendCommand(Address::Receiver, num(ReceiverCommand::ResetWatchdog));

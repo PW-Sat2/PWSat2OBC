@@ -22,7 +22,6 @@ COMM_BEGIN
 
 class CommObject final : public ITransmitter,      //
                          public IBeaconController, //
-                         public ICommTelemetryProvider,
                          public ICommHardwareObserver
 {
   public:
@@ -222,8 +221,6 @@ class CommObject final : public ITransmitter,      //
      * Additionally it resets hardware watchdog either via transmitter or via receiver.
      */
     bool PollHardware();
-
-    virtual bool GetTelemetry(CommTelemetry& telemetry) final override;
 
     void WaitForComLoop() final override;
 
