@@ -154,7 +154,7 @@ namespace experiment
                 LOG(LOG_LEVEL_ERROR, "Can't save end telemetry");
             }
 
-            auto dataSetClose = this->dataSet.Close();
+//            auto dataSetClose = this->dataSet.Close();
             if (OS_RESULT_FAILED(offResult))
             {
                 LOGF(LOG_LEVEL_ERROR, "Can't close data set (reason: %d)", static_cast<int>(dataSetClose));

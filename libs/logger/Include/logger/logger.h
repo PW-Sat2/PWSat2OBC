@@ -53,8 +53,8 @@ enum LogLevel
  * @param[in] messageFormat Pointer to logged message format string.
  * @param[in] messageArguments Logged message arguments.
  */
-typedef void (*LoggerProcedure)(
-    void* context, bool withinIsr, const char* messageHeader, const char* messageFormat, va_list messageArguments);
+//typedef void (*LoggerProcedure)(
+//    void* context, bool withinIsr, const char* messageHeader, const char* messageFormat, va_list messageArguments);
 
 /**
  * @brief Macro used for logging non parameterized entries.
@@ -63,7 +63,7 @@ typedef void (*LoggerProcedure)(
  * @param[in] message Message that should be logged.
  * @remark Do not use this macro from within interrupt service routines.
  */
-#define LOG(level, message) LogMessage(false, level, message)
+#define LOG(level, message) //LogMessage(false, level, message)
 
 /**
  * @brief Macro used for logging parameterized entries.
@@ -72,7 +72,7 @@ typedef void (*LoggerProcedure)(
  * @param[in] message Message that should be logged.
  * @remark Do not use this macro from within interrupt service routines.
  */
-#define LOGF(level, message, ...) LogMessage(false, level, message, __VA_ARGS__)
+#define LOGF(level, message, ...) //LogMessage(false, level, message, __VA_ARGS__)
 
 /**
  * @brief Macro used for logging non parameterized entries.
@@ -81,7 +81,7 @@ typedef void (*LoggerProcedure)(
  * @param[in] message Message that should be logged.
  * @remark This macro is intended for use only from within interrupt service routines.
  */
-#define LOG_ISR(level, message) LogMessage(true, level, message)
+#define LOG_ISR(level, message) //LogMessage(true, level, message)
 
 /**
  * @brief Macro used for logging parameterized entries.
@@ -90,7 +90,7 @@ typedef void (*LoggerProcedure)(
  * @param[in] message Message that should be logged.
  * @remark This macro is intended for use only from within interrupt service routines.
  */
-#define LOGF_ISR(level, message, ...) LogMessage(true, level, message, __VA_ARGS__)
+#define LOGF_ISR(level, message, ...) //LogMessage(true, level, message, __VA_ARGS__)
 
 /**
  * @brief Macro used for logging non parameterized entries.
@@ -100,7 +100,7 @@ typedef void (*LoggerProcedure)(
  * @param[in] level Requested log message level.
  * @param[in] message Message that should be logged.
  */
-#define LOGI(withinIsr, level, message) LogMessage(withinIsr, level, message)
+#define LOGI(withinIsr, level, message) //LogMessage(withinIsr, level, message)
 
 /**
  * @brief Macro used for logging parameterized entries.
@@ -110,7 +110,7 @@ typedef void (*LoggerProcedure)(
  * @param[in] level Requested log message level.
  * @param[in] message Message that should be logged.
  */
-#define LOGFI(withinIsr, level, message, ...) LogMessage(withinIsr, level, message, __VA_ARGS__)
+#define LOGFI(withinIsr, level, message, ...) //LogMessage(withinIsr, level, message, __VA_ARGS__)
 
 /**
  * @brief Reinitializes the logger.
@@ -124,7 +124,7 @@ typedef void (*LoggerProcedure)(
  *
  * @remark Initializing already initialized logger sets it back to default state.
  */
-void LogInit(enum LogLevel globalLogLevel);
+//void LogInit(enum LogLevel globalLogLevel);
 
 /**
  * @brief Adds logger endpoint.
@@ -148,7 +148,7 @@ void LogInit(enum LogLevel globalLogLevel);
  * be asked multiple times to log the same log entry. All registrations are independent from
  * each other and can use different contexts and logging levels.
  */
-bool LogAddEndpoint(LoggerProcedure endpoint, void* context, enum LogLevel endpointLogLevel);
+//bool LogAddEndpoint(LoggerProcedure endpoint, void* context, enum LogLevel endpointLogLevel);
 
 /**
  * @brief Removes requested logging endpoint.
@@ -163,7 +163,7 @@ bool LogAddEndpoint(LoggerProcedure endpoint, void* context, enum LogLevel endpo
  *
  * Removing non existing endpoint has no effect.
  */
-void LogRemoveEndpoint(LoggerProcedure endpoint);
+//void LogRemoveEndpoint(LoggerProcedure endpoint);
 
 /**
  * @brief Logs a message.
@@ -173,7 +173,7 @@ void LogRemoveEndpoint(LoggerProcedure endpoint);
  * @param[in] messageLevel Requested message logging level.
  * @param[in] message Logged message.
  */
-void LogMessage(bool withinIsr, enum LogLevel messageLevel, const char* message, ...) __attribute__((format(printf, 3, 4)));
+//void LogMessage(bool withinIsr, enum LogLevel messageLevel, const char* message, ...) __attribute__((format(printf, 3, 4)));
 
 /** @}*/
 

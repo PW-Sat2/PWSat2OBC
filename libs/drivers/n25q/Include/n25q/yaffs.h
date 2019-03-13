@@ -308,7 +308,7 @@ namespace devices
         }
 
         template <BlockMapping blockMapping, std::size_t ChunkSize, std::size_t TotalSize>
-        int N25QYaffsDevice<blockMapping, ChunkSize, TotalSize>::MarkBadBlock(struct yaffs_dev* dev, int block_no)
+        int N25QYaffsDevice<blockMapping, ChunkSize, TotalSize>::MarkBadBlock(struct yaffs_dev* dev, int)
         {
             UNREFERENCED_PARAMETER(dev);
             LOGF(LOG_LEVEL_WARNING, "[Device %s] Marking bad block %d", dev->param.name, block_no);

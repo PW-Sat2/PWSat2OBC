@@ -448,12 +448,14 @@ namespace mission
         LOG(LOG_LEVEL_TRACE, "Updating system state");
 
         auto updateResult = SystemStateUpdate(state, gsl::make_span(updates));
+        (void)updateResult;
 
         LOGF(LOG_LEVEL_TRACE, "System state update result %d", static_cast<int>(updateResult));
 
         auto verifyResult = SystemStateVerify(state,                 //
             gsl::span<const VerifyDescriptor<State>>(verifications), //
             gsl::make_span(detailedVerifyResult));
+        (void)verifyResult;
 
         LOGF(LOG_LEVEL_TRACE, "Verify result %d", static_cast<int>(verifyResult));
 

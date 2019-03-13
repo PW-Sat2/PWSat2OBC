@@ -32,7 +32,7 @@ void SwoEndpointClose(void* handle);
  * @param[in] handle SwoEndpoint context whose entry point should be returned.
  * @return Swo Endpoint entry point.
  */
-LoggerProcedure SwoGetEndpoint(void* handle);
+//LoggerProcedure SwoGetEndpoint(void* handle);
 
 /** @}*/
 

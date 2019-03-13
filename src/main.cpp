@@ -15,7 +15,6 @@
 #include <FreeRTOSConfig.h>
 #include <task.h>
 
-#include "SwoEndpoint/SwoEndpoint.h"
 #include "base/ecc.h"
 #include "base/os.h"
 #include "dmadrv.h"
@@ -105,16 +104,6 @@ void ACMP0_IRQHandler()
 
 __attribute__((optimize("O3"))) void UART1_RX_IRQHandler()
 {
-}
-
-static void InitSwoEndpoint(void)
-{
-    void* swoEndpointHandle = SwoEndpointInit();
-    const bool result = LogAddEndpoint(SwoGetEndpoint(swoEndpointHandle), swoEndpointHandle, LOG_LEVEL_TRACE);
-    if (!result)
-    {
-        SwoPutsOnChannel(0, "Unable to attach swo endpoint to logger. ");
-    }
 }
 
 static void ObcInitTask(void* param)
@@ -224,13 +213,6 @@ int main(void)
     drivers::watchdog::InternalWatchdog::Disable();
 
     SetupHardware();
-
-    SwoEnable();
-
-    LogInit(LOG_LEVEL_DEBUG);
-    InitSwoEndpoint();
-
-    SwoPutsOnChannel(0, "Hello I'm PW-SAT2 OBC\n");
 
     Main.Hardware.Pins.TimeIndicator.High();
     Main.Hardware.Pins.BootIndicator.High();

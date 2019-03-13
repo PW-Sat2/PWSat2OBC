@@ -55,7 +55,7 @@ namespace obc
         return this->_errorCounting;
     }
 
-    void FDIR::LimitReached(error_counter::Device device, error_counter::CounterValue errorsCount)
+    void FDIR::LimitReached(error_counter::Device device, error_counter::CounterValue)
     {
         if (has_flag(this->_maskedDevices, 1 << device))
         {

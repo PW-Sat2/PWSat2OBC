@@ -74,7 +74,7 @@ void yaffsfs_OSInitialisation(void)
 {
 }
 
-void yaffs_bug_fn(const char* file_name, int line_no)
+void yaffs_bug_fn(const char*, int)
 {
     LOGF(LOG_LEVEL_ERROR, "YAFFS BUG: %s:%d", file_name, line_no);
 }

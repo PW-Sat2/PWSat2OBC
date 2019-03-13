@@ -34,14 +34,14 @@ namespace mission
         {
             state.Time = currentTime.Value;
 
-            auto totalSeconds = duration_cast<seconds>(state.Time).count();
-            auto seconds = static_cast<std::uint32_t>(totalSeconds % 60);
-            auto minutes = static_cast<std::uint32_t>(totalSeconds / 60);
-            auto hours = static_cast<std::uint32_t>(minutes / 60);
-            auto days = static_cast<std::uint32_t>(hours / 24);
+//            auto totalSeconds = duration_cast<seconds>(state.Time).count();
+//            auto seconds = static_cast<std::uint32_t>(totalSeconds % 60);
+//            auto minutes = static_cast<std::uint32_t>(totalSeconds / 60);
+//            auto hours = static_cast<std::uint32_t>(minutes / 60);
+//            auto days = static_cast<std::uint32_t>(hours / 24);
 
-            minutes %= 60;
-            hours %= 24;
+//            minutes %= 60;
+//            hours %= 24;
 
             LOGF(LOG_LEVEL_INFO, "[time] Current mission time %02ld:%02ld:%02ld:%02ld", days, hours, minutes, seconds);
 

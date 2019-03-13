@@ -20,7 +20,7 @@ target_link_libraries(${NAME}
     comm
     swo
     logger
-    SwoEndpoint
+#    SwoEndpoint
     i2c
     time
     mission
