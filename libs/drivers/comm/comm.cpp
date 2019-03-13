@@ -556,11 +556,9 @@ bool CommObject::ScheduleFrameTransmission(
         if (timeDelta >= 15s && freeSlotsDelta < 0)
         {
             LOGF(LOG_LEVEL_WARNING,
-                "[comm] Restarting transmitter after queue stalled (free slots %d -> %d, time %lds -> %lds)",
+                "[comm] Restarting transmitter after queue stalled (free slots %d -> %d)",
                 this->_lastSend.Value.FreeSlots,
-                current.FreeSlots,
-                static_cast<std::uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(this->_lastSend.Value.Timestamp).count()),
-                static_cast<std::uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(current.Timestamp).count()));
+                current.FreeSlots);
             ResetTransmitter();
             this->_lastSend = None<LastSendTimestamp>();
             return false;
