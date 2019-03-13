@@ -20,7 +20,6 @@ namespace mission
 
     typedef MissionLoop<SystemState, //
         MemoryRecoveryTask,          //
-        TimeTask,
         CommTask,
         mission::SendMessageTask,
         EPSWatchdogTask,

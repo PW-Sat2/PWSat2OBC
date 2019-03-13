@@ -43,7 +43,6 @@ OBC Main;
 static void PerformMemoryRecovery();
 
 mission::ObcMission Mission(&PerformMemoryRecovery, //
-    std::tie(Main.timeProvider, Main.Hardware.rtc, Mission),
     Main.Hardware.CommDriver,
     Main.Hardware.CommDriver,
     Main.Hardware.EPS,
