@@ -268,6 +268,8 @@ namespace devices
                 return false;
             }
 
+            //[TODO] sleep GYRO
+
             System::SleepTask(ConfigDelay);
 
             if (!driver.pll_and_data_ready())
@@ -277,25 +279,6 @@ namespace devices
             }
 
             return true;
-        }
-
-        Option<GyroscopeTelemetry> GyroDriver::read()
-        {
-            DetailedDriver driver{i2cbus};
-            decltype(driver.get_raw()) result;
-            for (auto i = 0; i < 3; i++)
-            {
-                result = driver.get_raw();
-
-                if (result.HasValue)
-                {
-                    return result;
-                }
-
-                this->init();
-            }
-
-            return result;
         }
     }
 }

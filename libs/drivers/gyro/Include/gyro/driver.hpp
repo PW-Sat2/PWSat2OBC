@@ -30,7 +30,7 @@ namespace devices
         /**
          * @brief Low level gyroscope driver.
          */
-        class GyroDriver final : public IGyroscopeDriver
+        class GyroDriver final
         {
           public:
             /**
@@ -52,12 +52,6 @@ namespace devices
              *   - PLL with X Gyro reference clock source
              */
             bool init();
-
-            /**
-             * @brief Reads data from gyroscope
-             * @return Three-axis raw gyroscope reading. If read failed than empty value is returned.
-             */
-            virtual Option<GyroscopeTelemetry> read() final override;
 
           private:
             drivers::i2c::II2CBus& i2cbus;

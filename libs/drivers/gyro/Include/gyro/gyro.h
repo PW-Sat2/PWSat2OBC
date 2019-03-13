@@ -27,15 +27,6 @@ namespace devices
         /**
          * @brief Gyroscope driver interface.
          */
-        struct IGyroscopeDriver
-        {
-            /**
-            * @brief Reads data from gyroscope
-            * @return Three-axis raw gyroscope reading. If read failed than empty value is returned.
-            */
-            virtual Option<GyroscopeTelemetry> read() = 0;
-        };
-
         /** @}*/
     }
 }
