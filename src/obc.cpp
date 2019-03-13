@@ -31,7 +31,7 @@ static void AuditSystemStartup(uint32_t)
     efm::mcu::ResetBootReason();
 }
 
-static void TimePassed(void* /*context*/, TimePoint /*currentTime*/)
+static void TimePassed(void* /*context*/)
 {
     drivers::watchdog::InternalWatchdog::Kick();
 }

@@ -26,7 +26,7 @@ namespace services
          * timePassedCallbackContext parameter passed to TimeInitialize procedure.
          * @param[in] currentTime Current mission time in milliseconds.
          */
-        using TimePassedCallbackType = void (*)(void* context, TimePoint currentTime);
+        using TimePassedCallbackType = void (*)(void* context);
 
         /**
          * @brief This structure contains temporary timer state used for passing information between

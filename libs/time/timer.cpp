@@ -167,7 +167,7 @@ void TimeProvider::SendTimeNotification(TimerState state)
 {
     if (state.sendNotification && OnTimePassed != NULL)
     {
-        OnTimePassed(TimePassedCallbackContext, TimePointFromDuration(state.time));
+        OnTimePassed(TimePassedCallbackContext);
     }
 
     if (state.sendNotification)
