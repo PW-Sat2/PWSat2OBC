@@ -9,8 +9,8 @@ namespace mission
     namespace power
     {
         PeriodicPowerCycleTask::PeriodicPowerCycleTask(
-            std::tuple<services::power::IPowerControl&, IScrubbingStatus&> args)
-            : _power(std::get<0>(args)), _scrubbingStatus(std::get<1>(args))
+            std::tuple<services::power::IPowerControl&> args)
+            : _power(std::get<0>(args))
         {
         }
 
@@ -40,26 +40,6 @@ namespace mission
             auto timeSinceBoot = state.Time - This->_bootTime.Value;
 
             if (timeSinceBoot < PowerCycleTime)
-            {
-                return false;
-            }
-
-            if (This->_scrubbingStatus.BootloaderInProgress())
-            {
-                return false;
-            }
-
-            if (This->_scrubbingStatus.PrimarySlotsInProgress())
-            {
-                return false;
-            }
-
-            if (This->_scrubbingStatus.FailsafeSlotsInProgress())
-            {
-                return false;
-            }
-
-            if (This->_scrubbingStatus.SafeModeInProgress())
             {
                 return false;
             }

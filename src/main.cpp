@@ -36,7 +36,7 @@ OBC Main;
 mission::ObcMission Mission(
     Main.Hardware.EPS,
     &Main.Hardware.CommDriver,
-    std::make_tuple(std::ref(Main.PowerControlInterface), std::ref(Main.Scrubbing))
+    std::make_tuple(std::ref(Main.PowerControlInterface))
     );
 
 const int __attribute__((used)) uxTopUsedPriority = configMAX_PRIORITIES;

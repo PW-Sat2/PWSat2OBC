@@ -83,8 +83,6 @@ struct OBC
     /** @brief Overall satellite <-> Earth communication */
     obc::OBCCommunication Communication;
 
-    /** @brief Scrubbing mechanism */
-    obc::OBCScrubbing Scrubbing;
 };
 
 /** @brief Global OBC object. */

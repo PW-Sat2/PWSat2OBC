@@ -55,7 +55,7 @@ namespace mission
              * @param args Tuple with dependencies: power control, scrubbing status, experiment controller
              */
             PeriodicPowerCycleTask(
-                std::tuple<services::power::IPowerControl&, IScrubbingStatus&> args);
+                std::tuple<services::power::IPowerControl&> args);
 
             /**
              * @brief Returns action description
@@ -87,8 +87,6 @@ namespace mission
 
             /** @brief Power control interface */
             services::power::IPowerControl& _power;
-            /** @brief Scrubbing status */
-            IScrubbingStatus& _scrubbingStatus;
 
             /** @brief Boot time (timestamp at first action condition evaluation) */
             Option<std::chrono::milliseconds> _bootTime;

@@ -26,8 +26,7 @@ OBC::OBC()
           BootSettings,
           PowerControlInterface,
           Hardware.I2C.Buses.Bus,
-          Hardware.I2C.Buses.Payload),
-      Scrubbing(this->Hardware, this->BootTable, this->BootSettings, 0b000111) // [TODO] czy to dobrze?
+          Hardware.I2C.Buses.Payload)
 {
 }
 
@@ -66,8 +65,6 @@ OSResult OBC::InitializeRunlevel2()
     Mission.Resume();
 
     this->Hardware.Burtc.Start();
-
-    this->Scrubbing.InitializeRunlevel2();
 
     drivers::watchdog::InternalWatchdog::Enable();
 
