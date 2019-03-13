@@ -81,12 +81,6 @@ struct OBC
      */
     inline ILineIO& GetLineIO();
 
-    /**
-     * @brief Initialize adcs subsystem.
-     * @param persistentState Reference to obc global persistent state.
-     */
-    void InitializeAdcs(const state::SystemPersistentState& persistentState);
-
     /** @brief File system object */
     services::fs::YaffsFileSystem fs;
 
@@ -117,12 +111,6 @@ struct OBC
     /** @brief OBC storage */
     obc::OBCStorage Storage;
 
-    /** @brief Adcs subsytem for obc. */
-    obc::Adcs adcs;
-
-    /** @brief Experiments */
-    obc::OBCExperiments Experiments;
-
     /** @brief Overall satellite <-> Earth communication */
     obc::OBCCommunication Communication;
 
@@ -131,12 +119,6 @@ struct OBC
 
     /** @brief Memory management */
     obc::OBCMemory Memory;
-
-    /** @brief Camera object attached to UART */
-    devices::camera::Camera camera;
-
-    /** @brief Camera */
-    obc::OBCCamera Camera;
 };
 
 /** @brief Global OBC object. */

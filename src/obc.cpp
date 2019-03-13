@@ -77,24 +77,6 @@ OBC::OBC()
       PowerControlInterface(this->Hardware.EPS),                                       //
       Fdir(this->PowerControlInterface, GetErrorCounterMask()),                        //
       Storage(this->Fdir.ErrorCounting(), Hardware.SPI, fs, Hardware.Pins),            //
-      adcs(this->Hardware.imtqTelemetryCollector, this->PowerControlInterface),        //
-      Experiments(fs,
-          this->adcs.GetAdcsCoordinator(),
-          this->timeProvider,
-          Hardware.Gyro,
-          PowerControlInterface,
-          Hardware.SunS,
-          Hardware.PayloadDeviceDriver,
-          Storage.GetInternalStorage().GetTopDriver(),
-          Hardware.CommDriver,
-          Camera.PhotoService,
-          this->Hardware.Pins.SailIndicator, //
-          this->Hardware.imtqTelemetryCollector,
-          this->Hardware.EPS,
-          &this->Fdir,
-          &this->Hardware.MCUTemperature,
-          BootTable,
-          this->Hardware.FlashDriver), //
       Communication(                   //
           this->Hardware.CommDriver,
           Mission,
@@ -102,9 +84,7 @@ OBC::OBC()
           PowerControlInterface,
           Hardware.I2C.Buses.Bus,
           Hardware.I2C.Buses.Payload),
-      Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index),         //
-      camera(this->Fdir.ErrorCounting(), this->Hardware.Camera),                           //
-      Camera(this->PowerControlInterface, this->fs, this->Hardware.Pins.CamSelect, camera) //
+      Scrubbing(this->Hardware, this->BootTable, this->BootSettings, boot::Index)
 {
 }
 
@@ -136,15 +116,11 @@ OSResult OBC::InitializeRunlevel1()
 
     this->Communication.InitializeRunlevel1();
 
-    InitializeAdcs(persistentState);
-
     result = this->Storage.Initialize();
     if (OS_RESULT_FAILED(result))
     {
         LOGF(LOG_LEVEL_FATAL, "[obc] Storage initialization failed %d", num(result));
     }
-
-    this->Experiments.InitializeRunlevel1();
 
     ProcessState(this);
     AuditSystemStartup(this->BootSettings.BootCounter());
@@ -183,8 +159,6 @@ OSResult OBC::InitializeRunlevel1()
         LOG(LOG_LEVEL_ERROR, "[obc] Unable to initialize telemetry acquisition loop.");
     }
 
-    Camera.InitializeRunlevel1();
-
     BootSettings.ConfirmBoot();
 
     return OSResult::Success;
@@ -209,8 +183,6 @@ OSResult OBC::InitializeRunlevel2()
         LOG(LOG_LEVEL_WARNING, "[obc] Not starting scrubbing as boot to upper detected");
     }
 
-    Camera.InitializeRunlevel2();
-
     drivers::watchdog::InternalWatchdog::Enable();
 
     return OSResult::Success;
@@ -221,18 +193,4 @@ OSResult OBC::InitializeRunlevel3()
     Mission.EnableAutostart();
 
     return OSResult::Success;
-}
-
-void OBC::InitializeAdcs(const state::SystemPersistentState& persistentState)
-{
-    state::AdcsState adcsState;
-    this->adcs.Initialize();
-    if (!persistentState.Get(adcsState))
-    {
-        LOG(LOG_LEVEL_ERROR, "[obc] Can't get adcs state");
-    }
-    else
-    {
-        this->adcs.GetAdcsCoordinator().SetBlockMode(adcs::AdcsMode::BuiltinDetumbling, adcsState.IsInternalDetumblingDisabled());
-    }
 }

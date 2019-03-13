@@ -7,8 +7,7 @@ set(SOURCES
     checks/checks.cpp
     obc.h
     obc.cpp
-    obc_access.cpp
-    fault_handlers.cpp
+        fault_handlers.cpp
     blink.cpp
 )
 

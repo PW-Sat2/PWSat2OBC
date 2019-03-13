@@ -27,3 +27,4 @@ integration_tests/tests/*.dat
 integration_tests/tests/*.jpg
 
 cmake-build-debug/
+cmake-build-release
