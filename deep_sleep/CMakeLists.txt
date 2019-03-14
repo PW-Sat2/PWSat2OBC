@@ -4,6 +4,7 @@ generate_version_file(${CMAKE_CURRENT_BINARY_DIR}/gen/version.h)
 
 set(SOURCES
     eps.cpp
+    fault_handler.cpp
     main.cpp
     state.cpp
     timer.cpp
