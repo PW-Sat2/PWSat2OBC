@@ -18,8 +18,8 @@ struct NullErrorCounter : public error_counter::IErrorCounting
 enum class CounterType
 {
     None = 0,
-    PrintCounter1 = 1,
-    PrintCounter2 = 2,
+    PrintCounter,
+    EraseFlash,
     Max,
 };
 
