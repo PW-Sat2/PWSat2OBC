@@ -38,22 +38,33 @@ static void GyroSleep()
 {
     SendToUart(io_map::UART_1::Peripheral, "Gyro sleep\n");
 
-    std::array<uint8_t, 1> inData = {static_cast<uint8_t>(0x00)};
-    std::array<uint8_t, 1> outData;
-
-    auto status = PayloadI2C.WriteRead(0x68, inData, outData);
-
-    if (status == drivers::i2c::I2CResult::OK)
     {
-        SendToUart(io_map::UART_1::Peripheral, "i2c ok: ");
-        char buf[100];
-        itoa(outData[0], buf, 16);
-        SendToUart(io_map::UART_1::Peripheral, buf);
-        SendToUart(io_map::UART_1::Peripheral, "\n");
+        std::array<uint8_t, 1> inData = {static_cast<uint8_t>(0x00)};
+        std::array<uint8_t, 1> outData;
+
+        auto status = PayloadI2C.WriteRead(0x68, inData, outData);
+
+        if (status == drivers::i2c::I2CResult::OK && outData[0] == 0x68)
+        {
+            SendToUart(io_map::UART_1::Peripheral, "Gyro ID ok\n");
+        }
+        else
+        {
+            SendToUart(io_map::UART_1::Peripheral, "Gyro ID nok\n");
+        }
     }
-    else
+
     {
-        SendToUart(io_map::UART_1::Peripheral, "i2c nok\n");
+        std::array<uint8_t, 2> cmd = {0x3E, 1 << 6};
+        const auto status = PayloadI2C.Write(Gyro, cmd);
+        if (status == drivers::i2c::I2CResult::OK)
+        {
+            SendToUart(io_map::UART_1::Peripheral, "Gyro Sleep ok\n");
+        }
+        else
+        {
+            SendToUart(io_map::UART_1::Peripheral, "Gyro Sleep nok\n");
+        }
     }
 }
 
