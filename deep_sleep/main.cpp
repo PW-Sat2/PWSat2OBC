@@ -50,7 +50,10 @@ int main()
 
     SendToUart(io_map::UART_1::Peripheral, msg);
 
+    SendToUart(io_map::UART_1::Peripheral, "Sleeping!\n");
     EMU_EnterEM2(true);
+
+    SendToUart(io_map::UART_1::Peripheral, "Wake up!\n");
 
     while (1)
         ;
