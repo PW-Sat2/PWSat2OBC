@@ -4,6 +4,7 @@ generate_version_file(${CMAKE_CURRENT_BINARY_DIR}/gen/version.h)
 
 set(SOURCES
     main.cpp
+    timer.cpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -28,7 +29,10 @@ target_link_libraries(${NAME}
     version
 )
 
-target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen)
+target_include_directories(${NAME} 
+    PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
+    )
 
 target_generate_bin(${NAME})
 target_generate_hex(${NAME})

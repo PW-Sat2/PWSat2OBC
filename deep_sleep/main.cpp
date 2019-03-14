@@ -5,9 +5,12 @@
 #include <em_emu.h>
 #include <em_i2c.h>
 #include <em_usart.h>
+#include <em_burtc.h>
+#include <em_rmu.h>
 #include "mcu/io_map.h"
 #include "standalone/i2c/i2c.hpp"
 #include "system.h"
+#include "timer.h"
 
 #include "boot/params.hpp"
 
@@ -96,16 +99,23 @@ int main()
     char msg[256] = {0};
 
     sprintf(msg, "Magic: 0x%lX\nReason=%d\nIndex=%d\n", boot::MagicNumber, num(boot::BootReason), boot::Index);
-
     SendToUart(io_map::UART_1::Peripheral, msg);
 
     GyroSleep();
 
-    SendToUart(io_map::UART_1::Peripheral, "Sleeping!\n");
-    EMU_EnterEM3(true);
+    ConfigureBurtc();
+    SendToUart(io_map::UART_1::Peripheral, "Configured Burtc!\n");
 
-    SendToUart(io_map::UART_1::Peripheral, "Wake up!\n");
+    while (1) 
+    {
+        // Deep-sleep logic goes here
 
-    while (1)
-        ;
+        // Setup next BURTC iteration
+        ArmBurtc();
+
+        SendToUart(io_map::UART_1::Peripheral, "Sleeping!\n");
+        EMU_EnterEM3(true);
+
+        SendToUart(io_map::UART_1::Peripheral, "Wake up!\n");
+    }
 }

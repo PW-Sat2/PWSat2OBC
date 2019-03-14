@@ -1,0 +1,2 @@
+void ConfigureBurtc();
+void ArmBurtc();
