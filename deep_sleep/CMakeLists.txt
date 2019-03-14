@@ -7,9 +7,11 @@ set(SOURCES
     fault_handler.cpp
     main.cpp
     state.cpp
+    flash_eraser.cpp
     timer.cpp
     include/eps.hpp
     include/state.hpp
+    include/flash_eraser.hpp
     include/timer.h
 )
 
@@ -37,7 +39,7 @@ target_link_libraries(${NAME}
     error_counter
 )
 
-target_include_directories(${NAME} 
+target_include_directories(${NAME}
     PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/gen
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
     )

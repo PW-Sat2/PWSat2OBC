@@ -14,6 +14,7 @@
 #include "state.hpp"
 #include "system.h"
 #include "timer.h"
+#include "flash_eraser.hpp"
 
 #include "boot/params.hpp"
 
@@ -34,6 +35,7 @@ StandaloneEPS EPS(BusI2C, PayloadI2C);
 
 SPIPeripheral Spi;
 State PersistentState{Spi};
+FlashEraser Eraser{Spi};
 
 using PLDI2C = io_map::I2C_1;
 
@@ -48,7 +50,7 @@ static void InitI2C()
 
     BusI2C.Initialize(cmuClock_I2C0, bus::SDA::Port, bus::SDA::PinNumber, bus::SCL::Port, bus::SCL::PinNumber, bus::Location);
 }
- 
+
 static void GyroSleep()
 {
     SendToUart(io_map::UART_1::Peripheral, "Gyro sleep\n");
@@ -103,6 +105,13 @@ static void BootPrinter(void* text, const Counter&)
     SendToUart(io_map::UART_1::Peripheral, static_cast<const char*>(text));
 }
 
+static void EraseFlash(void*, const Counter&)
+{
+    SendToUart(io_map::UART_1::Peripheral, "Erasing flash\n");
+
+    Eraser.Run();
+}
+
 int main()
 {
     SCB->VTOR = 0x00080000;
@@ -141,11 +150,13 @@ int main()
 
     Spi.Initialize();
     PersistentState.Initialize();
+    Eraser.Initialize();
 
-    Counter counter1{CounterType::PrintCounter1, 5, BootPrinter, const_cast<char*>("Boot Action 5 done\n")};
-    Counter counter2{CounterType::PrintCounter2, 7, BootPrinter, const_cast<char*>("Boot Action 7 done\n")};
-    counter1.Verify(PersistentState);
-    counter2.Verify(PersistentState);
+    Counter printCounter{CounterType::PrintCounter, 1, BootPrinter, const_cast<char*>("Boot Action done\n")};
+    Counter eraseFlashCounter{CounterType::EraseFlash, 10, EraseFlash, const_cast<char*>("Flash erased\n")};
+
+    printCounter.Verify(PersistentState);
+    eraseFlashCounter.Verify(PersistentState);
 
     while (1)
     {
