@@ -203,6 +203,8 @@ int main()
 
     Spi.Initialize();
     PersistentState.Initialize();
+    FlashDriver.Initialize();
+    BootTable.Initialize();
 
     Counter counter1{CounterType::PrintCounter1, 5, BootPrinter, const_cast<char*>("Boot Action 5 done\n")};
     Counter counter2{CounterType::PrintCounter2, 7, BootPrinter, const_cast<char*>("Boot Action 7 done\n")};
