@@ -16,8 +16,15 @@
 #include "timer.h"
 #include "comm.hpp"
 #include "sleep.h"
+#include "config.hpp"
+#include "scrubbing.hpp"
 
 #include "boot/params.hpp"
+
+
+using namespace std::chrono;
+
+minutes ScrubbingInterval = 30min;
 
 void SendToUart(USART_TypeDef* uart, const char* message)
 {
@@ -34,6 +41,10 @@ StandaloneI2C PayloadI2C(I2C1);
 StandaloneI2C BusI2C(I2C0);
 StandaloneEPS EPS(BusI2C, PayloadI2C);
 StandaloneComm Comm(BusI2C);
+
+drivers::msc::MCUMemoryController MCUFlash;
+StandaloneFlashDriver FlashDriver(io_map::ProgramFlash::FlashBase);
+program_flash::BootTable BootTable(FlashDriver);
 
 SPIPeripheral Spi;
 State PersistentState{Spi};
@@ -106,6 +117,7 @@ static void BootPrinter(void* text, const Counter&)
     SendToUart(io_map::UART_1::Peripheral, static_cast<const char*>(text));
 }
 
+
 int main()
 {
     SCB->VTOR = 0x00080000;
@@ -144,6 +156,8 @@ int main()
 
     DWT_Init();
 
+    milliseconds next_scrubbing = 0ms;
+
     Spi.Initialize();
     PersistentState.Initialize();
 
@@ -155,14 +169,27 @@ int main()
 
     while (1)
     {
+        auto current_time = GetTime();
+
         // Deep-sleep logic goes here
-        sprintf(msg, "Time ms=%lu\n", (uint32_t)GetTime().count());
+        sprintf(msg, "Time ms=%lu\n", (uint32_t)current_time.count());
         SendToUart(io_map::UART_1::Peripheral, msg);
 
         EPSTelemetryA epsA;
         EPSTelemetryB epsB;
         EPS.ReadTelemetryA(epsA);
         EPS.ReadTelemetryB(epsB);
+
+        if (current_time >= next_scrubbing)
+        {
+            next_scrubbing = current_time + Config::ScrubbingInterval;
+            
+            SendToUart(io_map::UART_1::Peripheral, "Commencing scrubbing!\n");
+
+            ScrubProgram(MCUFlash, FlashDriver, BootTable);
+
+            SendToUart(io_map::UART_1::Peripheral, "Scrubbing complete!\n");
+        }
 
         // Setup next BURTC iteration
         ArmBurtc();

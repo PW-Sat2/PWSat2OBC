@@ -6,10 +6,13 @@
 
 struct Config
 {
+
 #ifdef FAST_DEEP_SLEEP
     static constexpr std::uint32_t BuRTCCompareValue = 1024;
+    static constexpr std::chrono::minutes ScrubbingInterval = std::chrono::minutes(1);
 #else
     static constexpr std::uint32_t BuRTCCompareValue = 10240;
+    static constexpr std::chrono::minutes ScrubbingInterval = std::chrono::minutes(30);
 #endif
 
     static constexpr uint32_t PrescalerDivider = burtcClkDiv_128;

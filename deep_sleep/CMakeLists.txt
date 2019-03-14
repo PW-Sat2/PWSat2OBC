@@ -10,6 +10,7 @@ set(SOURCES
     main.cpp
     state.cpp
     timer.cpp
+    scrubbing.cpp
     include/eps.hpp
     include/state.hpp
     include/config.hpp
@@ -17,6 +18,7 @@ set(SOURCES
     sleep.cpp
     include/timer.h
     include/comm.hpp
+    include/scrubbing.hpp
 )
 
 add_executable(${NAME} ${SOURCES})
