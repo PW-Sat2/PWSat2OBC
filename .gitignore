@@ -25,3 +25,5 @@ integration_tests/ipython_profile/history.sqlite
 
 integration_tests/tests/*.dat
 integration_tests/tests/*.jpg
+
+.vscode

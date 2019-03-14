@@ -21,6 +21,7 @@ target_link_libraries(${NAME}
     program_flash
     standalone_flash_driver
     standalone_spi
+    standalone_i2c
     scrubber
     msc
     n25q

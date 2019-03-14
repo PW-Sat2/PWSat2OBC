@@ -3,8 +3,10 @@
 #include <em_chip.h>
 #include <em_cmu.h>
 #include <em_emu.h>
+#include <em_i2c.h>
 #include <em_usart.h>
 #include "mcu/io_map.h"
+#include "standalone/i2c/i2c.hpp"
 #include "system.h"
 
 #include "boot/params.hpp"
@@ -20,6 +22,41 @@ static void SendToUart(USART_TypeDef* uart, const char* message)
 
 extern "C" void __libc_init_array(void);
 
+StandaloneI2C PayloadI2C(I2C1);
+
+using PLDI2C = io_map::I2C_1;
+
+constexpr std::uint8_t Gyro = 0x68;
+
+static void InitI2C()
+{
+    PayloadI2C.Initialize(
+        cmuClock_I2C1, PLDI2C::SDA::Port, PLDI2C::SDA::PinNumber, PLDI2C::SCL::Port, PLDI2C::SCL::PinNumber, PLDI2C::Location);
+}
+
+static void GyroSleep()
+{
+    SendToUart(io_map::UART_1::Peripheral, "Gyro sleep\n");
+
+    std::array<uint8_t, 1> inData = {static_cast<uint8_t>(0x00)};
+    std::array<uint8_t, 1> outData;
+
+    auto status = PayloadI2C.WriteRead(0x68, inData, outData);
+
+    if (status == drivers::i2c::I2CResult::OK)
+    {
+        SendToUart(io_map::UART_1::Peripheral, "i2c ok: ");
+        char buf[100];
+        itoa(outData[0], buf, 16);
+        SendToUart(io_map::UART_1::Peripheral, buf);
+        SendToUart(io_map::UART_1::Peripheral, "\n");
+    }
+    else
+    {
+        SendToUart(io_map::UART_1::Peripheral, "i2c nok\n");
+    }
+}
+
 int main()
 {
     SCB->VTOR = 0x00080000;
@@ -29,7 +66,6 @@ int main()
     __libc_init_array();
 
     CMU_ClockEnable(cmuClock_GPIO, true);
-    CMU_ClockEnable(cmuClock_DMA, true);
 
     USART_InitAsync_TypeDef init = USART_INITASYNC_DEFAULT;
     init.baudrate = io_map::UART_1::Baudrate;
@@ -38,7 +74,9 @@ int main()
     CMU_ClockEnable(cmuClock_UART1, true);
     USART_InitAsync(io_map::UART_1::Peripheral, &init);
 
-    io_map::UART_1::Peripheral->ROUTE |= UART_ROUTE_TXPEN | UART_ROUTE_RXPEN | io_map::UART_1::Location;
+    io_map::UART_1::Peripheral->ROUTE |= UART_ROUTE_TXPEN | io_map::UART_1::Location;
+
+    InitI2C();
 
     USART_Enable(io_map::UART_1::Peripheral, usartEnable);
 
@@ -50,8 +88,10 @@ int main()
 
     SendToUart(io_map::UART_1::Peripheral, msg);
 
+    GyroSleep();
+
     SendToUart(io_map::UART_1::Peripheral, "Sleeping!\n");
-    EMU_EnterEM2(true);
+    EMU_EnterEM3(true);
 
     SendToUart(io_map::UART_1::Peripheral, "Wake up!\n");
 
