@@ -117,6 +117,26 @@ static void BootPrinter(void* text, const Counter&)
     SendToUart(io_map::UART_1::Peripheral, static_cast<const char*>(text));
 }
 
+void SetupHardware(void)
+{
+    CMU_ClockEnable(cmuClock_GPIO, true);
+
+    // LFXTAL
+    GPIO_PinModeSet(io_map::XTAL::LF::Pin1::Port, io_map::XTAL::LF::Pin1::PinNumber, gpioModeDisabled, 0);
+    GPIO_PinModeSet(io_map::XTAL::LF::Pin2::Port, io_map::XTAL::LF::Pin2::PinNumber, gpioModeDisabled, 0);
+
+    // HFXTAL
+    GPIO_PinModeSet(io_map::XTAL::HF::Pin1::Port, io_map::XTAL::HF::Pin1::PinNumber, gpioModeDisabled, 0);
+    GPIO_PinModeSet(io_map::XTAL::HF::Pin2::Port, io_map::XTAL::HF::Pin2::PinNumber, gpioModeDisabled, 0);
+
+    CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_HFCLKLE);
+    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_HFCLKLE);
+
+    CMU_OscillatorEnable(cmuOsc_HFXO, true, true);
+    CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
+    CMU_OscillatorEnable(cmuOsc_HFRCO, false, true);
+}
+
 
 int main()
 {
@@ -124,9 +144,10 @@ int main()
 
     CHIP_Init();
 
+    SetupHardware();
+
     __libc_init_array();
 
-    CMU_ClockEnable(cmuClock_GPIO, true);
     {
         USART_InitAsync_TypeDef init = USART_INITASYNC_DEFAULT;
         init.baudrate = io_map::UART_1::Baudrate;
