@@ -108,7 +108,9 @@ int main()
 
     while (1)
     {
-        // Deep-sleep logic goes here
+        // Deep-sleep logic goes here        
+        sprintf(msg, "Time ms=%lu\n", (uint32_t)GetTime().count());
+        SendToUart(io_map::UART_1::Peripheral, msg);
 
         // Setup next BURTC iteration
         ArmBurtc();
