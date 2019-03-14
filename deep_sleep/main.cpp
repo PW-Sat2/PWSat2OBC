@@ -146,6 +146,7 @@ int main()
     Counter counter2{CounterType::PrintCounter2, 7, BootPrinter, const_cast<char*>("Boot Action 7 done\n")};
     counter1.Verify(PersistentState);
     counter2.Verify(PersistentState);
+    PersistentState.ConfirmBoot();
 
     while (1)
     {

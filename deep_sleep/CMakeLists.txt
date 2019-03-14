@@ -27,6 +27,7 @@ target_link_libraries(${NAME}
     gsl
     emlib
     boot_params
+    boot_settings
     logger
     program_flash
     standalone_flash_driver

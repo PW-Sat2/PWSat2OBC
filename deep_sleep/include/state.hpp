@@ -34,6 +34,7 @@ class State
 
     void WriteCounter(CounterType counter, std::int32_t value);
 
+    void ConfirmBoot();
   private:
     void ResetInvalidCounters();
 

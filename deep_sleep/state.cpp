@@ -1,4 +1,5 @@
 #include "state.hpp"
+#include "boot/settings.hpp"
 
 static constexpr devices::fm25w::Address BaseAddress = 1024;
 static constexpr std::int32_t InvalidTopLimit = 1024;
@@ -67,6 +68,12 @@ void State::WriteCounter(CounterType counter, std::int32_t value)
 
     local.value = value;
     this->_fram.Write(BaseAddress + num(counter) * sizeof(std::int32_t), gsl::make_span(local.buffer));
+}
+
+void State::ConfirmBoot()
+{
+    boot::BootSettings settings{this->_fram};
+    settings.ConfirmBoot();
 }
 
 void Counter::Verify(State& state)
