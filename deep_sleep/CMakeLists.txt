@@ -13,7 +13,10 @@ set(SOURCES
     include/eps.hpp
     include/state.hpp
     include/config.hpp
+    comm.cpp
+    sleep.cpp
     include/timer.h
+    include/comm.hpp
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -39,6 +42,7 @@ target_link_libraries(${NAME}
     fm25w
     version
     error_counter
+    comm
 )
 
 target_include_directories(${NAME} 

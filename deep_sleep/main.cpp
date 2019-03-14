@@ -14,6 +14,8 @@
 #include "state.hpp"
 #include "system.h"
 #include "timer.h"
+#include "comm.hpp"
+#include "sleep.h"
 
 #include "boot/params.hpp"
 
@@ -31,6 +33,7 @@ extern "C" void __libc_init_array(void);
 StandaloneI2C PayloadI2C(I2C1);
 StandaloneI2C BusI2C(I2C0);
 StandaloneEPS EPS(BusI2C, PayloadI2C);
+StandaloneComm Comm(BusI2C);
 
 SPIPeripheral Spi;
 State PersistentState{Spi};
@@ -139,6 +142,8 @@ int main()
     ConfigureBurtc();
     SendToUart(io_map::UART_1::Peripheral, "Configured Burtc!\n");
 
+    DWT_Init();
+
     Spi.Initialize();
     PersistentState.Initialize();
 
@@ -161,6 +166,12 @@ int main()
 
         // Setup next BURTC iteration
         ArmBurtc();
+
+        // Reset Comm watchdogs and check if there are frames
+        if (Comm.PollHardware())
+        {
+            SendToUart(io_map::UART_1::Peripheral, "Frame received!\n");
+        }
 
         SendToUart(io_map::UART_1::Peripheral, "Sleeping!\n");
         while (!(io_map::UART_1::Peripheral->STATUS & USART_STATUS_TXC))
