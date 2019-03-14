@@ -76,6 +76,17 @@ void State::ConfirmBoot()
     settings.ConfirmBoot();
 }
 
+void State::SwapBootSlots()
+{
+    boot::BootSettings settings{this->_fram};
+
+    auto primary = settings.BootSlots();
+    auto backup = settings.FailsafeBootSlots();
+
+    settings.BootSlots(backup);
+    settings.FailsafeBootSlots(primary);
+}
+
 void Counter::Verify(State& state)
 {
     const auto value = state.ReadCounter(_type) - 1;

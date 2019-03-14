@@ -148,6 +148,11 @@ void SetupHardware(void)
     CMU_OscillatorEnable(cmuOsc_HFRCO, false, true);
 }
 
+static void RebootToNormal()
+{
+    PersistentState.SwapBootSlots();
+    NVIC_SystemReset();
+}
 
 int main()
 {
@@ -233,6 +238,7 @@ int main()
         if (Comm.PollHardware())
         {
             SendToUart(io_map::UART_1::Peripheral, "Frame received!\n");
+            RebootToNormal();
         }
 
         SendToUart(io_map::UART_1::Peripheral, "Sleeping!\n");
