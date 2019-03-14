@@ -60,6 +60,7 @@ program_flash::BootTable BootTable(FlashDriver);
 
 SPIPeripheral Spi;
 State PersistentState{Spi};
+FlashEraser Eraser{Spi};
 
 using PLDI2C = io_map::I2C_1;
 
@@ -233,7 +234,7 @@ int main()
         if (current_time >= next_scrubbing)
         {
             next_scrubbing = current_time + Config::ScrubbingInterval;
-            
+
             SendToUart(io_map::UART_1::Peripheral, "Commencing scrubbing!\n");
 
             ScrubProgram(MCUFlash, FlashDriver, BootTable);
