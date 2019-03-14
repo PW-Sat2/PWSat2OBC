@@ -7,6 +7,7 @@
 #include <em_i2c.h>
 #include <em_rmu.h>
 #include <em_usart.h>
+#include "eps.hpp"
 #include "mcu/io_map.h"
 #include "standalone/i2c/i2c.hpp"
 #include "system.h"
@@ -26,15 +27,19 @@ static void SendToUart(USART_TypeDef* uart, const char* message)
 extern "C" void __libc_init_array(void);
 
 StandaloneI2C PayloadI2C(I2C1);
-
-using PLDI2C = io_map::I2C_1;
+StandaloneI2C BusI2C(I2C0);
+StandaloneEPS EPS(BusI2C, PayloadI2C);
 
 constexpr std::uint8_t Gyro = 0x68;
 
 static void InitI2C()
 {
-    PayloadI2C.Initialize(
-        cmuClock_I2C1, PLDI2C::SDA::Port, PLDI2C::SDA::PinNumber, PLDI2C::SCL::Port, PLDI2C::SCL::PinNumber, PLDI2C::Location);
+    using pld = io_map::I2C_1;
+    using bus = io_map::I2C_0;
+
+    PayloadI2C.Initialize(cmuClock_I2C1, pld::SDA::Port, pld::SDA::PinNumber, pld::SCL::Port, pld::SCL::PinNumber, pld::Location);
+
+    BusI2C.Initialize(cmuClock_I2C0, bus::SDA::Port, bus::SDA::PinNumber, bus::SCL::Port, bus::SCL::PinNumber, bus::Location);
 }
 
 static void GyroSleep()
@@ -71,6 +76,31 @@ static void GyroSleep()
     }
 }
 
+static void DisableLCLs()
+{
+    SendToUart(io_map::UART_1::Peripheral, "Disabling LCLs\n");
+
+    SendToUart(io_map::UART_1::Peripheral, "1\n");
+    EPS.DisableLCL(LCL::TKMain);
+    SendToUart(io_map::UART_1::Peripheral, "2\n");
+    EPS.DisableLCL(LCL::SunS);
+    SendToUart(io_map::UART_1::Peripheral, "3\n");
+    EPS.DisableLCL(LCL::CamNadir);
+    SendToUart(io_map::UART_1::Peripheral, "4\n");
+    EPS.DisableLCL(LCL::CamWing);
+    SendToUart(io_map::UART_1::Peripheral, "5\n");
+    EPS.DisableLCL(LCL::SENS);
+    SendToUart(io_map::UART_1::Peripheral, "6\n");
+    EPS.DisableLCL(LCL::AntennaMain);
+    SendToUart(io_map::UART_1::Peripheral, "7\n");
+    EPS.DisableLCL(LCL::IMTQ);
+    SendToUart(io_map::UART_1::Peripheral, "8\n");
+    EPS.DisableLCL(LCL::TKRed);
+    SendToUart(io_map::UART_1::Peripheral, "9\n");
+    EPS.DisableLCL(LCL::AntennaRed);
+    SendToUart(io_map::UART_1::Peripheral, "Done\n");
+}
+
 int main()
 {
     SCB->VTOR = 0x00080000;
@@ -102,6 +132,7 @@ int main()
     SendToUart(io_map::UART_1::Peripheral, msg);
 
     GyroSleep();
+    DisableLCLs();
 
     ConfigureBurtc();
     SendToUart(io_map::UART_1::Peripheral, "Configured Burtc!\n");

@@ -5,6 +5,9 @@ generate_version_file(${CMAKE_CURRENT_BINARY_DIR}/gen/version.h)
 set(SOURCES
     main.cpp
     timer.cpp
+    eps.cpp
+    include/timer.h
+    include/eps.hpp
 )
 
 add_executable(${NAME} ${SOURCES})
