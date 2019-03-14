@@ -18,6 +18,7 @@
 #include "sleep.h"
 #include "config.hpp"
 #include "scrubbing.hpp"
+#include "logger/logger.h"
 
 #include "boot/params.hpp"
 
@@ -33,6 +34,16 @@ void SendToUart(USART_TypeDef* uart, const char* message)
         USART_Tx(uart, *message);
         message++;
     }
+}
+
+static void LogToUart(void* context, bool /*withinIsr*/, const char* messageHeader, const char* messageFormat, va_list messageArguments)
+{
+    char buf[256];
+    auto uart = static_cast<USART_TypeDef*>(context);
+    SendToUart(uart, messageHeader);
+    vsprintf(buf, messageFormat, messageArguments);
+    SendToUart(uart, buf);
+    USART_Tx(uart, '\n');
 }
 
 extern "C" void __libc_init_array(void);
@@ -157,6 +168,9 @@ int main()
     }
 
     io_map::UART_1::Peripheral->ROUTE |= UART_ROUTE_TXPEN | io_map::UART_1::Location;
+
+    LogInit(LOG_LEVEL_DEBUG);
+    LogAddEndpoint(LogToUart, io_map::UART_1::Peripheral, LOG_LEVEL_DEBUG);
 
     InitI2C();
 
