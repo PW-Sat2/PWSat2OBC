@@ -7,22 +7,20 @@
 #include <em_i2c.h>
 #include <em_rmu.h>
 #include <em_usart.h>
+#include "comm.hpp"
 #include "config.hpp"
 #include "eps.hpp"
 #include "mcu/io_map.h"
+#include "scrubbing.hpp"
+#include "sleep.h"
 #include "standalone/i2c/i2c.hpp"
 #include "standalone/spi/spi.hpp"
 #include "state.hpp"
 #include "system.h"
 #include "timer.h"
-#include "comm.hpp"
-#include "sleep.h"
-#include "config.hpp"
-#include "scrubbing.hpp"
 #include "logger/logger.h"
 
 #include "boot/params.hpp"
-
 
 using namespace std::chrono;
 
@@ -131,11 +129,12 @@ static void BootPrinter(void* text, const Counter&)
 
 static void RebootToDeepSleep(std::uint32_t swap)
 {
-    while (1)
-    {
-        EPS.PowerCycle(swap ? EPSController::A : EPSController::B);
-        EPS.PowerCycle(swap ? EPSController::B : EPSController::A);
-    }
+    (void)swap;
+    // while (1)
+    // {
+    //     EPS.PowerCycle(swap ? EPSController::A : EPSController::B);
+    //     EPS.PowerCycle(swap ? EPSController::B : EPSController::A);
+    // }
 }
 
 void SetupHardware(void)
@@ -157,7 +156,6 @@ void SetupHardware(void)
     CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
     CMU_OscillatorEnable(cmuOsc_HFRCO, false, true);
 }
-
 
 int main()
 {
@@ -233,7 +231,7 @@ int main()
         if (current_time >= next_scrubbing)
         {
             next_scrubbing = current_time + Config::ScrubbingInterval;
-            
+
             SendToUart(io_map::UART_1::Peripheral, "Commencing scrubbing!\n");
 
             ScrubProgram(MCUFlash, FlashDriver, BootTable);
