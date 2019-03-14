@@ -3,11 +3,13 @@ set(NAME deep_sleep)
 generate_version_file(${CMAKE_CURRENT_BINARY_DIR}/gen/version.h)
 
 set(SOURCES
-    main.cpp
-    timer.cpp
     eps.cpp
-    include/timer.h
+    main.cpp
+    state.cpp
+    timer.cpp
     include/eps.hpp
+    include/state.hpp
+    include/timer.h
 )
 
 add_executable(${NAME} ${SOURCES})
@@ -29,7 +31,9 @@ target_link_libraries(${NAME}
     scrubber
     msc
     n25q
+    fm25w
     version
+    error_counter
 )
 
 target_include_directories(${NAME} 

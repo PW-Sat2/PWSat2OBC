@@ -10,12 +10,14 @@
 #include "eps.hpp"
 #include "mcu/io_map.h"
 #include "standalone/i2c/i2c.hpp"
+#include "standalone/spi/spi.hpp"
+#include "state.hpp"
 #include "system.h"
 #include "timer.h"
 
 #include "boot/params.hpp"
 
-static void SendToUart(USART_TypeDef* uart, const char* message)
+void SendToUart(USART_TypeDef* uart, const char* message)
 {
     while (*message != '\0')
     {
@@ -30,6 +32,11 @@ StandaloneI2C PayloadI2C(I2C1);
 StandaloneI2C BusI2C(I2C0);
 StandaloneEPS EPS(BusI2C, PayloadI2C);
 
+SPIPeripheral Spi;
+State PersistentState{Spi};
+
+using PLDI2C = io_map::I2C_1;
+
 constexpr std::uint8_t Gyro = 0x68;
 
 static void InitI2C()
@@ -41,7 +48,7 @@ static void InitI2C()
 
     BusI2C.Initialize(cmuClock_I2C0, bus::SDA::Port, bus::SDA::PinNumber, bus::SCL::Port, bus::SCL::PinNumber, bus::Location);
 }
-
+ 
 static void GyroSleep()
 {
     SendToUart(io_map::UART_1::Peripheral, "Gyro sleep\n");
@@ -91,6 +98,11 @@ static void DisableLCLs()
     EPS.DisableLCL(LCL::AntennaRed);
 }
 
+static void BootPrinter(void* text, const Counter&)
+{
+    SendToUart(io_map::UART_1::Peripheral, static_cast<const char*>(text));
+}
+
 int main()
 {
     SCB->VTOR = 0x00080000;
@@ -100,13 +112,13 @@ int main()
     __libc_init_array();
 
     CMU_ClockEnable(cmuClock_GPIO, true);
-
-    USART_InitAsync_TypeDef init = USART_INITASYNC_DEFAULT;
-    init.baudrate = io_map::UART_1::Baudrate;
-    init.enable = usartDisable;
-
-    CMU_ClockEnable(cmuClock_UART1, true);
-    USART_InitAsync(io_map::UART_1::Peripheral, &init);
+    {
+        USART_InitAsync_TypeDef init = USART_INITASYNC_DEFAULT;
+        init.baudrate = io_map::UART_1::Baudrate;
+        init.enable = usartDisable;
+        CMU_ClockEnable(cmuClock_UART1, true);
+        USART_InitAsync(io_map::UART_1::Peripheral, &init);
+    }
 
     io_map::UART_1::Peripheral->ROUTE |= UART_ROUTE_TXPEN | io_map::UART_1::Location;
 
@@ -126,6 +138,14 @@ int main()
 
     ConfigureBurtc();
     SendToUart(io_map::UART_1::Peripheral, "Configured Burtc!\n");
+
+    Spi.Initialize();
+    PersistentState.Initialize();
+
+    Counter counter1{CounterType::PrintCounter1, 5, BootPrinter, const_cast<char*>("Boot Action 5 done\n")};
+    Counter counter2{CounterType::PrintCounter2, 7, BootPrinter, const_cast<char*>("Boot Action 7 done\n")};
+    counter1.Verify(PersistentState);
+    counter2.Verify(PersistentState);
 
     while (1)
     {
