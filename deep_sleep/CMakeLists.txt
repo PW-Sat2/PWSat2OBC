@@ -1,5 +1,7 @@
 set(NAME deep_sleep)
 
+option(FAST_DEEP_SLEEP "Enable fast deep sleep" OFF)
+
 generate_version_file(${CMAKE_CURRENT_BINARY_DIR}/gen/version.h)
 
 set(SOURCES
@@ -10,6 +12,7 @@ set(SOURCES
     timer.cpp
     include/eps.hpp
     include/state.hpp
+    include/config.hpp
     include/timer.h
 )
 
@@ -50,3 +53,7 @@ target_jlink_flash(${NAME} ${UPPER_ADDRESS})
 target_memory_report(${NAME})
 
 target_asm_listing(${NAME})
+
+if(FAST_DEEP_SLEEP)
+    target_compile_definitions(${NAME} PUBLIC -DFAST_DEEP_SLEEP)
+endif()

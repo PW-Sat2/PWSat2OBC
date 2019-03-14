@@ -1,34 +1,28 @@
 #include <stdio.h>
 #include <string.h>
+#include <chrono>
+#include <em_burtc.h>
 #include <em_chip.h>
 #include <em_cmu.h>
 #include <em_emu.h>
-#include <em_usart.h>
-#include <em_burtc.h>
 #include <em_rmu.h>
+#include <em_usart.h>
+#include "config.hpp"
 #include "mcu/io_map.h"
 #include "system.h"
-#include <chrono>
 
 using namespace std::chrono;
-
-// TODO: uncomment this for final version!
-//static constexpr uint32_t BurtcCompareValue = 10240; // 40 seconds
-static constexpr uint32_t BurtcCompareValue = 1024; // 4 seconds
-
-static constexpr uint32_t PrescalerDivider = burtcClkDiv_128;
-static constexpr milliseconds TickLength = milliseconds(1000 * BurtcCompareValue * PrescalerDivider / 32768);
 
 milliseconds elapsed_time = 0ms;
 
 void BURTC_IRQHandler(void)
-{    
+{
     BURTC_IntClear(BURTC_IntGet());
-    elapsed_time += TickLength;
+    elapsed_time += Config::TickLength;
 }
 
 void ConfigureBurtc()
-{        
+{
     static constexpr uint32_t InterruptPriority = 6;
 
     CMU_ClockEnable(cmuClock_CORELE, true);
@@ -39,7 +33,7 @@ void ConfigureBurtc()
 
     burtcInit.clkSel = burtcClkSelLFRCO;
     burtcInit.mode = burtcModeEM3;
-    burtcInit.clkDiv = PrescalerDivider;
+    burtcInit.clkDiv = Config::PrescalerDivider;
     burtcInit.lowPowerComp = 0;
     BURTC_Init(&burtcInit);
 
@@ -55,7 +49,7 @@ void ConfigureBurtc()
 
 void ArmBurtc()
 {
-    BURTC_CompareSet(0, BURTC_CounterGet() + BurtcCompareValue);
+    BURTC_CompareSet(0, BURTC_CounterGet() + Config::BuRTCCompareValue);
 }
 
 milliseconds GetTime()
