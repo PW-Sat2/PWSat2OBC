@@ -80,25 +80,15 @@ static void DisableLCLs()
 {
     SendToUart(io_map::UART_1::Peripheral, "Disabling LCLs\n");
 
-    SendToUart(io_map::UART_1::Peripheral, "1\n");
     EPS.DisableLCL(LCL::TKMain);
-    SendToUart(io_map::UART_1::Peripheral, "2\n");
     EPS.DisableLCL(LCL::SunS);
-    SendToUart(io_map::UART_1::Peripheral, "3\n");
     EPS.DisableLCL(LCL::CamNadir);
-    SendToUart(io_map::UART_1::Peripheral, "4\n");
     EPS.DisableLCL(LCL::CamWing);
-    SendToUart(io_map::UART_1::Peripheral, "5\n");
     EPS.DisableLCL(LCL::SENS);
-    SendToUart(io_map::UART_1::Peripheral, "6\n");
     EPS.DisableLCL(LCL::AntennaMain);
-    SendToUart(io_map::UART_1::Peripheral, "7\n");
     EPS.DisableLCL(LCL::IMTQ);
-    SendToUart(io_map::UART_1::Peripheral, "8\n");
     EPS.DisableLCL(LCL::TKRed);
-    SendToUart(io_map::UART_1::Peripheral, "9\n");
     EPS.DisableLCL(LCL::AntennaRed);
-    SendToUart(io_map::UART_1::Peripheral, "Done\n");
 }
 
 int main()
