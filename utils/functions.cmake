@@ -52,8 +52,6 @@ function(target_jlink_flash TARGET BASE_ADDRESS)
   
   configure_file(${CMAKE_SOURCE_DIR}/jlink/flash.jlink.template ${COMMAND_FILE})
 
-  unset(FLASH_FILE)
-
   set(JLINK_ARGS 
       "-device" ${DEVICE}
       "-ExitOnError"

@@ -62,6 +62,7 @@ add_subdirectory(sample)
 add_subdirectory(tools)
 add_subdirectory(safe_mode)
 add_subdirectory(flatsat_tools)
+add_subdirectory(deep_sleep)
 
 message(STATUS "Using C compiler from ${CMAKE_C_COMPILER}")
 message(STATUS "Target mcu platform ${TARGET_MCU_PLATFORM}")
