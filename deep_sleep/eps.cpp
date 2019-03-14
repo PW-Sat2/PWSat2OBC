@@ -23,3 +23,23 @@ bool StandaloneEPS::DisableLCL(LCL lcl)
 
     return busToUse.Write(addressToUse, command) == drivers::i2c::I2CResult::OK;
 }
+
+bool StandaloneEPS::ReadTelemetryA(EPSTelemetryA& telemetry)
+{
+    std::array<std::uint8_t, 1> command{0x0};
+    auto buffer = gsl::make_span(telemetry.Buffer);
+
+    auto result = _bus.WriteRead(ControllerA, command, buffer);
+
+    return result == drivers::i2c::I2CResult::OK;
+}
+
+bool StandaloneEPS::ReadTelemetryB(EPSTelemetryB& telemetry)
+{
+    std::array<std::uint8_t, 1> command{0x0};
+    auto buffer = gsl::make_span(telemetry.Buffer);
+
+    auto result = _pld.WriteRead(ControllerB, command, buffer);
+
+    return result == drivers::i2c::I2CResult::OK;
+}

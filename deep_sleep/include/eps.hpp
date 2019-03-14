@@ -5,12 +5,12 @@
 
 struct EPSTelemetryA
 {
-    std::array<std::uint8_t, 12> Buffer;
+    std::array<std::uint8_t, 72> Buffer;
 };
 
 struct EPSTelemetryB
 {
-    std::array<std::uint8_t, 12> Buffer;
+    std::array<std::uint8_t, 18> Buffer;
 };
 
 enum class LCL : std::uint8_t
@@ -34,7 +34,7 @@ class StandaloneEPS
     bool DisableLCL(LCL lcl);
 
     bool ReadTelemetryA(EPSTelemetryA& telemetry);
-    bool ReadTelemetryB(EPSTelemetryA& telemetry);
+    bool ReadTelemetryB(EPSTelemetryB& telemetry);
 
   private:
     StandaloneI2C& _bus;
