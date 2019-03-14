@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <string.h>
+#include <em_burtc.h>
 #include <em_chip.h>
 #include <em_cmu.h>
 #include <em_emu.h>
 #include <em_i2c.h>
-#include <em_usart.h>
-#include <em_burtc.h>
 #include <em_rmu.h>
+#include <em_usart.h>
 #include "mcu/io_map.h"
 #include "standalone/i2c/i2c.hpp"
 #include "system.h"
@@ -106,7 +106,7 @@ int main()
     ConfigureBurtc();
     SendToUart(io_map::UART_1::Peripheral, "Configured Burtc!\n");
 
-    while (1) 
+    while (1)
     {
         // Deep-sleep logic goes here
 
@@ -114,6 +114,8 @@ int main()
         ArmBurtc();
 
         SendToUart(io_map::UART_1::Peripheral, "Sleeping!\n");
+        while (!(io_map::UART_1::Peripheral->STATUS & USART_STATUS_TXC))
+            ;
         EMU_EnterEM3(true);
 
         SendToUart(io_map::UART_1::Peripheral, "Wake up!\n");
