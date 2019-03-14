@@ -7,6 +7,7 @@
 #include <em_i2c.h>
 #include <em_rmu.h>
 #include <em_usart.h>
+#include "config.hpp"
 #include "eps.hpp"
 #include "mcu/io_map.h"
 #include "standalone/i2c/i2c.hpp"
@@ -73,7 +74,7 @@ static void InitI2C()
 
     BusI2C.Initialize(cmuClock_I2C0, bus::SDA::Port, bus::SDA::PinNumber, bus::SCL::Port, bus::SCL::PinNumber, bus::Location);
 }
- 
+
 static void GyroSleep()
 {
     SendToUart(io_map::UART_1::Peripheral, "Gyro sleep\n");
@@ -126,6 +127,15 @@ static void DisableLCLs()
 static void BootPrinter(void* text, const Counter&)
 {
     SendToUart(io_map::UART_1::Peripheral, static_cast<const char*>(text));
+}
+
+static void RebootToDeepSleep(std::uint32_t swap)
+{
+    while (1)
+    {
+        EPS.PowerCycle(swap ? EPSController::A : EPSController::B);
+        EPS.PowerCycle(swap ? EPSController::B : EPSController::A);
+    }
 }
 
 void SetupHardware(void)
@@ -209,6 +219,11 @@ int main()
         // Deep-sleep logic goes here
         sprintf(msg, "Time ms=%lu\n", (uint32_t)current_time.count());
         SendToUart(io_map::UART_1::Peripheral, msg);
+
+        if (GetTime() >= Config::RebootToDeepSleepThreshold)
+        {
+            RebootToDeepSleep(PersistentState.BootCounter() & 1);
+        }
 
         EPSTelemetryA epsA;
         EPSTelemetryB epsB;

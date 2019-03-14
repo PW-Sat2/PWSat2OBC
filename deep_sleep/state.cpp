@@ -76,13 +76,19 @@ void State::ConfirmBoot()
     settings.ConfirmBoot();
 }
 
+std::uint32_t State::BootCounter()
+{
+    boot::BootSettings settings{this->_fram};
+    return settings.BootCounter();
+}
+
 void Counter::Verify(State& state)
 {
     const auto value = state.ReadCounter(_type) - 1;
-    if(value <= 0)
+    if (value <= 0)
     {
         state.WriteCounter(_type, _limit);
-        if(_handler != nullptr)
+        if (_handler != nullptr)
         {
             _handler(_context, *this);
         }
