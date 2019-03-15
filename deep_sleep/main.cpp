@@ -202,6 +202,13 @@ int main()
 
     io_map::UART_1::Peripheral->ROUTE |= UART_ROUTE_TXPEN | io_map::UART_1::Location;
 
+    // SystickIndicator
+    GPIO_PinModeSet(io_map::SystickIndicator::Port, io_map::SystickIndicator::PinNumber, gpioModePushPull, 0);
+    // BootIndicator
+    GPIO_PinModeSet(io_map::BootIndicator::Port, io_map::BootIndicator::PinNumber, gpioModePushPull, 0);
+    // TimeIndicator
+    GPIO_PinModeSet(io_map::TimeIndicator::Port, io_map::TimeIndicator::PinNumber, gpioModePushPull, 0);
+
     // LogInit(LOG_LEVEL_DEBUG);
     // LogAddEndpoint(LogToUart, io_map::UART_1::Peripheral, LOG_LEVEL_DEBUG);
 
