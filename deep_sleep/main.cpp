@@ -129,11 +129,12 @@ static void BootPrinter(void* text, const Counter&)
 
 static void RebootToDeepSleep(std::uint32_t swap)
 {
-    (void)swap;
     while (1)
     {
         EPS.PowerCycle(swap ? EPSController::A : EPSController::B);
+        Sleep(1s);
         EPS.PowerCycle(swap ? EPSController::B : EPSController::A);
+        Sleep(1s);
     }
 }
 
@@ -253,7 +254,7 @@ int main()
         SendToUart(io_map::UART_1::Peripheral, "Sleeping!\n");
         while (!(io_map::UART_1::Peripheral->STATUS & USART_STATUS_TXC))
             ;
-        EMU_EnterEM3(true);
+        EMU_EnterEM1();
 
         SendToUart(io_map::UART_1::Peripheral, "Wake up!\n");
     }
