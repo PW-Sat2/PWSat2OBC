@@ -25,8 +25,6 @@
 
 using namespace std::chrono;
 
-minutes ScrubbingInterval = 30min;
-
 void SendToUart(USART_TypeDef* uart, const char* message)
 {
     while (*message != '\0')
@@ -36,15 +34,15 @@ void SendToUart(USART_TypeDef* uart, const char* message)
     }
 }
 
-static void LogToUart(void* context, bool /*withinIsr*/, const char* messageHeader, const char* messageFormat, va_list messageArguments)
-{
-    char buf[256];
-    auto uart = static_cast<USART_TypeDef*>(context);
-    SendToUart(uart, messageHeader);
-    vsprintf(buf, messageFormat, messageArguments);
-    SendToUart(uart, buf);
-    USART_Tx(uart, '\n');
-}
+// static void LogToUart(void* context, bool /*withinIsr*/, const char* messageHeader, const char* messageFormat, va_list messageArguments)
+// {
+//     char buf[256];
+//     auto uart = static_cast<USART_TypeDef*>(context);
+//     SendToUart(uart, messageHeader);
+//     vsprintf(buf, messageFormat, messageArguments);
+//     SendToUart(uart, buf);
+//     USART_Tx(uart, '\n');
+// }
 
 extern "C" void __libc_init_array(void);
 
@@ -204,8 +202,8 @@ int main()
 
     io_map::UART_1::Peripheral->ROUTE |= UART_ROUTE_TXPEN | io_map::UART_1::Location;
 
-    LogInit(LOG_LEVEL_DEBUG);
-    LogAddEndpoint(LogToUart, io_map::UART_1::Peripheral, LOG_LEVEL_DEBUG);
+    // LogInit(LOG_LEVEL_DEBUG);
+    // LogAddEndpoint(LogToUart, io_map::UART_1::Peripheral, LOG_LEVEL_DEBUG);
 
     InitI2C();
 
