@@ -329,6 +329,7 @@ int main()
         if (Comm.PollHardware())
         {
             SendToUart(io_map::UART_1::Peripheral, "Frame received!\n");
+            rebootToNormalCounter.Reset(PersistentState);
             RebootToNormal();
         }
 

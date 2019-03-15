@@ -103,7 +103,7 @@ void Counter::Verify(State& state)
     const auto value = state.ReadCounter(_type) - 1;
     if (value <= 0)
     {
-        state.WriteCounter(_type, _limit);
+        Reset(state);
         if (_handler != nullptr)
         {
             _handler(_context, *this);
@@ -113,4 +113,9 @@ void Counter::Verify(State& state)
     {
         state.WriteCounter(_type, value);
     }
+}
+
+void Counter::Reset(State& state)
+{
+    state.WriteCounter(_type, _limit);
 }
