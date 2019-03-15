@@ -124,6 +124,28 @@ static void DisableLCLs()
     EPS.DisableLCL(LCL::AntennaRed);
 }
 
+static void RebootToDeepSleep(std::uint32_t swap)
+{
+    while (1)
+    {
+        EPS.PowerCycle(swap ? EPSController::A : EPSController::B);
+        Sleep(1s);
+        EPS.PowerCycle(swap ? EPSController::B : EPSController::A);
+        Sleep(1s);
+    }
+}
+static void RebootToNormal()
+{
+    PersistentState.SwapBootSlots();
+    while (1)
+    {
+        EPS.PowerCycle(EPSController::A);
+        Sleep(1s);
+        EPS.PowerCycle(EPSController::B);
+        Sleep(1s);
+    }
+}
+
 static void BootPrinter(void* text, const Counter&)
 {
     SendToUart(io_map::UART_1::Peripheral, static_cast<const char*>(text));
@@ -136,15 +158,10 @@ static void EraseFlash(void*, const Counter&)
     Eraser.Run();
 }
 
-static void RebootToDeepSleep(std::uint32_t swap)
+static void DoRebootToNormal(void*, const Counter&)
 {
-    while (1)
-    {
-        EPS.PowerCycle(swap ? EPSController::A : EPSController::B);
-        Sleep(1s);
-        EPS.PowerCycle(swap ? EPSController::B : EPSController::A);
-        Sleep(1s);
-    }
+    SendToUart(io_map::UART_1::Peripheral, "Rebooting to normal\n");
+    RebootToNormal();
 }
 
 void SetupHardware(void)
@@ -167,17 +184,6 @@ void SetupHardware(void)
     CMU_OscillatorEnable(cmuOsc_HFRCO, false, true);
 }
 
-static void RebootToNormal()
-{
-    PersistentState.SwapBootSlots();
-    while (1)
-    {
-        EPS.PowerCycle(EPSController::A);
-        Sleep(1s);
-        EPS.PowerCycle(EPSController::B);
-        Sleep(1s);
-    }
-}
 int main()
 {
     SCB->VTOR = 0x00080000;
@@ -230,9 +236,13 @@ int main()
 
     Counter printCounter{CounterType::PrintCounter, 1, BootPrinter, const_cast<char*>("Boot Action done\n")};
     Counter eraseFlashCounter{CounterType::EraseFlash, Config::EraseFlashCycles, EraseFlash, const_cast<char*>("Flash erased\n")};
+    Counter rebootToNormalCounter{
+        CounterType::RebootToNormal, Config::RebootToNormalAfter, DoRebootToNormal, const_cast<char*>("Reboot to normal\n")};
 
     printCounter.Verify(PersistentState);
     eraseFlashCounter.Verify(PersistentState);
+    rebootToNormalCounter.Verify(PersistentState);
+
     PersistentState.ConfirmBoot();
 
     while (1)

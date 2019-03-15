@@ -20,6 +20,7 @@ enum class CounterType
     None = 0,
     PrintCounter,
     EraseFlash,
+    RebootToNormal,
     Max,
 };
 
@@ -39,7 +40,6 @@ class State
     void SwapBootSlots();
 
     std::uint32_t BootCounter();
-
 
   private:
     void ResetInvalidCounters();

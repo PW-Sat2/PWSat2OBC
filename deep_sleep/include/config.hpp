@@ -12,11 +12,16 @@ struct Config
     static constexpr std::chrono::minutes ScrubbingInterval = std::chrono::minutes(1);
 
     static constexpr std::uint32_t EraseFlashCycles = 10;
+
+    static constexpr std::uint32_t RebootToNormalAfter = 10;
 #else
     static constexpr std::uint32_t BuRTCCompareValue = 10240;
     static constexpr std::chrono::minutes ScrubbingInterval = std::chrono::minutes(30);
     static constexpr auto RebootToDeepSleepThreshold = std::chrono::hours(2);
-    static constexpr std::uint32_t EraseFlashCycles = 100;
+
+    static constexpr std::uint32_t EraseFlashCycles = 10;
+
+    static constexpr std::uint32_t RebootToNormalAfter = 10;
 #endif
 
     static constexpr uint32_t PrescalerDivider = burtcClkDiv_128;
