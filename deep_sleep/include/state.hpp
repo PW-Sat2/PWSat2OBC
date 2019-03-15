@@ -17,7 +17,8 @@ struct NullErrorCounter : public error_counter::IErrorCounting
 
 enum class CounterType
 {
-    None = 0,
+    Init = 0,
+    None = 1,
     PrintCounter,
     EraseFlash,
     RebootToNormal,
@@ -42,7 +43,7 @@ class State
     std::uint32_t BootCounter();
 
   private:
-    void ResetInvalidCounters();
+    void ResetCounters();
 
     NullErrorCounter _errorCounter;
     SPIDevice<io_map::SlaveSelectFram1> _fram1Spi;
@@ -65,6 +66,8 @@ class Counter
     constexpr Counter(CounterType type, std::int32_t limit, HandlerType handler, void* context);
 
     void Verify(State& state);
+
+    void Reset(State& state);
 
     constexpr CounterType Type() const;
 

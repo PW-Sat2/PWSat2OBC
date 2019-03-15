@@ -1,8 +1,12 @@
 #include "state.hpp"
 #include "boot/settings.hpp"
+#include "mcu/io_map.h"
 
 static constexpr devices::fm25w::Address BaseAddress = 1024;
 static constexpr std::int32_t InvalidTopLimit = 1024;
+static constexpr std::int32_t OneTimeInitMarker = 0xdeadbeaf;
+
+void SendToUart(USART_TypeDef* uart, const char* message);
 
 error_counter::CounterValue NullErrorCounter::Current(error_counter::Device /* device*/) const
 {
@@ -33,18 +37,19 @@ void State::Initialize()
     this->_fram1Spi.Initialize();
     this->_fram2Spi.Initialize();
     this->_fram3Spi.Initialize();
-    ResetInvalidCounters();
+    if(ReadCounter(CounterType::Init) != OneTimeInitMarker)
+    {
+        SendToUart(io_map::UART_1::Peripheral, "Resetting deep sleep counters\n");
+        ResetCounters();
+        WriteCounter(CounterType::Init, OneTimeInitMarker);
+    }
 }
 
-void State::ResetInvalidCounters()
+void State::ResetCounters()
 {
     for (int i = 0; i < num(CounterType::Max); ++i)
     {
-        auto value = ReadCounter(static_cast<CounterType>(i));
-        if (value >= InvalidTopLimit)
-        {
-            WriteCounter(static_cast<CounterType>(i), 0);
-        }
+        WriteCounter(static_cast<CounterType>(i), 0);
     }
 }
 
