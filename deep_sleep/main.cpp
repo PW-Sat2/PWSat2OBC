@@ -286,8 +286,13 @@ int main()
         SendToUart(io_map::UART_1::Peripheral, "Sleeping!\n");
         while (!(io_map::UART_1::Peripheral->STATUS & USART_STATUS_TXC))
             ;
+
+        while (EBI->STATUS & EBI_STATUS_AHBACT)
+        {
+        }
         EMU_EnterEM1();
 
         SendToUart(io_map::UART_1::Peripheral, "Wake up!\n");
+        UpdateTime();
     }
 }

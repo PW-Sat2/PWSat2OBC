@@ -5,3 +5,4 @@
 void ConfigureBurtc();
 void ArmBurtc();
 std::chrono::milliseconds GetTime();
+void UpdateTime();

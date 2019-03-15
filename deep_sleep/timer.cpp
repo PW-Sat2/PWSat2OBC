@@ -18,7 +18,6 @@ milliseconds elapsed_time = 0ms;
 void BURTC_IRQHandler(void)
 {
     BURTC_IntClear(BURTC_IntGet());
-    elapsed_time += Config::TickLength;
 }
 
 void ConfigureBurtc()
@@ -55,4 +54,9 @@ void ArmBurtc()
 milliseconds GetTime()
 {
     return elapsed_time;
+}
+
+void UpdateTime() 
+{
+    elapsed_time += Config::TickLength;
 }
