@@ -306,7 +306,7 @@ int main()
         if(current_time >= nextBeacon)
         {
             SendBeacon(epsA, epsB, current_time);
-            current_time += Config::BeaconInterval;
+            nextBeacon += Config::BeaconInterval;
         }
 
         WDOGn_Feed(WDOG);
