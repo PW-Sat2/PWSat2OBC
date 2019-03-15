@@ -198,12 +198,12 @@ void SetupHardware(void)
 
 static constexpr std::array<std::uint8_t, 3> BeaconHeader = {0x24, 0, 0};
 
-void SendBeacon(const EPSTelemetryA& epsA, const EPSTelemetryB& epsB, std::chrono::milliseconds currentTime)
+void SendBeacon(const EPSTelemetryA& epsA, const EPSTelemetryB& epsB, std::chrono::milliseconds currentTime, std::int32_t rebootToNormalValue)
 {
     SendToUart(io_map::UART_1::Peripheral, "Sending comm bitrate\n");
     Comm.SetTransmitterBitRate(COMM::Bitrate::Comm9600bps);
     SendToUart(io_map::UART_1::Peripheral, "Sending Beacon\n");
-    std::array<std::uint8_t, 3 + 4 + 2 + 2> beaconBuffer;
+    std::array<std::uint8_t, 3 + 4 + 2 + 2 + 4> beaconBuffer;
     Reader aReader{epsA.Buffer};
     Reader bReader{epsB.Buffer};
     Writer writer{beaconBuffer};
@@ -213,6 +213,7 @@ void SendBeacon(const EPSTelemetryA& epsA, const EPSTelemetryB& epsB, std::chron
     writer.WriteWordLE(aReader.ReadWordLE());
     bReader.Skip(3);
     writer.WriteWordLE(bReader.ReadWordLE());
+    writer.WriteDoubleWordLE(rebootToNormalValue);
     Comm.SendFrame(gsl::make_span(beaconBuffer));
 }
 
@@ -282,6 +283,10 @@ int main()
     eraseFlashCounter.Verify(PersistentState);
     rebootToNormalCounter.Verify(PersistentState);
 
+    auto rebootToNormalValue = PersistentState.ReadCounter(CounterType::RebootToNormal);
+    sprintf(msg, "rebootToNormalValue=%ld\n", rebootToNormalValue);
+    SendToUart(io_map::UART_1::Peripheral, msg);
+
     PersistentState.ConfirmBoot();
 
     while (1)
@@ -305,7 +310,7 @@ int main()
 
         if(current_time >= nextBeacon)
         {
-            SendBeacon(epsA, epsB, current_time);
+            SendBeacon(epsA, epsB, current_time, rebootToNormalValue);
             nextBeacon += Config::BeaconInterval;
         }
 
