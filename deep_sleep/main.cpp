@@ -20,6 +20,8 @@
 #include "state.hpp"
 #include "system.h"
 #include "timer.h"
+#include "base/reader.h"
+#include "base/writer.h"
 
 #include "boot/params.hpp"
 
@@ -143,6 +145,7 @@ static void RebootToDeepSleep(std::uint32_t swap)
         Sleep(1s);
     }
 }
+
 static void RebootToNormal()
 {
     PersistentState.SwapBootSlots();
@@ -193,6 +196,26 @@ void SetupHardware(void)
     CMU_OscillatorEnable(cmuOsc_HFRCO, false, true);
 }
 
+static constexpr std::array<std::uint8_t, 3> BeaconHeader = {0x24, 0, 0};
+
+void SendBeacon(const EPSTelemetryA& epsA, const EPSTelemetryB& epsB, std::chrono::milliseconds currentTime)
+{
+    SendToUart(io_map::UART_1::Peripheral, "Sending comm bitrate\n");
+    Comm.SetTransmitterBitRate(COMM::Bitrate::Comm9600bps);
+    SendToUart(io_map::UART_1::Peripheral, "Sending Beacon\n");
+    std::array<std::uint8_t, 3 + 4 + 2 + 2> beaconBuffer;
+    Reader aReader{epsA.Buffer};
+    Reader bReader{epsB.Buffer};
+    Writer writer{beaconBuffer};
+    writer.WriteArray(gsl::make_span(BeaconHeader));
+    writer.WriteDoubleWordLE(std::chrono::duration_cast<seconds>(currentTime).count());
+    aReader.Skip(42);
+    writer.WriteWordLE(aReader.ReadWordLE());
+    bReader.Skip(3);
+    writer.WriteWordLE(bReader.ReadWordLE());
+    Comm.SendFrame(gsl::make_span(beaconBuffer));
+}
+
 int main()
 {
     SCB->VTOR = 0x00080000;
@@ -220,9 +243,6 @@ int main()
     // TimeIndicator
     GPIO_PinModeSet(io_map::TimeIndicator::Port, io_map::TimeIndicator::PinNumber, gpioModePushPull, 0);
 
-    // LogInit(LOG_LEVEL_DEBUG);
-    // LogAddEndpoint(LogToUart, io_map::UART_1::Peripheral, LOG_LEVEL_DEBUG);
-
     InitI2C();
 
     USART_Enable(io_map::UART_1::Peripheral, usartEnable);
@@ -245,6 +265,7 @@ int main()
     DWT_Init();
 
     milliseconds next_scrubbing = 0ms;
+    milliseconds nextBeacon = 0ms;
 
     Spi.Initialize();
     PersistentState.Initialize();
@@ -256,7 +277,7 @@ int main()
     Counter eraseFlashCounter{CounterType::EraseFlash, Config::EraseFlashCycles, EraseFlash, const_cast<char*>("Flash erased\n")};
     Counter rebootToNormalCounter{
         CounterType::RebootToNormal, Config::RebootToNormalAfter, DoRebootToNormal, const_cast<char*>("Reboot to normal\n")};
-
+    
     printCounter.Verify(PersistentState);
     eraseFlashCounter.Verify(PersistentState);
     rebootToNormalCounter.Verify(PersistentState);
@@ -281,6 +302,12 @@ int main()
         EPS.ReadTelemetryA(epsA);
         EPS.ReadTelemetryB(epsB);
         EPS.KickWatchdogs();
+
+        if(current_time >= nextBeacon)
+        {
+            SendBeacon(epsA, epsB, current_time);
+            current_time += Config::BeaconInterval;
+        }
 
         WDOGn_Feed(WDOG);
 

@@ -14,6 +14,8 @@ struct Config
     static constexpr std::uint32_t EraseFlashCycles = 10;
 
     static constexpr std::uint32_t RebootToNormalAfter = 10;
+
+    static constexpr std::chrono::seconds BeaconInterval = std::chrono::seconds(20);
 #else
     static constexpr std::uint32_t BuRTCCompareValue = 10240;
     static constexpr std::chrono::minutes ScrubbingInterval = std::chrono::minutes(30);
@@ -22,6 +24,8 @@ struct Config
     static constexpr std::uint32_t EraseFlashCycles = 10;
 
     static constexpr std::uint32_t RebootToNormalAfter = 10;
+
+    static constexpr std::chrono::minutes BeaconInterval = std::chrono::minutes(1);
 #endif
 
     static constexpr uint32_t PrescalerDivider = burtcClkDiv_128;

@@ -54,6 +54,22 @@ class StandaloneComm
      */
     bool PollHardware();
 
+    /**
+     * @brief Set the transmitter baud rate.
+     *
+    0 * @param[in] bitrate New transmitter baud rate.
+     * @return Operation status, true in case of success, false otherwise.
+     */
+    bool SetTransmitterBitRate(COMM::Bitrate bitrate);
+
+    /**
+     * @brief Adds the requested frame to the send queue.
+     *
+     * @param[in] frame Buffer containing frame contents.
+     * @return Operation status, true in case of success, false otherwise.
+     */
+    bool SendFrame(gsl::span<const std::uint8_t> frame);
+
   private:
     /**
      * @brief Sends passed no argument command to the device with requested address.

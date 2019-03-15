@@ -1,23 +1,22 @@
 #include "comm/comm.hpp"
-#include "comm.hpp"
+#include <chrono>
 #include "base/reader.h"
+#include "comm.hpp"
 #include "logger/logger.h"
 #include "sleep.h"
-#include <chrono>
 
-using std::uint8_t;
-using gsl::span;
-using drivers::i2c::II2CBus;
-using drivers::i2c::I2CResult;
 using devices::comm::Address;
 using devices::comm::ReceiverCommand;
-using devices::comm::TransmitterCommand;
 using devices::comm::ReceiverFrameCount;
+using devices::comm::TransmitterCommand;
+using drivers::i2c::I2CResult;
+using drivers::i2c::II2CBus;
+using gsl::span;
+using std::uint8_t;
 
 using namespace std::chrono_literals;
 
-StandaloneComm::StandaloneComm(StandaloneI2C& i2c)
-    : _i2c(i2c)
+StandaloneComm::StandaloneComm(StandaloneI2C& i2c) : _i2c(i2c)
 {
 }
 
@@ -34,9 +33,8 @@ bool StandaloneComm::SendCommand(Address address, uint8_t command)
 }
 
 bool StandaloneComm::SendBufferWithResponse(Address address, //
-    gsl::span<const std::uint8_t> inputBuffer,           //
-    gsl::span<uint8_t> outBuffer
-    )
+    gsl::span<const std::uint8_t> inputBuffer,               //
+    gsl::span<uint8_t> outBuffer)
 {
     if (inputBuffer.empty())
     {
@@ -71,9 +69,8 @@ bool StandaloneComm::SendBufferWithResponse(Address address, //
 }
 
 bool StandaloneComm::SendCommandWithResponse(Address address, //
-    uint8_t command,                                      //
-    span<uint8_t> outBuffer
-    )
+    uint8_t command,                                          //
+    span<uint8_t> outBuffer)
 {
     return SendBufferWithResponse(address, gsl::span<const uint8_t>(&command, 1), outBuffer);
 }
@@ -137,4 +134,41 @@ bool StandaloneComm::PollHardware()
     }
 
     return anyFrame;
+}
+
+bool StandaloneComm::SetTransmitterBitRate(COMM::Bitrate bitrate)
+{
+    uint8_t buffer[2];
+    buffer[0] = num(TransmitterCommand::SetBitRate);
+    buffer[1] = num(bitrate);
+    return this->_i2c.Write(num(Address::Transmitter), buffer) == I2CResult::OK;
+}
+
+bool StandaloneComm::SendFrame(gsl::span<const std::uint8_t> frame)
+{
+    if (frame.size() > COMM::MaxDownlinkFrameSize)
+    {
+        LOGF(LOG_LEVEL_ERROR, "Frame payload is too long. Allowed: %d, Requested: '%d'.", MaxDownlinkFrameSize, frame.size());
+        return false;
+    }
+
+    std::uint8_t remainingBufferSize = 0;
+    std::uint8_t cmd[COMM::PrefferedBufferSize];
+    cmd[0] = num(TransmitterCommand::SendFrame);
+    memcpy(cmd + 1, frame.data(), frame.size());
+
+    const bool status = SendBufferWithResponse(Address::Transmitter, //
+        gsl::span<const std::uint8_t>(cmd, 1 + frame.size()),        //
+        gsl::span<std::uint8_t>(&remainingBufferSize, 1));
+    if (!status)
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Failed to send frame");
+    }
+
+    if (remainingBufferSize == 0xff)
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Frame was not accepted by the transmitter.");
+    }
+
+    return status && remainingBufferSize != 0xff;
 }
