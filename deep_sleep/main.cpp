@@ -10,6 +10,7 @@
 #include "comm.hpp"
 #include "config.hpp"
 #include "eps.hpp"
+#include "flash_eraser.hpp"
 #include "logger/logger.h"
 #include "mcu/io_map.h"
 #include "scrubbing.hpp"
@@ -19,7 +20,6 @@
 #include "state.hpp"
 #include "system.h"
 #include "timer.h"
-#include "flash_eraser.hpp"
 
 #include "boot/params.hpp"
 
@@ -170,7 +170,13 @@ void SetupHardware(void)
 static void RebootToNormal()
 {
     PersistentState.SwapBootSlots();
-    NVIC_SystemReset();
+    while (1)
+    {
+        EPS.PowerCycle(EPSController::A);
+        Sleep(1s);
+        EPS.PowerCycle(EPSController::B);
+        Sleep(1s);
+    }
 }
 int main()
 {
@@ -223,7 +229,7 @@ int main()
     Eraser.Initialize();
 
     Counter printCounter{CounterType::PrintCounter, 1, BootPrinter, const_cast<char*>("Boot Action done\n")};
-    Counter eraseFlashCounter{CounterType::EraseFlash, 10, EraseFlash, const_cast<char*>("Flash erased\n")};
+    Counter eraseFlashCounter{CounterType::EraseFlash, Config::EraseFlashCycles, EraseFlash, const_cast<char*>("Flash erased\n")};
 
     printCounter.Verify(PersistentState);
     eraseFlashCounter.Verify(PersistentState);
