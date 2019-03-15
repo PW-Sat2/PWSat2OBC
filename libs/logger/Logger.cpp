@@ -1,14 +1,14 @@
+#include "logger.h"
 #include <assert.h> // static_assert
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h> //memset
-#include "logger.h"
 #include "system.h"
 
 /**
  * @addtogroup Logger
  * @{
-*/
+ */
 
 /** @brief Logger endpoint number limit. */
 #define MAX_ENDPOINTS 3
@@ -69,17 +69,17 @@ static_assert(LOG_LEVEL_TRACE == 6, "Fix level conversion map for level: Trace")
  * @return String representation of logging level.
  * @remark Logging level strings are already aligned. If passed log level is not known then the default string will be returned.
  */
-static const char* LogConvertLevelToString(enum LogLevel level)
-{
-    if (level >= COUNT_OF(levelMap))
-    {
-        return "[Unknown] ";
-    }
-    else
-    {
-        return levelMap[level];
-    }
-}
+// static const char* LogConvertLevelToString(enum LogLevel level)
+// {
+//     if (level >= COUNT_OF(levelMap))
+//     {
+//         return "[Unknown] ";
+//     }
+//     else
+//     {
+//         return levelMap[level];
+//     }
+// }
 
 void LogInit(enum LogLevel globalLogLevel)
 {
@@ -128,28 +128,28 @@ static inline bool CanLogAtLevel(const enum LogLevel requestedLogLEvel, const en
     return requestedLogLEvel <= currentLogLevel;
 }
 
-void LogMessage(bool withinIsr, enum LogLevel messageLevel, const char* message, ...)
-{
-    if (!CanLogAtLevel(messageLevel, logger.globalLevel))
-    {
-        return;
-    }
+// void LogMessage(bool withinIsr, enum LogLevel messageLevel, const char* message, ...)
+// {
+//     if (!CanLogAtLevel(messageLevel, logger.globalLevel))
+//     {
+//         return;
+//     }
 
-    const char* header = LogConvertLevelToString(messageLevel);
+//     const char* header = LogConvertLevelToString(messageLevel);
 
-    va_list arguments;
-    va_start(arguments, message);
+//     va_list arguments;
+//     va_start(arguments, message);
 
-    for (uint8_t cx = 0; cx < logger.endpointCount; ++cx)
-    {
-        const LoggerEndpoint* endpoint = &logger.endpoints[cx];
-        if (CanLogAtLevel(messageLevel, endpoint->endpointLogLevel))
-        {
-            endpoint->endpoint(endpoint->context, withinIsr, header, message, arguments);
-        }
-    }
+//     for (uint8_t cx = 0; cx < logger.endpointCount; ++cx)
+//     {
+//         const LoggerEndpoint* endpoint = &logger.endpoints[cx];
+//         if (CanLogAtLevel(messageLevel, endpoint->endpointLogLevel))
+//         {
+//             endpoint->endpoint(endpoint->context, withinIsr, header, message, arguments);
+//         }
+//     }
 
-    va_end(arguments);
-}
+//     va_end(arguments);
+// }
 
 /** @} */
