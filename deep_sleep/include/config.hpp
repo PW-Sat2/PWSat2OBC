@@ -25,7 +25,7 @@ struct Config
 
     static constexpr std::uint32_t RebootToNormalAfter = 10;
 
-    static constexpr std::chrono::minutes BeaconInterval = std::chrono::minutes(1);
+    static constexpr std::chrono::minutes BeaconInterval = std::chrono::minutes(4);
 #endif
 
     static constexpr uint32_t PrescalerDivider = burtcClkDiv_128;
