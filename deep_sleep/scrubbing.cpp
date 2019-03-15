@@ -1,15 +1,11 @@
 #include "scrubbing.hpp"
 
-#include "scrubber/program.hpp"
 #include "scrubber/bootloader.hpp"
+#include "scrubber/program.hpp"
+#include "scrubber/safe_mode.hpp"
 
-
-void ScrubProgram(
-    drivers::msc::MCUMemoryController &mcuFlash, 
-    StandaloneFlashDriver &flashDriver,
-    program_flash::BootTable &bootTable)
+void ScrubProgram(drivers::msc::MCUMemoryController& mcuFlash, StandaloneFlashDriver& flashDriver, program_flash::BootTable& bootTable)
 {
-    
     std::array<std::uint8_t, 64_KB> scrub_buffer;
 
     {
@@ -20,7 +16,7 @@ void ScrubProgram(
             scrub.ScrubSlots();
         }
     }
-    
+
     {
         scrubber::ProgramScrubber scrub(scrub_buffer, bootTable, flashDriver, 0b111000);
 
@@ -32,6 +28,12 @@ void ScrubProgram(
 
     {
         scrubber::BootloaderScrubber scrub(scrub_buffer, bootTable, mcuFlash);
+
+        scrub.Scrub();
+    }
+
+    {
+        scrubber::SafeModeScrubber scrub(scrub_buffer, bootTable);
 
         scrub.Scrub();
     }

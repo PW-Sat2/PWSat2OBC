@@ -12,6 +12,7 @@ set(SOURCES
     flash_eraser.cpp
     timer.cpp
     scrubbing.cpp
+    dummy_os.cpp
     include/eps.hpp
     include/state.hpp
     include/flash_eraser.hpp
