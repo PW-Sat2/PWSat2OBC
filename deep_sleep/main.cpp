@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <em_acmp.h>
 #include <em_burtc.h>
 #include <em_chip.h>
 #include <em_cmu.h>
@@ -7,12 +8,15 @@
 #include <em_i2c.h>
 #include <em_rmu.h>
 #include <em_usart.h>
+#include "base/reader.h"
+#include "base/writer.h"
 #include "comm.hpp"
 #include "config.hpp"
 #include "eps.hpp"
 #include "flash_eraser.hpp"
 #include "logger/logger.h"
 #include "mcu/io_map.h"
+#include "obc/memory.hpp"
 #include "scrubbing.hpp"
 #include "sleep.h"
 #include "standalone/i2c/i2c.hpp"
@@ -20,8 +24,6 @@
 #include "state.hpp"
 #include "system.h"
 #include "timer.h"
-#include "base/reader.h"
-#include "base/writer.h"
 
 #include "boot/params.hpp"
 
@@ -52,6 +54,7 @@ StandaloneI2C PayloadI2C(I2C1);
 StandaloneI2C BusI2C(I2C0);
 StandaloneEPS EPS(BusI2C, PayloadI2C);
 StandaloneComm Comm(BusI2C);
+obc::OBCMemory Memory;
 
 drivers::msc::MCUMemoryController MCUFlash;
 StandaloneFlashDriver FlashDriver(io_map::ProgramFlash::FlashBase);
@@ -64,6 +67,37 @@ FlashEraser Eraser{Spi};
 using PLDI2C = io_map::I2C_1;
 
 constexpr std::uint8_t Gyro = 0x68;
+
+static bool RamAlreadyLatched = false;
+
+void ACMP0_IRQHandler()
+{
+    SendToUart(io_map::UART_1::Peripheral, "L");
+    if (RamAlreadyLatched)
+    {
+        while (1)
+        {
+            EPS.PowerCycle(EPSController::A);
+            Sleep(1s);
+            EPS.PowerCycle(EPSController::B);
+            Sleep(1s);
+        }
+    }
+
+    if (has_flag(ACMP_IntGet(ACMP0), ACMP_IF_EDGE))
+    {
+        Memory.HandleLatchup(obc::MemoryModule::SRAM1);
+        ACMP_IntClear(ACMP0, ACMP_IFC_EDGE);
+    }
+
+    if (has_flag(ACMP_IntGet(ACMP1), ACMP_IF_EDGE))
+    {
+        Memory.HandleLatchup(obc::MemoryModule::SRAM2);
+        ACMP_IntClear(ACMP1, ACMP_IFC_EDGE);
+    }
+
+    RamAlreadyLatched = true;
+}
 
 static void InitI2C()
 {
@@ -198,7 +232,8 @@ void SetupHardware(void)
 
 static constexpr std::array<std::uint8_t, 3> BeaconHeader = {0x24, 0, 0};
 
-void SendBeacon(const EPSTelemetryA& epsA, const EPSTelemetryB& epsB, std::chrono::milliseconds currentTime, std::int32_t rebootToNormalValue)
+void SendBeacon(
+    const EPSTelemetryA& epsA, const EPSTelemetryB& epsB, std::chrono::milliseconds currentTime, std::int32_t rebootToNormalValue)
 {
     SendToUart(io_map::UART_1::Peripheral, "Sending comm bitrate\n");
     Comm.SetTransmitterBitRate(COMM::Bitrate::Comm9600bps);
@@ -278,7 +313,7 @@ int main()
     Counter eraseFlashCounter{CounterType::EraseFlash, Config::EraseFlashCycles, EraseFlash, const_cast<char*>("Flash erased\n")};
     Counter rebootToNormalCounter{
         CounterType::RebootToNormal, Config::RebootToNormalAfter, DoRebootToNormal, const_cast<char*>("Reboot to normal\n")};
-    
+
     printCounter.Verify(PersistentState);
     eraseFlashCounter.Verify(PersistentState);
     rebootToNormalCounter.Verify(PersistentState);
@@ -308,7 +343,7 @@ int main()
         EPS.ReadTelemetryB(epsB);
         EPS.KickWatchdogs();
 
-        if(current_time >= nextBeacon)
+        if (current_time >= nextBeacon)
         {
             SendBeacon(epsA, epsB, current_time, rebootToNormalValue);
             nextBeacon += Config::BeaconInterval;

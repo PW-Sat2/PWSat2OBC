@@ -48,6 +48,7 @@ target_link_libraries(${NAME}
     version
     error_counter
     comm
+    obc_memory
 )
 
 target_include_directories(${NAME}

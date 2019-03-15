@@ -102,17 +102,17 @@ namespace obc
             {
                 this->_sramLatched[1] = !obc::Recover<2>();
 
-                if (!this->_sramLatched[2])
+                if (!this->_sramLatched[1])
                 {
                     LOGF(LOG_LEVEL_INFO, "[recovery] SRAM 2 recovered after %d retries", i);
                     break;
                 }
             }
 
-            if (this->_sramLatched[2])
+            if (this->_sramLatched[1])
             {
                 LOGF(LOG_LEVEL_FATAL, "[recovery] SRAM 2 not recovered after %d retries", RecoveryRetries);
             }
         }
     }
-}
+} // namespace obc
