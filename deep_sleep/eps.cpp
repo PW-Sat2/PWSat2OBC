@@ -7,6 +7,7 @@ StandaloneEPS::StandaloneEPS(StandaloneI2C& bus, StandaloneI2C& pld) : _bus(bus)
 struct Command
 {
     static constexpr std::uint8_t DisableLCL = 0xE2;
+    static constexpr std::uint8_t PowerCycle = 0xE0;
 };
 
 static constexpr drivers::i2c::I2CAddress ControllerA = 0b0110101;
@@ -42,4 +43,18 @@ bool StandaloneEPS::ReadTelemetryB(EPSTelemetryB& telemetry)
     auto result = _pld.WriteRead(ControllerB, command, buffer);
 
     return result == drivers::i2c::I2CResult::OK;
+}
+
+void StandaloneEPS::PowerCycle(EPSController controller)
+{
+    std::array<std::uint8_t, 1> command{Command::PowerCycle};
+
+    if (controller == EPSController::A)
+    {
+        this->_bus.Write(ControllerA, command);
+    }
+    else
+    {
+        this->_pld.Write(ControllerB, command);
+    }
 }

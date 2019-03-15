@@ -26,6 +26,12 @@ enum class LCL : std::uint8_t
     AntennaRed = 0x12   //!< AntennaRed
 };
 
+enum class EPSController
+{
+    A,
+    B
+};
+
 class StandaloneEPS
 {
   public:
@@ -35,6 +41,8 @@ class StandaloneEPS
 
     bool ReadTelemetryA(EPSTelemetryA& telemetry);
     bool ReadTelemetryB(EPSTelemetryB& telemetry);
+
+    void PowerCycle(EPSController controller);
 
   private:
     StandaloneI2C& _bus;

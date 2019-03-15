@@ -7,22 +7,21 @@
 #include <em_i2c.h>
 #include <em_rmu.h>
 #include <em_usart.h>
+#include "comm.hpp"
+#include "config.hpp"
 #include "eps.hpp"
+#include "logger/logger.h"
 #include "mcu/io_map.h"
+#include "scrubbing.hpp"
+#include "sleep.h"
 #include "standalone/i2c/i2c.hpp"
 #include "standalone/spi/spi.hpp"
 #include "state.hpp"
 #include "system.h"
 #include "timer.h"
 #include "flash_eraser.hpp"
-#include "comm.hpp"
-#include "sleep.h"
-#include "config.hpp"
-#include "scrubbing.hpp"
-#include "logger/logger.h"
 
 #include "boot/params.hpp"
-
 
 using namespace std::chrono;
 
@@ -137,6 +136,17 @@ static void EraseFlash(void*, const Counter&)
     Eraser.Run();
 }
 
+static void RebootToDeepSleep(std::uint32_t swap)
+{
+    while (1)
+    {
+        EPS.PowerCycle(swap ? EPSController::A : EPSController::B);
+        Sleep(1s);
+        EPS.PowerCycle(swap ? EPSController::B : EPSController::A);
+        Sleep(1s);
+    }
+}
+
 void SetupHardware(void)
 {
     CMU_ClockEnable(cmuClock_GPIO, true);
@@ -162,7 +172,6 @@ static void RebootToNormal()
     PersistentState.SwapBootSlots();
     NVIC_SystemReset();
 }
-
 int main()
 {
     SCB->VTOR = 0x00080000;
@@ -209,6 +218,8 @@ int main()
 
     Spi.Initialize();
     PersistentState.Initialize();
+    FlashDriver.Initialize();
+    BootTable.Initialize();
     Eraser.Initialize();
 
     Counter printCounter{CounterType::PrintCounter, 1, BootPrinter, const_cast<char*>("Boot Action done\n")};
@@ -225,6 +236,11 @@ int main()
         // Deep-sleep logic goes here
         sprintf(msg, "Time ms=%lu\n", (uint32_t)current_time.count());
         SendToUart(io_map::UART_1::Peripheral, msg);
+
+        if (GetTime() >= Config::RebootToDeepSleepThreshold)
+        {
+            RebootToDeepSleep(PersistentState.BootCounter() & 1);
+        }
 
         EPSTelemetryA epsA;
         EPSTelemetryB epsB;
@@ -255,7 +271,7 @@ int main()
         SendToUart(io_map::UART_1::Peripheral, "Sleeping!\n");
         while (!(io_map::UART_1::Peripheral->STATUS & USART_STATUS_TXC))
             ;
-        EMU_EnterEM3(true);
+        EMU_EnterEM1();
 
         SendToUart(io_map::UART_1::Peripheral, "Wake up!\n");
     }
