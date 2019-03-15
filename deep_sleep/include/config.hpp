@@ -21,9 +21,9 @@ struct Config
     static constexpr std::chrono::minutes ScrubbingInterval = std::chrono::minutes(30);
     static constexpr auto RebootToDeepSleepThreshold = std::chrono::hours(2);
 
-    static constexpr std::uint32_t EraseFlashCycles = 10;
+    static constexpr std::uint32_t EraseFlashCycles = 50;
 
-    static constexpr std::uint32_t RebootToNormalAfter = 10;
+    static constexpr std::uint32_t RebootToNormalAfter = 36;
 
     static constexpr std::chrono::minutes BeaconInterval = std::chrono::minutes(4);
 #endif
