@@ -8,6 +8,7 @@ struct Command
 {
     static constexpr std::uint8_t DisableLCL = 0xE2;
     static constexpr std::uint8_t PowerCycle = 0xE0;
+    static constexpr std::uint8_t ResetWatchdog = 0xE5;
 };
 
 static constexpr drivers::i2c::I2CAddress ControllerA = 0b0110101;
@@ -57,4 +58,12 @@ void StandaloneEPS::PowerCycle(EPSController controller)
     {
         this->_pld.Write(ControllerB, command);
     }
+}
+
+void StandaloneEPS::KickWatchdogs()
+{
+    std::array<std::uint8_t, 1> command{Command::ResetWatchdog};
+
+    this->_bus.Write(ControllerA, command);
+    this->_pld.Write(ControllerB, command);
 }

@@ -126,7 +126,7 @@ bool StandaloneComm::PollHardware()
         anyFrame = true;
     }
 
-    if (!ResetWatchdogReceiver() && !ResetWatchdogTransmitter())
+    if (!ResetWatchdogReceiver())
     {
         LOG(LOG_LEVEL_ERROR, "[comm] Unable to reset RX comm watchdog. ");
     }

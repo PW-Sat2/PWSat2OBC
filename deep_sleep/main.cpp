@@ -262,6 +262,7 @@ int main()
         EPSTelemetryB epsB;
         EPS.ReadTelemetryA(epsA);
         EPS.ReadTelemetryB(epsB);
+        EPS.KickWatchdogs();
 
         if (current_time >= next_scrubbing)
         {

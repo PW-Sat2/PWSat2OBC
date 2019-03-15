@@ -44,6 +44,8 @@ class StandaloneEPS
 
     void PowerCycle(EPSController controller);
 
+    void KickWatchdogs();
+
   private:
     StandaloneI2C& _bus;
     StandaloneI2C& _pld;
