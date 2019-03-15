@@ -35,12 +35,3 @@ void FlashEraser::Run()
     wait2.Wait();
     wait3.Wait();
 }
-
-void System::Yield()
-{
-}
-
-std::chrono::milliseconds System::GetUptime()
-{
-    return std::chrono::milliseconds::zero();
-}
