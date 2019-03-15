@@ -107,6 +107,17 @@ static void GyroSleep()
     }
 }
 
+static void InitObcWatchdog()
+{
+    WDOG_Init_TypeDef init = WDOG_INIT_DEFAULT;
+    init.debugRun = false;
+    init.enable = true;
+    init.perSel = wdogPeriod_256k;
+
+    WDOGn_Init(WDOG, &init);
+    SendToUart(io_map::UART_1::Peripheral, "OBC Watchdog initialized\n");
+}
+
 static void DisableLCLs()
 {
     SendToUart(io_map::UART_1::Peripheral, "Disabling LCLs\n");
@@ -223,6 +234,8 @@ int main()
     sprintf(msg, "Magic: 0x%lX\nReason=%d\nIndex=%d\n", boot::MagicNumber, num(boot::BootReason), boot::Index);
     SendToUart(io_map::UART_1::Peripheral, msg);
 
+    InitObcWatchdog();
+
     GyroSleep();
     DisableLCLs();
 
@@ -268,6 +281,8 @@ int main()
         EPS.ReadTelemetryA(epsA);
         EPS.ReadTelemetryB(epsB);
         EPS.KickWatchdogs();
+
+        WDOGn_Feed(WDOG);
 
         if (current_time >= next_scrubbing)
         {
