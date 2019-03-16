@@ -2,6 +2,7 @@ import struct
 
 from response_frames import ResponseFrame, response_frame
 from utils import ensure_string
+from telecommand.program_upload import WriteProgramPart
 
 
 @response_frame(0x04)
@@ -22,6 +23,12 @@ class EntryProgramPartWriteSuccess(ResponseFrame):
 
     def decode(self):
         (_, _, self.entries, self.offset, self.size) = struct.unpack('<BBBIB', ensure_string(self.payload()))
+
+    def __repr__(self):
+        chunk = self.offset * 1.0 / WriteProgramPart.MAX_PART_SIZE
+        if chunk.is_integer():
+            chunk = int(chunk)
+        return "Upload[{}]".format(chunk)
 
 
 @response_frame(0x04)

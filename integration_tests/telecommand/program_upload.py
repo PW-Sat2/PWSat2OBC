@@ -31,6 +31,13 @@ class WriteProgramPart(Telecommand):
 
         return list(struct.pack('<BI', mask, self._offset)) + list(self._content)
 
+    def __repr__(self):
+        chunk = self._offset*1.0/self.MAX_PART_SIZE
+        if chunk.is_integer():
+            chunk = int(chunk)
+
+        return "Upload[{}]".format(chunk)
+
     def __init__(self, entries, offset, content):
         self._offset = offset
         self._content = content
