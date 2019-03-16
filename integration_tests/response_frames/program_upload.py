@@ -40,6 +40,9 @@ class EntryFinalizeSuccess(ResponseFrame):
     def decode(self):
         (_, _, self.entries, self.crc) = struct.unpack('<BBBH', ensure_string(self.payload()))
 
+    def __repr__(self):
+        return "{}: Entry={} CRC=0x{:X}".format(self.__class__.__name__, self.entries, self.crc)
+
 
 @response_frame(0x1D)
 class CopyBootSlots(ResponseFrame):
@@ -58,7 +61,7 @@ class EntryEraseError(ResponseFrame):
         (_, _, self.code, self.entry, self.offset) = struct.unpack('<BBBBI', ensure_string(self.payload()))
 
     def __repr__(self):
-        return "{}: Seq={:02d} Code={} Entry={} @ 0x{:X}".format(self.__class__.__name__, self._seq, self.code, self.entry, self.offset)
+        return "{}: Code={} Entry={} @ 0x{:X}".format(self.__class__.__name__, self.code, self.entry, self.offset)
 
 
 @response_frame(0x04)
@@ -78,13 +81,18 @@ class EntryProgramPartWriteError(ResponseFrame):
         (_, _, self.code, self.entry, self.offset) = struct.unpack('<BBBBI', ensure_string(self.payload()))
 
     def __repr__(self):
-        return "{}: Seq={:02d} Code={} Entry={} @ 0x{:X}".format(self.__class__.__name__, self._seq, self.code, self.entry, self.offset)
+        chunk = self.offset * 1.0 / WriteProgramPart.MAX_PART_SIZE
+        if chunk.is_integer():
+            chunk = int(chunk)
+        return "Upload[{}]: Code={} Entry={} @ 0x{:X}".format(chunk, self.code, self.entry, self.offset)
+
 
 @response_frame(0x04)
 class EntryProgramPartWriteMalformedError(ResponseFrame):
     @classmethod
     def matches(cls, payload):
         return len(payload) == 3 and payload[0:2] == [1, 1, 10]
+
 
 @response_frame(0x04)
 class EntryFinalizeError(ResponseFrame):
@@ -96,7 +104,8 @@ class EntryFinalizeError(ResponseFrame):
         (_, _, self.code, self.entry) = struct.unpack('<BBBB', ensure_string(self.payload()))
 
     def __repr__(self):
-        return "{}: Seq={:02d} Code={} Entry={}".format(self.__class__.__name__, self._seq, self.code, self.entry)
+        return "{}: Code={} Entry={}".format(self.__class__.__name__, self.code, self.entry)
+
 
 @response_frame(0x04)
 class EntryFinalizeCRCError(ResponseFrame):
@@ -108,7 +117,8 @@ class EntryFinalizeCRCError(ResponseFrame):
         (_, _, self.entry, self.crc) = struct.unpack('<BBBH', ensure_string(self.payload()))
 
     def __repr__(self):
-        return "{}: Seq={:02d} Entry={} CRC=0x{:X}".format(self.__class__.__name__, self._seq, self.entry, self.crc)
+        return "{}: Entry={} CRC=0x{:X}".format(self.__class__.__name__, self.entry, self.crc)
+
 
 @response_frame(0x04)
 class EntryFinalizeMalformedError(ResponseFrame):
