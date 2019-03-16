@@ -22,7 +22,7 @@ def buildPlatform(mcu, pld) {
 			ENABLE_LTO: 1,
 			COMM_SECURITY_CODE: env.SECURITY_CODE
 		])
-		bat "make pwsat boot safe_mode pwsat.hex pwsat.bin boot.bin safe_mode.bin generate_telemetry generate_exp_data generate_persistent_state"
+		bat "make deep_sleep.bin"
 	}
 }
 
@@ -116,20 +116,20 @@ node('pwsat-build') {
 
 					build()
 
-					stage 'Unit tests'
-					unitTests()
+					// stage 'Unit tests'
+					// unitTests()
 
-					stage 'Reports'
-					reports()
+					// stage 'Reports'
+					// reports()
 
-					stage 'Generate Documentation'
-					generateDoc()
+					// stage 'Generate Documentation'
+					// generateDoc()
 
-					stage concurrency: 1, name: 'Integration Tests'
-					integrationTests()
+					// stage concurrency: 1, name: 'Integration Tests'
+					// integrationTests()
 
-					stage 'Code Coverage'
-					coverage()
+					// stage 'Code Coverage'
+					// coverage()
 				}
 			}
 		}		
