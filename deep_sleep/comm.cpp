@@ -3,6 +3,7 @@
 #include "base/reader.h"
 #include "comm.hpp"
 #include "logger/logger.h"
+#include "settings.h"
 #include "sleep.h"
 
 using devices::comm::Address;
@@ -109,9 +110,9 @@ bool StandaloneComm::ResetWatchdogTransmitter()
     return this->SendCommand(Address::Transmitter, num(TransmitterCommand::ResetWatchdog));
 }
 
-bool StandaloneComm::PollHardware()
+StandaloneFrameType StandaloneComm::PollHardware()
 {
-    bool anyFrame = false;
+    StandaloneFrameType receivedFrame = StandaloneFrameType::None;
 
     auto frameResponse = this->GetFrameCount();
     if (!frameResponse.status)
@@ -120,7 +121,13 @@ bool StandaloneComm::PollHardware()
     }
     else if (frameResponse.frameCount > 0)
     {
-        anyFrame = true;
+        LOGF(LOG_LEVEL_INFO, "[comm] Got %d frames", static_cast<int>(frameResponse.frameCount));
+        for (decltype(frameResponse.frameCount) i = 0; i < frameResponse.frameCount; i++)
+        {
+            receivedFrame = ProcessSingleFrame();
+            if (receivedFrame != StandaloneFrameType::None)
+                break;
+        }
     }
 
     if (!ResetWatchdogReceiver())
@@ -133,7 +140,7 @@ bool StandaloneComm::PollHardware()
         LOG(LOG_LEVEL_ERROR, "[comm] Unable to reset TX comm watchdog. ");
     }
 
-    return anyFrame;
+    return receivedFrame;
 }
 
 bool StandaloneComm::SetTransmitterBitRate(COMM::Bitrate bitrate)
@@ -148,7 +155,7 @@ bool StandaloneComm::SendFrame(gsl::span<const std::uint8_t> frame)
 {
     if (frame.size() > COMM::MaxDownlinkFrameSize)
     {
-        LOGF(LOG_LEVEL_ERROR, "Frame payload is too long. Allowed: %d, Requested: '%d'.", MaxDownlinkFrameSize, frame.size());
+        LOGF(LOG_LEVEL_ERROR, "Frame payload is too long. Allowed: %d, Requested: '%d'.", COMM::MaxDownlinkFrameSize, frame.size());
         return false;
     }
 
@@ -171,4 +178,146 @@ bool StandaloneComm::SendFrame(gsl::span<const std::uint8_t> frame)
     }
 
     return status && remainingBufferSize != 0xff;
+}
+
+StandaloneFrameType StandaloneComm::ProcessSingleFrame()
+{
+    StandaloneFrameType isValidFrameReceived = StandaloneFrameType::None;
+    StandaloneFrame frame;
+    std::uint8_t buffer[COMM::PrefferedBufferSize];
+    const bool status = GetFrame(buffer, 3, frame);
+    if (status && frame.Verify())
+    {
+        LOGF(LOG_LEVEL_INFO, "[comm] Received frame %d bytes. ", static_cast<int>(frame.Size()));
+        isValidFrameReceived = HandleFrame(frame);
+    }
+
+    if (!this->RemoveFrameInternal())
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Unable to remove frame from receiver. ");
+    }
+
+    return isValidFrameReceived;
+}
+
+StandaloneFrameType StandaloneComm::HandleFrame(StandaloneFrame& frame)
+{
+    Reader r(frame.Payload());
+
+    auto code = r.ReadDoubleWordBE();
+    auto command = r.ReadByte();
+
+    if (!r.Status())
+    {
+        return StandaloneFrameType::None;
+    }
+
+    if (code != settings::CommSecurityCode)
+    {
+        return StandaloneFrameType::None;
+    }
+
+    if (command == 0xAE)
+    {
+        return StandaloneFrameType::SendBeacon;
+    }
+
+    return StandaloneFrameType::Reboot;
+}
+
+bool StandaloneComm::GetFrame(gsl::span<std::uint8_t> buffer, int retryCount, StandaloneFrame& frame)
+{
+    for (int i = 0; i < retryCount; ++i)
+    {
+        const bool status = ReceiveFrameInternal(buffer, frame);
+        if (!status)
+        {
+            LOG(LOG_LEVEL_ERROR, "[comm] Unable to receive frame. ");
+        }
+        else if (!frame.Verify())
+        {
+            LOGF(LOG_LEVEL_ERROR, "[comm] Received invalid frame. Size: %d. ", static_cast<int>(frame.FullSize()));
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static gsl::span<std::uint8_t> ReceiveSpan(std::uint16_t frameSize, gsl::span<std::uint8_t> buffer)
+{
+    if (buffer.size() <= frameSize + 6)
+    {
+        return buffer;
+    }
+    else
+    {
+        return buffer.subspan(0, frameSize + 6);
+    }
+}
+
+bool StandaloneComm::ReceiveFrameInternal(gsl::span<std::uint8_t> buffer, StandaloneFrame& frame)
+{
+    if (buffer.size() < 2)
+    {
+        return false;
+    }
+
+    bool status = this->SendCommandWithResponse(Address::Receiver, num(ReceiverCommand::GetFrame), buffer.subspan(0, 2));
+    if (!status)
+    {
+        return status;
+    }
+
+    Reader reader(buffer.subspan(0, 2));
+    auto size = reader.ReadWordLE();
+    buffer = ReceiveSpan(size, buffer);
+    status = this->SendCommandWithResponse(Address::Receiver, num(ReceiverCommand::GetFrame), buffer);
+    if (!status)
+    {
+        return status;
+    }
+
+    reader.Initialize(buffer);
+    const auto fullSize = reader.ReadWordLE();
+    reader.Skip(4); // doppler and rssi
+    gsl::span<std::uint8_t> frameContent;
+    if (!reader.Status())
+    {
+        // TODO: Status here is still true? Should we report error?
+        LOG(LOG_LEVEL_ERROR, "[comm] Failed to receive frame");
+    }
+    else
+    {
+        LOGF(LOG_LEVEL_DEBUG, "[comm] Received frame %d bytes", static_cast<int>(fullSize));
+        auto span = reader.ReadArray(reader.RemainingSize());
+        frameContent = gsl::span<std::uint8_t>(const_cast<std::uint8_t*>(span.data()), span.size());
+    }
+
+    frame = StandaloneFrame(fullSize, std::move(frameContent));
+    return status;
+}
+
+bool StandaloneComm::RemoveFrameInternal()
+{
+    const bool status = this->SendCommand(Address::Receiver, num(ReceiverCommand::RemoveFrame));
+    if (!status)
+    {
+        LOG(LOG_LEVEL_ERROR, "[comm] Failed to remove frame from buffer");
+    }
+
+    return status;
+}
+
+StandaloneFrame::StandaloneFrame() : fullFrameSize(0)
+{
+}
+
+StandaloneFrame::StandaloneFrame(std::uint16_t fullSize, gsl::span<std::uint8_t> data)
+    : fullFrameSize(fullSize), //
+      content(std::move(data))
+{
 }

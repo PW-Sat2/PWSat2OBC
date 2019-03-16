@@ -313,13 +313,26 @@ int main()
         EPS.ReadTelemetryB(epsB);
         EPS.KickWatchdogs();
 
+        WDOGn_Feed(WDOG);
+
+        // Reset Comm watchdogs and check if there are frames
+        auto rxFrameStatus = Comm.PollHardware();
+        if (rxFrameStatus == StandaloneFrameType::Reboot)
+        {
+            SendToUart(io_map::UART_1::Peripheral, "FR\n");
+            rebootToNormalCounter.Reset(PersistentState);
+            RebootToNormal();
+        }
+        else if (rxFrameStatus == StandaloneFrameType::SendBeacon)
+        {
+            nextBeacon = GetTime();
+        }
+
         if (current_time >= nextBeacon)
         {
             SendBeacon(epsA, epsB, current_time, rebootToNormalValue);
             nextBeacon += Config::BeaconInterval;
         }
-
-        WDOGn_Feed(WDOG);
 
         if (current_time >= next_scrubbing)
         {
@@ -334,14 +347,6 @@ int main()
 
         // Setup next BURTC iteration
         ArmBurtc();
-
-        // Reset Comm watchdogs and check if there are frames
-        if (Comm.PollHardware())
-        {
-            SendToUart(io_map::UART_1::Peripheral, "FR!");
-            rebootToNormalCounter.Reset(PersistentState);
-            RebootToNormal();
-        }
 
         SendToUart(io_map::UART_1::Peripheral, "S\n");
         while (!(io_map::UART_1::Peripheral->STATUS & USART_STATUS_TXC))
