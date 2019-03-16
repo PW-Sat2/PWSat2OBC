@@ -124,9 +124,12 @@ StandaloneFrameType StandaloneComm::PollHardware()
         LOGF(LOG_LEVEL_INFO, "[comm] Got %d frames", static_cast<int>(frameResponse.frameCount));
         for (decltype(frameResponse.frameCount) i = 0; i < frameResponse.frameCount; i++)
         {
-            receivedFrame = ProcessSingleFrame();
-            if (receivedFrame != StandaloneFrameType::None)
-                break;
+            auto lastReceivedFrame = ProcessSingleFrame();
+            if (lastReceivedFrame == StandaloneFrameType::Reboot ||
+                (lastReceivedFrame == StandaloneFrameType::SendBeacon && receivedFrame != StandaloneFrameType::Reboot))
+            {
+                receivedFrame = lastReceivedFrame;
+            }
         }
     }
 
