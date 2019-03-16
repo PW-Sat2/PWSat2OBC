@@ -11,6 +11,9 @@ class EntryEraseSuccessFrame(ResponseFrame):
     def matches(cls, payload):
         return len(payload) >= 3 and payload[0:2] == [0, 0]
 
+    def __repr__(self):
+        return "EntryEraseSuccessFrame[{}]".format(self.entries)
+
     def decode(self):
         self.entries = self.payload()[2]
 

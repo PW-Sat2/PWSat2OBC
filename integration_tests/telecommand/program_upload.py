@@ -4,6 +4,9 @@ from telecommand import Telecommand
 
 
 class EraseBootTableEntry(Telecommand):
+    def __init__(self, entries):
+        self._entries = entries
+
     def apid(self):
         return 0xB0
 
@@ -14,8 +17,8 @@ class EraseBootTableEntry(Telecommand):
 
         return [mask]
 
-    def __init__(self, entries):
-        self._entries = entries
+    def __repr__(self):
+        return "EraseBootTableEntry[{}]".format(self._entries)
 
 
 class WriteProgramPart(Telecommand):
