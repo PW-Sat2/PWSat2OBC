@@ -9,9 +9,9 @@
 
 enum class StandaloneFrameType
 {
-    None,
-    SendBeacon,
-    Reboot
+    None = 0,
+    SendBeacon = 1,
+    Reboot = 2
 };
 
 class StandaloneFrame

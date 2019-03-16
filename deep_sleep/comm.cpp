@@ -125,11 +125,7 @@ StandaloneFrameType StandaloneComm::PollHardware()
         for (decltype(frameResponse.frameCount) i = 0; i < frameResponse.frameCount; i++)
         {
             auto lastReceivedFrame = ProcessSingleFrame();
-            if (lastReceivedFrame == StandaloneFrameType::Reboot ||
-                (lastReceivedFrame == StandaloneFrameType::SendBeacon && receivedFrame != StandaloneFrameType::Reboot))
-            {
-                receivedFrame = lastReceivedFrame;
-            }
+            receivedFrame = std::max(receivedFrame, lastReceivedFrame);
         }
     }
 
