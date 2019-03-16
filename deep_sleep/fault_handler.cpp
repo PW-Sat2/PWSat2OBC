@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstdlib>
 #include <em_system.h>
 #include "core_cm3.h"
 #include "mcu/io_map.h"
@@ -53,18 +54,48 @@ extern "C" __attribute__((used)) void prvGetRegistersFromStack(uint32_t* pulFaul
     /* When the following line is hit, the variables contain the register values. */
 
     char msg[256] = {0};
-
-    sprintf(msg,
-        "ICSR:0x%X\nCFSR: 0x%X\nHFSR: 0x%X\nMMFAR: 0x%X\nBFAR: 0x%X\nLR: 0x%X\nPC: 0x%X\nPSR: 0x%X",
-        (unsigned int)icsr,
-        (unsigned int)cfsr,
-        (unsigned int)hfsr,
-        (unsigned int)mmfar,
-        (unsigned int)bfar,
-        (unsigned int)lr,
-        (unsigned int)pc,
-        (unsigned int)psr);
+    SendToUart(io_map::UART_1::Peripheral, "\nICSR: 0x");
+    itoa((unsigned int)icsr, msg, 16);
     SendToUart(io_map::UART_1::Peripheral, msg);
+
+    SendToUart(io_map::UART_1::Peripheral, "\nCFSR: 0x");
+    itoa((unsigned int)cfsr, msg, 16);
+    SendToUart(io_map::UART_1::Peripheral, msg);
+
+    SendToUart(io_map::UART_1::Peripheral, "\nHFSR: 0x");
+    itoa((unsigned int)hfsr, msg, 16);
+    SendToUart(io_map::UART_1::Peripheral, msg);
+
+    SendToUart(io_map::UART_1::Peripheral, "\nMMFAR: 0x");
+    itoa((unsigned int)mmfar, msg, 16);
+    SendToUart(io_map::UART_1::Peripheral, msg);
+
+    SendToUart(io_map::UART_1::Peripheral, "\nBFAR: 0x");
+    itoa((unsigned int)bfar, msg, 16);
+    SendToUart(io_map::UART_1::Peripheral, msg);
+
+    SendToUart(io_map::UART_1::Peripheral, "\nLR: 0x");
+    itoa((unsigned int)lr, msg, 16);
+    SendToUart(io_map::UART_1::Peripheral, msg);
+
+    SendToUart(io_map::UART_1::Peripheral, "\nPC: 0x");
+    itoa((unsigned int)pc, msg, 16);
+    SendToUart(io_map::UART_1::Peripheral, msg);
+
+    SendToUart(io_map::UART_1::Peripheral, "\nPSR: 0x");
+    itoa((unsigned int)psr, msg, 16);
+    SendToUart(io_map::UART_1::Peripheral, msg);
+    // sprintf(msg,
+    //     "ICSR:0x%X\nCFSR: 0x%X\nHFSR: 0x%X\nMMFAR: 0x%X\nBFAR: 0x%X\nLR: 0x%X\nPC: 0x%X\nPSR: 0x%X",
+    //     (unsigned int)icsr,
+    //     (unsigned int)cfsr,
+    //     (unsigned int)hfsr,
+    //     (unsigned int)mmfar,
+    //     (unsigned int)bfar,
+    //     (unsigned int)lr,
+    //     (unsigned int)pc,
+    //     (unsigned int)psr);
+    // SendToUart(io_map::UART_1::Peripheral, msg);
 
     Hang();
 }
@@ -130,3 +161,12 @@ HANDLER(MSC_IRQHandler)
 HANDLER(AES_IRQHandler)
 HANDLER(EBI_IRQHandler)
 HANDLER(EMU_IRQHandler)
+
+namespace std
+{
+    void terminate()
+    {
+                while (1)
+            ;
+    }
+} // namespace std

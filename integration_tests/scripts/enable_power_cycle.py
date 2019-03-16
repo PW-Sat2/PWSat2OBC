@@ -1,8 +1,11 @@
-power_cycle_count = 0;
+power_cycle_count = 0
+
 
 def on_power_cycle(*args):
     def p():
         global power_cycle_count
+        import datetime
+        print(datetime.datetime.now())
         print 'Power cycling!'
         from obc.boot import NormalBoot
         from time import sleep
