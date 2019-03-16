@@ -111,34 +111,17 @@ static void InitI2C()
 
 static void GyroSleep()
 {
-    SendToUart(io_map::UART_1::Peripheral, "Gyro sleep\n");
-
-    {
-        std::array<uint8_t, 1> inData = {static_cast<uint8_t>(0x00)};
-        std::array<uint8_t, 1> outData;
-
-        auto status = PayloadI2C.WriteRead(0x68, inData, outData);
-
-        if (status == drivers::i2c::I2CResult::OK && outData[0] == 0x68)
-        {
-            SendToUart(io_map::UART_1::Peripheral, "Gyro ID ok\n");
-        }
-        else
-        {
-            SendToUart(io_map::UART_1::Peripheral, "Gyro ID nok\n");
-        }
-    }
+    SendToUart(io_map::UART_1::Peripheral, "GS");
 
     {
         std::array<uint8_t, 2> cmd = {0x3E, 1 << 6};
         const auto status = PayloadI2C.Write(Gyro, cmd);
         if (status == drivers::i2c::I2CResult::OK)
         {
-            SendToUart(io_map::UART_1::Peripheral, "Gyro Sleep ok\n");
         }
         else
         {
-            SendToUart(io_map::UART_1::Peripheral, "Gyro Sleep nok\n");
+            SendToUart(io_map::UART_1::Peripheral, "N\n");
         }
     }
 }
@@ -151,13 +134,10 @@ static void InitObcWatchdog()
     init.perSel = wdogPeriod_256k;
 
     WDOGn_Init(WDOG, &init);
-    SendToUart(io_map::UART_1::Peripheral, "OBC Watchdog initialized\n");
 }
 
 static void DisableLCLs()
 {
-    SendToUart(io_map::UART_1::Peripheral, "Disabling LCLs\n");
-
     EPS.DisableLCL(LCL::TKMain);
     EPS.DisableLCL(LCL::SunS);
     EPS.DisableLCL(LCL::CamNadir);
@@ -192,21 +172,16 @@ static void RebootToNormal()
     }
 }
 
-static void BootPrinter(void* text, const Counter&)
-{
-    SendToUart(io_map::UART_1::Peripheral, static_cast<const char*>(text));
-}
-
 static void EraseFlash(void*, const Counter&)
 {
-    SendToUart(io_map::UART_1::Peripheral, "Erasing flash\n");
+    SendToUart(io_map::UART_1::Peripheral, "EF\n");
 
     Eraser.Run();
 }
 
 static void DoRebootToNormal(void*, const Counter&)
 {
-    SendToUart(io_map::UART_1::Peripheral, "Rebooting to normal\n");
+    SendToUart(io_map::UART_1::Peripheral, "RN");
     RebootToNormal();
 }
 
@@ -235,15 +210,14 @@ static constexpr std::array<std::uint8_t, 3> BeaconHeader = {0x24, 0, 0};
 void SendBeacon(
     const EPSTelemetryA& epsA, const EPSTelemetryB& epsB, std::chrono::milliseconds currentTime, std::int32_t rebootToNormalValue)
 {
-    SendToUart(io_map::UART_1::Peripheral, "Sending comm bitrate\n");
     Comm.SetTransmitterBitRate(COMM::Bitrate::Comm9600bps);
-    SendToUart(io_map::UART_1::Peripheral, "Sending Beacon\n");
+    SendToUart(io_map::UART_1::Peripheral, "B");
     std::array<std::uint8_t, 3 + 4 + 2 + 2 + 4> beaconBuffer;
     Reader aReader{epsA.Buffer};
     Reader bReader{epsB.Buffer};
     Writer writer{beaconBuffer};
     writer.WriteArray(gsl::make_span(BeaconHeader));
-    writer.WriteDoubleWordLE(std::chrono::duration_cast<seconds>(currentTime).count());
+    writer.WriteDoubleWordLE(currentTime.count());
     aReader.Skip(42);
     writer.WriteWordLE(aReader.ReadWordLE());
     bReader.Skip(3);
@@ -285,18 +259,12 @@ int main()
 
     USART_Tx(io_map::UART_1::Peripheral, '!');
 
-    char msg[256] = {0};
-
-    sprintf(msg, "Magic: 0x%lX\nReason=%d\nIndex=%d\n", boot::MagicNumber, num(boot::BootReason), boot::Index);
-    SendToUart(io_map::UART_1::Peripheral, msg);
-
     InitObcWatchdog();
 
     GyroSleep();
     DisableLCLs();
 
     ConfigureBurtc();
-    SendToUart(io_map::UART_1::Peripheral, "Configured Burtc!\n");
 
     DWT_Init();
 
@@ -309,18 +277,18 @@ int main()
     BootTable.Initialize();
     Eraser.Initialize();
 
-    Counter printCounter{CounterType::PrintCounter, 1, BootPrinter, const_cast<char*>("Boot Action done\n")};
-    Counter eraseFlashCounter{CounterType::EraseFlash, Config::EraseFlashCycles, EraseFlash, const_cast<char*>("Flash erased\n")};
-    Counter rebootToNormalCounter{
-        CounterType::RebootToNormal, Config::RebootToNormalAfter, DoRebootToNormal, const_cast<char*>("Reboot to normal\n")};
+    Counter eraseFlashCounter{CounterType::EraseFlash, Config::EraseFlashCycles, EraseFlash, const_cast<char*>("FE.\n")};
+    Counter rebootToNormalCounter{CounterType::RebootToNormal, Config::RebootToNormalAfter, DoRebootToNormal, const_cast<char*>("RN.\n")};
 
-    printCounter.Verify(PersistentState);
     eraseFlashCounter.Verify(PersistentState);
     rebootToNormalCounter.Verify(PersistentState);
 
+    char msg[256];
     auto rebootToNormalValue = PersistentState.ReadCounter(CounterType::RebootToNormal);
-    sprintf(msg, "rebootToNormalValue=%ld\n", rebootToNormalValue);
+    SendToUart(io_map::UART_1::Peripheral, "toNormal=");
+    itoa(rebootToNormalValue, msg, 10);
     SendToUart(io_map::UART_1::Peripheral, msg);
+    SendToUart(io_map::UART_1::Peripheral, "\n");
 
     PersistentState.ConfirmBoot();
 
@@ -329,8 +297,10 @@ int main()
         auto current_time = GetTime();
 
         // Deep-sleep logic goes here
-        sprintf(msg, "Time ms=%lu\n", (uint32_t)current_time.count());
+        SendToUart(io_map::UART_1::Peripheral, "MS=");
+        itoa((uint32_t)current_time.count(), msg, 10);
         SendToUart(io_map::UART_1::Peripheral, msg);
+        SendToUart(io_map::UART_1::Peripheral, "\n");
 
         if (GetTime() >= Config::RebootToDeepSleepThreshold)
         {
@@ -355,11 +325,11 @@ int main()
         {
             next_scrubbing = current_time + Config::ScrubbingInterval;
 
-            SendToUart(io_map::UART_1::Peripheral, "Commencing scrubbing!\n");
+            SendToUart(io_map::UART_1::Peripheral, "SCB");
 
             ScrubProgram(MCUFlash, FlashDriver, BootTable);
 
-            SendToUart(io_map::UART_1::Peripheral, "Scrubbing complete!\n");
+            SendToUart(io_map::UART_1::Peripheral, ".");
         }
 
         // Setup next BURTC iteration
@@ -368,12 +338,12 @@ int main()
         // Reset Comm watchdogs and check if there are frames
         if (Comm.PollHardware())
         {
-            SendToUart(io_map::UART_1::Peripheral, "Frame received!\n");
+            SendToUart(io_map::UART_1::Peripheral, "FR!");
             rebootToNormalCounter.Reset(PersistentState);
             RebootToNormal();
         }
 
-        SendToUart(io_map::UART_1::Peripheral, "Sleeping!\n");
+        SendToUart(io_map::UART_1::Peripheral, "S\n");
         while (!(io_map::UART_1::Peripheral->STATUS & USART_STATUS_TXC))
             ;
 
@@ -382,7 +352,7 @@ int main()
         }
         EMU_EnterEM1();
 
-        SendToUart(io_map::UART_1::Peripheral, "Wake up!\n");
+        // SendToUart(io_map::UART_1::Peripheral, "Wake up!\n");
         UpdateTime();
     }
 }

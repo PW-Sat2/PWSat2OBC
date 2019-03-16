@@ -9,12 +9,12 @@
 
 #include "n25q.h"
 
-using std::uint8_t;
-using std::uint32_t;
+using gsl::span;
 using std::array;
 using std::min;
 using std::ptrdiff_t;
-using gsl::span;
+using std::uint32_t;
+using std::uint8_t;
 using namespace devices::n25q;
 using drivers::spi::ISPIInterface;
 using drivers::spi::SPISelectSlave;
@@ -235,7 +235,7 @@ OperationWaiter N25QDriver::BeginWritePage(size_t address, ptrdiff_t offset, spa
 {
     if (page.length() > PageSize)
     {
-        assertFailed("N25QDriver", __FILE__, __LINE__);
+        // assertFailed("N25QDriver", __FILE__, __LINE__);
         return OperationWaiter(nullptr, std::chrono::milliseconds(0), FlagStatus::ProgramError);
     }
 
