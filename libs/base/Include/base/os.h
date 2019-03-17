@@ -746,10 +746,7 @@ class Timeout final
     bool Expired();
 
   private:
-    /**
-     * @brief System uptime at which timeout will expire
-     */
-    const std::chrono::milliseconds _expireAt;
+    int32_t milliseconds_left;
 };
 
 /**

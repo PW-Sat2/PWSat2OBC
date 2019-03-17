@@ -13,13 +13,25 @@ Lock::~Lock()
     }
 }
 
-Timeout::Timeout(std::chrono::milliseconds timeout) : _expireAt(System::GetUptime() + timeout)
+__attribute__((optimize("O0"))) void wait_100ms_spinloop() {
+    // about 100 ms spin-loop delay
+    // 0.3666666 second = 100000 ticks
+    // 0.1 sec = 27272 ticks
+
+    volatile uint32_t timeout = 27272;
+    while(timeout--) {};
+}
+
+Timeout::Timeout(std::chrono::milliseconds timeout) : milliseconds_left(timeout.count())
 {
 }
 
 bool Timeout::Expired()
 {
-    return System::GetUptime() >= this->_expireAt;
+    wait_100ms_spinloop();
+
+    milliseconds_left -= 100;
+    return milliseconds_left <= 0;
 }
 
 EventGroup::EventGroup() : _handle(nullptr)
