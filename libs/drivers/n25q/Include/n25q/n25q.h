@@ -103,11 +103,11 @@ namespace devices
         struct IN25QDriver
         {
             /**
-            * @brief Reads data from memory starting from given address
-            * @param[in] address Start address
-            * @param[out] buffer Buffer
-            * @return Operation result
-            */
+             * @brief Reads data from memory starting from given address
+             * @param[in] address Start address
+             * @param[out] buffer Buffer
+             * @return Operation result
+             */
             virtual OSResult ReadMemory(std::size_t address, gsl::span<uint8_t> buffer) = 0;
 
             /**
@@ -379,6 +379,8 @@ namespace devices
              */
             OperationResult Wait();
 
+            void Cancel();
+
             /**
              * @brief Move operator
              * @param other Other Operation Waiter
@@ -494,7 +496,7 @@ namespace devices
         };
 
         /** @} */
-    }
-}
+    } // namespace n25q
+} // namespace devices
 
 #endif /* LIBS_DRIVERS_N25Q_INCLUDE_N25Q_N25Q_H_ */
