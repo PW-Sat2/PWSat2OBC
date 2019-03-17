@@ -31,7 +31,19 @@ void FlashEraser::Run()
     auto wait2 = _flash2.BeginEraseChip();
     auto wait3 = _flash3.BeginEraseChip();
 
-    wait1.Wait();
-    wait2.Wait();
-    wait3.Wait();
+//  Watchdog is 256 seconds, we put 60 seconds wait it allow erase operation to finish.
+//  It takes typically 100 seconds, MAX 240 seconds in the datasheet, but we don't have that time.
+//  On our platforms, it takes about 40 seconds.
+
+    for (int i = 0; i < 10*60; ++i) {
+        extern void wait_100ms_spinloop();
+        wait_100ms_spinloop();
+    }
+
+//    We make no use of following flags.
+//    We ignore them.
+
+//    wait1.Wait();
+//    wait2.Wait();
+//    wait3.Wait();
 }
