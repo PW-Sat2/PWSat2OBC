@@ -217,6 +217,11 @@ OperationResult OperationWaiter::Wait()
     return _waitResult.Value;
 }
 
+void OperationWaiter::Cancel()
+{
+    _waitResult = Some(OperationResult::Success);
+}
+
 OperationWaiter& OperationWaiter::operator=(OperationWaiter&& other) noexcept
 {
     OperationWaiter tmp(std::move(other));
