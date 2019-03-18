@@ -26,8 +26,12 @@ if(ENABLE_LTO)
     set(LTO_SWITCH "-flto")
 endif()
 
+set (EIGEN_WARN_FIX "-Wno-int-in-bool-context")
+set (RAPID_CHECK_WARN_FIX "-Wno-shift-negative-value")
+
 set (CWARN "-Wall -Wstrict-prototypes -Wextra -Werror")
-set (CXXWARN "-Wall -Wextra -Werror")
+set (CXXWARN "-Wall -Wextra -Werror  ${EIGEN_WARN_FIX} ${RAPID_CHECK_WARN_FIX} -Wno-unused-function")
+
 set (CTUNING "-ggdb -pedantic -fomit-frame-pointer -ffunction-sections -fdata-sections")
 set (CMCU "-mtune=cortex-m3 -MMD -MP -mcpu=cortex-m3 -mthumb -march=armv7-m -mlittle-endian -mfix-cortex-m3-ldrd -mno-thumb-interwork")
 set (CMAKE_C_FLAGS "-std=gnu11 ${CWARN} ${CTUNING} ${CMCU} ${CCOVERAGE}")

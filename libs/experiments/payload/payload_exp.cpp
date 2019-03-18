@@ -38,7 +38,7 @@ namespace experiment
             _cameraCommisioningController.SetPhotoFilesBaseName(this->_fileName);
         }
 
-        PayloadCommissioningExperiment::PayloadCommissioningExperiment(PayloadCommissioningExperiment&& other)
+        PayloadCommissioningExperiment::PayloadCommissioningExperiment(PayloadCommissioningExperiment&& other) noexcept
             : _payload(other._payload), _time(other._time), _fileSystem(other._fileSystem), _powerControl(other._powerControl),
               _experimentalSunS(other._experimentalSunS), _photoService(other._photoService),
               _experimentFile(std::move(other._experimentFile)), _telemetryProvider(other._telemetryProvider),

@@ -7,9 +7,7 @@ using experiments::fs::ExperimentFile;
 
 void GenerateSunSData(IFileSystem& fs)
 {
-    experiment::suns::DataPoint data;
-
-    memset(&data, 0, sizeof(data));
+    experiment::suns::DataPoint data = {};
 
     data.Timestamp = 1234ms;
 

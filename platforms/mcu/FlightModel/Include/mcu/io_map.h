@@ -36,7 +36,7 @@ namespace io_map
     struct SPI : public SPIPins<SPI>
     {
         static constexpr std::uint32_t Baudrate = 20_MHz;
-        static constexpr USART_TypeDef* Peripheral = USART0;
+        static USART_TypeDef* const Peripheral;
         static constexpr std::uint8_t Location = 1;
         using MOSI = PinLocation<gpioPortE, 7>;
         using MISO = PinLocation<gpioPortE, 6>;
@@ -48,7 +48,7 @@ namespace io_map
     struct UART_0 : public UARTPins<UART_0>
     {
         static constexpr std::uint8_t Id = 0;
-        static constexpr USART_TypeDef* Peripheral = UART0;
+        static USART_TypeDef* const Peripheral;
 
         static constexpr CMU_Clock_TypeDef Clock = cmuClock_UART0;
         static constexpr std::uint32_t Baudrate = 57600;
@@ -66,7 +66,7 @@ namespace io_map
     struct UART_1 : public UARTPins<UART_1>
     {
         static constexpr std::uint8_t Id = 1;
-        static constexpr USART_TypeDef* Peripheral = UART1;
+        static USART_TypeDef* const Peripheral;
 
         static constexpr CMU_Clock_TypeDef Clock = cmuClock_UART1;
         static constexpr std::uint32_t Baudrate = 115200;
@@ -118,13 +118,13 @@ namespace io_map
 
     struct ProgramFlash
     {
-        static constexpr std::uint8_t* FlashBase = reinterpret_cast<std::uint8_t*>(0x84000000);
-        static constexpr std::uint8_t* ApplicatonBase = reinterpret_cast<std::uint8_t*>(0x00080000);
+        static std::uint8_t* const FlashBase;
+        static std::uint8_t* const ApplicatonBase;
     };
 
     struct RAMScrubbing
     {
-        static constexpr auto TimerHW = TIMER0;
+        static TIMER_TypeDef* const TimerHW;
         static constexpr auto Prescaler = timerPrescale1024;
         static constexpr auto TimerTop = 468;
         static constexpr auto IRQ = IRQn_Type::TIMER0_IRQn;
@@ -180,7 +180,7 @@ namespace io_map
 
         struct Latchup
         {
-            static constexpr auto HW = ACMP0;
+            static ACMP_TypeDef* const HW;
             using SRAM1 = PinLocation<gpioPortC, 2>;
             using SRAM2 = PinLocation<gpioPortC, 8>;
 
@@ -203,7 +203,7 @@ namespace io_map
         using Control = PinLocation<gpioPortE, 2>;
         using Buffer = PinLocation<gpioPortC, 14>;
         using Power = PinLocation<gpioPortC, 0>;
-        static constexpr decltype(auto) Comparator = ACMP0;
+        static ACMP_TypeDef* const Comparator;
 
         struct Group
         {
@@ -216,7 +216,7 @@ namespace io_map
         using Control = PinLocation<gpioPortE, 3>;
         using Buffer = PinLocation<gpioPortC, 15>;
         using Power = PinLocation<gpioPortC, 1>;
-        static constexpr decltype(auto) Comparator = ACMP1;
+        static ACMP_TypeDef* const Comparator;
 
         struct Group
         {

@@ -119,7 +119,7 @@ namespace state
             return false;
         }
 
-        object = state.Get<Object>();
+        object = state.template Get<Object>();
 
         return true;
     }
