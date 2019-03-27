@@ -14,7 +14,7 @@ namespace efm
      *
      * @ingroup efm_support
      */
-    constexpr CMU_Clock_TypeDef Clock(const USART_TypeDef* hw)
+    inline CMU_Clock_TypeDef Clock(const USART_TypeDef* hw)
     {
         if (hw == USART0)
             return cmuClock_USART0;
@@ -34,7 +34,7 @@ namespace efm
      *
      * @ingroup efm_support
      */
-    constexpr CMU_Clock_TypeDef Clock(const TIMER_TypeDef* hw)
+    inline CMU_Clock_TypeDef Clock(const TIMER_TypeDef* hw)
     {
         if (hw == TIMER0)
             return cmuClock_TIMER0;

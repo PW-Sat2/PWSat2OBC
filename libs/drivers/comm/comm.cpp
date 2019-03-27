@@ -301,7 +301,7 @@ bool CommObject::RemoveFrameInternal(AggregatedErrorCounter& resultAggregator)
 
 bool CommObject::GetReceiverTelemetryInternal(ReceiverTelemetry& telemetry, AggregatedErrorCounter& resultAggregator)
 {
-    memset(&telemetry, 0, sizeof(ReceiverTelemetry));
+    telemetry = {};
 
     bool result = true;
 
@@ -372,7 +372,7 @@ bool CommObject::GetReceiverTelemetry(ReceiverTelemetry& telemetry)
 
 bool CommObject::GetTransmitterTelemetryInternal(TransmitterTelemetry& telemetry, AggregatedErrorCounter& resultAggregator)
 {
-    memset(&telemetry, 0, sizeof(TransmitterTelemetry));
+    telemetry = {};
 
     bool result = true;
 

@@ -23,7 +23,7 @@ namespace experiment
             _controller.SetPhotoFilesBaseName(this->_fileName);
         }
 
-        CameraCommissioningExperiment::CameraCommissioningExperiment(CameraCommissioningExperiment&& other)
+        CameraCommissioningExperiment::CameraCommissioningExperiment(CameraCommissioningExperiment&& other) noexcept
             : _time(other._time), _fileSystem(other._fileSystem), _experimentFile(std::move(other._experimentFile)),
               _photoService(other._photoService), _controller(_experimentFile, _photoService), _currentStep(other._currentStep)
         {

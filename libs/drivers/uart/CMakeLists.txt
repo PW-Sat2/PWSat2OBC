@@ -1,6 +1,7 @@
 set(NAME uart)
 
 set(SOURCES
+	Include/uart/uart.hpp
 )
 
 add_library(${NAME} STATIC ${SOURCES})

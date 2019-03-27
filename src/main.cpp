@@ -310,7 +310,7 @@ extern "C" void __libc_init_array(void);
 
 int main(void)
 {
-    memset(&Main, 0, sizeof(Main));
+    memset(reinterpret_cast<void*>(&Main), 0, sizeof(Main));
 
     __libc_init_array();
 

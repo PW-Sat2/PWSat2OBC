@@ -25,7 +25,7 @@ namespace efm
      */
     template <DMASignalUSART Signal> constexpr DMADRV_PeripheralSignal_t DMASignal(const USART_TypeDef* peripheral) = delete;
 
-    template <> constexpr DMADRV_PeripheralSignal_t DMASignal<DMASignalUSART::RXDATAV>(const USART_TypeDef* peripheral)
+    template <> inline DMADRV_PeripheralSignal_t DMASignal<DMASignalUSART::RXDATAV>(const USART_TypeDef* peripheral)
     {
         if (peripheral == USART0)
             return dmadrvPeripheralSignal_USART0_RXDATAV;
@@ -36,7 +36,7 @@ namespace efm
         return static_cast<DMADRV_PeripheralSignal_t>(-1);
     }
 
-    template <> constexpr DMADRV_PeripheralSignal_t DMASignal<DMASignalUSART::TXBL>(const USART_TypeDef* peripheral)
+    template <> inline DMADRV_PeripheralSignal_t DMASignal<DMASignalUSART::TXBL>(const USART_TypeDef* peripheral)
     {
         if (peripheral == USART0)
             return dmadrvPeripheralSignal_USART0_TXBL;

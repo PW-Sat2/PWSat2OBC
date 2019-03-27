@@ -55,7 +55,7 @@ namespace experiment
             strsafecpy(this->_primaryFileName, baseName);
 
             strsafecpy(this->_secondaryFileName, this->_primaryFileName, sizeof(this->_primaryFileName));
-            std::strncat(this->_secondaryFileName, "_sec", 4);
+            std::strncat(this->_secondaryFileName, "_sec", 5);
         }
 
         ExperimentCode SunSExperiment::Type()

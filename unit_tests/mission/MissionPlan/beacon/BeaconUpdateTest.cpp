@@ -26,8 +26,10 @@ namespace
         mission::BeaconUpdate beacon{0};
         mission::ActionDescriptor<SystemState> action{beacon.BuildAction()};
 
-        static constexpr OSTaskHandle Task = reinterpret_cast<OSTaskHandle>(1);
+        static const OSTaskHandle Task;
     };
+
+    const OSTaskHandle BeaconUpdateTest::Task = reinterpret_cast<OSTaskHandle>(1);
 
     BeaconUpdateTest::BeaconUpdateTest()
     {

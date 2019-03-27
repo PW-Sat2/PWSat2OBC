@@ -52,9 +52,9 @@ namespace scrubber
 
       private:
         /** @brief Pointer to first byte of memory */
-        static constexpr auto MemoryStart = reinterpret_cast<std::uint32_t*>(Start);
+        static std::uint32_t* const MemoryStart;
         /** @brief Pointer to first byte after memory */
-        static constexpr auto MemoryEnd = reinterpret_cast<std::uint32_t*>(Start + Size);
+        static std::uint32_t* const MemoryEnd;
         /** @brief Pointer increment in single cycle */
         static constexpr auto PointerIncrement = CycleSize / 4;
         /** @brief Pointer to next byte to be scrubbed */
@@ -64,7 +64,14 @@ namespace scrubber
     template <std::size_t Start, std::size_t Size, std::size_t CycleSize>
     std::uint32_t* RAMScrubber<Start, Size, CycleSize>::_current(MemoryStart);
 
-    template <std::size_t Start, std::size_t Size, std::size_t CycleSize> inline void RAMScrubber<Start, Size, CycleSize>::Scrub()
+    template <std::size_t Start, std::size_t Size, std::size_t CycleSize>
+    std::uint32_t* const RAMScrubber<Start, Size, CycleSize>::MemoryStart = reinterpret_cast<std::uint32_t*>(Start);
+
+    template <std::size_t Start, std::size_t Size, std::size_t CycleSize>
+    std::uint32_t* const RAMScrubber<Start, Size, CycleSize>::MemoryEnd = reinterpret_cast<std::uint32_t*>(Start + Size);
+
+    template <std::size_t Start, std::size_t Size, std::size_t CycleSize> 
+    inline void RAMScrubber<Start, Size, CycleSize>::Scrub()
     {
         INT_Disable();
 

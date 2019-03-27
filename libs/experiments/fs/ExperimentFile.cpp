@@ -19,7 +19,7 @@ ExperimentFile::~ExperimentFile()
     }
 }
 
-ExperimentFile::ExperimentFile(ExperimentFile&& other)
+ExperimentFile::ExperimentFile(ExperimentFile&& other) noexcept
     : _buffer(other._buffer), _time(other._time), _writer(_buffer), _hasPayloadInFrame(other._hasPayloadInFrame),
       onFlush(OnFlushDelegate::make_delegate<ExperimentFile, &ExperimentFile::DoNothing>(this))
 {
@@ -29,7 +29,7 @@ ExperimentFile::ExperimentFile(ExperimentFile&& other)
     _writer.Reserve(other._writer.GetDataLength());
 }
 
-ExperimentFile& ExperimentFile::operator=(ExperimentFile&& other)
+ExperimentFile& ExperimentFile::operator=(ExperimentFile&& other) noexcept
 {
     ExperimentFile tmp(std::move(other));
 
