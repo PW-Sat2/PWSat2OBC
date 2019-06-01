@@ -56,14 +56,14 @@ class BeaconFrame(object):
             bp_volt_ok = "!!!!! "
 
         bp_temp_ok = '      '
-        if not check_range('14: Controller A', '1062: BP.Temperature A', 0, 45) \
-                or not check_range('14: Controller A', '1075: BP.Temperature B', 0, 45)\
-                or not check_range('15: Controller B', '1194: BP.Temperature', 0, 45):
+        if not check_range('14: Controller A', '1062: BP.Temperature A', -4, 45) \
+                or not check_range('14: Controller A', '1075: BP.Temperature B', -4, 45)\
+                or not check_range('15: Controller B', '1194: BP.Temperature', -4, 45):
             bp_temp_ok = "!!!!! "
 
         pa_temp_ok = '      '
-        if not check_range('11: Comm', '0756: [Now] Power Amplifier Temperature', 0, 45) \
-                or not check_range('11: Comm', '0605: [Last transmission] Power Amplifier Temperature', 0, 56):
+        if not check_range('11: Comm', '0756: [Now] Power Amplifier Temperature', -4, 45) \
+                or not check_range('11: Comm', '0605: [Last transmission] Power Amplifier Temperature', -4, 56):
             pa_temp_ok = "!!!!! "
 
         rx_current_ok = '      '
