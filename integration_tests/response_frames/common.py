@@ -32,6 +32,11 @@ class DownlinkApid(IntEnum):
     PeriodicSet = 0x1B,
     SailExperiment = 0x1C,
 
+    LittleOryxEcho = 0x25
+    LittleOryxDelayReboot = 0x26
+    LittleOryxReboot = 0x27
+
+
 @response_frame(0)
 class GenericSuccessResponseFrame(ResponseFrame):
     @classmethod
