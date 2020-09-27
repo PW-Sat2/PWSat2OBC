@@ -19,6 +19,7 @@ from eps import *
 from adcs import *
 from memory import *
 from ping import *
+from little_oryx import *
 
 __all__ = [
     'DownloadFile',
@@ -63,6 +64,11 @@ __all__ = [
     'StopSailDeployment',
     'ReadMemory',
     'PingTelecommand',
-    'CorrelatedTelecommand'
+    'CorrelatedTelecommand',
+
+    'Reboot',
+    'RebootToNormal',
+    'DelayRebootToNormal',
+    'Echo'
 ]
 
