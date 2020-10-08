@@ -1,6 +1,7 @@
 from response_frames import ResponseFrame, response_frame
 from enum import unique, IntEnum
 
+
 @unique
 class DownlinkApid(IntEnum):
     Pong = 0x01,
@@ -32,9 +33,10 @@ class DownlinkApid(IntEnum):
     PeriodicSet = 0x1B,
     SailExperiment = 0x1C,
 
-    LittleOryxEcho = 0x25
-    LittleOryxDelayReboot = 0x26
-    LittleOryxReboot = 0x27
+    LittleOryxEcho = 0x25,
+    LittleOryxDelayReboot = 0x26,
+    LittleOryxReboot = 0x27,
+    LittleOryxDeepSleepBeacon = 0x28,
 
 
 @response_frame(0)
