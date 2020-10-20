@@ -47,7 +47,7 @@ class LittleOryxDeepSleepBeacon(ResponseFrame):
             uptime, vbat_a, vbat_b, reboot_counter, distr_3v3_current, distr_5v_current, distr_vbat_current, temp_a,
             temp_b,
             text) = struct.unpack(
-            '<LHHLHHHHH27s', ensure_string(self.payload()))
+            '<LHHLHHHhh27s', ensure_string(self.payload()))
         self.text = text
         self.uptime = timedelta(milliseconds=uptime)
         self.reboot_counter = reboot_counter
@@ -61,18 +61,27 @@ class LittleOryxDeepSleepBeacon(ResponseFrame):
 
     def __str__(self):
         lines = [
-            '\n\tTime: {}s',
+            '\tTime: {}s',
             '\tVBAT_A: {}',
             '\tVBAT_B: {}',
             '\tReboot to normal: {}',
-            '\t3V3 Current: {}',
-            '\t5V Current: {}',
-            '\tVbat Current: {}',
+            '\t3V3 Current: {:.0f} mA',
+            '\t5V Current: {:.0f} mA',
+            '\tVbat Current: {:.0f} mA',
             '\tTemp A: {}',
             '\tTemp B: {}'
         ]
-        data = [self.uptime.seconds, self.vbat_a, self.vbat_b, self.reboot_counter, self.distr_3v3_current,
-                self.distr_5v_current, self.distr_vbat_current, self.temp_a, self.temp_b]
+        data = [
+            self.uptime.seconds, #
+            self.vbat_a, 
+            self.vbat_b, 
+            self.reboot_counter, 
+            self.distr_3v3_current.converted * 1000.0,
+            self.distr_5v_current.converted * 1000.0, 
+            self.distr_vbat_current.converted * 1000.0, 
+            self.temp_a, 
+            self.temp_b
+        ]
         return '\n'.join(lines).format(*data)
 
     def __repr__(self):
