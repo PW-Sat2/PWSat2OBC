@@ -14,3 +14,5 @@ class MemoryContent(ResponseFrame):
     def __str__(self):
         return 'Memory content (Correlation {}, Seq: {})'.format(self.correlation_id, self.seq())
 
+    def __repr__(self):
+        return 'Memory: CID={} Seq={}'.format(self.correlation_id, self.seq())
