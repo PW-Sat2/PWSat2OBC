@@ -205,24 +205,74 @@ void SetupHardware(void)
     CMU_OscillatorEnable(cmuOsc_HFRCO, false, true);
 }
 
-static constexpr std::array<std::uint8_t, 3> BeaconHeader = {0x24, 0, 0};
+static constexpr std::array<std::uint8_t, 3> BeaconHeader = {0x28, 0, 0}; // {0x24, 0, 0};
+
+struct EpsData
+{
+    std::uint16_t distr5VCurrent;
+    std::uint16_t distr3V3Current;
+    std::uint16_t distrVBatCurrent;
+    std::uint16_t batteryVoltageA;
+    std::uint16_t batteryTemperatureA;
+    std::uint16_t batteryTemperatureB;
+    std::uint16_t batteryVoltageB;
+};
 
 void SendBeacon(
     const EPSTelemetryA& epsA, const EPSTelemetryB& epsB, std::chrono::milliseconds currentTime, std::int32_t rebootToNormalValue)
 {
     Comm.SetTransmitterBitRate(COMM::Bitrate::Comm9600bps);
     SendToUart(io_map::UART_1::Peripheral, "B");
-    std::array<std::uint8_t, 3 + 4 + 2 + 2 + 4> beaconBuffer;
-    Reader aReader{epsA.Buffer};
-    Reader bReader{epsB.Buffer};
+    std::array<std::uint8_t, 3 + 4 + 2 + 2 + 4    + 10 + 27> beaconBuffer;
+    Reader epsAReader{epsA.Buffer};
+    Reader epsBReader{epsB.Buffer};
+
+    EpsData epsData{};
+
+    // DISTR_.3V3_CURR - 0x1C (28) (+28 skip)
+    epsAReader.Skip(28);
+    epsData.distr3V3Current = epsAReader.ReadWordLE();
+
+    // DISTR_.5V_CURR - 0x20 (32) (+2 skip)
+    epsAReader.Skip(2);
+    epsData.distr5VCurrent = epsAReader.ReadWordLE();
+
+    // DISTR_.VBAT_CURR - 0x24 (36) (+2 skip)
+    epsAReader.Skip(2);
+    epsData.distrVBatCurrent = epsAReader.ReadWordLE();
+
+    // BATC.VOLT__A - 0x2A (42) (+4 skip)
+    epsAReader.Skip(4);
+    epsData.batteryVoltageA = epsAReader.ReadWordLE();
+
+    // BP.TEMP_A - 0x33 (51) (+7 skip)
+    epsAReader.Skip(7);
+    epsData.batteryTemperatureA = epsAReader.ReadWordLE();
+
+    // BP.TEMP_B - 0x35 (53) (+0 skip)
+    epsData.batteryTemperatureB = epsAReader.ReadWordLE();
+
+    // BATC.VOLT__B - 0x03 (+3 skip)
+    epsBReader.Skip(3);
+    epsData.batteryVoltageB = epsBReader.ReadWordLE();
+
     Writer writer{beaconBuffer};
+    std::array<std::uint8_t, 27> marketingText{  'O', 'R', 'I', 'G', 'I', 'N', 'A',
+                                                'L', ' ', 'D', 'E', 'E', 'P', ' ',
+                                                'S', 'L', 'E', 'E', 'P'};
+
     writer.WriteArray(gsl::make_span(BeaconHeader));
     writer.WriteDoubleWordLE(currentTime.count());
-    aReader.Skip(42);
-    writer.WriteWordLE(aReader.ReadWordLE());
-    bReader.Skip(3);
-    writer.WriteWordLE(bReader.ReadWordLE());
+    writer.WriteWordLE(epsData.batteryVoltageA);
+    writer.WriteWordLE(epsData.batteryVoltageB);
     writer.WriteDoubleWordLE(rebootToNormalValue);
+    writer.WriteWordLE(epsData.distr3V3Current);
+    writer.WriteWordLE(epsData.distr5VCurrent);
+    writer.WriteWordLE(epsData.distrVBatCurrent);
+    writer.WriteWordLE(epsData.batteryTemperatureA);
+    writer.WriteWordLE(epsData.batteryTemperatureB);
+    writer.WriteArray(marketingText);
+
     Comm.SendFrame(gsl::make_span(beaconBuffer));
 }
 
