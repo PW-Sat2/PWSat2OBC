@@ -69,3 +69,13 @@ target_asm_listing(${NAME})
 if(FAST_DEEP_SLEEP)
     target_compile_definitions(${NAME} PUBLIC -DFAST_DEEP_SLEEP)
 endif()
+
+add_custom_target(${NAME}.oflash
+    COMMAND
+    ${OPENOCD}
+    -s ${CMAKE_SOURCE_DIR}/openocd/pwsat2
+    -c "set IMAGE $<TARGET_FILE:${NAME}>"
+    -f init.cfg
+    -f flash.cfg
+    DEPENDS ${NAME}
+)

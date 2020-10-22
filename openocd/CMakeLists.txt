@@ -1,0 +1,4 @@
+install(DIRECTORY
+    ./
+    DESTINATION openocd
+)
