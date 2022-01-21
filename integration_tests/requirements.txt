@@ -1,4 +1,4 @@
-ipython==5.5.0
+ipython==7.16.3
 nose
 pyserial==3.2.1
 rednose
